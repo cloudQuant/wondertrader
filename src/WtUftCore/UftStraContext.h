@@ -67,7 +67,7 @@ public:
 	 * @brief 获取上下文ID
 	 * @return 上下文唯一标识符
 	 */
-	virtual uint32_t id() { return _context_id; }
+	virtual uint32_t id() override { return _context_id; }
 
 	/**
 	 * @brief 策略初始化回调
@@ -826,9 +826,9 @@ private:
 		/**
 		 * @brief 构造函数
 		 */
-		_Position():_volume(0),_valid_idx(0), _total_profit(0),
+		_Position():_volume(0),
 			_opencost(0),_dynprofit(0)
-		{
+		, _total_profit(0),_valid_idx(0){
 		}
 	} PosInfo;
 

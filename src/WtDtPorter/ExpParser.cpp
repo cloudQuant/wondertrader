@@ -26,7 +26,7 @@ extern WtDtRunner& getRunner();
  * @param config 解析器配置参数，当前实现中未使用
  * @return 始终返回true，表示初始化成功
  */
-bool ExpParser::init(WTSVariant* config)
+bool ExpParser::init(WTSVariant* /*config*/)
 {
 	// 调用WtDtRunner的相应方法来初始化解析器
 	getRunner().parser_init(_id.c_str());

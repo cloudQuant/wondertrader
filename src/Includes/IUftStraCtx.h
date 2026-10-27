@@ -45,9 +45,9 @@ public:
 	virtual void on_order_queue(const char* stdCode, WTSOrdQueData* newOrdQue) = 0;
 	virtual void on_order_detail(const char* stdCode, WTSOrdDtlData* newOrdDtl) = 0;
 	virtual void on_transaction(const char* stdCode, WTSTransData* newTrans) = 0;
-	virtual void on_bar(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar) {}
-	virtual void on_session_begin(uint32_t uTDate) {}
-	virtual void on_session_end(uint32_t uTDate) {}
+	virtual void on_bar(const char* /*stdCode*/, const char* /*period*/, uint32_t /*times*/, WTSBarStruct* /*newBar*/) {}
+	virtual void on_session_begin(uint32_t /*uTDate*/) {}
+	virtual void on_session_end(uint32_t /*uTDate*/) {}
 	virtual void on_params_updated(){}
 
 	/*
@@ -56,33 +56,33 @@ public:
 	 */
 	virtual void	on_bactest_end() {};
 
-	virtual void	on_tick_updated(const char* stdCode, WTSTickData* newTick) {}
-	virtual void	on_ordque_updated(const char* stdCode, WTSOrdQueData* newOrdQue) {}
-	virtual void	on_orddtl_updated(const char* stdCode, WTSOrdDtlData* newOrdDtl) {}
-	virtual void	on_trans_updated(const char* stdCode, WTSTransData* newTrans) {}
+	virtual void	on_tick_updated(const char* /*stdCode*/, WTSTickData* /*newTick*/) {}
+	virtual void	on_ordque_updated(const char* /*stdCode*/, WTSOrdQueData* /*newOrdQue*/) {}
+	virtual void	on_orddtl_updated(const char* /*stdCode*/, WTSOrdDtlData* /*newOrdDtl*/) {}
+	virtual void	on_trans_updated(const char* /*stdCode*/, WTSTransData* /*newTrans*/) {}
 
-	virtual const char*	watch_param(const char* name, const char* initVal = "") { return initVal; }
-	virtual double		watch_param(const char* name, double initVal = 0) { return initVal; }
-	virtual uint32_t	watch_param(const char* name, uint32_t initVal = 0) { return initVal; }
-	virtual uint64_t	watch_param(const char* name, uint64_t initVal = 0) { return initVal; }
-	virtual int32_t		watch_param(const char* name, int32_t initVal = 0) { return initVal; }
-	virtual int64_t		watch_param(const char* name, int64_t initVal = 0) { return initVal; }
+	virtual const char*	watch_param(const char* /*name*/, const char* initVal = "") { return initVal; }
+	virtual double		watch_param(const char* /*name*/, double initVal = 0) { return initVal; }
+	virtual uint32_t	watch_param(const char* /*name*/, uint32_t initVal = 0) { return initVal; }
+	virtual uint64_t	watch_param(const char* /*name*/, uint64_t initVal = 0) { return initVal; }
+	virtual int32_t		watch_param(const char* /*name*/, int32_t initVal = 0) { return initVal; }
+	virtual int64_t		watch_param(const char* /*name*/, int64_t initVal = 0) { return initVal; }
 
 	virtual void		commit_param_watcher() {}
 
-	virtual const char*	read_param(const char* name, const char* defVal = "") { return defVal; }
-	virtual double		read_param(const char* name, double defVal = 0) { return defVal; }
-	virtual uint32_t	read_param(const char* name, uint32_t defVal = 0) { return defVal; }
-	virtual uint64_t	read_param(const char* name, uint64_t defVal = 0) { return defVal; }
-	virtual int32_t		read_param(const char* name, int32_t defVal = 0) { return defVal; }
-	virtual int64_t		read_param(const char* name, int64_t defVal = 0) { return defVal; }
+	virtual const char*	read_param(const char* /*name*/, const char* defVal = "") { return defVal; }
+	virtual double		read_param(const char* /*name*/, double defVal = 0) { return defVal; }
+	virtual uint32_t	read_param(const char* /*name*/, uint32_t defVal = 0) { return defVal; }
+	virtual uint64_t	read_param(const char* /*name*/, uint64_t defVal = 0) { return defVal; }
+	virtual int32_t		read_param(const char* /*name*/, int32_t defVal = 0) { return defVal; }
+	virtual int64_t		read_param(const char* /*name*/, int64_t defVal = 0) { return defVal; }
 
-	virtual const char*	sync_param(const char* name, const char* initVal = "", bool bForceWrite = false) { return nullptr; }
-	virtual double*		sync_param(const char* name, double initVal = 0, bool bForceWrite = false) { return nullptr; }
-	virtual uint32_t*	sync_param(const char* name, uint32_t initVal = 0, bool bForceWrite = false) { return nullptr; }
-	virtual uint64_t*	sync_param(const char* name, uint64_t initVal = 0, bool bForceWrite = false) { return nullptr; }
-	virtual int32_t*	sync_param(const char* name, int32_t initVal = 0, bool bForceWrite = false) { return nullptr; }
-	virtual int64_t*	sync_param(const char* name, int64_t initVal = 0, bool bForceWrite = false) { return nullptr; }
+	virtual const char*	sync_param(const char* /*name*/, const char* /*initVal*/ = "", bool /*bForceWrite*/ = false) { return nullptr; }
+	virtual double*		sync_param(const char* /*name*/, double /*initVal*/ = 0, bool /*bForceWrite*/ = false) { return nullptr; }
+	virtual uint32_t*	sync_param(const char* /*name*/, uint32_t /*initVal*/ = 0, bool /*bForceWrite*/ = false) { return nullptr; }
+	virtual uint64_t*	sync_param(const char* /*name*/, uint64_t /*initVal*/ = 0, bool /*bForceWrite*/ = false) { return nullptr; }
+	virtual int32_t*	sync_param(const char* /*name*/, int32_t /*initVal*/ = 0, bool /*bForceWrite*/ = false) { return nullptr; }
+	virtual int64_t*	sync_param(const char* /*name*/, int64_t /*initVal*/ = 0, bool /*bForceWrite*/ = false) { return nullptr; }
 
 	//策略接口
 
@@ -110,7 +110,7 @@ public:
 	 *	@qty		下单数量
 	 *	@flag		下单标志: 0-normal，1-fak，2-fok，默认0
 	 */
-	virtual OrderIDs	stra_buy(const char* stdCode, double price, double qty, int flag = 0) { return OrderIDs(); }
+	virtual OrderIDs	stra_buy(const char* /*stdCode*/, double /*price*/, double /*qty*/, int /*flag*/ = 0) { return OrderIDs(); }
 
 	/*
 	 *	下单接口: 卖出
@@ -120,7 +120,7 @@ public:
 	 *	@qty		下单数量
 	 *	@flag		下单标志: 0-normal，1-fak，2-fok，默认0
 	 */
-	virtual OrderIDs	stra_sell(const char* stdCode, double price, double qty, int flag = 0) { return OrderIDs(); }
+	virtual OrderIDs	stra_sell(const char* /*stdCode*/, double /*price*/, double /*qty*/, int /*flag*/ = 0) { return OrderIDs(); }
 
 	/*
 	 *	开多
@@ -129,7 +129,7 @@ public:
 	 *	@qty		下单数量
 	 *	@flag		下单标志: 0-normal，1-fak，2-fok，默认0
 	 */
-	virtual uint32_t	stra_enter_long(const char* stdCode, double price, double qty, int flag = 0) { return 0; }
+	virtual uint32_t	stra_enter_long(const char* /*stdCode*/, double /*price*/, double /*qty*/, int /*flag*/ = 0) { return 0; }
 
 	/*
 	 *	开空
@@ -138,7 +138,7 @@ public:
 	 *	@qty		下单数量
 	 *	@flag		下单标志: 0-normal，1-fak，2-fok，默认0
 	 */
-	virtual uint32_t	stra_enter_short(const char* stdCode, double price, double qty, int flag = 0) { return 0; }
+	virtual uint32_t	stra_enter_short(const char* /*stdCode*/, double /*price*/, double /*qty*/, int /*flag*/ = 0) { return 0; }
 
 	/*
 	 *	平多
@@ -148,7 +148,7 @@ public:
 	 *	@isToday	是否今仓，SHFE、INE专用
 	 *	@flag		下单标志: 0-normal，1-fak，2-fok，默认0
 	 */
-	virtual uint32_t	stra_exit_long(const char* stdCode, double price, double qty, bool isToday = false, int flag = 0) { return 0; }
+	virtual uint32_t	stra_exit_long(const char* /*stdCode*/, double /*price*/, double /*qty*/, bool /*isToday*/ = false, int /*flag*/ = 0) { return 0; }
 
 	/*
 	 *	平空
@@ -158,7 +158,7 @@ public:
 	 *	@isToday	是否今仓，SHFE、INE专用
 	 *	@flag		下单标志: 0-normal，1-fak，2-fok，默认0
 	 */
-	virtual uint32_t	stra_exit_short(const char* stdCode, double price, double qty, bool isToday = false, int flag = 0) { return 0; }
+	virtual uint32_t	stra_exit_short(const char* /*stdCode*/, double /*price*/, double /*qty*/, bool /*isToday*/ = false, int /*flag*/ = 0) { return 0; }
 
 	/*
 	 *	获取品种信息
@@ -230,9 +230,9 @@ public:
 	 */
 	virtual double stra_get_local_position(const char* stdCode) = 0;
 
-	virtual double stra_get_local_posprofit(const char* stdCode) { return 0; }
+	virtual double stra_get_local_posprofit(const char* /*stdCode*/) { return 0; }
 
-	virtual double stra_get_local_closeprofit(const char* stdCode) { return 0; }
+	virtual double stra_get_local_closeprofit(const char* /*stdCode*/) { return 0; }
 
 	/*
 	 *	获取最新价格
@@ -246,7 +246,7 @@ public:
 	 */
 	virtual double stra_get_undone(const char* stdCode) = 0;
 
-	virtual uint32_t stra_get_infos(const char* stdCode) { return 0; }
+	virtual uint32_t stra_get_infos(const char* /*stdCode*/) { return 0; }
 
 	/*
 	 *	订阅接口

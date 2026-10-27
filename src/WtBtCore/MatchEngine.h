@@ -100,8 +100,8 @@ public:
 	 * @brief 构造函数
 	 * @details 初始化撮合引擎，设置初始参数
 	 */
-	MatchEngine() : _tick_cache(NULL),_cancelrate(0), _sink(NULL)
-	{
+	MatchEngine() : _sink(NULL)
+	,_cancelrate(0), _tick_cache(NULL){
 		
 	}
 private:

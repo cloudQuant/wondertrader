@@ -53,49 +53,49 @@ const char* getModuleName()
 #endif
 
 WtRtRunner::WtRtRunner()
-	: _data_store(NULL)
-	, _cb_cta_init(NULL)
+	: _cb_cta_init(NULL)
+	, _cb_cta_sessevt(NULL)
+
 	, _cb_cta_tick(NULL)
 	, _cb_cta_calc(NULL)
 	, _cb_cta_bar(NULL)
 	, _cb_cta_cond_trigger(NULL)
-	, _cb_cta_sessevt(NULL)
-
 	, _cb_sel_init(NULL)
+	, _cb_sel_sessevt(NULL)
+
 	, _cb_sel_tick(NULL)
 	, _cb_sel_calc(NULL)
 	, _cb_sel_bar(NULL)
-	, _cb_sel_sessevt(NULL)
-
 	, _cb_hft_init(NULL)
+	, _cb_hft_sessevt(NULL)
+
 	, _cb_hft_tick(NULL)
 	, _cb_hft_bar(NULL)
+	, _cb_hft_chnl(NULL)
+
 	, _cb_hft_ord(NULL)
 	, _cb_hft_trd(NULL)
 	, _cb_hft_entrust(NULL)
-	, _cb_hft_chnl(NULL)
-
-	, _cb_hft_orddtl(NULL)
-	, _cb_hft_ordque(NULL)
-	, _cb_hft_trans(NULL)
 	, _cb_hft_position(NULL)
-	, _cb_hft_sessevt(NULL)
+	, _cb_hft_ordque(NULL)
+	, _cb_hft_orddtl(NULL)
+	, _cb_hft_trans(NULL)
+	, _cb_evt(NULL)
+	, _cb_parser_evt(NULL)
+	, _cb_parser_sub(NULL)
 
 	, _cb_exec_cmd(NULL)
 	, _cb_exec_init(NULL)
 
-	, _cb_parser_evt(NULL)
-	, _cb_parser_sub(NULL)
-
-	, _cb_evt(NULL)
+	, _data_store(NULL)
 	, _is_hft(false)
 	, _is_sel(false)
+
+	, _to_exit(false)
 
 	, _ext_fnl_bar_loader(NULL)
 	, _ext_raw_bar_loader(NULL)
 	, _ext_adj_fct_loader(NULL)
-
-	, _to_exit(false)
 {
 }
 

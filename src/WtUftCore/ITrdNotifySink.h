@@ -68,7 +68,7 @@ public:
 	 * @param newavail 新的可用持仓量
 	 * @param tradingday 交易日
 	 */
-	virtual void on_position(const char* stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t tradingday) {}
+	virtual void on_position(const char* /*stdCode*/, bool /*isLong*/, double /*prevol*/, double /*preavail*/, double /*newvol*/, double /*newavail*/, uint32_t /*tradingday*/) {}
 
 	/**
 	 * @brief 交易通道就绪回调函数
@@ -96,7 +96,7 @@ public:
 	 * @param bSuccess 下单是否成功，true表示成功，false表示失败
 	 * @param message 回报消息，并常包含错误信息（当失败时）
 	 */
-	virtual void on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message){}
+	virtual void on_entrust(uint32_t /*localid*/, const char* /*stdCode*/, bool /*bSuccess*/, const char* /*message*/){}
 };
 
 NS_WTP_END

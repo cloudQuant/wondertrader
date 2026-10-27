@@ -129,14 +129,14 @@ public:
 	 * @param stdCode 标准化合约代码
 	 * @param newTick 最新的tick数据
 	 */
-	virtual void on_tick_updated(const char* stdCode, WTSTickData* newTick){}
+	virtual void on_tick_updated(const char* /*stdCode*/, WTSTickData* /*newTick*/){}
 
 	/**
 	 * @brief 策略定时调度回调
 	 * @param curDate 当前日期，格式为YYYYMMDD
 	 * @param curTime 当前时间，格式为HHMMSS
 	 */
-	virtual void on_strategy_schedule(uint32_t curDate, uint32_t curTime) {}
+	virtual void on_strategy_schedule(uint32_t /*curDate*/, uint32_t /*curTime*/) {}
 
 	/**
 	 * @brief 枚举策略持仓
@@ -367,7 +367,7 @@ public:
 	 * @brief 输出警告级别的日志
 	 * @param message 日志消息
 	 */
-	virtual void stra_log_warn(const char* message) {}
+	virtual void stra_log_warn(const char* /*message*/) {}
 
 	/**
 	 * @brief 保存用户自定义数据
@@ -375,7 +375,7 @@ public:
 	 * @param val 数据值
 	 * @details 用于在策略中保存用户自定义的持久化数据，例如策略参数、状态等
 	 */
-	virtual void stra_save_user_data(const char* key, const char* val){}
+	virtual void stra_save_user_data(const char* /*key*/, const char* /*val*/){}
 
 	/**
 	 * @brief 加载用户自定义数据
@@ -384,7 +384,7 @@ public:
 	 * @return 数据值或默认值
 	 * @details 用于在策略中读取之前保存的用户自定义数据
 	 */
-	virtual const char* stra_load_user_data(const char* key, const char* defVal = "") { return defVal; }
+	virtual const char* stra_load_user_data(const char* /*key*/, const char* defVal = "") { return defVal; }
 
 protected:
 	/**

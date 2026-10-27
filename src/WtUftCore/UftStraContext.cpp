@@ -43,9 +43,9 @@ inline uint32_t makeUftCtxId()
 UftStraContext::UftStraContext(WtUftEngine* engine, const char* name)
 	: IUftStraCtx(name)
 	, _engine(engine)
-	, _strategy(NULL)
 	, _tradingday(0)
-{
+, _strategy(NULL)
+	{
 	_context_id = makeUftCtxId();
 }
 
@@ -662,7 +662,7 @@ void UftStraContext::on_channel_lost()
 		_strategy->on_channel_lost(this);
 }
 
-void UftStraContext::on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message)
+void UftStraContext::on_entrust(uint32_t localid, const char* /*stdCode*/, bool bSuccess, const char* message)
 {
 	if (!is_my_order(localid))
 		return;
@@ -671,7 +671,7 @@ void UftStraContext::on_entrust(uint32_t localid, const char* stdCode, bool bSuc
 		_strategy->on_entrust(localid, bSuccess, message);
 }
 
-void UftStraContext::on_position(const char* stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t tradingday)
+void UftStraContext::on_position(const char* /*stdCode*/, bool /*isLong*/, double /*prevol*/, double /*preavail*/, double /*newvol*/, double /*newavail*/, uint32_t /*tradingday*/)
 {
 	//账户的持仓通知不给策略了
 	//if (_strategy)
@@ -884,7 +884,7 @@ OrderIDs UftStraContext::stra_buy(const char* stdCode, double price, double qty,
 	{
 		_order_ids[localid] = NULL;
 	}
-	return std::move(ids);
+	return ids;
 }
 
 OrderIDs UftStraContext::stra_sell(const char* stdCode, double price, double qty, int flag /* = 0 */)
@@ -894,7 +894,7 @@ OrderIDs UftStraContext::stra_sell(const char* stdCode, double price, double qty
 	{
 		_order_ids[localid] = NULL;
 	}
-	return std::move(ids);
+	return ids;
 }
 
 uint32_t UftStraContext::stra_enter_long(const char* stdCode, double price, double qty, int flag /* = 0 */)

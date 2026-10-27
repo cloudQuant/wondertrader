@@ -15,7 +15,7 @@
 #include <unordered_map>
 #include <stdint.h>
 
-#include "../API/HTS5.2.43.0/include/secitpdk.h"
+#include <API/HTS5.2.43.0/include/secitpdk.h>
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/io_context_strand.hpp>

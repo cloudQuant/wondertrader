@@ -140,7 +140,7 @@ public:
 	 *
 	 *	返回值		是否注册成功
 	 */
-	virtual bool		registerTimer(const char* stdCode, uint32_t elapse){ return false; }
+	virtual bool		registerTimer(const char* /*stdCode*/, uint32_t /*elapse*/){ return false; }
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -148,7 +148,7 @@ public:
 class ExecuteUnit
 {
 public:
-	ExecuteUnit(bool bDiffMode = false) :_ctx(NULL), _code("") {}
+	ExecuteUnit(bool /*bDiffMode*/ = false) :_ctx(NULL), _code("") {}
 	virtual ~ExecuteUnit(){}
 
 public:
@@ -167,7 +167,7 @@ public:
 	 *	ctx		执行单元运行环境
 	 *	code	管理的合约代码
 	 */
-	virtual void init(ExecuteContext* ctx, const char* stdCode, WTSVariant* cfg){ _ctx = ctx; _code = stdCode; }
+	virtual void init(ExecuteContext* ctx, const char* stdCode, WTSVariant* /*cfg*/){ _ctx = ctx; _code = stdCode; }
 
 public:
 	/*
@@ -181,7 +181,7 @@ public:
 	 *	清理全部持仓，锁仓的情况下也要清理
 	 *	stdCode	合约代码	
 	 */
-	virtual void clear_all_position(const char* stdCode){}
+	virtual void clear_all_position(const char* /*stdCode*/){}
 
 	/*
 	 *	tick数据回调
@@ -227,7 +227,7 @@ public:
 	/*
 	 *	资金回报，只在交易通道初始化完成以后调用一次
 	 */
-	virtual void on_account(const char* currency, double prebalance, double balance, double dynbalance, double avaliable, double closeprofit, double dynprofit, double margin, double fee, double deposit, double withdraw) {}
+	virtual void on_account(const char* /*currency*/, double /*prebalance*/, double /*balance*/, double /*dynbalance*/, double /*avaliable*/, double /*closeprofit*/, double /*dynprofit*/, double /*margin*/, double /*fee*/, double /*deposit*/, double /*withdraw*/) {}
 
 protected:
 	ExecuteContext*	_ctx;

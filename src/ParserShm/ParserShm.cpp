@@ -61,11 +61,11 @@ extern "C"
 
 
 ParserShm::ParserShm()
-	: _stopped(false)
-	, _sink(NULL)
-	, _queue(NULL)
+	: _queue(NULL)
 	, _check_span(0)
-{
+, _sink(NULL)
+	, _stopped(false)
+	{
 }
 
 
@@ -173,7 +173,7 @@ bool ParserShm::connect()
 				if(cInfo == NULL)
 					break;
 
-				const char* fullCode = cInfo->getFullCode();
+				[[maybe_unused]] const char* fullCode = cInfo->getFullCode();
 				bool isSubbed = !_subbed.empty() && _subbed[cInfo->getTotalIndex()];
 				if (isSubbed)
 				{
@@ -196,7 +196,7 @@ bool ParserShm::connect()
 				if (cInfo == NULL)
 					break;
 
-				const char* fullCode = cInfo->getFullCode();
+				[[maybe_unused]] const char* fullCode = cInfo->getFullCode();
 				bool isSubbed = !_subbed.empty() && _subbed[cInfo->getTotalIndex()];
 				if (isSubbed)
 				{
@@ -219,7 +219,7 @@ bool ParserShm::connect()
 				if(cInfo == NULL)
 					break;
 
-				const char* fullCode = cInfo->getFullCode();
+				[[maybe_unused]] const char* fullCode = cInfo->getFullCode();
 				bool isSubbed = !_subbed.empty() && _subbed[cInfo->getTotalIndex()];
 				if (isSubbed)
 				{
@@ -242,7 +242,7 @@ bool ParserShm::connect()
 				if (cInfo == NULL)
 					break;
 
-				const char* fullCode = cInfo->getFullCode();
+				[[maybe_unused]] const char* fullCode = cInfo->getFullCode();
 				bool isSubbed = !_subbed.empty() && _subbed[cInfo->getTotalIndex()];
 				if (isSubbed)
 				{

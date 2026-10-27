@@ -61,19 +61,19 @@ public:
 	 * @param stdCode 标准合约代码
 	 * @param curOrdQue 当前的委托队列数据
 	 */
-	virtual void	handle_order_queue(const char* stdCode, WTSOrdQueData* curOrdQue) {};
+	virtual void	handle_order_queue(const char* /*stdCode*/, WTSOrdQueData* /*curOrdQue*/) {};
 	/**
 	 * @brief 处理委托明细数据
 	 * @param stdCode 标准合约代码
 	 * @param curOrdDtl 当前的委托明细数据
 	 */
-	virtual void	handle_order_detail(const char* stdCode, WTSOrdDtlData* curOrdDtl) {};
+	virtual void	handle_order_detail(const char* /*stdCode*/, WTSOrdDtlData* /*curOrdDtl*/) {};
 	/**
 	 * @brief 处理逐笔成交数据
 	 * @param stdCode 标准合约代码
 	 * @param curTrans 当前的逐笔成交数据
 	 */
-	virtual void	handle_transaction(const char* stdCode, WTSTransData* curTrans) {};
+	virtual void	handle_transaction(const char* /*stdCode*/, WTSTransData* /*curTrans*/) {};
 	/**
 	 * @brief 处理K线周期结束事件
 	 * @param stdCode 标准合约代码
@@ -118,7 +118,7 @@ public:
 	 * @param curTime 当前时间，格式为HHMMSS
 	 * @details 当交易时段结束时调用，一个交易日可能包含多个交易时段
 	 */
-	virtual void	handle_section_end(uint32_t curTDate, uint32_t curTime) {}
+	virtual void	handle_section_end(uint32_t /*curTDate*/, uint32_t /*curTime*/) {}
 };
 
 /**
@@ -281,7 +281,7 @@ private:
 		 * @brief 构造函数
 		 * @details 初始化游标为UINT_MAX，计数为0，日期为0
 		 */
-		HftDataList() :_cursor(UINT_MAX), _count(0), _date(0){}
+		HftDataList() : _date(0),_cursor(UINT_MAX), _count(0){}
 	};
 
 	typedef wt_hashmap<std::string, HftDataList<WTSTickStruct>>		TickCache;

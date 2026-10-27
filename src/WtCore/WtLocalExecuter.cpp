@@ -32,13 +32,13 @@ USING_NS_WTP;
  */
 WtLocalExecuter::WtLocalExecuter(WtExecuterFactory* factory, const char* name, IDataManager* dataMgr)
 	: IExecCommand(name)
-	, _factory(factory)
+	, _trader(NULL)
+, _factory(factory)
 	, _data_mgr(dataMgr)
-	, _channel_ready(false)
 	, _scale(1.0)
 	, _auto_clear(true)
-	, _trader(NULL)
-{
+	, _channel_ready(false)
+	{
 }
 
 
@@ -234,7 +234,7 @@ ExecuteUnitPtr WtLocalExecuter::getUnit(const char* stdCode, bool bAutoCreate /*
  * @details 从数据管理器中获取指定合约的最近count个tick数据。
  * 如果数据管理器不可用，则返回NULL。
  */
-WTSTickSlice* WtLocalExecuter::getTicks(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
+WTSTickSlice* WtLocalExecuter::getTicks(const char* stdCode, uint32_t count, uint64_t /*etime*/ /* = 0 */)
 {
 	// 检查数据管理器是否可用
 	if (_data_mgr == NULL)
@@ -734,7 +734,7 @@ void WtLocalExecuter::on_trade(uint32_t localid, const char* stdCode, bool isBuy
  * @details 当订单状态变化时调用此函数，并将状态变化转发给相应的执行单元。
  * 如果启用了线程池，则异步处理订单状态。
  */
-void WtLocalExecuter::on_order(uint32_t localid, const char* stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled /* = false */)
+void WtLocalExecuter::on_order(uint32_t localid, const char* stdCode, bool isBuy, double /*totalQty*/, double leftQty, double price, bool isCanceled /* = false */)
 {
 	// 尝试获取执行单元，但不自动创建
 	ExecuteUnitPtr unit = getUnit(stdCode, false);
@@ -914,7 +914,7 @@ void WtLocalExecuter::on_account(const char* currency, double prebalance, double
  * 此函数还包含自动清理过期主力合约的逻辑，通过检查当前合约是否是上一期的主力合约，
  * 并根据包含和排除列表决定是否进行自动清仓。
  */
-void WtLocalExecuter::on_position(const char* stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t tradingday)
+void WtLocalExecuter::on_position(const char* stdCode, bool /*isLong*/, double /*prevol*/, double /*preavail*/, double /*newvol*/, double /*newavail*/, uint32_t tradingday)
 {
     // 将合约添加到通道持仓集合中
     _channel_holds.insert(stdCode);

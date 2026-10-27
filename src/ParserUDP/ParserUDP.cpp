@@ -80,14 +80,14 @@ extern "C"
 
 
 ParserUDP::ParserUDP()
-	: _b_socket(NULL)
+	: _strand(boost::asio::make_strand(_io_service))
+	, _b_socket(NULL)
 	, _s_socket(NULL)
-	, _strand(boost::asio::make_strand(_io_service))
-	, _stopped(false)
-	, _sink(NULL)
-	, _connecting(false)
 	, _s_inited(false)
-{
+, _sink(NULL)
+	, _stopped(false)
+	, _connecting(false)
+	{
 }
 
 
@@ -140,7 +140,7 @@ bool ParserUDP::reconnect(uint32_t flag /* = 3 */)
 #endif
 		_b_socket->bind(_broad_ep);
 
-		_b_socket->async_receive_from(buffer(_b_buffer), _broad_ep,
+		_b_socket->async_receive_from(buffer(_b_buffer.data(), _b_buffer.size()), _broad_ep,
 			boost::bind(&ParserUDP::handle_read, this,
 			boost::asio::placeholders::error,
 			boost::asio::placeholders::bytes_transferred, true));
@@ -228,7 +228,7 @@ void ParserUDP::do_send()
 	if(!_s_inited)
 	{
 		_s_inited = true;
-		_s_socket->async_receive_from(buffer(_s_buffer), _server_ep,
+		_s_socket->async_receive_from(buffer(_s_buffer.data(), _s_buffer.size()), _server_ep,
 			boost::bind(&ParserUDP::handle_read, this,
 				boost::asio::placeholders::error,
 				boost::asio::placeholders::bytes_transferred, false));
@@ -299,7 +299,7 @@ void ParserUDP::subscribe( const CodeSet &vecSymbols )
 	}
 }
 
-void ParserUDP::unsubscribe(const CodeSet &setSymbols)
+void ParserUDP::unsubscribe(const CodeSet &/*setSymbols*/)
 {
 
 }
@@ -339,14 +339,14 @@ void ParserUDP::handle_read(const boost::system::error_code& e, std::size_t byte
 
 	if (isBroad && _b_socket)
 	{
-		_b_socket->async_receive_from(buffer(_b_buffer), _broad_ep,
+		_b_socket->async_receive_from(buffer(_b_buffer.data(), _b_buffer.size()), _broad_ep,
 			boost::bind(&ParserUDP::handle_read, this, 
 			boost::asio::placeholders::error,
 			boost::asio::placeholders::bytes_transferred, true));
 	} 
 	else if(!isBroad && _s_socket)
 	{
-		_s_socket->async_receive_from(buffer(_s_buffer), _server_ep,
+		_s_socket->async_receive_from(buffer(_s_buffer.data(), _s_buffer.size()), _server_ep,
 			boost::bind(&ParserUDP::handle_read, this,
 			boost::asio::placeholders::error,
 			boost::asio::placeholders::bytes_transferred, false));
@@ -354,7 +354,7 @@ void ParserUDP::handle_read(const boost::system::error_code& e, std::size_t byte
 	}
 }
 
-void ParserUDP::extract_buffer(uint32_t length, bool isBroad /* = true */)
+void ParserUDP::extract_buffer(uint32_t /*length*/, bool isBroad /* = true */)
 {
 	UDPPacketHead* header = NULL;
 	if(isBroad)

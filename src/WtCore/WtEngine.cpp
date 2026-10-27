@@ -37,14 +37,14 @@ namespace rj = rapidjson;
 USING_NS_WTP;
 
 WtEngine::WtEngine()
-	: _port_fund(NULL)
+	: _fund_udt_span(0)
+	, _evt_listener(NULL)
+	, _notifier(NULL)
+	, _port_fund(NULL)
+	, _terminated(false)
 	, _risk_volscale(1.0)
 	, _risk_date(0)
-	, _terminated(false)
-	, _evt_listener(NULL)
 	, _adapter_mgr(NULL)
-	, _notifier(NULL)
-	, _fund_udt_span(0)
 	, _ready(false)
 {
 	TimeUtils::getDateTime(_cur_date, _cur_time);
@@ -527,7 +527,7 @@ void WtEngine::load_datas()
 	}
 
 	{//读取仓位
-		double total_profit = 0;
+		[[maybe_unused]] double total_profit = 0;
 		double total_dynprofit = 0;
 		const rj::Value& jPos = root["positions"];
 		if (!jPos.IsNull() && jPos.IsArray())
@@ -589,12 +589,12 @@ void WtEngine::load_datas()
 	}
 }
 
-WTSTickSlice* WtEngine::get_tick_slice(uint32_t sid, const char* code, uint32_t count)
+WTSTickSlice* WtEngine::get_tick_slice(uint32_t /*sid*/, const char* code, uint32_t count)
 {
 	return _data_mgr->get_tick_slice(code, count);
 }
 
-WTSTickData* WtEngine::get_last_tick(uint32_t sid, const char* stdCode)
+WTSTickData* WtEngine::get_last_tick(uint32_t /*sid*/, const char* stdCode)
 {
 	return _data_mgr->grab_last_tick(stdCode);
 }
@@ -648,7 +648,7 @@ void WtEngine::handle_push_quote(WTSTickData* curTick)
 	_data_mgr->handle_push_quote(stdCode.c_str(), curTick);
 	on_tick(stdCode.c_str(), curTick);
 
-	double price = curTick->price();
+	[[maybe_unused]] double price = curTick->price();
 	WTSContractInfo* cInfo = curTick->getContractInfo();
 
 	//if(hotFlag == 1)

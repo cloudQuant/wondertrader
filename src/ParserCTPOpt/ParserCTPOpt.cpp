@@ -82,10 +82,10 @@ constexpr inline double checkValid(double val) noexcept
 }
 
 ParserCTPOpt::ParserCTPOpt()
-	:m_pUserAPI(NULL)
+	:m_uTradingDate(0)
+,m_pUserAPI(NULL)
 	,m_iRequestID(0)
-	,m_uTradingDate(0)
-{
+	{
 }
 
 
@@ -161,7 +161,7 @@ bool ParserCTPOpt::disconnect()
 	return true;
 }
 
-void ParserCTPOpt::OnRspError( CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast )
+void ParserCTPOpt::OnRspError( CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/ )
 {
 	IsErrorRspInfo(pRspInfo);
 }
@@ -177,7 +177,7 @@ void ParserCTPOpt::OnFrontConnected()
 	ReqUserLogin();
 }
 
-void ParserCTPOpt::OnRspUserLogin( CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast )
+void ParserCTPOpt::OnRspUserLogin( CThostFtdcRspUserLoginField */*pRspUserLogin*/, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast )
 {
 	if(bIsLast && !IsErrorRspInfo(pRspInfo))
 	{
@@ -193,7 +193,7 @@ void ParserCTPOpt::OnRspUserLogin( CThostFtdcRspUserLoginField *pRspUserLogin, C
 	}
 }
 
-void ParserCTPOpt::OnRspUserLogout(CThostFtdcUserLogoutField *pUserLogout, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void ParserCTPOpt::OnRspUserLogout(CThostFtdcUserLogoutField */*pUserLogout*/, CThostFtdcRspInfoField */*pRspInfo*/, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	if(m_sink)
 	{
@@ -210,7 +210,7 @@ void ParserCTPOpt::OnFrontDisconnected( int nReason )
 	}
 }
 
-void ParserCTPOpt::OnRspUnSubMarketData( CThostFtdcSpecificInstrumentField *pSpecificInstrument, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast )
+void ParserCTPOpt::OnRspUnSubMarketData( CThostFtdcSpecificInstrumentField */*pSpecificInstrument*/, CThostFtdcRspInfoField */*pRspInfo*/, int /*nRequestID*/, bool /*bIsLast*/ )
 {
 
 }
@@ -323,7 +323,7 @@ void ParserCTPOpt::OnRtnDepthMarketData( CThostFtdcDepthMarketDataField *pDepthM
 	tick->release();
 }
 
-void ParserCTPOpt::OnRspSubMarketData( CThostFtdcSpecificInstrumentField *pSpecificInstrument, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast )
+void ParserCTPOpt::OnRspSubMarketData( CThostFtdcSpecificInstrumentField */*pSpecificInstrument*/, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/ )
 {
 	if(!IsErrorRspInfo(pRspInfo))
 	{
@@ -399,7 +399,7 @@ void ParserCTPOpt::SubscribeMarketData()
 	delete[] subscribe;
 }
 
-bool ParserCTPOpt::IsErrorRspInfo(CThostFtdcRspInfoField *pRspInfo)
+bool ParserCTPOpt::IsErrorRspInfo(CThostFtdcRspInfoField */*pRspInfo*/)
 {
 	return false;
 }
@@ -441,7 +441,7 @@ void ParserCTPOpt::subscribe(const CodeSet &vecSymbols)
 	}
 }
 
-void ParserCTPOpt::unsubscribe(const CodeSet &vecSymbols)
+void ParserCTPOpt::unsubscribe(const CodeSet &/*vecSymbols*/)
 {
 }
 

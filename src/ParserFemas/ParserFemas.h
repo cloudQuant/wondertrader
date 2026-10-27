@@ -10,7 +10,7 @@
 #pragma once
 #include "../Includes/IParserApi.h"
 #include "../Share/DLLHelper.hpp"
-#include "../API/Femas3.02/USTPFtdcMduserApi.h"
+#include <API/Femas3.02/USTPFtdcMduserApi.h>
 #include <map>
 
 NS_WTP_BEGIN
@@ -53,24 +53,24 @@ public:
 
 //CUstpFtdcMdSpi 接口
 public:
-	virtual void OnRspError( CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast );
+	virtual void OnRspError( CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast ) override;
 
-	virtual void OnFrontConnected();
+	virtual void OnFrontConnected() override;
 
-	virtual void OnRspUserLogin( CUstpFtdcRspUserLoginField *pRspUserLogin, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast );
+	virtual void OnRspUserLogin( CUstpFtdcRspUserLoginField *pRspUserLogin, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast ) override;
 
 	///登出请求响应
-	virtual void OnRspUserLogout(CUstpFtdcRspUserLogoutField *pUserLogout, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast);
+	virtual void OnRspUserLogout(CUstpFtdcRspUserLogoutField *pUserLogout, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) override;
 
-	virtual void OnFrontDisconnected( int nReason );
+	virtual void OnFrontDisconnected( int nReason ) override;
 
-	virtual void OnRspUnSubMarketData( CUstpFtdcSpecificInstrumentField *pSpecificInstrument, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast );
+	virtual void OnRspUnSubMarketData( CUstpFtdcSpecificInstrumentField *pSpecificInstrument, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast ) override;
 
-	virtual void OnRtnDepthMarketData( CUstpFtdcDepthMarketDataField *pDepthMarketData );
+	virtual void OnRtnDepthMarketData( CUstpFtdcDepthMarketDataField *pDepthMarketData ) override;
 
-	virtual void OnRspSubMarketData( CUstpFtdcSpecificInstrumentField *pSpecificInstrument, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast );
+	virtual void OnRspSubMarketData( CUstpFtdcSpecificInstrumentField *pSpecificInstrument, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast ) override;
 
-	virtual void OnHeartBeatWarning( int nTimeLapse );
+	virtual void OnHeartBeatWarning( int nTimeLapse ) override;
 
 private:
 	/*
@@ -89,7 +89,7 @@ private:
 
 private:
 	uint32_t			m_uTradingDate;
-	LoginStatus			m_loginState;
+	[[maybe_unused]] LoginStatus			m_loginState;
 	CUstpFtdcMduserApi*	m_pUserAPI;
 
 	std::string			m_strFrontAddr;

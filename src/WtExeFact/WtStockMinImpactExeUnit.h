@@ -226,7 +226,7 @@ private:
 	/** @brief 目标金额 */
 	double		_target_amount;
 	/** @brief 目标持仓比例 */
-	double		_target_ratio;
+	[[maybe_unused]] double		_target_ratio;
 
 	/** @brief 账户可用资金 */
 	double		_avaliable{ 0 };
@@ -264,7 +264,7 @@ private:
 	/** @brief 开始价格，记录执行开始时的价格 */
 	double		_start_price{ 0 };
 	/** @brief 是否为第一个Tick标志 */
-	bool		_is_first_tick{ true };
+	[[maybe_unused]] bool		_is_first_tick{ true };
 	/** @brief 最大撤单次数，如果超过这个次数仍然未撤单，则说明是错单 */
 	double		_max_cancel_time{ 3 };
 	/** @brief 总资金，用于计算持仓比例时的基数，-1表示使用账户实际资金 */
@@ -336,10 +336,12 @@ public:
 		if (strcmp(comm_info->getProduct(), cbondStr) == 0)
 			min_order = 10.0;
 		else if (strcmp(comm_info->getProduct(), stockStr) == 0)
+		{
 			if (is_KC)
 				min_order = 200.0;
 			else
 				min_order = 100.0;
+		}
 		if (comm_info)
 			comm_info->release();
 		return min_order;

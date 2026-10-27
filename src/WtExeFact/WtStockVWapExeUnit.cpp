@@ -19,23 +19,23 @@ extern const char* FACT_NAME;
  */
 WtStockVWapExeUnit::WtStockVWapExeUnit()
 	:_last_tick(NULL)       // 行情数据指针
-	, _comm_info(NULL)      // 品种信息
-	, _ord_sticky(0)        // 挂单超时时间
-	, _cancel_cnt(0)        // 撤单计数
+	, _target_pos(0)        // 目标仓位
 	, _channel_ready(false) // 交易通道就绪标志
-	, _last_fire_time(0)    // 上次发单时间
-	, _fired_times(0)       // 已执行次数
-	, _total_times(0)       // 总执行次数
+	, _comm_info(NULL)      // 品种信息
+	, _cancel_times(0)      // 撤单次数
+	, _cancel_cnt(0)        // 撤单计数
 	, _total_secs(0)        // 总执行时间
+	, _total_times(0)       // 总执行次数
+	, _ord_sticky(0)        // 挂单超时时间
 	, _price_mode(0)        // 价格模式
 	, _price_offset(0)      // 价格偏移
-	, _target_pos(0)        // 目标仓位
-	, _cancel_times(0)      // 撤单次数
 	, _begin_time(0)        // 开始时间
 	, _end_time(0)          // 结束时间
-	, _is_clear{ false }    // 清仓标志
 	, _is_KC{ false }       // 科创板标志
 	,isCanCancel{true}     // 订单是否可撤销
+	, _is_clear{ false }    // 清仓标志
+	, _fired_times(0)       // 已执行次数
+	, _last_fire_time(0)    // 上次发单时间
 {
 }
 
@@ -255,7 +255,7 @@ void WtStockVWapExeUnit::init(ExecuteContext * ctx, const char * stdCode, WTSVar
  * @param price 订单委托价格
  * @param isCanceled 订单是否已撤销
  */
-void WtStockVWapExeUnit::on_order(uint32_t localid, const char * stdCode, bool isBuy, double leftover, double price, bool isCanceled)
+void WtStockVWapExeUnit::on_order(uint32_t localid, const char * stdCode, bool /*isBuy*/, double leftover, double /*price*/, bool isCanceled)
 {
 	// 检查订单是否在监控器中
 	if (!_orders_mon.has_order(localid))
@@ -452,7 +452,7 @@ void WtStockVWapExeUnit::on_tick(WTSTickData * newTick)
  * @param vol 成交数量
  * @param price 成交价格
  */
-void WtStockVWapExeUnit::on_trade(uint32_t localid, const char * stdCode, bool isBuy, double vol, double price)
+void WtStockVWapExeUnit::on_trade(uint32_t localid, const char * stdCode, bool /*isBuy*/, double vol, double price)
 {
 	// 记录成交日志
 	_ctx->writeLog(fmtutil::format("Order {} of {} traded: {} @ {}", localid, stdCode, vol, price));
@@ -460,7 +460,7 @@ void WtStockVWapExeUnit::on_trade(uint32_t localid, const char * stdCode, bool i
 /*
 下单结果回报
 */
-void WtStockVWapExeUnit::on_entrust(uint32_t localid, const char * stdCode, bool bSuccess, const char * message)
+void WtStockVWapExeUnit::on_entrust(uint32_t localid, const char * /*stdCode*/, bool bSuccess, const char * /*message*/)
 {
 	if (!bSuccess)
 	{

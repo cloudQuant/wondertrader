@@ -401,7 +401,7 @@ std::vector<std::string> ShareBlocks::get_sections(const char* domain)
 		ret.emplace_back(shm._block->_sections[i]._name);
 	}
 
-	return std::move(ret);
+	return ret;
 }
 
 std::vector<KeyInfo*> ShareBlocks::get_keys(const char* domain, const char* section)
@@ -429,7 +429,7 @@ std::vector<KeyInfo*> ShareBlocks::get_keys(const char* domain, const char* sect
 		ret.emplace_back(v.second);
 	}
 
-	return std::move(ret);
+	return ret;
 }
 
 const char* ShareBlocks::allocate_string(const char* domain, const char* section, const char* key, const char* initVal /* = "" */, bool bForceWrite/* = false*/)
@@ -731,7 +731,7 @@ bool ShareBlocks::add_cmd(const char* name, const char* cmd)
 #ifdef _MSC_VER
     if (cmdPair._block->_cmdpid != _getpid())
 #else
-	if (cmdPair._block->_cmdpid != getpid())
+	if (cmdPair._block->_cmdpid != (uint32_t)getpid())
 #endif
 	
 		return false;

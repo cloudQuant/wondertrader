@@ -181,7 +181,7 @@ private:
 		 * @brief 构造函数
 		 * @details 初始化缓存块和文件指针为NULL
 		 */
-		_RTBarCacheWrapper():_cache_block(NULL),_file_ptr(NULL){}
+		_RTBarCacheWrapper():_file_ptr(NULL),_cache_block(NULL){}
 
 		/**
 		 * @brief 检查缓存是否为空

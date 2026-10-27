@@ -59,9 +59,9 @@ public:
 	virtual bool dumpHisBars(const char* stdCode, const char* period, WTSBarStruct* bars, uint32_t count) = 0;
 	virtual bool dumpHisTicks(const char* stdCode, uint32_t uDate, WTSTickStruct* ticks, uint32_t count) = 0;
 
-	virtual bool dumpHisOrdQue(const char* stdCode, uint32_t uDate, WTSOrdQueStruct* items, uint32_t count) { return false; }
-	virtual bool dumpHisOrdDtl(const char* stdCode, uint32_t uDate, WTSOrdDtlStruct* items, uint32_t count) { return false; }
-	virtual bool dumpHisTrans(const char* stdCode, uint32_t uDate, WTSTransStruct* items, uint32_t count) { return false; }
+	virtual bool dumpHisOrdQue(const char* /*stdCode*/, uint32_t /*uDate*/, WTSOrdQueStruct* /*items*/, uint32_t /*count*/) { return false; }
+	virtual bool dumpHisOrdDtl(const char* /*stdCode*/, uint32_t /*uDate*/, WTSOrdDtlStruct* /*items*/, uint32_t /*count*/) { return false; }
+	virtual bool dumpHisTrans(const char* /*stdCode*/, uint32_t /*uDate*/, WTSTransStruct* /*items*/, uint32_t /*count*/) { return false; }
 };
 
 typedef wt_hashmap<std::string, IHisDataDumper*> ExtDumpers;
@@ -73,8 +73,9 @@ class IDataWriter
 {
 public:
 	IDataWriter():_sink(NULL){}
+	virtual ~IDataWriter() = default;
 
-	virtual bool init(WTSVariant* params, IDataWriterSink* sink) { _sink = sink; return true; }
+	virtual bool init(WTSVariant* /*params*/, IDataWriterSink* sink) { _sink = sink; return true; }
 
 	virtual void release() = 0;
 
@@ -83,15 +84,15 @@ public:
 public:
 	virtual bool writeTick(WTSTickData* curTick, uint32_t procFlag) = 0;
 
-	virtual bool writeOrderQueue(WTSOrdQueData* curOrdQue) { return false; }
+	virtual bool writeOrderQueue(WTSOrdQueData* /*curOrdQue*/) { return false; }
 
-	virtual bool writeOrderDetail(WTSOrdDtlData* curOrdDetail) { return false; }
+	virtual bool writeOrderDetail(WTSOrdDtlData* /*curOrdDetail*/) { return false; }
 
-	virtual bool writeTransaction(WTSTransData* curTrans) { return false; }
+	virtual bool writeTransaction(WTSTransData* /*curTrans*/) { return false; }
 
-	virtual void transHisData(const char* sid) {}
+	virtual void transHisData(const char* /*sid*/) {}
 
-	virtual bool isSessionProceeded(const char* sid) { return true; }
+	virtual bool isSessionProceeded(const char* /*sid*/) { return true; }
 
 	virtual WTSTickData* getCurTick(const char* code, const char* exchg = "") = 0;
 

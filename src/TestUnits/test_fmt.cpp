@@ -117,7 +117,7 @@ TEST(test_fmt, test_itos)
 	ticker.reset();
 	for (int i = 0; i < times; i++)
 	{
-		sprintf(buffer, "%d", num);
+		snprintf(buffer, sizeof(buffer), "%d", num);
 	}
 	uint64_t t2 = ticker.nano_seconds();
 

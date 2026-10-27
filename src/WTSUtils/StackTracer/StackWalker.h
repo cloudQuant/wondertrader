@@ -44,7 +44,9 @@
 typedef std::function<void(const char*)> WalkerLogger;
 
 #if _MSC_VER >= 1900
+#ifdef _MSC_VER
 #pragma warning(disable : 4091)
+#endif
 #endif
 
 // special defines for VC5/6 (if no actual PSDK is installed):

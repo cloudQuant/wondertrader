@@ -10,7 +10,7 @@
 
 #include "TraderHTS.h"
 #include <boost/asio/post.hpp>
-#include "../API/HTS5.2.43.0/include/scopeguard.hpp"
+#include <API/HTS5.2.43.0/include/scopeguard.hpp>
 
 #include "../Includes/WTSError.hpp"
 #include "../Includes/WTSContractInfo.hpp"

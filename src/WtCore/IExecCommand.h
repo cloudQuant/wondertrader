@@ -72,7 +72,7 @@ public:
 	 * @param targets 目标仓位映射表，键为合约代码，值为目标仓位
 	 * @details 根据输入的目标仓位映射表调整成交易代码的仓位
 	 */
-	virtual void set_position(const wt_hashmap<std::string, double>& targets) {}
+	virtual void set_position(const wt_hashmap<std::string, double>& /*targets*/) {}
 
 	/**
 	 * @brief 合约仓位变动通知
@@ -80,7 +80,7 @@ public:
 	 * @param diffPos 仓位变动量，正数表示增加，负数表示减少
 	 * @details 当成交后合约仓位发生变化时调用
 	 */
-	virtual void on_position_changed(const char* stdCode, double diffPos) {}
+	virtual void on_position_changed(const char* /*stdCode*/, double /*diffPos*/) {}
 
 	/**
 	 * @brief 实时行情回调
@@ -88,7 +88,7 @@ public:
 	 * @param newTick 新的Tick数据
 	 * @details 当收到合约的新Tick数据时调用
 	 */
-	virtual void on_tick(const char* stdCode, WTSTickData* newTick) {}
+	virtual void on_tick(const char* /*stdCode*/, WTSTickData* /*newTick*/) {}
 
 	/**
 	 * @brief 设置执行器存根

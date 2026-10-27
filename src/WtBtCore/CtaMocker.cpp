@@ -62,19 +62,19 @@ CtaMocker::CtaMocker(HisDataReplayer* replayer, const char* name, int32_t slippa
 	, _replayer(replayer)
 	, _total_calc_time(0)
 	, _emit_times(0)
-	, _is_in_schedule(false)
-	, _ud_modified(false)
-	, _strategy(NULL)
 	, _slippage(slippage)
 	, _ratio_slippage(isRatioSlp)
 	, _schedule_times(0)
 	, _total_closeprofit(0)
+	, _is_in_schedule(false)
+	, _ud_modified(false)
+	, _strategy(NULL)
 	, _notifier(notifier)
 	, _has_hook(false)
 	, _hook_valid(true)
 	, _cur_step(0)
-	, _wait_calc(false)
 	, _in_backtest(false)
+	, _wait_calc(false)
 	, _persist_data(persistData)
 {
 	_context_id = makeCtxId();
@@ -648,7 +648,7 @@ void CtaMocker::handle_session_end(uint32_t curTDate)
 	this->on_session_end(curTDate);
 }
 
-void CtaMocker::handle_section_end(uint32_t curTDate, uint32_t curTime)
+void CtaMocker::handle_section_end(uint32_t /*curTDate*/, uint32_t /*curTime*/)
 {
 	/*
 	 *	By Wesley @ 2022.05.16
@@ -849,7 +849,7 @@ void CtaMocker::proc_tick(const char* stdCode, double last_px, double cur_px)
 			//_replayer->is_tick_enabled() ? newTick->price() : entrust._target;	//如果开启了tick回测,则用tick数据的价格,如果没有开启,则只能用条件单价格
 			WTSLogger::log_dyn("strategy", _name.c_str(), LL_INFO,
 				"Condition order triggered[newprice: {}{}{}], instrument: {}, {} {}",
-				curPrice, CMP_ALG_NAMES[entrust._alg], entrust._target, stdCode, ACTION_NAMES[entrust._action], entrust._qty);
+				curPrice, CMP_ALG_NAMES[(uint32_t)entrust._alg], entrust._target, stdCode, ACTION_NAMES[(uint32_t)entrust._action], entrust._qty);
 			switch (entrust._action)
 			{
 			case COND_ACTION_OL:
@@ -1013,7 +1013,7 @@ void CtaMocker::update_dyn_profit(const char* stdCode, double price)
 	_fund_info._total_dynprofit = total_dynprofit;
 }
 
-void CtaMocker::on_tick(const char* stdCode, WTSTickData* newTick, bool bEmitStrategy /* = true */)
+void CtaMocker::on_tick(const char* /*stdCode*/, WTSTickData* /*newTick*/, bool /*bEmitStrategy*/ /* = true */)
 {
 	//这个逻辑全部迁移到handle_tick里去了
 }
@@ -1238,7 +1238,7 @@ void CtaMocker::on_session_begin(uint32_t curTDate)
 		_strategy->on_session_begin(this, curTDate);
 }
 
-void CtaMocker::enum_position(FuncEnumCtaPosCallBack cb, bool bForExecute)
+void CtaMocker::enum_position(FuncEnumCtaPosCallBack cb, bool /*bForExecute*/)
 {
 	wt_hashmap<std::string, double> desPos;
 	for (auto& it : _pos_map)
@@ -1268,8 +1268,8 @@ void CtaMocker::on_session_end(uint32_t curTDate)
 
 	uint32_t curDate = curTDate;//_replayer->get_trading_date();
 
-	double total_profit = 0;
-	double total_dynprofit = 0;
+	[[maybe_unused]] double total_profit = 0;
+	[[maybe_unused]] double total_dynprofit = 0;
 
 	for (auto it = _pos_map.begin(); it != _pos_map.end(); it++)
 	{
@@ -1809,7 +1809,7 @@ WTSKlineSlice* CtaMocker::stra_get_bars(const char* stdCode, const char* period,
 	{
 		//double lastClose = kline->close(-1);
 		CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _replayer->get_hot_mgr());
-		WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
+		[[maybe_unused]] WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
 		std::string realCode = stdCode;
 		if(cInfo.isExright())
 			realCode = realCode.substr(0, realCode.size()-1);

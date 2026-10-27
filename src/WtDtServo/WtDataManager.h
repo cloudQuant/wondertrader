@@ -315,7 +315,7 @@ private:
 		uint32_t		_times;          ///< 周期倍数
 
 		/// @brief 构造函数，初始化成员变量
-		_BarCache():_last_bartime(0),_period(KP_DAY),_times(1),_bars(NULL){}
+		_BarCache():_bars(NULL),_last_bartime(0),_period(KP_DAY),_times(1){}
 	} BarCache;
 	/// @brief K线缓存映射类型，键为合约代码，值为K线缓存
 	typedef wt_hashmap<std::string, BarCache>	BarCacheMap;

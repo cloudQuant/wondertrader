@@ -348,7 +348,7 @@ bool WtUftRunner::initEvtNotifier()
 	return true;
 }
 
-void WtUftRunner::run(bool bAsync /* = false */)
+void WtUftRunner::run(bool /*bAsync*/ /* = false */)
 {
 	try
 	{
@@ -382,6 +382,6 @@ const char* LOG_TAGS[] = {
 	"none"
 };
 
-void WtUftRunner::handleLogAppend(WTSLogLevel ll, const char* msg)
+void WtUftRunner::handleLogAppend(WTSLogLevel /*ll*/, const char* /*msg*/)
 {
 }

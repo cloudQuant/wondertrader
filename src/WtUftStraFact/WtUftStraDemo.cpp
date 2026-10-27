@@ -29,10 +29,10 @@ extern const char* FACT_NAME;
 WtUftStraDemo::WtUftStraDemo(const char* id)
 	: UftStrategy(id)              // 调用父类构造函数
 	, _last_tick(NULL)             // 初始化最后一个Tick为空
+	, _lots(1)                     // 交易手数默认为1手
 	, _last_entry_time(UINT64_MAX) // 最后入场时间初始化为最大值，确保首次可以正常入场
 	, _channel_ready(false)        // 初始化交易通道为未就绪状态
 	, _last_calc_time(0)           // 最后计算时间初始化为0
-	, _lots(1)                     // 交易手数默认为1手
 	, _cancel_cnt(0)               // 撤单计数器初始化为0
 {
 }
@@ -95,7 +95,7 @@ bool WtUftStraDemo::init(WTSVariant* cfg)
  * @param message 委托消息
  * @details 在委托发送后回调，如果委托失败则从内部订单集合中移除该委托
  */
-void WtUftStraDemo::on_entrust(uint32_t localid, bool bSuccess, const char* message)
+void WtUftStraDemo::on_entrust(uint32_t localid, bool bSuccess, const char* /*message*/)
 {
 	// 委托失败的处理
 	if(!bSuccess)
@@ -292,7 +292,7 @@ void WtUftStraDemo::check_orders()
  * @param newBar 最新K线数据
  * @details 在收到新的K线数据时调用，当前示例策略中未实现具体逻辑
  */
-void WtUftStraDemo::on_bar(IUftStraCtx* ctx, const char* code, const char* period, uint32_t times, WTSBarStruct* newBar)
+void WtUftStraDemo::on_bar(IUftStraCtx* /*ctx*/, const char* /*code*/, const char* /*period*/, uint32_t /*times*/, WTSBarStruct* /*newBar*/)
 {
 	// 当前示例策略中不使用K线数据进行交易决策
 }
@@ -308,7 +308,7 @@ void WtUftStraDemo::on_bar(IUftStraCtx* ctx, const char* code, const char* perio
  * @param price 成交价格
  * @details 在有成交发生时调用，当前示例策略中未实现具体逻辑
  */
-void WtUftStraDemo::on_trade(IUftStraCtx* ctx, uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double qty, double price)
+void WtUftStraDemo::on_trade(IUftStraCtx* /*ctx*/, uint32_t /*localid*/, const char* /*stdCode*/, bool /*isLong*/, uint32_t /*offset*/, double /*qty*/, double /*price*/)
 {
 	// 当前示例策略中不处理成交回调
 }
@@ -324,7 +324,7 @@ void WtUftStraDemo::on_trade(IUftStraCtx* ctx, uint32_t localid, const char* std
  * @param newavail 新的可用持仓
  * @details 在持仓变更时调用，记录前一交易日持仓并输出日志
  */
-void WtUftStraDemo::on_position(IUftStraCtx* ctx, const char* stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail)
+void WtUftStraDemo::on_position(IUftStraCtx* /*ctx*/, const char* stdCode, bool /*isLong*/, double prevol, double /*preavail*/, double /*newvol*/, double /*newavail*/)
 {
 	// 如果不是监控的品种，则直接返回
 	if (_code != stdCode)
@@ -349,7 +349,7 @@ void WtUftStraDemo::on_position(IUftStraCtx* ctx, const char* stdCode, bool isLo
  * @param isCanceled 是否已撤销
  * @details 在订单状态变更时调用，用于管理内部订单集合，当订单完成或撤销时从集合中移除
  */
-void WtUftStraDemo::on_order(IUftStraCtx* ctx, uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double totalQty, double leftQty, double price, bool isCanceled)
+void WtUftStraDemo::on_order(IUftStraCtx* /*ctx*/, uint32_t localid, const char* /*stdCode*/, bool /*isLong*/, uint32_t /*offset*/, double /*totalQty*/, double leftQty, double /*price*/, bool isCanceled)
 {
 	//如果不是我发出去的订单,我就不管了
 	auto it = _orders.find(localid);
@@ -379,7 +379,7 @@ void WtUftStraDemo::on_order(IUftStraCtx* ctx, uint32_t localid, const char* std
  * @param ctx 策略上下文
  * @details 在交易通道准备就绪时调用，处理未完成订单并标记通道就绪状态
  */
-void WtUftStraDemo::on_channel_ready(IUftStraCtx* ctx)
+void WtUftStraDemo::on_channel_ready(IUftStraCtx* /*ctx*/)
 {
 	// 获取当前品种的未完成订单数量
 	double undone = _ctx->stra_get_undone(_code.c_str());
@@ -412,7 +412,7 @@ void WtUftStraDemo::on_channel_ready(IUftStraCtx* ctx)
  * @param ctx 策略上下文
  * @details 在交易通道中断时调用，标记通道为非就绪状态
  */
-void WtUftStraDemo::on_channel_lost(IUftStraCtx* ctx)
+void WtUftStraDemo::on_channel_lost(IUftStraCtx* /*ctx*/)
 {
 	// 标记交易通道为非就绪状态，暂停交易活动
 	_channel_ready = false;

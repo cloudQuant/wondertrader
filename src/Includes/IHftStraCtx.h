@@ -116,21 +116,21 @@ public:
 	 * @param newBar 最新的K线数据
 	 * @details 当新的K线数据完成时触发，在高频策略中较少使用
 	 */
-	virtual void on_bar(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar) {}
+	virtual void on_bar(const char* /*stdCode*/, const char* /*period*/, uint32_t /*times*/, WTSBarStruct* /*newBar*/) {}
 
 	/**
 	 * @brief 交易日开始回调
 	 * @param uTDate 交易日，格式为YYYYMMDD
 	 * @details 每个交易日开始时触发，用于准备当日交易
 	 */
-	virtual void on_session_begin(uint32_t uTDate) {}
+	virtual void on_session_begin(uint32_t /*uTDate*/) {}
 
 	/**
 	 * @brief 交易日结束回调
 	 * @param uTDate 交易日，格式为YYYYMMDD
 	 * @details 每个交易日结束时触发，用于清理或汇总当日交易
 	 */
-	virtual void on_session_end(uint32_t uTDate) {}
+	virtual void on_session_end(uint32_t /*uTDate*/) {}
 	/**
 	 * @brief 回测结束事件回调
 	 * @details 该回调仅在回测环境下会被触发，用于通知策略回测已结束
@@ -144,7 +144,7 @@ public:
 	 * @param newTick 更新的Tick数据
 	 * @details 与on_tick类似，但一般用于数据更新通知，而非交易信号触发
 	 */
-	virtual void on_tick_updated(const char* stdCode, WTSTickData* newTick) {}
+	virtual void on_tick_updated(const char* /*stdCode*/, WTSTickData* /*newTick*/) {}
 
 	/**
 	 * @brief 委托队列数据更新回调
@@ -152,7 +152,7 @@ public:
 	 * @param newOrdQue 更新的委托队列数据
 	 * @details 当委托队列数据更新时触发，一般用于市场数据监控而非交易信号
 	 */
-	virtual void on_ordque_updated(const char* stdCode, WTSOrdQueData* newOrdQue) {}
+	virtual void on_ordque_updated(const char* /*stdCode*/, WTSOrdQueData* /*newOrdQue*/) {}
 
 	/**
 	 * @brief 逐笔委托数据更新回调
@@ -160,7 +160,7 @@ public:
 	 * @param newOrdDtl 更新的逐笔委托数据
 	 * @details 当逐笔委托数据更新时触发，一般用于市场数据监控而非交易信号
 	 */
-	virtual void on_orddtl_updated(const char* stdCode, WTSOrdDtlData* newOrdDtl) {}
+	virtual void on_orddtl_updated(const char* /*stdCode*/, WTSOrdDtlData* /*newOrdDtl*/) {}
 
 	/**
 	 * @brief 逐笔成交数据更新回调
@@ -168,7 +168,7 @@ public:
 	 * @param newTrans 更新的逐笔成交数据
 	 * @details 当逐笔成交数据更新时触发，一般用于市场数据监控而非交易信号
 	 */
-	virtual void on_trans_updated(const char* stdCode, WTSTransData* newTrans) {}
+	virtual void on_trans_updated(const char* /*stdCode*/, WTSTransData* /*newTrans*/) {}
 
 	/**
 	 * @brief 策略交易接口
@@ -229,7 +229,7 @@ public:
 	 * @return 发出订单的本地ID
 	 * @details 发出买入开仓指令，与stra_buy的区别是这个函数明确指定为开仓
 	 */
-	virtual uint32_t	stra_enter_long(const char* stdCode, double price, double qty, const char* userTag, int flag = 0) { return 0; }
+	virtual uint32_t	stra_enter_long(const char* /*stdCode*/, double /*price*/, double /*qty*/, const char* /*userTag*/, int /*flag*/ = 0) { return 0; }
 
 	/**
 	 * @brief 下单接口: 开空(卖出开仓)
@@ -241,7 +241,7 @@ public:
 	 * @return 发出订单的本地ID
 	 * @details 发出卖出开仓指令，与stra_sell的区别是这个函数明确指定为开仓
 	 */
-	virtual uint32_t	stra_enter_short(const char* stdCode, double price, double qty, const char* userTag, int flag = 0) { return 0; }
+	virtual uint32_t	stra_enter_short(const char* /*stdCode*/, double /*price*/, double /*qty*/, const char* /*userTag*/, int /*flag*/ = 0) { return 0; }
 
 	/**
 	 * @brief 下单接口: 平多(卖出平仓)
@@ -254,7 +254,7 @@ public:
 	 * @return 发出订单的本地ID
 	 * @details 发出卖出平多头指令，与stra_sell的区别是这个函数明确指定为平多头仓位
 	 */
-	virtual uint32_t	stra_exit_long(const char* stdCode, double price, double qty, const char* userTag, bool isToday = false, int flag = 0) { return 0; }
+	virtual uint32_t	stra_exit_long(const char* /*stdCode*/, double /*price*/, double /*qty*/, const char* /*userTag*/, bool /*isToday*/ = false, int /*flag*/ = 0) { return 0; }
 
 	/**
 	 * @brief 下单接口: 平空(买入平仓)
@@ -267,7 +267,7 @@ public:
 	 * @return 发出订单的本地ID
 	 * @details 发出买入平空头指令，与stra_buy的区别是这个函数明确指定为平空头仓位
 	 */
-	virtual uint32_t	stra_exit_short(const char* stdCode, double price, double qty, const char* userTag, bool isToday = false, int flag = 0) { return 0; }
+	virtual uint32_t	stra_exit_short(const char* /*stdCode*/, double /*price*/, double /*qty*/, const char* /*userTag*/, bool /*isToday*/ = false, int /*flag*/ = 0) { return 0; }
 
 	/**
 	 * @brief 获取合约品种信息
@@ -459,7 +459,7 @@ public:
 	 * @param message 日志消息
 	 * @details 输出警告级别的日志，用于记录需要注意但不影响策略正常运行的情况
 	 */
-	virtual void stra_log_warn(const char* message) {}
+	virtual void stra_log_warn(const char* /*message*/) {}
 
 	/**
 	 * @brief 保存用户自定义数据
@@ -467,7 +467,7 @@ public:
 	 * @param val 数据值
 	 * @details 将用户自定义数据保存到存储中，可用于记录策略状态或参数，便于策略重启后继续使用
 	 */
-	virtual void stra_save_user_data(const char* key, const char* val) {}
+	virtual void stra_save_user_data(const char* /*key*/, const char* /*val*/) {}
 
 	/**
 	 * @brief 加载用户自定义数据
@@ -476,7 +476,7 @@ public:
 	 * @return 数据值或默认值
 	 * @details 从存储中加载用户自定义数据，用于恢复策略状态或参数
 	 */
-	virtual const char* stra_load_user_data(const char* key, const char* defVal = "") { return defVal; }
+	virtual const char* stra_load_user_data(const char* /*key*/, const char* defVal = "") { return defVal; }
 
 protected:
 	/**

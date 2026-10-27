@@ -25,13 +25,13 @@ USING_NS_WTP;
 
 WtHftRtTicker::WtHftRtTicker(WtHftEngine* engine)
 	: _engine(engine)
-	, _stopped(false)
 	, _date(0)
 	, _time(UINT_MAX)
-	, _next_check_time(0)
-	, _last_emit_pos(0)
 	, _cur_pos(0)
-{
+, _next_check_time(0)
+	, _last_emit_pos(0)
+	, _stopped(false)
+	{
 }
 
 
@@ -230,9 +230,9 @@ void WtHftRtTicker::run()
 					//优先修改时间标记
 					_last_emit_pos = total_mins;
 
-					bool bEndingTDate = true;
+					[[maybe_unused]] bool bEndingTDate = true;
 					uint32_t thisMin = _s_info->getCloseTime(false);
-					uint32_t offMin = _s_info->getCloseTime(true);
+					[[maybe_unused]] uint32_t offMin = _s_info->getCloseTime(true);
 
 					WTSLogger::info("Minute bar {}.{:04d} closed automatically", _date, thisMin);
 					if (_store)

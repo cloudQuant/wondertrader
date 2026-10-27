@@ -65,9 +65,7 @@ private:
 	{
 		WTSVariant* ret = new WTSVariant();
 		ret->_type = VT_Int32;
-		char s[32] = { 0 };
-		sprintf(s, "%d", i32);
-		ret->_value._string = new std::string(s);
+		ret->_value._string = new std::string(std::to_string(i32));
 		return ret;
 	}
 
@@ -75,9 +73,7 @@ private:
 	{
 		WTSVariant* ret = new WTSVariant();
 		ret->_type = VT_Uint32;
-		char s[32] = { 0 };
-		sprintf(s, "%u", u32);
-		ret->_value._string = new std::string(s);
+		ret->_value._string = new std::string(std::to_string(u32));
 		return ret;
 	}
 
@@ -85,9 +81,7 @@ private:
 	{
 		WTSVariant* ret = new WTSVariant();
 		ret->_type = VT_Int64;
-		char s[32] = { 0 };
-		sprintf(s, INT64_FMT, i64);
-		ret->_value._string = new std::string(s);
+		ret->_value._string = new std::string(std::to_string(i64));
 		return ret;
 	}
 
@@ -95,9 +89,7 @@ private:
 	{
 		WTSVariant* ret = new WTSVariant();
 		ret->_type = VT_Uint64;
-		char s[32] = { 0 };
-		sprintf(s, UINT64_FMT, u64);
-		ret->_value._string = new std::string(s);
+		ret->_value._string = new std::string(std::to_string(u64));
 		return ret;
 	}
 
@@ -346,7 +338,7 @@ public:
 	{
 		WTSVariant* p = get(name);
 		if (p)
-			return std::move(p->asString());
+			return p->asString();
 
 		return defVal;
 	}
@@ -700,7 +692,7 @@ public:
 			}
 		}
 
-		return std::move(names);
+		return names;
 	}
 
 	virtual void release()

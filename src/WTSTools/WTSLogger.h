@@ -333,7 +333,7 @@ public:
 	 * @param args 参数列表
 	 */
 	template<typename... Args>
-	static void log_by_cat_prefix(const char* catName, WTSLogLevel ll, const char* format, const Args& ...args)
+	static void log_by_cat_prefix(const char* catName, WTSLogLevel ll, const char* /*format*/, const Args& .../*args*/)
 	{
 		if (m_logLevel > ll || m_bStopped)
 			return;
@@ -342,7 +342,7 @@ public:
 		strcpy(m_buffer + 1, catName);
 		auto offset = strlen(catName);
 		m_buffer[offset + 1] = ']';
-		char* s = m_buffer + offset + 2;
+		[[maybe_unused]] char* s = m_buffer + offset + 2;
 		log_raw_by_cat(catName, ll, m_buffer);
 	}
 

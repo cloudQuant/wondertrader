@@ -16,7 +16,7 @@
 #include <atomic>
 
 #define TRADE_API_USE_STATIC
-#include "../API/AtpTradeApi/include/atp_trade_api.h"
+#include <API/AtpTradeApi/include/atp_trade_api.h>
 
 #include "../Includes/ITraderApi.h"
 #include "../Includes/WTSCollection.hpp"

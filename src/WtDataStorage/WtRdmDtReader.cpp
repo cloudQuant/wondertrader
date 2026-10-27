@@ -1440,7 +1440,7 @@ bool WtRdmDtReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key,
 			break;
 		} while (false);
 
-		bool bAllCovered = false;
+		[[maybe_unused]] bool bAllCovered = false;
 		do
 		{
 			//const char* curCode = it->first.c_str();
@@ -1525,7 +1525,7 @@ bool WtRdmDtReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key,
 							double factor = adjFact._factor / baseFactor;
 
 							WTSBarStruct* pBar = NULL;
-							pBar = std::lower_bound(firstBar, firstBar + lastIdx - 1, bar, [period](const WTSBarStruct& a, const WTSBarStruct& b) {
+							pBar = std::lower_bound(firstBar, firstBar + lastIdx - 1, bar, [](const WTSBarStruct& a, const WTSBarStruct& b) {
 								return a.date < b.date;
 							});
 
@@ -1641,7 +1641,7 @@ WTSBarStruct* WtRdmDtReader::indexBarFromCacheByRange(const std::string& key, ui
 	std::size_t eIdx,sIdx;
 	{
 		//光标尚未初始化, 需要重新定位
-		uint64_t nowTime = (uint64_t)rDate * 10000 + rTime;
+		[[maybe_unused]] uint64_t nowTime = (uint64_t)rDate * 10000 + rTime;
 
 		WTSBarStruct eBar;
 		eBar.date = rDate;
@@ -1794,7 +1794,7 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByRange(const char* stdCode, WTSKlin
 
 	std::string key = fmt::format("{}#{}", stdCode, (uint32_t)period);
 	auto it = _bars_cache.find(key);
-	bool bHasHisData = false;
+	[[maybe_unused]] bool bHasHisData = false;
 	if (it == _bars_cache.end())
 	{
 		bHasHisData = cacheHisBarsFromFile(&cInfo, key, stdCode, period);
@@ -2225,7 +2225,7 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByCount(const char* stdCode, WTSKlin
 
 	std::string key = fmtutil::format("{}#{}", stdCode, (uint32_t)period);
 	auto it = _bars_cache.find(key);
-	bool bHasHisData = false;
+	[[maybe_unused]] bool bHasHisData = false;
 	if (it == _bars_cache.end())
 	{
 		bHasHisData = cacheHisBarsFromFile(&cInfo, key, stdCode, period);

@@ -47,11 +47,11 @@ inline uint32_t makeUftCtxId()
 UftMocker::UftMocker(HisDataReplayer* replayer, const char* name)
 	: IUftStraCtx(name)
 	, _replayer(replayer)
-	, _strategy(NULL)
 	, _use_newpx(false)
 	, _error_rate(0)
 	, _match_this_tick(false)
-{
+, _strategy(NULL)
+	{
 	_context_id = makeUftCtxId();
 }
 
@@ -166,7 +166,7 @@ bool UftMocker::init_uft_factory(WTSVariant* cfg)
 	return true;
 }
 
-void UftMocker::handle_tick(const char* stdCode, WTSTickData* curTick, uint32_t pxType)
+void UftMocker::handle_tick(const char* stdCode, WTSTickData* curTick, uint32_t /*pxType*/)
 {
 	on_tick(stdCode, curTick);
 }
@@ -197,7 +197,7 @@ void UftMocker::handle_init()
 	on_channel_ready();
 }
 
-void UftMocker::handle_schedule(uint32_t uDate, uint32_t uTime)
+void UftMocker::handle_schedule(uint32_t /*uDate*/, uint32_t /*uTime*/)
 {
 	//on_schedule(uDate, uTime);
 }
@@ -367,8 +367,8 @@ void UftMocker::on_session_end(uint32_t curTDate)
 
 	uint32_t curDate = curTDate;// _replayer->get_trading_date();
 
-	double total_profit = 0;
-	double total_dynprofit = 0;
+	[[maybe_unused]] double total_profit = 0;
+	[[maybe_unused]] double total_dynprofit = 0;
 
 	for (auto it = _pos_map.begin(); it != _pos_map.end(); it++)
 	{
@@ -397,7 +397,7 @@ double UftMocker::stra_get_undone(const char* stdCode)
 		const OrderInfoPtr& ordInfo = it->second;
 		if (strcmp(ordInfo->_code, stdCode) == 0)
 		{
-			ret += ordInfo->_left * ordInfo->_isLong ? 1 : -1;
+			ret += ordInfo->_left * (ordInfo->_isLong ? 1 : -1);
 		}
 	}
 
@@ -456,7 +456,7 @@ bool UftMocker::stra_cancel(uint32_t localid)
 OrderIDs UftMocker::stra_cancel_all(const char* stdCode)
 {
 	OrderIDs ret;
-	uint32_t cnt = 0;
+	[[maybe_unused]] uint32_t cnt = 0;
 	for (auto it = _orders.begin(); it != _orders.end(); it++)
 	{
 		const OrderInfoPtr& ordInfo = it->second;
@@ -469,7 +469,7 @@ OrderIDs UftMocker::stra_cancel_all(const char* stdCode)
 	return ret;
 }
 
-OrderIDs UftMocker::stra_buy(const char* stdCode, double price, double qty, int flag /* = 0 */)
+OrderIDs UftMocker::stra_buy(const char* stdCode, double price, double qty, int /*flag*/ /* = 0 */)
 {
 	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
 	if (commInfo == NULL)
@@ -531,7 +531,7 @@ OrderIDs UftMocker::stra_buy(const char* stdCode, double price, double qty, int 
 	return ids;
 }
 
-OrderIDs UftMocker::stra_sell(const char* stdCode, double price, double qty, int flag /* = 0 */)
+OrderIDs UftMocker::stra_sell(const char* stdCode, double price, double qty, int /*flag*/ /* = 0 */)
 {
 	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
 	if (commInfo == NULL)
@@ -594,7 +594,7 @@ OrderIDs UftMocker::stra_sell(const char* stdCode, double price, double qty, int
 	return ids;
 }
 
-uint32_t UftMocker::stra_enter_long(const char* stdCode, double price, double qty, int flag /* = 0 */)
+uint32_t UftMocker::stra_enter_long(const char* stdCode, double price, double qty, int /*flag*/ /* = 0 */)
 {
 	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
 	if (commInfo == NULL)
@@ -635,7 +635,7 @@ uint32_t UftMocker::stra_enter_long(const char* stdCode, double price, double qt
 	return localid;
 }
 
-uint32_t UftMocker::stra_enter_short(const char* stdCode, double price, double qty, int flag /* = 0 */)
+uint32_t UftMocker::stra_enter_short(const char* stdCode, double price, double qty, int /*flag*/ /* = 0 */)
 {
 	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
 	if (commInfo == NULL)
@@ -676,7 +676,7 @@ uint32_t UftMocker::stra_enter_short(const char* stdCode, double price, double q
 	return localid;
 }
 
-uint32_t UftMocker::stra_exit_long(const char* stdCode, double price, double qty, bool isToday /* = false */, int flag /* = 0 */)
+uint32_t UftMocker::stra_exit_long(const char* stdCode, double price, double qty, bool isToday /* = false */, int /*flag*/ /* = 0 */)
 {
 	PosInfo& pInfo = _pos_map[stdCode];
 	PosItem& pItem = pInfo._long;
@@ -737,7 +737,7 @@ uint32_t UftMocker::stra_exit_long(const char* stdCode, double price, double qty
 	return localid;
 }
 
-uint32_t UftMocker::stra_exit_short(const char* stdCode, double price, double qty, bool isToday /* = false */, int flag /* = 0 */)
+uint32_t UftMocker::stra_exit_short(const char* stdCode, double price, double qty, bool isToday /* = false */, int /*flag*/ /* = 0 */)
 {
 	PosInfo& pInfo = _pos_map[stdCode];
 	PosItem& pItem = pInfo._short;
@@ -813,7 +813,7 @@ void UftMocker::on_trade(uint32_t localid, const char* stdCode, bool isLong, uin
 		_strategy->on_trade(this, localid, stdCode, isLong, offset, vol, price);
 }
 
-void UftMocker::on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message)
+void UftMocker::on_entrust(uint32_t localid, const char* /*stdCode*/, bool bSuccess, const char* message)
 {
 	if (_strategy)
 		_strategy->on_entrust(localid, bSuccess, message);
@@ -1029,7 +1029,7 @@ double UftMocker::stra_get_local_position(const char* stdCode)
 
 double UftMocker::stra_enum_position(const char* stdCode)
 {
-	uint32_t tdate = _replayer->get_trading_date();
+	[[maybe_unused]] uint32_t tdate = _replayer->get_trading_date();
 	double ret = 0;
 	bool bAll = (strlen(stdCode) == 0);
 	for (auto it = _pos_map.begin(); it != _pos_map.end(); it++)
@@ -1259,7 +1259,7 @@ void UftMocker::update_position(const char* stdCode, bool isLong, uint32_t offse
 		std::vector<DetailInfo>::iterator sit = pItem._details.end();
 		std::vector<DetailInfo>::iterator eit = pItem._details.end();
 
-		uint32_t count = 0;
+		[[maybe_unused]] uint32_t count = 0;
 		double left = qty;
 		for (auto it = pItem._details.begin(); it != pItem._details.end(); it++)
 		{

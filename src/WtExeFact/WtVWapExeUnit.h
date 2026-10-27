@@ -213,13 +213,13 @@ private:
 	/** @brief 上次执行的时间戳，单位毫秒，用于计算下次发单时间 */
 	uint64_t		_last_fire_time;
 	/** @brief 上个下单时间戳，单位毫秒，用于计算订单是否超时需要撤单 */
-	uint64_t		_last_place_time;
+	[[maybe_unused]] uint64_t		_last_place_time;
 	/** @brief 上个行情数据的时间戳，单位毫秒，用于判断行情数据是否有效 */
 	uint64_t		_last_tick_time;
 	/** @brief VWAP单位时间下单量，根据VWAP算法计算的每个时间单元应发送的订单量 */
 	double			_Vwap_vol;
 	/** @brief VWAP价格，当前计算得到的成交量加权平均价格 */
-	double			_Vwap_prz;
+	[[maybe_unused]] double			_Vwap_prz;
 	/** @} */
 
 	/** @brief 计算锁标志，用于防止do_calc方法被并发调用 */

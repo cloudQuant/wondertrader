@@ -14,7 +14,7 @@
 #include <string>
 
 #include "../Share/DLLHelper.hpp"
-#include "../Share/cppcli.hpp"
+#include <Share/cppcli.hpp>
 #include "../Share/fmtlib.h"
 #include "../Share/StdUtils.hpp"
 

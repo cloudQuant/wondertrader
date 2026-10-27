@@ -25,7 +25,7 @@
 #include "../Includes/ITraderApi.h"
 #include "../Includes/WTSCollection.hpp"
 
-#include "../API/FixApi/include/FixApi.h"
+#include <API/FixApi/include/FixApi.h>
 
 #include "../Share/IniHelper.hpp"
 #include "../Share/StdUtils.hpp"

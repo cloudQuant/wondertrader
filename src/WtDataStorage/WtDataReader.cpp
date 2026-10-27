@@ -137,10 +137,10 @@ bool proc_block_data(std::string& content, bool isBar, bool bKeepHead /* = true 
 
 
 WtDataReader::WtDataReader()
-	: _last_time(0)
-	, _base_data_mgr(NULL)
+	: _base_data_mgr(NULL)
 	, _hot_mgr(NULL)
-{
+, _last_time(0)
+	{
 }
 
 
@@ -399,7 +399,7 @@ WTSTickSlice* WtDataReader::readTickSlice(const char* stdCode, uint32_t count, u
 		{
 			std::string filename;
 			bool bHit = false;
-			for (const std::string hisdir : _his_dir)
+			for (const std::string& hisdir : _his_dir)
 			{
 				filename = fmtutil::format("{}ticks/{}/{}/{}.dsb", hisdir, cInfo._exchg, endTDate, curCode);
 				if (StdFile::exists(filename.c_str()))
@@ -541,7 +541,7 @@ WTSOrdQueSlice* WtDataReader::readOrdQueSlice(const char* stdCode, uint32_t coun
 
 			std::string filename;
 			bool bHit = false;
-			for (const std::string hisdir : _his_dir)
+			for (const std::string& hisdir : _his_dir)
 			{
 				filename = fmtutil::format("{}queue/{}/{}/{}.dsb", hisdir, cInfo._exchg, endTDate, curCode);
 				if (StdFile::exists(filename.c_str()))
@@ -698,7 +698,7 @@ WTSOrdDtlSlice* WtDataReader::readOrdDtlSlice(const char* stdCode, uint32_t coun
 
 			std::string filename;
 			bool bHit = false;
-			for (const std::string hisdir : _his_dir)
+			for (const std::string& hisdir : _his_dir)
 			{
 				filename = fmtutil::format("{}orders/{}/{}/{}.dsb", hisdir, cInfo._exchg, endTDate, curCode);
 				if (StdFile::exists(filename.c_str()))
@@ -855,7 +855,7 @@ WTSTransSlice* WtDataReader::readTransSlice(const char* stdCode, uint32_t count,
 
 			std::string filename;
 			bool bHit = false;
-			for (const std::string hisdir : _his_dir)
+			for (const std::string& hisdir : _his_dir)
 			{
 				filename = fmtutil::format("{}trans/{}/{}/{}.dsb", hisdir, cInfo._exchg, endTDate, curCode);
 				if (StdFile::exists(filename.c_str()))
@@ -1018,7 +1018,7 @@ bool WtDataReader::cacheIntegratedBars(void* codeInfo, const std::string& key, c
 
 		std::string filename;
 		bool bHit = false;
-		for (const std::string hisdir : _his_dir)
+		for (const std::string& hisdir : _his_dir)
 		{
 			std::string filename = fmtutil::format("{}{}/{}.{}_{}{}.dsb", hisdir, pname, cInfo->_exchg, cInfo->_product, ruleTag, cInfo->isExright()?(cInfo->_exright == 1 ? SUFFIX_QFQ_S : SUFFIX_HFQ_S):"");
 			if (StdFile::exists(filename.c_str()))
@@ -1149,7 +1149,7 @@ bool WtDataReader::cacheIntegratedBars(void* codeInfo, const std::string& key, c
 
 			std::string filename;
 			bool bHit = false;
-			for (const std::string hisdir : _his_dir)
+			for (const std::string& hisdir : _his_dir)
 			{
 				filename = fmtutil::format("{}{}/{}/{}.dsb", hisdir, pname, cInfo->_exchg, curCode);
 				if (StdFile::exists(filename.c_str()))
@@ -1291,7 +1291,7 @@ bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, 
 	uint32_t curDate = TimeUtils::getCurDate();
 	uint32_t curTime = TimeUtils::getCurMin() / 100;
 
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(cInfo->stdCommID(), curDate, curTime, false);
+	[[maybe_unused]] uint32_t endTDate = _base_data_mgr->calcTradingDate(cInfo->stdCommID(), curDate, curTime, false);
 
 	std::string pname;
 	switch (period)
@@ -1329,7 +1329,7 @@ bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, 
 
 		std::string filename;
 		bool bHit = false;
-		for (const std::string hisdir : _his_dir)
+		for (const std::string& hisdir : _his_dir)
 		{
 			filename = fmtutil::format("{}{}/{}/{}{}.dsb", hisdir, pname, cInfo->_exchg, cInfo->_code, flag);
 			if (StdFile::exists(filename.c_str()))
@@ -1366,7 +1366,7 @@ bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, 
 	} while (false);
 
 
-	bool bAllCovered = false;
+	[[maybe_unused]] bool bAllCovered = false;
 	do
 	{
 		const char* curCode = cInfo->_code;
@@ -1401,7 +1401,7 @@ bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, 
 			});
 		}
 
-		bool bOldVer = false;
+		[[maybe_unused]] bool bOldVer = false;
 		if (!bLoaded)
 		{
 			//std::stringstream ss;
@@ -1412,7 +1412,7 @@ bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, 
 
 			std::string filename;
 			bool bHit = false;
-			for (const std::string hisdir : _his_dir)
+			for (const std::string& hisdir : _his_dir)
 			{
 				filename = fmtutil::format("{}{}/{}/{}.dsb", hisdir, pname, cInfo->_exchg, cInfo->_code);
 				if (StdFile::exists(filename.c_str()))
@@ -1490,7 +1490,7 @@ bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, 
 					double factor = adjFact._factor / baseFactor;
 
 					WTSBarStruct* pBar = NULL;
-					pBar = std::lower_bound(firstBar, firstBar + lastIdx - 1, bar, [period](const WTSBarStruct& a, const WTSBarStruct& b) {
+					pBar = std::lower_bound(firstBar, firstBar + lastIdx - 1, bar, [](const WTSBarStruct& a, const WTSBarStruct& b) {
 						return a.date < b.date;
 					});
 
@@ -1570,7 +1570,7 @@ bool WtDataReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key, 
 	uint32_t curDate = TimeUtils::getCurDate();
 	uint32_t curTime = TimeUtils::getCurMin() / 100;
 
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, curDate, curTime, false);
+	[[maybe_unused]] uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, curDate, curTime, false);
 
 	std::string pname;
 	switch (period)
@@ -1651,7 +1651,7 @@ bool WtDataReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key, 
 
 		std::string filename;
 		bool bHit = false;
-		for (const std::string hisdir : _his_dir)
+		for (const std::string& hisdir : _his_dir)
 		{
 			filename = fmtutil::format("{}{}/{}/{}.dsb", hisdir, pname, cInfo->_exchg, cInfo->_code);
 			if (StdFile::exists(filename.c_str()))
@@ -2139,7 +2139,7 @@ WtDataReader::RTKlineBlockPair* WtDataReader::getRTKilneBlock(const char* exchg,
 
 	RTKBlockFilesMap* cache_map = NULL;
 	std::string subdir = "";
-	BlockType bType;
+	[[maybe_unused]] BlockType bType;
 	switch (period)
 	{
 	case KP_Minute1:
@@ -2207,7 +2207,7 @@ WtDataReader::RTKlineBlockPair* WtDataReader::getRTKilneBlock(const char* exchg,
 	return &block;
 }
 
-void WtDataReader::onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTDate /* = 0 */)
+void WtDataReader::onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t /*endTDate*/ /* = 0 */)
 {
 	//这里应该触发检查
 	uint64_t nowTime = (uint64_t)uDate * 10000 + uTime;

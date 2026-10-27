@@ -33,7 +33,7 @@ typedef struct _HotSection
 	 * @param factor 连续因子
 	 */
 	_HotSection(const char* code, uint32_t sdate, uint32_t edate, double factor)
-		: _s_date(sdate), _e_date(edate), _code(code),_factor(factor)
+		: _code(code), _s_date(sdate), _e_date(edate),_factor(factor)
 	{
 	
 	}

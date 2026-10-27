@@ -28,13 +28,13 @@ USING_NS_WTP;
  */
 WtUftRtTicker::WtUftRtTicker(WtUftEngine* engine)
 	: _engine(engine)
-	, _stopped(false)
 	, _date(0)
 	, _time(UINT_MAX)
-	, _next_check_time(0)
-	, _last_emit_pos(0)
 	, _cur_pos(0)
-{
+, _next_check_time(0)
+	, _last_emit_pos(0)
+	, _stopped(false)
+	{
 }
 
 
@@ -185,11 +185,9 @@ void WtUftRtTicker::run()
 	// 触发交易日开始事件
 	_engine->on_session_begin();
 
-	// 获取当前时间在交易时段中的偏移值
-	uint32_t offTime = _s_info->offsetTime(_engine->get_min_time(), true);
 
 	// 创建并启动工作线程
-	_thrd.reset(new StdThread([this, offTime](){
+	_thrd.reset(new StdThread([this](){
 		// 循环运行直到被停止
 		while (!_stopped)
 		{

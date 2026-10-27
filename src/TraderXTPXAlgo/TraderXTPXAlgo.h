@@ -5,7 +5,7 @@
 #include <boost/asio/post.hpp>
 #include <boost/asio/executor_work_guard.hpp>
 
-#include "../API/XTPXAlgo/include/xtp_trader_api.h"
+#include <API/XTPXAlgo/include/xtp_trader_api.h>
 
 #include "../Includes/ITraderApi.h"
 #include "../Includes/WTSCollection.hpp"

@@ -220,7 +220,7 @@ void feed_adj_factors(WtString stdCode, WtUInt32* dates, double* factors, WtUInt
  *          引擎会自动处理这些数据并分发给相应的策略
  *          实现了WtPorter.h中声明的feed_raw_ticks函数
  */
-void feed_raw_ticks(WTSTickStruct* ticks, WtUInt32 count)
+void feed_raw_ticks(WTSTickStruct* /*ticks*/, WtUInt32 /*count*/)
 {
 	WTSLogger::error("API not implemented");
 }

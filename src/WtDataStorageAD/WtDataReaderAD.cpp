@@ -46,10 +46,10 @@ extern "C"
 
 
 WtDataReaderAD::WtDataReaderAD()
-	: _last_time(0)
-	, _base_data_mgr(NULL)
+	: _base_data_mgr(NULL)
 	, _hot_mgr(NULL)
-{
+, _last_time(0)
+	{
 }
 
 
@@ -152,7 +152,7 @@ WTSTickSlice* WtDataReaderAD::readTickSlice(const char* stdCode, uint32_t count,
 		LMDBHftKey lKey(cInfo._exchg, cInfo._code, (uint32_t)(last_access_time / 1000000000), (uint32_t)(last_access_time % 1000000000));
 		LMDBHftKey rKey(cInfo._exchg, cInfo._code, (uint32_t)(etime / 1000000000), (uint32_t)(etime % 1000000000));
 		int cnt = query.get_range(std::string((const char*)&lKey, sizeof(lKey)), 
-			std::string((const char*)&rKey, sizeof(rKey)), [this, &tickList](const ValueArray& ayKeys, const ValueArray& ayVals) {
+			std::string((const char*)&rKey, sizeof(rKey)), [&tickList](const ValueArray& /*ayKeys*/, const ValueArray& ayVals) {
 			for(const std::string& item : ayVals)
 			{
 				WTSTickStruct* curTick = (WTSTickStruct*)item.data();
@@ -169,7 +169,7 @@ WTSTickSlice* WtDataReaderAD::readTickSlice(const char* stdCode, uint32_t count,
 		LMDBHftKey rKey(cInfo._exchg, cInfo._code, (uint32_t)(etime / 1000000000), (uint32_t)(etime % 1000000000));
 		LMDBHftKey lKey(cInfo._exchg, cInfo._code, 0, 0);
 		int cnt = query.get_lowers(std::string((const char*)&lKey, sizeof(lKey)), std::string((const char*)&rKey, sizeof(rKey)),
-			count, [this, &tickList](const ValueArray& ayKeys, const ValueArray& ayVals) {
+			count, [&tickList](const ValueArray& /*ayKeys*/, const ValueArray& ayVals) {
 			tickList._ticks.resize(ayVals.size());
 			for (std::size_t i = 0; i < ayVals.size(); i++)
 			{
@@ -217,20 +217,20 @@ std::string WtDataReaderAD::read_bars_to_buffer(const char* exchg, const char* c
 	LMDBBarKey lKey(exchg, code, 0);
 	LMDBBarKey rKey(exchg, code, 0xffffffff);
 	query.get_range(std::string((const char*)&lKey, sizeof(lKey)),
-		std::string((const char*)&lKey, sizeof(lKey)), [this, &buffer](const ValueArray& ayKeys, const ValueArray& ayVals) {
+		std::string((const char*)&lKey, sizeof(lKey)), [&buffer](const ValueArray& /*ayKeys*/, const ValueArray& ayVals) {
 		if (ayVals.empty())
 			return;
 
 		buffer.resize(sizeof(WTSBarStruct)*ayVals.size());
 		memcpy((void*)buffer.data(), ayVals.data(), sizeof(WTSBarStruct)*ayVals.size());
 	});
-	return std::move(buffer);
+	return buffer;
 }
 
 bool WtDataReaderAD::cacheBarsFromStorage(const std::string& key, const char* stdCode, WTSKlinePeriod period, uint32_t count)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
-	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
+	[[maybe_unused]] WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
 	std::string stdPID = fmtutil::format<64>("{}.{}", cInfo._exchg, cInfo._product);
 
 	BarsList& barList = _bars_cache[key];
@@ -247,7 +247,7 @@ bool WtDataReaderAD::cacheBarsFromStorage(const std::string& key, const char* st
 	LMDBBarKey rKey(cInfo._exchg, cInfo._code, 0xffffffff);
 	LMDBBarKey lKey(cInfo._exchg, cInfo._code, 0);
 	int cnt = query.get_lowers(std::string((const char*)&lKey, sizeof(lKey)), std::string((const char*)&rKey, sizeof(rKey)),
-		count, [this, &barList, &lKey](const ValueArray& ayKeys, const ValueArray& ayVals) {
+		count, [&barList, &lKey](const ValueArray& ayKeys, const ValueArray& ayVals) {
 		if (ayVals.empty())
 			return;
 
@@ -273,7 +273,7 @@ void WtDataReaderAD::update_cache_from_lmdb(BarsList& barsList, const char* exch
 	WtLMDBQuery query(*db);
 	LMDBBarKey lKey(exchg, code, lastBarTime);
 	LMDBBarKey rKey(exchg, code, 0xFFFFFFFF);
-	int cnt = query.get_uppers(std::string((const char*)&lKey, sizeof(lKey)), std::string((const char*)&rKey, sizeof(rKey)), 
+	[[maybe_unused]] int cnt = query.get_uppers(std::string((const char*)&lKey, sizeof(lKey)), std::string((const char*)&rKey, sizeof(rKey)), 
 		9999, [this, &barsList, isDay, &lastBarTime](const ValueArray& ayKeys, const ValueArray& ayVals) {
 
 		std::size_t cnt = ayVals.size();
@@ -281,7 +281,7 @@ void WtDataReaderAD::update_cache_from_lmdb(BarsList& barsList, const char* exch
 		{
 			const std::string& item = ayVals[idx];
 			const std::string& key = ayKeys[idx];
-			LMDBBarKey* barKey = (LMDBBarKey*)key.data();
+			[[maybe_unused]] LMDBBarKey* barKey = (LMDBBarKey*)key.data();
 			WTSBarStruct* curBar = (WTSBarStruct*)item.data();
 			uint64_t curBarTime = isDay ? curBar->date : curBar->time;
 			if (curBarTime == lastBarTime)
@@ -312,7 +312,7 @@ WTSBarStruct* WtDataReaderAD::get_rt_cache_bar(const char* exchg, const char* co
 	else if (period == KP_Minute5)
 		wrapper = &_m5_cache;
 
-	bool isDay = (period == KP_DAY);
+	[[maybe_unused]] bool isDay = (period == KP_DAY);
 
 	if (wrapper != NULL)
 	{
@@ -571,7 +571,7 @@ WtDataReaderAD::WtLMDBPtr WtDataReaderAD::get_k_db(const char* exchg, WTSKlinePe
 		subdir = "day";
 	}
 	else
-		return std::move(WtLMDBPtr());
+		return WtLMDBPtr();
 
 	auto it = the_map->find(exchg);
 	if (it != the_map->end())
@@ -583,7 +583,7 @@ WtDataReaderAD::WtLMDBPtr WtDataReaderAD::get_k_db(const char* exchg, WTSKlinePe
 	if (!dbPtr->open(path.c_str()))
 	{
 		pipe_reader_log(_sink, LL_ERROR, "Opening {} db if {} failed: {}", subdir, exchg, dbPtr->errmsg());
-		return std::move(WtLMDBPtr());
+		return WtLMDBPtr();
 	}
 	else
 	{
@@ -591,7 +591,7 @@ WtDataReaderAD::WtLMDBPtr WtDataReaderAD::get_k_db(const char* exchg, WTSKlinePe
 	}
 
 	(*the_map)[exchg] = dbPtr;
-	return std::move(dbPtr);
+	return dbPtr;
 }
 
 WtDataReaderAD::WtLMDBPtr WtDataReaderAD::get_t_db(const char* exchg, const char* code)
@@ -607,7 +607,7 @@ WtDataReaderAD::WtLMDBPtr WtDataReaderAD::get_t_db(const char* exchg, const char
 	if (!dbPtr->open(path.c_str()))
 	{
 		pipe_reader_log(_sink, LL_ERROR, "Opening tick db of {}.{} failed: {}", exchg, code, dbPtr->errmsg());
-		return std::move(WtLMDBPtr());
+		return WtLMDBPtr();
 	}
 	else
 	{
@@ -615,5 +615,5 @@ WtDataReaderAD::WtLMDBPtr WtDataReaderAD::get_t_db(const char* exchg, const char
 	}
 
 	_tick_dbs[exchg] = dbPtr;
-	return std::move(dbPtr);
+	return dbPtr;
 }

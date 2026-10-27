@@ -11,9 +11,9 @@
 #include "../Includes/IParserApi.h"
 #include "../Share/DLLHelper.hpp"
 #ifdef __APPLE__
-#include "../API/CTP6.6.9/ThostFtdcMdApi.h"
+#include <API/CTP6.6.9/ThostFtdcMdApi.h>
 #else
-#include "../API/CTP6.3.15/ThostFtdcMdApi.h"
+#include <API/CTP6.3.15/ThostFtdcMdApi.h>
 #endif
 #include <map>
 
@@ -57,24 +57,24 @@ public:
 
 //CThostFtdcMdSpi 接口
 public:
-	virtual void OnRspError( CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast );
+	virtual void OnRspError( CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast ) override;
 
-	virtual void OnFrontConnected();
+	virtual void OnFrontConnected() override;
 
-	virtual void OnRspUserLogin( CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast );
+	virtual void OnRspUserLogin( CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast ) override;
 
 	///登出请求响应
-	virtual void OnRspUserLogout(CThostFtdcUserLogoutField *pUserLogout, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast);
+	virtual void OnRspUserLogout(CThostFtdcUserLogoutField *pUserLogout, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) override;
 
-	virtual void OnFrontDisconnected( int nReason );
+	virtual void OnFrontDisconnected( int nReason ) override;
 
-	virtual void OnRspUnSubMarketData( CThostFtdcSpecificInstrumentField *pSpecificInstrument, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast );
+	virtual void OnRspUnSubMarketData( CThostFtdcSpecificInstrumentField *pSpecificInstrument, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast ) override;
 
-	virtual void OnRtnDepthMarketData( CThostFtdcDepthMarketDataField *pDepthMarketData );
+	virtual void OnRtnDepthMarketData( CThostFtdcDepthMarketDataField *pDepthMarketData ) override;
 
-	virtual void OnRspSubMarketData( CThostFtdcSpecificInstrumentField *pSpecificInstrument, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast );
+	virtual void OnRspSubMarketData( CThostFtdcSpecificInstrumentField *pSpecificInstrument, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast ) override;
 
-	virtual void OnHeartBeatWarning( int nTimeLapse );
+	virtual void OnHeartBeatWarning( int nTimeLapse ) override;
 
 private:
 	/*
@@ -109,7 +109,7 @@ private:
 	IParserSpi*			m_sink;
 	IBaseDataMgr*		m_pBaseDataMgr;
 
-	DllHandle		m_hInstCTP;
+	[[maybe_unused]] DllHandle		m_hInstCTP;
 	typedef CThostFtdcMdApi* (*CTPCreator)(const char *, const bool, const bool);
 	CTPCreator		m_funcCreator;
 };

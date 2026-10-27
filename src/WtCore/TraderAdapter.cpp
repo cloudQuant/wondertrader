@@ -76,17 +76,17 @@ inline const char* formatAction(WTSDirectionType dType, WTSOffsetType oType)
 }
 
 TraderAdapter::TraderAdapter(EventNotifier* caster /* = NULL */)
-	: _id("")
-	, _cfg(NULL)
-	, _state(AS_NOTLOGIN)
+	: _cfg(NULL)
+	, _id("")
 	, _trader_api(NULL)
+	, _state(AS_NOTLOGIN)
+	, _notifier(caster)
 	, _orders(NULL)
-	, _stat_map(NULL)
+	, _ignore_sefmatch(false)
+, _stat_map(NULL)
 	, _risk_mon_enabled(false)
 	, _save_data(false)
-	, _notifier(caster)
-	, _ignore_sefmatch(false)
-{
+	{
 }
 
 
@@ -2099,9 +2099,9 @@ void TraderAdapter::onPushOrder(WTSOrderInfo* orderInfo)
 		if (orderInfo->getOrderState() == WOS_Canceled )
 		{
 			//撤单的时候, 要更新未完成
-			bool isLong = (orderInfo->getDirection() == WDT_LONG);
-			bool isOpen = (orderInfo->getOffsetType() == WOT_OPEN);
-			bool isToday = (orderInfo->getOffsetType() == WOT_CLOSETODAY);
+			[[maybe_unused]] bool isLong = (orderInfo->getDirection() == WDT_LONG);
+			[[maybe_unused]] bool isOpen = (orderInfo->getOffsetType() == WOT_OPEN);
+			[[maybe_unused]] bool isToday = (orderInfo->getOffsetType() == WOT_CLOSETODAY);
 			double qty = orderInfo->getVolume() - orderInfo->getVolTraded();
 
 			updateUndone(stdCode.c_str(), qty*(isBuy ? -1 : 1), true);
@@ -2334,7 +2334,7 @@ void TraderAdapter::onPushTrade(WTSTradeInfo* tradeRecord)
 	_trader_api->queryAccount();
 }
 
-void TraderAdapter::onTraderError(WTSError* err, void* pData /* = NULL */)
+void TraderAdapter::onTraderError(WTSError* err, void* /*pData*/ /* = NULL */)
 {
 	if(err)
 		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR,"[{}] Error of trading channel occured: {}", _id.c_str(), err->getMessage());

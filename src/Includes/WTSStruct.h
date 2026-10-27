@@ -14,7 +14,9 @@
 #include "WTSTypes.h"
 
 #ifdef _MSC_VER
+#ifdef _MSC_VER
 #pragma warning(disable:4200)
+#endif
 #endif
 
 NS_WTP_BEGIN

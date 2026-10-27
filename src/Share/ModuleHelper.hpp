@@ -75,7 +75,7 @@ static const std::string& getInstPath()
  *          然后提取路径中的目录部分，去除文件名
  *          首次调用时计算路径并缓存，后续调用直接返回缓存值
  */
-static const char* getBinDir()
+[[maybe_unused]] static const char* getBinDir()
 {
 	static std::string g_bin_dir;
 

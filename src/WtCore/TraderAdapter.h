@@ -56,7 +56,7 @@ public:
 	/*!
 	 * \brief 析构函数
 	 */
-	~TraderAdapter();
+	virtual ~TraderAdapter();
 
 		/*!
 	 * \brief 适配器状态枚举

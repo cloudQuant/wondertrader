@@ -284,7 +284,7 @@ private:
 	//用户数据
 	typedef wt_hashmap<std::string, std::string> StringHashMap;
 	StringHashMap	_user_datas;
-	bool			_ud_modified;
+	[[maybe_unused]] bool			_ud_modified;
 
 	typedef struct _DetailInfo
 	{

@@ -225,7 +225,7 @@ private:
 	uint64_t		_last_fire_time;
 
 	/// @brief 上次下单时间，上一次成功下单的时间戳
-	uint64_t		_last_place_time;
+	[[maybe_unused]] uint64_t		_last_place_time;
 
 	/// @brief 上次行情时间，上一次收到行情数据的时间戳
 	uint64_t		_last_tick_time;

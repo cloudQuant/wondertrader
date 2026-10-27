@@ -25,13 +25,13 @@ USING_NS_WTP;
 
 WtSelRtTicker::WtSelRtTicker(WtSelEngine* engine)
 	: _engine(engine)
-	, _stopped(false)
 	, _date(0)
 	, _time(UINT_MAX)
-	, _next_check_time(0)
-	, _last_emit_pos(0)
 	, _cur_pos(0)
-{
+, _next_check_time(0)
+	, _last_emit_pos(0)
+	, _stopped(false)
+	{
 }
 
 
@@ -47,7 +47,7 @@ void WtSelRtTicker::init(IDataReader* store, const char* sessionID)
 	TimeUtils::getDateTime(_date, _time);
 }
 
-void WtSelRtTicker::trigger_price(WTSTickData* curTick, uint32_t hotFlag /* = 0 */)
+void WtSelRtTicker::trigger_price(WTSTickData* curTick, uint32_t /*hotFlag*/ /* = 0 */)
 {
 	if (_engine)
 	{

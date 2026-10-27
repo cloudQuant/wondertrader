@@ -13,7 +13,7 @@
 #include <boost/asio/executor_work_guard.hpp>
 
 #include "../Includes/IParserApi.h"
-#include "../API/XTP2.2.32.2/xtp_quote_api.h"
+#include <API/XTP2.2.32.2/xtp_quote_api.h>
 
 #include "../Share/DLLHelper.hpp"
 #include "../Share/StdUtils.hpp"
@@ -96,7 +96,7 @@ private:
 
 private:
 	uint32_t			m_uTradingDate;
-	LoginStatus			m_loginState;
+	[[maybe_unused]] LoginStatus			m_loginState;
 	XTP::API::QuoteApi*	m_pUserAPI;
 
 	std::string			m_strHost;
@@ -114,7 +114,7 @@ private:
 	CodeSet				m_fitSHSubs;
 	CodeSet				m_fitSZSubs;
 
-	int					m_iRequestID;
+	[[maybe_unused]] int					m_iRequestID;
 
 	IParserSpi*			m_sink;
 	IBaseDataMgr*		m_pBaseDataMgr;

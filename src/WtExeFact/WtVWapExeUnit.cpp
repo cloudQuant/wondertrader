@@ -17,22 +17,22 @@ extern const char* FACT_NAME;
 
 WtVWapExeUnit::WtVWapExeUnit()
 	:_last_tick(NULL)
-	,_comm_info(NULL)//品种信息
-	,_ord_sticky(0)
-	,_cancel_cnt(0)
+	, _target_pos(0)
 	,_channel_ready(false)
-	, _last_fire_time(0)
-	, _fired_times(0)
-	, _total_times(0)
+	,_comm_info(NULL)//品种信息
+	, _cancel_times(0)
+	,_cancel_cnt(0)
 	, _total_secs(0)
+	, _total_times(0)
+	,_ord_sticky(0)
 	, _price_mode(0)
 	, _price_offset(0)
-	, _target_pos(0)
-	, _cancel_times(0)
 	, _begin_time(0)
 	, _end_time(0)
 	,isCanCancel(true)
-{
+, _fired_times(0)
+	, _last_fire_time(0)
+	{
 }
 
 WtVWapExeUnit::~WtVWapExeUnit()
@@ -145,7 +145,7 @@ void WtVWapExeUnit::init(ExecuteContext * ctx, const char * stdCode, WTSVariant 
 	}
 } 
 
-void WtVWapExeUnit::on_order(uint32_t localid, const char * stdCode, bool isBuy, double leftover, double price, bool isCanceled)
+void WtVWapExeUnit::on_order(uint32_t localid, const char * stdCode, bool /*isBuy*/, double leftover, double /*price*/, bool isCanceled)
 {
 	if (!_orders_mon.has_order(localid))
 		return;
@@ -277,13 +277,13 @@ void WtVWapExeUnit::on_tick(WTSTickData * newTick)
 	
 }
 
-void WtVWapExeUnit::on_trade(uint32_t localid, const char * stdCode, bool isBuy, double vol, double price)
+void WtVWapExeUnit::on_trade(uint32_t /*localid*/, const char * /*stdCode*/, bool /*isBuy*/, double /*vol*/, double /*price*/)
 {//在ontick中触发
 }
 /*
 下单结果回报
 */
-void WtVWapExeUnit::on_entrust(uint32_t localid, const char * stdCode, bool bSuccess, const char * message)
+void WtVWapExeUnit::on_entrust(uint32_t localid, const char * /*stdCode*/, bool bSuccess, const char * /*message*/)
 {
 	if (!bSuccess)
 	{

@@ -40,12 +40,12 @@ public:
 	 */
 	WtCtaRtTicker(WtCtaEngine* engine) 
 		: _engine(engine)      // 策略引擎指针
-		, _stopped(false)      // 停止标志，初始化为未停止
 		, _date(0)             // 当前日期，初始化为0
 		, _time(UINT_MAX)      // 当前时间，初始化为最大值
-		, _next_check_time(0)  // 下次检查时间，初始化为0
+		, _cur_pos(0), _next_check_time(0)  // 下次检查时间，初始化为0
 		, _last_emit_pos(0)    // 上次发布位置，初始化为0
-		, _cur_pos(0){}        // 当前位置，初始化为0
+		, _stopped(false)      // 停止标志，初始化为未停止
+		{}        // 当前位置，初始化为0
 	
 	/**
 	 * @brief 析构函数

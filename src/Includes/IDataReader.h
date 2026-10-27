@@ -203,7 +203,7 @@ public:
 	 * @param sink 模块回调接口，用于回调事件和获取系统状态
 	 * @param loader 历史数据加载器，用于加载历史数据，默认为NULL
 	 */
-	virtual void init(WTSVariant* cfg, IDataReaderSink* sink, IHisDataLoader* loader = NULL) { _sink = sink; _loader = loader; }
+	virtual void init(WTSVariant* /*cfg*/, IDataReaderSink* sink, IHisDataLoader* loader = NULL) { _sink = sink; _loader = loader; }
 
 	/**
 	 * @brief 分钟线闭合事件处理接口
@@ -235,7 +235,7 @@ public:
 	 * @param etime 结束时间，精确到毫秒，格式为YYYYMMDDHHMMSSmmm，如果要读取到最后一条，etime设为0，默认为0
 	 * @return 逐笔委托数据片段对象指针，如果不支持返回NULL
 	 */
-	virtual WTSOrdDtlSlice*	readOrdDtlSlice(const char* stdCode, uint32_t count, uint64_t etime = 0) { return NULL; }
+	virtual WTSOrdDtlSlice*	readOrdDtlSlice(const char* /*stdCode*/, uint32_t /*count*/, uint64_t /*etime*/ = 0) { return NULL; }
 	/**
 	 * @brief 读取委托队列数据切片
 	 * @details 从缓存中读取指定数量的委托队列数据，切片不会复制数据，只把缓存中的数据指针传递出来
@@ -245,7 +245,7 @@ public:
 	 * @param etime 结束时间，精确到毫秒，格式为YYYYMMDDHHMMSSmmm，如果要读取到最后一条，etime设为0，默认为0
 	 * @return 委托队列数据片段对象指针，如果不支持返回NULL
 	 */
-	virtual WTSOrdQueSlice*	readOrdQueSlice(const char* stdCode, uint32_t count, uint64_t etime = 0) { return NULL; }
+	virtual WTSOrdQueSlice*	readOrdQueSlice(const char* /*stdCode*/, uint32_t /*count*/, uint64_t /*etime*/ = 0) { return NULL; }
 
 	/**
 	 * @brief 读取逐笔成交数据切片
@@ -256,7 +256,7 @@ public:
 	 * @param etime 结束时间，精确到毫秒，格式为YYYYMMDDHHMMSSmmm，如果要读取到最后一条，etime设为0，默认为0
 	 * @return 逐笔成交数据片段对象指针，如果不支持返回NULL
 	 */
-	virtual WTSTransSlice*	readTransSlice(const char* stdCode, uint32_t count, uint64_t etime = 0) { return NULL; }
+	virtual WTSTransSlice*	readTransSlice(const char* /*stdCode*/, uint32_t /*count*/, uint64_t /*etime*/ = 0) { return NULL; }
 
 	/**
 	 * @brief 读取K线序列，并返回一个存储容器类
@@ -278,7 +278,7 @@ public:
 	 * @param date 指定日期，格式为YYYYMMDD，默认为0，为0则按当前日期处理
 	 * @return 复权因子值，无除权除息情况下为1.0
 	 */
-	virtual double		getAdjFactorByDate(const char* stdCode, uint32_t date = 0) { return 1.0; }
+	virtual double		getAdjFactorByDate(const char* /*stdCode*/, uint32_t /*date*/ = 0) { return 1.0; }
 
 	/**
 	 * @brief 获取复权标记

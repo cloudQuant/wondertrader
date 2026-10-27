@@ -1,7 +1,7 @@
 ﻿#include <string>
 #include <map>
 
-#include "../API/CTPOpt3.5.8/ThostFtdcTraderApi.h"
+#include <API/CTPOpt3.5.8/ThostFtdcTraderApi.h>
 #include "TraderSpi.h"
 
 #include "../Share/IniHelper.hpp"

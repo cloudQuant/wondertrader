@@ -162,7 +162,7 @@ uint32_t strToDate(const char* strDate)
 	return convert::to_uint32(ss.str().c_str());
 }
 
-void dump_bars(WtString binFolder, WtString csvFolder, WtString strFilter /* = "" */, FuncLogCallback cbLogger /* = NULL */)
+void dump_bars(WtString binFolder, WtString csvFolder, WtString /*strFilter*/ /* = "" */, FuncLogCallback cbLogger /* = NULL */)
 {
 	std::string srcFolder = StrUtil::standardisePath(binFolder);
 	if (!StdFile::exists(srcFolder.c_str()))
@@ -267,7 +267,7 @@ void dump_bars(WtString binFolder, WtString csvFolder, WtString strFilter /* = "
 		cbLogger(fmtutil::format(u8"目录{}全部导出完成...", binFolder));
 }
 
-void dump_ticks(WtString binFolder, WtString csvFolder, WtString strFilter /* = "" */, FuncLogCallback cbLogger /* = NULL */)
+void dump_ticks(WtString binFolder, WtString csvFolder, WtString /*strFilter*/ /* = "" */, FuncLogCallback cbLogger /* = NULL */)
 {
 	std::string srcFolder = StrUtil::standardisePath(binFolder);
 	if (!StdFile::exists(srcFolder.c_str()))

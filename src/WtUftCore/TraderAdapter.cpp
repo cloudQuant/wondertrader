@@ -70,14 +70,14 @@ inline const char* formatAction(WTSDirectionType dType, WTSOffsetType oType)
 }
 
 TraderAdapter::TraderAdapter()
-	: _id("")
-	, _cfg(NULL)
-	, _state(AS_NOTLOGIN)
+	: _cfg(NULL)
+	, _id("")
 	, _trader_api(NULL)
+	, _state(AS_NOTLOGIN)
 	, _orders(NULL)
-	, _risk_mon_enabled(false)
 	, _stat_map(NULL)
-{
+, _risk_mon_enabled(false)
+	{
 }
 
 
@@ -304,7 +304,7 @@ OrderMap* TraderAdapter::getOrders(const char* stdCode)
 void TraderAdapter::updateUndone(const char* stdCode, double qty)
 {
 	double& undone = _undone_qty[stdCode];
-	double oldQty = undone;
+	[[maybe_unused]] double oldQty = undone;
 	undone += qty;
 }
 
@@ -400,7 +400,7 @@ OrderIDs TraderAdapter::cancelAll(const char* stdCode)
 {
 	OrderIDs ret;
 
-	double actQty = 0;
+	[[maybe_unused]] double actQty = 0;
 	bool isAll = strlen(stdCode) == 0;
 	if (_orders != NULL && _orders->size() > 0)
 	{
@@ -1203,7 +1203,7 @@ void TraderAdapter::onRspEntrust(WTSEntrust* entrust, WTSError *err)
 	}
 }
 
-void TraderAdapter::onRspAccount(WTSArray* ayAccounts)
+void TraderAdapter::onRspAccount(WTSArray* /*ayAccounts*/)
 {
 	if(_state == AS_TRADES_QRYED)
 	{
@@ -1569,10 +1569,10 @@ void TraderAdapter::onPushOrder(WTSOrderInfo* orderInfo)
 		//撤单的时候, 要更新未完成
 		bool isLong = (orderInfo->getDirection() == WDT_LONG);
 		bool isOpen = (orderInfo->getOffsetType() == WOT_OPEN);
-		bool isToday = (orderInfo->getOffsetType() == WOT_CLOSETODAY);
+		[[maybe_unused]] bool isToday = (orderInfo->getOffsetType() == WOT_CLOSETODAY);
 		double qty = orderInfo->getVolume() - orderInfo->getVolTraded();
 
-		bool isBuy = (isLong&&isOpen) || (!isLong&&!isOpen);
+		[[maybe_unused]] bool isBuy = (isLong&&isOpen) || (!isLong&&!isOpen);
 		//double oldQty = _undone_qty[stdCode];
 		//double newQty = oldQty - qty*(isBuy ? 1 : -1);
 		//_undone_qty[stdCode] = newQty;
@@ -1745,7 +1745,7 @@ void TraderAdapter::onPushTrade(WTSTradeInfo* tradeRecord)
 
 	bool isLong = (tradeRecord->getDirection() == WDT_LONG);
 	bool isOpen = (tradeRecord->getOffsetType() == WOT_OPEN);
-	bool isBuy = (tradeRecord->getDirection() == WDT_LONG && tradeRecord->getOffsetType() == WOT_OPEN) || (tradeRecord->getDirection() == WDT_SHORT && tradeRecord->getOffsetType() != WOT_OPEN);
+	[[maybe_unused]] bool isBuy = (tradeRecord->getDirection() == WDT_LONG && tradeRecord->getOffsetType() == WOT_OPEN) || (tradeRecord->getDirection() == WDT_SHORT && tradeRecord->getOffsetType() != WOT_OPEN);
 
 	std::string stdCode = cInfo->getFullCode();
 
@@ -1838,7 +1838,7 @@ void TraderAdapter::onPushTrade(WTSTradeInfo* tradeRecord)
 	_trader_api->queryAccount();
 }
 
-void TraderAdapter::onTraderError(WTSError* err, void* pData /* = NULL */)
+void TraderAdapter::onTraderError(WTSError* err, void* /*pData*/ /* = NULL */)
 {
 	if(err)
 		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR,"[{}] Error of trading channel occured: {}", _id.c_str(), err->getMessage());

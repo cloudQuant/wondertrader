@@ -80,6 +80,8 @@ bool json_to_variant(const rj::Value& root, WTSVariant* params)
 			case rj::kFalseType:
 				params->append(key, item.GetBool());
 				break;
+			case rj::kNullType:
+				break;
 
 			}
 		}
@@ -122,6 +124,8 @@ bool json_to_variant(const rj::Value& root, WTSVariant* params)
 			case rj::kTrueType:
 			case rj::kFalseType:
 				params->append(item.GetBool());
+				break;
+			case rj::kNullType:
 				break;
 			}
 		}
@@ -210,6 +214,9 @@ bool yaml_to_variant(const YAML::Node& root, WTSVariant* params)
 				params->append(key.c_str(), item.as<std::string>().c_str());
 			else
 				params->append(item.as<std::string>().c_str());
+			break;
+		case YAML::NodeType::Undefined:
+		case YAML::NodeType::Null:
 			break;
 		}
 	}

@@ -8,17 +8,17 @@ void run_test(uint32_t times, uint32_t len)
 	char buffer[512] = { 0 };
 
 	char fmt[32] = { 0 };
-	sprintf(fmt, "{:0%dd}", len);
+	snprintf(fmt, sizeof(fmt), "{:0%dd}", len);
 
 	TimeUtils::Ticker ticker;
-	for (int i = 0; i < times; i++)
+	for (uint32_t i = 0; i < times; i++)
 	{
 		wt_strcpy(buffer, fmtutil::format(fmt, i));
 	}
 	uint64_t t1 = ticker.nano_seconds();
 
 	ticker.reset();
-	for (int i = 0; i < times; i++)
+	for (uint32_t i = 0; i < times; i++)
 	{
 		strcpy(buffer, fmtutil::format(fmt, i));
 	}

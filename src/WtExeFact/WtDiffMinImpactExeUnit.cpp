@@ -28,12 +28,12 @@ extern const char* PriceModeNames[4];
  */
 WtDiffMinImpactExeUnit::WtDiffMinImpactExeUnit()
 	: _last_tick(NULL)
+	, _left_diff(0)
 	, _comm_info(NULL)
-	, _price_mode(0)
 	, _price_offset(0)
 	, _expire_secs(0)
+	, _price_mode(0)
 	, _cancel_cnt(0)
-	, _left_diff(0)
 	, _cancel_times(0)
 	, _last_place_time(0)
 	, _last_tick_time(0)
@@ -114,7 +114,7 @@ void WtDiffMinImpactExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTSV
  * @param price 委托价格
  * @param isCanceled 是否已撤销
  */
-void WtDiffMinImpactExeUnit::on_order(uint32_t localid, const char* stdCode, bool isBuy, double leftover, double price, bool isCanceled)
+void WtDiffMinImpactExeUnit::on_order(uint32_t localid, const char* stdCode, bool /*isBuy*/, double leftover, double /*price*/, bool isCanceled)
 {
 	{
 		if (!_orders_mon.has_order(localid))
@@ -263,7 +263,7 @@ void WtDiffMinImpactExeUnit::on_tick(WTSTickData* newTick)
  * @param vol 成交数量
  * @param price 成交价格
  */
-void WtDiffMinImpactExeUnit::on_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price)
+void WtDiffMinImpactExeUnit::on_trade(uint32_t localid, const char* /*stdCode*/, bool isBuy, double vol, double /*price*/)
 {
 	//如果是本地订单，则更新差量
 	if (!_orders_mon.has_order(localid))
@@ -282,7 +282,7 @@ void WtDiffMinImpactExeUnit::on_trade(uint32_t localid, const char* stdCode, boo
  * @param bSuccess 是否下单成功
  * @param message 错误消息，当bSuccess为false时有效
  */
-void WtDiffMinImpactExeUnit::on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message)
+void WtDiffMinImpactExeUnit::on_entrust(uint32_t localid, const char* /*stdCode*/, bool bSuccess, const char* /*message*/)
 {
 	if (!bSuccess)
 	{
@@ -388,7 +388,7 @@ void WtDiffMinImpactExeUnit::do_calc()
 		this_qty = min(this_qty, abs(curPos));
 	}
 
-	double buyPx, sellPx;
+	double buyPx = 0.0, sellPx = 0.0;
 	if (_price_mode == 2)
 	{
 		double mp = (_last_tick->bidqty(0) - _last_tick->askqty(0))*1.0 / (_last_tick->bidqty(0) + _last_tick->askqty(0));
@@ -515,7 +515,7 @@ void WtDiffMinImpactExeUnit::set_position(const char* stdCode, double newDiff)
  * @details 清空合约的全部持仓。差量最小冲击执行单元不支持此操作，只会记录日志而不进行任何操作
  * @param stdCode 合约代码
  */
-void WtDiffMinImpactExeUnit::clear_all_position(const char* stdCode)
+void WtDiffMinImpactExeUnit::clear_all_position(const char* /*stdCode*/)
 {
 	_ctx->writeLog("Diff execute unit do not support clear command");
 	return;

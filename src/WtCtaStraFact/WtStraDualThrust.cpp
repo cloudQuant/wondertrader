@@ -107,7 +107,7 @@ bool WtStraDualThrust::init(WTSVariant* cfg)
  * \param ctx 策略上下文，用于调用策略接口
  * \param uTDate 交易日期，格式为YYYYMMDD
  */
-void WtStraDualThrust::on_session_begin(ICtaStraCtx* ctx, uint32_t uTDate)
+void WtStraDualThrust::on_session_begin(ICtaStraCtx* ctx, uint32_t /*uTDate*/)
 {
 	std::string newMonCode = ctx->stra_get_rawcode(_code.c_str());
 	if(newMonCode!=_moncode)
@@ -140,7 +140,7 @@ void WtStraDualThrust::on_session_begin(ICtaStraCtx* ctx, uint32_t uTDate)
  * \param curDate 当前日期，格式为YYYYMMDD
  * \param curTime 当前时间，格式为HHMMSS或HHMMSS000
  */
-void WtStraDualThrust::on_schedule(ICtaStraCtx* ctx, uint32_t curDate, uint32_t curTime)
+void WtStraDualThrust::on_schedule(ICtaStraCtx* ctx, uint32_t /*curDate*/, uint32_t /*curTime*/)
 {
 	// 获取交易的合约代码
 	std::string code = _code;
@@ -192,7 +192,7 @@ void WtStraDualThrust::on_schedule(ICtaStraCtx* ctx, uint32_t curDate, uint32_t 
 	ctx->set_index_value("DualThrust", "lower_bound", lower_bound);
 
 	// 获取合约信息
-	WTSCommodityInfo* commInfo = ctx->stra_get_comminfo(_code.c_str());
+	[[maybe_unused]] WTSCommodityInfo* commInfo = ctx->stra_get_comminfo(_code.c_str());
 
 	// 获取当前持仓并转换为手数
 	double curPos = ctx->stra_get_position(_moncode.c_str()) / trdUnit;
@@ -304,7 +304,7 @@ void WtStraDualThrust::on_init(ICtaStraCtx* ctx)
  * \param stdCode 合约代码
  * \param newTick 新的Tick数据
  */
-void WtStraDualThrust::on_tick(ICtaStraCtx* ctx, const char* stdCode, WTSTickData* newTick)
+void WtStraDualThrust::on_tick(ICtaStraCtx* /*ctx*/, const char* /*stdCode*/, WTSTickData* /*newTick*/)
 {
 	//没有什么要处理
 }

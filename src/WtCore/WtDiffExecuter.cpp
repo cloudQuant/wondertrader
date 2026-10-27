@@ -40,13 +40,13 @@ USING_NS_WTP;
  */
 WtDiffExecuter::WtDiffExecuter(WtExecuterFactory* factory, const char* name, IDataManager* dataMgr, IBaseDataMgr* bdMgr)
 	: IExecCommand(name)
+	, _trader(NULL)
 	, _factory(factory)
 	, _data_mgr(dataMgr)
-	, _channel_ready(false)
-	, _scale(1.0)
-	, _trader(NULL)
 	, _bd_mgr(bdMgr)
-{
+, _scale(1.0)
+	, _channel_ready(false)
+	{
 }
 
 
@@ -301,7 +301,7 @@ ExecuteUnitPtr WtDiffExecuter::getUnit(const char* stdCode, bool bAutoCreate /* 
  * @param etime 结束时间，默认为0
  * @return WTSTickSlice* tick数据切片指针
  */
-WTSTickSlice* WtDiffExecuter::getTicks(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
+WTSTickSlice* WtDiffExecuter::getTicks(const char* stdCode, uint32_t count, uint64_t /*etime*/ /* = 0 */)
 {
 	if (_data_mgr == NULL)
 		return NULL;
@@ -617,7 +617,7 @@ void WtDiffExecuter::set_position(const wt_hashmap<std::string, double>& targets
 
 			//更新差量
 			double& thisDiff = _diff_pos[stdCode];
-			double prevDiff = thisDiff;
+			[[maybe_unused]] double prevDiff = thisDiff;
 
 			//WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "[DiffExecuter][set_position][{}] {} is not in target, thisDiff: {}, prevDiff: {}, pos: {}, new thisDiff: {}", _name, stdCode, thisDiff, prevDiff, pos, thisDiff + pos);
 
@@ -718,7 +718,7 @@ void WtDiffExecuter::on_trade(uint32_t localid, const char* stdCode, bool isBuy,
  * @param price 价格
  * @param isCanceled 是否已撤销
  */
-void WtDiffExecuter::on_order(uint32_t localid, const char* stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled /* = false */)
+void WtDiffExecuter::on_order(uint32_t localid, const char* stdCode, bool isBuy, double /*totalQty*/, double leftQty, double price, bool isCanceled /* = false */)
 {
 	ExecuteUnitPtr unit = getUnit(stdCode, false);
 	if (unit == NULL)
@@ -894,7 +894,7 @@ void WtDiffExecuter::on_account(const char* currency, double prebalance, double 
  * @param newavail 新可用持仓量
  * @param tradingday 交易日
  */
-void WtDiffExecuter::on_position(const char* stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t tradingday)
+void WtDiffExecuter::on_position(const char* /*stdCode*/, bool /*isLong*/, double /*prevol*/, double /*preavail*/, double /*newvol*/, double /*newavail*/, uint32_t /*tradingday*/)
 {
 	// 注意：当前实现为空，可能在子类中实现
 }

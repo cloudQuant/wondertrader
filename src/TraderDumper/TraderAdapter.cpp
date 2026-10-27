@@ -36,10 +36,10 @@ extern std::string getBaseFolder();
 
 
 TraderAdapter::TraderAdapter(TraderAdapterMgr* mgr)
-	: _id("")
+	: _mgr(mgr)
 	, _cfg(NULL)
+	, _id("")
 	, _trader_api(NULL)
-	, _mgr(mgr)
 	, _done(false)
 {
 }
@@ -320,7 +320,7 @@ void TraderAdapter::onRspPosition(const WTSArray* ayPositions)
 		_trader_api->queryAccount();
 }
 
-void TraderAdapter::onTraderError(WTSError* err, void* pData /* = NULL */)
+void TraderAdapter::onTraderError(WTSError* err, void* /*pData*/ /* = NULL */)
 {
 	if(err)
 		WTSLogger::error("[{}]交易通道出现错误: {}", _id.c_str(), err->getMessage());

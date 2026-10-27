@@ -17,7 +17,7 @@
 #include "../Includes/ITraderApi.h"
 #include "../Includes/WTSCollection.hpp"
 
-#include "../API/yd1.108.360/ydApi.h"
+#include <API/yd1.108.360/ydApi.h>
 
 #include "../Share/IniHelper.hpp"
 #include "../Share/StdUtils.hpp"

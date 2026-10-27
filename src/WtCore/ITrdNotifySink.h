@@ -56,7 +56,7 @@ public:
 	 * @param tradingday 交易日，格式为YYYYMMDD
 	 * @details 当持仓状态发生变化时，交易引擎调用此接口将最新持仓信息通知给相关组件
 	 */
-	virtual void on_position(const char* stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t tradingday) {}
+	virtual void on_position(const char* /*stdCode*/, bool /*isLong*/, double /*prevol*/, double /*preavail*/, double /*newvol*/, double /*newavail*/, uint32_t /*tradingday*/) {}
 
 	/**
 	 * @brief 交易通道就绪通知
@@ -78,7 +78,7 @@ public:
 	 * @param message 回报消息，通常在下单失败时包含错误信息
 	 * @details 当委托下单后收到确认或拒绝时，交易引擎调用此接口通知相关组件
 	 */
-	virtual void on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message){}
+	virtual void on_entrust(uint32_t /*localid*/, const char* /*stdCode*/, bool /*bSuccess*/, const char* /*message*/){}
 
 	/**
 	 * @brief 资金账户更新回调
@@ -95,7 +95,7 @@ public:
 	 * @param withdraw 出金
 	 * @details 当账户资金状态发生变化时，交易引擎调用此接口将最新资金信息通知给相关组件
 	 */
-	virtual void on_account(const char* currency, double prebalance, double balance, double dynbalance, double avaliable, double closeprofit, double dynprofit, double margin, double fee, double deposit, double withdraw){}
+	virtual void on_account(const char* /*currency*/, double /*prebalance*/, double /*balance*/, double /*dynbalance*/, double /*avaliable*/, double /*closeprofit*/, double /*dynprofit*/, double /*margin*/, double /*fee*/, double /*deposit*/, double /*withdraw*/){}
 };
 
 NS_WTP_END

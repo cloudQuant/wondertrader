@@ -110,7 +110,7 @@ void WtDistExecuter::on_position_changed(const char* stdCode, double targetPos)
  * \param stdCode 品种代码
  * \param newTick 最新的行情数据
  */
-void WtDistExecuter::on_tick(const char* stdCode, WTSTickData* newTick)
+void WtDistExecuter::on_tick(const char* /*stdCode*/, WTSTickData* /*newTick*/)
 {
 	// 分布式执行器不需要处理ontick
 }

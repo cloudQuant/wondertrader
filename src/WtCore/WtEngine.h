@@ -74,8 +74,8 @@ class IEngineEvtListener
 {
 public:
 	virtual void on_initialize_event() {}
-	virtual void on_schedule_event(uint32_t uDate, uint32_t uTime) {}
-	virtual void on_session_event(uint32_t uDate, bool isBegin = true) {}
+	virtual void on_schedule_event(uint32_t /*uDate*/, uint32_t /*uTime*/) {}
+	virtual void on_session_event(uint32_t /*uDate*/, bool /*isBegin*/ = true) {}
 };
 
 class WtEngine : public WtPortContext, public IParserStub
@@ -146,7 +146,7 @@ public:
 	virtual uint32_t	getCurDate() override;
 	virtual uint32_t	getCurTime() override;
 	virtual uint32_t	getTradingDate() override;
-	virtual uint32_t	transTimeToMin(uint32_t uTime) override{ return 0; }
+	virtual uint32_t	transTimeToMin(uint32_t /*uTime*/) override{ return 0; }
 
 	//////////////////////////////////////////////////////////////////////////
 	/// IParserStub接口

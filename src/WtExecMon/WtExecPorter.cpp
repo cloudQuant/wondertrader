@@ -45,7 +45,7 @@ WtExecRunner& getRunner()
  * @param logCfg 日志配置，可以是配置文件路径或者配置内容字符串
  * @param isFile 是否为文件路径，默认为true
  */
-void init_exec(WtString logCfg, bool isFile /*= true*/)
+void init_exec(WtString logCfg, bool /*isFile*/ /*= true*/)
 {
 	// 使用静态变量记录初始化状态，确保只初始化一次
 	static bool inited = false;
@@ -65,7 +65,7 @@ void init_exec(WtString logCfg, bool isFile /*= true*/)
  * @param cfgfile 配置文件路径或者配置内容字符串
  * @param isFile 是否为文件路径，默认为true
  */
-void config_exec(WtString cfgfile, bool isFile /*= true*/)
+void config_exec(WtString cfgfile, bool /*isFile*/ /*= true*/)
 {
 	// 如果配置文件路径为空，则使用默认的"cfgexec.json"
 	if (strlen(cfgfile) == 0)

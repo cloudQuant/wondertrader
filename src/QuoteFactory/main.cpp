@@ -14,7 +14,7 @@
 #include "../WTSTools/WTSLogger.h"
 #include "../WTSUtils/WTSCfgLoader.h"
 #include "../Share/StrUtil.hpp"
-#include "../Share/cppcli.hpp"
+#include <Share/cppcli.hpp>
 
 #include "../WTSUtils/SignalHook.hpp"
 

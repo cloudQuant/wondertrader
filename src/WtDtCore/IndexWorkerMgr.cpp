@@ -181,7 +181,7 @@ void IndexWorkerMgr::handle_quote(WTSTickData* newTick)
 
 	if (_pool)
 	{
-		_pool->schedule([this, newTick, fullCode]() {
+		_pool->schedule([this, newTick]() {
 
 			for (auto& v : _workers)
 			{

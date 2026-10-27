@@ -757,7 +757,7 @@ uint32_t WTSBaseDataMgr::calcTradingDate(const char* stdPID, uint32_t uDate, uin
 	return uDate;
 }
 
-uint32_t WTSBaseDataMgr::getTradingDate(const char* pid, uint32_t uOffDate /* = 0 */, uint32_t uOffMinute /* = 0 */, bool isTpl /* = false */)
+uint32_t WTSBaseDataMgr::getTradingDate(const char* pid, uint32_t uOffDate /* = 0 */, uint32_t /*uOffMinute*/ /* = 0 */, bool isTpl /* = false */)
 {
 	const char* tplID = isTpl ? pid : getTplIDByPID(pid);
 

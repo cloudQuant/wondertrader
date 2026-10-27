@@ -105,10 +105,10 @@ class WtLMDBQuery
 {
 public:
 	WtLMDBQuery(WtLMDB& db)
-		: _txn(NULL)
+		: _db(db)
+	, _txn(NULL)
 		, _commited(false)
-		, _db(db)
-	{
+		{
 		_readonly = db.is_readonly();
 		_db.update_errno(mdb_txn_begin(_db.env(), NULL, (_readonly ? MDB_RDONLY : 0), &_txn));
 		_dbi = _db.update_dbi(_txn);
@@ -197,7 +197,7 @@ public:
 		int _errno = mdb_cursor_open(_txn, _dbi, &cursor);
 		_db.update_errno(_errno);
 		if (_errno != MDB_SUCCESS)
-			return std::move(std::string());
+			return std::string();
 
 		MDB_val mKey, mData;
 		mKey.mv_data = key;
@@ -206,11 +206,11 @@ public:
 		_errno = mdb_cursor_get(cursor, &mKey, &mData, MDB_NEXT);
 		_db.update_errno(_errno);
 		if (_errno != MDB_SUCCESS)
-			return std::move(std::string());
+			return std::string();
 
 		auto ret = std::string((char*)mData.mv_data, mData.mv_size);
 		mdb_cursor_close(cursor);
-		return std::move(ret);
+		return ret;
 	}
 
 	/*

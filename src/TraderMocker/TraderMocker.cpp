@@ -81,14 +81,14 @@ std::vector<uint32_t> splitVolume(uint32_t vol, uint32_t minQty = 1, uint32_t ma
 TraderMocker::TraderMocker()
 	: _terminated(false)
 	, _listener(NULL)
-	, _ticks(NULL)
 	, _orders(NULL)
-	, _awaits(NULL)
 	, _trades(NULL)
-	, _b_socket(NULL)
+	, _ticks(NULL)
+	, _awaits(NULL)
 	, _max_tick_time(0)
 	, _last_match_time(0)
-{
+, _b_socket(NULL)
+	{
 	_auto_order_id = (uint32_t)((TimeUtils::getLocalTimeNow() - TimeUtils::makeTime(20200101, 0)) / 1000 * 100);
 	_auto_trade_id = (uint32_t)((TimeUtils::getLocalTimeNow() - TimeUtils::makeTime(20200101, 0)) / 1000 * 300);
 	_auto_entrust_id = (uint32_t)((TimeUtils::getLocalTimeNow() - TimeUtils::makeTime(20200101, 0)) / 1000 * 100);
@@ -197,7 +197,7 @@ int TraderMocker::orderInsert(WTSEntrust* entrust)
 			if(!decimal::eq(entrust->getPrice(), 0))
 			{
 				double pricetick = commInfo->getPriceTick();
-				double v = entrust->getPrice() / pricetick;
+				[[maybe_unused]] double v = entrust->getPrice() / pricetick;
 
 				if (!decimal::eq(decimal::mod(entrust->getPrice(), pricetick), 0))	//整除的检查方式,先小数相除得到商,然后商取整以后,再跟原来的商相减,如果等于0,则是整除,否则是
 				{
@@ -351,7 +351,7 @@ int32_t TraderMocker::match_once()
 		if (curTick && strcmp(curTick->code(), ct->getCode())==0)
 		{
 			StdUniqueLock lock(_mtx_awaits);
-			uint64_t tickTime = (uint64_t)curTick->actiondate() * 1000000000 + curTick->actiontime();
+			[[maybe_unused]] uint64_t tickTime = (uint64_t)curTick->actiondate() * 1000000000 + curTick->actiontime();
 			if (decimal::gt(curTick->price(), 0) /*&& tickTime >= _last_match_time*/)
 			{
 				//开始处理订单
@@ -561,8 +561,8 @@ void TraderMocker::load_positions()
 
 	if(root.HasMember("positions"))
 	{//读取仓位
-		double total_profit = 0;
-		double total_dynprofit = 0;
+		[[maybe_unused]] double total_profit = 0;
+		[[maybe_unused]] double total_dynprofit = 0;
 		const rj::Value& jPos = root["positions"];
 		if (!jPos.IsNull() && jPos.IsArray())
 		{
@@ -600,7 +600,7 @@ void TraderMocker::save_positions()
 
 		for (auto& v : _positions)
 		{
-			const char* fullcode = v.first.c_str();
+			[[maybe_unused]] const char* fullcode = v.first.c_str();
 			const PosItem& pInfo = v.second;
 
 			rj::Value pItem(rj::kObjectType);
@@ -680,7 +680,7 @@ void TraderMocker::reconn_udp()
 	_b_socket->bind(_broad_ep);
 
 
-	_b_socket->async_receive_from(boost::asio::buffer(_b_buffer), _broad_ep,
+	_b_socket->async_receive_from(boost::asio::buffer(_b_buffer.data(), _b_buffer.size()), _broad_ep,
 		boost::bind(&TraderMocker::handle_read, this,
 		boost::asio::placeholders::error,
 		boost::asio::placeholders::bytes_transferred, true));
@@ -720,7 +720,7 @@ bool TraderMocker::isConnected()
 	return _thrd_match != NULL;
 }
 
-int TraderMocker::login(const char* user, const char* pass, const char* productInfo)
+int TraderMocker::login(const char* /*user*/, const char* /*pass*/, const char* /*productInfo*/)
 {
 	_thrd_match.reset(new StdThread([this]() {
 		while (!_terminated)
@@ -774,7 +774,7 @@ int TraderMocker::orderAction(WTSEntrustAction* action)
 		WTSContractInfo* ct = ordInfo->getContractInfo();
 		WTSCommodityInfo* commInfo = ct->getCommInfo();
 
-		bool bPass = false;
+		[[maybe_unused]] bool bPass = false;
 		do 
 		{
 			//开仓委托直接撤单
@@ -954,7 +954,7 @@ void TraderMocker::handle_read(const boost::system::error_code& e, std::size_t b
 
 	if (isBroad && _b_socket)
 	{
-		_b_socket->async_receive_from(boost::asio::buffer(_b_buffer), _broad_ep,
+		_b_socket->async_receive_from(boost::asio::buffer(_b_buffer.data(), _b_buffer.size()), _broad_ep,
 			boost::bind(&TraderMocker::handle_read, this,
 			boost::asio::placeholders::error,
 			boost::asio::placeholders::bytes_transferred, true));
@@ -982,7 +982,7 @@ struct UDPDataPacket : UDPPacketHead
 };
 #pragma pack(pop)
 typedef UDPDataPacket<WTSTickStruct>	UDPTickPacket;
-void TraderMocker::extract_buffer(uint32_t length, bool isBroad /* = true */)
+void TraderMocker::extract_buffer(uint32_t /*length*/, bool /*isBroad*/ /* = true */)
 {
 	UDPPacketHead* header = (UDPTickPacket*)_b_buffer.data();
 

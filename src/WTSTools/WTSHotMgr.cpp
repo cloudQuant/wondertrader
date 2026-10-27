@@ -21,9 +21,9 @@
 
 
 WTSHotMgr::WTSHotMgr()
-	: m_mapCustRules(NULL)
-	, m_bInitialized(false)
-{
+	: m_bInitialized(false)
+, m_mapCustRules(NULL)
+	{
 }
 
 

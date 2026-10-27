@@ -21,7 +21,7 @@
  * \param src 输入的原始16位无符号整数
  * \return 返回字节序转换后的结果
  */
-static uint16_t reverseEndian(uint16_t src)
+[[maybe_unused]] static uint16_t reverseEndian(uint16_t src)
 {
 	uint16_t up = (src & 0x00FF) << 8;
 	uint16_t low = (src & 0xFF00) >> 8;

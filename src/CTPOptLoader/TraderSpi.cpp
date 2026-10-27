@@ -37,7 +37,9 @@ using namespace loader;
 extern std::map<std::string, std::string>	MAP_NAME;
 extern std::map<std::string, std::string>	MAP_SESSION;
 
+#ifdef _MSC_VER
 #pragma warning(disable : 4996)
+#endif
 
 // USER_API参数
 extern CThostFtdcTraderApi* pUserApi;
@@ -126,7 +128,7 @@ void CTraderSpi::ReqAuth()
 	std::cerr << "--->>> Requesting authentication: " << ((iResult == 0) ? "succeed" : "failed") << std::endl;
 }
 
-void CTraderSpi::OnRspAuthenticate(CThostFtdcRspAuthenticateField *pRspAuthenticateField, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void CTraderSpi::OnRspAuthenticate(CThostFtdcRspAuthenticateField */*pRspAuthenticateField*/, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
 	std::cerr << "--->>> " << "OnRspAuthenticate" << std::endl;
 	if (bIsLast && !IsErrorRspInfo(pRspInfo))
@@ -147,7 +149,7 @@ void CTraderSpi::ReqUserLogin()
 }
 
 void CTraderSpi::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin,
-		CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+		CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
 	std::cerr << "--->>> " << "OnRspUserLogin" << std::endl;
 	if (bIsLast && !IsErrorRspInfo(pRspInfo))
@@ -157,7 +159,7 @@ void CTraderSpi::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin,
 		SESSION_ID = pRspUserLogin->SessionID;
 		int iNextOrderRef = atoi(pRspUserLogin->MaxOrderRef);
 		iNextOrderRef++;
-		sprintf(ORDER_REF, "%d", iNextOrderRef);
+		snprintf(ORDER_REF, sizeof(ORDER_REF), "%d", iNextOrderRef);
 		///获取当前交易日
 		m_lTradingDate = atoi(pUserApi->GetTradingDay());
 		
@@ -223,7 +225,7 @@ inline const char* wrapProductID(const char* rawProductID)
 }
 
 
-void CTraderSpi::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void CTraderSpi::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
 	if (!IsErrorRspInfo(pRspInfo))
 	{
@@ -605,7 +607,7 @@ void CTraderSpi:: OnFrontDisconnected(int nReason)
 }
 		
 
-void CTraderSpi::OnRspError(CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void CTraderSpi::OnRspError(CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	std::cerr << "--->>> " << "OnRspError" << std::endl;
 	IsErrorRspInfo(pRspInfo);

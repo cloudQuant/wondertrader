@@ -260,6 +260,8 @@ void WtSelEngine::on_minute_end(uint32_t curDate, uint32_t curTime)
 		bool bIgnore = true;
 		switch (tInfo->_period)
 		{
+		case TPT_None:
+			break;
 		case TPT_Daily:
 			bIgnore = false;
 			break;

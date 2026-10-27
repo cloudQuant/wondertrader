@@ -43,23 +43,23 @@ TEST(test_lmdb, test_query)
 
 		EXPECT_EQ(query.get(std::string("key-001")), "value-001");
 
-		query.get_lowers(std::string("key-000"), std::string("key-030"), 10, [](const ValueArray& ayKeys, const ValueArray& ayVals) {
+		query.get_lowers(std::string("key-000"), std::string("key-030"), 10, [](const ValueArray& ayKeys, const ValueArray& /*ayVals*/) {
 			EXPECT_EQ(ayKeys.size(), 10);
 		});
 
-		query.get_lowers(std::string("key-000"), std::string("key-005"), 10, [](const ValueArray& ayKeys, const ValueArray& ayVals) {
+		query.get_lowers(std::string("key-000"), std::string("key-005"), 10, [](const ValueArray& ayKeys, const ValueArray& /*ayVals*/) {
 			EXPECT_EQ(ayKeys.size(), 5);
 		});
 
-		query.get_uppers(std::string("key-030"), std::string("key-999"), 10, [](const ValueArray& ayKeys, const ValueArray& ayVals) {
+		query.get_uppers(std::string("key-030"), std::string("key-999"), 10, [](const ValueArray& ayKeys, const ValueArray& /*ayVals*/) {
 			EXPECT_EQ(ayKeys.size(), 10);
 		});
 
-		query.get_uppers(std::string("key-095"), std::string("key-999"), 10, [](const ValueArray& ayKeys, const ValueArray& ayVals) {
+		query.get_uppers(std::string("key-095"), std::string("key-999"), 10, [](const ValueArray& ayKeys, const ValueArray& /*ayVals*/) {
 			EXPECT_EQ(ayKeys.size(), 6);
 		});
 
-		query.get_range(std::string("key-030"), std::string("key-050"), [](const ValueArray& ayKeys, const ValueArray& ayVals) {
+		query.get_range(std::string("key-030"), std::string("key-050"), [](const ValueArray& ayKeys, const ValueArray& /*ayVals*/) {
 			EXPECT_EQ(ayKeys.size(), 21);
 		});
 	}
@@ -79,7 +79,7 @@ std::string makeData(uint32_t v, bool trans)
 	if (trans)
 		v = reverseEndian(v);
 
-	return std::move(std::string((const char*)&v, sizeof(uint32_t)));
+	return std::string((const char*)&v, sizeof(uint32_t));
 }
 
 TEST(test_lmdb, test_endian)

@@ -27,10 +27,10 @@
 WTSDataFactory g_dataFact;
 
 WtDataManager::WtDataManager()
-	: _bd_mgr(NULL)
+	: _reader(NULL)
+	, _bd_mgr(NULL)
 	, _hot_mgr(NULL)
 	, _runner(NULL)
-	, _reader(NULL)
 	, _rt_bars(NULL)
 {
 }

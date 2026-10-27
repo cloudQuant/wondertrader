@@ -30,10 +30,10 @@
 ParserAdapter::ParserAdapter(WTSBaseDataMgr * bgMgr, DataManager* dtMgr, IndexWorkerMgr *idxFactory)
 	: _parser_api(NULL)
 	, _remover(NULL)
-	, _stopped(false)
 	, _bd_mgr(bgMgr)
 	, _dt_mgr(dtMgr)
 	, _idx_fact(idxFactory)
+	, _stopped(false)
 	, _cfg(NULL)
 {
 }
@@ -227,7 +227,7 @@ bool ParserAdapter::run()
 	return true;
 }
 
-void ParserAdapter::handleSymbolList( const WTSArray* aySymbols )
+void ParserAdapter::handleSymbolList( const WTSArray* /*aySymbols*/ )
 {
 	
 }

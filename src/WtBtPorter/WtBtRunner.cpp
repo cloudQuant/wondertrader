@@ -45,42 +45,42 @@ const char* getModuleName()
 #endif
 
 WtBtRunner::WtBtRunner()
-	: _cta_mocker(NULL)
-	, _sel_mocker(NULL)
-
-	, _cb_cta_init(NULL)
+	: _cb_cta_init(NULL)
+	, _cb_cta_sessevt(NULL)
 	, _cb_cta_tick(NULL)
 	, _cb_cta_calc(NULL)
 	, _cb_cta_calc_done(NULL)
 	, _cb_cta_bar(NULL)
-	, _cb_cta_sessevt(NULL)
 	, _cb_cta_cond_trigger(NULL)
 
 	, _cb_sel_init(NULL)
+	, _cb_sel_sessevt(NULL)
+
 	, _cb_sel_tick(NULL)
 	, _cb_sel_calc(NULL)
 	, _cb_sel_calc_done(NULL)
 	, _cb_sel_bar(NULL)
-	, _cb_sel_sessevt(NULL)
-
 	, _cb_hft_init(NULL)
+	, _cb_hft_sessevt(NULL)
+
 	, _cb_hft_tick(NULL)
 	, _cb_hft_bar(NULL)
+	, _cb_hft_chnl(NULL)
+
 	, _cb_hft_ord(NULL)
 	, _cb_hft_trd(NULL)
 	, _cb_hft_entrust(NULL)
-	, _cb_hft_chnl(NULL)
-
-	, _cb_hft_orddtl(NULL)
 	, _cb_hft_ordque(NULL)
+	, _cb_hft_orddtl(NULL)
 	, _cb_hft_trans(NULL)
-
-	, _cb_hft_sessevt(NULL)
 
 	, _ext_fnl_bar_loader(NULL)
 	, _ext_raw_bar_loader(NULL)
 	, _ext_adj_fct_loader(NULL)
 	, _ext_tick_loader(NULL)
+
+	, _cta_mocker(NULL)
+	, _sel_mocker(NULL)
 
 	, _inited(false)
 	, _running(false)
@@ -473,7 +473,7 @@ void WtBtRunner::config(const char* cfgFile, bool isFile /* = true */)
 	{
 		const char* name = cfgMode->getCString("name");
 		int32_t slippage = cfgMode->getInt32("slippage");
-		_cta_mocker = new ExpCtaMocker(&_replayer, name, slippage, &_notifier);
+		_cta_mocker = new ExpCtaMocker(&_replayer, name, slippage, true, &_notifier);
 		_cta_mocker->init_cta_factory(cfgMode);
 		_replayer.register_sink(_cta_mocker, name);
 	}

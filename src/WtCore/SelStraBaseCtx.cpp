@@ -40,14 +40,14 @@ inline uint32_t makeSelCtxId()
 SelStraBaseCtx::SelStraBaseCtx(WtSelEngine* engine, const char* name, int32_t slippage)
 	: ISelStraCtx(name)
 	, _engine(engine)
-	, _total_calc_time(0)
+	, _slippage(slippage)
+, _total_calc_time(0)
 	, _emit_times(0)
-	, _is_in_schedule(false)
-	, _ud_modified(false)
 	, _schedule_date(0)
 	, _schedule_time(0)
-	, _slippage(slippage)
-{
+	, _is_in_schedule(false)
+	, _ud_modified(false)
+	{
 	_context_id = makeSelCtxId();
 }
 
@@ -226,7 +226,7 @@ void SelStraBaseCtx::load_userdata()
 	}
 }
 
-void SelStraBaseCtx::load_data(uint32_t flag /* = 0xFFFFFFFF */)
+void SelStraBaseCtx::load_data(uint32_t /*flag*/ /* = 0xFFFFFFFF */)
 {
 	std::string filename = WtHelper::getStraDataDir();
 	filename += _name;
@@ -376,7 +376,7 @@ void SelStraBaseCtx::load_data(uint32_t flag /* = 0xFFFFFFFF */)
 	}
 }
 
-void SelStraBaseCtx::save_data(uint32_t flag /* = 0xFFFFFFFF */)
+void SelStraBaseCtx::save_data(uint32_t /*flag*/ /* = 0xFFFFFFFF */)
 {
 	rj::Document root(rj::kObjectType);
 
@@ -683,8 +683,8 @@ void SelStraBaseCtx::on_session_end(uint32_t uTDate)
 {
 	uint32_t curDate = uTDate;//_engine->get_trading_date();
 
-	double total_profit = 0;
-	double total_dynprofit = 0;
+	[[maybe_unused]] double total_profit = 0;
+	[[maybe_unused]] double total_dynprofit = 0;
 
 	for (auto it = _pos_map.begin(); it != _pos_map.end(); it++)
 	{
@@ -783,7 +783,7 @@ void SelStraBaseCtx::append_signal(const char* stdCode, double qty, const char* 
 	save_data();
 }
 
-void SelStraBaseCtx::do_set_position(const char* stdCode, double qty, const char* userTag /* = "" */, bool bTriggered /* = false */)
+void SelStraBaseCtx::do_set_position(const char* stdCode, double qty, const char* userTag /* = "" */, bool /*bTriggered*/ /* = false */)
 {
 	PosInfo& pInfo = _pos_map[stdCode];
 	double curPx = _price_map[stdCode];

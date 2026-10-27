@@ -37,8 +37,8 @@ inline uint32_t makeMQSvrId()
 
 
 MQServer::MQServer(MQManager* mgr)
-	: _sock(-1)
-	, _ready(false)
+	: _ready(false)
+	, _sock(-1)
 	, _mgr(mgr)
 	, _confirm(false)
 	, m_bTerminated(false)
@@ -172,13 +172,13 @@ void MQServer::publish(const char* topic, const void* data, uint32_t dataLen)
 					if (total_len + len > PACKET_BUFFER_SIZE)
 					{
 						_mgr->log_server(_id, fmtutil::format("Packet buffer is about to be full ({} - > {}), force to send", total_len, total_len + len));
-						int bytes_snd = 0;
+						std::size_t bytes_snd = 0;
 						for (;;)
 						{
 							int bytes = nn_send(_sock, m_sendBuf + bytes_snd, total_len - bytes_snd, 0);
 							if (bytes >= 0)
 							{
-								bytes_snd += bytes;
+								bytes_snd += (std::size_t)bytes;
 							}
 							else
 							{
@@ -205,13 +205,13 @@ void MQServer::publish(const char* topic, const void* data, uint32_t dataLen)
 
 				if(total_len > 0)
 				{
-					int bytes_snd = 0;
+					std::size_t bytes_snd = 0;
 					for (;;)
 					{
 						int bytes = nn_send(_sock, m_sendBuf + bytes_snd, total_len - bytes_snd, 0);
 						if (bytes >= 0)
 						{
-							bytes_snd += bytes;
+							bytes_snd += (std::size_t)bytes;
 						}
 						else
 						{

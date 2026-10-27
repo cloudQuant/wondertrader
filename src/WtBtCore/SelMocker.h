@@ -251,7 +251,7 @@ public:
 	 * @brief 获取策略上下文ID
 	 * @return 策略上下文ID
 	 */
-	virtual uint32_t id() { return _context_id; }
+	virtual uint32_t id() override { return _context_id; }
 
 	//回调函数
 	/**

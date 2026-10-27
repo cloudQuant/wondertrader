@@ -29,7 +29,7 @@ USING_NS_WTP;
  * @param bServer 是否为服务器模式
  * @details 该函数用于处理消息队列服务器的日志信息，当前实现为空
  */
-void on_mq_log(unsigned long id, const char* message, bool bServer)
+void on_mq_log(unsigned long /*id*/, const char* /*message*/, bool /*bServer*/)
 {
 	// 当前实现为空，可以根据需要添加日志处理逻辑
 }

@@ -53,13 +53,13 @@ static const uint32_t CACHE_SIZE_STEP_AD = 400;
 
 
 WtDataWriterAD::WtDataWriterAD()
-	: _terminated(false)
+	: _tick_cache_block(nullptr)
 	, _log_group_size(1000)
-	, _disable_day(false)
+	, _terminated(false)
+	, _disable_tick(false)
 	, _disable_min1(false)
 	, _disable_min5(false)
-	, _disable_tick(false)
-	, _tick_cache_block(nullptr)
+	, _disable_day(false)
 	, _tick_mapsize(16*1024*1024)
 	, _kline_mapsize(8*1024*1024)
 {
@@ -859,7 +859,7 @@ WTSTickData* WtDataWriterAD::getCurTick(const char* code, const char* exchg/* = 
 	return WTSTickData::create(item._tick);
 }
 
-bool WtDataWriterAD::updateTickCache(WTSContractInfo* ct, WTSTickData* curTick, uint32_t procFlag)
+bool WtDataWriterAD::updateTickCache(WTSContractInfo* /*ct*/, WTSTickData* curTick, uint32_t procFlag)
 {
 	if (curTick == NULL || _tick_cache_block == NULL)
 	{
@@ -1033,7 +1033,7 @@ WtDataWriterAD::WtLMDBPtr WtDataWriterAD::get_k_db(const char* exchg, WTSKlinePe
 		subdir = "day";
 	}
 	else
-		return std::move(WtLMDBPtr());
+		return WtLMDBPtr();
 
 	auto it = the_map->find(exchg);
 	if (it != the_map->end())
@@ -1045,11 +1045,11 @@ WtDataWriterAD::WtLMDBPtr WtDataWriterAD::get_k_db(const char* exchg, WTSKlinePe
 	if(!dbPtr->open(path.c_str(), _kline_mapsize))
 	{
 		if (_sink) pipe_writer_log(_sink, LL_ERROR, "Opening {} db at {} failed: {}", subdir, path, dbPtr->errmsg());
-		return std::move(WtLMDBPtr());
+		return WtLMDBPtr();
 	}
 
 	(*the_map)[exchg] = dbPtr;
-	return std::move(dbPtr);
+	return dbPtr;
 }
 
 WtDataWriterAD::WtLMDBPtr WtDataWriterAD::get_t_db(const char* exchg, const char* code)
@@ -1065,9 +1065,9 @@ WtDataWriterAD::WtLMDBPtr WtDataWriterAD::get_t_db(const char* exchg, const char
 	if (!dbPtr->open(path.c_str(), _tick_mapsize))
 	{
 		if (_sink) pipe_writer_log(_sink, LL_ERROR, "Opening tick db at {} failed: {}", path, dbPtr->errmsg());
-		return std::move(WtLMDBPtr());
+		return WtLMDBPtr();
 	}
 
 	_tick_dbs[key] = dbPtr;
-	return std::move(dbPtr);
+	return dbPtr;
 }

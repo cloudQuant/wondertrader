@@ -29,7 +29,7 @@ namespace rj = rapidjson;
 
 USING_NS_WTP;
 
-void on_mq_log(unsigned long id, const char* message, bool bServer)
+void on_mq_log(unsigned long /*id*/, const char* /*message*/, bool /*bServer*/)
 {
 
 }

@@ -14,7 +14,7 @@
 #include "../Includes/IIndexDefs.h"
 #include "../Share/DLLHelper.hpp"
 
-#include "../Share/threadpool.hpp"
+#include <Share/threadpool.hpp>
 
 USING_NS_WTP;
 

@@ -33,7 +33,7 @@
  * @brief 包含命令行参数解析工具的头文件
  * @details cppcli提供了命令行参数的解析功能
  */
-#include "../Share/cppcli.hpp"
+#include <Share/cppcli.hpp>
 
 /**
  * @brief 内存泄漏检测工具头文件（已注释）

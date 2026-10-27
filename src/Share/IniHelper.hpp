@@ -181,7 +181,7 @@ public:
 	std::string	readString(const char* szSec, const char* szKey, const char* defVal = "")
 	{
 		static char path[MAX_KEY_LENGTH] = { 0 };
-		sprintf(path, "%s.%s", szSec, szKey);
+		snprintf(path, sizeof(path), "%s.%s", szSec, szKey);
 		return readValue<std::string>(path, defVal);
 	}
 
@@ -197,7 +197,7 @@ public:
 	int			readInt(const char* szSec, const char* szKey, int defVal = 0)
 	{
 		static char path[MAX_KEY_LENGTH] = { 0 };
-		sprintf(path, "%s.%s", szSec, szKey);
+		snprintf(path, sizeof(path), "%s.%s", szSec, szKey);
 		return readValue<int>(path, defVal);
 	}
 
@@ -213,7 +213,7 @@ public:
 	uint32_t	readUInt(const char* szSec, const char* szKey, uint32_t defVal = 0)
 	{
 		static char path[MAX_KEY_LENGTH] = { 0 };
-		sprintf(path, "%s.%s", szSec, szKey);
+		snprintf(path, sizeof(path), "%s.%s", szSec, szKey);
 		return readValue<uint32_t>(path, defVal);
 	}
 
@@ -230,7 +230,7 @@ public:
 	bool		readBool(const char* szSec, const char* szKey, bool defVal = false)
 	{
 		static char path[MAX_KEY_LENGTH] = { 0 };
-		sprintf(path, "%s.%s", szSec, szKey);
+		snprintf(path, sizeof(path), "%s.%s", szSec, szKey);
 		return readValue<bool>(path, defVal);
 	}
 
@@ -246,7 +246,7 @@ public:
 	double		readDouble(const char* szSec, const char* szKey, double defVal = 0.0)
 	{
 		static char path[MAX_KEY_LENGTH] = { 0 };
-		sprintf(path, "%s.%s", szSec, szKey);
+		snprintf(path, sizeof(path), "%s.%s", szSec, szKey);
 		return readValue<double>(path, defVal);
 	}
 
@@ -349,7 +349,7 @@ public:
 	void		writeString(const char* szSec, const char* szKey, const char* val)
 	{
 		static char path[MAX_KEY_LENGTH] = { 0 };
-		sprintf(path, "%s.%s", szSec, szKey);
+		snprintf(path, sizeof(path), "%s.%s", szSec, szKey);
 		writeValue<std::string>(path, val);
 	}
 
@@ -365,7 +365,7 @@ public:
 	void		writeInt(const char* szSec, const char* szKey, int val)
 	{
 		static char path[MAX_KEY_LENGTH] = { 0 };
-		sprintf(path, "%s.%s", szSec, szKey);
+		snprintf(path, sizeof(path), "%s.%s", szSec, szKey);
 		writeValue<int>(path, val);
 	}
 
@@ -381,7 +381,7 @@ public:
 	void		writeUInt(const char* szSec, const char* szKey, uint32_t val)
 	{
 		static char path[MAX_KEY_LENGTH] = { 0 };
-		sprintf(path, "%s.%s", szSec, szKey);
+		snprintf(path, sizeof(path), "%s.%s", szSec, szKey);
 		writeValue<uint32_t>(path, val);
 	}
 
@@ -398,7 +398,7 @@ public:
 	void		writeBool(const char* szSec, const char* szKey, bool val)
 	{
 		static char path[MAX_KEY_LENGTH] = { 0 };
-		sprintf(path, "%s.%s", szSec, szKey);
+		snprintf(path, sizeof(path), "%s.%s", szSec, szKey);
 		writeValue<bool>(path, val);
 	}
 
@@ -414,7 +414,7 @@ public:
 	void		writeDouble(const char* szSec, const char* szKey, double val)
 	{
 		static char path[MAX_KEY_LENGTH] = { 0 };
-		sprintf(path, "%s.%s", szSec, szKey);
+		snprintf(path, sizeof(path), "%s.%s", szSec, szKey);
 		writeValue<double>(path, val);
 	}
 };

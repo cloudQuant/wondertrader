@@ -13,7 +13,7 @@ class EventNotifier;
 class WtFilterMgr
 {
 public:
-	WtFilterMgr():_notifier(NULL), _is_first(true){}
+	WtFilterMgr(): _is_first(true),_notifier(NULL){}
 
 	void		set_notifier(EventNotifier* notifier) { _notifier = notifier; }
 

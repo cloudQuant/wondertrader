@@ -123,7 +123,7 @@ ExecuteUnit* WtExeFact::createDiffExeUnit(const char* name)
  * @param name 执行单元名称
  * @return 创建的套利执行单元指针，当前始终返回NULL
  */
-ExecuteUnit* WtExeFact::createArbiExeUnit(const char* name)
+ExecuteUnit* WtExeFact::createArbiExeUnit(const char* /*name*/)
 {
 	return NULL;
 }

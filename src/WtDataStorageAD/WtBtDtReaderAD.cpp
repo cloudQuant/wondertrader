@@ -72,8 +72,8 @@ bool WtBtDtReaderAD::read_raw_bars(const char* exchg, const char* code, WTSKline
 	WtLMDBQuery query(*db);
 	LMDBBarKey rKey(exchg, code, 0xffffffff);
 	LMDBBarKey lKey(exchg, code, 0);
-	int cnt = query.get_range(std::string((const char*)&lKey, sizeof(lKey)), std::string((const char*)&rKey, sizeof(rKey)),
-		[this, &buffer, &lKey](const ValueArray& ayKeys, const ValueArray& ayVals) {
+	[[maybe_unused]] int cnt = query.get_range(std::string((const char*)&lKey, sizeof(lKey)), std::string((const char*)&rKey, sizeof(rKey)),
+		[&buffer](const ValueArray& /*ayKeys*/, const ValueArray& ayVals) {
 		if (ayVals.empty())
 			return;
 
@@ -102,8 +102,8 @@ bool WtBtDtReaderAD::read_raw_ticks(const char* exchg, const char* code, uint32_
 	WtLMDBQuery query(*db);
 	LMDBHftKey rKey(exchg, code, uDate, 240000000);
 	LMDBHftKey lKey(exchg, code, uDate, 0);
-	int cnt = query.get_range(std::string((const char*)&lKey, sizeof(lKey)), std::string((const char*)&rKey, sizeof(rKey)),
-		[this, &buffer, &lKey](const ValueArray& ayKeys, const ValueArray& ayVals) {
+	[[maybe_unused]] int cnt = query.get_range(std::string((const char*)&lKey, sizeof(lKey)), std::string((const char*)&rKey, sizeof(rKey)),
+		[&buffer](const ValueArray& /*ayKeys*/, const ValueArray& ayVals) {
 		if (ayVals.empty())
 			return;
 
@@ -141,7 +141,7 @@ WtBtDtReaderAD::WtLMDBPtr WtBtDtReaderAD::get_k_db(const char* exchg, WTSKlinePe
 		subdir = "day";
 	}
 	else
-		return std::move(WtLMDBPtr());
+		return WtLMDBPtr();
 
 	auto it = the_map->find(exchg);
 	if (it != the_map->end())
@@ -150,12 +150,12 @@ WtBtDtReaderAD::WtLMDBPtr WtBtDtReaderAD::get_k_db(const char* exchg, WTSKlinePe
 	WtLMDBPtr dbPtr(new WtLMDB(true));
 	std::string path = fmtutil::format("{}{}/{}/", _base_dir.c_str(), subdir.c_str(), exchg);
 	if (!StdFile::exists(path.c_str()))
-		return std::move(WtLMDBPtr());
+		return WtLMDBPtr();
 
 	if (!dbPtr->open(path.c_str()))
 	{
 		pipe_btreader_log(_sink, LL_ERROR, "Opening {} db if {} failed: {}", subdir, exchg, dbPtr->errmsg());
-		return std::move(WtLMDBPtr());
+		return WtLMDBPtr();
 	}
 	else
 	{
@@ -163,7 +163,7 @@ WtBtDtReaderAD::WtLMDBPtr WtBtDtReaderAD::get_k_db(const char* exchg, WTSKlinePe
 	}
 
 	(*the_map)[exchg] = dbPtr;
-	return std::move(dbPtr);
+	return dbPtr;
 }
 
 WtBtDtReaderAD::WtLMDBPtr WtBtDtReaderAD::get_t_db(const char* exchg, const char* code)
@@ -176,12 +176,12 @@ WtBtDtReaderAD::WtLMDBPtr WtBtDtReaderAD::get_t_db(const char* exchg, const char
 	WtLMDBPtr dbPtr(new WtLMDB(true));
 	std::string path = fmtutil::format("{}ticks/{}/{}", _base_dir.c_str(), exchg, code);
 	if (!StdFile::exists(path.c_str()))
-		return std::move(WtLMDBPtr());
+		return WtLMDBPtr();
 
 	if (!dbPtr->open(path.c_str()))
 	{
 		pipe_btreader_log(_sink, LL_ERROR, "Opening tick db of {}.{} failed: {}", exchg, code, dbPtr->errmsg());
-		return std::move(WtLMDBPtr());
+		return WtLMDBPtr();
 	}
 	else
 	{
@@ -189,5 +189,5 @@ WtBtDtReaderAD::WtLMDBPtr WtBtDtReaderAD::get_t_db(const char* exchg, const char
 	}
 
 	_tick_dbs[exchg] = dbPtr;
-	return std::move(dbPtr);
+	return dbPtr;
 }

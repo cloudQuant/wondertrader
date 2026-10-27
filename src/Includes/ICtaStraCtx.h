@@ -121,7 +121,7 @@ public:
 	 * @param curDate 当前日期，格式为YYYYMMDD
 	 * @param curTime 当前时间，格式为HHMMSS
 	 */
-	virtual void on_calculate_done(uint32_t curDate, uint32_t curTime) { };
+	virtual void on_calculate_done(uint32_t /*curDate*/, uint32_t /*curTime*/) { };
 
 	/**
 	 * @brief K线周期结束时的回调
@@ -152,7 +152,7 @@ public:
 	 * @param stdCode 合约代码
 	 * @param newTick 最新的Tick数据
 	 */
-	virtual void on_tick_updated(const char* stdCode, WTSTickData* newTick){}
+	virtual void on_tick_updated(const char* /*stdCode*/, WTSTickData* /*newTick*/){}
 
 	/**
 	 * @brief 条件触发事件
@@ -164,7 +164,7 @@ public:
 	 * @param price 当前价格
 	 * @param usertag 用户标记
 	 */
-	virtual void on_condition_triggered(const char* stdCode, double target, double price, const char* usertag){}
+	virtual void on_condition_triggered(const char* /*stdCode*/, double /*target*/, double /*price*/, const char* /*usertag*/){}
 
 	/**
 	 * @brief 遍历持仓回调函数
@@ -504,7 +504,7 @@ public:
 	 * 
 	 * @param message 日志消息
 	 */
-	virtual void stra_log_warn(const char* message) {}
+	virtual void stra_log_warn(const char* /*message*/) {}
 
 	/**
 	 * @brief 保存用户数据
@@ -514,7 +514,7 @@ public:
 	 * @param key 数据键名
 	 * @param val 数据值
 	 */
-	virtual void stra_save_user_data(const char* key, const char* val){}
+	virtual void stra_save_user_data(const char* /*key*/, const char* /*val*/){}
 
 	/**
 	 * @brief 加载用户数据
@@ -525,7 +525,7 @@ public:
 	 * @param defVal 默认值，当键名不存在时返回该值
 	 * @return 读取到的数据值或默认值
 	 */
-	virtual const char* stra_load_user_data(const char* key, const char* defVal = "") { return defVal; }
+	virtual const char* stra_load_user_data(const char* /*key*/, const char* defVal = "") { return defVal; }
 
 	/**
 	 * @brief 设置图表K线
@@ -535,7 +535,7 @@ public:
 	 * @param stdCode 合约代码
 	 * @param period 周期标识，如m1/m5/d1等
 	 */
-	virtual void set_chart_kline(const char* stdCode, const char* period) {}
+	virtual void set_chart_kline(const char* /*stdCode*/, const char* /*period*/) {}
 
 	/**
 	 * @brief 添加信号标记
@@ -546,7 +546,7 @@ public:
 	 * @param icon 图标，如“⬆️”表示上涨，“⬇️”表示下跌
 	 * @param tag 标记文字，用于描述信号
 	 */
-	virtual void add_chart_mark(double price, const char* icon, const char* tag) {}
+	virtual void add_chart_mark(double /*price*/, const char* /*icon*/, const char* /*tag*/) {}
 
 	/**
 	 * @brief 添加指标
@@ -556,7 +556,7 @@ public:
 	 * @param idxName 指标名称
 	 * @param indexType 指标类型：0-主图指标，1-副图指标
 	 */
-	virtual void register_index(const char* idxName, uint32_t indexType) {}
+	virtual void register_index(const char* /*idxName*/, uint32_t /*indexType*/) {}
 
 
 	/**
@@ -569,7 +569,7 @@ public:
 	 * @param lineType 线性，0-曲线
 	 * @return 是否添加成功
 	 */
-	virtual bool register_index_line(const char* idxName, const char* lineName, uint32_t lineType) { return false; }
+	virtual bool register_index_line(const char* /*idxName*/, const char* /*lineName*/, uint32_t /*lineType*/) { return false; }
 
 	/**
 	 * @brief 添加基准线
@@ -581,7 +581,7 @@ public:
 	 * @param val 数值，基准线的水平位置
 	 * @return 是否添加成功
 	 */
-	virtual bool add_index_baseline(const char* idxName, const char* lineName, double val) { return false; }
+	virtual bool add_index_baseline(const char* /*idxName*/, const char* /*lineName*/, double /*val*/) { return false; }
 
 	/**
 	 * @brief 设置指标值
@@ -593,7 +593,7 @@ public:
 	 * @param val 指标值
 	 * @return 是否设置成功
 	 */
-	virtual bool set_index_value(const char* idxName, const char* lineName, double val) { return false; }
+	virtual bool set_index_value(const char* /*idxName*/, const char* /*lineName*/, double /*val*/) { return false; }
 
 	/**
 	 * @brief 获取最后的进场标记

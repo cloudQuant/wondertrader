@@ -222,7 +222,7 @@ private:
 	/// @brief 目标金额（金额模式）
 	double		_target_amount;
 	/// @brief 账户可用资金
-	double		_avaliable{ 0 };
+	[[maybe_unused]] double		_avaliable{ 0 };
 	/// @brief 交易通道是否就绪
 	bool		_channel_ready;
 	/// @brief 计算锁，用于多线程同步
@@ -296,13 +296,13 @@ private:
 	/// @brief 上次执行的时间戳
 	uint64_t		_last_fire_time;
 	/// @brief 上个下单时间戳
-	uint64_t		_last_place_time;
+	[[maybe_unused]] uint64_t		_last_place_time;
 	/// @brief 上个tick数据的时间戳
 	uint64_t		_last_tick_time;
 	/// @brief VWAP单位时间下单量
 	double			_Vwap_vol;
 	/// @brief VWAP价格
-	double			_Vwap_prz;
+	[[maybe_unused]] double			_Vwap_prz;
 	
 	/// @brief 原子变量，标记是否在计算过程中，用于防止多线程竞争
 	std::atomic<bool> _in_calc;
@@ -375,10 +375,12 @@ private:
 		if (strcmp(comm_info->getProduct(), cbondStr) == 0)
 			min_order = 10.0;  // 可转债最小下单数量为10张
 		else if (strcmp(comm_info->getProduct(), stockStr) == 0)
+		{
 			if (is_KC)
 				min_order = 200.0;  // 科创板股票最小下单数量为200股
 			else
-				min_order = 100.0;  // 普通股票最小下单数量为100股
+				min_order = 100.0;
+		}  // 普通股票最小下单数量为100股
 		// 释放商品信息对象
 		if (comm_info)
 			comm_info->release();

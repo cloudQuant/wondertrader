@@ -59,7 +59,7 @@ public:
 	virtual ~IRdmDtReader(){}
 
 public:
-	virtual void init(WTSVariant* cfg, IRdmDtReaderSink* sink) { _sink = sink; }
+	virtual void init(WTSVariant* /*cfg*/, IRdmDtReaderSink* sink) { _sink = sink; }
 
 	virtual WTSOrdDtlSlice*	readOrdDtlSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime = 0) = 0;
 	virtual WTSOrdQueSlice*	readOrdQueSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime = 0) = 0;
@@ -79,7 +79,7 @@ public:
 	 *	@param	stdCode	标准品种代码,如SSE.600000
 	 *	@param	date	指定日期,格式yyyyMMdd，默认为0，为0则按当前日期处理
 	 */
-	virtual double		getAdjFactorByDate(const char* stdCode, uint32_t date = 0) { return 1.0; }
+	virtual double		getAdjFactorByDate(const char* /*stdCode*/, uint32_t /*date*/ = 0) { return 1.0; }
 
 	virtual void		clearCache(){}
 

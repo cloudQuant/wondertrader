@@ -48,7 +48,7 @@ void MatchEngine::clear()
  * @param stdCode 标准合约代码
  * @param to_erase 需要删除的订单ID列表
  */
-void MatchEngine::fire_orders(const char* stdCode, OrderIDs& to_erase)
+void MatchEngine::fire_orders(const char* stdCode, OrderIDs& /*to_erase*/)
 {
 	for (auto& v : _orders)
 	{
@@ -73,8 +73,8 @@ void MatchEngine::fire_orders(const char* stdCode, OrderIDs& to_erase)
  */
 void MatchEngine::match_orders(WTSTickData* curTick, OrderIDs& to_erase)
 {
-	uint64_t curTime = (uint64_t)curTick->actiondate() * 1000000000 + curTick->actiontime();
-	uint64_t curUnixTime = TimeUtils::makeTime(curTick->actiondate(), curTick->actiontime());
+	[[maybe_unused]] uint64_t curTime = (uint64_t)curTick->actiondate() * 1000000000 + curTick->actiontime();
+	[[maybe_unused]] uint64_t curUnixTime = TimeUtils::makeTime(curTick->actiondate(), curTick->actiontime());
 
 	for (auto& v : _orders)
 	{
@@ -361,7 +361,7 @@ OrderIDs MatchEngine::sell(const char* stdCode, double price, double qty, uint64
  * @param cb 撤单回调函数，用于通知撤单结果
  * @return OrderIDs 返回撤销的订单ID列表
  */
-OrderIDs MatchEngine::cancel(const char* stdCode, bool isBuy, double qty, FuncCancelCallback cb)
+OrderIDs MatchEngine::cancel(const char* /*stdCode*/, bool isBuy, double qty, FuncCancelCallback cb)
 {
 	OrderIDs ret;
 	for (auto& v : _orders)

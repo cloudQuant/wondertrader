@@ -158,7 +158,7 @@ void ExpHftContext::on_order(uint32_t localid, const char* stdCode, bool isBuy, 
  * @param newavail 今日可用持仓量
  * @param tradingday 交易日，格式为YYYYMMDD
  */
-void ExpHftContext::on_position(const char* stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t tradingday)
+void ExpHftContext::on_position(const char* stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t /*tradingday*/)
 {
 	// 将持仓回报转发给外部接口
 	getRunner().hft_on_position(_context_id, stdCode, isLong, prevol, preavail, newvol, newavail);

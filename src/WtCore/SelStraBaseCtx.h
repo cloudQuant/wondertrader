@@ -199,7 +199,7 @@ public:
 	 * @return 策略上下文的唯一标识符
 	 * @details 返回当前策略上下文的唯一ID，用于标识不同的策略实例
 	 */
-	virtual uint32_t id() { return _context_id; }
+	virtual uint32_t id() override { return _context_id; }
 
 	//回调函数
 	/**

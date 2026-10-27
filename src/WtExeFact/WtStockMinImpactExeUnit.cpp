@@ -20,21 +20,20 @@ extern const char* FACT_NAME;
  */
 WtStockMinImpactExeUnit::WtStockMinImpactExeUnit()
 	: _last_tick(NULL)          // 最新行情数据初始化为空
+	, _target_pos(0)            // 目标仓位默认为0
 	, _comm_info(NULL)          // 商品信息初始化为空
-	, _price_mode(0)            // 价格模式默认为最新价
 	, _price_offset(0)          // 价格偏移默认为0
 	, _expire_secs(0)           // 订单超时秒数默认为0
-	//, _cancel_cnt(0)
-	, _target_pos(0)            // 目标仓位默认为0
+	//, _price_mode(0)            // 价格模式默认为最新价
+	, _min_order{ 0 }           // 最小下单量初始化为0
+	, _is_finish{ true }        // 初始执行完成状态
+	, _is_first_tick{ true }    // 初始为第一个Tick
 	, _cancel_times(0)          // 撤单次数初始化为0
+	, _is_cancel_unmanaged_order{ true }  // 默认撤销未管理订单
 	, _last_place_time(0)       // 最后下单时间初始化为0
 	, _last_tick_time(0)        // 最后收到Tick时间初始化为0
 	, _is_clear{ false }        // 初始非清仓状态
-	, _min_order{ 0 }           // 最小下单量初始化为0
 	, _is_KC{ false }           // 初始非科创板股票
-	, _is_cancel_unmanaged_order{ true }  // 默认撤销未管理订单
-	, _is_finish{ true }        // 初始执行完成状态
-	, _is_first_tick{ true }    // 初始为第一个Tick
 	, _is_ready{ false }        // 初始通道未就绪
 	, _is_total_money_ready{ false }  // 初始总资金未就绪
 {
@@ -242,7 +241,7 @@ void WtStockMinImpactExeUnit::on_channel_lost()
  * @param deposit 入金
  * @param withdraw 出金
  */
-void WtStockMinImpactExeUnit::on_account(const char* currency, double prebalance, double balance, double dynbalance, double avaliable, double closeprofit, double dynprofit, double margin, double fee, double deposit, double withdraw)
+void WtStockMinImpactExeUnit::on_account(const char* currency, double /*prebalance*/, double /*balance*/, double /*dynbalance*/, double avaliable, double /*closeprofit*/, double /*dynprofit*/, double /*margin*/, double /*fee*/, double /*deposit*/, double /*withdraw*/)
 {
 	// 只处理人民币账户信息
 	if (strcmp(currency, "CNY") == 0)
@@ -379,7 +378,7 @@ void WtStockMinImpactExeUnit::on_tick(WTSTickData* newTick)
  * @param vol 成交数量
  * @param price 成交价格
  */
-void WtStockMinImpactExeUnit::on_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price)
+void WtStockMinImpactExeUnit::on_trade(uint32_t /*localid*/, const char* /*stdCode*/, bool /*isBuy*/, double /*vol*/, double /*price*/)
 {
 }
 
@@ -391,7 +390,7 @@ void WtStockMinImpactExeUnit::on_trade(uint32_t localid, const char* stdCode, bo
  * @param bSuccess 委托是否成功
  * @param message 委托结果消息
  */
-void WtStockMinImpactExeUnit::on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message)
+void WtStockMinImpactExeUnit::on_entrust(uint32_t localid, const char* /*stdCode*/, bool bSuccess, const char* /*message*/)
 {
 	if (!bSuccess)
 	{
@@ -638,7 +637,7 @@ void WtStockMinImpactExeUnit::do_calc()
 	if (decimal::eq(this_qty, 0))
 		return;
 
-	double buyPx, sellPx;
+	double buyPx = 0.0, sellPx = 0.0;
 	if (_price_mode == AUTOPX)
 	{
 		double mp = (_last_tick->bidqty(0) - _last_tick->askqty(0)) * 1.0 / (_last_tick->bidqty(0) + _last_tick->askqty(0));

@@ -24,10 +24,10 @@
 
 
 StateMonitor::StateMonitor()
-	: _stopped(false)
-	, _bd_mgr(NULL)
+	: _bd_mgr(NULL)
 	, _dt_mgr(NULL)
-{
+, _stopped(false)
+	{
 }
 
 
@@ -199,7 +199,7 @@ void StateMonitor::run()
 							uint32_t offTime = sInfo->offsetTime(curMin, true);        // 当前时间的偏移值，格式HHMM
 							uint32_t offInitTime = sInfo->offsetTime(stateInfo->_init_time, true);    // 初始化时间的偏移值
 							uint32_t offCloseTime = sInfo->offsetTime(stateInfo->_close_time, false);  // 收盘时间的偏移值
-							uint32_t aucStartTime = sInfo->getAuctionStartTime(true);                 // 集合竹开始时间
+							int32_t aucStartTime = sInfo->getAuctionStartTime(true);                 // 集合竹开始时间
 
 							// 检查是否所有合约都处于节假日状态
 							bool isAllHoliday = true;
@@ -258,7 +258,7 @@ void StateMonitor::run()
 								stateInfo->_state = SS_CLOSED; // 进入已收盘状态
 								WTSLogger::info("Trading session {}[{}] stopped receiving data", sInfo->name(), stateInfo->_session);
 							}
-							else if (aucStartTime != -1 && offTime >= aucStartTime) // 集合竹已开始
+							else if (aucStartTime != -1 && offTime >= (uint32_t)aucStartTime) // 集合竹已开始
 							{
 								if (stateInfo->isInSections(offTime)) // 如果当前时间在交易时间区间内
 								{
@@ -299,10 +299,10 @@ void StateMonitor::run()
 						{
 							// 获取当前偏移时间和集合竹开始时间
 							uint32_t offTime = sInfo->offsetTime(curMin, true);       // 当前时间的偏移值
-							uint32_t offAucSTime = sInfo->getAuctionStartTime(true); // 集合竹开始时间
+							int32_t offAucSTime = sInfo->getAuctionStartTime(true); // 集合竹开始时间
 							
 							// 如果没有集合竹或已经到达集合竹开始时间
-							if (offAucSTime == -1 || offTime >= sInfo->getAuctionStartTime(true))
+							if (offAucSTime == -1 || offTime >= (uint32_t)sInfo->getAuctionStartTime(true))
 							{
 								// 如果当前时间不在交易时间区间内且小于市场收盘时间，则为中途休盘状态
 								if (!stateInfo->isInSections(offTime) && offTime < sInfo->getCloseTime(true))
@@ -344,7 +344,7 @@ void StateMonitor::run()
 								WTSLogger::info("Trading session {}[{}] stopped receiving data", sInfo->name(), stateInfo->_session);
 							}
 							// 当前时间超过集合竹开始时间
-							else if (offTime >= sInfo->getAuctionStartTime(true))
+							else if (offTime >= (uint32_t)sInfo->getAuctionStartTime(true))
 							{
 								// 当前时间小于市场收盘时间
 								if (offTime < sInfo->getCloseTime(true))
@@ -374,7 +374,7 @@ void StateMonitor::run()
 						{
 							// 休息状态只能转换为交易状态或节假日状态
 							// 这里使用偏移日期进行判断，避免周末交易时间段判断错误
-							uint32_t weekDay = TimeUtils::getWeekDay(); // 获取当前星期
+							[[maybe_unused]] uint32_t weekDay = TimeUtils::getWeekDay(); // 获取当前星期
 
 							// 检查是否所有合约都处于节假日状态
 							bool isAllHoliday = true;
@@ -449,7 +449,7 @@ void StateMonitor::run()
 								}
 							}
 							// 当前时间在集合竹开始时间和市场收盘时间之间
-							else if (offTime >= sInfo->getAuctionStartTime(true) && offTime <= sInfo->getCloseTime(true))
+							else if (offTime >= (uint32_t)sInfo->getAuctionStartTime(true) && offTime <= sInfo->getCloseTime(true))
 							{
 								// 如果当前时间不在交易时间区间内，进入休息中状态
 								if (!stateInfo->isInSections(offTime))

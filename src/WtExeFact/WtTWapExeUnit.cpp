@@ -29,23 +29,23 @@ extern const char* FACT_NAME;
  */
 WtTWapExeUnit::WtTWapExeUnit()
 	: _last_tick(NULL)       // 行情数据指针
-	, _comm_info(NULL)      // 品种信息
-	, _ord_sticky(0)        // 挂单超时时间
-	, _cancel_cnt(0)        // 撤单计数
+	, _target_pos(0)        // 目标仓位
 	, _channel_ready(false) // 交易通道就绪标志
-	, _last_fire_time(0)    // 上次发单时间
-	, _fired_times(0)       // 已执行次数
-	, _total_times(0)       // 总执行次数
+	, _comm_info(NULL)      // 品种信息
+	, _cancel_times(0)      // 撤单次数
+	, _cancel_cnt(0)        // 撤单计数
 	, _total_secs(0)        // 总执行时间
+	, _total_times(0)       // 总执行次数
+	, _ord_sticky(0)        // 挂单超时时间
 	, _price_mode(0)        // 价格模式
 	, _price_offset(0)      // 价格偏移
-	, _target_pos(0)        // 目标仓位
-	, _cancel_times(0)      // 撤单次数
 	, _begin_time(0)        // 开始时间
 	, _end_time(0)          // 结束时间
+	, isCanCancel{ true }   // 订单是否可撤销
+	, _fired_times(0)       // 已执行次数
+	, _last_fire_time(0)    // 上次发单时间
 	, _last_place_time(0)   // 上个下单时间
 	, _last_tick_time(0)    // 上个tick时间
-	, isCanCancel{ true }   // 订单是否可撤销
 {
 }
 
@@ -180,7 +180,7 @@ void WtTWapExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTSVariant* c
  * @param price 委托价格
  * @param isCanceled 是否已撤销
  */
-void WtTWapExeUnit::on_order(uint32_t localid, const char* stdCode, bool isBuy, double leftover, double price, bool isCanceled)
+void WtTWapExeUnit::on_order(uint32_t localid, const char* stdCode, bool /*isBuy*/, double leftover, double /*price*/, bool isCanceled)
 {
 	// 如果订单不在监控中，则忽略此回报
 	if (!_orders_mon.has_order(localid))
@@ -429,7 +429,7 @@ void WtTWapExeUnit::on_tick(WTSTickData* newTick)
  * @param vol 成交数量
  * @param price 成交价格
  */
-void WtTWapExeUnit::on_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price)
+void WtTWapExeUnit::on_trade(uint32_t /*localid*/, const char* /*stdCode*/, bool /*isBuy*/, double /*vol*/, double /*price*/)
 {
 	// 不在此处触发交易逻辑，而是在on_tick中处理
 }
@@ -442,7 +442,7 @@ void WtTWapExeUnit::on_trade(uint32_t localid, const char* stdCode, bool isBuy, 
  * @param bSuccess 委托是否成功
  * @param message 委托回报消息
  */
-void WtTWapExeUnit::on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message)
+void WtTWapExeUnit::on_entrust(uint32_t localid, const char* /*stdCode*/, bool bSuccess, const char* /*message*/)
 {
 	// 如果委托失败，需要处理
 	if (!bSuccess)
@@ -668,7 +668,7 @@ void WtTWapExeUnit::do_calc()
 	_last_tick_time = curTickTime;
 	
 	// 设置单次发单手数
-	double this_qty = _order_lots;
+	[[maybe_unused]] double this_qty = _order_lots;
 	/***---end---23.5.26---zhaoyk***/
 
 	// 计算剩余的发单次数

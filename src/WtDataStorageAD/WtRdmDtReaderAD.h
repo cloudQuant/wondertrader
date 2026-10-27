@@ -55,7 +55,7 @@ public:
 	 * @param sink 数据读取器回调接口
 	 * @details 从配置对象中读取数据目录等信息，初始化数据读取器
 	 */
-	virtual void init(WTSVariant* cfg, IRdmDtReaderSink* sink);
+	virtual void init(WTSVariant* cfg, IRdmDtReaderSink* sink) override;
 
 	/**
 	 * @brief 按时间区间读取逐笔成交数据片段
@@ -65,7 +65,7 @@ public:
 	 * @return 成交数据片段指针
 	 * @note 当前版本未实现该方法
 	 */
-	virtual WTSOrdDtlSlice*	readOrdDtlSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime = 0) override { return NULL; }
+	virtual WTSOrdDtlSlice*	readOrdDtlSliceByRange(const char* /*stdCode*/, uint64_t /*stime*/, uint64_t /*etime*/ = 0) override { return NULL; }
 
 	/**
 	 * @brief 按时间区间读取委托队列数据片段
@@ -75,7 +75,7 @@ public:
 	 * @return 委托队列数据片段指针
 	 * @note 当前版本未实现该方法
 	 */
-	virtual WTSOrdQueSlice*	readOrdQueSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime = 0) override { return NULL; }
+	virtual WTSOrdQueSlice*	readOrdQueSliceByRange(const char* /*stdCode*/, uint64_t /*stime*/, uint64_t /*etime*/ = 0) override { return NULL; }
 
 	/**
 	 * @brief 按时间区间读取逐笔成交数据片段
@@ -85,7 +85,7 @@ public:
 	 * @return 逐笔成交数据片段指针
 	 * @note 当前版本未实现该方法
 	 */
-	virtual WTSTransSlice*	readTransSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime = 0) override { return NULL; }
+	virtual WTSTransSlice*	readTransSliceByRange(const char* /*stdCode*/, uint64_t /*stime*/, uint64_t /*etime*/ = 0) override { return NULL; }
 
 	/**
 	 * @brief 按时间区间读取Tick数据片段
@@ -180,7 +180,7 @@ private:
 		 * @brief 构造函数
 		 * @details 初始化最后Tick时间为0，第一个Tick时间为最大值
 		 */
-		_TicksList() :_last_tick_time(0), _first_tick_time(UINT64_MAX){}
+		_TicksList() : _first_tick_time(UINT64_MAX),_last_tick_time(0){}
 	} TicksList;
 
 	typedef wt_hashmap<std::string, BarsList> BarsCache;  /**< K线数据缓存容器类型定义 */

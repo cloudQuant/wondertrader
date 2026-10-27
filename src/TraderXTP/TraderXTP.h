@@ -14,7 +14,7 @@
 #include <boost/asio/post.hpp>
 #include <boost/asio/executor_work_guard.hpp>
 
-#include "../API/XTP2.2.32.2/xtp_trader_api.h"
+#include <API/XTP2.2.32.2/xtp_trader_api.h>
 
 #include "../Includes/ITraderApi.h"
 #include "../Includes/WTSCollection.hpp"

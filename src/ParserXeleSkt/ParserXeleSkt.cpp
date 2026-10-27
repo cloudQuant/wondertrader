@@ -37,7 +37,7 @@ inline void write_log(IParserSpi* sink, WTSLogLevel ll, const char* format, cons
 inline uint32_t strToTime(const char* strTime)
 {
 	static char str[10] = { 0 };
-	const char *pos = strTime;
+	[[maybe_unused]] const char *pos = strTime;
 	int idx = 0;
 	auto len = strlen(strTime);
 	for (std::size_t i = 0; i < len; i++)
@@ -82,10 +82,10 @@ extern "C"
 
 
 ParserXeleSkt::ParserXeleSkt()
-	: _udp_socket(NULL)
-	, _strand(_io_service)
-	, _stopped(false)
+	: _strand(_io_service)
+	, _udp_socket(NULL)
 	, _sink(NULL)
+	, _stopped(false)
 	, _prepared(false)
 	, _tick_cache(NULL)
 {
@@ -144,7 +144,7 @@ bool ParserXeleSkt::reconnect()
 		_udp_socket->bind(_mcast_ep);
 		_udp_socket->set_option(ip::multicast::join_group(ip::make_address_v4(_mcast_host.c_str()), ip::make_address_v4(_local_host.c_str())));
 
-		_udp_socket->async_receive_from(buffer(_udp_buffer), _udp_ep,
+		_udp_socket->async_receive_from(buffer(_udp_buffer.data(), _udp_buffer.size()), _udp_ep,
 			boost::bind(&ParserXeleSkt::handle_udp_read, this,
 			boost::asio::placeholders::error,
 			boost::asio::placeholders::bytes_transferred));
@@ -175,7 +175,7 @@ bool ParserXeleSkt::prepare()
 	auto snap_size = sizeof(CXeleShfeSnapShot) + sizeof(CXeleShfeMarketHead);
 	for (;;)
 	{
-		std::size_t reply_length = boost::asio::read(s, boost::asio::buffer(buffer), ec);
+		std::size_t reply_length = boost::asio::read(s, boost::asio::buffer(buffer.data(), buffer.size()), ec);
 		if (ec)
 		{
 			//接收错误
@@ -310,7 +310,7 @@ void ParserXeleSkt::subscribe( const CodeSet &vecSymbols )
 	}
 }
 
-void ParserXeleSkt::unsubscribe(const CodeSet &setSymbols)
+void ParserXeleSkt::unsubscribe(const CodeSet &/*setSymbols*/)
 {
 
 }
@@ -351,7 +351,7 @@ void ParserXeleSkt::handle_udp_read(const boost::system::error_code& e, std::siz
 
 	extract_buffer(bytes_transferred);
 
-	_udp_socket->async_receive_from(buffer(_udp_buffer), _udp_ep,
+	_udp_socket->async_receive_from(buffer(_udp_buffer.data(), _udp_buffer.size()), _udp_ep,
 		boost::bind(&ParserXeleSkt::handle_udp_read, this,
 			boost::asio::placeholders::error,
 			boost::asio::placeholders::bytes_transferred));
@@ -366,7 +366,7 @@ void ParserXeleSkt::handle_udp_read(const boost::system::error_code& e, std::siz
 void ParserXeleSkt::extract_buffer(uint32_t length)
 {
 	std::size_t len = 0;
-	char * data = _udp_buffer.data();
+	[[maybe_unused]] char * data = _udp_buffer.data();
 	while (length > len)
 	{
 		char * data = _udp_buffer.data() + len;
@@ -515,7 +515,7 @@ void ParserXeleSkt::extract_buffer(uint32_t length)
 			}
 		}
 		else if (type == MESSAGE_TYPE_HEART_BEAT) {
-			CXeleShfeHeartBeat *p = reinterpret_cast<CXeleShfeHeartBeat *>(data + sizeof(CXeleShfeMarketHead));
+			[[maybe_unused]] CXeleShfeHeartBeat *p = reinterpret_cast<CXeleShfeHeartBeat *>(data + sizeof(CXeleShfeMarketHead));
 			static std::size_t packLen = sizeof(CXeleShfeMarketHead) + sizeof(CXeleShfeHeartBeat);
 			len += packLen;
 			write_log(_sink, LL_DEBUG, "[ParserXeleSkt] Receiving heartbeat packet, length: {}\n", packLen);

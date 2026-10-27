@@ -60,7 +60,7 @@ public:
 	 * @param cfg 配置信息
 	 * @param sink 数据接收器
 	 */
-	virtual void init(WTSVariant* cfg, IBtDtReaderSink* sink);
+	virtual void init(WTSVariant* cfg, IBtDtReaderSink* sink) override;
 
 	/**
 	 * @brief 读取原始K线数据

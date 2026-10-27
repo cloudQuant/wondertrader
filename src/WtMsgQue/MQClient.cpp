@@ -23,7 +23,9 @@
 
 USING_NS_WTP;
 
+#ifdef _MSC_VER
 #pragma warning(disable:4200)
+#endif
 
 #define  RECV_BUF_SIZE  1024*1024
 
@@ -35,14 +37,14 @@ inline uint32_t makeMQCientId()
 
 
 MQClient::MQClient(MQManager* mgr)
-	: _sock(-1)
-	, m_bReady(false)
+	: m_bReady(false)
+	, _sock(-1)
 	, _mgr(mgr)
 	, m_bTerminated(false)
-	, _cb_message(NULL)
 	, m_iCheckTime(0)
 	, m_bNeedCheck(false)
-{
+, _cb_message(NULL)
+	{
 	_id = makeMQCientId();
 }
 
@@ -184,7 +186,7 @@ void MQClient::extract_buffer()
 		if (_buffer.length() - proc_len < sizeof(MQPacket) + packet->_length)
 			break;
 
-		char* data = packet->_data;
+		[[maybe_unused]] char* data = packet->_data;
 
 		if (is_allowed(packet->_topic))
 			_cb_message(_id, packet->_topic, packet->_data, packet->_length);

@@ -43,49 +43,49 @@ public:
 	/*
 	*	初始化
 	*/
-	virtual bool init(WTSVariant* cfg){ return true; }
+	virtual bool init(WTSVariant* /*cfg*/){ return true; }
 
 	virtual const char* id() const { return _id.c_str(); }
 
 	/*
 	 *	初始化回调
 	 */
-	virtual void on_init(ICtaStraCtx* ctx){}
+	virtual void on_init(ICtaStraCtx* /*ctx*/){}
 
 	/*
 	 *	交易日开始
 	 */
-	virtual void on_session_begin(ICtaStraCtx* ctx, uint32_t uTDate) {}
+	virtual void on_session_begin(ICtaStraCtx* /*ctx*/, uint32_t /*uTDate*/) {}
 
 	/*
 	 *	交易日结束
 	 */
-	virtual void on_session_end(ICtaStraCtx* ctx, uint32_t uTDate) {}
+	virtual void on_session_end(ICtaStraCtx* /*ctx*/, uint32_t /*uTDate*/) {}
 
 	/*
 	 *	主体逻辑执行入口
 	 */
-	virtual void on_schedule(ICtaStraCtx* ctx, uint32_t uDate, uint32_t uTime){}
+	virtual void on_schedule(ICtaStraCtx* /*ctx*/, uint32_t /*uDate*/, uint32_t /*uTime*/){}
 
 	/*
 	 *	主体逻辑执行完成
 	 */
-	virtual void on_schedule_done(ICtaStraCtx* ctx, uint32_t uDate, uint32_t uTime) {}
+	virtual void on_schedule_done(ICtaStraCtx* /*ctx*/, uint32_t /*uDate*/, uint32_t /*uTime*/) {}
 
 	/*
 	 *	tick数据
 	 */
-	virtual void on_tick(ICtaStraCtx* ctx, const char* stdCode, WTSTickData* newTick){}
+	virtual void on_tick(ICtaStraCtx* /*ctx*/, const char* /*stdCode*/, WTSTickData* /*newTick*/){}
 
 	/*
 	 *	K线闭合
 	 */
-	virtual void on_bar(ICtaStraCtx* ctx, const char* stdCode, const char* period, WTSBarStruct* newBar){}
+	virtual void on_bar(ICtaStraCtx* /*ctx*/, const char* /*stdCode*/, const char* /*period*/, WTSBarStruct* /*newBar*/){}
 
 	/*
 	 *	条件单触发
 	 */
-	virtual void on_condition_triggered(ICtaStraCtx* ctx, const char* stdCode, double target, double price, const char* usertag) {}
+	virtual void on_condition_triggered(ICtaStraCtx* /*ctx*/, const char* /*stdCode*/, double /*target*/, double /*price*/, const char* /*usertag*/) {}
 
 protected:
 	std::string _id;

@@ -11,7 +11,9 @@
 
 typedef std::shared_ptr<BoostMappingFile> BoostMFPtr;
 
+#ifdef _MSC_VER
 #pragma warning(disable:4200)
+#endif
 
 NS_WTP_BEGIN
 

@@ -8,7 +8,7 @@
  * \brief 
  */
 #include "TraderYD.h"
-#include "../API/yd1.108.360/ydError.h"
+#include <API/yd1.108.360/ydError.h>
 
 #include "../Includes/WTSContractInfo.hpp"
 #include "../Includes/WTSSessionInfo.hpp"
@@ -224,18 +224,18 @@ extern "C"
 }
 
 TraderYD::TraderYD()
-	: m_pUserAPI(NULL)
-	, m_mapPosition(NULL)
-	, m_mapOrders(NULL)
-	, m_mapTrades(NULL)
-	, m_wrapperState(WS_NOTLOGIN)
-	, m_ayFunds(NULL)
-	, m_uLastQryTime(0)
-	, m_iRequestID(0)
-	, m_bCatchup(false)
-	, m_bStopped(false)
+	: m_bCatchup(false)
 	, m_bApiInited(false)
-{
+, m_uLastQryTime(0)
+	, m_wrapperState(WS_NOTLOGIN)
+	, m_pUserAPI(NULL)
+	, m_iRequestID(0)
+	, m_mapPosition(NULL)
+	, m_mapTrades(NULL)
+	, m_mapOrders(NULL)
+	, m_ayFunds(NULL)
+	, m_bStopped(false)
+	{
 }
 
 
@@ -244,7 +244,7 @@ TraderYD::~TraderYD()
 }
 
 
-void TraderYD::notifyReadyForLogin(bool hasLoginFailed)
+void TraderYD::notifyReadyForLogin(bool /*hasLoginFailed*/)
 {
 	if (m_sink)
 		m_sink->handleEvent(WTE_Connect, 0);
@@ -255,7 +255,7 @@ void TraderYD::on_kvcache_message(const char* message)
 	write_log(m_sink, LL_WARN, "[TraderYD] WtKVCache message: {}", message);
 }
 
-void TraderYD::notifyLogin(int errorNo, int maxOrderRef, bool isMonitor)
+void TraderYD::notifyLogin(int errorNo, int maxOrderRef, bool /*isMonitor*/)
 {
 	if (errorNo == 0)
 	{
@@ -301,7 +301,7 @@ void TraderYD::notifyLogin(int errorNo, int maxOrderRef, bool isMonitor)
 	}
 }
 
-void TraderYD::notifyFailedOrder(const YDInputOrder *pFailedOrder, const YDInstrument *pInstrument, const YDAccount *pAccount)
+void TraderYD::notifyFailedOrder(const YDInputOrder *pFailedOrder, const YDInstrument *pInstrument, const YDAccount */*pAccount*/)
 {
 	if (!m_bCatchup)
 		return;
@@ -324,7 +324,7 @@ void TraderYD::notifyFailedOrder(const YDInputOrder *pFailedOrder, const YDInstr
 	}
 }
 
-void TraderYD::notifyFailedCancelOrder(const YDFailedCancelOrder *pFailedCancelOrder, const YDExchange *pExchange, const YDAccount *pAccount)
+void TraderYD::notifyFailedCancelOrder(const YDFailedCancelOrder *pFailedCancelOrder, const YDExchange */*pExchange*/, const YDAccount */*pAccount*/)
 {
 	if (!m_bCatchup)
 		return;
@@ -423,7 +423,7 @@ void TraderYD::notifyFinishInit()
 }
 
 
-void TraderYD::notifyOrder(const YDOrder *pOrder, const YDInstrument *pInstrument, const YDAccount *pAccount)
+void TraderYD::notifyOrder(const YDOrder *pOrder, const YDInstrument *pInstrument, const YDAccount */*pAccount*/)
 {
 	WTSOrderInfo *orderInfo = makeOrderInfo(pOrder, pInstrument);
 	if (orderInfo)
@@ -445,8 +445,8 @@ void TraderYD::notifyOrder(const YDOrder *pOrder, const YDInstrument *pInstrumen
 				{
 					const char* key = fmtutil::format("{}-{}", orderInfo->getCode(), orderInfo->getDirection());
 					WTSPositionItem* pos = (WTSPositionItem*)m_mapPosition->get(key);
-					double preQty = pos->getPrePosition();
-					double newQty = pos->getNewPosition();
+					[[maybe_unused]] double preQty = pos->getPrePosition();
+					[[maybe_unused]] double newQty = pos->getNewPosition();
 					double availPre = pos->getAvailPrePos();
 					double availNew = pos->getAvailNewPos();
 
@@ -482,7 +482,7 @@ void TraderYD::notifyOrder(const YDOrder *pOrder, const YDInstrument *pInstrumen
 				{
 					std::string key = fmtutil::format("{}-{}", orderInfo->getCode(), orderInfo->getDirection());
 					WTSPositionItem* pos = (WTSPositionItem*)m_mapPosition->get(key);
-					double preQty = pos->getPrePosition();
+					[[maybe_unused]] double preQty = pos->getPrePosition();
 					double newQty = pos->getNewPosition();
 					double availPre = pos->getAvailPrePos();
 					double availNew = pos->getAvailNewPos();
@@ -524,7 +524,7 @@ void TraderYD::notifyOrder(const YDOrder *pOrder, const YDInstrument *pInstrumen
 }
 
 
-void TraderYD::notifyTrade(const YDTrade *pTrade, const YDInstrument *pInstrument, const YDAccount *pAccount)
+void TraderYD::notifyTrade(const YDTrade *pTrade, const YDInstrument *pInstrument, const YDAccount */*pAccount*/)
 {
 	WTSTradeInfo *trdInfo = makeTradeRecord(pTrade, pInstrument);
 	if (trdInfo)
@@ -559,7 +559,7 @@ void TraderYD::notifyTrade(const YDTrade *pTrade, const YDInstrument *pInstrumen
 
 				double preQty = pos->getPrePosition();
 				double newQty = pos->getNewPosition();
-				double availPre = pos->getAvailPrePos();
+				[[maybe_unused]] double availPre = pos->getAvailPrePos();
 				double availNew = pos->getAvailNewPos();
 
 				double qty = trdInfo->getVolume();
@@ -737,7 +737,7 @@ void TraderYD::registerSpi(ITraderSpi *listener)
 	}
 }
 
-int TraderYD::login(const char* user, const char* pass, const char* productInfo)
+int TraderYD::login(const char* user, const char* pass, const char* /*productInfo*/)
 {
 	m_strUser = user;
 	m_strPass = pass;
@@ -1063,7 +1063,7 @@ WTSTradeInfo* TraderYD::makeTradeRecord(const YDTrade *tradeField, const YDInstr
 		return NULL;
 
 	WTSCommodityInfo* commInfo = cInfo->getCommInfo();
-	WTSSessionInfo* sInfo = commInfo->getSessionInfo();
+	[[maybe_unused]] WTSSessionInfo* sInfo = commInfo->getSessionInfo();
 
 	WTSTradeInfo *pRet = WTSTradeInfo::create(cInfo->getCode(), commInfo->getExchg());
 	pRet->setContractInfo(cInfo);

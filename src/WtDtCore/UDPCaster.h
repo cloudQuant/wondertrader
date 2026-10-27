@@ -110,15 +110,15 @@ private:
 		WTSObject*	_data;
 
 		_CastData(WTSObject* obj = NULL, uint32_t dataType = 0)
-			: _data(obj), _datatype(dataType)
-		{
+			: _datatype(dataType)
+		, _data(obj){
 			if (_data)
 				_data->retain();
 		}
 
 		_CastData(const _CastData& data)
-			: _data(data._data), _datatype(data._datatype)
-		{
+			: _datatype(data._datatype)
+		, _data(data._data){
 			if (_data)
 				_data->retain();
 		}

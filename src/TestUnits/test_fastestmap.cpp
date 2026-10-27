@@ -25,7 +25,7 @@ TEST(test_fastestmap, test_perform)
 
 	for (uint32_t i = 0; i < times; i++)
 	{
-		char* s = fmtutil::format_to(buffer, "{:09d}", i);
+		[[maybe_unused]] char* s = fmtutil::format_to(buffer, "{:09d}", i);
 		a[buffer] = buffer;
 	}
 	uint64_t t1 = ticker.nano_seconds();
@@ -33,7 +33,7 @@ TEST(test_fastestmap, test_perform)
 	ticker.reset();
 	for (uint32_t i = 0; i < times; i++)
 	{
-		char* s = fmtutil::format_to(buffer, "{:09d}", i);
+		[[maybe_unused]] char* s = fmtutil::format_to(buffer, "{:09d}", i);
 		b[buffer] = buffer;
 	}
 	uint64_t t2 = ticker.nano_seconds();
@@ -41,7 +41,7 @@ TEST(test_fastestmap, test_perform)
 	ticker.reset();
 	for (uint32_t i = 0; i < times; i++)
 	{
-		char* s = fmtutil::format_to(buffer, "{:09d}", i);
+		[[maybe_unused]] char* s = fmtutil::format_to(buffer, "{:09d}", i);
 		c[buffer] = buffer;
 	}
 	uint64_t t3 = ticker.nano_seconds();
@@ -49,7 +49,7 @@ TEST(test_fastestmap, test_perform)
 	ticker.reset();
 	for (uint32_t i = 0; i < times; i++)
 	{
-		char* s = fmtutil::format_to(buffer, "{:09d}", i);
+		[[maybe_unused]] char* s = fmtutil::format_to(buffer, "{:09d}", i);
 		d[buffer] = buffer;
 	}
 	uint64_t t4 = ticker.nano_seconds();
@@ -57,7 +57,7 @@ TEST(test_fastestmap, test_perform)
 	ticker.reset();
 	for (uint32_t i = 0; i < times; i++)
 	{
-		char* s = fmtutil::format_to(buffer, "{:09d}", i);
+		[[maybe_unused]] char* s = fmtutil::format_to(buffer, "{:09d}", i);
 		a[buffer];
 	}
 	uint64_t t5 = ticker.nano_seconds();
@@ -65,7 +65,7 @@ TEST(test_fastestmap, test_perform)
 	ticker.reset();
 	for (uint32_t i = 0; i < times; i++)
 	{
-		char* s = fmtutil::format_to(buffer, "{:09d}", i);
+		[[maybe_unused]] char* s = fmtutil::format_to(buffer, "{:09d}", i);
 		b[buffer];
 	}
 	uint64_t t6 = ticker.nano_seconds();
@@ -73,7 +73,7 @@ TEST(test_fastestmap, test_perform)
 	ticker.reset();
 	for (uint32_t i = 0; i < times; i++)
 	{
-		char* s = fmtutil::format_to(buffer, "{:09d}", i);
+		[[maybe_unused]] char* s = fmtutil::format_to(buffer, "{:09d}", i);
 		c[buffer];
 	}
 	uint64_t t7 = ticker.nano_seconds();
@@ -81,7 +81,7 @@ TEST(test_fastestmap, test_perform)
 	ticker.reset();
 	for (uint32_t i = 0; i < times; i++)
 	{
-		char* s = fmtutil::format_to(buffer, "{:09d}", i);
+		[[maybe_unused]] char* s = fmtutil::format_to(buffer, "{:09d}", i);
 		d[buffer];
 	}
 	uint64_t t8 = ticker.nano_seconds();

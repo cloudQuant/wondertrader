@@ -144,22 +144,22 @@ bool proc_block_data(const char* tag, std::string& content, bool isBar, bool bKe
 
 HisDataReplayer::HisDataReplayer()
 	: _listener(NULL)
-	, _cur_date(0)
+	, _bt_loader(NULL)
+	, _min_period("d")
+	, _tick_enabled(true)
+	, _tick_simulated(true)
+	, _align_by_section(false)
+, _cur_date(0)
 	, _cur_time(0)
 	, _cur_secs(0)
 	, _cur_tdate(0)
-	, _tick_enabled(true)
-	, _opened_tdate(0)
 	, _closed_tdate(0)
-	, _tick_simulated(true)
-	, _running(false)
+	, _opened_tdate(0)
 	, _begin_time(0)
 	, _end_time(0)
-	, _bt_loader(NULL)
-	, _min_period("d")
 	, _cache_clear_days(0)
-	, _align_by_section(false)
-{
+	, _running(false)
+	{
 }
 
 
@@ -203,7 +203,7 @@ bool HisDataReplayer::init(WTSVariant* cfg, EventNotifier* notifier /* = NULL */
 		}
 	}
 	
-	bool isRangeCfg = (_begin_time == 0 || _end_time == 0);//是否从配置文件读取回测区间
+	[[maybe_unused]] bool isRangeCfg = (_begin_time == 0 || _end_time == 0);//是否从配置文件读取回测区间
 	if(_begin_time == 0)
 		_begin_time = cfg->getUInt64("stime");
 
@@ -738,7 +738,7 @@ void HisDataReplayer::run(bool bNeedDump/* = false*/)
 	_running = false;
 }
 
-void HisDataReplayer::run_by_ticks(bool bNeedDump /* = false */)
+void HisDataReplayer::run_by_ticks(bool /*bNeedDump*/ /* = false */)
 {
 	//如果没有订阅K线，且tick回测是打开的，则按照每日的tick进行回放
 	uint32_t edt = (uint32_t)(_end_time / 10000);
@@ -937,7 +937,7 @@ void HisDataReplayer::run_by_bars(bool bNeedDump /* = false */)
 	_listener->handle_replay_done();
 }
 
-void HisDataReplayer::run_by_tasks(bool bNeedDump /* = false */)
+void HisDataReplayer::run_by_tasks(bool /*bNeedDump*/ /* = false */)
 {
 	//时间调度任务不为空,则按照时间调度任务回放
 	WTSSessionInfo* sInfo = NULL;
@@ -977,6 +977,8 @@ void HisDataReplayer::run_by_tasks(bool bNeedDump /* = false */)
 
 					switch (_task->_period)
 					{
+					case TPT_None:
+						break;
 					case TPT_Daily:
 						fired = true;
 						break;
@@ -1333,7 +1335,7 @@ void HisDataReplayer::simTicks(uint32_t uDate, uint32_t uTime, uint32_t endTDate
 						if (ticker == it->first)
 						{
 							CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(barsList->_code.c_str(), &_hot_mgr);
-							WTSCommodityInfo* commInfo = _bd_mgr.getCommodity(cInfo._exchg, cInfo._product);
+							[[maybe_unused]] WTSCommodityInfo* commInfo = _bd_mgr.getCommodity(cInfo._exchg, cInfo._product);
 
 							std::string realCode = barsList->_code;
 							if (cInfo.isExright())
@@ -1387,7 +1389,7 @@ void HisDataReplayer::simTicks(uint32_t uDate, uint32_t uTime, uint32_t endTDate
 void HisDataReplayer::simTickWithUnsubBars(uint64_t stime, uint64_t nowTime, uint32_t endTDate /* = 0 */, int pxType /* = 0 */)
 {
 	//uint64_t nowTime = (uint64_t)uDate * 10000 + uTime;
-	uint32_t uDate = (uint32_t)(stime / 10000);
+	[[maybe_unused]] uint32_t uDate = (uint32_t)(stime / 10000);
 
 	for (auto& item : _unbars_cache)
 	{
@@ -1945,7 +1947,7 @@ bool HisDataReplayer::replayHftDatas(uint64_t stime, uint64_t etime)
 		{
 			const char* stdCode = v.first.c_str();
 			auto& itemList = _trans_cache[stdCode];
-			if (itemList._cursor = itemList._count)
+			if (itemList._cursor == itemList._count)
 				continue;
 
 			auto& nextItem = itemList._items[itemList._cursor - 1];
@@ -2008,7 +2010,7 @@ bool HisDataReplayer::replayHftDatas(uint64_t stime, uint64_t etime)
 	return true;
 }
 
-void HisDataReplayer::onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTDate /* = 0 */, bool tickSimulated /* = true */)
+void HisDataReplayer::onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTDate /* = 0 */, bool /*tickSimulated*/ /* = true */)
 {
 	//这里应该触发检查
 	uint64_t nowTime = (uint64_t)uDate * 10000 + uTime;
@@ -2017,7 +2019,7 @@ void HisDataReplayer::onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTD
 	{
 		BarsListPtr& barsList = (BarsListPtr&)it->second;
 		barsList->mark();
-		double factor = 1.0;// barsList->_factor;
+		[[maybe_unused]] double factor = 1.0;// barsList->_factor;
 		if (barsList->_period != KP_DAY)
 		{
 			if (barsList->_bars.size() > barsList->_cursor)
@@ -2083,7 +2085,7 @@ void HisDataReplayer::onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTD
 	for (auto it = _unbars_cache.begin(); it != _unbars_cache.end(); it++)
 	{
 		BarsListPtr& barsList = (BarsListPtr&)it->second;
-		double factor = 1.0;// barsList->_factor;
+		[[maybe_unused]] double factor = 1.0;// barsList->_factor;
 		if (barsList->_period != KP_DAY)
 		{
 			if (barsList->_bars.size() > barsList->_cursor)
@@ -3068,7 +3070,7 @@ double HisDataReplayer::get_day_price(const char* stdCode, int flag /* = 0 */)
 		return 0.0;
 
 	const WTSTickStruct& curTs = it->second;
-	double price = 0.0;
+	[[maybe_unused]] double price = 0.0;
 	switch (flag)
 	{
 	case 0:
@@ -3221,7 +3223,7 @@ void HisDataReplayer::checkUnbars()
 		if (!bHasHisData)
 			continue;
 
-		WTSSessionInfo* sInfo = get_session_info(stdCode.c_str(), true);
+		[[maybe_unused]] WTSSessionInfo* sInfo = get_session_info(stdCode.c_str(), true);
 
 		BarsListPtr& kBlkPair = _unbars_cache[key];
 
@@ -3591,7 +3593,7 @@ bool HisDataReplayer::cacheFinalBarsFromLoader(const std::string& key, const cha
 
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
 	WTSCommodityInfo* commInfo = _bd_mgr.getCommodity(cInfo._exchg, cInfo._product);
-	const char* stdPID = cInfo.stdCommID();
+	[[maybe_unused]] const char* stdPID = cInfo.stdCommID();
 
 	std::string pname;
 	std::string dirname;
@@ -4231,7 +4233,7 @@ const HisDataReplayer::AdjFactorList& HisDataReplayer::getAdjFactors(const char*
 	return _adj_factors[key];
 }
 
-bool HisDataReplayer::cacheAdjustedStkBarsFromBin(void* codeInfo, const std::string& key, const char* stdCode, WTSKlinePeriod period, bool bSubbed /* = true */)
+bool HisDataReplayer::cacheAdjustedStkBarsFromBin(void* codeInfo, const std::string& key, const char* stdCode, WTSKlinePeriod period, bool /*bSubbed*/ /* = true */)
 {
 	CodeHelper::CodeInfo* cInfo = (CodeHelper::CodeInfo*)codeInfo;
 	const char* stdPID = cInfo->stdCommID();
@@ -4239,7 +4241,7 @@ bool HisDataReplayer::cacheAdjustedStkBarsFromBin(void* codeInfo, const std::str
 	uint32_t curDate = TimeUtils::getCurDate();
 	uint32_t curTime = TimeUtils::getCurMin() / 100;
 
-	uint32_t endTDate = _bd_mgr.calcTradingDate(stdPID, curDate, curTime, false);
+	[[maybe_unused]] uint32_t endTDate = _bd_mgr.calcTradingDate(stdPID, curDate, curTime, false);
 
 	_bars_cache[key].reset(new BarsList());
 	BarsListPtr& barsList = _bars_cache[key];
@@ -4403,7 +4405,7 @@ bool HisDataReplayer::cacheAdjustedStkBarsFromBin(void* codeInfo, const std::str
 					double factor = adjFact._factor / baseFactor;
 
 					WTSBarStruct* pBar = NULL;
-					pBar = std::lower_bound(firstBar, firstBar + lastIdx - 1, bar, [period](const WTSBarStruct& a, const WTSBarStruct& b) {
+					pBar = std::lower_bound(firstBar, firstBar + lastIdx - 1, bar, [](const WTSBarStruct& a, const WTSBarStruct& b) {
 						return a.date < b.date;
 					});
 
@@ -4488,9 +4490,9 @@ bool HisDataReplayer::cacheRawBarsFromBin(const std::string& key, const char* st
 	uint32_t curDate = TimeUtils::getCurDate();
 	uint32_t curTime = TimeUtils::getCurMin() / 100;
 
-	uint32_t endTDate = _bd_mgr.calcTradingDate(stdPID, curDate, curTime, false);
+	[[maybe_unused]] uint32_t endTDate = _bd_mgr.calcTradingDate(stdPID, curDate, curTime, false);
 
-	bool isDay = (period == KP_DAY);
+	[[maybe_unused]] bool isDay = (period == KP_DAY);
 
 	if (bSubbed)
 		_bars_cache[key].reset(new BarsList);

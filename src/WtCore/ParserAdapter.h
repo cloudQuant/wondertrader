@@ -22,11 +22,11 @@ class IHotMgr;
 class IParserStub
 {
 public:
-	virtual void			handle_push_quote(WTSTickData* curTick){}
+	virtual void			handle_push_quote(WTSTickData* /*curTick*/){}
 
-	virtual void			handle_push_order_detail(WTSOrdDtlData* curOrdDtl){}
-	virtual void			handle_push_order_queue(WTSOrdQueData* curOrdQue) {}
-	virtual void			handle_push_transaction(WTSTransData* curTrans) {}
+	virtual void			handle_push_order_detail(WTSOrdDtlData* /*curOrdDtl*/){}
+	virtual void			handle_push_order_queue(WTSOrdQueData* /*curOrdQue*/) {}
+	virtual void			handle_push_transaction(WTSTransData* /*curTrans*/) {}
 };
 
 class ParserAdapter : public IParserSpi,
@@ -34,7 +34,7 @@ class ParserAdapter : public IParserSpi,
 {
 public:
 	ParserAdapter();
-	~ParserAdapter();
+	virtual ~ParserAdapter();
 
 public:
 	bool	init(const char* id, WTSVariant* cfg, IParserStub* stub, IBaseDataMgr* bgMgr, IHotMgr* hotMgr = NULL);
@@ -48,7 +48,7 @@ public:
 	const char* id() const{ return _id.c_str(); }
 
 public:
-	virtual void handleSymbolList(const WTSArray* aySymbols) override {}
+	virtual void handleSymbolList(const WTSArray* /*aySymbols*/) override {}
 
 	/*
 	 *	处理实时行情

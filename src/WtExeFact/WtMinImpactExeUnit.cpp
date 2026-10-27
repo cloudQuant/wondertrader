@@ -64,18 +64,18 @@ inline bool is_clear(double target)
  */
 WtMinImpactExeUnit::WtMinImpactExeUnit()
 	: _last_tick(NULL)
+	, _target_pos(0)
 	, _comm_info(NULL)
-	, _price_mode(0)
 	, _price_offset(0)
 	, _expire_secs(0)
-	, _cancel_cnt(0)
-	, _target_pos(0)
+	, _price_mode(0)
+	, _min_open_lots(1)
+, _cancel_cnt(0)
 	, _cancel_times(0)
 	, _last_place_time(0)
 	, _last_tick_time(0)
 	, _in_calc(false)
-	, _min_open_lots(1)
-{
+	{
 }
 
 
@@ -154,7 +154,7 @@ void WtMinImpactExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTSVaria
  * @param price 订单委托价格
  * @param isCanceled 是否已撤销，true表示订单已撤销
  */
-void WtMinImpactExeUnit::on_order(uint32_t localid, const char* stdCode, bool isBuy, double leftover, double price, bool isCanceled)
+void WtMinImpactExeUnit::on_order(uint32_t localid, const char* stdCode, bool /*isBuy*/, double leftover, double /*price*/, bool isCanceled)
 {
 	{
 		if (!_orders_mon.has_order(localid)) //如果没有对应订单 返回
@@ -300,7 +300,7 @@ void WtMinImpactExeUnit::on_tick(WTSTickData* newTick)
  * @param vol 成交数量，始终为正值
  * @param price 成交价格
  */
-void WtMinImpactExeUnit::on_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price)
+void WtMinImpactExeUnit::on_trade(uint32_t /*localid*/, const char* /*stdCode*/, bool /*isBuy*/, double /*vol*/, double /*price*/)
 {
 	//不用触发,这里在ontick里触发吧
 }
@@ -314,7 +314,7 @@ void WtMinImpactExeUnit::on_trade(uint32_t localid, const char* stdCode, bool is
  * @param bSuccess 下单是否成功
  * @param message 失败时的错误消息
  */
-void WtMinImpactExeUnit::on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message)
+void WtMinImpactExeUnit::on_entrust(uint32_t localid, const char* /*stdCode*/, bool bSuccess, const char* /*message*/)
 {
 	if (!bSuccess)
 	{
@@ -458,7 +458,7 @@ void WtMinImpactExeUnit::do_calc()
 		_ctx->writeLog(fmtutil::format("Lots of {} changed from {} to {} due to minimum open lots", _code, this_qty, _min_open_lots));
 	}
 
-	double buyPx, sellPx;
+	double buyPx = 0.0, sellPx = 0.0;
 	if (_price_mode == 2)//价格类型,0-最新价,-1-最优价,1-对手价,2-自动,默认为0
 	{
 		double mp = (_last_tick->bidqty(0) - _last_tick->askqty(0))*1.0 / (_last_tick->bidqty(0) + _last_tick->askqty(0));

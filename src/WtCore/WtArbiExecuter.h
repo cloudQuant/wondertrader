@@ -13,7 +13,7 @@
 #include "IExecCommand.h"
 #include "WtExecuterFactory.h"
 #include "../Includes/ExecuteDefs.h"
-#include "../Share/threadpool.hpp"
+#include <Share/threadpool.hpp>
 #include "../Share/SpinMutex.hpp"
 
 NS_WTP_BEGIN

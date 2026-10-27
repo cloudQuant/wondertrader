@@ -33,7 +33,7 @@ public:
 	 *	@e	事件类型,如连接、断开、登录、登出
 	 *	@ec	错误码,0为没有错误
 	 */
-	virtual void handleEvent(WTSParserEvent e, int32_t ec){}
+	virtual void handleEvent(WTSParserEvent /*e*/, int32_t /*ec*/){}
 
 	/*
 	 *	处理合约列表
@@ -52,19 +52,19 @@ public:
 	 *	处理委托队列数据（股票level2）
 	 *	@ordQueData	委托对垒数据
 	 */
-	virtual void handleOrderQueue(WTSOrdQueData* ordQueData){}
+	virtual void handleOrderQueue(WTSOrdQueData* /*ordQueData*/){}
 
 	/*
 	 *	处理逐笔委托数据（股票level2）
 	 *	@ordDetailData	逐笔委托数据
 	 */
-	virtual void handleOrderDetail(WTSOrdDtlData* ordDetailData){}
+	virtual void handleOrderDetail(WTSOrdDtlData* /*ordDetailData*/){}
 
 	/*
 	 *	处理逐笔成交数据
 	 *	@transData	逐笔成交数据
 	 */
-	virtual void handleTransaction(WTSTransData* transData){}
+	virtual void handleTransaction(WTSTransData* /*transData*/){}
 
 	/*
 	 *	处理解析模块的日志
@@ -91,7 +91,7 @@ public:
 	 *	@config	模块配置
 	 *	返回值	是否初始化成功
 	 */
-	virtual bool init(WTSVariant* config) { return false; }
+	virtual bool init(WTSVariant* /*config*/) { return false; }
 
 	/*
 	 *	释放解析模块
@@ -120,17 +120,17 @@ public:
 	/*
 	 *	订阅合约列表
 	 */
-	virtual void subscribe(const CodeSet& setCodes){}
+	virtual void subscribe(const CodeSet& /*setCodes*/){}
 
 	/*
 	 *	退订合约列表
 	 */
-	virtual void unsubscribe(const CodeSet& setCodes){}
+	virtual void unsubscribe(const CodeSet& /*setCodes*/){}
 
 	/*
 	 *	注册回调接口
 	 */
-	virtual void registerSpi(IParserSpi* spi) {}
+	virtual void registerSpi(IParserSpi* /*spi*/) {}
 };
 
 NS_WTP_END

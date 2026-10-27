@@ -30,9 +30,9 @@
 ParserAdapter::ParserAdapter(WTSBaseDataMgr * bgMgr, WtDtRunner* runner)
 	: _parser_api(NULL)
 	, _remover(NULL)
-	, _stopped(false)
 	, _bd_mgr(bgMgr)
 	, _dt_runner(runner)
+	, _stopped(false)
 	, _cfg(NULL)
 {
 }
@@ -225,7 +225,7 @@ bool ParserAdapter::run()
 	return true;
 }
 
-void ParserAdapter::handleSymbolList( const WTSArray* aySymbols )
+void ParserAdapter::handleSymbolList( const WTSArray* /*aySymbols*/ )
 {
 	
 }
@@ -273,7 +273,7 @@ void ParserAdapter::handleOrderQueue(WTSOrdQueData* ordQueData)
 		
 }
 
-void ParserAdapter::handleQuote( WTSTickData *quote, uint32_t procFlag )
+void ParserAdapter::handleQuote( WTSTickData *quote, uint32_t /*procFlag*/ )
 {
 	if (quote == NULL || _stopped || quote->actiondate() == 0 || quote->tradingdate() == 0)
 		return;

@@ -41,7 +41,9 @@ extern std::map<std::string, std::string>	MAP_NAME;
 extern std::map<std::string, std::string>	MAP_SESSION;
 extern std::set<std::string>				SET_FILTERS;
 
+#ifdef _MSC_VER
 #pragma warning(disable : 4996)
+#endif
 
 // USER_API参数
 extern CThostFtdcTraderApi* pUserApi;
@@ -133,7 +135,7 @@ void CTraderSpi::ReqAuth()
 	std::cerr << "--->>> Requesting authentication: " << ((iResult == 0) ? "succeed" : "failed") << std::endl;
 }
 
-void CTraderSpi::OnRspAuthenticate(CThostFtdcRspAuthenticateField *pRspAuthenticateField, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void CTraderSpi::OnRspAuthenticate(CThostFtdcRspAuthenticateField */*pRspAuthenticateField*/, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
 	std::cerr << "--->>> " << "OnRspAuthenticate" << std::endl;
 	if (bIsLast && !IsErrorRspInfo(pRspInfo))
@@ -154,7 +156,7 @@ void CTraderSpi::ReqUserLogin()
 }
 
 void CTraderSpi::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin,
-	CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+	CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
 	std::cerr << "--->>> " << "OnRspUserLogin" << std::endl;
 	if (bIsLast && !IsErrorRspInfo(pRspInfo))
@@ -176,7 +178,7 @@ void CTraderSpi::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin,
 
 void CTraderSpi::ReqQryInstrument()
 {
-	AppendQuery([this]() {
+	AppendQuery([]() {
 		CThostFtdcQryInstrumentField req;
 		memset(&req, 0, sizeof(req));
 		int iResult = pUserApi->ReqQryInstrument(&req, ++iRequestID);
@@ -187,7 +189,7 @@ void CTraderSpi::ReqQryInstrument()
 
 void CTraderSpi::ReqQryCommission(const Contract& cInfo)
 {
-	AppendQuery([this, &cInfo]() {
+	AppendQuery([&cInfo]() {
 		//auto it = _fees.find(cInfo.m_strProduct);
 		//if (it != _fees.end())
 		//	return false;
@@ -207,7 +209,7 @@ void CTraderSpi::ReqQryCommission(const Contract& cInfo)
 
 void CTraderSpi::ReqQryMargin(const Contract& cInfo)
 {
-	AppendQuery([this, &cInfo]() {
+	AppendQuery([&cInfo]() {
 		//auto it = _margins.find(cInfo.m_strProduct);
 		//if (it != _margins.end())
 		//	return false;
@@ -334,11 +336,11 @@ std::string fillCzceCode(const char* code, uint32_t tdate)
 		ret.append(code + pid_len);
 	}
 
-	return std::move(ret);
+	return ret;
 }
 
 
-void CTraderSpi::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void CTraderSpi::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
 	if (!IsErrorRspInfo(pRspInfo))
 	{
@@ -545,7 +547,7 @@ void CTraderSpi::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CTho
 	}
 }
 
-void CTraderSpi::OnRspQryInstrumentCommissionRate(CThostFtdcInstrumentCommissionRateField *pInstrumentCommissionRate, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void CTraderSpi::OnRspQryInstrumentCommissionRate(CThostFtdcInstrumentCommissionRateField *pInstrumentCommissionRate, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	if(!IsErrorRspInfo(pRspInfo))
 	{
@@ -573,7 +575,7 @@ void CTraderSpi::OnRspQryInstrumentCommissionRate(CThostFtdcInstrumentCommission
 	}
 }
 
-void CTraderSpi::OnRspQryInstrumentMarginRate(CThostFtdcInstrumentMarginRateField *pInstrumentMarginRate, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void CTraderSpi::OnRspQryInstrumentMarginRate(CThostFtdcInstrumentMarginRateField *pInstrumentMarginRate, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	if (!IsErrorRspInfo(pRspInfo))
 	{
@@ -849,7 +851,7 @@ void CTraderSpi::OnFrontDisconnected(int nReason)
 }
 
 
-void CTraderSpi::OnRspError(CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void CTraderSpi::OnRspError(CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	std::cerr << "--->>> " << "OnRspError" << std::endl;
 	IsErrorRspInfo(pRspInfo);

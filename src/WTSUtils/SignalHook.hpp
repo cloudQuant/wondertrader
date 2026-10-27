@@ -31,7 +31,7 @@ void handle_signal(int signum)
 	case SIGSEGV:         // segment violation
 	case SIGABRT:         // abnormal termination triggered by abort call
 	case SIGABRT_COMPAT:  // SIGABRT compatible with other platforms, same as SIGABRT
-		sprintf(buf, "app stopped by signal %d", signum);
+		snprintf(buf, sizeof(buf), "app stopped by signal %d", signum);
 		g_cbSignalLog(buf);
 		print_stack_trace(g_cbSignalLog);
 		if (g_exitHandler)
@@ -45,14 +45,14 @@ void handle_signal(int signum)
 	case SIGCHLD:      // discard signal       child status has changed
 	case SIGIO:        // discard signal       I/O is possible on a descriptor (see fcntl(2))
 	case SIGWINCH:     // discard signal       Window size change
-		sprintf(buf, "app discard signal %d", signum);
+		snprintf(buf, sizeof(buf), "app discard signal %d", signum);
 		g_cbSignalLog(buf);
 		break;
 	case SIGSTOP:      // stop process         stop (cannot be caught or ignored)
 	case SIGTSTP:      // stop process         stop signal generated from keyboard
 	case SIGTTIN:      // stop process         background read attempted from control terminal
 	case SIGTTOU:      // stop process         background write attempted to control terminal
-		sprintf(buf, "app stopped by signal %d", signum);
+		snprintf(buf, sizeof(buf), "app stopped by signal %d", signum);
 		g_cbSignalLog(buf);
 		if (g_exitHandler)
 			g_exitHandler(signum);
@@ -89,7 +89,7 @@ void handle_signal(int signum)
 	case SIGXFSZ:      // terminate process    file size limit exceeded (see setrlimit(2))
 	case SIGVTALRM:    // terminate process    virtual time alarm (see setitimer(2))
 	case SIGPROF:      // terminate process    profiling timer alarm (see setitimer(2))
-		sprintf(buf, "app terminated by signal %d", signum);
+		snprintf(buf, sizeof(buf), "app terminated by signal %d", signum);
 		g_cbSignalLog(buf);
 		print_stack_trace(g_cbSignalLog);
 		if (g_exitHandler)
@@ -99,7 +99,7 @@ void handle_signal(int signum)
 		break;
 	//case SIGUSR1:      // terminate process    User defined signal 1
 	//case SIGUSR2:      // terminate process    User defined signal 2
-	//	sprintf(buf, "app caught user defined signal %d", signum);
+	//	snprintf(buf, sizeof(buf), "app caught user defined signal %d", signum);
 	//	g_cbSignalLog(buf);
 	//	print_stack_trace(g_cbSignalLog);
 	//	if (g_exitHandler)
@@ -129,7 +129,7 @@ void handle_signal(int signum)
 			exit(signum);
 		break;
 	case SIGSYS:       // create core image    non-existent system call invoked
-		sprintf(buf, "app caught unexpected signal %d", signum);
+		snprintf(buf, sizeof(buf), "app caught unexpected signal %d", signum);
 		g_cbSignalLog(buf);
 		print_stack_trace(g_cbSignalLog);
 		if (g_exitHandler)
@@ -139,7 +139,7 @@ void handle_signal(int signum)
 		break;
 #endif // _WINDOWS
 	default:
-		sprintf(buf, "app caught unknown signal %d, signal ignored", signum);
+		snprintf(buf, sizeof(buf), "app caught unknown signal %d, signal ignored", signum);
 		g_cbSignalLog(buf);
 		break;
 	}

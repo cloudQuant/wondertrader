@@ -241,7 +241,7 @@ private:
 	 * 
 	 * 初始化基本属性值，实现单例模式
 	 */
-	ShareManager():_inited(false), _stopped(false), _engine(nullptr), _sync("sync"){}
+	ShareManager():_inited(false), _sync("sync"), _stopped(false), _engine(nullptr){}
 	
 	/**
 	 * @brief 析构函数

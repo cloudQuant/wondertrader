@@ -58,14 +58,14 @@ inline uint32_t makeCtaCtxId()
 CtaStraBaseCtx::CtaStraBaseCtx(WtCtaEngine* engine, const char* name, int32_t slippage)
 	: ICtaStraCtx(name)
 	, _engine(engine)
-	, _total_calc_time(0)
+	, _slippage(slippage)
+, _total_calc_time(0)
 	, _emit_times(0)
 	, _last_cond_min(0)
+	, _last_barno(0)
 	, _is_in_schedule(false)
 	, _ud_modified(false)
-	, _last_barno(0)
-	, _slippage(slippage)
-{
+	{
 	_context_id = makeCtaCtxId();
 }
 
@@ -274,7 +274,7 @@ void CtaStraBaseCtx::load_userdata()
 	}
 }
 
-void CtaStraBaseCtx::load_data(uint32_t flag /* = 0xFFFFFFFF */)
+void CtaStraBaseCtx::load_data(uint32_t /*flag*/ /* = 0xFFFFFFFF */)
 {
 	std::string filename = WtHelper::getStraDataDir();
 	filename += _name;
@@ -304,7 +304,7 @@ void CtaStraBaseCtx::load_data(uint32_t flag /* = 0xFFFFFFFF */)
 		{
 			_fund_info._total_profit = jFund["total_profit"].GetDouble();
 			_fund_info._total_dynprofit = jFund["total_dynprofit"].GetDouble();
-			uint32_t tdate = jFund["tdate"].GetUint();
+			[[maybe_unused]] uint32_t tdate = jFund["tdate"].GetUint();
 			_fund_info._total_fees = jFund["total_fees"].GetDouble();
 		}
 	}
@@ -442,7 +442,7 @@ void CtaStraBaseCtx::load_data(uint32_t flag /* = 0xFFFFFFFF */)
 					condList.emplace_back(condInfo);
 
 					log_info("{} condition recovered, {} {}, condition: newprice {} {}",
-						stdCode, ACTION_NAMES[condInfo._action], condInfo._qty, CMP_ALG_NAMES[condInfo._alg], condInfo._target);
+						stdCode, ACTION_NAMES[(uint32_t)condInfo._action], condInfo._qty, CMP_ALG_NAMES[(uint32_t)condInfo._alg], condInfo._target);
 					count++;
 				}
 			}
@@ -492,7 +492,7 @@ void CtaStraBaseCtx::load_data(uint32_t flag /* = 0xFFFFFFFF */)
 	}
 }
 
-void CtaStraBaseCtx::save_data(uint32_t flag /* = 0xFFFFFFFF */)
+void CtaStraBaseCtx::save_data(uint32_t /*flag*/ /* = 0xFFFFFFFF */)
 {
 	rj::Document root(rj::kObjectType);
 
@@ -858,7 +858,7 @@ void CtaStraBaseCtx::on_tick(const char* stdCode, WTSTickData* newTick, bool bEm
 			if (isMatched)
 			{
 				log_info("Condition triggered[newprice {}{} targetprice {}], instrument: {}, {} {}",
-					curPrice, CMP_ALG_NAMES[entrust._alg], entrust._target, stdCode, ACTION_NAMES[entrust._action], entrust._qty);
+					curPrice, CMP_ALG_NAMES[(uint32_t)entrust._alg], entrust._target, stdCode, ACTION_NAMES[(uint32_t)entrust._action], entrust._qty);
 
 				switch (entrust._action)
 				{
@@ -1074,8 +1074,8 @@ void CtaStraBaseCtx::on_session_end(uint32_t uTDate)
 {
 	uint32_t curDate = uTDate;//_engine->get_trading_date();
 
-	double total_profit = 0;
-	double total_dynprofit = 0;
+	[[maybe_unused]] double total_profit = 0;
+	[[maybe_unused]] double total_dynprofit = 0;
 
 	for (auto it = _pos_map.begin(); it != _pos_map.end(); it++)
 	{

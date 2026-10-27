@@ -138,7 +138,7 @@ constexpr static inline WTSPriceType wrapPriceType(TThostFtdcOrderPriceTypeType 
 	}
 }
 
-constexpr static inline int wrapTimeCondition(WTSTimeCondition timeCond) noexcept
+[[maybe_unused]] constexpr static inline int wrapTimeCondition(WTSTimeCondition timeCond) noexcept
 {
 	switch (timeCond)
 	{
@@ -151,7 +151,7 @@ constexpr static inline int wrapTimeCondition(WTSTimeCondition timeCond) noexcep
 	}
 }
 
-constexpr static inline WTSTimeCondition wrapTimeCondition(TThostFtdcTimeConditionType timeCond) noexcept
+[[maybe_unused]] constexpr static inline WTSTimeCondition wrapTimeCondition(TThostFtdcTimeConditionType timeCond) noexcept
 {
 	switch(timeCond)
 	{
@@ -201,19 +201,19 @@ extern "C"
 }
 
 TraderCTP::TraderCTP()
-	: m_pUserAPI(NULL)
-	, m_mapPosition(NULL)
-	, m_ayOrders(NULL)
-	, m_ayTrades(NULL)
-	, m_ayPosDetail(NULL)
-	, m_wrapperState(WS_NOTLOGIN)
+	: m_bQuickStart(false)
 	, m_uLastQryTime(0)
+	, m_wrapperState(WS_NOTLOGIN)
+	, m_pUserAPI(NULL)
 	, m_iRequestID(0)
-	, m_bQuickStart(false)
+	, m_mapPosition(NULL)
+	, m_ayTrades(NULL)
+	, m_ayOrders(NULL)
+	, m_ayPosDetail(NULL)
 	, m_bInQuery(false)
-	, m_bStopped(false)
 	, m_lastQryTime(0)
-{
+, m_bStopped(false)
+	{
 }
 
 
@@ -717,12 +717,12 @@ void TraderCTP::OnFrontDisconnected(int nReason)
 		m_sink->handleEvent(WTE_Close, nReason);
 }
 
-void TraderCTP::OnHeartBeatWarning(int nTimeLapse)
+void TraderCTP::OnHeartBeatWarning(int /*nTimeLapse*/)
 {
 	write_log(m_sink, LL_DEBUG, "[TraderCTP][{}-{}] Heartbeating...", m_strBroker.c_str(), m_strUser.c_str());
 }
 
-void TraderCTP::OnRspAuthenticate(CThostFtdcRspAuthenticateField *pRspAuthenticateField, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTP::OnRspAuthenticate(CThostFtdcRspAuthenticateField */*pRspAuthenticateField*/, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	if (!IsErrorRspInfo(pRspInfo))
 	{
@@ -739,7 +739,7 @@ void TraderCTP::OnRspAuthenticate(CThostFtdcRspAuthenticateField *pRspAuthentica
 
 }
 
-void TraderCTP::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTP::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	if (!IsErrorRspInfo(pRspInfo))
 	{
@@ -796,14 +796,14 @@ void TraderCTP::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThos
 	}
 }
 
-void TraderCTP::OnRspUserLogout(CThostFtdcUserLogoutField *pUserLogout, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTP::OnRspUserLogout(CThostFtdcUserLogoutField */*pUserLogout*/, CThostFtdcRspInfoField */*pRspInfo*/, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	m_wrapperState = WS_NOTLOGIN;
 	if (m_sink)
 		m_sink->handleEvent(WTE_Logout, 0);
 }
 
-void TraderCTP::OnRspQrySettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField *pSettlementInfoConfirm, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTP::OnRspQrySettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField *pSettlementInfoConfirm, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
 	if (bIsLast)
 	{
@@ -842,7 +842,7 @@ void TraderCTP::OnRspQrySettlementInfoConfirm(CThostFtdcSettlementInfoConfirmFie
 
 }
 
-void TraderCTP::OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField *pSettlementInfoConfirm, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTP::OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField *pSettlementInfoConfirm, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	if (!IsErrorRspInfo(pRspInfo) && pSettlementInfoConfirm != NULL)
 	{
@@ -858,7 +858,7 @@ void TraderCTP::OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField 
 	}
 }
 
-void TraderCTP::OnRspOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTP::OnRspOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	WTSEntrust* entrust = makeEntrust(pInputOrder);
 	if (entrust)
@@ -879,7 +879,7 @@ void TraderCTP::OnRspOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostF
 	}
 }
 
-void TraderCTP::OnRspOrderAction(CThostFtdcInputOrderActionField *pInputOrderAction, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTP::OnRspOrderAction(CThostFtdcInputOrderActionField *pInputOrderAction, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	if (IsErrorRspInfo(pRspInfo))
 	{
@@ -896,7 +896,7 @@ void TraderCTP::OnRspOrderAction(CThostFtdcInputOrderActionField *pInputOrderAct
 	}
 }
 
-void TraderCTP::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAccount, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTP::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAccount, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
 	if (bIsLast)
 	{
@@ -929,7 +929,7 @@ void TraderCTP::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAc
 	}
 }
 
-void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInvestorPosition, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInvestorPosition, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
 	if (bIsLast)
 	{
@@ -1077,7 +1077,7 @@ void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInves
 	}
 }
 
-void TraderCTP::OnRspQrySettlementInfo(CThostFtdcSettlementInfoField *pSettlementInfo, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTP::OnRspQrySettlementInfo(CThostFtdcSettlementInfoField *pSettlementInfo, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
 	if (bIsLast)
 	{
@@ -1096,7 +1096,7 @@ void TraderCTP::OnRspQrySettlementInfo(CThostFtdcSettlementInfoField *pSettlemen
 	}
 }
 
-void TraderCTP::OnRspQryTrade(CThostFtdcTradeField *pTrade, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTP::OnRspQryTrade(CThostFtdcTradeField *pTrade, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
 	if (bIsLast)
 	{
@@ -1126,7 +1126,7 @@ void TraderCTP::OnRspQryTrade(CThostFtdcTradeField *pTrade, CThostFtdcRspInfoFie
 	}
 }
 
-void TraderCTP::OnRspQryOrder(CThostFtdcOrderField *pOrder, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTP::OnRspQryOrder(CThostFtdcOrderField *pOrder, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
 	if (bIsLast)
 	{
@@ -1156,7 +1156,7 @@ void TraderCTP::OnRspQryOrder(CThostFtdcOrderField *pOrder, CThostFtdcRspInfoFie
 	}
 }
 
-void TraderCTP::OnRspError(CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTP::OnRspError(CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool /*bIsLast*/)
 {
 	m_sink->handleTraderLog(LL_ERROR, fmtutil::format("{} rsp error: {} : {}", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg));
 }

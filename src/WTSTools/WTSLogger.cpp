@@ -136,7 +136,7 @@ void WTSLogger::print_message(const char* buffer)
 void WTSLogger::initLogger(const char* catName, WTSVariant* cfgLogger)
 {
 	bool bAsync = cfgLogger->getBoolean("async");
-	const char* level = cfgLogger->getCString("level");
+	[[maybe_unused]] const char* level = cfgLogger->getCString("level");
 
 	WTSVariant* cfgSinks = cfgLogger->get("sinks");
 	std::vector<spdlog::sink_ptr> sinks;

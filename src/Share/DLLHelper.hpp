@@ -84,7 +84,7 @@ public:
 #else
 		ret += ".so";
 #endif
-		return std::move(ret);
+		return ret;
 #endif
 	}
 };

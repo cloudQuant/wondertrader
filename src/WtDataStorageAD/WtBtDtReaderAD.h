@@ -46,7 +46,7 @@ public:
 	 * \param cfg 配置项，包含数据存储路径等信息
 	 * \param sink 数据接收器，用于接收读取器返回的数据和日志
 	 */
-	virtual void init(WTSVariant* cfg, IBtDtReaderSink* sink);
+	virtual void init(WTSVariant* cfg, IBtDtReaderSink* sink) override;
 
 	/**
 	 * \brief 读取原始K线数据

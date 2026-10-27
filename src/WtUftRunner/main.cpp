@@ -18,7 +18,7 @@
 #include "../Common/mdump.h"
 #endif
 
-#include "../Share/cppcli.hpp"
+#include <Share/cppcli.hpp>
 //#include <vld.h>
 
 /**

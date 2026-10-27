@@ -218,21 +218,21 @@ inline int wrapActionFlag(WTSActionFlag actionFlag)
 }
 
 TraderCTPOpt::TraderCTPOpt()
-	: m_pUserAPI(NULL)
-	, m_mapPosition(NULL)
-	, m_ayOrders(NULL)
-	, m_ayTrades(NULL)
-	, m_ayPosDetail(NULL)
-	, m_wrapperState(WS_NOTLOGIN)
-	, m_uLastQryTime(0)
-	, m_iRequestID(0)
-	, m_bQuickStart(false)
-	, m_optSink(NULL)
+	: m_bQuickStart(false)
 	, m_bscSink(NULL)
+	, m_optSink(NULL)
+	, m_uLastQryTime(0)
+	, m_wrapperState(WS_NOTLOGIN)
+	, m_pUserAPI(NULL)
+	, m_iRequestID(0)
+	, m_mapPosition(NULL)
+	, m_ayTrades(NULL)
+	, m_ayOrders(NULL)
+	, m_ayPosDetail(NULL)
 	, m_bInQuery(false)
-	, m_bStopped(NULL)
 	, m_lastQryTime(0)
-{
+, m_bStopped(false)
+	{
 }
 
 
@@ -862,12 +862,12 @@ void TraderCTPOpt::OnFrontDisconnected(int nReason)
 		m_bscSink->handleEvent(WTE_Close, nReason);
 }
 
-void TraderCTPOpt::OnHeartBeatWarning(int nTimeLapse)
+void TraderCTPOpt::OnHeartBeatWarning(int /*nTimeLapse*/)
 {
 	write_log(m_bscSink, LL_DEBUG, "[TraderCTPOpt][{}-{}] Heartbeating...", m_strBroker.c_str(), m_strUser.c_str());
 }
 
-void TraderCTPOpt::OnRspAuthenticate(CThostFtdcRspAuthenticateField *pRspAuthenticateField, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTPOpt::OnRspAuthenticate(CThostFtdcRspAuthenticateField */*pRspAuthenticateField*/, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	if (!IsErrorRspInfo(pRspInfo))
 	{
@@ -884,7 +884,7 @@ void TraderCTPOpt::OnRspAuthenticate(CThostFtdcRspAuthenticateField *pRspAuthent
 
 }
 
-void TraderCTPOpt::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTPOpt::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	if (!IsErrorRspInfo(pRspInfo))
 	{
@@ -935,14 +935,14 @@ void TraderCTPOpt::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CT
 	}
 }
 
-void TraderCTPOpt::OnRspUserLogout(CThostFtdcUserLogoutField *pUserLogout, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTPOpt::OnRspUserLogout(CThostFtdcUserLogoutField */*pUserLogout*/, CThostFtdcRspInfoField */*pRspInfo*/, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	m_wrapperState = WS_NOTLOGIN;
 	if (m_bscSink)
 		m_bscSink->handleEvent(WTE_Logout, 0);
 }
 
-void TraderCTPOpt::OnRspQrySettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField *pSettlementInfoConfirm, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTPOpt::OnRspQrySettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField *pSettlementInfoConfirm, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
 	if (bIsLast)
 	{
@@ -981,7 +981,7 @@ void TraderCTPOpt::OnRspQrySettlementInfoConfirm(CThostFtdcSettlementInfoConfirm
 
 }
 
-void TraderCTPOpt::OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField *pSettlementInfoConfirm, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTPOpt::OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField *pSettlementInfoConfirm, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	if (!IsErrorRspInfo(pRspInfo) && pSettlementInfoConfirm != NULL)
 	{
@@ -997,7 +997,7 @@ void TraderCTPOpt::OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmFie
 	}
 }
 
-void TraderCTPOpt::OnRspOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTPOpt::OnRspOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	WTSEntrust* entrust = makeEntrust(pInputOrder);
 	if (entrust)
@@ -1011,7 +1011,7 @@ void TraderCTPOpt::OnRspOrderInsert(CThostFtdcInputOrderField *pInputOrder, CTho
 	}
 }
 
-void TraderCTPOpt::OnRspExecOrderInsert(CThostFtdcInputExecOrderField *pInputExecOrder, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTPOpt::OnRspExecOrderInsert(CThostFtdcInputExecOrderField *pInputExecOrder, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	WTSEntrust* entrust = makeEntrust(pInputExecOrder);
 	if (entrust)
@@ -1025,7 +1025,7 @@ void TraderCTPOpt::OnRspExecOrderInsert(CThostFtdcInputExecOrderField *pInputExe
 	}
 }
 
-void TraderCTPOpt::OnRspExecOrderAction(CThostFtdcInputExecOrderActionField *pInputExecOrderAction, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTPOpt::OnRspExecOrderAction(CThostFtdcInputExecOrderActionField */*pInputExecOrderAction*/, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	if (IsErrorRspInfo(pRspInfo))
 	{
@@ -1065,7 +1065,7 @@ void TraderCTPOpt::OnErrRtnExecOrderInsert(CThostFtdcInputExecOrderField *pInput
 	}
 }
 
-void TraderCTPOpt::OnRspQryExecOrder(CThostFtdcExecOrderField *pExecOrder, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTPOpt::OnRspQryExecOrder(CThostFtdcExecOrderField *pExecOrder, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
 	if (bIsLast)
 	{
@@ -1095,7 +1095,7 @@ void TraderCTPOpt::OnRspQryExecOrder(CThostFtdcExecOrderField *pExecOrder, CThos
 	}
 }
 
-void TraderCTPOpt::OnRspOrderAction(CThostFtdcInputOrderActionField *pInputOrderAction, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTPOpt::OnRspOrderAction(CThostFtdcInputOrderActionField */*pInputOrderAction*/, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	if (IsErrorRspInfo(pRspInfo))
 	{
@@ -1109,7 +1109,7 @@ void TraderCTPOpt::OnRspOrderAction(CThostFtdcInputOrderActionField *pInputOrder
 	}
 }
 
-void TraderCTPOpt::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAccount, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTPOpt::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAccount, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
 	if (bIsLast)
 	{
@@ -1142,7 +1142,7 @@ void TraderCTPOpt::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradin
 	}
 }
 
-void TraderCTPOpt::OnRspQrySettlementInfo(CThostFtdcSettlementInfoField *pSettlementInfo, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTPOpt::OnRspQrySettlementInfo(CThostFtdcSettlementInfoField *pSettlementInfo, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
 	if (bIsLast)
 	{
@@ -1161,7 +1161,7 @@ void TraderCTPOpt::OnRspQrySettlementInfo(CThostFtdcSettlementInfoField *pSettle
 	}
 }
 
-void TraderCTPOpt::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInvestorPosition, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTPOpt::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInvestorPosition, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
 	if (bIsLast)
 	{
@@ -1312,7 +1312,7 @@ void TraderCTPOpt::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pIn
 	}
 }
 
-void TraderCTPOpt::OnRspQryTrade(CThostFtdcTradeField *pTrade, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTPOpt::OnRspQryTrade(CThostFtdcTradeField *pTrade, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
 	if (bIsLast)
 	{
@@ -1342,7 +1342,7 @@ void TraderCTPOpt::OnRspQryTrade(CThostFtdcTradeField *pTrade, CThostFtdcRspInfo
 	}
 }
 
-void TraderCTPOpt::OnRspQryOrder(CThostFtdcOrderField *pOrder, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTPOpt::OnRspQryOrder(CThostFtdcOrderField *pOrder, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
 	if (bIsLast)
 	{
@@ -1372,9 +1372,9 @@ void TraderCTPOpt::OnRspQryOrder(CThostFtdcOrderField *pOrder, CThostFtdcRspInfo
 	}
 }
 
-void TraderCTPOpt::OnRspError(CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderCTPOpt::OnRspError(CThostFtdcRspInfoField */*pRspInfo*/, int /*nRequestID*/, bool /*bIsLast*/)
 {
-	int x = 0;
+	[[maybe_unused]] int x = 0;
 }
 
 void TraderCTPOpt::OnRtnOrder(CThostFtdcOrderField *pOrder)
@@ -1439,7 +1439,7 @@ WTSOrderInfo* TraderCTPOpt::makeOrderInfo(CThostFtdcOrderField* orderField)
 	pRet->setOrderDate(convert::to_uint32(orderField->InsertDate));
 	std::string strTime = orderField->InsertTime;
 	StrUtil::replace(strTime, ":", "");
-	uint32_t uTime = convert::to_uint32(strTime.c_str());
+	[[maybe_unused]] uint32_t uTime = convert::to_uint32(strTime.c_str());
 	pRet->setOrderTime(TimeUtils::makeTime(pRet->getOrderDate(), convert::to_uint32(strTime.c_str()) * 1000));
 
 	pRet->setOrderState(wrapOrderState(orderField->OrderStatus));
@@ -1536,7 +1536,7 @@ WTSOrderInfo* TraderCTPOpt::makeOrderInfo(CThostFtdcExecOrderField* orderField)
 	pRet->setOrderDate(convert::to_uint32(orderField->InsertDate));
 	std::string strTime = orderField->InsertTime;
 	StrUtil::replace(strTime, ":", "");
-	uint32_t uTime = convert::to_uint32(strTime.c_str());
+	[[maybe_unused]] uint32_t uTime = convert::to_uint32(strTime.c_str());
 	pRet->setOrderTime(TimeUtils::makeTime(pRet->getOrderDate(), convert::to_uint32(strTime.c_str()) * 1000));
 
 	pRet->setOrderState(WOS_Nottouched);

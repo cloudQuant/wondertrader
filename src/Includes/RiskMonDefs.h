@@ -102,7 +102,7 @@ public:
 	*	ctx		执行单元运行环境
 	*	code	管理的合约代码
 	*/
-	virtual void init(WtPortContext* ctx, WTSVariant* cfg){ _ctx = ctx; }
+	virtual void init(WtPortContext* ctx, WTSVariant* /*cfg*/){ _ctx = ctx; }
 
 	/*
 	 *	启动风控模块

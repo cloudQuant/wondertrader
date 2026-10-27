@@ -28,7 +28,7 @@ class ParserAdapter : public IParserSpi, private boost::noncopyable
 {
 public:
 	ParserAdapter(WTSBaseDataMgr * bgMgr, DataManager* dtMgr, IndexWorkerMgr *idxFactory);
-	~ParserAdapter();
+	virtual ~ParserAdapter();
 
 public:
 	bool	init(const char* id, WTSVariant* cfg);

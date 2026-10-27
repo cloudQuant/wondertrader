@@ -64,7 +64,7 @@ namespace hft
 	inline uint32_t strToTime(const char* strTime)
 	{
 		static char str[10] = { 0 };
-		const char *pos = strTime;
+		[[maybe_unused]] const char *pos = strTime;
 		int idx = 0;
 		auto len = strlen(strTime);
 		// 移除字符串中的冒号
@@ -242,7 +242,7 @@ namespace hft
 		 * @return 委托单号生成是否成功
 		 * @details 实现ITraderApi接口的方法，生成简单固定的委托单号
 		 */
-		virtual bool makeEntrustID(char* buffer, int length) override
+		virtual bool makeEntrustID(char* buffer, int /*length*/) override
 		{
 			// 生成固定的委托单号（测试用途）
 			wt_strcpy(buffer, "123456");
@@ -255,7 +255,7 @@ namespace hft
 		 * @return 返回码，0表示成功
 		 * @details 实现ITraderApi接口的方法，处理委托单插入请求，在测试中只返回成功状态
 		 */
-		virtual int orderInsert(WTSEntrust* eutrust) override
+		virtual int orderInsert(WTSEntrust* /*eutrust*/) override
 		{
 			// 测试环境下直接返回成功
 			return 0;
@@ -284,14 +284,14 @@ namespace hft
 		 * @return 策略名称
 		 * @details 返回测试策略的名称，用于标识策略
 		 */
-		virtual const char* getName() { return "TestStrategy"; }
+		virtual const char* getName() override { return "TestStrategy"; }
 
 		/**
 		 * @brief 获取策略所属工厂名称
 		 * @return 策略工厂名称
 		 * @details 返回测试策略所属的工厂名称，用于策略创建和管理
 		 */
-		virtual const char* getFactName() { return "TestStrategyFact"; }
+		virtual const char* getFactName() override { return "TestStrategyFact"; }
 
 
 		/**
@@ -312,7 +312,7 @@ namespace hft
 		 * @param newTick 新到达的Tick数据
 		 * @details 当收到新的Tick数据时调用，执行买入操作，用于测试高频交易引擎的冲击
 		 */
-		virtual void on_tick(IHftStraCtx* ctx, const char* code, WTSTickData* newTick)
+		virtual void on_tick(IHftStraCtx* ctx, const char* /*code*/, WTSTickData* /*newTick*/) override
 		{
 			// 注释掉的卖出代码
 			//ctx->stra_sell("SHFE.rb.2205", 2300, 1, "", HFT_OrderFlag_Nor);
@@ -359,7 +359,7 @@ namespace hft
 
 		//基础数据文件
 		WTSVariant* cfgBF = _config->get("basefiles");
-		bool isUTF8 = cfgBF->getBoolean("utf-8");
+		[[maybe_unused]] bool isUTF8 = cfgBF->getBoolean("utf-8");
 		if (cfgBF->get("session"))
 			_bd_mgr.loadSessions(cfgBF->getCString("session"));
 

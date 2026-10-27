@@ -141,7 +141,7 @@ public:
 	 */
 	bool map(const char *filename,
 		int mode=boost::interprocess::read_write,
-		int mapmode=boost::interprocess::read_write,bool zeroother=true)
+		int mapmode=boost::interprocess::read_write,bool /*zeroother*/=true)
 	{
 		if (!boost::filesystem::exists(filename))
 		{

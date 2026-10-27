@@ -448,7 +448,7 @@ public:
 		bool bMatch = regex_match(code, reg_stk);
 		if(bMatch)
 		{
-			std::string s = std::move(fmt::format("{}.{}", exchg, code));
+			std::string s = fmt::format("{}.{}", exchg, code);
 			StrUtil::replace(s, "-", ".");
 			return s;
 		}

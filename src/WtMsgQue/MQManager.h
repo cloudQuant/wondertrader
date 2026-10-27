@@ -17,7 +17,9 @@
 
 NS_WTP_BEGIN
 
+#ifdef _MSC_VER
 #pragma warning(disable:4200)
+#endif
 
 #pragma pack(push,1)
 /**

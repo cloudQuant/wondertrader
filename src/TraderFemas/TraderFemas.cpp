@@ -69,20 +69,20 @@ inline uint32_t strToTime(const char* strTime)
 }
 
 TraderFemas::TraderFemas()
-	: m_pUserAPI(NULL)
-	, m_ayPosition(NULL)
-	, m_ayOrders(NULL)
-	, m_ayTrades(NULL)
-	, m_ayPosDetail(NULL)
-	, m_wrapperState(WS_NOTLOGIN)
+	: m_bQuickStart(false)
 	, m_uLastQryTime(0)
-	, m_iRequestID(0)
-	, m_bQuickStart(false)
-	, m_bStopped(false)
-	, m_bQryOnline(false)
 	, m_uLocalOrdID(1)
-	, m_bInQuery(false)
+	, m_wrapperState(WS_NOTLOGIN)
+	, m_pUserAPI(NULL)
+	, m_iRequestID(0)
+	, m_ayPosition(NULL)
+	, m_ayTrades(NULL)
+	, m_ayOrders(NULL)
+	, m_ayPosDetail(NULL)
+	, m_bQryOnline(false)
+	, m_bStopped(false)
 	, m_strandIO(NULL)
+	, m_bInQuery(false)
 	, m_lastQryTime(0)
 {
 }
@@ -530,17 +530,17 @@ void TraderFemas::OnFrontDisconnected( int nReason )
 		m_sink->handleEvent(WTE_Close, nReason);
 }
 
-void TraderFemas::OnQryFrontDisconnected(int nReason)
+void TraderFemas::OnQryFrontDisconnected(int /*nReason*/)
 {
 	m_bQryOnline = false;
 }
 
-void TraderFemas::OnHeartBeatWarning( int nTimeLapse )
+void TraderFemas::OnHeartBeatWarning( int /*nTimeLapse*/ )
 {
 	write_log(m_sink,LL_DEBUG, "[TraderFemas][{}-{}] Heartbeating...", m_strBroker.c_str(), m_strUser.c_str());
 }
 
-void TraderFemas::OnRspQueryUserLogin(CUstpFtdcRspUserLoginField *pRspUserLogin, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderFemas::OnRspQueryUserLogin(CUstpFtdcRspUserLoginField */*pRspUserLogin*/, CUstpFtdcRspInfoField */*pRspInfo*/, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	m_bQryOnline = true;
 
@@ -548,7 +548,7 @@ void TraderFemas::OnRspQueryUserLogin(CUstpFtdcRspUserLoginField *pRspUserLogin,
 		onInitialized();
 }
 
-void TraderFemas::OnRspDSUserCertification(CUstpFtdcDSUserCertRspDataField *pDSUserCertRspData, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderFemas::OnRspDSUserCertification(CUstpFtdcDSUserCertRspDataField */*pDSUserCertRspData*/, CUstpFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	if (pRspInfo->ErrorID == 0)
 	{
@@ -564,7 +564,7 @@ void TraderFemas::OnRspDSUserCertification(CUstpFtdcDSUserCertRspDataField *pDSU
 	}
 }
 
-void TraderFemas::OnRspUserLogin( CUstpFtdcRspUserLoginField *pRspUserLogin, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderFemas::OnRspUserLogin( CUstpFtdcRspUserLoginField *pRspUserLogin, CUstpFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	if(!IsErrorRspInfo(pRspInfo))
 	{
@@ -594,14 +594,14 @@ void TraderFemas::OnRspUserLogin( CUstpFtdcRspUserLoginField *pRspUserLogin, CUs
 	}
 }
 
-void TraderFemas::OnRspUserLogout(CUstpFtdcRspUserLogoutField *pRspUserLogout, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderFemas::OnRspUserLogout(CUstpFtdcRspUserLogoutField */*pRspUserLogout*/, CUstpFtdcRspInfoField */*pRspInfo*/, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	m_wrapperState = WS_NOTLOGIN;
 	if(m_sink)
 		m_sink->handleEvent(WTE_Logout, 0);
 }
 
-void TraderFemas::OnRspOrderInsert( CUstpFtdcInputOrderField *pInputOrder, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast )
+void TraderFemas::OnRspOrderInsert( CUstpFtdcInputOrderField *pInputOrder, CUstpFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/ )
 {
 	WTSEntrust* entrust = makeEntrust(pInputOrder);
 	if(entrust)
@@ -617,7 +617,7 @@ void TraderFemas::OnRspOrderInsert( CUstpFtdcInputOrderField *pInputOrder, CUstp
 	}
 }
 
-void TraderFemas::OnRspOrderAction(CUstpFtdcOrderActionField *pOrderAction, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderFemas::OnRspOrderAction(CUstpFtdcOrderActionField */*pOrderAction*/, CUstpFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	if(!IsErrorRspInfo(pRspInfo))
 	{
@@ -631,7 +631,7 @@ void TraderFemas::OnRspOrderAction(CUstpFtdcOrderActionField *pOrderAction, CUst
 	}
 }
 
-void TraderFemas::OnRspQryInvestorAccount(CUstpFtdcRspInvestorAccountField *pRspInvestorAccount, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderFemas::OnRspQryInvestorAccount(CUstpFtdcRspInvestorAccountField *pRspInvestorAccount, CUstpFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
 	if (bIsLast)
 	{
@@ -664,7 +664,7 @@ void TraderFemas::OnRspQryInvestorAccount(CUstpFtdcRspInvestorAccountField *pRsp
 	}
 }
 
-void TraderFemas::OnRspQryInvestorPosition(CUstpFtdcRspInvestorPositionField *pRspInvestorPosition, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderFemas::OnRspQryInvestorPosition(CUstpFtdcRspInvestorPositionField *pRspInvestorPosition, CUstpFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
 	if (bIsLast)
 	{
@@ -741,7 +741,7 @@ void TraderFemas::OnRspQryInvestorPosition(CUstpFtdcRspInvestorPositionField *pR
 	}
 }
 
-void TraderFemas::OnRspQryTrade(CUstpFtdcTradeField *pTrade, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderFemas::OnRspQryTrade(CUstpFtdcTradeField *pTrade, CUstpFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
 	if (bIsLast)
 	{
@@ -771,7 +771,7 @@ void TraderFemas::OnRspQryTrade(CUstpFtdcTradeField *pTrade, CUstpFtdcRspInfoFie
 	}
 }
 
-void TraderFemas::OnRspQryOrder(CUstpFtdcOrderField *pOrder, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void TraderFemas::OnRspQryOrder(CUstpFtdcOrderField *pOrder, CUstpFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
 	if (bIsLast)
 	{
@@ -809,7 +809,7 @@ void TraderFemas::onInitialized()
 		m_sink->onLoginResult(true, "", m_lDate);
 }
 
-void TraderFemas::OnRspError( CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast )
+void TraderFemas::OnRspError( CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool /*bIsLast*/ )
 {
 	if (m_sink)
 		write_log(m_sink,LL_ERROR, "[TraderFemas][{}-{}] Error occured: {}, request id: {}", m_strBroker.c_str(), m_strUser.c_str(), pRspInfo->ErrorMsg, nRequestID);
@@ -995,7 +995,7 @@ WTSOrderInfo* TraderFemas::makeOrderInfo(CUstpFtdcOrderField* orderField)
 	pRet->setOrderDate(convert::to_uint32(orderField->TradingDay));
 	std::string strTime = orderField->InsertTime;
 	StrUtil::replace(strTime, ":", "");
-	uint32_t uTime = convert::to_uint32(strTime.c_str());
+	[[maybe_unused]] uint32_t uTime = convert::to_uint32(strTime.c_str());
 	pRet->setOrderTime(TimeUtils::makeTime(pRet->getOrderDate(), convert::to_uint32(strTime.c_str())*1000));
 	pRet->setOrderState(wrapOrderState(orderField->OrderStatus));
 
@@ -1120,12 +1120,12 @@ bool TraderFemas::IsErrorRspInfo(CUstpFtdcRspInfoField *pRspInfo)
 	return false;
 }
 
-void TraderFemas::OnErrRtnOrderInsert(CUstpFtdcInputOrderField *pInputOrder, CUstpFtdcRspInfoField *pRspInfo)
+void TraderFemas::OnErrRtnOrderInsert(CUstpFtdcInputOrderField */*pInputOrder*/, CUstpFtdcRspInfoField */*pRspInfo*/)
 {
 
 }
 
-void TraderFemas::OnErrRtnOrderAction(CUstpFtdcOrderActionField *pOrderAction, CUstpFtdcRspInfoField *pRspInfo)
+void TraderFemas::OnErrRtnOrderAction(CUstpFtdcOrderActionField */*pOrderAction*/, CUstpFtdcRspInfoField */*pRspInfo*/)
 {
 
 }

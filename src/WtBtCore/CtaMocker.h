@@ -331,7 +331,7 @@ public:
 	 * @details 实现ICtaStraCtx接口的方法，返回策略上下文的唯一标识符
 	 * @return 返回策略上下文ID
 	 */
-	virtual uint32_t id() { return _context_id; }
+	virtual uint32_t id() override { return _context_id; }
 
 	//回调函数
 	/**

@@ -60,9 +60,9 @@ class IStkTraderApi
 class IOptTraderSpi
 {
 public:
-	virtual void onRspEntrustOpt(WTSEntrust* entrust, WTSError *err) {}
-	virtual void onRspOrdersOpt(const WTSArray* ayOrders) {}
-	virtual void onPushOrderOpt(WTSOrderInfo* orderInfo) {}
+	virtual void onRspEntrustOpt(WTSEntrust* /*entrust*/, WTSError */*err*/) {}
+	virtual void onRspOrdersOpt(const WTSArray* /*ayOrders*/) {}
+	virtual void onPushOrderOpt(WTSOrderInfo* /*orderInfo*/) {}
 };
 
 /*
@@ -78,18 +78,18 @@ public:
 	 *	下单接口
 	 *	entrust 下单的具体数据结构
 	 */
-	virtual int orderInsertOpt(WTSEntrust* eutrust) { return -1; }
+	virtual int orderInsertOpt(WTSEntrust* /*eutrust*/) { return -1; }
 
 	/*
 	 *	订单操作接口
 	 *	action	操作的具体数据结构
 	 */
-	virtual int orderActionOpt(WTSEntrustAction* action) { return -1; }
+	virtual int orderActionOpt(WTSEntrustAction* /*action*/) { return -1; }
 
 	/*
 	 *	查询期权订单
 	 */
-	virtual int	queryOrdersOpt(WTSBusinessType bType) { return -1; }
+	virtual int	queryOrdersOpt(WTSBusinessType /*bType*/) { return -1; }
 };
 #pragma endregion
 
@@ -106,7 +106,7 @@ public:
 	/*
 	 *	处理交易接口的日志
 	 */
-	virtual void handleTraderLog(WTSLogLevel ll, const char* message){}
+	virtual void handleTraderLog(WTSLogLevel /*ll*/, const char* /*message*/){}
 
 	/*
 	 *	获取股票交易接口Spi
@@ -137,52 +137,52 @@ public:
 	/*
 	 *	委托回报
 	 */
-	virtual void onRspEntrust(WTSEntrust* entrust, WTSError *err){}
+	virtual void onRspEntrust(WTSEntrust* /*entrust*/, WTSError */*err*/){}
 
 	/*
 	 * 资金查询回报
 	 */
-	virtual void onRspAccount(WTSArray* ayAccounts) {}
+	virtual void onRspAccount(WTSArray* /*ayAccounts*/) {}
 
 	/*
 	 *	持仓查询回报
 	 */
-	virtual void onRspPosition(const WTSArray* ayPositions){}
+	virtual void onRspPosition(const WTSArray* /*ayPositions*/){}
 
 	/*
 	 *	订单查询回报
 	 */
-	virtual void onRspOrders(const WTSArray* ayOrders){}
+	virtual void onRspOrders(const WTSArray* /*ayOrders*/){}
 
 	/*
 	 *	成交查询回报
 	 */
-	virtual void onRspTrades(const WTSArray* ayTrades){}
+	virtual void onRspTrades(const WTSArray* /*ayTrades*/){}
 
 	/*
 	 *	结算单查询回报
 	 */
-	virtual void onRspSettlementInfo(uint32_t uDate, const char* content){}
+	virtual void onRspSettlementInfo(uint32_t /*uDate*/, const char* /*content*/){}
 
 	/*
 	 *	订单回报推送
 	 */
-	virtual void onPushOrder(WTSOrderInfo* orderInfo){}
+	virtual void onPushOrder(WTSOrderInfo* /*orderInfo*/){}
 
 	/*
 	 *	成交回报推送
 	 */
-	virtual void onPushTrade(WTSTradeInfo* tradeRecord){}
+	virtual void onPushTrade(WTSTradeInfo* /*tradeRecord*/){}
 
 	/*
 	 *	交易接口错误回报
 	 */
-	virtual void onTraderError(WTSError* err, void* pData = NULL){}
+	virtual void onTraderError(WTSError* /*err*/, void* /*pData*/ = NULL){}
 
 	/*
 	 *	合约状态推送
 	 */
-	virtual void onPushInstrumentStatus(const char* exchg, const char* code, WTSTradeStatus state) {}
+	virtual void onPushInstrumentStatus(const char* /*exchg*/, const char* /*code*/, WTSTradeStatus /*state*/) {}
 };
 
 //下单接口管理接口
@@ -198,7 +198,7 @@ public:
 	/*
 	 *	初始化解析管理器
 	 */
-	virtual bool init(WTSVariant *params) { return false; }
+	virtual bool init(WTSVariant */*params*/) { return false; }
 
 	/*
 	 *	释放解析管理器
@@ -208,7 +208,7 @@ public:
 	/*
 	 *	注册回调接口
 	 */
-	virtual void registerSpi(ITraderSpi *listener) {}
+	virtual void registerSpi(ITraderSpi */*listener*/) {}
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -229,12 +229,12 @@ public:
 	/*
 	 *	生成委托单号
 	 */
-	virtual bool makeEntrustID(char* buffer, int length){ return false; }
+	virtual bool makeEntrustID(char* /*buffer*/, int /*length*/){ return false; }
 
 	/*
 	 *	登录接口
 	 */
-	virtual int login(const char* user, const char* pass, const char* productInfo) { return -1; }
+	virtual int login(const char* /*user*/, const char* /*pass*/, const char* /*productInfo*/) { return -1; }
 
 	/*
 	 *	注销接口
@@ -245,13 +245,13 @@ public:
 	 *	下单接口
 	 *	entrust 下单的具体数据结构
 	 */
-	virtual int orderInsert(WTSEntrust* eutrust) { return -1; }
+	virtual int orderInsert(WTSEntrust* /*eutrust*/) { return -1; }
 
 	/*
 	 *	订单操作接口
 	 *	action	操作的具体数据结构
 	 */
-	virtual int orderAction(WTSEntrustAction* action) { return -1; }
+	virtual int orderAction(WTSEntrustAction* /*action*/) { return -1; }
 
 	/*
 	 *	查询账户信息
@@ -276,7 +276,7 @@ public:
 	/*
 	 *	查询结算单
 	 */
-	virtual int querySettlement(uint32_t uDate){ return 0; }
+	virtual int querySettlement(uint32_t /*uDate*/){ return 0; }
 
 };
 

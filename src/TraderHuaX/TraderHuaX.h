@@ -34,7 +34,7 @@
  //By Wesley @ 2022.01.05
 #include "../Share/fmtlib.h"
 
-#include "../API/HuaX4.03/traderapi/TORATstpTraderApi.h"
+#include <API/HuaX4.03/traderapi/TORATstpTraderApi.h>
 
 USING_NS_WTP;
 

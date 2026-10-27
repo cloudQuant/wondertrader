@@ -29,7 +29,7 @@ public:
 		wt_strcpy(ret->m_strSession, session);
 		wt_strcpy(ret->m_strTrdTpl, trdtpl);
 
-		sprintf(ret->m_strFullPid, "%s.%s", exchg, pid);
+		snprintf(ret->m_strFullPid, sizeof(ret->m_strFullPid), "%s.%s", exchg, pid);
 
 		return ret;
 	}
@@ -176,8 +176,8 @@ public:
 		wt_strcpy(ret->m_strProduct, pid);
 		wt_strcpy(ret->m_strExchg, exchg);
 
-		sprintf(ret->m_strFullCode, "%s.%s", exchg, code);
-		sprintf(ret->m_strFullPid, "%s.%s", exchg, pid);
+		snprintf(ret->m_strFullCode, sizeof(ret->m_strFullCode), "%s.%s", exchg, code);
+		snprintf(ret->m_strFullPid, sizeof(ret->m_strFullPid), "%s.%s", exchg, pid);
 
 		return ret;
 	}
@@ -187,7 +187,7 @@ public:
 	inline void setAltCode(const char* altCode) noexcept
 	{
 		wt_strcpy(m_strAltCode, altCode);
-		sprintf(m_strFullAltCode, "%s.%s", m_strExchg, altCode);
+		snprintf(m_strFullAltCode, sizeof(m_strFullAltCode), "%s.%s", m_strExchg, altCode);
 	}
 
 	constexpr inline void	setVolumeLimits(uint32_t maxMarketVol, uint32_t maxLimitVol, uint32_t minMarketVol = 1, uint32_t minLimitVol = 1) noexcept
@@ -312,9 +312,9 @@ public:
 
 protected:
 	WTSContractInfo()
-		: m_commInfo(NULL), m_openDate(19900101), m_expireDate(30991231)
-		, m_lMarginRatio(0), m_sMarginRatio(0), m_nFeeAlg(-1), m_uMarginFlag(0)
-		, m_uTotalIdx(UINT_MAX){}
+		: m_openDate(19900101), m_expireDate(30991231)
+		, m_lMarginRatio(0), m_sMarginRatio(0), m_uMarginFlag(0)
+		, m_nFeeAlg(-1), m_commInfo(NULL), m_uTotalIdx(UINT_MAX){}
 	virtual ~WTSContractInfo(){}
 
 private:

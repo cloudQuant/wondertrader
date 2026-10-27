@@ -32,7 +32,7 @@ class TraderAdapter : public ITraderSpi
 {
 public:
 	TraderAdapter(TraderAdapterMgr* mgr);
-	~TraderAdapter();
+	virtual ~TraderAdapter();
 
 public:
 	bool init(const char* id, WTSVariant* params, IBaseDataMgr* bdMgr);

@@ -28,7 +28,9 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
+#ifdef _MSC_VER
 #pragma warning(disable:4996)
+#endif
 
 #include <windows.h>
 
@@ -62,7 +64,7 @@ namespace TimeUtils
 		if (offset == 99)
 		{
 			time_t now = time(NULL);
-			tm tm_ltm = *localtime(&now);
+			[[maybe_unused]] tm tm_ltm = *localtime(&now);
 			tm tm_gtm = *gmtime(&now);
 
 			time_t _gt = mktime(&tm_gtm);
@@ -142,9 +144,9 @@ namespace TimeUtils
 
 		char str[64] = {0};
 		if(bIncludeMilliSec)
-			sprintf(str, "%02d:%02d:%02d,%03d", tNow.tm_hour, tNow.tm_min, tNow.tm_sec, millitm);
+			snprintf(str, sizeof(str), "%02d:%02d:%02d,%03d", tNow.tm_hour, tNow.tm_min, tNow.tm_sec, millitm);
 		else
-			sprintf(str, "%02d:%02d:%02d", tNow.tm_hour, tNow.tm_min, tNow.tm_sec);
+			snprintf(str, sizeof(str), "%02d:%02d:%02d", tNow.tm_hour, tNow.tm_min, tNow.tm_sec);
 		return str;
 	}
 
@@ -255,7 +257,7 @@ namespace TimeUtils
 		return ts * 1000+ millisec;
 	}
 
-	static std::string timeToString(int64_t mytime) noexcept
+	[[maybe_unused]] static std::string timeToString(int64_t mytime) noexcept
 	{
 		if (mytime == 0) return "";
 		int64_t sec = mytime/1000;
@@ -270,15 +272,15 @@ namespace TimeUtils
 #endif
 		char tm_buf[64] = {'\0'};
 		if (msec > 0) //是否有毫秒
-		   sprintf(tm_buf,"%4d%02d%02d%02d%02d%02d.%03d",t.tm_year+1900, t.tm_mon+1, t.tm_mday,
+		   snprintf(tm_buf,sizeof(tm_buf),"%4d%02d%02d%02d%02d%02d.%03d",t.tm_year+1900, t.tm_mon+1, t.tm_mday,
 			t.tm_hour, t.tm_min, t.tm_sec, msec);
 		else 
-		   sprintf(tm_buf,"%4d%02d%02d%02d%02d%02d",t.tm_year+1900, t.tm_mon+1, t.tm_mday,
+		   snprintf(tm_buf,sizeof(tm_buf),"%4d%02d%02d%02d%02d%02d",t.tm_year+1900, t.tm_mon+1, t.tm_mday,
 			t.tm_hour, t.tm_min, t.tm_sec);
 		return tm_buf;
 	};
 
-	static uint32_t getNextDate(uint32_t curDate, int days = 1) noexcept
+	[[maybe_unused]] static uint32_t getNextDate(uint32_t curDate, int days = 1) noexcept
 	{
 		tm t;	
 		memset(&t,0,sizeof(tm));
@@ -423,7 +425,7 @@ namespace TimeUtils
 			static char buff[1024];
 			uint32_t length = (uint32_t)strftime(buff, 1023, sfmt, &t);
 			if (hasMilliSec)
-				sprintf(buff + length, ",%03u", _msec);
+				snprintf(buff + length, sizeof(buff) - length, ",%03u", _msec);
 			return buff;
 		}
 

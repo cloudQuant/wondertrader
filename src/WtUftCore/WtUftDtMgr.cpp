@@ -62,7 +62,7 @@ WtUftDtMgr::~WtUftDtMgr()
  * @return 初始化是否成功
  * @details 存储引擎指针并完成初始化设置
  */
-bool WtUftDtMgr::init(WTSVariant* cfg, WtUftEngine* engine)
+bool WtUftDtMgr::init(WTSVariant* /*cfg*/, WtUftEngine* engine)
 {
 	_engine = engine;
 
@@ -127,7 +127,7 @@ WTSTickData* WtUftDtMgr::grab_last_tick(const char* code)
  * @return Tick切片数据指针，当前实现返回NULL
  * @details 当前实现为空，需要在后续版本中实现
  */
-WTSTickSlice* WtUftDtMgr::get_tick_slice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
+WTSTickSlice* WtUftDtMgr::get_tick_slice(const char* /*stdCode*/, uint32_t /*count*/, uint64_t /*etime*/ /* = 0 */)
 {
 	return NULL;
 }
@@ -140,7 +140,7 @@ WTSTickSlice* WtUftDtMgr::get_tick_slice(const char* stdCode, uint32_t count, ui
  * @return 委托队列切片数据指针，当前实现返回NULL
  * @details 当前实现为空，需要在后续版本中实现
  */
-WTSOrdQueSlice* WtUftDtMgr::get_order_queue_slice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
+WTSOrdQueSlice* WtUftDtMgr::get_order_queue_slice(const char* /*stdCode*/, uint32_t /*count*/, uint64_t /*etime*/ /* = 0 */)
 {
 	return NULL;
 }
@@ -153,7 +153,7 @@ WTSOrdQueSlice* WtUftDtMgr::get_order_queue_slice(const char* stdCode, uint32_t 
  * @return 委托明细切片数据指针，当前实现返回NULL
  * @details 当前实现为空，需要在后续版本中实现
  */
-WTSOrdDtlSlice* WtUftDtMgr::get_order_detail_slice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
+WTSOrdDtlSlice* WtUftDtMgr::get_order_detail_slice(const char* /*stdCode*/, uint32_t /*count*/, uint64_t /*etime*/ /* = 0 */)
 {
 	return NULL;
 }
@@ -166,7 +166,7 @@ WTSOrdDtlSlice* WtUftDtMgr::get_order_detail_slice(const char* stdCode, uint32_t
  * @return 成交切片数据指针，当前实现返回NULL
  * @details 当前实现为空，需要在后续版本中实现
  */
-WTSTransSlice* WtUftDtMgr::get_transaction_slice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
+WTSTransSlice* WtUftDtMgr::get_transaction_slice(const char* /*stdCode*/, uint32_t /*count*/, uint64_t /*etime*/ /* = 0 */)
 {
 	return NULL;
 }
@@ -181,7 +181,7 @@ WTSTransSlice* WtUftDtMgr::get_transaction_slice(const char* stdCode, uint32_t c
  * @return K线切片数据指针，当前实现返回NULL
  * @details 当前实现为空，需要在后续版本中实现
  */
-WTSKlineSlice* WtUftDtMgr::get_kline_slice(const char* stdCode, WTSKlinePeriod period, uint32_t times, uint32_t count, uint64_t etime /* = 0 */)
+WTSKlineSlice* WtUftDtMgr::get_kline_slice(const char* /*stdCode*/, WTSKlinePeriod /*period*/, uint32_t /*times*/, uint32_t /*count*/, uint64_t /*etime*/ /* = 0 */)
 {
 	return NULL;
 }

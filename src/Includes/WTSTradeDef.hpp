@@ -82,15 +82,15 @@ typedef struct _WTSEntrustStruct
 	char				m_extras[64] = {0};
 
 	_WTSEntrustStruct()
-		: m_iPrice(0)
-		, m_dVolume(0)
-		, m_businessType(BT_CASH)
-		, m_direction(WDT_LONG)
+		: m_dVolume(0)
+		, m_iPrice(0)
+		, m_bIsNet(false)
+		, m_bIsBuy(true), m_direction(WDT_LONG)
 		, m_priceType(WPT_ANYPRICE)
 		, m_orderFlag(WOF_NOR)
 		, m_offsetType(WOT_OPEN)
-		, m_bIsNet(false)
-		, m_bIsBuy(true){}
+		, m_businessType(BT_CASH)
+		{}
 
 } WTSEntrustStruct;
 
@@ -316,14 +316,14 @@ typedef struct _WTSOrderStruct
 	char			m_strStateMsg[64] = { 0 };
 
 	_WTSOrderStruct()
-		:m_orderState(WOS_Submitting)
-		, m_orderType(WORT_Normal)
-		, m_uInsertDate(0)
+		: m_uErrorFlag(WOEF_None)
+	, m_uInsertDate(0)
 		, m_uInsertTime(0)
 		, m_dVolTraded(0)
 		, m_dVolLeft(0)
-		, m_uErrorFlag(WOEF_None)
-	{
+		,m_orderState(WOS_Submitting)
+		, m_orderType(WORT_Normal)
+		{
 
 	}
 } WTSOrderStruct;
@@ -504,10 +504,10 @@ typedef struct _WTSTradeStruct
 	WTSBusinessType		m_businessType;
 
 	_WTSTradeStruct()
-		: m_orderType(WORT_Normal)
+		: m_dPrice(0)
+		, m_orderType(WORT_Normal)
 		, m_tradeType(WTT_Common)
 		, m_uAmount(0)
-		, m_dPrice(0)
 		, m_businessType(BT_CASH)
 	{}
 }WTSTradeStruct;
@@ -636,10 +636,10 @@ typedef struct _WTSPositionStruct
 		, m_dApplyPosition(0)
 		, m_dAvailPrePos(0)
 		, m_dAvailNewPos(0)
+		, m_dTotalPosCost(0)
 		, m_dMargin(0)
 		, m_dAvgPrice(0)
 		, m_dDynProfit(0)
-		, m_dTotalPosCost(0)
 		, m_businessType(BT_CASH)
 	{}
 }WTSPositionStruct;

@@ -31,8 +31,8 @@ public:
 		uint32_t	second;		//偏移过的结束时间
 
 		_TradingSection(uint32_t stime, uint32_t etime, uint32_t stime_raw, uint32_t etime_raw)
-			: first(stime), second(etime), first_raw(stime_raw), second_raw(etime_raw)
-		{
+			: first_raw(stime_raw), first(stime), second_raw(etime_raw)
+		, second(etime){
 		}
 	} TradingSection;
 	typedef std::vector<TradingSection>		TradingTimes;

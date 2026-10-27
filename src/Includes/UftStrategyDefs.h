@@ -45,7 +45,7 @@ public:
 	/*
 	*	初始化
 	*/
-	virtual bool init(WTSVariant* cfg){ return true; }
+	virtual bool init(WTSVariant* /*cfg*/){ return true; }
 
 	virtual const char* id() const { return _id.c_str(); }
 
@@ -63,32 +63,32 @@ public:
 	 *	回测时，生命周期中会调用多次
 	 *	如果有什么数据需要每天初始化，可以放到这个回调中处理，实盘就和回测保持一致了
 	 */
-	virtual void on_session_begin(IUftStraCtx* ctx, uint32_t uTDate) {}
+	virtual void on_session_begin(IUftStraCtx* /*ctx*/, uint32_t /*uTDate*/) {}
 
 	/*
 	 *	交易日结束事件
 	 */
-	virtual void on_session_end(IUftStraCtx* ctx, uint32_t uTDate) {}
+	virtual void on_session_end(IUftStraCtx* /*ctx*/, uint32_t /*uTDate*/) {}
 
 	/*
 	 *	tick推送
 	 */
-	virtual void on_tick(IUftStraCtx* ctx, const char* stdCode, WTSTickData* newTick) {}
+	virtual void on_tick(IUftStraCtx* /*ctx*/, const char* /*stdCode*/, WTSTickData* /*newTick*/) {}
 
 	/*
 	 *	委托队列推送
 	 */
-	virtual void on_order_queue(IUftStraCtx* ctx, const char* stdCode, WTSOrdQueData* newOrdQue) {}
+	virtual void on_order_queue(IUftStraCtx* /*ctx*/, const char* /*stdCode*/, WTSOrdQueData* /*newOrdQue*/) {}
 
 	/*
 	 *	逐笔委托推送
 	 */
-	virtual void on_order_detail (IUftStraCtx* ctx, const char* stdCode, WTSOrdDtlData* newOrdDtl) {}
+	virtual void on_order_detail (IUftStraCtx* /*ctx*/, const char* /*stdCode*/, WTSOrdDtlData* /*newOrdDtl*/) {}
 
 	/*
 	 *	逐笔成交推送
 	 */
-	virtual void on_transaction(IUftStraCtx* ctx, const char* stdCode, WTSTransData* newTrans) {}
+	virtual void on_transaction(IUftStraCtx* /*ctx*/, const char* /*stdCode*/, WTSTransData* /*newTrans*/) {}
 
 	/*
 	 *	K线闭合事件
@@ -97,7 +97,7 @@ public:
 	 *	@period		周期
 	 *	@times		重采样倍数
 	 */
-	virtual void on_bar(IUftStraCtx* ctx, const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar) {}
+	virtual void on_bar(IUftStraCtx* /*ctx*/, const char* /*stdCode*/, const char* /*period*/, uint32_t /*times*/, WTSBarStruct* /*newBar*/) {}
 
 	/*
 	 *	成交回报
@@ -109,7 +109,7 @@ public:
 	 *	@vol		成交量
 	 *	@price		成交价格
 	 */
-	virtual void on_trade(IUftStraCtx* ctx, uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double vol, double price) {}
+	virtual void on_trade(IUftStraCtx* /*ctx*/, uint32_t /*localid*/, const char* /*stdCode*/, bool /*isLong*/, uint32_t /*offset*/, double /*vol*/, double /*price*/) {}
 
 	/*
 	 *	持仓同步回报
@@ -123,7 +123,7 @@ public:
 	 *	@newvol		今仓	
 	 *	@newavail	可用今仓
 	 */
-	virtual void on_position(IUftStraCtx* ctx, const char* stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail) {}
+	virtual void on_position(IUftStraCtx* /*ctx*/, const char* /*stdCode*/, bool /*isLong*/, double /*prevol*/, double /*preavail*/, double /*newvol*/, double /*newavail*/) {}
 
 	/*
 	 *	订单
@@ -137,17 +137,17 @@ public:
 	 *	@price		委托价格
 	 *	@isCanceled	是否已撤销
 	 */
-	virtual void on_order(IUftStraCtx* ctx, uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double totalQty, double leftQty, double price, bool isCanceled) {}
+	virtual void on_order(IUftStraCtx* /*ctx*/, uint32_t /*localid*/, const char* /*stdCode*/, bool /*isLong*/, uint32_t /*offset*/, double /*totalQty*/, double /*leftQty*/, double /*price*/, bool /*isCanceled*/) {}
 
 	/*
 	 *	交易通道就绪事件
 	 */
-	virtual void on_channel_ready(IUftStraCtx* ctx) {}
+	virtual void on_channel_ready(IUftStraCtx* /*ctx*/) {}
 
 	/*
 	 *	交易通道断线事件
 	 */
-	virtual void on_channel_lost(IUftStraCtx* ctx) {}
+	virtual void on_channel_lost(IUftStraCtx* /*ctx*/) {}
 
 	/*
 	 *	下单回报
@@ -157,7 +157,7 @@ public:
 	 *	@bSuccess	是否成功
 	 *	@message	返回消息
 	 */
-	virtual void on_entrust(uint32_t localid, bool bSuccess, const char* message) {}
+	virtual void on_entrust(uint32_t /*localid*/, bool /*bSuccess*/, const char* /*message*/) {}
 
 
 	/*

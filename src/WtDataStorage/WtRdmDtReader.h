@@ -385,7 +385,7 @@ public:
 	 * 
 	 * @details 根据给定的配置对象初始化数据存储器，设置数据路径和其他相关参数
 	 */
-	virtual void init(WTSVariant* cfg, IRdmDtReaderSink* sink);
+	virtual void init(WTSVariant* cfg, IRdmDtReaderSink* sink) override;
 
 	/**
 	 * @brief 按时间范围读取委托明细数据切片

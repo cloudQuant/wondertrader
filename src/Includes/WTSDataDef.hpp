@@ -23,7 +23,9 @@
 
 using namespace std;
 
+#ifdef _MSC_VER
 #pragma warning(disable:4267)
+#endif
 
 
 NS_WTP_BEGIN
@@ -749,7 +751,7 @@ public:
 		uint32_t begin = min(head, tail);
 		uint32_t end = max(head, tail);
 
-		if(begin >= m_vecBarData.size() || end >= (int32_t)m_vecBarData.size())
+		if(begin >= m_vecBarData.size() || end >= m_vecBarData.size())
 			return NULL;
 
 		WTSValueArray *vArray = NULL;
@@ -1038,7 +1040,7 @@ class WTSTickRef : public WTSPoolObject<WTSTickRef>
 {	
 	friend WTSPoolObject<WTSTickRef>::PoolType;
 protected:
-	WTSTickRef() :m_pContract(nullptr), m_tickStruct(nullptr) {}
+	WTSTickRef() : m_tickStruct(nullptr) ,m_pContract(nullptr){}
 
 public:
 	/*

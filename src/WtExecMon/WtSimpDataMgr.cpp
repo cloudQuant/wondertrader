@@ -87,7 +87,7 @@ bool WtSimpDataMgr::init(WTSVariant* cfg, WtExecRunner* runner)
 	return initStore(cfg->get("store"));
 }
 
-void WtSimpDataMgr::on_all_bar_updated(uint32_t updateTime)
+void WtSimpDataMgr::on_all_bar_updated(uint32_t /*updateTime*/)
 {
 
 }
@@ -122,7 +122,7 @@ void WtSimpDataMgr::reader_log(WTSLogLevel ll, const char* message)
 	WTSLogger::log_raw(ll, message);
 }
 
-void WtSimpDataMgr::on_bar(const char* code, WTSKlinePeriod period, WTSBarStruct* newBar)
+void WtSimpDataMgr::on_bar(const char* /*code*/, WTSKlinePeriod /*period*/, WTSBarStruct* /*newBar*/)
 {
 
 }

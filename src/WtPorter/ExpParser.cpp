@@ -23,7 +23,7 @@ extern WtRtRunner& getRunner();
  * @param config 配置项，当前未使用
  * @return 始终返回true，表示初始化成功
  */
-bool ExpParser::init(WTSVariant* config)
+bool ExpParser::init(WTSVariant* /*config*/)
 {
 	// 调用运行器的解析器初始化接口，传入解析器ID
 	getRunner().parser_init(_id.c_str());

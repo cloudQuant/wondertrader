@@ -46,11 +46,11 @@ namespace StrUtil
 		if(left)
 			ret.erase(0, ret.find_first_not_of(delims));
 
-		return std::move(ret);
+		return ret;
 	}
 
 	/*用法：支持链式调用和任意字符组合过滤，StrUtil::trimAll("A [1, 2:x3]", " :,[]x3");   结果："A12"*/
-	static std::string& trimAll(std::string &s, const char* chars = " \t\n\r")
+	[[maybe_unused]] static std::string& trimAll(std::string &s, const char* chars = " \t\n\r")
 	{
 		std::string pattern(chars);
 		s.erase(std::remove_if(s.begin(), s.end(),
@@ -125,7 +125,7 @@ namespace StrUtil
 			++numSplits;
 
 		} while (pos != std::string::npos);
-		return std::move(ret);
+		return ret;
 	}
 
 	static inline void split(const std::string& str, StringVector& ret, const std::string& delims = "\t\n ", unsigned int maxSplits = 0) noexcept
@@ -197,7 +197,7 @@ namespace StrUtil
 			++numSplits;
 
 		} while (pos != std::string::npos);
-		return std::move(ret);
+		return ret;
 	}
 
 	/** Upper-cases all the characters in the std::string.
@@ -231,7 +231,7 @@ namespace StrUtil
 			strRet.end(),
 			strRet.begin(),
 			(int(*)(int))tolower);
-		return std::move(strRet);
+		return strRet;
 	}
 
 	static inline std::string makeUpperCase(const char* str) noexcept
@@ -242,7 +242,7 @@ namespace StrUtil
 			strRet.end(),
 			strRet.begin(),
 			(int(*)(int))toupper);
-		return std::move(strRet);
+		return strRet;
 	}
 
 	/*
@@ -311,7 +311,7 @@ namespace StrUtil
 		if (path[path.length() - 1] != '/' && bIsDir)
 			path += '/';
 
-		return std::move(path);
+		return path;
 	}
 
 	static inline void replace(std::string& str, const char* src, const char* des) noexcept

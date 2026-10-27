@@ -239,7 +239,7 @@ public:
 	 * @param fctLoader 复权因子加载器
 	 * @param tickLoader Tick数据加载器，可选
 	 */
-	void		registerExtDataLoader(FuncLoadFnlBars fnlBarLoader, FuncLoadRawBars rawBarLoader, FuncLoadAdjFactors fctLoader, FuncLoadRawTicks tickLoader = NULL)
+	void		registerExtDataLoader(FuncLoadFnlBars fnlBarLoader, FuncLoadRawBars rawBarLoader, FuncLoadAdjFactors fctLoader, FuncLoadRawTicks /*tickLoader*/ = NULL)
 	{
 		_ext_fnl_bar_loader = fnlBarLoader;
 		_ext_raw_bar_loader = rawBarLoader;
@@ -855,7 +855,7 @@ private:
 	/**
 	 * @brief 数据存储器
 	 */
-	WtDataStorage*		_data_store;
+	[[maybe_unused]] WtDataStorage*		_data_store;
 
 	/**
 	 * @brief 数据管理器

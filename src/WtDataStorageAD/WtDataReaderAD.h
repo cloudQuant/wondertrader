@@ -143,7 +143,7 @@ private:
 		/**
 		 * @brief 构造函数
 		 */
-		_RTBarCacheWrapper() :_cache_block(NULL), _file_ptr(NULL), _last_size(0){}
+		_RTBarCacheWrapper() : _file_ptr(NULL),_cache_block(NULL), _last_size(0){}
 
 		/**
 		 * @brief 检查缓存是否为空

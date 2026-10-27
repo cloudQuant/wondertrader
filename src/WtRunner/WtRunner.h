@@ -169,7 +169,7 @@ private:
 	WtSelEngine			_sel_engine;			//!< 选股交易引擎
 	WtEngine*			_engine;				//!< 当前使用的交易引擎指针
 
-	WtDataStorage*		_data_store;			//!< 数据存储对象
+	[[maybe_unused]] WtDataStorage*		_data_store;			//!< 数据存储对象
 
 	WtDtMgr				_data_mgr;			//!< 数据管理器
 

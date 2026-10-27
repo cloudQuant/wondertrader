@@ -29,14 +29,14 @@ ExecMocker::ExecMocker(HisDataReplayer* replayer)
 	: _replayer(replayer)
 	, _position(0)
 	, _undone(0)
-	, _ord_qty(0)
+	, _last_tick(NULL)
+, _sig_px(DBL_MAX)
 	, _ord_cnt(0)
+	, _ord_qty(0)
 	, _cacl_cnt(0)
 	, _cacl_qty(0)
 	, _sig_cnt(0)
-	, _sig_px(DBL_MAX)
-	, _last_tick(NULL)
-{
+	{
 }
 
 
@@ -100,17 +100,17 @@ uint64_t ExecMocker::getCurTime()
 	return TimeUtils::makeTime(_replayer->get_date(), _replayer->get_raw_time() * 100000 + _replayer->get_secs());
 }
 
-void ExecMocker::handle_bar_close(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar)
+void ExecMocker::handle_bar_close(const char* /*stdCode*/, const char* /*period*/, uint32_t /*times*/, WTSBarStruct* /*newBar*/)
 {
 	//throw std::logic_error("The method or operation is not implemented.");
 }
 
-void ExecMocker::handle_session_begin(uint32_t curTDate)
+void ExecMocker::handle_session_begin(uint32_t /*curTDate*/)
 {
 	//throw std::logic_error("The method or operation is not implemented.");
 }
 
-void ExecMocker::handle_session_end(uint32_t curTDate)
+void ExecMocker::handle_session_end(uint32_t /*curTDate*/)
 {
 	_matcher.clear();
 	_undone = 0;
@@ -119,7 +119,7 @@ void ExecMocker::handle_session_end(uint32_t curTDate)
 		_ord_cnt, _ord_qty, _cacl_cnt, _cacl_qty, _sig_cnt);
 }
 
-void ExecMocker::handle_tick(const char* stdCode, WTSTickData* curTick, uint32_t pxType)
+void ExecMocker::handle_tick(const char* stdCode, WTSTickData* curTick, uint32_t /*pxType*/)
 {
  	if (_last_tick)
 	{
@@ -201,22 +201,22 @@ WTSTickData* ExecMocker::grabLastTick(const char* stdCode)
 	return _replayer->get_last_tick(stdCode);
 }
 
-double ExecMocker::getPosition(const char* stdCode, bool validOnly /* = true */, int32_t flag /* = 3 */)
+double ExecMocker::getPosition(const char* /*stdCode*/, bool /*validOnly*/ /* = true */, int32_t /*flag*/ /* = 3 */)
 {
 	return _position;
 }
 
-OrderMap* ExecMocker::getOrders(const char* stdCode)
+OrderMap* ExecMocker::getOrders(const char* /*stdCode*/)
 {
 	return NULL;
 }
 
-double ExecMocker::getUndoneQty(const char* stdCode)
+double ExecMocker::getUndoneQty(const char* /*stdCode*/)
 {
 	return _undone;
 }
 
-OrderIDs ExecMocker::buy(const char* stdCode, double price, double qty, bool bForceClose /* = false */)
+OrderIDs ExecMocker::buy(const char* stdCode, double price, double qty, bool /*bForceClose*/ /* = false */)
 {
 	uint64_t curTime = (uint64_t)_replayer->get_date() * 1000000000 + (uint64_t)_replayer->get_raw_time() * 100000 + _replayer->get_secs();
 	OrderIDs ret = _matcher.buy(stdCode, price, qty, curTime);
@@ -233,7 +233,7 @@ OrderIDs ExecMocker::buy(const char* stdCode, double price, double qty, bool bFo
 	return ret;
 }
 
-OrderIDs ExecMocker::sell(const char* stdCode, double price, double qty, bool bForceClose /* = false */)
+OrderIDs ExecMocker::sell(const char* stdCode, double price, double qty, bool /*bForceClose*/ /* = false */)
 {
 	uint64_t curTime = (uint64_t)_replayer->get_date() * 1000000000 + (uint64_t)_replayer->get_raw_time() * 100000 + _replayer->get_secs();
 	OrderIDs ret = _matcher.sell(stdCode, price, qty, curTime);
@@ -282,7 +282,7 @@ void ExecMocker::writeLog(const char* message)
 	WTSLogger::log_dyn_raw("executer", _id.c_str(), LL_INFO, message);
 }
 
-void ExecMocker::handle_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message, uint64_t ordTime)
+void ExecMocker::handle_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message, uint64_t /*ordTime*/)
 {
 	_exec_unit->on_entrust(localid, stdCode, bSuccess, message);
 }

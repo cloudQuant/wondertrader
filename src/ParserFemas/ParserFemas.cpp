@@ -81,10 +81,10 @@ inline double checkValid(double val)
 }
 
 ParserFemas::ParserFemas()
-	:m_pUserAPI(NULL)
+	:m_uTradingDate(0)
+,m_pUserAPI(NULL)
 	,m_iRequestID(0)
-	,m_uTradingDate(0)
-{
+	{
 }
 
 
@@ -160,7 +160,7 @@ bool ParserFemas::disconnect()
 	return true;
 }
 
-void ParserFemas::OnRspError( CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast )
+void ParserFemas::OnRspError( CUstpFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/ )
 {
 	IsErrorRspInfo(pRspInfo);
 }
@@ -176,7 +176,7 @@ void ParserFemas::OnFrontConnected()
 	ReqUserLogin();
 }
 
-void ParserFemas::OnRspUserLogin( CUstpFtdcRspUserLoginField *pRspUserLogin, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast )
+void ParserFemas::OnRspUserLogin( CUstpFtdcRspUserLoginField */*pRspUserLogin*/, CUstpFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast )
 {
 	if(bIsLast && !IsErrorRspInfo(pRspInfo))
 	{
@@ -192,7 +192,7 @@ void ParserFemas::OnRspUserLogin( CUstpFtdcRspUserLoginField *pRspUserLogin, CUs
 	}
 }
 
-void ParserFemas::OnRspUserLogout(CUstpFtdcRspUserLogoutField *pUserLogout, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+void ParserFemas::OnRspUserLogout(CUstpFtdcRspUserLogoutField */*pUserLogout*/, CUstpFtdcRspInfoField */*pRspInfo*/, int /*nRequestID*/, bool /*bIsLast*/)
 {
 	if(m_sink)
 	{
@@ -209,7 +209,7 @@ void ParserFemas::OnFrontDisconnected( int nReason )
 	}
 }
 
-void ParserFemas::OnRspUnSubMarketData( CUstpFtdcSpecificInstrumentField *pSpecificInstrument, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast )
+void ParserFemas::OnRspUnSubMarketData( CUstpFtdcSpecificInstrumentField */*pSpecificInstrument*/, CUstpFtdcRspInfoField */*pRspInfo*/, int /*nRequestID*/, bool /*bIsLast*/ )
 {
 
 }
@@ -327,7 +327,7 @@ void ParserFemas::OnRtnDepthMarketData( CUstpFtdcDepthMarketDataField *pDepthMar
 	tick->release();
 }
 
-void ParserFemas::OnRspSubMarketData( CUstpFtdcSpecificInstrumentField *pSpecificInstrument, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast )
+void ParserFemas::OnRspSubMarketData( CUstpFtdcSpecificInstrumentField */*pSpecificInstrument*/, CUstpFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/ )
 {
 	if(!IsErrorRspInfo(pRspInfo))
 	{
@@ -402,7 +402,7 @@ void ParserFemas::SubscribeMarketData()
 	delete[] subscribe;
 }
 
-bool ParserFemas::IsErrorRspInfo(CUstpFtdcRspInfoField *pRspInfo)
+bool ParserFemas::IsErrorRspInfo(CUstpFtdcRspInfoField */*pRspInfo*/)
 {
 	return false;
 }
@@ -444,7 +444,7 @@ void ParserFemas::subscribe(const CodeSet &vecSymbols)
 	}
 }
 
-void ParserFemas::unsubscribe(const CodeSet &vecSymbols)
+void ParserFemas::unsubscribe(const CodeSet &/*vecSymbols*/)
 {
 }
 

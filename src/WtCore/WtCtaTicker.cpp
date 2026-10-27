@@ -252,9 +252,9 @@ void WtCtaRtTicker::run()
 					//优先修改时间标记
 					_last_emit_pos = total_mins;
 
-					bool bEndingTDate = true;
+					[[maybe_unused]] bool bEndingTDate = true;
 					uint32_t thisMin = _s_info->getCloseTime(false);
-					uint32_t offMin = _s_info->getCloseTime(true);
+					[[maybe_unused]] uint32_t offMin = _s_info->getCloseTime(true);
 
 					WTSLogger::info("Minute bar {}.{:04d} closed automatically", _date, thisMin);
 					if (_store)

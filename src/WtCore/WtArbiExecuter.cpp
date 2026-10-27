@@ -32,13 +32,13 @@ USING_NS_WTP;
  */
 WtArbiExecuter::WtArbiExecuter(WtExecuterFactory* factory, const char* name, IDataManager* dataMgr)
 	: IExecCommand(name)
-	, _factory(factory)
+	, _trader(NULL)
+, _factory(factory)
 	, _data_mgr(dataMgr)
-	, _channel_ready(false)
 	, _scale(1.0)
 	, _auto_clear(true)
-	, _trader(NULL)
-{
+	, _channel_ready(false)
+	{
 }
 
 
@@ -214,7 +214,7 @@ ExecuteUnitPtr WtArbiExecuter::getUnit(const char* stdCode, bool bAutoCreate /* 
  * \param etime 结束时间，默认为0表示当前
  * \return Tick切片数据指针
  */
-WTSTickSlice* WtArbiExecuter::getTicks(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
+WTSTickSlice* WtArbiExecuter::getTicks(const char* stdCode, uint32_t count, uint64_t /*etime*/ /* = 0 */)
 {
 	if (_data_mgr == NULL)
 		return NULL;
@@ -645,7 +645,7 @@ void WtArbiExecuter::on_trade(uint32_t localid, const char* stdCode, bool isBuy,
  * \param price 委托价格
  * \param isCanceled 是否已撤销，默认为false
  */
-void WtArbiExecuter::on_order(uint32_t localid, const char* stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled /* = false */)
+void WtArbiExecuter::on_order(uint32_t localid, const char* stdCode, bool isBuy, double /*totalQty*/, double leftQty, double price, bool isCanceled /* = false */)
 {
 	ExecuteUnitPtr unit = getUnit(stdCode, false);
 	if (unit == NULL)
@@ -818,7 +818,7 @@ void WtArbiExecuter::on_account(const char* currency, double prebalance, double 
  * \param newavail 新的可用持仓量
  * \param tradingday 交易日
  */
-void WtArbiExecuter::on_position(const char* stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t tradingday)
+void WtArbiExecuter::on_position(const char* stdCode, bool /*isLong*/, double /*prevol*/, double /*preavail*/, double /*newvol*/, double /*newavail*/, uint32_t tradingday)
 {
 	_channel_holds.insert(stdCode);
 

@@ -41,13 +41,13 @@ SelMocker::SelMocker(HisDataReplayer* replayer, const char* name, int32_t slippa
 	, _replayer(replayer)
 	, _total_calc_time(0)
 	, _emit_times(0)
-	, _is_in_schedule(false)
-	, _ud_modified(false)
-	, _strategy(NULL)
 	, _slippage(slippage)
 	, _ratio_slippage(isRatioSlp)
 	, _schedule_times(0)
-{
+, _is_in_schedule(false)
+	, _ud_modified(false)
+	, _strategy(NULL)
+	{
 	_context_id = makeSelCtxId();
 }
 
@@ -353,7 +353,7 @@ void SelMocker::handle_tick(const char* stdCode, WTSTickData* newTick, uint32_t 
 		proc_tick(stdCode, last_px, cur_px);
 }
 
-void SelMocker::proc_tick(const char* stdCode, double last_px, double cur_px)
+void SelMocker::proc_tick(const char* stdCode, double /*last_px*/, double cur_px)
 {
 	{
 		auto it = _sig_map.find(stdCode);
@@ -449,7 +449,7 @@ void SelMocker::update_dyn_profit(const char* stdCode, double price)
 	_fund_info._total_dynprofit = total_dynprofit;
 }
 
-void SelMocker::on_tick(const char* stdCode, WTSTickData* newTick, bool bEmitStrategy /* = true */)
+void SelMocker::on_tick(const char* /*stdCode*/, WTSTickData* /*newTick*/, bool /*bEmitStrategy*/ /* = true */)
 {
 	//By Wesley @ 2022.04.19
 	//这个逻辑迁移到handle_tick去了
@@ -478,7 +478,7 @@ void SelMocker::on_strategy_schedule(uint32_t curDate, uint32_t curTime)
 }
 
 
-bool SelMocker::on_schedule(uint32_t curDate, uint32_t curTime, uint32_t fireTime)
+bool SelMocker::on_schedule(uint32_t curDate, uint32_t curTime, uint32_t /*fireTime*/)
 {
 	_is_in_schedule = true;//开始调度,修改标记
 
@@ -554,8 +554,8 @@ void SelMocker::on_session_end(uint32_t curTDate)
 {
 	uint32_t curDate = curTDate;//_replayer->get_trading_date();
 
-	double total_profit = 0;
-	double total_dynprofit = 0;
+	[[maybe_unused]] double total_profit = 0;
+	[[maybe_unused]] double total_dynprofit = 0;
 
 	for (auto it = _pos_map.begin(); it != _pos_map.end(); it++)
 	{
@@ -643,7 +643,7 @@ void SelMocker::append_signal(const char* stdCode, double qty, const char* userT
 	//save_data();
 }
 
-void SelMocker::do_set_position(const char* stdCode, double qty, double price /* = 0.0 */, const char* userTag /* = "" */, bool bTriggered /* = false */)
+void SelMocker::do_set_position(const char* stdCode, double qty, double price /* = 0.0 */, const char* userTag /* = "" */, bool /*bTriggered*/ /* = false */)
 {
 	PosInfo& pInfo = _pos_map[stdCode];
 	double curPx = price;
@@ -741,8 +741,8 @@ void SelMocker::do_set_position(const char* stdCode, double qty, double price /*
 			if (decimal::eq(maxQty, 0))
 				continue;
 
-			double maxProf = dInfo._max_profit * maxQty / dInfo._volume;
-			double maxLoss = dInfo._max_loss * maxQty / dInfo._volume;
+			[[maybe_unused]] double maxProf = dInfo._max_profit * maxQty / dInfo._volume;
+			[[maybe_unused]] double maxLoss = dInfo._max_loss * maxQty / dInfo._volume;
 
 			dInfo._volume -= maxQty;
 			left -= maxQty;

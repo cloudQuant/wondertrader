@@ -33,8 +33,8 @@ USING_NS_WTP;
  * @details 初始化UFT引擎对象，获取当前系统时间并设置初始化参数
  */
 WtUftEngine::WtUftEngine()
-	: _cfg(NULL)
-	, _tm_ticker(NULL)
+	: _tm_ticker(NULL)
+	, _cfg(NULL)
 	, _notifier(NULL)
 {
 	// 获取当前系统日期和时间
@@ -176,7 +176,7 @@ WTSSessionInfo* WtUftEngine::get_session_info(const char* sid, bool isCode /* = 
  * @details 根据策略ID、合约代码和请求数量获取Tick切片数据，但当前实现为空
  * @note 当前实现直接返回NULL，后续的数据获取代码被不可达（注释了执行但未删除）
  */
-WTSTickSlice* WtUftEngine::get_tick_slice(uint32_t sid, const char* code, uint32_t count)
+WTSTickSlice* WtUftEngine::get_tick_slice(uint32_t /*sid*/, const char* code, uint32_t count)
 {
 	return NULL;
 	return _data_mgr->get_tick_slice(code, count);
@@ -189,7 +189,7 @@ WTSTickSlice* WtUftEngine::get_tick_slice(uint32_t sid, const char* code, uint32
  * @return 最新的Tick数据指针，如果找不到则返回NULL
  * @details 从数据管理器中获取指定合约的最新Tick数据
  */
-WTSTickData* WtUftEngine::get_last_tick(uint32_t sid, const char* stdCode)
+WTSTickData* WtUftEngine::get_last_tick(uint32_t /*sid*/, const char* stdCode)
 {
 	return _data_mgr->grab_last_tick(stdCode);
 }
@@ -214,7 +214,7 @@ WTSKlineSlice* WtUftEngine::get_kline_slice(uint32_t sid, const char* stdCode, c
 	if (cInfo == NULL)
 		return NULL;
 
-	WTSSessionInfo* sInfo = cInfo->getSessionInfo();
+	[[maybe_unused]] WTSSessionInfo* sInfo = cInfo->getSessionInfo();
 
 	// 构造唯一的订阅键值
 	std::string key = fmt::format("{}-{}-{}", stdCode, period, times);
@@ -608,7 +608,7 @@ void WtUftEngine::on_bar(const char* stdCode, const char* period, uint32_t times
  * @param curTime 当前时间
  * @details 在每分钟结束时触发，当前实现为空
  */
-void WtUftEngine::on_minute_end(uint32_t curDate, uint32_t curTime)
+void WtUftEngine::on_minute_end(uint32_t /*curDate*/, uint32_t /*curTime*/)
 {
 	// 当剏未实现
 }
@@ -652,7 +652,7 @@ UftContextPtr WtUftEngine::getContext(uint32_t id)
  * @return 委托队列切片数据指针
  * @details 获取指定合约的委托队列切片数据，直接调用数据管理器的相应方法
  */
-WTSOrdQueSlice* WtUftEngine::get_order_queue_slice(uint32_t sid, const char* code, uint32_t count)
+WTSOrdQueSlice* WtUftEngine::get_order_queue_slice(uint32_t /*sid*/, const char* code, uint32_t count)
 {
 	// 直接调用数据管理器获取委托队列切片
 	return _data_mgr->get_order_queue_slice(code, count);
@@ -666,7 +666,7 @@ WTSOrdQueSlice* WtUftEngine::get_order_queue_slice(uint32_t sid, const char* cod
  * @return 逆序委托切片数据指针
  * @details 获取指定合约的逆序委托切片数据，直接调用数据管理器的相应方法
  */
-WTSOrdDtlSlice* WtUftEngine::get_order_detail_slice(uint32_t sid, const char* code, uint32_t count)
+WTSOrdDtlSlice* WtUftEngine::get_order_detail_slice(uint32_t /*sid*/, const char* code, uint32_t count)
 {
 	// 直接调用数据管理器获取逆序委托切片
 	return _data_mgr->get_order_detail_slice(code, count);
@@ -680,7 +680,7 @@ WTSOrdDtlSlice* WtUftEngine::get_order_detail_slice(uint32_t sid, const char* co
  * @return 逆序页成交切片数据指针
  * @details 获取指定合约的逆序页成交切片数据，直接调用数据管理器的相应方法
  */
-WTSTransSlice* WtUftEngine::get_transaction_slice(uint32_t sid, const char* code, uint32_t count)
+WTSTransSlice* WtUftEngine::get_transaction_slice(uint32_t /*sid*/, const char* code, uint32_t count)
 {
 	// 直接调用数据管理器获取逆序页成交切片
 	return _data_mgr->get_transaction_slice(code, count);

@@ -226,7 +226,7 @@ void HftStraContext::on_order(uint32_t localid, const char* stdCode, bool isBuy,
  * @param newavail 新的可用量
  * @param tradingday 交易日期
  */
-void HftStraContext::on_position(const char* stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t tradingday)
+void HftStraContext::on_position(const char* stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t /*tradingday*/)
 {
 	// 只调用策略实例的持仓回调，此处没有调用基类的处理函数
 	if (_strategy)

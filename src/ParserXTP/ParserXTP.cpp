@@ -79,10 +79,10 @@ inline double checkValid(double val)
 }
 
 ParserXTP::ParserXTP()
-	:m_pUserAPI(NULL)
+	:m_uTradingDate(0)
+,m_pUserAPI(NULL)
 	,m_iRequestID(0)
-	,m_uTradingDate(0)
-{
+	{
 }
 
 
@@ -195,7 +195,7 @@ void ParserXTP::OnDisconnected(int nReason)
 	});
 }
 
-void ParserXTP::OnUnSubMarketData(XTPST *ticker, XTPRI *error_info, bool is_last)
+void ParserXTP::OnUnSubMarketData(XTPST */*ticker*/, XTPRI */*error_info*/, bool /*is_last*/)
 {
 
 }
@@ -228,7 +228,7 @@ void ParserXTP::OnTickByTick(XTPTBT *tbt_data)
 
 	uint32_t actDate = (uint32_t)(tbt_data->data_time / 1000000000);
 	uint32_t actTime = tbt_data->data_time % 1000000000;
-	uint32_t actHour = actTime / 10000000;
+	[[maybe_unused]] uint32_t actHour = actTime / 10000000;
 
 	if(tbt_data->type == XTP_TBT_ENTRUST)
 	{
@@ -291,7 +291,7 @@ void ParserXTP::OnDepthMarketData(XTPMD *market_data, int64_t bid1_qty[], int32_
 
 	uint32_t actDate = (uint32_t)(market_data->data_time / 1000000000);
 	uint32_t actTime = market_data->data_time % 1000000000;
-	uint32_t actHour = actTime / 10000000;
+	[[maybe_unused]] uint32_t actHour = actTime / 10000000;
 
 	std::string code, exchg;
 	if (market_data->exchange_id == XTP_EXCHANGE_SH)
@@ -416,7 +416,7 @@ void ParserXTP::OnDepthMarketData(XTPMD *market_data, int64_t bid1_qty[], int32_
 	tick->release();
 }
 
-void ParserXTP::OnSubMarketData(XTPST *ticker, XTPRI *error_info, bool is_last)
+void ParserXTP::OnSubMarketData(XTPST *ticker, XTPRI *error_info, bool /*is_last*/)
 {
 	if (!IsErrorRspInfo(error_info))
 	{
@@ -429,7 +429,7 @@ void ParserXTP::OnSubMarketData(XTPST *ticker, XTPRI *error_info, bool is_last)
 	}
 }
 
-void ParserXTP::OnSubTickByTick(XTPST *ticker, XTPRI *error_info, bool is_last)
+void ParserXTP::OnSubTickByTick(XTPST *ticker, XTPRI *error_info, bool /*is_last*/)
 {
 	if (!IsErrorRspInfo(error_info))
 	{
@@ -468,7 +468,7 @@ void ParserXTP::DoLogin()
 			else
 			{
 				m_sink->handleEvent(WPE_Connect, 0);
-				boost::asio::post(_asyncio, [this, iResult] {
+				boost::asio::post(_asyncio, [this] {
 					m_sink->handleEvent(WPE_Connect, 0);
 				});
 
@@ -678,7 +678,7 @@ void ParserXTP::subscribe(const CodeSet &vecSymbols)
 	}
 }
 
-void ParserXTP::unsubscribe(const CodeSet &vecSymbols)
+void ParserXTP::unsubscribe(const CodeSet &/*vecSymbols*/)
 {
 }
 

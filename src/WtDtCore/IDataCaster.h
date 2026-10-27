@@ -37,19 +37,19 @@ public:
 	 * @details 将委托队列数据广播到外部系统，默认为空实现，子类可以根据需要重写
 	 * @param curOrdQue 当前的委托队列数据指针
 	 */
-	virtual void	broadcast(WTSOrdQueData* curOrdQue){}
+	virtual void	broadcast(WTSOrdQueData* /*curOrdQue*/){}
 	/**
 	 * @brief 广播委托明细数据
 	 * @details 将委托明细数据广播到外部系统，默认为空实现，子类可以根据需要重写
 	 * @param curOrdDtl 当前的委托明细数据指针
 	 */
-	virtual void	broadcast(WTSOrdDtlData* curOrdDtl){}
+	virtual void	broadcast(WTSOrdDtlData* /*curOrdDtl*/){}
 	/**
 	 * @brief 广播成交数据
 	 * @details 将成交数据广播到外部系统，默认为空实现，子类可以根据需要重写
 	 * @param curTrans 当前的成交数据指针
 	 */
-	virtual void	broadcast(WTSTransData* curTrans){}
+	virtual void	broadcast(WTSTransData* /*curTrans*/){}
 };
 
 NS_WTP_END

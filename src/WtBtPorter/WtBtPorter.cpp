@@ -351,7 +351,7 @@ CtxHandler init_sel_mocker(const char* name, WtUInt32 date, WtUInt32 time, const
  * @param limitprice 限价，为0则为市价单
  * @param stopprice 止损价，为0则不设止损
  */
-void cta_enter_long(CtxHandler cHandle, const char* stdCode, double qty, const char* userTag, double limitprice, double stopprice)
+void cta_enter_long(CtxHandler /*cHandle*/, const char* stdCode, double qty, const char* userTag, double limitprice, double stopprice)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -370,7 +370,7 @@ void cta_enter_long(CtxHandler cHandle, const char* stdCode, double qty, const c
  * @param limitprice 限价，为0则为市价单
  * @param stopprice 止损价，为0则不设止损
  */
-void cta_exit_long(CtxHandler cHandle, const char* stdCode, double qty, const char* userTag, double limitprice, double stopprice)
+void cta_exit_long(CtxHandler /*cHandle*/, const char* stdCode, double qty, const char* userTag, double limitprice, double stopprice)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -389,7 +389,7 @@ void cta_exit_long(CtxHandler cHandle, const char* stdCode, double qty, const ch
  * @param limitprice 限价，为0则为市价单
  * @param stopprice 止损价，为0则不设止损
  */
-void cta_enter_short(CtxHandler cHandle, const char* stdCode, double qty, const char* userTag, double limitprice, double stopprice)
+void cta_enter_short(CtxHandler /*cHandle*/, const char* stdCode, double qty, const char* userTag, double limitprice, double stopprice)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -408,7 +408,7 @@ void cta_enter_short(CtxHandler cHandle, const char* stdCode, double qty, const 
  * @param limitprice 限价，为0则为市价单
  * @param stopprice 止损价，为0则不设止损
  */
-void cta_exit_short(CtxHandler cHandle, const char* stdCode, double qty, const char* userTag, double limitprice, double stopprice)
+void cta_exit_short(CtxHandler /*cHandle*/, const char* stdCode, double qty, const char* userTag, double limitprice, double stopprice)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -503,7 +503,7 @@ WtUInt32	cta_get_ticks(CtxHandler cHandle, const char* stdCode, WtUInt32 tickCnt
  * @param stdCode 标准合约代码
  * @return double 持仓盈亏金额
  */
-double cta_get_position_profit(CtxHandler cHandle, const char* stdCode)
+double cta_get_position_profit(CtxHandler /*cHandle*/, const char* stdCode)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -520,7 +520,7 @@ double cta_get_position_profit(CtxHandler cHandle, const char* stdCode)
  * @param openTag 开仓标签
  * @return WtUInt64 入场时间，格式为YYYYMMDDHHmmss
  */
-WtUInt64 cta_get_detail_entertime(CtxHandler cHandle, const char* stdCode, const char* openTag)
+WtUInt64 cta_get_detail_entertime(CtxHandler /*cHandle*/, const char* stdCode, const char* openTag)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -537,7 +537,7 @@ WtUInt64 cta_get_detail_entertime(CtxHandler cHandle, const char* stdCode, const
  * @param openTag 开仓标签
  * @return double 开仓成本
  */
-double cta_get_detail_cost(CtxHandler cHandle, const char* stdCode, const char* openTag)
+double cta_get_detail_cost(CtxHandler /*cHandle*/, const char* stdCode, const char* openTag)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -555,7 +555,7 @@ double cta_get_detail_cost(CtxHandler cHandle, const char* stdCode, const char* 
  * @param flag 盈亏标志，0-浮动盈亏，1-平仓盈亏
  * @return double 盈亏金额
  */
-double cta_get_detail_profit(CtxHandler cHandle, const char* stdCode, const char* openTag, int flag)
+double cta_get_detail_profit(CtxHandler /*cHandle*/, const char* stdCode, const char* openTag, int flag)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -571,7 +571,7 @@ double cta_get_detail_profit(CtxHandler cHandle, const char* stdCode, const char
  * @param stdCode 标准合约代码
  * @return double 持仓均价
  */
-double cta_get_position_avgpx(CtxHandler cHandle, const char* stdCode)
+double cta_get_position_avgpx(CtxHandler /*cHandle*/, const char* stdCode)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -611,7 +611,7 @@ void cta_get_all_position(CtxHandler cHandle, FuncGetPositionCallback cb)
  * @param openTag 开仓标签，如果不为空，则只返回指定标签的持仓
  * @return double 持仓量，正数表示多头持仓，负数表示空头持仓
  */
-double cta_get_position(CtxHandler cHandle, const char* stdCode, bool bOnlyValid, const char* openTag)
+double cta_get_position(CtxHandler /*cHandle*/, const char* stdCode, bool bOnlyValid, const char* openTag)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -627,7 +627,7 @@ double cta_get_position(CtxHandler cHandle, const char* stdCode, bool bOnlyValid
  * @param flag 资金数据标志，0-动态权益，1-静态权益，2-浮动盈亏
  * @return double 资金数据值
  */
-double cta_get_fund_data(CtxHandler cHandle, int flag)
+double cta_get_fund_data(CtxHandler /*cHandle*/, int flag)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -646,7 +646,7 @@ double cta_get_fund_data(CtxHandler cHandle, int flag)
  * @param limitprice 限价，为0则为市价单
  * @param stopprice 止损价，为0则不设止损
  */
-void cta_set_position(CtxHandler cHandle, const char* stdCode, double qty, const char* userTag, double limitprice, double stopprice)
+void cta_set_position(CtxHandler /*cHandle*/, const char* stdCode, double qty, const char* userTag, double limitprice, double stopprice)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -662,7 +662,7 @@ void cta_set_position(CtxHandler cHandle, const char* stdCode, double qty, const
  * @param stdCode 标准合约代码
  * @return WtUInt64 首次入场时间，格式为YYYYMMDDHHmmss
  */
-WtUInt64 cta_get_first_entertime(CtxHandler cHandle, const char* stdCode)
+WtUInt64 cta_get_first_entertime(CtxHandler /*cHandle*/, const char* stdCode)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -678,7 +678,7 @@ WtUInt64 cta_get_first_entertime(CtxHandler cHandle, const char* stdCode)
  * @param stdCode 标准合约代码
  * @return WtUInt64 最近入场时间，格式为YYYYMMDDHHmmss
  */
-WtUInt64 cta_get_last_entertime(CtxHandler cHandle, const char* stdCode)
+WtUInt64 cta_get_last_entertime(CtxHandler /*cHandle*/, const char* stdCode)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -694,7 +694,7 @@ WtUInt64 cta_get_last_entertime(CtxHandler cHandle, const char* stdCode)
  * @param stdCode 标准合约代码
  * @return WtUInt64 最近出场时间，格式为YYYYMMDDHHmmss
  */
-WtUInt64 cta_get_last_exittime(CtxHandler cHandle, const char* stdCode)
+WtUInt64 cta_get_last_exittime(CtxHandler /*cHandle*/, const char* stdCode)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -710,7 +710,7 @@ WtUInt64 cta_get_last_exittime(CtxHandler cHandle, const char* stdCode)
  * @param stdCode 标准合约代码
  * @return double 最近入场价格
  */
-double cta_get_last_enterprice(CtxHandler cHandle, const char* stdCode)
+double cta_get_last_enterprice(CtxHandler /*cHandle*/, const char* stdCode)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -726,7 +726,7 @@ double cta_get_last_enterprice(CtxHandler cHandle, const char* stdCode)
  * @param stdCode 标准合约代码
  * @return WtString 最近入场标签
  */
-WtString cta_get_last_entertag(CtxHandler cHandle, const char* stdCode)
+WtString cta_get_last_entertag(CtxHandler /*cHandle*/, const char* stdCode)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -795,7 +795,7 @@ WtUInt32 cta_get_time()
  * @param level 日志级别，LOG_LEVEL_DEBUG/LOG_LEVEL_INFO/LOG_LEVEL_WARN/LOG_LEVEL_ERROR
  * @param message 日志内容
  */
-void cta_log_text(CtxHandler cHandle, WtUInt32 level, const char* message)
+void cta_log_text(CtxHandler /*cHandle*/, WtUInt32 level, const char* message)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -827,7 +827,7 @@ void cta_log_text(CtxHandler cHandle, WtUInt32 level, const char* message)
  * @param key 数据键名
  * @param val 数据值
  */
-void cta_save_userdata(CtxHandler cHandle, const char* key, const char* val)
+void cta_save_userdata(CtxHandler /*cHandle*/, const char* key, const char* val)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -844,7 +844,7 @@ void cta_save_userdata(CtxHandler cHandle, const char* key, const char* val)
  * @param defVal 默认值，当指定键名的数据不存在时返回此值
  * @return WtString 加载的数据值
  */
-WtString cta_load_userdata(CtxHandler cHandle, const char* key, const char* defVal)
+WtString cta_load_userdata(CtxHandler /*cHandle*/, const char* key, const char* defVal)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -859,7 +859,7 @@ WtString cta_load_userdata(CtxHandler cHandle, const char* key, const char* defV
  * @param cHandle 策略上下文句柄
  * @param stdCode 标准合约代码
  */
-void cta_sub_ticks(CtxHandler cHandle, const char* stdCode)
+void cta_sub_ticks(CtxHandler /*cHandle*/, const char* stdCode)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -875,7 +875,7 @@ void cta_sub_ticks(CtxHandler cHandle, const char* stdCode)
  * @param stdCode 标准合约代码
  * @param period K线周期，如m1/m5/d1等
  */
-void cta_sub_bar_events(CtxHandler cHandle, const char* stdCode, const char* period)
+void cta_sub_bar_events(CtxHandler /*cHandle*/, const char* stdCode, const char* period)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -890,7 +890,7 @@ void cta_sub_bar_events(CtxHandler cHandle, const char* stdCode, const char* per
  * @param cHandle 策略上下文句柄
  * @return bool 返回计算是否成功
  */
-bool cta_step(CtxHandler cHandle)
+bool cta_step(CtxHandler /*cHandle*/)
 {
 	//只有异步模式才有意义
 	if (!getRunner().isAsync())
@@ -910,7 +910,7 @@ bool cta_step(CtxHandler cHandle)
  * @param stdCode 标准合约代码
  * @param period K线周期，如m1/m5/d1等
  */
-void cta_set_chart_kline(CtxHandler cHandle, const char* stdCode, const char* period)
+void cta_set_chart_kline(CtxHandler /*cHandle*/, const char* stdCode, const char* period)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -927,7 +927,7 @@ void cta_set_chart_kline(CtxHandler cHandle, const char* stdCode, const char* pe
  * @param icon 标记图标，如"buy"/"sell"等
  * @param tag 标记标签，用于显示标记的说明文字
  */
-void cta_add_chart_mark(CtxHandler cHandle, double price, const char* icon, const char* tag)
+void cta_add_chart_mark(CtxHandler /*cHandle*/, double price, const char* icon, const char* tag)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -943,7 +943,7 @@ void cta_add_chart_mark(CtxHandler cHandle, double price, const char* icon, cons
  * @param idxName 指标名称
  * @param indexType 指标类型
  */
-void cta_register_index(CtxHandler cHandle, const char* idxName, WtUInt32 indexType)
+void cta_register_index(CtxHandler /*cHandle*/, const char* idxName, WtUInt32 indexType)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -961,7 +961,7 @@ void cta_register_index(CtxHandler cHandle, const char* idxName, WtUInt32 indexT
  * @param lineType 线型类型
  * @return bool 返回注册是否成功
  */
-bool cta_register_index_line(CtxHandler cHandle, const char* idxName, const char* lineName, WtUInt32 lineType)
+bool cta_register_index_line(CtxHandler /*cHandle*/, const char* idxName, const char* lineName, WtUInt32 lineType)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -978,7 +978,7 @@ bool cta_register_index_line(CtxHandler cHandle, const char* idxName, const char
  * @param val 基准线值
  * @return bool 返回添加是否成功
  */
-bool cta_add_index_baseline(CtxHandler cHandle, const char* idxName, const char* lineName, double val)
+bool cta_add_index_baseline(CtxHandler /*cHandle*/, const char* idxName, const char* lineName, double val)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -996,7 +996,7 @@ bool cta_add_index_baseline(CtxHandler cHandle, const char* idxName, const char*
  * @param val 数据值
  * @return bool 返回设置是否成功
  */
-bool cta_set_index_value(CtxHandler cHandle, const char* idxName, const char* lineName, double val)
+bool cta_set_index_value(CtxHandler /*cHandle*/, const char* idxName, const char* lineName, double val)
 {
 	CtaMocker* ctx = getRunner().cta_mocker();
 	if (ctx == NULL)
@@ -1015,7 +1015,7 @@ bool cta_set_index_value(CtxHandler cHandle, const char* idxName, const char* li
  * @param key 数据键名
  * @param val 数据值
  */
-void sel_save_userdata(CtxHandler cHandle, const char* key, const char* val)
+void sel_save_userdata(CtxHandler /*cHandle*/, const char* key, const char* val)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
 	if (ctx == NULL)
@@ -1032,7 +1032,7 @@ void sel_save_userdata(CtxHandler cHandle, const char* key, const char* val)
  * @param defVal 默认值，当指定键名的数据不存在时返回此值
  * @return WtString 加载的数据值
  */
-WtString sel_load_userdata(CtxHandler cHandle, const char* key, const char* defVal)
+WtString sel_load_userdata(CtxHandler /*cHandle*/, const char* key, const char* defVal)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
 	if (ctx == NULL)
@@ -1048,7 +1048,7 @@ WtString sel_load_userdata(CtxHandler cHandle, const char* key, const char* defV
  * @param level 日志级别，LOG_LEVEL_DEBUG/LOG_LEVEL_INFO/LOG_LEVEL_WARN/LOG_LEVEL_ERROR
  * @param message 日志内容
  */
-void sel_log_text(CtxHandler cHandle, WtUInt32 level, const char* message)
+void sel_log_text(CtxHandler /*cHandle*/, WtUInt32 level, const char* message)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
 	if (ctx == NULL)
@@ -1135,7 +1135,7 @@ void sel_get_all_position(CtxHandler cHandle, FuncGetPositionCallback cb)
  * @param openTag 开仓标签，用于区分不同的开仓来源
  * @return double 合约持仓量，正数为多头仓位，负数为空头仓位
  */
-double sel_get_position(CtxHandler cHandle, const char* stdCode, bool bOnlyValid, const char* openTag)
+double sel_get_position(CtxHandler /*cHandle*/, const char* stdCode, bool bOnlyValid, const char* openTag)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
 	if (ctx == NULL)
@@ -1191,7 +1191,7 @@ WtUInt32 sel_get_bars(CtxHandler cHandle, const char* stdCode, const char* perio
  * @param qty 目标仓位，正数表示多头仓位，负数表示空头仓位
  * @param userTag 用户自定义标签，用于标记仓位的来源
  */
-void sel_set_position(CtxHandler cHandle, const char* stdCode, double qty, const char* userTag)
+void sel_set_position(CtxHandler /*cHandle*/, const char* stdCode, double qty, const char* userTag)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
 	if (ctx == NULL)
@@ -1245,7 +1245,7 @@ WtUInt32	sel_get_ticks(CtxHandler cHandle, const char* stdCode, WtUInt32 tickCnt
  * @param cHandle 策略上下文句柄
  * @param stdCode 标准合约代码
  */
-void sel_sub_ticks(CtxHandler cHandle, const char* stdCode)
+void sel_sub_ticks(CtxHandler /*cHandle*/, const char* stdCode)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
 	if (ctx == NULL)
@@ -1283,7 +1283,7 @@ WtUInt32 sel_get_tdate()
  * @param flag 资金数据标志，0-动态权益，1-静态权益，2-各类资金指标
  * @return double 对应的资金数据值
  */
-double sel_get_fund_data(CtxHandler cHandle, int flag)
+double sel_get_fund_data(CtxHandler /*cHandle*/, int flag)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
 	if (ctx == NULL)
@@ -1299,7 +1299,7 @@ double sel_get_fund_data(CtxHandler cHandle, int flag)
  * @param stdCode 标准合约代码
  * @return double 持仓盈亏数值
  */
-double sel_get_position_profit(CtxHandler cHandle, const char* stdCode)
+double sel_get_position_profit(CtxHandler /*cHandle*/, const char* stdCode)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
 	if (ctx == NULL)
@@ -1316,7 +1316,7 @@ double sel_get_position_profit(CtxHandler cHandle, const char* stdCode)
  * @param openTag 开仓标签
  * @return WtUInt64 入场时间，格式为时间戳
  */
-WtUInt64 sel_get_detail_entertime(CtxHandler cHandle, const char* stdCode, const char* openTag)
+WtUInt64 sel_get_detail_entertime(CtxHandler /*cHandle*/, const char* stdCode, const char* openTag)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
 	if (ctx == NULL)
@@ -1333,7 +1333,7 @@ WtUInt64 sel_get_detail_entertime(CtxHandler cHandle, const char* stdCode, const
  * @param openTag 开仓标签
  * @return double 持仓成本
  */
-double sel_get_detail_cost(CtxHandler cHandle, const char* stdCode, const char* openTag)
+double sel_get_detail_cost(CtxHandler /*cHandle*/, const char* stdCode, const char* openTag)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
 	if (ctx == NULL)
@@ -1351,7 +1351,7 @@ double sel_get_detail_cost(CtxHandler cHandle, const char* stdCode, const char* 
  * @param flag 盈亏标志，0-浮动盈亏，1-平仓盈亏
  * @return double 持仓盈亏
  */
-double sel_get_detail_profit(CtxHandler cHandle, const char* stdCode, const char* openTag, int flag)
+double sel_get_detail_profit(CtxHandler /*cHandle*/, const char* stdCode, const char* openTag, int flag)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
 	if (ctx == NULL)
@@ -1367,7 +1367,7 @@ double sel_get_detail_profit(CtxHandler cHandle, const char* stdCode, const char
  * @param stdCode 标准合约代码
  * @return double 持仓平均价
  */
-double sel_get_position_avgpx(CtxHandler cHandle, const char* stdCode)
+double sel_get_position_avgpx(CtxHandler /*cHandle*/, const char* stdCode)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
 	if (ctx == NULL)
@@ -1383,7 +1383,7 @@ double sel_get_position_avgpx(CtxHandler cHandle, const char* stdCode)
  * @param stdCode 标准合约代码
  * @return WtUInt64 入场时间，格式为时间戳
  */
-WtUInt64 sel_get_first_entertime(CtxHandler cHandle, const char* stdCode)
+WtUInt64 sel_get_first_entertime(CtxHandler /*cHandle*/, const char* stdCode)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
 	if (ctx == NULL)
@@ -1399,7 +1399,7 @@ WtUInt64 sel_get_first_entertime(CtxHandler cHandle, const char* stdCode)
  * @param stdCode 标准合约代码
  * @return WtUInt64 入场时间，格式为时间戳
  */
-WtUInt64 sel_get_last_entertime(CtxHandler cHandle, const char* stdCode)
+WtUInt64 sel_get_last_entertime(CtxHandler /*cHandle*/, const char* stdCode)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
 	if (ctx == NULL)
@@ -1415,7 +1415,7 @@ WtUInt64 sel_get_last_entertime(CtxHandler cHandle, const char* stdCode)
  * @param stdCode 标准合约代码
  * @return WtUInt64 离场时间，格式为时间戳
  */
-WtUInt64 sel_get_last_exittime(CtxHandler cHandle, const char* stdCode)
+WtUInt64 sel_get_last_exittime(CtxHandler /*cHandle*/, const char* stdCode)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
 	if (ctx == NULL)
@@ -1431,7 +1431,7 @@ WtUInt64 sel_get_last_exittime(CtxHandler cHandle, const char* stdCode)
  * @param stdCode 标准合约代码
  * @return double 入场价格
  */
-double sel_get_last_enterprice(CtxHandler cHandle, const char* stdCode)
+double sel_get_last_enterprice(CtxHandler /*cHandle*/, const char* stdCode)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
 	if (ctx == NULL)
@@ -1447,7 +1447,7 @@ double sel_get_last_enterprice(CtxHandler cHandle, const char* stdCode)
  * @param stdCode 标准合约代码
  * @return WtString 入场标签字符串
  */
-WtString sel_get_last_entertag(CtxHandler cHandle, const char* stdCode)
+WtString sel_get_last_entertag(CtxHandler /*cHandle*/, const char* stdCode)
 {
 	SelMocker* ctx = getRunner().sel_mocker();
 	if (ctx == NULL)
@@ -1467,7 +1467,7 @@ WtString sel_get_last_entertag(CtxHandler cHandle, const char* stdCode)
  * @param bOnlyValid 是否只计算可用持仓（非冲销中）
  * @return double 合约持仓量，正数为多头仓位，负数为空头仓位
  */
-double hft_get_position(CtxHandler cHandle, const char* stdCode, bool bOnlyValid)
+double hft_get_position(CtxHandler /*cHandle*/, const char* stdCode, bool bOnlyValid)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
 	if (mocker == NULL)
@@ -1483,7 +1483,7 @@ double hft_get_position(CtxHandler cHandle, const char* stdCode, bool bOnlyValid
  * @param stdCode 标准合约代码
  * @return double 当前持仓浮动盈亏
  */
-double hft_get_position_profit(CtxHandler cHandle, const char* stdCode)
+double hft_get_position_profit(CtxHandler /*cHandle*/, const char* stdCode)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
 	if (mocker == NULL)
@@ -1499,7 +1499,7 @@ double hft_get_position_profit(CtxHandler cHandle, const char* stdCode)
  * @param stdCode 标准合约代码
  * @return double 当前持仓平均价格
  */
-double hft_get_position_avgpx(CtxHandler cHandle, const char* stdCode)
+double hft_get_position_avgpx(CtxHandler /*cHandle*/, const char* stdCode)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
 	if (mocker == NULL)
@@ -1516,7 +1516,7 @@ double hft_get_position_avgpx(CtxHandler cHandle, const char* stdCode)
  * @param stdCode 标准合约代码
  * @return double 未完成委托数量
  */
-double hft_get_undone(CtxHandler cHandle, const char* stdCode)
+double hft_get_undone(CtxHandler /*cHandle*/, const char* stdCode)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
 	if (mocker == NULL)
@@ -1756,7 +1756,7 @@ WtUInt32 hft_get_trans(CtxHandler cHandle, const char* stdCode, WtUInt32 itemCnt
  * @param level 日志级别，LOG_LEVEL_DEBUG/LOG_LEVEL_INFO/LOG_LEVEL_WARN/LOG_LEVEL_ERROR
  * @param message 日志内容
  */
-void hft_log_text(CtxHandler cHandle, WtUInt32 level, const char* message)
+void hft_log_text(CtxHandler /*cHandle*/, WtUInt32 level, const char* message)
 {
 	HftMocker* ctx = getRunner().hft_mocker();
 	if (ctx == NULL)
@@ -1787,7 +1787,7 @@ void hft_log_text(CtxHandler cHandle, WtUInt32 level, const char* message)
  * @param cHandle 策略上下文句柄
  * @param stdCode 标准合约代码
  */
-void hft_sub_ticks(CtxHandler cHandle, const char* stdCode)
+void hft_sub_ticks(CtxHandler /*cHandle*/, const char* stdCode)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
 	if (mocker == NULL)
@@ -1802,7 +1802,7 @@ void hft_sub_ticks(CtxHandler cHandle, const char* stdCode)
  * @param cHandle 策略上下文句柄
  * @param stdCode 标准合约代码
  */
-void hft_sub_order_detail(CtxHandler cHandle, const char* stdCode)
+void hft_sub_order_detail(CtxHandler /*cHandle*/, const char* stdCode)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
 	if (mocker == NULL)
@@ -1817,7 +1817,7 @@ void hft_sub_order_detail(CtxHandler cHandle, const char* stdCode)
  * @param cHandle 策略上下文句柄
  * @param stdCode 标准合约代码
  */
-void hft_sub_order_queue(CtxHandler cHandle, const char* stdCode)
+void hft_sub_order_queue(CtxHandler /*cHandle*/, const char* stdCode)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
 	if (mocker == NULL)
@@ -1832,7 +1832,7 @@ void hft_sub_order_queue(CtxHandler cHandle, const char* stdCode)
  * @param cHandle 策略上下文句柄
  * @param stdCode 标准合约代码
  */
-void hft_sub_transaction(CtxHandler cHandle, const char* stdCode)
+void hft_sub_transaction(CtxHandler /*cHandle*/, const char* stdCode)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
 	if (mocker == NULL)
@@ -1848,7 +1848,7 @@ void hft_sub_transaction(CtxHandler cHandle, const char* stdCode)
  * @param localid 要取消的委托的本地ID
  * @return bool 取消操作是否成功
  */
-bool hft_cancel(CtxHandler cHandle, WtUInt32 localid)
+bool hft_cancel(CtxHandler /*cHandle*/, WtUInt32 localid)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
 	if (mocker == NULL)
@@ -1865,7 +1865,7 @@ bool hft_cancel(CtxHandler cHandle, WtUInt32 localid)
  * @param isBuy 是否为买入委托，true为买入，false为卖出
  * @return WtString 返回被取消的委托ID组成的字符串，以逗号分隔
  */
-WtString hft_cancel_all(CtxHandler cHandle, const char* stdCode, bool isBuy)
+WtString hft_cancel_all(CtxHandler /*cHandle*/, const char* stdCode, bool isBuy)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
 	if (mocker == NULL)
@@ -1897,7 +1897,7 @@ WtString hft_cancel_all(CtxHandler cHandle, const char* stdCode, bool isBuy)
  * @param flag 下单标志
  * @return WtString 返回多个委托ID组成的字符串，以逗号分隔
  */
-WtString hft_buy(CtxHandler cHandle, const char* stdCode, double price, double qty, const char* userTag, int flag)
+WtString hft_buy(CtxHandler /*cHandle*/, const char* stdCode, double price, double qty, const char* userTag, int flag)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
 	if (mocker == NULL)
@@ -1928,7 +1928,7 @@ WtString hft_buy(CtxHandler cHandle, const char* stdCode, double price, double q
  * @param flag 下单标志
  * @return WtString 返回多个委托ID组成的字符串，以逗号分隔
  */
-WtString hft_sell(CtxHandler cHandle, const char* stdCode, double price, double qty, const char* userTag, int flag)
+WtString hft_sell(CtxHandler /*cHandle*/, const char* stdCode, double price, double qty, const char* userTag, int flag)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
 	if (mocker == NULL)
@@ -1955,7 +1955,7 @@ WtString hft_sell(CtxHandler cHandle, const char* stdCode, double price, double 
  * @param key 数据键名
  * @param val 数据值
  */
-void hft_save_userdata(CtxHandler cHandle, const char* key, const char* val)
+void hft_save_userdata(CtxHandler /*cHandle*/, const char* key, const char* val)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
 	if (mocker == NULL)
@@ -1972,7 +1972,7 @@ void hft_save_userdata(CtxHandler cHandle, const char* key, const char* val)
  * @param defVal 默认值，当键不存在时返回此值
  * @return WtString 返回数据值，如果键不存在则返回默认值
  */
-WtString hft_load_userdata(CtxHandler cHandle, const char* key, const char* defVal)
+WtString hft_load_userdata(CtxHandler /*cHandle*/, const char* key, const char* defVal)
 {
 	HftMocker* mocker = getRunner().hft_mocker();
 	if (mocker == NULL)
@@ -1987,7 +1987,7 @@ WtString hft_load_userdata(CtxHandler cHandle, const char* key, const char* defV
  * @param cHandle 策略上下文句柄
  * @note 该函数仅在异步模式下有意义，同步模式下将直接返回
  */
-void hft_step(CtxHandler cHandle)
+void hft_step(CtxHandler /*cHandle*/)
 {
 	//只有异步模式才有意义
 	if (!getRunner().isAsync())

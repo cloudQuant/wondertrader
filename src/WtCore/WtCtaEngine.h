@@ -9,7 +9,7 @@
  */
 #pragma once
 #include "../Includes/ICtaStraCtx.h"
-#include "../Share/threadpool.hpp"
+#include <Share/threadpool.hpp>
 #include "WtExecMgr.h"
 #include "WtEngine.h"
 
@@ -52,8 +52,8 @@ public:
 	virtual uint64_t get_real_time() override;
 	virtual WTSCommodityInfo* get_comm_info(const char* stdCode) override;
 	virtual WTSSessionInfo* get_sess_info(const char* stdCode) override;
-	virtual IHotMgr* get_hot_mon() { return _hot_mgr; }
-	virtual uint32_t get_trading_day() { return _cur_tdate; }
+	virtual IHotMgr* get_hot_mon() override { return _hot_mgr; }
+	virtual uint32_t get_trading_day() override { return _cur_tdate; }
 
 
 public:

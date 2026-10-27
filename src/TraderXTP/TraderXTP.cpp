@@ -115,7 +115,7 @@ inline XTP_POSITION_EFFECT_TYPE wrapOffsetType(WTSOffsetType offType)
 		return XTP_POSITION_EFFECT_FORCECLOSE;
 }
 
-inline WTSOffsetType wrapOffsetType(XTP_SIDE_TYPE side, XTP_POSITION_EFFECT_TYPE offType = 0)
+inline WTSOffsetType wrapOffsetType(XTP_SIDE_TYPE /*side*/, XTP_POSITION_EFFECT_TYPE offType = 0)
 {
 	if (XTP_POSITION_EFFECT_OPEN == offType)
 		return WOT_OPEN;
@@ -169,15 +169,15 @@ inline uint32_t makeRefID()
 TraderXTP::TraderXTP()
 	: _api(NULL)
 	, _sink(NULL)
-	, _ordref(makeRefID())
-	, _reqid(1)
-	, _orders(NULL)
-	, _trades(NULL)
 	, _positions(NULL)
+	, _trades(NULL)
+	, _orders(NULL)
 	, _bd_mgr(NULL)
-	, _tradingday(0)
 	, _inited(false)
-{
+, _tradingday(0)
+	, _reqid(1)
+	, _ordref(makeRefID())
+	{
 }
 
 
@@ -342,7 +342,7 @@ WTSTradeInfo* TraderXTP::makeTradeInfo(XTPQueryTradeRsp* trade_info)
 	return pRet;
 }
 
-void TraderXTP::OnDisconnected(uint64_t session_id, int reason)
+void TraderXTP::OnDisconnected(uint64_t /*session_id*/, int reason)
 {
 	if (_sink)
 		_sink->handleEvent(WTE_Close, reason);
@@ -360,7 +360,7 @@ void TraderXTP::OnError(XTPRI *error_info)
 		write_log(_sink,LL_ERROR, error_info->error_msg);
 }
 
-void TraderXTP::OnOrderEvent(XTPOrderInfo *order_info, XTPRI *error_info, uint64_t session_id)
+void TraderXTP::OnOrderEvent(XTPOrderInfo *order_info, XTPRI *error_info, uint64_t /*session_id*/)
 {
 	if(IsErrorInfo(error_info))
 	{
@@ -385,7 +385,7 @@ void TraderXTP::OnOrderEvent(XTPOrderInfo *order_info, XTPRI *error_info, uint64
 	}
 }
 
-void TraderXTP::OnTradeEvent(XTPTradeReport *trade_info, uint64_t session_id)
+void TraderXTP::OnTradeEvent(XTPTradeReport *trade_info, uint64_t /*session_id*/)
 {
 	WTSTradeInfo *trdInfo = makeTradeInfo(trade_info);
 	if (trdInfo)
@@ -397,7 +397,7 @@ void TraderXTP::OnTradeEvent(XTPTradeReport *trade_info, uint64_t session_id)
 	}
 }
 
-void TraderXTP::OnCancelOrderError(XTPOrderCancelInfo *cancel_info, XTPRI *error_info, uint64_t session_id)
+void TraderXTP::OnCancelOrderError(XTPOrderCancelInfo */*cancel_info*/, XTPRI *error_info, uint64_t /*session_id*/)
 {
 	if (IsErrorInfo(error_info))
 	{
@@ -408,7 +408,7 @@ void TraderXTP::OnCancelOrderError(XTPOrderCancelInfo *cancel_info, XTPRI *error
 
 }
 
-void TraderXTP::OnQueryOrder(XTPQueryOrderRsp *order_info, XTPRI *error_info, int request_id, bool is_last, uint64_t session_id)
+void TraderXTP::OnQueryOrder(XTPQueryOrderRsp *order_info, XTPRI *error_info, int /*request_id*/, bool is_last, uint64_t /*session_id*/)
 {
 	//if (is_last)
 	//{
@@ -438,7 +438,7 @@ void TraderXTP::OnQueryOrder(XTPQueryOrderRsp *order_info, XTPRI *error_info, in
 	}
 }
 
-void TraderXTP::OnQueryTrade(XTPQueryTradeRsp *trade_info, XTPRI *error_info, int request_id, bool is_last, uint64_t session_id)
+void TraderXTP::OnQueryTrade(XTPQueryTradeRsp *trade_info, XTPRI *error_info, int /*request_id*/, bool is_last, uint64_t /*session_id*/)
 {
 	//if (is_last)
 	//{
@@ -468,7 +468,7 @@ void TraderXTP::OnQueryTrade(XTPQueryTradeRsp *trade_info, XTPRI *error_info, in
 	}
 }
 
-void TraderXTP::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error_info, int request_id, bool is_last, uint64_t session_id)
+void TraderXTP::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error_info, int /*request_id*/, bool is_last, uint64_t /*session_id*/)
 {
 	//if (is_last)
 	//{
@@ -541,7 +541,7 @@ void TraderXTP::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error_i
 	}
 }
 
-void TraderXTP::OnQueryAsset(XTPQueryAssetRsp *asset, XTPRI *error_info, int request_id, bool is_last, uint64_t session_id)
+void TraderXTP::OnQueryAsset(XTPQueryAssetRsp *asset, XTPRI *error_info, int /*request_id*/, bool is_last, uint64_t /*session_id*/)
 {
 	//if (is_last)
 	//{
@@ -816,7 +816,7 @@ void TraderXTP::doLogin()
 	}
 }
 
-int TraderXTP::login(const char* user, const char* pass, const char* productInfo)
+int TraderXTP::login(const char* user, const char* pass, const char* /*productInfo*/)
 {
 	_user = user;
 	_pass = pass;

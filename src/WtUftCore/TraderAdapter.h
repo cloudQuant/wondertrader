@@ -29,7 +29,7 @@ class TraderAdapter : public ITraderSpi
 {
 public:
 	TraderAdapter();
-	~TraderAdapter();
+	virtual ~TraderAdapter();
 
 	typedef enum tagAdapterState
 	{

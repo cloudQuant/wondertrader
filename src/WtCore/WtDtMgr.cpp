@@ -25,13 +25,13 @@ WTSDataFactory g_dataFact;
 
 WtDtMgr::WtDtMgr()
 	: _reader(NULL)
-	, _engine(NULL)
 	, _loader(NULL)
-	, _bars_cache(NULL)
-	, _ticks_adjusted(NULL)
-	, _rt_tick_map(NULL)
+	, _engine(NULL)
 	, _force_cache(false)
-{
+, _bars_cache(NULL)
+	, _rt_tick_map(NULL)
+	, _ticks_adjusted(NULL)
+	{
 }
 
 
@@ -101,7 +101,7 @@ bool WtDtMgr::init(WTSVariant* cfg, WtEngine* engine, bool bForceCache /* = fals
 	return initStore(cfg->get("store"));
 }
 
-void WtDtMgr::on_all_bar_updated(uint32_t updateTime)
+void WtDtMgr::on_all_bar_updated(uint32_t /*updateTime*/)
 {
 	if (_bar_notifies.empty())
 		return;

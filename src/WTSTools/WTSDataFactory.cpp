@@ -586,7 +586,7 @@ WTSBarStruct* WTSDataFactory::updateHourData(WTSSessionInfo* sInfo, WTSKlineData
 	return NULL;
 }
 
-WTSBarStruct* WTSDataFactory::updateHalfData(WTSSessionInfo* sInfo, WTSKlineData* klineData, WTSBarStruct* newBasicBar)
+WTSBarStruct* WTSDataFactory::updateHalfData(WTSSessionInfo* /*sInfo*/, WTSKlineData* klineData, WTSBarStruct* newBasicBar)
 {
 	uint32_t uTradingDate = newBasicBar->date;
 	uint32_t uYYYYMMDD = TimeUtils::minBarToDate(newBasicBar->time);
@@ -668,7 +668,7 @@ WTSBarStruct* WTSDataFactory::updateHalfData(WTSSessionInfo* sInfo, WTSKlineData
 	return NULL;
 }
 
-WTSBarStruct* WTSDataFactory::updateDayData(WTSSessionInfo* sInfo, WTSKlineData* klineData, WTSTickData* tick)
+WTSBarStruct* WTSDataFactory::updateDayData(WTSSessionInfo* /*sInfo*/, WTSKlineData* klineData, WTSTickData* tick)
 {
 	uint32_t curDate = tick->tradingdate();
 	uint32_t lastDate = klineData->date(klineData->size()-1);
@@ -1242,7 +1242,7 @@ WTSKlineData* WTSDataFactory::extractHalfData(WTSKlineSlice* baseKline, WTSSessi
 	return ret;
 }
 
-WTSKlineData* WTSDataFactory::extractDayData(WTSKlineSlice* baseKline, uint32_t times, bool bIncludeOpen /* = true */)
+WTSKlineData* WTSDataFactory::extractDayData(WTSKlineSlice* baseKline, uint32_t times, bool /*bIncludeOpen*/ /* = true */)
 {
 	//计算时间步长
 	uint32_t steplen = times;
@@ -1304,7 +1304,7 @@ WTSKlineData* WTSDataFactory::extractDayData(WTSKlineSlice* baseKline, uint32_t 
 }
 
 WTSKlineData* WTSDataFactory::extractKlineData(WTSTickSlice* ayTicks, uint32_t seconds, 
-	WTSSessionInfo* sInfo, bool bUnixTime /* = false */, bool bAlignSec /* = false */)
+	WTSSessionInfo* sInfo, bool bUnixTime /* = false */, bool /*bAlignSec*/ /* = false */)
 {
 	if(ayTicks == NULL || ayTicks->size() == 0)
 		return NULL;

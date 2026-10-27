@@ -13,7 +13,7 @@
 
 #include "TraderDD.h"
 #include <boost/asio/post.hpp>
-#include "../API/FixApi/include/fiddef.h"
+#include <API/FixApi/include/fiddef.h>
 #include "../Includes/WTSError.hpp"
 #include "../Includes/WTSContractInfo.hpp"
 #include "../Includes/WTSSessionInfo.hpp"

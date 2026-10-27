@@ -151,7 +151,7 @@ private:
 	WtUftRtTicker*	_tm_ticker;
 	WTSVariant*		_cfg;
 
-	bool			_dependent;	//子策略独立记账
+	[[maybe_unused]] bool			_dependent;	//子策略独立记账
 
 	EventNotifier*	_notifier;
 };

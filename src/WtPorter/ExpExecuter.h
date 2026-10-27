@@ -27,6 +27,8 @@ public:
 	 */
 	ExpExecuter(const char* name):IExecCommand(name){}
 
+	virtual ~ExpExecuter() = default;
+
 	/**
 	 * @brief 初始化执行器
 	 * @details 调用运行器的执行器初始化接口

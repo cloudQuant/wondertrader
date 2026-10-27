@@ -43,12 +43,24 @@
 #include <windows.h>
 #include <wchar.h>				/* get wcscpy() */
 
+#ifdef _MSC_VER
 #pragma warning(disable: 4996)
+#endif
+#ifdef _MSC_VER
 #pragma warning(disable: 4146)
+#endif
+#ifdef _MSC_VER
 #pragma warning(disable: 4267)
+#endif
+#ifdef _MSC_VER
 #pragma warning(disable: 4244)
+#endif
+#ifdef _MSC_VER
 #pragma warning(disable: 4333)
+#endif
+#ifdef _MSC_VER
 #pragma warning(disable: 4172)
+#endif
 
 /** getpid() returns int; MinGW defines pid_t but MinGW64 typedefs it
  *  as int64 which is wrong. MSVC doesn't define it at all, so just

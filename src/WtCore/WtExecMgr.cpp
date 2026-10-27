@@ -133,11 +133,11 @@ void WtExecuterMgr::commit_cached_targets(double scale /* = 1.0 */)
 	for(auto& v : _all_cached_targets)
 	{	
 		//先对组合进行缩放
-		const char* execid = v.first.c_str();
+		[[maybe_unused]] const char* execid = v.first.c_str();
 		TargetsMap& target_pos = (TargetsMap&)v.second;
 		for(auto& item : target_pos)
 		{
-			const auto& stdCode = item.first;
+			[[maybe_unused]] const auto& stdCode = item.first;
 			double& pos = (double&)item.second;
 
 			if(decimal::eq(pos, 0))

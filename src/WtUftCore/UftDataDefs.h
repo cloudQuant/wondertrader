@@ -13,7 +13,9 @@
 #include <string.h>
 #include "../Includes/WTSMarcos.h"
 
+#ifdef _MSC_VER
 #pragma warning(disable:4200)
+#endif
 
 namespace uft {
 

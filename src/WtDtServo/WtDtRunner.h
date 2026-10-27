@@ -291,7 +291,7 @@ private:
 	 * @brief 数据存储对象指针
 	 * @details 负责数据的存储和读取
 	 */
-	WtDataStorage*	_data_store;
+	[[maybe_unused]] WtDataStorage*	_data_store;
 
 	/**
 	 * @brief 数据管理器

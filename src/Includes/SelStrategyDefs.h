@@ -42,39 +42,39 @@ public:
 	/*
 	*	初始化
 	*/
-	virtual bool init(WTSVariant* cfg){ return true; }
+	virtual bool init(WTSVariant* /*cfg*/){ return true; }
 
 	virtual const char* id() const { return _id.c_str(); }
 
 	/*
 	*	初始化回调
 	*/
-	virtual void on_init(ISelStraCtx* ctx){}
+	virtual void on_init(ISelStraCtx* /*ctx*/){}
 
 	/*
 	 *	交易日开始
 	 */
-	virtual void on_session_begin(ISelStraCtx* ctx, uint32_t uTDate) {}
+	virtual void on_session_begin(ISelStraCtx* /*ctx*/, uint32_t /*uTDate*/) {}
 
 	/*
 	 *	交易日结束
 	 */
-	virtual void on_session_end(ISelStraCtx* ctx, uint32_t uTDate) {}
+	virtual void on_session_end(ISelStraCtx* /*ctx*/, uint32_t /*uTDate*/) {}
 
 	/*
 	*	主体逻辑执行入口
 	*/
-	virtual void on_schedule(ISelStraCtx* ctx, uint32_t uDate, uint32_t uTime){}
+	virtual void on_schedule(ISelStraCtx* /*ctx*/, uint32_t /*uDate*/, uint32_t /*uTime*/){}
 
 	/*
 	*	tick数据
 	*/
-	virtual void on_tick(ISelStraCtx* ctx, const char* stdCode, WTSTickData* newTick){}
+	virtual void on_tick(ISelStraCtx* /*ctx*/, const char* /*stdCode*/, WTSTickData* /*newTick*/){}
 
 	/*
 	*	K线闭合
 	*/
-	virtual void on_bar(ISelStraCtx* ctx, const char* stdCode, const char* period, WTSBarStruct* newBar){}
+	virtual void on_bar(ISelStraCtx* /*ctx*/, const char* /*stdCode*/, const char* /*period*/, WTSBarStruct* /*newBar*/){}
 
 protected:
 	std::string _id;

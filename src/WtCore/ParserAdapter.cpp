@@ -236,7 +236,7 @@ bool ParserAdapter::run()
 
 //合理毫秒数时间差
 const int RESONABLE_MILLISECS = 60 * 60 * 1000;
-void ParserAdapter::handleQuote(WTSTickData *quote, uint32_t procFlag)
+void ParserAdapter::handleQuote(WTSTickData *quote, uint32_t /*procFlag*/)
 {
 	if (quote == NULL || _stopped || quote->actiondate() == 0 || quote->tradingdate() == 0)
 		return;
@@ -255,7 +255,7 @@ void ParserAdapter::handleQuote(WTSTickData *quote, uint32_t procFlag)
 		return;
 
 	WTSCommodityInfo* commInfo = cInfo->getCommInfo();
-	WTSSessionInfo* sInfo = commInfo->getSessionInfo();
+	[[maybe_unused]] WTSSessionInfo* sInfo = commInfo->getSessionInfo();
 
 	if (_check_time)
 	{

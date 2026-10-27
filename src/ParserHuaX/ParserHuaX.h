@@ -10,7 +10,7 @@
 #pragma once
 #include "../Includes/IParserApi.h"
 #include "../Share/DLLHelper.hpp"
-#include "../API/HuaX4.03/parserapi/xfastmdapitest/TORATstpXMdApi.h"
+#include <API/HuaX4.03/parserapi/xfastmdapitest/TORATstpXMdApi.h>
 #include <map>
 
 #include "../Includes/WTSDataDef.hpp"

@@ -43,7 +43,7 @@ uint32_t makeLocalOrderID()
 
 std::vector<uint32_t> splitVolume(uint32_t vol)
 {
-	if (vol == 0) return std::move(std::vector<uint32_t>());
+	if (vol == 0) return std::vector<uint32_t>();
 
 	uint32_t minQty = 1;
 	uint32_t maxQty = 100;
@@ -72,7 +72,7 @@ std::vector<uint32_t> splitVolume(uint32_t vol)
 		}
 	}
 
-	return std::move(ret);
+	return ret;
 }
 
 std::vector<double> splitVolume(double vol, double minQty = 1.0, double maxQty = 100.0, double qtyTick = 1.0)
@@ -102,7 +102,7 @@ std::vector<double> splitVolume(double vol, double minQty = 1.0, double maxQty =
 		}
 	}
 
-	return std::move(ret);
+	return ret;
 }
 
 uint32_t genRand(uint32_t maxVal = 10000)
@@ -120,10 +120,10 @@ inline uint32_t makeHftCtxId()
 HftMocker::HftMocker(HisDataReplayer* replayer, const char* name)
 	: IHftStraCtx(name)
 	, _replayer(replayer)
-	, _strategy(NULL)
 	, _use_newpx(false)
 	, _error_rate(0)
 	, _match_this_tick(false)
+	, _strategy(NULL)
 	, _has_hook(false)
 	, _hook_valid(true)
 	, _resumed(false)
@@ -252,7 +252,7 @@ bool HftMocker::init_hft_factory(WTSVariant* cfg)
 	return true;
 }
 
-void HftMocker::handle_tick(const char* stdCode, WTSTickData* curTick, uint32_t pxType)
+void HftMocker::handle_tick(const char* stdCode, WTSTickData* curTick, uint32_t /*pxType*/)
 {
 	on_tick(stdCode, curTick);
 }
@@ -283,7 +283,7 @@ void HftMocker::handle_init()
 	on_channel_ready();
 }
 
-void HftMocker::handle_schedule(uint32_t uDate, uint32_t uTime)
+void HftMocker::handle_schedule(uint32_t /*uDate*/, uint32_t /*uTime*/)
 {
 	//on_schedule(uDate, uTime);
 }
@@ -503,10 +503,10 @@ void HftMocker::on_session_begin(uint32_t curTDate)
 
 void HftMocker::on_session_end(uint32_t curTDate)
 {
-	uint32_t curDate = curTDate;// _replayer->get_trading_date();
+	[[maybe_unused]] uint32_t curDate = curTDate;// _replayer->get_trading_date();
 
-	double total_profit = 0;
-	double total_dynprofit = 0;
+	[[maybe_unused]] double total_profit = 0;
+	[[maybe_unused]] double total_dynprofit = 0;
 
 	for (auto it = _pos_map.begin(); it != _pos_map.end(); it++)
 	{
@@ -538,7 +538,7 @@ double HftMocker::stra_get_undone(const char* stdCode)
 		OrderInfoPtr ordInfo = it->second;
 		if (strcmp(ordInfo->_code, stdCode) == 0)
 		{
-			ret += ordInfo->_left * ordInfo->_isBuy ? 1 : -1;
+			ret += ordInfo->_left * (ordInfo->_isBuy ? 1 : -1);
 		}
 	}
 
@@ -574,7 +574,7 @@ bool HftMocker::stra_cancel(uint32_t localid)
 OrderIDs HftMocker::stra_cancel(const char* stdCode, bool isBuy, double qty /* = 0 */)
 {
 	OrderIDs ret;
-	uint32_t cnt = 0;
+	[[maybe_unused]] uint32_t cnt = 0;
 	for (auto it = _orders.begin(); it != _orders.end(); it++)
 	{
 		OrderInfoPtr ordInfo = it->second;
@@ -594,7 +594,7 @@ OrderIDs HftMocker::stra_cancel(const char* stdCode, bool isBuy, double qty /* =
 	return ret;
 }
 
-OrderIDs HftMocker::stra_buy(const char* stdCode, double price, double qty, const char* userTag, int flag /* = 0 */, bool bForceClose /* = false */)
+OrderIDs HftMocker::stra_buy(const char* stdCode, double price, double qty, const char* userTag, int /*flag*/ /* = 0 */, bool /*bForceClose*/ /* = false */)
 {
 	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
 	if (commInfo == NULL)
@@ -650,7 +650,7 @@ void HftMocker::on_trade(uint32_t localid, const char* stdCode, bool isBuy, doub
 		_strategy->on_trade(this, localid, stdCode, isBuy, vol, price, userTag);
 }
 
-void HftMocker::on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message, const char* userTag/* = ""*/)
+void HftMocker::on_entrust(uint32_t localid, const char* /*stdCode*/, bool bSuccess, const char* message, const char* userTag/* = ""*/)
 {
 	if (_strategy)
 		_strategy->on_entrust(localid, bSuccess, message, userTag);
@@ -786,7 +786,7 @@ bool HftMocker::procOrder(uint32_t localid)
 	return false;
 }
 
-OrderIDs HftMocker::stra_sell(const char* stdCode, double price, double qty, const char* userTag, int flag /* = 0 */, bool bForceClose /* = false */)
+OrderIDs HftMocker::stra_sell(const char* stdCode, double price, double qty, const char* userTag, int /*flag*/ /* = 0 */, bool /*bForceClose*/ /* = false */)
 {
 	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
 	if (commInfo == NULL)
@@ -896,7 +896,7 @@ WTSTickData* HftMocker::stra_get_last_tick(const char* stdCode)
 	return _replayer->get_last_tick(stdCode);
 }
 
-double HftMocker::stra_get_position(const char* stdCode, bool bOnlyValid/* = false*/, int flag/* = 3*/)
+double HftMocker::stra_get_position(const char* stdCode, bool bOnlyValid/* = false*/, int /*flag*//* = 3*/)
 {
 	const PosInfo& pInfo = _pos_map[stdCode];
 	if (bOnlyValid)
@@ -1112,7 +1112,7 @@ void HftMocker::do_set_position(const char* stdCode, double qty, double price /*
 	double trdPx = curPx;
 
 	double diff = qty - pInfo._volume;
-	bool isBuy = decimal::gt(diff, 0.0);
+	[[maybe_unused]] bool isBuy = decimal::gt(diff, 0.0);
 	if (decimal::gt(pInfo._volume*diff, 0))//当前持仓和仓位变化方向一致, 增加一条明细, 增加数量即可
 	{
 		pInfo._volume = qty;

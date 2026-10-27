@@ -91,7 +91,9 @@
 #include <tchar.h>
 #include <windows.h>
 #pragma comment(lib, "version.lib") // for "VerQueryValue"
+#ifdef _MSC_VER
 #pragma warning(disable : 4826)
+#endif
 
 
  // If VC7 and later, then use the shipped 'dbghelp.h'-file
@@ -1450,8 +1452,12 @@ void StackWalker::OnSymInit(LPCSTR szSearchPath, DWORD symOptions, LPCSTR szUser
 	ZeroMemory(&ver, sizeof(OSVERSIONINFOEXA));
 	ver.dwOSVersionInfoSize = sizeof(ver);
 #if _MSC_VER >= 1900
+#ifdef _MSC_VER
 #pragma warning(push)
+#endif
+#ifdef _MSC_VER
 #pragma warning(disable : 4996)
+#endif
 #endif
 	if (GetVersionExA((OSVERSIONINFOA*)&ver) != FALSE)
 	{
@@ -1462,7 +1468,9 @@ void StackWalker::OnSymInit(LPCSTR szSearchPath, DWORD symOptions, LPCSTR szUser
 		m_logger(buffer);
 	}
 #if _MSC_VER >= 1900
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif
 #endif
 #endif
 }

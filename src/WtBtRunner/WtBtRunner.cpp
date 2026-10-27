@@ -24,7 +24,7 @@
 #include "../WTSUtils/WTSCfgLoader.h"
 #include "../Includes/WTSVariant.hpp"
 #include "../Share/StdUtils.hpp"
-#include "../Share/cppcli.hpp"
+#include <Share/cppcli.hpp>
 
 #ifdef _MSC_VER
 #include "../Common/mdump.h"

@@ -30,9 +30,9 @@ namespace rj = rapidjson;
 USING_NS_WTP;
 
 WtHftEngine::WtHftEngine()
-	: _cfg(NULL)
-	, _tm_ticker(NULL)
-{
+	: _tm_ticker(NULL)
+, _cfg(NULL)
+	{
 }
 
 
@@ -334,7 +334,7 @@ void WtHftEngine::on_session_end()
 		_evt_listener->on_session_event(_cur_tdate, false);
 }
 
-void WtHftEngine::on_minute_end(uint32_t curDate, uint32_t curTime)
+void WtHftEngine::on_minute_end(uint32_t /*curDate*/, uint32_t /*curTime*/)
 {
 	//已去掉高频策略的on_schedule
 	//for(auto& cit : _ctx_map)
@@ -359,17 +359,17 @@ HftContextPtr WtHftEngine::getContext(uint32_t id)
 	return it->second;
 }
 
-WTSOrdQueSlice* WtHftEngine::get_order_queue_slice(uint32_t sid, const char* code, uint32_t count)
+WTSOrdQueSlice* WtHftEngine::get_order_queue_slice(uint32_t /*sid*/, const char* code, uint32_t count)
 {
 	return _data_mgr->get_order_queue_slice(code, count);
 }
 
-WTSOrdDtlSlice* WtHftEngine::get_order_detail_slice(uint32_t sid, const char* code, uint32_t count)
+WTSOrdDtlSlice* WtHftEngine::get_order_detail_slice(uint32_t /*sid*/, const char* code, uint32_t count)
 {
 	return _data_mgr->get_order_detail_slice(code, count);
 }
 
-WTSTransSlice* WtHftEngine::get_transaction_slice(uint32_t sid, const char* code, uint32_t count)
+WTSTransSlice* WtHftEngine::get_transaction_slice(uint32_t /*sid*/, const char* code, uint32_t count)
 {
 	return _data_mgr->get_transaction_slice(code, count);
 }

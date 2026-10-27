@@ -105,7 +105,7 @@ bool WtBlkIdxWorker::init(WTSVariant* config)
 	}
 	else if (cfgCodes != NULL && cfgCodes->size() > 0)
 	{
-		IBaseDataMgr* bdMgr = _bd_mgr;
+		[[maybe_unused]] IBaseDataMgr* bdMgr = _bd_mgr;
 		IHotMgr* hotMgr = _hot_mgr;
 
 		std::size_t cnt = cfgCodes->size();

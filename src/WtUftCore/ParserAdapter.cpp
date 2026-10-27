@@ -248,7 +248,7 @@ bool ParserAdapter::run()
 	return true;
 }
 
-void ParserAdapter::handleQuote(WTSTickData *quote, uint32_t procFlag)
+void ParserAdapter::handleQuote(WTSTickData *quote, uint32_t /*procFlag*/)
 {
 	if (quote == NULL || _stopped || quote->actiondate() == 0)
 		return;

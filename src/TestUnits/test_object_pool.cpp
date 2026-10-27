@@ -50,10 +50,10 @@ public:
 class A
 {
 private:
-	uint32_t	_x;
+	[[maybe_unused]] uint32_t	_x;
 	std::string _y;
-	uint64_t	_z;
-	bool		_w;
+	[[maybe_unused]] uint64_t	_z;
+	[[maybe_unused]] bool		_w;
 };
 
 TEST(test_object_pool, test_object_pool)

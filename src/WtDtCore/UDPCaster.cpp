@@ -189,7 +189,7 @@ void UDPCaster::do_receive()
 					curTick->release();
 					m_sktSubscribe->async_send_to(
 						boost::asio::buffer(*data, data->size()), m_senderEP,
-						[this, data](const boost::system::error_code& ec, std::size_t /*bytes_sent*/)
+						[data](const boost::system::error_code& ec, std::size_t /*bytes_sent*/)
 					{
 						delete data;
 						if (ec)
@@ -205,7 +205,7 @@ void UDPCaster::do_receive()
 			std::string* data = new std::string("Can not indentify the command");
 			m_sktSubscribe->async_send_to(
 				boost::asio::buffer(*data, data->size()), m_senderEP,
-				[this, data](const boost::system::error_code& ec, std::size_t /*bytes_sent*/)
+				[data](const boost::system::error_code& ec, std::size_t /*bytes_sent*/)
 			{
 				delete data;
 				if (ec)
@@ -399,7 +399,7 @@ void UDPCaster::do_broadcast(WTSObject* data, uint32_t dataType)
 	}
 }
 
-void UDPCaster::handle_send_broad(const EndPoint& ep, const boost::system::error_code& error, std::size_t bytes_transferred)
+void UDPCaster::handle_send_broad(const EndPoint& ep, const boost::system::error_code& error, std::size_t /*bytes_transferred*/)
 {
 	if(error)
 	{
@@ -407,7 +407,7 @@ void UDPCaster::handle_send_broad(const EndPoint& ep, const boost::system::error
 	}
 }
 
-void UDPCaster::handle_send_multi(const EndPoint& ep, const boost::system::error_code& error, std::size_t bytes_transferred)
+void UDPCaster::handle_send_multi(const EndPoint& ep, const boost::system::error_code& error, std::size_t /*bytes_transferred*/)
 {
 	if(error)
 	{

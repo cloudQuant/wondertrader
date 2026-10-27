@@ -28,5 +28,16 @@ ENDIF()
 
 INCLUDE_DIRECTORIES(${INCS})
 
+# Third-party sources are compiled with their own warning policy
+IF(NOT MSVC)
+FOREACH(SRC ${SRCS})
+	IF(SRC MATCHES "/lmdb/")
+		SET_SOURCE_FILES_PROPERTIES(${SRC} PROPERTIES COMPILE_OPTIONS "-w;-fno-asynchronous-unwind-tables;-fno-unwind-tables")
+	ELSEIF(SRC MATCHES "/(zstdlib|yamlcpp|StackTracer)/")
+		SET_SOURCE_FILES_PROPERTIES(${SRC} PROPERTIES COMPILE_OPTIONS "-w")
+	ENDIF()
+ENDFOREACH()
+ENDIF()
+
 #8. 编译成动态库，并生成库文件
 add_library(WTSUtils STATIC ${SRCS} ${HDRS})

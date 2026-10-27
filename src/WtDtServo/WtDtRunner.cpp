@@ -420,9 +420,9 @@ void WtDtRunner::proc_tick(WTSTickData* curTick)
 		return;
 
 	WTSCommodityInfo* commInfo = cInfo->getCommInfo();
-	WTSSessionInfo* sInfo = commInfo->getSessionInfo();
+	[[maybe_unused]] WTSSessionInfo* sInfo = commInfo->getSessionInfo();
 
-	uint32_t hotflag = 0;
+	[[maybe_unused]] uint32_t hotflag = 0;
 
 	std::string stdCode;
 	if (commInfo->getCategoty() == CC_FutOption)

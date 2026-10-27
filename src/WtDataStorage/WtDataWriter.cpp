@@ -83,20 +83,20 @@ WtDataWriter::_TaskInfo::~_TaskInfo()
 
 
 WtDataWriter::WtDataWriter()
-	: _terminated(false)
+	: _log_group_size(1000)
+	, _terminated(false)
 	, _save_tick_log(false)
-	, _log_group_size(1000)
-	, _disable_day(false)
-	, _disable_min1(false)
-	, _disable_min5(false)
-	, _disable_orddtl(false)
-	, _disable_ordque(false)
-	, _disable_trans(false)
-	, _disable_tick(false)
-	, _disable_his(false)
 	, _skip_notrade_tick(false)
 	, _skip_notrade_bar(false)
-{
+, _disable_his(false)
+	, _disable_tick(false)
+	, _disable_min1(false)
+	, _disable_min5(false)
+	, _disable_day(false)
+	, _disable_trans(false)
+	, _disable_ordque(false)
+	, _disable_orddtl(false)
+	{
 }
 
 
@@ -1933,7 +1933,7 @@ bool WtDataWriter::dump_day_data(WTSContractInfo* ct, WTSBarStruct* newBar)
 	BoostFile f;
 	if (f.create_or_open_file(filename.c_str()))
 	{
-		bool bNeedWrite = true;
+		[[maybe_unused]] bool bNeedWrite = true;
 		if (bNew)
 		{
 			BlockHeader header;
@@ -2093,7 +2093,7 @@ uint32_t WtDataWriter::dump_bars_to_file(WTSContractInfo* ct)
 			if (f.create_or_open_file(filename.c_str()))
 			{
 				std::string buffer;
-				bool bOldVer = false;
+				[[maybe_unused]] bool bOldVer = false;
 				if (!bNew)
 				{
 					std::string content;
@@ -2172,7 +2172,7 @@ uint32_t WtDataWriter::dump_bars_to_file(WTSContractInfo* ct)
 			if (f.create_or_open_file(filename.c_str()))
 			{
 				std::string buffer;
-				bool bOldVer = false;
+				[[maybe_unused]] bool bOldVer = false;
 				if (!bNew)
 				{
 					std::string content;
@@ -2449,7 +2449,7 @@ void WtDataWriter::proc_loop()
 							fs::create_directories(ss.str().c_str());
 							std::string filename = fmtutil::format("{}{}.dsb", path, code);
 
-							bool bNew = false;
+							[[maybe_unused]] bool bNew = false;
 							if (!StdFile::exists(filename.c_str()))
 								bNew = true;
 
@@ -2516,7 +2516,7 @@ void WtDataWriter::proc_loop()
 						fs::create_directories(ss.str().c_str());
 						std::string filename = fmtutil::format("{}{}.dsb", path, code);
 
-						bool bNew = false;
+						[[maybe_unused]] bool bNew = false;
 						if (!StdFile::exists(filename.c_str()))
 							bNew = true;
 
@@ -2582,7 +2582,7 @@ void WtDataWriter::proc_loop()
 						fs::create_directories(ss.str().c_str());
 						std::string filename = fmtutil::format("{}{}.dsb", path, code);
 
-						bool bNew = false;
+						[[maybe_unused]] bool bNew = false;
 						if (!StdFile::exists(filename.c_str()))
 							bNew = true;
 
@@ -2648,7 +2648,7 @@ void WtDataWriter::proc_loop()
 						fs::create_directories(ss.str().c_str());
 						std::string filename = fmtutil::format("{}{}.dsb", path, code);
 
-						bool bNew = false;
+						[[maybe_unused]] bool bNew = false;
 						if (!StdFile::exists(filename.c_str()))
 							bNew = true;
 

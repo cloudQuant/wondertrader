@@ -41,9 +41,9 @@ inline uint32_t makeHftCtxId()
 HftStraBaseCtx::HftStraBaseCtx(WtHftEngine* engine, const char* name, bool bAgent, int32_t slippage)
 	: IHftStraCtx(name)
 	, _engine(engine)
-	, _data_agent(bAgent)
 	, _slippage(slippage)
-{
+, _data_agent(bAgent)
+	{
 	_context_id = makeHftCtxId();
 }
 
@@ -140,7 +140,7 @@ void HftStraBaseCtx::on_init()
 	load_userdata();
 }
 
-void HftStraBaseCtx::on_tick(const char* stdCode, WTSTickData* newTick)
+void HftStraBaseCtx::on_tick(const char* /*stdCode*/, WTSTickData* /*newTick*/)
 {
 	if (_ud_modified)
 	{
@@ -149,7 +149,7 @@ void HftStraBaseCtx::on_tick(const char* stdCode, WTSTickData* newTick)
 	}
 }
 
-void HftStraBaseCtx::on_order_queue(const char* stdCode, WTSOrdQueData* newOrdQue)
+void HftStraBaseCtx::on_order_queue(const char* /*stdCode*/, WTSOrdQueData* /*newOrdQue*/)
 {
 	if (_ud_modified)
 	{
@@ -158,7 +158,7 @@ void HftStraBaseCtx::on_order_queue(const char* stdCode, WTSOrdQueData* newOrdQu
 	}
 }
 
-void HftStraBaseCtx::on_order_detail(const char* stdCode, WTSOrdDtlData* newOrdDtl)
+void HftStraBaseCtx::on_order_detail(const char* /*stdCode*/, WTSOrdDtlData* /*newOrdDtl*/)
 {
 	if (_ud_modified)
 	{
@@ -167,7 +167,7 @@ void HftStraBaseCtx::on_order_detail(const char* stdCode, WTSOrdDtlData* newOrdD
 	}
 }
 
-void HftStraBaseCtx::on_transaction(const char* stdCode, WTSTransData* newTrans)
+void HftStraBaseCtx::on_transaction(const char* /*stdCode*/, WTSTransData* /*newTrans*/)
 {
 	if (_ud_modified)
 	{
@@ -176,7 +176,7 @@ void HftStraBaseCtx::on_transaction(const char* stdCode, WTSTransData* newTrans)
 	}
 }
 
-void HftStraBaseCtx::on_bar(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar)
+void HftStraBaseCtx::on_bar(const char* /*stdCode*/, const char* /*period*/, uint32_t /*times*/, WTSBarStruct* /*newBar*/)
 {
 	if (_ud_modified)
 	{
@@ -322,7 +322,7 @@ OrderIDs HftStraBaseCtx::stra_sell(const char* stdCode, double price, double qty
 	}
 }
 
-uint32_t HftStraBaseCtx::stra_enter_long(const char* stdCode, double price, double qty, const char* userTag, int flag/* = 0*/)
+uint32_t HftStraBaseCtx::stra_enter_long(const char* stdCode, double price, double qty, const char* /*userTag*/, int flag/* = 0*/)
 {
 	std::string realCode = stdCode;
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _engine->get_hot_mgr());
@@ -336,7 +336,7 @@ uint32_t HftStraBaseCtx::stra_enter_long(const char* stdCode, double price, doub
 	return _trader->openLong(realCode.c_str(), price, qty, flag);
 }
 
-uint32_t HftStraBaseCtx::stra_exit_long(const char* stdCode, double price, double qty, const char* userTag, bool isToday/* = false*/, int flag/* = 0*/)
+uint32_t HftStraBaseCtx::stra_exit_long(const char* stdCode, double price, double qty, const char* /*userTag*/, bool isToday/* = false*/, int flag/* = 0*/)
 {
 	std::string realCode = stdCode;
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _engine->get_hot_mgr());
@@ -351,7 +351,7 @@ uint32_t HftStraBaseCtx::stra_exit_long(const char* stdCode, double price, doubl
 	return _trader->closeLong(realCode.c_str(), price, qty, isToday, flag);
 }
 
-uint32_t HftStraBaseCtx::stra_enter_short(const char* stdCode, double price, double qty, const char* userTag, int flag/* = 0*/)
+uint32_t HftStraBaseCtx::stra_enter_short(const char* stdCode, double price, double qty, const char* /*userTag*/, int flag/* = 0*/)
 {
 	std::string realCode = stdCode;
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _engine->get_hot_mgr());
@@ -382,7 +382,7 @@ uint32_t HftStraBaseCtx::stra_enter_short(const char* stdCode, double price, dou
 	return _trader->openShort(realCode.c_str(), price, qty, flag);
 }
 
-uint32_t HftStraBaseCtx::stra_exit_short(const char* stdCode, double price, double qty, const char* userTag, bool isToday/* = false*/, int flag/* = 0*/)
+uint32_t HftStraBaseCtx::stra_exit_short(const char* stdCode, double price, double qty, const char* /*userTag*/, bool isToday/* = false*/, int flag/* = 0*/)
 {
 	std::string realCode = stdCode;
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _engine->get_hot_mgr());
@@ -552,7 +552,7 @@ void HftStraBaseCtx::on_trade(uint32_t localid, const char* stdCode, bool isBuy,
 	do_set_position(stdCode, curPos, price, getOrderTag(localid));
 }
 
-void HftStraBaseCtx::on_order(uint32_t localid, const char* stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled /* = false */)
+void HftStraBaseCtx::on_order(uint32_t /*localid*/, const char* /*stdCode*/, bool /*isBuy*/, double /*totalQty*/, double leftQty, double /*price*/, bool isCanceled /* = false */)
 {
 	if (_ud_modified)
 	{
@@ -584,7 +584,7 @@ void HftStraBaseCtx::on_channel_lost()
 	}
 }
 
-void HftStraBaseCtx::on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message)
+void HftStraBaseCtx::on_entrust(uint32_t /*localid*/, const char* /*stdCode*/, bool /*bSuccess*/, const char* /*message*/)
 {
 	if (_ud_modified)
 	{
@@ -593,7 +593,7 @@ void HftStraBaseCtx::on_entrust(uint32_t localid, const char* stdCode, bool bSuc
 	}
 }
 
-void HftStraBaseCtx::on_position(const char* stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t tradingday)
+void HftStraBaseCtx::on_position(const char* /*stdCode*/, bool /*isLong*/, double /*prevol*/, double /*preavail*/, double /*newvol*/, double /*newavail*/, uint32_t /*tradingday*/)
 {
 
 }
@@ -938,7 +938,7 @@ void HftStraBaseCtx::update_dyn_profit(const char* stdCode, WTSTickData* newTick
 	}
 }
 
-void HftStraBaseCtx::on_session_begin(uint32_t uTDate)
+void HftStraBaseCtx::on_session_begin(uint32_t /*uTDate*/)
 {
 
 }
@@ -947,12 +947,12 @@ void HftStraBaseCtx::on_session_end(uint32_t uTDate)
 {
 	uint32_t curDate = uTDate;//_engine->get_trading_date();
 
-	double total_profit = 0;
-	double total_dynprofit = 0;
+	[[maybe_unused]] double total_profit = 0;
+	[[maybe_unused]] double total_dynprofit = 0;
 
 	for (auto it = _pos_map.begin(); it != _pos_map.end(); it++)
 	{
-		const char* stdCode = it->first.c_str();
+		[[maybe_unused]] const char* stdCode = it->first.c_str();
 		const PosInfo& pInfo = it->second;
 		total_profit += pInfo._closeprofit;
 		total_dynprofit += pInfo._dynprofit;
