@@ -10,7 +10,8 @@ TEST(test_session, test_allday)
 
 	EXPECT_EQ(sInfo->timeToMinutes(0), 0);
 	EXPECT_EQ(sInfo->minuteToTime(0), 0);
-	EXPECT_EQ(sInfo->minuteToTime(1440), 0);
+	// 24:00 is the raw end-of-day time used by getCloseTime(true); 1440 minutes maps to it
+	EXPECT_EQ(sInfo->minuteToTime(1440), 2400);
 
 	EXPECT_EQ(sInfo->getOpenTime(), 0);
 	EXPECT_EQ(sInfo->getCloseTime(true), 2400);

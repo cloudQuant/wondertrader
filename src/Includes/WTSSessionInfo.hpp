@@ -458,7 +458,8 @@ public:
 		for(; it != m_tradingTimes.end(); it++)
 		{
 			TradingSection &section = *it;
-			if(section.second_raw == uTime)
+			uint32_t endTime = section.second_raw % 2400;
+			if (uTime == section.second_raw || uTime == endTime)
 				return true;
 		}
 
@@ -505,9 +506,6 @@ public:
 	 */
 	inline uint32_t	offsetTime(uint32_t uTime, bool bAlignLeft) const
 	{
-		if (m_uOffsetMins == 0)
-			return uTime;
-
 		int32_t curMinute = (uTime/100)*60 + uTime%100;
 		curMinute += m_uOffsetMins;
 		if(bAlignLeft)
