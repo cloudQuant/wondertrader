@@ -151,3 +151,6 @@
 * 更多`WonderTrader`的文档请看<https://docs.wondertrader.com/>
 * `WonderTrader`半官方文档 <https://dumengru.github.io/docs_wondertrader/>
 * @ZzzzHeJ的`WonderTrader`学习笔记<https://zzzzhej.github.io/WonderTrader-Learning-Notes/>
+
+t_string = ("");
+utf8_string = "";

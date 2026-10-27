@@ -18,15 +18,28 @@
 * along with this program; if not, write to the Free Software
 * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+
+/*
+这段代码实现了一个异常捕获和内存转储功能，主要用于在 Windows 应用程序中捕获未处理的异常，并生成一个内存转储文件，以便开发人员分析和调试崩溃的原因。以下是关键点：
+
+异常捕获：通过 SetUnhandledExceptionFilter 设置顶层异常过滤器。
+
+内存转储：使用 MiniDumpWriteDump 函数生成内存转储文件。
+
+错误报告：调用外部程序 CrashReporter.exe 发送错误报告。
+
+路径处理：生成转储文件的完整路径，并替换文件名中的特殊字符。
+ */
 #include "mdump.h"
-#include <dbghelp.h>
-#include <ShellAPI.h>
-#include <tchar.h>
-#include <stdio.h>
+#include <dbghelp.h>   // 用于使用 MiniDumpWriteDump 函数
+#include <ShellAPI.h> // 用于调用外部程序（如 CrashReporter.exe）
+#include <tchar.h>   // 用于处理宽字符和多字节字符。
+#include <stdio.h>  // 用于格式化字符串。
 
-#define ARRSIZE(x)	(sizeof(x)/sizeof(x[0]))
+#define ARRSIZE(x)	(sizeof(x)/sizeof(x[0]))  // 计算数组 x 的大小。
 
 
+// 定义一个函数指针类型，指向 MiniDumpWriteDump 函数。
 typedef BOOL(WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hFile, MINIDUMP_TYPE DumpType,
 	CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
 	CONST PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam,

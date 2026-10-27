@@ -1,10 +1,12 @@
-﻿/*!
+/*!
  * \file WtMinImpactExeUnit.cpp
+ * \brief 最小冲击执行单元实现文件
  *
+ * 本文件实现了最小冲击执行单元类，通过缩小单笔交易量和控制交易时机
+ * 来尽可能地减少对市场的冲击，实现更优的成交价格
+ * 
  * \author Wesley
  * \date 2020/03/30
- *
- * 
  */
 #include "WtMinImpactExeUnit.h"
 
@@ -15,8 +17,13 @@
 #include "../Share/StrUtil.hpp"
 #include "../Share//fmtlib.h"
 
+/** @brief 外部声明的工厂名称常量 */
 extern const char* FACT_NAME;
 
+/**
+ * @brief 价格模式名称数组
+ * @details 对应不同的价格模式，用于日志输出和调试
+ */
 const char* PriceModeNames[] =
 {
 	"BESTPX",		//最优价
@@ -25,6 +32,12 @@ const char* PriceModeNames[] =
 	"AUTOPX"		//自动
 };
 
+/**
+ * @brief 获取真实目标仓位
+ * @details 如果目标仓位为DBL_MAX，意味着清仓，则返回0；否则返回原值
+ * @param target 需要处理的目标仓位
+ * @return 返回处理后的实际目标仓位
+ */
 inline double get_real_target(double target)
 {
 	if (target == DBL_MAX)			 
@@ -33,12 +46,22 @@ inline double get_real_target(double target)
 	return target;
 }
 
+/**
+ * @brief 判断是否为清仓操作
+ * @details 当目标仓位为DBL_MAX时，表示目标是清仓
+ * @param target 目标仓位
+ * @return 如果是清仓操作返回true，否则返回false
+ */
 inline bool is_clear(double target)
 {
 	return (target == DBL_MAX);
 }
 
 
+/**
+ * @brief 构造函数
+ * @details 初始化所有成员变量的默认值，包括行情数据、商品信息、价格模式等
+ */
 WtMinImpactExeUnit::WtMinImpactExeUnit()
 	: _last_tick(NULL)
 	, _comm_info(NULL)
@@ -56,6 +79,10 @@ WtMinImpactExeUnit::WtMinImpactExeUnit()
 }
 
 
+/**
+ * @brief 析构函数
+ * @details 释放内部资源，包括最近的行情数据和商品信息
+ */
 WtMinImpactExeUnit::~WtMinImpactExeUnit()
 {
 	if (_last_tick)
@@ -65,16 +92,31 @@ WtMinImpactExeUnit::~WtMinImpactExeUnit()
 		_comm_info->release();
 }
 
+/**
+ * @brief 获取所属执行器工厂名称
+ * @return 返回执行器工厂名称常量
+ */
 const char* WtMinImpactExeUnit::getFactName()
 {
 	return FACT_NAME;
 }
 
+/**
+ * @brief 获取执行单元名称
+ * @return 返回实现类的名称字符串
+ */
 const char* WtMinImpactExeUnit::getName()
 {
 	return "WtMinImpactExeUnit";
 }
 
+/**
+ * @brief 初始化执行单元
+ * @details 读取配置参数，初始化合约信息和交易时间模板，并设置交易相关的参数
+ * @param ctx 执行单元的运行环境上下文
+ * @param stdCode 标准化的合约代码
+ * @param cfg 包含各种配置参数的变量集合
+ */
 void WtMinImpactExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTSVariant* cfg)
 {
 	ExecuteUnit::init(ctx, stdCode, cfg);
@@ -101,14 +143,16 @@ void WtMinImpactExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTSVaria
 	ctx->writeLog(fmtutil::format("MiniImpactExecUnit of {} inited, order price @ {}±{} ticks, expired after {} secs, reorder after {} millisec, lots policy: {} @ {:.2f}, min open lots: {}",
 		stdCode, PriceModeNames[_price_mode + 1], _price_offset, _expire_secs, _entrust_span, _by_rate ? "byrate" : "byvol", _by_rate ? _qty_rate : _order_lots, _min_open_lots));
 }
-/*
- *	订单回报
- *	localid	本地单号
- *	code	合约代码
- *	isBuy	买or卖
- *	leftover	剩余数量
- *	price	委托价格
- *	isCanceled	是否已撤销
+/**
+ * @brief 订单回报处理函数
+ * @details 处理订单状态变化的通知，包括成交、撤单或部分成交。根据订单状态更新内部的订单监控器，
+ *          并在订单被撤销时触发重新计算交易逻辑
+ * @param localid 本地订单号
+ * @param stdCode 标准化合约代码
+ * @param isBuy 交易方向，true为买入，false为卖出
+ * @param leftover 订单剩余数量，为0表示全部成交
+ * @param price 订单委托价格
+ * @param isCanceled 是否已撤销，true表示订单已撤销
  */
 void WtMinImpactExeUnit::on_order(uint32_t localid, const char* stdCode, bool isBuy, double leftover, double price, bool isCanceled)
 {
@@ -138,8 +182,11 @@ void WtMinImpactExeUnit::on_order(uint32_t localid, const char* stdCode, bool is
 		do_calc();
 	}
 }
-/*
- *	交易通道就绪回调
+/**
+ * @brief 交易通道就绪回调函数
+ * @details 当交易通道就绪可用时调用此函数。检查是否有未完成的订单，并根据
+ *          未完成订单情况重建订单监控器。如果发现未完成的订单则进行订单处理
+ *          如果当前订单库与监控器状态不匹配，则触发重新计算交易逻辑
  */
 void WtMinImpactExeUnit::on_channel_ready()
 {
@@ -186,13 +233,20 @@ void WtMinImpactExeUnit::on_channel_ready()
 /*
 	 *	交易通道丢失回调
 	 */
+/**
+ * @brief 交易通道丢失回调函数
+ * @details 当交易通道断开或失去连接时调用此函数。
+ *          清空内部的订单监控器，以确保通道恢复后的状态一致性
+ */
 void WtMinImpactExeUnit::on_channel_lost()
 {
 	
 }
-/*
- *	tick数据回调
- *	newTick	最新的tick数据
+/**
+ * @brief 处理新到的行情数据
+ * @details 更新最新的行情数据，检查超时订单并触发交易计算。
+ *          包含对非交易时间的行情过滤、超时订单的撤销处理
+ * @param newTick 最新的行情数据对象
  */
 void WtMinImpactExeUnit::on_tick(WTSTickData* newTick)
 {
@@ -236,20 +290,29 @@ void WtMinImpactExeUnit::on_tick(WTSTickData* newTick)
 	
 	do_calc();
 }
-/*
- *	成交回报
- *	code	合约代码
- *	isBuy	买or卖
- *	vol		成交数量,这里没有正负,通过isBuy确定买入还是卖出
- *	price	成交价格
+/**
+ * @brief 成交回报处理函数
+ * @details 处理成交回报信息。在当前实现中，成交通知不导致直接操作，
+ *          而是在on_tick中统一触发计算逻辑。
+ * @param localid 本地订单号
+ * @param stdCode 标准化合约代码
+ * @param isBuy 交易方向，true为买入，false为卖出
+ * @param vol 成交数量，始终为正值
+ * @param price 成交价格
  */
 void WtMinImpactExeUnit::on_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price)
 {
 	//不用触发,这里在ontick里触发吧
 }
 
-/*
- *	下单结果回报
+/**
+ * @brief 委托下单结果回报处理函数
+ * @details 处理委托下单后的结果回报。当下单失败时，清理监控器中的相关订单
+ *          并触发重新计算逻辑，以尝试新的交易策略
+ * @param localid 本地订单号
+ * @param stdCode 标准化合约代码
+ * @param bSuccess 下单是否成功
+ * @param message 失败时的错误消息
  */
 void WtMinImpactExeUnit::on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message)
 {
@@ -265,6 +328,16 @@ void WtMinImpactExeUnit::on_entrust(uint32_t localid, const char* stdCode, bool 
 	}
 }
 
+/**
+ * @brief 核心交易计算逻辑
+ * @details 基于当前市场状态、目标仓位和当前仓位计算最优的交易策略。
+ *          包括以下核心步骤：
+ *          1. 防止重复计算进行锁定检查
+ *          2. 判断对已有未完成订单是否需要撤销
+ *          3. 计算目标仓位与当前仓位的差额和方向
+ *          4. 使用最小冲击策略计算交易数量和价格
+ *          5. 发送交易订单
+ */
 void WtMinImpactExeUnit::do_calc()
 {
 	CalcFlag flag(&_in_calc);
@@ -476,10 +549,13 @@ void WtMinImpactExeUnit::do_calc()
 
 	_last_place_time = now;
 }
-/*
- *	设置新的目标仓位
- *	code	合约代码
- *	newVol	新的目标仓位
+/**
+ * @brief 设置新的目标仓位
+ * @details 设置合约的新目标仓位，并在目标发生变化时触发交易计算逻辑。
+ *          当目标仓位为DBL_MAX时，表示清仓操作。特殊情况判断：如果原来目标仓位
+ *          已经是清仓且新目标仓位为0，则跳过处理。
+ * @param stdCode 标准化合约代码
+ * @param newVol 新的目标仓位，当设置为DBL_MAX时代表清仓
  */
 void WtMinImpactExeUnit::set_position(const char* stdCode, double newVol)
 {
@@ -507,6 +583,12 @@ void WtMinImpactExeUnit::set_position(const char* stdCode, double newVol)
 	do_calc();
 }
 
+/**
+ * @brief 清空所有仓位
+ * @details 将目标仓位设置为清仓状态（DBL_MAX），触发交易计算逻辑
+ *          实现对该合约的全部清仓操作
+ * @param stdCode 标准化合约代码
+ */
 void WtMinImpactExeUnit::clear_all_position(const char* stdCode)
 {
 	if (_code.compare(stdCode) != 0)

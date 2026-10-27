@@ -94,7 +94,7 @@
 
 
 /* *************************************
-*  Includes & Memory related functions
+*  src & Memory related functions
 ***************************************/
 /* Modify the local functions below should you wish to use some other memory routines */
 /* for malloc(), free() */

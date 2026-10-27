@@ -1,4 +1,10 @@
-﻿#include "MatchEngine.h"
+/**
+ * @file MatchEngine.cpp
+ * @brief 回测撮合引擎实现文件
+ * @details 该文件实现了回测过程中的订单撮合功能，模拟真实市场中的订单撮合机制
+ */
+
+#include "MatchEngine.h"
 #include "../Includes/WTSDataDef.hpp"
 #include "../Includes/WTSVariant.hpp"
 
@@ -12,6 +18,12 @@
 
 extern uint32_t makeLocalOrderID();
 
+/**
+ * @brief 初始化撮合引擎
+ * @details 从配置中读取撮合引擎的相关参数，如撤单率等
+ * 
+ * @param cfg 配置项指针，包含撮合引擎的配置参数
+ */
 void MatchEngine::init(WTSVariant* cfg)
 {
 	if (cfg == NULL)
@@ -20,11 +32,22 @@ void MatchEngine::init(WTSVariant* cfg)
 	_cancelrate = cfg->getDouble("cancelrate");
 }
 
+/**
+ * @brief 清空撮合引擎中的所有订单
+ * @details 清除撮合引擎中的所有订单数据，通常在重置回测环境或结束回测时调用
+ */
 void MatchEngine::clear()
 {
 	_orders.clear();
 }
 
+/**
+ * @brief 激活待处理的订单
+ * @details 遍历所有订单，将状态为0的订单激活，并通知回调接口
+ * 
+ * @param stdCode 标准合约代码
+ * @param to_erase 需要删除的订单ID列表
+ */
 void MatchEngine::fire_orders(const char* stdCode, OrderIDs& to_erase)
 {
 	for (auto& v : _orders)
@@ -41,6 +64,13 @@ void MatchEngine::fire_orders(const char* stdCode, OrderIDs& to_erase)
 	}
 }
 
+/**
+ * @brief 撮合订单
+ * @details 根据当前行情数据对所有活跃订单进行撮合处理，包括撤单和成交处理
+ * 
+ * @param curTick 当前Tick数据指针
+ * @param to_erase 需要删除的订单ID列表
+ */
 void MatchEngine::match_orders(WTSTickData* curTick, OrderIDs& to_erase)
 {
 	uint64_t curTime = (uint64_t)curTick->actiondate() * 1000000000 + curTick->actiontime();
@@ -184,6 +214,12 @@ void MatchEngine::match_orders(WTSTickData* curTick, OrderIDs& to_erase)
 	}
 }
 
+/**
+ * @brief 更新限价委托账本(Limit Order Book)
+ * @details 根据当前Tick数据更新内部的委托账本数据，包括当前价格、买一价、卖一价等
+ * 
+ * @param curTick 当前Tick数据指针
+ */
 void MatchEngine::update_lob(WTSTickData* curTick)
 {
 	LmtOrdBook& curBook = _lmt_ord_books[curTick->code()];
@@ -226,6 +262,16 @@ void MatchEngine::update_lob(WTSTickData* curTick)
 }
 
 
+/**
+ * @brief 创建买入订单
+ * @details 创建一个买入订单，并计算订单排队位置
+ * 
+ * @param stdCode 标准合约代码
+ * @param price 委托价格
+ * @param qty 委托数量
+ * @param curTime 当前时间戳
+ * @return OrderIDs 返回创建的订单ID列表
+ */
 OrderIDs MatchEngine::buy(const char* stdCode, double price, double qty, uint64_t curTime)
 {
 	WTSTickData* lastTick = grab_last_tick(stdCode);
@@ -261,6 +307,16 @@ OrderIDs MatchEngine::buy(const char* stdCode, double price, double qty, uint64_
 	return ret;
 }
 
+/**
+ * @brief 创建卖出订单
+ * @details 创建一个卖出订单，并计算订单排队位置
+ * 
+ * @param stdCode 标准合约代码
+ * @param price 委托价格
+ * @param qty 委托数量
+ * @param curTime 当前时间戳
+ * @return OrderIDs 返回创建的订单ID列表
+ */
 OrderIDs MatchEngine::sell(const char* stdCode, double price, double qty, uint64_t curTime)
 {
 	WTSTickData* lastTick = grab_last_tick(stdCode);
@@ -295,6 +351,16 @@ OrderIDs MatchEngine::sell(const char* stdCode, double price, double qty, uint64
 	return ret;
 }
 
+/**
+ * @brief 按合约和方向撤销订单
+ * @details 撤销指定合约和方向的订单，可以指定撤销数量
+ * 
+ * @param stdCode 标准合约代码
+ * @param isBuy 是否为买入订单
+ * @param qty 需要撤销的数量，为0时撤销全部
+ * @param cb 撤单回调函数，用于通知撤单结果
+ * @return OrderIDs 返回撤销的订单ID列表
+ */
 OrderIDs MatchEngine::cancel(const char* stdCode, bool isBuy, double qty, FuncCancelCallback cb)
 {
 	OrderIDs ret;
@@ -325,6 +391,13 @@ OrderIDs MatchEngine::cancel(const char* stdCode, bool isBuy, double qty, FuncCa
 	return ret;
 }
 
+/**
+ * @brief 按订单ID撤销订单
+ * @details 撤销指定订单ID的订单
+ * 
+ * @param localid 本地订单ID
+ * @return double 返回撤销的数量，买入为正值，卖出为负值，撤单失败返回0
+ */
 double MatchEngine::cancel(uint32_t localid)
 {
 	auto it = _orders.find(localid);
@@ -337,6 +410,13 @@ double MatchEngine::cancel(uint32_t localid)
 	return ordInfo._left*(ordInfo._buy ? 1 : -1);
 }
 
+/**
+ * @brief 处理Tick数据
+ * @details 处理新到达的Tick数据，包括更新委托账本、激活订单和进行订单撮合
+ * 
+ * @param stdCode 标准合约代码
+ * @param curTick 当前Tick数据指针
+ */
 void MatchEngine::handle_tick(const char* stdCode, WTSTickData* curTick)
 {
 	if (NULL == curTick)
@@ -364,6 +444,13 @@ void MatchEngine::handle_tick(const char* stdCode, WTSTickData* curTick)
 	}
 }
 
+/**
+ * @brief 获取最新的Tick数据
+ * @details 从缓存中获取指定合约的最新Tick数据
+ * 
+ * @param stdCode 标准合约代码
+ * @return WTSTickData* 返回Tick数据指针，如果不存在则返回NULL
+ */
 WTSTickData* MatchEngine::grab_last_tick(const char* stdCode)
 {
 	if (NULL == _tick_cache)
