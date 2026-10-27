@@ -203,6 +203,12 @@ IF(NOT MSVC)
 	ADD_COMPILE_OPTIONS(${WT_WARN_FLAGS})
 ENDIF()
 
+OPTION(WT_ENABLE_COVERAGE "Build with LLVM source-based coverage" OFF)
+IF(WT_ENABLE_COVERAGE AND NOT MSVC)
+	ADD_COMPILE_OPTIONS(-fprofile-instr-generate -fcoverage-mapping)
+	ADD_LINK_OPTIONS(-fprofile-instr-generate)
+ENDIF()
+
 # Vendor headers included as <API/...> are treated as system headers
 INCLUDE_DIRECTORIES(SYSTEM ${CMAKE_CURRENT_SOURCE_DIR})
 
