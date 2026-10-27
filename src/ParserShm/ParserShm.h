@@ -14,7 +14,9 @@
 #include "../Share/BoostMappingFile.hpp"
 
 #include <boost/asio.hpp>
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/post.hpp>
+#include <boost/asio/executor_work_guard.hpp>
 
 USING_NS_WTP;
 using namespace boost::asio;

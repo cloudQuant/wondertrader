@@ -3,7 +3,9 @@
 
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/post.hpp>
+#include <boost/asio/executor_work_guard.hpp>
 
 #include "../Includes/FasterDefs.h"
 #include "../Includes/ITraderApi.h"
@@ -101,7 +103,7 @@ private:
 	int			_udp_port;
 
 	boost::asio::ip::udp::endpoint	_broad_ep;
-	boost::asio::io_service			_io_service;
+	boost::asio::io_context			_io_service;
 
 	boost::asio::ip::udp::socket*	_b_socket;
 

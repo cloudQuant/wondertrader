@@ -81,7 +81,7 @@ private:
 
 	WTSBaseDataMgr	_bd_mgr;
 	WTSHotMgr		_hot_mgr;
-	boost::asio::io_service _async_io;
+	boost::asio::io_context _async_io;
 	StateMonitor	_state_mon;
 	UDPCaster		_udp_caster;
 	ShmCaster		_shm_caster;

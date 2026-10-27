@@ -205,7 +205,7 @@ WTSKlineSlice* WtDataManager::get_kline_slice_by_range(const char* stdCode, WTSK
 
 	//只有非基础周期的会进到下面的步骤
 	WTSSessionInfo* sInfo = get_session_info(stdCode, true);
-	std::string key = fmtutil::format<64>("{}-{}-{}", stdCode, period, times);
+	std::string key = fmtutil::format<64>("{}-{}-{}", stdCode, (uint32_t)period, times);
 	BarCache& barCache = _bars_cache[key];
 	barCache._period = period;
 	barCache._times = times;
@@ -343,7 +343,7 @@ WTSKlineSlice* WtDataManager::get_kline_slice_by_count(const char* stdCode, WTSK
 
 	//只有非基础周期的会进到下面的步骤
 	WTSSessionInfo* sInfo = get_session_info(stdCode, true);
-	std::string key = fmtutil::format<64>("{}-{}-{}", stdCode, period, times);
+	std::string key = fmtutil::format<64>("{}-{}-{}", stdCode, (uint32_t)period, times);
 	BarCache& barCache = _bars_cache[key];
 	barCache._period = period;
 	barCache._times = times;

@@ -283,7 +283,7 @@ WTSKlineSlice* WtRdmDtReaderAD::readKlineSliceByRange(const char* stdCode, WTSKl
 	etime = isDay ? endTDate : (etime - 19000000);
 
 	//暂时不考虑HOT之类的，只针对7×24小时品种做一个实现
-	std::string key = fmtutil::format<64>("{}#{}", stdCode, period);
+	std::string key = fmtutil::format<64>("{}#{}", stdCode, (uint32_t)period);
 	BarsList& barsList = _bars_cache[key];
 
 	bool bNeedNewer = (etime > barsList._last_bar_time);

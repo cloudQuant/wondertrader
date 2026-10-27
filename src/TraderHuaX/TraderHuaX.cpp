@@ -586,7 +586,7 @@ void TraderHuaX::OnRspQryShareholderAccount(CTORATstpShareholderAccountField* pS
 			write_log(_sink, LL_INFO, "[TraderHuaX] [{}] Login succeed, trading date: {}...", _user.c_str(), _tradingday);
 
 			_inited = true;
-			_asyncio.post([this] {
+			boost::asio::post(_asyncio, [this] {
 				_sink->onLoginResult(true, 0, _tradingday);
 				_state = TS_ALLREADY;
 			});
@@ -736,7 +736,7 @@ void TraderHuaX::connect()
 
 	if (_thrd_worker == NULL)
 	{
-		boost::asio::io_service::work work(_asyncio);
+		auto work = boost::asio::make_work_guard(_asyncio);
 		_thrd_worker.reset(new StdThread([this](){
 			while (true)
 			{
@@ -817,7 +817,7 @@ void TraderHuaX::doLogin()
 		write_log(_sink, LL_ERROR, "[TraderHuaX] Login failed: error code {}", erro_code);
 		
 		_state = TS_LOGINFAILED;
-		_asyncio.post([this, erro_code]{
+		boost::asio::post(_asyncio, [this, erro_code]{
 			_sink->onLoginResult(false, erro_code.c_str(), 0);
 		});
 	}

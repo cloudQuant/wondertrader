@@ -148,7 +148,7 @@ void WtDtMgr::reader_log(WTSLogLevel ll, const char* message)
 
 void WtDtMgr::on_bar(const char* code, WTSKlinePeriod period, WTSBarStruct* newBar)
 {
-	std::string key_pattern = fmt::format("{}-{}", code, period);
+	std::string key_pattern = fmt::format("{}-{}", code, (uint32_t)period);
 
 	char speriod;
 	uint32_t times = 1;

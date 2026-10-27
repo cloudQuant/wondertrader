@@ -17,7 +17,10 @@
 
 #include "../API/HTS5.2.43.0/include/secitpdk.h"
 
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/io_context_strand.hpp>
+#include <boost/asio/post.hpp>
+#include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/strand.hpp>
 
 #include "../Includes/WTSTypes.h"
@@ -146,8 +149,8 @@ protected:
 	StdUniqueMutex		m_mtxQuery;
 	uint64_t			m_lastQryTime;
 
-	boost::asio::io_service		m_asyncIO;
-	boost::asio::io_service::strand*	m_strandIO;
+	boost::asio::io_context		m_asyncIO;
+	boost::asio::io_context::strand*	m_strandIO;
 	StdThreadPtr		m_thrdWorker;
 
 	std::string		m_strModule;

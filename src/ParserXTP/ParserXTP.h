@@ -8,7 +8,9 @@
  * \brief 
  */
 #pragma once
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/post.hpp>
+#include <boost/asio/executor_work_guard.hpp>
 
 #include "../Includes/IParserApi.h"
 #include "../API/XTP2.2.32.2/xtp_quote_api.h"
@@ -122,9 +124,9 @@ private:
 	//typedef CUstpFtdcMduserApi* (*FemasCreator)(const char *);
 	XTPCreater		m_funcCreator;
 
-	boost::asio::io_service		_asyncio;
+	boost::asio::io_context		_asyncio;
 	StdThreadPtr				_thrd_worker;
-	typedef std::shared_ptr<boost::asio::io_service::work> BoostWorkerPtr;
+	typedef std::shared_ptr<boost::asio::executor_work_guard<boost::asio::io_context::executor_type>> BoostWorkerPtr;
 	BoostWorkerPtr				_worker;
 };
 

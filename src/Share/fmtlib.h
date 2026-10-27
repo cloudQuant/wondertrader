@@ -3,7 +3,11 @@
 #ifndef FMT_HEADER_ONLY
 #define FMT_HEADER_ONLY
 #endif
+#if defined(SPDLOG_FMT_EXTERNAL) || !__has_include(<spdlog/fmt/bundled/format.h>)
+#include <fmt/format.h>
+#else
 #include <spdlog/fmt/bundled/format.h>
+#endif
 
 namespace fmtutil
 {

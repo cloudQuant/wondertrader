@@ -402,7 +402,7 @@ WTSKlineSlice* WtDataReaderAD::readKlineSlice(const char* stdCode, WTSKlinePerio
 		//	curCode = _hot_mgr->getSecondRawCode(cInfo._exchg, cInfo._product, endTDate);
 	}
 
-	std::string key = fmtutil::format<64>("{}#{}", stdCode, period);
+	std::string key = fmtutil::format<64>("{}#{}", stdCode, (uint32_t)period);
 	BarsList& barsList = _bars_cache[key];
 	if (barsList._bars.capacity() < count)
 	{

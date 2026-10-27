@@ -223,7 +223,7 @@ bool UDPCaster::addBRecver(const char* remote, int port, int type /* = 0 */)
 {
 	try
 	{
-		boost::asio::ip::address_v4 addr = boost::asio::ip::address_v4::from_string(remote);
+		boost::asio::ip::address_v4 addr = boost::asio::ip::make_address_v4(remote);
 		UDPReceiverPtr item(new UDPReceiver(EndPoint(addr, port), type));
 		if(type == 0)
 			m_listFlatRecver.emplace_back(item);
@@ -245,7 +245,7 @@ bool UDPCaster::addMRecver(const char* remote, int port, int sendport, int type 
 {
 	try
 	{
-		boost::asio::ip::address_v4 addr = boost::asio::ip::address_v4::from_string(remote);
+		boost::asio::ip::address_v4 addr = boost::asio::ip::make_address_v4(remote);
 		UDPReceiverPtr item(new UDPReceiver(EndPoint(addr, port), type));
 		UDPSocketPtr sock(new UDPSocket(m_ioservice, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), sendport)));
 		boost::asio::ip::multicast::join_group option(item->_ep.address());

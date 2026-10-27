@@ -66,7 +66,7 @@ public:
 #if _WIN32
 			_mkdir(path);
 #else
-			mkdir(path, 777);
+			mkdir(path, 0777);
 #endif
 		}
 

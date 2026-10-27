@@ -22,7 +22,7 @@ ELSE(GNUCC)
 	SET(LIBS
 		boost_thread
         	boost_filesystem
-		stdc++fs
+		${STDCXXFS}
 		dl
 	)
 	TARGET_LINK_LIBRARIES(TraderYD ${LIBS})

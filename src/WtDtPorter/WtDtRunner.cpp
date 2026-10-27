@@ -8,6 +8,7 @@
  * \brief 
  */
 #include "WtDtRunner.h"
+#include <boost/asio/post.hpp>
 #include "ExpParser.h"
 
 #include "../WtDtCore/WtHelper.h"
@@ -56,7 +57,7 @@ void WtDtRunner::start(bool bAsync /* = false */, bool bAlldayMode /* = false */
 			WTSLogger::info("Exit flag is {}", _to_exit);
 		});
 
-		_async_io.post([this, bAlldayMode]() {
+		boost::asio::post(_async_io, [this, bAlldayMode]() {
 			if(!bAlldayMode)
 			{
 				std::this_thread::sleep_for(std::chrono::milliseconds(5));

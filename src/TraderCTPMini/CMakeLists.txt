@@ -20,7 +20,9 @@ IF(MSVC)
 ELSE(GNUCC)
 	SET(LIBS
 		pthread
-		stdc++fs
+		boost_thread
+		boost_filesystem
+		${STDCXXFS}
 		dl
 		)
 	TARGET_LINK_LIBRARIES(TraderCTPMini ${LIBS})

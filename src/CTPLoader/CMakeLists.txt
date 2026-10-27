@@ -28,6 +28,14 @@ SET(LIBS
 
 IF(WIN32)
 LIST(APPEND LIBS iconv)
+ELSEIF(APPLE)
+LIST(APPEND LIBS
+	iconv
+	${CMAKE_SOURCE_DIR}/API/CTP6.6.9/darwin/libthosttraderapi_se.a
+	${CMAKE_SOURCE_DIR}/API/CTP6.6.9/darwin/libs/libssl.a
+	${CMAKE_SOURCE_DIR}/API/CTP6.6.9/darwin/libs/libcrypto.a
+	${CMAKE_SOURCE_DIR}/API/CTP6.6.9/darwin/libs/comunicationkeylib.a
+	)
 ENDIF()
 
 #9. 生成可执行文件

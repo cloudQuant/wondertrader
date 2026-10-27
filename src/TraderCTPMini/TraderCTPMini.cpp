@@ -8,6 +8,7 @@
  * \brief 
  */
 #include "TraderCTPMini.h"
+#include <boost/asio/post.hpp>
 
 #include "../Includes/WTSContractInfo.hpp"
 #include "../Includes/WTSSessionInfo.hpp"
@@ -1346,7 +1347,7 @@ int TraderCTPMini::authenticate()
 /*
 void TraderCTPMini::triggerQuery()
 {
-	m_strandIO->post([this](){
+	boost::asio::post(*m_strandIO, [this](){
 		if (m_queQuery.empty() || m_bInQuery)
 			return;
 
@@ -1354,7 +1355,7 @@ void TraderCTPMini::triggerQuery()
 		if (curTime - m_lastQryTime < 1000)
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(50));
-			m_strandIO->post([this](){
+			boost::asio::post(*m_strandIO, [this](){
 				triggerQuery();
 			});
 			return;

@@ -21,10 +21,18 @@ IF(MSVC)
 ELSE(GNUCC)
 	SET(LIBS
 		pthread
-		stdc++fs
+		${STDCXXFS}
         boost_filesystem
 		dl
 	)
+	IF(APPLE)
+		LIST(APPEND LIBS
+			${CMAKE_SOURCE_DIR}/API/CTP6.6.9/darwin/libthosttraderapi_se.a
+			${CMAKE_SOURCE_DIR}/API/CTP6.6.9/darwin/libs/libssl.a
+			${CMAKE_SOURCE_DIR}/API/CTP6.6.9/darwin/libs/libcrypto.a
+			${CMAKE_SOURCE_DIR}/API/CTP6.6.9/darwin/libs/comunicationkeylib.a
+			)
+	ENDIF()
 	TARGET_LINK_LIBRARIES(TraderCTP ${LIBS})
 ENDIF()
 

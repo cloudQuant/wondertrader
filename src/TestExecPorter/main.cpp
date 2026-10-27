@@ -6,6 +6,8 @@ void test_exec()
 {
 #ifdef _WIN32
 	DLLHelper::load_library("WtExecMon.dll");
+#elif defined __APPLE__
+	DLLHelper::load_library("libWtExecMon.dylib");
 #else
 	DLLHelper::load_library("libWtExecMon.so");
 #endif

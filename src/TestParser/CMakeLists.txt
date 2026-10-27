@@ -21,7 +21,7 @@ ELSE(GNUCC)
 	LIST(APPEND LIBS
 		dl
         pthread
-		stdc++fs)
+		${STDCXXFS})
     IF(WIN32)
 		LIST(APPEND LIBS
 			iconv)

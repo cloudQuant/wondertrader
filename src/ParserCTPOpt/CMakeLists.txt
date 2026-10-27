@@ -21,7 +21,7 @@ IF (MSVC)
 ELSE (GNUCC)
 	SET(LIBS
 		boost_thread
-		stdc++fs
+		${STDCXXFS}
 		dl
 	)
 	TARGET_LINK_LIBRARIES(ParserCTPOpt ${LIBS})

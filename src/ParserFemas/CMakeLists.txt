@@ -20,7 +20,7 @@ ADD_LIBRARY(ParserFemas SHARED ${SRC})
 IF(MSVC)
 ELSE(GNUCC)
 	SET(LIBS
-		stdc++fs
+		${STDCXXFS}
 		dl
 	)
 	TARGET_LINK_LIBRARIES(ParserFemas ${LIBS})

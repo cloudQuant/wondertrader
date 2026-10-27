@@ -16,7 +16,7 @@ LINK_DIRECTORIES(${LNKS})
 ADD_LIBRARY(WtHftStraFact SHARED ${SRCS} ${HDRS})
 
 SET(LIBS
-	stdc++fs
+	${STDCXXFS}
 	dl
 )
 

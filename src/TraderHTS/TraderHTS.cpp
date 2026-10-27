@@ -9,6 +9,7 @@
  */
 
 #include "TraderHTS.h"
+#include <boost/asio/post.hpp>
 #include "../API/HTS5.2.43.0/include/scopeguard.hpp"
 
 #include "../Includes/WTSError.hpp"
@@ -343,8 +344,8 @@ void TraderHTS::connect()
 {
 	if (m_thrdWorker == NULL)
 	{
-		m_strandIO = new boost::asio::io_service::strand(m_asyncIO);
-		boost::asio::io_service::work work(m_asyncIO);
+		m_strandIO = new boost::asio::io_context::strand(m_asyncIO);
+		auto work = boost::asio::make_work_guard(m_asyncIO);
 		m_thrdWorker.reset(new StdThread([this]() {
 			while (true)
 			{
@@ -359,7 +360,7 @@ void TraderHTS::connect()
 
 void TraderHTS::disconnect()
 {
-	m_asyncIO.post([this]() {
+	boost::asio::post(m_asyncIO, [this]() {
 		release();
 	});
 
@@ -671,7 +672,7 @@ int TraderHTS::login(const char* user, const char* pass, const char* productInfo
 
 void TraderHTS::qryGDNo()
 {
-	m_strandIO->post([this]() {
+	boost::asio::post(*m_strandIO, [this]() {
 
 		std::cout << "=========== query_gudong_info ============" << std::endl;
 
@@ -722,7 +723,7 @@ void TraderHTS::qryGDNo()
 
 void TraderHTS::doLogin()
 {
-	m_strandIO->post([this]() {
+	boost::asio::post(*m_strandIO, [this]() {
 		if (m_bUseEX)
 		{
 			strcpy(cusreqinfo.AccountId, m_strUser.c_str());  // 客户号
@@ -813,7 +814,7 @@ int TraderHTS::orderInsert(WTSEntrust* entrust)
 	}
 
 	entrust->retain();
-	m_strandIO->post([this, entrust]() {
+	boost::asio::post(*m_strandIO, [this, entrust]() {
 		bool isBuy = entrust->getOffsetType() == WOT_OPEN;
 		bool isSH = strcmp(entrust->getExchg(), "SSE") == 0;
 
@@ -905,7 +906,7 @@ int TraderHTS::orderAction(WTSEntrustAction* action)
 		return -1;
 
 	action->retain();
-	m_strandIO->post([this, action]() {
+	boost::asio::post(*m_strandIO, [this, action]() {
 		//write_log(m_traderSink, LL_INFO, "[TraderHTS]调用撤单接口");
 
 		bool isSH = strcmp(action->getExchg(), "SSE") == 0;
@@ -1379,7 +1380,7 @@ bool TraderHTS::isConnected()
 
 void TraderHTS::triggerQuery()
 {
-	m_strandIO->post([this]() {
+	boost::asio::post(*m_strandIO, [this]() {
 		if (m_queQuery.empty() || m_bInQuery)
 			return;
 

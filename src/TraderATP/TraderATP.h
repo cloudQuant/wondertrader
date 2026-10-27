@@ -10,7 +10,9 @@
 #pragma once
 
 #include <stdint.h>
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/post.hpp>
+#include <boost/asio/executor_work_guard.hpp>
 #include <atomic>
 
 #define TRADE_API_USE_STATIC
@@ -199,7 +201,7 @@ private:
 
 	std::string		_cust_id;  // 客户号
 
-	boost::asio::io_service		_asyncio;
+	boost::asio::io_context		_asyncio;
 	StdThreadPtr				_thrd_worker;
 
 	DllHandle		m_hInstATP;

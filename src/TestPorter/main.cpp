@@ -86,6 +86,8 @@ void test_porter()
 {
 #ifdef _WIN32
 	DLLHelper::load_library("WtPorter.dll");
+#elif defined __APPLE__
+	DLLHelper::load_library("libWtPorter.dylib");
 #else
 	DLLHelper::load_library("libWtPorter.so");
 #endif

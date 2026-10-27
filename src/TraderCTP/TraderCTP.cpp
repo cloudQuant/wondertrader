@@ -8,6 +8,7 @@
  * \brief 
  */
 #include "TraderCTP.h"
+#include <boost/asio/post.hpp>
 
 #include "../Includes/WTSContractInfo.hpp"
 #include "../Includes/WTSSessionInfo.hpp"
@@ -250,6 +251,9 @@ bool TraderCTP::init(WTSVariant* params)
 
 	m_strFlowDir = StrUtil::standardisePath(m_strFlowDir);
 
+#ifdef __APPLE__
+	m_funcCreator = CThostFtdcTraderApi::CreateFtdcTraderApi;
+#else
 	std::string module = params->getCString("ctpmodule");
 	if (module.empty())
 		module = "thosttraderapi_se";
@@ -267,6 +271,7 @@ bool TraderCTP::init(WTSVariant* params)
 	const char* creatorName = "_ZN19CThostFtdcTraderApi19CreateFtdcTraderApiEPKc";
 #endif
 	m_funcCreator = (CTPCreator)DLLHelper::get_symbol(m_hInstCTP, creatorName);
+#endif
 
 	m_bQuickStart = params->getBoolean("quick");
 
@@ -1485,7 +1490,7 @@ int TraderCTP::authenticate()
 /*
 void TraderCTP::triggerQuery()
 {
-	m_strandIO->post([this](){
+	boost::asio::post(*m_strandIO, [this](){
 		if (m_queQuery.empty() || m_bInQuery)
 			return;
 
@@ -1493,7 +1498,7 @@ void TraderCTP::triggerQuery()
 		if (curTime - m_lastQryTime < 1000)
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(50));
-			m_strandIO->post([this](){
+			boost::asio::post(*m_strandIO, [this](){
 				triggerQuery();
 			});
 			return;

@@ -10,7 +10,9 @@
 #pragma once
 
 #include <stdint.h>
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/post.hpp>
+#include <boost/asio/executor_work_guard.hpp>
 
 #include <oes_api/oes_async_api.h>
 
@@ -116,7 +118,7 @@ private:
 
 	uint32_t		_tradingday;
 
-	boost::asio::io_service		_asyncio;
+	boost::asio::io_context		_asyncio;
 	StdThreadPtr				_thrd_worker;
 
 	//委托单标记缓存器

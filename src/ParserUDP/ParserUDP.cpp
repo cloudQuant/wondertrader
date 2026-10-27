@@ -8,6 +8,7 @@
  * \brief 
  */
 #include "ParserUDP.h"
+#include <boost/asio/post.hpp>
 #include "../Includes/WTSVariant.hpp"
 #include "../Includes/WTSDataDef.hpp"
 
@@ -81,7 +82,7 @@ extern "C"
 ParserUDP::ParserUDP()
 	: _b_socket(NULL)
 	, _s_socket(NULL)
-	, _strand(_io_service)
+	, _strand(boost::asio::make_strand(_io_service))
 	, _stopped(false)
 	, _sink(NULL)
 	, _connecting(false)
@@ -103,7 +104,7 @@ bool ParserUDP::init( WTSVariant* config )
 	if (_gpsize == 0)
 		_gpsize = 1000;
 
-	ip::address addr = ip::address::from_string(_hots);
+	ip::address addr = ip::make_address(_hots);
 	_server_ep = ip::udp::endpoint(addr, _sport);
 
 	_broad_ep = ip::udp::endpoint(ip::address_v4::any(), _bport);
@@ -132,7 +133,11 @@ bool ParserUDP::reconnect(uint32_t flag /* = 3 */)
 		_b_socket->open(_broad_ep.protocol());
 		_b_socket->set_option(ip::udp::socket::reuse_address(true));
 		_b_socket->set_option(ip::udp::socket::broadcast(true));
+#ifdef __APPLE__
+		_b_socket->set_option(ip::udp::socket::receive_buffer_size(7 * 1024 * 1024));
+#else
 		_b_socket->set_option(ip::udp::socket::receive_buffer_size(8 * 1024 * 1024));
+#endif
 		_b_socket->bind(_broad_ep);
 
 		_b_socket->async_receive_from(buffer(_b_buffer), _broad_ep,
@@ -250,7 +255,7 @@ bool ParserUDP::connect()
 {
 	if(reconnect(3))
 	{
-		_thrd_parser.reset(new StdThread(boost::bind(&io_service::run, &_io_service)));
+		_thrd_parser.reset(new StdThread(boost::bind(&io_context::run, &_io_service)));
 	}
 	else
 	{
@@ -270,7 +275,7 @@ bool ParserUDP::disconnect()
 	}
 
 	_stopped = true;
-	_strand.post(boost::bind(&ParserUDP::doOnDisconnected, this));
+	boost::asio::post(_strand, boost::bind(&ParserUDP::doOnDisconnected, this));
 
 	return true;
 }

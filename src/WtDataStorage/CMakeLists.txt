@@ -25,9 +25,9 @@ ELSE (GNUCC)
 		dl
 		boost_filesystem
 		pthread
-		stdc++fs
+		${STDCXXFS}
 		)
-	if(WIN32)
+	if(WIN32 OR APPLE)
 		LIST(APPEND LIBS iconv)
 	ENDIF()
 ENDIF()

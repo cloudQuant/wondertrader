@@ -111,14 +111,17 @@ bool ParserCTP::init(WTSVariant* config)
     m_bLocaltime = config->getBoolean("localtime");
 	m_strFlowDir = StrUtil::standardisePath(m_strFlowDir);
 
-	const char* module = config->getCString("ctpmodule", "thostmduserapi_se");
-	std::string dllpath = getBinDir() + DLLHelper::wrap_module(module, "");
-	m_hInstCTP = DLLHelper::load_library(dllpath.c_str());
 	std::string path = fmtutil::format("{}{}/{}/", m_strFlowDir, m_strBroker, m_strUserID);
 	if (!StdFile::exists(path.c_str()))
 	{
 		fs::create_directories(fs::path(path));
 	}	
+#ifdef __APPLE__
+	m_funcCreator = CThostFtdcMdApi::CreateFtdcMdApi;
+#else
+	const char* module = config->getCString("ctpmodule", "thostmduserapi_se");
+	std::string dllpath = getBinDir() + DLLHelper::wrap_module(module, "");
+	m_hInstCTP = DLLHelper::load_library(dllpath.c_str());
 #ifdef _WIN32
 #	ifdef _WIN64
 	const char* creatorName = "?CreateFtdcMdApi@CThostFtdcMdApi@@SAPEAV1@PEBD_N1@Z";
@@ -129,6 +132,7 @@ bool ParserCTP::init(WTSVariant* config)
 	const char* creatorName = "_ZN15CThostFtdcMdApi15CreateFtdcMdApiEPKcbb";
 #endif
 	m_funcCreator = (CTPCreator)DLLHelper::get_symbol(m_hInstCTP, creatorName);
+#endif
 	m_pUserAPI = m_funcCreator(path.c_str(), false, false);
 	m_pUserAPI->RegisterSpi(this);
 	m_pUserAPI->RegisterFront((char*)m_strFrontAddr.c_str());
