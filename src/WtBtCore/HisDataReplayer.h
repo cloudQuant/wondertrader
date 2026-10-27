@@ -924,6 +924,15 @@ public:
 	 * @details 根据交易品种、价格、数量和开平仓标志计算交易费用
 	 */
 	double calc_fee(const char* stdCode, double price, double qty, uint32_t offset);
+
+	/* Apply an optional per-fill minimum to the native fee calculation. */
+	static inline double apply_fee_minimum(double base_fee, double qty,
+		double rate, double minimum_fee)
+	{
+		if (qty > 0.0 && rate > 0.0 && minimum_fee > 0.0 && base_fee < minimum_fee)
+			return minimum_fee;
+		return base_fee;
+	}
 	/**
 	 * @brief 获取交易时段信息
 	 * @param sid 交易时段ID或合约代码
@@ -1107,6 +1116,7 @@ private:
 		double	_open;			///< 开仓手续费率
 		double	_close;		///< 平仓手续费率
 		double	_close_today;	///< 平今手续费率
+		double	_min_fee;		///< 每笔成交最低手续费金额
 		bool	_by_volume;		///< 是否按照成交量计算，否则按金额计算
 
 		/**
