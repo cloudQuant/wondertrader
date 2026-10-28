@@ -1,0 +1,6 @@
+#!/bin/sh
+# 由 tools/gen_core_gate.py 从 build.ninja 的真实编译命令生成，勿手改。
+# 源对象: TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n01_wtcore_tradepaths/n01_action_policy_test.cpp.o
+# 用法: sh CoverageTests_wtcore.sh <你的测试 .cpp>
+if [ $# -ne 1 ]; then echo 'usage: $0 <file.cpp>' >&2; exit 2; fi
+exec /usr/bin/c++ -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -DNOTFOUND -Dinst_hlp=cov_inst_hlp_37294239 -I/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/TestUnits/coverage/cov_boost_include -I/Users/yunjinqi/Documents/new_projects/wondertrader/src/Includes -I/Users/yunjinqi/Documents/new_projects/wondertrader/src/Share -I/Users/yunjinqi/Documents/new_projects/wondertrader/src/WTSTools -I/Users/yunjinqi/Documents/new_projects/wondertrader/src/WTSUtils -isystem /opt/homebrew/include -isystem /Users/yunjinqi/Documents/new_projects/wondertrader/src -include /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h -g -std=gnu++17 -arch arm64 -Wall -Wextra -Wno-deprecated-copy-with-user-provided-copy '-Wno-#pragma-messages' -Werror -fprofile-instr-generate -fcoverage-mapping /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/n01_action_policy_test.cpp -fsyntax-only "$1"

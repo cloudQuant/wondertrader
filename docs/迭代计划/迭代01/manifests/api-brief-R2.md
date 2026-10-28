@@ -1,0 +1,208 @@
+# API 简报 R2
+
+测试目标: btcore。
+本简报只覆盖本轮要动的文件（按报表 missed 行数选出的），
+每条形如 `L<行号>: <签名>`，可直接 Read 该文件对应行段。
+语义/分支以源码为准；**清单外的文件本轮不要动**。
+
+### `src/WtBtCore/HisDataReplayer.cpp` (4635 行)
+- L326: `std::sort(fctrLst.begin(), fctrLst.end(), [](const AdjFactor& left, const AdjFactor& right)`
+- L344: `StdFile::read_file_content(adjfile, content)`
+- L396: `std::sort(fctrLst.begin(), fctrLst.end(), [](const AdjFactor& left, const AdjFactor& right)`
+- L456: `WTSLogger::log_raw(LL_WARN, "All cached data cleared")`
+- L522: `rj::Documentroot(rj::kObjectType)`
+- L543: `rj::PrettyWriter<rj::StringBuffer>writer(sb)`
+- L552: `fs::create_directories(folder.c_str())`
+- L554: `StdFile::write_file_content(filename.c_str(), output.c_str(), output.size())`
+- L564: `rj::Documentroot(rj::kObjectType)`
+- L584: `rj::PrettyWriter<rj::StringBuffer>writer(sb)`
+- L638: `WTSLogger::log_raw(LL_ERROR, "Backtesting is not running, no need to stop")`
+- L646: `WTSLogger::log_raw(LL_WARN, "Terminating flag reset to true, backtesting will quit at next round")`
+- L653: `WTSLogger::log_raw(LL_ERROR, "Cannot run more than one backtesting task at the same time")`
+- L727: `WTSLogger::log_raw(LL_INFO, "Main K bars not subscribed and backtesting of tick data not available , replaying done")`
+- L763: `WTSLogger::debug("Replaying by ticks terminated forcely")`
+- L765: `WTSLogger::log_raw(LL_INFO, "All back data replayed, replaying done")`
+- L908: `WTSLogger::log_raw(LL_INFO, "All back data replayed, replaying done")`
+- L914: `WTSLogger::log_raw(LL_ERROR, "No back data initialized, replaying canceled")`
+- L920: `WTSLogger::debug("Replaying by bars terminated forcely")`
+- L1091: `WTSLogger::log_raw(LL_INFO, "Backtesting with task frequency is done")`
+- L1229: `WTSLogger::log_raw(LL_INFO, "Backtesting with task frequency is done")`
+- L1906: `WTSLogger::log_raw(LL_DEBUG, "replaying hft data...")`
+- L2169: `std::stringtickCode(stdCode, len - 1)`
+- L2721: `WTSLogger::error("Cannot use stock level2 data in csv mode!")`
+- L2763: `WTSLogger::error("Cannot use stock level2 data in csv mode!")`
+- L2805: `WTSLogger::error("Cannot use stock level2 data in csv mode!")`
+- L3103: `std::stringhitCode(stdCode, length)`
+- L3479: `fs::create_directories(path.c_str())`
+- L3487: `StdFile::read_file_content(filename.c_str(), content)`
+- L3508: `WTSLogger::warn("If you want to use tick data in csv mode, you can use wtpy.WtDataHelper.store_ticks to generate dsb file", filename.c_str())`
+- L3613: `fs::create_directories(ss.str().c_str())`
+- L3638: `StdFile::read_file_content(filename.c_str(), content)`
+- L3673: `WTSLogger::log_raw(LL_INFO, "Reading data via extended loader...")`
+- L3729: `StdFile::write_file_content(filename.c_str(), content.c_str(), content.size())`
+- L3760: `fs::create_directories(ss.str().c_str())`
+- L3784: `StdFile::read_file_content(filename.c_str(), content)`
+- L3893: `StdFile::write_file_content(filename.c_str(), content.c_str(), content.size())`
+- L4224: `std::sort(fctrLst.begin(), fctrLst.end(), [](const AdjFactor& left, const AdjFactor& right)`
+
+### `src/WtBtCore/CtaMocker.cpp` (2228 行)
+- L90: `rj::Documentroot(rj::kObjectType)`
+- L93: `rj::ValuejPos(rj::kArrayType)`
+- L102: `rj::ValuepItem(rj::kObjectType)`
+- L110: `rj::Valuedetails(rj::kArrayType)`
+- L114: `rj::ValuedItem(rj::kObjectType)`
+- L140: `rj::ValuejFund(rj::kObjectType)`
+- L152: `rj::ValuejSigs(rj::kObjectType)`
+- L160: `rj::ValuejItem(rj::kObjectType)`
+- L174: `rj::ValuejCond(rj::kObjectType)`
+- L175: `rj::ValuejItems(rj::kObjectType)`
+- L184: `rj::ValuecArray(rj::kArrayType)`
+- L187: `rj::ValuecItem(rj::kObjectType)`
+- L215: `fs::create_directories(folder.c_str())`
+- L222: `rj::PrettyWriter<rj::StringBuffer>writer(sb)`
+- L224: `StdFile::write_file_content(filename.c_str(), sb.GetString())`
+- L230: `rj::Documentroot(rj::kObjectType)`
+- L233: `rj::ValueklineItem(rj::kObjectType)`
+- L250: `rj::ValuejIndice(rj::kArrayType)`
+- L254: `rj::ValuejIndex(rj::kObjectType)`
+- L258: `rj::ValuejLines(rj::kArrayType)`
+- L262: `rj::ValuejLine(rj::kObjectType)`
+- L279: `rj::ValuejBaseLines(rj::kObjectType)`
+- L317: `fs::create_directories(folder.c_str())`
+- L323: `rj::PrettyWriter<rj::StringBuffer>writer(sb)`
+- L325: `StdFile::write_file_content(filename.c_str(), sb.GetString())`
+- L331: `StdFile::write_file_content(filename.c_str(), (void*)content.c_str(), content.size())`
+- L337: `StdFile::write_file_content(filename.c_str(), (void*)content.c_str(), content.size())`
+- L349: `fs::create_directories(folder.c_str())`
+- L354: `StdFile::write_file_content(filename.c_str(), (void*)content.c_str(), content.size())`
+- L359: `StdFile::write_file_content(filename.c_str(), (void*)content.c_str(), content.size())`
+- L364: `StdFile::write_file_content(filename.c_str(), (void*)content.c_str(), content.size())`
+- L369: `StdFile::write_file_content(filename.c_str(), (void*)content.c_str(), content.size())`
+- L374: `StdFile::write_file_content(filename.c_str(), (void*)content.c_str(), content.size())`
+- L377: `rj::Documentroot(rj::kObjectType)`
+- L390: `rj::PrettyWriter<rj::StringBuffer>writer(sb)`
+- L392: `StdFile::write_file_content(filename.c_str(), sb.GetString())`
+- L429: `DLLHelper::free_library(hInst)`
+- L464: `std::ifstreamtradesFile(tradesFilename)`
+- L467: `std::getline(tradesFile, str)`
+- L477: `std::ifstreamclosesFile(closesFilename)`
+- L480: `std::getline(closesFile, str)`
+- L490: `std::ifstreamfundsFile(fundsFilename)`
+- L493: `std::getline(fundsFile, str)`
+- L503: `std::ifstreampositionsFile(positionsFilename)`
+- L506: `std::getline(positionsFile, str)`
+- L516: `std::ifstreamsignalsFile(signalsFilename)`
+- L519: `std::getline(signalsFile, str)`
+- L532: `rj::FileReadStreamstrategyDumpFile(fp, readBuffer, sizeof(readBuffer))`
+- L685: `WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_DEBUG, "Replay done, notify control thread")`
+- L688: `WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_DEBUG, "Notify control thread the end done")`
+- L691: `WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "Notify strategy the end of backtest")`
+- L1054: `WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "CTA hook installed")`
+- L1075: `WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "Notify calc thread, wait for calc done")`
+- L1080: `StdUniqueLocklock(_mtx_calc)`
+- L1083: `WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "Calc done notified")`
+- L1091: `WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "Backtest exit automatically")`
+- L1139: `WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "Waiting for resume notify")`
+- L1140: `StdUniqueLocklock(_mtx_calc)`
+- L1142: `WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "Calc resumed")`
+- L1150: `WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "Calc done, notify control thread")`
+- L1154: `WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "Waiting for resume notify")`
+- L1155: `StdUniqueLocklock(_mtx_calc)`
+- L1157: `WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "Calc resumed")`
+- L1197: `WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "Calc done, notify control thread")`
+- L1792: `WTSLogger::error("Main k bars can only be setup once")`
+- L1904: `WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_INFO, message)`
+- L1909: `WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_DEBUG, message)`
+- L1914: `WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_WARN, message)`
+- L1919: `WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_ERROR, message)`
+- L2153: `WTSLogger::error("Marks can be added only during schedule")`
+- （另有 1 个声明，按需用 Read 定位）
+
+### `src/WtBtCore/UftMocker.cpp` (1321 行)
+- L27: `extern uint32_tmakeLocalOrderID()`
+- L36: `extern std::vector<uint32_t>splitVolume(uint32_t vol)`
+- L37: `extern std::vector<double>splitVolume(double vol, double minQty = 1.0, double maxQty = 100.0, double qtyTick = 1.0)`
+- L39: `extern uint32_tgenRand(uint32_t maxVal = 10000)`
+- L83: `std::unique_lock<std::mutex>lck(_mtx)`
+- L94: `std::unique_lock<std::mutex>lck(_mtx)`
+- L150: `DLLHelper::free_library(hInst)`
+- L232: `std::unique_lock<std::recursive_mutex>lck(_mtx_control)`
+- L418: `StdLocker<StdRecurMutex>lock(_mtx_ords)`
+- L448: `StdLocker<StdRecurMutex>lock(_mtx_ords)`
+- L614: `OrderInfoPtrordInfo(new OrderInfo)`
+- L655: `OrderInfoPtrordInfo(new OrderInfo)`
+- L716: `OrderInfoPtrordInfo(new OrderInfo)`
+- L777: `OrderInfoPtrordInfo(new OrderInfo)`
+- L1098: `WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_INFO, message)`
+- L1103: `WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_DEBUG, message)`
+- L1108: `WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_ERROR, message)`
+- L1117: `fs::create_directories(folder.c_str())`
+- L1122: `StdFile::write_file_content(filename.c_str(), (void*)content.c_str(), content.size())`
+- L1127: `StdFile::write_file_content(filename.c_str(), (void*)content.c_str(), content.size())`
+- L1133: `StdFile::write_file_content(filename.c_str(), (void*)content.c_str(), content.size())`
+- L1138: `StdFile::write_file_content(filename.c_str(), (void*)content.c_str(), content.size())`
+
+### `src/WtBtCore/HftMocker.cpp` (1218 行)
+- L168: `std::unique_lock<std::mutex>lck(_mtx)`
+- L179: `std::unique_lock<std::mutex>lck(_mtx)`
+- L235: `DLLHelper::free_library(hInst)`
+- L325: `WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "HFT hook installed")`
+- L333: `WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "Notify calc thread, wait for calc done")`
+- L338: `StdUniqueLocklock(_mtx_calc)`
+- L340: `WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "Calc done notified")`
+- L349: `std::unique_lock<std::recursive_mutex>lck(_mtx_control)`
+- L363: `WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "Waiting for resume notify")`
+- L364: `StdUniqueLocklock(_mtx_calc)`
+- L366: `WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "Calc resumed")`
+- L376: `StdLocker<StdRecurMutex>lock(_mtx_ords)`
+- L395: `StdLocker<StdRecurMutex>lock(_mtx_ords)`
+- L412: `WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "Waiting for resume notify")`
+- L413: `StdUniqueLocklock(_mtx_calc)`
+- L415: `WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "Calc resumed")`
+- L426: `WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "Calc done, notify control thread")`
+- L553: `StdLocker<StdRecurMutex>lock(_mtx_ords)`
+- L566: `StdLocker<StdRecurMutex>lock(_mtx_ords)`
+- L614: `OrderInfoPtrorder(new OrderInfo)`
+- L624: `StdLocker<StdRecurMutex>lock(_mtx_ords)`
+- L817: `OrderInfoPtrorder(new OrderInfo)`
+- L827: `StdLocker<StdRecurMutex>lock(_mtx_ords)`
+- L991: `WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_INFO, message)`
+- L996: `WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_DEBUG, message)`
+- L1001: `WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_WARN, message)`
+- L1006: `WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_ERROR, message)`
+- L1029: `fs::create_directories(folder.c_str())`
+- L1034: `StdFile::write_file_content(filename.c_str(), (void*)content.c_str(), content.size())`
+- L1039: `StdFile::write_file_content(filename.c_str(), (void*)content.c_str(), content.size())`
+- L1045: `StdFile::write_file_content(filename.c_str(), (void*)content.c_str(), content.size())`
+- L1051: `StdFile::write_file_content(filename.c_str(), (void*)content.c_str(), content.size())`
+- L1056: `StdFile::write_file_content(filename.c_str(), (void*)content.c_str(), content.size())`
+- L1059: `rj::Documentroot(rj::kObjectType)`
+- L1072: `rj::PrettyWriter<rj::StringBuffer>writer(sb)`
+- L1074: `StdFile::write_file_content(filename.c_str(), sb.GetString())`
+
+### `src/WtBtCore/SelMocker.cpp` (1174 行)
+- L61: `rj::Documentroot(rj::kObjectType)`
+- L64: `rj::ValuejPos(rj::kArrayType)`
+- L73: `rj::ValuepItem(rj::kObjectType)`
+- L81: `rj::Valuedetails(rj::kArrayType)`
+- L85: `rj::ValuedItem(rj::kObjectType)`
+- L111: `rj::ValuejFund(rj::kObjectType)`
+- L123: `rj::ValuejSigs(rj::kObjectType)`
+- L131: `rj::ValuejItem(rj::kObjectType)`
+- L154: `rj::PrettyWriter<rj::StringBuffer>writer(sb)`
+- L156: `StdFile::write_file_content(filename.c_str(), sb.GetString())`
+- L166: `fs::create_directories(folder.c_str())`
+- L171: `StdFile::write_file_content(filename.c_str(), (void*)content.c_str(), content.size())`
+- L176: `StdFile::write_file_content(filename.c_str(), (void*)content.c_str(), content.size())`
+- L182: `StdFile::write_file_content(filename.c_str(), (void*)content.c_str(), content.size())`
+- L188: `StdFile::write_file_content(filename.c_str(), (void*)content.c_str(), content.size())`
+- L193: `StdFile::write_file_content(filename.c_str(), (void*)content.c_str(), content.size())`
+- L196: `rj::Documentroot(rj::kObjectType)`
+- L209: `rj::PrettyWriter<rj::StringBuffer>writer(sb)`
+- L211: `StdFile::write_file_content(filename.c_str(), sb.GetString())`
+- L248: `DLLHelper::free_library(hInst)`
+- L933: `WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_INFO, message)`
+- L938: `WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_DEBUG, message)`
+- L943: `WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_WARN, message)`
+- L948: `WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_ERROR, message)`
+

@@ -1,0 +1,985 @@
+# API 简报 L03
+
+覆盖模块: Includes。
+每条形如 `L<行号>: <签名>`，可直接 Read 该文件对应行段，不要整模块通读。语义/分支以源码为准，本表只给入口。
+
+## `Includes`
+
+### `src/Includes/CtaStrategyDefs.h` (130 行)
+- 类型: WTSVariant:17, ICtaStraCtx:18, ICtaTickStraCtx:19, WTSTickData:20, WTSBarStruct:21, CtaStrategy:26, ICtaStrategyFact:98
+- L30: `virtual ~CtaStrategy() }`
+- L36: `virtual const char*getName() = 0`
+- L41: `virtual const char*getFactName() = 0`
+- L46: `virtual boolinit(WTSVariant* /*cfg*/) return true; }`
+- L48: `virtual const char*id() }`
+- L53: `virtual voidon_init(ICtaStraCtx* /*ctx*/) }`
+- L58: `virtual voidon_session_begin(ICtaStraCtx* /*ctx*/, uint32_t /*uTDate*/) }`
+- L63: `virtual voidon_session_end(ICtaStraCtx* /*ctx*/, uint32_t /*uTDate*/) }`
+- L68: `virtual voidon_schedule(ICtaStraCtx* /*ctx*/, uint32_t /*uDate*/, uint32_t /*uTime*/) }`
+- L73: `virtual voidon_schedule_done(ICtaStraCtx* /*ctx*/, uint32_t /*uDate*/, uint32_t /*uTime*/) }`
+- L78: `virtual voidon_tick(ICtaStraCtx* /*ctx*/, const char* /*stdCode*/, WTSTickData* /*newTick*/) }`
+- L83: `virtual voidon_bar(ICtaStraCtx* /*ctx*/, const char* /*stdCode*/, const char* /*period*/, WTSBarStruct* /*newBar*/) }`
+- L88: `virtual voidon_condition_triggered(ICtaStraCtx* /*ctx*/, const char* /*stdCode*/, double /*target*/, double /*price*/, const char* /*usertag*/) }`
+- L96: `typedefvoid(*FuncEnumStrategyCallback)(const char* factName, const char* straName, bool isLast)`
+- L102: `virtual ~ICtaStrategyFact() }`
+- L108: `virtual const char*getName() = 0`
+- L113: `virtual voidenumStrategy(FuncEnumStrategyCallback cb) = 0`
+- L118: `virtual CtaStrategy*createStrategy(const char* name, const char* id) = 0`
+- L124: `virtual booldeleteStrategy(CtaStrategy* stra) = 0`
+- L130: `typedefvoid(*FuncDeleteStraFact)(ICtaStrategyFact* &fact)`
+
+### `src/Includes/ExecuteDefs.h` (284 行)
+- 类型: WTSTickData:15, WTSHisTickData:16, WTSVariant:17, WTSCommodityInfo:18, WTSSessionInfo:19, ExecuteContext:26, ExecuteUnit:148, IExecuterFact:241
+- L30: `virtual ~ExecuteContext() }`
+- L41: `virtual WTSTickSlice*getTicks(const char* stdCode, uint32_t count, uint64_t etime = 0) = 0`
+- L49: `virtual WTSTickData*grabLastTick(const char* stdCode) = 0`
+- L59: `virtual doublegetPosition(const char* stdCode, bool validOnly = true, int32_t flag = 3) = 0`
+- L67: `virtual OrderMap*getOrders(const char* stdCode) = 0`
+- L75: `virtual doublegetUndoneQty(const char* stdCode) = 0`
+- L85: `virtual OrderIDsbuy(const char* stdCode, double price, double qty, bool bForceClose = false) = 0`
+- L95: `virtual OrderIDssell(const char* stdCode, double price, double qty, bool bForceClose = false) = 0`
+- L103: `virtual boolcancel(uint32_t localid) = 0`
+- L114: `virtual OrderIDscancel(const char* stdCode, bool isBuy, double qty = 0) = 0`
+- L119: `virtual voidwriteLog(const char* message) = 0`
+- L124: `virtual WTSCommodityInfo*getCommodityInfo(const char* stdCode) = 0`
+- L129: `virtual WTSSessionInfo*getSessionInfo(const char* stdCode) = 0`
+- L134: `virtual uint64_tgetCurTime() = 0`
+- L143: `virtual boolregisterTimer(const char* /*stdCode*/, uint32_t /*elapse*/) return false; }`
+- L152: `virtual ~ExecuteUnit() }`
+- L158: `virtual const char*getName() = 0`
+- L163: `virtual const char*getFactName() = 0`
+- L170: `virtual voidinit(ExecuteContext* ctx, const char* stdCode, WTSVariant* /*cfg*/) _ctx = ctx; _code = stdCode; }`
+- L178: `virtual voidset_position(const char* stdCode, double newVol) = 0`
+- L184: `virtual voidclear_all_position(const char* /*stdCode*/) }`
+- L190: `virtual voidon_tick(WTSTickData* newTick) = 0`
+- L199: `virtual voidon_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price) = 0`
+- L210: `virtual voidon_order(uint32_t localid, const char* stdCode, bool isBuy, double leftover, double price, bool isCanceled) = 0`
+- L215: `virtual voidon_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message) = 0`
+- L220: `virtual voidon_channel_ready() = 0`
+- L225: `virtual voidon_channel_lost() = 0`
+- L230: `virtual voidon_account(const char* /*currency*/, double /*prebalance*/, double /*balance*/, double /*dynbalance*/, double /*avaliable*/, double /*closeprofit*/, double /*dynprofit*/, double /*margin*/, double /*fee*/, double /*deposit*/, double /*withdraw*/) }`
+- L239: `typedefvoid(*FuncEnumUnitCallback)(const char* factName, const char* unitName, bool isLast)`
+- L245: `virtual ~IExecuterFact() }`
+- L251: `virtual const char*getName() = 0`
+- L256: `virtual voidenumExeUnit(FuncEnumUnitCallback cb) = 0`
+- L261: `virtual ExecuteUnit*createExeUnit(const char* name) = 0`
+- L266: `virtual ExecuteUnit*createDiffExeUnit(const char* name) = 0`
+- L271: `virtual ExecuteUnit*createArbiExeUnit(const char* name) = 0`
+- L276: `virtual booldeleteExeUnit(ExecuteUnit* unit) = 0`
+- L282: `typedefvoid(*FuncDeleteExeFact)(IExecuterFact* &fact)`
+
+### `src/Includes/FasterDefs.h` (226 行)
+- 类型: string_hash:55, fastest_hashmap:85, fastest_hashmap:102, fastest_hashset:118, fastest_hashset:134, wt_hashmap:162, wt_hashmap:179, wt_hashset:197, wt_hashset:213
+
+### `src/Includes/HftStrategyDefs.h` (164 行)
+- 类型: WTSVariant:17, IHftStraCtx:18, WTSTickData:19, WTSOrdDtlData:20, WTSOrdQueData:21, WTSTransData:22, WTSBarStruct:23, HftStrategy:28, IHftStrategyFact:133
+- L32: `virtual ~HftStrategy() }`
+- L38: `virtual const char*getName() = 0`
+- L43: `virtual const char*getFactName() = 0`
+- L48: `virtual boolinit(WTSVariant* /*cfg*/) return true; }`
+- L50: `virtual const char*id() }`
+- L57: `virtual voidon_init(IHftStraCtx* ctx) = 0`
+- L62: `virtual voidon_session_begin(IHftStraCtx* /*ctx*/, uint32_t /*uTDate*/) }`
+- L67: `virtual voidon_session_end(IHftStraCtx* /*ctx*/, uint32_t /*uTDate*/) }`
+- L72: `virtual voidon_tick(IHftStraCtx* /*ctx*/, const char* /*code*/, WTSTickData* /*newTick*/) }`
+- L77: `virtual voidon_order_queue(IHftStraCtx* /*ctx*/, const char* /*code*/, WTSOrdQueData* /*newOrdQue*/) }`
+- L82: `virtual voidon_order_detail(IHftStraCtx* /*ctx*/, const char* /*code*/, WTSOrdDtlData* /*newOrdDtl*/) }`
+- L87: `virtual voidon_transaction(IHftStraCtx* /*ctx*/, const char* /*code*/, WTSTransData* /*newTrans*/) }`
+- L92: `virtual voidon_bar(IHftStraCtx* /*ctx*/, const char* /*code*/, const char* /*period*/, uint32_t /*times*/, WTSBarStruct* /*newBar*/) }`
+- L97: `virtual voidon_trade(IHftStraCtx* /*ctx*/, uint32_t /*localid*/, const char* /*stdCode*/, bool /*isBuy*/, double /*vol*/, double /*price*/, const char* /*userTag*/) }`
+- L103: `virtual voidon_position(IHftStraCtx* /*ctx*/, const char* /*stdCode*/, bool /*isLong*/, double /*prevol*/, double /*preavail*/, double /*newvol*/, double /*newavail*/) }`
+- L108: `virtual voidon_order(IHftStraCtx* /*ctx*/, uint32_t /*localid*/, const char* /*stdCode*/, bool /*isBuy*/, double /*totalQty*/, double /*leftQty*/, double /*price*/, bool /*isCanceled*/, const char* /*userTag*/) }`
+- L113: `virtual voidon_channel_ready(IHftStraCtx* /*ctx*/) }`
+- L118: `virtual voidon_channel_lost(IHftStraCtx* /*ctx*/) }`
+- L123: `virtual voidon_entrust(uint32_t /*localid*/, bool /*bSuccess*/, const char* /*message*/, const char* /*userTag*/) }`
+- L131: `typedefvoid(*FuncEnumHftStrategyCallback)(const char* factName, const char* straName, bool isLast)`
+- L137: `virtual ~IHftStrategyFact() }`
+- L143: `virtual const char*getName() = 0`
+- L148: `virtual voidenumStrategy(FuncEnumHftStrategyCallback cb) = 0`
+- L153: `virtual HftStrategy*createStrategy(const char* name, const char* id) = 0`
+- L158: `virtual booldeleteStrategy(HftStrategy* stra) = 0`
+- L164: `typedefvoid(*FuncDeleteHftStraFact)(IHftStrategyFact* &fact)`
+
+### `src/Includes/IBaseDataMgr.h` (57 行)
+- 类型: WTSContractInfo:20, WTSArray:21, WTSSessionInfo:22, WTSCommodityInfo:23, IBaseDataMgr:34
+- L37: `virtual WTSCommodityInfo*getCommodity(const char* exchgpid) = 0`
+- L38: `virtual WTSCommodityInfo*getCommodity(const char* exchg, const char* pid) = 0`
+- L40: `virtual WTSContractInfo*getContract(const char* code, const char* exchg = "", uint32_t uDate = 0) = 0`
+- L41: `virtual WTSArray*getContracts(const char* exchg = "", uint32_t uDate = 0) = 0`
+- L43: `virtual WTSSessionInfo*getSession(const char* sid) = 0`
+- L44: `virtual WTSSessionInfo*getSessionByCode(const char* code, const char* exchg = "") = 0`
+- L45: `virtual WTSArray*getAllSessions() = 0`
+- L47: `virtual boolisHoliday(const char* pid, uint32_t uDate, bool isTpl = false) = 0`
+- L49: `virtual uint32_tcalcTradingDate(const char* stdPID, uint32_t uDate, uint32_t uTime, bool isSession = false) = 0`
+- L50: `virtual uint64_tgetBoundaryTime(const char* stdPID, uint32_t tDate, bool isSession = false, bool isStart = true) = 0`
+- L52: `virtual uint32_tgetContractSize(const char* /*exchg*/ = "", uint32_t /*uDate*/ = 0) return 0; }`
+- L54: `virtual uint32_tgetGlobalSize() return 0; }`
+- L55: `virtual WTSContractInfo*getContractByIndex(uint32_t /*idx*/) return NULL; }`
+
+### `src/Includes/IBtDtReader.h` (61 行)
+- 类型: WTSVariant:16, IBtDtReaderSink:22, IBtDtReader:36
+- L28: `virtual voidreader_log(WTSLogLevel ll, const char* message) = 0`
+- L40: `virtual ~IBtDtReader() }`
+- L43: `virtual voidinit(WTSVariant* /*cfg*/, IBtDtReaderSink* sink) _sink = sink; }`
+- L45: `virtual boolread_raw_bars(const char* exchg, const char* code, WTSKlinePeriod period, std::string& buffer) = 0`
+- L46: `virtual boolread_raw_ticks(const char* exchg, const char* code, uint32_t uDate, std::string& buffer) = 0`
+- L48: `virtual boolread_raw_order_details(const char* /*exchg*/, const char* /*code*/, uint32_t /*uDate*/, std::string& /*buffer*/) return false; }`
+- L49: `virtual boolread_raw_order_queues(const char* /*exchg*/, const char* /*code*/, uint32_t /*uDate*/, std::string& /*buffer*/) return false; }`
+- L50: `virtual boolread_raw_transactions(const char* /*exchg*/, const char* /*code*/, uint32_t /*uDate*/, std::string& /*buffer*/) return false; }`
+- L59: `typedefvoid(*FuncDeleteBtDtReader)(IBtDtReader* store)`
+
+### `src/Includes/ICtaStraCtx.h` (612 行)
+- 类型: WTSCommodityInfo:21, WTSTickData:22, WTSBarStruct:23, WTSKlineSlice:24, WTSTickSlice:25, ICtaStraCtx:38
+- L50: `virtual ~ICtaStraCtx() }`
+- L56: `inline const char*name() }`
+- L63: `virtual uint32_tid() = 0`
+- L70: `virtual voidon_init() = 0`
+- L76: `virtual voidon_session_begin(uint32_t uTDate) = 0`
+- L82: `virtual voidon_session_end(uint32_t uTDate) = 0`
+- L89: `virtual voidon_tick(const char* stdCode, WTSTickData* newTick, bool bEmitStrategy = true) = 0`
+- L98: `virtual voidon_bar(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar) = 0`
+- L106: `virtual boolon_schedule(uint32_t curDate, uint32_t curTime) = 0`
+- L113: `virtual voidon_bactest_end() }`
+- L124: `virtual voidon_calculate_done(uint32_t /*curDate*/, uint32_t /*curTime*/) }`
+- L135: `virtual voidon_bar_close(const char* stdCode, const char* period, WTSBarStruct* newBar) = 0`
+- L145: `virtual voidon_calculate(uint32_t curDate, uint32_t curTime) = 0`
+- L155: `virtual voidon_tick_updated(const char* /*stdCode*/, WTSTickData* /*newTick*/) }`
+- L167: `virtual voidon_condition_triggered(const char* /*stdCode*/, double /*target*/, double /*price*/, const char* /*usertag*/) }`
+- L174: `virtual voidenum_position(FuncEnumCtaPosCallBack cb, bool bForExecute = false) = 0`
+- L188: `virtual voidstra_enter_long(const char* stdCode, double qty, const char* userTag = "", double limitprice = 0.0, double stopprice = 0.0) = 0`
+- L201: `virtual voidstra_enter_short(const char* stdCode, double qty, const char* userTag = "", double limitprice = 0.0, double stopprice = 0.0) = 0`
+- L214: `virtual voidstra_exit_long(const char* stdCode, double qty, const char* userTag = "", double limitprice = 0.0, double stopprice = 0.0) = 0`
+- L227: `virtual voidstra_exit_short(const char* stdCode, double qty, const char* userTag = "", double limitprice = 0.0, double stopprice = 0.0) = 0`
+- L239: `virtual doublestra_get_position(const char* stdCode, bool bOnlyValid = false, const char* userTag = "") = 0`
+- L252: `virtual voidstra_set_position(const char* stdCode, double qty, const char* userTag = "", double limitprice = 0.0, double stopprice = 0.0) = 0`
+- L262: `virtual doublestra_get_price(const char* stdCode) = 0`
+- L273: `virtual doublestra_get_day_price(const char* stdCode, int flag = 0) = 0`
+- L280: `virtual uint32_tstra_get_tdate() = 0`
+- L287: `virtual uint32_tstra_get_date() = 0`
+- L294: `virtual uint32_tstra_get_time() = 0`
+- L304: `virtual doublestra_get_fund_data(int flag = 0) = 0`
+- L314: `virtual uint64_tstra_get_first_entertime(const char* stdCode) = 0`
+- L324: `virtual uint64_tstra_get_last_entertime(const char* stdCode) = 0`
+- L334: `virtual uint64_tstra_get_last_exittime(const char* stdCode) = 0`
+- L344: `virtual doublestra_get_last_enterprice(const char* stdCode) = 0`
+- L354: `virtual doublestra_get_position_avgpx(const char* stdCode) = 0`
+- L364: `virtual doublestra_get_position_profit(const char* stdCode) = 0`
+- L375: `virtual uint64_tstra_get_detail_entertime(const char* stdCode, const char* userTag) = 0`
+- L386: `virtual doublestra_get_detail_cost(const char* stdCode, const char* userTag) = 0`
+- L398: `virtual doublestra_get_detail_profit(const char* stdCode, const char* userTag, int flag = 0) = 0`
+- L408: `virtual WTSCommodityInfo*stra_get_comminfo(const char* stdCode) = 0`
+- L421: `virtual WTSKlineSlice*stra_get_bars(const char* stdCode, const char* period, uint32_t count, bool isMain = false) = 0`
+- L432: `virtual WTSTickSlice*stra_get_ticks(const char* stdCode, uint32_t count) = 0`
+- L442: `virtual WTSTickData*stra_get_last_tick(const char* stdCode) = 0`
+- L452: `virtual std::stringstra_get_rawcode(const char* stdCode) = 0`
+- L461: `virtual voidstra_sub_ticks(const char* stdCode) = 0`
+- L471: `virtual voidstra_sub_bar_events(const char* stdCode, const char* period) = 0`
+- L480: `virtual voidstra_log_info(const char* message) = 0`
+- L489: `virtual voidstra_log_debug(const char* message) = 0`
+- L498: `virtual voidstra_log_error(const char* message) = 0`
+- L507: `virtual voidstra_log_warn(const char* /*message*/) }`
+- L517: `virtual voidstra_save_user_data(const char* /*key*/, const char* /*val*/) }`
+- L528: `virtual const char*stra_load_user_data(const char* /*key*/, const char* defVal = "") return defVal; }`
+- L538: `virtual voidset_chart_kline(const char* /*stdCode*/, const char* /*period*/) }`
+- L549: `virtual voidadd_chart_mark(double /*price*/, const char* /*icon*/, const char* /*tag*/) }`
+- L559: `virtual voidregister_index(const char* /*idxName*/, uint32_t /*indexType*/) }`
+- L572: `virtual boolregister_index_line(const char* /*idxName*/, const char* /*lineName*/, uint32_t /*lineType*/) return false; }`
+- L584: `virtual booladd_index_baseline(const char* /*idxName*/, const char* /*lineName*/, double /*val*/) return false; }`
+- L596: `virtual boolset_index_value(const char* /*idxName*/, const char* /*lineName*/, double /*val*/) return false; }`
+- L606: `virtual const char*stra_get_last_entertag(const char* stdCode) = 0`
+
+### `src/Includes/IDataFactory.h` (78 行)
+- 类型: WTSKlineData:17, WTSHisTrendData:18, WTSTickData:19, WTSSessionInfo:20, WTSKlineSlice:21, WTSContractInfo:22, WTSBarStruct:23, WTSTickStruct:24, WTSTickSlice:25, IDataFactory:32
+- L41: `virtual WTSBarStruct*updateKlineData(WTSKlineData* klineData, WTSTickData* tick, WTSSessionInfo* sInfo, bool bAlignSec = false) = 0`
+- L49: `virtual WTSBarStruct*updateKlineData(WTSKlineData* klineData, WTSBarStruct* newBasicBar, WTSSessionInfo* sInfo, bool bAlignSec = false) = 0`
+- L59: `virtual WTSKlineData*extractKlineData(WTSKlineSlice* baseKline, WTSKlinePeriod period, uint32_t times, WTSSessionInfo* sInfo, bool bIncludeOpen = true, bool bSectionSplit = false) = 0`
+- L68: `virtual WTSKlineData*extractKlineData(WTSTickSlice* ayTicks, uint32_t seconds, WTSSessionInfo* sInfo, bool bUnixTime = false, bool bSectionSplit = false) = 0`
+- L75: `virtual boolmergeKlineData(WTSKlineData* klineData, WTSKlineData* newKline) = 0`
+
+### `src/Includes/IDataManager.h` (29 行)
+- 类型: WTSTickSlice:5, WTSKlineSlice:6, WTSTickData:7, WTSOrdQueSlice:8, WTSOrdDtlSlice:9, WTSTransSlice:10, IDataManager:13
+- L16: `virtual WTSTickSlice*get_tick_slice(const char* /*stdCode*/, uint32_t /*count*/, uint64_t /*etime*/ = 0) return NULL; }`
+- L17: `virtual WTSOrdQueSlice*get_order_queue_slice(const char* /*stdCode*/, uint32_t /*count*/, uint64_t /*etime*/ = 0) return NULL; }`
+- L18: `virtual WTSOrdDtlSlice*get_order_detail_slice(const char* /*stdCode*/, uint32_t /*count*/, uint64_t /*etime*/ = 0) return NULL; }`
+- L19: `virtual WTSTransSlice*get_transaction_slice(const char* /*stdCode*/, uint32_t /*count*/, uint64_t /*etime*/ = 0) return NULL; }`
+- L20: `virtual WTSKlineSlice*get_kline_slice(const char* /*stdCode*/, WTSKlinePeriod /*period*/, uint32_t /*times*/, uint32_t /*count*/, uint64_t /*etime*/ = 0) return NULL; }`
+- L22: `virtual WTSTickData*grab_last_tick(const char* /*stdCode*/) return NULL; }`
+- L24: `virtual doubleget_adjusting_factor(const char* /*stdCode*/, uint32_t /*uDate*/) return 1.0; }`
+- L26: `virtual uint32_tget_adjusting_flag() return 0; }`
+
+### `src/Includes/IDataReader.h` (308 行)
+- 类型: WTSKlineData:18, WTSKlineSlice:19, WTSTickSlice:20, WTSOrdQueSlice:21, WTSOrdDtlSlice:22, WTSTransSlice:23, WTSBarStruct:24, WTSVariant:25, IBaseDataMgr:26, IHotMgr:27, IDataReaderSink:33, IHisDataLoader:125, IDataReader:182
+- L44: `virtual voidon_bar(const char* stdCode, WTSKlinePeriod period, WTSBarStruct* newBar) = 0`
+- L52: `virtual voidon_all_bar_updated(uint32_t updateTime) = 0`
+- L59: `virtual IBaseDataMgr*get_basedata_mgr() = 0`
+- L66: `virtual IHotMgr*get_hot_mgr() = 0`
+- L73: `virtual uint32_tget_date() = 0`
+- L81: `virtual uint32_tget_min_time() = 0`
+- L88: `virtual uint32_tget_secs() = 0`
+- L96: `virtual voidreader_log(WTSLogLevel ll, const char* message) = 0`
+- L107: `typedefvoid(*FuncReadBars)(void* obj, WTSBarStruct* bars, uint32_t count)`
+- L119: `typedefvoid(*FuncReadFactors)(void* obj, const char* stdCode, uint32_t* dates, double* factors, uint32_t count)`
+- L140: `virtual boolloadFinalHisBars(void* obj, const char* stdCode, WTSKlinePeriod period, FuncReadBars cb) = 0`
+- L153: `virtual boolloadRawHisBars(void* obj, const char* stdCode, WTSKlinePeriod period, FuncReadBars cb) = 0`
+- L163: `virtual boolloadAllAdjFactors(void* obj, FuncReadFactors cb) = 0`
+- L174: `virtual boolloadAdjFactors(void* obj, const char* stdCode, FuncReadFactors cb) = 0`
+- L195: `virtual ~IDataReader() }`
+- L206: `virtual voidinit(WTSVariant* /*cfg*/, IDataReaderSink* sink, IHisDataLoader* loader = NULL) _sink = sink; _loader = loader; }`
+- L216: `virtual voidonMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTDate = 0) = 0`
+- L227: `virtual WTSTickSlice*readTickSlice(const char* stdCode, uint32_t count, uint64_t etime = 0) = 0`
+- L238: `virtual WTSOrdDtlSlice*readOrdDtlSlice(const char* /*stdCode*/, uint32_t /*count*/, uint64_t /*etime*/ = 0) return NULL; }`
+- L248: `virtual WTSOrdQueSlice*readOrdQueSlice(const char* /*stdCode*/, uint32_t /*count*/, uint64_t /*etime*/ = 0) return NULL; }`
+- L259: `virtual WTSTransSlice*readTransSlice(const char* /*stdCode*/, uint32_t /*count*/, uint64_t /*etime*/ = 0) return NULL; }`
+- L271: `virtual WTSKlineSlice*readKlineSlice(const char* stdCode, WTSKlinePeriod period, uint32_t count, uint64_t etime = 0) = 0`
+- L281: `virtual doublegetAdjFactorByDate(const char* /*stdCode*/, uint32_t /*date*/ = 0) return 1.0; }`
+- L289: `virtual uint32_tgetAdjustingFlag() return 0; }`
+- L306: `typedefvoid(*FuncDeleteDataReader)(IDataReader* store)`
+
+### `src/Includes/IDataWriter.h` (109 行)
+- 类型: WTSTickData:16, WTSOrdQueData:17, WTSOrdDtlData:18, WTSTransData:19, WTSVariant:20, IBaseDataMgr:21, WTSBarStruct:22, WTSTickStruct:23, WTSOrdDtlStruct:24, WTSOrdQueStruct:25, WTSTransStruct:26, IDataWriterSink:28, IHisDataDumper:56, IDataWriter:72
+- L32: `virtual IBaseDataMgr*getBDMgr() = 0`
+- L34: `virtual boolcanSessionReceive(const char* sid) = 0`
+- L36: `virtual voidbroadcastTick(WTSTickData* curTick) = 0`
+- L38: `virtual voidbroadcastOrdQue(WTSOrdQueData* curOrdQue) = 0`
+- L40: `virtual voidbroadcastOrdDtl(WTSOrdDtlData* curOrdDtl) = 0`
+- L42: `virtual voidbroadcastTrans(WTSTransData* curTrans) = 0`
+- L44: `virtual CodeSet*getSessionComms(const char* sid) = 0`
+- L46: `virtual uint32_tgetTradingDate(const char* pid) = 0`
+- L53: `virtual voidoutputLog(WTSLogLevel ll, const char* message) = 0`
+- L59: `virtual booldumpHisBars(const char* stdCode, const char* period, WTSBarStruct* bars, uint32_t count) = 0`
+- L60: `virtual booldumpHisTicks(const char* stdCode, uint32_t uDate, WTSTickStruct* ticks, uint32_t count) = 0`
+- L62: `virtual booldumpHisOrdQue(const char* /*stdCode*/, uint32_t /*uDate*/, WTSOrdQueStruct* /*items*/, uint32_t /*count*/) return false; }`
+- L63: `virtual booldumpHisOrdDtl(const char* /*stdCode*/, uint32_t /*uDate*/, WTSOrdDtlStruct* /*items*/, uint32_t /*count*/) return false; }`
+- L64: `virtual booldumpHisTrans(const char* /*stdCode*/, uint32_t /*uDate*/, WTSTransStruct* /*items*/, uint32_t /*count*/) return false; }`
+- L78: `virtual boolinit(WTSVariant* /*params*/, IDataWriterSink* sink) _sink = sink; return true; }`
+- L80: `virtual voidrelease() = 0`
+- L82: `voidadd_ext_dumper(const char* id, IHisDataDumper* dumper) _dumpers[id] = dumper; }`
+- L85: `virtual boolwriteTick(WTSTickData* curTick, uint32_t procFlag) = 0`
+- L87: `virtual boolwriteOrderQueue(WTSOrdQueData* /*curOrdQue*/) return false; }`
+- L89: `virtual boolwriteOrderDetail(WTSOrdDtlData* /*curOrdDetail*/) return false; }`
+- L91: `virtual boolwriteTransaction(WTSTransData* /*curTrans*/) return false; }`
+- L93: `virtual voidtransHisData(const char* /*sid*/) }`
+- L95: `virtual boolisSessionProceeded(const char* /*sid*/) return true; }`
+- L97: `virtual WTSTickData*getCurTick(const char* code, const char* exchg = "") = 0`
+- L109: `typedefvoid(*FuncDeleteWriter)(wtp::IDataWriter* &writer)`
+
+### `src/Includes/IExpFactory.h` (25 行)
+- 类型: WTSKlineData:14, WTSExpressParams:15, WTSExpressData:16, WTSHisTrendData:17, IExpFactory:19
+- L22: `virtual WTSExpressData *calcKlineExpress(const char* expName, WTSKlineData* klineData, WTSExpressParams* params) = 0`
+- L23: `virtual WTSExpressData *calcTrendExpress(const char* expName, WTSHisTrendData* trendData, WTSExpressParams* params) = 0`
+
+### `src/Includes/IHftStraCtx.h` (489 行)
+- 类型: WTSCommodityInfo:20, WTSTickSlice:21, WTSKlineSlice:22, WTSTickData:23, WTSBarStruct:24, IHftStraCtx:41
+- L53: `virtual ~IHftStraCtx() }`
+- L59: `const char*name() }`
+- L66: `virtual uint32_tid() = 0`
+- L77: `virtual voidon_init() = 0`
+- L85: `virtual voidon_tick(const char* stdCode, WTSTickData* newTick) = 0`
+- L93: `virtual voidon_order_queue(const char* stdCode, WTSOrdQueData* newOrdQue) = 0`
+- L101: `virtual voidon_order_detail(const char* stdCode, WTSOrdDtlData* newOrdDtl) = 0`
+- L109: `virtual voidon_transaction(const char* stdCode, WTSTransData* newTrans) = 0`
+- L119: `virtual voidon_bar(const char* /*stdCode*/, const char* /*period*/, uint32_t /*times*/, WTSBarStruct* /*newBar*/) }`
+- L126: `virtual voidon_session_begin(uint32_t /*uTDate*/) }`
+- L133: `virtual voidon_session_end(uint32_t /*uTDate*/) }`
+- L139: `virtual voidon_bactest_end() }`
+- L147: `virtual voidon_tick_updated(const char* /*stdCode*/, WTSTickData* /*newTick*/) }`
+- L155: `virtual voidon_ordque_updated(const char* /*stdCode*/, WTSOrdQueData* /*newOrdQue*/) }`
+- L163: `virtual voidon_orddtl_updated(const char* /*stdCode*/, WTSOrdDtlData* /*newOrdDtl*/) }`
+- L171: `virtual voidon_trans_updated(const char* /*stdCode*/, WTSTransData* /*newTrans*/) }`
+- L184: `virtual boolstra_cancel(uint32_t localid) = 0`
+- L194: `virtual OrderIDsstra_cancel(const char* stdCode, bool isBuy, double qty) = 0`
+- L207: `virtual OrderIDsstra_buy(const char* stdCode, double price, double qty, const char* userTag, int flag = 0, bool bForceClose = false) = 0`
+- L220: `virtual OrderIDsstra_sell(const char* stdCode, double price, double qty, const char* userTag, int flag = 0, bool bForceClose = false) = 0`
+- L232: `virtual uint32_tstra_enter_long(const char* /*stdCode*/, double /*price*/, double /*qty*/, const char* /*userTag*/, int /*flag*/ = 0) return 0; }`
+- L244: `virtual uint32_tstra_enter_short(const char* /*stdCode*/, double /*price*/, double /*qty*/, const char* /*userTag*/, int /*flag*/ = 0) return 0; }`
+- L257: `virtual uint32_tstra_exit_long(const char* /*stdCode*/, double /*price*/, double /*qty*/, const char* /*userTag*/, bool /*isToday*/ = false, int /*flag*/ = 0) return 0; }`
+- L270: `virtual uint32_tstra_exit_short(const char* /*stdCode*/, double /*price*/, double /*qty*/, const char* /*userTag*/, bool /*isToday*/ = false, int /*flag*/ = 0) return 0; }`
+- L278: `virtual WTSCommodityInfo*stra_get_comminfo(const char* stdCode) = 0`
+- L288: `virtual WTSKlineSlice*stra_get_bars(const char* stdCode, const char* period, uint32_t count) = 0`
+- L297: `virtual WTSTickSlice*stra_get_ticks(const char* stdCode, uint32_t count) = 0`
+- L306: `virtual WTSOrdDtlSlice*stra_get_order_detail(const char* stdCode, uint32_t count) = 0`
+- L315: `virtual WTSOrdQueSlice*stra_get_order_queue(const char* stdCode, uint32_t count) = 0`
+- L324: `virtual WTSTransSlice*stra_get_transaction(const char* stdCode, uint32_t count) = 0`
+- L332: `virtual WTSTickData*stra_get_last_tick(const char* stdCode) = 0`
+- L340: `virtual std::stringstra_get_rawcode(const char* stdCode) = 0`
+- L353: `virtual doublestra_get_position(const char* stdCode, bool bOnlyValid = false, int flag = 3) = 0`
+- L361: `virtual doublestra_get_position_avgpx(const char* stdCode) = 0`
+- L369: `virtual doublestra_get_position_profit(const char* stdCode) = 0`
+- L377: `virtual doublestra_get_price(const char* stdCode) = 0`
+- L385: `virtual doublestra_get_undone(const char* stdCode) = 0`
+- L392: `virtual uint32_tstra_get_date() = 0`
+- L399: `virtual uint32_tstra_get_time() = 0`
+- L406: `virtual uint32_tstra_get_secs() = 0`
+- L413: `virtual voidstra_sub_ticks(const char* stdCode) = 0`
+- L420: `virtual voidstra_sub_order_queues(const char* stdCode) = 0`
+- L427: `virtual voidstra_sub_order_details(const char* stdCode) = 0`
+- L434: `virtual voidstra_sub_transactions(const char* stdCode) = 0`
+- L441: `virtual voidstra_log_info(const char* message) = 0`
+- L448: `virtual voidstra_log_debug(const char* message) = 0`
+- L455: `virtual voidstra_log_error(const char* message) = 0`
+- L462: `virtual voidstra_log_warn(const char* /*message*/) }`
+- L470: `virtual voidstra_save_user_data(const char* /*key*/, const char* /*val*/) }`
+- L479: `virtual const char*stra_load_user_data(const char* /*key*/, const char* defVal = "") return defVal; }`
+
+### `src/Includes/IHotMgr.h` (227 行)
+- 类型: IHotMgr:66
+- L78: `virtual const char*getRawCode(const char* exchg, const char* pid, uint32_t dt) = 0`
+- L89: `virtual const char*getPrevRawCode(const char* exchg, const char* pid, uint32_t dt) = 0`
+- L100: `virtual boolisHot(const char* exchg, const char* rawCode, uint32_t dt) = 0`
+- L113: `virtual boolsplitHotSecions(const char* exchg, const char* hotCode, uint32_t sDt, uint32_t eDt, HotSections& sections) = 0`
+- L124: `virtual const char*getSecondRawCode(const char* exchg, const char* pid, uint32_t dt) = 0`
+- L135: `virtual const char*getPrevSecondRawCode(const char* exchg, const char* pid, uint32_t dt) = 0`
+- L146: `virtual boolisSecond(const char* exchg, const char* rawCode, uint32_t dt) = 0`
+- L159: `virtual boolsplitSecondSecions(const char* exchg, const char* hotCode, uint32_t sDt, uint32_t eDt, HotSections& sections) = 0`
+- L170: `virtual const char*getCustomRawCode(const char* tag, const char* fullPid, uint32_t dt = 0) = 0`
+- L181: `virtual const char*getPrevCustomRawCode(const char* tag, const char* fullPid, uint32_t dt = 0) = 0`
+- L192: `virtual boolisCustomHot(const char* tag, const char* fullCode, uint32_t d = 0) = 0`
+- L205: `virtual boolsplitCustomSections(const char* tag, const char* hotCode, uint32_t sDt, uint32_t eDt, HotSections& sections) = 0`
+- L214: `virtual const char*getRuleTag(const char* stdCode) = 0`
+- L225: `virtual doublegetRuleFactor(const char* ruleTag, const char* fullPid, uint32_t uDate = 0) = 0`
+
+### `src/Includes/IIndexDefs.h` (98 行)
+- 类型: WTSVariant:7, WTSTickData:8, IHotMgr:9, IBaseDataMgr:10, IIndexContext:12, IIndexWorker:31, IIndexWorkerFact:68
+- L16: `virtual ~IIndexContext() }`
+- L19: `virtual IHotMgr*get_hot_mgr() = 0`
+- L20: `virtual IBaseDataMgr*get_bd_mgr() = 0`
+- L22: `virtual WTSTickData*sub_ticks(const char* fullCode) = 0`
+- L24: `virtual WTSTickData*get_tick(const char* code, const char* exchg) = 0`
+- L26: `virtual voidpush_tick(WTSTickData* newTick) = 0`
+- L28: `virtual voidoutput_log(WTSLogLevel ll, const char* message) = 0`
+- L35: `virtual ~IIndexWorker() }`
+- L41: `virtual const char*get_fact_name() = 0`
+- L43: `virtual boolinit(WTSVariant* config) = 0`
+- L45: `virtual voidhandle_quote(WTSTickData* newTick) = 0`
+- L66: `typedefvoid(*FuncEnumIndexWorkerCallback)(const char* factName, const char* straName, bool isLast)`
+- L72: `virtual ~IIndexWorkerFact() }`
+- L78: `virtual const char*get_name() = 0`
+- L83: `virtual IIndexWorker*create_worker(const char* name, const char* id) = 0`
+- L89: `virtual booldelete_worker(IIndexWorker* stra) = 0`
+- L98: `typedefvoid(*FuncDeleteIndexFact)(wtp::IIndexWorkerFact* &fact)`
+
+### `src/Includes/ILogHandler.h` (20 行)
+- 类型: ILogHandler:15
+- L18: `virtual voidhandleLogAppend(WTSLogLevel ll, const char* msg) = 0`
+
+### `src/Includes/IParserApi.h` (140 行)
+- 类型: WTSTickData:17, WTSOrdDtlData:18, WTSOrdQueData:19, WTSTransData:20, WTSVariant:21, WTSArray:22, IBaseDataMgr:23, IParserSpi:28, IParserApi:83
+- L36: `virtual voidhandleEvent(WTSParserEvent /*e*/, int32_t /*ec*/) }`
+- L42: `virtual voidhandleSymbolList(const WTSArray* aySymbols) = 0`
+- L49: `virtual voidhandleQuote(WTSTickData *quote, uint32_t procFlag) = 0`
+- L55: `virtual voidhandleOrderQueue(WTSOrdQueData* /*ordQueData*/) }`
+- L61: `virtual voidhandleOrderDetail(WTSOrdDtlData* /*ordDetailData*/) }`
+- L67: `virtual voidhandleTransaction(WTSTransData* /*transData*/) }`
+- L74: `virtual voidhandleParserLog(WTSLogLevel ll, const char* message) = 0`
+- L77: `virtual IBaseDataMgr*getBaseDataMgr() = 0`
+- L86: `virtual ~IParserApi() }`
+- L94: `virtual boolinit(WTSVariant* /*config*/) return false; }`
+- L100: `virtual voidrelease() }`
+- L106: `virtual boolconnect() return false; }`
+- L112: `virtual booldisconnect() return false; }`
+- L118: `virtual boolisConnected() return false; }`
+- L123: `virtual voidsubscribe(const CodeSet& /*setCodes*/) }`
+- L128: `virtual voidunsubscribe(const CodeSet& /*setCodes*/) }`
+- L133: `virtual voidregisterSpi(IParserSpi* /*spi*/) }`
+- L140: `typedefvoid(*FuncDeleteParser)(wtp::IParserApi* &parser)`
+
+### `src/Includes/IRdmDtReader.h` (95 行)
+- 类型: WTSKlineSlice:17, WTSTickSlice:18, WTSOrdQueSlice:19, WTSOrdDtlSlice:20, WTSTransSlice:21, IBaseDataMgr:22, IHotMgr:23, WTSVariant:24, IRdmDtReaderSink:31, IRdmDtReader:55
+- L37: `virtual IBaseDataMgr*get_basedata_mgr() = 0`
+- L42: `virtual IHotMgr*get_hot_mgr() = 0`
+- L47: `virtual voidreader_log(WTSLogLevel ll, const char* message) = 0`
+- L59: `virtual ~IRdmDtReader() }`
+- L62: `virtual voidinit(WTSVariant* /*cfg*/, IRdmDtReaderSink* sink) _sink = sink; }`
+- L64: `virtual WTSOrdDtlSlice*readOrdDtlSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime = 0) = 0`
+- L65: `virtual WTSOrdQueSlice*readOrdQueSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime = 0) = 0`
+- L66: `virtual WTSTransSlice*readTransSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime = 0) = 0`
+- L68: `virtual WTSTickSlice*readTickSliceByDate(const char* stdCode, uint32_t uDate = 0) = 0`
+- L70: `virtual WTSTickSlice*readTickSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime = 0) = 0`
+- L71: `virtual WTSKlineSlice*readKlineSliceByRange(const char* stdCode, WTSKlinePeriod period, uint64_t stime, uint64_t etime = 0) = 0`
+- L73: `virtual WTSTickSlice*readTickSliceByCount(const char* stdCode, uint32_t count, uint64_t etime = 0) = 0`
+- L74: `virtual WTSKlineSlice*readKlineSliceByCount(const char* stdCode, WTSKlinePeriod period, uint32_t count, uint64_t etime = 0) = 0`
+- L82: `virtual doublegetAdjFactorByDate(const char* /*stdCode*/, uint32_t /*date*/ = 0) return 1.0; }`
+- L84: `virtual voidclearCache() }`
+- L93: `typedefvoid(*FuncDeleteRdmDtReader)(IRdmDtReader* store)`
+
+### `src/Includes/ISelStraCtx.h` (396 行)
+- 类型: WTSCommodityInfo:17, WTSSessionInfo:18, WTSTickData:19, WTSBarStruct:20, WTSKlineSlice:21, WTSTickSlice:22, ISelStraCtx:38
+- L50: `virtual ~ISelStraCtx() }`
+- L56: `inline const char*name() }`
+- L63: `virtual uint32_tid() = 0`
+- L74: `virtual voidon_init() = 0`
+- L80: `virtual voidon_session_begin(uint32_t uTDate) = 0`
+- L86: `virtual voidon_session_end(uint32_t uTDate) = 0`
+- L94: `virtual voidon_tick(const char* stdCode, WTSTickData* newTick, bool bEmitStrategy = true) = 0`
+- L103: `virtual voidon_bar(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar) = 0`
+- L112: `virtual boolon_schedule(uint32_t curDate, uint32_t curTime, uint32_t fireTime) = 0`
+- L117: `virtual voidon_bactest_end() }`
+- L125: `virtual voidon_bar_close(const char* stdCode, const char* period, WTSBarStruct* newBar) = 0`
+- L132: `virtual voidon_tick_updated(const char* /*stdCode*/, WTSTickData* /*newTick*/) }`
+- L139: `virtual voidon_strategy_schedule(uint32_t /*curDate*/, uint32_t /*curTime*/) }`
+- L145: `virtual voidenum_position(FuncEnumSelPositionCallBack cb) = 0`
+- L159: `virtual doublestra_get_position(const char* stdCode, bool bOnlyValid = false, const char* userTag = "") = 0`
+- L167: `virtual voidstra_set_position(const char* stdCode, double qty, const char* userTag = "") = 0`
+- L174: `virtual doublestra_get_price(const char* stdCode) = 0`
+- L186: `virtual doublestra_get_day_price(const char* stdCode, int flag = 0) = 0`
+- L192: `virtual uint32_tstra_get_tdate() = 0`
+- L198: `virtual uint32_tstra_get_date() = 0`
+- L204: `virtual uint32_tstra_get_time() = 0`
+- L214: `virtual doublestra_get_fund_data(int flag = 0) = 0`
+- L221: `virtual uint64_tstra_get_first_entertime(const char* stdCode) = 0`
+- L228: `virtual uint64_tstra_get_last_entertime(const char* stdCode) = 0`
+- L235: `virtual uint64_tstra_get_last_exittime(const char* stdCode) = 0`
+- L242: `virtual doublestra_get_last_enterprice(const char* stdCode) = 0`
+- L249: `virtual const char*stra_get_last_entertag(const char* stdCode) = 0`
+- L256: `virtual doublestra_get_position_avgpx(const char* stdCode) = 0`
+- L263: `virtual doublestra_get_position_profit(const char* stdCode) = 0`
+- L271: `virtual uint64_tstra_get_detail_entertime(const char* stdCode, const char* userTag) = 0`
+- L279: `virtual doublestra_get_detail_cost(const char* stdCode, const char* userTag) = 0`
+- L293: `virtual doublestra_get_detail_profit(const char* stdCode, const char* userTag, int flag = 0) = 0`
+- L300: `virtual WTSCommodityInfo*stra_get_comminfo(const char* stdCode) = 0`
+- L307: `virtual WTSSessionInfo*stra_get_sessinfo(const char* stdCode) = 0`
+- L316: `virtual WTSKlineSlice*stra_get_bars(const char* stdCode, const char* period, uint32_t count) = 0`
+- L324: `virtual WTSTickSlice*stra_get_ticks(const char* stdCode, uint32_t count) = 0`
+- L331: `virtual WTSTickData*stra_get_last_tick(const char* stdCode) = 0`
+- L339: `virtual std::stringstra_get_rawcode(const char* stdCode) = 0`
+- L346: `virtual voidstra_sub_ticks(const char* stdCode) = 0`
+- L352: `virtual voidstra_log_info(const char* message) = 0`
+- L358: `virtual voidstra_log_debug(const char* message) = 0`
+- L364: `virtual voidstra_log_error(const char* message) = 0`
+- L370: `virtual voidstra_log_warn(const char* /*message*/) }`
+- L378: `virtual voidstra_save_user_data(const char* /*key*/, const char* /*val*/) }`
+- L387: `virtual const char*stra_load_user_data(const char* /*key*/, const char* defVal = "") return defVal; }`
+
+### `src/Includes/ISessionMgr.h` (32 行)
+- 类型: WTSSessionInfo:15, ISessionMgr:20
+- L30: `virtual WTSSessionInfo*getSession(const char* code, const char* exchg = "") = 0`
+
+### `src/Includes/ITraderApi.h` (287 行)
+- 类型: WTSVariant:18, WTSEntrust:19, WTSOrderInfo:20, WTSTradeInfo:21, WTSEntrustAction:22, WTSAccountInfo:23, WTSPositionItem:24, WTSContractInfo:25, WTSError:26, WTSTickData:27, WTSNotify:28, WTSArray:29, IBaseDataMgr:30, IStkTraderSpi:39, IStkTraderApi:50, IOptTraderSpi:60, IOptTraderApi:74, ITraderSpi:98, ITraderApi:189
+- L63: `virtual voidonRspEntrustOpt(WTSEntrust* /*entrust*/, WTSError */*err*/) }`
+- L64: `virtual voidonRspOrdersOpt(const WTSArray* /*ayOrders*/) }`
+- L65: `virtual voidonPushOrderOpt(WTSOrderInfo* /*orderInfo*/) }`
+- L81: `virtual intorderInsertOpt(WTSEntrust* /*eutrust*/) return -1; }`
+- L87: `virtual intorderActionOpt(WTSEntrustAction* /*action*/) return -1; }`
+- L92: `virtual intqueryOrdersOpt(WTSBusinessType /*bType*/) return -1; }`
+- L104: `virtual IBaseDataMgr*getBaseDataMgr() = 0`
+- L109: `virtual voidhandleTraderLog(WTSLogLevel /*ll*/, const char* /*message*/) }`
+- L114: `virtual IStkTraderSpi*getStkSpi() return NULL; }`
+- L119: `virtual IOptTraderSpi*getOptSpi() return NULL; }`
+- L125: `virtual voidhandleEvent(WTSTraderEvent e, int32_t ec) = 0`
+- L130: `virtual voidonLoginResult(bool bSucc, const char* msg, uint32_t tradingdate) = 0`
+- L135: `virtual voidonLogout() }`
+- L140: `virtual voidonRspEntrust(WTSEntrust* /*entrust*/, WTSError */*err*/) }`
+- L145: `virtual voidonRspAccount(WTSArray* /*ayAccounts*/) }`
+- L150: `virtual voidonRspPosition(const WTSArray* /*ayPositions*/) }`
+- L155: `virtual voidonRspOrders(const WTSArray* /*ayOrders*/) }`
+- L160: `virtual voidonRspTrades(const WTSArray* /*ayTrades*/) }`
+- L165: `virtual voidonRspSettlementInfo(uint32_t /*uDate*/, const char* /*content*/) }`
+- L170: `virtual voidonPushOrder(WTSOrderInfo* /*orderInfo*/) }`
+- L175: `virtual voidonPushTrade(WTSTradeInfo* /*tradeRecord*/) }`
+- L180: `virtual voidonTraderError(WTSError* /*err*/, void* /*pData*/ = NULL) }`
+- L185: `virtual voidonPushInstrumentStatus(const char* /*exchg*/, const char* /*code*/, WTSTradeStatus /*state*/) }`
+- L192: `virtual ~ITraderApi() }`
+- L194: `virtual IStkTraderApi*getStkTrader() return NULL; }`
+- L195: `virtual IOptTraderApi*getOptTrader() return NULL; }`
+- L201: `virtual boolinit(WTSVariant */*params*/) return false; }`
+- L206: `virtual voidrelease() }`
+- L211: `virtual voidregisterSpi(ITraderSpi */*listener*/) }`
+- L220: `virtual voidconnect() }`
+- L225: `virtual voiddisconnect() }`
+- L227: `virtual boolisConnected() return false; }`
+- L232: `virtual boolmakeEntrustID(char* /*buffer*/, int /*length*/) return false; }`
+- L237: `virtual intlogin(const char* /*user*/, const char* /*pass*/, const char* /*productInfo*/) return -1; }`
+- L242: `virtual intlogout() return -1; }`
+- L248: `virtual intorderInsert(WTSEntrust* /*eutrust*/) return -1; }`
+- L254: `virtual intorderAction(WTSEntrustAction* /*action*/) return -1; }`
+- L259: `virtual intqueryAccount() return -1; }`
+- L264: `virtual intqueryPositions() return -1; }`
+- L269: `virtual intqueryOrders() return -1; }`
+- L274: `virtual intqueryTrades() return -1; }`
+- L279: `virtual intquerySettlement(uint32_t /*uDate*/) return 0; }`
+- L287: `typedefvoid(*FuncDeleteTrader)(wtp::ITraderApi* &trader)`
+
+### `src/Includes/IUftStraCtx.h` (270 行)
+- 类型: WTSCommodityInfo:18, WTSTickSlice:19, WTSKlineSlice:20, WTSTickData:21, WTSBarStruct:22, IUftStraCtx:31
+- L35: `virtual ~IUftStraCtx() }`
+- L37: `const char*name() }`
+- L40: `virtual uint32_tid() = 0`
+- L43: `virtual voidon_init() = 0`
+- L44: `virtual voidon_tick(const char* stdCode, WTSTickData* newTick) = 0`
+- L45: `virtual voidon_order_queue(const char* stdCode, WTSOrdQueData* newOrdQue) = 0`
+- L46: `virtual voidon_order_detail(const char* stdCode, WTSOrdDtlData* newOrdDtl) = 0`
+- L47: `virtual voidon_transaction(const char* stdCode, WTSTransData* newTrans) = 0`
+- L48: `virtual voidon_bar(const char* /*stdCode*/, const char* /*period*/, uint32_t /*times*/, WTSBarStruct* /*newBar*/) }`
+- L49: `virtual voidon_session_begin(uint32_t /*uTDate*/) }`
+- L50: `virtual voidon_session_end(uint32_t /*uTDate*/) }`
+- L51: `virtual voidon_params_updated() }`
+- L57: `virtual voidon_bactest_end() }`
+- L59: `virtual voidon_tick_updated(const char* /*stdCode*/, WTSTickData* /*newTick*/) }`
+- L60: `virtual voidon_ordque_updated(const char* /*stdCode*/, WTSOrdQueData* /*newOrdQue*/) }`
+- L61: `virtual voidon_orddtl_updated(const char* /*stdCode*/, WTSOrdDtlData* /*newOrdDtl*/) }`
+- L62: `virtual voidon_trans_updated(const char* /*stdCode*/, WTSTransData* /*newTrans*/) }`
+- L64: `virtual const char*watch_param(const char* /*name*/, const char* initVal = "") return initVal; }`
+- L65: `virtual doublewatch_param(const char* /*name*/, double initVal = 0) return initVal; }`
+- L66: `virtual uint32_twatch_param(const char* /*name*/, uint32_t initVal = 0) return initVal; }`
+- L67: `virtual uint64_twatch_param(const char* /*name*/, uint64_t initVal = 0) return initVal; }`
+- L68: `virtual int32_twatch_param(const char* /*name*/, int32_t initVal = 0) return initVal; }`
+- L69: `virtual int64_twatch_param(const char* /*name*/, int64_t initVal = 0) return initVal; }`
+- L71: `virtual voidcommit_param_watcher() }`
+- L73: `virtual const char*read_param(const char* /*name*/, const char* defVal = "") return defVal; }`
+- L74: `virtual doubleread_param(const char* /*name*/, double defVal = 0) return defVal; }`
+- L75: `virtual uint32_tread_param(const char* /*name*/, uint32_t defVal = 0) return defVal; }`
+- L76: `virtual uint64_tread_param(const char* /*name*/, uint64_t defVal = 0) return defVal; }`
+- L77: `virtual int32_tread_param(const char* /*name*/, int32_t defVal = 0) return defVal; }`
+- L78: `virtual int64_tread_param(const char* /*name*/, int64_t defVal = 0) return defVal; }`
+- L80: `virtual const char*sync_param(const char* /*name*/, const char* /*initVal*/ = "", bool /*bForceWrite*/ = false) return nullptr; }`
+- L81: `virtual double*sync_param(const char* /*name*/, double /*initVal*/ = 0, bool /*bForceWrite*/ = false) return nullptr; }`
+- L82: `virtual uint32_t*sync_param(const char* /*name*/, uint32_t /*initVal*/ = 0, bool /*bForceWrite*/ = false) return nullptr; }`
+- L83: `virtual uint64_t*sync_param(const char* /*name*/, uint64_t /*initVal*/ = 0, bool /*bForceWrite*/ = false) return nullptr; }`
+- L84: `virtual int32_t*sync_param(const char* /*name*/, int32_t /*initVal*/ = 0, bool /*bForceWrite*/ = false) return nullptr; }`
+- L85: `virtual int64_t*sync_param(const char* /*name*/, int64_t /*initVal*/ = 0, bool /*bForceWrite*/ = false) return nullptr; }`
+- L89: `virtual uint32_tstra_get_date() = 0`
+- L90: `virtual uint32_tstra_get_time() = 0`
+- L91: `virtual uint32_tstra_get_secs() = 0`
+- L97: `virtual boolstra_cancel(uint32_t localid) = 0`
+- L103: `virtual OrderIDsstra_cancel_all(const char* stdCode) = 0`
+- L113: `virtual OrderIDsstra_buy(const char* /*stdCode*/, double /*price*/, double /*qty*/, int /*flag*/ = 0) }`
+- L123: `virtual OrderIDsstra_sell(const char* /*stdCode*/, double /*price*/, double /*qty*/, int /*flag*/ = 0) }`
+- L132: `virtual uint32_tstra_enter_long(const char* /*stdCode*/, double /*price*/, double /*qty*/, int /*flag*/ = 0) return 0; }`
+- L141: `virtual uint32_tstra_enter_short(const char* /*stdCode*/, double /*price*/, double /*qty*/, int /*flag*/ = 0) return 0; }`
+- L151: `virtual uint32_tstra_exit_long(const char* /*stdCode*/, double /*price*/, double /*qty*/, bool /*isToday*/ = false, int /*flag*/ = 0) return 0; }`
+- L161: `virtual uint32_tstra_exit_short(const char* /*stdCode*/, double /*price*/, double /*qty*/, bool /*isToday*/ = false, int /*flag*/ = 0) return 0; }`
+- L167: `virtual WTSCommodityInfo*stra_get_comminfo(const char* stdCode) = 0`
+- L175: `virtual WTSKlineSlice*stra_get_bars(const char* stdCode, const char* period, uint32_t count) = 0`
+- L182: `virtual WTSTickSlice*stra_get_ticks(const char* stdCode, uint32_t count) = 0`
+- L189: `virtual WTSOrdDtlSlice*stra_get_order_detail(const char* stdCode, uint32_t count) = 0`
+- L196: `virtual WTSOrdQueSlice*stra_get_order_queue(const char* stdCode, uint32_t count) = 0`
+- L203: `virtual WTSTransSlice*stra_get_transaction(const char* stdCode, uint32_t count) = 0`
+- L209: `virtual WTSTickData*stra_get_last_tick(const char* stdCode) = 0`
+- L217: `virtual doublestra_get_position(const char* stdCode, bool bOnlyValid = false, int32_t iFlag = 3) = 0`
+- L224: `virtual doublestra_enum_position(const char* stdCode) = 0`
+- L231: `virtual doublestra_get_local_position(const char* stdCode) = 0`
+- L233: `virtual doublestra_get_local_posprofit(const char* /*stdCode*/) return 0; }`
+- L235: `virtual doublestra_get_local_closeprofit(const char* /*stdCode*/) return 0; }`
+- L241: `virtual doublestra_get_price(const char* stdCode) = 0`
+- L247: `virtual doublestra_get_undone(const char* stdCode) = 0`
+- L249: `virtual uint32_tstra_get_infos(const char* /*stdCode*/) return 0; }`
+- L254: `virtual voidstra_sub_ticks(const char* stdCode) = 0`
+- L255: `virtual voidstra_sub_order_queues(const char* stdCode) = 0`
+- L256: `virtual voidstra_sub_order_details(const char* stdCode) = 0`
+- L257: `virtual voidstra_sub_transactions(const char* stdCode) = 0`
+- L262: `virtual voidstra_log_info(const char* message) = 0`
+- L263: `virtual voidstra_log_debug(const char* message) = 0`
+- L264: `virtual voidstra_log_error(const char* message) = 0`
+
+### `src/Includes/RiskMonDefs.h` (159 行)
+- 类型: WTSVariant:27, WTSPortFundInfo:28, WtPortContext:33, WtRiskMonitor:83, IRiskMonitorFact:126
+- L39: `virtual WTSPortFundInfo*getFundInfo() = 0`
+- L45: `virtual voidsetVolScale(double scale) = 0`
+- L52: `virtual boolisInTrading() = 0`
+- L57: `virtual voidwriteRiskLog(const char* message) = 0`
+- L62: `virtual uint32_tgetCurDate() = 0`
+- L67: `virtual uint32_tgetCurTime() = 0`
+- L72: `virtual uint32_tgetTradingDate() = 0`
+- L77: `virtual uint32_ttransTimeToMin(uint32_t uTime) = 0`
+- L87: `virtual ~WtRiskMonitor() }`
+- L93: `virtual const char*getName() = 0`
+- L98: `virtual const char*getFactName() = 0`
+- L105: `virtual voidinit(WtPortContext* ctx, WTSVariant* /*cfg*/) _ctx = ctx; }`
+- L110: `virtual voidrun() }`
+- L115: `virtual voidstop() }`
+- L124: `typedefvoid(*FuncEnumRiskMonCallback)(const char* factName, const char* unitName, bool isLast)`
+- L130: `virtual ~IRiskMonitorFact() }`
+- L136: `virtual const char*getName() = 0`
+- L141: `virtual voidenumRiskMonitors(FuncEnumRiskMonCallback cb) = 0`
+- L146: `virtual WtRiskMonitor*createRiskMonotor(const char* name) = 0`
+- L151: `virtual booldeleteRiskMonotor(WtRiskMonitor* unit) = 0`
+- L157: `typedefvoid(*FuncDeleteRiskMonFact)(IRiskMonitorFact* &fact)`
+
+### `src/Includes/SelStrategyDefs.h` (119 行)
+- 类型: WTSVariant:17, ISelStraCtx:18, WTSTickData:19, WTSBarStruct:20, SelStrategy:25, ISelStrategyFact:87
+- L29: `virtual ~SelStrategy() }`
+- L35: `virtual const char*getName() = 0`
+- L40: `virtual const char*getFactName() = 0`
+- L45: `virtual boolinit(WTSVariant* /*cfg*/) return true; }`
+- L47: `virtual const char*id() }`
+- L52: `virtual voidon_init(ISelStraCtx* /*ctx*/) }`
+- L57: `virtual voidon_session_begin(ISelStraCtx* /*ctx*/, uint32_t /*uTDate*/) }`
+- L62: `virtual voidon_session_end(ISelStraCtx* /*ctx*/, uint32_t /*uTDate*/) }`
+- L67: `virtual voidon_schedule(ISelStraCtx* /*ctx*/, uint32_t /*uDate*/, uint32_t /*uTime*/) }`
+- L72: `virtual voidon_tick(ISelStraCtx* /*ctx*/, const char* /*stdCode*/, WTSTickData* /*newTick*/) }`
+- L77: `virtual voidon_bar(ISelStraCtx* /*ctx*/, const char* /*stdCode*/, const char* /*period*/, WTSBarStruct* /*newBar*/) }`
+- L85: `typedefvoid(*FuncEnumSelStrategyCallback)(const char* factName, const char* straName, bool isLast)`
+- L91: `virtual ~ISelStrategyFact() }`
+- L97: `virtual const char*getName() = 0`
+- L102: `virtual voidenumStrategy(FuncEnumSelStrategyCallback cb) = 0`
+- L107: `virtual SelStrategy*createStrategy(const char* name, const char* id) = 0`
+- L113: `virtual booldeleteStrategy(SelStrategy* stra) = 0`
+- L119: `typedefvoid(*FuncDeleteSelStraFact)(ISelStrategyFact* &fact)`
+
+### `src/Includes/UftStrategyDefs.h` (207 行)
+- 类型: WTSVariant:17, IUftStraCtx:18, WTSTickData:19, WTSOrdDtlData:20, WTSOrdQueData:21, WTSTransData:22, WTSBarStruct:23, UftStrategy:28, IUftStrategyFact:176
+- L32: `virtual ~UftStrategy() }`
+- L38: `virtual const char*getName() = 0`
+- L43: `virtual const char*getFactName() = 0`
+- L48: `virtual boolinit(WTSVariant* /*cfg*/) return true; }`
+- L50: `virtual const char*id() }`
+- L58: `virtual voidon_init(IUftStraCtx* ctx) = 0`
+- L66: `virtual voidon_session_begin(IUftStraCtx* /*ctx*/, uint32_t /*uTDate*/) }`
+- L71: `virtual voidon_session_end(IUftStraCtx* /*ctx*/, uint32_t /*uTDate*/) }`
+- L76: `virtual voidon_tick(IUftStraCtx* /*ctx*/, const char* /*stdCode*/, WTSTickData* /*newTick*/) }`
+- L81: `virtual voidon_order_queue(IUftStraCtx* /*ctx*/, const char* /*stdCode*/, WTSOrdQueData* /*newOrdQue*/) }`
+- L86: `virtual voidon_order_detail(IUftStraCtx* /*ctx*/, const char* /*stdCode*/, WTSOrdDtlData* /*newOrdDtl*/) }`
+- L91: `virtual voidon_transaction(IUftStraCtx* /*ctx*/, const char* /*stdCode*/, WTSTransData* /*newTrans*/) }`
+- L100: `virtual voidon_bar(IUftStraCtx* /*ctx*/, const char* /*stdCode*/, const char* /*period*/, uint32_t /*times*/, WTSBarStruct* /*newBar*/) }`
+- L112: `virtual voidon_trade(IUftStraCtx* /*ctx*/, uint32_t /*localid*/, const char* /*stdCode*/, bool /*isLong*/, uint32_t /*offset*/, double /*vol*/, double /*price*/) }`
+- L126: `virtual voidon_position(IUftStraCtx* /*ctx*/, const char* /*stdCode*/, bool /*isLong*/, double /*prevol*/, double /*preavail*/, double /*newvol*/, double /*newavail*/) }`
+- L140: `virtual voidon_order(IUftStraCtx* /*ctx*/, uint32_t /*localid*/, const char* /*stdCode*/, bool /*isLong*/, uint32_t /*offset*/, double /*totalQty*/, double /*leftQty*/, double /*price*/, bool /*isCanceled*/) }`
+- L145: `virtual voidon_channel_ready(IUftStraCtx* /*ctx*/) }`
+- L150: `virtual voidon_channel_lost(IUftStraCtx* /*ctx*/) }`
+- L160: `virtual voidon_entrust(uint32_t /*localid*/, bool /*bSuccess*/, const char* /*message*/) }`
+- L166: `virtual voidon_params_updated() }`
+- L174: `typedefvoid(*FuncEnumUftStrategyCallback)(const char* factName, const char* straName, bool isLast)`
+- L180: `virtual ~IUftStrategyFact() }`
+- L186: `virtual const char*getName() = 0`
+- L191: `virtual voidenumStrategy(FuncEnumUftStrategyCallback cb) = 0`
+- L196: `virtual UftStrategy*createStrategy(const char* name, const char* id) = 0`
+- L201: `virtual booldeleteStrategy(UftStrategy* stra) = 0`
+- L207: `typedefvoid(*FuncDeleteUftStraFact)(IUftStrategyFact* &fact)`
+
+### `src/Includes/WTSCollection.hpp` (940 行)
+- 类型: WTSArray:32, WTSMap:315, WTSHashMap:595, WTSQueue:755, WTSStack:876
+- L58: `inline uint32_tsize() }`
+- L60: `inline boolempty() }`
+- L177: `std::swap(_vec.at(idx), obj)`
+- L295: `std::sort(_vec.begin(), _vec.end(), func)`
+- L300: `virtual ~WTSArray() }`
+- L340: `uint32_tsize() }`
+- L599: `virtual ~WTSHashMap() }`
+- L623: `inline uint32_tsize() }`
+- L804: `inline uint32_tsize() }`
+- L806: `inline boolempty() }`
+- L871: `virtual ~WTSQueue() }`
+- L885: `inline uint32_tsize() }`
+- L886: `inline boolempty() }`
+- L926: `WTSObject::release()`
+
+### `src/Includes/WTSContractInfo.hpp` (360 行)
+- 类型: WTSSessionInfo:17, WTSCommodityInfo:19, WTSContractInfo:168
+- L37: `constexpr inline voidsetVolScale(uint32_t volScale) noexcept { m_uVolScale = volScale; }`
+- L38: `constexpr inline voidsetPriceTick(double pxTick) noexcept { m_dPriceTick = pxTick; }`
+- L39: `constexpr inline voidsetCategory(ContractCategory cat) noexcept { m_ccCategory = cat; }`
+- L40: `constexpr inline voidsetCoverMode(CoverMode cm) noexcept { m_coverMode = cm; }`
+- L41: `constexpr inline voidsetPriceMode(PriceMode pm) noexcept { m_priceMode = pm; }`
+- L42: `constexpr inline voidsetTradingMode(TradingMode tm) noexcept { m_tradeMode = tm; }`
+- L44: `constexpr inline boolcanShort() const noexcept { return m_tradeMode == TM_Both; }`
+- L45: `constexpr inline boolisT1() const noexcept { return m_tradeMode == TM_LongT1; }`
+- L47: `constexpr inline const char*getName() const noexcept { return m_strName; }`
+- L48: `constexpr inline const char*getExchg() const noexcept { return m_strExchg; }`
+- L49: `constexpr inline const char*getProduct() const noexcept { return m_strProduct; }`
+- L50: `constexpr inline const char*getCurrency() const noexcept { return m_strCurrency; }`
+- L51: `constexpr inline const char*getSession() const noexcept { return m_strSession; }`
+- L52: `constexpr inline const char*getTradingTpl() const noexcept { return m_strTrdTpl; }`
+- L53: `constexpr inline const char*getFullPid() const noexcept { return m_strFullPid; }`
+- L55: `constexpr inline uint32_tgetVolScale() const noexcept { return m_uVolScale; }`
+- L56: `constexpr inline doublegetPriceTick() const noexcept { return m_dPriceTick; }`
+- L59: `constexpr inline ContractCategorygetCategoty() const noexcept { return m_ccCategory; }`
+- L60: `constexpr inline CoverModegetCoverMode() const noexcept { return m_coverMode; }`
+- L61: `constexpr inline PriceModegetPriceMode() const noexcept { return m_priceMode; }`
+- L62: `constexpr inline TradingModegetTradingMode() const noexcept { return m_tradeMode; }`
+- L64: `inline voidaddCode(const char* code) }`
+- L65: `inline const CodeSet&getCodes() const noexcept { return m_setCodes; }`
+- L67: `constexpr inline voidsetLotsTick(double lotsTick) noexcept { m_dLotTick = lotsTick; }`
+- L68: `constexpr inline voidsetMinLots(double minLots) noexcept { m_dMinLots = minLots; }`
+- L85: `constexpr inline doublegetLotsTick() const noexcept { return m_dLotTick; }`
+- L86: `constexpr inline doublegetMinLots() const noexcept { return m_dMinLots; }`
+- L88: `constexpr inline voidsetSessionInfo(WTSSessionInfo* sInfo) noexcept { m_pSession = sInfo; }`
+- L89: `constexpr inline WTSSessionInfo*getSessionInfo() const noexcept { return m_pSession; }`
+- L99: `constexpr inline voidsetMarginRate(double rate) noexcept { m_dMarginRate = rate; }`
+- L100: `constexpr inline doublegetMarginRate() const noexcept { return m_dMarginRate; }`
+- L135: `virtual ~WTSCommodityInfo() }`
+- L185: `constexpr inline voidsetVolScale(uint32_t volScale) noexcept { m_uVolScale = volScale; }`
+- L215: `constexpr inline const char*getCode() const noexcept {return m_strCode;}`
+- L216: `constexpr inline const char*getAltCode() const noexcept { return m_strAltCode; }`
+- L217: `constexpr inline const char*getExchg() const noexcept {return m_strExchg;}`
+- L218: `constexpr inline const char*getName() const noexcept {return m_strName;}`
+- L219: `constexpr inline const char*getProduct() const noexcept {return m_strProduct;}`
+- L221: `constexpr inline const char*getFullCode() const noexcept { return m_strFullCode; }`
+- L222: `constexpr inline const char*getFullAltCode() const noexcept { return m_strFullAltCode; }`
+- L223: `constexpr inline const char*getFullPid() const noexcept { return m_strFullPid; }`
+- L225: `constexpr inline uint32_tgetMaxMktVol() const noexcept { return m_maxMktQty; }`
+- L226: `constexpr inline uint32_tgetMaxLmtVol() const noexcept { return m_maxLmtQty; }`
+- L227: `constexpr inline uint32_tgetMinMktVol() const noexcept { return m_minMktQty; }`
+- L228: `constexpr inline uint32_tgetMinLmtVol() const noexcept { return m_minLmtQty; }`
+- L230: `constexpr inline uint32_tgetOpenDate() const noexcept { return m_openDate; }`
+- L231: `constexpr inline uint32_tgetExpireDate() const noexcept { return m_expireDate; }`
+- L233: `constexpr inline doublegetLongMarginRatio() const noexcept`
+- L241: `constexpr inline doublegetShortMarginRatio() const noexcept`
+- L249: `constexpr inline uint32_tgetVolScale() const noexcept { return m_uVolScale; }`
+- L251: `constexpr inline voidsetCommInfo(WTSCommodityInfo* commInfo) noexcept { m_commInfo = commInfo; }`
+- L252: `constexpr inline WTSCommodityInfo*getCommInfo() const noexcept { return m_commInfo; }`
+- L298: `inline boolisFlat() }`
+- L302: `inline const std::vector<std::string>&getHotCodes() const { return m_ayHotCodes; }`
+- L304: `constexpr inline voidsetTotalIndex(uint32_t idx) noexcept { m_uTotalIdx = idx; }`
+- L305: `constexpr inline uint32_tgetTotalIndex() const noexcept { return m_uTotalIdx; }`
+- L308: `constexpr inline voidsetExtData(void* pExtData) noexcept { m_pExtData[INDEX] = pExtData; }`
+- L311: `constexpr inline T*getExtData() }`
+- L318: `virtual ~WTSContractInfo() }`
+
+### `src/Includes/WTSDataDef.hpp` (1648 行)
+- 类型: WTSContractInfo:32, WTSValueArray:39, WTSKlineSlice:204, WTSKlineData:444, WTSTickData:858, WTSTickRef:1039, WTSOrdQueData:1189, WTSOrdDtlData:1225, WTSTransData:1262, WTSHisTickData:1302, WTSTickSlice:1390, WTSOrdDtlSlice:1498, WTSOrdQueSlice:1550, WTSTransSlice:1602
+- L59: `inline uint32_tsize() }`
+- L60: `inline boolempty() }`
+- L368: `inline int32_tsize() const{ return _count; }`
+- L369: `inline boolempty() const{ return _count == 0; }`
+- L374: `inline const char*code() const{ return _code; }`
+- L375: `inline voidsetCode(const char* code) }`
+- L492: `inline voidsetClosed(bool bClosed) m_bClosed = bClosed; }`
+- L493: `inline boolisClosed() const{ return m_bClosed; }`
+- L500: `inline voidsetPeriod(WTSKlinePeriod period, uint32_t times = 1) m_kpPeriod = period; m_uTimes = times; }`
+- L502: `inline voidsetUnixTime(bool bEnabled = true) m_bUnixTime = bEnabled; }`
+- L504: `inline WTSKlinePeriodperiod() const{ return m_kpPeriod; }`
+- L505: `inline uint32_ttimes() const{ return m_uTimes; }`
+- L506: `inline boolisUnixTime() const{ return m_bUnixTime; }`
+- L563: `inline uint32_tsize() }`
+- L564: `inline boolIsEmpty() }`
+- L569: `inline const char*code() const{ return m_strCode; }`
+- L570: `inline voidsetCode(const char* code) }`
+- L802: `inline WTSBarList&getDataRef() return m_vecBarData; }`
+- L824: `WTSObject::release()`
+- L900: `constexpr inline const char*code() const noexcept { return m_tickStruct.code; }`
+- L905: `constexpr inline const char*exchg() const noexcept { return m_tickStruct.exchg; }`
+- L910: `constexpr inline doubleprice() const noexcept { return m_tickStruct.price; }`
+- L912: `constexpr inline doubleopen() const noexcept { return m_tickStruct.open; }`
+- L917: `constexpr inline doublehigh() const noexcept { return m_tickStruct.high; }`
+- L922: `constexpr inline doublelow() const noexcept { return m_tickStruct.low; }`
+- L925: `constexpr inline doublepreclose() const noexcept { return m_tickStruct.pre_close; }`
+- L926: `constexpr inline doublepresettle() const noexcept { return m_tickStruct.pre_settle; }`
+- L927: `constexpr inline doublepreinterest() const noexcept { return m_tickStruct.pre_interest; }`
+- L929: `constexpr inline doubleupperlimit() const noexcept { return m_tickStruct.upper_limit; }`
+- L930: `constexpr inline doublelowerlimit() const noexcept { return m_tickStruct.lower_limit; }`
+- L932: `constexpr inline doubletotalvolume() const noexcept { return m_tickStruct.total_volume; }`
+- L935: `constexpr inline doublevolume() const noexcept { return m_tickStruct.volume; }`
+- L938: `constexpr inline doublesettlepx() const noexcept { return m_tickStruct.settle_price; }`
+- L941: `constexpr inline doubleopeninterest() const noexcept { return m_tickStruct.open_interest; }`
+- L943: `constexpr inline doubleadditional() const noexcept { return m_tickStruct.diff_interest; }`
+- L946: `constexpr inline doubletotalturnover() const noexcept { return m_tickStruct.total_turnover; }`
+- L949: `constexpr inline doubleturnover() const noexcept { return m_tickStruct.turn_over; }`
+- L952: `constexpr inline uint32_ttradingdate() const noexcept { return m_tickStruct.trading_date; }`
+- L955: `constexpr inline uint32_tactiondate() const noexcept { return m_tickStruct.action_date; }`
+- L958: `constexpr inline uint32_tactiontime() const noexcept { return m_tickStruct.action_time; }`
+- L1012: `constexpr inline WTSTickStruct&getTickStruct() noexcept{ return m_tickStruct; }`
+- L1014: `constexpr inline voidsetContractInfo(WTSContractInfo* cInfo) noexcept { m_pContract = cInfo; }`
+- L1015: `constexpr inline WTSContractInfo*getContractInfo() const noexcept { return m_pContract; }`
+- L1017: `inline voidsetLimitFlag(uint32_t flag) m_uLimitFlag = flag; }`
+- L1018: `constexpr inline uint32_tgetLimitFlag() const { return m_uLimitFlag; }`
+- L1020: `constexpr inline boolisNewHigh() const { return m_uLimitFlag & 1; }`
+- L1021: `constexpr inline boolisNewLow() const { return m_uLimitFlag & 2; }`
+- L1062: `constexpr inline const char*code() const noexcept { return m_tickStruct->code; }`
+- L1067: `constexpr inline const char*exchg() const noexcept { return m_tickStruct->exchg; }`
+- L1072: `constexpr inline doubleprice() const noexcept { return m_tickStruct->price; }`
+- L1074: `constexpr inline doubleopen() const noexcept { return m_tickStruct->open; }`
+- L1079: `constexpr inline doublehigh() const noexcept { return m_tickStruct->high; }`
+- L1084: `constexpr inline doublelow() const noexcept { return m_tickStruct->low; }`
+- L1087: `constexpr inline doublepreclose() const noexcept { return m_tickStruct->pre_close; }`
+- L1088: `constexpr inline doublepresettle() const noexcept { return m_tickStruct->pre_settle; }`
+- L1089: `constexpr inline doublepreinterest() const noexcept { return m_tickStruct->pre_interest; }`
+- L1091: `constexpr inline doubleupperlimit() const noexcept { return m_tickStruct->upper_limit; }`
+- L1092: `constexpr inline doublelowerlimit() const noexcept { return m_tickStruct->lower_limit; }`
+- L1094: `constexpr inline doubletotalvolume() const noexcept { return m_tickStruct->total_volume; }`
+- L1097: `constexpr inline doublevolume() const noexcept { return m_tickStruct->volume; }`
+- L1100: `constexpr inline doublesettlepx() const noexcept { return m_tickStruct->settle_price; }`
+- L1103: `constexpr inline doubleopeninterest() const noexcept { return m_tickStruct->open_interest; }`
+- L1105: `constexpr inline doubleadditional() const noexcept { return m_tickStruct->diff_interest; }`
+- L1108: `constexpr inline doubletotalturnover() const noexcept { return m_tickStruct->total_turnover; }`
+- L1111: `constexpr inline doubleturnover() const noexcept { return m_tickStruct->turn_over; }`
+- L1114: `constexpr inline uint32_ttradingdate() const noexcept { return m_tickStruct->trading_date; }`
+- L1117: `constexpr inline uint32_tactiondate() const noexcept { return m_tickStruct->action_date; }`
+- L1120: `constexpr inline uint32_tactiontime() const noexcept { return m_tickStruct->action_time; }`
+- L1171: `constexpr inline boolvalid() const noexcept { return m_tickStruct != nullptr; }`
+- L1173: `constexpr inline operatorbool() const noexcept { return m_tickStruct != nullptr; }`
+- （另有 43 个声明，按需用 Read 定位）
+
+### `src/Includes/WTSExpressData.hpp` (385 行)
+- 类型: WTSLineInfo:29, WTSExpressParams:60, WTSExpressLine:101, WTSExpressData:197
+- L41: `COLORREFcolor() const{return _line_color;}`
+- L42: `intwidth() const{return _line_width;}`
+- L43: `intstyle() const{return _line_style;}`
+- L91: `uint32_tgetParamCount() }`
+- L124: `WTSObject::release()`
+- L129: `WTSObject::retain()`
+- L150: `uint32_tgetDecimal() return m_uDecimal;}`
+- L175: `voidsetLineTag(const char* tag) m_strLineTag = tag;}`
+- L176: `const char*getLineTag() }`
+- L178: `boolisStyle(uint32_t uStyle) == uStyle; }`
+- L180: `voidsetLineType(WTSExpressLineType lineType) m_lineType = lineType;}`
+- L181: `WTSExpressLineTypegetLineType() const{return m_lineType;}`
+- L222: `WTSObject::release()`
+- L225: `voidsetTitle(const char* title) m_strExpTitle = title;}`
+- L226: `const char*getTitle() }`
+- L228: `voidsetType(WTSExpressType eType) m_expType = eType;}`
+- L229: `WTSExpressTypegetType() const{return m_expType;}`
+- L237: `boolhasBaseLine() const{ return m_bBaseLine; }`
+- L238: `doublegetBaseLine() const{ return m_dBaseLine; }`
+- L262: `uint32_tgetLineCount() }`
+- L366: `uint32_tgetPrecision() const { return m_uPrec; }`
+- L367: `voidsetPrecision(uint32_t prec) m_uPrec = prec; }`
+- L369: `voidsetDevide(double dvd) m_dDevide = dvd;}`
+- L370: `doublegetDevide() const{return m_dDevide;}`
+
+### `src/Includes/WTSObject.hpp` (113 行)
+- 类型: WTSObject:20, WTSPoolObject:57
+- L24: `virtual ~WTSObject() }`
+- L27: `inline uint32_tretain() + 1; }`
+- L48: `inline boolisSingleRefs() noexcept { return m_uRefs == 1; }`
+- L50: `inline uint32_tretainCount() noexcept { return m_uRefs; }`
+- L66: `virtual ~WTSPoolObject() }`
+
+### `src/Includes/WTSRiskDef.hpp` (187 行)
+- 类型: WTSTradeStateInfo:57, WTSPortFundInfo:147
+- L71: `constexpr inline TradeStatInfo&statInfo() noexcept{ return _trd_stat_info; }`
+- L72: `constexpr inline const TradeStatInfo&statInfo() const noexcept{ return _trd_stat_info; }`
+- L74: `constexpr inline const char*code() const noexcept { return _trd_stat_info._code; }`
+- L76: `constexpr inline doubleopen_volume_long() const noexcept { return _trd_stat_info.l_openvol; }`
+- L77: `constexpr inline doubleclose_volume_long() const noexcept { return _trd_stat_info.l_closevol; }`
+- L78: `constexpr inline doublecloset_volume_long() const noexcept { return _trd_stat_info.l_closetvol; }`
+- L79: `constexpr inline doubleopen_volume_short() const noexcept { return _trd_stat_info.s_openvol; }`
+- L80: `constexpr inline doubleclose_volume_short() const noexcept { return _trd_stat_info.s_closevol; }`
+- L81: `constexpr inline doublecloset_volume_short() const noexcept { return _trd_stat_info.s_closetvol; }`
+- L83: `constexpr inline doubletotal_trade_volumes() const noexcept`
+- L87: `constexpr inline uint32_torders_buy() const noexcept { return _trd_stat_info.b_orders; }`
+- L88: `constexpr inline doubleordqty_buy() const noexcept { return _trd_stat_info.b_ordqty; }`
+- L89: `constexpr inline uint32_torders_sell() const noexcept { return _trd_stat_info.s_orders; }`
+- L90: `constexpr inline doubleordqty_sell() const noexcept { return _trd_stat_info.s_ordqty; }`
+- L92: `constexpr inline uint32_tcancels_buy() const noexcept { return _trd_stat_info.b_cancels; }`
+- L93: `constexpr inline doublecancelqty_buy() const noexcept { return _trd_stat_info.b_canclqty; }`
+- L94: `constexpr inline uint32_tcancels_sell() const noexcept { return _trd_stat_info.s_cancels; }`
+- L95: `constexpr inline doublecancelqty_sell() const noexcept { return _trd_stat_info.s_canclqty; }`
+- L97: `constexpr inline uint32_ttotal_cancels() const noexcept { return _trd_stat_info.b_cancels + _trd_stat_info.s_cancels; }`
+- L98: `constexpr inline uint32_ttotal_orders() const noexcept { return _trd_stat_info.b_orders + _trd_stat_info.s_orders; }`
+- L100: `constexpr inline uint32_tinfos() const noexcept { return _trd_stat_info._infos; }`
+- L159: `WTSFundStruct&fundInfo() return _fund_info; }`
+- L160: `const WTSFundStruct&fundInfo() const{ return _fund_info; }`
+- L162: `doublepredynbalance() const{ return _fund_info._predynbal; }`
+- L163: `doublebalance() const{ return _fund_info._balance; }`
+- L164: `doubleprofit() const{ return _fund_info._profit; }`
+- L165: `doubledynprofit() const{ return _fund_info._dynprofit; }`
+- L166: `doublefees() const{ return _fund_info._fees; }`
+- L168: `doublemax_dyn_balance() const{ return _fund_info._max_dyn_bal; }`
+- L169: `doublemin_dyn_balance() const{ return _fund_info._min_dyn_bal; }`
+- L171: `doublemax_md_dyn_balance() const{ return _fund_info._max_md_dyn_bal._dyn_balance; }`
+- L172: `doublemin_md_dyn_balance() const{ return _fund_info._min_md_dyn_bal._dyn_balance; }`
+- L174: `uint32_tmax_dynbal_time() const{ return _fund_info._max_time; }`
+- L175: `uint32_tmin_dynbal_time() const{ return _fund_info._min_time; }`
+- L177: `uint32_tlast_settle_date() const{ return _fund_info._last_date; }`
+- L179: `uint32_tmax_md_dynbal_date() const{ return _fund_info._max_md_dyn_bal._date; }`
+- L180: `uint32_tmin_md_dynbal_date() const{ return _fund_info._min_md_dyn_bal._date; }`
+
+### `src/Includes/WTSSessionInfo.hpp` (545 行)
+- 类型: WTSSessionInfo:20
+- L61: `virtual ~WTSSessionInfo() }`
+- L64: `const char*id() }`
+- L65: `const char*name() }`
+- L76: `int32_tgetOffsetMins() const{return m_uOffsetMins;}`
+- L103: `voidsetOffsetMins(int32_t offset) m_uOffsetMins = offset;}`
+- L105: `const TradingTimes&getTradingSections() const{ return m_tradingTimes; }`
+- L106: `const TradingTimes&getAuctionSections() const{ return m_auctionTimes; }`
+- L110: `uint32_tgetSectionCount() }`
+- L121: `TimeUtils::getDateTime(uDate, uTime)`
+
+### `src/Includes/WTSStruct.h` (312 行)
+- 类型: WTSBarStructOld:26, WTSTickStructOld:48, WTSBarStruct:94, WTSTickStruct:148, WTSOrdQueStruct:243, WTSOrdDtlStruct:264, WTSTransStruct:286
+
+### `src/Includes/WTSSwitchItem.hpp` (49 行)
+- 类型: WTSSwitchItem:14
+- L18: `virtual ~WTSSwitchItem() }`
+- L32: `const char*exchg() }`
+- L33: `const char*product() }`
+- L34: `const char*from() }`
+- L35: `const char*to() }`
+- L36: `uint32_tswitch_date() const{return _dt;}`
+- L38: `voidset_factor(double factor) _factor = factor; }`
+- L39: `doubleget_factor() const { return _factor; }`
+
+### `src/Includes/WTSTradeDef.hpp` (786 行)
+- 类型: WTSContractInfo:21, WTSVariant:22, WTSError:23, WTSEntrust:99, WTSEntrustAction:217, WTSOrderInfo:333, WTSTradeInfo:516, WTSPositionItem:649, WTSAccountInfo:747
+- L27: `virtual ~WTSError() }`
+- L39: `constexpr const char*getMessage() const noexcept { return m_strMsg; }`
+- L40: `constexpr WTSErroCodegetErrorCode() const noexcept { return m_errCode; }`
+- L107: `virtual ~WTSEntrust() }`
+- L140: `constexpr inline boolisCreditBusiness() }`
+- L141: `constexpr inline voidsetCreditBalance(double credBal) noexcept { m_dCredBal = credBal; }`
+- L142: `constexpr inline doublegetCreditBalance() const noexcept { return m_dCredBal; }`
+- L144: `constexpr inline voidsetDirection(WTSDirectionType dType) noexcept {m_direction = dType;}`
+- L145: `constexpr inline voidsetPriceType(WTSPriceType pType) noexcept {m_priceType = pType;}`
+- L146: `constexpr inline voidsetOrderFlag(WTSOrderFlag oFlag) noexcept {m_orderFlag = oFlag;}`
+- L147: `constexpr inline voidsetOffsetType(WTSOffsetType oType) noexcept {m_offsetType = oType;}`
+- L149: `constexpr inline WTSDirectionTypegetDirection() const noexcept {return m_direction;}`
+- L150: `constexpr inline WTSPriceTypegetPriceType() const noexcept {return m_priceType;}`
+- L151: `constexpr inline WTSOrderFlaggetOrderFlag() const noexcept {return m_orderFlag;}`
+- L152: `constexpr inline WTSOffsetTypegetOffsetType() const noexcept {return m_offsetType;}`
+- L154: `constexpr inline voidsetBusinessType(WTSBusinessType bType) noexcept { m_businessType = bType; }`
+- L155: `constexpr inline WTSBusinessTypegetBusinessType() const noexcept { return m_businessType; }`
+- L157: `constexpr inline voidsetVolume(double volume) noexcept { m_dVolume = volume; }`
+- L158: `constexpr inline voidsetPrice(double price) noexcept { m_iPrice = price; }`
+- L160: `constexpr inline doublegetVolume() const noexcept { return m_dVolume; }`
+- L161: `constexpr inline doublegetPrice() const noexcept { return m_iPrice; }`
+- L163: `constexpr inline const char*getCode() const noexcept { return m_strCode; }`
+- L164: `constexpr inline const char*getExchg() const noexcept { return m_strExchg; }`
+- L166: `inline voidsetEntrustID(const char* eid) }`
+- L167: `constexpr inline const char*getEntrustID() const noexcept { return m_strEntrustID; }`
+- L168: `constexpr inline char*getEntrustID() noexcept { return m_strEntrustID; }`
+- L170: `inline voidsetUserTag(const char* tag) }`
+- L171: `constexpr inline const char*getUserTag() const noexcept { return m_strUserTag; }`
+- L172: `constexpr inline char*getUserTag() noexcept { return m_strUserTag; }`
+- L174: `constexpr inline voidsetNetDirection(bool isBuy) noexcept { m_bIsNet = true; m_bIsBuy = isBuy; }`
+- L175: `constexpr inline boolisNet() const noexcept { return m_bIsNet; }`
+- L176: `constexpr inline boolisNetBuy() const noexcept { return m_bIsBuy; }`
+- L183: `constexpr inline voidsetContractInfo(WTSContractInfo* cInfo) noexcept { m_pContract = cInfo; }`
+- L184: `constexpr inline WTSContractInfo*getContractInfo() const noexcept { return m_pContract; }`
+- L186: `constexpr inline voidsetExtras(WTSVariant* pExtras) noexcept { m_pExtras = pExtras; }`
+- L187: `inline voidsetextras(const char* pExtras) }`
+- L189: `constexpr inline WTSVariant*getExtras() const noexcept { return m_pExtras; }`
+- L220: `virtual ~WTSEntrustAction() }`
+- L251: `constexpr inline const char*getExchg() const noexcept { return m_strExchg; }`
+- L252: `constexpr inline const char*getCode() const noexcept {return m_strCode;}`
+- L254: `inline voidsetExchange(const char* exchg, std::size_t len = 0) noexcept`
+- L258: `inline voidsetCode(const char* code, std::size_t len = 0) noexcept`
+- L262: `constexpr inline voidsetActionFlag(WTSActionFlag af) noexcept {m_actionFlag = af;}`
+- L263: `constexpr inline WTSActionFlaggetActionFlag() const noexcept {return m_actionFlag;}`
+- L265: `inline voidsetEntrustID(const char* eid) }`
+- L266: `constexpr inline const char*getEntrustID() const noexcept {return m_strEnturstID;}`
+- L267: `constexpr inline char*getEntrustID() noexcept { return m_strEnturstID; }`
+- L269: `inline voidsetOrderID(const char* oid) }`
+- L270: `constexpr inline const char*getOrderID() const noexcept {return m_strOrderID;}`
+- L272: `constexpr inline voidsetBusinessType(WTSBusinessType bType) noexcept { m_businessType = bType; }`
+- L273: `constexpr inline WTSBusinessTypegetBusinessType() const noexcept { return m_businessType; }`
+- L275: `inline voidsetUserTag(const char* tag) }`
+- L276: `constexpr inline const char*getUserTag() const noexcept { return m_strUserTag; }`
+- L277: `constexpr inline char*getUserTag() noexcept { return m_strUserTag; }`
+- L279: `constexpr inline voidsetContractInfo(WTSContractInfo* cInfo) noexcept { m_pContract = cInfo; }`
+- L280: `constexpr inline WTSContractInfo*getContractInfo() const noexcept { return m_pContract; }`
+- L336: `virtual ~WTSOrderInfo() }`
+- L366: `inline voidsetExchange(const char* exchg, std::size_t len = 0) noexcept`
+- L370: `inline voidsetCode(const char* code, std::size_t len = 0) noexcept`
+- L374: `constexpr inline voidsetDirection(WTSDirectionType dType) noexcept { m_direction = dType; }`
+- L375: `constexpr inline voidsetPriceType(WTSPriceType pType) noexcept { m_priceType = pType; }`
+- L376: `constexpr inline voidsetOrderFlag(WTSOrderFlag oFlag) noexcept { m_orderFlag = oFlag; }`
+- L377: `constexpr inline voidsetOffsetType(WTSOffsetType oType) noexcept { m_offsetType = oType; }`
+- L379: `constexpr inline WTSDirectionTypegetDirection() const noexcept { return m_direction; }`
+- L380: `constexpr inline WTSPriceTypegetPriceType() const noexcept { return m_priceType; }`
+- L381: `constexpr inline WTSOrderFlaggetOrderFlag() const noexcept { return m_orderFlag; }`
+- L382: `constexpr inline WTSOffsetTypegetOffsetType() const noexcept { return m_offsetType; }`
+- L402: `constexpr inline voidsetBusinessType(WTSBusinessType bType) noexcept { m_businessType = bType; }`
+- L403: `constexpr inline WTSBusinessTypegetBusinessType() const noexcept { return m_businessType; }`
+- L405: `constexpr inline voidsetVolume(double volume) noexcept { m_dVolume = volume; }`
+- （另有 139 个声明，按需用 Read 定位）
+
+### `src/Includes/WTSVariant.hpp` (744 行)
+- 类型: WTSVariant:38
+- L107: `std::stringvalue(static_cast<size_t>(length) + 1, '\0')`
+- L724: `WTSObject::release()`
+- L727: `inline ValueTypetype() const{ return _type; }`
+- L729: `inline boolisArray() const{ return _type == VT_Array; }`
+- L730: `inline boolisObject() const{ return _type == VT_Object; }`
+

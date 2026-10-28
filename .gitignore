@@ -2,3 +2,14 @@ dist/*
 .xmake
 src/build_all/*
 .idea/*
+# 本机覆盖率构建产物与插桩计数。
+# 注意范围：只挡构建目录与 llvm 计数器文件；证据载体
+# （docs/迭代计划/迭代01/reports/*.txt、bugs/*.md、manifests/*.md）必须仍可提交，
+# 所以这里不加 *.log / *.txt 这类宽规则。
+build-cov/
+*.profraw
+*.profdata
+
+# Python 缓存
+__pycache__/
+*.pyc

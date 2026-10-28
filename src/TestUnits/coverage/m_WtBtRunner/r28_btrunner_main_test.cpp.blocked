@@ -1,0 +1,339 @@
+/*
+ * R28 lane —— src/WtBtRunner/WtBtRunner.cpp（可执行体 main 目标 CoverageTests_m_WtBtRunner）
+ *
+ * 这个目录之前是空的，所以 CMakeLists 的 WT_MAIN_MODULES 循环里
+ * `if(NOT mod_tus OR NOT mod_tests) continue()` 直接把 CoverageTests_m_WtBtRunner
+ * 跳过了 —— WtBtRunner **确实**登记在 WT_MAIN_MODULES 里（src/TestUnits/coverage/CMakeLists.txt
+ * 的 SET(WT_MAIN_MODULES WtRunner WtBtRunner ...)），目录里有用例之后目标就会自动建立，
+ * 不需要改 CMakeLists。本文件就是那个「第一个用例文件」。
+ *
+ * 被测 TU 的入口经 -Dmain=wt_coverage_main_wtbtrunner 改名（模块名小写）。
+ * WtBtRunner.cpp 整个文件只有一个 main()，所以覆盖率完全取决于 main 能走到哪一行。
+ *
+ * 可安全到达的早退（读源码确认，不是猜）：
+ *   E1 WtBtRunner.cpp:74-78  配置文件不存在 -> fmt::print("confiture {} not exists") -> return 0
+ *   E2 WtBtRunner.cpp:80-85  文件在但加载不出 variant -> WTSLogger::info -> return -1
+ *   两条都在 replayer 之前，不起线程、不挂 shm，是本轮的主力。
+ * 再往下（:87 `HisDataReplayer replayer;` 之后）必崩或必挂，见文件末尾 DISABLED_ 与留白说明。
+ *
+ * 入口一律在 fork 出来的子进程里调（原因见 entry_in_child 的注释）：
+ *   - help 分支被 cppcli.hpp:1897-1900 的 std::exit(0) 截断；
+ *   - 坏 YAML 让 yaml-cpp 异常穿透 main() -> std::terminate -> SIGABRT；
+ *   - 这两件在父进程里都会把 gtest 宿主一起带走。
+ */
+#include <gtest/gtest.h>
+
+#include <fcntl.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+#include <cstdio>
+#include <cstdint>
+#include <cstdlib>
+#include <string>
+#include <vector>
+
+#include "Share/StdUtils.hpp"
+
+/* src/WtBtRunner/WtBtRunner.cpp 的 main 经 -Dmain= 改名后的入口 */
+int wt_coverage_main_wtbtrunner(int argc, char* argv[]);
+
+/* 子进程必须换计数文件名，否则它 exit() 时写的是父进程已展开过的 %p 路径 */
+extern "C" void __llvm_profile_set_filename(const char*);
+
+namespace {
+
+const char* kTag = "r28bt";
+
+struct ChildResult
+{
+	bool exited = false;
+	int code = -1;
+	int signal = -1;
+	std::string out;
+};
+
+std::string child_profpath(const std::string& name)
+{
+	const char* env = getenv("LLVM_PROFILE_FILE");
+	std::string base = (env != nullptr && *env != '\0') ? std::string(env) : std::string("./%p.profraw");
+	const std::string pid = std::to_string(static_cast<long>(getpid()));
+	for (std::string::size_type pos = base.find("%p"); pos != std::string::npos; pos = base.find("%p", pos + pid.size()))
+		base.replace(pos, 2, pid);
+	const std::string suffix = std::string("_") + name + ".profraw";
+	const std::string::size_type dot = base.rfind(".profraw");
+	if (dot == std::string::npos)
+		return base + suffix;
+	return base.substr(0, dot) + suffix;
+}
+
+ChildResult entry_in_child(std::vector<const char*> words, const std::string& name)
+{
+	ChildResult r;
+	int fds[2];
+	if (pipe(fds) != 0)
+		return r;
+
+	pid_t pid = fork();
+	if (pid < 0)
+	{
+		close(fds[0]);
+		close(fds[1]);
+		return r;
+	}
+
+	if (pid == 0)
+	{
+		__llvm_profile_set_filename(child_profpath(name).c_str());
+		dup2(fds[1], STDOUT_FILENO);
+		int devnull = open("/dev/null", O_WRONLY);
+		if (devnull >= 0)
+		{
+			dup2(devnull, STDERR_FILENO);
+			close(devnull);
+		}
+		close(fds[0]);
+		close(fds[1]);
+
+		std::vector<char*> argv;
+		argv.reserve(words.size());
+		for (const char* w : words)
+			argv.push_back(const_cast<char*>(w));
+		const int rc = wt_coverage_main_wtbtrunner(static_cast<int>(argv.size()), argv.data());
+		// main 自己走到 :160 没有 return 语句，能返回就说明整条链没崩
+		_exit(rc == 0 ? 0 : 7);
+	}
+
+	close(fds[1]);
+	char buf[4096];
+	ssize_t got = 0;
+	while ((got = read(fds[0], buf, sizeof(buf))) > 0)
+		r.out.append(buf, static_cast<size_t>(got));
+	close(fds[0]);
+
+	int raw = 0;
+	waitpid(pid, &raw, 0);
+	r.exited = WIFEXITED(raw);
+	r.code = r.exited ? WEXITSTATUS(raw) : -1;
+	r.signal = WIFSIGNALED(raw) ? WTERMSIG(raw) : -1;
+	return r;
+}
+
+std::string fixture_path(const std::string& name)
+{
+	return std::string("./") + kTag + "_" + name;
+}
+
+void write_fixture(const std::string& name, const std::string& body)
+{
+	StdFile::write_file_content(fixture_path(name).c_str(), body);
+}
+
+} // namespace
+
+/* =========================================================================
+ * 一、help 分支（WtBtRunner.cpp:43-55）
+ * ====================================================================== */
+
+TEST(r28_btrunner_entry, long_help_prints_three_rules_and_exits_zero)
+{
+	ChildResult r = entry_in_child({"wt_btrunner", "--help"}, "help1");
+	ASSERT_TRUE(r.exited) << "signal=" << r.signal;
+	EXPECT_EQ(r.code, 0);
+	// 可观察副作用：cppcli buildHelpDoc() 的三条 Rule
+	EXPECT_NE(r.out.find("-c | --config"), std::string::npos) << r.out;
+	EXPECT_NE(r.out.find("-l | --logcfg"), std::string::npos);
+	EXPECT_NE(r.out.find("gain help doc"), std::string::npos);
+}
+
+TEST(r28_btrunner_entry, short_help_prints_default_paths)
+{
+	ChildResult r = entry_in_child({"wt_btrunner", "-h"}, "help2");
+	ASSERT_TRUE(r.exited) << "signal=" << r.signal;
+	EXPECT_EQ(r.code, 0);
+	EXPECT_NE(r.out.find("dtcfg.yaml as default"), std::string::npos) << r.out;
+	EXPECT_NE(r.out.find("logcfgbt.yaml as default"), std::string::npos);
+}
+
+TEST(r28_btrunner_entry, help_beats_explicit_c_and_l)
+{
+	// WtBtRunner.cpp:52 opt.parse() 内部就 exit(0)，:54-55 的 return 0 是死代码，
+	// :57-72 的 lParam/cParam 取值也一次都执行不到
+	ChildResult r = entry_in_child({"wt_btrunner", "-c", "./r28bt_absent_a.yaml",
+		"-l", "./r28bt_absent_b.yaml", "-h"}, "help3");
+	ASSERT_TRUE(r.exited) << "signal=" << r.signal;
+	EXPECT_EQ(r.code, 0);
+	// 关键反证：help 退出时「logger initialized」这行绝不能出现
+	EXPECT_EQ(r.out.find("---logger initialized---"), std::string::npos) << r.out;
+}
+
+/* =========================================================================
+ * 二、E1：配置文件不存在（WtBtRunner.cpp:57-78）
+ * ====================================================================== */
+
+TEST(r28_btrunner_entry, missing_config_prints_notice_and_returns_zero)
+{
+	// lParam 不存在 -> :61 filename="./logcfgdt.yaml"（不存在，WTSLogger::init 自己告警）
+	// cParam 存在 -> :70 filename=给定路径 -> :74 StdFile::exists 假 -> :76 print -> :77 return 0
+	ChildResult r = entry_in_child({"wt_btrunner", "-c", "./r28bt_definitely_absent_cfg.yaml"},
+		"e1a");
+	ASSERT_TRUE(r.exited) << "signal=" << r.signal;
+	EXPECT_EQ(r.code, 0);
+	// 三处可观察副作用，按源码顺序
+	EXPECT_NE(r.out.find("---WtBtRunner begins---"), std::string::npos) << r.out;
+	EXPECT_NE(r.out.find("---logger initialized---"), std::string::npos) << r.out;
+	EXPECT_NE(r.out.find("confiture"), std::string::npos) << r.out;
+	EXPECT_NE(r.out.find("r28bt_definitely_absent_cfg.yaml"), std::string::npos) << r.out;
+	// :76 的 fmt::print 少了行尾换行，且拼写是 confiture（不是 config）—— 见 BUG-R28-004
+	EXPECT_NE(r.out.find("confiture {} not exists"), std::string::npos) << r.out;
+}
+
+TEST(r28_btrunner_entry, default_config_path_used_when_c_absent)
+{
+	// cParam 不存在 -> :72 filename="./configbt.yaml"。共享 cwd 下这个文件不存在，
+	// 于是走的还是 E1，但覆盖的是 :69-72 的 else 分支而不是 :70
+	ChildResult r = entry_in_child({"wt_btrunner"}, "e1b");
+	ASSERT_TRUE(r.exited) << "signal=" << r.signal;
+	EXPECT_EQ(r.code, 0);
+	EXPECT_NE(r.out.find("confiture"), std::string::npos) << r.out;
+	EXPECT_NE(r.out.find("./configbt.yaml"), std::string::npos) << r.out;
+}
+
+TEST(r28_btrunner_entry, logcfg_from_l_param_is_read_before_config_check)
+{
+	// lParam 存在 -> :59 filename = lParam->get<std::string>()（覆盖 :58-59 而非 :61）
+	// 日志配置指向一个存在的文件，这样 WTSLogger::init 走成功支，
+	// 再由 cParam 指向不存在的配置 -> 仍然 E1 返回 0
+	write_fixture("logcfg_ok.yaml",
+		"root:\n    async: false\n    level: error\n    sinks:\n"
+		"    -   pattern: '[%m.%d %H:%M:%S - %-5l] %v'\n        type: ostream_sink\n");
+	ChildResult r = entry_in_child({"wt_btrunner", "-l", fixture_path("logcfg_ok.yaml").c_str(),
+		"-c", "./r28bt_absent_for_e1c.yaml"}, "e1c");
+	ASSERT_TRUE(r.exited) << "signal=" << r.signal;
+	EXPECT_EQ(r.code, 0);
+	EXPECT_NE(r.out.find("---logger initialized---"), std::string::npos) << r.out;
+	EXPECT_NE(r.out.find("confiture"), std::string::npos) << r.out;
+}
+
+/* =========================================================================
+ * 三、E2：配置存在但加载不出 variant（WtBtRunner.cpp:80-85）
+ *     只有两种输入能到这里还让 cfg==NULL：空文件、非 .json/.yaml/.yml 后缀
+ * ====================================================================== */
+
+TEST(r28_btrunner_entry, empty_config_file_returns_minus_one)
+{
+	// StdFile::exists 真 -> 进 :80；content.empty() -> load_from_file 返回 NULL
+	// -> :82 WTSLogger::info -> :83 return -1
+	write_fixture("empty_cfg.yaml", "");
+	ChildResult r = entry_in_child({"wt_btrunner", "-c",
+		fixture_path("empty_cfg.yaml").c_str()}, "e2a");
+	ASSERT_TRUE(r.exited) << "signal=" << r.signal;
+	// 子进程用 _exit(rc==0?0:7) 编码「main 返回了非 0」—— -1 只能这样观察
+	EXPECT_EQ(r.code, 7) << "main 应当 return -1（非 0）";
+	// E1 的那句绝不能出现，反证真的走过了 :74 的判空
+	EXPECT_EQ(r.out.find("confiture"), std::string::npos) << r.out;
+	EXPECT_NE(r.out.find("---logger initialized---"), std::string::npos) << r.out;
+}
+
+TEST(r28_btrunner_entry, unknown_suffix_config_returns_minus_one)
+{
+	// load_from_file 只认 .json/.yaml/.yml，其它后缀 return NULL -> 还是 E2
+	write_fixture("cfg_no_suffix.txt", "replayer:\n    mode: csv\n");
+	ChildResult r = entry_in_child({"wt_btrunner", "-c",
+		fixture_path("cfg_no_suffix.txt").c_str()}, "e2b");
+	ASSERT_TRUE(r.exited) << "signal=" << r.signal;
+	EXPECT_EQ(r.code, 7);
+	EXPECT_EQ(r.out.find("confiture"), std::string::npos) << r.out;
+}
+
+TEST(r28_btrunner_entry, bad_json_config_returns_minus_one_without_throwing)
+{
+	// .json 走 rapidjson（不抛异常，返回 NULL）-> E2
+	// 和下面 bad_yaml 形成对照：同一条 main 对两种坏输入的结局差一个量级
+	write_fixture("bad_cfg.json", "{ \"replayer\": ][ ");
+	ChildResult r = entry_in_child({"wt_btrunner", "-c",
+		fixture_path("bad_cfg.json").c_str()}, "e2c");
+	ASSERT_TRUE(r.exited) << "signal=" << r.signal;
+	EXPECT_EQ(r.code, 7);
+}
+
+TEST(r28_btrunner_entry, bad_yaml_config_terminates_the_process)
+{
+	// WtBtRunner.cpp:80 没有 try/catch，yaml-cpp 的解析异常穿透 main()
+	// -> std::terminate -> SIGABRT。真实回测进程里「YAML 少个括号」= 进程当场死，
+	// 而不是拿到 -1（BUG-R28-003，与 WtRunner::config 同一条缺陷）。
+	write_fixture("bad_cfg.yaml", "replayer: [ this is : not valid\n\t- {{{\n");
+	ChildResult r = entry_in_child({"wt_btrunner", "-c",
+		fixture_path("bad_cfg.yaml").c_str()}, "e2d");
+	EXPECT_FALSE(r.exited) << "code=" << r.code;
+	EXPECT_EQ(r.signal, SIGABRT) << r.out;
+}
+
+/* =========================================================================
+ * 四、DISABLED_：:87 `HisDataReplayer replayer;` 之后的全部支路
+ *
+ * 读源码得到的触发条件（每条都有出处，不是「怕挂就禁」）：
+ *  X1 WtBtRunner.cpp:88 `replayer.init(cfg->get("replayer"))`
+ *     配置里没有 replayer 段时 get() 返回 NULL，HisDataReplayer::init 第一行就
+ *     `_mode = cfg->getCString("mode")`（HisDataReplayer.cpp:175）→ 空 this 解引用 → SIGSEGV。
+ *  X2 就算 replayer 段齐了，:90-91 `cfgEnv->getCString("mocker")` 在 env 缺失时同样空指针。
+ *  X3 mode 不是 cta/hft/sel/exec/uft 之一时，五个分支全跳过，
+ *     register_sink（HisDataReplayer.h:804-807）没被调过 -> _listener 仍是 NULL（:146），
+ *     :151 replayer.prepare() 走到 :669 `_listener->handle_init()` → SIGSEGV。
+ *     也就是说「mocker 拼错」在真实 WtBtRunner 里就是当场段错误，不是友好报错。
+ *  X4 mode 认得时，:100-:115 需要 dlopen cta/ 工厂目录 + cfg->get("cta")->get("strategy")
+ *     等一串键，任一缺失即空指针；而 main 调 replayer.init 时没传 dataLoader
+ *     （:88 只有一个实参，_bt_loader 保持 NULL，HisDataReplayer.cpp:147），
+ *     prepare()/run() 里读历史数据要经 _bt_loader → 仍需真实回测数据目录才能走通。
+ *  X5 全部走通后 :155 `getchar()` 阻塞等 stdin；子进程里 stdin 是 /dev/null 可以立刻 EOF，
+ *     但 :156 之后的 WTSLogger::stop() 会把日志线程停掉，影响同进程后续用例。
+ * 启用它们需要下面「留白面」一节列的接缝，本轮不硬闯。
+ * ====================================================================== */
+
+TEST(r28_btrunner_entry, DISABLED_config_without_replayer_section_derefs_null_variant)
+{
+	// X1
+	write_fixture("noreplayer_cfg.yaml", "env:\n    mocker: cta\n    slippage: 1\n");
+	ChildResult r = entry_in_child({"wt_btrunner", "-c",
+		fixture_path("noreplayer_cfg.yaml").c_str()}, "x1");
+	EXPECT_TRUE(r.exited) << "signal=" << r.signal;
+}
+
+TEST(r28_btrunner_entry, DISABLED_config_without_env_section_derefs_null_cfgenv)
+{
+	// X2
+	write_fixture("noenv_cfg.yaml", "replayer:\n    mode: csv\n    path: ./r28bt_storage/\n"
+		"    cta_stime: 201909010900\n    cta_etime: 201909051500\n");
+	ChildResult r = entry_in_child({"wt_btrunner", "-c",
+		fixture_path("noenv_cfg.yaml").c_str()}, "x2");
+	EXPECT_TRUE(r.exited) << "signal=" << r.signal;
+}
+
+TEST(r28_btrunner_entry, DISABLED_unknown_mocker_leaves_listener_null_and_segv_in_prepare)
+{
+	// X3：replayer 与 env 都齐，只有 mocker 值认不出来
+	write_fixture("badmocker_cfg.yaml", "replayer:\n    mode: csv\n"
+		"    path: ./r28bt_storage/\n    cta_stime: 201909010900\n    cta_etime: 201909051500\n"
+		"    basefiles:\n        session: " + fixture_path("sessions.json") + "\n"
+		"env:\n    mocker: r28nosuchmocker\n    slippage: 1\n");
+	ChildResult r = entry_in_child({"wt_btrunner", "-c",
+		fixture_path("badmocker_cfg.yaml").c_str()}, "x3");
+	EXPECT_TRUE(r.exited) << "signal=" << r.signal;
+}
+
+TEST(r28_btrunner_entry, DISABLED_cta_mocker_needs_real_factory_and_dataloader)
+{
+	// X4 + X5：需要 cta/ 工厂目录 + 真实历史数据 + stdin 收尾，本轮不启用
+	write_fixture("cta_cfg.yaml", "replayer:\n    mode: csv\n"
+		"    path: ./r28bt_storage/\n    cta_stime: 201909010900\n    cta_etime: 201909051500\n"
+		"    tick: false\n"
+		"env:\n    mocker: cta\n    slippage: 1\n"
+		"cta:\n    module: WtCtaStraFact\n    strategy:\n        id: r28c\n"
+		"        name: DualThrust\n        params:\n            code: SHFE.rb.2510\n"
+		"            count: 50\n            days: 30\n            k1: 0.6\n            k2: 0.6\n"
+		"            period: m1\n            stock: false\n");
+	ChildResult r = entry_in_child({"wt_btrunner", "-c",
+		fixture_path("cta_cfg.yaml").c_str()}, "x4");
+	EXPECT_TRUE(r.exited) << "signal=" << r.signal;
+	EXPECT_EQ(r.code, 0);
+}

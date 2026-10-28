@@ -1,0 +1,443 @@
+# API 简报 R20
+
+测试目标: btcore。
+本简报只覆盖本轮要动的文件（按报表 missed 行数选出的），
+每条形如 `L<行号>: <签名>`，可直接 Read 该文件对应行段。
+语义/分支以源码为准；**清单外的文件本轮不要动**。
+
+### `src/WtBtCore/ExecMocker.cpp` (347 行)
+- L26: `extern uint32_tmakeLocalOrderID()`
+- L67: `DLLHelper::free_library(hInst)`
+- L282: `WTSLogger::log_dyn_raw("executer", _id.c_str(), LL_INFO, message)`
+- L341: `fs::create_directories(folder.c_str())`
+- L346: `StdFile::write_file_content(filename.c_str(), _trade_logs.str())`
+
+### `src/WtBtCore/HisDataMgr.cpp` (214 行)
+- L27: `WTSLogger::log_raw(ll, message)`
+- L53: `WTSLogger::error("Initializing of backtest data reader failed: function createBtDtReader not found...")`
+- L90: `WTSLogger::log_raw(LL_ERROR, "Backtest Data Reader not initialized")`
+- L118: `WTSLogger::log_raw(LL_ERROR, "Backtest Data Reader not initialized")`
+- L146: `WTSLogger::log_raw(LL_ERROR, "Backtest Data Reader not initialized")`
+- L174: `WTSLogger::log_raw(LL_ERROR, "Backtest Data Reader not initialized")`
+- L202: `WTSLogger::log_raw(LL_ERROR, "Backtest Data Reader not initialized")`
+
+### `src/WtBtCore/EventNotifier.cpp` (185 行)
+- L96: `DLLHelper::free_library(dllInst)`
+- L163: `rj::Documentroot(rj::kObjectType)`
+- L175: `rj::PrettyWriter<rj::StringBuffer>writer(sb)`
+
+### `src/WtBtCore/HisDataReplayer.h` (1196 行)
+- 类型: WTSTickData:26, WTSVariant:27, WTSKlineSlice:28, WTSTickSlice:29, WTSOrdDtlSlice:30, WTSOrdQueSlice:31, WTSTransSlice:32, WTSSessionInfo:33, WTSCommodityInfo:34, WTSOrdDtlData:36, WTSOrdQueData:37, WTSTransData:38, EventNotifier:40, IDataSink:49, IBtDataLoader:185, HisDataReplayer:255, HftDataList:265
+- L58: `virtual voidhandle_tick(const char* stdCode, WTSTickData* curTick, uint32_t pxType) = 0`
+- L64: `virtual voidhandle_order_queue(const char* /*stdCode*/, WTSOrdQueData* /*curOrdQue*/) }`
+- L70: `virtual voidhandle_order_detail(const char* /*stdCode*/, WTSOrdDtlData* /*curOrdDtl*/) }`
+- L76: `virtual voidhandle_transaction(const char* /*stdCode*/, WTSTransData* /*curTrans*/) }`
+- L84: `virtual voidhandle_bar_close(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar) = 0`
+- L90: `virtual voidhandle_schedule(uint32_t uDate, uint32_t uTime) = 0`
+- L96: `virtual voidhandle_init() = 0`
+- L102: `virtual voidhandle_session_begin(uint32_t curTDate) = 0`
+- L108: `virtual voidhandle_session_end(uint32_t curTDate) = 0`
+- L113: `virtual voidhandle_replay_done() }`
+- L121: `virtual voidhandle_section_end(uint32_t /*curTDate*/, uint32_t /*curTime*/) }`
+- L131: `typedefvoid(*FuncReadBars)(void* obj, WTSBarStruct* firstBar, uint32_t count)`
+- L142: `typedefvoid(*FuncReadFactors)(void* obj, const char* stdCode, uint32_t* dates, double* factors, uint32_t count)`
+- L151: `typedefvoid(*FuncReadTicks)(void* obj, WTSTickStruct* firstItem, uint32_t count)`
+- L160: `typedefvoid(*FuncReadOrdDtl)(void* obj, WTSOrdDtlStruct* firstItem, uint32_t count)`
+- L169: `typedefvoid(*FuncReadOrdQue)(void* obj, WTSOrdQueStruct* firstItem, uint32_t count)`
+- L178: `typedefvoid(*FuncReadTrans)(void* obj, WTSTransStruct* firstItem, uint32_t count)`
+- L198: `virtual boolloadFinalHisBars(void* obj, const char* stdCode, WTSKlinePeriod period, FuncReadBars cb) = 0`
+- L209: `virtual boolloadRawHisBars(void* obj, const char* stdCode, WTSKlinePeriod period, FuncReadBars cb) = 0`
+- L218: `virtual boolloadAllAdjFactors(void* obj, FuncReadFactors cb) = 0`
+- L228: `virtual boolloadAdjFactors(void* obj, const char* stdCode, FuncReadFactors cb) = 0`
+- L239: `virtual boolloadRawHisTicks(void* obj, const char* stdCode, uint32_t uDate, FuncReadTicks cb) = 0`
+- L246: `virtual boolisAutoTrans() return true; }`
+- L389: `boolcacheRawBarsFromBin(const std::string& key, const char* stdCode, WTSKlinePeriod period, bool bForBars = true)`
+- L401: `boolcacheRawBarsFromCSV(const std::string& key, const char* stdCode, WTSKlinePeriod period, bool bSubbed = true)`
+- L412: `boolcacheRawTicksFromBin(const std::string& key, const char* stdCode, uint32_t uDate)`
+- L423: `boolcacheRawOrdDtlFromBin(const std::string& key, const char* stdCode, uint32_t uDate)`
+- L434: `boolcacheRawOrdQueFromBin(const std::string& key, const char* stdCode, uint32_t uDate)`
+- L445: `boolcacheRawTransFromBin(const std::string& key, const char* stdCode, uint32_t uDate)`
+- L456: `boolcacheRawTicksFromCSV(const std::string& key, const char* stdCode, uint32_t uDate)`
+- L468: `boolcacheFinalBarsFromLoader(const std::string& key, const char* stdCode, WTSKlinePeriod period, bool bSubbed = true)`
+- L479: `boolcacheRawTicksFromLoader(const std::string& key, const char* stdCode, uint32_t uDate)`
+- L492: `boolcacheIntegratedFutBarsFromBin(void* codeInfo, const std::string& key, const char* stdCode, WTSKlinePeriod period, bool bSubbed = true)`
+- L505: `boolcacheAdjustedStkBarsFromBin(void* codeInfo, const std::string& key, const char* stdCode, WTSKlinePeriod period, bool bSubbed = true)`
+- L515: `voidonMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTDate = 0, bool tickSimulated = true)`
+- L522: `voidloadFees(const char* filename)`
+- L532: `boolreplayHftDatas(uint64_t stime, uint64_t etime)`
+- L540: `uint64_treplayHftDatasByDay(uint32_t curTDate)`
+- L550: `voidsimTickWithUnsubBars(uint64_t stime, uint64_t etime, uint32_t endTDate = 0, int pxType = 0)`
+- L560: `voidsimTicks(uint32_t uDate, uint32_t uTime, uint32_t endTDate = 0, int pxType = 0)`
+- L570: `inline boolcheckTicks(const char* stdCode, uint32_t uDate)`
+- L580: `inline boolcheckOrderDetails(const char* stdCode, uint32_t uDate)`
+- L590: `inline boolcheckOrderQueues(const char* stdCode, uint32_t uDate)`
+- L600: `inline boolcheckTransactions(const char* stdCode, uint32_t uDate)`
+- L606: `voidcheckUnbars()`
+- L615: `boolloadStkAdjFactorsFromFile(const char* adjfile)`
+- L623: `boolloadStkAdjFactorsFromLoader()`
+- L632: `boolcheckAllTicks(uint32_t uDate)`
+- L641: `inline uint64_tgetNextTickTime(uint32_t curTDate, uint64_t stime = UINT64_MAX)`
+- L649: `inline uint64_tgetNextOrdQueTime(uint32_t curTDate, uint64_t stime = UINT64_MAX)`
+- L657: `inline uint64_tgetNextOrdDtlTime(uint32_t curTDate, uint64_t stime = UINT64_MAX)`
+- L665: `inline uint64_tgetNextTransTime(uint32_t curTDate, uint64_t stime = UINT64_MAX)`
+- L671: `voidreset()`
+- L685: `voiddump_btstate(const char* stdCode, WTSKlinePeriod period, uint32_t times, uint64_t stime, uint64_t etime, double progress, int64_t elapse)`
+- L697: `voidnotify_state(const char* stdCode, WTSKlinePeriod period, uint32_t times, uint64_t stime, uint64_t etime, double progress)`
+- L707: `uint32_tlocate_barindex(const std::string& key, uint64_t curTime, bool bUpperBound = false)`
+- L715: `voidrun_by_bars(bool bNeedDump = false)`
+- L723: `voidrun_by_tasks(bool bNeedDump = false)`
+- L731: `voidrun_by_ticks(bool bNeedDump = false)`
+- L737: `voidcheck_cache_days()`
+- L748: `boolinit(WTSVariant* cfg, EventNotifier* notifier = NULL, IBtDataLoader* dataLoader = NULL)`
+- L755: `boolprepare()`
+- L762: `voidrun(bool bNeedDump = false)`
+- L768: `voidstop()`
+- L774: `voidclear_cache()`
+- L820: `voidregister_task(uint32_t taskid, uint32_t date, uint32_t time, const char* period, const char* trdtpl = "CHINA", const char* session = "TRADING")`
+- L832: `WTSKlineSlice*get_kline_slice(const char* stdCode, const char* period, uint32_t count, uint32_t times = 1, bool isMain = false)`
+- L842: `WTSTickSlice*get_tick_slice(const char* stdCode, uint32_t count, uint64_t etime = 0)`
+- L852: `WTSOrdDtlSlice*get_order_detail_slice(const char* stdCode, uint32_t count, uint64_t etime = 0)`
+- L862: `WTSOrdQueSlice*get_order_queue_slice(const char* stdCode, uint32_t count, uint64_t etime = 0)`
+- （另有 21 个声明，按需用 Read 定位）
+
+### `src/WtBtCore/CtaMocker.h` (1080 行)
+- 类型: EventNotifier:30, HisDataReplayer:35, CtaStrategy:36, CtaMocker:108
+- L126: `virtual ~CtaMocker()`
+- L133: `voiddump_outputs()`
+- L138: `voiddump_stradata()`
+- L143: `voiddump_chartdata()`
+- L153: `inline voidlog_signal(const char* stdCode, double target, double price, uint64_t gentime, const char* usertag = "")`
+- L167: `inline voidlog_trade(const char* stdCode, bool isLong, bool isOpen, uint64_t curTime, double price, double qty, const char* userTag = "", double fee = 0.0, uint32_t barNo = 0)`
+- L196: `voidupdate_dyn_profit(const char* stdCode, double price)`
+- L206: `voiddo_set_position(const char* stdCode, double qty, double price = 0.0, const char* userTag = "")`
+- L216: `voidappend_signal(const char* stdCode, double qty, const char* userTag, double price, uint32_t sigType)`
+- L224: `inline CondList&get_cond_entrusts(const char* stdCode)`
+- L233: `voidproc_tick(const char* stdCode, double last_px, double cur_px)`
+- L242: `boolinit_cta_factory(WTSVariant* cfg)`
+- L248: `voidload_incremental_data(const char* lastBacktestName)`
+- L253: `voidinstall_hook()`
+- L259: `voidenable_hook(bool bEnabled = true)`
+- L265: `boolstep_calc()`
+- L277: `virtual voidhandle_tick(const char* stdCode, WTSTickData* curTick, uint32_t pxType = 0) override`
+- L286: `virtual voidhandle_bar_close(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar) override`
+- L293: `virtual voidhandle_schedule(uint32_t uDate, uint32_t uTime) override`
+- L299: `virtual voidhandle_init() override`
+- L305: `virtual voidhandle_session_begin(uint32_t curTDate) override`
+- L311: `virtual voidhandle_session_end(uint32_t curTDate) override`
+- L319: `virtual voidhandle_section_end(uint32_t curTDate, uint32_t curTime) override`
+- L325: `virtual voidhandle_replay_done() override`
+- L334: `virtual uint32_tid() override { return _context_id; }`
+- L341: `virtual voidon_init() override`
+- L347: `virtual voidon_session_begin(uint32_t curTDate) override`
+- L353: `virtual voidon_session_end(uint32_t curTDate) override`
+- L361: `virtual voidon_tick(const char* stdCode, WTSTickData* newTick, bool bEmitStrategy = true) override`
+- L370: `virtual voidon_bar(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar) override`
+- L378: `virtual boolon_schedule(uint32_t curDate, uint32_t curTime) override`
+- L385: `virtual voidenum_position(FuncEnumCtaPosCallBack cb, bool bForExecute) override`
+- L393: `virtual voidon_tick_updated(const char* stdCode, WTSTickData* newTick) override`
+- L401: `virtual voidon_bar_close(const char* stdCode, const char* period, WTSBarStruct* newBar) override`
+- L408: `virtual voidon_calculate(uint32_t curDate, uint32_t curTime) override`
+- L421: `virtual voidstra_enter_long(const char* stdCode, double qty, const char* userTag = "", double limitprice = 0.0, double stopprice = 0.0) override`
+- L431: `virtual voidstra_enter_short(const char* stdCode, double qty, const char* userTag = "", double limitprice = 0.0, double stopprice = 0.0) override`
+- L441: `virtual voidstra_exit_long(const char* stdCode, double qty, const char* userTag = "", double limitprice = 0.0, double stopprice = 0.0) override`
+- L451: `virtual voidstra_exit_short(const char* stdCode, double qty, const char* userTag = "", double limitprice = 0.0, double stopprice = 0.0) override`
+- L461: `virtual doublestra_get_position(const char* stdCode, bool bOnlyValid = false, const char* userTag = "") override`
+- L471: `virtual voidstra_set_position(const char* stdCode, double qty, const char* userTag = "", double limitprice = 0.0, double stopprice = 0.0) override`
+- L478: `virtual doublestra_get_price(const char* stdCode) override`
+- L487: `virtual doublestra_get_day_price(const char* stdCode, int flag = 0) override`
+- L494: `virtual uint32_tstra_get_tdate() override`
+- L500: `virtual uint32_tstra_get_date() override`
+- L506: `virtual uint32_tstra_get_time() override`
+- L514: `virtual doublestra_get_fund_data(int flag = 0) override`
+- L522: `virtual uint64_tstra_get_first_entertime(const char* stdCode) override`
+- L529: `virtual uint64_tstra_get_last_entertime(const char* stdCode) override`
+- L536: `virtual uint64_tstra_get_last_exittime(const char* stdCode) override`
+- L543: `virtual doublestra_get_last_enterprice(const char* stdCode) override`
+- L550: `virtual const char*stra_get_last_entertag(const char* stdCode) override`
+- L557: `virtual doublestra_get_position_avgpx(const char* stdCode) override`
+- L564: `virtual doublestra_get_position_profit(const char* stdCode) override`
+- L573: `virtual uint64_tstra_get_detail_entertime(const char* stdCode, const char* userTag) override`
+- L581: `virtual doublestra_get_detail_cost(const char* stdCode, const char* userTag) override`
+- L590: `virtual doublestra_get_detail_profit(const char* stdCode, const char* userTag, int flag = 0) override`
+- L598: `virtual WTSCommodityInfo*stra_get_comminfo(const char* stdCode) override`
+- L608: `virtual WTSKlineSlice*stra_get_bars(const char* stdCode, const char* period, uint32_t count, bool isMain = false) override`
+- L616: `virtual WTSTickSlice*stra_get_ticks(const char* stdCode, uint32_t count) override`
+- L623: `virtual WTSTickData*stra_get_last_tick(const char* stdCode) override`
+- L630: `virtual voidstra_sub_ticks(const char* stdCode) override`
+- L637: `virtual voidstra_sub_bar_events(const char* stdCode, const char* period) override`
+- L645: `virtual std::stringstra_get_rawcode(const char* stdCode) override`
+- L652: `virtual voidstra_log_info(const char* message) override`
+- L658: `virtual voidstra_log_debug(const char* message) override`
+- L664: `virtual voidstra_log_warn(const char* message) override`
+- L670: `virtual voidstra_log_error(const char* message) override`
+- L678: `virtual voidstra_save_user_data(const char* key, const char* val) override`
+- L686: `virtual const char*stra_load_user_data(const char* key, const char* defVal = "") override`
+- （另有 7 个声明，按需用 Read 定位）
+
+### `src/WtBtCore/HftMocker.h` (1272 行)
+- 类型: HisDataReplayer:27, HftMocker:39
+- L54: `virtual ~HftMocker()`
+- L113: `virtual voidhandle_tick(const char* stdCode, WTSTickData* curTick, uint32_t pxType) override`
+- L121: `virtual voidhandle_order_queue(const char* stdCode, WTSOrdQueData* curOrdQue) override`
+- L129: `virtual voidhandle_order_detail(const char* stdCode, WTSOrdDtlData* curOrdDtl) override`
+- L137: `virtual voidhandle_transaction(const char* stdCode, WTSTransData* curTrans) override`
+- L148: `virtual voidhandle_bar_close(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar) override`
+- L156: `virtual voidhandle_schedule(uint32_t uDate, uint32_t uTime) override`
+- L163: `virtual voidhandle_init() override`
+- L170: `virtual voidhandle_session_begin(uint32_t curTDate) override`
+- L177: `virtual voidhandle_session_end(uint32_t curTDate) override`
+- L184: `virtual voidhandle_replay_done() override`
+- L193: `virtual voidon_tick_updated(const char* stdCode, WTSTickData* newTick) override`
+- L201: `virtual voidon_ordque_updated(const char* stdCode, WTSOrdQueData* newOrdQue) override`
+- L209: `virtual voidon_orddtl_updated(const char* stdCode, WTSOrdDtlData* newOrdDtl) override`
+- L217: `virtual voidon_trans_updated(const char* stdCode, WTSTransData* newTrans) override`
+- L228: `virtual voidon_tick(const char* stdCode, WTSTickData* newTick) override`
+- L237: `virtual voidon_order_queue(const char* stdCode, WTSOrdQueData* newOrdQue) override`
+- L246: `virtual voidon_order_detail(const char* stdCode, WTSOrdDtlData* newOrdDtl) override`
+- L255: `virtual voidon_transaction(const char* stdCode, WTSTransData* newTrans) override`
+- L263: `virtual uint32_tid() override`
+- L270: `virtual voidon_init() override`
+- L281: `virtual voidon_bar(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar) override`
+- L289: `virtual voidon_session_begin(uint32_t curTDate) override`
+- L297: `virtual voidon_session_end(uint32_t curTDate) override`
+- L306: `virtual boolstra_cancel(uint32_t localid) override`
+- L317: `virtual OrderIDsstra_cancel(const char* stdCode, bool isBuy, double qty = 0) override`
+- L331: `virtual OrderIDsstra_buy(const char* stdCode, double price, double qty, const char* userTag, int flag = 0, bool bForceClose = false) override`
+- L345: `virtual OrderIDsstra_sell(const char* stdCode, double price, double qty, const char* userTag, int flag = 0, bool bForceClose = false) override`
+- L354: `virtual WTSCommodityInfo*stra_get_comminfo(const char* stdCode) override`
+- L365: `virtual WTSKlineSlice*stra_get_bars(const char* stdCode, const char* period, uint32_t count) override`
+- L375: `virtual WTSTickSlice*stra_get_ticks(const char* stdCode, uint32_t count) override`
+- L385: `virtual WTSOrdDtlSlice*stra_get_order_detail(const char* stdCode, uint32_t count) override`
+- L395: `virtual WTSOrdQueSlice*stra_get_order_queue(const char* stdCode, uint32_t count) override`
+- L405: `virtual WTSTransSlice*stra_get_transaction(const char* stdCode, uint32_t count) override`
+- L414: `virtual WTSTickData*stra_get_last_tick(const char* stdCode) override`
+- L423: `virtual std::stringstra_get_rawcode(const char* stdCode) override`
+- L434: `virtual doublestra_get_position(const char* stdCode, bool bOnlyValid = false, int flag = 3) override`
+- L443: `virtual doublestra_get_position_avgpx(const char* stdCode) override`
+- L452: `virtual doublestra_get_position_profit(const char* stdCode) override`
+- L461: `virtual doublestra_get_undone(const char* stdCode) override`
+- L470: `virtual doublestra_get_price(const char* stdCode) override`
+- L478: `virtual uint32_tstra_get_date() override`
+- L486: `virtual uint32_tstra_get_time() override`
+- L494: `virtual uint32_tstra_get_secs() override`
+- L502: `virtual voidstra_sub_ticks(const char* stdCode) override`
+- L510: `virtual voidstra_sub_order_queues(const char* stdCode) override`
+- L518: `virtual voidstra_sub_order_details(const char* stdCode) override`
+- L526: `virtual voidstra_sub_transactions(const char* stdCode) override`
+- L534: `virtual voidstra_log_info(const char* message) override`
+- L541: `virtual voidstra_log_debug(const char* message) override`
+- L548: `virtual voidstra_log_warn(const char* message) override`
+- L555: `virtual voidstra_log_error(const char* message) override`
+- L564: `virtual voidstra_save_user_data(const char* key, const char* val) override`
+- L574: `virtual const char*stra_load_user_data(const char* key, const char* defVal = "") override`
+- L588: `virtual voidon_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price, const char* userTag)`
+- L603: `virtual voidon_order(uint32_t localid, const char* stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled, const char* userTag)`
+- L610: `virtual voidon_channel_ready()`
+- L622: `virtual voidon_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message, const char* userTag)`
+- L632: `boolinit_hft_factory(WTSVariant* cfg)`
+- L638: `voidinstall_hook()`
+- L645: `voidenable_hook(bool bEnabled = true)`
+- L651: `voidstep_tick()`
+- L666: `voidpostTask(Task task)`
+- L673: `voidprocTask()`
+- L682: `boolprocOrder(uint32_t localid)`
+- L693: `voiddo_set_position(const char* stdCode, double qty, double price = 0.0, const char* userTag = "")`
+- L701: `voidupdate_dyn_profit(const char* stdCode, WTSTickData* newTick)`
+- L709: `voiddump_outputs()`
+- L723: `inline voidlog_trade(const char* stdCode, bool isLong, bool isOpen, uint64_t curTime, double price, double qty, double fee, const char* userTag)`
+- L1131: `inline doublevalid() const { return _volume - _frozen; }`
+
+### `src/WtBtCore/UftMocker.h` (370 行)
+- 类型: HisDataReplayer:24, UftMocker:26
+- L30: `virtual ~UftMocker()`
+- L57: `virtual voidhandle_tick(const char* stdCode, WTSTickData* curTick, uint32_t pxType) override`
+- L58: `virtual voidhandle_order_queue(const char* stdCode, WTSOrdQueData* curOrdQue) override`
+- L59: `virtual voidhandle_order_detail(const char* stdCode, WTSOrdDtlData* curOrdDtl) override`
+- L60: `virtual voidhandle_transaction(const char* stdCode, WTSTransData* curTrans) override`
+- L62: `virtual voidhandle_bar_close(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar) override`
+- L63: `virtual voidhandle_schedule(uint32_t uDate, uint32_t uTime) override`
+- L65: `virtual voidhandle_init() override`
+- L66: `virtual voidhandle_session_begin(uint32_t curTDate) override`
+- L67: `virtual voidhandle_session_end(uint32_t curTDate) override`
+- L69: `virtual voidhandle_replay_done() override`
+- L71: `virtual voidon_tick_updated(const char* stdCode, WTSTickData* newTick) override`
+- L72: `virtual voidon_ordque_updated(const char* stdCode, WTSOrdQueData* newOrdQue) override`
+- L73: `virtual voidon_orddtl_updated(const char* stdCode, WTSOrdDtlData* newOrdDtl) override`
+- L74: `virtual voidon_trans_updated(const char* stdCode, WTSTransData* newTrans) override`
+- L78: `virtual voidon_tick(const char* stdCode, WTSTickData* newTick) override`
+- L80: `virtual voidon_order_queue(const char* stdCode, WTSOrdQueData* newOrdQue) override`
+- L82: `virtual voidon_order_detail(const char* stdCode, WTSOrdDtlData* newOrdDtl) override`
+- L84: `virtual voidon_transaction(const char* stdCode, WTSTransData* newTrans) override`
+- L86: `virtual uint32_tid() override`
+- L88: `virtual voidon_init() override`
+- L90: `virtual voidon_bar(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar) override`
+- L92: `virtual voidon_session_begin(uint32_t curTDate) override`
+- L94: `virtual voidon_session_end(uint32_t curTDate) override`
+- L96: `virtual boolstra_cancel(uint32_t localid) override`
+- L98: `virtual OrderIDsstra_cancel_all(const char* stdCode) override`
+- L100: `virtual OrderIDsstra_buy(const char* stdCode, double price, double qty, int flag = 0) override`
+- L102: `virtual OrderIDsstra_sell(const char* stdCode, double price, double qty, int flag = 0) override`
+- L111: `virtual uint32_tstra_enter_long(const char* stdCode, double price, double qty, int flag = 0) override`
+- L120: `virtual uint32_tstra_enter_short(const char* stdCode, double price, double qty, int flag = 0) override`
+- L130: `virtual uint32_tstra_exit_long(const char* stdCode, double price, double qty, bool isToday = false, int flag = 0) override`
+- L140: `virtual uint32_tstra_exit_short(const char* stdCode, double price, double qty, bool isToday = false, int flag = 0) override`
+- L142: `virtual WTSCommodityInfo*stra_get_comminfo(const char* stdCode) override`
+- L144: `virtual WTSKlineSlice*stra_get_bars(const char* stdCode, const char* period, uint32_t count) override`
+- L146: `virtual WTSTickSlice*stra_get_ticks(const char* stdCode, uint32_t count) override`
+- L148: `virtual WTSOrdDtlSlice*stra_get_order_detail(const char* stdCode, uint32_t count) override`
+- L150: `virtual WTSOrdQueSlice*stra_get_order_queue(const char* stdCode, uint32_t count) override`
+- L152: `virtual WTSTransSlice*stra_get_transaction(const char* stdCode, uint32_t count) override`
+- L154: `virtual WTSTickData*stra_get_last_tick(const char* stdCode) override`
+- L162: `virtual doublestra_get_position(const char* stdCode, bool bOnlyValid = false, int32_t iFlag = 3) override`
+- L164: `virtual doublestra_get_local_position(const char* stdCode) override`
+- L166: `virtual doublestra_enum_position(const char* stdCode) override`
+- L168: `virtual doublestra_get_undone(const char* stdCode) override`
+- L170: `virtual doublestra_get_price(const char* stdCode) override`
+- L172: `virtual uint32_tstra_get_date() override`
+- L174: `virtual uint32_tstra_get_time() override`
+- L176: `virtual uint32_tstra_get_secs() override`
+- L178: `virtual voidstra_sub_ticks(const char* stdCode) override`
+- L180: `virtual voidstra_sub_order_queues(const char* stdCode) override`
+- L182: `virtual voidstra_sub_order_details(const char* stdCode) override`
+- L184: `virtual voidstra_sub_transactions(const char* stdCode) override`
+- L186: `virtual voidstra_log_info(const char* message) override`
+- L187: `virtual voidstra_log_debug(const char* message) override`
+- L188: `virtual voidstra_log_error(const char* message) override`
+- L192: `virtual voidon_trade(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double vol, double price)`
+- L194: `virtual voidon_order(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double totalQty, double leftQty, double price, bool isCanceled)`
+- L196: `virtual voidon_channel_ready()`
+- L198: `virtual voidon_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message)`
+- L201: `boolinit_uft_factory(WTSVariant* cfg)`
+- L205: `voidpostTask(Task task)`
+- L206: `voidprocTask()`
+- L208: `boolprocOrder(uint32_t localid)`
+- L210: `voidupdate_position(const char* stdCode, bool isLong, uint32_t offset, double qty, double price = 0.0)`
+- L211: `voidupdate_dyn_profit(const char* stdCode, WTSTickData* newTick)`
+- L213: `voiddump_outputs()`
+- L214: `voidlog_trade(const char* stdCode, bool isLong, uint32_t offset, uint64_t curTime, double price, double qty, double fee)`
+- L329: `inline doublevalid() const { return _preavail + _newavail; }`
+- L330: `inline doublevolume() const { return _prevol + _newvol; }`
+- L331: `inline doublefrozen() }`
+- L339: `inline doublecloseprofit() const{ return _long._closeprofit + _short._closeprofit; }`
+- （另有 1 个声明，按需用 Read 定位）
+
+### `src/WtBtCore/SelMocker.h` (837 行)
+- 类型: SelStrategy:23, HisDataReplayer:27, SelMocker:34
+- L50: `virtual ~SelMocker()`
+- L100: `voiddump_outputs()`
+- L105: `voiddump_stradata()`
+- L115: `inline voidlog_signal(const char* stdCode, double target, double price, uint64_t gentime, const char* usertag = "")`
+- L128: `inline voidlog_trade(const char* stdCode, bool isLong, bool isOpen, uint64_t curTime, double price, double qty, const char* userTag = "", double fee = 0.0)`
+- L157: `voidupdate_dyn_profit(const char* stdCode, double price)`
+- L168: `voiddo_set_position(const char* stdCode, double qty, double price = 0.0, const char* userTag = "", bool bTriggered = false)`
+- L177: `voidappend_signal(const char* stdCode, double qty, const char* userTag = "", double price = 0.0)`
+- L186: `voidproc_tick(const char* stdCode, double last_px, double cur_px)`
+- L195: `boolinit_sel_factory(WTSVariant* cfg)`
+- L207: `virtual voidhandle_tick(const char* stdCode, WTSTickData* curTick, uint32_t pxType) override`
+- L216: `virtual voidhandle_bar_close(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar) override`
+- L223: `virtual voidhandle_schedule(uint32_t uDate, uint32_t uTime) override`
+- L229: `virtual voidhandle_init() override`
+- L235: `virtual voidhandle_session_begin(uint32_t uCurDate) override`
+- L241: `virtual voidhandle_session_end(uint32_t uCurDate) override`
+- L246: `virtual voidhandle_replay_done() override`
+- L254: `virtual uint32_tid() override { return _context_id; }`
+- L261: `virtual voidon_init() override`
+- L267: `virtual voidon_session_begin(uint32_t curTDate) override`
+- L273: `virtual voidon_session_end(uint32_t curTDate) override`
+- L281: `virtual voidon_tick(const char* stdCode, WTSTickData* newTick, bool bEmitStrategy = true) override`
+- L290: `virtual voidon_bar(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar) override`
+- L299: `virtual boolon_schedule(uint32_t curDate, uint32_t curTime, uint32_t fireTime) override`
+- L305: `virtual voidenum_position(FuncEnumSelPositionCallBack cb) override`
+- L313: `virtual voidon_tick_updated(const char* stdCode, WTSTickData* newTick) override`
+- L321: `virtual voidon_bar_close(const char* stdCode, const char* period, WTSBarStruct* newBar) override`
+- L328: `virtual voidon_strategy_schedule(uint32_t curDate, uint32_t curTime) override`
+- L341: `virtual doublestra_get_position(const char* stdCode, bool bOnlyValid = false, const char* userTag = "") override`
+- L349: `virtual voidstra_set_position(const char* stdCode, double qty, const char* userTag = "") override`
+- L356: `virtual doublestra_get_price(const char* stdCode) override`
+- L365: `virtual doublestra_get_day_price(const char* stdCode, int flag = 0) override`
+- L372: `virtual uint32_tstra_get_tdate() override`
+- L378: `virtual uint32_tstra_get_date() override`
+- L384: `virtual uint32_tstra_get_time() override`
+- L392: `virtual doublestra_get_fund_data(int flag = 0) override`
+- L400: `virtual uint64_tstra_get_first_entertime(const char* stdCode) override`
+- L407: `virtual uint64_tstra_get_last_entertime(const char* stdCode) override`
+- L414: `virtual uint64_tstra_get_last_exittime(const char* stdCode) override`
+- L421: `virtual doublestra_get_last_enterprice(const char* stdCode) override`
+- L428: `virtual const char*stra_get_last_entertag(const char* stdCode) override`
+- L435: `virtual doublestra_get_position_avgpx(const char* stdCode) override`
+- L442: `virtual doublestra_get_position_profit(const char* stdCode) override`
+- L451: `virtual uint64_tstra_get_detail_entertime(const char* stdCode, const char* userTag) override`
+- L459: `virtual doublestra_get_detail_cost(const char* stdCode, const char* userTag) override`
+- L468: `virtual doublestra_get_detail_profit(const char* stdCode, const char* userTag, int flag = 0) override`
+- L476: `virtual WTSCommodityInfo*stra_get_comminfo(const char* stdCode) override`
+- L483: `virtual WTSSessionInfo*stra_get_sessinfo(const char* stdCode) override`
+- L492: `virtual WTSKlineSlice*stra_get_bars(const char* stdCode, const char* period, uint32_t count) override`
+- L500: `virtual WTSTickSlice*stra_get_ticks(const char* stdCode, uint32_t count) override`
+- L507: `virtual WTSTickData*stra_get_last_tick(const char* stdCode) override`
+- L515: `virtual std::stringstra_get_rawcode(const char* stdCode) override`
+- L522: `virtual voidstra_sub_ticks(const char* stdCode) override`
+- L529: `virtual voidstra_log_info(const char* message) override`
+- L535: `virtual voidstra_log_debug(const char* message) override`
+- L541: `virtual voidstra_log_warn(const char* message) override`
+- L547: `virtual voidstra_log_error(const char* message) override`
+- L555: `virtual voidstra_save_user_data(const char* key, const char* val) override`
+- L564: `virtual const char*stra_load_user_data(const char* key, const char* defVal = "") override`
+- L698: `inline doublevalid() const { return _volume - _frozen; }`
+
+### `src/WtBtCore/MatchEngine.cpp` (460 行)
+- L19: `extern uint32_tmakeLocalOrderID()`
+
+### `src/WtBtCore/MatchEngine.h` (303 行)
+- 类型: WTSTickData:19, WTSVariant:20, IMatchSink:41, MatchEngine:96
+- L56: `virtual voidhandle_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double fireprice, double price, uint64_t ordTime) = 0`
+- L70: `virtual voidhandle_order(uint32_t localid, const char* stdCode, bool isBuy, double leftover, double price, bool isCanceled, uint64_t ordTime) = 0`
+- L82: `virtual voidhandle_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message, uint64_t ordTime) = 0`
+- L115: `voidfire_orders(const char* stdCode, OrderIDs& to_erase)`
+- L123: `voidmatch_orders(WTSTickData* curTick, OrderIDs& to_erase)`
+- L130: `voidupdate_lob(WTSTickData* curTick)`
+- L139: `inline WTSTickData*grab_last_tick(const char* stdCode)`
+- L148: `voidinit(WTSVariant* cfg)`
+- L156: `voidregisSink(IMatchSink* sink) _sink = sink; }`
+- L162: `voidclear()`
+- L171: `voidhandle_tick(const char* stdCode, WTSTickData* curTick)`
+- L183: `OrderIDsbuy(const char* stdCode, double price, double qty, uint64_t curTime)`
+- L194: `OrderIDssell(const char* stdCode, double price, double qty, uint64_t curTime)`
+- L202: `doublecancel(uint32_t localid)`
+- L213: `virtual OrderIDscancel(const char* stdCode, bool isBuy, double qty, FuncCancelCallback cb)`
+
+### `src/WtBtCore/WtHelper.h` (60 行)
+- 类型: WtHelper:19
+- L27: `static std::stringgetCWD()`
+- L34: `static const char*getOutputDir()`
+- L41: `static const std::string&getInstDir() return _inst_dir; }`
+- L48: `static voidsetInstDir(const char* inst_dir) _inst_dir = inst_dir; }`
+- L54: `static voidsetOutputDir(const char* out_dir)`
+
+### `src/WtBtCore/ExecMocker.h` (326 行)
+- 类型: ExecMocker:30
+- L42: `virtual ~ExecMocker()`
+- L58: `virtual voidhandle_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double fireprice, double price, uint64_t ordTime) override`
+- L71: `virtual voidhandle_order(uint32_t localid, const char* stdCode, bool isBuy, double leftover, double price, bool isCanceled, uint64_t ordTime) override`
+- L82: `virtual voidhandle_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message, uint64_t ordTime) override`
+- L93: `virtual voidhandle_tick(const char* stdCode, WTSTickData* curTick, uint32_t pxType) override`
+- L101: `virtual voidhandle_schedule(uint32_t uDate, uint32_t uTime) override`
+- L107: `virtual voidhandle_init() override`
+- L117: `virtual voidhandle_bar_close(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar) override`
+- L124: `virtual voidhandle_session_begin(uint32_t curTDate) override`
+- L131: `virtual voidhandle_session_end(uint32_t curTDate) override`
+- L137: `virtual voidhandle_replay_done() override`
+- L149: `virtual WTSTickSlice*getTicks(const char* stdCode, uint32_t count, uint64_t etime = 0) override`
+- L157: `virtual WTSTickData*grabLastTick(const char* stdCode) override`
+- L167: `virtual doublegetPosition(const char* stdCode, bool validOnly = true, int32_t flag = 3) override`
+- L175: `virtual OrderMap*getOrders(const char* stdCode) override`
+- L183: `virtual doublegetUndoneQty(const char* stdCode) override`
+- L194: `virtual OrderIDsbuy(const char* stdCode, double price, double qty, bool bForceClose = false) override`
+- L205: `virtual OrderIDssell(const char* stdCode, double price, double qty, bool bForceClose = false) override`
+- L213: `virtual boolcancel(uint32_t localid) override`
+- L223: `virtual OrderIDscancel(const char* stdCode, bool isBuy, double qty = 0) override`
+- L230: `virtual voidwriteLog(const char* message) override`
+- L238: `virtual WTSCommodityInfo*getCommodityInfo(const char* stdCode) override`
+- L246: `virtual WTSSessionInfo*getSessionInfo(const char* stdCode) override`
+- L253: `virtual uint64_tgetCurTime() override`
+- L262: `boolinit(WTSVariant* cfg)`
+

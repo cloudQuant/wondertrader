@@ -35,6 +35,16 @@ def repo_root():
 
 
 def find_objects(build):
+    """收集参与覆盖率统计的对象文件。
+
+    /TestUnits/ 下混着两类东西，必须区分：
+      * 测试代码自己的对象（gtest、各 lane 的 *_test.cpp）—— 不该计入第一方产品覆盖率；
+      * 被覆盖率目标顺带编译的**生产** TU，路径形如
+        `TestUnits/coverage/CMakeFiles/CoverageTests_selfthft.dir/__/__/WtSelStraFact/WtSelStraFact.cpp.o`。
+        这类对象在顶层没有对应目标（WtSelStraFact / WtHftStraFact 根本不在
+        ADD_SUBDIRECTORY 里），如果一律按 "/TestUnits/" 排除，它们的覆盖行数就会凭空消失。
+        实测就是这样漏掉了这两个模块（报告里 0 行）。
+    """
     objs = []
     for base, _, files in os.walk(build):
         for name in files:
@@ -42,8 +52,12 @@ def find_objects(build):
                 continue
             path = os.path.join(base, name)
             rel = path.replace(build, "")
-            if any(x in rel for x in ("/TestUnits/", "/gtest/", "/lmdb/", "/zstdlib/", "/yamlcpp/", "/API/")):
-                continue
+            production_in_cov_target = ("/TestUnits/coverage/CMakeFiles/" in rel
+                                         and "/__/__/" in rel)
+            if not production_in_cov_target:
+                if any(x in rel for x in ("/TestUnits/", "/gtest/", "/lmdb/",
+                                          "/zstdlib/", "/yamlcpp/", "/API/")):
+                    continue
             objs.append(path)
     return sorted(objs)
 
@@ -122,8 +136,12 @@ def main():
         print(f"{mod:34s} files={f:4d} lines={l:6d} missed={m:6d} cover={cov(l, m):6.2f}%")
 
     uncovered = [(rel, l, m) for rel, l, m in files if m > 0]
+    # 旧版这里写死 [:30]：表头报 files=276 lines=47569，正文却只列 30 行，
+    # 于是按报表派工的 wave_scope.py 只看得到前 30 个文件，第二波之后就没有可选目标了
+    # （实测「剩余可选=0」就是这么来的）。改成默认全列，可用第三个参数收窄。
     print(f"\nUNCOVERED (unexcluded) files={len(uncovered)} lines={sum(m for _, _, m in uncovered)}")
-    for rel, l, m in sorted(uncovered, key=lambda x: -x[2])[:30]:
+    topn = int(sys.argv[3]) if len(sys.argv) > 3 else len(uncovered)
+    for rel, l, m in sorted(uncovered, key=lambda x: -x[2])[:topn]:
         print(f"  {m:5d}/{l:5d} {cov(l, m):6.2f}% {rel}")
 
     if gate and total_m > 0:
