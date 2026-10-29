@@ -8,7 +8,7 @@
  *   （`dropped_empty`），于是 WtRunner.cpp 一行都没记上。剩下 5 条只走
  *   main.cpp 的 --help 分支与全局数据表，同样不进 WtRunner.cpp 的函数体。
  *   同一个类改成 **堆上构造**（new / std::unique_ptr）后 ctor+dtor 全程正常。
- *   所以本文件的所有 WtRunner 一律 unique_ptr 持有。
+ *   常规用例的 WtRunner 一律 unique_ptr 持有；栈/堆构造析构对照仅在隔离子进程中运行。
  *
  * 安全口径：
  *   - 不调用 run()（起线程 + while(!_to_exit) 轮询 + install_signal_hooks）；
@@ -19,9 +19,13 @@
 #include <gtest/gtest.h>
 
 #include <fcntl.h>
+#include <signal.h>
+#include <sys/resource.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include <cerrno>
+#include <chrono>
 #include <cstdio>
 #include <cstdint>
 #include <cstdlib>
@@ -34,6 +38,9 @@
 #include "WtCore/WtHelper.h"
 #include "Includes/WTSVariant.hpp"
 #include "Share/StdUtils.hpp"
+
+static_assert(sizeof(WtRunner) <= 64 * 1024,
+	"WtRunner must remain small enough to exclude a giant stack frame");
 
 /* 生产 TU（src/WtRunner/main.cpp）经 -Dmain=wt_coverage_main_wtrunner 改名后的入口 */
 int wt_coverage_main_wtrunner(int argc, char* argv[]);
@@ -57,6 +64,16 @@ struct ChildResult
 	int code = -1;
 	int signal = -1;
 	std::string out;
+};
+
+struct RunnerLifecycleResult
+{
+	bool forked = false;
+	bool timed_out = false;
+	bool reaped = false;
+	int status = -1;
+	int wait_error = 0;
+	std::string markers;
 };
 
 /*
@@ -143,6 +160,121 @@ ChildResult entry_in_child(std::vector<const char*> words, const std::string& na
 	r.exited = WIFEXITED(raw);
 	r.code = r.exited ? WEXITSTATUS(raw) : -1;
 	r.signal = WIFSIGNALED(raw) ? WTERMSIG(raw) : -1;
+	return r;
+}
+
+/*
+ * 隔离诊断 WtRunner 的构造/析构。子进程只构造、写 C、析构、写 D；
+ * 父进程用 WNOHANG 最多观察 2 秒，超时即杀死并回收子进程。
+ * 只读至多 3 字节的 marker 管道，不做等待 EOF 的无界读取。
+ */
+RunnerLifecycleResult runner_lifecycle_in_child(bool useHeap)
+{
+	RunnerLifecycleResult r;
+	int fds[2];
+	if (pipe(fds) != 0)
+		return r;
+
+	const pid_t pid = fork();
+	if (pid < 0)
+	{
+		close(fds[0]);
+		close(fds[1]);
+		return r;
+	}
+
+	if (pid == 0)
+	{
+		close(fds[0]);
+		struct rlimit coreLimit;
+		coreLimit.rlim_cur = 0;
+		coreLimit.rlim_max = 0;
+		if (setrlimit(RLIMIT_CORE, &coreLimit) != 0)
+			_exit(125);
+
+		bool wroteC = false;
+		try
+		{
+			if (useHeap)
+			{
+				{
+					std::unique_ptr<WtRunner> runner(new WtRunner());
+					wroteC = write(fds[1], "C", 1) == 1;
+				}
+			}
+			else
+			{
+				{
+					WtRunner runner;
+					wroteC = write(fds[1], "C", 1) == 1;
+				}
+			}
+		}
+		catch (...)
+		{
+			_exit(124);
+		}
+
+		if (!wroteC)
+			_exit(123);
+		if (write(fds[1], "D", 1) != 1)
+			_exit(122);
+		close(fds[1]);
+		_exit(0);
+	}
+
+	close(fds[1]);
+	r.forked = true;
+	int raw = -1;
+	const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
+	for (;;)
+	{
+		const pid_t waited = waitpid(pid, &raw, WNOHANG);
+		if (waited == pid)
+		{
+			r.reaped = true;
+			break;
+		}
+		if (waited < 0 && errno != EINTR)
+		{
+			r.wait_error = errno;
+			(void)kill(pid, SIGKILL);
+			pid_t reaped;
+			do
+			{
+				reaped = waitpid(pid, &raw, 0);
+			} while (reaped < 0 && errno == EINTR);
+			r.reaped = reaped == pid;
+			break;
+		}
+		if (std::chrono::steady_clock::now() >= deadline)
+		{
+			r.timed_out = true;
+			(void)kill(pid, SIGKILL);
+			pid_t reaped;
+			do
+			{
+				reaped = waitpid(pid, &raw, 0);
+			} while (reaped < 0 && errno == EINTR);
+			r.reaped = reaped == pid;
+			break;
+		}
+		usleep(10000);
+	}
+
+	if (r.reaped)
+	{
+		r.status = raw;
+		const int readFlags = fcntl(fds[0], F_GETFL, 0);
+		if (readFlags >= 0 && fcntl(fds[0], F_SETFL, readFlags | O_NONBLOCK) == 0)
+		{
+			char markers[3] = {};
+			const ssize_t got = read(fds[0], markers, sizeof(markers));
+			if (got > 0)
+				r.markers.assign(markers, static_cast<size_t>(got));
+		}
+	}
+	close(fds[0]);
 	return r;
 }
 
@@ -259,7 +391,39 @@ void prepare_base_fixtures()
 } // namespace
 
 /* =========================================================================
- * 一、入口 wt_coverage_main_wtrunner（src/WtRunner/main.cpp:51-127）
+ * 一、WtRunner 构造/析构诊断：仅在 fork 子进程中运行
+ * ====================================================================== */
+
+TEST(r28_wtrunner_lifecycle, stack_construct_destroy_reports_cd_in_child)
+{
+	const RunnerLifecycleResult r = runner_lifecycle_in_child(false);
+	ASSERT_TRUE(r.forked) << "pipe/fork failed";
+	EXPECT_FALSE(r.timed_out) << "stack constructor/destructor exceeded 2-second watchdog";
+	ASSERT_TRUE(r.reaped) << "child was not reaped; wait_error=" << r.wait_error;
+	ASSERT_NE(-1, r.status);
+	EXPECT_TRUE(WIFEXITED(r.status))
+		<< "child signal=" << (WIFSIGNALED(r.status) ? WTERMSIG(r.status) : -1);
+	if (WIFEXITED(r.status))
+		EXPECT_EQ(0, WEXITSTATUS(r.status));
+	EXPECT_EQ("CD", r.markers) << "C marks constructor return; D marks destructor return";
+}
+
+TEST(r28_wtrunner_lifecycle, heap_construct_destroy_reports_cd_in_child)
+{
+	const RunnerLifecycleResult r = runner_lifecycle_in_child(true);
+	ASSERT_TRUE(r.forked) << "pipe/fork failed";
+	EXPECT_FALSE(r.timed_out) << "heap constructor/destructor exceeded 2-second watchdog";
+	ASSERT_TRUE(r.reaped) << "child was not reaped; wait_error=" << r.wait_error;
+	ASSERT_NE(-1, r.status);
+	EXPECT_TRUE(WIFEXITED(r.status))
+		<< "child signal=" << (WIFSIGNALED(r.status) ? WTERMSIG(r.status) : -1);
+	if (WIFEXITED(r.status))
+		EXPECT_EQ(0, WEXITSTATUS(r.status));
+	EXPECT_EQ("CD", r.markers) << "C marks constructor return; D marks destructor return";
+}
+
+/* =========================================================================
+ * 二、入口 wt_coverage_main_wtrunner（src/WtRunner/main.cpp:51-127）
  *     只能在子进程里调：
  *       - help 分支被 cppcli.hpp:1897-1900 的 std::exit(0) 截断，父进程里调
  *         等于提前收尾整个 gtest 宿主（判决会是 NORUN 而不是 PASS）；

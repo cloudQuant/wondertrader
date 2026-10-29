@@ -53,21 +53,6 @@ namespace {
 
 	ExtRec g_ext;
 
-	void ext_parser_evt(WtUInt32 evtId, const char* id)
-	{
-		g_ext.evt++;
-		g_ext.last_evt = evtId;
-		g_ext.last_id = (id == NULL) ? "<null>" : id;
-	}
-
-	void ext_parser_sub(const char* id, const char* code, bool bSub)
-	{
-		g_ext.sub++;
-		g_ext.last_sub = bSub;
-		g_ext.last_id = (id == NULL) ? "<null>" : id;
-		g_ext.last_code = (code == NULL) ? "<null>" : code;
-	}
-
 	void ext_exec_init(const char* id)
 	{
 		g_ext.init++;
@@ -213,26 +198,29 @@ TEST(R6PorterLogRoute, handleLogAppend_accepts_every_declared_level)
  * on_ext_parser_quote：1243~1256（未注册 parser 的告警支）
  * ---------------------------------------------------------------------- */
 
-TEST(R6PorterExtParserQuote, unknown_parser_leaves_the_supplied_tick_untouched)
+TEST(R6PorterExtParserQuote, unknown_parser_c_api_leaves_the_supplied_tick_untouched)
 {
-	WtRtRunner r;
-	r.registerParserPorter(ext_parser_evt, ext_parser_sub);
-
 	WTSTickStruct tick;
 	memset(&tick, 0, sizeof(tick));
 	tick.action_time = 93000;
 	tick.price = 1234.5;
 	wt_strcpy(tick.code, "IF2108");
+	wt_strcpy(tick.exchg, "SHFE");
 
-	const WtUInt32 before_time = tick.action_time;
-	const double before_price = tick.price;
+	// Use the public C API path exercised by Q06PorterCapi.ParserPushQuoteIgnoresUnknownParserId;
+	// do not call the internal method on a directly constructed, uninitialized WtRtRunner.
+	// WTSTickStruct has no reference-count field, so preserve and compare its full byte image.
+	unsigned char before[sizeof(tick)];
+	memcpy(before, &tick, sizeof(tick));
 
-	EXPECT_NO_THROW(r.on_ext_parser_quote("r6_absent_parser", &tick, 0));
+	EXPECT_NO_THROW(parser_push_quote("r6_absent_parser", &tick, 0));
 
-	// 没有任何 sink 消费它 -> 结构体必须逐字节不变
-	EXPECT_EQ(tick.action_time, before_time);
-	EXPECT_EQ(tick.price, before_price);
-	EXPECT_EQ(g_ext.evt, 0u) << "quote 通道不该反向触发 parser 事件回调";
+	EXPECT_EQ(0, memcmp(before, &tick, sizeof(tick)))
+		<< "unknown parser C API must leave the borrowed tick unchanged";
+	EXPECT_EQ(93000u, tick.action_time);
+	EXPECT_DOUBLE_EQ(1234.5, tick.price);
+	EXPECT_STREQ("IF2108", tick.code);
+	EXPECT_STREQ("SHFE", tick.exchg);
 }
 
 /* -------------------------------------------------------------------------

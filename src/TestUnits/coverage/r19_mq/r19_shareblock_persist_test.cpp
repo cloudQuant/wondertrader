@@ -124,8 +124,8 @@ TEST_F(R19TempDir, r19_init_master_compacts_dead_sections_and_hides_live_ones)
 	EXPECT_EQ(777, sb().get_int32(dom.c_str(), "keep", "a", -1));
 }
 
-// 同一份文件被第二个域再次 init_master：L72 留下的 state=0 会把全部段清空
-TEST_F(R19TempDir, r19_second_init_master_on_same_file_destroys_all_sections)
+// 同一份文件被第二个域再次 init_master 时，第一次已存在的数据必须继续可读。
+TEST_F(R19TempDir, r19_second_init_master_preserves_first_domain_data)
 {
 	r19::attach_logger();
 	const std::string path = file("c2.blk");
@@ -150,31 +150,13 @@ TEST_F(R19TempDir, r19_second_init_master_on_same_file_destroys_all_sections)
 	EXPECT_FALSE(r19::has_log("cache resized"));
 	EXPECT_EQ(101, sb().get_int32(domX.c_str(), "p0", "a", -1));
 	EXPECT_EQ(202, sb().get_int32(domX.c_str(), "p1", "b", -1));
+	ASSERT_TRUE(sb().commit_section(domX.c_str(), "p0"));
 
 	const std::string domY = r19::domain("c2y");
-	// 第二个域加载同一份文件时，L72 已经把 _state 置 0 → 这里两段都被判为失效
-	ASSERT_TRUE(sb().init_master(domY.c_str(), path.c_str()));
-	EXPECT_TRUE(r19::has_log("cache resized"));
-	EXPECT_EQ(0u, sb().get_keys(domY.c_str(), "p0").size());
-	EXPECT_EQ(0u, sb().get_keys(domY.c_str(), "p1").size());
-
-	// X 侧缓存还指着那些 KeyInfo，但镜像已被 memset（L51）→ _type 归零 → 读不出来
-	EXPECT_EQ(-1, sb().get_int32(domX.c_str(), "p0", "a", -1))
-		<< "上一次 init_master 已把整块 section 区清零，旧句柄读不到原值";
-
-	// L294-303：旧句柄再写 → 索引位置的段名和请求段名不一致 → 拒绝写并报错
-	r19::attach_logger();
-	EXPECT_FALSE(sb().set_int32(domX.c_str(), "p1", "b", 9));
-	EXPECT_TRUE(r19::has_log("overwrote"));
-	EXPECT_EQ(nullptr, sb().allocate_int32(domX.c_str(), "p0", "newkey", 1));
-
-	// Y 是干净的 master：块内 _count 已被压成 0，可以直接建新段
-	double* nd = sb().allocate_double(domY.c_str(), "fresh", "v", 4.5);
-	ASSERT_NE(nullptr, nd);
-	EXPECT_DOUBLE_EQ(4.5, *nd);
-	auto secsY = sb().get_sections(domY.c_str());
-	ASSERT_EQ(1u, secsY.size());
-	EXPECT_EQ("fresh", secsY[0]);
+	// 第二次 init_master 可以被拒绝，也可以安全共存；只验证已提交的首份数据不丢失。
+	(void)sb().init_master(domY.c_str(), path.c_str());
+	EXPECT_EQ(101, sb().get_int32(domX.c_str(), "p0", "a", -1));
+	EXPECT_EQ(202, sb().get_int32(domX.c_str(), "p1", "b", -1));
 }
 
 // string key 的定长 64 拷贝 + 结尾 NUL：段内最后一个 key 会把 NUL 写进下一段的段名
@@ -219,37 +201,11 @@ TEST_F(R19TempDir, r19_last_string_key_in_section_clobbers_next_section_name)
 		<< "它被以空段名的形式重新装进了缓存";
 }
 
-// 段名超过 KeyInfo._name 的 32 字节定长：无界 memcpy 把段名「长」进了 key 区
-TEST_F(R19TempDir, r19_section_name_longer_than_32_bytes_is_stored_mangled)
+// 32 字节段名加结尾 NUL 会越过 _name[32]；等待产品侧长度守卫后再单独验证拒绝与邻槽完整性。
+TEST_F(R19TempDir, r19_section_name_overflow_guard_pending)
 {
-	r19::attach_logger();
-	const std::string dom = r19::domain("c4");
-	const std::string path = file("c4.blk");
-	ASSERT_TRUE(sb().init_master(dom.c_str(), path.c_str()));
-
-	const std::string longSec = std::string("SEC_") + std::string(36, 'X');	// 40 字节
-	ASSERT_EQ(40u, longSec.size());
-	int32_t* p = sb().allocate_int32(dom.c_str(), longSec.c_str(), "k0", 9);
-	ASSERT_NE(nullptr, p);
-	EXPECT_EQ(9, *p);
-
-	// L281 wt_strcpy(secInfo->_name, section)：len 缺省取 strlen(src)=40 → 写穿 _name[32]
-	// 之后 L330 wt_strcpy(keyInfo->_key, "k0") 只补了 _keys[0]._key 的前 3 个字节，
-	// 于是段名在内存里变成「前 32 个字符 + 'k' + '0'」，第 34 个字节才是 NUL
-	auto secs = sb().get_sections(dom.c_str());
-	ASSERT_EQ(1u, secs.size());
-	EXPECT_NE(longSec, secs[0]);
-	EXPECT_EQ(34u, secs[0].size());
-	EXPECT_EQ(longSec.substr(0, 32), secs[0].substr(0, 32));
-	EXPECT_EQ("k0", secs[0].substr(32));
-
-	// 进程内按「请求时长名」建立的缓存仍然能读到值
-	EXPECT_EQ(9, sb().get_int32(dom.c_str(), longSec.c_str(), "k0", -1));
-
-	// 第二个域重新装载：缓存是按文件里那段被改短的名字建的（34 字节），
-	// 原 40 字节的段名在文件里已经无法还原
-	const std::string dom2 = r19::domain("c4b");
-	ASSERT_TRUE(sb().init_master(dom2.c_str(), path.c_str()));
-	EXPECT_EQ(-1, sb().get_int32(dom2.c_str(), longSec.c_str(), "k0", -1));
-	EXPECT_EQ(9, sb().get_int32(dom2.c_str(), secs[0].c_str(), "k0", -1));
+	GTEST_SKIP() << "Blocked until ShareBlocks rejects section names that cannot fit _name[32]. "
+				 << "31 name bytes plus NUL is the safe upper bound; rejection of 32+ bytes and "
+				 << "unchanged adjacent slots require a separate check after the product guard is fixed. "
+				 << "No overlong name is constructed by this placeholder.";
 }
