@@ -435,10 +435,9 @@ TEST_F(L02VariantFixture, WtsArrayAppendAtGrabAndSet)
 
 	ay->append(p1);               // 自动 retain -> 2
 	EXPECT_EQ(2u, p1->retainCount());
-	ay->append(p2, false);        // 不 retain -> 仍为 1
+	ay->append(p2, false);        // 把现有引用交给数组，不增加计数
 	EXPECT_EQ(1u, p2->retainCount());
-	// 注意：clear() 不区分是否自动持有，一律 release，见 bugs 记录
-	p2->retain();                 // 预留给后续 clear() 的额外 release
+	p2->retain();                 // 保留调用方引用，以便 resize 清空数组后继续使用 p2
 
 	EXPECT_EQ(2u, ay->size());
 	EXPECT_TRUE(ay->at(0) == p1);
@@ -457,32 +456,32 @@ TEST_F(L02VariantFixture, WtsArrayAppendAtGrabAndSet)
 	EXPECT_EQ(0u, ay->idxOf(p1));
 	EXPECT_EQ(1u, ay->idxOf(p2));
 	EXPECT_EQ(0xffffffffu, ay->idxOf(NULL));
-	RefProbe other;
-	EXPECT_EQ(0xffffffffu, ay->idxOf(&other));
+	RefProbe* other = new RefProbe();
+	EXPECT_EQ(0xffffffffu, ay->idxOf(other));
 
 	ay->resize(1, NULL);          // 先 clear 再预分配
 	EXPECT_EQ(1u, ay->size());
 	EXPECT_TRUE(ay->at(0) == NULL);
 	EXPECT_EQ(1u, p1->retainCount());
-	EXPECT_EQ(2u, p2->retainCount());
+	EXPECT_EQ(1u, p2->retainCount());
 
 	// set：新值 retain，旧值（此处为 NULL）交换出去
 	ay->set(0, p2, true);
-	EXPECT_EQ(3u, p2->retainCount());
+	EXPECT_EQ(2u, p2->retainCount());
 	// 越界 set 不生效
 	ay->set(5, p1, true);
 	EXPECT_EQ(1u, ay->size());
 	EXPECT_TRUE(ay->at(0) == p2);
 
-	// 收尾：数组持有 p2 两次？不，set 只 retain 一次，
-	// 归还前手工补齐引用计数
-	ay->clear();                  // p2 3 -> 2（p1 已不在数组内）
+	// 收尾：set 增加的一次引用由 clear 归还，调用方保留的一次引用仍在。
+	ay->clear();                  // p2 2 -> 1（p1 已不在数组内）
 	EXPECT_EQ(0u, ay->size());
+	EXPECT_EQ(1u, p2->retainCount());
 	ay->release();                // 释放数组本身
 	p1->release();                // 1 -> 0 delete
-	p2->release();                // 2 -> 1 ... 预留的那次
 	p2->release();                // 1 -> 0 delete
-	EXPECT_EQ(2, RefProbe::s_dtor);
+	other->release();             // 1 -> 0 delete
+	EXPECT_EQ(3, RefProbe::s_dtor);
 	RefProbe::s_dtor = 0;
 }
 
@@ -509,14 +508,17 @@ TEST_F(L02VariantFixture, WtsArrayMergeIterateAndSort)
 	EXPECT_TRUE(*it == p1);
 	WTSArray::ConstIterator cit = ((const WTSArray*)a)->begin();
 	EXPECT_TRUE(cit != ((const WTSArray*)a)->end());
+	EXPECT_TRUE(a->at(0) == p1);
+	EXPECT_TRUE(a->at(1) == p2);
 	EXPECT_TRUE(*((const WTSArray*)a)->rbegin() == p2);
 	EXPECT_TRUE(a->rend() != a->rbegin());
 
 	a->sort([](WTSObject* left, WTSObject* right) {
-		return left->retainCount() < right->retainCount();
+		return static_cast<RefProbe*>(left)->tag() > static_cast<RefProbe*>(right)->tag();
 	});
 	EXPECT_EQ(2u, a->size());
 	EXPECT_TRUE(a->at(0) == p2);
+	EXPECT_TRUE(a->at(1) == p1);
 
 	a->clear();
 	EXPECT_EQ(0u, a->size());
@@ -611,16 +613,20 @@ TEST_F(L02VariantFixture, WtsQueuePushPopFrontBack)
 	EXPECT_FALSE(q->empty());
 	EXPECT_TRUE(q->front(false) == p1);
 	EXPECT_TRUE(q->back(false) == p2);
-	EXPECT_EQ(3u, q->front(true)->retainCount());   // 2 持有 + 1 临时
-	q->front(true)->release();
+	WTSObject* grabbed_front = q->front(true);
+	ASSERT_TRUE(grabbed_front == p1);
+	EXPECT_EQ(3u, grabbed_front->retainCount());   // 队列持有 + 调用方 + 临时 grab
+	grabbed_front->release();
 	EXPECT_EQ(2u, p1->retainCount());
 	EXPECT_EQ(2u, p2->retainCount());
 
 	q->pop();
 	EXPECT_EQ(1u, q->size());
-	// BUG: pop() 只出队不做 release，被弹出对象引用计数仍为 2（泄漏）
-	EXPECT_EQ(2u, p1->retainCount());
-	p1->release();                                  // 手工补偿
+	// 出队应归还队列持有的引用，调用方自己的引用仍保留。
+	EXPECT_EQ(1u, p1->retainCount());
+	// 兼顾当前有缺陷的 pop 实现：若它漏还了队列引用，则在继续清理前补回。
+	if (p1->retainCount() > 1u)
+		p1->release();
 	EXPECT_EQ(1u, p1->retainCount());
 
 	q->clear();
@@ -639,9 +645,10 @@ TEST_F(L02VariantFixture, WtsQueueSwapIteratorsAndPushNoRetain)
 	RefProbe* p = new RefProbe(1);
 
 	a->push(p);
-	a->push(p, false);
+	EXPECT_EQ(2u, p->retainCount());
+	a->push(p, false);                // 第二份现有引用也移交给队列，不增加计数
 	EXPECT_EQ(2u, a->size());
-	EXPECT_EQ(3u, p->retainCount());   // 1 创建 + 1 自动 retain + 0
+	EXPECT_EQ(2u, p->retainCount());   // 队列各持有一份，false push 不额外 retain
 	EXPECT_TRUE(a->begin() != a->end());
 	EXPECT_TRUE(b->begin() == b->end());
 	WTSQueue::ConstIterator cit = ((const WTSQueue*)a)->begin();
@@ -652,13 +659,12 @@ TEST_F(L02VariantFixture, WtsQueueSwapIteratorsAndPushNoRetain)
 	EXPECT_EQ(2u, b->size());
 	EXPECT_TRUE(b->front(false) == p);
 
-	// b 持有 p 一次，a 持有 0 次（swap 后）
+	// b 持有两份已移交的引用，a 持有 0 份（swap 后）。
 	b->clear();
+	EXPECT_EQ(1, RefProbe::s_dtor);    // 两份队列引用均归还后对象析构。
 	a->clear();
 	a->release();
 	b->release();
-	p->release();
-	p->release();
 	EXPECT_EQ(1, RefProbe::s_dtor);
 	RefProbe::s_dtor = 0;
 }

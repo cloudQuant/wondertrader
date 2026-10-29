@@ -179,7 +179,7 @@ TEST_F(R162ReaderEdgeTest, R162RdmReaderHisTransBlocksWithMixedActionDates)
 		queues.size() * sizeof(WTSOrdQueStruct));
 	quePair._block = reinterpret_cast<HisOrdQueBlock*>(&quePair._buffer[0]);
 
-	// dtl/trans 入口用 _his_ordque_map 判命中（BUG-R74-001/R100-001），
+	// dtl/trans 入口用 _his_ordque_map 判命中（BUG-R74-001），
 	// 先占 key 让它们不再走文件装载，各自使用自己已挂好的块。
 	auto& dtlPair = reader._his_orddtl_map[key];
 	dtlPair._buffer.assign(sizeof(HisOrdDtlBlock), '\0');

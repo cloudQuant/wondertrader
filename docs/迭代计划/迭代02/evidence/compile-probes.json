@@ -1,0 +1,32 @@
+[
+  {
+    "label": "converter_char_probe",
+    "command": [
+      "/usr/bin/c++",
+      "-std=c++17",
+      "-fsyntax-only",
+      "-I/Users/yunjinqi/Documents/new_projects/wondertrader/src",
+      "-x",
+      "c++",
+      "-"
+    ],
+    "source": "#include <cstring>\n#include \"Share/Converter.hpp\"\nint main(){std::string value=\"42\"; return convert::from_str<int>(\"42\");}\n",
+    "returncode": 0,
+    "status": "COMPILE_PASS"
+  },
+  {
+    "label": "converter_string_probe",
+    "command": [
+      "/usr/bin/c++",
+      "-std=c++17",
+      "-fsyntax-only",
+      "-I/Users/yunjinqi/Documents/new_projects/wondertrader/src",
+      "-x",
+      "c++",
+      "-"
+    ],
+    "source": "#include <cstring>\n#include \"Share/Converter.hpp\"\nint main(){std::string value=\"42\"; return convert::from_str<int>(value);}\n",
+    "returncode": 1,
+    "status": "COMPILE_FAIL"
+  }
+]

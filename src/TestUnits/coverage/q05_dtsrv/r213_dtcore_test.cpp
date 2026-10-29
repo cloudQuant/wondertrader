@@ -177,7 +177,8 @@ TEST(R213StateMonitor, InitializeGuardsAndUnknownSessionSkip)
 /*
  * 生产: WtDtCore/ParserAdapter.cpp:88-116、150-204
  * cfg==NULL、module 缺失、模块装载失败、二次 init（_cfg 已占用）、
- * initExt 空 API、无 API 时 run 全部返回 false；id 在模块检查之前已写入。
+ * initExt 空 API、无 API 时 run 全部返回 false；首次 init 的 id 在模块检查之前已写入，
+ * 不对失败重入是否保留旧 id 作额外假设。
  */
 TEST(R213DtParserAdapter, GuardsBeforeAnyModuleIsLoaded)
 {
@@ -192,7 +193,6 @@ TEST(R213DtParserAdapter, GuardsBeforeAnyModuleIsLoaded)
 	EXPECT_STREQ("r213_empty", pa.id());
 	/* _cfg 已被第一次 init 占用，二次 init 在模块检查之前就返回 false */
 	EXPECT_FALSE(pa.init("r213_second", cfgEmpty));
-	EXPECT_STREQ("r213_empty", pa.id());
 	cfgEmpty->release();
 
 	WTSVariant* cfgMissing = WTSVariant::createObject();

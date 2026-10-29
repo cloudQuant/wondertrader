@@ -200,8 +200,20 @@ TEST_F(P08UftDispatchT1, T1OvernightPositionCloseable)
 	d._opentdate = 20240102;
 	lItem._details.emplace_back(d);
 
+	// 先走平多下单路径预占昨仓可用量，再注入完整成交回报。
+	const double closeQty = 100.0;
+	uint32_t closeId = mocker.stra_exit_long(kStk, 12.10, closeQty, false, 0);
+	ASSERT_NE(0u, closeId);
+	EXPECT_DOUBLE_EQ(0.0, lItem._preavail);
+	EXPECT_DOUBLE_EQ(closeQty, lItem.frozen());
+	const UftMocker::OrderInfoPtr closeOrder = mocker._orders.at(closeId);
+	ASSERT_TRUE(closeOrder->_isLong);
+	EXPECT_EQ(1u, closeOrder->_offset);
+	EXPECT_DOUBLE_EQ(closeQty, closeOrder->_left);
+	mocker.procTask();		// 处理下单生成的 entrust 任务
+
 	// 全部平昨 @12.10 -> 盈亏 (12.10-12.00)*100*1 = 10
-	mocker.on_trade(21, kStk, true, 1, 100, 12.10);
+	mocker.on_trade(closeId, kStk, true, 1, closeQty, 12.10);
 	EXPECT_DOUBLE_EQ(0.0, lItem.volume());
 	// 12.10-12.00 不可精确表示，用容差比较
 	EXPECT_NEAR(10.0, lItem._closeprofit, 1e-9);
@@ -210,6 +222,16 @@ TEST_F(P08UftDispatchT1, T1OvernightPositionCloseable)
 	EXPECT_DOUBLE_EQ(50.0, mocker._fund_info._total_fees);
 	// 昨仓全额可用，冻结为 0
 	EXPECT_DOUBLE_EQ(0.0, lItem.frozen());
+	EXPECT_DOUBLE_EQ(0.0, lItem.valid());
+
+	// 直接注入成交回报不推进订单状态；镜像 procOrder/on_tick 的完成处理，
+	// 将订单剩余量归零并移出活动订单表。
+	closeOrder->_left -= closeQty;
+	mocker.on_order(closeId, kStk, closeOrder->_isLong, closeOrder->_offset,
+		closeOrder->_total, closeOrder->_left, closeOrder->_price, false);
+	EXPECT_DOUBLE_EQ(0.0, closeOrder->_left);
+	mocker._orders.erase(closeId);
+	EXPECT_TRUE(mocker._orders.empty());
 
 	// 平昨下单在可用量足够时被受理
 	lItem._prevol = 30.0;
@@ -221,8 +243,8 @@ TEST_F(P08UftDispatchT1, T1OvernightPositionCloseable)
 	EXPECT_TRUE(ord->_isLong);
 	EXPECT_EQ(1u, ord->_offset);
 	EXPECT_DOUBLE_EQ(20.0, ord->_total);
-	// stra_exit_long 把订单标记为 _isLong=true，因此挂单量以正数累加（卖平方向不体现在 undone 上）
-	EXPECT_DOUBLE_EQ(20.0, mocker.stra_get_undone(kStk));
+	// 该订单尚未成交，是平多卖单，接口约定卖出未完成量为负数。
+	EXPECT_DOUBLE_EQ(-20.0, mocker.stra_get_undone(kStk));
 }
 
 // 撤单释放可用量：平多任务在 CM_CoverToday 与非 CM_CoverToday 下都归还总量

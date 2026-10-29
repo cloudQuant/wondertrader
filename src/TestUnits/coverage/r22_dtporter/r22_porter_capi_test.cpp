@@ -286,14 +286,13 @@ TEST_F(R22PorterCapiTest, CapiInitializeWithAbsentLogFileKeepsLoggerUninited)
 	EXPECT_FALSE(std::string(WtHelper::get_module_dir()).empty());
 }
 
-TEST_F(R22PorterCapiTest, CreateExtDumperIsIdempotentAndReturnsTrue)
+TEST_F(R22PorterCapiTest, CreateExtDumpersWithUniqueIdsAndDirectDumperCallback)
 {
-	EXPECT_TRUE(create_ext_dumper("r22_dup_dump"));
-	// 同一 id 第二次：_dumpers[id] 被覆盖，但 add_ext_dumper 已经登记过旧指针，
-	// 函数本身依旧返回 true（WtDtRunner.cpp:361-370）
-	EXPECT_TRUE(create_ext_dumper("r22_dup_dump"));
+	EXPECT_TRUE(create_ext_dumper("r22_primary_dump"));
+	EXPECT_TRUE(create_ext_dumper("r22_secondary_dump"));
 
-	ExpDumper probe("r22_dup_dump");
+	// 局部 probe 只检查 ExpDumper 直达全局回调的路径，不证明上面新建的实例被派发。
+	ExpDumper probe("r22_primary_dump");
 	WTSBarStruct bar;
 	memset(&bar, 0, sizeof(bar));
 	register_extended_dumper(bar_g, NULL);

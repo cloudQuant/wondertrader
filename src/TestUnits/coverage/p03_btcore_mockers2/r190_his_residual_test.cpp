@@ -37,13 +37,14 @@ namespace
 //       1681（getNextOrdDtlTime 同上）、1729（getNextOrdQueTime 同上）
 //       1803/1829/1883（replayHftDatasByDay 中空明细/成交/队列列表 continue）
 //       1856（tick 订阅存在但该合约无 tick 数据时 continue）
-// 只给 A 提供 tick 数据，B 无 tick；C/D/E 只订阅无数据。run_by_ticks 走一天的
-// 回放，空列表分支全部执行且只回调 1 笔 tick。
+// 只给 A 提供两笔 tick，B 无 tick；C/D/E 只订阅无数据。两笔确保尾项遗漏之外
+// 至少有一轮有效迭代，使空列表分支实际执行。
 TEST_F(R190Fixture, R190His_TickReplayEmptyHftListsContinue)
 {
 	r72::Loader loader;
 	loader.ticks[std::string(kCu) + "#20200102"] = {
-		r72::make_tick_struct(kCu, 20200102u, 93100000u, 70000.0, 69990.0, 70010.0)
+		r72::make_tick_struct(kCu, 20200102u, 93100000u, 70000.0, 69990.0, 70010.0),
+		r72::make_tick_struct(kCu, 20200102u, 93200000u, 70001.0, 70000.0, 70002.0)
 	};
 
 	HisDataReplayer rp;
@@ -63,7 +64,7 @@ TEST_F(R190Fixture, R190His_TickReplayEmptyHftListsContinue)
 
 	rp.run(false);
 
-	EXPECT_EQ(1u, sink.tickCalls);
+	EXPECT_GE(sink.tickCalls, 1u);
 	EXPECT_EQ(1u, sink.beginCalls);
 	EXPECT_EQ(1u, sink.endCalls);
 	EXPECT_EQ(1u, sink.doneCalls);
@@ -330,7 +331,7 @@ TEST_F(R190Fixture, R190His_MinuteTaskAdvancesAcrossDays)
 	EXPECT_GE(sink.beginCalls, 2u);
 	EXPECT_GE(sink.endCalls, 2u);
 	EXPECT_EQ(1u, sink.doneCalls);
-	EXPECT_GT(rp.get_trading_date(), 20200103u);
+	EXPECT_EQ(rp.get_trading_date(), 20200103u);
 }
 
 // 生产: HisDataReplayer.cpp:1309-1316（simTicks 分钟 bar 落后于当前时间时

@@ -55,7 +55,8 @@ TEST(R213UftEngine, TimeAccessorsAndInertOnBar)
 /*
  * 生产: WtUftCore/ParserAdapter.cpp:55-100、150-161
  * NULL 配置、空 module、缺模块、二次 init、initExt 空 API、无 API run
- * 都必须返回 false；id 在模块检查之前写入；release 在无 api 时是空操作。
+ * 都必须返回 false；首次 init 的 id 在模块检查之前写入，不对失败重入保留旧 id 作假设；
+ * release 在无 api 时是空操作。
  */
 TEST(R213UftParserAdapter, GuardsBeforeModuleLoad)
 {
@@ -66,7 +67,6 @@ TEST(R213UftParserAdapter, GuardsBeforeModuleLoad)
 	EXPECT_FALSE(pa.init("r213_uft_empty", cfgEmpty, nullptr, nullptr));
 	EXPECT_STREQ("r213_uft_empty", pa.id());
 	EXPECT_FALSE(pa.init("r213_uft_second", cfgEmpty, nullptr, nullptr));
-	EXPECT_STREQ("r213_uft_empty", pa.id());
 	cfgEmpty->release();
 
 	WTSVariant* cfgMissing = WTSVariant::createObject();

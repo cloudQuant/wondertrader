@@ -123,6 +123,13 @@ public:
     virtual void handleSymbolList(const WTSArray* aySymbols) override { (void)aySymbols; }
 };
 
+/// registerSpi() 已调用但数据管理器明确为空的 sink，用于测试回调入口的判空保护。
+class OptNullBaseDataMgrSink : public OptParserSink
+{
+public:
+    IBaseDataMgr* getBaseDataMgr() override { ++n_bdmgr_; return NULL; }
+};
+
 inline void fill_basic(CThostFtdcDepthMarketDataField& f)
 {
     memset(&f, 0, sizeof(f));
@@ -238,32 +245,29 @@ TEST_F(T2ParserCTPOptTest, front_connected_and_close_events)
     EXPECT_EQ((int)WPE_Logout, sink_.last_event_);
 }
 
-TEST_F(T2ParserCTPOptTest, heartbeat_and_error_callbacks_do_not_reach_core)
+TEST_F(T2ParserCTPOptTest, heartbeat_warning_logs_without_event)
 {
     uint32_t n_before = sink_.n_events_;
     parser_.OnHeartBeatWarning(12);
     EXPECT_EQ(1u, sink_.n_logs_);
     EXPECT_NE(std::string::npos, sink_.last_log_.find("Heartbeating"));
     EXPECT_EQ(n_before, sink_.n_events_);
+}
 
-    // IsErrorRspInfo 恒返回 false（ParserCTPOpt.cpp:402），所以 OnRspError 是个空操作：
-    // 柜台的错误码/错误文本既不进日志也不进事件
+TEST_F(T2ParserCTPOptTest, error_callbacks_are_safe_and_do_not_publish_quotes)
+{
     CThostFtdcRspInfoField err;
     memset(&err, 0, sizeof(err));
     err.ErrorID = 404;
     strcpy(err.ErrorMsg, "Instrument not found");
-    uint32_t logs_before = sink_.n_logs_;
-    parser_.OnRspError(&err, 7, true);
-    EXPECT_EQ(logs_before, sink_.n_logs_);
-    EXPECT_EQ(n_before, sink_.n_events_);
+    EXPECT_NO_THROW(parser_.OnRspError(&err, 7, true));
 
     CThostFtdcSpecificInstrumentField si;
     memset(&si, 0, sizeof(si));
     strcpy(si.InstrumentID, "m2401");
-    parser_.OnRspSubMarketData(&si, &err, 8, true);
-    parser_.OnRspSubMarketData(&si, NULL, 8, true);
-    parser_.OnRspUnSubMarketData(&si, &err, 9, true);
-    EXPECT_EQ(logs_before, sink_.n_logs_);
+    EXPECT_NO_THROW(parser_.OnRspSubMarketData(&si, &err, 8, true));
+    EXPECT_NO_THROW(parser_.OnRspSubMarketData(&si, NULL, 8, true));
+    EXPECT_NO_THROW(parser_.OnRspUnSubMarketData(&si, &err, 9, true));
     EXPECT_EQ(0u, sink_.n_quotes_);
 }
 
@@ -278,13 +282,16 @@ TEST_F(T2ParserCTPOptTest, login_rsp_without_is_last_is_ignored)
     EXPECT_EQ(0u, sink_.n_events_);
 }
 
-TEST_F(T2ParserCTPOptTest, depth_tick_without_datamgr_is_dropped)
+TEST_F(T2ParserCTPOptTest, depth_tick_guards_null_datamgr_and_missing_contract)
 {
     CThostFtdcDepthMarketDataField f;
     fill_basic(f);
-    ParserCTPOpt bare;                        // 从未 registerSpi => m_pBaseDataMgr==NULL
-    EXPECT_NO_THROW(bare.OnRtnDepthMarketData(&f));
-    EXPECT_EQ(0u, sink_.n_quotes_);
+    ParserCTPOpt nullMgrParser;
+    OptNullBaseDataMgrSink nullMgrSink;
+    nullMgrParser.registerSpi(&nullMgrSink);  // 已注册 SPI，但 manager 明确为 NULL
+    ASSERT_EQ(1u, nullMgrSink.n_bdmgr_);
+    EXPECT_NO_THROW(nullMgrParser.OnRtnDepthMarketData(&f));
+    EXPECT_EQ(0u, nullMgrSink.n_quotes_);
 
     // 有 datamgr 但合约未登记 => getContract 返回 NULL 后直接 return
     strcpy(f.InstrumentID, "zz9999");

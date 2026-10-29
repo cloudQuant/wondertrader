@@ -168,13 +168,14 @@ TEST_F(L05HelperBarTest, StoreAndReadBarsRoundtrip)
 	}
 }
 
-TEST_F(L05HelperBarTest, StoreBarsSwallowsFileCreationFailure)
+TEST_F(L05HelperBarTest, StoreBarsReportsMissingParentDirectoryFailure)
 {
-	// 目录不存在时 BoostFile 建文件失败，但函数仍返回 true —— 见缺陷 L05-002
 	std::vector<WTSBarStruct> bars{ make_day_bar(20200101, 100) };
-	const std::string bad = (_root / "no_such_dir" / "x.dsb").string();
-	EXPECT_TRUE(store_bars(bad.c_str(), bars.data(), (int)bars.size(), "d", log_cb));
-	EXPECT_FALSE(std::filesystem::exists(_root / "no_such_dir" / "x.dsb"));
+	const std::filesystem::path missing_dir = _root / "no_such_dir";
+	ASSERT_FALSE(std::filesystem::exists(missing_dir));
+	const std::filesystem::path output = missing_dir / "x.dsb";
+	EXPECT_FALSE(store_bars(output.string().c_str(), bars.data(), (int)bars.size(), "d", NULL));
+	EXPECT_FALSE(std::filesystem::exists(output));
 }
 
 TEST_F(L05HelperBarTest, ReadBarsHeaderValidation)

@@ -144,10 +144,14 @@ TEST(r12_charconv_encoding_helper, isutf8_rejects_broken_sequences)
 	// 0xFE/0xFF 首字节非法
 	unsigned char fe[] = { 0xFE, 0x80 };
 	EXPECT_FALSE(EncodingHelper::isUtf8(fe, sizeof(fe)));
-	// 截断的多字节序列：长度不够，末尾读到 '\0' 之外的越界位置由 len 限制，
-	// 循环按 len 结束前的续字节判定为不合法
-	unsigned char truncated[] = { 0xF0, 0x9F, 0x98 };
-	EXPECT_FALSE(EncodingHelper::isUtf8(truncated, sizeof(truncated)));
+}
+
+TEST(r12_charconv_encoding_helper, isutf8_rejects_sequence_truncated_by_logical_length)
+{
+	// 物理缓冲区含完整合法四字节序列；只把前三字节作为输入，长度边界处应判截断。
+	// 额外的有效续字节充当 canary，避免当前实现忽略 len 时读取越过物理分配。
+	unsigned char truncated_with_canary[] = { 0xF0, 0x9F, 0x98, 0x80 };
+	EXPECT_FALSE(EncodingHelper::isUtf8(truncated_with_canary, 3));
 }
 
 TEST(r12_charconv_url, encode_decode_round_trip_on_ascii_subset)

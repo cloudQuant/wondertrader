@@ -1,134 +1,92 @@
-# T26_ctploader（CTP 数据采集器 TraderSpi/CTPLoader）疑似缺陷
+# T26 CTPLoader 缺陷复核（2026-10-29）
 
-> 状态一律「待审核」；本迭代不修改 `src/**`。行号以 dev 分支当前文件为准。
-> 「实测」= 在 `CoverageTests_t_CTPLoader` 里执行过；「嫌疑」= 仅代码级证据，不下结论。
+本轮只核查该台账各项涉及的源码、现有测试和本机既有测试二进制；未修改生产代码或测试。`CoverageTests_t_CTPLoader` 的 3 条启用用例均通过：`t26_ctploader_flow.incremental_login_reloads_commodities_and_contracts`、`t26_ctploader_flow.last_instrument_response_with_fees_switch_queues_both_rate_requests`、`t26_ctploader_dump.margin_response_dumps_fees_to_fixed_relative_name_with_product_fallback`。队列用例的真实名字是单数 `switch_queues`；原先使用的 `switches_queues` 过滤名匹配不到用例（`NORUN`），已用正确名称重跑为 `PASS`。所有 `DISABLED_` 用例本轮未执行。测试通过只表示当前测试所断言的行为成立，不证明符合业务契约。
 
-## BUG-T26-001
+## BUG-T26-001 — worker 空队列时析构无法唤醒
+- 状态: 已撤回（迭代02：NOT_BUG，原产品主张不成立）
 
-- 状态: 待审核
-- 严重级别: Major
-- 模块/文件: `src/CTPLoader/TraderSpi.cpp`（`AppendQuery` worker L239-272，尤其 L243-246）+ `src/CTPLoader/TraderSpi.h`（析构 L24-29）
-- 相关测试: `src/TestUnits/coverage/t_CTPLoader/t26_ctploader_flow_test.cpp` → `DISABLED_t26_ctploader_flow_hang.destructor_joins_forever_after_queue_drained`
-- 输入/前置条件: 触发过一次 `AppendQuery`（登录后队列被 worker 排空），随后析构 `CTraderSpi`。
-- 期望行为: `_stopped=true` 后 worker 应在一个睡眠片内退出外层循环，`join()` 正常返回。
-- 实际行为: worker 的内层 `while (_queries.empty()) { sleep_for(10ms); }` **不回看 `_stopped`**；队列排空后它永远停在空转里，析构的 `join()` 永不返回。实测打开该 DISABLED 用例 25 秒不退出（kill -9，rc=137）。
-- 复现步骤: `--gtest_also_run_disabled_tests --gtest_filter=DISABLED_t26_ctploader_flow_hang.*` 单跑。
-- 影响范围: 生产形态下 loader 以 `exit(0)` 收尾、从不调析构，所以日常不炸；但只要 CTraderSpi 被嵌进长命宿主（测试/复用/未来改造为非 exit 收尾），析构即挂死。本轮所有触发队列的启用用例都被迫「泄漏 spi 不析构」，就是这条的绕行成本。
-- 备注: 修复方向：内层空转改 `while (!_stopped && _queries.empty())`，并给 `empty()` 加锁/原子化（见 BUG-T26-010）。
+- 复核状态：`条件性生命周期缺陷；常规一次性 exit 路径未证为受影响`。
+- 证据：`TraderSpi.cpp:239-271` 创建 worker；内层 `while (_queries.empty())`（`:243-246`）没有检查 `_stopped`。析构只设置 `_stopped=true` 并 join（`TraderSpi.h:24-29`），空队列时线程不会回到外层循环检查标记；`_stopped` 本身也是跨析构线程读写的普通 `bool`，存在同步缺口。
+- 边界：`DISABLED_t26_ctploader_flow_hang.destructor_joins_forever_after_queue_drained` 本轮未运行。代码主流程使用 `exit(0)` 的说法不等于已验证所有进程/宿主生命周期；风险限于 worker 已启动后走普通析构的使用方式。
+- 修复方向：将等待改为有谓词的条件变量/可中断等待，在设置停止标记时通知；同步保护队列状态。不要用单纯增加析构超时来掩盖未收尾线程。
 
-## BUG-T26-002
+## BUG-T26-002 — `fillCzceCode` 对不含数字的输入越界扫描
 
-- 状态: 待审核
-- 严重级别: Major
-- 模块/文件: `src/CTPLoader/TraderSpi.cpp`（`fillCzceCode` L318-324）
-- 相关测试: 同文件 → `DISABLED_t26_ctploader_flow_crash.fill_czce_code_on_letters_only_scans_past_terminator`
-- 输入/前置条件: 任何不含数字的合约代码进入 `fillCzceCode`（例如异常/新形态的 CZCE 代码 "SRCS"）。
-- 期望行为: 找不到数字前缀时应判 `'\0'` 终止并原样返回/记日志。
-- 实际行为: `for(;;) if (isdigit(code[pid_len++])) break;` 不检查字符串结束符，越过 `'\0'` 继续越界读，直到在进程内存里**碰巧**撞到某个数字字节。实测本机 2ms 返回、拼出的是越界垃圾（不崩，但结果不可复现、不可断言）；页边界布局不同即段错误。
-- 复现步骤: 开启 DISABLED 用例单跑（建议只在一次性沙箱里）。
-- 影响范围: 当前 CZCE 合约码惯例都带数字，正常柜台回报不命中；一旦上游数据异常（人工夹具、新品种、乱码回报）就是未定义行为，且**锁存的是越界读来的十年位**，污染同进程后续全部 CZCE 代码换算。
-- 备注: 修复方向：循环判 `code[pid_len]=='\0'` 提前返回。
+- 复核状态：`条件性输入健壮性缺陷；无效代码是否可由柜台/产品输入尚待证`。
+- 证据：`TraderSpi.cpp:318-324` 的 `for(;;)` 递增 `pid_len` 并调用 `isdigit(code[pid_len++])`，不在 `\0` 处结束；输入没有数字时会越过字符串边界。
+- 边界：`DISABLED_t26_ctploader_flow_crash.fill_czce_code_on_letters_only_scans_past_terminator` 本轮未运行。`"SRCS"` 是人工构造的非典型合约代码；本地 CTP 头文件未证明柜台可能发出此形状，因此不能外推为常规 CZCE 回报必现崩溃。
+- 修复方向：循环检测 `\0`，若找不到数字则安全返回错误/原码；测试覆盖含数字合法代码及无数字、空串输入，不要求进程崩溃才算证据。
 
-## BUG-T26-003
+## BUG-T26-003 — 期权 JSON 写入嵌套、读取却访问顶层
 
-- 状态: 待审核
-- 严重级别: Major
-- 模块/文件: `src/CTPLoader/TraderSpi.cpp`（`LoadFromJson` L662-668 读侧 vs `DumpToJson` L807-813 写侧）
-- 相关测试: `t26_ctploader_flow_test.cpp` → `t26_ctploader_flow.incremental_login_reloads_commodities_and_contracts`
-- 输入/前置条件: 增量模式（INCREMENTAL=true）用本工具自己 dump 出来的 contracts.json 回读一条期权合约。
-- 期望行为: `DumpToJson` 把期权四件套嵌在 `"option":{...}` 子对象里写；`LoadFromJson` 也应在该子对象里读回 optiontype/underlying/strikeprice/underlyingscale。
-- 实际行为: 读侧只判 `pCont->has("option")`，随后全部从**合约对象顶层**平铺取值（`pCont->getUInt32("optiontype")` 等）。嵌套键读不到 → optType 落 0（OT_None）、underlying 落 ""、scale 落 0；「dump→增量回读」往返把期权信息整体清零。用例逐字段钉死了这四个值。
-- 复现步骤: 见 f6 夹具 JSON（option 块嵌套）；跑该用例即可看到读回值恒为默认。
-- 影响范围: 增量刷新流程里所有商品/股指期权合约的期权属性静默丢失；下游按 OT_None 把它当期货处理。
-- 备注: 修复方向：`pCont->get("option")` 拿到子对象后在其上取值。
+- 复核状态：`确认的 dump/增量回读往返缺陷`。
+- 证据：`DumpToJson()` 将期权字段写入 `option` 对象（`TraderSpi.cpp:801-814`）；`LoadFromJson()` 只检查该对象存在，却从合约顶层取 `optiontype/underlying/underlyingscale`（`:662-668`）。修正 `incremental_login_reloads_commodities_and_contracts` 的现状式断言后，单次定向运行 FAIL：输入与 dump 结构一致，类型、标的及 scale 实际为默认值，预期与输入一致。
+- 修复方向：取得 `option` 子对象并在其上读取各字段；保留无 `option` 合约的默认行为。测试应检查嵌套期权四字段往返一致。
 
-## BUG-T26-004
+## BUG-T26-004 — strike price 读取了 product 键
 
-- 状态: 待审核
-- 严重级别: Major
-- 模块/文件: `src/CTPLoader/TraderSpi.cpp`（`LoadFromJson` L666）
-- 相关测试: 同 f6 用例（`EXPECT_NEAR(0.0, cont.m_strikePrice, 1e-9)` 即此钉）
-- 输入/前置条件: contracts.json 中合约 `product` 为品种代码字符串（如 "SR"），期权含 `strikeprice`。
-- 期望行为: `contract.m_strStrikePrice`（应为 m_strikePrice）读 `"strikeprice"` 键。
-- 实际行为: `contract.m_strikePrice = pCont->getDouble("product");` —— 键名写错，把**品种代码字符串**经 `asDouble→strtod` 转成执行价；品种码非数字时静默为 0，数字品种名会得到完全无关的值。
-- 复现步骤: f6 用例（"product":"SR" → strike 0，文件里 "strikeprice":5700 被无视）。
-- 影响范围: 与 003 同源：增量回读执行价必错；若某品种代码恰以数字开头（如数币类），错误值会伪装成合法执行价，比 0 更难发现。
-- 备注: 单行修复；改键名即可。
+- 复核状态：`确认的独立字段映射缺陷；与 T26-003 同一往返路径但不重复`。
+- 证据：`TraderSpi.cpp:666` 把 `getDouble("product")` 赋给 `m_strikePrice`，而 dump 将执行价写为 `option.strikeprice`（`:807-813`）。`incremental_login_reloads_commodities_and_contracts` 的 `"product":"SR"`、`"strikeprice":5700` fixture 读回 strike 为 0。即使修复 T26-003 的子对象读取，这个错误键仍会使 strike 读错。
+- 修复方向：在 option 子对象上读取 `strikeprice`，测试断言其值与写入值相同；不要把当前 0 当成产品默认契约。
 
-## BUG-T26-005
+## BUG-T26-005 — 增量回读丢失 altcode，费率查询字段还存在独立条件错误
 
-- 状态: 待审核
-- 严重级别: Major
-- 模块/文件: `src/CTPLoader/TraderSpi.cpp`（`LoadFromJson` L651-655 无 m_strAltCode 赋值；消费侧 L201-202、L221）
-- 相关测试: 同 f6 用例（`EXPECT_TRUE(cont.m_strAltCode.empty())` 钉住现状）
-- 输入/前置条件: 增量回读一条 CZCE 合约（dump 侧 L786 明明写了 `"altcode":"SR510"`）。
-- 期望行为: `contract.m_strAltCode = pCont->getCString("altcode")`，保持查询柜台时用 CTP 三位原码。
-- 实际行为: 装载代码根本不读 altcode。回读后 altCode 为空 → `ReqQryCommission/ReqQryMargin` 的 `InstrumentID` 取换算后四位码 "SR2510"（L201-202 的三元取空侧），CZCE 柜台按原码 "SR510" 认单——**增量模式下所有 CZCE 合约的费率/保证金查询会查不到数据**（静默空回报，不报错）。
-- 复现步骤: f6 用例看 `m_strAltCode`；再对照 `ReqQryCommission` 拼 InstrumentID 的分支。
-- 影响范围: 只在「增量 + QRYFEES + CZCE」组合命中，但一旦命中是整体性缺数，不是个别合约。
-- 备注: 修复方向：装载时读回 altcode；并建议装载后按「code/alt 两键」分别登记以兼容老产物。
+- 复核状态：`确认的 JSON 字段丢失；下游错码结果依赖 CTP 接受的合约码`。
+- 证据：dump 在 `TraderSpi.cpp:784-789` 写入 `altcode`，contract 装载 `:651-676` 没有读取它。`incremental_login_reloads_commodities_and_contracts` 输入 `altcode=SR510`，读回为空。之后 commission 查询 `:197-204` 和 margin 查询 `:217-225` 选择 code/altcode；若空 altcode 导致发出展开后的 `SR2510`，是否被柜台拒绝需以实际接口/回报验证。
+- 额外独立问题：commission 查询的 `if(cInfo.m_strAltCode.empty())`（`:201`）包住了三元选码的 `strcpy`；因此 altcode **非空时反而不会填写 `InstrumentID`**。只补 JSON 读取并不能修复 commission 请求。margin 分支无此外围条件。
+- 修复方向：装载 `altcode`；移除 commission 处错误的外围条件并统一选码；分别断言有 altcode/无 altcode 时 commission 和 margin 请求的 `InstrumentID`。不要在没有柜台响应证据时断言“所有 CZCE 费率查询必然空回报”。
 
-## BUG-T26-006
+## BUG-T26-006 — 相对 feesfile 配置被忽略
 
-- 状态: 待审核
-- 严重级别: Minor
-- 模块/文件: `src/CTPLoader/TraderSpi.cpp`（`DumpFees` L711-721）
-- 相关测试: `t26_ctploader_dump_test.cpp` → `t26_ctploader_dump.margin_response_dumps_fees_to_fixed_relative_name_with_product_fallback`
-- 输入/前置条件: 配置 `feesfile=custom_fees.json`（相对名），QRYFEES 流程走终局 dump。
-- 期望行为: 相对 FEES_FILE 应拼到 SAVEPATH 下并**保留配置的文件名**。
-- 实际行为: 相对分支硬编码 `path = SAVEPATH; path += "fees.json";`，`FEES_FILE` 的相对名被丢弃（绝对分支 L713-716 才尊重名字）。用例钉了两侧：`fees.json` 存在、`custom_fees.json` 不存在。
-- 复现步骤: 见该 fork 用例。
-- 影响范围: 配置项 `feesfile` 半失效；同目录跑两个不同配置的 loader 实例会互相覆盖 fees.json。
-- 备注: 与 `CTPLoader.cpp` L104/L146/L176 读取该配置的意图不一致，属配置契约缺陷。
+- 复核状态：`确认的配置行为不一致`。
+- 证据：配置入口将 `feesfile` 读入 `FEES_FILE`（`CTPLoader.cpp:104,146,176`）；`DumpFees()` 仅在绝对路径分支使用该值，普通相对路径却固定写 `SAVEPATH/fees.json`（`TraderSpi.cpp:711-721`）。修正后的 `margin_response_dumps_fees_to_configured_relative_name_with_product_fallback` 定向运行 FAIL：测试配置 `custom_fees.json`，实际生成 `fees.json`，配置名文件不存在。
+- 修复方向：将相对 `FEES_FILE` 拼到 `SAVEPATH`，保留文件名；测试同时覆盖相对、绝对配置，并避免只检查默认名。
 
-## BUG-T26-007
+## BUG-T26-007 — DumpFees 在费率键缺失时解引用 end iterator
 
-- 状态: 待审核
-- 严重级别: Major
-- 模块/文件: `src/CTPLoader/TraderSpi.cpp`（`DumpFees` L694-699）
-- 相关测试: `t26_ctploader_dump_test.cpp` → `DISABLED_t26_ctploader_dump_crash.fees_dump_of_unknown_margin_code_dereferences_end_iterator`
-- 输入/前置条件: `_margins` 里存在一个「`_contracts` 没有、`_fees` 既无代码键也无品种键」的合约码（柜台回报了保证金但合约表缺行/品种费率缺失）。
-- 期望行为: 两次 find 皆 miss 时跳过该码或记 error。
-- 实际行为: 无 end() 判定直接 `const FeeInfo& fInfo = it->second;` —— 解引用 `_fees.end()`，UB。实测本机不崩但落盘的费率行取自越界内存；且该路径终点是 `exit(0)`，宿主进程直接被杀。DISABLED 的原因就是「崩溃形态与落盘值都不可证伪」。
-- 复现步骤: 开启 DISABLED 用例（一次性沙箱；注意它必然以 exit(0) 结束进程）。
-- 影响范围: 增量/全量场景里保证金与费率回报顺序天然不同步（margin 先回、fee 未回）时完全可能触发；写出的是「看似正常的垃圾费率文件」。
-- 备注: 修复方向：miss 时 `continue`；另注意 L694 `_contracts[rawCode]` 的 operator[] 会顺手给合约表插空行（次要，一并评审）。
+- 复核状态：`静态条件风险成立；测试夹具不代表正常查询流，异步收尾前提也未验证`。
+- 证据：`DumpFees()` 从 `_fees` 按 raw code 查询，再按品种查询；两次均 miss 后仍解引用 `it->second`（`TraderSpi.cpp:694-700`）。`_contracts[rawCode]` 还会在 key 不存在时插入默认合约。`DISABLED_t26_ctploader_dump_crash.fees_dump_of_unknown_margin_code_dereferences_end_iterator` 通过直接塞入 `ZZ99` 保证两张表都缺项；本轮未运行。测试源码 `t26_ctploader_dump_test.cpp:320-323` 的注释把它误标为 BUG-T26-003，应改成 T26-007。
+- 证据边界：测试人为制造了 `_margins` 中存在、但没有正常查询来源的 `ZZ99`，不能证明该输入由正常 CTP 流程产生；也没有本轮柜台证据说明真实费率缺项的回报形状。发送队列清空与异步响应收齐的区别单列为 BUG-T26-011，避免把两种根因混为一项。
+- 修复方向：查找不到 fee 时明确跳过或记录错误，不解引用 `end()`；用已登记合约、缺少 instrument fee 的有效响应夹具测试；以请求/响应计数或每请求终态决定何时落盘，并验证回报乱序时不会提前退出。
 
-## BUG-T26-008
+## BUG-T26-008 — `_trading_day` 构造时未初始化
 
-- 状态: 待审核
-- 严重级别: Minor
-- 模块/文件: `src/CTPLoader/TraderSpi.h`（L76 `int _trading_day;` 无初始化）+ `src/CTPLoader/TraderSpi.cpp`（L423、L442 使用）
-- 相关测试: 本轮无法为「未初始化值」写可证伪断言（读栈垃圾结果随机）；CZCE 族用例（i13/i14）全部先走替身登录把该值钉成 20251027 再断言，正是绕开此洞
-- 输入/前置条件: 不调用 `OnRspUserLogin`（L171 是 `_trading_day` 唯一写点）就收到 CZCE 合约回报。
-- 期望行为: 构造函数初始化 `_trading_day`（或在未登录时拒绝换算）。
-- 实际行为: 构造函数只初始化 `_stopped(false)`；未登录时 `fillCzceCode(code, _trading_day)` 拿不确定值，十年位/闰十年分支随机。
-- 复现步骤: 代码级：`TraderSpi.h` L23 构造 + L76 声明对照 L423 使用点。
-- 影响范围: 厂商回调顺序保证「先登录后回报」，正常链路不命中；但顺序假设一旦被流式回放/单测打破，产出的是难复现的错码。
-- 备注: 嫌疑级（未证明生产环境可达），修复成本一个等号。
+- 状态: 已撤回（迭代02：NOT_BUG，原产品主张不成立）
 
-## BUG-T26-009
+- 复核状态：`非标准调用顺序下的条件风险`。
+- 证据：`TraderSpi.h:76` 声明 `_trading_day` 未设初值，登录回调在 `TraderSpi.cpp:171` 写入；CZCE 合约代码和期权 underlying 转换分别在 `:423`、`:442` 使用它。
+- 边界：正常登录成功后才调用 `ReqQryInstrument()`（`:173-176`），因此正常链路先写后读；本轮没有证据显示柜台在登录前发合约回报。不能把普通运行的随机年份输出作为已复现故障。
+- 修复方向：初始化为 0，并在日期未就绪时拒绝/延迟 CZCE 日期换算；对未登录回调测试安全失败。
 
-- 状态: 待审核
-- 严重级别: Minor
-- 模块/文件: `src/CTPLoader/TraderSpi.cpp`（`LoadFromJson` L637-642、L679）
-- 相关测试: f6 用例走的是同一段（行为可跑通，泄漏本身不可断言）
-- 输入/前置条件: 增量装载、contracts.json 存在。
-- 期望行为: 文件只 load 一次；每个 `load_from_file` 返回的对象恰好 `release()` 一次。
-- 实际行为: L639 外层 `root` 判 NULL 后，L642 又对**同一路径再 load 一次**并以内层同名 `root` 遮蔽；L679 `root->release()` 释放的是内层，外层那份整对象（含子节点图）从未释放 → 每次增量装载泄漏一棵配置树。二次 load 也白白多一次磁盘解析。
-- 复现步骤: 代码级复读；如评审要证据，可挂 instruments/leak 工具跑一次 f6 场景。
-- 影响范围: loader 进程短命（dump 完 exit），实害有限；但和 BUG-T26-001 一样，属于「宿主一复用就暴露」的债。
-- 备注: 嫌疑级（未做运行时泄漏计量）；修复方向：删掉 L642 的重复 load。
 
-## BUG-T26-010
+- 迭代02复核: NOT_BUG。_trading_day 确实没有构造初值，但当前生产链先在成功登录回调写入交易日，再调用 ReqQryInstrument；合约回调通过该请求到达，CZCE 日期换算因此在正常链路中先写后读。未发现仓库生产路径在该赋值前读取它。
+- 迭代02依据: [逐条裁定与主代理修订](../../迭代02/缺陷裁定总表.md)。原记录保留作为历史，未声称产品已修复。
+## BUG-T26-009 — LoadFromJson 重复 load 且外层 root 未释放
 
-- 状态: 待审核
-- 严重级别: Major
-- 模块/文件: `src/CTPLoader/TraderSpi.cpp`（`AppendQuery` L230-273：worker 侧 L243 `_queries.empty()`、L258 `front()`、L269 `_queries.size()` 全部**无锁**读；主线程侧 L233-235 emplace 持 `_mtx`）
-- 相关测试: 本轮启用用例对「入列后等 worker 消费」的轮询等待（wait_for + 消费计数）即是与此竞态共存的现实成本；竞态本身无启用断言（无法稳定证伪）
-- 输入/前置条件: worker 空转期间主线程 `AppendQuery` emplace（QRYFEES 流程：bIsLast 循环连推两条请求必命中该窗口）。
-- 期望行为: 对 `std::queue` 的多线程读写全部在同一互斥量下（或改无锁队列/条件变量）。
-- 实际行为: `std::queue/std::deque` 非线程安全；worker 无锁读 empty()/front() 与持锁 emplace 并发，ARM64 弱内存序下可读到「size 已更新、节点数据未可见」的中间态。代码级竞态（data race 即 UB）；本 lane 在 stress 中复现过同类形态的堆破坏（发生在夹具的 ostringstream 上，非此队列本身，故此处只登记为嫌疑）。
-- 复现步骤: 静态复读 L230-273；动态复现需 TSan 构建，本迭代未授权。
-- 影响范围: 与 001 同函数：轻则任务丢失/重排，重则野指针调用。修 001 时一并修最划算。
-- 备注: 嫌疑位置明确（L243/L258/L269），不下「已崩」结论。
+- 复核状态：`源码可确认的短生命周期内存泄漏；运行时泄漏未测`。
+- 证据：合约文件在 `TraderSpi.cpp:639` load 到外层 `root`，随后 `:642` 对相同路径再次 load 并以同名局部变量遮蔽；循环使用并在 `:679` release 的是内层对象。外层对象丢失引用，无法 release。
+- 影响边界：每次增量装载多解析一次文件并泄漏一棵配置树；loader 的复用次数/运行时间决定实际影响，本轮没有 Instruments/Leaks 计量。
+- 修复方向：使用 `:639` 得到的 `root` 遍历，移除重复 load，确保每个返回对象恰好 release 一次。
+
+## BUG-T26-010 — 查询队列读写同步不一致
+
+- 复核状态：`确认的线程安全缺陷；本轮未用 TSan 或压力测试复现`。
+- 证据：生产者 `AppendQuery()` 在 push 时加 `_mtx`（`TraderSpi.cpp:230-235`）；worker 对 `empty()/front()/size()` 无锁读取（`:243,258,269`），只在 pop 时加锁（`:261-265`）。`std::queue` 不是并发容器，同一对象读写缺少共同同步会构成数据竞争。`last_instrument_response_with_fees_switch_queues_both_rate_requests` 本轮 `PASS`，只验证请求最终被 stub 观察到，不验证并发无竞态。
+- 修复方向：队列的所有读写都在同一锁下，或改用条件变量队列；锁内只取出 task，执行 API callback/request 时释放锁，避免扩大临界区。补 TSan/并发压力验证。移除原稿中“ARM 弱内存一定读到中间态”和 ostringstream 堆破坏的因果表述：没有证据将这些现象归因于该队列。
+
+## BUG-T26-011 — 发送队列清空被当作费率响应全部结束
+
+- 复核状态：`异步收尾候选；源码判据明确，厂商响应时序与动态结果待验证`。
+- 证据：`OnRspQryInstrument(bIsLast=true)` 将 commission 和 margin 查询任务排入 `_queries`（`TraderSpi.cpp:527-540`）。worker 消费并 pop 后 `_queries` 可为空，但这只说明请求发送任务已耗尽。两个异步回调 `OnRspQryInstrumentCommissionRate`、`OnRspQryInstrumentMarginRate` 随后只要看到 `_queries.empty() && QRYFEES` 就各自执行 `DumpToJson(); DumpFees(); exit(0)`（`:550-575,578-592`）。因此某个费率回调到达时发送队列虽空、其他请求仍可能处于 in-flight；若该时序成立，进程会在收到其余回报前落盘并退出。
+- 边界：本轮未用 fake API 重排两个响应，也未连真实 CTP 验证响应是否可能晚于最后一个请求的发送。已有 `last_instrument_response_with_fees_switch_queues_both_rate_requests` 只验证两条请求被发送，不能验证回调收齐后才退出。此候选与 T26-010 的 `std::queue` 数据竞争是不同问题：即使队列锁正确，队列空仍不代表异步响应完成。
+- 修复/验证方向：分别跟踪待发送任务与 in-flight 请求/每个 instrument 的 commission、margin 终态；仅在所有请求都有成功、空结果或错误终态后落盘。先依据厂商 API 合同确认成功/空结果/错误回调是否都有 `bIsLast`，再用 stub 按“最后请求发送前、最后请求发送后、两类响应乱序、响应缺失”控制回调，证明不会提前 `exit(0)`。
+
+## 汇总
+
+| 处置 | 编号 | 结论 |
+| --- | --- | --- |
+| 源码确认的功能/并发问题 | T26-003、004、005、006、010 | T26-005 的柜台拒绝后果、T26-010 的运行时触发率仍需验证 |
+| 异步流程候选 | T26-011 | 队列为空的代码条件已确认；提前退出可达性需厂商时序和 mock 重排验证 |
+| 条件风险/需验证正常前提 | T26-001、002、007、008、009 | 不把人工坏输入或未运行的禁用测试表述为已复现生产故障 |
+| 测试注释已修正 | T26-007 | dump 禁用测试注释已改为正确编号；缺项危险路径仍 NOT_RUN |
+| 动态检查 | 本轮 3 条启用用例均 PASS | 使用本机既有二进制；没有冷构建、没有运行禁用项、没有真实柜台验证 |

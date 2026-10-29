@@ -1,23 +1,33 @@
-# P03 WtBtCore 模拟交易主路径 疑似缺陷（迭代 01 第三波）
+# P03 WtBtCore 模拟交易主路径疑似缺陷（迭代 01 第三波）
 
-- Lane: p03，模块 `src/WtBtCore/`（CtaMocker/SelMocker/UftMocker 下单—成交—持仓—盈亏）
-- 状态: 全部**待审核**，未修改任何生产代码
+本轮只读复核生产代码与测试前提；未修改生产代码或测试。以下逐项区分已证缺陷与待验证风险。
 
-## BUG-P03-001 calc_fee 按额计费时空解引用 WTSCommodityInfo（待审核）
-- 位置: `src/WtBtCore/HisDataReplayer.cpp` L2983-L3019（`calc_fee`）
-- 复现: 费用模板 `_fee_map["DCE.m"]` 存在且 `by_volume=false`，但 `DCE.m` 未注册 commodity → L2993 `commInfo == NULL` 未判空，L3007 直接 `commInfo->getVolScale()` → 段错误。
-- 期望: commInfo 为 NULL 时返回 0 或记录错误日志后早退。
-- 测试: `p03_cta_trade_path_test.cpp` 中 `DISABLED_CalcFeeByAmountCrashesWhenCommodityMissing`（整类空解引用收进同一 DISABLED 用例，启用用例零残留）。
+## BUG-P03-001 按额计费缺少 commodity 空值检查
 
-## BUG-P03-002 update_dyn_profit 对缺失合约信息无判空（待审核）
-- 位置: `src/WtBtCore/CtaMocker.cpp` L985-L990（`SelMocker.cpp` 同构路径同样存在）
-- 现象: 持仓 `volume != 0` 时 `_replayer->get_commodity_info(stdCode)` 返回值直接解引用取 `getVolScale()`。正常链路下持仓必伴随已注册合约，但该不变量仅靠调用顺序维持，基础数据被重载/剔除（如运行期 `clear_cache`、commodities 配置变更）即崩。与 BUG-P03-001 同属"计费/盈亏路径不判空 commInfo"缺陷类，已在 p03 的 DISABLED 用例说明中合并归档。
+- 状态: 已合并（BUG-L06-007）
+- 审核裁定：代码缺陷成立，但不是新条目；与 `bugs/l06_wtbtcore.md` 的 BUG-L06-007 在同一 `HisDataReplayer::calc_fee()` 行及同一缺失品种前提下完全重复。P03 只进一步说明按额计费分支触发该解引用。
+- 位置：`src/WtBtCore/HisDataReplayer.cpp:2946-2979,2983-3018`，尤其 `:2993`、`:3005-3008`。
+- 证据：`loadFees()` 按配置中的 key 写 `_fee_map`，没有验证 commodity 是否存在。`calc_fee()` 找到 fee template 后获取 `commInfo`；按量模板不使用该指针，但按额模板在 `:3007` 无条件调用 `commInfo->getVolScale()`。因此配置中误留了一个不存在的品种费率模板时，公开 `calc_fee()` 会空指针解引用。
+- 测试前提：`p03_cta_trade_path_test.cpp:286-294` 用私有成员注入费率模板、故意不注册品种，证明了函数内部缺少防护，但没有走配置加载。该状态也可由现有 `loadFees()` 接受的配置输入形成；建议补配置级覆盖。仅按量模板不会触发本问题。
+- 修复方向：`commInfo == nullptr` 时记录品种与费率模板不匹配并返回明确中性结果；同时在加载手续费配置时校验模板 key 与基础品种数据，尽早报告配置错误。若 `calc_fee()` 需区分错误与零费用，应扩充错误通道而非静默伪装为有效费用。
 
-## BUG-P03-003 UftMocker::PosItem 构造函数遗漏 `_long` 初始化（待审核）
-- 位置: `src/WtBtCore/UftMocker.h` L305-L332（`_PosItem`）
-- 现象: `_PosItem()` 显式清零 `_prevol/_newvol/_preavail/_newavail/_closeprofit/_dynprofit`，但 bool 成员 `_long` 未初始化（同文件 `_DetailInfo/_OrderInfo/_StraFundInfo` 均 `memset(this,0,...)`）。读取默认构造 PosItem 的 `_long` 为不确定值（UB）。当前持仓推进路径以外部 map key 方向为准未见实际错算，但属初始化遗漏类缺陷。
-- 测试: `p03_pos_structs_test.cpp` 刻意不断言默认 `_long` 的值，仅覆盖其初始化缺口。
+## BUG-P03-002 Cta/Sel 动态盈亏路径缺少 commodity 空值检查
+- 状态: 已撤回（迭代02：NOT_BUG，原产品主张不成立）
 
-## 其它观察（不构成缺陷条目）
-- `stra_exit_short`（CtaMocker.cpp L1453）用**总量**仓位而非 valid 仓位做前置判断，与 `stra_exit_long`（L1402，非末根 bar 用 valid）不对称；期货无 T+1 场景下等价，暂不立条。
-- 测试通过重定义 `private/protected` 访问宏获取 Mocker 私有持仓结构与 `HisDataReplayer::_bd_mgr/_fee_map` 的可见性，未改动任何头文件与源码；clang/Itanium ABI 下不改变对象布局，链接期符号与生产一致。
+- 审核裁定：待验证，不作为已证生产缺陷；与 N04-003 的同一 CtaMocker 观察重复引用，但与 `BUG-P03-001` 并非同一路径。
+- 位置：`src/WtBtCore/CtaMocker.cpp:973-1002`，`src/WtBtCore/SelMocker.cpp:409-438`，重点分别为 `:990`、`:426`。
+- 证据边界：两段代码在非零持仓时查询 commodity 后裸解引用。正常开仓/持仓路径在 commodity 缺失时会拒绝交易，或在 `update_position()` 中早退；测试说明也承认“持仓必然先注册合约”，当前没有证明回放期间有受支持的途径删除/替换该商品元数据。私有状态注入只能证明防御性缺口，不能证明生产场景可达。
+- 现有测试缺口：`DISABLED_CalcFeeByAmountCrashesWhenCommodityMissing` 只调用 `HisDataReplayer::calc_fee()`，没有构造持仓，也没有覆盖 Cta/Sel 的 `update_dyn_profit()`。
+- 修复/验证方向：先确认运行期间是否支持清理或重载 commodity 且保留持仓。若支持，定义持仓元数据缺失时浮盈、明细和账户汇总的处理规则，再对 Cta/Sel 分别加 guard 与可达性测试；若不支持，保留为前置不变量文档，不登记为已证产品缺陷。
+
+## BUG-P03-003 UftMocker::PosItem::_long 未初始化
+
+- 状态: 已撤回（迭代02：NOT_BUG，原产品主张不成立）
+
+- 审核裁定：构造后 bool 字段确为不确定值；当前生产影响未证，列为低优先级对象状态清理，不按已观测的交易错误定级。
+- 位置：`src/WtBtCore/UftMocker.h:305-332`，尤其构造函数 `:318-327`。
+- 证据：构造函数显式初始化仓量、可用量和盈亏字段，但未初始化 `_long`。当前 `UftMocker.cpp` 的持仓推进与查询代码不读取该字段，不能据此声称现有交易路径已发生错误；原测试也没有断言 `_long`。
+- 修复方向：确认该字段是否有用途。若无用途则移除；若表示方向则在创建每条持仓腿时写入方向；若只要求确定的默认态则显式初始化为 `false`。在生产代码开始依赖前，不以私有字段的任意默认值建立业务行为断言。
+
+- 迭代02复核: NOT_BUG。_PosItem::_long 未初始化，但源码未找到读取；实际多空持仓是外层 PosInfo._long/_short。当前没有可观察行为依赖该 bool。
+- 迭代02依据: [逐条裁定与主代理修订](../../迭代02/缺陷裁定总表.md)。原记录保留作为历史，未声称产品已修复。

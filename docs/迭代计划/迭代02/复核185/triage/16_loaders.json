@@ -1,0 +1,225 @@
+[
+  {
+    "lane": "T26_ctploader",
+    "id": "BUG-T26-001",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/CTPLoader/TraderSpi.h:23-29",
+      "src/CTPLoader/TraderSpi.cpp:230-273",
+      "src/CTPLoader/CTPLoader.cpp:71-76",
+      "src/CTPLoader/CTPLoader.cpp:256-290",
+      "src/API/CTP6.6.9/ThostFtdcTraderApi.h:467-503"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_flow_test.cpp:138-163",
+      "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_flow_test.cpp:466-481"
+    ],
+    "input_reachability": "CTPLoader::run 在堆上 new CTraderSpi 并 RegisterSpi；可见调用只 Init，非异步分支 Join，没有 delete pUserSpi，也没有 Release API 的关闭路径。队列 worker 正常启动后长期服务 API；仓库路径不会调用该析构。",
+    "oracle_basis": "CTP SDK 仅声明 RegisterSpi 接受回调接口指针、Release 释放 API 对象；没有把 SPI 所有权交给 API 的注释。仓库可见代码也没有析构 SPI 的 owner。",
+    "reason": "析构在手工 delete 一个已启动 worker 的 SPI 时确实可能 join 挂起，但现有测试手工 new/delete 并不对应 loader 的正常生命周期。该对象在产品入口中泄漏而不是被析构，因此不能把此析构路径认定为当前产品 bug。此结论不消除 loader 缺少完整关闭/资源回收路径这一相邻问题。",
+    "root_cause": "测试路径与产品生命周期不一致：测试在 worker 已启动后显式 delete；产品入口将 SPI 指针注册后丢弃，且没有释放调用。",
+    "fix": "本条不安排当前产品修复。若后续新增 loader stop/release，应先明确 API 与 SPI 的唯一 owner，再实现停止入队、唤醒 worker、join、注销 SPI 和 Release 的完整顺序。",
+    "acceptance": "当前无需以此作为迭代缺陷验收。未来若提供公开关闭路径，再以空队列和非空队列两种真实关闭顺序验证 worker 有界退出，并确认 API 不再回调已释放的 SPI。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_flow_test.cpp",
+        "case": "DISABLED_t26_ctploader_flow_hang.destructor_joins_forever_after_queue_drained",
+        "issue": "测试直接 delete heap SPI，但 CTPLoader::run 没有该销毁路径；它不能证明正常产品流程会挂起。",
+        "change": "保留为未运行的内部析构负例并改注释，不作为 loader 产品缺陷或迭代验收；只有新增正式 stop/release owner 后，才将测试改为调用该真实关闭入口。",
+        "target": "CoverageTests_t_CTPLoader",
+        "filter": "DISABLED_t26_ctploader_flow_hang.destructor_joins_forever_after_queue_drained",
+        "expected_result": "当前不启用此直接 delete 场景；未来关闭 API 的测试覆盖其真实 owner、stop、唤醒和 join 顺序。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/16_loaders/safe_stub_runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/16_loaders/run-01/gtest.xml",
+      "docs/迭代计划/迭代02/复核185/evidence/16_loaders/run-01/stdout.txt"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "T26_ctploader",
+    "id": "BUG-T26-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/CTPLoader/TraderSpi.cpp:303-340",
+      "src/CTPLoader/TraderSpi.cpp:343-365",
+      "src/CTPLoader/TraderSpi.cpp:420-444",
+      "src/API/CTP6.6.9/ThostFtdcUserApiDataType.h:84",
+      "src/API/CTP6.6.9/ThostFtdcUserApiStruct.h:503-509",
+      "src/API/CTP6.6.9/ThostFtdcTraderApi.h:155"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_flow_test.cpp:483-490",
+      "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_instrument_test.cpp:424-447",
+      "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_instrument_test.cpp:450-475"
+    ],
+    "input_reachability": "外部 CTP OnRspQryInstrument 回调把固定长度 InstrumentID/UnderlyingInstrID 传入 CZCE 分支；期货和期权两处均无格式验证就调用 fillCzceCode。SDK 固定数组类型本身不保证字段中一定出现数字或终止符。",
+    "oracle_basis": "仓库有效对照 SR510 -> SR2510、SR510CS5600 -> SR2510CS5600；无数字或未终止字段没有可接受的扩年语义，应被有界拒绝并记录，而不能扫描到对象外。",
+    "reason": "现有 DISABLED 测试直调 fillCzceCode(\"SRCS\")，这个格式不是有效的 CZCE 合约号，因此不能证明合法合约输入会触发问题。但生产回调是外部数据边界，fillCzceCode 对非空输入无长度上限、无 NUL 终止判断地寻找首位数字；畸形或截断回报仍可导致越界读取/挂起，必须单独做输入校验。",
+    "root_cause": "TraderSpi.cpp:319-323 的 for(;;) 只在遇到数字时退出，不检查字符串终止符或字段容量；strlen 和 isdigit 也未对输入边界/unsigned char 作保护。",
+    "fix": "改为接收有界 string_view/字段容量，先在容量内寻找 NUL 和首个 ASCII 数字；首位前无数字、空码或字段未终止时返回明确失败并由回调记录、跳过该合约；对 isdigit 传 unsigned char。保留原合法扩年规则。",
+    "acceptance": "有效 CZCE 期货 SR510 与期权 SR510CS5600 及 underlying SR510 的输出保持不变；通过 OnRspQryInstrument 注入非空无数字和容量内无 NUL 的独立非法夹具，均须有界返回、记录错误且不插入错误合约；修复后可在 ASan target 验证无越界。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_flow_test.cpp",
+        "case": "DISABLED_t26_ctploader_flow_crash.fill_czce_code_on_letters_only_scans_past_terminator",
+        "issue": "SRCS 是直接传给内部 helper 的无效合约码，且测试仅依赖可能崩溃/越界，不是可证伪的产品输入测试。",
+        "change": "继续禁用旧崩溃例；修复后新增启用的 OnRspQryInstrument 回调边界测试，分别输入合法 SR510、非空无数字码与容量内未终止数组，断言有效扩年和非法输入被跳过并记录。",
+        "target": "CoverageTests_t_CTPLoader",
+        "filter": "t26_ctploader_instrument.czce_invalid_instrument_id_is_rejected",
+        "expected_result": "合法对照保持扩年结果；非法字段在固定容量内安全拒绝，不读越界、不挂起、不插入合约。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/16_loaders/safe_stub_runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/16_loaders/run-02/gtest.xml",
+      "docs/迭代计划/迭代02/复核185/evidence/16_loaders/run-02/stdout.txt"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "T26_ctploader",
+    "id": "BUG-T26-007",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/CTPLoader/TraderSpi.cpp:190-227",
+      "src/CTPLoader/TraderSpi.cpp:527-540",
+      "src/CTPLoader/TraderSpi.cpp:550-592",
+      "src/CTPLoader/TraderSpi.cpp:684-708",
+      "src/API/CTP6.6.9/ThostFtdcTraderApi.h:143-146"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_dump_test.cpp:232-270",
+      "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_dump_test.cpp:318-334"
+    ],
+    "input_reachability": "有效 OnRspQryInstrument 会把合约登记进 _contracts 并在 QRYFEES 下按合约排入佣金/保证金查询。佣金回报遇到错误时跳过 _fees 写入；保证金回报仍会登记 _margins，队列已空时两类回调都会进入 DumpFees。",
+    "oracle_basis": "代码已明确实现 fee 精确码查询和品种级 fallback；当两者都没有结果时，该行不能解引用 end iterator。应明确省略/标记缺费行并保留其他有效输出。",
+    "reason": "现有 DISABLED 例直接写入没有 _contracts 的 ZZ99，导致同时触发缺合约和缺费两个无效夹具前置，不能单独证明产品请求形状。独立缺陷仍可达：合法合约有保证金回报，但其佣金请求错误/无记录且品种 fallback 也缺失时，DumpFees 两次 find 均可 miss，随后无条件解引用 end。回调成功/失败均走队列为空后的 dump 分支。",
+    "root_cause": "DumpFees 使用 _contracts[rawCode] 隐式插入缺省合约，再对 _fees.find(rawCode) 和品种 fallback 结果不检查 end，直接取 it->second。",
+    "fix": "改用 _contracts.find；缺合约时记录错误并跳过。先查精确费率，再查品种费率；均缺失时记录 contract/exchange/request 上下文并跳过或输出明确 null/缺失标记，禁止解引用 end。若同时调整终局判断，必须按实际请求的 bIsLast/错误终态跟踪 callback 完成，不能把 dispatch queue empty 当作全部回报完成。",
+    "acceptance": "用受控 CTP stub 从有效合约回报建表，构造佣金错误/无费率、品种 fallback 缺失和有效保证金回报；在安全子进程中经真实回调入口完成 dump，断言进程正常结束、缺费行被明确省略或标记，其他有效行与 product fallback 输出正确。不得运行当前 UB disabled 例。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_dump_test.cpp",
+        "case": "DISABLED_t26_ctploader_dump_crash.fees_dump_of_unknown_margin_code_dereferences_end_iterator",
+        "issue": "当前仅注入 _margins[ZZ99]，缺少有效 _contracts 合约及佣金/品种费率查询生命周期，无法定位为真实回报路径。",
+        "change": "修复后新增启用的 controlled-stub 回调 case：先用有效合约回报登记，再模拟该合约佣金失败/空结果、品种费率缺失和有效保证金回报；用 child 捕获 DumpFees 的 exit，断言无崩溃且缺费行状态明确。",
+        "target": "CoverageTests_t_CTPLoader",
+        "filter": "t26_ctploader_dump.missing_instrument_and_product_fees_skip_row_without_ub",
+        "expected_result": "合法合约回报链上 fee 两级 lookup miss 时不发生 UB，其他有效费率仍被写出。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/16_loaders/safe_stub_runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/16_loaders/run-03/gtest.xml",
+      "docs/迭代计划/迭代02/复核185/evidence/16_loaders/run-03/stdout.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/16_loaders/run-03/stderr.txt"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "T4_femas_ctploader_mini",
+    "id": "BUG-T4-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderFemas/TraderFemas.cpp:95-111",
+      "src/TraderFemas/TraderFemas.cpp:169-212",
+      "src/TraderFemas/TraderFemas.cpp:567-595",
+      "src/TraderFemas/TraderFemas.cpp:804-810",
+      "src/TraderFemas/TraderFemas.cpp:424-443",
+      "src/TraderFemas/TraderFemas.cpp:1152-1179",
+      "src/API/Femas3.02/USTPFtdcTraderApi.h:232-243",
+      "src/WtCore/TraderAdapter.cpp:1426-1442"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderFemas/femas_trader_test.cpp:1090-1102",
+      "src/TestUnits/coverage/t_TraderFemas/r93_femas_api_stub.h:16-36",
+      "src/TestUnits/coverage/t_TraderFemas/r93_traderFemas_api_test.cpp:203-224",
+      "src/TestUnits/coverage/t_TraderFemas/r93_traderFemas_api_test.cpp:258-296"
+    ],
+    "input_reachability": "`connect()` 把 API 注册并调用 Init，然后才创建 m_strandIO。SDK 注释只说明调用 Init 后 API 开始工作，没有声明回调必须等 Init 返回。登录/查询前置回调可同步调用 sink；自定义 ITraderSpi 若在 onLoginResult(true) 中重入 queryAccount，API 和 WS_ALLREADY 均有效，但 queryAccount 会进入尚未创建的 strand。当前 WtCore sink 的 onLoginResult 只调用 queryPositions，因此该具体重入路径需要以公共 callback 可重入方式验证，不能用未 connect 的哨兵状态代替。",
+    "oracle_basis": "公开的 ITraderSpi 回调是同步虚函数调用，仓库接口没有禁止重入 query API。任何在 API Init 启动通信前必须可用的执行器都应先完成初始化；若 SDK 不保证 callback/Init 返回顺序，初始化顺序必须对两种时序都安全。",
+    "reason": "原 DISABLED 测试手工设置非空 sentinel 和 WS_ALLREADY 后直接 queryAccount，确实不是有效的正常调用前置。但生产代码仍有独立的初始化时序风险：vendor Init 位于 strand 创建之前，Init 期间若收到登录完成回调并同步通知一个重入 queryAccount 的 sink，triggerQuery 会解引用空 m_strandIO。",
+    "root_cause": "m_strandIO 在 Init 可能启动的回调流程之后才构造；triggerQuery 没有检查执行器就绪状态，直接解引用。",
+    "fix": "在 RegisterSpi/Init 前创建并发布 m_strandIO 和其 worker，或在 callback 到达时通过显式 ready 状态缓存 query，直到执行器就绪再 post；connect 失败/release 也须保持状态一致。",
+    "acceptance": "受控 API stub 的 Init 在返回前同步触发成功登录/查询前置回调；sink 在 onLoginResult(true) 内重入 queryAccount。用安全 fake executor 断言请求恰好排入且无空指针访问。再验证 Init 返回后的正常调用与 release 阶段不会投递到已停止的 io_context。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/t_TraderFemas/femas_trader_test.cpp",
+        "case": "TraderFemasDisabled.DISABLED_query_account_before_connect_dereferences_null_strand",
+        "issue": "用 sentinel API 和人工 WS_ALLREADY 绕过 connect，不能验证产品的 Init/回调竞态。",
+        "change": "替换为 r93 fake API 的 Init 同步触发登录完成回调，并让测试 sink 在 onLoginResult(true) 中重入 queryAccount；只从 connect() 建立合法 API 生命周期，不人工设置 WS_ALLREADY。",
+        "target": "CoverageTests_t_TraderFemas",
+        "filter": "R93FemasTest.init_callback_reentrancy_can_query_account_before_strand_ready",
+        "expected_result": "修复前可稳定暴露 Init 与 strand 初始化顺序，修复后 queryAccount 安全投递且只发出一次查询。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/16_loaders/safe_stub_runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/16_loaders/run-04/gtest.xml",
+      "docs/迭代计划/迭代02/复核185/evidence/16_loaders/run-05/gtest.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "T4_femas_ctploader_mini",
+    "id": "BUG-T4-004",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderFemas/TraderFemas.cpp:169-197",
+      "src/TraderFemas/TraderFemas.cpp:567-595",
+      "src/TraderFemas/TraderFemas.cpp:140-149",
+      "src/API/Femas3.02/USTPFtdcTraderApi.h:228-243",
+      "src/API/Femas3.02/USTPFtdcTraderApi.h:259-261"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderFemas/femas_trader_test.cpp:1071-1088",
+      "src/TestUnits/coverage/t_TraderFemas/r93_femas_api_stub.h:16-36",
+      "src/TestUnits/coverage/t_TraderFemas/r93_traderFemas_api_test.cpp:258-296"
+    ],
+    "input_reachability": "正常 connect 先由 creator 返回 API，随后写入 m_pUserAPI 并 RegisterSpi，再调用 Init；成功登录回调只能在 API 已创建并开始工作后由 SPI 到达。成功响应分支消费 pRspUserLogin 字段。",
+    "oracle_basis": "Femas SDK 的 RegisterSpi 用于注册回调接口，Release 用于释放 API 对象；正常成功回报需要有效 API 生命周期和登录响应。仓库已有完整 fake API，可提供 GetTradingDay 并验证成功登录分支，无需真实动态库。",
+    "reason": "当前 disabled 用例把非空但不可访问的地址 0x1 填进 m_pUserAPI，再直接调用成功回调；这既不是空指针，也不是有效 SDK 实例。正常 connect 在 Init 前已设置 m_pUserAPI，现有 R93 stub 登录流程能覆盖成功回调。因此原始‘成功登录时没有 API 对象’主张不成立。此结论仅针对该主张；源码头文件没有说明 RegisterSpi(NULL)/Release 是否等待在途回调，不能据此宣称并发 release 回调已安全。",
+    "root_cause": "测试用 sentinel 伪造了 SDK 生命周期，且把需要有效 API 实例的成功分支误称为必须加载真实厂商库才能测试。",
+    "fix": "撤回本项产品修复。删除/重写 sentinel 负例说明，使用已有 R93FemasApiStub 覆盖成功登录。若后续调查释放竞态，应单独确定 callback quiescence 和 API 指针同步协议。",
+    "acceptance": "启用的 fake API 登录用例验证有效 pRspUserLogin、pRspInfo 和 GetTradingDay 被处理，并到达 WS_LOGINED/就绪回调；不再将无效 sentinel 作为产品验收。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/t_TraderFemas/femas_trader_test.cpp",
+        "case": "TraderFemasTest.DISABLED_user_login_success_branch_needs_vendor_api",
+        "issue": "kApiSentinel 是不可解引用的非空伪地址，不代表有效 API 或空 API；仓库已经有可控的完整 CUstpFtdcTraderApi stub。",
+        "change": "移除该 sentinel 产品负例及其‘需要真实厂商库’注释；把正常成功回调覆盖归属到现有 R93FemasTest.authenticate_login_and_query_front_reach_ready。若新增 null response 防护测试，需单独按 SDK 允许的 callback payload 形状构造。",
+        "target": "CoverageTests_t_TraderFemas",
+        "filter": "R93FemasTest.authenticate_login_and_query_front_reach_ready",
+        "expected_result": "有效 fake API 的成功登录分支可启用通过，交易日来自 stub，state 与 login sink 回报正确；不调用 0x1 sentinel。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/16_loaders/safe_stub_runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/16_loaders/run-04/gtest.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  }
+]

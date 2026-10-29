@@ -26,6 +26,8 @@
 #include <Includes/WTSContractInfo.hpp>
 #include <Includes/WTSDataDef.hpp>
 #include <Includes/WTSVariant.hpp>
+#include <WTSTools/WTSBaseDataMgr.h>
+#include <WTSTools/WTSHotMgr.h>
 #include <WTSUtils/WTSCfgLoader.h>
 
 namespace fs = std::filesystem;
@@ -215,6 +217,15 @@ public:
 
 TEST_F(Q05IdxWorkerMgrTest, WrapperOwnsAndReturnsDeleteToFactory)
 {
+	WTSVariant* cfg = loadCfg("idx_wrapper.json", R"JSON({"poolsize": 0, "indice": []})JSON");
+	ASSERT_NE(cfg, nullptr);
+	WTSHotMgr hot;
+	WTSBaseDataMgr bd;
+	DataManager dm;
+	IndexWorkerMgr mgr;
+	ASSERT_TRUE(mgr.init(cfg, &hot, &bd, &dm));
+	cfg->release();
+
 	FakeIdxFact fact;
 	{
 		wtp::IIndexWorker* w = fact.create_worker("Known", "q05id");
@@ -226,12 +237,11 @@ TEST_F(Q05IdxWorkerMgrTest, WrapperOwnsAndReturnsDeleteToFactory)
 	// 析构把 worker 归还给工厂
 	EXPECT_EQ(fact._delCnt, 1);
 
-	// set_factory 经由 IIndexContext 拉取 hot/bd mgr（此处均为空）
+	// mgr 已通过空 indice 配置完成 init，getter 返回本次注入的有效 manager 地址。
 	FakeIdxWorker worker;
-	IndexWorkerMgr mgr;
 	worker.set_factory(&mgr);
-	EXPECT_EQ(mgr.get_hot_mgr(), nullptr);
-	EXPECT_EQ(mgr.get_bd_mgr(), nullptr);
+	EXPECT_EQ(mgr.get_hot_mgr(), &hot);
+	EXPECT_EQ(mgr.get_bd_mgr(), &bd);
 }
 
 }  // namespace

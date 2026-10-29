@@ -178,20 +178,41 @@ CUstpFtdcDepthMarketDataField makeQuote(const char* code, const char* actDate)
 } // namespace
 
 //////////////////////////////////////////////////////////////////////////
-// 生命周期：未 init（m_pUserAPI==NULL）时的查询/守卫分支
+// 未建立连接：IParserApi.h 将 connect/disconnect 的返回值定义为命令是否发送，
+// isConnected 则表示当前是否已连接。用有效 sink 避免依赖未初始化的 SPI 指针。
 //////////////////////////////////////////////////////////////////////////
-TEST(femas_parser, lifecycle_without_api_reports_not_connected)
+TEST(femas_parser, is_not_connected_without_api)
 {
+	FakeDataMgr mgr;
+	FakeParserSink sink;
+	sink.mgr = &mgr;
 	ParserFemas parser;
+	parser.registerSpi(&sink);
 
-	// isConnected 直接看指针：未 init 必须是 false（ParserFemas.cpp:451）
 	EXPECT_FALSE(parser.isConnected());
+}
 
-	// connect/disconnect/release 都有 if(m_pUserAPI) 守卫，不得崩溃（:141/:151/:136）
-	EXPECT_TRUE(parser.connect());
-	EXPECT_TRUE(parser.disconnect());
+TEST(femas_parser, connect_without_api_reports_command_not_sent)
+{
+	FakeDataMgr mgr;
+	FakeParserSink sink;
+	sink.mgr = &mgr;
+	ParserFemas parser;
+	parser.registerSpi(&sink);
+
+	EXPECT_FALSE(parser.connect());
+}
+
+TEST(femas_parser, disconnect_without_api_reports_command_not_sent)
+{
+	FakeDataMgr mgr;
+	FakeParserSink sink;
+	sink.mgr = &mgr;
+	ParserFemas parser;
+	parser.registerSpi(&sink);
+
+	EXPECT_FALSE(parser.disconnect());
 	EXPECT_NO_THROW(parser.release());
-	EXPECT_FALSE(parser.isConnected());
 }
 
 TEST(femas_parser, register_spi_pulls_base_data_mgr_from_sink)
@@ -278,7 +299,7 @@ TEST(femas_parser, logout_rsp_emits_logout_event)
 	parser.OnRspUserLogout(&logout, &rsp, 2, true);
 }
 
-TEST(femas_parser, heartbeat_and_sub_rsp_are_sink_optional_noops)
+TEST(femas_parser, heartbeat_warning_is_logged)
 {
 	FakeParserSink sink;
 	ParserFemas parser;
@@ -287,6 +308,30 @@ TEST(femas_parser, heartbeat_and_sub_rsp_are_sink_optional_noops)
 	parser.OnHeartBeatWarning(1234);
 	ASSERT_EQ(1u, sink.logs.size());
 	EXPECT_NE(std::string::npos, sink.logs[0].find("1234"));
+}
+
+
+TEST(femas_parser, nonzero_rsp_error_is_reported_through_parser_log)
+{
+	FakeParserSink sink;
+	ParserFemas parser;
+	parser.registerSpi(&sink);
+
+	CUstpFtdcRspInfoField rsp;
+	memset(&rsp, 0, sizeof(rsp));
+	rsp.ErrorID = 100;
+
+	// IParserSpi exposes handleParserLog; other parser error callbacks use it for
+	// diagnostics. Check observability without prescribing text, level, or code.
+	EXPECT_NO_THROW(parser.OnRspError(&rsp, 3, true));
+	EXPECT_GT(sink.logs.size(), 0u);
+}
+
+TEST(femas_parser, subscription_error_callbacks_are_safe)
+{
+	FakeParserSink sink;
+	ParserFemas parser;
+	parser.registerSpi(&sink);
 
 	CUstpFtdcSpecificInstrumentField inst;
 	memset(&inst, 0, sizeof(inst));
@@ -294,12 +339,10 @@ TEST(femas_parser, heartbeat_and_sub_rsp_are_sink_optional_noops)
 	memset(&rsp, 0, sizeof(rsp));
 	rsp.ErrorID = 100;
 
-	// IsErrorRspInfo 在 Femas 里被写死 return false（:405）——
-	// 于是 OnRspError/OnRspSubMarketData 走「无错误」分支且什么都不做
-	EXPECT_NO_THROW(parser.OnRspError(&rsp, 3, true));
+	// These callbacks have no explicit IParserSpi reporting contract in this
+	// plugin, so keep this as a safety check without treating silence as success.
 	EXPECT_NO_THROW(parser.OnRspSubMarketData(&inst, &rsp, 4, true));
 	EXPECT_NO_THROW(parser.OnRspUnSubMarketData(&inst, &rsp, 5, true));
-	EXPECT_EQ(1u, sink.logs.size());
 }
 
 TEST(femas_parser, login_rsp_skipped_when_not_last)
@@ -428,8 +471,6 @@ TEST(femas_parser, extern_c_factory_round_trip)
 	IParserApi* p = createParser();
 	ASSERT_TRUE(p != NULL);
 	EXPECT_FALSE(p->isConnected());
-	EXPECT_TRUE(p->connect());
-	EXPECT_TRUE(p->disconnect());
 	p->release();
 	deleteParser(p);
 	EXPECT_TRUE(p == NULL);

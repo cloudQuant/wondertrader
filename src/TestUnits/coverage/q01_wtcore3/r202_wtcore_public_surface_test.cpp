@@ -10,8 +10,8 @@
  *     （TraderAdapter.cpp:599-601；TraderAdapter.h:198）
  *   - WtHftRtTicker 数据驱动闭合时写 store（WtHftTicker.cpp:123）
  *
- * 另有三个 DISABLED_ 用例，把本轮核对出的 ticker 跨日/收盘不可达条件与
- * TraderAdapter inline 弱符号问题固化成可复现断言（BUG-R202-001/002/003），不参与覆盖率。
+ * 另有一个 DISABLED_ 用例保留 TraderAdapter inline 弱符号问题的断言（BUG-R202-003），
+ * 不参与覆盖率。
  *
  * 边界：只走公开 API；ticker 用 run()+on_tick()+stop()，行情由主线程同步送入，
  * 不等待墙钟；临时目录走系统 temp；不访问 private、不镜像类布局。
@@ -253,31 +253,33 @@ TEST(R202HftTicker, DataDrivenMinuteCloseReachesStore)
 }
 
 /* ------------------------------------------------------------------ *
- * 6. BUG-R202-001：24h 时段 minuteToTime(1440) 返回 2400，run() 的
- *    `if (thisMin == 0)` 跨日分支不可达（R192 三条 rollover 用例同因失败）。
- *    期望 0（00:00），实际 2400。
+ * Full-day session metadata keeps the explicit midnight close label at 2400;
+ * minute zero remains the separate 00:00 label.
  * ------------------------------------------------------------------ */
-TEST(R202SelTicker, DISABLED_MidnightRolloverNeedsMinuteToTimeWrapToZero)
+TEST(R202SelTicker, FullDaySessionKeepsExplicitMidnightCloseLabel)
 {
     WTSSessionInfo* session = WTSSessionInfo::create("TRADING", "TRADING", 0);
     session->addTradingSection(0, 0);
 
-    EXPECT_EQ(0u, session->minuteToTime(1440));
+    EXPECT_EQ(2400u, session->minuteToTime(1440));
     EXPECT_EQ(0u, session->minuteToTime(0));
+    EXPECT_EQ(2400u, session->getCloseTime(true));
+    session->release();
 }
 
 /* ------------------------------------------------------------------ *
- * 7. BUG-R202-002：24h 时段收盘对齐值是 2400，而数据闭合最后一分钟的
- *    偏移是 2359，`offMin == getCloseTime(true)` 永不成立，数据驱动的
- *    on_session_end 分支（Sel/HFT/CTA）不可达。
+ * Session close labels and clock offsets are distinct at midnight. This checks
+ * session metadata only and does not reproduce a ticker on_session_end callback.
  * ------------------------------------------------------------------ */
-TEST(R202HftTicker, DISABLED_LastMinuteIn24hSessionNeverMatchesCloseTime)
+TEST(R202HftTicker, FullDaySessionCloseLabelAndClockOffsetAreDistinct)
 {
     WTSSessionInfo* session = WTSSessionInfo::create("TRADING", "TRADING", 0);
     session->addTradingSection(0, 0);
 
+    EXPECT_EQ(2400u, session->minuteToTime(1440));
+    EXPECT_EQ(0u, session->offsetTime(2400, true));
     EXPECT_EQ(2400u, session->getCloseTime(true));
-    EXPECT_EQ(2359u, session->offsetTime(2359, true));
+    session->release();
 }
 
 }  // namespace

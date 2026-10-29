@@ -1,16 +1,19 @@
-// r203 / 主存储读端残余：跨类型缓存守卫、后复权文件因子、反向切段防御分支
+// r203 / 主存储读端残余：逐笔短文件与缺文件控制、后复权因子、反向切段防御分支
 //
 // 覆盖（src/WtDataStorage/WtDataReader.cpp）：
-//  - readOrdDtlSlice 在 _his_ordque_map 已存在 key 时跳过装载，_his_orddtl_map 为空返回 NULL :741-743
-//  - readTransSlice 同型守卫（误查 _his_ordque_map）                                        :898-900
+//  - readOrdQueSlice 的历史短文件校验
+//  - readOrdDtlSlice / readTransSlice 的历史缺文件返回
+//  - DISABLED_ 同 reader/key 先读 queue 的正确缓存契约候选（合法三类文件，未运行）
 //  - cacheIntegratedBars 反向切段（左边界晚于右边界）后 eIdx < sIdx -> continue             :1211-1222
 //
 // 覆盖（src/WtDataStorage/WtRdmDtReader.cpp）：
-//  - readOrdDtlSliceByRange / readTransSliceByRange 同型缓存守卫                            :913-915 / :1087-1089
+//  - readOrdQueSliceByRange 的历史短文件校验
+//  - readOrdDtlSliceByRange / readTransSliceByRange 的历史缺文件返回
+//  - DISABLED_ 同 reader/key 先读 queue 的正确缓存契约候选（合法三类文件，未运行）
 //  - cacheHisBarsFromFile 后复权文件：barList._factor 取最后一档因子                        :1506-1513
 //  - cacheHisBarsFromFile 反向切段后 eIdx < sIdx -> continue                                :1329-1330
 //
-// 全部走公开 API；临时目录由 q03::Sandbox 提供，文件均为合法 RAW_V2 块。
+// 全部走公开 API；q03::Sandbox 提供临时目录，bar 用例使用合法 RAW_V2 块，短文件控制特意写入 8 字节坏文件。
 #include "r74_rdm_fixture.h"
 
 #include "WTSUtils/WTSCfgLoader.h"
@@ -64,36 +67,74 @@ protected:
 	WtDataReader			_reader;
 };
 
-// WtDataReader.cpp:741-743 / 898-900
-// 短队列文件让 readOrdQueSlice 在 _his_ordque_map 里留下 key；随后 dtl/trans
-// 因误用该 map 判命中而跳过文件装载，各自 map 为空，返回 NULL。
-TEST_F(R203StorageResidualTest, R203ReaderQueueCacheEntryLeavesDtlAndTransNull)
+// WtDataReader：短队列文件应被校验拒绝并记录错误。
+TEST_F(R203StorageResidualTest, R203ReaderRejectsShortHistoricalQueueFile)
 {
 	ASSERT_TRUE(write_bytes("his/queue/SSE/20240109/600000.dsb", string(8, 'x')));
 	init_reader();
 
 	const uint64_t etime = 20240109150000000ull;
 
-	WTSOrdQueSlice* que = _reader.readOrdQueSlice("SSE.600000", 5, etime);
+	WTSOrdQueSlice* que = _reader.readOrdQueSlice("SSE.STK.600000", 5, etime);
 	EXPECT_TRUE(que == NULL);
 	if (que != NULL)
 		que->release();
 	EXPECT_GE(_sink.count_of(LL_ERROR), 1u);
+}
 
-	WTSOrdDtlSlice* dtl = _reader.readOrdDtlSlice("SSE.600000", 5, etime);
+// 没有对应历史文件时，detail/trans 入口各自返回 NULL。
+// 本用例不先读取 queue，只检查两类数据的独立缺文件路径。
+TEST_F(R203StorageResidualTest, R203ReaderReturnsNullForMissingHistoricalDetailAndTrans)
+{
+	init_reader();
+
+	const uint64_t etime = 20240109150000000ull;
+	WTSOrdDtlSlice* dtl = _reader.readOrdDtlSlice("SSE.STK.600000", 5, etime);
 	EXPECT_TRUE(dtl == NULL);
 	if (dtl != NULL)
 		dtl->release();
 
-	WTSTransSlice* trans = _reader.readTransSlice("SSE.600000", 5, etime);
+	WTSTransSlice* trans = _reader.readTransSlice("SSE.STK.600000", 5, etime);
 	EXPECT_TRUE(trans == NULL);
 	if (trans != NULL)
 		trans->release();
 }
 
-// WtRdmDtReader.cpp:913-915 / 1087-1089
-// 同型守卫：短队列文件留下 key 后，逐笔委托/成交入口不再读文件，空块返回 NULL。
-TEST_F(R203StorageResidualTest, R203RdmQueueCacheEntryLeavesDtlAndTransNull)
+// 正确契约候选：三类合法文件齐全时，先读 queue 不应阻止 detail/trans 首次装载。
+// 保持禁用：同类 WtDataReader 路径已有 SIGTRAP 记录（BUG-R74-001）；本候选未运行。
+TEST_F(R203StorageResidualTest, DISABLED_R203ReaderQueueDetailTransCacheContract)
+{
+	_bd.set_cur_tdate(20240110);
+	vector<WTSOrdQueStruct> ques{make_ordque(20240109, 20240109, 93000000, 0)};
+	vector<WTSOrdDtlStruct> dtls{make_orddtl(20240109, 20240109, 93100000, 0)};
+	vector<WTSTransStruct> trans{make_trans(20240109, 20240109, 93200000, 0)};
+	ASSERT_TRUE(write_bytes("his/queue/SSE/20240109/600000.dsb",
+		make_block(BT_HIS_OrdQueue, BLOCK_VERSION_CMP_V2, pack_items(ques))));
+	ASSERT_TRUE(write_bytes("his/orders/SSE/20240109/600000.dsb",
+		make_block(BT_HIS_OrdDetail, BLOCK_VERSION_CMP_V2, pack_items(dtls))));
+	ASSERT_TRUE(write_bytes("his/trans/SSE/20240109/600000.dsb",
+		make_block(BT_HIS_Trnsctn, BLOCK_VERSION_CMP_V2, pack_items(trans))));
+	init_reader();
+
+	const uint64_t etime = 20240109150000000ull;
+	WTSOrdQueSlice* que = _reader.readOrdQueSlice("SSE.STK.600000", 5, etime);
+	ASSERT_TRUE(que != NULL);
+	EXPECT_EQ(que->size(), 1u);
+	que->release();
+
+	WTSOrdDtlSlice* dtl = _reader.readOrdDtlSlice("SSE.STK.600000", 5, etime);
+	ASSERT_TRUE(dtl != NULL);
+	EXPECT_EQ(dtl->size(), 1u);
+	dtl->release();
+
+	WTSTransSlice* trade = _reader.readTransSlice("SSE.STK.600000", 5, etime);
+	ASSERT_TRUE(trade != NULL);
+	EXPECT_EQ(trade->size(), 1u);
+	trade->release();
+}
+
+// WtRdmDtReader：短队列文件应被校验拒绝。
+TEST_F(R203StorageResidualTest, R203RdmRejectsShortHistoricalQueueFile)
 {
 	ASSERT_TRUE(write_bytes("his/queue/SSE/20240109/600000.dsb", string(8, 'x')));
 
@@ -103,20 +144,66 @@ TEST_F(R203StorageResidualTest, R203RdmQueueCacheEntryLeavesDtlAndTransNull)
 	const uint64_t stime = 20240109090000000ull;
 	const uint64_t etime = 20240109150000000ull;
 
-	WTSOrdQueSlice* que = reader.readOrdQueSliceByRange("SSE.600000", stime, etime);
+	WTSOrdQueSlice* que = reader.readOrdQueSliceByRange("SSE.STK.600000", stime, etime);
 	EXPECT_TRUE(que == NULL);
 	if (que != NULL)
 		que->release();
+}
 
-	WTSOrdDtlSlice* dtl = reader.readOrdDtlSliceByRange("SSE.600000", stime, etime);
+// 没有对应历史文件时，逐笔委托/成交区间入口各自返回 NULL。
+// 本用例不先读取 queue，只检查 detail/trans 的独立缺文件路径。
+TEST_F(R203StorageResidualTest, R203RdmReturnsNullForMissingHistoricalDetailAndTrans)
+{
+	WtRdmDtReader reader;
+	reader.init(NULL, &_rsink);
+
+	const uint64_t stime = 20240109090000000ull;
+	const uint64_t etime = 20240109150000000ull;
+
+	WTSOrdDtlSlice* dtl = reader.readOrdDtlSliceByRange("SSE.STK.600000", stime, etime);
 	EXPECT_TRUE(dtl == NULL);
 	if (dtl != NULL)
 		dtl->release();
 
-	WTSTransSlice* trans = reader.readTransSliceByRange("SSE.600000", stime, etime);
+	WTSTransSlice* trans = reader.readTransSliceByRange("SSE.STK.600000", stime, etime);
 	EXPECT_TRUE(trans == NULL);
 	if (trans != NULL)
 		trans->release();
+}
+
+// 正确契约候选：三类合法文件齐全时，同键先读 queue 不应阻止 detail/trans 首次装载。
+// 本候选未运行；RDM 的对应源码缺陷见 R1 §2 / R185，动态复现尚未确认。
+TEST_F(R203StorageResidualTest, DISABLED_R203RdmQueueDetailTransCacheContract)
+{
+	_bd.set_cur_tdate(20240110);
+	vector<WTSOrdQueStruct> ques{make_ordque(20240109, 20240109, 93000000, 0)};
+	vector<WTSOrdDtlStruct> dtls{make_orddtl(20240109, 20240109, 93100000, 0)};
+	vector<WTSTransStruct> trans{make_trans(20240109, 20240109, 93200000, 0)};
+	ASSERT_TRUE(write_bytes("his/queue/SSE/20240109/600000.dsb",
+		make_block(BT_HIS_OrdQueue, BLOCK_VERSION_CMP_V2, pack_items(ques))));
+	ASSERT_TRUE(write_bytes("his/orders/SSE/20240109/600000.dsb",
+		make_block(BT_HIS_OrdDetail, BLOCK_VERSION_CMP_V2, pack_items(dtls))));
+	ASSERT_TRUE(write_bytes("his/trans/SSE/20240109/600000.dsb",
+		make_block(BT_HIS_Trnsctn, BLOCK_VERSION_CMP_V2, pack_items(trans))));
+
+	WtRdmDtReader reader;
+	reader.init(NULL, &_rsink);
+	const uint64_t stime = 20240109090000000ull;
+	const uint64_t etime = 20240109150000000ull;
+	WTSOrdQueSlice* que = reader.readOrdQueSliceByRange("SSE.STK.600000", stime, etime);
+	ASSERT_TRUE(que != NULL);
+	EXPECT_EQ(que->size(), 1u);
+	que->release();
+
+	WTSOrdDtlSlice* dtl = reader.readOrdDtlSliceByRange("SSE.STK.600000", stime, etime);
+	ASSERT_TRUE(dtl != NULL);
+	EXPECT_EQ(dtl->size(), 1u);
+	dtl->release();
+
+	WTSTransSlice* trade = reader.readTransSliceByRange("SSE.STK.600000", stime, etime);
+	ASSERT_TRUE(trade != NULL);
+	EXPECT_EQ(trade->size(), 1u);
+	trade->release();
 }
 
 // WtRdmDtReader.cpp:1506-1513

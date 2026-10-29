@@ -236,6 +236,15 @@ TEST_F(XtpLoginF, login_success_sets_trading_date_and_starts_subscription_before
 	EXPECT_EQ("[ParserXTP] Tick_by_tick data of 1 instruments of SZSE subscribed", sink.logs[4].second);
 }
 
+TEST_F(XtpLoginF, login_success_accepts_eight_digit_trading_day)
+{
+	api.loginRet = 0;
+	std::snprintf(api.tradingDay, sizeof(api.tradingDay), "%s", "20260105");
+
+	EXPECT_TRUE(parser.connect());
+	EXPECT_EQ(20260105u, m->m_uTradingDate);
+}
+
 TEST_F(XtpLoginF, login_success_pump_delivers_connect_then_login_in_that_order)
 {
 	api.loginRet = 0;
@@ -249,32 +258,6 @@ TEST_F(XtpLoginF, login_success_pump_delivers_connect_then_login_in_that_order)
 	EXPECT_EQ(0, sink.events[1].second);
 	/* 队列排空 */
 	EXPECT_EQ(std::size_t{0}, pump());
-}
-
-TEST_F(XtpLoginF, login_success_with_dashed_trading_day_corrupts_the_trading_date)
-{
-	/*
-	 * strToTime（ParserXTP.cpp:57-71）只剥 ':'，其余字符全交给 convert::to_uint32，
-	 * 而后者是 `h*10 + *str - '0'` 且零校验（Converter.hpp:57-60）：
-	 * "2026-01-05" → 2,0,2,6,'-0',1,'-',0,5 → 2025700705（'-' 贡献 -3）。
-	 */
-	api.loginRet = 0;
-	std::snprintf(api.tradingDay, sizeof(api.tradingDay), "%s", "2026-01-05");
-
-	parser.connect();
-
-	EXPECT_EQ(2025700705u, m->m_uTradingDate);
-	EXPECT_NE(20260105u, m->m_uTradingDate);
-}
-
-TEST_F(XtpLoginF, login_success_with_colon_separated_trading_day_strips_only_colons)
-{
-	api.loginRet = 0;
-	std::snprintf(api.tradingDay, sizeof(api.tradingDay), "%s", "2026:01:05");
-
-	parser.connect();
-
-	EXPECT_EQ(20260105u, m->m_uTradingDate);
 }
 
 TEST_F(XtpLoginF, connect_returns_true_even_when_login_failed_and_never_creates_a_worker)

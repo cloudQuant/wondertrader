@@ -15,6 +15,8 @@
  */
 #include <gtest/gtest.h>
 
+#include <cstdio>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <new>
@@ -58,6 +60,22 @@ namespace
 		ofs << body;
 	}
 
+	class R124TempDir
+	{
+	public:
+		explicit R124TempDir(const char* tag) : _path(prepare_dir(tag)) {}
+		~R124TempDir()
+		{
+			std::error_code ec;
+			stdfs::remove_all(_path, ec);
+		}
+
+		const std::string& path() const { return _path; }
+
+	private:
+		std::string _path;
+	};
+
 	const char* kSessions =
 		"{\"TRADING\":{\"name\":\"Trading\",\"offset\":0,"
 		"\"sections\":[{\"from\":0,\"to\":2359}]}}";
@@ -84,6 +102,67 @@ namespace
 		void handle_session_end(uint32_t) override {}
 		void handle_replay_done() override { done++; }
 	};
+
+	int run_second_config_backtest_probe()
+	{
+		R124TempDir temp("config_once");
+		const std::string& dir = temp.path();
+		if (dir.empty() || !stdfs::is_directory(dir))
+			return 10;
+
+		write_text(dir + "/sessions.json", kSessions);
+		write_text(dir + "/commodities.json", kCommodities);
+		write_text(dir + "/contracts.json", kContracts);
+		if (!stdfs::exists(dir + "/sessions.json")
+			|| !stdfs::exists(dir + "/commodities.json")
+			|| !stdfs::exists(dir + "/contracts.json"))
+			return 11;
+
+		/* A valid, silent logger profile keeps this probe self-contained. */
+		const std::string logCfg = R"JSON({"root":{"level":"off","async":false,"sinks":[]}})JSON";
+		init_backtest(logCfg.c_str(), false, dir.c_str());
+		enable_tick(true);
+		if (!getRunner().replayer().is_tick_enabled())
+		{
+			std::fprintf(stderr, "could not establish initial tick-enabled state\n");
+			return 12;
+		}
+
+		auto make_config = [&dir](bool tick) {
+			return std::string("{\"replayer\":{")
+				+ "\"mode\":\"none\",\"path\":\"" + dir + "\","
+				+ "\"stime\":20240102000000,\"etime\":20240103000000,"
+				+ "\"tick\":" + (tick ? "true" : "false") + ","
+				+ "\"basefiles\":{"
+				+ "\"session\":\"" + dir + "/sessions.json\","
+				+ "\"commodity\":\"" + dir + "/commodities.json\","
+				+ "\"contract\":\"" + dir + "/contracts.json\"}},"
+				+ "\"env\":{\"mocker\":\"none\"}}";
+		};
+
+		const std::string firstCfg = make_config(false);
+		config_backtest(firstCfg.c_str(), false);
+		const bool firstConfigDisabledTicks = !getRunner().replayer().is_tick_enabled();
+
+		const std::string secondCfg = make_config(true);
+		config_backtest(secondCfg.c_str(), false);
+		const bool secondConfigWasIgnored = !getRunner().replayer().is_tick_enabled();
+
+		release_backtest();
+		reset_singleton();
+
+		if (!firstConfigDisabledTicks)
+		{
+			std::fprintf(stderr, "first valid config did not disable tick replay\n");
+			return 13;
+		}
+		if (!secondConfigWasIgnored)
+		{
+			std::fprintf(stderr, "second config_backtest call changed tick replay state\n");
+			return 14;
+		}
+		return 0;
+	}
 }
 
 /*
@@ -132,12 +211,17 @@ TEST(R124BtRunnerRun, EmptySyncReplayCompletesWithoutWorker)
 }
 
 /*
- * 生产: WtBtPorter.cpp:174-185（static inited 门 -> 第二次调用 L179 早退）
- * 用坏 JSON 内容调用两次：第一次即使真正走到 runner.config 也只会在
- * load 失败处返回，不建立 mocker；第二次必须被一次性门直接吃掉。
+ * WtBtPorter.cpp documents config_backtest as a once-only operation. Run in a
+ * threadsafe death-test subprocess because its function-local static state is
+ * process-wide and cannot be reset through the public API. Both configs and
+ * their basefiles are valid; no replay or trading is started.
  */
 TEST(R124BtPorterConfig, SecondConfigBacktestCallIsNoOp)
 {
-	EXPECT_NO_THROW(config_backtest("{ r124 not a json document", false));
-	EXPECT_NO_THROW(config_backtest("{ r124 not a json document", false));
+	const std::string previousDeathTestStyle = GTEST_FLAG_GET(death_test_style);
+	GTEST_FLAG_SET(death_test_style, "threadsafe");
+	EXPECT_EXIT(
+		std::exit(run_second_config_backtest_probe()),
+		::testing::ExitedWithCode(0), "");
+	GTEST_FLAG_SET(death_test_style, previousDeathTestStyle);
 }

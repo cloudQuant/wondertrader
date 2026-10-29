@@ -227,8 +227,8 @@ TEST(l01_objectpool, non_trivial_type_with_std_string)
 
 TEST(l01_objectpool, DISABLED_destroy_null_is_undefined_and_rejected)
 {
-	// BUG-L01-010：destroy() 没有空指针保护，pobj->~T() 会对 nullptr 解引用。
-	// 期望源码加上判空后，本用例才应通过（当前会崩溃，故禁用）。
+	// destroy(nullptr) 的接口容忍语义尚未定义；当前实现会解引用空指针，
+	// 但接口没有明确要求必须支持 NULL。先保留候选用例，等待输入前置条件定案。
 	ObjectPool<Pod> pool;
 	pool.destroy(nullptr);
 	SUCCEED();

@@ -1,27 +1,26 @@
-# 主控裁定过程中新登记的缺陷（状态：待审核，未改任何产品代码）
+# 主控裁定过程中新登记的缺陷（2026-10-29 复核）
 
-来源：`reports/FAIL裁定记录-20261027.md` 的逐条裁定。每条都由「用例日志 + 源码行」双向核对得出，
-可复算路径写在「复现步骤」里。
+来源：`reports/FAIL裁定记录-20261027.md` 的逐条裁定。下方保留旧登记的证据及 2026-10-29 的复核状态；测试修改和动态结果引用 `reports/缺陷复核-20261029.md`，不代表本次只读复核又运行过测试。当前本文件未改生产代码或测试。
+
+截至 2026-10-29：C00-001 的原错误预期已改，新增的全越界契约测试仍失败，产品问题保留；C00-002 为误报，已撤回；原 C00-003 的“返回 ID 与删除数不一致”是测试期望错误，已撤回，qty=0 全撤问题另由 BUG-P08-007 跟踪。
 
 ## BUG-C00-001 `WTSKlineSlice::extractData` 的区间夹取只夹一端，越界窗口静默返回空数组
 
-- 状态: 待审核
+- 状态: 已确认待修复（接口契约不符；产品代码未改）
 - 严重级别: Major
 - 模块/文件: `src/Includes/WTSDataDef.hpp:384-399`
-- 相关测试: `ws03_includes_data/ws03_data_def_test.cpp:281-287`（`ws03_kline_slice.extract_data_fields`）
-- 输入/前置条件: 4 根 bar 的 slice，调用 `extractData(KFT_CLOSE, 10, 20)`
-- 期望行为: 越界窗口要么被完整夹取到合法区间（返回可读的那几根），要么直接返回 `NULL`，与同文件里
-  `WTSKlineData::extractData`（:746-755，`begin/end` 越界时 `return NULL`）保持同一种约定
-- 实际行为: `begin = max(0, min(head,tail)) = 10`，`end = min(max(head,tail), size()-1) = 3`，
-  于是 `for(i=10; i<=3; i++)` 一次都不执行 → **返回一个 size==0 的非空对象**。
+- 相关测试: `ws03_includes_data/ws03_data_def_test.cpp`（`ws03_kline_slice.extract_data_rejects_range_after_all_bars`）
+- 输入/前置条件: 全越界窗口，例如两根 bar 的 slice 调用 `extractData(KFT_CLOSE, 10, 20)`。
+- 期望行为: 对完全越界的窗口返回 `NULL`：`WTSKlineSlice::extractData` 自身的接口注释（:378-382）明确写明「如果超出范围,则返回NULL」。
+  原测试期待最后一根 bar，并无此接口契约支持；不能据此要求把 `(10,20)` 夹成 `(3,3)`。
+- 实际行为: 对两根 bar，`begin = max(0, min(head,tail)) = 10`，`end = min(max(head,tail), size()-1) = 1`，
+  于是 `for(i=10; i<=1; i++)` 一次都不执行 → **返回一个 size==0 的非空对象**。
   调用端只判 `NULL` 的话，会拿着空数组继续读第 0 个元素。
-- 复现步骤: 跑该用例即可：日志里 `clamp->size()` 实得 0、期望 1；紧跟着 `clamp->at(0)` 返回
-  `1.7976931448623157e+308`（见 C00-002）。或单测 `WTSKlineSlice` 的三段：`(0,20)`、`(10,20)`、`(2,1)`。
-- 影响范围: 两个同名函数语义不一致（slice 走「静默空数组」，data 走「NULL」），上层按同一套约定写代码时
-  一条路径判空生效、另一条形同虚设。本轮统计里「数值为 0」形态的 FAIL 有 50 条，这类语义分歧是候选原因之一。
-- 备注: 修复方向由评审定：要么 `begin = min(begin, size())` 并同时把 `end` 夹到 `>= begin`，
-  要么与 `WTSKlineData::extractData` 一致越界返回 `NULL`。**本轮未改产品代码，也未改该用例的断言**，
-  用例保持红。
+- 动态证据（2026-10-29 主控报告）: 原 `extract_data_fields` 的错误“越界夹到最后一根”预期已改为验证相交区间，报告为 PASS；新增 `extract_data_rejects_range_after_all_bars` 按接口注释要求全越界返回 NULL，报告为 FAIL。当前源码仍含新增契约测试；本次复核未重跑。现有 `build-cov/coverage/rc` 未包含这个新用例名，不能用其中旧 `.rc` 覆盖 10/29 报告结果。
+- 影响范围: 两个同名函数在完全越界时可能语义不一致（slice 走「静默空数组」，data 走「NULL」），上层按同一套约定写代码时
+  一条路径判空生效、另一条形同虚设。旧统计中有 50 条「数值为 0」形态 FAIL；该数量只是历史筛查线索，未逐条归因，不能据此扩大本缺陷影响范围。
+- 备注: 建议在分配数组之前检查翻译后的窗口与合法区间是否相交；完全不相交返回 `NULL`，避免生成非空空数组。
+  部分越界是拒绝还是截断需明确接口契约，并补充正向、反向、负索引和空切片回归；不要以强制夹到最后一根 bar 作为修复。
 
 ## ~~BUG-C00-002~~ 撤回：`WTSValueArray::at()` 的 DBL_MAX **是文档化的越界哨兵，不是缺陷**
 
@@ -35,26 +34,14 @@
   仍然成立的部分只有一句：`INVALID_DOUBLE` 与业务侧「无结算价时下发 DBL_MAX」（对照
   `T1_ctpopt_parserxtp.md` 的 XTP `pre_settle` 分支）用的是同一个数值，二者在下游会互相冒充——
   这是**观察**，不是本轮能定级的缺陷，且要产品侧确认语义后才谈得上登记。
-- 真正站得住的只有 C00-001（`extractData` 的区间夹取不对称），该条保留。
+- 本文件中的产品缺陷只保留 C00-001（`extractData` 的区间夹取不对称）；原 C00-003 已撤回，qty=0 全撤问题独立见 BUG-P08-007。
 
-## BUG-C00-003 `HftMocker::stra_cancel(按代码+方向)` 返回的撤单清单与实际被移除的订单数不一致
+## ~~BUG-C00-003~~ 已撤回：原“撤单返回清单与实际移除数不一致”是测试预期错误
 
-- 状态: 待审核
-- 严重级别: Major
-- 模块/文件: `src/WtBtCore/HftMocker.cpp:574-592`（`stra_cancel(const char*, bool, double)`）与 `:548-572`（按 localid 的重载）
-- 相关测试: `p08_btcore_mockers3/p08_hft_order_cancel_test.cpp:228-238`（`P08HftOrderCancel.CancelByCodeAndDirection`）
-- 输入/前置条件: 同一合约下先建立 3 笔挂单（2 买 1 卖之类组合，见该用例 SetUp），
-  再以 `stra_cancel(kCode, false, 10.0)`（qty 大于任何单笔剩余量）撤卖单
-- 期望行为: 返回值 `ret` 里列出的 localid 数量 == 之后真正从 `_orders` 中消失的订单数量
-- 实际行为: 用例观察到 **返回 1 个 id，但 `_orders` 少了 2 笔**（`canceled2.size()==1` 断言通过，
-  随后 `_orders.size()` 实得 1、期望 2）。也就是说调用方拿到的「撤了哪些单」与真实结果不一致。
-- 复现步骤: 直接跑该用例：`CoverageTests_btcore --gtest_filter=P08HftOrderCancel.CancelByCodeAndDirection`，
-  失败点在 `:233` 与 `:236`（两处都是 `_orders.size()` 少 1）
-- 影响范围: 依赖返回值做后续对账/风控计数的高频链路会低估已撤单量。
-- 可疑机制（**我只写到实测能支撑的程度**）：`:578` 在遍历 `_orders` 的过程中，对每个命中项调用
-  `:548` 的按 id 重载，而该重载 post 的任务体在 `:567` `erase(localid)` —— 「遍历中的容器被后续任务修改」
-  与 `:587-590` 的 `if (left < qty) qty -= left; else break;` 组合，使「命中即 break」的判定
-  与 `ret` 的实际收集数不同步。**具体是 break 条件少算还是 erase 溢出，需要产品侧确认**，
-  本条只登记可复现的输入输出事实与嫌疑位置，不下未经证明的结论。
-- 备注: 该用例保持红；本轮未修改产品代码，也未修改用例断言（先前对同文件其它断言的改动是
-  `_hook_valid` 初值那条，依据 `HftMocker.cpp:128`，见 `reports/FAIL裁定记录-20261027.md` A-06）。
+- 状态: 已撤回（原报告的订单数推导错误；不代表 BUG-P08-007 已撤回）
+- 严重级别: 不适用
+- 历史位置: 原登记引用 `src/WtBtCore/HftMocker.cpp:574-592` 与旧版 `p08_hft_order_cancel_test.cpp` 的 `P08HftOrderCancel.CancelByCodeAndDirection`。
+- 原输入与错误结论: 先建立 2 买 1 卖；先撤一笔买单后尚余 1 买 1 卖，再按代码和方向撤销卖单后应余 1 买。旧断言却期待订单总数为 2，于是把正确结果 1 错读成“额外删除一单”。这不能证明返回的 ID 数与实际移除数不一致。
+- 当前测试与动态证据边界: 当前测试源码已将 `CancelByCodeAndDirection` 改为正数量单笔撤单，并新增 `CancelByCodeAndDirectionZeroCancelsAllMatching`。`reports/缺陷复核-20261029.md` 记录正数量用例 PASS、零数量契约用例 FAIL；`p08_btcore_mockers3.md` 另提醒其独立复核使用的预编译二进制仍是测试修改前版本，旧二进制结果不代表新增零数量测试。此次只读审查未运行，动态状态以 10/29 主控报告为当前记录，不能从旧 `.rc` 推断新测试已通过。
+- 分离后的产品问题: `src/Includes/IHftStraCtx.h:186-194` 明确 `qty == 0` 表示撤销全部；`BUG-P08-007` 记录实现只处理第一笔匹配订单。它是独立于原 C00-003 错误计数推导的契约缺陷，仍保留在 P08 主条目。
+- 处置: 从产品缺陷清单移除原 C00-003，不改生产代码或测试；修复方向和验收以 BUG-P08-007 为准，需用重建后的当前测试二进制验证全部匹配订单 ID 与订单状态。

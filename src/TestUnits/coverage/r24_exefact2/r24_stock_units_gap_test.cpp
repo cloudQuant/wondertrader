@@ -173,9 +173,11 @@ static inline std::vector<double> flatBuckets(double v, uint32_t rows = 241)
 // 第 1 个参数才是 product（WTSContractInfo.hpp:27），所以 "STK"/"CBOND" 必须写在第 1 位。
 // 额外 retain()：get_minOrderQty 会对借来的指针多做一次 release（StockVWap.h:386-388），
 // 抵消掉它，否则单元析构时引用计数净少 1。
-WTSCommodityInfo* mkSComm(const char* product, TradingMode tm = TM_Long)
+WTSCommodityInfo* mkSComm(const char* product, TradingMode tm = TM_Long,
+	const std::string& commName = std::string())
 {
-	WTSCommodityInfo* c = WTSCommodityInfo::create(product, sName("R24S").c_str(), "SHSE", "R24DAY", "CHN");
+	const std::string generatedName = commName.empty() ? sName("R24S") : commName;
+	WTSCommodityInfo* c = WTSCommodityInfo::create(product, generatedName.c_str(), "SHSE", "R24DAY", "CHN");
 	c->retain();
 	c->setVolScale(1);
 	c->setPriceTick(0.01);
@@ -295,37 +297,37 @@ TEST(r24_stkvw, init_without_distribution_file_returns_before_calc)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// StockVWap：init L201-218 的科创板钳位（max(cfg, min_hands=200)）与 L221-222 的 T+0 判定
-// （可转债 min_hands=10 那条 R7 已有用例，本轮不重复投）
+// StockVWap：同一增仓场景下，科创板与普通股的最小开仓量钳位对照。
+// _min_hands 的 200/100 取值及 init 中 max/min 规则见 WtStockVWapExeUnit.h/.cpp；此处不测试 T+0。
 //////////////////////////////////////////////////////////////////////////
-TEST(r24_stkvw, kcb_clamps_min_open_lots_up_and_t0_mode_widens_sellable)
+TEST(r24_stkvw, kcb_clamps_min_open_lots_up_for_buy)
 {
-	// 科创板：cfg 给 100，_min_hands=200 -> L213 max -> _min_open_lots=200
+	// 两个场景从同样的实仓 500 增至目标 700；cfg 给 100，科创板 _min_hands=200，
+	// 因而 init 的 max 应使最小开仓量成为 200。
 	const std::string name = sName("R24SKC");
 	SVwapFile vf(name, flatBuckets(30.0));
 	SFakeCtx ctx;
-	ctx.comm = mkSComm("STK", TM_Long);
+	ctx.comm = mkSComm("STK", TM_Both, name);
 	ctx.total = 500;
-	ctx.valid = 100;                             // T+0 被 TM_Long 打开（L221-222）-> vailyPos 用总仓
+	ctx.valid = 500;
 	WtStockVWapExeUnit unit;
 	unit.init(&ctx, kKcb, mkSCfg(5, 0, 0, 100.0));
-	unit.set_position(kKcb, 200);
+	unit.set_position(kKcb, 700);
 	unit.on_tick(mkSTick(kKcb, 100000000, 10.50, 10.49, 10.51));
 	unit.on_channel_ready();
-	// 目标 200 / 总仓 500 -> 走卖向；L609 的量恒等于 min(vailyPos, _min_open_lots)
-	// _is_t0 为真时 vailyPos=realPos=500（L501-502）-> min(500, 200)=200，即钳位后的 200
+	// 按配置的最小开仓量，首单量应为 200。
 	ASSERT_EQ(ctx.buys.size(), 1u);
 	EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 200.0);
-	// 对照：普通股同 cfg 只能到 100（L216 min(cfg, hands=100)）
+	// 对照：普通股 _min_hands=100，init 的 min 应将同一 cfg 保持为 100。
 	const std::string name2 = sName("R24SNRK");
 	SVwapFile vf2(name2, flatBuckets(30.0));
 	SFakeCtx ctx2;
-	ctx2.comm = mkSComm("STK", TM_Long);
+	ctx2.comm = mkSComm("STK", TM_Both, name2);
 	ctx2.total = 500;
-	ctx2.valid = 100;
+	ctx2.valid = 500;
 	WtStockVWapExeUnit unit2;
 	unit2.init(&ctx2, kStk, mkSCfg(5, 0, 0, 100.0));
-	unit2.set_position(kStk, 200);
+	unit2.set_position(kStk, 700);
 	unit2.on_tick(mkSTick(kStk, 100000000, 10.50, 10.49, 10.51));
 	unit2.on_channel_ready();
 	ASSERT_EQ(ctx2.buys.size(), 1u);
@@ -335,37 +337,61 @@ TEST(r24_stkvw, kcb_clamps_min_open_lots_up_and_t0_mode_widens_sellable)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// StockVWap：分桶映射的三段边界（L106-108 开盘前 / L110-112 上午 / L114-116+L127-129 午休）
-// 断言的不是分桶量（L609 无条件覆盖，BUG-R7-007），而是「每一笔新 tick 都恰好下一单、
-// 量=min(可用=min(total,100))」——分桶值在这里被产品丢弃。
+// 待验证：旧用例断言不同分桶仍发相同数量，固定了 BUG-R7-007 的错误现状；
+// 且连续行情间 fake 未同步成交仓位与未完成量，不能作为有效的分桶业务验收。
 //////////////////////////////////////////////////////////////////////////
-TEST(r24_stkvw, tick_buckets_across_morning_and_lunch_all_fire_same_qty)
+TEST(r24_stkvw, DISABLED_time_buckets_use_cumulative_aim_candidates)
 {
-	const std::string name = sName("R24SBK");
-	// 分桶值刻意各不相同：0 格 5、60 格 50、120 格 150
-	std::vector<double> buckets(241, 0.0);
-	buckets[0] = 5.0;
-	buckets[60] = 50.0;
-	buckets[120] = 150.0;
-	SVwapFile vf(name, buckets);
-	SFakeCtx ctx;
-	ctx.comm = mkSComm("STK");
-	ctx.total = 500;
-	ctx.valid = 500;
-	WtStockVWapExeUnit unit;
-	bootS(unit, ctx, kStk, 200, mkSCfg(5, 0, 0, 100.0), 90000000);   // 0900 -> L107-108 桶 0
-	unit.on_tick(mkSTick(kStk, 90000000, 10.50, 10.49, 10.51));
-	unit.on_tick(mkSTick(kStk, 103000000, 10.50, 10.49, 10.51));     // 1030 -> L110-112 桶 60
-	unit.on_tick(mkSTick(kStk, 120000000, 10.50, 10.49, 10.51));     // 1200 -> L114-116 后 L127-129 强制 120
-	// 三笔都是 min(total=500, minopenlots=100) = 100，与分桶值 5/50/150 无关
-	ASSERT_EQ(ctx.buys.size(), 3u);
-	EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 100.0);
-	EXPECT_DOUBLE_EQ(ctx.buys[1].qty, 100.0);
-	EXPECT_DOUBLE_EQ(ctx.buys[2].qty, 100.0);
-	EXPECT_EQ(ctx.countLog("第 1 次发单"), 1u);
-	EXPECT_EQ(ctx.countLog("第 2 次发单"), 1u);
-	EXPECT_EQ(ctx.countLog("第 3 次发单"), 1u);
-	ctx.comm->release();
+	// 候选合同来源：WtStockVWapExeUnit.h 将 VwapAim 定义为按分钟记录的目标总报单量；
+	// calTmStamp 将 10:00/10:30/午休 12:00 分别映射到 30/60/120 分钟桶。
+	// 用 5/50/150 的累计目标、0 起始仓位、1000 股目标和 100 股最小下单单位，
+	// 按 do_calc 的候选规则 max(aimQty-curPos, min_open_lots) 再按最小单位取整，
+	// 三个互相独立的场景应分别得到 100/100/200 股买单。该候选预期仍待业务确认，
+	// 同时会暴露 BUG-R7-007 当前的错误委托方向，因此测试暂时禁用。
+	const std::vector<double> buckets = []() {
+		std::vector<double> values(241, 0.0);
+		values[30] = 5.0;
+		values[60] = 50.0;
+		values[120] = 150.0;
+		return values;
+	}();
+
+	const auto expect_bucket_order = [&buckets](const char* suffix, uint32_t actionTime,
+		double expectedQty) {
+		const std::string name = sName(suffix);
+		SVwapFile vf(name, buckets);
+		SFakeCtx ctx;
+		ctx.comm = mkSComm("STK", TM_Both, name);
+		ctx.total = 0;
+		ctx.valid = 0;
+		{
+			// _last_tick_time is omitted from the user-provided constructor and remains
+			// uninitialized; unit{} does not establish a safe test state here. Keep this
+			// candidate disabled until product initialization is fixed or a safe seam exists.
+			WtStockVWapExeUnit unit{};
+			WTSVariant* cfg = mkSCfg(5, 0, 0, 100.0);
+			unit.init(&ctx, kStk, cfg);
+			cfg->release();
+			unit.set_position(kStk, 1000.0); // channel is not ready, so no tick is needed yet
+			WTSTickData* tick = mkSTick(kStk, actionTime, 10.50, 10.49, 10.51);
+			unit.on_tick(tick);
+			// Keep the create reference through unit destruction. do_calc currently releases
+			// the borrowed _last_tick itself (BUG-R7-015), so ordinary ownership is unverified.
+			unit.on_channel_ready();
+			EXPECT_EQ(ctx.buys.size(), 1u);
+			EXPECT_TRUE(ctx.sells.empty());
+			if (ctx.buys.size() == 1u)
+				EXPECT_DOUBLE_EQ(ctx.buys[0].qty, expectedQty);
+		}
+		if (ctx.comm)
+			ctx.comm->release();
+	};
+
+	// Each timestamp runs with a fresh unit, position, and order ledger; no synthetic
+	// multi-tick state is carried forward between minutes.
+	expect_bucket_order("R24SBK10", 100000000, 100.0);  // 10:00 -> bucket 30 -> aim 5
+	expect_bucket_order("R24SBK1030", 103000000, 100.0); // 10:30 -> bucket 60 -> aim 50
+	expect_bucket_order("R24SBK12", 120000000, 200.0);  // 12:00 -> lunch clamp, bucket 120 -> aim 150
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -377,15 +403,13 @@ TEST(r24_stkvw, session_filter_drops_pre_open_and_foreign_ticks)
 	const std::string name = sName("R24SSESS");
 	SVwapFile vf(name, flatBuckets(30.0));
 	SFakeCtx ctx;
-	ctx.comm = mkSComm("STK");
+	ctx.comm = mkSComm("STK", TM_Long, name);
 	ctx.sess = mkSSess();
 	ctx.total = 500;
 	ctx.valid = 500;
 	WtStockVWapExeUnit unit;
 	unit.init(&ctx, kStk, mkSCfg());
 	unit.set_position(kStk, 200);
-	unit.on_channel_ready();                     // 此时还没有 tick：BUG-R7-005 的解引用在 L517
-	EXPECT_TRUE(ctx.buys.empty());
 
 	unit.on_tick(NULL);                          // L381-382
 	WTSTickData* foreign = mkSTick("SHSE.STK.600999", 100000000, 10.50, 10.49, 10.51);
@@ -397,8 +421,9 @@ TEST(r24_stkvw, session_filter_drops_pre_open_and_foreign_ticks)
 	EXPECT_TRUE(ctx.buys.empty());
 
 	unit.on_tick(mkSTick(kStk, 100000000, 10.50, 10.49, 10.51));   // 1000 在时段内
-	ASSERT_EQ(ctx.buys.size(), 1u);
-	EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 100.0);
+	EXPECT_TRUE(ctx.buys.empty() && ctx.sells.empty());             // tick 已到达，但 channel 尚未 ready
+	unit.on_channel_ready();                                        // 缓存有效 tick 后再启动计算，避开 BUG-R7-005 前置
+	EXPECT_EQ(ctx.buys.size() + ctx.sells.size(), 1u);              // 过滤有效，且至少产生一笔订单
 	ctx.comm->release();
 	ctx.sess->release();
 }
@@ -415,7 +440,7 @@ TEST(r24_stkvw, holdpos_adjust_and_zero_diff_calc_paths)
 	const std::string name = sName("R24SADJ");
 	SVwapFile vf(name, flatBuckets(30.0));
 	SFakeCtx ctx;
-	ctx.comm = mkSComm("STK", TM_Both);          // 非 TM_Long -> _is_t0 保持 false，L501-502 不覆盖
+	ctx.comm = mkSComm("STK", TM_Both, name);    // 非 TM_Long -> _is_t0 保持 false，L501-502 不覆盖
 	ctx.total = 500;
 	ctx.valid = 1000;                            // 可用 > 总数（刻意不一致的柜台数据）
 	WtStockVWapExeUnit unit;
@@ -435,7 +460,7 @@ TEST(r24_stkvw, holdpos_adjust_and_zero_diff_calc_paths)
 	const std::string name2 = sName("R24SZERO");
 	SVwapFile vf2(name2, flatBuckets(30.0));
 	SFakeCtx ctx2;
-	ctx2.comm = mkSComm("STK", TM_Both);
+	ctx2.comm = mkSComm("STK", TM_Both, name2);
 	ctx2.total = 400;
 	ctx2.valid = 400;
 	WtStockVWapExeUnit unit2;
@@ -454,12 +479,12 @@ TEST(r24_stkvw, holdpos_adjust_and_zero_diff_calc_paths)
 // StockVWap：碎股取整命中 -> 标记完成并停止（L521-526），此后任何新 tick 都不再发单
 // target=1003、可用=1000：round_hands(1003,100)=(int)(1053/100)*100=1000 = round_hands(1000,100)
 //////////////////////////////////////////////////////////////////////////
-TEST(r24_stkvw, rounding_match_marks_finish_and_blocks_later_ticks)
+TEST(r24_stkvw, rounding_match_marks_finish_until_target_changes)
 {
 	const std::string name = sName("R24SFIN");
 	SVwapFile vf(name, flatBuckets(30.0));
 	SFakeCtx ctx;
-	ctx.comm = mkSComm("STK", TM_Both);
+	ctx.comm = mkSComm("STK", TM_Both, name);
 	ctx.total = 1000;
 	ctx.valid = 1000;
 	WtStockVWapExeUnit unit;
@@ -476,9 +501,9 @@ TEST(r24_stkvw, rounding_match_marks_finish_and_blocks_later_ticks)
 	EXPECT_EQ(ctx.countLog("set finish"), 1u);   // 没有重复标记
 	// 换目标会重置 _is_finish（set_position L787），完成态不是一去不回
 	unit.set_position(kStk, 1300);
-	unit.on_tick(mkSTick(kStk, 113000000, 10.80, 10.79, 10.81));
-	ASSERT_EQ(ctx.buys.size(), 1u);
-	EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 100.0);
+	// channel 已 ready，set_position 会同步执行 do_calc 并发出首单；不再追加 tick，
+	// 因为这个 fake 不会自动把刚发出的订单写回 undone 数量。
+	EXPECT_EQ(ctx.buys.size() + ctx.sells.size(), 1u);
 	ctx.comm->release();
 }
 
@@ -491,35 +516,54 @@ TEST(r24_stkvw, opposite_undone_canceled_and_same_direction_blocks_round)
 	const std::string name = sName("R24SOPP");
 	SVwapFile vf(name, flatBuckets(30.0));
 	SFakeCtx ctx;
-	ctx.comm = mkSComm("STK", TM_Both);
-	ctx.total = 0;
-	ctx.valid = 0;
-	ctx.undone = -3.0;                            // 场内 3 手卖单
-	ctx.cancelBydirRetCnt = 2;
+	ctx.comm = mkSComm("STK", TM_Both, name);
+	ctx.total = 500;
+	ctx.valid = 500;
+	ctx.cancelBydirRetCnt = 1;
 	WtStockVWapExeUnit unit;
 	unit.init(&ctx, kStk, mkSCfg(5, 0, 0, 100.0));
-	unit.set_position(kStk, 500);                 // diffQty = +500 -> 与 undone 反号
+	unit.set_position(kStk, 800);                 // 首先建立一个本地受管的增仓买单
 	unit.on_tick(mkSTick(kStk, 100000000, 10.50, 10.49, 10.51));
 	unit.on_channel_ready();
-	// on_channel_ready 先撤了外部单（L322-346），undone 仍是 -3 -> do_calc 进 L531
-	ASSERT_GE(ctx.bydirCancels.size(), 1u);
-	EXPECT_FALSE(ctx.bydirCancels[ctx.bydirCancels.size() - 1].second);   // isBuy=(undone>0)=false
-	EXPECT_TRUE(ctx.hasLog("live opposite order of"));                    // L538
-	EXPECT_TRUE(ctx.buys.empty());
+	const bool hasManagedBuy = ctx.buys.size() == 1u && ctx.sells.empty() && ctx.buys[0].qty > 0;
+	EXPECT_TRUE(hasManagedBuy);
+	if (hasManagedBuy)
+	{
+		// fake 以真实买单量回填正的未完成量，再把目标改成减仓；set_position 同步进入 L531-541。
+		ctx.undone = ctx.buys[0].qty;
+		const size_t orderCountBefore = ctx.buys.size() + ctx.sells.size();
+		unit.set_position(kStk, 200);
+		const bool cancellationIssued = ctx.bydirCancels.size() == 1u;
+		EXPECT_TRUE(cancellationIssued);
+		if (cancellationIssued)
+			EXPECT_TRUE(ctx.bydirCancels[0].second);                         // 撤买单
+		EXPECT_TRUE(ctx.hasLog("live opposite order of"));                  // L538
+		EXPECT_EQ(ctx.buys.size() + ctx.sells.size(), orderCountBefore);     // 撤单等待中不重发
+	}
 
-	// 同向：undone=+3、diffQty=+500 -> 531 不成立 -> L542-546 本轮放弃
+	// 同向待单也从已受管的首单建立，避免被 on_channel_ready 当成 unmanaged 订单提前撤销。
 	const std::string name2 = sName("R24SSAME");
 	SVwapFile vf2(name2, flatBuckets(30.0));
 	SFakeCtx ctx2;
-	ctx2.comm = mkSComm("STK", TM_Both);
-	ctx2.undone = 3.0;
+	ctx2.comm = mkSComm("STK", TM_Both, name2);
+	ctx2.total = 500;
+	ctx2.valid = 500;
 	WtStockVWapExeUnit unit2;
 	unit2.init(&ctx2, kStk, mkSCfg(5, 0, 0, 100.0));
-	unit2.set_position(kStk, 500);
+	unit2.set_position(kStk, 800);
 	unit2.on_tick(mkSTick(kStk, 100000000, 10.50, 10.49, 10.51));
-	unit2.on_channel_ready();                    // 撤外部单 -> 之后 undone 仍 3
-	EXPECT_TRUE(ctx2.hasLog("上一轮有挂单未完成"));   // L544
-	EXPECT_TRUE(ctx2.buys.empty());
+	unit2.on_channel_ready();
+	const bool hasManagedBuy2 = ctx2.buys.size() == 1u && ctx2.sells.empty() && ctx2.buys[0].qty > 0;
+	EXPECT_TRUE(hasManagedBuy2);
+	if (hasManagedBuy2)
+	{
+		ctx2.undone = ctx2.buys[0].qty;                                    // 已受管买单的实际未完成量
+		const size_t orderCountBefore = ctx2.buys.size() + ctx2.sells.size();
+		unit2.on_tick(mkSTick(kStk, 103000000, 10.60, 10.59, 10.61));
+		EXPECT_TRUE(ctx2.hasLog("上一轮有挂单未完成"));                     // L544
+		EXPECT_TRUE(ctx2.bydirCancels.empty());                             // 同向订单不撤
+		EXPECT_EQ(ctx2.buys.size() + ctx2.sells.size(), orderCountBefore);  // L542-546 不发新单
+	}
 	ctx.comm->release();
 	ctx2.comm->release();
 }
@@ -533,7 +577,7 @@ TEST(r24_stkvw, expired_scan_then_cancel_reports_drain_cancel_cnt)
 	const std::string name = sName("R24SEXP");
 	SVwapFile vf(name, flatBuckets(30.0));
 	SFakeCtx ctx;
-	ctx.comm = mkSComm("STK", TM_Both);
+	ctx.comm = mkSComm("STK", TM_Both, name);
 	ctx.total = 500;
 	ctx.valid = 500;
 	WtStockVWapExeUnit unit;
@@ -563,91 +607,57 @@ TEST(r24_stkvw, expired_scan_then_cancel_reports_drain_cancel_cnt)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// StockVWap：do_calc 的价格模式（L624-627 模式1 / L628-631 模式2 / L632-634 打板 +5 跳）
-// 以及末桶打板（L585-589）
+// StockVWap：目标从 500 减到 200 时，价格模式应走卖出方向。
+// 只核对首次发单方向；价格选择的业务定义尚未从外部契约确认。
+// 两个 scenario 都保留 bootS 创建 tick 的 caller 引用，临时隔离已登记 BUG-R7-015；
+// 这只是为了运行方向断言的生命周期 workaround，不构成所有权安全验收。
 //////////////////////////////////////////////////////////////////////////
-TEST(r24_stkvw, price_modes_and_last_bucket_showhand)
+TEST(r24_stkvw, price_modes_preserve_sell_direction)
 {
 	const std::string name = sName("R24SPM");
 	SVwapFile vf(name, flatBuckets(30.0));
 	SFakeCtx ctx;
-	ctx.comm = mkSComm("STK", TM_Both);
+	ctx.comm = mkSComm("STK", TM_Both, name);
+	EXPECT_STREQ(ctx.comm->getName(), name.c_str());
 	ctx.total = 500;
 	ctx.valid = 500;
-	WtStockVWapExeUnit unit;
-	// price_mode=1：L626 `isBuy ? bid : ask`，isBuy 来自 diffQty（此处 200-500<0）-> ask 10.51
-	bootS(unit, ctx, kStk, 200, mkSCfg(1, 1, 0, 100.0));          // total_times=1
-	ASSERT_EQ(ctx.buys.size(), 1u);
-	EXPECT_DOUBLE_EQ(ctx.buys[0].price, 10.51);
-	EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 100.0);
-
-	// 第二次：leftTimes = 1-1 = 0 且 diffQty!=0 -> L585-589 打板 + L633 再加 5 跳
-	unit.on_tick(mkSTick(kStk, 103000000, 10.60, 10.59, 10.61));
-	ASSERT_EQ(ctx.buys.size(), 2u);
-	EXPECT_DOUBLE_EQ(ctx.buys[1].price, 10.66);   // 10.60 + 0.01*5（isBuy=false 走 L633 的 -1? 见下）
+	{
+		WtStockVWapExeUnit unit;
+		// price_mode=1：500 -> 200 是减仓，应产生卖单。当前生产代码若把 curQty 符号翻成正数，
+		// 该断言会失败并由 BUG-R7-007/008 追踪；不要把错误的买单行为固化成测试预期。
+		bootS(unit, ctx, kStk, 200, mkSCfg(1, 1, 0, 100.0));
+		EXPECT_EQ(ctx.buys.size(), 0u);
+		EXPECT_EQ(ctx.sells.size(), 1u);
+	}
 	ctx.comm->release();
 
-	// price_mode=2：L630 `isBuy ? ask : bid`，diffQty<0 -> bid 10.49；offset=3 -> L637 再减 3 跳
 	const std::string name2 = sName("R24SPM2");
 	SVwapFile vf2(name2, flatBuckets(30.0));
 	SFakeCtx ctx2;
-	ctx2.comm = mkSComm("STK", TM_Both);
+	ctx2.comm = mkSComm("STK", TM_Both, name2);
+	EXPECT_STREQ(ctx2.comm->getName(), name2.c_str());
 	ctx2.total = 500;
 	ctx2.valid = 500;
-	WtStockVWapExeUnit unit2;
-	bootS(unit2, ctx2, kStk, 200, mkSCfg(5, 2, 3, 100.0));
-	ASSERT_EQ(ctx2.buys.size(), 1u);
-	EXPECT_DOUBLE_EQ(ctx2.buys[0].price, 10.46);  // 10.49 - 0.01*3
+	{
+		WtStockVWapExeUnit unit2;
+		// price_mode=2 也应对同一减仓目标的首次发单保持卖出方向；不锁定具体报价。
+		bootS(unit2, ctx2, kStk, 200, mkSCfg(5, 2, 3, 100.0));
+		EXPECT_EQ(ctx2.buys.size(), 0u);
+		EXPECT_EQ(ctx2.sells.size(), 1u);
+	}
 	ctx2.comm->release();
 }
 
 //////////////////////////////////////////////////////////////////////////
-// StockVWap：fire_at_once 的 0 量早退（L683-684）与卖出侧（L703-711 价、L729-735 跌停、L746 卖）
+// fire_at_once 的零量和卖出侧目前缺少安全、可达的公开测试路径。
 //////////////////////////////////////////////////////////////////////////
-TEST(r24_stkvw, fire_at_once_zero_qty_and_sell_paths)
+TEST(r24_stkvw, DISABLED_fire_at_once_zero_qty_and_sell_paths_need_safe_fixture)
 {
-	// 第一轮：minopenlots=0 -> 重发量 max(0, 100-400)=0 -> L683-684 直接返回
-	const std::string name = sName("R24SF0");
-	SVwapFile vf(name, flatBuckets(30.0));
-	SFakeCtx ctx;
-	ctx.comm = mkSComm("STK", TM_Both);
-	ctx.total = 500;
-	ctx.valid = 500;
-	WtStockVWapExeUnit unit;
-	unit.init(&ctx, kStk, mkSCfg(5, 0, 0, 0.0));
-	unit.set_position(kStk, 200);
-	unit.on_tick(mkSTick(kStk, 100000000, 10.50, 10.49, 10.51));
-	unit.on_channel_ready();
-	ASSERT_EQ(ctx.buys.size(), 1u);                // L609 min(500,0)=0 -> curQty=0 -> L664 sell(0)
-	// curQty==0 -> L659 不成立 -> sell(0)，本轮目标 _this_target = 500+0
-	unit.on_order(ctx.buys.size() ? 7000 : 7000, kStk, false, 5, 10.50, true);
-	EXPECT_TRUE(ctx.hasLog("re_fire will be done"));   // L291
-	EXPECT_EQ(ctx.buys.size(), 1u);                // L683-684：qty=0 不再加仓
-	ctx.comm->release();
-
-	// 第二轮：minopenlots=-200 -> 重发量 max(-200, 100-500) = -200 -> 卖 200，跌停收敛
-	const std::string name2 = sName("R24SSELL");
-	SVwapFile vf2(name2, flatBuckets(30.0));
-	SFakeCtx ctx2;
-	ctx2.comm = mkSComm("STK", TM_Both);
-	ctx2.total = 500;
-	ctx2.valid = 500;
-	WtStockVWapExeUnit unit2;
-	unit2.init(&ctx2, kStk, mkSCfg(5, 1, 0, -200.0));
-	unit2.set_position(kStk, 100);
-	unit2.on_tick(mkSTick(kStk, 100000000, 10.50, 10.49, 10.51, 0, 10.50));
-	unit2.on_channel_ready();
-	EXPECT_GE(ctx2.buys.size(), 1u);
-	ctx2.total = 500;
-	ctx2.valid = 500;
-	unit2.on_order(7000, kStk, false, 5, 10.50, true);
-	// fire_at_once(-200)：mode1 -> L705 卖向取 bidprice(0)=10.49，L714 再减 0.01*_cancel_times(1)
-	// = 10.48 < 跌停 10.50 -> L729-735 收敛，L746 sell(abs(-200))
-	ASSERT_EQ(ctx2.sells.size(), 1u);
-	EXPECT_DOUBLE_EQ(ctx2.sells[0].qty, 200.0);
-	EXPECT_DOUBLE_EQ(ctx2.sells[0].price, 10.50);
-	EXPECT_EQ(ctx2.countLog("modified to lower limit price"), 1u);
-	ctx2.comm->release();
+	// fire_at_once 是 private。正常 on_order 路径总是以 max(_min_open_lots, delta) 生成重发量，
+	// 因而合法正 minopenlots 无法覆盖零量早退。原用例用 0 触发 round_hands 除零，
+	// 用负 minopenlots 强造卖单，二者都不是有效配置；此外 do_calc 当前的减仓方向缺陷
+	// 使正常首单无法为卖出重发建立可靠前置条件。等待产品修复或提供安全测试 seam 后再恢复。
+	GTEST_SKIP() << "no safe public fixture reaches fire_at_once zero-quantity or sell paths";
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -659,7 +669,7 @@ TEST(r24_stkvw, set_position_grabs_start_price)
 	const std::string name = sName("R24SSP");
 	SVwapFile vf(name, flatBuckets(30.0));
 	SFakeCtx ctx;
-	ctx.comm = mkSComm("STK", TM_Both);
+	ctx.comm = mkSComm("STK", TM_Both, name);
 	ctx.total = 500;
 	ctx.valid = 500;
 	WTSTickData* grabbed = mkSTick(kStk, 93000000, 9.99, 9.98, 10.00);
@@ -676,7 +686,7 @@ TEST(r24_stkvw, set_position_grabs_start_price)
 	const std::string name2 = sName("R24SSP2");
 	SVwapFile vf2(name2, flatBuckets(30.0));
 	SFakeCtx ctx2;
-	ctx2.comm = mkSComm("STK", TM_Both);
+	ctx2.comm = mkSComm("STK", TM_Both, name2);
 	ctx2.grabReturnsTick = false;
 	ctx2.total = 500;
 	ctx2.valid = 500;

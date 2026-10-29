@@ -1,0 +1,628 @@
+{
+  "changed_entries": 69,
+  "changed_files": 47,
+  "remaining_active_candidates": 546,
+  "rows": [
+    {
+      "lane": "l00_build_graph",
+      "id": "BUG-L00-007",
+      "decision": "TEST",
+      "new_status": "已撤回（迭代02：TEST，原产品主张不成立）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": "",
+      "reason": "候选问题是带 main 的测试目标未链接产品可执行体的核心库；当前 coverage CMake 已从模块 CMakeLists 收集核心库并链接。属于测试目标设置问题，历史构建结果未在本轮重跑。"
+    },
+    {
+      "lane": "l00_build_graph",
+      "id": "BUG-L00-006",
+      "decision": "TEST",
+      "new_status": "已撤回（迭代02：TEST，原产品主张不成立）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": "",
+      "reason": "声称的头/库版本错配发生在 WT_ENABLE_COVERAGE 测试目标的 include 搜索顺序；生产目标本身有一致的 Boost 选择记录。当前测试 CMake 已加入路径桥接规避。旧链接失败/成功结果未在本轮重跑，所以分类为测试构建配置问题，不是产品运行缺陷。"
+    },
+    {
+      "lane": "l02_wtstools_mq",
+      "id": "BUG-L02-012",
+      "decision": "NOT_BUG",
+      "new_status": "已撤回（迭代02：NOT_BUG，原产品主张不成立）",
+      "previous_status": "- 状态: 待审核（越界主张在仓内路径不成立；常量宽度的外部使用边界待确认）",
+      "canonical": null,
+      "reason": "BLK_FLAG 的 sizeof=9 与 FLAG_SIZE=8 确实不同，但仓内没有活动 sizeof(BLK_FLAG) 拷贝；唯一实现引用是注释掉的比较，数组本身可容纳 7 个字符和 NUL。_data 的 1024 字节容量可能不足以存 128 个字符串，但 make_valid 在分配前检查 offset+len 并拒绝超额，未见越界写。MAX_KEY_CNT 是 metadata 上限，不是保证所有值槽都可分配。"
+    },
+    {
+      "lane": "R3_wtcore",
+      "id": "BUG-R3-007",
+      "decision": "TEST",
+      "new_status": "已撤回（迭代02：TEST，原产品主张不成立）",
+      "previous_status": "- 状态: 测试调用顺序绕过正常就绪门禁；未证明产品调用路径可达",
+      "canonical": null,
+      "reason": "已知测试通过上下文/tick helper 驱动持仓，不是在未就绪的 WtCtaEngine 回调链中运行；生产 on_tick 仅在 _ready 为 true 时分发到上下文，_ready 在 session begin 后才置 true。handle_pos_change 本身无 ready guard，但没有证据表明正常生命周期在 ready 前调用；原测试现象不足以支撑产品缺陷。"
+    },
+    {
+      "lane": "R3_wtcore",
+      "id": "BUG-R3-005",
+      "decision": "NOT_BUG",
+      "new_status": "已撤回（迭代02：NOT_BUG，原产品主张不成立）",
+      "previous_status": "- 状态: 证据不足；原缺陷的因果判断未获源码控制流支持",
+      "canonical": null,
+      "reason": "反手先按明细逐笔平仓，动态盈亏按剩余明细比例缩放；当一侧明细全部平完时分子剩余量为零，_dynprofit 已归零后才建立反向明细。现有反手测试只覆盖零动态盈亏，但源码控制流不支持“旧浮盈直接留给新仓”的因果主张。"
+    },
+    {
+      "lane": "R3_wtcore",
+      "id": "BUG-R3-004",
+      "decision": "NOT_BUG",
+      "new_status": "已撤回（迭代02：NOT_BUG，原产品主张不成立）",
+      "previous_status": "- 状态: 当前可由公开枚举不变量解释，未证明可达缺陷",
+      "canonical": null,
+      "reason": "平多读取可平量、平空读取净空头量的实现表面不对称；但当前公开交易模式实现中 canShort 仅对 TM_Both 返回 true，isT1 仅对 TM_LongT1 返回 true，提出的“可做空且有 T+1 冻结量”前提不可由同一 TradingMode 构造。没有证明其他冻结来源会进入空头平仓口径。"
+    },
+    {
+      "lane": "n01_wtcore_tradepaths",
+      "id": "BUG-N01-007",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-R42-002）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": "BUG-R42-002",
+      "reason": "候选描述的未初始化 _trader 与无守卫交易调用链，已由 R42-002 主记录覆盖；R13-001 提供 runner 绑定失败后仍返 context 的另一个触发链，但它明确指出成员漏初始化与 R42-002 同根因。"
+    },
+    {
+      "lane": "n01_wtcore_tradepaths",
+      "id": "BUG-N01-005",
+      "decision": "TEST",
+      "new_status": "已撤回（迭代02：TEST，原产品主张不成立）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": null,
+      "reason": "源码确实要求 _stat_map 存在，但 run 在 registerSpi/connect 之前先创建 map，因此候选所说的正常柜台回报早于 run 与正常注册顺序相反。N01 对应 disabled test 体只有局部变量，完全没有构造/投递回报；本测试主张作为生产 bug 的现有证据不成立。没有证明外部 API 会越过注册顺序回调。"
+    },
+    {
+      "lane": "R10_wtcore",
+      "id": "BUG-R10-012",
+      "decision": "NOT_BUG",
+      "new_status": "已撤回（迭代02：NOT_BUG，原产品主张不成立）",
+      "previous_status": "- 状态: 待验证（正常派发路径下的缺陷主张未成立，空指针合同待确认）",
+      "canonical": null,
+      "reason": "未知 key 由 map operator[] 插入空列表，但正常数据管理器先登记 bar 订阅再派发；目前只证明单个异常调用创建惰性空项，不能推出正常路径无界增长。上游也解引用 bar，未证明 NULL 是合同允许输入。"
+    },
+    {
+      "lane": "R160",
+      "id": "BUG-R160-001",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-R41-003）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": "BUG-R41-003",
+      "reason": "订单通知 retain 后异步 lambda 未 release，与 BUG-R41-003 是同调用、同引用失衡和修复点；消息测试未观察对象生命周期。"
+    },
+    {
+      "lane": "R171",
+      "id": "BUG-R171-004",
+      "decision": "NOT_BUG",
+      "new_status": "已撤回（迭代02：NOT_BUG，原产品主张不成立）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": null,
+      "reason": "_ticks 被创建但在可见代码中没有写入者；公开 getter 最终回退到 _replayer->get_last_tick，因此没有证据表明当前公开返回值错误。缓存未使用本身不能证明功能缺陷。"
+    },
+    {
+      "lane": "R215",
+      "id": "BUG-R215-005",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-R91-003）",
+      "previous_status": "- 状态: 待修复（代码路径明确；队列项有本轮定向 FAIL，逐笔委托/成交需独立回归确认）",
+      "canonical": "BUG-R91-003",
+      "reason": "detail、queue、transaction 三个切片都以同一类 lower_bound/游标边界错误处理 etime；其代码根因和公开 etime 右界契约与 BUG-R91-003 相同。现有队列测试只断言回调次数，未安全解引用返回记录；detail/trans 的相关边界仍缺直接回归。"
+    },
+    {
+      "lane": "R2_wtbtcore",
+      "id": "R2_wtbtcore#4",
+      "decision": "NOT_BUG",
+      "new_status": "已撤回（迭代02：NOT_BUG，原产品主张不成立）",
+      "previous_status": "  - 状态: 原重复撮合论据不成立；同 tick 新信号是否成交需按策略时序契约确认",
+      "canonical": null,
+      "reason": "一次 tick 的现有 signal 在第一次 proc_tick 后已被消费；第二次调用位于 on_tick_updated 之后，用于处理该回调中新建的 signal，代码注释说明了这个时序用途。现有测试覆盖两 tick 间下单，不证明同一订单重复成交。"
+    },
+    {
+      "lane": "R58",
+      "id": "BUG-R58-002",
+      "decision": "TEST",
+      "new_status": "已撤回（迭代02：TEST，原产品主张不成立）",
+      "previous_status": "- 状态: 测试错误导致的伪复现；独立产品风险尚待有效输入证明",
+      "canonical": null,
+      "reason": "原 rc=139 复现的夹具根目录少一级，未加载 dist/common session 数据，不能证明有效回放会出现空 session；当前修正后的测试加载有效配置并用 SSE.STK.000001。源码仍有空指针风险，但是否属于可接受输入未建立，故撤销原测试的产品复现主张。"
+    },
+    {
+      "lane": "p04_btcore_replayer",
+      "id": "BUG-P04-008",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-P04-010）",
+      "previous_status": "",
+      "canonical": "BUG-P04-010",
+      "reason": "声称的 cursor=size/OOB 情形与 BUG-P04-010 起始首日之前定位所设 cursor=eIdx+1 是同一段定位规则、同一边界根因；单 bar 数据可能成为 _bars[size]，多 bar 情形则跳过首 bar。当前 CSV 测试 oracle 已修正为覆盖所有 bars。"
+    },
+    {
+      "lane": "p04_btcore_replayer",
+      "id": "BUG-P04-007",
+      "decision": "NOT_BUG",
+      "new_status": "已撤回（迭代02：NOT_BUG，原产品主张不成立）",
+      "previous_status": "",
+      "canonical": null,
+      "reason": "任务默认 session 是 TRADING，当前样例 sessions.json 明确包含 TRADING；因此“默认值在样例中不存在”不成立。用户自定义未知 session 属于独立无效配置路径。"
+    },
+    {
+      "lane": "p04_btcore_replayer",
+      "id": "BUG-P04-003",
+      "decision": "NOT_BUG",
+      "new_status": "已撤回（迭代02：NOT_BUG，原产品主张不成立）",
+      "previous_status": "",
+      "canonical": null,
+      "reason": "零 end time 会按实现解析为当前日期，日循环仍有日期终止条件；没有证据支持旧记录所称无界挂死。禁用 composite 没有 timeout/可观测日期上限，也不能证明 hang。零值代表何种语义可另行澄清，但原挂死结论不成立。"
+    },
+    {
+      "lane": "R191",
+      "id": "BUG-R191-001",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-R64-002）",
+      "previous_status": "",
+      "canonical": "BUG-R64-002",
+      "reason": "按值插件删除函数与按引用 typedef 不匹配，与 BUG-R64-002 同一 ABI 根因；R54 用例禁用，本轮仅静态判读。"
+    },
+    {
+      "lane": "R20_wtbtcore",
+      "id": "R20_wtbtcore#6",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-N04-001）",
+      "previous_status": "  - 状态: 产品缺陷；与 `bugs/n04_btcore_mockers.md` BUG-N04-001、`bugs/R36_rerun_20261028.md` BUG-R36-002 同根重复，N04 保留主记录",
+      "canonical": "BUG-N04-001",
+      "reason": "ExecMocker 初始化失败仍登记/进入回调，与 BUG-N04-001 同一调用链。R20 disabled 测试也用未初始化对象写 NULL 前置，不能单独证明。"
+    },
+    {
+      "lane": "R20_wtbtcore",
+      "id": "R20_wtbtcore#2",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-L06-006）",
+      "previous_status": "  - 状态: 未确认产品缺陷；与 `bugs/l06_wtbtcore.md` BUG-L06-006 同一候选，NULL 支持契约未找到",
+      "canonical": "BUG-L06-006",
+      "reason": "同 BUG-L06-006：init(NULL) 源码会解引用，但正常 Runner 先过滤空配置；未找到 init 接受 NULL 的公开契约。"
+    },
+    {
+      "lane": "R63",
+      "id": "R63#1",
+      "decision": "TEST",
+      "new_status": "已撤回（迭代02：TEST，原产品主张不成立）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": null,
+      "reason": "R66 首 tick 只建分钟位、时间格式错误；R67 复权后缀及 cache 查询时点不合法；R68 两个配置构造曾是错误 raw-literal。属于 R63 测试前置/期望问题。另 ShmCaster 目录路径异常未转 false 是独立 BUG-R68-002，不属于此汇总行。未运行测试。"
+    },
+    {
+      "lane": "p03_btcore_mockers2",
+      "id": "BUG-P03-003",
+      "decision": "NOT_BUG",
+      "new_status": "已撤回（迭代02：NOT_BUG，原产品主张不成立）",
+      "previous_status": "",
+      "canonical": null,
+      "reason": "_PosItem::_long 未初始化，但源码未找到读取；实际多空持仓是外层 PosInfo._long/_short。当前没有可观察行为依赖该 bool。"
+    },
+    {
+      "lane": "p08_btcore_mockers3",
+      "id": "BUG-P08-002",
+      "decision": "TEST",
+      "new_status": "已撤回（迭代02：TEST，原产品主张不成立）",
+      "previous_status": "",
+      "canonical": null,
+      "reason": "复现把品种设为 TM_LongT1（canShort=false）后直接 on_trade 注入 short，绕过交易模式/下单约束；不能证明有合法 short T+1 结转缺陷。TM_Both short 是否有 frozen 跨日语义也未证明。"
+    },
+    {
+      "lane": "R36_rerun_20261028",
+      "id": "BUG-R36-007",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-R142-001）",
+      "previous_status": "- 状态: 待验证（堆损坏的历史复现仍成立；候选写入与崩溃因果未闭环）",
+      "canonical": "BUG-R142-001",
+      "reason": "与 BUG-R142-001 是相同 WtRdmDtReader CMP_V2 装载实现、相同 resize/append 后写旧头指针问题；SIGTRAP 记录是另一个输入和测试观察，不构成第二处独立实现缺陷。"
+    },
+    {
+      "lane": "R74",
+      "id": "BUG-R74-001",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-R132-002）",
+      "previous_status": "- 状态: 源码确认（运行复现未获得断言结果）",
+      "canonical": "BUG-R132-002",
+      "reason": "与 BUG-R132-002 的实现路径、误查 _his_ordque_map 的两处代码、空 block 结果完全相同；只是重复登记来源和复现 fixture 不同。"
+    },
+    {
+      "lane": "R94",
+      "id": "BUG-R94-001",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-P05-007）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": "BUG-P05-007",
+      "reason": "历史 ByRange/ByCount 在 eit==begin 且右界早于首根时无条件 eit--，与既有 BUG-P05-007 / 合并编号 BUG-P09-001 是相同 helper、同一根因；本条不新增计数。"
+    },
+    {
+      "lane": "l04_datastorage",
+      "id": "BUG-L04-001",
+      "decision": "NOT_BUG",
+      "new_status": "已撤回（迭代02：NOT_BUG，原产品主张不成立）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": null,
+      "reason": "函数内部确实将 std::vector<std::string> 对象区误当作 WTSBarStruct payload，并把 range 的右 key 写成左 key；但这是 private helper，仓库调用搜索只有声明/定义，没有生产调用路径。现有 LMDB test 不调用它，当前不能把不可达私有函数的问题计为产品运行缺陷。"
+    },
+    {
+      "lane": "R21_adstorage",
+      "id": "R21-BUG-05",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-P05-001）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": "BUG-P05-001",
+      "reason": "map 中 shared_ptr 被 move 后仍保留 key、值为空，这是 BUG-P05-001 的同一缺陷族。R21 还指出该文件 get_t_db 有同样写法，应作为 canonical 修复范围的附加调用点，不另计根因。"
+    },
+    {
+      "lane": "R32_adstorage",
+      "id": "BUG-R32-004",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-R16-11）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": "BUG-R16-11",
+      "reason": "get_all 未先判断 cursor 返回码即 append 末次 item，导致幻尾记录/空库未初始化数据；与 R16-BUG-11 是完全相同实现和缺陷，后者还包含 cursor 关闭问题。"
+    },
+    {
+      "lane": "R32_adstorage",
+      "id": "BUG-R32-002",
+      "decision": "TEST",
+      "new_status": "已撤回（迭代02：TEST，原产品主张不成立）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": null,
+      "reason": "公开字段注释说明 pre_interest 是上日总持；新交易日 fixture 没有给它设置，WTSStruct 默认值为 0。procFlag==1 计算差分时用这个输入值，因此 additional()==10 的 oracle 不成立，不能据此要求产品以缓存值覆盖输入。"
+    },
+    {
+      "lane": "R45",
+      "id": "BUG-R45-003",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-P05-002）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": "BUG-P05-002",
+      "reason": "tick/K 线空 vector 的 &v[0] 与 size()-1 下溢同 BUG-P05-002 完全重叠；manager 单周期入口只是同一实现的触发路径。"
+    },
+    {
+      "lane": "p05_datastorage2",
+      "id": "BUG-P05-004",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-R32-003）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": "BUG-R32-003",
+      "reason": "测试手工将独立正确 uint64 时间压入 uint32 key 可展示截断，但当前真实 writer 上游先在 timeToMinBar 回绕；当前可证的生产错误与 BUG-R32-003 重叠，额外扩展 key 格式要在迁移政策下处理。"
+    },
+    {
+      "lane": "R133",
+      "id": "BUG-R133-001",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-R78-001）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": "BUG-R78-001",
+      "reason": "_cfg retain 未配对 release，以及缺 createParser 符号时未释放已加载句柄，与 BUG-R78-001 是同一 ParserAdapter 资源清理根因。原记录称该类没有 initExt 不正确，头文件和实现都提供 initExt；重复 release 后指针未清零不属于已证明的正常生命周期问题。"
+    },
+    {
+      "lane": "R144",
+      "id": "BUG-R144-004",
+      "decision": "TEST",
+      "new_status": "已撤回（迭代02：TEST，原产品主张不成立）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": null,
+      "reason": "候选对应测试已经按真实装配补了长期存活的 TraderAdapterMgr 并调用 set_adapter_mgr；正常 WtRunner 也设置该依赖。该测试不再复现空指针，且没有公开契约支持未装配 manager 仍可触发 on_schedule。"
+    },
+    {
+      "lane": "R144",
+      "id": "BUG-R144-001",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-R175-001）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": "BUG-R175-001",
+      "reason": "与 BUG-R175-001 完全同根因：TraderAdapter::release 传 NULL 给 TraderMocker::registerSpi，而 mocker 随即解引用。R85 active 用例已在 init 后显式调用 release，因此‘测试绕过释放’不是当前事实；本轮未运行它。"
+    },
+    {
+      "lane": "n03_uftcore_index",
+      "id": "BUG-N03-008",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-R78-001）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": "BUG-R78-001",
+      "reason": "init 在配置空 module 等失败路径前已 retain _cfg 且 release 不释放，和 BUG-R78-001 的配置引用泄漏同根因。候选另一主张认为 initExt 注入 API 必属外部所有权，但没有接口所有权契约；现有测试分配 API 后由 adapter.release 使用，不能证明 double-free。"
+    },
+    {
+      "lane": "n03_uftcore_index",
+      "id": "BUG-N03-007",
+      "decision": "TEST",
+      "new_status": "已撤回（迭代02：TEST，原产品主张不成立）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": null,
+      "reason": "输入使用裸代码 600000，而这些公开方法参数约定为 stdCode，adapter 按 exchange.code 拆分并查基础数据。候选复现也在全新 adapter 上发裸代码单，既违反代码格式前置又未装配 API/依赖。"
+    },
+    {
+      "lane": "n03_uftcore_index",
+      "id": "BUG-N03-005",
+      "decision": "TEST",
+      "new_status": "已撤回（迭代02：TEST，原产品主张不成立）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": null,
+      "reason": "_stat_map 在 TraderAdapter::run 创建；候选测试对全新且未 run 的适配器调用 getInfos/check*。未找到这些调用在 init/run 前必须安全的公开生命周期契约，故该测试前置无效，不能将未装配对象的崩溃当产品缺陷。"
+    },
+    {
+      "lane": "p06_uftcore2",
+      "id": "BUG-P06-004",
+      "decision": "TEST",
+      "new_status": "已撤回（迭代02：TEST，原产品主张不成立）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": null,
+      "reason": "DISABLED 测试直接构造 context 后从未 setTrader，另一个 adapter 也未 init；runner 正常会先查找并绑定 trader，再把 context 加入 engine。没有公开契约要求未绑定交易通道的 context 可执行 trader 查询/撤单。"
+    },
+    {
+      "lane": "p06_uftcore2",
+      "id": "BUG-P06-002",
+      "decision": "TEST",
+      "new_status": "已撤回（迭代02：TEST，原产品主张不成立）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": null,
+      "reason": "WtUftEngine 的查询接口注释要求标准化交易所.合约代码；用 600000 缺交易所段，且测试和正常查询契约不符。"
+    },
+    {
+      "lane": "p06_uftcore2",
+      "id": "BUG-P06-001",
+      "decision": "TEST",
+      "new_status": "已撤回（迭代02：TEST，原产品主张不成立）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": null,
+      "reason": "候选在 WtUftEngine 构造后、init 前调用依赖基础数据/数据管理器的查询；正常 runner 装配先 init 引擎再启动策略。没有公开契约要求未 init 引擎提供查询能力，故这是生命周期前置错误而非本轮产品 bug。"
+    },
+    {
+      "lane": "R154",
+      "id": "BUG-R154-002",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-R68-002）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": "BUG-R68-002",
+      "reason": "并入 BUG-R68-002。目录输入在 create/truncate 失败（L39-42），早于 _mapfile.reset（L46），不能证明旧映射已替换或 _queue 悬垂；映射失败未收口已有主记录。"
+    },
+    {
+      "lane": "R18_wtdtcore",
+      "id": "BUG-R18-001",
+      "decision": "TEST",
+      "new_status": "已撤回（迭代02：TEST，原产品主张不成立）",
+      "previous_status": "- 状态: 静态缺陷成立；缺失配置路径未运行",
+      "canonical": null,
+      "reason": "参数是配置对象；候选把 init(null) 等同配置缺 data/store。runner 缺 data 时 initDataMgr 早退，不会调用此 init；null 不是已证有效输入。"
+    },
+    {
+      "lane": "R44",
+      "id": "BUG-R44-006",
+      "decision": "TEST",
+      "new_status": "已撤回（迭代02：TEST，原产品主张不成立）",
+      "previous_status": "- 状态: 待验证（NULL 确会解引用；init 是否接受 NULL 的调用契约未说明，已查生产调用先检查配置加载成功）",
+      "canonical": null,
+      "reason": "init 需要 config 对象；生产 runner 在解析出对象后才调用。候选传 null 不等于合法配置缺 indice，后者已有 false 分支。"
+    },
+    {
+      "lane": "R44",
+      "id": "BUG-R44-002",
+      "decision": "TEST",
+      "new_status": "已撤回（迭代02：TEST，原产品主张不成立）",
+      "previous_status": "- 状态: 待验证（空指针解引用源码路径明确；bdMgr 是否允许为空的接口前提未说明）",
+      "canonical": null,
+      "reason": "bdMgr 是提供 session 数据的依赖，正常调用传入基础数据管理器，未见 nullable 合同。禁用测试的 null 违反前置条件，不能证明有效产品路径。"
+    },
+    {
+      "lane": "R68",
+      "id": "BUG-R68-001",
+      "decision": "TEST",
+      "new_status": "已撤回（迭代02：TEST，原产品主张不成立）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": null,
+      "reason": "cfg 是必需配置指针，正常先解析后传入；没有 nullable 合同。直接 init(null) 属无效参数。"
+    },
+    {
+      "lane": "l05_dt_servo_porter",
+      "id": "BUG-L05-008",
+      "decision": "TEST",
+      "new_status": "已撤回（迭代02：TEST，原产品主张不成立）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": null,
+      "reason": "cb/cbCnt 无默认值，文档说读取先通知数量再传数据；只有 cbLogger 明确可选。直接空回调违反现合同。"
+    },
+    {
+      "lane": "l05_dt_servo_porter",
+      "id": "BUG-L05-005",
+      "decision": "TEST",
+      "new_status": "已撤回（迭代02：TEST，原产品主张不成立）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": null,
+      "reason": "write_log 对 catName strlen；公开注释只承诺空字符串表示默认分类，没有承诺 null 等价空串，候选输入超出契约。"
+    },
+    {
+      "lane": "R22_dtporter",
+      "id": "BUG-R22-001",
+      "decision": "NOT_BUG",
+      "new_status": "已撤回（迭代02：NOT_BUG，原产品主张不成立）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": null,
+      "reason": "公开 C API 通过函数静态 getRunner() 暴露单个 WtDtRunner，parser/dumper 回调也绑定它。仅从可构造第二个内部 C++ 对象推导多实例支持，没有公开合同，不构成已证产品缺陷。"
+    },
+    {
+      "lane": "R28_runner_mains",
+      "id": "BUG-R28-004",
+      "decision": "TEST",
+      "new_status": "已撤回（迭代02：TEST，原产品主张不成立）",
+      "previous_status": "- 状态: 待验证",
+      "canonical": null,
+      "reason": "生产函数名是标准 C++ main，落尾隐式 return 0；源注释也说明 0 成功。风险只在 coverage 用 -Dmain 改普通函数后、warnings-as-errors harness；当前 `.cpp.blocked` 不生成目标。"
+    },
+    {
+      "lane": "R6_porter_runner",
+      "id": "BUG-R6-015",
+      "decision": "NOT_BUG",
+      "new_status": "已撤回（迭代02：NOT_BUG，原产品主张不成立）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": null,
+      "reason": "越界枚举会越界访问，但 WTSLogLevel 合法范围为100..106，未找到生产调用给内部 handler 传范围外 enum。现测试只覆盖合法输入，不能据此算用户可达 bug。"
+    },
+    {
+      "lane": "R6_porter_runner",
+      "id": "BUG-R6-010",
+      "decision": "TEST",
+      "new_status": "已撤回（迭代02：TEST，原产品主张不成立）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": null,
+      "reason": "同名外链符号在自定义合并目标可能冲突，但正式 CMake 分别建 WtPorter shared library/WtRunner executable，coverage 也分别建目标。未证明受支持构建合并这些 TU；现存测试只比表内容。"
+    },
+    {
+      "lane": "R6_porter_runner",
+      "id": "BUG-R6-007",
+      "decision": "NOT_BUG",
+      "new_status": "已撤回（迭代02：NOT_BUG，原产品主张不成立）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": null,
+      "reason": "ExpExecuter 回调绑全局 getRunner，但公开 C API 就是静态单例；未找到多 runner 合同。启用测试直接 local.executer_init，不创建 ExpExecuter，不能证明其路由；内部可构造第二对象不是产品支持证据。"
+    },
+    {
+      "lane": "R6_porter_runner",
+      "id": "BUG-R6-005",
+      "decision": "NOT_BUG",
+      "new_status": "已撤回（迭代02：NOT_BUG，原产品主张不成立）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": null,
+      "reason": "内部回调在 callback 注册且数据为空时会解引用，但参数来自引擎策略上下文回调；静态未找到合法生产 caller 传 null。disabled 用例手工注入非法空值，不能证明产品可达。"
+    },
+    {
+      "lane": "R134",
+      "id": "BUG-R134-002",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-R9-001）",
+      "previous_status": "",
+      "canonical": "BUG-R9-001",
+      "reason": "_inited 初始化为 false，成功路径未将其置为 true；这是 BUG-R9-001 中 WtBtRunner config 守卫失效的同一根因，重复记录不独立计数。相关现存测试处于禁用状态。"
+    },
+    {
+      "lane": "R134",
+      "id": "BUG-R134-001",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-R9-001）",
+      "previous_status": "",
+      "canonical": "BUG-R9-001",
+      "reason": "config_backtest 的 once 守卫确实没有成功后置位，但相同根因和完整配置语义已由 BUG-R9-001 作为主记录覆盖。当前 negative-config 测试没有证明重复成功配置行为。"
+    },
+    {
+      "lane": "R13_wtporter",
+      "id": "BUG-R13-007",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 Q06-006）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": "Q06-006",
+      "reason": "本条把 config_porter 与 write_log 的 C 字符串边界合并描述；write_log(catName) 的同一生产行已由 Q06-006 覆盖，不能重复计数。config_porter 的 cfgfile NULLability 也未由公开契约证明为有效输入。"
+    },
+    {
+      "lane": "R173",
+      "id": "BUG-R173-005",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-R46-001）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": "BUG-R46-001",
+      "reason": "所列 _hft_mocker/_exec_mocker/_loader_auto_trans 构造遗漏，与 BUG-R46-001 已记录的 WtBtRunner 未初始化成员及消费者清单相同，按主记录合并。"
+    },
+    {
+      "lane": "R9_wtbtporter",
+      "id": "BUG-R9-004",
+      "decision": "TEST",
+      "new_status": "已撤回（迭代02：TEST，原产品主张不成立）",
+      "previous_status": "- 状态: 证据不足（现有测试绕过正常派发前置）",
+      "canonical": null,
+      "reason": "候选测试直接调用 on_bar_close(..., NULL)，绕过父类 on_bar 的 null guard；正常 dispatcher 只在有效新 bar 上进入 close 路径。当前证据只支持 wrapper 的直接调用行为，不支持产品可达路径会收到 NULL。"
+    },
+    {
+      "lane": "R7_exefact",
+      "id": "BUG-R7-010",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-R17-002）",
+      "previous_status": "- 状态: 已确认源码缺陷（越界日志索引静态确认；本次未运行）",
+      "canonical": "BUG-R17-002",
+      "reason": "与 BUG-R17-002 同属对无效 pricemode 值执行 PriceModeNames[_price_mode+1] 而越界；本条只是在股票单元的同形实现，非法值合同仍待确认。"
+    },
+    {
+      "lane": "n05_exec_factories",
+      "id": "BUG-N05-002",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-R17-004）",
+      "previous_status": "- 状态: 静态问题确认；动态未验证",
+      "canonical": "BUG-R17-004",
+      "reason": "与 BUG-R17-004 同为 session 信息缺失后行情处理解引用 _s_info；R17-004 已包含 runner 可返回 NULL、初始化返回成功和行情入口无判空的完整链路，本条不重复计数。"
+    },
+    {
+      "lane": "R61",
+      "id": "BUG-R61-005",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 T2-CTP-08）",
+      "previous_status": "- 状态: 与 BUG-R61-004 同根的接口契约候选",
+      "canonical": "T2-CTP-08",
+      "reason": "Mini 空 userTag 分支同样 fetch_add(0)，而公开 orderInsert 接口未规定先预留 ID；该候选与 T2-CTP-08 的 TraderCTP 及 R61-004 属同一引用分配根因。"
+    },
+    {
+      "lane": "R61",
+      "id": "BUG-R61-004",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 T2-CTP-08）",
+      "previous_status": "- 状态: 待接口调用契约确认（直接调用现象成立，正常 adapter 路径不适用）",
+      "canonical": "T2-CTP-08",
+      "reason": "空 userTag 分支 fetch_add(0) 不推进 OrderRef/ExecOrderRef；公开 ITraderApi::orderInsert 没有要求必须先 makeEntrustID 的前置契约，空 tag 也是显式支持分支。标准 adapter 先填 ID 的路径不能消除直接接口调用的重复引用风险。与 T2-CTP-08 同根。"
+    },
+    {
+      "lane": "R61",
+      "id": "BUG-R61-002",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-R61-001）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": "BUG-R61-001",
+      "reason": "Mini 有同一类永久 join 阻塞：worker 条件依赖一直为 false 的 m_bStopped，disconnect 把 release 入队后 join；现用例也安装 dummy worker。按根因归并到 R61-001，实施修复必须覆盖 Mini。"
+    },
+    {
+      "lane": "T1_ctpopt_parserxtp",
+      "id": "T1-XTP-03",
+      "decision": "TEST",
+      "new_status": "已撤回（迭代02：TEST，原产品主张不成立）",
+      "previous_status": "",
+      "canonical": "",
+      "reason": "构造函数确有多项仅在 init/注册后设置的成员；候选声称正常 adapter 生命周期危险不成立：标准 adapter 在 init 前 registerSpi(this)，XTP 注册时设置 BaseDataMgr。现证据只支持非标准直接调用/注销后的条件性风险，不支持正常路径产品 bug。"
+    },
+    {
+      "lane": "R214",
+      "id": "BUG-R214-004",
+      "decision": "DUPLICATE",
+      "new_status": "已合并（迭代02：主编号 BUG-R60-001）",
+      "previous_status": "- 状态: 待审核",
+      "canonical": "BUG-R60-001",
+      "reason": "disconnect 置 _terminated 并 join 撮合线程，之后 release 因 _terminated 提前返回、跳过 io worker stop/join；与已登记 BUG-R60-001 是同一个 disconnect→release 清理漏路径。isConnected 断开后的语义另有待确认边界，不单独合并为此缺陷。"
+    },
+    {
+      "lane": "T26_ctploader",
+      "id": "BUG-T26-008",
+      "decision": "NOT_BUG",
+      "new_status": "已撤回（迭代02：NOT_BUG，原产品主张不成立）",
+      "previous_status": "",
+      "canonical": null,
+      "reason": "_trading_day 确实没有构造初值，但当前生产链先在成功登录回调写入交易日，再调用 ReqQryInstrument；合约回调通过该请求到达，CZCE 日期换算因此在正常链路中先写后读。未发现仓库生产路径在该赋值前读取它。"
+    },
+    {
+      "lane": "T4_femas_ctploader_mini",
+      "id": "BUG-T4-019",
+      "decision": "NOT_BUG",
+      "new_status": "已撤回（迭代02：NOT_BUG，原产品主张不成立）",
+      "previous_status": "- 状态: 当前生产影响未证实（辅助函数无生产调用点；输入字符契约待确认）",
+      "canonical": null,
+      "reason": "ASCII 范围确实包含若干标点，但仓库检索到的生产 OnRspQryInstrument 路径不调用 extractProductID；唯一其他调用是单测。现有产品行为没有受该辅助函数影响的证据，字符集合契约也未定义。"
+    },
+    {
+      "lane": "T4_femas_ctploader_mini",
+      "id": "BUG-T4-006",
+      "decision": "NOT_BUG",
+      "new_status": "已撤回（迭代02：NOT_BUG，原产品主张不成立）",
+      "previous_status": "- 状态: 证据不足（零初始化是合理防御；柜台影响未证）",
+      "canonical": null,
+      "reason": "结构只有 AppID、AuthCode、EncryptType 三个字段，调用处都被赋值；未清零的部分是两个 C 字符串 NUL 后的尾字节及可能的结构填充，当前没有证据表明厂商接口按整块原始字节读取它们或影响认证行为。"
+    }
+  ]
+}

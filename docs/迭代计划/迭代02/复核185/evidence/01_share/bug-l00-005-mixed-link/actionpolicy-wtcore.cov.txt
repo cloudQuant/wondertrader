@@ -1,0 +1,163 @@
+    1|       |/*!
+    2|       | * \file ActionPolicyMgr.cpp
+    3|       | * \project	WonderTrader
+    4|       | *
+    5|       | * \author Wesley
+    6|       | * \date 2020/03/30
+    7|       | * 
+    8|       | * \brief 行为策略管理器实现文件
+    9|       | * \details 该文件实现了行为策略管理器，用于加载和管理交易动作的规则和策略。
+   10|       | *          通过这些规则，可以对交易行为进行精细化控制，实现风险管理。
+   11|       | */
+   12|       |#include "ActionPolicyMgr.h"
+   13|       |
+   14|       |#include "../Share/StdUtils.hpp"
+   15|       |#include "../WTSTools/WTSLogger.h"
+   16|       |
+   17|       |#include "../Includes/WTSVariant.hpp"
+   18|       |#include "../WTSUtils/WTSCfgLoader.h"
+   19|       |
+   20|       |USING_NS_WTP;
+   21|       |
+   22|       |/**
+   23|       | * @brief 行为策略管理器构造函数
+   24|       | * @details 初始化行为策略管理器对象
+   25|       | */
+   26|       |ActionPolicyMgr::ActionPolicyMgr()
+   27|      1|{
+   28|       |	// 构造函数不需要额外的初始化操作
+   29|      1|}
+   30|       |
+   31|       |
+   32|       |/**
+   33|       | * @brief 行为策略管理器析构函数
+   34|       | * @details 清理行为策略管理器对象的资源
+   35|       | */
+   36|       |ActionPolicyMgr::~ActionPolicyMgr()
+   37|      1|{
+   38|       |	// 析构函数不需要额外的清理操作，因为所有成员变量都会自动清理
+   39|      1|}
+   40|       |
+   41|       |/**
+   42|       | * @brief 初始化行为策略管理器
+   43|       | * @details 从指定的配置文件中加载交易动作的规则和策略
+   44|       | * @param filename 配置文件名称
+   45|       | * @return 初始化是否成功，成功返回true，失败返回false
+   46|       | */
+   47|       |bool ActionPolicyMgr::init(const char* filename)
+   48|      1|{
+   49|       |	// 从文件中加载配置
+   50|      1|	WTSVariant* cfg = WTSCfgLoader::load_from_file(filename);
+   51|      1|	if (cfg == NULL)
+   52|      1|		return false;
+   53|       |
+   54|       |	// 遍历配置中的所有规则组
+   55|      0|	auto keys = cfg->memberNames();
+   56|      0|	for (auto it = keys.begin(); it != keys.end(); it++)
+   57|      0|	{
+   58|       |		// 获取规则组名称
+   59|      0|		const char* gpName = (*it).c_str();
+   60|       |		// 获取规则组配置
+   61|      0|		WTSVariant*	vGpItem = cfg->get(gpName);
+   62|       |		// 创建或获取规则组
+   63|      0|		ActionRuleGroup& gp = _rules[gpName];
+   64|       |
+   65|       |		// 加载订单动作规则
+   66|      0|		WTSVariant* vOrds = vGpItem->get("order");
+   67|      0|		if(vOrds != NULL && vOrds->isArray())
+   68|      0|		{
+   69|       |			// 遍历所有订单动作规则
+   70|      0|			for (uint32_t i = 0; i < vOrds->size(); i++)
+   71|      0|			{
+   72|      0|				WTSVariant* vObj = vOrds->get(i);
+   73|      0|				ActionRule aRule;
+   74|       |				
+   75|       |				// 解析动作类型和限制值
+   76|      0|				const char* action = vObj->getCString("action");
+   77|      0|				uint32_t uLimit = vObj->getUInt32("limit");
+   78|      0|				uint32_t uLimitS = vObj->getUInt32("limit_s");
+   79|      0|				uint32_t uLimitL = vObj->getUInt32("limit_l");
+   80|       |				
+   81|       |				// 根据动作名称设置动作类型
+   82|      0|				if (wt_stricmp(action, "open") == 0)
+   83|      0|					aRule._atype = AT_Open;
+   84|      0|				else if (wt_stricmp(action, "close") == 0)
+   85|      0|					aRule._atype = AT_Close;
+   86|      0|				else if (wt_stricmp(action, "closetoday") == 0)
+   87|      0|					aRule._atype = AT_CloseToday;
+   88|      0|				else if (wt_stricmp(action, "closeyestoday") == 0)
+   89|      0|					aRule._atype = AT_CloseYestoday;
+   90|      0|				else 
+   91|      0|				{
+   92|       |					// 如果动作类型不识别，记录错误并跳过当前规则
+   93|      0|					WTSLogger::error("Loading action policy failed: unrecognized type {}", action);
+   94|      0|					continue;
+   95|      0|				}
+   96|       |
+   97|       |				// 设置规则的限制值
+   98|      0|				aRule._limit = uLimit;
+   99|      0|				aRule._limit_s = uLimitS;
+  100|      0|				aRule._limit_l = uLimitL;
+  101|      0|				aRule._pure = vObj->getBoolean("pure");
+  102|       |				
+  103|       |				// 将规则添加到规则组中
+  104|      0|				gp.emplace_back(aRule);
+  105|      0|			}
+  106|      0|		}
+  107|       |
+  108|       |		// 加载品种过滤器
+  109|      0|		WTSVariant* filters = vGpItem->get("filters");
+  110|      0|		if(filters!=NULL && filters->isArray() && filters->size()>0)
+  111|      0|		{
+  112|       |			// 遍历所有品种过滤器
+  113|      0|			for (uint32_t i = 0; i < filters->size(); i++)
+  114|      0|			{
+  115|       |				// 将品种映射到对应的规则组
+  116|      0|				const char* commid = filters->get(i)->asCString();
+  117|      0|				_comm_rule_map[commid] = gpName;
+  118|      0|			}
+  119|      0|		}
+  120|      0|	}
+  121|       |
+  122|       |	// 释放配置对象
+  123|      0|	cfg->release();
+  124|      0|	return true;
+  125|      1|}
+  126|       |
+  127|       |/**
+  128|       | * @brief 获取交易品种的动作规则组
+  129|       | * @details 根据品种标识符获取对应的交易动作规则组，如果找不到将使用默认规则组
+  130|       | * @param pid 品种标识符
+  131|       | * @return 交易动作规则组的常量引用
+  132|       | */
+  133|       |const ActionRuleGroup& ActionPolicyMgr::getActionRules(const char* pid)
+  134|      0|{
+  135|       |	// 默认使用"default"规则组
+  136|      0|	std::string gpName = "default";
+  137|       |
+  138|      0|	{// 先找到品种对应的规则组名称
+  139|       |		// 在品种规则映射中查找指定的品种
+  140|      0|		auto it = _comm_rule_map.find(pid);
+  141|       |		// 如果找到了，则使用对应的规则组名称
+  142|      0|		if (it != _comm_rule_map.end())
+  143|      0|			gpName = it->second;
+  144|      0|	}
+  145|       |
+  146|      0|	{
+  147|       |		// 在规则表中查找规则组
+  148|      0|		auto it = _rules.find(gpName);
+  149|       |		// 如果找不到指定的规则组，则使用默认规则组
+  150|      0|		if (it == _rules.end())
+  151|      0|		{
+  152|      0|			it = _rules.find("default");
+  153|       |			// 记录错误日志
+  154|      0|			WTSLogger::error("Action policy group {} not exists, changed to default group", gpName.c_str());
+  155|      0|		}
+  156|       |
+  157|       |		// 断言默认规则组必须存在
+  158|      0|		assert(it != _rules.end());
+  159|       |		// 返回规则组
+  160|      0|		return it->second;
+  161|      0|	}
+  162|      0|}
+

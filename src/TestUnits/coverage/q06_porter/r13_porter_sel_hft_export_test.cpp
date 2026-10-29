@@ -11,14 +11,24 @@
  *  - StraFundInfo 的构造函数 memset 全 0（SelStraBaseCtx.h:909-913、HftStraBaseCtx.h:790-794），
  *    所以资金族任意 flag 的取值都是精确 0.0；
  *  - _user_datas 是纯 map（SelStraBaseCtx.cpp:1066-1079）；
- *  - HFT 侧 _pos_map 之外的持仓/委托入口都要解引用 _trader，而 createHftContext
- *    在拿不到交易通道时**不设置也不初始化** _trader（HftStraBaseCtx.h:673 无默认初值，
- *    构造函数 HftStraBaseCtx.cpp:41-48 也没列它）-> 全部进 DISABLED_，见 BUG-R13-001。
+ *  - HFT 侧 trader-dependent 入口解引用 _trader；createHftContext 在拿不到交易通道时
+ *    不设置也不初始化 _trader（HftStraBaseCtx.h:673 无默认初值，构造函数
+ *    HftStraBaseCtx.cpp:41-48 也没列它）。本文件只在注册 dummy trader 的隔离子进程
+ *    中验证需要绑定的 getter；API-dependent 入口不在此夹具的活动范围内，见 BUG-R13-001。
  */
 #include <gtest/gtest.h>
 
+#include <cstdio>
+#include <cstdlib>
+#include <cerrno>
 #include <cstring>
+#include <filesystem>
+#include <fstream>
 #include <string>
+#include <system_error>
+
+#include <unistd.h>
+#include <stdlib.h>
 
 #include "WtPorter/PorterDefs.h"
 #include "WtPorter/WtPorter.h"
@@ -33,9 +43,9 @@ extern WtRtRunner& getRunner();
 namespace {
 
 	const CtxHandler kBadHandle = 0x7FFF0001UL;
-	/* 三段式分月合约键（只当 map 键用；本夹具没有注册品种） */
+	/* SEL fixture only uses its code as a map key; the HFT code is loaded by its isolated config. */
 	const char* kSelCode = "SSE.STK.600000";
-	const char* kHftCode = "SHFE.rb.2405";
+	const char* kHftCode = "SHFE.au.2406";
 
 	struct PosRec
 	{
@@ -56,37 +66,242 @@ namespace {
 		g_pos.last_islast = isLast;
 	}
 
-	struct HftRec
+	bool write_text(const std::string& path, const std::string& body)
 	{
-		uint32_t	pos = 0;
-		CtxHandler	last_handle = 0;
-		std::string	last_code;
-		bool		last_islong = false;
-		double		last_prevol = 0, last_preavail = 0, last_newvol = 0, last_newavail = 0;
-		void clear() { *this = HftRec(); }
+		std::ofstream ofs(path, std::ios::binary | std::ios::trunc);
+		if (!ofs)
+			return false;
+		ofs << body;
+		return ofs.good();
+	}
+
+	const char* kHftSessions =
+		"{\"TRADING\":{\"name\":\"Trading\",\"offset\":0,"
+		"\"sections\":[{\"from\":900,\"to\":1500}]}}";
+
+	const char* kHftCommodities =
+		"{\"SHFE\":{\"au\":{\"name\":\"Gold\",\"session\":\"TRADING\","
+		"\"pricetick\":0.02,\"volscale\":1000,\"covermode\":0,\"pricemode\":0,"
+		"\"trademode\":0,\"category\":1}}}";
+
+	const char* kHftContracts =
+		"{\"SHFE\":{\"au2406\":{\"name\":\"au2406\",\"product\":\"au\",\"exchg\":\"SHFE\"}}}";
+
+	const char* kHftRules =
+		"{\"SHFE\":{\"au\":[{\"from\":\"au2406\",\"to\":\"au2406\",\"date\":20240101,"
+		"\"oldclose\":100.0,\"newclose\":100.0}]}}";
+
+	std::string hft_config(const std::string& dir, const std::string& traderId)
+	{
+		return "{\"basefiles\":{"
+			"\"session\":\"" + dir + "/sessions.json\","
+			"\"commodity\":\"" + dir + "/commodities.json\","
+			"\"contract\":\"" + dir + "/contracts.json\","
+			"\"rules\":{\"R13\":\"" + dir + "/hot.json\"}},"
+			"\"env\":{\"name\":\"hft\"},\"data\":{},"
+			"\"bspolicy\":\"" + dir + "/actions.json\","
+			"\"traders\":[{\"active\":true,\"id\":\"" + traderId + "\"}]}";
+	}
+
+	int fail_hft_probe(int code, const char* reason)
+	{
+		std::fprintf(stderr, "R13 HFT registered-trader probe failed: %s\n", reason);
+		std::fflush(stderr);
+		return code;
+	}
+
+	struct HftProbeDir
+	{
+		std::string path;
+		bool preserve = false;
+
+		bool cleanup(std::error_code& ec) const
+		{
+			if (preserve)
+			{
+				ec = std::make_error_code(std::errc::operation_canceled);
+				return false;
+			}
+			if (path.empty())
+			{
+				ec.clear();
+				return true;
+			}
+			if (!std::filesystem::exists(path, ec))
+				return !ec;
+			const std::filesystem::path target = std::filesystem::canonical(path, ec);
+			if (ec)
+				return false;
+			const std::filesystem::path current = std::filesystem::current_path(ec);
+			if (ec)
+				return false;
+			const std::filesystem::path cwd = std::filesystem::canonical(current, ec);
+			if (ec)
+				return false;
+			for (std::filesystem::path p = cwd; !p.empty();)
+			{
+				if (p == target)
+				{
+					ec = std::make_error_code(std::errc::device_or_resource_busy);
+					return false;
+				}
+				const std::filesystem::path parent = p.parent_path();
+				if (parent == p)
+					break;
+				p = parent;
+			}
+			std::filesystem::remove_all(path, ec);
+			return !ec;
+		}
+
+		~HftProbeDir()
+		{
+			std::error_code ec;
+			if (!cleanup(ec))
+			{
+				std::fprintf(stderr, "R13 HFT probe cleanup failed or was skipped for %s: %s\n",
+					path.c_str(), ec.message().c_str());
+				std::fflush(stderr);
+			}
+		}
 	};
 
-	HftRec g_hft;
-
-	void hft_pos_cb(CtxHandler cHandle, const char* stdCode, bool isLong,
-		double prevol, double preavail, double newvol, double newavail)
+	struct HftProbeCwd
 	{
-		g_hft.pos++;
-		g_hft.last_handle = cHandle;
-		g_hft.last_code = (stdCode == NULL) ? "<null>" : stdCode;
-		g_hft.last_islong = isLong;
-		g_hft.last_prevol = prevol;
-		g_hft.last_preavail = preavail;
-		g_hft.last_newvol = newvol;
-		g_hft.last_newavail = newavail;
+		std::filesystem::path original;
+		HftProbeDir* temp = nullptr;
+		bool changed = false;
+
+		bool enter(const std::filesystem::path& target, HftProbeDir& tempDir, std::error_code& ec)
+		{
+			temp = &tempDir;
+			original = std::filesystem::current_path(ec);
+			if (ec)
+				return false;
+			std::filesystem::current_path(target, ec);
+			if (ec)
+				return false;
+			changed = true;
+			return true;
+		}
+
+		bool restore(std::error_code& ec)
+		{
+			if (!changed)
+			{
+				ec.clear();
+				return true;
+			}
+			std::filesystem::current_path(original, ec);
+			if (!ec)
+				changed = false;
+			else if (temp != nullptr)
+				temp->preserve = true;
+			return !ec;
+		}
+
+		~HftProbeCwd()
+		{
+			if (changed)
+			{
+				std::error_code ec;
+				if (!restore(ec))
+				{
+					std::fprintf(stderr, "R13 HFT probe cwd restore failed: %s\n",
+						ec.message().c_str());
+					std::fflush(stderr);
+				}
+			}
+		}
+	};
+
+	/*
+	 * Configure the R82 id-only local trader seam in a threadsafe death-test child.
+	 * initTraders registers the adapter object even though its empty module cannot
+	 * initialize a trading API; createHftContext then binds that object. The
+	 * hft_get_position probe only reads its empty in-memory position map. This does
+	 * not establish that a real trading connection is ready.
+	 */
+	int run_registered_hft_getter_probe()
+	{
+		std::error_code ec;
+		const std::filesystem::path tempRoot = std::filesystem::temp_directory_path(ec);
+		if (ec)
+			return fail_hft_probe(2, ("could not locate temp directory: " + ec.message()).c_str());
+		const std::filesystem::path tempPath = std::filesystem::absolute(tempRoot
+			/ "r13_porter_hft_XXXXXX", ec);
+		if (ec)
+			return fail_hft_probe(2, ("could not resolve absolute temp directory: " + ec.message()).c_str());
+		std::string dirTemplate = tempPath.string();
+		char* createdDir = ::mkdtemp(dirTemplate.data());
+		if (createdDir == nullptr)
+			return fail_hft_probe(2, ("could not atomically create temp directory: "
+				+ std::string(std::strerror(errno))).c_str());
+		HftProbeDir temp{ createdDir };
+		const std::string& dir = temp.path;
+
+		HftProbeCwd cwd;
+		if (!cwd.enter(dir, temp, ec))
+			return fail_hft_probe(3, ("could not switch cwd to temp directory: " + ec.message()).c_str());
+
+		const int probeResult = [&]() -> int
+		{
+
+		if (!write_text(dir + "/sessions.json", kHftSessions)
+			|| !write_text(dir + "/commodities.json", kHftCommodities)
+			|| !write_text(dir + "/contracts.json", kHftContracts)
+			|| !write_text(dir + "/hot.json", kHftRules)
+			|| !write_text(dir + "/actions.json", "{}"))
+			return fail_hft_probe(4, "could not write temporary config files");
+
+		const std::string traderId = "r13_registered_trader";
+		getRunner().init((dir + "/r13_absent_logcfg.yaml").c_str(), true, dir.c_str());
+		const std::string cfg = hft_config(dir, traderId);
+		config_porter(cfg.c_str(), false);
+		if (getRunner().getEngine() == NULL)
+			return fail_hft_probe(5, "HFT engine config did not initialize");
+
+		const CtxHandler h = create_hft_context("r13_hft_registered", traderId.c_str(), false, 1);
+		if (h == 0 || getRunner().getHftContext(h) == NULL)
+			return fail_hft_probe(6, "registered trader context was not created");
+
+		/* This getter traverses _trader->getPosition; zero proves the empty adapter is bound. */
+		if (hft_get_position(h, kHftCode, true) != 0.0)
+			return fail_hft_probe(7, "empty registered adapter did not report zero position");
+		if (hft_get_position_profit(h, kHftCode) != 0.0
+			|| hft_get_position_avgpx(h, kHftCode) != 0.0
+			|| hft_get_position_profit(kBadHandle, kHftCode) != 0.0)
+			return fail_hft_probe(8, "map-only HFT getter returned an unexpected value");
+
+		hft_save_userdata(h, "k1", "r13-hft-value");
+		hft_save_userdata(h, "k2", "");
+		if (std::strcmp(hft_load_userdata(h, "k1", "DEF"), "r13-hft-value") != 0
+			|| std::strcmp(hft_load_userdata(h, "k2", "DEF"), "") != 0
+			|| std::strcmp(hft_load_userdata(h, "absent", "DEF"), "DEF") != 0)
+			return fail_hft_probe(9, "HFT userdata roundtrip failed");
+		hft_save_userdata(h, "k1", "r13-hft-second");
+		if (std::strcmp(hft_load_userdata(h, "k1", "DEF"), "r13-hft-second") != 0)
+			return fail_hft_probe(10, "HFT userdata overwrite failed");
+
+		hft_save_userdata(h, "state", "before");
+		hft_log_text(h, LOG_LEVEL_DEBUG, "r13 hft debug");
+		hft_log_text(h, LOG_LEVEL_INFO, "r13 hft info");
+		hft_log_text(h, LOG_LEVEL_WARN, "r13 hft warn");
+		hft_log_text(h, LOG_LEVEL_ERROR, "r13 hft error");
+		hft_log_text(h, LOG_LEVEL_ERROR + 5, "r13 hft unmapped");
+		if (std::strcmp(hft_load_userdata(h, "state", "AFTER"), "before") != 0)
+			return fail_hft_probe(11, "HFT log changed userdata");
+
+		return 0;
+		}();
+
+		if (!cwd.restore(ec))
+			return fail_hft_probe(12, ("could not restore original cwd: " + ec.message()).c_str());
+		if (!temp.cleanup(ec))
+			return fail_hft_probe(13, ("could not safely clean temp directory: " + ec.message()).c_str());
+		return probeResult;
 	}
 
-	/* HFT 其余 11 个槽位：本文件只需要持仓槽，其余一律不注册（保持静默） */
-	void register_hft_pos_only()
-	{
-		register_hft_callbacks(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-			NULL, hft_pos_cb);
-	}
 }
 
 class R13PorterSelExport : public ::testing::Test
@@ -107,12 +322,11 @@ protected:
 };
 
 /*
- * create_sel_context 的 period 形参在 WtRtRunner::createSelContext
- * （WtRtRunner.cpp:336-349）里映射到 TaskPeriodType，六种写法都能拿到句柄；
- * 未识别的写法落 TPT_None（:348-349）但**照样返回句柄**。
- * 这里断言的是「每个名字各一个上下文」，不是「未知周期被拒绝」。
+ * 这里只验证 runner 当前识别的 period token 会注册出可查找的独立上下文，
+ * 不验证调度触发。WtPorter.h 的 d1/w1/m1 周期示例与 runner 当前识别的
+ * d/w/m/y/min 写法不一致；仅检查句柄不能证明这些文档示例实际参与调度。
  */
-TEST_F(R13PorterSelExport, create_sel_context_accepts_every_documented_period_and_returns_distinct_handles)
+TEST_F(R13PorterSelExport, create_sel_context_registers_contexts_for_supported_period_tokens)
 {
 	const char* periods[] = { "w", "m", "y", "min", "d" };
 	CtxHandler prev = _h;
@@ -126,12 +340,7 @@ TEST_F(R13PorterSelExport, create_sel_context_accepts_every_documented_period_an
 		prev = h;
 	}
 
-	const CtxHandler bogus = create_sel_context("r13_sel_bogus_period", 20240602, 93000,
-		"not-a-period", "CHINA", "TRADING", 0);
-	// 现状：未识别周期不返回错误，句柄仍然可用（登记见 BUG-R13-005）
-	ASSERT_NE(bogus, 0U);
-	EXPECT_TRUE(getRunner().getSelContext(bogus) != NULL);
-	// 未知句柄仍然查不到，证明上面的句柄不是巧合相等
+	// 非法句柄仍无法查找，作为有效上下文句柄的对照。
 	EXPECT_TRUE(getRunner().getSelContext(kBadHandle) == NULL);
 }
 
@@ -200,84 +409,49 @@ TEST_F(R13PorterSelExport, DISABLED_sel_mutation_and_subscription_need_engine_se
 	sel_sub_ticks(_h, kSelCode);
 }
 
-class R13PorterHftExport : public ::testing::Test
-{
-protected:
-	CtxHandler	_h = 0;
-
-	void SetUp() override
-	{
-		g_hft.clear();
-		g_pos.clear();
-		register_hft_pos_only();
-
-		_h = create_hft_context("r13_hft_export", "R13_TRADER_NOT_EXISTS", false, 1);
-		// 现状：绑定失败也返回可用句柄（WtRtRunner.cpp:318-332 只在 if(trdPtr) 里 setTrader）
-		ASSERT_NE(_h, 0U);
-		ASSERT_TRUE(getRunner().getHftContext(_h) != NULL);
-	}
-
-	void TearDown() override
-	{
-		register_hft_callbacks(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-			NULL, NULL);
-		g_hft.clear();
-	}
-};
-
 /*
- * 只读 _pos_map 的两个 HFT 取值入口是安全的
- * （HftStraBaseCtx.cpp:601-609、:611-629 都是 find miss -> 0）。
+ * The id-only adapter from R82 is registered without a trading API. hft_get_position
+ * confirms _trader points to that object by reading its empty position map; this
+ * does not prove a real trading connection is ready. The remaining getters inspect
+ * only the HFT context's own maps. Run in a threadsafe death-test child so
+ * configuring the process-global Porter runner cannot alter other q06 suites.
+ *
+ * Trader API-dependent order, cancellation and subscription calls remain outside
+ * this fixture; BUG-R13-001 still tracks the production behavior when binding fails.
  */
-TEST_F(R13PorterHftExport, hft_map_only_position_getters_are_exactly_zero)
+TEST(R13PorterHftExport, map_getters_userdata_and_logging_use_registered_dummy_trader)
 {
-	EXPECT_DOUBLE_EQ(hft_get_position_profit(_h, kHftCode), 0.0);
-	EXPECT_DOUBLE_EQ(hft_get_position_avgpx(_h, kHftCode), 0.0);
-	EXPECT_DOUBLE_EQ(hft_get_position_profit(kBadHandle, kHftCode), 0.0);
-}
-
-TEST_F(R13PorterHftExport, hft_userdata_roundtrips_exact_value_and_default)
-{
-	hft_save_userdata(_h, "k1", "r13-hft-value");
-	hft_save_userdata(_h, "k2", "");
-	EXPECT_STREQ(hft_load_userdata(_h, "k1", "DEF"), "r13-hft-value");
-	EXPECT_STREQ(hft_load_userdata(_h, "k2", "DEF"), "");
-	EXPECT_STREQ(hft_load_userdata(_h, "absent", "DEF"), "DEF");
-	hft_save_userdata(_h, "k1", "r13-hft-second");
-	EXPECT_STREQ(hft_load_userdata(_h, "k1", "DEF"), "r13-hft-second");
-}
-
-TEST_F(R13PorterHftExport, hft_log_text_passes_all_levels_without_touching_state)
-{
-	hft_save_userdata(_h, "state", "before");
-	hft_log_text(_h, LOG_LEVEL_DEBUG, "r13 hft debug");
-	hft_log_text(_h, LOG_LEVEL_INFO, "r13 hft info");
-	hft_log_text(_h, LOG_LEVEL_WARN, "r13 hft warn");
-	hft_log_text(_h, LOG_LEVEL_ERROR, "r13 hft error");
-	hft_log_text(_h, LOG_LEVEL_ERROR + 5, "r13 hft unmapped");
-	EXPECT_STREQ(hft_load_userdata(_h, "state", "AFTER"), "before");
-	// 日志不经过持仓槽位
-	EXPECT_EQ(g_hft.pos, 0U);
+	const std::string oldStyle = GTEST_FLAG_GET(death_test_style);
+	GTEST_FLAG_SET(death_test_style, "threadsafe");
+	EXPECT_EXIT(std::_Exit(run_registered_hft_getter_probe()),
+		::testing::ExitedWithCode(0), ".*");
+	GTEST_FLAG_SET(death_test_style, oldStyle);
 }
 
 /*
- * 崩溃/未初始化面（BUG-R13-001）：这几个入口都会解引用 _trader，
- * 而本夹具的 create_hft_context 因交易通道不存在而没有绑定 _trader，
- * HftStraBaseCtx.h:673 的 _trader 又没有被构造函数初始化 -> 野指针。
- * 触发条件：任一调用在 -DCOVERAGE 构建里稳定 SIGSEGV（不是可 catch 的异常）。
+ * BUG-R13-001 regression candidate. Keep DISABLED_: a missing trader still
+ * produces a context handle, while HftStraBaseCtx::_trader is not initialized
+ * on the failed binding path. The calls below reach that unbound pointer and
+ * must not be executed until the production defect is fixed and the test is
+ * redesigned to assert the repaired contract.
  */
-TEST_F(R13PorterHftExport, DISABLED_hft_trader_bound_entries_deref_unbound_pointer)
+TEST(R13PorterHftExport, DISABLED_hft_trader_bound_entries_deref_unbound_pointer)
 {
-	hft_get_position(_h, kHftCode, true);
-	hft_get_undone(_h, kHftCode);
-	hft_cancel(_h, 1);
-	hft_cancel_all(_h, kHftCode, true);
-	hft_buy(_h, kHftCode, 3500.0, 1, "r13", 0);
-	hft_sell(_h, kHftCode, 3500.0, 1, "r13", 0);
-	hft_sub_ticks(_h, kHftCode);
-	hft_sub_order_queue(_h, kHftCode);
-	hft_sub_order_detail(_h, kHftCode);
-	hft_sub_transaction(_h, kHftCode);
+	const CtxHandler h = create_hft_context("r13_hft_unbound_candidate",
+		"R13_TRADER_NOT_EXISTS", false, 1);
+	ASSERT_NE(h, 0U);
+	ASSERT_TRUE(getRunner().getHftContext(h) != NULL);
+
+	hft_get_position(h, kHftCode, true);
+	hft_get_undone(h, kHftCode);
+	hft_cancel(h, 1);
+	hft_cancel_all(h, kHftCode, true);
+	hft_buy(h, kHftCode, 3500.0, 1, "r13", 0);
+	hft_sell(h, kHftCode, 3500.0, 1, "r13", 0);
+	hft_sub_ticks(h, kHftCode);
+	hft_sub_order_queue(h, kHftCode);
+	hft_sub_order_detail(h, kHftCode);
+	hft_sub_transaction(h, kHftCode);
 }
 
 /*

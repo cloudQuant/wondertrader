@@ -676,7 +676,7 @@ TEST_F(T2TraderCTPTest, order_insert_cffex_anyprice_and_close_offsets)
     EXPECT_EQ(0, trader_.orderInsert(e));
     // 中金所的市价单要转成五档即时成交剩余撤销
     EXPECT_EQ(THOST_FTDC_OPT_FiveLevelPrice, api_.order_.OrderPriceType);
-    EXPECT_EQ(THOST_FTDC_D_Sell, api_.order_.Direction);
+    EXPECT_EQ(THOST_FTDC_D_Buy, api_.order_.Direction);
     EXPECT_EQ(THOST_FTDC_OF_CloseToday, api_.order_.CombOffsetFlag[0]);
     EXPECT_EQ(THOST_FTDC_TC_IOC, api_.order_.TimeCondition);
     EXPECT_EQ(THOST_FTDC_VC_CV, api_.order_.VolumeCondition);
@@ -930,6 +930,9 @@ TEST_F(T2TraderCTPTest, rsp_order_insert_and_action_error_paths)
 TEST_F(T2TraderCTPTest, rsp_account_position_and_settlement)
 {
     bringToReady();
+    ASSERT_EQ(1u, trader_.queryDepth());
+    ASSERT_EQ(1u, trader_.drainQueries());
+    ASSERT_EQ(0u, trader_.queryDepth());
 
     CThostFtdcTradingAccountField acct;
     memset(&acct, 0, sizeof(acct));
@@ -951,7 +954,7 @@ TEST_F(T2TraderCTPTest, rsp_account_position_and_settlement)
     trader_.OnRspQryTradingAccount(&acct, &ok, 12, true);
     ASSERT_EQ(1u, sink_.n_rsp_account_);
     EXPECT_EQ(1u, sink_.account_size_);
-    EXPECT_DOUBLE_EQ(103400.0, sink_.account_balance_);   // 100000+500-100+10000-2000
+    EXPECT_DOUBLE_EQ(108400.0, sink_.account_balance_);   // 100000+500-100+10000-2000
     EXPECT_DOUBLE_EQ(90000.0, sink_.account_available_);
 
     CThostFtdcInvestorPositionField pos;
@@ -965,17 +968,16 @@ TEST_F(T2TraderCTPTest, rsp_account_position_and_settlement)
     pos.UseMargin = 6000.0;
     pos.PositionProfit = 200.0;
     pos.PositionCost = 42000.0;
-    pos.LongFrozen = 2;
+    pos.ShortFrozen = 2; // Long position close freeze reduces available long quantity.
     trader_.OnRspQryInvestorPosition(&pos, &ok, 13, false);
-    // 同 key 再来一笔 => 累加保证金
+    // Same key row overwrites Position but adds PositionCost and margin.
     pos.UseMargin = 1000.0;
-    trader_.OnRspQryInvestorPosition(&pos, &ok, 13, false);
     trader_.OnRspQryInvestorPosition(&pos, &ok, 13, true);
     ASSERT_EQ(1u, sink_.n_rsp_position_);
     EXPECT_EQ(1u, sink_.position_size_);
     EXPECT_DOUBLE_EQ(6.0, sink_.pos_total_);
-    EXPECT_DOUBLE_EQ(7000.0, sink_.pos_avg_);     // (42000+42000)/6/1
-    EXPECT_DOUBLE_EQ(4.0, sink_.pos_avail_new_);  // Position 6 - LongFrozen 2
+    EXPECT_DOUBLE_EQ(14000.0, sink_.pos_avg_);    // (42000+42000)/6/volScale(1)
+    EXPECT_DOUBLE_EQ(4.0, sink_.pos_avail_new_);  // Position 6 - ShortFrozen 2
     EXPECT_EQ(0u, trader_.queryDepth());
 
     // 未知合约 => 不进持仓表，但 bIsLast 仍推送空数组

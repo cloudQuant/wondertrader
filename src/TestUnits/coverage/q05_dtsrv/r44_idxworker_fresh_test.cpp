@@ -207,16 +207,18 @@ TEST_F(R44IndexWorkerFreshTest, GetTickWithNullCodeIsStoppedByWriterGuard)
 }
 
 /*
- * 触发条件（禁用原因）：`fs::directory_iterator` 对普通文件构造会抛 filesystem_error，
- * loadFactories（IndexWorkerMgr.cpp:37-46）只检查 exists 不检查 is_directory，异常一路外抛。
+ * 待确认的输入合同：loadFactories 返回 bool，不存在路径返回 false；公开接口没有
+ * 说明普通文件应抛异常还是返回 false。普通文件不应被报告为成功，因此暂保留正确
+ * 的 false 期望但禁用，待确定异常/返回值合同后再启用。当前 directory_iterator
+ * 路径可能抛 filesystem_error，不能把异常本身当作通过。
  * 缺陷登记：bugs/R44.md BUG-R44-005。
  */
-TEST_F(R44IndexWorkerFreshTest, DISABLED_LoadFactoriesOnRegularFileThrows)
+TEST_F(R44IndexWorkerFreshTest, DISABLED_LoadFactoriesOnRegularFileReturnsFalse_ContractPending)
 {
 	fs::path file = _dir / "not_a_dir.txt";
 	r44_write_file(file, "plain file");
 	IndexWorkerMgr mgr;
-	EXPECT_TRUE(mgr.loadFactories(file.string().c_str()));
+	EXPECT_FALSE(mgr.loadFactories(file.string().c_str()));
 }
 
 /*

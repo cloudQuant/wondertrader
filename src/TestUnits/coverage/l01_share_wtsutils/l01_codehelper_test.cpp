@@ -148,8 +148,8 @@ TEST(l01_codehelper, std_code_to_std_comm_id)
 {
 	EXPECT_EQ(CodeHelper::stdCodeToStdCommID2("SHFE.ag.2012"), std::string("SHFE.ag"));
 	EXPECT_EQ(CodeHelper::stdCodeToStdCommID2("BINANCE.DC.BTCUSDT"), std::string("BINANCE.DC"));
-	EXPECT_EQ(CodeHelper::stdCodeToStdCommID2("CFFEX.IO2008.C.4300"), std::string("CFFEX.IO2008"));
-	// 两段代码原样返回（注意：与文件头注释“SSE.600000 -> SSE.STK”不一致，见 bug 清单）
+	// 期权代码的品种 ID 格式尚待合同明确；此处保留普通两段/三段代码对照。
+	// SSE.STK 是两段品种标识，作为两段输入原值返回的对照。
 	EXPECT_EQ(CodeHelper::stdCodeToStdCommID2("SSE.STK"), std::string("SSE.STK"));
 }
 
@@ -174,18 +174,18 @@ TEST(l01_codehelper, raw_month_code_to_std_code_4_digits)
 
 TEST(l01_codehelper, raw_month_code_to_std_code_3_digits)
 {
-	// 首位 > '5' => 20xx
+	// 三位尾码首位 > '5' 时选 '1' 前缀，否则选 '2' 前缀。
 	EXPECT_EQ(CodeHelper::rawMonthCodeToStdCode("au912", "SHFE"), std::string("SHFE.au.1912"));
-	EXPECT_EQ(CodeHelper::rawMonthCodeToStdCode("cu01", "SHFE"), std::string("SHFE.cu.2001"));
-	// 首位 <= '5' => 20xx
+	EXPECT_EQ(CodeHelper::rawMonthCodeToStdCode("cu001", "SHFE"), std::string("SHFE.cu.2001"));
 	EXPECT_EQ(CodeHelper::rawMonthCodeToStdCode("au512", "SHFE"), std::string("SHFE.au.2512"));
 	EXPECT_EQ(CodeHelper::rawMonthCodeToStdCode("rb105", "SHFE"), std::string("SHFE.rb.2105"));
 }
 
 TEST(l01_codehelper, raw_month_code_to_std_code_as_comm)
 {
-	EXPECT_EQ(CodeHelper::rawMonthCodeToStdCode("ag1912", "SHFE", true), std::string("SHFE.ag1912"));
-	EXPECT_EQ(CodeHelper::rawMonthCodeToStdCode("BTC-USDT", "OKEX", true), std::string("OKEX.BTC-USDT"));
+	// isComm=true 接收品种代码；不传入月合约或永续合约代码。
+	EXPECT_EQ(CodeHelper::rawMonthCodeToStdCode("ag", "SHFE", true), std::string("SHFE.ag"));
+	EXPECT_EQ(CodeHelper::rawMonthCodeToStdCode("IF", "CFFEX", true), std::string("CFFEX.IF"));
 }
 
 // ----------------------------------------------- rawFlatCodeToStdCode
@@ -217,7 +217,8 @@ TEST(l01_codehelper, is_monthly_code_false)
 	EXPECT_FALSE(CodeHelper::isMonthlyCode("a12"));
 	EXPECT_FALSE(CodeHelper::isMonthlyCode("STK"));
 	EXPECT_FALSE(CodeHelper::isMonthlyCode(""));
-	EXPECT_FALSE(CodeHelper::isMonthlyCode("IF211"));
+	// 合约主体近似月码但末尾含非数字，不满足月码尾缀。
+	EXPECT_FALSE(CodeHelper::isMonthlyCode("IF21A"));
 }
 
 // ------------------------------------------- rawFutOptCodeToStdCode
@@ -241,15 +242,16 @@ TEST(l01_codehelper, std_code_to_std_hot_code)
 	const std::string hot = CodeHelper::stdCodeToStdHotCode("DCE.m.2109");
 	// c_str() 在内部第一个 '\0' 处截断，可见文本正确
 	EXPECT_STREQ(hot.c_str(), "DCE.m.HOT");
-	// BUG-L01-002：resize 多留了 1 字节，string 末尾带一个多余的 '\0'
-	EXPECT_EQ(hot.size(), 10u);
+	EXPECT_EQ(std::string("DCE.m.HOT"), hot);
+	EXPECT_EQ(9u, hot.size());
 }
 
 TEST(l01_codehelper, std_code_to_std_2nd_code)
 {
 	const std::string snd = CodeHelper::stdCodeToStd2ndCode("DCE.m.2109");
 	EXPECT_STREQ(snd.c_str(), "DCE.m.2ND");
-	EXPECT_EQ(snd.size(), 10u);
+	EXPECT_EQ(std::string("DCE.m.2ND"), snd);
+	EXPECT_EQ(9u, snd.size());
 }
 
 TEST(l01_codehelper, std_code_to_std_hot_code_without_suffix_sep)
@@ -257,6 +259,8 @@ TEST(l01_codehelper, std_code_to_std_hot_code_without_suffix_sep)
 	// 只有一个分隔符时，取第一个 '.' 之前的部分
 	const std::string hot = CodeHelper::stdCodeToStdHotCode("SSE.STK");
 	EXPECT_STREQ(hot.c_str(), "SSE.HOT");
+	EXPECT_EQ(std::string("SSE.HOT"), hot);
+	EXPECT_EQ(7u, hot.size());
 }
 
 // ------------------------------------------- stdFutOptCodeToRawCode

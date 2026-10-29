@@ -11,7 +11,7 @@
  *  - 四个 broadcast 重载各自到达 caster（DataManager.cpp:252-289）
  *  - release 在 _writer==NULL 时的幂等性（L127-134）
  *  - getSessionComms 返回品种 fullPid 集合（L297-300），以及 getTradingDate 委托
- * 禁用用例记录「init 接受 bdMgr==NULL，但 getSessionComms 不做判空」的缺陷。
+ * 禁用占位说明 bdMgr 是必需依赖；全天候装配只允许 StateMonitor 为空。
  * 不加载真实写手插件（所有 module 路径都指向必然 dlopen 失败的临时文件/目录）。
  */
 #include <gtest/gtest.h>
@@ -234,18 +234,14 @@ TEST_F(R44DataManagerEdgesTest, SessionCommsExposeCommodityFullPids)
 }
 
 /*
- * 触发条件（禁用原因）：DataManager::init（L67-72）允许 bdMgr==NULL（q05 已把它作为
- * 「全天候模式」的正常输入），但 getSessionComms（L297-300）与 getTradingDate（L308-311）
- * 都不判空，初始化失败后调用就是空指针解引用。缺陷登记：bugs/R44.md BUG-R44-008。
+ * 无效依赖探针：QuoteFactory 的全天候装配仍传入 bdMgr，只把 StateMonitor 设为空。
+ * 本用例原先把 bdMgr=null 和 init 失败后的查询当成正常用法；该前置条件不受支持，
+ * 因而不作为 BUG-R44-008 的产品复现或验收。跳过以防显式启用 disabled 用例时崩溃。
  */
-TEST_F(R44DataManagerEdgesTest, DISABLED_SessionCommsCrashesAfterInitWithoutBdMgr)
+TEST_F(R44DataManagerEdgesTest, DISABLED_NullBaseDataManagerIsAnInvalidDependencyProbe)
 {
-	WTSVariant* params = loadDmCfg();
-	ASSERT_NE(params, nullptr);
-	DataManager dm;
-	EXPECT_FALSE(dm.init(params, nullptr, nullptr));
-	dm.getSessionComms("DAY0");	// 崩在 L299
-	params->release();
+	GTEST_SKIP() << "DataManager requires a base data manager; only StateMonitor is optional "
+				 << "for the QuoteFactory all-day mode.";
 }
 
 }  // namespace

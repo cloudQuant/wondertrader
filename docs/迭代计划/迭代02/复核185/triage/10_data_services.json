@@ -1,0 +1,710 @@
+[
+  {
+    "lane": "R154",
+    "id": "BUG-R154-001",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/UDPCaster.cpp:62-68",
+      "src/WtDtCore/UDPCaster.cpp:156-180",
+      "src/QuoteFactory/main.cpp:181-184",
+      "src/QuoteFactory/main.cpp:312-329"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r154_udp_caster_start_test.cpp:389-399"
+    ],
+    "input_reachability": "候选测试直接以 active=true 调用 init(cfg,nullptr,nullptr)。仓库正常装配只在 QuoteFactory 配置 broadcaster 时传入已构造的 g_baseDataMgr 和 g_dataMgr；订阅回调确实依赖两者，但没有支持省略依赖的调用者或契约。",
+    "oracle_basis": "此内部 C++ 组件的正常装配是 QuoteFactory::initialize；active 不表示 base/data manager 可选。测试人工传 NULL 不构成有效装配。",
+    "reason": "空指针解引用风险为真，但已知触发测试不满足正常初始化前提；不能将它作为产品缺陷或要求广播器接受空管理器。测试注释把未验证前置条件写成必然有效。",
+    "root_cause": null,
+    "fix": "不改产品代码。修正禁用测试说明，将 null manager 记录为未满足 init 依赖的风险探针；若未来要支持可选依赖，先定义合同再单独测试。",
+    "acceptance": "生产装配继续传入两个有效 manager；当前 null 依赖探针不作为产品验收或覆盖率要求。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q05_dtsrv/r154_udp_caster_start_test.cpp",
+        "case": "R154UdpCasterTest.DISABLED_NullManagersAreAnInvalidDependencyProbe",
+        "issue": "disabled case 将人工传 null manager 当作有效产品配置，且没有证明该依赖可省略。",
+        "change": "保留安全禁用状态并将注释改为未满足 init 依赖前提；不要把该 case 列作 R154 产品缺陷复现。",
+        "target": "CoverageTests_dtcore",
+        "filter": "R154UdpCasterTest.DISABLED_NullManagersAreAnInvalidDependencyProbe",
+        "expected_result": "只以有效 manager 装配覆盖订阅；null 依赖不构成产品支持合同。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R154",
+    "id": "BUG-R154-003",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/UDPCaster.cpp:58-60",
+      "src/WtDtCore/UDPCaster.cpp:133-143",
+      "src/QuoteFactory/main.cpp:312-329"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r154_udp_caster_start_test.cpp:423-442"
+    ],
+    "input_reachability": "测试显式对同一已启动对象连续调用两次 stop。QuoteFactory 正常运行主循环没有调用 UDPCaster::stop，析构函数为空，也不存在 stop 后析构再次 stop 的自然顺序。",
+    "oracle_basis": "stop 的单次停止行为可用；接口和调用链没有承诺任意重复 stop 幂等。",
+    "reason": "第二次 join 已 join 的线程可能抛 std::system_error，但候选只证明未承诺的手工重复调用；正常生命周期不自然触发第二次 stop。",
+    "root_cause": null,
+    "fix": "撤回产品缺陷项；如果未来有 owner 要求重复 stop，再定义幂等契约并单独实现。",
+    "acceptance": "受支持的单次停止路径完成线程 join；重复 stop 不列为当前产品验收条件。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R18_wtdtcore",
+    "id": "BUG-R18-004",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/ParserAdapter.cpp:207-219",
+      "src/WtDtCore/ParserAdapter.cpp:327-335",
+      "src/QuoteFactory/main.cpp:70-94",
+      "src/QuoteFactory/main.cpp:252-260",
+      "src/WtDtCore/ParserAdapter.cpp:42-44",
+      "src/WtPorter/WtRtRunner.cpp:1141-1154",
+      "src/WtDtPorter/WtDtRunner.cpp:349-357"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r18_parser_adapter_test.cpp:525-539",
+      "src/TestUnits/coverage/q05_dtsrv/r44_parser_adapter_edges_test.cpp:198-218"
+    ],
+    "input_reachability": "ParserAdapterMgr::release 逐个释放后清空 map；QuoteFactory 正常路径构建 adapter、运行 parser，未发现二次 release 调用者。候选所列 double-release 测试自身标题和注释明确登记的是 BUG-R18-003，而重复 initExt 的 R44 用例是另一问题。",
+    "oracle_basis": "manager 的支持清理是一次释放并清空容器；没有析构再次释放或生产重复 release 的链路。",
+    "reason": "release 不置空使人为第二次直接 release 有 double-delete 风险，但这不是自然生命周期；原候选测试与本 id 错配，不能证明 R18-004。",
+    "root_cause": null,
+    "fix": "从产品缺陷中撤回重复 release 主张；分别保留 R18-003 的独立归属以及 R44-003 对重复 initExt 的单独核实，不合并。",
+    "acceptance": "manager 单次 release 清空 adapter map；没有当前受支持的重复 release 用例要求。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R18_wtdtcore",
+    "id": "BUG-R18-011",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/ShmCaster.h:61-83",
+      "src/WtDtCore/ShmCaster.cpp:72-91",
+      "src/WtDtCore/ShmCaster.cpp:99-118",
+      "src/WtDtCore/ShmCaster.cpp:126-145",
+      "src/WtDtCore/ShmCaster.cpp:153-172",
+      "src/QuoteFactory/main.cpp:70-94",
+      "src/WtDtCore/DataManager.cpp:252-256",
+      "src/WtDataStorage/WtDataWriter.cpp:366-405",
+      "src/ParserShm/ParserShm.cpp:126-169"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r18_shm_caster_test.cpp:261-300",
+      "src/TestUnits/coverage/q05_dtsrv/r154_shm_caster_active_test.cpp:51-130"
+    ],
+    "input_reachability": "QuoteFactory 配置可启动多个 parser adapter；各 parser 的行情回调进入 DataManager::broadcastTick，再向同一个注册的 ShmCaster 广播。生产数据源插件可独立回调，因此并发 producer 可达。",
+    "oracle_basis": "队列注释明确承诺进程间安全传递；写索引虽注释称原子递增，实际是 volatile uint64_t 的非原子读改写，readable 的普通写也没有发布同步。",
+    "reason": "每个 overload 都先对共享 writable 做非原子 ++，按槽写 payload，再普通写 readable；多个生产者可竞争索引/覆盖槽，消费者也无 acquire/release 屏障。现有用例只测 fresh guard，没有验证实际队列并发。",
+    "root_cause": "src/WtDtCore/ShmCaster.h 的索引字段仅 volatile；src/WtDtCore/ShmCaster.cpp 四类广播都使用非原子取号及普通发布，无法兑现共享队列并发安全注释。",
+    "fix": "明确并实现可跨进程工作的 MPSC 协议：对写槽分配/占用使用进程间安全同步，先完整写 payload 再以匹配的发布语义让消费者读取；若协议最终限制单写者，则在 API/组装层实际串行化并文档化。",
+    "acceptance": "用独立生产线程和跨进程消费者写入带类型、序号和校验内容的项目；所有可接受项目不丢失、不撕裂、不读到未发布槽，容量回绕按既定队列策略处理；另验证正常单 producer 对照。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q05_dtsrv/r18_shm_caster_test.cpp",
+        "case": "ShmCaster.ConcurrentProducersPublishDistinctItems",
+        "issue": "现有测试没有触碰 active queue 上的并发发布或消费者可见性，不能验证多 parser 生产路径。",
+        "change": "实现同步协议后增加独立共享映射 producer/consumer 压力测试，以唯一序号、类型和 payload 校验，不使用公式拷贝测试替代。",
+        "target": "CoverageTests_dtcore",
+        "filter": "ShmCaster.ConcurrentProducersPublishDistinctItems",
+        "expected_result": "并发写入按定义的队列策略完整可见，无重复槽竞争、数据撕裂或越界；保留单生产者正常对照。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R44",
+    "id": "BUG-R44-001",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/StateMonitor.cpp:38-56",
+      "src/WtDtCore/StateMonitor.cpp:90-107",
+      "src/QuoteFactory/main.cpp:188-199",
+      "src/QuoteFactory/main.cpp:304-310"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r44_state_monitor_lifecycle_test.cpp:149-159"
+    ],
+    "input_reachability": "QuoteFactory 的 main 在一次 initialize 中创建状态监控器；没有热加载或在同一实例重启配置的生产调用。候选重复初始化由测试直接发起，且已禁用等待合同。",
+    "oracle_basis": "当前组件生命周期是启动时单次装配；API 未承诺同一实例的重配置替换或合并语义。",
+    "reason": "map 不清理会导致人工重复 initialize 保留旧 session，但该行为没有正常生产触发链，不能据此要求替换或合并策略。",
+    "root_cause": null,
+    "fix": "撤回当前生产缺陷主张；只有引入状态配置热重载时才另行定义替换、合并或拒绝语义。",
+    "acceptance": "单次 QuoteFactory 初始化将配置 session 写入状态表；重复初始化不作为当前合同。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R44",
+    "id": "BUG-R44-003",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/ParserAdapter.cpp:46-80",
+      "src/WtDtCore/ParserAdapter.cpp:207-219",
+      "src/QuoteFactory/main.cpp:70-94",
+      "src/WtDtPorter/WtDtRunner.cpp:349-357"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r44_parser_adapter_edges_test.cpp:198-218"
+    ],
+    "input_reachability": "生产扩展 parser 路径在 WtDtRunner::createExtParser 中为每次注册新建 ParserAdapter 后调用 initExt；没有把同一 adapter 再次传入 initExt 的生产调用链。候选重入用例仅手工复用 adapter，当前跳过等待所有权/替换合同。",
+    "oracle_basis": "当前产品创建扩展 parser 的顺序是新建 adapter、注入一个 api 并登记；initExt 只需支持每个 adapter 一次初始化，尚无支持同一对象重复注入/替换 API 的契约。",
+    "reason": "重复 initExt 会覆盖旧 api 指针，但其触发不是当前生产路径；不能将未支持的注入 API 重入自动提升为产品行为合同。",
+    "root_cause": null,
+    "fix": "当前撤回产品缺陷；若未来接入 initExt，应先约定 API 所有权和替换语义，再实现先释放旧 API 或拒绝二次初始化。",
+    "acceptance": "正常 init 一次后订阅、release 一次；当前不要求重复 initExt 的替换行为。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R44",
+    "id": "BUG-R44-005",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/IndexWorkerMgr.cpp:35-49",
+      "src/WtDtCore/IndexWorkerMgr.h:48-58",
+      "src/QuoteFactory/main.cpp:201-218"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r44_idxworker_fresh_test.cpp:209-222"
+    ],
+    "input_reachability": "IndexWorkerMgr::loadFactories 是 QuoteFactory 初始化时使用的目录加载入口；外部文件系统状态可以使期望目录被普通文件占据、权限拒绝或迭代过程中失效。函数已有 bool 成功/失败返回，缺失路径已返回 false。",
+    "oracle_basis": "函数以 bool 汇报加载结果，缺失目录走 false 和错误日志；已有路径若不是可遍历目录也应走同一失败通道，不能把 filesystem_error 未处理地抛出初始化调用边界。",
+    "reason": "只检查 exists 后直接构造 directory_iterator；普通文件或迭代错误可抛异常，未转换成 bool 失败。调用方忽略返回值不使异常路径成为有效成功合同。",
+    "root_cause": "src/WtDtCore/IndexWorkerMgr.cpp:35-46 只检查路径存在，不检查 directory 状态或使用 error_code iterator。",
+    "fix": "使用带 error_code 的 exists/is_directory 检查和目录遍历；记录路径及失败原因并返回 false，避免 filesystem_error 越过工厂加载接口。",
+    "acceptance": "缺失、普通文件、不可读或迭代中失效的路径稳定返回 false 且不抛；可遍历空目录和包含合法插件的目录仍按原合同工作。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q05_dtsrv/r44_idxworker_fresh_test.cpp",
+        "case": "R44IndexWorkerFreshTest.DISABLED_LoadFactoriesOnRegularFileReturnsFalse_ContractPending",
+        "issue": "普通文件路径是公开加载入口的 filesystem 错误结果；已有 bool/缺路径 false 语义支持失败返回，当前禁用用例未验证错误转译。",
+        "change": "在实现错误处理后启用并断言 false，且异常不跨出调用。",
+        "target": "CoverageTests_dtcore",
+        "filter": "R44IndexWorkerFreshTest.DISABLED_LoadFactoriesOnRegularFileReturnsFalse_ContractPending",
+        "expected_result": "普通文件路径不抛异常并返回 false；正常空目录仍返回成功。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R44",
+    "id": "BUG-R44-007",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/IndexWorkerMgr.cpp:129-167",
+      "src/WtDtCore/IndexWorkerMgr.cpp:170-208",
+      "src/WtIndexFactory/WtBlkIdxWorker.cpp:330-340",
+      "src/QuoteFactory/main.cpp:201-218",
+      "src/WtDtCore/ParserAdapter.cpp:286-309"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r44_idxworker_fresh_test.cpp:235-247"
+    ],
+    "input_reachability": "正常指数插件由 QuoteFactory 先 loadFactories 再 init；插件在初始化后由 IndexWorkerMgr::handle_quote 分发回调，仓库内 WtBlkIdxWorker 的 push_tick 也是该回调内使用。测试直接在新构造且未 init 的 manager 上调用 push_tick。",
+    "oracle_basis": "IIndexWorkerFactory 的管理器回调来自已加载并初始化的插件；fresh manager 不暴露给正常数据源调用链。",
+    "reason": "构造函数未初始化 _data_mgr，fresh push_tick 可解引用未定义指针；但唯一候选是违反 worker 初始化顺序的内部直接调用，正常插件链先 init。",
+    "root_cause": null,
+    "fix": "撤回当前产品缺陷；如未来将该 manager/方法独立开放给外部调用，再显式增加初始化状态守卫和失败返回。",
+    "acceptance": "初始化后的 worker callback 可安全 push；fresh-manager 人工直接调用不作为当前支持合同。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R44",
+    "id": "BUG-R44-008",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/DataManager.cpp:67-74",
+      "src/WtDtCore/DataManager.cpp:297-310",
+      "src/QuoteFactory/main.cpp:64-68",
+      "src/QuoteFactory/main.cpp:188-199",
+      "src/QuoteFactory/main.cpp:181-199"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp:237-245"
+    ],
+    "input_reachability": "全天候装配仅传 stMonitor=null，bdMgr 仍为 &g_baseDataMgr。禁用测试显式把 bdMgr 传 null 并在 init 失败后调用查询，未满足正常 DataManager 初始化依赖。",
+    "oracle_basis": "QuoteFactory 是当前正常装配者；其 helper 清楚显示全天候只将 state monitor 置空，基础数据 manager 始终有效。",
+    "reason": "查询确实解引用 _bd_mgr，但测试把 allday 对状态机的可空性错误外推成基础数据管理器可空；失败初始化后继续委托同样不是支持路径。",
+    "root_cause": null,
+    "fix": "不改产品代码；修正禁用用例注释，明确只允许 stMonitor 为空，bdMgr 是必需依赖。",
+    "acceptance": "正常初始化使用有效 bdMgr；全天候可令 stMonitor 为空而查询基础数据仍可用。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp",
+        "case": "R44DataManagerEdgesTest.DISABLED_NullBaseDataManagerIsAnInvalidDependencyProbe",
+        "issue": "用例注释误称 allday 装配允许 bdMgr=null；实际只有 StateMonitor 可空，且用例在 init 失败后继续调用。",
+        "change": "保留禁用状态并改写原因，说明 null base manager 不满足装配前提；不要作为产品复现。",
+        "target": "CoverageTests_dtcore",
+        "filter": "R44DataManagerEdgesTest.DISABLED_NullBaseDataManagerIsAnInvalidDependencyProbe",
+        "expected_result": "正常/全天候初始化均传有效 bdMgr；仅 allday 的 stMonitor 可以为空。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R54",
+    "id": "BUG-R54-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderHTS/TraderHTS.cpp:1336-1365",
+      "src/WtCore/TraderAdapter.cpp:1739-1765",
+      "src/Includes/WTSTradeDef.hpp:523-530",
+      "src/Includes/WTSTradeDef.hpp:594-601"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/r54_trader_callback_gaps_test.cpp:505-534"
+    ],
+    "input_reachability": "内置 TraderHTS 的查询回报路径从已知 contract 构造 WTSTradeInfo 后直接送 onRspTrades，没有 setContractInfo；这是仓库真实 adapter 输入，不是仅测试人工造形。",
+    "oracle_basis": "回报构造处掌握 code/exchange，adapter 已有代码能按 contract 输出交易统计；一个已知有效成交回报不得因缺少附加 contract 指针被静默丢弃。",
+    "reason": "TraderAdapter::onRspTrades 对 getContractInfo()==NULL 直接 continue，HTS 有真实路径制造此形态，因此该成交不会进入后续统计/风控。",
+    "root_cause": "src/WtCore/TraderAdapter.cpp:1747-1750 将可由回报 code/exchange 解析的成交仅按 ContractInfo 指针判定，缺失时静默丢弃。",
+    "fix": "对缺失 ContractInfo 的已知 code/exchange 使用基础数据 manager 查找合约后继续规范化和更新状态；查找失败时显式诊断该未知回报，不静默吞掉。",
+    "acceptance": "HTS 查询回报无 ContractInfo 时按 code/exchange 找到合同并更新成交统计、仓位和风险限制；未知合同有可观测诊断，正常附带 ContractInfo 的回报保持原行为。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q04_uftcore3/r54_trader_callback_gaps_test.cpp",
+        "case": "DISABLED_R54TraderCallback.onRspTrades_without_contract_info_drops_stats",
+        "issue": "现有 disabled fixture 与 TraderHTS.cpp:1336-1365 的内置真实查询构造形态一致，保留它能验证实际丢单缺陷。",
+        "change": "产品修复后启用，保留成交统计/风控上限断言；不要再以柜台形态未知为由跳过。",
+        "target": "CoverageTests",
+        "filter": "DISABLED_R54TraderCallback.onRspTrades_without_contract_info_drops_stats",
+        "expected_result": "已知 code/exchange 成交更新统计与风险；达到风险上限后拒绝超额委托。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R5_wtdtcore",
+    "id": "BUG-R5-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/UDPCaster.cpp:28-34",
+      "src/WtDtCore/UDPCaster.cpp:145-176",
+      "src/Share/StrUtil.hpp:94-114",
+      "src/ParserUDP/ParserUDP.cpp:173-205",
+      "src/WtDtCore/UDPCaster.cpp:156-180"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r164_udp_caster_receive_test.cpp:62-74"
+    ],
+    "input_reachability": "订阅端口接收网络报文，只筛选固定 1024 字节长度；同长度的外部 UDP 报文可填满 1020 字节 data 字段且不含 NUL。内置 ParserUDP 发送端用零填充，是正常对照但不能限制外部报文。",
+    "oracle_basis": "UDP 输入边界由接收端控制；没有 NUL 的定长字段必须在字段边界内安全拒绝，不能依赖发送方 NUL-terminated 假设。",
+    "reason": "StrUtil::split 接收 std::string，传入 char* 会按 C 字符串扫描；接收缓冲只有 1024 字节且没有检查 _data 内终止符，完整无 NUL 报文会越过固定字段读取。候选引用的 r154 用例实际测的是 null manager，r164 才是正常订阅报文路径。",
+    "root_cause": "src/WtDtCore/UDPCaster.cpp:164 将未验证终止符的定长数组隐式构造成 std::string，越界读取风险来自外部 UDP 输入。",
+    "fix": "在 1020 字节内用 memchr/有界长度扫描；无 NUL 或格式不合法的订阅字段安全拒绝并记录报文错误，再对确定长度的 view/string 做分割。",
+    "acceptance": "ParserUDP 零填充正常订阅行为不变；字段恰好填满且无 NUL 的 1024 字节包在边界内被拒绝，无越界读取；空/多代码正常对照保持解析稳定。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q05_dtsrv/r164_udp_caster_receive_test.cpp",
+        "case": "UDPCasterRejectsUnterminatedSubscribeField",
+        "issue": "现有回环用例覆盖了正常零填充订阅包和错误长度，但没有测试完整字段缺少 NUL 的边界输入；候选 r154 引用并非对应测试。",
+        "change": "实现有界解析后增加无 NUL 完整字段包的安全拒绝断言，并保留已知合约的正常订阅对照；不要在旧实现上直接驱动 UB。",
+        "target": "CoverageTests_dtcore",
+        "filter": "UDPCasterRejectsUnterminatedSubscribeField",
+        "expected_result": "缺少终止符的包不访问字段外存储、不触发订阅回调；零填充合法包仍按原格式解析。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R5_wtdtcore",
+    "id": "BUG-R5-009",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/StateMonitor.cpp:90-107",
+      "src/WtDtCore/StateMonitor.h:58-80",
+      "src/Includes/WTSSessionInfo.hpp:78-80",
+      "src/Includes/WTSSessionInfo.hpp:500-527",
+      "src/WTSTools/WTSBaseDataMgr.cpp:258-290",
+      "src/WtDtCore/StateMonitor.h:70-80"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:286-298"
+    ],
+    "input_reachability": "会话 JSON 的 sections.from/to 被 WTSBaseDataMgr 原样传给公开 addTradingSection；WTSSessionInfo 的 offsetTime 专门定义了 00:00 左对齐和右对齐为 24:00 的语义，所以午夜区间是可达输入。",
+    "oracle_basis": "状态 section 使用 [from,end) 时间区间；会话时间接口明确将 0 点作为合法对齐边界，状态监控不能对分钟数做无符号下溢。",
+    "reason": "from=0000 转为分钟 0 后执行 uint32_t stime--，回绕到 UINT32_MAX，再被错误转换为巨大 HHMM。源码注释称暂不考虑午夜，但输入类型和会话转换实际支持 midnight/24:00。现测试只断言 init/ORIGINAL，不观察数值区间。",
+    "root_cause": "src/WtDtCore/StateMonitor.cpp:99 在无符号分钟值 0 上直接减一，并在 102-103 用不处理跨日的 HHMM 算式转换。",
+    "fix": "使用有符号或 day-aware minute 边界运算表达前一分钟/后一分钟；显式保持 00:00 与 24:00 的半开区间语义，禁止无符号回绕。",
+    "acceptance": "通过可观察 section oracle 验证 0000 起点、跨午夜区间、2359 到 2400 边界的包含/排除关系；非法时间值按既定输入校验稳定拒绝。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp",
+        "case": "R5StateMonitorBdtTest.ZeroStartSectionIntervalsDoNotWrap",
+        "issue": "现用例只检查初始化成功和 ORIGINAL 状态，没有断言转换后的 section 或 isInSections 行为，不能证明下溢输出。",
+        "change": "增加可观察 section seam 或按确定的状态时间驱动验证区间边界；测试 0000、跨午夜、2359→2400，并保留正常白天区间。",
+        "target": "CoverageTests_dtcore",
+        "filter": "R5StateMonitorBdtTest.ZeroStartSectionIntervalsDoNotWrap",
+        "expected_result": "时间边界使用合法午夜表示，无 UINT32_MAX 回绕；半开区间判断符合 0000/2400 约定。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R66",
+    "id": "BUG-R66-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/EventNotifier.cpp:41-56",
+      "src/WtBtCore/EventNotifier.cpp:66-113",
+      "src/WtBtPorter/WtBtPorter.cpp:167-185",
+      "src/WtBtPorter/WtBtRunner.cpp:449-467",
+      "src/WtBtPorter/WtBtRunner.cpp:626-633",
+      "src/WtBtPorter/WtBtPorter.cpp:155-185"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r66_event_notifier_test.cpp:2-12",
+      "src/TestUnits/coverage/q01_wtcore3/r66_event_notifier_test.cpp:24",
+      "src/TestUnits/coverage/q01_wtcore3/r66_event_notifier_test.cpp:356-380",
+      "src/TestUnits/coverage/p08_btcore_mockers3/r20_event_notifier_test.cpp:4-15",
+      "src/TestUnits/coverage/p08_btcore_mockers3/r20_event_notifier_test.cpp:115-123"
+    ],
+    "input_reachability": "WtBtPorter 导出的 config_backtest 注释声明重复配置忽略，但函数局部 inited 从未置 true；WtBtRunner::_inited 也仅初始化 false 并被检查、从未赋 true。真实 public 重复配置因此再次进入 config 并调用 _notifier.init。",
+    "oracle_basis": "公开 config_backtest 注释承诺一次配置、重复忽略；C API 的 init_backtest 用同形静态 guard 并在调用后置 true，说明一次性门禁是既有 API 约定。",
+    "reason": "EventNotifier::init 每次成功都会创建新的 MQ server 并覆盖 _mq_sid/_remover；析构只销毁最后保存的 server，前一次资源失去清理路径。当前 R66 测试 include WtCore/EventNotifier.h，验证的是另一实现的 _worker；WtBtCore 正确测试 R20 则禁用了真实 MQ 初始化，均未覆盖 public 重复 config。",
+    "root_cause": "src/WtBtPorter/WtBtPorter.cpp:174-185 的一次性 guard 不置位，且 WtBtRunner::config 的 _inited 在成功路径也不置位，允许同一 backtest runner 重复创建 notifier server。",
+    "fix": "按既有一次性配置契约，在 config 成功后可靠置位 wrapper 与 runner 状态，失败加载时不锁死后续有效配置；同时避免重复 config 触达 EventNotifier::init。修复范围应覆盖真实配置入口，不要求 EventNotifier 任意重复 init 幂等。",
+    "acceptance": "两次 public config_backtest 按合同只应用首次配置、第二次不再创建 MQ server；一次创建的 server 恰好销毁一次。失败配置后可按合同重新配置；普通首次配置通知可用。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q01_wtcore3/r66_event_notifier_test.cpp",
+        "case": "R66EventNotifierTest.R66ActiveNotifierRepeatedInitKeepsWorker",
+        "issue": "测试实际 include WtCore/EventNotifier.h 并覆盖 _worker，不触达候选对应的 WtBtCore/EventNotifier 或 backtest config 生命周期。",
+        "change": "取消其作为 BUG-R66-001 的证据归属；在 WtBtCore/backtest porter fixture 通过可控 MQ create/destroy seam 测 public 重复配置和一次性资源清理。",
+        "target": "CoverageTests_btporter",
+        "filter": "R66BtNotifierRepeatedConfigDoesNotLeakServer",
+        "expected_result": "公开重复 config 被忽略；server 只创建一次且析构恰好 destroy 一次。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R67",
+    "id": "BUG-R67-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/HisDataReplayer.cpp:3687-3702",
+      "src/WtBtPorter/WtBtRunner.h:181-198",
+      "src/WtBtPorter/WtBtRunner.h:207-224",
+      "src/WtBtCore/HisDataReplayer.h:185-198"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q02_btcore3/r67_replayer_loader_gap_test.cpp:334-354"
+    ],
+    "input_reachability": "IBtDataLoader 是回测引擎公开扩展点，文档仅以 bool 表示是否成功，并允许数据库、网络或自定义文件数据源；true 且无行可表示合法空结果。",
+    "oracle_basis": "接口没有规定成功必须回调正数行；实现必须在任何索引访问前处理空集。",
+    "reason": "loadFinalHisBars 返回 true 且没有回调时 _bars 为空，成功分支仍读 _bars[0] 与 _bars[_count-1]，形成未定义行为。",
+    "root_cause": "src/WtBtCore/HisDataReplayer.cpp:3687-3702 只由 callback 设置 count/vector，却在 true 返回后无条件索引首尾。",
+    "fix": "成功返回后先检查 count/vector；空结果按明确无数据语义返回 false/空缓存并记录必要日志，任何时候保持 count 与 vector.size() 一致。",
+    "acceptance": "false+0、true+0、true+N 均安全；true+0 清晰表示空数据或失败并且不会读取首尾；非空按实际首尾时间缓存。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q02_btcore3/r67_replayer_loader_gap_test.cpp",
+        "case": "R67LoaderGap.DISABLED_EmptyLoaderSuccessDerefsEmptyBars",
+        "issue": "自定义 loader 接口只要求返回成功布尔值，true+0 是合法空结果边界；当前 disabled 用例覆盖真实 UB。",
+        "change": "产品先处理空结果后启用，断言无崩溃且空返回语义明确，并保留 true+N 正向对照。",
+        "target": "CoverageTests_btcore",
+        "filter": "R67LoaderGap.DISABLED_EmptyLoaderSuccessDerefsEmptyBars",
+        "expected_result": "true+0 安全返回空/无数据状态；true+N 正常缓存；不触碰空 vector 索引。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R67",
+    "id": "BUG-R67-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/HisDataReplayer.cpp:1464-1487",
+      "src/WtBtCore/HisDataReplayer.cpp:2933-2944",
+      "src/WtBtCore/HisDataReplayer.cpp:3089-3110",
+      "src/WtBtCore/HisDataReplayer.cpp:3167-3230",
+      "src/WtBtCore/HisDataReplayer.h:977-983"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p07_btcore_replayer2/r67_replayer_bars_gap_test.cpp:355-380"
+    ],
+    "input_reachability": "策略通过公开 tick 订阅入口可提供 stdCode；sub_tick 不验证 base-data 登记。未订阅 bar 加载器也会从自定义 loader/CSV 接受代码，存在 unknown code+daily bars 的可达组合。",
+    "oracle_basis": "运行时策略/外部数据源代码应在被解引用前解析到有效商品和 session；未知合约不能导致进程空指针访问。",
+    "reason": "daily synthetic-tick 分支对 getCommodity 结果直接调用 isStock，再对 get_session_info 结果调用 getOpenTime；未知 commodity 返回 NULL。",
+    "root_cause": "src/WtBtCore/HisDataReplayer.cpp:1475-1482 未对自定义/CSV 代码对应 commodity 和 session 检查空值。",
+    "fix": "在缓存或 synthetic tick 生成前校验代码能解析出 commodity/session；未知代码记录诊断并跳过该条数据，正常已登记商品仍按当前路径合成 tick。",
+    "acceptance": "登记商品日线继续产生 synthetic tick；未知 commodity/session 加载日线时不解引用空指针、不给策略伪 tick，并留下可定位诊断。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p07_btcore_replayer2/r67_replayer_bars_gap_test.cpp",
+        "case": "R67CsvBars.DISABLED_UnknownCommodityUnsubBarsDerefsNullCommodity",
+        "issue": "公开策略订阅与 CSV bar 导入组合会进入 daily synthetic tick 分支，当前禁用用例是有效未知代码健壮性边界。",
+        "change": "产品增加商品/session 校验后启用，并断言安全跳过/诊断及已登记代码正常对照。",
+        "target": "CoverageTests_btcore",
+        "filter": "R67CsvBars.DISABLED_UnknownCommodityUnsubBarsDerefsNullCommodity",
+        "expected_result": "未知代码不崩溃、不生成伪 tick；有效登记代码仍照常模拟。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R82",
+    "id": "BUG-R82-001",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtPorter/WtRtRunner.cpp:314-359",
+      "src/WtPorter/WtRtRunner.cpp:838-881",
+      "src/WtCore/WtEngine.cpp:39-57",
+      "src/WtPorter/WtPorter.h:255-266",
+      "src/WtPorter/WtPorter.h:690-700",
+      "src/WtPorter/WtPorter.h:995-1005"
+    ],
+    "test_evidence": [],
+    "input_reachability": "WtRtRunner::initEngine 读取唯一 env.name 并只 init CTA、SEL 或 HFT 中一个 engine；各 factory 方法类型明确。创建其他环境 context 会将其绑定到本次未初始化 engine，属于调用方与 runner 环境不匹配。",
+    "oracle_basis": "同一 runner 的配置只选择一种运行环境；各 context factory 名称、参数及具体 engine 一一对应，跨环境并用不属于当前配置契约。",
+    "reason": "错误环境的 engine 成员没有从 initEngine 获得依赖指针，调用该环境专属 factory 有潜在未定义访问；但这不证明正常配置/匹配调用存在产品缺陷，候选没有有效跨环境合同或生产用例。",
+    "root_cause": null,
+    "fix": "当前撤回跨环境支持缺陷；未来若需要一个 runner 并行承载多种环境，需显式扩展配置并分别初始化 engine，而不是从本候选推断现合同。",
+    "acceptance": "每种配置只创建与 env.name 匹配的 context；跨环境 factory 调用不纳入当前受支持使用。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "l05_dt_servo_porter",
+    "id": "BUG-L05-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtHelper/WtDtHelper.cpp:146-163",
+      "src/WtDtHelper/WtDtHelper.cpp:407-423",
+      "src/WtDtHelper/WtDtHelper.h:118-127"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:267-296",
+      "src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:298-307"
+    ],
+    "input_reachability": "trans_csv_bars 是导出 CSV 转换接口，逐行把用户文件 date 字段传给 strToDate；仓库正常输入含 YYYY/MM/DD、YYYY-MM-DD 和纯数字格式。外部 CSV 可包含截断/畸形日期行。",
+    "oracle_basis": "已支持示例格式可以保留；非支持格式必须被行级校验拒绝，不能在数组索引前提取 ay[2]。",
+    "reason": "日期字符串按斜杠/连字符切分后只要分段多于 1 就无条件访问 ay[2]；两段日期会越界。当前正向测试未覆盖这一 malformed row。",
+    "root_cause": "src/WtDtHelper/WtDtHelper.cpp:152-157 对 ay.size()>1 错当至少三段。",
+    "fix": "要求分段数严格等于 3 后解析年/月/日；对一段数字维持现格式，其余段数和范围错误逐行报告并跳过，避免写入伪日期。",
+    "acceptance": "有效斜杠、连字符和数字日期输出与现有结果一致；YYYY/MM、空段、非法年月日不会越界或写入错误 bar，并能从日志定位文件行。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp",
+        "case": "L05HelperBarTest.TransCsvBarsRejectsTwoPartDate",
+        "issue": "现有 positive control 只覆盖三段日期和纯数字日期，未覆盖外部 CSV 的两段日期越界输入。",
+        "change": "产品加日期校验后新增 YYYY/MM 或 YYYY-MM 行，验证该行拒绝且结果不含伪日期；保留两种有效格式对照。",
+        "target": "CoverageTests",
+        "filter": "L05HelperBarTest.TransCsvBarsRejectsTwoPartDate",
+        "expected_result": "畸形两段日期安全拒绝，不发生越界，合法日期转换结果不变。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "l05_dt_servo_porter",
+    "id": "BUG-L05-004",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/StatHelper.hpp:1-35",
+      "src/WtDtCore/StatHelper.hpp:89-124"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_core_util_test.cpp:116-160"
+    ],
+    "input_reachability": "对 src 下生产 C++ 做 include 和符号搜索后，StatHelper 仅出现在自身头、MSVC project/filter 登记、测试和 opts 说明中；没有生产消费方或受支持集成 API。",
+    "oracle_basis": "私有未接入 helper 的 standalone 编译/统计设计不自动构成产品合同；测试使用它不等于运行时会调用。",
+    "reason": "候选指出的 header 自足性/flag 语义即使需要改进，也没有当前生产可达路径；不能推导为 data service 运行缺陷。",
+    "root_cause": null,
+    "fix": "撤回生产 bug；若产品决定支持 StatHelper，再作为新 API 任务定义 header include、flag 消费和并发语义，否则由维护者另行评估是否清理。",
+    "acceptance": "当前不以无消费者的 helper 作为产品验收项；已有测试不代表生产功能依赖成立。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "l05_dt_servo_porter",
+    "id": "BUG-L05-007",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtHelper/WtDtHelper.cpp:595-608",
+      "src/WtDtHelper/WtDtHelper.cpp:735-747",
+      "src/WtDtHelper/WtDtHelper.cpp:769-780",
+      "src/WtDtHelper/WtDtHelper.cpp:926-937",
+      "src/Share/StdUtils.hpp:57-66",
+      "src/WtDtHelper/WtDtHelper.h:128-139",
+      "src/WtDtHelper/WtDtHelper.h:177-187",
+      "src/WtDtHelper/WtDtHelper.h:280-296",
+      "src/WtDtHelper/WtDtHelper.h:92-95"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:181-203",
+      "src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:211-225",
+      "src/TestUnits/coverage/q05_dtsrv/q05_resample_bars_test.cpp:173-190"
+    ],
+    "input_reachability": "这些导出 helper 从外部接收路径。StdFile::read_file_content 对缺失文件主动抛 runtime_error；bar/tick/resample 的 public 返回值是读取条数，正常 short file 则返回 0 并可记录 header 错误。",
+    "oracle_basis": "路径可失效是 public file input 的正常失败条件；API 暴露 count 返回和可选 log callback，稳定报告 0+read-error 比异常逃出导出边界更一致，且 short-file header 检查应保持独立。",
+    "reason": "read_dsb_ticks/read_dsb_bars/read_dmb_bars/resample_bars 在长度检查之前读取文件；缺失路径立即抛出，不进入头部校验。三处现有测试把 missing path 当作 header error，断言与当前真实控制流不符，但错误断言不消除 public file failure 风险。",
+    "root_cause": "数据读取 API 在 StdFile::read_file_content 的 throwing boundary 外没有捕获文件不存在/读取失败异常。",
+    "fix": "在每个 public helper 文件读取边界捕获并记录路径读失败，按 count API 返回 0；保持短文件走独立 header-invalid 日志，避免异常跨 C/插件调用边界。",
+    "acceptance": "不存在文件稳定返回 0 并记录 read-error；真实短文件仍返回 0 且报告 header-invalid；可读有效文件仍正常回调数量和数据；无 logger 也安全。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp",
+        "case": "L05HelperBarTest.ReadBarsHeaderValidation",
+        "issue": "missing.dsb 调用在 read_file_content 抛出，不能进入现断言的 header validation 分支。",
+        "change": "保留 tiny-file header 断言；缺失文件单独断言 API 约定的 0+read-error log，不把它写成 header error。",
+        "target": "CoverageTests",
+        "filter": "L05HelperBarTest.ReadBarsHeaderValidation",
+        "expected_result": "tiny file 走 header failure；missing file 走 read failure 并按推荐合同返回 0。"
+      },
+      {
+        "file": "src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp",
+        "case": "L05HelperTickTest.ReadTicksHeaderValidation",
+        "issue": "missing.dsb 调用在长度检查前抛出，当前 EXPECT_EQ(0) 且无捕获会失败。",
+        "change": "将缺失路径拆成独立 read-error 断言；保留 tiny-file header 对照。",
+        "target": "CoverageTests",
+        "filter": "L05HelperTickTest.ReadTicksHeaderValidation",
+        "expected_result": "tiny file 走 header failure；missing file 稳定返回 0 且不抛。"
+      },
+      {
+        "file": "src/TestUnits/coverage/q05_dtsrv/q05_resample_bars_test.cpp",
+        "case": "Q05ResampleTest.MissingOrShortFileFailsHeadCheck",
+        "issue": "缺失路径在 read_file_content 抛出；同一测试的 short file 才走头部长度分支。",
+        "change": "拆开 missing 与 short-file 检查，分别断言 read-error 和 header-error。",
+        "target": "CoverageTests_dtcore",
+        "filter": "Q05ResampleTest.MissingOrShortFileFailsHeadCheck",
+        "expected_result": "missing file 返回 0+read-error；short file 返回 0+header-error。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "q05_dtsrv",
+    "id": "BUG-Q05-004",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtHelper/WtDtHelper.cpp:833-864",
+      "src/WtDtHelper/WtDtHelper.cpp:941-1023",
+      "src/WtDtHelper/WtDtHelper.h:280-296",
+      "src/Includes/IDataFactory.h:52-59",
+      "src/WTSTools/WTSDataFactory.cpp:772-803",
+      "src/WTSTools/WTSDataFactory.cpp:805-911",
+      "src/WTSTools/WTSDataFactory.cpp:948-1050",
+      "src/WTSTools/WTSDataFactory.cpp:1053-1243",
+      "src/WTSTools/WTSDataFactory.cpp:1245-1303",
+      "src/WtDtHelper/WtDtHelper.h:43-52",
+      "src/WtDtHelper/WtDtHelper.h:81-86"
+    ],
+    "test_evidence": [],
+    "input_reachability": "resample_bars 接受非空基础 bar 切片後固定以 bIncludeOpen=true 提取；空文件/无命中会提前返回，extractKlineData 对空 slice 返回 NULL 并在 at(0) 前早退。cb/cbCnt 是必填形参，头文件没有 optional/default/null 语义。",
+    "oracle_basis": "公开签名中的回调是必需输出通道；有效非空 slice 的 m1/m5/hour/half/day 提取按每个输入 bar 构造输出，include-open=true 不会删去最后一条。",
+    "reason": "候选的 NULL callback 调用违反必需回调前提；所称 newCnt==0 在合法非空 slice 和当前 include-open=true 的提取路径不可达，提取返回 NULL 的路径又会先 return。无现有测试证据支持额外的零输出产品故障。",
+    "root_cause": null,
+    "fix": "撤回本条产品缺陷；不按 NULL callback 或未证明的 zero-output 输入改产品。若将来把回调定义为可选，再统一判空并明确零输出语义。",
+    "acceptance": "对有效非空 slice 使用非空 cb/cbCnt 正常返回数据；非法 null 回调不纳入当前支持合同；无命中/空文件继续走早退并返回 0。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  }
+]

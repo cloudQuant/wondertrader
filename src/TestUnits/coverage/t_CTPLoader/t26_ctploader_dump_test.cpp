@@ -145,8 +145,6 @@ TEST(t26_ctploader_dump, last_instrument_response_dumps_commodities_and_contract
 	EXPECT_EQ("SHFE", std::string(jget(*rb, "exchg")->GetString()));
 	EXPECT_EQ("dn", std::string(jget(*rb, "session")->GetString()));
 	EXPECT_EQ("CHINA", std::string(jget(*rb, "holiday")->GetString()));
-	// currency 装载时恒为 CNY（L467），但 DumpToJson 根本不落这个字段 → 增量往返必丢（行为钉子）
-	EXPECT_TRUE(jget(*rb, "currency") == NULL);
 	// 枚举按数值落盘：CM_CoverToday=1 / PM_Limit=1 / CC_Future=1 / TM_Both=0（L751-757）
 	EXPECT_EQ(1u, jget(*rb, "covermode")->GetUint());
 	EXPECT_EQ(1u, jget(*rb, "pricemode")->GetUint());
@@ -231,11 +229,11 @@ TEST(t26_ctploader_dump, czce_contract_is_keyed_by_expanded_code_with_altcode_ke
 /* DumpFees（经费率回报出口；顺带覆盖两个 exit 出口各一侧）                */
 /* ------------------------------------------------------------------ */
 
-TEST(t26_ctploader_dump, margin_response_dumps_fees_to_fixed_relative_name_with_product_fallback)
+TEST(t26_ctploader_dump, margin_response_dumps_fees_to_configured_relative_name_with_product_fallback)
 {
 	t26::setup_defaults("p3");
 	QRYFEES = true;							// L587-592 的 DumpToJson+DumpFees+exit(0) 出口
-	FEES_FILE = "custom_fees.json";			// 相对名 —— 产品落盘却硬编码 "fees.json"（L717-721，BUG-T26-006 钉子）
+	FEES_FILE = "custom_fees.json";			// 相对名应保留并拼接到 SAVEPATH（BUG-T26-006 回归）
 
 	_contracts["ao2512"] = make_contract("SHFE", "ao2512", "", "ao");
 	_commodities["SHFE.ao"] = make_commodity("SHFE", "ao");
@@ -257,9 +255,9 @@ TEST(t26_ctploader_dump, margin_response_dumps_fees_to_fixed_relative_name_with_
 	// _queries 全程为空（QRYFEES 的 bIsLast 队列路径没走），回报一进即触发终局
 	run_in_child([&spi, &mf, &ok]() { spi.OnRspQryInstrumentMarginRate(&mf, &ok, 77, true); });
 
-	const std::string feesPath = SAVEPATH + "fees.json";
+	const std::string feesPath = SAVEPATH + FEES_FILE;
 	ASSERT_TRUE(std::filesystem::exists(feesPath));
-	EXPECT_FALSE(std::filesystem::exists(SAVEPATH + FEES_FILE));	// 配置名被硬编码覆盖（行为钉子）
+	EXPECT_FALSE(std::filesystem::exists(SAVEPATH + "fees.json"));	// setup_defaults 已清理目录，不能有默认名的遗留文件
 
 	rj::Document fees;
 	ASSERT_TRUE(parse_dumped(feesPath, fees));
@@ -319,7 +317,7 @@ TEST(t26_ctploader_dump, commission_response_with_absolute_feesfile_dumps_to_tha
 
 // DumpFees 对「保证金里有、费率表与品种兜底都没有」的代码直接 `it->second`
 // （L696-699 两次 find 都 miss 后没有 end() 判定）→ 解引用 end 迭代器，UB，
-// 崩不崩取决于 allocator 邻接内存，无法写可证伪断言，只登记；BUG-T26-003。
+// 崩不崩取决于 allocator 邻接内存，无法写可证伪断言，只登记；BUG-T26-007。
 TEST(DISABLED_t26_ctploader_dump_crash, fees_dump_of_unknown_margin_code_dereferences_end_iterator)
 {
 	t26::setup_defaults("p5");

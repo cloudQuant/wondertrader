@@ -1,0 +1,385 @@
+[
+  {
+    "lane": "R14_executables",
+    "id": "BUG-R14-005",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtLatencyUFT/UftLatencyTool.cpp:305-327",
+      "src/WtLatencyHFT/HftLatencyTool.cpp:484-506",
+      "src/WtLatencyUFT/UftLatencyTool.cpp:28-34",
+      "src/WtLatencyHFT/HftLatencyTool.cpp:33-42",
+      "src/WtLatencyUFT/main.cpp:25-32",
+      "src/WtLatencyHFT/main.cpp:25-32"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/m_WtLatencyUFT/r95_uftlatency_init_run_test.cpp:243-258",
+      "src/TestUnits/coverage/m_WtLatencyHFT/r95_hftlatency_init_run_test.cpp:251-268",
+      "src/TestUnits/coverage/m_WtLatencyUFT/r14_uftlatency_main_test.cpp:151-155",
+      "src/TestUnits/coverage/m_WtLatencyHFT/r14_hftlatency_main_test.cpp:151-155"
+    ],
+    "input_reachability": "成功 init 后，run() 按顺序启动 parser、trader、engine，并调用内置 TestParser::run(_times)。这些是延迟工具的正常执行链；若其中任一步抛出异常，两个 run() 都会进入空 catch。入口随后仍输出等待回车并返回 0。零样本成功用例本轮通过，但没有触发异常路径。",
+    "oracle_basis": "延迟测试工具需要把运行失败作为可观察结果；静默结束且入口返回成功会让调用者无法区分测量完成与运行中止。入口 getchar 是交互暂停，本身不是缺陷。",
+    "reason": "UFT 与 HFT 的 run() 都使用 catch (...) {}，无日志、错误状态或返回值。test_uft/test_hft 忽略 init() 结果并调用 run()；run() 即使吞掉运行异常，main 仍会显示交互提示并返回 0。空 catch 因而掩盖运行失败。",
+    "root_cause": "src/WtLatencyUFT/UftLatencyTool.cpp:324-326 与 src/WtLatencyHFT/HftLatencyTool.cpp:503-505 捕获全部异常后丢弃；工具没有可观察的运行失败状态。",
+    "fix": "至少捕获并记录 std::exception 的消息及未知异常，并设置可由入口读取的失败状态；避免在错误后报告测量正常完成。是否让入口改为非零退出码属于返回语义选择，可在保留当前 void API 时通过状态字段或错误回调实现。",
+    "acceptance": "分别对 parser、trader 或 engine 阶段注入受控异常，确认错误文本或失败状态可观察且入口不会声称成功；正常零样本与有限样本仍完成。不能只用 EXPECT_NO_THROW 作为成功 oracle。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/m_WtLatencyUFT/r95_uftlatency_init_run_test.cpp",
+        "case": "r95_ufttool_run.zero_ticks_after_successful_init_exercises_engine_and_parser_tail",
+        "issue": "run() 吞掉所有异常，EXPECT_NO_THROW(tool.run()) 即使 parser/engine 尾部异常也会通过。",
+        "change": "保留为生命周期 smoke，并补一个可控异常阶段的用例，断言可观察错误状态/日志；另以 parser 完成标记或指标作为成功路径 oracle。",
+        "target": "CoverageTests_m_WtLatencyUFT",
+        "filter": "r95_ufttool_run.zero_ticks_after_successful_init_exercises_engine_and_parser_tail",
+        "expected_result": "正常路径证明 parser 尾部完成；注入异常时断言失败状态或错误诊断出现，而非仅断言 run 不抛出。"
+      },
+      {
+        "file": "src/TestUnits/coverage/m_WtLatencyHFT/r95_hftlatency_init_run_test.cpp",
+        "case": "r95_hft_run.zero_ticks_after_successful_init_exercises_engine_and_parser_tail",
+        "issue": "marker.json 证明 engine 初始化/运行到写 marker，但 EXPECT_NO_THROW(tool.run()) 不能证明 parser 尾部成功，因为 catch (...) 会吞异常。",
+        "change": "保留 marker 作为 engine 正控，增加 parser 完成标记/指标，并用可控异常路径检查失败诊断。",
+        "target": "CoverageTests_m_WtLatencyHFT",
+        "filter": "r95_hft_run.zero_ticks_after_successful_init_exercises_engine_and_parser_tail",
+        "expected_result": "engine marker 与 parser 完成各自被断言；注入异常时错误状态可观察。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/11_runners/safe_enabled_runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/11_runners/uft_zero_ticks.stdout.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/11_runners/hft_zero_ticks.stdout.txt"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "加入受控异常注入后运行上列两个 fresh target/filter；本轮仅执行正常零样本用例，没有复现异常注入。"
+    ]
+  },
+  {
+    "lane": "R14_executables",
+    "id": "BUG-R14-006",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtLatencyUFT/UftLatencyTool.cpp:198-208",
+      "src/WtLatencyHFT/HftLatencyTool.cpp:347-357",
+      "src/WtLatencyHFT/HftLatencyTool.cpp:398-407",
+      "src/WtLatencyUFT/main.cpp:25-32",
+      "src/WtLatencyHFT/main.cpp:25-32"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/m_WtLatencyUFT/r14_uftlatency_main_test.cpp:116-130",
+      "src/TestUnits/coverage/m_WtLatencyHFT/r14_hftlatency_main_test.cpp:113-128",
+      "src/TestUnits/coverage/m_WtLatencyUFT/r95_uftlatency_init_run_test.cpp:243-258",
+      "src/TestUnits/coverage/m_WtLatencyHFT/r95_hftlatency_init_run_test.cpp:251-268"
+    ],
+    "input_reachability": "两个 latency 入口都不接收配置路径参数；工具固定从进程 cwd 读取 config.yaml/logcfg.yaml，HFT 还从 cwd 读取 actpolicy.yaml。使用者可从放置这些文件的目录启动。正向测试在自己的 cwd 写入 config.yaml 并成功 init/run。",
+    "oracle_basis": "仓库没有证据要求这些工具从可执行文件目录解析配置或自动切换 cwd。对无参数的独立工具，cwd 是实际配置根；相对配置文件中的其他路径也保持同一解析基准。",
+    "reason": "相对 cwd 读取属当前工具入口的配置约定，不是对任意启动目录都必须成功的承诺。空 cwd 测试只确认文件缺失前提和目录恢复；本轮成功的零样本用例在 cwd 提供配置后走通，因此未证实产品读取路径错误。",
+    "root_cause": "无已确认根因；若部署希望从可执行文件目录读取配置，需要新增启动参数或部署约定，当前不是已证缺陷。",
+    "fix": "无。发布/启动说明可明确应从含 config.yaml 与相关相对文件的目录启动；若后续要求 exe-relative，再作为独立需求设计。",
+    "acceptance": "在启动 cwd 含有效 config.yaml 的受控目录中，UFT/HFT init 成功；cwd 缺少 config.yaml 时受控返回失败。当前已有正向零样本用例及空 cwd 前置用例覆盖相关路径。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/11_runners/safe_enabled_runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/11_runners/uft_zero_ticks.stdout.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/11_runners/hft_zero_ticks.stdout.txt"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R14_executables",
+    "id": "BUG-R14-008",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftRunner/WtUftRunner.cpp:53-58",
+      "src/WtUftRunner/WtUftRunner.cpp:340-349",
+      "src/WtUftRunner/WtUftRunner.cpp:375-387",
+      "src/WtUftRunner/main.cpp:64-79",
+      "src/WTSTools/WTSLogger.cpp:250-253",
+      "src/WTSTools/WTSLogger.cpp:271-320"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/m_WtUftRunner/r14_wtuftrunner_main_test.cpp:178-199",
+      "src/TestUnits/coverage/m_WtUftRunner/r95_wtuftrunner_config_run_test.cpp:124-156",
+      "src/TestUnits/coverage/m_WtUftRunner/r95_wtuftrunner_config_run_test.cpp:257-274"
+    ],
+    "input_reachability": "WTSLogger 只有在外部显式 registerHandler 时才调用该回调；WtUftRunner::init() 调用不带 handler 的 WTSLogger::init，主程序仅 init/config/run。仓内没有该 runner 的 registerHandler 调用。",
+    "oracle_basis": "ILogHandler 只定义回调签名，WtUftRunner 当前主程序未把自身注册为日志 sink；代码里虽有未使用的 LOG_TAGS 与 notifier helper，但无配置调用、无消息消费者，也没有 UFT runner 的对外通知契约。",
+    "reason": "空 override 的事实成立，但在 UFT runner 正常路径不可达；手工把该对象注册为 logger handler 属于外部选择，现有接口和配置无法证明其应把日志送到某个 notifier。不能据此声称正常 UFT 执行丢日志。当前测试只验回调不抛出，也未把日志转发说成产品保证。",
+    "root_cause": "无已确认产品根因；回调和日志标签表是未接入的实现残留。",
+    "fix": "无。若以后支持 UFT 日志转发，应同时定义 notifier 配置、初始化顺序、handler 注册者和实际消息消费者后再增加端到端测试。",
+    "acceptance": "无需以当前主程序验收 notifier 转发；确认 init/config/run 正常路径不注册 handler，现有 config 样例在没有 notifier 时成功配置。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/11_runners/uft_valid_config.stdout.txt"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R22_dtporter",
+    "id": "BUG-R22-004",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtPorter/WtDtRunner.cpp:88-103",
+      "src/WtDtPorter/WtDtPorter.cpp:48-65",
+      "src/WtDtCore/WtHelper.h:31-43"
+    ],
+    "test_evidence": [],
+    "input_reachability": "WtDtPorter 的公开 initialize() 进入函数级静态 runner，先配置进程级 logger 和模块目录，再解析文件/内容；配置失败会记录错误并立即返回，后续基础数据、状态监视器与数据服务初始化均未执行。",
+    "oracle_basis": "logger 在解析配置前初始化是为了让解析失败本身可以被记录；模块目录由 Porter 导出层提供，后续模块加载要用。失败没有将服务标为 ready，也没有发现要求回滚这些 bootstrap 全局量的公开契约。",
+    "reason": "候选指出的全局副作用属实，但它们是启动环境设置，不是半初始化服务状态。missing/unparsable config 分支返回前只留下日志器和模块路径；重试时同一进程仍可重新解析配置，模块路径会重设。没有证据表明初始化失败必须撤销 logger 或 module_dir。",
+    "root_cause": "无已确认根因；在配置加载前写入日志/模块目录是当前引导顺序。",
+    "fix": "无。若将来承诺跨不同 logger 配置重试，则单独定义 WTSLogger 全局重配置语义；当前不能以保留错误日志的 bootstrap 状态作为缺陷。",
+    "acceptance": "缺失或不可解析配置时记录错误并不进入后续服务初始化；当前源码在加载失败分支直接返回。跨进程生命周期或任意 logger 重配不属于本条已证范围。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R28_runner_mains",
+    "id": "BUG-R28-001",
+    "decision": "PRODUCT",
+    "evidence_level": "LOCAL_REPRO",
+    "source_evidence": [
+      "src/WtRunner/WtRunner.h:46-58",
+      "src/WtRunner/WtRunner.cpp:41-53",
+      "src/WtRunner/main.cpp:96-126",
+      "src/WtCore/WtCtaEngine.cpp:34-46",
+      "src/WtCore/WtSelEngine.cpp:33-56",
+      "src/WtCore/EventNotifier.h:57-68",
+      "src/WtCore/EventNotifier.cpp:37-56",
+      "src/WtBtCore/EventNotifier.h:110-117",
+      "src/WtBtCore/EventNotifier.cpp:41-57",
+      "src/TestUnits/coverage/CMakeLists.txt:45-52",
+      "src/TestUnits/coverage/CMakeLists.txt:439-456",
+      "src/WtRunner/CMakeLists.txt:21-25",
+      "src/WtBtPorter/CMakeLists.txt:20-36"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/CMakeLists.txt:408-445",
+      "src/TestUnits/coverage/m_WtRunner/r28_runner_main_test.cpp:69-77",
+      "src/TestUnits/coverage/m_WtRunner/r28_runner_main_test.cpp:171-278",
+      "src/TestUnits/coverage/m_WtRunner/r28_runner_main_test.cpp:397-423",
+      "src/TestUnits/coverage/m_WtRunner/r28_runner_main_test.cpp:1084-1089"
+    ],
+    "input_reachability": "生产 main() 使用栈上 WtRunner 默认构造。探针在独立子进程中只做默认构造和自动析构，不调用 init/config/run。主代理已确认新目标的 EventNotifier 符号来自本地 WtCore 静态实现，目标不再从 WtBtPorter 导入该符号。",
+    "oracle_basis": "公开默认对象的正常构造→析构生命周期应安全；生产 main() 使用该栈生命周期。正确绑定后 stack child 在构造完成写 C 后、析构返回写 D 前收到 SIGSEGV(11)，未触发 2 秒 watchdog；同一 SHA 的 heap child 写出 CD 并退出 0。这支持当前产品默认栈生命周期缺陷，但不证明栈地址本身致因，也不定位触发成员。",
+    "reason": "首轮 stack/heap 结果曾被证实使用错误 EventNotifier ABI，不能作为产品证据。隔离链接后，link/nm/dyld 记录确认 CoverageTests_m_WtRunner 使用本地 WtCore EventNotifier 构造/析构/init，不从 WtBtPorter 导入；随后 fresh binary（SHA d0f36d4df0cbdae9035484d3dfc6833b3d3c1e904cea63d866ef49f10582d03a）重跑仍得到 stack C/no-D、signal 11 和 heap CD/PASS。WtRunner ctor/dtor 为 public，生产 main() 正常采用栈对象，因此已确认正确产品依赖下可达的默认生命周期故障。不能将其归因栈本身或某个具体成员。",
+    "root_cause": "尚未精确定位。正确绑定后崩溃仍发生在析构窗口；WtRunner 析构函数体为空，但成员会自动析构。源码中存在未初始化指针候选（例如 WtCtaEngine、WtSelEngine、WtCore EventNotifier），但 signal 与 C/no-D marker 不能证明其中任何字段触发了 SIGSEGV。",
+    "fix": "获取该正确链接子进程的符号化 SIGSEGV 回溯，或逐个隔离析构子对象，定位真实读取点；将析构路径实际读取的未初始化 raw/function pointer 在默认构造时置空，并确保未配置对象的 release/destructor 安全。不要以改成 heap 作为产品修复。",
+    "acceptance": "保留已验证的正确链接映射（WtCore 提供 EventNotifier ctor/dtor/init，未从 WtBtPorter 导入）；修复后 fresh CoverageTests_m_WtRunner 的 stack 与 heap filters 都须在各自子进程写出 CD、waitpid 退出 0、无 signal 且 timed_out=false。该验收只覆盖默认构造→析构，不外推完整 main/config/run、插件或交易环境。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-3targets/runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-3targets/stack.log",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-3targets/stack.xml",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-3targets/heap.log",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-3targets/heap.xml",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-3targets/CoverageTests_m_WtRunner-nm.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-3targets/CoverageTests_m_WtRunner-dyld.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-3targets/CoverageTests_m_WtRunner-link.txt"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "取得正确链接 stack 子进程的符号化回溯或逐个隔离 member destructor，定位实际触发的读取点，供后续产品修复。"
+    ]
+  },
+  {
+    "lane": "R28_runner_mains",
+    "id": "BUG-R28-006",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtRunner/WtBtRunner.cpp:91-100",
+      "src/WtBtRunner/WtBtRunner.cpp:121-154",
+      "src/WtBtCore/HisDataReplayer.cpp:145-148",
+      "src/WtBtCore/HisDataReplayer.cpp:666-675",
+      "src/Includes/WTSVariant.hpp:346-353",
+      "src/TestUnits/coverage/CMakeLists.txt:141-155"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/m_WtBtRunner/r28_btrunner_main_test.cpp.blocked:312-322"
+    ],
+    "input_reachability": "有效 replayer 配置加上 env 对象和未支持的 mocker 字符串即可进入分支链；代码只为 cta/hft/sel/exec/uft 注册 sink。未知字符串不会提前失败，随后执行 prepare()。缺 env 对象是更早的独立空解引用，不在本条前置条件内。",
+    "oracle_basis": "公开配置解析出的枚举必须在使用前校验；未知模式不能让未设置的 listener 被 prepare() 解引用。安全拒绝是必须的，是否报错并返回非零是产品退出策略。",
+    "reason": "未知 mocker 是外部配置输入；没有任何分支注册 listener，而 HisDataReplayer 构造时 `_listener == NULL`，prepare() 直接调用 `_listener->handle_init()`。这构成确定的空指针路径，不应因枚举值无效而搁置。",
+    "root_cause": "src/WtBtRunner/WtBtRunner.cpp:100-150 仅列出五种模式但没有 else 失败分支；`prepare()` 无条件使用 listener。",
+    "fix": "在配置边界校验 env.mocker，只接受 cta/hft/sel/exec/uft；缺失或未知值记录清晰错误并在创建 HisDataReplayer/调用 prepare 前退出。或至少在 prepare 前验证 listener 非空并以失败状态终止。",
+    "acceptance": "五种支持值的模式解析正控通过；unknown、空和缺失 mocker 在 prepare 前受控失败，进程不崩溃、不进入 replay。验证解析 seam 即可，不依赖历史行情/日历。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/m_WtBtRunner/r28_btrunner_main_test.cpp.blocked",
+        "case": "R28BtRunner.UnknownMockerRejectedBeforePrepare",
+        "issue": "现有用例为 .blocked，不进入任何测试目标，且依赖回放数据、交易日历和 cwd 工厂；无法验证模式解析的安全门禁。当前 CoverageTests 拆分表没有 CoverageTests_m_WtBtRunner 目标。",
+        "change": "抽出纯 mocker-mode 解析/校验入口或新增专属 runner 测试目标；加入五个认可模式正控与 unknown/empty/缺失负控，断言失败发生在 prepare 前。",
+        "target": "新增 CoverageTests_m_WtBtRunner（需加入统一刷新清单）",
+        "filter": "R28BtRunner.UnknownMockerRejectedBeforePrepare",
+        "expected_result": "支持值解析到各自模式；未知/空/缺失配置返回可诊断失败且 listener 不为空解引用路径不可达。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "当前没有 runner 专属测试目标；由主代理决定新增轻量测试 seam/目标后再运行过滤用例。"
+    ]
+  },
+  {
+    "lane": "R6_porter_runner",
+    "id": "BUG-R6-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtPorter/WtPorter.h:140-161",
+      "src/WtPorter/WtPorter.h:226-233",
+      "src/WtPorter/WtPorter.cpp:149-156",
+      "src/WtPorter/WtRtRunner.cpp:55-100",
+      "src/WtPorter/WtRtRunner.cpp:295-303",
+      "src/WtPorter/WtRtRunner.cpp:838-882"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q06_porter/r6_porter_lifecycle_test.cpp:301-305",
+      "src/TestUnits/coverage/q06_porter/r82_porter_runner_edges_test.cpp:401-432"
+    ],
+    "input_reachability": "create_ext_parser 是导出 C API，文档要求先 register_parser_callbacks，但未写成功 config_porter 是前置。WtRtRunner 的构造器不初始化 `_engine`；该指针仅在 config 的 initEngine 成功后赋值。因而 init_porter 后注册回调、config 前调用 create_ext_parser 可进入 `_engine` 解引用路径。",
+    "oracle_basis": "C API 返回 bool，生命周期未就绪时应安全返回 false 或错误；不能在用户遵循接口注释的调用顺序时空解引用。若成功配置是隐藏前置条件，也应显式文档化并由代码作 ready guard。",
+    "reason": "createExtParser() 无状态检查，直接把 `_engine` 及其 manager 传给 adapter。公开文档只规定注册 parser 回调，没有把成功 config 列为该函数前提；因此这是公开生命周期边界上的可达安全缺陷。正确的 config 后路径本轮由 ExtParserQuoteSuccess 正控通过。",
+    "root_cause": "src/WtPorter/WtRtRunner.cpp:295-300 在 `_engine` 未就绪时直接调用 `_engine->get_basedata_mgr()` / `get_hot_mgr()`；构造器初始化列表未将 `_engine` 设为 null，config::initEngine 才赋值。",
+    "fix": "明确初始化 `_engine = nullptr`；createExtParser 先检查 engine/config ready，未就绪时返回 false 并记录错误；成功配置后再创建 adapter。同步把成功 config 的前置条件写入 create_ext_parser 文档。",
+    "acceptance": "通过公开 C API 在 init_porter+register_parser_callbacks 后、config_porter 前调用 create_ext_parser，返回 false 且不崩溃；成功 config 后创建 parser 并用有效 tick 推送成功。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q06_porter/q06_porter_capi_test.cpp",
+        "case": "Q06PorterCapi.CreateExtParserRejectsBeforeConfiguredEngine",
+        "issue": "公开 create_ext_parser 文档未说明必须先成功 config；当前 disabled 测试直接在局部未初始化 WtRtRunner 上调用，不能复现公开 C API 调用。",
+        "change": "以静态 C API runner 初始化 Porter 并注册 callbacks，但不 config，调用 create_ext_parser 并断言安全失败；保留 R82 成功 config 正控。",
+        "target": "CoverageTests_porter",
+        "filter": "Q06PorterCapi.CreateExtParserRejectsBeforeConfiguredEngine",
+        "expected_result": "config 前返回 false/有诊断且进程存活；config 后同一受支持流程可成功注册 parser。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/11_runners/porter_registered_ext_quote.stdout.txt"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "未运行 config 前的 invalid-lifecycle probe；现有 disabled 测试使用局部未初始化实例，不能安全启用。"
+    ]
+  },
+  {
+    "lane": "R6_porter_runner",
+    "id": "BUG-R6-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtPorter/WtPorter.h:1286-1296",
+      "src/WtPorter/WtPorter.cpp:2265-2268",
+      "src/WtPorter/WtRtRunner.cpp:1243-1255",
+      "src/WtCore/ParserAdapter.cpp:406-414"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q06_porter/r6_porter_dispatch_silence_test.cpp:338-345",
+      "src/TestUnits/coverage/q06_porter/q06_porter_capi_test.cpp:243-253",
+      "src/TestUnits/coverage/q06_porter/q06_porter_capi_test.cpp:259-270",
+      "src/TestUnits/coverage/q06_porter/r82_porter_runner_edges_test.cpp:405-432",
+      "src/TestUnits/coverage/q06_porter/r6_porter_lifecycle_test.cpp:217-237"
+    ],
+    "input_reachability": "parser_push_quote 是外部 parser 使用的导出 C API。传空 id 会直接进入 ParserAdapterMgr::getAdapter(id) 的 string-key lookup；当 id 命中已注册 adapter 后，空 curTick 会被 `WTSTickData::create(*curTick)` 解引用。当前 null-tick 正向测试只传 unknown id，因此在 adapter 分支之前安全返回。",
+    "oracle_basis": "公开 C ABI 原始指针参数即使传入无效值，也不应在边界触发未定义行为；至少应日志并安全返回。合法 id+tick 的 quote 路径必须继续投递。",
+    "reason": "两个独立输入缺口均存在：null id 未在 map lookup 前校验；registered id 命中后 null tick 未校验即解引用。现有混合 disabled 用例先 `parser_connect(NULL)`，既可能先触发另一处错误，又未隔离 quote/null-tick 分支；active null-tick 用例是 unknown id，与命中 adapter 的条件不同。",
+    "root_cause": "WtRtRunner::on_ext_parser_quote() 无参数守卫，先按 id 查 adapter，命中后对 curTick 直接解引用。",
+    "fix": "在 C API/runner 边界分别校验 id 与 curTick；null id 或 null tick 记录诊断并返回，不进入字符串 key 构造或 WTSTickData::create。保留未知 parser 的警告路径。",
+    "acceptance": "独立验证 null id+valid tick 与 valid registered id+null tick 均安全拒绝；合法 registered id+有效 tick 仍恰好投递一次；unknown id+null tick 不应被误当作已覆盖 registered-id 路径。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q06_porter/q06_porter_capi_test.cpp",
+        "case": "Q06PorterCapi.ParserPushQuoteRejectsNullParserId",
+        "issue": "禁用用例先调用 parser_connect(NULL)，无法隔离 null id quote；公开 C API 当前把 id 直接传入 map lookup。",
+        "change": "用静态 C API runner 单独调用 parser_push_quote(NULL, &validTick, 0)，断言安全忽略/诊断；不要调用其他 null-id API。",
+        "target": "CoverageTests_porter",
+        "filter": "Q06PorterCapi.ParserPushQuoteRejectsNullParserId",
+        "expected_result": "进程存活，invalid id 不进入 map key lookup；有效 tick 不被修改或分发。"
+      },
+      {
+        "file": "src/TestUnits/coverage/q06_porter/r82_porter_runner_edges_test.cpp",
+        "case": "R82PorterCapiReal.ExtParserQuoteRejectsNullTick",
+        "issue": "当前 null-tick 测试的 parser id 未注册；无法到达 on_ext_parser_quote 的 adapter 命中分支。",
+        "change": "沿已有 ExtParserQuoteSuccess 的真实本地 fixture 成功 config/create parser 后，独立调用 parser_push_quote(validRegisteredId, NULL, 0)，断言安全拒绝且回调计数不变。",
+        "target": "CoverageTests_porter",
+        "filter": "R82PorterCapiReal.ExtParserQuoteRejectsNullTick",
+        "expected_result": "null tick 不被解引用；前后 sink 计数相同，紧随其后的 valid tick 正控仍投递一次。"
+      },
+      {
+        "file": "src/TestUnits/coverage/q06_porter/r6_porter_lifecycle_test.cpp",
+        "case": "R6PorterExtParserQuote.unknown_parser_leaves_the_supplied_tick_untouched",
+        "issue": "本轮 fresh binary 执行该 enabled case returncode=-11；测试直接构造未经公开生命周期初始化的局部 WtRtRunner。相同条件下静态 C API 的 unknown-id 正控通过，当前崩溃不能当作 null 参数产品复现。",
+        "change": "改用静态 C API runner 的未知 parser 路径，或先完整初始化局部 runner；只断言有效 tick 未变、无 sink 调用，避免未初始化内部对象。",
+        "target": "CoverageTests_porter",
+        "filter": "R6PorterExtParserQuote.unknown_parser_leaves_the_supplied_tick_untouched",
+        "expected_result": "用例不崩溃；unknown parser 的有效输入保持未修改且不分发。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/11_runners/safe_enabled_runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/11_runners/porter_unknown_capi_quote.stdout.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/11_runners/porter_null_tick_unknown_id.stdout.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/11_runners/porter_unknown_quote.stdout.txt"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "本轮未运行 null id 或 registered-id+null-tick 路径，因为当前生产实现可能触发 UB；等待主代理/worker 修正边界和测试后再执行。"
+    ]
+  },
+  {
+    "lane": "R95",
+    "id": "BUG-R95-001",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftRunner/WtUftRunner.cpp:109-120",
+      "src/WtUftRunner/WtUftRunner.cpp:340-349",
+      "src/WtUftCore/WtUftEngine.cpp:308-319",
+      "src/WtUftCore/WtUftEngine.h:151-157",
+      "src/WtUftRunner/WtUftRunner.cpp:53-58",
+      "src/WtUftRunner/main.cpp:64-79"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/m_WtUftRunner/r95_wtuftrunner_config_run_test.cpp:124-156",
+      "src/TestUnits/coverage/m_WtUftRunner/r95_wtuftrunner_config_run_test.cpp:257-274"
+    ],
+    "input_reachability": "config() 处理 basefiles、engine、data、parsers、traders、strategies；不调用 initEvtNotifier。WtUftEngine::init 仅保存 notifier 指针；UFT core 未找到任何调用该指针 notify 方法的生产调用点。主程序的 init/config/run 不注册日志 handler。",
+    "oracle_basis": "存在一个未调用 helper 和私有 notifier 字段，不足以证明 UFT 对外承诺事件或日志通知。要形成产品合同，至少需要配置样例/API 文档、初始化调用及实际事件消费者。",
+    "reason": "本轮检索到 initEvtNotifier() 定义但无调用；UFT engine 只保存传入的 notifier 指针，未消费事件，仓内也没有 UFT notifier 配置样例。成功配置且没有 notifier 字段的本地用例是正常形态。当前没有可观察功能缺失，故不判产品缺陷。",
+    "root_cause": "无已确认根因；initEvtNotifier、EventNotifier 字段和 logger tag 表是未接入代码。",
+    "fix": "无。若后续支持 UFT notifier，需先定义配置模式、初始化失败策略、要发送的事件以及消费者，再单独补完整链路。",
+    "acceptance": "当前 UFT 配置在不含 notifier 时可成功；不将 helper 存在等同于已承诺事件通知。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/11_runners/uft_valid_config.stdout.txt"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  }
+]

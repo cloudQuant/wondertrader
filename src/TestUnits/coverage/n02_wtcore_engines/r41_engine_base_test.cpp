@@ -348,24 +348,31 @@ TEST_F(R41EngineFixture, R41RiskMonConfigBranchesDoNotBreakInit)
 }
 
 //////////////////////////////////////////////////////////////////
-// calc_fee: 模板查找失败分支 + 已知缺陷(模板从未填入 _fee_map)
-// src/WtCore/WtEngine.cpp:879-916
+// calc_fee: 按已加载的模板计算 by-volume 开仓费 + 无模板时返回 0
+// src/WtCore/WtEngine.cpp:843-916
 //////////////////////////////////////////////////////////////////
-TEST_F(R41EngineFixture, R41CalcFeeFallsBackToZeroBecauseFeeMapIsNeverFilled)
+TEST_F(R41EngineFixture, R41CalcFeeUsesLoadedTemplateAndDefaultsWithoutOne)
 {
-    WTSVariant* cfg = makeCfg(writeFees());
-    ASSERT_NE(nullptr, cfg);
+    {
+        WTSVariant* cfg = makeCfg(writeFees());
+        ASSERT_NE(nullptr, cfg);
 
-    WtCtaEngine engine;
-    engine.init(cfg, _bd.get(), _dt.get(), _hot.get(), NULL);
+        WtCtaEngine engine;
+        engine.init(cfg, _bd.get(), _dt.get(), _hot.get(), NULL);
 
-    // 品种上的费率确实被 load_fees 写入了
-    EXPECT_DOUBLE_EQ(10.0, _bd->commodity()->calcFee(3500.0, 5, 0));
+        // 配置的 open=2.0、byvolume=true，5 手的引擎手续费应为 10.0。
+        EXPECT_DOUBLE_EQ(10.0, _bd->commodity()->calcFee(3500.0, 5, 0));
+        EXPECT_DOUBLE_EQ(10.0, engine.calc_fee(kCode, 3500.0, 5, 0));
+    }
 
-    // 但 WtEngine::_fee_map 没有任何写入点, calc_fee 只能走"模板未找到"分支。
-    // 见 docs/.../bugs/R41.md BUG-R41-001。
-    EXPECT_DOUBLE_EQ(0.0, engine.calc_fee(kCode, 3500.0, 5, 0));
-    EXPECT_DOUBLE_EQ(0.0, engine.calc_fee("SHFE.rb.9999", 3500.0, 5, 1));
+    {
+        WTSVariant* cfg = makeCfg();
+        ASSERT_NE(nullptr, cfg);
+
+        WtCtaEngine engine;
+        engine.init(cfg, _bd.get(), _dt.get(), _hot.get(), NULL);
+        EXPECT_DOUBLE_EQ(0.0, engine.calc_fee(kCode, 3500.0, 5, 0));
+    }
 }
 
 //////////////////////////////////////////////////////////////////

@@ -1,0 +1,35 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = T25TraderCTPTest.front_disconnect_resets_state_and_logout_reports_reason
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from T25TraderCTPTest
+[ RUN      ] T25TraderCTPTest.front_disconnect_resets_state_and_logout_reports_reason
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1841: Failure
+Expected equality of these values:
+  TraderCTP::WS_NOTLOGIN
+    Which is: 0
+  trader_.state()
+    Which is: 6
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1842: Failure
+Value of: trader_.isConnected()
+  Actual: true
+Expected: false
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1843: Failure
+Expected equality of these values:
+  successfulLoginsBeforeLateReply
+    Which is: 1
+  sink_.n_login_result_
+    Which is: 2
+
+[  FAILED  ] T25TraderCTPTest.front_disconnect_resets_state_and_logout_reports_reason (2 ms)
+[----------] 1 test from T25TraderCTPTest (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (2 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] T25TraderCTPTest.front_disconnect_resets_state_and_logout_reports_reason
+
+ 1 FAILED TEST

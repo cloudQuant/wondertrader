@@ -1,12 +1,12 @@
 # R28_runner_mains（WtRunner / WtBtRunner 可执行体）疑似缺陷
 
-> 状态一律「待审核」；本迭代不修改 `src/**`，不降低 `-Werror`/告警门槛，
-> 未证明的因果只写嫌疑位置。涉及用例见 `docs/迭代计划/迭代01/manifests/R28_runner_mains.md`。
+> 本文按条目标注复核状态；本次复核（2026-10-29）核对源码、CMake 和现有测试前提，未运行用例或构建。
+> 静态可推导的空指针/编译路径不作为本轮运行复现。涉及用例见 `docs/迭代计划/迭代01/manifests/R28_runner_mains.md`。
 
 ## BUG-R28-001
 
-- 状态: 待审核
-- 严重级别: Blocker
+- 状态: 待验证
+- 严重级别: 待定（覆盖率现象报告，成因未明）
 - 模块/文件: `src/WtRunner/WtRunner.cpp`（`WtRunner::~WtRunner` :45-48 及其按值持有的
   `WtCtaEngine _cta_engine` / `WtHftEngine _hft_engine` / `WtSelEngine _sel_engine`，声明见
   `src/WtRunner/WtRunner.h:151-166`）；崩溃点本身在 libWtCore 的引擎析构链里
@@ -15,204 +15,129 @@
   同目录 `r6_wtrunner_main_test.cpp` 原有 4 条（`ctor_dtor_roundtrip_*`、
   `init_with_missing_logcfg_*`、`missing_file_returns_false`、`config_error_path_*`）
   在改成堆构造之前全部 `CRASH(rc=137,sig=9)`
-- 输入/前置条件: 在测试栈帧上构造再析构（`WtRunner runner;` 出作用域），
-  或单独在栈上构造 `WtCtaEngine` / `WtSelEngine`。
-  完全等价的对象改成 `new` / `std::unique_ptr` 持有则构造、析构、`init()`、`config()` 全程正常
-  （实测 `r28_probe.c_heap_runner` rc0 vs `d_stack_runner_only` SIGKILL）。
+- 输入/前置条件: 报告称测试栈帧构造/析构时收到 SIGKILL，而堆上构造通过；本次未复跑该对照，也未核对到可独立读取的进程状态/日志附件。
 - 期望行为: 同一类型的生命周期只取决于 ctor/dtor 本身，不因对象在栈上还是在堆上而改变进程存活。
-- 实际行为: 进程被 **SIGKILL(9)** 终止，`[ RUN ]` 之后、`[ OK ]` 之前，约 0.1s；
-  没有 core（`ulimit -c` = 0 且 `~/Library/Logs/DiagnosticReports` 无记录），
-  peak RSS 只有 32MB、`sizeof(WtRunner)` = 5232 字节、`ulimit -s` = 8176KB。
-  后果是乘法式的：clang 运行时不写计数器 → profraw 0 字节 → `coverage.sh` 丢弃该进程，
-  该用例跑过的 `WtRunner.cpp` 一行都不进分母。这就是「m_WtRunner 有 12 条 TEST 但
-  WtRunner.cpp 报 0.00%」的第一原因。
-- 复现步骤:
+- 实际行为/证据边界: 原 lane 笔记报告 SIGKILL(9)、无 core、peak RSS 32MB，并记录堆上/栈上结果不同；本次只核对到对应 `DISABLED_` 用例，不独立确认上述数值或信号来源。测试本身在 `EXPECT_TRUE(config(absent))` 后会因断言失败，但静态源码不能解释为何栈/堆位置会令进程被 SIGKILL。
+- 影响范围: 当前不能把 SIGKILL 归因于栈容量、libWtCore 重复状态、coverage runtime，亦不能认定它是 WtRunner.cpp 覆盖为 0.00% 的第一原因。应先取得独立子进程的 wait status、超时/看门狗记录、栈与堆最小复现及崩溃现场，再决定是否登记产品缺陷；目前仅是覆盖率测试环境的待验证现象。
+- 复现步骤（未执行）:
   `cmake --build build-cov --target CoverageTests_m_WtRunner`，把任一启用用例的
   `std::unique_ptr<WtRunner> runner(new WtRunner());` 改回 `WtRunner runner;` 并把 `->` 改成 `.`，
   用 `case_runner.sh` 单跑，看 `$rc/*.rc` 首词是 `CRASH(rc=137,sig=9)`；
   或用 `os.fork()/os.waitpid()` 取真实信号（shell 的 `$?`=137 只到信号号，看不到「无 core」）。
-- 影响范围: 凡是「在本进程内实例化 WtRunner/引擎」的测试写法都不可用；
-  `src/WtRunner/main.cpp:100` 的 `WtRunner runner;` 正好就是这个形状，
-  于是 `main.cpp:92/110/125` 三行在进程内永远取不到覆盖。
-  另外三个兄弟可执行体（WtUftRunner/WtLatencyUFT/WtLatencyHFT）的同名入口用例只跑了 help 分支，
-  一旦有人去驱动它们的非 help 分支会撞到同一面墙。
-- 备注: **因果未证明，只登记嫌疑位置**。已排除的假设：栈溢出（对象 5KB / 栈 8MB）、
-  OOM-jetsam（RSS 32MB）、代码签名（`codesign --verify` valid on disk 且 satisfies DR）、
-  `_engine` 空指针（R6 原注释的猜测，实测死亡发生在 ctor/dtor 阶段，`config()` 都没调到）。
-  两条嫌疑：① `CoverageTests_m_WtRunner` 同时链了 `libWtCore.a`（`WT_M_CORES`）和
-  `WtPorter/WtDtPorter/WtBtPorter` 这些**内部又静态嵌了同一份 libWtCore.a** 的 dylib，
-  libWtCore 的进程级 static 状态因此有两份（同 `bugs/l00_build_graph.md` BUG-L00-005 一族），
-  栈上对象的析构链可能踩到「另一份」的状态；
-  ② `-fprofile-instr-generate` 与 arm64 页保护的相互作用。
-  需要能跑 `lldb` 追 stop reason 的环境（本机 `lldb --batch` 在此二进制上超过 2 分钟不返回）。
-  本 lane 的绕行办法已经写进用例：一律 `std::unique_ptr` 堆上构造。
+- 后续覆盖率影响: 只有在 SIGKILL 现象被独立复现且能稳定关联到栈构造时，才可据此判定相关进程内测试/入口覆盖受阻；目前不能外推到三个兄弟可执行体。
+- 备注: WtRunner 的构造函数没有初始化 `_engine`，但该字段是否参与本用例结束时的崩溃链尚未证明；用 `unique_ptr` 绕行不能当作根因修复。上述 dylib/coverage runtime 说明仅是待检假设，本次不采信为因果。栈上对象测试当前为 `DISABLED_`，本次未运行。
 
-## BUG-R28-002
+## BUG-R28-002 cppcli 的参数解析错误以成功码退出（help 自退出是既定行为）
 
-- 状态: 待审核
-- 严重级别: Major
-- 模块/文件: `src/Share/cppcli.hpp:1891-1901`（`asHelpParam` 的 help 处理体）与
-  `:1570-1582`（缺参错误分支同样 `std::exit(0)`）；受害调用方
-  `src/WtRunner/main.cpp:86-87`、`src/WtBtRunner/WtBtRunner.cpp:58-59`、
-  以及 LoaderRunner/QuoteFactory/WtUftRunner/WtLatencyHFT/WtLatencyUFT 各自的同款分支
-- 相关测试: `src/TestUnits/coverage/m_WtRunner/r28_runner_main_test.cpp` →
-  `r28_wtrunner_entry.help_wins_even_when_c_and_l_are_present`（断言 help 时 `---logger initialized---`
-  绝不能出现）；`r6_wtrunner_main_test.cpp` → 三条 `r6_wtrunner_entry.DISABLED_*help*`
-  （改回 `EXPECT_EQ(call_entry(...), 0)` 的形式在 R28 之前是启用状态，判决是 NORUN）
-- 输入/前置条件: 任一 WonderTrader 可执行体带 `-h` / `--help` 启动。
-- 期望行为: `opt.parse()` 正常返回，调用方按自己写的 `if (hParam->exists()) return 0;` 收尾，
-  库不做退出决定。
-- 实际行为: `cppcli` 在 `parse()` 内部 `std::cout << buildHelpDoc(); std::exit(0);` ——
-  调用方那行 `return 0` 是**死代码**，`lParam`/`cParam` 的取值也一次都不会执行。
-- 复现步骤: 在 gtest 用例里调 `wt_coverage_main_wtrunner(2, {"x","-h"})`，
-  进程以 0 退出但 stdout 里没有 `[  PASSED  ]`，`case_runner.sh` 记 `NORUN`。
-- 影响范围: ① 嵌入式/被包装的调用方（把 WtRunner 当库用的场景）拿不到控制权，宿主被静默 exit；
-  ② 覆盖率侧「参数校验/帮助」这条本该最安全的早退支路无法在进程内取样，
-  只能像本 lane 一样 fork 子进程再收 stdout 断言。
-- 备注: 不改产品代码。修复方向是把 help/错误的 `std::exit` 换成返回状态码，
-  或至少给一个 `asHelpParam(/*bExit=*/false)` 开关。本 lane 用 fork + 管道把这段行为钉住了。
+- 状态: 待验证
+- 严重级别: 候选 Major（parse error 退出码契约待确认）
+- 模块/文件: `src/Share/cppcli.hpp:1563-1582`（参数解析错误输出后无条件 `std::exit(0)`）；help 正常路径在 `:1884-1899` 单独处理
+- 相关测试: `r28_runner_main_test.cpp` 的 `help_wins_even_when_c_and_l_are_present` 只确认 help 时立即退出；这与 `cppcli.hpp:1881-82` 的注释及实现一致，不作为缺陷证据。当前未见对非法参数/缺必需参数退出码的启用测试。
+- 输入/前置条件: 遗漏 `necessary` 必选参数，或其值未通过 type/allowed-value/range 校验，触发 `Option::errorExitFunc()`；未知参数路径不据此推断。
+- 期望行为: 帮助请求可按现有接口以 0 退出；解析错误应以非零状态退出，供 shell/supervisor 区分失败。
+- 实际行为: `errorExitFunc()` 输出错误文本后无条件 `std::exit(0)`。这是“parse error 返回成功码”的静态源码证据。`printHelpDoc()` 也会 `std::exit(0)`，但该行为在 cppcli 注释中明确设计为 help 输出后退出，不将它或调用方后续的 `if (hParam->exists())` 死代码另算产品缺陷。
+- 影响范围: 自动化调用者可能把参数错误误认为正常结束；具体 CLI 使用者影响和兼容码约定尚未通过运行/产品接口文档验证。
+- 备注: 若要修复，给错误退出设置非零码或返回解析状态；保留 help 的 0 退出语义。help 的 subprocess 包装属于测试隔离，不是产品 bug。
 
 ## BUG-R28-003
 
-- 状态: 待审核
-- 严重级别: Blocker
+- 状态: 解析失败受控返回契约不满足；本机定向测试 FAIL
+- 严重级别: Major（配置语法错误没有受控错误返回；进程终止码未在本次验证）
 - 模块/文件: `src/WtRunner/WtRunner.cpp:69`（`_config = WTSCfgLoader::load_from_file(filename);` 无
   try/catch）、`src/WtBtRunner/WtBtRunner.cpp:84`（同一形状）；抛出点在
   `src/WTSUtils/WTSCfgLoader.cpp` 的 `load_from_yaml` 分支
-- 相关测试: `r28_runner_main_test.cpp` → `r28_wtrunner_config.unparsable_yaml_escapes_as_exception`
-  （`EXPECT_THROW`，钉的是现状）与对照用例 `unparsable_json_returns_false_without_throwing`；
+- 相关测试: `r28_runner_main_test.cpp` → `r28_wtrunner_config.unparsable_yaml_returns_false_without_throwing`
+  （原测试以异常为预期，现要求受控返回 false）与对照用例 `unparsable_json_returns_false_without_throwing`；
   `m_WtBtRunner/r28_btrunner_main_test.cpp.blocked` →
   `r28_btrunner_entry.bad_yaml_config_terminates_the_process`（断言子进程 SIGABRT）
 - 输入/前置条件: 给一个语法不对的 YAML 配置（例：`basefiles: [ this is : not valid` 少一个 `]`）。
 - 期望行为: 和「文件不存在」「后缀不认识」「空文件」三条一样，返回 false / -1 并给出可诊断日志
   —— `load_from_file` 对这三条都老老实实返回 NULL，`WtRunner.cpp:71-73` 也会 error + return false。
-- 实际行为: yaml-cpp 异常从 `load_from_yaml` 一路穿透 `config()` / `main()`。
-  `main.cpp` 侧没有 catch → `std::terminate` → **SIGABRT**，进程当场死；
-  `WtRunner::config()` 被测试调用时异常直接抛给调用方。
-  实测两条错误路径的健壮性差一个量级：同一份坏内容写成 `.json` 后缀就只是 `return NULL`。
-- 复现步骤: 写一个 `r28wt_broken_cfg.yaml` 内容为 `basefiles: [ this is : not valid\n\t- {{{`，
-  调 `runner->config("r28wt_broken_cfg.yaml")`，观察 `C++ exception with description
-  "yaml-cpp: error at line 2, column 4: end of sequence flow not found"`。
-- 影响范围: 实盘进程「配置文件少个括号」= 静默崩溃而不是报错退出，运维侧看不到原因；
-  回测进程同理。覆盖率侧 `WtRunner.cpp:71-73` 的错误日志支对 YAML 输入永远取不到。
-- 备注: 不阻塞本 lane（`EXPECT_THROW` 已把现状钉住，改好后这条会自然变成 FAIL 提醒）。
-  修复方向：`WTSCfgLoader::load_from_yaml` 内部 catch 并返回 NULL，或在两个调用点包 try/catch。
+- 复核判定: `load_from_yaml()` 直接调用 `YAML::Load()` 且无 catch，而 `load_from_file()` 文档称解析失败返回 NULL；YAML 语法异常因此不遵守该返回约定。修正后的 WtRunner 测试本机 FAIL：Google Test 捕获到了 yaml-cpp 异常。未运行 WtBtRunner 进程路径，不能声称观察到 SIGABRT。
+- 对照边界: `load_from_json()` 在 `Parse()` 后检查 `HasParseError()` 并返回 NULL，是源码静态对照；本次未运行 JSON/YAML 对比。
+- 复现步骤: 独立临时工作目录中运行 `CoverageTests_m_WtRunner --gtest_filter=r28_wtrunner_config.unparsable_yaml_returns_false_without_throwing`；当前异常信息取决于 yaml-cpp 版本及输入内容。
+- 影响范围: 调用方可能收到异常而不是 loader 文档承诺的 NULL/受控失败；若异常未捕获，进程将走 C++ terminate 路径，但本次未确认终止信号、stderr 文案或日志表现。
+- 备注: 修复方向：在 loader 或调用边界 catch YAML 异常，记录文件路径/解析摘要并返回受控失败；修复后回归 YAML 与 JSON 解析失败及正常配置。
 
 ## BUG-R28-004
 
-- 状态: 待审核
-- 严重级别: Major
+- 状态: 已撤回（迭代02：TEST，原产品主张不成立）
+- 严重级别: Major（coverage-only 条件构建风险）
 - 模块/文件: `src/WtBtRunner/WtBtRunner.cpp:160`（`main` 落尾无 `return`）× 
   `src/TestUnits/coverage/CMakeLists.txt` 的 `WT_MAIN_MODULES` 循环（`-Dmain=wt_coverage_main_<模块>`）
-- 相关测试: `src/TestUnits/coverage/m_WtBtRunner/r28_btrunner_main_test.cpp.blocked`
-  （14 条 TEST，其中 4 条 `DISABLED_`；已用真实构建旗标 `-fsyntax-only` 验过零告警）
-- 输入/前置条件: 建立 `CoverageTests_m_WtBtRunner` 目标 —— `WtBtRunner` **已经在**
-  `WT_MAIN_MODULES` 列表里，只缺用例目录；目录一放上去目标就出现，然后编译失败。
+- 相关测试: `m_WtBtRunner/r28_btrunner_main_test.cpp.blocked` 当前是 `.cpp.blocked`，glob 不会纳入它；本目录没有可见的 `.cpp` 测试源。
+- 输入/前置条件: `WT_ENABLE_COVERAGE=ON`、`WT_WARNINGS_AS_ERRORS=ON`，并为 `m_WtBtRunner` 提供 `.cpp` 测试源使 CMake 生成该目标。
 - 期望行为: 产品 TU 在测试目标里换名后仍然编得过（或者构建表对这类 TU 有与
   SEL/UFT/HFT 工厂同款的处置），使 `src/WtBtRunner/WtBtRunner.cpp` 能进入覆盖率统计。
-- 实际行为: `src/WtBtRunner/WtBtRunner.cpp:160:1: error: non-void function does not return a
-  value in all control paths [-Werror,-Wreturn-type]`，`ninja` 停止。
-  根因是名字而不是代码：C++ 规定 `main` 落尾等价 `return 0`，clang 因此对 `main` 豁免
-  `-Wreturn-type`；`-Dmain=` 之后函数不再叫 `main`，豁免消失。
-  生产构建同一份 TU 没问题（`src/CMakeLists.txt:265 ADD_SUBDIRECTORY(WtBtRunner)`，
-  `build-cov/WtBtRunner/CMakeFiles/WtBtRunner.dir/WtBtRunner.cpp.o` 在），因为函数还叫 `main`。
-  `WtBtRunner.cpp:159` 之后本来也没有 return（`int main` 却没有返回值语句），
-  顺带还意味着这条路径每次回测跑完都靠「语言规定」而不是写明的 `return`。
-- 复现步骤: `mkdir -p src/TestUnits/coverage/m_WtBtRunner && 放入任意 *.cpp &&
+- 复核判定: `WtBtRunner` 确在 `WT_MAIN_MODULES`，其 TU 通过 `-Dmain=wt_coverage_main_wtbtrunner` 改名，源码末尾无显式 `return`。macOS coverage cache 中 `WT_WARNINGS_AS_ERRORS=ON`，而 `-Wall` 含 `-Wreturn-type`，因此目标启用后有触发 `-Werror=return-type` 的静态构建风险。CMake 虽定义 `WT_COV_RELAX_WARNINGS`，但本文件没有调用该函数；它不会自动为此 TU 放宽告警。本次未生成/编译该目标，故不把早前的错误行或零告警说成本次复现。生产源码中的函数仍名为 `main`，标准的 `main` 隐式返回规则不适用于改名后的普通函数；本次未检查生产二进制构建结果。
+- 复现步骤（未执行）: `mkdir -p src/TestUnits/coverage/m_WtBtRunner && 放入任意 *.cpp &&
   cmake --build build-cov --target CoverageTests_m_WtBtRunner`。
-- 影响范围: `src/WtBtRunner/WtBtRunner.cpp` 97 行保持 0.00%；
-  并且因为 ninja 遇错即停，**放上去就挂会连累整个 `cmake --build build-cov` 全量构建**
-  （`coverage.sh` 的构建步骤没有 `-k 0`），所以本 lane 把用例暂存成 `.cpp.blocked`
-  让 glob 收不到、目标回到「不存在」，实测全量重建 exit 0。
-- 备注: 三条出路都要主控拍板，本 lane 三条都无权走：
-  ①产品侧给 `WtBtRunner.cpp:160` 补 `return 0;`（本轮不许改产品代码）；
-  ②测试侧照 SEL/UFT/HFT 工厂那段先例，只对 `WtBtRunner/*.cpp` 这一个 TU
-  加 `COMPILE_OPTIONS -Wno-error`（本轮不许改 `coverage/CMakeLists.txt`，也不许降告警门槛）；
-  ③把 `WtBtRunner` 从 `WT_MAIN_MODULES` 摘掉并登记为「进程外采样」。
-  放行任一方案后把 `.blocked` 改回 `.cpp` 即可，用例本身不需要再改。
+- 影响范围: 目前没有 `CoverageTests_m_WtBtRunner` 目标，故没有本条对应的当前 coverage 百分比证据。目标创建后若编译失败，会阻止该目标；是否中止全量构建取决于调用的 build target/并行构建策略，不能只由 Ninja 默认行为推断。
+- 备注: 静态构建风险，不是生产运行缺陷。候选处理包括显式 `return 0`、只对改名 main 的 TU 设置精确的 `-Wno-error=return-type`，或调整 coverage 目标范围；选择前应以启用 `.cpp` 测试源后的真实编译命令与诊断验证。当前 `.blocked` 文件不会生成该 target。
 
+
+- 迭代02复核: TEST。生产函数名是标准 C++ main，落尾隐式 return 0；源注释也说明 0 成功。风险只在 coverage 用 -Dmain 改普通函数后、warnings-as-errors harness；当前 `.cpp.blocked` 不生成目标。
+- 迭代02依据: [逐条裁定与主代理修订](../../迭代02/缺陷裁定总表.md)。原记录保留作为历史，未声称产品已修复。
+- 迭代02前状态（历史）: - 状态: 待验证
 ## BUG-R28-005
 
-- 状态: 待审核
-- 严重级别: Blocker
+- 状态: 待验证
+- 严重级别: Major（router 条目缺必需键时未受控拒绝；运行信号未在本次复现）
 - 模块/文件: `src/WtCore/WtExecMgr.cpp:216-219`（`load_router_rules` 循环体）
 - 相关测试: `r28_runner_main_test.cpp` →
   `r28_wtrunner_config.DISABLED_router_rule_without_executer_key_derefs_null`；
-  正向对照 `r28_wtrunner_config.routers_section_reaches_load_router_rules`（补上 `executer` 键后 PASS）
+  对照用例 `r28_wtrunner_config.routers_section_reaches_load_router_rules` 为启用用例，本次未运行
 - 输入/前置条件: `WtRunner::config()` 的配置里有 `routers` 数组，但某个条目没写 `executer` 键
   （例：`routers:\n-   strategy: x\n    symbol: y`）。
-- 期望行为: 条目缺 `executer` 时跳过并记一条可诊断错误；`:216` 的 `item` 与 `:218` 的 `itemExec`
-  都该有 NULL 判定。
-- 实际行为: `itemExec = item->get("executer")` 返回 NULL，`:219` 无条件 `itemExec->isArray()` → 
-  **SIGSEGV(11)**。实测 `case_runner.sh` 记 `CRASH(rc=139,sig=11)`。
-- 复现步骤: 跑该 `DISABLED_` 用例，或在启用用例里把 routers 条目的 `executer:` 一行删掉。
-- 影响范围: 路由规则是实盘「下单走哪个执行器」的开关，YAML 手改漏一个键就把进程打挂；
-  `WtRunner.cpp:249-250`（executers 侧文件里的 routers）和 `:259-261`（顶层 routers）
-  两个入口都会转发到这里。另外 `:217` 的 `straName` 也没有判空，
-  `item->getCString("strategy")` 对缺键返回 `""`（`Includes/WTSVariant.hpp:346` 的 `defVal=""`），
-  于是所有漏写 strategy 的规则会被合并到同一个空字符串键下，属于静默错误路由。
-- 备注: 修复方向：`:216-219` 补 `if (item == NULL) continue;` + `if (itemExec == NULL) { log error; continue; }`。
+- 期望行为: 拒绝缺少必需 `executer` 的 router 条目并给出可诊断错误；对 `itemExec` 做判空。若输入 schema 允许 null array elements，再为 `item` 增加守卫。
+- 复核判定: `WTSVariant::get()` 缺键返回 `NULL`；`load_router_rules()` 在 `itemExec->isArray()` 前没有判空。因此配置数组元素缺少 `executer` 时源码会对空指针调用成员函数，属于静态确认的未受控输入路径；SIGSEGV 是常见结果但本次未运行，不能标为本次实测。
+- 复现步骤（未执行）: 在有效的 runner 配置中提供 routers 数组，并让某个对象缺少 `executer` 键；需在隔离子进程验证具体信号，不能在 gtest 宿主直接运行潜在崩溃路径。
+- 影响范围: 缺键的 router 条目会进入未定义行为而非返回配置错误；`WtRunner.cpp` 的 executers 侧与顶层 routers 入口都可能转发到此函数。`strategy` 缺键则由 `getCString()` 返回空串，但后续是否产生错误路由尚未验证。
+- 备注: `DISABLED_` 负向用例和启用正向对照本次均未运行。建议将缺 `executer` 作为配置错误记录并使 `config()` 失败，而不是静默跳过；对缺失 `strategy` 存入空键的后续路由影响也尚未验证。
 
 ## BUG-R28-006
 
-- 状态: 待审核
-- 严重级别: Blocker
+- 状态: 待验证
+- 严重级别: Major（未知 mocker 配置导致未注册 sink 路径；具体信号未验证）
 - 模块/文件: `src/WtBtRunner/WtBtRunner.cpp:98-150`（五个 `strcmp(mode, ...)` 分支）与
   `src/WtBtCore/HisDataReplayer.cpp:669`（`_listener->handle_init()`）；
   `_listener` 只在 `HisDataReplayer.h:804-807` 的 `register_sink` 里被赋值，初值 NULL 见 `:146`
 - 相关测试: `m_WtBtRunner/r28_btrunner_main_test.cpp.blocked` →
   `r28_btrunner_entry.DISABLED_unknown_mocker_leaves_listener_null_and_segv_in_prepare`
-- 输入/前置条件: `configbt.yaml` 的 `env.mocker` 写成 cta/hft/sel/exec/uft 之外的任意值（拼错即可）。
+- 输入/前置条件: 含有效 `replayer` 段的配置，其 `env` 为对象且 `mocker` 是非空、但不属于 cta/hft/sel/exec/uft 的字符串。缺整个 `env` 段会在前面的 `cfgEnv->getCString()` 触发另一条未经检查的空值路径，不是本条专属前置条件。
 - 期望行为: 认不出 mocker 时给出「不支持的回测引擎 xxx」之类的错误并退出非 0，
   而不是带着一个从未注册的 listener 继续跑 `prepare()`。
-- 实际行为: 五个分支全跳过 → `register_sink` 从没调用 → `_listener` 仍是 NULL →
-  `:152 replayer.prepare()` 走到 `HisDataReplayer.cpp:669` 空指针 → SIGSEGV。
-- 复现步骤: 见该 `DISABLED_` 用例（replayer 段与 env 段都给全，只有 mocker 值认不出来）。
-- 影响范围: 独立回测进程 `WtBtRunner` 的配置拼写错误直接崩；
-  这条也解释了为什么 `WtBtRunner.cpp:98-150`（约 57 行）在本轮只能全部留白 —— 
-  想避开这个崩溃就必须走「mocker 认得」那条，而那需要真实工厂目录 + 真实历史数据。
-- 备注: 与 `bugs/R6_porter_runner.md` BUG-R6-011（main 在 config 失败后照样 run）同族，不重复登记。
+- 复核判定: 对非空但不匹配 `cta/hft/sel/exec/uft` 的 `mode`，五个分支都不注册 sink；`HisDataReplayer` 的 `_listener` 初值为 NULL，`prepare()` 随后无条件调用 `_listener->handle_init()`。这是静态可确认的空指针调用路径，实际终止信号未由本次运行确认。
+- 复现步骤（未执行）: 为 `replayer` 和 `env` 提供有效配置，令 `mocker` 为未知字符串，再在隔离子进程调用入口；还需确保 `replayer.prepare()` 可通过 `calcTradingDate()` 前置数据读取。
+- 影响范围: 对有效 `replayer` 配置加未知 `env.mocker` 时，回测入口不会受控拒绝；调用未注册 listener 后的进程行为仍待验证。测试前提还需确认 `configbt.yaml` 的 replayer/storage、交易日历/历史数据和 cwd 工厂路径是否足以到达 `prepare()`；仅有 `.blocked` 用例不证明该路径已被运行。
+- 备注: 与 BUG-R6-011 同属启动前置失败后仍继续执行的家族，但本条是回测 `env.mocker` 未命中分支、并非 `config()` 返回 false 后继续 run，保留独立发生点。修复方向：未知类型时报错非零退出并跳过 `prepare()`；显式检查 `register_sink`/初始化结果。
 
 ## BUG-R28-007
 
-- 状态: 待审核
-- 严重级别: Major
+- 状态: 本机缺配置回归 FAIL；notifier 必需性待确认
+- 严重级别: Major（engine 初始化失败仍报告配置成功；notifier 是否必需待确认）
 - 模块/文件: `src/WtRunner/WtRunner.cpp:154`（`initEngine();`）、`:157`（`initDataMgr();`）、
   `:228`（`initEvtNotifier();`）—— 三处返回值被丢弃；对照 `:157-158` 的
   `if (!initActionPolicy()) return false;` 是同一个函数里唯一被检查的 init
-- 相关测试: `r28_wtrunner_config.missing_env_section_stops_at_actionpolicy_but_returns_true`
-  （断言「引擎根本没初始化成功，`config()` 仍然返回 true」这一现状）
-- 输入/前置条件: 一份 basefiles/bspolicy 都齐、但**没有 `env` 段**的配置。
-  `initEngine()` 在 `:368-370` 因 `cfg==NULL` 返回 false，`_engine` 保持未赋值。
-- 期望行为: 三个 init 中任一个失败都应该让 `config()` 返回 false，或至少记一条 error，
-  因为后续 `run()` 在 `:585` 无条件 `_engine->run()`。
-- 实际行为: `config()` 一路走到 `:276 return true`，调用方无从知道 `_engine == NULL`；
-  紧接着 `main.cpp:125 runner.run(false)` → `:585` 空指针调用。
-  `initDataMgr()` 同理（`:418-420` 无 data 段返回 false 被丢），
-  `initEvtNotifier()` 的返回值在整个函数里也没人看。
-- 复现步骤: 跑该启用用例即可（不需要崩溃就能观察到 `EXPECT_TRUE(config(...))`）；
-  要看到后果就照 `r28_wtrunner_entry.DISABLED_bare_argv_reaches_stack_runner_and_null_engine_run`。
-- 影响范围: 「配置缺一整段」在实盘侧从可控失败变成稍后必崩的定时炸弹，
-  而且 `run()` 外面套了 `catch(...)`（`:605-611`）也救不了空指针（SIGSEGV 不是 C++ 异常）。
-- 备注: 修复方向：三处按 `initActionPolicy` 的写法补 `if (!initXxx()) return false;`
-  或至少 `WTSLogger::error`。本 lane 用启用用例把现状钉住，改好后这条会 FAIL 提醒。
+- 相关测试: `r28_wtrunner_config.missing_env_and_data_sections_make_config_fail` 和 `missing_data_section_makes_config_fail`；均将应失败写为期望。
+- 输入/前置条件: 一份 basefiles/bspolicy 齐全而同时缺 `env` 和 `data` 的配置；另有 env 完整但缺 data 的独立负例。
+  `initEngine()` 在 `:367-370` 因 `cfg==NULL` 返回 false；`_engine` 未被赋值，不能表述为 NULL。
+- 期望行为: 必需的 engine/data 初始化失败时应令 `config()` 返回 false 或记录失败；不能让未初始化的 runner 被当作配置成功。notifier 是否为必需项尚未确认，不据其缺失单独判定配置失败。
+- 复核判定: `config()` 对 `initEngine()`、`initDataMgr()`、`initEvtNotifier()` 的返回值不作检查。本机两个独立负例均 FAIL，实际 config 返回 true；缺 env 的负例同时缺 data，不能单独证明只缺 env 的行为。由于 `_engine` 是未初始化成员而非被置 NULL，后续 `run()` 的 `_engine->run()` 属未定义行为，不能表述为确定空指针或必然 SIGSEGV。
+  `initDataMgr()` 同理（`:418-420` 无 data 段返回 false 被丢）。`initEvtNotifier()` 的返回值也被忽略，且无 notifier 的启用测试预期 `config()` 返回 true；因此其是否为必需初始化属于接口契约待确认项，不并入已确认的 engine/data 失败判断。
+- 复现步骤: 分别运行上述两个测试；本机均未调用 `run()`。仅缺 env 而保留 data 的初始化路径可能传递未初始化 `_engine`，本次未运行。
+- 影响范围: 缺少 env 时配置结果可能误报成功；继续运行会访问未初始化 `_engine`，但崩溃表现/信号不由源码静态证明。
+- 备注: 修复方向：对必需初始化调用检查返回值并记录错误；为未初始化状态增加确定初始化/安全拒绝，失败时清理已创建资源。
 
-## BUG-R28-008
+## BUG-R28-008 [已合并] WtBtRunner 缺配置文件提示拼写错误并返回 0
 
-- 状态: 待审核
-- 严重级别: Minor
+- 状态: 已合并
+- 严重级别: 不另计（与 BUG-R14-004 同类发生点）
 - 模块/文件: `src/WtBtRunner/WtBtRunner.cpp:80`（`fmt::print("confiture {} not exists", filename);`）
-- 相关测试: `m_WtBtRunner/r28_btrunner_main_test.cpp.blocked` →
-  `r28_btrunner_entry.missing_config_prints_notice_and_returns_zero`
-  （断言里直接匹配 `confiture {} not exists` 这个字面量，把现状钉住）
+- 相关测试: `m_WtBtRunner/r28_btrunner_main_test.cpp.blocked` 中 `missing_config_prints_notice_and_returns_zero`；当前源文件不是 CMake glob 可见的 `.cpp`，本次未运行。
 - 输入/前置条件: `WtBtRunner -c ./不存在的.yaml`。
 - 期望行为: 一句拼写正确、以换行结尾的提示，例如 `config file {} not exists\n`。
-- 实际行为: 三处叠加 —— ① 单词拼成 `confiture`；② 格式串没有 `\n`，
-  而它前面刚打过 `---logger initialized---\n`，所以这行会紧贴 shell 提示符、看起来像没打完；
-  ③ 这是 main 里唯一一条「配置找不到」的用户可见提示，却用 `fmt::print` 而不是
-  `WTSLogger`（同函数 `:86` 的另一条错误 `WTSLogger::info` 用了日志），
-  结果这条信息不会进日志文件。
+- 复核判定: 源码确认字面量为 `confiture`、无换行并 `return 0`。该 occurrence 与 BUG-R14-004 的 QuoteFactory `coniture` / `return 0` 同属缺配置提示及退出码缺陷家族，已并入 R14-004；本条保留作发生点索引，不另计。具体 shell 提示符表现、脚本影响和运行退出码本次未复现。
 - 复现步骤: `WtBtRunner -c ./nope.yaml`，或跑该用例看子进程 stdout 回收到的原文。
-- 影响范围: 回测首次使用者的第一手排障线索；日志里查不到这条，脚本按行解析输出也会漏。
-- 备注: 不改产品代码。用例行号是 `:74-78`（判空 + print + return 0），
-  这三行本身是本轮 WtBtRunner 唯一「早退且返回码明确」的可覆盖支路，所以顺手把文案钉住。
+- 影响范围: 当调用方要求错误诊断进日志或以非零码失败时可能不满足；调用契约待确认，见 BUG-R14-004。缺失配置文案为源码静态证据。
+- 备注: 修复方向与 BUG-R14-004 一并处理，修正文案/换行并按 CLI 契约选择退出码。本次未构建或运行该入口。

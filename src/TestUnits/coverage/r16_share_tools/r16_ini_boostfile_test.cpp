@@ -175,6 +175,9 @@ TEST(r16_inihelper, remove_value_and_remove_section)
 	const std::string path = make_sample_ini("ini7", "a.ini");
 	IniHelper ini;
 	ini.load(path.c_str());
+	// Boost.PropertyTree drops a section with no entries, so create a real section
+	// before checking that removing "sys" leaves it intact.
+	ini.writeString("empty", "placeholder", "retained");
 
 	ini.removeValue("sys", "name");
 	EXPECT_EQ(std::string("gone"), ini.readString("sys", "name", "gone"));
@@ -187,8 +190,10 @@ TEST(r16_inihelper, remove_value_and_remove_section)
 	EXPECT_EQ(0, ini.readSecKeyArray("sys", keys));
 	ini.removeSection("nosuchsec");
 	FieldArray secs;
-	EXPECT_EQ(1, ini.readSections(secs));
+	ASSERT_EQ(1, ini.readSections(secs));
+	ASSERT_EQ(1u, secs.size());
 	EXPECT_EQ(std::string("empty"), secs[0]);
+	EXPECT_EQ(std::string("retained"), ini.readString("empty", "placeholder"));
 	r16tmp::clean("ini7");
 }
 
@@ -203,36 +208,22 @@ TEST(r16_inihelper, write_overwrites_existing_value)
 	r16tmp::clean("ini8");
 }
 
-TEST(r16_inihelper, load_missing_file_still_marks_loaded)
+TEST(r16_inihelper, load_missing_file_does_not_mark_loaded)
 {
-	// BUG-R16-05 的实际行为：load() 把 read_ini 的异常吞掉后仍然 _loaded = true，
-	// isLoaded() 无法用来判断「文件到底读到了没有」。期望行为见 DISABLED_ 用例。
+	// IniHelper::isLoaded 文档承诺文件成功加载后才返回 true。
 	const std::string path = r16tmp::file("ini9", "definitely_missing.ini");
 	r16tmp::clean("ini9");
 	IniHelper ini;
 	ini.load(path.c_str());
-	EXPECT_TRUE(ini.isLoaded());
-	// 内容确实是空的
+	EXPECT_FALSE(ini.isLoaded());
 	FieldArray secs;
 	EXPECT_EQ(0, ini.readSections(secs));
 	r16tmp::clean("ini9");
 }
 
-TEST(r16_inihelper, DISABLED_load_missing_file_should_not_mark_loaded)
+TEST(r16_inihelper, long_distinct_section_keys_keep_independent_values)
 {
-	// 触发条件：load() 一个不存在/非法的 INI。见 BUG-R16-05。
-	const std::string path = r16tmp::file("ini10", "definitely_missing.ini");
-	IniHelper ini;
-	ini.load(path.c_str());
-	EXPECT_FALSE(ini.isLoaded());
-	r16tmp::clean("ini10");
-}
-
-TEST(r16_inihelper, long_section_and_key_are_silently_truncated_to_63_chars)
-{
-	// BUG-R16-06 的可观测后果：readXxx/writeXxx 用 static char path[64] + snprintf 组
-	// "节.键"，超过 63 字符直接被截断。两条「前 63 字符相同、仅尾部不同」的键会撞成同一路径，
-	// 后写覆盖先写。下面喂的输入：sec=30 字符，key=33 字符 → "sec.key" 正好 64 字符 → 截掉最后 1 个。
+	// 两个合法但超长的键仅最后一字符不同，不应被路径缓冲区截断后互相覆盖。
 	const std::string path = r16tmp::file("ini11", "long.ini");
 	r16tmp::clean("ini11");
 	const std::string sec(30, 'a');
@@ -246,24 +237,15 @@ TEST(r16_inihelper, long_section_and_key_are_silently_truncated_to_63_chars)
 	IniHelper ini;
 	ini.writeString(sec.c_str(), keyA.c_str(), "valueA");
 	ini.writeString(sec.c_str(), keyB.c_str(), "valueB");
-	// 实际行为：两个不同键被折叠成一个，keyA 的值已经没了
-	EXPECT_EQ(std::string("valueB"), ini.readString(sec.c_str(), keyA.c_str(), ""));
+	EXPECT_EQ(std::string("valueA"), ini.readString(sec.c_str(), keyA.c_str(), ""));
 	EXPECT_EQ(std::string("valueB"), ini.readString(sec.c_str(), keyB.c_str(), ""));
 
 	ini.save(path.c_str());
-	r16tmp::clean("ini11");
-}
-
-TEST(r16_inihelper, DISABLED_long_section_and_key_should_not_collide)
-{
-	// 期望行为：不同键名保留各自主体；见 BUG-R16-06（MAX_KEY_LENGTH=64 静默截断）。
-	const std::string sec(30, 'a');
-	const std::string keyA = std::string(32, 'b') + "x";
-	const std::string keyB = std::string(32, 'b') + "y";
-	IniHelper ini;
-	ini.writeString(sec.c_str(), keyA.c_str(), "valueA");
-	ini.writeString(sec.c_str(), keyB.c_str(), "valueB");
-	EXPECT_EQ(std::string("valueA"), ini.readString(sec.c_str(), keyA.c_str(), ""));
+	IniHelper loaded;
+	loaded.load(path.c_str());
+	EXPECT_TRUE(loaded.isLoaded());
+	EXPECT_EQ(std::string("valueA"), loaded.readString(sec.c_str(), keyA.c_str(), ""));
+	EXPECT_EQ(std::string("valueB"), loaded.readString(sec.c_str(), keyB.c_str(), ""));
 	r16tmp::clean("ini11");
 }
 

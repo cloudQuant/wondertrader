@@ -18,6 +18,7 @@
  */
 #include <gtest/gtest.h>
 
+#include <cstdlib>
 #include <cstring>
 #include <string>
 
@@ -148,23 +149,23 @@ TEST(R6PorterFactories, executer_factory_absent_dir_returns_false)
 
 TEST(R6PorterFactories, factory_path_pointing_at_a_file_does_not_return_cleanly)
 {
-	// StdFile::exists() 用的是 std::filesystem::exists（目录/文件都为真），
-	// 守卫过了以后 boost 的 directory_iterator 对「文件」抛 filesystem_error。
-	// 断言的是「不会安静地返回 false」这件事本身：返回值与异常二选一，异常优先。
-	WtRtRunner r;
-	bool threw = false;
-	bool ret = false;
-	try
-	{
-		ret = r.addCtaFactories(__FILE__);
-	}
-	catch (const std::exception&)
-	{
-		threw = true;
-	}
-	// 两条正当出路：抛异常（现状）或返回 false（将来加了类型守卫）；
-	// 唯独「报告加载成功」不能接受 —— 那个路径上一份插件都没枚举到。
-	EXPECT_TRUE(threw || !ret) << "把文件当目录传给 loadFactories 却返回了 true";
+	// 文件不是工厂目录；bool 接口应不抛异常并返回失败。runner 在子进程堆分配，
+	// 不 delete，由 _Exit 隔离析构；本用例不验证 runner 析构。
+	EXPECT_EXIT(
+		{
+			WtRtRunner* r = nullptr;
+			try
+			{
+				r = new WtRtRunner();
+				const bool ret = r->addCtaFactories(__FILE__);
+				std::_Exit(ret ? 1 : 0);
+			}
+			catch (...)
+			{
+				std::_Exit(2);
+			}
+		},
+		::testing::ExitedWithCode(0), "");
 }
 
 /* -------------------------------------------------------------------------

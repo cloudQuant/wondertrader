@@ -505,50 +505,77 @@ TEST_F(P05RdmReaderADTest, UnknownPeriodYieldsNullSlice)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 空集合越界/解引用缺陷类（全部收进同一个 DISABLED_ 用例，复现步骤见
-// docs/迭代计划/迭代01/bugs/p05_datastorage2.md 的 BUG-P05-002）：
-//   WtRdmDtReaderAD::readKlineSliceByRange 尾部无条件
-//     std::lower_bound(&barsList._bars[0], &barsList._bars[0] + (_bars.size() - 1), ...)
-//   readTickSliceByRange 尾部对 tickList._ticks 做同样的事。
-//   当库里没有该合约的数据（cnt==0，回调直接 return）时：
-//     1) &vec[0] 对空 vector 是未定义行为（越界解引用）；
-//     2) vec.size() - 1 在 size()==0 时下溢为 SIZE_MAX，搜索区间变成 [0, SIZE_MAX)
-//        → 必然段错误。
-//   触发输入（同一缺陷类，全部列在这里）：
-//     a. day/<exchg> 库存在但没有任何 key
-//     b. day/<exchg> 库只有别的合约的 key
-//     c. min1/<exchg> 空库 + KP_Minute1
-//     d. ticks/<exchg>/<code> 空库（readTickSliceByRange）
-//     e. ticks/<exchg>/<code> 有数据但请求的交易日落在库外
-//   ASAN 覆盖构建下这些用例会中止整轮，故不进入常规执行。
+// Empty-result boundaries in WtRdmDtReaderAD. Each disabled case owns a new
+// reader and a single database setup so one failure cannot hide later cases.
+// The AD slice API represents no matching records as NULL or an empty slice.
 //////////////////////////////////////////////////////////////////////////
-TEST_F(P05RdmReaderADTest, DISABLED_EmptyResultSetsCrashOnVectorSubscriptZero)
+static void expect_empty_kline_slice(WTSKlineSlice* slice)
+{
+	if (slice == NULL)
+		return;
+	for (std::size_t i = 0; i < slice->get_block_counts(); i++)
+		EXPECT_EQ(0u, slice->get_block_size(i));
+	slice->release();
+}
+
+static void expect_empty_tick_slice(WTSTickSlice* slice)
+{
+	if (slice == NULL)
+		return;
+	for (std::size_t i = 0; i < slice->get_block_counts(); i++)
+		EXPECT_EQ(0u, slice->get_block_size(i));
+	slice->release();
+}
+
+TEST_F(P05RdmReaderADTest, DISABLED_EmptyDailyDatabaseReturnsEmptyKlineSlice)
 {
 	init_reader(true);
+	// No prior read populates or moves the day database cache.
+	expect_empty_kline_slice(_reader->readKlineSliceByRange("SHFE.rb.rb2409", KP_DAY,
+		202401020000, 202401200000));
+}
 
-	// a + b：day/SHFE 里只有 hc2409，请求 rb2409
-	const std::vector<WTSBarStruct> hc = make_day_bars(4, 4000.0);
-	put_day_bars("SHFE", "hc2409", hc);
-	WTSKlineSlice* s1 = _reader->readKlineSliceByRange("SHFE.hc.hc2409", KP_DAY, 202401020000, 202401200000);
-	if(s1 != NULL) s1->release();
-	WTSKlineSlice* s2 = _reader->readKlineSliceByRange("SHFE.rb.rb2409", KP_DAY, 202401020000, 202401200000);
-	if(s2 != NULL) s2->release();
+TEST_F(P05RdmReaderADTest, DISABLED_DailyDatabaseWithOtherContractReturnsEmptyKlineSlice)
+{
+	init_reader(true);
+	put_day_bars("SHFE", "hc2409", make_day_bars(4, 4000.0));
+	// The existing SHFE DB contains bars, but none for rb2409.
+	expect_empty_kline_slice(_reader->readKlineSliceByRange("SHFE.rb.rb2409", KP_DAY,
+		202401020000, 202401200000));
+}
 
-	// c：min1/CZCE 目录由 get_k_db 自建，空库
-	WTSKlineSlice* s3 = _reader->readKlineSliceByRange("CZCE.SR.SR999", KP_Minute1, 202403010931, 202403011000);
-	if(s3 != NULL) s3->release();
+TEST_F(P05RdmReaderADTest, DISABLED_EmptyMinuteDatabaseReturnsEmptyKlineSlice)
+{
+	init_reader(true);
+	// get_k_db creates a valid, empty min1/CZCE database for this reader.
+	expect_empty_kline_slice(_reader->readKlineSliceByRange("CZCE.SR.SR999", KP_Minute1,
+		202403010931, 202403011000));
+}
 
-	// d + e：tick 库为空 / 请求交易日无数据
+TEST_F(P05RdmReaderADTest, DISABLED_EmptyTickDatabaseReturnsEmptyTickSlice)
+{
+	init_reader(true);
+	// get_t_db creates an empty but valid database for this exact contract.
+	expect_empty_tick_slice(_reader->readTickSliceByRange("SHFE.rb.rb2409",
+		20240101090000000ull, 20240101150000000ull));
+}
+
+TEST_F(P05RdmReaderADTest, DISABLED_TickDatabaseWithoutMatchingTradingDateReturnsEmptySlice)
+{
+	init_reader(true);
 	const std::filesystem::path tdir = _root / "ticks" / "SHFE" / "rb2409";
 	std::filesystem::create_directories(tdir);
 	{
 		WtLMDB db(false);
 		ASSERT_TRUE(db.open(tdir.string().c_str(), 4 * 1024 * 1024));
-		WtLMDBQuery q(db);
-		const WTSTickStruct t = make_tick("SHFE", "rb2409", 20240201, 20240201, 93000000, 3600.0);
-		ASSERT_TRUE(q.put(key_str(LMDBHftKey("SHFE", "rb2409", 20240201, 93000000)), raw_of(t)));
-		q.commit();
+		WtLMDBQuery query(db);
+		const WTSTickStruct tick = make_tick("SHFE", "rb2409", 20240201, 20240201,
+			93000000, 3600.0);
+		ASSERT_TRUE(query.put(key_str(LMDBHftKey("SHFE", "rb2409", 20240201, 93000000)),
+			raw_of(tick)));
+		query.commit();
 	}
-	_reader->readTickSliceByRange("SHFE.rb.rb2409", 20240101090000, 20240101150000);
-	_reader->readTickSliceByRange("SHFE.rb.rb9999", 20240101090000, 20240101150000);
+	// Same contract has a record, but the query is for the prior trading day.
+	expect_empty_tick_slice(_reader->readTickSliceByRange("SHFE.rb.rb2409",
+		20240101090000000ull, 20240101150000000ull));
 }

@@ -1,0 +1,227 @@
+[
+  {
+    "lane": "R171",
+    "id": "BUG-R171-003",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/SelMocker.cpp:356-371",
+      "src/WtBtCore/SelMocker.cpp:504",
+      "src/WtBtCore/SelMocker.cpp:591-638",
+      "src/WtBtCore/SelMocker.h:95-96",
+      "src/WtBtCore/SelMocker.h:168-177",
+      "src/WtBtCore/SelMocker.h:188-197",
+      "src/Includes/ISelStraCtx.h:161-167",
+      "src/WtCore/SelStraBaseCtx.cpp:734-768"
+    ],
+    "test_evidence": [],
+    "input_reachability": "策略可调用的 ISelStraCtx::stra_set_position(stdCode, qty, userTag) 不含价格参数；SelMocker 的 append_signal 位于 private 区域，公开策略入口调用时使用默认 price=0.0，自动退出入口也未传非零价格。策略无法通过支持的公开入口到达 _desprice 非零的目标价分支。",
+    "oracle_basis": "ISelStraCtx 的公开虚函数签名和 SelMocker 对该接口的实现；公开 API 没有目标价格字段或另一个目标价下单入口。",
+    "reason": "proc_tick 确有非零 _desprice 分支，但所有可达调用者只写入零价格。当前候选把私有实现分支当成公开策略功能故障，公开契约不支持该主张。",
+    "root_cause": "无已证实产品缺陷；目标价字段只在私有 helper 中存在，公开策略协议没有对应输入。",
+    "fix": "本轮不做产品修复。若目标价信号是新需求，应增加有文档的公开 API 并贯通；否则可另行清理不可达分支或注明预留用途。",
+    "acceptance": "当前验收结论不承诺策略可设置目标价格；若后续新增该功能，必须用公开接口到成交条件的行为测试证明非零目标价可达且影响触发结果。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R58",
+    "id": "BUG-R58-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/HisDataReplayer.cpp:230-248",
+      "src/WtBtCore/HisDataReplayer.cpp:251-264",
+      "src/WtBtCore/HisDataReplayer.cpp:287-299",
+      "src/WtBtCore/HisDataReplayer.h:739-748",
+      "src/WTSTools/WTSBaseDataMgr.cpp:243-255",
+      "src/WTSTools/WTSBaseDataMgr.cpp:328-341"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_init_basefiles_test.cpp:235-258"
+    ],
+    "input_reachability": "用户配置中的 basefiles.session 和 basefiles.commodity 文件名经 HisDataReplayer::init 传给公开基础数据加载器。路径存在但文件缺失或解析失败时，loadSessions/loadCommodities 返回 false；init 当前忽略返回值并继续。",
+    "oracle_basis": "HisDataReplayer::init 的公开注释声明 bool 表示初始化是否成功；两个 loader 对已配置但不存在/不可解析文件明确返回 false。adjfactor 则是单独的可选回退路径，现有用例覆盖其失败仍可初始化。",
+    "reason": "源码确认显式配置的 session/commodity 依赖加载失败后仍无条件返回 true。不能把该结论扩张成所有基础文件都必需：坏 adjfactor 是有效可选项对照；问题限定为明确配置的 session/commodity 路径失败未传播。",
+    "root_cause": "HisDataReplayer::init 在 basefiles 加载语句处丢弃 loader 的 bool 结果，并在函数末尾无条件 return true；调用方收到成功状态但基础映射可能为空。",
+    "fix": "对已配置的必需 session/commodity 路径检查 loader 返回值；失败时记录具体文件名、让 init 返回 false，并避免调用方继续 prepare。不要把 adjfactor 的可选加载失败改成致命错误。",
+    "acceptance": "完整有效配置的 init 仍成功；显式 session 或 commodity 文件缺失/解析失败时 init 返回 false；损坏的可选 adjfactor 仍按现有策略容忍并记录诊断。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_init_basefiles_test.cpp",
+        "case": "R43ReplayerInitBasefilesTest.missingConfiguredSessionFileFailsInit",
+        "issue": "显式配置的 session 文件加载失败被 HisDataReplayer::init 忽略",
+        "change": "新增完整有效配置，仅将 basefiles.session 指向不存在的临时路径并断言 init 返回 false；保留坏 adjfactor 成功用例作为可选文件对照。",
+        "target": "CoverageTests_btcore",
+        "filter": "R43ReplayerInitBasefilesTest.missingConfiguredSessionFileFailsInit:R43ReplayerInitBasefilesTest.badAdjFactorFileDoesNotBreakInit",
+        "expected_result": "缺失的已配置 session 文件使 init 返回 false；坏 adjfactor 对照仍成功。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/05_replay/run_03/result.json",
+      "docs/迭代计划/迭代02/复核185/evidence/05_replay/run_03/stdout.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/05_replay/run_03/gtest.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "主代理安排新增缺失 session 用例；产品修复后用该负向用例和坏 adjfactor 对照复测。"
+    ]
+  },
+  {
+    "lane": "R58",
+    "id": "BUG-R58-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtEngine.cpp:80-84",
+      "src/WtCore/WtEngine.cpp:104-143",
+      "src/WtCore/WtEngine.cpp:473-482",
+      "src/WtCore/WtEngine.cpp:529-577",
+      "src/WtCore/WtEngine.cpp:918-939",
+      "src/WtCore/WtCtaEngine.cpp:381-400",
+      "src/WtCore/WtCtaEngine.cpp:490-505",
+      "src/WtCore/WtCtaTicker.cpp:40-58",
+      "src/WTSTools/WTSBaseDataMgr.cpp:328-372"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n02_wtcore_engines/r41_engine_base_test.cpp:181-207"
+    ],
+    "input_reachability": "WtEngine::load_datas 从 portfolio/datas.json 装入持仓代码，不按当前基础数据过滤；WtCtaEngine::on_schedule 对已有但不在目标持仓中的非零仓位建立目标 0 的 standby signal，并明确注释称持仓中可能保留过期合约代码。随后 WtCtaTicker 对收到的每笔行情调用 WtCtaEngine::on_tick。若该旧代码当前没有商品或有效 session，get_session_info(stdCode,true) 返回 NULL，信号触发路径会解引用。",
+    "oracle_basis": "正常回放持久化生命周期会保存、重载 portfolio positions；引擎源码明确处理过期持仓并生成归零信号。缺少 session 时应安全保留待处理语义或拒绝该信号，不能让后续行情导致进程崩溃；现有有效 session standby 信号行为必须保持。",
+    "reason": "真实状态链路不依赖测试手工注入空指针：上一轮持仓可在当前 base data 不再包含商品/session 时重载；调度会创建归零信号；匹配行情到达时 on_tick 未判空。R41 现有用例只证明有效 session 对照，不覆盖持久化过期代码路径，因此本项暂为静态确认，尚无本轮动态复现。",
+    "root_cause": "WtEngine::get_session_info 在找不到商品或商品关联 session 时可返回 NULL；WtEngine::on_tick 处理待触发信号时未判空。WtCtaEngine::on_schedule 允许过期 portfolio code 进入该信号路径。",
+    "fix": "在 WtEngine::on_tick 的信号分支判空并给出诊断；缺 session 时不调用 do_set_position，保持信号待处理以便元数据恢复后重试。必要时在调度队列入口过滤不可解析的旧代码，避免无效执行请求。",
+    "acceptance": "以真实 portfolio JSON 重载一个当前无商品/session 的旧持仓，正常触发 on_schedule 后喂入同代码 tick；引擎不得崩溃、不得以未知交易时段成交，待处理信号状态按文档保留或安全拒绝；带有效 session 的现有 standby signal 控制仍在下一笔 tick 正常成交。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/n02_wtcore_engines/r41_engine_base_test.cpp",
+        "case": "R41EngineFixture.R41LegacyPositionWithoutSessionDoesNotCrashOnTick",
+        "issue": "持久化过期持仓在 CTA 调度中生成待触发归零信号，后续报价使 WtEngine::on_tick 解引用空 session",
+        "change": "用现有 R41 fixture 写入非零未知/过期 code 的合法 datas.json，初始化无该品种的有效 base data，调用 engine.on_schedule 后向同 code 调用 engine.on_tick；断言无崩溃且不产生无 session 成交。保留有效 session standby 控制。",
+        "target": "CoverageTests_wtcore",
+        "filter": "R41EngineFixture.R41LegacyPositionWithoutSessionDoesNotCrashOnTick:R41EngineFixture.R41StandbySignalFiresOnNextTick",
+        "expected_result": "过期 code 的 tick 不触发空指针崩溃或交易；有效 session 控制仍按下一笔 tick 触发。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/05_replay/run_04/result.json",
+      "docs/迭代计划/迭代02/复核185/evidence/05_replay/run_04/stdout.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/05_replay/run_04/gtest.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "主代理协调新增过期 portfolio signal 用例并在实现防护后复测。",
+      "跨组与 BUG-P01-001 对齐共同 missing-session 根因；本条仍包含独立的 portfolio 重载和 WtEngine::_sig_map 调用路径。"
+    ]
+  },
+  {
+    "lane": "R80",
+    "id": "BUG-R80-001",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/HisDataReplayer.cpp:951-963",
+      "src/WtBtCore/HisDataReplayer.cpp:1062-1081",
+      "src/WtBtCore/SelMocker.cpp:285-290",
+      "src/WtCore/WtCtaTicker.cpp:127-143",
+      "src/WtCore/WtSelEngine.cpp:224-242",
+      "src/WtCore/WtSelEngine.cpp:328-335",
+      "src/Includes/ISelStraCtx.h:106-112"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q02_btcore3/r80_replayer_task_bars_test.cpp:125-135"
+    ],
+    "input_reachability": "register_task 配置日频 15:00 进入 run_by_tasks；实现将 endtime 设为 task_time 前一分钟，然后在该时点调用 onMinuteEnd 推进数据并发调度回调。该路径并不等同于 run_by_bars 的逐日收盘路径。",
+    "oracle_basis": "运行态 ticker 在分钟闭合后调度；WtSelEngine 以 nextTime 匹配任务，并将当前分钟 curTime 与任务 fireTime 分别传给 ISelStraCtx::on_schedule。session-end 标记仅在实际 close minute 满足时生成。API 未承诺 daily-task 模式必须与 run_by_bars 在任务回调前闭合当前日线。",
+    "reason": "原 DISABLED_DailyTaskClosesCurrentDayBars 已被 DISABLED_DailyTaskSessionEndContractPending 取代。当前测试只有说明性注释和 disabled 的 GTEST_SKIP 占位，不再含旧的当日日线闭盘断言；原 oracle 错误的 TEST 裁定仍成立。本轮未运行 disabled 项。",
+    "root_cause": "旧 oracle 曾把逐 bar 模式当成任务模式契约，并把 task fireTime 误当作已完成 session-end 的时刻。当前测试修订已移除该错误断言。",
+    "fix": "不做产品修复，也无需再改当前测试。保持占位用例禁用；只有产品 owner 明确任务回调与日线收盘合同后，才新增单独的 enabled 回归。",
+    "acceptance": "当前测试文件不再断言 run_by_tasks 必须复制 run_by_bars 的日线收盘次序；未来若合同确定，新用例分别验证回调 fireTime 和 session-end endTDate。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "当前没有需修正的测试断言；如产品 owner 后续确立任务与日线收盘合同，再新增 enabled 回归。本轮未运行 DISABLED 占位。"
+    ]
+  },
+  {
+    "lane": "p04_btcore_replayer",
+    "id": "BUG-P04-001",
+    "decision": "PRODUCT",
+    "evidence_level": "LOCAL_REPRO",
+    "source_evidence": [
+      "src/WtBtCore/HisDataReplayer.cpp:171-176",
+      "src/WtBtCore/HisDataReplayer.cpp:230-235",
+      "src/WtBtCore/HisDataReplayer.h:739-748",
+      "src/WtBtRunner/WtBtRunner.cpp:84-93"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:390-420"
+    ],
+    "input_reachability": "runner 从用户配置取得 replayer 配置并调用公开 init；缺少 basefiles 节点时 cfg->get 返回空指针，HisDataReplayer::init 随后无条件访问 cfgBF->get。",
+    "oracle_basis": "公开 init 注释定义 bool 为初始化成功状态。缺少配置节点应以 false/诊断拒绝，而不是在返回状态前崩溃；现有子进程测试将其他字段保持有效，只省略 basefiles，并检查无崩溃的失败返回。",
+    "reason": "本轮实际运行了专门的子进程用例。子进程输出到 P04_INIT_BEGIN 后以 signal 11 结束；用例预期退出码 0，因此它正确暴露了 init 空指针崩溃，测试本身不是误报。",
+    "root_cause": "HisDataReplayer::init 在 src/WtBtCore/HisDataReplayer.cpp:231 读取 basefiles 后，未验证 cfgBF 是否为空就访问其成员。",
+    "fix": "在读取 cfgBF->get 前校验 cfgBF；缺少节点时记录配置错误并返回 false。必要时同时校验 init 的 cfg 参数，避免同类外部输入造成空解引用。",
+    "acceptance": "当前缺少 basefiles 的用例在隔离子进程中以预期 false 返回退出，不出现 signal；有效 basefiles 的 prepare 控制保持成功，并且 sink 初始化事件仍只触发一次。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/05_replay/run_01/result.json",
+      "docs/迭代计划/迭代02/复核185/evidence/05_replay/run_01/stdout.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/05_replay/run_01/gtest.xml",
+      "docs/迭代计划/迭代02/复核185/evidence/05_replay/run_02/result.json",
+      "docs/迭代计划/迭代02/复核185/evidence/05_replay/run_02/stdout.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/05_replay/run_02/gtest.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "产品空指针防护修复后重跑 initWithoutBasefilesReportsFailure 和有效 prepare 对照。"
+    ]
+  },
+  {
+    "lane": "p04_btcore_replayer",
+    "id": "BUG-P04-002",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/HisDataReplayer.cpp:649-674",
+      "src/WtBtCore/HisDataReplayer.h:798-808",
+      "src/WtBtRunner/WtBtRunner.cpp:100-154",
+      "src/WtBtPorter/WtBtRunner.cpp:457-527"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:207-239",
+      "src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:423-425"
+    ],
+    "input_reachability": "直接 prepare 无 sink 必须由调用方跳过 register_sink。当前测试文件所有 active prepare 调用均先注册 sink，正常 WtBtRunner/WtBtPorter 调用链也先注册 sink。WtBtRunner 在外部 mocker 配置未知时会漏注册后调用 prepare；该外部配置路径是 BUG-R28-006 的独立 runner 缺陷，不证明本项手工调用顺序属于有效 HisDataReplayer 生命周期。",
+    "oracle_basis": "prepare 会向 IDataSink 发送必需的 handle_init；公开 register_sink 文档说明其接收回放事件，正常 runner 与 active 测试都遵守 register_sink→prepare。当前文件没有实现或断言 no-sink prepare 的测试，只有说明该顺序无效的注释。",
+    "reason": "本项没有需要修正的具体测试断言：当前测试文件不存在 no-sink prepare 用例，行 423-425 只是将该调用顺序排除在产品测试之外。直接遗漏 sink 的序列属于无效生命周期前置主张，应撤回；未知 mocker 导致 runner 漏注册是另一个有真实外部配置入口的问题，由 BUG-R28-006 覆盖。",
+    "root_cause": "候选问题来自手工省略 sink 注册的调用序列，而非当前有效测试或正常 runner 顺序。Runner 未知 mocker 的缺陷位于配置校验层，不能与直接 HisDataReplayer 调用混为一个根因。",
+    "fix": "撤回直接 no-sink prepare 的产品缺陷主张；无需修改当前测试文件。可在 API 文档补充 register_sink 必须先于 prepare 的生命周期前置条件；BUG-R28-006 继续由 runner 在未知 mocker 配置处安全拒绝。",
+    "acceptance": "当前测试文件不新增或改写 no-sink 断言；所有受支持的 prepare 调用先注册 listener，并验证 handle_init 恰好一次。runner 未知 mocker 的安全拒绝按 BUG-R28-006 单独验收。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/05_replay/run_02/result.json",
+      "docs/迭代计划/迭代02/复核185/evidence/05_replay/run_02/stdout.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/05_replay/run_02/gtest.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "本项无待修测试；主代理在合并主表时保留 BUG-R28-006 的 unknown-mocker runner 校验项，不将它误归并为有效调用方省略 register_sink。"
+    ]
+  }
+]

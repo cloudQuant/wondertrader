@@ -73,7 +73,7 @@ struct RiskEnv
 		if (_cfg == nullptr)
 			return false;
 		//没有 module 字段, init 解析完风控参数后返回 false, 但 _cfg/风控表已留下
-		_adapter.init("uft1", _cfg, &_bd, &_policy);
+		EXPECT_FALSE(_adapter.init("uft1", _cfg, &_bd, &_policy));
 		return true;
 	}
 
@@ -97,6 +97,7 @@ struct RiskEnv
 		ord->setExchange("SHFE");
 		ord->setDirection(WDT_LONG);
 		ord->setOffsetType(WOT_OPEN);
+		ord->setOrderFlag(WOF_NOR);
 		ord->setVolume(1);
 		ord->setVolLeft(1);
 		ord->setOrderState(WOS_Canceled);
@@ -204,20 +205,19 @@ TEST(q04_trader_risk, order_total_limit_is_counted_from_order_reports)
 	o2->release();
 }
 
-TEST(q04_trader_risk, product_level_rule_is_looked_up_with_a_wrong_key)
+TEST(q04_trader_risk, product_cancel_limit_overrides_permissive_default)
 {
 	RiskEnv env;
 	//ag 组限额 1, default 组放宽到 1000000
 	ASSERT_TRUE(env.loadRisk(riskJson(1000000, 1000000, 1)));
 	env.finish();
+	ASSERT_TRUE(env._adapter.checkCancelLimits(kAg));
 
 	env.pushCanceledBuyOrder("PK-1");
+	ASSERT_EQ(2u, env._adapter.getInfos(kAg)) << "一张普通撤单回报应计入订单与撤单信息量";
 
-	//按约定: getRiskParams("SHFE.ag2406") 应取到 ag 组 -> 应返回 false
-	//实测: 品种键被截成 "ag24"(多切了两位), 命中不到 ag 组, 回落到 default -> true
-	//(实现如此, 语义待裁定, 见 q04_uftcore3.md BUG-Q04-003)
-	EXPECT_TRUE(env._adapter.checkCancelLimits(kAg));
-	//default 限额 1000000 没被打满, 交易仍然可用
+	//标准码 SHFE.ag2406 应命中 ag 组；已计入的一次普通撤单达到限额 1。
+	EXPECT_FALSE(env._adapter.checkCancelLimits(kAg));
 }
 
 TEST(q04_trader_risk, risk_params_default_group_is_used_for_unlisted_products)
@@ -236,8 +236,8 @@ TEST(q04_trader_risk, risk_params_default_group_is_used_for_unlisted_products)
 	//未列出的品种回落到 default: 一张撤单就命中限额
 	env.pushCanceledBuyOrder("OD-1");
 	EXPECT_FALSE(env._adapter.checkCancelLimits(kAg));
-	//排除队列里的代码在任何限额检查前就被挡掉
-	EXPECT_FALSE(env._adapter.checkOrderLimits("SHFE.cu2406"));
+	//同一个被排除的代码在任何限额检查前就会被挡掉
+	EXPECT_FALSE(env._adapter.checkOrderLimits(kAg));
 }
 
 //崩溃/未定义行为类输入整类收在这里

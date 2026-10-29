@@ -1,7 +1,7 @@
 // p10 / WtDataStorage：WtDataWriter 的日线 .dsb 文件形态写入路径（写入→读回→逐字段比对）
 //
 // 覆盖对象（全部为文件形态落盘，无命名共享内存、无后台线程）：
-//  - WtDataWriter::dump_day_data（新建块头 / 追加 / 同日期替换 / 旧日期忽略 / >100 条压缩 / 压缩态保持 / altcode 重命名 / 打开失败拒绝）
+//  - WtDataWriter::dump_day_data（新建块头 / 追加 / 同日期替换 / 旧日期忽略 / >100 条压缩 / 压缩态保持 / altcode 重命名 / 打开失败拒绝 / 空历史文件）
 //  - WtDataWriter::proc_block_data（作为读回解码器：RAW_V2 与 CMP_V2 两条分支）
 //  - WtDataWriter::dump_bars_to_file（NULL 合约入参拒绝）
 //
@@ -376,9 +376,9 @@ TEST_F(P10DayDsbTest, DumpBarsToFileRejectsNullContract)
 	EXPECT_EQ(_writer->dump_bars_to_file(NULL), 0u);
 }
 
-TEST_F(P10DayDsbTest, EmptyHistoryFileWithHeaderOnlyDecodesToEmptyPayload)
+TEST_F(P10DayDsbTest, HeaderOnlyDayFileDecodesToEmptyPayload)
 {
-	// 手写一个只有头部的 .dsb（模拟被截断的历史文件），解码应得到 0 长度载荷
+	// A valid empty RAW_V2 day file contains its header and no bar payload.
 	std::string file = day_file("rb2210");
 	std::filesystem::create_directories(std::filesystem::path(file).parent_path());
 	{
@@ -395,14 +395,51 @@ TEST_F(P10DayDsbTest, EmptyHistoryFileWithHeaderOnlyDecodesToEmptyPayload)
 	ASSERT_EQ(content.size(), sizeof(BlockHeader));
 	EXPECT_TRUE(_writer->proc_block_data(file.c_str(), content, true, false));
 	EXPECT_EQ(content.size(), 0u);
+}
 
-	// 空载荷 + 新 bar：barcnt==0 时既不追加也不替换，且 bNeedWrite 从未参与写入判断
-	// 实测（待审核 BUG-P10-004）：新 bar 被静默丢弃，函数仍返回 true，文件仍只有 12 字节头部。
-	// 这里刻意不再从 content.data()+12 读取结构体，避免越界读。
+TEST_F(P10DayDsbTest, AppendingToHeaderOnlyDayFileMustPersistBarOrRejectWithoutMutation)
+{
+	// A header-only file is decodable as empty history. A new bar must either be
+	// persisted on success or the operation must explicitly reject without mutation.
+	const std::string file = day_file("rb2210");
+	std::filesystem::create_directories(std::filesystem::path(file).parent_path());
+	{
+		std::ofstream ofs(file.c_str(), std::ios::binary | std::ios::trunc);
+		BlockHeader hdr;
+		std::memset(&hdr, 0, sizeof(hdr));
+		p10_set_flag(hdr._blk_flag, sizeof(hdr._blk_flag));
+		hdr._type = BT_HIS_Day;
+		hdr._version = BLOCK_VERSION_RAW_V2;
+		ofs.write((const char*)&hdr, sizeof(hdr));
+	}
+
+	const std::string before = p10_read_file(file);
+	ASSERT_EQ(before.size(), sizeof(BlockHeader));
 	WTSBarStruct bar = p10_make_bar(20240301, 5);
-	EXPECT_TRUE(_writer->dump_day_data(_ct, &bar));
-	content = p10_read_file(file);
-	EXPECT_EQ(content.size(), sizeof(BlockHeader));
+	const bool wrote = _writer->dump_day_data(_ct, &bar);
+	const std::string after = p10_read_file(file);
+
+	if (!wrote)
+	{
+		EXPECT_EQ(after, before) << "a rejected append must leave the empty history unchanged";
+		return;
+	}
+
+	ASSERT_EQ(after.size(), sizeof(BlockHeader) + sizeof(WTSBarStruct));
+	BlockHeader storedHeader;
+	std::memcpy(&storedHeader, after.data(), sizeof(storedHeader));
+	EXPECT_EQ(storedHeader._type, (uint16_t)BT_HIS_Day);
+	EXPECT_EQ(storedHeader._version, (uint16_t)BLOCK_VERSION_RAW_V2);
+
+	std::string decoded = after;
+	ASSERT_TRUE(_writer->proc_block_data(file.c_str(), decoded, true, false));
+	ASSERT_EQ(decoded.size(), sizeof(WTSBarStruct));
+	WTSBarStruct storedBar;
+	std::memcpy(&storedBar, decoded.data(), sizeof(storedBar));
+	EXPECT_EQ(storedBar.date, bar.date);
+	EXPECT_EQ(storedBar.time, bar.time);
+	EXPECT_DOUBLE_EQ(storedBar.open, bar.open);
+	EXPECT_DOUBLE_EQ(storedBar.close, bar.close);
 }
 
 }  // namespace

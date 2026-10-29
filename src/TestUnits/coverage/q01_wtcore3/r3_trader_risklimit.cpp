@@ -22,10 +22,13 @@
 #include <boost/noncopyable.hpp>
 #include <boost/core/noncopyable.hpp>
 
+#include <cstdlib>
+
 #include "../p11_wtcore_traderadapter/p11_trader_fixture.h"
 
 #include <WtCore/ActionPolicyMgr.h>
 #include <Includes/WTSSessionInfo.hpp>
+#include <rapidjson/document.h>
 
 using namespace p11fix;
 using wtp::TraderAdapter;
@@ -33,7 +36,6 @@ using wtp::TraderAdapter;
 namespace {
 
 const char* kStdAu = "SHFE.au.2212";
-const char* kTag1001 = "otp.r3a.1001";
 
 static std::string r3TmpDir(const char* tag)
 {
@@ -110,6 +112,18 @@ WTSArray* r3Array(std::initializer_list<T*> items)
     return arr;
 }
 
+template <typename T>
+WTSArray* r3OwnedArray(std::initializer_list<T*> items)
+{
+    WTSArray* arr = WTSArray::create();
+    for (auto* it : items)
+    {
+        arr->append(it);
+        it->release(); // transfer each create() reference to the array
+    }
+    return arr;
+}
+
 static std::string r3ReadAll(const std::string& path)
 {
     std::ifstream ifs(path, std::ios::binary);
@@ -141,6 +155,18 @@ protected:
         WtHelper::setTime(20250110, 931, 0);
     }
 
+    void TearDown() override
+    {
+        if (sess_)
+        {
+            sess_->release();
+            sess_ = NULL;
+        }
+        std::error_code ec;
+        std::filesystem::remove_all(dir_, ec);
+        P11TraderTest::TearDown();
+    }
+
     /// 写入下单/撤单频率限额配置并激活风控（无 module 段 -> init 返回 false，但风控参数已落地）
     void enableRisk(TraderAdapter& trader, uint32_t orderBoundary, uint32_t cancelBoundary)
     {
@@ -167,55 +193,140 @@ protected:
 //////////////////////////////////////////////////////////////////////////
 // checkOrderLimits 的频率窗口
 //////////////////////////////////////////////////////////////////////////
-TEST_F(R3TraderTest, order_freq_window_blocks_only_for_the_raw_code_key)
+TEST_F(R3TraderTest, order_freq_window_denies_submission_after_boundary)
 {
+    // Align the fake contract's alt code with checkOrderLimits' documented
+    // standardized-code key so this case measures the boundary logic alone.
+    ct_->setAltCode(kStdCode);
     TraderAdapter trader;
     ASSERT_TRUE(trader.initExt(id_.c_str(), &api_, &bd_, NULL));
     enableRisk(trader, 2, 9);
     ASSERT_TRUE(trader.checkOrderLimits(kStdCode));
 
-    // 3 笔：窗口内 cnt=3 >= boundary=2，但 times = 3-0-1 = 2 不 > 2 -> 仍放行
-    for (int i = 0; i < 3; i++)
+    // boundary is the maximum successful submissions in the window. Each
+    // submission follows the caller contract: check first, then submit.
+    for (int i = 0; i < 2; i++) {
+        ASSERT_TRUE(trader.checkOrderLimits(kStdCode));
         EXPECT_NE(UINT_MAX, trader.openLong(kStdCode, 7000.0, 1, 0));
-    EXPECT_EQ(3u, api_.n_insert_);
-    EXPECT_TRUE(trader.checkOrderLimits(kRawCode));
+    }
+    ASSERT_EQ(2u, api_.n_insert_);
+    const bool thirdAllowed = trader.checkOrderLimits(kStdCode);
+    EXPECT_FALSE(thirdAllowed);
 
-    // 第 4 笔：times = 4-0-1 = 3 > 2 -> 封禁，并进排除队列
-    EXPECT_NE(UINT_MAX, trader.openLong(kStdCode, 7000.0, 1, 0));
-    EXPECT_FALSE(trader.checkOrderLimits(kRawCode));
-    EXPECT_FALSE(trader.checkOrderLimits(kRawCode));    // 排除队列短路
-
-    // 排除队列里存的是「ag2512」，而 buy/sell/doCancel 传的是标准代码 -> 封禁不生效
-    EXPECT_TRUE(trader.checkOrderLimits(kStdCode));
+    // Honor the precheck result as the caller does; a denied third submission
+    // must not reach the trader API.
+    if (thirdAllowed)
+        (void)trader.openLong(kStdCode, 7000.0, 1, 0);
+    EXPECT_EQ(2u, api_.n_insert_);
     EXPECT_TRUE(trader.checkCancelLimits(kStdCode));
+    trader.release();
+}
+
+TEST_F(R3TraderTest, order_freq_window_precheck_uses_standard_code_after_raw_submission)
+{
+    // First observe how many submissions fit before this configured checker
+    // refuses a precheck when the submission key and check key are identical.
+    // This lets the alias case use the same measured boundary without pinning
+    // the current threshold arithmetic as the contract.
+    const std::string alignedStdCode = "SHFE.au.2212";
+    ct2_->setAltCode(alignedStdCode.c_str());
+
+    TraderAdapter trader;
+    ASSERT_TRUE(trader.initExt(id_.c_str(), &api_, &bd_, NULL));
+    enableRisk(trader, 2, 9);
+
+    uint32_t alignedSubmissions = 0;
+    bool alignedDenied = false;
+    for (uint32_t attempt = 0; attempt < 4; ++attempt) {
+        if (!trader.checkOrderLimits(alignedStdCode.c_str())) {
+            alignedDenied = true;
+            break;
+        }
+        const uint32_t localid = trader.openLong(alignedStdCode.c_str(), 7000.0, 1, 0);
+        EXPECT_NE(UINT_MAX, localid);
+        if (localid == UINT_MAX)
+            break;
+        ++alignedSubmissions;
+        EXPECT_EQ(alignedStdCode, api_.last_code_);
+    }
+    // If the loop used all four attempts, check once more to observe whether
+    // the configured boundary has been reached.
+    if (!alignedDenied)
+        alignedDenied = !trader.checkOrderLimits(alignedStdCode.c_str());
+    EXPECT_TRUE(alignedDenied);
+    EXPECT_GT(alignedSubmissions, 0u);
+    EXPECT_LE(alignedSubmissions, 4u);
+
+    // The normal caller sequence is precheck, then submit. For this contract,
+    // doEntrust changes the submitted code to the raw alt code and caches the
+    // timestamp under that raw key. Repeating the sequence for the same number
+    // of accepted submissions should exhaust the same window, so the
+    // standard-code precheck must deny the next request. The
+    // aligned control above proves when this boundary setup is reached; a pass
+    // here would isolate the raw/std key mismatch.
+    uint32_t rawSubmissions = 0;
+    for (; rawSubmissions < alignedSubmissions; ) {
+        const bool allowed = trader.checkOrderLimits(kStdCode);
+        EXPECT_TRUE(allowed);
+        if (!allowed)
+            break;
+        const uint32_t localid = trader.openLong(kStdCode, 7000.0, 1, 0);
+        EXPECT_NE(UINT_MAX, localid);
+        if (localid == UINT_MAX)
+            break;
+        ++rawSubmissions;
+        EXPECT_EQ(kRawCode, api_.last_code_);
+    }
+    EXPECT_EQ(alignedSubmissions, rawSubmissions);
+
+    const bool nextAllowed = trader.checkOrderLimits(kStdCode);
+    EXPECT_FALSE(nextAllowed);
+    if (nextAllowed)
+        (void)trader.openLong(kStdCode, 7000.0, 1, 0);
+    EXPECT_EQ(alignedSubmissions + rawSubmissions, api_.n_insert_);
+
     trader.release();
 }
 
 //////////////////////////////////////////////////////////////////////////
 // checkCancelLimits 的频率窗口
 //////////////////////////////////////////////////////////////////////////
-TEST_F(R3TraderTest, cancel_freq_window_is_keyed_by_order_raw_code)
+TEST_F(R3TraderTest, cancel_freq_window_denies_cancel_after_boundary)
 {
     TraderAdapter trader;
     ASSERT_TRUE(trader.initExt(id_.c_str(), &api_, &bd_, NULL));
     enableRisk(trader, 9, 2);
 
-    // 建一条活单（onRspOrders 按 usertag 里的 localid 建表）
-    trader.onRspOrders(r3Array({ r3Order(ct_, WDT_LONG, WOT_OPEN, 1, 0, "ORD1", kTag1001) }));
-    ASSERT_NE(nullptr, trader.getOrders(""));
+    // Seed three separately identified live orders so successful cancels are
+    // distinct operations. The test temporarily aligns the stored code with
+    // the standardized check key to keep raw/std key mapping out of the
+    // boundary assertion in this case.
+    WTSOrderInfo* order1 = r3Order(ct_, WDT_LONG, WOT_OPEN, 1, 0, "ORD1", "otp.p11a.1001");
+    WTSOrderInfo* order2 = r3Order(ct_, WDT_LONG, WOT_OPEN, 1, 0, "ORD2", "otp.p11a.1002");
+    WTSOrderInfo* order3 = r3Order(ct_, WDT_LONG, WOT_OPEN, 1, 0, "ORD3", "otp.p11a.1003");
+    WTSArray* orders = r3Array({ order1, order2, order3 });
+    trader.onRspOrders(orders);
+    orders->release();
+    OrderMap* seeded = trader.getOrders("");
+    ASSERT_NE(nullptr, seeded);
+    EXPECT_EQ(3u, seeded->size());
+    seeded->release();
+    order1->setCode(kStdCode);
+    order2->setCode(kStdCode);
+    order3->setCode(kStdCode);
+    order1->release();
+    order2->release();
+    order3->release();
 
-    // 3 次撤单：times = 3-0-1 = 2，不 > boundary=2 -> 请求照常下发
+    ASSERT_TRUE(trader.checkCancelLimits(kStdCode));
     EXPECT_TRUE(trader.cancel(1001u));
-    EXPECT_TRUE(trader.cancel(1001u));
-    EXPECT_TRUE(trader.cancel(1001u));
-    EXPECT_EQ(3u, api_.n_action_);
-    // doCancel 里按标准代码查窗口，缓存却按订单原始代码写 -> 查不到
-    EXPECT_TRUE(trader.checkCancelLimits(kStdCode));
+    ASSERT_TRUE(trader.checkCancelLimits(kStdCode));
+    EXPECT_TRUE(trader.cancel(1002u));
+    EXPECT_EQ(2u, api_.n_action_);
 
-    // 第 4 次：times = 3 > 2 -> 按原始代码封禁
-    EXPECT_FALSE(trader.checkCancelLimits(kRawCode));
-    EXPECT_FALSE(trader.checkCancelLimits(kRawCode));
-    EXPECT_TRUE(trader.checkCancelLimits(kStdCode));
+    EXPECT_FALSE(trader.checkCancelLimits(kStdCode));
+    EXPECT_FALSE(trader.cancel(1003u));
+    EXPECT_EQ(2u, api_.n_action_);
     trader.release();
 }
 
@@ -228,34 +339,68 @@ TEST_F(R3TraderTest, save_data_writes_long_short_positions_and_fund_block)
     ASSERT_TRUE(trader.initExt(id_.c_str(), &api_, &bd_, NULL));
     ASSERT_TRUE(trader.run());
 
-    trader.onRspPosition(r3Array({
+    WTSArray* positions = r3OwnedArray({
         r3Pos(ct_, WDT_LONG, 3, 3, 2, 2),
-        r3Pos(ct_, WDT_SHORT, 1, 1, 0, 0) }));
+        r3Pos(ct_, WDT_SHORT, 1, 1, 0, 0) });
+    trader.onRspPosition(positions);
+    positions->release();
 
     std::string rtfile = std::string(WtHelper::getBaseDir()) + "traders/" + id_ + "/rtdata.json";
-    EXPECT_TRUE(std::filesystem::exists(rtfile)) << rtfile;
+    EXPECT_FALSE(std::filesystem::exists(rtfile)) << rtfile;
 
     // saveData 是 private，由 onRspAccount 的资金分发链带动
     WTSAccountInfo* acct = WTSAccountInfo::create();
     acct->setBalance(123456.0);
     acct->setPreBalance(100000.0);
-    trader.onRspAccount(r3Array({ acct }));
+    WTSArray* accounts = r3OwnedArray({ acct });
+    trader.onRspAccount(accounts);
+    accounts->release();
 
     std::string body = r3ReadAll(rtfile);
-    EXPECT_NE(body.find("\"positions\""), std::string::npos) << body;
-    EXPECT_NE(body.find("\"long\""), std::string::npos) << body;
-    EXPECT_NE(body.find("\"short\""), std::string::npos) << body;
-    EXPECT_NE(body.find("\"newvol\" : 2"), std::string::npos) << body;
-    EXPECT_NE(body.find("\"prevol\" : 3"), std::string::npos) << body;
-    EXPECT_NE(body.find("\"funds\""), std::string::npos) << body;
-    EXPECT_NE(body.find("\"balance\" : 123456"), std::string::npos) << body;
-    EXPECT_NE(body.find("\"prebalance\" : 100000"), std::string::npos) << body;
+    rapidjson::Document doc;
+    doc.Parse(body.c_str());
+    ASSERT_FALSE(doc.HasParseError()) << body;
+    ASSERT_TRUE(doc.IsObject());
+    ASSERT_TRUE(doc.HasMember("positions") && doc["positions"].IsArray());
+    ASSERT_EQ(1u, doc["positions"].Size());
+    const auto& position = doc["positions"][0];
+    ASSERT_TRUE(position.IsObject());
+    ASSERT_TRUE(position.HasMember("code") && position["code"].IsString());
+    EXPECT_STREQ(kStdCode, position["code"].GetString());
+    ASSERT_TRUE(position.HasMember("long") && position["long"].IsObject());
+    ASSERT_TRUE(position["long"].HasMember("newvol") && position["long"]["newvol"].IsNumber());
+    ASSERT_TRUE(position["long"].HasMember("prevol") && position["long"]["prevol"].IsNumber());
+    EXPECT_DOUBLE_EQ(2.0, position["long"]["newvol"].GetDouble());
+    EXPECT_DOUBLE_EQ(3.0, position["long"]["prevol"].GetDouble());
+    ASSERT_TRUE(position.HasMember("short") && position["short"].IsObject());
+    ASSERT_TRUE(position["short"].HasMember("newvol") && position["short"]["newvol"].IsNumber());
+    ASSERT_TRUE(position["short"].HasMember("prevol") && position["short"]["prevol"].IsNumber());
+    EXPECT_DOUBLE_EQ(0.0, position["short"]["newvol"].GetDouble());
+    EXPECT_DOUBLE_EQ(1.0, position["short"]["prevol"].GetDouble());
+    ASSERT_TRUE(doc.HasMember("funds") && doc["funds"].IsObject());
+    ASSERT_TRUE(doc["funds"].HasMember("CNY") && doc["funds"]["CNY"].IsObject());
+    ASSERT_TRUE(doc["funds"]["CNY"].HasMember("balance") && doc["funds"]["CNY"]["balance"].IsNumber());
+    ASSERT_TRUE(doc["funds"]["CNY"].HasMember("prebalance") && doc["funds"]["CNY"]["prebalance"].IsNumber());
+    EXPECT_DOUBLE_EQ(123456.0, doc["funds"]["CNY"]["balance"].GetDouble());
+    EXPECT_DOUBLE_EQ(100000.0, doc["funds"]["CNY"]["prebalance"].GetDouble());
 
     // 空资金数组走 size()==0 支路，funds 仍是空对象
-    trader.onRspAccount(WTSArray::create());
+    WTSArray* emptyAccounts = WTSArray::create();
+    trader.onRspAccount(emptyAccounts);
+    emptyAccounts->release();
     std::string body2 = r3ReadAll(rtfile);
-    EXPECT_NE(body2.find("\"funds\" : { }"), std::string::npos) << body2;
-    EXPECT_NE(body2.find("\"prevol\" : 3"), std::string::npos) << body2;   // 持仓段仍在
+    rapidjson::Document emptyFundsDoc;
+    emptyFundsDoc.Parse(body2.c_str());
+    ASSERT_FALSE(emptyFundsDoc.HasParseError()) << body2;
+    ASSERT_TRUE(emptyFundsDoc.HasMember("funds") && emptyFundsDoc["funds"].IsObject());
+    EXPECT_EQ(0u, emptyFundsDoc["funds"].MemberCount());
+    ASSERT_TRUE(emptyFundsDoc.HasMember("positions") && emptyFundsDoc["positions"].IsArray());
+    ASSERT_EQ(1u, emptyFundsDoc["positions"].Size());
+    ASSERT_TRUE(emptyFundsDoc["positions"][0].IsObject());
+    ASSERT_TRUE(emptyFundsDoc["positions"][0].HasMember("long") && emptyFundsDoc["positions"][0]["long"].IsObject());
+    ASSERT_TRUE(emptyFundsDoc["positions"][0]["long"].HasMember("prevol")
+        && emptyFundsDoc["positions"][0]["long"]["prevol"].IsNumber());
+    EXPECT_DOUBLE_EQ(3.0, emptyFundsDoc["positions"][0]["long"]["prevol"].GetDouble());
     trader.release();
 }
 
@@ -267,15 +412,16 @@ TEST_F(R3TraderTest, four_wrappers_stamp_direction_offset_price_and_flag)
     TraderAdapter trader;
     buildReady(trader);
 
-    EXPECT_NE(UINT_MAX, trader.openLong(kStdCode, 7000.0, 1, 0));
+    const uint32_t firstLocalId = trader.openLong(kStdCode, 7000.0, 1, 0);
+    EXPECT_NE(UINT_MAX, firstLocalId);
     EXPECT_EQ(WDT_LONG, api_.last_dir_);
     EXPECT_EQ(WOT_OPEN, api_.last_offset_);
     EXPECT_EQ(WPT_LIMITPRICE, api_.last_pxtype_);
     EXPECT_EQ((int)WOF_NOR, (int)api_.last_flag_);
     EXPECT_STREQ(kRawCode, api_.last_code_.c_str());
     EXPECT_STREQ(kExchg, api_.last_exchg_.c_str());
-    EXPECT_EQ(0u, api_.last_usertag_.find("otp.")) << api_.last_usertag_;
-    EXPECT_NE(api_.last_usertag_.find(".1001"), std::string::npos) << api_.last_usertag_;
+    EXPECT_EQ("otp." + id_ + "." + std::to_string(firstLocalId), api_.last_usertag_);
+    EXPECT_EQ("P11E001", api_.last_entrust_id_);
 
     EXPECT_NE(UINT_MAX, trader.openShort(kStdCode, 0.0, 2, 0));
     EXPECT_EQ(WDT_SHORT, api_.last_dir_);
@@ -295,18 +441,42 @@ TEST_F(R3TraderTest, four_wrappers_stamp_direction_offset_price_and_flag)
     // 提交失败 -> UINT_MAX
     api_.insert_ret_ = -1;
     EXPECT_EQ(UINT_MAX, trader.openLong(kStdCode, 7000.0, 1, 0));
-    EXPECT_EQ(4u, api_.n_insert_);
+    EXPECT_EQ(5u, api_.n_insert_); // FakeTraderApi counts the failed API request too.
     api_.insert_ret_ = 0;
 
     // 按方向批量撤单：只挑卖方活单
-    trader.onRspOrders(r3Array({
-        r3Order(ct_, WDT_LONG, WOT_OPEN, 2, 0, "ORD1", "otp.r3a.2001"),
-        r3Order(ct_, WDT_SHORT, WOT_OPEN, 2, 0, "ORD2", "otp.r3a.2002"),
-        r3DeadOrder(ct_, WDT_LONG, WOT_OPEN, 2, 2, "ORD3", "otp.r3a.2003") }));
+    WTSArray* seededOrders = r3OwnedArray({
+        r3Order(ct_, WDT_LONG, WOT_OPEN, 2, 0, "ORD1", ("otp." + id_ + ".2001").c_str()),
+        r3Order(ct_, WDT_SHORT, WOT_OPEN, 2, 0, "ORD2", ("otp." + id_ + ".2002").c_str()),
+        r3DeadOrder(ct_, WDT_LONG, WOT_OPEN, 2, 2, "ORD3", ("otp." + id_ + ".2003").c_str()) });
+    trader.onRspOrders(seededOrders);
+    seededOrders->release();
     OrderIDs sold = trader.cancel(kStdCode, false);
     EXPECT_EQ(1u, sold.size());                  // 只有那笔卖开
-    OrderIDs all = trader.cancel("", true);
-    EXPECT_GE(all.size(), 1u);                   // 空代码 => 全部买向活单
+    trader.release();
+}
+
+TEST_F(R3TraderTest, cancel_empty_code_cancels_all_buy_orders_without_crashing)
+{
+    TraderAdapter trader;
+    buildReady(trader);
+
+    WTSArray* seededOrders = r3OwnedArray({
+        r3Order(ct_, WDT_LONG, WOT_OPEN, 2, 0, "ORD1", ("otp." + id_ + ".2001").c_str()) });
+    trader.onRspOrders(seededOrders);
+    seededOrders->release();
+
+    // TraderAdapter has an explicit empty-code "all orders" path. Keep the
+    // wrapper contract isolated because extractStdCode currently runs first.
+    EXPECT_EXIT(
+        {
+            OrderIDs cancelled = trader.cancel("", true);
+            if (cancelled.size() != 1u || api_.n_action_ != 1u)
+                std::exit(2);
+            std::exit(0);
+        },
+        ::testing::ExitedWithCode(0), "");
+
     trader.release();
 }
 
@@ -379,11 +549,13 @@ TEST_F(R3TraderTest, buy_skips_open_rule_when_daily_cap_already_consumed)
     t->setPrice(7000.0);
     t->setTradeID("T1");
     t->setRefOrder("ORD9");
-    t->setUserTag("otp.r3a.9001");
+    t->setUserTag(("otp." + id_ + ".9001").c_str());
     t->setTradeDate(20250110);
     t->setTradeTime(93010);
     t->setAmount(7000.0);
-    trader.onRspTrades(r3Array({ t }));
+    WTSArray* trades = r3OwnedArray({ t });
+    trader.onRspTrades(trades);
+    trades->release();
 
     size_t before = api_.n_insert_;
     OrderIDs ids = trader.buy(kStdCode, 7000.0, 3, 0, false);
@@ -405,11 +577,13 @@ TEST_F(R3TraderTest, position_and_order_tables_read_seeded_state)
     EXPECT_DOUBLE_EQ(trader.getPosition(kStdCode, true), 0.0);
     EXPECT_DOUBLE_EQ(trader.getPosition(kStdAu, false), 0.0);
 
-    trader.onRspPosition(r3Array({
+    WTSArray* positions = r3OwnedArray({
         r3Pos(ct_, WDT_LONG, 3, 1, 2, 2),
-        r3Pos(ct_, WDT_SHORT, 1, 0, 0, 0) }));
+        r3Pos(ct_, WDT_SHORT, 1, 0, 0, 0) });
+    trader.onRspPosition(positions);
+    positions->release();
 
-    EXPECT_DOUBLE_EQ(trader.getPosition(kStdCode, false), 6.0);   // 3+2+1+0
+    EXPECT_DOUBLE_EQ(trader.getPosition(kStdCode, false), 4.0);   // long 3+2 less short 1+0
     EXPECT_DOUBLE_EQ(trader.getPosition(kStdCode, true), 3.0);    // 1+2+0+0
 
     size_t n = 0;
@@ -418,21 +592,32 @@ TEST_F(R3TraderTest, position_and_order_tables_read_seeded_state)
         double prevol, double preavail, double newvol, double newavail) {
         (void)stdCode; (void)preavail; (void)newavail;
         ++n;
-        longVol += prevol + newvol;
-        shortVol += isLong ? 0.0 : (prevol + newvol);
+        if (isLong)
+            longVol += prevol + newvol;
+        else
+            shortVol += prevol + newvol;
     });
-    EXPECT_EQ(1u, n);
+    EXPECT_EQ(2u, n);
     EXPECT_DOUBLE_EQ(longVol, 5.0);
     EXPECT_DOUBLE_EQ(shortVol, 1.0);
 
-    trader.onRspOrders(r3Array({
-        r3Order(ct_, WDT_LONG, WOT_OPEN, 2, 0, "ORD1", kTag1001),
-        r3DeadOrder(ct_, WDT_LONG, WOT_CLOSE, 3, 3, "ORD2", "otp.r3a.1002") }));
+    WTSArray* orders = r3OwnedArray({
+        r3Order(ct_, WDT_LONG, WOT_OPEN, 2, 0, "ORD1", ("otp." + id_ + ".1001").c_str()),
+        r3DeadOrder(ct_, WDT_LONG, WOT_CLOSE, 3, 3, "ORD2", ("otp." + id_ + ".1002").c_str()) });
+    trader.onRspOrders(orders);
+    orders->release();
     OrderMap* tab = trader.getOrders(kStdCode);
     ASSERT_NE(nullptr, tab);
-    EXPECT_EQ(1u, tab->size());      // 死单不进表
+    EXPECT_EQ(1u, tab->size());      // 文档要求按标准化代码筛选；保持对当前 raw/std 不匹配的可证伪断言。
     tab->release();
-    EXPECT_NE(nullptr, trader.getOrders(""));
+    OrderMap* rawTab = trader.getOrders(kRawCode);
+    ASSERT_NE(nullptr, rawTab);
+    EXPECT_EQ(1u, rawTab->size());   // 确认活单已入表，定位标准化代码筛选差异。
+    rawTab->release();
+    OrderMap* allTab = trader.getOrders("");
+    EXPECT_NE(nullptr, allTab);
+    if (allTab)
+        allTab->release();
     trader.release();
 }
 

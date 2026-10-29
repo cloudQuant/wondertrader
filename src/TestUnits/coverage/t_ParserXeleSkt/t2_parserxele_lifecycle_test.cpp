@@ -6,15 +6,13 @@
  * 既没有 protected 段也没有可注入的 API 指针，
  * 所以「组播包 → WTSTickData」这段最大的转换逻辑（extract_buffer，约 L360-530）
  * 在不用 #define private public 的前提下**进不去**——已按规则留白并写入 bugs 文件。
- * 本文件覆盖的是 IParserApi 公开面 + init 的地址解析异常路径。
+ * 本文件覆盖的是 IParserApi 公开面 + init 的地址解析失败路径。
  */
 #include <gtest/gtest.h>
 
 #include <cstring>
 #include <string>
 #include <vector>
-
-#include <boost/system/system_error.hpp>
 
 #include "Includes/IBaseDataMgr.h"
 #include "Includes/IParserApi.h"
@@ -138,21 +136,26 @@ TEST_F(T2ParserXeleSktTest, init_builds_endpoints_without_opening_sockets)
     EXPECT_NO_THROW(other.release());
 }
 
-TEST_F(T2ParserXeleSktTest, init_throws_on_unparsable_tcp_host)
+TEST_F(T2ParserXeleSktTest, init_reports_failure_for_unparsable_tcp_host)
 {
     ParserXeleSkt bad;
     WTSVariant* cfg = make_cfg("not-an-ip");
-    // 未捕获的 boost::system::system_error 会穿透插件边界（已记 bug）
-    EXPECT_THROW(bad.init(cfg), boost::system::system_error);
+    bool initialized = true;
+    EXPECT_NO_THROW(initialized = bad.init(cfg));
+    EXPECT_FALSE(initialized);
     EXPECT_FALSE(bad.isConnected());
+    cfg->release();
 }
 
-TEST_F(T2ParserXeleSktTest, init_throws_when_tcp_host_missing)
+TEST_F(T2ParserXeleSktTest, init_reports_failure_when_tcp_host_is_missing)
 {
     ParserXeleSkt bad;
     WTSVariant* cfg = WTSVariant::createObject();
     cfg->append("tcp_port", (int32_t)9001);
-    EXPECT_THROW(bad.init(cfg), boost::system::system_error);
+    bool initialized = true;
+    EXPECT_NO_THROW(initialized = bad.init(cfg));
+    EXPECT_FALSE(initialized);
+    cfg->release();
 }
 
 TEST_F(T2ParserXeleSktTest, register_spi_wires_sink_and_base_datamgr)

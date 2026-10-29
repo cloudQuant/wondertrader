@@ -47,17 +47,10 @@ TEST(l01_timeutils, get_next_minute)
 	EXPECT_EQ(TimeUtils::getNextMinute(1000, 1440), 1000u);
 }
 
-TEST(l01_timeutils, get_next_minute_underflow_returns_wrapped_uint)
+TEST(l01_timeutils, get_next_minute_normalizes_large_negative_offset)
 {
-	// BUG-L01-006：mins 的绝对值大于 1440 时只做一次 +1440，totalMins 仍为负，
-	// 负值被强转成 uint32_t 返回。这里断言的是“实际行为”，期望值见 DISABLED 用例。
-	const uint32_t actual = TimeUtils::getNextMinute(0, -1500);
-	EXPECT_EQ(actual, 4294967196u);
-}
-
-TEST(l01_timeutils, DISABLED_get_next_minute_should_normalize_full_days)
-{
-	// 00:00 往前 1500 分钟 == 往前 60 分钟 == 前一天 23:00
+	// 该 helper 只返回 HHMM，不含日期；偏移按一天循环归一化。
+	// 00:00 回退 1500 分钟等价于回退 60 分钟，即前一天 23:00。
 	EXPECT_EQ(TimeUtils::getNextMinute(0, -1500), 2300u);
 }
 
@@ -71,18 +64,15 @@ TEST(l01_timeutils, get_next_month)
 	EXPECT_EQ(TimeUtils::getNextMonth(202401u, 0), 202401u);
 }
 
-TEST(l01_timeutils, get_next_month_negative_months_is_off_by_one_year)
+TEST(l01_timeutils, get_next_month_normalizes_negative_months)
 {
-	// BUG-L01-007：months<0 时 uAddYear = months/12 截断为 0，uAddMon 被 +12 修正，
-	// 但年份没有回退，结果比正确值大一年。断言的是当前实际行为。
-	EXPECT_EQ(TimeUtils::getNextMonth(202401u, -1), 202412u);
-	EXPECT_EQ(TimeUtils::getNextMonth(202406u, -1), 202505u);
-}
-
-TEST(l01_timeutils, DISABLED_get_next_month_negative_months)
-{
+	// 负偏移按日历月份向前归一化，跨年和超过一年的偏移都要同时调整年月。
 	EXPECT_EQ(TimeUtils::getNextMonth(202401u, -1), 202312u);
 	EXPECT_EQ(TimeUtils::getNextMonth(202406u, -1), 202405u);
+	EXPECT_EQ(TimeUtils::getNextMonth(202401u, -12), 202301u);
+	EXPECT_EQ(TimeUtils::getNextMonth(202401u, -13), 202212u);
+	EXPECT_EQ(TimeUtils::getNextMonth(202406u, -18), 202212u);
+	EXPECT_EQ(TimeUtils::getNextMonth(202406u, -25), 202205u);
 }
 
 TEST(l01_timeutils, min_bar_helpers)
@@ -100,20 +90,16 @@ TEST(l01_timeutils, min_bar_helpers)
 		"min bar time roundtrip");
 }
 
-TEST(l01_timeutils, time_to_min_bar_overflows_after_2032)
+TEST(l01_timeutils, time_to_min_bar_roundtrips_historical_and_future_dates)
 {
-	// BUG-L01-008：(uDate-19900000)*10000 在 uint32 里先算再升宽，
-	// 2032-10 之后的日期会绕回，minBarToDate 再也还原不出原日期。
-	const uint64_t bar = TimeUtils::timeToMinBar(20330101, 930);
-	EXPECT_EQ(bar, 6043634ull);
-	EXPECT_EQ(TimeUtils::minBarToDate(bar), 19900604u);
-}
-
-TEST(l01_timeutils, DISABLED_time_to_min_bar_should_roundtrip_for_2033)
-{
-	const uint64_t bar = TimeUtils::timeToMinBar(20330101, 930);
-	EXPECT_EQ(TimeUtils::minBarToDate(bar), 20330101u);
-	EXPECT_EQ(TimeUtils::minBarToTime(bar), 930u);
+	const uint32_t dates[] = { 20200101u, 20330101u, 20330102u, 20401231u };
+	const uint32_t times[] = { 930u, 1459u, 0u, 2359u };
+	for (std::size_t i = 0; i < sizeof(dates) / sizeof(dates[0]); ++i)
+	{
+		const uint64_t bar = TimeUtils::timeToMinBar(dates[i], times[i]);
+		EXPECT_EQ(TimeUtils::minBarToDate(bar), dates[i]) << "date=" << dates[i];
+		EXPECT_EQ(TimeUtils::minBarToTime(bar), times[i]) << "time=" << times[i];
+	}
 }
 
 // ------------------------------------------------------------------ makeTime / timeToString
@@ -256,8 +242,8 @@ TEST(l01_timeutils, time32_fmt)
 
 TEST(l01_timeutils, time32_fmt_returns_shared_static_buffer)
 {
-	// BUG-L01-009：fmt() 返回函数级 static 缓冲区（非 thread_local），
-	// 不同实例共用同一块内存，多线程/同表达式内两次调用会互相覆盖。
+	// 单线程连续调用观察：不同实例的 fmt() 返回同一块静态缓冲区，后一次调用覆盖前一次内容。
+	// 此用例没有验证并发行为；线程安全与并发调用合同仍未证明。
 	const time_t ts = 1700000000;
 	TimeUtils::Time32 a(ts, 1);
 	TimeUtils::Time32 b(ts + 86400, 2);

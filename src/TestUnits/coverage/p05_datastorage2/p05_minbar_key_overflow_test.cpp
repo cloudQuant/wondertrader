@@ -6,8 +6,8 @@
 // 而所有读侧（WtBtDtReaderAD::read_raw_bars、WtRdmDtReaderAD::readKlineSliceByRange、
 // WtDataReaderAD::read_bars_to_buffer）的右哨兵固定是 LMDBBarKey(exchg, code, 0xffffffff)。
 // 分钟线的 bar.time = (date - 19900000) * 10000 + hhmm（uint64），
-// 这里把它压成 uint32 做键尾。本文件用真实 LMDB 环境把“键尾 ≤ 0xffffffff”
-// 与“键尾 > 0xffffffff 的条目永远读不到”钉住，并验证写入→读回的逐字段一致性。
+// 这里把它压成 uint32 做键尾。本文件用隔离 LMDB 环境手工构造键值并检查键尾截断与
+// 哨兵扫描范围；这不是 WtDataWriterAD 的端到端写入证据。
 #include <gtest/gtest.h>
 
 #include <cstdint>
@@ -70,7 +70,8 @@ protected:
 		return bar;
 	}
 
-	// 复刻 WtDataWriterAD::pipeToM1Bars + 读侧 (lKey=0, rKey=0xffffffff) 的整段语义
+	// 手工按 uint32 键尾构造 LMDB 记录，再检查读侧 (lKey=0, rKey=0xffffffff) 的扫描范围；
+	// 不经过 WtDataWriterAD，不能作为 writer 端到端证据。
 	uint32_t scan_with_sentinel(const char* exchg, const char* code,
 		const std::vector<WTSBarStruct>& seeds, const std::vector<uint64_t>& key_times)
 	{
@@ -118,32 +119,32 @@ TEST_F(P05KeyTailTest, MinBarTimeGrowsMonotonicallyUpTo2032)
 
 TEST_F(P05KeyTailTest, BarsBeyond2033EscapeTheUpperSentinel)
 {
-	// 20330101 的分钟线键时间语义真值 = (20330101-19900000)*10000 + 1000
-	//   = 4,301,011,000 > 0xffffffff
-	// R32 修正（依据 TimeUtils.hpp:337-340）：timeToMinBar 的中间乘法
-	// `(uDate-19900000)*10000` 在 uint32 域内完成才提升 uint64，2033 年起先在这里
-	// 回绕（缺陷登记 BUG-R32-003），所以"真值大于哨兵"必须用测试自己的 uint64 算式
-	// 表达，不能借用 product helper 的返回值。
+	// 公开编码语义：(date-19900000)*10000+hhmm，结果应保留完整 uint64。
+	// 20330101 的真值为 4,301,011,000，超过 uint32；独立提升后再计算，避免复现
+	// BUG-R32-003 中 helper 先在 uint32 域乘法回绕的问题。
 	const uint64_t t_ok_2032 = TimeUtils::timeToMinBar(20321231, 1000);
-	const uint64_t t_true_2033 = 430101ull * 10000ull + 1000ull;
-	const uint64_t t_bad_2033 = TimeUtils::timeToMinBar(20330101, 1000);
-	ASSERT_GT(t_true_2033, 0xffffffffu);
-	// helper 的提前回绕就钉在这里（正确语义应返回 t_true_2033 本身）
-	EXPECT_EQ(t_bad_2033, (uint32_t)t_true_2033);
+	const uint64_t t_true_2033 =
+		(static_cast<uint64_t>(20330101u) - 19900000ull) * 10000ull + 1000ull;
+	const uint64_t t_helper_2033 = TimeUtils::timeToMinBar(20330101, 1000);
+	EXPECT_GT(t_true_2033, 0xffffffffull);
+	// 正确 helper 应返回完整真值。用非致命断言，helper 回绕失败时仍继续验证下方
+	// 独立手工构造的 LMDB uint32 键尾与哨兵格式事实。
+	EXPECT_EQ(t_helper_2033, t_true_2033) << "BUG-R32-003: timeToMinBar must preserve uint64 time";
 
-	// 三根可读 + 一根"2033"的条目的键尾被截断成 t_true_2033 & 0xffffffff
-	// 4,301,011,000 - 2^32 = 6,043,704 → 排序回到 1990 年附近，值本身仍在哨兵内。
+	// 独立的存储格式事实：下面由 scan_with_sentinel 手工 put，键尾被 LMDBBarKey 的
+	// uint32 参数截断。4,301,011,000 - 2^32 = 6,043,704，落在固定右哨兵内；
+	// 此检查没有经过 WtDataWriterAD，不能推断 writer 端到端行为。
+	const uint32_t truncated_tail_2033 = static_cast<uint32_t>(t_true_2033);
+	EXPECT_EQ(truncated_tail_2033, 6043704u);
 	std::vector<WTSBarStruct> seeds;
 	std::vector<uint64_t> keys;
 	seeds.push_back(make_bar(20240102, t_ok_2032, 100.0));	keys.push_back(t_ok_2032);
 	seeds.push_back(make_bar(20240103, t_ok_2032 + 1, 200.0));	keys.push_back(t_ok_2032 + 1);
 	seeds.push_back(make_bar(20330101, t_true_2033, 300.0));	keys.push_back(t_true_2033);
-	// 关键：把 uint64 键尾直接塞进 LMDBBarKey(uint32)（LMDBKeys.h:120-136）会静默回绕
-	EXPECT_NE((uint64_t)(uint32_t)t_true_2033, t_true_2033);
+	EXPECT_NE(static_cast<uint64_t>(truncated_tail_2033), t_true_2033);
 
 	const uint32_t hits = scan_with_sentinel("SHFE", "rb2409", seeds, keys);
-	// 回绕后的键尾 6,043,704 < 0xffffffff，所以这条仍会被扫到 —— 但它的顺序、
-	// 去重（与 lastBarTime 比较）都按"2033 之前的老 bar"处理，属于时间轴错乱。
+	// 三条手工写入的记录都在扫描结果中；这里仅钉住 32 位键尾与哨兵边界行为。
 	EXPECT_EQ(hits, 3u);
 }
 

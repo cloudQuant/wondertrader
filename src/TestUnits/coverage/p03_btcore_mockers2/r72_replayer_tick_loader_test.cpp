@@ -86,11 +86,11 @@ TEST_F(R72ReplayerTickLoader, TickSliceCursorAndEtimeMatrix)
 		rp.register_sink(&sink, "r72_tick_c");
 		ASSERT_TRUE(rp.prepare());
 
-		// etime 晚于末笔：lower_bound 到尾，取最后 count 笔（10、11）
+		// etime 晚于末笔：lower_bound 到尾，按契约应取最后 count 笔（10.5、11）。
 		WTSTickSlice* s = rp.get_tick_slice(kCode, 2, 202001021000ull);
 		ASSERT_NE(nullptr, s);
 		ASSERT_EQ(2u, s->size());
-		EXPECT_DOUBLE_EQ(10.0, s->at(0)->price);
+		EXPECT_DOUBLE_EQ(10.5, s->at(0)->price);
 		EXPECT_DOUBLE_EQ(11.0, s->at(1)->price);
 		s->release();
 	}
@@ -144,10 +144,12 @@ TEST_F(R72ReplayerTickLoader, LoaderBarsAndTicksDriveBarReplay)
 	{
 		bars.emplace_back(r72::make_bar(kDates[i], 1500u, 10.5 + i));
 		std::vector<WTSTickStruct> ticks = day_ticks(kDates[i], 10.5 + i);
-		// 15:00 后再放一笔：getNextTickTime 的游标差一（p07 BUG-P07-001/005）会把
-		// 最后一笔当「没有下一笔」，这样 15:00 仍然是能被看到的下一笔。
-		ticks.emplace_back(r72::make_tick_struct(kCode, kDates[i], 150100000u,
+		// 15:00 边界 tick 让 replayHftDatas 能以 etime 收束；15:01 尾哨兵
+		// 保证 15:00 不是最后一项，避免 P07-001 的末项游标缺陷遮蔽边界 tick。
+		ticks.emplace_back(r72::make_tick_struct(kCode, kDates[i], 150000000u,
 			10.5 + i + 1.5, 10.5 + i + 1.49, 10.5 + i + 1.51));
+		ticks.emplace_back(r72::make_tick_struct(kCode, kDates[i], 150100000u,
+			10.5 + i + 2.5, 10.5 + i + 2.49, 10.5 + i + 2.51));
 		loader.ticks[std::string(kCode) + "#" + std::to_string(kDates[i])] = ticks;
 	}
 	loader.finalBars[kCode] = bars;

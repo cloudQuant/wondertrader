@@ -1,13 +1,8 @@
-// r112 / WtDataReaderAD：tick 增量重载、库句柄缓存命中与第三次取库失败
+// r112 / WtDataReaderAD：tick 增量读取及重复读取的数据正确性
 //
 // 覆盖（src/WtDataStorageAD/WtDataReaderAD.cpp）：
-//  - readTickSlice 的 reload_flag==2 全量 get_lowers :165-182
-//  - reload_flag==1 增量 get_range :147-163
-//  - get_t_db 的命中缓存 :601-602 与第三次被 std::move 掏空后的返回 :143-145
-//  - array_two 足够/不足两条切片路径 :189-205
-//
-// WtLMDB 同一 (exchg,code) 的第 3 次 get_t_db 会拿到被移走的空句柄（R4-BUG-02），
-// 本用例把它作为确定性行为固定下来，不触碰任何写库或线程。
+//  - readTickSlice 的 reload_flag==1 增量读取与 reload_flag==2 全量读取 :147-182
+//  - array_two 切片路径 :189-205
 #include "r100_ad_fixture.h"
 
 namespace r112adr {
@@ -16,14 +11,49 @@ using namespace r100fx;
 
 namespace {
 const uint32_t kDate = 20230103;
+
+vector<uint32_t> tick_action_times(WTSTickSlice* slice)
+{
+	vector<uint32_t> times;
+	if (slice == NULL)
+		return times;
+
+	for (std::size_t block_idx = 0; block_idx < slice->get_block_counts(); ++block_idx)
+	{
+		WTSTickStruct* block = slice->get_block_addr(block_idx);
+		if (block == NULL)
+			continue;
+
+		const uint32_t block_size = slice->get_block_size(block_idx);
+		for (uint32_t tick_idx = 0; tick_idx < block_size; ++tick_idx)
+			times.push_back(block[tick_idx].action_time);
+	}
+	return times;
+}
+
+string tick_slice_layout(WTSTickSlice* slice)
+{
+	if (slice == NULL)
+		return "null slice";
+
+	string layout = "blocks=" + std::to_string(slice->get_block_counts()) + ", sizes=[";
+	for (std::size_t block_idx = 0; block_idx < slice->get_block_counts(); ++block_idx)
+	{
+		if (block_idx > 0)
+			layout += ", ";
+		layout += std::to_string(slice->get_block_size(block_idx));
+	}
+	layout += "]";
+	return layout;
+}
 }
 
 class R112ReaderADTickTest : public R100ADReaderTest
 {
 };
 
-// WtDataReaderAD.cpp: L143-145 / L147-182 / L189-205 / L601-602
-TEST_F(R112ReaderADTickTest, R112ReaderADTickIncrementalAndHandleMove)
+// WtDataReaderAD.cpp: L147-182 / L189-205
+TEST_F(R112ReaderADTickTest, R112ReaderADTickIncrementalAndRepeatedReadPreservesLatestData)
 {
 	add_stock("EXTK", "rb2301");
 
@@ -35,27 +65,34 @@ TEST_F(R112ReaderADTickTest, R112ReaderADTickIncrementalAndHandleMove)
 
 	init_reader();
 
-	// 第一次：容量 0<1 -> reload_flag=2 被随后的 _last_req_time==0 覆盖为增量 reload=1，
-	// 从 0 读到 21:00，容量 1 只保留最后一笔（array_two 直接切片）
-	WTSTickSlice* s1 = _reader->readTickSlice("EXTK.rb2301", 1, 20230103210000000ull);
+	// 首次请求取截至 09:32:30 的最新一笔；fixture 中三笔 tick 都早于该时间。
+	WTSTickSlice* s1 = _reader->readTickSlice("EXTK.rb2301", 1, 20230103093230000ull);
 	ASSERT_TRUE(s1 != NULL);
-	ASSERT_EQ(s1->size(), 1u);
-	EXPECT_EQ(s1->get_block_addr(0)[0].action_time, 93200000u);
+	EXPECT_EQ(s1->size(), 1u);
+	EXPECT_EQ(tick_action_times(s1), (vector<uint32_t>{93200000u}));
 	s1->release();
 
-	// 第二次：容量 1<3 -> reload_flag=2；etime 未前进，不再被增量分支覆盖，
-	// 走全量 get_lowers（get_t_db 命中缓存，move 出有效句柄）
-	WTSTickSlice* s2 = _reader->readTickSlice("EXTK.rb2301", 3, 20230103210000000ull);
+	// 扩大请求容量后全量加载，返回 fixture 中的三笔 tick。
+	WTSTickSlice* s2 = _reader->readTickSlice("EXTK.rb2301", 3, 20230103093230000ull);
 	ASSERT_TRUE(s2 != NULL);
-	ASSERT_EQ(s2->size(), 3u);
-	EXPECT_EQ(s2->get_block_addr(0)[0].action_time, 93000000u);
-	EXPECT_EQ(s2->get_block_addr(0)[2].action_time, 93200000u);
+	const string s2_layout = tick_slice_layout(s2);
+	{
+		SCOPED_TRACE("s2 " + s2_layout);
+		EXPECT_EQ(s2->size(), 3u);
+		EXPECT_EQ(tick_action_times(s2), (vector<uint32_t>{93000000u, 93100000u, 93200000u}));
+	}
 	s2->release();
 
-	// 第三次：get_t_db 的缓存槽已被 move 掏空，返回 NULL
-	WTSTickSlice* s3 = _reader->readTickSlice("EXTK.rb2301", 1, 20230103220000000ull);
-	EXPECT_TRUE(s3 == NULL);
-
+	// 第三次请求时间晚于已有 tick；没有新增 fixture 数据，仍应返回缓存中的最新 tick。
+	// 数据库句柄是否复用不属于此读取结果断言。
+	WTSTickSlice* s3 = _reader->readTickSlice("EXTK.rb2301", 1, 20230103093300000ull);
+	ASSERT_TRUE(s3 != NULL);
+	{
+		SCOPED_TRACE("s2 " + s2_layout + "; s3 " + tick_slice_layout(s3));
+		EXPECT_EQ(s3->size(), 1u);
+		EXPECT_EQ(tick_action_times(s3), (vector<uint32_t>{93200000u}));
+	}
+	s3->release();
 }
 
 } // namespace r112adr

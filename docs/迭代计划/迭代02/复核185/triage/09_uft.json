@@ -1,0 +1,220 @@
+[
+  {
+    "lane": "R11_wtuftcore",
+    "id": "BUG-R11-008",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/ITraderApi.h:127-135",
+      "src/Includes/ITraderApi.h:239-242",
+      "src/TraderATP/TraderATP.cpp:572-580",
+      "src/WtUftCore/TraderAdapter.cpp:1133-1152",
+      "src/WtUftCore/TraderAdapter.cpp:1261-1268",
+      "src/WtUftCore/TraderAdapter.h:98-110",
+      "src/WtUftCore/ITrdNotifySink.h:82-87"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/q04_trader_reply_machine_test.cpp:91-108",
+      "src/TestUnits/coverage/q04_uftcore3/r11_trader_reply_deep_test.cpp:429-440"
+    ],
+    "input_reachability": "真实 ITraderApi 实现可在成功注销后调用 onLogout；TraderATP 的现有生产回调链明确先把 API 状态设为 TS_NOTLOGIN。",
+    "oracle_basis": "onLogout 是注销回报；TraderATP 在该回报前设为未登录。UFT Adapter 对外暴露 AdapterState，且 onRspPosition 以 AS_LOGINED 推进订单查询。sink 的 channel_lost 契约仅写连接断开或异常，不外推到成功注销。",
+    "reason": "UFT TraderAdapter::onLogout() 为空，成功注销后保留 AS_LOGINED/后续就绪状态；迟到持仓回报仍可能按旧登录状态推进查询机。只判状态未复位为产品问题，不判缺少 channel_lost 通知。共享工作区中的 login_result_drives_state_and_position_query 已把期望改为 AS_NOTLOGIN；该断言待产品修复后验收，本轮未运行。",
+    "root_cause": "src/WtUftCore/TraderAdapter.cpp:1149-1152 的注销回调没有把 _state 重置为 AS_NOTLOGIN。",
+    "fix": "在 UFT TraderAdapter::onLogout() 将 _state 设为 AS_NOTLOGIN；不在本项中擅自改变 sink 的注销通知语义。",
+    "acceptance": "用 FakeTraderApi 先回报登录成功，再调用 onLogout，断言 state()==AS_NOTLOGIN；随后注入迟到的持仓响应，断言状态不进入 AS_POSITION_QRYED 且不新增 queryOrders 调用。不要把 on_channel_lost 次数作为成功注销的必需断言。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q04_uftcore3/q04_trader_reply_machine_test.cpp",
+        "case": "q04_trader_reply.login_result_drives_state_and_position_query",
+        "issue": "共享树已断言 logout 后为 AS_NOTLOGIN，但尚未验证迟到的 onRspPosition 不会推进状态并发出 queryOrders。",
+        "change": "在 onLogout 后记录 _api._qOrdCnt，调用 onRspPosition(nullptr)，断言 state 仍为 AS_NOTLOGIN 且 _qOrdCnt 不变。",
+        "target": "CoverageTests_uftcore",
+        "filter": "q04_trader_reply.login_result_drives_state_and_position_query",
+        "expected_result": "登出后状态保持 AS_NOTLOGIN；迟到持仓回报不进入 AS_POSITION_QRYED，也不增加 queryOrders 调用次数。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "主代理完成 onLogout 状态修复和迟到持仓回报断言后，运行指定 CoverageTests_uftcore 用例并保存本轮原始输出。"
+    ]
+  },
+  {
+    "lane": "R175",
+    "id": "BUG-R175-003",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/TraderAdapter.h:98-110",
+      "src/WtUftCore/TraderAdapter.cpp:90-100",
+      "src/WtUftCore/TraderAdapter.cpp:103-106",
+      "src/WtUftCore/TraderAdapter.cpp:183-203",
+      "src/WtUftRunner/WtUftRunner.cpp:313-330",
+      "src/WtLatencyUFT/UftLatencyTool.cpp:134-153",
+      "src/WtLatencyUFT/UftLatencyTool.cpp:295-299",
+      "src/WtLatencyHFT/HftLatencyTool.cpp:223-250",
+      "src/WtLatencyHFT/HftLatencyTool.cpp:470-474",
+      "src/WtCore/TraderAdapter.cpp:209-234"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/r163_uftcore_guards_test.cpp:321-327",
+      "src/TestUnits/coverage/q04_uftcore3/q04_trader_entrust_paths_test.cpp:394-408",
+      "src/TestUnits/coverage/q04_uftcore3/q04_trader_reply_machine_test.cpp:34-45"
+    ],
+    "input_reachability": "正常 WtUftRunner 路径走 TraderAdapter::init() 的插件工厂；initExt 的仓库内正常调用者传入刚创建的非空 TestTrader。nullptr 只来自禁用测试手工注入。",
+    "oracle_basis": "当前 initExt 签名没有声明 api 可空，且 api->init(NULL) 的 NULL 是 init 参数，不是 api 指针。WtCore 实现的判空是防御行为，不构成 UFT 方法接受 nullptr 的兼容承诺。",
+    "reason": "空指针调用会崩溃这一实现事实成立，但候选测试把未声明可空的必需依赖手工置空，并期待返回 false；有效初始化链没有该输入。应撤回该产品主张，保留非空 API 的正常初始化覆盖。",
+    "root_cause": "测试将 initExt 的依赖指针误当作 nullable 参数；disabled 用例在解引用发生前不可能观察到 EXPECT_FALSE 的返回结果。",
+    "fix": "不据此修改产品实现。将两个 disabled 测试中的 nullptr 分支移出产品缺陷证据，或清晰标为 invalid dependency probe；不要启用或增加 null 调用断言。",
+    "acceptance": "有效 FakeTraderApi 经 initExt 初始化并完成 init/run 流程；本项不要求对 nullptr 返回 false。若另行决定该参数可空，先增加明确接口契约，再实现判空并用可运行的返回值测试验收。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q04_uftcore3/r163_uftcore_guards_test.cpp",
+        "case": "R163UftTrader.DISABLED_InitExtWithNullApiCrashesInsteadOfReturningFalse",
+        "issue": "注释声称 NULL api 必须返回 false，但没有此接口契约；调用实际在 EXPECT_FALSE 前空指针解引用。",
+        "change": "移出 BUG-R175-003 产品证据或改标为 invalid dependency probe，不启用该测试，也不要断言当前方法支持 nullptr。",
+        "target": "CoverageTests_uftcore",
+        "filter": "R163UftTrader.DISABLED_InitExtWithNullApiCrashesInsteadOfReturningFalse",
+        "expected_result": "有效 API 的 initExt 路径继续由 enabled 用例覆盖；nullptr 输入不作为当前产品行为验收。"
+      },
+      {
+        "file": "src/TestUnits/coverage/q04_uftcore3/q04_trader_entrust_paths_test.cpp",
+        "case": "DISABLED_q04_trader_entrust.bare_code_and_null_api_class",
+        "issue": "disabled 组合类把裸代码行为与无契约的 nullptr API 前置混在一起。",
+        "change": "从该崩溃类移除 initExt(nullptr, ...) 分支，或另行标注为 invalid dependency；裸代码探针维持独立。",
+        "target": "CoverageTests_uftcore",
+        "filter": "DISABLED_q04_trader_entrust.bare_code_and_null_api_class",
+        "expected_result": "该 disabled 类不再把 nullptr initExt 作为产品缺陷证据，且没有新增危险的 enabled null 调用。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "主代理从两个 disabled 用例移除或重标无契约的 nullptr 依赖探针后，复核对应 diff；本轮未运行测试。"
+    ]
+  },
+  {
+    "lane": "R83",
+    "id": "BUG-R83-002",
+    "decision": "NEEDS_DECISION",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtPorter/WtBtPorter.cpp:1868-1886",
+      "src/WtBtPorter/WtBtPorter.cpp:1900-1917",
+      "src/WtBtPorter/WtBtPorter.cpp:1931-1948",
+      "src/WtBtPorter/WtBtPorter.h:1014-1038",
+      "src/Includes/WTSMarcos.h:77-79",
+      "src/WtBtPorter/WtBtRunner.cpp:509-544",
+      "src/WtBtCore/HftMocker.cpp:432-439"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q06_btporter/r83_btporter_mocker_surface_test.cpp:326-358",
+      "src/TestUnits/coverage/q06_btporter/r113_btporter_wired_orders_test.cpp:203-228",
+      "src/TestUnits/coverage/q06_btporter/r134_btporter_pos_orders_test.cpp:208-224"
+    ],
+    "input_reachability": "hft_buy/hft_sell 是导出的 HFT C ABI，常规策略回调可到达；异步回放允许 callback 在 worker 线程执行。仓库没有说明这些函数能否从多线程并发调用，也没有外部绑定实现可证实是否会跨调用保存返回指针。",
+    "oracle_basis": "头文件只保证返回 WtString 订单 ID，没有线程安全、所有权或指针失效规则；WtString 仅 typedef 为 const char*。因此函数级静态缓冲的数据竞争已证实，是否违背支持的调用契约尚无 oracle。",
+    "reason": "hft_buy/sell 的共享静态 std::string 在同一函数并发调用时存在数据竞争，同线程下一次同函数调用会覆盖先前返回串。已查到的调用测试均在下一次同函数调用前立即读取/复制，没有构成生命周期违约证据；C ABI 文档也未规定并发支持。需要明确线程模型和返回指针寿命后才能定产品责任。",
+    "root_cause": "hft_buy 与 hft_sell 分别使用非 thread_local 的函数级可变静态 std::string；相邻 hft_cancel_all 使用 thread_local，形成实现口径差异。",
+    "fix": "先选定并写明调用线程与返回指针有效期。推荐把 buy/sell 返回缓冲改为 thread_local，并规定指针到同线程下一次相同函数调用前有效；如果需要更长保留，则提供调用方缓冲或明确所有权的新 API。",
+    "acceptance": "根据选定契约增加有效商品/非空订单 ID 的用例。若支持并发，两个线程并发调用并在各自线程的下一次同函数调用前读取结果，ID 不互串且没有共享缓冲数据竞争；若允许跨调用保留，则验证新增所有权/输出缓冲 API 的生命周期。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": {
+      "question": "WtBtPorter 的 hft_buy/hft_sell 是否允许并发调用，返回 WtString 在何时失效？",
+      "options": [
+        "仅允许串行策略回调线程调用，返回指针在同函数下一次调用时失效。",
+        "允许多线程并发调用，返回指针在同线程下一次同函数调用时失效。",
+        "调用方可以跨后续调用保留结果，需要调用方缓冲或显式所有权 API。"
+      ],
+      "recommendation": "选择第二项，保留现有 C ABI 类型，使用 thread_local 缓冲并在头文件说明指针有效期；调用方需长期保存时立即复制。",
+      "impact": "第二项修复跨线程共享缓冲竞争，不改变返回文本和函数签名；第三项需要增加 API/所有权规则，兼容影响较大。当前无外部 SDK 阻塞，缺的是仓库维护者对公开 C ABI 的调用契约选择。"
+    },
+    "external_blocker": null,
+    "local_remaining": [
+      "线程/返回指针契约确定后，再按选定契约添加并运行非空结果与并发或保留期回归。"
+    ]
+  },
+  {
+    "lane": "p06_uftcore2",
+    "id": "BUG-P06-003",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/WtUftEngine.cpp:152-168",
+      "src/WTSTools/WTSBaseDataMgr.cpp:419-467",
+      "src/WTSTools/WTSBaseDataMgr.cpp:469-485",
+      "src/WTSTools/WTSBaseDataMgr.cpp:522-532",
+      "src/Includes/IBaseDataMgr.h:34-50"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p06_uftcore2/p06_uft_engine_test.cpp:43-73",
+      "src/TestUnits/coverage/p06_uftcore2/p06_uft_engine_test.cpp:136-156",
+      "src/TestUnits/coverage/p06_uftcore2/p06_uft_engine_test.cpp:424-447"
+    ],
+    "input_reachability": "当前 WtUftRunner 持有 WTSBaseDataMgr，合约通过配置 loader 装载；该 loader 在缺少商品时跳过合约，并只在已有 commInfo 后设置关联并登记。候选则由测试 fake manager 手工登记未关联对象。",
+    "oracle_basis": "该路径的有效会话查找要求合同具有商品关联；WTSBaseDataMgr 的唯一 loader 路径在进入可查询代码列表前执行 setCommInfo。测试通过直接 create+reg 绕过该生产构建不变量。",
+    "reason": "空 commInfo 会在 get_session_info(stdCode,true) 解引用，但候选只以手工注册的未关联 WTSContractInfo 触发；当前生产 WTSBaseDataMgr loader 不会把此对象加入可查询合同列表。该测试前置不代表正常 runner 产品缺陷。本结论不外推到未定义自定义 IBaseDataMgr 对象不变量的扩展实现。原 invalid commInfo 分支已从 `src/TestUnits/coverage/p06_uftcore2/p06_uft_engine_test.cpp` 的 `p06_uft_engine.DISABLED_uninitialized_and_malformed_stdcode_class` 移除；该 filter 现仅覆盖未初始化引擎和非标准代码两类探针。",
+    "root_cause": "候选夹具通过 P06BaseDataMgr::reg 直接存放 WTSContractInfo::create() 的对象，没有设置商品关联，绕过 WTSBaseDataMgr::loadContracts。",
+    "fix": "不据此修改产品实现。保持移除该分支的测试修正；若要测试正常装载路径，使用 WTSBaseDataMgr 的 sessions/commodities/contracts 文件 fixture 创建完整关联合约。",
+    "acceptance": "有效 WTSBaseDataMgr 加载出的标准合约能按商品 session 查询；当前候选不再以仅手工注册、未挂接商品的对象作为产品崩溃验收。若将来自定义 IBaseDataMgr 返回未关联合约的支持策略，另立契约后验收。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "p06_uftcore2",
+    "id": "BUG-P06-006",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftRunner/WtUftRunner.cpp:69-113",
+      "src/WtUftRunner/WtUftRunner.cpp:195-197",
+      "src/WtUftRunner/WtUftRunner.cpp:253-264",
+      "src/WtUftRunner/WtUftRunner.cpp:351-373",
+      "src/WtUftCore/WtUftEngine.cpp:308-320",
+      "src/WtUftCore/WtUftEngine.cpp:326-351",
+      "src/WtUftCore/WtUftEngine.cpp:152-168",
+      "src/WtUftCore/WtUftTicker.cpp:54-61",
+      "src/WtUftCore/WtUftTicker.cpp:172-187",
+      "src/Includes/IBaseDataMgr.h:34-50"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p06_uftcore2/p06_uft_engine_test.cpp:371-424",
+      "src/TestUnits/coverage/q04_uftcore3/r123_uft_ticker_engine_test.cpp:85-121"
+    ],
+    "input_reachability": "WtUftRunner 接受外部配置，将 env 配置交给有效 WtUftEngine；env.product.session 可引用未加载或拼错的 session。runner 不检查 loadSessions/initEngine 的返回结果并把 config 判成功。",
+    "oracle_basis": "Ticker 必须用有效 WTSSessionInfo 才能计算交易日期和判断交易时段；IBaseDataMgr::getSession 在未知 ID 时可以返回 NULL。对外部 session 配置应在启动策略回调和 ticker 线程前报告受控配置失败。",
+    "reason": "未知 env.product.session 会使 ticker.init() 保存 NULL _s_info 并正常返回；WtUftEngine::run() 随后调用策略 on_init，再在 WtUftRtTicker::run() 用 _s_info->id() 解引用。错误配置在 config 过程未被拒绝，导致正常 runner 启动路径无受控失败。现有 p06 active test 仅覆盖未起线程时的转发，不能证明 session 通过生命周期；R123 正向测试只证明已注册 session 路径。",
+    "root_cause": "WtUftRtTicker::init() 不验证 session lookup 结果，WtUftEngine::run() 不传播 init 失败且在创建 ticker 前调用策略 on_init；WtUftRunner::config() 未验证 product.session 是否可解析。",
+    "fix": "在 WtUftRtTicker::init 或引擎启动预检阶段验证选中的 session；WtUftEngine::run() 返回明确失败状态，runner 在失败时不启动策略、parsers、traders 或 ticker 线程，并将配置错误返回给调用者。",
+    "acceptance": "使用已初始化的 WtUftEngine 和 env.product.session=UNKNOWN_SESSION，断言配置/启动返回失败、无 on_init/on_session_begin、无 ticker 线程、无崩溃；对照注册 session 的正向用例应启动并转发行情。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p06_uftcore2/p06_uft_engine_test.cpp",
+        "case": "p06_uft_engine.unknown_product_session_rejected_before_start (new)",
+        "issue": "现有 init_and_forward_before_thread_start 不调用 run；null_engine_guard_on_forward 使用无效引擎，均未覆盖有效引擎的未知产品 session 正常启动路径。",
+        "change": "增加 env.product.session 指向未注册 ID 的 active 受控失败用例；先验证 session 再允许调用任何策略初始化或启动 ticker；保留 R123 有效 session 正向用例。",
+        "target": "CoverageTests_uftcore",
+        "filter": "p06_uft_engine.unknown_product_session_rejected_before_start",
+        "expected_result": "未知 session 返回可断言的失败状态且无策略初始化/线程启动；有效 session 仍通过正向生命周期。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "未知产品 session 的受控失败修复及回归用例完成后，运行该用例与有效 session 正向对照。"
+    ]
+  }
+]

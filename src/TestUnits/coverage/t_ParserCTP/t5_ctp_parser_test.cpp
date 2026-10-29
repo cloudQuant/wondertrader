@@ -257,8 +257,9 @@ TEST_F(ParserCTPTest, DISABLED_rsp_user_login_last_packet_dereferences_null_api)
 	parser_.OnRspUserLogin(&rsp, NULL, 1, true);
 }
 
-/// OnRspError 里唯一的动作是 IsErrorRspInfo（空实现）→ 什么都不外发
-TEST_F(ParserCTPTest, rsp_error_publishes_nothing_at_all)
+/// 非零错误响应不能被当作行情发布。错误是否需要经日志上报仍需接口契约确认：
+/// IParserSpi 只定义通用日志回调；WTSParserEvent 目前只有连接/登录/注销事件。
+TEST_F(ParserCTPTest, rsp_error_does_not_publish_market_data)
 {
 	CThostFtdcRspInfoField info;
 	memset(&info, 0, sizeof(info));
@@ -266,8 +267,6 @@ TEST_F(ParserCTPTest, rsp_error_publishes_nothing_at_all)
 	strncpy(info.ErrorMsg, "MarketNotInit", sizeof(info.ErrorMsg) - 1);
 
 	parser_.OnRspError(&info, 3, true);
-	EXPECT_TRUE(sink_.events_.empty());
-	EXPECT_TRUE(sink_.logs_.empty());
 	EXPECT_EQ(0u, sink_.n_quote_);
 }
 

@@ -4,7 +4,7 @@
  * 覆盖 src/WtCore/CtaStraBaseCtx.cpp 中 R42 未覆盖的行段：
  *   load_data 的缺省 maxprice/minprice/openbarno、零手明细、零手仓位
  *   update_dyn_profit 的 volume==0 与 max_loss 分支
- *   on_tick 条件单五种算法 + OL/CL/OS/CS/SP/未知动作
+ *   on_tick 条件单五种算法 + OL/CL/OS/CS/SP 五种合法动作；未知枚举不覆盖
  *   on_schedule 第 20 次统计、脏用户数据落盘、条件单落盘、非交易时段取消
  *   on_session_end 零手仓位跳过
  *   do_set_position 的 T+1 冻结、滑点、同仓位早退、无品种早退、平仓/反手
@@ -179,19 +179,20 @@ TEST_F(R71CtaTest, LoadDataOptionalDefaultsAndZeroVolumeQueries)
     EXPECT_NE(rows.find("SHFE.rb.2510"), std::string::npos);
 }
 
-// 覆盖 CtaStraBaseCtx.cpp:825-935 条件单五种算法与五种动作 + 未知动作
+// 覆盖 CtaStraBaseCtx.cpp:825-935 条件单五种算法与五种合法动作；未知枚举不覆盖
 TEST_F(R71CtaTest, TickConditionsCoverAllAlgorithmsAndActions)
 {
     auto ctx = makeCtx("r71_cta_cond");
+    // on_init/load_data 会先用 ACTION_NAMES[action] 写恢复日志；未知 action 在到达 on_tick
+    // default 分支前即越界。未知动作需安全测试接缝或独立的非法持久化输入拒绝契约，本用例不注入。
     const char* json = R"json({
   "positions": [
-    {"code": "SHFE.rb.2510", "volume": 0, "closeprofit": 0, "dynprofit": 0, "lastentertime": 0, "lastexittime": 0},
-    {"code": "SHFE.ag.2512", "volume": -1, "closeprofit": 0, "dynprofit": 0, "lastentertime": 0, "lastexittime": 0},
-    {"code": "SHFE.au.2212", "volume": 5, "closeprofit": 0, "dynprofit": 0, "lastentertime": 0, "lastexittime": 0},
-    {"code": "SHFE.cu.2510", "volume": 1, "closeprofit": 0, "dynprofit": 0, "lastentertime": 0, "lastexittime": 0},
-    {"code": "SHFE.ni.2510", "volume": -3, "closeprofit": 0, "dynprofit": 0, "lastentertime": 0, "lastexittime": 0},
-    {"code": "SHFE.zn.2510", "volume": 0, "closeprofit": 0, "dynprofit": 0, "lastentertime": 0, "lastexittime": 0},
-    {"code": "SHFE.sn.2510", "volume": 0, "closeprofit": 0, "dynprofit": 0, "lastentertime": 0, "lastexittime": 0}
+    {"code": "SHFE.rb.2510", "volume": 0, "closeprofit": 0, "dynprofit": 0, "lastentertime": 0, "lastexittime": 0, "details": []},
+    {"code": "SHFE.ag.2512", "volume": -1, "closeprofit": 0, "dynprofit": 0, "lastentertime": 0, "lastexittime": 0, "details": []},
+    {"code": "SHFE.au.2212", "volume": 5, "closeprofit": 0, "dynprofit": 0, "lastentertime": 0, "lastexittime": 0, "details": []},
+    {"code": "SHFE.cu.2510", "volume": 1, "closeprofit": 0, "dynprofit": 0, "lastentertime": 0, "lastexittime": 0, "details": []},
+    {"code": "SHFE.ni.2510", "volume": -3, "closeprofit": 0, "dynprofit": 0, "lastentertime": 0, "lastexittime": 0, "details": []},
+    {"code": "SHFE.zn.2510", "volume": 0, "closeprofit": 0, "dynprofit": 0, "lastentertime": 0, "lastexittime": 0, "details": []}
   ],
   "conditions": {"settime": 0, "items": {
     "SHFE.rb.2510": [{"usertag":"c1","field":0,"alg":0,"target":3500.0,"qty":2.0,"action":0}],
@@ -199,8 +200,7 @@ TEST_F(R71CtaTest, TickConditionsCoverAllAlgorithmsAndActions)
     "SHFE.au.2212": [{"usertag":"c3","field":0,"alg":3,"target":3300.0,"qty":2.0,"action":1}],
     "SHFE.cu.2510": [{"usertag":"c4","field":0,"alg":2,"target":3600.0,"qty":4.0,"action":2}],
     "SHFE.ni.2510": [{"usertag":"c5","field":0,"alg":4,"target":3700.0,"qty":1.0,"action":3}],
-    "SHFE.zn.2510": [{"usertag":"c6","field":0,"alg":0,"target":3500.0,"qty":7.0,"action":4}],
-    "SHFE.sn.2510": [{"usertag":"c7","field":0,"alg":0,"target":3500.0,"qty":9.0,"action":99}]
+    "SHFE.zn.2510": [{"usertag":"c6","field":0,"alg":0,"target":3500.0,"qty":7.0,"action":4}]
   }}
 })json";
     ASSERT_TRUE(r71::write_file(r71::stra_data_file("r71_cta_cond"), json));
@@ -220,7 +220,6 @@ TEST_F(R71CtaTest, TickConditionsCoverAllAlgorithmsAndActions)
     feed(*ctx, "SHFE.cu.2510", 3599.0); // Smaller + OS, 1 -> -4
     feed(*ctx, "SHFE.ni.2510", 3700.0); // SmallerOrEqual + CS, -3 -> -2
     feed(*ctx, "SHFE.zn.2510", 3500.0); // Equal + SP -> 7
-    feed(*ctx, "SHFE.sn.2510", 3500.0); // 未知动作：命中但不产生信号
 
     snapshot();
     EXPECT_DOUBLE_EQ(targets["SHFE.rb.2510"], 2.0);
@@ -229,7 +228,6 @@ TEST_F(R71CtaTest, TickConditionsCoverAllAlgorithmsAndActions)
     EXPECT_DOUBLE_EQ(targets["SHFE.cu.2510"], -4.0);
     EXPECT_DOUBLE_EQ(targets["SHFE.ni.2510"], -2.0);
     EXPECT_DOUBLE_EQ(targets["SHFE.zn.2510"], 7.0);
-    EXPECT_DOUBLE_EQ(targets["SHFE.sn.2510"], 0.0);
 }
 
 // 覆盖 CtaStraBaseCtx.cpp:1411-1575 do_set_position 的平仓/反手/T+1/滑点/早退，

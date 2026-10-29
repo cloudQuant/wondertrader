@@ -248,7 +248,7 @@ TraderAdapterPtr makeFailedAdapter(TraderAdapterMgr* mgr, FakeDataMgr* bd, const
 /* ------------------------------------------------------------------ */
 /* TraderAdapter.cpp:52-114、158-321 —— mocker 模块的正向回调链          */
 /* ------------------------------------------------------------------ */
-TEST_F(R114DumperFixture, mocker_adapter_forwards_account_trade_order_position_records)
+TEST_F(R114DumperFixture, mocker_adapter_forwards_account_position_trade_and_order_push_records)
 {
 	const std::string mod_dir = find_module_dir("libTraderMocker.dylib");
 	if (mod_dir.empty())
@@ -263,7 +263,7 @@ TEST_F(R114DumperFixture, mocker_adapter_forwards_account_trade_order_position_r
 	FakeDataMgr bd;
 	bd.ct = ct;
 	TraderAdapterMgr mgr;
-	mgr.run();		// 先把 _live_cnt 定为 0（此时表为空，不会启动任何通道）
+	mgr.run();		// 初始化空 manager；此用例中的 adapter 不在 manager 表内。
 	TraderAdapterPtr ad(new TraderAdapter(&mgr));
 	WTSVariant* params = WTSCfgLoader::load_from_content(
 		std::string("{\"module\":\"TraderMocker\",\"mockerid\":114}"), false);
@@ -410,55 +410,9 @@ TEST_F(R114DumperFixture, mocker_adapter_forwards_account_trade_order_position_r
 	ASSERT_EQ(g_cap.orderCalls, 2);
 	EXPECT_STREQ("DEAD-1", g_cap.orderid);
 
-	// :252-274 订单查询：两条已知，末条 isLast=true，收尾 _done=true
-	WTSOrderInfo* ord1 = WTSOrderInfo::create();
-	ord1->setCode("ru2601");
-	ord1->setExchange("SHFE");
-	ord1->setOrderID("Q1");
-	ord1->setDirection(WDT_LONG);
-	ord1->setOffsetType(WOT_OPEN);
-	ord1->setVolume(5);
-	ord1->setVolLeft(1);
-	ord1->setVolTraded(4);
-	ord1->setPrice(15000);
-	ord1->setPriceType(WPT_LIMITPRICE);
-	ord1->setOrderState(WOS_PartTraded_Queuing);
-	ord1->setStateMsg("partial");
-	ord1->setContractInfo(ct);
-	WTSOrderInfo* ord2 = WTSOrderInfo::create();
-	ord2->setCode("ru2601");
-	ord2->setExchange("SHFE");
-	ord2->setOrderID("Q2");
-	ord2->setDirection(WDT_SHORT);
-	ord2->setOffsetType(WOT_CLOSE);
-	ord2->setVolume(3);
-	ord2->setPrice(15100);
-	ord2->setPriceType(WPT_ANYPRICE);
-	ord2->setOrderState(WOS_Canceled);
-	ord2->setStateMsg("canceled");
-	WTSArray* ayOrders = WTSArray::create();
-	ayOrders->append(ord1, true);
-	ayOrders->append(ord2, true);
-	ad->onRspOrders(ayOrders);
-	ASSERT_EQ(g_cap.orderCalls, 4);
-	EXPECT_STREQ("Q2", g_cap.orderid);
-	EXPECT_TRUE(g_cap.lastFlag);
-	EXPECT_TRUE(ad->isDone());
-	ayOrders->release();
-	ord1->release();
-	ord2->release();
-
-	// _done 已真：onRspPosition 不再 queryAccount，只透传
-	WTSPositionItem* afterDone = WTSPositionItem::create("ru2601", "CNY", "SHFE");
-	afterDone->setDirection(WDT_LONG);
-	afterDone->setPrePosition(1);
-	afterDone->setContractInfo(ct);
-	WTSArray* ayAfter = WTSArray::create();
-	ayAfter->append(afterDone, true);
-	ad->onRspPosition(ayAfter);
-	EXPECT_EQ(g_cap.positionCalls, 3);
-	ayAfter->release();
-	afterDone->release();
+	// Do not call onRspOrders on this unregistered adapter: that terminal callback
+	// decrements mgr._live_cnt even though run() initialized it from an empty table.
+	// The manager completion path is covered separately with registered adapters below.
 
 	// 不能在 mocker 上调用 release()：其 registerSpi(NULL) 会解引用空 listener
 	// （BUG-T6 同源）。adapter 析构不释放 api，本用例只验证回调面。

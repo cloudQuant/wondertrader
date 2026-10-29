@@ -240,7 +240,6 @@ protected:
 /* ParserFemas.cpp:141-149、168-193、347-403 — connect→登录→首次订阅 */
 TEST_F(R105FemasTest, injected_api_connect_login_and_do_subscribe)
 {
-	EXPECT_TRUE(parser_.isConnected());
 	EXPECT_TRUE(parser_.connect());
 	EXPECT_EQ(1, api_.init_calls);
 
@@ -268,6 +267,26 @@ TEST_F(R105FemasTest, injected_api_connect_login_and_do_subscribe)
 	EXPECT_TRUE(api_.sub_codes.count("m2401") == 1);
 	EXPECT_TRUE(api_.sub_codes.count("CF405") == 1);
 	EXPECT_TRUE(sink_.hasLog("2 contracts subscribed in total"));
+}
+
+/* IParserApi.h:115-118 — API 对象存在不等于连接已建立，前置/断开回调更新连接状态 */
+TEST_F(R105FemasTest, is_connected_tracks_front_connection_callbacks)
+{
+	EXPECT_FALSE(parser_.isConnected());
+
+	EXPECT_TRUE(parser_.connect());
+	EXPECT_EQ(1, api_.init_calls);
+	EXPECT_FALSE(parser_.isConnected());
+
+	parser_.OnFrontConnected();
+	EXPECT_TRUE(parser_.isConnected());
+
+	parser_.OnFrontDisconnected(1);
+	EXPECT_FALSE(parser_.isConnected());
+
+	EXPECT_TRUE(parser_.disconnect());
+	EXPECT_EQ(1, api_.release_calls);
+	EXPECT_FALSE(parser_.isConnected());
 }
 
 /* ParserFemas.cpp:347-366、368-403、410-445 — 登录/订阅失败与登录后内联下发 */
@@ -389,8 +408,6 @@ TEST_F(R105FemasTest, null_sink_and_no_api_guards)
 	bare.m_sink = NULL;
 	bare.m_pBaseDataMgr = NULL;
 
-	EXPECT_TRUE(bare.connect());
-	EXPECT_TRUE(bare.disconnect());
 	bare.release();
 	bare.OnFrontConnected();
 	bare.OnHeartBeatWarning(3);

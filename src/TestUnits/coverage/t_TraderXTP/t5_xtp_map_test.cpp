@@ -11,7 +11,9 @@
  */
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <cstring>
+#include <limits>
 #include <string>
 
 #include "TraderXTP/TraderXTP.h"
@@ -76,22 +78,48 @@ TEST(xtp_map, vendor_side_to_wts_direction_uses_position_effect)
 	EXPECT_EQ((int)WDT_SHORT, (int)wrapDirectionType(XTP_SIDE_BUY, XTP_POSITION_EFFECT_INIT));   // INIT(0)!=OPEN -> 买被折成空头
 }
 
-TEST(xtp_map, offset_type_two_way_and_closeyesterday_alias)
+// These checks exercise the local mappings against the vendored XTP 2.2.32.2
+// enum declarations; they do not claim that a linked/vendor runtime was tested.
+TEST(xtp_map, wts_offset_maps_to_xtp_position_effect)
 {
 	EXPECT_EQ((int)XTP_POSITION_EFFECT_OPEN, (int)wrapOffsetType(WOT_OPEN));
 	EXPECT_EQ((int)XTP_POSITION_EFFECT_CLOSE, (int)wrapOffsetType(WOT_CLOSE));
 	EXPECT_EQ((int)XTP_POSITION_EFFECT_CLOSETODAY, (int)wrapOffsetType(WOT_CLOSETODAY));
-	// 现状：WOT_CLOSEYESTERDAY 被映射成 CLOSE（XTP 没有平昨枚举）
-	EXPECT_EQ((int)XTP_POSITION_EFFECT_CLOSE, (int)wrapOffsetType(WOT_CLOSEYESTERDAY));
+	// XTP 2.2.32.2 declares a distinct CLOSEYESTERDAY value (5).
+	EXPECT_EQ((int)XTP_POSITION_EFFECT_CLOSEYESTERDAY, (int)wrapOffsetType(WOT_CLOSEYESTERDAY));
 	EXPECT_EQ((int)XTP_POSITION_EFFECT_FORCECLOSE, (int)wrapOffsetType(WOT_FORCECLOSE));
+}
 
+TEST(xtp_map, xtp_position_effect_maps_to_wts_offset)
+{
 	EXPECT_EQ((int)WOT_OPEN, (int)wrapOffsetType(XTP_SIDE_BUY, XTP_POSITION_EFFECT_OPEN));
 	EXPECT_EQ((int)WOT_CLOSE, (int)wrapOffsetType(XTP_SIDE_BUY, XTP_POSITION_EFFECT_CLOSE));
 	EXPECT_EQ((int)WOT_CLOSETODAY, (int)wrapOffsetType(XTP_SIDE_SELL, XTP_POSITION_EFFECT_CLOSETODAY));
+	EXPECT_EQ((int)WOT_CLOSEYESTERDAY, (int)wrapOffsetType(XTP_SIDE_SELL, XTP_POSITION_EFFECT_CLOSEYESTERDAY));
 	EXPECT_EQ((int)WOT_FORCECLOSE, (int)wrapOffsetType(XTP_SIDE_SELL, XTP_POSITION_EFFECT_FORCECLOSE));
-	// 反向表里「XTP_POSITION_EFFECT_CLOSE → WOT_CLOSEYESTERDAY」那条分支是死代码：
-	// 前面的 CLOSE→WOT_CLOSE 已经先返回了（见 bugs）
-	EXPECT_EQ((int)WOT_CLOSE, (int)wrapOffsetType(XTP_SIDE_BUY, XTP_POSITION_EFFECT_CLOSE));
+}
+
+TEST(xtp_map, supported_offsets_round_trip_through_xtp_effects)
+{
+	const WTSOffsetType offsets[] = {
+		WOT_OPEN,
+		WOT_CLOSE,
+		WOT_CLOSETODAY,
+		WOT_CLOSEYESTERDAY,
+	};
+	const XTP_POSITION_EFFECT_TYPE effects[] = {
+		XTP_POSITION_EFFECT_OPEN,
+		XTP_POSITION_EFFECT_CLOSE,
+		XTP_POSITION_EFFECT_CLOSETODAY,
+		XTP_POSITION_EFFECT_CLOSEYESTERDAY,
+	};
+
+	for (std::size_t i = 0; i < sizeof(offsets) / sizeof(offsets[0]); ++i)
+	{
+		const XTP_POSITION_EFFECT_TYPE effect = wrapOffsetType(offsets[i]);
+		EXPECT_EQ((int)effects[i], (int)effect);
+		EXPECT_EQ((int)offsets[i], (int)wrapOffsetType(XTP_SIDE_BUY, effect));
+	}
 }
 
 TEST(xtp_map, price_type_limit_versus_everything_else)
@@ -113,15 +141,20 @@ TEST(xtp_map, order_state_table_and_default)
 	EXPECT_EQ((int)WOS_Nottouched, (int)wrapOrderState(XTP_ORDER_STATUS_UNKNOWN));
 }
 
-/// makeRefID：首次调用按「当前时间-20220101」播种成 100 的倍数，之后严格自增
-TEST(xtp_map, make_ref_id_is_seeded_and_monotonic)
+/// Verify consecutive uint32 IDs without assuming this process has not used the generator yet.
+TEST(xtp_map, make_ref_id_returns_consecutive_uint32_values)
 {
 	const uint32_t a = makeRefID();
 	const uint32_t b = makeRefID();
 	const uint32_t c = makeRefID();
-	EXPECT_EQ(0u, a % 100u);              // 播种值一定是 100 的整数倍
-	EXPECT_EQ(b, a + 1);
-	EXPECT_EQ(c, a + 2);
+	const uint32_t maxId = std::numeric_limits<uint32_t>::max();
+
+	// fetch_add can wrap the stored value to zero after returning UINT32_MAX;
+	// the next call treats zero as the uninitialized sentinel and reseeds it.
+	if (a != maxId)
+		EXPECT_EQ(static_cast<uint32_t>(a + uint32_t{1}), b);
+	if (b != maxId)
+		EXPECT_EQ(static_cast<uint32_t>(b + uint32_t{1}), c);
 }
 
 } // namespace

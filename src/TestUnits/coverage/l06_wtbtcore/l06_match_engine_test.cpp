@@ -302,6 +302,50 @@ TEST_F(MatchEngineTest, zeroVolumeTickSkipsMatching)
 	EXPECT_EQ(1u, sink->entrusts.size());
 }
 
+TEST_F(MatchEngineTest, zeroAskQuantityDoesNotCreateSyntheticBuyFill)
+{
+	setCancelRate(engine, 0.0);
+	const char* code = "SSE.STK.600011";
+
+	// 正常双边盘口用于注册可主动买入的初始 ask。
+	WTSTickData* t1 = makeTick(code, 10.0, 100, 10.0, 100, 10.05, 100);
+	feedTick(code, t1);
+
+	OrderIDs ids = engine.buy(code, 10.05, 30, 20240102093000000ULL);
+	ASSERT_EQ(1u, ids.size());
+
+	// 总成交量非零以进入撮合；对手 ask 数量为零时不得生成成交。
+	WTSTickData* t2 = makeTick(code, 10.0, 100, 10.0, 100, 10.05, 0);
+	feedTick(code, t2);
+
+	EXPECT_TRUE(sink->trades.empty());
+	ASSERT_EQ(1u, sink->orders.size());
+	EXPECT_EQ(ids[0], sink->orders[0].localid);
+	EXPECT_DOUBLE_EQ(30.0, sink->orders[0].leftover);
+}
+
+TEST_F(MatchEngineTest, zeroBidQuantityDoesNotCreateSyntheticSellFill)
+{
+	setCancelRate(engine, 0.0);
+	const char* code = "SSE.STK.600012";
+
+	// 正常双边盘口用于注册可主动卖出的初始 bid。
+	WTSTickData* t1 = makeTick(code, 10.0, 100, 10.0, 100, 10.05, 100);
+	feedTick(code, t1);
+
+	OrderIDs ids = engine.sell(code, 9.95, 30, 20240102093000000ULL);
+	ASSERT_EQ(1u, ids.size());
+
+	// 总成交量非零以进入撮合；对手 bid 数量为零时不得生成成交。
+	WTSTickData* t2 = makeTick(code, 10.0, 100, 10.0, 0, 10.05, 100);
+	feedTick(code, t2);
+
+	EXPECT_TRUE(sink->trades.empty());
+	ASSERT_EQ(1u, sink->orders.size());
+	EXPECT_EQ(ids[0], sink->orders[0].localid);
+	EXPECT_DOUBLE_EQ(30.0, sink->orders[0].leftover);
+}
+
 TEST_F(MatchEngineTest, cancelByIdMarksOrderAndReportsCancellation)
 {
 	setCancelRate(engine, 0.1);

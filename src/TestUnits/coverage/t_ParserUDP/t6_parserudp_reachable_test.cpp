@@ -10,7 +10,7 @@
  *    不绑真实端口、不 `#define private public`），报文体解析（UDP_MSG_PUSHTICK /
  *    0x201~0x203 四条分发）与「长度校验」本轮无法进入 —— 已记入 bugs 文档。
  *  - 本文件断言的都是「不需要 io_context 被驱动」就能观察到的行为：
- *    配置解析（含 make_address 抛出的异常路径）、订阅集合幂等、Spi 替换告警、
+ *    配置解析（无效地址返回初始化失败）、订阅集合幂等、Spi 替换告警、
  *    以及「提交后未 run io_context 时不得有事件回报」这条可证伪的 deferred 契约。
  */
 #include <gtest/gtest.h>
@@ -20,8 +20,6 @@
 #include <set>
 #include <string>
 #include <vector>
-
-#include <boost/system/system_error.hpp>
 
 #include "ParserUDP/ParserUDP.h"
 
@@ -142,25 +140,29 @@ TEST(t6_parserudp_init, explicit_gpsize_and_unicast_host_accepted)
 	EXPECT_FALSE(parser.isConnected());
 }
 
-TEST(t6_parserudp_init, non_numeric_host_throws_uncaught_system_error)
+TEST(t6_parserudp_init, non_numeric_host_reports_initialization_failure)
 {
 	ParserUDP parser;
-	// L107 make_address 对非数字地址抛异常，init 没有 try/catch 也没有返回 false
+	// IParserApi::init 的返回值表示初始化是否成功；错误主机应以 false 报告失败。
 	WTSVariant* cfg = make_cfg("udp-host-not-an-ip", 0, 0, 100);
 	ASSERT_NE(nullptr, cfg);
 
-	EXPECT_THROW(parser.init(cfg), boost::system::system_error);
+	bool initialized = true;
+	EXPECT_NO_THROW(initialized = parser.init(cfg));
+	EXPECT_FALSE(initialized);
 	cfg->release();
 }
 
-TEST(t6_parserudp_init, missing_host_config_throws_instead_of_reporting_failure)
+TEST(t6_parserudp_init, missing_host_reports_initialization_failure)
 {
 	ParserUDP parser;
-	// 空对象：_hots 取默认 ""，make_address("") 抛异常
+	// 空对象没有 host；与无效 host 一样，应通过 bool 返回值报告初始化失败。
 	WTSVariant* cfg = WTSVariant::createObject();
 	ASSERT_NE(nullptr, cfg);
 
-	EXPECT_THROW(parser.init(cfg), boost::system::system_error);
+	bool initialized = true;
+	EXPECT_NO_THROW(initialized = parser.init(cfg));
+	EXPECT_FALSE(initialized);
 	cfg->release();
 }
 

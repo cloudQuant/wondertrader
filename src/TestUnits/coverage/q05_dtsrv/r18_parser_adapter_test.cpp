@@ -59,17 +59,23 @@ void write_file(const fs::path& p, const std::string& content)
 	ofs.close();
 }
 
+struct FakeParserApiStats
+{
+	int initCnt { 0 };
+	int subCnt { 0 };
+	bool initResult { true };
+};
+
 /*
  *	纯内存的 IParserApi 替身：只计数，不碰任何 IO。
  *	_releaseCnt/_connectCnt 等用于证明 ParserAdapter 转发了哪个调用；
- *	_destroyed 指向用例自己持有的 bool，用于证明 ParserAdapter::release()
- *	里 `delete _parser_api`（ParserAdapter.cpp:218）真的执行了。
+ *	_destroyed 指向用例自己持有的 bool，用于在对象被释放后安全判断析构是否已发生。
  */
 class FakeParserApi : public IParserApi
 {
 public:
-	explicit FakeParserApi(bool* destroyed = nullptr, bool initRet = true)
-		: _destroyed(destroyed), _initRet(initRet) {}
+	explicit FakeParserApi(bool* destroyed = nullptr, bool initRet = true, FakeParserApiStats* stats = nullptr)
+		: _destroyed(destroyed), _initRet(initRet), _stats(stats) {}
 
 	virtual ~FakeParserApi() override
 	{
@@ -81,10 +87,18 @@ public:
 	{
 		_initCnt++;
 		_cfgSeen = config;
+		if (_stats != nullptr)
+		{
+			_stats->initCnt++;
+			_stats->initResult = _initRet;
+		}
 		return _initRet;
 	}
 
-	virtual void release() override { _releaseCnt++; }
+	virtual void release() override
+	{
+		_releaseCnt++;
+	}
 
 	virtual bool connect() override { _connectCnt++; return true; }
 
@@ -96,6 +110,8 @@ public:
 	{
 		_subCnt++;
 		_subbed = setCodes;
+		if (_stats != nullptr)
+			_stats->subCnt++;
 	}
 
 	virtual void unsubscribe(const CodeSet& setCodes) override
@@ -112,6 +128,7 @@ public:
 
 	bool*		_destroyed { nullptr };
 	bool		_initRet { true };
+	FakeParserApiStats* _stats { nullptr };
 	bool		_connected { false };
 	int			_initCnt { 0 };
 	int			_spiRegCnt { 0 };
@@ -257,27 +274,26 @@ TEST_F(R18ParserAdapterTest, FreshAdapterIsIdleAndExposesBaseDataMgr)
 	pa.release();
 }
 
-TEST_F(R18ParserAdapterTest, InitExtStillReturnsTrueWhenApiInitFails)
+TEST_F(R18ParserAdapterTest, InitExtReturnsFalseWhenApiInitFails)
 {
 	bool destroyed = false;
-	FakeParserApi* api = new FakeParserApi(&destroyed, false);
+	FakeParserApiStats stats;
+	FakeParserApi* api = new FakeParserApi(&destroyed, false, &stats);
 	ParserAdapter pa(&_bdMgr, &_dm, nullptr);
 
-	// 现状锁定：api->init 失败只打日志（ParserAdapter.cpp:74-77），函数照样 return true（L80）
-	EXPECT_TRUE(pa.initExt("p1", api));
-	EXPECT_EQ(api->_initCnt, 1);
-	EXPECT_EQ(api->_cfgSeen, nullptr);	// L58 传的是 NULL
-	EXPECT_EQ(api->_spiRegCnt, 1);		// L56 registerSpi(this)
-	EXPECT_EQ(api->_spi, static_cast<IParserSpi*>(&pa));
-	EXPECT_EQ(api->_subCnt, 0);			// 失败分支不订阅
-	EXPECT_EQ(api->_subbed.size(), 0u);
-	// id 在 L52 已经写入，早于 api->init
-	EXPECT_STREQ(pa.id(), "p1");
+	// IParserApi::init 返回 false 时，适配器初始化也必须报告失败。
+	EXPECT_FALSE(pa.initExt("p1", api));
+	EXPECT_EQ(stats.initCnt, 1);
+	EXPECT_FALSE(stats.initResult);
+	EXPECT_EQ(stats.subCnt, 0);			// 初始化失败不应订阅
 
 	pa.release();
-	// _remover 只在 init() 的 DLL 路径里赋值（L136），initExt 走不到 → release 走 delete（L218）
-	EXPECT_EQ(api->_releaseCnt, 1);
-	EXPECT_TRUE(destroyed);
+	// 失败后的 API 所有权策略尚未约定：允许 initExt 已清理，也允许仍由调用方清理。
+	if (!destroyed)
+	{
+		api->release();
+		delete api;
+	}
 }
 
 TEST_F(R18ParserAdapterTest, InitExtSubscribesEveryContractFullCode)
@@ -524,15 +540,23 @@ TEST_F(R18ParserAdapterTest, DISABLED_DoubleReleaseDoubleDelete)
 }
 
 /*
- * 触发条件（禁用原因）：ParserAdapterMgr::addAdapter（L339）先 `strlen(id)` 后判空，
- * id==NULL 时 strlen 空指针解引用直接崩（&& 短路只保护了 adapter==NULL 那一路）。
- * 缺陷登记：bugs/R18_wtdtcore.md BUG-R18-004。
+ * 空字符串是 addAdapter 明确检查的拒绝条件；普通唯一 ID 应成功登记。
+ * 这是安全边界与正向路径对照，不推断该 API 接受 NULL ID。
  */
-TEST_F(R18ParserAdapterTest, DISABLED_AddAdapterWithNullIdCrashesInStrlen)
+TEST_F(R18ParserAdapterTest, MgrRejectsEmptyIdAndAcceptsUniqueId)
 {
 	ParserAdapterMgr mgr;
 	ParserAdapterPtr a = std::make_shared<ParserAdapter>(&_bdMgr, &_dm, nullptr);
-	EXPECT_FALSE(mgr.addAdapter(nullptr, a));	// 崩在 L339 的 strlen(NULL)
+
+	EXPECT_FALSE(mgr.addAdapter("", a));
+	EXPECT_EQ(mgr.size(), 0u);
+
+	ASSERT_TRUE(mgr.addAdapter("r18_unique_parser", a));
+	EXPECT_EQ(mgr.size(), 1u);
+	EXPECT_EQ(mgr.getAdapter("r18_unique_parser"), a);
+
+	mgr.release();
+	EXPECT_EQ(mgr.size(), 0u);
 }
 
 }  // namespace

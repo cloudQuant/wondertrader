@@ -7,10 +7,8 @@
  * T1 lane 的 12 条用例全部跑在 m_uTradingDate==0 上，所以 L329/L368/L396 的
  * `trading_date` 落地值从来没被断言过。
  *
- * 深圳分支的可证伪点：`OnTickByTick` 用 vendor 的 exchange_id 拼出查表用的交易所
- * （SSE/SZSE），但写进记录的 `ts.exchg` 取的是**品种主档**的 getExchg()——
- * 两条链路的来源不同，所以夹具故意让 vendor 侧是 SZSE、主档侧是 SSE，
- * 任何一个改动这两处的实现都会把这条断言打红。
+ * 深圳分支按 vendor exchange_id 查 (code, exchg) 合约；常规 SZ 用例使用 SZSE 主档。
+ * 另有一个独立跨市场控制，验证不匹配的 SSE 主档不会被假管理器错误返回。
  */
 #include <gtest/gtest.h>
 
@@ -50,11 +48,11 @@ namespace
 
 /* ==================== OnTickByTick：深圳分支（0% 行） ==================== */
 
-TEST(XtpData27, tickbytick_szentrust_looks_up_szse_but_keeps_the_master_exchange)
+TEST(XtpData27, tickbytick_szentrust_uses_matching_szse_contract)
 {
 	FakeSink sink;
 	FakeBdMgr bd;
-	FixtureContract fc("rb", "SSE", "000001");		// 主档挂在 SSE，vendor 报文却是深圳
+	FixtureContract fc("rb", "SZSE", "000001");		// 主档与 vendor 深圳交易所匹配
 	bd.contract = fc.ct;
 	sink.bdMgr = &bd;				// 必须在 registerSpi 之前接好：L694-695 只在这里取一次
 	ParserXTP parser;
@@ -65,8 +63,8 @@ TEST(XtpData27, tickbytick_szentrust_looks_up_szse_but_keeps_the_master_exchange
 	tbt.entrust.seq = 445566;
 	tbt.entrust.price = 10.55;
 	tbt.entrust.qty = 700;
-	tbt.entrust.side = 'S';
-	tbt.entrust.ord_type = 'D';
+	tbt.entrust.side = '2';							// XTP 深圳卖方向，不是上交所的 'S'
+	tbt.entrust.ord_type = '2';					// XTP 深圳限价类型，不是上交所的 'D'
 
 	parser.OnTickByTick(&tbt);
 
@@ -74,16 +72,41 @@ TEST(XtpData27, tickbytick_szentrust_looks_up_szse_but_keeps_the_master_exchange
 	EXPECT_EQ("000001", bd.lastCode);
 	EXPECT_EQ("SZSE", bd.lastExchg);
 	EXPECT_EQ(1u, bd.getContractCalls);
-	/* 记录里的 exchg 来自品种主档，不是 vendor 交易所 → 与查询用的不是同一个来源 */
 	ASSERT_EQ(1u, sink.ordDtlCalls);
-	EXPECT_STREQ("SSE", sink.lastOrdDtl.exchg);
+	EXPECT_STREQ("SZSE", sink.lastOrdDtl.exchg);
 	EXPECT_EQ(20260105u, sink.lastOrdDtl.action_date);
 	EXPECT_EQ(93000123u, sink.lastOrdDtl.action_time);
 	EXPECT_EQ(445566u, sink.lastOrdDtl.index);
 	EXPECT_DOUBLE_EQ(10.55, sink.lastOrdDtl.price);
 	EXPECT_EQ(700u, sink.lastOrdDtl.volume);
 	EXPECT_EQ(BDT_Sell, sink.lastOrdDtl.side);
-	EXPECT_EQ(ODT_Delete, sink.lastOrdDtl.otype);
+	EXPECT_EQ(ODT_LimitPrice, sink.lastOrdDtl.otype);
+	EXPECT_EQ(0u, sink.transCalls);
+	parser.registerSpi(nullptr);
+}
+
+TEST(XtpData27, tickbytick_szentrust_with_mismatched_master_exchange_is_not_dispatched)
+{
+	FakeSink sink;
+	FakeBdMgr bd;
+	FixtureContract fc("rb", "SSE", "000001");		// 同代码但主档交易所不匹配 vendor 的 SZ
+	bd.contract = fc.ct;
+	sink.bdMgr = &bd;
+	ParserXTP parser;
+	parser.registerSpi(&sink);
+
+	XTPTBT tbt = makeTbt(XTP_EXCHANGE_SZ, "000001", kDataTime, XTP_TBT_ENTRUST);
+	tbt.entrust.side = '2';
+	tbt.entrust.ord_type = '2';
+	parser.OnTickByTick(&tbt);
+
+	EXPECT_EQ("000001", bd.lastCode);
+	EXPECT_EQ("SZSE", bd.lastExchg);
+	EXPECT_EQ(1u, bd.getContractCalls);
+	ASSERT_EQ(1u, sink.logs.size());
+	EXPECT_EQ(LL_ERROR, sink.logs[0].first);
+	EXPECT_EQ("[ParserXTP] Instrument SZSE.000001 not exists...", sink.logs[0].second);
+	EXPECT_EQ(0u, sink.ordDtlCalls);
 	EXPECT_EQ(0u, sink.transCalls);
 	parser.registerSpi(nullptr);
 }
@@ -119,8 +142,8 @@ TEST(XtpData27, tickbytick_sztrade_cancel_branch_marks_szse_master_exchange)
 	EXPECT_EQ(300u, sink.lastTrans.volume);
 	EXPECT_EQ(91u, sink.lastTrans.bidorder);
 	EXPECT_EQ(92u, sink.lastTrans.askorder);
-	/* 成交方向直接抄 trade_flag 强转（L271），'4' 既不是 'B' 也不是 'S' → 记录里是脏值 */
-	EXPECT_EQ(static_cast<WTSBSDirectType>('4'), sink.lastTrans.side);
+	/* SZ trade_flag='4' 表示撤单，不携带主动买卖方向；WTS 方向应保持未知。 */
+	EXPECT_EQ(BDT_Unknown, sink.lastTrans.side);
 	EXPECT_EQ(0u, sink.ordDtlCalls);
 	parser.registerSpi(nullptr);
 }
@@ -145,7 +168,7 @@ TEST(XtpData27, tickbytick_szse_unknown_contract_logs_the_szse_key)
 	parser.registerSpi(nullptr);
 }
 
-TEST(XtpData27, tickbytick_szentrust_side_digit_falls_outside_the_bsdirect_enum)
+TEST(XtpData27, tickbytick_szentrust_sdk_buy_code_maps_to_bdt_buy)
 {
 	FakeSink sink;
 	FakeBdMgr bd;
@@ -155,24 +178,20 @@ TEST(XtpData27, tickbytick_szentrust_side_digit_falls_outside_the_bsdirect_enum)
 	ParserXTP parser;
 	parser.registerSpi(&sink);
 
-	/* 深证逐笔委托 side 用 '1'/'2' 表示买/卖（xquote_api_struct.h:335 注释），
-	 * 而 WTSBSDirectType 是 'B'/'S'/'G'/'F' —— 强转后落到枚举外的值 */
+	/* 本地 XTP SDK 约定 SZ side='1' 为买，输出契约是 WTS 的 BDT_Buy。 */
 	XTPTBT tbt = makeTbt(XTP_EXCHANGE_SZ, "000001", kDataTime, XTP_TBT_ENTRUST);
 	tbt.entrust.side = '1';
 	tbt.entrust.ord_type = '2';		// 深证的 ord_type 是「限价」，不是增删
 	parser.OnTickByTick(&tbt);
 
 	ASSERT_EQ(1u, sink.ordDtlCalls);
-	EXPECT_EQ(static_cast<WTSBSDirectType>('1'), sink.lastOrdDtl.side);
-	EXPECT_NE(BDT_Buy, sink.lastOrdDtl.side);
-	EXPECT_NE(BDT_Sell, sink.lastOrdDtl.side);
-	EXPECT_NE(BDT_Unknown, sink.lastOrdDtl.side);
+	EXPECT_EQ(BDT_Buy, sink.lastOrdDtl.side);
 	/* ord_type 这一路反倒是通的：ODT_LimitPrice 就定义成 '2' */
 	EXPECT_EQ(ODT_LimitPrice, sink.lastOrdDtl.otype);
 	parser.registerSpi(nullptr);
 }
 
-TEST(XtpData27, tickbytick_sztrade_match_flag_collides_with_the_lend_direction)
+TEST(XtpData27, tickbytick_sztrade_match_flag_does_not_supply_a_direction)
 {
 	FakeSink sink;
 	FakeBdMgr bd;
@@ -182,8 +201,8 @@ TEST(XtpData27, tickbytick_sztrade_match_flag_collides_with_the_lend_direction)
 	ParserXTP parser;
 	parser.registerSpi(&sink);
 
-	/* 深证成交标识 'F'=成交 / '4'=撤单（xquote_api_struct.h:361-363 注释）。
-	 * ttype 认对了，但 side 抄同一个字节 → 'F' 撞上 BDT_Lend(='F' 出借) */
+	/* 本地 XTP SDK 约定 SZ trade_flag='F' 表示成交，不携带主动买卖方向。
+	 * WTS 记录应使用 BDT_Unknown；买卖方向没有从这条报文获得。 */
 	XTPTBT tbt = makeTbt(XTP_EXCHANGE_SZ, "000002", kDataTime, XTP_TBT_TRADE);
 	tbt.trade.trade_flag = 'F';
 	tbt.trade.qty = 500;
@@ -191,29 +210,17 @@ TEST(XtpData27, tickbytick_sztrade_match_flag_collides_with_the_lend_direction)
 
 	ASSERT_EQ(1u, sink.transCalls);
 	EXPECT_EQ(TT_Match, sink.lastTrans.ttype);
-	EXPECT_EQ(BDT_Lend, sink.lastTrans.side);
+	EXPECT_EQ(BDT_Unknown, sink.lastTrans.side);
 	parser.registerSpi(nullptr);
 }
 
-TEST(XtpData27, tickbytick_state_type_is_dropped_by_both_branches)
+TEST(XtpData27, DISABLED_state_type_support_scope_is_not_confirmed)
 {
-	FakeSink sink;
-	FakeBdMgr bd;
-	FixtureContract fc("rb", "SSE", "600000");
-	bd.contract = fc.ct;
-	sink.bdMgr = &bd;				// 必须在 registerSpi 之前接好：L694-695 只在这里取一次
-	ParserXTP parser;
-	parser.registerSpi(&sink);
-
-	/* XTP_TBT_STATE(=3) 是 2.2.32 新增的上海新债券状态订单，两个 if 都不进 → 静默丢弃 */
-	XTPTBT tbt = makeTbt(XTP_EXCHANGE_SH, "600000", kDataTime, XTP_TBT_STATE);
-	parser.OnTickByTick(&tbt);
-
-	EXPECT_EQ(1u, bd.getContractCalls);	// 合约查到了，但数据没落地
-	EXPECT_EQ(0u, sink.ordDtlCalls);
-	EXPECT_EQ(0u, sink.transCalls);
-	EXPECT_TRUE(sink.logs.empty());
-	parser.registerSpi(nullptr);
+	/* XTP_TBT_STATE(=3) 是 SDK 中存在的上海新债券状态订单，但现有产品资料未确认
+	 * ParserXTP 是否必须支持此类数据，也未确定通用 WTS 记录如何表达。确定能力契约
+	 * 后再补对应的正向或不支持行为测试；在此之前不能用当前静默丢弃行为作为通过标准。
+	 */
+	GTEST_SKIP() << "ParserXTP XTP_TBT_STATE support contract is not confirmed";
 }
 
 TEST(XtpData27, tickbytick_trading_date_comes_from_the_message_not_the_login)

@@ -1,0 +1,26 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = P04ReplayerConfigTest.initWithoutBasefilesReportsFailure
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from P04ReplayerConfigTest
+[ RUN      ] P04ReplayerConfigTest.initWithoutBasefilesReportsFailure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:420: Failure
+Death test: { struct rlimit noCoreDump{}; if (::setrlimit(4, &noCoreDump) != 0) std::_Exit(2); try { WTSVariant* cfg = base_cfg(_workdir); const char cfgReady[] = "P04_CFG_READY\n"; (void)::write(2, cfgReady, sizeof(cfgReady) - 1); HisDataReplayer* replayer = new HisDataReplayer(); const char replayerReady[] = "P04_REPLAYER_READY\n"; (void)::write(2, replayerReady, sizeof(replayerReady) - 1); const char initBegin[] = "P04_INIT_BEGIN\n"; (void)::write(2, initBegin, sizeof(initBegin) - 1); const bool initialized = replayer->init(cfg); std::_Exit(initialized ? 1 : 0); } catch (...) { std::_Exit(3); } }
+    Result: died but not with expected exit code:
+            Terminated by signal 11
+Actual msg:
+[  DEATH   ] P04_CFG_READY
+[  DEATH   ] P04_REPLAYER_READY
+[  DEATH   ] P04_INIT_BEGIN
+[  DEATH   ] 
+
+[  FAILED  ] P04ReplayerConfigTest.initWithoutBasefilesReportsFailure (58 ms)
+[----------] 1 test from P04ReplayerConfigTest (58 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (58 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] P04ReplayerConfigTest.initWithoutBasefilesReportsFailure
+
+ 1 FAILED TEST

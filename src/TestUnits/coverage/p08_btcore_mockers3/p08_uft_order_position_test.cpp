@@ -207,7 +207,7 @@ TEST_F(P08UftOrderPosition, CancelShortOpenReleasesFrozenAvail)
 	EXPECT_TRUE(mocker._orders.empty());
 }
 
-// stra_cancel_all 遍历匹配合约并返回（当前实现恒返回空容器，见 bugs）
+// stra_cancel_all 返回匹配合约的订单 ID，并将实际撤单排队处理。
 TEST_F(P08UftOrderPosition, CancelAllScansMatchingCodeOnly)
 {
 	UftMocker mocker(&_rp, "p08_cancelall");
@@ -216,11 +216,17 @@ TEST_F(P08UftOrderPosition, CancelAllScansMatchingCodeOnly)
 	ASSERT_NE(0u, a);
 	ASSERT_NE(0u, b);
 	ASSERT_EQ(2u, mocker._orders.size());
+	EXPECT_EQ(1u, mocker._orders.count(a));
+	EXPECT_EQ(1u, mocker._orders.count(b));
 
 	auto ids = mocker.stra_cancel_all(kFut);
-	EXPECT_TRUE(ids.empty());
-	// 撤单任务尚未执行，两笔订单仍在册
+	EXPECT_EQ(1u, ids.size());
+	if (!ids.empty())
+		EXPECT_EQ(a, ids[0]);
+	// 撤单仍是异步任务：目标订单要等任务处理后才从册中移除。
 	EXPECT_EQ(2u, mocker._orders.size());
+	EXPECT_EQ(1u, mocker._orders.count(a));
+	EXPECT_EQ(1u, mocker._orders.count(b));
 	mocker.procTask();
 	EXPECT_EQ(0u, mocker._orders.count(a)) << "目标合约的订单应被撤掉";
 	EXPECT_EQ(1u, mocker._orders.count(b)) << "其它合约订单不受影响";
@@ -347,9 +353,8 @@ TEST_F(P08UftOrderPosition, CloseTodayBranchScalesDynProfit)
 	EXPECT_DOUBLE_EQ(0.0, lItem._dynprofit);
 	// 开仓 4.0 + 平今 3.0*4 = 16.0
 	EXPECT_DOUBLE_EQ(16.0, mocker._fund_info._total_fees);
-	// 当前实现 erase(sit, eit) 在单一明细上是空区间，0 量明细会残留
-	ASSERT_EQ(1u, lItem._details.size());
-	EXPECT_DOUBLE_EQ(0.0, lItem._details[0]._volume);
+	// 全平后已无持仓明细；不保留零量条目。
+	EXPECT_TRUE(lItem._details.empty());
 }
 
 // 空头持仓盈亏方向取反

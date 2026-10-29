@@ -32,6 +32,8 @@
 #include <vector>
 #include <unistd.h>
 
+#include <rapidjson/document.h>
+
 #include <WtBtCore/CtaMocker.h>
 #include <WtBtCore/HisDataReplayer.h>
 #include <WtBtCore/WtHelper.h>
@@ -342,7 +344,8 @@ TEST_F(Q02CtaDumpTest, strategyDumpRoundTripsIntoSecondMocker)
 	const std::filesystem::path dumpFile = _out / kStraName / fmtutil::format("{}.json", kStraName);
 	ASSERT_TRUE(std::filesystem::exists(dumpFile));
 
-	const std::string json = squeeze(read_file(dumpFile));
+	const std::string rawJson = read_file(dumpFile);
+	const std::string json = squeeze(rawJson);
 	// fund 段三个可恢复字段
 	EXPECT_NE(std::string::npos, json.find("\"total_profit\":100"));
 	EXPECT_NE(std::string::npos, json.find("\"total_dynprofit\":20"));
@@ -354,8 +357,27 @@ TEST_F(Q02CtaDumpTest, strategyDumpRoundTripsIntoSecondMocker)
 	EXPECT_NE(std::string::npos, json.find("\"lastexittime\":20200106093100000"));
 	EXPECT_NE(std::string::npos, json.find("\"signals\":{\"SSE.STK.600001\""));
 	EXPECT_NE(std::string::npos, json.find("\"usertag\":\"sigA\""));
-	EXPECT_NE(std::string::npos, json.find("\"conditions\":{\"items\":{\"SSE.STK.600002\""));
-	EXPECT_NE(std::string::npos, json.find("\"opentag\":\"cond1\""));
+	rapidjson::Document dump;
+	dump.Parse(rawJson.c_str());
+	ASSERT_FALSE(dump.HasParseError());
+	ASSERT_TRUE(dump.IsObject());
+	auto conditions = dump.FindMember("conditions");
+	ASSERT_NE(dump.MemberEnd(), conditions);
+	ASSERT_TRUE(conditions->value.IsObject());
+	auto items = conditions->value.FindMember("items");
+	ASSERT_NE(conditions->value.MemberEnd(), items);
+	ASSERT_TRUE(items->value.IsObject());
+	auto codeItems = items->value.FindMember("SSE.STK.600002");
+	ASSERT_NE(items->value.MemberEnd(), codeItems);
+	ASSERT_TRUE(codeItems->value.IsArray());
+	ASSERT_GE(codeItems->value.Size(), 1u);
+	const rapidjson::Value& condition = codeItems->value[0];
+	ASSERT_TRUE(condition.IsObject());
+	ASSERT_TRUE(conditions->value.HasMember("settime"));
+	auto usertag = condition.FindMember("usertag");
+	ASSERT_NE(condition.MemberEnd(), usertag);
+	ASSERT_TRUE(usertag->value.IsString());
+	EXPECT_STREQ("cond1", usertag->value.GetString());
 	EXPECT_NE(std::string::npos, json.find("\"target\":12.34"));
 
 	CtaMocker second(NULL, kStraName);

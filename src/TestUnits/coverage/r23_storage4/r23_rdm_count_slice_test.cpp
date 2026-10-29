@@ -2,8 +2,8 @@
 //
 // 覆盖对象（src/WtDataStorage/WtRdmDtReader.cpp，q03 明确跳过、R1 未做，本文件补上）：
 //  - readTickSliceByCount  :2395-2605  RT 块优先取尾 + 逐日回退拼 his/ticks/<exchg>/<date>/<code>.dsb、
-//                                      缺文件累计 missingCnt 到 30 天停止、长度校验失败、
-//                                      尺寸校验失败后 _his_tick_map 留空条目、count==0、etime 边界
+//                                      缺文件累计 missingCnt 到 30 天停止、坏文件修复后的重新读取、
+//                                      count==0、etime 边界
 //  - readKlineSliceByCount :2219-2393  etime==0 → 203012312359、KP_DAY 无 RT 块、
 //                                      indexBarFromCacheByCount 尾窗、his+rt 双块拼接
 //  - indexBarFromCacheByCount :1688-1727 经公开入口驱动（eit==end 收敛 / curCnt=min 截断）
@@ -12,9 +12,15 @@
 // 手法沿用 q03/R1：WtRdmDtReader::_base_dir 是 private 且只有 init(cfg!=NULL) 才赋值
 // （那条路径起 5 秒轮询线程、析构 join），故保持空串 → 生产拼出的路径退化为相对路径，
 // 由 q03::Sandbox 把 CWD 切到 temp 目录。**没有访问权限宏**。
-// 注意 q03::BaseDataMgr::getCommodity 恒返回非空，所以 :2401 那句无条件解引用不会被本文件触发
-// （见 bugs/R23_storage.md BUG-R23-003）。
+// 常规用例使用 q03::BaseDataMgr（SSE 路径不检查 product），因此不能覆盖按真实
+// "exchg.product" 查表时 :2401 把合约代码当 product 的问题；严格替身见文件末尾。
 #include "../q03_storage3/q03_storage3_fixture.h"
+
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <sys/resource.h>
+#include <gtest/internal/gtest-port.h>
 
 #include "WtDataStorage/WtRdmDtReader.h"
 
@@ -177,7 +183,7 @@ TEST_F(R23RdmCountTest, CountZeroReturnsEmptySliceWithoutTouchingFiles)
 	slice->release();
 }
 
-TEST_F(R23RdmCountTest, HisWindowBoundaryDropsTickExactlyAtEtime)
+TEST_F(R23RdmCountTest, HisWindowBoundaryKeepsTickExactlyAtEtime)
 {
 	// etime 落在 20240108（< curTDate）→ hasToday 为假，直接走 his 逐日回退
 	const vector<WTSTickStruct> d08 = day_ticks(20240108, 100);
@@ -185,7 +191,7 @@ TEST_F(R23RdmCountTest, HisWindowBoundaryDropsTickExactlyAtEtime)
 	ASSERT_TRUE(write_his_tick_file(20240108, d08));
 	ASSERT_TRUE(write_his_tick_file(20240107, d07));
 
-	// 边界正好压在 14:31 那条上：his 分支判的是 `>=`（:2585）→ 边界那条被退掉
+	// 截止 14:31，应返回当日 14:30 和 14:31，不回补前一日数据。
 	WTSTickSlice* slice = _reader.readTickSliceByCount("SSE.STK.600000", 2, 20240108143100000ull);
 	ASSERT_TRUE(slice != NULL);
 	EXPECT_EQ(slice->size(), 2u);
@@ -193,11 +199,10 @@ TEST_F(R23RdmCountTest, HisWindowBoundaryDropsTickExactlyAtEtime)
 	const WTSTickStruct* last = slice->at(-1);
 	ASSERT_TRUE(first != NULL);
 	ASSERT_TRUE(last != NULL);
-	// 20240108 只拿到 14:30 一条，缺口由 20240107 的尾条前补
+	EXPECT_EQ(first->action_date, 20240108u);
+	EXPECT_EQ(first->action_time, 143000000u);
 	EXPECT_EQ(last->action_date, 20240108u);
-	EXPECT_EQ(last->action_time, 143000000u);
-	EXPECT_EQ(first->action_date, 20240107u);
-	EXPECT_EQ(first->action_time, 143200000u);
+	EXPECT_EQ(last->action_time, 143100000u);
 	slice->release();
 }
 
@@ -229,7 +234,7 @@ TEST_F(R23RdmCountTest, RtWindowBoundaryKeepsTickExactlyAtEtime)
 	whole->release();
 }
 
-TEST_F(R23RdmCountTest, CountSizeCheckFailureLeavesEmptyEntryForever)
+TEST_F(R23RdmCountTest, CountSizeCheckFailureCanRecoverAfterFileRepair)
 {
 	// 只有 8 字节头 → 小于 sizeof(HisTickBlock) → :2538 长度校验失败
 	const string bad = his_tick_file(20240108);
@@ -252,13 +257,32 @@ TEST_F(R23RdmCountTest, CountSizeCheckFailureLeavesEmptyEntryForever)
 	EXPECT_NE(_sink.last_log().find("Sizechecking of his tick data file"), string::npos);
 	s1->release();
 
-	// 第二次同样请求：_his_tick_map 里那条 key 还在，但 _block 为空 → 直接跳过，连日志都不再打
+	// 修复文件后同一 reader 应重新读取该日，而不是被首次失败留下的缓存条目永久挡住。
+	const vector<WTSTickStruct> repaired = day_ticks(20240108, 100);
+	ASSERT_TRUE(write_his_tick_file(20240108, repaired));
 	const uint32_t err_before = _sink.count_of(LL_ERROR);
 	WTSTickSlice* s2 = _reader.readTickSliceByCount("SSE.STK.600000", 3, 20240110150000000ull);
 	ASSERT_TRUE(s2 != NULL);
 	EXPECT_EQ(s2->size(), 3u);
+	EXPECT_EQ(s2->get_block_counts(), 1u);
+	const WTSTickStruct* first = s2->at(0);
+	const WTSTickStruct* last = s2->at(-1);
+	EXPECT_TRUE(first != NULL);
+	EXPECT_TRUE(last != NULL);
+	if (first != NULL)
+	{
+		EXPECT_EQ(first->action_date, 20240108u);
+		EXPECT_EQ(first->action_time, 143000000u);
+		EXPECT_DOUBLE_EQ(first->price, 130.0);
+	}
+	if (last != NULL)
+	{
+		EXPECT_EQ(last->action_date, 20240108u);
+		EXPECT_EQ(last->action_time, 143200000u);
+		EXPECT_DOUBLE_EQ(last->price, 132.0);
+	}
 	EXPECT_EQ(_sink.count_of(LL_ERROR), err_before)
-		<< "坏文件条目未被清掉：缓存里留下一个空 _block，该交易日此后永久跳过（见 BUG-R23-004）";
+		<< "有效修复文件不应继续触发尺寸校验错误";
 	s2->release();
 }
 
@@ -362,50 +386,47 @@ TEST_F(R23RdmCountTest, KlineCountSplicesHisTailWithRtMin1Block)
 	only_rt->release();
 }
 
-TEST_F(R23RdmCountTest, KlineCountWithNoBarsAnywhereReturnsPhantomSlice)
+TEST_F(R23RdmCountTest, KlineCountWithNoBarsAnywhereReturnsEmptyResult)
 {
-	// 既无 his 文件也无 RT 块 → indexBarFromCacheByCount 在 `_bars.empty()` 处 return NULL，
-	// 但它**没有把出参 count 归零**（WtRdmDtReader.cpp:1695-1696），于是
-	// readKlineSliceByCount 仍然用「请求条数」去 create 了一个没有任何块的切片（:2384-2389）
+	// 无历史、无实时 K 线时，契约允许返回 NULL 或 size()==0 的空切片；
+	// 任何非空返回值都应释放，且不能按 size() 读取没有数据块的幻影元素。
 	WTSKlineSlice* slice = _reader.readKlineSliceByCount("SSE.STK.600000", KP_Minute5, 5, 202401101500);
-	ASSERT_TRUE(slice != NULL) << ":2384 判的是 hisCnt+rtCnt，而 hisCnt 没被清空";
-	EXPECT_EQ(slice->size(), 5u)      << "切片自称 5 条";
-	EXPECT_EQ(slice->get_block_counts(), 0u) << "却一个数据块都没挂";
-	EXPECT_TRUE(slice->at(0) == NULL);
-	EXPECT_TRUE(slice->at(-1) == NULL);
-	slice->release();
+	EXPECT_TRUE(slice == NULL || slice->size() == 0)
+		<< "无 bar 时不应返回 count 大于零的切片";
+	if (slice != NULL)
+		slice->release();
 
-	// 空文件的 min5（barcnt==0）同样落进这条「缓存建好但没有条目」的路径
+	// barcnt==0 的有效空文件也应遵守相同的空结果契约。
 	vector<WTSBarStruct> none;
 	ASSERT_TRUE(write_bytes(his_kline_file("min5"),
 		make_block(BT_HIS_Minute5, BLOCK_VERSION_RAW_V2, pack_bars(none))));
 	WTSKlineSlice* slice2 = _reader.readKlineSliceByCount("SSE.STK.600000", KP_Minute5, 3, 202401101500);
-	ASSERT_TRUE(slice2 != NULL);
-	EXPECT_EQ(slice2->size(), 3u);
-	EXPECT_EQ(slice2->get_block_counts(), 0u);
-	EXPECT_TRUE(slice2->at(1) == NULL);
-	slice2->release();
+	EXPECT_TRUE(slice2 == NULL || slice2->size() == 0)
+		<< "空 bar 文件不应生成非空幻影切片";
+	if (slice2 != NULL)
+		slice2->release();
 }
 
 // ------------------------------------------------------------------ 崩溃类收口
 namespace {
 
-// 把 getCommodity(exchg,pid) 改成与真实 WTSBaseDataMgr 一致：查的是 "exchg.<product>" 表，
-// 拿**合约代码**去查一定返回 NULL（WTSBaseDataMgr.cpp:81-89）
+// 只接受真实 WTSBaseDataMgr 的 "exchg.product" 键形态；合约代码不能命中商品表。
 class StrictBDMgr : public BaseDataMgr
 {
 public:
 	StrictBDMgr()
 	{
 		_stk = WTSCommodityInfo::create("STK", "股票", "SSE", "SSE_DAY", "CHN");
+		_stk->setSessionInfo(BaseDataMgr::getSession("SSE_DAY"));
 		_stk->setCategory(ContractCategory::CC_Stock);
 	}
 
 	virtual ~StrictBDMgr() { _stk->release(); }
 
-	WTSCommodityInfo* getCommodity(const char*, const char* pid) override
+	WTSCommodityInfo* getCommodity(const char* exchg, const char* pid) override
 	{
-		if (pid != NULL && strcmp(pid, "STK") == 0)
+		if (exchg != NULL && pid != NULL
+			&& strcmp(exchg, "SSE") == 0 && strcmp(pid, "STK") == 0)
 			return _stk;
 		return NULL;
 	}
@@ -414,29 +435,213 @@ private:
 	WTSCommodityInfo*	_stk = NULL;
 };
 
+const char* const kStrictProbeDirectoryEnv = "R23_RDM_COUNT_STRICT_BDM_DIR";
+
+inline bool is_threadsafe_death_test_child()
+{
+	const std::vector<std::string> args = ::testing::internal::GetArgvs();
+	const std::string prefix = "--gtest_internal_run_death_test=";
+	for (const std::string& arg : args)
+	{
+		if (arg.compare(0, prefix.size(), prefix) == 0)
+			return true;
+	}
+	return false;
+}
+
+class OwnedProbeDirectory
+{
+public:
+	explicit OwnedProbeDirectory(const std::string& path) : _path(path) {}
+
+	~OwnedProbeDirectory()
+	{
+		if (!_path.empty())
+		{
+			std::error_code ec;
+			std::filesystem::remove_all(_path, ec);
+		}
+	}
+
+private:
+	std::string _path;
+};
+
+class ScopedEnvironmentVariable
+{
+public:
+	explicit ScopedEnvironmentVariable(const char* name) : _name(name)
+	{
+		const char* oldValue = std::getenv(name);
+		_hadPreviousValue = oldValue != NULL;
+		if (_hadPreviousValue)
+			_previousValue = oldValue;
+	}
+
+	bool set(const std::string& value)
+	{
+		if (::setenv(_name.c_str(), value.c_str(), 1) != 0)
+			return false;
+		_active = true;
+		return true;
+	}
+
+	~ScopedEnvironmentVariable()
+	{
+		if (!_active)
+			return;
+		if (_hadPreviousValue)
+			::setenv(_name.c_str(), _previousValue.c_str(), 1);
+		else
+			::unsetenv(_name.c_str());
+	}
+
+private:
+	std::string	_name;
+	std::string	_previousValue;
+	bool		_hadPreviousValue = false;
+	bool		_active = false;
+};
+
+inline void emit_probe_stage(const char* stage)
+{
+	std::fprintf(stderr, "%s\n", stage);
+	std::fflush(stderr);
+}
+
+int run_strict_commodity_probe(const std::string& directory)
+{
+	struct rlimit coreLimit;
+	coreLimit.rlim_cur = 0;
+	coreLimit.rlim_max = 0;
+	if (::setrlimit(RLIMIT_CORE, &coreLimit) != 0)
+	{
+		emit_probe_stage("R23_STAGE_CORE_LIMIT_FAILED");
+		return 10;
+	}
+	emit_probe_stage("R23_STAGE_CORE_DISABLED");
+
+	std::error_code ec;
+	const std::filesystem::path previousDirectory = std::filesystem::current_path(ec);
+	if (ec)
+	{
+		emit_probe_stage("R23_STAGE_CWD_READ_FAILED");
+		return 11;
+	}
+	std::filesystem::current_path(directory, ec);
+	if (ec)
+	{
+		emit_probe_stage("R23_STAGE_CWD_SET_FAILED");
+		return 12;
+	}
+	emit_probe_stage("R23_STAGE_CWD_READY");
+
+	const int result = [&]() -> int
+	{
+		StrictBDMgr bd;
+		HotMgr hot;
+		RdmSink sink(&bd, &hot);
+		WtRdmDtReader reader;
+		reader.init(NULL, &sink);
+
+		const vector<WTSTickStruct> rt = day_ticks(kCurTDate, 100);
+		if (!write_bytes(rt_tick_file(), make_rt_block<WTSTickStruct>(BT_RT_Ticks, kCurTDate, 3, 10, rt)))
+		{
+			emit_probe_stage("R23_STAGE_RT_INPUT_FAILED");
+			reader.clearCache();
+			return 13;
+		}
+		emit_probe_stage("R23_STAGE_RT_INPUT_READY");
+		emit_probe_stage("R23_STAGE_BEFORE_READ");
+
+		WTSTickSlice* slice = reader.readTickSliceByCount("SSE.STK.600000", 3, 20240110150000000ull);
+		emit_probe_stage("R23_STAGE_READ_RETURNED");
+		if (slice == NULL)
+		{
+			reader.clearCache();
+			emit_probe_stage("R23_STAGE_NULL_SLICE");
+			return 14;
+		}
+
+		const WTSTickStruct* first = slice->at(0);
+		const WTSTickStruct* last = slice->at(-1);
+		const bool valid = slice->size() == 3u
+			&& first != NULL && last != NULL
+			&& first->action_date == kCurTDate && first->action_time == 143000000u
+			&& last->action_date == kCurTDate && last->action_time == 143200000u;
+		slice->release();
+		reader.clearCache();
+		if (!valid)
+		{
+			emit_probe_stage("R23_STAGE_SLICE_ASSERTIONS_FAILED");
+			return 15;
+		}
+
+		emit_probe_stage("R23_STAGE_VALIDATION_COMPLETE");
+		return 0;
+	}();
+
+	std::filesystem::current_path(previousDirectory, ec);
+	if (ec)
+	{
+		emit_probe_stage("R23_STAGE_CWD_RESTORE_FAILED");
+		return 16;
+	}
+	return result;
+}
+
 } // namespace
 
-TEST_F(R23RdmCountTest, DISABLED_CountByCodeShapedPidDereferencesNullCommodity)
+TEST(R23RdmCountStrictProbe, CountByCodeShapedPidUsesProductForCommodityLookup)
 {
-	// 复现（不要启用）：readTickSliceByCount 的 :2401
-	//   getSession(getCommodity(cInfo._exchg, cInfo._code)->getSession())
-	// 两个问题：① 传的是**合约代码**而不是 product id，真实的按 "exchg.product" 建表的
-	//   WTSBaseDataMgr 一定查不到；② 返回值没有 NULL 判定，紧接着还有
-	//   `commInfo->isFuture()`（:2420）也无条件解引用 :2398 的结果。
-	// → 段错误。两个文件的其余 20+ 处 getCommodity 传的 are _product，只有这一行用 _code。
-	StrictBDMgr	bd;
-	HotMgr		hot;
-	RdmSink		sink(&bd, &hot);
-	WtRdmDtReader	reader;
-	reader.init(NULL, &sink);
+	const bool deathTestChild = is_threadsafe_death_test_child();
+	std::string probeDirectory;
+	std::unique_ptr<OwnedProbeDirectory> ownedDirectory;
+	std::unique_ptr<ScopedEnvironmentVariable> scopedDirectoryEnv;
+	if (deathTestChild)
+	{
+		const char* inheritedDirectory = std::getenv(kStrictProbeDirectoryEnv);
+		if (inheritedDirectory == NULL || inheritedDirectory[0] == '\0')
+		{
+			ADD_FAILURE() << "threadsafe death-test child did not inherit the parent-owned probe directory";
+			return;
+		}
+		probeDirectory = inheritedDirectory;
+	}
+	else
+	{
+		std::error_code ec;
+		const std::filesystem::path tempRoot = std::filesystem::temp_directory_path(ec);
+		if (ec)
+		{
+			ADD_FAILURE() << "could not locate temporary directory: " << ec.message();
+			return;
+		}
+		const std::string pattern = (tempRoot / "r23_strict_bdm_XXXXXX").string();
+		std::vector<char> writablePattern(pattern.begin(), pattern.end());
+		writablePattern.push_back('\0');
+		char* createdDirectory = ::mkdtemp(writablePattern.data());
+		if (createdDirectory == NULL)
+		{
+			ADD_FAILURE() << "mkdtemp failed for strict commodity probe: " << std::strerror(errno);
+			return;
+		}
+		probeDirectory = createdDirectory;
+		ownedDirectory.reset(new OwnedProbeDirectory(probeDirectory));
 
-	const vector<WTSTickStruct> rt = day_ticks(kCurTDate, 100);
-	ASSERT_TRUE(write_bytes(rt_tick_file(), make_rt_block<WTSTickStruct>(BT_RT_Ticks, kCurTDate, 3, 10, rt)));
+		scopedDirectoryEnv.reset(new ScopedEnvironmentVariable(kStrictProbeDirectoryEnv));
+		if (!scopedDirectoryEnv->set(probeDirectory))
+		{
+			ADD_FAILURE() << "could not pass strict commodity probe directory to death-test child: " << std::strerror(errno);
+			return;
+		}
+	}
 
-	WTSTickSlice* slice = reader.readTickSliceByCount("SSE.STK.600000", 3, 20240110150000000ull);
-	if (slice != NULL)
-		slice->release();
-	reader.clearCache();
+	const std::string oldDeathTestStyle = GTEST_FLAG_GET(death_test_style);
+	GTEST_FLAG_SET(death_test_style, "threadsafe");
+	EXPECT_EXIT(std::_Exit(run_strict_commodity_probe(probeDirectory)),
+		::testing::ExitedWithCode(0), "R23_STAGE_VALIDATION_COMPLETE");
+	GTEST_FLAG_SET(death_test_style, oldDeathTestStyle);
 }
 
 } // namespace r23

@@ -31,7 +31,7 @@ namespace
 	std::filesystem::path lane_root()
 	{
 		return std::filesystem::path(__FILE__).parent_path()
-			.parent_path().parent_path().parent_path();
+			.parent_path().parent_path().parent_path().parent_path();
 	}
 
 	std::filesystem::path make_temp_dir(const char* tag)
@@ -117,6 +117,8 @@ protected:
 	void SetUp() override
 	{
 		_root = lane_root();
+		ASSERT_TRUE(std::filesystem::exists(_root / "dist/common/sessions.json"));
+		ASSERT_TRUE(std::filesystem::exists(_root / "dist/common/stk_comms.json"));
 		_base = make_temp_dir("run");
 		_out = make_temp_dir("out");
 		WtHelper::setOutputDir(_out.string().c_str());
@@ -181,14 +183,16 @@ TEST_F(P07TaskScheduleTest, dailyTaskFiresOncePerTradingDay)
 
 /*
  * TPT_Weekly：只在 weekDay == _task->_day 的那天触发。
- * 用 TimeUtils::getWeekDay(20200102) 反推参数，避免依赖具体星期约定。
+ * 星期约定采用周日=0、周六=6；20200102（周四）任务应只触发一次。
  * 区间取到 20200106（含周末），只应触发 1 次，其余日期走「未触发 -> 换交易日」分支。
  */
 TEST_F(P07TaskScheduleTest, weeklyTaskFiresOnlyOnTargetWeekday)
 {
-	const uint32_t wday = TimeUtils::getWeekDay(20200102);
-	ASSERT_GE(wday, 1u);
-	ASSERT_LE(wday, 7u);
+	const uint32_t wday = 4;
+	ASSERT_LT(wday, 7u);
+	EXPECT_EQ(4u, TimeUtils::getWeekDay(20200102));
+	EXPECT_EQ(0u, TimeUtils::getWeekDay(20200105));
+	EXPECT_EQ(6u, TimeUtils::getWeekDay(20200104));
 
 	TaskSink sink;
 	ASSERT_TRUE(run_once(wday, 1500, "w", 202001020930ull, 202001061500ull, sink));
@@ -202,43 +206,35 @@ TEST_F(P07TaskScheduleTest, weeklyTaskFiresOnlyOnTargetWeekday)
 }
 
 /*
- * TPT_Monthly：判定式是 `_cur_date % 1000000 == _task->_day`，
- * 也就是 _day 必须写成 YYMMDD（20200102 -> 200102）才可能触发，
- * 「几号」这种写法（_day=2）永远不会触发 —— 见 p07 缺陷登记。
+ * TPT_Monthly 的公开 register_task 契约规定 day 为 1..31。
+ * 在 20200102-20200103 的 SD0930 回放窗口中，每月 2 日任务应只触发
+ * 20200102 一次，并在任务时间前一分钟（14:59）调度。
  */
-TEST_F(P07TaskScheduleTest, monthlyTaskNeedsYyMMddDayField)
+TEST_F(P07TaskScheduleTest, monthlyTaskUsesDayOfMonthContract)
 {
-	{
-		TaskSink hit;
-		ASSERT_TRUE(run_once(200102, 1500, "m", 202001020930ull, 202001031500ull, hit));
-		ASSERT_EQ(1u, hit.scheduleCalls);
-		EXPECT_EQ(20200102u, hit.scheduleDates[0]);
-		EXPECT_EQ(1u, hit.beginCalls);
-		EXPECT_EQ(2u, hit.endCalls);
-		EXPECT_EQ(1u, hit.replayDoneCalls);
-	}
-	{
-		// 同样区间、_day=2（「每月2号」的直觉写法）：一次都不触发，但必须正常收尾
-		TaskSink miss;
-		ASSERT_TRUE(run_once(2, 1500, "m", 202001020930ull, 202001031500ull, miss));
-		EXPECT_EQ(0u, miss.scheduleCalls);
-		EXPECT_EQ(0u, miss.beginCalls);
-		EXPECT_EQ(1u, miss.endCalls);
-		EXPECT_EQ(1u, miss.replayDoneCalls);
-	}
+	TaskSink sink;
+	ASSERT_TRUE(run_once(2, 1500, "m", 202001020930ull, 202001031500ull, sink));
+
+	ASSERT_EQ(1u, sink.scheduleCalls);
+	EXPECT_EQ(std::vector<uint32_t>({20200102u}), sink.scheduleDates);
+	EXPECT_EQ(std::vector<uint32_t>({TimeUtils::getNextMinute(1500, -1)}), sink.scheduleTimes);
+	EXPECT_EQ(1u, sink.beginCalls);
+	EXPECT_EQ(2u, sink.endCalls);
+	EXPECT_EQ(1u, sink.replayDoneCalls);
 }
 
 /*
- * TPT_Yearly：`preTDate % 10000 < _day && _cur_date % 10000 >= _day`，
- * 20200102 的前一交易日是 20200101（%10000 = 1），当天 %10000 = 102 -> _day=2 触发。
+ * TPT_Yearly 的公开 TaskInfo 契约要求 day 为 MMDD（0101..1231）。
+ * 20200101 是 CHINA 节假日，day=0101 的年度任务应顺延到 20200102 首个交易日执行一次。
  */
 TEST_F(P07TaskScheduleTest, yearlyTaskFiresOnYearBoundaryCrossing)
 {
 	TaskSink sink;
-	ASSERT_TRUE(run_once(2, 1500, "y", 202001020930ull, 202001031500ull, sink));
+	ASSERT_TRUE(run_once(101, 1500, "y", 202001020930ull, 202001031500ull, sink));
 
 	ASSERT_EQ(1u, sink.scheduleCalls);
 	EXPECT_EQ(20200102u, sink.scheduleDates[0]);
+	EXPECT_EQ(TimeUtils::getNextMinute(1500, -1), sink.scheduleTimes[0]);
 	EXPECT_EQ(1u, sink.beginCalls);
 	EXPECT_EQ(2u, sink.endCalls);
 	EXPECT_EQ(1u, sink.replayDoneCalls);

@@ -1,0 +1,472 @@
+[
+  {
+    "lane": "R12_headers_wtstools",
+    "id": "BUG-R12-11",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Share/CodeHelper.hpp:136-189",
+      "src/Share/CodeHelper.hpp:266-279",
+      "src/Share/CodeHelper.hpp:374-435",
+      "src/Share/CodeHelper.hpp:592-606"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r12_headers/r12_codehelper_test.cpp:111-139",
+      "src/TestUnits/coverage/l01_share_wtsutils/l01_codehelper_test.cpp:157-166",
+      "src/TestUnits/coverage/l01_share_wtsutils/l01_codehelper_test.cpp:203-222"
+    ],
+    "input_reachability": "候选中的 BTC_USDT 用于证明 A..z 包含标点，但 rawMonthCodeToRawCommID 的注释明确限定分月期货输入，并把永续码传入定义为调用方错误；BTC_USDT 的尾部不是数字，isMonthlyCode 已拒绝。现有有效用例还要求 IF_o1 的下划线前缀保留。未发现仓内有效输入因这段范围判断而产生错误产品结果。",
+    "oracle_basis": "CodeHelper 注释、有效月合约样例 ag1912/IF2112/IF_o1，以及拒绝 BTCUSDT/BTC-USDT 月码的现有断言。缺少交易所字符规范不能把任意非法码扩成有效输入合同。",
+    "reason": "ASCII A..z 范围包含标点是实现事实，但候选给出的 BTC_USDT 不属于这些解析器声明的输入；尤其 isMonthlyCode 还要求 3–6 位数字尾缀。将范围直接改为字母集合会破坏 IF_o1 的现有有效前缀行为。没有证据支持产品缺陷，撤回该项。",
+    "root_cause": "候选将字符范围的边界观察当成有效合约格式违约；当前有效业务输入与测试没有证明错误解析。",
+    "fix": "无需产品改动。若未来有实际有效的特殊字符月码，先为对应 API 明确独立语法，再按规范修订该 API。",
+    "acceptance": "无需单独修复验收；现有 IF_o1、月码数字尾缀、期权标准格式正反例继续通过。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R12_headers_wtstools",
+    "id": "BUG-R12-12",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/WTSMarcos.h:22",
+      "src/Includes/WTSMarcos.h:98-103",
+      "src/Includes/WTSStruct.h:148-152",
+      "src/Includes/WTSDataDef.hpp:870-877",
+      "src/Includes/WTSDataDef.hpp:892-895",
+      "src/ParserOES/ParserOES.cpp:541"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r12_headers/r12_data_def_test.cpp:454-465",
+      "src/TestUnits/coverage/r12_headers/r12_codehelper_test.cpp:183-190",
+      "src/TestUnits/coverage/l01_share_wtsutils/l01_codehelper_test.cpp:241-255"
+    ],
+    "input_reachability": "WTSTickData 的公开 create(const char*) 与 setCode 接收任意 C 字符串并写入 32 字节 code 数组；create 在复制后按输入长度写终止符，setCode 的 wt_strcpy 也按源长度写终止符。OES parser 存在 SDK SecurityID 到字符串再调用该 factory 的路径；长度大于 31 字节时不可能安全表示。当前判断是 public API 的容量防护缺陷，不声称存在已验证的合法交易所代码超过该容量。",
+    "oracle_basis": "MAX_INSTRUMENT_LENGTH 为 32，目标字段是 C 字符串数组，最多只能保存 31 个非 NUL 字节。可表示输入应完整保存；超出容量的输入应拒绝而不能越界或截断为另一个合约身份。",
+    "reason": "create 先分配后无界 memcpy，len>=32 时终止符写到 code[32] 或更远；setCode 在 len>=32 时同样越界。此项独立于 L01-002 的 CodeHelper 尾随 NUL 问题；当前 R12 wrapper 用例已经改为完整 string 与 size 断言，不能再把两项整条合并。",
+    "root_cause": "固定容量 32 字节的 tick code 字段没有在 public create/setCode 边界校验源长度；复制 helper 不接受目标容量。",
+    "fix": "create 在分配/复制前验证长度小于 MAX_INSTRUMENT_LENGTH，超限返回明确失败；setCode 提供可检查的失败路径并保持原值不变。不要静默截断代码标识。",
+    "acceptance": "0、1、31 字节输入逐字节完整保存并有 NUL；32 与更长输入受控拒绝且不改坏已有 code；在 ASan 下覆盖 create/setCode 两个入口。CodeHelper HOT/2ND 的完整字符串及 size=9 断言保留。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/r12_headers/r12_data_def_test.cpp",
+        "case": "r12_tick_data.code_length_boundaries_reject_oversized",
+        "issue": "现有 create_by_code_setcode_and_limit_flag 只测短代码，未覆盖 32 字节字段容量边界；超限路径会越界写。",
+        "change": "在 create 与 setCode 上分别验证 0/1/31 字节成功完整保存，32/33 字节受控拒绝；加入 setCode 超限后原 code 不变断言。",
+        "target": "build-cov/build_x64/Debug/bin/TestUnits/CoverageTests",
+        "filter": "--gtest_filter=r12_tick_data.code_length_boundaries_reject_oversized",
+        "expected_result": "新 guard 后用例通过；未修源码在安全工具下可检出越界，普通测试不直接访问越界内存。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "待容量 guard 与安全边界用例落地后，定向重建并运行；本轮未运行超长输入或 ASan。"
+    ]
+  },
+  {
+    "lane": "l02_wtstools_mq",
+    "id": "BUG-L02-009",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/WTSContractInfo.hpp:102-130",
+      "src/Includes/WTSContractInfo.hpp:262-291",
+      "src/WtCore/WtEngine.cpp:843-872",
+      "src/WtCore/WtEngine.cpp:982-1001",
+      "src/WTSTools/WTSBaseDataMgr.cpp:487-499"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l02_wtstools_mq/l02_session_contract_test.cpp:445-467",
+      "src/TestUnits/coverage/l03_includes/l03_contract_info_test.cpp:147-170"
+    ],
+    "input_reachability": "费用配置由 JSON 读取后直接写入手续费率；默认最大委托量为 1,000,000，品种 volScale 可为 300。合法有限示例 price=5000、qty=1,000,000、volScale=300、by-value fee rate=0.00002 得到 ret=30,000,000，ret*100=3,000,000,000，超过 int32 上限。引擎在正常开仓调用中以成交价和数量调用商品 calcFee。",
+    "oracle_basis": "金额手续费需要保留两位小数；目前普通例子明确按分四舍五入。所选有限正值均在当前公开配置/数量表示域内，不依赖负手续费或非有限输入。",
+    "reason": "商品与合约 calcFee 都把 ret*100+0.5 窄化为 int32。有限手续费金额超过约 21,474,836.47 时浮点转整数越出 int32 可表示范围；这不需要假设负值合同，也可由当前最大数量和正常数量级费率达到。现有测试只覆盖普通金额，没有覆盖该边界。",
+    "root_cause": "以 int32 中间值实现两位小数舍入，且 fee config 与交易金额乘积没有上限保护。",
+    "fix": "使用不会窄化到 int32 的安全舍入实现；同时对配置非有限值和乘法溢出定义受控处理。不要扩大到未经合同支持的负手续费语义。",
+    "acceptance": "覆盖有限正金额在 INT32_MAX/100 两侧、普通费率与已知样例；30,000,000.00 示例结果稳定且不发生越界浮点转整数；正周期现有手续费结果不变。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/l02_wtstools_mq/l02_session_contract_test.cpp",
+        "case": "L02ContractInfo.LargeFeeBeyondInt32Cents",
+        "issue": "当前只覆盖普通费用值；合法有限金额可使 ret*100 超出 int32。",
+        "change": "按 volume scale 300、price 5000、qty 1000000、by-value rate 0.00002 增加期望 30000000.00 的安全舍入回归，并增加临界值两侧样例。",
+        "target": "build-cov/build_x64/Debug/bin/TestUnits/CoverageTests",
+        "filter": "--gtest_filter=L02ContractInfo.LargeFeeBeyondInt32Cents",
+        "expected_result": "新实现返回按分舍入的有限手续费，不触发未定义窄化；普通费率用例不变。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "待安全舍入实现后定向重建并运行大额有限手续费回归；本轮未动态执行边界算例。"
+    ]
+  },
+  {
+    "lane": "l03_includes",
+    "id": "BUG-L03-003",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/WTSSessionInfo.hpp:352-360",
+      "src/Includes/WTSSessionInfo.hpp:442-467",
+      "src/Includes/WTSSessionInfo.hpp:500-526"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l03_includes/l03_session_info_test.cpp:435-445",
+      "src/TestUnits/coverage/l02_wtstools_mq/l02_session_contract_test.cpp:200-206"
+    ],
+    "input_reachability": "section.second_raw=2400 时 isLastOfSection 同时将原始 2400 和其 0 点别名视为收盘边界。仓内已显式规定 0 点左对齐保持 0000、右对齐表示 2400；未找到跨日消费者要求把二者区分的合同。",
+    "oracle_basis": "WTSSessionInfo 的午夜对齐注释及 L02 现有 0/2400 对照；当前 L03 测试明确把两者作为同一边界时点。",
+    "reason": "取模 alias 是真实行为，但其与午夜左/右对齐规则一致。候选单段 2100–2400 的 timeToMinutes(0) 会先因时段外返回 INVALID_UINT32，不能推出 isInTradingTime(0) 被错误判定；现有用例也未证明一个正常输入应区分两个标签。撤回缺陷结论，保留已定义的午夜别名行为。",
+    "root_cause": "没有证实产品缺陷；候选把标签表示差异当作时间线语义错误。",
+    "fix": "无需产品改动。后续若有跨日 session 约定 0000 与 2400 不等价，再据该合同调整边界转换。",
+    "acceptance": "现有 raw 0/2400 左右对齐行为和收盘边界用例继续通过；不新增反向断言。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "l03_includes",
+    "id": "BUG-L03-005",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/WTSContractInfo.hpp:171-182",
+      "src/Includes/WTSContractInfo.hpp:233-252",
+      "src/Includes/WTSContractInfo.hpp:262-291",
+      "src/Includes/WTSContractInfo.hpp:313-318",
+      "src/WTSTools/WTSBaseDataMgr.cpp:469-523"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l03_includes/l03_contract_info_test.cpp:118-145",
+      "src/TestUnits/coverage/l03_includes/l03_contract_info_test.cpp:147-170",
+      "src/TestUnits/coverage/l03_includes/l03_contract_info_test.cpp:234-256"
+    ],
+    "input_reachability": "margin flag 非 1 的 getter 与 fee algorithm -1/1 会要求 m_commInfo。唯一生产构造路径在 WTSBaseDataMgr 中先创建 builder、设置别称并挂接 commodity，再将合约加入已发布 code list；本轮未找到生产调用者在挂接前查询保证金/手续费。直接以未挂接对象调用依赖 commodity 的 getter 不属于已证明的 ready lifecycle。",
+    "oracle_basis": "基础数据管理器的 create→setCommInfo→addCode/publish 顺序；有效 margin/fee 测试均先挂接 commodity。active null test 只验证 flag=1 自有 margin 的安全分支。",
+    "reason": "空指针条件在源码上成立，但危险用例创建尚未完成挂接的对象并假设 flag=0 应回退到自有值；没有此类查询合同。正常加载发布门禁先附加 commodity，因此当前输入是未就绪 builder 状态，不足以构成产品违约。disabled 用例未运行，也不作为动态证据。L02-003 的相同缺失依赖子项不反向重复计数。",
+    "root_cause": "不完整构造期对象被测试误当作可查询的 ready contract。",
+    "fix": "无需产品行为改动；保留 create 后 setCommInfo 再发布的生命周期。可在 API 注释中写明依赖 commodity 的 getter/calcFee 仅对已挂接对象有效。",
+    "acceptance": "正常基础数据加载仍在加入 code list 前挂接 commodity；完整 margin 与 fee 用例通过。未就绪对象测试不得断言无合同的 fallback 值。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/l03_includes/l03_contract_info_test.cpp",
+        "case": "l03_contract.DISABLED_get_long_margin_ratio_without_comm_info",
+        "issue": "disabled 测试注释把未挂接 builder 状态写成已确认源码缺陷，并断言 flag=0 时返回自有值；仓内没有该生命周期合同。",
+        "change": "保持危险调用 disabled，不把它当修复验收；将注释改为未就绪对象/无行为 oracle，并保留 active flag=1 安全分支和已挂接 commodity 的正常 margin 对照。",
+        "target": "build-cov/build_x64/Debug/bin/TestUnits/CoverageTests",
+        "filter": "--gtest_filter=l03_contract.DISABLED_get_long_margin_ratio_without_comm_info",
+        "expected_result": "该危险用例仍不运行；测试说明不再声称无 commInfo 的 flag=0 查询属于支持行为。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "l03_includes",
+    "id": "BUG-L03-006",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/WTSMarcos.h:98-103",
+      "src/Includes/WTSContractInfo.hpp:19-35",
+      "src/Includes/WTSContractInfo.hpp:138-145",
+      "src/Includes/WTSContractInfo.hpp:171-191",
+      "src/Includes/WTSContractInfo.hpp:320-330",
+      "src/WTSTools/WTSBaseDataMgr.cpp:343-362",
+      "src/WTSTools/WTSBaseDataMgr.cpp:469-485"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l03_includes/l03_commodity_info_test.cpp:62-83"
+    ],
+    "input_reachability": "commodity JSON 的商品 ID、名称、交易所、session、holiday 等外部字符串直接进入 WTSCommodityInfo::create；contract JSON 的 code/name/exchg/product/altcode 直接进入 WTSContractInfo::create/setAltCode，之后才发布到基础数据集合。配置读取处没有按目标数组容量验证长度。",
+    "oracle_basis": "wt_strcpy 仅 strlen、memcpy 和写 NUL，不接收 destination capacity；CommodityInfo 多个目标为 char[64]，ContractInfo code/product/altcode/exchg 为 char[32]、name 为 char[64]。NUL 终止字符串必须为终止符留出一个字节。",
+    "reason": "外部文件配置可将超长字符串送入公共创建/设置入口，复制 helper 会越过固定数组写入；这是独立的文件输入内存安全缺陷，不要求把超长代码认作合法交易所品种。现有 identity_field_boundary_length 只测试 char[64] 的 63 字节安全载荷，不能证明拒绝越界输入。",
+    "root_cause": "商品及合约创建 API 和配置加载入口都没有把字符串长度与固定字段容量关联；wt_strcpy 无目标容量参数。",
+    "fix": "按每个字段容量在配置进入对象前验证，创建/别名设置改用容量感知复制；超长标识应受控拒绝而非静默截断，以免注册错误的商品/合约 identity。",
+    "acceptance": "商品 char[64]、合约 char[32]/char[64] 各字段覆盖容量-1/容量/容量+1 与空串；上限内完整保留，上限外在注册前拒绝，配置失败可观测且 ASan 无越界。FullCode 等 snprintf 派生字段单独保持其既有截断策略。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/l03_includes/l03_commodity_info_test.cpp",
+        "case": "l03_commodity.identity_fields_reject_overlong_inputs",
+        "issue": "现有边界测试仅测 63 字符安全写入；商品创建中外部配置字段可能超过各 char[64] 目标。",
+        "change": "覆盖商品 ID、名称、交易所、session、holiday/currency 的容量-1、容量和容量+1；确认超限由创建/加载边界拒绝，而不是执行危险复制。",
+        "target": "build-cov/build_x64/Debug/bin/TestUnits/CoverageTests",
+        "filter": "--gtest_filter=l03_commodity.identity_fields_reject_overlong_inputs",
+        "expected_result": "限内值完整保留，限外值安全拒绝且对象不发布；原 63 字符有效用例保留。"
+      },
+      {
+        "file": "src/TestUnits/coverage/l03_includes/l03_contract_info_test.cpp",
+        "case": "l03_contract.contract_identity_fields_reject_overlong_inputs",
+        "issue": "合约 code/product/altcode/exchg/name 在 create/setAltCode 中复制到 32/64 字节固定数组，无容量验证。",
+        "change": "覆盖 contract create 各字段及 setAltCode 的容量边界，并验证超限 contract 不进入 code list。",
+        "target": "build-cov/build_x64/Debug/bin/TestUnits/CoverageTests",
+        "filter": "--gtest_filter=l03_contract.contract_identity_fields_reject_overlong_inputs",
+        "expected_result": "31/63 字节上限内字符串安全完整；32/64 字节及更长值在注册前被拒绝，ASan 无越界。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "本轮未运行超长输入或 sanitizer；待配置/API guard 和边界测试落地后再定向验收。"
+    ]
+  },
+  {
+    "lane": "l03_includes",
+    "id": "BUG-L03-007",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/WTSSessionInfo.hpp:191-243",
+      "src/Includes/WTSSessionInfo.hpp:295-330",
+      "src/WtBtCore/HisDataReplayer.cpp:1203-1209"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l03_includes/l03_session_info_test.cpp:298-323",
+      "src/TestUnits/coverage/l03_includes/l03_session_info_test.cpp:354-378"
+    ],
+    "input_reachability": "minuteToTime 用于把有效 session 分钟位置映射回时间；历史回放在推进前把分钟位置钳到 getTradingMins。越界调用并非正常游标输入。secondsToTime 的越界结果用于报告无效秒位置，两者是反向转换函数的不同失败约定。",
+    "oracle_basis": "测试明确锁定普通时段 minuteToTime 超时长钳到 closeTime、secondsToTime 超时长返回 INVALID_UINT32；24 小时 0/2400 边界也单独覆盖。没有 API 文档要求两个函数在非法越界输入时返回相同结果。",
+    "reason": "越界策略差异存在，但候选未给出要求一致的接口合同或有效调用者错误结果。minuteToTime 的 close clamp 对游标收尾有用，secondsToTime 返回 sentinel 也有独立无效输入含义；不能为了外观一致性翻转当前行为。",
+    "root_cause": "没有证实产品缺陷；候选把不同反向转换函数的越界策略差异当作合同冲突。",
+    "fix": "无需产品改动。若未来统一越界策略，应先定义失败值并审查调用者是否把 close clamp 当作合法终点。",
+    "acceptance": "保留当前分钟末端 close clamp 与秒越界 sentinel 断言；有效末点和 24 小时会话行为保持一致。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "l03_includes",
+    "id": "BUG-L03-008",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/WTSSessionInfo.hpp:144-150",
+      "src/Includes/WTSSessionInfo.hpp:245-252",
+      "src/Includes/WTSSessionInfo.hpp:442-452",
+      "src/WTSTools/WTSDataFactory.cpp:19-44",
+      "src/WTSTools/WTSDataFactory.cpp:191-224",
+      "src/WTSTools/WTSBaseDataMgr.cpp:267-280"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l03_includes/l03_session_info_test.cpp:282-293",
+      "src/TestUnits/coverage/l02_wtstools_mq/l02_session_contract_test.cpp:325-354"
+    ],
+    "input_reachability": "竞价由 session JSON 的 auction/auctions 配置装载；配置的竞价 tick 被 timeToMinutes 映射到 opening bucket 0，isInTradingTime 将有效分钟视为 session time，updateKlineData 以该谓词决定是否处理 tick。timeToSeconds 的注释也明确规定竞价价格视为 0 秒。",
+    "oracle_basis": "接口注释、session 配置路径、行情工厂消费方式和现有测试共同表明竞价数据需进入首个 bar；没有合同把 isInTradingTime 限定为连续竞价状态。",
+    "reason": "候选看到竞价时 isInTradingTime 返回 true，但这与竞价映射到第 0 分钟/秒及数据工厂纳入开盘 bar 的设计一致。现有竞价测试只测映射，生产调用路径补足了行为用途；没有证据支持将此谓词改成只包含连续撮合时间。",
+    "root_cause": "没有证实产品缺陷；候选把交易时段/数据接收谓词误读为连续竞价专用谓词。",
+    "fix": "无需产品改动。若某个策略需要排除竞价，应使用独立连续竞价谓词，不应破坏当前首 bar 数据聚合。",
+    "acceptance": "竞价时段按现有配置映射到第 0 分钟/秒并被数据工厂接收；竞价右边界仍按半开区间排除。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "l03_includes",
+    "id": "BUG-L03-009",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/WTSSessionInfo.hpp:67-80",
+      "src/Includes/WTSSessionInfo.hpp:103",
+      "src/Includes/WTSSessionInfo.hpp:507-526",
+      "src/WTSTools/WTSBaseDataMgr.cpp:258-297"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l02_wtstools_mq/l02_session_contract_test.cpp:212-248"
+    ],
+    "input_reachability": "loadSessions 从外部 JSON 直接读取 offset 为 int32，再以该 offset 创建 session 并用普通 0900–1000 时段调用 addTradingSection；未检查 offset 范围。offset=INT32_MAX 时合法时段的 540 分钟与该值在 int32 中相加会有符号溢出。公开 create/setOffsetMins 也接受任意 int32。",
+    "oracle_basis": "对支持的常见 offset，现有测试覆盖 -420、500、-1300 与 0；无论异常 offset 最终应拒绝还是归一化，整数溢出都不是允许的行为。结论只覆盖 offset 加法安全，不声称极端 offset 是有效交易时区。",
+    "reason": "offsetTime 用 int32 累加后仅做一次 ±1440 回绕；外部 session 配置可到达有符号溢出，导致未定义行为。安全性和极端 offset 的业务接受策略可分离：先用宽类型消除 UB，再按既有时区域选择拒绝或模一天归一化。",
+    "root_cause": "公共 int32 offset 未验证即参与 int32 分钟加法；一次回绕不构成溢出保护。",
+    "fix": "在 offsetTime 用 int64_t 计算并实现一致的模一天归一化及 0000/2400 左右对齐；配置入口再按业务时区范围拒绝超域 offset，不能先执行溢出算术。",
+    "acceptance": "0、-420、500、-1300 现有结果不变；INT32_MIN/MAX 配 0900/1000 由 sanitizer 验证无溢出，按明确策略归一化或在 session 注册前受控拒绝；配置失败不发布半初始化 session。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/l03_includes/l03_session_info_test.cpp",
+        "case": "l03_session.extreme_offset_is_safe",
+        "issue": "无极值 offset 回归；外部 JSON int32 可进入 offsetTime 的有符号加法。",
+        "change": "覆盖 INT32_MIN/MAX 与 0900-1000；如果接口选择拒绝，验证受控失败且 session 不注册；如果做模一天归一化，使用 int64 测试 oracle 验证左右对齐值。",
+        "target": "build-cov/build_x64/Debug/bin/TestUnits/CoverageTests",
+        "filter": "--gtest_filter=l03_session.extreme_offset_is_safe",
+        "expected_result": "极值 offset 无 signed overflow；常见时区偏移结果保持兼容。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "本轮未执行极值算例/UBSan；等待宽类型与输入策略实现后定向验收。"
+    ]
+  },
+  {
+    "lane": "l03_includes",
+    "id": "BUG-L03-010",
+    "decision": "PRODUCT",
+    "evidence_level": "LOCAL_REPRO",
+    "source_evidence": [
+      "src/Includes/WTSSessionInfo.hpp:363-433",
+      "src/WTSTools/WTSBaseDataMgr.cpp:282-293",
+      "src/WtCore/WtCtaTicker.cpp:241-245",
+      "src/WtCore/WtHftTicker.cpp:219-224",
+      "src/WtBtCore/HisDataReplayer.cpp:1114-1119"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l03_includes/l03_session_info_test.cpp:325-347",
+      "src/TestUnits/coverage/l03_includes/l03_session_info_test.cpp:398-409",
+      "src/TestUnits/coverage/l02_wtstools_mq/l02_session_contract_test.cpp:179-197"
+    ],
+    "input_reachability": "外部 session JSON 中的 from/to 直接传给 addTradingSection 并注册，没有拒绝相同非零端点。addTradingSection(900,900) 会生成非空零累计 section；getTradingMins/Seconds 将任意零总量回退全天，而 getSecMinList 因 section 非空返回累计列表 [0]。CTA/HFT ticker 与历史回放分别消费总量和分段列表。",
+    "oracle_basis": "现有 0-0 全天测试已明确定义 raw 0-0 会话为 1440 分钟；空 session 也有独立一致 fallback [1440]。900-900 测试当前同时断言 1440 总量和 [0] 列表，反而直接暴露同一对象派生视图冲突。无论 900-900 最终拒绝、表示零时长或被定义为全天，多个 getter 都必须一致。",
+    "reason": "900-900 是否应被业务接受可以单独确定，但当前实现对同一个已接受 session 返回全天总量却给出零长度分段列表，直接被正常消费者用于调度/对齐；配置 loader 也未拒绝。已在本轮安全定向运行原测试：它 PASS，但输出对应的正是这组 1440/86400 与 [0] 不一致值，不能把测试通过当正确性验收。",
+    "root_cause": "getTradingMins/Seconds 把任何 count==0 都当全天；getSecMinList 只对空 vector fallback。配置/API 未将全天 sentinel 与其它相同端点分开。",
+    "fix": "推荐规定 0-0 为全天唯一端点表示，空列表继续沿用其既有全天 fallback；在配置加载和 public section API 拒绝其它相同端点，并让拒绝可由调用方观察。若产品选择零时长，则所有总量与列表必须统一为零，不能静默扩成全天。",
+    "acceptance": "0-0 与空会话继续各自得到一致全天视图；900-900 在注册前受控拒绝或按统一零时长语义返回，任何成功 session 的 getSecMinList 末值、getTradingMins、getTradingSeconds 相互一致；配置失败不得发布该 session。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/l03_includes/l03_session_info_test.cpp",
+        "case": "l03_session.zero_length_section_is_treated_as_full_day",
+        "issue": "当前用例把非零端点 900-900 断言为全天总量，却又断言累计列表为 [0]；它把矛盾行为写成正确 oracle。",
+        "change": "保留独立的 0-0 全天用例；将 900-900 改成验证注册时拒绝，或在选定零时长策略后验证总量/列表一致，不再断言其为全天。",
+        "target": "build-cov/build_x64/Debug/bin/TestUnits/CoverageTests",
+        "filter": "--gtest_filter=l03_session.zero_length_section_is_treated_as_full_day",
+        "expected_result": "同一 session 的分钟、秒数和分段列表遵守同一结果；900-900 不再无提示地返回 1440 与 [0]。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/02_models_tools/l03-010.json",
+      "docs/迭代计划/迭代02/复核185/evidence/02_models_tools/l03-010.log",
+      "docs/迭代计划/迭代02/复核185/evidence/02_models_tools/l03-010.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "待修正公开 API/配置边界并按统一策略更新该用例后，重建并定向运行；本轮只复现当前不一致，未运行修复后的行为。"
+    ]
+  },
+  {
+    "lane": "p12_datafactory_datadef",
+    "id": "BUG-P12-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/WTSDataDef.hpp:495-506",
+      "src/WTSTools/WTSDataFactory.cpp:19-38",
+      "src/WTSTools/WTSDataFactory.cpp:708-713",
+      "src/WTSTools/WTSDataFactory.cpp:1306-1333"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p12_datafactory_datadef/p12_factory_extract_merge_test.cpp:490-509"
+    ],
+    "input_reachability": "WTSKlineData::setPeriod 是公开无校验 setter，可将 KP_Tick 的 times 设为 0；updateKlineData 对非空有效 tick 走 updateSecData 并以 times 作除数。公开 extractKlineData 另有 seconds 参数，在 ticks/session 有效时直接以 seconds 作除数。两个入口彼此独立，单改 setter 不能保护 extractor。",
+    "oracle_basis": "0 秒/0 倍周期没有有效时间桶语义；无论业务将其定义为拒绝还是未配置，都不能对零执行整数除法。安全失败可与具体错误/回退策略分开。",
+    "reason": "setPeriod(0) 与 extractKlineData(seconds=0) 可由公开接口到达两个整数除法点，分别产生除零；旧 disabled 测试包含危险算例但本轮未启用。产品问题是缺少零值防护，不主张零周期具有业务含义。",
+    "root_cause": "周期 setter、updateSecData 和 tick slice extractor 都未建立 seconds/times>0 不变量。",
+    "fix": "在 updateSecData 与 extractKlineData 两个除法入口验证正值并安全失败；将 setPeriod 的周期合法性也纳入对象状态验证，避免依赖所有调用者自行检查。",
+    "acceptance": "seconds=0 的 extractor 返回规定失败值，times=0 的 updateKlineData/updateSecData 不修改 kline 且不除零；正秒周期原桶时间、volume/add 结果不变。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p12_datafactory_datadef/p12_factory_extract_merge_test.cpp",
+        "case": "P12Extract.ZeroSecondPeriodRejected",
+        "issue": "现有零周期用例位于 DISABLED 类中且可能触发 SIGFPE，不能直接启用。",
+        "change": "用有效非空 tick slice 和有效 session 调用 extractKlineData(seconds=0)，断言公开失败值，不触发除法。",
+        "target": "build-cov/build_x64/Debug/bin/TestUnits/CoverageTests",
+        "filter": "--gtest_filter=P12Extract.ZeroSecondPeriodRejected",
+        "expected_result": "零秒请求受控返回失败且无输出桶；不得依赖崩溃/signal 作为断言。"
+      },
+      {
+        "file": "src/TestUnits/coverage/p12_datafactory_datadef/p12_factory_extract_merge_test.cpp",
+        "case": "P12UpdateSec.ZeroTimesPeriodRejected",
+        "issue": "KlineData setter 可存入 times=0，updateKlineData 的 KP_Tick 分支最终用其作除数。",
+        "change": "对有效 tick、session 和 KP_Tick times=0 调用 updateKlineData，断言失败返回及原 bar 状态不变。",
+        "target": "build-cov/build_x64/Debug/bin/TestUnits/CoverageTests",
+        "filter": "--gtest_filter=P12UpdateSec.ZeroTimesPeriodRejected",
+        "expected_result": "零倍周期安全失败且不修改数据；正 times 的现有 update 测试保持通过。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "不运行现有 disabled 除零用例；待安全 guard 与两条正向/零值对照用例实现后定向验收。"
+    ]
+  },
+  {
+    "lane": "p12_datafactory_datadef",
+    "id": "BUG-P12-005",
+    "decision": "NEEDS_DECISION",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/Includes/WTSStruct.h:120-124",
+      "src/WTSTools/WTSDataFactory.cpp:1285-1293",
+      "src/WTSTools/WTSDataFactory.cpp:165-168",
+      "src/WtDataStorage/WtDataWriter.cpp:1723-1727",
+      "src/WtDataStorage/WtDataWriter.cpp:2047-2051"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p12_datafactory_datadef/p12_factory_extract_merge_test.cpp:277-309"
+    ],
+    "input_reachability": "extractDayData 是公开通用日线重采样入口，只拿到 KlineSlice/code 与 WTSBarStruct，没有传入 instrument kind。WTSBarStruct 的 add 与 option ask 共用 union；对期货日线，writer 将 add 写为 open_interest-pre_interest，按多日分组应累计净变化；对 option 数据，同一槽可能是 ask 价，按日分组合适地保留末值。两种合法数据都能进通用入口，但实现无法从类型参数区分。",
+    "oracle_basis": "WTSStruct.h 明确说明 add/ask 共用存储；日线 writer 将期货 add 定义为持仓变化。当前测试 fixture 的 code 是 DCE.i2405，可用于期货语义，但仅凭它不能规定通用 extractor 的 option 语义。其它周期无条件累加也不能推导 option ask 应累加。",
+    "reason": "day resample 的赋值对期权 ask 末值合理，对期货多日增仓可能丢掉前日变化。当前通用函数没有类型/语义入参，因此不能把赋值或 add 求和一概定为所有输入的正确合同；需要明确通用 API 如何区分这两类合法字段含义。当前测试只通过 WTSBarStruct 注释说明 add/ask 共用 union，没有 add=6/16/11 或期权 ask 聚合断言；本条仍是类型语义合同待定。",
+    "root_cause": "通用重采样 API 接收语义重载的字段，但没有 instrument/field 模式；实现固定采用末值赋值。",
+    "fix": "先由权威调用者/文档明确 extractDayData 如何获知 instrument kind 或字段聚合语义。若合同要求同一 API 支持期货 add 与期权 ask，则增加显式模式或类型来源后再分别实现；合同未确定前不把全局求和或末值替换定为修复。",
+    "acceptance": "合同必须明确 add/ask 的有效输入类型及其聚合规则，并说明通用入口如何区分；之后按该合同为每种受支持类型建立正反对照。具体数值期望须由确认后的规则与 fixture 派生，不能作为当前测试已验证的结论。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p12_datafactory_datadef/p12_factory_extract_merge_test.cpp",
+        "case": "P12Extract.DayResampleGroupsByCount; P12Extract.DayResampleOptionAskUsesLastValue",
+        "issue": "当前 DayResampleGroupsByCount 没有 add 或 option ask 聚合断言；通用函数面对 add/ask union，合同尚未说明如何区分两类输入。",
+        "change": "合同确认前不新增聚合语义断言。合同确定后，按明确的 instrument/field 模式修改期货用例；仅当合同确认通用入口支持期权 ask 时，再增加期权对照用例。所有期望值由确认后的合同推导。",
+        "target": "build-cov/build_x64/Debug/bin/TestUnits/CoverageTests",
+        "filter": "--gtest_filter=P12Extract.DayResampleGroupsByCount:P12Extract.DayResampleOptionAskUsesLastValue",
+        "expected_result": "本轮维持 NEEDS_DECISION，不声称聚合语义测试已新增或通过；合同确定后，按选定的类型/模式分别验证，并保持其他已确认字段语义。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": {
+      "question": "通用 extractDayData 遇到 WTSBarStruct.add/ask union 时，应按何种权威信息选择跨日聚合语义？",
+      "options": [
+        "增加明确 instrument/field 模式，期货 add 求和、期权 ask 取末值",
+        "该函数只支持期货 add，并在调用边界拒绝期权数据",
+        "统一保留最后日字段值，另提供期货专用的增仓累计接口"
+      ],
+      "recommendation": "推荐先确认权威类型/字段来源；若同一 API 需要支持两类语义，再采用显式 instrument/field 模式分别表达。合同和测试 oracle 未确认前，不固定 6/16/11 或期权末值为当前行为要求。",
+      "impact": "改变 day resample API 的 source/ABI 使用方式或调用者路由；若选择全局求和会破坏期权 ask，若保留全局末值会丢失期货跨日增仓。"
+    },
+    "external_blocker": null,
+    "local_remaining": [
+      "待主代理/owner 确认通用函数如何区分 add/ask 语义及支持范围；决策后再提出匹配合同的测试修订和定向验收。本轮没有 P12-005 聚合语义测试运行。"
+    ]
+  }
+]

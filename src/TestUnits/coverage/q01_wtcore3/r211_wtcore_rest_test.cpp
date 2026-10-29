@@ -94,7 +94,28 @@ fs::path binDir()
     return exePath.parent_path().parent_path();
 }
 
-/** 数据管理器替身：复权位返回 7，用来证明引擎侧把它丢掉。 */
+/** setInstDir() 与 init_riskmon() 的目录拼接要求目录值保留末尾分隔符。 */
+class R211InstDirGuard
+{
+public:
+    explicit R211InstDirGuard(const fs::path& dir) : _old(WtHelper::getInstDir())
+    {
+        _value = dir.string();
+        if (!_value.empty() && _value.back() != fs::path::preferred_separator)
+            _value.push_back(fs::path::preferred_separator);
+        WtHelper::setInstDir(_value.c_str());
+    }
+
+    ~R211InstDirGuard() { WtHelper::setInstDir(_old.c_str()); }
+
+    const std::string& value() const { return _value; }
+
+private:
+    std::string _old;
+    std::string _value;
+};
+
+/** 数据管理器替身：复权标志按位组合返回 7，供引擎转发断言使用。 */
 class R211FlagDtMgr : public WtDtMgr
 {
 public:
@@ -113,6 +134,8 @@ public:
         set_date_time(20250110, 931, 0);
         set_trading_date(20250110);
     }
+
+    bool has_riskmon() const { return _risk_mon != nullptr; }
 };
 
 /** 记录分钟闭合写入的 IDataReader 替身。 */
@@ -176,8 +199,20 @@ public:
 TEST(R211Engine, IncompatibleRiskMonModuleIsRejected)
 {
     R211Temp tmp("risk");
-    const std::string oldInst = WtHelper::getInstDir();
-    WtHelper::setInstDir(binDir().string().c_str());
+    const R211InstDirGuard instDir(binDir());
+    const std::string moduleName = DLLHelper::wrap_module("WtExeFact");
+    const fs::path modulePath = binDir() / moduleName;
+
+    // 前置条件：这是可加载的模块，但其导出接口是 ExecuterFact 而非 RiskMonFact。
+    ASSERT_TRUE(fs::is_regular_file(modulePath)) << modulePath.string();
+    ASSERT_FALSE(fs::exists(fs::path(WtHelper::getCWD()) / moduleName))
+        << "测试必须走 getInstDir() 的回退路径";
+    ASSERT_EQ(modulePath.string(), instDir.value() + moduleName);
+    DllHandle module = DLLHelper::load_library(modulePath.string().c_str());
+    ASSERT_NE(nullptr, module);
+    const bool hasRiskMonFactory = DLLHelper::get_symbol(module, "createRiskMonFact") != nullptr;
+    DLLHelper::free_library(module);
+    ASSERT_FALSE(hasRiskMonFactory);
 
     q01sel::BaseDataMgr bd;
     q01sel::HotMgr hot;
@@ -189,17 +224,13 @@ TEST(R211Engine, IncompatibleRiskMonModuleIsRejected)
     ASSERT_NE(nullptr, cfg);
 
     // BUG-R42-001：WtSelEngine 析构会读未初始化的 _tm_ticker，堆分配且不回收
-    WtSelEngine* engine = new WtSelEngine();
+    R211SelEngine* engine = new R211SelEngine();
     engine->init(cfg, &bd, &dm, &hot, NULL);
     cfg->release();
 
-    // 前置断言：模块确实存在且可 dlopen，否则走到的是 1159-1162 的加载失败支
-    EXPECT_TRUE(fs::exists(binDir() / "libWtExeFact.dylib"));
-    // 引擎仍然可用；风控模块被拒绝后不会留下半初始化状态
-    EXPECT_EQ(0u, engine->get_adjusting_flag());
+    // 有库且无 createRiskMonFact 时，init_riskmon 应拒绝模块并保持无风控包装器状态。
+    EXPECT_FALSE(engine->has_riskmon());
     // BUG-R211-001：init() 丢弃 init_riskmon 的 false，active 的风控配置会被静默忽略
-
-    WtHelper::setInstDir(oldInst.c_str());
 }
 
 /* ------------------------------------------------------------------ *
@@ -240,10 +271,10 @@ TEST(R211ExecMgr, ExecuterFilterAndExplicitRouteDispatch)
 }
 
 /* ------------------------------------------------------------------ *
- * 3. BUG-R192-001 characterization：数据管理器返回 7，引擎侧恒为 0。
- *    这解释了 WtSelEngine.cpp:189-206 的 flag&1/2/4 复权体为何不可达。
+ * 3. BUG-P02-003 regression：引擎公开 accessor 应转发 data manager 的复权位。
+ *    WtDataReader 将该值定义为按位组合（1/2/4），不能在引擎层固定成 0。
  * ------------------------------------------------------------------ */
-TEST(R211SelEngine, DataMgrAdjustingFlagIsDroppedByEngine)
+TEST(R211SelEngine, AdjustingFlagPropagatesDataManagerValue)
 {
     R211Temp tmp("flag");
     q01sel::BaseDataMgr bd;
@@ -256,8 +287,13 @@ TEST(R211SelEngine, DataMgrAdjustingFlagIsDroppedByEngine)
     R211SelEngine* engine = new R211SelEngine();
     engine->attach(&bd, &hot, &dm);
 
-    // 期望 7，实际 0：WtEngine::get_adjusting_flag 丢弃 _data_mgr 的返回值
-    EXPECT_EQ(0u, engine->get_adjusting_flag());
+    // 无 data manager 时公开 accessor 的默认值是 0；这是单独的空依赖控制。
+    R211SelEngine* engineWithoutDataMgr = new R211SelEngine();
+    engineWithoutDataMgr->attach(&bd, &hot, NULL);
+    EXPECT_EQ(0u, engineWithoutDataMgr->get_adjusting_flag());
+
+    // 回归断言：公开引擎接口应原样转发数据管理器的 flag。
+    EXPECT_EQ(7u, engine->get_adjusting_flag());
 }
 
 /* ------------------------------------------------------------------ *

@@ -48,17 +48,12 @@ protected:
 	std::string	m_file;
 };
 
-// WTSHotMgr.cpp:211-220,272-289,321-335,358-365,413-424
-TEST_F(R56HotMgr, MissingFilesKeepManagerEmpty)
+// 调用方仅在 hot 配置项存在时才调用 loadHots；未配置是正常可选路径。
+TEST_F(R56HotMgr, OptionalHotRulesOmittedLeavesManagerUninitialized)
 {
-	const std::string missing = (m_dir / "no_such_hots.json").string();
-	EXPECT_FALSE(m_mgr.loadCustomRules("HOT", missing.c_str()));
-	EXPECT_FALSE(m_mgr.loadSeconds(missing.c_str()));
-	// loadHots 无论 loadCustomRules 是否成功都把 initialized 置真（现状，见 manifest）
-	EXPECT_TRUE(m_mgr.loadHots(missing.c_str()));
-	EXPECT_TRUE(m_mgr.isInitialized());
+	EXPECT_FALSE(m_mgr.isInitialized());
 
-	// 规则表为空时所有查询都必须安全落空
+	// 未配置时没有规则，查询保持默认结果。
 	EXPECT_STREQ("", m_mgr.getRuleTag("SHFE.rb.HOT"));
 	EXPECT_DOUBLE_EQ(1.0, m_mgr.getRuleFactor("HOT", "SHFE.rb", 20240110));
 	EXPECT_STREQ("", m_mgr.getRawCode("SHFE", "rb", 20240110));
@@ -67,8 +62,16 @@ TEST_F(R56HotMgr, MissingFilesKeepManagerEmpty)
 	HotSections sections;
 	EXPECT_FALSE(m_mgr.splitHotSecions("SHFE", "rb", 20240101, 20240131, sections));
 	EXPECT_TRUE(sections.empty());
-	EXPECT_TRUE(m_mgr.getHotTags().empty());
-	m_mgr.release();
+}
+
+// 显式配置了路径时，缺失文件属于加载失败；不应报告成功或进入 initialized 状态。
+TEST_F(R56HotMgr, ExplicitMissingHotRulesFileFailsWithoutInitializingManager)
+{
+	const std::string missing = (m_dir / "no_such_hots.json").string();
+	EXPECT_FALSE(m_mgr.loadCustomRules("HOT", missing.c_str()));
+	EXPECT_FALSE(m_mgr.loadSeconds(missing.c_str()));
+	EXPECT_FALSE(m_mgr.loadHots(missing.c_str()));
+	EXPECT_FALSE(m_mgr.isInitialized());
 }
 
 // WTSHotMgr.cpp:232-269,34-59,148-159

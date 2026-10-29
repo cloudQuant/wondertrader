@@ -63,7 +63,7 @@ TEST_F(R19TempDir, r19_cmd_unknown_name_add_false_get_empty)
 	EXPECT_STREQ("", sb().get_cmd(r19::domain("d0b").c_str(), idx));
 }
 
-// 冷启动 + 消费者中途接入：第一条已入队的命令会被跳过（BUG-R19-006）
+// 现状刻画：ShareBlocks.cpp 将新启动时丢弃旧命令作为策略；公开接口未明确新消费者是否应重放历史命令。
 TEST_F(R19TempDir, r19_cmd_cmder_writes_and_consumer_joining_later_skips_first)
 {
 	const std::string domC = r19::domain("d1c");

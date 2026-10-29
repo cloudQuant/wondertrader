@@ -116,7 +116,10 @@ struct BuyEnv
 	void feedTrade(const char* exchg, const char* code, WTSDirectionType dir,
 		WTSOffsetType offset, double vol)
 	{
+		WTSContractInfo* cInfo = _bd.getContract(code, exchg);
+		ASSERT_NE(nullptr, cInfo);
 		WTSTradeInfo* t = WTSTradeInfo::create(code, exchg);
+		t->setContractInfo(cInfo);
 		t->setDirection(dir);
 		t->setOffsetType(offset);
 		t->setVolume(vol);

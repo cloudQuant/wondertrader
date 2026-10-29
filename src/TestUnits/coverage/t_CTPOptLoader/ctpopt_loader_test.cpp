@@ -198,8 +198,44 @@ TEST(CTPOptLoaderRun, empty_content_returns_zero_without_touching_globals)
 TEST(CTPOptLoaderRun, missing_json_file_returns_zero_without_touching_globals)
 {
 	// isFile=true 且不以 .ini 结尾 -> load_from_file 路径；文件不存在返回 NULL
+	FRONT_ADDR = "sentinel-front";
 	CONT_FILE = "sentinel-cont";
-	EXPECT_EQ(run("t4_no_such_loader_cfg.json", true, false), 0);
+	EXPECT_EQ(run("t4_no_such_loader_cfg.json", true, true), 0);
+	EXPECT_EQ(FRONT_ADDR, "sentinel-front");
+	EXPECT_EQ(CONT_FILE, "sentinel-cont");
+	EXPECT_EQ(pUserApi, nullptr);
+}
+
+TEST(CTPOptLoaderRun, yaml_content_missing_ctp_section_returns_zero_without_touching_globals)
+{
+	const char* cfg =
+		"config:\n"
+		"  path: ''\n"
+		"  mask: 0\n";
+	FRONT_ADDR = "sentinel-front";
+	CONT_FILE = "sentinel-cont";
+
+	EXPECT_EQ(run(cfg, true, false), 0);
+	EXPECT_EQ(FRONT_ADDR, "sentinel-front");
+	EXPECT_EQ(CONT_FILE, "sentinel-cont");
+	EXPECT_EQ(pUserApi, nullptr);
+}
+
+TEST(CTPOptLoaderRun, yaml_content_missing_config_section_returns_zero_without_touching_globals)
+{
+	const char* cfg =
+		"ctp:\n"
+		"  front: tcp://127.0.0.1:1234\n"
+		"  broker: brk9999\n"
+		"  user: inv001\n"
+		"  pass: pwd001\n"
+		"  appid: app-1\n"
+		"  authcode: auth-1\n";
+	FRONT_ADDR = "sentinel-front";
+	CONT_FILE = "sentinel-cont";
+
+	EXPECT_EQ(run(cfg, true, false), 0);
+	EXPECT_EQ(FRONT_ADDR, "sentinel-front");
 	EXPECT_EQ(CONT_FILE, "sentinel-cont");
 	EXPECT_EQ(pUserApi, nullptr);
 }

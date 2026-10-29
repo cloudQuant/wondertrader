@@ -178,7 +178,8 @@ namespace t27
 			lastExchg = exchg;
 			if (contract == nullptr || rejectAll)
 				return nullptr;
-			if (std::strcmp(code, contract->getCode()) != 0)
+			if (exchg == nullptr || std::strcmp(code, contract->getCode()) != 0 ||
+				std::strcmp(exchg, contract->getExchg()) != 0)
 				return nullptr;
 			return contract;
 		}
@@ -403,8 +404,8 @@ namespace t27
 			ASSERT_EQ(nullptr, m->m_pUserAPI);
 			ASSERT_TRUE(m->m_fitSHSubs.empty());
 			ASSERT_TRUE(m->m_fitSZSubs.empty());
-			ASSERT_EQ(nullptr, m->m_hInst);
-			ASSERT_EQ(nullptr, m->m_funcCreator);
+			/* init() assigns these raw fields after loading the vendor library;
+			 * the constructor leaves them indeterminate, so don't read them here. */
 			ASSERT_EQ(nullptr, m->_thrd_worker);
 			ASSERT_EQ(nullptr, m->_worker);
 

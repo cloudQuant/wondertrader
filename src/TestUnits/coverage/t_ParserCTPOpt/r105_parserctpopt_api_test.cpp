@@ -280,6 +280,48 @@ TEST_F(R105OptTest, injected_api_connect_login_and_do_subscribe)
 	EXPECT_EQ(1, api_.sub_calls);
 }
 
+TEST_F(R105OptTest, nonzero_login_error_does_not_report_success_or_subscribe)
+{
+	CodeSet codes;
+	codes.insert("DCE.m2401");
+	parser_.subscribe(codes); // 缓存登录前的订阅，错误登录不应下发
+	EXPECT_EQ(0, api_.sub_calls);
+
+	CThostFtdcRspInfoField err;
+	std::memset(&err, 0, sizeof(err));
+	err.ErrorID = 404;
+	std::strncpy(err.ErrorMsg, "Instrument not found", sizeof(err.ErrorMsg) - 1);
+	parser_.OnRspUserLogin(NULL, &err, 7, true);
+
+	bool reportedSuccessfulLogin = false;
+	for (const R105OptSink::Event& event : sink_.events)
+	{
+		if (event.e == (int)WPE_Login && event.ec == 0)
+			reportedSuccessfulLogin = true;
+	}
+	EXPECT_FALSE(reportedSuccessfulLogin);
+	EXPECT_EQ(0, api_.sub_calls);
+	EXPECT_TRUE(api_.sub_codes.empty());
+}
+
+TEST_F(R105OptTest, zero_error_login_response_reports_success_and_subscribes)
+{
+	CodeSet codes;
+	codes.insert("DCE.m2401");
+	parser_.subscribe(codes);
+
+	CThostFtdcRspInfoField ok;
+	std::memset(&ok, 0, sizeof(ok));
+	parser_.OnRspUserLogin(NULL, &ok, 8, true);
+
+	ASSERT_EQ(1u, sink_.events.size());
+	EXPECT_EQ((int)WPE_Login, sink_.events[0].e);
+	EXPECT_EQ(0, sink_.events[0].ec);
+	ASSERT_EQ(1, api_.sub_calls);
+	EXPECT_EQ(1, api_.sub_count);
+	EXPECT_EQ(1u, api_.sub_codes.count("m2401"));
+}
+
 /* ParserCTPOpt.cpp:344-363、365-400、407-442 — 登录/订阅失败与登录后内联下发 */
 TEST_F(R105OptTest, login_failure_and_inline_subscribe_branches)
 {

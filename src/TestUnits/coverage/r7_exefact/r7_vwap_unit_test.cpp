@@ -34,6 +34,7 @@
 #include "Includes/WTSStruct.h"
 #include "Includes/WTSDataDef.hpp"
 #include "WtExeFact/WtVWapExeUnit.h"
+#include "r7_init_probe.h"
 
 using namespace wtp;
 
@@ -189,6 +190,26 @@ void boot(WtVWapExeUnit& unit, FakeCtx& ctx, double target, WTSVariant* cfg)
 	cfg->release();
 	unit.set_position(kCode, target);
 	unit.on_channel_ready();
+}
+
+
+int run_vwap_init_probe(uint32_t totalTimes, int markerFd)
+{
+	VwapFile vf(25.0);
+	FakeCtx ctx;
+	ctx.comm = mkComm();
+	int exitCode = 0;
+	{
+		WtVWapExeUnit unit;
+		WTSVariant* cfg = mkCfg(totalTimes, 0, 0, 1.0, 10.0, 0, 0);
+		if (!r7_test::write_marker(markerFd))
+			exitCode = 4;
+		else
+			unit.init(&ctx, kCode, cfg);
+		cfg->release();
+	}
+	ctx.comm->release();
+	return exitCode;
 }
 }
 
@@ -721,17 +742,27 @@ TEST(r7_vwap, init_logs_total_seconds_from_begin_end_window)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 缺陷复现（SIGFPE，不能启用）：total_times=0 时 L120 整数除零
+// bounded child probe only: no fallback/default is asserted, and a normal ARM64
+// return does not rule out C++ undefined behavior in the division.
 //////////////////////////////////////////////////////////////////////////
-TEST(r7_vwap, DISABLED_init_zero_total_times_divide_by_zero)
+TEST(r7_vwap, init_zero_total_times_bounded_child_probe)
 {
-	VwapFile vf(25.0);
-	FakeCtx ctx;
-	ctx.comm = mkComm();
-	WtVWapExeUnit unit;
-	unit.init(&ctx, kCode, mkCfg(0, 0, 0, 1.0, 10.0, 0, 60));   // 期望 SIGFPE（BUG-R7-002）
-	unit.on_channel_ready();
-	ctx.comm->release();
+	r7_test::ScopedTempDir probeDir("WT_R7_002_VWAP");
+	ASSERT_TRUE(probeDir.ready());
+	const r7_test::ProbeResult result = r7_test::run_bounded_child(probeDir.path(), 0, run_vwap_init_probe);
+	ASSERT_TRUE(probeDir.cleanup()) << "failed to remove private init-probe directory";
+	if (!r7_test::expect_normal_return(result))
+		return;
+	GTEST_SKIP() << "The child returned normally on this build; without UBSan or an explicit invalid-config failure contract, this cannot prove safe rejection or absence of undefined behavior.";
+}
+
+TEST(r7_vwap, init_positive_total_times_control_returns)
+{
+	r7_test::ScopedTempDir probeDir("WT_R7_002_VWAP");
+	ASSERT_TRUE(probeDir.ready());
+	const r7_test::ProbeResult result = r7_test::run_bounded_child(probeDir.path(), 5, run_vwap_init_probe);
+	r7_test::expect_normal_return(result);
+	EXPECT_TRUE(probeDir.cleanup()) << "failed to remove private init-probe directory";
 }
 
 //////////////////////////////////////////////////////////////////////////

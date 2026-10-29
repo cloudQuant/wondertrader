@@ -134,18 +134,20 @@ TEST(R55_charconv, utf8_and_gb2312_roundtrip_for_fixed_chinese_input)
 	EXPECT_STREQ(utf8, backFromStd.c_str());
 }
 
-// 空串与空指针短路分支（charconv.hpp:85-98、257-270、167-171、341-345）
-TEST(R55_charconv, utf8_helpers_handle_empty_and_null_inputs)
+// 空串短路分支（charconv.hpp:85-98、257-270）
+TEST(R55_charconv, utf8_helpers_handle_empty_inputs)
 {
 	UTF8toChar empty("");
 	EXPECT_STREQ("", empty.c_str());
 
 	ChartoUTF8 emptyBack("");
 	EXPECT_STREQ("", emptyBack.c_str());
+}
 
-	// 空指针：c_str() 原样返回空指针；析构不应释放任何内存。
-	// 注意 needFree 未初始化（见 bugs/R55.md BUG-R55-001），但 t_string 为 NULL，
-	// delete[] NULL 是合法 no-op，因此本用例可确定通过。
+// BLOCKED by BUG-R55-001: null-input objects leave needFree uninitialized, which
+// their destructors may read. Keep these assertions disabled until that state is safe.
+TEST(R55_charconv, DISABLED_null_inputs_keep_null_pointers)
+{
 	UTF8toChar nullIn(static_cast<const char*>(nullptr));
 	EXPECT_EQ(nullptr, nullIn.c_str());
 
@@ -169,8 +171,8 @@ TEST(R55_charconv, ascii_helpers_keep_original_pointer_and_convert_operators)
 	EXPECT_EQ(raw2, localCast);
 }
 
-// 期望行为：合法 2 字节 UTF-8 应被接受（BUG-R55-002）。修复前保持禁用，不影响启用用例。
-TEST(R55_charconv, DISABLED_two_byte_utf8_should_be_accepted)
+// 合法 2 字节 UTF-8 应被接受（BUG-R55-002）。
+TEST(R55_charconv, two_byte_utf8_is_accepted)
 {
 	std::vector<unsigned char> utf8_2{ 0xC2, 0xA2 };	// U+00A2
 	EXPECT_TRUE(EncodingHelper::isUtf8(utf8_2.data(), utf8_2.size()));
@@ -179,12 +181,6 @@ TEST(R55_charconv, DISABLED_two_byte_utf8_should_be_accepted)
 // EncodingHelper 的 GBK 边界（charconv.hpp:560-669）
 TEST(R55_charconv, encoding_helper_two_byte_and_gbk_boundaries)
 {
-	// U+00A2 = C2 A2 是合法 2 字节 UTF-8，但实现用 `preNUm(...) > 2` 判多字节，
-	// num==2 直接落到 else 返回 false（BUG-R55-002）。这里锁定实际行为；
-	// 期望行为见同文件 DISABLED_two_byte_utf8_should_be_accepted。
-	std::vector<unsigned char> utf8_2{ 0xC2, 0xA2 };
-	EXPECT_FALSE(EncodingHelper::isUtf8(utf8_2.data(), utf8_2.size()));
-
 	// 后续字节不是 10xxxxxx（L654-660）
 	std::vector<unsigned char> utf8_2_bad{ 0xC2, 0x41 };
 	EXPECT_FALSE(EncodingHelper::isUtf8(utf8_2_bad.data(), utf8_2_bad.size()));

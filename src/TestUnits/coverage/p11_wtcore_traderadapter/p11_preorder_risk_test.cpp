@@ -280,7 +280,7 @@ TEST_F(P11PreOrderRisk, risk_params_loaded_by_init_and_cancel_limit_blocks)
     EXPECT_EQ(0u, api_.n_action_);
 }
 
-TEST_F(P11PreOrderRisk, order_time_cache_never_hits_std_code)
+TEST_F(P11PreOrderRisk, order_frequency_window_rejects_standard_code_after_successful_orders)
 {
     wtp::WTSVariant* cfg = writeCfg("freq.json",
         "{\"savedata\":false,\"riskmon\":{\"active\":true,\"policy\":{"
@@ -298,16 +298,16 @@ TEST_F(P11PreOrderRisk, order_time_cache_never_hits_std_code)
     // 未下单前放行
     EXPECT_TRUE(trader.checkOrderLimits(kStdCode));
 
-    // 连下 4 单: doEntrust 里时间缓存是按「交易所原始代码 ag2512」写入的
+    // 连续成功提交 4 单，超过 order_times_boundary=2。
     for (uint32_t i = 0; i < 4; ++i)
         EXPECT_NE(UINT_MAX, trader.openLong(kStdCode, 7000.0, 1, 0));
     EXPECT_EQ(4u, api_.n_insert_);
     EXPECT_STREQ(kRawCode, api_.last_code_.c_str());
 
-    // 而检查时上层传的是标准代码, 缓存查不到 -> 频率窗口这条分支实测不可达(见 bugs P11-003)
-    EXPECT_TRUE(trader.checkOrderLimits(kStdCode));
+    // 按公开标准码检查应命中这些记录并拒绝后续下单。
+    EXPECT_FALSE(trader.checkOrderLimits(kStdCode));
 
-    // 撤单频率同理: _cancel_time_cache 也按原始代码写入
+    // 仅撤销一单，cancel_times_boundary=9，撤单频率检查仍应放行。
     trader.onRspOrders(makeArray({
         makeAliveOrder(ct_, WDT_LONG, WOT_OPEN, 1, 0, "FB1", kTag1001) }));
     EXPECT_TRUE(trader.cancel(1001u));

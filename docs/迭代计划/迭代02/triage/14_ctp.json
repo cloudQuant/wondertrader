@@ -1,0 +1,847 @@
+[
+  {
+    "lane": "R61",
+    "id": "BUG-R61-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderCTPOpt/TraderCTPOpt.cpp:234",
+      "src/TraderCTPOpt/TraderCTPOpt.cpp:331-376",
+      "src/TraderCTPOpt/TraderCTPOpt.cpp:283-303"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTPOpt/r61_traderctpopt_api_test.cpp:511-543"
+    ],
+    "reason": "worker 只以 m_bStopped 为循环出口，但该类未在 disconnect/release 写入停止值；disconnect 仅排 release lambda 后无条件 join，实际 connect worker 空闲时也不会取队列并退出。测试用 dummy worker 避开常驻线程，不能当作运行复现。",
+    "fix": "让停止信号可达且线程退出有界；disconnect 应协调 worker 停止、API release 与 join 顺序。",
+    "acceptance": "用真实本地 stub worker 覆盖 connect→disconnect，有限等待成功，API 只 release 一次；重复 disconnect 不挂起。",
+    "canonical": "",
+    "proposed_test_fix": "保留现有正常 connect stub 覆盖，另加启动真实 worker 的停机用例；不启用当前 dummy-worker 测试来证明 join。"
+  },
+  {
+    "lane": "R61",
+    "id": "BUG-R61-002",
+    "decision": "DUPLICATE",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderCTPMini/TraderCTPMini.cpp:91",
+      "src/TraderCTPMini/TraderCTPMini.cpp:189-234",
+      "src/TraderCTPMini/TraderCTPMini.cpp:139-162"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTPMini/r61_traderctpmini_api_test.cpp:465-500"
+    ],
+    "reason": "Mini 有同一类永久 join 阻塞：worker 条件依赖一直为 false 的 m_bStopped，disconnect 把 release 入队后 join；现用例也安装 dummy worker。按根因归并到 R61-001，实施修复必须覆盖 Mini。",
+    "fix": "由 R61-001 统一修复策略覆盖 TraderCTPMini 的 stop/join 生命周期。",
+    "acceptance": "修复验收需同时跑 Mini 的本地 stub connect→disconnect 有界退出用例；不要把该行重复计为独立根因。",
+    "canonical": "BUG-R61-001",
+    "proposed_test_fix": "保留 Mini 独立回归用例；把它从独立缺陷计数归并到 canonical。"
+  },
+  {
+    "lane": "R61",
+    "id": "BUG-R61-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderCTPOpt/TraderCTPOpt.cpp:1068-1095",
+      "src/TraderCTPOpt/TraderCTPOpt.h:220-225"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTPOpt/r61_traderctpopt_api_test.cpp:1035-1053",
+      "src/TestUnits/coverage/t_TraderCTPOpt/cov_traderctpopt_spi_test.cpp:1047-1059"
+    ],
+    "reason": "有效行权查询行被追加到 m_ayExecOrds，但末帧却把普通订单 m_ayOrders 交给 onRspOrdersOpt，随后只清行权数组。R61 测试正确期望累积的两条记录；cov 用例的注释和 0 长度断言绑定了错误旧行为。",
+    "fix": "末帧传 m_ayExecOrds，且完成回调后清空同一批行权数组；区分普通订单查询容器。",
+    "acceptance": "两帧行权数据末帧应回调准确的两条记录；随后新查询不含旧记录。",
+    "canonical": "",
+    "proposed_test_fix": "立即修正 cov 第1059行 size=0 为该用例的有效行数（1），并验证首行字段；若不能维护该断言，则过滤错误的 size=0 旧 oracle。"
+  },
+  {
+    "lane": "R61",
+    "id": "BUG-R61-004",
+    "decision": "DUPLICATE",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderCTPOpt/TraderCTPOpt.cpp:496-507",
+      "src/Includes/ITraderApi.h:229-248",
+      "src/WtCore/TraderAdapter.cpp:487-508"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTPOpt/r61_traderctpopt_api_test.cpp:682-720"
+    ],
+    "reason": "空 userTag 分支 fetch_add(0) 不推进 OrderRef/ExecOrderRef；公开 ITraderApi::orderInsert 没有要求必须先 makeEntrustID 的前置契约，空 tag 也是显式支持分支。标准 adapter 先填 ID 的路径不能消除直接接口调用的重复引用风险。与 T2-CTP-08 同根。",
+    "fix": "按 T2-CTP-08 的统一入口契约处理：缺少 ID 时拒绝或分配唯一引用；已预留 ID 路径不得二次推进。",
+    "acceptance": "直接提交两个无 tag/no preallocated ID 的有效委托应得到不同引用；标准 adapter 路径仍使用 makeEntrustID 的引用。",
+    "canonical": "T2-CTP-08",
+    "proposed_test_fix": "本行测试仅校验字段传递，不足以支持复用当前引用的行为；加入双委托唯一性断言。"
+  },
+  {
+    "lane": "R61",
+    "id": "BUG-R61-005",
+    "decision": "DUPLICATE",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderCTPMini/TraderCTPMini.cpp:342-353",
+      "src/Includes/ITraderApi.h:229-248"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTPMini/r61_traderctpmini_api_test.cpp:673-730"
+    ],
+    "reason": "Mini 空 userTag 分支同样 fetch_add(0)，而公开 orderInsert 接口未规定先预留 ID；该候选与 T2-CTP-08 的 TraderCTP 及 R61-004 属同一引用分配根因。",
+    "fix": "按 canonical T2-CTP-08 统一修复和契约，不重复计数。",
+    "acceptance": "Mini 本地 stub 的双裸下单用例必须验证引用唯一或入口按明确契约拒绝。",
+    "canonical": "T2-CTP-08",
+    "proposed_test_fix": "为 Mini 增加双裸下单 ID 唯一性/拒绝测试；把原单次字段传递测试保留为映射覆盖。"
+  },
+  {
+    "lane": "R65",
+    "id": "BUG-R65-001",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/TraderMocker/TraderMocker.cpp:211-216",
+      "src/TraderMocker/TraderMocker.cpp:258-265"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp:720-749",
+      "src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp:1006-1025"
+    ],
+    "reason": "开仓成功确实把空 msg 写入订单状态；活动测试记录了空文案，禁用用例按 HftMocker 的平仓文案期待开仓也为“下单成功”。但本地 ITraderApi/IOrderInfo 契约没有规定成功状态必须携带非空或统一文案，不能仅靠跨 mocker parity 判产品缺陷。",
+    "fix": "先由产品/调用方契约明确是否要求成功状态文案以及语言/一致性；确认后再统一开平仓分支。",
+    "acceptance": "若契约要求文案，开仓与平仓成功订单都应返回规定文本，空输入和拒绝分支保持各自状态语义；否则移出 bug 计划。",
+    "canonical": "",
+    "proposed_test_fix": "保持活动测试只验证交易字段；不要启用按 HftMocker 假设写出的文案断言，待契约确认后再定 oracle。"
+  },
+  {
+    "lane": "R65",
+    "id": "BUG-R65-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderCTPOpt/TraderCTPOpt.cpp:1172-1179",
+      "src/TraderCTPOpt/TraderCTPOpt.cpp:1289-1313"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTPOpt/r61_traderctpopt_api_test.cpp:1210-1260"
+    ],
+    "reason": "未登记合约的任一行（特别是 bIsLast 行）在 1178 直接 return，使末帧聚合回调与 m_mapPosition 释放都被跳过；当前回归用例用未知末行后再开新批次，验证不污染后批。",
+    "fix": "对未知合约记录不完整/失败结果后仍进入末帧收尾；清理本批聚合状态，不能把部分快照静默当完整。",
+    "acceptance": "已登记行+未知末行的批次有明确失败/不完整信号并清理；下一批仅包含自身结果。",
+    "canonical": "",
+    "proposed_test_fix": "保留未知合约末行回归；增加明确的失败/不完整可观测断言，避免只测试后批不污染。"
+  },
+  {
+    "lane": "T1_ctpopt_parserxtp",
+    "id": "T1-CTPOpt-01",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderCTPOpt/TraderCTPOpt.cpp:220-236",
+      "src/TraderCTPOpt/TraderCTPOpt.h:220-225",
+      "src/TraderCTPOpt/TraderCTPOpt.cpp:1076-1095"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTPOpt/r61_traderctpopt_api_test.cpp:1035-1053",
+      "src/TestUnits/coverage/t_TraderCTPOpt/cov_traderctpopt_spi_test.cpp:1047-1060"
+    ],
+    "reason": "构造函数漏初始化头文件声明的 m_ayExecOrds；正常 OnRspQryExecOrder 非末帧在 1078 读取并条件性创建，末帧也可能访问该成员。探针硬化指针不能证明真实构造路径安全。",
+    "fix": "在构造函数初始化 m_ayExecOrds 为 NULL；保证释放、重连与查询批次遵守其所有权。",
+    "acceptance": "直接新建 TraderCTPOpt 后送入多帧行权查询无未初始化读取；回调准确且完成后可再查询。",
+    "canonical": "",
+    "proposed_test_fix": "增加不调用 probe.harden 的新对象查询回归，测试应走真实构造初始化。"
+  },
+  {
+    "lane": "T1_ctpopt_parserxtp",
+    "id": "T1-CTPOpt-02",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/TraderCTPOpt/TraderCTPOpt.cpp:283-303",
+      "src/TraderCTPOpt/TraderCTPOpt.cpp:531-573",
+      "src/TraderCTPOpt/TraderCTPOpt.cpp:704-739"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTPOpt/r61_traderctpopt_api_test.cpp:820-904"
+    ],
+    "reason": "两个撤单入口在 WS_ALLREADY 时使用 API 指针却未再判空；release 会将 API 置空而不重置 wrapper state。若对象在 release 后仍被调用可空解引用，但该调用是否违反插件对象生命周期契约目前未从接口和适配器路径确认；现有测试只覆盖有效 API。",
+    "fix": "确认并文档化 release 后调用规则；若 API 要容忍重复/迟到调用，状态与 API 生命周期需原子协调并返回错误。",
+    "acceptance": "根据确认的生命周期验收：release 后撤单返回失败且不触 API，或证明宿主绝不会再调此对象；增加相应生命周期测试。",
+    "canonical": "",
+    "proposed_test_fix": "现有有效 API 撤单测试不能作为释放后安全证据；暂不启用人工置 WS_ALLREADY+NULL API 的断言。"
+  },
+  {
+    "lane": "T1_ctpopt_parserxtp",
+    "id": "T1-CTPOpt-03",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderCTPOpt/TraderCTPOpt.cpp:1028-1040",
+      "src/TraderCTPOpt/TraderCTPOpt.cpp:1098-1110",
+      "src/TraderCTPOpt/TraderCTPOpt.cpp:1694-1700"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTPOpt/r61_traderctpopt_api_test.cpp:1059-1102"
+    ],
+    "reason": "ErrorID 非零时分支为空；ErrorID 为零时反而创建撤单错误并读取 ErrorMsg。正确测试已分别检查成功不报错、失败可见，和当前实现不符。pRspInfo==NULL 导致 else 分支解引用是额外子主张，厂商空指针语义未证。",
+    "fix": "反转成功/失败处理，仅在错误响应创建/上报 WTSError；对 NULL RspInfo 做安全策略，不能以此扩大厂商行为结论。",
+    "acceptance": "ErrorID=0 不发 TraderError；非零错误码发出含正确错误码/文本的事件；NULL 按已确认接口契约安全处置。",
+    "canonical": "",
+    "proposed_test_fix": "保留 R61 正确 oracle；把 NULL-RspInfo 另列待厂商契约验证，不作为分支反置成立的前提。"
+  },
+  {
+    "lane": "T1_ctpopt_parserxtp",
+    "id": "T1-CTPOpt-04",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/TraderCTPOpt/TraderCTPOpt.cpp:1145-1161",
+      "src/TraderCTPOpt/TraderCTPOpt.cpp:283-303"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTPOpt/r61_traderctpopt_api_test.cpp:1014-1026"
+    ],
+    "reason": "末帧有缓存内容时无条件访问 pSettlementInfo->TradingDay 与 m_bscSink；正常 adapter 注册 sink，但现有测试只传非空终帧。CTP SDK本地头文件给出回调签名，没有证明空末帧可出现或释放后回调有效，故不判为确定有效输入缺陷。",
+    "fix": "先确认 SDK 对无结果/错误末帧的参数约定及 teardown 回调保证；若可为空，缓存有效日期并在末帧安全完成/报告错误。",
+    "acceptance": "以真实 SDK 契约或可重复本地供应商兼容样例确认的空末帧安全处理；成功数据仍准确聚合。",
+    "canonical": "",
+    "proposed_test_fix": "暂不把人工 NULL 末帧断言设为必需通过；正常非空结算单回归保留。"
+  },
+  {
+    "lane": "T1_ctpopt_parserxtp",
+    "id": "T1-CTPOpt-05",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderCTPOpt/TraderCTPOpt.cpp:243-280",
+      "src/TraderCTPOpt/TraderCTPOpt.cpp:305-376"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTPOpt/r61_traderctpopt_api_test.cpp:511-543"
+    ],
+    "reason": "init 不验证动态库、symbol、creator；connect 直接调用 creator 并解引用 API。相同 connect 还启动无停止通路的 worker；R61 用 dummy worker 避开。线程缺陷与 R61-001 重叠，但 loader/API空值路径是独立失败处理缺口。",
+    "fix": "init/connect 对库句柄、符号、creator 返回 API 逐层判空，清理部分资源并失败返回；线程生命周期按 R61-001 收束。",
+    "acceptance": "缺库、缺符号及 creator 返回 NULL 均返回受控错误且无空函数调用；成功 stub connect→disconnect 可终止。",
+    "canonical": "",
+    "proposed_test_fix": "现有测试 stub 替换 creator 只证明成功初始化路径；补三个失败注入分支，修复后再增加停机回归。"
+  },
+  {
+    "lane": "T1_ctpopt_parserxtp",
+    "id": "T1-CTPOpt-07",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderCTPOpt/TraderCTPOpt.cpp:1375-1378",
+      "src/TraderCTPOpt/TraderCTPOpt.cpp:1694-1700",
+      "src/TraderCTP/TraderCTP.cpp:1159-1162"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTPOpt/cov_traderctpopt_spi_test.cpp:544-553"
+    ],
+    "reason": "CTPOpt OnRspError 明确空实现，合法带错误码响应因此无日志/上报；同类 TraderCTP handler 记录错误。cov 测试把“空实现”当期望，只能锁定当前实现，不能证明错误静默是产品契约。",
+    "fix": "对非零 ErrorID 记录/转发错误，对成功及空响应按明确策略处理；不重复实现 T1-CTPOpt-03 的 order-action 分支。",
+    "acceptance": "非零 OnRspError 在核心 sink 可观测；成功响应不产生错误；空指针行为单独按 SDK 契约验收。",
+    "canonical": "",
+    "proposed_test_fix": "更正 cov 第553行“仅心跳日志”作为目标的断言；新增非零错误可观测断言，或把该用例过滤为历史实现覆盖。"
+  },
+  {
+    "lane": "T1_ctpopt_parserxtp",
+    "id": "T1-XTP-01",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/ParserXTP/ParserXTP.cpp:94-134",
+      "src/ParserXTP/ParserXTP.cpp:119-132"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_ParserXTP/cov_parserxtp_spi_test.cpp:540-548"
+    ],
+    "reason": "init 未检查动态库句柄、creator symbol 或 API 创建结果，随后直接调用并 RegisterSpi，最后固定返回 true。失败状态由源码可确认；未在本轮运行缺库场景。",
+    "fix": "逐层判空、释放加载资源并返回 false，记录可操作错误，避免空函数/对象解引用。",
+    "acceptance": "注入库加载、symbol 查找、creator 各自失败均有受控 false；有效 stub 初始化维持成功。",
+    "canonical": "",
+    "proposed_test_fix": "禁用/注释性用例不计实证；新增三种失败注入和一条正常对照。"
+  },
+  {
+    "lane": "T1_ctpopt_parserxtp",
+    "id": "T1-XTP-02",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/ParserXTP/ParserXTP.cpp:142-160",
+      "src/ParserXTP/ParserXTP.cpp:163-173",
+      "src/ParserXTP/ParserXTP.cpp:137-140"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_ParserXTP/cov_parserxtp_spi_test.cpp:540-548"
+    ],
+    "reason": "connect 创建带 work_guard 的线程并循环 run_one 且条件恒 true；disconnect/release 仅释放 SDK API，不重置 guard、不停止 io_context、不 join/reset worker。生产销毁/重连存在确定的线程生命周期缺口，未本地启动证明。",
+    "fix": "定义 stop、guard/reset、join 顺序；release 与 disconnect 幂等，不能在 API 已释放后继续消费回调。",
+    "acceptance": "本地 stub 下 connect→release 有界返回且线程已 join；重复 release 安全，重连状态按设计恢复。",
+    "canonical": "",
+    "proposed_test_fix": "用无网络 fake API 验证实际 worker 生命周期；现有禁用线程注释不是运行证据。"
+  },
+  {
+    "lane": "T1_ctpopt_parserxtp",
+    "id": "T1-XTP-03",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/ParserXTP/ParserXTP.cpp:81-86",
+      "src/ParserXTP/ParserXTP.cpp:690-696",
+      "src/WtCore/ParserAdapter.cpp:56-61"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_ParserXTP/cov_parserxtp_spi_test.cpp:499-519"
+    ],
+    "reason": "构造函数确有多项仅在 init/注册后设置的成员；候选声称正常 adapter 生命周期危险不成立：标准 adapter 在 init 前 registerSpi(this)，XTP 注册时设置 BaseDataMgr。现证据只支持非标准直接调用/注销后的条件性风险，不支持正常路径产品 bug。",
+    "fix": "从产品缺陷中撤回“正常生命周期未初始化”主张；若另外追踪 unregister 后 manager 残留，单独明确调用前提与生命周期。",
+    "acceptance": "正常 adapter 的 register→init→使用路径不访问未初始化成员；若要保留 unregister 条目需单独证明读点和合法调用序列。",
+    "canonical": "",
+    "proposed_test_fix": "正常路径的 test oracle 应保持通过；不要用裸构造内部字段快照推断标准生命周期故障。"
+  },
+  {
+    "lane": "T1_ctpopt_parserxtp",
+    "id": "T1-XTP-04",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/ParserXTP/ParserXTP.cpp:324-338",
+      "src/API/XTP2.2.32.2/xquote_api_struct.h:205-213"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_ParserXTP/cov_parserxtp_spi_test.cpp:522-538"
+    ],
+    "reason": "settle_price 直接复制，pre_settl_price 经 checkValid 归一化；本地结构声明存在两个 double 字段，但未写 sentinel 取值契约。测试目前只覆盖通用 helper/sentinel，不能推出结算价语义要求同样归一化。",
+    "fix": "查阅此项目锁定的 XTP SDK 版本文档/厂商契约确认 settl_price sentinel；之后统一归一化或记录保留原值的语义。",
+    "acceptance": "从锁定 SDK 的字段契约确定 sentinel 输入输出，再用对应合法 sentinel 与普通价格测试；没有合同证据前不做强判。",
+    "canonical": "",
+    "proposed_test_fix": "不要把“一个字段走 checkValid”当成另一个字段必须同样变换的断言。"
+  },
+  {
+    "lane": "T1_ctpopt_parserxtp",
+    "id": "T1-XTP-05",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/ParserXTP/ParserXTP.cpp:681-683",
+      "src/Includes/IParserApi.h:120-128",
+      "src/API/XTP2.2.32.2/xtp_quote_api.h:301-307"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_ParserXTP/cov_parserxtp_spi_test.cpp:499-519",
+      "src/TestUnits/coverage/t_ParserXTP/cov_parserxtp_spi_test.cpp:238-254"
+    ],
+    "reason": "公开 IParserApi 暴露 unsubscribe，且仓库锁定的 XTP quote API 有 UnSubscribeMarketData；ParserXTP 实现为空。现测试在未登录时只检查无异常，没有检查已订阅后向 provider 发出退订，另一个用例测试的是 provider 退订回调而非请求。",
+    "fix": "按 SSE/SZSE 分组调用 SDK UnSubscribeMarketData，并同步更新本地订阅集合/登录前缓存语义。",
+    "acceptance": "已登录订阅后退订触发对应交易所 API 且精确匹配代码；重复/未订阅代码按定义处理；prelogin 行为清晰。",
+    "canonical": "",
+    "proposed_test_fix": "cov 的 unsubscribe prelogin no-throw 只能作为安全性测试，不能当功能覆盖；加已登录 fake API 调用与本地集合检查。"
+  },
+  {
+    "lane": "T25_traderctp",
+    "id": "BUG-T25-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderCTP/TraderCTP.cpp:469-501",
+      "src/TraderCTP/TraderCTP.cpp:551-558"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:791-805"
+    ],
+    "reason": "带 userTag 时 extractEntrustID 返回值被忽略，解析失败后仍将未初始化的 orderref 格式化并缓存、继续送 ReqOrderInsert；orderAction 同类输入会拒绝。有效 entrust 用户输入由公开入口收到，测试断言与下单保护目标一致。",
+    "fix": "校验 entrust ID 解析结果后再写请求和缓存；失败返回负值且不调用 SDK。",
+    "acceptance": "畸形 tag+ID 的委托不发请求、不写缓存；有效 ID 仍正确映射 OrderRef 和 userTag。",
+    "canonical": "",
+    "proposed_test_fix": "保留现有拒绝/no-request/no-cache oracle，并增加极短/多分隔符边界。"
+  },
+  {
+    "lane": "T25_traderctp",
+    "id": "BUG-T25-003",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/TraderCTP/TraderCTP.cpp:899-930",
+      "src/TraderCTP/TraderCTP.cpp:1080-1097",
+      "src/TraderCTP/TraderCTP.cpp:1159-1162"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1951-1981",
+      "src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1710-1736"
+    ],
+    "reason": "若回调以成功 RspInfo+bIsLast+NULL 行到达，账户/结算实现可能解引用；OnRspError 也假设 sink 与 RspInfo 非空。但本地 CTP 头文件仅声明回调签名，未证明这些空形状是有效 provider 输入；相关崩溃测试是 disabled/人工调用，不能判定柜台会发送。",
+    "fix": "按供应商 6.3.15 契约逐回调确认 NULL/无数据/错误末帧与注销后回调保证；对允许形状加安全分支并保持查询状态完成。",
+    "acceptance": "每个 provider 合法的空/错误末帧形状都不崩且能报告受控错误；未确认前只记录条件风险，不以 disabled 用例作为复现。",
+    "canonical": "",
+    "proposed_test_fix": "保留有效非空结算单回归；暂不将人工 NULL 成功末帧设为必过测试。"
+  },
+  {
+    "lane": "T25_traderctp",
+    "id": "BUG-T25-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderCTP/TraderCTP.cpp:415-429",
+      "src/TraderCTP/TraderCTP.cpp:1476-1488"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:758-768"
+    ],
+    "reason": "authenticate 调用 ReqAuthenticate 后丢弃非零同步返回并固定返回 0；login 因此保持 WS_LOGINING 并对调用方宣称受理，但不会有对应异步回报。API 的同步错误返回由本地接口调用结果判定，不依赖柜台行为。",
+    "fix": "传播同步失败码；login 收到非零结果时回滚至可重试/失败状态并向 sink 报告失败。",
+    "acceptance": "stub 返回非零时 login 返回失败、状态不留 LOGINING、不进入后续等待或发 ReqUserLogin；零码仍按异步流程处理。",
+    "canonical": "",
+    "proposed_test_fix": "保持测试对 nonzero auth 返回值和状态的检查；补明确错误结果回调/日志断言。"
+  },
+  {
+    "lane": "T25_traderctp",
+    "id": "BUG-T25-010",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderCTP/TraderCTP.cpp:432-447",
+      "src/TraderCTP/TraderCTP.cpp:725-735"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:721-734"
+    ],
+    "reason": "ReqUserLogin 同步返回非零时只记日志，doLogin 仍返回 0，且不撤销此前 WS_LOGINING；没有异步成功回调能收束该状态。调用边界可由 stub 确定。",
+    "fix": "让 doLogin 传播错误码并由认证成功回调的同步调用链报告登录失败/恢复状态。",
+    "acceptance": "ReqUserLogin nonzero 时状态不再 LOGINING、错误返回到登录链且不重复等待；返回 0 的异步路径维持现有行为。",
+    "canonical": "",
+    "proposed_test_fix": "修正现有期望 `state != WS_LOGINING`，增加状态目标（LOGINFAILED 或 NOTLOGIN）及失败通知断言。"
+  },
+  {
+    "lane": "T25_traderctp",
+    "id": "BUG-T25-011",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderCTP/TraderCTP.cpp:542-549",
+      "src/TraderCTP/TraderCTP.cpp:580-586",
+      "src/WtCore/TraderAdapter.cpp:487-508"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:736-756"
+    ],
+    "reason": "ReqOrderInsert/ReqOrderAction 同步返回非零后只写日志，仍返回 0；adapter 按负值判发送失败，调用者会把未受理请求当成功。测试使用有效 ID 和 stub 返回 9，接口行为可本地封闭判断。",
+    "fix": "同步发送失败返回负值并保留错误日志；成功返回约定成功码。",
+    "acceptance": "stub 返回 9 时两方法均返回负值、调用各一次、错误可观测；返回 0 时成功路径仍为 0。",
+    "canonical": "",
+    "proposed_test_fix": "保留“返回值<0、日志、请求次数”断言；不要把真实柜台成交/错误回报作为同步发送验收。"
+  },
+  {
+    "lane": "T25_traderctp",
+    "id": "BUG-T25-005",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/TraderCTP/TraderCTP.cpp:337-364",
+      "src/TraderCTP/TraderCTP.cpp:368-379",
+      "src/TraderCTP/TraderCTP.cpp:713-718"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:2012-2029",
+      "src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:980-1024"
+    ],
+    "reason": "worker 在发查询后置 m_bInQuery=true，只由具体 bIsLast 回调复位；若响应永不到达，队列中的 release 无法运行且 join 阻塞。代码停机路径清楚，但“合法断线/柜台必不再回终帧”的供应商保证没有本地契约支撑；相关直接挂死用例被禁用。",
+    "fix": "定义查询超时/断线取消与 worker 停机协议；在释放 API 前确保未完成 query 能被取消或有界解除阻塞。",
+    "acceptance": "stub 模拟终帧、错误末帧、front disconnect/no reply 三种路径，disconnect 在合同定义的上限内返回且 worker join。",
+    "canonical": "",
+    "proposed_test_fix": "维持 no-reply 测试禁用直到设计查询取消策略/厂商回报保证；不要称其为本轮实跑挂死。"
+  },
+  {
+    "lane": "T25_traderctp",
+    "id": "BUG-T25-006",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/TraderCTP/TraderCTP.cpp:1191-1218",
+      "src/API/CTP6.3.15/ThostFtdcUserApiDataType.h:858"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1738-1789"
+    ],
+    "reason": "GTD 是锁定 CTP SDK 定义的有效时间条件；makeOrderInfo 只在 GFD/IOC 写 WTSOrderInfo 的 orderFlag，其他值保留默认对象未初始化字段。不过 WTSEntrust/OrderInfo 的公开表达是否要求支持 GTD、应映射为何种标记尚不明确。现测试正确避免读取未初始化值，不是错误 oracle。",
+    "fix": "确认 WTS API 对 GTD 的表示策略；无论策略为何，避免把未初始化 orderFlag 泄漏给 sink，可用显式安全值/可选状态/错误报告。",
+    "acceptance": "GTD 回报传给 sink 时 orderFlag 有确定、文档化的值或明确拒绝标志；测试在定义后的契约上断言，不读取 UB。",
+    "canonical": "",
+    "proposed_test_fix": "当前用例跳过读取 indeterminate orderFlag 是正确保护，不要改为断言 NOR/FAK/FOK。"
+  },
+  {
+    "lane": "T25_traderctp",
+    "id": "BUG-T25-007",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderCTP/TraderCTP.cpp:766-768",
+      "src/TraderCTP/TraderCTP.cpp:498-501",
+      "src/Share/WtKVCache.hpp:211-232"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1913-1945",
+      "src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1984-2008"
+    ],
+    "reason": "登录时缓存 init 失败仅记录告警且忽略 false；带 tag 的 orderInsert 随后无条件 m_eidCache.put。WtKVCache 未初始化 block 的未命中写路径会访问空 block。登录错误目录和下一笔 tagged 订单是产品可发生的本地状态组合；本轮不把 disabled 注释的旧 SIGSEGV 当实跑。",
+    "fix": "缓存 init 失败后禁用相关写入并返回明确错误，或提供安全退化的内存缓存；不允许继续访问未初始化 block。",
+    "acceptance": "只读映射目录下登录保持定义好的状态；随后 tagged 下单不崩、不发不可靠请求并告知调用方；可写目录常规映射正常。",
+    "canonical": "",
+    "proposed_test_fix": "保留只读目录登录告警测试；以受控结果替代 disabled 崩溃例，测试不得把 EXPECT_EQ(0) 写成崩溃路径的目标。"
+  },
+  {
+    "lane": "T25_traderctp",
+    "id": "BUG-T25-008",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/TraderCTP/TraderCTP.cpp:713-718",
+      "src/TraderCTP/TraderCTP.cpp:806-841",
+      "src/TraderCTP/TraderCTP.cpp:845-859"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1823-1845"
+    ],
+    "reason": "前端断开将状态置 NOTLOGIN；查询确认回调在成功日期分支不检查状态而可置 ALLREADY。但现有回归手动在 OnFrontDisconnected 后注入一个过期 callback，CTP SDK 是否可能在断线后仍交付该请求回调未由本地签名证明，不能把人工顺序判作有效输入。",
+    "fix": "按请求代次/连接代次丢弃过期回调，或确认并实现 SDK 明确的 callback 生命周期契约。",
+    "acceptance": "stub 按已确认的断线/回调可达时序验证过期 callback 不恢复 ready；正常连接确认仍能 ready。",
+    "canonical": "",
+    "proposed_test_fix": "保留人工 callback 用例作为条件测试但标注前提；在厂商顺序有证据前避免把它作为生产复现。"
+  },
+  {
+    "lane": "T25_traderctp",
+    "id": "BUG-T25-009",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/TraderCTP/TraderCTP.cpp:806-841",
+      "src/TraderCTP/TraderCTP.cpp:1422-1447",
+      "src/TraderCTP/TraderCTP.cpp:1450-1473"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1142-1165"
+    ],
+    "reason": "查询确认发送失败被记日志但没有重试/恢复 worker query state；确认发送失败由回调忽略 confirm() 的负返回。功能上的失败处理确有缺口，但 ITraderSpi/登录接口没有定义此类失败应回滚、重试还是报告登录失败，现有 disabled 测试明确留待策略。",
+    "fix": "先决定失败策略并使 query 状态、worker 与登录通知一致；随后让确认/查询发送错误都可观测且可恢复。",
+    "acceptance": "按确定的策略验证同步失败不会永远停在未决状态或卡住查询队列；成功异步响应仍按正常状态机完成。",
+    "canonical": "",
+    "proposed_test_fix": "保留 queryConfirm 同步失败日志测试；confirm 同步失败断言继续禁用直到产品策略落文档。"
+  },
+  {
+    "lane": "T2_traderctp_xele_ctpopt",
+    "id": "T2-CTP-01",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderCTP/TraderCTP.cpp:205-215",
+      "src/TraderCTP/TraderCTP.cpp:381-391",
+      "src/Includes/ITraderApi.h:229-232",
+      "src/WtCore/TraderAdapter.cpp:487-508"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:597-613"
+    ],
+    "reason": "构造函数未初始化 front/session/orderRef；公开 makeEntrustID 没有登录前置条件，adapter 在 orderInsert ready 状态校验前先调用它。登录前受理交易意图会读取未初始化会话字段后才拒单；当前生成 ID 测试先 bringToReady。",
+    "fix": "初始化所有会话字段；无已登录 session 时 makeEntrustID 返回 false，不格式化未定义数据。",
+    "acceptance": "新对象未登录 makeEntrustID 失败且无未初始化读取；登录后 ID 结构和引用递增仍正确。",
+    "canonical": "",
+    "proposed_test_fix": "新增登录前调用测试，不把 bringToReady 后的递增用例作为前置状态安全证据。"
+  },
+  {
+    "lane": "T2_traderctp_xele_ctpopt",
+    "id": "T2-CTP-02",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderCTP/TraderCTP.cpp:224-279",
+      "src/TraderCTP/TraderCTP.cpp:305-332",
+      "src/WtCore/TraderAdapter.cpp:404-416"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:1112-1116",
+      "src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:980-1021"
+    ],
+    "reason": "非 Apple init 的库句柄和 creator symbol 不校验且总返回 true；connect 在 creator 返回值判空前注册 SPI/订阅/注册 front。标准 adapter 会先注册 sink，所以“标准路径必空 sink”属误报；加载/创建失败仍是独立可达配置故障。",
+    "fix": "校验库、symbol 与 API creator 结果，失败时返回 false并清理；日志对 sink 判空，不依赖 API 指针调用后的迟延检查。",
+    "acceptance": "失败注入各步骤无空调用、清理完整并返回失败；标准 adapter 的 sink 顺序维持正常。",
+    "canonical": "",
+    "proposed_test_fix": "将禁用真实 front 测试与失败注入测试分开；不写“本机缺库已崩”结论。"
+  },
+  {
+    "lane": "T2_traderctp_xele_ctpopt",
+    "id": "T2-CTP-03",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderCTP/TraderCTP.cpp:281-303",
+      "src/TraderCTP/TraderCTP.cpp:334-379"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:913-928",
+      "src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:1112-1116"
+    ],
+    "reason": "原“未连接 disconnect 直接泄漏已建 API”不成立：API 仅在 connect 创建。保留的对象复用缺陷成立：disconnect 无 worker 时仍排队旧 release；若随后 connect，可能释放新 API；常规 disconnect 后 release 置 m_bStopped=true，而 connect 不重置，重连 worker 立即退出；队列访问还存在锁外读写。",
+    "fix": "定义单次对象或可重连状态机；无 worker 时不留旧释放任务；线程停止位重置并与 API/队列同步保护。",
+    "acceptance": "覆盖未连接 disconnect→connect、不重启与正常断开后重连；只 release 当前 generation API，一次操作无数据竞争或失效 worker。",
+    "canonical": "",
+    "proposed_test_fix": "撤回“未连接资源泄漏”子主张；新增对象复用/重连用例，而不是继续测原误报。"
+  },
+  {
+    "lane": "T2_traderctp_xele_ctpopt",
+    "id": "T2-CTP-04",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/TraderCTP/TraderCTP.cpp:742-754",
+      "src/TraderCTP/TraderCTP.cpp:806-827"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:402-429"
+    ],
+    "reason": "成功登录把 GetTradingDay 转整数并用于确认日期比较；空/非法字段可能被转换为 0，但 SDK 头/本地 stub 未证明成功响应可为空或其格式约束。测试只提供规范日期。",
+    "fix": "取得锁定 CTP SDK 对 trading day/confirm date 的长度与空值契约；若输入可异常则校验后 fail closed。",
+    "acceptance": "覆盖正式契约允许的日期边界；非法/空字段不使未确认会话进入 ALLREADY。",
+    "canonical": "",
+    "proposed_test_fix": "不把由 atoi 推演的空字段人工输入当作柜台实证。"
+  },
+  {
+    "lane": "T2_traderctp_xele_ctpopt",
+    "id": "T2-CTP-05",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/TraderCTP/TraderCTP.cpp:861-879",
+      "src/TraderCTP/TraderCTP.cpp:882-897",
+      "src/TraderCTP/TraderCTP.cpp:1260-1312",
+      "src/API/CTP6.3.15/ThostFtdcTraderApi.h:250-310"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:930-1000"
+    ],
+    "reason": "转换器对多种 callback 字段直接读成员；本地测试传非空结构，SDK 本地头只给 callback 类型签名，没有标注 error callback 下 payload 是否允许 NULL。源码可见防御薄弱，但合法输入边界未确定。",
+    "fix": "逐回调确认供应商空载荷规则；对契约允许的空值安全返回并独立处理 RspInfo 错误。",
+    "acceptance": "对 SDK 允许形状用 stub 回归；对不允许形状保留边界日志并不伪造供应商行为。",
+    "canonical": "",
+    "proposed_test_fix": "非空回调映射测试继续保留；不添加未经 SDK 契约支持的“NULL 必须成功”断言。"
+  },
+  {
+    "lane": "T2_traderctp_xele_ctpopt",
+    "id": "T2-CTP-06",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/TraderCTP/TraderCTP.cpp:899-930",
+      "src/TraderCTP/TraderCTP.cpp:1080-1097"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1710-1736",
+      "src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1951-1966",
+      "src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:930-1000"
+    ],
+    "reason": "成功末帧账户行直接解引用；结算累积后末帧又无条件读 TradingDay。非空成功路径有覆盖；NULL 末帧崩溃用例 disabled，SDK 头没有说明无结果收尾参数形状，属于条件性空指针风险而非确认柜台必达。",
+    "fix": "账户无行和结算末帧要按 SDK 契约安全完成；结算日期在有效行缓存，末帧不得重读空 payload。",
+    "acceptance": "契约确认允许的空查询末帧可安全结束并清 m_bInQuery；正常多行结算保持内容/日期正确。",
+    "canonical": "",
+    "proposed_test_fix": "不要启用人工 NULL 末帧 test 作为供应商复现；待契约确认后增加可执行的兼容性测试。"
+  },
+  {
+    "lane": "T2_traderctp_xele_ctpopt",
+    "id": "T2-CTP-07",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderCTP/TraderCTP.cpp:167-178",
+      "src/API/CTP6.3.15/ThostFtdcUserApiDataType.h:552-558",
+      "src/Includes/WTSTypes.h:250-261",
+      "src/API/CTP6.3.15/ThostFtdcUserApiDataType.h:986-1000",
+      "src/Includes/WTSTypes.h:360-372"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:756-820",
+      "src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:1074-1083"
+    ],
+    "reason": "合约交易状态字符范围在 CTP/WTS 定义相同，原合约状态强转主张是误报；订单 status b/c 则 CTP NotTouched/Touched 被直接 cast 成 WTS Cancelling/Nottouched。Unknown 的 a 映射有专门分支，不能弥补 b/c 的语义错位。",
+    "fix": "显式映射 CTP 订单状态；为 WTS 无对应项的 Touched 定义稳定表示/策略，不靠数值强转。",
+    "acceptance": "对 Unknown、NotTouched、Touched 和常用队列状态逐值验证；instrument status 0..6 原样对齐回归保持。",
+    "canonical": "",
+    "proposed_test_fix": "保留合约状态 cast 的正向测试；新增订单 b/c 语义映射断言，不把合约状态误报加入修复范围。"
+  },
+  {
+    "lane": "T2_traderctp_xele_ctpopt",
+    "id": "T2-CTP-08",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderCTP/TraderCTP.cpp:485-501",
+      "src/Includes/ITraderApi.h:244-248",
+      "src/WtCore/TraderAdapter.cpp:487-508",
+      "src/TraderCTPOpt/TraderCTPOpt.cpp:496-507",
+      "src/TraderCTPMini/TraderCTPMini.cpp:342-353"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:773-789",
+      "src/TestUnits/coverage/t_TraderCTPOpt/r61_traderctpopt_api_test.cpp:682-720",
+      "src/TestUnits/coverage/t_TraderCTPMini/r61_traderctpmini_api_test.cpp:673-730"
+    ],
+    "reason": "旧主张“标准 adapter 的 ID 序列不同步”不成立：adapter 先生成 ID 并写 tag。真实窄问题是 ITraderApi 公开 orderInsert 未声明必须先 makeEntrustID，三个 provider 又明确实现空 tag 分支，而 fetch_add(0) 让每个裸调用重复当前 OrderRef。T25 当前测试正好将不递增固定为行为。",
+    "fix": "明确接口责任并兑现：不支持无 ID 就入口拒绝；若允许空 tag 直接下单则原子分配唯一 OrderRef。不要让 makeEntrustID 已预留值重复递增。",
+    "acceptance": "CTP、CTPOpt、CTPMini 的双无 tag 调用按契约拒绝或产生不同 OrderRef；标准 tag 路径保持一一映射。",
+    "canonical": "",
+    "proposed_test_fix": "修正 T25 单次用例命名/期望，不再把不递增写成目标；增加双裸下单验证。"
+  },
+  {
+    "lane": "T2_traderctp_xele_ctpopt",
+    "id": "T2-XELE-01",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/ParserXeleSkt/ParserXeleSkt.cpp:99-116",
+      "src/Includes/IParserApi.h:88-95",
+      "src/WtDtServo/ParserAdapter.cpp:149-154"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_ParserXeleSkt/t2_parserxele_lifecycle_test.cpp:139-158"
+    ],
+    "reason": "init 直接用 ip::make_address 解析配置且不捕获异常，但 IParserApi 明确用 bool 表示初始化是否成功；上层 adapter 直接调用 init。非法或缺失 IP 是配置错误输入，符合初始化失败路径。",
+    "fix": "捕获地址解析异常、记录配置错误并返回 false；初始化状态保持未连接。",
+    "acceptance": "非法和缺失 host 均不向 adapter 传播异常且返回失败；合法地址仍返回成功。",
+    "canonical": "",
+    "proposed_test_fix": "将当前“EXPECT_NO_THROW + false”保留为目标；不靠启动网络验证。"
+  },
+  {
+    "lane": "T2_traderctp_xele_ctpopt",
+    "id": "T2-XELE-02",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/ParserXeleSkt/ParserXeleSkt.cpp:95-97",
+      "src/ParserXeleSkt/ParserXeleSkt.cpp:119-122",
+      "src/ParserXeleSkt/ParserXeleSkt.cpp:265-292",
+      "src/Share/StdUtils.hpp:21-24",
+      "src/WtDtServo/ParserAdapter.cpp:205-217"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_ParserXeleSkt/t2_parserxele_lifecycle_test.cpp:213-214",
+      "src/TestUnits/coverage/t_ParserXeleSkt/t2_parserxele_lifecycle_test.cpp:177-187"
+    ],
+    "reason": "release 为空；connect 建 std::thread 执行 io_context::run；disconnect 关 socket/置 stopped/post 但不 join/reset，析构也为空。adapter release 随后删除 API 对象，joinable std::thread 析构有 terminate 风险。原“stopped 未被读取”不成立，handler 的 349 行会读它；本轮未启动线程实证。",
+    "fix": "统一 release/disconnect 清理：取消接收、停止 io_context、join 并清理线程句柄；析构调用安全且幂等清理。",
+    "acceptance": "使用本地可控 socket/API 证明 release/disconnect 有界 join、重复清理安全且析构无 joinable thread；不要求真实组播。",
+    "canonical": "",
+    "proposed_test_fix": "撤回 stopped 未读取说法；当前空 release 测试需在实现清理后改为实际生命周期验收。"
+  },
+  {
+    "lane": "T2_traderctp_xele_ctpopt",
+    "id": "T2-XELE-03",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/ParserXeleSkt/ParserXeleSkt.cpp:84-92",
+      "src/ParserXeleSkt/ParserXeleSkt.cpp:318-329",
+      "src/ParserXeleSkt/ParserXeleSkt.cpp:202-214",
+      "src/ParserXeleSkt/ParserXeleSkt.cpp:402-405"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_ParserXeleSkt/r76_xele_boundary_test.cpp:141-161",
+      "src/TestUnits/coverage/t_ParserXeleSkt/t2_parserxele_lifecycle_test.cpp:177-187"
+    ],
+    "reason": "构造未初始化 _bd_mgr；registerSpi(NULL) 清 sink 但不清 manager；直接 prepare 会用 manager。标准 adapter 先注册非空 SPI，但注销后是否允许还有 datagram decode、BaseDataMgr 生命周期何时结束没有测试/合同支撑。",
+    "fix": "至少将 manager 初始化为 null，并使注销和 in-flight 解析生命周期明确；prepare/行情解码在依赖无效时受控退出。",
+    "acceptance": "裸构造/空管理器不会读未初始化数据；若注销后仍可能收到数据，验证解码不使用已失效 manager；若保证回调排空则测试该保证。",
+    "canonical": "",
+    "proposed_test_fix": "R76 现有断言只能记录“不清 manager”，不能判定实际悬空读；新增 decode-after-unregister 前需先确认回调时序。"
+  },
+  {
+    "lane": "T2_traderctp_xele_ctpopt",
+    "id": "T2-OPT-01",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/ParserCTPOpt/ParserCTPOpt.cpp:97-135"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_ParserCTPOpt/r105_parserctpopt_api_test.cpp:243-281",
+      "src/TestUnits/coverage/t_ParserCTPOpt/t2_parserctpopt_tick_test.cpp:427-434"
+    ],
+    "reason": "ParserCTPOpt init 加载模块/查符号后不判空，直接调用 creator 并 dereference，失败时仍返回 true。R105 测试注入正常 stub；T2 的缺库用例 disabled，均未证明本机缺库状态。",
+    "fix": "验证 module、creator symbol、creator 返回值；任一失败释放资源、记录错误并返回 false。",
+    "acceptance": "分别注入缺 library/symbol/null creator 结果，均无异常和空解引用并返回 false；成功 injected API init 保持通过。",
+    "canonical": "",
+    "proposed_test_fix": "正常 stub 注入测试不能代表缺库；为 loader 错误新增 deterministic fake loader 测试。"
+  },
+  {
+    "lane": "T2_traderctp_xele_ctpopt",
+    "id": "T2-OPT-02",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/ParserCTPOpt/ParserCTPOpt.cpp:152-161",
+      "src/ParserCTPOpt/ParserCTPOpt.cpp:180-193"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_ParserCTPOpt/r105_parserctpopt_api_test.cpp:307-323",
+      "src/TestUnits/coverage/t_ParserCTPOpt/t2_parserctpopt_tick_test.cpp:281-289"
+    ],
+    "reason": "普通未初始化对象收不到 API login callback 的主张不符合标准流；teardown 先 unregister/release/null 后，在途 callback 能否仍进入未知。SDK 头只列签名，现有测试只用非空 stub 正常成功回调。",
+    "fix": "查询锁定 API 的 unregister/release 排空语义；若允许在途回调，用同步/代次机制保障 API 与对象存活，单纯 null guard不足以解决竞态。",
+    "acceptance": "并发 teardown fake callback 按厂商允许时序执行，无释放后访问；正常登录/订阅仍工作。",
+    "canonical": "",
+    "proposed_test_fix": "不启用“裸未初始化对象收到登录回调”的旧断言；等待 SDK teardown 语义确认。"
+  },
+  {
+    "lane": "T2_traderctp_xele_ctpopt",
+    "id": "T2-OPT-03",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/ParserCTPOpt/ParserCTPOpt.cpp:164-167",
+      "src/ParserCTPOpt/ParserCTPOpt.cpp:180-194",
+      "src/ParserCTPOpt/ParserCTPOpt.cpp:326-336",
+      "src/ParserCTPOpt/ParserCTPOpt.cpp:402-405"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_ParserCTPOpt/r105_parserctpopt_api_test.cpp:283-323",
+      "src/TestUnits/coverage/t_ParserCTPOpt/t2_parserctpopt_tick_test.cpp:257-272"
+    ],
+    "reason": "IsErrorRspInfo 被硬编码 false，非零登录 ErrorID 仍进入成功事件与订阅；R105 已有独立错误登录与成功对照，错误 oracle 是正确的。OnRspError 还丢结果，订阅/退订回调为空，属于相关的错误可观测性子项。",
+    "fix": "实现 ErrorID 判定和错误可观测处理；登录错误不得触发 WPE_Login 成功/订阅；对订阅/退订失败记录或上报。",
+    "acceptance": "ErrorID 非零登录无成功事件、无 SubscribeMarketData；零码正常成功；错误回调能形成日志/上报且不发布 quote。",
+    "canonical": "",
+    "proposed_test_fix": "保持 R105 第283-304行失败应被观察的正确断言；增加订阅失败回调的可观测验证。"
+  },
+  {
+    "lane": "T2_traderctp_xele_ctpopt",
+    "id": "T2-OPT-04",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/ParserCTPOpt/ParserCTPOpt.cpp:407-430",
+      "src/ParserCTPOpt/ParserCTPOpt.cpp:365-400"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_ParserCTPOpt/r105_parserctpopt_api_test.cpp:307-323"
+    ],
+    "reason": "登录后 subscribe 分支固定 `char *subscribe[500]`，对无上限 CodeSet 每项写入且无容量检查；另一个首次订阅 helper 使用动态按量分配，说明此处实现不一致。现用例只有一项，无法覆盖越界。",
+    "fix": "使用动态数组并根据 SDK 单次请求限制做安全分批或拒绝；避免超过实际 buffer 容量写栈。",
+    "acceptance": "超过 500 且跨 SDK 限制时无越界，每个符号按正式批次上限准确提交一次；边界 500/501 均验证。",
+    "canonical": "",
+    "proposed_test_fix": "登录后 R105 小集合覆盖只验证基本路径；补 500/501 和批次总数，不引用未证实业务订阅规模。"
+  },
+  {
+    "lane": "T2_traderctp_xele_ctpopt",
+    "id": "T2-OPT-05",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/ParserCTPOpt/ParserCTPOpt.cpp:59-76",
+      "src/ParserCTPOpt/ParserCTPOpt.cpp:218-226"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_ParserCTPOpt/t2_parserctpopt_tick_test.cpp:302-312"
+    ],
+    "reason": "strToTime 使用文件级共享可写 tmp_timestr，无线程隔离；回调调用点是行情更新。定长合法 UpdateTime 不支持常规溢出主张；多个 parser 实例的回调并发是否符合此 SDK 回调模型尚无本地契约/并发证据。",
+    "fix": "换为函数局部 buffer 或直接解析，避免即使供应商并发也共享状态；另对输入长度上界做安全处理。",
+    "acceptance": "多实例并发时间解析互不污染；固定字段内普通时间正确，过长输入按定义安全拒绝或截断。",
+    "canonical": "",
+    "proposed_test_fix": "单线程映射测试继续保留；并发断言以 SDK线程模型为前提，不再声称 UpdateTime 常规值必溢出。"
+  }
+]

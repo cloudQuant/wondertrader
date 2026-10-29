@@ -1,0 +1,743 @@
+[
+  {
+    "lane": "R100",
+    "id": "BUG-R100-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorageAD/WtDataReaderAD.cpp:503-545",
+      "src/Includes/IDataReader.h:210-216"
+    ],
+    "test_evidence": [],
+    "reason": "endBarTime 在遍历外初始化；分钟分支读它，日线分支在 EOD 回调中把同一变量改成自然日。若同一 reader 同时缓存日线/分钟线且 map 先遍历日线，后续分钟条会因比较时标不同而漏更新。map 顺序未承诺，缺陷是条件触发，不能说每次随机。",
+    "fix": "分钟右界与日线日期边界使用独立局部变量；确保各分支不改写彼此边界。",
+    "acceptance": "同一 reader 同时缓存 KP_DAY 和 KP_Minute1/5，在 endTDate!=0 回调中两种遍历顺序都应只按各自正确截止更新；验证最后一根分钟线不漏报。",
+    "canonical": null,
+    "proposed_test_fix": "新增覆盖混合周期的确定性测试；若无法控制 map 迭代顺序，先把边界计算提取为可直接验证的纯逻辑，不依赖哈希容器偶然顺序。"
+  },
+  {
+    "lane": "R100",
+    "id": "BUG-R100-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtRdmDtReader.cpp:748-780",
+      "src/WtDataStorage/WtRdmDtReader.cpp:923-954",
+      "src/WtDataStorage/WtRdmDtReader.cpp:1097-1128",
+      "src/Includes/IRdmDtReader.h:64-66"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q03_storage3/r100_rdm_crossday_test.cpp:358-375"
+    ],
+    "reason": "三种历史逐笔区间读取均在 cursor 晚于请求右界时无条件 pItem--、eIdx--。当历史块只有一条且请求右界早于首条，回退落在数组 begin 之前，size_t 索引同时下溢；公开 range 接口可触发。",
+    "fix": "回退前显式判 eIdx==0；对右界早于首记录返回对应空切片/NULL，并保证计数与指针一致。",
+    "acceptance": "queue/detail/trans 分别覆盖单条记录、右界早于首条、等于首条、晚于末条；用公开 ByRange API 断言空/边界结果并在 sanitizer 下无越界。",
+    "canonical": null,
+    "proposed_test_fix": "保留禁用的 before-first 候选作为公开 API 回归，去掉当前三项共用的 disabled 崩溃组合风险，修复后启用并按三类文件断言。"
+  },
+  {
+    "lane": "R112",
+    "id": "BUG-R112-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtRdmDtReader.cpp:1866-1884",
+      "src/WtDataStorage/WtRdmDtReader.cpp:2288-2307"
+    ],
+    "test_evidence": [],
+    "reason": "非复权 K 线的 ByRange/ByCount 分支只判 kPair 非空，未判 block 非空或 _size>0，却用 _size-1 构造 lower_bound 末端并随后解引用结果。已映射但空的 RT 分钟块可在首 bar 发布前或清空后触发无效指针运算。",
+    "fix": "进入 RT 搜索前验证 kPair、_block 与 _size>0；空实时块按无实时数据处理并继续历史或空结果路径。",
+    "acceptance": "对普通合约构造 RT K 线头存在、_size=0 的 ByRange/ByCount 输入；应无崩溃且返回可用历史/空切片；非空 RT 正控须保持原结果。",
+    "canonical": null,
+    "proposed_test_fix": "新增启用的空 RT block 测试，分别覆盖 min1/min5 与 range/count，断言不会调用负长度区间或越界元素。"
+  },
+  {
+    "lane": "R132",
+    "id": "BUG-R132-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtDataReader.cpp:565-581",
+      "src/WtDataStorage/WtDataReader.cpp:722-738",
+      "src/WtDataStorage/WtDataReader.cpp:879-895"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q03_storage3/r132_reader_his_test.cpp:215-230"
+    ],
+    "reason": "三个 CMP_V2 历史 HFT 分支均先令 tBlockV2 指向 _buffer，再 resize/append 重建同一 string，随后通过旧指针写版本。解压 payload 使最终 size 超过原 capacity 时 append 会重分配，旧指针悬垂；默认禁用用例刻意回避该重分配。",
+    "fix": "在新缓冲区重建后重新取得头部指针写版本，或直接在独立目标缓冲区构造头部与 payload，避免保存跨 string 修改的内部指针。",
+    "acceptance": "queue/detail/trans 均用高压缩 payload 使解压后容量确定超过压缩缓冲区，验证记录逐字段正确、缓存复读成功，并在 ASan/容器检查下运行。",
+    "canonical": null,
+    "proposed_test_fix": "保留不可压缩 roundtrip 正控，新增可控重分配的启用回归；不要让测试依赖 allocator 恰好扩容。"
+  },
+  {
+    "lane": "R132",
+    "id": "BUG-R132-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtDataReader.cpp:687-743",
+      "src/WtDataStorage/WtDataReader.cpp:844-900"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q03_storage3/r132_reader_his_test.cpp:231-264",
+      "src/TestUnits/coverage/q03_storage3/r74_reader_residual2_test.cpp:251-287"
+    ],
+    "reason": "WtDataReader 的历史明细/成交缓存命中查询误查 _his_ordque_map，而实际装入各自的 _his_orddtl_map/_his_trans_map。同 key queue 先读后会跳过首次加载，目标 map 仍是空块，文件存在也返回 NULL。",
+    "fix": "明细和成交缓存命中分别查询对应的 _his_orddtl_map、_his_trans_map。",
+    "acceptance": "使用同一 reader、同一 stdCode/交易日，queue→detail→trans 后三类都返回各自文件内容；反向顺序和缓存复读也一致。",
+    "canonical": null,
+    "proposed_test_fix": "将现有 DISABLED 同键复现拆为独立启用测试，使用不同记录值证明没有误取 queue 内容且 detail/trans 不再为 NULL。"
+  },
+  {
+    "lane": "R142",
+    "id": "BUG-R142-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtRdmDtReader.cpp:719-735",
+      "src/WtDataStorage/WtRdmDtReader.cpp:903-910",
+      "src/WtDataStorage/WtRdmDtReader.cpp:1077-1084"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q03_storage3/r142_fixture.h:1-20",
+      "src/TestUnits/coverage/q03_storage3/r142_rdm_hft_his_test.cpp:9-30"
+    ],
+    "reason": "WtRdmDtReader 的三条历史 CMP_V2 解压分支也保存 _buffer 内部头指针，resize/append 后再写版本；扩容时是悬垂写。当前 R142 fixture 明确选择不可压缩输入以避开此路径。",
+    "fix": "重建缓冲区后重取头部指针写版本，或在目标 buffer 中直接初始化 raw header，再复制解压数据。",
+    "acceptance": "queue/detail/trans 的压缩小文件在解压后超过原 capacity 时都可正确返回并复读；ASan 下无 use-after-free。",
+    "canonical": null,
+    "proposed_test_fix": "新增确定触发重分配的 CMP_V2 输入，保留 R142 不可压缩样本作正常格式对照。"
+  },
+  {
+    "lane": "R161",
+    "id": "BUG-R161-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/HisDataReplayer.cpp:48-72",
+      "src/WtBtCore/HisDataReplayer.cpp:3487-3500"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p03_btcore_mockers2/r161_btcore_edges_test.cpp:50-88",
+      "src/TestUnits/coverage/p03_btcore_mockers2/r161_btcore_edges_test.cpp:254-273"
+    ],
+    "reason": "cacheRawTicksFromCSV 忽略 proc_block_data 的 false；失败时 content 保持压缩文件原字节，随后以按整条向下取整的 tickcnt resize，却按完整 content.size() memcpy。有效 CMP_V2 头后长度为 WTSTickStruct 大小加余数时，目标必短 3 字节以上。启用的 mismatch tests 都刻意用结构体整数倍，不覆盖越界尾部。",
+    "fix": "传播 proc_block_data 失败并拒绝该文件；解码成功后校验 payload 长度是 WTSTickStruct 的整数倍，再创建缓存。",
+    "acceptance": "空/短头、_size 不匹配、整条加尾余数都应返回失败且不建缓存/不越界；合法 raw/compressed tick roundtrip 仍通过。",
+    "canonical": null,
+    "proposed_test_fix": "保留整数倍 mismatch 用例作控制；将 sizeof(tick)+3 用例置于子进程或 sanitizer 执行并断言失败返回、无缓存条目，而非只断言后续 slice 为 NULL。"
+  },
+  {
+    "lane": "R1_wtdatastorage",
+    "id": "BUG-R1-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtRdmDtReader.cpp:870-913",
+      "src/WtDataStorage/WtRdmDtReader.cpp:1048-1088",
+      "src/Includes/IRdmDtReader.h:64-66"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r1_storage/r1_rdm_hft_slice_test.cpp:175-204"
+    ],
+    "reason": "WtRdmDtReader 的历史 detail/trans 分支查找 _his_ordque_map，却分别装载 _his_orddtl_map/_his_trans_map。同 key queue 先读会造成后续 detail/trans 跳过装载；另一 reader 的首次读取 roundtrip 未覆盖该缓存顺序。",
+    "fix": "缓存命中检查改查对应的 _his_orddtl_map 与 _his_trans_map。",
+    "acceptance": "同一 WtRdmDtReader、同一 key 的 queue→detail/trans 首次加载、同类型复读、反向顺序都返回相应记录。",
+    "canonical": null,
+    "proposed_test_fix": "现有首次读取 roundtrip 保留；新增 queue-first 同 key 启用回归，分别检查 detail/trans 记录内容和非空。"
+  },
+  {
+    "lane": "R1_wtdatastorage",
+    "id": "BUG-R1-003",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WTSTools/WTSBaseDataMgr.cpp:880-887",
+      "src/WTSTools/WTSBaseDataMgr.cpp:201-215",
+      "src/WTSTools/WTSBaseDataMgr.cpp:760-765"
+    ],
+    "test_evidence": [],
+    "reason": "split(pid,'.') 后直接取 ay[1] 的 UB 静态成立，但触发需要少于两段的 PID。公开代码示例把 PID 作为 exchange.product；当前接口没有明确恶意/非规范 PID 是否可接受，不能把构造字符串 NOPIVOT 当作有效行情输入。",
+    "fix": "先确认 PID 格式约束；若 public API 需要容忍无效值，检查段数后返回空模板 ID/安全默认并记录错误。",
+    "acceptance": "以配置/API 文档确认合法 PID 形式；对合法值保持映射，对缺段/多段值按约定安全拒绝，不触发越界访问。",
+    "canonical": null,
+    "proposed_test_fix": "只有确认 malformed PID 属于受支持输入后，启用 no-dot/one-dot 的安全拒绝测试；否则将非法输入测试标成参数校验测试，不登记为正常产品故障。"
+  },
+  {
+    "lane": "R1_wtdatastorage",
+    "id": "BUG-R1-005",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtDataReader.cpp:1907-1914",
+      "src/Includes/IDataReader.h:261-271"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r1_storage/r1_reader_bars_slice_test.cpp:213-225"
+    ],
+    "reason": "请求的历史交易日早于当前交易日且历史文件不存在时，公开 readKlineSlice 进入 else 分支，hisCnt=min(count,0)=0 后仍取 &vector[0]。vector::operator[](size()) 前提被违反；appendBlock 的 count==0 早退不能消除前面的 UB。",
+    "fix": "hisCnt 为 0 时不取 vector 元素地址，直接返回空 slice 或 NULL。",
+    "acceptance": "无历史文件、有效 header-only 空文件、count=0 都返回明确空结果；debug STL/ASan 下不访问空 vector 的下标 0。",
+    "canonical": null,
+    "proposed_test_fix": "现有 missing_his_file 测试在空结果断言外再覆盖 debug STL/UBSan 构建；确保调用代码不因 Release 下偶然不崩而被当成已安全。"
+  },
+  {
+    "lane": "R1_wtdatastorage",
+    "id": "BUG-R1-006",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtDataReader.cpp:1751-1765",
+      "src/WtDataStorage/WtDataReader.cpp:1783-1784",
+      "src/WtDataStorage/WtDataReader.cpp:1895-1914",
+      "src/Includes/IDataReader.h:261-271"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r1_storage/r1_reader_bars_slice_test.cpp:108-127"
+    ],
+    "reason": "IDataReader 将 etime 定义为 K 线读取截止时间；当 endTDate 早于当前交易日时，非当日历史分支未按 etime 定位，而按整个缓存末尾取 count 根，能把截止日期之后的历史日线带入结果。",
+    "fix": "根据截止日/时间在历史缓存中定位右端，再从该右端向前取 count；不足 count 时保留实际可用条数。",
+    "acceptance": "两条历史 bar 跨过非现存截止日时只返回截止前 bar；另测截止等于 bar、晚于末 bar、跨交易日和 count 不足。",
+    "canonical": null,
+    "proposed_test_fix": "保留中间日期 `day_his_cutoff_excludes_later_bar`；旧 tail/升级/cache hit 的正向测试需将 etime 设在目标数据之后，避免测试前提互相矛盾。"
+  },
+  {
+    "lane": "R23_storage",
+    "id": "BUG-R23-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtDataWriter.cpp:103-105",
+      "src/WtDataStorage/WtDataWriter.cpp:117-174",
+      "src/WtDataStorage/WtDataWriter.cpp:177-215",
+      "src/WtDataStorage/WtDataWriter.cpp:1616-1628"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r23_storage4/r23_writer_tick_cache_test.cpp:70-92"
+    ],
+    "reason": "init 无条件启动捕获 this 的 _proc_chk；release 仅 join _proc_thrd、不停止/通知/join 检查线程，析构函数为空。正常 init→release→delete 会析构仍 joinable 的 std::thread 并 terminate；重复 init 还 reset 旧 joinable thread。",
+    "fix": "定义 writer 状态机；release/析构先停止并唤醒、join _proc_chk 与其他工作线程，再释放缓存；重复 init 要拒绝或先完整关闭旧生命周期。不能仅 detach。",
+    "acceptance": "init→release→delete、init→重复 release、重复 init、check_loop 运行中并发 release 均不 terminate、不访问已释放 this；release 有可界定的结束时间。",
+    "canonical": null,
+    "proposed_test_fix": "补充独立子进程生命周期回归并主动 delete 对象；当前 DISABLED 第二次 init 用例只覆盖重入，不覆盖最小 init→release→destruct 路径。"
+  },
+  {
+    "lane": "R23_storage",
+    "id": "BUG-R23-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtDataWriter.cpp:148-150",
+      "src/WtDataStorage/WtDataWriter.cpp:470-480",
+      "src/WtDataStorage/WtDataWriter.cpp:524-535",
+      "src/WtDataStorage/WtDataWriter.cpp:2491-2495"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r23_storage4/r23_writer_kline_hft_test.cpp:463-500"
+    ],
+    "reason": "writeTransaction 在入口用 _disable_orddtl 拒绝成交，_disable_trans 仅在收盘转储时读取；两个独立配置语义因此串扰且 disabletrans 未阻止实时写入。",
+    "fix": "writeTransaction 使用 _disable_trans；确认收盘转储与实时写入都统一遵守各自的 disable 开关。",
+    "acceptance": "四种 disableorddtl/disabletrans 组合分别断言 writeOrderDetail/writeTransaction 返回值、对应 RT 文件是否产生、收盘转储是否保留。",
+    "canonical": null,
+    "proposed_test_fix": "现有独立性测试方向正确；补上文件落盘和 `disabletrans=true` 的入口拒绝断言，防止只检查返回值。"
+  },
+  {
+    "lane": "R23_storage",
+    "id": "BUG-R23-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtRdmDtReader.cpp:2395-2401",
+      "src/WTSTools/WTSBaseDataMgr.cpp:80-89",
+      "src/Includes/IRdmDtReader.h:73-74"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp:513-580",
+      "src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp:596-646"
+    ],
+    "reason": "标准商品查询按 exchg.product 组合查表；readTickSliceByCount 已成功取得 cInfo._product 的 commInfo，却再次用 cInfo._code（合约号）查商品并无条件解引用。对有效 SSE.STK.600000 输入会查不到 SSE.600000 并空指针解引用。",
+    "fix": "以已取得的 commInfo 取 session，并分别判空商品与 session；或按 _product 查商品。",
+    "acceptance": "启用的严格品种键隔离 probe 通过，返回三条 RT tick；同时对未知商品按接口安全返回，不崩溃。",
+    "canonical": null,
+    "proposed_test_fix": "当前 probe 是启用的 threadsafe 子进程测试，过滤器为 `R23RdmCountStrictProbe.CountByCodeShapedPidUsesProductForCommodityLookup`；运行前不需改为 DISABLED。"
+  },
+  {
+    "lane": "R23_storage",
+    "id": "BUG-R23-004",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtDataStorage/WtRdmDtReader.cpp:2501-2506",
+      "src/WtDataStorage/WtRdmDtReader.cpp:2536-2548",
+      "src/WtDataStorage/WtRdmDtReader.cpp:2567-2575"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp:238-288"
+    ],
+    "reason": "首次读到短坏文件时 map 中先插入默认 HisTBlockPair，校验失败后保留空条目；相同 reader 再查不会重读。静态行为成立，但候选以外部修复文件后同 reader 自动重读为预期，仓库未定义历史文件热替换/clearCache 语义。",
+    "fix": "明确 reader 对失败读取的缓存语义；若支持修复后重试，校验失败时不插入条目或 erase 该 key，并统一 ByDate/ByRange/ByCount。",
+    "acceptance": "先确认历史文件是否允许运行期更换；若允许，短文件首读后替换为合法文件，同 reader 重查要返回新数据并重新记录状态；否则测试须调用公开 clearCache 后重读。",
+    "canonical": null,
+    "proposed_test_fix": "不要单独把当前同 reader 修复文件的失败判为产品回归，除非确认缓存失效合同；测试应分成“缓存未就绪项不命中”和“clearCache 后重建”两个语义。"
+  },
+  {
+    "lane": "R23_storage",
+    "id": "BUG-R23-005",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtDataStorage/WtRdmDtReader.cpp:2456-2470",
+      "src/WtDataStorage/WtRdmDtReader.cpp:2577-2596",
+      "src/Includes/IRdmDtReader.h:73-74"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp:186-236"
+    ],
+    "reason": "RT 使用严格大于回退、历史使用大于等于回退，故 etime 恰好命中记录时返回集合不同。公开接口只说结束时间，没有定义右端闭/开；当前两项测试只是把两种现状各自写成通过预期。",
+    "fix": "先明确 tick count 查询 etime 的端点语义，再统一 RT/His 比较和回退规则。",
+    "acceptance": "同一时间戳/记录分别置于 RT 与历史文件，同一 count/etime 必须符合文档定义；另覆盖跨日分片避免补数产生重复/遗漏。",
+    "canonical": null,
+    "proposed_test_fix": "在区间合同落定前把两个现状断言视为观察，不纳入行为验收；随后保留一个明确的统一语义断言，重命名测试避免暗示现状即规范。"
+  },
+  {
+    "lane": "R23_storage",
+    "id": "BUG-R23-006",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtDataWriter.cpp:313-363",
+      "src/WtDataStorage/WtDataWriter.cpp:1438-1459"
+    ],
+    "test_evidence": [],
+    "reason": "resizeRTBlock 的写入扩容异常和重新 map 失败路径返回 NULL，且 remap 前已经 reset 旧映射；updateCache 无条件把结果写入 _tick_cache_block，下一行立即解引用。容量扩张时正常可达，资源/映射错误会导致崩溃并丢失旧映射。",
+    "fix": "扩容采用先完成新文件/映射再替换旧映射的事务式步骤；调用者检查失败，回滚新索引/size 并返回错误，不解引用 NULL。",
+    "acceptance": "在写扩展和 remap 两处分别注入失败；writeTick/updateCache 应返回失败或保留旧缓存，不能崩溃，原有 tick 可继续读取，后续恢复可重试。",
+    "canonical": null,
+    "proposed_test_fix": "增加受控故障注入 seam，而不是依赖文件权限/真实磁盘满等不稳定环境；验证失败日志和旧缓存一致性。"
+  },
+  {
+    "lane": "R23_storage",
+    "id": "BUG-R23-007",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtRdmDtReader.cpp:1688-1726",
+      "src/WtDataStorage/WtRdmDtReader.cpp:2376-2392",
+      "src/Includes/WTSDataDef.hpp:236-246"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp:390-409"
+    ],
+    "reason": "空历史缓存时 indexBarFromCacheByCount 返回 NULL 但未把 count 清零；调用方以仍为请求数的 hisCnt 决定建切片，WTSKlineSlice::create 在 bars==NULL 时不挂块却保留 count，生成 size>0、无 block 的幻影结果。",
+    "fix": "空缓存返回前将 count=0；调用侧再以有效指针与实际 count 共同决定切片，禁止创建无块非空 slice。",
+    "acceptance": "无历史/无 RT、header-only 空历史、只有空历史但 RT 有数据三种场景都返回与实际 bar 数相同的 size/block count；无数据返回 NULL 或 size=0。",
+    "canonical": null,
+    "proposed_test_fix": "当前测试预期正确；补 `get_block_counts()==0` 和不产生 phantom size 的断言，并让第二个空文件使用独立 reader/key，避免首个失败缓存影响第二子场景。"
+  },
+  {
+    "lane": "R36_rerun_20261028",
+    "id": "BUG-R36-007",
+    "decision": "DUPLICATE",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtRdmDtReader.cpp:719-735",
+      "src/WtDataStorage/WtRdmDtReader.cpp:903-910",
+      "src/WtDataStorage/WtRdmDtReader.cpp:1077-1084"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r1_storage/r1_rdm_hft_slice_test.cpp:108-130"
+    ],
+    "reason": "与 BUG-R142-001 是相同 WtRdmDtReader CMP_V2 装载实现、相同 resize/append 后写旧头指针问题；SIGTRAP 记录是另一个输入和测试观察，不构成第二处独立实现缺陷。",
+    "fix": "由 canonical BUG-R142-001 修复该共享解压重建路径。",
+    "acceptance": "随 canonical 的 queue/detail/trans 可控重分配回归一并验收，并核对 cache-hit/file-removal 路径。",
+    "canonical": "BUG-R142-001",
+    "proposed_test_fix": "保留 cache-hit/file-removal 作为路径覆盖，但把它作为 canonical 缺陷的复核，不独立计数；先用确定触发重分配的 fixture，避免把文件删除行为当作根因。"
+  },
+  {
+    "lane": "R52",
+    "id": "BUG-R52-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtDataReader.cpp:1019-1041",
+      "src/WtDataStorage/WtDataReader.cpp:1593-1608"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q03_storage3/r52_reader_hot_adj_test.cpp:64-118"
+    ],
+    "reason": "HOT 历史包裹文件命中时，循环内声明同名 filename 遮蔽外层变量；exists 检查内层真实路径，循环后 read_file_content 使用外层空字符串并抛异常，catch 返回 false。公开 readKlineSlice 因此对存在包裹文件的合约缓存空数据。",
+    "fix": "删除内层重声明，统一使用外层 filename；错误路径清理空缓存项，避免后续请求静默复用空条目。",
+    "acceptance": "存在 HOT 包裹文件时首读与同 reader 缓存重读均返回合成/期望 bars；验证切段、热尾拼接和日志，且包裹文件不存在时保持原分月回退行为。",
+    "canonical": null,
+    "proposed_test_fix": "现有首读/缓存重读断言方向正确；另外断言 fixture 包裹文件实际存在，错误日志路径明确，并避免只测不带包裹文件的控制组。"
+  },
+  {
+    "lane": "R52",
+    "id": "BUG-R52-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtRdmDtReader.cpp:1911-1978",
+      "src/WtDataStorage/WtRdmDtReader.cpp:2318-2369",
+      "src/Includes/IRdmDtReader.h:71-74"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r23_storage4/r52_rdm_hot_adj_test.cpp:303-324"
+    ],
+    "reason": "后复权 RT 缓存非空且全部早于 etime 时 lower_bound 返回 end、idx==size；ByRange/ByCount 立刻解引用 _rt_bars[idx]。即使不崩，后续 count 可按 idx+1 得到超过实际长度的数量。",
+    "fix": "处理空 vector 与 lower_bound 的 begin/end 结果后再构造指针/数量；严格以有效范围计算，不返回超实际缓存长度的切片。",
+    "acceptance": "单条及多条 RT bar 分别覆盖 etime 在首条前、命中条、末条后；range/count 返回符合区间合同的有限数据，不越界。",
+    "canonical": null,
+    "proposed_test_fix": "把当前同时触发 BUG-R52-003 的 DISABLED 组合用例拆开；002 用已稳定预载 _rt_bars 的 ByCount/ByRange 输入，增加返回数和数据范围断言。"
+  },
+  {
+    "lane": "R52",
+    "id": "BUG-R52-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtRdmDtReader.cpp:1917-1930",
+      "src/WtDataStorage/WtRdmDtReader.cpp:2329-2337"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r23_storage4/r52_rdm_hot_adj_test.cpp:303-324"
+    ],
+    "reason": "后复权 ByRange 首次复制时 oldSize=0、idx=0，resize(newSize) 仅有 newSize 个有效元素，却 memcpy newSize-oldSize+1 条；多写/多读一条。已有 ByCount 的长度公式在首次调用时是 newSize。",
+    "fix": "按复制起点计算 copyCnt = newSize - idx；若要覆盖最后一条，只有 oldSize>0 时把 idx 回退一条，不能首次装载额外加一。",
+    "acceptance": "用 _size=1 和 _size>1 的 RT block 首次 ByRange 查询，断言 _rt_bars 中数据条数/每条字段正确；对重分配及 ASan/容器边界工具复核。",
+    "canonical": null,
+    "proposed_test_fix": "从组合 disabled 用例中移出独立首次 ByRange 测试，令 etime 等于末条以避免 002 的 end() 路径，断言实际拷贝 bar 数和字段。"
+  },
+  {
+    "lane": "R74",
+    "id": "BUG-R74-001",
+    "decision": "DUPLICATE",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtDataReader.cpp:687-743",
+      "src/WtDataStorage/WtDataReader.cpp:844-900"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q03_storage3/r74_reader_residual2_test.cpp:251-287"
+    ],
+    "reason": "与 BUG-R132-002 的实现路径、误查 _his_ordque_map 的两处代码、空 block 结果完全相同；只是重复登记来源和复现 fixture 不同。",
+    "fix": "由 canonical BUG-R132-002 修复 WtDataReader 两条历史读取路径。",
+    "acceptance": "采用 canonical 的 same-key queue→detail/trans 验收。",
+    "canonical": "BUG-R132-002",
+    "proposed_test_fix": "保留一个启用同键测试；R74 fixture 不再作为单独 bug 计数，可保留其作为第二个数据样本。"
+  },
+  {
+    "lane": "R94",
+    "id": "BUG-R94-001",
+    "decision": "DUPLICATE",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtRdmDtReader.cpp:1654-1685",
+      "src/WtDataStorage/WtRdmDtReader.cpp:1703-1726"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q03_storage3/r94_rdm_day_backoff_test.cpp:74-87"
+    ],
+    "reason": "历史 ByRange/ByCount 在 eit==begin 且右界早于首根时无条件 eit--，与既有 BUG-P05-007 / 合并编号 BUG-P09-001 是相同 helper、同一根因；本条不新增计数。",
+    "fix": "由 BUG-P05-007 canonical 修复右界早于缓存首根的索引回退。",
+    "acceptance": "用公开非零 etime 验证 range/count 在首 bar 前返回安全空结果；默认 etime=0 的私有 helper 直接调用不能替代公开调用前提。",
+    "canonical": "BUG-P05-007",
+    "proposed_test_fix": "现有 DISABLED 候选只作为 canonical 的回归；先修复公开窗口路径后启用，不另立一个 R94 修复项。"
+  },
+  {
+    "lane": "l04_datastorage",
+    "id": "BUG-L04-001",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorageAD/WtDataReaderAD.cpp:208-227",
+      "src/WtDataStorageAD/WtDataReaderAD.h:302"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l04_datastorage/l04_ad_lmdb_store_test.cpp:281-305"
+    ],
+    "reason": "函数内部确实将 std::vector<std::string> 对象区误当作 WTSBarStruct payload，并把 range 的右 key 写成左 key；但这是 private helper，仓库调用搜索只有声明/定义，没有生产调用路径。现有 LMDB test 不调用它，当前不能把不可达私有函数的问题计为产品运行缺陷。",
+    "fix": "本轮不排生产修复项；若未来恢复调用，先逐条复制 item.data() 并使用 rKey 做右边界。",
+    "acceptance": "只有证明生产调用点存在后才重新评估；若被重新启用，需经 public read path 加载多条 LMDB value 验证连续 bar 数据与完整区间。",
+    "canonical": null,
+    "proposed_test_fix": "不要把 `BarsCommittedAndReadableBack` 或 `GetUppersSkipsBarEqualToLastBarTime` 当作该 helper 的回归；它们覆盖 LMDB 原语/去重，不证明此私有函数运行。"
+  },
+  {
+    "lane": "l04_datastorage",
+    "id": "BUG-L04-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtDataReader.cpp:50-90"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l04_datastorage/l04_proc_block_data_test.cpp:92-123",
+      "src/TestUnits/coverage/l04_datastorage/l04_proc_block_data_test.cpp:129-205"
+    ],
+    "reason": "通用解析器读取 BlockHeader 前没有 12 字节检查；压缩分支读取 BlockHeaderV2._size 前没有 20 字节检查；RAW 老格式在短于 12 时执行 size_t 下溢长度 append。损坏/截断的持久文件会导致越界读或超大追加。现有启用测试只测合法长度。",
+    "fix": "先按版本验证最小头长，再读取任何字段；按 payload 长度与文件长度做防溢出的精确校验，失败不改写 content。",
+    "acceptance": "独立覆盖 0/1/11 字节、12-19 字节压缩头、完整 V2 但 _size 不匹配，以及有效 RAW/CMP 控制；坏输入返回 false 且原内容不变，ASan/UBSan 下安全。",
+    "canonical": null,
+    "proposed_test_fix": "保留合法格式 roundtrip 测试；新增单输入隔离/不触发套件崩溃的拒绝断言，避免只以「没有崩溃」推断边界安全。"
+  },
+  {
+    "lane": "l04_datastorage",
+    "id": "BUG-L04-004",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtDataStorageAD/LMDBKeys.h:89-97",
+      "src/WtDataStorageAD/LMDBKeys.h:131-137",
+      "src/Includes/WTSMarcos.h:22-23"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l04_datastorage/l04_lmdb_key_layout_test.cpp:249-262"
+    ],
+    "reason": "固定数组与 strcpy 的越界条件静态成立，但要传入不含终止空间的超长交易所/合约代码才触发。接口/业务代码是否允许超过 MAX_EXCHANGE_LENGTH-1 / MAX_INSTRUMENT_LENGTH-1 尚未找到明确合同；现有测试只证明合法上限内安全。",
+    "fix": "明确并执行长度契约：接受超长值则改有界/动态编码；不接受则在构造 key 前明确拒绝，避免静默覆盖结构体字段。",
+    "acceptance": "确认长度上限后测试上限值、上限+1、空值；拒绝输入不得构造/写入键，合法最大值要正确 roundtrip。",
+    "canonical": null,
+    "proposed_test_fix": "当前 `MaxLengthFieldsFitExactly` 是安全上限正控，不是溢出证据；只有确认超长输入受支持时才将越界用例作为产品验收。"
+  },
+  {
+    "lane": "l04_datastorage",
+    "id": "BUG-L04-005",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtDataStorageAD/WtDataReaderAD.cpp:271-303",
+      "src/WtDataStorageAD/WtDataReaderAD.cpp:419-437"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l04_datastorage/l04_ad_lmdb_store_test.cpp:281-305"
+    ],
+    "reason": "短 LMDB value 被直接 cast 成 WTSBarStruct 的风险存在，但候选输入是非规范/损坏 value；仓库 writer 是否可生成该长度未证明。无条件 back() 的分支也需结合上游 bars 非空前提，现有公开调用链会较早访问末条。",
+    "fix": "先从 LMDB value schema/所有写入点确认短 value 可达性；若读端应承受数据库损坏，则校验 item.size()==sizeof(WTSBarStruct) 并记录错误，日志只在容器非空时取 back。",
+    "acceptance": "通过真实 public read path 注入短值并确认安全失败；另覆盖空/非空增量更新日志。若格式固定值长且数据库损坏不在合同内，撤回产品缺陷主张。",
+    "canonical": null,
+    "proposed_test_fix": "当前 GetUppers 用例复刻查询/去重逻辑，未调用 private update_cache_from_lmdb；不得当成短 value 的回归或复现。"
+  },
+  {
+    "lane": "l04_datastorage",
+    "id": "BUG-L04-006",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WTSUtils/WtLMDB.hpp:57-84",
+      "src/Includes/WTSStruct.h:48-50",
+      "src/Includes/WTSStruct.h:197-205"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l04_datastorage/l04_ad_lmdb_store_test.cpp:81-88",
+      "src/TestUnits/coverage/l04_datastorage/l04_proc_block_data_test.cpp:178-205"
+    ],
+    "reason": "`WtLMDB::open` 对 mdb_env_set_mapsize 的返回码不作处理，仍返回 true；调用者无法知道请求的 map size 设置失败。old tick 的 16 字节 strncpy 读取 10 字节旧子数组仅在无 NUL 的损坏字段下风险，不作为有效旧格式缺陷主张。",
+    "fix": "检查 mdb_env_set_mapsize 返回码并记录成员错误状态；失败时 open 返回 false 且释放已创建的 env，避免留半初始化对象。",
+    "acceptance": "构造一个明确使 mapsize 设置失败的配置/故障注入，open 返回 false 并无活动 env；有效默认/显式 mapsize 仍可写读。old tick 超界另需真实格式说明和无 NUL fixture 后再判断。",
+    "canonical": null,
+    "proposed_test_fix": "现有 8MB map size 后写数据及零填充 OldTicksUpgraded 只验证成功路径；不要用其否定 set_mapsize 失败处理，也不要把零填充数据当成无 NUL 风险覆盖。"
+  },
+  {
+    "lane": "p09_storage_readers",
+    "id": "BUG-P09-003",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtDataStorage/WtDataReader.cpp:151-180",
+      "src/Includes/IDataReader.h:200-206"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p09_storage_readers/p09_reader_init_adjfactor_test.cpp:386-398"
+    ],
+    "reason": "非空 cfg 缺少 path 时 cfg->get 返回值会被直接解引用，UB/崩溃静态可证；但 path 是否是必填配置项、缺失是否属于受支持 init 输入没有配置 schema/上层合同证据。现有 crash 用例只覆盖配置错误路径。",
+    "fix": "明确 path 是必填还是允许缺省；必填时判空并记录配置错误且让上层可识别初始化失败，允许缺省时设安全默认并返回。",
+    "acceptance": "针对 schema 定义的缺失/null/字符串/数组 path 配置验证 init 状态和日志；合法最小配置无崩溃。",
+    "canonical": null,
+    "proposed_test_fix": "禁用的 no-path crash 用例在确定配置必填性前不作产品验收；若缺路径本属无效配置，测试应断言安全拒绝而不是将崩溃作为正常调用路径。"
+  },
+  {
+    "lane": "p09_storage_readers",
+    "id": "BUG-P09-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtRdmDtReader.h:536-540",
+      "src/WtDataStorage/WtDataReader.cpp:2349-2364",
+      "src/Share/fmtlib.h:15-19",
+      "src/Includes/WTSMarcos.h:22-23"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p09_storage_readers/p09_reader_init_adjfactor_test.cpp:323-350"
+    ],
+    "reason": "两个复权因子 key 都无界写入 thread_local char[20]；fmtutil::format_to 没容量参数并在结束位置再写 NUL。有效长商品/合约 ID 能使 key 长于 19 字节，覆盖相邻静态存储；宏允许的 exchange/product/code 组合没有 19 字节限制。",
+    "fix": "改为 std::string key = fmt::format(\"{}.{}.{}\", exchg, pid, code)，并保证 map 与 loader 使用同一拥有型 key。",
+    "acceptance": "分别覆盖 19、20、明显更长的合法 key，核验 loader 输入和因子 lookup 一致；ASan 下无静态缓冲区写越界。",
+    "canonical": null,
+    "proposed_test_fix": "扩展现有短键排序测试，添加合法长交易所/品种/代码组合；不要只测试 14 字节 SSE.STK.600000。"
+  },
+  {
+    "lane": "p09_storage_readers",
+    "id": "BUG-P09-005",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtRdmDtReader.cpp:1637-1685",
+      "src/WtDataStorage/WtRdmDtReader.cpp:1688-1726",
+      "src/Includes/IRdmDtReader.h:71-74"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p09_storage_readers/p09_rdm_window_range_test.cpp:241-255",
+      "src/TestUnits/coverage/p09_storage_readers/p09_rdm_window_range_test.cpp:367-391"
+    ],
+    "reason": "公开 range 左界晚于全部缓存 bar 时无符号 count 可回绕为 0，但 helper 仍访问 vector[size]；ByCount count=0 时 sIdx=eIdx+1，右端在末条时也会构造 vector[size]。调用方 count=0 时不解引用不消除 helper 内的越界下标。",
+    "fix": "helper 对空结果/零条数提前返回安全 NULL 并置 count=0；调用侧仅在有效 pointer/count 下建切片。",
+    "acceptance": "公开 range 覆盖左界超过末条、右界早于首条、空缓存；count=0 覆盖末条/非末条 etime；返回 NULL/空并在 debug STL/ASan 下无越界。",
+    "canonical": null,
+    "proposed_test_fix": "保留 disabled 危险候选直到修复；启用前明确 helper 空结果指针语义并断言 count==0 与 p==nullptr，不能只检查 count。"
+  },
+  {
+    "lane": "p10_storage_writer",
+    "id": "BUG-P10-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtDataWriter.cpp:1818-1844"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p10_storage_writer/p10_proc_block_data_test.cpp:433-454"
+    ],
+    "reason": "writer 解码器在读 BlockHeader 版本位前未确认至少 12 字节；CMP/CMP_V2 再读 BlockHeaderV2._size 前未确认 20 字节。短/截断文件输入可造成越界读取；这和错误返回后的调用端处理是不同问题。",
+    "fix": "按版本先验证基础头/V2 压缩头长度，之后再做无溢出的 size 校验；拒绝时不修改 content。",
+    "acceptance": "单进程隔离测试覆盖空、4 字节、12-19 字节压缩头、完整头错误 _size 和合法 RAW_V2/CMP 控制；失败返回 false 且原 buffer 不变，sanitizer 下无越界。",
+    "canonical": null,
+    "proposed_test_fix": "当前子进程测试接受组合断言失败后退出 2 的现状，不应标为通过；拆开检查返回值与内容不变两个断言，保留 ASan 运行。"
+  },
+  {
+    "lane": "p10_storage_writer",
+    "id": "BUG-P10-003",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtDataStorage/WtDataWriter.cpp:1818-1831"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p10_storage_writer/p10_proc_block_data_test.cpp:381-405"
+    ],
+    "reason": "当前 decoder 仅按版本位处理，不校验 blk_flag；writer 会写 BLK_FLAG，但仓库/接口未明确 decoder 必须拒绝错误 magic。原来把错误 magic 被接受当作正确的测试假设没有规范依据，当前已禁用。",
+    "fix": "先取得 block 格式协议中 magic 必须匹配的约定；若需检查，在头长验证后拒绝错误标志；具体 block type 应由知道预期类型的调用边界校验。",
+    "acceptance": "用格式规范/真实旧文件确认坏 magic 行为，再按规范增加 reject/accept 测试；不以当前实现行为定义接口。",
+    "canonical": null,
+    "proposed_test_fix": "保持 BlockFlagValidationContractPending 禁用，直到协议明确；删去把 `_type` 由无预期类型参数的 helper 负责校验的要求。"
+  },
+  {
+    "lane": "p10_storage_writer",
+    "id": "BUG-P10-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtDataWriter.cpp:1951-2006"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p10_storage_writer/p10_day_dsb_dump_test.cpp:379-420"
+    ],
+    "reason": "dump_day_data 对只有合法 RAW_V2 头且无 payload 的既存日线文件，barcnt=0 后跳过更新 newBar，仍截断并重写空头，最终返回 true。新 bar 静默丢失，是明确可构造输入的持久化缺陷，不依赖真实掉电。",
+    "fix": "把 header-only 解码为空历史后的新 bar 写入分支补齐；若按损坏策略不自动恢复，应保留文件并返回 false，不可成功但丢 bar。",
+    "acceptance": "header-only 后 dump 新 bar 必须读回完全一致的一条 bar；或返回 false 且文件字节未变；合法追加、同日替换和压缩文件追加不回归。",
+    "canonical": null,
+    "proposed_test_fix": "现有测试拆分方式正确；`HeaderOnlyDayFileDecodesToEmptyPayload` 是 parser 控制，不可作为追加持久化通过证据。"
+  },
+  {
+    "lane": "p10_storage_writer",
+    "id": "BUG-P10-005",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtDataWriter.cpp:578-622",
+      "src/WtDataStorage/WtDataWriter.cpp:1595-1614",
+      "src/WtDataStorage/WtDataWriter.cpp:2216-2233"
+    ],
+    "test_evidence": [],
+    "reason": "主 writer 的 _tasks worker 在锁外检查 queue.empty 后无谓词 wait，producer 入队/notify 可落在判空与实际 wait 之间；并发 empty 读取也未受 mutex 保护。收盘队列 _proc_que 的 producer 也未用 _proc_mtx，而 consumer 锁外判空再无谓词 wait。锁外读队列存在数据竞争，且存在丢唤醒挂起窗口。标题中的 `_async_task` 未初始化是错误归因，实际 `_async_proc` 在 init 赋值。",
+    "fix": "producer/consumer 的所有 queue 操作使用同一个 mutex；wait(lock,predicate) 包含 queue 非空或终止条件；release 置终止、唤醒并 join 对应 worker。",
+    "acceptance": "确定性 barrier 测试覆盖 empty 检查后并发入队、连续入队、收盘任务唤醒、release 空队列与有任务退出；队列元素恰一次处理，退出无挂起。",
+    "canonical": null,
+    "proposed_test_fix": "不要用现有正常 async 写入或长超时测试证明无丢唤醒；引入可控同步点并 separately 验证 task worker 和 proc worker。"
+  },
+  {
+    "lane": "q03_storage3",
+    "id": "BUG-Q03-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtRdmDtReader.cpp:1178-1196",
+      "src/WtDataStorage/WtRdmDtReader.cpp:1430-1437"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q03_storage3/q03_rdm_tick_file_test.cpp:402-425"
+    ],
+    "reason": "存在的 HOT/raw 复权文件只检查达到 block header 大小，没有验证解码载荷至少一根且是 WTSBarStruct 整数倍。payload 短于一根时 barcnt=0，仍对零长度 vector memcpy 非零 content 并访问 at(barcnt-1)；含尾部残余也会复制超过 vector 有效长度。崩溃信号未定位，本裁定由静态边界成立，不声称本轮动态复现。",
+    "fix": "检查 proc_block_data 成功，载荷非空且为完整 bar 整数倍后再分配/拷贝/访问末条；用 RAII 管理 hotAy。",
+    "acceptance": "HOT raw/CMP 文件覆盖 header-only、短于一根、完整 bar+余数、正常多 bar；异常文件安全跳过/报错且不缓存部分结果，正常文件完整载入。",
+    "canonical": null,
+    "proposed_test_fix": "当前 disabled fragment 用例可保持子进程隔离，加入返回/错误日志和缓存状态断言；SIGSEGV/exit139 不能写成已定位到 at() 的证据。"
+  },
+  {
+    "lane": "q03_storage3",
+    "id": "BUG-Q03-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtRdmDtReader.cpp:1186",
+      "src/WtDataStorage/WtRdmDtReader.cpp:1281",
+      "src/WtDataStorage/WtRdmDtReader.cpp:1479",
+      "src/WtDataStorage/WtRdmDtReader.cpp:1586",
+      "src/WtDataStorage/WtDataReader.cpp:1041",
+      "src/WtDataStorage/WtDataReader.cpp:1172",
+      "src/WtDataStorage/WtDataReader.cpp:1352",
+      "src/WtDataStorage/WtDataReader.cpp:1435",
+      "src/WtDataStorage/WtDataReader.cpp:1675",
+      "src/WtDataStorage/WtDataReader.cpp:50-90"
+    ],
+    "test_evidence": [],
+    "reason": "读侧多个 HOT/复权历史 bar 装载调用 proc_block_data 后忽略 bool 结果。解析器对 CMP/CMP_V2 声明长度与实际长度不符会 false 且保留原 content；调用侧随后仍计数/cast/swap/copy，可能把压缩头当 bars 或产生错误 slice。与 parser 缺最小头长的 L04-002 是另一责任边界。",
+    "fix": "所有这些调用点都检查返回值；失败时记录路径、清掉候选缓存并放弃此文件，不能继续对原始压缩 content 解码或缓存。",
+    "acceptance": "每个 reader/HOT/adjusted 路径用有效 header 但不匹配 _size 的独立输入调用公开 API，应安全返回错误/空结果，不污染 cache；合法 RAW/CMP 各有正控。",
+    "canonical": null,
+    "proposed_test_fix": "新增调用侧而非仅 parser 单测；区分 Q03-001 的 RAW 残余 payload、L04-002 的短头 UB 与这里 CMP 长度错误后未传播 false。"
+  },
+  {
+    "lane": "q03_storage3",
+    "id": "BUG-Q03-004",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtDataStorage/WtRdmDtReader.cpp:323-328",
+      "src/WtDataStorage/WtRdmDtReader.cpp:486-507",
+      "src/WtDataStorage/WtDataReader.cpp:433-456"
+    ],
+    "test_evidence": [],
+    "reason": "tcnt 是无符号数，tcnt<=0 等价 ==0，只是可读性问题。lower_bound 搜索范围 tcnt-1 排除末条，之后的回退/索引可能是既有右界闭开策略；IDataReader/IRdmDtReader 只说结束时间，未明确是否包含恰等于末条的 tick。没有接口证据判定结果错。",
+    "fix": "不按现状写法直接改；先确定 tick range/count 上界的闭开语义，再按统一语义选择 lower_bound/upper_bound 和末条处理。",
+    "acceptance": "协议明确 etime 恰等末条时含或不含；覆盖单条、首条前、末条等于上界、末条晚于上界以及跨历史/RT 分支。",
+    "canonical": null,
+    "proposed_test_fix": "现有 tcnt<=0 不能作为产品缺陷测试；边界测试只记录当前行为，待规范确定后改为规范断言。"
+  },
+  {
+    "lane": "q03_storage3",
+    "id": "BUG-Q03-005",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtRdmDtReader.cpp:2643-2654",
+      "src/WtDataStorage/WtRdmDtReader.h:266-269",
+      "src/WtDataStorage/WtRdmDtReader.h:485-490"
+    ],
+    "test_evidence": [],
+    "reason": "WtRdmDtReader 自身公开注释承诺 clearCache 清所有 K线、Tick、委托、队列、成交缓存，但实现只清 bars 与 6 个 RT map，不清 4 个按日期增长的历史 tick/detail/queue/trans map。源码能证明 clearCache 后历史缓存仍命中；没有 RSS 量测，不据此声称已证明内存无限增长或不可接受。",
+    "fix": "在确认无并发读者/悬垂 slice 的生命周期条件后，清理四张历史 map；必要时先使缓存 slice 生命周期完成或明确 invalidation 约束。",
+    "acceptance": "加载历史 HFT→调用 clearCache→替换/移走文件→同一 reader 再读不再命中旧数据；对各四 map 检查重建行为。内存上界另用长期多日期观测定义。",
+    "canonical": null,
+    "proposed_test_fix": "新增四类历史 map 的定向 clearCache 后重载测试；不要引用仅检查 K 线 map 或旧 RSS 推断作为 HFT 清理覆盖。"
+  }
+]

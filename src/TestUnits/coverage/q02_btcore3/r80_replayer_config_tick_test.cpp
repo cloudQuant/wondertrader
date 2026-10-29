@@ -22,7 +22,9 @@
 #include <vector>
 
 #include <Includes/WTSDataDef.hpp>
+#include <Includes/WTSSessionInfo.hpp>
 #include <Includes/WTSVariant.hpp>
+#include <Share/CodeHelper.hpp>
 #include <WtBtCore/HisDataReplayer.h>
 
 #include "r80_common.h"
@@ -45,6 +47,27 @@ namespace
 			r80::mk_bar(20200102u, 932, 10.2, 10.4, 10.0, 10.3, 120.0)
 		};
 	}
+
+	class RecordingTickLoader : public r80::Loader
+	{
+	public:
+		struct Request
+		{
+			std::string code;
+			uint32_t date;
+			size_t available;
+		};
+
+		std::vector<Request> requests;
+
+		bool loadRawHisTicks(void* obj, const char* stdCode, uint32_t uDate,
+			FuncReadTicks cb) override
+		{
+			auto it = ticks.find(std::string(stdCode) + "#" + std::to_string(uDate));
+			requests.push_back({ stdCode, uDate, it == ticks.end() ? 0u : it->second.size() });
+			return r80::Loader::loadRawHisTicks(obj, stdCode, uDate, cb);
+		}
+	};
 }
 
 class R80ConfigTick : public r80::Fixture
@@ -144,11 +167,11 @@ TEST_F(R80ConfigTick, DumpStateUsesMinutePeriodNames)
  * 逐 tick 回放 + Level2 订阅（csv 模式无 Level2 数据）：
  * getNext*Time 在 checkOrder* 处早退，replayHftDatasByDay 对空缓存循环 continue；
  * 第二轮 prepare 触发 reset 的 tick 游标复位（L462-L466），重新订阅后可再次回放。
- * 同时覆盖 sub_tick、sub_order_* 与 sub_transaction 的 Q/H 后缀剥离。
+ * 同时覆盖 sub_tick、sub_order_* 与 sub_transaction 的真实复权后缀 -/+ 剥离。
  */
 TEST_F(R80ConfigTick, TickReplayResetsCursorAndSkipsEmptyLevel2)
 {
-	r80::Loader loader;
+	RecordingTickLoader loader;
 	loader.ticks[std::string("SSE.STK.000001#20200102")] = {
 		r80::mk_tick(20200102u, 930, 10.0, 100.0),
 		r80::mk_tick(20200102u, 931, 11.0, 110.0),
@@ -166,11 +189,20 @@ TEST_F(R80ConfigTick, TickReplayResetsCursorAndSkipsEmptyLevel2)
 	rp.register_sink(&sink, "r80_tick_reset");
 
 	ASSERT_TRUE(rp.prepare());
+	const std::string baseCode = "SSE.STK.000001";
+	const std::string qfqCode = baseCode + SUFFIX_QFQ;
+	const std::string hfqCode = baseCode + SUFFIX_HFQ;
 	// prepare 内部的 reset 会清空订阅表，必须在 prepare 之后再订阅
-	rp.sub_tick(1, "SSE.STK.000001Q");
-	rp.sub_order_detail(2, "SSE.STK.000001Q");
-	rp.sub_order_queue(3, "SSE.STK.000001H");
-	rp.sub_transaction(4, "SSE.STK.000001H");
+	rp.sub_tick(1, qfqCode.c_str());
+	rp.sub_order_detail(2, qfqCode.c_str());
+	rp.sub_order_queue(3, hfqCode.c_str());
+	rp.sub_transaction(4, hfqCode.c_str());
+	ASSERT_EQ(20200102u, rp.get_trading_date());
+	ASSERT_NE(nullptr, rp.get_commodity_info(baseCode.c_str()));
+	WTSSessionInfo* stockSession = rp.get_session_info("SSE.STK.000001", true);
+	ASSERT_NE(nullptr, stockSession);
+	EXPECT_TRUE(stockSession->isInTradingTime(930));
+	EXPECT_TRUE(stockSession->isInTradingTime(932));
 
 	// csv 模式拒绝 Level2：三个切片入口直接返回 NULL
 	EXPECT_EQ(nullptr, rp.get_order_detail_slice("SSE.STK.000001", 2));
@@ -178,19 +210,50 @@ TEST_F(R80ConfigTick, TickReplayResetsCursorAndSkipsEmptyLevel2)
 	EXPECT_EQ(nullptr, rp.get_transaction_slice("SSE.STK.000001", 2));
 
 	rp.run(false);
-	// 当前实现每天少回放最后一笔（BUG-P07-001，沿用既有测试口径）
-	ASSERT_EQ(2u, sink.ticks.size());
-	EXPECT_DOUBLE_EQ(10.0, sink.ticks[0].price);
-	EXPECT_DOUBLE_EQ(11.0, sink.ticks[1].price);
+	ASSERT_EQ(1u, loader.requests.size());
+	ASSERT_EQ(baseCode, loader.requests[0].code);
+	ASSERT_EQ(20200102u, loader.requests[0].date);
+	ASSERT_EQ(3u, loader.requests[0].available);
+	// 三笔 tick 均在配置的回放窗口内。
+	const size_t firstRoundCount = sink.ticks.size();
+	EXPECT_EQ(3u, firstRoundCount);
+	if (firstRoundCount >= 3u)
+	{
+		EXPECT_DOUBLE_EQ(10.0, sink.ticks[0].price);
+		EXPECT_EQ(20200102u, sink.ticks[0].date);
+		EXPECT_EQ(930u, sink.ticks[0].time);
+		EXPECT_DOUBLE_EQ(11.0, sink.ticks[1].price);
+		EXPECT_EQ(20200102u, sink.ticks[1].date);
+		EXPECT_EQ(931u, sink.ticks[1].time);
+		EXPECT_DOUBLE_EQ(12.0, sink.ticks[2].price);
+		EXPECT_EQ(20200102u, sink.ticks[2].date);
+		EXPECT_EQ(932u, sink.ticks[2].time);
+	}
 	EXPECT_EQ(1u, sink.beginCalls);
 	EXPECT_EQ(1u, sink.endCalls);
 	EXPECT_EQ(1u, sink.doneCalls);
 
 	// 第二轮：prepare -> reset 把 tick 游标还原到 UINT_MAX，重新订阅后再次回放
+	const size_t beforeSecondRound = sink.ticks.size();
 	ASSERT_TRUE(rp.prepare());
-	rp.sub_tick(1, "SSE.STK.000001");
+	rp.sub_tick(1, qfqCode.c_str());
 	rp.run(false);
-	ASSERT_EQ(4u, sink.ticks.size());
-	EXPECT_DOUBLE_EQ(10.0, sink.ticks[2].price);
-	EXPECT_DOUBLE_EQ(11.0, sink.ticks[3].price);
+	const size_t secondRoundCount = sink.ticks.size() - beforeSecondRound;
+	EXPECT_EQ(3u, secondRoundCount);
+	EXPECT_EQ(6u, sink.ticks.size());
+	if (sink.ticks.size() >= 6u)
+	{
+		EXPECT_DOUBLE_EQ(10.0, sink.ticks[3].price);
+		EXPECT_EQ(20200102u, sink.ticks[3].date);
+		EXPECT_EQ(930u, sink.ticks[3].time);
+		EXPECT_DOUBLE_EQ(11.0, sink.ticks[4].price);
+		EXPECT_EQ(20200102u, sink.ticks[4].date);
+		EXPECT_EQ(931u, sink.ticks[4].time);
+		EXPECT_DOUBLE_EQ(12.0, sink.ticks[5].price);
+		EXPECT_EQ(20200102u, sink.ticks[5].date);
+		EXPECT_EQ(932u, sink.ticks[5].time);
+	}
+	EXPECT_EQ(2u, sink.beginCalls);
+	EXPECT_EQ(2u, sink.endCalls);
+	EXPECT_EQ(2u, sink.doneCalls);
 }

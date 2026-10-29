@@ -368,7 +368,7 @@ TEST_F(P02DiffExecuterTest, ScaleAppliedOnlyAfterUnitExists)
     _executer.set_position(no_targets);   // set_position 末尾会调用私有的 save_data()
 
     std::error_code ec;
-    EXPECT_TRUE(fs::exists(exec_data_file("p02_diff_scale"), ec));
+    EXPECT_TRUE(fs::exists(exec_data_file("p02_diff_exe"), ec));
 }
 
 }  // namespace

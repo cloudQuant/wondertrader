@@ -277,6 +277,7 @@ TEST_F(P12TickFactory, DayPathReturnsDetachedBar)
 	seed.open = seed.high = seed.low = seed.close = 3500.0;
 	seed.vol = 10.0;
 	seed.money = 35000.0;
+	seed.add = 12.0;
 	m_kline->appendBar(seed);
 
 	WTSTickData* t2 = keep(makeTick(3520.0, 5.0, 17600.0, 90200000, 20240105, 20240105, 810.0, 2.0));
@@ -297,6 +298,8 @@ TEST_F(P12TickFactory, SecPathWithTimesAndUnixTime)
 	WTSTickData* t1 = keep(makeTick(3500.0, 1.0, 3500.0, 90012500));
 	WTSBarStruct* bar = m_factory.updateSecData(m_sInfo, m_kline, t1);
 	ASSERT_TRUE(bar != NULL);
+	// 首根是调用方所有的 detached bar；装入序列后由序列持有，供同桶更新路径使用。
+	m_kline->appendBar(*bar);
 	delete bar;
 
 	// 同一 30 秒桶 -> 原地更新，返回 NULL

@@ -1,0 +1,23 @@
+In file included from <stdin>:2:
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/Converter.hpp:48:3: error: no matching function for call to 'from_chars'
+   48 |                 std::from_chars(str.begin(), str.end(), ret);
+      |                 ^~~~~~~~~~~~~~~
+<stdin>:3:52: note: in instantiation of function template specialization 'convert::from_str<int>' requested here
+    3 | int main(){std::string value="42"; return convert::from_str<int>(value);}
+      |                                                    ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__charconv/from_chars_integral.h:224:1: note: candidate function template not viable: no known conversion from 'iterator' (aka '__wrap_iter<char *>') to 'const char *' for 1st argument
+  224 | from_chars(const char* __first, const char* __last, _Tp& __value) {
+      | ^          ~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__charconv/from_chars_integral.h:38:19: note: candidate function not viable: no known conversion from 'iterator' (aka '__wrap_iter<char *>') to 'const char *' for 1st argument
+   38 | from_chars_result from_chars(const char*, const char*, bool, int = 10) = delete;
+      |                   ^          ~~~~~~~~~~~
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__charconv/from_chars_floating_point.h:58:1: note: candidate function not viable: no known conversion from 'iterator' (aka '__wrap_iter<char *>') to 'const char *' for 1st argument
+   58 | from_chars(const char* __first, const char* __last, float& __value, chars_format __fmt = chars_format::general) {
+      | ^          ~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__charconv/from_chars_floating_point.h:63:1: note: candidate function not viable: no known conversion from 'iterator' (aka '__wrap_iter<char *>') to 'const char *' for 1st argument
+   63 | from_chars(const char* __first, const char* __last, double& __value, chars_format __fmt = chars_format::general) {
+      | ^          ~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__charconv/from_chars_integral.h:230:1: note: candidate function template not viable: requires 4 arguments, but 3 were provided
+  230 | from_chars(const char* __first, const char* __last, _Tp& __value, int __base) {
+      | ^          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1 error generated.

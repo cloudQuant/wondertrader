@@ -49,6 +49,9 @@ protected:
 		m_sInfoShort = WTSSessionInfo::create("SHORT", "短小节", 0);
 		m_sInfoShort->addTradingSection(900, 910);
 		m_sInfoShort->addTradingSection(930, 940);
+
+		m_sInfoNight = WTSSessionInfo::create("NIGHT", "夜盘", 0);
+		m_sInfoNight->addTradingSection(2100, 2359);
 	}
 
 	void TearDown() override
@@ -65,6 +68,7 @@ protected:
 		m_sInfo->release();
 		m_sInfoTwo->release();
 		m_sInfoShort->release();
+		m_sInfoNight->release();
 	}
 
 	WTSKlineData* newKline(WTSKlinePeriod period, uint32_t times)
@@ -85,6 +89,7 @@ protected:
 	WTSSessionInfo*	m_sInfo = NULL;
 	WTSSessionInfo*	m_sInfoTwo = NULL;
 	WTSSessionInfo*	m_sInfoShort = NULL;
+	WTSSessionInfo*	m_sInfoNight = NULL;
 	WTSKlineData*		m_kline = NULL;
 	std::vector<WTSKlineData*>	m_extraKlines;
 	WTSDataFactory		m_factory;
@@ -171,16 +176,15 @@ TEST_F(P12BarFactory, Minute1RawTimeBarUsesTradingDateSentinel)
 	EXPECT_EQ(TimeUtils::timeToMinBar(20240105, 903), r->time);
 }
 
-TEST_F(P12BarFactory, Minute1DateRollWhenTargetTimeFallsBehind)
+TEST_F(P12BarFactory, Minute1SessionCloseStaysOnTradingDate)
 {
 	newKline(KP_Minute1, 3);
-	// 时段外的 bar 时间（2330）：timeToMinutes 返回 INVALID_UINT32，
-	// 无符号回绕后 minuteToTime 落到 getCloseTime()=1000 < 2330 -> 日期 +1
-	WTSBarStruct bar = mkBar(20240105, TimeUtils::timeToMinBar(20240105, 2330), 10, 12, 9, 11, 5, 50, 100, 2);
+	// 合法的 session 收盘分钟是 timeToMinutes 的闭区间边界；3 分钟桶仍落在收盘点。
+	WTSBarStruct bar = mkBar(20240105, TimeUtils::timeToMinBar(20240105, 1000), 10, 12, 9, 11, 5, 50, 100, 2);
 	WTSBarStruct* r = m_factory.updateKlineData(m_kline, &bar, m_sInfo);
 	ASSERT_TRUE(r != NULL);
-	EXPECT_EQ(20240106u, r->date);
-	EXPECT_EQ(TimeUtils::timeToMinBar(20240106, 1000), r->time);
+	EXPECT_EQ(20240105u, r->date);
+	EXPECT_EQ(TimeUtils::timeToMinBar(20240105, 1000), r->time);
 }
 
 TEST_F(P12BarFactory, Minute1AlignedToSection)
@@ -224,8 +228,8 @@ TEST_F(P12BarFactory, Minute5Times1And2)
 	EXPECT_EQ(TimeUtils::timeToMinBar(20240105, 910), r2->time);
 	EXPECT_EQ(20240105u, r2->date);
 
-	// 0911 -> 6 -> 10 -> 同一根合并
-	WTSBarStruct b3 = mkBar(20240105, TimeUtils::timeToMinBar(20240105, 911), 11, 20, 8, 19, 7, 70, 120, 30);
+	// 09:10 是有效的五分钟基础 bar，归入 09:10 桶并与前一根合并。
+	WTSBarStruct b3 = mkBar(20240105, TimeUtils::timeToMinBar(20240105, 910), 11, 20, 8, 19, 7, 70, 120, 30);
 	EXPECT_EQ(NULL, m_factory.updateKlineData(k2, &b3, m_sInfo));
 	ASSERT_EQ(1u, k2->size());
 	EXPECT_DOUBLE_EQ(20.0, k2->at(-1)->high);
@@ -251,13 +255,13 @@ TEST_F(P12BarFactory, Minute5AlignedAndSentinel)
 	EXPECT_EQ(TimeUtils::timeToMinBar(20240105, 910), r1->time);
 
 	WTSKlineData* k2 = extraKline(KP_Minute5, 2);
-	// 日期哨兵：time 只带 HHMM -> 回落 curBar.date
-	WTSBarStruct b2 = mkBar(20240105, 906, 10, 13, 9, 12, 5, 50, 100, 2);
+	// 日期哨兵：time 只带 HHMM；有效五分钟基础 bar 回落 curBar.date。
+	WTSBarStruct b2 = mkBar(20240105, 905, 10, 13, 9, 12, 5, 50, 100, 2);
 	WTSBarStruct* r2 = m_factory.updateKlineData(k2, &b2, m_sInfo);
 	ASSERT_TRUE(r2 != NULL);
 	EXPECT_EQ(20240105u, r2->date);
-	// 0907 -> 2 -> 10 -> 0910，同一根合并
-	WTSBarStruct b3 = mkBar(20240105, 907, 12, 30, 11, 28, 9, 90, 150, 60);
+	// 0910 -> 5 -> 10 -> 0910，同一根合并
+	WTSBarStruct b3 = mkBar(20240105, 910, 12, 30, 11, 28, 9, 90, 150, 60);
 	EXPECT_EQ(NULL, m_factory.updateKlineData(k2, &b3, m_sInfo));
 	ASSERT_EQ(1u, k2->size());
 	EXPECT_DOUBLE_EQ(30.0, k2->at(-1)->high);
@@ -288,13 +292,13 @@ TEST_F(P12BarFactory, HourResamplePaths)
 	// 合并后 lastBar->time == curBar.time -> 重新置为闭合
 	EXPECT_TRUE(m_kline->isClosed());
 
-	// 2330 -> 跨日：uHH 归 0，日期 +1
+	// 夜盘自然时间跨午夜；输出 date 仍是 bar 的交易日，time 走到次日 00:00。
 	WTSKlineData* k2 = extraKline(KP_Hour, 1);
-	WTSBarStruct b3 = mkBar(20240105, TimeUtils::timeToMinBar(20240105, 2330), 10, 12, 9, 11, 5, 50, 100, 2);
-	WTSBarStruct* r2 = m_factory.updateKlineData(k2, &b3, m_sInfo);
+	WTSBarStruct b3 = mkBar(20240108, TimeUtils::timeToMinBar(20240107, 2330), 10, 12, 9, 11, 5, 50, 100, 2);
+	WTSBarStruct* r2 = m_factory.updateKlineData(k2, &b3, m_sInfoNight);
 	ASSERT_TRUE(r2 != NULL);
-	EXPECT_EQ(20240106u, r2->date);
-	EXPECT_EQ(TimeUtils::timeToMinBar(20240106, 0), r2->time);
+	EXPECT_EQ(20240108u, r2->date);
+	EXPECT_EQ(TimeUtils::timeToMinBar(20240108, 0), r2->time);
 }
 
 TEST_F(P12BarFactory, HalfResamplePaths)
@@ -321,13 +325,13 @@ TEST_F(P12BarFactory, HalfResamplePaths)
 	EXPECT_EQ(2u, m_kline->size());
 	EXPECT_EQ(TimeUtils::timeToMinBar(20240105, 1000), r3->time);
 
-	// 2345 -> 跨日 0000
+	// 自然日 20240107 夜盘跨午夜；date 保留对应的交易日 20240108。
 	WTSKlineData* k2 = extraKline(KP_Half, 1);
-	WTSBarStruct b4 = mkBar(20240105, TimeUtils::timeToMinBar(20240105, 2345), 10, 12, 9, 11, 5, 50, 100, 2);
-	WTSBarStruct* r4 = m_factory.updateKlineData(k2, &b4, m_sInfo);
+	WTSBarStruct b4 = mkBar(20240108, TimeUtils::timeToMinBar(20240107, 2345), 10, 12, 9, 11, 5, 50, 100, 2);
+	WTSBarStruct* r4 = m_factory.updateKlineData(k2, &b4, m_sInfoNight);
 	ASSERT_TRUE(r4 != NULL);
-	EXPECT_EQ(20240106u, r4->date);
-	EXPECT_EQ(TimeUtils::timeToMinBar(20240106, 0), r4->time);
+	EXPECT_EQ(20240108u, r4->date);
+	EXPECT_EQ(TimeUtils::timeToMinBar(20240108, 0), r4->time);
 }
 
 TEST_F(P12BarFactory, ExtractDispatchParameterGuards)

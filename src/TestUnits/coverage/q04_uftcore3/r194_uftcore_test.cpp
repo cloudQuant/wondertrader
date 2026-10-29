@@ -8,9 +8,8 @@
  *    其后的订阅表/重采样代码是死代码（见 bugs/R194.md BUG-R194-001），
  *    本文件锁定该桩行为与 on_bar 空订阅不崩。
  *  - ParserAdapter::init 的 module 缺失/装载失败早退（不加载任何真实插件）。
- *  - UftStraContext 的 5 个数值 watch_param 重载在 ShareManager 未初始化时
- *    对 allocate_value 返回值直接解引用（BUG-R11-002，本 lane 复核仍成立），
- *    保留 DISABLED_ 复现占位，启用即段错误。
+ *  - UftStraContext 数值 watch_param 离线安全回退的候选契约由 R11 的逐重载
+ *    子进程用例覆盖（BUG-R11-002）；此处不重复保留禁用占位。
  *
  * 边界：只构造引擎/上下文，不 run、不建 shm、不加载插件、不写文件。
  */
@@ -59,22 +58,4 @@ TEST(R194UftParserAdapter, MissingModuleIsRejected)
 	EXPECT_STREQ("r194", pa.id());
 
 	cfg->release();
-}
-
-/*
- * 生产: WtUftCore/UftStraContext.cpp:704-727（5 个数值 watch_param 重载）
- * 它们在 ShareManager::self().allocate_value 返回 nullptr 时直接解引用，
- * 无共享内存段即段错误（BUG-R11-002 复核）。保留复现占位，禁止启用。
- */
-TEST(R194UftContext, DISABLED_NumericWatchParamDereferencesNullWhenShareManagerAbsent)
-{
-	WtUftEngine engine;
-	engine.init(nullptr, nullptr, nullptr, nullptr);
-	UftStraContext ctx(&engine, "r194_ctx");
-
-	EXPECT_EQ(1, ctx.watch_param("r194_key", (int32_t)1));
-	EXPECT_EQ(2, ctx.watch_param("r194_key", (int64_t)2));
-	EXPECT_EQ(3U, ctx.watch_param("r194_key", (uint32_t)3));
-	EXPECT_EQ(4U, ctx.watch_param("r194_key", (uint64_t)4));
-	EXPECT_DOUBLE_EQ(5.5, ctx.watch_param("r194_key", 5.5));
 }

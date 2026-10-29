@@ -156,7 +156,8 @@ TEST(R11ParserAdapter, initRejectsNullConfig)
 	EXPECT_FALSE(adapter.init("p1", nullptr, &env._stub, &env._bd));
 	//没有 api, run 必须失败
 	EXPECT_FALSE(adapter.run());
-	EXPECT_STREQ("p1", adapter.id());
+	// 空配置在 ParserAdapter::init 的首个守卫返回，失败前不会设置 id。
+	EXPECT_STREQ("", adapter.id());
 }
 
 TEST(R11ParserAdapter, initRejectsEmptyModule)
@@ -209,6 +210,7 @@ TEST(R11ParserAdapter, initExtSubscribesAllContracts)
 	//_filters 为空 -> 走 else 全量分支, 只注册了 SHFE.ag2406 一个合约
 	EXPECT_EQ((size_t)1, st._subbedSize);
 	EXPECT_EQ("SHFE.ag2406", st._firstSubbed);
+	EXPECT_STREQ("SHFE.ag2406", env._bd.getContract("ag2406", "SHFE")->getFullAltCode());
 
 	EXPECT_TRUE(adapter.run());
 	EXPECT_EQ((uint32_t)1, st._connectCnt);

@@ -1,0 +1,389 @@
+[
+  {
+    "lane": "R125",
+    "id": "BUG-R125-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtSelStraFact/WtStraDtSel.cpp:88-95",
+      "src/WtSelStraFact/WtStraDtSel.cpp:104-111",
+      "src/WtSelStraFact/WtStraDtSel.cpp:121-150",
+      "src/Includes/ISelStraCtx.h:309-316"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r125_selfthft/r125_sel_test.cpp:116-130",
+      "src/TestUnits/coverage/r125_selfthft/r125_sel_test.cpp:133-158"
+    ],
+    "input_reachability": "策略配置 codes 支持逗号分隔多标的；on_init 会全部订阅。某个标的在其交易时段内可能没有 K 线切片，当前接口可返回 NULL 或空切片。",
+    "oracle_basis": "每个已配置、已订阅代码都由同一调度循环逐一处理；一个代码缺少本轮 bars 不应阻止其余代码的独立处理。",
+    "reason": "多码输入和逐码订阅是实际支持路径，但 on_schedule 在逐码循环里遇到 NULL 或空 bars 时直接 return，跳过集合中后续所有代码。现有 ScheduleEarlyReturns 只用单码 fixture，不能发现跨码短路；InitSubscribesAllCodes 仅证明配置和订阅多码。",
+    "root_cause": "src/WtSelStraFact/WtStraDtSel.cpp:139-150 的逐码循环将缺少当前切片处理为整个 on_schedule 结束，而非跳过当前代码。",
+    "fix": "将 NULL/空切片分支改为释放存在的切片后 continue；不改变当前代码以外的持仓/信号计算。",
+    "acceptance": "两只代码按稳定顺序调度，第一只的 bars 分别为 NULL、空切片，第二只有有效切片；两种情形下第二只仍执行既有信号/下单逻辑，空切片被释放，单码早退控制仍安全。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/r125_selfthft/r125_sel_test.cpp",
+        "case": "ScheduleContinuesAfterMissingBarsInOneCode",
+        "issue": "现有缺 bars 用例只有一个代码，未验证多码循环会不会被第一只代码的缺片提前终止。",
+        "change": "使用两个配置并已订阅的代码，分别为第一只设置 NULL/空 bars、第二只设置可触发既有处理逻辑的有效 bars；以独立子用例覆盖 NULL 和空切片，并按 _codes 的确定性顺序断言第二只被处理。",
+        "target": "CoverageTests_selfthft",
+        "filter": "R125SelStrategy.*",
+        "expected_result": "第一只代码没有切片时跳过该代码，第二只的既有结果与单独调度第二只一致；空切片完成释放。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/12_porters/safe-tests.json",
+      "docs/迭代计划/迭代02/复核185/evidence/12_porters/runs/r125_schedule_early/result.json",
+      "docs/迭代计划/迭代02/复核185/evidence/12_porters/runs/r125_multicode_subscription/result.json"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "实现缺片分支逐代码跳过，并加入上述多码回归；当前没有执行能复现跨码短路的测试。"
+    ]
+  },
+  {
+    "lane": "R13_wtporter",
+    "id": "BUG-R13-001",
+    "decision": "DUPLICATE",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtPorter/WtPorter.h:995-1005",
+      "src/WtPorter/WtRtRunner.cpp:321-335",
+      "src/WtPorter/WtRtRunner.cpp:791-833",
+      "src/WtCore/HftStraBaseCtx.h:670-674",
+      "src/WtCore/HftStraBaseCtx.cpp:41-48",
+      "src/WtCore/HftStraBaseCtx.cpp:60-63",
+      "src/WtCore/HftStraBaseCtx.cpp:325-337",
+      "src/WtPorter/ExpHftContext.cpp:50-69",
+      "docs/迭代计划/迭代02/缺陷裁定总表.json:2608-2623"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q06_porter/r13_porter_sel_hft_export_test.cpp:257-275",
+      "src/TestUnits/coverage/q06_porter/r13_porter_sel_hft_export_test.cpp:431-455"
+    ],
+    "input_reachability": "公开 create_hft_context 接受 trader 名称，策略配置也能提供 trader 字段；传入未注册或拼错的名称是 C ABI/配置边界可达输入。",
+    "oracle_basis": "创建入口应返回可用句柄，或以失败句柄拒绝；不能在绑定失败后返回看似有效的上下文，令后续正常 HFT 入口访问不确定的交易适配器指针。",
+    "reason": "WtRtRunner 先将新 HFT context 放入引擎 map，再查找 trader。查找失败只记录日志仍返回 context id；HftStraBaseCtx 构造函数没有初始化 _trader，后续委托、持仓及部分事件路径会解引用该指针。未初始化 _trader 及未绑定调用安全性已由当前主编号 BUG-R42-002 覆盖，因此本行重复计数；本行补充 runner 在公开 create API 的绑定失败分支仍返回并保留句柄这一触发路径，建议并入 canonical 验收。",
+    "root_cause": "src/WtPorter/WtRtRunner.cpp:323-335 将 context 注册与 trader 绑定拆开，失败分支未撤销 context 或给出失败句柄；src/WtCore/HftStraBaseCtx.cpp:41-48 未为 _trader 设定安全初值。",
+    "fix": "沿 BUG-R42-002 初始化 _trader 并让未绑定入口安全失败；将 runner 的未知 trader 分支提前到 map 注册之前，失败返回 0、不留 context。配置驱动的创建也需传播绑定失败。",
+    "acceptance": "沿 BUG-R42-002 增加公开 runner 路径验收：已注册 trader 创建仍得到可用句柄并可读持仓；未知 trader 创建返回失败且引擎中没有该句柄；所有 HFT 导出/事件入口都不会因失败绑定解引用不确定指针。",
+    "canonical": "BUG-R42-002",
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q06_porter/r13_porter_sel_hft_export_test.cpp",
+        "case": "DISABLED_hft_trader_bound_entries_deref_unbound_pointer",
+        "issue": "当前 disabled 用例在已知未初始化的 _trader 上调用读持仓、下单、撤单和订阅，属于 UB 探针，不能直接启用。",
+        "change": "重写为安全失败契约测试：未知 trader 的创建结果应为 0，getHftContext 不存在；不对失败句柄调用任何策略入口。保留现有已注册 trader 正常路径作为正向对照。",
+        "target": "CoverageTests_porter",
+        "filter": "R13PorterHftExport.*",
+        "expected_result": "失败绑定不返回可用句柄、不遗留 context；已注册绑定路径照常通过，测试不触发未定义行为。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "将 runner 绑定失败及无残留句柄纳入 BUG-R42-002 的实现/回归；本轮未运行会触发未绑定指针的 disabled 用例。"
+    ]
+  },
+  {
+    "lane": "R13_wtporter",
+    "id": "BUG-R13-005",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtPorter/WtPorter.cpp:2121-2139",
+      "src/WtPorter/WtPorter.cpp:2157-2175",
+      "src/WtPorter/WtPorter.cpp:2193-2211",
+      "src/WtPorter/WtPorter.h:1232-1260",
+      "src/WtCore/WtHftEngine.cpp:221-253",
+      "src/WtCore/TraderAdapter.cpp:2133-2135",
+      "src/WtCore/TraderAdapter.cpp:2321-2322"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q06_porter/r124_porter_hft_orders_test.cpp:199-228"
+    ],
+    "input_reachability": "HFT 行情订阅回调和交易适配器的委托/成交回调分别直接派发到 context；宿主在这些回调路径调用公开 hft_buy/hft_sell 属于正常异步运行路径。",
+    "oracle_basis": "同一返回 API 的并发调用不能产生 C++ 数据竞争或互相改写对方返回的本地订单 ID；hft_cancel_all 已用 thread_local 保存相同类型返回串。",
+    "reason": "hft_buy 与 hft_sell 各自将结果写入函数级 static std::string 并返回其 c_str()；行情事件与 trader 回报走直接回调路径，没有统一串行派发。不同回调线程重叠调用会竞争共享字符串。现有 R124 用例按顺序调用并立即复制返回值，只覆盖顺序路径；本轮没有执行并发/TSan 复现。",
+    "root_cause": "src/WtPorter/WtPorter.cpp:2163 与 :2199 使用跨线程共享的可变函数静态字符串；相邻 hft_cancel_all 在 :2127 使用 thread_local，表明可沿用线程隔离的返回存储。",
+    "fix": "将 hft_buy/hft_sell 返回缓冲改为 thread_local std::string，与 hft_cancel_all 一致；文档说明返回指针在同线程下一次相同 API 调用前有效，调用方需要更长保留时应立即复制。",
+    "acceptance": "两个独立线程分别并发调用买入/卖出导出，返回串与各自产生的订单本地 ID 对应、互不覆盖；TSan 对这些并发调用无该字符串的数据竞争。连续同线程调用仍符合明确的指针有效期。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q06_porter/r13_porter_sel_hft_export_test.cpp",
+        "case": "HftBuySellReturnStorageIsThreadLocal",
+        "issue": "现有 hft_buy/hft_sell 覆盖是顺序调用，不能发现函数静态字符串在异步回调线程并发调用时的竞争。",
+        "change": "通过两个已绑定 fake trader 的独立 HFT context 并行触发 buy/sell，在线程内立即复制返回值并比对各自 fake trader 生成的本地 ID；在 TSan 变体运行同一用例。",
+        "target": "CoverageTests_porter",
+        "filter": "R13PorterHftExport.HftBuySellReturnStorageIsThreadLocal",
+        "expected_result": "两线程都取得各自正确且稳定的订单 ID 串；TSan 不报告共享返回缓冲的数据竞争。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "落实线程局部缓冲并新增并发回归；本轮没有运行并发复现或 TSan，不能声称动态重现。"
+    ]
+  },
+  {
+    "lane": "R13_wtporter",
+    "id": "BUG-R13-006",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtPorter/WtPorter.h:218-224",
+      "src/WtPorter/WtPorter.h:995-1005",
+      "src/WtPorter/WtPorter.cpp:34-38",
+      "src/WtPorter/WtPorter.cpp:286-289",
+      "src/WtPorter/WtRtRunner.cpp:103-105",
+      "src/WtPorter/WtRtRunner.cpp:1141-1155",
+      "src/WtPorter/WtRtRunner.h:841-849",
+      "src/WtCore/WtCtaEngine.cpp:41-59",
+      "src/WtCore/WtCtaEngine.cpp:133-137",
+      "src/WtCore/WtHftEngine.cpp:39-57",
+      "src/WtCore/WtHftEngine.cpp:347-351",
+      "src/WtCore/WtSelEngine.cpp:40-56",
+      "src/WtCore/WtSelEngine.cpp:390-416"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q06_porter/r13_porter_cta_export_test.cpp:192-230"
+    ],
+    "input_reachability": "公开 create_*_context 可创建进程内策略上下文；公开 release_porter 文档定位为异步运行下的程序退出清理，之后不能继续调用 Porter API，除非重新初始化。",
+    "oracle_basis": "未发现支持运行期销毁/热重载短期 context 的公开 API 或调用工作流。当前 context 由 runner 的引擎 map 持有至 runner/进程生命周期结束；运行期无单体 destroy 不足以证明违反受支持的生命周期。",
+    "reason": "引擎 map 在 release() 中不清空，但 release_porter 被文档定义为退出前 teardown；getRunner 是函数静态单例，其内嵌引擎对象在进程退出时析构，map 持有的 shared_ptr 随之释放。现有测试只验证不同 context 的用户数据隔离，不是泄漏证据。代码没有提供反复运行期创建/热重载为支持工作流的依据，因此撤回“必然永久泄漏”的产品主张；这不证明任意创建量或进程内热重载安全。",
+    "root_cause": "不适用。观测到的是进程生命周期内 map 持有，而不是在受支持的短期 context 生命周期上有遗失引用。",
+    "fix": "当前无需产品修复。若将来明确支持运行期 context 热重载，应设计 destroy API，并在释放 HFT context 前从 trader sink 脱离、从 SEL task 与各引擎 map 移除。",
+    "acceptance": "按现有生命周期在退出前调用 release_porter 并终止进程；上下文随函数静态 runner 中引擎成员析构释放。若引入热重载契约，另验收循环 create/destroy 后 map、task 与 trader sink 回到基线。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R46",
+    "id": "BUG-R46-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtPorter/WtBtPorter.h:118-124",
+      "src/WtBtPorter/WtBtPorter.cpp:174-185",
+      "src/WtBtPorter/WtBtRunner.cpp:449-471",
+      "src/WtBtCore/HisDataReplayer.cpp:171-189"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q06_btporter/r46_btporter_runner_test.cpp:159-179"
+    ],
+    "input_reachability": "config_backtest 是公开 C ABI，接受配置文件路径或内容字符串；合法 JSON 中缺少 replayer 或 env 段时可直接进入该配置加载路径。",
+    "oracle_basis": "配置解析边界必须将缺少必需结构当成配置错误并安全返回；无效配置不能在 C ABI 调用中空指针解引用。此要求不依赖错误返回值必须采用哪种 ABI 表示。",
+    "reason": "WtBtRunner::config 只检查根配置加载成功，随后将 _cfg->get(\"replayer\") 传给会立即读取 cfg 字段的 HisDataReplayer::init；env 缺失时又在 getCString 上解引用空指针。config_backtest 公开接受外部文件/内容且返回 void，因此校验失败可通过记录错误并保持 runner 未就绪来处理，不需要改变 ABI。候选崩溃测试是 disabled，本轮未运行。",
+    "root_cause": "src/WtBtPorter/WtBtRunner.cpp:467-471 未验证 replayer/env 子段及所需字段就调用依赖者；src/WtBtCore/HisDataReplayer.cpp:171-189 对必需 cfg 直接解引用。",
+    "fix": "在 WtBtRunner::config 中调用 _replayer.init 和读取 env 前校验 replayer、env 对象及 mocker 字段；遇到非法配置记录结构化错误并设置未就绪状态。run_backtest 对未就绪 runner 安全拒绝；保留当前 void C ABI。",
+    "acceptance": "分别提供缺 replayer、缺 env、缺 mocker 的可解析配置，config 不崩溃且 runner 不可运行；随后的 run 安全拒绝。完整有效配置仍完成配置。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q06_btporter/r46_btporter_runner_test.cpp",
+        "case": "DISABLED_ConfigWithoutEnvSectionDerefsNull / DISABLED_ConfigWithoutReplayerSectionDerefsNull",
+        "issue": "原用例以空指针崩溃为观察结果并被禁用，不能直接启用，也未把结果断言为安全的配置失败。",
+        "change": "修复后改写成隔离的配置验证用例：缺每个必需段时 config 正常返回到测试、ready=false/配置失败可观测；不调用异步 run，不以崩溃作为期望。",
+        "target": "CoverageTests_btporter",
+        "filter": "R46BtRunner.*",
+        "expected_result": "缺 replayer/env/mocker 均不崩溃且 runner 标记不可运行；有效配置正向用例通过。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "实现配置结构校验和未就绪运行门禁后，再运行重写的安全负例；本轮未执行两个危险 disabled 用例。"
+    ]
+  },
+  {
+    "lane": "R69",
+    "id": "BUG-R69-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtPorter/WtPorter.cpp:260-265",
+      "src/WtPorter/WtRtRunner.cpp:489-491",
+      "src/WtPorter/WtRtRunner.cpp:583-588",
+      "src/WtPorter/WtRtRunner.cpp:884-895",
+      "src/WtCore/WtDtMgr.cpp:50-102",
+      "src/WtCore/WtDtMgr.cpp:277-281",
+      "src/WtCore/WtDtMgr.cpp:378-399",
+      "src/WtCore/WtDtMgr.cpp:421-447"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q06_porter/r69_porter_runner_config_test.cpp:250-275",
+      "src/TestUnits/coverage/p02_wtcore_engines2/r42_dtmgr_test.cpp:52-80"
+    ],
+    "input_reachability": "外部 runner 配置可以显式提供 data.store.module；该插件名称进入 WtDtMgr::initStore 的动态模块加载路径。",
+    "oracle_basis": "显式配置的数据存储插件若缺失/加载失败，外层 config 不应报告配置成功并留下无 reader 的数据管理器；无 store 配置是不同模式，现有受控路径及查询守卫允许无 reader，应保持不变。",
+    "reason": "WtDtMgr::initStore 对缺失或不可加载的显式 store 模块会返回 false，WtDtMgr::init 将该结果返回；但 WtRtRunner::initDataMgr 忽略 _data_mgr.init 的布尔值并无条件打印初始化成功、返回 true。config 随后可能成功。现有 R69 用例只覆盖 data:{} 无 store，确实通过；R42 用例证明 manager 层可安全检测 store 失败。故产品问题限定为显式 store 插件加载失败被吞掉，不把无 store 模式判缺陷，也不重复 R6-006 的缺 env/data 门禁问题。",
+    "root_cause": "src/WtPorter/WtRtRunner.cpp:892-895 丢弃 _data_mgr.init 的 false；src/WtPorter/WtRtRunner.cpp:583-588 也没有把 initDataMgr 失败传递到 config 结果。",
+    "fix": "对于显式配置的 data.store，若 _data_mgr.init 失败则 initDataMgr/config 返回失败并保持 runner 未就绪；无 store 或空 data 的既有可选模式继续按现有 reader 空值守卫工作。",
+    "acceptance": "在其余配置有效的情况下，data.store.module 指向缺失插件时 config 失败/runner 未就绪、查询不冒充成功；无 store 的控制配置仍成功且无 reader 查询安全返回；正确插件仍能完成初始化。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q06_porter/r69_porter_runner_config_test.cpp",
+        "case": "ExplicitStoreLoadFailureMakesRunnerConfigFail",
+        "issue": "现有 EmptyDataStillReturnTrue 用例没有 store，不能验证显式配置的 store 插件加载失败是否被吞掉。",
+        "change": "沿用有效其余配置，将 data.store.module 指向唯一且不存在的测试模块名，调用 runner config 并断言 false/未就绪；保留现有 data:{} no-store 测试作为可选模式控制。",
+        "target": "CoverageTests_porter",
+        "filter": "R69PorterRunnerConfig.*Store*",
+        "expected_result": "显式缺失 store 模块导致 config 失败且未就绪；no-store 控制仍通过，WtDtMgr 直接失败控制维持 false。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/12_porters/safe-tests.json",
+      "docs/迭代计划/迭代02/复核185/evidence/12_porters/runs/r69_empty_data_optional/result.json",
+      "docs/迭代计划/迭代02/复核185/evidence/12_porters/runs/r42_dt_mgr_failure_control/result.json"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "在 runner 层传播显式 store 初始化失败并新增集成用例；本轮控制用例没有覆盖 runner 配置缺失模块。"
+    ]
+  },
+  {
+    "lane": "q06_porters",
+    "id": "Q06-001",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtPorter/WtPorter.cpp:839-845",
+      "src/WtPorter/WtPorter.h:553-562",
+      "src/WtCore/CtaStraBaseCtx.cpp:1774-1784"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q06_porter/q06_porter_capi_test.cpp:139-147",
+      "src/TestUnits/coverage/q06_porter/r35_porter_trail_getters_test.cpp:154-168",
+      "src/TestUnits/coverage/q06_btporter/q06_btporter_capi_test.cpp:112-137"
+    ],
+    "input_reachability": "该候选针对不存在的 context 句柄；有效 CTA context 且没有持仓记录属于正常查询路径。",
+    "oracle_basis": "公开头文件只承诺有效策略 context 下没有相关持仓时返回空字符串；无效句柄属于调用前置不满足，未承诺 NULL 与空串必须统一。",
+    "reason": "live 实现对无效句柄返回 NULL，而有效 context 的无持仓标签由基类返回空串，与头文件契约一致。测试对无效句柄允许 NULL 或空串；R35 同时精确断言有效句柄返回非 NULL 空串。回测侧测试是无 mocker/无效句柄中性返回路径，也没有额外的有效句柄空值合同。故原主张把无效句柄结果与有效查询合同混为一谈。",
+    "root_cause": "不适用。有效句柄行为符合文档；无效句柄空值表示未被规定。",
+    "fix": "当前无需产品修改；继续保留有效 context 无持仓返回空串的契约。",
+    "acceptance": "有效 CTA context 无持仓时返回非 NULL 空串；无效句柄按未承诺输入处理，不以 NULL 本身判产品失败。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/12_porters/safe-tests.json",
+      "docs/迭代计划/迭代02/复核185/evidence/12_porters/runs/r35_entertag_contract/result.json"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "q06_porters",
+    "id": "Q06-002",
+    "decision": "DUPLICATE",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtPorter/WtPorter.h:135-161",
+      "src/WtPorter/WtPorter.cpp:260-265",
+      "src/WtPorter/WtPorter.cpp:857-907",
+      "src/WtPorter/WtPorter.cpp:1215-1239",
+      "src/WtPorter/WtPorter.cpp:1409-1423",
+      "src/WtPorter/WtPorter.cpp:1743-1781",
+      "src/WtPorter/WtRtRunner.cpp:838-895",
+      "docs/迭代计划/迭代02/缺陷裁定总表.json:8126-8153"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q06_porter/q06_porter_capi_test.cpp:273-288"
+    ],
+    "input_reachability": "config_porter 是公开 void C ABI；无有效 engine 的早期 getter 和工厂导出可从导出层调用。",
+    "oracle_basis": "配置失败/未就绪后，公开 C API 不应继续把 runner 当作有效 engine 使用；该 readiness 与 run guard 根因已经归属 BUG-R6-006。",
+    "reason": "多处导出直接解引用 getEngine；正常配置中 initEngine/initDataMgr 失败被忽略，构成失败配置仍被视作已配置的同一 ready-state 问题。主裁定总表中的 BUG-R6-006 已登记 config 失败传播和 run 未就绪保护。Q06 disabled 测试主体仅 (void)0，没有执行或断言，不能独立证明崩溃。将 getter 家族并入该主编号，避免同一 ready invariant 重复计数。",
+    "root_cause": "与 BUG-R6-006 相同：配置流程没有可靠传播 engine/data 初始化失败并建立 ready 门禁，C ABI 又有无 guard 的 engine 直取入口。",
+    "fix": "随 BUG-R6-006 实施统一 config readiness 传播与入口保护；为 getter 家族明确未就绪失败值，不单独建设第二套状态机制。",
+    "acceptance": "按 BUG-R6-006 的缺 env/data 配置建立未就绪状态，随后 getter 安全返回明确失败值；有效配置下 getter 正常工作。",
+    "canonical": "BUG-R6-006",
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q06_porter/q06_porter_capi_test.cpp",
+        "case": "DISABLED_UninitializedEngineGettersCrash",
+        "issue": "当前 disabled 用例主体只有 (void)0，没有调用入口或断言，不能作为崩溃或 ready-state 证据。",
+        "change": "依 BUG-R6-006 修复后改成安全门禁测试：用可解析但缺必需 env/data 的配置建立未就绪状态，再逐项调用代表性 getter 并断言文档化失败值；不要调用 run/thread 入口，不启用当前空 placeholder。",
+        "target": "CoverageTests_porter",
+        "filter": "Q06PorterCapi.*",
+        "expected_result": "未就绪时 getter 不崩溃且返回固定失败值；完整初始化后的 getter 正常返回。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "随 BUG-R6-006 的实现增加 getter 未就绪安全门禁回归；本轮没有通过无效 runner 状态运行这些导出。"
+    ]
+  },
+  {
+    "lane": "q06_porters",
+    "id": "Q06-005",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtPorter/PorterDefs.h:27-31",
+      "src/WtBtPorter/WtBtPorter.h:141-176",
+      "src/WtBtPorter/WtBtRunner.h:505-524",
+      "src/WtBtPorter/WtBtRunner.cpp:266-313",
+      "src/WtBtPorter/WtBtPorter.cpp:354-360",
+      "src/WtBtPorter/WtBtPorter.cpp:558-564",
+      "src/WtBtPorter/WtBtPorter.cpp:574-581",
+      "src/WtBtPorter/WtBtPorter.cpp:729-736"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q06_btporter/q06_btporter_capi_test.cpp:112-137"
+    ],
+    "input_reachability": "回测 C ABI 的 init_*_mocker 返回 CtxHandler；当前 runner 对 CTA/SEL/HFT 各自只有一个活动 mocker slot，重复初始化会先删除当前对象再替换。",
+    "oracle_basis": "单实例 runner 的当前 mocker 行为不要求多个同时活动的 context 按句柄隔离；已删除的旧 ID 是无效句柄，未证明为有效多实例调用。",
+    "reason": "CtxHandler 类型意为策略上下文标识，但 WtBtRunner 对每族只持有一个 mocker 指针，init 时会替换既有 mocker；相关 C ABI 入口使用当前 singleton slot。因此忽略 cHandle 在当前单活动 mocker 模式下未造成两个受支持实例串线。现有无 mocker 测试传任意句柄，只验证无实例时的中性返回，不证明句柄路由或多实例契约。",
+    "root_cause": "不适用。当前实现与单活动 mocker runner 一致；未找到同时保留多 mocker 的公开契约。",
+    "fix": "当前无需产品修改。若将来承诺多活动实例，需按 CtxHandler 建立映射并路由全部导出，而非只保存每类一个 runner slot。",
+    "acceptance": "按当前单实例契约，重复 init 明确替换当前 mocker，只有当前实例有效；未来支持多实例时再增加双实例隔离与句柄路由验收。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "q06_porters",
+    "id": "Q06-006",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtPorter/WtPorter.h:163-172",
+      "src/WtPorter/WtPorter.cpp:333-343",
+      "src/WtBtPorter/WtBtPorter.h:186-193",
+      "src/WtBtPorter/WtBtPorter.cpp:285-295"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q06_porter/q06_porter_capi_test.cpp:95-106",
+      "src/TestUnits/coverage/q06_btporter/q06_btporter_capi_test.cpp:83-90"
+    ],
+    "input_reachability": "write_log 的正常 C ABI 参数为 C 字符串；空字符串是可达且被支持的类别默认值。",
+    "oracle_basis": "头文件将 catName 定义为类别字符串，未声明可空；backtest 头注释明确空字符串选择默认分类。C ABI 的必填字符串参数以非 NULL、NUL 结尾字符串作为前置，空字符串与 NULL 不是同一输入。",
+    "reason": "live/backtest 的实现都以 strlen(catName) 区分命名类别和默认类别。公开注释不承诺 NULL 可空，空字符串默认行为有明确注释且现有两侧测试覆盖。NULL 对必填 C 字符串是违反前置的输入，不能据此认定产品违反公开合同；无需新增 NULL 用例。",
+    "root_cause": "不适用。该行为是必填 C 字符串参数的前置条件，不是支持的空字符串路径缺陷。",
+    "fix": "当前无需产品修改；保持空字符串走默认分类、命名字符串走指定分类。若未来 API 明确 catName 可空，再增加入口守卫并统一两侧行为。",
+    "acceptance": "live 与 backtest 对空字符串使用默认分类，对非空字符串使用命名分类；不把未经声明的 NULL 当作有效输入验收。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  }
+]

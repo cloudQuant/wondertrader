@@ -663,9 +663,8 @@ namespace
 	/* 平仓冻结/释放：CM_OpenCover                                          */
 	/* ------------------------------------------------------------------ */
 
-	/// TraderYD.cpp L461-470（不区分平今：先冻结昨仓）与 L500-509（取消释放分支）。
-	/// 释放分支因 maxQty = min(newQty-availNew, untrade) 恒 <= untrade，内层
-	/// decimal::lt 不可达；本用例只断言不崩且回调正常（缺陷见 bugs/R93.md）。
+	/// CM_OpenCover 按昨仓优先冻结；未成交委托撤销后应恢复冻结来源的可用量。
+	/// BUG-R93-006：当前 TraderYD 撤单路径没有恢复这笔昨仓冻结。
 	TEST_F(R93YdTest, open_cover_order_freezes_yesterday_available)
 	{
 		comm_->setCoverMode(CM_OpenCover);
@@ -679,6 +678,7 @@ namespace
 		ASSERT_EQ(0, api_.queryPositions());
 		ASSERT_TRUE(api_.runNextQuery());
 		ASSERT_EQ(1u, sink_.positions.size());
+		ASSERT_TRUE(sink_.positions[0].valid);
 		EXPECT_DOUBLE_EQ(1.0, sink_.positions[0].availPre);
 		EXPECT_DOUBLE_EQ(0.0, sink_.positions[0].availNew);
 
@@ -686,28 +686,19 @@ namespace
 			YD_OS_Canceled, 6101, 301);
 		api_.notifyOrder(&canceled, &stub_.instrument_, NULL);
 		ASSERT_EQ(0, api_.queryPositions());
-		EXPECT_TRUE(api_.runNextQuery());
-		EXPECT_EQ(2u, sink_.positions.size());
-	}
-
-	/// 现状缺陷：CM_OpenCover 下撤单释放只从今仓可用量里扣（newQty-availNew=0），
-	/// 昨仓冻结的 4 手不会回补。修复后 availPre 应为 5；当前为 1，故整条禁用。
-	TEST_F(R93YdTest, DISABLED_open_cover_cancel_should_release_yesterday_freeze)
-	{
-		comm_->setCoverMode(CM_OpenCover);
-		add_pre_position(YD_PD_Long, 5, 7000.0);
-		login_and_finish();
-
-		YDOrder freeze = make_order(YD_D_Sell, YD_OF_Close, YD_ODT_Limit, 7050.0, 4,
-			YD_OS_Queuing, 6201, 401);
-		api_.notifyOrder(&freeze, &stub_.instrument_, NULL);
-		YDOrder canceled = make_order(YD_D_Sell, YD_OF_Close, YD_ODT_Limit, 7050.0, 4,
-			YD_OS_Canceled, 6201, 401);
-		api_.notifyOrder(&canceled, &stub_.instrument_, NULL);
-
-		ASSERT_EQ(0, api_.queryPositions());
 		ASSERT_TRUE(api_.runNextQuery());
 		ASSERT_EQ(2u, sink_.positions.size());
+		ASSERT_TRUE(sink_.positions[1].valid);
 		EXPECT_DOUBLE_EQ(5.0, sink_.positions[1].availPre);
+		EXPECT_DOUBLE_EQ(0.0, sink_.positions[1].availNew);
+
+		// YD 的 OrderSysID 是真实订单号；撤单前后都使用 6101。
+		// 再查询订单缓存，确认恢复断言对应同一笔已终态撤单，而非未匹配的回报。
+		ASSERT_EQ(0, api_.queryOrders());
+		ASSERT_TRUE(api_.runNextQuery());
+		ASSERT_EQ(1u, sink_.orderArrays.size());
+		ASSERT_TRUE(sink_.orderArrays[0].valid);
+		EXPECT_EQ("6101", sink_.orderArrays[0].orderID);
+		EXPECT_EQ((int)WOS_Canceled, sink_.orderArrays[0].state);
 	}
 } // namespace

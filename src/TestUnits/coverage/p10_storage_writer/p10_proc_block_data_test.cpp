@@ -4,17 +4,23 @@
 //  - 新版未压缩（RAW_V2）：保留头部 / 去头部 两条分支
 //  - 新版压缩（CMP_V2）：长度校验通过 -> 解压；长度不符 -> 返回 false 且内容不被改写
 //  - 老版本未压缩 bar（BLOCK_VERSION_RAW）：WTSBarStructOld -> WTSBarStruct 升版
+//  - 老版本压缩 bar（BlockHeaderV2 + BLOCK_VERSION_CMP）：解压后升级旧结构体
 //  - 老版本未压缩 tick：WTSTickStructOld -> WTSTickStruct 升版
 //  - 未知版本号：既非压缩也非老版本 -> 直接透传
-//  - 块标志不做校验的实测行为（&^%$#@! 之外的标志照样返回 true）
+//  - 块标志非法值候选输入（BUG-P10-003：输入契约待定，用例暂禁用）
 //  - WtDataWriter::isSessionProceeded（纯查表分支，_proc_date 空/命中/未命中）
 //
 // 崩溃类输入（空 content / 头部不足一个 BlockHeader）整类收进一个 DISABLED_ 用例，启用用例零残留。
 #include <gtest/gtest.h>
 
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <string>
+
+#if defined(__unix__) || defined(__APPLE__)
+#include <sys/resource.h>
+#endif
 
 #include "p10_writer_prefix.h"   // 第三方头需先于访问宏 include，见该文件注释
 
@@ -93,6 +99,43 @@ static std::string make_cmp_bar_block(uint32_t count, uint64_t declaredSizeOffse
 	return content;
 }
 
+static std::string make_short_cmp_v2_header()
+{
+	// Only construct the 16 bytes that exist: BlockHeader plus four bytes of
+	// the BlockHeaderV2 size field. Do not write a full BlockHeaderV2 here.
+	std::string content(16, '\0');
+	BlockHeader prefix;
+	std::memset(&prefix, 0, sizeof(prefix));
+	set_flag(prefix._blk_flag, sizeof(prefix._blk_flag));
+	prefix._type = BT_HIS_Day;
+	prefix._version = BLOCK_VERSION_CMP_V2;
+	std::memcpy(content.data(), &prefix, sizeof(prefix));
+	return content;
+}
+
+static void expect_proc_block_data_rejects_without_mutation(WtDataWriter& writer, std::string content)
+{
+#if defined(__unix__) || defined(__APPLE__)
+	struct rlimit core_limit;
+	core_limit.rlim_cur = 0;
+	core_limit.rlim_max = 0;
+	if (setrlimit(RLIMIT_CORE, &core_limit) != 0)
+		std::_Exit(4);
+#endif
+
+	const std::string before = content;
+	try
+	{
+		if (writer.proc_block_data("unit", content, true, false) || content != before)
+			std::_Exit(2);
+		std::_Exit(0);
+	}
+	catch (...)
+	{
+		std::_Exit(3);
+	}
+}
+
 // 老结构体条块：BlockHeader(RAW) + N 个 WTSBarStructOld（44 字节）
 static std::string make_old_bar_block(uint32_t count)
 {
@@ -119,6 +162,26 @@ static std::string make_old_bar_block(uint32_t count)
 		bars[i].hold = 200 + i;
 		bars[i].add = -5 + (int32_t)i;
 	}
+	return content;
+}
+
+static std::string make_old_cmp_bar_block(uint32_t count)
+{
+	const std::string oldBlock = make_old_bar_block(count);
+	const char* oldPayload = oldBlock.data() + sizeof(BlockHeader);
+	const size_t oldPayloadSize = oldBlock.size() - sizeof(BlockHeader);
+	const std::string cmp = WTSCmpHelper::compress_data(oldPayload, oldPayloadSize);
+
+	BlockHeaderV2 hdr;
+	std::memset(&hdr, 0, sizeof(hdr));
+	set_flag(hdr._blk_flag, sizeof(hdr._blk_flag));
+	hdr._type = BT_HIS_Day;
+	hdr._version = BLOCK_VERSION_CMP;
+	hdr._size = (uint64_t)cmp.size();
+
+	std::string content(sizeof(hdr), '\0');
+	std::memcpy(content.data(), &hdr, sizeof(hdr));
+	content.append(cmp);
 	return content;
 }
 
@@ -315,24 +378,43 @@ TEST_F(P10ProcBlockTest, UnknownVersionPassesThrough)
 	EXPECT_EQ(keep, keepBefore);
 }
 
-TEST_F(P10ProcBlockTest, BlockFlagNotValidated)
+TEST_F(P10ProcBlockTest, BlockFlagMismatchRejectsWithoutMutatingContent)
 {
-	// 实测行为：proc_block_data 完全不校验 _blk_flag，坏标志照样按 RAW_V2 透传
 	std::string content = make_raw_bar_block(BLOCK_VERSION_RAW_V2, 2);
 	BlockHeader* hdr = (BlockHeader*)&content[0];
 	std::memcpy(hdr->_blk_flag, "WRONGFLG", 8);
-	EXPECT_TRUE(_writer.proc_block_data("unit", content, true, false));
-	EXPECT_EQ(content.size(), 2 * sizeof(WTSBarStruct));
-}
-
-TEST_F(P10ProcBlockTest, OldCompressedFlagGoesThroughV2HeaderCheck)
-{
-	// BLOCK_VERSION_CMP 同时命中 is_compressed 与 is_old_version，
-	// 但代码只按 BlockHeaderV2(20 字节) 头解析长度 -> 老的压缩块永远长度校验失败
-	std::string content = make_raw_bar_block(BLOCK_VERSION_CMP, 3);
 	const std::string before = content;
 	EXPECT_FALSE(_writer.proc_block_data("unit", content, true, false));
-	EXPECT_EQ(content, before);
+	EXPECT_EQ(before, content);
+}
+
+TEST_F(P10ProcBlockTest, OldCompressedBarBlockDecompressesAndUpgradesStruct)
+{
+	const uint32_t count = 3;
+	std::string content = make_old_cmp_bar_block(count);
+	BlockHeaderV2 hdr;
+	std::memcpy(&hdr, content.data(), sizeof(hdr));
+	ASSERT_EQ(hdr._version, (uint16_t)BLOCK_VERSION_CMP);
+	ASSERT_EQ(content.size(), sizeof(BlockHeaderV2) + (size_t)hdr._size);
+
+	ASSERT_TRUE(_writer.proc_block_data("unit", content, true, false));
+	ASSERT_EQ(content.size(), count * sizeof(WTSBarStruct));
+
+	const WTSBarStruct* bars = (const WTSBarStruct*)content.data();
+	for (uint32_t i = 0; i < count; ++i)
+	{
+		EXPECT_EQ(bars[i].date, 20190101u + i);
+		EXPECT_EQ(bars[i].time, (uint64_t)(80000 + i));
+		EXPECT_DOUBLE_EQ(bars[i].open, 11.0 + i);
+		EXPECT_DOUBLE_EQ(bars[i].high, 12.0 + i);
+		EXPECT_DOUBLE_EQ(bars[i].low, 10.0 + i);
+		EXPECT_DOUBLE_EQ(bars[i].close, 11.5 + i);
+		EXPECT_DOUBLE_EQ(bars[i].settle, 11.25 + i);
+		EXPECT_DOUBLE_EQ(bars[i].money, 2000.0 + i);
+		EXPECT_DOUBLE_EQ(bars[i].vol, 100.0 + i);
+		EXPECT_DOUBLE_EQ(bars[i].hold, 200.0 + i);
+		EXPECT_DOUBLE_EQ(bars[i].add, -5.0 + i);
+	}
 }
 
 TEST_F(P10ProcBlockTest, IsSessionProceededOnEmptyTable)
@@ -347,26 +429,25 @@ TEST_F(P10ProcBlockTest, IsSessionProceededOnEmptyTable)
 	EXPECT_TRUE(_writer.isSessionProceeded("P10_FUTURE"));
 }
 
-// 崩溃类输入整类收口（缺陷记录见 bugs/p10_storage_writer.md BUG-P10-001/002）：
-//   1) 空 content：header 取自 content.data()，libc++ 对空串返回 nullptr -> 解引用崩溃
-//   2) content 短于 BlockHeader / 短于 BlockHeaderV2：越界读 _version、_size
-// 这些输入不进入常规执行，只在 --gtest_also_run_disabled_tests 下复现。
-TEST_F(P10ProcBlockTest, DISABLED_CrashClassInputs)
+// 崩溃类输入整类收口（缺陷记录见 bugs/p10_storage_writer.md BUG-P10-001/002）。
+// 每个输入单独在子进程里执行，避免越界访问或崩溃终止测试宿主；即使不启用
+// ASan 时通过，也不能据此证明所有未定义越界读取都已暴露或已消除。
+TEST_F(P10ProcBlockTest, EmptyInputRejectedInChild)
 {
-	std::string empty;
-	(void)_writer.proc_block_data("unit", empty, true, false);
+	EXPECT_EXIT(expect_proc_block_data_rejects_without_mutation(_writer, std::string()),
+		::testing::ExitedWithCode(0), "");
+}
 
-	std::string tiny = "1234";
-	(void)_writer.proc_block_data("unit", tiny, true, false);
+TEST_F(P10ProcBlockTest, FourByteInputRejectedInChild)
+{
+	EXPECT_EXIT(expect_proc_block_data_rejects_without_mutation(_writer, std::string("1234", 4)),
+		::testing::ExitedWithCode(0), "");
+}
 
-	std::string shortCmp;
-	shortCmp.resize(16);
-	BlockHeaderV2* hdr = (BlockHeaderV2*)&shortCmp[0];
-	std::memset(hdr, 0, sizeof(*hdr));
-	set_flag(hdr->_blk_flag, sizeof(hdr->_blk_flag));
-	hdr->_version = BLOCK_VERSION_CMP_V2;
-	hdr->_size = 1024 * 1024;
-	(void)_writer.proc_block_data("unit", shortCmp, true, false);
+TEST_F(P10ProcBlockTest, ShortCompressedHeaderRejectedInChild)
+{
+	EXPECT_EXIT(expect_proc_block_data_rejects_without_mutation(_writer, make_short_cmp_v2_header()),
+		::testing::ExitedWithCode(0), "");
 }
 
 }  // namespace

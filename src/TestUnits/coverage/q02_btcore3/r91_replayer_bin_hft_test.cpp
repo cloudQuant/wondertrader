@@ -389,16 +389,53 @@ TEST_F(R91Fixture, R91BinHft_TickReplaySkipsPreOpenAndAdvancesSessions)
 	EXPECT_EQ(20200104u, replayer.get_trading_date());
 }
 
+TEST_F(R91Fixture, R91BinHft_TransactionSliceLoadsWithoutOrderDetailMiss)
+{
+	const char* const code = "SSE.STK.000004";
+	std::vector<WTSTransStruct> trans;
+	trans.push_back(r91::mk_trans(kDay1, 931u, 30.1, 31u, "000004"));
+	trans.push_back(r91::mk_trans(kDay1, 932u, 30.2, 32u, "000004"));
+	ASSERT_TRUE(r91::write_trans(_base, "SSE", "000004", kDay1, trans));
+
+	r91::CfgOpts opts;
+	opts.mode = "bin";
+	WTSVariant* cfg = r91::make_cfg(_root, _base, 202001020930ull, 202001021500ull, opts);
+
+	HisDataReplayer replayer;
+	ASSERT_TRUE(replayer.init(cfg, NULL, NULL));
+	cfg->release();
+
+	r91::Sink sink;
+	replayer.register_sink(&sink, "r91_trans_direct");
+	ASSERT_TRUE(replayer.prepare());
+	replayer.sub_transaction(1u, code);
+
+	// etime 命中最后一笔成交；不先查询缺失订单明细，因此直接验证正常成交缓存读取。
+	WTSTransSlice* slice = replayer.get_transaction_slice(code, 2u, 202001020932ull);
+	ASSERT_NE(nullptr, slice);
+	EXPECT_EQ(2u, slice->size());
+	if (slice->size() == 2u)
+	{
+		EXPECT_DOUBLE_EQ(30.1, slice->at(0)->price);
+		EXPECT_EQ(31u, slice->at(0)->volume);
+		EXPECT_DOUBLE_EQ(30.2, slice->at(1)->price);
+		EXPECT_EQ(32u, slice->at(1)->volume);
+	}
+	slice->release();
+}
+
 /*
  * 生产: HisDataReplayer.cpp:2731-2738（checkOrderDetails 无数据时写 _trans_cache）
  *       2773-2780（checkOrderQueues 同样写 _trans_cache）、2786-2825（checkTransactions）
  *
- * 缺陷归档：orddtl 缺失会把 trans 缓存伪造成「当日已装载的空列表」，
- * 之后的 get_transaction_slice 不再读磁盘，返回 NULL/垃圾而不是两条成交。
+ * 缺陷归档：orddtl 缺失会把 trans 缓存设为空并标成当日已加载；后续成交查询跳过磁盘加载，
+ * 却可能按空数组构造非空切片。禁用用例保留正确的两条成交契约预期，不把越界路径当作通过。
  * 详见 docs/迭代计划/迭代01/bugs/R91.md BUG-R91-001。
  */
-TEST_F(R91Fixture, R91BinHft_DISABLED_OrderDetailCacheMissPoisonsTransactionCache)
+TEST_F(R91Fixture, DISABLED_R91BinHft_OrderDetailCacheMissPoisonsTransactionCache)
 {
+	// 暂时禁用：缺订单明细会把空 trans 缓存标记为当日已加载；随后查询在空数组上
+	// 得到非零切片长度，可能构造越界 view。不能运行此未定义行为路径来充当成功结果。
 	const char* const code = "SSE.STK.000003";
 	std::vector<WTSTransStruct> trans;
 	trans.push_back(r91::mk_trans(kDay1, 931u, 20.1, 1u, "000003"));

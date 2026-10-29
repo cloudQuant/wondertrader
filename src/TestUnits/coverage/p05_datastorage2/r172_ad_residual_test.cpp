@@ -337,7 +337,8 @@ TEST_F(R172AdTest, R172BtADKlineDbOpenFailureReturnsFalse)
 	string buffer;
 	EXPECT_FALSE(reader.read_raw_bars("SSE", "600000", KP_Minute1, buffer));
 	EXPECT_TRUE(buffer.empty());
-	EXPECT_TRUE(sink.has_log("Opening min1 db if SSE failed"));
+	EXPECT_TRUE(sink.has_log("Opening min1 db "));
+	EXPECT_TRUE(sink.has_log("SSE failed"));
 	EXPECT_GE(sink.count_of(LL_ERROR), 1u);
 }
 

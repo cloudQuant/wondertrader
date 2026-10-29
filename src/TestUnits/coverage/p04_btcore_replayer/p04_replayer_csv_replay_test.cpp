@@ -20,6 +20,8 @@
 #include <string>
 #include <system_error>
 #include <vector>
+#include <cstdlib>
+#include <sys/resource.h>
 #include <unistd.h>
 
 #include <WtBtCore/HisDataReplayer.h>
@@ -32,7 +34,7 @@ namespace
 	std::filesystem::path lane_root()
 	{
 		return std::filesystem::path(__FILE__).parent_path()
-			.parent_path().parent_path().parent_path();
+			.parent_path().parent_path().parent_path().parent_path();
 	}
 
 	std::filesystem::path make_temp_dir(const char* tag)
@@ -124,6 +126,8 @@ namespace
 		std::vector<double> closedPrices;
 		std::vector<std::string> closedPeriods;
 		std::vector<uint32_t> beginTDates;
+		std::vector<uint32_t> scheduleDates;
+		std::vector<uint32_t> scheduleTimes;
 
 		void handle_init() override
 		{
@@ -152,8 +156,9 @@ namespace
 
 		void handle_schedule(uint32_t uDate, uint32_t uTime) override
 		{
-			(void)uDate; (void)uTime;
 			scheduleCalls++;
+			scheduleDates.push_back(uDate);
+			scheduleTimes.push_back(uTime);
 		}
 
 		void handle_session_begin(uint32_t curTDate) override
@@ -223,25 +228,32 @@ TEST_F(P04ReplayCsvTest, dailyBarsReplayFullTradingDayCycle)
 
 	replayer.run(false);
 
-	// 5 根日线，但游标初始定位把第一根（回测起始日）当成了"已收盘"，
-	// 于是闭盘发生在后 4 根上 —— 见 BUG-P04-010（漏掉首根日线）
-	EXPECT_EQ(kBarCnt - 1, sink.beginCalls);
-	EXPECT_EQ(kBarCnt - 1, sink.endCalls);
-	EXPECT_EQ(kBarCnt - 1, sink.sectionCalls);
-	EXPECT_EQ(kBarCnt - 1, sink.scheduleCalls);
+	// 区间从首根交易日 09:30 开始，到末根 15:00 结束；两端日线都应闭盘回调。
+	EXPECT_EQ(kBarCnt, sink.beginCalls);
+	EXPECT_EQ(kBarCnt, sink.endCalls);
+	EXPECT_EQ(kBarCnt, sink.sectionCalls);
+	EXPECT_EQ(kBarCnt, sink.scheduleCalls);
 	EXPECT_EQ(1u, sink.replayDoneCalls);
 
 	std::vector<uint32_t> expectDates;
 	std::vector<double> expectCloses;
-	for (uint32_t i = 1; i < kBarCnt; i++)
+	for (uint32_t i = 0; i < kBarCnt; i++)
 	{
 		expectDates.push_back(kDayBars[i].date);
 		expectCloses.push_back(kDayBars[i].close);
 	}
 	EXPECT_EQ(expectDates, sink.closedDates);
 	EXPECT_EQ(expectCloses, sink.closedPrices);
-	EXPECT_EQ(std::vector<uint32_t>({20200103u, 20200106u, 20200107u, 20200108u}),
-		sink.beginTDates);
+	EXPECT_EQ(expectDates, sink.beginTDates);
+	EXPECT_EQ(expectDates, sink.scheduleDates);
+	EXPECT_EQ(std::vector<uint32_t>(kBarCnt, 1500u), sink.scheduleTimes);
+	if (!sink.closedDates.empty() && !sink.closedPrices.empty())
+	{
+		EXPECT_EQ(kDayBars[0].date, sink.closedDates.front());
+		EXPECT_EQ(kDayBars[kBarCnt - 1].date, sink.closedDates.back());
+		EXPECT_DOUBLE_EQ(kDayBars[0].close, sink.closedPrices.front());
+		EXPECT_DOUBLE_EQ(kDayBars[kBarCnt - 1].close, sink.closedPrices.back());
+	}
 	for (const auto& p : sink.closedPeriods)
 		EXPECT_EQ(std::string("d"), p);
 
@@ -275,7 +287,16 @@ TEST_F(P04ReplayCsvTest, prepareAfterRunResetsClock)
 	replayer.run(false);
 	ASSERT_EQ(20200108u, replayer.get_date());
 	const uint32_t firstRunCloses = (uint32_t)sink.closedDates.size();
-	ASSERT_EQ(kBarCnt - 1, firstRunCloses);
+	EXPECT_EQ(kBarCnt, firstRunCloses);
+	std::vector<uint32_t> expectedDates;
+	std::vector<double> expectedCloses;
+	for (uint32_t i = 0; i < kBarCnt; i++)
+	{
+		expectedDates.push_back(kDayBars[i].date);
+		expectedCloses.push_back(kDayBars[i].close);
+	}
+	EXPECT_EQ(expectedDates, sink.closedDates);
+	EXPECT_EQ(expectedCloses, sink.closedPrices);
 
 	// 第二次 prepare 走 reset()：时间字段归零后重新按 stime 推进，
 	// 且K线缓存不清空（只还原游标），所以第二轮闭盘根数相同
@@ -287,7 +308,13 @@ TEST_F(P04ReplayCsvTest, prepareAfterRunResetsClock)
 	EXPECT_EQ(2u, sink.initCalls);
 
 	replayer.run(false);
-	EXPECT_EQ((kBarCnt - 1) * 2, sink.closedDates.size());
+	std::vector<uint32_t> expectedDatesTwice = expectedDates;
+	expectedDatesTwice.insert(expectedDatesTwice.end(), expectedDates.begin(), expectedDates.end());
+	std::vector<double> expectedClosesTwice = expectedCloses;
+	expectedClosesTwice.insert(expectedClosesTwice.end(), expectedCloses.begin(), expectedCloses.end());
+	EXPECT_EQ(kBarCnt * 2, sink.closedDates.size());
+	EXPECT_EQ(expectedDatesTwice, sink.closedDates);
+	EXPECT_EQ(expectedClosesTwice, sink.closedPrices);
 	EXPECT_EQ(2u, sink.replayDoneCalls);
 }
 
@@ -304,7 +331,16 @@ TEST_F(P04ReplayCsvTest, csvBarsTransferedToDsbAndReRead)
 		sink.onInit = [&first]() { first.get_kline_slice("SSE.STK.000001", "d", 1, 1, true); };
 		ASSERT_TRUE(first.prepare());
 		first.run(false);
-		EXPECT_EQ(kBarCnt - 1, sink.closedDates.size());
+		EXPECT_EQ(kBarCnt, sink.closedDates.size());
+		std::vector<uint32_t> expectDates;
+		std::vector<double> expectCloses;
+		for (uint32_t i = 0; i < kBarCnt; i++)
+		{
+			expectDates.push_back(kDayBars[i].date);
+			expectCloses.push_back(kDayBars[i].close);
+		}
+		EXPECT_EQ(expectDates, sink.closedDates);
+		EXPECT_EQ(expectCloses, sink.closedPrices);
 	}
 
 	std::error_code ec;
@@ -334,8 +370,14 @@ TEST_F(P04ReplayCsvTest, csvBarsTransferedToDsbAndReRead)
 	second.run(false);
 
 	std::vector<double> expectCloses;
-	for (uint32_t i = 1; i < kBarCnt; i++)
+	std::vector<uint32_t> expectDates;
+	for (uint32_t i = 0; i < kBarCnt; i++)
+	{
 		expectCloses.push_back(kDayBars[i].close);
+		expectDates.push_back(kDayBars[i].date);
+	}
+	EXPECT_EQ(kBarCnt, sink2.closedDates.size());
+	EXPECT_EQ(expectDates, sink2.closedDates);
 	EXPECT_EQ(expectCloses, sink2.closedPrices);
 	if (sink2.slice != nullptr)
 		sink2.slice->release();
@@ -364,26 +406,50 @@ TEST_F(P04ReplayCsvTest, missingCsvFileYieldsNullSlice)
 	EXPECT_EQ(0u, sink.closedDates.size());
 }
 
-/*
- * 崩溃/越界缺陷类，统一收进一个禁用用例（逐个开启会拖垮整个二进制）：
- * CSV 只有表头、0 行数据时，cacheRawBarsFromCSV 仍然会执行
- *   stime = barsList->_bars[0].date
- *   etime = barsList->_bars[barsList->_count - 1].date   （_count 为 0）
- * —— 空 vector 的 operator[] 是未定义行为（BUG-P04-004）；
- * 随后 locate_barindex 在 _bars 为空时算出 idx = size()-1 = UINT32_MAX 的越界下标（BUG-P04-005）。
- * 正常运行期不会构造空行情文件，故这里只做缺陷归档。
- */
-TEST_F(P04ReplayCsvTest, DISABLED_emptyCsvCrashes)
+TEST_F(P04ReplayCsvTest, emptyCsvReturnsNullAndReplayCompletesInChild)
 {
 	ASSERT_TRUE(write_daily_csv(_base, "SSE.STK.000002", false));
-	HisDataReplayer replayer;
-	WTSVariant* cfg = replay_cfg(_root, _base);
-	ASSERT_TRUE(replayer.init(cfg));
-	cfg->release();
-	RecordingSink sink;
-	replayer.register_sink(&sink, "p04_emptycsv");
-	ASSERT_TRUE(replayer.prepare());
-	// 触发空缓存越界
-	replayer.get_kline_slice("SSE.STK.000002", "d", 1, 1, true);
-	replayer.run(false);
+
+	// Empty CSV handling used to index the empty bar vector. Isolate the regression
+	// check so a product crash is reported as a failed expectation, never success.
+	EXPECT_EXIT(
+		{
+			struct rlimit noCoreDumps{};
+			if (::setrlimit(RLIMIT_CORE, &noCoreDumps) != 0)
+				std::_Exit(90);
+			auto writeStage = [](const char* marker, std::size_t length) {
+				const auto written = ::write(STDERR_FILENO, marker, length);
+				(void)written;
+			};
+
+			HisDataReplayer* replayer = new HisDataReplayer();
+			WTSVariant* cfg = replay_cfg(_root, _base);
+			if (cfg == nullptr)
+				std::_Exit(91);
+			writeStage("INIT_START\n", sizeof("INIT_START\n") - 1);
+			const bool initialized = replayer->init(cfg);
+			cfg->release();
+			if (!initialized)
+				std::_Exit(92);
+			writeStage("INIT_OK\n", sizeof("INIT_OK\n") - 1);
+
+			RecordingSink sink;
+			replayer->register_sink(&sink, "p04_emptycsv");
+			writeStage("PREPARE_START\n", sizeof("PREPARE_START\n") - 1);
+			if (!replayer->prepare())
+				std::_Exit(93);
+			writeStage("PREPARE_OK\n", sizeof("PREPARE_OK\n") - 1);
+
+			writeStage("BEFORE_READ\n", sizeof("BEFORE_READ\n") - 1);
+			WTSKlineSlice* slice = replayer->get_kline_slice("SSE.STK.000002", "d", 1, 1, false);
+			writeStage("AFTER_READ\n", sizeof("AFTER_READ\n") - 1);
+			if (slice != nullptr)
+				std::_Exit(1);
+			writeStage("NULL_SLICE_OK\n", sizeof("NULL_SLICE_OK\n") - 1);
+			writeStage("BEFORE_RUN\n", sizeof("BEFORE_RUN\n") - 1);
+			replayer->run(false);
+			writeStage("AFTER_RUN\n", sizeof("AFTER_RUN\n") - 1);
+			std::_Exit(sink.replayDoneCalls == 1 && sink.closedDates.empty() ? 0 : 2);
+		},
+		::testing::ExitedWithCode(0), "");
 }

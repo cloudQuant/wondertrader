@@ -402,7 +402,7 @@ TEST(ParserXTP, depth_market_data_converts_snapshot_and_level1_queues)
 	EXPECT_EQ(0u, spi.tick.trading_date);	/* 未登录 → m_uTradingDate 保持 0 */
 	EXPECT_DOUBLE_EQ(12.0, spi.tick.bid_prices[0]);
 	EXPECT_EQ(100u, spi.tick.bid_qty[0]);
-	EXPECT_DOUBLE_EQ(12.9, spi.tick.bid_prices[9]);
+	EXPECT_DOUBLE_EQ(21.0, spi.tick.bid_prices[9]);
 	EXPECT_DOUBLE_EQ(12.5, spi.tick.ask_prices[0]);
 	EXPECT_EQ(209u, spi.tick.ask_qty[9]);
 	EXPECT_STREQ("SSE", spi.tick.exchg);

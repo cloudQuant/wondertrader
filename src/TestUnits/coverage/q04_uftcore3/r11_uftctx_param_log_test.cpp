@@ -12,8 +12,8 @@
  *   在 _strategy==NULL 时的静默分支;
  * - id() / set_strategy / get_stragety / stra_get_date / stra_get_time / stra_get_secs 的时间转发。
  *
- * 缺陷: watch_param 的 5 个数值重载对 ShareManager::allocate_value 的返回值直接解引用,
- * 未初始化时是 *nullptr -> 段错误。用例整条 DISABLED_, 见 bugs/R11_wtuftcore.md BUG-R11-002。
+ * 候选缺陷: watch_param 的 5 个数值重载对 ShareManager::allocate_value 的返回值直接解引用，
+ * 未初始化时会段错误。离线返回 initVal 是候选安全回退契约；逐重载子进程回归见 BUG-R11-002。
  */
 #include <boost/noncopyable.hpp>
 
@@ -28,6 +28,8 @@
 #include <gtest/gtest.h>
 
 #include <cstring>
+#include <cstdio>
+#include <cstdlib>
 #include <filesystem>
 #include <string>
 #include <unistd.h>
@@ -58,6 +60,38 @@ struct LightEnv
 };
 
 const char* kName = "r11ctx_light";
+
+std::string missingModule()
+{
+	const std::filesystem::path dir = std::filesystem::temp_directory_path();
+	return (dir / ("r11ctx_missing_share_" + std::to_string((long)::getpid()) + ".dylib")).string();
+}
+
+int probeOfflineNumericWatchParamFallback(int overload)
+{
+	const std::string missing = missingModule();
+	if (ShareManager::self().initialize(missing.c_str()))
+		return 11;
+
+	WtUftEngine engine;
+	engine.init(nullptr, nullptr, nullptr, nullptr);
+	UftStraContext ctx(&engine, kName);
+	const char* overloadNames[] = { "int32_t", "int64_t", "uint32_t", "uint64_t", "double" };
+	if (overload >= 0 && overload < 5)
+	{
+		std::fprintf(stderr, "R11_WATCH_PARAM_READY:%s\n", overloadNames[overload]);
+		std::fflush(stderr);
+	}
+	switch (overload)
+	{
+	case 0: return ctx.watch_param("wk_i32", (int32_t)-11) == (int32_t)-11 ? 0 : 12;
+	case 1: return ctx.watch_param("wk_i64", (int64_t)-9876543210LL) == (int64_t)-9876543210LL ? 0 : 12;
+	case 2: return ctx.watch_param("wk_u32", (uint32_t)4000000001U) == (uint32_t)4000000001U ? 0 : 12;
+	case 3: return ctx.watch_param("wk_u64", (uint64_t)18446744073709551610ULL) == (uint64_t)18446744073709551610ULL ? 0 : 12;
+	case 4: return ctx.watch_param("wk_dbl", 5.5) == 5.5 ? 0 : 12;
+	default: return 13;
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////
 //read_param 六个重载: ShareManager 未初始化时必须原样回吐默认值
@@ -106,17 +140,21 @@ TEST(R11UftCtxParam, stringWatchParamAndCommitAreNullSafe)
 	EXPECT_STREQ("again", env._ctx.read_param("wk_after", "again"));
 }
 
-//缺陷接缝: 5 个数值 watch_param 会 *nullptr -> 崩溃, 整条 DISABLED
-TEST(DISABLED_R11UftCtxParam, numericWatchParamDereferencesNull)
+//每个数值重载都放到重新启动的子进程里验证，防止已初始化的单例状态污染结果，
+//并把空指针崩溃变成测试失败，而不是终止整个测试进程。返回 initVal 是候选安全回退契约，需产品接口合同确认。
+TEST(R11UftCtxParam, numericWatchParamOfflineFallbackCandidate)
 {
-	LightEnv env(kName);
-	//BUG-R11-002: 下面 5 行任何一行都会段错误
-	env._ctx.watch_param("wk_dbl", 1.0);
-	env._ctx.watch_param("wk_u32", (uint32_t)1);
-	env._ctx.watch_param("wk_i32", (int32_t)1);
-	env._ctx.watch_param("wk_u64", (uint64_t)1);
-	env._ctx.watch_param("wk_i64", (int64_t)1);
-	FAIL() << "unreachable";
+	const std::string oldStyle = GTEST_FLAG_GET(death_test_style);
+	GTEST_FLAG_SET(death_test_style, "threadsafe");
+	const char* overloadNames[] = { "int32_t", "int64_t", "uint32_t", "uint64_t", "double" };
+	for (int overload = 0; overload != 5; ++overload)
+	{
+		SCOPED_TRACE(overloadNames[overload]);
+		EXPECT_EXIT(std::_Exit(probeOfflineNumericWatchParamFallback(overload)),
+			::testing::ExitedWithCode(0), "R11_WATCH_PARAM_READY");
+	}
+
+	GTEST_FLAG_SET(death_test_style, oldStyle);
 }
 
 //////////////////////////////////////////////////////////////////////////

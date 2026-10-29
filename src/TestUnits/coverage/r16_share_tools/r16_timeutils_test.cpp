@@ -149,8 +149,8 @@ TEST(r16_timeutils, fasttime_does_not_fill_week_or_dst_fields)
 TEST(r16_timeutils, DISABLED_fasttime_pre_epoch_date_is_wrong)
 {
 	// 触发条件见 bugs/R16_share_tools.md BUG-R16-01。
-	// 期望：1969-12-31T00:00:00Z（fasttime 对负 epoch 走了截断除法，实际算不出这个值）
-	time_t sec = -86400 * 365;	// 1968-12-31 前后，明显早于 epoch
+	// epoch 前 365 天是 1969-01-01T00:00:00Z；本用例与 UTC 分解结果比较。
+	time_t sec = -86400 * 365;	// 1969-01-01T00:00:00Z
 	struct tm out;
 	memset(&out, 0, sizeof(out));
 	TimeUtils::fasttime(sec, &out, 0);

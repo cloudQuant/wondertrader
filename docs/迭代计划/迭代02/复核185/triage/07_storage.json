@@ -1,0 +1,331 @@
+[
+  {
+    "lane": "R1_wtdatastorage",
+    "id": "BUG-R1-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/IBaseDataMgr.h:47-50",
+      "src/WTSTools/WTSBaseDataMgr.cpp:201-218",
+      "src/WTSTools/WTSBaseDataMgr.cpp:760-768",
+      "src/WTSTools/WTSBaseDataMgr.cpp:856-868",
+      "src/WTSTools/WTSBaseDataMgr.cpp:880-888"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r1_storage/r1_basedatamgr_test.cpp:328-344"
+    ],
+    "input_reachability": "isHoliday、calcTradingDate/getTradingDate、setTradingDate 的公开 pid 参数在 isTpl=false 时进入 getTplIDByPID；星期一的 malformed 单段 PID 不会被周末早退挡住。仓库正常代码通常传 exchg.product 或以 isTpl=true 传模板 ID，本结论限于公开边界的 malformed 输入安全，不把单段字符串主张为有效行情品种。",
+    "oracle_basis": "IBaseDataMgr 暴露 pid 参数，但未给错误格式安全崩溃作为契约；public API 对外部字符串至少应先检查拆分段数。合法 exchg.product 映射和完整但不存在的 key 已有正/负对照。",
+    "reason": "getTplIDByPID 对 StrUtil::split(pid, \".\") 的结果直接访问 ay[0] 与 ay[1]。split 结果只有一段时 ay[1] 越界，属于调用公开查询路径可达的输入校验/内存安全问题。现有 DISABLED 用例直接在主测试进程触发 OOB，本轮未启用。",
+    "root_cause": "pid 形状校验缺失，getTplIDByPID 在验证字段数之前无边界访问 split 结果。",
+    "fix": "在读取 ay[0]/ay[1] 前验证输入非空且具有恰当的 exchg.product 两段；非法值返回空模板 ID/安全失败值并记录字段级错误。避免以可越界的 operator[] 判断输入是否合法。",
+    "acceptance": "用 weekday 单段 malformed PID 调用 isHoliday 时安全返回配置定义的失败值且无 OOB；合法 SSE.STK 仍映射并识别已配置节假日；完整但未知的 SHFE.nosec 继续安全返回默认值。必要时由主代理用有界子进程或 sanitizer 探针验证当前 OOB，不在主宿主启用旧 disabled body。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/r1_storage/r1_basedatamgr_test.cpp",
+        "case": "MalformedPidRejectedSafely",
+        "issue": "当前 DISABLED_getTplIDByPID_single_segment_pid_is_oob 直接在测试宿主触发未定义访问，没有安全拒绝断言。",
+        "change": "产品加入段数校验后，将星期一 malformed 单段 PID 改为启用的安全拒绝回归；同一测试保留合法 SSE.STK 映射与完整未知 PID 对照。若要验证当前缺陷，用独立有界子进程/sanitizer probe，不直接启用旧 case。",
+        "target": "CoverageTests",
+        "filter": "R1BaseDataMgrTest.MalformedPidRejectedSafely",
+        "expected_result": "Malformed pid 不崩溃、不越界且返回约定失败值；合法映射结果不变。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "产品修复后运行启用的安全拒绝回归；若需当前 UB 动态证据，使用主代理安排的有界子进程/sanitizer 探针，本轮未直接启用。"
+    ]
+  },
+  {
+    "lane": "R23_storage",
+    "id": "BUG-R23-004",
+    "decision": "PRODUCT",
+    "evidence_level": "LOCAL_REPRO",
+    "source_evidence": [
+      "src/WtDataStorage/WtRdmDtReader.cpp:2501-2548",
+      "src/WtDataStorage/WtRdmDtReader.cpp:2567-2598",
+      "src/WtDataStorage/WtDataWriter.cpp:2458-2471",
+      "src/Share/BoostFile.hpp:44-50",
+      "src/Share/BoostFile.hpp:147-154"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp:237-287"
+    ],
+    "input_reachability": "历史 Tick 文件通过 public readTickSliceByCount 读取。writer 正常路径先 create_new_file 使目标文件可见，再分开写 header 和 compressed payload 后 close；无临时文件原子 rename，且 write_file 返回值未检查。并发读者可先遇到短文件；首次校验失败留下的 map 状态会影响同一 reader 后续的正常重读。",
+    "oracle_basis": "writer 正常创建历史 block 的文件发布顺序允许读者观察不完整阶段；reader 应让失败读取保持可重试，成功写完后不能因为先前的失败缓存项永久隐去该交易日。",
+    "reason": "ByCount 在尺寸验证前通过 _his_tick_map[key] 插入默认项。短文件分支只清 buffer 并 break，保留 _block==NULL 的项；下一次调用由 find 命中后跳过文件读取，并在 NULL block 处分支退出。当前 CountSizeCheckFailureCanRecoverAfterFileRepair 在主代理刷新后的目标上 FAIL：修复文件后仍返回上一交易日 330/332，而不是 20240108 的 130/132。ByDate/ByRange 有相似模式，本轮只动态复现 ByCount。",
+    "root_cause": "失败状态与有效历史块共用 _his_tick_map；失败项被当成已加载缓存，未设置可重试状态或移除 key。",
+    "fix": "只在完整性/解码校验成功后发布缓存项；失败时 erase 对应 key 并释放/清空 buffer 与 block。统一 ByCount、ByDate、ByRange 的失败缓存生命周期。",
+    "acceptance": "短文件首次读取返回稳定空/缺数并记录错误；writer 完成或修复成合法 block 后同一 reader 第二次调用必须加载该日、返回修复数据且不再重复短文件错误。合法文件首读和缺文件对照正常；ByCount/ByDate/ByRange 分别验证。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/07_storage/runs/20261029T110035-2ce0cd4f-manifest.json",
+      "docs/迭代计划/迭代02/复核185/evidence/07_storage/runs/20261029T110035-2ce0cd4f-03-R23RdmCountTest_CountSizeCheckFailureCanRecoverAfterFileRepair/stdout.log",
+      "docs/迭代计划/迭代02/复核185/evidence/07_storage/runs/20261029T110035-2ce0cd4f-03-R23RdmCountTest_CountSizeCheckFailureCanRecoverAfterFileRepair/results.xml",
+      "docs/迭代计划/迭代02/复核185/evidence/07_storage/post-refresh-sha256.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/07_storage/post-refresh-mtime.txt"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "修复失败缓存项污染后，fresh target 复跑 ByCount 恢复用例；补跑 ByDate/ByRange 同形态入口。"
+    ]
+  },
+  {
+    "lane": "R23_storage",
+    "id": "BUG-R23-005",
+    "decision": "PRODUCT",
+    "evidence_level": "LOCAL_REPRO",
+    "source_evidence": [
+      "src/Includes/IDataReader.h:218-227",
+      "src/Includes/IRdmDtReader.h:68-74",
+      "src/WtDataStorage/WtRdmDtReader.cpp:2449-2470",
+      "src/WtDataStorage/WtRdmDtReader.cpp:2577-2597"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp:186-235"
+    ],
+    "input_reachability": "公开 count 查询可在当前 RT 或历史分支收到同一 etime 与同一组 ticks。14:31 等时边界会依当前交易日分支改变返回集合。",
+    "oracle_basis": "IDataReader 把 etime 定义为结束时间，0 表示读取到最后一条。相同查询的 RT 和 history 分支应采用同一闭端点语义；闭边界由结束时间文义和 RT 现有等值保留行为推断，接口没有独立的闭开字样。",
+    "reason": "RT count 只在记录严格晚于 etime 时回退；history count 在大于或等于 etime 时回退。当前已修正的两个测试在 fresh target 上分别为 RT PASS、history FAIL，验证同一 14:31 等时 tick 在 history 被丢弃并回补前一日。BUG-Q03-004 是相同端点模式的 sibling issue，但它落在 readTickSliceByRange 与 WtDataReader::readTickSlice，count 的尾部选取和跨日补数路径不同；修复和验收分别进行。",
+    "root_cause": "WtRdmDtReader::readTickSliceByCount 内 RT 与 history 两套独立计数算法使用了不同的 etime 等值比较策略；该逻辑与 range API 不共用代码。",
+    "fix": "在 readTickSliceByCount 中单独统一 RT/history cutoff comparator，使等于 etime 的 tick 在 count 计算和跨日补数前保留；不依赖 BUG-Q03-004 的 range 修复。",
+    "acceptance": "使用同一 3 tick 输入分别放置 RT block 与 history file，count 请求 etime 命中中间记录时两分支均返回截止记录及之前最近 count 条，不得为 history 丢边界后从前日补足；再单独覆盖 etime 命中块内末条。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/07_storage/runs/20261029T110035-2ce0cd4f-manifest.json",
+      "docs/迭代计划/迭代02/复核185/evidence/07_storage/runs/20261029T110035-2ce0cd4f-01-R23RdmCountTest_HisWindowBoundaryKeepsTickExactlyAtEtime/stdout.log",
+      "docs/迭代计划/迭代02/复核185/evidence/07_storage/runs/20261029T110035-2ce0cd4f-02-R23RdmCountTest_RtWindowBoundaryKeepsTickExactlyAtEtime/stdout.log"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "readTickSliceByCount 的 RT/history comparator 需单独修复并复测；BUG-Q03-004 range API 的修复不能替代此 count 回归。"
+    ]
+  },
+  {
+    "lane": "l04_datastorage",
+    "id": "BUG-L04-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/WTSMarcos.h:22-23",
+      "src/Includes/WTSMarcos.h:98-103",
+      "src/WtDataStorageAD/LMDBKeys.h:89-96",
+      "src/WtDataStorageAD/LMDBKeys.h:131-137",
+      "src/WTSTools/WTSBaseDataMgr.h:51-56",
+      "src/WTSTools/WTSBaseDataMgr.cpp:394-416",
+      "src/WTSTools/WTSBaseDataMgr.cpp:469-472",
+      "src/Includes/WTSContractInfo.hpp:171-182",
+      "src/Includes/WTSContractInfo.hpp:321-328",
+      "src/WtDataStorageAD/WtDataWriterAD.cpp:416-429",
+      "src/WtDataStorageAD/WtDataWriterAD.cpp:450-492",
+      "src/WtDataStorageAD/WtDataWriterAD.cpp:516-524"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l04_datastorage/l04_lmdb_key_layout_test.cpp:249-262"
+    ],
+    "input_reachability": "WTSBaseDataMgr::loadContracts 从外部 contracts JSON 读取交易所/合约代码并创建固定字段 WTSContractInfo；AD writer 随后用这些字段构造 LMDBHftKey/LMDBBarKey。输入长度不受校验。exchange 16..31 字符会先装入 32 字节上游字段、再越过 key 的 16 字节字段；code 超过 31 字符还会更早越过 WTSContractInfo 的 32 字节字段。",
+    "oracle_basis": "MAX_EXCHANGE_LENGTH=16 与 MAX_INSTRUMENT_LENGTH=32 是含 NUL 的固定数组容量；安全配置必须满足长度小于容量。公有合同文件导入不能把超长标识带入 strcpy/wt_strcpy 并覆盖结构体后续字段。",
+    "reason": "LMDB key 两构造函数对固定数组使用 strcpy 且没有拒绝超长值；合同导入也没有校验，WTSContractInfo::create 的 wt_strcpy 仅 memcpy 输入长度再追加 NUL，同样无容量限制。现有 MaxLengthFieldsFitExactly 只证明 15/31 字符正控，本轮 PASS；没有在主进程直接调用超长构造函数。",
+    "root_cause": "外部合同导入没有统一字段长度边界，固定数组编码层继续使用无界复制。",
+    "fix": "在合同文件导入并调用 WTSContractInfo::create 前验证 exchange/code 长度，分别满足后续各结构的容量；不静默截断。LMDB key 构造边界还应防止其他调用者绕过合同导入直接传超长值。",
+    "acceptance": "15 字符 exchange 与 31 字符 code 正常注册并可构造/roundtrip；16 字符 exchange 和 32 字符 code 分别安全拒绝，合同不注册、无 key 写入、无 ASan/UBSan 越界。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/l04_datastorage/l04_lmdb_key_layout_test.cpp",
+        "case": "OverlengthContractIdentifiersRejectedSafely",
+        "issue": "现有 MaxLengthFieldsFitExactly 只有合法最大值正控，没有验证 public 合同导入对超限 exchange/code 的拒绝；直接构造超长 LMDB key 当前会触发未定义写入。",
+        "change": "产品加入导入边界校验后，通过 WTSBaseDataMgr::loadContracts 的合同 JSON 路径分别输入 exchange 16 字符和 code 32 字符；不要在主宿主直接调用当前无界 key 构造函数。",
+        "target": "CoverageTests",
+        "filter": "L04LmdbKeys.OverlengthContractIdentifiersRejectedSafely",
+        "expected_result": "两种超限输入均安全拒绝且不新增合同/键；15/31 字符边界正控仍通过。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/07_storage/runs/20261029T110035-2ce0cd4f-manifest.json",
+      "docs/迭代计划/迭代02/复核185/evidence/07_storage/runs/20261029T110035-2ce0cd4f-06-L04LmdbKeys_MaxLengthFieldsFitExactly/stdout.log"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "在合同导入边界实现长度拒绝并运行安全超限回归；本轮只运行了合法最大长度正控。"
+    ]
+  },
+  {
+    "lane": "l04_datastorage",
+    "id": "BUG-L04-005",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorageAD/WtDataReaderAD.h:34-38",
+      "src/WtDataStorageAD/WtDataReaderAD.h:81-90",
+      "src/WtDataStorageAD/WtDataReaderAD.h:281-292",
+      "src/WtDataStorageAD/WtDataReaderAD.cpp:230-263",
+      "src/WtDataStorageAD/WtDataReaderAD.cpp:269-303",
+      "src/WtDataStorageAD/WtDataReaderAD.cpp:368-420",
+      "src/WtDataStorageAD/WtDataReaderAD.cpp:432-437",
+      "src/WtDataStorageAD/WtDataWriterAD.cpp:450-492",
+      "src/WtDataStorageAD/WtDataWriterAD.cpp:516-524"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l04_datastorage/l04_ad_lmdb_store_test.cpp:249-311"
+    ],
+    "input_reachability": "WtDataReaderAD 是 IDataReader 实现，readKlineSlice 公共入口在缓存容量不足时调用 cacheBarsFromStorage，数据推进时调用 update_cache_from_lmdb。query 返回的 value 来自配置路径中的持久化 LMDB；标准 writer 写 sizeof(WTSBarStruct)，但外部/损坏/旧库 value 可在读端出现短长度，当前两条读取路径都无 size guard。",
+    "oracle_basis": "外部持久化数据库 value 在读端必须符合当前 WTSBarStruct 长度；reader 应在读取字段前验证长度并安全报错，不能将任意 byte string 视为完整 struct。标准 writer 的固定长度仅作正常格式控制，不排除损坏输入。",
+    "reason": "cacheBarsFromStorage 将 ayVals[i].data() 直接 cast 后 push 一个 WTSBarStruct；update_cache_from_lmdb 同样 cast 后先读日期/时间并复制或回调，均无长度检查。候选所列 GetUppersSkipsBarEqualToLastBarTime 直接测的是 query 范围/去重模拟，没有走 WtDataReaderAD::readKlineSlice，也没有证明短值行为。候选关联的 update `.back()` 不是本轮成立根因：公开读路径先在 bars 为空时于 :419-420 返回，而更新只在已有 bar 后执行。",
+    "root_cause": "AD reader 把数据库查询的原始 value 当作固定大小 bar，不验证 value byte length。",
+    "fix": "首次加载与增量读取均在任何 cast/字段访问/复制前检查 item.size()==sizeof(WTSBarStruct)；对无效记录记录 key 与长度，并用稳定错误/空结果终止该条处理。",
+    "acceptance": "通过真实 public readKlineSlice path 分别注入短值并确认安全拒绝、注入标准 writer 长度记录并确认逐字段读回；再以已有缓存触发 update_cache_from_lmdb，覆盖增量短值和控制。运行 sanitizer 或边界检查验证无结构体越界访问。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/l04_datastorage/l04_ad_lmdb_store_test.cpp",
+        "case": "ShortLMDBValueRejectedByPublicKlineReader",
+        "issue": "GetUppersSkipsBarEqualToLastBarTime 只调用 WtLMDBQuery 并在测试代码中 cast，未实例化 WtDataReaderAD 或调用公开 readKlineSlice，不能验证短 value 安全。",
+        "change": "添加真实 WtDataReaderAD public readKlineSlice fixture：通过 LMDB 写入小于 sizeof(WTSBarStruct) 的 value 与正常 writer 大小控制，分别走首次加载与已有缓存后的增量路径。只在产品 size guard 落地后启用短值 case，当前不要运行可能触发 UB 的路径。",
+        "target": "CoverageTests",
+        "filter": "L04ADStoreTest.ShortLMDBValueRejectedByPublicKlineReader",
+        "expected_result": "短 value 在 cast 前被拒绝且不返回/回调伪 bar；标准 value 完整读回，缓存更新不越界。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "产品 size guard 落地后新增并运行 public reader 首次加载/增量短值回归与标准记录对照；本轮不执行短值 UB 路径。"
+    ]
+  },
+  {
+    "lane": "p09_storage_readers",
+    "id": "BUG-P09-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/IDataReader.h:198-206",
+      "src/WtDataStorage/WtDataReader.cpp:151-205",
+      "src/WtDtServo/WtDataManager.cpp:54-88",
+      "src/WtBtCore/HisDataMgr.cpp:56-73"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p09_storage_readers/p09_reader_init_adjfactor_test.cpp:236-263",
+      "src/TestUnits/coverage/p09_storage_readers/p09_reader_init_adjfactor_test.cpp:386-398"
+    ],
+    "input_reachability": "IDataReader::init 为模块公开初始化接口，行情服务与回测管理器把解析后的模块配置传给插件。非空但缺 path 的外部配置在调用方可形成；cfg==NULL 有单独早退，不是本候选触发形态。",
+    "oracle_basis": "无论 path 在部署 schema 中标为必填还是可选，初始化面对缺失/空目录列表配置都应安全失败并保持 reader 不可读，而不能以空指针或空 vector 索引未定义行为。接口 init 返回 void，因此失败状态/日志必须可观察且 read 入口需 fail closed。",
+    "reason": "非空 cfg 下 cfg->get(\"path\") 未判空即调用 isArray；缺字段时空指针解引用。path 若为空数组，for 循环零次，随后初始化日志在 :204 访问 _rt_dir[0]/_his_dir[0]。现有 DISABLED_p09_init_without_path_crashes 证实测试前置是缺 path 配置，但本轮不在主宿主运行。",
+    "root_cause": "init 未验证 path 字段存在、可转换且至少生成一个数据目录；没有显式初始化失败状态。",
+    "fix": "对 cfgPath 判空并验证类型/内容、数组非空；失败记录 path 配置错误并设置不可读状态，所有 read 入口在访问目录向量前 fail closed。避免仅打印前读取 `[0]`。",
+    "acceptance": "缺 path、null path、空数组分别无崩溃并记录可定位错误，后续查询返回稳定空/失败值；合法单路径/数组配置照常初始化并继续通过现有 path 正控。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p09_storage_readers/p09_reader_init_adjfactor_test.cpp",
+        "case": "init_missing_path_fails_closed",
+        "issue": "当前 DISABLED_p09_init_without_path_crashes 只是直接执行缺 path 崩溃输入，没有安全失败状态断言，且 disabled。",
+        "change": "产品加入配置校验与 reader fail-closed 状态后，启用缺 path、null path、空 path 数组的非崩溃断言，检查 sink 的字段错误日志和后续读入口空结果；保留 init_single_path... 合法对照。",
+        "target": "CoverageTests",
+        "filter": "P09DataReaderTest.init_missing_path_fails_closed",
+        "expected_result": "初始化对每种坏配置安全拒绝，read 方法不访问空目录向量；合法 path 控制仍通过。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "实现配置拒绝和显式不可读状态后，运行缺失/null/空数组安全用例与合法 path 控制；本轮不启用 disabled 崩溃输入。"
+    ]
+  },
+  {
+    "lane": "p10_storage_writer",
+    "id": "BUG-P10-003",
+    "decision": "PRODUCT",
+    "evidence_level": "LOCAL_REPRO",
+    "source_evidence": [
+      "src/WtDataStorage/DataDefine.h:23-33",
+      "src/WtDataStorage/DataDefine.h:73-77",
+      "src/WtDataStorage/WtDataWriter.h:112-122",
+      "src/WtDataStorage/WtDataWriter.cpp:1818-1846",
+      "src/WtDataStorage/WtDataWriter.cpp:1948-2009",
+      "src/WtDataStorage/WtDataWriter.cpp:2093-2120"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p10_storage_writer/p10_proc_block_data_test.cpp:381-389"
+    ],
+    "input_reachability": "WtDataWriter 的正常 append/closing task 会读取已有 history 文件，并将内容传入 proc_block_data 解码后再追加/重写。错误 magic 是 persistent block 输入，不依赖调用者手工调用内部测试 helper。",
+    "oracle_basis": "DataDefine.h 将 `_blk_flag` 定义为块起始标记/块标识；所有 writer 创建块都会写 BLK_FLAG。未匹配标识的文件不能被接受为当前格式块。该 helper 没有 expected type 参数，具体 `_type` 的文件类型检查由知道预期类型的调用边界负责。",
+    "reason": "proc_block_data 读取版本位和压缩标志但不对 `_blk_flag` 与 BLK_FLAG 比较。fresh target 上当前已修正的 BlockFlagMismatchRejectsWithoutMutatingContent 用 WRONGFLG RAW_V2 输入 FAIL：实际返回 true，并因 bKeepHead=false 删除 12 字节 header。旧 BlockFlagNotValidated 用例把当前行为当规范的测试 oracle 已被改正；本轮运行的是修正后的源和刷新后的二进制。",
+    "root_cause": "block decoder 未验证文件格式标识；现有 append callers 还忽略解析返回值，需在改为 false 后确保不继续处理坏文件。",
+    "fix": "先验证足够的通用头长，再比较 `_blk_flag` 与 BLK_FLAG；失败时不改写 content 并返回 false。审查 dump_day_data、dump_bars 等续写调用点，对解码失败停止当前文件写入，不能把 false 当作已解码内容继续拼接。",
+    "acceptance": "错误 magic RAW_V2/CMP_V2 在任何 header strip/decompress 前返回 false 且 content 完全不变；有效 RAW/CMP/旧结构块仍按格式解析；存在坏历史文件时 writer 不将其静默接纳或重写成新 magic。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/07_storage/runs/20261029T110035-2ce0cd4f-manifest.json",
+      "docs/迭代计划/迭代02/复核185/evidence/07_storage/runs/20261029T110035-2ce0cd4f-04-P10ProcBlockTest_BlockFlagMismatchRejectsWithoutMutatingContent/stdout.log",
+      "docs/迭代计划/迭代02/复核185/evidence/07_storage/runs/20261029T110035-2ce0cd4f-04-P10ProcBlockTest_BlockFlagMismatchRejectsWithoutMutatingContent/results.xml",
+      "docs/迭代计划/迭代02/复核185/evidence/07_storage/post-refresh-sha256.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/07_storage/post-refresh-mtime.txt"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "产品加入 magic guard 并修复续写调用点对 false 的处理后，fresh target 复跑错误标记回归与合法 RAW/CMP 控制。"
+    ]
+  },
+  {
+    "lane": "q03_storage3",
+    "id": "BUG-Q03-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/IDataReader.h:218-227",
+      "src/Includes/IRdmDtReader.h:68-74",
+      "src/WtDataStorage/WtRdmDtReader.cpp:490-505",
+      "src/WtDataStorage/WtRdmDtReader.cpp:564-581",
+      "src/WtDataStorage/WtRdmDtReader.cpp:2449-2470",
+      "src/WtDataStorage/WtRdmDtReader.cpp:2577-2597",
+      "src/WtDataStorage/WtDataReader.cpp:371-389",
+      "src/WtDataStorage/WtDataReader.cpp:437-453"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q03_storage3/q03_rdm_tick_file_test.cpp:335-352",
+      "src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp:186-235"
+    ],
+    "input_reachability": "公开 IDataReader count 查询明确提供结束时间 etime；IRdmDtReader 公开 range/count 入口可从历史存储 reader 查询。精确 etime 边界会分别进入 RT block 或历史文件分支，是同一查询的正常数据落盘位置变化。",
+    "oracle_basis": "结束时间应包括时间戳等于截止值的记录，并排除严格晚于截止值的数据；同一 reader 不应依数据位于 RT 还是历史文件改变边界。闭端点是根据 public `etime` 结束时间语义及 RT 现有相等保留策略作出的推断，文档没有另列闭/开符号。",
+    "reason": "历史 range 分支用 `>= eTick` 回退掉等时记录，RT range 用 `> eTick` 保留它；range 入口内的两条路径端点不一致。无符号 `tcnt <= 0` 仅等同 `tcnt == 0`，是写法问题，不是独立产品缺陷。当前 Q03 range 用例只测试严格晚于 etime 的 tick 裁剪，本轮 1/1 PASS，不能证明相等端点。BUG-R23-005 另测 readTickSliceByCount 的独立实现；其 count FAIL/RT 对照 PASS 是同类问题的旁证，但不是本 range 入口的直接复现。",
+    "root_cause": "WtRdmDtReader::readTickSliceByRange 的 RT/history 区间算法在各自独立分支处理 etime 相等时采用了不同回退条件；count API 不与该 range 路径共享 comparator。",
+    "fix": "在 WtRdmDtReader::readTickSliceByRange 内单独统一 RT/history range 的端点回退条件；按闭端点将 `tick_time == etime` 纳入、`tick_time > etime` 排除，同时保持空块/单条块索引有效。不要只把无符号 <= 改成 == 当作修复，也不要将此 range 修复视为 R23 count 修复。",
+    "acceptance": "Q03 public range 用同一组 ticks 分别通过 RT 和 history 输入，etime 等于中间记录时包含该记录、严格晚于的后续记录被排除；另覆盖 etime==0/latest、首条边界、单条块。R23 count 有独立测试和独立修复，不用其通过代替本 range API 验收。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q03_storage3/q03_rdm_tick_file_test.cpp",
+        "case": "range_keeps_tick_equal_to_etime",
+        "issue": "当前 range_clips_right_window_on_end_trading_date 在 etime=11:00 时只测试 14:30 严格晚于边界被裁掉，没有等时记录，且未覆盖 history 分支。",
+        "change": "新增 public readTickSliceByRange 精确端点回归；分别在 RT block 与历史文件放相同的 14:30/14:31/14:32 ticks，请求 etime=14:31，断言 14:30 与 14:31 保留且 14:32 排除。不要沿用现有 strict-later 测试代替相等边界。",
+        "target": "CoverageTests",
+        "filter": "Q03RdmTickTest.range_keeps_tick_equal_to_etime",
+        "expected_result": "RT/history range 都包含等于 etime 的记录，不含严格晚于 etime 的记录；输出顺序、slice release 正确。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/07_storage/runs/20261029T110035-2ce0cd4f-manifest.json",
+      "docs/迭代计划/迭代02/复核185/evidence/07_storage/runs/20261029T110035-2ce0cd4f-01-R23RdmCountTest_HisWindowBoundaryKeepsTickExactlyAtEtime/stdout.log",
+      "docs/迭代计划/迭代02/复核185/evidence/07_storage/runs/20261029T110035-2ce0cd4f-02-R23RdmCountTest_RtWindowBoundaryKeepsTickExactlyAtEtime/stdout.log",
+      "docs/迭代计划/迭代02/复核185/evidence/07_storage/runs/20261029T110035-2ce0cd4f-05-Q03RdmTickTest_range_clips_right_window_on_end_trading_date/stdout.log"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "运行前述 Q03 range 等时新回归前仍需由 worker 添加测试、主代理刷新 target；产品修复后与 R23 count 端点用例一起复测。"
+    ]
+  }
+]

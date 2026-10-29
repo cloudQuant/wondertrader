@@ -278,12 +278,32 @@ TEST(ws03_kline_slice, extract_data_fields)
 	EXPECT_DOUBLE_EQ(tm->at(3), 903.0);
 	tm->release();
 
-	// 区间被夹取到合法范围
-	WTSValueArray* clamp = slice->extractData(KFT_CLOSE, 10, 20);
+	// 与数据相交的区间被裁剪到合法范围
+	WTSValueArray* clamp = slice->extractData(KFT_CLOSE, 2, 20);
 	ASSERT_NE(clamp, nullptr);
-	EXPECT_EQ(clamp->size(), 1u);
-	EXPECT_DOUBLE_EQ(clamp->at(0), 14.0);
+	EXPECT_EQ(clamp->size(), 2u);
+	EXPECT_DOUBLE_EQ(clamp->at(0), 10.0);
+	EXPECT_DOUBLE_EQ(clamp->at(1), 14.0);
 	clamp->release();
+
+	slice->release();
+}
+
+TEST(ws03_kline_slice, extract_data_rejects_range_after_all_bars)
+{
+	WTSBarStruct bars[2];
+	bars[0] = mkBar(20240102, 900, 10.0, 12.0, 9.0, 11.0, 100.0);
+	bars[1] = mkBar(20240102, 901, 11.0, 13.0, 10.0, 12.0, 200.0);
+
+	WTSKlineSlice* slice = WTSKlineSlice::create("SHFE.rb2401", KP_Minute1, 1, bars, 2);
+	ASSERT_NE(slice, nullptr);
+
+	// WTSKlineSlice::extractData 声明全越界时返回 NULL。当前实现可能返回空数组；
+	// 仍要求这里可安全观察该返回值，不解引用非预期的结果。
+	WTSValueArray* outside = slice->extractData(KFT_CLOSE, 10, 20);
+	EXPECT_EQ(nullptr, outside);
+	if (outside != nullptr)
+		outside->release();
 
 	slice->release();
 }

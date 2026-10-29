@@ -61,6 +61,12 @@ struct DeepEnv
 		WTSDirectionType dir, WTSOffsetType offset,
 		WTSOrderState st, WTSOrderFlag flag = WOF_NOR, double traded = 0.0)
 	{
+		if (entrustIdx >= _api._entrusts.size())
+		{
+			ADD_FAILURE() << "makeOrder requires a previously submitted entrust at index " << entrustIdx;
+			return nullptr;
+		}
+
 		const double price = 5000.0;
 		WTSEntrust* e = WTSEntrust::create(code, vol, price, "SHFE");
 		e->setUserTag(_api._entrusts[entrustIdx]._usertag.c_str());
@@ -97,7 +103,7 @@ struct DeepEnv
 	{
 		WTSArray* ay = WTSArray::create();
 		for (auto one : items)
-			ay->append(one, false);
+			ay->append(one, true);
 		(_adapter.*fn)(ay);
 		ay->release();
 		for (auto one : items)
@@ -154,6 +160,8 @@ TEST(R11TraderDeep, positionResponseAfterLoginChainsQueryOrders)
 TEST(R11TraderDeep, orderResponseFiltersBadEntries)
 {
 	DeepEnv env(false);
+	uint32_t localid = env._adapter.openLong(kAg, 5000.0, 2.0, 0);
+	ASSERT_NE(UINT_MAX, localid);
 	//NULL 数组 -> 整块跳过
 	env._adapter.onRspOrders(nullptr);
 
@@ -169,23 +177,25 @@ TEST(R11TraderDeep, orderResponseFiltersBadEntries)
 
 	WTSArray* ay = WTSArray::create();
 	ay->append((WTSObject*)nullptr, false);
-	ay->append(ghost, false);
-	ay->append(dead, false);
-	ay->append(foreign, false);
-	ay->append(alive, false);
+	ay->append(ghost, true);
+	ay->append(dead, true);
+	ay->append(foreign, true);
+	ay->append(alive, true);
 	env._adapter.onRspOrders(ay);
 	ay->release();
 	ghost->release(); dead->release(); foreign->release(); alive->release();
 
-	//_orders 里只有活单(按 fullcode 过滤的分支永远取不到, 见 BUG-R11-004)
+	//_orders 里只有本通道的活单; 未知合约、死单和外部订单都被过滤。
 	OrderMap* orders = env._adapter.getOrders("");
 	ASSERT_NE(nullptr, orders);
 	EXPECT_EQ(1u, orders->size());
+	EXPECT_EQ(alive, orders->get(localid));
 	orders->release();
-	//按标准代码查会被 strcmp(ordInfo->getCode(), stdCode) 挡掉 -> 空集合
+	//公开标准代码查询应返回同一笔活单。
 	orders = env._adapter.getOrders(kAg);
 	ASSERT_NE(nullptr, orders);
-	EXPECT_EQ(0u, orders->size());
+	EXPECT_EQ(1u, orders->size());
+	EXPECT_EQ(alive, orders->get(localid));
 	orders->release();
 
 	//未完成量: 只有活单贡献 volLeft = 6-2 = 4
@@ -199,20 +209,23 @@ TEST(R11TraderDeep, orderResponseFiltersBadEntries)
 TEST(R11TraderDeep, orderResponseCancelTallyBranches)
 {
 	DeepEnv env(false);
+	ASSERT_NE(UINT_MAX, env._adapter.openLong(kAg, 5000.0, 1.0, 0));
+	ASSERT_NE(UINT_MAX, env._adapter.openLong(kAg, 5000.0, 1.0, 0));
+	ASSERT_NE(UINT_MAX, env._adapter.openLong(kAg, 5000.0, 1.0, 0));
 	//三条都是本通道、都已撤销: 普通撤单 / 非普通标记的自动撤单 / 带错单标记
 	WTSOrderInfo* normalCancel = env.makeOrder(0, "ag2406", 5.0, WDT_LONG, WOT_OPEN, WOS_Canceled);
-	WTSOrderInfo* autoCancel = env.makeOrder(0, "ag2406", 4.0, WDT_LONG, WOT_OPEN,
+	WTSOrderInfo* autoCancel = env.makeOrder(1, "ag2406", 4.0, WDT_LONG, WOT_OPEN,
 		WOS_Canceled, (WTSOrderFlag)99);
-	WTSOrderInfo* wrongCancel = env.makeOrder(0, "ag2406", 3.0, WDT_SHORT, WOT_CLOSE, WOS_Canceled);
+	WTSOrderInfo* wrongCancel = env.makeOrder(2, "ag2406", 3.0, WDT_SHORT, WOT_CLOSE, WOS_Canceled);
 	wrongCancel->setError((WTSOrderErrorFlag)5);
 	normalCancel->setOrderID("ORD-911");
 	autoCancel->setOrderID("ORD-912");
 	wrongCancel->setOrderID("ORD-913");
 
 	WTSArray* ay = WTSArray::create();
-	ay->append(normalCancel, false);
-	ay->append(autoCancel, false);
-	ay->append(wrongCancel, false);
+	ay->append(normalCancel, true);
+	ay->append(autoCancel, true);
+	ay->append(wrongCancel, true);
 	env._adapter.onRspOrders(ay);
 	ay->release();
 
@@ -296,6 +309,8 @@ TEST(R11TraderDeep, pushOrderCancelWrongAndAutoCancel)
 	ASSERT_NE(UINT_MAX, id1);
 	uint32_t id2 = env._adapter.openLong(kAg, 5000.0, 4.0, 0);
 	ASSERT_NE(UINT_MAX, id2);
+	uint32_t id3 = env._adapter.openLong(kAg, 5000.0, 4.0, 0);
+	ASSERT_NE(UINT_MAX, id3);
 
 	//先把 _orders 建起来: 推一笔活单(id1 对应委托 0)
 	WTSOrderInfo* alive = env.makeOrder(0, "ag2406", 5.0, WDT_LONG, WOT_OPEN, WOS_NotTraded_Queuing);
@@ -318,14 +333,14 @@ TEST(R11TraderDeep, pushOrderCancelWrongAndAutoCancel)
 	env._adapter.onPushOrder(o2);
 
 	//3) 撤销 + 错单标记 -> b_wrongs(SHORT+CLOSE 也归买入侧)
-	WTSOrderInfo* o3 = env.makeOrder(1, "ag2406", 4.0, WDT_SHORT, WOT_CLOSE, WOS_Canceled);
+	WTSOrderInfo* o3 = env.makeOrder(2, "ag2406", 4.0, WDT_SHORT, WOT_CLOSE, WOS_Canceled);
 	o3->setError((WTSOrderErrorFlag)5);
 	o3->setOrderID("PUSH-3");
 	env._adapter.onPushOrder(o3);
 
 	//活单 1 + 三条撤销各 2(撤单信息量 + 首次推送信息量) = 7
 	EXPECT_EQ(7u, env._adapter.getInfos(kAg));
-	//未完成量: 下单 9, 撤销回收 (5-1)+4 = 8
+	//未完成量: 下单 13, 三个订单撤销回收 (5-1)+4+4 = 12
 	EXPECT_DOUBLE_EQ(1.0, env._adapter.getUndoneQty(kAg));
 	//死单不留在 _orders
 	orders = env._adapter.getOrders("");
@@ -341,6 +356,8 @@ TEST(R11TraderDeep, pushOrderCancelWrongAndAutoCancel)
 	EXPECT_DOUBLE_EQ(4.0, env._sink._orders[1]._left);
 	EXPECT_EQ(id2, env._sink._orders[2]._localid);
 	EXPECT_DOUBLE_EQ(4.0, env._sink._orders[2]._total);
+	EXPECT_EQ(id3, env._sink._orders[3]._localid);
+	EXPECT_EQ(id3, env._sink._orders[3]._localid);
 	//第三条是平仓 -> offset=1, 且方向是空头
 	EXPECT_FALSE(env._sink._orders[3]._long);
 	EXPECT_EQ(1u, env._sink._orders[3]._offset);
@@ -352,6 +369,7 @@ TEST(R11TraderDeep, pushOrderCancelWrongAndAutoCancel)
 TEST(R11TraderDeep, pushOrderForeignAndEmptyOrderID)
 {
 	DeepEnv env(true);
+	ASSERT_NE(UINT_MAX, env._adapter.openLong(kAg, 5000.0, 2.0, 0));
 	WTSPositionItem* real = q04::posItem("SHFE", "ag2406", WDT_LONG, 10, 10, 0, 0);
 	env.feed({ real }, &TraderAdapter::onRspPosition);
 
@@ -366,8 +384,8 @@ TEST(R11TraderDeep, pushOrderForeignAndEmptyOrderID)
 	//订单号为空: 跳过首推认领块, 只按 usertag 认领(本通道 empty 单)
 	WTSOrderInfo* empty = env.makeOrder(0, "ag2406", 2.0, WDT_LONG, WOT_CLOSE, WOS_NotTraded_Queuing);
 	env._adapter.onPushOrder(empty);
-	//平仓首推扣掉 2 手可平(全走昨仓)
-	EXPECT_DOUBLE_EQ(8.0, env._adapter.getPosition(kAg, true, 1));
+	//空单号无法标记为首次推送订单，生产代码只在有订单号时更新可平数量。
+	EXPECT_DOUBLE_EQ(10.0, env._adapter.getPosition(kAg, true, 1));
 	//本通道活单进 _orders
 	OrderMap* orders = env._adapter.getOrders("");
 	ASSERT_NE(nullptr, orders);
@@ -400,11 +418,12 @@ TEST(R11TraderDeep, queriesOnEmptyChannel)
 	env.feed({ l, s }, &TraderAdapter::onRspPosition);
 	//onRspPosition 自身已经通知过 2 次
 	const size_t afterRsp = env._sink._positions.size();
-	EXPECT_DOUBLE_EQ(3.0, env._adapter.enumPosition(kAg));
+	// enumPosition 汇总多空的持仓总量（不计算净头寸）：多头 4 + 空头 1。
+	EXPECT_DOUBLE_EQ(5.0, env._adapter.enumPosition(kAg));
 	//枚举又额外通知了 2 次
 	EXPECT_EQ(afterRsp + 2, env._sink._positions.size());
 	//全量枚举: 只有 ag2406 一个条目
-	EXPECT_DOUBLE_EQ(3.0, env._adapter.enumPosition());
+	EXPECT_DOUBLE_EQ(5.0, env._adapter.enumPosition());
 }
 
 //日志/登出/无错对象入口都只做最小动作, 不能崩也不能通知错东西
@@ -460,9 +479,9 @@ TEST(R11TraderDeep, adapterMgrAddGetRunRelease)
 	EXPECT_EQ(first.get(), mgr.getAdapter("uft2").get());
 	EXPECT_EQ(nullptr, mgr.getAdapter("uft-none").get());
 
-	const uint32_t before = env._api._initCnt;
+	const uint32_t beforeConnect = env._api._connectCnt;
 	mgr.run();
-	EXPECT_EQ(before + 1, env._api._initCnt);
+	EXPECT_EQ(beforeConnect + 1, env._api._connectCnt);
 
 	mgr.release();
 	EXPECT_EQ((size_t)0, mgr.getAdapters().size());

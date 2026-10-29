@@ -1,0 +1,381 @@
+[
+  {
+    "label": "session_close",
+    "target": "CoverageTests_wtcore",
+    "filter": "R202SelTicker.FullDaySessionKeepsExplicitMidnightCloseLabel",
+    "bug": "TEST_CORRECTION",
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_wtcore",
+      "--gtest_filter=R202SelTicker.FullDaySessionKeepsExplicitMidnightCloseLabel",
+      "--gtest_output=xml:/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代02/evidence/session_close.xml"
+    ],
+    "cwd": "/tmp/wondertrader-review-20261029/runtime/session_close",
+    "LLVM_PROFILE_FILE": "/tmp/wondertrader-review-20261029/runtime/session_close/profile-%p.profraw",
+    "status": "PASS",
+    "returncode": 0,
+    "tests": 1,
+    "seconds": 0.4073065420379862,
+    "binary_sha256": "779ecd25f633ec0b11f2cf44f0afc9f2c4edcf438b9851f8ac00d418940c30ce"
+  },
+  {
+    "label": "session_offset",
+    "target": "CoverageTests_wtcore",
+    "filter": "R202HftTicker.FullDaySessionCloseLabelAndClockOffsetAreDistinct",
+    "bug": "TEST_CORRECTION",
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_wtcore",
+      "--gtest_filter=R202HftTicker.FullDaySessionCloseLabelAndClockOffsetAreDistinct",
+      "--gtest_output=xml:/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代02/evidence/session_offset.xml"
+    ],
+    "cwd": "/tmp/wondertrader-review-20261029/runtime/session_offset",
+    "LLVM_PROFILE_FILE": "/tmp/wondertrader-review-20261029/runtime/session_offset/profile-%p.profraw",
+    "status": "PASS",
+    "returncode": 0,
+    "tests": 1,
+    "seconds": 0.13659108302090317,
+    "binary_sha256": "779ecd25f633ec0b11f2cf44f0afc9f2c4edcf438b9851f8ac00d418940c30ce"
+  },
+  {
+    "label": "ctp_close_short",
+    "target": "CoverageTests_t_TraderCTP",
+    "filter": "T2TraderCTPTest.order_insert_cffex_anyprice_and_close_offsets",
+    "bug": "TEST_CORRECTION",
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_t_TraderCTP",
+      "--gtest_filter=T2TraderCTPTest.order_insert_cffex_anyprice_and_close_offsets",
+      "--gtest_output=xml:/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代02/evidence/ctp_close_short.xml"
+    ],
+    "cwd": "/tmp/wondertrader-review-20261029/runtime/ctp_close_short",
+    "LLVM_PROFILE_FILE": "/tmp/wondertrader-review-20261029/runtime/ctp_close_short/profile-%p.profraw",
+    "status": "PASS",
+    "returncode": 0,
+    "tests": 1,
+    "seconds": 0.6458956249989569,
+    "binary_sha256": "f1f515cd58e97db2bdf64347c5b7d69ec5e975ae051b6c369db1393240412d44"
+  },
+  {
+    "label": "ctpopt_exec_array",
+    "target": "CoverageTests_t_TraderCTPOpt",
+    "filter": "TraderCTPOpt.query_rsp_streams_fill_arrays_and_reset_state",
+    "bug": "BUG-R61-003",
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_t_TraderCTPOpt",
+      "--gtest_filter=TraderCTPOpt.query_rsp_streams_fill_arrays_and_reset_state",
+      "--gtest_output=xml:/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代02/evidence/ctpopt_exec_array.xml"
+    ],
+    "cwd": "/tmp/wondertrader-review-20261029/runtime/ctpopt_exec_array-corrected",
+    "LLVM_PROFILE_FILE": "/tmp/wondertrader-review-20261029/runtime/ctpopt_exec_array-corrected/profile-%p.profraw",
+    "status": "FAIL",
+    "returncode": 1,
+    "tests": 1,
+    "seconds": 0.7793521670391783,
+    "binary_sha256": "f9103d28428f1469616adf877b4471c3ef6f0526fcb03fc322c6b62adbf4ad2a",
+    "supersedes": "superseded/ctpopt_exec_array-before-order-count-correction"
+  },
+  {
+    "label": "weekly_contract",
+    "target": "CoverageTests_btcore",
+    "filter": "P07TaskScheduleTest.weeklyTaskFiresOnlyOnTargetWeekday",
+    "bug": "TEST_CORRECTION",
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_btcore",
+      "--gtest_filter=P07TaskScheduleTest.weeklyTaskFiresOnlyOnTargetWeekday",
+      "--gtest_output=xml:/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代02/evidence/weekly_contract.xml"
+    ],
+    "cwd": "/tmp/wondertrader-review-20261029/runtime/weekly_contract",
+    "LLVM_PROFILE_FILE": "/tmp/wondertrader-review-20261029/runtime/weekly_contract/profile-%p.profraw",
+    "status": "PASS",
+    "returncode": 0,
+    "tests": 1,
+    "seconds": 0.8527847499935888,
+    "binary_sha256": "430676e26c035f16dc733f23f4e72196a86ed5d4373f3b86ebce7d554be370d4"
+  },
+  {
+    "label": "session_reoffset",
+    "target": "CoverageTests",
+    "filter": "l03_session.set_offset_mins_keeps_registered_sections_consistent",
+    "bug": "BUG-L03-004",
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests",
+      "--gtest_filter=l03_session.set_offset_mins_keeps_registered_sections_consistent",
+      "--gtest_output=xml:/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代02/evidence/session_reoffset.xml"
+    ],
+    "cwd": "/tmp/wondertrader-review-20261029/runtime/session_reoffset",
+    "LLVM_PROFILE_FILE": "/tmp/wondertrader-review-20261029/runtime/session_reoffset/profile-%p.profraw",
+    "status": "FAIL",
+    "returncode": 1,
+    "tests": 1,
+    "seconds": 1.038341791019775,
+    "binary_sha256": "50e6a8019a6192cff4ceaee707dd8886181e5b19a97070a13d4a06b082c063e3"
+  },
+  {
+    "label": "hft_period",
+    "target": "CoverageTests_btporter",
+    "filter": "R9Wired.HftBarPeriodRenamedByTimes",
+    "bug": "BUG-R9-002",
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_btporter",
+      "--gtest_filter=R9Wired.HftBarPeriodRenamedByTimes",
+      "--gtest_output=xml:/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代02/evidence/hft_period.xml"
+    ],
+    "cwd": "/tmp/wondertrader-review-20261029/runtime/hft_period",
+    "LLVM_PROFILE_FILE": "/tmp/wondertrader-review-20261029/runtime/hft_period/profile-%p.profraw",
+    "status": "FAIL",
+    "returncode": 1,
+    "tests": 1,
+    "seconds": 0.6157901670085266,
+    "binary_sha256": "bad2889a53efa46a0f96d9a43d5e86cfb1f7232a667a1d611b42b1864972cf92"
+  },
+  {
+    "label": "cta_period_control",
+    "target": "CoverageTests_btporter",
+    "filter": "R9Wired.CtaBarClosePassesPeriodUnchanged",
+    "bug": "TEST_CORRECTION",
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_btporter",
+      "--gtest_filter=R9Wired.CtaBarClosePassesPeriodUnchanged",
+      "--gtest_output=xml:/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代02/evidence/cta_period_control.xml"
+    ],
+    "cwd": "/tmp/wondertrader-review-20261029/runtime/cta_period_control",
+    "LLVM_PROFILE_FILE": "/tmp/wondertrader-review-20261029/runtime/cta_period_control/profile-%p.profraw",
+    "status": "PASS",
+    "returncode": 0,
+    "tests": 1,
+    "seconds": 0.11933474999386817,
+    "binary_sha256": "bad2889a53efa46a0f96d9a43d5e86cfb1f7232a667a1d611b42b1864972cf92"
+  },
+  {
+    "label": "cta_null_guard",
+    "target": "CoverageTests_btporter",
+    "filter": "R9Wired.CtaNullBarIsRejectedBeforeCallback",
+    "bug": "BUG-R9-004",
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_btporter",
+      "--gtest_filter=R9Wired.CtaNullBarIsRejectedBeforeCallback",
+      "--gtest_output=xml:/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代02/evidence/cta_null_guard.xml"
+    ],
+    "cwd": "/tmp/wondertrader-review-20261029/runtime/cta_null_guard",
+    "LLVM_PROFILE_FILE": "/tmp/wondertrader-review-20261029/runtime/cta_null_guard/profile-%p.profraw",
+    "status": "PASS",
+    "returncode": 0,
+    "tests": 1,
+    "seconds": 0.12471233401447535,
+    "binary_sha256": "bad2889a53efa46a0f96d9a43d5e86cfb1f7232a667a1d611b42b1864972cf92"
+  },
+  {
+    "label": "encoding_empty",
+    "target": "CoverageTests",
+    "filter": "R55_charconv.utf8_helpers_handle_empty_inputs",
+    "bug": "TEST_CORRECTION",
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests",
+      "--gtest_filter=R55_charconv.utf8_helpers_handle_empty_inputs",
+      "--gtest_output=xml:/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代02/evidence/encoding_empty.xml"
+    ],
+    "cwd": "/tmp/wondertrader-review-20261029/runtime/encoding_empty",
+    "LLVM_PROFILE_FILE": "/tmp/wondertrader-review-20261029/runtime/encoding_empty/profile-%p.profraw",
+    "status": "PASS",
+    "returncode": 0,
+    "tests": 1,
+    "seconds": 0.13429983402602375,
+    "binary_sha256": "50e6a8019a6192cff4ceaee707dd8886181e5b19a97070a13d4a06b082c063e3"
+  },
+  {
+    "label": "converter_char_control",
+    "target": "CoverageTests",
+    "filter": "l01_convert.const_char_pointer_overload_parses_signed_and_invalid_input",
+    "bug": "BUG-L01-011",
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests",
+      "--gtest_filter=l01_convert.const_char_pointer_overload_parses_signed_and_invalid_input",
+      "--gtest_output=xml:/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代02/evidence/converter_char_control.xml"
+    ],
+    "cwd": "/tmp/wondertrader-review-20261029/runtime/converter_char_control",
+    "LLVM_PROFILE_FILE": "/tmp/wondertrader-review-20261029/runtime/converter_char_control/profile-%p.profraw",
+    "status": "PASS",
+    "returncode": 0,
+    "tests": 1,
+    "seconds": 0.13986316695809364,
+    "binary_sha256": "50e6a8019a6192cff4ceaee707dd8886181e5b19a97070a13d4a06b082c063e3"
+  },
+  {
+    "label": "hot_full_string",
+    "target": "CoverageTests",
+    "filter": "r12_codehelper.std_code_to_hot_and_2nd_wrappers",
+    "bug": "BUG-L01-002",
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests",
+      "--gtest_filter=r12_codehelper.std_code_to_hot_and_2nd_wrappers",
+      "--gtest_output=xml:/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代02/evidence/hot_full_string.xml"
+    ],
+    "cwd": "/tmp/wondertrader-review-20261029/runtime/hot_full_string",
+    "LLVM_PROFILE_FILE": "/tmp/wondertrader-review-20261029/runtime/hot_full_string/profile-%p.profraw",
+    "status": "FAIL",
+    "returncode": 1,
+    "tests": 1,
+    "seconds": 0.14256491599371657,
+    "binary_sha256": "50e6a8019a6192cff4ceaee707dd8886181e5b19a97070a13d4a06b082c063e3"
+  },
+  {
+    "label": "match_zero_volume_control",
+    "target": "CoverageTests_btcore",
+    "filter": "MatchEngineTest.zeroVolumeTickSkipsMatching",
+    "bug": "TEST_CONTROL",
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_btcore",
+      "--gtest_filter=MatchEngineTest.zeroVolumeTickSkipsMatching",
+      "--gtest_output=xml:/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代02/evidence/match_zero_volume_control.xml"
+    ],
+    "cwd": "/tmp/wondertrader-review-20261029/runtime/match_zero_volume_control",
+    "LLVM_PROFILE_FILE": "/tmp/wondertrader-review-20261029/runtime/match_zero_volume_control/profile-%p.profraw",
+    "status": "PASS",
+    "returncode": 0,
+    "tests": 1,
+    "seconds": 0.16468337504193187,
+    "binary_sha256": "430676e26c035f16dc733f23f4e72196a86ed5d4373f3b86ebce7d554be370d4"
+  },
+  {
+    "label": "match_zero_ask",
+    "target": "CoverageTests_btcore",
+    "filter": "MatchEngineTest.zeroAskQuantityDoesNotCreateSyntheticBuyFill",
+    "bug": "BUG-L06-004",
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_btcore",
+      "--gtest_filter=MatchEngineTest.zeroAskQuantityDoesNotCreateSyntheticBuyFill",
+      "--gtest_output=xml:/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代02/evidence/match_zero_ask.xml"
+    ],
+    "cwd": "/tmp/wondertrader-review-20261029/runtime/match_zero_ask",
+    "LLVM_PROFILE_FILE": "/tmp/wondertrader-review-20261029/runtime/match_zero_ask/profile-%p.profraw",
+    "status": "FAIL",
+    "returncode": 1,
+    "tests": 1,
+    "seconds": 0.13794758403673768,
+    "binary_sha256": "430676e26c035f16dc733f23f4e72196a86ed5d4373f3b86ebce7d554be370d4"
+  },
+  {
+    "label": "match_zero_bid",
+    "target": "CoverageTests_btcore",
+    "filter": "MatchEngineTest.zeroBidQuantityDoesNotCreateSyntheticSellFill",
+    "bug": "BUG-L06-004",
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_btcore",
+      "--gtest_filter=MatchEngineTest.zeroBidQuantityDoesNotCreateSyntheticSellFill",
+      "--gtest_output=xml:/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代02/evidence/match_zero_bid.xml"
+    ],
+    "cwd": "/tmp/wondertrader-review-20261029/runtime/match_zero_bid",
+    "LLVM_PROFILE_FILE": "/tmp/wondertrader-review-20261029/runtime/match_zero_bid/profile-%p.profraw",
+    "status": "FAIL",
+    "returncode": 1,
+    "tests": 1,
+    "seconds": 0.1523204170516692,
+    "binary_sha256": "430676e26c035f16dc733f23f4e72196a86ed5d4373f3b86ebce7d554be370d4"
+  },
+  {
+    "label": "legacy_tick_terminated",
+    "target": "CoverageTests",
+    "filter": "r53_struct_tick.assignment_preserves_maximum_terminated_legacy_strings",
+    "bug": "BUG-R53-003",
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests",
+      "--gtest_filter=r53_struct_tick.assignment_preserves_maximum_terminated_legacy_strings",
+      "--gtest_output=xml:/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代02/evidence/legacy_tick_terminated.xml"
+    ],
+    "cwd": "/tmp/wondertrader-review-20261029/runtime/legacy_tick_terminated",
+    "LLVM_PROFILE_FILE": "/tmp/wondertrader-review-20261029/runtime/legacy_tick_terminated/profile-%p.profraw",
+    "status": "PASS",
+    "returncode": 0,
+    "tests": 1,
+    "seconds": 0.14419716701377183,
+    "binary_sha256": "50e6a8019a6192cff4ceaee707dd8886181e5b19a97070a13d4a06b082c063e3"
+  },
+  {
+    "label": "ad_front_overwrite",
+    "target": "CoverageTests_adstorage",
+    "filter": "R21ReaderADTest.FirstTickRangeReadLoadsThreeTicksInActionTimeOrder",
+    "bug": "BUG-R32-001",
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_adstorage",
+      "--gtest_filter=R21ReaderADTest.FirstTickRangeReadLoadsThreeTicksInActionTimeOrder",
+      "--gtest_output=xml:/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代02/evidence/ad_front_overwrite.xml"
+    ],
+    "cwd": "/tmp/wondertrader-review-20261029/runtime/ad_front_overwrite",
+    "LLVM_PROFILE_FILE": "/tmp/wondertrader-review-20261029/runtime/ad_front_overwrite/profile-%p.profraw",
+    "status": "FAIL",
+    "returncode": 1,
+    "tests": 1,
+    "seconds": 0.6470435420051217,
+    "binary_sha256": "b906a816a4420f624e0f06cae44f3921557d96ba79cf8a87f52ad7b1d89a0d2c"
+  },
+  {
+    "label": "tick_replay_tail",
+    "target": "CoverageTests_btcore",
+    "filter": "R80ConfigTick.TickReplayResetsCursorAndSkipsEmptyLevel2",
+    "bug": "BUG-P07-001",
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_btcore",
+      "--gtest_filter=R80ConfigTick.TickReplayResetsCursorAndSkipsEmptyLevel2",
+      "--gtest_output=xml:/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代02/evidence/tick_replay_tail.xml"
+    ],
+    "cwd": "/tmp/wondertrader-review-20261029/runtime/tick_replay_tail",
+    "LLVM_PROFILE_FILE": "/tmp/wondertrader-review-20261029/runtime/tick_replay_tail/profile-%p.profraw",
+    "status": "FAIL",
+    "returncode": 1,
+    "tests": 1,
+    "seconds": 0.12931808299617842,
+    "binary_sha256": "430676e26c035f16dc733f23f4e72196a86ed5d4373f3b86ebce7d554be370d4"
+  },
+  {
+    "label": "ctp_sync_failure",
+    "target": "CoverageTests_t_TraderCTP",
+    "filter": "T25TraderCTPTest.order_insert_and_action_send_failures_return_error_and_are_logged",
+    "bug": "BUG-T25-011",
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_t_TraderCTP",
+      "--gtest_filter=T25TraderCTPTest.order_insert_and_action_send_failures_return_error_and_are_logged",
+      "--gtest_output=xml:/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代02/evidence/ctp_sync_failure.xml"
+    ],
+    "cwd": "/tmp/wondertrader-review-20261029/runtime/ctp_sync_failure",
+    "LLVM_PROFILE_FILE": "/tmp/wondertrader-review-20261029/runtime/ctp_sync_failure/profile-%p.profraw",
+    "status": "FAIL",
+    "returncode": 1,
+    "tests": 1,
+    "seconds": 0.13217258296208456,
+    "binary_sha256": "f1f515cd58e97db2bdf64347c5b7d69ec5e975ae051b6c369db1393240412d44"
+  },
+  {
+    "label": "uft_sync_failure",
+    "target": "CoverageTests_uftcore",
+    "filter": "q04_trader_entrust.insert_failure_returns_uint_max_without_counting_undone",
+    "bug": "BUG-Q04-002",
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_uftcore",
+      "--gtest_filter=q04_trader_entrust.insert_failure_returns_uint_max_without_counting_undone",
+      "--gtest_output=xml:/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代02/evidence/uft_sync_failure.xml"
+    ],
+    "cwd": "/tmp/wondertrader-review-20261029/runtime/uft_sync_failure",
+    "LLVM_PROFILE_FILE": "/tmp/wondertrader-review-20261029/runtime/uft_sync_failure/profile-%p.profraw",
+    "status": "FAIL",
+    "returncode": 1,
+    "tests": 1,
+    "seconds": 0.1526494160061702,
+    "binary_sha256": "0e0f06912b65cae776054792b4958d5393559582dd900a605ac173d9cf091e7e"
+  },
+  {
+    "label": "uft_order_control",
+    "target": "CoverageTests_uftcore",
+    "filter": "q04_trader_entrust.four_direction_actions_are_assembled_correctly",
+    "bug": "TEST_CONTROL",
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_uftcore",
+      "--gtest_filter=q04_trader_entrust.four_direction_actions_are_assembled_correctly",
+      "--gtest_output=xml:/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代02/evidence/uft_order_control.xml"
+    ],
+    "cwd": "/tmp/wondertrader-review-20261029/runtime/uft_order_control",
+    "LLVM_PROFILE_FILE": "/tmp/wondertrader-review-20261029/runtime/uft_order_control/profile-%p.profraw",
+    "status": "PASS",
+    "returncode": 0,
+    "tests": 1,
+    "seconds": 0.14096862502628937,
+    "binary_sha256": "0e0f06912b65cae776054792b4958d5393559582dd900a605ac173d9cf091e7e"
+  }
+]

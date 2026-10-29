@@ -26,9 +26,11 @@ FIELDS = {
     "现象": "actual",
     "输入/前置条件": "input",
     "前置条件": "input",
+    "触发": "input",
     "期望行为": "expect",
     "复现步骤": "repro",
     "影响范围": "impact",
+    "影响": "impact",
     "备注": "note",
     "分级": "severity",
     "复现": "repro",
@@ -38,12 +40,24 @@ FIELDS = {
     "留给主控": "note",
 }
 
+# These fields are atomic. An indented explanatory bullet after them is usually
+# a child finding or note, not part of the severity/status value. In particular,
+# joining that text can turn an explicit terminal status into a nonterminal one.
+SCALAR_FIELDS = {"status", "severity"}
+
 # 条目标题必须带可排序的编号。历史上只认 `BUG-`，结果 lane 用 `Q06-001` 这类
 # 自己的前缀时，整份缺陷清单被静默丢掉（实测 q06_porters.md 7 条 0 进汇总），
 # 汇总表面看是「这一路没发现 bug」。所以现在按 `<标识>-<数字>` 通用匹配，
 # 并把仍然不合模板的 `## ` 标题显式计数打出来，交人工确认，不再静默。
-HEAD_RE = re.compile(r"^##\s+((?:BUG-)?[A-Za-z][A-Za-z0-9_]*-\d+[A-Za-z0-9_.-]*)(.*)$")
+ENTRY_ID = (
+    r"(?:BUG-[A-Za-z][A-Za-z0-9_]*-\d+"
+    r"|[A-Za-z][A-Za-z0-9_]*-BUG-\d+"
+    r"|[A-Za-z][A-Za-z0-9_]*-\d+)"
+    r"[A-Za-z0-9_.-]*"
+)
+HEAD_RE = re.compile(r"^(?:#\s+|##\s+)(" + ENTRY_ID + r")(.*)$")
 ANY_HEAD_RE = re.compile(r"^##\s+(.*)$")
+NUMERIC_HEAD_RE = re.compile(r"^#{2,6}\s+(\d+)[.)、]?\s+(.+)$")
 SEV_IN_TITLE = re.compile(r"\b(Blocker|Major|Minor)\b")
 FIELD_LINE_RE = re.compile(r"^-\s*\*{0,2}([^:：*]{1,14})\*{0,2}\s*[:：]\s*(.*)$")
 
@@ -55,19 +69,42 @@ CONT_RE = re.compile(r"^\s{2,}-\s+(.*)$")
 # （实测 rows=234 少了 T1 的 12 条 + T2 的 19 条），所以两种语法都要解析，
 # 并在文件层面比对「条目数 vs 解析出的行数」。
 BULLET_HEAD_RE = re.compile(r"^-\s*\*\*\s*([A-Za-z][A-Za-z0-9_-]*-\d+[A-Za-z0-9_.-]*)\s+(.*?)\s*\*\*\s*$")
+TITLE_HEAD_RE = re.compile(r"^-\s*标题\s*[:：]\s*(.+?)\s*$")
+NON_FINDING_REVIEW_HEAD_RE = re.compile(
+    r"^#{2,6}\s+复核记录\s*[（(][^）)]*非新增缺陷[^）)]*[）)]\s*$"
+)
 
 
 # 允许「待审核」后面带说明文字（R1 的 `## 2.` 条目写的是
 # `- 状态: 待审核（R1 用例只测「首次读」…）`，旧式带 $ 锚点会把整条静默丢掉，
 # 实测行数 342 里就少了这一条）。只要「状态: 待审核」成行即可算条目。
 ENTRY_MARK = re.compile(r"^\s*(?:[-*]\s*)?状态\s*[:：]\s*待审核")
+TITLE_STATUS_RE = re.compile(r"[（(]\s*状态\s*[:：]\s*([^）)]*)[）)]\s*$")
+TITLE_BARE_TERMINAL_STATUS_RE = re.compile(r"[（(]\s*(已撤回|已合并)\s*[）)]\s*$")
+TERMINAL_STATUSES = {"已撤回", "已合并"}
 DELIM = re.compile(
     r"^(?:"
     r"#{2,6}\s"                      # 任意级标题（## BUG-xx / ## 1. 标题 / ### A. …）
+    r"|#\s+" + ENTRY_ID +            # 单井号只把带缺陷编号的标题作为条目边界
     r"|-{3,}$"                       # --- 分隔（T5 用法）
     r"|-\s*\*\*\s*[A-Za-z][A-Za-z0-9_-]*-\d+"   # - **R5-001 …** （T1/T2 用法）
     r"|-\s*(?:标题|ID)\s*[:：]"            # - 标题: … / - ID: … （R2/T5 用法）
     r")")
+
+
+def status_value(value):
+    """Return the explicit status before an optional explanatory note."""
+    return re.split(r"[（(，,]", str(value).strip(), maxsplit=1)[0].strip()
+
+
+def title_status(head):
+    """Read an explicit status annotation at the end of a numbered heading."""
+    title = re.sub(r"^#+\s*", "", head.strip())
+    match = TITLE_STATUS_RE.search(title)
+    if match:
+        return status_value(match.group(1))
+    match = TITLE_BARE_TERMINAL_STATUS_RE.search(title)
+    return match.group(1) if match else None
 
 
 def parse_file(path: Path):
@@ -75,10 +112,10 @@ def parse_file(path: Path):
 
     历史上栽过两次：只认 `## BUG-` 时，T1/T2 的 bullet 语法整路静默消失（31 条）；
     补了 bullet 语法后，R1（`## 1. 数字标题`）、R2（`- 标题:`）、T5（`---` 分隔的 `- ID:`）
-    又整路丢掉 0 行。所以判定改成与会写字形无关的不变量：
-    **一个条目块 = 含有一行独立「状态: 待审核」字段的最小段落**，
+    又整路丢掉 0 行。因此判定支持已知的几种条目写法：
+    **一个条目块 = 含有一行独立「状态: 待审核」字段、编号标题、字段签名完整的数字标题，或 `- 标题:` 标记的最小段落**，
     块边界取「标题 / --- / 粗体编号 bullet / `- 标题:` / `- ID:`」这几种实际出现过的写法。
-    每文件再用「待审核标记数 vs 解析行数」对账，不平就报警（不再静默）。
+    解析器只对已识别的编号标题和字段签名完整的数字标题负责；这不是对任意非标准标题的穷举检查。
     """
     body = path.read_text(encoding="utf-8").splitlines()
     blocks, cur = [], []
@@ -92,14 +129,43 @@ def parse_file(path: Path):
         blocks.append(cur)
 
     rows = []
+    skipped = []
+    intentionally_excluded_ids = set()
     seq = 0
     for blk in blocks:
+        # Some lane files append a review matrix under an explicitly labelled
+        # section. Its trailing `状态: 待审核` describes the section, not a new
+        # defect candidate. Keep this exclusion narrow: ordinary unnumbered
+        # entries and review headings without this explicit label still parse.
+        if NON_FINDING_REVIEW_HEAD_RE.match(blk[0].strip()):
+            continue
         has_mark = any(ENTRY_MARK.match(l) for l in blk)
         head_id = HEAD_RE.match(blk[0]) or BULLET_HEAD_RE.match(blk[0])
-        # 条目判据取并集：独立「状态: 待审核」字段行，**或** 标题自带编号
+        title_head = TITLE_HEAD_RE.match(blk[0])
+        numeric_head = NUMERIC_HEAD_RE.match(blk[0].strip())
+        numeric_id = None
+        numeric_signature = False
+        numeric_has_finding_fields = False
+        if numeric_head:
+            numeric_id = "%s#%s" % (path.stem, numeric_head.group(1))
+            numeric_fields = set()
+            for raw in blk[1:]:
+                fm = FIELD_LINE_RE.match(raw.strip())
+                if fm:
+                    key = FIELDS.get(fm.group(1).strip())
+                    if key:
+                        numeric_fields.add(key)
+            descriptive_fields = {"actual", "impact", "fix", "input", "expect", "repro", "test"}
+            numeric_signature = "where" in numeric_fields and bool(numeric_fields & descriptive_fields)
+            numeric_has_finding_fields = bool(numeric_fields & (descriptive_fields | {"where"}))
+        # 条目判据取并集：独立「状态: 待审核」字段行、标题自带编号，或显式 `- 标题:`
         # （p03/p08 那一族把状态写在标题尾巴上 ——「（状态：待审核）」——
-        # 只认字段行会整族丢掉 21 条，实测行数 302→300 就是这么来的）。
-        if not (has_mark or head_id):
+        # 只认字段行会整族丢掉 21 条，实测行数 302→300 就是这么来的；R2 的无编号标题也不能依赖固定状态值）。
+        if not (has_mark or head_id or title_head or numeric_signature):
+            if numeric_head and numeric_has_finding_fields:
+                skipped.append(
+                    "%s: 数字标题候选 %s（`%s`）含疑似缺陷字段但未满足自动收录签名（需位置/模块字段及至少一个行为、影响、复现或建议字段）"
+                    % (path.stem, numeric_id, numeric_head.group(0).strip()))
             continue
         seq += 1
         head = blk[0].strip()
@@ -108,8 +174,10 @@ def parse_file(path: Path):
         title = re.sub(r"^-\s*\*{0,2}\s*", "", title)
         title = re.sub(r"^(?:标题|ID|状态)\s*[:：]\s*", "", title)
         title = title.replace("**", "").strip()
-        row = {"id": idm.group(1) if idm else "%s#%d" % (path.stem, seq),
-               "lane": path.stem, "line": None, "title": title, "status": "待审核"}
+        heading_status = title_status(head)
+        row = {"id": numeric_id or (idm.group(1) if idm else "%s#%d" % (path.stem, seq)),
+               "lane": path.stem, "line": None, "title": title,
+               "status": heading_status or "待审核"}
         last_key = None
         for raw in blk[1:]:
             fm = FIELD_LINE_RE.match(raw.strip())
@@ -119,6 +187,8 @@ def parse_file(path: Path):
                     row[key] = fm.group(2).strip()
                     last_key = key
                     continue
+            if last_key in SCALAR_FIELDS:
+                continue
             if last_key and row.get(last_key) == "":
                 cm = CONT_RE.match(raw)
                 if cm:
@@ -137,20 +207,19 @@ def parse_file(path: Path):
                 row["_severity_from_title"] = True
         else:
             row["severity"] = norm_sev(sev)
+
+        if status_value(row.get("status", "")) in TERMINAL_STATUSES:
+            # These are explicit review outcomes, not pending defects. Track their
+            # IDs so the legacy unparsed-title diagnostic does not flag them.
+            intentionally_excluded_ids.add(row["id"])
+            continue
+
         rows.append(row)
 
-    marks = len([l for l in body if ENTRY_MARK.match(l)])
-    head_ids = len([l for l in body if HEAD_RE.match(l) or BULLET_HEAD_RE.match(l)])
-    expect = len([b for b in blocks
-                  if any(ENTRY_MARK.match(l) for l in b)
-                  or (HEAD_RE.match(b[0]) or BULLET_HEAD_RE.match(b[0]))])
-    skipped = []
-    if expect != len(rows):
-        skipped.append("%s: 条目判据命中 %d 块（字段标记 %d / 编号标题 %d），解析出 %d 行 —— 不平"
-                       % (path.stem, expect, marks, head_ids, len(rows)))
     for l in body:
         hm = HEAD_RE.match(l)
-        if hm and not any(r["id"] == hm.group(1) for r in rows):
+        if (hm and hm.group(1) not in intentionally_excluded_ids
+                and not any(r["id"] == hm.group(1) for r in rows)):
             skipped.append("%s: 标题 `%s` 未被解析成条目" % (path.stem, hm.group(1)))
     return rows, skipped
 
@@ -208,10 +277,10 @@ def main() -> int:
                              r["lane"], r["id"]))
 
     out = []
-    out.append("# 缺陷汇总 — 待审核")
+    out.append("# 问题汇总 — 尚未撤回/合并")
     out.append("")
-    out.append(f"来源：{len(lanes)} 份 lane 缺陷日志，共 **{len(rows)}** 条。"
-               "本迭代**不修改任何生产代码**，全部条目等待评审通过后再修。")
+    out.append(f"来源：{len(lanes)} 份 lane 问题记录，共 **{len(rows)}** 条尚未撤回/合并的候选或确认问题；"
+               "其中有些已复核、有些仍待验证，该计数不等于已确认产品缺陷总数。")
     out.append("")
     out.append("## 计数")
     out.append("")
@@ -243,12 +312,12 @@ def main() -> int:
     out.append("- 部分用例以 `DISABLED_` 前缀留在测试树里（会崩溃/死循环的路径），"
                "它们计入用例总数但不产生覆盖，修缺陷后需重新启用。")
     out.append("")
-    out.append(f"复现：`python3 docs/迭代计划/迭代01/tools/aggregate_bugs.py .`")
+    out.append(f"复现：`/Users/yunjinqi/opt/anaconda3/bin/conda run -n base python docs/迭代计划/迭代01/tools/aggregate_bugs.py .`")
 
     dest = bugs_dir / "汇总-待审核.md"
     dest.write_text("\n".join(out) + "\n", encoding="utf-8")
     print(f"lanes={len(lanes)} rows={len(rows)} -> {dest.relative_to(root)}")
-    print(f"标题不合模板、未进汇总的条目={len(unparsed)}")
+    print(f"已知编号标题遗漏或字段签名不完整的告警={len(unparsed)}（仅覆盖可识别 BUG-ID 标题及疑似缺陷数字标题，不是对所有非标准标题的穷举扫描）")
     for u in unparsed[:20]:
         print("   !", u)
     print("severity:", dict(sev))

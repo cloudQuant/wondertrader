@@ -1,0 +1,652 @@
+[
+  {
+    "lane": "R111",
+    "id": "BUG-R111-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/CtaMocker.cpp:437-449",
+      "src/WtBtCore/UftMocker.cpp:158-166",
+      "src/WtCtaStraFact/WtCtaStraFact.cpp:82-94",
+      "src/WtUftStraFact/WtUftStraFact.cpp:93-110"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p08_btcore_mockers3/r111_cta_mocker_plugin_test.cpp:65-101",
+      "src/TestUnits/coverage/p08_btcore_mockers3/r111_uft_mocker_plugin_test.cpp:67-105"
+    ],
+    "reason": "工厂公开约定未知策略名返回 NULL；CTA/UFT 在策略配置存在时仍解引用 _strategy。现有测试只创建已支持策略。静态判断，未运行。",
+    "fix": "检查 _fact 与 _strategy；创建失败时释放资源并返回 false，不调用 init/id；审计 SEL/HFT 同型代码。",
+    "acceptance": "真实工厂插件下未知名初始化 false、无崩溃/回调/泄漏；有效名称正常初始化。",
+    "canonical": null,
+    "proposed_test_fix": "分别用真实工厂配置未知策略名并 EXPECT_FALSE；过滤 R111CtaMocker.UnknownStrategyReturnsFalse、R111UftMocker.UnknownStrategyReturnsFalse。"
+  },
+  {
+    "lane": "R121",
+    "id": "BUG-R121-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/UftMocker.cpp:130-166",
+      "src/WtBtCore/UftMocker.cpp:343-366"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p08_btcore_mockers3/r121_uft_mocker_test.cpp:76-100"
+    ],
+    "reason": "无 strategy 子节点时 init 允许成功返回，但 session_begin/end 无条件解引用 _strategy；该配置是当前接受的生命周期。FactoryWithoutStrategy 未调用会话回调。",
+    "fix": "无策略模式的会话回调安全早退，或统一空指针守卫。",
+    "acceptance": "无策略成功 init 后调用 on/handle session begin/end 不崩；有策略仍恰好分发一次且结转不变。",
+    "canonical": null,
+    "proposed_test_fix": "扩展 FactoryWithoutStrategy 调用四个会话入口；过滤 R121UftMocker.FactoryWithoutStrategy。"
+  },
+  {
+    "lane": "R121",
+    "id": "BUG-R121-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/ExecMocker.cpp:71-85",
+      "src/WtExeFact/WtExeFact.cpp:86-104"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p08_btcore_mockers3/r121_exec_mocker_factory_test.cpp:37-69"
+    ],
+    "reason": "WtExeFact 文档明确未知 executer 名返回 NULL；ExecMocker 对空对象调用 init。现有用例只覆盖 executer 节点缺失，不覆盖未知名称。",
+    "fix": "校验 factory/createExeUnit 返回和 unit init 结果；失败返回 false，Runner 不得注册失败对象。",
+    "acceptance": "未知名称返回 false、回调不可达、析构安全；有效执行器仍成功。",
+    "canonical": null,
+    "proposed_test_fix": "保留无 executer 节点用例，另加 unknown name 返回 false；过滤 R121ExecMocker.UnknownExecuterNameReturnsFalse。"
+  },
+  {
+    "lane": "R191",
+    "id": "BUG-R191-001",
+    "decision": "DUPLICATE",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/UftStrategyDefs.h:204-207",
+      "src/WtUftStraFact/WtUftStraFact.cpp:40-47",
+      "src/WtUftCore/UftStrategyMgr.h:140-144"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/r54_uftcore_guards_test.cpp:225-242",
+      "src/TestUnits/coverage/p08_btcore_mockers3/r201_mocker_residual_test.cpp:145-150"
+    ],
+    "reason": "按值插件删除函数与按引用 typedef 不匹配，与 BUG-R64-002 同一 ABI 根因；R54 用例禁用，本轮仅静态判读。",
+    "fix": "并入 R64-002，统一导出声明与 typedef ABI 并重建插件。",
+    "acceptance": "真实插件 loadFactories 后 manager 正常析构；启用 R54 实测进程退出码 0。",
+    "canonical": "BUG-R64-002",
+    "proposed_test_fix": "不新增重复测试；修复 ABI 后启用 R54StraMgr.manager_destructor_releases_factory_with_mismatched_abi。"
+  },
+  {
+    "lane": "R201",
+    "id": "BUG-R201-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/UftMocker.cpp:381-385"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p08_btcore_mockers3/r201_mocker_residual_test.cpp:136-166"
+    ],
+    "reason": "short PosItem 写 positions.csv 时 direct 固定为 LONG。UFT 支持 TM_Both 短仓；现有测试误设 TM_LongT1 并直接注入 short trade，且只检查文件存在，不足以验证方向，但不推翻源代码缺陷。",
+    "fix": "short 行输出 SHORT；测试用允许做空的 TM_Both 有效上下文。",
+    "acceptance": "positions.csv 多空行 direct 分别是 LONG/SHORT，数量及盈亏对应正确。",
+    "canonical": null,
+    "proposed_test_fix": "改 R201... 用 TM_Both 并读取 CSV 断言 short 行第三列 SHORT；过滤 R201MockerFixture.R201UftMocker_PluginEnumMismatchAndShortSessionLog。"
+  },
+  {
+    "lane": "R20_wtbtcore",
+    "id": "R20_wtbtcore#1",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/EventNotifier.cpp:41-56",
+      "src/WtBtCore/EventNotifier.cpp:124-144",
+      "src/WtBtCore/EventNotifier.h:110-116",
+      "src/WtBtPorter/WtBtRunner.cpp:464-467",
+      "src/WtBtCore/HisDataReplayer.cpp:666-668"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p08_btcore_mockers3/r20_event_notifier_test.cpp:94-112"
+    ],
+    "reason": "构造只初始化 _mq_sid，四个函数指针未初始化；无 notifier 配置时 Runner 仍传 notifier 给 replayer，notify/析构读取不确定指针。现有用例用 static 对象，被静态存储期零初始化掩盖。",
+    "fix": "四个指针成员默认初始化为 nullptr，失败初始化保持该不变量。",
+    "acceptance": "自动存储期对象默认构造后所有 notify 和析构安全；未配置 notifier 的 Runner 正常回放无 UB；sanitizer 覆盖。",
+    "canonical": null,
+    "proposed_test_fix": "将 static 对象换局部自动对象，inactive init/未 init 后调用 notify* 并析构；过滤 R20EventNotifier.AutomaticObjectInactiveNotifyAndDestruction。"
+  },
+  {
+    "lane": "R20_wtbtcore",
+    "id": "R20_wtbtcore#2",
+    "decision": "DUPLICATE",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/EventNotifier.cpp:66-70",
+      "src/WtBtPorter/WtBtRunner.cpp:626-632"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p08_btcore_mockers3/r20_event_notifier_test.cpp:126-132"
+    ],
+    "reason": "同 BUG-L06-006：init(NULL) 源码会解引用，但正常 Runner 先过滤空配置；未找到 init 接受 NULL 的公开契约。",
+    "fix": "合并至 L06-006；先明确空指针前置条件。",
+    "acceptance": "若契约支持 NULL，返回 false 且析构安全；否则文档化非空前置并保留 Runner 守卫。",
+    "canonical": "BUG-L06-006",
+    "proposed_test_fix": "移除 GTEST_SKIP 空壳；仅在契约确认支持 NULL 后改成局部对象 ASSERT_FALSE(init(nullptr))。"
+  },
+  {
+    "lane": "R20_wtbtcore",
+    "id": "R20_wtbtcore#3",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/EventNotifier.cpp:91-110",
+      "src/WtBtCore/EventNotifier.cpp:52-56",
+      "src/WtBtCore/EventNotifier.cpp:122-143"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p08_btcore_mockers3/r20_event_notifier_test.cpp:115-123"
+    ],
+    "reason": "缺 regiter_callbacks 会在 L107 调空函数指针；但尚未找到消息队列插件 ABI 对必需/可选符号清单，现有测试受真实 MQ/socket 阻断。publisher 源注释明确允许缺失。",
+    "fix": "确认 ABI 后在创建 server 前校验必需符号并释放模块返回 false；声明 remover 可选时定义资源语义。",
+    "acceptance": "fake module 分别缺 register/publisher/remover；必需符号缺失无服务器且返回 false，publisher 可选则通知安全 no-op。",
+    "canonical": null,
+    "proposed_test_fix": "用 fake module/注入 resolver 测缺符号矩阵，不启用拉真实 MQ 的用例；过滤 R20EventNotifier.MissingRequiredSymbolRejected。"
+  },
+  {
+    "lane": "R20_wtbtcore",
+    "id": "R20_wtbtcore#5",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/MatchEngine.cpp:401-410",
+      "src/WtBtCore/ExecMocker.cpp:253-264",
+      "src/Includes/ExecuteDefs.h:97-103"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p08_btcore_mockers3/r20_exec_mocker_test.cpp:196-217"
+    ],
+    "reason": "重复撤单时 state=9 的订单仍返回同一 left，ExecMocker 再扣 undone；接口仅约定返回是否发送指令，未定义 pending cancel 重复请求语义。当前测试禁用且 fixture 未 init。",
+    "fix": "先定语义：拒绝重复则仅 active 可撤；允许重复则 ExecMocker 去重账本变更。",
+    "acceptance": "安全执行器创建订单，立即重复撤单后按定义断言返回/回报/undone/计数；未完成量不负数。",
+    "canonical": null,
+    "proposed_test_fix": "改 DISABLED 用例为成功 init fixture，确定接口语义后固定第二次返回值；过滤 R20ExecMocker.CancelByIdDoesNotRestoreUndoneTwice。"
+  },
+  {
+    "lane": "R20_wtbtcore",
+    "id": "R20_wtbtcore#6",
+    "decision": "DUPLICATE",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/ExecMocker.cpp:49-85",
+      "src/WtBtPorter/WtBtRunner.cpp:500-505"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n04_btcore_mockers/n04_exec_mocker_test.cpp:227-244"
+    ],
+    "reason": "ExecMocker 初始化失败仍登记/进入回调，与 BUG-N04-001 同一调用链。R20 disabled 测试也用未初始化对象写 NULL 前置，不能单独证明。",
+    "fix": "并入 N04-001，以安全成功/失败初始化夹具统一验收。",
+    "acceptance": "init 失败不注册、不接收回放回调；成功路径保持不变。",
+    "canonical": "BUG-N04-001",
+    "proposed_test_fix": "不新增重复项；按 N04-001 替换安全夹具后再启用。"
+  },
+  {
+    "lane": "R20_wtbtcore",
+    "id": "R20_wtbtcore#8",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/MatchEngine.cpp:39-42",
+      "src/WtBtCore/MatchEngine.cpp:420-428",
+      "src/WtBtCore/MatchEngine.h:96-106",
+      "src/WtBtCore/MatchEngine.h:298-301",
+      "src/WtBtCore/MatchEngine.h:35"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l06_wtbtcore/l06_match_engine_test.cpp:374-382"
+    ],
+    "reason": "首 tick 懒创建 WTSTickCache 并由 MatchEngine 持有，但类无析构释放；clear 只清订单。每个用过 tick 的实例生命周期遗留 cache，规模未做运行测量。",
+    "fix": "明确唯一所有权并在析构 release；显式禁用复制或实现安全复制/移动。",
+    "acceptance": "多合约 cache 引用随对象析构归还；重复创建销毁内存稳定且不重复释放。",
+    "canonical": null,
+    "proposed_test_fix": "增加引用计数或 leak-sanitizer 生命周期用例；过滤 MatchEngineTest.TickCacheReleasedOnDestruction。"
+  },
+  {
+    "lane": "R63",
+    "id": "R63#1",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtCtaTicker.cpp:110-114",
+      "src/WtCore/WtHftTicker.cpp:102-106",
+      "src/WtCore/WtSelTicker.cpp:105-109",
+      "src/Share/CodeHelper.hpp:27-37",
+      "src/WtDtCore/ShmCaster.cpp:35-51",
+      "src/WTSUtils/WTSCfgLoader.cpp:144-160",
+      "src/WtBtCore/HisDataReplayer.cpp:2396-2409",
+      "src/WtBtCore/HisDataReplayer.cpp:4607-4634"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r66_tickers_test.cpp:58-75",
+      "src/TestUnits/coverage/p07_btcore_replayer2/r67_replayer_bars_gap_test.cpp:35-38",
+      "src/TestUnits/coverage/q05_dtsrv/r68_shm_caster_init_test.cpp:65-80"
+    ],
+    "reason": "R66 首 tick 只建分钟位、时间格式错误；R67 复权后缀及 cache 查询时点不合法；R68 两个配置构造曾是错误 raw-literal。属于 R63 测试前置/期望问题。另 ShmCaster 目录路径异常未转 false 是独立 BUG-R68-002，不属于此汇总行。未运行测试。",
+    "fix": "R66 用第二笔/9 位时间，R67 用 '-'/'+' 并在有效 session/cache 时点查，R68 用有效 JSON；BUG-R68-002 单独追踪。",
+    "acceptance": "测试按有效代码、时间、配置与可观察时点断言；目录路径异常单独证明返回 false 且无异常。",
+    "canonical": null,
+    "proposed_test_fix": "沿用当前 r66 第二笔与9位时间、r67 kAdjCode='-'、r68 有效 JSON；cache 测试在第二次 session_begin 处观测；过滤各自目标 test suite，不以旧报告运行结果作证。"
+  },
+  {
+    "lane": "R64",
+    "id": "BUG-R64-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WTSTools/WTSHotMgr.cpp:358-410",
+      "src/WTSTools/WTSHotMgr.h:80"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l02_wtstools_mq/r56_hotmgr_test.cpp:154-169"
+    ],
+    "reason": "公开 isCustomHot 在自定义规则/product/date map 落空时返回空串指针，bool 转换为 true，未知品种误判主力。现有 disabled 测试调用 isHot 且未使用已加载自定义 tag，不能验证目标接口。",
+    "fix": "两个落空分支返回 false，保持有效切换规则命中语义。",
+    "acceptance": "登记 SHFE tag 后查询未登记交易所/品种为 false；切换日前后有效合约结果正确。",
+    "canonical": null,
+    "proposed_test_fix": "修正 disabled 用例调用 isCustomHot(已登记 tag, 未登记 code, dt)；补 productMap/dtMap 两条；过滤 R56HotMgr.UnknownProductIsNotCustomHot。"
+  },
+  {
+    "lane": "R64",
+    "id": "BUG-R64-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/UftStrategyDefs.h:204-207",
+      "src/WtUftStraFact/WtUftStraFact.cpp:40-47",
+      "src/WtUftCore/UftStrategyMgr.cpp:57-76",
+      "src/WtUftCore/UftStrategyMgr.h:140-144"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/r54_uftcore_guards_test.cpp:225-242"
+    ],
+    "reason": "宿主删除函数 typedef 参数为 IUftStrategyFact*&，插件导出实际按值 IUftStrategyFact*；manager 强转符号后按错误 ABI 调用。R54 真实插件测试禁用，本轮仅静态确认。",
+    "fix": "统一导出声明/typedef ABI，重建并部署所有 UFT 插件。",
+    "acceptance": "真实 plugin loadFactories 后 manager 析构退出码 0；所有受支持插件符号与宿主签名一致。",
+    "canonical": null,
+    "proposed_test_fix": "ABI 修复重建插件后启用 R54StraMgr.manager_destructor_releases_factory_with_mismatched_abi；过滤同名测试。"
+  },
+  {
+    "lane": "R92",
+    "id": "BUG-R92-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/HftMocker.cpp:345-422",
+      "src/WtBtCore/HftMocker.cpp:628-631",
+      "src/WtBtCore/UftMocker.cpp:228-285",
+      "src/WtBtCore/UftMocker.cpp:629-633"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p03_btcore_mockers2/r72_hft_uft_paths_test.cpp:49-80",
+      "src/TestUnits/coverage/p03_btcore_mockers2/r72_hft_uft_paths_test.cpp:139-174"
+    ],
+    "reason": "默认非同 tick 顺序先 procOrder 并擦除全成订单，再 procTask；entrust lambda 用 _orders[localid]，不存在 key 会新建空 shared_ptr 并解引用。这是正常订单/回调生命周期。R72 是夹具线索，本轮未运行，旧 crash 不作复现证据。",
+    "fix": "任务入队时捕获不可变回报字段，或 find 检查已删除订单并定义终态 entrust；禁止 operator[] 重建空订单。",
+    "acceptance": "默认 false 下订单下一 tick 全成且待处理 task 随后执行，进程存活、订单不复活；部分成交与同 tick 模式正常。",
+    "canonical": null,
+    "proposed_test_fix": "R72 fixture 下 HFT/UFT 下市价单、全成 tick、再 drain task；断言状态/entrust/trade 一致。过滤 R72HftUftPaths.HftMarketOrderFillsAndDumps、R72HftUftPaths.UftMarketOrderFillsAndCloses。"
+  },
+  {
+    "lane": "l06_wtbtcore",
+    "id": "BUG-L06-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/MatchEngine.cpp:354-391",
+      "src/Includes/ExecuteDefs.h:105-114"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l06_wtbtcore/l06_match_engine_test.cpp:345-372"
+    ],
+    "reason": "接口要求按 code+方向撤单，qty=0 全撤，正 qty 按时间累计到阈值；实现忽略 code 并在每轮重置 left。现测试只同 code 单笔。",
+    "fix": "筛选 code/方向；循环外累计 remaining qty；qty=0 遍历全部。",
+    "acceptance": "双 code、多笔多方向验证 code 隔离、零数量全撤、正数量累计和 callback/id。",
+    "canonical": null,
+    "proposed_test_fix": "扩展 cancelBySideCollectsActiveOrdersOnly 加第二 code 和 qty 阈值；过滤 MatchEngineTest.cancelBySideCollectsActiveOrdersOnly。"
+  },
+  {
+    "lane": "l06_wtbtcore",
+    "id": "BUG-L06-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/MatchEngine.cpp:96-154",
+      "src/WtBtCore/MatchEngine.cpp:157-211"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l06_wtbtcore/l06_match_engine_test.cpp:287-303"
+    ],
+    "reason": "total volume 非零而 askqty/bidqty 为零时 qty=0 后强制改成 1 并成交；现测试只覆盖 total volume==0 的早退。",
+    "fix": "移除零量强制成交；qty<=0 时不回调/不改订单。",
+    "acceptance": "total volume>0、对应对手数量为0时买卖无成交且余量不变；正对手量成交量不超过盘口与订单量。",
+    "canonical": null,
+    "proposed_test_fix": "新增买卖镜像零 askqty/bidqty 用例；过滤 MatchEngineTest.zeroOpposingBookQuantityDoesNotFill。"
+  },
+  {
+    "lane": "l06_wtbtcore",
+    "id": "BUG-L06-005",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/MatchEngine.cpp:51-64",
+      "src/WtBtCore/MatchEngine.cpp:74-82",
+      "src/WtBtCore/MatchEngine.cpp:420-443"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l06_wtbtcore/l06_match_engine_test.cpp:345-372"
+    ],
+    "reason": "激活/撮合循环未按 stdCode 或订单 code 过滤；多品种正常回放会用另一合约 tick 成交订单并用当前代码回报。当前测试仅一个 code。",
+    "fix": "fire_orders/match_orders 按当前 code 过滤，回报使用订单自身 code。",
+    "acceptance": "A/B 双代码挂单，喂 A 仅 A 状态变化；喂 B 后 B 才撮合，回报 code 对应订单。",
+    "canonical": null,
+    "proposed_test_fix": "新增双品种隔离测试；过滤 MatchEngineTest.TickOnlyTouchesOrdersForItsSymbol。"
+  },
+  {
+    "lane": "l06_wtbtcore",
+    "id": "BUG-L06-006",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/EventNotifier.cpp:66-70",
+      "src/WtBtPorter/WtBtRunner.cpp:626-632"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p08_btcore_mockers3/r20_event_notifier_test.cpp:126-132"
+    ],
+    "reason": "init(nullptr) 源码会解引用；正常 Runner 先检查配置。未找到该 public API 接受 NULL 的契约，disabled 空壳不构成产品证据。",
+    "fix": "确认前置条件并与 R20#2 合并；支持时返回 false，不支持时文档化并保留调用方守卫。",
+    "acceptance": "支持 NULL 时局部对象返回 false 且析构安全；否则所有调用方预检查并有文档约束。",
+    "canonical": null,
+    "proposed_test_fix": "移除 GTEST_SKIP；契约确认支持后加局部对象 false 断言。过滤 R20EventNotifier.InitNullConfigReturnsFalse。"
+  },
+  {
+    "lane": "l06_wtbtcore",
+    "id": "BUG-L06-007",
+    "decision": "DUPLICATE",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/HisDataReplayer.cpp:2983-3018",
+      "src/WtBtCore/HisDataReplayer.cpp:3005-3014"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p03_btcore_mockers2/p03_cta_trade_path_test.cpp:283-294"
+    ],
+    "reason": "按额模板命中而商品缺失时 getVolScale 空解引用，与 BUG-P03-001 同函数/分支/前置条件。by-volume 不使用 commInfo；disabled 测试也未证明该配置是受支持正常输入。",
+    "fix": "并入 P03-001 并确认 fee template/catalog 契约；不重复计数。",
+    "acceptance": "按最终契约明确拒绝错配费率模板或安全返回有定义结果；不崩溃且按量分支不回归。",
+    "canonical": "BUG-P03-001",
+    "proposed_test_fix": "不建重复测试；先决定错配配置契约，再重写/移除 DISABLED_CalcFeeByAmountCrashesWhenCommodityMissing。过滤 P03CtaTradePath.CalcFeeByAmountCrashesWhenCommodityMissing。"
+  },
+  {
+    "lane": "n04_btcore_mockers",
+    "id": "BUG-N04-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/ExecMocker.cpp:49-85",
+      "src/WtBtCore/ExecMocker.cpp:148-160",
+      "src/WtBtPorter/WtBtRunner.cpp:500-505"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n04_btcore_mockers/n04_exec_mocker_test.cpp:227-244",
+      "src/TestUnits/coverage/p08_btcore_mockers3/r20_exec_mocker_test.cpp:196-224"
+    ],
+    "reason": "init 在模块缺失返回 false 前已向 matcher 登记自己；Runner 忽视返回值仍 register_sink；handle_init 解引用 _exec_unit。错误 init 不得进入回放是失败关闭契约。",
+    "fix": "全部执行单元创建并 init 成功后再注册 matcher；Runner 检查 init 结果，失败不登记、不 prepare/run。",
+    "acceptance": "模块缺失/无 creator/无或未知 executer/unit init false 均不进入 callbacks 且析构安全；成功配置仍回放。",
+    "canonical": null,
+    "proposed_test_fix": "用 fake module/loader 做 Runner init-failure 集成测试断言未注册；过滤 N04ExecMocker.InitFailureIsNotRegisteredWithReplayer。"
+  },
+  {
+    "lane": "n04_btcore_mockers",
+    "id": "BUG-N04-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/HisDataMgr.cpp:45-73",
+      "src/WtBtCore/HisDataMgr.h:36-43"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n04_btcore_mockers/n04_hisdatamgr_test.cpp:147-169"
+    ],
+    "reason": "模块缺失或 creator 缺失时 _reader 仍空，末尾无条件 _reader->init 并返回 true。加载失败是显式错误分支；现测试混合输入并 DISABLED，未运行。",
+    "fix": "creator 缺失时释放库并 false；校验 factory/readers 及 reader->init 成功后才 true。",
+    "acceptance": "不存在模块、缺符号、creator 空、reader init false 均返回 false 且析构安全；合法 reader 可读。",
+    "canonical": null,
+    "proposed_test_fix": "拆分 disabled 家族，分别测缺模块/缺导出符号 false；creator 空/read init false 用 fake module。过滤 HisDataMgrTest.MissingReaderModuleReturnsFalse。"
+  },
+  {
+    "lane": "p03_btcore_mockers2",
+    "id": "BUG-P03-002",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/CtaMocker.cpp:973-1002",
+      "src/WtBtCore/SelMocker.cpp:409-438"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p03_btcore_mockers2/p03_cta_trade_path_test.cpp:283-294"
+    ],
+    "reason": "非零持仓更新浮盈时无 commodity 判空；但持仓通常从已登记合约建立，缺少运行中移除基础数据/恢复未知 code 属支持生命周期的证据。现 disabled 测试测 calc_fee，不覆盖 CTA/SEL 活跃持仓。",
+    "fix": "确认回放中商品目录是否可变及快照可否引用未知 code；允许则定义缺元数据时盈亏并判空，否则载入边界拒绝。",
+    "acceptance": "用有效公开持仓路径证明缺商品场景是否可达；若支持则更新不崩且资金/持仓不污染，否则拒绝快照并返回明确错误。",
+    "canonical": null,
+    "proposed_test_fix": "不用 calc_fee 测试替代；构造有效持仓后经受支持路径触发缺商品，过滤 CtaSelMocker.DynamicProfitWithMissingCommodity。"
+  },
+  {
+    "lane": "p03_btcore_mockers2",
+    "id": "BUG-P03-003",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/UftMocker.h:305-332"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p08_btcore_mockers3/p08_uft_order_position_test.cpp:360-372"
+    ],
+    "reason": "_PosItem::_long 未初始化，但源码未找到读取；实际多空持仓是外层 PosInfo._long/_short。当前没有可观察行为依赖该 bool。",
+    "fix": "无消费者时移除字段；如保留则初始化并补真实功能读者。",
+    "acceptance": "引用检查确认无读者可删除；若有功能则显式初始化并覆盖真实行为。",
+    "canonical": null,
+    "proposed_test_fix": "不保留 crash 测试；除非新增该字段消费者，无需单独测试。"
+  },
+  {
+    "lane": "p08_btcore_mockers3",
+    "id": "BUG-P08-002",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/UftMocker.cpp:343-362",
+      "src/Includes/WTSContractInfo.hpp:42-45",
+      "src/WtBtCore/UftMocker.h:334-341"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p08_btcore_mockers3/r201_mocker_residual_test.cpp:169-186"
+    ],
+    "reason": "复现把品种设为 TM_LongT1（canShort=false）后直接 on_trade 注入 short，绕过交易模式/下单约束；不能证明有合法 short T+1 结转缺陷。TM_Both short 是否有 frozen 跨日语义也未证明。",
+    "fix": "撤回 TM_LongT1 手工 short 的期望；另行审查 stra_enter_short 是否应拒绝 canShort=false，不并入此候选。",
+    "acceptance": "通过允许方向的公开下单建立持仓；若 TM_Both short 有 frozen 语义再立独立产品项并验证 session_begin 可用量变化，否则删除 claim。",
+    "canonical": null,
+    "proposed_test_fix": "保持/移除 DISABLED_R201UftMocker_ShortFrozenIsNotReleasedOnSessionBegin 的非法模式注入；过滤 R201MockerFixture.R201UftMocker_ShortFrozenIsNotReleasedOnSessionBegin。"
+  },
+  {
+    "lane": "p08_btcore_mockers3",
+    "id": "BUG-P08-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/UftMocker.cpp:1211-1252",
+      "src/WtBtCore/UftMocker.cpp:1259-1310"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p08_btcore_mockers3/p08_uft_order_position_test.cpp:339-357"
+    ],
+    "reason": "offset1 erase(begin,eit) 与 offset2 erase(sit,eit) 都是半开区间，漏掉作为 eit 的末个零量明细；有效全平后残留零量 detail。现有 CloseToday 测试使用成交夹具并断言 empty。",
+    "fix": "用 erase-remove_if/待删除 iterator 收集所有 volume==0 明细，避免 exclusive end 漏末项。",
+    "acceptance": "offset1/2 唯一和多条明细全平均清零量项，非零明细顺序保留。",
+    "canonical": null,
+    "proposed_test_fix": "保留 CloseTodayBranchScalesDynProfit，补 offset1 全平及多 detail 边界；过滤 P08UftOrderPosition.CloseTodayBranchScalesDynProfit。"
+  },
+  {
+    "lane": "p08_btcore_mockers3",
+    "id": "BUG-P08-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/UftMocker.cpp:456-470",
+      "src/Includes/IUftStraCtx.h:99-103",
+      "src/WtUftStraFact/WtUftStraDemo.cpp:392-400"
+    ],
+    "test_evidence": [],
+    "reason": "公开接口返回 OrderIDs，示例调用方消费返回的撤单 IDs；实现只投递 stra_cancel 却返回始终为空 ret，丢失请求标识。",
+    "fix": "将每个已投递 local id 加入 ret，并定义非活动订单返回语义。",
+    "acceptance": "同 code 多笔订单返回对应全部 ids，其他 code 不变；procTask 后撤单完成。",
+    "canonical": null,
+    "proposed_test_fix": "新建多订单 stra_cancel_all 测试，断言 IDs 与同 code 待撤单集合相同；过滤 P08UftOrderPosition.CancelAllReturnsSubmittedOrderIds。"
+  },
+  {
+    "lane": "p08_btcore_mockers3",
+    "id": "BUG-P08-005",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/UftMocker.cpp:392-405",
+      "src/WtBtCore/UftMocker.cpp:679-798",
+      "src/WtBtCore/UftMocker.cpp:913-930",
+      "src/Includes/IUftStraCtx.h:243-247"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p08_btcore_mockers3/p08_uft_dispatch_t1_test.cpp:189-247"
+    ],
+    "reason": "公开 undone 契约买为正卖为负；_isLong 是持仓腿，平多实际卖、平空实际买，但实现按持仓腿判定未完成方向及 ask/bid。现测试以有效开多后 exit_long 前置并检查负 undone。",
+    "fix": "把订单 side 与持仓 leg/offset 分离；平多卖单用 bid，平空买单用 ask。",
+    "acceptance": "开多平多 undone 为负且 bid 成交；开空平空 undone 为正且 ask 成交；开仓方向和账本无回归。",
+    "canonical": null,
+    "proposed_test_fix": "保留有效 open→exit 测试，补平空镜像和 procOrder 撮合方向；过滤 P08UftDispatchT1.ExitOrdersUseMarketSideDirection。"
+  },
+  {
+    "lane": "p08_btcore_mockers3",
+    "id": "BUG-P08-006",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/UftMocker.cpp:679-746",
+      "src/WtBtCore/UftMocker.cpp:407-441",
+      "src/WtBtCore/UftMocker.cpp:597-650"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p08_btcore_mockers3/p08_uft_order_position_test.cpp:472-493"
+    ],
+    "reason": "exit 对未知 code 会空解引用，但 unknown-code 公开契约未定义；disabled 家族先在无 strategy 对象调用 session 已会崩，遮蔽 exit 分支。撤单中商品元数据消失也没有稳定目录生命周期证据。",
+    "fix": "确认 unknown code 是否应安全返回；若是先查 commodity 再动 _pos_map 并返回0；撤单任务对失效 metadata 定义安全终态。",
+    "acceptance": "分别用策略/回放器有效的 isolated fixture 测 unknown exit 与待撤单 metadata 缺失，确认返回/状态无变化；无效路径不混测。",
+    "canonical": null,
+    "proposed_test_fix": "拆分 DISABLED_NullStrategyAndNullCommDerefFamily，单独测 exit_unknown_code 与 cancel_task_metadata_missing；先确认是否受支持。过滤 P08UftOrderPosition.ExitUnknownCodeReturnsZero。"
+  },
+  {
+    "lane": "p08_btcore_mockers3",
+    "id": "BUG-P08-007",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/HftMocker.cpp:574-595",
+      "src/Includes/IHftStraCtx.h:186-194"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p08_btcore_mockers3/p08_hft_order_cancel_test.cpp:258-296"
+    ],
+    "reason": "IHftStraCtx 明定 qty=0 撤所有同合约同方向订单；实现处理首单后 left<0 为假而 break。现测试两买一卖，期望撤两买保留反向，前置有效。",
+    "fix": "qty==0 时遍历全部匹配订单；正 qty 保留按累计量终止。",
+    "acceptance": "零 qty 返回并撤销所有匹配单，反向/异 code 保留；正 qty 仍按阈值。",
+    "canonical": null,
+    "proposed_test_fix": "保留 CancelByCodeAndDirectionZeroCancelsAllMatching 断言并补运行；过滤 P08HftOrderCancel.CancelByCodeAndDirectionZeroCancelsAllMatching。"
+  },
+  {
+    "lane": "q02_btcore3",
+    "id": "BUG-Q02-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/CtaMocker.cpp:60-80",
+      "src/WtBtCore/CtaMocker.cpp:88-148",
+      "src/WtBtCore/CtaMocker.cpp:173-205",
+      "src/WtBtCore/CtaMocker.h:1037-1039",
+      "src/WtBtCore/CtaMocker.cpp:661-681"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q02_btcore3/q02_cta_dump_incremental_test.cpp:378-389"
+    ],
+    "reason": "构造未初始化 _cur_tdate/_last_cond_min，replay_done 无条件 dump_stradata；空回放也序列化二者。空回放正常结束路径可达；现测试触发收尾但未断言时间字段。",
+    "fix": "初始化日期/minute 状态为明确定义值，并定义无有效 session 时的输出语义。",
+    "acceptance": "无 session/tick 快照写稳定 tdate/settime（零或明确 absent）；有 session 时写实际值；重复输出一致。",
+    "canonical": null,
+    "proposed_test_fix": "扩展空回放测试解析 JSON 并断言 fund.tdate、conditions.settime 的确定值；过滤 Q02CtaDumpTest.EmptyReplayWritesDeterministicDates。"
+  },
+  {
+    "lane": "q02_btcore3",
+    "id": "BUG-Q02-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/CtaMocker.h:244-248",
+      "src/WtBtCore/CtaMocker.cpp:151-170",
+      "src/WtBtCore/CtaMocker.cpp:533-616",
+      "src/WtBtCore/CtaMocker.cpp:695-715",
+      "src/WtBtCore/CtaMocker.cpp:1586-1598"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q02_btcore3/q02_cta_dump_incremental_test.cpp:330-372",
+      "src/TestUnits/coverage/q02_btcore3/q02_cta_position_query_matrix_test.cpp:262-280"
+    ],
+    "reason": "公开注释称增量数据用于继续回测；待处理信号 dump/load 遗失 _desprice/_sigtype，而 proc_tick 用它们决定执行价格及条件触发回调。现 roundtrip 只验 JSON/持仓；position test 对 frozen 的既定行为不覆盖信号继续语义。",
+    "fix": "dump/load 对称恢复信号全部字段和条件状态；明确 frozen 是仅交易日边界还是续跑快照字段，并据此保存或拒绝不匹配快照。",
+    "acceptance": "非零 desprice、sigtype=2 信号在第二实例 load 后下一 tick 的执行价/callback/信号清除与原实例相同；冻结状态策略有明文并对应验证。",
+    "canonical": null,
+    "proposed_test_fix": "扩展 strategyDumpRoundTripsIntoSecondMocker，除 JSON/position 外构造 pending signal 并在二次 load 后喂 tick，断言成交价及 condition callback；过滤 Q02CtaDumpTest.PendingSignalResumesWithSameExecutionSemantics。"
+  },
+  {
+    "lane": "q02_btcore3",
+    "id": "BUG-Q02-004",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/CtaMocker.cpp:527-570",
+      "src/WtBtCore/CtaMocker.cpp:574-616"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q02_btcore3/q02_cta_dump_incremental_test.cpp:414-455"
+    ],
+    "reason": "ParseStream 后未核 parse error/schema/类型，strcpy 写固定 tag 数组；但未找到损坏/手工编辑输入属于受支持快照契约的证据。现用例覆盖缺目录/合法和缺 details，不覆盖 malformed/incompatible JSON。",
+    "fix": "确认跨版本/损坏快照契约；若需容错，校验 parse/schema/类型/长度并原子失败；否则加版本识别并拒绝不兼容快照。",
+    "acceptance": "按契约测损坏 JSON、字段缺失/类型错、超长 tag、版本不匹配；无崩溃/越界/部分状态污染且错误可观察。",
+    "canonical": null,
+    "proposed_test_fix": "明确输入契约后新增 malformed snapshot test；不要把现有合法/缺 details 用例当解析器健壮性证据。过滤 Q02CtaDumpTest.MalformedIncrementalSnapshotRejected。"
+  },
+  {
+    "lane": "q02_btcore3",
+    "id": "BUG-Q02-006",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/CtaMocker.cpp:461-524",
+      "src/WtBtCore/CtaMocker.cpp:533-616"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q02_btcore3/q02_cta_dump_incremental_test.cpp:229-263",
+      "src/TestUnits/coverage/q02_btcore3/q02_cta_dump_incremental_test.cpp:334-372"
+    ],
+    "reason": "CSV/明细/条件重复 load 会 append；公开注释只说从上次结果继续，没有说明同一实例重复调用必须幂等。现有测试每实例只 load 一次。",
+    "fix": "定义一次性或可重复 API；一次性则第二次返回错误且状态不变，可重复则事务式替换完整状态。",
+    "acceptance": "同实例重复加载的结果按约定为明确拒绝无变化，或状态/日志完全等同单次 load。",
+    "canonical": null,
+    "proposed_test_fix": "先定 one-shot/idempotent 语义再测两次 load，对比持仓/明细/信号/条件及 CSV 行数；过滤 Q02CtaDumpTest.RepeatedIncrementalLoadFollowsContract。"
+  }
+]

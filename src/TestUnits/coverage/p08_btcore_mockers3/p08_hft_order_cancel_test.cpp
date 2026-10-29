@@ -12,6 +12,7 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <set>
 #include <sstream>
 #include <string>
 
@@ -206,34 +207,93 @@ TEST_F(P08HftOrderCancel, CancelIsDeferredUntilTaskDrain)
 	EXPECT_TRUE(mocker._orders.empty());
 }
 
-// 按合约+方向撤单：qty=0 时只撤第一笔匹配订单（源码 else 分支 break）
+// 按合约+方向撤单：正 qty=1 小于首笔剩余量，所以只撤第一笔匹配订单。
 TEST_F(P08HftOrderCancel, CancelByCodeAndDirection)
 {
 	HftMocker mocker(&_rp, "p08_hft_cancelby");
-	mocker.stra_buy(kCode, 3800.0, 2, "b1");
-	mocker.stra_buy(kCode, 3800.0, 3, "b2");
-	uint32_t s1 = mocker.stra_sell(kCode, 3810.0, 5, "s1")[0];
+	auto b1 = mocker.stra_buy(kCode, 3800.0, 2, "b1");
+	auto b2 = mocker.stra_buy(kCode, 3800.0, 3, "b2");
+	ASSERT_EQ(1u, b1.size());
+	ASSERT_EQ(1u, b2.size());
+	auto s1s = mocker.stra_sell(kCode, 3810.0, 5, "s1");
+	ASSERT_EQ(1u, s1s.size());
+	uint32_t s1 = s1s[0];
 	ASSERT_EQ(3u, mocker._orders.size());
+	ASSERT_EQ(1u, mocker._orders.count(b1[0]));
+	ASSERT_EQ(1u, mocker._orders.count(b2[0]));
+	ASSERT_EQ(1u, mocker._orders.count(s1));
 
-	auto canceled = mocker.stra_cancel(kCode, true, 0);
-	// _orders 是哈希表，遍历顺序不确定，只能断言数量
-	EXPECT_EQ(1u, canceled.size()) << "qty=0 命中第一笔后即 break";
+	auto canceled = mocker.stra_cancel(kCode, true, 1);
+	ASSERT_EQ(1u, canceled.size()) << "qty=1 小于首笔剩余量，命中第一笔后即 break";
+	EXPECT_TRUE(canceled[0] == b1[0] || canceled[0] == b2[0]);
+	const uint32_t remaining_buy = canceled[0] == b1[0] ? b2[0] : b1[0];
 	// 撤单任务未执行前，三笔订单都还在
 	EXPECT_EQ(3u, mocker._orders.size());
+	EXPECT_EQ(1u, mocker._orders.count(b1[0]));
+	EXPECT_EQ(1u, mocker._orders.count(b2[0]));
+	EXPECT_EQ(1u, mocker._orders.count(s1));
 	mocker.procTask();
 	EXPECT_EQ(2u, mocker._orders.size());
+	EXPECT_EQ(0u, mocker._orders.count(canceled[0]));
+	EXPECT_EQ(1u, mocker._orders.count(remaining_buy));
 	EXPECT_EQ(1u, mocker._orders.count(s1));
 
-	// qty 大于单笔剩余量：把两笔买单都撤掉
+	// 卖方向 qty=10 大于卖单剩余量 5，撤销该卖单。
 	auto canceled2 = mocker.stra_cancel(kCode, false, 10);
 	ASSERT_EQ(1u, canceled2.size());
 	EXPECT_EQ(s1, canceled2[0]);
+	EXPECT_EQ(1u, mocker._orders.count(remaining_buy));
+	EXPECT_EQ(1u, mocker._orders.count(s1));
 	mocker.procTask();
 	EXPECT_EQ(0u, mocker._orders.count(s1));
-	EXPECT_EQ(2u, mocker._orders.size());
+	EXPECT_EQ(0u, mocker._orders.count(canceled[0]));
+	EXPECT_EQ(1u, mocker._orders.count(remaining_buy));
+	EXPECT_EQ(1u, mocker._orders.size());
 
 	mocker.procTask();
-	EXPECT_EQ(2u, mocker._orders.size());
+	EXPECT_EQ(1u, mocker._orders.size());
+	EXPECT_EQ(1u, mocker._orders.count(remaining_buy));
+}
+
+// qty=0 表示撤销同方向的全部订单，且不能影响反方向订单。
+TEST_F(P08HftOrderCancel, CancelByCodeAndDirectionZeroCancelsAllMatching)
+{
+	HftMocker mocker(&_rp, "p08_hft_cancelby_zero");
+	auto b1 = mocker.stra_buy(kCode, 3800.0, 2, "b1");
+	auto b2 = mocker.stra_buy(kCode, 3800.0, 3, "b2");
+	auto sells = mocker.stra_sell(kCode, 3810.0, 5, "s1");
+	ASSERT_EQ(1u, b1.size());
+	ASSERT_EQ(1u, b2.size());
+	ASSERT_EQ(1u, sells.size());
+	const uint32_t sell_id = sells[0];
+	ASSERT_EQ(3u, mocker._orders.size());
+
+	auto canceled = mocker.stra_cancel(kCode, true, 0);
+	const std::set<uint32_t> expected_buy_ids{b1[0], b2[0]};
+	const std::set<uint32_t> canceled_ids(canceled.begin(), canceled.end());
+	EXPECT_EQ(2u, canceled.size());
+	EXPECT_EQ(expected_buy_ids, canceled_ids);
+	EXPECT_EQ(1u, mocker._orders.count(b1[0]));
+	EXPECT_EQ(1u, mocker._orders.count(b2[0]));
+	EXPECT_EQ(1u, mocker._orders.count(sell_id));
+
+	mocker.procTask();
+	EXPECT_EQ(0u, mocker._orders.count(b1[0]));
+	EXPECT_EQ(0u, mocker._orders.count(b2[0]));
+	EXPECT_EQ(1u, mocker._orders.count(sell_id));
+	EXPECT_EQ(1u, mocker._orders.size());
+
+	// 清理未被错误实现撤掉的买单以及异方向卖单，保持预期失败无副作用。
+	for (uint32_t buy_id : expected_buy_ids)
+	{
+		if (mocker._orders.count(buy_id) != 0)
+			mocker.stra_cancel(buy_id);
+	}
+	if (mocker._orders.count(sell_id) != 0)
+		mocker.stra_cancel(sell_id);
+	mocker.procTask();
+	EXPECT_TRUE(mocker._tasks.empty());
+	EXPECT_TRUE(mocker._orders.empty());
 }
 
 // 按量撤单：qty 大于所有匹配单之和时把它们全部撤掉

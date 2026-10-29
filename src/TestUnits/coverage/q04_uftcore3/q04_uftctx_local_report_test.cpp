@@ -31,7 +31,6 @@ const std::string& ctxRoot()
 	static std::string root =
 		(std::filesystem::temp_directory_path() / "q04_uftctx_root").string() + "/";
 	std::error_code ec;
-	std::filesystem::remove_all(std::filesystem::temp_directory_path() / "q04_uftctx_root", ec);
 	std::filesystem::create_directories(root, ec);
 	WtHelper::setGenerateDir(root.c_str());
 	return root;
@@ -261,8 +260,8 @@ TEST(q04_uftctx_local, trading_day_switch_rebuilds_stale_blocks)
 
 	//切到新交易日: 明细文件按 _date 判定过期并清理
 	ctx._ctx.on_channel_ready(20240318);
-	//清理只作用于块内数据, 内存里的净持仓不会被回退(见 BUG-Q04-007 待裁定)
-	EXPECT_DOUBLE_EQ(8.0, ctx._ctx.stra_get_local_position(kAg));
+	//切日无新成交: 已有4手在重载持仓块后仍应只累计一次
+	EXPECT_DOUBLE_EQ(4.0, ctx._ctx.stra_get_local_position(kAg));
 	EXPECT_TRUE(std::filesystem::exists(ctx.straFile("position.membin")));
 	ctx.removeOwnFolder();
 }

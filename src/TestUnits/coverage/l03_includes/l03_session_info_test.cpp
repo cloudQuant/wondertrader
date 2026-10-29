@@ -395,18 +395,9 @@ TEST_F(L03DaySessionTest, trading_minutes_and_section_list)
 	EXPECT_EQ(sess_->getSecMinList().size(), 3u);
 }
 
-TEST(l03_session, zero_length_section_is_treated_as_full_day)
+TEST(l03_session, DISABLED_zero_length_section_semantics_contract_pending)
 {
-	WTSSessionInfo* s = WTSSessionInfo::create("L03_ZEROLEN", "零时长", 0);
-	ASSERT_NE(s, nullptr);
-	s->addTradingSection(900, 900);
-	// count==0 时被兜底当成全天候时段，容易被配置错误静默放大
-	EXPECT_EQ(s->getTradingMins(), 1440u);
-	EXPECT_EQ(s->getTradingSeconds(), 86400u);
-	const std::vector<uint32_t>& mins = s->getSecMinList();
-	ASSERT_EQ(mins.size(), 1u);
-	EXPECT_EQ(mins[0], 0u);
-	s->release();
+	GTEST_SKIP() << "09:00-09:00 是零长度还是全天时段尚无明确合同；0-0 全天正控单独保留。";
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -478,20 +469,21 @@ TEST(l03_session, auction_sections)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// setOffsetMins 不会重算已登记时段
+// setOffsetMins keeps registered trading section times aligned with the new offset
 //////////////////////////////////////////////////////////////////////////
-TEST(l03_session, set_offset_mins_leaves_sections_stale)
+TEST(l03_session, set_offset_mins_keeps_registered_sections_consistent)
 {
 	WTSSessionInfo* s = WTSSessionInfo::create("L03_STALE", "偏移变更", 0);
 	ASSERT_NE(s, nullptr);
 	s->addTradingSection(900, 1500);
 	s->setOffsetMins(300);
 	EXPECT_EQ(s->getOffsetMins(), 300);
-	// 时段里的 first/second 仍是旧偏移下算出来的值（见 BUG-L03-004）
-	EXPECT_EQ(s->getOpenTime(true), 900u);
-	EXPECT_EQ(s->getCloseTime(true), 1500u);
-	// 但换算函数用的是新偏移，两者已经不自洽
+	EXPECT_EQ(s->getOpenTime(false), 900u);
+	EXPECT_EQ(s->getCloseTime(false), 1500u);
+	EXPECT_EQ(s->getOpenTime(true), 1400u);
+	EXPECT_EQ(s->getCloseTime(true), 2000u);
 	EXPECT_EQ(s->offsetTime(900, true), 1400u);
+	EXPECT_EQ(s->offsetTime(1500, true), 2000u);
 	s->release();
 }
 }  // namespace

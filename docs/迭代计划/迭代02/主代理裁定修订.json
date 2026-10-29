@@ -1,0 +1,182 @@
+[
+  {
+    "lane": "l01_share_wtsutils",
+    "id": "BUG-L01-001",
+    "before": {
+      "decision": "DUPLICATE",
+      "canonical": "BUG-R12-01",
+      "reason": "反向 find 的无符号下标回绕与 BUG-R12-01 是同一代码、同一触发条件；本行不另计数。既有 disabled 测试及历史运行不作为本轮执行证据。",
+      "fix": "并入 canonical 条目的修复：改为有界反向扫描，无匹配返回 npos。",
+      "acceptance": "canonical 条目覆盖有点、无点和空字符串输入，且无越界访问。"
+    },
+    "after": {
+      "decision": "PRODUCT",
+      "canonical": "",
+      "reason": "主代理纠正反向归并：R12-01 原记录已经合并到 L01-001，应保留当前 L01 主编号。CodeHelper::find 的 size_t 反向循环缺少终止保护，未找到字符时下溢。有效输入范围与生产触发影响仍按原证据边界，不声称本次动态复现。",
+      "fix": "从 len 开始用 idx>0 的反向循环再访问 idx-1；空串和未找到时返回既定哨兵。",
+      "acceptance": "正常分隔符、首尾字符、空串和未找到的输入分别验证，无下溢或越界；相关解析调用合同单列。"
+    }
+  },
+  {
+    "lane": "l01_share_wtsutils",
+    "id": "BUG-L01-002",
+    "before": {
+      "decision": "DUPLICATE",
+      "canonical": "BUG-R12-12",
+      "reason": "主力/次主力码尾部多计一个 NUL 与 BUG-R12-12 的 CodeHelper 子项是同一缺陷；R12-12 主记录的 WTSTickData 问题不合并到此处。当前完整字符串/size 断言是正确的，历史 FAIL 未在本轮执行。",
+      "fix": "并入 canonical 的 CodeHelper 子项修复，std::string 长度只包含可见字符。",
+      "acceptance": "HOT/2ND 输出完整相等且 size 与可见长度一致，不含嵌入终止 NUL。"
+    },
+    "after": {
+      "decision": "PRODUCT",
+      "canonical": "",
+      "reason": "主代理纠正错误归并：L01-002 的 std::string 长度/尾NUL 与 R12-12 的超长 Tick 字段风险不能整条归并。独立完整字符串回归已本机 FAIL：HOT/2ND 字符串均多一个 NUL，实际 size=10，正确 size=9。",
+      "fix": "结果长度只包含有效字符，不把 C 字符串终止符计入 std::string 逻辑长度；保留各 helper 的边界保护。",
+      "acceptance": "完整 std::string 等值和 size 均正确，包含 HOT/2ND 正常代码与边界；不再以 c_str 比较掩盖多余字节。"
+    }
+  },
+  {
+    "lane": "l06_wtbtcore",
+    "id": "BUG-L06-007",
+    "before": {
+      "decision": "DUPLICATE",
+      "canonical": "BUG-P03-001",
+      "reason": "按额模板命中而商品缺失时 getVolScale 空解引用，与 BUG-P03-001 同函数/分支/前置条件。by-volume 不使用 commInfo；disabled 测试也未证明该配置是受支持正常输入。",
+      "fix": "并入 P03-001 并确认 fee template/catalog 契约；不重复计数。",
+      "acceptance": "按最终契约明确拒绝错配费率模板或安全返回有定义结果；不崩溃且按量分支不回归。"
+    },
+    "after": {
+      "decision": "PRODUCT",
+      "canonical": "",
+      "reason": "主代理纠正反向归并：P03-001 已在原记录合并到 L06-007；当前主项不能再反向指向 P03-001。按额费率模板存在而 commodity 缺失时 calc_fee 裸解引用；公开配置加载未校验该模板 key。",
+      "fix": "装载费率时校验品种，按额计算前检查 commodity，定义配置错误通道与中性返回的区别。",
+      "acceptance": "配置级缺品种按额模板受控拒绝/报告，按量及正确按额模板保持结果；不得只靠私有表注入验证。"
+    }
+  },
+  {
+    "lane": "R32_adstorage",
+    "id": "BUG-R32-004",
+    "before": {
+      "canonical": "R16-BUG-11"
+    },
+    "after": {
+      "canonical": "BUG-R16-11"
+    }
+  },
+  {
+    "lane": "R173",
+    "id": "BUG-R173-005",
+    "before": {
+      "canonical": null
+    },
+    "after": {
+      "canonical": "BUG-R46-001"
+    }
+  },
+  {
+    "lane": "R21_adstorage",
+    "id": "R21-BUG-10",
+    "before": {
+      "decision": "TEST",
+      "evidence_level": "STATIC",
+      "reason": "日志字面量确有 “db if” 笔误，但候选影响依赖某个未知的运维 grep 规则；没有测试或公开日志契约证明错误文案造成漏报，不能据此列为产品正确性缺陷。",
+      "fix": "可将 if 改为 of 作为文案清理；除非日志文案被运维协议消费，否则不纳入行为修复。",
+      "acceptance": "若保留该项，明确日志格式契约并只断言失败事件包含数据库类别、路径、错误；不把自然语言介词当数据接口。"
+    },
+    "after": {
+      "decision": "PRODUCT",
+      "evidence_level": "STATIC",
+      "reason": "主代理收窄原影响而保留实际源码笔误：日志字面量 db if 为错误文案，可列低优先级产品文案缺陷；未知运维 grep 漏报及生产影响没有证据，不据此上升严重度。这里没有错误测试，不能归类 TEST。",
+      "fix": "修正该条日志的 db if 文案；不改变数据库读取/成功失败语义。",
+      "acceptance": "定向错误路径的日志能准确指明数据库/合约；不以此声称业务正确性或运维漏报已验证。"
+    }
+  },
+  {
+    "lane": "n03_uftcore_index",
+    "id": "BUG-N03-001",
+    "before": {
+      "decision": "TEST",
+      "evidence_level": "STATIC",
+      "reason": "候选仅给非法 weight_alg=3 及以上；当前算法表只定义 0、1、2，测试没有证明该输入属于受支持配置，也没有配置 schema 承诺非法值必须被安全处理。因此越界路径不构成符合本轮准入标准的产品缺陷。",
+      "fix": "暂无产品修复主张；若需保证坏配置安全，先将非法配置处理写进接口契约。",
+      "acceptance": "当前有效算法 0/1/2 路径保持通过；只有明确承诺坏配置防御后才增加拒绝行为验收。"
+    },
+    "after": {
+      "decision": "PRODUCT",
+      "evidence_level": "STATIC",
+      "reason": "主代理保留配置入口的静态边界缺陷：init 从 JSON 直接取任意 uint32 weight_alg，未做范围验证即以其索引三项 WEIGHT_ALGS。非法算法值应被配置入口受控拒绝，不能因其不属于支持算法而让配置校验自身越界。测试尚未动态执行。",
+      "fix": "在任何表索引/订阅副作用前验证 weight_alg 为0..2，非法值记录错误并返回false。",
+      "acceptance": "0/1/2正常，3和UINT32_MAX由init受控拒绝且无越界/残留订阅；必要时sanitizer验证。"
+    }
+  },
+  {
+    "lane": "R60",
+    "id": "BUG-R60-007",
+    "before": {
+      "decision": "TEST",
+      "evidence_level": "STATIC",
+      "reason": "orderAction(NULL) 会解引用，但接口只说明参数为撤单结构，未规定 NULL 是合法输入。orderInsert 的防护实现不能推出所有方法都须接受 NULL；当前没有公开合同支持这一产品主张。"
+    },
+    "after": {
+      "decision": "UNDECIDED",
+      "evidence_level": "PENDING",
+      "reason": "主代理保留接口合同未决：orderAction(NULL) 的空指针路径存在，但NULL是否允许未定义；相邻orderInsert有guard不足以确定本接口合同。当前测试不能证明产品违约，也不能凭缺少合同认定测试错误并永久撤回。"
+    }
+  },
+  {
+    "lane": "q06_porters",
+    "id": "Q06-001",
+    "before": {
+      "decision": "NOT_BUG",
+      "evidence_level": "STATIC",
+      "reason": "该分支处理无效句柄/未注册 mocker；未找到有效 context 下必须返回非空的公开保证。现存测试也接受 NULL 或空串。无效句柄不属于已证明的有效输入产品缺陷。"
+    },
+    "after": {
+      "decision": "UNDECIDED",
+      "evidence_level": "PENDING",
+      "reason": "主代理保留返回值合同未决：未知句柄允许NULL还是稳定空串未明确；目前测试接受两者，仅证明当前分支可运行，不能当作正式空值合同。"
+    }
+  },
+  {
+    "lane": "T27_parserxtp",
+    "id": "BUG-T27-001",
+    "before": {
+      "decision": "TEST",
+      "evidence_level": "STATIC",
+      "reason": "代码确会把带连字符的 fake 日期按非数字字符累计成异常整数，但本地 XTP SDK 只说登录后 GetTradingDay 返回正确交易日，未规定允许连字符。现测试自己提供未经合同确认的格式并断言损坏值，不能据此立产品缺陷或把坏值作为正确 oracle。"
+    },
+    "after": {
+      "decision": "UNDECIDED",
+      "evidence_level": "PENDING",
+      "reason": "主代理保留厂商日期格式未决：fake带连字符日期不是已证合法SDK输入，损坏数值不能当正确oracle；SDK未在本仓库明确格式，尚不足以二分为产品错或测试错。"
+    }
+  },
+  {
+    "lane": "p06_uftcore2",
+    "id": "BUG-P06-006",
+    "before": {
+      "decision": "TEST",
+      "evidence_level": "STATIC",
+      "reason": "候选触发条件为 null engine 或不存在的交易时段；前者违反 ticker 构造依赖，后者是未配置成功的 session。其 disabled 路径还要求 run 起线程，而本轮候选明确未运行。没有证据表明有效 engine 与已注册 session 的正常输入会到达该空指针。"
+    },
+    "after": {
+      "decision": "UNDECIDED",
+      "evidence_level": "PENDING",
+      "reason": "主代理拆分未决边界：null engine 属不完整装配；但有效engine找不到配置session时是否必须拒绝初始化、由哪层传播错误未明，不能整条按错误测试撤回。保留缺session受控拒绝的合同与线程路径验证任务。"
+    }
+  },
+  {
+    "lane": "q05_dtsrv",
+    "id": "BUG-Q05-004",
+    "before": {
+      "decision": "TEST",
+      "evidence_level": "STATIC",
+      "reason": "cb/cbCnt 无默认值，文档要求提供；仅 cbLogger 明确 optional。空回调违约；newCnt=0 可达性也未证，不能把 at(0) 静态风险升级为有效缺陷。"
+    },
+    "after": {
+      "decision": "UNDECIDED",
+      "evidence_level": "PENDING",
+      "reason": "主代理保留混合项：NULL必需回调的旧用例违反接口前提，不能证明违约；newCnt==0后at(0)的独立合法空结果可达性尚未验证。先拆两种输入，不能因前者错误而撤回整个候选。"
+    }
+  }
+]

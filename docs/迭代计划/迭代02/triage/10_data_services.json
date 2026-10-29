@@ -1,0 +1,992 @@
+[
+  {
+    "lane": "R102",
+    "id": "BUG-R102-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtServo/WtDataManager.cpp:247-263",
+      "src/WtDtServo/WtDataManager.cpp:398-415",
+      "src/WtDataStorage/WtRdmDtReader.cpp:1729-1785"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05b_dtservo/r102_wtdatamgr_test.cpp:351-395"
+    ],
+    "reason": "两个增量循环遍历 idx 却用 rawData[0] 算 barTime；区间 reader 可含缓存末根，首根时间相等后其他新行也被跳过。候选用例禁用，本轮未重跑。",
+    "fix": "按 rawData[idx] 计算时间并比较，保留未闭合末 bar 规则。",
+    "acceptance": "返回含重叠旧 bar 和至少两根新 bar；区间/数量路径合并所有新 bar、不重复旧 bar，缓存末时间正确。",
+    "canonical": null,
+    "proposed_test_fix": "启用定向测试并断言最终时间序列和 OHLCV，不只断言非空。"
+  },
+  {
+    "lane": "R102",
+    "id": "BUG-R102-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtServo/WtDataManager.h:282-287",
+      "src/WtDtServo/WtDataManager.cpp:607-616",
+      "src/WtDtServo/WtDataManager.cpp:560-565"
+    ],
+    "test_evidence": [],
+    "reason": "公开注释承诺清除 K 线和实时缓存；实现仅调 reader->clearCache()，未清 _bars_cache/_rt_bars。另有 clear_subbed_bars() 却未调用。",
+    "fix": "clear_cache 清理自有缓存和实时 map，再调用 reader 清理，按对象所有权释放。",
+    "acceptance": "分别建立 reader/重采样/实时缓存；调用后不再读到旧缓存，资源释放且 reader 清理仍执行。",
+    "canonical": null,
+    "proposed_test_fix": null
+  },
+  {
+    "lane": "R123",
+    "id": "BUG-R123-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtServo/WtDataManager.cpp:29-47",
+      "src/WtDtServo/WtDataManager.cpp:49-78",
+      "src/WtDtServo/WtDataManager.h:289-293",
+      "src/WtDtServo/WtDataManager.h:325-330"
+    ],
+    "test_evidence": [],
+    "reason": "析构仅释放 _bars_cache；工厂创建的 _reader/_remover 和 RtBarMap* _rt_bars 均未清理。头文件声明 reader 有专用删除器且析构承诺释放资源。",
+    "fix": "停止依赖线程后释放实时 map，再通过 remover 销毁 reader；如需 DLL handle，按依赖顺序释放。",
+    "acceptance": "计数替身确认部分/完整初始化各清理一次；停止后析构无回调访问。",
+    "canonical": null,
+    "proposed_test_fix": null
+  },
+  {
+    "lane": "R154",
+    "id": "BUG-R154-001",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtDtCore/UDPCaster.cpp:62-68",
+      "src/WtDtCore/UDPCaster.cpp:156-180",
+      "src/WtDtCore/UDPCaster.h:58-64"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r154_udp_caster_start_test.cpp:395-421"
+    ],
+    "reason": "收包订阅分支无条件解引用 manager，但公开签名未说明可空性，生产装配与测试不足以证明 active 广播-only 能否省略 manager。直传 null 不足以证明有效输入。",
+    "fix": "先明确 manager 前置条件；必需则 init 判空失败，可选则订阅时判空、记录并丢弃请求。",
+    "acceptance": "按合同覆盖 active 广播-only/订阅；空 manager 要么初始化失败要么安全忽略，不崩溃。",
+    "canonical": null,
+    "proposed_test_fix": "不要将 null 装配标为有效输入，除非接口合同允许；有效装配走集成包测试。"
+  },
+  {
+    "lane": "R154",
+    "id": "BUG-R154-002",
+    "decision": "DUPLICATE",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/ShmCaster.cpp:37-51",
+      "src/WtDtCore/ShmCaster.cpp:24-64"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r154_shm_caster_active_test.cpp:150-177",
+      "src/TestUnits/coverage/q05_dtsrv/r68_shm_caster_init_test.cpp:57-80"
+    ],
+    "reason": "并入 BUG-R68-002。目录输入在 create/truncate 失败（L39-42），早于 _mapfile.reset（L46），不能证明旧映射已替换或 _queue 悬垂；映射失败未收口已有主记录。",
+    "fix": "由 BUG-R68-002 修复：成功 map 前不替换旧 queue/map，失败返回 false 并保持一致。",
+    "acceptance": "首次/重入失败均不抛；旧状态可用或按合同关闭，不能从目录异常推断悬垂。",
+    "canonical": "BUG-R68-002",
+    "proposed_test_fix": "删除独立悬垂 queue 主张，转测 canonical 的失败原子性。"
+  },
+  {
+    "lane": "R154",
+    "id": "BUG-R154-003",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtDtCore/UDPCaster.cpp:133-143"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r154_udp_caster_start_test.cpp:452-465"
+    ],
+    "reason": "第二次 stop 对已 join 线程再 join 有异常路径；但公开接口未承诺幂等，生产链只证明一次 stop。",
+    "fix": "明确生命周期语义；若要求幂等，joinable 检查并让资源清理只发生一次。",
+    "acceptance": "按合同测重复 stop；幂等合同下多次不抛、不重复清理。",
+    "canonical": null,
+    "proposed_test_fix": "禁用用例不应以现状定义幂等合同，先确定语义。"
+  },
+  {
+    "lane": "R164",
+    "id": "BUG-R164-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/UDPCaster.h:84-102",
+      "src/WtDtCore/UDPCaster.cpp:58-60",
+      "src/WtDtCore/UDPCaster.cpp:101-143"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r164_udp_caster_active_test.cpp:283-301",
+      "src/TestUnits/coverage/q05_dtsrv/r154_udp_caster_start_test.cpp:424-444"
+    ],
+    "reason": "active 路径创建并保留 socket；stop 未 reset socket/group。成员逆序析构时 io_context 先于 socket/group 销毁。LeakyCaster 绕开真实析构，不是反证。",
+    "fix": "在 context 存活时 cancel/close 并清理 socket/group，或调整所有权顺序保证 context 生命周期覆盖 socket；析构 join 线程。",
+    "acceptance": "真实栈对象 active init/start/stop 后离开作用域，socket 先于 context 释放，无崩溃或线程残留。",
+    "canonical": null,
+    "proposed_test_fix": "保留真实对象析构测试，不用泄漏子类替代。"
+  },
+  {
+    "lane": "R18_wtdtcore",
+    "id": "BUG-R18-001",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/DataManager.cpp:62-72",
+      "src/WtDtCore/DataManager.h:55-65"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r18_state_info_datamgr_test.cpp:217-234"
+    ],
+    "reason": "参数是配置对象；候选把 init(null) 等同配置缺 data/store。runner 缺 data 时 initDataMgr 早退，不会调用此 init；null 不是已证有效输入。",
+    "fix": "不按候选改产品；如需 null 防御，单独制定 init 输入合同。",
+    "acceptance": "缺配置字段与 null 分开测；只有公开保证 null 安全才要求 false。",
+    "canonical": null,
+    "proposed_test_fix": "不要把直接空指针称为合法部署复现。"
+  },
+  {
+    "lane": "R18_wtdtcore",
+    "id": "BUG-R18-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/DataManager.cpp:78-106",
+      "src/WtDtCore/DataManager.h:55-65"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r18_state_info_datamgr_test.cpp:236-260"
+    ],
+    "reason": "插件库加载成功但必需符号缺失或 factory 返回 null 时 _writer 未赋值，随后无条件解引用，且先报 module loaded。部署/ABI 错误应由 bool init 失败收口。",
+    "fix": "校验符号、实例及 init；失败释放局部资源/模块，返回 false 并诊断。",
+    "acceptance": "缺库/符号/实例、writer init false 均不崩且不报成功；合法插件正常初始化。",
+    "canonical": null,
+    "proposed_test_fix": "加可控插件替身测缺符号/null 实例，不以复制任意 dylib 为唯一前提。"
+  },
+  {
+    "lane": "R18_wtdtcore",
+    "id": "BUG-R18-004",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtDtCore/ParserAdapter.cpp:207-219",
+      "src/WtDtCore/ParserAdapter.h:35-42"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r18_parser_adapter_test.cpp:531-539",
+      "src/TestUnits/coverage/q05_dtsrv/r44_parser_adapter_edges_test.cpp:198-218"
+    ],
+    "reason": "release 不清空指针，重复调用会再次 release/delete；但公开接口未规定幂等，manager 只调用一次，二次释放是否为有效生命周期未证。",
+    "fix": "明确 release 合同；若幂等则置空并防重复释放；若只许一次则加断言且保证调用单次。",
+    "acceptance": "按合同验证释放次数；幂等模式下重复调用不重复触发插件释放器。",
+    "canonical": null,
+    "proposed_test_fix": "二次释放用例等待合同，不从空析构推出必须幂等。"
+  },
+  {
+    "lane": "R18_wtdtcore",
+    "id": "BUG-R18-006",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/ParserAdapter.cpp:46-80",
+      "src/WtDtCore/ParserAdapter.cpp:151-204",
+      "src/WtDtCore/ParserAdapter.cpp:207-219"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r18_parser_adapter_test.cpp:277-297"
+    ],
+    "reason": "initExt API init false 只记日志仍返回 true；配置 init 失败也返回 true，违背 bool 初始化结果。跨模块 delete 所有权无合同支撑，不纳入缺陷结论。",
+    "fix": "API init 失败返回 false，记录错误并保持可安全释放状态；另行定义 API 所有权。",
+    "acceptance": "fake API init false 时两类 init 均 false、不订阅/启动；成功仍 true；失败只 cleanup 一次。",
+    "canonical": null,
+    "proposed_test_fix": "保留 InitExtReturnsFalseWhenApiInitFails，删除无依据跨模块所有权断言。"
+  },
+  {
+    "lane": "R18_wtdtcore",
+    "id": "BUG-R18-007",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/IndexWorkerMgr.cpp:170-203"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r18_idxworker_mgr_test.cpp:203-235"
+    ],
+    "reason": "命中订阅先 retain；线程池分支 release，同步 pool==0 分支没有配对 release，默认模式每帧多留一引用。测试可观察 refcount，本轮未运行。",
+    "fix": "用 RAII 临时持有保证同步、异步和提前退出各 release 一次。",
+    "acceptance": "pool 0/>0 多帧后 refcount 回到调用者基线，异步任务完成前对象仍有效。",
+    "canonical": null,
+    "proposed_test_fix": "修复后每帧完成期望 refcount 为 1，异步用同步机制避免测量竞态。"
+  },
+  {
+    "lane": "R18_wtdtcore",
+    "id": "BUG-R18-011",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtDtCore/ShmCaster.h:64-77",
+      "src/WtDtCore/ShmCaster.cpp:78-91",
+      "src/WtDtCore/ShmCaster.cpp:107-118",
+      "src/WtDtCore/ShmCaster.cpp:134-145",
+      "src/WtDtCore/ShmCaster.cpp:161-172"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r18_shm_caster_test.cpp:260-300"
+    ],
+    "reason": "volatile 不是原子 RMW/跨进程内存序；但生产者/消费者数目和发布协议未定，纯内存算式测试不执行真实广播，不能证明损坏。",
+    "fix": "先定义共享队列并发合同，再按合同实现进程间同步；数据写完再发布 readable。",
+    "acceptance": "双进程校验序号/内容/次序；若单写者合同，验证多写入被串行化或拒绝。",
+    "canonical": null,
+    "proposed_test_fix": "不要把复制环形算式测试作为并发复现，补共享映射端到端测试。"
+  },
+  {
+    "lane": "R18_wtdtcore",
+    "id": "BUG-R18-012",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/ParserAdapter.cpp:42-44",
+      "src/WtDtCore/ParserAdapter.cpp:84-95",
+      "src/WtDtCore/ParserAdapter.cpp:207-219"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r18_parser_adapter_test.cpp:315-340"
+    ],
+    "reason": "配置 init retain _cfg；空析构与 release 均不 release。测试间接显示 retain 后重试被拒，未直接核引用计数。",
+    "fix": "统一 cleanup/析构释放并置空 _cfg；失败 init 也释放持有引用。",
+    "acceptance": "成功与失败 init 后 adapter 生命周期结束时配置 refcount 回到基线。",
+    "canonical": null,
+    "proposed_test_fix": null
+  },
+  {
+    "lane": "R44",
+    "id": "BUG-R44-001",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtDtCore/StateMonitor.cpp:38-56",
+      "src/WtDtCore/StateMonitor.cpp:107"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r44_state_monitor_lifecycle_test.cpp:149-159"
+    ],
+    "reason": "源码不清 _map，二次 init 保留旧 session；替换/合并/拒绝语义未定义，生产启动未证同一实例热重载。候选测试已禁用等待合同。",
+    "fix": "明确重入语义后实现替换清旧、合并文档化或拒绝。",
+    "acceptance": "按合同验证旧 session 不残留或按合并语义保留，拒绝时不污染。",
+    "canonical": null,
+    "proposed_test_fix": "不恢复把旧 SSE 残留锁定为正确结果的历史测试。"
+  },
+  {
+    "lane": "R44",
+    "id": "BUG-R44-002",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/StateMonitor.cpp:38-66",
+      "src/WtDtCore/StateMonitor.h:142-150"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r44_state_monitor_lifecycle_test.cpp:161-171"
+    ],
+    "reason": "bdMgr 是提供 session 数据的依赖，正常调用传入基础数据管理器，未见 nullable 合同。禁用测试的 null 违反前置条件，不能证明有效产品路径。",
+    "fix": "不按候选改产品；如支持无基础数据模式另订合同。",
+    "acceptance": "有效 bdMgr 正常初始化；只有 nullable 合同发布后才要求 null 安全拒绝。",
+    "canonical": null,
+    "proposed_test_fix": "移除把 null 当合法配置的预期，或先公开 nullable 合同。"
+  },
+  {
+    "lane": "R44",
+    "id": "BUG-R44-003",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtDtCore/ParserAdapter.cpp:46-52",
+      "src/WtDtCore/ParserAdapter.cpp:207-219"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r44_parser_adapter_edges_test.cpp:198-218"
+    ],
+    "reason": "重复 initExt 覆盖 api1，release 只清 api2；重入和注入 API 所有权未定义，生产路径每次新建 adapter。旧测试已跳过等合同。",
+    "fix": "明确重入/所有权；允许替换则先 release 旧 API，不允许则在改状态前拒绝。",
+    "acceptance": "按合同核对两 API init/release 次数、状态和唯一 owner。",
+    "canonical": null,
+    "proposed_test_fix": "不要启用把泄漏现状当预期的旧测试，使用计数替身。"
+  },
+  {
+    "lane": "R44",
+    "id": "BUG-R44-005",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtDtCore/IndexWorkerMgr.cpp:35-46",
+      "src/WtDtCore/IndexWorkerMgr.h:45-58"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r44_idxworker_fresh_test.cpp:216-226"
+    ],
+    "reason": "普通文件路径进入 directory_iterator 可能抛异常；方法异常策略未声明，普通文件又是目录参数配置错误。bool 是否承诺失败返回待确认。",
+    "fix": "若 bool 表示加载成败，检查目录并用 error_code iterator 返回 false；否则明示异常策略。",
+    "acceptance": "缺失/普通文件/不可读目录均按合同稳定处理，不让未声明异常跨初始化边界。",
+    "canonical": null,
+    "proposed_test_fix": null
+  },
+  {
+    "lane": "R44",
+    "id": "BUG-R44-006",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/IndexWorkerMgr.cpp:129-145",
+      "src/WtDtCore/IndexWorkerMgr.h:57-68"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r44_idxworker_fresh_test.cpp:228-238"
+    ],
+    "reason": "init 需要 config 对象；生产 runner 在解析出对象后才调用。候选传 null 不等于合法配置缺 indice，后者已有 false 分支。",
+    "fix": "不按候选改产品；如需 null 防御，统一 init 输入合同。",
+    "acceptance": "有效 config 缺 indice 返回 false；只有公开 null 防御合同才要求空指针测试。",
+    "canonical": null,
+    "proposed_test_fix": "将缺字段与无配置对象分开。"
+  },
+  {
+    "lane": "R44",
+    "id": "BUG-R44-007",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtDtCore/IndexWorkerMgr.cpp:26-28",
+      "src/WtDtCore/IndexWorkerMgr.cpp:129-167",
+      "src/WtDtCore/IndexWorkerMgr.cpp:205-221",
+      "src/WtDtCore/IndexWorkerMgr.h:57-68"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r44_idxworker_fresh_test.cpp:240-249"
+    ],
+    "reason": "指针只在 init 写入，未初始化调用有 UB；头文件未规定调用前必须 init，正常 runner 确实先 init，支持生命周期仍需合同。",
+    "fix": "明确生命周期；禁止未 init 调用则文档化/assert；要求容错则初始化 null 并安全拒绝。",
+    "acceptance": "按合同验证早期断言或安全失败，无未定义指针访问。",
+    "canonical": null,
+    "proposed_test_fix": "禁用用例仅为风险提示，不是已复现崩溃。"
+  },
+  {
+    "lane": "R44",
+    "id": "BUG-R44-008",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtDtCore/DataManager.cpp:67-70",
+      "src/WtDtCore/DataManager.cpp:297-311"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp:241-251"
+    ],
+    "reason": "查询无条件使用 _bd_mgr，但 init 未明确它可空；全天候 StateMonitor 仅说明 stMonitor 可空，不等于 bdMgr 可空。",
+    "fix": "明确 bdMgr 必需/可选；必需时 init 拒绝 null，可选则查询返回 NULL/0。",
+    "acceptance": "有效 writer init 后按合同查询；空依赖不留到委托时崩溃。",
+    "canonical": null,
+    "proposed_test_fix": "不要用全天候模式证明 bdMgr 可空。"
+  },
+  {
+    "lane": "R54",
+    "id": "BUG-R54-001",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtCore/TraderAdapter.cpp:1739-1768",
+      "src/WtCore/TraderAdapter.cpp:1249-1254"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/r54_trader_callback_gaps_test.cpp:509-534"
+    ],
+    "reason": "onRspTrades 对空 ContractInfo continue；柜台回报是否允许仅 code/exchange 未有合同。测试直造对象不能证明实柜台合法形态；onRspOrders fallback 仅是线索。",
+    "fix": "明确 SPI 合同；允许缺失则按 code/exchange 查基础数据，不允许则边界报错而非静默跳过。",
+    "acceptance": "按合同回报形态验证成交统计和未知合约处理，合法成交不静默丢弃。",
+    "canonical": null,
+    "proposed_test_fix": "保持待合同确认，不从 test-only 对象推导实柜台行为。"
+  },
+  {
+    "lane": "R54",
+    "id": "BUG-R54-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/ParserAdapter.cpp:251-264",
+      "src/WtUftCore/WtUftEngine.cpp:358-363",
+      "src/WtUftCore/WtUftTicker.cpp:68-75",
+      "src/WtUftCore/UftStraContext.cpp:69-85"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p06_uftcore2/r54_uftctx_callback_gaps_test.cpp:408-422"
+    ],
+    "reason": "parser fallback 可查到 cInfo 却只规范 code、未写回 quote；ticker/engine 原样转发，持仓 context 对 tick contract info 无条件解引用。候选测试直接调用 context，绕过生产遗漏。",
+    "fix": "fallback 成功时将 ContractInfo 附回 quote并维护引用计数；下游再防御不变量破坏。",
+    "acceptance": "parser→ticker→engine→有仓 context 输入无内嵌 info 但基础库可查的 tick，浮盈正确且引用平衡。",
+    "canonical": null,
+    "proposed_test_fix": "重建生产链测试，不直接调用 context 或手工补 info。"
+  },
+  {
+    "lane": "R5_wtdtcore",
+    "id": "BUG-R5-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/UDPCaster.cpp:101-131",
+      "src/WtDtCore/UDPCaster.cpp:145-148"
+    ],
+    "test_evidence": [],
+    "reason": "端口占用异常被吞后仍 do_receive；m_sktSubscribe 为空导致解引用。绑定失败应返回失败，不应崩溃。",
+    "fix": "start 返回结果；socket 创建失败即清理已有资源，不启动 receive/线程。",
+    "acceptance": "占用端口安全报错失败；空闲端口正常启动收发。",
+    "canonical": null,
+    "proposed_test_fix": null
+  },
+  {
+    "lane": "R5_wtdtcore",
+    "id": "BUG-R5-003",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtDtCore/UDPCaster.cpp:28-34",
+      "src/WtDtCore/UDPCaster.cpp:156-176",
+      "src/ParserUDP/ParserUDP.cpp:173-205"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r154_udp_caster_start_test.cpp:414-419"
+    ],
+    "reason": "接收端无界 split 固定字段；仓库发送端零初始化请求包，因此标准包有终止零。外部无终止符包是否合法未见 wire 合同。",
+    "fix": "明确 wire 长度/终止符并做定长解析；无终止零安全拒绝。",
+    "acceptance": "标准包仍正常订阅；满长无 NUL 按合同拒绝而不读取字段外内存。",
+    "canonical": null,
+    "proposed_test_fix": "先确认线协议；回环测试覆盖固定包有界解析和拒绝。"
+  },
+  {
+    "lane": "R5_wtdtcore",
+    "id": "BUG-R5-005",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/UDPCaster.cpp:222-241",
+      "src/WtDtCore/UDPCaster.cpp:244-266",
+      "src/WtDtCore/UDPCaster.h:58-64"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r5_udp_caster_test.cpp:113-126"
+    ],
+    "reason": "仅 type 0/1/2 入 bucket，未知 type 静默丢弃却 true，bool 报告未发生注册成功。当前测试将现状固化成预期。",
+    "fix": "校验明确支持 type；未知值返回 false 并记录。",
+    "acceptance": "0/1/2 成功入相应 bucket；3/99 false 且状态不变。",
+    "canonical": null,
+    "proposed_test_fix": "第 123-125 行改 EXPECT_FALSE 并验证状态不变。"
+  },
+  {
+    "lane": "R5_wtdtcore",
+    "id": "BUG-R5-006",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/UDPCaster.cpp:222-227",
+      "src/WtDtCore/UDPCaster.cpp:244-251",
+      "src/WtDtCore/UDPCaster.h:63-64"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r5_udp_caster_test.cpp:143-152"
+    ],
+    "reason": "接口收 int 而 endpoint 仅 uint16；负数/超范围值窄化到别端口仍 true。测试把 -1 断言成功是错误合同。",
+    "fix": "构造 endpoint 前校验 port/sendport 0..65535，非法返回 false。",
+    "acceptance": "0/65535 成功；-1/65536 在单播多播均失败且无部分资源。",
+    "canonical": null,
+    "proposed_test_fix": "删除 -1 EXPECT_TRUE，改测 -1/65536 false；保留合法边界。"
+  },
+  {
+    "lane": "R5_wtdtcore",
+    "id": "BUG-R5-007",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/UDPCaster.h:96-102",
+      "src/WtDtCore/UDPCaster.cpp:133-143",
+      "src/WtDtCore/UDPCaster.cpp:288-315",
+      "src/WtDtCore/StateMonitor.h:224-232",
+      "src/WtDtCore/StateMonitor.cpp:150-173",
+      "src/WtDtCore/StateMonitor.cpp:537-543"
+    ],
+    "test_evidence": [],
+    "reason": "后台线程读普通 bool、stop 线程写同值构成 data race；队列锁外 empty 检查到加锁 wait 间 producer 也可丢唤醒，属于正常并发停止生命周期。",
+    "fix": "停止标记原子/受锁；empty 与 predicate wait 同 mutex，明定 stop 时 producer 顺序。",
+    "acceptance": "并发 producer/stop 压力无 race、丢唤醒或挂起，线程 join 完成。",
+    "canonical": null,
+    "proposed_test_fix": "补跨线程/TSAN 测试，不用单线程 guard 测试替代。"
+  },
+  {
+    "lane": "R5_wtdtcore",
+    "id": "BUG-R5-009",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtDtCore/StateMonitor.cpp:90-105",
+      "src/WtDtCore/StateMonitor.h:70-80",
+      "src/Includes/WTSSessionInfo.hpp:78-80"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:286-298"
+    ],
+    "reason": "from minute 0 时 stime-- 下溢，跨午夜未处理且源码注释排除；测试只看 init/ORIGINAL，观察不到 _sections。午夜合法性未定；2400 可是半开区间日终点。",
+    "fix": "明确时间域；支持跨午夜则展开处理，否则校验拒绝 0000/跨日输入。",
+    "acceptance": "可观察区间覆盖 0000、跨午夜、2359→2400 和非法拒绝。",
+    "canonical": null,
+    "proposed_test_fix": "现用例不是数值复现；加可观察 seam 后按合同断言。"
+  },
+  {
+    "lane": "R66",
+    "id": "BUG-R66-001",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtBtCore/EventNotifier.cpp:41-56",
+      "src/WtBtCore/EventNotifier.cpp:66-113"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r66_event_notifier_test.cpp:356-383"
+    ],
+    "reason": "重复 init 覆盖 _mq_sid 使旧 server 无 destroy 路径；但公开接口未说明允许重入，现有测试只证新 worker 可用。",
+    "fix": "明确重入；只准一次则拒绝二次且不改状态，允许替换则先 destroy 旧 server。",
+    "acceptance": "计数 MQ 替身证明每个创建 server 恰好 destroy 一次并符合拒绝/替换策略。",
+    "canonical": null,
+    "proposed_test_fix": "重复后可用不等于旧 server 已释放。"
+  },
+  {
+    "lane": "R67",
+    "id": "BUG-R67-001",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtBtCore/HisDataReplayer.cpp:3687-3702",
+      "src/WtBtCore/HisDataReplayer.h:185-198"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q02_btcore3/r67_replayer_loader_gap_test.cpp:337-354"
+    ],
+    "reason": "loader true 且未回调时 bars=0，成功臂读首尾越界；接口只说成功与否，未规定成功必须非空。",
+    "fix": "明确空集语义；取首尾前处理空结果并按合同返回空/失败。",
+    "acceptance": "true+0、false+0、true+N 均安全，空结果含义明确。",
+    "canonical": null,
+    "proposed_test_fix": "不要默认 true+0 必然有效或违规，先定 loader 合同。"
+  },
+  {
+    "lane": "R67",
+    "id": "BUG-R67-002",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtBtCore/HisDataReplayer.cpp:1474-1482",
+      "src/WtBtCore/HisDataReplayer.cpp:3089-3105",
+      "src/WtBtCore/HisDataReplayer.h:977-983"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p07_btcore_replayer2/r67_replayer_bars_gap_test.cpp:358-380"
+    ],
+    "reason": "未订阅日线模拟 tick 解引用 commodity/session 查询结果；sub_tick 注释未要求合约已登记。人工放入未知合约 CSV 是否有效输入待确认。",
+    "fix": "明确未知代码合同；允许 CSV 时查询 null 安全拒绝，不允许则订阅入口尽早报错。",
+    "acceptance": "登记/未知代码有无 CSV 按合同诊断，无空指针访问。",
+    "canonical": null,
+    "proposed_test_fix": "先明确 sub_tick 对未知合约的合同，再启用输入用例。"
+  },
+  {
+    "lane": "R68",
+    "id": "BUG-R68-001",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/UDPCaster.cpp:62-68",
+      "src/WtDtCore/UDPCaster.h:58-61"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r68_udp_caster_init_test.cpp:57-70"
+    ],
+    "reason": "cfg 是必需配置指针，正常先解析后传入；没有 nullable 合同。直接 init(null) 属无效参数。",
+    "fix": "不按候选修改；如承诺空配置防御则另订统一输入合同。",
+    "acceptance": "有效配置正常；null 仅在新合同后要求 false。",
+    "canonical": null,
+    "proposed_test_fix": "不把直接 null DISABLED 用例叫作有效配置复现。"
+  },
+  {
+    "lane": "R68",
+    "id": "BUG-R68-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/ShmCaster.cpp:24-64",
+      "src/WtDtCore/ShmCaster.h:18-23"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r68_shm_caster_init_test.cpp:57-80"
+    ],
+    "reason": "init 注释承诺 bool 成功；create/truncate/map 结果忽略，之后取 addr 并 placement-new，失败可能抛异常或空地址访问。候选测试源码期望 false，本轮未运行。",
+    "fix": "校验 create/truncate/map/addr 并收异常为 false；成功映射后才交换 map/queue 并置 inited。",
+    "acceptance": "目录/父目录缺失/只读/map fail 均 false 不抛且无半初始化状态；有效映射可用。",
+    "canonical": null,
+    "proposed_test_fix": "保留不抛/false，增加各阶段失败接缝；目录异常不证明旧 queue 悬垂。"
+  },
+  {
+    "lane": "R68",
+    "id": "BUG-R68-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/IndexWorkerMgr.cpp:31-33",
+      "src/WtDtCore/IndexWorkerMgr.cpp:62-81",
+      "src/WtDtCore/IndexWorkerMgr.h:26-40",
+      "src/WtDtCore/IndexWorkerMgr.h:70-88"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r68_idxworker_factory_test.cpp:192-234"
+    ],
+    "reason": "析构为空；factory 持有裸模块句柄/factory/remover，重复同名加载覆盖旧条目。当前测试只测新 factory 可用，不测旧资源释放。",
+    "fix": "先销毁 workers，再 remover factory，最后 free_library；重名加载拒绝或安全替换。",
+    "acceptance": "计数插件验证 worker/factory/module 顺序清理一次；重复 load 不丢旧 owner/卸载活动代码。",
+    "canonical": null,
+    "proposed_test_fix": "补计数 deleter/module 观察，不把 RepeatedLoadKeepsFactoryUsable 当泄漏实测。"
+  },
+  {
+    "lane": "R72",
+    "id": "BUG-R72-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/HisDataReplayer.cpp:2497-2536",
+      "src/WtBtCore/HisDataReplayer.h:834-842"
+    ],
+    "test_evidence": [],
+    "reason": "etime 是公开截止时间；lower_bound=end 时 cursor=size，随后 eIdx=cursor-2 漏末 tick。晚于末笔是有效截止。候选声称 binary 复现，本轮未运行，故 STATIC。",
+    "fix": "lower_bound=end 时将末 tick 设为截止索引，统一 cursor/eIdx 并覆盖短切片。",
+    "acceptance": "截止等于/晚于末笔、落在两笔间、早于首笔时最近 count 条正确且不漏末笔。",
+    "canonical": null,
+    "proposed_test_fix": null
+  },
+  {
+    "lane": "R82",
+    "id": "BUG-R82-001",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtPorter/WtRtRunner.cpp:321-359",
+      "src/WtPorter/WtRtRunner.cpp:838-881",
+      "src/WtCore/WtEngine.cpp:39-55",
+      "src/WtPorter/WtPorter.h:263-266",
+      "src/WtPorter/WtPorter.h:697-700",
+      "src/WtPorter/WtPorter.h:1002-1005"
+    ],
+    "test_evidence": [],
+    "reason": "runner 只初始化 env 对应 engine，三类 context factory 却用不同 engine；跨环境创建可能 UB，但公开 API 未说明必须匹配，也未证混用受支持。",
+    "fix": "明确 factory 是否只支持当前环境；若限用则早期拒绝，若可并用则分别完整初始化 engine。",
+    "acceptance": "按合同覆盖正常及不匹配环境；不支持时明确失败，不发生未定义访问。",
+    "canonical": null,
+    "proposed_test_fix": "按环境重配置测试不是混用反例，先定合同再加测试。"
+  },
+  {
+    "lane": "R82",
+    "id": "BUG-R82-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtPorter/WtRtRunner.cpp:726-740",
+      "src/WtPorter/WtRtRunner.cpp:801-818",
+      "src/WtCore/CtaStrategyMgr.cpp:95-123",
+      "src/WtCore/CtaStrategyMgr.h:97-106"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/m_WtRunner/r28_runner_main_test.cpp:969-984"
+    ],
+    "reason": "active CTA 配置可拿到空 wrapper 或 null self；CTA 立即 init，HFT 已先判 wrapper。未知策略/工厂属于配置失败，不应崩溃。",
+    "fix": "检查 wrapper/self 并记策略 id/name，按配置合同返回失败或跳过。",
+    "acceptance": "未知策略/缺工厂/factory null 均不崩且有诊断，有效 CTA/HFT 不回归。",
+    "canonical": null,
+    "proposed_test_fix": "用 fake factory 覆盖 null wrapper/self，禁用真实工厂测试非运行证据。"
+  },
+  {
+    "lane": "R8_wtdtservo",
+    "id": "BUG-R8-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtServo/WtDtRunner.cpp:72-80",
+      "src/WtDtServo/WtDtRunner.cpp:150-153",
+      "src/WtDtServo/WtDataManager.cpp:100-104"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05b_dtservo/r8_wtdtrunner_test.cpp:499-513"
+    ],
+    "reason": "配置成功但缺 basefiles 时 cfgBF null 后立即访问；同函数对 parsers/store 缺失有判空。配置错误应诊断而非崩。候选用例本轮未运行。",
+    "fix": "检查 cfgBF 存在且类型正确；错误报告配置路径并停止 initialize。",
+    "acceptance": "缺段/null/错类型不崩并不启动，完整配置正常。",
+    "canonical": null,
+    "proposed_test_fix": null
+  },
+  {
+    "lane": "R8_wtdtservo",
+    "id": "BUG-R8-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtServo/WtDtRunner.cpp:150-151",
+      "src/WtDtServo/WtDtRunner.cpp:185-200",
+      "src/WtDtServo/WtDtRunner.cpp:202-220",
+      "src/WtDtServo/WtDataManager.cpp:49-105",
+      "src/WtDtServo/WtDataManager.cpp:116-142"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05b_dtservo/r8_wtdtrunner_test.cpp:514-536",
+      "src/TestUnits/coverage/q05b_dtservo/r8_wtdatamgr_sinks_test.cpp:194-223"
+    ],
+    "reason": "缺 data 时 initDataMgr 早退，reader 初始化 false 也忽略；runner 仍置 inited，查询后委托空 reader。不同于 Q05-001，此处是 runner 吞初始化失败。",
+    "fix": "传播 data/reader init 结果，仅成功置 inited；无 reader 查询入口安全拒绝。",
+    "acceptance": "缺 data/store/plugin 时不报告 inited，查询安全失败；有效 reader 正常。",
+    "canonical": null,
+    "proposed_test_fix": null
+  },
+  {
+    "lane": "R8_wtdtservo",
+    "id": "BUG-R8-006",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtServo/ParserAdapter.cpp:40-42",
+      "src/WtDtServo/ParserAdapter.cpp:82-95",
+      "src/WtDtServo/ParserAdapter.cpp:205-217"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05b_dtservo/r8_parseradapter_test.cpp:88-110"
+    ],
+    "reason": "确定子项是 _cfg retain 未在析构/release 释放。失败重入改 _id 无合同要求，不能以当前现状断言正确；死分支及 DLL 泄漏未证。",
+    "fix": "cleanup 释放置空 _cfg；将 _id 赋值移到重入检查后保持首次状态。",
+    "acceptance": "成功/失败生命周期后 refcount 回基线；重复 init false 且首次 id/API/cfg 不变。",
+    "canonical": null,
+    "proposed_test_fix": "移除 pa_second 现状断言，改断言拒绝且 id 保持首次绑定，并测引用计数。"
+  },
+  {
+    "lane": "l05_dt_servo_porter",
+    "id": "BUG-L05-001",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtDtHelper/WtDtHelper.cpp:146-163"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:267-305"
+    ],
+    "reason": "两段 date 访问 ay[2] 有静态越界风险，但未证 YYYY/MM 或 YYYY-MM 是有效 CSV 日期格式；正常 3/1 段用例不能定义语义。",
+    "fix": "先定 CSV 日期格式；校验段数，不支持则报错，支持则安全解析。",
+    "acceptance": "合同内格式正确；短缺/多段/非法值返回错误无越界。",
+    "canonical": null,
+    "proposed_test_fix": null
+  },
+  {
+    "lane": "l05_dt_servo_porter",
+    "id": "BUG-L05-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtHelper/WtDtHelper.cpp:457-473",
+      "src/WtDtHelper/WtDtHelper.cpp:1077-1086",
+      "src/WtDtHelper/WtDtHelper.cpp:1089-1128",
+      "src/WtDtHelper/WtDtHelper.cpp:1150-1247",
+      "src/WtDtHelper/WtDtHelper.h:218-229"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:171-180"
+    ],
+    "reason": "store API 文档返回成功与否；多种 store_* 创建失败仍 true；trans_csv_bars 在创建判断外写数据并报成功。候选历史测试结果本轮未重跑。",
+    "fix": "检查创建/写入错误；trans_csv_bars 成功打开后才写，最终成功后才日志。",
+    "acceptance": "缺目录/只读/写失败 false 且无成功日志；正常文件完整读回。",
+    "canonical": null,
+    "proposed_test_fix": null
+  },
+  {
+    "lane": "l05_dt_servo_porter",
+    "id": "BUG-L05-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtHelper/WtDtHelper.cpp:37-64",
+      "src/WtDtHelper/WtDtHelper.cpp:595-623",
+      "src/WtDtHelper/WtDtHelper.cpp:630-732",
+      "src/WtDtHelper/WtDtHelper.cpp:735-761",
+      "src/WtDtHelper/WtDtHelper.cpp:190-219",
+      "src/WtDtHelper/WtDtHelper.cpp:285-313"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:181-204",
+      "src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:211-226"
+    ],
+    "reason": "混合候选 NULL+count 是无效入参，不据此判产品 bug；压缩长度损坏时 proc_block_data false 被各调用忽略，仍解析/回调。损坏外部 dsb 是必须安全处理的文件错误。",
+    "fix": "检查解块返回值，拒绝坏块；校验类型/长度后才解析并回调。",
+    "acceptance": "坏长度/错类型/短头不调用数据回调并报错；有效压缩块 roundtrip 正常。",
+    "canonical": null,
+    "proposed_test_fix": "删掉 NULL 入参证据，补真实坏文件夹具。"
+  },
+  {
+    "lane": "l05_dt_servo_porter",
+    "id": "BUG-L05-004",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtDtCore/StatHelper.hpp:89-124"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_core_util_test.cpp:116-160"
+    ],
+    "reason": "独立包含依赖缺失且 flag 未用，但生产代码没有包含该头；未确认它是公共支持 API 还是未接入试验代码。",
+    "fix": "先确认支持定位；支持则补自足依赖并明确统计语义，否则转清理事项。",
+    "acceptance": "支持时 standalone/多 TU 编译和统计有消费端；非支持时不列生产缺陷。",
+    "canonical": null,
+    "proposed_test_fix": null
+  },
+  {
+    "lane": "l05_dt_servo_porter",
+    "id": "BUG-L05-005",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtPorter/WtDtPorter.cpp:83-93",
+      "src/WtDtPorter/WtDtPorter.h:45-52"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_porter_capi_test.cpp:80-104"
+    ],
+    "reason": "write_log 对 catName strlen；公开注释只承诺空字符串表示默认分类，没有承诺 null 等价空串，候选输入超出契约。",
+    "fix": "不按候选将 null 当默认；若要支持 nullable，应更新合同并实现安全行为。",
+    "acceptance": "空串使用默认分类；只有 nullable 合同发布后才测 null。",
+    "canonical": null,
+    "proposed_test_fix": "保留空串测试，不主张 null 等价默认。"
+  },
+  {
+    "lane": "l05_dt_servo_porter",
+    "id": "BUG-L05-006",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtHelper/WtDtHelper.cpp:190-210",
+      "src/WtDtHelper/WtDtHelper.cpp:293-309"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:211-252"
+    ],
+    "reason": "逐文件 dump 用 path 读取，但头部/类型错误日志传 binFolder；同目录多坏文件不能定位。属产品诊断缺陷，不影响内容正确。",
+    "fix": "逐文件错误日志改用 path。",
+    "acceptance": "多文件夹具日志各含具体出错文件名。",
+    "canonical": null,
+    "proposed_test_fix": null
+  },
+  {
+    "lane": "l05_dt_servo_porter",
+    "id": "BUG-L05-007",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtDtHelper/WtDtHelper.cpp:735-747",
+      "src/WtDtHelper/WtDtHelper.cpp:769-779",
+      "src/Share/StdUtils.hpp:57-66"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:181-204",
+      "src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:211-226",
+      "src/TestUnits/coverage/q05_dtsrv/q05_resample_bars_test.cpp:173-189"
+    ],
+    "reason": "缺文件在 read_file_content 抛 runtime_error，不会进入 header-size 检查；多条候选测试把路径说错。API 对缺文件返回 0 还是抛出未约定，产品合同待定、现断言无效。",
+    "fix": "明确缺文件合同；若应返回 0/日志则边界捕获异常，否则文档明确并确保 FFI 安全。",
+    "acceptance": "不存在文件按一个稳定合同处理；short file 独立走 header error。",
+    "canonical": null,
+    "proposed_test_fix": "从 HeaderValidation 删除 missing path 的头部日志断言；按合同改 EXPECT_THROW 或返回错误。"
+  },
+  {
+    "lane": "l05_dt_servo_porter",
+    "id": "BUG-L05-008",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtHelper/WtDtHelper.h:129-139",
+      "src/WtDtHelper/WtDtHelper.cpp:735-761"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:181-204",
+      "src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:211-226"
+    ],
+    "reason": "cb/cbCnt 无默认值，文档说读取先通知数量再传数据；只有 cbLogger 明确可选。直接空回调违反现合同。",
+    "fix": "不按候选修改；若 callback optional，先更合同再统一守卫并定返回语义。",
+    "acceptance": "当前调用提供必需回调；nullable 合同建立后再测 null 组合。",
+    "canonical": null,
+    "proposed_test_fix": "删除 NULL callback 合法用法断言，提供必需计数与数据回调。"
+  },
+  {
+    "lane": "q05_dtsrv",
+    "id": "BUG-Q05-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtServo/WtDataManager.cpp:49-89",
+      "src/WtDtServo/WtDataManager.cpp:91-105"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05b_dtservo/q05_servo_wtdatamgr_test.cpp:105-127",
+      "src/TestUnits/coverage/q05b_dtservo/r102_wtdatamgr_test.cpp:397-409"
+    ],
+    "reason": "reader 模块/符号缺失或 creator null 时 _reader 为空；initStore 仍无条件 _reader->init 并返回 true。bool API 对部署/ABI 错误应失败而不崩。",
+    "fix": "验证库、符号、实例与 init；失败清理并 false，报告插件路径。",
+    "acceptance": "缺模块/符号/null factory/init false 均不崩且失败传播；有效 reader 正常取数。",
+    "canonical": null,
+    "proposed_test_fix": null
+  },
+  {
+    "lane": "q05_dtsrv",
+    "id": "BUG-Q05-004",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtHelper/WtDtHelper.cpp:833-864",
+      "src/WtDtHelper/WtDtHelper.cpp:1010-1029",
+      "src/WtDtHelper/WtDtHelper.h:280-296"
+    ],
+    "test_evidence": [],
+    "reason": "cb/cbCnt 无默认值，文档要求提供；仅 cbLogger 明确 optional。空回调违约；newCnt=0 可达性也未证，不能把 at(0) 静态风险升级为有效缺陷。",
+    "fix": "不按候选修改；若回调改 optional，统一判空并定义零输出语义。",
+    "acceptance": "合同内回调输出正常；nullable 合同发布后再测空 callback/零条结果。",
+    "canonical": null,
+    "proposed_test_fix": "不要将直接 NULL 或未经证明的 at(0) 当动态复现。"
+  },
+  {
+    "lane": "q05_dtsrv",
+    "id": "BUG-Q05-005",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/StateMonitor.cpp:49-56",
+      "src/WtDtCore/StateMonitor.cpp:68-75",
+      "src/WtDtCore/StateMonitor.cpp:135-136",
+      "src/WtDtCore/StateMonitor.h:45-50"
+    ],
+    "test_evidence": [],
+    "reason": "确定子项是 load 成功的 config 未在函数末尾 release；本结论不包括无长度合同的 session id 溢出，也不并入 loadSessions 异常条目。",
+    "fix": "RAII 覆盖 success/错误/提前返回释放 config；另行明确 ID 长度和异常 session 行所有权。",
+    "acceptance": "成功/空表/中途异常后 config 引用回基线；超长 ID 仅在合同确认后单测拒绝。",
+    "canonical": null,
+    "proposed_test_fix": null
+  },
+  {
+    "lane": "q05_dtsrv",
+    "id": "BUG-Q05-006",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtHelper/WtDtHelper.cpp:892-924"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/q05_resample_bars_test.cpp:158-171"
+    ],
+    "reason": "函数计划校验 sections 并返回格式错，但先 root[sections]；缺成员时 RapidJSON assertion 先于校验。BadSessionTemplateRejected 包含缺 sections。历史 exit 134 本轮未运行，仅标 STATIC。",
+    "fix": "先校验 root object 和 offset/auction/sections 成员类型，再取值；错误返回 0 并释放 sInfo。",
+    "acceptance": "合法模板不回归；缺字段/错类型/malformed JSON 返回 0 与错误日志，不触发 assertion。",
+    "canonical": null,
+    "proposed_test_fix": null
+  }
+]

@@ -307,9 +307,9 @@ TEST_F(R4ReaderADTest, FirstTickReadTakesIncrementalRangeAndKeepsLastCount)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 3. 同一 etime 二次读取不再查库；换交易所/合约后一次读取又重开环境
+// 3. 同一 etime 复读和时间推进均返回预期 tick 窗口
 //////////////////////////////////////////////////////////////////////////
-TEST_F(R4ReaderADTest, RepeatReadAtSameEtimeSkipsQueryButReopensDb)
+TEST_F(R4ReaderADTest, RepeatTickReadPreservesDataAndAdvancesWindow)
 {
 	add_stock("EXR2", "rb2301");
 	seed_ticks("EXR2", "rb2301", {
@@ -328,29 +328,27 @@ TEST_F(R4ReaderADTest, RepeatReadAtSameEtimeSkipsQueryButReopensDb)
 	EXPECT_DOUBLE_EQ(s1->get_block_addr(0)[1].price, 3910.0);
 	s1->release();
 
-	// 第 2 次：容量够、etime 未前进 → reload_flag 保持 0，不做任何区间查询
-	const uint32_t dbg_after_first = _sink->log_count(LL_DEBUG);
+	// IDataReader 只约定返回指定窗口的数据；是否跳过查询或重开 LMDB 是 AD
+	// reader 的实现细节。这里检查公开结果，重开行为仅作为诊断时可观察的日志。
 	WTSTickSlice* s2 = _reader->readTickSlice("EXR2.rb2301", 2, 20230103093130000ull);
 	ASSERT_TRUE(s2 != NULL);
+	ASSERT_EQ(s2->get_block_counts(), (std::size_t)1);
 	ASSERT_EQ(s2->get_block_size(0), 2u);
+	EXPECT_DOUBLE_EQ(s2->get_block_addr(0)[0].price, 3900.0);
+	EXPECT_DOUBLE_EQ(s2->get_block_addr(0)[1].price, 3910.0);
 	s2->release();
-	// 唯一新增的 DEBUG 只能是"重开环境"，而不是"append to cache"
-	EXPECT_GT(_sink->log_count(LL_DEBUG), dbg_after_first);
-	EXPECT_EQ(_sink->last_log(LL_DEBUG).find("append to cache"), std::string::npos)
-		<< _sink->last_log(LL_DEBUG);
-	EXPECT_NE(_sink->last_log(LL_DEBUG).find("Tick db of EXR2.rb2301 opened"), std::string::npos);
 
-	// 第 3 次：etime 前进 1 分钟 → 增量窗口只命中 932 那一笔 → 缓冲区挤出 3900 并换成回绕两段
+	// 第 3 次：etime 前进 1 分钟，结果应包含窗口尾部的 931、932 两笔。
 	WTSTickSlice* s3 = _reader->readTickSlice("EXR2.rb2301", 2, 20230103093230000ull);
 	ASSERT_TRUE(s3 != NULL);
-	EXPECT_NE(_sink->last_log(LL_DEBUG).find("1 ticks after"), std::string::npos)
-		<< _sink->last_log(LL_DEBUG);
 	// 缓冲区已回绕：array_two 有 1 条，必须靠 appendBlock 拼出第二个块
 	EXPECT_EQ(s3->get_block_counts(), (std::size_t)2);
 	ASSERT_EQ(s3->get_block_size(0), 1u);
 	EXPECT_DOUBLE_EQ(s3->get_block_addr(0)[0].price, 3910.0);
 	ASSERT_EQ(s3->get_block_size(1), 1u);
 	EXPECT_DOUBLE_EQ(s3->get_block_addr(1)[0].price, 3920.0);
+	EXPECT_EQ(s3->get_block_addr(0)[0].action_time, 93100000u);
+	EXPECT_EQ(s3->get_block_addr(1)[0].action_time, 93200000u);
 	s3->release();
 }
 
@@ -409,11 +407,10 @@ TEST_F(R4ReaderADTest, KlineFirstReadLoadsLowerBarsAndChecksLatest)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 6. 同一 etime 复读：不再回源；此时交易所级句柄缓存已被掏空，
-//    换合约读取会拿到空指针 → cacheBarsFromStorage 返回 false → 切片为 NULL
-//    （get_k_db 的 move 语义，R4-BUG-02 的读取侧表现）
+// 6. 同一交易所下第二个合约仍应读出它自己的已落盘 K 线；同合约同 etime
+//    复读作为正常数据对照。资源句柄生命周期由 fixture/reader 析构清理。
 //////////////////////////////////////////////////////////////////////////
-TEST_F(R4ReaderADTest, SecondCodeOnSameExchangeFailsAfterCacheHandleMovedOut)
+TEST_F(R4ReaderADTest, SecondCodeOnSameExchangeReadsSeededBars)
 {
 	add_stock("EXK2", "rb2301");
 	add_stock("EXK2", "rb2302");
@@ -429,14 +426,30 @@ TEST_F(R4ReaderADTest, SecondCodeOnSameExchangeFailsAfterCacheHandleMovedOut)
 	uint64_t etime = 20230103100000000ull;
 	WTSKlineSlice* s1 = _reader->readKlineSlice("EXK2.rb2301", KP_Minute1, 2, etime);
 	ASSERT_TRUE(s1 != NULL);
-	ASSERT_EQ(s1->get_block_size(0), 2u);
+	EXPECT_EQ(s1->get_block_counts(), (std::size_t)1);
+	EXPECT_EQ(s1->get_block_size(0), 2u);
+	if (s1->get_block_counts() == 1 && s1->get_block_size(0) == 2)
+	{
+		EXPECT_DOUBLE_EQ(s1->get_block_addr(0)[0].open, 3900.0);
+		EXPECT_DOUBLE_EQ(s1->get_block_addr(0)[1].open, 3910.0);
+	}
 	s1->release();
 
-	// rb2302 第一次读：min1/EXK2 的缓存项已被上一次 move 掏空 → 拿不到库
+	// rb2302 的合法数据不能因 rb2301 首次读取而消失。
 	WTSKlineSlice* s2 = _reader->readKlineSlice("EXK2.rb2302", KP_Minute1, 1, etime);
-	EXPECT_TRUE(s2 == NULL);
+	ASSERT_TRUE(s2 != NULL);
+	EXPECT_EQ(s2->get_block_counts(), (std::size_t)1);
+	EXPECT_EQ(s2->get_block_size(0), 1u);
+	if (s2->get_block_counts() == 1 && s2->get_block_size(0) == 1)
+	{
+		const WTSBarStruct* b2 = s2->get_block_addr(0);
+		EXPECT_DOUBLE_EQ(b2[0].open, 4900.0);
+		EXPECT_DOUBLE_EQ(b2[0].close, 4900.5);
+		EXPECT_EQ(b2[0].time, (uint64_t)R4_M1_931);
+	}
+	s2->release();
 
-	// 同一合约再读（etime 不变 → 不触发 update_cache_from_lmdb）仍可复用上次的缓存
+	// 同一合约同 etime 再读仍返回首次读取的两根数据。
 	WTSKlineSlice* s3 = _reader->readKlineSlice("EXK2.rb2301", KP_Minute1, 2, etime);
 	ASSERT_TRUE(s3 != NULL);
 	ASSERT_EQ(s3->get_block_size(0), 2u);

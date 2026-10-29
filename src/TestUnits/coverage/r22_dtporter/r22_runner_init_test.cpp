@@ -168,6 +168,8 @@ protected:
 	void TearDown() override
 	{
 		register_parser_callbacks(NULL, NULL);
+		std::error_code ec;
+		fs::remove_all(_dir, ec);
 	}
 
 	std::string pathOf(const char* name) const { return (_dir / name).string(); }
@@ -362,11 +364,13 @@ TEST_F(R22RunnerInitTest, ParsersAsInlineArrayRegistersActiveEntriesOnly)
 	cfg += "]}";
 	runner.initialize(cfg.c_str(), _logCfg.c_str(), _dir.string().c_str(), false, false);
 
-	// 契约：createExtParser 不检查 ParserAdapterMgr::addAdapter 的返回值，
-	// 撞名时依旧返回 true（见 BUG-R22-003）；不存在的 id 也返回 true -> 返回值零信息量
-	EXPECT_TRUE(runner.createExtParser("r22_p2"));
-	EXPECT_TRUE(runner.createExtParser("auto_parser_1000"));
-	EXPECT_TRUE(runner.createExtParser("r22_never_used"));
+	// initParsers 即使在缺失模块时初始化失败，仍会把活跃条目的 ID 加入 registry。
+	// 未配置的 ID 首次创建成功，同一 ID 再创建必须因重复而失败。
+	ASSERT_TRUE(runner.createExtParser("r22_never_used"));
+	EXPECT_FALSE(runner.createExtParser("r22_never_used"));
+	// 配置中已登记的显式 ID 和自动 ID 也必须拒绝重复创建。
+	EXPECT_FALSE(runner.createExtParser("r22_p2"));
+	EXPECT_FALSE(runner.createExtParser("auto_parser_1000"));
 }
 
 TEST_F(R22RunnerInitTest, ParsersAsStringPathToExistingFileIsExpanded)
@@ -381,8 +385,11 @@ TEST_F(R22RunnerInitTest, ParsersAsStringPathToExistingFileIsExpanded)
 	cfg += ",\"parsers\":\"" + pathOf("parsers.json") + "\"}";
 	runner.initialize(cfg.c_str(), _logCfg.c_str(), _dir.string().c_str(), false, false);
 
-	// 该 id 已被 initParsers 占用：重复 createExtParser 仍返回 true（BUG-R22-003）
-	EXPECT_TRUE(runner.createExtParser("r22_from_file"));
+	// 唯一且未配置的 ID 首次创建成功，第二次创建必须失败。
+	ASSERT_TRUE(runner.createExtParser("r22_file_control"));
+	EXPECT_FALSE(runner.createExtParser("r22_file_control"));
+	// 文件存在，且 initParsers 即使无法加载模块也会登记活跃条目的 ID。
+	EXPECT_FALSE(runner.createExtParser("r22_from_file"));
 }
 
 TEST_F(R22RunnerInitTest, ParsersAsStringPathToMissingFileIsSkipped)

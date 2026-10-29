@@ -211,8 +211,8 @@ TEST_F(Q02FactoryTest, repeatedFailedLoadLeavesNoHalfInitFactory)
  *      _strategy->init(params)：需要仓库外编译产物，且不同 TU 下同名 wtp:: 类
  *      有 ODR/惰性抽取择一风险（BUG-L00-005）。
  *   2) SelMocker::handle_replay_done(L303-L314) 无条件计算
- *      `_total_calc_time / _emit_times`，而 _emit_times 构造为 0（SelMocker.cpp:43）
- *      -> 整数除零 UB：arm64 的 UDIV 不陷入（返回 0），x86 直接 SIGFPE。
+ *      `_total_calc_time / _emit_times`，而 _emit_times 构造为 0（SelMocker.cpp:43）。
+ *      整数除零属于未定义行为，不能据此断言特定架构会返回什么值或触发什么信号。
  *      CtaMocker 同一位置有 `if(_emit_times > 0)` 保护（CtaMocker.cpp:665），
  *      SelMocker 没有 -> 已登记缺陷，修复前不进启用用例。
  *   3) CtaMocker/SelMocker/HftMocker 的 install_hook/enable_hook(true)/step_calc
@@ -221,7 +221,7 @@ TEST_F(Q02FactoryTest, repeatedFailedLoadLeavesNoHalfInitFactory)
 TEST_F(Q02FactoryTest, DISABLED_RealModuleLoadAndSelDivZeroFamily)
 {
 	SelMocker sel(NULL, "q02_fac_disabled_sel");
-	// _emit_times == 0 -> _total_calc_time / _emit_times 整数除零
+	// _emit_times == 0 会触发未定义行为；不在测试注释中固定架构结果。
 	sel.handle_replay_done();
 
 	HftMocker hft(NULL, "q02_fac_disabled_hft");

@@ -8,14 +8,15 @@
  *   故 _exec_unit 无法注入桩件：handle_init / handle_schedule / handle_entrust /
  *   handle_order / handle_trade 五条解引用 _exec_unit（且 schedule/order/trade 还解引用
  *   _last_tick）的路径整条 DISABLED_ 登记留白。
- * - MatchEngine::handle_tick 对 _tick_cache 懒创建（MatchEngine.cpp L425-426），
- *   _orders 为空时 fire_orders/match_orders 不解引用 _sink →
- *   未 init 的 ExecMocker 可安全喂真实 WTSTickData::create tick（R2 实测的公开工厂）。
+ * - MatchEngine::handle_tick 对 _tick_cache 懒创建（MatchEngine.cpp L425-426）。但目标
+ *   撤单测试未经成功 init 就调用 handle_tick，单例在 ExecMocker.cpp L133 的 matcher 调用处
+ *   SIGSEGV；同一夹具的 TickSwap 控制也失败，无 tick 的 BuySellRefused 控制通过。ExecMocker
+ *   构造函数还未初始化 _exec_unit，因此未成功 init 的 tick 回调不是安全测试前提。
  * - 但一旦 _orders 非空（buy/sell 之后），下一个 handle_tick 会进 fire_orders
  *   `_sink->handle_entrust` → _sink==NULL 崩溃（regisSink 只在 init() 里做）。
  *   该「先有单再喂 tick 必崩」序列整条 DISABLED_。
- * - MatchEngine::cancel(localid) 只置 state=9 不 erase、也不判 state，重复撤单会
- *   二次扣减 _undone 并二次计数 _cacl_cnt —— 以启用用例固化现行为，缺陷另记。
+ * - MatchEngine::cancel(localid) 只置 state=9、不 erase 且不检查既有 state；源码显示重复调用
+ *   可能再次返回剩余量并触发重复扣减/计数。对应回归测试因 fixture 不安全暂时禁用，行为尚未验证。
  * - buy/sell 只依赖撮合器内部 tick 缓存，不查 comminfo；合约键仍按三段式喂
  *   （CodeHelper.hpp:601-616），SetUp 自检 getCommodityInfo 可判定注册与否。
  * - handle_replay_done 不碰 _exec_unit（L337-347）：output dir 由 WtHelper::setOutputDir
@@ -134,8 +135,10 @@ TEST_F(R20ExecMocker, CurTimeDerivedFromReplayerClock)
 	EXPECT_EQ(m.getCurTime(), expect);
 }
 
-// tick 换入换出：第二次 handle_tick 先 release 旧 tick（L124-128），无订单时全链安全
-TEST_F(R20ExecMocker, TickSwapReleasesPreviousTick)
+// 暂停：裸构造的 ExecMocker 未初始化 _exec_unit，handle_tick 会在 matcher 回调后读取该未定指针
+//（BUG-N04-001 风险）；本夹具此前的 tick 路径也触发 signal 11。缺失模块的 init() 返回 false
+// 且仍不设置 _exec_unit；可用的恢复前置是产品初始化/失败关闭修复，以及可注入的安全 no-op 执行单元。
+TEST_F(R20ExecMocker, DISABLED_TickSwapReleasesPreviousTick)
 {
 	ExecMocker m(&_rp);
 	WTSTickData* t1 = make_exec_tick(kCode, 3800.0, 3799.0, 3801.0, 5, 7, 20240103, 142500000);
@@ -159,8 +162,9 @@ TEST_F(R20ExecMocker, BuySellRefusedBeforeAnyTick)
 	EXPECT_FALSE(m.cancel(999999u));
 }
 
-// 有 tick 后 buy 挂单成功：_ord_cnt/_undone 更新（L226-229），undone 取整数量
-TEST_F(R20ExecMocker, BuyAfterTickAccumulatesUndone)
+// 暂停：同一未初始化 _exec_unit 的 handle_tick 前置使买单和 undone 断言无效。重新启用需先修复
+// BUG-N04-001 的初始化/失败关闭路径，并为 matcher 提供不执行真实逻辑的 no-op ExecuteUnit。
+TEST_F(R20ExecMocker, DISABLED_BuyAfterTickAccumulatesUndone)
 {
 	ExecMocker m(&_rp);
 	WTSTickData* t1 = make_exec_tick(kCode, 3800.0, 3799.0, 3801.0, 5, 7, 20240103, 142500000);
@@ -173,8 +177,9 @@ TEST_F(R20ExecMocker, BuyAfterTickAccumulatesUndone)
 	m.handle_session_end(20240103);
 }
 
-// sell 方向 undone 取负（L246），与 buy 混合累加
-TEST_F(R20ExecMocker, SellDecrementsUndone)
+// 暂停：同一未初始化 _exec_unit 的 handle_tick 前置使卖单和 undone 断言无效。重新启用需先修复
+// BUG-N04-001 的初始化/失败关闭路径，并为 matcher 提供不执行真实逻辑的 no-op ExecuteUnit。
+TEST_F(R20ExecMocker, DISABLED_SellDecrementsUndone)
 {
 	ExecMocker m(&_rp);
 	WTSTickData* t1 = make_exec_tick(kCode, 3800.0, 3799.0, 3801.0, 5, 7, 20240103, 142500000);
@@ -188,10 +193,9 @@ TEST_F(R20ExecMocker, SellDecrementsUndone)
 	m.handle_session_end(20240103);
 }
 
-// 按 localid 撤单：state=9、_undone 归还、撤单计数更新；重复撤单不判 state，
-// 现行为是二次归还（_undone 变负、_cacl_cnt 双计）——缺陷已记 bugs/R20_wtbtcore.md，
-// 本用例按源码实际行为固化，非期望语义。
-TEST_F(R20ExecMocker, CancelByIdRestoresUndoneAndDoubleCancelQuirk)
+// 暂停：未成功 init 的 fixture 无法安全进入 tick/撤单路径，SIGSEGV 发生在 matcher 调用处。
+// 保留期望与首撤对照；需换成成功初始化的 executer fixture 后再启用验证。
+TEST_F(R20ExecMocker, DISABLED_CancelByIdDoesNotRestoreUndoneTwice)
 {
 	ExecMocker m(&_rp);
 	WTSTickData* t1 = make_exec_tick(kCode, 3800.0, 3799.0, 3801.0, 5, 7, 20240103, 142500000);
@@ -203,15 +207,18 @@ TEST_F(R20ExecMocker, CancelByIdRestoresUndoneAndDoubleCancelQuirk)
 	EXPECT_TRUE(m.cancel(rb[0]));			// change=+3 → undone 0（L259-264）
 	EXPECT_DOUBLE_EQ(0.0, m.getUndoneQty(kCode));
 
-	EXPECT_TRUE(m.cancel(rb[0]));			// 同一单再撤：仍返回 left=3
-	EXPECT_DOUBLE_EQ(-3.0, m.getUndoneQty(kCode));
+	// 重复撤单的 bool 返回语义尚未明确；这里只检查撤单账本没有重复归还。
+	m.cancel(rb[0]);
+	EXPECT_DOUBLE_EQ(0.0, m.getUndoneQty(kCode));
 
 	m.handle_session_end(20240103);			// 清 _orders，之后撤单查无
 	EXPECT_FALSE(m.cancel(rb[0]));
+	EXPECT_DOUBLE_EQ(0.0, m.getUndoneQty(kCode));
 }
 
-// 按合约+方向批量撤单：未激活(state!=1)的单被 continue 跳过 → 返回空、_undone 不变
-TEST_F(R20ExecMocker, CancelByCodeSkipsUnfiredOrders)
+// 暂停：本测试依赖 handle_tick 后再下单，裸构造对象的 _exec_unit 未初始化（BUG-N04-001 风险），
+// 因而未到达的撤单断言不能用于裁定 matcher 行为。恢复需产品初始化/失败关闭修复及安全 no-op ExecuteUnit。
+TEST_F(R20ExecMocker, DISABLED_CancelByCodeSkipsUnfiredOrders)
 {
 	ExecMocker m(&_rp);
 	WTSTickData* t1 = make_exec_tick(kCode, 3800.0, 3799.0, 3801.0, 5, 7, 20240103, 142500000);
@@ -228,8 +235,9 @@ TEST_F(R20ExecMocker, CancelByCodeSkipsUnfiredOrders)
 	EXPECT_TRUE(none.empty());
 }
 
-// 会话收尾：_matcher.clear() 清全部订单、_undone 归零、统计日志（L113-120）
-TEST_F(R20ExecMocker, SessionEndClearsMatcherAndUndone)
+// 暂停：本测试依赖 handle_tick 后再下单，裸构造对象的 _exec_unit 未初始化（BUG-N04-001 风险），
+// 因而未到达的 session-end 断言不能用于裁定 matcher 行为。恢复需产品初始化/失败关闭修复及安全 no-op ExecuteUnit。
+TEST_F(R20ExecMocker, DISABLED_SessionEndClearsMatcherAndUndone)
 {
 	ExecMocker m(&_rp);
 	WTSTickData* t1 = make_exec_tick(kCode, 3800.0, 3799.0, 3801.0, 5, 7, 20240103, 142500000);

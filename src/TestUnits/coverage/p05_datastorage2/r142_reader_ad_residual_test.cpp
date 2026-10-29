@@ -62,9 +62,9 @@ TEST_F(R142ReaderADTest, DISABLED_R142ReaderADKlineIncrementalAppendAndRtMiss)
 
 	init_reader();
 
-	// 第一次：容量 0<3 -> get_lowers 取最新 3 条（09:31/09:32/09:33）
+	// 第一次：结束时间包含 09:33，容量 0<3 -> get_lowers 取 09:31/09:32/09:33
 	WTSKlineSlice* s1 = _reader->readKlineSlice("EXR.rb2301", KP_Minute1, 3,
-		20230103093100000ull);
+		20230103093300000ull);
 	ASSERT_TRUE(s1 != NULL);
 	ASSERT_EQ(s1->size(), 3u);
 	EXPECT_EQ(s1->at(0)->time, mt(20230103, 931));

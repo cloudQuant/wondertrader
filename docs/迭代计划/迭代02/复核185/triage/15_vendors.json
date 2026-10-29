@@ -1,0 +1,672 @@
+[
+  {
+    "lane": "R105",
+    "id": "BUG-R105-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/ParserCTP/ParserCTP.cpp:254-275",
+      "src/ParserCTPMini/ParserCTPMini.cpp:232-257",
+      "src/ParserFemas/ParserFemas.cpp:228-253",
+      "src/API/CTPMini1.5.8/ThostFtdcUserApiStruct.h:830-831",
+      "src/API/CTPMini1.5.8/ThostFtdcUserApiStruct.h:916-917"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_ParserCTP/r105_parserctp_api_test.cpp:360-397",
+      "src/TestUnits/coverage/t_ParserCTPMini/r105_parserctpmini_api_test.cpp:359-388",
+      "src/TestUnits/coverage/t_ParserFemas/r105_parserfemas_api_test.cpp:372-401"
+    ],
+    "input_reachability": "正常 SDK 深度行情回调携带 ActionDay、UpdateTime；ActionDay 等于登录 TradingDay，行情时刻 00:xx 且本地时钟仍在前一日 23:xx 时可进入日期纠偏路径。CTP SDK 结构分别包含 TradingDay 与 ActionDay 字段；代码注释也明确考虑系统时钟慢于行情时钟。",
+    "oracle_basis": "SDK 结构把 ActionDay 定义为业务日期，并与 TradingDay 分列；本地纠偏代码对 23:xx 行情/00 点本地时钟计算前一日，同时保留了 00:xx 行情/23 点本地时钟的预期修正表达式。该路径应按行情时间与本地日期关系保留 ActionDay 对应的次日日期。",
+    "reason": "三份实现都只在 actDate==m_uTradingDate 且 actHour>=20 时进入纠偏。内层 actHour==0 && curHour==23 因外层 gate 永远不可达；在该有效边界上，代码仍会把 actDate 设为前一日 curDate，产出错误 action_date。",
+    "root_cause": "纠偏 gate 仅接收 20-23 时，没有包括 00 时段；日期策略分支与入口谓词不一致。",
+    "fix": "把纯日期决策提取为可注入 actDate、actHour、curDate、curHour 的 helper；在三种 parser 的正常时间路径上允许 00 时段进入，并保留 03-09 时的早盘过滤语义。",
+    "acceptance": "对 CTP、CTPMini、Femas 分别以本地 fake clock 验证 (行情 00:30、本地 23:30、ActionDay=TradingDay) 输出 curDate+1；并保留 23:30/00:30、03-09 时过滤和普通日盘对照。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/t_ParserCTP/r105_parserctp_api_test.cpp",
+        "case": "R105CtpTest.night_session_recomputes_action_date",
+        "issue": "现有用例只构造行情 23:30，按真实墙钟分支，未覆盖 dead 00:xx/23:xx 修正；结果不能验证这一候选。",
+        "change": "增加可注入本地时钟的用例，分别覆盖 00:xx 行情/23:xx 本地时钟与 23:xx 行情/00:xx 本地时钟。",
+        "target": "CoverageTests_t_ParserCTP",
+        "filter": "R105CtpTest.night_session_action_date_handles_local_midnight_skew",
+        "expected_result": "第一种情况 action_date 为本地日期次日；第二种为本地日期前一日；测试不读取真实墙钟。"
+      },
+      {
+        "file": "src/TestUnits/coverage/t_ParserCTPMini/r105_parserctpmini_api_test.cpp",
+        "case": "R105MiniTest.night_session_recomputes_action_date",
+        "issue": "用例只覆盖 23:30 行情，没覆盖外层条件漏掉 00:xx。",
+        "change": "通过纯日期 helper 或 fake clock 覆盖 00:xx 行情/23:xx 本地时钟。",
+        "target": "CoverageTests_t_ParserCTPMini",
+        "filter": "R105MiniTest.night_session_action_date_handles_local_midnight_skew",
+        "expected_result": "action_date 与行情日期关系一致，其他夜盘/早盘过滤保持不变。"
+      },
+      {
+        "file": "src/TestUnits/coverage/t_ParserFemas/r105_parserfemas_api_test.cpp",
+        "case": "R105FemasTest.night_session_recomputes_action_date",
+        "issue": "用例只覆盖 23:30 行情，没覆盖外层条件漏掉 00:xx。",
+        "change": "通过纯日期 helper 或 fake clock 覆盖 00:xx 行情/23:xx 本地时钟。",
+        "target": "CoverageTests_t_ParserFemas",
+        "filter": "R105FemasTest.night_session_action_date_handles_local_midnight_skew",
+        "expected_result": "action_date 为本地日期次日，且 03-09 时过滤语义保持。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "提取纯日期决策 helper 并加入三组安全 stub 边界用例；本轮未运行测试。"
+    ]
+  },
+  {
+    "lane": "R105",
+    "id": "BUG-R105-005",
+    "decision": "EXTERNAL_BLOCKED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/ParserCTPMini/ParserCTPMini.cpp:180-193",
+      "src/ParserCTPMini/ParserCTPMini.cpp:415-449",
+      "src/ParserFemas/ParserFemas.cpp:179-192",
+      "src/ParserFemas/ParserFemas.cpp:410-445",
+      "src/ParserCTPOpt/ParserCTPOpt.cpp:179-192",
+      "src/ParserCTPOpt/ParserCTPOpt.cpp:407-442",
+      "src/ParserCTP/ParserCTP.cpp:188-204",
+      "src/API/CTPMini1.5.8/ThostFtdcMdApi.h:102-105",
+      "src/API/Femas3.02/USTPFtdcMduserApi.h:123-126",
+      "src/API/CTPOpt3.5.8/ThostFtdcMdApi.h:104-107",
+      "src/Share/Converter.hpp:57-60"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_ParserCTP/r105_parserctp_api_test.cpp:309-333"
+    ],
+    "input_reachability": "成功登录回调读取 SDK GetTradingDay 并把结果转换成 m_uTradingDate。若 SDK 在成功登录后返回空值，Mini/Femas/Opt 会留下 0；后续动态 subscribe 只更新缓存并不下发。若返回 NULL，当前 converter 也没有在调用点看到空指针保护。",
+    "oracle_basis": "三个仓内 SDK 头文件只说明 GetTradingDay 在登录成功后才返回正确交易日，签名为 const char*；未说明成功登录时指针、空串或格式的保证。CTP 的本地日期回退测试不能证明 Mini/Femas/Opt 的柜台契约。",
+    "reason": "源码风险和缓存影响可确认，但当前仓库没有与这三个 API 版本匹配的成功登录空值/NULL 规则。无法判断这种回调是否属于有效供应商生命周期，故不把相似 CTP 行为外推。",
+    "root_cause": "m_uTradingDate==0 同时表示未就绪和转换失败；动态订阅路径在 0 状态只缓存，不产生错误或延迟重放状态。",
+    "fix": "待匹配 SDK 契约确认后，对 GetTradingDay 指针、空值和日期格式先作显式验证；若暂不可用则保持未就绪并报告错误，动态订阅须有可观察的缓存/重放策略，不要用本地日期替代交易日。",
+    "acceptance": "分别按 Mini、Femas、CTPOpt 的精确 SDK 合同验证 NULL、空串、合法日期和非法格式；确认无日期时不会错误报告登录就绪，后续订阅被重放或明确拒绝。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": {
+      "required": "CTPMini 1.5.8、Femas 3.02、CTPOpt 3.5.8 各自对成功登录后 GetTradingDay 指针/空串/格式的明确保证。",
+      "checked_locally": "检查了三个仓内 GetTradingDay 声明、登录成功回调、动态 subscribe 路径及 CTP 自己的空日期回退 stub；本地 SDK 头文件只声明返回 const char* 和登录后交易日正确。",
+      "why_local_is_insufficient": "空值由外部 SDK 在成功登录回调生命周期中产生与否，不能由 fake 或另一版 CTP 的行为推出；错误假设可能把有效未就绪状态判成产品故障，或漏掉合法接口输入。",
+      "next_action": "取得与仓内固定 SDK 版本一致的 vendor release/API contract 后，才把该输入归为支持或排除，再写对应 stub 断言。"
+    },
+    "local_remaining": [
+      "获取并比对上述精确版本 SDK 对 GetTradingDay 的合同；合同未到前不得以 CTP 空串行为替代 Mini/Femas/Opt。"
+    ]
+  },
+  {
+    "lane": "R113",
+    "id": "BUG-R113-001",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderMocker/TraderMocker.cpp:640-657",
+      "src/TraderMocker/TraderMocker.cpp:689-703",
+      "src/TraderMocker/TraderMocker.cpp:723-743",
+      "src/WtCore/TraderAdapter.cpp:404-416",
+      "src/WtCore/TraderAdapter.cpp:1405-1412",
+      "src/Includes/ITraderApi.h:217-242"
+    ],
+    "test_evidence": [
+    "src/TestUnits/coverage/t_TraderMocker/r113_mocker_login_retry_test.cpp:12-16"
+    ],
+    "input_reachability": "正常 TraderAdapter::run 只调用一次 connect；一次成功 WTE_Connect 会调用一次 login；release 设置终止状态并 join 撮合/worker 线程。被禁用用例直接在 connect/login 后重复调用接口。",
+    "oracle_basis": "仓内 ITraderApi 对 connect、login、disconnect、logout 只声明接口，没有承诺同一实例可重复登录/连接；正常 adapter 调用顺序各只一次，release 是终止生命周期。",
+    "reason": "重复 login/connect 会 reset 仍 joinable 的线程而触发 terminate，但该序列不是仓内 adapter 的正常生命周期，也没有公开重试合同。现用例把第二次 login 和第二次 connect 串在一起；第一次若终止，第二条路径永远没覆盖。",
+    "root_cause": "测试把未经接口约定的直接重复调用提升成正常产品缺陷，并将两条独立路径写在一个崩溃用例中。",
+    "fix": "当前不据此要求支持重试。若后续产品要求重复连接，单独定义状态机，先 stop/join 旧线程并重置 io_context，再启动新生命周期。",
+    "acceptance": "移除或改写该测试为明确的契约占位；若重试被确认为支持，则分开测试 repeat-login、repeat-connect 和 release 后调用，并断言安全状态转换及线程回收。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/t_TraderMocker/r113_mocker_login_retry_test.cpp",
+        "case": "R113MockerLoginRetry.DISABLED_SecondLoginOrConnectTerminates",
+        "issue": "把 repeat-login 与 repeat-connect 连在一起且假设均属正常生命周期；第二段不可达，并无 ITraderApi 重试合同。",
+        "change": "将该项改为不参与产品缺陷判定的契约占位；若保留诊断入口则把两条序列拆成独立用例，不写成已确认的正常生命周期缺陷。",
+        "target": "CoverageTests_t_TraderMocker",
+        "filter": "R113MockerLoginRetry.DISABLED_SecondLoginOrConnectTerminates",
+        "expected_result": "不再把不受支持的重复调用作为产品失败；每个有明确契约的路径独立验证。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "主代理审核并修正/撤销该复合 DISABLED 测试；本轮未运行该崩溃用例。"
+    ]
+  },
+  {
+    "lane": "R113",
+    "id": "BUG-R113-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderMocker/TraderMocker.cpp:52-79",
+      "src/TraderMocker/TraderMocker.cpp:397-401",
+      "src/TraderMocker/TraderMocker.cpp:723-733",
+      "src/README.md:78"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderMocker/r113_mocker_match_long_test.cpp:40-58",
+      "src/TestUnits/coverage/t_TraderMocker/r113_mocker_match_short_test.cpp:33-50",
+      "src/TestUnits/coverage/t_TraderMocker/r113_mocker_partial_cancel_test.cpp:1-67"
+    ],
+    "input_reachability": "TraderMocker 正常撮合每个满足成交条件的订单都调用 splitVolume；登录后撮合线程每 5ms 处理一次。多次成交可在同一秒内触发该函数。",
+    "oracle_basis": "splitVolume 明确调用 srand(time(NULL)) 后用 rand 选成交拆分量，表示拆量依赖随机序列；按秒对每次拆分重置全局 PRNG，会让同秒调用重复相同序列并覆盖宿主进程的 C rand 状态。",
+    "reason": "这是公开模拟撮合的正常成交路径，不依赖非法输入。对每次拆分按秒重新播种会使多个交易/实例的拆量相关且扰乱其他组件的随机数；现有长短方向测试只验证总成交量和订单状态，不验证拆量序列或 RNG 隔离。",
+    "root_cause": "每次 splitVolume 都用秒精度时钟重置进程全局 RNG，而不是维护模拟器自身的随机状态。",
+    "fix": "使用 TraderMocker 实例内 RNG，构造/配置时播种一次；为重复模拟提供可选固定 seed，避免调用 srand/rand 修改进程全局状态。",
+    "acceptance": "固定 seed 的相同订单/行情序列得到相同逐笔拆量；连续调用推进序列而不在同一秒重复第一段；总量守恒、每段边界正确，两个实例的随机状态互不影响。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+      "file": "src/TestUnits/coverage/t_TraderMocker/r113_mocker_match_long_test.cpp",
+        "case": "new deterministic splitVolume/RNG regression",
+        "issue": "现有撮合测试只断言总成交量/状态，无法发现每次调用重播种和全局 RNG 污染。",
+        "change": "为实例 RNG 加固定 seed seam；测试相同 seed 可复现、连续调用序列前进、两个实例隔离，并保留拆分总量边界断言。",
+        "target": "CoverageTests_t_TraderMocker",
+        "filter": "R113MockerSplitVolume.*",
+        "expected_result": "无 srand/rand 全局状态副作用，固定 seed 逐笔结果确定且量守恒。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "在主代理实现实例 RNG 后添加 deterministic stub 测试并核对逐笔边界；本轮未执行撮合测试。"
+    ]
+  },
+  {
+    "lane": "R114",
+    "id": "BUG-R114-004",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderDumper/TraderAdapter.cpp:252-274",
+      "src/TraderDumper/TraderAdapter.cpp:344-380",
+      "src/TraderDumper/TraderAdapter.cpp:393-411"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderDumper/r114_dumper_test.cpp:251-276",
+      "src/TestUnits/coverage/t_TraderDumper/r114_dumper_test.cpp:439-446",
+      "src/TestUnits/coverage/t_TraderDumper/r114_dumper_test.cpp:501-525"
+    ],
+    "input_reachability": "正常 manager 在 run() 时把已登记 adapter 数设为 _live_cnt；每个 adapter 的订单末帧回调结束时调用一次 decAlive。被引用 forwarding 用例先对空 manager 调 run()，再单独创建且未登记 adapter 并人工调用 onRspOrders。",
+    "oracle_basis": "_live_cnt 对应 _adapters 数量；decAlive 的契约前置是已登记运行中的 adapter 结束一次。用例没有满足该前置，因而不能用 0→UINT_MAX 的 fetch_sub 证明正常生命周期会回绕。",
+    "reason": "decAlive 在 0 上确会无符号回绕，但候选关键用例的 manager 计数为 0、adapter 不在 manager 表中。另一个登记 3 个 adapter 的用例按 3→2→1→0 递减。没有证据证明 vendor 会对单一查询重复发送末帧回调。",
+    "root_cause": "测试在设置 live count 前运行 manager、随后创建未登记 adapter，造成计数和回调对象不一致。",
+    "fix": "修复测试 fixture：先 addAdapter，再调用 run() 建立计数，然后仅对登记 adapter 调一次终态回调。对重复末帧单独讨论精确 callback cardinality，不作为当前产品结论。",
+    "acceptance": "fixture 中 _live_cnt 与 manager size 一致；正常终态一次后计数从 N 到 N-1 且不回绕，adapter 完成状态与刷新顺序符合预期。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/t_TraderDumper/r114_dumper_test.cpp",
+        "case": "R114DumperFixture.mocker_adapter_forwards_account_trade_order_position_records",
+        "issue": "mgr.run() 在空表上先设 _live_cnt=0，之后创建的 adapter 未 addAdapter，却调用 onRspOrders 触发 decAlive。",
+        "change": "将 adapter 登记进 manager 后再 run；或让 forwarding fixture 使用不会递减 manager 计数的 fake manager。重复末帧另做合同确认。",
+        "target": "CoverageTests_t_TraderDumper",
+        "filter": "R114DumperFixture.mocker_adapter_forwards_account_trade_order_position_records",
+        "expected_result": "已登记 adapter 的一次末帧把计数从 1 减至 0；测试不再以未登记对象触发下溢。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "修正无效 fixture 后由主代理重跑单个 forwarding 用例；本轮未运行。"
+    ]
+  },
+  {
+    "lane": "R76",
+    "id": "R76-01",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/ParserShm/ParserShm.cpp:315-328",
+      "src/Includes/IParserApi.h:70-78",
+      "src/WtCore/ParserAdapter.cpp:45-75"
+    ],
+    "test_evidence": [
+    "src/TestUnits/coverage/t_ParserShm/r76_shm_boundary_test.cpp:284-303",
+    "src/TestUnits/coverage/t_ParserShm/r76_shm_boundary_test.cpp:305-310"
+    ],
+    "input_reachability": "正常 ParserAdapter::initExt 保存 IBaseDataMgr、注册自身为 SPI，再读取 manager 的合约列表；用户禁用用例创建返回 NULL BaseDataMgr 的人工 sink 直接注册 ParserShm。",
+    "oracle_basis": "仓内接口只把 getBaseDataMgr 声明为纯虚返回指针，没有承诺 NULL 是受支持值。正常上层明确依赖有效 manager。不能用违反该内部初始化前置的人工 sink 推导产品缺陷。",
+    "reason": "ParserShm::registerSpi 对非空 listener 直接读取 manager size，空指针会崩溃；但当前测试前置不属于正常 adapter 初始化，也没有接口承诺支持空 BaseDataMgr。",
+    "root_cause": "测试把有效 manager 这一上层初始化前置省略后，将内部解引用缺陷标成产品错误。",
+    "fix": "不要把 NULL BaseDataMgr 纳入产品输入合同。若 ParserShm 要支持自定义 sink，则另加清楚的前置校验与失败状态；正常 Adapter 保持注入有效 manager。",
+    "acceptance": "删除/改名该禁用测试为违反前置的契约占位；正常 initExt 测试验证有效 manager 注册与订阅成功。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/t_ParserShm/r76_shm_boundary_test.cpp",
+        "case": "R76ParserShmTest.DISABLED_RegisterSpiWithNullBaseDataMgrCrashes",
+        "issue": "人工 sink 返回 NULL BaseDataMgr，和 ParserAdapter::initExt 的正常注册路径不符，接口也未承诺可空。",
+        "change": "从产品缺陷断言中撤回或保留为禁用的违反前置占位；不要启用崩溃用例。",
+        "target": "CoverageTests_t_ParserShm",
+        "filter": "R76ParserShmTest.DISABLED_RegisterSpiWithNullBaseDataMgrCrashes",
+        "expected_result": "不再把不满足 manager 前置的输入作为产品回归失败；正常注册仍以有效 BaseDataMgr 验证。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "主代理审核并撤回误报/修正测试命名；本轮未运行禁用崩溃用例。"
+    ]
+  },
+  {
+    "lane": "R76",
+    "id": "R76-02",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/ParserUDP/ParserUDP.cpp:254-266",
+      "src/ParserUDP/ParserUDP.cpp:443-450",
+      "src/ParserUDP/ParserUDP.cpp:120-170",
+      "src/Includes/IParserApi.h:28-36",
+      "src/Includes/IParserApi.h:102-106"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_ParserUDP/r76_udp_boundary_test.cpp:183-197"
+    ],
+    "input_reachability": "有效 UDP parser 配置后，connect() 成功建立广播/订阅 socket、启动 io_context worker 并返回 true；成功初始化是正常公开调用。SPI 接口提供 Connect/Login 事件回调。",
+    "oracle_basis": "ParserUDP 已有 doOnConnected()，在 sink 存在时按 Connect、Login 顺序发送成功事件，但全仓该 helper 无调用点；普通成功 connect 因而没有对应事件。IParserSpi 明确包含连接/登录事件类型。",
+    "reason": "正常 connect 成功只返回 true，不通知注册的 SPI 已就绪；实现中专门写好的成功事件 helper 从未调用。当前启用用例只测重复 disconnect，没有正向 connect/事件断言。",
+    "root_cause": "连接 socket 成功后遗漏调用 doOnConnected，SPI 的连接生命周期事件丢失。",
+    "fix": "在 reconnect 成功、socket 接收与订阅通道已建立后通过 strand 投递一次 doOnConnected；失败路径不发成功事件。",
+    "acceptance": "fake 本地 socket 或受控 seam 下，connect 成功时 SPI 依序收到一次 WPE_Connect 与 WPE_Login；连接失败时不收到成功事件；disconnect 后收到配对的 WPE_Close。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/t_ParserUDP/r76_udp_boundary_test.cpp",
+        "case": "R76ParserUDPTest.DisconnectBeforeAndAfterRegisterSpiIsIdempotent",
+        "issue": "现有用例仅覆盖 disconnect，没有验证 connect 成功后 SPI 是否收到就绪事件。",
+        "change": "加可控本地 transport 的成功/失败 connect 测试，记录事件次序和次数。",
+        "target": "CoverageTests_t_ParserUDP",
+        "filter": "R76ParserUDPTest.ConnectReportsReadyEventsOnce",
+        "expected_result": "成功 setup 为 Connect→Login 各一次；失败 setup 无成功事件。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "在本地 fake transport/seam 上补连接成功与失败事件测试；本轮未运行网络用例。"
+    ]
+  },
+  {
+    "lane": "R76",
+    "id": "R76-03",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/ParserXeleSkt/ParserXeleSkt.cpp:124-154",
+      "src/ParserXeleSkt/ParserXeleSkt.cpp:265-277",
+      "src/ParserXeleSkt/ParserXeleSkt.cpp:526-533",
+      "src/Includes/IParserApi.h:28-36",
+      "src/Includes/IParserApi.h:102-106"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_ParserXeleSkt/r76_xele_boundary_test.cpp:192-210"
+    ],
+    "input_reachability": "有效配置下 connect() 完成快照准备、打开组播接收 socket、启动 worker 并返回 true；连接错误会由 reconnect 返回 false。",
+    "oracle_basis": "ParserXeleSkt 的 doOnConnected() 已定义成功时 Connect、Login 两个 SPI 事件；该 helper 没有调用者。接口 SPI 暴露连接与登录事件。",
+    "reason": "正常成功连接路径启动数据接收但从不通知已注册 SPI；现有用例只验证 connect 前 disconnect 的延迟 Close，不覆盖成功连接事件。",
+    "root_cause": "reconnect 成功之后未调用 doOnConnected，成功生命周期事件缺失。",
+    "fix": "在快照同步成功且 multicast 接收通道已建立后，经 strand 投递 doOnConnected 一次；快照/TCP/UDP setup 失败时不发成功事件。",
+    "acceptance": "以 mock TCP 快照和本地组播 seam 验证 Connect、Login 各一次且顺序正确；失败路径不报成功；disconnect 发送 Close。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/t_ParserXeleSkt/r76_xele_boundary_test.cpp",
+        "case": "R76XeleSktTest.DisconnectBeforeConnectDefersCloseAndIsIdempotent",
+        "issue": "现有用例只覆盖 disconnect-before-connect，不验证成功快照/组播 setup 的 SPI 事件。",
+        "change": "加 mock TCP snapshot 和受控 multicast 接收 setup，验证成功事件及失败不报成功。",
+        "target": "CoverageTests_t_ParserXeleSkt",
+        "filter": "R76XeleSktTest.ConnectReportsReadyEventsOnce",
+        "expected_result": "成功 setup 发送 Connect→Login 各一次，失败不发送成功事件，disconnect 发送 Close。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "为快照传输和组播 setup 补无外网的本地 fake 测试；本轮未运行。"
+    ]
+  },
+  {
+    "lane": "R76",
+    "id": "R76-08",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/ParserShm/ParserShm.cpp:63-68",
+      "src/ParserShm/ParserShm.cpp:85-105",
+      "src/ParserShm/ParserShm.cpp:127",
+      "src/ParserShm/ParserShm.cpp:271-276",
+      "src/ParserUDP/ParserUDP.cpp:82-90",
+      "src/ParserUDP/ParserUDP.cpp:254-281",
+      "src/ParserUDP/ParserUDP.cpp:318-337",
+      "src/ParserXeleSkt/ParserXeleSkt.cpp:83-90",
+      "src/ParserXeleSkt/ParserXeleSkt.cpp:265-292",
+      "src/ParserXeleSkt/ParserXeleSkt.cpp:332-350",
+      "src/Includes/IParserApi.h:96-112"
+    ],
+    "test_evidence": [
+    "src/TestUnits/coverage/t_ParserShm/r76_shm_boundary_test.cpp:265-282",
+      "src/TestUnits/coverage/t_ParserUDP/r76_udp_boundary_test.cpp:183-197",
+      "src/TestUnits/coverage/t_ParserXeleSkt/r76_xele_boundary_test.cpp:192-210"
+    ],
+    "input_reachability": "IParserApi 区分 disconnect() 与仅用于退出的 release()；同一实例 disconnect 后再次 connect 是可由公开接口表达的正常可恢复生命周期。三种 parser 的 disconnect 都设置 _stopped=true。",
+    "oracle_basis": "disconnect 只表示断开连接命令，release 注释明确用于退出；故 disconnect 不应隐式终结对象。重连应恢复 worker/socket/receive loop，或安全返回明确不支持，不能 reset 一个仍 joinable 的线程。",
+    "reason": "三实现都不把 _stopped 复位。ParserShm 的 connect 会 reset 旧 thread；UDP/Xele 在同一 io_context 上重新开 socket 并 reset worker。disconnect 后即便旧线程已经退出，std::thread 仍 joinable，reset 会触发 terminate；即使安全 join，sticky stopped 也会使接收回调退出。",
+    "root_cause": "停止状态、线程回收与重新初始化没有构成完整的可重入连接状态机；connect 假定只调用一次。",
+    "fix": "实现 disconnect→join/cancel→socket/handler 清理→状态复位→connect 的完整状态机，重建或 restart io_context；若产品决定禁止复用，则 connect 必须安全拒绝并在接口文档明确，不能 reset joinable thread。",
+    "acceptance": "在三种 parser 上执行 connect→disconnect→connect，第二次不 terminate，数据回调与连接事件重新工作；release 后再次 connect 有明确安全结果；每个本地 worker 最终 join。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/t_ParserShm/r76_shm_boundary_test.cpp",
+        "case": "R76ParserShmTest.FactoryDeleteWithRegisteredSinkIsSafe",
+        "issue": "现有用例没有完整 connect→disconnect→connect 生命周期。",
+        "change": "增加带临时共享内存 fixture 的同实例重连测试，覆盖旧线程回收、stopped 复位和再次消费。",
+        "target": "CoverageTests_t_ParserShm",
+        "filter": "R76ParserShmTest.DisconnectThenConnectRestartsWorker",
+        "expected_result": "同一实例第二次连接工作且线程可 join；若策略选择不支持，则返回明确失败而不 terminate。"
+      },
+      {
+        "file": "src/TestUnits/coverage/t_ParserUDP/r76_udp_boundary_test.cpp",
+        "case": "R76ParserUDPTest.DisconnectBeforeAndAfterRegisterSpiIsIdempotent",
+        "issue": "只测 disconnect 幂等，不测 disconnect 后重连。",
+        "change": "通过无外网本地 socket seam 测完整复用连接周期。",
+        "target": "CoverageTests_t_ParserUDP",
+        "filter": "R76ParserUDPTest.DisconnectThenConnectRestartsTransport",
+        "expected_result": "第二次连接恢复接收且无 joinable-thread terminate。"
+      },
+      {
+        "file": "src/TestUnits/coverage/t_ParserXeleSkt/r76_xele_boundary_test.cpp",
+        "case": "R76XeleSktTest.DisconnectBeforeConnectDefersCloseAndIsIdempotent",
+        "issue": "只测 disconnect-before-connect，不测成功连接后复用。",
+        "change": "用 fake snapshot TCP 和本地 multicast seam 测完整复用连接周期。",
+        "target": "CoverageTests_t_ParserXeleSkt",
+        "filter": "R76XeleSktTest.DisconnectThenConnectRestartsTransport",
+        "expected_result": "第二次连接恢复接收且无 joinable-thread terminate。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "三模块完整线程/transport 回收和重连测试尚未执行；本轮不启动真实柜台或公网服务。"
+    ]
+  },
+  {
+    "lane": "T27_parserxtp",
+    "id": "BUG-T27-001",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/ParserXTP/ParserXTP.cpp:57-71",
+      "src/Share/Converter.hpp:57-60",
+      "src/API/XTP2.2.32.2/xtp_api_data_type.h:18-20",
+      "src/API/XTP2.2.32.2/xtp_quote_api.h:238-241"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_ParserXTP/t27_parserxtp_api_seam_test.cpp:254-278"
+    ],
+    "input_reachability": "本地 XTP SDK 为交易日字符串定义长度 9；测试 fake 提供的 \"2026-01-05\" 和 \"2026:01:05\" 都有 10 个字符，不含终止符也已超过 SDK 声明长度。fake 的 16 字节缓冲允许实际 SDK 不会满足的输入。",
+    "oracle_basis": "仓内 SDK 只说明登录后 GetTradingDay 才能返回正确交易日，并定义 XTP_TRADING_DAY_LEN=9；没有明确字符串格式。两组 10 字符假值不能作为有效 SDK 输入，因此损坏数值/被转换成 20260105 都不是合法产品 oracle。",
+    "reason": "现有测试用例名与断言把超长 fake 数据当成登录成功后的有效交易日格式；它既没有满足 pinned SDK 的长度约束，也没有格式合同支撑，不能证明真实 SDK 输入下产品错误。",
+    "root_cause": "测试 fake 使用大于 SDK 长度的数组，且用未确认格式创建正向断言。",
+    "fix": "按供应商确认的格式验证长度和数字字符；非法数据安全拒绝并不更新登录日期。不要把未知格式永久留给用户决策，先找匹配 SDK 的格式说明。",
+    "acceptance": "以不超过 XTP_TRADING_DAY_LEN-1 的供应商合法日期测试正向转换；另对超长、非数字值断言受控失败，不锁定错误整数。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/t_ParserXTP/t27_parserxtp_api_seam_test.cpp",
+        "case": "XtpLoginF.login_success_with_dashed_trading_day_corrupts_the_trading_date 与 XtpLoginF.login_success_with_colon_separated_trading_day_strips_only_colons",
+        "issue": "fake 字符串均超过 XTP_TRADING_DAY_LEN=9，且仓内 SDK 没有证明 dash/colon 是合法格式；现断言把无效输入当成功 oracle。",
+        "change": "撤销这两个正向格式断言；确认精确供应商格式后测试合法输入，超长/非法格式只断言安全拒绝。",
+        "target": "CoverageTests_t_ParserXTP",
+        "filter": "XtpLoginF.login_success_with_dashed_trading_day_corrupts_the_trading_date:XtpLoginF.login_success_with_colon_separated_trading_day_strips_only_colons",
+        "expected_result": "仅接受不超 SDK 缓冲长度且符合供应商格式的交易日；非法输入不写入损坏日期。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "主代理审核并替换超长 fake 正向 oracle；供应商有效格式仍需从 pinned 文档核对；本轮未运行用例。"
+    ]
+  },
+  {
+    "lane": "T27_parserxtp",
+    "id": "BUG-T27-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/ParserXTP/ParserXTP.cpp:142-160",
+      "src/ParserXTP/ParserXTP.cpp:457-476",
+      "src/ParserXTP/ParserXTP.cpp:690-695",
+      "src/Includes/IParserApi.h:130-133"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_ParserXTP/t27_parserxtp_api_seam_test.cpp:590-597"
+    ],
+    "input_reachability": "登录失败的公开 connect 流程中，若 sink 已注册，DoLogin 会把失败事件 post 到本地 io_context；connect 返回后调用公开 registerSpi(nullptr) 清空 sink，再泵送该 pending handler，即会走到未检查的空指针解引用。该 seam 用 placeholder worker 避开了真实线程，序列可控。",
+    "oracle_basis": "注册回调的公开 API 接收 IParserSpi*，测试/其他调用点使用 nullptr 注销；失败分支的两个 lambda 直接访问 m_sink，而成功分支 lambda 有 if(m_sink) 守卫。",
+    "reason": "pending 失败事件与 SPI 注销是可达的公开 API 顺序；失败 handler 执行时无重新检查，能在 sink 已清空时解引用空指针。现有用例因预期进程崩溃而禁用，且其 pump 使用确定性 seam，不依赖柜台。",
+    "root_cause": "DoLogin 在 post 时检查 m_sink，却将裸 this 延迟捕获；执行时直接解引用可能已注销的 m_sink。",
+    "fix": "让 pending handler 与 SPI 注销在同一同步策略下访问 listener；执行时同步读取当前 listener 并空值检查，确保 unregister 与 callback 执行没有数据竞争；同时让 release/drain 工作线程有明确寿命边界。",
+    "acceptance": "fake API 令 Login 返回连接错误；在 handler 执行前注销 sink；处理队列后不崩、不调用失效 sink。sink 保持有效时错误事件仍按既有语义发送。测试用受控队列，不创建 unstoppable worker。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/t_ParserXTP/t27_parserxtp_api_seam_test.cpp",
+        "case": "XtpLoginF.DISABLED_posted_login_handlers_deref_sink_nulled_after_post",
+        "issue": "用例正确指向 pending callback 风险，但当前 body 是崩溃探针并被禁用，不能当作已验证证据。",
+        "change": "修复后改为安全回归断言；保留 XtpSeamF 的 placeholder worker 与 pump，登录失败 post 后注销 sink，再 pump 并断言无事件/无崩溃。",
+        "target": "CoverageTests_t_ParserXTP",
+        "filter": "XtpLoginF.posted_login_handlers_ignore_sink_nulled_after_post",
+        "expected_result": "pending handler 执行时不解引用已注销 listener；不启用原崩溃探针。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "使用受控异步队列添加修复后安全回归；本轮未运行禁用崩溃用例。"
+    ]
+  },
+  {
+    "lane": "T27_parserxtp",
+    "id": "BUG-T27-007",
+    "decision": "NEEDS_DECISION",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/API/XTP2.2.32.2/xtp_api_data_type.h:383-389",
+      "src/API/XTP2.2.32.2/xquote_api_struct.h:367-375",
+      "src/ParserXTP/ParserXTP.cpp:233-283",
+      "src/Includes/IParserApi.h:57-67"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_ParserXTP/t27_parserxtp_data_state_test.cpp:217-224"
+    ],
+    "input_reachability": "XTP SDK 明确会为上海新债券 Level2 产生 XTP_TBT_STATE 回报；ParserXTP 当前 OnTickByTick 只处理 ENTRUST/TRADE。",
+    "oracle_basis": "pinned XTP SDK 有状态订单类型和结构，但通用 IParserSpi 只有 OrdDetail 与 Transaction 回调，没有状态订单数据表述；仓内产品材料未承诺 ParserXTP 对上海新债券状态单提供兼容。",
+    "reason": "静默忽略的行为静态可确认，但是否是产品缺陷取决于 ParserXTP 的市场能力范围和 WTS 的通用数据表示；测试已作为禁用的范围待定占位，不能把 SDK 有 enum 直接等同产品承诺。",
+    "root_cause": "SDK 能力扩展没有相应 WTS 状态单记录/回调映射合同。",
+    "fix": "决定产品范围。若支持，先确定 WTS 记录、排序、持久化与回放语义后新增映射；若不支持，明确标注上海新债券 State 回报不支持，并提供可观测诊断。",
+    "acceptance": "能力决定后，支持时验证每个 SDK 字段映射及回放/落库；不支持时验证回报被计数/告警且不被误认为已消费。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": {
+      "question": "ParserXTP 是否必须输出 XTP_TBT_STATE（上海新债券 Level2 状态订单）？",
+      "options": [
+        "在 ParserXTP/WTS 中增加统一状态订单表示与回调",
+        "明确暂不支持并提供可观测忽略/告警"
+      ],
+      "recommendation": "先不支持，直到产品确认 WTS 状态订单记录与下游消费合同；当前通用 SPI 没有状态订单回调。",
+      "impact": "支持会新增公共数据语义并影响存储、回放和消费者；不支持则对该证券类别明确能力边界。"
+    },
+    "external_blocker": null,
+    "local_remaining": [
+      "等待产品能力决定；如选支持，先补 WTS 数据模型和下游使用合同。"
+    ]
+  },
+  {
+    "lane": "T3_ctpmini_dumper_femas",
+    "id": "T3-007",
+    "decision": "EXTERNAL_BLOCKED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/TraderCTPMini/TraderCTPMini.cpp:460-480",
+      "src/TraderCTPMini/TraderCTPMini.cpp:683-720",
+      "src/TraderCTPMini/TraderCTPMini.cpp:900-927",
+      "src/API/CTPMini1.5.8/ThostFtdcTraderApi.h:100-101"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderCTPMini/ctpmini_trader_callbacks_test.cpp:746-786",
+      "src/TestUnits/coverage/t_TraderCTPMini/ctpmini_trader_callbacks_test.cpp:933-936"
+    ],
+    "input_reachability": "queryAccount() 正常发送 ReqQryTradingAccount；OnRspQryTradingAccount 处理 SDK 的 pRspInfo、pTradingAccount 和 bIsLast。错误/零行末帧且此前没有账户记录时会保留 m_ayFunds==NULL 并在末尾 clear。仓内回调签名可见，但未找到匹配 CTPMini 1.5.8 文档说明该 SDK 在这些结果下是否会调用此末帧组合。",
+    "oracle_basis": "仓内固定 SDK 目录是 CTPMini1.5.8，仅有头文件和动态库；回调声明没有参数 NULL/cardinality 说明。主代理提供的 SimNow CTPIIMini API Ver1.2 文档版本不同，仓内没有其与 1.5.8 的对应/兼容声明，故不可用于此条 oracle。",
+    "reason": "空容器 clear 的空解引用静态成立；OnRspQryTradingAccount 的正常错误/零行生命周期是否会给出 bIsLast=true 且无成功行，必须由精确固定 SDK 合同确认。不能用相似版本的 NULL 规则直接定产品 bug。",
+    "root_cause": "末帧路径假定此前至少有一条成功账户记录创建 m_ayFunds；没有时仍无条件解引用。",
+    "fix": "防御性地保证末帧回调总能向 sink 提供空数组或明确定义的失败结果；清理时先判容器非空，并确保下一次 query 可以重新积累。此防御不依赖是否将候选定为产品缺陷。",
+    "acceptance": "用 CTPMini 1.5.8 的准确回调合同确认有效错误/零行序列；stub 覆盖成功单行、多行、错误末帧和零行末帧，均不崩且空结果语义明确。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/t_TraderCTPMini/ctpmini_trader_callbacks_test.cpp",
+        "case": "ctpmini.DISABLED_qry_account_last_without_record_crashes",
+        "issue": "现用例 body 只有 GTEST_SKIP，没有调用回调；正常正向测试先创建容器，覆盖不到首个末帧错误路径。",
+        "change": "在确认 CTPMini 1.5.8 合同时，增加 fake API 回调场景或启用安全 stub 测试，先无成功账户行，再以匹配合同的错误/零行末帧结束。",
+        "target": "CoverageTests_t_TraderCTPMini",
+        "filter": "ctpmini.rsp_qry_account_error_final_without_record_is_safe",
+        "expected_result": "无账户行时末帧不崩，sink 收到空结果或明确失败；后续 query 状态不残留。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": {
+      "required": "与仓内 CTPMini 1.5.8 对应的官方查询回调规则：查询出错/零行时 pTradingAccount 与 pRspInfo 的取值、bIsLast 末帧是否回调。",
+      "checked_locally": "核对了 src/API/CTPMini1.5.8 的 TraderApi.h/struct/data type 目录；本地只有 OnRspQryTradingAccount 签名，没有 NULL/零行/cardinality 注释；代码与 stub 展示了错误末帧路径，但不能证明真实 1.5.8 会产生它。",
+      "why_local_is_insufficient": "SimNow CTPIIMini API Ver1.2 是不同版本且仓库没有兼容映射；不能把该文档的参数规则直接套用到 CTPMini1.5.8。",
+      "next_action": "取得匹配 CTPMini1.5.8 的正式文档或供应商确认；确认后由主代理运行安全 fake callback 回归。"
+    },
+    "local_remaining": [
+      "待获取 CTPMini 1.5.8 匹配文档；随后运行本地安全 stub，不能先引用 SimNow 1.2 PDF 当作该版本合同。"
+    ]
+  },
+  {
+    "lane": "T3_ctpmini_dumper_femas",
+    "id": "T3-012",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderDumper/Dumper.h:9-11",
+      "src/TraderDumper/Dumper.cpp:21-39",
+      "src/TraderDumper/Dumper.cpp:102-135"
+    ],
+    "test_evidence": [
+    "src/TestUnits/coverage/t_TraderDumper/r114_dumper_test.cpp:543-552"
+    ],
+    "input_reachability": "外部配置 config.refresh_span 通过 getUInt32 直接写入，配置成功返回 true；run(false) 是公开的持续刷新入口，零间隔会在 while 循环中执行 sleep_for(0) 后反复 refresh。",
+    "oracle_basis": "该字段默认 10 秒且日志称为主动刷新间隔；持续刷新线程要求正间隔，0 不能表示有效周期。应拒绝零或定义成显式关闭刷新，而不能无界轮询。",
+    "reason": "零值可由正常配置读取且没有校验，公开 run(false) 接受它并起 worker，造成无等待的刷新循环。当前启用 smoke test 正是用 0 缩短运行时间，不验证业务零值策略；另一个永久运行测试被禁用。",
+    "root_cause": "refresh_span 的外部配置没有最小值/关闭语义，零秒被直接交给 periodic worker。",
+    "fix": "明确零值政策：优先在 config() 拒绝 0 并给诊断；或将 0 定义为不创建刷新 worker。持续刷新时只接受正间隔。",
+    "acceptance": "config(refresh_span=0) 按政策安全拒绝或不启动 worker；正间隔启动后 release 可及时停止；run(true) 空 manager 单独验证立即返回。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/t_TraderDumper/r114_dumper_test.cpp",
+        "case": "R114DumperFixture.dumper_run_once_returns_immediately_and_worker_joins",
+        "issue": "同一用例用 refresh_span=0 运行无等待 worker 来快速 join，既掩盖紧循环又没有校验配置语义。",
+        "change": "run(false) join smoke test 改用正间隔；另加独立零间隔 config 策略测试，不以 sleep(0) 作为加速器。",
+        "target": "CoverageTests_t_TraderDumper",
+        "filter": "R114DumperFixture.dumper_zero_refresh_span_is_rejected:R114DumperFixture.dumper_worker_joins_with_positive_refresh_span",
+        "expected_result": "零配置被拒绝或明确不创建 worker；正值 worker 可停止；run(true) 空表立即返回。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "主代理修正 config 零值策略并拆分启用测试；本轮未运行 worker 测试。"
+    ]
+  },
+  {
+    "lane": "T3_ctpmini_dumper_femas",
+    "id": "T3-014",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/ParserFemas/ParserFemas.cpp:96-102",
+      "src/ParserFemas/ParserFemas.cpp:347-360",
+      "src/TraderCTPMini/TraderCTPMini.cpp:100-108",
+      "src/TraderCTPMini/TraderCTPMini.cpp:270-295",
+      "src/TraderCTPMini/TraderCTPMini.cpp:1333-1342",
+      "src/WtCore/TraderAdapter.cpp:1405-1412",
+      "src/API/Femas3.02/USTPFtdcUserApiDataType.h:158-160",
+      "src/API/Femas3.02/USTPFtdcUserApiDataType.h:253-260",
+      "src/API/Femas3.02/USTPFtdcUserApiDataType.h:278-280",
+      "src/API/Femas3.02/USTPFtdcUserApiStruct.h:759-770",
+      "src/API/CTPMini1.5.8/ThostFtdcUserApiDataType.h:28-33",
+      "src/API/CTPMini1.5.8/ThostFtdcUserApiDataType.h:61-68",
+      "src/API/CTPMini1.5.8/ThostFtdcUserApiDataType.h:181-183",
+      "src/API/CTPMini1.5.8/ThostFtdcUserApiDataType.h:5212-5214",
+      "src/API/CTPMini1.5.8/ThostFtdcUserApiDataType.h:6449-6451",
+      "src/API/CTPMini1.5.8/ThostFtdcUserApiStruct.h:29-40",
+      "src/API/CTPMini1.5.8/ThostFtdcUserApiStruct.h:105-116"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_ParserFemas/r105_parserfemas_api_test.cpp:192-199",
+      "src/TestUnits/coverage/t_ParserFemas/r105_parserfemas_api_test.cpp:240-265",
+      "src/TestUnits/coverage/t_TraderCTPMini/r61_traderctpmini_api_test.cpp:423-463",
+      "src/TestUnits/coverage/t_TraderCTPMini/r61_traderctpmini_api_test.cpp:512-550"
+    ],
+    "input_reachability": "ParserFemas 从外部 config 读取 broker/user/pass，正常 OnFrontConnected 会组装登录请求。TraderCTPMini 从 params 读取 broker/user/pass/appid/authcode；正常 TraderAdapter 的成功连接事件以外部配置 user/pass 调 login，之后 authenticate 与 doLogin 把字段复制到本地 SDK 请求结构。ITraderApi::login 的 productInfo 参数也被保存并写入固定字段。",
+    "oracle_basis": "固定 SDK 字段是 N 字节 char 数组，至少要为终止 NUL 保留 1 字节：broker 10、user 15、password 40；CTPMini AuthCode 16、AppID 32、ProductInfo 10。配置/公开 login 输入比字段容量长时，strcpy 写越界是确定的内存安全错误，不需要厂商对超长输入作业务保证。",
+    "reason": "配置与 public login 字符串可达栈上固定 SDK 字段，代码在认证/登录前未校验长度并裸 strcpy。超长值能够越过字段边界；这是输入校验缺陷，和柜台是否接受超长凭证不同。",
+    "root_cause": "没有在字符串进入 SDK 请求结构前按固定字段字节容量验证，直接把 std::string::c_str() 交给 strcpy。",
+    "fix": "在 config/init 与 public login 参数边界验证每个字段的字节长度不超过 sizeof(field)-1；超长时在任何请求结构写入或 SDK 调用前返回可诊断失败，不静默截断。UTF-8 配置按字节计数。",
+    "acceptance": "为每个外部字段测最大允许字节长度与 max+1：max 值完整到达安全 SDK spy；max+1 在构造请求前失败且 spy 调用数为 0；空值按现有配置合同处理；正常 Adapter 路径一致。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/t_TraderCTPMini/r61_traderctpmini_api_test.cpp",
+        "case": "R61_TraderCTPMini.login_authenticate_and_logout_assemble_requests 与 init_reads_config_and_applies_defaults",
+        "issue": "现有 stub 只用短字符串并验证请求组装，没有字段容量边界断言；直接触发溢出不是安全测试方法。",
+        "change": "在安全 spy/逻辑长度校验上增加 appid/authcode、broker/user/pass 与 public productInfo 的 exact-max/max+1 用例；超长不得复制或调用 SDK。",
+        "target": "CoverageTests_t_TraderCTPMini",
+        "filter": "R61_TraderCTPMini.rejects_overlength_login_fields_before_sdk_call",
+        "expected_result": "broker/user/pass/productInfo/appid/authcode 的最大值完整传输；max+1 在安全边界拒绝且 SDK spy 零调用。"
+      },
+      {
+        "file": "src/TestUnits/coverage/t_ParserFemas/r105_parserfemas_api_test.cpp",
+        "case": "R105FemasTest.injected_api_connect_login_and_do_subscribe",
+        "issue": "现有 Femas stub 用短 broker/user/pass 验证成功组装，没有验证固定 SDK 字段越界边界。",
+        "change": "为 broker/user/pass 增 exact-max/max+1 配置登录用例；长度校验在组装 SDK 请求前执行。",
+        "target": "CoverageTests_t_ParserFemas",
+        "filter": "R105FemasTest.rejects_overlength_login_fields_before_sdk_call",
+        "expected_result": "最大允许字段原样传到 fake API；任一 max+1 输入受控失败且 ReqUserLogin 调用次数为 0。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "按容量边界实现无溢出的配置校验和安全 stub；主代理提供独立逻辑容量探针后再核；本轮未直接触发越界或运行测试。"
+    ]
+  }
+]

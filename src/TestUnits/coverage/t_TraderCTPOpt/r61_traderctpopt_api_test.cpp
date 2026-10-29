@@ -23,6 +23,7 @@
 #include <cstdlib>
 #include <filesystem>
 #include <map>
+#include <set>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -190,6 +191,7 @@ namespace
 		std::vector<std::pair<WTSLogLevel, std::string>> logs;
 		std::vector<PosCap> positions;
 		uint32_t accountCalls = 0, orderCalls = 0, tradeCalls = 0, execOrderCalls = 0;
+		uint32_t positionCalls = 0;
 		uint32_t settleCalls = 0;
 		uint32_t lastAccountSize = 0, lastOrderSize = 0, lastTradeSize = 0;
 		bool lastOrdersNull = false, lastExecOrdersNull = false;
@@ -238,6 +240,7 @@ namespace
 		}
 		void onRspPosition(const WTSArray* ay) override
 		{
+			++positionCalls;
 			if (ay == nullptr)
 				return;
 			for (uint32_t i = 0; i < ay->size(); i++)
@@ -474,6 +477,26 @@ namespace
 		std::memset(&f, 0, sizeof(f));
 		return f;
 	}
+
+	CThostFtdcRspInfoField r61_opt_error(int errorId, const char* message)
+	{
+		CThostFtdcRspInfoField f = r61_opt_ok();
+		f.ErrorID = errorId;
+		std::snprintf(f.ErrorMsg, sizeof(f.ErrorMsg), "%s", message);
+		return f;
+	}
+
+	struct R61OptCancelCallbackFixture
+	{
+		R61OptSink sink;
+		R61OptProbe probe;
+
+		R61OptCancelCallbackFixture()
+		{
+			probe.harden();
+			probe.registerSpi(&sink);
+		}
+	};
 }
 
 /* TraderCTPOpt.cpp:43-57 —— 冒号剔除 + to_uint32 */
@@ -1009,7 +1032,7 @@ TEST(R61_TraderCTPOpt, query_entries_enqueue_requests_drained_locally)
 	EXPECT_EQ(2u, sink.tradeCalls);
 	EXPECT_EQ(0u, sink.lastTradeSize);
 
-	/* 行权单查询：产品把 m_ayOrders 而不是 m_ayExecOrds 传给 opt sink（BUG-R61-003） */
+	/* 两帧各提供一条有效行权单；末帧应将两条结果交给 option sink。 */
 	CThostFtdcExecOrderField eo;
 	std::memset(&eo, 0, sizeof(eo));
 	std::snprintf(eo.InstrumentID, sizeof(eo.InstrumentID), "%s", "rb2610");
@@ -1027,19 +1050,55 @@ TEST(R61_TraderCTPOpt, query_entries_enqueue_requests_drained_locally)
 	probe.OnRspQryExecOrder(&eo, nullptr, 8, true);
 	EXPECT_EQ(1u, optSpi.ordersCalls);
 	EXPECT_FALSE(optSpi.lastOrdersNull);
-	EXPECT_EQ(0u, optSpi.lastOrdersSize);	/* 期望 2，实际 0：见 BUG-R61-003 */
-
-	/* 撤单回报：ErrorID==0 时产品把它当「交易错误」上抛；真错误反而被吞掉 */
-	CThostFtdcRspInfoField ok = r61_opt_ok();
-	probe.OnRspOrderAction(nullptr, &ok, 8, true);
-	ASSERT_EQ(1u, sink.traderErrors.size());
-	probe.OnRspExecOrderAction(nullptr, &ok, 9, true);
-	ASSERT_EQ(2u, sink.traderErrors.size());
-	probe.OnRspOrderAction(nullptr, &err, 10, true);
-	EXPECT_EQ(2u, sink.traderErrors.size());
+	EXPECT_EQ(2u, optSpi.lastOrdersSize);
 
 	probe.release();
 	EXPECT_EQ(1u, api.release_calls);
+}
+
+/* CTP RspInfo.ErrorID==0 is success; a successful cancel response must not be reported as an error. */
+TEST(R61_TraderCTPOpt, order_action_success_rsp_does_not_emit_trader_error)
+{
+	R61OptCancelCallbackFixture fx;
+	CThostFtdcRspInfoField rsp = r61_opt_ok();
+
+	fx.probe.OnRspOrderAction(nullptr, &rsp, 1, true);
+
+	EXPECT_TRUE(fx.sink.traderErrors.empty());
+}
+
+TEST(R61_TraderCTPOpt, order_action_error_rsp_is_reported_as_order_cancel)
+{
+	R61OptCancelCallbackFixture fx;
+	CThostFtdcRspInfoField rsp = r61_opt_error(12, "cancel rejected");
+
+	fx.probe.OnRspOrderAction(nullptr, &rsp, 2, true);
+
+	ASSERT_EQ(1u, fx.sink.traderErrors.size());
+	EXPECT_EQ(static_cast<int>(WEC_ORDERCANCEL), fx.sink.traderErrors[0].first);
+	EXPECT_EQ("cancel rejected", fx.sink.traderErrors[0].second);
+}
+
+TEST(R61_TraderCTPOpt, exec_order_action_success_rsp_does_not_emit_trader_error)
+{
+	R61OptCancelCallbackFixture fx;
+	CThostFtdcRspInfoField rsp = r61_opt_ok();
+
+	fx.probe.OnRspExecOrderAction(nullptr, &rsp, 3, true);
+
+	EXPECT_TRUE(fx.sink.traderErrors.empty());
+}
+
+TEST(R61_TraderCTPOpt, exec_order_action_error_rsp_is_reported_as_exec_cancel)
+{
+	R61OptCancelCallbackFixture fx;
+	CThostFtdcRspInfoField rsp = r61_opt_error(13, "exec cancel rejected");
+
+	fx.probe.OnRspExecOrderAction(nullptr, &rsp, 4, true);
+
+	ASSERT_EQ(1u, fx.sink.traderErrors.size());
+	EXPECT_EQ(static_cast<int>(WEC_EXECCANCEL), fx.sink.traderErrors[0].first);
+	EXPECT_EQ("exec cancel rejected", fx.sink.traderErrors[0].second);
 }
 
 /* TraderCTPOpt.cpp:1164-1313 OnRspQryInvestorPosition 的 OpenCover/组合/负仓分支 */
@@ -1145,16 +1204,17 @@ TEST(R61_TraderCTPOpt, position_query_covers_open_cover_combo_and_negative)
 	probe.OnRspQryInvestorPosition(&p, &err, 6, false);
 }
 
-/* 产品缺陷占位：OnRspQryInvestorPosition 在 contract==NULL 时提前 return
- * （TraderCTPOpt.cpp:1177-1179），跳过了函数尾部 bIsLast 的聚合与
- * onRspPosition 回调；如果查询结果的最后一行来自未登记合约，整批持仓全部丢失。
- * 见 docs/迭代计划/迭代01/bugs/R65.md BUG-R65-002（历史注释曾引用 BUG-R57-003）；默认不执行。 */
-TEST(R61_TraderCTPOpt, DISABLED_position_query_last_row_unknown_still_flushes)
+/* BUG-R65-002：未知合约末帧提前返回，可能留下上一批聚合状态。
+ * 不把未知合约前的部分持仓当作成功快照；先记录首批回调数量，再发起不同请求 ID
+ * 的新批次，确认新结果不混入首批持仓。 */
+TEST(R61_TraderCTPOpt, position_query_unknown_last_row_does_not_pollute_next_batch)
 {
 	R61OptContract fx("rb", "rb2610", "SHFE", CM_OpenCover, CC_Future, 10);
+	R61OptContract next("ag", "ag2610", "SHFE", CM_OpenCover, CC_Future, 10);
 	R61OptSink sink;
 	R61OptDataMgr mgr;
 	mgr.add(fx.ct);
+	mgr.add(next.ct);
 	sink.mgr = &mgr;
 
 	R61OptProbe probe;
@@ -1168,13 +1228,34 @@ TEST(R61_TraderCTPOpt, DISABLED_position_query_last_row_unknown_still_flushes)
 	p.PositionDate = THOST_FTDC_PSD_History;
 	p.Position = 10;
 	p.TodayPosition = 4;
+	p.PosiDirection = THOST_FTDC_PD_Long;
 	probe.OnRspQryInvestorPosition(&p, nullptr, 1, false);
 
 	std::memset(&p, 0, sizeof(p));
 	std::snprintf(p.InstrumentID, sizeof(p.InstrumentID), "%s", "ghost");
 	std::snprintf(p.ExchangeID, sizeof(p.ExchangeID), "%s", "SHFE");
+	p.PosiDirection = THOST_FTDC_PD_Long;
+	probe.OnRspQryInvestorPosition(&p, nullptr, 1, true);
+
+	RecordProperty("first_batch_position_callback_count", (int)sink.positionCalls);
+	sink.positionCalls = 0;
+	sink.positions.clear();
+
+	std::memset(&p, 0, sizeof(p));
+	std::snprintf(p.InstrumentID, sizeof(p.InstrumentID), "%s", "ag2610");
+	std::snprintf(p.ExchangeID, sizeof(p.ExchangeID), "%s", "SHFE");
+	p.PositionDate = THOST_FTDC_PSD_History;
+	p.Position = 2;
+	p.PosiDirection = THOST_FTDC_PD_Short;
 	probe.OnRspQryInvestorPosition(&p, nullptr, 2, true);
 
-	ASSERT_EQ(1u, sink.positions.size());
-	EXPECT_EQ(std::string("rb2610"), sink.positions[0].code);
+	ASSERT_EQ(1u, sink.positionCalls);
+	std::set<std::string> actualCodes;
+	for (const auto& position : sink.positions)
+		actualCodes.insert(position.code);
+	EXPECT_EQ((std::set<std::string>{ "ag2610" }), actualCodes);
+
+	const R61OptSink::PosCap* ag = findPos(sink.positions, "ag2610");
+	ASSERT_NE(nullptr, ag);
+	EXPECT_DOUBLE_EQ(2.0, ag->total);
 }

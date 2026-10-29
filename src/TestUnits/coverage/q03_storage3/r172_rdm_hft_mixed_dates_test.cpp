@@ -115,7 +115,7 @@ protected:
 	}
 
 	// 每种历史逐笔各用一个新 reader：WtRdmDtReader 的三个历史读取入口
-	// 共用一个 `_his_ordque_map` 做装载判断（BUG-R74-001/R100-001），
+	// 共用一个 `_his_ordque_map` 做装载判断（R1_wtdatastorage §2 / R185 观察3），
 	// 同一 reader 先读 queue 后，orders/trans 会跳过装载返回空块。
 	// 本用例的目标是 lower_bound 的跨日比较，不是历史缓存复用，故按入口隔离。
 	std::unique_ptr<WtRdmDtReader> make_reader()
@@ -182,7 +182,7 @@ protected:
 	}
 
 	// 与 Rdm 用例同理：WtDataReader 的 queue/orders/trans 也共用
-	// `_his_ordque_map` 做装载判断（BUG-R74-001/R100-001），
+	// `_his_ordque_map` 做装载判断（BUG-R74-001），
 	// 同一 reader 先读 queue 会让 orders/trans 跳过装载返回空块。
 	std::unique_ptr<WtDataReader> make_reader()
 	{

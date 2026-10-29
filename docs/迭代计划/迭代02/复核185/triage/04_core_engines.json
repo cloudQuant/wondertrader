@@ -1,0 +1,474 @@
+[
+  {
+    "lane": "R10_wtcore",
+    "id": "BUG-R10-005",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/EventNotifier.cpp:58-111",
+      "src/WtCore/EventNotifier.cpp:214-227"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n02_wtcore_engines/r160_event_notifier_test.cpp:74-176"
+    ],
+    "input_reachability": "notifier.active=true 时，EventNotifier 会从工作目录或安装目录加载配置指定的 WtMsgQue 插件。插件可导出 create_server 而不导出 regiter_callbacks；当前只检查前者，取到空 _register 后会在 init 内直接调用。",
+    "oracle_basis": "regiter_callbacks 在成功加载后被无条件调用，故它是 init 的必需入口；必需入口缺失时 init 不应继续执行。通知模块从 WTSVariant 配置与可加载动态库进入，是公开运行配置边界。",
+    "reason": "已确认缺少必需注册导出会空函数指针调用，属于产品加载器安全错误。订单通知 retain 后缺 release 的子项与 BUG-R41-003 相同，单独去重；R160 正常发布用例未观察生命周期，也没有覆盖缺失导出。",
+    "root_cause": "EventNotifier::init 在 create_server 之后取 regiter_callbacks，但未验证其非空即调用；失败路径没有在状态初始化前释放当前模块句柄并返回 false。",
+    "fix": "在调用任何插件函数前校验所有无条件使用的导出；缺 regiter_callbacks 时释放已加载模块、清理候选状态并返回 false。不要把可选的 destroy_server/publish_message 与必需导出混为一类。订单对象引用释放按 canonical BUG-R41-003 修复。",
+    "acceptance": "缺 create_server 或缺 regiter_callbacks 的插件均令 init 明确返回 false，不崩溃、不启动 worker、不泄露加载句柄；完整插件仍能完成全部通知发布，订单对象在异步完成后最终释放一次。",
+    "canonical": "BUG-R41-003（仅订单通知 retain/release 子项）",
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/n02_wtcore_engines/r160_event_notifier_test.cpp",
+        "case": "新增 R160EventNotifier.MissingRequiredCallbackExportFailsInit",
+        "issue": "现有完整插件用例只覆盖正常发布，未覆盖 create_server 存在但 regiter_callbacks 缺失的加载边界。",
+        "change": "用隔离测试 dylib 导出 create_server、缺少 regiter_callbacks；断言 init 返回 false、无崩溃、无 worker/服务器残留。不要启用当前订单引用泄漏复现。",
+        "target": "CoverageTests_wtcore",
+        "filter": "R160EventNotifier.MissingRequiredCallbackExportFailsInit",
+        "expected_result": "单用例 PASS；缺导出路径安全失败，完整插件原有通知发布用例仍 PASS。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/04_core_engines/selected-runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/04_core_engines/runs/r160_inproc_publish/run.json",
+      "docs/迭代计划/迭代02/复核185/evidence/04_core_engines/runs/r160_inproc_publish/stdout.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/04_core_engines/runs/r160_inproc_publish/gtest.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "产品修复后新增并运行缺 regiter_callbacks 的隔离插件测试；本轮未运行缺导出插件探针。"
+    ]
+  },
+  {
+    "lane": "R211",
+    "id": "BUG-R211-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtEngine.cpp:285-316",
+      "src/WtCore/WtEngine.cpp:1143-1184",
+      "src/WtRunner/WtRunner.cpp:153-160",
+      "src/WtRunner/WtRunner.cpp:365-408",
+      "src/WtRunner/WtRunner.cpp:578-585",
+      "src/WtCore/WtCtaEngine.cpp:109-112"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r211_wtcore_rest_test.cpp:195-234"
+    ],
+    "input_reachability": "Runner 的 env 配置进入 WtEngine::init；其中 riskmon.active=true 且 module 指向缺失/不兼容动态库时，init_riskmon 返回 false。Runner 仍设置 _engine 并继续 config，之后 WtRunner::run 调用 engine->run；CTA 的 run 只在 _risk_mon 非空时启动风险线程。",
+    "oracle_basis": "active=true 明确请求启动指定风控模块。对该配置静默成功并进入交易运行态会把“已请求风控”变成“无风控运行”，其结果与配置意图不一致；未配置风控或 active=false 是另一个策略分支，不在此项内。",
+    "reason": "WtEngine::init 丢弃 init_riskmon 的失败值且返回 void；WtRunner::initEngine 将 engine 指针设好后返回 true，WtRunner::config 也忽略 initEngine 的 bool。现有测试确实证明不兼容插件未创建 riskmon，但没有证明 Runner 拒绝启动。该测试本轮在隔离目录以当前目标运行 PASS；它是失败加载的正常控制，不是 fail-closed 验收。",
+    "root_cause": "风控初始化失败没有从插件入口向 WtRunner::config 传播，active 风控配置被当作可选失败处理。",
+    "fix": "让 WtEngine::init 返回初始化结果；active=true 时 init_riskmon 失败即返回失败。WtRunner::initEngine 和 config 必须逐层传播 false，禁止把未完成风控初始化的 engine 暴露给 run。",
+    "acceptance": "active=true 的不存在模块、不兼容模块及有效模块分别验证：前两者 Runner::config 返回 false 且 WtRunner::run 不进入交易引擎；有效模块创建并启动一次；无 riskmon 配置继续采用当前 fund 更新分支。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q01_wtcore3/r211_wtcore_rest_test.cpp",
+        "case": "R211Engine.IncompatibleRiskMonModuleIsRejected",
+        "issue": "现有测试只验证 has_riskmon()==false，未覆盖 active=true 的失败是否由 Runner 拒绝；因此不能作为失败启动策略的验收。",
+        "change": "在保留当前模块不兼容正控的基础上，增补真实 WtRunner::config 链路的断言：不兼容模块使 config 返回 false，engine 不进入 run。若重构引擎初始化接口，则同步断言失败状态逐层传播。",
+        "target": "CoverageTests_wtcore",
+        "filter": "R211Engine.IncompatibleRiskMonModuleIsRejected",
+        "expected_result": "active=true 不兼容插件明确拒绝 Runner 配置；有效插件路径仍能初始化。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/04_core_engines/selected-runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/04_core_engines/runs/r211_incompatible_risk_plugin/run.json",
+      "docs/迭代计划/迭代02/复核185/evidence/04_core_engines/runs/r211_incompatible_risk_plugin/stdout.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/04_core_engines/runs/r211_incompatible_risk_plugin/gtest.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "fail-closed 产品改动后补 Runner 配置失败/不运行回归；本轮只运行了当前不兼容模块正控。"
+    ]
+  },
+  {
+    "lane": "R31_pluginload",
+    "id": "BUG-R31-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtRunner/WtRunner.cpp:283-342",
+      "src/WtCore/HftStrategyMgr.cpp:57-87",
+      "src/WtCore/CtaStrategyMgr.cpp:61-85"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r31_stra_mgr_pluginload.cpp:353-378",
+      "src/TestUnits/coverage/q01_wtcore3/r211_wtcore_rest_test.cpp:392-415"
+    ],
+    "input_reachability": "Runner 从 strategies.hft 配置解析 HFT 插件目录，HftStrategyMgr 会扫描其中每个动态库。若配置目录中包含仓库 CTA 插件，它同样导出 createStrategyFact；loader 将 CTA 工厂按 IHftStrategyFact 调用并在登记时访问虚接口。错族插件因此能从普通目录扫描链到达类型不匹配调用。",
+    "oracle_basis": "目录扫描器对不匹配导出会跳过并继续；错族插件应同样安全拒绝。由加载器在未验证类型时把接口指针按另一虚表布局使用，会在插件登记阶段崩溃，属于扩展边界的安全性缺陷。",
+    "reason": "不是正常 CTA/HFT 分目录配置下的热路径缺陷，但用户可配置的插件目录会扫描所有动态库，且 CTA/HFT 共用入口符号造成无法识别族别。已登记的两个 disabled 用例明确构造这一实际崩溃路径；按规则未运行 UB 用例。",
+    "root_cause": "CTA 与 HFT 工厂使用同名 createStrategyFact 导出，但 loader 在调用前没有族别 ABI 标识，直接把 creator 返回值解释成不同接口类型。",
+    "fix": "增加族别专用 creator 符号或稳定 ABI 类型标记，并在调用 creator 前核验；不匹配时释放库并跳过/返回配置错误。若改导出符号，提供旧插件迁移与 ABI 版本策略。",
+    "acceptance": "正确族插件仍加载并能创建工厂；CTA 插件放入 HFT 目录时在 creator 调用/虚接口访问前被拒绝，无崩溃、无库/工厂泄漏；原 disabled 崩溃用例不直接启用，改为安全拒绝断言。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q01_wtcore3/r31_stra_mgr_pluginload.cpp",
+        "case": "新增 r31_stra_mgr.hft_rejects_cta_family_before_virtual_factory_use",
+        "issue": "现有 DISABLED_hft_loads_cta_plugin_via_shared_symbol_name 与 R211 的 disabled 类型双关用例是 UB/崩溃探针，不可直接启用作验收。",
+        "change": "保留两个崩溃用例为 disabled；新增显式族别标记错配的测试插件，断言 HFT loader 在调用工厂前安全拒绝 CTA 插件。",
+        "target": "CoverageTests_wtcore",
+        "filter": "r31_stra_mgr.hft_rejects_cta_family_before_virtual_factory_use",
+        "expected_result": "错族插件被拒绝且进程正常退出；正确 HFT 插件仍加载。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "新增带族别标记的测试插件并在产品防护落地后运行；本轮未执行已知会崩溃的 disabled 用例。"
+    ]
+  },
+  {
+    "lane": "R31_pluginload",
+    "id": "BUG-R31-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtExecuterFactory.cpp:49-65",
+      "src/WtCore/CtaStrategyMgr.cpp:61-85",
+      "src/WtCore/HftStrategyMgr.cpp:61-85"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r31_exe_fact_pluginload.cpp:183-199"
+    ],
+    "input_reachability": "WtExecuterFactory 扫描配置目录中的插件库；库可导出 createExecFact 而 creator 因初始化失败返回 NULL。这个值当前直接进入 fInfo._fact，再用于 _fact->getName。",
+    "oracle_basis": "同仓 CTA/HFT strategy factory loader 对 creator 返回 NULL 已采取释放模块并继续扫描的处理；执行器 factory 的同类插件创建失败也不能空指针解引用。",
+    "reason": "创建失败是动态插件入口正常可表达的失败结果；该 loader 没有检查 creator 返回值，下一行即调用虚方法。当前启用测试只覆盖非空真实 factory，未有 null creator 负例。",
+    "root_cause": "WtExecuterFactory::loadFactories 缺少 creator 返回值判空和失败清理。",
+    "fix": "creator 调用后先检查返回值；NULL 时释放 hInst 并继续扫描，不登记条目；确保 factory 信息在校验通过后才写入 map。",
+    "acceptance": "null creator 插件被安全跳过且有效插件仍可创建 unit；map 无空条目、模块句柄释放；多次 loadFactories 后无崩溃。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q01_wtcore3/r31_exe_fact_pluginload.cpp",
+        "case": "新增 r31_exe_fact.null_factory_result_is_skipped",
+        "issue": "现有真实 dylib 用例只验证 creator 非空的成功路径，未覆盖工厂创建失败返回 NULL。",
+        "change": "增加隔离测试 dylib：导出 createExecFact 但返回 NULL；同目录放置有效执行器插件，验证空工厂被跳过且有效工厂仍登记。",
+        "target": "CoverageTests_wtcore",
+        "filter": "r31_exe_fact.null_factory_result_is_skipped",
+        "expected_result": "加载返回正常、不崩溃，空工厂不可查询，其他有效工厂可创建 unit。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/04_core_engines/selected-runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/04_core_engines/runs/r31_valid_plugin_factory/run.json",
+      "docs/迭代计划/迭代02/复核185/evidence/04_core_engines/runs/r31_valid_plugin_factory/stdout.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/04_core_engines/runs/r31_valid_plugin_factory/gtest.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "增加返回 NULL 的隔离 factory 测试插件并在判空修复后运行；本轮只运行了有效 factory 正控。"
+    ]
+  },
+  {
+    "lane": "R42",
+    "id": "BUG-R42-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/ParserAdapter.cpp:214-235",
+      "src/WtCore/ParserAdapter.cpp:378-424",
+      "src/WtCore/ParserAdapter.h:40-46",
+      "src/WtCore/ParserAdapter.h:110-119"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p02_wtcore_engines2/r42_parser_adapter_test.cpp:163-198",
+      "src/TestUnits/coverage/p02_wtcore_engines2/r42_parser_adapter_test.cpp:280-300"
+    ],
+    "input_reachability": "ParserAdapterMgr::getAdapter 返回 shared_ptr，调用者可以合法保留该对象。mgr.release 会对 adapter 调用 release 后清空 map；外部保留的 shared_ptr 仍能调用公开 run。当前 release 已销毁 API 对象，但未清 _parser_api，run 只检查非空后调用 connect。",
+    "oracle_basis": "公开 shared_ptr 获取接口允许 adapter 生命周期长于 manager map；release 后对象对外仍存在，run 不应对已销毁的 API 指针调用虚方法。",
+    "reason": "这不是仅靠手工二次 release 才触发：manager 的公开取回句柄可以被外部持有，而 manager release 是公开生命周期操作。现有测试覆盖 release 后 handleQuote 不再转发和 manager 常规清空，但没有保留句柄后再 run。已运行常规 manager release 正控 PASS，不能证明 retained-handle 安全。",
+    "root_cause": "ParserAdapter::release 删除 _parser_api 指向的对象后未将指针置空；run 不检查 _stopped。",
+    "fix": "release 时先将成员 API 指针交换为局部并清空成员，再调用 release/remover；设置终态后让 run 返回 false。若产品支持 release 后重启，需通过明确 init 重建 API，而不能复用旧指针。",
+    "acceptance": "保留 adapter shared_ptr，manager.release 后调用 adapter->run 返回 false 且无 connect；重复 adapter.release 安全；release 前正常 run 仍只连接一次，manager map 清空。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p02_wtcore_engines2/r42_parser_adapter_test.cpp",
+        "case": "新增 R42ParserAdapterTest.RetainedAdapterRejectsRunAfterManagerRelease",
+        "issue": "现有 post-release 断言只覆盖 handleQuote 的 _stopped 守卫，没有覆盖 run 对已删除 API 的虚调用。",
+        "change": "先取回并保留 ParserAdapterPtr，再调用 mgr.release，随后断言 retained->run() 返回 false；再验证重复 release 不会二次删除。仅在产品清指针后启用。",
+        "target": "CoverageTests_wtcore",
+        "filter": "R42ParserAdapterTest.RetainedAdapterRejectsRunAfterManagerRelease",
+        "expected_result": "run 返回 false、fake API 的 connect 次数不增加、无 UAF/二次释放。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/04_core_engines/selected-runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/04_core_engines/runs/r42_adapter_manager_release/run.json",
+      "docs/迭代计划/迭代02/复核185/evidence/04_core_engines/runs/r42_adapter_manager_release/stdout.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/04_core_engines/runs/r42_adapter_manager_release/gtest.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "清指针修复后增加 retained shared_ptr 的 release→run 回归；本轮未运行当前 UAF 序列。"
+    ]
+  },
+  {
+    "lane": "R81",
+    "id": "BUG-R81-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/CtaStraBaseCtx.cpp:32-48",
+      "src/WtCore/CtaStraBaseCtx.cpp:409-447",
+      "src/WtCore/CtaStraBaseCtx.cpp:585-615",
+      "src/WtCore/CtaStraBaseCtx.cpp:839-865",
+      "src/WtCore/CtaStraBaseCtx.h:30-34",
+      "src/Includes/WTSTypes.h:328-335"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p02_wtcore_engines2/r81_cta_gap_test.cpp:69-85",
+      "src/TestUnits/coverage/p02_wtcore_engines2/r81_cta_gap_test.cpp:231-239"
+    ],
+    "input_reachability": "CtaStraBaseCtx::on_init 会从 stradata/<strategy>.json 调用 load_data；保存路径也会把 conditions.alg/action 序列化为整数。损坏、手工编辑或跨版本的本地持久化文件可包含超出两个五元素名称数组范围的整数。",
+    "oracle_basis": "文件解析入口应先保证字段类型和值域，再将恢复记录用于数组索引或交易动作；未知条件不得越界、触发交易或形成未验证的内存状态。",
+    "reason": "load_data 将 alg cast 为 WTSCompareType、action cast 为 char，插入条件表后立即对 CMP_ALG_NAMES/ACTION_NAMES 下标读取；两数组长度均为 5。现有测试文件中的合法 JSON 为正控，后续的 99 由测试子类直接注入内存，既不走 JSON 恢复，也不会触发 load_data 的越界日志。此处是文件输入校验缺陷，不依赖是否承诺恢复损坏文件。",
+    "root_cause": "恢复条件时未检查成员存在性、JSON 类型或 enum 范围，且在校验前先入表并索引名称数组。",
+    "fix": "对 conditions.items 的每条记录验证对象结构、field/alg/action 类型和值域；坏记录在入表前拒绝并记录明确错误，整个条件文件是否原子拒绝可采用一致策略；不可执行未知 enum。",
+    "acceptance": "合法保存文件逐字段恢复一致；真实 JSON 中 alg=99 和 action=99 分别被安全拒绝、有可观察诊断、不会越界且之后 on_tick 不产生条件交易；不同坏项不污染其他恢复状态。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p02_wtcore_engines2/r81_cta_gap_test.cpp",
+        "case": "新增 R81CtaTest.InvalidPersistedConditionEnumsAreRejected",
+        "issue": "ConditionAlgorithmsActionsAndNoMatchCode 中的 alg=99 通过 inject_condition 写入内存，未测试恢复文件解析；switch default 不匹配也没有覆盖 load_data 的名称数组下标。",
+        "change": "分别写入真实 stradata JSON（合法合同代码、完整必需字段，单独设 alg=99 或 action=99），经 on_init 加载后断言坏条件未进入并且 feed 不会发出交易动作。",
+        "target": "CoverageTests_wtcore",
+        "filter": "R81CtaTest.InvalidPersistedConditionEnumsAreRejected",
+        "expected_result": "两个损坏持久化记录均安全拒绝；合法历史条件恢复正控保持通过。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "产品校验修复后用真实 JSON fixture 跑 alg/action 越界回归；本轮未运行当前可触发 UB 的文件输入。"
+    ]
+  },
+  {
+    "lane": "n02_wtcore_engines",
+    "id": "BUG-N02-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtCtaTicker.h:41-55",
+      "src/WtCore/WtCtaTicker.cpp:28-40",
+      "src/WtCore/WtCtaTicker.cpp:285-299",
+      "src/WtCore/WtCtaEngine.cpp:61-65",
+      "src/WtCore/WtCtaEngine.cpp:109-112",
+      "src/WtCore/WtSelTicker.cpp:26-48",
+      "src/WtCore/WtHftTicker.cpp:26-48"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n02_wtcore_engines/n02_ticker_slicing_test.cpp:92-119"
+    ],
+    "input_reachability": "WtCtaRtTicker 暴露 is_in_trading/time_to_mins 两个 public 查询；它们显式对 _s_info==NULL 提供 false/原时间回退，但构造函数没有初始化 _s_info。调用者在 init 前查询时，守卫自身读取未初始化指针。正常 WtCtaEngine 路径会先 init ticker 再 run，因此结论限于公开的预初始化查询，不延伸到 Sel/HFT 正常运行。",
+    "oracle_basis": "对外可调用的 null-guard 查询已定义未绑定 session 时的 fallback；fresh object 应确定地满足该守卫，而不是读随机指针。",
+    "reason": "CTA 路径有明确的预初始化查询回退，但成员未初始化，使回退实现本身未定义。禁用测试把 CTA 查询与 Sel/HFT 只传 NULL tick、stop 的行为混在一起，后两者没有触碰 _s_info，不能作为同一缺陷证据。",
+    "root_cause": "WtCtaRtTicker 构造函数未初始化 _s_info 和 _store；公开查询依赖 _s_info 的确定初值。",
+    "fix": "在 WtCtaRtTicker 构造函数初始化 _s_info/_store 为 NULL；init 获取不到 session 时保留 NULL，让查询稳定返回已有 fallback。Sel/HFT 预初始化 run/on_tick 生命周期需另行确认，不纳入本次结论。",
+    "acceptance": "fresh CTA ticker 的 is_in_trading 返回 false、time_to_mins 返回原参数；init 后合法 session 查询与正常 engine init→run 不变；缺失 session 不触发未初始化读。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/n02_wtcore_engines/n02_ticker_slicing_test.cpp",
+        "case": "新增 N02TickerPreInit.CTAPublicQueriesReturnDefaults",
+        "issue": "DISABLED_UninitialisedSessionInfoIsReadBeforeInit 把 CTA 查询与 Sel/HFT on_tick(NULL)/stop 合并；后两者不是该成员读取的触发路径。",
+        "change": "拆出只测试 CTA 的预初始化查询，并在 _s_info 明确置空修复后启用；Sel/HFT 保留独立生命周期测试，不归因到 CTA 查询缺陷。",
+        "target": "CoverageTests_wtcore",
+        "filter": "N02TickerPreInit.CTAPublicQueriesReturnDefaults",
+        "expected_result": "CTA 预初始化查询稳定返回 documented fallback；正常初始化路径仍 PASS。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "初始化修复后拆分并运行 CTA 预初始化查询用例；本轮未运行带未初始化读的 disabled 测试。"
+    ]
+  },
+  {
+    "lane": "n02_wtcore_engines",
+    "id": "BUG-N02-003",
+    "decision": "NEEDS_DECISION",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/IExecCommand.h:61-115",
+      "src/WtCore/WtLocalExecuter.h:433",
+      "src/WtCore/WtCtaEngine.h:68-72",
+      "src/WtRunner/WtRunner.cpp:481-506",
+      "src/WtRunner/WtRunner.cpp:508-541"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n02_wtcore_engines/n02_helper_dist_executer_test.cpp:276-292"
+    ],
+    "input_reachability": "仓内 Runner 以 WtLocalExecuter/WtDiffExecuter/WtDistExecuter 的具体类型指针构造 ExecCmdPtr，或先有 shared_ptr<Derived> 再转为基类 shared_ptr，控制块会保留派生删除器。危险序列需要消费者先持有 IExecCommand* 再直接以该基类指针创建拥有型 shared_ptr/执行 delete；仓内未找到该序列，但公开 ExecCmdPtr 类型允许外部构造。",
+    "oracle_basis": "C++ 通过基类指针删除派生对象需要虚析构；但 `shared_ptr<Base>` 若由派生指针或 `shared_ptr<Derived>` 构造，会保留正确删除器。是否为公开扩展点承诺基类所有权不能单靠仓内调用确定，且加虚析构会改变 ABI/vtable。",
+    "reason": "多态基类确实没有析构函数；仓内正常 Runner/测试的所有权构造方式又保留了派生删除器，没有证明内部生命周期会触发错误删除。需要发布方确定 ExecCmdPtr 是否承诺支持从基类裸指针取得所有权，以及对已编译外部扩展的 ABI 兼容策略。",
+    "root_cause": "IExecCommand 有虚方法但无虚析构；在基类静态类型直接销毁派生对象时不调用派生析构。",
+    "fix": "若允许基类拥有权，增加 virtual ~IExecCommand 并要求所有外部扩展重编；若 ABI 必须保持，明确禁止由 IExecCommand* 构造默认删除所有权，提供/要求 shared_ptr<Derived> 到 ExecCmdPtr 的安全转换入口。",
+    "acceptance": "选择增加析构时，用唯一派生析构计数验证 ExecCmdPtr/base-owned destruction 调用派生析构一次并在重建所有插件后通过；选择限制所有权时，文档/API 明确限制并为推荐构造方式加测试。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": {
+      "question": "IExecCommand/ExecCmdPtr 是否承诺允许第三方通过 IExecCommand 基类裸指针取得并释放派生执行器所有权？",
+      "options": [
+        "增加 virtual destructor，要求所有依赖模块重编",
+        "保持 ABI，明确仅可从 shared_ptr<Derived>/Derived* 构造 ExecCmdPtr"
+      ],
+      "recommendation": "若 IExecCommand 是第三方扩展接口，建议选择增加 virtual destructor 并统一重编；若二进制兼容不可破坏，则选择第二项并收紧所有权构造API。",
+      "impact": "第一项改变基类 vtable/ABI，需要重新构建并分发所有使用该接口的插件；第二项保持二进制布局，但要求外部调用者不能从基类裸指针重新创建默认删除器的 owning shared_ptr。"
+    },
+    "external_blocker": null,
+    "local_remaining": [
+      "等待发布方选择 ABI/所有权合同；选择后再补对应生命周期用例。"
+    ]
+  },
+  {
+    "lane": "p02_wtcore_engines2",
+    "id": "BUG-P02-001",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtRunner/WtRunner.cpp:481-506",
+      "src/WtRunner/WtRunner.cpp:508-534",
+      "src/WtCore/TraderAdapter.cpp:1418-1423",
+      "src/WtCore/TraderAdapter.cpp:1538-1542",
+      "src/WtCore/WtLocalExecuter.cpp:60-66",
+      "src/WtCore/WtLocalExecuter.cpp:328-355",
+      "src/WtCore/WtLocalExecuter.cpp:831-845",
+      "src/WtCore/WtDiffExecuter.cpp:69-75",
+      "src/WtCore/WtDiffExecuter.cpp:379-401",
+      "src/WtCore/WtDiffExecuter.cpp:824-845"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r10_wtcore_executers.cpp:608-622",
+      "src/TestUnits/coverage/p02_wtcore_engines2/p02_local_arbi_executer_test.cpp:243-256",
+      "src/TestUnits/coverage/p02_wtcore_engines2/p02_diff_executer_test.cpp:311-322"
+    ],
+    "input_reachability": "正常 Runner 只有找到 TraderAdapter 后才 setTrader(adapter) 并 addSink(executer)；找不到 trader 时仅记录错误，_channel_ready 保持构造初值 false。已绑定 adapter 的连接/断开事件通过 sink 调用 on_channel_ready/on_channel_lost；断开时两种执行器均将 _channel_ready 设为 false。仓内没有无 adapter 的 ready 通知链。",
+    "oracle_basis": "订单入口的 ready 门禁在正常绑定与断连流程中对应真实 adapter 状态；缺少 trader 的配置不会先置 ready。",
+    "reason": "候选崩溃状态要靠直接调用 on_channel_ready 或先处于 ready 再 setTrader(NULL) 才能构造，未找到正常 Runner/TraderAdapter 生命周期产生该状态的路径。现有 R10 用例明确在无 trader 时不调用危险下单；p02 两个 NULL setter 对照也发生在未 ready 状态。",
+    "root_cause": null,
+    "fix": "不作为本轮产品缺陷。若后续正式支持 setTrader(nullptr) 作为解除绑定操作，应另行定义它同时清除 ready 状态，并对已有订单入口加防御性 adapter 检查。",
+    "acceptance": "当前可从源码确认：无 trader 初始化时 ready=false；绑定通道断开后 ready=false；未发现真实调用序列满足 ready=true 且 trader==NULL。direct callback 的人为构造不作为产品复现。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "p02_wtcore_engines2",
+    "id": "BUG-P02-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtEngine.cpp:285-316",
+      "src/WtCore/WtEngine.cpp:843-877",
+      "src/WtCore/WtEngine.cpp:956-1003",
+      "src/WtRunner/WtRunner.cpp:153-160",
+      "src/WtRunner/WtRunner.cpp:365-408"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p02_wtcore_engines2/p02_wt_engine_state_test.cpp:413-425",
+      "src/TestUnits/coverage/q01_wtcore3/r130_engine_fee_test.cpp:147-175"
+    ],
+    "input_reachability": "正常 Runner 将自身初始化的非空 BaseDataMgr 传入 WtEngine::init，并按 fees 配置加载外部费率 JSON。文件各 member key 进入 load_fees 后由 StrUtil::split(fullPid, \".\") 解析；合法键形状在已有费率正控中为 SHFE.ag。外部 JSON 若含不带点的 key，split 结果不足两个元素仍被直接索引。",
+    "oracle_basis": "外部配置解析不能对格式错误的 key 进行越界访问。对这类费率配置应有确定诊断和安全失败/拒绝策略；空指针人工注入内部必需依赖不单独成立。",
+    "reason": "已确认的产品缺陷是外部手续费文件键形状未校验导致 vector 越界。旧条目内其余手工注入空 hot/data/base manager 的断言并非正常 Runner 路径；`task_loop` 的循环由 release/stop 条件控制，也不是该空指针问题。现有 DISABLED 用例为空体，不提供运行证据；r130 仅覆盖合法 key 正向读取。",
+    "root_cause": "load_fees 假设所有 JSON member key 至少包含交易所和品种两段，未在读取 ay[0]/ay[1] 前验证。",
+    "fix": "校验 key 必须含合法的两段 exchange/product 标识后再查 commodity；格式不符时记录文件名与 key 并使费率加载返回失败，向 engine/runner 传播，避免在部分费率已应用后继续交易。",
+    "acceptance": "标准 SHFE.ag 费率仍加载且 calc_fee 正确；含 broken 或单段 key 的文件使配置明确失败、无越界、无不完整费率继续交易；缺少必需内部 manager 的人工 null 测试不作为该项验收。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q01_wtcore3/r130_engine_fee_test.cpp",
+        "case": "新增 R130EngineFee.MalformedFeeKeyIsRejected",
+        "issue": "当前费用用例只覆盖标准 SHFE.ag key；另一个 P02 DISABLED_NullHotMgrAndUnseededBaseDataPaths 用例为空体，没有执行 malformed external fee input。",
+        "change": "通过当前测试提供的真实 reloadFees/file fixture 写入 {\"broken\":{...}}；断言设置可观察加载错误且 Runner/engine 不接受该配置，并保持合法费用正控。移除或缩小 P02 空壳，不要把手工 NULL 依赖混到 malformed key 回归。",
+        "target": "CoverageTests_wtcore",
+        "filter": "R130EngineFee.MalformedFeeKeyIsRejected",
+        "expected_result": "非法 key 安全拒绝并返回配置失败；不崩溃、不部分启用费率；合法 key 计算结果保持原值。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "load_fees 失败传播实现后运行 malformed-key fixture；本轮只读判定，没有执行越界输入。"
+    ]
+  },
+  {
+    "lane": "p02_wtcore_engines2",
+    "id": "BUG-P02-006",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtDiffExecuter.cpp:113-172",
+      "src/WtCore/WtDiffExecuter.cpp:180-232",
+      "src/WtCore/WtDiffExecuter.cpp:243-280",
+      "src/WtCore/WtDiffExecuter.cpp:501-545",
+      "src/WtCore/WtDiffExecuter.cpp:554-642",
+      "src/WtCore/WtDiffExecuter.cpp:680-696",
+      "src/Share/BoostFile.hpp:44-50",
+      "src/Share/BoostFile.hpp:147-155"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p02_wtcore_engines2/p02_diff_executer_test.cpp:217-260",
+      "src/TestUnits/coverage/p02_wtcore_engines2/p02_diff_executer_test.cpp:267-280",
+      "src/TestUnits/coverage/p02_wtcore_engines2/p02_diff_executer_test.cpp:324-372"
+    ],
+    "input_reachability": "WtDiffExecuter::init 会从 execdata/<name>.json 恢复本地目标/差量快照；文件存在且语法合法后直接假设 targets/diffs 是数组、元素有正确 code/target/diff 类型。set_position/on_trade 的正常业务路径会调用 save_data；BoostFile::create_new_file 会截断原文件，write_file 返回 bool 但 save_data 忽略结果。",
+    "oracle_basis": "持久化仓位快照被描述为重启恢复数据；无效结构不能使加载端 RapidJSON 断言，写入失败也不能静默覆盖最后一份有效快照后仍把状态当作已保存。",
+    "reason": "确认两个独立产品风险：正确 JSON 但字段缺失/类型不符可在 GetArray/GetString/GetDouble 触发断言或未定义行为；写盘前会 truncate 现有文件，但忽略写入返回值，磁盘失败可留下空/部分快照且调用方无可观察状态。factory 缺 unit 时会记错误并跳过更新；该条测试明确把 skip 当预期，本轮不把该业务策略误报为静默无告警产品缺陷。",
+    "root_cause": "恢复代码只处理语法错误，没有结构/字段 schema 校验；save_data 直接截断最终文件且忽略 create/write 错误。",
+    "fix": "先在临时对象完整校验根对象、数组元素和字段，再一次性采用恢复状态；坏快照返回可观察错误且不部分装载。保存改为临时文件写全并检查 write/close，再原子替换旧文件；失败时保留 last-good 文件并向调用路径记录/传播失败状态。",
+    "acceptance": "缺 targets/diffs、错误类型、缺 code/target/diff 的语法合法 JSON 均安全拒绝且不部分恢复；合法快照读回值与内存一致；故障注入验证写失败时旧文件字节保持不变且错误可观察；正常 set_position 与 trade 更新持久化仍 PASS。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p02_wtcore_engines2/p02_diff_executer_test.cpp",
+        "case": "新增 P02DiffExecuterTest.LoadDataRejectsStructurallyInvalidSnapshots",
+        "issue": "现有 LoadDataToleratesMissingEmptyAndBrokenFiles 仅覆盖缺文件、空文件和语法错误，未覆盖语法合法但根/字段类型不符的 RapidJSON 调用；未知ticker仅验证合同查找失败。",
+        "change": "加入 root 为非对象、targets 非数组、元素缺 code 或 target 为字符串等真实 execdata JSON；断言不崩溃、不部分恢复并暴露错误。",
+        "target": "CoverageTests_wtcore",
+        "filter": "P02DiffExecuterTest.LoadDataRejectsStructurallyInvalidSnapshots",
+        "expected_result": "所有结构损坏输入安全拒绝；已支持的缺失/空/语法错误与有效快照对照维持确定结果。"
+      },
+      {
+        "file": "src/TestUnits/coverage/p02_wtcore_engines2/p02_diff_executer_test.cpp",
+        "case": "新增 P02DiffExecuterTest.SaveDataPreservesLastGoodSnapshotOnWriteFailure",
+        "issue": "SaveDataCreatesFileWhenNothingLoaded 和 ScaleAppliedOnlyAfterUnitExists 只检查文件存在/JSON标记，没有读回字段，也没有验证 create/write 失败；BoostFile 的 create_new_file 会先 truncate。",
+        "change": "通过可注入文件写入故障或目录权限替身令保存失败；先写入 last-good JSON，断言失败时原快照仍可读、调用路径报告失败。增加一次正常写入的完整 JSON 读回断言。",
+        "target": "CoverageTests_wtcore",
+        "filter": "P02DiffExecuterTest.SaveDataPreservesLastGoodSnapshotOnWriteFailure",
+        "expected_result": "写失败不清空/截断旧快照且错误可观察；成功保存读回的 targets/diffs 与内存一致。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/04_core_engines/selected-runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/04_core_engines/runs/p02_diff_syntax_invalid_positive/run.json",
+      "docs/迭代计划/迭代02/复核185/evidence/04_core_engines/runs/p02_diff_syntax_invalid_positive/stdout.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/04_core_engines/runs/p02_diff_syntax_invalid_positive/gtest.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "schema validation 与 atomic-save 修复后运行新增结构损坏/写失败测试；本轮只运行语法错误正控，未运行结构 UB 或权限故障注入。"
+    ]
+  }
+]

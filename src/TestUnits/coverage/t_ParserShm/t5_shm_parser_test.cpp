@@ -143,6 +143,8 @@ protected:
 	ShmSink sink_;
 	WTSCommodityInfo* comm_ = NULL;
 	WTSContractInfo* ct_ = NULL;
+	WTSCommodityInfo* option_comm_ = NULL;
+	WTSContractInfo* option_ct_ = NULL;
 
 	void SetUp() override
 	{
@@ -152,12 +154,21 @@ protected:
 		comm_->setCategory(CC_Future);
 		comm_->setVolScale(5);
 		sink_.bd_.regis(comm_, ct_);
+		// 仓内合法的多段期权标准码：CFFEX.IO2013.C.4000；原始码为 IO2013.C.4000。
+		option_ct_ = WTSContractInfo::create("IO2013.C.4000", "IO2013 C 4000", "CFFEX", "IO");
+		option_ct_->setTotalIndex(4);
+		option_comm_ = WTSCommodityInfo::create("IO", "IO", "CFFEX", "TRADING", "CHINA");
+		option_comm_->setCategory(CC_SpotOption);
+		option_comm_->setVolScale(1);
+		sink_.bd_.regis(option_comm_, option_ct_);
 		parser_.registerSpi(&sink_);
 	}
 
 	void TearDown() override
 	{
 		parser_.disconnect();
+		if (option_ct_) option_ct_->release();
+		if (option_comm_) option_comm_->release();
 		if (ct_) ct_->release();
 		if (comm_) comm_->release();
 	}
@@ -228,14 +239,19 @@ TEST_F(ParserShmTest, subscribe_splits_std_code_into_raw_code_and_exchange)
 	EXPECT_EQ("a2509@DCE", sink_.bd_.calls_[1]);
 }
 
-/// 多段标准码只取第 2 段做原始代码（不是最后一段）——可证伪的现状断言
-TEST_F(ParserShmTest, subscribe_uses_second_segment_only)
+/// 多段标准期权码必须保留完整原始代码；查询路径不得丢弃后续段
+TEST_F(ParserShmTest, subscribe_and_unsubscribe_preserve_multisegment_standard_code)
 {
 	CodeSet codes;
-	codes.insert("SHFE.ag.2512");
+	codes.insert("CFFEX.IO2013.C.4000");
 	parser_.subscribe(codes);
 	ASSERT_EQ(1u, sink_.bd_.calls_.size());
-	EXPECT_EQ("ag@SHFE", sink_.bd_.calls_[0]);
+	EXPECT_EQ("IO2013.C.4000@CFFEX", sink_.bd_.calls_[0]);
+	EXPECT_EQ(0u, sink_.n_quote_);
+
+	parser_.unsubscribe(codes);
+	ASSERT_EQ(2u, sink_.bd_.calls_.size());
+	EXPECT_EQ("IO2013.C.4000@CFFEX", sink_.bd_.calls_[1]);
 }
 
 /// unsubscribe 与 subscribe 走同一套拆分；不依赖 _subbed 尺寸（已 registerSpi）
@@ -345,7 +361,7 @@ TEST(ParserShmNoSpi, DISABLED_subscribe_without_register_spi_uses_uninit_bd_mgr)
 	p.disconnect();
 }
 
-/// getGlobalSize()==0 时 subscribe 会在空 vector<bool> 上写下标（越界写，见 bugs）
+/// 零容量基础数据管理器没有已登记合约；查找返回空后不应访问订阅位图。
 class ZeroSizeShmSink : public ShmSink
 {
 public:
@@ -354,22 +370,28 @@ public:
 	class Mgr : public ShmFakeBdMgr
 	{
 	public:
-		virtual uint32_t getGlobalSize() override { return 0; }   // 只有 0 个全局槽位
+		virtual uint32_t getGlobalSize() override
+		{
+			++n_global_size_;
+			return 0;
+		}
 	} _mgr;
 };
 
-TEST(ParserShmNoSpi, DISABLED_subscribe_with_zero_global_size_writes_out_of_range)
+TEST(ParserShmZeroGlobalSize, no_contract_lookup_skips_subscription_index)
 {
 	ParserShm p;
-	ZeroSizeShmSink z;
-	WTSCommodityInfo* comm = WTSCommodityInfo::create("ag", "agname", "SHFE", "TRADING", "CHINA");
-	WTSContractInfo* ct = WTSContractInfo::create("ag2512", "agname", "SHFE", "ag");
-	ct->setTotalIndex(3);
-	z._mgr.regis(comm, ct);
-	p.registerSpi(&z);
+	ZeroSizeShmSink sink;
+	p.registerSpi(&sink);
 	CodeSet codes;
 	codes.insert("SHFE.ag2512");
-	p.subscribe(codes);        // _subbed 为空、下标 3 → vector<bool>::operator[] 越界
+	p.subscribe(codes);
+
+	// 零个槽位意味着没有可查到的合约，subscribe 应跳过索引写入。
+	ASSERT_EQ(1u, sink._mgr.n_get_contract_);
+	EXPECT_EQ("ag2512@SHFE", sink._mgr.calls_[0]);
+	EXPECT_EQ(0u, sink.n_quote_);
+	EXPECT_TRUE(sink.events_.empty());
 	p.disconnect();
 }
 

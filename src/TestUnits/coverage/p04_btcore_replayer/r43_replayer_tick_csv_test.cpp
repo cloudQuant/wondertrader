@@ -197,8 +197,12 @@ namespace
 		uint32_t tickCalls {0};
 
 		std::vector<double> tickPrices;
+		std::vector<uint32_t> tickDates;
 		std::vector<uint32_t> closedDates;
+		std::vector<double> closedPrices;
 		std::vector<uint32_t> beginTDates;
+		std::vector<uint32_t> scheduleDates;
+		std::vector<uint32_t> scheduleTimes;
 
 		void handle_init() override
 		{
@@ -212,7 +216,10 @@ namespace
 			(void)stdCode; (void)pxType;
 			tickCalls++;
 			if (curTick != nullptr)
+			{
 				tickPrices.push_back(curTick->price());
+				tickDates.push_back(curTick->actiondate());
+			}
 		}
 
 		void handle_bar_close(const char* stdCode, const char* period,
@@ -220,12 +227,19 @@ namespace
 		{
 			(void)stdCode; (void)period; (void)times;
 			if (newBar != nullptr)
+			{
 				closedDates.push_back(newBar->date);
+				closedPrices.push_back(newBar->close);
+			}
 			if (onBarClose)
 				onBarClose();
 		}
 
-		void handle_schedule(uint32_t, uint32_t) override {}
+		void handle_schedule(uint32_t uDate, uint32_t uTime) override
+		{
+			scheduleDates.push_back(uDate);
+			scheduleTimes.push_back(uTime);
+		}
 		void handle_session_begin(uint32_t curTDate) override
 		{
 			beginCalls++;
@@ -413,17 +427,43 @@ TEST_F(R43ReplayerTickCsvTest, barsWithTicksUseHftReplayPath)
 		replayer.get_kline_slice(code, "d", 1, 1, true);
 	};
 	ASSERT_TRUE(replayer.prepare());
-	// 首根日线（20200102）被初始定位吃掉，第一根真正回放的是 20200103
+	// Tick 子订阅不改变主K线日期范围：日线区间仍从 20200102 首根开始。
 	replayer.sub_tick(1, code);
 
 	replayer.run(false);
 
-	ASSERT_EQ(kDayCnt - 1, sink.closedDates.size());
-	EXPECT_EQ(20200103u, sink.closedDates[0]);
+	std::vector<uint32_t> expectedDates;
+	std::vector<double> expectedCloses;
+	for (uint32_t i = 0; i < kDayCnt; i++)
+	{
+		expectedDates.push_back(kDayBars[i].date);
+		expectedCloses.push_back(kDayBars[i].close);
+	}
+	EXPECT_EQ(kDayCnt, sink.closedDates.size());
+	EXPECT_EQ(expectedDates, sink.closedDates);
+	EXPECT_EQ(expectedCloses, sink.closedPrices);
+	EXPECT_EQ(expectedDates, sink.scheduleDates);
+	EXPECT_EQ(std::vector<uint32_t>(kDayCnt, 1500u), sink.scheduleTimes);
+	if (!sink.closedDates.empty() && !sink.closedPrices.empty())
+	{
+		EXPECT_EQ(kDayBars[0].date, sink.closedDates.front());
+		EXPECT_EQ(kDayBars[kDayCnt - 1].date, sink.closedDates.back());
+		EXPECT_DOUBLE_EQ(kDayBars[0].close, sink.closedPrices.front());
+		EXPECT_DOUBLE_EQ(kDayBars[kDayCnt - 1].close, sink.closedPrices.back());
+	}
 	// 前两笔来自 replayHftDatas 的真实tick，价格必须与 dsb 一致
-	ASSERT_GE(sink.tickCalls, 2u);
-	EXPECT_DOUBLE_EQ(20.1, sink.tickPrices[0]);
-	EXPECT_DOUBLE_EQ(20.2, sink.tickPrices[1]);
+	std::vector<double> day03TickPrices;
+	for (std::size_t i = 0; i < sink.tickPrices.size() && i < sink.tickDates.size(); i++)
+	{
+		if (sink.tickDates[i] == 20200103u)
+			day03TickPrices.push_back(sink.tickPrices[i]);
+	}
+	EXPECT_GE(day03TickPrices.size(), 2u);
+	if (day03TickPrices.size() >= 2)
+	{
+		EXPECT_DOUBLE_EQ(20.1, day03TickPrices[0]);
+		EXPECT_DOUBLE_EQ(20.2, day03TickPrices[1]);
+	}
 	// 20200103 之后没有tick文件 -> 回落到模拟tick
 	EXPECT_TRUE(replayer.is_tick_simulated());
 	EXPECT_EQ(1u, sink.replayDoneCalls);
@@ -453,10 +493,13 @@ TEST_F(R43ReplayerTickCsvTest, stopDuringBarReplayTerminatesCleanly)
 	ASSERT_TRUE(replayer.prepare());
 	replayer.run(false);
 
-	// 首根日线被初始定位吃掉，实际闭盘从 20200103 开始；第二根闭盘后立即终止
+	// on_bar_close 每完成一根就检查数量：首根 20200102 后继续，第二根 20200103 后 stop。
 	ASSERT_EQ(2u, sink.closedDates.size());
-	EXPECT_EQ(20200103u, sink.closedDates[0]);
-	EXPECT_EQ(20200106u, sink.closedDates[1]);
+	EXPECT_EQ(std::vector<uint32_t>({20200102u, 20200103u}), sink.closedDates);
+	EXPECT_EQ(std::vector<double>({10.5, 11.5}), sink.closedPrices);
+	EXPECT_EQ(std::vector<uint32_t>({20200102u, 20200103u}), sink.beginTDates);
+	EXPECT_EQ(std::vector<uint32_t>({20200102u, 20200103u}), sink.scheduleDates);
+	EXPECT_EQ(std::vector<uint32_t>(2, 1500u), sink.scheduleTimes);
 	EXPECT_EQ(2u, sink.beginCalls);
 	EXPECT_EQ(2u, sink.endCalls);
 	EXPECT_EQ(1u, sink.replayDoneCalls);

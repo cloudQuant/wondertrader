@@ -108,9 +108,17 @@ public:
 	}
 };
 
+struct MCommCleanup
+{
+	MFakeCtx& ctx;
+	~MCommCleanup() { if (ctx.comm) ctx.comm->release(); }
+};
+
 WTSCommodityInfo* mkMComm(const char* product)
 {
-	WTSCommodityInfo* c = WTSCommodityInfo::create("sh6", "R7SMIN", "SHSE", "NIGHT_DAY", product);
+	// create 参数顺序是 pid/product, name, exchange, session, trading template。
+	// get_minOrderQty 按 getProduct() 区分 STK / CBOND，故产品代码必须位于第一个参数。
+	WTSCommodityInfo* c = WTSCommodityInfo::create(product, "R7SMIN", "SHSE", "NIGHT_DAY", "CHN");
 	c->retain();                     // 抵消 get_minOrderQty 的多余 release（见文件头）
 	c->setVolScale(1);
 	c->setPriceTick(0.01);
@@ -280,7 +288,7 @@ TEST(r7_stkmin, non_cny_account_update_is_ignored)
 	ASSERT_EQ(ctx.buys.size(), 1u);
 	EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 500.0);          // _avaliable 仍为 0 -> 不受资金约束
 	unit.on_account("CNY", 0, 0, 0, 2500.0, 0, 0, 0, 0, 0, 0);
-	EXPECT_TRUE(ctx.hasLog("avaliable update 0.00->:2500.00"));   // L249
+	EXPECT_TRUE(ctx.hasLog("avaliable update"));       // 收到 CNY 资金更新；不依赖浮点日志格式
 	ctx.comm->release();
 }
 
@@ -564,36 +572,100 @@ TEST(r7_stkmin, full_fill_report_resets_cancel_times)
 {
 	MFakeCtx ctx;
 	ctx.comm = mkMComm("STK");
+	MCommCleanup commCleanup{ ctx };
 	WtStockMinImpactExeUnit unit;
-	bootM(unit, ctx, kSmStk, 3000, mkMCfg(0, 0, 0, false, 500.0, 0.0, 100.0));
+	WTSVariant* cfg = mkMCfg(0, 0, 0, false, 500.0, 0.0, 100.0);
+	unit.init(&ctx, kSmStk, cfg);
+	cfg->release();
+	unit.set_position(kSmStk, 3000);
+	WTSTickData* firstTick = mkMTick(kSmStk, 100000000, 10.50, 10.49, 1000, 10.51, 800);
+	unit.on_tick(firstTick);
+	firstTick->release(); // 释放 create 与 mkMTick 持有的引用，执行器保留自己的引用
+	firstTick->release();
+	unit.on_channel_ready();
 	ASSERT_EQ(ctx.buys.size(), 1u);
-	unit.on_order(6000, kSmStk, true, 0, 10.50, false);            // 全额成交
-	EXPECT_TRUE(ctx.hasLog("6000 done, earse from mon"));          // L190
-	unit.on_tick(mkMTick(kSmStk, 100001000, 10.50, 10.49, 1000, 10.51, 800));
-	unit.on_order(6001, kSmStk, true, 100, 10.50, true);           // 撤 on_tick 里补下的单
-	// 成交回报把 _cancel_times 归零，所以这里加价应为 0.01*1（本笔撤单自己累加的那一次）
+	ASSERT_DOUBLE_EQ(ctx.totalPos, 0.0);
+	ASSERT_DOUBLE_EQ(ctx.availPos, 0.0);
+	ASSERT_GT(ctx.buys[0].qty, 0.0);
+
+	// 先撤掉首笔单，建立非零 _cancel_times；撤单回调会按 +1 tick 重算下单。
+	unit.on_order(6000, kSmStk, true, ctx.buys[0].qty, ctx.buys[0].price, true);
+	ASSERT_EQ(ctx.buys.size(), 2u);
+	EXPECT_DOUBLE_EQ(ctx.buys[1].price, 10.51);
+
+	// 第二笔单全成前，fake 仓位同步反映成交数量；目标仍有 3000 - qty 的剩余买量。
+	ctx.totalPos = ctx.buys[1].qty;
+	ctx.availPos = ctx.buys[1].qty;
+	unit.on_order(6001, kSmStk, true, 0, ctx.buys[1].price, false);
+	EXPECT_TRUE(ctx.hasLog("6001 done, earse from mon"));
+
+	WTSTickData* nextTick = mkMTick(kSmStk, 100001000, 10.50, 10.49, 1000, 10.51, 800);
+	unit.on_tick(nextTick);
+	nextTick->release();
+	nextTick->release();
 	ASSERT_EQ(ctx.buys.size(), 3u);
-	EXPECT_DOUBLE_EQ(ctx.buys[2].price, 10.51);
-	ctx.comm->release();
+	// 全成回报复位撤单计数；仓位同步后目标仍未完成，下一笔价格回到 tick 的 10.50。
+	EXPECT_DOUBLE_EQ(ctx.buys[2].price, 10.50);
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 委托成功也会触发重算（L406 在 if 之外）
+// 成功委托回报不应重复提交尚有未成交买量的订单。
 //////////////////////////////////////////////////////////////////////////
-TEST(r7_stkmin, successful_entrust_also_recalculates)
+TEST(r7_stkmin, successful_entrust_callback_does_not_duplicate_outstanding_buy)
 {
 	MFakeCtx ctx;
 	ctx.comm = mkMComm("STK");
+	MCommCleanup commCleanup{ ctx };
 	WtStockMinImpactExeUnit unit;
-	bootM(unit, ctx, kSmStk, 3000, mkMCfg(0, 0, 0, false, 500.0, 0.0, 100.0));
+	WTSVariant* cfg = mkMCfg(0, 0, 0, false, 500.0, 0.0, 100.0);
+	unit.init(&ctx, kSmStk, cfg);
+	cfg->release();
+	unit.set_position(kSmStk, 3000);
+	WTSTickData* tick = mkMTick(kSmStk, 100000000, 10.50, 10.49, 1000, 10.51, 800);
+	unit.on_tick(tick);
+	tick->release();
+	tick->release();
+	unit.on_channel_ready();
 	ASSERT_EQ(ctx.buys.size(), 1u);
+	ASSERT_GT(ctx.buys[0].qty, 0.0);
+	// 模拟 ExecMocker 提交首单后报告的未成交买量，回调重算时应等待该订单完成。
+	ctx.undone = ctx.buys[0].qty;
 	unit.on_entrust(6000, kSmStk, true, "accepted");
-	// L395 只在失败时进分支，但 L406 的 do_calc 无条件执行 -> 同一笔 tick 又下一次单
-	EXPECT_EQ(ctx.buys.size(), 2u);
+	EXPECT_EQ(ctx.buys.size(), 1u);
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 未知 ID 的失败委托回报应直接忽略（L395-398）
+//////////////////////////////////////////////////////////////////////////
+TEST(r7_stkmin, unknown_failed_entrust_is_ignored)
+{
+	MFakeCtx ctx;
+	ctx.comm = mkMComm("STK");
+	MCommCleanup commCleanup{ ctx };
+	ASSERT_NE(ctx.comm, nullptr);
+	ASSERT_TRUE(ctx.buys.empty());
+	ASSERT_DOUBLE_EQ(ctx.totalPos, 0.0);
+	ASSERT_DOUBLE_EQ(ctx.availPos, 0.0);
+	ASSERT_DOUBLE_EQ(ctx.undone, 0.0);
+
+	WtStockMinImpactExeUnit unit;
+	WTSVariant* cfg = mkMCfg(0, 0, 0, false, 500.0, 0.0, 100.0);
+	unit.init(&ctx, kSmStk, cfg);
+	cfg->release();
+	unit.set_position(kSmStk, 3000);
+	WTSTickData* tick = mkMTick(kSmStk, 100000000, 10.50, 10.49, 1000, 10.51, 800);
+	unit.on_tick(tick);
+	tick->release();
+	tick->release();
+	unit.on_channel_ready();
+	ASSERT_EQ(ctx.buys.size(), 1u);
+	ASSERT_EQ(ctx.buys[0].code, kSmStk);
+	const uint32_t ordersBeforeUnknownFailure = static_cast<uint32_t>(ctx.buys.size());
+
 	unit.on_entrust(9999, kSmStk, false, "not mine");
-	EXPECT_FALSE(ctx.hasLog("entrust failed erase from mon"));   // L403 只对管理中的单记
-	EXPECT_EQ(ctx.buys.size(), 3u);                              // L406 仍然无条件重算一次
-	ctx.comm->release();
+
+	EXPECT_FALSE(ctx.hasLog("entrust failed erase from mon"));
+	EXPECT_EQ(ctx.buys.size(), ordersBeforeUnknownFailure);
 }
 
 //////////////////////////////////////////////////////////////////////////

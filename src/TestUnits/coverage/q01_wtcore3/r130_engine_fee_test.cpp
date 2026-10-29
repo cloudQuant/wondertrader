@@ -2,11 +2,9 @@
  * r130_engine_fee_test.cpp — lane R130 / wave21
  *
  * 目标：src/WtCore/WtEngine.cpp 的手续费计算面。
- * 基线中 :890-916 共 27 行全未覆盖：`_fee_map` 只由 `load_fees` “应该”填充，
- * 但 `load_fees` 实际只把费率写到品种对象上，从未写入 `_fee_map`（见 bugs/R130.md
- * BUG-R130-001），因此走公开 init 路径时 `calc_fee` 永远在 :884 早退。
- * 本文件用测试子类向 protected `_fee_map` 注入模板，逐分支验证 `calc_fee` 的
- * 算术与四舍五入；另用公开 `load_fees`（经子类公开）钉住缺陷现状。
+ * 本文件用测试子类注入模板，逐分支验证 `calc_fee` 的算术与四舍五入；另通过
+ * `load_fees` 的公开加载路径验证商品费率正控及引擎手续费计算契约
+ *（BUG-R130-001 / BUG-R41-001）。加载路径只断言公开结果，不约束内部模板存储方式。
  *
  * 覆盖行段：
  *   calc_fee :879-916（byvolume × offset 0/1/2/default、按金额 × 0/1/2/default、
@@ -51,8 +49,6 @@ public:
         _fee_map[fullPid] = item;
     }
 
-    std::size_t feeCount() const { return _fee_map.size(); }
-
     void reloadFees(const char* filename) { load_fees(filename); }
 };
 
@@ -66,7 +62,6 @@ void prepareEnv(q01sel::BaseDataMgr& bd, q01sel::HotMgr& /*hot*/)
     ag->setSessionInfo(sess);
     bd.regis(ag, q01sel::makeCt("SHFE", "ag", "ag2512"));
 }
-
 /**
  * 裸引擎必须走一次 init：WtCtaEngine 的 `_cfg` 由 init 赋值，
  * 而 `~WtCtaEngine` 会无条件 `_cfg->release()`。原夹具只 attach 不 init，
@@ -149,10 +144,10 @@ TEST(R130EngineFee, ByAmountOffsetsUseVolumeScale)
 }
 
 //////////////////////////////////////////////////////////////////
-// 公开 load_fees 的现状：品种费率被写入，但引擎模板表仍为空
-// src/WtCore/WtEngine.cpp:843-876（缺陷现状，见 BUG-R130-001）
+// 公开 load_fees → calc_fee 正向契约：按量模板的引擎手续费应为 3.0
+// src/WtCore/WtEngine.cpp:843-916（BUG-R130-001 / BUG-R41-001）
 //////////////////////////////////////////////////////////////////
-TEST(R130EngineFee, LoadFeesWritesCommodityRatesButNotFeeMap)
+TEST(R130EngineFee, LoadFeesMakesTemplateAvailableForEngineCalculation)
 {
     r130::TempEnv env("r130fee");
     q01sel::BaseDataMgr bd;
@@ -166,6 +161,10 @@ TEST(R130EngineFee, LoadFeesWritesCommodityRatesButNotFeeMap)
     R130FeeEngine engine;
     engine.attach(&bd, &hot);
     initEngine(engine, bd, hot);
+
+    // 未加载模板时，引擎手续费使用无模板默认值 0。
+    EXPECT_DOUBLE_EQ(0.0, engine.calc_fee(kAg, 3500.0, 2.0, 0));
+
     engine.reloadFees(path.c_str());
 
     // 品种上的费率确实被 load_fees 改写（1.5 * 2 手 = 3.0）
@@ -173,35 +172,7 @@ TEST(R130EngineFee, LoadFeesWritesCommodityRatesButNotFeeMap)
     ASSERT_NE(nullptr, comm);
     EXPECT_DOUBLE_EQ(3.0, comm->calcFee(3500.0, 2.0, 0));
 
-    // 但引擎的 _fee_map 没有被填充，calc_fee 仍返回 0（缺陷现状）
-    EXPECT_EQ(0u, engine.feeCount());
-    EXPECT_DOUBLE_EQ(0.0, engine.calc_fee(kAg, 3500.0, 2.0, 0));
-
-    std::error_code ec;
-    sfs::remove(sfs::path(path).parent_path(), ec);
-}
-
-//////////////////////////////////////////////////////////////////
-// 缺陷契约：load_fees 后 calc_fee 应能命中模板（当前失败，保持 DISABLED）
-// src/WtCore/WtEngine.cpp:843-888
-//////////////////////////////////////////////////////////////////
-TEST(R130EngineFee, DISABLED_LoadFeesShouldPopulateEngineFeeMap)
-{
-    r130::TempEnv env("r130fee");
-    q01sel::BaseDataMgr bd;
-    q01sel::HotMgr hot;
-    prepareEnv(bd, hot);
-
-    const std::string path = writeFeeFile(
-        "{\"SHFE.ag\":{\"open\":1.5,\"close\":1.2,\"closetoday\":1.0,"
-        "\"byvolume\":true}}");
-
-    R130FeeEngine engine;
-    engine.attach(&bd, &hot);
-    initEngine(engine, bd, hot);
-    engine.reloadFees(path.c_str());
-
-    EXPECT_EQ(1u, engine.feeCount());
+    // 引擎计算与同一已加载模板一致，不锁定模板在引擎内部的存储实现。
     EXPECT_DOUBLE_EQ(3.0, engine.calc_fee(kAg, 3500.0, 2.0, 0));
 
     std::error_code ec;

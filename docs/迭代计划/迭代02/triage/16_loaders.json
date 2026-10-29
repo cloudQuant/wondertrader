@@ -1,0 +1,625 @@
+[
+  {
+    "lane": "T26_ctploader",
+    "id": "BUG-T26-001",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/CTPLoader/TraderSpi.cpp:239-270",
+      "src/CTPLoader/TraderSpi.h:23-29"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_flow_test.cpp:466-481"
+    ],
+    "reason": "worker 的内层空队列循环不检查 _stopped，析构置位后 join 可能永久等待；但 CTPLoader 当前以 new 创建 SPI，仓库可见路径未显式析构该 SPI，且收尾回调以 exit 结束进程。禁用测试没有证明正常产品生命周期会调用此析构。",
+    "fix": "先明确 SPI 的拥有者与析构时点；若可析构，改为带停止谓词的条件变量队列，析构置停并通知，且用同一同步原语保护队列状态。",
+    "acceptance": "通过明确的 API/宿主关闭路径启动 worker、使队列空、销毁 SPI；验证关闭有界完成且无挂起线程。未确认该关闭路径前不登记为本迭代产品修复项。",
+    "canonical": null,
+    "proposed_test_fix": "当前 DISABLED 用例仅构造了直接 delete 场景。先以受控 API 生命周期证明该对象确会被释放；若证明成立，再保留该场景并增加队列空与队列非空两种关闭断言。"
+  },
+  {
+    "lane": "T26_ctploader",
+    "id": "BUG-T26-002",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/CTPLoader/TraderSpi.cpp:303-340",
+      "src/CTPLoader/TraderSpi.cpp:421-446"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_flow_test.cpp:483-490",
+      "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_instrument_test.cpp:482-499"
+    ],
+    "reason": "非空且首个数字不存在时循环越过终止符；正常 OnRspQryInstrument 只对 CZCE 的 InstrumentID/UnderlyingInstrID 调用，现有禁用例使用人工字符串 SRCS，仓库没有给出柜台允许该格式的依据。现有空串保护与无数字字符串不是同一输入。",
+    "fix": "先以本仓库绑定的 CTP 合约字段契约确认 CZCE InstrumentID 的格式边界；若无数字值可能由有效回报到达，循环应在 NUL 处终止并返回明确定义的失败/原码结果。",
+    "acceptance": "用有效 CZCE 普通合约与期权 underlying 保持现有扩年结果；只有在字段契约确认后，才对无数字/非字母输入增加安全结果断言。",
+    "canonical": null,
+    "proposed_test_fix": "保留已有空码早退断言。不要启用当前以崩溃为通过条件的 DISABLED 用例；在确认允许输入前，不把 SRCS 当成有效 CTP 合约码。"
+  },
+  {
+    "lane": "T26_ctploader",
+    "id": "BUG-T26-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/CTPLoader/TraderSpi.cpp:662-668",
+      "src/CTPLoader/TraderSpi.cpp:801-814"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_flow_test.cpp:207-212",
+      "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_flow_test.cpp:253-260"
+    ],
+    "reason": "DumpToJson 把 optiontype、underlying、strikeprice、underlyingscale 写入嵌套 option 对象；增量读取只检查 option 存在，却从父对象读取这些字段，正常导出文件往返会丢失期权属性。",
+    "fix": "读取并校验 pCont 的 option 子对象，再从该对象映射四个字段；没有 option 对象时保留非期权默认值。",
+    "acceptance": "以 DumpToJson 输出的实际嵌套结构执行一次序列化到文件再 LoadFromJson；四个字段逐项与写入值相同，非期权合约仍按默认值装载。",
+    "canonical": null,
+    "proposed_test_fix": "现有增量 fixture 已包含嵌套 option 且对四字段有断言，filter 为 t26_ctploader_flow.incremental_login_reloads_commodities_and_contracts；主控定向运行即可，无需另造错误形状。"
+  },
+  {
+    "lane": "T26_ctploader",
+    "id": "BUG-T26-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/CTPLoader/TraderSpi.cpp:662-668",
+      "src/CTPLoader/TraderSpi.cpp:807-813"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_flow_test.cpp:208-212",
+      "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_flow_test.cpp:253-260"
+    ],
+    "reason": "独立于 option 父子层级错误，strikeprice 的导出键是 option.strikeprice，而读取将父对象 product 字段赋给 m_strikePrice；即便先修复子对象读取，这个键映射仍然错误。",
+    "fix": "在 option 子对象上读取 strikeprice，不从 product 取值。",
+    "acceptance": "同一往返用例同时用非零 product 字符串和非零 strikeprice 数字，断言反序列化 strikeprice 等于写入值，避免默认 0 假阳性。",
+    "canonical": null,
+    "proposed_test_fix": "保留现有 fixture 中 product=SR、strikeprice=5700 的对照；filter 为 t26_ctploader_flow.incremental_login_reloads_commodities_and_contracts。"
+  },
+  {
+    "lane": "T26_ctploader",
+    "id": "BUG-T26-005",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/CTPLoader/TraderSpi.cpp:197-205",
+      "src/CTPLoader/TraderSpi.cpp:217-225",
+      "src/CTPLoader/TraderSpi.cpp:421-428",
+      "src/CTPLoader/TraderSpi.cpp:784-789"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_flow_test.cpp:207-212",
+      "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_flow_test.cpp:253-260",
+      "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_flow_test.cpp:294-333"
+    ],
+    "reason": "两项独立行为缺陷：DumpToJson 输出 altcode、增量装载不读，导致有效 CZCE 展开码丢失；commission 请求把写 InstrumentID 的语句放在 altcode 为空的 if 内，altcode 非空时请求字段保持空。margin 请求则有正常的 altcode 选择逻辑。",
+    "fix": "增量装载 altcode；commission 与 margin 请求共用相同的 code/altcode 选择结果，并无条件写入请求 InstrumentID。",
+    "acceptance": "增量装载 CZCE 合约后 altcode 保留；分别用 altcode 非空和为空的合约捕获 commission/margin 请求，断言 InstrumentID 选择一致且非空。不得仅以柜台是否拒绝请求作为验收。",
+    "canonical": null,
+    "proposed_test_fix": "现有 JSON fixture 已有 altcode=SR510，但未覆盖其 fee request；在队列测试增加 CZCE altcode case，filter 可沿用 t26_ctploader_flow.last_instrument_response_with_fees_switch_queues_both_rate_requests 并增加独立测试名。"
+  },
+  {
+    "lane": "T26_ctploader",
+    "id": "BUG-T26-006",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/CTPLoader/CTPLoader.cpp:102-104",
+      "src/CTPLoader/CTPLoader.cpp:144-146",
+      "src/CTPLoader/TraderSpi.cpp:711-723"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_dump_test.cpp:232-270",
+      "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_dump_test.cpp:273-307"
+    ],
+    "reason": "配置入口读取 feesfile；绝对路径会使用配置值，但相对路径被无条件替换成 SAVEPATH/fees.json，配置文件名不生效。",
+    "fix": "绝对路径保留原值；相对 FEES_FILE 拼接到 SAVEPATH 并保留相对文件名。",
+    "acceptance": "分别配置自定义相对名和绝对名，触发落盘后只在目标路径生成有效 JSON，内容字段与当前费用结构一致；默认 fees.json 仍作为默认值可用。",
+    "canonical": null,
+    "proposed_test_fix": "现有两个定向用例已覆盖自定义相对名和绝对名，尤其 t26_ctploader_dump.margin_response_dumps_fees_to_configured_relative_name_with_product_fallback；主控用 stub 定向运行，不需要测试侧修正。"
+  },
+  {
+    "lane": "T26_ctploader",
+    "id": "BUG-T26-007",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/CTPLoader/TraderSpi.cpp:684-709"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_dump_test.cpp:318-330"
+    ],
+    "reason": "两个 fee lookup 都 miss 后仍解引用 end iterator，静态危险成立；但禁用夹具直接写入 _margins[ZZ99]，同时没有 _contracts 和 fee/product fallback，未证明正常请求或合法回报会产生该表形状。测试也没有执行。",
+    "fix": "无论最终是否成为有效产品项，DumpFees 应在精确码和品种兜底均缺失时记录可诊断错误并跳过该行，不能解引用 end；但产品定级等待回报契约确认。",
+    "acceptance": "基于已登记合约、有效 margin 回报以及明确的 commission 空结果/错误回报构造 case；确认缺费是否可由正常查询产生后，再将其纳入产品缺陷验收。",
+    "canonical": null,
+    "proposed_test_fix": "不要启用当前 ZZ99 直灌 _margins 的崩溃型测试。改用受控回调组合，但需先从 CTP 接口约定确认 commission 无数据时的回调形状。"
+  },
+  {
+    "lane": "T26_ctploader",
+    "id": "BUG-T26-008",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/CTPLoader/TraderSpi.cpp:160-176",
+      "src/CTPLoader/TraderSpi.cpp:421-446"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_flow_test.cpp:190-220"
+    ],
+    "reason": "_trading_day 确实没有构造初值，但当前生产链先在成功登录回调写入交易日，再调用 ReqQryInstrument；合约回调通过该请求到达，CZCE 日期换算因此在正常链路中先写后读。未发现仓库生产路径在该赋值前读取它。",
+    "fix": "无需作为产品缺陷修复。若以后允许独立调用 SPI 回调，可将成员初始化为零并单独定义未登录时的行为。",
+    "acceptance": "正常登录到合约查询顺序保持；若增加未登录回调保护，必须对未就绪交易日采取显式安全行为而非生成随机日期。",
+    "canonical": null,
+    "proposed_test_fix": "现有增量登录 fixture 从 OnRspUserLogin 进入查询链。不要用直接构造 CTraderSpi 后调用合约回调的测试，把未初始化成员单独定为正常产品路径。"
+  },
+  {
+    "lane": "T26_ctploader",
+    "id": "BUG-T26-009",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/CTPLoader/TraderSpi.cpp:637-643",
+      "src/CTPLoader/TraderSpi.cpp:677-680"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_flow_test.cpp:190-220"
+    ],
+    "reason": "增量模式处理既有 contracts.json 时先解析到外层 root，又在 if 内重复解析并用同名变量遮蔽；遍历和末尾 release 只作用于内层 root，外层配置树失去指针而泄漏。该条件可由正常增量装载触发。",
+    "fix": "复用第一次解析得到的 root 遍历合约，并保证该对象在所有正常/错误路径恰好 release 一次；去掉重复解析。",
+    "acceptance": "以已有 contracts.json 进入增量登录装载，确认读回字段不变；用可控分配/释放计数或泄漏检测证明每个加载对象恰好释放一次，且没有第二次文件解析。",
+    "canonical": null,
+    "proposed_test_fix": "现有增量登录 fixture 覆盖该装载路径，但不能证明内存归还；增加 parser/load 计数 seam 或本地泄漏检测断言，filter 为 t26_ctploader_flow.incremental_login_reloads_commodities_and_contracts。"
+  },
+  {
+    "lane": "T26_ctploader",
+    "id": "BUG-T26-010",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/CTPLoader/TraderSpi.cpp:230-270"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_flow_test.cpp:294-333"
+    ],
+    "reason": "AppendQuery 生产者仅在 push 时持 _mtx；worker 对 empty/front/size 无锁读取，仅 pop 时加锁。std::queue 的同一对象存在并发读写，形成数据竞争；现有测试只观察请求是否发送，不能证明线程安全。",
+    "fix": "统一保护 _queries 所有读写，优先改为带 mutex/condition_variable 的任务队列；锁内只弹出任务，释放锁后调用 CTP API。",
+    "acceptance": "在多生产者加单消费者压力下保持请求数/顺序一致，TSan 无队列竞争；队列空时停止可及时退出，API 请求调用不持队列锁。",
+    "canonical": null,
+    "proposed_test_fix": "现有队列用例只检查 commission 与 margin 两请求抵达 stub，不作为 race 覆盖；增加可控队列并发测试或启用 TSan 专项，避免依赖 10ms 轮询时序。"
+  },
+  {
+    "lane": "T26_ctploader",
+    "id": "BUG-T26-011",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/CTPLoader/TraderSpi.cpp:179-227",
+      "src/CTPLoader/TraderSpi.cpp:527-592"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_CTPLoader/t26_ctploader_flow_test.cpp:294-333"
+    ],
+    "reason": "合约末包会将 commission/margin 任务排入待发送队列；worker pop 完只能证明发送任务耗尽，不代表异步 API 的费率回报全部完成。回调在 _queries.empty() 时就 dump 并 exit，未跟踪 in-flight 请求或 bIsLast，因此此前发送的慢回报仍可能丢失。",
+    "fix": "分离待发送队列和 in-flight 请求状态；按 request ID/合约及 commission、margin 两类终态计数，在所有请求成功、空结果或错误终态后统一落盘并通知 run 收尾。",
+    "acceptance": "stub 控制响应慢于后续发送、先后乱序、空结果、错误回报和完整收齐；只有所有请求终态到齐后才 dump/结束，不能由队列暂时为空提前收尾。",
+    "canonical": null,
+    "proposed_test_fix": "当前 filter t26_ctploader_flow.last_instrument_response_with_fees_switch_queues_both_rate_requests 只断言请求发送。新增 fake API 手动释放 callback 的用例，先确认两个请求均已发出，再延迟并乱序投递回报。"
+  },
+  {
+    "lane": "T4_femas_ctploader_mini",
+    "id": "BUG-T4-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderFemas/TraderFemas.cpp:675-742"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderFemas/femas_trader_test.cpp:928-948"
+    ],
+    "reason": "有效持仓回报且基础数据可查时构造并填充 WTSPositionItem，但从未 append 到 m_ayPosition；末包回调返回空数组，局部池对象也未释放，导致持仓结果缺失并泄漏对象。",
+    "fix": "contract 有效时把 pos 以正确所有权 append 到 m_ayPosition；append 前失败或 contract 缺失路径须释放已创建对象。",
+    "acceptance": "stub 回调输入 Position=5、YdPosition=3、Frozen=1，sink 收到一条 rb2401 持仓并核对关键方向/数量；contract 不存在时不泄漏对象。",
+    "canonical": null,
+    "proposed_test_fix": "现有 position_query_response_appends_the_reported_item 已改为非空断言，filter 为 FemasContractFixture.position_query_response_appends_the_reported_item；主控定向运行即可。"
+  },
+  {
+    "lane": "T4_femas_ctploader_mini",
+    "id": "BUG-T4-003",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/TraderFemas/TraderFemas.cpp:197-210",
+      "src/TraderFemas/TraderFemas.cpp:1152-1179"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderFemas/femas_trader_test.cpp:1090-1102"
+    ],
+    "reason": "triggerQuery 无条件解引用 m_strandIO，而 connect 在厂商 API Init 返回后才创建 strand；如果 Init 启动的异步回调在返回前走到查询完成，有竞态可能。现有禁用用例通过哨兵 API 和 WS_ALLREADY 伪造从未 connect 的状态，不能复现该生产时序。",
+    "fix": "在启动厂商回调前建立 strand，并在 triggerQuery 入口检查初始化状态；避免回调线程访问未发布的 strand。",
+    "acceptance": "使用可控 API stub 在 Init 内同步触发登录/查询响应，证明 strand 已就绪并成功排队；另测未 connect 的查询按公开 API 返回错误，不伪造 WS_ALLREADY。",
+    "canonical": null,
+    "proposed_test_fix": "替换 DISABLED_query_account_before_connect_dereferences_null_strand；让 fake API 在 connect 的 Init 内同步触发回调，使用可控执行器，不创建真实厂商实例。"
+  },
+  {
+    "lane": "T4_femas_ctploader_mini",
+    "id": "BUG-T4-004",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/TraderFemas/TraderFemas.cpp:169-197",
+      "src/TraderFemas/TraderFemas.cpp:567-595"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderFemas/femas_trader_test.cpp:1071-1088"
+    ],
+    "reason": "成功登录分支读取响应对象并调用 m_pUserAPI->GetTradingDay；禁用测试人工将一个不可访问的 sentinel 指针注入 API 后直接调回调，并未建立 API 注册/登录生命周期。加载失败在 connect 更早会触发 BUG-T4-007；没有证据证明无效 API 对象能收到该有效成功回报。",
+    "fix": "在处理登录成功回调前核对 API 和响应对象，缺失时记录错误并保持失败状态；若释放时可能有迟到回调，需先确定与 vendor API 的回调/释放同步契约。",
+    "acceptance": "通过 fake API 注册、触发登录成功、释放竞态三条路径验证；正常成功回调更新交易日，空对象只在契约允许注入时验证安全失败。",
+    "canonical": null,
+    "proposed_test_fix": "不要把 DISABLED_user_login_success_branch_needs_vendor_api 的 sentinel 条件作为有效产品复现；改用 fake API 提供 GetTradingDay，并独立测试 pRspUserLogin 为空的输入。"
+  },
+  {
+    "lane": "T4_femas_ctploader_mini",
+    "id": "BUG-T4-005",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderFemas/TraderFemas.cpp:221-239",
+      "src/Includes/ITraderApi.h:229-233",
+      "src/WtCore/TraderAdapter.cpp:489"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderFemas/femas_trader_test.cpp:452-483",
+      "src/TestUnits/coverage/t_TraderFemas/femas_trader_test.cpp:1104-1124"
+    ],
+    "reason": "公开 ITraderApi::makeEntrustID 接口同时接收 buffer 和 length；实现只拒绝 length==0，却把裸指针交给无容量边界的 format_to。有效调用方传入小容量时会越过接口所给容量；仓库主调用目前传 64，不能据此否定接口缺陷。",
+    "fix": "先计算完整输出含终止符的长度，容量不足返回 false；或使用有界格式化并确保失败时缓冲不越界。",
+    "acceptance": "覆盖容量 0、输出长度不足、恰好输出长度+NUL、充足容量；以 canary 确认 logical capacity 之外无写入，正常格式继续保留 session 与 12 位序号。",
+    "canonical": null,
+    "proposed_test_fix": "当前 make_entrust_id_rejects_insufficient_logical_capacity 已启用并以大物理缓冲模拟逻辑容量，filter 为 TraderFemasTest.make_entrust_id_rejects_insufficient_logical_capacity；文档中旧的 DISABLED 标注已过期。"
+  },
+  {
+    "lane": "T4_femas_ctploader_mini",
+    "id": "BUG-T4-006",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderFemas/TraderFemas.cpp:260-268",
+      "src/API/Femas3.02/USTPFtdcUserApiStruct.h:1955-1963"
+    ],
+    "test_evidence": [],
+    "reason": "结构只有 AppID、AuthCode、EncryptType 三个字段，调用处都被赋值；未清零的部分是两个 C 字符串 NUL 后的尾字节及可能的结构填充，当前没有证据表明厂商接口按整块原始字节读取它们或影响认证行为。",
+    "fix": "不作为产品缺陷排期。可以用值初始化消除未定字节作为防御性清理，但不得声称已修复认证失败或安全问题。",
+    "acceptance": "除非协议或 vendor API 证据证明尾字节有语义，否则不设置产品验收门槛。",
+    "canonical": null,
+    "proposed_test_fix": "不新增“脏字节导致认证失败”测试；若未来有 API stub，最多断言三个语义字段值，原始尾部字节不作行为断言。"
+  },
+  {
+    "lane": "T4_femas_ctploader_mini",
+    "id": "BUG-T4-007",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderFemas/TraderFemas.cpp:125-137",
+      "src/TraderFemas/TraderFemas.cpp:169-176"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderFemas/femas_trader_test.cpp:1126-1139"
+    ],
+    "reason": "ITraderApi::init 返回是否初始化成功；模块缺失或 creator 符号不存在时 init 仍返回 true，随后 connect 调用空 creator 并解引用返回的 API。配置/部署错误会从可返回失败的初始化路径变成崩溃。",
+    "fix": "校验 library handle、creator 符号及 creator 返回指针；init 失败返回 false，connect 在前置失败时停止并记录诊断。",
+    "acceptance": "以可控 DLLHelper stub 模拟库缺失、符号缺失、creator 返回空，分别断言 init false 或 connect 可诊断中止且不触发空调用。",
+    "canonical": null,
+    "proposed_test_fix": "当前 DISABLED_init_dlopens_vendor_module 会进入真实 dlopen，不适合作为常规 stub 测试；替换为可注入模块加载器的失败分支测试。"
+  },
+  {
+    "lane": "T4_femas_ctploader_mini",
+    "id": "BUG-T4-014",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/CTPOptLoader/CTPOptLoader.cpp:237-257"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_CTPOptLoader/ctpopt_loader_test.cpp:529-550"
+    ],
+    "reason": "配置完整但厂商期权库或 creator 缺失时只打印错误，仍调用空 g_ctpCreator，之后还无条件解引用 pUserApi；run 是导出入口，可返回错误码而非崩溃。",
+    "fix": "每个加载阶段都检查 handle、symbol、creator result，失败时释放已创建资源并返回非零状态。",
+    "acceptance": "fake module loader 覆盖库缺失、符号缺失和 creator 返回空；run 返回明确非零状态、不创建 vendor API/Flow 后续操作且不崩溃。",
+    "canonical": null,
+    "proposed_test_fix": "替换 DISABLED_complete_config_reaches_dlopen_and_null_creator 的真实 dlopen 与 CWD 写目录前提，使用 fake loader 控制返回值并保留同名失败场景。"
+  },
+  {
+    "lane": "T4_femas_ctploader_mini",
+    "id": "BUG-T4-015",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/CTPOptLoader/TraderSpi.cpp:390-394",
+      "src/CTPOptLoader/CTPOptLoader.cpp:62-76",
+      "src/CTPOptLoader/CTPOptLoader.cpp:253-267"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_CTPOptLoader/ctpopt_loader_test.cpp:298-300",
+      "src/TestUnits/coverage/t_CTPOptLoader/ctpopt_loader_test.cpp:512-527"
+    ],
+    "reason": "bIsLast 到达时回调无条件 DumpToJson 后 exit(0)，即使 run 以 bAsync=true 返回到同进程宿主，最终异步回调仍终止整个进程；错误末包也报告状态 0。导出 run 接受异步参数，宿主收尾职责不应由回调直接结束进程。",
+    "fix": "用完成状态/通知让 run 收尾并返回结果，由 LoaderRunner 或调用方决定进程生命周期；错误末包走非零错误状态。",
+    "acceptance": "stub API 在 run(bAsync=true) 返回后延迟投递末包；验证回调完成后宿主仍可继续执行、写入后续标记，且错误末包可观测为失败状态。",
+    "canonical": null,
+    "proposed_test_fix": "当前 DISABLED_last_instrument_packet_exits_the_process 只证明旧 exit 行为且启用后会把测试进程当作成功结束；改为 fake API 延迟回调并断言宿主回调后的代码仍运行。"
+  },
+  {
+    "lane": "T4_femas_ctploader_mini",
+    "id": "BUG-T4-016",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/CTPOptLoader/TraderSpi.cpp:439-445",
+      "src/CTPOptLoader/TraderSpi.cpp:480-483"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_CTPOptLoader/ctpopt_loader_test.cpp:291-300"
+    ],
+    "reason": "增量模式有 contracts.json 时外层 root 先解析一次，随后局部同名 root 再解析并遮蔽；末尾释放的是内层对象，外层解析树泄漏。正常增量加载就会触发重复解析和泄漏。",
+    "fix": "遍历并释放第一次解析得到的 root，删去遮蔽变量和第二次 load；空 root 路径也要安全返回。",
+    "acceptance": "可控 loader 计数确认每个文件只解析一次；成功与解析失败路径均恰好释放返回对象；合约字段保持现有结果。",
+    "canonical": null,
+    "proposed_test_fix": "当前 CTPOptLoader 测试没有登录增量正路径；需 fake API 驱动 OnRspUserLogin 到 LoadFromJson，并记录 load/release 次数。"
+  },
+  {
+    "lane": "T4_femas_ctploader_mini",
+    "id": "BUG-T4-017",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/CTPOptLoader/TraderSpi.cpp:459-479",
+      "src/CTPOptLoader/TraderSpi.cpp:539-568"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_CTPOptLoader/ctpopt_loader_test.cpp:291-300",
+      "src/TestUnits/coverage/t_CTPOptLoader/ctpopt_loader_test.cpp:353-380"
+    ],
+    "reason": "DumpToJson 将 option 四字段存入 option 对象；LoadFromJson 检查 option 存在后仍从父对象读，且 strike price 使用 product 键。期权增量加载从有效导出文件无法还原字段。它与 CTPLoader 的同形问题在不同生产实现，需要分别修复，不是重复记录。",
+    "fix": "读取 option 子对象并逐字段按 optiontype、underlying、strikeprice、underlyingscale 映射。",
+    "acceptance": "通过 fake API 登录进入增量反序列化，使用实际 DumpToJson 结构逐字段验证四个期权属性，非期权合约默认字段保持不变。",
+    "canonical": null,
+    "proposed_test_fix": "现有 CTPOptLoader 用例没有增量 JSON 往返；增加可驱动 LoadFromJson 的回归，不把 OnRspQryInstrument 测试中的 option 输入当作增量装载覆盖。"
+  },
+  {
+    "lane": "T4_femas_ctploader_mini",
+    "id": "BUG-T4-018",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/CTPOptLoader/CTPOptLoader.cpp:75-91",
+      "src/CTPOptLoader/CTPOptLoader.cpp:147-162"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_CTPOptLoader/ctpopt_loader_test.cpp:198-240"
+    ],
+    "reason": "run 是导出配置入口，根节点成功解析但缺 ctp 或 config 段时立即将空指针作为 Variant 使用；缺 config 时还会先更新部分全局配置再崩溃。相邻代码已有缺失文件/必填字段的错误返回路径，段缺失也应安全失败。",
+    "fix": "在读取和改写任何全局字段前校验根对象、ctp 与 config 均存在且类型正确；错误路径释放根节点并返回统一的非成功状态。",
+    "acceptance": "分别提交有效 YAML 根对象但缺 ctp、缺 config、段类型错误；run 不崩溃、不部分改写全局变量并返回约定失败状态。独立实现，不与 CTPLoader 的 BUG-T6-003 合并。",
+    "canonical": null,
+    "proposed_test_fix": "现有两个测试 yaml_content_missing_ctp_section_returns_zero_without_touching_globals 与 yaml_content_missing_config_section_returns_zero_without_touching_globals 正好覆盖输入，主控 stub 定向重跑；根据明确的失败码契约调整断言值。"
+  },
+  {
+    "lane": "T4_femas_ctploader_mini",
+    "id": "BUG-T4-019",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/CTPOptLoader/TraderSpi.cpp:74-85",
+      "src/CTPOptLoader/TraderSpi.cpp:228-280"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_CTPOptLoader/ctpopt_loader_test.cpp:264-275"
+    ],
+    "reason": "ASCII 范围确实包含若干标点，但仓库检索到的生产 OnRspQryInstrument 路径不调用 extractProductID；唯一其他调用是单测。现有产品行为没有受该辅助函数影响的证据，字符集合契约也未定义。",
+    "fix": "不排期为生产 bug。若未来新增生产调用，先定义允许的 ProductID 字符集合，避免在未明确下划线契约前简单换成 isalpha。",
+    "acceptance": "现有生产代码保持不受影响；新增生产调用时须以合法 SDK 产品码集合验收。",
+    "canonical": null,
+    "proposed_test_fix": "现有测试只检查字母数字边界且 option fixture 的 m_o 来自厂商 ProductID，不经过该 helper；不要将该测试当成生产错误复现。"
+  },
+  {
+    "lane": "T6_ctploader_mocker_udp",
+    "id": "BUG-T6-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderMocker/TraderMocker.cpp:399-424",
+      "src/Includes/WTSTradeDef.hpp:310-326"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderMocker/r113_mocker_common.h:27-35",
+      "src/TestUnits/coverage/t_TraderMocker/r113_mocker_common.h:88-102",
+      "src/TestUnits/coverage/t_TraderMocker/r113_mocker_partial_cancel_test.cpp:29-40"
+    ],
+    "reason": "正常撮合成交片 curVol>0 时 VolLeft 按成交量递减，但 VolTraded 从初始 0 递减，回报推送因此暴露负成交量，订单查询也保留错误累计值。现有 R113 sink 已采集 vol_traded，却没有断言该字段。",
+    "fix": "将已成交量改为 getVolTraded()+curVol，并确保每个拆分成交片只累计一次。",
+    "acceptance": "初始成交量 0；部分成交 1/10 后订单推送及查询均为 vol_traded=1、vol_left=9；剩余成交后累计守恒且不为负。",
+    "canonical": null,
+    "proposed_test_fix": "在 R113 partial fill 用例断言现有 OrderSnap.vol_traded，filter 为 R113MockerPartialCancel.R113Mocker_PartialFillThenCancelPushesCanceled；R113 long/short 完全成交用例可再核对总成交累计。"
+  },
+  {
+    "lane": "T6_ctploader_mocker_udp",
+    "id": "BUG-T6-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/CTPLoader/TraderSpi.cpp:527-547",
+      "src/CTPLoader/TraderSpi.cpp:550-592",
+      "src/CTPLoader/CTPLoader.cpp:67-76",
+      "src/CTPLoader/CTPLoader.cpp:276-290"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_CTPLoader/t6_ctploader_reachable_test.cpp:380-390"
+    ],
+    "reason": "导出 run 接受 bAsync；若异步返回后调用方继续工作，CTPLoader 的查询末包或费率响应会在回调中 exit(0) 终止同进程宿主。回调也不向 run 返回最终状态。与 CTPOptLoader 对应条目是不同模块实现。",
+    "fix": "由 callback 更新完成状态并通知 run；释放 API/worker 后返回准确结果，由宿主决定是否退出进程。",
+    "acceptance": "fake API 在 bAsync run 返回后延迟触发合约及费率末包；宿主回调后代码仍能运行，所有请求收齐后报告成功，错误回报不以 0 结束进程。",
+    "canonical": null,
+    "proposed_test_fix": "禁用的 instrument_last_response_calls_exit_zero 只观察旧 exit；替换为 fake API 的延迟回调测试，不在 gtest 主进程内调用 exit。"
+  },
+  {
+    "lane": "T6_ctploader_mocker_udp",
+    "id": "BUG-T6-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/CTPLoader/CTPLoader.cpp:84-110",
+      "src/CTPLoader/CTPLoader.cpp:156-184",
+      "src/CTPLoader/CTPLoader.cpp:201-204"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_CTPLoader/t6_ctploader_reachable_test.cpp:138-162",
+      "src/TestUnits/coverage/t_CTPLoader/t6_ctploader_reachable_test.cpp:391-397"
+    ],
+    "reason": "公开 run 配置入口对根对象缺少 ctp/config 段不做校验，直接解引用空 Variant；缺 config 还会先修改 ctp 全局字段。缺文件和缺少 savepath 已被安全返回处理，说明配置失败需要沿错误路径收尾。与 CTPOptLoader 的 T4-018 是不同生产实现。",
+    "fix": "在读取全局配置前检查根、ctp、config 存在且类型正确；在修改全局值前先校验必填字段，失败释放 Variant 并返回约定错误状态。",
+    "acceptance": "分别测试 inline/file YAML 缺 ctp、缺 config、config 缺必填 path；进程不崩溃，不出现半更新全局变量，返回值与 run 错误协议一致。",
+    "canonical": null,
+    "proposed_test_fix": "现有 disabled inline_config_without_ctp_section_dereferences_null 只执行危险路径；改成启用的返回状态与全局哨兵断言，并补缺 config 的独立用例。"
+  },
+  {
+    "lane": "T6_ctploader_mocker_udp",
+    "id": "BUG-T6-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/CTPLoader/CTPLoader.cpp:71-88",
+      "src/CTPLoader/CTPLoader.cpp:156-160",
+      "src/WTSUtils/WTSCfgLoader.h:66-76",
+      "src/WTSUtils/WTSCfgLoader.cpp:227-250"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_CTPLoader/t6_ctploader_reachable_test.cpp:129-136"
+    ],
+    "reason": "WTSCfgLoader 的公开注释承诺非法 YAML 返回 NULL；实现的 YAML::Load 会抛 ParserException，异常穿过 run 的 extern C 配置入口且没有捕获，调用者无法使用返回状态处理语法错误。当前测试明确断言不抛并返回其既有失败码 0。",
+    "fix": "在 load_from_yaml 捕获解析异常并按既有文档返回 NULL，或在 run 的 C ABI 边界捕获并转为统一非成功状态。",
+    "acceptance": "对非法内联 YAML 和非法 YAML 文件分别验证不抛异常、全局配置不变、返回明确失败状态；有效 YAML 路径不受影响。",
+    "canonical": null,
+    "proposed_test_fix": "现有 unparsable_inline_yaml_reports_failure_without_throwing 是正确回归而非错误测试；filter 为 t6_ctploader_run.unparsable_inline_yaml_reports_failure_without_throwing，并补文件形式。"
+  },
+  {
+    "lane": "T6_ctploader_mocker_udp",
+    "id": "BUG-T6-005",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/CTPLoader/TraderSpi.cpp:94-105",
+      "src/CTPLoader/TraderSpi.cpp:378-389",
+      "src/CTPOptLoader/TraderSpi.cpp:87-98",
+      "src/CTPOptLoader/TraderSpi.cpp:261-273"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_CTPLoader/t6_ctploader_reachable_test.cpp:219-229",
+      "src/TestUnits/coverage/t_CTPLoader/t6_ctploader_reachable_test.cpp:417-423"
+    ],
+    "reason": "空字符串会在 strlen(cname)-1 下溢并访问无效索引；非空 UTF-8 中文 InstrumentName 是有效行情数据，但 signed char 字节传入 isdigit 超出其允许输入域。CTPLoader 的 MAP_NAME 未命中时正常期货自动命名路径会调用该扫描；CTPOptLoader 也有相同实现和调用。",
+    "fix": "先处理空串；只在索引非负且字符存在时扫描；将字节转 unsigned char 后调用 isdigit，保持当前尾部月份数字截取语义；同步修复 CTPOptLoader 的同形 helper。",
+    "acceptance": "空串返回空串；ASCII 合约名称与尾部数字保持既有结果；两个 loader 的有效 UTF-8 中文名如沪银2512 安全返回预期前缀；ASan/UBSan 不报越界或 ctype 未定义行为。",
+    "canonical": null,
+    "proposed_test_fix": "把 CTPLoader 现有 DISABLED 用例改为结果断言并增加有效 UTF-8 名称断言；同时在 CTPOptLoader extract_product_name_strips_trailing_digits 邻近增加中文回归。filter 可沿用 t6_ctp_loader_names_crash.extract_product_name_on_empty_string_reads_out_of_bounds，但去除 DISABLED 并避免把“是否崩溃”作为断言。"
+  },
+  {
+    "lane": "T6_ctploader_mocker_udp",
+    "id": "BUG-T6-006",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/ParserUDP/ParserUDP.cpp:318-355",
+      "src/ParserUDP/ParserUDP.cpp:357-441"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_ParserUDP/t6_parserudp_reachable_test.cpp:303-309"
+    ],
+    "reason": "接收回调把实际 datagram 字节数传入解析函数，但解析函数忽略长度；任何非空短帧仍读取完整包头和相应结构体，可能消费未收到或前一帧残留字节，违背接收长度边界。",
+    "fix": "解析前按消息类型验证包头及完整结构长度；短帧只丢弃并可记录诊断，不产生 sink 回调。",
+    "acceptance": "对短于包头、恰好包头、每种结构体短一字节、完整帧及连续短帧/完整帧组合验证无回调、正确回调和无旧缓冲污染。",
+    "canonical": null,
+    "proposed_test_fix": "当前 DISABLED extract_buffer_needs_a_seam_before_it_can_be_fed 仅 SUCCEED 占位；后续增加纯内存解析接缝或 fake socket 送入真实 bytes_transferred，再断言截断帧安全丢弃。"
+  },
+  {
+    "lane": "T6_ctploader_mocker_udp",
+    "id": "BUG-T6-007",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderMocker/TraderMocker.cpp:935-962",
+      "src/TraderMocker/TraderMocker.cpp:964-1006"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderMocker/t6_tradermocker_reachable_test.cpp:6-18",
+      "src/TestUnits/coverage/t_TraderMocker/r103_mocker_udp_packet_test.cpp:58-69"
+    ],
+    "reason": "handle_read 把接收长度交给 extract_buffer，但 latter 忽略它；只要类型字段读为 PUSHTICK 就会读取完整 WTSTickStruct，即使当前 datagram 尾部没有这些字节。后续会将未收数据/旧缓存数据作为行情处理。",
+    "fix": "验证至少包含包头且长度不少于 sizeof(UDPTickPacket) 后才读取；按完整帧类型处理，不足则丢弃。",
+    "acceptance": "短头、含完整类型但短于 tick 结构、完整 tick、短帧后完整帧等 case；短帧不得创建/推送 tick，完整帧字段精确一致。",
+    "canonical": null,
+    "proposed_test_fix": "现有 R103 UDP 测试只发送 sizeof(packet) 的完整帧；增加可注入 extract_buffer 的真实长度 case，不能把有效全长 UDP 行为当截断覆盖。"
+  },
+  {
+    "lane": "T6_ctploader_mocker_udp",
+    "id": "BUG-T6-008",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/ParserUDP/ParserUDP.cpp:98-112",
+      "src/TraderMocker/TraderMocker.cpp:518-547",
+      "src/WtCore/ParserAdapter.cpp:45-61",
+      "src/WtCore/TraderAdapter.cpp:209-232"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_ParserUDP/t6_parserudp_reachable_test.cpp:143-166",
+      "src/TestUnits/coverage/t_TraderMocker/t6_tradermocker_reachable_test.cpp:272-285"
+    ],
+    "reason": "两条适配器正常 initExt 路径都向 API init 传 NULL，ParserUDP 与 TraderMocker 却直接解引用配置；ParserUDP 的缺失/非法 host 还会从 bool init 抛出地址解析异常，而 IParserApi 明确以 bool 表示初始化成功。普通非空 TraderMocker 配置缺可选键会走默认值，不认定为缺陷；udp_port=0 的语义也未定。",
+    "fix": "两模块先显式拒绝空 params 并返回 false，或由 adapter 传入有效配置对象；ParserUDP 捕获地址解析失败并返回 false。不要未经 schema 定义将可选默认键改成必填。",
+    "acceptance": "通过 ParserAdapter/TraderAdapter initExt 的 NULL 参数路径确认安全失败或有效配置注入；ParserUDP 非法/缺失 host 不抛异常并返回 false；TraderMocker 缺可选键回归仍保留默认行为。",
+    "canonical": null,
+    "proposed_test_fix": "ParserUDP 两个现有 host 用例已断言 EXPECT_NO_THROW+false，filter 分别为 t6_parserudp_init.non_numeric_host_reports_initialization_failure 和 missing_host_reports_initialization_failure；另增加 TraderAdapter/ParserAdapter initExt 传 NULL 的安全边界用例。"
+  },
+  {
+    "lane": "T6_ctploader_mocker_udp",
+    "id": "BUG-T6-009",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/TraderMocker/TraderMocker.cpp:98-108",
+      "src/TraderMocker/TraderMocker.cpp:302-310",
+      "src/Includes/WTSCollection.hpp:660-675",
+      "src/Includes/WTSCollection.hpp:732-744"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderMocker/t6_tradermocker_reachable_test.cpp:144-158",
+      "src/TestUnits/coverage/t_TraderMocker/seam_tradermocker_test.cpp:12-29"
+    ],
+    "reason": "成功订单插入时创建 _awaits 并 retain 订单；实例正常析构释放 orders/trades/ticks，却不释放 _awaits，缓存和仍在缓存中的订单引用随实例丢失而泄漏。构造后未 init 调用 makeEntrustID 的风险不作为本条产品问题，Adapter 实际会先 init(NULL)，该问题列于 T6-008。",
+    "fix": "析构或幂等 release 负责释放 _awaits 并置空，保证唯一所有权收尾。",
+    "acceptance": "通过受控订单插入形成一个未撮合订单，然后正常 release/delete；缓存和 retain 的订单引用均归还，已撮合/已移除的订单不重复释放。",
+    "canonical": null,
+    "proposed_test_fix": "当前工厂 roundtrip 与 seam 测试均没有建立 _awaits 条目；新增一个可驱动 orderInsert lambda 的 fixture，在 teardown 时保留未撮合订单并检查释放计数。"
+  },
+  {
+    "lane": "T6_ctploader_mocker_udp",
+    "id": "BUG-T6-010",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/ParserUDP/ParserUDP.cpp:94-96",
+      "src/ParserUDP/ParserUDP.cpp:115-118",
+      "src/ParserUDP/ParserUDP.cpp:254-280",
+      "src/ParserUDP/ParserUDP.cpp:318-355",
+      "src/Share/StdUtils.hpp:22-24"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_ParserUDP/t6_parserudp_reachable_test.cpp:262-309"
+    ],
+    "reason": "正常 connect 创建并运行 io_context 线程以及两路 socket 操作；disconnect 只关闭广播 socket、置 stopped 并 post 捕获 this 的 handler，不关闭订阅 socket、不停 io_context、不 join。release/析构为空；活动线程与 handler 可越过对象寿命，joinable thread 销毁还可能 terminate。",
+    "fix": "实现幂等关闭：取消并关闭两路 socket，停止 io_context，在非 worker 线程 join，确保 handler 完成后再销毁对象；release 和析构复用该收尾逻辑。",
+    "acceptance": "用受控执行器/假 socket 驱动 connect、订阅 receive/send pending、disconnect、release、重复 release；确认所有操作完成、线程 join、无 handler 访问已析构 this。",
+    "canonical": null,
+    "proposed_test_fix": "现有 release_and_disconnect_without_connect_are_safe 仅覆盖空状态，connect 用例因真实 socket 被禁用；不要据此通过生命周期验收。增加 fake socket/执行器生命周期测试，无真实柜台或端口。"
+  }
+]

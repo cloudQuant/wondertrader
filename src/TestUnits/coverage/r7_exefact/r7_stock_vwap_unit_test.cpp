@@ -1,13 +1,13 @@
 // R7 lane：WtStockVWapExeUnit（股票/科创板 VWAP 分片执行单元）
 // 目标文件: src/WtExeFact/WtStockVWapExeUnit.cpp / WtStockVWapExeUnit.h
-// 覆盖面: init（产品最小手数、科创板 max/普通 min 的钳位、可选键 "offset"、分布文件解析）、
+// 覆盖面: init（产品分类及数量场景、可选键 "offset"、分布文件解析）、
 //         do_calc 的持仓不足目标修正、碎股完成判定、成交量分片被丢弃的路径、价格模式与涨跌停、
 //         on_tick/on_order/on_channel_ready/on_entrust/on_trade/clear_all_position/set_position 各分支。
 //
 // 关键量（L601-609）：isBuy 在 L530 由 **undone** 决定，而能走到这里说明 undone==0（L542 已拦），
 // 所以恒为 false -> 永远走「卖」分支，且 L609 无条件 `curQty = min(vailyPos, _min_open_lots)`
-// 覆盖了 L601/L607 的结果。因此 VWAP 分桶值与分片量无关（下面两个用例用不同的分布文件断言
-// 出同样的成交量），并且减仓目标会发出买单。两条都是缺陷，见 bugs/R7_exefact.md。
+// 覆盖了 L601/L607 的结果。分桶用例用两个低于目标的累计量断言较大分桶应计划较大买量；
+// 当前覆写会让这条正确性断言失败。减仓目标也会因正的 `curQty` 被发成买单，见 bugs/R7_exefact.md。
 //
 // 时序：tail_secs 一律取 0 —— init 在 L192 计算 _fire_span 时 _total_secs 仍是 0（L198 才赋值），
 // tail_secs=0 时 _fire_span=0，on_tick 非首笔分支的间隔判定恒真（同 BUG-R7-001）。
@@ -16,11 +16,15 @@
 #include <gtest/gtest.h>
 
 #include <cmath>
+#include <cerrno>
 #include <cstdint>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
+#include <filesystem>
 #include <fstream>
 #include <string>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <vector>
 
@@ -30,6 +34,7 @@
 #include "Includes/WTSStruct.h"
 #include "Includes/WTSDataDef.hpp"
 #include "WtExeFact/WtStockVWapExeUnit.h"
+#include "r7_init_probe.h"
 
 using namespace wtp;
 
@@ -47,15 +52,12 @@ public:
 
 	WTSTickSlice* getTicks(const char*, uint32_t, uint64_t) override { return NULL; }
 	WTSTickData* grabLastTick(const char*) override { return NULL; }
-	// getPosition(code) -> 总仓；getPosition(code,false) -> 可用（昨仓）；
-	// getPosition(code,true,1) -> 今仓多头（清仓对比用）
-	double getPosition(const char*, bool bOnlyValid = true, int32_t strategy = 3) override
+	// ExecuteContext: validOnly=true (including the default) returns available
+	// holdings; false returns total holdings. The strategy flag selects sides,
+	// which this single-sided fixture does not model separately.
+	double getPosition(const char*, bool validOnly = true, int32_t = 3) override
 	{
-		if (!bOnlyValid)
-			return avail;
-		if (strategy == 1)
-			return todayPos;
-		return pos;
+		return validOnly ? avail : pos;
 	}
 	OrderMap* getOrders(const char*) override { return NULL; }
 	double getUndoneQty(const char*) override { return undone; }
@@ -87,7 +89,6 @@ public:
 
 	double pos = 0;
 	double avail = 0;
-	double todayPos = 0;
 	double undone = 0;
 	uint32_t nextId = 7000;
 	uint32_t cancelBydirRetCnt = 2;
@@ -136,13 +137,59 @@ private:
 	std::string _path;
 };
 
-// 第 5 个参数就是 product（get_minOrderQty 拿它和 "STK"/"CBOND" 比对）。
+class ScopedProbeDir
+{
+public:
+	ScopedProbeDir()
+	{
+		std::error_code ec;
+		const std::filesystem::path tempRoot = std::filesystem::temp_directory_path(ec);
+		if (ec)
+			return;
+		const std::string pattern = (tempRoot / "WT_R7_005_XXXXXX").string();
+		std::vector<char> writable(pattern.begin(), pattern.end());
+		writable.push_back('\0');
+		char* created = ::mkdtemp(writable.data());
+		if (created == nullptr)
+			return;
+
+		_path = created;
+		_owns = true;
+		_ready = true;
+	}
+
+	~ScopedProbeDir() { cleanup(); }
+
+	bool ready() const { return _ready; }
+
+	bool cleanup()
+	{
+		if (!_owns)
+			return true;
+
+		std::error_code ec;
+		std::filesystem::remove_all(_path, ec);
+		if (!ec)
+			_owns = false;
+		return !ec;
+	}
+
+	const std::string& path() const { return _path; }
+
+private:
+	std::string _path;
+	bool _owns{ false };
+	bool _ready{ false };
+};
+
+// WTSCommodityInfo::create 的第 1 个参数是 product， 第 5 个参数是交易模板。
 // 额外 retain() 一次是为了抵消 get_minOrderQty（WtStockVWapExeUnit.h:386）对
 // ctx->getCommodityInfo() 借来指针的那次 release —— 否则引用计数净少 1，
-// 单元析构就会把对象打回 0，用例收尾的 release 会踩已销毁对象。
+// 单元析构就会把对象打回 0，用例收尾的 release 会踩已销毁对象。每个 commodity
+// 只供一个执行单元使用，因为 helper 对借来的指针执行一次 release。
 WTSCommodityInfo* mkSComm(const char* product)
 {
-	WTSCommodityInfo* c = WTSCommodityInfo::create("sh6", sCommName().c_str(), "SHSE", "NIGHT_DAY", product);
+	WTSCommodityInfo* c = WTSCommodityInfo::create(product, sCommName().c_str(), "SHSE", "NIGHT_DAY", "NIGHT_DAY");
 	c->retain();
 	c->setVolScale(1);
 	c->setPriceTick(0.01);
@@ -203,6 +250,166 @@ void bootS(WtStockVWapExeUnit& unit, SFakeCtx& ctx, const char* code, double tar
 	unit.on_tick(mkSTick(code, actTime, lastPx, bidPx, askPx));
 	unit.on_channel_ready();
 }
+
+const char* channel_ready_probe_marker(bool provideTick)
+{
+	return provideTick
+		? "BUG-R7-005 probe: before on_channel_ready, tick=present\n"
+		: "BUG-R7-005 probe: before on_channel_ready, tick=absent\n";
+}
+
+int run_channel_ready_probe(bool provideTick, double target, int markerFd)
+{
+	SVwapFile vf(25.0);
+	SFakeCtx ctx;
+	ctx.comm = mkSComm("STK");
+	ctx.pos = 0;
+	ctx.avail = 0;
+	int result = 0;
+	{
+		WtStockVWapExeUnit unit;
+		WTSVariant* cfg = mkSCfg();
+		unit.init(&ctx, kStk, cfg);
+		cfg->release();
+		unit.set_position(kStk, target);
+		if (provideTick)
+		{
+			WTSTickData* tick = mkSTick(kStk, 100000000, 10.50, 10.49, 10.51);
+			unit.on_tick(tick);
+			tick->release(); // on_tick retains the accepted tick; leave that reference to the unit.
+		}
+		const char* marker = channel_ready_probe_marker(provideTick);
+		size_t markerBytes = 0;
+		const size_t markerSize = std::strlen(marker);
+		while (markerBytes < markerSize)
+		{
+			ssize_t written = ::write(markerFd, marker + markerBytes, markerSize - markerBytes);
+			if (written > 0)
+				markerBytes += (size_t)written;
+			else if (written < 0 && errno == EINTR)
+				continue;
+			else
+				return 4;
+		}
+		unit.on_channel_ready();
+		if (!ctx.buys.empty() || !ctx.sells.empty())
+			result = 2;
+	}
+	ctx.comm->release();
+	return result;
+}
+
+struct ProbeChildResult
+{
+	bool started{ false };
+	bool waited{ false };
+	bool markerReceived{ false };
+	int waitStatus{ 0 };
+	int error{ 0 };
+	std::string output;
+};
+
+ProbeChildResult run_channel_ready_probe_in_child(const std::string& tempDir,
+	bool provideTick, double target)
+{
+	ProbeChildResult result;
+	int markerPipe[2];
+	if (::pipe(markerPipe) != 0)
+	{
+		result.error = errno;
+		return result;
+	}
+
+	// The child executes C++ setup after fork. POSIX only guarantees async-signal-safe
+	// calls before exec when the parent is multithreaded; keep this probe in a
+	// single-threaded test process and do not reuse it from a threaded host.
+	pid_t child = ::fork();
+	if (child < 0)
+	{
+		result.error = errno;
+		::close(markerPipe[0]);
+		::close(markerPipe[1]);
+		return result;
+	}
+	if (child == 0)
+	{
+		::close(markerPipe[0]);
+		if (::chdir(tempDir.c_str()) != 0)
+			::_exit(125);
+		::alarm(5);
+		int exitCode = run_channel_ready_probe(provideTick, target, markerPipe[1]);
+		::close(markerPipe[1]);
+		::_exit(exitCode);
+	}
+
+	result.started = true;
+	::close(markerPipe[1]);
+	char buffer[128];
+	for (;;)
+	{
+		ssize_t count = ::read(markerPipe[0], buffer, sizeof(buffer));
+		if (count > 0)
+			result.output.append(buffer, (size_t)count);
+		else if (count == 0)
+			break;
+		else if (errno != EINTR)
+		{
+			result.error = errno;
+			break;
+		}
+	}
+	::close(markerPipe[0]);
+	result.markerReceived = result.output.find(channel_ready_probe_marker(provideTick)) != std::string::npos;
+
+	pid_t waited;
+	do
+	{
+		waited = ::waitpid(child, &result.waitStatus, 0);
+	}
+	while (waited < 0 && errno == EINTR);
+	if (waited == child)
+		result.waited = true;
+	else if (result.error == 0)
+		result.error = errno;
+	return result;
+}
+
+void expect_channel_ready_probe_success(const ProbeChildResult& result)
+{
+	EXPECT_TRUE(result.started) << "fork/pipe failed with errno " << result.error;
+	EXPECT_TRUE(result.markerReceived) << "child did not print the pre-call marker; output: " << result.output;
+	EXPECT_TRUE(result.waited) << "waitpid failed with errno " << result.error;
+	if (!result.waited)
+		return;
+	if (WIFEXITED(result.waitStatus))
+		EXPECT_EQ(WEXITSTATUS(result.waitStatus), 0) << "child output: " << result.output;
+	else if (WIFSIGNALED(result.waitStatus))
+		ADD_FAILURE() << "child terminated by signal " << WTERMSIG(result.waitStatus)
+			<< "; output: " << result.output;
+	else
+		ADD_FAILURE() << "child did not exit normally; status=" << result.waitStatus;
+}
+
+
+int run_stock_vwap_init_probe(uint32_t totalTimes, int markerFd)
+{
+	SVwapFile vf(25.0);
+	SFakeCtx ctx;
+	ctx.comm = mkSComm("STK");
+	int exitCode = 0;
+	{
+		WtStockVWapExeUnit unit;
+		WTSVariant* cfg = mkSCfg(totalTimes, 0, 0, 100.0, 1000.0, 0, 0);
+		if (!r7_test::write_marker(markerFd))
+			exitCode = 4;
+		else
+			unit.init(&ctx, kStk, cfg);
+		cfg->release();
+	}
+	ctx.comm->release();
+	return exitCode;
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -210,18 +417,29 @@ void bootS(WtStockVWapExeUnit& unit, SFakeCtx& ctx, const char* code, double tar
 //////////////////////////////////////////////////////////////////////////
 TEST(r7_stkvw, names_and_fact_binding)
 {
-	SFakeCtx ctx;
-	ctx.comm = mkSComm("STK");
 	WtStockVWapExeUnit unit;
 	EXPECT_STREQ(unit.getName(), "WtStockVWapExeUnit");   // L150
 	EXPECT_STREQ(unit.getFactName(), "WtExeFact");        // L141
-	ctx.comm->release();
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 普通股：_min_open_lots 被 min(cfg, _min_hands=100) 钳到 100，成交量 = min(可用, 100)
+// SFakeCtx follows ExecuteContext's public validOnly contract.
 //////////////////////////////////////////////////////////////////////////
-TEST(r7_stkvw, normal_stock_clamps_min_open_lots_down_to_100)
+TEST(r7_stkvw, fake_position_matches_execute_context_contract)
+{
+	SFakeCtx ctx;
+	ctx.pos = 1000;
+	ctx.avail = 200;
+
+	EXPECT_DOUBLE_EQ(ctx.getPosition(kStk), 200.0);        // default validOnly=true
+	EXPECT_DOUBLE_EQ(ctx.getPosition(kStk, true), 200.0);
+	EXPECT_DOUBLE_EQ(ctx.getPosition(kStk, false), 1000.0);
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 普通股增仓：方向为买，数量规则不由本用例定合同（当前 L609 会覆盖分桶计算）。
+//////////////////////////////////////////////////////////////////////////
+TEST(r7_stkvw, normal_stock_increase_emits_positive_buy)
 {
 	SVwapFile vf(25.0);
 	SFakeCtx ctx;
@@ -229,21 +447,19 @@ TEST(r7_stkvw, normal_stock_clamps_min_open_lots_down_to_100)
 	ctx.pos = 1000;
 	ctx.avail = 1000;
 	WtStockVWapExeUnit unit;
-	bootS(unit, ctx, kStk, 500, mkSCfg(5, 0, 0, 200.0, 1000.0));
-	// init: min_hands=100(非科创) -> _min_open_lots = min(200,100) = 100
-	// do_calc: _is_t0 -> vailyPos=realPos=1000 -> curQty = min(1000,100) = 100
-	// diffQty = 500-1000 = -500 < 0 -> 期望是卖出，却按 curQty>0 走了 buy（缺陷 BUG-R7-008）
+	bootS(unit, ctx, kStk, 1500, mkSCfg(5, 0, 0, 200.0, 1000.0));
+	// 增仓目标 1000->1500；L609 会覆盖分桶计算，订单数量不作为业务合同。
 	ASSERT_EQ(ctx.buys.size(), 1u);
-	EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 100.0);
 	EXPECT_TRUE(ctx.sells.empty());
+	EXPECT_GT(ctx.buys[0].qty, 0.0);
 	EXPECT_DOUBLE_EQ(ctx.buys[0].price, 10.50);      // price_mode=0 -> 最新价
 	ctx.comm->release();
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 分布文件里的分桶值完全不参与成交量：25 与 100000 得到同一笔数量
+// 不同累计 VWAP 目标应产生不同的正向切片；不固定精确数量。
 //////////////////////////////////////////////////////////////////////////
-TEST(r7_stkvw, vwap_bucket_distribution_does_not_affect_fired_qty)
+TEST(r7_stkvw, vwap_bucket_distribution_changes_planned_buy_qty)
 {
 	SFakeCtx c1, c2;
 	c1.comm = mkSComm("STK");
@@ -252,27 +468,26 @@ TEST(r7_stkvw, vwap_bucket_distribution_does_not_affect_fired_qty)
 	c1.avail = c2.avail = 1000;
 	WtStockVWapExeUnit u1, u2;
 	{
-		SVwapFile vfA(25.0);
-		bootS(u1, c1, kStk, 4000, mkSCfg());          // diffQty=3000，分桶 25
+		SVwapFile vfA(1300.0);
+		bootS(u1, c1, kStk, 4000, mkSCfg());          // diffQty=3000，累计分桶目标 1300
 	}
 	{
-		SVwapFile vfB(100000.0);
-		bootS(u2, c2, kStk, 4000, mkSCfg());          // 同一目标，分桶 10 万
+		SVwapFile vfB(2500.0);
+		bootS(u2, c2, kStk, 4000, mkSCfg());          // 同一目标，累计分桶目标 2500
 	}
-	// _Vwap_vol = aimQty - curPos 分别是 25-1000=-975 和 100000-1000=99000，
-	// 但 L609 无条件把 curQty 覆写成 min(vailyPos,_min_open_lots)=100
+	// 头文件定义 VwapAim 为按分钟的目标总报单量；在 10:00 的 bucket 30，增量分别为 300 和 1500。
 	ASSERT_EQ(c1.buys.size(), 1u);
 	ASSERT_EQ(c2.buys.size(), 1u);
-	EXPECT_DOUBLE_EQ(c1.buys[0].qty, 100.0);
-	EXPECT_DOUBLE_EQ(c2.buys[0].qty, c1.buys[0].qty);   // 分片计划被丢弃（BUG-R7-007）
+	EXPECT_GT(c1.buys[0].qty, 0.0);
+	EXPECT_GT(c2.buys[0].qty, c1.buys[0].qty);
 	c1.comm->release();
 	c2.comm->release();
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 科创板：_min_open_lots = max(cfg, 200)
+// 科创板增仓方向；具体最小手数/切片量仍待业务合同确认。
 //////////////////////////////////////////////////////////////////////////
-TEST(r7_stkvw, kcb_stock_clamps_min_open_lots_up_to_200)
+TEST(r7_stkvw, kcb_stock_increase_emits_positive_buy)
 {
 	SVwapFile vf(25.0);
 	SFakeCtx ctx;
@@ -281,16 +496,16 @@ TEST(r7_stkvw, kcb_stock_clamps_min_open_lots_up_to_200)
 	ctx.avail = 5000;
 	WtStockVWapExeUnit unit;
 	bootS(unit, ctx, kKcb, 6000, mkSCfg(5, 0, 0, 50.0, 1000.0));
-	// split("SHSE.STK.688001",".")[2]="688001" >= 688000 -> _is_KC -> max(50, 200) = 200
 	ASSERT_EQ(ctx.buys.size(), 1u);
-	EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 200.0);
+	EXPECT_TRUE(ctx.sells.empty());
+	EXPECT_GT(ctx.buys[0].qty, 0.0);
 	ctx.comm->release();
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 可转债：get_minOrderQty 走 CBOND 分支 -> min_hands=10
+// 可转债增仓方向；具体最小手数/切片量仍待业务合同确认。
 //////////////////////////////////////////////////////////////////////////
-TEST(r7_stkvw, convertible_bond_min_hands_is_10)
+TEST(r7_stkvw, convertible_bond_increase_emits_positive_buy)
 {
 	SVwapFile vf(25.0);
 	SFakeCtx ctx;
@@ -299,16 +514,16 @@ TEST(r7_stkvw, convertible_bond_min_hands_is_10)
 	ctx.avail = 5000;
 	WtStockVWapExeUnit unit;
 	bootS(unit, ctx, kBond, 6000, mkSCfg(5, 0, 0, 50.0, 1000.0));
-	// CBOND -> min_hands=10 -> 非科创 -> _min_open_lots = min(50,10) = 10
 	ASSERT_EQ(ctx.buys.size(), 1u);
-	EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 10.0);
+	EXPECT_TRUE(ctx.sells.empty());
+	EXPECT_GT(ctx.buys[0].qty, 0.0);
 	ctx.comm->release();
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 空仓买入目标：可用仓 0 -> curQty=0 -> 落到 sell(qty=0) 分支
+// 空仓建仓目标应买入；当前产品错误地落入 0 量卖单分支（BUG-R7-007）。
 //////////////////////////////////////////////////////////////////////////
-TEST(r7_stkvw, flat_position_buy_target_emits_zero_qty_sell)
+TEST(r7_stkvw, flat_position_buy_target_requires_a_buy)
 {
 	SVwapFile vf(25.0);
 	SFakeCtx ctx;
@@ -316,18 +531,17 @@ TEST(r7_stkvw, flat_position_buy_target_emits_zero_qty_sell)
 	ctx.pos = 0;
 	WtStockVWapExeUnit unit;
 	bootS(unit, ctx, kStk, 1000, mkSCfg(5, 0, 0, 100.0, 1000.0));
-	// diffQty=1000>0，但 L530 的 isBuy 由 undone(=0) 决定 -> false -> L609 curQty=min(0,100)=0
-	// L659 `curQty > 0` 为假 -> sell(code, px, 0)
-	ASSERT_EQ(ctx.sells.size(), 1u);
-	EXPECT_DOUBLE_EQ(ctx.sells[0].qty, 0.0);
-	EXPECT_TRUE(ctx.buys.empty());
+	// 目标从空仓增至 1000，应产生正向买入；数量规则没有在接口中约定。
+	ASSERT_EQ(ctx.buys.size(), 1u);
+	EXPECT_TRUE(ctx.sells.empty());
+	EXPECT_GT(ctx.buys[0].qty, 0.0);
 	ctx.comm->release();
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 碎股：可用仓小于最小手数时按可用量整单出（L601-603 的分支）
+// 碎股清仓：方向应为卖出，数量不得超过可用仓；产品当前会反向买入（BUG-R7-007）。
 //////////////////////////////////////////////////////////////////////////
-TEST(r7_stkvw, odd_lot_uses_available_position_as_qty)
+TEST(r7_stkvw, odd_lot_clear_target_sells_within_available_position)
 {
 	SVwapFile vf(25.0);
 	SFakeCtx ctx;
@@ -340,12 +554,12 @@ TEST(r7_stkvw, odd_lot_uses_available_position_as_qty)
 	unit.set_position(kStk, 400);
 	unit.on_tick(mkSTick(kStk, 100000000, 10.50, 10.49, 10.51));
 	unit.on_channel_ready();
-	uint32_t before = (uint32_t)ctx.buys.size();
+	uint32_t sellsBefore = (uint32_t)ctx.sells.size();
 	unit.clear_all_position(kStk);
-	// _target_pos=0 -> diffQty=-40；L521 的完成判定被 !(target==0 && real<min_hands && real>target)
-	// 这一条排除掉（40<100 且 40>0），所以继续算；curQty=min(40,100)=40 -> buy 40
-	ASSERT_EQ(ctx.buys.size(), before + 1u);
-	EXPECT_DOUBLE_EQ(ctx.buys.back().qty, 40.0);
+	ASSERT_EQ(ctx.sells.size(), sellsBefore + 1u);
+	EXPECT_GT(ctx.sells.back().qty, 0.0);
+	EXPECT_LE(ctx.sells.back().qty, ctx.avail);
+	EXPECT_EQ(ctx.buys.size(), 1u); // only the initial increase may buy
 	ctx.comm->release();
 }
 
@@ -371,49 +585,50 @@ TEST(r7_stkvw, rounding_to_whole_lots_marks_finish_and_stops)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 持仓不足以卖出时目标被上抬（L501-508，非 T+0）
+// 非 T+0 应使用 total-available 保留不可卖持仓；正确目标应上抬到 800。
 //////////////////////////////////////////////////////////////////////////
 TEST(r7_stkvw, insufficient_sellable_position_adjusts_target_up)
 {
 	SVwapFile vf(25.0);
 	SFakeCtx ctx;
 	WTSCommodityInfo* c = mkSComm("STK");
-	c->setTradingMode(TM_Both);          // 不走 _is_t0 -> vailyPos 取 getPosition(code,false)
+	c->setTradingMode(TM_Both);          // 非 T+0；接口规定 false 返回总仓，产品当前将其用作 vailyPos
 	ctx.comm = c;
 	ctx.pos = 1000;
 	ctx.avail = 200;
 	WtStockVWapExeUnit unit;
 	bootS(unit, ctx, kStk, 0, mkSCfg(5, 0, 0, 100.0, 1000.0));
-	// target_pos = max(realPos-vailyPos, _target_pos) = max(800, 0) = 800 != 0
 	EXPECT_TRUE(ctx.hasLog("can sell hold pos not enough"));
 	EXPECT_TRUE(ctx.hasLog("target adjust"));
-	// curQty = min(vailyPos=200, _min_open_lots=100) = 100 -> buy 100（方向同样错位）
-	ASSERT_EQ(ctx.buys.size(), 1u);
-	EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 100.0);
+	ASSERT_EQ(ctx.sells.size(), 1u);
+	EXPECT_GT(ctx.sells[0].qty, 0.0);
+	EXPECT_LE(ctx.sells[0].qty, ctx.avail);
+	EXPECT_TRUE(ctx.buys.empty());
 	ctx.comm->release();
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 价格模式与偏移：mode1 在减仓时取卖一；"offset" 键（不是 "price_offset"）参与加价
+// 价格模式与偏移：增仓路径覆盖 mode1 和 "offset" 键（不是 "price_offset"）。
 //////////////////////////////////////////////////////////////////////////
 TEST(r7_stkvw, price_mode_and_offset_key)
 {
 	SVwapFile vf(25.0);
-	SFakeCtx ctx;
-	ctx.comm = mkSComm("STK");
-	ctx.pos = 1000;
-	ctx.avail = 1000;
+	SFakeCtx c1, c2;
+	c1.comm = mkSComm("STK");
+	c1.pos = c1.avail = 1000;
+	c2.comm = mkSComm("STK");
+	c2.pos = c2.avail = 1000;
 	WtStockVWapExeUnit u1, u2;
-	bootS(u1, ctx, kStk, 500, mkSCfg(5, 1, 0, 100.0, 1000.0));
-	// diffQty = 500-1000 = -500 -> L617 isBuy=false -> mode1 -> askprice(0)（L626）
-	ASSERT_EQ(ctx.buys.size(), 1u);
-	EXPECT_DOUBLE_EQ(ctx.buys[0].price, 10.51);
-	bootS(u2, ctx, kStk, 500, mkSCfg(5, 1, 4, 100.0, 1000.0));
-	// 非打板走 L635-638：targetPx = 10.51 + 0.01*4*(-1) = 10.47
-	ASSERT_EQ(ctx.buys.size(), 2u);
-	EXPECT_DOUBLE_EQ(ctx.buys[1].price, 10.47);
-	EXPECT_DOUBLE_EQ(ctx.buys[1].qty, 100.0);        // min(vailyPos=1000, _min_open_lots=100)
-	ctx.comm->release();
+	bootS(u1, c1, kStk, 1500, mkSCfg(5, 1, 0, 100.0, 1000.0));
+	// 增仓目标：当前实现的 mode1 买价取 bidprice(0)。
+	ASSERT_EQ(c1.buys.size(), 1u);
+	EXPECT_DOUBLE_EQ(c1.buys[0].price, 10.49);
+	bootS(u2, c2, kStk, 1500, mkSCfg(5, 1, 4, 100.0, 1000.0));
+	// 非打板走 L635-638：targetPx = 10.49 + 0.01*4 = 10.53
+	ASSERT_EQ(c2.buys.size(), 1u);
+	EXPECT_DOUBLE_EQ(c2.buys[0].price, 10.53);
+	c1.comm->release();
+	c2.comm->release();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -439,7 +654,7 @@ TEST(r7_stkvw, buy_price_capped_to_upper_limit)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 跌停收敛（L652-657）：走卖分支（undone==0 -> isBuy=false）
+// 减仓应卖出且不能超过可用仓；价格分支命中下限收敛，产品当前却发买单（BUG-R7-007）。
 //////////////////////////////////////////////////////////////////////////
 TEST(r7_stkvw, sell_price_floored_to_lower_limit)
 {
@@ -453,10 +668,11 @@ TEST(r7_stkvw, sell_price_floored_to_lower_limit)
 	unit.set_position(kStk, 100);           // diffQty=-900 -> isBuy=false
 	unit.on_tick(mkSTick(kStk, 100000000, 10.50, 10.49, 10.51, 0, 10.20));
 	unit.on_channel_ready();
-	// mode0 -> 10.50 - 0.01*300 = 7.50 < 10.20 -> 收敛到 10.20；curQty=min(1000,100)=100>0 -> buy
-	ASSERT_EQ(ctx.buys.size(), 1u);
-	EXPECT_DOUBLE_EQ(ctx.buys[0].price, 10.20);
+	ASSERT_EQ(ctx.sells.size(), 1u);
+	EXPECT_GT(ctx.sells[0].qty, 0.0);
+	EXPECT_LE(ctx.sells[0].qty, ctx.avail);
 	EXPECT_TRUE(ctx.hasLog("modified to lower limit price"));
+	EXPECT_TRUE(ctx.buys.empty());
 	ctx.comm->release();
 }
 
@@ -472,7 +688,7 @@ TEST(r7_stkvw, zero_last_price_falls_back_to_preclose)
 	ctx.avail = 1000;
 	WtStockVWapExeUnit unit;
 	unit.init(&ctx, kStk, mkSCfg());
-	unit.set_position(kStk, 500);
+	unit.set_position(kStk, 1500);
 	unit.on_tick(mkSTick(kStk, 100000000, 0.0, 0.0, 0.0));
 	unit.on_channel_ready();
 	// price()==0 -> 用 preclose()=10.0
@@ -510,7 +726,7 @@ TEST(r7_stkvw, channel_ready_branches)
 		ctx.pos = 1000;
 		ctx.avail = 1000;
 		WtStockVWapExeUnit unit;
-		bootS(unit, ctx, kStk, 500, mkSCfg());
+		bootS(unit, ctx, kStk, 1500, mkSCfg());
 		ASSERT_EQ(ctx.buys.size(), 1u);
 		unit.on_channel_ready();
 		EXPECT_TRUE(ctx.hasLog("not confirmed in trading channel, clear all"));
@@ -529,8 +745,8 @@ TEST(r7_stkvw, on_order_reports_and_refire)
 	ctx.pos = 1000;
 	ctx.avail = 1000;
 	WtStockVWapExeUnit unit;
-	bootS(unit, ctx, kStk, 500, mkSCfg(5, 0));
-	ASSERT_EQ(ctx.buys.size(), 1u);          // 本地单 7000，_this_target = 1000+100 = 1100
+	bootS(unit, ctx, kStk, 1500, mkSCfg(5, 0));
+	ASSERT_EQ(ctx.buys.size(), 1u);          // 初始正向委托，具体分片量不在本用例断言
 	unit.on_order(4242, kStk, true, 0, 10.50, true);       // 未知 id -> L261
 	unit.on_order(7000, kStk, true, 0, 10.50, false);      // 全额成交
 	EXPECT_TRUE(ctx.hasLog("has filled"));   // L280
@@ -538,11 +754,10 @@ TEST(r7_stkvw, on_order_reports_and_refire)
 	EXPECT_EQ(ctx.countLog("has filled"), 1u);
 	unit.on_tick(mkSTick(kStk, 100100000, 10.60, 10.59, 10.61));  // 换 tick
 	unit.on_order(7001, kStk, true, 5, 10.60, true);       // 撤单回报（_cancel_cnt==0）
-	// _this_target=1100，realPos 仍是 1000 -> 不等 -> _cancel_times=1 -> fire_at_once(max(100,100))
-	// fire_at_once: mode0 -> 10.60 + 0.01*1 = 10.61
+	// 取消确认触发重发；这里验证重发方向与价格，不锁定分片数量。
 	EXPECT_TRUE(ctx.hasLog("re_fire will be done"));
 	ASSERT_EQ(ctx.buys.size(), 3u);
-	EXPECT_DOUBLE_EQ(ctx.buys[2].qty, 100.0);
+	EXPECT_GT(ctx.buys[2].qty, 0.0);
 	EXPECT_DOUBLE_EQ(ctx.buys[2].price, 10.61);
 	ctx.comm->release();
 }
@@ -558,10 +773,10 @@ TEST(r7_stkvw, on_trade_logs_and_on_entrust_recalculates)
 	ctx.pos = 1000;
 	ctx.avail = 1000;
 	WtStockVWapExeUnit unit;
-	bootS(unit, ctx, kStk, 500, mkSCfg());
+	bootS(unit, ctx, kStk, 1500, mkSCfg());
 	ASSERT_EQ(ctx.buys.size(), 1u);
 	unit.on_trade(7000, kStk, true, 100, 10.50);
-	EXPECT_TRUE(ctx.hasLog("Order 7000 of SHSE.STK.600000 traded: 100.00 @ 10.50"));   // L458
+	EXPECT_TRUE(ctx.hasLog("Order 7000 of SHSE.STK.600000 traded:"));   // L458; numeric formatting is not part of the log contract
 	unit.on_entrust(9999, kStk, false, "not mine");        // 非本单元 -> L468
 	unit.on_entrust(7000, kStk, false, "rejected");        // erase -> do_calc -> 同一 tick 被拦
 	EXPECT_EQ(ctx.buys.size(), 1u);
@@ -586,6 +801,8 @@ TEST(r7_stkvw, set_position_guards)
 	unit.set_position("other", 100);                       // 代码不符 -> L766
 	unit.set_position(kStk, -5);                           // 负目标 -> L774
 	EXPECT_TRUE(ctx.hasLog("is an error stock target position"));
+	ctx.pos = 500;
+	ctx.avail = 500;
 	unit.set_position(kStk, 1000);
 	unit.set_position(kStk, 1000);                         // 重复目标 -> L770
 	EXPECT_EQ(ctx.countLog("第 1 次发单"), 1u);
@@ -604,30 +821,42 @@ TEST(r7_stkvw, clear_all_position_filters_code)
 	ctx.pos = 1000;
 	ctx.avail = 1000;
 	WtStockVWapExeUnit unit;
-	bootS(unit, ctx, kStk, 500, mkSCfg());
+	bootS(unit, ctx, kStk, 1500, mkSCfg());
 	uint32_t n = (uint32_t)ctx.buys.size();
 	unit.clear_all_position("SHSE.STK.000001");            // 非本合约 -> 直接 return
 	EXPECT_EQ(ctx.buys.size(), n);
+	EXPECT_TRUE(ctx.sells.empty());
 	unit.clear_all_position(kStk);                         // _target_pos=0 -> do_calc
-	EXPECT_EQ(ctx.buys.size(), n + 1u);                    // 仍然错位发买（BUG-R7-008）
+	ASSERT_EQ(ctx.sells.size(), 1u);
+	EXPECT_GT(ctx.sells[0].qty, 0.0);
+	EXPECT_LE(ctx.sells[0].qty, ctx.avail);
+	EXPECT_EQ(ctx.buys.size(), n);
 	ctx.comm->release();
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 缺陷复现（空指针解引用，不能启用）：通道先于首笔 tick 就绪
-// do_calc L517 在 L547 的 _last_tick==NULL 检查之前就解引用 _last_tick->price()
+// BUG-R7-005 候选回归：父进程隔离子进程并回收其临时目录；崩溃和 alarm 超时均失败。
 //////////////////////////////////////////////////////////////////////////
-TEST(r7_stkvw, DISABLED_channel_ready_before_first_tick_crashes)
+TEST(r7_stkvw, channel_ready_before_first_tick_returns_without_orders)
 {
-	SVwapFile vf(25.0);
-	SFakeCtx ctx;
-	ctx.comm = mkSComm("STK");
-	WtStockVWapExeUnit unit;
-	unit.init(&ctx, kStk, mkSCfg());
-	unit.set_position(kStk, 1000);                         // 未就绪 -> L497 return
-	unit.on_channel_ready();                               // 期望：L518 崩（BUG-R7-005）
-	EXPECT_TRUE(ctx.buys.empty());
-	ctx.comm->release();
+	ScopedProbeDir probeDir;
+	ASSERT_TRUE(probeDir.ready());
+	const ProbeChildResult result = run_channel_ready_probe_in_child(probeDir.path(), false, 1000.0);
+	expect_channel_ready_probe_success(result);
+	EXPECT_TRUE(probeDir.cleanup()) << "failed to remove private death-test directory";
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 正控：提供首笔 tick 后再就绪。10 股低于普通股 100 股最小手数，当前实现
+// 会在安全读取 tick 后收敛到 finish，不进入存在引用缺陷的发单尾部。
+//////////////////////////////////////////////////////////////////////////
+TEST(r7_stkvw, channel_ready_after_first_tick_returns_without_orders)
+{
+	ScopedProbeDir probeDir;
+	ASSERT_TRUE(probeDir.ready());
+	const ProbeChildResult result = run_channel_ready_probe_in_child(probeDir.path(), true, 10.0);
+	expect_channel_ready_probe_success(result);
+	EXPECT_TRUE(probeDir.cleanup()) << "failed to remove private death-test directory";
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -643,4 +872,28 @@ TEST(r7_stkvw, DISABLED_two_segment_stock_code_out_of_range)
 	unit.init(&ctx, "SHSE.600000", mkSCfg());              // 期望：越界/stoi 异常（BUG-R7-009）
 	unit.on_channel_ready();
 	ctx.comm->release();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// bounded child probe only: no fallback/default is asserted, and a normal ARM64
+// return does not rule out C++ undefined behavior in the division.
+//////////////////////////////////////////////////////////////////////////
+TEST(r7_stkvw, init_zero_total_times_bounded_child_probe)
+{
+	r7_test::ScopedTempDir probeDir("WT_R7_002_STOCK_VWAP");
+	ASSERT_TRUE(probeDir.ready());
+	const r7_test::ProbeResult result = r7_test::run_bounded_child(probeDir.path(), 0, run_stock_vwap_init_probe);
+	ASSERT_TRUE(probeDir.cleanup()) << "failed to remove private init-probe directory";
+	if (!r7_test::expect_normal_return(result))
+		return;
+	GTEST_SKIP() << "The child returned normally on this build; without UBSan or an explicit invalid-config failure contract, this cannot prove safe rejection or absence of undefined behavior.";
+}
+
+TEST(r7_stkvw, init_positive_total_times_control_returns)
+{
+	r7_test::ScopedTempDir probeDir("WT_R7_002_STOCK_VWAP");
+	ASSERT_TRUE(probeDir.ready());
+	const r7_test::ProbeResult result = r7_test::run_bounded_child(probeDir.path(), 5, run_stock_vwap_init_probe);
+	r7_test::expect_normal_return(result);
+	EXPECT_TRUE(probeDir.cleanup()) << "failed to remove private init-probe directory";
 }

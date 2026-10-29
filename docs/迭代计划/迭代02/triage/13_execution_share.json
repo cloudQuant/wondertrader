@@ -1,0 +1,903 @@
+[
+  {
+    "lane": "R17_exefact",
+    "id": "BUG-R17-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExeFact/WtDiffMinImpactExeUnit.cpp:117-146",
+      "src/WtExeFact/WtDiffMinImpactExeUnit.cpp:241-252",
+      "src/WtExeFact/WtMinImpactExeUnit.cpp:163-171"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r17_diff_minimpact_unit_test.cpp:639-687"
+    ],
+    "reason": "撤单/全成回报后，差异执行器为保留晚到成交关联而把订单留在 _orders_mon；同一表仍被超时扫描使用，终态订单随后可能再次被撤，影响计数和下一轮计算。常规取消生命周期可达，晚到成交与真实柜台影响本轮未验证。",
+    "fix": "把超时资格与成交回报关联分开保存；终态订单从超时集合退出，但保留可关联晚到成交所需的短期记录。",
+    "acceptance": "撤单确认后后续 tick 不再对该本地单发撤单；终态成交仍能关联，迟到成交不会丢失；监控与关联记录最终清理。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R17_exefact",
+    "id": "BUG-R17-002",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExeFact/WtDiffMinImpactExeUnit.cpp:97-104",
+      "src/WtExeFact/WtMinImpactExeUnit.cpp:27-33",
+      "src/WtExeFact/WtStockMinImpactExeUnit.cpp:100-155"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r17_diff_minimpact_unit_test.cpp:689-705",
+      "src/TestUnits/coverage/r7_exefact/r7_stock_minimpact_unit_test.cpp:766-779"
+    ],
+    "reason": "pricemode=3 会令日志索引越过 4 项 PriceModeNames；静态边界成立，但 3 不在源码列出的 -1..2 模式域内。当前未找到无效配置必须如何处理的公开契约，因此不把非法枚举输入提升为已确认产品缺陷。",
+    "fix": "先确认并公开 price mode 的有效范围和无效配置策略；若应拒绝，则在数组访问前校验并返回失败/默认值，避免越界求值。",
+    "acceptance": "确认无效模式合同后，分别覆盖 -1、0、1、2 和边界外值；边界外必须按合同安全拒绝或回退，所有合法模式初始化正常。",
+    "canonical": null,
+    "proposed_test_fix": "保留为合同待定项；当前禁用越界用例不作为产品验收证据。若合同要求拒绝非法值，再改成子进程/UBSan 安全拒绝测试。"
+  },
+  {
+    "lane": "R17_exefact",
+    "id": "BUG-R17-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExeFact/WtDiffMinImpactExeUnit.cpp:432-449",
+      "src/WtExeFact/WtMinImpactExeUnit.cpp:492-519",
+      "src/WtExeFact/WtDiffMinImpactExeUnit.cpp:90-98"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r17_diff_minimpact_unit_test.cpp:268-318"
+    ],
+    "reason": "有效 pricemode=1 与正负 offset 下，差异执行器卖侧先减 offset，随后公共分支再次减；买侧只应用一次。源码注释定义 offset 与委托同方向，普通 MinImpact 对照也每侧只偏移一次。",
+    "fix": "把偏移只应用于一个公共价格计算位置，或确保买卖两侧各自恰好应用一次并遵循同一符号约定。",
+    "acceptance": "同一 bid/ask、tick、正 offset 下买卖均只偏移一次；对照 MinImpact 得到一致方向和 tick 数，offset=0 保持基准价。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R17_exefact",
+    "id": "BUG-R17-004",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExecMon/WtSimpDataMgr.cpp:28-34",
+      "src/WtExecMon/WtSimpDataMgr.cpp:77-81",
+      "src/WtExecMon/WtSimpDataMgr.cpp:130-160",
+      "src/WtExecMon/WtExecRunner.cpp:371-381",
+      "src/WtExecMon/WtExecRunner.cpp:354-363"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r17_simpdata_porter_unit_test.cpp:143-157"
+    ],
+    "reason": "数据管理器取得 session 信息后不检查空指针，初始化仍返回成功；runner 查询在 session 资料缺失时可返回 NULL，后续行情处理直接调用 _s_info，runner 也不检查 _data_mgr.init 的返回值。静态风险明确，但缺 session 是否属于有效配置/公开失败策略未找到；_cur_* 未初始化是独立 BUG-N05-001。",
+    "fix": "先确认 session 是必需配置还是允许缺省；若必需，让数据管理器/runner 在 NULL 时失败关闭，并在行情转换入口保留防御性判空。",
+    "acceptance": "按配置 schema 覆盖缺少 session 和有效 session：缺项按合同安全失败或采用约定缺省，不能进入空指针转换；有效 session 下日期、分钟和交易日正常推进。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R17_exefact",
+    "id": "BUG-R17-005",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExecMon/WtSimpDataMgr.cpp:43-47",
+      "src/WtExecMon/WtSimpDataMgr.cpp:84-88",
+      "src/WtExecMon/WtExecRunner.cpp:354-360"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r17_simpdata_porter_unit_test.cpp:130-141"
+    ],
+    "reason": "直接把 cfg=NULL 传给 init 会在 cfg->get 前解引用；但本条输入是违反可能存在的非空配置前置条件，runner 现有调用先检查 data 节点。尚无公开接口合同说明 NULL 必须返回 false。",
+    "fix": "确认 init 的 cfg 可空性；若不允许为空，公开前置条件并在边界安全拒绝；若承诺可空，则判空并返回 false。",
+    "acceptance": "用接口合同确定 NULL 行为；符合合同的测试验证返回值及无状态副作用，现有 DISABLED 崩溃预期不作为产品缺陷证据。",
+    "canonical": null,
+    "proposed_test_fix": "保持待定；只有确认 NULL 是受支持/需安全拒绝的输入后才启用对应测试。"
+  },
+  {
+    "lane": "R19_mq_sharehelper",
+    "id": "BUG-R19-001",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtShareHelper/ShareBlocks.cpp:130-160",
+      "src/WtShareHelper/ShareBlocks.cpp:202-225",
+      "src/WtShareHelper/ShareBlocks.cpp:407-429",
+      "src/WtShareHelper/ShareBlocks.h:138-147"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r19_mq/r19_shareblock_slave_test.cpp:117-142"
+    ],
+    "reason": "commit_section 只更新时间戳在 SectionInfo，不推进 ShmBlock 版本；update_slave(false) 以 block 时间戳早退。get_keys 仅在 section 数量变化时强制刷新，因此既有 section 新增 key 可能不会进入 slave 本地索引。公开头文件未规定 commit 与 slave 刷新的关系，且已有 key 的值通过共享映射直接可见。",
+    "fix": "先定义 commit_section 是仅提交 section 更新标记还是必须发布新增 key；若要发布索引，应推进 slave 可观察的 block 版本或在 key 索引读取时验证 section 版本。",
+    "acceptance": "合同确认后，覆盖既有段新增 key、commit、slave update(false) 和 get_keys/get value；若 commit 不负责索引发布，则测试应改为显式 force refresh 或使用约定 API。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R19_mq_sharehelper",
+    "id": "BUG-R19-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtShareHelper/ShareBlocks.cpp:130-160",
+      "src/WtShareHelper/ShareBlocks.cpp:227-249",
+      "src/WtShareHelper/ShareBlocks.cpp:383-404"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r19_mq/r19_shareblock_slave_test.cpp:144-194"
+    ],
+    "reason": "delete_section 将共享段标为 state=2 并推进 block 时间；slave 重载只跳过 count==0、不跳过 state!=1，仍把删除段装入本地 KV 索引。get_sections 却过滤 state，导致枚举和读取不一致。",
+    "fix": "slave 重载时只索引 state==1 的段，并清除已失效段的本地缓存；getter 对删除状态也应回落默认值。",
+    "acceptance": "slave 初始化后删除段并 update_slave(false)，get_sections 不含它，所有类型 getter 返回默认值；存活段读取不变。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R19_mq_sharehelper",
+    "id": "BUG-R19-003",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtShareHelper/ShareBlocks.cpp:227-250",
+      "src/WtShareHelper/ShareBlocks.cpp:273-278",
+      "src/WtShareHelper/ShareBlocks.cpp:32-59",
+      "src/WtShareHelper/ShareBlocks.h:135-147"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r19_mq/r19_shareblock_master_test.cpp:304-340"
+    ],
+    "reason": "delete_section 只把段标为 tombstone，不减少 _count；init_master 有下一次初始化压缩 state!=1 的清理路径。现有测试证明当前进程删除后槽位不复用，但接口没有规定即时回收或回收时点，不能把 64 槽耗尽直接认定违反合同。",
+    "fix": "先确定 delete_section 的生命周期承诺：立即复用、显式 compact，或下一次 init_master 回收；按选定合同实现，不在未确认前改变共享布局语义。",
+    "acceptance": "合同明确后覆盖 64 槽、删除、再次分配及重新 init_master；断言只对应承诺的回收时点，并保留删除后枚举为空的验证。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R19_mq_sharehelper",
+    "id": "BUG-R19-004",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtShareHelper/ShareBlocks.cpp:9-84",
+      "src/WtShareHelper/ShareBlocks.cpp:32-59"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r19_mq/r19_shareblock_persist_test.cpp:128-180"
+    ],
+    "reason": "init_master 重开已有文件时将已加载段置 state=0；代码注释表明此为 mark-and-sweep，未被本轮使用的段将在下次启动清掉。同一进程用另一个 domain 再映射同一物理文件会把这些段视为失效并压缩/清空，但尚未找到允许多个 master domain 指向同一文件的合同。",
+    "fix": "确认单文件是否允许多个 master alias 和重新启动时哪些段必须持久；若支持 alias，需要所有权/代际标记避免第二次 init 清除第一实例数据；若只支持唯一 master，明确并校验约束。",
+    "acceptance": "覆盖唯一 master 重启与同文件多 alias 两种已确认支持的生命周期；必须保留的段在重载后仍可读取，不应把未使用标记语义误判为产品错误。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R19_mq_sharehelper",
+    "id": "BUG-R19-005",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtShareHelper/ShareBlocks.h:46-66",
+      "src/WtShareHelper/ShareBlocks.h:68-80",
+      "src/WtShareHelper/ShareBlocks.cpp:323-337",
+      "src/WtShareHelper/ShareBlocks.cpp:435-449",
+      "src/WtShareHelper/ShareBlocks.cpp:537-547",
+      "src/Includes/WTSMarcos.h:98-103"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r19_mq/r19_shareblock_persist_test.cpp:181-222"
+    ],
+    "reason": "SMVT_STRING 占 64 字节，分配边界只按 64 检查；wt_strcpy(des,src,64) 复制 64 字节后再写 des[64]=NUL。对有效的 63 字符字符串也会源端多读并在槽尾多写一字节；满段的末槽会覆盖后续共享结构。",
+    "fix": "让 64 字节槽包含终止符，最多拷贝 63 个内容字节；拒绝过长值或做有界截断，分配边界保持槽长一致。",
+    "acceptance": "63 字符值读写往返且相邻段/块头不变；64 字符及更长输入按合同拒绝或截断，不读越界、不改共享区外字节；空串和短串正控正常。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R19_mq_sharehelper",
+    "id": "BUG-R19-007",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtShareHelper/ShareBlocks.cpp:675-718",
+      "src/WtShareHelper/ShareBlocks.cpp:751-790",
+      "src/WtShareHelper/ShareBlocks.h:82-102"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r19_mq/r19_shareblock_cmd_test.cpp:175-218"
+    ],
+    "reason": "cmd block 的 readable/writable 是共享单调序号，但每次 init_cmder 映射都会对共享字段取容量余数。活动队列已跨圈时，后附着的 consumer/producer 将别的进程正在使用的序号改小，旧消费者可能停滞或错读。",
+    "fix": "只在受排他保护的冷启动初始化时重置游标；活动队列的进程附着不得改写共享计数。若需重置，增加进程间初始化锁/代际协议。",
+    "acceptance": "先写入跨圈队列，再由第二映射附着；既有消费者仍按单调序号读完且不跳读/覆盖；冷启动空队列可独立初始化。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R19_mq_sharehelper",
+    "id": "BUG-R19-008",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtMsgQue/MQClient.cpp:51-62",
+      "src/WtMsgQue/MQClient.cpp:64-107",
+      "src/WtMsgQue/MQClient.cpp:110-124",
+      "src/WtMsgQue/MQManager.cpp:58-66",
+      "src/WtMsgQue/MQManager.cpp:95-105"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r19_mq/r19_mq_manager_test.cpp:187-215"
+    ],
+    "reason": "nn_connect 失败只记日志并返回 false，没有关闭/重置已创建的 socket；manager 忽略 init 返回值仍保存并返回客户端 ID；start 只看 socket 是否小于 0，失败 socket 仍可开接收线程；析构在 !m_bReady 时直接 return，无法清理该资源/线程路径。",
+    "fix": "connect 失败时关闭 socket 并重置为 -1；manager 应传播初始化状态或使无效 ID 不可 start；析构必须清理所有已分配资源，不依赖 ready 才执行。",
+    "acceptance": "不可达地址/无效连接失败后 start 不创建线程、destroy 无泄漏或挂起；正常连接 start/destroy 可完成。错误 URL 的日志行为仍保留。本轮未做网络或动态验证。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R19_mq_sharehelper",
+    "id": "BUG-R19-009",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtShareHelper/ShareBlocks.h:180-199",
+      "src/WtShareHelper/ShareBlocks.cpp:87-105",
+      "src/WtShareHelper/ShareBlocks.cpp:130-137",
+      "src/WtShareHelper/ShareBlocks.cpp:165-183"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r19_mq/r19_shareblock_master_test.cpp:34-55"
+    ],
+    "reason": "_ShmPair 构造没有初始化 _blocktime，init_slave 会赋值；update_slave 对已初始化映射读取该字段。候选仅在把 master domain 传入 update_slave 的情况下触发，release_slave 反而明确拒绝 master；该调用是否支持未有合同。",
+    "fix": "明确 update_slave 的角色前置条件；若只允许 slave，应在读取 _blocktime 前拒绝 master；若 master 也支持，则构造/初始化 _blocktime 为确定值。",
+    "acceptance": "对所有合同允许的 mode 调用 update_slave；非法角色返回 false 且不读取未初始化状态；合法 slave 首次及增量刷新结果确定。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R19_mq_sharehelper",
+    "id": "BUG-R19-011",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtShareHelper/ShareBlocks.h:20",
+      "src/WtShareHelper/ShareBlocks.h:82-88",
+      "src/WtShareHelper/ShareBlocks.cpp:720-748"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r19_mq/r19_shareblock_cmd_test.cpp:228-235"
+    ],
+    "reason": "add_cmd 使用 strcpy 写入 64 字节数组，长度达到 64 字符即没有 NUL 空间，超长会覆盖后续记录；但 MAX_CMD_SIZE=64 对外可见，文档没有说明长度上限是含 NUL 还是不含，也没有超限行为合同。禁用用例用更长命令，不能单独确定支持范围。",
+    "fix": "将允许长度定义为最多 63 字节并在 strcpy 前拒绝超限；若产品要容纳 64 字符命令则增加实际存储容量。",
+    "acceptance": "明确上限合同后覆盖 63、64、长字符串；上限内完整终止，上限外显式拒绝且相邻槽与映射尾不变。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R19_mq_sharehelper",
+    "id": "BUG-R19-012",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtShareHelper/ShareBlocks.h:170-173",
+      "src/WtShareHelper/ShareBlocks.cpp:675-696"
+    ],
+    "test_evidence": [],
+    "reason": "path 为空时所有不同 name 都映射当前目录下同一个 .cmd 文件；name 仍区分本进程 registry 项。API 未说明默认路径是单全局队列还是按 name 隔离，仓内未找到生产省略 path 的调用点，不能判定冲突为产品错误。",
+    "fix": "确定默认 path 的命名语义；若 name 是逻辑队列隔离键，使用安全文件名编码；若为空 path 有意共享全局队列，文档明确并提供显式共享选项。",
+    "acceptance": "两种不同 name 在省略 path 时按选定合同共享或隔离；显式同 path 的跨域共享行为另有独立用例。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R19_mq_sharehelper",
+    "id": "BUG-R19-013",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtShareHelper/ShareBlocks.h:35-54",
+      "src/WtShareHelper/ShareBlocks.cpp:252-285",
+      "src/WtShareHelper/ShareBlocks.cpp:323-337",
+      "src/Includes/WTSMarcos.h:98-103"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r19_mq/r19_shareblock_persist_test.cpp:223-247"
+    ],
+    "reason": "section/name 与 key 均写入 32 字节字段，默认 wt_strcpy 按 strlen 复制并附加 NUL；32 字节及更长会越界。但接口没有公开最大字符串长度，现测试用 40 字符值，尚未证明这是合同允许的有效名称输入。",
+    "fix": "公开最大长度为 31 字节并在 make_valid 入口校验拒绝；或按需求扩大共享 ABI 字段并兼容旧映射，不能静默覆盖邻接字段。",
+    "acceptance": "确认 ABI/字符串长度合同后覆盖 31、32 和长值；边界外失败且共享内存布局和已有 key 不变。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R53",
+    "id": "BUG-R53-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/WTSTradeDef.hpp:217-248",
+      "src/Includes/WTSObject.hpp:56-88",
+      "src/Includes/WTSObject.hpp:92-105"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r12_headers/r12_trade_def_test.cpp:122-130",
+      "src/TestUnits/coverage/r12_headers/r53_trade_def_more_test.cpp:359-369"
+    ],
+    "reason": "createCancelAction 用裸 new 创建 WTSPoolObject 派生类，没有设置 _pool/_mutex；该类 release 在引用计数归零时会使用二者。工厂与同类 create 的 pool 生命周期接口不一致；活动字段测试没有 release，不能据此声称当前生产撤单路径已触发。",
+    "fix": "createCancelAction 改为 allocate()，或明确定义裸堆对象的独立析构路径且不要把其交给 release。",
+    "acceptance": "createCancelAction 返回对象按公开 WTSObject release 生命周期释放无崩溃；字段与 action flag 正确；destroy 路径引用计数归零且无池状态错误。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R53",
+    "id": "BUG-R53-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/WTSCollection.hpp:392-428",
+      "src/Includes/WTSCollection.hpp:494-510",
+      "src/Includes/WTSCollection.hpp:542-554"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r12_headers/r53_collection_variant_test.cpp:374-388"
+    ],
+    "reason": "add 默认 retain 以取得容器持有引用，remove/clear 会 release；三个 erase 重载只从 map 删除且无返回对象，丢失容器持有引用。所有权从容器移除时的路径与其他接口不一致。",
+    "fix": "若 erase 是释放型操作，保存对象、摘除节点再 release；若是所有权转移，应返回指针并在接口明确该语义，不应无返回值丢失引用。",
+    "acceptance": "retainCount 从调用方+容器的 2 降到调用方的 1；迭代器、key 与 const_iterator 重载均覆盖，调用方最终 release 后对象销毁。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R53",
+    "id": "BUG-R53-003",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/WTSStruct.h:48-51",
+      "src/Includes/WTSStruct.h:148-205",
+      "src/Includes/WTSMarcos.h:22-23"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r12_headers/r53_struct_union_test.cpp:276-288"
+    ],
+    "reason": "现有 disabled 测试对 WTSTickStructOld::exchg[10] 使用 MAX_EXCHANGE_LENGTH=16 做 memset，本身越界并覆盖 code，故该夹具不能证明产品错误。另一方面，旧二进制字段能否按固定宽度填满、赋值后的消费者是否要求 NUL 尚无格式/接口合同；不能据坏夹具撤回边界风险。",
+    "fix": "先确认旧格式字段是固定宽原始字节还是 NUL 终止字符串；若要求字符串，则按各源字段容量做有界转换并显式终止；若为固定宽，保留长度并在消费者处按定长解析。",
+    "acceptance": "先做合法 max-1+NUL 对照，且单独构造不越界的原始字段字节 fixture；依据旧格式合同断言赋值内容/终止行为，不能让测试的 memset 越过源结构体字段。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R56",
+    "id": "BUG-R56-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WTSTools/WTSHotMgr.cpp:321-353",
+      "src/WTSTools/WTSHotMgr.h:52-58"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l02_wtstools_mq/r56_hotmgr_test.cpp:253-260"
+    ],
+    "reason": "查询日期早于最早换月日时 lower_bound 返回 begin，代码因 dt<first 执行 cit--，随后比较 end 已无法挽救迭代器越界。日期参数是主力接口公开输入，无更早日期限制。",
+    "fix": "对 lower_bound==begin 且查询日期早于首条记录单独返回空值/按明确策略回退；不要递减 begin。",
+    "acceptance": "覆盖早于首日、等于首日、首日之间、晚于最后记录；前置日期安全返回合同规定空值，其余结果正确，不越界。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R56",
+    "id": "BUG-R56-003",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WTSTools/CsvHelper.cpp:56-75",
+      "src/WTSTools/CsvHelper.cpp:77-100",
+      "src/WTSTools/CsvHelper.cpp:161-170",
+      "src/WTSTools/CsvHelper.h:125-138"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l02_wtstools_mq/r56_csv_test.cpp:57-67"
+    ],
+    "reason": "check_cell 只按表头字段数检查，getter 再对 _current_cells 取值；尚未成功 next_row 或 EOF 后 getter 可索引空/短行。但 API 描述 next_row 成功后加载单元格，未承诺当前行不存在时 getter 的行为，因此直接在首行前调用的 disabled 测试合同不充分。",
+    "fix": "明确 getters 仅可在 next_row 返回 true 后调用，或提供无当前行安全默认值；无论哪种都检查当前行长度而不是只检查 header。",
+    "acceptance": "合同确定后覆盖首行前、成功行、短行、EOF 后读取；若安全默认是承诺，则返回默认值且不越界；若要求先 next_row，则调用方/测试遵守前置条件。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R56",
+    "id": "BUG-R56-004",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WTSTools/WTSHotMgr.cpp:117-122",
+      "src/WTSTools/WTSHotMgr.cpp:211-220"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l02_wtstools_mq/r56_hotmgr_test.cpp:52-71"
+    ],
+    "reason": "loadHots 忽略 loadCustomRules 的 false 仍标为 initialized 并返回 true。现有活动测试明确断言缺文件时 manager 可空运行且 loadHots 返回 true；尚不清楚 HOT 文件是可选规则还是必需依赖，bool 的成功语义未定义。",
+    "fix": "确定 HOT 配置文件缺失是可选还是初始化失败；可选则文档说明空规则成功，必需则传播 loadCustomRules 失败并保持未初始化。",
+    "acceptance": "分别覆盖存在、格式错误、缺失文件；返回值、initialized 状态和查询空值统一符合已确定的可选/必需合同。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R7_exefact",
+    "id": "BUG-R7-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExeFact/WtVWapExeUnit.cpp:18-35",
+      "src/WtExeFact/WtVWapExeUnit.cpp:110-123",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:20-39",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:181-198",
+      "src/WtExeFact/WtTWapExeUnit.cpp:161-169"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r7_vwap_unit_test.cpp:12-15",
+      "src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:12-14"
+    ],
+    "reason": "VWAP 两类单元构造时 _total_secs=0，init 先计算 (_total_secs-_tail_secs)/_total_times，后计算时长；有效 total_times>0、tail_secs=0 时 span 错为 0，tail_secs>0 时无符号下溢。TWAP 的时长计算顺序正确。",
+    "fix": "先算执行总秒数，再校验 tail_secs 不超过总时长、total_times 大于零，最后计算 span；init 失败时执行单元不得继续下单。",
+    "acceptance": "正的非零执行时长/次数和多个 tail 值得到预期派生 span；零尾时间按间隔合同运行，超过总时长配置安全拒绝。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R7_exefact",
+    "id": "BUG-R7-002",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExeFact/WtVWapExeUnit.cpp:110-123",
+      "src/WtExeFact/WtTWapExeUnit.cpp:146-169",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:177-198"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r7_vwap_unit_test.cpp:744-765",
+      "src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:699-720"
+    ],
+    "reason": "total_times=0 会进入整数除法，但零次数或缺参很可能是无效执行配置；三个 init 都未校验，不过当前没有公开的必填/范围及失败策略合同，子进程 probe 也明确指出正常返回不能证明安全。",
+    "fix": "补充执行配置 schema；确认次数必须正数后，在除法前返回失败并发诊断，不能选择未约定默认值。",
+    "acceptance": "合同明确后对缺项、0、1、正数覆盖：无效值在派生计算前被拒绝，正控 span 正确；必要时用 UBSan 子进程验证。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R7_exefact",
+    "id": "BUG-R7-003",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExeFact/WtVWapExeUnit.cpp:125-145",
+      "src/WtExeFact/WtVWapExeUnit.cpp:360-373",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:224-246",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:569-579"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r7_vwap_unit_test.cpp:768-780"
+    ],
+    "reason": "分布文件缺失时 init 只记日志并提前返回，短文件也未校验；后续 do_calc 对 0..240 下标直接访问 vector。缺文件/短文件属于配置或数据完整性错误，尚无合同说明该执行单元是否必须拒绝启动，原 disabled 测试输入也未证明是有效分布文件。",
+    "fix": "定义 profile 文件的必需性与长度；若必需，init 标记失败并阻止后续下单；访问前对下标和长度再做防护。",
+    "acceptance": "在确认 profile 格式后覆盖缺失、空、短、正好完整及超长文件；无效文件不允许执行或越界，完整文件按分桶输出。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R7_exefact",
+    "id": "BUG-R7-004",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExeFact/WtVWapExeUnit.cpp:346-362",
+      "src/WtExeFact/WtTWapExeUnit.cpp:634-653",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:515-566"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r7_vwap_unit_test.cpp:438-460",
+      "src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:685-696"
+    ],
+    "reason": "三类单元都在 diffQty==0 先返回，使后续净仓为零时清理多头子仓的兜底分支不可达；普通 flat-position 测试断言不下单是合理的。账户是否允许净仓零但多头子仓非零、clear 是否承诺逐方向清理尚未明确。",
+    "fix": "先定义 hedge/long-short 子仓账户下 clear 的语义；若必须清理残余子仓，把该分支放在 diffQty==0 早退前；若不支持，删除无效分支而不是保留误导逻辑。",
+    "acceptance": "明确账户模式后用净仓零/多头子仓、净仓零/空头子仓、普通 flat、非零净仓分别验收；只对合同支持的账户模式要求发单。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R7_exefact",
+    "id": "BUG-R7-005",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:482-519",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:313-370",
+      "src/Includes/ExecuteDefs.h:218-220"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:837-859"
+    ],
+    "reason": "StockVWAP 的 do_calc 在检查 _last_tick 前访问 _last_tick->price；_start_price 默认 0，目标/持仓差非零时可达。通道 ready 回调是公开生命周期事件，不要求先有行情；候选子进程测试源码覆盖此顺序，但本轮未运行。",
+    "fix": "把 _last_tick 判空移动到所有行情访问之前；缺行情时只记录并返回，等待首 tick 后再计算。",
+    "acceptance": "init、设非零目标、先 channel_ready、无 tick 时无崩溃且无订单；随后首 tick 到达后可正常计算。另覆盖目标与现仓相同的安全早退。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R7_exefact",
+    "id": "BUG-R7-006",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/ExecuteDefs.h:121-129",
+      "src/WtExecMon/WtExecRunner.cpp:434-447",
+      "src/WtExeFact/WtTWapExeUnit.cpp:136-145",
+      "src/WtExeFact/WtVWapExeUnit.cpp:99-127",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:162-230"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:723-736"
+    ],
+    "reason": "上下文在商品基础资料查不到 stdCode 时可返回 NULL，三个单元保存/使用商品信息时缺少一致守卫；TWAP 价格路径与股票 VWAP init 中都有解引用。不过有效执行代码是否必须已经存在于商品表、缺少商品资料能否算有效输入尚未有合同。",
+    "fix": "定义商品资料为单元初始化的必需依赖或明确可缺省；必需时 init 失败并停止接收交易逻辑，任何后续路径仍保持判空。",
+    "acceptance": "按 schema 确认有效代码后，缺商品元数据应被安全拒绝；有效元数据正控能完成 init、do_calc 和 fire_at_once。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R7_exefact",
+    "id": "BUG-R7-007",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:530-545",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:580-617",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:658-665"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:462-485",
+      "src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:590-607"
+    ],
+    "reason": "无未完成单时 isBuy 由 undone 得到 false；进入卖分支后把前面计算的 VWAP 切片量覆盖为 min(vailyPos,_min_open_lots)，可令买入切片退化为零/最小量，也可令减仓的正数量走买单。调用按 diffQty 重置价格方向却按 curQty 符号决定 buy/sell。",
+    "fix": "按 diffQty 确定方向；只对减仓分支按可卖量截断绝对值，保留分布切片量，避免重写数量符号或无条件覆盖。",
+    "acceptance": "相同目标/仓位下改变累计 VWAP 分布会相应改变切片量；增仓只发正量买单，减仓只发不超过可卖仓的卖单，零差不下单；覆盖 odd-lot clear。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R7_exefact",
+    "id": "BUG-R7-019",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/ExecuteDefs.h:51-59",
+      "src/WtCore/TraderAdapter.cpp:428-452",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:494-508"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:588-607"
+    ],
+    "reason": "公开 getPosition(validOnly=true) 定义为可用仓，false 为总仓，TraderAdapter 实现吻合；StockVWAP 将默认 true 命名为 realPos、false 命名为 vailyPos，导致非 T+0 卖出保护使用反向数量。现测试 fake 也反向实现参数，不可直接作为产品行为证据，但接口与生产 adapter 已独立定出错误。",
+    "fix": "按 ExecuteContext 合同将 true 作为可用仓、false 作为总仓；修正 StockVWAP 所有读取位置和命名。",
+    "acceptance": "总仓1000/可用仓200/目标清仓时目标按不可卖仓抬高且卖量不超过200；fake 与接口语义一致；T+0 可卖量等于总仓正控。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R7_exefact",
+    "id": "BUG-R7-010",
+    "decision": "DUPLICATE",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExeFact/WtStockMinImpactExeUnit.cpp:100-155",
+      "src/WtExeFact/WtDiffMinImpactExeUnit.cpp:97-104",
+      "src/WtExeFact/WtMinImpactExeUnit.cpp:27-33"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r7_stock_minimpact_unit_test.cpp:766-779"
+    ],
+    "reason": "与 BUG-R17-002 同属对无效 pricemode 值执行 PriceModeNames[_price_mode+1] 而越界；本条只是在股票单元的同形实现，非法值合同仍待确认。",
+    "fix": "并入 canonical BUG-R17-002 的 price mode 范围与失败策略，不单独重复计数。",
+    "acceptance": "按 canonical 的合同验收覆盖股票 MinImpact 对应模式。",
+    "canonical": "BUG-R17-002",
+    "proposed_test_fix": "保留该实现位置为 canonical 的复核样本，不另加产品验收项。"
+  },
+  {
+    "lane": "R7_exefact",
+    "id": "BUG-R7-011",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExecMon/WtExecRunner.cpp:61-78",
+      "src/TestUnits/coverage/r7_exefact/r7_exec_runner_test.cpp:61-80"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r7_exec_runner_test.cpp:91-105"
+    ],
+    "reason": "JSON {} 缺少 basefiles 时 config 直接对 cfgBF 解引用；但 basefiles 是否必需由整体运行配置 schema 决定，单凭语法合法 JSON 不构成有效完整配置，尚未找到缺项失败合同。",
+    "fix": "补齐并验证配置 schema；若 basefiles 必需，检查 NULL 并报告缺字段后返回 false；若允许省略，按空基础资料处理。",
+    "acceptance": "合同确认后覆盖最小有效配置、缺 basefiles、缺 session/commodity 子项；缺项按明确失败/可选语义返回，不崩溃。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R7_exefact",
+    "id": "BUG-R7-012",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExeFact/WtVWapExeUnit.cpp:18-35",
+      "src/WtExeFact/WtVWapExeUnit.cpp:148-177",
+      "src/WtExeFact/WtVWapExeUnit.cpp:185-223",
+      "src/WtExeFact/WtTWapExeUnit.cpp:253-283",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:313-369",
+      "src/WtExeFact/WtVWapExeUnit.h:215-216"
+    ],
+    "test_evidence": [],
+    "reason": "三个执行单元启动时发现未被本地监控的活动单会撤销并记录返回的本地订单；该正常重连流程在初始目标尚未计算时可因 cancel_cnt 早退，随后取消回报比较未初始化 _this_target 并计算重发量。相关字段没有构造初始化，生命周期顺序可达。",
+    "fix": "增加本轮目标是否有效的显式状态；尚未形成目标时只清理/关联启动外部单，不根据 _this_target 重发；同时初始化数值字段以消除未定义状态。",
+    "acceptance": "模拟 init→设置账户有未管理活动单→channel ready→撤单回报，未建立目标前不得重发随机数量；建立目标后普通超时撤单回报按目标重发。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R7_exefact",
+    "id": "BUG-R7-013",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExeFact/WtVWapExeUnit.cpp:110-120",
+      "src/WtExeFact/WtTWapExeUnit.cpp:146-169",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:177-198",
+      "src/WtExeFact/WtVWapExeUnit.h:185-205",
+      "src/WtExeFact/WtStockVWapExeUnit.h:260-269"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r7_vwap_unit_test.cpp:168-183",
+      "src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:224-239"
+    ],
+    "reason": "三个单元把 minopenlots 当可选配置，仅在 cfg->has 时赋值；相关成员没有构造初始化或类内默认值，省略该键后后续 min/max 与下单量计算读取不确定值。夹具普遍显式提供，未覆盖此有效可选路径。",
+    "fix": "为所有单元统一设确定默认值或在 init 中要求必填并安全失败；若默认与最小手数有关，使用已校验的品种参数计算。",
+    "acceptance": "每个单元都覆盖省略、0、合法正数 minopenlots；所有路径订单量确定、满足合同最小手数，非法配置在 init 阶段被拒绝。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R7_exefact",
+    "id": "BUG-R7-014",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExeFact/WtVWapExeUnit.h:189-190",
+      "src/WtExeFact/WtTWapExeUnit.h:192-193",
+      "src/WtExeFact/WtStockVWapExeUnit.h:258-260",
+      "src/WtExeFact/WtVWapExeUnit.cpp:394-406",
+      "src/WtExeFact/WtVWapExeUnit.cpp:458-468",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:619-630",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:697-710"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r7_vwap_unit_test.cpp:548-570"
+    ],
+    "reason": "VWAP/股票 VWAP 常规计算与 fire_at_once 的 mode=1 取价不同，常规路径用己方最优，立即重发路径用对手方；TWAP 的两条路径定义较一致。头文件定义 mode 名称，但 fire_at_once 是否故意为撤单重发提高成交概率、是否仍受相同模式约束尚不明确，现测试只锁定实现。",
+    "fix": "先确认撤单重发是否沿用 price_mode，还是固定使用激进对手价；将合同写入接口文档并据此统一实现或明确重发例外。",
+    "acceptance": "同一 tick 下比较常规与立即重发；测试断言遵循确认后的 mode/重发策略，覆盖 mode0/1/2、买卖和非法模式。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R7_exefact",
+    "id": "BUG-R7-015",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExeFact/WtVWapExeUnit.cpp:390-445",
+      "src/WtExeFact/WtVWapExeUnit.cpp:448-470",
+      "src/WtExeFact/WtTWapExeUnit.cpp:713-769",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:615-670",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:378-400"
+    ],
+    "test_evidence": [],
+    "reason": "on_tick 保留当前 _last_tick 作为成员所有权；三种 do_calc 把该指针复制到局部变量并在末尾 release，却没有对应 retain。fire_at_once 明确先 retain 再 release。普通发单会提前消耗成员引用，后续替换/析构可能重复释放。",
+    "fix": "删除 do_calc 的非配对 release，或对临时借用明确 retain/release；成员持有的那一份只由 tick 替换或析构释放。",
+    "acceptance": "连续两个 tick、一次 do_calc、再析构与多次 do_calc 生命周期下引用数正确；两条路径均无泄漏/重复释放，使用引用计数对象验证。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R7_exefact",
+    "id": "BUG-R7-016",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExeFact/WtStockVWapExeUnit.h:373-388",
+      "src/WtExeFact/WtStockMinImpactExeUnit.h:332-347",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:167-208",
+      "src/WTSTools/WTSBaseDataMgr.cpp:74-88"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:185-198",
+      "src/TestUnits/coverage/r7_exefact/r7_stock_minimpact_unit_test.cpp:18-19",
+      "src/TestUnits/coverage/r7_exefact/r7_stock_minimpact_unit_test.cpp:117-123"
+    ],
+    "reason": "get_minOrderQty 重新通过上下文获取商品指针，先解引用，后 release；执行上下文透传基础资料 map 中的借用指针且不 retain。两个单元 init 已另行 retain 保存 _comm_info，再释放借用指针会错误减少 map/调用方引用计数，并可能造成悬垂引用。",
+    "fix": "helper 复用单元已持有的 _comm_info，或只读借用且绝不 release；判空须在 getProduct 前。",
+    "acceptance": "多个执行单元依次 init/use/destroy 同一商品资料后引用计数不被 helper 改变；缺失元数据按明确 init 失败处理，正常品种最小单手数仍正确。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R7_exefact",
+    "id": "BUG-R7-017",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExeFact/WtStockMinImpactExeUnit.cpp:385-410",
+      "src/WtCore/TraderAdapter.cpp:1482-1501",
+      "src/Includes/ExecuteDefs.h:202-215"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r7_stock_minimpact_unit_test.cpp:612-634"
+    ],
+    "reason": "实现对成功和失败 entrust 回报都重算，但测试明确手工调用成功回调；当前检查到的生产 TraderAdapter 路径只发送失败回调，因此测试不能证明重复发单在当前生产调用链可达。公开 ExecuteUnit 接口仍包含 bSuccess 参数且未承诺成功值不会到达，故不据此否定潜在行为风险。",
+    "fix": "缩窄候选表述为成功回调被生产路径触发时的条件性风险；先确认所有 adapter/调用点是否会发成功回调，再决定仅失败重算还是增加防重状态。",
+    "acceptance": "穷举 adapter 到 on_entrust 的调用映射和回调顺序；若任何生产成功回调可达，用真实顺序模拟 OMS 未完成量更新前后并验收不重复下单；若不可达，则只保留直接方法行为测试，不计产品影响。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "R84b",
+    "id": "BUG-R84b-001",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/StateMonitor.h:205-222"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp:344-350"
+    ],
+    "reason": "nullptr 传给 isInState 后进入 map<string>::find(const char*) 的隐式字符串转换，可能产生未定义行为；接口未承诺 sid 可空，仓内调用均为非空字符串。现有测试直接构造空指针，无法单独证明受支持输入缺陷。",
+    "fix": "确认参数合同；若可空则入口判空返回 false，若非空则写入前置条件并确保所有调用者保证生命周期内有效字符串。",
+    "acceptance": "按合同覆盖 nullptr、空串、已知和未知非空 sid；nullable 契约下空指针稳定返回 false，否则调用者测试保证非空。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "n05_exec_factories",
+    "id": "BUG-N05-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExecMon/WtSimpDataMgr.cpp:28-34",
+      "src/WtExecMon/WtSimpDataMgr.cpp:105-117",
+      "src/WtExecMon/WtSimpDataMgr.cpp:140-160",
+      "src/WtExecMon/WtSimpDataMgr.h:178-183"
+    ],
+    "test_evidence": [],
+    "reason": "构造函数未初始化 _cur_*，getter 直接读取；即便暂不调用 getter，首个行情的单调时间判定也会先读取 _cur_date/_cur_act_time，再赋值。有效数据管理器初始化后收到首笔行情即走该路径。",
+    "fix": "为所有时钟/日期字段设确定初值；确保首个行情按初始化状态接受，时间 getter 在行情前返回有文档的 sentinel。",
+    "acceptance": "构造后 getter 返回合同 sentinel；第一笔合法 tick 被接受，第二笔旧 tick 被过滤，交易日/分钟/秒 getter 与输入一致。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "n05_exec_factories",
+    "id": "BUG-N05-002",
+    "decision": "DUPLICATE",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExecMon/WtSimpDataMgr.cpp:77-81",
+      "src/WtExecMon/WtSimpDataMgr.cpp:130-160"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r17_simpdata_porter_unit_test.cpp:143-157"
+    ],
+    "reason": "与 BUG-R17-004 同为 session 信息缺失后行情处理解引用 _s_info；R17-004 已包含 runner 可返回 NULL、初始化返回成功和行情入口无判空的完整链路，本条不重复计数。",
+    "fix": "并入 canonical BUG-R17-004；保持 _cur_* 的初始化问题由 BUG-N05-001 单独处理。",
+    "acceptance": "按 BUG-R17-004 的 session 缺失/正常配置验收，不新增重复产品用例。",
+    "canonical": "BUG-R17-004",
+    "proposed_test_fix": "在原 bug 清单中用交叉引用替代重复修复项。"
+  },
+  {
+    "lane": "n05_exec_factories",
+    "id": "BUG-N05-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExeFact/WtOrdMon.cpp:17-42",
+      "src/WtExeFact/WtOrdMon.cpp:51-69",
+      "src/WtExeFact/WtOrdMon.cpp:77-89",
+      "src/WtExeFact/WtOrdMon.h:60-88"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n05_exec_factories/n05_ordmon_test.cpp:1-120"
+    ],
+    "reason": "写/删订单使用 _mtx_ords，但 check_orders、enumOrder 在加锁前读 _orders.empty()，has_order 和 clear_orders 完全不加锁；tick 与订单回调重叠时会与 map 写操作并发读写。源码使用互斥锁表明对象内部确有同步意图。",
+    "fix": "所有 map 访问统一通过同一互斥量保护；把 empty 检查移到锁内，给 has_order/clear_orders 加锁，并审视带用户 callback 时是否需快照后解锁。",
+    "acceptance": "并发 push/erase 与 has/check/enum/clear 运行在受控多线程测试及 TSAN 下无数据竞争、崩溃或迭代器失效；单线程语义不变。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "n06_strategies_mq_share",
+    "id": "BUG-WSN06-001",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCtaStraFact/WtCtaStraFact.cpp:81-94",
+      "src/WtCtaTwoMaFact/WtCtaTwoMaFact.cpp:82-94",
+      "src/WtSelStraFact/WtSelStraFact.cpp:63-77",
+      "src/WtUftStraFact/WtUftStraFact.cpp:95-110",
+      "src/WtHftStraFact/WtHftStraFact.cpp:86-101"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n06_strategies_mq_share/n06_cta_stra_test.cpp:126-150"
+    ],
+    "reason": "多处 createStrategy 直接 strcmp(name,...); null 会出错，但工厂注释说明的是策略名称，未承诺 nullable，正常 runner 从配置读名称。直接传 NULL 的测试前提缺少公开合同，不足以判产品缺陷。",
+    "fix": "确认工厂 name 可空性；nullable 时返回 NULL，非空前置时在 runner/config 边界验证 name 并返回配置错误。",
+    "acceptance": "对所有工厂按确定的 name 合同覆盖 nullptr、空名、未知名和已知名；不把直接 null 崩溃纳入产品验收直到合同确定。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "n06_strategies_mq_share",
+    "id": "BUG-WSN06-002",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftStraFact/WtUftStraDemo.cpp:78-89",
+      "src/WtHftStraFact/WtHftStraDemo.cpp:77-89",
+      "src/WtUftRunner/WtUftRunner.cpp:213-232",
+      "src/WtExecMon/WtExecRunner.cpp:330-345"
+    ],
+    "test_evidence": [],
+    "reason": "UFT/HFT demo init 直接解引用 cfg，runner 在 params 缺失时传 NULL；但 params 是不是可省略的策略配置字段没有 schema 证据。两个 init 都返回 bool，但 runner 当前忽略该结果。",
+    "fix": "确认 params 是否必填/可空；若缺项无效，runner 在调用前给出配置错误并不安装策略；若允许省略，策略 init 将 NULL 视为空对象并安全使用默认值。",
+    "acceptance": "对一个允许缺省 params 的策略和一个必填参数策略分别测试缺项、空对象、合法对象；runner 遵守 init 返回值，不创建未初始化 context。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "n06_strategies_mq_share",
+    "id": "BUG-WSN06-004",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCtaTwoMaFact/WtStraTwoMa.cpp:79-101",
+      "src/WtCtaTwoMaFact/WtStraTwoMa.cpp:190-205",
+      "src/WtCtaStraFact/WtStraDualThrust.cpp:79-99",
+      "src/WtCtaStraFact/WtStraDualThrust.cpp:169-181"
+    ],
+    "test_evidence": [],
+    "reason": "TwoMa 允许 short_days/long_days 为零后在 on_schedule 除零，DualThrust 接受 days=0 后按零窗口计算；零窗口是否是有效策略参数没有 schema 或接口合同。候选 test 只能证明无验证，不能以无效周期输入认定产品错误。",
+    "fix": "为窗口参数定义最小正值及数据需求；初始化校验非法范围并返回 false，避免先接受再除法/空窗口计算。",
+    "acceptance": "有效正窗口和边界窗口初始化与回调正常；0、负值或历史不足按确定策略拒绝/不交易，不出现除零或误导信号。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  },
+  {
+    "lane": "n06_strategies_mq_share",
+    "id": "BUG-WSN06-005",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtMsgQue/MQManager.cpp:6-18",
+      "src/WtMsgQue/MQManager.cpp:58-66",
+      "src/WtMsgQue/MQServer.cpp:70-106",
+      "src/WtMsgQue/WtMsgQue.h:25-32",
+      "src/WtMsgQue/WtMsgQue.h:50-78"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r19_mq/r19_mq_manager_test.cpp:101-120",
+      "src/TestUnits/coverage/r19_mq/r19_mq_manager_test.cpp:187-215"
+    ],
+    "reason": "MQManager 忽略 init 返回值并把对象 ID 返回给 C API 调用方；C API 只说明返回新 ID，没有规定连接/绑定失败时的 sentinel 或 create 是否仅分配实例。MQClient 失败 socket 生命周期已由 BUG-R19-008 覆盖，本条主要缺少统一失败返回契约。",
+    "fix": "确定 C API 创建成功定义与失败信号；若 ID 代表可用 endpoint，init 失败应不登记/返回保留的无效 ID；若代表已分配对象，增加状态查询或显式 start/result API。",
+    "acceptance": "分别对 bind/connect 成功与失败检查 ID、manager 可见状态、publish/start 行为及 destroy；结果严格遵循新增的 API 失败合同，避免用日志代替调用方可观察状态。",
+    "canonical": null,
+    "proposed_test_fix": "按本条验收条件增加或修正定向回归；本轮不运行测试。"
+  }
+]

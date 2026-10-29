@@ -154,7 +154,7 @@ TEST(q04_trader_push, closetoday_and_short_side_offsets_are_handled)
 	uint32_t id = env.place(5000.0, 2.0, false, false);	//平空(昨)
 	WTSOrderInfo* ord = env.pushOrderFromLast("PX-2", WOS_NotTraded_Queuing, WOT_CLOSETODAY);
 	//平今只扣今仓可平: 4 -> 2, 昨可平不受影响
-	EXPECT_DOUBLE_EQ(5.0, env._adapter.getPosition(kAg, true, 2));
+	EXPECT_DOUBLE_EQ(-5.0, env._adapter.getPosition(kAg, true, 2));
 	EXPECT_DOUBLE_EQ(0.0, env._adapter.getPosition(kAg, true, 1));
 	ASSERT_EQ(1u, env._sink._orders.size());
 	EXPECT_EQ(id, env._sink._orders[0]._localid);
@@ -166,7 +166,7 @@ TEST(q04_trader_push, closetoday_and_short_side_offsets_are_handled)
 	env._api._entrusts.clear();
 	env.place(5000.0, 3.0, false, true);
 	WTSOrderInfo* openOrd = env.pushOrderFromLast("PX-3", WOS_PartTraded_Queuing, WOT_OPEN);
-	EXPECT_DOUBLE_EQ(5.0, env._adapter.getPosition(kAg, true, 2)) << "开仓不应改变可平量";
+	EXPECT_DOUBLE_EQ(-5.0, env._adapter.getPosition(kAg, true, 2)) << "空头可平量按净头寸符号返回，开仓不应改变可平量";
 	openOrd->release();
 }
 
@@ -248,10 +248,10 @@ TEST(q04_trader_push, canceled_push_updates_cancel_stats_and_undone)
 	env._api._entrusts.clear();
 	uint32_t idS = env.place(5000.0, 3.0, false, false);
 	WTSOrderInfo* cs = env.pushOrderFromLast("PX-6", WOS_NotTraded_Queuing, WOT_CLOSETODAY);
-	EXPECT_DOUBLE_EQ(7.0, env._adapter.getPosition(kAg, true, 2));
+	EXPECT_DOUBLE_EQ(-7.0, env._adapter.getPosition(kAg, true, 2));
 	cs->setOrderState(WOS_Canceled);
 	env._adapter.onPushOrder(cs);
-	EXPECT_DOUBLE_EQ(10.0, env._adapter.getPosition(kAg, true, 2));
+	EXPECT_DOUBLE_EQ(-10.0, env._adapter.getPosition(kAg, true, 2));
 	cs->release();
 	(void)id;
 	(void)idS;

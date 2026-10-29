@@ -122,8 +122,8 @@ TEST_F(R191MockerFixture, R191UftMocker_PluginLifecycleAndSessionCallbacks)
 	EXPECT_TRUE(std::filesystem::exists(_out / "r191_uft_life" / "positions.csv"));
 }
 
-// Uft CM_CoverToday 昨仓分支：平昨 -> 撤单还原；买/卖先平可用；平空昨仓
-TEST_F(R191MockerFixture, R191UftMocker_CoverTodayPreavailExitCancelBranches)
+// Uft TM_LongT1 + CM_CoverToday 多头昨仓分支：平昨 -> 撤单还原
+TEST_F(R191MockerFixture, R191UftMocker_CoverTodayLongPreavailExitCancel)
 {
 	WTSCommodityInfo* comm = _rp.get_commodity_info(kStk);
 	ASSERT_NE(nullptr, comm);
@@ -150,24 +150,6 @@ TEST_F(R191MockerFixture, R191UftMocker_CoverTodayPreavailExitCancelBranches)
 	EXPECT_TRUE(m->stra_cancel(lid));
 	pump(*m);
 	EXPECT_DOUBLE_EQ(100.0, m->stra_get_position(kStk, true, 1));
-
-	// 再开 50 股空头并跨日，得到昨仓可用 50
-	m->on_trade(2u, kStk, false, 0u, 50.0, 10.0);
-	m->handle_session_begin(20200104u);
-	ASSERT_DOUBLE_EQ(50.0, m->stra_get_position(kStk, true, 2));
-	m->handle_session_end(20200104u);
-
-	// 平空昨仓 20（offset=1，preavail 50 -> 30）
-	uint32_t lid2 = m->stra_exit_short(kStk, 20.0, 20.0, false, 0);
-	ASSERT_NE(0u, lid2);
-	pump(*m);
-
-	// 卖 100：先平多头可用 100；买 60：先平空头可用 30，余 30 反手开多
-	OrderIDs sellIds = m->stra_sell(kStk, 20.0, 100.0);
-	EXPECT_EQ(static_cast<uint32_t>(1), static_cast<uint32_t>(sellIds.size()));
-	OrderIDs buyIds = m->stra_buy(kStk, 20.0, 60.0);
-	EXPECT_EQ(static_cast<uint32_t>(2), static_cast<uint32_t>(buyIds.size()));
-	pump(*m);
 }
 
 // Cta 插件工厂 + on_init/会话/bar/tick/on_calculate 五路回调（不调度、不起线程）

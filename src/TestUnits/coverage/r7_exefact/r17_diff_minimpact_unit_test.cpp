@@ -4,7 +4,7 @@
 // 说明: 全部用例只引用 WtExeFact 符号；宿主替身沿用 n05 FakeExecCtx 形态（本文件自带一份，
 //       匿名命名空间隔离），额外提供 onAfterBuy 钩子制造 do_calc 重入以覆盖 CalcFlag 占用分支。
 //       超时撤单走 _ctx->getCurTime()（可注入时间），不读挂钟、不起线程。
-//       撤单回报后订单不删除的问题按“实际行为”断言，登记为 BUG-R17-001（见 bugs/R17_exefact.md）。
+//       撤单回报后终态订单应退出监控；对应回归断言见 BUG-R17-001（bugs/R17_exefact.md）。
 #include <gtest/gtest.h>
 
 #include <algorithm>
@@ -12,6 +12,7 @@
 #include <cstdio>
 #include <cstring>
 #include <functional>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -26,6 +27,16 @@ using namespace wtp;
 
 namespace
 {
+template <typename T>
+struct ReleaseWTSObject
+{
+	void operator()(T* obj) const
+	{
+		if (obj)
+			obj->release();
+	}
+};
+
 class FakeExecCtx : public ExecuteContext
 {
 public:
@@ -623,47 +634,52 @@ TEST(r17_diff_minimpact, calc_flag_blocks_reentrant_calc)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// BUG-R17-001 证据：撤单回报不从 _orders_mon 摘除（L123-134 与 MinImpact L165 相反）
-// 终态订单在下一轮超时扫描里被再次撤 -> 撤单风暴 + 监控表只增不减
+// BUG-R17-001 回归契约：撤单回报后 id1 不应再被超时撤销；新单 id2 仍独立到期
 //////////////////////////////////////////////////////////////////////////
-TEST(r17_diff_minimpact, cancelled_order_stays_monitored_and_recancels)
+TEST(r17_diff_minimpact, cancel_ack_removes_terminal_order_from_expiry_monitor)
 {
 	Harness h;
+	std::unique_ptr<WTSCommodityInfo, ReleaseWTSObject<WTSCommodityInfo>> commOwner(h.comm);
 	{
 		WtDiffMinImpactExeUnit unit;
-		WTSVariant* cfg = mkCfg(0, 1, 0, 0, false, 3.0, 0.0);  // expire=1s
-		unit.init(&h.ctx, kCode, cfg);
-		cfg->release();
+		std::unique_ptr<WTSVariant, ReleaseWTSObject<WTSVariant>> cfg(
+			mkCfg(0, 1, 0, 0, false, 3.0, 0.0));  // expire=1s
+		ASSERT_NE(nullptr, cfg.get());
+		unit.init(&h.ctx, kCode, cfg.get());
 
 		unit.set_position(kCode, 5);
-		WTSTickData* t1 = mkTick(kCode, 93000000, 3505, 3500, 100, 3510, 50);
-		unit.on_tick(t1);                                     // 发买(id1) 监控于 T0
-		uint32_t id1 = h.ctx.lastIds[0];
+		std::unique_ptr<WTSTickData, ReleaseWTSObject<WTSTickData>> t1(
+			mkTick(kCode, 93000000, 3505, 3500, 100, 3510, 50));
+		unit.on_tick(t1.get());                               // 发买(id1) 监控于 T0
 		ASSERT_EQ(h.ctx.buys.size(), 1u);
+		ASSERT_EQ(h.ctx.lastIds.size(), 1u);
+		const uint32_t id1 = h.ctx.lastIds.front();
 
 		h.ctx.curTime += 1500;
-		WTSTickData* t2 = mkTick(kCode, 93001500, 3505, 3500, 100, 3510, 50);
-		unit.on_tick(t2);                                     // 超时 -> 撤 id1，cancel_cnt=1
+		std::unique_ptr<WTSTickData, ReleaseWTSObject<WTSTickData>> t2(
+			mkTick(kCode, 93001500, 3505, 3500, 100, 3510, 50));
+		unit.on_tick(t2.get());                               // 超时 -> 撤 id1，cancel_cnt=1
 		ASSERT_EQ(h.ctx.byidCancels.size(), 1u);
-		EXPECT_EQ(h.ctx.byidCancels[0], id1);
+		EXPECT_EQ(h.ctx.byidCancels.front(), id1);
 
-		unit.on_order(id1, kCode, true, 3.0, 3505, true);      // 撤单回报：cnt 归 0，但不 erase
-		ASSERT_EQ(h.ctx.buys.size(), 2u);                       // 回报内 do_calc 补发 id2
-		uint32_t id2 = h.ctx.lastIds[0];
+		unit.on_order(id1, kCode, true, 3.0, 3505, true);      // 撤单回报后应摘除 id1，do_calc 补发 id2
+		ASSERT_EQ(h.ctx.buys.size(), 2u);                       // 先验证已生成新单，再读取其 id
+		ASSERT_EQ(h.ctx.lastIds.size(), 1u);
+		const uint32_t id2 = h.ctx.lastIds.front();
+		ASSERT_NE(id1, id2);
 
 		h.ctx.curTime += 1500;
-		WTSTickData* t3 = mkTick(kCode, 93003000, 3506, 3501, 100, 3511, 50);
-		unit.on_tick(t3);
-		// id1 已是终态却仍被第二次撤（僵尸单）；id2 正常到期被撤
-		size_t zombieHits = std::count(h.ctx.byidCancels.begin(), h.ctx.byidCancels.end(), id1);
-		EXPECT_EQ(zombieHits, 2u);                              // 期望 1，实际 2 -> BUG-R17-001
-		(void)id2;
-		EXPECT_EQ(h.ctx.buys.size(), 2u);                       // cancel_cnt=2 挡住本轮发单
-		t1->release();
-		t2->release();
-		t3->release();
+		std::unique_ptr<WTSTickData, ReleaseWTSObject<WTSTickData>> t3(
+			mkTick(kCode, 93003000, 3506, 3501, 100, 3511, 50));
+		unit.on_tick(t3.get());
+		// id1 撤单回报后不得再次出现；新单 id2 到期后仍应正常撤销。
+		const size_t id1CancelCount = std::count(h.ctx.byidCancels.begin(), h.ctx.byidCancels.end(), id1);
+		const size_t id2CancelCount = std::count(h.ctx.byidCancels.begin(), h.ctx.byidCancels.end(), id2);
+		EXPECT_EQ(id1CancelCount, 1u);
+		EXPECT_EQ(id2CancelCount, 1u);
+		EXPECT_EQ(h.ctx.byidCancels.size(), 2u);
+		EXPECT_EQ(h.ctx.buys.size(), 2u);                       // id2 到期撤单期间不再发新单
 	}
-	h.comm->release();
 }
 
 //////////////////////////////////////////////////////////////////////////

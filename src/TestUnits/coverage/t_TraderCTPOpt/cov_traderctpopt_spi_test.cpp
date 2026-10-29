@@ -1025,7 +1025,8 @@ TEST(TraderCTPOpt, query_rsp_streams_fill_arrays_and_reset_state)
 	std::snprintf(of2.OrderRef, sizeof(of2.OrderRef), "%s", "2");
 	probe.OnRspQryOrder(&of2, NULL, 2, false);
 	probe.OnRspQryOrder(&of2, NULL, 2, true);
-	EXPECT_EQ(3u, fx.spi.orderCalls);
+	// This batch emits one callback, and only after its last frame.
+	EXPECT_EQ(2u, fx.spi.orderCalls);
 	EXPECT_FALSE(fx.spi.lastOrdersWasNull);
 	EXPECT_EQ(2u, fx.spi.lastOrderSize);	/* of + of2 两次入队后 clear */
 
@@ -1054,9 +1055,8 @@ TEST(TraderCTPOpt, query_rsp_streams_fill_arrays_and_reset_state)
 	std::snprintf(eo.ExecOrderRef, sizeof(eo.ExecOrderRef), "%s", "3");
 	probe.OnRspQryExecOrder(&eo, NULL, 5, true);
 	EXPECT_EQ(1u, fx.opt.ordersOptCalls);
-	/* 转发的是 m_ayOrders（前序 OnRspQryOrder 已创建并 clear，非空但 size 0） */
 	EXPECT_FALSE(fx.opt.lastOrdersOptNull);
-	EXPECT_EQ(0u, fx.opt.lastOrdersOptSize);
+	EXPECT_EQ(1u, fx.opt.lastOrdersOptSize);
 	EXPECT_NE(nullptr, probe.ayExecOrds());
 
 	/* 资金流 */

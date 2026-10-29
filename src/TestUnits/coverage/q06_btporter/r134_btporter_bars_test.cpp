@@ -53,10 +53,12 @@ namespace
 
 	BarsRec g_bars;
 	WTSBarStruct g_feed[3];
+	uint32_t g_loader_calls = 0;
 
 	void clear_bars()
 	{
 		g_bars.clear();
+		g_loader_calls = 0;
 		memset(g_feed, 0, sizeof(g_feed));
 		for (int i = 0; i < 3; i++)
 		{
@@ -74,6 +76,7 @@ namespace
 	/* FuncLoadFnlBars：三根合成日线经公开 C API 喂回读取器。 */
 	bool fnl_loader(const char* /*stdCode*/, const char* /*period*/)
 	{
+		g_loader_calls++;
 		feed_raw_bars(g_feed, 3);
 		return true;
 	}
@@ -139,7 +142,7 @@ namespace
 				std::string(mode) + "_bars\",\"slippage\":0}";
 
 		return "{\"replayer\":{\"mode\":\"none\",\"path\":\"" + dir + "\","
-			"\"stime\":20240103000000,\"etime\":20240104000000,\"tick\":false,"
+			"\"stime\":202401030000,\"etime\":202401040000,\"tick\":false,"
 			"\"basefiles\":{"
 			"\"session\":\"" + dir + "/sessions.json\","
 			"\"commodity\":\"" + dir + "/commodities.json\","
@@ -153,7 +156,7 @@ namespace
 		std::string dir;
 		bool cleaned = false;
 
-		bool setup(const char* tag, const char* mode)
+		bool setup(const char* tag, const char* mode, bool documentedFourteenDigitRange = false)
 		{
 			dir = prepare_dir(tag);
 			if (dir.empty())
@@ -175,6 +178,8 @@ namespace
 				return false;
 			if (strcmp(mode, "hft") == 0 && getRunner().hft_mocker() == nullptr)
 				return false;
+			if (documentedFourteenDigitRange)
+				getRunner().set_time_range(20240103000000ULL, 20240104000000ULL);
 
 			/* 只做同步初始化：确定 _cur_tdate，不进入 run()/行情循环。 */
 			return getRunner().replayer().prepare();
@@ -193,6 +198,17 @@ namespace
 			stdfs::remove_all(dir, ec);
 		}
 	};
+
+	void expect_two_bar_callback()
+	{
+		EXPECT_GE(g_loader_calls, 1U);
+		EXPECT_EQ(1U, g_bars.calls);
+		EXPECT_EQ(2U, g_bars.count);
+		EXPECT_TRUE(g_bars.last);
+		EXPECT_EQ(std::string(kCode), g_bars.code);
+		EXPECT_EQ(std::string("d"), g_bars.period);
+		EXPECT_DOUBLE_EQ(4520.0, g_bars.last_close);
+	}
 }
 
 /*
@@ -206,12 +222,7 @@ TEST(R134BtPorterBars, CtaGetBarsReturnsLoadedBlocks)
 
 	const WtUInt32 cnt = cta_get_bars(1, kCode, "d", 5, false, bars_cb);
 	EXPECT_EQ(2U, cnt);
-	EXPECT_EQ(1U, g_bars.calls);
-	EXPECT_EQ(2U, g_bars.count);
-	EXPECT_TRUE(g_bars.last);
-	EXPECT_EQ(std::string(kCode), g_bars.code);
-	EXPECT_EQ(std::string("d"), g_bars.period);
-	EXPECT_DOUBLE_EQ(4520.0, g_bars.last_close);
+	expect_two_bar_callback();
 
 	fx.teardown();
 }
@@ -227,11 +238,7 @@ TEST(R134BtPorterBars, SelGetBarsReturnsLoadedBlocks)
 
 	const WtUInt32 cnt = sel_get_bars(1, kCode, "d", 5, bars_cb);
 	EXPECT_EQ(2U, cnt);
-	EXPECT_EQ(1U, g_bars.calls);
-	EXPECT_EQ(2U, g_bars.count);
-	EXPECT_TRUE(g_bars.last);
-	EXPECT_EQ(std::string(kCode), g_bars.code);
-	EXPECT_DOUBLE_EQ(4520.0, g_bars.last_close);
+	expect_two_bar_callback();
 
 	fx.teardown();
 }
@@ -247,11 +254,24 @@ TEST(R134BtPorterBars, HftGetBarsReturnsLoadedBlocks)
 
 	const WtUInt32 cnt = hft_get_bars(1, kCode, "d", 5, bars_cb);
 	EXPECT_EQ(2U, cnt);
-	EXPECT_EQ(1U, g_bars.calls);
-	EXPECT_EQ(2U, g_bars.count);
-	EXPECT_TRUE(g_bars.last);
-	EXPECT_EQ(std::string(kCode), g_bars.code);
-	EXPECT_DOUBLE_EQ(4520.0, g_bars.last_close);
+	expect_two_bar_callback();
+
+	fx.teardown();
+}
+
+/*
+ * BUG-P04-011 回归：公开 WtBtRunner::set_time_range 文档约定 YYYYMMDDHHMMSS。
+ * 同一 Jan 3 至 Jan 4 区间应能读取已喂入的日线；当前实现按 12 位拆分时会
+ * 将 14 位输入解析成错误日期，导致 lower_bound 找不到 cutoff 前的 bar。
+ */
+TEST(R134BtPorterBars, DocumentedFourteenDigitRangeReturnsLoadedBars)
+{
+	BtFixture fx;
+	ASSERT_TRUE(fx.setup("cta_bars_14digit_contract", "cta", true));
+
+	const WtUInt32 cnt = cta_get_bars(1, kCode, "d", 5, false, bars_cb);
+	EXPECT_EQ(2U, cnt) << "BUG-P04-011: documented YYYYMMDDHHMMSS range should include bars";
+	expect_two_bar_callback();
 
 	fx.teardown();
 }

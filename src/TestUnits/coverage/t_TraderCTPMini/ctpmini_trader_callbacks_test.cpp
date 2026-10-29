@@ -98,6 +98,8 @@ public:
 	int loginResults;
 	bool lastLoginSucc;
 	std::string lastLoginMsg;
+	int32_t lastTraderErrorCode;
+	std::string lastTraderErrorMsg;
 	uint32_t lastTradeDate;
 	int entrustRsp;
 	int accountRsp;
@@ -124,7 +126,7 @@ public:
 	WTSTradeStatus status;
 	FakeDataMgr* mgr;
 
-	FakeTraderSink() : loginResults(0), lastLoginSucc(false), lastTradeDate(0), entrustRsp(0)
+	FakeTraderSink() : loginResults(0), lastLoginSucc(false), lastTraderErrorCode((int32_t)WEC_NONE), lastTradeDate(0), entrustRsp(0)
 		, accountRsp(0), orderPush(0), tradePush(0), errorRsp(0)
 		, lastOrderCnt(0), lastAccountCnt(0), lastPosCnt(0), lastTradeCnt(0), lastOrderCntRsp(0)
 		, posTotal(0), posNew(0), posPre(0), posAvailNew(0), posAvailPre(0), posAvg(0), posMargin(0)
@@ -202,7 +204,11 @@ public:
 	{
 		++errorRsp;
 		if (err != NULL)
-			lastLoginMsg = err->getMessage();
+		{
+			// Copy only fields needed by the assertion; the caller owns/releases WTSError.
+			lastTraderErrorCode = (int32_t)err->getErrorCode();
+			lastTraderErrorMsg = err->getMessage();
+		}
 	}
 	virtual void onPushInstrumentStatus(const char* exchg, const char* code, WTSTradeStatus st) override
 	{
@@ -506,20 +512,28 @@ TEST(ctpmini, authenticate_failure_marks_login_failed_and_reports)
 	ASSERT_TRUE(sink.logs.size() > 0);
 }
 
-TEST(ctpmini, order_action_success_branch_pushes_trader_error)
+TEST(ctpmini, order_action_success_does_not_push_trader_error)
 {
 	Probe api;
 	FakeTraderSink sink;
 	api.registerSpi(&sink);
 
 	CThostFtdcRspInfoField good = okRsp();
-	// IsErrorRspInfo==false 反而去 create 错误并上抛（:669-680）——语义反了，见 bug 文件
 	api.OnRspOrderAction(NULL, &good, 1, true);
-	EXPECT_EQ(1, sink.errorRsp);
+	EXPECT_EQ(0, sink.errorRsp);
+}
+
+TEST(ctpmini, order_action_error_pushes_cancel_error_once)
+{
+	Probe api;
+	FakeTraderSink sink;
+	api.registerSpi(&sink);
 
 	CThostFtdcRspInfoField bad = errRsp(15, "撤单失败");
 	api.OnRspOrderAction(NULL, &bad, 2, true);
-	EXPECT_EQ(1, sink.errorRsp);
+	ASSERT_EQ(1, sink.errorRsp);
+	EXPECT_EQ((int32_t)WEC_ORDERCANCEL, sink.lastTraderErrorCode);
+	EXPECT_EQ("撤单失败", sink.lastTraderErrorMsg);
 
 	// OnRspOrderInsert/OnErrRtnOrderInsert 没有 bdMgr 时 makeEntrust 会解引用 NULL →
 	// 这两条只能 DISABLED（见 ctpminiDISABLED 用例）

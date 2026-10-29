@@ -165,8 +165,8 @@ TEST_F(L05PorterCapiTest, DumpersWithRegistrationDelegateToCallbacks)
 	register_extended_hftdata_dumper(NULL, NULL, NULL);
 }
 
-TEST_F(L05PorterCapiTest, CreateExtDumperRegistersById)
+TEST_F(L05PorterCapiTest, CreateExtDumpersWithUniqueIdsSucceed)
 {
-	EXPECT_TRUE(create_ext_dumper("l05dumper"));
-	EXPECT_TRUE(create_ext_dumper("l05dumper"));
+	EXPECT_TRUE(create_ext_dumper("l05dumper_a"));
+	EXPECT_TRUE(create_ext_dumper("l05dumper_b"));
 }

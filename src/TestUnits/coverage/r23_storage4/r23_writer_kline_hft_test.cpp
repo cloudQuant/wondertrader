@@ -10,9 +10,8 @@
 //  - procTrans     :537-576    rt/trans 块
 //  - writeOrderQueue/Detail/Transaction :416/:470/:524 的 NULL 与 disable* 拒绝面
 //
-// ⚠ 本文件有一条「行为固化」用例（DisableOrdDtlAlsoBlocksTransaction）记录的是
-//    BUG-R23-002（writeTransaction 判的是 _disable_orddtl 而不是 _disable_trans）的**现状**，
-//    源码修复后该用例会变红，需要同步更新期望值。
+// BUG-R23-002 用例验证逐笔成交与委托明细分别遵守各自的 disable 开关；当前
+// writeTransaction 实际检查了 _disable_orddtl，因此正确契约断言在现状下会失败。
 #include "r23_writer_fixture.h"
 
 namespace r23 {
@@ -461,28 +460,46 @@ TEST_F(R23WriterTest, NullAndDisabledHftWritersAreRejected)
 	EXPECT_EQ(_sink->queues(), 1u) << "被禁用的队列写入仍然走了 broadcastOrdQue";
 }
 
-// ------------------------------------------------------------------ BUG-R23-002 现状固化
-TEST_F(R23WriterTest, DisableOrdDtlAlsoBlocksTransaction)
+// ------------------------------------------------------------------ BUG-R23-002 开关独立性
+TEST_F(R23WriterTest, DisableOrderDetailAndTransactionAreIndependent)
 {
-	// 现状：writeTransaction 判的是 _disable_orddtl（WtDataWriter.cpp:526），
-	// _disable_trans 只在 proc_loop 的收盘作业里被读（:2492）。
-	// 本用例固化的是**当前行为**，BUG-R23-002 修好后需要把期望改成 true。
+	// 关闭委托明细不应连带关闭逐笔成交。
 	R23Writer* w = make_writer("\"disableorddtl\":true");
 	ASSERT_TRUE(w != NULL);
 
 	WTSOrdDtlData* dtl = make_orddtl_data(93000000, 3600.0, 1);
 	WTSTransData* trns = make_trans_data(93000000, 3601.0, 2);
 	EXPECT_FALSE(w->writeOrderDetail(dtl));
-	EXPECT_FALSE(w->writeTransaction(trns));      // ← 这里本该放行（disabletrans=false）
-	EXPECT_FALSE(file_exists(_base + "rt/trans/SHFE/rb2210.dmb"));
+	dtl->release();
+	EXPECT_TRUE(w->writeTransaction(trns));
+	trns->release();
+	const string trans_file = _base + "rt/trans/SHFE/rb2210.dmb";
+	EXPECT_TRUE(file_exists(trans_file));
+	if (file_exists(trans_file))
+		EXPECT_EQ(read_block_header<RTDayBlockHeader>(trans_file)._size, 1u);
+	EXPECT_EQ(_sink->trans(), 1u);
 	EXPECT_FALSE(file_exists(_base + "rt/orders/SHFE/rb2210.dmb"));
 
-	// 对照组：只关 trans 开关时，逐笔成交照样写（证明 _disable_trans 对写入路径无影响）
+	// 关闭逐笔成交时应拒绝该数据，但不影响委托明细写入。
 	R23Writer* w2 = make_writer("\"disabletrans\":true");
 	ASSERT_TRUE(w2 != NULL);
-	EXPECT_TRUE(w2->writeTransaction(make_trans_data(93100000, 3602.0, 3)));
-	EXPECT_TRUE(file_exists(_base + "rt/trans/SHFE/rb2210.dmb"));
-	EXPECT_EQ(_sink->trans(), 1u);
+	WTSOrdDtlData* enabled_dtl = make_orddtl_data(93100000, 3602.0, 3);
+	EXPECT_TRUE(w2->writeOrderDetail(enabled_dtl));
+	enabled_dtl->release();
+	EXPECT_TRUE(file_exists(_base + "rt/orders/SHFE/rb2210.dmb"));
+	EXPECT_EQ(_sink->dtls(), 1u);
+
+	const bool had_trans_file = file_exists(trans_file);
+	const uint32_t trans_size_before = had_trans_file
+		? read_block_header<RTDayBlockHeader>(trans_file)._size : 0u;
+	const uint32_t trans_broadcasts_before = _sink->trans();
+	WTSTransData* disabled_trans = make_trans_data(93100000, 3603.0, 4);
+	EXPECT_FALSE(w2->writeTransaction(disabled_trans));
+	disabled_trans->release();
+	EXPECT_EQ(file_exists(trans_file), had_trans_file);
+	if (had_trans_file)
+		EXPECT_EQ(read_block_header<RTDayBlockHeader>(trans_file)._size, trans_size_before);
+	EXPECT_EQ(_sink->trans(), trans_broadcasts_before);
 }
 
 TEST_F(R23WriterTest, SessionNotReceivingStopsAllHftWriters)

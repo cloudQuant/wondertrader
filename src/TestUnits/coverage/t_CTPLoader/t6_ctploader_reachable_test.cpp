@@ -126,24 +126,13 @@ TEST(t6_ctploader_run, inline_yaml_without_savepath_stops_at_required_field_guar
 	EXPECT_TRUE(cap.text().empty()) << cap.text();
 }
 
-TEST(t6_ctploader_run, unparsable_inline_yaml_escapes_through_the_c_entry)
+TEST(t6_ctploader_run, unparsable_inline_yaml_reports_failure_without_throwing)
 {
-	bool threw = false;
-	{
-		CoutCapture cap;
-		try
-		{
-			run("[unterminated", false, false);
-			EXPECT_TRUE(cap.text().empty()) << cap.text();
-		}
-		catch (const std::exception&)
-		{
-			threw = true;
-		}
-	}
-	// 契约：非法配置要么被防护成返回值、要么被 catch。这里实测是异常穿透 extern "C" 入口，
-	// 已记入 bugs 文档；若哪天变成「静默成功并继续装载」，本断言同样会红。
-	EXPECT_TRUE(threw);
+	// WTSCfgLoader 文档约定解析失败返回 NULL；run() 对 NULL 根节点以 0 报告失败。
+	// 非法 YAML 应遵守同一失败协议，异常不得穿过 C ABI 入口。
+	int result = -1;
+	EXPECT_NO_THROW(result = run("[unterminated", false, false));
+	EXPECT_EQ(0, result);
 }
 
 TEST(t6_ctploader_run, missing_config_files_are_rejected_for_both_layouts)

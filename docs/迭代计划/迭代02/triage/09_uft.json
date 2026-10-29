@@ -1,0 +1,705 @@
+[
+  {
+    "lane": "R11_wtuftcore",
+    "id": "BUG-R11-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/UftStraContext.cpp:704-726",
+      "src/WtUftCore/ShareManager.cpp:396-402",
+      "src/WtUftCore/ShareManager.cpp:417-422",
+      "src/WtUftCore/ShareManager.cpp:501-506",
+      "src/Includes/IUftStraCtx.h:64-69",
+      "src/WtUftRunner/WtUftRunner.cpp:115-122"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/r11_uftctx_param_log_test.cpp:70-94",
+      "src/TestUnits/coverage/q04_uftcore3/r11_uftctx_param_log_test.cpp:143-155"
+    ],
+    "reason": "share_domain 是可选配置；共享管理器未初始化时数值 allocate_value 返回 nullptr，而五个数值 watch_param 重载立即解引用。接口基类的同签名重载会返回 initVal。候选所述离线安全回退与公开基类行为一致；本轮只静态核对，未重跑历史声称的 signal 11。",
+    "fix": "对 allocate_value 结果判空并按 IUftStraCtx 的 initVal 语义回退；或明确要求 runner 配置 share_domain 并在调用前拒绝未初始化状态。",
+    "acceptance": "无 share_domain 的新进程逐个调用五种数值重载均返回传入 initVal 且不崩溃；启用共享服务时仍可读写共享值。",
+    "canonical": null,
+    "proposed_test_fix": "保留子进程隔离，分别断言 int32/int64/uint32/uint64/double 离线返回 initVal；另加共享服务初始化后的值持久化对照。"
+  },
+  {
+    "lane": "R11_wtuftcore",
+    "id": "BUG-R11-008",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtUftCore/TraderAdapter.cpp:1149-1152",
+      "src/Includes/ITraderApi.h:127-135",
+      "src/WtUftCore/ITrdNotifySink.h:82-87"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/r11_trader_reply_deep_test.cpp:429-440"
+    ],
+    "reason": "onLogout 确为无操作，但接口只把它称作注销回报，没有规定它等价于连接丢失、必须重置 AS_* 状态或广播 on_channel_lost。现有测试也明确断言不广播；因此“策略会误以为通道可用”的产品主张缺少 logout 状态语义契约。",
+    "fix": "先确定并写明主动注销回报对 TraderAdapter 状态与策略 sink 的语义；若它代表通道丢失，再统一更新状态并通知 sink。",
+    "acceptance": "提供 ITraderApi logout 回调的公开契约及对应测试，明确主动登出与传输断连各自的最终状态、sink 通知次数和重复回调行为。",
+    "canonical": null,
+    "proposed_test_fix": "暂不以‘缺少 on_channel_lost’判产品缺陷；契约明确后分别覆盖主动 logout 与传输断连。"
+  },
+  {
+    "lane": "R11_wtuftcore",
+    "id": "BUG-R11-009",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/WtUftTicker.cpp:111-116",
+      "src/WtUftCore/WtUftTicker.cpp:138-157",
+      "src/WtUftCore/WtUftEngine.cpp:546-570"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/r78_uftcore_ticker_ctx_test.cpp:152-178"
+    ],
+    "reason": "线程已创建时首笔行情只赋值 _cur_pos，随后越过按分钟推进/同分钟转发分支，因此首笔 tick 不会进入 engine/订阅策略。有效缺陷应收窄为首笔丢失；跨分钟缺口是否合并闭合未找到公开语义。当前测试在 run 后先 stop 再喂行情，且未检查 t1 是否送达，不能作为正常运行生命周期的动态证明。",
+    "fix": "在首次建立分钟位置时也转发当前 tick 并同步日期、时间和交易日；避免只设置 _cur_pos 后丢弃行情。",
+    "acceptance": "ticker 处于正常运行线程期间首笔 tick 即到达订阅策略并更新价格；同分钟后续 tick 和分钟推进仍按现有顺序工作。",
+    "canonical": null,
+    "proposed_test_fix": "将测试改为 worker 正常运行期间发送 t1，并在发送 t2 前断言 engine/策略已收到 t1；测试结束后再 stop。暂不要求对缺口内每个分钟合成闭合。"
+  },
+  {
+    "lane": "R133",
+    "id": "BUG-R133-001",
+    "decision": "DUPLICATE",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/ParserAdapter.cpp:38-55",
+      "src/WtUftCore/ParserAdapter.cpp:70-86",
+      "src/WtUftCore/ParserAdapter.cpp:228-240"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/r133_uftcore_remaining_test.cpp:313-405",
+      "src/TestUnits/coverage/q04_uftcore3/r78_uftcore_adapter_init_test.cpp:189-220"
+    ],
+    "reason": "_cfg retain 未配对 release，以及缺 createParser 符号时未释放已加载句柄，与 BUG-R78-001 是同一 ParserAdapter 资源清理根因。原记录称该类没有 initExt 不正确，头文件和实现都提供 initExt；重复 release 后指针未清零不属于已证明的正常生命周期问题。",
+    "fix": "并入 BUG-R78-001 统一修复 ParserAdapter 的配置引用和 dlopen 句柄清理。",
+    "acceptance": "由 canonical 项验收：cfg 引用恰好释放一次，缺符号分支释放已加载模块句柄。",
+    "canonical": "BUG-R78-001",
+    "proposed_test_fix": "并入 BUG-R78-001 测试；不要重复新增同根因测试。若要验证重复 release，先定义 release 是否承诺幂等。"
+  },
+  {
+    "lane": "R143",
+    "id": "BUG-R143-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/EventNotifier.cpp:197-211",
+      "src/WtUftCore/EventNotifier.cpp:214-228"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/r143_uftcore_notifier_test.cpp:151-188"
+    ],
+    "reason": "订单通知 retain 后异步 lambda 序列化并发布，但没有与成交通知相同的 release；正常通知路径永久留下一个引用。现有用例也在排空后读取并手动释放多出的引用，但本轮未执行。",
+    "fix": "在订单通知 lambda 的所有完成路径配对释放 ordInfo；异常/发布失败路径也使用 RAII 保证释放。",
+    "acceptance": "MQ 正常时订单对象在任务完成后 retainCount 恢复到创建时值；发布器缺失或序列化失败时同样无引用泄漏。",
+    "canonical": null,
+    "proposed_test_fix": "在现有订单通知用例中等待异步队列完成后直接断言 retainCount 为 1；避免测试侧循环释放掩盖实现泄漏。"
+  },
+  {
+    "lane": "R143",
+    "id": "BUG-R143-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/EventNotifier.h:18-20",
+      "src/WtUftCore/EventNotifier.cpp:78-96",
+      "src/WtMsgQue/WtMsgQue.h:25-32",
+      "src/WtMsgQue/MQManager.cpp:6-17",
+      "src/WtMsgQue/MQServer.cpp:66-106"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/r143_uftcore_notifier_test.cpp:98-115"
+    ],
+    "reason": "消费者 typedef 将 create_server 声明为单参数/unsigned long 返回，插件导出函数实际是 (url,bool)/WtUInt32，调用签名不匹配；同时 MQManager 忽略 MQServer::init 的 false 并仍返回非零 ID，EventNotifier 只看 _mq_sid 是否为零，故 socket/bind 失败不可由 init 可靠反馈。",
+    "fix": "统一插件 ABI 声明与实现签名，并让创建服务失败返回明确失败值或状态；EventNotifier 检查该状态并释放加载资源。",
+    "acceptance": "ABI 的参数与返回类型逐项一致；注入 socket/bind 失败时 EventNotifier::init 返回 false、不报告 initialized、不启动可用发布通道；正常地址初始化继续通过。",
+    "canonical": null,
+    "proposed_test_fix": "保留正常创建对照；统一 ABI 后，用可控 MQ 初始化失败注入验证 false 传播及资源清理，不用当前错误签名进行动态失败测试。"
+  },
+  {
+    "lane": "R144",
+    "id": "BUG-R144-001",
+    "decision": "DUPLICATE",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/TraderAdapter.cpp:223-229",
+      "src/TraderMocker/TraderMocker.cpp:659-664"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/r85_uftcore_trader_paths_test.cpp:138-143"
+    ],
+    "reason": "与 BUG-R175-001 完全同根因：TraderAdapter::release 传 NULL 给 TraderMocker::registerSpi，而 mocker 随即解引用。R85 active 用例已在 init 后显式调用 release，因此‘测试绕过释放’不是当前事实；本轮未运行它。",
+    "fix": "并入 BUG-R175-001 修复 TraderMocker 的解绑路径。",
+    "acceptance": "由 canonical 项验收：init 成功后通过 adapter.release 正常解绑、API release 并退出，不崩溃。",
+    "canonical": "BUG-R175-001",
+    "proposed_test_fix": "复用 R85 active release 用例作为回归；避免与 BUG-R175-001 重复登记。"
+  },
+  {
+    "lane": "R144",
+    "id": "BUG-R144-004",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtCtaEngine.cpp:404-411",
+      "src/WtRunner/WtRunner.cpp:406"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r130_ticker_on_tick_test.cpp:80-94"
+    ],
+    "reason": "候选对应测试已经按真实装配补了长期存活的 TraderAdapterMgr 并调用 set_adapter_mgr；正常 WtRunner 也设置该依赖。该测试不再复现空指针，且没有公开契约支持未装配 manager 仍可触发 on_schedule。",
+    "fix": "无产品修复依据；将候选从产品缺陷清单移出。",
+    "acceptance": "将测试夹具中 manager 生命周期保持到 engine/ticker 结束；不再把必需依赖未装配的崩溃列为产品缺陷。",
+    "canonical": null,
+    "proposed_test_fix": "当前 fixture 的 set_adapter_mgr 与生命周期安排已正确，保留该有效前置，不恢复无 manager 的故障断言。"
+  },
+  {
+    "lane": "R163",
+    "id": "BUG-R163-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/EventNotifier.cpp:98-109",
+      "src/WtUftCore/EventNotifier.cpp:197-227"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/r163_uftcore_guards_test.cpp:230-257"
+    ],
+    "reason": "work_guard 只在 worker 创建的 if 块内局部存活；离开 init 后 guard 被销毁。worker 的 run_one 在没有工作时会令 io_context 进入 stopped 状态，后续 notify 虽 post 任务但同一个 worker 不 restart，导致可接受通知停止消费。",
+    "fix": "把 executor_work_guard 持有为 EventNotifier 生命周期成员，或在停止后显式 restart 并定义重启/关闭状态机。",
+    "acceptance": "init 后先空闲再 notify，任务仍能被处理；多次空闲/投递保持工作；release 后不再处理并能安全 join。",
+    "canonical": null,
+    "proposed_test_fix": "启用现有 trade 通知测试并覆盖先空闲再 post，断言异步完成与 retain 归还；当前文件只覆盖被禁用的单次路径。"
+  },
+  {
+    "lane": "R175",
+    "id": "BUG-R175-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/TraderAdapter.cpp:223-229",
+      "src/TraderMocker/TraderMocker.cpp:659-664"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/r85_uftcore_trader_paths_test.cpp:97-105",
+      "src/TestUnits/coverage/q04_uftcore3/r85_uftcore_trader_paths_test.cpp:138-143"
+    ],
+    "reason": "TraderAdapter 正常清理时调用 registerSpi(NULL)；TraderMocker 只赋值 _listener，下一行无条件 listener->getBaseDataMgr()。这是由正常的 init→release 生命周期触发的插件实现不兼容。R85 用例已包含此清理调用，本轮仅静态核对。",
+    "fix": "TraderMocker::registerSpi 收到 NULL 时清空 _listener 并将 _bd_mgr 置空后返回；其他非空绑定保持原行为。",
+    "acceptance": "实际加载 TraderMocker 后执行 adapter.init→adapter.release 不崩溃；非空 listener 仍能绑定 base data；重复解绑行为明确定义。",
+    "canonical": null,
+    "proposed_test_fix": "保留 R85 测试并确认运行；如需隔离精确根因，增加小型单测直接执行 mocker.registerSpi(nullptr) 并断言解绑状态。"
+  },
+  {
+    "lane": "R175",
+    "id": "BUG-R175-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorage/WtRdmDtReader.cpp:719-735",
+      "src/WtDataStorage/WtRdmDtReader.cpp:894-910",
+      "src/WtDataStorage/WtRdmDtReader.cpp:1068-1084"
+    ],
+    "test_evidence": [],
+    "reason": "三种 V2 逐笔块路径都先从 string::c_str 取得头指针，再 resize/append 改写同一 string，之后通过旧指针写版本字段。若解压追加使存储重分配，旧指针失效；合法压缩块可扩展到原始大小，源码缺少重新取指针。尚无生产格式文件动态复现。",
+    "fix": "完成 resize/append 后从当前缓冲区重新取得原始块头指针，再设置版本字段；检查块长度与解压结果一致。",
+    "acceptance": "对有效 CMP_V2 委托队列/明细/成交块，在强制扩容和不扩容情况下均正确转换、读取字段且无 sanitizer 越界/用后失效报告。",
+    "canonical": null,
+    "proposed_test_fix": "新增合法格式的压缩输入，令解压后容量超过输入容量并分别覆盖三类块；断言读取内容正确。当前没有找到覆盖该重分配路径的现有测试。"
+  },
+  {
+    "lane": "R175",
+    "id": "BUG-R175-003",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtUftCore/TraderAdapter.cpp:90-100",
+      "src/WtCore/TraderAdapter.cpp:209-234"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/r163_uftcore_guards_test.cpp:323-330"
+    ],
+    "reason": "UFT initExt 确实不检查 api 并调用 api->init(NULL)，WtCore 同名函数则判空；但未找到 UFT 对 NULL 参数行为的公开契约。现有 disabled 测试把“NULL api 必须返回 false”当作契约，不能单独证明该保证。",
+    "fix": "先统一并公开两套 initExt 的空指针契约；若保证返回 false，再在 UFT 实现入口添加判空。",
+    "acceptance": "接口文档明确 NULL api 的结果；两套实现和 active 测试一致验证返回值且不触碰 api。",
+    "canonical": null,
+    "proposed_test_fix": "不要仅凭 disabled 测试推定产品缺陷；契约确认后把空指针用例改为可启用的普通返回值断言。"
+  },
+  {
+    "lane": "R78",
+    "id": "BUG-R78-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/ParserAdapter.cpp:38-55",
+      "src/WtUftCore/ParserAdapter.cpp:70-86",
+      "src/WtUftCore/ParserAdapter.cpp:228-240"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/r78_uftcore_adapter_init_test.cpp:189-220",
+      "src/TestUnits/coverage/q04_uftcore3/r133_uftcore_remaining_test.cpp:313-405"
+    ],
+    "reason": "ParserAdapter::init retain 配置后，空析构与 release 均不释放 _cfg；createParser 符号缺失时直接返回而未 free_library。前者对正常适配器生命周期成立，后者对可加载但缺入口符号的插件失败路径成立；现有测试覆盖正常插件链而未断言这两项清理。",
+    "fix": "统一清理 _cfg；在缺符号等失败早退点释放 hInst，避免重复释放并使 release/destructor 生命周期明确。",
+    "acceptance": "非空 cfg 经 init 后 release/析构引用计数归还；可加载但缺 createParser 的模块失败后句柄关闭；正常插件仍通过 init/run/release。",
+    "canonical": null,
+    "proposed_test_fix": "增加 cfg 引用计数/弱引用回收断言，并使用可加载但不导出 createParser 的测试模块验证失败路径释放；当前成功用例不覆盖清理。"
+  },
+  {
+    "lane": "R78",
+    "id": "BUG-R78-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/UftStraContext.cpp:1052-1061",
+      "src/WtUftCore/UftStraContext.cpp:1090-1122"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p06_uftcore2/r54_uftctx_callback_gaps_test.cpp:229-280"
+    ],
+    "reason": "loader 返回非空 manual 后，缺少 details 的 break 路径以及正常导入完成路径都没有 manual->release；解析返回 NULL 时则没有可泄漏对象。现有手工持仓测试只验证业务结果，不测对象释放。",
+    "fix": "对非空 manual 使用作用域 RAII 或确保所有 break/成功出口恰好 release 一次。",
+    "acceptance": "缺 details、有效 details、合同不存在 continue 三条路径均释放 loader 返回的 WTSVariant，持仓导入结果不变。",
+    "canonical": null,
+    "proposed_test_fix": "扩展手工导入用例，在 loader 返回对象上记录引用/释放次数，分别覆盖有效 details 与无 details；解析失败 NULL 路径确认不执行 release。"
+  },
+  {
+    "lane": "R83",
+    "id": "BUG-R83-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtPorter/WtBtPorter.cpp:338-341",
+      "src/WtBtPorter/WtBtRunner.cpp:299-313",
+      "src/WtBtCore/HisDataReplayer.cpp:423-426",
+      "src/WtBtCore/HisDataReplayer.h:355-368"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q06_btporter/r83_btporter_mocker_surface_test.cpp:463-470"
+    ],
+    "reason": "公开入口原样转发非空 trdtpl/session；register_task 用 strcpy 写入 16 字节数组，未校验长度。非空字符串长度达到 16 字节即越界。当前 DISABLED 用例传 NULL，只能覆盖空指针崩溃，不能验证超长输入；本结论不依赖 NULL 可空性。",
+    "fix": "在写入前校验模板名和时段名均小于字段容量；超限时安全拒绝并给出错误结果，不截断成另一个有效配置。",
+    "acceptance": "长度 15 字节输入可安全写入；16 字节及更长输入被拒绝且无内存错误；合法短值任务照常注册。",
+    "canonical": null,
+    "proposed_test_fix": "将现有 NULL 用例拆开；新增两个非空边界测试，分别以长度 16 的 trdtpl、session 输入验证返回/拒绝行为，并用 ASan 或保护哨兵确认无越界。"
+  },
+  {
+    "lane": "R83",
+    "id": "BUG-R83-002",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtBtPorter/WtBtPorter.cpp:1874-1886",
+      "src/WtBtPorter/WtBtPorter.cpp:1900-1917",
+      "src/WtBtPorter/WtBtPorter.cpp:1931-1948"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q06_btporter/r83_btporter_mocker_surface_test.cpp:326-397"
+    ],
+    "reason": "hft_buy/sell 返回函数级 static std::string，存在并发写共享缓冲风险；但没有找到 WtString 返回值的存活时间、是否允许跨线程调用的公开契约。当前 HFT 测试只做子进程内顺序调用，没有检查返回指针生命周期或并发。",
+    "fix": "先明确返回指针有效期与线程模型；若允许并发或调用方保留指针，改为调用方缓冲/线程局部存储或独立结果对象。",
+    "acceptance": "公开 ABI 文档明确生命周期与并发；对应测试并发调用不同上下文并验证结果互不覆盖，或通过契约证明单线程瞬时消费。",
+    "canonical": null,
+    "proposed_test_fix": "契约未确认前不新增产品故障断言；确认多线程支持后增加并发返回字符串隔离测试。"
+  },
+  {
+    "lane": "R85",
+    "id": "BUG-R85-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/TraderAdapter.cpp:197-220",
+      "src/WtUftRunner/WtUftRunner.cpp:313-335",
+      "src/WtUftCore/TraderAdapter.cpp:2019-2026"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/r85_uftcore_trader_paths_test.cpp:96-143"
+    ],
+    "reason": "动态库成功创建 API 但 api->init(params) 返回 false 时，adapter 保留非空 _trader_api 并返回 false；WtUftRunner 忽略返回值照样注册 adapter，TraderAdapterMgr::run 对所有 adapter 调 run，后者只检查 api 非空并 connect。日志也把初始化失败误报为 deleteTrader 入口缺失。",
+    "fix": "runner 检查 init 返回值并仅注册成功 adapter；同时修正日志。失败 API 的 release/delete 必须按插件所有权规则清理。",
+    "acceptance": "模拟 createTrader 成功、init 失败：runner 记录准确错误、不注册/不 run 该 adapter，API 资源按约定释放；init 成功链保持正常。",
+    "canonical": null,
+    "proposed_test_fix": "扩展现有 TraderMocker 动态库测试或注入 API，使 init 返回 false；断言 initTraders 不把实例加入 manager，且后续 run/connect 未调用。"
+  },
+  {
+    "lane": "R85",
+    "id": "BUG-R85-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/WtUftTicker.h:80",
+      "src/WtUftCore/WtUftTicker.cpp:190-193",
+      "src/WtUftCore/WtUftTicker.cpp:242-264"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/r78_uftcore_ticker_ctx_test.cpp:152-164"
+    ],
+    "reason": "worker 线程读普通 bool _stopped，stop 在另一线程写入后 join，构成数据竞争；休市分支先 sleep_for 10 秒，故停机可能卡到睡眠结束。现有测试只在盘中快速 stop，没有覆盖休市延迟或并发同步。",
+    "fix": "使用原子停止标志或条件变量；休市等待改为可中断 wait，stop 通知后及时 join。",
+    "acceptance": "ThreadSanitizer 不报告停止标志数据竞争；休市期间调用 stop 可在有界短时间内返回，盘中关闭和析构仍安全。",
+    "canonical": null,
+    "proposed_test_fix": "增加休市分支 stop 延迟测试及重复启停测试；使用 TSAN 运行针对性 ticker 测试验证同步。"
+  },
+  {
+    "lane": "n03_uftcore_index",
+    "id": "BUG-N03-001",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtIndexFactory/WtBlkIdxWorker.cpp:12-17",
+      "src/WtIndexFactory/WtBlkIdxWorker.cpp:178-180"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n03b_idxfactory/n03_idxfactory_worker_test.cpp:508-524"
+    ],
+    "reason": "候选仅给非法 weight_alg=3 及以上；当前算法表只定义 0、1、2，测试没有证明该输入属于受支持配置，也没有配置 schema 承诺非法值必须被安全处理。因此越界路径不构成符合本轮准入标准的产品缺陷。",
+    "fix": "暂无产品修复主张；若需保证坏配置安全，先将非法配置处理写进接口契约。",
+    "acceptance": "当前有效算法 0/1/2 路径保持通过；只有明确承诺坏配置防御后才增加拒绝行为验收。",
+    "canonical": null,
+    "proposed_test_fix": "将测试聚焦合法 alg 0/1/2；若保留非法配置测试，先定义 init 必须返回 false，再断言该行为，不以无效输入崩溃单独立产品项。"
+  },
+  {
+    "lane": "n03_uftcore_index",
+    "id": "BUG-N03-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtIndexFactory/WtBlkIdxWorker.cpp:246-300",
+      "src/WtIndexFactory/WtBlkIdxWorker.cpp:306-341"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n03b_idxfactory/n03_idxfactory_worker_test.cpp:351-385"
+    ],
+    "reason": "有效算法 1/2 对已收到且 action_date 非零的成分快照不检查 total_base 或 total_weight 是否为零，直接计算除法并发布结果；初始化/零成交量快照可满足该数据前置，造成 NaN 指数进入行情缓存。现有动态算法测试仅用非零持仓/成交量。",
+    "fix": "除法前校验动态算法分母与总权重为有限非零值；无效快照时不更新缓存、不发布 tick，并记录可诊断状态。",
+    "acceptance": "算法 1 的所有 open_interest 为 0、算法 2 的所有 total_volume 为 0 时均不产生 NaN/Inf tick；随后收到有效快照可以恢复正常指数。",
+    "canonical": null,
+    "proposed_test_fix": "基于现有动态算法 fixture 增加 action_date 非零但分母为零的快照，断言无输出或既定安全行为；再推有效快照验证恢复。"
+  },
+  {
+    "lane": "n03_uftcore_index",
+    "id": "BUG-N03-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/ActionPolicyMgr.cpp:51-127",
+      "src/WtUftCore/ActionPolicyMgr.cpp:130-162"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n03_uftcore_index/n03_action_policy_test.cpp:247-258"
+    ],
+    "reason": "init 对只有自定义组且无 default 的配置仍返回 true；查未映射 pid 时默认查找失败，assert 在 Release 被移除后继续解引用 end。disabled 测试首个 SHFE.rb 查询命中 onlygroup 不会故障，第二个 SSE.600000 才真正命中缺失默认分支。",
+    "fix": "init 时要求 default 组存在并在不满足时返回 false；或让 getActionRules 在 default 缺失时返回安全空规则组。",
+    "acceptance": "仅自定义组配置要么初始化失败并给出错误，要么所有未映射/空 pid 查询都安全返回；Release/NDEBUG 行为一致。",
+    "canonical": null,
+    "proposed_test_fix": "将未映射 pid 的缺 default 路径独立到子进程/普通安全返回用例；删除首个命中 onlygroup 的调用，明确 assert 不应承担运行时保护。"
+  },
+  {
+    "lane": "n03_uftcore_index",
+    "id": "BUG-N03-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/TraderAdapter.cpp:120-150",
+      "src/WtUftCore/TraderAdapter.cpp:1970-1984"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/q04_trader_risk_limits_test.cpp:243-260",
+      "src/TestUnits/coverage/q04_uftcore3/r54_trader_callback_gaps_test.cpp:76-113"
+    ],
+    "reason": "候选把键长度解析错误归因于风险参数 key mismatch，但有效 fixture 明确以 ag24 命中；不采纳该子主张。独立成立的风险是 init 接受只有自定义组且无 default 的 active riskmon（仅 warning），getRiskParams 查不到自定义键后仍解引用 default 的 end；因此按此窄化项保留 PRODUCT。",
+    "fix": "active riskmon 初始化时校验 default 组，或缺少匹配组与 default 时让 getRiskParams 返回 nullptr 并使 check* 安全放行/拒绝。",
+    "acceptance": "合法装载 custom-only policy 后查询未配置品种不会崩溃；已配置 ag24 仍命中正确规则；无 default 的配置按选定契约被拒绝或安全处理。",
+    "canonical": null,
+    "proposed_test_fix": "把 disabled 混合用例拆成：initExt+run+合法配置后查询缺键；单独测试未初始化状态；删除将裸适配器/未 run 作为该风险参数缺陷复现的断言。"
+  },
+  {
+    "lane": "n03_uftcore_index",
+    "id": "BUG-N03-005",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/TraderAdapter.cpp:208-220",
+      "src/WtUftCore/TraderAdapter.cpp:429-436",
+      "src/WtUftCore/TraderAdapter.cpp:1919-1929"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n03_uftcore_index/n03_uftcore_helper_adapter_test.cpp:495-508"
+    ],
+    "reason": "_stat_map 在 TraderAdapter::run 创建；候选测试对全新且未 run 的适配器调用 getInfos/check*。未找到这些调用在 init/run 前必须安全的公开生命周期契约，故该测试前置无效，不能将未装配对象的崩溃当产品缺陷。",
+    "fix": "无有效产品缺陷证据；若希望这些访问器支持未 run 状态，可另行定义接口后再实现判空。",
+    "acceptance": "正常 init→run→查询流程仍可覆盖统计与限额；未启动访问的行为只有在文档承诺后纳入产品验收。",
+    "canonical": null,
+    "proposed_test_fix": "将 getInfos/check* 用例改为 initExt+run 后查询；未 run 的危险分支从产品缺陷断言中移除，或转成契约明确的安全返回测试。"
+  },
+  {
+    "lane": "n03_uftcore_index",
+    "id": "BUG-N03-006",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/TraderAdapter.h:192",
+      "src/WtUftCore/TraderAdapter.cpp:1908-1917"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n03_uftcore_index/n03_uftcore_helper_adapter_test.cpp:347-348"
+    ],
+    "reason": "公开头文件把 isTradeEnabled 声明为 inline 但没有函数体，唯一实现放在 .cpp。其他翻译单元调用时定义不在调用点可见，Clang 可报 undefined-inline，且该头文件本身无法支撑 header-only inline 调用。",
+    "fix": "删除声明上的 inline，或将完整定义移至头文件并确保所需成员可见。",
+    "acceptance": "独立测试翻译单元包含 TraderAdapter.h 并调用 isTradeEnabled，能在项目启用的 -Werror 配置下编译、链接和运行。",
+    "canonical": null,
+    "proposed_test_fix": "新增跨翻译单元调用用例；不要因为当前测试注释跳过调用而视为接口可用。"
+  },
+  {
+    "lane": "n03_uftcore_index",
+    "id": "BUG-N03-007",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/TraderAdapter.h:147-165",
+      "src/WtUftCore/TraderAdapter.cpp:311-319",
+      "src/WtUftCore/TraderAdapter.cpp:345-352"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n03_uftcore_index/n03_uftcore_helper_adapter_test.cpp:501-510"
+    ],
+    "reason": "输入使用裸代码 600000，而这些公开方法参数约定为 stdCode，adapter 按 exchange.code 拆分并查基础数据。候选复现也在全新 adapter 上发裸代码单，既违反代码格式前置又未装配 API/依赖。",
+    "fix": "无有效输入下的产品修复依据；如要增强输入校验，应单独约定非法 stdCode 的返回行为。",
+    "acceptance": "只在标准化 exchange.code 输入上验证正常委托路径；无点输入的行为待明确接口约定，不作为当前产品缺陷。",
+    "canonical": null,
+    "proposed_test_fix": "删去从未 init 的 adapter 上 openLong/openShort(\"600000\") 断言；需要测试格式校验时先定义稳定的错误返回，再单独覆盖。"
+  },
+  {
+    "lane": "n03_uftcore_index",
+    "id": "BUG-N03-008",
+    "decision": "DUPLICATE",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/ParserAdapter.cpp:42-55",
+      "src/WtUftCore/ParserAdapter.cpp:166-180",
+      "src/WtUftCore/ParserAdapter.cpp:228-240"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n03_uftcore_index/n03_uftcore_helper_adapter_test.cpp:406-469"
+    ],
+    "reason": "init 在配置空 module 等失败路径前已 retain _cfg 且 release 不释放，和 BUG-R78-001 的配置引用泄漏同根因。候选另一主张认为 initExt 注入 API 必属外部所有权，但没有接口所有权契约；现有测试分配 API 后由 adapter.release 使用，不能证明 double-free。",
+    "fix": "并入 BUG-R78-001 清理 _cfg；不要在缺少所有权契约时改变 initExt API 释放语义。",
+    "acceptance": "由 BUG-R78-001 的 cfg 引用/失败路径验收覆盖；注入 API 的所有权按公开契约另行确定。",
+    "canonical": "BUG-R78-001",
+    "proposed_test_fix": "并入 canonical 项；先明确 initExt 是否转移 API 所有权，再写相应 API release 次数测试。"
+  },
+  {
+    "lane": "p06_uftcore2",
+    "id": "BUG-P06-001",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/WtUftEngine.cpp:35-51",
+      "src/WtUftCore/WtUftEngine.h:133-156"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p06_uftcore2/p06_uft_engine_test.cpp:425-437"
+    ],
+    "reason": "候选在 WtUftEngine 构造后、init 前调用依赖基础数据/数据管理器的查询；正常 runner 装配先 init 引擎再启动策略。没有公开契约要求未 init 引擎提供查询能力，故这是生命周期前置错误而非本轮产品 bug。",
+    "fix": "暂无有效产品修复依据；若产品希望 pre-init 查询安全，需补充明确契约后单独评估。",
+    "acceptance": "正常 init 后查询行为有测试覆盖；未 init 行为不作为当前产品承诺。",
+    "canonical": null,
+    "proposed_test_fix": "保留为 disabled 的无效生命周期示例或移出产品缺陷测试；不要以 bare engine 查询崩溃作为有效 bug 复现。"
+  },
+  {
+    "lane": "p06_uftcore2",
+    "id": "BUG-P06-002",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/WtUftEngine.cpp:112-142",
+      "src/WtUftCore/WtUftEngine.cpp:152-168"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p06_uftcore2/p06_uft_engine_test.cpp:425-446"
+    ],
+    "reason": "WtUftEngine 的查询接口注释要求标准化交易所.合约代码；用 600000 缺交易所段，且测试和正常查询契约不符。",
+    "fix": "无有效输入下的产品修复依据；若需鲁棒拒绝非法格式，先明确返回契约。",
+    "acceptance": "对文档规定的 exchange.code 测试；只有接口新增非法格式保证后再验收无点字符串安全返回。",
+    "canonical": null,
+    "proposed_test_fix": "删除把裸 600000 越界读作为产品缺陷的断言；如补格式校验，输入仍需通过 active 返回值测试而不是崩溃测试。"
+  },
+  {
+    "lane": "p06_uftcore2",
+    "id": "BUG-P06-003",
+    "decision": "UNDECIDED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtUftCore/WtUftEngine.cpp:152-168",
+      "src/TestUnits/coverage/p06_uftcore2/p06_uft_engine_test.cpp:136-156"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p06_uftcore2/p06_uft_engine_test.cpp:430-452"
+    ],
+    "reason": "存在合约但 getCommInfo 返回 NULL 时 get_session_info(code,true) 会解引用；然而 disabled 测试用手工 create 的未关联合约，尚未确认生产 IBaseDataMgr 是否允许把此类对象作为有效可查询合约返回。公开函数注释仅说明找不到合约时返回 NULL，未定义挂接关系。",
+    "fix": "先核实并写明 IBaseDataMgr 中已注册合约必须关联品种的契约；若允许有效未关联合约，则在 commInfo 为空时安全返回 NULL。",
+    "acceptance": "以真实/契约认可的 IBaseDataMgr 装载路径验证关联保证；若允许缺关联，补 active 测试断言安全返回 NULL。",
+    "canonical": null,
+    "proposed_test_fix": "不要用仅 create 而未按生产注册流程关联的对象直接定级；获取有效基数据信息路径或在接口契约确认后确定预期。"
+  },
+  {
+    "lane": "p06_uftcore2",
+    "id": "BUG-P06-004",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftRunner/WtUftRunner.cpp:231-247",
+      "src/WtUftCore/UftStraContext.cpp:43-58"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p06_uftcore2/p06_uft_context_test.cpp:245-268"
+    ],
+    "reason": "DISABLED 测试直接构造 context 后从未 setTrader，另一个 adapter 也未 init；runner 正常会先查找并绑定 trader，再把 context 加入 engine。没有公开契约要求未绑定交易通道的 context 可执行 trader 查询/撤单。",
+    "fix": "无有效产品缺陷依据；如需要无 trader 策略安全访问，需明示其可选性并定义查询返回值。",
+    "acceptance": "有效 runner 生命周期中 context 在 addContext 前已绑定 trader；未绑定访问只在接口约定后另行验收。",
+    "canonical": null,
+    "proposed_test_fix": "从缺陷测试中移出 bare context 与未 init adapter 的崩溃段；针对正常 runner 装配测试绑定后的查询。"
+  },
+  {
+    "lane": "p06_uftcore2",
+    "id": "BUG-P06-006",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/WtUftTicker.cpp:54-61",
+      "src/WtUftCore/WtUftTicker.cpp:68-109",
+      "src/WtUftCore/WtUftTicker.cpp:172-182"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p06_uftcore2/p06_uft_engine_test.cpp:371-424"
+    ],
+    "reason": "候选触发条件为 null engine 或不存在的交易时段；前者违反 ticker 构造依赖，后者是未配置成功的 session。其 disabled 路径还要求 run 起线程，而本轮候选明确未运行。没有证据表明有效 engine 与已注册 session 的正常输入会到达该空指针。",
+    "fix": "无当前有效输入下的产品缺陷依据；若 API 承诺拒绝未知 session，应在契约下实现 init 失败。",
+    "acceptance": "先通过公开文档明确 init 对未知 session 的成功/失败语义，再按该语义覆盖；有效 session 启动和行情路径正常。",
+    "canonical": null,
+    "proposed_test_fix": "不要将 null engine/未知 session 配置列为有效运行时产品缺陷；若要测试未知 session，先断言 init 返回状态并避免 run。"
+  },
+  {
+    "lane": "q04_uftcore3",
+    "id": "BUG-Q04-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/TraderAdapter.cpp:284-302",
+      "src/WtUftCore/TraderAdapter.cpp:399-415"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/q04_trader_reply_machine_test.cpp:230-241"
+    ],
+    "reason": "活单保存的柜台裸 code 与公开 stdCode 形式不同；getOrders 对非空过滤直接把 ordInfo->getCode 与 stdCode 比较，而 cancelAll 则用完整交易所.合约代码。合法的 SHFE.ag2406 查询因此漏单；空字符串全查并不能代表过滤正确。",
+    "fix": "按订单 exchange 与 code 构造规范化 fullCode 后比较，或按订单关联合约的 getFullCode 比较并对缺信息安全处理。",
+    "acceptance": "输入 SHFE.ag2406 返回对应 ag2406 活单，不返回其他交易所/合约；空查询仍返回所有活单。",
+    "canonical": null,
+    "proposed_test_fix": "保留 full stdCode 查询断言和空串对照；加入同裸代码异交易所订单以验证过滤不串单。"
+  },
+  {
+    "lane": "q04_uftcore3",
+    "id": "BUG-Q04-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/TraderAdapter.cpp:311-342",
+      "src/WtUftCore/TraderAdapter.cpp:994-1107",
+      "src/TraderCTP/TraderCTP.cpp:469-475",
+      "src/TraderFemas/TraderFemas.cpp:325-330",
+      "src/TraderYD/TraderYD.cpp:782-787"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/q04_trader_entrust_paths_test.cpp:154-171"
+    ],
+    "reason": "四个入口先增加 undone 数量，doEntrust 遇到 orderInsert 同步负返回仅返回 UINT_MAX 而不回滚。CTP/Femas/YD 在未就绪的有效运行状态可同步返回 -1 且直接早退，不进入后续柜台请求回报链，因此确有可能留下虚增未完成量。现有 fake 用例观察到的数字本轮未重跑。",
+    "fix": "对同步未接受的负返回回滚本笔 undone 增量；并避免与后续异步拒单回报重复扣减。",
+    "acceptance": "模拟同步 -1 无回调时 undone 恢复原值；正常接受后只加一次；异步拒单/重复回报按单号幂等扣减。",
+    "canonical": null,
+    "proposed_test_fix": "保留同步拒单无回报断言；再独立覆盖已接受后异步拒单，验证仅扣一次，不能把两类失败合并。"
+  },
+  {
+    "lane": "q04_uftcore3",
+    "id": "BUG-Q04-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/TraderAdapter.cpp:337-341",
+      "src/WtUftCore/TraderAdapter.cpp:391-392",
+      "src/WtUftCore/TraderAdapter.cpp:994-1107",
+      "src/WtUftCore/TraderAdapter.cpp:1875-1905",
+      "src/WtUftCore/TraderAdapter.cpp:1937-1968"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/q04_trader_risk_limits_test.cpp:5-10",
+      "src/TestUnits/coverage/q04_uftcore3/q04_trader_risk_limits_test.cpp:223-241"
+    ],
+    "reason": "riskmon.active=true 会解析 order/cancel 的频次边界和统计窗口，限额方法也实现了窗口检查，但记录时间戳的写入和下单/撤单入口调用限额的方法都被注释；配置表达了启用风控，正常适配器操作却不会执行频率限制。现有测试只验证总量支，明确未覆盖频率窗口。",
+    "fix": "接通正常下单/撤单频率检查，并在委托/撤单尝试的定义点记录时间；明确拒绝时 undone 和时间戳如何处理。",
+    "acceptance": "active 风控配置下，在指定窗口内超过 order/cancel 边界会阻止后续操作并登记排除；边界内允许，active=false 不改变现有行为。",
+    "canonical": null,
+    "proposed_test_fix": "扩展风险配置测试经真实 adapter 下单/撤单入口累积时间戳并验证窗口前后行为；不要只直接调用 check* 后声称正常下单路径已接入。"
+  },
+  {
+    "lane": "q04_uftcore3",
+    "id": "BUG-Q04-007",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/UftStraContext.cpp:1128-1183",
+      "src/WtUftCore/UftStraContext.cpp:1185-1206"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:251-266"
+    ],
+    "reason": "交易日切换重映射本地持仓块时会把 detail 汇总进 _positions，但此路径没有清空旧 _positions；同一持仓重复累计。本轮静态核对测试断言和源码，未重跑报告中声称的 4→8。候选关于旧映射 detail 指针必然崩溃的子主张没有动态证据，不纳入。",
+    "fix": "在交易日重载前清理或重建对应 _positions 汇总和 details 引用，确保只引用新映射块中的明细。",
+    "acceptance": "同一 context 从交易日 A 切换到 B、没有新成交时本地净持仓保持不变且明细不重复；历史文件内容与盈亏字段保持正确。",
+    "canonical": null,
+    "proposed_test_fix": "保留切日前后数量完全相等断言；另测多明细及部分平仓；不要将映射地址变化等同于已证实崩溃。"
+  },
+  {
+    "lane": "q04_uftcore3",
+    "id": "BUG-Q04-008",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/TraderAdapter.cpp:399-426",
+      "src/WtUftCore/TraderAdapter.cpp:354-374",
+      "src/WtUftCore/TraderAdapter.cpp:1271-1292",
+      "src/WtUftCore/TraderAdapter.cpp:1374-1376"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/q04_trader_entrust_paths_test.cpp:357-391",
+      "src/TestUnits/coverage/q04_uftcore3/q04_trader_entrust_paths_test.cpp:302-355"
+    ],
+    "reason": "onRspOrders 可从 _bd_mgr 查到 cInfo 并接受订单，但只存局部变量，没有回填 OrderInfo；cancelAll 对非空 stdCode 过滤直接解引用 orderInfo->getContractInfo。基础数据能回查且有效订单未附合约时为正常可处理回报，非空 cancelAll 会空指针；空字符串路径因短路不能复现。",
+    "fix": "cancelAll 像 doCancel 一样回查缺失 ContractInfo；回查失败时跳过并记日志，不解引用空指针。",
+    "acceptance": "测试订单仅带 exchange/code、未附 ContractInfo；基础数据可查时按完整代码撤销并返回 localid；不可查时安全跳过；空串全撤仍正常。",
+    "canonical": null,
+    "proposed_test_fix": "启用当前 disabled 的 lookup-only-contract 用例，保留非空过滤；另外覆盖查找失败和空串短路对照。"
+  },
+  {
+    "lane": "q04_uftcore3",
+    "id": "BUG-Q04-009",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftCore/TraderAdapter.cpp:72-88",
+      "src/WtUftCore/TraderAdapter.cpp:1271-1276",
+      "src/WtUftCore/TraderAdapter.cpp:1374-1376",
+      "src/Includes/WTSCollection.hpp:392-412",
+      "src/Includes/WTSCollection.hpp:546-572"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q04_uftcore3/q04_trader_reply_machine_test.cpp:475-503"
+    ],
+    "reason": "候选的未初始化回调复现无效：fresh adapter 首先因 _trader_api 未装配而无效，不能证明其余字段在正常生命周期中未初始化。独立成立的 _orders 生命周期泄漏是析构只释放 _stat_map；onRspOrders 创建并向拥有元素引用的 WTSMap 增加订单，adapter 析构未释放该 map。",
+    "fix": "在析构/release 生命周期内释放 _orders 并清空指针；明确订单 map 与外部回报对象的引用所有权，保证只释放一次。",
+    "acceptance": "正常 init/run→接收活单→销毁 adapter 后 map 与保留订单引用均归还；空 map 和重复清理安全；不把 fresh adapter 回调当作此项证据。",
+    "canonical": null,
+    "proposed_test_fix": "将未初始化回调段从 Q04-009 测试主张中剔除；新增正常装配、接收活单并析构的引用计数/泄漏检查，只验证 _orders 清理。"
+  }
+]

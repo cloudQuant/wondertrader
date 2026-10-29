@@ -25,15 +25,20 @@
  *
  * 不可达 / 崩溃类（见 bugs/R10_wtcore.md）：
  *   L328-335 任务派发：StdThreadPtr thrd(new StdThread(...)) 是局部对象，std::thread 析构时
- *            仍处于 joinable ⇒ std::terminate（TPT_Daily 到点必炸，已收 DISABLED_）
+ *            仍处于 joinable ⇒ std::terminate（定时派发回归隔离在子进程中，要求正常完成）
  *   L339-380 run()：_cfg/_data_mgr->reader()/WtSelRtTicker/_adapter_mgr 全依赖 init + 插件
  *   L382-388 init：转调 WtEngine::init（线程 + DLL 缝，R3 已登记，本 lane 不硬闯）
  */
 #include "q01_sel_env.h"
 
+#include <atomic>
+#include <chrono>
+#include <cstdio>
 #include <cstring>
+#include <cstdlib>
 #include <memory>
 #include <string>
+#include <thread>
 #include <utility>
 
 #include <Includes/IHotMgr.h>
@@ -94,7 +99,7 @@ public:
 
     uint32_t n_bar_close = 0;
     uint32_t n_tick_upd = 0;
-    uint32_t n_sched = 0;
+    std::atomic<uint32_t> n_sched{ 0 };
     uint32_t n_on_bar = 0;
     uint32_t n_on_tick = 0;
     std::string _bar_key;
@@ -381,11 +386,11 @@ TEST_F(R10SelEngineTest, minute_end_skips_tasks_by_time_and_holiday)
 
     // 931 命中的任务：TPT_None => bIgnore 保持 true（L263-264）
     _eng.on_minute_end(20250110, 930);
-    EXPECT_EQ(raw->n_sched, 0u);
+    EXPECT_EQ(raw->n_sched.load(), 0u);
 
     // 已经执行过同一分钟 => L240-241 跳过
     _eng.on_minute_end(20250110, 930);
-    EXPECT_EQ(raw->n_sched, 0u);
+    EXPECT_EQ(raw->n_sched.load(), 0u);
 }
 
 TEST_F(R10SelEngineTest, minute_end_holiday_task_is_skipped)
@@ -402,7 +407,7 @@ TEST_F(R10SelEngineTest, minute_end_holiday_task_is_skipped)
     // trdtpl="H0" => isHoliday 恒真 ⇒ L243-244 continue
     eng.addContext(keep, 20250110, 931, TPT_Daily, true, "H0", "TRADING");
     eng.on_minute_end(20250110, 930);
-    EXPECT_EQ(raw->n_sched, 0u);
+    EXPECT_EQ(raw->n_sched.load(), 0u);
     EXPECT_GE(bdm.n_holiday, 1u);
 
     // "H1" 只有 20250109 是假日 ⇒ 走 while 顺延块（L247-256）+ TPT_None 不触发
@@ -410,7 +415,7 @@ TEST_F(R10SelEngineTest, minute_end_holiday_task_is_skipped)
     SelContextPtr keep2(raw2);
     eng.addContext(keep2, 20250110, 935, TPT_None, true, "H1", "TRADING");
     eng.on_minute_end(20250110, 934);
-    EXPECT_EQ(raw2->n_sched, 0u);
+    EXPECT_EQ(raw2->n_sched.load(), 0u);
     EXPECT_GE(bdm.n_holiday, 3u);   // 至少 243、247、250 三处查询
 }
 
@@ -418,7 +423,7 @@ TEST_F(R10SelEngineTest, minute_end_period_branches_that_do_not_fire)
 {
     // _time 全部设成 931（nextTime=931 才会往下走），_day 取永不相等的值
     DispatchCtx* minute = addCtx("s_min", 999999, 931, TPT_Minute);
-    EXPECT_EQ(minute->n_sched, 0u);
+    EXPECT_EQ(minute->n_sched.load(), 0u);
 
     // 同一引擎里再挂月度/周度/年度任务
     DispatchCtx* m = new DispatchCtx(&_eng, "s_mon");
@@ -433,10 +438,10 @@ TEST_F(R10SelEngineTest, minute_end_period_branches_that_do_not_fire)
 
     // addContext 只保留最后一个 ctx（_ctx_map 按 id 覆盖），这里逐个把订阅表填上
     _eng.on_minute_end(20250110, 930);
-    EXPECT_EQ(m->n_sched, 0u);
-    EXPECT_EQ(w->n_sched, 0u);
-    EXPECT_EQ(y->n_sched, 0u);
-    EXPECT_EQ(minute->n_sched, 0u);
+    EXPECT_EQ(m->n_sched.load(), 0u);
+    EXPECT_EQ(w->n_sched.load(), 0u);
+    EXPECT_EQ(y->n_sched.load(), 0u);
+    EXPECT_EQ(minute->n_sched.load(), 0u);
 }
 
 TEST_F(R10SelEngineTest, handle_pos_change_creates_pos_and_signal)
@@ -458,12 +463,32 @@ TEST_F(R10SelEngineTest, handle_pos_change_creates_pos_and_signal)
 }
 
 // 触发条件：任务到期（TPT_Daily 且 _time==nextTime、非假日、未执行过）时，
-// L330 的 StdThreadPtr thrd(new StdThread(...)) 是循环体内的局部对象，
-// std::thread 析构时仍处于 joinable ⇒ std::terminate 直接 abort 整个测试进程。
-// 规则 2 禁止起线程，故整条 DISABLED_，缺陷登记为 BUG-R10-006。
-TEST_F(R10SelEngineTest, DISABLED_minute_end_fires_task_thread_terminates_process)
+// 先保留不会命中的时间对照；再在 threadsafe 子进程中触发每日任务。
+// 期望任务安全派发并正常结束子进程；std::terminate/abort 必须使此测试失败。
+TEST_F(R10SelEngineTest, minute_end_fires_task_without_terminating_process)
 {
-    DispatchCtx* raw = addCtx("s_fire", 20250110, 931, TPT_Daily);
-    _eng.on_minute_end(20250110, 930);   // ⇒ std::terminate
-    EXPECT_EQ(raw->n_sched, 1u);
+    DispatchCtx* skipped = addCtx("s_skip", 20250110, 932, TPT_Daily);
+    _eng.on_minute_end(20250110, 930);   // nextTime=931，时间不匹配，不应派发
+    EXPECT_EQ(skipped->n_sched.load(), 0u);
+
+    const std::string oldStyle = GTEST_FLAG_GET(death_test_style);
+    GTEST_FLAG_SET(death_test_style, "threadsafe");
+    EXPECT_EXIT(
+        {
+            DispatchCtx* raw = addCtx("s_fire", 20250110, 931, TPT_Daily);
+            std::fprintf(stderr, "R10_TASK_FIRE_READY\n");
+            std::fflush(stderr);
+            _eng.on_minute_end(20250110, 930);
+
+            const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(500);
+            while (raw->n_sched.load() == 0 && std::chrono::steady_clock::now() < deadline)
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+            const bool dispatched = raw->n_sched.load() == 1;
+            std::error_code ec;
+            std::filesystem::remove_all(_env->dir(), ec);
+            std::_Exit(dispatched && !ec ? 0 : 2);
+        },
+        ::testing::ExitedWithCode(0), "R10_TASK_FIRE_READY");
+    GTEST_FLAG_SET(death_test_style, oldStyle);
 }

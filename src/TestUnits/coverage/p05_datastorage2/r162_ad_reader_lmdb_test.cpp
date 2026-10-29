@@ -4,14 +4,114 @@
 //  - WtRdmDtReaderAD::readTickSliceByRange 的起始 lower_bound 分支 :236-247
 //  - WtRdmDtReaderAD::get_k_db / get_t_db 打开失败的返回 :423-426 / :447-450
 //  - WtDataReaderAD::readTickSlice 的 tick db 打开失败返回 :143-145
-//
-// 数据全部由 WtDataWriterAD 的公开 writeTick 落 LMDB；写入端 _async_task 未初始化，
-// 因此一律以 sink 计数轮询等待，不假设同步/异步。
+// LMDB fixture 直接按 writer 使用的 key/value schema 构造，避免 reader 用例依赖
+// WtDataWriterAD 未初始化的 _async_task 执行模式。
 #include "r162_ad_fixture.h"
+
+#include "WtDataStorageAD/LMDBKeys.h"
+#include "WTSUtils/WtLMDB.hpp"
 
 #include <sys/stat.h>
 
 namespace r162ad {
+
+namespace {
+
+template <typename T>
+struct ReleaseSlice
+{
+	void operator()(T* slice) const
+	{
+		if (slice != nullptr)
+			slice->release();
+	}
+};
+
+std::string bar_key(const char* exchg, const char* code, uint32_t bartime)
+{
+	LMDBBarKey key(exchg, code, bartime);
+	return std::string((const char*)&key, sizeof(key));
+}
+
+std::string tick_key(const char* exchg, const char* code, uint32_t date, uint32_t time)
+{
+	LMDBHftKey key(exchg, code, date, time);
+	return std::string((const char*)&key, sizeof(key));
+}
+
+WTSBarStruct make_bar(uint32_t date, uint32_t hhmm, double price)
+{
+	WTSBarStruct bar;
+	bar.date = date;
+	bar.time = (uint64_t)(date - 19900000u) * 10000u + hhmm;
+	bar.open = price;
+	bar.high = price + 1.0;
+	bar.low = price - 1.0;
+	bar.close = price + 0.5;
+	bar.vol = 1.0;
+	bar.money = price;
+	return bar;
+}
+
+WTSTickStruct make_tick_struct(uint32_t date, uint32_t time, double price, double volume)
+{
+	WTSTickStruct tick;
+	strcpy(tick.exchg, "SSE");
+	strcpy(tick.code, "600000");
+	tick.trading_date = date;
+	tick.action_date = date;
+	tick.action_time = time;
+	tick.price = price;
+	tick.open = price;
+	tick.high = price;
+	tick.low = price;
+	tick.total_volume = volume;
+	tick.volume = 1.0;
+	tick.total_turnover = price * volume;
+	tick.turn_over = price;
+	return tick;
+}
+
+bool put_bar(const std::filesystem::path& dir, const WTSBarStruct& bar)
+{
+	std::error_code ec;
+	std::filesystem::create_directories(dir, ec);
+	if (ec)
+		return false;
+
+	WtLMDB db(false);
+	if (!db.open(dir.string().c_str(), 8 * 1024 * 1024))
+		return false;
+	WtLMDBQuery query(db);
+	const std::string value((const char*)&bar, sizeof(bar));
+	if (!query.put(bar_key("SSE", "600000", (uint32_t)bar.time), value))
+		return false;
+	query.commit();
+	return !db.has_error();
+}
+
+bool seed_ticks(const std::filesystem::path& dir, const std::vector<WTSTickStruct>& ticks)
+{
+	std::error_code ec;
+	std::filesystem::create_directories(dir, ec);
+	if (ec)
+		return false;
+
+	WtLMDB db(false);
+	if (!db.open(dir.string().c_str(), 8 * 1024 * 1024))
+		return false;
+	WtLMDBQuery query(db);
+	for (const WTSTickStruct& tick : ticks)
+	{
+		const std::string value((const char*)&tick, sizeof(tick));
+		if (!query.put(tick_key("SSE", "600000", tick.trading_date, tick.action_time), value))
+			return false;
+	}
+	query.commit();
+	return !db.has_error();
+}
+
+} // namespace
 
 class R162AdReaderTest : public AdFixture
 {
@@ -20,43 +120,63 @@ class R162AdReaderTest : public AdFixture
 // WtDataReaderAD.cpp:292-297, 601-602
 TEST_F(R162AdReaderTest, R162ReaderADMinuteBarsAppendFromLmdb)
 {
-	WtDataWriterAD* w = make_writer();
-	ASSERT_TRUE(w != NULL);
-
-	push_tick(w, 20240110, 93000000u, 10.0, 1.0);
-	push_tick(w, 20240110, 93100000u, 11.0, 2.0);
+	const std::filesystem::path kline_dir = _dir / "min1" / "SSE";
+	const std::filesystem::path tick_dir = _dir / "ticks" / "SSE" / "600000";
+	const WTSBarStruct first_bar = make_bar(20240110u, 931u, 11.0);
+	ASSERT_TRUE(put_bar(kline_dir, first_bar));
+	ASSERT_TRUE(seed_ticks(tick_dir, std::vector<WTSTickStruct>{
+		make_tick_struct(20240110u, 93000000u, 10.0, 1.0),
+		make_tick_struct(20240110u, 93100000u, 11.0, 2.0),
+		make_tick_struct(20240110u, 93200000u, 12.0, 3.0),
+	}));
 
 	WtDataReaderAD* reader = make_reader();
 	ASSERT_TRUE(reader != NULL);
+	std::unique_ptr<WtDataReaderAD> reader_guard(reader);
 
 	uint64_t etime = (uint64_t)20240110 * 1000000000ULL + 93100000ULL;
-	WTSKlineSlice* first = reader->readKlineSlice("SSE.600000", KP_Minute1, 10, etime);
+	std::unique_ptr<WTSKlineSlice, ReleaseSlice<WTSKlineSlice>> first(
+		reader->readKlineSlice("SSE.600000", KP_Minute1, 10, etime));
 	ASSERT_TRUE(first != NULL);
-	EXPECT_EQ(bar_count(first), 1u);	// 只有 09:31 这一根已落库
-	first->release();
+	ASSERT_EQ(bar_count(first.get()), 1u);
+	ASSERT_NE(first->at(0), nullptr);
+	EXPECT_EQ(first->at(0)->time, first_bar.time);
+	EXPECT_DOUBLE_EQ(first->at(0)->close, first_bar.close);
 
-	// 再推一笔 09:32，把 09:32 那根分钟线转储到 LMDB
-	push_tick(w, 20240110, 93200000u, 12.0, 3.0);
+	// 09:31 首批数据已读入 reader cache 后，再直接追加 09:32 LMDB 记录。
+	const WTSBarStruct second_bar = make_bar(20240110u, 932u, 12.0);
+	ASSERT_TRUE(put_bar(kline_dir, second_bar));
 
-	WTSKlineSlice* second = reader->readKlineSlice("SSE.600000", KP_Minute1, 10,
-		(uint64_t)20240110 * 1000000000ULL + 93200000ULL);
+	std::unique_ptr<WTSKlineSlice, ReleaseSlice<WTSKlineSlice>> second(
+		reader->readKlineSlice("SSE.600000", KP_Minute1, 10,
+			(uint64_t)20240110 * 1000000000ULL + 93200000ULL));
 	ASSERT_TRUE(second != NULL);
-	EXPECT_EQ(bar_count(second), 2u);	// 09:31 + 09:32，走 update_cache_from_lmdb 的追加分支
-	second->release();
-	EXPECT_GE(_rsink->bars(), 1u);
+	EXPECT_EQ(bar_count(second.get()), 2u);
+	const WTSBarStruct* returned_first = second->at(0);
+	ASSERT_NE(returned_first, nullptr);
+	EXPECT_EQ(returned_first->time, first_bar.time);
+	EXPECT_DOUBLE_EQ(returned_first->close, first_bar.close);
+	if (bar_count(second.get()) >= 2)
+	{
+		const WTSBarStruct* returned_second = second->at(1);
+		ASSERT_NE(returned_second, nullptr);
+		EXPECT_EQ(returned_second->time, second_bar.time);
+		EXPECT_DOUBLE_EQ(returned_second->close, second_bar.close);
+	}
+	EXPECT_EQ(_rsink->bars(), 1u);
 
-	// 两次读 tick：第二次命中 get_t_db 的 _tick_dbs 缓存
-	WTSTickSlice* ticks1 = reader->readTickSlice("SSE.600000", 10,
-		(uint64_t)20240110 * 1000000000ULL + 93300000ULL);
+	// 两次读 tick：第二次命中 get_t_db 的 _tick_dbs 缓存。
+	std::unique_ptr<WTSTickSlice, ReleaseSlice<WTSTickSlice>> ticks1(
+		reader->readTickSlice("SSE.600000", 10,
+			(uint64_t)20240110 * 1000000000ULL + 93300000ULL));
 	ASSERT_TRUE(ticks1 != NULL);
-	EXPECT_EQ(tick_count(ticks1), 3u);
-	ticks1->release();
+	EXPECT_EQ(tick_count(ticks1.get()), 3u);
 
-	WTSTickSlice* ticks2 = reader->readTickSlice("SSE.600000", 10,
-		(uint64_t)20240110 * 1000000000ULL + 93300000ULL);
+	std::unique_ptr<WTSTickSlice, ReleaseSlice<WTSTickSlice>> ticks2(
+		reader->readTickSlice("SSE.600000", 10,
+			(uint64_t)20240110 * 1000000000ULL + 93300000ULL));
 	ASSERT_TRUE(ticks2 != NULL);
-	EXPECT_EQ(tick_count(ticks2), 3u);
-	ticks2->release();
+	EXPECT_EQ(tick_count(ticks2.get()), 3u);
 }
 
 // WtDataReaderAD.cpp:292-297（日线周期同一追加分支）
@@ -187,7 +307,9 @@ TEST_F(R162AdReaderTest, R162RdmReaderADKlineDbOpenFailureReturnsNull)
 	if (slice != NULL)
 		slice->release();
 	EXPECT_GE(_qsink->count_of(LL_ERROR), 1u);
-	EXPECT_NE(_qsink->last_log().find("Opening min1 db if SSE failed"), string::npos);
+	const string error_log = _qsink->last_log();
+	EXPECT_NE(error_log.find("Opening min1 db "), string::npos);
+	EXPECT_NE(error_log.find("SSE failed"), string::npos);
 }
 
 // WtDataWriterAD.cpp:649-652：同一交易日第二笔 tick 合并日线时 vol/money 被累加两次。

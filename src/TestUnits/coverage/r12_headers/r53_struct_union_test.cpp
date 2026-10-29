@@ -2,11 +2,12 @@
 // 覆盖：新旧 bar/tick 结构体构造清零、跨版本 operator= 全字段复制、
 //       tick 联合体别名（settle/iopv、open_interest/sedimentary、pre_interest/pre_sedimentary）、
 //       HFT 三个结构体（委托队列/逐笔委托/逐笔成交）构造清零。
-// 说明：全部栈上结构体，不访问共享内存；发现的全宽字符串无终止符缺陷用 DISABLED 记录。
+// 说明：全部栈上结构体，不访问共享内存；无 NUL 固定宽字符串的赋值支持合同仍待 R53-003 确认。
 #include <gtest/gtest.h>
 
 #include <cstdint>
 #include <cstring>
+#include <string>
 
 #include "Includes/WTSStruct.h"
 #include "Includes/WTSMarcos.h"
@@ -273,17 +274,22 @@ TEST(r53_struct_hft, ordque_orddtl_trans_ctor_and_fields)
 	EXPECT_EQ(ts.bidorder, 12);
 }
 
-// WTSStruct.h:203-205（BUG-R53-003）：旧结构体字段写满缓冲区时 strncpy 不补 '\0'。
-// 期望：赋值后的 exchg/code 缓冲区仍有终止符；实际：10/32 字节全被覆盖，
-// 后续 strlen/%s 会越过数组读到相邻字段。因属 UB 输入，保持 DISABLED。
-TEST(DISABLED_r53_struct_tick, assignment_terminates_full_width_code)
+// Terminated legacy strings copy with their full contents and bounded lengths.
+// Support for fixed-width inputs without NUL remains unresolved under R53-003.
+TEST(r53_struct_tick, assignment_preserves_maximum_terminated_legacy_strings)
 {
 	WTSTickStructOld ot;
-	std::memset(ot.exchg, 'E', MAX_EXCHANGE_LENGTH);
-	std::memset(ot.code, 'C', MAX_INSTRUMENT_LENGTH);
+	std::memset(ot.exchg, 'E', sizeof(ot.exchg) - 1);
+	ot.exchg[sizeof(ot.exchg) - 1] = '\0';
+	std::memset(ot.code, 'C', sizeof(ot.code) - 1);
+	ot.code[sizeof(ot.code) - 1] = '\0';
 
 	WTSTickStruct nt;
 	nt = ot;
-	EXPECT_TRUE(buffer_has_nul(nt.exchg, MAX_EXCHANGE_LENGTH));
-	EXPECT_TRUE(buffer_has_nul(nt.code, MAX_INSTRUMENT_LENGTH));
+	ASSERT_TRUE(buffer_has_nul(nt.exchg, sizeof(nt.exchg)));
+	EXPECT_EQ(std::string(9, 'E'), std::string(nt.exchg));
+	EXPECT_EQ(9u, std::strlen(nt.exchg));
+	ASSERT_TRUE(buffer_has_nul(nt.code, sizeof(nt.code)));
+	EXPECT_EQ(std::string(31, 'C'), std::string(nt.code));
+	EXPECT_EQ(31u, std::strlen(nt.code));
 }

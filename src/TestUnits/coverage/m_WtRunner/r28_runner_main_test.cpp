@@ -546,15 +546,13 @@ TEST(r28_wtrunner_config, missing_file_returns_false)
 	EXPECT_FALSE(runner->config("./r28wt_absent_cfg.yaml"));
 }
 
-TEST(r28_wtrunner_config, unparsable_yaml_escapes_as_exception)
+TEST(r28_wtrunner_config, unparsable_yaml_returns_false_without_throwing)
 {
-	// 实测：WTSCfgLoader::load_from_yaml 对坏 YAML 抛 yaml-cpp 异常，
-	// WtRunner::config():69 没有 try/catch，异常一路穿透到调用方。
-	// 真实 WtRunner 进程里这就是 std::terminate（BUG-R28-003），
-	// 所以这里钉的是「现状 = 抛出」而不是「期望 = 返回 false」。
+	// WTSCfgLoader.h 承诺文件/内容解析失败返回 NULL；对 WtRunner 来说应转成 false。
+	// 这项回归不把 yaml-cpp 异常向外传播当成预期行为（BUG-R28-003）。
 	write_fixture("broken_cfg.yaml", "basefiles: [ this is : not valid\n\t- {{{\n");
 	std::unique_ptr<WtRunner> runner = make_runner();
-	EXPECT_THROW(runner->config(fixture_path("broken_cfg.yaml")), std::exception);
+	EXPECT_FALSE(runner->config(fixture_path("broken_cfg.yaml")));
 }
 
 TEST(r28_wtrunner_config, unparsable_json_returns_false_without_throwing)
@@ -659,19 +657,32 @@ TEST(r28_wtrunner_config, unknown_env_name_falls_through_to_hft_else)
 	EXPECT_TRUE(runner->config(fixture_path("badname_cfg.yaml")));
 }
 
-TEST(r28_wtrunner_config, missing_env_section_stops_at_actionpolicy_but_returns_true)
+TEST(r28_wtrunner_config, missing_env_and_data_sections_make_config_fail)
 {
 	prepare_base_fixtures();
 	std::unique_ptr<WtRunner> runner = make_runner();
 	runner->init(fixture_path("logcfg.yaml"));
 
-	// initEngine():368-370 `cfg==NULL` -> return false（config() 不看返回值）
-	// initDataMgr():418-420 data 段缺失 -> return false
-	// initActionPolicy():412 仍会执行 -> 有 bspolicy -> true -> config 继续
+	// 缺少 env 时 engine 初始化失败；同时缺 data 可避免把未初始化的 _engine
+	// 传进 initDataMgr。缺少任一必需初始化配置都不应被报告为成功。
 	std::string cfg = basefiles_block()
 		+ "bspolicy: " + fixture_path("actpolicy.yaml") + "\n";
 	write_fixture("noenv_cfg.yaml", cfg);
-	EXPECT_TRUE(runner->config(fixture_path("noenv_cfg.yaml")));
+	EXPECT_FALSE(runner->config(fixture_path("noenv_cfg.yaml")));
+}
+
+TEST(r28_wtrunner_config, missing_data_section_makes_config_fail)
+{
+	prepare_base_fixtures();
+	std::unique_ptr<WtRunner> runner = make_runner();
+	runner->init(fixture_path("logcfg.yaml"));
+
+	// env 完整使 engine 已初始化；缺少 data 时 initDataMgr() 返回 false，
+	// config() 应将必需数据管理器初始化失败传递给调用方。
+	const std::string cfg = basefiles_block() + env_block("cta")
+		+ "bspolicy: " + fixture_path("actpolicy.yaml") + "\n";
+	write_fixture("nodata_cfg.yaml", cfg);
+	EXPECT_FALSE(runner->config(fixture_path("nodata_cfg.yaml")));
 }
 
 TEST(r28_wtrunner_config, missing_bspolicy_makes_config_return_false_early)

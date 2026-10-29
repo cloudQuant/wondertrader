@@ -16,8 +16,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
-#include <exception>
 #include <fstream>
 #include <iterator>
 #include <string>
@@ -26,7 +24,6 @@
 #include <filesystem>
 
 #include <WtDtCore/ShmCaster.h>
-#include <Includes/WTSDataDef.hpp>
 #include <Includes/WTSVariant.hpp>
 #include <WTSUtils/WTSCfgLoader.h>
 
@@ -54,18 +51,6 @@ protected:
 		return WTSCfgLoader::load_from_file(p.string().c_str());
 	}
 
-	static WTSTickData* makeTick()
-	{
-		WTSTickStruct s;
-		memset(&s, 0, sizeof(s));
-		strcpy(s.code, "600000");
-		strcpy(s.exchg, "SSE");
-		s.action_date = 20240102;
-		s.trading_date = 20240102;
-		s.price = 12.5;
-		return WTSTickData::create(s);
-	}
-
 	fs::path _dir;
 };
 
@@ -77,7 +62,7 @@ protected:
  * 缺陷登记：docs/迭代计划/迭代01/bugs/R68.md BUG-R68-002。
  * 该路径未建立映射，也未创建/截断任何文件，因此不违反「不建真实 shm 映射」约束。
  */
-TEST_F(R68ShmCasterInitTest, InitWithDirectoryPathThrowsInsteadOfReturningFalse)
+TEST_F(R68ShmCasterInitTest, InitWithDirectoryPathReturnsFalseWithoutThrowing)
 {
 	fs::path dirAsPath = _dir / "shm_dir";
 	fs::create_directories(dirAsPath);
@@ -89,22 +74,10 @@ TEST_F(R68ShmCasterInitTest, InitWithDirectoryPathThrowsInsteadOfReturningFalse)
 	ASSERT_NE(cfg, nullptr);
 
 	ShmCaster caster;
-	EXPECT_THROW(caster.init(cfg), std::exception);
+	bool initialized = false;
+	EXPECT_NO_THROW(initialized = caster.init(cfg));
+	EXPECT_FALSE(initialized);
 	cfg->release();
-
-	// 映射失败后 _queue 仍为 NULL、_inited 仍为 false：四个广播继续走守卫
-	WTSTickData* tick = makeTick();
-	ASSERT_NE(tick, nullptr);
-	caster.broadcast(tick);
-	EXPECT_EQ(tick->retainCount(), 1u);
-	tick->release();
-
-	// 后续 active=false 的 init 仍然安全拒绝
-	WTSVariant* inactive = loadCfg("inactive2.json",
-		std::string("{\"active\": false, \"path\": \"") + dirAsPath.string() + "\"}");
-	ASSERT_NE(inactive, nullptr);
-	EXPECT_FALSE(caster.init(inactive));
-	inactive->release();
 }
 
 // ShmCaster.cpp:31-32 —— active=false 时即使 path 指向一个已有文件，也必须原样保留

@@ -10,6 +10,20 @@
 #include <string>
 #include <vector>
 
+namespace {
+
+std::size_t boundedCStringLength(const char* text, std::size_t capacity)
+{
+	for (std::size_t i = 0; i < capacity; ++i)
+	{
+		if (text[i] == '\0')
+			return i;
+	}
+	return capacity;
+}
+
+} // namespace
+
 // ------------------------------------------------------------------ convert::to_str
 TEST(l01_convert, to_str_into_caller_buffer)
 {
@@ -17,7 +31,7 @@ TEST(l01_convert, to_str_into_caller_buffer)
 	std::memset(buf, 0, sizeof(buf));
 	const char* ret = convert::to_str(buf, sizeof(buf), 12345);
 	EXPECT_EQ(ret, buf);
-	// 调用方已经清零，to_chars 不写结尾 '\0'，靠零字节截断
+	// 零填充让数值内容检查有界；复用缓冲区时的终止符契约由下一用例检查。
 	EXPECT_STREQ(buf, "12345");
 
 	std::memset(buf, 0, sizeof(buf));
@@ -30,27 +44,21 @@ TEST(l01_convert, to_str_into_caller_buffer)
 	EXPECT_STREQ(convert::to_str(buf, sizeof(buf), 9223372036854775807LL), "9223372036854775807");
 }
 
-// 复现 BUG-L01-003：复用同一个调用方缓冲区时，短数字会残留上一次长数字的尾巴
-TEST(l01_convert, to_str_into_caller_buffer_keeps_stale_tail)
+// Caller buffer overload returns a C string and must replace the previous value.
+TEST(l01_convert, to_str_into_caller_buffer_terminates_each_result)
 {
 	char buf[32];
-	std::memset(buf, 0, sizeof(buf));
-	convert::to_str(buf, sizeof(buf), 123456);
-	ASSERT_STREQ(buf, "123456");
+	std::memset(buf, 0xA5, sizeof(buf));
+	buf[sizeof(buf) - 1] = '\0'; // bounded sentinel prevents any unterminated read
+	convert::to_str(buf, sizeof(buf) - 1, 123456);
+	EXPECT_EQ(6u, boundedCStringLength(buf, sizeof(buf)));
+	EXPECT_EQ('\0', buf[6]);
 
-	convert::to_str(buf, sizeof(buf), 7);
-	// 实际行为：'7' 覆盖了第 0 位，第 1~5 位仍是旧内容
-	EXPECT_STREQ(buf, "723456");
-}
-
-// 期望行为（待源码修复后启用）
-TEST(l01_convert, DISABLED_to_str_into_caller_buffer_should_not_keep_stale_tail)
-{
-	char buf[32];
-	std::memset(buf, 0, sizeof(buf));
-	convert::to_str(buf, sizeof(buf), 123456);
-	convert::to_str(buf, sizeof(buf), 7);
-	EXPECT_STREQ(buf, "7");
+	convert::to_str(buf, sizeof(buf) - 1, 7);
+	EXPECT_EQ(1u, boundedCStringLength(buf, sizeof(buf)));
+	EXPECT_EQ('7', buf[0]);
+	EXPECT_EQ('\0', buf[1]);
+	EXPECT_STREQ(buf, "7"); // the reserved final byte bounds the C-string read
 }
 
 TEST(l01_convert, to_str_internal_static_buffer_max_width)
@@ -60,14 +68,18 @@ TEST(l01_convert, to_str_internal_static_buffer_max_width)
 	EXPECT_STREQ(s, "-9223372036854775807");
 }
 
-TEST(l01_convert, DISABLED_to_str_internal_static_buffer_stale_digits)
+TEST(l01_convert, to_str_internal_static_buffer_terminates_each_result)
 {
-	// BUG-L01-003：to_str(T) 复用 thread_local 缓冲区且 std::to_chars 不写 '\0'，
-	// 先把长数字再长短数字，短数字的结果会带脏尾巴。修复后本用例应通过。
-	const char* first = convert::to_str<int64_t>(9876543210LL);
-	ASSERT_STREQ(first, "9876543210");
-	const char* second = convert::to_str<int32_t>(1);
-	EXPECT_STREQ(second, "1");
+	// Use one T so both calls share the same thread_local buffer; the 64-byte bound
+	// keeps the check safe even if the implementation omits the required terminator.
+	const char* first = convert::to_str<unsigned long long>(9876543210ULL);
+	EXPECT_EQ(10u, boundedCStringLength(first, 64));
+	EXPECT_EQ('\0', first[10]);
+
+	const char* second = convert::to_str<unsigned long long>(1ULL);
+	EXPECT_EQ(1u, boundedCStringLength(second, 64));
+	EXPECT_EQ('1', second[0]);
+	EXPECT_EQ('\0', second[1]);
 }
 
 // ------------------------------------------------------------------ convert::from_str
@@ -96,9 +108,9 @@ TEST(l01_convert, from_str_cstr)
 // 修复方向（不在本迭代实施）：改用 str.c_str() / &str[0] + str.size()，或改成
 // 模板参数为 const std::string& 并用 std::from_chars(str.data(), str.data()+str.size(), ret)。
 // 同时注意该重载里是 `T ret;`（未初始化），失败路径读取的是不确定值，而 char* 版本是 `T ret{}`。
-TEST(l01_convert, from_str_string_overload_is_not_compilable)
+TEST(l01_convert, const_char_pointer_overload_parses_signed_and_invalid_input)
 {
-	// 这里只验证仍然可用的 char* 重载等价语义，占位保证用例可见。
+	// 只验证 const char* 重载，不能据此证明 std::string 重载可以编译。
 	EXPECT_EQ(convert::from_str<int32_t>("4567"), 4567);
 	EXPECT_EQ(convert::from_str<int32_t>("-7"), -7);
 	EXPECT_EQ(convert::from_str<int64_t>("1234567890123"), 1234567890123LL);
@@ -116,14 +128,11 @@ TEST(l01_convert, to_int_helpers)
 	EXPECT_EQ(convert::to_uint64("1844674407370955161"), 1844674407370955161ull);
 }
 
-TEST(l01_convert, to_int_helpers_do_not_validate_digits)
+TEST(l01_convert, to_int32_parses_negative_decimal)
 {
-	// 非数字字符按 ch-'0' 直接参与运算（没有 digit 校验，也没有符号处理）
-	// 'a' = 97 -> 97-48 = 49 => 1*10 + 49 = 59
-	EXPECT_EQ(convert::to_int32("1a"), 59);
-	// '-' = 45 -> 45-48 = -3 => -3*10 + 5 = -25
-	EXPECT_EQ(convert::to_int32("-5"), -25);
-	EXPECT_EQ(convert::to_uint32("9"), 9u);
+	// CsvReader::get_int32 is documented as a signed 32-bit integer reader and
+	// delegates to this helper; a valid negative decimal must preserve its sign.
+	EXPECT_EQ(convert::to_int32("-5"), -5);
 }
 
 static_assert(convert::to_int32("2024") == 2024, "to_int32 must stay constexpr");

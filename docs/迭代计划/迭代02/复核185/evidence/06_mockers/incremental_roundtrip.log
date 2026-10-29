@@ -1,0 +1,29 @@
+COMMAND: /Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_btcore --gtest_filter=Q02CtaDumpTest.strategyDumpRoundTripsIntoSecondMocker --gtest_output=xml:/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/wt_mockers_incremental_roundtrip_2qw7d03x/result.xml
+RETURN_CODE: 1
+TIMED_OUT: False
+SECONDS: 0.479
+STDOUT:
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = Q02CtaDumpTest.strategyDumpRoundTripsIntoSecondMocker
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Q02CtaDumpTest
+[ RUN      ] Q02CtaDumpTest.strategyDumpRoundTripsIntoSecondMocker
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/q02_cta_dump_incremental_test.cpp:357: Failure
+Expected: (std::string::npos) != (json.find("\"conditions\":{\"items\":{\"SSE.STK.600002\"")), actual: 18446744073709551615 vs 18446744073709551615
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/q02_cta_dump_incremental_test.cpp:358: Failure
+Expected: (std::string::npos) != (json.find("\"opentag\":\"cond1\"")), actual: 18446744073709551615 vs 18446744073709551615
+
+[  FAILED  ] Q02CtaDumpTest.strategyDumpRoundTripsIntoSecondMocker (12 ms)
+[----------] 1 test from Q02CtaDumpTest (12 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (12 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] Q02CtaDumpTest.strategyDumpRoundTripsIntoSecondMocker
+
+ 1 FAILED TEST
+
+STDERR:

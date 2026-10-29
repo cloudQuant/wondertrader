@@ -152,15 +152,15 @@ TEST_F(R35PorterTrailGetters, CtaDetailProfitAcceptsEveryFlagAndReturnsExactZero
 }
 
 /*
- * entertag 的两支必须在「指针是否为空」上分家：
- *  未知句柄 -> WtPorter.cpp:841-843 `return 0;` -> NULL；
- *  真句柄   -> ctx->stra_get_last_entertag -> ""（CtaStraBaseCtx.cpp:1774-1780）。
- * 这是 R13 清单外、也是本文件里对「真句柄支确实被走到」最硬的证明。
+ * 真句柄必须返回非 NULL 空串（CtaStraBaseCtx.cpp:1774-1780）。
+ * BUG-Q06-001：无效句柄的公开契约尚未明确 NULL 与空串哪种表示有效；只接受
+ * NULL 或合法的空字符串，不把任意非空内容当作有效结果。
  */
-TEST_F(R35PorterTrailGetters, CtaLastEnterTagRealHandleIsBlankStringUnknownIsNull)
+TEST_F(R35PorterTrailGetters, CtaLastEnterTagRealHandleIsBlankUnknownAllowsNullOrEmpty)
 {
 	WtString unknown = cta_get_last_entertag(kBadHandle, kMonthCode);
-	EXPECT_EQ(unknown, nullptr) << "拒绝支是 WtPorter.cpp:843 的 `return 0;`（BUG-Q06-001 已登记，此处钉现状）";
+	if (unknown != nullptr)
+		EXPECT_STREQ(unknown, "") << "非 NULL 无效句柄返回值必须是合法空字符串";
 
 	WtString real = cta_get_last_entertag(_cta, kMonthCode);
 	ASSERT_NE(real, nullptr) << "真句柄支必须返回基类的空串而不是 NULL";

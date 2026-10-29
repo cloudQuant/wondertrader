@@ -2,9 +2,9 @@
 //
 // 本文件只碰 _bars_cache 的纯计算层（无共享内存、无线程、无落盘），把「日期区间与窗口裁剪 /
 // 跨块拼接 / 增量与全量 / 切片访问器边界」这些分支一次跑清楚：
-//  - indexBarFromCacheByRange：左闭右闭、右端越界（eit==end）、左端越界（返回 0 条）、isDay 比较器
+//  - indexBarFromCacheByRange：左闭右闭、右端越界（eit==end）、isDay 比较器；左端整体越界为 BUG-P09-005 禁用候选
 //  - readBarsFromCacheByRange：同一区间的拷贝版语义（含空区间不 resize）
-//  - indexBarFromCacheByCount：count 收敛 / count==1 / count 超过可用条数
+//  - indexBarFromCacheByCount：count 收敛 / count==1 / count 超过可用条数；count==0 保留为 BUG-P09-005 禁用候选
 //  - BarsList::_rt_bars 不参与索引（只有 _bars 被扫）
 //
 // 时间编码沿用生产代码的 bar.time = (date - 19900000) * 10000 + hhmm（uint32，2033 年起溢出，
@@ -209,7 +209,7 @@ TEST_F(P09WindowTest, window_bounds_are_inclusive_on_both_sides)
 	EXPECT_DOUBLE_EQ(out[1].open, 5.0);
 }
 
-TEST_F(P09WindowTest, right_edge_beyond_last_bar_and_left_edge_beyond_all)
+TEST_F(P09WindowTest, range_right_edge_beyond_last_bar_clamps_to_latest)
 {
 	const std::string key = fresh_key("SSE.STK.000002");
 	WtRdmDtReader::BarsList& lst = _reader._bars_cache[key];
@@ -223,12 +223,7 @@ TEST_F(P09WindowTest, right_edge_beyond_last_bar_and_left_edge_beyond_all)
 	EXPECT_EQ(count, 2u);
 	EXPECT_DOUBLE_EQ(p[count - 1].open, 4.0);
 
-	// 左端整体越过最后一条：eIdx(3) - sIdx(4) + 1 == 0（size_t 环绕刚好落回 0）
-	count = 9;
-	p = _reader.indexBarFromCacheByRange(key, 202012311500, 202101011500, count);
-	EXPECT_EQ(count, 0u);
-	if (count > 0) EXPECT_DOUBLE_EQ(p[0].open, 0.0);	// 只在有数据时解引用
-
+	// 复制版对空区间安全；指针版对应的 BUG-P09-005 候选见下方禁用测试。
 	std::vector<WTSBarStruct> out;
 	out.reserve(8);
 	uint32_t n = _reader.readBarsFromCacheByRange(key, 202012311500, 202101011500, out);
@@ -241,6 +236,23 @@ TEST_F(P09WindowTest, right_edge_beyond_last_bar_and_left_edge_beyond_all)
 	ASSERT_NE(p, nullptr);
 	EXPECT_EQ(count, 4u);
 	EXPECT_EQ(p, &lst._bars[0]);
+}
+
+// BUG-P09-005 regression candidate: the active right-edge test above is a non-empty positive control.
+// The current helper derives count==0 for a left edge after all cached bars, then still indexes _bars[size()].
+// Intended post-fix contract: count==0 and p==nullptr. The helper's declaration does not currently promise
+// nullptr for empty results, so keep this disabled until the contract is decided and the one-past access is fixed.
+TEST_F(P09WindowTest, DISABLED_range_left_edge_beyond_all_returns_null_for_empty_result)
+{
+	const std::string key = fresh_key("SSE.STK.000002_EMPTY_RANGE");
+	WtRdmDtReader::BarsList& lst = _reader._bars_cache[key];
+	for (uint32_t d = 20200501; d <= 20200504; d++)
+		lst._bars.push_back(make_bar(d, 1500, (double)(d - 20200500)));
+
+	uint32_t count = 9;
+	WTSBarStruct* p = _reader.indexBarFromCacheByRange(key, 202012311500, 202101011500, count);
+	EXPECT_EQ(count, 0u);
+	EXPECT_EQ(p, nullptr);
 }
 
 TEST_F(P09WindowTest, seam_between_two_sections_is_returned_whole_without_dedup)
@@ -350,11 +362,23 @@ TEST_F(P09WindowTest, index_bar_by_count_walks_back_from_right_edge)
 	EXPECT_EQ(count, 10u);
 	EXPECT_EQ(p, &lst._bars[0]);
 
-	// count 入参为 0：min() 分支返回 0 条，调用方不得解引用返回指针
-	count = 0;
-	p = _reader.indexBarFromCacheByCount(key, 202010101500, count);
+}
+
+// BUG-P09-005 regression candidate: the active index_bar_by_count_walks_back_from_right_edge test
+// keeps non-empty controls; count==0 computes sIdx==_bars.size(), then still indexes _bars[sIdx].
+// Intended post-fix contract: count==0 and p==nullptr. The helper declaration does not currently promise
+// nullptr for empty results; re-enable only after deciding that contract and fixing the one-past access.
+TEST_F(P09WindowTest, DISABLED_index_bar_by_count_zero_returns_null_for_empty_result)
+{
+	const std::string key = fresh_key("SSE.STK.000006_ZERO_COUNT");
+	WtRdmDtReader::BarsList& lst = _reader._bars_cache[key];
+	for (uint32_t d = 20201001; d <= 20201010; d++)
+		lst._bars.push_back(make_bar(d, 1500, (double)(d - 20201000)));
+
+	uint32_t count = 0;
+	WTSBarStruct* p = _reader.indexBarFromCacheByCount(key, 202010101500, count);
 	EXPECT_EQ(count, 0u);
-	(void)p;
+	EXPECT_EQ(p, nullptr);
 }
 
 // 崩溃/UB 类输入整类收进同一个 DISABLED_ 用例（常规用例零残留）。

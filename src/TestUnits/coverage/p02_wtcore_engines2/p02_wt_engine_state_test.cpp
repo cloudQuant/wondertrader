@@ -265,9 +265,9 @@ TEST_F(P02EngineTest, DateTimeGettersMirrorTheValuesSet)
 
 TEST_F(P02EngineTest, PortContextQueriesWithoutInit)
 {
-    // 基类实现: 恒为 false / 恒为 0
+    // fixture override transTimeToMin 直接返回输入；isInTrading 在未初始化时为 false
     EXPECT_FALSE(_engine.isInTrading());
-    EXPECT_EQ(_engine.transTimeToMin(930), 0u);
+    EXPECT_EQ(_engine.transTimeToMin(930), 930u);
 
     _engine.on_bar("SHFE.ag.2212", "m", 1, NULL);
     EXPECT_EQ(_engine._bar_calls, 1u);
@@ -294,12 +294,24 @@ TEST_F(P02EngineTest, InitBuildsPortFundAndReadsNoFiles)
     EXPECT_GT(_bd_mgr._comm_calls, 0u);
 }
 
-TEST_F(P02EngineTest, AdjustingFlagIgnoresDataManager)
+TEST_F(P02EngineTest, AdjustingFlagPropagatesDataManagerValue)
 {
     do_init();
-    // 替身返回 1, 但 WtEngine::get_adjusting_flag() 丢弃了返回值恒返回 0
-    // -> 见 bugs/p02_wtcore_engines2.md BUG-P02-003
+    // 已初始化的数据管理器返回 1；引擎查询应向调用方传播该值。
     EXPECT_EQ(_dt_mgr.get_adjusting_flag(), 1u);
+    EXPECT_EQ(_engine.get_adjusting_flag(), 1u);
+}
+
+TEST_F(P02EngineTest, AdjustingFlagDefaultsToZeroWithoutDataManager)
+{
+    const std::string path = write_cfg("p02_engine_cfg_no_data_mgr.json", kEngineInitCfg);
+    WTSVariant* cfg = WTSCfgLoader::load_from_file(path.c_str());
+    ASSERT_TRUE(cfg != NULL);
+
+    // init 显式写入空指针；get_adjusting_flag() 的空 manager 分支不读取未初始化状态。
+    _engine.init(cfg, &_bd_mgr, NULL, NULL, NULL);
+    cfg->release();
+
     EXPECT_EQ(_engine.get_adjusting_flag(), 0u);
 }
 

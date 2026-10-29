@@ -1,0 +1,29 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = r28_wtrunner_lifecycle.stack_construct_destroy_reports_cd_in_child
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from r28_wtrunner_lifecycle
+[ RUN      ] r28_wtrunner_lifecycle.stack_construct_destroy_reports_cd_in_child
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r28_runner_main_test.cpp:404: Failure
+Value of: (((*(int *)&(r.status)) & 0177) == 0)
+  Actual: false
+Expected: true
+child signal=11
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r28_runner_main_test.cpp:408: Failure
+Expected equality of these values:
+  "CD"
+  r.markers
+    Which is: "C"
+C marks constructor return; D marks destructor return
+
+[  FAILED  ] r28_wtrunner_lifecycle.stack_construct_destroy_reports_cd_in_child (24 ms)
+[----------] 1 test from r28_wtrunner_lifecycle (24 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (24 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] r28_wtrunner_lifecycle.stack_construct_destroy_reports_cd_in_child
+
+ 1 FAILED TEST

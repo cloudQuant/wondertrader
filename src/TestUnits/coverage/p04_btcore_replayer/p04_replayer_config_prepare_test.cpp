@@ -16,9 +16,11 @@
 #include <gtest/gtest.h>
 
 #include <cstdint>
+#include <cstdlib>
 #include <filesystem>
 #include <string>
 #include <system_error>
+#include <sys/resource.h>
 #include <unistd.h>
 
 #include <WtBtCore/HisDataReplayer.h>
@@ -385,42 +387,39 @@ TEST_F(P04ReplayerConfigTest, registerTaskAcceptsEveryPeriodTag)
 	EXPECT_DOUBLE_EQ(3.0, replayer.get_cur_price("SSE.STK.000001"));
 }
 
-/*
- * 会崩溃的入参统一收进一个 DISABLED_ 用例：
- * 1) init 传入没有 basefiles 的配置 —— L231-L232 直接 cfgBF->get("session")，
- *    WTSVariant::get 对缺失键返回 NULL，空指针解引用（BUG-P04-001）。
- * 2) 未 register_sink 就 prepare() —— L669 无条件 _listener->handle_init()（BUG-P04-002）。
- * 3) _end_time 为 0 时 run_by_ticks 的日期推进循环：edt=0/etime=0 算出的 end_tdate
- *    远大于 _cur_tdate，循环天数不可控（BUG-P04-003，挂死风险）。
- * 逐个开启会拖垮整个二进制，故默认禁用，只作为缺陷归档。
- */
-TEST_F(P04ReplayerConfigTest, DISABLED_crashClassInitAndPrepareAndZeroEndRun)
+// base_cfg 的其他字段均有效，唯一缺少的是 basefiles。将危险 init 放在子进程，
+// 验证其按 bool 接口返回失败；_Exit 避免析构过程掩盖 init 的结果。
+TEST_F(P04ReplayerConfigTest, initWithoutBasefilesReportsFailure)
 {
-	WTSVariant* cfg = base_cfg(_workdir);
-	HisDataReplayer missingBasefiles;
-	// 崩溃点 1
-	ASSERT_TRUE(missingBasefiles.init(cfg));
-	cfg->release();
+	EXPECT_EXIT(
+		{
+			struct rlimit noCoreDump{};
+			if (::setrlimit(RLIMIT_CORE, &noCoreDump) != 0)
+				std::_Exit(2);
 
-	WTSVariant* cfg2 = base_cfg(_workdir);
-	attach_basefiles(cfg2, _root, true, true);
-	HisDataReplayer noSink;
-	ASSERT_TRUE(noSink.init(cfg2));
-	cfg2->release();
-	// 崩溃点 2
-	noSink.prepare();
+			try
+			{
+				WTSVariant* cfg = base_cfg(_workdir);
+				const char cfgReady[] = "P04_CFG_READY\n";
+				(void)::write(STDERR_FILENO, cfgReady, sizeof(cfgReady) - 1);
 
-	WTSVariant* cfg3 = base_cfg(_workdir);
-	attach_basefiles(cfg3, _root, true, true);
-	cfg3->append("stime", static_cast<uint64_t>(0));
-	cfg3->append("etime", static_cast<uint64_t>(0));
-	cfg3->append("tick", true);
-	HisDataReplayer zeroRange;
-	ASSERT_TRUE(zeroRange.init(cfg3));
-	cfg3->release();
-	RecordingSink sink;
-	zeroRange.register_sink(&sink, "p04_zero");
-	zeroRange.prepare();
-	// 挂死点 3
-	zeroRange.run(false);
+				HisDataReplayer* replayer = new HisDataReplayer();
+				const char replayerReady[] = "P04_REPLAYER_READY\n";
+				(void)::write(STDERR_FILENO, replayerReady, sizeof(replayerReady) - 1);
+
+				const char initBegin[] = "P04_INIT_BEGIN\n";
+				(void)::write(STDERR_FILENO, initBegin, sizeof(initBegin) - 1);
+				const bool initialized = replayer->init(cfg);
+				std::_Exit(initialized ? 1 : 0);
+			}
+			catch (...)
+			{
+				std::_Exit(3);
+			}
+		},
+		::testing::ExitedWithCode(0), "");
 }
+
+// “没有 sink 就 prepare”违反接收器注册的回放生命周期前置条件；不作为产品缺陷测试。
+// 零 stime/etime 的解析依赖当前日期和 session 交易日规则，现有证据显示推进有界，
+// 但零值表示何种时间范围尚无契约。待语义确定并补充可控时钟/日期观测后再单独增加用例。

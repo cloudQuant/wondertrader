@@ -1,144 +1,100 @@
-# T25_traderctp（TraderCTP 交易端）疑似缺陷
+# T25 TraderCTP 缺陷复核（2026-10-29）
 
-> 状态一律「待审核」；本迭代不修改 `src/**`。生产文件只有 `src/TraderCTP/TraderCTP.cpp`
-> （仓库里没有 `src/TraderCTP/TraderSpi.cpp`，SPI 回调就是 `TraderCTP` 自身，见 `TraderCTP.h:32`）。
-> 实测判决都来自 `CoverageTests_t_TraderCTP` 单条运行（隔离运行目录、`--gtest_also_run_disabled_tests`），
-> 标注「源码判据」的条目表示本 lane 没能给出确定性运行时证据。
+初次复核时使用 `build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_t_TraderCTP` 对旧版本 7 条启用用例逐条运行全部 PASS；该结果不代表后续修改过的断言。后续已定向复测 T25-002、004、006、008、010、011，具体见各条。未修改生产代码；`DISABLED_` 崩溃/挂死用例仍未执行，旧 rc 记录未重新取证。
 
-## BUG-T25-001
+## BUG-T25-001 — 未初始化成员（与 T2 条目重复，需合并）
 
-- 状态: 待审核
-- 严重级别: Major
-- 模块/文件: `src/TraderCTP/TraderCTP.cpp`（构造表 L203-217）、`src/TraderCTP/TraderCTP.h`（L174 `m_sink`、L193 `m_bdMgr`、L177-180 会话四值）
-- 相关测试: `src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp` → `DISABLED_plugin_created_trader_has_indeterminate_sink`（未崩，见「备注」）；可确定性复现的 NULL 面在 BUG-T25-003
-- 输入/前置条件: 经插件 C 入口 `createTrader()` 拿到对象后，**不调用** `registerSpi()` 就调用任何会打日志或取合约的路径（本条走 `orderInsert`，L471-475 的 `write_log(m_sink, ...)`）。
-- 期望行为: 构造完成后所有指针成员都是确定的空值，未登记 sink 时走「静默丢弃日志」这条已存在的分支（L32-33）。
-- 实际行为: 构造表列了 12 个字段，`m_sink`、`m_bdMgr`、`m_frontID`、`m_sessionID`、`m_orderRef`、`m_lDate`、`m_uLastQryTime`、`m_lastQryTime`、`m_hInstCTP`、`m_funcCreator` 都不在表里且类内没有初值 ⇒ 未登记 sink 时 `write_log` 读的是**不确定指针**，`m_sink==NULL` 的保护形同抛硬币；同理 `m_funcCreator` 未初始化时 `connect()`（L310）会跳到垃圾地址。
-- 复现步骤: 单独跑上面那条 `DISABLED_` 用例（先涂脏 64 块 512B 归还的堆，再 `createTrader()` + `orderInsert()`）。
-- 影响范围: 真实装配顺序是 `WtTraderBroker` 先 `init` 再 `registerSpi`，所以常规链路不命中；但任何「先调用后登记」的调用顺序（含崩溃恢复路径与新增适配器）都是未定义行为。`m_frontID/m_sessionID/m_orderRef` 同族问题已由 lane T2 登记（`bugs/T2_traderctp_xele_ctpopt.md` 的 T2-CTP-01），本条只补**指针成员**这一半。
-- 备注: 不阻塞覆盖率（启用用例全部先 `registerSpi`）。本 lane 实测这条**没有稳定崩**（3 次 rc=0，归还页面恰好是 0），所以缺陷按源码判据登记、级别定 Major 而不是 Blocker；确定性崩溃证据请见 BUG-T25-003。修复方向：给这批成员加类内初值 `= NULL / = 0`。
+- 状态: 已合并
+- 复核状态：`已合并（主编号 T2-CTP-01、T2-CTP-02）`。
+- 证据：`TraderCTP.cpp:203-217` 未初始化 `m_frontID`、`m_sessionID`、`m_orderRef`、`m_lDate`、`m_sink`、`m_bdMgr` 等字段；其中 `m_uLastQryTime` **已初始化为 0**，不应再列为漏初始化。`makeEntrustID` 读取会话字段（`:381-391`）；`registerSpi` 写 sink 和基础数据管理器（`:401-406`）；`init` 设置 creator（`:254-273`）。标准适配器在 `connect()` 前登记 SPI（`TraderAdapter.cpp:412-415`），所以未初始化指针的危险路径依赖非标准调用顺序/初始化失败。
+- 结论与边界：会话字段部分已由 T2-CTP-01 登记；`m_sink`/creator 的失败初始化路径与 T2-CTP-02 重叠。没有本轮动态证据支持单独 Major 项，建议合并去重。建议构造时初始化全部裸指针和标量，并让 `connect()` 对 creator、返回 API 和 sink 失败进行受控处理。
+- 测试：相关 `DISABLED_plugin_created_trader_has_indeterminate_sink` 本轮未运行；未声称复现。
 
-## BUG-T25-002
+## BUG-T25-002 — 畸形 entrustID 未解析仍发单
 
-- 状态: 待审核
-- 严重级别: Blocker
-- 模块/文件: `src/TraderCTP/TraderCTP.cpp`（`orderInsert` L485-501、`extractEntrustID` L1373-1395）
-- 相关测试: `t25_traderctp_gap_test.cpp` → `order_insert_ignores_malformed_entrust_id_when_usertag_set`（启用，已钉死当前行为）
-- 输入/前置条件: 状态 `WS_ALLREADY`，`WTSEntrust` 带 usertag 但 `entrustID` 不是三段式（例如 `"no-hash-at-all"`，缺 `#`）。
-- 期望行为: 与 `orderAction`（L557-558 判 `extractEntrustID` 返回值后 `return -1`）一致：委托号不可解析就拒绝下单，不发请求、不写缓存。
-- 实际行为: L493 `extractEntrustID(entrust->getEntrustID(), fid, sid, orderref);` **丢弃返回值**，三个出参保持未初始化，L495 直接把未初始化的 `orderref` 用 `fmt::format_to` 写进 `req.OrderRef` 发给柜台；同时 L500 把这个畸形 key 写进 eid 缓存。用例实测到「请求照发（`ReqOrderInsert` 计数 +1）+ 缓存里出现 `"no-hash-at-all" → "TAG-BAD"`」；`OrderRef` 的具体取值取决于栈上残留（所以本条不断言该字段，未初始化读本身即 UB）。
-- 复现步骤: 启用该用例即可；`src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:785`。
-- 影响范围: 直接涉及**委托报文的委托号**——上 Layer 传错 entrustID 形态（或被截断）时不是拒绝而是发一个随机委托号，后续回报反查（eid 缓存）也会错位，属于下单正确性/资金风险面。
-- 备注: 阻塞「把 L490-501 写成可证伪断言」的覆盖收口（本 lane 用「请求照发 + 缓存 key」这条可复现的侧面向后钉）。修复方向：`if (!extractEntrustID(...)) return -1;`。
+- 复核状态：`确认的输入校验缺陷；仅在带 usertag 且 ID 格式错误时触发`。
+- 证据：`TraderCTP.cpp:492-500` 忽略 `extractEntrustID()` 的布尔返回值；解析失败时 `fid/sid/orderref` 未赋值，仍把未初始化 `orderref` 格式化进请求并写缓存。解析器在 `:1373-1394` 对缺少 `#` 明确返回 false；`orderAction` 有检查返回值的对照实现。
+- 动态证据：旧测试将下发畸形 ID 当成通过；现改为 `order_insert_rejects_malformed_entrust_id_when_usertag_set`，要求失败返回且不发请求/不写缓存。修正后本地 stub 定向 FAIL：实际返回 0、调用 API 1 次并写入缓存。测试没有断言未初始化 `OrderRef` 的具体内容；有效 ID 的映射对照 PASS。
+- 修复方向：解析失败时在构造请求和写缓存前返回错误；增加有效三段 ID 对照测试。严重性建议 Major；不把任意上游畸形 ID 单独表述成无条件 Blocker。
 
-## BUG-T25-003
+## BUG-T25-003 — 回调空指针保护缺失
 
-- 状态: 待审核
-- 严重级别: Blocker
-- 模块/文件: `src/TraderCTP/TraderCTP.cpp`（`OnRspError` L1159-1162、`OnRspQrySettlementInfo` L1093-1096）
-- 相关测试: `t25_traderctp_gap_test.cpp` → `DISABLED_rsp_error_with_null_sink_crashes`、`DISABLED_settlement_info_last_row_without_payload_crashes`
-- 输入/前置条件:
-  1. `registerSpi(NULL)`（`m_sink` 明确为 NULL）后厂商抛回一个 `OnRspError`；
-  2. 结算单查询先收到 1 行有 `Content` 的回报，随后以「`pSettlementInfo==NULL` + `bIsLast==true`」收尾（CTP 无更多数据时的常见形状）。
-- 期望行为: 与同文件其余 6 处回调一致——先判 `m_sink` 再打日志；回报对象为空时不取字段，只按「无内容」处理。
-- 实际行为: `OnRspError` 无条件 `m_sink->handleTraderLog(...)`；`OnRspQrySettlementInfo` 的 `if (bIsLast && !m_strSettleInfo.empty())` 里无条件 `atoi(pSettlementInfo->TradingDay)` 且无条件 `m_sink->...`。实测两条用例都是 **SIGSEGV（rc=139）**。
-- 复现步骤: `--gtest_also_run_disabled_tests --gtest_filter=T25TraderCTPTest.DISABLED_rsp_error_with_null_sink_crashes`（另一条同理）。
-- 影响范围: 柜台在断链/流控时正是靠 `OnRspError` 报错的；只要 SPI 注册晚于首包（或将来有调用方传 NULL），错误上报本身就把进程打死——错误处理路径成为崩溃源。结算单同理。
-- 备注: 阻塞覆盖率（这两个分支只能以 DISABLED 形式存在）。修复方向：统一走 `write_log(m_sink,...)`，并在 L1093 加上 `pSettlementInfo != NULL` 判定。
+- 复核状态：`条件风险；厂商回调载荷和 SPI 解绑时序待验证`。
+- 证据：`OnRspError`（`TraderCTP.cpp:1159-1162`）无条件解引用 `m_sink`、`pRspInfo`；`OnRspQrySettlementInfo` 在已有结算内容且末帧时（`:1088-1096`）无条件读取 `pSettlementInfo->TradingDay` 并调用 `m_sink`。本地 CTP 头文件只给回调签名，没有说明这两个参数在末帧/解绑后是否可空。
+- 测试边界：现存 `DISABLED_rsp_error_with_null_sink_crashes` 和 `DISABLED_settlement_info_last_row_without_payload_crashes` 为人工注入空指针的测试，不代表本轮运行或证明柜台会按该形状回调。`OnRspError` 在 `registerSpi(NULL)` 后的 NULL sink 路径尤其依赖 unregister 后是否仍有在途回调。
+- 修复方向：回调边界判空；结算信息在收到有效行时保存交易日，末帧使用已保存值。先从 CTP SDK/柜台确认空末帧与解绑后的回调语义，再分别测试空查询、有效行后空末帧及 SPI 解绑时序。
 
-## BUG-T25-004
+## BUG-T25-004 — authenticate 同步失败被吞
 
-- 状态: 待审核
-- 严重级别: Minor
-- 模块/文件: `src/TraderCTP/TraderCTP.cpp`（`authenticate` L1476-1488）
-- 相关测试: `t25_traderctp_gap_test.cpp` → `authenticate_return_code_is_swallowed_and_logs_nothing`（启用）
-- 输入/前置条件: `m_pUserAPI->ReqAuthenticate(&req, id)` 同步返回非 0（柜台侧流控/报文错误/超过发送频率都会给非 0）。
-- 期望行为: 与 `doLogin`(L441)、`logout`(L461)、`orderInsert`(L543)、`orderAction`(L581)、`confirm`(L1467) 一致：记一条 `Sending ... failed: <code>` 日志，并把失败暴露给上层（返回非 0 或走 `onLoginResult(false,...)`）。
-- 实际行为: L1485 `m_pUserAPI->ReqAuthenticate(&req, genRequestID());` 返回值直接丢弃，函数恒返回 0。用例实测 `ret_=7` 时 **日志条数为 0**、状态停在 `WS_LOGINING`，之后只能等一个永不到来的 `OnRspAuthenticate`。
-- 复现步骤: 启用该用例；`t25_traderctp_gap_test.cpp:753`。
-- 影响范围: 认证请求被柜台同步拒绝时登录流程静默挂住（既不报错也不重试），运维侧看不到任何线索。
-- 备注: 不阻塞覆盖率（分支本身已覆盖，只是行为不合契约）。修复方向：判返回值 + `write_log(LL_ERROR, ...)`。
+- 复核状态：`确认的失败处理缺口`。
+- 证据：`authenticate()`（`TraderCTP.cpp:1476-1488`）丢弃 `ReqAuthenticate()` 的同步返回值并恒返回 0；调用方 `login` 已将状态置为 `WS_LOGINING` 后调用它（`:426-427`）。当 API 返回非 0 且不产生回调时，没有日志、错误结果或状态回退。`OnRspAuthenticate` 仅处理实际异步回报（`:725-738`）。
+- 动态证据：旧测试将吞码视为通过；现以 `authenticate_sync_failure_returns_error_without_waiting_for_login` 要求非零返回且不继续等待，定向 FAIL：stub 返回 7 后实际 login 返回 0、状态仍为 `WS_LOGINING`。这不证明真实柜台的具体错误码分布。
+- 修复方向：检查同步返回码，记录发送失败并将状态置为失败/通知登录失败；测试断言非零返回可见、零返回仍等待异步认证结果。
 
-## BUG-T25-005
+## BUG-T25-010 — 登录请求同步发送失败后状态仍等待回调
 
-- 状态: 待审核
-- 严重级别: Blocker
-- 模块/文件: `src/TraderCTP/TraderCTP.cpp`（`connect` 的 worker L334-365、`disconnect` L368-379、各 `OnRsp*` 的 `m_bInQuery=false`：L810/L903/L936/L1084/L1103/L1133）
-- 相关测试: `t25_traderctp_gap_test.cpp` → `DISABLED_disconnect_hangs_when_no_response_clears_in_query`（实测 HANG，>22s 存活被 KILL）；复位路径由启用用例 `connect_with_stub_creator_wires_spi_fronts_and_worker_sends_query` 覆盖
-- 输入/前置条件: `connect()` 起 worker → 队列里执行掉一个查询（`m_bInQuery` 被置 true）→ 该查询的回报始终没有以 `bIsLast` 回来（断流、报文丢弃、柜台只回 `OnRspError`）。
-- 期望行为: `m_bInQuery` 必须有超时/复位兜底（例如发送时间戳 + 超时重开，或 `OnRspError`/`OnFrontDisconnected` 里清零），`disconnect()` 必须能在有限时间内收尾。
-- 实际行为: 只有 6 个 `OnRsp*` 的 `bIsLast` 分支会清零；`OnRspError`（L1159）与 `OnFrontDisconnected`（L713）都不清 ⇒ worker 在 `if(m_queQuery.empty() || m_bInQuery)` 上 1ms 步长无限自旋，`disconnect()` 的 `m_thrdWorker->join()` 永不返回。用例在 22s 看门狗下仍存活，判定 HANG。附带：此时 CPU 常驻一个忙等核心，且队列里剩余的查询项全部不被执行。
-- 复现步骤: `--gtest_also_run_disabled_tests --gtest_filter=T25TraderCTPTest.DISABLED_disconnect_hangs_when_no_response_clears_in_query`。
-- 影响范围: 断线/流控场景下进程退出会卡死在交易通道上（`WtRunner` 停机流程走 `disconnect`），并伴随一个空转线程；这是停机路径的硬阻塞。
-- 备注: 阻塞覆盖率（本条不能以启用用例存在，`L337-343` 的自旋支只能靠有界轮询间接覆盖）。修复方向：worker 内加 `m_lastQryTime` 超时复位，或把 `OnRspError/OnFrontDisconnected` 也作为复位点。
+- 状态: 本地 stub 定向复现；真实柜台行为未验证
+- 严重级别: Major（同步拒绝后若无异步回报，登录状态可能停留等待）
+- 位置: `src/TraderCTP/TraderCTP.cpp:432-447,725-729`。认证请求成功受理后，认证回报触发 `doLogin()`；`ReqUserLogin` 非零时只写日志并仍返回 0，没有回退登录状态。
+- 相关测试: `T25TraderCTPTest.do_login_send_failure_is_logged_without_waiting_for_response`。先让认证请求返回 0，再将本地 stub 的登录发送返回设置为 5，模拟认证成功回报；定向 FAIL，状态仍为 `WS_LOGINING`。请求次数及错误日志断言未失败。
+- 修复方向: 区分认证及登录请求的同步发送失败，为当前登录代次设置失败或可重试状态，并向上游提供失败通知；不依赖未成功发送请求的异步回报。明确回调与重试的去重方式。
 
-## BUG-T25-006
+## BUG-T25-011 — 委托和撤单同步发送失败仍报告成功
 
-- 状态: 待审核
-- 严重级别: Major
-- 模块/文件: `src/TraderCTP/TraderCTP.cpp`（`makeOrderInfo` L1205-1215、`makeEntrust` L1281-1291、`wrapTimeCondition` L141-165）
-- 相关测试: `t25_traderctp_gap_test.cpp` → `order_flag_stays_zero_when_time_condition_is_neither_gfd_nor_ioc`（启用）
-- 输入/前置条件: 回报里的 `TimeCondition` 既不是 `THOST_FTDC_TC_GFD('3')` 也不是 `THOST_FTDC_TC_IOC('1')`（CTP 还有 GFS'2'/GTD'4'/GTC'5'/GFA'6'，交易所转单/条件单会用到）。
-- 期望行为: 两条通道对未知时间条件给出同一个确定值（要么都映射到 `WTC_*` 再降回 `WOF_NOR`，要么记日志后拒绝推送）。注意产品自己写了 `wrapTimeCondition` 的两个重载却一处都没用。
-- 实际行为: 两个函数都是 `if GFD / else if IOC`，**没有 else** ⇒ 字段保持对象初值：`WTSOrderInfo` 的 `m_orderFlag` 在 `_WTSOrderStruct` 构造表（`WTSTradeDef.hpp:318-328`）里没有初值、placement new 的值初始化把整块内存清零 ⇒ 推送出去是 `0`（不是 `WOF_NOR('0')/FAK/FOK` 任何一个合法值）；`WTSEntrust` 的构造表有 `m_orderFlag(WOF_NOR)` ⇒ 同一回报委托通道拿到的是 `WOF_NOR`。用例把这两个值分别钉死（0 与 48）。
-- 复现步骤: 启用该用例；`t25_traderctp_gap_test.cpp:1736`。
-- 影响范围: 下游按 `getOrderFlag()` 分派的重发/改单/风控判断在未知时间条件下会「三个分支都不命中」；订单与委托两条通道还互相不一致，排查时容易误判成数据丢失。
-- 备注: 不阻塞覆盖率（`L141-165` 那 22 行是另一回事：内部链接 + 0 调用点，见 manifest 留白面）。修复方向：补 else 显式 `setOrderFlag(WOF_NOR)` 或直接使用已有的 `wrapTimeCondition`。
+- 状态: 本地 stub 定向复现；真实柜台行为未验证
+- 严重级别: Major（同步拒绝可能被上层当作已发送）
+- 位置: `src/TraderCTP/TraderCTP.cpp:543-549,580-586`。`ReqOrderInsert` / `ReqOrderAction` 返回非零时只记录日志，方法仍返回 0；`TraderAdapter` 按负值判同步失败。
+- 相关测试: `T25TraderCTPTest.order_insert_and_action_send_failures_return_error_and_are_logged` 使用有效 entrust ID 和本地 stub 返回 9；两次方法实际均返回 0，正确的负值断言 FAIL，调用和日志对照未失败。
+- 修复方向: 将发送失败映射为上层可识别的负值并保留可诊断信息；协调预占、缓存及异步拒单回调，防止重复回滚或把未发送请求当成在途委托。
 
-## BUG-T25-007
+## BUG-T25-005 — 查询无终帧时 disconnect 可能永久等待
 
-- 状态: 待审核
-- 严重级别: Blocker
-- 模块/文件: `src/TraderCTP/TraderCTP.cpp`（`OnRspUserLogin` L758-782）、`src/Share/WtKVCache.hpp`（`init` L119-186、`put` L211-232）
-- 相关测试: `t25_traderctp_gap_test.cpp` → `login_warns_and_continues_when_cache_dir_is_not_writable`（启用，钉住告警面）+ `DISABLED_order_insert_after_failed_cache_init_crashes`（实测 SIGSEGV，rc=139）
-- 输入/前置条件: `flowdir/local/<broker>/` 已存在但**不可写**（目录被挂成只读、磁盘配额、上一轮以 root 跑过留下的属主），随后正常登录 → 状态推到 `WS_ALLREADY` → 下一笔带 usertag 的委托。
-- 期望行为: `m_eidCache.init(...) / m_oidCache.init(...)` 的 false 返回值必须被处理：报错并终止登录（或退化为「不缓存 usertag」的安全模式），绝不能让缓存进入「有对象、无 block」的半初始化状态。
-- 实际行为: L766/L779 只看回调日志、不接返回值；`init` 失败时 `_cache._file.reset()` 而 `_cache._block` 一直是 NULL。`get()` 因为只查 `_indice`（空表）会安全回落 `""`，但 `put()` 索引未命中时第一步就读 `_cache._block->_size` ⇒ 空指针解引用。启用用例实测：告警各 1 条、登录链照常 `WS_LOGINED` 并压入确认查询（即产品认为一切正常）；DISABLED 用例实测下单即 SIGSEGV。
-- 复现步骤: 先跑 `--gtest_also_run_disabled_tests --gtest_filter=T25TraderCTPTest.DISABLED_order_insert_after_failed_cache_init_crashes`。
-- 影响范围: flowdir 不可写是很常见的部署问题（换机器、权限、上一版残留），一旦命中就是「登录成功、第一笔委托直接崩」，且崩在下单路径上；同类「init 返回值被吞」在 `CTPLoader/CTPOptLoader` 的夹具里也存在，建议一并排查。
-- 备注: 阻塞覆盖率（崩溃面只能 DISABLED）。修复方向：`put` 先判 `_cache._block`；`TraderCTP` 侧接住 init 的 false 并 `onLoginResult(false, "cache init failed", 0)`。
+- 复核状态：`条件性生命周期缺陷；厂商无响应场景未在本轮动态复现`。
+- 证据：worker 在 `TraderCTP.cpp:337-363` 将 `m_bInQuery` 设为 true 后，依赖查询回调的 `bIsLast` 清零；`OnFrontDisconnected` 只改 wrapper 状态（`:713-718`），不清查询状态。`disconnect()` 把 `release()` 排队后 `join()`（`:368-379`）；若 outstanding 查询既无末帧也无错误回调，队列里的 release 无法运行，join 没有超时。worker 每 1ms 睡眠轮询，不能描述为持续占满一个 CPU 核。`m_bInQuery` 在 worker 和回调线程间共享且不是原子量，另有数据竞争风险。
+- 测试边界：`DISABLED_disconnect_hangs_when_no_response_clears_in_query` 用 stub 发出请求但不回调，能够检查该假设下的阻塞；本轮未运行。CTP 断线时是否保证补齐查询末帧/错误回调，尚无 SDK 契约证据。
+- 修复方向：为查询状态提供互斥或原子同步和有限超时；断线/请求发送失败时按 request id 清理 outstanding 状态；disconnect 采用可中断等待并确保 API release 与 worker 收尾有序。新增有界测试，不以真实柜台无响应作为唯一覆盖方式。
 
-## BUG-T25-008
+## BUG-T25-006 — 未支持时间条件留下未初始化订单标志，现有测试 oracle 不成立
 
-- 状态: 待审核
-- 严重级别: Major
-- 模块/文件: `src/TraderCTP/TraderCTP.cpp`（`OnFrontDisconnected` L713-718、`OnRspQrySettlementInfoConfirm` L806-843、`OnRspSettlementInfoConfirm` L845-859）
-- 相关测试: `t25_traderctp_gap_test.cpp` → `front_disconnect_resets_state_and_logout_reports_reason`（启用，已把当前行为钉死）
-- 输入/前置条件: 先跑到 `WS_ALLREADY` → `OnFrontDisconnected(200)`（状态回到 `WS_NOTLOGIN`）→ 一个**在途**的确认查询回报随后到达（`ConfirmDate >= m_lDate`）。
-- 期望行为: 断线后所有在途回报都应该被丢弃（或先把状态机锁在 `WS_NOTLOGIN`，等 `OnFrontConnected` → 重新认证登录），不能仅凭一条迟到的回报把通道报成「可用」。
-- 实际行为: `OnRspQrySettlementInfoConfirm` 不检查任何前置状态，`uConfirmDate >= m_lDate` 成立就 `WS_CONFIRMED → WS_ALLREADY` 并 `m_sink->onLoginResult(true, "", m_lDate)`；`OnRspSettlementInfoConfirm` 只认 `WS_CONFIRM_QRYED`。用例实测断线后确实回到 `WS_ALLREADY`、`isConnected()==true`。
-- 复现步骤: 启用该用例；`t25_traderctp_gap_test.cpp:1825`（断线后被迟到回报抬回就绪的那两句在 `:1840-1842`）。
-- 影响范围: 断线瞬间上层会收到一次虚假的「登录成功」，交易/UI 侧可能在通道实际不可用时继续下单（下单侧只判 `WS_ALLREADY`，L471/L553）；与 BUG-T25-005 叠加时更糟（断线后 worker 仍卡在 inQuery）。
-- 备注: 不阻塞覆盖率。修复方向：这两个回调加 `if (m_wrapperState == WS_LOGINED / WS_CONFIRM_QRYED)` 之类的前置判定，或引入断线代次（epoch）丢弃陈旧回报。
+- 复核状态：`存在未初始化输出；GTD 等回报是否属于产品支持输入待确认；测试 oracle 已修正并 PASS`。
+- 证据：`makeOrderInfo` 和 `makeEntrust`（`TraderCTP.cpp:1205-1215, 1281-1291`）只映射 GFD/IOC，没有给其他 `TimeCondition` 设值。`WTSEntrustStruct` 构造函数将 `m_orderFlag` 初始化为 `WOF_NOR`（`WTSTradeDef.hpp:84-93`），而 `_WTSOrderStruct` 构造函数没有初始化它（`:286-328`）。`ObjectPool::construct()` 执行 `new(mem) T()`（`ObjectPool.hpp:53-60`）；由于这里调用用户定义的默认构造函数，不能据此断言未初始化成员会被整块清零。
+- 测试边界：现用例 `unsupported_time_condition_keeps_other_order_mappings`（测试 `:1735-1788`）不再读取 `_WTSOrderStruct::m_orderFlag`，只断言回调明确映射的价格类型、开平和方向；本地定向运行 PASS。GTD 是人工构造回报，仓库没有证据说明正常适配器会发送/收到该条件，因此 PASS 不证明该字段输出契约。
+- 修复方向：先明确未知条件的输出契约；若回退为 `WOF_NOR`，初始化 `_WTSOrderStruct::m_orderFlag` 或在转换分支显式赋值，并把测试改为断言 `WOF_NOR`。若 GTD 不属于产品输入契约，删除“固定输出 0”的测试并改测支持的 GFD/IOC 映射；不要断言未初始化内存值。
+- 后续测试处理（2026-10-29）：已移除 GTD 回报中对未初始化字段的读取与固定为 0 的断言，保留确定的方向、开平和价格类型映射；该用例及支持类型对照 PASS。未确定 GTD 的产品默认值契约。
 
-## BUG-T25-009
+## BUG-T25-007 — cache init 失败后仍允许写入
 
-- 状态: 待审核
-- 严重级别: Major
-- 模块/文件: `src/TraderCTP/TraderCTP.cpp`（`confirm` L1450-1474、`OnRspQrySettlementInfoConfirm` L833、`queryConfirm` L1422-1448）
-- 相关测试: `t25_traderctp_gap_test.cpp` → `confirm_send_failure_logs_error_and_state_stays_confirm_qryed`、`query_confirm_send_failure_is_logged_inside_worker_item`、`confirm_guard_rejects_when_api_is_gone_or_state_moved_on`（均启用）
-- 输入/前置条件: 结算确认报文 `ReqSettlementInfoConfirm` 同步返回非 0（`ret_=8`），或 `m_pUserAPI` 已被摘掉（`confirm()` 返回 -1）。
-- 期望行为: 确认请求发送失败要让上层可感知（返回码上抛 / `onLoginResult(false, ...)` / 重新排队），而不是停在中间状态等一个没发出的请求的回报。
-- 实际行为: `confirm()` 的返回值被 L833 的调用点丢弃，只留一条日志；状态停在 `WS_CONFIRM_QRYED`。用例实测此时 `onLoginResult` 计数为 0（既不成功也不失败），只有等柜台**自己**补一个 `OnRspSettlementInfoConfirm` 才能进 `WS_ALLREADY`——而请求根本没发出去，所以该回报不会来，登录链无限等待。`queryConfirm` 的发送失败（L1437-1441）同样只记日志、不重排；`OnRspQrySettlementInfoConfirm` 里 `pSettlementInfoConfirm==NULL` 时也是「发一次确认就不再看结果」。
-- 复现步骤: 启用上述三条；`t25_traderctp_gap_test.cpp:1135 / 1156 / 1886`。
-- 影响范围: 登录流程在「已登录未就绪」这一步可能永久卡住且对外无提示（`isConnected()` 恒 false，上层只会看到「一直连不上」），是可用性而非正确性问题，故定 Major 不定 Blocker。
-- 备注: 不阻塞覆盖率。修复方向：发送失败时把确认动作重新压 `m_queQuery`（有 1s 节流）或直接 `onLoginResult(false, ...)`。
+- 复核状态：`确认的失败路径缺陷；禁用崩溃用例本轮未重跑`。
+- 证据：`OnRspUserLogin` 调用两个 `WtKVCache::init()` 却未处理返回值（`TraderCTP.cpp:758-781`）。映射失败时 `WtKVCache::init` 将 `_file` 清空并返回 false，而 `_block` 没有可用映射（`WtKVCache.hpp:135-142`）；之后 `put()` 在插入新键时直接读 `_cache._block->_size`（`:211-230`）。带 usertag 的 `orderInsert()` 会走 `put()`（`TraderCTP.cpp:498-500`）。
+- 动态证据：`login_warns_and_continues_when_cache_dir_is_not_writable` 本轮 `PASS`，只证明登录路径继续运行且发出告警。`DISABLED_order_insert_after_failed_cache_init_crashes` 本轮未执行；旧记录中的 SIGSEGV 未重新验证。
+- 修复方向：登录阶段处理 cache init 失败（阻止进入可交易状态或明确降级为不缓存），并在 `WtKVCache::put()` 对未初始化 block 安全失败；测试覆盖失败初始化后的带/不带 usertag 下单。
 
-## BUG-T25-010
+## BUG-T25-008 — 断线后迟到确认回调可将状态恢复为就绪
 
-- 状态: 待审核
-- 严重级别: Major
-- 模块/文件: `src/TraderCTP/TraderCTP.cpp`（`disconnect` L368-372 对比 `queryAccount` L596-605 等 6 个入队点）
-- 相关测试: `t25_traderctp_gap_test.cpp` → `disconnect_without_worker_only_queues_release`（启用，钉住「无 worker 时队列里留下一个永不执行的 release」）；竞态本身没有确定性用例
-- 输入/前置条件: `connect()` 已起 worker（L336），此时调用 `disconnect()`。
-- 期望行为: 与其它 6 个入队点一致，`m_queQuery.push(...)` 必须在 `StdUniqueLock lock(m_mtxQuery)` 保护下做——worker 正是用同一把锁做 `front()/pop()`（L354-359）。
-- 实际行为: L370 的 `m_queQuery.push([this]{ release(); });` 是**唯一不加锁**的入队点，与 worker 的 `empty()/front()/pop()` 并发访问 `std::queue`（链表容器）构成数据竞争；同文件其余入队点全部加锁，可见是漏写而不是设计。
-- 复现步骤: 源码判据（`TraderCTP.cpp:370` 无 `StdUniqueLock`，对照 L597/L620/L643/L667/L691/L1430）。本 lane 尝试过用「worker 正在消费 + 主线程 disconnect」放大命中概率，但没有做成可重复的判决，因此**不声称已实测复现**，只登记嫌疑位置与判据。
-- 影响范围: 只在 `connect()` 之后调用 `disconnect()` 时存在（生产停机流程每次都走）：概率性破坏队列（丢项/踩坏链表节点），最坏表现是 worker 拿到一个已被破坏的 handler；与 BUG-T25-005 的挂死叠加时更难归因。
-- 备注: 不阻塞覆盖率（行已覆盖，竞态不可证）。修复方向：给 L370 补同款 `StdUniqueLock` 作用域。
+- 复核状态：`状态机缺陷候选；已修正的人工迟到回调测试 FAIL，真实回调时序待验证`。
+- 证据：`OnFrontDisconnected` 设 `WS_NOTLOGIN`（`TraderCTP.cpp:713-718`）；`OnRspQrySettlementInfoConfirm` 不检查先前状态，只要非错误且确认日期满足条件就设 `WS_ALLREADY` 并报告登录成功（`:806-827`）。
+- 测试边界：旧测试在断线后人工注入确认查询回报，却断言 `WS_ALLREADY`。现已改为断言仍未登录、未连接且成功登录计数不增加；重建后单例 FAIL，实际状态复活且成功计数增加。此为人工乱序回调复现，不证明真实 CTP 一定产生该时序。
+- 修复方向：检查认证/登录/查询状态，或给连接和查询分配代次并丢弃旧代次回报；与 CTP teardown 回调约定一起验证。
 
-## 分级汇总
+## BUG-T25-009 — 结算查询/确认发送失败后状态没有恢复
 
-- Blocker：BUG-T25-002（委托号未初始化即发单）、BUG-T25-003（错误上报路径 SIGSEGV ×2）、BUG-T25-005（disconnect 挂死，实测 HANG）、BUG-T25-007（缓存 init 被吞 → 下单 SIGSEGV，实测）
-- Major：BUG-T25-001（未初始化指针成员，源码判据）、BUG-T25-006（时间条件漏映射、两通道不一致）、BUG-T25-008（迟到回报复活「已就绪」）、BUG-T25-009（确认失败后登录链无限等待）、BUG-T25-010（`disconnect` 入队不加锁，仅判据）
-- Minor：BUG-T25-004（`ReqAuthenticate` 返回码被吞）
+- 复核状态：`确认错误处理缺口；永久等待是条件结论；查询发送失败子项与 T25-005 重叠`。
+- 证据：`confirm()` 对同步发送失败会记日志并返回 -1（`TraderCTP.cpp:1450-1473`），但 `OnRspQrySettlementInfoConfirm` 的两个调用点丢弃返回值（`:833, 839`），状态保留 `WS_CONFIRM_QRYED`。`queryConfirm()` 的 worker lambda 对请求返回码只记日志（`:1422-1447`）；worker 在调用 lambda 前已经置 `m_bInQuery=true`，若同步失败且之后无回调，阻塞机制与 T25-005 相同。
+- 动态证据：旧 `confirm_send_failure_logs_error_and_state_stays_confirm_qryed` 将停滞状态当作预期，且人工补入成功回调；现改为 `DISABLED_confirm_send_failure_outcome_pending_contract`，删除该现状式断言和伪造回调，待明确重试/失败通知合同。`query_confirm_send_failure_is_logged_inside_worker_item` 是独立 worker stub 观察；不能由这些测试证明真实系统会或不会继续回报。
+- 去重与修复方向：T25-009 保留“确认发送返回码被调用方吞掉、登录结果不终结”问题；查询发送失败导致 worker 卡住的部分并入 T25-005。确认发送失败应回滚/重试或明确报告登录失败，不能只依赖假设中的后续成功回调。
+
+## BUG-T25-010 — disconnect 对查询队列无锁 push
+
+- 状态: 已合并
+- 复核状态：`已合并（主编号 T2-CTP-03）`。
+- 证据：`disconnect()` 的 `m_queQuery.push()`（`TraderCTP.cpp:368-372`）无锁；worker 的 `empty/front` 读取也无锁（`:339-355`），其他查询入队点使用 `m_mtxQuery`。与 T2-CTP-03 已记录的 CTP 队列线程安全/生命周期问题重叠；竞态本轮未动态复现，`disconnect_without_worker_only_queues_release` 不覆盖并发读写。
+- 修复方向：队列所有读写统一受同一锁保护，或用条件变量队列；不要只给 push 加锁却保留 worker 的锁外 `empty/front`。
+
+## 汇总
+
+| 处置 | 编号 | 结论 |
+| --- | --- | --- |
+| 有条件的源码缺陷 | T25-002、004、005、007、009 | 失败输入/无响应/初始化失败前提见各条；T25-005/009 的无响应后果尚未以本轮动态测试复现 |
+| 条件风险或输入契约待证 | T25-003、006、008 | 需确认 CTP 回调空载荷、产品支持的时间条件以及断线后回调顺序 |
+| 合并/去重 | T25-001→T2-CTP-01/02；T25-010→T2-CTP-03；T25-009 查询失败分支→T25-005 | 避免同一成员初始化/队列问题重复计数 |
+| 已修正测试的定向结果 | T25-006、T25-008 | T25-006 映射用例 PASS；T25-008 按断线后不得复活的契约断言 FAIL。迟到回调由测试人工注入，未证明真实 CTP 会产生该时序 |

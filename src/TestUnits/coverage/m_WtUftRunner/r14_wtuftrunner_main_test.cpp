@@ -157,24 +157,18 @@ TEST(r14_uft_config, authored_config_without_basefiles_children_walks_the_early_
 	ASSERT_TRUE(StdFile::exists(kSelfAuthoredCfg));
 
 	WtUftRunner runner;
-	// 本用例喂进去的键集决定结果：
-	//  :70 basefiles 存在（子键 session/commodity/contract/holiday 全缺 -> get() 返回 NULL -> 跳过）
-	//  :110 initEngine()  -> :255 get("env") 为 NULL -> :257 return false
-	//  :113 initDataMgr()  -> :270 get("data") 为 NULL -> :272 return false
-	//  :115 has("share_domain") 为假 -> 跳过 ShareManager（不碰共享内存）
-	//  :124 _act_policy.init("./r14_uft_absent_actpolicy.yaml") -> 文件不存在 -> false -> :126 记日志
-	//  :130 parsers / :163 traders 缺失 -> 跳过；:195 initUftStrategies -> :202 get("strategies") NULL -> false
-	//  于是 :197 return true
-	EXPECT_TRUE(runner.config(kSelfAuthoredCfg));
+	// basefiles 存在，但必要的 env/data 段缺失；initEngine/initDataMgr 返回 false。
+	// config() 目前吞掉这两个失败并最终返回 true，因此这里保留 false 契约断言以暴露产品问题。
+	EXPECT_FALSE(runner.config(kSelfAuthoredCfg));
 }
 
 TEST(r14_uft_config, missing_then_authored_order_is_independent)
 {
 	WtUftRunner runner;
-	// 先走 :63~66 的失败支（_config 保持 NULL），再走成功支：两段结果只由输入决定
+	// 缺文件失败后，再验证缺少必要 env/data 的配置也应失败。
 	EXPECT_FALSE(runner.config(kAbsentCfg));
 	write_min_config();
-	EXPECT_TRUE(runner.config(kSelfAuthoredCfg));
+	EXPECT_FALSE(runner.config(kSelfAuthoredCfg));
 }
 
 /* -------------------------------------------------------------------------

@@ -1,0 +1,628 @@
+[
+  {
+    "lane": "R21_adstorage",
+    "id": "R21-BUG-07",
+    "decision": "PRODUCT",
+    "evidence_level": "LOCAL_REPRO",
+    "source_evidence": [
+      "src/WtDataStorageAD/WtRdmDtReaderAD.h:155-164",
+      "src/WtDataStorageAD/WtRdmDtReaderAD.cpp:287-337"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p05_datastorage2/r21_rdmbars_kline_test.cpp:280-305"
+    ],
+    "input_reachability": "公开 K 线 range API 的同一窗口重复读取会复用 BarsList。",
+    "oracle_basis": "末 bar 时间字段是增量查询下界，应在成功加载后更新。",
+    "reason": "本轮 singleton PASS 确认重复窗口每次都执行全范围 get_range；小 fixture 返回仍正确，本结论限有效查询读放大，不声称已有延迟 SLA。",
+    "root_cause": "_last_bar_time 只初始化为0，始终未更新，增量下界恒为0。",
+    "fix": "成功加载后维护末 bar 游标，后续只查游标之后；保留必要的首次全量路径。",
+    "acceptance": "同窗口复读不扫全量；新数据只查游标后，返回内容/顺序不变。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/08_ad_storage/safe-runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/08_ad_storage/runs/r21_repeat_kline/run.json",
+      "docs/迭代计划/迭代02/复核185/evidence/08_ad_storage/runs/r21_repeat_kline/stdout.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/08_ad_storage/runs/r21_repeat_kline/gtest.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "修复后测重复窗口与增量范围；本轮无代表性大库/性能阈值。"
+    ]
+  },
+  {
+    "lane": "R21_adstorage",
+    "id": "R21-BUG-04",
+    "decision": "NEEDS_DECISION",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/IRdmDtReader.h:64-74",
+      "src/WtDataStorageAD/WtRdmDtReaderAD.cpp:216-249",
+      "src/WtDataStorage/WtRdmDtReader.cpp:490-505",
+      "src/WtDataStorage/WtRdmDtReader.cpp:564-581"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p05_datastorage2/r21_rdmtick_slice_test.cpp:237-280"
+    ],
+    "input_reachability": "range 查询会涉及历史 LMDB 和当前 RT ticks。",
+    "oracle_basis": "接口无闭开说明；AD/history 对等值回退，RT 保留等值。",
+    "reason": "LMDB 内部闭区间不等于输出边界。AD 与历史表现为 [stime,etime)，默认 RT 对 etime 等值保留，存在跨路径兼容歧义。between 单例本轮 FAIL 是 R32 首 tick 覆写，不能裁定端点。",
+    "root_cause": "公开端点合同缺失，RT/history 等值比较不一致。",
+    "fix": "建议统一左闭右开，和 AD/history 一致且避免相邻窗口重复；若选闭区间则改 AD/history 并评估调用者。",
+    "acceptance": "用 before/equal/after 与相邻窗口 fixture，在 AD/history/RT 验证同一所选合同。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p05_datastorage2/r21_rdmtick_slice_test.cpp",
+        "case": "DISABLED_EtimeOnExistingTickNeedsBoundaryContract",
+        "issue": "等值用例因接口端点未定而禁用。",
+        "change": "决策后加入 before/equal/after 和相邻窗口断言，跨存储路径统一 oracle。",
+        "target": "CoverageTests_adstorage",
+        "filter": "R21ReaderADTest.EtimeOnExistingTickNeedsBoundaryContract",
+        "expected_result": "所有路径遵循选定端点合同。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/08_ad_storage/safe-runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/08_ad_storage/runs/r21_tick_between_boundaries/run.json",
+      "docs/迭代计划/迭代02/复核185/evidence/08_ad_storage/runs/r21_tick_between_boundaries/stdout.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/08_ad_storage/runs/r21_tick_between_boundaries/gtest.xml"
+    ],
+    "decision_request": {
+      "question": "readTickSliceByRange 的 etime 等于某笔 tick 时是否包含该笔？",
+      "options": [
+        "闭区间 [stime,etime]，包含等值",
+        "左闭右开 [stime,etime)，排除等值"
+      ],
+      "recommendation": "左闭右开，与 AD/history 当前表现一致，需调整 RT。",
+      "impact": "闭区间改变 AD/history 等值结果；半开区间改变 RT 等值结果。"
+    },
+    "external_blocker": null,
+    "local_remaining": [
+      "owner 明确端点；本轮 between FAIL 因 R32 覆写，不作端点证据。"
+    ]
+  },
+  {
+    "lane": "R21_adstorage",
+    "id": "R21-BUG-11",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorageAD/WtRdmDtReaderAD.cpp:60-74",
+      "src/Includes/IRdmDtReader.h:58-74",
+      "src/WtDtServo/WtDataManager.cpp:74-88"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p05_datastorage2/r21_lmdbkeys_btreader_test.cpp:389-396"
+    ],
+    "input_reachability": "正常 WtDataManager factory 调 init(cfg,this)；候选直接 init(NULL,NULL)。",
+    "oracle_basis": "无 sink 可空合同；正常 factory 注入有效 sink。",
+    "reason": "源码的空 sink 解引用成立，但用例人工违反初始化前置并混合 cfg/sink 为空；无生产空 sink 来源，撤回缺陷主张。",
+    "root_cause": "测试绕过 factory 传入未声明 nullable 的 sink。",
+    "fix": "不改产品行为；正常调用保持有效 sink，若未来允许 null 再定义错误返回。",
+    "acceptance": "保留 factory/有效 sink 生命周期测试，不以手工 NULL sink 为产品回归。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p05_datastorage2/r21_lmdbkeys_btreader_test.cpp",
+        "case": "DISABLED_RdmInitWithNullSinkDereferencesBeforeCfgGuard",
+        "issue": "unsupported null sink 且 cfg/sink 条件混杂。",
+        "change": "移除其产品崩溃主张；正常 init 通过 factory 和有效 sink，只有合同允许 null 后才另测。",
+        "target": "CoverageTests_adstorage",
+        "filter": "R21ReaderADTest.AdRdmFactoryBuildsUsableReaderAndToleratesNullDelete",
+        "expected_result": "正常 reader 有效初始化与查询通过。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R21_adstorage",
+    "id": "R21-BUG-12",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/IRdmDtReader.h:68-74",
+      "src/WtDtServo/WtDataManager.cpp:112-116",
+      "src/WtDataStorageAD/WtRdmDtReaderAD.cpp:114-145",
+      "src/WtDataStorageAD/WtRdmDtReaderAD.cpp:436-457"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p05_datastorage2/r21_rdmtick_slice_test.cpp:480-502"
+    ],
+    "input_reachability": "有效 public range 可到 tick DB getter；目录可能被普通文件占用。",
+    "oracle_basis": "有效读接口对 DB 打开失败有空句柄出口；文件系统错误需转成安全失败。",
+    "reason": "create_directories 使用抛异常重载，冲突时 open 错误处理不可达。保留异常传播缺口；原测试注释所称必然 std::terminate 没有证据。",
+    "root_cause": "创建目录失败未转成 reader API 错误。",
+    "fix": "用 error_code 创建目录，记录 path/error 并返回空 DB/slice，避免异常逃逸。",
+    "acceptance": "隔离普通文件冲突返回约定空结果和错误日志，后续有效查询可继续。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p05_datastorage2/r21_rdmtick_slice_test.cpp",
+        "case": "DISABLED_TickDbPathOccupiedByRegularFileThrowsOutOfReadTickSlice",
+        "issue": "异常穿出不证明必然 std::terminate。",
+        "change": "修正文案；加防护后启用隔离冲突测试，断言失败结果/日志和后续有效读取。",
+        "target": "CoverageTests_adstorage",
+        "filter": "R21ReaderADTest.TickDbPathOccupiedByRegularFileReturnsFailureSafely",
+        "expected_result": "无异常逃出、返回空结果、进程继续。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "产品加 error_code 后运行隔离路径冲突回归；本轮未触发异常。"
+    ]
+  },
+  {
+    "lane": "R45",
+    "id": "BUG-R45-001",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtServo/ParserAdapter.h:25-38",
+      "src/WtDtServo/ParserAdapter.cpp:205-217",
+      "src/WtDtServo/ParserAdapter.cpp:301-309",
+      "src/WtDtServo/WtDtRunner.cpp:35-37",
+      "src/WtDtServo/WtDtRunner.cpp:397-403"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05b_dtservo/r45_parseradapter_test.cpp:272-298",
+      "src/TestUnits/coverage/q05b_dtservo/r45_parseradapter_test.cpp:309-316"
+    ],
+    "input_reachability": "manager 正常 release 一次后 clear；runner 析构不再调用 release。",
+    "oracle_basis": "未承诺重复 release 幂等，正常生命周期没有第二次调用。",
+    "reason": "二次直接调用确会使用已释放 API，但唯一触发方式是手工 double-release；正常 manager 只释放一次，撤回产品缺陷证据。",
+    "root_cause": "测试构造不在生产生命周期中的重复释放。",
+    "fix": "不改产品；验证 manager 正常一次释放。",
+    "acceptance": "API 恰好 release/delete 一次，manager map 清空。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q05b_dtservo/r45_parseradapter_test.cpp",
+        "case": "DISABLED_ReleaseTwiceContractPending",
+        "issue": "没有生产重复调用链。",
+        "change": "已将原重复调用用例改成安全禁用占位；正常 manager 生命周期正控单独运行 PASS 1/1。不要把直接重入列为产品回归。",
+        "target": "CoverageTests_dtservo",
+        "filter": "R45ParserAdapterFakeTest.ManagerRunsAndReleasesLiveAdapters",
+        "expected_result": "每个 API 恰好释放一次，map 清空。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/final-fix/r45.json",
+      "docs/迭代计划/迭代02/复核185/evidence/final-fix/r45.log",
+      "docs/迭代计划/迭代02/复核185/evidence/final-fix/r45.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R45",
+    "id": "BUG-R45-002",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtServo/ParserAdapter.h:25-38",
+      "src/WtDtServo/ParserAdapter.cpp:44-78",
+      "src/WtDtServo/ParserAdapter.cpp:82-93",
+      "src/WtDtServo/WtDtRunner.cpp:397-403"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05b_dtservo/r45_parseradapter_test.cpp:300-307"
+    ],
+    "input_reachability": "全仓无生产 initExt 调用；runner 每个 adapter 只调用一次 init(cfg)，并拒绝重复 cfg init。",
+    "oracle_basis": "没有重复 initExt 或重载合同。",
+    "reason": "二次调用覆盖旧 api 的源码事实存在，但当前 case 人工重复私有/内部方法；没有正常重载调用者，撤回现产品主张。",
+    "root_cause": "测试假定未经承诺的重复扩展初始化合法。",
+    "fix": "不因本项改产品；未来支持 reload 时定义旧 API 清理和替换策略。",
+    "acceptance": "单次 init 与 manager close 正常；只有热重载合同确定后再测替换。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q05b_dtservo/r45_parseradapter_test.cpp",
+        "case": "DISABLED_SecondInitExtContractUnproven",
+        "issue": "无仓内 initExt 调用者，直接二次调用并断言泄漏。",
+        "change": "已将原重复调用用例改成安全禁用占位；正常 manager 生命周期正控单独运行 PASS 1/1。不要把直接重入列为产品回归。",
+        "target": "CoverageTests_dtservo",
+        "filter": "R45ParserAdapterFakeTest.ManagerRunsAndReleasesLiveAdapters",
+        "expected_result": "单次 init/release 正常，不声称重复 initExt 受支持。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/final-fix/r45.json",
+      "docs/迭代计划/迭代02/复核185/evidence/final-fix/r45.log",
+      "docs/迭代计划/迭代02/复核185/evidence/final-fix/r45.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R4_adstorage",
+    "id": "R4-BUG-09",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorageAD/WtDataWriterAD.cpp:55-65",
+      "src/WtDataStorageAD/WtDataWriterAD.cpp:73-103",
+      "src/Includes/WTSVariant.hpp:301-308",
+      "src/WtDataStorageAD/WtDataWriterAD.cpp:327-365"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p05_datastorage2/r4_writer_ad_lmdb_test.cpp:438-443"
+    ],
+    "input_reachability": "外部 WTSVariant 可缺 groupsize/设为0；writeTick task 对其取模。",
+    "oracle_basis": "构造默认1000应由缺键保留，显式0应在 init 边界拒绝。",
+    "reason": "init 无条件以 getter 覆盖默认，缺键返回0，writeTick 后取模。disabled case 仅 GTEST_SKIP，不是除零复现。",
+    "root_cause": "缺少缺键默认与显式零校验。",
+    "fix": "缺键保留1000；显式0记录错误并让 init 失败。",
+    "acceptance": "缺键/0/正数三种 init-only 测试；不调用 writeTick，以避开独立未初始化 async flag。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p05_datastorage2/r4_writer_ad_lmdb_test.cpp",
+        "case": "DISABLED_GroupSizeZeroWriteProbeBlockedByAsyncTaskInitialization",
+        "issue": "仅 GTEST_SKIP，且 writeTick 前置 async flag 未初始化。",
+        "change": "替换为缺键/0/正数 init-only；不调用 writeTick。",
+        "target": "CoverageTests_adstorage",
+        "filter": "R4WriterADTest.GroupSizeMissingZeroAndPositiveAreValidatedAtInit",
+        "expected_result": "缺键安全默认、0 拒绝、正数成功。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "配置修复后运行 init-only 用例；本轮未执行 writeTick。"
+    ]
+  },
+  {
+    "lane": "R4_adstorage",
+    "id": "R4-BUG-06",
+    "decision": "PRODUCT",
+    "evidence_level": "LOCAL_REPRO",
+    "source_evidence": [
+      "src/WtDataStorageAD/WtDataReaderAD.cpp:117-140",
+      "src/WtDataStorageAD/WtDataReaderAD.cpp:142-182",
+      "src/WtDataStorageAD/WtDataReaderAD.cpp:184-190",
+      "src/WTSUtils/WtLMDB.hpp:262-323"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p05_datastorage2/r4_reader_ad_slices_test.cpp:275-306"
+    ],
+    "input_reachability": "首次 public count tick 查询遇 capacity<count 且 etime>0 即可到达。",
+    "oracle_basis": "实现已有 get_lowers(count) 路径，首载应受 count 限制，不先扫描全库。",
+    "reason": "容量不足先置2，紧接着时间条件覆盖成1。本轮单例 PASS 并观察到 append 全区间3笔，最终只回传2笔；PASS 确认 defect path，不是正确验收。",
+    "root_cause": "首载容量与增量时间逻辑共用 reload_flag，后者覆盖前者。",
+    "fix": "分离首次 count reload 与增量状态，首读用 get_lowers(count)。",
+    "acceptance": "count=2 首读最多扫2笔并返回末两笔；推进只扫新数据，空结果和排序正确。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p05_datastorage2/r4_reader_ad_slices_test.cpp",
+        "case": "FirstTickReadTakesIncrementalRangeAndKeepsLastCount",
+        "issue": "现用例把首次全量 append 当正确预期。",
+        "change": "修复后断言首载 get_lowers(count)，加扫描数观测且保留末 count 数据断言。",
+        "target": "CoverageTests_adstorage",
+        "filter": "R4ReaderADTest.FirstTickReadTakesIncrementalRangeAndKeepsLastCount",
+        "expected_result": "count=2 最多处理2笔，不走全量 append。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/08_ad_storage/safe-runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/08_ad_storage/runs/r4_first_count_tick_read/run.json",
+      "docs/迭代计划/迭代02/复核185/evidence/08_ad_storage/runs/r4_first_count_tick_read/stdout.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/08_ad_storage/runs/r4_first_count_tick_read/gtest.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "现测试 PASS 断言缺陷；改产品与 oracle 后 fresh target 复验。"
+    ]
+  },
+  {
+    "lane": "R4_adstorage",
+    "id": "R4-BUG-05",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorageAD/WtDataWriterAD.cpp:327-369",
+      "src/WtDataStorageAD/WtDataWriterAD.cpp:373-414",
+      "src/WtDataStorageAD/WtDataWriterAD.cpp:1055-1072",
+      "src/WtDataStorageAD/WtDataWriterAD.h:245"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p05_datastorage2/r4_writer_ad_lmdb_test.cpp:445-465"
+    ],
+    "input_reachability": "公开 writeTick task 可到 DB getter；普通文件占库路径会令目录创建失败。",
+    "oracle_basis": "写失败要可观测且不能以未处理异常结束 worker；同步/异步要分别定义。",
+    "reason": "create_directories 抛异常会离开 task。旧测试由异常直接声称必然 std::terminate，不成立；_async_task 未初始化，当前 writeTick probe 不安全且本轮不运行。",
+    "root_cause": "目录错误未转换，且 async flag 有独立初始化缺陷。",
+    "fix": "error_code 转换并走 writer 错误通道，释放 tick；先初始化 async flag。",
+    "acceptance": "确定同步/异步模式分别冲突失败可观测、worker/进程存活，后续有效写成功。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p05_datastorage2/r4_writer_ad_lmdb_test.cpp",
+        "case": "DISABLED_TickDbPathOccupiedByRegularFileThrowsOutOfWriteTick",
+        "issue": "异常传播不能证明必然 terminate，且 async flag 未初始化。",
+        "change": "修正文案；async 与错误处理修好后再分同步/异步隔离测试，当前不启用。",
+        "target": "CoverageTests_adstorage",
+        "filter": "R4WriterADTest.TickDbPathOccupiedByRegularFileReturnsFailureSafely",
+        "expected_result": "失败可观测且不 terminate，后续有效写成功。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "async flag 与错误处理修复后主代理再运行安全 writeTick probe。"
+    ]
+  },
+  {
+    "lane": "R4_adstorage",
+    "id": "R4-BUG-10",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorageAD/WtDataWriterAD.cpp:73-103",
+      "src/WtDataStorageAD/WtDataWriterAD.cpp:116-156",
+      "src/WtDataStorageAD/WtDataWriterAD.cpp:159-280",
+      "src/Share/BoostMappingFile.hpp:97-119",
+      "src/Share/BoostMappingFile.hpp:142-164",
+      "src/WtDataStorageAD/DataDefineAD.h:58-99"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p05_datastorage2/r4_writer_ad_lmdb_test.cpp:36-65",
+      "src/TestUnits/coverage/p05_datastorage2/r4_writer_ad_lmdb_test.cpp:104-135"
+    ],
+    "input_reachability": "writer init 读取已有 mmap cache 文件；中断/复制/截断可形成持久化输入。",
+    "oracle_basis": "map 成功、映射长度和 header schema 必须在按 capacity 访问前校验。",
+    "reason": "loadCache 忽略 map 结果，addr 后直接 cast，仅 clamp size/capacity；正常 round-trip 不覆盖坏头/截断，存在越界/SIGBUS 风险。",
+    "root_cause": "文件长度、map 状态及 magic/type/version 没校验。",
+    "fix": "先校验 map/header/version/size/capacity与实际长度，损坏按明确策略拒绝或重建。",
+    "acceptance": "隔离测截断头、坏版本、size>capacity、文件短于容量声明；无越界/SIGBUS，按策略拒绝/重建。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p05_datastorage2/r4_writer_ad_lmdb_test.cpp",
+        "case": "ReloadExistingCacheClampsSizeAndRebuildsIndex",
+        "issue": "合法 cache 测试不覆盖损坏文件。",
+        "change": "保留合法 case；增加独立坏文件 fixture，待 loader guard 后运行/sanitizer。",
+        "target": "CoverageTests_adstorage",
+        "filter": "R4WriterADTest.TruncatedAndInvalidCacheHeadersFailSafely",
+        "expected_result": "坏文件安全拒绝或重建，合法文件仍加载。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "无 guard 时不跑坏文件 probe；产品修复后补 sanitizer。"
+    ]
+  },
+  {
+    "lane": "R4_adstorage",
+    "id": "R4-BUG-13",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorageAD/WtDataWriterAD.cpp:601-629",
+      "src/WtDataStorageAD/WtDataWriterAD.cpp:450-478",
+      "src/WtDataStorage/WtDataWriter.cpp:1716-1727",
+      "src/WtDataStorage/WtDataWriter.cpp:2040-2053",
+      "src/Includes/WTSStruct.h:94-105"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p05_datastorage2/r4_writer_ad_cache_test.cpp:480-505"
+    ],
+    "input_reachability": "AD/default writer 都产生 public WTSBarStruct 日线供同类 consumer。",
+    "oracle_basis": "默认 writer 两条日线生成路径均 time=0,date=tradingdate，作为 backend compatibility oracle。",
+    "reason": "AD 把日线 time 写为 trading date，和默认后端不一致。当前 disabled test 错误断言该现状；writeTick 又有 async flag 未初始化，未动态运行。",
+    "root_cause": "日线构造将 date 重复写入 time。",
+    "fix": "AD day.time 写0，date 保留；分钟线语义不改。",
+    "acceptance": "相同 fixture 比较后端 date/time/OHLCV，day time=0，M1/M5 不变。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p05_datastorage2/r4_writer_ad_cache_test.cpp",
+        "case": "BarCacheMergesTicksOfDayMinute5AndMinute1BlockedByUninitializedAsyncTask",
+        "issue": "day.time 当前 oracle 与默认后端冲突，写入测试不宜直接启用。",
+        "change": "修正 day.time=0；async 生命周期可安全运行后启用，或测纯 bar 构造。",
+        "target": "CoverageTests_adstorage",
+        "filter": "R4WriterADCacheTest.BarCacheMergesTicksOfDayMinute5AndMinute1",
+        "expected_result": "day time=0/date正确，M1/M5不回归。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "本轮不直接运行 writeTick；async 生命周期修复后再测。"
+    ]
+  },
+  {
+    "lane": "R60",
+    "id": "BUG-R60-005",
+    "decision": "EXTERNAL_BLOCKED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/API/yd1.108.360/ydApi.h:41-55",
+      "src/API/yd1.108.360/ydApi.h:64-69",
+      "src/TraderYD/TraderYD.cpp:226-237",
+      "src/TraderYD/TraderYD.cpp:346-382",
+      "src/TraderYD/TraderYD.cpp:527-558",
+      "src/TraderYD/TraderYD.cpp:1059-1078"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderYD/r60_traderYD_callbacks_test.cpp:594-616"
+    ],
+    "input_reachability": "外部合法合约 trade 回调访问 m_mapPosition；它只在 notifyFinishInit 创建。",
+    "oracle_basis": "仓内 header 给 typical init/caught-up 序列，但没有首笔 trade 相对 finish-init 的硬保证。",
+    "reason": "early trade 可能空指针；当前测试只测未登记合约并提前返回，stub 时序不能证明 vendor callback 可达。",
+    "root_cause": "position map 初始化时点晚，trade 路径未判空。",
+    "fix": "需要 vendor order clause；若允许 early trade，则初始化/暂存并正确合并；若保证顺序按合同测试。",
+    "acceptance": "按真实 DLL/柜台序列覆盖 init 前后 trade，状态正确无崩溃，unknown contract 继续丢弃。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": {
+      "required": "YD SDK 对 notifyFinishInit 和第一笔 notifyTrade 的次序条款或真实 SDK 启动 trace。",
+      "checked_locally": "检查 ydApi.h、m_mapPosition 初始化、notifyTrade 路径和现有回调测试。",
+      "why_local_is_insufficient": "header 未规定首笔 trade 一定晚于 finish-init，stub 顺序不是厂商行为证据。",
+      "next_action": "向供应商索取条款或在支持 SDK 环境记录启动回报后决定策略。"
+    },
+    "local_remaining": [
+      "等待供应商时序依据；不运行空 map dereference probe。"
+    ]
+  },
+  {
+    "lane": "R60",
+    "id": "BUG-R60-006",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/ITraderApi.h:217-227",
+      "src/TraderMocker/TraderMocker.cpp:689-721",
+      "src/TraderMocker/TraderMocker.cpp:723-747",
+      "src/TraderMocker/TraderMocker.cpp:640-657",
+      "src/TraderCTP/TraderCTP.cpp:1417-1420",
+      "src/TraderYD/TraderYD.cpp:1114-1117"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp:643-660"
+    ],
+    "input_reachability": "正常 login 后 disconnect/release 结束 matcher，isConnected 为公开生命周期查询。",
+    "oracle_basis": "终态 disconnect 不应仍报告 connected；其他 adapter 以 ready 状态表示，不以 connect event 代表 login success。",
+    "reason": "disconnect/release join matcher 却不清指针，isConnected 只检查指针，因此终态仍 true。现 test 仅断言 WTE_Connect 和持仓回报。",
+    "root_cause": "把 thread pointer 当连接状态。",
+    "fix": "用明确状态机；按统一 ready 定义更新，logout/disconnect/release 清 false。",
+    "acceptance": "覆盖初始、event、login success/failure、logout/disconnect/release；按状态合同断言。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp",
+        "case": "connect_loads_positions_and_query_returns_long_short",
+        "issue": "WTE_Connect 不是 login ready；没断言 isConnected 终态。",
+        "change": "保留持仓回归；新增无网络状态机单测，ready true，disconnect/logout/release false。",
+        "target": "CoverageTests_tradermocker",
+        "filter": "R60MockerTest.IsConnectedTracksLoginAndDisconnectLifecycle",
+        "expected_result": "ready 状态正确，断开后 false。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "不运行固定 UDP 测试；补无网络状态机单测。"
+    ]
+  },
+  {
+    "lane": "R60",
+    "id": "BUG-R60-007",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/ITraderApi.h:245-254",
+      "src/TraderMocker/TraderMocker.cpp:750-756",
+      "src/WtCore/TraderAdapter.cpp:1244-1268",
+      "src/WtUftCore/TraderAdapter.cpp:354-374"
+    ],
+    "test_evidence": [],
+    "input_reachability": "正常 adapter 从有效撤单创建 action 后调用；无 NULL caller/nullable contract。",
+    "oracle_basis": "接口注释没定义 NULL 可传；不能因相邻接口有 guard 就推定本参数 nullable。",
+    "reason": "NULL 在 retain 处崩溃属源码事实，但未证是有效输入/合同违约；撤回人工 NULL 作为产品缺陷证据。",
+    "root_cause": "测试向未声明 nullable 的内部 action 参数传 NULL。",
+    "fix": "不按该候选改产品；如 API owner 规定 nullable，再定义失败码并加 guard。",
+    "acceptance": "当前只验证正常有效 action 路径；将来合同改变再测 NULL。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "没有正常 NULL 调用证据。"
+    ]
+  },
+  {
+    "lane": "p05_datastorage2",
+    "id": "BUG-P05-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorageAD/WtBtDtReaderAD.cpp:169-192",
+      "src/WtDataStorageAD/WtRdmDtReaderAD.cpp:436-457",
+      "src/WtDataStorageAD/WtDataReaderAD.cpp:597-618"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p05_datastorage2/p05_btdtreader_ad_lmdb_test.cpp:449-472"
+    ],
+    "input_reachability": "三个读者重复读取同一 exchange.code tick DB 会使用 getter。",
+    "oracle_basis": "缓存查找和插入 key 应一致；命中要保留 map shared_ptr 所有权。",
+    "reason": "三处查 exchange.code 却只按 exchange 插入，命中又 move 出 handle。safe test 检数据但无 open count，故静态成立而未动态量开库次数。",
+    "root_cause": "key 不一致且 move 清空 map handle。",
+    "fix": "统一 key 为 exchange.code；命中返回 shared_ptr 副本。",
+    "acceptance": "同 code 多次只 open 一次，不同 code 隔离，数据/空结果正确；增加 open counter/identity。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p05_datastorage2/p05_btdtreader_ad_lmdb_test.cpp",
+        "case": "TickDbCacheKeyNeverMatchesSoEveryCallReopens",
+        "issue": "测试没有 open counter，标题不是动态证据。",
+        "change": "修复后用 counter/identity seam 证明各 reader 的复用，并保留数据断言。",
+        "target": "CoverageTests_adstorage",
+        "filter": "P05BtReaderADTest.TickDbCacheReusesSameContractHandle",
+        "expected_result": "同 code 只开一次，不同 code 隔离，读值正确。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "本轮没直接观测 open count；待增加测试 seam 再复验。"
+    ]
+  },
+  {
+    "lane": "p05_datastorage2",
+    "id": "BUG-P05-006",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDataStorageAD/WtBtDtReaderAD.cpp:64-89",
+      "src/WtDataStorageAD/WtBtDtReaderAD.cpp:94-121"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p05_datastorage2/p05_btdtreader_ad_lmdb_test.cpp:474-510"
+    ],
+    "input_reachability": "reader 从配置目录的持久化 LMDB value 解码，截断/损坏/旧 schema 属文件输入。",
+    "oracle_basis": "不得复制超过 item.size；坏值安全拒绝，旧 schema 仅按正式版本转换；长值固定复制是截断不是 cursor 写越界。",
+    "reason": "bar/tick 固定 memcpy struct 大小且不验长度，短值构成越界读。disabled 探针未运行、无 sanitizer；原输出 cursor overflow 主张错误。",
+    "root_cause": "反序列化未核验 value 长度/schema。",
+    "fix": "memcpy 前校验支持长度，诊断 key/date/size；旧格式显式转换。",
+    "acceptance": "空/短/精确/长分别覆盖；坏值无越界且可诊断，合法值正常，旧版本按合同转换。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p05_datastorage2/p05_btdtreader_ad_lmdb_test.cpp",
+        "case": "DISABLED_ShortLmdbValuesOverreadStructBuffer",
+        "issue": "短值是源端越界读，长值截断；不是 cursor 写越界。",
+        "change": "修正文案，bar/tick 空短值拆开；加 guard 后才以隔离 fixture 和 sanitizer 运行。",
+        "target": "CoverageTests_adstorage",
+        "filter": "P05BtReaderADTest.ShortLmdbValuesReturnSafeFailure",
+        "expected_result": "坏值安全失败无越界，精确长度成功，长值按 schema 拒绝/兼容。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "短值与 ASan/UBSan 本轮 NOT_RUN；长度 guard 后运行。"
+    ]
+  }
+]

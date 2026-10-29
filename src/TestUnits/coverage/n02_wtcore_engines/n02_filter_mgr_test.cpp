@@ -12,8 +12,8 @@
  *   - _notifier != NULL 的通知分支（EventNotifier 需要 ZMQ 端点，属外部依赖）。
  *
  * 注意: load_filters 对 WTSCfgLoader::load_from_file 的返回值没有判空,
- *       非法配置会得到 NULL 并立刻 cfg->get(...)  ->  空指针解引用。
- *       该缺陷类的全部输入集中在唯一一个 DISABLED_ 用例里, 启用用例只喂合法 JSON。
+ *       空文件或语法错误会得到 NULL 并立刻 cfg->get(...) -> 空指针解引用。
+ *       strategy_filters:null 会被 JSON 转换器忽略，不属于上述畸形输入，单独由启用用例覆盖。
  */
 #include <gtest/gtest.h>
 
@@ -137,6 +137,16 @@ TEST_F(N02FilterMgrTest, LoadMissingFileIsLoggedAndSkipped)
     double pos = 3;
     EXPECT_FALSE(mgr.is_filtered_by_strategy("S_IGNORE", pos));
     EXPECT_FALSE(mgr.is_filtered_by_executer("exec_off"));
+}
+
+TEST_F(N02FilterMgrTest, NullStrategyFiltersSectionIsIgnored)
+{
+    WtFilterMgr mgr;
+    mgr.load_filters(writeFilters("{\"strategy_filters\": null}\n").c_str());
+
+    double pos = 12;
+    EXPECT_FALSE(mgr.is_filtered_by_strategy("S_IGNORE", pos));
+    EXPECT_DOUBLE_EQ(12, pos);
 }
 
 //////////////////////////////////////////////////////////////////
@@ -303,7 +313,6 @@ TEST(N02FilterMgrDisabled, DISABLED_MalformedConfigFilesCrashLoadFilters)
         "{",                                    // 截断对象
         "[1,2,3]",                              // 顶层是数组不是对象
         "not json at all",                      // 完全非法
-        "{\"strategy_filters\": null}",         // 节点为 null
     };
 
     TempRoot root("fltbad");

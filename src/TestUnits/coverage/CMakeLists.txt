@@ -275,7 +275,15 @@ FOREACH(spec ${WT_COV_SPLIT_TARGETS})
 		TARGET_LINK_OPTIONS(CoverageTests_${suffix} PRIVATE "-Wl,-undefined,dynamic_lookup")
 		MESSAGE(STATUS "coverage: CoverageTests_${suffix} 无 darwin 厂商库，链接期容忍未定义厂商符号（用例不得调用真实 API）")
 	ENDIF()
-	TARGET_LINK_LIBRARIES(CoverageTests_${suffix} PRIVATE ${WT_COV_SHARED_LIBS})
+	IF(suffix STREQUAL "porter")
+		# This target uses WtCore; WtBtPorter brings in the incompatible WtBtCore
+		# EventNotifier implementation, so keep the rest of the shared test deps only.
+		SET(WT_COV_PORTER_SHARED_LIBS ${WT_COV_SHARED_LIBS})
+		LIST(REMOVE_ITEM WT_COV_PORTER_SHARED_LIBS WtBtPorter)
+		TARGET_LINK_LIBRARIES(CoverageTests_${suffix} PRIVATE ${WT_COV_PORTER_SHARED_LIBS})
+	ELSE()
+		TARGET_LINK_LIBRARIES(CoverageTests_${suffix} PRIVATE ${WT_COV_SHARED_LIBS})
+	ENDIF()
 	# 厂商静态库：不手敲清单，直接从各模块自己的 CMakeLists 里读 `API/...*.a` 引用。
 	# 实测只有 CTPLoader/ParserCTP/TraderCTP 三个目录需要（链接期报
 	# CThostFtdcTraderApi::CreateFtdcTraderApi / CThostFtdcMdApi::CreateFtdcMdApi 未定义），
@@ -419,10 +427,8 @@ FOREACH(mod ${WT_MAIN_MODULES})
 	set_source_files_properties(${mod_tus} PROPERTIES
 		COMPILE_DEFINITIONS "main=wt_coverage_main_${_modlc}")
 	WT_COV_ISOLATE_INST_HLP(${mod_tus})
-	# 该可执行体自己链哪些「核心静态库」，从它自己的 CMakeLists 里读，不手敲。
-	# 实测：WtRunner 能链上是因为它的核心符号可以从 libWtPorter.dylib 里取到，
-	# 而 WtUftRunner / WtLatencyUFT 用到的 `ShareManager::*` 等在共享库集合里没有出处
-	# （产品那边是 `SET(LIBS WtUftCore …)`），测试目标照抄才不漏符号。
+	# 普通模块目标从自身 CMakeLists 读取核心静态库候选；下面几个 runner 的
+	# 专属链接集则直接对应各自产品依赖，避免全局库带入同名符号实现。
 	SET(WT_M_CORES "")
 	FOREACH(cand WtCore WtBtCore WtUftCore WtDtCore)
 		IF(cand STREQUAL "${mod}")
@@ -438,7 +444,63 @@ FOREACH(mod ${WT_MAIN_MODULES})
 	MESSAGE(STATUS "coverage: CoverageTests_m_${mod} 附加核心静态库 [${WT_M_CORES}]")
 	ADD_EXECUTABLE(CoverageTests_m_${mod} ${mod_tests} ${mod_tus})
 	TARGET_INCLUDE_DIRECTORIES(CoverageTests_m_${mod} PRIVATE ${WT_COV_INCS})
-	TARGET_LINK_LIBRARIES(CoverageTests_m_${mod} PRIVATE ${WT_COV_SHARED_LIBS} ${WT_M_CORES})
+	IF(mod STREQUAL "WtRunner")
+		# Match WtRunner's product link set; in particular, do not bring in
+		# WtBtPorter/WtBtCore or other global coverage libraries that can supply
+		# a conflicting EventNotifier implementation.
+		SET(WT_RUNNER_COV_LIBS
+			GTest::gtest_main Threads::Threads
+			WtCore WTSTools WTSUtils)
+		IF(MSVC)
+			LIST(APPEND WT_RUNNER_COV_LIBS ws2_32)
+		ELSE()
+			LIST(APPEND WT_RUNNER_COV_LIBS
+				dl pthread boost_filesystem boost_thread ${STDCXXFS})
+			IF(WIN32)
+				LIST(APPEND WT_RUNNER_COV_LIBS ws2_32 iconv)
+			ENDIF()
+		ENDIF()
+		LIST(APPEND WT_RUNNER_COV_LIBS ${ICONV_LIBRARY})
+		TARGET_LINK_LIBRARIES(CoverageTests_m_${mod} PRIVATE ${WT_RUNNER_COV_LIBS})
+	ELSEIF(mod STREQUAL "WtUftRunner")
+		# WtUftRunner 的产品依赖只含 UFT 核心和基础工具库。不要把全局
+		# WT_COV_SHARED_LIBS 中的 WtExecMon/WtPorter 链入来，以免其引入 WtCore，
+		# 与 WtUftCore 中同名的 ActionPolicyMgr 符号发生静态归档抢占。
+		SET(WT_UFT_RUNNER_COV_LIBS
+			GTest::gtest_main Threads::Threads
+			WtUftCore WTSTools WTSUtils)
+		IF(MSVC)
+			LIST(APPEND WT_UFT_RUNNER_COV_LIBS ws2_32)
+		ELSE()
+			LIST(APPEND WT_UFT_RUNNER_COV_LIBS
+				dl pthread boost_filesystem boost_thread ${STDCXXFS})
+			IF(WIN32)
+				LIST(APPEND WT_UFT_RUNNER_COV_LIBS ws2_32 iconv)
+			ENDIF()
+		ENDIF()
+		# src/CMakeLists.txt also links ICONV_LIBRARY to each product executable.
+		LIST(APPEND WT_UFT_RUNNER_COV_LIBS ${ICONV_LIBRARY})
+		TARGET_LINK_LIBRARIES(CoverageTests_m_${mod} PRIVATE ${WT_UFT_RUNNER_COV_LIBS})
+	ELSEIF(mod STREQUAL "WtLatencyUFT")
+		# Match WtLatencyUFT's product link set while keeping the shared global
+		# coverage libraries (notably WtExecMon/WtPorter) out of this binary.
+		SET(WT_LATENCY_UFT_COV_LIBS
+			GTest::gtest_main Threads::Threads
+			WtUftCore WTSTools WTSUtils WtShareHelper)
+		IF(MSVC)
+			LIST(APPEND WT_LATENCY_UFT_COV_LIBS ws2_32)
+		ELSE()
+			LIST(APPEND WT_LATENCY_UFT_COV_LIBS
+				dl pthread boost_thread ${STDCXXFS})
+			IF(WIN32)
+				LIST(APPEND WT_LATENCY_UFT_COV_LIBS ws2_32 iconv)
+			ENDIF()
+		ENDIF()
+		LIST(APPEND WT_LATENCY_UFT_COV_LIBS ${ICONV_LIBRARY})
+		TARGET_LINK_LIBRARIES(CoverageTests_m_${mod} PRIVATE ${WT_LATENCY_UFT_COV_LIBS})
+	ELSE()
+		TARGET_LINK_LIBRARIES(CoverageTests_m_${mod} PRIVATE ${WT_COV_SHARED_LIBS} ${WT_M_CORES})
+	ENDIF()
 	SET_TARGET_PROPERTIES(CoverageTests_m_${mod} PROPERTIES
 		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 	LIST(APPEND MOVED_SRCS ${mod_tests})

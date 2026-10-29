@@ -69,14 +69,14 @@ TEST_F(R1ReaderBarsTest, day_his_raw_v2_tail_window_by_count)
 	ASSERT_TRUE(write_bytes(his_kline_file("day", "610001"),
 		make_block(BT_HIS_Day, BLOCK_VERSION_RAW_V2, pack_bars(bars))));
 
-	// etime 在 20240108（非当日 curTDate=20240110）→ 纯 his 尾窗：count=2 取最后两条
-	WTSKlineSlice* slice = _reader.readKlineSlice("SSE.STK.610001", KP_DAY, 2, 202401081500ull);
+	// etime 晚于预置的 20240108/09/10 数据且不是当日 → 纯 his 尾窗：count=2 取最后两条
+	WTSKlineSlice* slice = _reader.readKlineSlice("SSE.STK.610001", KP_DAY, 2, 202401111500ull);
 	ASSERT_TRUE(slice != NULL);
 	ASSERT_EQ(slice->size(), 2);
 	expect_bar_eq(*slice->at(0), bars[1]);
 	expect_bar_eq(*slice->at(1), bars[2]);
 	// count 超过总量时钳制到全量
-	WTSKlineSlice* all = _reader.readKlineSlice("SSE.STK.610001", KP_DAY, 10, 202401081500ull);
+	WTSKlineSlice* all = _reader.readKlineSlice("SSE.STK.610001", KP_DAY, 10, 202401111500ull);
 	ASSERT_TRUE(all != NULL);
 	EXPECT_EQ(all->size(), 3);
 	expect_bar_eq(*all->at(0), bars[0]);
@@ -89,7 +89,7 @@ TEST_F(R1ReaderBarsTest, day_his_cmp_v2_and_old_struct_upgrade)
 	vector<WTSBarStruct> bars = { make_bar(20240108, 20240108, 0), make_bar(20240109, 20240109, 1) };
 	ASSERT_TRUE(write_bytes(his_kline_file("day", "610002"),
 		make_block(BT_HIS_Day, BLOCK_VERSION_CMP_V2, pack_bars(bars))));
-	WTSKlineSlice* cmp = _reader.readKlineSlice("SSE.STK.610002", KP_DAY, 2, 202401081500ull);
+	WTSKlineSlice* cmp = _reader.readKlineSlice("SSE.STK.610002", KP_DAY, 2, 202401111500ull);
 	ASSERT_TRUE(cmp != NULL);
 	ASSERT_EQ(cmp->size(), 2);
 	expect_bar_eq(*cmp->at(1), bars[1]);
@@ -98,11 +98,32 @@ TEST_F(R1ReaderBarsTest, day_his_cmp_v2_and_old_struct_upgrade)
 	vector<WTSBarStructOld> oldBars = { make_old_bar(20240108, 20240108, 0), make_old_bar(20240109, 20240109, 1) };
 	ASSERT_TRUE(write_bytes(his_kline_file("day", "610003"),
 		make_block(BT_HIS_Day, BLOCK_VERSION_RAW, pack_old_bars(oldBars))));
-	WTSKlineSlice* up = _reader.readKlineSlice("SSE.STK.610003", KP_DAY, 2, 202401081500ull);
+	WTSKlineSlice* up = _reader.readKlineSlice("SSE.STK.610003", KP_DAY, 2, 202401111500ull);
 	ASSERT_TRUE(up != NULL);
 	ASSERT_EQ(up->size(), 2);
 	expect_bar_upgraded(*up->at(1), oldBars[1]);
 	up->release();
+}
+
+TEST_F(R1ReaderBarsTest, day_his_cutoff_excludes_later_bar)
+{
+	vector<WTSBarStruct> bars = {
+		make_bar(20240108, 20240108, 0),
+		make_bar(20240110, 20240110, 1)
+	};
+	ASSERT_TRUE(write_bytes(his_kline_file("day", "610009"),
+		make_block(BT_HIS_Day, BLOCK_VERSION_RAW_V2, pack_bars(bars))));
+
+	// 202401091500 严格晚于目标日 20240108，早于后续 bar 所在的 20240110。
+	// 这个中间日期用例验证截止时间不会把之后的 bar 带入切片。
+	WTSKlineSlice* slice = _reader.readKlineSlice("SSE.STK.610009", KP_DAY, 2, 202401091500ull);
+	ASSERT_TRUE(slice != NULL);
+	EXPECT_EQ(slice->size(), 1);
+	for(int32_t i = 0; i < slice->size(); i++)
+		EXPECT_LE(slice->at(i)->date, 20240109u);
+	if(slice->size() == 1)
+		expect_bar_eq(*slice->at(0), bars[0]);
+	slice->release();
 }
 
 TEST_F(R1ReaderBarsTest, day_size_check_failure_logs_error_and_returns_empty)
@@ -175,14 +196,14 @@ TEST_F(R1ReaderBarsTest, bars_cache_hit_survives_file_deletion)
 	string f = his_kline_file("day", "610007");
 	ASSERT_TRUE(write_bytes(f, make_block(BT_HIS_Day, BLOCK_VERSION_RAW_V2, pack_bars(bars))));
 
-	WTSKlineSlice* first = _reader.readKlineSlice("SSE.STK.610007", KP_DAY, 2, 202401081500ull);
+	WTSKlineSlice* first = _reader.readKlineSlice("SSE.STK.610007", KP_DAY, 2, 202401111500ull);
 	ASSERT_TRUE(first != NULL);
 	ASSERT_EQ(first->size(), 2);
 	first->release();
 
 	std::error_code ec;
 	std::filesystem::remove(f, ec);
-	WTSKlineSlice* second = _reader.readKlineSlice("SSE.STK.610007", KP_DAY, 2, 202401081500ull);
+	WTSKlineSlice* second = _reader.readKlineSlice("SSE.STK.610007", KP_DAY, 2, 202401111500ull);
 	ASSERT_TRUE(second != NULL);
 	ASSERT_EQ(second->size(), 2);
 	expect_bar_eq(*second->at(0), bars[0]);		// 缓存命中：不再触盘

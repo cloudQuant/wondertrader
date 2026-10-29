@@ -99,6 +99,9 @@ TEST_F(R162WriterClosingEdgeTest, R162WriterRawMin1BlockHeaderIsStrippedBeforeAp
 	head._version = BLOCK_VERSION_RAW_V2;
 
 	const string file = his_min1_file("rb2210");
+	std::error_code ec;
+	std::filesystem::create_directories(std::filesystem::path(file).parent_path(), ec);
+	ASSERT_FALSE(ec) << ec.message();
 	{
 		std::ofstream ofs(file.c_str(), std::ios::binary | std::ios::trunc);
 		ASSERT_TRUE(ofs.is_open());

@@ -3,10 +3,9 @@
  *
  * 靶子（WtBtPorter 残余 58 行 / WtBtRunner.cpp 25 行 / WtBtRunner.h 36 行）：
  *  - WtBtPorter.cpp:438-457 / 1164-1183 / 1587-1606 三个 get_bars 的非空切片分块回调。
- *    既有 r134 用自定义 basefiles 时三个用例均 FAIL（cnt=0），本文件改用仓库
- *    dist/common 的公开基础数据（r180 已证同一 loader 路径可拿到 m5 切片），
- *    只断言“返回值不超过请求量 + 回调次数与返回值一致”，不把结论压死在
- *    具体条数上：数据面若仍为空，用例依旧通过，不伪造覆盖。
+ *    通过公开 loader/feed_raw_bars 注入 12 根合成 m5；12 位配置时间设为末根
+ *    10:30，使每条路径都应返回末尾 5 根，并核对 loader、回调条数及字段。
+ *    dist/common 只提供 SSE 股票的 session/commodity 描述，不作为行情数据源。
  *  - WtBtRunner.h:202-205/217-224/510-539/548-596 的公开事件与访问器（栈对象）。
  *  - WtBtPorter.cpp:174-185 config_backtest 的首次/空配置入口（不传合法完整配置，
  *    避免在未 init 的 replayer 上继续初始化）。
@@ -68,15 +67,30 @@ struct BarsRec
 {
 	uint32_t	calls = 0;
 	uint32_t	count = 0;
+	double		first_close = 0.0;
+	double		last_close = 0.0;
+	uint64_t	first_time = 0;
+	uint64_t	last_time = 0;
+	bool		valid = true;
+	bool		last = false;
+	uint32_t	last_calls = 0;
+	std::string	code;
+	std::string	period;
 	void clear() { *this = BarsRec(); }
 };
 
 BarsRec g_bars;
 WTSBarStruct g_feed[12];
+uint32_t g_loader_calls = 0;
+std::string g_loader_code;
+std::string g_loader_period;
 
 void clear_bars()
 {
 	g_bars.clear();
+	g_loader_calls = 0;
+	g_loader_code.clear();
+	g_loader_period.clear();
 	memset(g_feed, 0, sizeof(g_feed));
 	for (int i = 0; i < 12; i++)
 	{
@@ -93,21 +107,40 @@ void clear_bars()
 }
 
 /* FuncLoadFnlBars / FuncLoadRawBars：把 12 根合成 m5 经公开 feed_raw_bars 回灌。 */
-bool fnl_loader(const char* /*stdCode*/, const char* period)
+bool fnl_loader(const char* stdCode, const char* period)
 {
-	if (strcmp(period, "m5") != 0)
+	g_loader_calls++;
+	g_loader_code = stdCode ? stdCode : "";
+	g_loader_period = period ? period : "";
+	if (g_loader_code != kCode || g_loader_period != "m5")
 		return false;
 
 	feed_raw_bars(g_feed, 12);
 	return true;
 }
 
-void bars_cb(CtxHandler, const char*, const char*, WTSBarStruct* bar,
-	WtUInt32 count, bool /*isLast*/)
+void bars_cb(CtxHandler, const char* code, const char* period, WTSBarStruct* bar,
+	WtUInt32 count, bool isLast)
 {
 	g_bars.calls++;
-	g_bars.count = count;
-	(void)bar;
+	g_bars.code = code ? code : "";
+	g_bars.period = period ? period : "";
+	g_bars.last = isLast;
+	if (isLast)
+		g_bars.last_calls++;
+	if (bar == NULL || count == 0)
+	{
+		g_bars.valid = false;
+		return;
+	}
+	if (g_bars.count == 0)
+	{
+		g_bars.first_close = bar[0].close;
+		g_bars.first_time = bar[0].time;
+	}
+	g_bars.count += count;
+	g_bars.last_close = bar[count - 1].close;
+	g_bars.last_time = bar[count - 1].time;
 }
 
 struct BarsFixture
@@ -130,7 +163,7 @@ struct BarsFixture
 		const std::string root = repo_root().string();
 		const std::string cfg =
 			"{\"replayer\":{\"mode\":\"csv\",\"path\":\"" + dir + "\","
-			"\"stime\":202001020930,\"etime\":202001021500,\"tick\":false,"
+			"\"stime\":202001021030,\"etime\":202001021500,\"tick\":false,"
 			"\"basefiles\":{"
 			"\"session\":\"" + root + "/dist/common/sessions.json\","
 			"\"commodity\":[\"" + root + "/dist/common/commodities.json\","
@@ -186,26 +219,33 @@ void evt_cb(WtUInt32 evtId, WtUInt32 curDate, WtUInt32 curTime)
 
 } // namespace
 
-/*
- * 生产: WtBtPorter.cpp:438-457（cta_get_bars 命中 WTSKlineSlice 的分块循环/release/reaCnt）
- * 数据面若未加载成功，返回 0 也合法；因此只做上界与回调计数的一致性断言。
- */
+void expect_loaded_bars(WtUInt32 returnedCount)
+{
+	EXPECT_GE(g_loader_calls, 1U);
+	EXPECT_EQ(std::string(kCode), g_loader_code);
+	EXPECT_EQ(std::string("m5"), g_loader_period);
+	EXPECT_GT(g_bars.calls, 0U);
+	EXPECT_TRUE(g_bars.valid);
+	EXPECT_EQ(5U, returnedCount);
+	EXPECT_EQ(returnedCount, g_bars.count);
+	EXPECT_TRUE(g_bars.last);
+	EXPECT_EQ(1U, g_bars.last_calls);
+	EXPECT_EQ(std::string(kCode), g_bars.code);
+	EXPECT_EQ(std::string("m5"), g_bars.period);
+	EXPECT_DOUBLE_EQ(10.12, g_bars.first_close);
+	EXPECT_DOUBLE_EQ(10.16, g_bars.last_close);
+	EXPECT_EQ(g_feed[7].time, g_bars.first_time);
+	EXPECT_EQ(g_feed[11].time, g_bars.last_time);
+}
+
+/* 生产: WtBtPorter.cpp:438-457（非空切片分块回调/release/返回条数） */
 TEST(R194BtPorterBars, CtaGetBarsPathStaysWithinRequestedCount)
 {
 	BarsFixture fx;
 	ASSERT_TRUE(fx.setup("cta"));
 
 	const WtUInt32 cnt = cta_get_bars(1, kCode, "m5", 5, false, bars_cb);
-	EXPECT_LE(cnt, 5U);
-	if (cnt > 0)
-	{
-		EXPECT_EQ(1U, g_bars.calls);
-		EXPECT_GT(g_bars.count, 0U);
-	}
-	else
-	{
-		EXPECT_EQ(0U, g_bars.calls);
-	}
+	expect_loaded_bars(cnt);
 
 	fx.teardown();
 }
@@ -219,16 +259,7 @@ TEST(R194BtPorterBars, SelGetBarsPathStaysWithinRequestedCount)
 	ASSERT_TRUE(fx.setup("sel"));
 
 	const WtUInt32 cnt = sel_get_bars(1, kCode, "m5", 5, bars_cb);
-	EXPECT_LE(cnt, 5U);
-	if (cnt > 0)
-	{
-		EXPECT_EQ(1U, g_bars.calls);
-		EXPECT_GT(g_bars.count, 0U);
-	}
-	else
-	{
-		EXPECT_EQ(0U, g_bars.calls);
-	}
+	expect_loaded_bars(cnt);
 
 	fx.teardown();
 }
@@ -242,16 +273,7 @@ TEST(R194BtPorterBars, HftGetBarsPathStaysWithinRequestedCount)
 	ASSERT_TRUE(fx.setup("hft"));
 
 	const WtUInt32 cnt = hft_get_bars(1, kCode, "m5", 5, bars_cb);
-	EXPECT_LE(cnt, 5U);
-	if (cnt > 0)
-	{
-		EXPECT_EQ(1U, g_bars.calls);
-		EXPECT_GT(g_bars.count, 0U);
-	}
-	else
-	{
-		EXPECT_EQ(0U, g_bars.calls);
-	}
+	expect_loaded_bars(cnt);
 
 	fx.teardown();
 }

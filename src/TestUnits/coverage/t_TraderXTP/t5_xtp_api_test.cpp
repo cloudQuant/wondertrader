@@ -733,9 +733,8 @@ TEST_F(TraderXTPTest, query_asset_maps_into_account_info)
 	EXPECT_DOUBLE_EQ(5000.0, a.deposit);
 }
 
-/// 负 deposit_withdraw：产品侧走 setWithdraw(0) 而不是 setWithdraw(-x)
-/// —— 现状断言（锁定缺陷行为），修复后这条应改为期望 8000，见 bugs 文件
-TEST_F(TraderXTPTest, query_asset_negative_deposit_withdraw_currently_lost)
+/// 负 deposit_withdraw 仅用于确认资产回报仍被转发；负号映射契约待厂商确认（T5-05）
+TEST_F(TraderXTPTest, query_asset_negative_deposit_withdraw_forwards_account_without_sign_oracle)
 {
 	XTPQueryAssetRsp asset;
 	memset(&asset, 0, sizeof(asset));
@@ -744,8 +743,9 @@ TEST_F(TraderXTPTest, query_asset_negative_deposit_withdraw_currently_lost)
 
 	api_.OnQueryAsset(&asset, NULL, 42, true, 1);
 	ASSERT_EQ(1u, sink_.n_rsp_account_);
-	EXPECT_DOUBLE_EQ(0.0, sink_.last_acc_.withdraw);   // 现状：出金金额被吞掉
-	EXPECT_DOUBLE_EQ(0.0, sink_.last_acc_.deposit);
+	EXPECT_TRUE(sink_.last_acc_.valid);
+	EXPECT_DOUBLE_EQ(90000.0, sink_.last_acc_.balance);
+	// XTP 头文件没有说明负值是否表示出金；不把它映射为 0 或 8000 写成合同。
 }
 
 /// 下单被拒（error_id≠0）且合约已登记：走 makeEntrust + onRspEntrust(entrust, error)

@@ -925,7 +925,7 @@ TEST_F(FemasContractFixture, account_query_response_computes_balance)
 	EXPECT_EQ(sink.accounts[0].currency, "CNY");
 }
 
-TEST_F(FemasContractFixture, position_query_response_never_appends_the_item_it_builds)
+TEST_F(FemasContractFixture, position_query_response_appends_the_reported_item)
 {
 	CUstpFtdcRspInvestorPositionField pos;
 	memset(&pos, 0, sizeof(pos));
@@ -941,10 +941,9 @@ TEST_F(FemasContractFixture, position_query_response_never_appends_the_item_it_b
 
 	probe.OnRspQryInvestorPosition(&pos, &ok, 1, true);
 
-	// BUG（见 bugs/T4_femas_ctploader_mini.md）：构造出的 WTSPositionItem 从未 append，
-	// 所以对外汇报的持仓数组永远是空的。该断言在修复后会失败，属于故意留下的哨兵。
 	ASSERT_EQ(sink.positions.size(), 1u);
-	EXPECT_EQ(sink.positions[0].size, 0u);
+	EXPECT_EQ(sink.positions[0].size, 1u);
+	EXPECT_EQ(sink.positions[0].firstCode, "rb2401");
 	EXPECT_EQ(sink.m_mgr.m_getContractCalls, 1u);
 }
 
@@ -1089,9 +1088,9 @@ TEST_F(TraderFemasTest, DISABLED_user_login_success_branch_needs_vendor_api)
 }
 
 /*
- * BUG-T4-003：triggerQuery() 无条件解引用 m_strandIO，而它只在 connect() 里 new。
- * 未 connect 就 queryAccount() → post(*NULL) → 崩。上面的启用用例都把 strand 补上了，
- * 这条保留「真实调用顺序」的原始形状，因此不能启用。
+ * BUG-T4-003（待验证）：triggerQuery() 无条件解引用 m_strandIO，而它只在 connect() 里 new。
+ * 此用例人工注入 API sentinel 和 WS_ALLREADY，绕过了正常生命周期前置；不能据此断言
+ * 未 connect 时 queryAccount() 在真实调用顺序下可达。运行可达性仍待验证。
  */
 TEST(TraderFemasDisabled, DISABLED_query_account_before_connect_dereferences_null_strand)
 {
@@ -1102,19 +1101,26 @@ TEST(TraderFemasDisabled, DISABLED_query_account_before_connect_dereferences_nul
 	EXPECT_EQ(probe.queryAccount(), 0);
 }
 
-/*
- * BUG-T4-005：makeEntrustID 只判断 length==0，不校验缓冲区实际容量。
- * 传一个小缓冲区，format_to 仍会写「会话号 + 12 位数字」→ 越界写。
- * 不启用：这是内存破坏，不是可断言的行为差异。
- */
-TEST(TraderFemasDisabled, DISABLED_make_entrust_id_ignores_buffer_capacity)
+TEST(TraderFemasTest, make_entrust_id_rejects_insufficient_logical_capacity)
 {
 	FemasProbe probe;
 	probe.registerSpi(nullptr);
-	probe.setSessionID("SESSIONVERYLONGID");
-	char tiny[8];
-	memset(tiny, 0, sizeof(tiny));
-	probe.makeEntrustID(tiny, static_cast<int>(sizeof(tiny)));
+	// MaxOrderLocalID is char[21], so a 20-character session is the longest
+	// value received from the Femas login response.
+	probe.setSessionID("12345678901234567891");
+
+	// Keep the physical storage large enough for session + 12 digits + NUL;
+	// `length` is the smaller logical capacity passed to makeEntrustID.
+	char storage[128];
+	memset(storage, 0x5A, sizeof(storage));
+	const int logical_length = 8;
+	EXPECT_FALSE(probe.makeEntrustID(storage, logical_length));
+
+	for (int i = logical_length; i < static_cast<int>(sizeof(storage)); ++i)
+	{
+		EXPECT_EQ(storage[i], static_cast<char>(0x5A))
+			<< "write past logical capacity at offset " << i;
+	}
 }
 
 /*

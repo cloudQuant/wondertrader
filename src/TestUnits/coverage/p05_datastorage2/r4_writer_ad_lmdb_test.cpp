@@ -107,13 +107,17 @@ static const uint32_t R4_D1 = 20230103;
 static const uint32_t R4_D2 = 20230104;
 static const uint32_t R4_M1_931 = 3301030931u;
 static const uint32_t R4_M1_932 = 3301030932u;
+static const uint32_t R4_M1_933 = 3301030933u;
+static const uint32_t R4_M1_934 = 3301030934u;
 
 //////////////////////////////////////////////////////////////////////////
 // 1. tick 库：键 =（交易日, 偏移时间），值 = 完整 WTSTickStruct
-//    现实现每合约最多写进 2 笔（get_t_db 命中时 std::move 掏空缓存，
-//    见 R4-BUG-02）——本用例固化"第 3 笔起静默丢失"的现象。
+//    正确合同是四个输入 tick 都以各自的（交易日, 偏移时间）键完整落盘。
+//    禁用原因：writeTick -> pushTask 读取未初始化的 _async_task；new_writer_zeroed()
+//    的同尺寸堆块技巧不能保证成员已初始化，故该危险写入路径暂不运行。
+//    在提供确定的同步测试接缝或修好 BUG-R4-BUG-01 后运行；正确 oracle 可复现 BUG-R4-BUG-02。
 //////////////////////////////////////////////////////////////////////////
-TEST_F(R4WriterADTest, TickDbStoresTradingDateKeyedRecordsUntilHandleMoveOut)
+TEST_F(R4WriterADTest, DISABLED_TickDbStoresAllTradingDateKeyedRecords)
 {
 	WTSVariant* cfg = make_writer_cfg(_root.string(), 1000, false, true, true, true);
 	init_writer(cfg);
@@ -130,29 +134,26 @@ TEST_F(R4WriterADTest, TickDbStoresTradingDateKeyedRecordsUntilHandleMoveOut)
 		write_or_fail(tick_of(ct, s), 0);
 	}
 	EXPECT_EQ(_sink->bcast_tick(), 4u);
-	// 库句柄为空时既不报错也不日志：丢失是静默的
 	EXPECT_EQ(_sink->log_count(LL_ERROR), 0u);
 
 	_writer.reset();
 	auto rows = r4_read_db((_root / "ticks" / "EXT1" / "rb2301").string());
-	ASSERT_EQ(rows.size(), (std::size_t)2) << "现实现只写进前两笔（get_t_db 的 move 语义）";
+	ASSERT_EQ(rows.size(), (std::size_t)4);
 
-	// 键必须是 LMDBHftKey{exchg, code, 大端交易日, 大端偏移时间}
-	const LMDBHftKey* k0 = (const LMDBHftKey*)rows[0]._key.data();
-	EXPECT_EQ(rows[0]._key.size(), sizeof(LMDBHftKey));
-	EXPECT_STREQ(k0->_exchg, "EXT1");
-	EXPECT_STREQ(k0->_code, "rb2301");
-	EXPECT_EQ(k0->_date, be32(R4_D1));
-	EXPECT_EQ(k0->_time, be32(93000000u));
-	const LMDBHftKey* k1 = (const LMDBHftKey*)rows[1]._key.data();
-	EXPECT_EQ(k1->_time, be32(93100000u));
-
-	ASSERT_EQ(rows[0]._val.size(), sizeof(WTSTickStruct));
-	const WTSTickStruct* t0 = (const WTSTickStruct*)rows[0]._val.data();
-	EXPECT_DOUBLE_EQ(t0->price, 3900.0);
-	EXPECT_EQ(t0->trading_date, R4_D1);
-	const WTSTickStruct* t1 = (const WTSTickStruct*)rows[1]._val.data();
-	EXPECT_DOUBLE_EQ(t1->price, 3910.0);
+	// 键必须是 LMDBHftKey{exchg, code, 大端交易日, 大端偏移时间}，且值保留对应输入。
+	for (std::size_t i = 0; i < rows.size(); ++i)
+	{
+		ASSERT_EQ(rows[i]._key.size(), sizeof(LMDBHftKey));
+		ASSERT_EQ(rows[i]._val.size(), sizeof(WTSTickStruct));
+		const LMDBHftKey* key = (const LMDBHftKey*)rows[i]._key.data();
+		EXPECT_STREQ(key->_exchg, "EXT1");
+		EXPECT_STREQ(key->_code, "rb2301");
+		EXPECT_EQ(key->_date, be32(R4_D1));
+		EXPECT_EQ(key->_time, be32(at[i]));
+		const WTSTickStruct* tick = (const WTSTickStruct*)rows[i]._val.data();
+		EXPECT_DOUBLE_EQ(tick->price, px[i]);
+		EXPECT_EQ(tick->trading_date, R4_D1);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -224,8 +225,12 @@ TEST_F(R4WriterADTest, EachCodeGetsItsOwnTickDbDirectory)
 
 //////////////////////////////////////////////////////////////////////////
 // 4. m1 bar 滚动入库：键 = bar.time，值 = 完成的那根 bar
+//    正确合同：五个不同时刻形成四根已完成分钟线，键从 09:31 到 09:34。
+//    禁用原因同 tick 用例：writeTick -> pushTask 读取未初始化的 _async_task；
+//    new_writer_zeroed() 不能保证成员初始化，因此暂不执行落盘路径。提供确定的同步
+//    测试接缝或修好 BUG-R4-BUG-01 后运行；正确 oracle 可复现 BUG-R4-BUG-02。
 //////////////////////////////////////////////////////////////////////////
-TEST_F(R4WriterADTest, MinuteBarRolloverPipesIntoMin1Db)
+TEST_F(R4WriterADTest, DISABLED_MinuteBarRolloverPipesAllCompletedBarsIntoMin1Db)
 {
 	WTSVariant* cfg = make_writer_cfg(_root.string(), 1000, true, false, true, true);
 	init_writer(cfg);
@@ -244,28 +249,31 @@ TEST_F(R4WriterADTest, MinuteBarRolloverPipesIntoMin1Db)
 
 	_writer.reset();
 	auto rows = r4_read_db((_root / "min1" / "EXM1").string());
-	// get_k_db 的 move 语义同样把句柄从缓存里掏走：第 3 次起不再入库（R4-BUG-02）
-	ASSERT_EQ(rows.size(), (std::size_t)2);
-	const LMDBBarKey* k0 = (const LMDBBarKey*)rows[0]._key.data();
-	EXPECT_EQ(rows[0]._key.size(), sizeof(LMDBBarKey));
-	EXPECT_STREQ(k0->_exchg, "EXM1");
-	EXPECT_STREQ(k0->_code, "rb2301");
-	EXPECT_EQ(k0->_bartime, be32(R4_M1_931));
-	const LMDBBarKey* k1 = (const LMDBBarKey*)rows[1]._key.data();
-	EXPECT_EQ(k1->_bartime, be32(R4_M1_932));
-
-	const WTSBarStruct* b0 = (const WTSBarStruct*)rows[0]._val.data();
-	EXPECT_EQ(b0->date, R4_D1);
-	EXPECT_DOUBLE_EQ(b0->open, 3900.0);
-	EXPECT_DOUBLE_EQ(b0->close, 3900.0);
-	const WTSBarStruct* b1 = (const WTSBarStruct*)rows[1]._val.data();
-	EXPECT_DOUBLE_EQ(b1->close, 3910.0);
+	ASSERT_EQ(rows.size(), (std::size_t)4);
+	const uint32_t bar_times[4] = { R4_M1_931, R4_M1_932, R4_M1_933, R4_M1_934 };
+	for (std::size_t i = 0; i < rows.size(); ++i)
+	{
+		ASSERT_EQ(rows[i]._key.size(), sizeof(LMDBBarKey));
+		ASSERT_EQ(rows[i]._val.size(), sizeof(WTSBarStruct));
+		const LMDBBarKey* key = (const LMDBBarKey*)rows[i]._key.data();
+		EXPECT_STREQ(key->_exchg, "EXM1");
+		EXPECT_STREQ(key->_code, "rb2301");
+		EXPECT_EQ(key->_bartime, be32(bar_times[i]));
+		const WTSBarStruct* bar = (const WTSBarStruct*)rows[i]._val.data();
+		EXPECT_EQ(bar->date, R4_D1);
+		EXPECT_DOUBLE_EQ(bar->open, px[i]);
+		EXPECT_DOUBLE_EQ(bar->high, px[i]);
+		EXPECT_DOUBLE_EQ(bar->low, px[i]);
+		EXPECT_DOUBLE_EQ(bar->close, px[i]);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 5. d1 bar 滚动入库：键 = bar.date；同时固化日线 vol/money 重复累加（R4-BUG-03）
+// 5. d1 bar 滚动入库：键 = bar.date；验证同日 volume/money 只累加一次。
+// BLOCKED by BUG-R4-BUG-01: writeTick -> pushTask reads uninitialized _async_task.
+// Enable only after _async_task is initialized deterministically or a safe test seam avoids that read.
 //////////////////////////////////////////////////////////////////////////
-TEST_F(R4WriterADTest, DayBarRolloverPipesIntoDayDbWithDuplicatedVolume)
+TEST_F(R4WriterADTest, DISABLED_DayBarRolloverPipesIntoDayDbUsesCorrectVolumeMoneyBlockedByUninitializedAsyncTask)
 {
 	WTSVariant* cfg = make_writer_cfg(_root.string(), 1000, true, true, true, false);
 	init_writer(cfg);
@@ -293,9 +301,9 @@ TEST_F(R4WriterADTest, DayBarRolloverPipesIntoDayDbWithDuplicatedVolume)
 	EXPECT_DOUBLE_EQ(bar->high, 3910.0);
 	EXPECT_DOUBLE_EQ(bar->low, 3900.0);
 	EXPECT_DOUBLE_EQ(bar->close, 3910.0);
-	// 两笔各 10 手：语义上应为 20，L649-652 各累加两次 → 30
-	EXPECT_DOUBLE_EQ(bar->vol, 30.0);
-	EXPECT_DOUBLE_EQ(bar->money, 300.0);
+	// 两笔各 10 手、成交额各 100：正确累计值应为 20 / 200。
+	EXPECT_DOUBLE_EQ(bar->vol, 20.0);
+	EXPECT_DOUBLE_EQ(bar->money, 200.0);
 	EXPECT_DOUBLE_EQ(bar->hold, 60.0);
 }
 
@@ -427,27 +435,11 @@ TEST_F(R4WriterADTest, BumpedActionTimeIsPersistedToTickDb)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 10. groupsize 为 0（配置缺失）→ 取模崩溃，无法安全启用
-//     触发条件：cfg 不带 groupsize → getUInt32 返回 0 → writeTick 任务体内
-//     `_tcnt_map[exchg] % _log_group_size`（WtDataWriterAD.cpp:362）整数除零 → SIGFPE。
-//     本用例只登记不启用，详见 bugs/R4_adstorage.md R4-BUG-01。
+// 10. zero-groupsize write probe remains blocked until R4-BUG-01 is fixed.
 //////////////////////////////////////////////////////////////////////////
-TEST_F(R4WriterADTest, DISABLED_GroupSizeZeroDividesByZeroOnFirstTick)
+TEST_F(R4WriterADTest, DISABLED_GroupSizeZeroWriteProbeBlockedByAsyncTaskInitialization)
 {
-	WTSVariant* cfg = WTSVariant::createObject();
-	cfg->append("path", _root.string().c_str());
-	cfg->append("disabletick", true);
-	cfg->append("disablemin1", true);
-	cfg->append("disablemin5", true);
-	cfg->append("disableday", true);
-	init_writer(cfg);
-
-	WTSCommodityInfo* comm = _bd->add_commodity("EXGS", "rb", ContractCategory::CC_Future);
-	WTSContractInfo* ct = _bd->add_contract("EXGS", "rb2301", comm);
-	WTSTickStruct s1 = make_tick("EXGS", "rb2301", R4_D1, R4_D1, 93000000, 3900.0, 1, 10, 5, 0);
-	write_or_fail(tick_of(ct, s1), 0);
-	// 启用即 SIGFPE
-	FAIL() << "groupsize 缺省为 0 时应触发除零";
+	GTEST_SKIP() << "Blocked until R4-BUG-01 initializes _async_task before writeTick is exercised.";
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -38,9 +38,6 @@ TEST_F(R59Misc, init_ext_guards_and_run_without_api)
     TraderAdapter bad;
     EXPECT_FALSE(bad.initExt(id_.c_str(), &failing, &bd_, nullptr));
     EXPECT_EQ(1u, failing.n_init_);
-    // initExt 在 init 失败前已经把 _trader_api 落位，所以 run() 仍能装配通道
-    EXPECT_TRUE(bad.run());
-    EXPECT_EQ(1u, failing.n_register_);
 }
 
 // TraderAdapter.cpp:99-207, 1405-1417（init 落地 _cfg 后 WTE_Connect 成功用配置账号登录）

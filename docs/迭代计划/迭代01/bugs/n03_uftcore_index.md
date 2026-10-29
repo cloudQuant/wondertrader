@@ -59,7 +59,7 @@
 
 ## BUG-N03-005
 
-- 状态: 待审核
+- 状态: 已撤回（迭代02：TEST，原产品主张不成立）
 - 严重级别: Major
 - 模块/文件: `src/WtUftCore/TraderAdapter.cpp:429-436`（`getInfos`）、`1857`（`checkCancelLimits`）、`1919`（`checkOrderLimits`）
 - 相关测试: 同上 DISABLED_ 用例
@@ -70,6 +70,10 @@
 - 影响范围: 单测/回放/任何在未连接状态下查询统计信息的调用；也使这三条分支在无真实柜台时不可达，压低可达覆盖率。
 - 备注: 建议修复方向——把 `_stat_map` 的创建移到构造函数或加判空。
 
+
+- 迭代02复核: TEST。_stat_map 在 TraderAdapter::run 创建；候选测试对全新且未 run 的适配器调用 getInfos/check*。未找到这些调用在 init/run 前必须安全的公开生命周期契约，故该测试前置无效，不能将未装配对象的崩溃当产品缺陷。
+- 迭代02依据: [逐条裁定与主代理修订](../../迭代02/缺陷裁定总表.md)。原记录保留作为历史，未声称产品已修复。
+- 迭代02前状态（历史）: - 状态: 待审核
 ## BUG-N03-006
 
 - 状态: 待审核
@@ -85,7 +89,7 @@
 
 ## BUG-N03-007
 
-- 状态: 待审核
+- 状态: 已撤回（迭代02：TEST，原产品主张不成立）
 - 严重级别: Major
 - 模块/文件: `src/WtUftCore/TraderAdapter.cpp:345-352`（`getContract`）、`311-319`（`doEntrust`）
 - 相关测试: `n03_uftcore_helper_adapter_test.cpp` → `TEST(DISABLED_n03_trader_adapter, uninitialized_deref_class)` 内的 `openLong("600000", ...)` / `openShort(...)`
@@ -96,9 +100,13 @@
 - 影响范围: 任何上层把裸代码（不带交易所前缀）传进 UFT 下单接口的路径；越界写属于可利用的内存破坏。
 - 备注: 建议修复方向——`if(pos == std::string::npos) return NULL;`。
 
+
+- 迭代02复核: TEST。输入使用裸代码 600000，而这些公开方法参数约定为 stdCode，adapter 按 exchange.code 拆分并查基础数据。候选复现也在全新 adapter 上发裸代码单，既违反代码格式前置又未装配 API/依赖。
+- 迭代02依据: [逐条裁定与主代理修订](../../迭代02/缺陷裁定总表.md)。原记录保留作为历史，未声称产品已修复。
+- 迭代02前状态（历史）: - 状态: 待审核
 ## BUG-N03-008
 
-- 状态: 待审核
+- 状态: 已合并（迭代02：主编号 BUG-R78-001）
 - 严重级别: Minor
 - 模块/文件: `src/WtUftCore/ParserAdapter.cpp:39-58`（`init`）、`228-240`（`release`）
 - 相关测试: `n03_uftcore_helper_adapter_test.cpp`（`init_ext_subscribes_and_pushes_quote` 里为绕开该问题把计数改成全局变量）
@@ -108,3 +116,48 @@
 - 复现步骤: `ParserAdapter a; a.initExt("x", new SomeApi, &stub, &bdMgr); a.release();` 然后访问该 api 指针。
 - 影响范围: 解析器适配器的生命周期管理；影响后续用例的可写性。
 - 备注: 建议修复方向——`initExt` 与 `init` 用不同的所有权标志；失败路径补 `cfg->release()`。
+
+- 迭代02复核: DUPLICATE。init 在配置空 module 等失败路径前已 retain _cfg 且 release 不释放，和 BUG-R78-001 的配置引用泄漏同根因。候选另一主张认为 initExt 注入 API 必属外部所有权，但没有接口所有权契约；现有测试分配 API 后由 adapter.release 使用，不能证明 double-free。
+- 迭代02依据: [逐条裁定与主代理修订](../../迭代02/缺陷裁定总表.md)。原记录保留作为历史，未声称产品已修复。
+- 迭代02前状态（历史）: - 状态: 待审核
+## 独立逐项复核（2026-10-29）
+
+本节依据当前源码、接口注释、仓库调用点及测试定义做静态审查；本次没有运行测试、编译或动态复现。DISABLED_ 用例和其他文档的历史运行记录不记作本次复现证据。
+
+### BUG-N03-001：越界读源码确认；关联用例路径与原条目不一致
+
+WtBlkIdxWorker::init 无条件读取 WEIGHT_ALGS[_weight_alg]（src/WtIndexFactory/WtBlkIdxWorker.cpp:12-17,54,178），数组只有 3 项且没有先校验。weight_alg=3 等配置在初始化日志处形成越界读。关联 DISABLED 用例实际位于 src/TestUnits/coverage/n03b_idxfactory/n03_idxfactory_worker_test.cpp:508-524，不是原条目所写的 n03_uftcore_index 目录；该用例覆盖若干越界值，但本次未运行。建议先验证 _weight_alg < 3，错误时记录配置并返回 false，不要静默截到其他算法。
+
+### BUG-N03-002：动态权重零分母缺陷确认；空权重表不是当前可达触发条件
+
+generate_tick 只用 action_date==0 判断数据是否就绪（src/WtIndexFactory/WtBlkIdxWorker.cpp:262-267），动态总持/成交量算法分别累加 open_interest/total_volume 到 total_base，随后直接计算 total_value / total_base / total_weight（:279-300）。有效时间戳但所有成分基数为 0 时会产生非有限值并写入/广播。关联启用测试 src/TestUnits/coverage/n03b_idxfactory/n03_idxfactory_worker_test.cpp:351-385 只用正持仓和正成交量，没有覆盖零分母；本次未运行。原条目所说空 _weight_scales 会令 total_weight==0，但 handle_quote 对不在成分表中的行情立即返回（:187-191），空表不能由这条入口触发计算。建议对有效成分的基数做有限且非零校验，按产品定义停止发布或明确回退值；负权重及权重和为零的合法性待定义。
+
+### BUG-N03-003：缺少 default 组时 end() 解引用确认；配置是否应被拒绝需定契约
+
+ActionPolicyMgr::init 不要求配置包含 default，直接返回成功（src/WtUftCore/ActionPolicyMgr.cpp:51-127）。getActionRules 未命中映射组后回退查 default，仍未命中时只执行 assert，再返回 it->second（:139-162）；Debug 触发断言，NDEBUG 构建对 end() 解引用。禁用测试 src/TestUnits/coverage/n03_uftcore_index/n03_action_policy_test.cpp:241-259 定义了仅自定义组配置，但本次未运行。建议初始化时强制 default 并报错，或查询时返回静态空组/错误结果。Q04 的 getRiskParams 缺 default 是相同缺陷模式但不同位置；其第 69 行误引 BUG-N03-002，本处 ActionPolicyMgr 对应 BUG-N03-003。
+
+### BUG-N03-004：产品键切片与无 default 回退均有源码缺陷；影响描述需收窄
+
+getRiskParams（src/WtUftCore/TraderAdapter.cpp:1970-1983）的产品段起点为 idx+1、终点为 eIdx，所需长度是 eIdx-idx-1；当前 eIdx-idx+1 多取 2 个字符，例如 SHFE.ag2406 得到 ag24、CFFEX.IF2202 得到 IF22，会错过 ag/IF 规则并回落 default。该项与 BUG-Q04-003 完全重复；相关测试定义在 q04_trader_risk_limits_test.cpp:208-222，本次未运行。找不到 default 时对 end() 取址也有问题（:1978-1983），与 BUG-Q04-005 重复。建议先校验标准码，再修正切片长度；无匹配/default 时返回明确无规则结果或配置失败，不能取 end 地址。
+
+原条目称“流量风控整体失效/合规风险”超出这两段代码可证明的范围：checkOrderLimits/checkCancelLimits 是公开方法，但 buy/sell/doCancel/open* 中自动调用它们的代码目前被注释（TraderAdapter.cpp:364,444,724,996,1025,1054,1083）；频率缓存写入另见 BUG-Q04-004。可确认的是显式调用限额检查时的键查找/缺省组错误，不能据此声称当前正常下单链已接入风控或已实证违规。
+
+### BUG-N03-005：未 run 时访问统计表会空指针解引用；是否属于有效调用顺序待定
+
+构造函数把 _stat_map 置为 NULL（TraderAdapter.cpp:72-80），只在 run() 里创建且在 connect() 前完成（:208-218）；getInfos 无判空调用 _stat_map->get（:429-436），check*Limits 取到规则后也使用该表（:1866,1928）。若契约允许 initExt 后、run 前查询，缺陷成立；常规 UFT 装配顺序在 UftLatencyTool.cpp:317-320 先运行 trader 再启动 engine，公开接口文档未承诺 pre-run 查询安全。DISABLED 测试 n03_uftcore_helper_adapter_test.cpp:495-510 将多个崩溃路径合并，不能隔离证明每项；限额检查可能先命中 N03-004，裸代码下单也触发其他路径。本次未运行。建议明确 run 前置条件；若 pre-run 查询应受支持，则入口判空返回安全值并用隔离用例验收。
+
+### BUG-N03-006：inline 外部 TU 可见定义问题确认；已有重复登记
+
+TraderAdapter.h:192 将公开成员声明为 inline，唯一定义在 TraderAdapter.cpp:1908-1917。其他 TU 看不到定义，不能合法依赖该 inline 声明调用；现有测试用注释回避（n03_uftcore_helper_adapter_test.cpp:347-348）。本次未编译调用用例。该项与 BUG-R204-001、BUG-Q04-006（及 R215 交叉记录）是同一位置的重复登记。建议去掉声明上的 inline，或把完整定义放在头文件，再启用跨 TU 调用验收。
+
+### BUG-N03-007：缺分隔符时存在未定义行为；输入违反标准代码格式，现有禁用用例未隔离该路径
+
+IUftStraCtx.h:127-141 将开仓代码格式示例写为 SSE.600000，缺点号不是所文档化的标准码。源码仍应拒绝坏输入：getContract 用 findFirst 的 npos 写 buf[idx]（TraderAdapter.cpp:345-352），doEntrust 则把 npos 传给 setExchange 并继续指针计算（:311-319）。原 DISABLED 测试对 fresh adapter 调 openLong("600000",...)（n03_uftcore_helper_adapter_test.cpp:503-510），但 doEntrust 在到达分隔符逻辑前先解引用空 _trader_api（:313），不能隔离证明该路径；openLong 也不经过 getContract。另有 buy/sell 对缺失合约的 getContract 返回值未判空即取 cInfo->getCommInfo()（:450-451,730-731），这是不同的空指针路径。建议先校验标准码结构、再检查合约查询结果；补证时须初始化/注入 adapter 后分别隔离目标路径。本次未运行。
+
+该项与 BUG-P06-002 属于同一类无交易所分隔符输入，但触发于不同方法；可共用解析校验策略，不应合并成一个源码缺陷。
+
+### BUG-N03-008：_cfg 引用泄漏确认且重复登记；initExt 删除所有权主张待定
+
+ParserAdapter::init 在检查 module 前已保存并 retain 配置（src/WtUftCore/ParserAdapter.cpp:51-60）；module 为空或加载失败会早退（:59-75,81-92），而析构为空且 release() 不释放 _cfg（:38-40,228-240）。失败后 _cfg 仍非空，重试也会被 :51-52 拒绝。该泄漏已由同一文件 BUG-R78-001 登记，N03 仅补充早退路径，不重复计数。建议明确引用持有规则并配对释放，定义失败后是否可重试。
+
+“initExt 注入 api 属调用方所有，因此 adapter 不应 delete”不能由现有契约确认：头文件只收裸指针而未说明借用/转移；当前测试以 new U3ParserApi 传入，再由 adapter.release() 调 release 并走 delete（n03_uftcore_helper_adapter_test.cpp:414-417,459-460），呈现转移所有权用法。若调用方继续释放会 double delete 是条件风险，不是接口已承诺行为；跨动态库 delete 则需要专用 deleter。建议明确 initExt 所有权语义，必要时增加 deleter/借用模式，再按契约调整实现与测试。

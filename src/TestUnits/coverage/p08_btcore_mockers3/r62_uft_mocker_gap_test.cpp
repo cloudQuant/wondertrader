@@ -116,8 +116,10 @@ TEST_F(R62UftMockerGap, TickProcessesOrdersAndDrainsCancelTasks)
 	EXPECT_DOUBLE_EQ(0.0, mocker.stra_get_position(kAg));
 
 	// 按合约撤单：任务入队，下一次 on_tick 排空后订单消失
-	EXPECT_TRUE(mocker.stra_cancel_all(kAg).empty());
-	EXPECT_TRUE(mocker.stra_cancel(lid));
+	OrderIDs canceled = mocker.stra_cancel_all(kAg);
+	EXPECT_EQ(1u, canceled.size());
+	if (!canceled.empty())
+		EXPECT_EQ(lid, canceled.front());
 	feed(mocker, kRb, 3800.0, 3799.0, 3801.0);
 	EXPECT_DOUBLE_EQ(0.0, mocker.stra_get_undone(kAg));
 }

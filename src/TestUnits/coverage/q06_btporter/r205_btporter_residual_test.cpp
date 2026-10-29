@@ -427,6 +427,77 @@ TEST(R205BtPorterLevel2, HftLevel2GettersServeStoredBlocksAndRejectMissing)
 	EXPECT_EQ(1U, g_trans_calls);
 }
 
+TEST(R205BtPorterLevel2, HftOrderQueueQueryAfterLastStoredRecordDoesNotOvercount)
+{
+	const std::string dir = prepare_dir("l2_after_last_record");
+	ASSERT_FALSE(dir.empty());
+
+	struct Guard
+	{
+		std::string dir;
+		std::string old_inst;
+		~Guard()
+		{
+			reset_singleton();
+			if (!old_inst.empty())
+				WtHelper::setInstDir(old_inst.c_str());
+			if (!dir.empty())
+			{
+				std::error_code ec;
+				stdfs::remove_all(dir, ec);
+			}
+		}
+	} guard;
+	guard.dir = dir;
+	guard.old_inst = WtHelper::getInstDir();
+
+	std::error_code ec;
+	stdfs::create_directories(dir + "/his/queue/SSE/20200102", ec);
+	WTSOrdQueStruct q{};
+	strcpy(q.exchg, "SSE");
+	strcpy(q.code, "600000");
+	q.trading_date = 20200102;
+	q.action_date = 20200102;
+	q.action_time = 90000000;
+	q.side = (WTSBSDirectType)0;
+	q.price = 10.5;
+	q.order_items = 1;
+	q.qsize = 2;
+	q.volumes[0] = 100;
+	q.volumes[1] = 200;
+	ASSERT_TRUE(store_order_queues((dir + "/his/queue/SSE/20200102/600000.dsb").c_str(),
+		&q, 1, NULL));
+
+	reset_singleton();
+	getRunner().init((dir + "/r205_absent_logcfg.yaml").c_str(), true, dir.c_str());
+	ASSERT_TRUE(prepare_inst_dir()) << "找不到 libWtDataStorage，mode=bin 会空指针";
+
+	const std::string root = repo_root().string();
+	const std::string cfg =
+		"{\"replayer\":{\"mode\":\"bin\",\"path\":\"" + dir + "\","
+		"\"stime\":202001020930,\"etime\":202001021500,\"tick\":true,"
+		"\"basefiles\":{"
+		"\"session\":\"" + root + "/dist/common/sessions.json\","
+		"\"commodity\":[\"" + root + "/dist/common/commodities.json\","
+		"\"" + root + "/dist/common/stk_comms.json\"],"
+		"\"holiday\":\"" + root + "/dist/common/holidays.json\"}},"
+		"\"env\":{\"mocker\":\"hft\"},"
+		"\"hft\":{\"name\":\"r205_l2_after_last\",\"module\":\"\"}}";
+	getRunner().config(cfg.c_str(), false);
+	ASSERT_NE(nullptr, getRunner().hft_mocker());
+	ASSERT_TRUE(getRunner().replayer().prepare());
+
+	g_ordque_calls = 0;
+	g_ordque_cnt = 0;
+	const WtUInt32 returned = hft_get_ordque(1, "SSE.600000", 5, ordque_cb);
+	// At 09:30 the only stored block (09:00) is still eligible and must be returned once.
+	// ordque_cb records only the count and never dereferences the callback pointer,
+	// so this regression assertion cannot read past the single stored item.
+	EXPECT_EQ(1U, returned);
+	EXPECT_EQ(1U, g_ordque_calls);
+	EXPECT_EQ(1U, g_ordque_cnt);
+}
+
 /* 产品缺陷 BUG-R205-003：HisDataReplayer::checkOrderQueues 失败时把空记录写进
  * `_trans_cache`（checkOrderDetails 同样），污染逐笔成交缓存。启用本用例即可看到
  * 一次 ordque 缺失查询之后，随后写入的 trans 文件被 `_count == 0` 的脏缓存挡住。

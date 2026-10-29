@@ -12,8 +12,9 @@
  *
  * 与既有 lane 的分工：R113 覆盖了正常成交/部分成交/撤单主链，但对上面这些
  * 「跳过」分支只走过其中一部分；本文件用公开 API（init/connect/login/
- * orderInsert/query*）与本机回环 UDP 逐条构造。未注册合约用来命中 ct==NULL；
- * 零手委托用来命中 VolLeft==0；newpx=false 的配置对象由公开 WTSVariant 构造。
+ * orderInsert/query*）与本机回环 UDP 逐条构造。跨合约隔离与零量分支分开验证，
+ * 通过成交代码和成交所引用的委托 ID 检查撮合归属；newpx=false 的配置对象由公开
+ * WTSVariant 构造。
  *
  * 边界：不镜像私有布局、不直接调 match_once；每条用例在 TearDown 里 release()
  * 并 join 撮合线程；UDP 只发本机回环，端口由内核临时分配。
@@ -42,8 +43,8 @@ WTSContractInfo* make_unregistered_ct(const char* commid, const char* code, Cont
 
 } // namespace
 
-/* 生产: TraderMocker.cpp:344-346、363-365 */
-TEST_F(R214MockerBranches, UnregisteredContractAndZeroVolumeAreSkipped)
+/* 生产: TraderMocker.cpp:344-346 */
+TEST_F(R214MockerBranches, UnregisteredOrderDoesNotTradeOnOtherContractTick)
 {
 	const uint16_t port = r103m::pick_free_udp_port();
 	ASSERT_NE(0, port);
@@ -54,6 +55,7 @@ TEST_F(R214MockerBranches, UnregisteredContractAndZeroVolumeAreSkipped)
 
 	/* 未注册进 BdMgr 的合约：orderInsert 仍可通过（entrust 自带 ContractInfo），
 	 * 但 match_once 按 fullcode 反查 BdMgr 时会拿到 NULL。 */
+	EXPECT_EQ(nullptr, sink_.bd_.getContract("zz2512", "SHFE"));
 	WTSContractInfo* zz_ct = make_unregistered_ct("zz", "zz2512", CC_Future, CM_OpenCover);
 	WTSEntrust* entrust = r103m::make_entrust("zz2512", "SHFE", zz_ct, 7000.0, 1.0,
 		WDT_LONG, WOT_OPEN);
@@ -63,17 +65,92 @@ TEST_F(R214MockerBranches, UnregisteredContractAndZeroVolumeAreSkipped)
 	ASSERT_TRUE(r113m::wait_until([this, before]() {
 		return sink_.n_push_order() >= before + 1u;
 	}));
+	const std::string unregistered_order_id = sink_.last_order_id();
+	ASSERT_FALSE(unregistered_order_id.empty());
 
-	/* 零手委托：VolLeft 恒为 0，撮合循环必须跳过。 */
-	insert_order(0.0, 7000.0, WDT_LONG, WOT_OPEN);
+	/* 注册合约上的有效订单作为正控：证明本轮 match_once 确实完成一次撮合。 */
+	insert_order(5.0, 7000.0, WDT_LONG, WOT_OPEN);
+	const std::string registered_order_id = sink_.last_order_id();
+	ASSERT_FALSE(registered_order_id.empty());
+	ASSERT_NE(unregistered_order_id, registered_order_id);
 
-	/* ag2512 的 tick 让 _ticks 非空，并令 _codes 同时含 zz2512/ag2512，
-	 * 一次 match_once 就会先遍历到两条被跳过的委托。 */
+	/* ag2512 行情只应成交 ag2512 委托；zz2512 的委托不得借另一个合约的行情成交。 */
 	send_tick(7000.0, 7000.0, 5.0, 7000.0, 5.0);
-	std::this_thread::sleep_for(std::chrono::milliseconds(120));
+	ASSERT_TRUE(r113m::wait_until([this]() {
+		return sink_.total_trade_volume() >= 5.0;
+	})) << "ag2512 正控未成交，无法检查跨合约委托隔离";
+	/* 完整撮合处理屏障：成交回调在 match_once 的 _awaits 遍历中同步发出；
+	 * release() join 撮合线程，确保该次 ag tick 的同一轮订单遍历已结束后再快照。 */
+	api_.release();
 
-	EXPECT_DOUBLE_EQ(0.0, sink_.total_trade_volume());
-	EXPECT_FALSE(sink_.has_state((int)WOS_AllTraded));
+	const std::vector<r113m::TradeSnap> trades = sink_.trades();
+	ASSERT_FALSE(trades.empty());
+	double registered_trade_volume = 0.0;
+	for (const r113m::TradeSnap& trade : trades)
+	{
+		EXPECT_EQ("ag2512", trade.code);
+		if (trade.ref_order == unregistered_order_id)
+			ADD_FAILURE() << "ag2512 行情成交了 zz2512 委托 " << unregistered_order_id;
+		else
+		{
+			EXPECT_EQ(registered_order_id, trade.ref_order);
+			registered_trade_volume += trade.volume;
+		}
+	}
+	EXPECT_DOUBLE_EQ(5.0, registered_trade_volume);
+}
+
+/* 生产: TraderMocker.cpp:363-365 */
+TEST_F(R214MockerBranches, ZeroVolumeOrderIsSkipped)
+{
+	const uint16_t port = r103m::pick_free_udp_port();
+	ASSERT_NE(0, port);
+	set_udp_port((int)port);
+	init_api(9825, (int)port);
+	connect_api();
+	login_api();
+
+	/* 零手委托的 VolLeft 为 0；随后加入同合约正量委托作为成交正控。 */
+	insert_order(0.0, 7000.0, WDT_LONG, WOT_OPEN);
+	const std::string zero_order_id = sink_.last_order_id();
+	ASSERT_FALSE(zero_order_id.empty());
+
+	insert_order(5.0, 7000.0, WDT_LONG, WOT_OPEN);
+	const std::string live_order_id = sink_.last_order_id();
+	ASSERT_FALSE(live_order_id.empty());
+	ASSERT_NE(zero_order_id, live_order_id);
+
+	send_tick(7000.0, 7000.0, 5.0, 7000.0, 5.0);
+	ASSERT_TRUE(r113m::wait_until([this]() {
+		return sink_.total_trade_volume() >= 5.0;
+	})) << "正量订单未成交，无法确认零量订单被跳过";
+	api_.release();
+
+	const std::vector<r113m::OrderSnap> orders = sink_.orders();
+	bool found_zero_order = false;
+	for (const r113m::OrderSnap& order : orders)
+	{
+		if (order.id == zero_order_id)
+		{
+			found_zero_order = true;
+			EXPECT_DOUBLE_EQ(0.0, order.volume);
+			EXPECT_DOUBLE_EQ(0.0, order.vol_left);
+			EXPECT_NE((int)WOS_AllTraded, order.state);
+		}
+	}
+	EXPECT_TRUE(found_zero_order);
+
+	const std::vector<r113m::TradeSnap> trades = sink_.trades();
+	ASSERT_FALSE(trades.empty());
+	double live_trade_volume = 0.0;
+	for (const r113m::TradeSnap& trade : trades)
+	{
+		EXPECT_EQ("ag2512", trade.code);
+		EXPECT_EQ(live_order_id, trade.ref_order);
+		EXPECT_NE(zero_order_id, trade.ref_order);
+		live_trade_volume += trade.volume;
+	}
+	EXPECT_DOUBLE_EQ(5.0, live_trade_volume);
 }
 
 /* 生产: TraderMocker.cpp:381-395（382/390/395 三个 continue） */

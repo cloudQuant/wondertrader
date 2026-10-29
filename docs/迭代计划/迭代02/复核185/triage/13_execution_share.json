@@ -1,0 +1,897 @@
+[
+  {
+    "lane": "R17_exefact",
+    "id": "BUG-R17-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExeFact/WtDiffMinImpactExeUnit.cpp:97-104",
+      "src/WtExeFact/WtMinImpactExeUnit.cpp:27-33",
+      "src/WtExeFact/WtStockMinImpactExeUnit.cpp:100-155",
+      "src/WtCore/WtDiffExecuter.cpp:243-280",
+      "src/WtExecMon/WtExecRunner.cpp:232-280"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r17_diff_minimpact_unit_test.cpp:689-705",
+      "src/TestUnits/coverage/r7_exefact/r7_stock_minimpact_unit_test.cpp:766-779"
+    ],
+    "input_reachability": "外部 executer policy 的配置经 WtDiffExecuter 自动建单进入 init。",
+    "oracle_basis": "注释给出合法域 -1..2；无效外部值必须安全拒绝，不能越界访问。",
+    "reason": "pricemode=3 可沿正常自动建单到 PriceModeNames[4]，表仅 4 项；外部配置边界没有校验。",
+    "root_cause": "init 记录配置时直接按 _price_mode+1 索引，工厂仍接受未校验值。",
+    "fix": "在索引/注册前校验 -1..2；非法值令 init/工厂失败并诊断，不擅自选默认模式。",
+    "acceptance": "-1..2 均正常初始化；-2/3 安全失败、不注册、不越界。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/r7_exefact/r17_diff_minimpact_unit_test.cpp",
+        "case": "init_pricemode_3_reads_past_name_table",
+        "issue": "旧 disabled 用例触发越界",
+        "change": "改为工厂/配置边界安全拒绝测试，并覆盖合法 -1..2 控制值",
+        "target": "CoverageTests_exefact",
+        "filter": "r17_diff_minimpact.*:r7_stkmin.*",
+        "expected_result": "合法值成功；-2/3 安全失败且不注册"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R17_exefact",
+    "id": "BUG-R17-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExecMon/WtSimpDataMgr.cpp:28-34",
+      "src/WtExecMon/WtSimpDataMgr.cpp:77-81",
+      "src/WtExecMon/WtSimpDataMgr.cpp:130-160",
+      "src/WtExecMon/WtExecRunner.cpp:371-381",
+      "src/WtExecMon/WtExecRunner.cpp:354-363",
+      "src/WtExecMon/WtExecRunner.cpp:384-399"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r17_simpdata_porter_unit_test.cpp:143-157"
+    ],
+    "input_reachability": "外部 data.store 配置通过 WtExecRunner 初始化；非空行情会正常进入 runner 的 quote 分发。",
+    "oracle_basis": "runner 初始化成功应建立行情处理所需 session；缺失依赖必须失败关闭。",
+    "reason": "session 查询可返回 NULL，WtSimpDataMgr::initStore 仍返回 true，runner 忽略 init 结果；后续 quote 解引用 _s_info。",
+    "root_cause": "初始化没有检查 session 查找结果，runner 未传播数据管理器失败。",
+    "fix": "缺失/未知 session 时返回初始化失败并阻断启动；quote 入口防御性判空。",
+    "acceptance": "无效 session 在首个 quote 前失败；有效 session 正常推进日期、分钟、交易日。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/r7_exefact/r17_simpdata_porter_unit_test.cpp",
+        "case": "configured missing/unknown session",
+        "issue": "原用例未走 runner 正常路径",
+        "change": "增加 runner data.store 缺/未知 session 配置，断言 quote 前初始化失败并保留有效 session 正控",
+        "target": "CoverageTests_exefact",
+        "filter": "r17_simpdata.*",
+        "expected_result": "坏 session 安全失败；有效 session 时间推进"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R17_exefact",
+    "id": "BUG-R17-005",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExecMon/WtSimpDataMgr.cpp:43-47",
+      "src/WtExecMon/WtSimpDataMgr.cpp:84-88",
+      "src/WtExecMon/WtExecRunner.cpp:354-360"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r17_simpdata_porter_unit_test.cpp:130-141"
+    ],
+    "input_reachability": "原用例直接向内部 init 传 cfg=NULL；正常 runner 先检查 data 配置，initStore 也拒绝 NULL store。",
+    "oracle_basis": "该内部入口以有效 WTSVariant 为前置；人工违反前置不能单独证明产品缺陷。",
+    "reason": "NULL 会在 cfg->get 前解引用，但正常 runner 路径不以 NULL 调用；外部 session 缺失另列 BUG-R17-004。",
+    "root_cause": "测试使用不受支持的内部参数，未证明有效输入路径可达。",
+    "fix": "撤回 NULL init 的产品缺陷主张；继续在外部配置边界校验必需 data/store。",
+    "acceptance": "测试改为 runner 缺 data/store 时安全失败；不把内部非法 NULL 调用算产品回归。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R19_mq_sharehelper",
+    "id": "BUG-R19-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtShareHelper/ShareBlocks.cpp:130-160",
+      "src/WtShareHelper/ShareBlocks.cpp:202-225",
+      "src/WtShareHelper/ShareBlocks.cpp:407-429",
+      "src/WtShareHelper/ShareBlocks.h:138-147"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r19_mq/r19_shareblock_slave_test.cpp:117-142"
+    ],
+    "input_reachability": "公开 API 可在既有 master 段分配 key、commit_section，slave 可 update 和 get_keys；运行期增 key 可达。",
+    "oracle_basis": "allocate_* 可创建 key，commit_section 应发布变化；公开 get_keys 应反映已提交索引。",
+    "reason": "新增 key 后 commit_section 仅改 section 时间戳，不推进 update_slave 使用的 block 时间戳；update_slave(false) 早退，get_keys 仅在段数不一致时强刷，既有段的新 key 对 slave 不可见。",
+    "root_cause": "key/section 版本发布粒度未与 slave 的索引刷新条件连通。",
+    "fix": "提交时推进共享 generation，slave 按 generation 更新 key 索引；如只支持静态 schema，应显式限制运行期创建。",
+    "acceptance": "slave 初始化后 master 在既有段新增 key 并 commit；slave update(false)/get_keys 可见该 key；未提交变化按合同不可见。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R19_mq_sharehelper",
+    "id": "BUG-R19-003",
+    "decision": "NEEDS_DECISION",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtShareHelper/ShareBlocks.cpp:227-250",
+      "src/WtShareHelper/ShareBlocks.cpp:273-278",
+      "src/WtShareHelper/ShareBlocks.cpp:32-59",
+      "src/WtShareHelper/ShareBlocks.h:135-147"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r19_mq/r19_shareblock_master_test.cpp:304-340"
+    ],
+    "input_reachability": "公开 delete_section 后可继续创建段；实现只 tombstone，下一次 init_master 才有清理路径。",
+    "oracle_basis": "接口未约定立即复用、显式压缩或下次初始化回收；当前测试只证明现状。",
+    "reason": "删除后 block count 不减少，达到 MAX_SEC_CNT 时无法继续分配；即时复用是否为合同要求未确定。",
+    "root_cause": "段回收时点与跨进程索引/布局语义无明确契约。",
+    "fix": "明确立即复用、显式 compact 或下次 init_master 回收，再按合同实现兼容的回收协议。",
+    "acceptance": "覆盖满 64 段、删除、重新分配和重启，断言只对应选定的回收时点。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": {
+      "question": "delete_section 后段槽何时必须可复用？",
+      "options": [
+        "立即复用",
+        "显式压缩后复用",
+        "下次 init_master 回收"
+      ],
+      "recommendation": "明确一个显式回收点并维护跨进程映射一致性。",
+      "impact": "决定共享段索引、计数和 ABI 生命周期语义。"
+    },
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R19_mq_sharehelper",
+    "id": "BUG-R19-004",
+    "decision": "PRODUCT",
+    "evidence_level": "LOCAL_REPRO",
+    "source_evidence": [
+      "src/WtShareHelper/ShareBlocks.cpp:9-84",
+      "src/WtShareHelper/ShareBlocks.cpp:32-59",
+      "src/WtShareHelper/ShareBlocks.cpp:9-59",
+      "src/WtShareHelper/ShareBlocks.cpp:61-84",
+      "src/WtShareHelper/WtShareHelper.h:17-20"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r19_mq/r19_shareblock_persist_test.cpp:128-180",
+      "src/TestUnits/coverage/r19_mq/r19_shareblock_persist_test.cpp:128-160"
+    ],
+    "input_reachability": "公开 init_master(domain,path) 接受不同 domain 显式映射同一个临时文件；本轮当前回归使用该正常接口序列。",
+    "oracle_basis": "活跃 master 数据应在另一 domain 映射同文件时保留；不得静默清掉仍在用的数据。",
+    "reason": "第二 domain 同文件 init 后，两个预置 key 都读为 -1；当前刷新二进制的定向回归 1 test/0 skipped FAIL。",
+    "root_cause": "每次 init_master 都将已有段 state 置 0 并以当前实例使用的段 mark-sweep，未协调文件所有权。",
+    "fix": "拒绝同一物理文件并存的 master alias，或增加 owner/generation 协议防止清除别的活跃实例。",
+    "acceptance": "首次读 key 101/202 成功；同文件第二 init 按策略拒绝或安全共存且保留数据；唯一 master 重启另测。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/core-fix/mq_preserve.log",
+      "docs/迭代计划/迭代02/复核185/evidence/core-fix/mq_preserve.xml",
+      "docs/迭代计划/迭代02/复核185/evidence/core-fix/runs.json"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R19_mq_sharehelper",
+    "id": "BUG-R19-009",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtShareHelper/ShareBlocks.h:180-199",
+      "src/WtShareHelper/ShareBlocks.cpp:87-105",
+      "src/WtShareHelper/ShareBlocks.cpp:130-137",
+      "src/WtShareHelper/ShareBlocks.cpp:165-183"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r19_mq/r19_shareblock_master_test.cpp:34-55"
+    ],
+    "input_reachability": "公开 master 正常 allocate/delete/get_keys；删除后 map 数与共享段计数不同会使 get_keys 调 update_slave(domain,true)。",
+    "oracle_basis": "删除段不可重新枚举；正常公开查询必须确定且不读未初始化状态。",
+    "reason": "ShmPair 未初始化 _blocktime；master 初始化仅某些重排分支赋值。删除后 get_keys 强刷，update_slave 在 bForce 判断前读该字段，且重建索引未过滤 tombstone，可能 UB 并复活已删段。",
+    "root_cause": "master query 误入 slave rebuild，缺 role guard、确定的 blocktime 初始化及 state 过滤。",
+    "fix": "master 走本地索引读取或在刷新前拒绝 master；初始化 blocktime；重建只加载 state==1。",
+    "acceptance": "master 创建/删除/get_keys 后 tombstone 不复活且无未初始化读；slave 初始/增量只见有效段。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/r19_mq/r19_shareblock_master_test.cpp",
+        "case": "master delete then get_keys",
+        "issue": "旧路径修复前可能读取未初始化 blocktime",
+        "change": "修复 role/generation 后用临时映射执行创建、删除、枚举",
+        "target": "CoverageTests_mqshare",
+        "filter": "R19.*shareblock.*",
+        "expected_result": "tombstone 不复活且 slave 刷新正常"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R19_mq_sharehelper",
+    "id": "BUG-R19-011",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtShareHelper/ShareBlocks.h:20",
+      "src/WtShareHelper/ShareBlocks.h:82-88",
+      "src/WtShareHelper/ShareBlocks.cpp:720-748"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r19_mq/r19_shareblock_cmd_test.cpp:228-235"
+    ],
+    "input_reachability": "公开 add_cmd 接收外部 C 字符串并复制进固定 64 字节命令字段。",
+    "oracle_basis": "固定 C 字符串必须预留 NUL 且写前检查长度。",
+    "reason": "strcpy 将长度>=64 的命令写出 _command，覆盖后续记录字段；没有长度检查。",
+    "root_cause": "add_cmd 先推进 writable 后无界 strcpy。",
+    "fix": "先验证最多 63 字节；超长返回 false 且游标/映射保持不变。",
+    "acceptance": "63 字节可往返；64+ 拒绝且相邻记录与游标不变。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/r19_mq/r19_shareblock_cmd_test.cpp",
+        "case": "command length boundary",
+        "issue": "超长输入原用例可能越界",
+        "change": "修复后覆盖 63+NUL、64 和超长，检查游标/邻接槽",
+        "target": "CoverageTests_mqshare",
+        "filter": "R19.*cmd.*",
+        "expected_result": "63 可回读；64+拒绝且映射不变"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R19_mq_sharehelper",
+    "id": "BUG-R19-012",
+    "decision": "NEEDS_DECISION",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtShareHelper/ShareBlocks.h:170-173",
+      "src/WtShareHelper/ShareBlocks.cpp:675-696"
+    ],
+    "test_evidence": [],
+    "input_reachability": "公开 init_cmder(name,isCmder,path) 允许省略 path；空值会映射同一 .cmd 文件。",
+    "oracle_basis": "当前 SDK 未规定默认路径是按 name 隔离还是全局共享；仓内无省略 path 的生产调用者可推断合同。",
+    "reason": "不同 name 的 registry 项仍映射同一个 .cmd 文件，可能共享命令与游标；语义是否错误未知。",
+    "root_cause": "默认文件路径未纳入逻辑队列 name，默认共享策略未文档化。",
+    "fix": "确认语义；若 name 表示队列隔离则对 name 安全编码为文件名，若全局共享则文档说明并提供显式共享参数。",
+    "acceptance": "两个不同 name 省略路径时按选定契约共享/隔离；显式同路径另测。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": {
+      "question": "省略 init_cmder path 时不同 name 应隔离还是共用 .cmd？",
+      "options": [
+        "按 name 隔离",
+        "默认全局共享"
+      ],
+      "recommendation": "默认按 name 隔离；共享由调用方显式传同一路径。",
+      "impact": "改变默认文件名可能影响现有依赖全局 .cmd 的调用方。"
+    },
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R19_mq_sharehelper",
+    "id": "BUG-R19-013",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtShareHelper/ShareBlocks.h:35-54",
+      "src/WtShareHelper/ShareBlocks.cpp:252-285",
+      "src/WtShareHelper/ShareBlocks.cpp:323-337",
+      "src/Includes/WTSMarcos.h:98-103"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r19_mq/r19_shareblock_persist_test.cpp:204-210"
+    ],
+    "input_reachability": "公开 share helper API 把外部 domain/section/key C 字符串写入固定 char[32] 共享字段。",
+    "oracle_basis": "写共享 ABI 前应检查最大字节数并终止，超长不能覆盖邻接字段。",
+    "reason": "wt_strcpy 按 strlen 复制；32+ 字节名称越过固定 32 字节字段。",
+    "root_cause": "共享内存字段固定宽度而写入无界。",
+    "fix": "在修改共享状态前限制长度最多 31 字节；超长返回失败，保持旧 ABI 大小。",
+    "acceptance": "31 字节成功且 NUL 终止；32+ 安全失败，段/key/邻接字段不变。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/r19_mq/r19_shareblock_persist_test.cpp",
+        "case": "section/key length boundary",
+        "issue": "超长输入原用例可能越界",
+        "change": "修复后覆盖 31/32 字节安全边界及邻接字段",
+        "target": "CoverageTests_mqshare",
+        "filter": "R19.*shareblock.*",
+        "expected_result": "31 成功终止；32+失败且布局不变"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R53",
+    "id": "BUG-R53-003",
+    "decision": "EXTERNAL_BLOCKED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/Includes/WTSStruct.h:48-51",
+      "src/Includes/WTSStruct.h:81-84",
+      "src/Includes/WTSStruct.h:202-205",
+      "src/WtBtCore/HisDataReplayer.cpp:111-120",
+      "src/WtDtHelper/WtDtHelper.cpp:97-106",
+      "src/ParserCTP/ParserCTP.cpp:284",
+      "src/ParserFemas/ParserFemas.cpp:263"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r12_headers/r53_struct_union_test.cpp:277-295"
+    ],
+    "input_reachability": "当前兼容层按 sizeof(WTSTickStructOld) 将历史 DSB payload 反序列化。仓库 2021-12-30 历史记录显示旧字段来源为 10 字节的 MAX_EXCHANGE_LENGTH，旧结构构造时 memset 全零，内置 parser 从基础资料 C 字符串 strcpy exchange；当前有效 max-1+NUL 回归不涉及满宽无 NUL 历史记录。",
+    "oracle_basis": "这属于既有磁盘二进制格式事实：需要具体旧版生成器或格式规范确定旧 exchg[10] 是否必须 NUL 终止。不得由产品偏好决定，也不能由人工构造的越界测试夹具定义。",
+    "reason": "本地 git 历史显示旧 exchange 字段容量为 10（5f6fa321 前的 MAX_EXCHANGE_LENGTH）；旧 struct 构造全零，内置 CTP/Femas 等 parser 使用 strcpy 写基础资料 C 字符串。迁移提交 12098b5b 的旧格式赋值也用 strcpy，历史 reader 提交 007d7bc3/9bb6c1f2 按旧 struct size 读取并转换。这强烈支持官方生成的有效记录带 NUL，但仓库没有已发布旧 DSB/raw tick 样本或格式文档，无法确认第三方 writer/全部发布版本。当前测试已修为合法 max-1+NUL；不把满宽原始字节风险当作用户可选择的产品策略。",
+    "root_cause": "外部旧版 DSB 的 exchg[10] 编码契约及实际发布数据未在仓库留档；本地只能证明内置生成器的 C 字符串写法，不能证明所有支持的旧文件来源。",
+    "fix": "在取得证据前不改产品代码。若旧版正式格式保证 NUL，撤回满宽无 NUL 缺陷主张并保留合法字符串回归；若已发布格式允许满宽原始字节，按该格式做有界定长转换，不跨 exchg 字段读取 code。",
+    "acceptance": "确认具体旧版数据格式/生产者版本；检查该版本真实 DSB 中 exchg[10] 的终止字节。若保证 NUL，状态改为 NOT_BUG/TEST；若满宽为有效值，增加不越界原始字节 fixture 并验证 conversion 安全保留字段边界。现有 max-1+NUL 测试只作为合法字符串对照，不声称验证满宽格式。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": {
+      "required": "一个明确版本的已发布旧版 DSB 历史 tick 文件（记录生产者/发行版本及压缩/结构版本），或该版本的正式 SDK/磁盘格式说明，能够界定旧 WTSTickStruct.exchg[10] 是 NUL 终止字符串还是可满宽原始字段。",
+      "checked_locally": "本地 git 历史：5f6fa321^ 的 MAX_EXCHANGE_LENGTH 为 10；12098b5b 将其拆为 WTSTickStructOld[10] 并以 strcpy 迁移字符串；该旧结构构造 memset 全零；5f6fa321^ 的内置 CTP/CTPMini/CTPOpt/Femas/XTP parser 用 strcpy(quote.exchg,getExchg())；007d7bc3 和 9bb6c1f2 增加旧 DSB 读取/结构转换。仓库文件清单未发现旧 .dsb/raw tick 二进制 fixture，也未找到旧版字段格式规范。当前 r53 测试仅有合法 max-1+NUL fixture。",
+      "why_local_is_insufficient": "源码可证明本仓库内置生成路径按 C 字符串写入，但不能证明所有已发布旧版本、外部数据写入器或用户存量 DSB 都遵守同一规则。历史二进制的有效格式不能由人工构造的无 NUL 字节或当前代码偏好推断。",
+      "next_action": "由主代理从归档取得一份有生产者版本元数据的旧版 DSB tick 文件，或对应旧发布 SDK/格式文档；核对 exchg[10] 与相邻 code 字节并确认兼容合同，再按结果将本项撤回或转为具体产品边界修复。"
+    },
+    "local_remaining": []
+  },
+  {
+    "lane": "R56",
+    "id": "BUG-R56-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WTSTools/CsvHelper.cpp:56-75",
+      "src/WTSTools/CsvHelper.cpp:77-100",
+      "src/WTSTools/CsvHelper.cpp:161-170",
+      "src/WTSTools/CsvHelper.h:125-138"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l02_wtstools_mq/r56_csv_test.cpp:57-67"
+    ],
+    "input_reachability": "外部 CSV 成功读取一条非空但短于 header 的行是解析器正常路径；后续可用 getter 访问任一 header 列。",
+    "oracle_basis": "成功加载行后，按 header 取列须安全报告缺失列，不得越过当前行 vector。",
+    "reason": "check_cell 仅检查 header map，getter 直接索引较短 _current_cells；短行 next_row 成功后取缺列可越界。旧 disabled 用例在 next_row 前读取的前提无效，但不否定独立短行风险。",
+    "root_cause": "未检查实际当前行字段数。",
+    "fix": "next_row 或 getter 校验当前行实际列数；缺列返回错误/安全默认。",
+    "acceptance": "加载 header a,b,c 与短行 1；取 c 安全返回缺列错误/默认；完整行正控不回归。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/l02_wtstools_mq/r56_csv_test.cpp",
+        "case": "short row after successful next_row",
+        "issue": "旧 disabled 测试在 next_row 前取值，前提无效",
+        "change": "改成 header a,b,c、短行 1 成功读取后取 c；保留完整行正控",
+        "target": "CoverageTests",
+        "filter": "R56Csv.*",
+        "expected_result": "缺列安全错误/默认；完整行值不变"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R56",
+    "id": "BUG-R56-004",
+    "decision": "PRODUCT",
+    "evidence_level": "LOCAL_REPRO",
+    "source_evidence": [
+      "src/WTSTools/WTSHotMgr.cpp:117-122",
+      "src/WTSTools/WTSHotMgr.cpp:211-220",
+      "src/WtRunner/WtRunner.cpp:116-117",
+      "src/WtBtCore/HisDataReplayer.cpp:270-271"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l02_wtstools_mq/r56_hotmgr_test.cpp:51-65",
+      "src/TestUnits/coverage/l02_wtstools_mq/r56_hotmgr_test.cpp:67-75"
+    ],
+    "input_reachability": "runner 仅在外部配置包含 hot 配置时调用 loadHots；显式路径是可达配置依赖。",
+    "oracle_basis": "缺少可选字段与显式文件加载失败是两种输入；显式路径失败应由 bool 返回并被调用者处理。",
+    "reason": "loadHots 忽略 loadCustomRules false，仍标 initialized 并返回 true。现活动测试把显式缺文件当空成功，混淆了未配置可选路径与显式坏路径。",
+    "root_cause": "显式配置错误没有传播，manager 进入 initialized 却无规则。",
+    "fix": "缺 hot 字段维持可选不调用；显式缺失/坏格式路径传播 false，保持未初始化，runner 报错。",
+    "acceptance": "未提供 hot 不加载；有效文件成功；显式缺失/坏格式 false 且未初始化。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/l02_wtstools_mq/r56_hotmgr_test.cpp",
+        "case": "MissingFilesKeepManagerEmpty",
+        "issue": "混淆未配置 hot 与显式路径缺失",
+        "change": "拆分 runner 不提供字段与显式 missing/malformed 文件；显式文件错误必须传播",
+        "target": "CoverageTests",
+        "filter": "R56HotMgr.*",
+        "expected_result": "可选字段不加载；显式失败且未初始化"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/final-fix/hot-runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/final-fix/OptionalHotRulesOmittedLeavesManagerUninitialized.log",
+      "docs/迭代计划/迭代02/复核185/evidence/final-fix/OptionalHotRulesOmittedLeavesManagerUninitialized.xml",
+      "docs/迭代计划/迭代02/复核185/evidence/final-fix/ExplicitMissingHotRulesFileFailsWithoutInitializingManager.log",
+      "docs/迭代计划/迭代02/复核185/evidence/final-fix/ExplicitMissingHotRulesFileFailsWithoutInitializingManager.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R7_exefact",
+    "id": "BUG-R7-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExeFact/WtVWapExeUnit.cpp:110-123",
+      "src/WtExeFact/WtTWapExeUnit.cpp:146-169",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:177-198"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r7_vwap_unit_test.cpp:744-765",
+      "src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:699-720"
+    ],
+    "input_reachability": "total_times 来自外部 execution policy；缺省值为 0 并在 init 派生周期跨度。",
+    "oracle_basis": "外部配置分母必须除法前验证为正数，非法值安全拒绝。",
+    "reason": "VWAP/TWAP/StockVWAP 缺少次数校验，0 会进入整数除法。",
+    "root_cause": "init 直接除以由外部配置得到的零值。",
+    "fix": "派生前验证 total_times>0；缺省/0 失败且不注册。",
+    "acceptance": "缺项/0 安全失败；1/N 正控周期跨度正确。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/r7_exefact/r7_vwap_unit_test.cpp",
+        "case": "zero total_times boundary",
+        "issue": "原 disabled probe 可能整数除零",
+        "change": "改成 init/factory 失败与合法 1/N 正控，不跑崩溃输入",
+        "target": "CoverageTests_exefact",
+        "filter": "r7_vwap.*:r7_twap.*:r7_stkvw.*",
+        "expected_result": "缺省/0 拒绝；正值 span 正确"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R7_exefact",
+    "id": "BUG-R7-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExeFact/WtVWapExeUnit.cpp:125-145",
+      "src/WtExeFact/WtVWapExeUnit.cpp:360-373",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:224-246",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:569-579"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r7_vwap_unit_test.cpp:768-780"
+    ],
+    "input_reachability": "外部策略配置给出 VWAP profile，init 后工厂保留单元并接受 tick。",
+    "oracle_basis": "profile 是执行依赖；失败加载不得留下可运行单元，所有 profile 下标须有效。",
+    "reason": "缺失或短 profile 时 init 提前返回但未标失败；后续 do_calc 按分钟直接访问 vector。",
+    "root_cause": "init 失败信号未传至工厂，运行路径假设向量完整。",
+    "fix": "检查文件格式/长度/分钟边界，失败不注册且下单路径防护。",
+    "acceptance": "missing/empty/short 不得进入计算或下单；完整 profile 正控覆盖合法分钟边界。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/r7_exefact/r7_vwap_unit_test.cpp",
+        "case": "profile missing/short",
+        "issue": "旧 probe tick 可能越界",
+        "change": "测试初始化拒绝和有效 profile 对照，坏文件不进入 tick/order",
+        "target": "CoverageTests_exefact",
+        "filter": "r7_vwap.*:r7_stkvw.*",
+        "expected_result": "坏文件失败，无订单；完整 profile 正常"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R7_exefact",
+    "id": "BUG-R7-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExeFact/WtVWapExeUnit.cpp:346-362",
+      "src/WtExeFact/WtTWapExeUnit.cpp:634-653",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:515-566"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r7_vwap_unit_test.cpp:438-460",
+      "src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:685-696"
+    ],
+    "input_reachability": "执行单元通过仓位接口读净/多/空视图，clear sentinel 可进入正常 do_calc。",
+    "oracle_basis": "ExecuteDefs 提供 long/short/netted 视图；清仓目标应处理净额抵消但仍存在的方向子仓。",
+    "reason": "VWAP/TWAP/StockVWAP 在 diffQty==0 先返回，后面的 clear sentinel 多空子仓清理不可达；净仓抵消会隐藏残仓。",
+    "root_cause": "清仓逻辑在净差零早退之后。",
+    "fix": "对 clear sentinel 先按可用 long/short 分别生成平仓，再处理普通 diffQty==0。",
+    "acceptance": "测试净零但 gross long/short 非零、仅 long、仅 short、flat、非零净额；只在支持双向账户时发方向平仓。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/r7_exefact/r7_vwap_unit_test.cpp",
+        "case": "clear on gross positions with net zero",
+        "issue": "普通 flat 不覆盖净额抵消子仓",
+        "change": "构造 long/short/net 视图，覆盖净零毛仓、单边仓与 flat",
+        "target": "CoverageTests_exefact",
+        "filter": "r7_vwap.*:r7_twap.*:r7_stkvw.*",
+        "expected_result": "按账户合同方向清仓；flat 不多发"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R7_exefact",
+    "id": "BUG-R7-006",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/ExecuteDefs.h:121-129",
+      "src/WtExecMon/WtExecRunner.cpp:434-447",
+      "src/WtExeFact/WtTWapExeUnit.cpp:136-145",
+      "src/WtExeFact/WtVWapExeUnit.cpp:99-127",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:162-230"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:723-736"
+    ],
+    "input_reachability": "外部 code/策略可由 getUnit 自动建单；商品/session 元数据查询可返回 NULL。",
+    "oracle_basis": "必需执行元数据缺失应失败关闭，不得注册到行情/下单路径。",
+    "reason": "VWAP/TWAP/StockVWAP 初始化或价格路径解引用 commodity/session/tmode 指针，缺资料时没有一致门禁。",
+    "root_cause": "自动工厂先保存 unit 再 init；依赖缺失没有阻止注册。",
+    "fix": "统一校验必需元数据，失败不加入 unit_map/不调度，后续保留空值防护。",
+    "acceptance": "未知 code 安全拒绝、无订单；有效元数据正控完成 init/tick/下单。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/r7_exefact/r7_vwap_unit_test.cpp",
+        "case": "required commodity metadata missing",
+        "issue": "需要从工厂初始化入口验证",
+        "change": "增加未知 code/缺 commodity/session 失败和有效依赖控制",
+        "target": "CoverageTests_exefact",
+        "filter": "r7_vwap.*:r7_twap.*:r7_stkvw.*",
+        "expected_result": "缺依赖不注册不下单；正控可执行"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R7_exefact",
+    "id": "BUG-R7-011",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExecMon/WtExecRunner.cpp:61-78",
+      "src/TestUnits/coverage/r7_exefact/r7_exec_runner_test.cpp:61-80"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r7_exec_runner_test.cpp:91-105"
+    ],
+    "input_reachability": "runner 读外部 JSON 配置；语法合法但缺 basefiles 的对象可到 config。",
+    "oracle_basis": "外部必填配置错误应返回失败和字段诊断，不应崩溃。",
+    "reason": "config 直接解引用 _config->get(basefiles) 返回的 NULL；语法合法的 {} 可触发。",
+    "root_cause": "必填字段校验晚于指针使用。",
+    "fix": "先检查 basefiles 并报告缺字段，再继续配置。",
+    "acceptance": "完整最小配置成功；缺 basefiles 返回 false 和诊断，不发生空指针访问。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/r7_exefact/r7_exec_runner_test.cpp",
+        "case": "config missing basefiles",
+        "issue": "外部 JSON 合法但配置不完整",
+        "change": "隔离临时配置调用 config，断言 false 与缺字段诊断",
+        "target": "CoverageTests_exefact",
+        "filter": "r7_exec_runner.*",
+        "expected_result": "缺项安全失败；完整最小配置成功"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R7_exefact",
+    "id": "BUG-R7-014",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExeFact/WtVWapExeUnit.h:189-190",
+      "src/WtExeFact/WtTWapExeUnit.h:192-193",
+      "src/WtExeFact/WtStockVWapExeUnit.h:258-260",
+      "src/WtExeFact/WtVWapExeUnit.cpp:394-406",
+      "src/WtExeFact/WtVWapExeUnit.cpp:458-468",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:619-630",
+      "src/WtExeFact/WtStockVWapExeUnit.cpp:697-710"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r7_vwap_unit_test.cpp:548-570"
+    ],
+    "input_reachability": "外部 price_mode 同时控制常规 VWAP 与撤单重发 fire_at_once。",
+    "oracle_basis": "注释定义 mode1 为本方最优、mode2 对手价；StockVWAP fire_at_once 注释也称遵循当前模式。",
+    "reason": "VWAP/StockVWAP 常规 mode1 买取 bid/卖取 ask，重发 mode1 却与 mode2 都取对手价；已有用例把不一致实现锁定。",
+    "root_cause": "fire_at_once 错将 mode1 映射为对手价。",
+    "fix": "统一常规与重发的 mode 映射；撤单次数偏移另行叠加，保留涨跌停限制。",
+    "acceptance": "同一行情买卖分别核对 VWAP/StockVWAP mode0/1/2；mode1 重发保持本方最优，mode2 对手价。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/r7_exefact/r7_vwap_unit_test.cpp",
+        "case": "fire_at_once_price_mode_1_takes_ask_price",
+        "issue": "当前用例把 mode1 错误锁为对手价",
+        "change": "更新买卖常规/重发对照，mode1 采用本方最优，mode2 对手价",
+        "target": "CoverageTests_exefact",
+        "filter": "r7_vwap.*:r7_stkvw.*",
+        "expected_result": "mode1 基准价一致，mode2 对手价保持"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R7_exefact",
+    "id": "BUG-R7-017",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtExeFact/WtStockMinImpactExeUnit.cpp:385-410",
+      "src/WtCore/TraderAdapter.cpp:1482-1501",
+      "src/Includes/ExecuteDefs.h:202-215",
+      "src/WtBtCore/ExecMocker.cpp:219-233",
+      "src/WtBtCore/ExecMocker.cpp:285-288",
+      "src/WtBtCore/MatchEngine.cpp:51-64",
+      "src/WtBtCore/MatchEngine.cpp:420-437",
+      "src/WtCore/TraderAdapter.cpp:1482-1502",
+      "src/WtUftCore/TraderAdapter.cpp:1154-1202"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r7_exefact/r7_stock_minimpact_unit_test.cpp:612-634",
+      "src/TestUnits/coverage/r7_exefact/r7_stock_minimpact_unit_test.cpp:614-634"
+    ],
+    "input_reachability": "ExecMocker/MatchEngine 是真实 backtest 成功回报入口；buy 在订单创建后先更新 undone，下一 tick 才回调。当前修正测试也设置同样 undone。",
+    "oracle_basis": "回调重算时存在未完成买量应等待；实际 success callback 的状态前置是 undone 非零。",
+    "reason": "旧 fake success 用例 undone=0，与 ExecMocker::buy 先加 undone、MatchEngine 下一 tick 才发 success 的实际顺序不同；当前修正测试先设成已下单量后回调，do_calc 命中 undone 门禁，因此只买一次。TraderAdapter/Uft Adapter 当前实际 entrust sink 只发送失败回调，未证实 live-success 可达。",
+    "root_cause": "重复下单结论由不真实的 fake 状态触发，忽略了真实路径的未完成量更新时序。",
+    "fix": "撤回当前重复下单产品主张；保留按真实 ExecMocker 时序构造的回归。",
+    "acceptance": "ExecMocker buy 后 undone 已更新，下一 tick success callback 时 undone 非零；当前测试回调后 buys 仍为 1。失败回调继续按原错误重算路径测试。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R84b",
+    "id": "BUG-R84b-001",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtDtCore/StateMonitor.h:205-222",
+      "src/WtDtCore/DataManager.cpp:237-245"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp:338-342"
+    ],
+    "input_reachability": "StateMonitor::isInState 有内部调用；当前调用点传非空 session id，测试人工传 nullptr。",
+    "oracle_basis": "没有 nullable 契约时，人工传 NULL 不能独立证明缺陷；也不由此推断所有路径安全。",
+    "reason": "候选唯一触发是 disabled 测试人工将 nullptr 传给内部 StateMonitor::isInState；其实现按非空字符串查 map，仓内正常调用 DataManager::canSessionReceive 传入会话标识，现未发现正常可空路径或 nullable 契约。因此该测试不能支持产品缺陷主张，应撤回，而不是要求用户决定人工参数的语义。",
+    "root_cause": "原结论从不受支持的 nullptr 直接调用外推；正常调用者均提供 sid。",
+    "fix": "撤回产品修复要求；若未来 SDK 声明 nullable，再由入口判空并单独设计公共契约。",
+    "acceptance": "移除或保持禁用人工 nullptr 崩溃断言；现有非空、空串和未知非空 sid 行为用例继续验证正常路径。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "n06_strategies_mq_share",
+    "id": "BUG-WSN06-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCtaStraFact/WtCtaStraFact.cpp:81-94",
+      "src/WtCtaTwoMaFact/WtCtaTwoMaFact.cpp:82-94",
+      "src/WtSelStraFact/WtSelStraFact.cpp:63-77",
+      "src/WtUftStraFact/WtUftStraFact.cpp:95-110",
+      "src/WtHftStraFact/WtHftStraFact.cpp:86-101",
+      "src/Includes/WTSVariant.hpp:346-352",
+      "src/WtRunner/WtRunner.cpp:302-309",
+      "src/WtRunner/WtRunner.cpp:328-344",
+      "src/WtPorter/WtRtRunner.cpp:728-739",
+      "src/WtPorter/WtRtRunner.cpp:755-785"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n06_strategies_mq_share/n06_cta_stra_test.cpp:126-150",
+      "src/TestUnits/coverage/n06_strategies_mq_share/n06_cta_stra_test.cpp:177-185",
+      "src/TestUnits/coverage/n06_strategies_mq_share/n06_sel_uft_hft_test.cpp:222-238"
+    ],
+    "input_reachability": "runner 对缺少 name 使用 WTSVariant::getCString 默认空串，而非 NULL；空/未知名使工厂返回 NULL。WtRunner CTA 和 WtRtRunner CTA/Sel 在得到该空 factory result 后直接解引用，故外部不完整/错误策略配置存在真实 crash 路径。",
+    "oracle_basis": "外部策略配置初始化必须拒绝缺名、未知策略或 factory 创建失败；不能解引用空实例。",
+    "reason": "直接 createStrategy(nullptr) 的 disabled 用例不代表正常 runner 参数，getCString 缺字段返回默认空串；但这条外部输入使 factory 返回 NULL，WtRunner CTA 与 WtRtRunner CTA/Sel 随后无判空解引用。产品风险可达，根因是 runner 未验证配置名称和 factory 结果，而非正常路径传了 NULL 给 strcmp。",
+    "root_cause": "配置缺 name 时得到空串，unsupported/empty name 的工厂返回 NULL；部分 runner 继续调用 stra->self()/init，造成可达空指针解引用。",
+    "fix": "在 runner 配置边界要求非空且受支持的 name；所有 factory result 在 init/self 前检查，失败返回配置错误并跳过/终止注册。",
+    "acceptance": "用外部配置分别省略 name、提供未知名和有效名；前两者在 context 安装/回调前返回明确失败且不崩溃，合法名正常初始化。测试不得将直接 createStrategy(nullptr) 当作生产可达证据。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/m_WtRunner/wt_runner_strategy_name_test.cpp",
+        "case": "missing_or_unknown_strategy_name_fails_before_context_registration",
+        "issue": "工厂 NULL 参数测试不符合 runner 真实输入；配置缺名会变为空串，工厂返回 NULL 后 CTA/Sel runner 解引用。",
+        "change": "新增 WtRunner 配置入口回归：省略 name、未知 name 与合法 name；检查初始化结果及 context 注册，覆盖 runner null-result guard。",
+        "target": "CoverageTests_wtrunner",
+        "filter": "wt_runner_strategy_name.*",
+        "expected_result": "缺/未知 name 安全失败且不注册 context；有效 name 正常 init。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "n06_strategies_mq_share",
+    "id": "BUG-WSN06-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtUftStraFact/WtUftStraDemo.cpp:78-89",
+      "src/WtHftStraFact/WtHftStraDemo.cpp:77-89",
+      "src/WtUftRunner/WtUftRunner.cpp:213-232",
+      "src/WtExecMon/WtExecRunner.cpp:330-345"
+    ],
+    "test_evidence": [],
+    "input_reachability": "外部 active 策略配置缺 params 时 runner 可传 NULL；当前 runner 忽略 init 返回值并仍注册。",
+    "oracle_basis": "配置错误或 init 失败不得进入可运行 callback/context。",
+    "reason": "UFT/HFT demo init 直接解引用 cfg；runner 可将 NULL 传入并继续安装未初始化策略。",
+    "root_cause": "缺少 params 验证，且 init 失败没有阻止注册。",
+    "fix": "按策略 schema 校验 params，传播 init false；失败不注册；可选项显式转为空对象/默认值。",
+    "acceptance": "缺/非法 params 安全失败不注册；合法配置完成 init 与首个 callback。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/m_WtUftRunner/wtuftrunner_params_test.cpp",
+        "case": "active_strategy_missing_params_is_not_registered",
+        "issue": "外部 active UFT/HFT 策略 params 缺失可传 NULL，runner 忽略 init false 并继续注册。",
+        "change": "新增 UFT runner 配置入口缺 params、空对象和合法对象测试；断言 init 失败不会安装未初始化策略。",
+        "target": "CoverageTests_wtuftrunner",
+        "filter": "wtuftrunner_params.*",
+        "expected_result": "缺/非法必需 params 安全失败且不注册；合法配置完成 init 与 callback。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "n06_strategies_mq_share",
+    "id": "BUG-WSN06-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCtaTwoMaFact/WtStraTwoMa.cpp:79-101",
+      "src/WtCtaTwoMaFact/WtStraTwoMa.cpp:190-205",
+      "src/WtCtaStraFact/WtStraDualThrust.cpp:79-99",
+      "src/WtCtaStraFact/WtStraDualThrust.cpp:169-181"
+    ],
+    "test_evidence": [],
+    "input_reachability": "TwoMa 周期来自 CTA 外部配置并进入 on_schedule；0 可到达除法。",
+    "oracle_basis": "配置驱动除数/窗口必须在调度前为正数；DualThrust 零窗口是独立策略合同。",
+    "reason": "TwoMa short_days/long_days 为 0 会参与周期除法；混合用例中的 DualThrust 不应归入同一错误。",
+    "root_cause": "TwoMa 未验证周期参数并在调度时直接使用。",
+    "fix": "TwoMa init 检查正周期与历史长度；失败不注册调度；DualThrust 独立定义零值。",
+    "acceptance": "TwoMa 非正值/历史不足安全失败，正周期正常；DualThrust 单独测试其零值语义。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/n06_strategies_mq_share/n06_cta_stra_test.cpp",
+        "case": "TwoMa zero periods",
+        "issue": "混合用例把 TwoMa 与 DualThrust 混在一起",
+        "change": "拆分两种策略；TwoMa 非正值拒绝，DualThrust 单独定义零窗口 oracle",
+        "target": "CoverageTests_ctafact",
+        "filter": "n06_two_ma.*",
+        "expected_result": "TwoMa 非正不调度；正值正常，DualThrust 独立判定"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "n06_strategies_mq_share",
+    "id": "BUG-WSN06-005",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtMsgQue/MQManager.cpp:6-18",
+      "src/WtMsgQue/MQManager.cpp:58-66",
+      "src/WtMsgQue/MQServer.cpp:70-106",
+      "src/WtMsgQue/WtMsgQue.h:25-32",
+      "src/WtMsgQue/WtMsgQue.h:50-78",
+      "src/WtMsgQue/MQClient.cpp:64-107",
+      "src/WtMsgQue/MQServer.cpp:66-106"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r19_mq/r19_mq_manager_test.cpp:101-120",
+      "src/TestUnits/coverage/r19_mq/r19_mq_manager_test.cpp:187-215"
+    ],
+    "input_reachability": "公开 C API create_server/client 描述为创建并初始化；外部 endpoint 配置可导致 init 失败。",
+    "oracle_basis": "后续 API 以返回 ID 操作实例；init 失败不能伪装成正常可用句柄。",
+    "reason": "MQManager 忽略 init bool，仍登记并返回正常 ID；调用者只能由后续日志发现不可用。",
+    "root_cause": "资源初始化状态与成功 ID 返回脱节。",
+    "fix": "定义不与有效 ID 冲突的 invalid sentinel；init 失败不登记且返回 sentinel。",
+    "acceptance": "有效 endpoint 返回可用 ID；非法协议/绑定冲突返回 sentinel、不登记，后续操作 not-exists。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/r19_mq/r19_mq_manager_test.cpp",
+        "case": "invalid_protocol_logs_bind_failure_but_handle_still_returned",
+        "issue": "测试当前把初始化失败 ID 当成功",
+        "change": "改断言无效 sentinel、无注册、后续 not-exists，并加有效 endpoint 控制",
+        "target": "CoverageTests_mqshare",
+        "filter": "r19_mq_server.*:r19_mq_client.*",
+        "expected_result": "坏 endpoint 不登记且返回 sentinel；有效 endpoint 返回可用 ID"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  }
+]

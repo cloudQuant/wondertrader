@@ -13,8 +13,8 @@
  *   - setTrader(已就绪通道) 后 buy/sell/cancel 真的转发到 TraderAdapter，
  *     再 on_channel_lost 后重新拒单。
  *
- * 执行单元本体（拆单/追单）由插件反射创建，本目标不加载任何 dylib，
- * 因此 _unit_map 永远为空，unit 非空的分支不在本文件范围内。
+ * 普通清理与空数据用例不加载插件；过期目标测试会像 r31 一样把构建产物
+ * libWtExeFact 临时复制后加载，以确保清理断言经过真实 diff 执行单元。
  */
 #include "r59_trader_fixture.h"
 
@@ -28,6 +28,7 @@
 
 #include <filesystem>
 #include <iterator>
+#include <cstdlib>
 
 using namespace r59x;
 using wtp::ActionPolicyMgr;
@@ -37,6 +38,51 @@ using wtp::WtDiffExecuter;
 using wtp::WtLocalExecuter;
 
 namespace {
+
+namespace fs = std::filesystem;
+
+#if defined(_WIN32)
+const char* const kExeFactLib = "WtExeFact.dll";
+#elif defined(__APPLE__)
+const char* const kExeFactLib = "libWtExeFact.dylib";
+#else
+const char* const kExeFactLib = "libWtExeFact.so";
+#endif
+
+const fs::path& exeFactBinDir()
+{
+    static fs::path cached;
+    if (!cached.empty())
+        return cached;
+
+    if (const char* env = std::getenv("WT_COV_PLUGIN_BIN"))
+    {
+        fs::path candidate(env);
+        std::error_code ec;
+        if (fs::is_regular_file(candidate / kExeFactLib, ec))
+        {
+            cached = candidate;
+            return cached;
+        }
+    }
+
+    fs::path up = fs::absolute(fs::path(__FILE__)).parent_path();
+    for (int i = 0; i < 10 && !up.empty(); ++i)
+    {
+        for (const char* config : { "Debug", "Release" })
+        {
+            fs::path candidate = up / "build-cov" / "build_x64" / config / "bin";
+            std::error_code ec;
+            if (fs::is_regular_file(candidate / kExeFactLib, ec))
+            {
+                cached = candidate;
+                return cached;
+            }
+        }
+        up = up.parent_path();
+    }
+    return cached;
+}
 
 class R59Reader : public wtp::IDataManager
 {
@@ -104,12 +150,37 @@ class R59DiffBd : public p11fix::FakeBaseDataMgr
 {
 public:
     WTSContractInfo* any_ = nullptr;
+    std::vector<std::string> lookups_;
 
     virtual WTSContractInfo* getContract(const char* code, const char* exchg = "", uint32_t uDate = 0) override
     {
-        if (any_ != nullptr &&
+        std::string key = code == nullptr ? "" : code;
+        key += "|";
+        key += exchg == nullptr ? "" : exchg;
+        lookups_.push_back(key);
+        if (any_ != nullptr && code != nullptr &&
             (strcmp(code, "SHFE.ag.2512") == 0 || strcmp(code, "ag2512") == 0))
             return any_;
+        return p11fix::FakeBaseDataMgr::getContract(code, exchg, uDate);
+    }
+};
+
+/// 严格匹配基础库公开约定：仅 (raw code, exchange) 能解析到合约。
+class R59RawCodeDiffBd : public p11fix::FakeBaseDataMgr
+{
+public:
+    WTSContractInfo* raw_contract_ = nullptr;
+    std::vector<std::string> lookups_;
+
+    virtual WTSContractInfo* getContract(const char* code, const char* exchg = "", uint32_t uDate = 0) override
+    {
+        std::string key = code == nullptr ? "" : code;
+        key += "|";
+        key += exchg == nullptr ? "" : exchg;
+        lookups_.push_back(key);
+        if (raw_contract_ != nullptr && code != nullptr && strcmp(code, "ag2512") == 0 &&
+            exchg != nullptr && strcmp(exchg, "SHFE") == 0)
+            return raw_contract_;
         return p11fix::FakeBaseDataMgr::getContract(code, exchg, uDate);
     }
 };
@@ -145,7 +216,8 @@ protected:
     void TearDown() override
     {
         std::error_code ec;
-        for (const char* n : { "r59_diff_load", "r59_diff_fwd", "r59_diff_null", "r59_diff_stale" })
+        for (const char* n : { "r59_diff_load", "r59_diff_fwd", "r59_diff_null",
+                "r59_diff_stale", "r59_diff_stale_strict" })
             std::filesystem::remove(execFile(n), ec);
         R59TraderTest::TearDown();
     }
@@ -171,6 +243,17 @@ const char* kPlainCfg = R"json(
 {
     "scale": 1.0, "poolsize": 0,
     "policy": {"default": {"name": "r59.none"}}
+}
+)json";
+
+const char* kDiffUnitCfg = R"json(
+{
+    "scale": 1.0, "poolsize": 0,
+    "policy": {"default": {
+        "name": "WtExeFact.WtDiffMinImpactExeUnit",
+        "offset": 0, "expire": 0, "pricemode": 0, "span": 0,
+        "byrate": false, "lots": 1.0, "rate": 0.0
+    }}
 }
 )json";
 
@@ -400,28 +483,44 @@ TEST_F(R59Exec, set_trader_forwards_orders_only_while_channel_ready)
     EXPECT_EQ(1u, local.buy(kStdCode, 7000.0, 1.0).size());
 }
 
-/*
- * DISABLED_：WtDiffExecuter::set_position 的过期目标清理用标准代码查基础数据。
- * 依据 WtDiffExecuter.cpp:606 `_bd_mgr->getContract(stdCode)`，而 load_data 同一份
- * 数据用的是 CodeHelper 解析后的原始代码（:161-162）。按 IBaseDataMgr 约定
- * getContract(code, exchg) 收原始代码，真实基础库按 (code,exchg) 建键，
- * 因此这里的查询必然落空 -> continue，被移出目标集合的合约永远留在 _target_pos，
- * save_data 仍写出旧目标 10。正确行为应把目标清零。详见 BUG-R59-002。
- */
-TEST_F(R59Exec, DISABLED_diff_stale_target_is_not_cleared_with_standard_code)
+// WtDiffExecuter.cpp:113-172, 597-641（真实 diff 单元下的过期目标清理）
+TEST_F(R59Exec, diff_stale_target_uses_raw_code_lookup_and_clears_with_real_unit)
 {
-    std::string file = execFile("r59_diff_stale");
+    const fs::path& pluginBin = exeFactBinDir();
+    ASSERT_FALSE(pluginBin.empty()) << "cannot locate build-cov plugin bin";
+    ASSERT_TRUE(fs::is_regular_file(pluginBin / kExeFactLib)) << pluginBin.string();
+
+    const fs::path stagedPlugins = tmp_ / "r59_plugins";
     std::error_code ec;
+    fs::create_directories(stagedPlugins, ec);
+    ASSERT_FALSE(ec) << ec.message();
+    fs::copy_file(pluginBin / kExeFactLib, stagedPlugins / kExeFactLib,
+        fs::copy_options::overwrite_existing, ec);
+    ASSERT_FALSE(ec) << ec.message();
+    ASSERT_TRUE(factory_.loadFactories(stagedPlugins.string().c_str()));
+
+    auto unitProbe = factory_.createDiffExeUnit("WtExeFact", "WtDiffMinImpactExeUnit");
+    ASSERT_NE(nullptr, unitProbe.get());
+    EXPECT_STREQ("WtDiffMinImpactExeUnit", unitProbe->self()->getName());
+    unitProbe.reset();
+
+    std::string file = execFile("r59_diff_stale");
     std::filesystem::create_directories(std::filesystem::path(file).parent_path(), ec);
+    ASSERT_FALSE(ec) << ec.message();
     {
         std::ofstream out(file);
+        ASSERT_TRUE(out.is_open()) << file;
         out << R"json({"targets":[{"code":"SHFE.ag.2512","target":10.0}],"diffs":[]})json";
+        out.close();
+        ASSERT_TRUE(out.good());
     }
 
-    // p11fix::FakeBaseDataMgr 按 (原始代码, 交易所) 建键，与真实基础库语义一致
-    wtp::WTSVariant* cfg = writeCfg("r59_diff_stale.json", kPlainCfg);
+    // 双格式替身让真实单元清理分支可达，同时记录查询参数，单独检查应使用原始码+交易所。
+    R59DiffBd bd;
+    bd.any_ = ct_;
+    wtp::WTSVariant* cfg = writeCfg("r59_diff_stale.json", kDiffUnitCfg);
     ASSERT_NE(nullptr, cfg);
-    WtDiffExecuter ex(&factory_, "r59_diff_stale", nullptr, &bd_);
+    WtDiffExecuter ex(&factory_, "r59_diff_stale", nullptr, &bd);
     ex.setStub(&stub_);
     ASSERT_TRUE(ex.init(cfg));
     cfg->release();
@@ -429,7 +528,66 @@ TEST_F(R59Exec, DISABLED_diff_stale_target_is_not_cleared_with_standard_code)
     wt_hashmap<std::string, double> empty;
     ex.set_position(empty);
 
+    ASSERT_EQ(2u, bd.lookups_.size());
+    EXPECT_EQ("ag2512|SHFE", bd.lookups_[0]); // load_data 的原始码查询
+    EXPECT_EQ("ag2512|SHFE", bd.lookups_[1]); // 过期清理应遵循相同查询契约
+
     std::ifstream in(file);
+    ASSERT_TRUE(in.is_open()) << file;
+    std::string saved((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+    EXPECT_NE(std::string::npos, saved.find("\"target\": 0"));
+}
+
+// 真实 diff 单元 + 严格基础库：只接受 (raw code, exchange)，校验清理对外可见结果。
+TEST_F(R59Exec, diff_stale_target_clears_with_raw_code_only_contract_lookup)
+{
+    const fs::path& pluginBin = exeFactBinDir();
+    ASSERT_FALSE(pluginBin.empty()) << "cannot locate build-cov plugin bin";
+    ASSERT_TRUE(fs::is_regular_file(pluginBin / kExeFactLib)) << pluginBin.string();
+
+    const fs::path stagedPlugins = tmp_ / "r59_plugins_strict";
+    std::error_code ec;
+    fs::create_directories(stagedPlugins, ec);
+    ASSERT_FALSE(ec) << ec.message();
+    fs::copy_file(pluginBin / kExeFactLib, stagedPlugins / kExeFactLib,
+        fs::copy_options::overwrite_existing, ec);
+    ASSERT_FALSE(ec) << ec.message();
+    ASSERT_TRUE(factory_.loadFactories(stagedPlugins.string().c_str()));
+
+    auto unitProbe = factory_.createDiffExeUnit("WtExeFact", "WtDiffMinImpactExeUnit");
+    ASSERT_NE(nullptr, unitProbe.get());
+    EXPECT_STREQ("WtDiffMinImpactExeUnit", unitProbe->self()->getName());
+    unitProbe.reset();
+
+    const std::string file = execFile("r59_diff_stale_strict");
+    fs::create_directories(fs::path(file).parent_path(), ec);
+    ASSERT_FALSE(ec) << ec.message();
+    {
+        std::ofstream out(file);
+        ASSERT_TRUE(out.is_open()) << file;
+        out << R"json({"targets":[{"code":"SHFE.ag.2512","target":10.0}],"diffs":[]})json";
+        out.close();
+        ASSERT_TRUE(out.good());
+    }
+
+    R59RawCodeDiffBd bd;
+    bd.raw_contract_ = ct_;
+    wtp::WTSVariant* cfg = writeCfg("r59_diff_stale_strict.json", kDiffUnitCfg);
+    ASSERT_NE(nullptr, cfg);
+    WtDiffExecuter ex(&factory_, "r59_diff_stale_strict", nullptr, &bd);
+    ex.setStub(&stub_);
+    ASSERT_TRUE(ex.init(cfg));
+    cfg->release();
+
+    wt_hashmap<std::string, double> empty;
+    ex.set_position(empty);
+
+    ASSERT_EQ(2u, bd.lookups_.size());
+    EXPECT_EQ("ag2512|SHFE", bd.lookups_[0]); // load_data 以原始码和交易所装载目标
+    EXPECT_EQ("ag2512|SHFE", bd.lookups_[1]); // 清理也必须使用同一公开查询形式
+
+    std::ifstream in(file);
+    ASSERT_TRUE(in.is_open()) << file;
     std::string saved((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
     EXPECT_NE(std::string::npos, saved.find("\"target\": 0"));
 }

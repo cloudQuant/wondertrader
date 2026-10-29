@@ -182,9 +182,12 @@ TEST(r12_codehelper, raw_flat_code_to_std_code_branches)
 
 TEST(r12_codehelper, std_code_to_hot_and_2nd_wrappers)
 {
-	// 结果串尾带一个 NUL 填充（resize 计算），所以只能按 c_str 比较
-	EXPECT_STREQ(CodeHelper::stdCodeToStdHotCode("DCE.m.2409").c_str(), "DCE.m.HOT");
-	EXPECT_STREQ(CodeHelper::stdCodeToStd2ndCode("DCE.m.2409").c_str(), "DCE.m.2ND");
+	const std::string hot = CodeHelper::stdCodeToStdHotCode("DCE.m.2409");
+	EXPECT_EQ(std::string("DCE.m.HOT"), hot);
+	EXPECT_EQ(9u, hot.size());
+	const std::string second = CodeHelper::stdCodeToStd2ndCode("DCE.m.2409");
+	EXPECT_EQ(std::string("DCE.m.2ND"), second);
+	EXPECT_EQ(9u, second.size());
 	// 无点号（BTCUSDT）会命中 CodeHelper::find 的反向死循环/越界读，
 	// 见 bugs/R12_headers_wtstools.md，已移入下面的 DISABLED_ 用例。
 }
@@ -205,8 +208,10 @@ TEST(r12_codehelper, std_code_to_std_comm_id_and_opt_raw)
 {
 	// 三段码取前两段
 	EXPECT_EQ(CodeHelper::stdCodeToStdCommID2("SHFE.ag.1912"), std::string("SHFE.ag"));
-	// 两段码原样返回（合约即品种）
-	EXPECT_EQ(CodeHelper::stdCodeToStdCommID2("SSE.600000"), std::string("SSE.600000"));
+	// 0.8.0 起股票标准码使用三段格式；品种 ID 去掉末尾证券代码。
+	EXPECT_EQ(CodeHelper::stdCodeToStdCommID2("SSE.STK.600000"), std::string("SSE.STK"));
+	// 两段 SSE.STK 仍按原值返回。
+	EXPECT_EQ(CodeHelper::stdCodeToStdCommID2("SSE.STK"), std::string("SSE.STK"));
 	// 单段无点号入参会越界读，见 DISABLED_ 用例
 
 	// 中金所/大商所格式：短横换成点

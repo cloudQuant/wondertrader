@@ -277,7 +277,7 @@ TEST_F(P05BtReaderADTest, DayBarRoundTripFieldByField)
 	EXPECT_EQ(_sink.count_of(LL_INFO), 1u);
 }
 
-TEST_F(P05BtReaderADTest, SecondLookupSucceedsThirdIsPoisonedByMoveFromCache)
+TEST_F(P05BtReaderADTest, RepeatedDayBarReadsReturnStableBytes)
 {
 	std::vector<WTSBarStruct> bars;
 	for(uint32_t i = 0; i < 5; i++)
@@ -287,40 +287,21 @@ TEST_F(P05BtReaderADTest, SecondLookupSucceedsThirdIsPoisonedByMoveFromCache)
 	init_reader(true);
 
 	const std::size_t expect_sz = bars.size() * sizeof(WTSBarStruct);
-	std::string b1, b2, b3;
-	ASSERT_TRUE(_reader->read_raw_bars("DCE", "m2409", KP_DAY, b1));
-	ASSERT_EQ(b1.size(), expect_sz);
-
-	// 第二次命中 the_map->find(exchg)，返回语句是 std::move(it->second)，把缓存项掏空
-	ASSERT_TRUE(_reader->read_raw_bars("DCE", "m2409", KP_DAY, b2));
-	ASSERT_EQ(b2, b1);
-
-	// 第三次仍然 find 得到 key，但值已经是 moved-from 的空 shared_ptr，
-	// 现状是 read_raw_bars 返回 false 且 buffer 为空 —— 属于缺陷（见 BUG-P05-001），
-	// 故不在这里断言，理想行为写在下面的 DISABLED_ 用例里。
-	_reader->read_raw_bars("DCE", "m2409", KP_DAY, b3);
-	// 另一个周期用的是另一张 map，第一次访问仍可用
-	std::string d1;
-	EXPECT_TRUE(_reader->read_raw_bars("DCE", "m2409", KP_Minute1, d1) || d1.empty());
-}
-
-// 修复 BUG-P05-001（get_k_db 的 `return std::move(it->second)` 掏空缓存）以后启用：
-// 期望同一 (exchg, period) 的第 N 次读取和第 1 次完全一致。
-TEST_F(P05BtReaderADTest, DISABLED_KlineDbCacheShouldSurviveRepeatedLookups)
-{
-	std::vector<WTSBarStruct> bars;
-	for(uint32_t i = 0; i < 5; i++)
-		bars.push_back(make_bar(20240205 + i, 20240205 + i, 100.0 + i));
-	put_bars(_root / "day" / "DCE", "DCE", "m2409", bars, true);
-	init_reader(true);
-
-	std::string first, again;
+	std::string first, second, third;
 	ASSERT_TRUE(_reader->read_raw_bars("DCE", "m2409", KP_DAY, first));
-	for(uint32_t round = 0; round < 3; round++)
-	{
-		ASSERT_TRUE(_reader->read_raw_bars("DCE", "m2409", KP_DAY, again)) << round;
-		EXPECT_EQ(again, first) << round;
-	}
+	ASSERT_EQ(first.size(), expect_sz);
+
+	auto expect_same_bytes = [&first](const std::string& actual) {
+		EXPECT_EQ(actual.size(), first.size());
+		if (actual.size() == first.size())
+			EXPECT_TRUE(std::equal(actual.begin(), actual.end(), first.begin()));
+	};
+
+	// 每次访问同一库都应成功，并返回与首读完全一致的原始字节。
+	EXPECT_TRUE(_reader->read_raw_bars("DCE", "m2409", KP_DAY, second));
+	expect_same_bytes(second);
+	EXPECT_TRUE(_reader->read_raw_bars("DCE", "m2409", KP_DAY, third));
+	expect_same_bytes(third);
 }
 
 TEST_F(P05BtReaderADTest, Min1AndMin5UseSeparateDatabases)
@@ -491,17 +472,9 @@ TEST_F(P05BtReaderADTest, TickDbCacheKeyNeverMatchesSoEveryCallReopens)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 会越界读的路径：故意不执行，见 docs/迭代计划/迭代01/bugs/p05_datastorage2.md
-//   - read_raw_bars / read_raw_ticks 的回调按 sizeof(结构体) 从 std::string 取值，
-//     库里若存了短于结构体的 value（例如老版本 WTSTickStructOld 落进同一个 db），
-//     memcpy 会越界读；这与 BUG-L04-001/005 是同一类缺陷，覆盖整个缺陷类：
-//       * bars 库中 value.size() < sizeof(WTSBarStruct)
-//       * bars 库中 value.size() == 0
-//       * ticks 库中 value.size() < sizeof(WTSTickStruct)
-//       * 同一区间里混合长短 value（buffer.resize 之后 cursor 溢出）
-//   这些输入在 ASAN 覆盖构建下会中止整轮用例，故全部收进下面的 DISABLED_ 用例。
-//   本仓库自带的 gtest 版本没有 GTEST_SKIP，故用例体只在显式
-//   --gtest_also_run_disabled_tests 时才会执行。
+// 短 value 路径：按结构体 sizeof 从 value.data() 拷贝，短记录会越过源 value 边界。
+// 超长 value 只读取 sizeof(结构体) 字节、尾部被截断是独立行为；本用例不验证该行为。
+// 此探针保持 DISABLED，未运行 ASan；不把混合长度描述为输出 cursor 越界写。
 //////////////////////////////////////////////////////////////////////////
 TEST_F(P05BtReaderADTest, DISABLED_ShortLmdbValuesOverreadStructBuffer)
 {
@@ -521,7 +494,7 @@ TEST_F(P05BtReaderADTest, DISABLED_ShortLmdbValuesOverreadStructBuffer)
 		WtLMDB tdb(false);
 		ASSERT_TRUE(tdb.open(tick_dir.string().c_str(), 4 * 1024 * 1024));
 		WtLMDBQuery tquery(tdb);
-		// 缺陷类输入 3+4：短 value 与长短混合
+		// 第一条为短 tick value；后一条完整结构是另一条正常长度记录。
 		const WTSTickStruct full = make_tick("KEX", "xx2409", 20240601, 20240601, 93001000, 1.0);
 		tquery.put(key_str(LMDBHftKey("KEX", "xx2409", 20240601, 93000000)), std::string(4, 'y'));
 		tquery.put(key_str(LMDBHftKey("KEX", "xx2409", 20240601, 93001000)), raw_of(full));
@@ -530,7 +503,7 @@ TEST_F(P05BtReaderADTest, DISABLED_ShortLmdbValuesOverreadStructBuffer)
 
 	init_reader(true);
 	std::string buffer;
-	// 回调里 memcpy(cursor, item.data(), sizeof(WTSBarStruct))，item 只有 0/8 字节 → 越界读
+	// 按 sizeof(WTSBarStruct) 从只有 0/8 字节的源 value 读取，会越过源边界。
 	_reader->read_raw_bars("KEX", "xx2409", KP_DAY, buffer);
 	buffer.clear();
 	_reader->read_raw_ticks("KEX", "xx2409", 20240601, buffer);

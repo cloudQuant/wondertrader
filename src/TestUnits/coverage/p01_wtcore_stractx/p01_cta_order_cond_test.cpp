@@ -9,7 +9,8 @@
  *   - stra_set_position：目标仓位等于当前仓位时不登记条件单
  *   - on_tick 中 bEmitStrategy == false 时不回调策略、条件单触发时 sigtype = 2
  * 会真正走到 do_set_position（需要引擎的组合持仓簿）与真实柜台回报的分支见 manifest 跳过清单；
- * 判定为会段错误的空指针输入全部收在 DISABLED_ 用例里，启用用例零残留。
+ * 缺 session 的 CTA 平仓空指针路径保留为 DISABLED_ 静态探针；不以未初始化
+ * engine 上的历史查询作为产品复现或验收。
  */
 #include "p01_cta_env.h"
 
@@ -44,7 +45,7 @@ protected:
         ofComm->setSessionInfo(bd.getSession("TRADING"));
         bd.regis(ofComm, p01MakeCt("SZSE", "of", "of159915"));
 
-        // 有时段的品种，但故意不挂时段，只给 DISABLED_ 用例使用
+        // 缺 session 的品种只供 BUG-P01-001 的禁用边界探针使用。
         WTSCommodityInfo* noSess = p01MakeComm("CZCE", "ta", "TRADING", TM_Both);
         bd.regis(noSess, p01MakeCt("CZCE", "ta", "ta509"));
 
@@ -259,15 +260,11 @@ TEST_F(P01CtaOrderTest, tick_can_be_emitted_to_strategy_after_condition_handling
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 缺陷类：以下输入判定为会段错误，统一收进一个 DISABLED_ 用例。
-// 见 bugs/p01_wtcore_stractx.md（BUG-P01-001 / BUG-P01-002）。
-//   1) stra_exit_long/short 对 commInfo->getSessionInfo() 不做 NULL 判定
-//   2) on_tick 的信号分支对 _engine->get_session_info() 不做 NULL 判定
-//   3) stra_get_ticks/stra_get_last_tick/stra_get_bars 直接解引用 _data_mgr(WtDtMgr*)
-//      —— 裸引擎没有 init，_data_mgr 恒为 NULL
-// 启用用例里刻意不出现任何上述输入。
+// BUG-P01-001 的缺 session 平仓探针。它没有完成 WtEngine::init，因此不能证明
+// BUG-P01-002 的历史数据接口在受支持生命周期内出错；该 fixture 中 _data_mgr 还是
+// 未初始化指针，并非 NULL。历史查询不在此处调用，以免将无效前置条件写成产品回归。
 //////////////////////////////////////////////////////////////////////////
-TEST(DISABLED_P01CtaCrashClass, unchecked_null_pointers_segfault)
+TEST(DISABLED_P01CtaMissingSessionProbe, exit_long_with_unbound_session)
 {
     P01TempEnv env2{ "cta_crash" };
     FakeBaseDataMgr bd;
@@ -281,12 +278,8 @@ TEST(DISABLED_P01CtaCrashClass, unchecked_null_pointers_segfault)
     engine.attach(&bd, &hot);
 
     P01CtaCtx ctx(&engine, "p01c_stra", 0);
-    // 1) getSessionInfo() == NULL -> offsetTime 解引用空指针
+    // getSessionInfo() == NULL -> offsetTime 解引用空指针（仅保留静态探针）。
     ctx.stra_exit_long("CZCE.ta509", 1, "t");
-    // 3) _data_mgr == NULL
-    ctx.stra_get_ticks("CZCE.ta509", 10);
-    ctx.stra_get_last_tick("CZCE.ta509");
-    ctx.stra_get_bars("CZCE.ta509", "m1", 10);
 }
 
 } // namespace

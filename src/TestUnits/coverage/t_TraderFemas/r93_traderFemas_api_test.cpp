@@ -3,11 +3,12 @@
  *
  * 目标：src/TraderFemas/TraderFemas.cpp。用 r93_femas_api_stub.h 的机械空实现
  * 替代真实 CUstpFtdcTraderApi，覆盖 connect/release、认证→登录→查询前置→就绪、
- * orderInsert/orderAction/logout、四个查询入口的请求组装。不连真实柜台。
+ * orderInsert/orderAction/logout、查询请求组装和独立调度回归。不连真实柜台。
  *
  * 既有 T4 已覆盖：init/dll 失败留白、回调解析、枚举换算、无 API 拒绝面。
- * 本文件不重复这些断言；queryPositions/Orders/Trades 只入队不触发发送的现状
- * 以「测试侧手工执行队列」驱动，缺陷登记在 bugs/R93.md。
+ * 查询请求组装用例中，queryPositions/Orders/Trades 的字段断言会由测试侧手工
+ * 出队执行；这不验证自动调度。独立调度用例通过可控 strand/io_context 观察
+ * 三种查询是否真正发送，不手工执行队列；现有缺陷登记在 bugs/R93.md。
  */
 #include <gtest/gtest.h>
 
@@ -420,9 +421,8 @@ namespace
 	/* 查询请求                                                              */
 	/* ------------------------------------------------------------------ */
 
-	/// TraderFemas.cpp L424-506：queryAccount 经 strand 触发；其余三个只入队，
-	/// 由测试探针取出执行，逐字段校验 BrokerID/UserID/InvestorID。
-	TEST_F(R93FemasTest, query_entries_assemble_requests)
+	/// queryAccount 经 strand 自动触发，验证账户请求组装及调度。
+	TEST_F(R93FemasTest, query_account_is_scheduled_and_request_is_assembled)
 	{
 		make_ready();
 		boost::asio::io_context ioc;
@@ -437,9 +437,17 @@ namespace
 		EXPECT_STREQ("femasuser", stub_.qry_account_req_.UserID);
 		EXPECT_STREQ("femasuser", stub_.qry_account_req_.InvestorID);
 		EXPECT_EQ(0u, probe_.queued());
+	}
+
+	/// 只验证三个入队闭包的请求字段。runNextQuery() 是测试侧手工出队执行，
+	/// 不代表 queryPositions/Orders/Trades 的产品调度已经成功。
+	TEST_F(R93FemasTest, position_order_trade_requests_assemble_after_manual_test_drain)
+	{
+		make_ready();
 
 		ASSERT_EQ(0, probe_.queryPositions());
 		ASSERT_EQ(1u, probe_.queued());
+		// 人工执行队首闭包，仅用于观察其组装的请求字段。
 		ASSERT_TRUE(probe_.runNextQuery());
 		EXPECT_EQ(1, stub_.n_qry_position_);
 		EXPECT_STREQ("9999", stub_.qry_position_req_.BrokerID);
@@ -448,16 +456,73 @@ namespace
 
 		ASSERT_EQ(0, probe_.queryOrders());
 		ASSERT_EQ(1u, probe_.queued());
+		// 人工执行队首闭包，仅用于观察其组装的请求字段。
 		ASSERT_TRUE(probe_.runNextQuery());
 		EXPECT_EQ(1, stub_.n_qry_order_);
 		EXPECT_STREQ("9999", stub_.qry_order_req_.BrokerID);
+		EXPECT_STREQ("femasuser", stub_.qry_order_req_.UserID);
 		EXPECT_STREQ("femasuser", stub_.qry_order_req_.InvestorID);
 
 		ASSERT_EQ(0, probe_.queryTrades());
 		ASSERT_EQ(1u, probe_.queued());
+		// 人工执行队首闭包，仅用于观察其组装的请求字段。
 		ASSERT_TRUE(probe_.runNextQuery());
 		EXPECT_EQ(1, stub_.n_qry_trade_);
 		EXPECT_STREQ("9999", stub_.qry_trade_req_.BrokerID);
+		EXPECT_STREQ("femasuser", stub_.qry_trade_req_.UserID);
+		EXPECT_STREQ("femasuser", stub_.qry_trade_req_.InvestorID);
+	}
+
+	/// 这些回归只调用公开查询入口并运行注入的单线程 io_context，不手工出队。
+	/// 当前实现未在三个入口调用 triggerQuery()，因此它们会揭示 BUG-R93-003。
+	TEST_F(R93FemasTest, standalone_position_query_is_scheduled_and_sent)
+	{
+		make_ready();
+		boost::asio::io_context ioc;
+		boost::asio::io_context::strand strand(ioc);
+		probe_.setStrand(&strand);
+
+		ASSERT_EQ(0, probe_.queryPositions());
+		EXPECT_EQ(1u, probe_.queued());
+		ioc.run();
+		EXPECT_EQ(1, stub_.n_qry_position_);
+		EXPECT_EQ(0u, probe_.queued());
+		EXPECT_STREQ("9999", stub_.qry_position_req_.BrokerID);
+		EXPECT_STREQ("femasuser", stub_.qry_position_req_.UserID);
+		EXPECT_STREQ("femasuser", stub_.qry_position_req_.InvestorID);
+	}
+
+	TEST_F(R93FemasTest, standalone_order_query_is_scheduled_and_sent)
+	{
+		make_ready();
+		boost::asio::io_context ioc;
+		boost::asio::io_context::strand strand(ioc);
+		probe_.setStrand(&strand);
+
+		ASSERT_EQ(0, probe_.queryOrders());
+		EXPECT_EQ(1u, probe_.queued());
+		ioc.run();
+		EXPECT_EQ(1, stub_.n_qry_order_);
+		EXPECT_EQ(0u, probe_.queued());
+		EXPECT_STREQ("9999", stub_.qry_order_req_.BrokerID);
+		EXPECT_STREQ("femasuser", stub_.qry_order_req_.UserID);
+		EXPECT_STREQ("femasuser", stub_.qry_order_req_.InvestorID);
+	}
+
+	TEST_F(R93FemasTest, standalone_trade_query_is_scheduled_and_sent)
+	{
+		make_ready();
+		boost::asio::io_context ioc;
+		boost::asio::io_context::strand strand(ioc);
+		probe_.setStrand(&strand);
+
+		ASSERT_EQ(0, probe_.queryTrades());
+		EXPECT_EQ(1u, probe_.queued());
+		ioc.run();
+		EXPECT_EQ(1, stub_.n_qry_trade_);
+		EXPECT_EQ(0u, probe_.queued());
+		EXPECT_STREQ("9999", stub_.qry_trade_req_.BrokerID);
+		EXPECT_STREQ("femasuser", stub_.qry_trade_req_.UserID);
 		EXPECT_STREQ("femasuser", stub_.qry_trade_req_.InvestorID);
 	}
 } // namespace

@@ -408,8 +408,7 @@ TEST_F(R9Wired, HftBarNullGuardSkipsDispatch)
 }
 
 /*
- * 周期重算：period[0]=='d' 走 "{}{}"（"d1"+3 → "d13"），
- * 否则一律 "m{times}"（"m1"+5 → "m5"，"w1"+2 → "m2"）——ExpHftMocker.cpp:19-23
+ * 每个周期用真实的基础标识和倍数，验证 mock bridge 传递后的 period。
  */
 TEST_F(R9Wired, HftBarPeriodRenamedByTimes)
 {
@@ -418,20 +417,24 @@ TEST_F(R9Wired, HftBarPeriodRenamedByTimes)
 	memset(&bar, 0, sizeof(bar));
 	bar.close = 88.5;
 
-	hft.on_bar("SHFE.au2406", "m1", 5, &bar);
+	hft.on_bar("SHFE.au2406", "m", 5, &bar);
 	ASSERT_EQ(g9.hft_bar, 1U);
 	EXPECT_EQ(g9.last_period, "m5");
 	EXPECT_EQ(g9.last_code, "SHFE.au2406");
 	EXPECT_EQ(g9.last_handle, hft.id());
 	EXPECT_DOUBLE_EQ(g9.p1, 88.5);
 
-	hft.on_bar("SHFE.au2406", "d1", 3, &bar);
+	hft.on_bar("SHFE.au2406", "d", 3, &bar);
 	ASSERT_EQ(g9.hft_bar, 2U);
-	EXPECT_EQ(g9.last_period, "d13");
+	EXPECT_EQ(g9.last_period, "d3");
 
-	hft.on_bar("SHFE.au2406", "w1", 2, &bar);
+	hft.on_bar("SHFE.au2406", "h", 1, &bar);
 	ASSERT_EQ(g9.hft_bar, 3U);
-	EXPECT_EQ(g9.last_period, "m2");
+	EXPECT_EQ(g9.last_period, "h1");
+
+	hft.on_bar("SHFE.au2406", "f", 1, &bar);
+	ASSERT_EQ(g9.hft_bar, 4U);
+	EXPECT_EQ(g9.last_period, "f1");
 }
 
 /* on_tick_updated 先看订阅表，未订阅不得外发；订阅后把 tick 透传给 ctx_on_tick（ExpHftMocker.cpp:76-84） */
@@ -576,10 +579,7 @@ TEST_F(R9Wired, HftInitFiresCtxInitAndEngineEvent)
 	EXPECT_EQ(g9.evt_id, (uint32_t)EVENT_ENGINE_INIT);
 }
 
-/*
- * ExpCtaMocker::on_bar_close 不做周期换算、也不判空指针，
- * 与 ExpHftMocker::on_bar 的两次行为正好相反（ExpCtaMocker.cpp:133-139）
- */
+/* ExpCtaMocker::on_bar_close preserves the incoming period for a valid bar. */
 TEST_F(R9Wired, CtaBarClosePassesPeriodUnchanged)
 {
 	SubbedCta cta(&getRunner().replayer(), "r9_cta_bar");
@@ -595,11 +595,14 @@ TEST_F(R9Wired, CtaBarClosePassesPeriodUnchanged)
 	EXPECT_EQ(g9.last_handle, cta.id());
 	EXPECT_FALSE(g9.last_bar_null);
 	EXPECT_DOUBLE_EQ(g9.p1, 15.25);
+}
 
-	cta.on_bar_close("SSE.600519", "d1", NULL);
-	ASSERT_EQ(g9.cta_bar, 2U);
-	EXPECT_EQ(g9.last_period, "d1");
-	EXPECT_TRUE(g9.last_bar_null);
+/* CtaMocker::on_bar rejects a null bar before it can reach the callback. */
+TEST_F(R9Wired, CtaNullBarIsRejectedBeforeCallback)
+{
+	SubbedCta cta(&getRunner().replayer(), "r9_cta_bar_null");
+	cta.on_bar("SSE.600519", "d", 1, NULL);
+	EXPECT_EQ(0U, g9.cta_bar);
 }
 
 /* on_calculate → ctx_on_calc(ET_CTA)；on_calculate_done 额外补一次全局调度事件（ExpCtaMocker.cpp:151-174） */

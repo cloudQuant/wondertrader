@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -27,6 +28,7 @@
 #include "Includes/WTSStruct.h"
 #include "Includes/WTSDataDef.hpp"
 #include "WtExeFact/WtTWapExeUnit.h"
+#include "r7_init_probe.h"
 
 using namespace wtp;
 
@@ -152,6 +154,25 @@ void bootT(WtTWapExeUnit& unit, TFakeCtx& ctx, double target, WTSVariant* cfg)
 	unit.set_position(kTCode, target);
 	unit.on_channel_ready();
 }
+
+
+int run_twap_init_probe(uint32_t totalTimes, int markerFd)
+{
+	TFakeCtx ctx;
+	ctx.comm = mkTComm();
+	int exitCode = 0;
+	{
+		WtTWapExeUnit unit;
+		WTSVariant* cfg = mkTCfg(totalTimes, 0, 0, 1.0, 10.0, 0, 0);
+		if (!r7_test::write_marker(markerFd))
+			exitCode = 4;
+		else
+			unit.init(&ctx, kTCode, cfg);
+		cfg->release();
+	}
+	ctx.comm->release();
+	return exitCode;
+}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -242,29 +263,48 @@ TEST(r7_twap, sell_side_keeps_sign_and_splits_evenly)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 尾桶打板：leftTimes==0 -> 量=diffQty、价 +5 跳（L694-700、L732-735）
+// 尾桶打板：同一目标下首笔常规单部分成交，余单终结后新 tick 触发 leftTimes==0，
+// 买入剩余 diffQty 并在最新价上加 5 跳（L675、L694-700、L732-735）。
 //////////////////////////////////////////////////////////////////////////
-TEST(r7_twap, last_slice_showhand_buys_all_with_5_tick_premium)
+TEST(r7_twap, last_slice_showhand_buys_remaining_with_5_tick_premium)
 {
 	TFakeCtx ctx;
-	ctx.comm = mkTComm();
+	auto releaseComm = [](WTSCommodityInfo* comm) { if (comm) comm->release(); };
+	std::unique_ptr<WTSCommodityInfo, decltype(releaseComm)> comm(mkTComm(), releaseComm);
+	ctx.comm = comm.get();
 	WtTWapExeUnit unit;
-	bootT(unit, ctx, 100, mkTCfg(1));                   // total_times=1 -> 第二次 leftTimes=0
-	unit.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));   // 25? 不：round(100/1)=100
-	// total_times=1 且 _fired_times=0 -> leftTimes=1 -> max(1, round(100/1)) = 100
+	bootT(unit, ctx, 100, mkTCfg(1));
+	auto sendTick = [&unit](WTSTickData* rawTick) {
+		auto releaseTick = [](WTSTickData* tick) { if (tick) tick->release(); };
+		std::unique_ptr<WTSTickData, decltype(releaseTick)> tick(rawTick, releaseTick);
+		unit.on_tick(tick.get());
+		// 临时规避 BUG-R7-015：do_calc() 错误地额外 release 借用的 _last_tick，
+		// 因此这里按回调后的引用数交接，避免这个既有缺陷干扰本用例的价格/数量断言。
+		// 这不是标准 tick 所有权契约，也不证明生命周期安全；BUG-R7-015 修复后，
+		// 应移除此规避并按正常 retain/release 契约统一回归。
+		if (tick->retainCount() == 1)
+			(void)tick.release();
+	};
+	sendTick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	// 首次发单：_fired_times=0、total_times=1，leftTimes=1，常规切片为 100 手。
 	ASSERT_EQ(ctx.buys.size(), 1u);
 	EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 100.0);
-	EXPECT_DOUBLE_EQ(ctx.buys[0].price, 10.50);         // 非打板：不加 5 跳
-	unit.set_position(kTCode, 300);                     // 换目标 -> _fired_times 归零
-	unit.on_tick(mkTTick(kTCode, 100100000, 10.60, 10.59, 10.61));
-	// leftTimes = 1-1 = 0 且 diffQty=300 -> 打板：curQty=max(1,300)=300，价 10.60+0.05
-	unit.set_position(kTCode, 400);
-	unit.on_tick(mkTTick(kTCode, 100200000, 10.70, 10.69, 10.71));
-	ASSERT_EQ(ctx.buys.size(), 3u);
-	EXPECT_DOUBLE_EQ(ctx.buys[1].price, 10.65);         // 10.60 + 0.01*5
-	EXPECT_DOUBLE_EQ(ctx.buys[2].qty, 400.0);
-	EXPECT_DOUBLE_EQ(ctx.buys[2].price, 10.75);         // 10.70 + 0.01*5
-	ctx.comm->release();
+	EXPECT_DOUBLE_EQ(ctx.buys[0].price, 10.50);
+	EXPECT_TRUE(ctx.hasLog("第 1 次发单"));
+
+	// 模拟该单成交 20 手、余下挂单已终结：仓位更新为 20，当前无未完成委托。
+	// 通道状态同步会清理本地的旧订单记录，但不会重置本轮 _fired_times。
+	ctx.pos = 20;
+	ctx.undone = 0;
+	unit.on_channel_ready();
+	ASSERT_EQ(ctx.buys.size(), 1u);
+
+	// 新 tick：_fired_times 仍为 1，leftTimes=1-1=0，剩余 diffQty=80 走 showhand。
+	sendTick(mkTTick(kTCode, 100100000, 10.60, 10.59, 10.61));
+	ASSERT_EQ(ctx.buys.size(), 2u);
+	EXPECT_DOUBLE_EQ(ctx.buys[1].qty, 80.0);
+	EXPECT_DOUBLE_EQ(ctx.buys[1].price, 10.65);         // 最新价 10.60 + 5 * priceTick 0.01
+	EXPECT_TRUE(ctx.hasLog("第 2 次发单"));
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -657,16 +697,27 @@ TEST(r7_twap, clear_target_with_flat_position_does_nothing)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 缺陷复现（SIGFPE，不能启用）：total_times=0 时 L166 整数除零
+// bounded child probe only: no fallback/default is asserted, and a normal ARM64
+// return does not rule out C++ undefined behavior in the division.
 //////////////////////////////////////////////////////////////////////////
-TEST(r7_twap, DISABLED_init_zero_total_times_divide_by_zero)
+TEST(r7_twap, init_zero_total_times_bounded_child_probe)
 {
-	TFakeCtx ctx;
-	ctx.comm = mkTComm();
-	WtTWapExeUnit unit;
-	unit.init(&ctx, kTCode, mkTCfg(0, 0, 0, 1.0, 10.0, 0, 1000));   // BUG-R7-002 同型
-	unit.on_channel_ready();
-	ctx.comm->release();
+	r7_test::ScopedTempDir probeDir("WT_R7_002_TWAP");
+	ASSERT_TRUE(probeDir.ready());
+	const r7_test::ProbeResult result = r7_test::run_bounded_child(probeDir.path(), 0, run_twap_init_probe);
+	ASSERT_TRUE(probeDir.cleanup()) << "failed to remove private init-probe directory";
+	if (!r7_test::expect_normal_return(result))
+		return;
+	GTEST_SKIP() << "The child returned normally on this build; without UBSan or an explicit invalid-config failure contract, this cannot prove safe rejection or absence of undefined behavior.";
+}
+
+TEST(r7_twap, init_positive_total_times_control_returns)
+{
+	r7_test::ScopedTempDir probeDir("WT_R7_002_TWAP");
+	ASSERT_TRUE(probeDir.ready());
+	const r7_test::ProbeResult result = r7_test::run_bounded_child(probeDir.path(), 5, run_twap_init_probe);
+	r7_test::expect_normal_return(result);
+	EXPECT_TRUE(probeDir.cleanup()) << "failed to remove private init-probe directory";
 }
 
 //////////////////////////////////////////////////////////////////////////

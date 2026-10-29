@@ -395,10 +395,8 @@ TEST_F(R15CtxTest, on_trade_forwards_inner_code_and_order_tag)
     EXPECT_DOUBLE_EQ(stra.last_vol, 1.0);
     EXPECT_TRUE(stra.last_buy);
 
-    // 基类账本（_data_agent=false）：701 买 1 手 @7100、702 卖 1 手 ⇒ FIFO 全平
-    // （注意：这里不能 setUserTag(702,...)：_orders 是 capacity 0 的
-    //  boost::circular_buffer，push_back 即 UB —— 见 BUG-R15-001，
-    //  含 setUserTag 的完整标签链收在下方 DISABLED_ 用例）
+    // 基类账本（_data_agent=false）：701 买 1 手 @7100、702 卖 1 手 ⇒ FIFO 全平。
+    // 独立的标签用例覆盖 setUserTag；默认零容量问题见 BUG-R15-001。
     ctx.on_trade(702u, kAg, false, 1, 7110.0);
     EXPECT_EQ(stra.n_trade, 2u);
     EXPECT_STREQ(stra.last_tag.c_str(), "");        // 空标签链的真实可运行子集
@@ -414,7 +412,7 @@ TEST_F(R15CtxTest, on_order_and_entrust_forward_tag_and_cancel_flag)
     ctx.set_strategy(&stra);
     ctx.on_init();
 
-    // 不 setUserTag（BUG-R15-001 的 UB 触发点）⇒ getOrderTag 恒 ""
+    // 缺少登记时返回空串。
     ctx.on_order(801u, kAg, true, 2, 0, 7100.0, true);
     EXPECT_EQ(stra.n_order, 1u);
     EXPECT_EQ(stra.last_localid, 801u);
@@ -475,23 +473,28 @@ TEST_F(R15CtxTest, channel_events_forward_and_flush_userdata_only_when_dirty)
     EXPECT_NE(slurp(udFile("c15_chn")).find("v1"), std::string::npos);
 }
 
-/* ---------------- HftStraBaseCtx.h 的 inline 订单标签链 ----------------
- * 触发条件（两条 DISABLED 共用）：setUserTag 对 capacity==0 的
- * boost::circular_buffer 执行 push_back（HftStraBaseCtx.h L648 + L774，全工程
- * 没有任何 set_capacity 调用）⇒ BOOST_CB_ASSERT 失败 abort / release 下 UB。
- * 解开会立刻崩宿主，故整条收 DISABLED_，见 BUG-R15-001。
- */
+/* ---------------- HftStraBaseCtx.h 的 inline 订单标签链 ---------------- */
 
-TEST_F(R15CtxTest, DISABLED_order_tag_set_get_erase_end_to_end)
+TEST_F(R15CtxTest, order_tag_default_capacity_preserves_registered_tag)
 {
     R15HftCtx ctx(&_eng, "c15_tag", false, 0);
 
-    // 空表：查询/删除都只是早退（这部分本身安全）
+    // 默认构造上下文仍应保存已登记的订单标签；当前产品容器 capacity 为 0，
+    // 正确契约断言会暴露标签未保存的问题（BUG-R15-001）。
+    ctx.setUserTag(1, "AAA");
+    EXPECT_STREQ(ctx.getOrderTag(1), "AAA");
+}
+
+TEST_F(R15CtxTest, DISABLED_order_tag_set_get_erase_with_initialized_capacity)
+{
+    R15HftCtx ctx(&_eng, "c15_tag_capacity", false, 0);
+
+    // 完整标签链需要非零 _orders 容量；该成员为 private，当前没有安全初始化 seam。
+    // 保留正确的回读、精确删除和非匹配查询断言，待生产提供 seam 后再启用。
     EXPECT_STREQ(ctx.getOrderTag(1), "");
     ctx.eraseOrderTag(1);
     EXPECT_STREQ(ctx.getOrderTag(1), "");
 
-    // 以下三行 push 即命中 BUG-R15-001 的 UB
     ctx.setUserTag(1, "AAA");
     ctx.setUserTag(2, "BBB");
     ctx.setUserTag(3, "CCC");
@@ -504,16 +507,15 @@ TEST_F(R15CtxTest, DISABLED_order_tag_set_get_erase_end_to_end)
     EXPECT_STREQ(ctx.getOrderTag(9), "");       // 大于所有 id ⇒ lower_bound 命中 end
 }
 
-TEST_F(R15CtxTest, DISABLED_order_tag_lookup_miss_returns_neighbor_tag)
+TEST_F(R15CtxTest, DISABLED_order_tag_lookup_miss_does_not_match_or_erase_neighbor)
 {
-    // 实际行为（BUG-R15-002）：lower_bound 命中「第一个不小于」的元素，
-    // 但没有校验 it->_localid == localid ⇒ 查不存在的中间 id 会拿到后继的标签，
-    // eraseOrderTag 失配即删后继。前提是 push 先能活下来（见 BUG-R15-001）。
+    // 契约按精确 localid 匹配：缺失的中间 id 查询为空，删除缺失 id 不影响后继标签。
+    // _orders 是 private 且默认容量为零，当前测试没有安全 seam 构造非空标签集合。
     R15HftCtx ctx(&_eng, "c15_tagmiss", false, 0);
     ctx.setUserTag(1, "AAA");
     ctx.setUserTag(5, "EEE");
-    EXPECT_STREQ(ctx.getOrderTag(3), "EEE");    // 契约上应是 ""
+    EXPECT_STREQ(ctx.getOrderTag(3), "");
     ctx.eraseOrderTag(2);
-    EXPECT_STREQ(ctx.getOrderTag(5), "");
+    EXPECT_STREQ(ctx.getOrderTag(5), "EEE");
     EXPECT_STREQ(ctx.getOrderTag(1), "AAA");
 }

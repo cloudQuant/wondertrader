@@ -12,8 +12,6 @@
 // 由 Sandbox 把 CWD 切到 temp_directory_path()/q03_rdmtk_<pid>_<seq>/data，TearDown 还原并 remove_all。
 #include "q03_storage3_fixture.h"
 
-#include <stdexcept>
-
 #include "WtDataStorage/WtRdmDtReader.h"
 
 namespace q03 {
@@ -23,7 +21,12 @@ class RuleTagHotMgr : public HotMgr
 public:
 	// 让 CodeHelper::extractStdCode 走进「主力连续」分支（:648 起）
 	const char* getRuleTag(const char*) override { return "HOT"; }
-	bool splitCustomSections(const char*, const char*, uint32_t, uint32_t, HotSections&) override { return false; }
+	const char* getCustomRawCode(const char*, const char*, uint32_t) override { return "rb2401"; }
+	bool splitCustomSections(const char*, const char*, uint32_t, uint32_t, HotSections& out) override
+	{
+		out.emplace_back("rb2401", 20240101, 20240110, 1.0);
+		return true;
+	}
 };
 
 class Q03RdmTickTest : public ::testing::Test
@@ -395,24 +398,27 @@ TEST_F(Q03RdmTickTest, trading_date_override_routes_to_his_branch)
 	slice->release();
 }
 
-// ---------------------------------------------------------------- 缺陷复现（不进启用集）
-// BUG-Q03-001：cacheHisBarsFromFile 主力连续分支 :1194/:1196 直接 hotAy->at(barcnt - 1)，
-// barcnt 是 uint32_t，12~99 字节的合法长度文件（擦掉头之后不足一条 WTSBarStruct）会让
-// barcnt == 0 → at(0xFFFFFFFF) 抛 std::out_of_range 逃出库函数；同时 hotAy(:1189 new) 泄漏。
-// 崩溃/异常类输入统一收进本 DISABLED_ 用例，启用用例零残留。
-TEST_F(Q03RdmTickTest, DISABLED_his_kline_hot_fragment_throws_out_of_range)
+// ---------------------------------------------------------------- 缺陷回归（不进启用集）
+// BUG-Q03-001：RAW_V2 头之后只有 50 字节，不足一条 WTSBarStruct；该损坏历史文件
+// 应安全跳过并按无可用 bars 返回 NULL。当前实现 barcnt==0 后先 resize(0)，再向空 vector
+// 的 data() memcpy 50 字节，之后还可能访问 barcnt-1。隔离运行 exit 139、无栈，不能断言抛异常；
+// 本回归保持禁用，避免默认测试进程被崩溃打断。
+TEST_F(Q03RdmTickTest, DISABLED_his_kline_hot_fragment_returns_null)
 {
 	RuleTagHotMgr hot;
 	RdmSink sink2{ &_bd, &hot };
 	WtRdmDtReader reader;
 	reader.init(NULL, &sink2);
 
-	// SHFE.rb.HOT → _ruletag="HOT"，文件名 <exchg>.<product>_<ruletag>.dsb（:1170）
+	// SHFE.rb.HOT → _ruletag="HOT"，主力历史路径为 SHFE.rb_HOT.dsb。
 	string frag = make_block(BT_HIS_Day, BLOCK_VERSION_RAW_V2, string(50, 'A'));
 	ASSERT_TRUE(write_bytes("his/day/SHFE/SHFE.rb_HOT.dsb", frag));
 
-	EXPECT_THROW(reader.readKlineSliceByRange("SHFE.rb.HOT", KP_DAY, 20240101000000000ull,
-		20240110150000000ull), std::out_of_range);
+	WTSKlineSlice* slice = reader.readKlineSliceByRange("SHFE.rb.HOT", KP_DAY,
+		202401010000ull, 202401101500ull);
+	EXPECT_EQ(nullptr, slice);
+	if (slice != nullptr)
+		slice->release();
 	reader.clearCache();
 }
 

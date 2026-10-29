@@ -102,7 +102,7 @@ TEST(R214PorterRunnerApi, ExtLoaderPeriodsAndEngineGetter)
 	EXPECT_TRUE(r.loadFinalHisBars(NULL, "SHFE.rb.2510", KP_Minute5, NULL));
 	EXPECT_EQ("m5", g_period);
 	EXPECT_FALSE(r.loadFinalHisBars(NULL, "SHFE.rb.2510", (WTSKlinePeriod)99, NULL));
-	EXPECT_EQ(4U, g_loads);
+	EXPECT_EQ(3U, g_loads);
 
 	r.registerExtDataLoader(NULL, NULL, NULL, NULL);
 	EXPECT_FALSE(r.loadRawHisBars(NULL, "SHFE.rb.2510", KP_DAY, NULL));

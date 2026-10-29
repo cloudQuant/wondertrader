@@ -227,6 +227,7 @@ public:
 
 		std::string key = std::string(exchg) + "." + code;
 		WTSContractInfo* cInfo = WTSContractInfo::create(code, code, exchg, pid);
+		cInfo->setAltCode(code);
 		cInfo->setCommInfo(comm);
 		cInfo->setVolumeLimits(maxMktVol, maxLmtVol);
 		_contracts[key] = cInfo;
@@ -254,7 +255,7 @@ public:
 	{
 		WTSArray* ret = WTSArray::create();
 		for (auto& v : _contracts)
-			ret->append(v.second, false);
+			ret->append(v.second, true);
 		return ret;
 	}
 

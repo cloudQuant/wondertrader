@@ -426,7 +426,7 @@ TEST(p06_uft_ticker, null_engine_guard_on_forward)
 //      读它们是野指针解引用（与 BUG-N03-005 未初始化成员同一缺陷类）。
 //   2) 非标准化合约代码（没有 '.'）：StrUtil::split 结果只有 1 个元素，
 //      get_contract_info / get_commodity_info / get_session_info(isCode) 直接取 ay[1] 越界读。
-//   3) get_session_info(code, true) 在合约存在但品种未挂接时解引用 NULL commInfo。
+// P06-003 仅能通过手工注册未挂接品种的合约违反 WTSBaseDataMgr loader 不变量触发，不代表正常产品问题。
 TEST(p06_uft_engine, DISABLED_uninitialized_and_malformed_stdcode_class)
 {
 	// (1) 未 init 的引擎直接查询 -> 野指针
@@ -444,10 +444,4 @@ TEST(p06_uft_engine, DISABLED_uninitialized_and_malformed_stdcode_class)
 	(void)r;
 	volatile WTSSessionInfo* s = fx.engine.get_session_info("600000", true);
 	(void)s;
-
-	// (3) 合约存在、品种未挂接 -> commInfo NULL 解引用
-	WTSContractInfo* cInfo = WTSContractInfo::create("600000", "p06name", "SSE", "SSE.600000");
-	fx.bdMgr.reg(cInfo);
-	volatile WTSSessionInfo* s2 = fx.engine.get_session_info("SSE.600000", true);
-	(void)s2;
 }

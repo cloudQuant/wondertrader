@@ -617,8 +617,28 @@ TEST_F(Q06PorterRunner, FeedRawBarsUsesCachedFeeder)
 	EXPECT_EQ(g_feeder_bar_cnt, 1U);
 	EXPECT_EQ(g_feeder_bar_ptr, nullptr);	// obj 非空 → 走 obj 分支，bars 不外泄
 
+	// feedAdjFactors 使用最近一次 loadAdjFactors 缓存的 factors feeder。
+	ASSERT_TRUE(r.loadAdjFactors(&feedObj, "SSE.600000", factors_feeder));
+	EXPECT_EQ(g_fct_calls, 1U);
+	EXPECT_EQ(g_load_code, "SSE.600000");
 	r.feedAdjFactors("SSE.600000", NULL, NULL, 7);
 	EXPECT_EQ(g_feeder_fct_cnt, 7U);
+}
+
+TEST_F(Q06PorterRunner, FeedRawBarsUsesRawOnlyLoader)
+{
+	WtRtRunner& r = getRunner();
+	// Keep the raw loader active while explicitly leaving the final loader absent.
+	r.registerExtDataLoader(NULL, raw_bar_loader, adj_fct_loader, NULL);
+	WTSBarStruct bar = makeBar();
+
+	ASSERT_TRUE(r.loadRawHisBars(NULL, "SSE.600000", KP_DAY, bars_feeder));
+	EXPECT_EQ(g_raw_calls, 1U);
+	EXPECT_EQ(g_load_period, "d1");
+
+	r.feedRawBars(&bar, 1);
+	EXPECT_EQ(g_feeder_bar_cnt, 1U);
+	EXPECT_EQ(g_feeder_bar_ptr, &bar);
 }
 
 TEST(Q06PorterRunnerNoLoader, LoaderFreePathsReturnFalseOrWarn)

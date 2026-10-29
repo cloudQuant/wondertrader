@@ -1,0 +1,506 @@
+[
+  {
+    "lane": "R15_wtcore",
+    "id": "BUG-R15-002",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/HftStraBaseCtx.cpp:41-48",
+      "src/WtCore/HftStraBaseCtx.cpp:234-236",
+      "src/WtCore/HftStraBaseCtx.cpp:255-257",
+      "src/WtCore/HftStraBaseCtx.cpp:298-300",
+      "src/WtCore/HftStraBaseCtx.cpp:318-320",
+      "src/WtCore/HftStraBaseCtx.h:625-668",
+      "src/WtCore/HftStraBaseCtx.h:774",
+      "build-cov/TestUnits/coverage/cov_boost_include/boost/circular_buffer/base.hpp:1008-1025"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:478-520"
+    ],
+    "input_reachability": "正常 HFT 下单路径会调用 setUserTag，但 _orders 默认构造为零容量 circular_buffer，当前构造与正常下单生命周期中没有 set_capacity；Boost 零容量 push_back 不保存元素。非空标签集合和中间缺键查询只有在 BUG-R15-001 启用容量后才可达。",
+    "oracle_basis": "当前运行态中没有已存标签，getOrderTag 返回空符合当前空状态；lower_bound miss 的精确 ID 语义只有建立可存储状态后才可观察，应随 R15-001 的容量修复一并验收。",
+    "reason": "lower_bound 后不比较 localid 的算法问题静态成立，但当前零容量使 _orders 永远为空，所以查询误命中/删除后继不是独立可达的现行运行时缺陷。现有 DISABLED 缺键用例明确承认没有生产 seam，语义断言可保留为 R15-001 同一回归的后续检查。",
+    "root_cause": "当前主要可观察问题是 BUG-R15-001 的零容量标签容器；本条算法失配在容量启用前被遮蔽。",
+    "fix": "本条不单独登记产品改动。实现 BUG-R15-001 容量策略时，在 getOrderTag 和 eraseOrderTag 的 lower_bound 结果处检查 localid 相等；缺失查询返回空、删除缺失 ID 不改变相邻项。",
+    "acceptance": "容量启用后的正常订单标签集合中，精确 ID 返回对应标签；中间/前置/后置缺失 ID 返回空；删除任意缺失 ID 不改变任何邻居。当前默认零容量行为不作为该后续验收状态。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "R15_wtcore",
+    "id": "BUG-R15-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/SelStraContext.cpp:16-21",
+      "src/WtCore/SelStraBaseCtx.cpp:198-227",
+      "src/WtCore/SelStraBaseCtx.cpp:229-377",
+      "src/WtCore/SelStraBaseCtx.cpp:379-460",
+      "src/WtCore/SelStraBaseCtx.cpp:502-510"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r15_sel_persist.cpp:287-305",
+      "src/TestUnits/coverage/q01_wtcore3/r15_sel_persist.cpp:370-385"
+    ],
+    "input_reachability": "SEL context 的正常 on_init 会自动加载本地策略数据和用户数据 JSON。只要 JSON 语法正确但根结构、必需字段或字段类型不符合 loader 假设，文件输入即可到达无守卫 RapidJSON Get*；当前只对解析语法错误和空内容早退。",
+    "oracle_basis": "应用每次策略初始化都读取本地持久化文件；损坏、跨版本或部分写入的状态文件应被确定性拒绝/恢复，不能触发进程断言或留下半更新策略状态。当前 save_data 写出的字段是当前 schema 的基准。",
+    "reason": "load_data 对根节点、positions、fund、position/detail/signal 必需成员和类型没有完整校验；load_userdata 对成员值也直接 GetString。现有测试仅覆盖规范信号恢复及空文件/语法错误，未覆盖合法 JSON 的结构损坏。该文件是正常启动读取的持久化边界，不能将是否容忍损坏状态无限期留作合同问题。",
+    "root_cause": "load_data/load_userdata 在解析成功后边读取边写入成员状态，缺少版本识别、类型/成员校验和原子提交。",
+    "fix": "为 SEL 快照定义版本与 schema；先验证根对象、必需字段、类型和数组/对象形状，再把解析结果暂存后一次性应用。错误时记录字段路径并整体拒绝/恢复默认，保证此前 context 状态不被部分覆盖。",
+    "acceptance": "当前版本完整快照往返一致；明确支持的历史版本迁移到当前状态；缺成员、错误类型、非 object 根或损坏明细被安全拒绝且不触发 RapidJSON assertion、不留下部分仓位/资金/信号更新。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q01_wtcore3/r15_sel_persist.cpp",
+        "case": "malformed_valid_json_is_rejected_without_partial_state",
+        "issue": "现有持久化测试只覆盖完整 schema 与语法错误/空文件，未覆盖语法有效但根类型、必需成员或字段类型错误的本地快照。",
+        "change": "新增真实文件 fixture，分别覆盖缺 positions/必需 position 字段、错误字段类型和非 object 根；经正常 on_init 加载并断言整体拒绝，保留 context 默认状态。",
+        "target": "CoverageTests_wtcore",
+        "filter": "R15SelTest.malformed_valid_json_is_rejected_without_partial_state",
+        "expected_result": "产品 schema 校验完成后单用例 PASS；无 RapidJSON assertion，坏快照不产生半更新状态。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "产品 schema 校验后补充并运行有效 JSON 错 schema 和整体无状态污染的回归。"
+    ]
+  },
+  {
+    "lane": "R15_wtcore",
+    "id": "BUG-R15-005",
+    "decision": "DUPLICATE",
+    "evidence_level": "LOCAL_REPRO",
+    "source_evidence": [
+      "src/WtCore/SelStraBaseCtx.cpp:348-375",
+      "src/WtCore/SelStraBaseCtx.cpp:555-571",
+      "src/WtCore/WtEngine.cpp:104-115",
+      "src/WTSTools/WTSBaseDataMgr.cpp:429-448"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r15_sel_persist.cpp:287-305",
+      "src/TestUnits/coverage/l02_wtstools_mq/r56_basedatamgr_test.cpp:68-86"
+    ],
+    "input_reachability": "本轮 R56 loader 用例运行通过，并从 rules 自动建 commodity 的正常加载入口产生 session id 为 ALLDAY、但 sessionInfo 为 NULL 的对象。SEL on_init 可从本地文件恢复待发 signal；其后正常 on_tick 对同一代码直接解引用 get_session_info 的结果。",
+    "oracle_basis": "缺 session 基础数据必须在加载边界拒绝，或在 strategy consumer 边界安全处理；允许 loader 成功产生 commodity 且 sessionInfo 为 NULL 后，消费者不能无保护崩溃。非交易时段的有效 session signal 继续保留。",
+    "reason": "SEL on_tick 是 CTA BUG-P01-001 所述基础数据缺 session 根因的第二个正常消费者路径。R56 用例本轮 1/1 PASS 证明 loader 接受并返回 null sessionInfo；它没有调用 SEL/CTA 解引用，因此只是输入可达性复现，不是 crash repro。按同一 session 缺失问题并入主编号 BUG-P01-001，canonical 只单向指向 CTA 主记录。",
+    "root_cause": "基础数据加载允许未解析 session 的 commodity 进入策略环境，SEL on_tick 对 get_session_info 返回值缺少边界处理；共享根因与 BUG-P01-001 相同。",
+    "fix": "按 canonical BUG-P01-001 的修复统一处理缺 session：优先让消费者在 session 为 NULL 时安全拒绝/保留 signal 并记录可诊断错误，必要时在基础数据加载阶段标记或拒绝不可交易 commodity。避免分别修一处后遗漏另一个策略引擎。",
+    "acceptance": "P01 canonical 的 session 缺失回归同时包含 SEL：经真实 loader fixture 恢复 pending signal 后投递 tick，不崩溃、不错误提交交易，signal 按确定策略保留或明确拒绝；有效 session 非交易时段信号仍保留。R56 运行仅证明输入前提，不证明回调行为。",
+    "canonical": "BUG-P01-001",
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q01_wtcore3/r15_sel_persist.cpp",
+        "case": "missing_session_pending_signal_tick_is_safe",
+        "issue": "现有 signal recovery 只使用有效 session，未覆盖基础数据 loader 可正常产生的 null session commodity。",
+        "change": "使用 R56 同类真实 WTSBaseDataMgr rules 加载 fixture，恢复一个 SEL pending signal 并投递该代码 tick；按 BUG-P01-001 选定的安全策略断言 signal/下单状态，不通过人工 null session 单独声称可达。",
+        "target": "CoverageTests_wtcore",
+        "filter": "R15SelTest.missing_session_pending_signal_tick_is_safe",
+        "expected_result": "产品边界修复后单用例 PASS；缺 session 不崩溃、不提交交易，有效 session 的非交易时段保留行为不变。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/03_core_orders/run_r56_case.py",
+      "docs/迭代计划/迭代02/复核185/evidence/03_core_orders/r56_contract_rules_missing_session.json",
+      "docs/迭代计划/迭代02/复核185/evidence/03_core_orders/r56_contract_rules_missing_session.stdout.log",
+      "docs/迭代计划/迭代02/复核185/evidence/03_core_orders/r56_contract_rules_missing_session.stderr.log",
+      "docs/迭代计划/迭代02/复核185/evidence/03_core_orders/r56_contract_rules_missing_session.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "n01_wtcore_tradepaths",
+    "id": "BUG-N01-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/TraderAdapter.cpp:99-165",
+      "src/WtRunner/WtRunner.cpp:551-575"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p11_wtcore_traderadapter/p11_preorder_risk_test.cpp:321-346"
+    ],
+    "input_reachability": "WtRunner::initTraders 将活动 trader 的配置对象直接传给 TraderAdapter::init；riskmon.active=true 而 policy 成员缺失时 cfgRisk->get 返回 NULL，memberNames 立即被调用。此前 _cfg 已 retain，且 Runner 忽略 init 返回值并登记 adapter。",
+    "oracle_basis": "活动风控配置若缺少 policy，应由配置入口返回失败并不进入交易运行；不能因漏字段而崩溃，也不能把 active 风控静默变为无规则放行。",
+    "reason": "空 policy 的 null dereference 位于配置输入直接进入的正常 init 路径，不依赖测试人工调用内部函数。现有测试只覆盖 active=false/无 riskmon 的短路，对 active 缺 policy 无反例。",
+    "root_cause": "init 未在 cfgPolicy->memberNames 前检查 policy 是否存在/对象类型；并且配置解析前 retain _cfg，失败状态无法干净重试，WtRunner 也未检查 init 结果。",
+    "fix": "在提交 _cfg/其它 adapter 状态前校验 riskmon 和 policy 结构；active=true 缺 policy 或 policy 类型错误时安全返回 false。WtRunner::initTraders 只登记成功初始化的 adapter，失败时回收局部对象并向上报告配置失败。",
+    "acceptance": "active=false 与不配置 riskmon 的路径保持；active=true 完整 policy 正常加载；active=true 缺 policy/错误类型返回 false、不崩溃、不注册到 Runner、不开始连接；失败 adapter 状态可安全析构且不会污染重试。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p11_wtcore_traderadapter/p11_preorder_risk_test.cpp",
+        "case": "active_riskmon_missing_policy_returns_false_without_dereference",
+        "issue": "现有风控用例只测 inactive/bare 风控路径，没有覆盖 active=true 漏掉 policy 的真实配置输入。",
+        "change": "以 JSON 配置初始化 adapter，保留 inactive 和完整 policy 正控；新增缺 policy 和错误类型负例，并断言 false 与无半初始化状态。另在 Runner 链路断言失败通道不登记。",
+        "target": "CoverageTests_wtcore",
+        "filter": "P11PreOrderRisk.active_riskmon_missing_policy_returns_false_without_dereference",
+        "expected_result": "产品修复后单用例 PASS；缺字段安全拒绝，其他配置行为保持。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "产品初始化校验和 Runner 失败传播修复后运行新配置负例与既有 inactive/完整 policy 正控。"
+    ]
+  },
+  {
+    "lane": "n01_wtcore_tradepaths",
+    "id": "BUG-N01-006",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/IParserApi.h:89-95",
+      "src/WtCore/ParserAdapter.cpp:45-82",
+      "src/WtCore/ParserAdapter.cpp:156-211",
+      "src/WtCore/ParserAdapter.cpp:228-235",
+      "src/WtRunner/WtRunner.cpp:428-458"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n01_wtcore_tradepaths/n01_parser_adapter_test.cpp:235-247",
+      "src/TestUnits/coverage/n01_wtcore_tradepaths/n01_parser_adapter_test.cpp:449-471"
+    ],
+    "input_reachability": "正常 parser 配置由 WtRunner 传给 ParserAdapter::init；initExt 也由公开接口接入 IParserApi。IParserApi::init 明确返回初始化成功状态，返回 false 后 adapter 仍报告成功，Runner 随后登记 adapter 且 run() 会调用 connect。",
+    "oracle_basis": "初始化 API 返回 false 意味着依赖未就绪；adapter 必须失败关闭，不得订阅或连接一个 init 失败的 API。有效 API 的正常合同订阅路径应保持。",
+    "reason": "原候选的 Level2 handler NULL payload 主张没有接口合同和真实输入证据，相关 disabled 测试只调用 handleQuote；但 API init 失败未传播是独立、正常配置可达的生产错误，故本条保留为收窄后的 PRODUCT。",
+    "root_cause": "ParserAdapter::init/initExt 只记录 api->init 返回 false，仍返回 true；WtRunner::initParsers 忽略 adapter init 返回值并登记它。",
+    "fix": "必需 API、基础数据 manager 和 API init 成功均通过后才返回 true；init 失败清理 SPI/adapter 状态并返回 false。WtRunner::initParsers 只保存成功 adapter，并让 ParserAdapterMgr/Runner 配置失败状态可观察。",
+    "acceptance": "fake API init=false 时 init 与 initExt 均返回 false，不发生 subscribe/connect，Runner 不登记；fake API init=true 且 manager 有效时仍订阅同一合同集并可 connect。Level2 payload NULL 仅在接口合同明确允许时另行决定守卫。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/n01_wtcore_tradepaths/n01_parser_adapter_test.cpp",
+        "case": "init_ext_returns_false_when_api_init_fails",
+        "issue": "当前用例覆盖 NULL cfg/API 以及模块缺失，但未覆盖 IParserApi::init 返回 false 后 ParserAdapter 仍返回 true。",
+        "change": "增加 init 返回 false 的 fake IParserApi，并使用 getContracts 返回有效非空数组的 fake manager；断言 initExt 返回 false、没有订阅/连接。为普通配置 init 再覆盖相同失败传播，并验证 Runner 不登记失败 adapter。",
+        "target": "CoverageTests_wtcore",
+        "filter": "N01ParserAdapter.init_ext_returns_false_when_api_init_fails",
+        "expected_result": "产品修复后单用例 PASS；失败 API 不进入 adapter ready/run 路径，成功 API 正控保持。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "API init 失败传播修复后补充并运行普通 init、initExt 与 Runner 不登记断言。"
+    ]
+  },
+  {
+    "lane": "p01_wtcore_stractx",
+    "id": "BUG-P01-001",
+    "decision": "PRODUCT",
+    "evidence_level": "LOCAL_REPRO",
+    "source_evidence": [
+      "src/WtCore/CtaStraBaseCtx.cpp:795-817",
+      "src/WtCore/CtaStraBaseCtx.cpp:1229-1244",
+      "src/WtCore/CtaStraBaseCtx.cpp:1352-1409",
+      "src/WtCore/WtEngine.cpp:104-115",
+      "src/WTSTools/WTSBaseDataMgr.cpp:429-448"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p01_wtcore_stractx/p01_cta_order_cond_test.cpp:263-283",
+      "src/TestUnits/coverage/l02_wtstools_mq/r56_basedatamgr_test.cpp:68-86"
+    ],
+    "input_reachability": "本轮实际运行 R56BaseDataMgr.ContractRulesAutoCreateCommodityAndWindows；基础数据 loader 成功插入 rules commodity，但 ALLDAY 模板缺失使 getSessionInfo 返回 NULL。公开 CTA set_position 可创建 pending signal 并订阅 tick；stra_exit_long 直接消费同一 commodity session，两个 consumer 都沿正常策略输入到达。",
+    "oracle_basis": "基础数据缺 session 时交易窗口不可判定；系统应在加载/策略边界明确拒绝或安全返回，不能成功接受数据后在策略 callback/平仓方法里空指针崩溃。有效 session 下的交易窗口行为必须不变。",
+    "reason": "CTA on_tick signal 与 stra_exit_long 对 sessionInfo 无检查；WtEngine 可返回 NULL。R56 loader 测试本轮 PASS，证明确实存在正常 loadContracts 成功但 sessionInfo 为空的输入状态；崩溃路径没有运行，故本结论是可达性 LOCAL_REPRO 加静态 consumer 分析，不是 crash repro。原 disabled 测试人工构造空 session，且第一条可能终止的调用使后续语句不可达，不能单独证明正常输入。",
+    "root_cause": "consumer 假设每个成功装载的 commodity 都有已解析 session，但基础数据 loader 允许默认 ALLDAY 标识解析失败后仍发布 commodity；CTA 两处使用点未处理 NULL。",
+    "fix": "在 stra_exit_long 与 pending-signal on_tick 的 session 使用点增加诊断和安全失败；tick 路径不得在缺 session 时误消费 signal。也可在 loader 层拒绝该 commodity，但若保留 loader 的不完整 metadata 模式，两个运行时守卫仍须存在。",
+    "acceptance": "用真实 WTSBaseDataMgr rules fixture 分别驱动缺 session 的 stra_exit_long 和 restored/pending signal tick；结果不崩溃、不提交订单/改变持仓，signal 按明确定义保留或拒绝；有效 session 控制用例维持原交易时段和信号消费语义。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p01_wtcore_stractx/p01_cta_order_cond_test.cpp",
+        "case": "missing_session_exit_long_is_safe",
+        "issue": "现有缺 session 负例是 disabled 假管理器 fixture，未覆盖真实 base-data loader 返回 null sessionInfo 后的策略路径。",
+        "change": "增加真实 WTSBaseDataMgr rules fixture，未装载 ALLDAY 模板时创建 context 并调用 stra_exit_long；断言安全返回且没有委托/持仓变化，不通过启用会崩溃的 DISABLED 聚合体验证。",
+        "target": "CoverageTests_wtcore",
+        "filter": "P01CtaOrderTest.missing_session_exit_long_is_safe",
+        "expected_result": "产品边界修复后单用例 PASS；无崩溃、无错误委托，带有效 session 的退出正控仍通过。"
+      },
+      {
+        "file": "src/TestUnits/coverage/p01_wtcore_stractx/p01_cta_order_cond_test.cpp",
+        "case": "missing_session_pending_signal_tick_is_safe",
+        "issue": "原 disabled crash-class 用例没有创建/触发 pending signal，on_tick 缺 session 分支只有静态证据。",
+        "change": "使用真实 loader fixture 建立有效 commodity 及缺 session 状态，通过公开 set_position/restored signal 和订阅 tick 触发正常 on_tick；断言 signal 按约定保留或拒绝且无订单。",
+        "target": "CoverageTests_wtcore",
+        "filter": "P01CtaOrderTest.missing_session_pending_signal_tick_is_safe",
+        "expected_result": "产品边界修复后单用例 PASS；不崩溃、不下单，signal 生命周期确定，正常 session 控制不变。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/03_core_orders/run_r56_case.py",
+      "docs/迭代计划/迭代02/复核185/evidence/03_core_orders/r56_contract_rules_missing_session.json",
+      "docs/迭代计划/迭代02/复核185/evidence/03_core_orders/r56_contract_rules_missing_session.stdout.log",
+      "docs/迭代计划/迭代02/复核185/evidence/03_core_orders/r56_contract_rules_missing_session.stderr.log",
+      "docs/迭代计划/迭代02/复核185/evidence/03_core_orders/r56_contract_rules_missing_session.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "CTA 缺 session 的两个 consumer 回归需在产品边界修复后新增并运行；本轮未触发 crash。"
+    ]
+  },
+  {
+    "lane": "p01_wtcore_stractx",
+    "id": "BUG-P01-002",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtEngine.cpp:39-56",
+      "src/WtCore/WtEngine.cpp:285-302",
+      "src/WtCore/WtEngine.cpp:592-641",
+      "src/WtCore/WtEngine.h:206-209",
+      "src/WtRunner/WtRunner.cpp:153-160",
+      "src/WtRunner/WtRunner.cpp:275-280",
+      "src/WtRunner/WtRunner.cpp:365-408",
+      "src/WtCore/CtaStraBaseCtx.cpp:1577-1608",
+      "src/WtCore/CtaStraBaseCtx.cpp:1648-1659"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p01_wtcore_stractx/p01_cta_env.h:224-250",
+      "src/TestUnits/coverage/p01_wtcore_stractx/p01_cta_order_cond_test.cpp:263-283"
+    ],
+    "input_reachability": "候选只由未调用 WtEngine::init 的 P01CtaEngine::attach fixture 构造；正常 Runner 先初始化 engine/data manager，再创建 strategy contexts，并在引擎运行后进入回调。当前没有证据表明策略 API 在 engine init 前可合法调用历史查询。",
+    "oracle_basis": "支持的正常生命周期需先完成 engine 与 data-manager 初始化；仓内 Runner 在创建策略前已安装 _data_mgr 指针。初始化前的裸对象直接调用没有公开可用性保证，不能当作常规产品输入。",
+    "reason": "测试夹具 P01CtaEngine::attach 仍不调用 WtEngine::init，因此不能证明 init 前历史查询属于受支持用法；当前 disabled 测试已被收窄为独立的缺 session stra_exit_long 探针，并明确不再调用历史查询。正常 Runner 在创建策略前已初始化 data manager，所以 P01-002 的产品主张不成立。",
+    "root_cause": "先前测试把未初始化的私有生命周期状态当作受支持历史查询输入；测试现已隔离缺 session 探针，不再执行或声称覆盖历史查询崩溃。",
+    "fix": "不改产品。当前测试已移除 P01-002 的历史查询错误归因；若未来需要覆盖正常历史查询，仅新增已初始化 WtEngine/data-manager 的有效生命周期测试。",
+    "acceptance": "有效初始化后的 bars/ticks/last_tick 查询按已有历史数据语义工作；当前不要求未初始化 engine 查询的产品行为。若拆分测试，历史查询用例必须由已初始化 manager 驱动。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "p01_wtcore_stractx",
+    "id": "BUG-P01-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/ICtaStraCtx.h:241-252",
+      "src/WtCore/CtaStraBaseCtx.cpp:1119-1128",
+      "src/WtCore/CtaStraBaseCtx.cpp:1352-1425"
+    ],
+    "test_evidence": [],
+    "input_reachability": "策略经公开 ICtaStraCtx::stra_set_position 传入不存在 commodity 的标准代码时，函数先调用 sub_tick，然后立即追加并保存信号或条件；后续 on_tick/do_set_position 可能收不到代码行情，且 do_set_position 对缺失 commodity 静默返回。",
+    "oracle_basis": "该公开接口的参数是指定合约目标仓位；其它 enter/exit 入口先检查 commodity。不存在 commodity 的输入不能产生持久化订单意图或订阅副作用。",
+    "reason": "对不存在 commodity 的标准代码，stra_set_position 不做和 stra_enter_long 同等的前置检查，先写入订阅与持久化状态，后续 do_set_position 才返回。结论限定为不存在 commodity，不扩张到已知 commodity 下精确月份合约不存在的情形。",
+    "root_cause": "stra_set_position 在调用 sub_tick、append_signal 或建立 condition 前没有检查 get_commodity_info；do_set_position 的晚期检查无法撤销之前副作用。",
+    "fix": "在 stra_set_position 最开始验证 _engine 与 get_commodity_info(stdCode)；不存在时记录诊断并返回，保证不调用 sub_tick、不写 _sig_map/_condtions、不落盘。对 limit/stop 与市价目标仓位共用此守卫。",
+    "acceptance": "不存在 commodity 调用市价及条件 stra_set_position 后均无 subscription/signal/condition/持久化变化；已知 commodity 的市价和条件目标仓位行为及信号持久化保持。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p01_wtcore_stractx/p01_cta_order_cond_test.cpp",
+        "case": "set_position_rejects_unknown_commodity_without_persisting_signal",
+        "issue": "现有 CTA order-cond 用例没有覆盖 stra_set_position 对不存在 commodity 的副作用。",
+        "change": "新增不存在 exchange/product 的标准代码调用；分别检查市价目标与条件目标均未新增 tick subscription、signal/condition 和 JSON 内容，同时保留已知 commodity 正控。",
+        "target": "CoverageTests_wtcore",
+        "filter": "P01CtaOrderTest.set_position_rejects_unknown_commodity_without_persisting_signal",
+        "expected_result": "产品前置检查后单用例 PASS；无效输入零副作用，既有有效目标仓位语义不变。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "CTA set_position 前置验证后补充并运行未知 commodity 零副作用测试。"
+    ]
+  },
+  {
+    "lane": "p01_wtcore_stractx",
+    "id": "BUG-P01-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/CtaStraBaseCtx.cpp:277-430",
+      "src/WtCore/CtaStraBaseCtx.cpp:495-558",
+      "src/WtCore/CtaStraBaseCtx.cpp:668-676",
+      "src/WtCore/CtaStraContext.cpp:64-71"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p01_wtcore_stractx/r42_cta_persist_test.cpp:188-245",
+      "src/TestUnits/coverage/p01_wtcore_stractx/r42_cta_persist_test.cpp:275-309"
+    ],
+    "input_reachability": "CtaStraContext 正常 on_init 会调用 CtaStraBaseCtx::load_data，从 stradata/<strategy>.json 自动读取本地快照。语法有效但 schema 形状错误、缺必需成员或类型错误时可到达无守卫 RapidJSON Get*。",
+    "oracle_basis": "本地策略状态每次正常初始化都会恢复；损坏或升级后不兼容的持久化文件必须被整体安全拒绝/迁移，不得使启动断言终止或部分改变持仓/条件。",
+    "reason": "load_data 只检查 ParseError；parse 成功后直接读取 positions、conditions 及多组必需字段。save_data 写完整当前字段，但没有版本或整体 schema 验证；现有测试仅使用完整规范 JSON 和正常 round-trip。",
+    "root_cause": "持久化 loader 对根节点/必需字段/类型不校验，并在完整文件验证前直接变更资金、仓位、信号和条件状态。",
+    "fix": "增加版本化 schema 验证，验证根对象、positions/conditions/fund 的字段类型和嵌套 shape，再暂存并整体提交状态；schema 无效时记录字段路径并拒绝整份文件，保证 context 默认状态不被部分覆盖。",
+    "acceptance": "当前 schema round-trip 一致；明确支持的旧版本正常迁移；缺字段、错类型、错误 root/嵌套 shape 安全拒绝且无 assertion、无部分仓位/信号/条件变更。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p01_wtcore_stractx/r42_cta_persist_test.cpp",
+        "case": "OnInitRejectsMalformedSchemaWithoutPartialState",
+        "issue": "现有 R42 测试只验证完整状态恢复和 round-trip，不覆盖语法有效但 schema 缺字段/类型错误的生产文件输入。",
+        "change": "写入真实 JSON 文件后经 on_init 覆盖缺 positions/conditions、缺 position/detail 必需字段、错类型和非 object root；断言安全拒绝、无部分状态污染，再保留完整 schema 正控。",
+        "target": "CoverageTests_wtcore",
+        "filter": "R42CtaPersistTest.OnInitRejectsMalformedSchemaWithoutPartialState",
+        "expected_result": "产品 schema 校验后单用例 PASS；坏文件整体拒绝，无 RapidJSON assertion 或半更新策略状态。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "CTA 快照 schema 验证后补充并运行有效 JSON 错 schema 和无部分状态污染测试。"
+    ]
+  },
+  {
+    "lane": "p11_wtcore_traderadapter",
+    "id": "BUG-P11-001",
+    "decision": "NEEDS_DECISION",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtCore/TraderAdapter.cpp:209-235",
+      "src/WtCore/TraderAdapter.cpp:404-416",
+      "src/WtCore/TraderAdapter.cpp:1405-1417",
+      "src/Includes/ITraderApi.h:198-237",
+      "src/WtCore/TraderAdapter.h:167-175",
+      "src/WtLatencyHFT/HftLatencyTool.cpp:461-475",
+      "src/WtLatencyUFT/UftLatencyTool.cpp:288-300"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p11_wtcore_traderadapter/p11_crash_class_test.cpp:95-118",
+      "src/TestUnits/coverage/p11_wtcore_traderadapter/r59_trader_misc_test.cpp:43-68"
+    ],
+    "input_reachability": "initExt 成功后 run 会 registerSpi(this) 并调用 ITraderApi::connect；成功连接事件进入 handleEvent 的 WTE_Connect 分支时 _cfg 仍为空。当前内置外部 API 调用点为 latency fake API，接口未说明是否由注入 API 自行登录，因此认证路径的有效所有权尚不能从仓内调用推断。",
+    "oracle_basis": "成功连接后必须由且仅由一个明确责任方完成登录；API 自行认证时 Adapter 不得重复访问空配置，Adapter 认证时 initExt 必须提供可用凭据。",
+    "reason": "源码显示 initExt 不设置 _cfg、run 注册回调后 connect、WTE_Connect 成功分支读取 _cfg；但 ITraderApi 分开声明 connect/login，并未规定谁负责 login。禁用测试直接调用 handler，enabled R59 用例则使用显式 config，不足以决定外部 API 的设计合同。",
+    "root_cause": "initExt 的公开签名没有配置/凭据参数，却复用了默认内部 API 的自动登录事件分支；外部注入 API 的认证职责不明确。",
+    "fix": "按选择实现：若 Adapter 负责认证，给 initExt 增加显式 config/credential source 并验证其生命周期；若注入 API 自行认证，明确标志并在 WTE_Connect 时跳过 Adapter login。避免仅空指针判空后静默继续。",
+    "acceptance": "按确认的 API ownership 走 initExt->run->registerSpi->connect->WTE_Connect 正常事件链；成功和失败事件均不崩溃，登录恰好一次、凭据来源正确，内部 init(config) 行为不变。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": {
+      "question": "initExt 接入的外部 ITraderApi 由谁负责登录，以及成功 WTE_Connect 是否应由 TraderAdapter 调 login？",
+      "options": [
+        "外部 API 自行登录；Adapter 在 initExt 模式下不自动 login。",
+        "TraderAdapter 负责登录；initExt 新增明确的配置/凭据输入并执行一次 login。"
+      ],
+      "recommendation": "采用第二种并把凭据来源加入 initExt 的显式 API；若现有注入者已自行登录，则提供明确模式参数以避免双重登录。",
+      "impact": "改变外部 API 接入签名/配置方式；现有依赖 API 自登录者需迁移，依赖 Adapter 自动 login 者需提供凭据。认证重复或缺失会影响通道就绪与交易可用性。"
+    },
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "p11_wtcore_traderadapter",
+    "id": "BUG-P11-002",
+    "decision": "TEST",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/TraderAdapter.cpp:303-389",
+      "src/WtCore/TraderAdapter.cpp:1514-1533",
+      "src/WtCore/TraderAdapter.cpp:1739-1751",
+      "src/WtCore/TraderAdapter.cpp:2148-2154",
+      "src/WtCore/TraderAdapter.cpp:2337-2344",
+      "src/Includes/ITraderApi.h:170-180",
+      "src/TraderOES/TraderOES.cpp:481-483",
+      "src/TraderOES/TraderOES.cpp:985-1000",
+      "src/TraderOES/TraderOES.cpp:763-778",
+      "src/TraderXTP/TraderXTP.cpp:388-397",
+      "src/TraderXTP/TraderXTP.cpp:552-575"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p11_wtcore_traderadapter/p11_crash_class_test.cpp:95-125",
+      "src/TestUnits/coverage/p11_wtcore_traderadapter/r59_trader_misc_test.cpp:70-105"
+    ],
+    "input_reachability": "当前验证的 OES 零结果仅传 NULL 整体数组且 Adapter 已守卫；OES/XTP 仅在创建成功时 append/推送对象，错误路径创建 WTSError。候选的 null array element、null trade object 和 null error object 来自 disabled 测试人工造值，未找到当前 supported provider 的正常构造路径。ITraderApi 未规定第三方是否可送 NULL，故不推论所有外部插件的任意输入。",
+    "oracle_basis": "不能将明确未在 supported provider path 证实的人工 NULL callback 输入当作已发生产品错误；若要支持 NULL，需先把 callback nullability 写入 ITraderApi 合同并按 callback 定义响应/忽略/状态推进行为。",
+    "reason": "本条只撤回原缺陷记录把人工注入的 NULL callback 输入宣称为正常产品可达的主张。唯一直接构造 NULL 数组元素/对象的 P11CrashClass 用例整体 DISABLED，且没有 enabled 测试对这些人工空输入作断言；R59 enabled 用例只验证 provider 可传的 whole-array NULL 且 Adapter 正确推进状态。因此当前没有需要修正或启用的测试，test_change_requests 保持为空。",
+    "root_cause": "原缺陷记录将 disabled crash-class 中手工构造的空数组元素/对象当作柜台可达证据；这属于证据主张过宽，不是当前启用测试的错误断言。",
+    "fix": "不改测试或产品代码；只撤回未证实的人工 NULL callback 可达性主张。保留现有 enabled whole-array NULL 正控，不启用 crash-class 探针；未来如接口合同正式允许 NULL，再按 callback 单独新增测试。",
+    "acceptance": "当前 whole-array NULL 回报用例继续 PASS；只有 API 合同承诺可空的 callback 才新增对应 NULL 测试，并验证状态机和 notifier 行为。现有 crash-class 不得作为这些 NULL 形态的产品复现。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "p11_wtcore_traderadapter",
+    "id": "BUG-P11-005",
+    "decision": "EXTERNAL_BLOCKED",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtCore/TraderAdapter.cpp:1244-1268",
+      "src/WtCore/TraderAdapter.cpp:1450-1464",
+      "src/WtCore/TraderAdapter.cpp:1604-1623",
+      "src/WtCore/TraderAdapter.cpp:1873-1882",
+      "src/TraderXTP/TraderXTP.cpp:190-200",
+      "src/TraderXTP/TraderXTP.cpp:363-374"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p11_wtcore_traderadapter/p11_crash_class_test.cpp:111-126"
+    ],
+    "input_reachability": "doCancel 正常从 adapter 活单 map 取单，而两个已核实入表路径先验证 contract。另一候选路径中，XTP makeEntrust 在基础数据找不到 contract 时返回 NULL，OnOrderEvent 错单回调会传递并 release 该 NULL；adapter onRspEntrust 错误分支立即访问 contract。是否能由受支持 XTP SDK 回报产生该映射失败状态，尚无本地合同证明。",
+    "oracle_basis": "若 SDK 允许未知/未映射 ticker 的错误订单回报，Adapter/Provider 应安全报告错误而不是解引用 NULL；若 SDK 保证错误事件只对应 Adapter 已提交且当前 manager 可映射的订单，则人工裸 entrust 不构成正常输入缺陷。",
+    "reason": "原 doCancel 子主张被正常订单 map 的入表校验排除；XTP provider 源码则暴露了真实潜在 NULL 转换链，但 callback 的 order_info 范围和 ticker/market 映射保证需要对应 XTP SDK 版本的合同或真实回报确认。仅用 fake 造 NULL 无法证明 SDK 事件在正常生命周期可达。",
+    "root_cause": "XTP 转换失败返回 NULL，但错误 OnOrderEvent 分支不检查结果；TraderAdapter 的错误 onRspEntrust 分支也假定 entrust 和 contract 必非空。",
+    "fix": "取证后按合同处理：若可空，XTP wrapper 不向 sink 传 NULL 且不 release NULL；Adapter 对无 entrust 的错误回报给出通用错误诊断，避免按未知代码修改 undone qty。若合同保证非空，则记录该约束并为转换失败加可诊断失败路径。",
+    "acceptance": "先核对确切 XTP SDK 的 OnOrderEvent 参数保证和错误/拒单事件范围；之后使用对应 XTP callback fixture 验证 mapped 与 unmapped 行为，同时单独验证正常活单 map 的 doCancel 不接受无 contract 单。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": {
+      "required": "准确版本 XTP SDK 对 OnOrderEvent 的触发范围、order_info 在拒单时是否必有，以及 ticker/market 是否必须映射到当前 IBaseDataMgr 的文档或头文件合同；若文档未覆盖，则需要一条脱敏的只读真实拒单回报记录。",
+      "checked_locally": "核对了 TraderAdapter::doCancel 的 map 入口和 onRspOrders/onPushOrder 的 contract 入表守卫；检查了 TraderXTP::makeEntrust 与 OnOrderEvent 的完整本地转换/回调；检查 ITraderApi 与测试中的 disabled 裸 WTSEntrust 调用。",
+      "why_local_is_insufficient": "本地 wrapper 只能证明映射失败会产生 NULL 和下游解引用，不能证明已提交的正常 XTP SDK 错单回报是否可能含未映射 ticker；fake callback 只会人为构造该形态。",
+      "next_action": "获取仓库配套 XTP SDK 版本的官方 API 头文件/文档或脱敏真实只读拒单回报；按其合同决定加入安全守卫和回归，随后拆分撤单与错单路径的测试。"
+    },
+    "local_remaining": []
+  },
+  {
+    "lane": "p11_wtcore_traderadapter",
+    "id": "BUG-P11-007",
+    "decision": "NEEDS_DECISION",
+    "evidence_level": "PENDING",
+    "source_evidence": [
+      "src/WtCore/TraderAdapter.cpp:209-235",
+      "src/WtCore/TraderAdapter.cpp:237-278",
+      "src/WtCore/TraderAdapter.cpp:303-389",
+      "src/WtLatencyHFT/HftLatencyTool.cpp:461-475",
+      "src/WtLatencyUFT/UftLatencyTool.cpp:288-300"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p11_wtcore_traderadapter/p11_push_persist_test.cpp:117-130"
+    ],
+    "input_reachability": "任何调用公开 initExt 的外部 API adapter 都会立即启用 _save_data 并创建 traders/<id> CSV；账户 callback 进一步写 rtdata.json。仓内 HFT/UFT latency 工具实际使用 initExt，因此非实盘工具也有该文件副作用。",
+    "oracle_basis": "现有实现和测试证明默认写盘是当前行为，但仓库没有说明 initExt 是否必须对所有 injected API 保存快照/日志、是否应默认关闭、或输出目录所有权由谁配置；这属于产品策略选择而非单凭源码可判的错误。",
+    "reason": "initExt 无条件开启保存数据并在其初始化期间创建文件；enabled 测试确认当前行为，但没有对保存策略做需求判断。切换默认值会改变既有调用方和测试可见行为，必须先确定兼容策略。",
+    "root_cause": "initExt 没有配置参数或 per-adapter 开关，直接强制 _save_data=true 并使用全局 baseDir。",
+    "fix": "按决定保留并文档化 always-on；或新增 savedata 与输出目录配置并定义默认迁移策略。推荐提供显式 per-adapter 开关和路径，但本版本保留现有兼容默认，再由调用方逐步选择。",
+    "acceptance": "策略确定后，分别验证启用时 CSV/rtdata 写入目标目录、禁用时不创建/修改文件、自定义目录隔离多个 adapter，且既有配置默认行为符合选定兼容规则。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [],
+    "decision_request": {
+      "question": "TraderAdapter::initExt 是否应该无条件启用 CSV/rtdata 持久化，还是要允许调用方关闭并指定 per-adapter 目录？",
+      "options": [
+        "保留当前 always-on 行为并把文件路径和副作用写入接口合同。",
+        "改为默认关闭，由调用方显式启用并提供输出目录。",
+        "新增 savedata/输出目录配置，当前版本保留兼容默认，按迁移计划逐步显式化。"
+      ],
+      "recommendation": "选择第三种；增加 per-adapter 开关和目录，先保留当前默认以免破坏既有 CSV/快照消费者，再计划迁移到显式配置。",
+      "impact": "影响 latency 工具和外部 API 调用者产生的文件、依赖 CSV/快照的分析流程、测试 fixture 清理路径，以及不同 adapter 间的输出隔离。"
+    },
+    "external_blocker": null,
+    "local_remaining": []
+  }
+]

@@ -75,7 +75,9 @@ TEST_F(R103Mocker, R103Mocker_UdpUnknownTickAndEmptyDatagram)
 	ASSERT_TRUE(r103m::wait_until([this]() { return sink_.n_account() >= 1u; }));
 	const uint32_t accounts = sink_.n_account();
 
-	// 空数据报触发 bytes_transferred<=0 的早退（之后不再 rearm，但 io_context 仍可查询）
+	// 空数据报触发 bytes_transferred<=0 的早退，接收不会重新挂起。若没有其它待处理工作，
+	// io_context::run 可能返回；因此“之后仍能处理 queryAccount”是本测试额外要求的行为，
+	// 不能仅凭 queryAccount() 入队成功就认为仍有 worker 会执行并回报。
 	ASSERT_TRUE(r103m::send_udp(port, "", 0));
 	std::this_thread::sleep_for(std::chrono::milliseconds(20));
 	ASSERT_EQ(0, api_.queryAccount());

@@ -36,8 +36,8 @@ TEST(r7_execrunner, queries_return_null_before_base_data_loaded)
 	EXPECT_EQ(runner.get_sess_info("SHFE.rb2401"), nullptr);          // L443-445
 	// isCode=true 走同一条抽取+查品种路径
 	EXPECT_EQ(runner.get_session_info("SHFE.rb2401", true), nullptr); // L376-379
-	// 代码解析不出交易所时同样落空
-	EXPECT_EQ(runner.get_sess_info("nosuchcode"), nullptr);
+	// 格式有效但基础数据中没有该品种时返回 NULL
+	EXPECT_EQ(runner.get_sess_info("SHFE.unknown.2401"), nullptr);
 }
 
 //////////////////////////////////////////////////////////////////////////

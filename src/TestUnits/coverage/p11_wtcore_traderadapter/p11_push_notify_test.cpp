@@ -211,8 +211,10 @@ TEST_F(P11PushNotify, external_orders_do_not_touch_undone)
     trader.onRspPosition(makeArray({ makePosItem(ct_, WDT_LONG, 8, 8, 0, 0) }));
 
     // 外部单(usertag 不带 otp.p11a. 前缀): 预占可平量但不入订单表、不更新未完成量、不通知订阅者
-    trader.onPushOrder(makePushOrder(ct_, WDT_LONG, WOT_CLOSE, WOS_Submitting,
-        3, 0, "PX1", ""));
+    WTSOrderInfo* externalSubmitted = makePushOrder(ct_, WDT_LONG, WOT_CLOSE, WOS_Submitting,
+        3, 0, "PX1", "");
+    trader.onPushOrder(externalSubmitted);
+    externalSubmitted->release();
     EXPECT_DOUBLE_EQ(5.0, trader.getPosition(kStdCode, true, 1));
     EXPECT_DOUBLE_EQ(0.0, trader.getUndoneQty(kStdCode));
     EXPECT_EQ(0u, sink_.orders_.size());
@@ -220,28 +222,40 @@ TEST_F(P11PushNotify, external_orders_do_not_touch_undone)
     EXPECT_EQ(nullptr, trader.getOrders(""));
 
     // 同一外部单撤销: 可平量回补, 仍未分发
-    trader.onPushOrder(makePushOrder(ct_, WDT_LONG, WOT_CLOSE, WOS_Canceled,
-        3, 0, "PX1", ""));
+    WTSOrderInfo* externalCanceled = makePushOrder(ct_, WDT_LONG, WOT_CLOSE, WOS_Canceled,
+        3, 0, "PX1", "");
+    trader.onPushOrder(externalCanceled);
+    externalCanceled->release();
     EXPECT_DOUBLE_EQ(8.0, trader.getPosition(kStdCode, true, 1));
     EXPECT_EQ(0u, sink_.orders_.size());
 
-    // 错单(WOEF_Normal) 与撤单在统计里区分开, 但撤销分支仍会回补未完成量
-    WTSOrderInfo* wrong = makePushOrder(ct_, WDT_LONG, WOT_OPEN, WOS_Canceled,
+    // 外部单在撤单回报后也不应进入本系统的活单表。
+    OrderMap* afterExternalCancel = trader.getOrders("");
+    if (afterExternalCancel != nullptr)
+    {
+        EXPECT_EQ(0u, afterExternalCancel->size());
+        afterExternalCancel->release();
+    }
+}
+
+TEST_F(P11PushNotify, first_local_canceled_push_is_not_returned_as_alive)
+{
+    TraderAdapter trader;
+    buildReady(trader);
+    trader.onLoginResult(true, "ok", 20240510);
+
+    // 测试聚焦 getOrders 的活单视图，不延伸断言终态首回报的其它统计语义。
+    WTSOrderInfo* terminal = makePushOrder(ct_, WDT_LONG, WOT_OPEN, WOS_Canceled,
         2, 0, "PX2", kTag1001);
-    wrong->retain();
-    wrong->setError(WOEF_Normal);
-    trader.onPushOrder(wrong);
-    EXPECT_TRUE(wrong->isError());
-    EXPECT_FALSE(wrong->isSelfTrade());
-    EXPECT_DOUBLE_EQ(-2.0, trader.getUndoneQty(kStdCode));
-    EXPECT_DOUBLE_EQ(0.0, trader.getPosition(kStdCode, false, 2));
-    // 实测行为：_orders 还不存在时, 死单会走 else 分支被塞进订单表
-    // （与 _orders 已存在时「移除死单」的分支不一致, 见 bugs/p11_wtcore_traderadapter.md）
-    OrderMap* after = trader.getOrders("");
-    ASSERT_NE(nullptr, after);
-    EXPECT_EQ(1u, after->size());
-    EXPECT_EQ(wrong, after->get(1001));
-    after->release();
+    trader.onPushOrder(terminal);
+    terminal->release(); // 交回测试创建时持有的引用；订单表若收录会持有自己的引用。
+
+    OrderMap* alive = trader.getOrders("");
+    if (alive != nullptr)
+    {
+        EXPECT_EQ(0u, alive->size());
+        alive->release();
+    }
 }
 
 TEST_F(P11PushNotify, push_trade_updates_position_and_undone)

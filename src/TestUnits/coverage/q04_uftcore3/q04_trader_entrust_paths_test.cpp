@@ -151,25 +151,24 @@ TEST(q04_trader_entrust, price_type_and_order_flag_mapping)
 	EXPECT_EQ((int)WOT_CLOSETODAY, env._api._entrusts[4]._offset);
 }
 
-TEST(q04_trader_entrust, insert_failure_returns_uint_max_but_keeps_undone)
+TEST(q04_trader_entrust, insert_failure_returns_uint_max_without_counting_undone)
 {
 	OrdEnv env;
 
 	env._api._insertRet = -1;
 	uint32_t bad = env._adapter.openLong(kStdAg, 5000.0, 2.0, 0);
 	EXPECT_EQ(UINT_MAX, bad);
-	//委托失败时 updateUndone 已经加过, doEntrust 不回滚
-	//(实现如此, 是否合理见 q04_uftcore3.md BUG-Q04-002, 状态: 待裁定)
-	EXPECT_DOUBLE_EQ(2.0, env._adapter.getUndoneQty(kStdAg));
+	//API 同步拒绝本笔委托, 未完成量不应计入未被接受的数量
+	EXPECT_DOUBLE_EQ(0.0, env._adapter.getUndoneQty(kStdAg));
 	//失败单不会被登记进 _orders
 	EXPECT_EQ(nullptr, env._adapter.getOrders(""));
 
-	//恢复成功后, 未完成量继续累加
+	//后续成功单只贡献自己的未完成量
 	env._api._insertRet = 0;
-	uint32_t good = env._adapter.openShort(kStdAg, 5000.0, 3.0, 0);
+	uint32_t good = env._adapter.openLong(kStdAg, 5000.0, 3.0, 0);
 	EXPECT_NE(UINT_MAX, good);
 	EXPECT_NE(bad, good);
-	EXPECT_DOUBLE_EQ(5.0, env._adapter.getUndoneQty(kStdAg));
+	EXPECT_DOUBLE_EQ(3.0, env._adapter.getUndoneQty(kStdAg));
 }
 
 TEST(q04_trader_entrust, usertag_pattern_is_scoped_per_channel)
@@ -355,8 +354,46 @@ TEST(q04_trader_entrust, cancel_all_filters_alive_orders_by_full_code)
 	deadAg->release();
 }
 
-//崩溃/未初始化类输入整类收在这里(与 BUG-N03-005 / BUG-P06-004 同源)
-TEST(DISABLED_q04_trader_entrust, null_contract_and_bare_code_class)
+//cancelAll 的非空标准码过滤需要逐项读取 ContractInfo。onRspOrders 虽能从
+//_bd_mgr 回查合约并统计订单，但当前实现没有把回查结果写回 OrderInfo，故这里保留
+//一条精确的契约回归。产品修复前它会在 cancelAll(kStdAg) 处触发空指针，暂禁用。
+TEST(DISABLED_q04_trader_entrust, cancel_all_with_lookup_only_contract_info)
+{
+	OrdEnv env;
+	uint32_t localid = env._adapter.openLong(kStdAg, 5000.0, 1.0, 0);
+	ASSERT_NE(UINT_MAX, localid);
+	ASSERT_EQ(1u, env._api._entrusts.size());
+
+	//Entrust 快照提供由适配器生成的有效 usertag；FakeBaseDataMgr 已登记
+	//SHFE.ag2406，因此 onRspOrders 可以成功回查合约。orderFromSnap 不附加
+	//ContractInfo，正好隔离“回查结果没有回填订单”这一条路径。
+	WTSOrderInfo* noComm = q04::orderFromSnap(env._api._entrusts[0], "ORD-LOOKUP");
+	ASSERT_EQ(nullptr, noComm->getContractInfo());
+	WTSArray* ay = WTSArray::create();
+	ay->append(noComm);
+	env._adapter.onRspOrders(ay);
+	ay->release();
+
+	OrderMap* orders = env._adapter.getOrders("");
+	ASSERT_NE(nullptr, orders);
+	ASSERT_EQ(1u, orders->size());
+	EXPECT_EQ(noComm, orders->get(localid));
+	EXPECT_EQ(nullptr, noComm->getContractInfo());
+	orders->release();
+
+	//契约要求按 SHFE.ag2406 撤销该活单并返回 localid；不能用空串全撤，
+	//因为空串会短路 getFullCode()，掩盖缺失的 ContractInfo。
+	OrderIDs canceled = env._adapter.cancelAll(kStdAg);
+	ASSERT_EQ(1u, canceled.size());
+	EXPECT_EQ(localid, canceled[0]);
+	ASSERT_EQ(1u, env._api._actions.size());
+	EXPECT_EQ("ORD-LOOKUP", env._api._actions[0]._code);
+	noComm->release();
+}
+
+// 裸代码输入保留为单独禁用探针。initExt 所需 ITraderApi 是必需依赖，nullptr
+// 没有接口合同支持；相关空依赖主张已从本用例移除。
+TEST(DISABLED_q04_trader_entrust, bare_code_with_initialized_api_probe)
 {
 	q04::TempRoot tmp("cls2");
 	q04::FakeTraderApi api;
@@ -366,23 +403,6 @@ TEST(DISABLED_q04_trader_entrust, null_contract_and_bare_code_class)
 	adapter.initExt("uft1", &api, &bd, &policy);
 	adapter.run();
 
-	//1) 裸代码: doEntrust 里 findFirst 返回 npos, setExchange(…, npos) 越界写
+	//裸代码会让 doEntrust 的代码拆分路径收到缺少交易所的输入。
 	adapter.openLong("ag2406", 5000.0, 1.0, 0);
-
-	//2) cancelAll: orderInfo->getContractInfo() 为 NULL 时直接 cInfo->getFullCode()
-	WTSOrderInfo* noComm = WTSOrderInfo::create();
-	noComm->setCode("ag2406");
-	noComm->setExchange("SHFE");
-	noComm->setOrderState(WOS_NotTraded_Queuing);
-	noComm->setUserTag("wtp.uft1.123");
-	WTSArray* ay = WTSArray::create();
-	ay->append(noComm);
-	adapter.onRspOrders(ay);
-	ay->release();
-	adapter.cancelAll("");
-	noComm->release();
-
-	//3) initExt 传 NULL api: api->init(NULL) 空指针调用
-	TraderAdapter adapter2;
-	adapter2.initExt("x", nullptr, &bd, &policy);
 }

@@ -117,35 +117,48 @@ TEST(r16_kvcache, put_if_none_keeps_existing_value)
 	r16tmp::clean("kv3");
 }
 
-TEST(r16_kvcache, put_with_len_beyond_64_corrupts_next_item_key)
+TEST(r16_kvcache, DISABLED_oversized_value_length_has_safe_defined_behavior)
 {
-	// BUG-R16-07 的可观测后果：put(key,val,len) 把 len 原样交给 wt_strcpy，
-	// 而 _val 只有 64 字节，wt_strcpy 还会在 des[len] 处补 '\0'。
-	// 本用例喂 len=70 → 6 字节数据 + 1 个终止符溢出到下一条目的 _key[0..6]。
+	// 生产 BUG-R16-07：put(key, val, len) 将 len 原样传给 wt_strcpy，
+	// 但 CacheItem::_val 只有 64 字节；len=70 会越过该字段并写入相邻存储。
+	// 此回归必须保持 DISABLED，直到生产代码定义并实现安全合同；不能在普通测试中触发 UB。
+	// 合同允许拒绝写入或安全截断，不在这里把其中一种定为唯一行为。
 	const std::string path = r16tmp::file("kv4", "c1.cache");
 	r16tmp::clean("kv4");
 	{
 		wtp::WtKVCache cache;
 		ASSERT_TRUE(cache.init(path.c_str(), kDate));
+		// 先建立相邻记录，再更新前一项，避免后续写入覆盖回归信号。
+		cache.put("oversized", "initial");
+		cache.put("guard", "guard-value");
 		const std::string longval(70, 'x');
-		cache.put("k0", longval.c_str(), 70);
-		// get 读的是 C 串，长度被溢出到下一项的终止符决定 → 70 个 x
-		EXPECT_EQ(longval, std::string(cache.get("k0")));
-		// 溢出写把 item[1] 的 _key 前 6 字节变成了 "xxxxxx"
-		EXPECT_TRUE(cache.has("xxxxxx"));
+		cache.put("oversized", longval.c_str(), longval.size());
+		if (cache.has("oversized"))
+			EXPECT_LE(std::strlen(cache.get("oversized")), 63u);
+	}
+	{
+		wtp::WtKVCache cache;
+		ASSERT_TRUE(cache.init(path.c_str(), kDate));
+		// 同一文件重开会依据持久化 key 重建索引，验证相邻合法记录未被覆盖。
+		EXPECT_TRUE(cache.has("guard"));
+		EXPECT_STREQ("guard-value", cache.get("guard"));
 	}
 	r16tmp::clean("kv4");
 }
 
-TEST(r16_kvcache, DISABLED_put_with_len_beyond_64_should_be_rejected)
+TEST(r16_kvcache, value_at_63_byte_limit_is_readable)
 {
-	// 期望行为：超出 64 字节的 val/len 应被拒绝或截断；见 BUG-R16-07。
-	const std::string path = r16tmp::file("kv4", "c2.cache");
-	wtp::WtKVCache cache;
-	ASSERT_TRUE(cache.init(path.c_str(), kDate));
-	cache.put("k0", std::string(70, 'x').c_str(), 70);
-	EXPECT_FALSE(cache.has("xxxxxx"));
-	r16tmp::clean("kv4");
+	const std::string path = r16tmp::file("kv4_max_value", "c1.cache");
+	r16tmp::clean("kv4_max_value");
+	{
+		wtp::WtKVCache cache;
+		ASSERT_TRUE(cache.init(path.c_str(), kDate));
+		const std::string value(63, 'v');
+		cache.put("max", value.c_str(), value.size());
+		EXPECT_EQ(1u, cache.size());
+		EXPECT_STREQ(value.c_str(), cache.get("max"));
+	}
+	r16tmp::clean("kv4_max_value");
 }
 
 TEST(r16_kvcache, put_fills_capacity_then_resizes_to_double)
@@ -256,7 +269,7 @@ TEST(r16_kvcache, init_on_unwritable_path_fails_with_log)
 	r16tmp::clean("kv9");
 }
 
-TEST(r16_kvcache, truncated_file_same_date_repairs_capacity_from_real_size)
+TEST(r16_kvcache, truncated_file_same_date_preserves_records_and_repairs_capacity)
 {
 	const std::string path = r16tmp::file("kv10", "c1.cache");
 	r16tmp::clean("kv10");
@@ -267,23 +280,32 @@ TEST(r16_kvcache, truncated_file_same_date_repairs_capacity_from_real_size)
 		cache.put("k1", "v1");
 		cache.put("k2", "v2");
 	}
+	// 显式 flush 已关闭的缓存映射，确保文件中的头和三条记录在截断前已同步。
+	{
+		BoostMappingFile mapping;
+		ASSERT_TRUE(mapping.map(path.c_str()));
+		mapping.sync();
+	}
 	// 把文件截到 20 + 10*128 = 1300 字节（模拟 capacity 标记与实际扩容不一致）
 	{
 		BoostFile f;
 		ASSERT_TRUE(f.open_existing_file(path.c_str()));
 		ASSERT_TRUE(f.truncate_file((std::size_t)(kBlockHead + kItemSize * 10)));
 	}
+	ASSERT_EQ(kBlockHead + kItemSize * 10, BoostFile::get_file_size(path.c_str()));
 	{
 		wtp::WtKVCache cache;
-		ASSERT_TRUE(cache.init(path.c_str(), kDate));	// 同日期 → 走「自动恢复」分支
-		// 容量按真实文件大小回填：(1300-20)/128 = 10
+		ASSERT_TRUE(cache.init(path.c_str(), kDate));	// 同日期 → 按真实文件大小恢复容量
 		EXPECT_EQ(10u, cache.capacity());
-		// size 被写成 min(realCap, markedCap) = 10，而不是真实的 3 条
-		EXPECT_EQ(10u, cache.size());
+		// 截断只改变可用容量，不应把空槽算作已写记录。
+		EXPECT_EQ(3u, cache.size());
+		EXPECT_TRUE(cache.has("k0"));
+		EXPECT_TRUE(cache.has("k1"));
+		EXPECT_TRUE(cache.has("k2"));
 		EXPECT_STREQ("v0", cache.get("k0"));
+		EXPECT_STREQ("v1", cache.get("k1"));
 		EXPECT_STREQ("v2", cache.get("k2"));
-		// 第 4~10 槽是全零的 _key，索引里因此多出一个空串键（重建索引未过滤空键）
-		EXPECT_TRUE(cache.has(""));
+		EXPECT_FALSE(cache.has(""));
 	}
 	r16tmp::clean("kv10");
 }

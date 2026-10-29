@@ -3,13 +3,15 @@
  * \brief lane N06: CTA 策略(WtStraTwoMa / WtStraDualThrust)与 CTA 工厂的参数边界与查找逻辑
  *
  * 说明：
- * - WtCtaStraFact 与 WtCtaTwoMaFact 两个插件 TU 都在 CoverageTests 里定义了同名类 WtStraFact、
- *   同名全局 FACT_NAME 与 extern "C" createStrategyFact（ODR/重复符号风险已在 manifest 上报）。
- *   因此本文件对“工厂名/策略名”只做不依赖链接选择的宽松断言（见 bugs/n06 待审核条目）。
+ * - 当前 CoverageTests_ctafact 按 coverage/CMakeLists.txt 中的 CTA_FACTORY_TUS 编译
+ *   WtCtaTwoMaFact.cpp、WtStraTwoMa.cpp、WtStraDualThrust.cpp；不编译
+ *   WtCtaStraFact.cpp（DualThrust 工厂 TU）。虽然 WtCtaStraFact 动态库也在链接列表中，
+ *   其内部 C++ 符号为 hidden；本测试直接调用的 WtStraFact 来自 TwoMa 工厂，
+ *   DualThrust 策略实现虽被编译，其工厂 TU 不在当前目标的编译源中。
  * - 符号名全部来自本轮读取的源码：
- *   WtCtaTwoMaFact.cpp L17 FACT_NAME/WtStraFact::createStrategy("TwoMa")、
- *   WtCtaStraFact.cpp L17/L90 ("DualThrust")、WtStraTwoMa::init (WtStraTwoMa.cpp L79)、
- *   WtStraDualThrust::init (WtStraDualThrust.cpp L79)。
+ *   WtCtaTwoMaFact.cpp 中的 FACT_NAME 与 WtStraFact::createStrategy("TwoMa")、
+ *   WtCtaStraFact.cpp 中未列入当前目标编译源的 DualThrust 工厂实现、以及
+ *   WtStraTwoMa::init (WtStraTwoMa.cpp)、WtStraDualThrust::init (WtStraDualThrust.cpp)。
  */
 #include <gtest/gtest.h>
 
@@ -76,7 +78,7 @@ TEST(n06_cta_stra, strategy_names_are_stable)
 	// 名称在各自 .cpp 里硬编码：WtStraTwoMa::getName()="TwoMa"、WtStraDualThrust="DualThrust"
 	EXPECT_STREQ("TwoMa", two_ma.getName());
 	EXPECT_STREQ("DualThrust", dt.getName());
-	// getFactName() 返回外部全局 FACT_NAME（存在 ODR 竞争，见 bugs），只断言非空
+	// 当前目标由 WtCtaTwoMaFact.cpp 提供 FACT_NAME；策略实现读取该符号，只断言非空
 	EXPECT_NE(nullptr, two_ma.getFactName());
 	EXPECT_GT(strlen(two_ma.getFactName()), 0u);
 	EXPECT_GT(strlen(dt.getFactName()), 0u);
@@ -124,9 +126,9 @@ TEST(n06_cta_stra, init_missing_keys_fall_back_to_defaults)
 TEST(n06_cta_fact, create_strategy_unknown_name_returns_null)
 {
 	WtStraFact fact;
-	// 无论链接到哪个工厂实现，未知名称都必须返回 NULL
+	// 当前目标编入的是 WtCtaTwoMaFact.cpp；未知名称必须返回 NULL
 	EXPECT_EQ(nullptr, fact.createStrategy("NoSuchStrategy", "id1"));
-	// "TwoMa" 与 "DualThrust" 至多命中其中一个（两个 TU 的 WtStraFact ODR 竞争，见 bugs）
+	// 当前直接编入的工厂只实现 TwoMa；DualThrust 策略实现虽在目标中，但其工厂 TU 未编译
 	CtaStrategy* a = fact.createStrategy("TwoMa", "idA");
 	CtaStrategy* b = fact.createStrategy("DualThrust", "idB");
 	int hits = (a != NULL) + (b != NULL);
@@ -149,8 +151,7 @@ TEST(n06_cta_fact, factory_get_name_non_empty)
 	WtStraFact fact;
 	const char* name = fact.getName();
 	EXPECT_NE(nullptr, name);
-	// FACT_NAME 可能是 "WtCtaStraFact" 或 "WtCtaTwoMaFact"（ODR 竞争），不断言具体值
-	// 但策略自身的 getName 必须与之一致：deleteStrategy 用 getFactName() 与 FACT_NAME 比较
+	// 当前目标的 FACT_NAME 来自 WtCtaTwoMaFact.cpp；策略与工厂应读取同一名称
 	WtStraTwoMa two_ma("id1");
 	EXPECT_STREQ(fact.getName(), two_ma.getFactName());
 }
@@ -160,7 +161,7 @@ TEST(n06_cta_fact, enum_strategy_reports_one_name)
 	WtStraFact fact;
 	enum_result().clear();
 	fact.enumStrategy(collect_enum_cb);
-	// 两个实现都恰好回调一次（cb(FACT_NAME, "TwoMa"/"DualThrust", true)）
+	// 当前编入的 TwoMa 工厂恰好枚举一次（cb(FACT_NAME, "TwoMa", true)）
 	ASSERT_EQ(1u, enum_result().size());
 	EXPECT_NE(std::string::npos, enum_result()[0].find(":last"));
 	// 回调里出现的策略名必须能被 createStrategy 找回

@@ -14,8 +14,7 @@
 //
 // 手法：真实 init(cfg, sink, loader) + q03::Sandbox 临时目录；无访问权限宏。
 // 已知缺陷（见 bugs/R52.md BUG-R52-001）：cacheIntegratedBars 的 HOT 文件读取变量被内层同名
-// 变量遮蔽（L1019-1041），HOT 包裹文件永远读不到；本文件用「错误日志出现 + 输出缺 HOT 后段」
-// 固化现状。
+// 变量遮蔽（L1019-1041）。相关回归按正确的数据返回契约断言，当前产品缺陷应使其失败。
 #include "r52_storage_fixture.h"
 
 #include "WTSUtils/WTSCfgLoader.h"
@@ -62,43 +61,56 @@ protected:
 // WtDataReader.cpp: cacheIntegratedBars 的 HOT 包裹文件读取 L1019-1041 + cacheHisBarsFromFile 的
 //                   try/catch L1593-1608 + readKlineSlice 空缓存兜底 L1895-1912
 //
-// 当前实际行为（BUG-R52-001，Blocker）：L1023 在内层重新声明了 `std::string filename`，遮蔽 L1019
-// 的外层变量；文件存在后 L1035 用空路径 read_file_content（StdUtils.hpp L60-63 直接 throw），
-// 被 L1599-1607 的 catch 吞掉并 return false → 整个主力连续历史装配被放弃，返回空切片。
-TEST_F(R52ReaderTest, R52HotWrappedFileReadAbortsIntegratedBars)
+TEST_F(R52ReaderTest, R52HotWrappedFileReadReturnsIntegratedBars)
 {
 	_hot.set_tag("HOT");
 	_hot.set_raw_code("rb2402");
-	_hot.add_section("rb2401", 20240102, 20240103, 1.1);
-	_hot.add_section("rb2402", 20240104, 20240110, 1.2);
+	// 覆盖 HOT bars 的切段在最后一根 HOT bar 处结束，避免依赖不存在的分月合约文件。
+	_hot.add_section("rb2402", 20240104, 20240106, 1.2);
 
 	vector<WTSBarStruct> hotbars;
 	hotbars.push_back(q03::make_bar(20240105, 20240105, 1));
 	hotbars.push_back(q03::make_bar(20240106, 20240106, 2));
 	// 路径必须与 cacheIntegratedBars L1023 的拼装严格一致：
 	//   {his_dir}{pname}/{exchg}.{product}_{ruleTag}{suf}.dsb
-	// 原用例多写了一层 <exchg>/ 目录，产品探测不到包裹文件，根本不会进入读取分支，
-	// 因而既没有异常日志也没有切段调用（LL_ERROR==0 / split_calls==1）。
+	// 原用例多写了一层 <exchg>/ 目录，产品探测不到包裹文件，会落入分段装配路径，
+	// 无法覆盖 HOT 包裹文件读取。
 	ASSERT_TRUE(q03::write_bytes("his/day/SHFE.rb_HOT.dsb",
 		q03::make_block(BT_HIS_Day, BLOCK_VERSION_RAW_V2, q03::pack_bars(hotbars))));
 
 	init_reader();
 
 	WTSKlineSlice* slice = _reader.readKlineSlice("SHFE.rb.HOT", KP_DAY, 100, 202401101500ull);
-	ASSERT_TRUE(slice != NULL);
-	EXPECT_EQ(slice->size(), 0u);
-	EXPECT_EQ(slice->get_block_counts(), 0u);
-	EXPECT_TRUE(slice->at(0) == NULL);
+	ASSERT_NE(slice, nullptr);
+	const vector<WTSBarStruct> got = flatten_bars(slice);
+	EXPECT_EQ(got.size(), 2u);
+	EXPECT_EQ(slice->size(), 2u);
+	if (got.size() == 2)
+	{
+		EXPECT_EQ(got[0].date, 20240105u);
+		EXPECT_DOUBLE_EQ(got[0].close, 11.5);
+		EXPECT_EQ(got[1].date, 20240106u);
+		EXPECT_DOUBLE_EQ(got[1].close, 12.5);
+	}
 	slice->release();
 
-	// 进入 catch 的错误日志；切段函数根本未被调用
-	EXPECT_GE(_sink.count_of(LL_ERROR), 1u);
-	EXPECT_EQ(_hot.split_calls(), 0u);
+	EXPECT_EQ(_sink.count_of(LL_ERROR), 0u);
+	EXPECT_EQ(_hot.split_calls(), 1u);
 
-	// 空条目已进 _bars_cache：第二次直接命中，仍然是空切片
+	// 第二次读取命中缓存，返回相同包裹文件 bars，且不重复切段。
 	WTSKlineSlice* again = _reader.readKlineSlice("SHFE.rb.HOT", KP_DAY, 2, 202401101500ull);
-	ASSERT_TRUE(again != NULL);
-	EXPECT_EQ(again->size(), 0u);
+	ASSERT_NE(again, nullptr);
+	const vector<WTSBarStruct> cached = flatten_bars(again);
+	EXPECT_EQ(cached.size(), 2u);
+	if (cached.size() == 2)
+	{
+		EXPECT_EQ(cached[0].date, 20240105u);
+		EXPECT_DOUBLE_EQ(cached[0].close, 11.5);
+		EXPECT_EQ(cached[1].date, 20240106u);
+		EXPECT_DOUBLE_EQ(cached[1].close, 12.5);
+	}
+	EXPECT_EQ(_sink.count_of(LL_ERROR), 0u);
+	EXPECT_EQ(_hot.split_calls(), 1u);
 	again->release();
 }
 

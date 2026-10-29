@@ -1,47 +1,77 @@
 # q05_dtsrv 缺陷清单（迭代01 第五波 · WtDtCore/WtDtServo/WtDtHelper）
 
-- 范围: 本波仅记录，未修改任何生产代码。
+- 范围: 本波缺陷逐项复核；未修改任何生产代码或测试。
 - 关联用例目录: `src/TestUnits/coverage/q05_dtsrv/`
 
 ## BUG-Q05-001 WtDtServo::WtDataManager::initStore 模块加载失败后空指针解引用
-- 状态: 待审核
+- 状态: 静态缺陷成立；DISABLED 崩溃用例未运行
 - 严重级别: Blocker
 - 位置: `src/WtDtServo/WtDataManager.cpp:59-88`
 - 现象: `DLLHelper::load_library` 失败（或插件缺 `createRdmDtReader`/`deleteRdmDtReader` 符号）时 `_reader` 保持 NULL，但 L87 无条件执行 `_reader->init(cfg, this)`，直接段错误。`init()` L104 又无条件调用 `initStore(cfg->get("store"))`，即「配置里 store.module 写错 / 插件没装」这一最常见部署故障路径必崩，而不是返回 false。
 - 对照: 兄弟实现 `src/WtDtCore/DataManager.cpp:67-107` 同形状代码在加载失败时 `return false`，且 `_writer->init` 在守卫之后——Servo 版疑似移植时丢了这个 return。
 - 复现: `q05_servo_wtdatamgr_test.cpp` 的 `DISABLED_Q05ServoWtDataManagerTest.DISABLED_InitStoreLoadFailureDerefsNullReader`（按硬约束保持禁用，启用即段错误）。
 
-## BUG-Q05-002 CoverageTests_dtsrv 目标内 ParserAdapter/ParserAdapterMgr 强符号重复
-- 状态: 待审核
-- 严重级别: Blocker
+## BUG-Q05-002 ParserAdapter/ParserAdapterMgr 在当前 coverage 配置下重复链接
+- 状态: 已撤回（当前 CMake 将相关 TU 拆成独立测试目标）
+- 严重级别: 不适用（当前目标隔离后不存在该链接问题）
 - 位置: `src/WtDtCore/ParserAdapter.{h,cpp}` 与 `src/WtDtServo/ParserAdapter.{h,cpp}`
-- 现象: 两个全局类**同名且多数方法签名逐字相同**（`~ParserAdapter()`、`init(const char*, WTSVariant*)`、`initExt`、`release`、`run`、`handleQuote(WTSTickData*, uint32_t)`、`handleSymbolList(const WTSArray*)`、`handleOrderQueue/handleOrderDetail/handleTransaction/handleParserLog/getBaseDataMgr`，以及 `ParserAdapterMgr::release/run/getAdapter/addAdapter`），两份 .cpp 都编进 `CoverageTests_dtsrv` 后为同签名强符号，链接期必 duplicate symbol（macOS ld 直接报错）；即便按 BUG-L00-005 思路摘掉一份，另一份的归因也是假的。两个头文件还各以 `#pragma once` 定义不同类形状的 `class ParserAdapter`，任何 TU 各自包含一份即构成 ODR UB。
-- 影响: 本波因此**未对两个 ParserAdapter 写任何启用用例**（原计划靶子「行情过滤与时间戳判定」无法在该目标下安全归属）；主控需要先把其中一份按目录级编译别名（同 CMakeLists 里 WtStraFact 家族的做法 `PARSER...=..._dtcore`）拆开，或把 WtDtServo 的 ParserAdapter TU 移出本目标，再补波次。
-- 建议: 长期方案是产品侧给 WtDtServo 版加命名空间；测试侧不改生产代码。
+- 现象: 两类同名且形状不同，若编进同一二进制会有类型/符号冲突；但当前 `src/TestUnits/coverage/CMakeLists.txt` 已把 WtDtCore 与 WtDtServo 分别编成 `CoverageTests_dtcore`、`CoverageTests_dtservo`，并注释说明不能放在同一目标。没有证据支持当前 coverage 配置链接失败。
+- 处置: 这是针对旧目标假设的误报，状态为**已撤回**。当前目标拆分不需再改 CMake，也不能据此要求生产类加命名空间。
 
 ## BUG-Q05-003 IndexWorkerMgr::handle_quote 同步分支 retain 后不 release（行情对象泄漏）
-- 状态: 待审核
+- 状态: 已合并（BUG-R18-007；同一源码位置与同一 retain/release 失衡）
 - 严重级别: Major
 - 位置: `src/WtDtCore/IndexWorkerMgr.cpp:170-203`
-- 现象: L180 `newTick->retain()` 之后，仅 `_pool` 异步分支在任务末尾 `newTick->release()`；`_pool==NULL` 的同步分支遍历完 `_workers` 就直接返回，引用计数只加不还。datakit 以「poolsize=0 + 高频 tick」运行时每 tick 泄漏一个 WTSTickData 池对象，池/内存单调增长。
+- 现象: L180 `newTick->retain()` 之后，仅 `_pool` 异步分支在任务末尾 `newTick->release()`；`_pool==NULL` 的同步分支无配对 release。与 BUG-R18-007 完全重复，不另计数。
 - 佐证: 两分支唯一差异就是这句 release；语义上 handle_quote 对入参引用计数应平衡。
-- 复现: `q05_idxworker_mgr_test.cpp::HandleQuoteNullUnsubscribedAndSubscribed`（同步分支路径本身已被启用用例走过，断言引用计数需暴露池内部状态，未做）。
+- 复现: `q05_idxworker_mgr_test.cpp::HandleQuoteNullUnsubscribedAndSubscribed` 走过部分同步路径，但未断言引用计数，也未测长期池增长。按 BUG-R18-007 合并处理。
 
 ## BUG-Q05-004 resample_bars 对 cb/cbCnt 无 NULL 守卫（cbLogger 有）
-- 状态: 待审核
+- 迭代02第二轮前状态（历史）: - 状态: 待验证（空回调是否违背调用合同未确认；零输出可达性未证）
+- 状态: 已撤回（迭代02：TEST，原产品主张不成立）
 - 严重级别: Minor
 - 位置: `src/WtDtHelper/WtDtHelper.cpp:1021-1023`
-- 现象: 同函数内 12 处 `cbLogger` 调用全部先判空，而成功路径 `cbCnt(newCnt); cb(&kline->getDataRef().at(0), newCnt, true);` 裸调用；头文件签名默认参数只给 `cbLogger` 提供 `= NULL` 缺省（cb/cbCnt 无缺省），一旦 C 侧调用方传 NULL 即空指针解引用。另外 `kline->getDataRef().at(0)` 在 `newCnt==0` 时越界访问 vector 首元素。
+- 现象: 成功路径裸调用 `cbCnt`/`cb`；头文件仅把 `cbLogger` 设为可选，`cb`/`cbCnt` 没有默认值，故源码证明传 NULL 会崩，但尚无证据说明 NULL 是合法调用。`newCnt==0` 时访问 vector 首元素的静态风险成立，但 `resample_bars` 传入 `bIncludeOpen=true`，本轮没有证明该路径能产生零输出。
 - 复现: 未写启用用例（属崩溃类输入，与 BUG-Q05-001 不同类，暂不建 DISABLED 条目，交排除清单评审）。
 
 ## BUG-Q05-005 StateMonitor::initialize 的配置泄漏与会话 ID 缓冲区溢出风险
-- 状态: 待审核
+- 状态: 混合项；配置引用未释放是静态缺陷，其它子项的输入合同单独列明
 - 严重级别: Minor
 - 位置: `src/WtDtCore/StateMonitor.cpp:49-74`、`src/WtDtCore/StateMonitor.h:47`
-- 现象: ① L49 `WTSCfgLoader::load_from_file` 返回的 `config` 全程未 `release()`，每次初始化泄漏整棵配置树；② `StateInfo::_session` 为 `char[16]`，L74 用 `strcpy` 拷贝任意长度的 JSON key，`sid` ≥16 字符即栈溢出 UB（配置可外源输入，属不安全拷贝）。另 `WTSBaseDataMgr::loadSessions`（`src/WTSTools/WTSBaseDataMgr.cpp:282-284`）对缺 `sections` 的条目 `continue` 前已 `new` 出 `WTSSessionInfo` 且不释放，同类泄漏。
-- 备注: ②的溢出路径属崩溃类输入，未收录任何启用用例；本波 DISABLED_ 名额用于 BUG-Q05-001（同文件内崩溃类不叠加）。
+- 现象: ① **状态：静态资源缺陷成立。** `StateMonitor::initialize` 成功读取的 `config` 在函数末尾未 `release()`，配置树未见其它 owner。② **状态：待验证。** `StateInfo::_session` 为 `char[16]`，`strcpy` 写入会话 JSON key；超过 15 字符可越界，但允许的 session id 最大长度未找到合同。③ **状态：静态异常输入泄漏成立。** `WTSBaseDataMgr::loadSessions` 对缺失/非数组 `sections` 的条目，在 `continue` 前已创建 `WTSSessionInfo` 且未 release；是否接受并跳过此类配置行需在接口合同中注明。
+- 进一步复核: `src/WTSTools/WTSBaseDataMgr.cpp:265-293` 在正常条目上调用 `_session_map->add(id, sInfo)`；该 `WTSHashMap` 的 `add` 默认 retain（`src/Includes/WTSCollection.hpp:660-663`），随后也未释放创建者的初始引用。因此成功路径同样存在引用不配对的静态泄漏风险，不仅限于异常行。本次没有运行引用计数或泄漏检测。修复时应统一创建、入表与异常退出的所有权，并覆盖成功和缺失 sections 两条路径。
+- 备注: session ID 长度子项未动态验证；本轮不运行越界输入。
 
-## 待裁定（期望值推导不充分，允许首跑失败后由主控裁定）
-1. `q05_resample_bars_test.cpp::DayResampleOfTenDailyBarsPassesThrough` 断言 `d→d(times=1)` 全区间透传 10 条：由 L961-1010 的 lower_bound 区间推导 hitCnt=10，但 `WTSDataFactory::extractKlineData(KP_DAY, 1)` 是否恒返回 NULL 或改写条数依赖 WTSTools 实现，未在本波预算内读其源码。若实测失败请裁定为「实现缺陷」或「约定如此」并调整断言。
-2. 同文件 `MinuteResampleReportsConsistentCounts` 只断言自一致性（返回值==cbCnt 参数==cb 条数），不断言 m5 合并具体条数——合并条数取决于 `extractKlineData` 的会话对齐语义，推不出唯一期望值。
-3. `q05_state_monitor_test.cpp::InitializeMalformedJsonReturnsFalse` 假设 `load_from_json` 对坏 JSON 返回 NULL（`WTSCfgLoader.cpp:323` 起未再核对 parse 失败分支），若返回空对象而非 NULL 则本用例语义变为「空配置」，需改写。
+## BUG-Q05-006 resample_bars 对缺失 sections 先索引再校验，触发 RapidJSON assertion
+- 状态: 已确认（本机单项运行 exit 134；未使用 sanitizer）
+- 严重级别: Major（外部 session JSON 缺字段时进程 abort）
+- 位置: `src/WtDtHelper/WtDtHelper.cpp:900-922`（解析 session JSON）
+- 现象: 代码先执行 `const rj::Value& jSecs = root["sections"]`，之后才检查 `jSecs.IsNull() || !jSecs.IsArray()`。成员完全缺失时 RapidJSON `operator[]` 先触发断言，预期的格式错误日志和 `return 0` 分支不可达。`BadSessionTemplateRejected` 已提供 `{"offset":0,"auction":null}` 的缺字段输入。
+- 修复方向: 先校验 `root.IsObject()`、`HasMember("offset")`/`HasMember("sections")` 和字段类型，再访问字段；确认 required/optional 字段合同。会话对象最好在校验完成后创建，或用 RAII 确保错误分支 release。
+- 证据边界: 仅本机 `CoverageTests_dtcore` 单项运行确认 abort；未用 ASAN/UBSAN，未在其它平台复测。
+
+## 待裁定（接口合同或 oracle 尚不充分）
+1. `Q05ResampleTest.DayResampleOfTenDailyBarsPassesThrough` 断言 `d→d(times=1)` 全区间透传 10 条；实测返回 0。`WTSDataFactory::extractKlineData` 在 `times<=1` 时明确返回 NULL，`resample_bars` 因而返回 0；但公开注释未明确 `times` 必须大于 1，接口是否应支持 no-op 请求仍待合同裁定，不更改期望。
+2. `MinuteResampleReportsConsistentCounts` 只断言返回值、计数 callback、数据 callback 自一致，不断言 m5 具体条数；目前没有唯一条数 oracle。
+3. `Q05StateMonitorTest.InitializeMalformedJsonReturnsFalse` 本机过滤运行 PASS，已确认当前坏 JSON 路径返回 false；原有 loader 疑问撤销。
+
+## 2026-10-29 独立复核与本机测试记录
+
+本轮复核源码、接口与现有测试定义；结果来自本机现有 coverage 二进制，没有声称 sanitizer、其它平台或生产运行证据。
+
+### 逐项分类
+
+- **BUG-Q05-001 — 静态缺陷成立。** `initStore` 在模块加载失败或必要符号缺失时保留 `_reader == NULL`，随后无条件调用 `_reader->init`。修复方向：对加载、符号、creator 和 `_reader->init` 逐步判错并返回 false，失败时释放已打开模块。禁用用例本轮未执行；结论来自源码控制流，不是崩溃动态复现。
+- **BUG-Q05-002 — 已撤回。** 当前 CMake 分别构建 `CoverageTests_dtcore` 和 `CoverageTests_dtservo`；文件注释明确说明两种 `ParserAdapter` 不能混在同一目标。原 `CoverageTests_dtsrv` 强符号重复前提不成立。
+- **BUG-Q05-003 — 已合并（BUG-R18-007）。** 同一行同步 retain 没有 release；当前测试虽执行部分同步分支，但没有引用计数断言，BUG-R18-007 是主记录。修复方向以主记录为准：同步路径配对释放或使用作用域守卫。
+- **BUG-Q05-004 — 待验证。** 回调裸调用是源码事实；头文件只明确 `cbLogger` 可选、未声明 `cb/cbCnt` 可空，因此 NULL 输入是否违约未确定。`newCnt==0` 未证明可达。修复方向：明确必填回调合同并在入口拒绝 NULL，或统一支持可选回调并守卫调用；若保留零输出路径，先检查 size 再取元素。
+- **BUG-Q05-005 — 子项拆分。** `config` 未 release 为静态资源缺陷成立，未做泄漏测量；修复方向为 RAII/统一 release。session ID 长度合同未证，溢出子项待验证；可按容量检查拒绝过长 id 或改用长度受控存储。`loadSessions` 缺 `sections` 时先创建对象再 continue、未 release 是静态异常输入泄漏点；在跳过前 release，或先验证结构再创建对象。
+- **BUG-Q05-006 — 本机动态确认。** 缺失 `sections` 触发 RapidJSON assertion；测试对错误输入期待返回 0 的前提与源码中显式格式检查相符，但访问顺序让检查不可达。建议 `HasMember`/类型校验后再建会话对象。
+
+### 本机目标与结果
+
+- 历史版本运行 `build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_dtcore --gtest_filter='Q05*.*-Q05ResampleTest.BadSessionTemplateRejected'`：25 项，22 PASS、3 FAIL。其中 `Q05IdxWorkerMgrTest.WrapperOwnsAndReturnsDeleteToFactory` 旧断言使用了**未 init 的 manager**；当前测试已先用空 indice 配置调用 `mgr.init(cfg,&hot,&bd,&dm)`，再检查实际传入的 manager。当前版本独立运行该单例 PASS（`LLVM_PROFILE_FILE=/tmp/wt-review-q05-%p.profraw`）；历史 3 FAIL 的其余两项仍见下文，不能用此单例结果替代整组重跑。未初始化 manager 的产品风险已归并至 BUG-R44-007。
+- 同一目标的 `Q05ResampleTest.MissingOrShortFileFailsHeadCheck` 收到 `std::runtime_error("File does not exist")`；这是 BUG-L05-007 `StdFile::read_file_content` 缺文件抛异常口径的重复，**状态：已合并（BUG-L05-007）**。此项不是新 Q05 缺陷。
+- 同一目标 `Q05ResampleTest.DayResampleOfTenDailyBarsPassesThrough` 失败为 0 vs 10；见上方待裁定，未擅自改期望。
+- 单项运行 `CoverageTests_dtcore --gtest_filter='Q05ResampleTest.BadSessionTemplateRejected'` 进程 exit 134，打印 RapidJSON `document.h:1231` assertion；这是 BUG-Q05-006 本机证据。本次没有运行 sanitizer。
+- `build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_dtservo --gtest_filter='Q05ServoWtDataManagerTest.*'`：3 PASS、1 DISABLED。

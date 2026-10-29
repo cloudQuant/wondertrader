@@ -35,7 +35,7 @@ namespace
 	std::filesystem::path lane_root()
 	{
 		return std::filesystem::path(__FILE__).parent_path()
-			.parent_path().parent_path().parent_path();
+			.parent_path().parent_path().parent_path().parent_path();
 	}
 
 	std::filesystem::path make_temp_dir(const char* tag)
@@ -60,7 +60,7 @@ namespace
 	};
 
 	/*
-	 * 20200102 五笔、20200103 三笔；时间戳都是交易时间内的 HHMMSS*1000。
+	 * 20200102 五笔、20200103 两笔；时间戳都是交易时间内的 HHMMSS*1000。
 	 * action_time/100000 必须落在 SD0930 的交易时段里，否则 getNextTickTime 会跳过。
 	 */
 	const TickRow kTicks[] = {
@@ -113,6 +113,7 @@ namespace
 		uint32_t	_adjAllCalls {0};
 		uint32_t	_adjOneCalls {0};
 		bool		_giveTicks {true};
+		std::vector<uint32_t> _loadedTickDates;
 
 		bool loadFinalHisBars(void* obj, const char* stdCode, WTSKlinePeriod period, FuncReadBars cb) override
 		{
@@ -193,6 +194,7 @@ namespace
 		{
 			(void)stdCode;
 			_tickCalls++;
+			_loadedTickDates.push_back(uDate);
 			if (!_giveTicks)
 				return false;
 
@@ -279,7 +281,10 @@ namespace
 		uint32_t replayDoneCalls {0};
 
 		std::vector<double> tickPrices;
-		std::vector<double> peekedPrices;
+		std::vector<double> tickOpens;
+		std::vector<double> tickHighs;
+		std::vector<double> tickLows;
+		std::vector<double> lastTickPrices;
 		std::vector<double> dayOpen;
 		std::vector<double> dayHigh;
 		std::vector<double> dayLow;
@@ -304,12 +309,15 @@ namespace
 				return;
 			const WTSTickStruct& ts = curTick->getTickStruct();
 			tickPrices.push_back(ts.price);
+			tickOpens.push_back(ts.open);
+			tickHighs.push_back(ts.high);
+			tickLows.push_back(ts.low);
 			tickDates.push_back(ts.action_date);
 			tickTimes.push_back(ts.action_time / 100000);
 			if (rp != nullptr && !probeCode.empty())
 			{
 				curPrices.push_back(rp->get_cur_price(probeCode.c_str()));
-				// tick 模式下 get_day_price 走 get_last_tick 分支（取的是原始tick字段）
+				// tick 模式下 flag 0/1/2/3 分别读取 open/high/low/price。
 				if (peekLastTick)
 				{
 					dayOpen.push_back(rp->get_day_price(probeCode.c_str(), 0));
@@ -317,7 +325,7 @@ namespace
 					dayLow.push_back(rp->get_day_price(probeCode.c_str(), 2));
 					dayLast.push_back(rp->get_day_price(probeCode.c_str(), 3));
 					WTSTickData* last = rp->get_last_tick(probeCode.c_str());
-					peekedPrices.push_back(last == nullptr ? 0.0 : last->getTickStruct().price);
+					lastTickPrices.push_back(last == nullptr ? 0.0 : last->getTickStruct().price);
 					if (last != NULL)
 						last->release();
 				}
@@ -348,6 +356,8 @@ protected:
 	void SetUp() override
 	{
 		_root = lane_root();
+		ASSERT_TRUE(std::filesystem::exists(_root / "dist/common/sessions.json"));
+		ASSERT_TRUE(std::filesystem::exists(_root / "dist/common/stk_comms.json"));
 		_base = make_temp_dir("ld");
 		_out = make_temp_dir("out");
 		WtHelper::setOutputDir(_out.string().c_str());
@@ -368,8 +378,7 @@ protected:
 /*
  * 逐tick回放主循环：只订阅tick（不订阅K线）+ tick模式 -> run() 派发到 run_by_ticks。
  * replayHftDatasByDay 每个交易日把该日的tick按时间序回放；
- * getNextTickTime 的判据是 `_cursor >= _count` 就跳过，所以每天最后一笔不会被回放
- * （5 笔回 4 笔、3 笔回 2 笔）—— 见 p07 缺陷登记。
+ * 两日 fixture 的 5+2 笔都在 SD0930 交易时段和回测窗口内，应逐笔回放一次。
  */
 TEST_F(P07TickLoaderTest, tickOnlyReplayDrivesHftLoopPerDay)
 {
@@ -382,24 +391,26 @@ TEST_F(P07TickLoaderTest, tickOnlyReplayDrivesHftLoopPerDay)
 	cfg->release();
 
 	TickSink sink;
+	sink.onInit = [&replayer]() {
+		// prepare() 会先 reset 并清空订阅；与策略初始化一致，在 handle_init 中订阅。
+		replayer.sub_tick(11, "SSE.STK.600000");
+	};
 	replayer.register_sink(&sink, "p07_ticks");
-	replayer.sub_tick(11, "SSE.STK.600000");
 
 	ASSERT_TRUE(replayer.prepare());
+	ASSERT_NE(nullptr, replayer.get_session_info("SSE.STK.600000", true));
 	EXPECT_TRUE(replayer.is_tick_enabled());
 	// init 里带 loader 时会通过扩展装载器拉一次全量复权因子
 	EXPECT_EQ(1u, loader._adjAllCalls);
 
 	replayer.run(false);
 
-	// 5 笔 -> 4 笔，3 笔 -> 2 笔
-	ASSERT_EQ(kDay1Ticks - 1 + kDay2Ticks - 1, sink.tickPrices.size());
-	const double expectPrices[] = {10.2, 10.8, 11.5, 11.6, 12.2};
-	for (uint32_t i = 0; i < 5; i++)
-		EXPECT_EQ(expectPrices[i], sink.tickPrices[i]) << "tick " << i;
-
-	EXPECT_EQ(std::vector<uint32_t>({20200102u, 20200102u, 20200102u, 20200102u, 20200103u}), sink.tickDates);
-	EXPECT_EQ(std::vector<uint32_t>({931u, 932u, 933u, 1458u, 931u}), sink.tickTimes);
+	EXPECT_EQ(std::vector<uint32_t>({20200102u, 20200103u}), loader._loadedTickDates);
+	ASSERT_EQ(kDay1Ticks + kDay2Ticks, sink.tickPrices.size());
+	EXPECT_EQ(std::vector<double>({10.2, 10.8, 11.5, 11.6, 12.0, 12.2, 12.8}), sink.tickPrices);
+	EXPECT_EQ(std::vector<uint32_t>({20200102u, 20200102u, 20200102u, 20200102u, 20200102u,
+		20200103u, 20200103u}), sink.tickDates);
+	EXPECT_EQ(std::vector<uint32_t>({931u, 932u, 933u, 1458u, 1459u, 931u, 932u}), sink.tickTimes);
 
 	// 每个有tick的交易日各一对 session_begin/end，收尾再补 1 次 replay_done
 	EXPECT_EQ(2u, sink.beginCalls);
@@ -409,17 +420,18 @@ TEST_F(P07TickLoaderTest, tickOnlyReplayDrivesHftLoopPerDay)
 	EXPECT_EQ(0u, sink.closedPrices.size());
 
 	// update_price 由回放中的每笔tick驱动，最后一笔是 20200103 的第 2 笔
-	EXPECT_DOUBLE_EQ(12.2, replayer.get_cur_price("SSE.STK.600000"));
+	EXPECT_DOUBLE_EQ(12.8, replayer.get_cur_price("SSE.STK.600000"));
 	// 20200104 已超出 end_tdate，装载器没有该日数据 -> 缓存被清空 -> 取不到last tick
 	EXPECT_EQ(nullptr, replayer.get_last_tick("SSE.STK.600000"));
 }
 
 /*
- * get_last_tick / get_day_price 的有数据路径（tick 模式）：
- * 回放顺序是「先推进游标再回调」，所以回调里 get_last_tick 拿到的其实是下一笔，
- * get_day_price(flag=3) 同样取该笔的 price 字段。
+ * 回调收到的 tick 应是当前最新行情；tick 模式的 get_last_tick 和
+ * get_day_price(0..3) 都应对应这同一条 tick。总回调数由上面的
+ * tickOnlyReplayDrivesHftLoopPerDay 单独检查，本用例按实际收到的每个回调比较字段，
+ * 避免尾笔数量问题掩盖 getter 是否错位。
  */
-TEST_F(P07TickLoaderTest, lastTickAndDayPriceHaveData)
+TEST_F(P07TickLoaderTest, lastTickAndDayPriceMatchCurrentCallbackTick)
 {
 	StubBtLoader loader;
 	HisDataReplayer replayer;
@@ -431,24 +443,42 @@ TEST_F(P07TickLoaderTest, lastTickAndDayPriceHaveData)
 	sink.rp = &replayer;
 	sink.probeCode = "SSE.STK.600000";
 	sink.peekLastTick = true;
+	sink.onInit = [&replayer]() {
+		// prepare() 会 reset 并清空订阅；在策略初始化回调中登记订阅。
+		replayer.sub_tick(11, "SSE.STK.600000");
+	};
 	replayer.register_sink(&sink, "p07_peek");
-	replayer.sub_tick(11, "SSE.STK.600000");
 
 	ASSERT_TRUE(replayer.prepare());
+	ASSERT_NE(nullptr, replayer.get_session_info("SSE.STK.600000", true));
 	replayer.run(false);
 
-	ASSERT_EQ(4u, sink.peekedPrices.size());
-	// 游标已推进，peek 到的是 items[1..4]
-	EXPECT_EQ(std::vector<double>({10.8, 11.5, 11.6, 12.0}), sink.peekedPrices);
-	// get_day_price 在 tick 模式下取原始tick的 open/high/low/price
-	EXPECT_EQ(std::vector<double>({10.2, 10.8, 11.5, 11.6}), sink.dayLast);
-	EXPECT_EQ(std::vector<double>({10.0, 10.2, 10.8, 11.5}), sink.dayOpen);
-	EXPECT_EQ(std::vector<double>({11.0, 12.0, 11.8, 12.5}), sink.dayHigh);
-	EXPECT_EQ(std::vector<double>({10.1, 10.6, 11.2, 11.4}), sink.dayLow);
+	EXPECT_EQ(std::vector<uint32_t>({20200102u}), loader._loadedTickDates);
+	ASSERT_FALSE(sink.tickPrices.empty());
+	EXPECT_EQ(20200102u, sink.tickDates.front());
+	EXPECT_EQ(931u, sink.tickTimes.front());
+	EXPECT_DOUBLE_EQ(10.2, sink.tickPrices.front());
+	EXPECT_DOUBLE_EQ(10.0, sink.tickOpens.front());
+	EXPECT_DOUBLE_EQ(10.5, sink.tickHighs.front());
+	EXPECT_DOUBLE_EQ(9.8, sink.tickLows.front());
+	ASSERT_EQ(sink.tickPrices.size(), sink.tickOpens.size());
+	ASSERT_EQ(sink.tickPrices.size(), sink.tickHighs.size());
+	ASSERT_EQ(sink.tickPrices.size(), sink.tickLows.size());
+	ASSERT_EQ(sink.tickPrices.size(), sink.lastTickPrices.size());
+	ASSERT_EQ(sink.tickPrices.size(), sink.dayOpen.size());
+	ASSERT_EQ(sink.tickPrices.size(), sink.dayHigh.size());
+	ASSERT_EQ(sink.tickPrices.size(), sink.dayLow.size());
+	ASSERT_EQ(sink.tickPrices.size(), sink.dayLast.size());
+	ASSERT_EQ(sink.tickPrices.size(), sink.curPrices.size());
+
+	// 每次回调中的 last tick 与 day-price 字段必须来自回调本身的当前 tick。
+	EXPECT_EQ(sink.tickPrices, sink.lastTickPrices);
+	EXPECT_EQ(sink.tickOpens, sink.dayOpen);
+	EXPECT_EQ(sink.tickHighs, sink.dayHigh);
+	EXPECT_EQ(sink.tickLows, sink.dayLow);
+	EXPECT_EQ(sink.tickPrices, sink.dayLast);
 	// get_cur_price 是 update_price 写入的「已回放」价
-	EXPECT_EQ(std::vector<double>({10.2, 10.8, 11.5, 11.6}), sink.curPrices);
-	// flag=4 走 default 分支 -> 0
-	EXPECT_DOUBLE_EQ(0.0, replayer.get_day_price("SSE.STK.600000", 4));
+	EXPECT_EQ(sink.tickPrices, sink.curPrices);
 }
 
 /*

@@ -9,8 +9,8 @@
  *   - init() 的 savedata/无默认风控规则告警、模块加载失败/createTrader 缺失、
  *     重复 init 拒绝：:105-207
  *
- * 频率窗口用「交易所原始代码」直接调用检查函数，绕开 P11-003 记录的
- * 原始码/标准码键不一致（该缺陷已在 bugs/p11 登记，本 lane 不重复开号）。
+ * 频率窗口用公开标准码检查由成功下单/撤单产生的缓存；夹具合约的 alt code
+ * 是交易所原始码，用于核对标准码检查能否命中相应的缓存记录。
  */
 #include "../p11_wtcore_traderadapter/r59_trader_fixture.h"
 #include "r90_env.h"
@@ -59,7 +59,7 @@ protected:
 // 下单/撤单频率窗口：连续 3 次、边界 1 -> 第 3 次检查封禁
 // src/WtCore/TraderAdapter.cpp:566-593, 631-658
 //////////////////////////////////////////////////////////////////
-TEST_F(R90TraderRisk, FrequencyWindowsExcludeRawCode)
+TEST_F(R90TraderRisk, FrequencyWindowsRejectStandardCodeAfterRawCodeEvents)
 {
     const char* cfgText =
         "{\"savedata\":false,\"riskmon\":{\"active\":true,\"policy\":{"
@@ -67,7 +67,7 @@ TEST_F(R90TraderRisk, FrequencyWindowsExcludeRawCode)
         "\"order_total_limits\":0,\"cancel_times_boundary\":1,"
         "\"cancel_stat_timespan\":60,\"cancel_total_limits\":0}}}}";
 
-    // 下单频率：doEntrust 按原始代码 ag2512 写缓存
+    // doEntrust 把标准合约改写成 alt code ag2512 后提交；限额检查的公开输入仍是标准码。
     {
         WTSVariant* cfg = loadCfg("r90_order_freq.json", cfgText);
         ASSERT_NE(nullptr, cfg);
@@ -76,17 +76,15 @@ TEST_F(R90TraderRisk, FrequencyWindowsExcludeRawCode)
         EXPECT_FALSE(trader.init(id_.c_str(), cfg, &bd_, NULL));
         cfg->release();
         ASSERT_TRUE(trader.run());
+        ASSERT_TRUE(trader.checkOrderLimits("SHFE.ag.2512"));
 
         for (uint32_t i = 0; i < 3; ++i)
-            EXPECT_NE(UINT_MAX, trader.openLong("SHFE.ag.2512", 7000.0, 1, 0));
-        EXPECT_EQ(3u, api_.n_insert_);
+            ASSERT_NE(UINT_MAX, trader.openLong("SHFE.ag.2512", 7000.0, 1, 0));
+        ASSERT_EQ(3u, api_.n_insert_);
+        ASSERT_EQ("ag2512", api_.last_code_);
 
-        // 标准代码查不到原始码缓存 -> 放行（P11-003 现状）
-        EXPECT_TRUE(trader.checkOrderLimits("SHFE.ag.2512"));
-        // 直接用缓存键检查 -> 命中频率窗口并封禁
-        EXPECT_FALSE(trader.checkOrderLimits("ag2512"));
-        // 排除队列短路
-        EXPECT_FALSE(trader.checkOrderLimits("ag2512"));
+        // 三次成功委托已超过窗口门限；按公开标准码检查应命中并拒绝。
+        EXPECT_FALSE(trader.checkOrderLimits("SHFE.ag.2512"));
     }
 
     // 撤单频率：cancel() 按原始代码写 _cancel_time_cache
@@ -98,6 +96,7 @@ TEST_F(R90TraderRisk, FrequencyWindowsExcludeRawCode)
         EXPECT_FALSE(trader.init(id_.c_str(), cfg, &bd_, NULL));
         cfg->release();
         ASSERT_TRUE(trader.run());
+        ASSERT_TRUE(trader.checkCancelLimits("SHFE.ag.2512"));
 
         trader.onRspOrders(r59x::makeArray({
             r59x::makeOrder(ct_, WDT_LONG, WOT_OPEN, WOS_NotTraded_Queuing, 1, 0,
@@ -107,14 +106,14 @@ TEST_F(R90TraderRisk, FrequencyWindowsExcludeRawCode)
             r59x::makeOrder(ct_, WDT_LONG, WOT_OPEN, WOS_NotTraded_Queuing, 1, 0,
                 "FQ3", "otp.r90risk.1003") }));
 
-        EXPECT_TRUE(trader.cancel(1001u));
-        EXPECT_TRUE(trader.cancel(1002u));
-        EXPECT_TRUE(trader.cancel(1003u));
-        EXPECT_EQ(3u, api_.n_action_);
+        ASSERT_TRUE(trader.cancel(1001u));
+        ASSERT_TRUE(trader.cancel(1002u));
+        ASSERT_TRUE(trader.cancel(1003u));
+        ASSERT_EQ(3u, api_.n_action_);
+        ASSERT_EQ("ag2512", api_.last_action_code_);
 
-        EXPECT_TRUE(trader.checkCancelLimits("SHFE.ag.2512"));
-        EXPECT_FALSE(trader.checkCancelLimits("ag2512"));
-        EXPECT_FALSE(trader.checkCancelLimits("ag2512"));
+        // 三次成功撤单已超过窗口门限；按公开标准码检查应命中并拒绝。
+        EXPECT_FALSE(trader.checkCancelLimits("SHFE.ag.2512"));
     }
 }
 

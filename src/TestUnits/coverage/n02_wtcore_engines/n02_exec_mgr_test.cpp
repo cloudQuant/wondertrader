@@ -117,11 +117,13 @@ const char* const kFilterJson =
     "  }\n"
     "}\n";
 
-const char* const kRouterJson =
-    "[\n"
-    "  { \"strategy\": \"stra_a\", \"executer\": [\"exec_1\", \"exec_2\"] },\n"
-    "  { \"strategy\": \"stra_b\", \"executer\": \"exec_3\" }\n"
-    "]\n";
+const char* const kRouterConfigJson =
+    "{\n"
+    "  \"router_rules\": [\n"
+    "    { \"strategy\": \"stra_a\", \"executer\": [\"exec_1\", \"exec_2\"] },\n"
+    "    { \"strategy\": \"stra_b\", \"executer\": \"exec_3\" }\n"
+    "  ]\n"
+    "}\n";
 
 class N02ExecMgrTest : public ::testing::Test
 {
@@ -154,6 +156,19 @@ protected:
     {
         root().write(rel, content);
         return WTSCfgLoader::load_from_file(root().file(rel).c_str());
+    }
+
+    WTSVariant* loadRouterRules(const std::string& rel, const char* content)
+    {
+        WTSVariant* config = loadJson(rel, content);
+        if (config == NULL)
+            return NULL;
+
+        WTSVariant* rules = config->get("router_rules");
+        if (rules != NULL)
+            rules->retain();
+        config->release();
+        return rules;
     }
 
 protected:
@@ -284,7 +299,7 @@ TEST_F(N02ExecMgrTest, HandlePosChangeWithAllReachesEveryUnroutedExecuter)
 
 TEST_F(N02ExecMgrTest, HandlePosChangeSkipsRoutedExecutersWhenExecidIsAll)
 {
-    WTSVariant* rules = loadJson("router.json", kRouterJson);
+    WTSVariant* rules = loadRouterRules("router.json", kRouterConfigJson);
     ASSERT_NE(nullptr, rules);
 
     WtExecuterMgr mgr;
@@ -302,7 +317,7 @@ TEST_F(N02ExecMgrTest, HandlePosChangeSkipsRoutedExecutersWhenExecidIsAll)
 
 TEST_F(N02ExecMgrTest, HandlePosChangeWithExplicitExecidHitsRoutedExecuter)
 {
-    WTSVariant* rules = loadJson("router.json", kRouterJson);
+    WTSVariant* rules = loadRouterRules("router.json", kRouterConfigJson);
     ASSERT_NE(nullptr, rules);
 
     WtExecuterMgr mgr;
@@ -400,9 +415,27 @@ TEST_F(N02ExecMgrTest, CommitPrefersOwnGroupAndIgnoresUnmatchedGroups)
     mgr.add_target_to_cache("DCE.m2309", 1, "exec_missing"); // 无人认领的组合
     mgr.commit_cached_targets();
 
-    EXPECT_DOUBLE_EQ(9, own->_sets.at(0).find("SHFE.rb2310")->second);
-    EXPECT_DOUBLE_EQ(2, plain->_sets.at(0).find("SHFE.rb2310")->second);
-    EXPECT_EQ(0u, orphan->_sets.size());                     // 找不到即 continue
+    ASSERT_EQ(1u, own->_sets.size());
+    const auto& ownTargets = own->_sets.at(0);
+    auto ownTarget = ownTargets.find("SHFE.rb2310");
+    ASSERT_NE(ownTargets.end(), ownTarget);
+    EXPECT_DOUBLE_EQ(9, ownTarget->second);
+    EXPECT_EQ(ownTargets.end(), ownTargets.find("DCE.m2309"));
+
+    ASSERT_EQ(1u, plain->_sets.size());
+    const auto& plainTargets = plain->_sets.at(0);
+    auto plainTarget = plainTargets.find("SHFE.rb2310");
+    ASSERT_NE(plainTargets.end(), plainTarget);
+    EXPECT_DOUBLE_EQ(2, plainTarget->second);
+    EXPECT_EQ(plainTargets.end(), plainTargets.find("DCE.m2309"));
+
+    // 无私有目标的 executor 使用 ALL；exec_missing 的独有目标无人接收。
+    ASSERT_EQ(1u, orphan->_sets.size());
+    const auto& orphanTargets = orphan->_sets.at(0);
+    auto orphanTarget = orphanTargets.find("SHFE.rb2310");
+    ASSERT_NE(orphanTargets.end(), orphanTarget);
+    EXPECT_DOUBLE_EQ(2, orphanTarget->second);
+    EXPECT_EQ(orphanTargets.end(), orphanTargets.find("DCE.m2309"));
 }
 
 TEST_F(N02ExecMgrTest, CommitAppliesFiltersAndClearsCache)
@@ -450,7 +483,7 @@ TEST_F(N02ExecMgrTest, LoadRouterRulesRejectsNullAndNonArray)
 
 TEST_F(N02ExecMgrTest, LoadRouterRulesAcceptsStringAndArrayExecuters)
 {
-    WTSVariant* rules = loadJson("router.json", kRouterJson);
+    WTSVariant* rules = loadRouterRules("router.json", kRouterConfigJson);
     ASSERT_NE(nullptr, rules);
 
     WtExecuterMgr mgr;
@@ -476,7 +509,7 @@ TEST_F(N02ExecMgrTest, RouteOfUnknownStrategyFallsBackToAll)
     ASSERT_EQ(1u, pre.size());
     EXPECT_NE(pre.end(), pre.find("ALL"));
 
-    WTSVariant* rules = loadJson("router.json", kRouterJson);
+    WTSVariant* rules = loadRouterRules("router.json", kRouterConfigJson);
     ASSERT_NE(nullptr, rules);
     ASSERT_TRUE(mgr.load_router_rules(rules));
     rules->release();
@@ -488,27 +521,33 @@ TEST_F(N02ExecMgrTest, RouteOfUnknownStrategyFallsBackToAll)
 
 //////////////////////////////////////////////////////////////////
 // 缺陷类: 路由条目缺少 executer 节点时 itemExec 为 NULL 立刻解引用
-// 见 BUG-N02-004, 同类输入全部收在这唯一一个用例里。
+// 见 BUG-N02-004; 仅将实际会触发空指针解引用的输入保留为 DISABLED。
 //////////////////////////////////////////////////////////////////
 
-TEST(N02ExecMgrDisabled, DISABLED_RouterRuleWithoutExecuterNodeCrashes)
+TEST_F(N02ExecMgrTest, DISABLED_RouterRuleWithoutExecuterNodeCrashes)
 {
-    TempRoot root("execbad");
-    const char* const bad[] = {
-        "[\n  { \"strategy\": \"s\" }\n]\n",                 // 缺 executer
-        "[\n  { \"executer\": \"e\" }\n]\n",                 // 缺 strategy
-        "[\n  { \"strategy\": \"s\", \"executer\": null }\n]\n",
-    };
-    for (size_t i = 0; i < sizeof(bad) / sizeof(bad[0]); ++i)
-    {
-        root.write("router_bad.json", bad[i]);
-        WTSVariant* cfg = WTSCfgLoader::load_from_file(root.file("router_bad.json").c_str());
-        if (cfg == NULL)
-            continue;
-        WtExecuterMgr mgr;
-        mgr.load_router_rules(cfg);      // 期望记录错误并返回 false
-        cfg->release();
-    }
+    const char* const missingExecuterConfig =
+        "{\"router_rules\":[{\"strategy\":\"s\"}]}\n";
+    WTSVariant* rules = loadRouterRules("router_bad.json", missingExecuterConfig);
+    ASSERT_NE(nullptr, rules);
+
+    WtExecuterMgr mgr;
+    mgr.load_router_rules(rules);       // itemExec == NULL, 当前实现会在此解引用
+    rules->release();
+}
+
+TEST_F(N02ExecMgrTest, RouterRuleWithoutStrategyDoesNotDereferenceNull)
+{
+    const char* const missingStrategyConfig =
+        "{\"router_rules\":[{\"executer\":\"e\"}]}\n";
+    WTSVariant* rules = loadRouterRules("router_missing_strategy.json", missingStrategyConfig);
+    ASSERT_NE(nullptr, rules);
+
+    WtExecuterMgr mgr;
+    // strategy 缺失时 getCString 返回默认空串；此用例只锚定不会在该处空指针解引用，
+    // 不对缺失 strategy 的路由语义作额外约定。
+    EXPECT_NO_THROW(mgr.load_router_rules(rules));
+    rules->release();
 }
 
 }  // namespace

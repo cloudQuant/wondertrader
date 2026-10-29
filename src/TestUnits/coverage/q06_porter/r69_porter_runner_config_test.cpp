@@ -1,6 +1,6 @@
 /*
  * R69 - WtRtRunner 配置成功臂：basefiles 全段、parsers/traders/executers
- *       外部文件、initDataMgr 缺段、initEvtNotifier、initEngine 非标准 env
+ *       外部文件、initDataMgr 空配置、initEvtNotifier、initEngine 非标准 env
  *
  * 目标：src/WtPorter/WtRtRunner.cpp
  *   - basefiles 每一段：session / commodity(string|array) / contract(string|array) /
@@ -9,7 +9,7 @@
  *     内联数组合法项与 auto id（L620-623、L904-930）
  *   - traders 外部文件数组合法项（L630-647、L1071-1087）
  *   - executers 外部文件 + routers 两处入口（L668-685、L702-704）、文件缺失（L691-694）
- *   - initDataMgr() 缺 data 段的 false 分支（L884-896，config 不检查返回值）
+ *   - initDataMgr() 空 data/no-store 配置（L884-896，config 不检查返回值）
  *   - initEngine() 空 name -> CTA（L846-850）与未知 name -> HFT（L855-865）
  *   - initEvtNotifier() 对象段（L1054-1063）
  *
@@ -113,7 +113,7 @@ namespace {
  * contract 单串、holiday/hot/second/rules 五个可选项全部给值；env.name="" 走 CTA。
  * 主力代码回填循环（:562-580）用 WTSHotMgr::getHotTags 的静态缓存，缓存为空时
  * 会按当前实例重填，因此本用例能覆盖内层 isCustomHot 分支；但缓存非空时会沿
- * 用前序用例的标签集（R69-002），故这里不对「已回填」做断言。 */
+ * 用前序用例的标签集（R69-001），故这里不对「已回填」做断言。 */
 TEST(R69PorterRunnerConfig, BasefilesStringFormsAndEmptyEnvNameBuildCtaEngine)
 {
 	const std::string dir = prepare_dir();
@@ -248,10 +248,11 @@ TEST(R69PorterRunnerConfig, TraderAndExecuterFilesLoadWithRouterSections)
 }
 
 /* WtRtRunner.cpp:691-694 + :884-896 + :1054-1063：executers 指向不存在的文件只告警；
- * data 段缺失时 initDataMgr() 在 :887-888 返回 false，但 config() 不检查返回值继续走；
+ * tail() 固定附加 data:{}，此用例覆盖空 data/no-store 配置；不会声称覆盖缺失 data 键。
+ * initDataMgr() 的返回值不被 config() 检查，config() 继续走；
  * notifier 是对象（active=false，EventNotifier::init 内部返回 false，不加载 MQ 模块），
  * initEvtNotifier() 仍返回 true。 */
-TEST(R69PorterRunnerConfig, MissingExecuterFileAndDataSectionStillReturnTrue)
+TEST(R69PorterRunnerConfig, MissingExecuterFileAndEmptyDataStillReturnTrue)
 {
 	const std::string dir = prepare_dir();
 	ASSERT_FALSE(dir.empty());
@@ -296,7 +297,7 @@ TEST(R69PorterRunnerConfig, UnknownEnvNameFallsBackToHftEngine)
 	clean_dir(dir);
 }
 
-/* 缺陷 R69-002（WTSHotMgr::getHotTags 首次结果被 static 缓存）：
+/* 缺陷 R69-001（WTSHotMgr::getHotTags 首次结果被 static 缓存）：
  * - WTSHotMgr.cpp:148-159 把 getHotTags 的返回值做成函数内 static vector，只在
  *   该 vector 为空时按「当时那个实例」的 m_mapCustCodes 重填；
  * - WtRtRunner.cpp:562-580 每次 config 都用这个缓存做主力代码回填，于是同一个

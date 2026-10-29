@@ -1,0 +1,682 @@
+[
+  {
+    "lane": "R10_wtcore",
+    "id": "BUG-R10-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtDiffExecuter.cpp:84-104",
+      "src/WtCore/WtDiffExecuter.cpp:243-280",
+      "src/WtCore/WtArbiExecuter.cpp:163-196",
+      "src/WtCore/WtLocalExecuter.cpp:170-216"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r10_wtcore_executers.cpp:183-195"
+    ],
+    "reason": "三种执行器的 init 仅拒绝空 params 并返回成功，getUnit 随后无判空解引用 policy/default/name。有效仓位或信号首次创建单元即可触发；init 前调用不作为依据。",
+    "fix": "init 校验 policy、商品/default 节点及 name，失败返回 false；getUnit 再作空值保护并拒绝半初始化。",
+    "acceptance": "缺 policy/default/name 均被拒绝且事件不崩溃、不登记半成品；有效配置仍创建单元。",
+    "canonical": "BUG-R10-001",
+    "proposed_test_fix": "增加坏配置负例；现有夹具总是提供 policy.default.name。"
+  },
+  {
+    "lane": "R10_wtcore",
+    "id": "BUG-R10-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtSelEngine.cpp:328-335",
+      "src/Share/StdUtils.hpp:23-24"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r10_wtcore_selengine.cpp:465-493"
+    ],
+    "reason": "到期任务在循环体创建局部 shared_ptr<std::thread>；作用域结束时 thread 仍 joinable，std::thread 析构触发 terminate。启用的子进程测试建立了实际到期前提。",
+    "fix": "将任务提交至可管理的任务池，或由稳定所有者管理线程并停止/join。",
+    "acceptance": "到期任务至多派发一次；重复 run/stop 和析构安全，线程均可停止并 join。",
+    "canonical": "BUG-R10-004",
+    "proposed_test_fix": null
+  },
+  {
+    "lane": "R10_wtcore",
+    "id": "BUG-R10-005",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/EventNotifier.cpp:214-227",
+      "src/WtCore/EventNotifier.cpp:78-94"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n02_wtcore_engines/r160_event_notifier_test.cpp:153-176",
+      "src/TestUnits/coverage/n02_wtcore_engines/r160_event_notifier_test.cpp:181-190"
+    ],
+    "reason": "订单 retain 不 release 是 BUG-R41-003 同一泄漏；_register 缺失时空函数指针调用则依赖尚未构造的 MQ ABI 变体。当前测试只验证消息发布，不验证引用归零。",
+    "fix": "泄漏并入 canonical；先明确 MQ 必需导出合同，若缺符号属可接收输入则逐项校验、释放模块并返回失败。",
+    "acceptance": "确认缺符号时 init 有确定失败结果且不调用空指针；正常/丢弃通知路径最终释放订单引用。",
+    "canonical": "BUG-R41-003（仅泄漏子项）",
+    "proposed_test_fix": "补引用计数/析构观察；仅当契约确认后才用只缺 regiter_callbacks 的插件验证失败处理。"
+  },
+  {
+    "lane": "R10_wtcore",
+    "id": "BUG-R10-008",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtDtMgr.cpp:263-275",
+      "src/Includes/IDataReader.h:283-289"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r10_wtcore_dtmgr.cpp:133-142"
+    ],
+    "reason": "函数内 static 缓存全进程首个 reader flag；IDataReader 定义该标志属于当前 reader。第二个 manager 串用首个实例值。现有测试只覆盖单实例空 reader。",
+    "fix": "删除 static 缓存；按当前实例读取 reader flag，无 reader 返回0。",
+    "acceptance": "两个 manager 绑定不同 flag reader 后交错查询各自返回本实例值；空 reader 返回0且顺序无影响。",
+    "canonical": "BUG-R10-008",
+    "proposed_test_fix": "扩成双 reader 实例交错查询及空 reader 控制。"
+  },
+  {
+    "lane": "R10_wtcore",
+    "id": "BUG-R10-009",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtDiffExecuter.cpp:597-638",
+      "src/WtCore/WtDiffExecuter.cpp:135-163",
+      "src/Includes/IBaseDataMgr.h:40",
+      "src/WTSTools/WTSBaseDataMgr.cpp:91-123",
+      "src/WTSTools/WTSBaseDataMgr.cpp:525-533"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r110_diff_executer_test.cpp:148-153"
+    ],
+    "reason": "自动清零分支把 stdCode 作为原始 code 且 exchange 默认空查询合约。生产 manager 空 exchange 时查 raw _code_map；其他恢复分支先拆 raw code/exchange。因此删除目标时查不到并跳过归零。现有测试清空目标但无有效断言。",
+    "fix": "解析 stdCode 后用 raw code/exchange 查合约；缺合约时记录可观察错误而非静默跳过。",
+    "acceptance": "先登记非零目标再提交空目标，单元收到零且账本写零；同时覆盖合约缺失反馈。",
+    "canonical": "BUG-R10-009",
+    "proposed_test_fix": "增强 R110 用例：fake 按 raw/exchange 查找并断言最后 set_position 为0及账本为零。"
+  },
+  {
+    "lane": "R10_wtcore",
+    "id": "BUG-R10-010",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtArbiExecuter.cpp:352-358"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r10_wtcore_executers.cpp:461-469"
+    ],
+    "reason": "公开日志入口把任意 message strcat 到固定2048字节 thread_local 缓冲，无上限/检查；当前测试只送短消息。",
+    "fix": "改用动态字符串或安全有界格式化，并规定超长消息保留/截断策略。",
+    "acceptance": "短消息语义不变；超长及空字符串输入在边界/sanitizer 检查下不越界，截断可观察。",
+    "canonical": "BUG-R10-010",
+    "proposed_test_fix": "加超2048、边界长度、空消息输入并验证完整日志或约定截断。"
+  },
+  {
+    "lane": "R10_wtcore",
+    "id": "BUG-R10-012",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtSelEngine.cpp:85-103",
+      "src/WtCore/WtDtMgr.cpp:111-114",
+      "src/WtCore/WtDtMgr.cpp:149-158"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r10_wtcore_selengine.cpp:271-285"
+    ],
+    "reason": "未知 key 由 map operator[] 插入空列表，但正常数据管理器先登记 bar 订阅再派发；目前只证明单个异常调用创建惰性空项，不能推出正常路径无界增长。上游也解引用 bar，未证明 NULL 是合同允许输入。",
+    "fix": "无产品缺陷修复；保持回调有效 stdCode/period/newBar 的调用前提。若将来允许任意键，可用 find 避免空项。",
+    "acceptance": "正常订阅只派发登记上下文；未知键不派发且不会在正常数据管理流持续累积。",
+    "canonical": null,
+    "proposed_test_fix": null
+  },
+  {
+    "lane": "R160",
+    "id": "BUG-R160-001",
+    "decision": "DUPLICATE",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/EventNotifier.cpp:214-227"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n02_wtcore_engines/r160_event_notifier_test.cpp:153-176"
+    ],
+    "reason": "订单通知 retain 后异步 lambda 未 release，与 BUG-R41-003 是同调用、同引用失衡和修复点；消息测试未观察对象生命周期。",
+    "fix": "按 canonical 以 RAII 覆盖成功、取消/丢弃路径。",
+    "acceptance": "异步完成或 notifier 停止时订单对象最终析构一次。",
+    "canonical": "BUG-R41-003",
+    "proposed_test_fix": "沿 canonical 增加 async 排空后引用归零/析构断言。"
+  },
+  {
+    "lane": "R160",
+    "id": "BUG-R160-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/EventNotifier.h:18",
+      "src/WtCore/EventNotifier.cpp:78-95",
+      "src/WtMsgQue/WtMsgQue.h:25-32",
+      "src/WtMsgQue/WtMsgQue.cpp:32-34"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n02_wtcore_engines/r160_event_notifier_test.cpp:130-176"
+    ],
+    "reason": "EventNotifier 用单参数指针调用 create_server；仓库 MQ 导出原型为 (const char*, bool)。这是对随仓库提供的受支持插件的 ABI 不匹配。集成测试调用插件但未核实签名/confirm。",
+    "fix": "WtCore 和 WtUftCore typedef 均改成与 MQ 导出完全相同的类型并显式设置 confirm。",
+    "acceptance": "真实模块 init/销毁成功；confirm 值可观察且符合配置；签名跨平台编译一致。",
+    "canonical": "BUG-R160-002",
+    "proposed_test_fix": "增加可观测 confirm 的插件测试及真实模块集成测试。"
+  },
+  {
+    "lane": "R160",
+    "id": "BUG-R160-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtHftTicker.cpp:172-200",
+      "src/WtCore/WtHftTicker.cpp:208-216"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n02_wtcore_engines/r160_hft_ticker_test.cpp:66-92"
+    ],
+    "reason": "HFT 后续按 _time/100000 读取 HHMM，自动闭合分支却写裸 HHMM。下一轮把它解释为0点。测试用 00:00-03:59 会话并断言 _time==359，把错误单位当成正确预期。",
+    "fix": "保持 _time 为 HHMMSSmmm：自动分钟闭合写 thisMin*100000；换日单独归零。",
+    "acceptance": "常规09:30-15:00会话闭合后 _time/100000 为闭合HHMM，下一轮仍处于正确交易时段且日期不误滚。",
+    "canonical": "BUG-R160-003",
+    "proposed_test_fix": "测试改用常规会话，断言 _time==359*100000 并检查下一轮交易时段。"
+  },
+  {
+    "lane": "R160",
+    "id": "BUG-R160-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtDtMgr.cpp:301-314",
+      "src/Includes/IDataReader.h:218-227",
+      "src/WtDataStorage/WtDataReader.cpp:397-420",
+      "src/WtDataStorage/WtDataReader.cpp:427-435"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n02_wtcore_engines/r160_dtmgr_test.cpp:40-63",
+      "src/TestUnits/coverage/n02_wtcore_engines/r160_dtmgr_test.cpp:117-149"
+    ],
+    "reason": "HFQ 缓存首次构建对 readTickSlice 返回值立即调 size；真实 reader 对历史文件缺失/坏数据/空切片返回 NULL。fake reader 始终构造有效 slice。",
+    "fix": "判空后返回 NULL，不缓存半成品并记录代码/日期。",
+    "acceptance": "fake reader 首次返回 NULL 时安全返回；后续成功读取可重建并返回正确 slice。",
+    "canonical": "BUG-R160-004",
+    "proposed_test_fix": "fake 增加 null 模式，覆盖首次失败及后续成功。"
+  },
+  {
+    "lane": "R202",
+    "id": "BUG-R202-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/WTSSessionInfo.hpp:191-222",
+      "src/Includes/WTSSessionInfo.hpp:348-360",
+      "src/WtCore/WtHftTicker.cpp:188-200",
+      "src/WtCore/WtSelTicker.cpp:191-205",
+      "src/WtCore/WtCtaTicker.cpp:204-219"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r202_wtcore_public_surface_test.cpp:255-267",
+      "src/TestUnits/coverage/q01_wtcore3/r192_wtcore_ticker_residual_test.cpp:168-204"
+    ],
+    "reason": "0-0 全天 session 将 close label 明确表示为2400。ticker 的自动换日只在 thisMin==0 推进日期，末位置2400不满足。R202 旧断言 minuteToTime(1440)==0 错；R192 使用23:59:60无效行情时间。",
+    "fix": "保留2400收盘标签；ticker 按内部分钟位置/日界推进日期并写新日00:00。",
+    "acceptance": "用全天session和有效23:59:59.999 tick 验证 CTA/SEL/HFT 跨日一天、引擎时间归零、store/回调标签符合契约。",
+    "canonical": "BUG-R202-001",
+    "proposed_test_fix": "保持 minuteToTime(1440)==2400；以有效行情做ticker级跨日断言，删无效秒数和错误归一预期。"
+  },
+  {
+    "lane": "R202",
+    "id": "BUG-R202-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Includes/WTSSessionInfo.hpp:348-360",
+      "src/Includes/WTSSessionInfo.hpp:500-526",
+      "src/WtCore/WtHftTicker.cpp:119-131",
+      "src/WtCore/WtSelTicker.cpp:122-134",
+      "src/WtCore/WtCtaTicker.cpp:127-136"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r202_wtcore_public_surface_test.cpp:270-282"
+    ],
+    "reason": "午夜 close label 是2400，offsetTime(...,true) 按定义左对齐午夜为00:00；各 ticker 用左对齐结果精确比较 getCloseTime(true)，全天最后有效分钟不满足条件，session-end/store trading date 不触发。现有测试仅测元数据。",
+    "fix": "收盘判定改用与 close 相同的右对齐口径，或明确识别午夜2400；统一三类 ticker。",
+    "acceptance": "全天最终有效分钟触发一次 session end；CTA store 收到正确 trading date；普通收盘行为不变。",
+    "canonical": "BUG-R202-002",
+    "proposed_test_fix": "保留offset/close元数据断言，新增ticker级有效最后分钟输入并断言回调和store日期。"
+  },
+  {
+    "lane": "R202",
+    "id": "BUG-R202-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/TraderAdapter.h:363-368",
+      "src/WtCore/TraderAdapter.cpp:598-605"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r202_wtcore_public_surface_test.cpp:166-212"
+    ],
+    "reason": "头文件把公开方法声明为 inline，定义仅在.cpp；跨TU调用看不到 inline 定义。测试注释指出调用被禁用，未真实编译/执行跨TU调用。",
+    "fix": "移除 inline 声明或把定义完整移到头文件并保持 ODR 一致。",
+    "acceptance": "独立翻译单元仅包含公开头文件即可调用并链接；风控开关和未知代码均返回正确状态。",
+    "canonical": "BUG-R202-003",
+    "proposed_test_fix": "启用独立 TU 调用测试并覆盖风险开关状态。"
+  },
+  {
+    "lane": "R211",
+    "id": "BUG-R211-001",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtEngine.cpp:285-316",
+      "src/WtCore/WtEngine.cpp:1143-1171"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r211_wtcore_rest_test.cpp:195-234"
+    ],
+    "reason": "active 风控加载失败时 init_riskmon 返回false但 void init 忽略；尚无契约说明应中止、回退还是禁用。现有测试只断言 has_riskmon 为false，不验证调用方后果。",
+    "fix": "先明确active风控失败策略；再通过返回状态、启动拒绝或明确降级暴露失败。",
+    "acceptance": "不兼容/有效模块分别验证指定启动策略、风控订单边界和错误状态。",
+    "canonical": "BUG-R211-001",
+    "proposed_test_fix": "契约确认前不要将无风控断言当成引擎必须拒绝启动的测试。"
+  },
+  {
+    "lane": "R31_pluginload",
+    "id": "BUG-R31-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/SelStrategyMgr.cpp:57-76",
+      "src/WtSelStraFact/WtSelStraFact.cpp:22-42"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r31_stra_mgr_pluginload.cpp:179-194",
+      "src/TestUnits/coverage/q01_wtcore3/r31_stra_mgr_pluginload.cpp:320-337"
+    ],
+    "reason": "SEL manager 查找 createMfStrategyFact/deleteMfStrategyFact，仓库 SEL 工厂导出 createSelStrategyFact/deleteSelStrategyFact，ABI名不匹配。测试的产品插件清单未列出 WtSelStraFact 本身，真实产物验证缺失，但静态两端签名已成立。",
+    "fix": "统一 manager 与 SEL 工厂导出符号，并检查可空 remover/creator 后释放库。",
+    "acceptance": "真实 SEL dylib/so 经 manager 成功加载、创建和销毁策略；缺失工厂明确失败。",
+    "canonical": "BUG-R31-001",
+    "proposed_test_fix": "把真实 SEL factory 纳入插件清单并通过实际 manager 创建策略验证，避免只扫描 CTA/执行器/指标插件。"
+  },
+  {
+    "lane": "R31_pluginload",
+    "id": "BUG-R31-002",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/HftStrategyMgr.cpp:57-77",
+      "src/WtCore/CtaStrategyMgr.cpp:57-85"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r31_stra_mgr_pluginload.cpp:353-378"
+    ],
+    "reason": "HFT/CTA loader 使用同名工厂符号却按不同接口类型解释对象；将 CTA 目录喂给 HFT 会形成类型混用。但这是跨族错误目录，尚无目录纯度/错配必须被拒合同，现有禁用用例是该错误输入。",
+    "fix": "确认 loader 目录合同；若要求拒错族，则采用族别 ABI 标识并登记前验证。",
+    "acceptance": "正确族插件加载成功；错族输入按合同安全失败并释放库、不崩溃。",
+    "canonical": "BUG-R31-002",
+    "proposed_test_fix": "错误目录用例不能证明正常输入缺陷；只有确认容错合同后再改成失败返回测试。"
+  },
+  {
+    "lane": "R31_pluginload",
+    "id": "BUG-R31-003",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtExecuterFactory.cpp:49-65",
+      "src/WtCore/CtaStrategyMgr.cpp:68-85",
+      "src/WtCore/SelStrategyMgr.cpp:68-86"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r31_exe_fact_pluginload.cpp:183-205"
+    ],
+    "reason": "creator 返回NULL会在 getName 解引用；同族策略 loader 对 null creator 结果有保护。但未明确执行器插件 ABI 是否允许 NULL 表示工厂创建失败，现有测试仅覆盖非空产品工厂。",
+    "fix": "先确认 creator 返回约定；若 NULL 允许，判空、释放库并继续或返回失败。",
+    "acceptance": "null-return 测试插件下 loader 不崩溃且无泄漏/空条目；有效工厂仍能创建单元。",
+    "canonical": "BUG-R31-003",
+    "proposed_test_fix": "确定 ABI 后新增导出 createExecFact 且返回NULL的测试插件。"
+  },
+  {
+    "lane": "R41",
+    "id": "BUG-R41-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtEngine.cpp:825-837"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n02_wtcore_engines/r41_cta_engine_test.cpp:261-289"
+    ],
+    "reason": "无规则标签分支去除末尾QFQ/HFQ后读取后缀前一字符，QFQ不能被标为flag1，后续复权分发错误。唯一重现测试 DISABLED 且只断言回调字符串。",
+    "fix": "递减length后读取 stdCode[length]，保持有规则标签分支行为一致。",
+    "acceptance": "无规则QFQ/HFQ/普通代码在池与直接路径均断言回调后缀、flag和价格转换。",
+    "canonical": "BUG-R41-002",
+    "proposed_test_fix": "启用禁用用例并增价格/flag断言，避免只检查字符串。"
+  },
+  {
+    "lane": "R41",
+    "id": "BUG-R41-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/EventNotifier.cpp:214-230",
+      "src/WtCore/EventNotifier.cpp:202-212"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n02_wtcore_engines/r160_event_notifier_test.cpp:153-176"
+    ],
+    "reason": "订单异步通知 post 前 retain；对照 trade lambda 末尾有 release，订单 lambda 无 release。调用方释放自有引用后对象仍被通知多持有一份。消息测试没有生命周期观察。",
+    "fix": "用RAII交接异步引用，成功、投递失败及停机丢弃路径均释放。",
+    "acceptance": "覆盖订单投递完成/停止/丢弃，原对象最终析构一次且通知循环无残留引用。",
+    "canonical": "BUG-R41-003",
+    "proposed_test_fix": "新增异步队列排空后对象析构/引用归零断言。"
+  },
+  {
+    "lane": "R42",
+    "id": "BUG-R42-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtSelEngine.cpp:33-56",
+      "src/WtCore/WtSelEngine.h:94"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p02_wtcore_engines2/r42_sel_ctx_test.cpp:340-346"
+    ],
+    "reason": "构造不初始化裸 _tm_ticker，析构 release 读取并可能 stop/delete 随机指针；构造后析构是普通对象清理路径。直接生命周期用例当前禁用。",
+    "fix": "声明处或构造处初始化 _tm_ticker=nullptr，release保持空指针安全。",
+    "acceptance": "无init、init失败及成功后析构都安全； sanitizer 下无未初始化读/重复释放。",
+    "canonical": "BUG-R42-001",
+    "proposed_test_fix": "修复后启用直接析构用例并覆盖初始化失败清理。"
+  },
+  {
+    "lane": "R42",
+    "id": "BUG-R42-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/HftStraBaseCtx.cpp:41-48",
+      "src/WtCore/HftStraBaseCtx.cpp:136-149",
+      "src/WtCore/HftStraBaseCtx.h:670-686"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p02_wtcore_engines2/r42_hft_ctx_test.cpp:101-137"
+    ],
+    "reason": "构造未初始化 _ud_modified；on_init 未设置该字段，第一次 on_tick 即读取，正常初始化后首行情即可触发未定义行为。_trader同组风险依赖绑定前调用交易API。",
+    "fix": "初始化 _ud_modified=false、_trader=nullptr；交易API对未绑定状态给出明确失败。",
+    "acceptance": "on_init 后未置脏的首 tick 不写数据且无未初始化读；setTrader前API行为确定。",
+    "canonical": "BUG-R42-002",
+    "proposed_test_fix": "现有用户数据用例先 save_user_data 掩盖默认值；新增未置脏首tick。"
+  },
+  {
+    "lane": "R42",
+    "id": "BUG-R42-003",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/ParserAdapter.cpp:214-235",
+      "src/WtCore/ParserAdapter.cpp:378-386"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p02_wtcore_engines2/r42_parser_adapter_test.cpp:191-197"
+    ],
+    "reason": "release 删除 API 不清空指针，后续 run 会通过非空检查后调用 connect。但 manager release 会清 map，未证明 release 后 run 属于受支持生命周期；测试只检验 handleQuote 不再转发。",
+    "fix": "确认 release 是否终态/允许重启；终态则清空指针并拒绝run，重启则重建API。",
+    "acceptance": "按明确契约验证 release-run、重复release和manager释放，无UAF/二次释放。",
+    "canonical": "BUG-R42-003",
+    "proposed_test_fix": "handleQuote停止守卫不是run安全证据；契约确定后补release-run顺序测试。"
+  },
+  {
+    "lane": "R81",
+    "id": "BUG-R81-002",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/CtaStraBaseCtx.cpp:430-446",
+      "src/WtCore/CtaStraBaseCtx.cpp:595-607",
+      "src/WtCore/CtaStraBaseCtx.cpp:858-865"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p02_wtcore_engines2/r81_cta_gap_test.cpp:69-85",
+      "src/TestUnits/coverage/p02_wtcore_engines2/r81_cta_gap_test.cpp:231-239"
+    ],
+    "reason": "JSON恢复把alg/action直接转枚举后作为固定名称数组下标；非法持久化值可越界。但还未明确损坏/旧版本策略文件必须恢复还是拒绝。测试用子类注入alg=99，绕过JSON恢复。",
+    "fix": "明确文件格式和损坏输入策略；如需稳健恢复，加载时校验字段类型/枚举范围并拒绝或跳过坏记录。",
+    "acceptance": "合法历史文件一致恢复；非法alg/action不越界、不执行交易动作且有可观察错误。",
+    "canonical": "BUG-R81-002",
+    "proposed_test_fix": "将99写入真实stradata JSON经过on_init恢复，而非仅注入内存enum。"
+  },
+  {
+    "lane": "n02_wtcore_engines",
+    "id": "BUG-N02-001",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtFilterMgr.cpp:19-23",
+      "src/WtCore/WtFilterMgr.cpp:38-48"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n02_wtcore_engines/n02_filter_mgr_test.cpp:303-326"
+    ],
+    "reason": "空/坏JSON可使loader返回NULL；函数先更新时间戳并清空旧过滤器，再对cfg调用get而崩溃。热加载坏文件是运维可达输入且会损失旧规则。",
+    "fix": "先校验并解析到临时规则集合，完整成功后再更新时间戳和替换；失败保留旧规则并报错。",
+    "acceptance": "空、坏JSON、非对象根节点重载不崩溃且保留旧过滤器；有效修改原子生效。",
+    "canonical": "BUG-N02-001",
+    "proposed_test_fix": "启用 malformed 用例；先加载有效规则，再写坏文件并断言旧规则保持。"
+  },
+  {
+    "lane": "n02_wtcore_engines",
+    "id": "BUG-N02-002",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtCtaTicker.h:41-48",
+      "src/WtCore/WtSelTicker.cpp:26-35",
+      "src/WtCore/WtHftTicker.cpp:26-35",
+      "src/WtCore/WtCtaTicker.cpp:285-299"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n02_wtcore_engines/n02_ticker_slicing_test.cpp:92-119"
+    ],
+    "reason": "ticker成员未统一初始化；CTA init前查询会读_s_info，Sel/HFT禁用用例调用的on_tick/stop并不读该成员。正常引擎先init再run，但standalone调用合同不明确。",
+    "fix": "明确生命周期；若支持init前查询，则空初始化并返回false/INVALID_UINT32；未初始化run应显式失败。",
+    "acceptance": "分别验证合同允许的init前查询/run/stop及正常init流程，均无未初始化读。",
+    "canonical": "BUG-N02-002",
+    "proposed_test_fix": "拆分用例；不能把CTA查询和Sel/HFT不触达session的回调混作一个重现。"
+  },
+  {
+    "lane": "n02_wtcore_engines",
+    "id": "BUG-N02-003",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/IExecCommand.h:61-115"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n02_wtcore_engines/n02_helper_dist_executer_test.cpp:276-288"
+    ],
+    "reason": "多态IExecCommand无虚析构，通过基类指针delete派生对象不符合C++规则；但runner保留派生shared_ptr删除器，现有测试也只用基类调用方法，未证明基类拥有权受支持。",
+    "fix": "确认接口所有权合同；若允许基类拥有对象，加virtual destructor并评估ABI影响。",
+    "acceptance": "若合同允许，unique_ptr<IExecCommand>销毁派生对象经sanitizer验证完整析构；否则类型/文档明确禁止默认删除。",
+    "canonical": "BUG-N02-003",
+    "proposed_test_fix": "先确认所有权合同；现测试没有析构断言。"
+  },
+  {
+    "lane": "n02_wtcore_engines",
+    "id": "BUG-N02-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtExecMgr.cpp:209-242"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n02_wtcore_engines/n02_exec_mgr_test.cpp:522-537",
+      "src/TestUnits/coverage/n02_wtcore_engines/n02_exec_mgr_test.cpp:539-545"
+    ],
+    "reason": "有效router_rules数组中的对象缺少或 executer:null 会令 itemExec 为空，再解引用 isArray。缺strategy仅产生空串，不是此崩溃输入；有对应独立控制测试。",
+    "fix": "校验 item/executer存在、非null且为字符串或数组；错误规则明确返回失败或跳过，不提交半成品。",
+    "acceptance": "缺失/null/错误类型不崩溃且失败状态确定；字符串/数组规则仍登记。",
+    "canonical": "BUG-N02-004",
+    "proposed_test_fix": "启用有效嵌套router_rules负例，分别覆盖缺失、null、错误类型；避免顶层数组提前失败的旧输入。"
+  },
+  {
+    "lane": "n02_wtcore_engines",
+    "id": "BUG-N02-005",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtDistExecuter.cpp:26-39",
+      "src/WtCore/WtDistExecuter.cpp:47-57"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n02_wtcore_engines/n02_helper_dist_executer_test.cpp:212-242"
+    ],
+    "reason": "init成功 retain params并保存裸_config，析构为空，没有配对release，引用泄漏。_scale未init访问是独立生命周期问题，不并入。",
+    "fix": "析构释放已持有_config，并定义重复init/初始化失败的所有权平衡。",
+    "acceptance": "成功init后调用方释放原引用、执行器析构使配置归零析构；null init不增加引用。",
+    "canonical": "BUG-N02-005",
+    "proposed_test_fix": "测试加入引用计数或析构sentinel；现用例只核验scale默认行为。"
+  },
+  {
+    "lane": "n02_wtcore_engines",
+    "id": "BUG-N02-006",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtExecuterFactory.cpp:15-25",
+      "src/WtCore/WtExecuterFactory.cpp:68-69"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/n02_wtcore_engines/n02_executer_factory_test.cpp:230-238"
+    ],
+    "reason": "返回bool的API对不存在路径返回false；存在的普通文件却进入directory_iterator并抛异常。启用测试把异常列为预期，错路径调用越过bool错误通道。",
+    "fix": "迭代前验证目录或用error_code重载；路径错误记录日志并返回false。",
+    "acceptance": "不存在路径/普通文件/不可读目录/空目录均不抛并返回确定bool；有效目录仍加载。",
+    "canonical": "BUG-N02-006",
+    "proposed_test_fix": "将 LoadFactoriesWithRegularFileThrows 改为 EXPECT_NO_THROW + EXPECT_FALSE；保留空目录成功测试。"
+  },
+  {
+    "lane": "p02_wtcore_engines2",
+    "id": "BUG-P02-001",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtLocalExecuter.cpp:328-392",
+      "src/WtCore/WtLocalExecuter.cpp:798-824",
+      "src/WtCore/WtDiffExecuter.cpp:379-432",
+      "src/WtCore/WtDiffExecuter.cpp:69-75"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r10_wtcore_executers.cpp:608-622"
+    ],
+    "reason": "买卖撤入口只检查_channel_ready后解引用_trader，setTrader(NULL)也不重置已ready状态。但正常runner是否会无adapter通知ready尚未追到；测试明确在ready+NULL后不调用危险订单方法。",
+    "fix": "确认ready来源/null/reconnect合同；若状态可达，所有订单入口加adapter检查并返回失败。",
+    "acceptance": "由真实runner/adapter连接断连置空序列验证；无adapter订单调用确定失败且不崩溃，ready与adapter一致。",
+    "canonical": "BUG-P02-001",
+    "proposed_test_fix": "直接调用on_channel_ready构造状态不是正常可达性证据；需经runner/adapter链建立前提。"
+  },
+  {
+    "lane": "p02_wtcore_engines2",
+    "id": "BUG-P02-002",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtLocalExecuter.cpp:170-216",
+      "src/WtCore/WtDiffExecuter.cpp:243-280",
+      "src/WtCore/WtArbiExecuter.cpp:163-196"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r10_wtcore_executers.cpp:183-195"
+    ],
+    "reason": "Local/Diff/Arbi getUnit都不检查policy/default；Local是R10-001同类问题的额外实现。成功init未验证配置，随后有效仓位/信号创建单元时可空解引用。",
+    "fix": "依BUG-R10-001统一验证并防御三种执行器策略配置。",
+    "acceptance": "三种执行器缺policy/default/name均安全拒绝；合法配置成功创建。",
+    "canonical": "BUG-R10-001",
+    "proposed_test_fix": "复用配置负例分别覆盖Local/Diff/Arbi，不能只在夹具塞default。"
+  },
+  {
+    "lane": "p02_wtcore_engines2",
+    "id": "BUG-P02-003",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtEngine.cpp:771-777",
+      "src/WtCore/WtEngine.h:120-124"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r211_wtcore_rest_test.cpp:273-297",
+      "src/TestUnits/coverage/p02_wtcore_engines2/p02_wt_engine_state_test.cpp:294-316"
+    ],
+    "reason": "get_adjusting_flag调用data manager却丢弃值并固定返回0；接口定义flag为位组合。测试用返回7的替身要求透传，主张符合接口。本轮未跑测试，证据仅静态。",
+    "fix": "有data manager时原样返回其flag，无manager时返回0。",
+    "acceptance": "替身返回0/1/7时engine原样返回；空manager返回0。",
+    "canonical": "BUG-P02-003",
+    "proposed_test_fix": null
+  },
+  {
+    "lane": "p02_wtcore_engines2",
+    "id": "BUG-P02-004",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtEngine.cpp:760-777",
+      "src/WtCore/WtEngine.cpp:779-840",
+      "src/WtCore/WtEngine.cpp:285-316"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p02_wtcore_engines2/p02_wt_engine_state_test.cpp:413-425"
+    ],
+    "reason": "条目合并hot/base/data/commodity空依赖和task_loop无限等待；内部依赖是否允许NULL未确认，task_loop也不是空指针问题。现有DISABLED用例为空体，未建前提或观察结果。",
+    "fix": "拆成子项并明确init依赖合同；必需依赖在init失败，只有允许空的依赖才在访问点保护。",
+    "acceptance": "每个子项独立建立可达序列及断言；正常初始化不变，缺必需依赖启动明确失败。",
+    "canonical": "BUG-P02-004",
+    "proposed_test_fix": "以逐项有设置/调用/观察的测试替代空体禁用用例。"
+  },
+  {
+    "lane": "p02_wtcore_engines2",
+    "id": "BUG-P02-005",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtLocalExecuter.cpp:505-592",
+      "src/WtCore/WtLocalExecuter.cpp:594-605",
+      "src/WtCore/WtArbiExecuter.cpp:404-479",
+      "src/WtCore/WtArbiExecuter.cpp:481-515"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q01_wtcore3/r110_diff_executer_test.cpp:155-219"
+    ],
+    "reason": "Local/Arbi计算real_targets组合单和成分残量后仍遍历原targets更新账本和派发；组合单元收不到组合目标，成分也收不到扣减值。当前测试配置groups却不观察数量。",
+    "fix": "派发、账本更新、订单限制及清理统一使用real_targets。",
+    "acceptance": "组合目标按gpQty派给组合单元、成分收到扣减后数量；重复调用稳定，空目标正确清理。",
+    "canonical": "BUG-P02-005",
+    "proposed_test_fix": "R110 fake unit记录代码/数量；断言组合目标、成分余量和清仓结果。"
+  },
+  {
+    "lane": "p02_wtcore_engines2",
+    "id": "BUG-P02-006",
+    "decision": "UNDECIDED",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtCore/WtDiffExecuter.cpp:124-172",
+      "src/WtCore/WtDiffExecuter.cpp:180-231",
+      "src/WtCore/WtDiffExecuter.cpp:501-545",
+      "src/WtCore/WtDiffExecuter.cpp:243-280"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p02_wtcore_engines2/p02_diff_executer_test.cpp:217-260",
+      "src/TestUnits/coverage/p02_wtcore_engines2/p02_diff_executer_test.cpp:358-372"
+    ],
+    "reason": "混合JSON字段类型/结构未校验、执行单元创建失败使position变化被丢弃、写盘失败没有状态三类问题；合同不同。插件缺工厂可能合法失败，坏JSON属于损坏持久化，写盘失败需定义对账。现有路径已修正且仅检查文件存在。",
+    "fix": "拆成schema校验、单元失败状态/重试、原子持久化/错误报告三项，先确定状态不得静默丢失的业务合同。",
+    "acceptance": "坏JSON不污染账本；unit失败可观察并保留/拒绝仓位事件；写盘故障可注入且返回/告警，成功读回与内存一致。",
+    "canonical": "BUG-P02-006（需拆分）",
+    "proposed_test_fix": "保留已修正文件路径；增加读回解析和写盘故障注入，不能只检查文件存在。"
+  }
+]

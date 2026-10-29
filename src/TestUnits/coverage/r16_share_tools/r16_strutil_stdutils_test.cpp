@@ -13,6 +13,12 @@
 #include <stdexcept>
 #include <mutex>
 #include <fstream>
+#include <cstdio>
+#include <cstdlib>
+#if !defined(_WIN32)
+#include <sys/resource.h>
+#include <unistd.h>
+#endif
 #include "Share/StrUtil.hpp"
 #include "Share/StdUtils.hpp"
 #include "r16_tmp.h"
@@ -167,13 +173,46 @@ TEST(r16_strutil, replace_shrinks_target)
 	EXPECT_EQ(std::string("C:/tmp/dir"), s);
 }
 
-TEST(r16_strutil, DISABLED_replace_with_empty_source_hangs)
+TEST(r16_strutil, replace_with_empty_target_removes_matches)
 {
-	// BUG-R16-03：src 为空串时 find("") 恒为 0，循环不推进 → 死循环 + 内存无限增长。
-	// 触发条件：StrUtil::replace(s, "", "x")。整条用例隔离，不参与门禁以外的执行。
-	std::string s = "abc";
-	StrUtil::replace(s, "", "x");
+	std::string s = "aXbXc";
+	StrUtil::replace(s, "X", "");
 	EXPECT_EQ(std::string("abc"), s);
+}
+
+TEST(r16_strutil, replace_with_empty_source_terminates_candidate)
+{
+#if defined(_WIN32)
+	GTEST_SKIP() << "The bounded empty-source probe requires POSIX CPU limits and alarm().";
+	#else
+	const std::string oldStyle = GTEST_FLAG_GET(death_test_style);
+	GTEST_FLAG_SET(death_test_style, "threadsafe");
+
+	EXPECT_EXIT(
+		{
+			struct rlimit cpuLimit;
+			if (::getrlimit(RLIMIT_CPU, &cpuLimit) != 0 ||
+				(cpuLimit.rlim_max != RLIM_INFINITY && cpuLimit.rlim_max < 1))
+				std::_Exit(90);
+			cpuLimit.rlim_cur = 1;
+			if (::setrlimit(RLIMIT_CPU, &cpuLimit) != 0)
+				std::_Exit(90);
+
+			::alarm(3);
+			std::fprintf(stderr, "R16_EMPTY_SOURCE_REPLACE_READY\n");
+			std::fflush(stderr);
+
+			// Empty replacement keeps this probe bounded in memory even if the
+			// empty source causes the loop not to advance.
+			std::string s = "abc";
+			StrUtil::replace(s, "", "");
+			::alarm(0);
+			std::_Exit(0);
+		},
+		::testing::ExitedWithCode(0), "R16_EMPTY_SOURCE_REPLACE_READY");
+
+	GTEST_FLAG_SET(death_test_style, oldStyle);
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////////

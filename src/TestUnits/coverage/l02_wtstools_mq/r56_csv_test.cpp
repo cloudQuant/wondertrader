@@ -54,14 +54,15 @@ TEST_F(R56Csv, HeaderOnlyFileStopsAtEof)
 	EXPECT_FALSE(reader.next_row());
 }
 
-// 产品缺陷占位：next_row 尚未成功时 _current_cells 为空，但 check_cell 只按
-// _fields_map.size() 判界，get_string(0) 会对空 vector 取下标。
-// 见 docs/迭代计划/迭代01/bugs/R56.md BUG-R56-003；默认不执行。
-// CsvHelper.cpp:117-123,161-170
-TEST_F(R56Csv, DISABLED_GetValueBeforeFirstRow)
+// 短行边界探针：先成功读取一行，再访问表头合法但本行缺失的 b/c；期望返回空串/默认值。
+// 当前 check_cell 只按表头列数判界，未检查当前行长度，可能越过 _current_cells 边界，故保持禁用。
+// CsvHelper.cpp:56-75,117-123,161-170；见 BUG-R56-003。
+TEST_F(R56Csv, DISABLED_ShortRowMissingCellsReturnDefaults)
 {
-	const std::string path = r56tmp::write_file(m_dir, "norow.csv", "a,b\n1,2\n");
+	const std::string path = r56tmp::write_file(m_dir, "short_row.csv", "a,b,c\n1\n");
 	CsvReader reader;
 	ASSERT_TRUE(reader.load_from_file(path.c_str()));
-	EXPECT_STREQ("", reader.get_string("a"));
+	ASSERT_TRUE(reader.next_row());
+	EXPECT_STREQ("", reader.get_string("b"));
+	EXPECT_EQ(0u, reader.get_uint32("c"));
 }

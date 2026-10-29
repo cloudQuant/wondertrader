@@ -1,0 +1,317 @@
+[
+  {
+    "lane": "R20_wtbtcore",
+    "id": "R20_wtbtcore#3",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/EventNotifier.cpp:52-56",
+      "src/WtBtCore/EventNotifier.cpp:66-115",
+      "src/WtBtCore/EventNotifier.cpp:122-143",
+      "src/WtMsgQue/WtMsgQue.h:18-47",
+      "src/WtMsgQue/WtMsgQue.cpp:27-44",
+      "src/WtBtPorter/WtBtRunner.cpp:85-94",
+      "src/WtBtPorter/WtBtRunner.cpp:449-467",
+      "src/WtBtPorter/WtBtRunner.cpp:550-588",
+      "src/WtBtPorter/WtBtRunner.cpp:626-634",
+      "src/WtBtPorter/WtBtPorter.cpp:172-185",
+      "src/WtBtPorter/WtBtPorter.cpp:219-235",
+      "src/WtBtPorter/WtBtPorter.h:202-206"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p08_btcore_mockers3/r20_event_notifier_test.cpp:48-113",
+      "src/TestUnits/coverage/p08_btcore_mockers3/r20_event_notifier_test.cpp:115-123"
+    ],
+    "input_reachability": "正常回测配置会从 WtBtRunner::config -> initEvtNotifier -> EventNotifier::init 进入 active 分支。WtMsgQue.h 对外声明 regiter_callbacks/create_server/destroy_server/publish_message；不是人工给内部类传空函数。回测结束后调用公开 release_backtest() 是头文件和 API 注释写明的正常生命周期。当前 wrapper 注释称重复 config 忽略，但其 static guard 未置 true，Runner::_inited 也未置 true，重复 config 会再次触发 notifier init。",
+    "oracle_basis": "插件 ABI 定义 create_server、destroy_server、regiter_callbacks 为 server 正常建立/销毁/日志注册函数；notifyEvent/notifyData 的源码注释和守卫明确 publisher 缺失时可 no-op。WtBtPorter.h:202-206 与 WtBtPorter.cpp:228-235 将 release_backtest 定义为回测后释放内存和系统资源。",
+    "reason": "init 只校验 create_server，随后无条件调用可能为 NULL 的 regiter_callbacks；如果 destroy_server 缺失，服务器可以创建但 EventNotifier 析构无法配对销毁。更重要的是正常 C API release_backtest 当前只停止 logger，notifier 服务器留到进程退出；重复 config 还会覆盖旧 _mq_sid，使一次析构只处理最新 server。publisher 是唯一可选符号。",
+    "root_cause": "EventNotifier::init 没有对必需 ABI 符号做创建前的完整校验；EventNotifier 没有显式 release/资源句柄状态，runner release 不调用其析构清理；WtBtPorter::config_backtest 的 one-shot 标志和 WtBtRunner::_inited 都没有在成功配置后置位。",
+    "fix": "将 create_server、destroy_server、regiter_callbacks 作为必需符号，在任何注册或创建 server 前全部验证；缺任一则释放库并返回 false，不调用 create。保留 publish_message 可选且缺失时通知 no-op。EventNotifier 保存模块句柄并增加幂等 release：先 destroy 非零 server id，再清空函数指针/id，最后释放模块；析构复用 release。WtBtRunner::release 在停止回测后显式释放 notifier，并在一次配置成功后设置 _inited，重复 config 按现有注释拒绝。",
+    "acceptance": "使用不会创建 socket 的 fake WtMsgQue 插件：分别缺 create_server/destroy_server/regiter_callbacks 时 init=false 且 create 次数为0；缺 publish_message 时 init 可成功且 notify 安全 no-op。完整插件 init 后 release_backtest 恰好 destroy 一次，随后 Runner/EventNotifier 析构不重复 destroy；重复 config 不新增 server，server id 与 destroy 次数保持一一配对。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p08_btcore_mockers3/r20_event_notifier_test.cpp",
+        "case": "RequiredSymbolMatrixRejectsBeforeCreate",
+        "issue": "当前 active init 用例被禁用以避免连接真实 MQ，因而缺 register/destroy 的空指针和资源配对没有安全覆盖。",
+        "change": "用 fake plugin 或可注入 symbol resolver 覆盖缺 create/register/destroy、缺 publisher、全符号成功；不要加载真实 libWtMsgQue 或打开 socket。",
+        "target": "CoverageTests_btcore",
+        "filter": "R20EventNotifier.RequiredSymbolMatrixRejectsBeforeCreate",
+        "expected_result": "缺任一必需符号时 init=false 且 fake create_server 调用数为0；仅缺 publisher 时 init 成功且通知 no-op。"
+      },
+      {
+        "file": "src/TestUnits/coverage/q06_btporter/r69_btporter_capi_lifecycle_test.cpp",
+        "case": "NotifierReleasedOnceAndDuplicateConfigIgnored",
+        "issue": "当前 C API lifecycle 用例没有覆盖 release_backtest 对 notifier server 的释放及重复 config guard。",
+        "change": "用 fake notifier plugin 记录 create/destroy 次数，配置一次后调用 stop/release/析构，并按公开注释重复 config；若 singleton 测试污染 logger，则将该生命周期放入独立进程。",
+        "target": "CoverageTests_btporter",
+        "filter": "R69BtPorterLifecycle.NotifierReleasedOnceAndDuplicateConfigIgnored",
+        "expected_result": "release_backtest 后 server destroy 恰好一次，析构不重复；第二次 config 不增加创建次数。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/06_mockers/runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/06_mockers/notifier_inactive.log"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "本轮未运行 active plugin 分支；实现修复后用 fake plugin 定向回归并保存新二进制 SHA、XML 和 stdout。"
+    ]
+  },
+  {
+    "lane": "R20_wtbtcore",
+    "id": "R20_wtbtcore#5",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/MatchEngine.cpp:84-93",
+      "src/WtBtCore/MatchEngine.cpp:394-410",
+      "src/WtBtCore/ExecMocker.cpp:253-264",
+      "src/Includes/ExecuteDefs.h:97-103"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p08_btcore_mockers3/r20_exec_mocker_test.cpp:97-115",
+      "src/TestUnits/coverage/p08_btcore_mockers3/r20_exec_mocker_test.cpp:196-217"
+    ],
+    "input_reachability": "正常执行器可以提交一个未成交订单；在下一次 tick 将 state=9 订单转入取消回报前，客户端因重试/重复点击对同一 localid 再次调用公开 cancel(uint32_t) 是可达序列。",
+    "oracle_basis": "MatchEngine::cancel 注释定义返回取消数量，失败返回0；IExecUnit::cancel 注释定义返回撤单指令是否成功。ExecMocker._undone 是尚未完成数量，取消同一个未完成量应只从账本扣减一次，不能成为负值。",
+    "reason": "第一次 cancel 将订单状态设为9并返回 _left；在撮合处理下一 tick 前第二次 cancel 不检查 state，再返回相同 _left。ExecMocker 对每个非零 change 都扣减 _undone 并增加撤单计数，因此一个订单会被重复结算。",
+    "root_cause": "MatchEngine::cancel 只判断订单是否存在，没有判断已处于取消待处理状态；ExecMocker 将返回值作为每次调用的新增取消数量使用。",
+    "fix": "对 state=9 或其他非活动终态的订单返回0，不重复生成取消数量变化；仅首次 active->cancel-pending 转换返回剩余量。ExecMocker 继续只对非零变化更新 undone 和撤单计数。",
+    "acceptance": "在成功初始化且能撮合的执行器中挂一笔未成交订单，tick 前连续 cancel 两次：第一次 true 并扣掉剩余量，第二次 false 且账本、撤单计数不变；后续取消回报只发一次，undone 不为负。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p08_btcore_mockers3/r20_exec_mocker_test.cpp",
+        "case": "DISABLED_CancelByIdDoesNotRestoreUndoneTwice",
+        "issue": "现用例用未 init 的裸 ExecMocker 调 handle_tick/下单/撤单，_exec_unit 等依赖无效，不能证明账本语义。",
+        "change": "改用已成功 init 的有效 executer/fake fixture；创建有效未成交订单，在 tick 前重复按 id 撤单，断言第一次 true、第二次 false、undone 和撤单计数仅变化一次；不要直接启用当前 disabled body。",
+        "target": "CoverageTests_btcore",
+        "filter": "R20ExecMocker.CancelByIdDoesNotRestoreUndoneTwice",
+        "expected_result": "第二次撤单不再扣减 undone；完成取消后 undone 为0且只产生一次取消状态变化。"
+      }
+    ],
+    "execution_refs": [],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "现有重复取消用例前置无效且为 disabled，本轮未运行；产品/fixture 修复后定向运行 filter。"
+    ]
+  },
+  {
+    "lane": "l06_wtbtcore",
+    "id": "BUG-L06-006",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/EventNotifier.cpp:66-70",
+      "src/WtBtPorter/WtBtRunner.cpp:626-634",
+      "src/WtBtCore/EventNotifier.h:76-82"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p08_btcore_mockers3/r20_event_notifier_test.cpp:126-132"
+    ],
+    "input_reachability": "仓库中正常 runner 调用 EventNotifier::init 的入口是 WtBtRunner::initEvtNotifier；该入口对 NULL 和非 object 配置先返回 false，不把 NULL 传给 init。当前没有发现接受 NULL cfg 的公开契约或正常调用者。",
+    "oracle_basis": "EventNotifier::init 的注释只称配置项包含 active/url，没有承诺 NULL；runner 包装层明确守住该前置条件。内部 C++ 指针方法被直接传 NULL 不能单独认定为产品缺陷。",
+    "reason": "源码对 cfg->getBoolean 的确没有 NULL 守卫，但受支持 runner 生命周期在调用前做了守卫。现有 DISABLED_InitNullConfigDerefsAndCrashes 只有跳过语句，没有可执行断言；它把不支持的直接调用当成产品主张。",
+    "root_cause": "旧主张把 EventNotifier 内部方法的非空前置条件遗漏，与产品正常调用路径混为一谈。",
+    "fix": "撤销 NULL init 的产品缺陷主张；保留 runner 入口的 NULL/non-object 检查。若需要直接使用 EventNotifier，可在头文件补明确非空前置条件。",
+    "acceptance": "正常配置缺失或非 object 时 initEvtNotifier 返回 false 且不进入 EventNotifier::init；不要求内部方法接受不受支持的 NULL。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p08_btcore_mockers3/r20_event_notifier_test.cpp",
+        "case": "DISABLED_InitNullConfigDerefsAndCrashes",
+        "issue": "该 case 只有 GTEST_SKIP，且直接 NULL 不属于 runner 支持输入，容易被误读成可达产品回归。",
+        "change": "移除这条产品缺陷登记，或把用例重命名为明确的 unsupported-precondition 文档占位；不加崩溃测试。",
+        "target": "CoverageTests_btcore",
+        "filter": "R20EventNotifier.*",
+        "expected_result": "enabled 的正常 notifier 配置守卫用例通过；报告不再声称正常路径传 NULL。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/06_mockers/runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/06_mockers/notifier_inactive.log"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "p03_btcore_mockers2",
+    "id": "BUG-P03-002",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/CtaMocker.cpp:695-720",
+      "src/WtBtCore/CtaMocker.cpp:1305-1314",
+      "src/WtBtCore/CtaMocker.cpp:1350-1365",
+      "src/WtBtCore/SelMocker.cpp:356-376",
+      "src/WtBtCore/SelMocker.cpp:591-626",
+      "src/WtBtCore/HisDataReplayer.cpp:1536-1564",
+      "src/WtBtCore/HisDataReplayer.cpp:2933-2944",
+      "src/WtBtCore/CtaMocker.cpp:973-1003",
+      "src/WtBtCore/SelMocker.cpp:409-438"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p03_btcore_mockers2/p03_cta_trade_path_test.cpp:82-135",
+      "src/TestUnits/coverage/p03_btcore_mockers2/p03_cta_trade_path_test.cpp:283-294"
+    ],
+    "input_reachability": "CTA/SEL update_dyn_profit 只在对应 replay tick 的 proc_tick 中调用。CTA 开多/开空和 SEL set_position 在写信号、订阅前都要求 get_commodity_info 非 NULL。即便用户直接对无 metadata code 调用 stra_sub_ticks，原始 tick 排程需要 get_session_info；HisDataReplayer 对无商品返回 NULL，并在回调 mocker 前读取 session 时间段。Cta 增量快照确可恢复未知 code 持仓，但这本身不会为该 code 建立一条正常 replay tick 通路。",
+    "oracle_basis": "正常策略生命周期的持仓由带 commodity guard 的交易接口创建，market tick 来自 replayer listener；缺少 session/commodity 的 code 不属于当前受支持的 replay instrument。直接调用实现类 update_dyn_profit 或向 IDataSink 手工注入非 replay tick 不构成正常策略契约。",
+    "reason": "两处 updater 对非零持仓会解引用 commodity，但在仓库可确认的正常策略/replayer 路径中不存在“同一缺商品 code 持仓 + replay callback tick 到达 updater”的有效序列。CTA/SEL 先拒绝缺商品的建仓；tick replayer 又要求 session 信息。disabled CalcFee 用例实际针对的是 calc_fee，不是动态盈亏。该候选的动态盈亏主张应撤回，不应扩展到 calc_fee 或其他独立代码。",
+    "root_cause": "候选从 updater 的静态空指针风险推导可达性，但没有将策略的 commodity guard 和 replayer 的 session/tick 准入条件连起来。",
+    "fix": "不按 BUG-P03-002 修改产品；如后续定义允许 stale-position snapshot 在缺少当期 metadata 时继续被 replay，则需在 load 边界明确拒绝该 code 或由盈亏更新定义可观察的 fail-safe 行为，再单独立项。",
+    "acceptance": "现有有效商品的 CTA 持仓可完成建仓、tick 浮盈更新和收尾；未知 code 的公开建仓/设仓调用早退，不产生信号或持仓。没有依据要求内部 updater 对不受支持的缺 metadata tick 提供业务计算结果。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/06_mockers/runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/06_mockers/cta_normal_trade_lifecycle.log",
+      "docs/迭代计划/迭代02/复核185/evidence/06_mockers/cta_unknown_code_guard.log"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "p08_btcore_mockers3",
+    "id": "BUG-P08-006",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/UftMocker.cpp:407-453",
+      "src/WtBtCore/UftMocker.cpp:597-650",
+      "src/WtBtCore/UftMocker.cpp:679-746",
+      "src/WtBtCore/UftMocker.h:104-140",
+      "src/Includes/IUftStraCtx.h:125-161"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/p08_btcore_mockers3/p08_uft_order_position_test.cpp:109-127",
+      "src/TestUnits/coverage/p08_btcore_mockers3/p08_uft_order_position_test.cpp:273-289",
+      "src/TestUnits/coverage/p08_btcore_mockers3/p08_uft_order_position_test.cpp:472-493"
+    ],
+    "input_reachability": "策略通过公开 IUftStraCtx/UftMocker 平仓接口传 stdCode。错拼或当前基础数据没有的代码是无效策略参数，但该公开 API 已将同类未知代码的 enter_long/enter_short 定义成记录错误并返回0，属于应安全拒绝的策略输入。正常 runtime 不提供商品目录删除流程；本结论不包括人工删除 metadata 后处理已存在的 cancel task。",
+    "oracle_basis": "stra_enter_long/short 在 get_commodity_info 为 NULL 时返回0；Uft API 的 exit_long/short 返回订单 id，失败可返回0。相同策略上下文对缺少商品应返回失败而不是对空指针解引用，也不应因失败调用先在 _pos_map 插入空项。",
+    "reason": "exit_long/short 在创建/读取 _pos_map 项后直接对 get_commodity_info 结果调用 getCoverMode，无空检查；而 enter 两侧已安全拒绝未知 code。现有 DISABLED_NullStrategyAndNullCommDerefFamily 先对空 strategy 调 session 回调，首个 UB 会遮蔽后续未知 code exit。只保留未知 code exit 这一可独立判断的公开输入风险；撤单 task 中“运行时商品 metadata 消失”未证明是支持生命周期，不纳入此行。",
+    "root_cause": "UFT exit 路径漏了 enter 路径已有的 commodity guard，且 guard 位置在 _pos_map[stdCode] 后会把失败输入变成空持仓项。",
+    "fix": "在修改 _pos_map 之前查 get_commodity_info；无商品时记录错误并返回0，保持 positions/orders 均不变。正常 commodity 与 position 不足语义保持不变。",
+    "acceptance": "有效 replayer fixture 对未知 code 调 exit_long 与 exit_short 都返回0，不崩溃且不插入 position/order；有效 known-code 的无可用仓位仍返回0；正常开仓、平仓、撤单路径保持通过。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/p08_btcore_mockers3/p08_uft_order_position_test.cpp",
+        "case": "DISABLED_NullStrategyAndNullCommDerefFamily",
+        "issue": "混合了 null strategy 回调、unknown-code exit、cancel metadata 和 null tick；首个 null strategy 解引用使后续验证无效。",
+        "change": "拆出启用用例 ExitUnknownCodeReturnsZero，复用已注册 SHFE.rb 的 _rp fixture，不调用 session callbacks；分别对未知 code 的 long/short exit 断言0并检查 map/order 未变。将运行时 metadata 消失的 cancel 分支标为不在正常生命周期，不作为本行断言。",
+        "target": "CoverageTests_btcore",
+        "filter": "P08UftOrderPosition.ExitUnknownCodeReturnsZero",
+        "expected_result": "未知 code 平仓返回0且无崩溃、无新增 position/order；已知 code 无可用持仓仍返回0。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/06_mockers/runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/06_mockers/uft_order_input_guard.log",
+      "docs/迭代计划/迭代02/复核185/evidence/06_mockers/uft_exit_no_position.log"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "本轮只运行了正常未知开仓守卫和已知 code 无持仓平仓；未知 code exit 的当前路径会空解引用，未直接执行。待产品 guard 和隔离用例落地后定向运行。"
+    ]
+  },
+  {
+    "lane": "q02_btcore3",
+    "id": "BUG-Q02-004",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/CtaMocker.cpp:88-136",
+      "src/WtBtCore/CtaMocker.cpp:139-148",
+      "src/WtBtCore/CtaMocker.cpp:173-225",
+      "src/WtBtCore/CtaMocker.cpp:454-535",
+      "src/WtBtCore/CtaMocker.cpp:536-570",
+      "src/WtBtCore/CtaMocker.cpp:574-616",
+      "src/WtBtCore/CtaMocker.cpp:60-80",
+      "src/WtBtCore/CtaMocker.h:57-79",
+      "src/WtBtCore/CtaMocker.h:837-860",
+      "src/WtBtCore/CtaMocker.h:1039-1039"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q02_btcore3/q02_cta_dump_incremental_test.cpp:90-167",
+      "src/TestUnits/coverage/q02_btcore3/q02_cta_dump_incremental_test.cpp:232-263",
+      "src/TestUnits/coverage/q02_btcore3/q02_cta_dump_incremental_test.cpp:334-372",
+      "src/TestUnits/coverage/q02_btcore3/q02_cta_dump_incremental_test.cpp:414-455"
+    ],
+    "input_reachability": "CtaMocker::load_incremental_data 是 public 方法，按公开注释读取指定上一轮回测产物。实现用 output dir + 名称拼出 JSON/CSV，并接受文件系统当前内容；没有来源签名或版本/校验器限制，文件可来自较早版本、手工导出或被截断。即使只接受 writer 生成的文件，跨版本与文件可读失败仍是外部输入边界。",
+    "oracle_basis": "dump_stradata 明确给出当前 writer schema：positions/details、fund、signals、conditions.settime/items；DetailInfo::_opentag 与 CondEntrust::_usertag 的容量为32字节含终止符。恢复入口必须校验 RapidJSON parse/type/required fields/长度，且失败前不修改已加载状态和历史日志。",
+    "reason": "加载前先向多个 CSV log stream 追加内容，再 fopen/ParseStream；未检查 fp、HasParseError、root 类型、数组/对象类型、字段存在与类型。positions/details/signals/conditions 上的 Size/GetXxx 可对坏 schema 触发断言/非法访问；opentag 与条件单 usertag 用 strcpy 写入32字节数组，可被长字符串越界覆盖。逐项插入状态后遇到后续坏字段会留下半份 state/log。另有有效字段不完整恢复：writer 写 conditions.settime，loader 只恢复 items；_last_cond_min 构造时未初始化且重新 dump 会读取它。",
+    "root_cause": "loader 将本地 JSON 当可信内部产物，不做 schema/长度/版本校验，也没有 stage-validate-commit；CSV 在 JSON 验证前已经变更。writer/loader 的条件单持久字段集合还不对称。",
+    "fix": "先安全打开文件并检查 parse/root；按 writer schema 对所有容器、必要字段、数值类型、enum/range、字符串长度逐层验证。把 JSON 与 CSV 内容解析到临时对象/缓冲，再一次性提交；任何失败记录可定位错误并保持原 map/fund/log 完全不变。检查 Details._opentag 和 CondEntrust._usertag 长度（或将目的字段改为有界字符串）。同步处理 conditions.settime：要么校验并恢复它且初始化成员，要么从 schema 删除并给兼容策略。",
+    "acceptance": "有效 writer 输出可完整 round-trip positions/details/fund/signals/conditions(settime/items)；对截断 JSON、非 object root、数组/对象类型错、字段缺失/类型错、超长 opentag/usertag、坏 conditions item、文件打开失败，loader 不崩溃/不越界，返回或记录可辨认错误，并在失败后逐项比较确认内存持仓/资金/信号/条件和五类 CSV logs 未发生部分改变。另运行 ASan/UBSan 定向目标证明长字符串不覆盖内存；未运行 sanitizer 不得声称通过。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/q02_btcore3/q02_cta_dump_incremental_test.cpp",
+        "case": "strategyDumpRoundTripsIntoSecondMocker",
+        "issue": "本轮新二进制运行失败在357-358：断言假定 conditions 后紧跟 items，且把条件单 tag 键写成 opentag；writer 实际先写 settime，条件 tag 字段是 usertag。",
+        "change": "将两个文本断言改为独立查找 `items\":{\"SSE.STK.600002\"` 和 `usertag\":\"cond1\"`；增加 settime 有效恢复断言以暴露 writer/loader schema 不对称。",
+        "target": "CoverageTests_btcore",
+        "filter": "Q02CtaDumpTest.strategyDumpRoundTripsIntoSecondMocker",
+        "expected_result": "该单例在修正文本 oracle 后通过，并明确验证条件单 key/tag/settime 的 writer-reader 往返。"
+      },
+      {
+        "file": "src/TestUnits/coverage/q02_btcore3/q02_cta_dump_incremental_test.cpp",
+        "case": "MalformedIncrementalSnapshotRejectedAtomically",
+        "issue": "现有用例仅覆盖 writer 对齐的有效 JSON、缺目录和 details 可选分支，没有坏 JSON/schema/长度或原子失败检查。",
+        "change": "新增独立临时 fixture：分开覆盖截断/错 root/缺字段/错类型/超长 opentag 与 condition usertag/坏条件 items；在已加载基线 state/log 后令错误出现在后续条目，逐项断言状态及日志不变。",
+        "target": "CoverageTests_btcore",
+        "filter": "Q02CtaDumpTest.MalformedIncrementalSnapshotRejectedAtomically",
+        "expected_result": "每个坏快照都安全拒绝，不崩溃、不越界、不产生位置/资金/信号/条件或CSV部分变更。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/06_mockers/runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/06_mockers/incremental_missing_base.log",
+      "docs/迭代计划/迭代02/复核185/evidence/06_mockers/incremental_optional_details.log",
+      "docs/迭代计划/迭代02/复核185/evidence/06_mockers/incremental_roundtrip.log"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "本轮未运行坏快照或 sanitizer 探针；先修 loader 与隔离回归用例，再在刷新后的目标运行 malformed filter。"
+    ]
+  },
+  {
+    "lane": "q02_btcore3",
+    "id": "BUG-Q02-006",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/WtBtCore/CtaMocker.h:244-248",
+      "src/WtBtCore/CtaMocker.cpp:454-524",
+      "src/WtBtCore/CtaMocker.cpp:536-616"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/q02_btcore3/q02_cta_dump_incremental_test.cpp:232-263",
+      "src/TestUnits/coverage/q02_btcore3/q02_cta_dump_incremental_test.cpp:334-372"
+    ],
+    "input_reachability": "同一实例重复调用确实会再次追加 CSV、details、conditions；但文档将它描述为“从指定上一次回测结果中加载，用于继续回测”，仓库正常闭环是在新建 Mocker 后加载一次，round-trip 也是把文件加载到第二个新实例。仓库没有 production caller 通过重复 load 表示 retry/合并多个来源。",
+    "oracle_basis": "当前接口没有声明 idempotent、replace 或多次合并语义；“load 上一次结果”提供的是一次恢复初始化用途。未有本地调用者或测试契约要求把重复载入同一输入视为幂等。",
+    "reason": "append 结果是静态可见，但重复载入同一个 lastBacktestName 不属于文档/正常策略生命周期定义的操作。不能据此要求 API 做幂等替换或 one-shot 拒绝，也不能把人工重复初始化主张当产品 bug。",
+    "root_cause": "候选将一次性恢复 API 的重复手工调用推定为应幂等，但仓库没有该语义约定。",
+    "fix": "不按 BUG-Q02-006 改产品。若产品之后要支持重试或多源合并，再明确语义是幂等替换、拒绝第二次或组合导入，并补对应 API 状态/返回码。",
+    "acceptance": "正常生命周期在新建实例上加载一个 prior-backtest snapshot 一次，并按公开查询恢复 state；当前 round-trip 单例覆盖此路径。重复加载行为不作为本轮缺陷验收。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/06_mockers/runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/06_mockers/incremental_optional_details.log",
+      "docs/迭代计划/迭代02/复核185/evidence/06_mockers/incremental_missing_base.log"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  }
+]

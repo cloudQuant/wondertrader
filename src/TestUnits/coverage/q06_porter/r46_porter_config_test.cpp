@@ -234,24 +234,21 @@ TEST(R46PorterConfig, MissingBspolicyStopsConfigAfterDataManager)
 	clean_dir(dir);
 }
 
-/* WtRtRunner.cpp:840-842 + 584（返回值未检查）：env 段缺失时 initEngine() 直接
- * return false，config() 既不回滚也不报错，继续把 data/bspolicy 跑完后返回 true。
- * 此时 _engine 从未被赋值，而 WtRtRunner 构造列表也不初始化它（BUG-R46-001），
- * getEngine() 读到的是不确定值 —— 属未定义行为，故整条用例 DISABLED_。
- * 缺陷见 bugs/R46.md BUG-R46-002。 */
-TEST(R46PorterConfig, DISABLED_MissingEnvLeavesEngineUninitializedButConfigSucceeds)
+/* WtRtRunner.cpp:840-842: env 缺失时 initEngine() 返回 false，配置入口应拒绝该配置。
+ * 不读取可能未初始化的 _engine；缺陷见 bugs/R46.md BUG-R46-002。 */
+TEST(R46PorterConfig, MissingEnvMakesConfigFail)
 {
 	const std::string dir = prepare_gen_dir();
 	ASSERT_FALSE(dir.empty());
 	write_text(dir + "/actions.json", "{}");
 
 	WtRtRunner* r = new_runner(dir);
+	ASSERT_NE(r, nullptr);
 	const std::string cfg =
 		"{\"basefiles\":{},\"data\":{},"
 		"\"bspolicy\":\"" + dir + "/actions.json\"}";
 
-	EXPECT_TRUE(r->config(cfg.c_str(), false));
-	EXPECT_EQ(r->getEngine(), nullptr);
+	EXPECT_FALSE(r->config(cfg.c_str(), false));
 
 	clean_dir(dir);
 }

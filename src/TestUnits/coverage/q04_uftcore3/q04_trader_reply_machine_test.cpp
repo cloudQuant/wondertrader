@@ -99,9 +99,9 @@ TEST(q04_trader_reply, login_result_drives_state_and_position_query)
 	EXPECT_EQ(TraderAdapter::AS_LOGINED, env._adapter.state());
 	EXPECT_EQ(1u, env._api._qPosCnt);
 
-	//onLogout 是空实现, 不改状态
+	//登出后恢复未登录状态
 	env._adapter.onLogout();
-	EXPECT_EQ(TraderAdapter::AS_LOGINED, env._adapter.state());
+	EXPECT_EQ(TraderAdapter::AS_NOTLOGIN, env._adapter.state());
 
 	//未登录前不应有持仓通知
 	env.login();
@@ -166,6 +166,11 @@ TEST(q04_trader_reply, onRspOrders_counts_stats_and_registers_alive_orders)
 {
 	Env env;
 	env.login();
+	//订单查询在持仓响应之后才会进入 AS_POSITION_QRYED。
+	WTSArray* emptyPositions = WTSArray::create();
+	env._adapter.onRspPosition(emptyPositions);
+	emptyPositions->release();
+	ASSERT_EQ(TraderAdapter::AS_POSITION_QRYED, env._adapter.state());
 
 	//先真实发一笔委托, 拿到适配器自己组装的 usertag
 	uint32_t localid = env._adapter.openLong(kStdAg, 5000.0, 2.0, 0);
@@ -224,12 +229,11 @@ TEST(q04_trader_reply, onRspOrders_counts_stats_and_registers_alive_orders)
 
 	env._adapter.onRspOrders(ay);
 
-	//只有自己的活单进 _orders
-	//注意: getOrders 用 ordInfo->getCode()(柜台裸代码)与传入 stdCode(带市场前缀)比较,
-	//带标准代码的过滤永远匹配不上, 详见 q04_uftcore3.md BUG-Q04-001
+	//只有自己的活单进 _orders；按公开 stdCode 查询同合约应返回这笔活单
 	OrderMap* orders = env._adapter.getOrders(kStdAg);
 	ASSERT_NE(nullptr, orders);
-	EXPECT_EQ(0u, orders->size());
+	EXPECT_EQ(1u, orders->size());
+	EXPECT_EQ(myOrder, orders->get(localid));
 	orders->release();
 	orders = env._adapter.getOrders("");
 	ASSERT_NE(nullptr, orders);
@@ -252,9 +256,19 @@ TEST(q04_trader_reply, onRspTrades_accumulates_stats_then_channel_ready)
 {
 	Env env;
 	env.login();
+	//成交查询必须等持仓和委托查询回报依次推进状态。
+	WTSArray* emptyPositions = WTSArray::create();
+	env._adapter.onRspPosition(emptyPositions);
+	emptyPositions->release();
+	WTSArray* emptyOrders = WTSArray::create();
+	env._adapter.onRspOrders(emptyOrders);
+	emptyOrders->release();
+	ASSERT_EQ(TraderAdapter::AS_ORDERS_QRYED, env._adapter.state());
+	ASSERT_NE(nullptr, env._bd.getContract("ag2406", "SHFE"));
 
-	auto makeTrade = [](const char* code, WTSDirectionType dir, WTSOffsetType offset, double vol) {
+	auto makeTrade = [&env](const char* code, WTSDirectionType dir, WTSOffsetType offset, double vol) {
 		WTSTradeInfo* t = WTSTradeInfo::create(code, "SHFE");
+		t->setContractInfo(env._bd.getContract(code, "SHFE"));
 		t->setDirection(dir);
 		t->setOffsetType(offset);
 		t->setVolume(vol);
@@ -295,9 +309,19 @@ TEST(q04_trader_reply, onRspTrades_accumulates_stats_then_channel_ready)
 	for (auto one : trades)
 		one->release();
 
-	//NULL 成交数组: 只走状态推进支
-	env._adapter.onRspTrades(nullptr);
-	EXPECT_EQ(2u, env._api._qAccCnt);
+	//NULL 成交数组仍应推进状态；用独立通道模拟完整查询链，避免复用已就绪状态。
+	Env emptyTradeEnv;
+	emptyTradeEnv.login();
+	WTSArray* emptyPositionResponse = WTSArray::create();
+	emptyTradeEnv._adapter.onRspPosition(emptyPositionResponse);
+	emptyPositionResponse->release();
+	WTSArray* emptyOrderResponse = WTSArray::create();
+	emptyTradeEnv._adapter.onRspOrders(emptyOrderResponse);
+	emptyOrderResponse->release();
+	ASSERT_EQ(TraderAdapter::AS_ORDERS_QRYED, emptyTradeEnv._adapter.state());
+	emptyTradeEnv._adapter.onRspTrades(nullptr);
+	EXPECT_EQ(TraderAdapter::AS_TRADES_QRYED, emptyTradeEnv._adapter.state());
+	EXPECT_EQ(1u, emptyTradeEnv._api._qAccCnt);
 }
 
 TEST(q04_trader_reply, onRspEntrust_error_only_counts_the_first_time)
@@ -350,7 +374,6 @@ TEST(q04_trader_reply, onRspEntrust_error_only_counts_the_first_time)
 
 	entrust->release();
 	err->release();
-	entrust->release();
 }
 
 TEST(q04_trader_reply, handleEvent_and_error_channels_forward_to_sinks)

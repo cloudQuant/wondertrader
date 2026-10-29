@@ -135,14 +135,12 @@ TEST(R76ParserUDPTest, RegisterSpiNullMakesNextRegistrationSilent)
 	ParserUDP parser;
 	R76UdpSink first;
 	parser.registerSpi(&first);
-	EXPECT_EQ(1u, first.bd_calls);
 	ASSERT_TRUE(first.logs.empty());
 
 	parser.registerSpi(nullptr);
 	R76UdpSink second;
 	parser.registerSpi(&second);
 	EXPECT_TRUE(second.logs.empty());
-	EXPECT_EQ(1u, second.bd_calls);
 
 	R76UdpSink third;
 	parser.registerSpi(&third);

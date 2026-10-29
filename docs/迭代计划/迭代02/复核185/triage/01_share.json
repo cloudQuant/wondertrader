@@ -1,0 +1,341 @@
+[
+  {
+    "lane": "l00_build_graph",
+    "id": "BUG-L00-005",
+    "decision": "LOCAL_INCOMPLETE",
+    "evidence_level": "LOCAL_REPRO",
+    "source_evidence": [
+      "docs/迭代计划/迭代01/bugs/l00_build_graph.md:72-85",
+      "src/WtCore/ActionPolicyMgr.cpp:47",
+      "src/WtUftCore/ActionPolicyMgr.cpp:51",
+      "src/WtRunner/CMakeLists.txt:21-25",
+      "src/WtUftRunner/CMakeLists.txt:21-25",
+      "src/TestUnits/coverage/CMakeLists.txt:278-285",
+      "src/TestUnits/coverage/CMakeLists.txt:320-326",
+      "src/TestUnits/coverage/CMakeLists.txt:447-503",
+      "src/WtLatencyHFT/CMakeLists.txt:22",
+      "src/WtExecMon/CMakeLists.txt:23",
+      "src/WtBtPorter/CMakeLists.txt:22-31",
+      "src/WtCore/TraderAdapter.cpp:598",
+      "src/WtUftCore/TraderAdapter.cpp:1908"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/CMakeLists.txt:141-151",
+      "src/TestUnits/coverage/CMakeLists.txt:278-285",
+      "src/TestUnits/coverage/CMakeLists.txt:447-503",
+      "src/TestUnits/coverage/m_WtRunner/r28_runner_main_test.cpp:397-423",
+      "src/TestUnits/coverage/m_WtUftRunner/r95_wtuftrunner_config_run_test.cpp:257-264",
+      "src/TestUnits/coverage/m_WtLatencyUFT/r95_uftlatency_init_run_test.cpp:198-206",
+      "src/TestUnits/coverage/q06_porter/r6_porter_lifecycle_test.cpp:202-211",
+      "src/TestUnits/coverage/n01_wtcore_tradepaths/n01_action_policy_test.cpp:3-6",
+      "src/TestUnits/coverage/n03_uftcore_index/n03_action_policy_test.cpp:4-6"
+    ],
+    "input_reachability": "原条目覆盖 WtCore、WtUftCore、WtBtCore、WtDtCore 四个核心中的同名类，以及多个最终链接目标；旧报告称有 37 个跨目录重复类，但其计数是未附完整扫描清单的历史静态结果，本轮尚未复验。当前已实证若干目标的实际链接和符号提供者：WtUftRunner、WtLatencyUFT、WtRunner 与 CoverageTests_porter；其余目标及类未核查。",
+    "oracle_basis": "每个被测目标应将核心方法执行和覆盖映射归因到目标所属实现。核查以各目标最终 link command、nm/dyld 实际符号提供者、safe case 与源文件覆盖映射为依据；类名重复只构成审计线索，不能单独证明产品行为错误。正确绑定后仍出现的功能/生命周期异常应按自身输入和契约单独判定。",
+    "reason": "本轮确认并修正了若干测试构建目标的核心归属问题，但原条目横跨四核心、历史记录的 37 个同名类及多个最终目标，不能据此整体关闭。WtUftRunner 的 ActionPolicyMgr 和 WtLatencyUFT 的 ActionPolicyMgr::getActionRules 先前实际绑定 WtCore 的 libWtExecMon；目标依赖隔离后分别重建，r95 安全配置用例各 1/1 PASS，nm/link 指向本地 WtUftCore。WtRunner 隔离为 WtCore 后，nm 显示 EventNotifier/ActionPolicyMgr 本地定义；正确绑定下 stack 构造/析构测试仍因子进程 SIGSEGV(11) 失败，heap 对照 1/1 PASS，该生命周期结果不归因于错绑。CoverageTests_porter 修正后 link 不含 WtBtPorter，dyld 将 EventNotifier 归于 WtCore 的 libWtExecMon，unknown-parser C API 对照 1/1 PASS。其余最终目标及历史 37 类清单尚未核查；整体保持 LOCAL_INCOMPLETE，未据重名本身主张产品缺陷。 扩展只读筛查还确认 WtLatencyHFT 的 ActionPolicyMgr/WtHftEngine provider 与 WtCore 产品依赖匹配、CoverageTests_btporter 的 EventNotifier 与 WtBtCore 匹配；wtcore/uftcore/btcore/dtcore 仅筛查 ActionPolicyMgr/EventNotifier 动态导入且未见不匹配项，不证明其它重复类或静态成员安全。 最新只读清单覆盖 39 个最终目标、四核心归档，统计 50 个重复 wtp 类名与 849 个重复外部符号；静态清单还显示 CoverageTests_wtcore 中 TraderAdapter::isTradeEnabled 是 U/flat-namespace import，候选为 WtCore/WtUftCore，未找到直接对象定义，provider 未知。weak-def-coalesce、flat-namespace 与可执行映像本地 nm 定义都不能单独给出唯一归档成员。旧 37 类与新 50 类统计尚未对账；这些静态结果没有运行用例或证明动态调用，因此继续保留整体未完成。",
+    "root_cause": "已确认的测试构建局部根因是多个目标复用全局 WT_COV_SHARED_LIBS，将不属于该目标核心家族的 WtCore/WtBtCore 提供者带入最终链接闭包。已按目标产品依赖隔离 WtUftRunner、WtLatencyUFT、WtRunner 和 porter 覆盖目标；其他核心及重复类的目标级根因尚未完成审计。 新静态矩阵还标出 CoverageTests_wtcore 的 TraderAdapter::isTradeEnabled flat-namespace provider，具体实现来源与是否被目标实际调用待确认。",
+    "fix": "已在 coverage CMake 中为 WtUftRunner、WtLatencyUFT、WtRunner 配置与对应产品核心家族匹配的独立依赖；为 CoverageTests_porter 排除会带入不兼容 WtBtCore/EventNotifier 的 WtBtPorter（src/TestUnits/coverage/CMakeLists.txt:278-285, 447-503）。这些只解决已验证目标，不代表四核心所有类/最终目标均已修复或验证。",
+    "acceptance": "已验证子项（macOS arm64）：WtUftRunner r95 配置用例 1/1 PASS，核心归档为 WtUftCore 且 ActionPolicyMgr 本地定义、UFT init 覆盖命中；WtLatencyUFT r95 成功配置用例 1/1 PASS，ActionPolicyMgr::getActionRules/init 为本地定义且核心链接为 WtUftCore；WtRunner 核心归档为 WtCore，EventNotifier/ActionPolicyMgr 本地定义，R28 stack 用例 1/1 FAIL(SIGSEGV 11)、heap 对照 1/1 PASS；CoverageTests_porter link 不含 WtBtPorter，EventNotifier 来自 WtCore 的 libWtExecMon，unknown-parser C API 用例 1/1 PASS。整体验收还需逐目标确认四核心其余相关类的真实 archive 抽取/动态绑定及源码覆盖映射；37 类历史计数待复验，Windows/MSVC 未运行。 扩展 provider 筛查摘要已保存；这些只读结果仅覆盖所列符号，不替代其余同名类/最终目标的成员级链接映射。 新静态普查列出 39 个最终 CoverageTests 二进制、四核心 50 个重复类名和 849 个重复外部符号；CoverageTests_wtcore::TraderAdapter::isTradeEnabled 来自 flat-namespace，provider/调用路径尚未确认，且 37/50 类清单未对账。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/bug-l00-005-mixed-link/mrunner-1793244481375674000.json",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/bug-l00-005-mixed-link/mrunner-1793244481375674000.stdout.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/bug-l00-005-mixed-link/mrunner-1793244481375674000.xml",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/bug-l00-005-mixed-link/link-CoverageTests_m_WtUftRunner.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/bug-l00-005-mixed-link/link-WtExecMon.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/bug-l00-005-mixed-link/dyld-mrunner-actionpolicy.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/bug-l00-005-mixed-link/nm-mrunner-actionpolicy.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/bug-l00-005-mixed-link/actionpolicy-uftcore-in-lib.cov.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-after/run.json",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-after/case.log",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-after/case.xml",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-after/link.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-after/nm.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-after/dyld.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-after/uft.cov.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-after/core.cov.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-after/profile.profdata",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-3targets/runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-3targets/latency.log",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-3targets/latency.xml",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-3targets/uftrunner.log",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-3targets/uftrunner.xml",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-3targets/CoverageTests_m_WtLatencyUFT-link.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-3targets/CoverageTests_m_WtLatencyUFT-nm.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-3targets/CoverageTests_m_WtLatencyUFT-dyld.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-3targets/CoverageTests_m_WtRunner-link.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-3targets/CoverageTests_m_WtRunner-nm.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-3targets/CoverageTests_m_WtRunner-dyld.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-3targets/stack.log",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-3targets/stack.xml",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-3targets/heap.log",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-3targets/heap.xml",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-porter/run.json",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-porter/test.log",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-porter/test.xml",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-porter/link.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-porter/nm.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-porter/dyld.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-final-target-provider-audit.md",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-full-audit/summary.md",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-full-audit/target-provider-matrix.json",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/l00-full-audit/archive-class-inventory.json"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "核查 CoverageTests_wtcore 的 TraderAdapter::isTradeEnabled：矩阵记录为 U/flat-namespace import、候选 WtCore/WtUftCore、无直接对象定义；追踪链接/运行时真实 provider，并找安全用例确认调用与源映射，再决定是否错绑。",
+      "为 weak-def-coalesce imports、flat-namespace imports 以及 nm 显示为最终可执行映像 T/W/V 的静态定义取得可唯一归档成员的 link map/对象来源证据；不得用 nm final-image 定义单独判定归档来源。",
+      "对 39 个目标按实际成员/动态 provider 和调用覆盖继续核查；静态矩阵显示核心四个 split 目标仅筛查 ActionPolicyMgr/EventNotifier，不能替代对其它同名类的核查。",
+      "对账旧记录 37 个重复类与当前清单 50 个重复 wtp 类名、849 个完全相同外部符号的口径和逐项差异。",
+      "Windows/MSVC 覆盖构建尚未运行；在对应受支持平台复核链接闭包与符号/覆盖归属。"
+    ]
+  },
+  {
+    "lane": "l00_build_graph",
+    "id": "BUG-L00-009",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/ParserYD/ParserYD.cpp:55-59",
+      "src/ParserYD/ParserYD.h:68-71",
+      "src/ParserYD/CMakeLists.txt:13-27",
+      "src/ParserYD/ParserYD.vcxproj:99-125",
+      "src/CMakeLists.txt:238-316"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/CMakeLists.txt:115-125"
+    ],
+    "input_reachability": "ParserYD 是 Windows solution 中的厂商适配工程，默认 Visual Studio 配置使用 Level3 告警级别；候选中的 -Werror,-Wreorder-ctor 是另行施加的严格 GCC/Clang 参数。当前顶层 CMake 构建列表没有 ParserYD 子目录，CoverageTests 也没有 ParserYD target。",
+    "oracle_basis": "C++ 按成员声明顺序初始化。m_uTradingDate 和 m_pUserAPI 的当前初始化值都是常量，列表顺序不一致只产生告警，不改变当前运行时值；仓库内该厂商项目没有 TreatWarningAsError 或等价严格门槛。",
+    "reason": "初始化列表顺序与成员声明顺序不一致确实可触发严格编译器的 reorder warning，但当前值分别为 0 和 NULL，不构成可观察运行时缺陷；仓库的 ParserYD Visual Studio 工程使用 Level3，未发现 /WX，顶层 CMake 与 39 个已刷新 CoverageTests targets 均未编译该项目。因此“当前产品构建被此告警阻断”的主张不成立。若项目未来统一启用 warnings-as-errors，重排列表仍是低成本告警清理。",
+    "root_cause": "源码初始化列表与成员声明顺序不一致，但该项目前是严格告警配置下的可维护性问题，不是现行产品构建或运行故障。",
+    "fix": "当前无需产品缺陷修复；可按声明顺序排列初始化列表，作为普通 warning-cleanup。若将 ParserYD 纳入严格告警门禁，再对该目标及其厂商依赖实际编译。",
+    "acceptance": "当前缺陷条目可撤下。若后续纳入 -Werror 门禁，则以该正式产品目标和真实厂商头构建，确保 reorder warning 与同 TU 其他告警符合统一门槛。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/initial-build.json"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "l01_share_wtsutils",
+    "id": "BUG-L01-006",
+    "decision": "PRODUCT",
+    "evidence_level": "LOCAL_REPRO",
+    "source_evidence": [
+      "src/Share/TimeUtils.hpp:299-313",
+      "src/WtCore/WtSelEngine.cpp:227",
+      "src/WtBtCore/HisDataReplayer.cpp:951",
+      "src/WtBtCore/SelMocker.cpp:287"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l01_share_wtsutils/l01_timeutils_test.cpp:36-54"
+    ],
+    "input_reachability": "getNextMinute 是公开 constexpr helper，mins 类型为 int32_t，声明中没有 ±1440 或单日范围前置条件；输入 (0, -1500) 是其公开参数域中的有效分钟偏移。仓内已检索到的生产调用只使用 -1 或 +1，当前生产触发大偏移尚未观察到。",
+    "oracle_basis": "该函数不带日期，只返回 HHMM；跨日偏移应将总分钟按一天循环归一化。测试明确给出 00:00 回退 1500 分钟等于回退 60 分钟，预期为 2300。",
+    "reason": "本轮在刷新后 CoverageTests 二进制上执行普通分钟对照和大负偏移用例：普通用例 1/1 PASS；大负偏移 1/1 FAIL，实际返回 4294967196 而预期 2300。实现只加/减一次 1440，剩余 -60 分钟转换成 HHMM -100 后再转 uint32。缺陷成立于公开 helper 的有效输入；已检索生产调用为小偏移，不据此声称当前生产路径会触发。",
+    "root_cause": "TimeUtils::getNextMinute 在总分钟数只跨过一个日界时才修正一次；未完整取模，负余数最后被转换为无符号大数。",
+    "fix": "将计算提升到 int64_t 后执行完整正模归一化：先把 curHour*60+curMin 与 mins 相加，再按 ((total % 1440) + 1440) % 1440 归一化，最后转换为 HHMM。提升类型同时避免 int32_t 在极端 mins 与 curTime 相加时溢出。",
+    "acceptance": "保留 930/+1、2359/+1、0/-1 等普通边界；补充 ±1440、-1500、跨多日正负偏移以及 INT32_MIN/INT32_MAX；每个有效时钟输入都返回 0..2359 的规范 HHMM，且大型偏移与完整模 1440 计算一致。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/recheck-runs-second-round.json",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/runs/second_get_next_minute_normal/results.xml",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/runs/second_get_next_minute_large_negative/stdout.txt",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/runs/second_get_next_minute_large_negative/results.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "产品修复后重跑上述过滤器，并在修复后用例中验证 int32_t 极值偏移的无溢出行为。"
+    ]
+  },
+  {
+    "lane": "l01_share_wtsutils",
+    "id": "BUG-L01-009",
+    "decision": "NOT_BUG",
+    "evidence_level": "LOCAL_REPRO",
+    "source_evidence": [
+      "src/Share/TimeUtils.hpp:423-430"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l01_share_wtsutils/l01_timeutils_test.cpp:243-255"
+    ],
+    "input_reachability": "fmt 是公开 const char* 返回接口，代码实现使用函数级 static char 缓冲。全仓生产源检索未发现非测试 .fmt() 调用；测试只在同一线程通过两个实例连续调用。",
+    "oracle_basis": "头文件没有承诺每次调用返回独立可保留字符串，也没有线程安全约定；现有断言验证实现的共享缓冲行为。共享静态缓冲只有在调用者需要跨调用保留旧内容或并发安全是已承诺合同时才构成违约。",
+    "reason": "本轮启用用例 1/1 PASS，确认两个实例返回同一静态地址且第二次调用覆盖内容；这证明实现行为，不证明违反 API 合同。仓内没有生产调用点，也未发现指针生命周期或并发保证。测试注释现已明确这是单线程观察，不声称线程安全或竞态。",
+    "root_cause": "无已证实产品根因；函数确实共用缓冲，但缺少要求独立结果或线程安全的现行合同。",
+    "fix": "无需产品行为修复。若 API owner 要求多结果留存，明确返回 string/调用方缓冲合同；若保留当前实现，应记录返回内容会被后续 fmt 调用覆盖且不保证并发安全。",
+    "acceptance": "不把指针相等断言作为缺陷验收。若后续确立独立生命周期或线程安全合同，再按该合同增加串写/并发行为测试。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/recheck-runs-second-round.json",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/runs/second_time32_shared_buffer/results.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "l01_share_wtsutils",
+    "id": "BUG-L01-012",
+    "decision": "NOT_BUG",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Share/CodeHelper.hpp:131-145",
+      "src/Share/CodeHelper.hpp:527-542",
+      "src/Share/CodeHelper.hpp:544-599"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l01_share_wtsutils/l01_codehelper_test.cpp:290-318",
+      "src/TestUnits/coverage/l01_share_wtsutils/l01_codehelper_test.cpp:350-370",
+      "src/TestUnits/coverage/r16_share_tools/r55_codehelper_charconv_test.cpp:67-75"
+    ],
+    "input_reachability": "extractStdChnFutOptCode 位于 CodeHelper 的 public 区域，但其注释和名称把输入限定为标准期货期权代码。仓内唯一生产入口 extractStdCode 先调用 isStdChnFutOptCode，格式不匹配时走普通代码分支；没有发现生产代码绕过此验证直接调用 helper。",
+    "oracle_basis": "可从现行 wrapper 得出的输入合同是标准期权代码，而不是任意文本解析器。候选中的 SHFE.ag.C.4000 不满足月份代码格式，直接传给该 helper 不能证明受支持生产输入路径违约。",
+    "reason": "直接 helper 对月份探测返回 -1 后用于 memcpy 长度的静态风险成立，但输入违反其“标准期货期权代码”前置条件；仓内生产入口在 helper 之前验证格式，合法直接样例和 wrapper 期权路径的定向用例均覆盖该入口。该复核只撤回候选的生产可达性主张，不推断任意外部调用方传入畸形字符串也安全。",
+    "root_cause": "在不满足 helper 前置条件的直接调用中，indexCodeMonth 返回 -1 后被作为 memcpy 长度；当前仓内受支持生产调用未绕过格式门禁。",
+    "fix": "当前不要求产品修复以支持任意畸形输入。若未来决定该 public helper 接受任意字符串，应明确错误返回合同并在 mpos < 0 或分段数不足时安全拒绝；该设计不改变本次对现有生产路径的裁定。",
+    "acceptance": "合法标准期权输入通过直接 helper 与 extractStdCode 路径；任意畸形文本只有在 API 明确纳入支持输入后才需增加安全拒绝验收。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/recheck-runs-second-round.json",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/runs/second_extract_option_valid_cffex/results.xml",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/runs/second_extract_std_code_option_route/results.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  },
+  {
+    "lane": "l01_share_wtsutils",
+    "id": "BUG-L01-014",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Share/CodeHelper.hpp:443-477",
+      "src/WTSTools/WTSBaseDataMgr.cpp:300-308",
+      "src/WTSTools/WTSBaseDataMgr.cpp:409-485",
+      "src/WtCore/ParserAdapter.cpp:278-294",
+      "src/WtDtServo/WtDtRunner.cpp:427-440",
+      "src/WtCore/TraderAdapter.cpp:1249-1259"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l01_share_wtsutils/l01_codehelper_test.cpp:225-237",
+      "src/TestUnits/coverage/r12_headers/r12_codehelper_test.cpp:215-222"
+    ],
+    "input_reachability": "外部合同配置中的 exchange/code 会被 WTSBaseDataMgr 建成 contract；同一配置可将 commodity category 设为 CC_FutOption。ParserAdapter、WtDtRunner 和 TraderAdapter 在 option 分支把 contract 的原始 code 直接传入 rawFutOptCodeToStdCode，当前这些入口未做 fallback 形状校验。",
+    "oracle_basis": "外部配置是产品输入边界；配置允许形成期权合约且代码值被后续解析器消费。格式错误时不得发生越界读取、越界字符串构造或未定义行为；有效 CZCE/SHFE fallback 样例需保留原有标准化结果。",
+    "reason": "正则不匹配后 fallback 用 size_t 扫描数字后缀，idx >= 0 对无符号永真；全数字字符串会下溢继续越界读，idx < 3 时 idx-3 还会下溢并形成越界字符串范围。该 helper 被原始配置/合约代码驱动的产品期权路径调用，因此不是只对内部人工错误调用的静态风险。未执行明显 UB 的畸形输入；本条为源码与输入路径静态确认。",
+    "root_cause": "rawFutOptCodeToStdCode 假设 regex 失败的每个输入都已满足 CZCE/SHFE 期权尾部形状，没有先验证长度、P/C 分隔位置和数字段。",
+    "fix": "在 fallback 扫描前检查非空 code、最小长度、末尾价格数字段、P/C 位置及其前置合约月份；不合法时返回明确失败值。ParserAdapter/WtDtRunner/TraderAdapter 等调用点需检测失败并拒绝该无效合同/行情转换，不得继续发布空或伪造的标准代码。配置加载阶段也应对 option code 做同一格式校验并报告文件键。",
+    "acceptance": "有效 CZCE `ZC010P11600` 与 SHFE `au2012C3400` 仍转换正确；空串、短串、全数字、P/C 位于前 3 字符的输入在代码修复后均安全返回明确失败，不触发 ASan/UBSan；外部配置中的无效 option contract 在 parser/trader 发布代码前被拒绝并可诊断。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/l01_share_wtsutils/l01_codehelper_test.cpp",
+        "case": "l01_codehelper.raw_fut_opt_code_to_std_code_rejects_malformed_fallback",
+        "issue": "现有 enabled 测试只覆盖合法 fallback，size_t 下标回绕的非法 fallback 尚无安全回归；修复前直接运行可能触发 UB。",
+        "change": "在产品先定义失败返回值并添加格式校验后，增加 `rawFutOptCodeToStdCode(\"123456\", \"CZCE\")` 失败值断言；不要在修复前启用该输入。",
+        "target": "CoverageTests",
+        "filter": "l01_codehelper.raw_fut_opt_code_to_std_code_rejects_malformed_fallback",
+        "expected_result": "修复后过滤器 1/1 PASS；有效 unmatched 期权样例仍保持原结果；ASan/UBSan 不报告越界。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/recheck-runs-second-round.json",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/runs/second_raw_fut_opt_valid_unmatched/results.xml",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/runs/second_extract_option_valid_cffex/results.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "产品实现并定义失败值后，运行 malformed fallback 回归与 ASan/UBSan；当前未运行 UB 输入。",
+      "对配置加载拒绝无效期权代码的路径增加安全测试，确认不会进入行情/交易发布分支。"
+    ]
+  },
+  {
+    "lane": "l01_share_wtsutils",
+    "id": "BUG-L01-018",
+    "decision": "PRODUCT",
+    "evidence_level": "STATIC",
+    "source_evidence": [
+      "src/Share/TimeUtils.hpp:201-221",
+      "src/WTSTools/WTSBaseDataMgr.cpp:201-205"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/l01_share_wtsutils/l01_timeutils_test.cpp:156-182"
+    ],
+    "input_reachability": "getWeekDay 是公开日历 helper，参数为 YYYYMMDD 且未声明 1970 年下界；WTSBaseDataMgr::isHoliday 也把传入的 uDate 直接转发。1969-12-31 是有效公历日期，非非法日期样例。",
+    "oracle_basis": "星期几是有效公历日期的确定属性，应在支持的构建平台上返回同一星期值。Microsoft UCRT 文档规定 1970-01-01 前 mktime 返回 -1；localtime 对负值触发 invalid-parameter handler，若 handler 继续则返回 NULL。当前实现随后直接解引用结果。官方依据与本机非 Windows 对照探针保存在 `microsoft-time-range.md` 和 `macos-time-range-probe.json`。",
+    "reason": "有效输入路径与失败处理缺陷均可由接口和平台文档确认：对 19691231 构造 tm 后调用 mktime/localtime，代码没有检查返回值并在下一行解引用 tNow。当前 macOS CST 探针能成功解析该日期，但不能证明 Windows CRT；本地没有 Windows/MSVC 动态运行，因此本条是跨平台 API/CRT 静态确认，不把 Mac 结果冒充 Windows 复现。",
+    "root_cause": "getWeekDay 未验证 mktime 的 -1 失败结果，也未检查 localtime 返回的空指针；实现将 CRT 的时间范围失败变成参数处理器终止或空指针解引用。",
+    "fix": "优先用平台无关的 Gregorian 日期算法计算有效 YYYYMMDD 的星期，避免 Windows CRT 的 1970 下界；若继续使用 CRT，则必须先验证日历日期、检查 mktime/localtime 结果，并定义可传播的失败结果，所有调用点须在周末/交易日逻辑前处理失败。",
+    "acceptance": "在 Windows/MSVC 与 macOS 上，`getWeekDay(19691231)` 均返回星期三 3；常规日期如 20240101 仍返回 1。对非法日历日期返回明确失败值，不触发 CRT 终止或空指针解引用；传递失败值的 isHoliday 等调用点需有显式处理。若 owner 只支持 1970 及之后日期，必须先把此范围写入接口合同并验证超界输入安全拒绝。",
+    "canonical": null,
+    "test_change_requests": [
+      {
+        "file": "src/TestUnits/coverage/l01_share_wtsutils/l01_timeutils_test.cpp",
+        "case": "l01_timeutils.get_week_day_handles_pre_epoch_valid_date",
+        "issue": "当前 weekday 用例只覆盖 2020/2024 日期，未覆盖 Windows CRT 1970 下界；现行函数存在有效日期负时间路径。",
+        "change": "修复合同后新增 19691231 的有效公历日期测试，期望星期三 3；若 API owner 明确只支持 1970 年及以后，则先将该下界写入合同，并改为验证安全失败值。",
+        "target": "CoverageTests",
+        "filter": "l01_timeutils.get_week_day_handles_pre_epoch_valid_date",
+        "expected_result": "修复后 macOS 与 Windows/MSVC 对有效日期均返回定义结果；无 CRT invalid-parameter 终止和 NULL 解引用；普通日期对照继续通过。"
+      }
+    ],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/microsoft-time-range.md",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/macos-time-range-probe.json",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/recheck-runs-second-round.json",
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/runs/second_week_day_normal_dates/results.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": [
+      "本轮未运行 Windows/MSVC；修复后在 Windows runner 执行上述条件回归并保存原始输出。",
+      "确认 weekday 错误值如何经 WTSBaseDataMgr::isHoliday 和其他调用点传播。"
+    ]
+  },
+  {
+    "lane": "l01_share_wtsutils",
+    "id": "BUG-L01-019",
+    "decision": "NOT_BUG",
+    "evidence_level": "LOCAL_REPRO",
+    "source_evidence": [
+      "src/Share/CodeHelper.hpp:242-264",
+      "src/Share/CodeHelper.hpp:603-606",
+      "updatelog.md:122-130"
+    ],
+    "test_evidence": [
+      "src/TestUnits/coverage/r12_headers/r12_codehelper_test.cpp:207-215",
+      "src/TestUnits/coverage/l01_share_wtsutils/l01_codehelper_test.cpp:146-154"
+    ],
+    "input_reachability": "CodeHelper::stdCodeToStdCommID2 是 public helper，但仓内没有非测试生产调用点。当前标准股票代码是三段 SSE.STK.600000；SSE.600000 属于 0.8.0 已明确停止支持的简写。",
+    "oracle_basis": "updatelog.md 0.8.0 明确要求股票代码标准化成 SSE.STK.600000 并停止支持 SSE.600000。历史提交 1f5f2b3c 删除简写映射；当前两段码原样返回与该合同一致。CodeHelper::extractStdCode 当前注释也用 SSE.STK.600000 作为标准输入。",
+    "reason": "候选行为来自 CodeHelper.hpp:245 的旧注释示例，但 0.8.0 更新日志和 1f5f2b3c 历史变更明确废弃该简写；代码当前保留两段代码原样返回符合生效合同，仓内没有当前生产调用。本轮刷新后二进制上，R12 规范股票输入测试和 L01 两段代码对照测试分别 1/1 PASS；二进制 SHA-256 为 99f535d45e79aa664cf767dfb86d541fcc419386a5f88caf9af8179fe2972556。当前测试注释已按规范输入更新。",
+    "root_cause": "产品行为没有已证实缺陷；CodeHelper.hpp:245 仍保留与 0.8.0 更新记录冲突的历史简写示例，但当前有效代码合同、生产路径和测试期望均不支持该简写。",
+    "fix": "无需转换逻辑修复；保持 0.8.0 规范股票代码合同，当前测试用规范三段码与两段码恒等输入验证该行为。",
+    "acceptance": "当前刷新后的 CoverageTests 中，r12_codehelper.std_code_to_std_comm_id_and_opt_raw 与 l01_codehelper.std_code_to_std_comm_id 均 1/1 PASS；断言 SSE.STK.600000 -> SSE.STK，且 SSE.STK 两段码原样返回，不要求 SSE.600000 简写映射。",
+    "canonical": null,
+    "test_change_requests": [],
+    "execution_refs": [
+      "docs/迭代计划/迭代02/复核185/evidence/01_share/sse-code-contract-history.md",
+      "docs/迭代计划/迭代02/复核185/evidence/final-fix/runs.json",
+      "docs/迭代计划/迭代02/复核185/evidence/final-fix/stock.log",
+      "docs/迭代计划/迭代02/复核185/evidence/final-fix/stock.xml",
+      "docs/迭代计划/迭代02/复核185/evidence/final-fix/code.xml"
+    ],
+    "decision_request": null,
+    "external_blocker": null,
+    "local_remaining": []
+  }
+]

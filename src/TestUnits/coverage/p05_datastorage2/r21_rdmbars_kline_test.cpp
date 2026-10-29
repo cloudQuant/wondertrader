@@ -104,13 +104,9 @@ TEST_F(R21ReaderADTest, DayKlineWindowBeforeFirstBarReturnsWholeLoadedRange)
 }
 
 // ---------------------------------------------------------------------------
-// 第三次取同交易所同周期的库：命中分支 :417 `return std::move(it->second)`
-// 把缓存项掏空 → 第 3 次拿到空句柄 → :293-294 静默返回 NULL
-//   第 1 次：miss → open + 存键 "XEX" → 有效句柄 → 切片 3 根
-//   第 2 次：find("XEX") 命中 → 搬走缓存项 → 仍有效 → 切片 3 根（开环次数仍为 1）
-//   第 3 次：find("XEX") 命中但值为空 → 返回 NULL
+// 同一交易所同周期库重复读取：每次都应返回请求窗口内相同的 3 根历史 bar。
 // ---------------------------------------------------------------------------
-TEST_F(R21ReaderADTest, ThirdKlineLookupOfSameExchangeReturnsNullAfterCacheHandleMovedOut)
+TEST_F(R21ReaderADTest, RepeatedKlineLookupOfSameExchangeReturnsCachedBars)
 {
 	init_reader();
 	put_bar_db("day", K2_EXCHG, K2_CODE, four_day_bars(), true);
@@ -129,18 +125,24 @@ TEST_F(R21ReaderADTest, ThirdKlineLookupOfSameExchangeReturnsNullAfterCacheHandl
 
 	WTSKlineSlice* third = reader()->readKlineSliceByRange(K2_STD, KP_DAY,
 		202401020930ull, 202401041500ull);
-	// R21-BUG-05（与 R4-BUG-02 同形）：第三次起静默丢数据，没有任何 LL_ERROR 日志
-	EXPECT_EQ(third, nullptr);
-	EXPECT_EQ(sink()->count_of(LL_ERROR), 0u);
-	EXPECT_EQ(sink()->count_containing("day db of XEX opened"), 1u);
+	ASSERT_TRUE(third != NULL);
+	ASSERT_EQ(third->get_block_counts(), (std::size_t)1);
+	ASSERT_EQ(third->get_block_size(0), 3u);
+	const WTSBarStruct* out = (const WTSBarStruct*)third->get_block_addr(0);
+	ASSERT_TRUE(out != NULL);
+	const uint32_t want_date[3] = { 20240102, 20240103, 20240104 };
+	for (uint32_t i = 0; i < 3; i++)
+	{
+		EXPECT_EQ(out[i].date, want_date[i]);
+		EXPECT_NEAR(out[i].close, 101.0 + i, 1e-9);
+	}
+	third->release();
 }
 
 // ---------------------------------------------------------------------------
-// 同一交易所、不同合约：交易所级共享一个库句柄 → 第 3 个合约直接查不到数
-//   rb2409 首读（开环 1 次）、rb2410 次读（命中被掏空前的句柄，仍可用）、
-//   rb2411 三读（空句柄 → NULL）
+// 同一交易所的不同合约都应保留各自有效的历史 bar。
 // ---------------------------------------------------------------------------
-TEST_F(R21ReaderADTest, ThirdCodeOfSameExchangeFailsBecauseOneHandleServesTheWholeExchange)
+TEST_F(R21ReaderADTest, ThirdCodeOfSameExchangeReturnsItsBars)
 {
 	init_reader();
 
@@ -176,8 +178,14 @@ TEST_F(R21ReaderADTest, ThirdCodeOfSameExchangeFailsBecauseOneHandleServesTheWho
 
 	WTSKlineSlice* sc = reader()->readKlineSliceByRange("XEX.rb.rb2411", KP_DAY,
 		202401020930ull, 202401021500ull);
-	EXPECT_EQ(sc, nullptr);
-	EXPECT_EQ(sink()->count_containing("day db of XEX opened"), 1u);
+	ASSERT_TRUE(sc != NULL);
+	ASSERT_EQ(sc->get_block_counts(), (std::size_t)1);
+	ASSERT_EQ(sc->get_block_size(0), 1u);
+	const WTSBarStruct* out_c = (const WTSBarStruct*)sc->get_block_addr(0);
+	ASSERT_TRUE(out_c != NULL);
+	EXPECT_EQ(out_c[0].date, 20240102u);
+	EXPECT_NEAR(out_c[0].close, 501.0, 1e-9);
+	sc->release();
 }
 
 // ---------------------------------------------------------------------------

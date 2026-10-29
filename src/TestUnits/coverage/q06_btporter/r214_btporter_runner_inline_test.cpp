@@ -16,7 +16,7 @@
  * 使该头按用户头编译；后续 `WtBtPorter/WtBtRunner.h` 被 `#pragma once` 挡掉。
  *
  * 边界：只在栈上构造未初始化实例，不配置、不跑回放、不起线程；
- * hft_mocker 未进构造函数初始化列表（BUG-Q06-003），只执行 getter 不断言其值。
+ * hft_mocker 未进构造函数初始化列表（BUG-Q06-003），修复构造初始化后才能验证该 getter。
  */
 #include "../../../WtBtPorter/WtBtRunner.h"
 
@@ -62,8 +62,6 @@ TEST(R214BtRunnerInline, AccessorsAndExtLoaderFlags)
 
 	EXPECT_EQ(nullptr, runner.cta_mocker());
 	EXPECT_EQ(nullptr, runner.sel_mocker());
-	/* BUG-Q06-003：_hft_mocker 未初始化，只驱动 getter，不对返回值做断言。 */
-	(void)runner.hft_mocker();
 	EXPECT_NE(nullptr, &runner.replayer());
 	EXPECT_FALSE(runner.isAsync());
 

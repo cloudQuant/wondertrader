@@ -78,6 +78,10 @@ protected:
 	{
 		m_sInfo = WTSSessionInfo::create("NONE", "无偏移时段", 0);
 		m_sInfo->addTradingSection(900, 1000);
+
+		m_sInfoTwo = WTSSessionInfo::create("TWO", "两小节", 0);
+		m_sInfoTwo->addTradingSection(900, 1000);
+		m_sInfoTwo->addTradingSection(1030, 1130);
 	}
 
 	void TearDown() override
@@ -95,11 +99,12 @@ protected:
 			v->release();
 		m_arrays.clear();
 		m_sInfo->release();
+		m_sInfoTwo->release();
 	}
 
-	WTSKlineSlice* newSlice(std::vector<WTSBarStruct>& store)
+	WTSKlineSlice* newSlice(std::vector<WTSBarStruct>& store, WTSKlinePeriod period = KP_Minute1)
 	{
-		WTSKlineSlice* s = WTSKlineSlice::create(kCode, KP_Minute1, 1, store.data(), (uint32_t)store.size());
+		WTSKlineSlice* s = WTSKlineSlice::create(kCode, period, 1, store.data(), (uint32_t)store.size());
 		m_slices.push_back(s);
 		return s;
 	}
@@ -126,6 +131,7 @@ protected:
 	}
 
 	WTSSessionInfo*	m_sInfo = NULL;
+	WTSSessionInfo*	m_sInfoTwo = NULL;
 	std::vector<WTSKlineData*>	m_klines;
 	std::vector<WTSKlineSlice*>	m_slices;
 	std::vector<WTSTickSlice*>	m_tickSlices;
@@ -193,12 +199,12 @@ TEST_F(P12Extract, Minute1TrimsOpenBarWhenExcluded)
 TEST_F(P12Extract, Minute5ResampleAndAligned)
 {
 	std::vector<WTSBarStruct> bars;
-	bars.push_back(mkMinBar(20240105, 906, 10.0, 1));
-	bars.push_back(mkMinBar(20240105, 911, 11.0, 2));
+	bars.push_back(mkMinBar(20240105, 905, 10.0, 1));
+	bars.push_back(mkMinBar(20240105, 910, 11.0, 2));
 	bars.push_back(mkMinBar(20240105, 915, 12.0, 3));
 
-	WTSKlineSlice* slice = newSlice(bars);
-	// 0906 -> 1 -> 10 -> 0910；0911 -> 6 -> 10 -> 合并；0915 -> 10 -> 20 -> 0920
+	WTSKlineSlice* slice = newSlice(bars, KP_Minute5);
+	// 输入是五分钟基础 bar：0905、0910 -> 0910 桶；0915 -> 0920 桶。
 	WTSKlineData* ret = keep(m_factory.extractMin5Data(slice, 2, m_sInfo, true, false));
 	ASSERT_TRUE(ret != NULL);
 	EXPECT_EQ(KP_Minute5, ret->period());
@@ -207,15 +213,21 @@ TEST_F(P12Extract, Minute5ResampleAndAligned)
 	EXPECT_EQ(TimeUtils::timeToMinBar(20240105, 910), ret->at(0)->time);
 	EXPECT_EQ(20240105u, ret->at(0)->date);	// 该分支取 curBar.date
 	EXPECT_DOUBLE_EQ(3.0, ret->at(0)->vol);
-	EXPECT_DOUBLE_EQ(13.0, ret->at(0)->close);
+	EXPECT_DOUBLE_EQ(11.5, ret->at(0)->close);
 	EXPECT_EQ(TimeUtils::timeToMinBar(20240105, 920), ret->at(1)->time);
+	EXPECT_DOUBLE_EQ(3.0, ret->at(1)->vol);
+	EXPECT_DOUBLE_EQ(12.5, ret->at(1)->close);
 	// 0920 > 原始 0915 -> 未闭合
 	EXPECT_FALSE(ret->isClosed());
 
 	// bAlignSec=true：secMins=[60]，桶落在小节内的第一个 10 分钟点
 	WTSKlineData* aligned = keep(m_factory.extractMin5Data(slice, 2, m_sInfo, true, true));
 	ASSERT_TRUE(aligned != NULL);
-	EXPECT_GE(aligned->size(), 1u);
+	ASSERT_EQ(2u, aligned->size());
+	EXPECT_EQ(TimeUtils::timeToMinBar(20240105, 910), aligned->at(0)->time);
+	EXPECT_DOUBLE_EQ(3.0, aligned->at(0)->vol);
+	EXPECT_EQ(TimeUtils::timeToMinBar(20240105, 920), aligned->at(1)->time);
+	EXPECT_DOUBLE_EQ(3.0, aligned->at(1)->vol);
 
 	EXPECT_EQ(NULL, m_factory.extractMin5Data(slice, 2, NULL, true, false));
 }
@@ -228,17 +240,20 @@ TEST_F(P12Extract, HourAndHalfResample)
 	bars.push_back(mkMinBar(20240105, 1030, 12.0, 3));
 
 	WTSKlineSlice* slice = newSlice(bars);
-	WTSKlineData* hour = keep(m_factory.extractHourData(slice, m_sInfo, true));
+	// 10:30 是第二小节起点；session 覆盖所有输入源 bar。
+	WTSKlineData* hour = keep(m_factory.extractHourData(slice, m_sInfoTwo, true));
 	ASSERT_TRUE(hour != NULL);
 	EXPECT_EQ(KP_Hour, hour->period());
 	EXPECT_EQ(1u, hour->times());
 	ASSERT_EQ(2u, hour->size());
 	EXPECT_EQ(TimeUtils::timeToMinBar(20240105, 1000), hour->at(0)->time);
+	EXPECT_EQ(20240105u, hour->at(0)->date);
 	EXPECT_DOUBLE_EQ(3.0, hour->at(0)->vol);
 	EXPECT_EQ(TimeUtils::timeToMinBar(20240105, 1100), hour->at(1)->time);
+	EXPECT_EQ(20240105u, hour->at(1)->date);
 	EXPECT_FALSE(hour->isClosed());	// 1100 > 原始 1030
 
-	WTSKlineData* hourTrim = keep(m_factory.extractHourData(slice, m_sInfo, false));
+	WTSKlineData* hourTrim = keep(m_factory.extractHourData(slice, m_sInfoTwo, false));
 	ASSERT_TRUE(hourTrim != NULL);
 	EXPECT_EQ(1u, hourTrim->size());
 	EXPECT_TRUE(hourTrim->isClosed());
@@ -284,8 +299,7 @@ TEST_F(P12Extract, DayResampleGroupsByCount)
 	EXPECT_DOUBLE_EQ(15.0, ret->at(0)->high);
 	EXPECT_DOUBLE_EQ(8.0, ret->at(0)->low);
 	EXPECT_DOUBLE_EQ(14.0, ret->at(0)->close);
-	// 注意：日线分组用的是赋值而非累加（add 只保留最后一条）
-	EXPECT_DOUBLE_EQ(5.0, (double)ret->at(0)->add);
+	// add 与期权 ask 共用 union，通用 WTSKlineSlice 不带品种类型；分类型汇总合同待确定。
 	EXPECT_DOUBLE_EQ(20.0, (double)ret->at(0)->hold);
 	EXPECT_EQ(20240103u, ret->at(1)->date);
 	EXPECT_DOUBLE_EQ(7.0, ret->at(1)->vol);

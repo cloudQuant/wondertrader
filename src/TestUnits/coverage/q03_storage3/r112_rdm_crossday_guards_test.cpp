@@ -220,7 +220,7 @@ TEST_F(R112RdmResidualTest, R112RdmMissingAndShortFileGuards)
 	EXPECT_TRUE(_reader.readOrdQueSliceByRange("SSE.STK.610703",
 		20240107090000000ull, 20240107100000000ull) == NULL);
 
-	// 历史 detail / trans 文件缺失
+	// 仅检查物理文件缺失时的 NULL 行为；这不能证明跨类型缓存独立性。
 	EXPECT_TRUE(_reader.readOrdDtlSliceByRange("SSE.STK.620703",
 		20240106090000000ull, 20240106100000000ull) == NULL);
 	EXPECT_TRUE(_reader.readTransSliceByRange("SSE.STK.630703",
@@ -231,21 +231,59 @@ TEST_F(R112RdmResidualTest, R112RdmMissingAndShortFileGuards)
 		20240110090000000ull, 20240110100000000ull) == NULL);
 	EXPECT_TRUE(_reader.readTransSliceByRange("SSE.STK.630702",
 		20240110090000000ull, 20240110100000000ull) == NULL);
+}
 
-	// 先读 queue，把同一 key 放进 _his_ordque_map；随后 detail/trans 会跳过装载，
-	// 直接取各自 map 的默认空块（BUG-R74-001 的确定性表现）
+// NOT_RUN: true cache-order regression. This uses valid queue/detail/trans files
+// for one reader/key and checks each type's record after queue is loaded first.
+// The CMP_V2 reader resizes/appends the backing string and then writes via its old
+// V2-header pointer; append may reallocate it. Keep disabled until the reader path
+// can be exercised safely; missing-file guards above do not stand in for this case.
+TEST_F(R112RdmResidualTest, DISABLED_R112RdmQueueDetailTransCachesAreIndependent)
+{
+	const uint32_t date = 20240105;
+	const char* const stdCode = "SSE.STK.610705";
+	vector<WTSOrdQueStruct> queues = cross_ques(date, 20240104, 40);
+	vector<WTSOrdDtlStruct> details = cross_dtls(date, 20240104, 43);
+	vector<WTSTransStruct> transactions = cross_trans(date, 20240104, 46);
+
+	for (std::size_t i = 0; i < queues.size(); ++i)
+		snprintf(queues[i].code, sizeof(queues[i].code), "%s", "610705");
+	for (std::size_t i = 0; i < details.size(); ++i)
+		snprintf(details[i].code, sizeof(details[i].code), "%s", "610705");
+	for (std::size_t i = 0; i < transactions.size(); ++i)
+		snprintf(transactions[i].code, sizeof(transactions[i].code), "%s", "610705");
+
 	ASSERT_TRUE(write_bytes("his/queue/SSE/20240105/610705.dsb",
-		make_block(BT_HIS_OrdQueue, BLOCK_VERSION_CMP_V2,
-			pack_items(cross_ques(20240105, 20240104, 40)))));
-	WTSOrdQueSlice* q = _reader.readOrdQueSliceByRange("SSE.STK.610705",
+		make_block(BT_HIS_OrdQueue, BLOCK_VERSION_CMP_V2, pack_items(queues))));
+	ASSERT_TRUE(write_bytes("his/orders/SSE/20240105/610705.dsb",
+		make_block(BT_HIS_OrdDetail, BLOCK_VERSION_CMP_V2, pack_items(details))));
+	ASSERT_TRUE(write_bytes("his/trans/SSE/20240105/610705.dsb",
+		make_block(BT_HIS_Trnsctn, BLOCK_VERSION_CMP_V2, pack_items(transactions))));
+
+	// All three physical files exist for the same reader/key; queue is read first.
+	WTSOrdQueSlice* q = _reader.readOrdQueSliceByRange(stdCode,
 		20240105090000000ull, 20240105100000000ull);
 	ASSERT_TRUE(q != NULL);
+	ASSERT_EQ(q->size(), 1u);
+	EXPECT_EQ(q->at(0)->action_time, 93000000u);
+	EXPECT_DOUBLE_EQ(q->at(0)->price, queues[1].price);
 	q->release();
 
-	EXPECT_TRUE(_reader.readOrdDtlSliceByRange("SSE.STK.610705",
-		20240105090000000ull, 20240105100000000ull) == NULL);
-	EXPECT_TRUE(_reader.readTransSliceByRange("SSE.STK.610705",
-		20240105090000000ull, 20240105100000000ull) == NULL);
+	WTSOrdDtlSlice* d = _reader.readOrdDtlSliceByRange(stdCode,
+		20240105090000000ull, 20240105100000000ull);
+	ASSERT_TRUE(d != NULL);
+	ASSERT_EQ(d->size(), 1u);
+	EXPECT_EQ(d->at(0)->action_time, 93000000u);
+	EXPECT_EQ(d->at(0)->index, details[1].index);
+	d->release();
+
+	WTSTransSlice* tr = _reader.readTransSliceByRange(stdCode,
+		20240105090000000ull, 20240105100000000ull);
+	ASSERT_TRUE(tr != NULL);
+	ASSERT_EQ(tr->size(), 1u);
+	EXPECT_EQ(tr->at(0)->action_time, 93000000u);
+	EXPECT_EQ(tr->at(0)->index, transactions[1].index);
+	tr->release();
 }
 
 // WtRdmDtReader.cpp: L492 / L566 / L2451 / L2579

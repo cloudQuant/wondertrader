@@ -250,13 +250,13 @@ TEST(t26_ctploader_flow, incremental_login_reloads_commodities_and_contracts)
 	EXPECT_NEAR(0.08, cont.m_dLongMarginRatio, 1e-9);
 	EXPECT_NEAR(0.09, cont.m_dShortMarginRatio, 1e-9);
 
-	// —— 期权块按「嵌套写、平铺读」的现实形状回读 → 全部读丢（BUG-T26-004/005 的行为钉子）
-	EXPECT_EQ(OT_None, cont.m_optType);					// 顶层没有 optiontype → 0
-	EXPECT_TRUE(cont.m_strUnderlying.empty());			// underlying 嵌在 option 里 → 读到 ""
-	EXPECT_NEAR(0.0, cont.m_strikePrice, 1e-9);			// strike=getDouble("product")=strtod("SR")=0（L666）
-	EXPECT_NEAR(0.0, cont.m_dUnderlyingScale, 1e-9);
-	// altcode 在装载里根本没有对应的读取语句 → 平铺 json 也丢（L651-655 无 m_strAltCode 赋值）
-	EXPECT_TRUE(cont.m_strAltCode.empty());
+	// —— DumpToJson 的合同格式将期权信息嵌在 option 对象中；增量回读应保留每个字段。
+	// fixture 的 optiontype=49 对应 WTSTypes.h 中 OT_Call='1'。
+	EXPECT_EQ(OT_Call, cont.m_optType);
+	EXPECT_EQ("SR510", cont.m_strUnderlying);
+	EXPECT_NEAR(5700.0, cont.m_strikePrice, 1e-9);
+	EXPECT_NEAR(1.0, cont.m_dUnderlyingScale, 1e-9);
+	EXPECT_EQ("SR510", cont.m_strAltCode);
 	ASSERT_TRUE(t26::wait_for([&stub]() { return stub.n_qry_inst_ >= 1u; }));	// 让队列排空、worker 闭嘴
 	std::this_thread::sleep_for(std::chrono::milliseconds(250));
 	pUserApi = NULL;

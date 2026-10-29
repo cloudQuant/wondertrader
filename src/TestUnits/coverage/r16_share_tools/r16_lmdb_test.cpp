@@ -26,7 +26,6 @@ void seed_keys(wtp::WtLMDB& db, char first, int n)
 		ASSERT_TRUE(q.put(keys[i], std::string("v") + keys[i]));
 	q.commit();
 }
-
 struct Captured
 {
 	std::vector<std::string> keys;
@@ -266,11 +265,9 @@ TEST(r16_lmdb, readonly_env_reports_readonly_and_rejects_put)
 	r16tmp::clean("lmdb9");
 }
 
-TEST(r16_lmdb, get_ignores_the_key_and_returns_first_record)
+TEST(r16_lmdb, get_looks_up_the_requested_key)
 {
-	// BUG-R16-09：WtLMDBQuery::get() 用 MDB_NEXT 取「游标的第一条」，传进去的 key 完全没被用。
-	// 因此不存在的键也会返回一条数据。这里喂的输入是 a→va、b→vb，
-	// 期望（实际行为）是：无论查什么键都拿到最小键 a 的值 va。
+	// WtLMDBQuery::get(key) 的接口是按传入键读取；缺失键应返回空串。
 	const std::string dir = r16tmp::file("lmdb10", "env");
 	r16tmp::clean("lmdb10");
 	{
@@ -279,32 +276,15 @@ TEST(r16_lmdb, get_ignores_the_key_and_returns_first_record)
 		seed_keys(db, 'a', 2);
 		wtp::WtLMDBQuery q(db);
 		EXPECT_EQ(std::string("va"), q.get(std::string("a")));
-		EXPECT_EQ(std::string("va"), q.get(std::string("b")));
-		EXPECT_EQ(std::string("va"), q.get(std::string("does_not_exist")));
-	}
-	r16tmp::clean("lmdb10");
-}
-
-TEST(r16_lmdb, DISABLED_get_should_honour_the_key)
-{
-	// 期望行为（见 BUG-R16-09）：按 key 精确取值，不存在的键返回空串。
-	const std::string dir = r16tmp::file("lmdb10", "env2");
-	{
-		wtp::WtLMDB db;
-		ASSERT_TRUE(db.open(dir.c_str()));
-		seed_keys(db, 'a', 2);
-		wtp::WtLMDBQuery q(db);
 		EXPECT_EQ(std::string("vb"), q.get(std::string("b")));
 		EXPECT_EQ(std::string(""), q.get(std::string("does_not_exist")));
 	}
 	r16tmp::clean("lmdb10");
 }
 
-TEST(r16_lmdb, get_all_appends_a_phantom_duplicate_of_the_last_record)
+TEST(r16_lmdb, get_all_returns_each_record_once)
 {
-	// BUG-R16-11：get_all 的循环把「读到 NOTFOUND 之后」的那一轮也 emplace 了。
-	// mdb_cursor_next 返回 NOTFOUND 时不会改写调用方的 MDB_val（mdb.c:5945 提前 return），
-	// 所以末元素是上一条记录的副本，返回值也被抬成 N+1。
+	// get_all 应将每个 key/value 恰好回调一次，返回数应与库中的记录数一致。
 	const std::string dir = r16tmp::file("lmdb11", "env");
 	r16tmp::clean("lmdb11");
 	{
@@ -315,11 +295,16 @@ TEST(r16_lmdb, get_all_appends_a_phantom_duplicate_of_the_last_record)
 		Captured cap;
 		wtp::WtLMDBQuery q(db);
 		int cnt = q.get_all(capture(&cap));
-		EXPECT_EQ(3, cnt);
-		ASSERT_EQ((size_t)3, cap.keys.size());
-		EXPECT_EQ(std::string("x"), cap.keys[0]);
-		EXPECT_EQ(std::string("y"), cap.keys[1]);
-		EXPECT_EQ(std::string("y"), cap.keys[2]);	// 幽灵重复项
+		EXPECT_EQ(2, cnt);
+		EXPECT_EQ((size_t)2, cap.keys.size());
+		EXPECT_EQ((size_t)2, cap.vals.size());
+		if (cap.keys.size() == 2 && cap.vals.size() == 2)
+		{
+			EXPECT_EQ(std::string("x"), cap.keys[0]);
+			EXPECT_EQ(std::string("y"), cap.keys[1]);
+			EXPECT_EQ(std::string("vx"), cap.vals[0]);
+			EXPECT_EQ(std::string("vy"), cap.vals[1]);
+		}
 		EXPECT_EQ(1, cap.calls);
 	}
 	r16tmp::clean("lmdb11");
@@ -345,10 +330,9 @@ TEST(r16_lmdb, DISABLED_get_all_on_empty_db_reads_uninitialised_mdb_val)
 	r16tmp::clean("lmdb12");
 }
 
-TEST(r16_lmdb, open_failure_leaves_member_errno_untouched)
+TEST(r16_lmdb, open_failure_updates_member_error)
 {
-	// BUG-R16-10：open() 里三处 `int _errno = ...` 把成员 _errno 遮蔽了，
-	// 所以打开失败后 has_error() 仍是 false、errmsg() 仍是“成功”文案。
+	// Failed open must expose its error through the public has_error()/errmsg() accessors.
 	const std::string filePath = r16tmp::file("lmdb13", "not_a_dir.txt");
 	{
 		std::ofstream f(filePath, std::ios::binary);
@@ -358,20 +342,10 @@ TEST(r16_lmdb, open_failure_leaves_member_errno_untouched)
 	{
 		wtp::WtLMDB db;
 		EXPECT_FALSE(db.open(filePath.c_str()));		// 同名普通文件不是环境目录
-		EXPECT_FALSE(db.has_error());				// 实际行为：错误码被局部变量吃掉
+		EXPECT_TRUE(db.has_error());
 		const char* msg = db.errmsg();
 		ASSERT_NE(nullptr, msg);
-		EXPECT_STREQ("Successful return: 0", msg);	// mdb_strerror(0)（成员 errno 被局部变量遮蔽）
+		EXPECT_NE('\0', msg[0]);
 	}
-	r16tmp::clean("lmdb13");
-}
-
-TEST(r16_lmdb, DISABLED_open_failure_should_set_member_errno)
-{
-	// 期望行为（见 BUG-R16-10）：open() 失败要把错误码写进成员，便于 has_error()/errmsg() 判断。
-	const std::string filePath = r16tmp::file("lmdb13", "not_a_dir.txt");
-	wtp::WtLMDB db;
-	EXPECT_FALSE(db.open(filePath.c_str()));
-	EXPECT_TRUE(db.has_error());
 	r16tmp::clean("lmdb13");
 }
