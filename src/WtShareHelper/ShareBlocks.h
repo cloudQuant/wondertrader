@@ -12,6 +12,14 @@ typedef std::shared_ptr<BoostMappingFile> MappedFilePtr;
 
 namespace shareblock
 {
+	namespace detail
+	{
+		using Logger = void(*)(uint32_t, const char*);
+		Logger snapshot_logger(Logger* target) noexcept;
+		void update_logger(Logger* target, Logger logger) noexcept;
+		void dispatch_log(Logger logger, uint32_t level, const char* message) noexcept;
+	}
+
 	const char BLK_FLAG[] = "&^%$#@!\0";
 
 	constexpr int FLAG_SIZE = 8;
@@ -48,9 +56,9 @@ namespace shareblock
 		char		_name[32];
 		KeyInfo		_keys[MAX_KEY_CNT];
 		uint16_t	_count;			//数据条数，即key的个数
-		uint16_t	_state;			//状态：0-无效，1-生效
+		uint16_t	_state;			//状态：0-无效，1-生效，2-删除墓碑
 		uint32_t	_offset;		//记录下一个可分配地址的偏移量
-		uint64_t	_updatetime;
+		uint64_t	_updatetime;		//段级更新时间
 		char		_data[1024];	//极端情况下，128个double，刚好是1024，考虑到还有一些int和string，算下来刚好
 
 		template<typename T>
@@ -70,7 +78,7 @@ namespace shareblock
 		char		_flag[8];
 		char		_name[32];
 		SecInfo		_sections[MAX_SEC_CNT];
-		uint64_t	_updatetime;
+		uint64_t	_updatetime;		//单调发布版本；复用既有字段以保持共享文件布局
 		uint32_t	_count;
 
 		_ShmBlock()
@@ -119,17 +127,18 @@ namespace shareblock
 		typedef void(*FuncLogger)(uint32_t, const char*);
 		void	register_logger(FuncLogger logger)
 		{
-			_logger = logger;
+			detail::update_logger(&_logger, logger);
 		}
 
 		template<typename ...Args>
 		void	write_log(uint32_t lvl, const char* format, const Args&... args) noexcept
 		{
-			if (!_logger)
+			FuncLogger logger = detail::snapshot_logger(&_logger);
+			if (!logger)
 				return;
 
 			const char* buffer = fmtutil::format(format, args...);
-			_logger(lvl, buffer);
+			detail::dispatch_log(logger, lvl, buffer);
 		}
 
 		bool	init_master(const char* name, const char* path = "");
@@ -138,14 +147,20 @@ namespace shareblock
 		bool	update_slave(const char* name, bool bForce);
 		bool	release_slave(const char* name);
 
+		// Locking protects each method's internal metadata access. Returned KeyInfo
+		// and string pointers are mapped views and remain caller-synchronized after return.
 		std::vector<std::string>	get_sections(const char* domain);
 		std::vector<KeyInfo*>		get_keys(const char* domain, const char* section);
 
 		uint64_t get_section_updatetime(const char* domain, const char* section);
+		// Publishes the section metadata version. Values written through pointers
+		// returned by allocate_* remain caller-synchronized and are not a snapshot transaction.
 		bool	commit_section(const char* domain, const char* section);
 
 		bool	delete_section(const char* domain, const char*section);
 
+		// allocate_* returns pointers into the mapped file. Their post-return value access
+		// is caller-synchronized; the block version publishes metadata/index changes only.
 		const char* allocate_string(const char* domain, const char* section, const char* key, const char* initVal = "", bool bForceWrite = false);
 		int32_t*	allocate_int32(const char* domain, const char* section, const char* key, int32_t initVal = 0, bool bForceWrite = false);
 		int64_t*	allocate_int64(const char* domain, const char* section, const char* key, int64_t initVal = 0, bool bForceWrite = false);
@@ -199,6 +214,9 @@ namespace shareblock
 		}ShmPair;
 		typedef wt_hashmap<std::string, ShmPair>	ShmBlockMap;
 		ShmBlockMap		_shm_blocks;
+
+		// Caller holds the process-local mutex and the backing file lock.
+		bool	update_slave_locked(const char* name, ShmPair& shm, bool bForce);
 
 		typedef struct _CmdPair
 		{

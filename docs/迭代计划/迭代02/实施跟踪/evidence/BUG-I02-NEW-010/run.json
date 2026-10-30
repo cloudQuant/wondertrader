@@ -1,0 +1,46 @@
+{
+  "scope": "Time32(uint64_t) 现代 epoch 毫秒余数修复；本机完整 R16 share-tools 复测，独立复审待完成。",
+  "source": "src/Share/TimeUtils.hpp:422-433",
+  "target_test": "r16_timeutils.time32_ctor_from_milliseconds_splits_msec",
+  "pre_fix_run": {
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/wt-r16-headers-focused"
+    ],
+    "binary_sha256": "355104a9cb992f0b0141b3bc248e1b5bb45d7fbe7efdfa79fac15162a35913b5",
+    "exit": 1,
+    "gtest": {
+      "tests": 78,
+      "passed": 73,
+      "failures": 5
+    },
+    "relevant_failure": {
+      "test": "r16_timeutils.time32_ctor_from_milliseconds_splits_msec",
+      "expected_time_ms": 93015750,
+      "actual_time_ms": 93015454
+    },
+    "evidence": "pre-fix-expanded-run.log",
+    "note": "修复前完整日志，仅作历史失败复现证据。"
+  },
+  "post_fix_build": {
+    "command": "/opt/homebrew/bin/ninja -C build-cov TestUnits/coverage/CMakeFiles/CoverageTests.dir/r16_share_tools/r16_timeutils_test.cpp.o TestUnits/coverage/CMakeFiles/CoverageTests.dir/r16_share_tools/r16_strutil_stdutils_test.cpp.o TestUnits/coverage/CMakeFiles/CoverageTests.dir/r16_share_tools/r16_ini_boostfile_test.cpp.o",
+    "exit": 0,
+    "evidence": "post-fix-build.log"
+  },
+  "post_fix_run": {
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/wt-r16-headers-focused"
+    ],
+    "cwd": ".",
+    "exit": 0,
+    "binary_sha256": "8123ba8838735a0639a5b2b92a6d50b517b20b124a00fd75d762b0acb4b354e9",
+    "gtest": {
+      "tests": 78,
+      "passed": 78,
+      "failures": 0,
+      "disabled": 0
+    },
+    "evidence": "post-fix-expanded-run.log"
+  },
+  "reproduction": "执行上列 ninja 命令后，用构建记录中同一独立链接命令生成 wt-r16-headers-focused；运行该二进制并筛选 r16_timeutils.time32_ctor_from_milliseconds_splits_msec，或不传 filter 重跑全部 78 项。独立链接命令见 BUG-R16-02/reproduce.sh。",
+  "review": "独立复审未发现 blocker；据此将本条本机定向状态登记为 TEST_PASS。"
+}

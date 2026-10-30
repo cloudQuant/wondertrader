@@ -1,185 +1,183 @@
 /**
  * @file WtExecuterFactory.h
- * @brief 执行器工厂定义文件
- * @details 定义了执行器工厂类和执行单元封装类，用于创建和管理交易执行单元
+ * @brief Execution plugin factory using the versioned plugin ABI.
  */
 #pragma once
+
 #include "IExecCommand.h"
+#include "ExecCommandQuiesce.h"
 #include "../Includes/ExecuteDefs.h"
+#include "../Includes/IExecPluginV2.h"
 #include "../Share/DLLHelper.hpp"
 
 #include <boost/core/noncopyable.hpp>
+#include <atomic>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <vector>
 
 NS_WTP_BEGIN
 
-//////////////////////////////////////////////////////////////////////////
-/**
- * @brief 执行单元封装类
- * @details 因为执行单元是dll里创建的, 如果不封装的话, 直接delete可能会有问题
- * 所以要把工厂指针一起封装到这里, 直接调用工厂实例的deleteUnit方法释放执行单元
- */
-class ExeUnitWrapper
+class ExePluginV2State;
+class ExeFactoryAdmissionState;
+class ExeUnitContextGate;
+
+/** Owns a plugin-created execution unit and keeps its plugin loaded. */
+class ExeUnitWrapper : public IExecCommandQuiesce
 {
 public:
-	/**
-	 * @brief 构造函数
-	 * @param unitPtr 执行单元指针
-	 * @param fact 执行器工厂指针
-	 */
-	ExeUnitWrapper(ExecuteUnit* unitPtr, IExecuterFact* fact) :_unit(unitPtr), _fact(fact) {}
+	ExeUnitWrapper(ExecuteUnit* unitPtr, void* unitHandle,
+		const std::shared_ptr<ExePluginV2State>& plugin,
+		const std::shared_ptr<ExeFactoryAdmissionState>& admissions);
+	/* Source compatibility for in-process test doubles only. The factory loader
+	 * never constructs wrappers through the unversioned plugin interface. */
+	ExeUnitWrapper(ExecuteUnit* unitPtr, IExecuterFact* fact);
+	~ExeUnitWrapper();
 
-	/**
-	 * @brief 析构函数
-	 * @details 调用工厂的deleteExeUnit方法释放执行单元
-	 */
-	~ExeUnitWrapper()
-	{
-		if (_unit)
-		{
-			_fact->deleteExeUnit(_unit);
-		}
-	}
-
-	/**
-	 * @brief 获取执行单元指针
-	 * @return 执行单元指针
-	 */
 	ExecuteUnit* self() { return _unit; }
+	/** Borrowed context identity only; this wrapper does not retain its owner. */
+	const void* initializedContextIdentity() const;
+	bool isInitialized() const;
+	/**
+	 * True only when ABI 2.2 initialization returned a failure status normally
+	 * and the host's immediate destroy_unit callback also returned normally.
+	 * This records the plugin's synchronous failed-init cleanup contract; a null
+	 * self() pointer alone does not establish that cleanup completed safely.
+	 */
+	bool failedInitializationWasSafelyDestroyed() const;
+
+	/** Initialize this unit once. A failed unit is destroyed and cannot be used. */
+	bool initialize(ExecuteContext* ctx, const char* stdCode, WTSVariant* cfg,
+		std::string& error);
+
+	/**
+	 * V2 plugin-unit quiesce hooks. A failed request/wait keeps the plugin unit
+	 * and its module alive so the owning executor can retry. A successfully
+	 * initialized plugin unit must be quiesced before this wrapper is destroyed;
+	 * destroying it after a failed or omitted wait terminates rather than
+	 * releasing code or context that plugin-owned work may still reference.
+	 */
+	void requestQuiesce() override;
+	bool canWaitQuiescedOnCurrentThread() const override;
+	bool waitQuiesced() override;
 
 private:
-	/**
-	 * @brief 执行单元指针
-	 */
-	ExecuteUnit*	_unit;
+	ExecuteUnit* _unit;
+	void* _unit_handle;
+	std::shared_ptr<ExePluginV2State> _plugin;
+	std::shared_ptr<ExeFactoryAdmissionState> _admissions;
+	// Per-unit proxy: order calls are denied until initialization succeeds and
+	// after quiesce begins. Timer registration stays unsupported because the
+	// context API has no unregister contract. Null contexts remain null; the
+	// proxy stays alive through failed destroy_unit and successful quiescence.
+	std::unique_ptr<ExeUnitContextGate> _init_context;
+	IExecuterFact* _legacy_fact;
+	const void* _context_identity;
+	bool _init_attempted;
+	bool _failed_init_cleanup_proven;
+	// Linearizes initialization publication with a concurrent quiesce request.
+	// All plain lifecycle state below is protected by this mutex; plugin hooks
+	// are always invoked after releasing it.
+	mutable std::mutex _lifecycle_mutex;
+	bool _initialized;
+	bool _quiesce_requested;
+	bool _quiesce_request_in_progress;
+	bool _quiesce_request_succeeded;
+	mutable std::atomic<bool> _quiesce_operation_in_progress;
+	bool _quiesced;
+};
 
-	/**
-	 * @brief 执行器工厂指针
-	 */
-	IExecuterFact*	_fact;
+typedef std::shared_ptr<ExeUnitWrapper> ExecuteUnitPtr;
+typedef wt_hashmap<std::string, ExecuteUnitPtr> ExecuteUnitMap;
+
+/**
+ * Factory-scope current-thread preflight for ABI V2 execution plugins.
+ * Call this on the control thread before sending any per-unit quiesce request.
+ * It probes every loaded plugin factory; each plugin checks its active and
+ * initializing units without changing state. A false result means the caller
+ * must not begin the request/wait phase. Repeated calls are safe.
+ */
+class IExecFactoryQuiescePreflight
+{
+public:
+	virtual ~IExecFactoryQuiescePreflight() {}
+	virtual bool preflightQuiesceFactoriesOnCurrentThread() const = 0;
+};
+
+/** Strong-owner snapshot of one live wrapper held by a factory. */
+struct ExecPluginUnitSnapshot
+{
+	ExecQuiesceOwnerPtr owner;
+	bool initialized;
 };
 
 /**
- * @brief 执行单元智能指针类型
+ * Factory-level staged shutdown controls. Config close is a one-way admission
+ * transition that must happen before any factory probe. Unit admission stays
+ * open until every host ingress has drained, then closes before the control
+ * thread waits for in-flight create/initialize operations. Snapshot owners keep
+ * wrappers/modules alive, but do not own ExecuteContext; the coordinator must
+ * prove initialized wrappers are registered by a host and retain that host.
  */
-typedef std::shared_ptr<ExeUnitWrapper>	ExecuteUnitPtr;
-
-/**
- * @brief 执行单元映射表类型
- * @details 哈希表，键为字符串，值为执行单元智能指针
- */
-typedef wt_hashmap<std::string, ExecuteUnitPtr> ExecuteUnitMap;
-
-//////////////////////////////////////////////////////////////////////////
-/**
- * @brief 执行器工厂类
- * @details 用于加载和管理执行器工厂，创建各种类型的执行单元
- */
-class WtExecuterFactory : private boost::noncopyable
+class IExecFactoryQuiesceLifecycle : public IExecFactoryQuiescePreflight
 {
 public:
+	virtual ~IExecFactoryQuiesceLifecycle() {}
+	virtual const void* quiesceFactoryIdentity() const noexcept = 0;
+	/** Irreversible/idempotent admission close; already leased loaders may finish. */
+	virtual void closeFactoryConfigAdmissions() noexcept = 0;
+	/** Irreversible/idempotent admission close; does not wait for current leases. */
+	virtual bool closeUnitAdmissions() noexcept = 0;
+	/** Blocking control-thread wait; false until gates close or for a caller holding a lease. */
+	virtual bool waitForFactoryOperationsQuiesced() = 0;
 	/**
-	 * @brief 析构函数
+	 * Includes all live wrappers, initialized and uninitialized. False clears out.
+	 * The caller must retain host/context owners for initialized wrappers.
 	 */
+	virtual bool snapshotLivePluginUnitOwners(
+		std::vector<ExecPluginUnitSnapshot>& out) const = 0;
+};
+
+/** Loads and owns versioned execution plugins. */
+class WtExecuterFactory : private boost::noncopyable,
+	public IExecFactoryQuiesceLifecycle
+{
+public:
+	WtExecuterFactory();
 	~WtExecuterFactory() {}
 
-public:
-	/**
-	 * @brief 加载执行器工厂
-	 * @param path 执行器工厂动态库所在目录路径
-	 * @return 是否加载成功
-	 */
 	bool loadFactories(const char* path);
-
 	/**
-	 * @brief 创建普通执行单元
-	 * @param name 执行单元名称，格式为“工厂名.单元名”
-	 * @return 执行单元智能指针
+	 * Explicit pre-request phase; unit hooks never invoke this implicitly.
+	 * Requires config/load admission to be closed and no loader in flight. The
+	 * probe is read-only/nonblocking; callbacks run without the factory-map lock.
 	 */
+	bool preflightQuiesceFactoriesOnCurrentThread() const override;
+	const void* quiesceFactoryIdentity() const noexcept override;
+	void closeFactoryConfigAdmissions() noexcept override;
+	bool closeUnitAdmissions() noexcept override;
+	bool waitForFactoryOperationsQuiesced() override;
+	bool snapshotLivePluginUnitOwners(
+		std::vector<ExecPluginUnitSnapshot>& out) const override;
+
 	ExecuteUnitPtr createExeUnit(const char* name);
-
-	/**
-	 * @brief 创建差价执行单元
-	 * @param name 执行单元名称，格式为“工厂名.单元名”
-	 * @return 执行单元智能指针
-	 */
 	ExecuteUnitPtr createDiffExeUnit(const char* name);
-
-	/**
-	 * @brief 创建套利执行单元
-	 * @param name 执行单元名称，格式为“工厂名.单元名”
-	 * @return 执行单元智能指针
-	 */
 	ExecuteUnitPtr createArbiExeUnit(const char* name);
-
-	/**
-	 * @brief 创建普通执行单元
-	 * @param factname 工厂名称
-	 * @param unitname 单元名称
-	 * @return 执行单元智能指针
-	 */
 	ExecuteUnitPtr createExeUnit(const char* factname, const char* unitname);
-
-	/**
-	 * @brief 创建差价执行单元
-	 * @param factname 工厂名称
-	 * @param unitname 单元名称
-	 * @return 执行单元智能指针
-	 */
 	ExecuteUnitPtr createDiffExeUnit(const char* factname, const char* unitname);
-
-	/**
-	 * @brief 创建套利执行单元
-	 * @param factname 工厂名称
-	 * @param unitname 单元名称
-	 * @return 执行单元智能指针
-	 */
 	ExecuteUnitPtr createArbiExeUnit(const char* factname, const char* unitname);
 
 private:
-	/**
-	 * @brief 执行器工厂信息结构体
-	 * @details 存储执行器工厂的路径、实例、函数指针等信息
-	 */
-	typedef struct _ExeFactInfo
-	{
-		/**
-		 * @brief 模块路径
-		 */
-		std::string		_module_path;
+	ExecuteUnitPtr createUnit(const char* factname, const char* unitname,
+		WtExecPluginV2UnitKind kind);
+	ExecuteUnitPtr createUnit(const char* name, WtExecPluginV2UnitKind kind);
 
-		/**
-		 * @brief 动态库句柄
-		 */
-		DllHandle		_module_inst;
-
-		/**
-		 * @brief 执行器工厂指针
-		 */
-		IExecuterFact*	_fact;
-
-		/**
-		 * @brief 创建执行器工厂的函数指针
-		 */
-		FuncCreateExeFact	_creator;
-
-		/**
-		 * @brief 删除执行器工厂的函数指针
-		 */
-		FuncDeleteExeFact	_remover;
-	} ExeFactInfo;
-
-	/**
-	 * @brief 执行器工厂映射表类型
-	 * @details 哈希表，键为工厂名称，值为工厂信息
-	 */
-	typedef wt_hashmap<std::string, ExeFactInfo> ExeFactMap;
-
-	/**
-	 * @brief 执行器工厂映射表
-	 * @details 存储所有已加载的执行器工厂
-	 */
-	ExeFactMap	_factories;
+	wt_hashmap<std::string, std::shared_ptr<ExePluginV2State> > _factories;
+	mutable std::mutex _factories_mutex;
+	std::shared_ptr<ExeFactoryAdmissionState> _admissions;
+	mutable std::mutex _live_units_mutex;
+	mutable std::vector<std::weak_ptr<ExeUnitWrapper> > _live_units;
 };
-
 
 NS_WTP_END

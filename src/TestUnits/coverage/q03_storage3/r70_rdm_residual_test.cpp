@@ -431,22 +431,165 @@ TEST_F(R70RdmResidualTest, R70RdmHotTickCountAndRangeTail)
 	r2->release();
 }
 
-// ------------------------------------------------------------------ 缺陷复现（不进启用集）
+// ------------------------------------------------------------------ RT HFT 区间边界回归
 // BUG-R70-001：readOrdQueSliceByRange / readOrdDtlSliceByRange / readTransSliceByRange 的
 //   isToday 分支（:670-674 / :845-849 / :1019-1023）在 etime 早于 RT 块首条时，
 //   lower_bound 返回 begin，随后无 eIdx==0 守卫直接 `pItem--; eIdx--;`（size_t 回绕）；
 //   同交易日分支再用回绕后的 eIdx 调 lower_bound，区间 first > last → 未定义行为/崩溃。
-TEST_F(R70RdmResidualTest, DISABLED_R70RdmTodayHftRangeBeforeFirstItemUnderflows)
+TEST_F(R70RdmResidualTest, R70RdmTodayOrderQueueRangeBoundaries)
 {
 	const vector<WTSOrdQueStruct> items = make_queues(kCurTDate, 1);
 	ASSERT_TRUE(write_bytes(rt_hft_file("queue"),
 		make_rt_block<WTSOrdQueStruct>(BT_RT_OrdQueue, kCurTDate, 4, 8, items)));
 
-	// 块内首条 09:30，etime 09:00 → pItem==begin，`pItem-- / eIdx--` 回绕
-	WTSOrdQueSlice* s = _reader.readOrdQueSliceByRange("SSE.STK.600000",
-		20240110090000000ull, 20240110090000000ull);
-	if (s != NULL)
-		s->release();
+	// 09:00 precedes the first visible item (09:30): no range result and no iterator underflow.
+	EXPECT_TRUE(_reader.readOrdQueSliceByRange("SSE.STK.600000",
+		20240110090000000ull, 20240110090000000ull) == NULL);
+
+	// The end is inclusive: an exact first-item endpoint returns that item.
+	WTSOrdQueSlice* first = _reader.readOrdQueSliceByRange("SSE.STK.600000",
+		20240110093000000ull, 20240110093000000ull);
+	ASSERT_TRUE(first != NULL);
+	ASSERT_EQ(first->size(), 1u);
+	EXPECT_EQ(first->at(0)->action_time, 93000000u);
+	first->release();
+
+	// Preserve ordinary inclusive range behavior.
+	WTSOrdQueSlice* normal = _reader.readOrdQueSliceByRange("SSE.STK.600000",
+		20240110093100000ull, 20240110093200000ull);
+	ASSERT_TRUE(normal != NULL);
+	ASSERT_EQ(normal->size(), 2u);
+	EXPECT_EQ(normal->at(0)->action_time, 93100000u);
+	EXPECT_EQ(normal->at(1)->action_time, 93200000u);
+	normal->release();
+
+	// Starts after the final visible entry and inverted windows have no result.
+	EXPECT_TRUE(_reader.readOrdQueSliceByRange("SSE.STK.600000",
+		20240110094000000ull, 20240110094000000ull) == NULL);
+	EXPECT_TRUE(_reader.readOrdQueSliceByRange("SSE.STK.600000",
+		20240110093200000ull, 20240110093100000ull) == NULL);
+
+	// All records sharing the inclusive end timestamp are retained.
+	_reader.clearCache();
+	vector<WTSOrdQueStruct> duplicates = items;
+	duplicates[2].action_time = duplicates[1].action_time;
+	ASSERT_TRUE(write_bytes(rt_hft_file("queue"),
+		make_rt_block<WTSOrdQueStruct>(BT_RT_OrdQueue, kCurTDate, 4, 8, duplicates)));
+	WTSOrdQueSlice* sameTime = _reader.readOrdQueSliceByRange("SSE.STK.600000",
+		20240110093100000ull, 20240110093100000ull);
+	ASSERT_TRUE(sameTime != NULL);
+	ASSERT_EQ(sameTime->size(), 2u);
+	EXPECT_EQ(sameTime->at(0)->action_time, 93100000u);
+	EXPECT_EQ(sameTime->at(1)->action_time, 93100000u);
+	sameTime->release();
+
+	// An empty RT block has no published entry to search.
+	_reader.clearCache();
+	const vector<WTSOrdQueStruct> empty;
+	ASSERT_TRUE(write_bytes(rt_hft_file("queue"),
+		make_rt_block<WTSOrdQueStruct>(BT_RT_OrdQueue, kCurTDate, 0, 4, empty)));
+	EXPECT_TRUE(_reader.readOrdQueSliceByRange("SSE.STK.600000",
+		20240110090000000ull, 20240110090000000ull) == NULL);
+}
+
+TEST_F(R70RdmResidualTest, R70RdmTodayOrderDetailRangeBoundaries)
+{
+	const vector<WTSOrdDtlStruct> items = make_orddtls(kCurTDate, 11);
+	ASSERT_TRUE(write_bytes(rt_hft_file("orders"),
+		make_rt_block<WTSOrdDtlStruct>(BT_RT_OrdDetail, kCurTDate, 4, 8, items)));
+
+	EXPECT_TRUE(_reader.readOrdDtlSliceByRange("SSE.STK.600000",
+		20240110090000000ull, 20240110090000000ull) == NULL);
+
+	WTSOrdDtlSlice* first = _reader.readOrdDtlSliceByRange("SSE.STK.600000",
+		20240110093000000ull, 20240110093000000ull);
+	ASSERT_TRUE(first != NULL);
+	ASSERT_EQ(first->size(), 1u);
+	EXPECT_EQ(first->at(0)->action_time, 93000000u);
+	first->release();
+
+	WTSOrdDtlSlice* normal = _reader.readOrdDtlSliceByRange("SSE.STK.600000",
+		20240110093100000ull, 20240110093200000ull);
+	ASSERT_TRUE(normal != NULL);
+	ASSERT_EQ(normal->size(), 2u);
+	EXPECT_EQ(normal->at(0)->action_time, 93100000u);
+	EXPECT_EQ(normal->at(1)->action_time, 93200000u);
+	normal->release();
+
+	EXPECT_TRUE(_reader.readOrdDtlSliceByRange("SSE.STK.600000",
+		20240110094000000ull, 20240110094000000ull) == NULL);
+	EXPECT_TRUE(_reader.readOrdDtlSliceByRange("SSE.STK.600000",
+		20240110093200000ull, 20240110093100000ull) == NULL);
+
+	_reader.clearCache();
+	vector<WTSOrdDtlStruct> duplicates = items;
+	duplicates[2].action_time = duplicates[1].action_time;
+	ASSERT_TRUE(write_bytes(rt_hft_file("orders"),
+		make_rt_block<WTSOrdDtlStruct>(BT_RT_OrdDetail, kCurTDate, 4, 8, duplicates)));
+	WTSOrdDtlSlice* sameTime = _reader.readOrdDtlSliceByRange("SSE.STK.600000",
+		20240110093100000ull, 20240110093100000ull);
+	ASSERT_TRUE(sameTime != NULL);
+	ASSERT_EQ(sameTime->size(), 2u);
+	EXPECT_EQ(sameTime->at(0)->action_time, 93100000u);
+	EXPECT_EQ(sameTime->at(1)->action_time, 93100000u);
+	sameTime->release();
+
+	_reader.clearCache();
+	const vector<WTSOrdDtlStruct> empty;
+	ASSERT_TRUE(write_bytes(rt_hft_file("orders"),
+		make_rt_block<WTSOrdDtlStruct>(BT_RT_OrdDetail, kCurTDate, 0, 4, empty)));
+	EXPECT_TRUE(_reader.readOrdDtlSliceByRange("SSE.STK.600000",
+		20240110090000000ull, 20240110090000000ull) == NULL);
+}
+
+TEST_F(R70RdmResidualTest, R70RdmTodayTransactionRangeBoundaries)
+{
+	const vector<WTSTransStruct> items = make_transes(kCurTDate, 21);
+	ASSERT_TRUE(write_bytes(rt_hft_file("trans"),
+		make_rt_block<WTSTransStruct>(BT_RT_Trnsctn, kCurTDate, 4, 8, items)));
+
+	EXPECT_TRUE(_reader.readTransSliceByRange("SSE.STK.600000",
+		20240110090000000ull, 20240110090000000ull) == NULL);
+
+	WTSTransSlice* first = _reader.readTransSliceByRange("SSE.STK.600000",
+		20240110093000000ull, 20240110093000000ull);
+	ASSERT_TRUE(first != NULL);
+	ASSERT_EQ(first->size(), 1u);
+	EXPECT_EQ(first->at(0)->action_time, 93000000u);
+	first->release();
+
+	WTSTransSlice* normal = _reader.readTransSliceByRange("SSE.STK.600000",
+		20240110093100000ull, 20240110093200000ull);
+	ASSERT_TRUE(normal != NULL);
+	ASSERT_EQ(normal->size(), 2u);
+	EXPECT_EQ(normal->at(0)->action_time, 93100000u);
+	EXPECT_EQ(normal->at(1)->action_time, 93200000u);
+	normal->release();
+
+	EXPECT_TRUE(_reader.readTransSliceByRange("SSE.STK.600000",
+		20240110094000000ull, 20240110094000000ull) == NULL);
+	EXPECT_TRUE(_reader.readTransSliceByRange("SSE.STK.600000",
+		20240110093200000ull, 20240110093100000ull) == NULL);
+
+	_reader.clearCache();
+	vector<WTSTransStruct> duplicates = items;
+	duplicates[2].action_time = duplicates[1].action_time;
+	ASSERT_TRUE(write_bytes(rt_hft_file("trans"),
+		make_rt_block<WTSTransStruct>(BT_RT_Trnsctn, kCurTDate, 4, 8, duplicates)));
+	WTSTransSlice* sameTime = _reader.readTransSliceByRange("SSE.STK.600000",
+		20240110093100000ull, 20240110093100000ull);
+	ASSERT_TRUE(sameTime != NULL);
+	ASSERT_EQ(sameTime->size(), 2u);
+	EXPECT_EQ(sameTime->at(0)->action_time, 93100000u);
+	EXPECT_EQ(sameTime->at(1)->action_time, 93100000u);
+	sameTime->release();
+
+	_reader.clearCache();
+	const vector<WTSTransStruct> empty;
+	ASSERT_TRUE(write_bytes(rt_hft_file("trans"),
+		make_rt_block<WTSTransStruct>(BT_RT_Trnsctn, kCurTDate, 0, 4, empty)));
+	EXPECT_TRUE(_reader.readTransSliceByRange("SSE.STK.600000",
+		20240110090000000ull, 20240110090000000ull) == NULL);
 }
 
 } // namespace r70

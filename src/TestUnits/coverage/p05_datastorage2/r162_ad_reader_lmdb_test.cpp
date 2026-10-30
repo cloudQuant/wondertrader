@@ -53,11 +53,12 @@ WTSBarStruct make_bar(uint32_t date, uint32_t hhmm, double price)
 	return bar;
 }
 
-WTSTickStruct make_tick_struct(uint32_t date, uint32_t time, double price, double volume)
+WTSTickStruct make_tick_struct_for_code(const char* exchg, const char* code,
+	uint32_t date, uint32_t time, double price, double volume)
 {
 	WTSTickStruct tick;
-	strcpy(tick.exchg, "SSE");
-	strcpy(tick.code, "600000");
+	strcpy(tick.exchg, exchg);
+	strcpy(tick.code, code);
 	tick.trading_date = date;
 	tick.action_date = date;
 	tick.action_time = time;
@@ -70,6 +71,11 @@ WTSTickStruct make_tick_struct(uint32_t date, uint32_t time, double price, doubl
 	tick.total_turnover = price * volume;
 	tick.turn_over = price;
 	return tick;
+}
+
+WTSTickStruct make_tick_struct(uint32_t date, uint32_t time, double price, double volume)
+{
+	return make_tick_struct_for_code("SSE", "600000", date, time, price, volume);
 }
 
 bool put_bar(const std::filesystem::path& dir, const WTSBarStruct& bar)
@@ -90,7 +96,8 @@ bool put_bar(const std::filesystem::path& dir, const WTSBarStruct& bar)
 	return !db.has_error();
 }
 
-bool seed_ticks(const std::filesystem::path& dir, const std::vector<WTSTickStruct>& ticks)
+bool seed_ticks_for_code(const std::filesystem::path& dir, const char* exchg, const char* code,
+	const std::vector<WTSTickStruct>& ticks)
 {
 	std::error_code ec;
 	std::filesystem::create_directories(dir, ec);
@@ -104,11 +111,16 @@ bool seed_ticks(const std::filesystem::path& dir, const std::vector<WTSTickStruc
 	for (const WTSTickStruct& tick : ticks)
 	{
 		const std::string value((const char*)&tick, sizeof(tick));
-		if (!query.put(tick_key("SSE", "600000", tick.trading_date, tick.action_time), value))
+		if (!query.put(tick_key(exchg, code, tick.trading_date, tick.action_time), value))
 			return false;
 	}
 	query.commit();
 	return !db.has_error();
+}
+
+bool seed_ticks(const std::filesystem::path& dir, const std::vector<WTSTickStruct>& ticks)
+{
+	return seed_ticks_for_code(dir, "SSE", "600000", ticks);
 }
 
 } // namespace
@@ -177,6 +189,41 @@ TEST_F(R162AdReaderTest, R162ReaderADMinuteBarsAppendFromLmdb)
 			(uint64_t)20240110 * 1000000000ULL + 93300000ULL));
 	ASSERT_TRUE(ticks2 != NULL);
 	EXPECT_EQ(tick_count(ticks2.get()), 3u);
+	EXPECT_EQ(_rsink->count_containing("Tick db of SSE.600000 opened"), 1u);
+}
+
+TEST_F(R162AdReaderTest, R162ReaderADTickDbCacheSeparatesContractsWithinExchange)
+{
+	ASSERT_TRUE(seed_ticks_for_code(_dir / "ticks" / "SSE" / "600000", "SSE", "600000",
+		{ make_tick_struct_for_code("SSE", "600000", 20240110u, 93000000u, 10.0, 1.0) }));
+	ASSERT_TRUE(seed_ticks_for_code(_dir / "ticks" / "SSE" / "600001", "SSE", "600001",
+		{ make_tick_struct_for_code("SSE", "600001", 20240110u, 93000000u, 20.0, 2.0) }));
+
+	std::unique_ptr<WtDataReaderAD> reader(make_reader());
+	ASSERT_NE(reader, nullptr);
+	const uint64_t etime = (uint64_t)20240110 * 1000000000ULL + 93000000ULL;
+	for (int round = 0; round < 2; ++round)
+	{
+		std::unique_ptr<WTSTickSlice, ReleaseSlice<WTSTickSlice>> first(
+			reader->readTickSlice("SSE.600000", 10, etime));
+		ASSERT_NE(first, nullptr);
+		ASSERT_EQ(tick_count(first.get()), 1u);
+		const WTSTickStruct* first_tick = (const WTSTickStruct*)first->get_block_addr(0);
+		ASSERT_NE(first_tick, nullptr);
+		EXPECT_STREQ(first_tick->code, "600000");
+		EXPECT_DOUBLE_EQ(first_tick->price, 10.0);
+
+		std::unique_ptr<WTSTickSlice, ReleaseSlice<WTSTickSlice>> second(
+			reader->readTickSlice("SSE.600001", 10, etime));
+		ASSERT_NE(second, nullptr);
+		ASSERT_EQ(tick_count(second.get()), 1u);
+		const WTSTickStruct* second_tick = (const WTSTickStruct*)second->get_block_addr(0);
+		ASSERT_NE(second_tick, nullptr);
+		EXPECT_STREQ(second_tick->code, "600001");
+		EXPECT_DOUBLE_EQ(second_tick->price, 20.0);
+	}
+	EXPECT_EQ(_rsink->count_containing("Tick db of SSE.600000 opened"), 1u);
+	EXPECT_EQ(_rsink->count_containing("Tick db of SSE.600001 opened"), 1u);
 }
 
 // WtDataReaderAD.cpp:292-297（日线周期同一追加分支）

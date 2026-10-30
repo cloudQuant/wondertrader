@@ -22,6 +22,8 @@
 #include "../WTSTools/WTSBaseDataMgr.h"
 
 #include <boost/asio.hpp>
+#include <atomic>
+#include <vector>
 
 NS_WTP_BEGIN
 class WTSVariant;
@@ -88,6 +90,10 @@ private:
 	DataManager		_data_mgr;
 	IndexWorkerMgr	_idx_factory;
 	ParserAdapterMgr	_parsers;
+	// Failed external parser candidates remain outside the runnable manager,
+	// but their API may still hold the adapter's SPI pointer. Keep the candidate
+	// and its borrowed runner graph alive until a provider-specific drain exists.
+	std::vector<ParserAdapterPtr> _quarantined_ext_parsers;
 
 	FuncParserEvtCallback	_cb_parser_evt;
 	FuncParserSubCallback	_cb_parser_sub;
@@ -103,6 +109,9 @@ private:
 	typedef std::map<std::string, ExpDumperPtr>  ExpDumpers;
 	ExpDumpers		_dumpers;
 
-	bool _to_exit;
+	std::atomic<bool> _to_exit;
+	bool _startup_blocked; // guarded by parser registry mutex; required init failed
+	bool _parser_registry_started; // guarded with ParserAdapterMgr by registry mutex
+	bool _parser_registry_stopped; // guarded with ParserAdapterMgr by registry mutex
 };
 

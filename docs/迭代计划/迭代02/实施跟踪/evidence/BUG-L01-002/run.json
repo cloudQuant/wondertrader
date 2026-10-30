@@ -1,0 +1,28 @@
+{
+  "scope": "本机 CodeHelper isolated focused suite；13 项全通过；独立复审未发现 blocker。",
+  "command": [
+    "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/wt-codehelper-focused"
+  ],
+  "cwd": ".",
+  "binary_sha256": "9382d6dade4d636f8372603d45a3c95e29744c774d94b4ea1d765e51e2c096a3",
+  "gtest": {
+    "tests": 13,
+    "passed": 13,
+    "failures": 0,
+    "disabled": 0
+  },
+  "build": {
+    "command": "/opt/homebrew/bin/ninja -C build-cov TestUnits/coverage/CMakeFiles/CoverageTests.dir/r12_headers/r12_codehelper_test.cpp.o",
+    "exit": 0,
+    "evidence": "build-v2.log",
+    "scope": "重新编译 r12_codehelper_test.cpp 测试翻译单元。",
+    "link_note": "运行目标为独立测试二进制 wt-codehelper-focused；提供的 v2 构建日志仅含测试对象编译，未保存该 isolated binary 的链接命令。"
+  },
+  "run_evidence": "run-v2.log",
+  "suite": "r12_codehelper",
+  "reproduction_note": "在当前 macOS arm64 构建目录中，对已记录 SHA-256 的 focused binary 执行无 filter 运行命令；若从对象重建，需要重新生成 isolated binary，链接命令未随本次 v2 日志保存。",
+  "review": "独立复审未发现本两项修复的 blocker。",
+  "limitations": [
+    "此为本机 focused suite，不是完整工程测试、跨平台或生产环境验收。"
+  ]
+}

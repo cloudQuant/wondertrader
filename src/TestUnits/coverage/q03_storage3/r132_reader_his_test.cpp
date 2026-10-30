@@ -12,9 +12,8 @@
 //
 // 手法：
 //  - 一律走公开 API（init/read*），不访问私有成员，没有访问权限宏；
-//  - 逐笔 CMP_V2 载荷用伪随机字节填充（价格/量/代码字段），让 zstd 压缩后长度不小于
-//    原始载荷，避免生产代码在 `_buffer.resize()+append()` 之后仍通过旧指针写
-//    `tBlockV2->_version`（BUG-R132-001，缓冲区一旦重分配即悬垂写）；
+//  - HFT 解压/裁剪用例以伪随机字段保持压缩载荷难压缩；独立 R132 回归另用高度重复的
+//    记录断言解压块远大于压缩文件，覆盖实际扩容、缓存隔离、复读及损坏帧处理；
 //  - 临时目录由 q03::Sandbox 管理，TearDown remove_all，不写仓库。
 #include "r52_storage_fixture.h"
 
@@ -212,55 +211,161 @@ TEST_F(R132ReaderHisTest, R132ReaderHisHftCompressedRoundTrip)
 	st->release();
 }
 
-// 缺陷复现（BUG-R132-001）：可高度压缩的 CMP_V2 载荷在 resize+append 后可能重分配，
-// 生产代码仍通过旧指针写 tBlockV2->_version。默认不跑；--gtest_also_run_disabled_tests 可复现。
-TEST_F(R132ReaderHisTest, DISABLED_R132ReaderHisCompressibleQueueDanglingWrite)
+// BUG-R132-001：解压后的记录块远大于 CMP_V2 文件，覆盖缓存字符串扩容路径。
+TEST_F(R132ReaderHisTest, R132ReaderHisCompressibleQueueExpansion)
 {
 	vector<WTSOrdQueStruct> que;
-	que.push_back(make_ordque(20240109, 20240109, 93100000, 41));
-	que.push_back(make_ordque(20240109, 20240109, 93200000, 42));
-	ASSERT_TRUE(write_bytes("his/queue/SSE/20240109/600040.dsb",
-		make_block(BT_HIS_OrdQueue, BLOCK_VERSION_CMP_V2, pack_items(que))));
+	for (uint32_t i = 0; i < 64; i++)
+	{
+		const uint32_t minuteOfDay = 570 + i;
+		const uint32_t hhmm = minuteOfDay / 60 * 100 + minuteOfDay % 60;
+		WTSOrdQueStruct item = make_ordque(20240109, 20240109, hhmm * 100000u, 41 + i);
+		item.price = 50.0;
+		item.order_items = 3;
+		item.qsize = 5;
+		for (uint32_t j = 0; j < 50; j++)
+			item.volumes[j] = 10;
+		que.push_back(item);
+	}
+	const string payload = pack_items(que);
+	const string compressed = make_block(BT_HIS_OrdQueue, BLOCK_VERSION_CMP_V2, payload);
+	ASSERT_LT(compressed.size() * 4, sizeof(HisOrdQueBlock) + payload.size())
+		<< "fixture must expand well beyond the compressed input allocation";
+	ASSERT_TRUE(write_bytes("his/queue/SSE/20240109/600040.dsb", compressed));
 
 	WTSOrdQueSlice* sq = _reader.readOrdQueSlice("SSE.STK.600040", 2, 20240109150000000ull);
 	ASSERT_TRUE(sq != NULL);
-	EXPECT_EQ(sq->size(), 2u);
+	ASSERT_EQ(sq->size(), 2u);
+	EXPECT_EQ(sq->at(0)->action_time, 103200000u);
+	EXPECT_EQ(sq->at(1)->action_time, 103300000u);
 	sq->release();
 }
 
-// 缺陷复现（BUG-R132-002）：readOrdDtlSlice 用 _his_ordque_map 判缓存命中。同一合约/日期
-// 先读过队列后，明细文件即使存在也不会被加载，直接返回 NULL。默认不跑。
-TEST_F(R132ReaderHisTest, DISABLED_R132ReaderHisQueueCachePoisonsDetail)
+// BUG-R132-002：逐笔队列、委托明细、成交必须使用各自独立的历史块缓存。
+// 同一合约/交易日依次访问不同数据类型，并在不同顺序重复读取，确认不会误命中别的类型缓存。
+TEST_F(R132ReaderHisTest, R132ReaderHisOrderQueueDetailAndTransCachesAreIndependent)
 {
+	const auto action_time = [](uint32_t minuteOfDay) {
+		const uint32_t hhmm = minuteOfDay / 60 * 100 + minuteOfDay % 60;
+		return hhmm * 100000u;
+	};
+
 	vector<WTSOrdQueStruct> que;
-	WTSOrdQueStruct q1 = make_ordque(20240109, 20240109, 93100000, 51);
-	WTSOrdQueStruct q2 = make_ordque(20240109, 20240109, 93200000, 52);
-	scramble_ordque(q1);
-	scramble_ordque(q2);
-	que.push_back(q1);
-	que.push_back(q2);
-	ASSERT_TRUE(write_bytes("his/queue/SSE/20240109/600041.dsb",
-		make_block(BT_HIS_OrdQueue, BLOCK_VERSION_CMP_V2, pack_items(que))));
+	for (uint32_t i = 0; i < 64; i++)
+	{
+		WTSOrdQueStruct item = make_ordque(20240109, 20240109, action_time(570 + i), 51 + i);
+		item.price = 50.0;
+		item.order_items = 3;
+		item.qsize = 5;
+		for (uint32_t j = 0; j < 50; j++)
+			item.volumes[j] = 10;
+		que.push_back(item);
+	}
+	const string quePayload = pack_items(que);
+	const string queBlock = make_block(BT_HIS_OrdQueue, BLOCK_VERSION_CMP_V2, quePayload);
+	ASSERT_LT(queBlock.size() * 4, sizeof(HisOrdQueBlock) + quePayload.size());
+	ASSERT_TRUE(write_bytes("his/queue/SSE/20240109/600041.dsb", queBlock));
 
 	vector<WTSOrdDtlStruct> dtl;
-	WTSOrdDtlStruct d1 = make_orddtl(20240109, 20240109, 93100000, 53);
-	WTSOrdDtlStruct d2 = make_orddtl(20240109, 20240109, 93200000, 54);
-	scramble_orddtl(d1);
-	scramble_orddtl(d2);
-	dtl.push_back(d1);
-	dtl.push_back(d2);
-	ASSERT_TRUE(write_bytes("his/orders/SSE/20240109/600041.dsb",
-		make_block(BT_HIS_OrdDetail, BLOCK_VERSION_CMP_V2, pack_items(dtl))));
+	for (uint32_t i = 0; i < 64; i++)
+	{
+		WTSOrdDtlStruct item = make_orddtl(20240109, 20240109, action_time(600 + i), 115 + i);
+		item.index = i;
+		item.price = 51.0;
+		item.volume = 100.0;
+		item.orderid = 700000;
+		item.side = BDT_Buy;
+		item.otype = ODT_LimitPrice;
+		dtl.push_back(item);
+	}
+	const string dtlPayload = pack_items(dtl);
+	const string dtlBlock = make_block(BT_HIS_OrdDetail, BLOCK_VERSION_CMP_V2, dtlPayload);
+	ASSERT_LT(dtlBlock.size() * 4, sizeof(HisOrdDtlBlock) + dtlPayload.size());
+	ASSERT_TRUE(write_bytes("his/orders/SSE/20240109/600041.dsb", dtlBlock));
 
-	WTSOrdQueSlice* sq = _reader.readOrdQueSlice("SSE.STK.600041", 2, 20240109150000000ull);
-	ASSERT_TRUE(sq != NULL);
-	sq->release();
+	vector<WTSTransStruct> trans;
+	for (uint32_t i = 0; i < 64; i++)
+	{
+		WTSTransStruct item = make_trans(20240109, 20240109, action_time(630 + i), 179 + i);
+		item.index = i;
+		item.ttype = TT_Match;
+		item.side = BDT_Buy;
+		item.price = 52.0;
+		item.volume = 200.0;
+		item.askorder = 300000;
+		item.bidorder = 400000;
+		trans.push_back(item);
+	}
+	const string transPayload = pack_items(trans);
+	const string transBlock = make_block(BT_HIS_Trnsctn, BLOCK_VERSION_CMP_V2, transPayload);
+	ASSERT_LT(transBlock.size() * 4, sizeof(HisTransBlock) + transPayload.size());
+	ASSERT_TRUE(write_bytes("his/trans/SSE/20240109/600041.dsb", transBlock));
 
-	// 期望明细仍可读到两条；当前实现因 _his_ordque_map 命中而返回 NULL
 	WTSOrdDtlSlice* sd = _reader.readOrdDtlSlice("SSE.STK.600041", 2, 20240109150000000ull);
 	ASSERT_TRUE(sd != NULL);
-	EXPECT_EQ(sd->size(), 2u);
+	ASSERT_EQ(sd->size(), 2u);
+	EXPECT_EQ(sd->at(0)->action_time, 110200000u);
+	EXPECT_EQ(sd->at(1)->action_time, 110300000u);
 	sd->release();
+
+	WTSTransSlice* st = _reader.readTransSlice("SSE.STK.600041", 2, 20240109150000000ull);
+	ASSERT_TRUE(st != NULL);
+	ASSERT_EQ(st->size(), 2u);
+	EXPECT_EQ(st->at(0)->action_time, 113200000u);
+	EXPECT_EQ(st->at(1)->action_time, 113300000u);
+	st->release();
+	WTSOrdQueSlice* sq = _reader.readOrdQueSlice("SSE.STK.600041", 2, 20240109150000000ull);
+	ASSERT_TRUE(sq != NULL);
+	ASSERT_EQ(sq->size(), 2u);
+	EXPECT_EQ(sq->at(0)->action_time, 103200000u);
+	EXPECT_EQ(sq->at(1)->action_time, 103300000u);
+	sq->release();
+
+	// 独立 reader 对同一文件执行反向首次访问，证明先有队列缓存不会屏蔽后续类型。
+	WtDataReader queueFirstReader;
+	WTSVariant* cfg = _cfg();
+	ASSERT_TRUE(cfg != NULL);
+	queueFirstReader.init(cfg, &_sink, NULL);
+	cfg->release();
+
+	WTSOrdQueSlice* qFirst = queueFirstReader.readOrdQueSlice("SSE.STK.600041", 2, 20240109150000000ull);
+	ASSERT_TRUE(qFirst != NULL);
+	ASSERT_EQ(qFirst->size(), 2u);
+	EXPECT_EQ(qFirst->at(0)->action_time, 103200000u);
+	EXPECT_EQ(qFirst->at(1)->action_time, 103300000u);
+	qFirst->release();
+	WTSOrdDtlSlice* dAfterQueue = queueFirstReader.readOrdDtlSlice("SSE.STK.600041", 2, 20240109150000000ull);
+	ASSERT_TRUE(dAfterQueue != NULL);
+	ASSERT_EQ(dAfterQueue->size(), 2u);
+	EXPECT_EQ(dAfterQueue->at(0)->action_time, 110200000u);
+	EXPECT_EQ(dAfterQueue->at(1)->action_time, 110300000u);
+	dAfterQueue->release();
+	WTSTransSlice* tAfterQueue = queueFirstReader.readTransSlice("SSE.STK.600041", 2, 20240109150000000ull);
+	ASSERT_TRUE(tAfterQueue != NULL);
+	ASSERT_EQ(tAfterQueue->size(), 2u);
+	EXPECT_EQ(tAfterQueue->at(0)->action_time, 113200000u);
+	EXPECT_EQ(tAfterQueue->at(1)->action_time, 113300000u);
+	tAfterQueue->release();
+
+	// 重复读取改按 trans/detail/queue 顺序，核对三个缓存仍各自返回原始记录。
+	WTSTransSlice* tAgain = queueFirstReader.readTransSlice("SSE.STK.600041", 2, 20240109150000000ull);
+	ASSERT_TRUE(tAgain != NULL);
+	ASSERT_EQ(tAgain->size(), 2u);
+	EXPECT_EQ(tAgain->at(0)->action_time, 113200000u);
+	EXPECT_EQ(tAgain->at(1)->action_time, 113300000u);
+	tAgain->release();
+	WTSOrdDtlSlice* dAgain = queueFirstReader.readOrdDtlSlice("SSE.STK.600041", 2, 20240109150000000ull);
+	ASSERT_TRUE(dAgain != NULL);
+	ASSERT_EQ(dAgain->size(), 2u);
+	EXPECT_EQ(dAgain->at(0)->action_time, 110200000u);
+	EXPECT_EQ(dAgain->at(1)->action_time, 110300000u);
+	dAgain->release();
+	WTSOrdQueSlice* qAgain = queueFirstReader.readOrdQueSlice("SSE.STK.600041", 2, 20240109150000000ull);
+	ASSERT_TRUE(qAgain != NULL);
+	ASSERT_EQ(qAgain->size(), 2u);
+	EXPECT_EQ(qAgain->at(0)->action_time, 103200000u);
+	EXPECT_EQ(qAgain->at(1)->action_time, 103300000u);
+	qAgain->release();
 }
 
 // WtDataReader.cpp: 空块/空数据守卫 L585-586、L591-592、L749、L905
@@ -283,6 +388,46 @@ TEST_F(R132ReaderHisTest, R132ReaderHisEmptyBlockAndEmptyRecordSet)
 	ASSERT_TRUE(write_bytes("his/trans/SSE/20240106/600013.dsb",
 		make_block(BT_HIS_Trnsctn, BLOCK_VERSION_CMP_V2, string())));
 	EXPECT_TRUE(_reader.readTransSlice("SSE.STK.600013", 2, 20240106150000000ull) == NULL);
+}
+
+TEST_F(R132ReaderHisTest, R132ReaderHisMalformedCompressedRecordsAreRejected)
+{
+	const auto truncate_frame = [](string block) {
+		if (block.size() > sizeof(BlockHeaderV2) + 1)
+		{
+			block.pop_back();
+			BlockHeaderV2* header = (BlockHeaderV2*)block.data();
+			header->_size = block.size() - sizeof(BlockHeaderV2);
+		}
+		return block;
+	};
+
+	vector<WTSOrdQueStruct> queues(1, make_ordque(20240109, 20240109, 93100000, 61));
+	ASSERT_TRUE(write_bytes("his/queue/SSE/20240109/600014.dsb",
+		truncate_frame(make_block(BT_HIS_OrdQueue, BLOCK_VERSION_CMP_V2, pack_items(queues)))));
+	WTSOrdQueSlice* queueSlice = NULL;
+	EXPECT_NO_THROW(queueSlice = _reader.readOrdQueSlice("SSE.STK.600014", 2, 20240109150000000ull));
+	EXPECT_EQ(queueSlice, nullptr);
+	if (queueSlice != NULL)
+		queueSlice->release();
+
+	vector<WTSOrdDtlStruct> details(1, make_orddtl(20240109, 20240109, 93200000, 62));
+	ASSERT_TRUE(write_bytes("his/orders/SSE/20240109/600015.dsb",
+		truncate_frame(make_block(BT_HIS_OrdDetail, BLOCK_VERSION_CMP_V2, pack_items(details)))));
+	WTSOrdDtlSlice* detailSlice = NULL;
+	EXPECT_NO_THROW(detailSlice = _reader.readOrdDtlSlice("SSE.STK.600015", 2, 20240109150000000ull));
+	EXPECT_EQ(detailSlice, nullptr);
+	if (detailSlice != NULL)
+		detailSlice->release();
+
+	vector<WTSTransStruct> trans(1, make_trans(20240109, 20240109, 93300000, 63));
+	ASSERT_TRUE(write_bytes("his/trans/SSE/20240109/600016.dsb",
+		truncate_frame(make_block(BT_HIS_Trnsctn, BLOCK_VERSION_CMP_V2, pack_items(trans)))));
+	WTSTransSlice* transSlice = NULL;
+	EXPECT_NO_THROW(transSlice = _reader.readTransSlice("SSE.STK.600016", 2, 20240109150000000ull));
+	EXPECT_EQ(transSlice, nullptr);
+	if (transSlice != NULL)
+		transSlice->release();
 }
 
 // WtDataReader.cpp: cacheIntegratedBars L1098-1108/L1114-1122/L1163/L1262-1265

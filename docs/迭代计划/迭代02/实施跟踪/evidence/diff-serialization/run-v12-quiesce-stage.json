@@ -1,0 +1,39 @@
+{
+  "suite": "WtDiffExecuterConcurrencyTest",
+  "binary": "build-cov/build_x64/Debug/bin/TestUnits/wt-diff-focused",
+  "binary_sha256": "651f682e32074316ab0d0445c1dd07ef75dab12e3996c3f444a6b0a983f96333",
+  "stage_version": true,
+  "object_build_logs": [
+    "build-v12-quiesce-stage.log"
+  ],
+  "rebuilt_objects": [
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/WtDiffExecuter.cpp.o",
+    "build-cov/TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n02_wtcore_engines/n02_diff_concurrency_test.cpp.o",
+    "build-cov/TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n02_wtcore_engines/r120_diff_executer_unit_test.cpp.o"
+  ],
+  "reused_dependencies": [
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/WtExecuterFactory.cpp.o",
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/TraderAdapter.cpp.o",
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/WtHelper.cpp.o",
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/ActionPolicyMgr.cpp.o"
+  ],
+  "link_command": "/usr/bin/c++ -arch arm64 -g -fprofile-instr-generate -Wl,-undefined,dynamic_lookup build-cov/TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n02_wtcore_engines/n02_diff_concurrency_test.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/WtDiffExecuter.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/WtExecuterFactory.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/TraderAdapter.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/WtHelper.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/ActionPolicyMgr.cpp.o /opt/homebrew/lib/libgtest_main.a /opt/homebrew/lib/libgtest.a build-cov/build_x64/Debug/libs/libWTSTools.a build-cov/build_x64/Debug/libs/libWTSUtils.a /usr/local/lib/libiconv.dylib -L/opt/homebrew/lib -lboost_filesystem -lboost_thread -lpthread -o build-cov/build_x64/Debug/bin/TestUnits/wt-diff-focused",
+  "run_command": "build-cov/build_x64/Debug/bin/TestUnits/wt-diff-focused",
+  "run_log": "run-v12-quiesce-stage.log",
+  "tests": 21,
+  "passed": 21,
+  "skipped": 0,
+  "failures": 0,
+  "previous_run": "run-v11.json",
+  "added_coverage": [
+    "Quiesce drains accepted pool FIFO work and rejects new ingress",
+    "Quiesce preflight rejects synchronous callback self-wait",
+    "Quiesce remains incomplete when a callback drops a queued event"
+  ],
+  "review_closed_scope": "Independent review confirmed code-version protection closes the explicit and omitted target batch overwrite cases covered by this suite.",
+  "review_open_findings": [
+    "After a unit has been acquired, a concurrent state invalidation can currently lose the notification without setting sticky incomplete; a fix is in progress.",
+    "There is not yet direct test evidence for pool rejection followed by synchronous fallback."
+  ],
+  "scope": "Stage-only local Diff executor quiesce tests. The 21/21 result does not close the review findings above. Third-party plugin-owned threads and complete Runner integration are unverified. Durable intent before side effects, side-effect-to-tombstone crash/restart behavior, power-loss/fsync durability, other platforms, real brokers, and the full plugin/host chain remain unverified. Independent review is ongoing."
+}

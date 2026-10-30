@@ -3,15 +3,14 @@
  * \project WonderTrader — 覆盖率补写第六波（收发族）lane T3 / TraderDumper
  *
  * 覆盖：Dumper 的回调登记/记录转发（on_account/on_order/on_trade/on_position）、
- *       配置加载分支（Dumper::config）、TraderAdapter 的失败/未就绪分支、
- *       TraderAdapterMgr 的注册/查重/释放。
+ *       配置加载分支（Dumper::config）、TraderAdapter 的失败/未就绪和日期保护分支、
+ *       TraderAdapterMgr 的注册/查重/刷新/释放。
  *
  * 安全约束：
  *   - 全部落盘动作只允许发生在临时目录：用例内 chdir 到 mkdtemp 目录；
- *   - 不连柜台：适配器 init 故意指向一个不存在的交易模块，走 dlopen 失败分支；
+ *   - 不连柜台：模块加载失败用例使用不存在的交易模块；日期保护用例注入只计数查询的假 API；
  *   - 不起线程：Dumper::run()（bOnce 为 for(;;) 死循环、否则起 worker 线程）整条 DISABLED；
- *   - _trader_api 恒为 NULL，因此任何 `if(!_done) _trader_api->xxx()` 之前都先把 _done 置真，
- *     否则就是空指针解引用（见 bug 文件）。
+ *   - 注入的假 API 不起线程、不访问外部环境；其余空 API 回调测试在调用查询前将 _done 置真。
  */
 #include <gtest/gtest.h>
 
@@ -22,9 +21,18 @@
 #include <memory>
 #include <unistd.h>
 #include <cstdlib>
+#include <atomic>
+#include <unordered_map>
+#include <boost/noncopyable.hpp>
+
+#include "ExecuteDefs.h"
+#include "ITraderApi.h"
+
+#define private public
+#include "TraderDumper/TraderAdapter.h"
+#undef private
 
 #include "TraderDumper/Dumper.h"
-#include "TraderDumper/TraderAdapter.h"
 #include "TraderDumper/WtHelper.h"
 #include "TraderDumper/TraderDumper.h"
 
@@ -158,6 +166,25 @@ public:
 	virtual bool isHoliday(const char* /*pid*/, uint32_t /*uDate*/, bool /*isTpl*/ = false) override { return false; }
 	virtual uint32_t calcTradingDate(const char* /*stdPID*/, uint32_t /*uDate*/, uint32_t /*uTime*/, bool /*isSession*/ = false) override { return 0; }
 	virtual uint64_t getBoundaryTime(const char* /*stdPID*/, uint32_t /*tDate*/, bool /*isSession*/ = false, bool /*isStart*/ = true) override { return 0; }
+};
+
+class FakeTraderApi : public ITraderApi
+{
+public:
+	int queryAccount() override
+	{
+		++account_queries;
+		return 0;
+	}
+
+	int queryPositions() override
+	{
+		++position_queries;
+		return 0;
+	}
+
+	int account_queries = 0;
+	int position_queries = 0;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -295,6 +322,7 @@ TEST(dumper, forwards_order_trade_and_position_records)
 
 TEST(dumper, records_are_dropped_when_no_callback_registered)
 {
+	g_cap.reset();
 	Dumper d;
 	// 未 register_callbacks：_cb_* 都是 nullptr，转发必须被跳过而不是崩
 	EXPECT_NO_THROW(d.on_account("ch", 20260105, "CNY", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, true));
@@ -302,6 +330,9 @@ TEST(dumper, records_are_dropped_when_no_callback_registered)
 	EXPECT_NO_THROW(d.on_trade("ch", "SHFE", "ru2601", 20260105, "T", "1", 0, 0, 1, 1, 1, 0, 0, 1, true));
 	EXPECT_NO_THROW(d.on_position("ch", "SHFE", "ru2601", 20260105, 0, 1, 1, 1, 1, 1, 1, 10, true));
 	EXPECT_EQ(0, g_cap.accountCalls);
+	EXPECT_EQ(0, g_cap.orderCalls);
+	EXPECT_EQ(0, g_cap.tradeCalls);
+	EXPECT_EQ(0, g_cap.positionCalls);
 }
 
 TEST_F(TempCwd, dumper_init_with_missing_log_profile_is_a_noop)
@@ -312,7 +343,7 @@ TEST_F(TempCwd, dumper_init_with_missing_log_profile_is_a_noop)
 	EXPECT_NO_THROW(d.release());
 }
 
-TEST_F(TempCwd, dumper_config_registers_adapters_even_when_module_load_failed)
+TEST_F(TempCwd, dumper_config_does_not_register_adapters_when_init_fails)
 {
 	g_adapterMgr.release();
 	const size_t before = g_adapterMgr.size();
@@ -320,39 +351,93 @@ TEST_F(TempCwd, dumper_config_registers_adapters_even_when_module_load_failed)
 	Dumper d;
 	// isFile=true 分支：走 load_from_file（.json 后缀）
 	writeFile("dumper_cfg.json", kCfgOk);
-	ASSERT_TRUE(d.config("dumper_cfg.json", true, dir.c_str()));
-
-	// 三条 traders：active 的 2 条都要注册（其中 channelid="" 的被 addAdapter 拒收）
-	// => 只有 "dump_missing" 真正进入；模块 dlopen 失败但适配器仍被登记
-	EXPECT_EQ(before + 1, g_adapterMgr.size());
-	TraderAdapterPtr ad = g_adapterMgr.getAdapter("dump_missing");
-	ASSERT_TRUE(ad != NULL);
-	EXPECT_STREQ("dump_missing", ad->id());
-	// init 失败（没有交易模块）→ run 必须返回 false，且不得解引用空 api
-	EXPECT_FALSE(ad->run());
-	EXPECT_FALSE(ad->isDone());
-	// 空 channelid 的那条被 addAdapter 挡下
+	EXPECT_FALSE(d.config("dumper_cfg.json", true, dir.c_str()));
+	// 两条 active adapter 均不能初始化：均不得登记到 manager。
+	EXPECT_EQ(before, g_adapterMgr.size());
 	EXPECT_TRUE(g_adapterMgr.getAdapter("") == NULL);
+	EXPECT_TRUE(g_adapterMgr.getAdapter("dump_missing") == NULL);
 
 	g_adapterMgr.release();
 	EXPECT_EQ(0u, g_adapterMgr.size());
 }
 
-TEST_F(TempCwd, dumper_config_from_content_skips_inactive_and_empty_module)
+TEST_F(TempCwd, dumper_config_rejects_active_adapter_with_empty_module)
 {
 	g_adapterMgr.release();
 	const size_t before = g_adapterMgr.size();
 
 	Dumper d;
 	// isFile=false 分支：走 load_from_content(JSON)
-	ASSERT_TRUE(d.config(kCfgNoModule, false, dir.c_str()));
-	// module="" → TraderAdapter::init 返回 false，但 Dumper::config 不看返回值，
-	// 适配器照样登记（:88-92 的返回值被丢弃，见 bug 文件）
-	EXPECT_EQ(before + 1, g_adapterMgr.size());
-	TraderAdapterPtr ad = g_adapterMgr.getAdapter("dump_empty_module");
-	ASSERT_TRUE(ad != NULL);
-	EXPECT_FALSE(ad->run());
+	EXPECT_FALSE(d.config(kCfgNoModule, false, dir.c_str()));
+	EXPECT_EQ(before, g_adapterMgr.size());
+	EXPECT_TRUE(g_adapterMgr.getAdapter("dump_empty_module") == NULL);
 	g_adapterMgr.release();
+}
+
+TEST_F(TempCwd, dumper_config_rejects_invalid_document_and_missing_or_wrong_required_sections)
+{
+	g_adapterMgr.release();
+	Dumper nullConfig;
+	EXPECT_FALSE(nullConfig.config(NULL, false, dir.c_str()));
+	EXPECT_FALSE(nullConfig.config("{}", false, NULL));
+	EXPECT_EQ(0u, g_adapterMgr.size());
+
+	const char* invalidConfigs[] = {
+		"{",
+		"[]",
+		R"({"traders":[]})",
+		R"({"basefiles":{}})",
+		R"({"basefiles":[],"traders":[]})",
+		R"({"basefiles":{},"traders":{}})",
+		R"({"basefiles":{},"traders":[1]})"
+	};
+
+	for (const char* cfg : invalidConfigs)
+	{
+		Dumper d;
+		EXPECT_FALSE(d.config(cfg, false, dir.c_str())) << cfg;
+		EXPECT_EQ(0u, g_adapterMgr.size()) << cfg;
+	}
+
+	writeFile("invalid_dumper_cfg.json", "{");
+	Dumper fromFile;
+	EXPECT_FALSE(fromFile.config("invalid_dumper_cfg.json", true, dir.c_str()));
+	EXPECT_EQ(0u, g_adapterMgr.size());
+}
+
+TEST_F(TempCwd, dumper_config_keeps_optional_config_and_inactive_adapter_compatibility)
+{
+	g_adapterMgr.release();
+	const char* cfg = R"({"basefiles":{},"traders":[{"active":false}]})";
+	Dumper d;
+	EXPECT_TRUE(d.config(cfg, false, dir.c_str()));
+	EXPECT_EQ(0u, g_adapterMgr.size());
+}
+
+TEST_F(TempCwd, dumper_config_rejects_invalid_refresh_span_and_accepts_numeric_yaml_string)
+{
+	g_adapterMgr.release();
+	const char* invalidConfigs[] = {
+		R"({"config":{"refresh_span":0},"basefiles":{},"traders":[]})",
+		R"({"config":{"refresh_span":-1},"basefiles":{},"traders":[]})",
+		R"({"config":{"refresh_span":4294967296},"basefiles":{},"traders":[]})",
+		R"({"config":{"refresh_span":1.5},"basefiles":{},"traders":[]})",
+		R"({"config":{"refresh_span":"1.5"},"basefiles":{},"traders":[]})",
+		R"({"config":{"refresh_span":"invalid"},"basefiles":{},"traders":[]})",
+		R"({"config":{"refresh_span":true},"basefiles":{},"traders":[]})"
+	};
+
+	for (const char* cfg : invalidConfigs)
+	{
+		Dumper d;
+		EXPECT_FALSE(d.config(cfg, false, dir.c_str())) << cfg;
+		EXPECT_EQ(0u, g_adapterMgr.size()) << cfg;
+	}
+
+	Dumper numericString;
+	EXPECT_TRUE(numericString.config(
+		R"({"config":{"refresh_span":"3"},"basefiles":{},"traders":[]})", false, dir.c_str()));
+	EXPECT_EQ(0u, g_adapterMgr.size());
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -383,6 +468,43 @@ TEST_F(TempCwd, adapter_init_rejects_null_params_and_missing_module)
 	EXPECT_STREQ("c", ad.id());
 	EXPECT_EQ(&bd, ad.getBaseDataMgr());
 	EXPECT_FALSE(ad.run());
+}
+
+TEST_F(TempCwd, adapter_date_defaults_to_zero_and_failed_login_refresh_skips_queries)
+{
+	FakeTraderApi api;
+	TraderAdapterMgr mgr;
+	TraderAdapterPtr ad(new TraderAdapter(&mgr));
+	ad->_trader_api = &api;
+
+	EXPECT_EQ(0u, ad->_date);
+	ASSERT_TRUE(mgr.addAdapter("date_guard", ad));
+	mgr.run();
+
+	ad->onLoginResult(false, "bad credentials", 0);
+	EXPECT_TRUE(ad->isDone());
+	mgr.refresh();
+	EXPECT_EQ(0, api.account_queries);
+	EXPECT_EQ(0, api.position_queries);
+
+	mgr.release();
+}
+
+TEST_F(TempCwd, adapter_successful_login_sets_date_and_preserves_queries)
+{
+	FakeTraderApi api;
+	TraderAdapter ad(nullptr);
+	ad._trader_api = &api;
+
+	EXPECT_EQ(0u, ad._date);
+	ad.onLoginResult(true, "ok", 20260302);
+	EXPECT_EQ(20260302u, ad._date);
+	EXPECT_EQ(1, api.position_queries);
+
+	ad.queryPosition();
+	ad.queryFund();
+	EXPECT_EQ(2, api.position_queries);
+	EXPECT_EQ(1, api.account_queries);
 }
 
 TEST_F(TempCwd, adapter_close_event_only_logs_and_connect_failure_marks_done)
@@ -595,9 +717,9 @@ TEST_F(TempCwd, extern_c_entries_route_to_the_singleton_dumper)
 
 	g_adapterMgr.release();
 	const size_t before = g_adapterMgr.size();
-	EXPECT_TRUE(config(kCfgOk, false));
-	// C 入口把 modDir 换成 getBinDir()，仍然只会走到 dlopen 失败分支
-	EXPECT_EQ(before + 1, g_adapterMgr.size());
+	EXPECT_FALSE(config(kCfgOk, false));
+	// C 入口在任一 active adapter 初始化失败时返回 false，且不登记失败项。
+	EXPECT_EQ(before, g_adapterMgr.size());
 
 	release();
 	EXPECT_NO_THROW(getDumper().release());
@@ -633,10 +755,4 @@ TEST(trader_adapter, DISABLED_login_and_connect_success_paths_deref_null_api)
 {
 	GTEST_SKIP() << "handleEvent(WTE_Connect,0):143 / onLoginResult(true):171 / queryFund:185 / "
 					"queryPosition:193 都要 _trader_api->xxx()，且 _date 未初始化（见 bug）";
-}
-
-TEST(dumper, DISABLED_config_without_basefiles_or_traders_crashes)
-{
-	GTEST_SKIP() << "Dumper::config:34 `root->get(\"basefiles\")` 与 :70 `root->get(\"traders\")` "
-					"都未判空，缺任一节即空指针解引用（P0）";
 }

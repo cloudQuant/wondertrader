@@ -23,17 +23,45 @@
  */
 #include <gtest/gtest.h>
 
+#include <cstdint>
+#include <filesystem>
 #include <memory>
 #include <string>
+#include <system_error>
+#include <unordered_map>
 
 #include "Includes/WTSVariant.hpp"
 #include "Share/StdUtils.hpp"
 #include "WtCore/WtHelper.h"
+#include "../n02_wtcore_engines/r160_common.h"
+
+// Pre-include WtRunner's dependencies so the white-box seam below exposes only
+// WtRunner's private trader registry in this test translation unit.
+#include "Includes/ILogHandler.h"
+#include "WtCore/EventNotifier.h"
+#include "WtCore/CtaStrategyMgr.h"
+#include "WtCore/HftStrategyMgr.h"
+#include "WtCore/SelStrategyMgr.h"
+#include "WtCore/WtCtaEngine.h"
+#include "WtCore/WtHftEngine.h"
+#include "WtCore/WtSelEngine.h"
+#include "WtCore/WtLocalExecuter.h"
+#include "WtCore/WtDistExecuter.h"
+#include "WtCore/TraderAdapter.h"
+#include "WtCore/ParserAdapter.h"
+#include "WtCore/WtDtMgr.h"
+#include "WtCore/ActionPolicyMgr.h"
+#include "WTSTools/WTSHotMgr.h"
+#include "WTSTools/WTSBaseDataMgr.h"
+#define private public
 #include "WtRunner/WtRunner.h"
+#undef private
 
 using namespace wtp;
 
 namespace {
+
+namespace runner_fs = std::filesystem;
 
 std::string fixture(const std::string& name)
 {
@@ -129,36 +157,138 @@ std::unique_ptr<WtRunner> make_runner()
 	return std::unique_ptr<WtRunner>(new WtRunner());
 }
 
+class ScopedRunnerInstDir
+{
+public:
+	explicit ScopedRunnerInstDir(const std::string& path)
+		: _old(WtHelper::getInstDir())
+	{
+		WtHelper::setInstDir(path.c_str());
+	}
+
+	~ScopedRunnerInstDir()
+	{
+		WtHelper::setInstDir(_old.c_str());
+	}
+
+private:
+	std::string _old;
+};
+
+class RunnerTraderFixture
+{
+public:
+	explicit RunnerTraderFixture(const std::string& tag)
+		: _temp(tag)
+	{
+		// WtRunner::init resolves its initial install directory from the process CWD.
+		const std::string initLogPath = _temp.path() + "/runner_logcfg.yaml";
+		const std::string initLogCfg =
+			"root:\n    async: false\n    level: error\n    sinks:\n"
+			"    -   filename: " + _temp.path() + "/runner_%s.log\n"
+			"        pattern: '[%Y.%m.%d %H:%M:%S - %-5l] %v'\n"
+			"        truncate: true\n        type: daily_file_sink\n";
+		StdFile::write_file_content(initLogPath.c_str(), initLogCfg);
+		_runner = make_runner();
+		_runner->init(initLogPath);
+
+		const std::string moduleDir = r160::find_module_dir("TraderMocker");
+		if (moduleDir.empty())
+		{
+			_error = "libTraderMocker not found in the test executable's bin directory or its parents";
+			return;
+		}
+
+		_module_name = DLLHelper::wrap_module("TraderMocker", "lib");
+		_module_source = runner_fs::path(moduleDir) / _module_name;
+		if (!runner_fs::exists(_module_source))
+		{
+			_error = "TraderMocker build artifact missing: " + _module_source.string();
+			return;
+		}
+
+		std::error_code ec;
+		runner_fs::create_directories(runner_fs::path(_temp.path()) / "traders", ec);
+		if (ec)
+		{
+			_error = "cannot create temporary traders directory: " + ec.message();
+			return;
+		}
+		runner_fs::create_symlink(_module_source,
+			runner_fs::path(_temp.path()) / "traders" / _module_name, ec);
+		if (ec)
+		{
+			_error = "cannot stage TraderMocker from " + _module_source.string() + ": " + ec.message();
+			return;
+		}
+
+		_cwd.reset(new r160::ScopedCwd(_temp.path()));
+		if (!_cwd->ok())
+		{
+			_error = "cannot change CWD to temporary trader fixture";
+			return;
+		}
+		_instdir.reset(new ScopedRunnerInstDir(_temp.path() + "/"));
+		// All config/data paths now resolve inside the isolated test directory.
+		prepare_base_fixtures();
+		_ready = true;
+	}
+
+	~RunnerTraderFixture()
+	{
+		// The real TraderMocker is initialized but never connected; destroy it
+		// before its staged module and temporary CWD are removed.
+		_runner.reset();
+		_instdir.reset();
+		_cwd.reset();
+	}
+
+	bool ready() const { return _ready; }
+	const std::string& error() const { return _error; }
+	std::string temp_path() const { return _temp.path(); }
+	const runner_fs::path& module_source() const { return _module_source; }
+	WtRunner& runner() { return *_runner; }
+
+private:
+	r160::TempDir _temp;
+	std::unique_ptr<WtRunner> _runner;
+	std::unique_ptr<r160::ScopedCwd> _cwd;
+	std::unique_ptr<ScopedRunnerInstDir> _instdir;
+	std::string _module_name;
+	runner_fs::path _module_source;
+	std::string _error;
+	bool _ready = false;
+};
+
+std::string one_trader_block(const std::string& id, std::uint32_t mockerId,
+	const std::string& module = "TraderMocker")
+{
+	return "-   id: " + id + "\n"
+		+ "    active: true\n"
+		+ "    module: " + module + "\n"
+		+ "    mockerid: " + std::to_string(mockerId) + "\n"
+		+ "    span: 0\n    udp_port: 0\n";
+}
+
 } // namespace
 
 /* =========================================================================
- * 一、三个子初始化器的 active 体（WtRunner.cpp:440~455 / 476~544 / 563~571）
+ * 一、executer 的 active 体（WtRunner.cpp:476~548）
  * ====================================================================== */
 
-TEST(r104_wtrunner_config, traders_parsers_and_all_three_executer_kinds)
+TEST(r104_wtrunner_config, all_three_executer_kinds_without_external_modules)
 {
 	prepare_base_fixtures();
 	std::unique_ptr<WtRunner> runner = make_runner();
 	runner->init(fixture("logcfg.yaml"));
 
 	/*
-	 * config():196~226 traders 字符串/数组段都走数组分支 -> initTraders():557~575
-	 *   :560 active 真 -> :565 new TraderAdapter -> :566 init(module 不存在, 内部返回 false)
-	 *   -> :568 addAdapter -> :570 count++ -> :573 "{} traders loaded"
-	 * config():189~192 parsers 数组 -> initParsers():434~459
-	 *   :437 active 真 -> :440~452（第二条 id 为空 -> :444~448 自动 id）-> :454 count++
 	 * config():231~268 executers 数组 -> initExecuters():470~548
-	 *   :481~507 local（:494~500 能拿到 r104wt_t1，走 setTrader + addSink）
-	 *   :508~534 diff （第一条 trader 也是 r104wt_t1 -> :521~528 的「找到」支；
-	 *                   第二条 trader 不存在 -> :529~531 的错误支）
+	 *   :481~507 local（missing trader 留作 executer 的缺失关联分支）
+	 *   :508~534 diff （覆盖 diff 初始化分支）
 	 *   :535~542 dist
 	 */
 	const std::string cfg = basefiles_block() + env_block() + tail_block()
-		+ "traders:\n"
-		+ "-   id: r104wt_t1\n    active: true\n    module: R104NoSuchTraderModule\n"
-		+ "parsers:\n"
-		+ "-   id: r104wt_p1\n    active: true\n    module: R104NoSuchParserModule\n"
-		+ "-   id: \"\"\n    active: true\n    module: R104NoSuchParserModule\n"
 		+ "executers:\n"
 		+ "-   id: r104wt_e_local\n    active: true\n    name: local\n    trader: r104wt_t1\n"
 		+ "-   id: r104wt_e_diff\n    active: true\n    name: diff\n    trader: r104wt_t1\n"
@@ -171,6 +301,65 @@ TEST(r104_wtrunner_config, traders_parsers_and_all_three_executer_kinds)
 	// 可观察副作用：WtEngine::init_outputs() 在 portfolio/ 下建 trades.csv / closes.csv
 	const std::string pdir = WtHelper::getPortifolioDir();
 	EXPECT_TRUE(StdFile::exists((pdir + "trades.csv").c_str())) << pdir;
+}
+
+TEST(r104_wtrunner_config, active_trader_mocker_initializes_and_is_registered)
+{
+	RunnerTraderFixture fixtureEnv("r104_trader_success");
+	ASSERT_TRUE(fixtureEnv.ready()) << fixtureEnv.error();
+	WtRunner& runner = fixtureEnv.runner();
+
+	const std::string cfg = basefiles_block() + env_block() + tail_block()
+		+ "traders:\n" + one_trader_block("r104wt_trader_ok", 104101);
+	write_fixture("trader_success.yaml", cfg);
+
+	ASSERT_TRUE(runner.config(fixture("trader_success.yaml")))
+		<< "TraderMocker artifact: " << fixtureEnv.module_source().string();
+	EXPECT_EQ(static_cast<size_t>(1), runner._traders.getAdapters().size());
+	EXPECT_NE(nullptr, runner._traders.getAdapter("r104wt_trader_ok"));
+	EXPECT_TRUE(runner_fs::exists(runner_fs::path(fixtureEnv.temp_path()) / "mocker_104101"));
+	// This config/init positive control deliberately does not call run/connect.
+}
+
+TEST(r104_wtrunner_config, active_trader_missing_module_fails_without_registration)
+{
+	RunnerTraderFixture fixtureEnv("r104_trader_missing");
+	ASSERT_TRUE(fixtureEnv.ready()) << fixtureEnv.error();
+	WtRunner& runner = fixtureEnv.runner();
+
+	const std::string cfg = basefiles_block() + env_block() + tail_block()
+		+ "traders:\n" + one_trader_block("r104wt_trader_missing", 104102, "R104MissingTrader");
+	write_fixture("trader_missing.yaml", cfg);
+
+	EXPECT_FALSE(runner.config(fixture("trader_missing.yaml")));
+	EXPECT_TRUE(runner._traders.getAdapters().empty());
+	EXPECT_EQ(nullptr, runner._traders.getAdapter("r104wt_trader_missing"));
+	// Failed configuration must not enter run()'s event loop.
+	runner.run(false);
+}
+
+TEST(r104_wtrunner_config, later_trader_failure_removes_prior_adapter_from_registry)
+{
+	RunnerTraderFixture fixtureEnv("r104_trader_rollback");
+	ASSERT_TRUE(fixtureEnv.ready()) << fixtureEnv.error();
+	WtRunner& runner = fixtureEnv.runner();
+
+	const std::string cfg = basefiles_block() + env_block() + tail_block()
+		+ "traders:\n"
+		+ one_trader_block("r104wt_trader_first", 104103)
+		+ one_trader_block("r104wt_trader_second", 104104, "R104MissingTrader");
+	write_fixture("trader_rollback.yaml", cfg);
+
+	EXPECT_FALSE(runner.config(fixture("trader_rollback.yaml")));
+	// TraderMocker creates this directory during init, proving item 1 initialized
+	// before item 2 failed. The manager's public registry view proves item 1 was
+	// removed. There is no release spy here, so this does not independently prove
+	// how many times the plugin release callback ran.
+	EXPECT_TRUE(runner_fs::exists(runner_fs::path(fixtureEnv.temp_path()) / "mocker_104103"));
+	EXPECT_TRUE(runner._traders.getAdapters().empty());
+	EXPECT_EQ(nullptr, runner._traders.getAdapter("r104wt_trader_first"));
+	EXPECT_EQ(nullptr, runner._traders.getAdapter("r104wt_trader_second"));
+	runner.run(false);
 }
 
 TEST(r104_wtrunner_config, executer_name_defaults_to_local_and_missing_trader_paths)

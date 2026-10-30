@@ -1,0 +1,38 @@
+COMMAND=LLVM_PROFILE_FILE=/tmp/wondertrader-r202-final/r202-%p.profraw build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_wtcore --gtest_filter=R202CtaTicker.*:R202SelTicker.*:R202HftTicker.* --gtest_output=xml:/tmp/wondertrader-r202-final/r202.xml
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R202CtaTicker.*:R202SelTicker.*:R202HftTicker.*
+[==========] Running 10 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 3 tests from R202CtaTicker
+[ RUN      ] R202CtaTicker.ConstructAndStopWithoutEngine
+[       OK ] R202CtaTicker.ConstructAndStopWithoutEngine (0 ms)
+[ RUN      ] R202CtaTicker.FullDayMidnightCloseEndsSessionAndStoresTradingDate
+[       OK ] R202CtaTicker.FullDayMidnightCloseEndsSessionAndStoresTradingDate (120 ms)
+[ RUN      ] R202CtaTicker.OrdinaryCloseStillEndsSessionAndStoresTradingDate
+[       OK ] R202CtaTicker.OrdinaryCloseStillEndsSessionAndStoresTradingDate (121 ms)
+[----------] 3 tests from R202CtaTicker (242 ms total)
+
+[----------] 4 tests from R202HftTicker
+[ RUN      ] R202HftTicker.DataDrivenMinuteCloseReachesStore
+[       OK ] R202HftTicker.DataDrivenMinuteCloseReachesStore (3 ms)
+[ RUN      ] R202HftTicker.FullDayMidnightCloseEndsSessionOnce
+[       OK ] R202HftTicker.FullDayMidnightCloseEndsSessionOnce (115 ms)
+[ RUN      ] R202HftTicker.OrdinaryCloseStillEndsSession
+[       OK ] R202HftTicker.OrdinaryCloseStillEndsSession (115 ms)
+[ RUN      ] R202HftTicker.FullDaySessionCloseLabelAndClockOffsetAreDistinct
+[       OK ] R202HftTicker.FullDaySessionCloseLabelAndClockOffsetAreDistinct (0 ms)
+[----------] 4 tests from R202HftTicker (234 ms total)
+
+[----------] 3 tests from R202SelTicker
+[ RUN      ] R202SelTicker.FullDayMidnightCloseEndsSessionOnce
+[       OK ] R202SelTicker.FullDayMidnightCloseEndsSessionOnce (115 ms)
+[ RUN      ] R202SelTicker.OrdinaryCloseStillEndsSession
+[       OK ] R202SelTicker.OrdinaryCloseStillEndsSession (117 ms)
+[ RUN      ] R202SelTicker.FullDaySessionKeepsExplicitMidnightCloseLabel
+[       OK ] R202SelTicker.FullDaySessionKeepsExplicitMidnightCloseLabel (0 ms)
+[----------] 3 tests from R202SelTicker (233 ms total)
+
+[----------] Global test environment tear-down
+[==========] 10 tests from 3 test suites ran. (711 ms total)
+[  PASSED  ] 10 tests.
+EXIT=0

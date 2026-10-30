@@ -44,6 +44,7 @@
 #include "WtPorter/PorterDefs.h"
 #include "WtPorter/WtPorter.h"
 #include "WtPorter/WtRtRunner.h"
+#include "../trader_mocker_fixture.h"
 
 USING_NS_WTP;
 
@@ -66,6 +67,7 @@ namespace {
 	{
 		std::error_code ec;
 		std::filesystem::remove_all(dir, ec);
+		std::filesystem::remove_all("mocker_82001", ec);
 	}
 
 	void write_text(const std::string& path, const std::string& body)
@@ -100,19 +102,24 @@ namespace {
 
 	const char* kActions = "{}";
 
-	/* 真实上下文用的完整配置：session/commodity/contract/自定义主力规则 + 指定
-	 * env + 一个只有 id 的 trader（TraderAdapter 入表失败但句柄可用，供 HFT 绑定）。 */
+	/* 真实上下文用的完整配置：session/commodity/contract/自定义主力规则 + 指定 env；
+	 * HFT 分支用本地 TraderMocker 正常初始化交易通道。 */
 	std::string real_cfg(const std::string& dir, const char* envName)
 	{
-		return "{\"basefiles\":{"
+		std::string cfg =
+			"{\"basefiles\":{"
 			"\"session\":\"" + dir + "/sessions.json\","
 			"\"commodity\":\"" + dir + "/commodities.json\","
 			"\"contract\":\"" + dir + "/contracts.json\","
 			"\"rules\":{\"R82\":\"" + dir + "/hot.json\"}},"
 			"\"env\":{\"name\":\"" + envName + "\"},"
 			"\"data\":{},"
-			"\"bspolicy\":\"" + dir + "/actions.json\","
-			"\"traders\":[{\"active\":true,\"id\":\"r82_trd\"}]}";
+			"\"bspolicy\":\"" + dir + "/actions.json\"";
+		if (std::string(envName) == "hft")
+			cfg += ",\"traders\":[{\"active\":true,\"id\":\"r82_trd\","
+				"\"module\":\"TraderMocker\",\"mockerid\":82001,\"udp_port\":0}]";
+		cfg += "}";
+		return cfg;
 	}
 
 	/* 每族引擎在新进程里只初始化一次；C API 用例各自可先于其它用例执行。
@@ -151,10 +158,21 @@ namespace {
 			configure_porter(dir, "sel", g_sel_configured);
 	}
 
-	void ensure_hft_configured(const std::string& dir)
+	bool ensure_hft_configured(const std::string& dir,
+		wtp_test::TraderMockerFixture& trader_mocker)
 	{
-		if (need_config(g_hft_configured, "hft"))
-			configure_porter(dir, "hft", g_hft_configured);
+		if (!need_config(g_hft_configured, "hft"))
+			return true;
+
+		getRunner().init((dir + "/r82_absent_logcfg.yaml").c_str(), true, dir.c_str());
+		if (!trader_mocker.install())
+			return false;
+
+		/* WtPorter.cpp:260-266 的 isFile=false 转发支 */
+		config_porter(real_cfg(dir, "hft").c_str(), false);
+		g_current_env = "hft";
+		g_hft_configured = true;
+		return true;
 	}
 
 	void write_real_fixtures(const std::string& dir)
@@ -357,10 +375,17 @@ TEST(R82PorterCapiReal, HftEntriesAndMicroSliceMisses)
 {
 	const std::string dir = prepare_dir("hft");
 	write_real_fixtures(dir);
-	ensure_hft_configured(dir);
+	wtp_test::TraderMockerFixture trader_mocker("r82");
+	if (!ensure_hft_configured(dir, trader_mocker))
+	{
+		clean_dir(dir);
+		FAIL() << "Could not prepare TraderMocker from product output at "
+			<< trader_mocker.product_plugin() << ": " << trader_mocker.error();
+		return;
+	}
 	ASSERT_NE(getRunner().getEngine(), nullptr);
 
-	/* r82_trd 在 config 里以无 module 的 TraderAdapter 入表：id 可用但 API 为空。 */
+	/* r82_trd 使用成功初始化的本地模拟 API；本测试不启动连接/交易线程。 */
 	const CtxHandler h = create_hft_context("r82_hft_real", "r82_trd", false, 0);
 	ASSERT_NE(h, 0U);
 	ASSERT_TRUE(getRunner().getHftContext(h) != NULL);
@@ -510,11 +535,11 @@ TEST(R82RunnerEdges, ConfigFailureArmsAcrossSections)
 	}
 
 	{
-		/* L630-647 + L1068：traders 文件内容不是数组 -> initTraders false。 */
+		/* L630-647 + L1068：traders 文件内容不是数组，config 必须拒绝。 */
 		WtRtRunner* r = new_heap_runner(dir);
 		const std::string cfg = "{\"basefiles\":{},\"traders\":\""
 			+ dir + "/traders_obj.json\"," + tail + "}";
-		EXPECT_TRUE(r->config(cfg.c_str(), false));
+		EXPECT_FALSE(r->config(cfg.c_str(), false));
 	}
 
 	{
@@ -522,7 +547,15 @@ TEST(R82RunnerEdges, ConfigFailureArmsAcrossSections)
 		WtRtRunner* r = new_heap_runner(dir);
 		const std::string cfg = "{\"basefiles\":{},\"traders\":\""
 			+ dir + "/bad.json\"," + tail + "}";
-		EXPECT_TRUE(r->config(cfg.c_str(), false));
+		EXPECT_FALSE(r->config(cfg.c_str(), false));
+	}
+
+	{
+		/* trader 配置路径缺失必须拒绝本轮配置并释放旧交易通道。 */
+		WtRtRunner* r = new_heap_runner(dir);
+		const std::string cfg = "{\"basefiles\":{},\"traders\":\""
+			+ dir + "/missing_traders.json\"," + tail + "}";
+		EXPECT_FALSE(r->config(cfg.c_str(), false));
 	}
 
 	{

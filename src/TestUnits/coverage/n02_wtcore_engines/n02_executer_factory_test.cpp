@@ -227,14 +227,33 @@ TEST(N02ExecuterFactoryTest, LoadFactoriesSkipsDirectoriesAndForeignExtensions)
     EXPECT_EQ(nullptr, factory.createExeUnit("bogus", "unit").get());
 }
 
-TEST(N02ExecuterFactoryTest, LoadFactoriesWithRegularFileThrows)
+TEST(N02ExecuterFactoryTest, LoadFactoriesWithRegularFileReturnsFalseWithoutThrowing)
 {
     TempRoot root("exefact");
     root.write("a_plain_file.dylib", "not a directory");
     WtExecuterFactory factory;
-    // StdFile::exists 对普通文件为真, 但 directory_iterator 会抛 filesystem_error
-    EXPECT_THROW(factory.loadFactories(root.file("a_plain_file.dylib").c_str()),
-                 std::exception);
+    bool loaded = true;
+    EXPECT_NO_THROW(loaded = factory.loadFactories(root.file("a_plain_file.dylib").c_str()));
+    EXPECT_FALSE(loaded);
+}
+
+TEST(N02ExecuterFactoryTest, LoadFactoriesWithUnreadableDirectoryReturnsFalseWithoutThrowing)
+{
+    TempRoot root("exefact");
+    root.mkdir("unreadable_plugins");
+    const std::string path = root.file("unreadable_plugins");
+    std::error_code error;
+    fs::permissions(path, fs::perms::none, fs::perm_options::replace, error);
+    ASSERT_FALSE(error) << error.message();
+
+    WtExecuterFactory factory;
+    bool loaded = true;
+    EXPECT_NO_THROW(loaded = factory.loadFactories(path.c_str()));
+
+    // Restore permissions so TempRoot can reliably clean up the directory.
+    fs::permissions(path, fs::perms::owner_all, fs::perm_options::replace, error);
+    ASSERT_FALSE(error) << error.message();
+    EXPECT_FALSE(loaded);
 }
 
 //////////////////////////////////////////////////////////////////

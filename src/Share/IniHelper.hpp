@@ -52,11 +52,10 @@ private:
 	 */
 	bool						_loaded;
 
-	/**
-	 * @brief 键路径的最大长度
-	 * @details 用于内部构建节名和键名组合路径的缓冲区大小限制
-	 */
-	static const uint32_t MAX_KEY_LENGTH = 64;
+	static std::string makeKeyPath(const char* szSec, const char* szKey)
+	{
+		return std::string(szSec) + "." + szKey;
+	}
 
 public:
 	/**
@@ -76,13 +75,12 @@ public:
 		try
 		{
 			boost::property_tree::ini_parser::read_ini(szFile, _root);
+			_loaded = true;
 		}
 		catch(...)
 		{
 
 		}
-		
-		_loaded = true;
 	}
 
 	/**
@@ -180,9 +178,8 @@ public:
 	 */
 	std::string	readString(const char* szSec, const char* szKey, const char* defVal = "")
 	{
-		static char path[MAX_KEY_LENGTH] = { 0 };
-		snprintf(path, sizeof(path), "%s.%s", szSec, szKey);
-		return readValue<std::string>(path, defVal);
+		const std::string path = makeKeyPath(szSec, szKey);
+		return readValue<std::string>(path.c_str(), defVal);
 	}
 
 	/**
@@ -196,9 +193,8 @@ public:
 	 */
 	int			readInt(const char* szSec, const char* szKey, int defVal = 0)
 	{
-		static char path[MAX_KEY_LENGTH] = { 0 };
-		snprintf(path, sizeof(path), "%s.%s", szSec, szKey);
-		return readValue<int>(path, defVal);
+		const std::string path = makeKeyPath(szSec, szKey);
+		return readValue<int>(path.c_str(), defVal);
 	}
 
 	/**
@@ -212,9 +208,8 @@ public:
 	 */
 	uint32_t	readUInt(const char* szSec, const char* szKey, uint32_t defVal = 0)
 	{
-		static char path[MAX_KEY_LENGTH] = { 0 };
-		snprintf(path, sizeof(path), "%s.%s", szSec, szKey);
-		return readValue<uint32_t>(path, defVal);
+		const std::string path = makeKeyPath(szSec, szKey);
+		return readValue<uint32_t>(path.c_str(), defVal);
 	}
 
 	/**
@@ -229,9 +224,8 @@ public:
 	 */
 	bool		readBool(const char* szSec, const char* szKey, bool defVal = false)
 	{
-		static char path[MAX_KEY_LENGTH] = { 0 };
-		snprintf(path, sizeof(path), "%s.%s", szSec, szKey);
-		return readValue<bool>(path, defVal);
+		const std::string path = makeKeyPath(szSec, szKey);
+		return readValue<bool>(path.c_str(), defVal);
 	}
 
 	/**
@@ -245,9 +239,8 @@ public:
 	 */
 	double		readDouble(const char* szSec, const char* szKey, double defVal = 0.0)
 	{
-		static char path[MAX_KEY_LENGTH] = { 0 };
-		snprintf(path, sizeof(path), "%s.%s", szSec, szKey);
-		return readValue<double>(path, defVal);
+		const std::string path = makeKeyPath(szSec, szKey);
+		return readValue<double>(path.c_str(), defVal);
 	}
 
 	/**
@@ -348,9 +341,8 @@ public:
 	 */
 	void		writeString(const char* szSec, const char* szKey, const char* val)
 	{
-		static char path[MAX_KEY_LENGTH] = { 0 };
-		snprintf(path, sizeof(path), "%s.%s", szSec, szKey);
-		writeValue<std::string>(path, val);
+		const std::string path = makeKeyPath(szSec, szKey);
+		writeValue<std::string>(path.c_str(), val);
 	}
 
 	/**
@@ -364,9 +356,8 @@ public:
 	 */
 	void		writeInt(const char* szSec, const char* szKey, int val)
 	{
-		static char path[MAX_KEY_LENGTH] = { 0 };
-		snprintf(path, sizeof(path), "%s.%s", szSec, szKey);
-		writeValue<int>(path, val);
+		const std::string path = makeKeyPath(szSec, szKey);
+		writeValue<int>(path.c_str(), val);
 	}
 
 	/**
@@ -380,9 +371,8 @@ public:
 	 */
 	void		writeUInt(const char* szSec, const char* szKey, uint32_t val)
 	{
-		static char path[MAX_KEY_LENGTH] = { 0 };
-		snprintf(path, sizeof(path), "%s.%s", szSec, szKey);
-		writeValue<uint32_t>(path, val);
+		const std::string path = makeKeyPath(szSec, szKey);
+		writeValue<uint32_t>(path.c_str(), val);
 	}
 
 	/**
@@ -397,9 +387,8 @@ public:
 	 */
 	void		writeBool(const char* szSec, const char* szKey, bool val)
 	{
-		static char path[MAX_KEY_LENGTH] = { 0 };
-		snprintf(path, sizeof(path), "%s.%s", szSec, szKey);
-		writeValue<bool>(path, val);
+		const std::string path = makeKeyPath(szSec, szKey);
+		writeValue<bool>(path.c_str(), val);
 	}
 
 	/**
@@ -413,8 +402,7 @@ public:
 	 */
 	void		writeDouble(const char* szSec, const char* szKey, double val)
 	{
-		static char path[MAX_KEY_LENGTH] = { 0 };
-		snprintf(path, sizeof(path), "%s.%s", szSec, szKey);
-		writeValue<double>(path, val);
+		const std::string path = makeKeyPath(szSec, szKey);
+		writeValue<double>(path.c_str(), val);
 	}
 };

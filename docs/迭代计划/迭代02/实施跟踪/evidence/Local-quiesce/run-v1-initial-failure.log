@@ -1,0 +1,32 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 15 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 15 tests from R71LocalSerialTest
+[ RUN      ] R71LocalSerialTest.QuiesceDrainsAcceptedCallbacksAndRejectsNewIngress
+[       OK ] R71LocalSerialTest.QuiesceDrainsAcceptedCallbacksAndRejectsNewIngress (61 ms)
+[ RUN      ] R71LocalSerialTest.QuiesceWaitFromPluginCallbackReturnsFalseWithoutBlocking
+[       OK ] R71LocalSerialTest.QuiesceWaitFromPluginCallbackReturnsFalseWithoutBlocking (54 ms)
+[ RUN      ] R71LocalSerialTest.SameCodeCallbacksStayFifoAndReentrantCallbackDoesNotWait
+[       OK ] R71LocalSerialTest.SameCodeCallbacksStayFifoAndReentrantCallbackDoesNotWait (2 ms)
+[ RUN      ] R71LocalSerialTest.InitializationCallbackCanSpawnAndJoinSameCodePositionEvent
+[       OK ] R71LocalSerialTest.InitializationCallbackCanSpawnAndJoinSameCodePositionEvent (3 ms)
+[ RUN      ] R71LocalSerialTest.AccountEventQueuedDuringInitializationRunsAfterSuccessfulReady
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_local_serialization_test.cpp:714: Failure
+Value of: entered
+  Actual: false
+Expected: true
+stock unit did not block inside its channel-ready callback
+
+[  FAILED  ] R71LocalSerialTest.AccountEventQueuedDuringInitializationRunsAfterSuccessfulReady (5007 ms)
+[ RUN      ] R71LocalSerialTest.LatestTargetReconciliationPrecedesTickQueuedDuringInitialization
+[       OK ] R71LocalSerialTest.LatestTargetReconciliationPrecedesTickQueuedDuringInitialization (3 ms)
+[ RUN      ] R71LocalSerialTest.TargetReservationCapturesTicksBeforeCreatorStarts
+[       OK ] R71LocalSerialTest.TargetReservationCapturesTicksBeforeCreatorStarts (1 ms)
+[ RUN      ] R71LocalSerialTest.StrictSyncUnmanagedHoldBecomesAuthoritativeZeroTarget
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_local_serialization_test.cpp:834: Failure
+Value of: local.waitForTargetLogs(1, std::chrono::seconds(5))
+  Actual: false
+Expected: true
+
+[  FAILED  ] R71LocalSerialTest.StrictSyncUnmanagedHoldBecomesAuthoritativeZeroTarget (5011 ms)
+[ RUN      ] R71LocalSerialTest.DifferentContractsCanRunCallbacksInParallel

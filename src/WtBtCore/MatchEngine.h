@@ -97,14 +97,34 @@ class MatchEngine
 {
 public:
 	/**
+	 * @brief Detached copy of one live backtest order.
+	 * @details The snapshot is detached from the matcher's mutable order table,
+	 * so callers can safely retain and inspect it after the query returns.
+	 */
+	struct OrderSnapshot
+	{
+		uint32_t	localid;
+		char		code[32];
+		bool		buy;
+		double		qty;
+		double		left;
+		double		traded;
+		double		price;  ///< Limit price used by the matcher
+		uint32_t	state;  ///< Matcher states: 0=new, 1=active, 9=cancel pending
+		uint64_t	time;   ///< Submission time encoded as YYYYMMDD * 1e9 + HHMMSSsss
+	};
+
+	/**
 	 * @brief 构造函数
 	 * @details 初始化撮合引擎，设置初始参数
 	 */
 	MatchEngine() : _sink(NULL)
-	,_cancelrate(0), _tick_cache(NULL){
+	,_cancelrate(0), _tick_cache(NULL), _next_order_sequence(0){
 		
 	}
 private:
+	friend class MatchEngineTestAccess;
+
 	/**
 	 * @brief 激活待处理的订单
 	 * @details 遍历所有订单，将状态为0的订单激活，并通知回调接口
@@ -120,7 +140,8 @@ private:
 	 * @param curTick 当前Tick数据指针
 	 * @param to_erase 需要删除的订单ID列表
 	 */
-	void	match_orders(WTSTickData* curTick, OrderIDs& to_erase);
+	void	match_orders(const char* stdCode, WTSTickData* curTick, OrderIDs& to_erase,
+		const OrderIDs& cancelPendingAtTickStart);
 	/**
 	 * @brief 更新限价委托账本(Limit Order Book)
 	 * @details 根据当前Tick数据更新内部的委托账本数据，包括当前价格、买一价和卖一价等
@@ -137,6 +158,7 @@ private:
 	 * @return WTSTickData* 返回Tick数据指针，如果不存在则返回NULL
 	 */
 	inline WTSTickData*	grab_last_tick(const char* stdCode);
+	uint64_t next_order_sequence();
 
 public:
 	/**
@@ -212,6 +234,14 @@ public:
 	 */
 	virtual OrderIDs cancel(const char* stdCode, bool isBuy, double qty, FuncCancelCallback cb);
 
+	/**
+	 * @brief 获取指定合约的逐单未完成委托快照
+	 * @details 只导出状态为未激活、活跃或待撤销且剩余数量大于零的订单。
+	 * 空代码表示导出全部合约；返回值为独立数据副本，不引用内部订单表。
+	 * @note 查询须与回测撮合一样在回放线程上执行；返回副本可在查询结束后独立持有。
+	 */
+	std::vector<OrderSnapshot> get_order_snapshots(const char* stdCode) const;
+
 private:
 	/**
 	 * @brief 订单信息结构体
@@ -228,6 +258,7 @@ private:
 		double		_price;         ///< 委托时的市场价格
 		uint32_t	_state;         ///< 订单状态（0-未激活，1-活跃，9-要撤单，99-已撤单）
 		uint64_t	_time;          ///< 订单时间
+		uint64_t	_creation_sequence; ///< Stable insertion order for equal timestamps
 		double		_queue;         ///< 排队位置
 		bool		_positive;      ///< 是否为主动委托（对手价）
 
@@ -299,5 +330,6 @@ private:
 
 	double			_cancelrate;     ///< 撤单率，用于模拟市场中的撤单行为
 	WTSTickCache*	_tick_cache;    ///< Tick数据缓存指针
+	uint64_t		_next_order_sequence; ///< Per-matcher creation order; independent of wrapping local IDs
 };
 

@@ -22,6 +22,16 @@
 
 USING_NS_WTP;
 
+namespace
+{
+	bool isSessionCloseTime(WTSSessionInfo* session, uint32_t minute)
+	{
+		const uint32_t closeTime = session->getCloseTime(true);
+		return session->offsetTime(minute, true) == closeTime ||
+			(minute == 2400 && closeTime == 2400);
+	}
+}
+
 
 WtSelRtTicker::WtSelRtTicker(WtSelEngine* engine)
 	: _engine(engine)
@@ -61,7 +71,13 @@ void WtSelRtTicker::trigger_price(WTSTickData* curTick, uint32_t /*hotFlag*/ /* 
 			for (const std::string& hotCode : hotCodes)
 			{
 				WTSTickData* hotTick = WTSTickData::create(curTick->getTickStruct());
-				hotTick->setCode(hotCode.c_str());
+				if (hotTick == NULL)
+					continue;
+				if (!hotTick->trySetCode(hotCode.c_str()))
+				{
+					hotTick->release();
+					continue;
+				}
 				_engine->on_tick(hotCode.c_str(), hotTick);
 				hotTick->release();
 			}
@@ -127,8 +143,7 @@ void WtSelRtTicker::on_tick(WTSTickData* curTick, uint32_t hotFlag /* = 0 */)
 
 			_engine->on_minute_end(_date, thisMin);
 
-			uint32_t offMin = _s_info->offsetTime(thisMin, true);
-			if (offMin == _s_info->getCloseTime(true))
+			if (isSessionCloseTime(_s_info, thisMin))
 			{
 				_engine->on_session_end();
 			}
@@ -211,7 +226,8 @@ void WtSelRtTicker::run()
 					_engine->on_minute_end(_date, thisMin);
 
 					uint32_t offMin = _s_info->offsetTime(thisMin, true);
-					if (offMin >= _s_info->getCloseTime(true))
+					if (offMin >= _s_info->getCloseTime(true) ||
+						isSessionCloseTime(_s_info, thisMin))
 					{
 						_engine->on_session_end();
 					}

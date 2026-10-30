@@ -1,0 +1,25 @@
+{
+  "suite": "R71LocalSerialTest",
+  "binary": "build-cov/build_x64/Debug/bin/TestUnits/wt-local-focused",
+  "binary_sha256": "74177f903e2105d148f2f583785184af6cb41ecc45134b029c03d7dfe6e4ea14",
+  "object_build_log": "build.log",
+  "run_log": "run.log",
+  "tests": 17,
+  "passed": 17,
+  "failures": 0,
+  "skipped": 0,
+  "exit_code": 0,
+  "run_command": "build-cov/build_x64/Debug/bin/TestUnits/wt-local-focused",
+  "reused_existing_focused_binary": true,
+  "added_coverage": [
+    "Quiesce waits for an ingress producer before draining an accepted target",
+    "A no-pool synchronous callback can request quiesce"
+  ],
+  "fixture_note": "The new cases use the corrected stock fixture.",
+  "previous_attempt": {
+    "log": "run-v1-initial-failure.log",
+    "observation": "Two fixture waits timed out; the subsequent test run ended in SIGSEGV with no stack. The cause is still unknown. Preserve this failure despite the newer passing run."
+  },
+  "quiesce_boundary": "An incomplete sticky state is a conservative permanent failure: it can remain uncleared after a recoverable preflight error. In this state wait returns false immediately without waiting for other active tasks. Callers must retain all owners and APIs; this is not proof that work drained.",
+  "scope": "Local focused harness only. Plugin-owned threads, concrete API/Runner integration, and the unexplained earlier SIGSEGV remain unverified."
+}

@@ -1,0 +1,24 @@
+{
+  "object_build_log": "compile.log",
+  "built_objects": [
+    "build-cov/TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n02_wtcore_engines/n02_diff_concurrency_test.cpp.o",
+    "build-cov/TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n01_wtcore_tradepaths/r220_arbi_serialization_test.cpp.o",
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/WtDiffExecuter.cpp.o",
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/WtArbiExecuter.cpp.o"
+  ],
+  "preexisting_dependencies": [
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/WtExecuterFactory.cpp.o",
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/TraderAdapter.cpp.o",
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/WtHelper.cpp.o",
+    "build-cov/build_x64/Debug/bin/libWtExeFact.dylib"
+  ],
+  "link_command": "/usr/bin/c++ -arch arm64 -g -fprofile-instr-generate -Wl,-undefined,dynamic_lookup build-cov/TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n02_wtcore_engines/n02_diff_concurrency_test.cpp.o build-cov/TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n01_wtcore_tradepaths/r220_arbi_serialization_test.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/WtDiffExecuter.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/WtArbiExecuter.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/WtExecuterFactory.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/TraderAdapter.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/WtHelper.cpp.o /opt/homebrew/lib/libgtest_main.a /opt/homebrew/lib/libgtest.a build-cov/build_x64/Debug/libs/libWTSTools.a build-cov/build_x64/Debug/libs/libWTSUtils.a /usr/local/lib/libiconv.dylib -L/opt/homebrew/lib -lboost_filesystem -lboost_thread -lpthread -o build-cov/build_x64/Debug/bin/TestUnits/wt-diff-arbi-focused",
+  "run_command": "build-cov/build_x64/Debug/bin/TestUnits/wt-diff-arbi-focused --gtest_filter='WtArbiExecuterSerialization.*'",
+  "exit": 0,
+  "binary_sha256": "651e896f82ec667089ac8cf56c641e9ed80bb4ed3c4949b4c5254a0800d4f78f",
+  "tests": 18,
+  "passed": 18,
+  "skipped": 0,
+  "failures": 0,
+  "scope": "Historical local isolated Arbi test run from before the review identified a possible concurrent double-drain between release and first drain. The window remains unfixed and the same-code FIFO fix is pending; this 18/18 filtered run does not cover that window and cannot establish final Arbi acceptance."
+}

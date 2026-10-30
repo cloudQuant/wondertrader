@@ -6,13 +6,9 @@
  *       生命周期查询（init/connect/isConnected/release/subscribe）
  *       与厂商回调 → WTS 结构的转换路径（OnRtnDepthMarketData 等）。
  *
- * 关键约束（见 docs/迭代计划/迭代01/bugs/T3_ctpmini_dumper_femas.md）：
- *   ParserFemas::init() 会 dlopen 厂商库 USTPmduserapiAF，本机不存在 →
- *   m_funcCreator 为空，init 末尾 `m_pUserAPI = m_funcCreator(path)` 必段错误。
- *   因此所有需要 m_pUserAPI 非空的路径（OnRspUserLogin 取交易日、
- *   SubscribeMarketData 真正下发）只能留作 DISABLED，其余用默认构造对象
- *   （m_pUserAPI == NULL）即可安全驱动：源码里每条 API 调用都有
- *   `if(m_pUserAPI)` 守卫。
+ * 厂商库 USTPmduserapiAF 不在本机，因此在线 API 路径由
+ * r105_parserfemas_api_test.cpp 的 fake API 覆盖。init 的加载失败路径返回 false；
+ * 默认构造对象用于这里只覆盖生产代码明确支持的无 API 守卫分支。
  */
 #include <gtest/gtest.h>
 
@@ -259,6 +255,8 @@ TEST(femas_parser, front_connected_emits_connect_event_then_skips_login)
 
 	// OnFrontConnected(:168) 先写日志 + WPE_Connect，再 ReqUserLogin
 	// ReqUserLogin(:347) 因 m_pUserAPI==NULL 早退，不能奔溃
+	// 未通过 connect 启动 API 的孤立回调不能让 parser 报告已连接。
+	EXPECT_FALSE(parser.isConnected());
 	EXPECT_TRUE(sink.hasEvent(WPE_Connect));
 	ASSERT_EQ(1u, sink.events.size());
 	ASSERT_EQ(1u, sink.logs.size());
@@ -274,6 +272,7 @@ TEST(femas_parser, front_disconnect_reports_close_event_and_reason)
 
 	parser.OnFrontDisconnected(-9);
 
+	EXPECT_FALSE(parser.isConnected());
 	EXPECT_TRUE(sink.hasEvent(WPE_Close));
 	ASSERT_EQ(1u, sink.logs.size());
 	// 错误码要出现在日志里（:207）
@@ -477,13 +476,7 @@ TEST(femas_parser, extern_c_factory_round_trip)
 	deleteParser(p);			// 二次删除必须安全
 }
 
-TEST(femas_parser, DISABLED_init_needs_vendor_dylib_and_null_creator_crashes)
-{
-	GTEST_SKIP() << "ParserFemas::init(:118-130) dlopen 失败后 m_funcCreator 为空，"
-					"末尾直接调用空函数指针必 SIGSEGV；缺厂商 shim 无法进入";
-}
-
 TEST(femas_parser, DISABLED_login_rsp_last_true_calls_null_api)
 {
-	GTEST_SKIP() << "OnRspUserLogin(:183) bIsLast=true 时 m_pUserAPI->GetTradingDay() 解引用空指针";
+	GTEST_SKIP() << "测试强制调用仅由厂商 API 驱动的成功回调，但 parser 没有已初始化 API";
 }

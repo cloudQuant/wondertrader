@@ -409,6 +409,19 @@ namespace
 		std::memset(&f, 0, sizeof(f));
 		return f;
 	}
+
+	WTSVariant* r61_mini_config(const std::string& broker = "9999", const std::string& user = "tester",
+		const std::string& pass = "secret", const std::string& appid = "app", const std::string& authcode = "auth")
+	{
+		WTSVariant* cfg = WTSVariant::createObject();
+		cfg->append("front", "tcp://127.0.0.1:1");
+		cfg->append("broker", broker.c_str());
+		cfg->append("user", user.c_str());
+		cfg->append("pass", pass.c_str());
+		cfg->append("appid", appid.c_str());
+		cfg->append("authcode", authcode.c_str());
+		return cfg;
+	}
 }
 
 /* TraderCTPMini.cpp:43-57 —— 冒号剔除 + to_uint32 */
@@ -460,6 +473,52 @@ TEST(R61_TraderCTPMini, init_reads_config_and_applies_defaults)
 	EXPECT_EQ("auth2", custom.authcode());
 	EXPECT_TRUE(custom.quickStart());
 	cfg2->release();
+}
+
+TEST(R61_TraderCTPMini, init_accepts_sdk_capacity_and_rejects_overlength_config_fields)
+{
+	const std::string broker(sizeof(TThostFtdcBrokerIDType) - 1, 'b');
+	const std::string user(sizeof(TThostFtdcUserIDType) - 1, 'u');
+	const std::string pass(sizeof(TThostFtdcPasswordType) - 1, 'p');
+	const std::string appid(sizeof(TThostFtdcClientAppIDType) - 1, 'a');
+	const std::string authcode(sizeof(TThostFtdcAuthCodeType) - 1, 'c');
+	R61MiniProbe exact;
+	exact.harden();
+	WTSVariant* exactCfg = r61_mini_config(broker, user, pass, appid, authcode);
+	EXPECT_TRUE(exact.init(exactCfg));
+	EXPECT_EQ(broker, exact.broker());
+	EXPECT_EQ(user, exact.user());
+	EXPECT_EQ(pass, exact.pass());
+	EXPECT_EQ(appid, exact.appid());
+	EXPECT_EQ(authcode, exact.authcode());
+	exactCfg->release();
+
+	struct InvalidConfig
+	{
+		const char* name;
+		std::string broker, user, pass, appid, authcode;
+	};
+	std::vector<InvalidConfig> invalid = {
+		{"broker", std::string(sizeof(TThostFtdcBrokerIDType), 'b'), "tester", "secret", "app", "auth"},
+		{"user", "9999", std::string(sizeof(TThostFtdcUserIDType), 'u'), "secret", "app", "auth"},
+		{"pass", "9999", "tester", std::string(sizeof(TThostFtdcPasswordType), 'p'), "app", "auth"},
+		{"appid", "9999", "tester", "secret", std::string(sizeof(TThostFtdcClientAppIDType), 'a'), "auth"},
+		{"authcode", "9999", "tester", "secret", "app", std::string(sizeof(TThostFtdcAuthCodeType), 'c')}
+	};
+	for (const auto& item : invalid)
+	{
+		R61MiniProbe probe;
+		R61MiniSink sink;
+		probe.harden();
+		probe.registerSpi(&sink);
+		WTSVariant* cfg = r61_mini_config(item.broker, item.user, item.pass, item.appid, item.authcode);
+		EXPECT_FALSE(probe.init(cfg)) << item.name;
+		EXPECT_TRUE(sink.hasLog(item.name)) << item.name;
+		EXPECT_TRUE(probe.broker().empty()) << item.name;
+		EXPECT_TRUE(probe.user().empty()) << item.name;
+		EXPECT_TRUE(probe.pass().empty()) << item.name;
+		cfg->release();
+	}
 }
 
 /* TraderCTPMini.cpp:164-221 connect；223-234 disconnect；139-162 release */
@@ -548,6 +607,63 @@ TEST(R61_TraderCTPMini, login_authenticate_and_logout_assemble_requests)
 	EXPECT_EQ("secret", api.login_pass);
 	EXPECT_EQ("prod", api.login_product);
 	EXPECT_TRUE(sink.hasLog("Sending login request failed"));
+}
+
+TEST(R61_TraderCTPMini, login_accepts_sdk_capacity_and_rejects_overlength_before_api_call)
+{
+	const std::string broker(sizeof(TThostFtdcBrokerIDType) - 1, 'b');
+	const std::string user(sizeof(TThostFtdcUserIDType) - 1, 'u');
+	const std::string pass(sizeof(TThostFtdcPasswordType) - 1, 'p');
+	const std::string appid(sizeof(TThostFtdcClientAppIDType) - 1, 'a');
+	const std::string authcode(sizeof(TThostFtdcAuthCodeType) - 1, 'c');
+	const std::string productInfo(sizeof(TThostFtdcProductInfoType) - 1, 'i');
+	R61MiniApi api;
+	R61MiniSink sink;
+	R61MiniProbe exact;
+	exact.harden();
+	exact.setApi(&api);
+	exact.setBrokerUser(broker.c_str(), "olduser");
+	exact.setAuth(appid.c_str(), authcode.c_str());
+	exact.registerSpi(&sink);
+	ASSERT_EQ(0, exact.login(user.c_str(), pass.c_str(), productInfo.c_str()));
+	ASSERT_EQ(1u, api.auth_calls);
+	EXPECT_EQ(broker, api.auth_broker);
+	EXPECT_EQ(user, api.auth_user);
+	EXPECT_EQ(appid, api.auth_appid);
+	EXPECT_EQ(authcode, api.auth_code);
+	exact.OnRspAuthenticate(nullptr, nullptr, 1, true);
+	ASSERT_EQ(1u, api.login_calls);
+	EXPECT_EQ(broker, api.login_broker);
+	EXPECT_EQ(user, api.login_user);
+	EXPECT_EQ(pass, api.login_pass);
+	EXPECT_EQ(productInfo, api.login_product);
+
+	struct InvalidLogin
+	{
+		const char* field;
+		std::string user, pass, productInfo;
+	};
+	std::vector<InvalidLogin> invalid = {
+		{"user", std::string(sizeof(TThostFtdcUserIDType), 'u'), "secret", "prod"},
+		{"pass", "alice", std::string(sizeof(TThostFtdcPasswordType), 'p'), "prod"},
+		{"productInfo", "alice", "secret", std::string(sizeof(TThostFtdcProductInfoType), 'i')}
+	};
+	for (const auto& item : invalid)
+	{
+		R61MiniApi rejectedApi;
+		R61MiniSink rejectedSink;
+		R61MiniProbe probe;
+		probe.harden();
+		probe.setApi(&rejectedApi);
+		probe.setBrokerUser("9999", "olduser");
+		probe.setAuth("app", "auth");
+		probe.registerSpi(&rejectedSink);
+		EXPECT_EQ(-1, probe.login(item.user.c_str(), item.pass.c_str(), item.productInfo.c_str())) << item.field;
+		EXPECT_EQ(0u, rejectedApi.auth_calls) << item.field;
+		EXPECT_EQ(0u, rejectedApi.login_calls) << item.field;
+		EXPECT_EQ(TraderCTPMini::WS_NOTLOGIN, probe.state()) << item.field;
+		EXPECT_TRUE(rejectedSink.hasLog(item.field)) << item.field;
+	}
 }
 
 /* TraderCTPMini.cpp:589-646 OnRspUserLogin 成功 + eid/oid 缓存；

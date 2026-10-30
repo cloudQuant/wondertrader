@@ -58,11 +58,15 @@ TEST(r195_cfg_variant, json_all_number_types_and_nested_containers)
 		"i64": -9223372036854775807,
 		"u64": 18446744073709551615,
 		"real": 3.25,
+		"tiny": 1e-11,
+		"nearOne": 1.00000000001,
 		"str": "text",
 		"flagT": true,
 		"flagF": false,
 		"emptyObj": {},
 		"emptyArr": [],
+		"precisionArray": [1e-11, 1.00000000001],
+		"integerValues": [1e-5, 1e6, 1.5],
 		"obj": {"x": 1, "sub": [1, 2.5, true, "s", {"n": 7}, [8, 9]]},
 		"arr": [2147483647, 2147483648, -2147483649, 9223372036854775807,
 				9223372036854775808, 2.5, false, "x", {"k": 2}, [3, 4]]
@@ -77,11 +81,31 @@ TEST(r195_cfg_variant, json_all_number_types_and_nested_containers)
 	EXPECT_EQ(cfg->get("i64")->asInt64(), -9223372036854775807LL);
 	EXPECT_EQ(cfg->get("u64")->asUInt64(), 18446744073709551615ULL);
 	EXPECT_DOUBLE_EQ(cfg->get("real")->asDouble(), 3.25);
+	EXPECT_DOUBLE_EQ(cfg->get("tiny")->asDouble(), 1e-11);
+	EXPECT_DOUBLE_EQ(cfg->get("nearOne")->asDouble(), 1.00000000001);
+	EXPECT_EQ(0LL, cfg->get("tiny")->asInt64());
+	EXPECT_EQ(0ULL, cfg->get("tiny")->asUInt64());
+	EXPECT_EQ(1LL, cfg->get("nearOne")->asInt64());
+	EXPECT_EQ(1ULL, cfg->get("nearOne")->asUInt64());
 	EXPECT_EQ(cfg->get("str")->asString(), std::string("text"));
 	EXPECT_TRUE(cfg->get("flagT")->asBoolean());
 	EXPECT_FALSE(cfg->get("flagF")->asBoolean());
 	EXPECT_EQ(cfg->get("emptyObj")->size(), 0u);
 	EXPECT_EQ(cfg->get("emptyArr")->size(), 0u);
+	WTSVariant* precisionArray = cfg->get("precisionArray");
+	ASSERT_NE(precisionArray, nullptr);
+	ASSERT_EQ(precisionArray->size(), 2u);
+	EXPECT_DOUBLE_EQ(precisionArray->get((uint32_t)0)->asDouble(), 1e-11);
+	EXPECT_DOUBLE_EQ(precisionArray->get((uint32_t)1)->asDouble(), 1.00000000001);
+	WTSVariant* integerValues = cfg->get("integerValues");
+	ASSERT_NE(integerValues, nullptr);
+	ASSERT_EQ(integerValues->size(), 3u);
+	EXPECT_EQ(0LL, integerValues->get((uint32_t)0)->asInt64());
+	EXPECT_EQ(0ULL, integerValues->get((uint32_t)0)->asUInt64());
+	EXPECT_EQ(1000000LL, integerValues->get((uint32_t)1)->asInt64());
+	EXPECT_EQ(1000000ULL, integerValues->get((uint32_t)1)->asUInt64());
+	EXPECT_EQ(1LL, integerValues->get((uint32_t)2)->asInt64());
+	EXPECT_EQ(1ULL, integerValues->get((uint32_t)2)->asUInt64());
 
 	WTSVariant* obj = cfg->get("obj");
 	ASSERT_NE(obj, nullptr);

@@ -3,12 +3,12 @@
 //   src/WtExeFact/WtStockVWapExeUnit.cpp: L115-129（calTmStamp 的午休区间/午休钳位/下午区间；
 //       L107-108 的 hour<9:30 分支因 to_string 丢前导 0 实际不可达，同 BUG-R115-001）、L175（session retain）、
 //       L271-274（撤单完成回减 cancelcnt）、L300-302（未撤单但 cancelcnt 非 0）、L382/L396（异码、
-//       首笔非交易时段）、L426-436（超时撤单单次回调体）、L487（CalcFlag 重入保护）、
+//       首笔非交易时段）、L426-436（超时 fail-closed 回调体）、L487（CalcFlag 重入保护）、
 //       L505-508/L516（可卖仓位修正、diff==0）、L531-546（反向未完成单先撤/同向等待）、
 //       L586-589/L597-598/L633-634（末次打板与整手取整、打板 5 跳）、L624-631（mode1/mode2 价格）、
 //       L703-711/L721-726/L744（fire_at_once 的价格模式与涨停钳位）、L795-797（set_position 抓最新 tick）
 //   src/WtExeFact/WtStockVWapExeUnit.h: L376（可转债最小 10 股）
-//   src/WtExeFact/WtStockMinImpactExeUnit.cpp: L329-347（enumOrder + 超时撤单回调 + cancel_map）、
+//   src/WtExeFact/WtStockMinImpactExeUnit.cpp: L329-347（enumOrder + 超时 fail-closed 回调）、
 //       L351-366（撤单次数超限强制删除）、L402-404（委托失败删除）、L459-462（抓最新 tick）、
 //       L638（取整后 0 股不发单）；.h L337/L341（可转债 10 股、科创板 200 股）
 //
@@ -17,8 +17,7 @@
 //   1) getPosition 按 ExecuteDefs.h 的真实语义 true=可用（昨仓）、false=总仓位。StockMinImpact 的调用
 //      与该语义一致；StockVWap 在 L494/L495 把两个实参写反（变量名与语义相反，BUG-R115-002），
 //      对应用例按产品的变量名喂值，只为触达 L505-508 的“目标上调”计算。
-//   2) 超时判定用 expiresecs*1000 的 uint32 回绕（536870912*1000 == 0）构造确定性输入，
-//      不 sleep、不读挂钟断言；同 BUG-R24-003 已在 R24 记录的同型问题。
+//   2) 超时回归通过可控 context clock 推进正常 1 秒阈值；只验证 fail-closed 和监控记录保留。
 //
 // 纪律：不启线程、无真实插件；Vwap_*.txt 写在系统临时目录并把 CWD 临时切过去，析构恢复并删除。
 #include <gtest/gtest.h>
@@ -75,7 +74,7 @@ public:
 		return validOnly ? avail_pos : total_pos;
 	}
 
-	OrderMap* getOrders(const char*) override { return NULL; }
+	OrderMap* getOrders(const char*) override { return OrderMap::create(); }
 	double getUndoneQty(const char*) override { return undone; }
 
 	OrderIDs buy(const char* stdCode, double price, double qty, bool bForceClose) override
@@ -253,6 +252,21 @@ std::string vwapBody(double value, uint32_t rows)
 	return body;
 }
 
+std::string r115V2VwapBody(double value)
+{
+	std::string body = "{\"version\":2,\"profiles\":[{\"session_id\":\"R115S\",\"offset_minutes\":0,"
+		"\"sections\":[{\"from\":900,\"to\":1500}],\"bucket_unit\":\"trading_minute\","
+		"\"value_mode\":\"cumulative\",\"close_inclusive\":true,\"values\":[";
+	for (uint32_t i = 0; i <= 360; ++i)
+	{
+		if (i != 0)
+			body += ",";
+		body += std::to_string((long long)value);
+	}
+	body += "]}]}";
+	return body;
+}
+
 WTSVariant* makeVwapCfg(uint32_t totalTimes, uint32_t priceMode, uint32_t ordSticky,
 	double lots, double minOpenLots, uint32_t offset = 0)
 {
@@ -422,15 +436,14 @@ TEST(r115_exefact, stock_vwap_target_adjust_diff_zero_and_mode2_price)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// StockVWap：超时撤单回调 L426-436 + 未撤单/撤单完成的 cancelcnt 两条回报路径
-//           + 撤单重发 fire_at_once（mode1 价与涨停钳位）
+// StockVWap：身份未验证的超时 fail-closed；普通订单回报和 fire_at_once 由其他用例覆盖。
 // 生产文件: src/WtExeFact/WtStockVWapExeUnit.cpp:271-274,300-302,426-436,
 //           703-708,721-726,744
 //////////////////////////////////////////////////////////////////////////
-TEST(r115_exefact, stock_vwap_timeout_cancel_reports_and_refire)
+TEST(r115_exefact, stock_vwap_unverified_timeout_fails_closed)
 {
 	TempCwd cwd("svwap3");
-	cwd.write("Vwap_R115SV3.txt", vwapBody(1000, 400));
+	cwd.write("Vwap_R115SV3.txt", r115V2VwapBody(1000));
 
 	Env env;
 	env.comm = makeStockComm("STK", "R115SV3", "SHSE");
@@ -439,36 +452,35 @@ TEST(r115_exefact, stock_vwap_timeout_cancel_reports_and_refire)
 	env.ctx.sess = env.sess;
 	{
 		WtStockVWapExeUnit unit;
-		// 536870912*1000 在 uint32 里回绕为 0 -> 超时判定对任意非负时差都成立
-		WTSVariant* cfg = makeVwapCfg(10, 1, 536870912u, 100.0, 100.0);
+		WTSVariant* cfg = makeVwapCfg(10, 1, 1u, 100.0, 100.0);
 		unit.init(&env.ctx, kStockCode, cfg);
 		cfg->release();
+		ASSERT_TRUE(env.ctx.hasLog("初始化完成"));
 
+		unit.set_position(kStockCode, 1000.0);
+		unit.on_channel_ready();
 		WTSTickData* t1 = makeStockTick(kStockCode, 100000000, 10.0, 9.99, 10.01);
 		unit.on_tick(t1);
-		unit.on_channel_ready();
-		unit.set_position(kStockCode, 1000.0);
 		ASSERT_EQ(env.ctx.buys.size(), 1u);
 		EXPECT_DOUBLE_EQ(env.ctx.buys[0].price, 9.99);	// mode1：买用买一价
-		uint32_t id1 = env.ctx.lastId;
+		const uint32_t id1 = env.ctx.lastId;
+		env.ctx.undone = env.ctx.buys[0].qty;	// fake 回填活单未完成量
 
-		// L425-436：第二笔行情触发超时扫描，cancel 返回 true -> cancel_cnt=1
+		// 第二笔行情触发超时扫描；没有可验证身份时不调用 provider cancel。
+		env.ctx.curTime += 1000;
 		WTSTickData* t2 = makeStockTick(kStockCode, 100100000, 10.4, 10.39, 10.41, 9.5, 0.5);
 		unit.on_tick(t2);
-		ASSERT_EQ(env.ctx.byidCancels.size(), 1u);
-		EXPECT_EQ(env.ctx.byidCancels[0], id1);
+		EXPECT_TRUE(env.ctx.byidCancels.empty());
+		EXPECT_TRUE(env.ctx.hasLog(std::string("Expired order ") + std::to_string(id1)));
+		EXPECT_EQ(env.ctx.buys.size(), 1u);
 
-		// L299-302：订单仍在监控中、未被撤、cancel_cnt 非 0 -> 只记错误日志
-		unit.on_order(id1, kStockCode, true, 50.0, 10.39, false);
-		EXPECT_TRUE(env.ctx.hasLog("hasn't canceled"));
-
-		// L265-274：撤单完成，cancel_cnt 回减到 0；随后 L284-294 重发
-		unit.on_order(id1, kStockCode, true, 0.0, 10.39, true);
-		ASSERT_EQ(env.ctx.buys.size(), 2u);
-		// fire_at_once mode1：买用卖一价 10.41 + 1 次撤单的 1 跳 = 10.42，
-		// 但高于涨停 9.5 -> L720-726 钳到 9.5
-		EXPECT_DOUBLE_EQ(env.ctx.buys[1].price, 9.5);
-		EXPECT_DOUBLE_EQ(env.ctx.buys[1].qty, 1000.0);
+		env.ctx.curTime += 1000;
+		WTSTickData* t3 = makeStockTick(kStockCode, 100200000, 10.5, 10.49, 10.51);
+		unit.on_tick(t3);
+		EXPECT_TRUE(env.ctx.byidCancels.empty());
+		EXPECT_EQ(env.ctx.buys.size(), 1u);
+		unit.on_order(id1, kStockCode, true, 0.0, env.ctx.buys[0].price, true);
+		EXPECT_TRUE(env.ctx.hasLog(std::string("Order ") + std::to_string(id1) + " of " + kStockCode + " canceled"));
 
 		t1->release();
 		t2->release();
@@ -476,7 +488,7 @@ TEST(r115_exefact, stock_vwap_timeout_cancel_reports_and_refire)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// StockMinImpact：超时撤单 + enumOrder（L329-347）+ 撤单次数超限强制删除（L351-366）
+// StockMinImpact：超时 fail-closed + enumOrder；超时不增加撤单次数，也不强制删除监控项。
 //                 + 委托失败删除（L402-404）+ set_position 抓 tick（L459-462）
 //                 + 取整为 0 股不发单（L637-638）
 //////////////////////////////////////////////////////////////////////////
@@ -489,7 +501,7 @@ TEST(r115_exefact, stock_minimpact_expire_enum_error_order_entrust_and_zero_qty)
 	env.ctx.sess = env.sess;
 	{
 		WtStockMinImpactExeUnit unit;
-		WTSVariant* cfg = makeStockMinCfg(536870912u, 0, 0, 100.0, 100.0, 1);
+		WTSVariant* cfg = makeStockMinCfg(1u, 0, 0, 100.0, 100.0, 1);
 		unit.init(&env.ctx, kStockCode, cfg);
 		cfg->release();
 
@@ -498,18 +510,25 @@ TEST(r115_exefact, stock_minimpact_expire_enum_error_order_entrust_and_zero_qty)
 		unit.on_tick(t1);
 		unit.set_position(kStockCode, 200.0);
 		ASSERT_EQ(env.ctx.buys.size(), 1u);
+		env.ctx.undone = env.ctx.buys[0].qty;	// fake 回填活单未完成量
 
-		// 第二笔 tick：L328-330 enumOrder + L333-347 超时撤单回调；cancel_map[id]=1
+		// 第二笔 tick：枚举后报告身份不可验证的超时；不调用 provider cancel。
+		env.ctx.curTime += 1000;
 		WTSTickData* t2 = makeStockTick(kStockCode, 100100000, 10.05, 10.04, 10.06);
 		unit.on_tick(t2);
-		EXPECT_GE(env.ctx.byidCancels.size(), 1u);
+		EXPECT_TRUE(env.ctx.byidCancels.empty());
+		EXPECT_TRUE(env.ctx.hasLog("Expired order"));
+		EXPECT_TRUE(env.ctx.hasLog("9500 entertime:"));
+		EXPECT_EQ(env.ctx.buys.size(), 1u);
 
-		// 第三笔 tick：再次超时（cancel_map[id]=2 > max_cancel_time=1）
-		// -> L351-366 强制删除并写 "erase forcely"
+		// 第三笔 tick 仍能枚举监控项，不会重复自动撤单或强制删除。
+		env.ctx.curTime += 1000;
 		WTSTickData* t3 = makeStockTick(kStockCode, 100200000, 10.08, 10.07, 10.09);
 		unit.on_tick(t3);
-		EXPECT_TRUE(env.ctx.hasLog("erase forcely"));
-		EXPECT_GE(env.ctx.byidCancels.size(), 2u);
+		EXPECT_TRUE(env.ctx.byidCancels.empty());
+		EXPECT_FALSE(env.ctx.hasLog("erase forcely"));
+		EXPECT_TRUE(env.ctx.hasLog("9500 entertime:"));
+		EXPECT_EQ(env.ctx.buys.size(), 1u);
 
 		t1->release();
 		t2->release();

@@ -37,7 +37,7 @@ int wt_coverage_main_quotefactory(int argc, char* argv[]);
 const char* getBinDir();
 
 /* 生产 TU（QuoteFactory/main.cpp:96）的自由函数：配置缺失时在 :104 return，不碰任何 caster */
-void initialize(const std::string& filename);
+bool initialize(const std::string& filename);
 
 namespace {
 
@@ -134,7 +134,9 @@ TEST(r14_quote_initialize, missing_config_stamps_module_dir_then_returns)
 	WtHelper::set_module_dir("");
 	// :100 load_from_file(不存在的路径) -> WTSCfgLoader.cpp:300 exists() 为假 -> NULL
 	// -> :103 记 error -> :104 return，后面的 basefiles/caster/stateMonotor/writer/parsers 全不执行
-	EXPECT_NO_THROW(initialize(kAbsentDtCfg));
+	bool initialized = true;
+	EXPECT_NO_THROW(initialized = initialize(kAbsentDtCfg));
+	EXPECT_FALSE(initialized);
 
 	// :98 在早退之前无条件执行，因此可作为「确实进了 initialize()」的可证伪观测点
 	const std::string expect(getBinDir());

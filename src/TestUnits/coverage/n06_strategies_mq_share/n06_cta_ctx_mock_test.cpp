@@ -124,6 +124,23 @@ private:
 	std::string _rawcode;
 };
 
+class ReleaseCountingKlineSlice : public WTSKlineSlice
+{
+public:
+	explicit ReleaseCountingKlineSlice(uint32_t& releaseCount)
+		: _releaseCount(releaseCount)
+	{}
+
+	void release() override
+	{
+		++_releaseCount;
+		WTSKlineSlice::release();
+	}
+
+private:
+	uint32_t& _releaseCount;
+};
+
 // create() 内部按指针引用 bars 数组，容器需覆盖 slice 使用期（进程单测结束后随 OS 回收）
 std::vector<std::vector<WTSBarStruct>*> g_bar_holders;
 
@@ -290,10 +307,38 @@ TEST(n06_cta_ctx, twoma_on_schedule_golden_cross_enters_long)
 	// now_s=(50+60)/2=55 > now_l=(1+50+60)/3=37 → 金叉做多
 	ctx.set_bars(makeKlineSlice({0, 100, 1, 50, 60}, 60));
 	ctx.set_position(0.0);
+	ma.on_session_begin(&ctx, 20240102);
 	ma.on_schedule(&ctx, 20240102, 150000);
-	EXPECT_TRUE(hasPrefix(ctx.orders, "enter_long:"));
-	EXPECT_TRUE(hasPrefix(ctx.orders, ":DT_EnterLong"));
+	ASSERT_EQ(ctx.orders.size(), 1u);
+	EXPECT_EQ(ctx.orders[0], "enter_long:SHFE.au.2005:2.000000:DT_EnterLong");
 	EXPECT_GT(ctx.logs.size(), 0u);
+}
+
+TEST(n06_cta_ctx, twoma_short_window_needs_more_history_and_releases_slice)
+{
+	WtStraTwoMa ma("s6-short-history");
+	VarHolder cfg(WTSVariant::createObject());
+	cfg->append("short_days", (uint32_t)9);
+	cfg->append("long_days", (uint32_t)8);
+	cfg->append("period", "d1");
+	cfg->append("count", (uint32_t)10);
+	cfg->append("code", "SHFE.au.2005");
+	cfg->append("stock", false);
+	ASSERT_TRUE(ma.init(cfg.get()));
+
+	// 有效的 previous MA 要覆盖 max(9,8)+1 根；这里仅有 long_days+1 根。
+	std::vector<WTSBarStruct> bars(9);
+	uint32_t releaseCount = 0;
+	ReleaseCountingKlineSlice* slice = new ReleaseCountingKlineSlice(releaseCount);
+	slice->setCode("SHFE.au.2005");
+	ASSERT_TRUE(slice->appendBlock(bars.data(), static_cast<uint32_t>(bars.size())));
+
+	MockCtaCtx ctx;
+	ctx.set_bars(slice);
+	ma.on_schedule(&ctx, 20240102, 150000);
+
+	EXPECT_TRUE(ctx.orders.empty());
+	EXPECT_EQ(releaseCount, 1u);
 }
 
 TEST(n06_cta_ctx, DISABLED_ZERO_PERIOD_DAYS_DIVIDE_CLASS)

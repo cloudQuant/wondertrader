@@ -4,11 +4,8 @@
 //  - 禁止 #define private public：只允许走 WtDataWriterAD / WtDataReaderAD 的公开接口
 //    （init / release / writeTick / getCurTick / add_ext_dumper / readTickSlice /
 //     readKlineSlice / onMinuteEnd），因此缓存块内容一律用「回读落盘文件字节」的方式断言；
-//  - 禁止起线程：WtDataWriterAD::_async_task（WtDataWriterAD.h:245）在全仓库**没有任何赋值**
-//    （见 bugs/R4_adstorage.md R4-BUG-01），构造后是堆内存残值。writeTick→pushTask 一旦读到
-//    非 0 就会新建 StdThread（且 release() 的 notify_all 未持锁，存在丢唤醒死等）。
-//    这里用「先申请同尺寸全 0 块再释放，随后 new 复用同一 size class」把残值压成 0，
-//    并在每条用例里用同步副作用（sink 计数）证伪；
+//  - 同步模式是默认配置；异步模式只在显式设置 async=true 的测试中启用，TearDown 调用
+//    release() 等待已接受的异步任务完成后再销毁 writer；
 //  - 落盘只进各自 mkdtemp/temp_directory 下的唯一目录，不碰仓库。
 #pragma once
 
@@ -398,7 +395,7 @@ struct R4BlkHead
 // WTSVariant 构造：AD writer 的 init 只读这几个键
 //////////////////////////////////////////////////////////////////////////
 [[maybe_unused]] static WTSVariant* make_writer_cfg(const std::string& root, uint32_t groupsize,
-	bool disabletick, bool disablemin1, bool disablemin5, bool disableday)
+	bool disabletick, bool disablemin1, bool disablemin5, bool disableday, bool async_task = false)
 {
 	WTSVariant* cfg = WTSVariant::createObject();
 	cfg->append("path", root.c_str());
@@ -407,25 +404,21 @@ struct R4BlkHead
 	cfg->append("disablemin1", disablemin1);
 	cfg->append("disablemin5", disablemin5);
 	cfg->append("disableday", disableday);
+	if (async_task)
+		cfg->append("async", true);
 	return cfg;
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 见文件头 R4-BUG-01 说明：new 之前先把同尺寸堆块清零，压住 _async_task 残值
+// 使用正常构造函数；默认同步模式由生产初始化合同保证。
 //////////////////////////////////////////////////////////////////////////
-[[maybe_unused]] static WtDataWriterAD* new_writer_zeroed()
+[[maybe_unused]] static WtDataWriterAD* new_writer()
 {
-	const std::size_t sz = sizeof(WtDataWriterAD);
-	void* probe = ::operator new(sz);
-	memset(probe, 0, sz);
-	::operator delete(probe);
 	return new WtDataWriterAD();
 }
 
 //////////////////////////////////////////////////////////////////////////
 // 夹具：唯一临时目录 + 替身 + 写入器工厂
-// 注意：故意不调用 release()（release 在 _task_thrd 非空时会 join，见 R4-BUG-01），
-// 只有「无异步线程」这一条分支由单独的用例显式验证。
 //////////////////////////////////////////////////////////////////////////
 class R4WriterADTest : public ::testing::Test
 {
@@ -444,6 +437,8 @@ protected:
 
 	void TearDown() override
 	{
+		if (_writer)
+			_writer->release();
 		_writer.reset();
 		delete _sink;
 		delete _bd;
@@ -457,15 +452,15 @@ protected:
 
 	void init_writer(WTSVariant* cfg)
 	{
-		_writer.reset(new_writer_zeroed());
+		_writer.reset(new_writer());
 		ASSERT_TRUE(_writer->init(cfg, _sink));
 		cfg->release();
 	}
 
 	// 全禁用：只让 tick 缓存和 K 线缓存生效，避免创建任何 LMDB 环境
-	void init_writer_all_disabled(uint32_t groupsize = 1000)
+	void init_writer_all_disabled(uint32_t groupsize = 1000, bool async_task = false)
 	{
-		WTSVariant* cfg = make_writer_cfg(_root.string(), groupsize, true, true, true, true);
+		WTSVariant* cfg = make_writer_cfg(_root.string(), groupsize, true, true, true, true, async_task);
 		init_writer(cfg);
 	}
 

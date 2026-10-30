@@ -40,6 +40,7 @@ TraderAdapter::TraderAdapter(TraderAdapterMgr* mgr)
 	, _cfg(NULL)
 	, _id("")
 	, _trader_api(NULL)
+	, _date(0)
 	, _done(false)
 {
 }

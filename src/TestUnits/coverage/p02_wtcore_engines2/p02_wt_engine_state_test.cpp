@@ -113,6 +113,7 @@ class P02SilentDtMgr : public WtDtMgr
 {
 public:
     uint32_t _grab_calls {0};
+    uint32_t _adjusting_flag {1};
 
     WTSTickData* grab_last_tick(const char*) override
     {
@@ -122,7 +123,7 @@ public:
     WTSTickSlice* get_tick_slice(const char*, uint32_t, uint64_t) override { return NULL; }
     WTSKlineSlice* get_kline_slice(const char*, WTSKlinePeriod, uint32_t, uint32_t, uint64_t) override { return NULL; }
     double get_adjusting_factor(const char*, uint32_t) override { return 1.5; }
-    uint32_t get_adjusting_flag() override { return 1; }
+    uint32_t get_adjusting_flag() override { return _adjusting_flag; }
 };
 
 /// 商品/合约/时段一律查不到
@@ -294,12 +295,17 @@ TEST_F(P02EngineTest, InitBuildsPortFundAndReadsNoFiles)
     EXPECT_GT(_bd_mgr._comm_calls, 0u);
 }
 
-TEST_F(P02EngineTest, AdjustingFlagPropagatesDataManagerValue)
+TEST_F(P02EngineTest, AdjustingFlagPropagatesDataManagerValues)
 {
     do_init();
-    // 已初始化的数据管理器返回 1；引擎查询应向调用方传播该值。
-    EXPECT_EQ(_dt_mgr.get_adjusting_flag(), 1u);
-    EXPECT_EQ(_engine.get_adjusting_flag(), 1u);
+    // IDataManager 的 uint32_t 标志应原样透传，包括 0 和非枚举值。
+    const uint32_t flags[] = {0u, 1u, 7u};
+    for (uint32_t flag : flags)
+    {
+        _dt_mgr._adjusting_flag = flag;
+        EXPECT_EQ(_dt_mgr.get_adjusting_flag(), flag);
+        EXPECT_EQ(_engine.get_adjusting_flag(), flag);
+    }
 }
 
 TEST_F(P02EngineTest, AdjustingFlagDefaultsToZeroWithoutDataManager)

@@ -1,0 +1,5 @@
+BUG-P10-001 AddressSanitizer attempt
+
+The `source.sh` and `test.sh` commands were derived from the CoverageTests compile commands captured by `ninja -C build-cov -t commands CoverageTests`, with `-fsanitize=address -fno-omit-frame-pointer` added and all output/dependency paths redirected to this directory. Both changed translation units compiled successfully (source.exit=0, test.exit=0). `link.sh` linked the two fresh ASan-instrumented objects plus the other pre-existing CoverageTests objects, static libraries, and dylibs from build-cov; link.exit=0. This is not a clean ASan rebuild of the whole dependency graph.
+
+The exact focused filter was `P10ProcBlockTest.*-P10ProcBlockTest.IsSessionProceededOnEmptyTable`, with a 60-second subprocess timeout. The executable did not emit any test output and timed out; the log records `TIMEOUT_60S`. A separate `--gtest_list_tests` startup probe also produced no output and timed out after 10 seconds (`TIMEOUT_10S`), supporting a hang during runtime/process startup before GTest test enumeration. No ASan test result can be claimed (NOT_RUN); the timeout is not evidence of a memory error in the tested code.

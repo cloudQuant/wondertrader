@@ -708,6 +708,9 @@ WTSBarStruct* WTSDataFactory::updateDayData(WTSSessionInfo* /*sInfo*/, WTSKlineD
 WTSBarStruct* WTSDataFactory::updateSecData(WTSSessionInfo* sInfo, WTSKlineData* klineData, WTSTickData* tick)
 {
 	uint32_t seconds = klineData->times();
+	if (seconds == 0)
+		return NULL;
+
 	uint32_t curSeconds = sInfo->timeToSeconds(tick->actiontime()/1000);
 	uint32_t barSeconds = (curSeconds/seconds)*seconds + seconds;
 	uint32_t barTime = sInfo->secondsToTime(barSeconds);
@@ -1306,6 +1309,9 @@ WTSKlineData* WTSDataFactory::extractDayData(WTSKlineSlice* baseKline, uint32_t 
 WTSKlineData* WTSDataFactory::extractKlineData(WTSTickSlice* ayTicks, uint32_t seconds, 
 	WTSSessionInfo* sInfo, bool bUnixTime /* = false */, bool /*bAlignSec*/ /* = false */)
 {
+	if (seconds == 0)
+		return NULL;
+
 	if(ayTicks == NULL || ayTicks->size() == 0)
 		return NULL;
 	

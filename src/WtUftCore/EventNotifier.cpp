@@ -25,19 +25,36 @@
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/writer.h>
+#include <exception>
+#include <memory>
 namespace rj = rapidjson;
 
 USING_NS_WTP;
 
-void on_mq_log(unsigned long /*id*/, const char* /*message*/, bool /*bServer*/)
+namespace
+{
+	template<typename T>
+	std::shared_ptr<T> retainForAsync(T* object)
+	{
+		object->retain();
+		return std::shared_ptr<T>(object, [](T* retained) {
+			retained->release();
+		});
+	}
+}
+
+void PORTER_FLAG on_mq_log(WtUInt32 /*id*/, const char* /*message*/, bool /*bServer*/)
 {
 
 }
 
 EventNotifier::EventNotifier()
-	: _mq_sid(0)
+	: _dll_handle(NULL)
+	, _mq_sid(0)
+	, _creator(NULL)
+	, _remover(NULL)
 	, _publisher(NULL)
-	, _stopped(false)
+	, _register(NULL)
 {
 	
 }
@@ -45,22 +62,47 @@ EventNotifier::EventNotifier()
 
 EventNotifier::~EventNotifier()
 {
-	_stopped = true;
-	if (_worker)
-		_worker->join();
-
+	stopWorker();
 	_asyncio.stop();
 
 	if (_remover && _mq_sid != 0)
+	{
 		_remover(_mq_sid);
+		_mq_sid = 0;
+	}
+
+	// The MQ ABI has no callback-quiescence contract. Keep a successful module
+	// load pinned until process exit rather than risking unloading code that a
+	// plugin thread may still call through a registered callback pointer.
+}
+
+void EventNotifier::stopWorker()
+{
+	// Keep the io_context alive until release starts, then let run() drain all
+	// already-posted notifications before the worker is joined.
+	if (_work_guard)
+		_work_guard->reset();
+
+	if (_worker && _worker->joinable())
+		_worker->join();
 }
 
 bool EventNotifier::init(WTSVariant* cfg)
 {
-	if (!cfg->getBoolean("active"))
+	if (cfg == NULL || !cfg->getBoolean("active"))
 		return false;
 
-	_url = cfg->getCString("url");
+	const char* url = cfg->getCString("url");
+	if (url == NULL)
+		return false;
+
+	// Repeated init with the same active URL is harmless; changing the URL on an
+	// already active notifier is rejected instead of leaking another MQ server.
+	if (_dll_handle != NULL || _worker != NULL || _mq_sid != 0)
+		return _dll_handle != NULL && _worker != NULL && _worker->joinable()
+			&& _mq_sid != 0 && _url == url;
+
+	_url = url;
 	std::string module = DLLHelper::wrap_module("WtMsgQue", "lib");
 	//先看工作目录下是否有对应模块
 	std::string dllpath = WtHelper::getCWD() + module;
@@ -75,35 +117,58 @@ bool EventNotifier::init(WTSVariant* cfg)
 		return false;
 	}
 
-	_creator = (FuncCreateMQServer)DLLHelper::get_symbol(dllInst, "create_server");
-	if (_creator == NULL)
+	FuncCreateMQServer creator = (FuncCreateMQServer)DLLHelper::get_symbol(dllInst, "create_server");
+	FuncDestroyMQServer remover = (FuncDestroyMQServer)DLLHelper::get_symbol(dllInst, "destroy_server");
+	FundPublishMessage publisher = (FundPublishMessage)DLLHelper::get_symbol(dllInst, "publish_message");
+	FuncRegCallbacks registerCallbacks = (FuncRegCallbacks)DLLHelper::get_symbol(dllInst, "regiter_callbacks");
+	if (creator == NULL || remover == NULL || publisher == NULL || registerCallbacks == NULL)
 	{
 		DLLHelper::free_library(dllInst);
 		WTSLogger::error("MQ module {} is not compatible", dllpath.c_str());
 		return false;
 	}
 
-	_remover = (FuncDestroyMQServer)DLLHelper::get_symbol(dllInst, "destroy_server");
-	_publisher = (FundPublishMessage)DLLHelper::get_symbol(dllInst, "publish_message");
-	_register = (FuncRegCallbacks)DLLHelper::get_symbol(dllInst, "regiter_callbacks");
+	//创建一个MQServer。注册全局日志回调前先确认所有必需符号和服务端 ID。
+	WtUInt32 mqSid = creator(_url.c_str(), false);
+	if (mqSid == 0)
+	{
+		DLLHelper::free_library(dllInst);
+		WTSLogger::error("MQ module {} failed to create a server", dllpath.c_str());
+		return false;
+	}
 
-	//注册回调函数
-	_register(on_mq_log);
-	
-	//创建一个MQServer
-	_mq_sid = _creator(_url.c_str());
+	registerCallbacks(on_mq_log);
+	_dll_handle = dllInst;
+	_creator = creator;
+	_remover = remover;
+	_publisher = publisher;
+	_register = registerCallbacks;
+	_mq_sid = mqSid;
 
 	WTSLogger::info("EventNotifier initialized with channel {}", _url.c_str());
 
 	if (_worker == NULL)
 	{
-		auto work = boost::asio::make_work_guard(_asyncio);
+		_work_guard.reset(new boost::asio::executor_work_guard<boost::asio::io_context::executor_type>(
+			boost::asio::make_work_guard(_asyncio)));
 		_worker.reset(new StdThread([this]() {
-			while (!_stopped)
+			for (;;)
 			{
-				std::this_thread::sleep_for(std::chrono::milliseconds(2));
-				_asyncio.run_one();
-				//m_asyncIO.run();
+				try
+				{
+					_asyncio.run();
+					return;
+				}
+				catch (const std::exception& e)
+				{
+					try { WTSLogger::error("EventNotifier async handler failed: {}", e.what()); }
+					catch (...) {}
+				}
+				catch (...)
+				{
+					try { WTSLogger::error("EventNotifier async handler failed with an unknown exception"); }
+					catch (...) {}
+				}
 			}
 		}));
 	}
@@ -136,7 +201,7 @@ void EventNotifier::notify_log(const char* tag, const char* message)
 		}
 
 		if (_publisher)
-			_publisher(_mq_sid, "LOG", data.c_str(), (unsigned long)data.size());
+			_publisher(_mq_sid, "LOG", data.c_str(), (WtUInt32)data.size());
 	});
 }
 
@@ -162,7 +227,7 @@ void EventNotifier::notify_event(const char* message)
 			data = sb.GetString();
 		}
 		if (_publisher)
-			_publisher(_mq_sid, "GRP_EVENT", data.c_str(), (unsigned long)data.size());
+			_publisher(_mq_sid, "GRP_EVENT", data.c_str(), (WtUInt32)data.size());
 	});
 }
 
@@ -190,7 +255,7 @@ void EventNotifier::notify(const char* trader, const char* message)
 			data = sb.GetString();
 		}
 		if (_publisher)
-			_publisher(_mq_sid, "TRD_NOTIFY", data.c_str(), (unsigned long)data.size());
+			_publisher(_mq_sid, "TRD_NOTIFY", data.c_str(), (WtUInt32)data.size());
 	});
 }
 
@@ -201,13 +266,12 @@ void EventNotifier::notify(const char* trader, uint32_t localid, const char* std
 
 	std::string strTrader = trader;
 	std::string strCode = stdCode;
-	trdInfo->retain();
-	boost::asio::post(_asyncio, [this, strTrader, strCode, localid, trdInfo]() {
+	std::shared_ptr<WTSTradeInfo> retained = retainForAsync(trdInfo);
+	boost::asio::post(_asyncio, [this, strTrader, strCode, localid, retained]() {
 		std::string data;
-		tradeToJson(strTrader.c_str(), localid, strCode.c_str(), trdInfo, data);
+		tradeToJson(strTrader.c_str(), localid, strCode.c_str(), retained.get(), data);
 		if (_publisher)
-			_publisher(_mq_sid, "TRD_TRADE", data.c_str(), (unsigned long)data.size());
-		trdInfo->release();
+			_publisher(_mq_sid, "TRD_TRADE", data.c_str(), (WtUInt32)data.size());
 	});
 }
 
@@ -218,12 +282,12 @@ void EventNotifier::notify(const char* trader, uint32_t localid, const char* std
 
 	std::string strTrader = trader;
 	std::string strCode = stdCode;
-	ordInfo->retain();
-	boost::asio::post(_asyncio, [this, strTrader, strCode, localid, ordInfo]() {
+	std::shared_ptr<WTSOrderInfo> retained = retainForAsync(ordInfo);
+	boost::asio::post(_asyncio, [this, strTrader, strCode, localid, retained]() {
 		std::string data;
-		orderToJson(strTrader.c_str(), localid, strCode.c_str(), ordInfo, data);
+		orderToJson(strTrader.c_str(), localid, strCode.c_str(), retained.get(), data);
 		if (_publisher)
-			_publisher(_mq_sid, "TRD_ORDER", data.c_str(), (unsigned long)data.size());
+			_publisher(_mq_sid, "TRD_ORDER", data.c_str(), (WtUInt32)data.size());
 	});
 }
 

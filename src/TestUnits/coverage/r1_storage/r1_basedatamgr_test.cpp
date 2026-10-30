@@ -16,6 +16,7 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <limits>
 #include <string>
 #include <system_error>
 #include <unistd.h>
@@ -30,6 +31,7 @@
 #include "Includes/FasterDefs.h"
 #include "Share/StrUtil.hpp"
 #include "Share/StdUtils.hpp"
+#include "Share/TimeUtils.hpp"
 #include "Share/fmtlib.h"
 #include "WTSTools/WTSBaseDataMgr.h"
 
@@ -256,7 +258,7 @@ TEST_F(R1BaseDataMgrTest, holidays_and_trading_date_arithmetic)
 	EXPECT_EQ(_mgr.getNextTDate("CHINA", 20240209, 1, true), 20240212u);	// 周五→(周六日+20240210节假日)→周一
 	EXPECT_EQ(_mgr.getNextTDate("CHINA", 20240209, 2, true), 20240213u);
 	EXPECT_EQ(_mgr.getPrevTDate("CHINA", 20240108, 1, true), 20240105u);	// 周一→上周五
-	EXPECT_EQ(_mgr.getPrevTDate("CHINA", 20240213, 1, true), 20240209u);
+	EXPECT_EQ(_mgr.getPrevTDate("CHINA", 20240213, 1, true), 20240212u); // 周二→按 fixture 为工作日的周一
 
 	// 品种 pid 通过 getTplIDByPID 映射到 CHINA
 	EXPECT_EQ(_mgr.getNextTDate("SSE.STK", 20240112, 1), 20240115u);		// 周五→周一
@@ -269,6 +271,17 @@ TEST_F(R1BaseDataMgrTest, holidays_and_trading_date_arithmetic)
 	// 周六偏移日 → 顺延下个交易日（不清缓存路径用 uOffDate）
 	_mgr.setTradingDate("CHINA", 0, true);		// 清缓存语义：0 视为未设置
 	EXPECT_EQ(_mgr.getTradingDate("CHINA", 20240113, 0, true), 20240115u);
+}
+
+TEST_F(R1BaseDataMgrTest, invalid_dates_fail_closed_for_trading_calendar_queries)
+{
+	// isHoliday has no error channel, so an invalid date is conservatively
+	// considered unavailable; isTradingDate must never call it tradable.
+	EXPECT_EQ(TimeUtils::getWeekDay(20240230u), TimeUtils::INVALID_WEEKDAY);
+	EXPECT_TRUE(_mgr.isHoliday("CHINA", 20240230u, true));
+	EXPECT_FALSE(_mgr.isTradingDate("CHINA", 20240230u, true));
+	EXPECT_TRUE(_mgr.isHoliday("CHINA", std::numeric_limits<uint32_t>::max(), true));
+	EXPECT_FALSE(_mgr.isTradingDate("CHINA", std::numeric_limits<uint32_t>::max(), true));
 }
 
 TEST_F(R1BaseDataMgrTest, boundary_time_offsets_and_weekend_shift)
@@ -334,13 +347,20 @@ TEST_F(R1BaseDataMgrTest, missing_commodity_pid_falls_back_to_empty_tpl)
 	EXPECT_TRUE(_mgr.isHoliday("SHFE.rb", 20240101, false));
 }
 
-// 触发条件：pid 不含 "."（单层），getTplIDByPID:882 直接访问 ay[1]，
-// StrUtil::split 只返回 1 个元素 → 越界 UB（进程级，无法用 EXPECT 断言存活）。
-// 公开触发入口是 isHoliday(pid, date, false)。见 bugs/R1_wtdatastorage.md。
-// 复现需 --gtest_also_run_disabled_tests。
-TEST_F(R1BaseDataMgrTest, DISABLED_getTplIDByPID_single_segment_pid_is_oob)
+TEST_F(R1BaseDataMgrTest, getTplIDByPID_malformed_and_valid_pid_holiday_semantics)
 {
+	// 非法/空 PID 在工作日查不到模板，保持 false。
 	EXPECT_FALSE(_mgr.isHoliday("NOPIVOT", 20240108, false));
+	EXPECT_FALSE(_mgr.isHoliday("", 20240108, false));
+
+	// 周末检查先于 PID 映射；非法/空 PID 仍按周末返回 true。
+	EXPECT_TRUE(_mgr.isHoliday("NOPIVOT", 20240106, false));
+	EXPECT_TRUE(_mgr.isHoliday("", 20240107, false));
+
+	// 已知品种仍映射到 CHINA 模板：配置节假日、普通工作日及周末语义不变。
+	EXPECT_TRUE(_mgr.isHoliday("SSE.STK", 20240101, false));
+	EXPECT_FALSE(_mgr.isHoliday("SSE.STK", 20240108, false));
+	EXPECT_TRUE(_mgr.isHoliday("SSE.STK", 20240106, false));
 }
 
 } // namespace r1

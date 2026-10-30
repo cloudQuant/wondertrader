@@ -50,9 +50,6 @@ MQClient::MQClient(MQManager* mgr)
 
 MQClient::~MQClient()
 {
-	if (!m_bReady)
-		return;
-
 	m_bTerminated = true;
 	if (m_thrdRecv)
 		m_thrdRecv->join();
@@ -96,6 +93,8 @@ bool MQClient::init(const char* url, FuncMQCallback cb)
 	if (nn_connect(_sock, url) < 0)
 	{
 		_mgr->log_client(_id, fmtutil::format("MQClient {} connecting url {} failed: {}", _id, url, nn_strerror(nn_errno())));
+		nn_close(_sock);
+		_sock = -1;
 		return false;
 	}
 	else
@@ -112,7 +111,7 @@ void MQClient::start()
 	if (m_bTerminated)
 		return;
 
-	if(_sock < 0)
+	if (!m_bReady || _sock < 0)
 	{
 		_mgr->log_client(_id, fmtutil::format("MQClient {} has not been initialized yet", _id));
 		return;

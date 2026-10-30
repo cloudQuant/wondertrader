@@ -1,0 +1,57 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = r12_value_array.*:r12_kline_slice.*:r12_kline_data.*:P12Extract.closed_extrema_ranges_reject_end_equal_size
+[==========] Running 19 tests from 4 test suites.
+[----------] Global test environment set-up.
+[----------] 4 tests from r12_value_array
+[ RUN      ] r12_value_array.size_empty_append_and_at
+[       OK ] r12_value_array.size_empty_append_and_at (0 ms)
+[ RUN      ] r12_value_array.negative_index_translates_from_tail
+[       OK ] r12_value_array.negative_index_translates_from_tail (0 ms)
+[ RUN      ] r12_value_array.maxvalue_minvalue_range_semantics
+[       OK ] r12_value_array.maxvalue_minvalue_range_semantics (0 ms)
+[ RUN      ] r12_value_array.set_resize_and_operator_index
+[       OK ] r12_value_array.set_resize_and_operator_index (0 ms)
+[----------] 4 tests from r12_value_array (0 ms total)
+
+[----------] 9 tests from r12_kline_slice
+[ RUN      ] r12_kline_slice.create_at_and_block_accessors
+[       OK ] r12_kline_slice.create_at_and_block_accessors (0 ms)
+[ RUN      ] r12_kline_slice.append_block_and_empty_slice
+[       OK ] r12_kline_slice.append_block_and_empty_slice (0 ms)
+[ RUN      ] r12_kline_slice.create_rejects_invalid_count_or_backing
+[       OK ] r12_kline_slice.create_rejects_invalid_count_or_backing (0 ms)
+[ RUN      ] r12_kline_slice.extrema_skip_invalid_price_fields
+[       OK ] r12_kline_slice.extrema_skip_invalid_price_fields (0 ms)
+[ RUN      ] r12_kline_slice.append_block_rejects_count_overflow_without_mutation
+[       OK ] r12_kline_slice.append_block_rejects_count_overflow_without_mutation (0 ms)
+[ RUN      ] r12_kline_slice.negative_index_uses_wide_count_across_blocks
+[       OK ] r12_kline_slice.negative_index_uses_wide_count_across_blocks (0 ms)
+[ RUN      ] r12_kline_slice.maxprice_minprice_and_setcode
+[       OK ] r12_kline_slice.maxprice_minprice_and_setcode (0 ms)
+[ RUN      ] r12_kline_slice.extract_data_per_field_type
+[       OK ] r12_kline_slice.extract_data_per_field_type (0 ms)
+[ RUN      ] r12_kline_slice.extract_from_empty_slice_returns_null
+[       OK ] r12_kline_slice.extract_from_empty_slice_returns_null (0 ms)
+[----------] 9 tests from r12_kline_slice (0 ms total)
+
+[----------] 5 tests from r12_kline_data
+[ RUN      ] r12_kline_data.property_accessors_and_sized_create
+[       OK ] r12_kline_data.property_accessors_and_sized_create (0 ms)
+[ RUN      ] r12_kline_data.field_by_index_accessors
+[       OK ] r12_kline_data.field_by_index_accessors (0 ms)
+[ RUN      ] r12_kline_data.append_bar_overwrites_same_time_and_extacts
+[       OK ] r12_kline_data.append_bar_overwrites_same_time_and_extacts (0 ms)
+[ RUN      ] r12_kline_data.maxprice_minprice_and_release_keeps_slice_refs
+[       OK ] r12_kline_data.maxprice_minprice_and_release_keeps_slice_refs (0 ms)
+[ RUN      ] r12_kline_data.extrema_skip_invalid_price_fields
+[       OK ] r12_kline_data.extrema_skip_invalid_price_fields (0 ms)
+[----------] 5 tests from r12_kline_data (0 ms total)
+
+[----------] 1 test from P12Extract
+[ RUN      ] P12Extract.closed_extrema_ranges_reject_end_equal_size
+[       OK ] P12Extract.closed_extrema_ranges_reject_end_equal_size (0 ms)
+[----------] 1 test from P12Extract (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 19 tests from 4 test suites ran. (0 ms total)
+[  PASSED  ] 19 tests.

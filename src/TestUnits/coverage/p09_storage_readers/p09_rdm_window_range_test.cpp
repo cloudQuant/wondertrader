@@ -2,9 +2,9 @@
 //
 // 本文件只碰 _bars_cache 的纯计算层（无共享内存、无线程、无落盘），把「日期区间与窗口裁剪 /
 // 跨块拼接 / 增量与全量 / 切片访问器边界」这些分支一次跑清楚：
-//  - indexBarFromCacheByRange：左闭右闭、右端越界（eit==end）、isDay 比较器；左端整体越界为 BUG-P09-005 禁用候选
+//  - indexBarFromCacheByRange：左闭右闭、右端越界（eit==end）、isDay 比较器和空窗口
 //  - readBarsFromCacheByRange：同一区间的拷贝版语义（含空区间不 resize）
-//  - indexBarFromCacheByCount：count 收敛 / count==1 / count 超过可用条数；count==0 保留为 BUG-P09-005 禁用候选
+//  - indexBarFromCacheByCount：count 收敛 / count==1 / count 超过可用条数 / count==0
 //  - BarsList::_rt_bars 不参与索引（只有 _bars 被扫）
 //
 // 时间编码沿用生产代码的 bar.time = (date - 19900000) * 10000 + hhmm（uint32，2033 年起溢出，
@@ -223,7 +223,7 @@ TEST_F(P09WindowTest, range_right_edge_beyond_last_bar_clamps_to_latest)
 	EXPECT_EQ(count, 2u);
 	EXPECT_DOUBLE_EQ(p[count - 1].open, 4.0);
 
-	// 复制版对空区间安全；指针版对应的 BUG-P09-005 候选见下方禁用测试。
+	// 两种读取方式都应安全处理晚于末条的空窗口。
 	std::vector<WTSBarStruct> out;
 	out.reserve(8);
 	uint32_t n = _reader.readBarsFromCacheByRange(key, 202012311500, 202101011500, out);
@@ -238,11 +238,7 @@ TEST_F(P09WindowTest, range_right_edge_beyond_last_bar_clamps_to_latest)
 	EXPECT_EQ(p, &lst._bars[0]);
 }
 
-// BUG-P09-005 regression candidate: the active right-edge test above is a non-empty positive control.
-// The current helper derives count==0 for a left edge after all cached bars, then still indexes _bars[size()].
-// Intended post-fix contract: count==0 and p==nullptr. The helper's declaration does not currently promise
-// nullptr for empty results, so keep this disabled until the contract is decided and the one-past access is fixed.
-TEST_F(P09WindowTest, DISABLED_range_left_edge_beyond_all_returns_null_for_empty_result)
+TEST_F(P09WindowTest, range_left_edge_beyond_all_returns_null_for_empty_result)
 {
 	const std::string key = fresh_key("SSE.STK.000002_EMPTY_RANGE");
 	WtRdmDtReader::BarsList& lst = _reader._bars_cache[key];
@@ -251,6 +247,28 @@ TEST_F(P09WindowTest, DISABLED_range_left_edge_beyond_all_returns_null_for_empty
 
 	uint32_t count = 9;
 	WTSBarStruct* p = _reader.indexBarFromCacheByRange(key, 202012311500, 202101011500, count);
+	EXPECT_EQ(count, 0u);
+	EXPECT_EQ(p, nullptr);
+
+	// Empty cache and a right endpoint before the first bar follow the same null/zero convention.
+	count = 9;
+	p = _reader.indexBarFromCacheByRange(fresh_key("SSE.STK.EMPTY"), 202012311500, 202101011500, count);
+	EXPECT_EQ(count, 0u);
+	EXPECT_EQ(p, nullptr);
+
+	count = 9;
+	p = _reader.indexBarFromCacheByRange(key, 202005011500, 202004301500, count);
+	EXPECT_EQ(count, 0u);
+	EXPECT_EQ(p, nullptr);
+
+	count = 9;
+	p = _reader.indexBarFromCacheByRange(key, 202005011500, 202005011400, count);
+	EXPECT_EQ(count, 0u);
+	EXPECT_EQ(p, nullptr);
+
+	// Direct indexer calls with a zero timestamp also mean an endpoint before these cached bars.
+	count = 9;
+	p = _reader.indexBarFromCacheByRange(key, 0, 0, count);
 	EXPECT_EQ(count, 0u);
 	EXPECT_EQ(p, nullptr);
 }
@@ -364,11 +382,7 @@ TEST_F(P09WindowTest, index_bar_by_count_walks_back_from_right_edge)
 
 }
 
-// BUG-P09-005 regression candidate: the active index_bar_by_count_walks_back_from_right_edge test
-// keeps non-empty controls; count==0 computes sIdx==_bars.size(), then still indexes _bars[sIdx].
-// Intended post-fix contract: count==0 and p==nullptr. The helper declaration does not currently promise
-// nullptr for empty results; re-enable only after deciding that contract and fixing the one-past access.
-TEST_F(P09WindowTest, DISABLED_index_bar_by_count_zero_returns_null_for_empty_result)
+TEST_F(P09WindowTest, index_bar_by_count_zero_returns_null_for_empty_result)
 {
 	const std::string key = fresh_key("SSE.STK.000006_ZERO_COUNT");
 	WtRdmDtReader::BarsList& lst = _reader._bars_cache[key];
@@ -379,33 +393,54 @@ TEST_F(P09WindowTest, DISABLED_index_bar_by_count_zero_returns_null_for_empty_re
 	WTSBarStruct* p = _reader.indexBarFromCacheByCount(key, 202010101500, count);
 	EXPECT_EQ(count, 0u);
 	EXPECT_EQ(p, nullptr);
-}
 
-// 崩溃/UB 类输入整类收进同一个 DISABLED_ 用例（常规用例零残留）。
-// 复现（--gtest_also_run_disabled_tests）：
-//  IRdmDtReader 的公开签名是 readKlineSliceByRange(code, period, stime, etime = 0)，
-//  etime=0 会被算成 eBar.time = (uint32)(0 - 19900000) * 10000 = 2863462912，
-//  它小于任何 2013 年以后的 bar.time，于是 lower_bound 命中 begin()，
-//  而 indexBarFromCacheByRange / indexBarFromCacheByCount 的 eit-- 没有 eit==begin() 守卫
-//  （同文件 readBarsFromCacheByRange 有，直接 return 0），随即回绕越界。
-TEST_F(P09WindowTest, DISABLED_p09_default_etime_zero_underflows_the_range_indexers)
-{
-	const std::string key = fresh_key("SSE.STK.000007");
-	WtRdmDtReader::BarsList& lst = _reader._bars_cache[key];
-	for (uint32_t d = 20201101; d <= 20201105; d++)
-		lst._bars.push_back(make_bar(d, 1500, (double)(d - 20201100)));
+	count = 5;
+	p = _reader.indexBarFromCacheByCount(fresh_key("SSE.STK.EMPTY"), 202010101500, count);
+	EXPECT_EQ(count, 0u);
+	EXPECT_EQ(p, nullptr);
 
-	uint32_t count = 5;
-	WTSBarStruct* p = _reader.indexBarFromCacheByRange(key, 202011011500, 0, count);
-	(void)p;
+	count = 5;
+	p = _reader.indexBarFromCacheByCount(key, 202009301500, count);
+	EXPECT_EQ(count, 0u);
+	EXPECT_EQ(p, nullptr);
+
 	count = 5;
 	p = _reader.indexBarFromCacheByCount(key, 0, count);
-	(void)p;
+	EXPECT_EQ(count, 0u);
+	EXPECT_EQ(p, nullptr);
+}
 
-	// 这一条是安全的：readBarsFromCacheByRange 有 begin() 守卫，但结果是「静默返回 0 条」，
-	// 也就是默认参数 etime=0 在拷贝版里等价于「什么都读不到」。
-	std::vector<WTSBarStruct> out;
-	EXPECT_EQ(_reader.readBarsFromCacheByRange(key, 202011011500, 0, out), 0u);
+TEST_F(P09WindowTest, public_kline_slice_readers_keep_empty_and_nonempty_results)
+{
+	const char* code = "SSE.STK.000008";
+	const std::string key = std::string(code) + "#" + std::to_string((uint32_t)KP_DAY);
+	WtRdmDtReader::BarsList& lst = _reader._bars_cache[key];
+	for (uint32_t d = 20200501; d <= 20200504; d++)
+		lst._bars.push_back(make_bar(d, 1500, (double)(d - 20200500)));
+
+	// Range API: empty windows return nullptr, while ordinary ranges expose their bars.
+	WTSKlineSlice* range = _reader.readKlineSliceByRange(code, KP_DAY, 202012311500, 202101011500);
+	EXPECT_EQ(range, nullptr);
+
+	range = _reader.readKlineSliceByRange(code, KP_DAY, 202005021500, 202012311500);
+	ASSERT_NE(range, nullptr);
+	ASSERT_EQ(range->size(), 3u);
+	ASSERT_NE(range->at(0), nullptr);
+	ASSERT_NE(range->at(-1), nullptr);
+	EXPECT_EQ(range->at(0)->date, 20200502u);
+	EXPECT_EQ(range->at(-1)->date, 20200504u);
+	range->release();
+
+	// Count API: zero and unavailable windows return nullptr; a positive request is a tail window.
+	EXPECT_EQ(_reader.readKlineSliceByCount(code, KP_DAY, 0, 202012311500), nullptr);
+	EXPECT_EQ(_reader.readKlineSliceByCount(code, KP_DAY, 5, 202004301500), nullptr);
+
+	WTSKlineSlice* tail = _reader.readKlineSliceByCount(code, KP_DAY, 2, 202012311500);
+	ASSERT_NE(tail, nullptr);
+	ASSERT_EQ(tail->size(), 2u);
+	EXPECT_EQ(tail->at(0)->date, 20200503u);
+	EXPECT_EQ(tail->at(-1)->date, 20200504u);
+	tail->release();
 }
 
 }

@@ -29,6 +29,8 @@ public:
 	UftMocker(HisDataReplayer* replayer, const char* name);
 	virtual ~UftMocker();
 
+	friend struct UftMockerTestAccess;
+
 private:
 	template<typename... Args>
 	void log_debug(const char* format, const Args& ...args)
@@ -204,6 +206,9 @@ private:
 	typedef std::function<void()> Task;
 	void	postTask(Task task);
 	void	procTask();
+	bool	init_uft_factory_impl(WTSVariant* cfg, DllHandle module,
+		const std::string& modulePath, FuncCreateUftStraFact creator, FuncDeleteUftStraFact remover);
+	void	release_uft_factory() noexcept;
 
 	bool	procOrder(uint32_t localid);
 
@@ -238,12 +243,62 @@ private:
 		{
 			_module_inst = NULL;
 			_fact = NULL;
+			_creator = NULL;
+			_remover = NULL;
 		}
 
 		~_StraFactInfo()
 		{
-			if (_fact)
-				_remover(_fact);
+			release();
+		}
+
+		void release() noexcept
+		{
+			if (is_preserved())
+				return;
+
+			if (_fact != NULL)
+			{
+				if (_remover == NULL)
+				{
+					pin();
+					return;
+				}
+				try
+				{
+					_remover(_fact);
+				}
+				catch (...)
+				{
+					// Keep plugin code mapped when factory destruction is uncertain.
+					pin();
+					return;
+				}
+				_fact = NULL;
+			}
+			if (_module_inst != NULL)
+			{
+				DLLHelper::free_library(_module_inst);
+				_module_inst = NULL;
+			}
+			_creator = NULL;
+			_remover = NULL;
+			_module_path.clear();
+		}
+
+		bool is_preserved() const noexcept
+		{
+			return _module_inst == NULL && _fact == NULL && _creator == NULL &&
+				_remover == NULL && !_module_path.empty();
+		}
+
+		void pin() noexcept
+		{
+			// Relinquish ownership without unloading a module that may still own live objects.
+			_module_inst = NULL;
+			_fact = NULL;
+			_creator = NULL;
+			_remover = NULL;
 		}
 	} StraFactInfo;
 	StraFactInfo	_factory;
@@ -260,6 +315,7 @@ private:
 	typedef struct _OrderInfo
 	{
 		bool	_isLong;
+		bool	_isBuy;
 		char	_code[32];
 		double	_price;
 		double	_total;

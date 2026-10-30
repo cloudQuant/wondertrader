@@ -58,15 +58,109 @@ public:
     void on_tick(const char* stdCode, WTSTickData* newTick, bool bEmitStrategy = true) override
     {
         _last_code = stdCode;
+        _last_tick_price = newTick->price();
+        _last_tick_open = newTick->getTickStruct().open;
         ++_ticks;
         CtaStraBaseCtx::on_tick(stdCode, newTick, bEmitStrategy);
     }
 
     std::string _last_code;
+    double _last_tick_price = 0.0;
+    double _last_tick_open = 0.0;
     uint32_t _ticks = 0;
 };
 
 typedef std::shared_ptr<CtaCtxFake> CtaCtxPtr;
+
+// 给无规则股票复权用例提供真实的 Stock 商品类别和确定的非 1 因子。
+class R41StockBaseDataMgr final : public IBaseDataMgr
+{
+public:
+	R41StockBaseDataMgr()
+	{
+		_stock = WTSCommodityInfo::create("600000", "R41 stock", "SSE", "TRADING", "CHINA");
+		_stock->setCategory(CC_Stock);
+		_stock->setTradingMode(TM_Both);
+		_stock->setVolScale(1);
+		_stock->setSessionInfo(_fallback.session());
+
+		_stock_contract = WTSContractInfo::create("600000", "600000", "SSE", "600000");
+		_stock_contract->setVolScale(1);
+		_stock_contract->setCommInfo(_stock);
+	}
+
+	~R41StockBaseDataMgr()
+	{
+		_stock_contract->release();
+		_stock->release();
+	}
+
+	WTSCommodityInfo* getCommodity(const char* exchgpid) override
+	{
+		if (exchgpid != NULL && std::string(exchgpid) == "SSE.600000")
+			return _stock;
+		return _fallback.getCommodity(exchgpid);
+	}
+
+	WTSCommodityInfo* getCommodity(const char* exchg, const char* pid) override
+	{
+		if (exchg != NULL && pid != NULL && std::string(exchg) == "SSE" && std::string(pid) == "600000")
+			return _stock;
+		return _fallback.getCommodity(exchg, pid);
+	}
+
+	WTSContractInfo* getContract(const char* code, const char* exchg, uint32_t date = 0) override
+	{
+		if (code != NULL && exchg != NULL && std::string(code) == "600000" && std::string(exchg) == "SSE")
+			return _stock_contract;
+		return _fallback.getContract(code, exchg, date);
+	}
+
+	WTSArray* getContracts(const char* exchg = "", uint32_t date = 0) override
+	{
+		return _fallback.getContracts(exchg, date);
+	}
+
+	WTSSessionInfo* getSession(const char* sid) override { return _fallback.getSession(sid); }
+	WTSSessionInfo* getSessionByCode(const char* code, const char* exchg = "") override
+	{
+		return _fallback.getSessionByCode(code, exchg);
+	}
+	WTSArray* getAllSessions() override { return _fallback.getAllSessions(); }
+	bool isHoliday(const char* pid, uint32_t date, bool isTpl = false) override
+	{
+		return _fallback.isHoliday(pid, date, isTpl);
+	}
+	uint32_t calcTradingDate(const char* stdPID, uint32_t date, uint32_t time, bool isSession = false) override
+	{
+		return _fallback.calcTradingDate(stdPID, date, time, isSession);
+	}
+	uint64_t getBoundaryTime(const char* stdPID, uint32_t date, bool isSession = false, bool isStart = true) override
+	{
+		return _fallback.getBoundaryTime(stdPID, date, isSession, isStart);
+	}
+
+	WTSContractInfo* stockContract() const { return _stock_contract; }
+
+private:
+	BaseDataMgrFake _fallback;
+	WTSCommodityInfo* _stock = NULL;
+	WTSContractInfo* _stock_contract = NULL;
+};
+
+class R41StockFactorDtMgr final : public WtDtMgr
+{
+public:
+	double get_adjusting_factor(const char* stdCode, uint32_t date) override
+	{
+		_last_code = stdCode == NULL ? "" : stdCode;
+		_last_date = date;
+		return 2.0;
+	}
+
+	std::string _last_code;
+	uint32_t _last_date = 0;
+};
 
 // 通过公开 API 造一手理论持仓: stra_set_position 挂信号, 再喂一笔 tick 让上下文成交。
 // ctx 里的 do_set_position 是 private, 这里不绕过访问控制。
@@ -259,12 +353,12 @@ TEST_F(R41EngineFixture, R41OnTickDispatchesRawAndHfqAdjusted)
 }
 
 //////////////////////////////////////////////////////////////////
-// 缺陷复现(默认禁用): 无规则标签的 '-' 订阅被误判成后复权
-// src/WtCore/WtEngine.cpp:825-837 (flag 取 stdCode[length-1] 而非 [length])
-// 期望: 前复权代码 -> 上下文收到 "SHFE.rb.2310-"; 实际: 收到 "+" 分支。
+// 无规则标签的 '-' 订阅保持前复权标记，并在实际 tick 分发时收到 '-' 代码
+// src/WtCore/WtEngine.cpp:842-849 (length-- 后缀位于 stdCode[length])
+// 期望: 前复权代码 -> 上下文收到 "SHFE.rb.2310-"。
 // 见 bugs/R41.md BUG-R41-002
 //////////////////////////////////////////////////////////////////
-TEST_F(R41EngineFixture, DISABLED_R41PlainQfqSubscriptionDispatchesFrontAdjusted)
+TEST_F(R41EngineFixture, R41PlainQfqSubscriptionDispatchesFrontAdjusted)
 {
     WTSVariant* cfg = makeCfg("", 0);
     ASSERT_NE(nullptr, cfg);
@@ -283,10 +377,161 @@ TEST_F(R41EngineFixture, DISABLED_R41PlainQfqSubscriptionDispatchesFrontAdjusted
     WTSTickData* tick = makeTick(kCode, 10.0);
     engine.on_tick(kCode, tick);
 
-    // 当前实现下这里是 "+", 用例保持 DISABLED_
+	// 前复权订阅应保留前复权后缀。
     EXPECT_EQ(std::string("SHFE.rb.2310-"), ctx->_last_code);
 
     tick->release();
+}
+
+//////////////////////////////////////////////////////////////////
+// QFQ/HFQ/plain 回调在直连与线程池模式下保留代码后缀与价格语义。
+// 普通代码覆盖非主力订阅分支（含 R41- 修复）；.R41 使用 HotMgrFake 的
+// 非 1 复权因子 2.0，确认 HFQ 回调 Tick 价格字段确实转换。
+//////////////////////////////////////////////////////////////////
+TEST_F(R41EngineFixture, R41AdjustedTickDispatchMatchesDirectAndPoolModes)
+{
+	for (uint32_t poolsize : { 0u, 2u })
+	{
+		SCOPED_TRACE(::testing::Message() << "poolsize=" << poolsize);
+		WTSVariant* cfg = makeCfg("", poolsize);
+		ASSERT_NE(nullptr, cfg);
+
+		WtCtaEngine engine;
+		engine.init(cfg, _bd.get(), _dt.get(), _hot.get(), NULL);
+		engine.set_date_time(20231010, 931, 0);
+		engine.set_trading_date(20231010);
+
+		CtaCtxPtr rawCtx(new CtaCtxFake(&engine, "r41raw", 0));
+		CtaCtxPtr qfqCtx(new CtaCtxFake(&engine, "r41qfq", 0));
+		CtaCtxPtr hfqCtx(new CtaCtxFake(&engine, "r41hfq", 0));
+		CtaCtxPtr ruleRawCtx(new CtaCtxFake(&engine, "r41rule_raw", 0));
+		CtaCtxPtr ruleQfqCtx(new CtaCtxFake(&engine, "r41rule_qfq", 0));
+		CtaCtxPtr ruleHfqCtx(new CtaCtxFake(&engine, "r41rule_hfq", 0));
+		engine.addContext(rawCtx);
+		engine.addContext(qfqCtx);
+		engine.addContext(hfqCtx);
+		engine.addContext(ruleRawCtx);
+		engine.addContext(ruleQfqCtx);
+		engine.addContext(ruleHfqCtx);
+		engine.on_session_begin();
+
+		engine.sub_tick(rawCtx->id(), kCode);
+		engine.sub_tick(qfqCtx->id(), "SHFE.rb.2310-");
+		engine.sub_tick(hfqCtx->id(), "SHFE.rb.2310+");
+		engine.sub_tick(ruleRawCtx->id(), "SHFE.rb.R41");
+		engine.sub_tick(ruleQfqCtx->id(), "SHFE.rb.R41-");
+		engine.sub_tick(ruleHfqCtx->id(), "SHFE.rb.R41+");
+
+		WTSTickData* tick = makeTick(kCode, 10.0);
+		engine.on_tick(kCode, tick);
+		tick->release();
+
+		WTSTickData* ruleTick = makeTick("SHFE.rb.R41", 10.0);
+		engine.on_tick("SHFE.rb.R41", ruleTick);
+		ruleTick->release();
+
+		EXPECT_EQ(kCode, rawCtx->_last_code);
+		EXPECT_EQ("SHFE.rb.2310-", qfqCtx->_last_code);
+		EXPECT_EQ("SHFE.rb.2310+", hfqCtx->_last_code);
+		EXPECT_EQ("SHFE.rb.R41", ruleRawCtx->_last_code);
+		EXPECT_EQ("SHFE.rb.R41-", ruleQfqCtx->_last_code);
+		EXPECT_EQ("SHFE.rb.R41+", ruleHfqCtx->_last_code);
+		EXPECT_EQ(1u, rawCtx->_ticks);
+		EXPECT_EQ(1u, qfqCtx->_ticks);
+		EXPECT_EQ(1u, hfqCtx->_ticks);
+		EXPECT_EQ(1u, ruleRawCtx->_ticks);
+		EXPECT_EQ(1u, ruleQfqCtx->_ticks);
+		EXPECT_EQ(1u, ruleHfqCtx->_ticks);
+		EXPECT_DOUBLE_EQ(10.0, rawCtx->_last_tick_price);
+		EXPECT_DOUBLE_EQ(9.0, rawCtx->_last_tick_open);
+		EXPECT_DOUBLE_EQ(10.0, qfqCtx->_last_tick_price);
+		EXPECT_DOUBLE_EQ(9.0, qfqCtx->_last_tick_open);
+		EXPECT_DOUBLE_EQ(10.0, hfqCtx->_last_tick_price);
+		EXPECT_DOUBLE_EQ(9.0, hfqCtx->_last_tick_open);
+		EXPECT_DOUBLE_EQ(10.0, ruleRawCtx->_last_tick_price);
+		EXPECT_DOUBLE_EQ(9.0, ruleRawCtx->_last_tick_open);
+		EXPECT_DOUBLE_EQ(10.0, ruleQfqCtx->_last_tick_price);
+		EXPECT_DOUBLE_EQ(9.0, ruleQfqCtx->_last_tick_open);
+		EXPECT_DOUBLE_EQ(20.0, ruleHfqCtx->_last_tick_price);
+		EXPECT_DOUBLE_EQ(18.0, ruleHfqCtx->_last_tick_open);
+		EXPECT_DOUBLE_EQ(10.0, rawCtx->stra_get_price(kCode));
+		EXPECT_DOUBLE_EQ(10.0, qfqCtx->stra_get_price("SHFE.rb.2310-"));
+		EXPECT_DOUBLE_EQ(10.0, hfqCtx->stra_get_price("SHFE.rb.2310+"));
+		EXPECT_DOUBLE_EQ(10.0, ruleRawCtx->stra_get_price("SHFE.rb.R41"));
+		EXPECT_DOUBLE_EQ(10.0, ruleQfqCtx->stra_get_price("SHFE.rb.R41-"));
+		EXPECT_DOUBLE_EQ(20.0, ruleHfqCtx->stra_get_price("SHFE.rb.R41+"));
+	}
+}
+
+TEST_F(R41EngineFixture, R41UnruledStockAdjustmentDispatchMatchesDirectAndPoolModes)
+{
+	const char* stockCode = "SSE.600000";
+	for (uint32_t poolsize : { 0u, 2u })
+	{
+		SCOPED_TRACE(::testing::Message() << "poolsize=" << poolsize);
+		WTSVariant* cfg = makeCfg("", poolsize);
+		ASSERT_NE(nullptr, cfg);
+
+		R41StockBaseDataMgr stockBaseData;
+		R41StockFactorDtMgr dataMgr;
+		WTSCommodityInfo* stockInfo = stockBaseData.getCommodity("SSE", "600000");
+		ASSERT_NE(nullptr, stockInfo);
+		EXPECT_TRUE(stockInfo->isStock());
+		EXPECT_STREQ("", _hot->getRuleTag(stockCode));
+		WtCtaEngine engine;
+		engine.init(cfg, &stockBaseData, &dataMgr, _hot.get(), NULL);
+		engine.set_date_time(20231010, 931, 0);
+		engine.set_trading_date(20231010);
+
+		CtaCtxPtr rawCtx(new CtaCtxFake(&engine, "r41stock_raw", 0));
+		CtaCtxPtr qfqCtx(new CtaCtxFake(&engine, "r41stock_qfq", 0));
+		CtaCtxPtr hfqCtx(new CtaCtxFake(&engine, "r41stock_hfq", 0));
+		engine.addContext(rawCtx);
+		engine.addContext(qfqCtx);
+		engine.addContext(hfqCtx);
+		engine.on_session_begin();
+
+		engine.sub_tick(rawCtx->id(), stockCode);
+		engine.sub_tick(qfqCtx->id(), "SSE.600000-");
+		engine.sub_tick(hfqCtx->id(), "SSE.600000+");
+
+		WTSTickData* tick = WTSTickData::create(stockCode);
+		ASSERT_NE(nullptr, tick);
+		WTSTickStruct& tickStruct = tick->getTickStruct();
+		tickStruct.price = 10.0;
+		tickStruct.open = 9.0;
+		tickStruct.high = 11.0;
+		tickStruct.low = 8.0;
+		tickStruct.pre_close = 9.0;
+		tickStruct.pre_settle = 9.0;
+		tickStruct.settle_price = 10.0;
+		tickStruct.volume = 0;
+		tickStruct.total_volume = 0;
+		tickStruct.trading_date = 20231010;
+		tickStruct.action_date = 20231010;
+		tickStruct.action_time = 93000000;
+		tick->setContractInfo(stockBaseData.stockContract());
+		engine.on_tick(stockCode, tick);
+		tick->release();
+
+		EXPECT_EQ("SSE.600000", rawCtx->_last_code);
+		EXPECT_EQ("SSE.600000-", qfqCtx->_last_code);
+		EXPECT_EQ("SSE.600000+", hfqCtx->_last_code);
+		EXPECT_EQ(1u, rawCtx->_ticks);
+		EXPECT_EQ(1u, qfqCtx->_ticks);
+		EXPECT_EQ(1u, hfqCtx->_ticks);
+		EXPECT_DOUBLE_EQ(10.0, rawCtx->_last_tick_price);
+		EXPECT_DOUBLE_EQ(9.0, rawCtx->_last_tick_open);
+		EXPECT_DOUBLE_EQ(10.0, qfqCtx->_last_tick_price);
+		EXPECT_DOUBLE_EQ(9.0, qfqCtx->_last_tick_open);
+		EXPECT_DOUBLE_EQ(20.0, hfqCtx->_last_tick_price);
+		EXPECT_DOUBLE_EQ(18.0, hfqCtx->_last_tick_open);
+		EXPECT_DOUBLE_EQ(10.0, rawCtx->stra_get_price(stockCode));
+		EXPECT_DOUBLE_EQ(10.0, qfqCtx->stra_get_price("SSE.600000-"));
+		EXPECT_DOUBLE_EQ(20.0, hfqCtx->stra_get_price("SSE.600000+"));
+		EXPECT_EQ(stockCode, dataMgr._last_code);
+		EXPECT_EQ(20231010u, dataMgr._last_date);
+	}
 }
 
 //////////////////////////////////////////////////////////////////

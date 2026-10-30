@@ -11,6 +11,8 @@
 #include <boost/filesystem.hpp>
 #include <boost/interprocess/file_mapping.hpp>
 #include <boost/interprocess/mapped_region.hpp>
+#include <boost/interprocess/detail/os_file_functions.hpp>
+#include <cstdint>
 
 /**
  * @brief Boost内存映射文件的封装类
@@ -176,6 +178,36 @@ public:
 	const char* filename()
 	{
 		return _file_name.c_str();
+	}
+
+	// Returns the identity of the file actually opened by file_mapping. The
+	// returned OS handle is borrowed from Boost and must not be closed here.
+	// This accessor adds no object state and remains valid for the lifetime of
+	// the mapping object.
+	bool get_file_identity(std::uint64_t& volume, std::uint64_t& file) const noexcept
+	{
+		if (_file_map == NULL)
+			return false;
+		const boost::interprocess::mapping_handle_t mappingHandle = _file_map->get_mapping_handle();
+		const boost::interprocess::file_handle_t handle =
+			boost::interprocess::ipcdetail::file_handle_from_mapping_handle(mappingHandle);
+		if (handle == boost::interprocess::ipcdetail::invalid_file())
+			return false;
+
+#if defined(BOOST_INTERPROCESS_WINDOWS)
+		boost::interprocess::winapi::interprocess_by_handle_file_information info;
+		if (!boost::interprocess::winapi::get_file_information_by_handle(handle, &info))
+			return false;
+		volume = info.dwVolumeSerialNumber;
+		file = (std::uint64_t(info.nFileIndexHigh) << 32) | std::uint64_t(info.nFileIndexLow);
+#else
+		struct stat info;
+		if (::fstat(handle, &info) != 0)
+			return false;
+		volume = (std::uint64_t)info.st_dev;
+		file = (std::uint64_t)info.st_ino;
+#endif
+		return true;
 	}
 
 	/**

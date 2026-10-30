@@ -72,6 +72,7 @@ TEST_F(R180LoaderFixture, R180Exec_InitRealExecuterAndHandleInit)
 	mocker.handle_replay_done();
 	const std::string log = r161::read_text(_out / "exec" / "trades_r180_exec_init.csv");
 	EXPECT_NE(std::string::npos, log.find("localid,signaltime"));
+	EXPECT_TRUE(mocker.quiesce());
 }
 
 // 生产: ExecMocker.cpp:168-192（handle_schedule 三个 volmode 分支与信号计数）
@@ -113,6 +114,7 @@ TEST_F(R180LoaderFixture, R180Exec_ScheduleAndDirectCallbacks)
 	const std::string log = r161::read_text(_out / "exec" / "trades_r180_exec_sched.csv");
 	EXPECT_NE(std::string::npos, log.find(",true"));
 	EXPECT_NE(std::string::npos, log.find(",false"));
+	EXPECT_TRUE(mocker.quiesce());
 }
 
 // 生产: ExecMocker.cpp:270-274（cancel(stdCode,isBuy,qty) 的撤单回调）
@@ -144,6 +146,7 @@ TEST_F(R180LoaderFixture, R180Exec_CancelByCodeRunsCallback)
 	OrderIDs canceled = mocker.cancel(kCu, true, 0.0);
 	EXPECT_EQ(1u, canceled.size());
 	EXPECT_DOUBLE_EQ(0.0, mocker.getUndoneQty(kCu));
+	EXPECT_TRUE(mocker.quiesce());
 }
 
 // 生产: ExecMocker.cpp:180-187（volmode=-1/+1 的累加分支）
@@ -171,6 +174,7 @@ TEST_F(R180LoaderFixture, R180Exec_ScheduleDirectionalVolumeModes)
 
 		mocker.handle_schedule(20200102u, 1000u);
 		EXPECT_DOUBLE_EQ(0.0, mocker.getPosition(kCu));
+		EXPECT_TRUE(mocker.quiesce());
 	}
 }
 

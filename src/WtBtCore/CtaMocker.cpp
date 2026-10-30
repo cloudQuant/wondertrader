@@ -12,7 +12,9 @@
 #include "EventNotifier.h"
 
 #include <exception>
+#include <cstring>
 #include <filesystem>
+#include <system_error>
 namespace fs = std::filesystem;
 
 #include "../Includes/WTSContractInfo.hpp"
@@ -27,9 +29,169 @@ namespace fs = std::filesystem;
 
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
-#include "rapidjson/filereadstream.h"
+#include <rapidjson/istreamwrapper.h>
 #include <fstream>
 namespace rj = rapidjson;
+
+namespace
+{
+	enum class SnapshotJsonType
+	{
+		Object,
+		Array,
+		String,
+		Number,
+		Boolean,
+		Int,
+		Uint,
+		Uint64
+	};
+
+	const char* snapshot_json_type_name(SnapshotJsonType type)
+	{
+		switch (type)
+		{
+		case SnapshotJsonType::Object: return "object";
+		case SnapshotJsonType::Array: return "array";
+		case SnapshotJsonType::String: return "string";
+		case SnapshotJsonType::Number: return "number";
+		case SnapshotJsonType::Boolean: return "boolean";
+		case SnapshotJsonType::Int: return "integer";
+		case SnapshotJsonType::Uint: return "unsigned integer";
+		case SnapshotJsonType::Uint64: return "unsigned 64-bit integer";
+		default: return "value";
+		}
+	}
+
+	bool snapshot_json_type_matches(const rj::Value& value, SnapshotJsonType type)
+	{
+		switch (type)
+		{
+		case SnapshotJsonType::Object: return value.IsObject();
+		case SnapshotJsonType::Array: return value.IsArray();
+		case SnapshotJsonType::String: return value.IsString();
+		case SnapshotJsonType::Number: return value.IsNumber();
+		case SnapshotJsonType::Boolean: return value.IsBool();
+		case SnapshotJsonType::Int: return value.IsInt();
+		case SnapshotJsonType::Uint: return value.IsUint();
+		case SnapshotJsonType::Uint64: return value.IsUint64();
+		default: return false;
+		}
+	}
+
+	const rj::Value* require_snapshot_member(const rj::Value& object, const char* name,
+		SnapshotJsonType type, const std::string& objectPath, std::string& error)
+	{
+		const std::string memberPath = objectPath + "." + name;
+		if (!object.IsObject())
+		{
+			error = objectPath + " must be an object";
+			return nullptr;
+		}
+
+		rj::Value::ConstMemberIterator member = object.FindMember(name);
+		if (member == object.MemberEnd())
+		{
+			error = memberPath + " is missing";
+			return nullptr;
+		}
+		if (!snapshot_json_type_matches(member->value, type))
+		{
+			error = memberPath + " must be a " + snapshot_json_type_name(type);
+			return nullptr;
+		}
+		return &member->value;
+	}
+
+	bool validate_snapshot_string(const rj::Value& value, size_t maxLength,
+		const std::string& path, std::string& error)
+	{
+		if (std::memchr(value.GetString(), '\0', value.GetStringLength()) != nullptr)
+		{
+			error = path + " contains an embedded NUL";
+			return false;
+		}
+		if (value.GetStringLength() > maxLength)
+		{
+			error = path + " exceeds its string buffer";
+			return false;
+		}
+		return true;
+	}
+
+	bool is_valid_snapshot_compare_field(int value)
+	{
+		switch (value)
+		{
+		case WCF_NEWPRICE:
+		case WCF_BIDPRICE:
+		case WCF_ASKPRICE:
+		case WCF_PRICEDIFF:
+		case WCF_NONE:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	bool is_valid_snapshot_compare_type(int value)
+	{
+		return value >= (int)WCT_Equal && value <= (int)WCT_SmallerOrEqual;
+	}
+
+	bool is_valid_snapshot_action(uint32_t value)
+	{
+		return value >= (uint32_t)COND_ACTION_OL && value <= (uint32_t)COND_ACTION_SP;
+	}
+
+	bool read_incremental_csv_rows(const std::string& filename, std::string& rows, std::string& error)
+	{
+		std::error_code ec;
+		const bool exists = fs::exists(filename, ec);
+		if (ec)
+		{
+			error = "cannot inspect file";
+			return false;
+		}
+		if (!exists)
+			return true;
+
+		if (fs::is_directory(filename, ec))
+		{
+			error = "path is a directory";
+			return false;
+		}
+		if (ec)
+		{
+			error = "cannot inspect file type";
+			return false;
+		}
+
+		std::ifstream input(filename);
+		if (!input.is_open())
+		{
+			error = "cannot open file";
+			return false;
+		}
+
+		std::string line;
+		// Match the historical format: skip one header line and preserve data rows verbatim.
+		if (std::getline(input, line))
+		{
+			while (std::getline(input, line))
+			{
+				rows += line;
+				rows.push_back('\n');
+			}
+		}
+		if (input.bad() || (input.fail() && !input.eof()))
+		{
+			error = "read failed";
+			return false;
+		}
+		return true;
+	}
+}
 
 const char* CMP_ALG_NAMES[] =
 {
@@ -76,6 +238,7 @@ CtaMocker::CtaMocker(HisDataReplayer* replayer, const char* name, int32_t slippa
 	, _in_backtest(false)
 	, _wait_calc(false)
 	, _persist_data(persistData)
+	, _last_cond_min(0)
 {
 	_context_id = makeCtxId();
 }
@@ -83,6 +246,33 @@ CtaMocker::CtaMocker(HisDataReplayer* replayer, const char* name, int32_t slippa
 
 CtaMocker::~CtaMocker()
 {
+	destroy_strategy();
+}
+
+void CtaMocker::destroy_strategy()
+{
+	if (_strategy == NULL)
+		return;
+
+	bool destroyed = false;
+	if (_factory._fact != NULL)
+	{
+		try
+		{
+			destroyed = _factory._fact->deleteStrategy(_strategy);
+		}
+		catch (...)
+		{
+			WTSLogger::error("CTA strategy {} threw while being destroyed; keeping its plugin loaded", _name);
+		}
+	}
+
+	if (!destroyed)
+	{
+		WTSLogger::error("CTA strategy {} could not be destroyed; keeping its factory and plugin loaded", _name);
+		_factory.preserve();
+	}
+	_strategy = NULL;
 }
 
 void CtaMocker::dump_stradata()
@@ -414,18 +604,45 @@ void CtaMocker::log_close(const char* stdCode, bool isLong, uint64_t openTime, d
 
 bool CtaMocker::init_cta_factory(WTSVariant* cfg)
 {
-	if (cfg == NULL)
+	if (cfg == NULL || _factory._preserve_module || _factory._module_inst != NULL ||
+		_factory._fact != NULL || _strategy != NULL)
 		return false;
 
 	const char* module = cfg->getCString("module");
+	if (module == NULL || module[0] == '\0')
+	{
+		WTSLogger::error("Initializing CTA strategy factory failed: module path is empty");
+		return false;
+	}
 
 	DllHandle hInst = DLLHelper::load_library(module);
 	if (hInst == NULL)
 		return false;
 
 	FuncCreateStraFact creator = (FuncCreateStraFact)DLLHelper::get_symbol(hInst, "createStrategyFact");
-	if (creator == NULL)
+	FuncDeleteStraFact remover = (FuncDeleteStraFact)DLLHelper::get_symbol(hInst, "deleteStrategyFact");
+	if (creator == NULL || remover == NULL)
 	{
+		WTSLogger::error("Initializing CTA strategy factory failed: {} missing {}", module,
+			creator == NULL ? "createStrategyFact" : "deleteStrategyFact");
+		DLLHelper::free_library(hInst);
+		return false;
+	}
+
+	ICtaStrategyFact* fact = NULL;
+	try
+	{
+		fact = creator();
+	}
+	catch (...)
+	{
+		WTSLogger::error("Initializing CTA strategy factory failed: {} creator threw", module);
+		DLLHelper::free_library(hInst);
+		return false;
+	}
+	if (fact == NULL)
+	{
+		WTSLogger::error("Initializing CTA strategy factory failed: {} creator returned null", module);
 		DLLHelper::free_library(hInst);
 		return false;
 	}
@@ -433,20 +650,90 @@ bool CtaMocker::init_cta_factory(WTSVariant* cfg)
 	_factory._module_inst = hInst;
 	_factory._module_path = module;
 	_factory._creator = creator;
-	_factory._remover = (FuncDeleteStraFact)DLLHelper::get_symbol(hInst, "deleteStrategyFact");
-	_factory._fact = _factory._creator();
+	_factory._remover = remover;
+	_factory._fact = fact;
 
 	WTSVariant* cfgStra = cfg->get("strategy");
-	if (cfgStra)
+	if (cfgStra == NULL)
 	{
-		_strategy = _factory._fact->createStrategy(cfgStra->getCString("name"), cfgStra->getCString("id"));
-		if(_strategy)
-		{
-			WTSLogger::info("Strategy {}.{} is created,strategy ID: {}", _factory._fact->getName(), _strategy->getName(), _strategy->id());
-		}
-		_strategy->init(cfgStra->get("params"));
-		_name = _strategy->id();
+		WTSLogger::error("Initializing CTA strategy failed: strategy configuration is missing");
+		_factory.release();
+		return false;
 	}
+
+	const char* strategyName = cfgStra->getCString("name");
+	const char* strategyId = cfgStra->getCString("id");
+	if (strategyName == NULL || strategyName[0] == '\0' || strategyId == NULL || strategyId[0] == '\0')
+	{
+		WTSLogger::error("Initializing CTA strategy failed: strategy name or id is empty");
+		_factory.release();
+		return false;
+	}
+
+	try
+	{
+		_strategy = _factory._fact->createStrategy(strategyName, strategyId);
+	}
+	catch (...)
+	{
+		WTSLogger::error("Creating CTA strategy {} failed: plugin threw", strategyName);
+		_factory.release();
+		return false;
+	}
+	if (_strategy == NULL)
+	{
+		WTSLogger::error("Creating CTA strategy {} failed: plugin returned null", strategyName);
+		_factory.release();
+		return false;
+	}
+
+	bool initialized = false;
+	try
+	{
+		initialized = _strategy->init(cfgStra->get("params"));
+	}
+	catch (...)
+	{
+		WTSLogger::error("Initializing CTA strategy {} failed: plugin threw", strategyName);
+	}
+	if (!initialized)
+	{
+		WTSLogger::error("Initializing CTA strategy {} failed", strategyName);
+		destroy_strategy();
+		_factory.release();
+		return false;
+	}
+
+	std::string initializedId;
+	std::string factoryName;
+	std::string initializedName;
+	try
+	{
+		const char* id = _strategy->id();
+		const char* factName = _factory._fact->getName();
+		const char* name = _strategy->getName();
+		if (id == NULL || id[0] == '\0' || factName == NULL || factName[0] == '\0' ||
+			name == NULL || name[0] == '\0')
+		{
+			WTSLogger::error("Initializing CTA strategy {} failed: plugin returned an empty identity", strategyName);
+			destroy_strategy();
+			_factory.release();
+			return false;
+		}
+		initializedId = id;
+		factoryName = factName;
+		initializedName = name;
+	}
+	catch (...)
+	{
+		WTSLogger::error("Initializing CTA strategy {} failed: plugin identity lookup threw", strategyName);
+		destroy_strategy();
+		_factory.release();
+		return false;
+	}
+
+	_name = initializedId;
+	WTSLogger::info("Strategy {}.{} is created,strategy ID: {}", factoryName, initializedName, _name);
 
 	return true;
 }
@@ -458,164 +745,324 @@ void CtaMocker::load_incremental_data(const char* incremental_backtest_base)
 	folder += "/";
 	WTSLogger::info("loading incremental data from: {}", folder);
 
-	std::string tradesFilename = folder + "trades.csv";
-	if (fs::exists(tradesFilename))
-	{
-		std::ifstream tradesFile(tradesFilename);
-		std::string str;
-		// 跳过标题行
-		std::getline(tradesFile, str);
-		while (std::getline(tradesFile, str))
-		{
-			_trade_logs << str << "\n";
-		}
-	}
-
-	std::string closesFilename = folder + "closes.csv";
-	if (fs::exists(closesFilename))
-	{
-		std::ifstream closesFile(closesFilename);
-		std::string str;
-		// 跳过标题行
-		std::getline(closesFile, str);
-		while (std::getline(closesFile, str))
-		{
-			_close_logs << str << "\n";
-		}
-	}
-
-	std::string fundsFilename = folder + "funds.csv";
-	if (fs::exists(fundsFilename))
-	{
-		std::ifstream fundsFile(fundsFilename);
-		std::string str;
-		// 跳过标题行
-		std::getline(fundsFile, str);
-		while (std::getline(fundsFile, str))
-		{
-			_fund_logs << str << "\n";
-		}
-	}
-
-	std::string positionsFilename = folder + "positions.csv";
-	if (fs::exists(positionsFilename))
-	{
-		std::ifstream positionsFile(positionsFilename);
-		std::string str;
-		// 跳过标题行
-		std::getline(positionsFile, str);
-		while (std::getline(positionsFile, str))
-		{
-			_pos_logs << str << "\n";
-		}
-	}
-
-	std::string signalsFilename = folder + "signals.csv";
-	if (fs::exists(signalsFilename))
-	{
-		std::ifstream signalsFile(signalsFilename);
-		std::string str;
-		// 跳过标题行
-		std::getline(signalsFile, str);
-		while (std::getline(signalsFile, str))
-		{
-			_sig_logs << str << "\n";
-		}
-	}
-
 	std::string strategyDumpFilename = folder + fmtutil::format("{}.json", incremental_backtest_base);
-	if (fs::exists(strategyDumpFilename))
+	std::error_code strategyDumpPathError;
+	const bool hasStrategyDump = fs::exists(strategyDumpFilename, strategyDumpPathError);
+	if (strategyDumpPathError)
+	{
+		WTSLogger::warn("fail load incremental data json: {} (cannot inspect file: {})",
+			strategyDumpFilename, strategyDumpPathError.message());
+		return;
+	}
+	bool restoreStrategyData = false;
+	PositionMap restoredPositions;
+	SignalMap restoredSignals;
+	CondEntrustMap restoredConditions;
+	StraFundInfo restoredFundInfo = _fund_info;
+	uint64_t restoredLastCondMin = _last_cond_min;
+
+	// Parse and stage the complete JSON snapshot before appending any CSV rows or
+	// changing live state. A malformed snapshot must not leave a partial restore.
+	if (hasStrategyDump)
 	{
 		WTSLogger::info("load incremental data json: {}", strategyDumpFilename);
-		FILE* fp = fopen(strategyDumpFilename.c_str(), "rb");
-		char readBuffer[65536];
-		rj::FileReadStream strategyDumpFile(fp, readBuffer, sizeof(readBuffer));
-		rj::Document d;
-		d.ParseStream(strategyDumpFile);
-		fclose(fp);
-		if (d.HasMember("positions"))
+		std::ifstream strategyDumpFile(strategyDumpFilename, std::ios::binary);
+		if (!strategyDumpFile.is_open())
 		{
-			const rj::Value& positions = d["positions"];
-			for (rj::SizeType i = 0; i < positions.Size(); i++)
-			{
-				const rj::Value& positionEntry = positions[i];
-				const char* positionEntry_code = positionEntry["code"].GetString();
-				PosInfo& pInfo = _pos_map[positionEntry_code];
-				pInfo._volume = positionEntry["volume"].GetDouble();
-				pInfo._closeprofit = positionEntry["closeprofit"].GetDouble();
-				pInfo._dynprofit = positionEntry["dynprofit"].GetDouble();
-				pInfo._last_entertime = positionEntry["lastentertime"].GetUint64();
-				pInfo._last_exittime = positionEntry["lastexittime"].GetUint64();
+			WTSLogger::warn("fail load incremental data json: {} (cannot open file)", strategyDumpFilename);
+			return;
+		}
 
-				if (positionEntry.HasMember("details"))
+		rj::IStreamWrapper strategyDumpStream(strategyDumpFile);
+		rj::Document d;
+		d.ParseStream(strategyDumpStream);
+		if (d.HasParseError())
+		{
+			WTSLogger::warn("fail load incremental data json: {} (parse error at byte {})",
+				strategyDumpFilename, d.GetErrorOffset());
+			return;
+		}
+		if (!d.IsObject())
+		{
+			WTSLogger::warn("fail load incremental data json: {} (root must be an object)", strategyDumpFilename);
+			return;
+		}
+
+		restoredPositions = _pos_map;
+		restoredSignals = _sig_map;
+		restoredConditions = _condtions;
+
+		std::string validationError;
+		auto stageSnapshot = [&]() -> bool
+		{
+			if (d.HasMember("positions"))
+			{
+				const rj::Value* positions = require_snapshot_member(d, "positions", SnapshotJsonType::Array, "$", validationError);
+				if (positions == nullptr)
+					return false;
+
+				for (rj::SizeType i = 0; i < positions->Size(); i++)
 				{
-					const rj::Value& details = positionEntry["details"];
-					for (rj::SizeType j = 0; j < details.Size(); j++)
+					const rj::Value& positionEntry = (*positions)[i];
+					const std::string positionPath = "$.positions[" + std::to_string(i) + "]";
+					if (!positionEntry.IsObject())
 					{
-						const rj::Value& positionDetailEntry = details[j];
-						DetailInfo curPosDetail;
-						curPosDetail._long = positionDetailEntry["long"].GetBool();
-						curPosDetail._price = positionDetailEntry["price"].GetDouble();
-						curPosDetail._max_price = positionDetailEntry["maxprice"].GetDouble();
-						curPosDetail._min_price = positionDetailEntry["minprice"].GetDouble();
-						curPosDetail._volume = positionDetailEntry["volume"].GetDouble();
-						curPosDetail._opentime = positionDetailEntry["opentime"].GetUint64();
-						curPosDetail._opentdate = positionDetailEntry["opentdate"].GetInt();
-						curPosDetail._profit = positionDetailEntry["profit"].GetDouble();
-						curPosDetail._max_profit = positionDetailEntry["maxprofit"].GetDouble();
-						curPosDetail._max_loss = positionDetailEntry["maxloss"].GetDouble();
-						strcpy(curPosDetail._opentag, positionDetailEntry["opentag"].GetString());
-						pInfo._details.push_back(curPosDetail);
+						validationError = positionPath + " must be an object";
+						return false;
+					}
+
+					const rj::Value* code = require_snapshot_member(positionEntry, "code", SnapshotJsonType::String, positionPath, validationError);
+					const rj::Value* volume = require_snapshot_member(positionEntry, "volume", SnapshotJsonType::Number, positionPath, validationError);
+					const rj::Value* closeprofit = require_snapshot_member(positionEntry, "closeprofit", SnapshotJsonType::Number, positionPath, validationError);
+					const rj::Value* dynprofit = require_snapshot_member(positionEntry, "dynprofit", SnapshotJsonType::Number, positionPath, validationError);
+					const rj::Value* lastentertime = require_snapshot_member(positionEntry, "lastentertime", SnapshotJsonType::Uint64, positionPath, validationError);
+					const rj::Value* lastexittime = require_snapshot_member(positionEntry, "lastexittime", SnapshotJsonType::Uint64, positionPath, validationError);
+					if (code == nullptr || volume == nullptr || closeprofit == nullptr || dynprofit == nullptr ||
+						lastentertime == nullptr || lastexittime == nullptr)
+						return false;
+					if (!validate_snapshot_string(*code, std::string::npos, positionPath + ".code", validationError))
+						return false;
+
+					const std::string positionCode(code->GetString(), code->GetStringLength());
+					PosInfo& pInfo = restoredPositions[positionCode];
+					pInfo._volume = volume->GetDouble();
+					pInfo._closeprofit = closeprofit->GetDouble();
+					pInfo._dynprofit = dynprofit->GetDouble();
+					pInfo._last_entertime = lastentertime->GetUint64();
+					pInfo._last_exittime = lastexittime->GetUint64();
+
+					if (positionEntry.HasMember("details"))
+					{
+						const rj::Value* details = require_snapshot_member(positionEntry, "details", SnapshotJsonType::Array, positionPath, validationError);
+						if (details == nullptr)
+							return false;
+						for (rj::SizeType j = 0; j < details->Size(); j++)
+						{
+							const rj::Value& detailEntry = (*details)[j];
+							const std::string detailPath = positionPath + ".details[" + std::to_string(j) + "]";
+							if (!detailEntry.IsObject())
+							{
+								validationError = detailPath + " must be an object";
+								return false;
+							}
+
+							DetailInfo curPosDetail;
+							const rj::Value* isLong = require_snapshot_member(detailEntry, "long", SnapshotJsonType::Boolean, detailPath, validationError);
+							const rj::Value* price = require_snapshot_member(detailEntry, "price", SnapshotJsonType::Number, detailPath, validationError);
+							const rj::Value* maxprice = require_snapshot_member(detailEntry, "maxprice", SnapshotJsonType::Number, detailPath, validationError);
+							const rj::Value* minprice = require_snapshot_member(detailEntry, "minprice", SnapshotJsonType::Number, detailPath, validationError);
+							const rj::Value* detailVolume = require_snapshot_member(detailEntry, "volume", SnapshotJsonType::Number, detailPath, validationError);
+							const rj::Value* opentime = require_snapshot_member(detailEntry, "opentime", SnapshotJsonType::Uint64, detailPath, validationError);
+							const rj::Value* opentdate = require_snapshot_member(detailEntry, "opentdate", SnapshotJsonType::Int, detailPath, validationError);
+							const rj::Value* profit = require_snapshot_member(detailEntry, "profit", SnapshotJsonType::Number, detailPath, validationError);
+							const rj::Value* maxprofit = require_snapshot_member(detailEntry, "maxprofit", SnapshotJsonType::Number, detailPath, validationError);
+							const rj::Value* maxloss = require_snapshot_member(detailEntry, "maxloss", SnapshotJsonType::Number, detailPath, validationError);
+							const rj::Value* opentag = require_snapshot_member(detailEntry, "opentag", SnapshotJsonType::String, detailPath, validationError);
+							if (isLong == nullptr || price == nullptr || maxprice == nullptr || minprice == nullptr || detailVolume == nullptr ||
+								opentime == nullptr || opentdate == nullptr || profit == nullptr || maxprofit == nullptr || maxloss == nullptr || opentag == nullptr)
+								return false;
+							if (!validate_snapshot_string(*opentag, sizeof(curPosDetail._opentag) - 1, detailPath + ".opentag", validationError))
+								return false;
+
+							curPosDetail._long = isLong->GetBool();
+							curPosDetail._price = price->GetDouble();
+							curPosDetail._max_price = maxprice->GetDouble();
+							curPosDetail._min_price = minprice->GetDouble();
+							curPosDetail._volume = detailVolume->GetDouble();
+							curPosDetail._opentime = opentime->GetUint64();
+							curPosDetail._opentdate = (uint32_t)opentdate->GetInt();
+							curPosDetail._profit = profit->GetDouble();
+							curPosDetail._max_profit = maxprofit->GetDouble();
+							curPosDetail._max_loss = maxloss->GetDouble();
+							std::memcpy(curPosDetail._opentag, opentag->GetString(), opentag->GetStringLength());
+							curPosDetail._opentag[opentag->GetStringLength()] = '\0';
+							pInfo._details.push_back(curPosDetail);
+						}
 					}
 				}
 			}
-		}
 
-		if (d.HasMember("fund"))
-		{
-			_fund_info._total_profit = d["fund"]["total_profit"].GetDouble();
-			_fund_info._total_dynprofit = d["fund"]["total_dynprofit"].GetDouble();
-			_fund_info._total_fees = d["fund"]["total_fees"].GetDouble();
-		}
-
-		if (d.HasMember("signals"))
-		{
-			for (rj::Value::ConstMemberIterator itr = d["signals"].MemberBegin(); itr != d["signals"].MemberEnd(); ++itr)
+			if (d.HasMember("fund"))
 			{
-				std::string stkCode = itr->name.GetString();
-				SigInfo& sInfo = _sig_map[stkCode];
-				sInfo._usertag = itr->value["usertag"].GetString();
-				sInfo._volume = itr->value["volume"].GetDouble();
-				sInfo._sigprice = itr->value["sigprice"].GetDouble();
-				sInfo._gentime = itr->value["gentime"].GetUint64();
+				const rj::Value* fund = require_snapshot_member(d, "fund", SnapshotJsonType::Object, "$", validationError);
+				if (fund == nullptr)
+					return false;
+				const rj::Value* totalProfit = require_snapshot_member(*fund, "total_profit", SnapshotJsonType::Number, "$.fund", validationError);
+				const rj::Value* totalDynprofit = require_snapshot_member(*fund, "total_dynprofit", SnapshotJsonType::Number, "$.fund", validationError);
+				const rj::Value* totalFees = require_snapshot_member(*fund, "total_fees", SnapshotJsonType::Number, "$.fund", validationError);
+				if (totalProfit == nullptr || totalDynprofit == nullptr || totalFees == nullptr)
+					return false;
+				restoredFundInfo._total_profit = totalProfit->GetDouble();
+				restoredFundInfo._total_dynprofit = totalDynprofit->GetDouble();
+				restoredFundInfo._total_fees = totalFees->GetDouble();
 			}
-		}
 
-		if (d.HasMember("conditions") && d["conditions"].HasMember("items"))
-		{
-			// conditions -> items 下面的内容是两层嵌套   items[CODE] is a list
-			rj::Value& conditionItemsEntry = d["conditions"]["items"];
-
-			for (rj::Value::ConstMemberIterator itr = conditionItemsEntry.MemberBegin(); itr != conditionItemsEntry.MemberEnd(); ++itr)
+			if (d.HasMember("signals"))
 			{
-				std::string stkCode = itr->name.GetString();
-				for (rj::SizeType i = 0; i < itr->value.Size(); i++)
+				const rj::Value* signals = require_snapshot_member(d, "signals", SnapshotJsonType::Object, "$", validationError);
+				if (signals == nullptr)
+					return false;
+				for (rj::Value::ConstMemberIterator itr = signals->MemberBegin(); itr != signals->MemberEnd(); ++itr)
 				{
-					const rj::Value& conditionItemStkCondEntry = itr->value[i];
-					CondEntrust condEntrust;
-					strcpy(condEntrust._usertag, conditionItemStkCondEntry["usertag"].GetString());
-					condEntrust._field = (WTSCompareField)conditionItemStkCondEntry["field"].GetInt();
-					condEntrust._alg = (WTSCompareType)conditionItemStkCondEntry["alg"].GetInt();
-					condEntrust._target = conditionItemStkCondEntry["target"].GetDouble();
-					condEntrust._qty = conditionItemStkCondEntry["qty"].GetDouble();
-					condEntrust._action = (char)conditionItemStkCondEntry["action"].GetUint();
+					const std::string signalPath = "$.signals." + std::string(itr->name.GetString(), itr->name.GetStringLength());
+					if (!validate_snapshot_string(itr->name, std::string::npos, signalPath, validationError))
+						return false;
+					const rj::Value& signalEntry = itr->value;
+					const rj::Value* usertag = require_snapshot_member(signalEntry, "usertag", SnapshotJsonType::String, signalPath, validationError);
+					const rj::Value* volume = require_snapshot_member(signalEntry, "volume", SnapshotJsonType::Number, signalPath, validationError);
+					const rj::Value* sigprice = require_snapshot_member(signalEntry, "sigprice", SnapshotJsonType::Number, signalPath, validationError);
+					const rj::Value* gentime = require_snapshot_member(signalEntry, "gentime", SnapshotJsonType::Uint64, signalPath, validationError);
+					if (usertag == nullptr || volume == nullptr || sigprice == nullptr || gentime == nullptr)
+						return false;
+					if (!validate_snapshot_string(*usertag, std::string::npos, signalPath + ".usertag", validationError))
+						return false;
 
-					_condtions[stkCode].push_back(condEntrust);
+					const std::string signalCode(itr->name.GetString(), itr->name.GetStringLength());
+					SigInfo& sInfo = restoredSignals[signalCode];
+					sInfo._usertag.assign(usertag->GetString(), usertag->GetStringLength());
+					sInfo._volume = volume->GetDouble();
+					sInfo._sigprice = sigprice->GetDouble();
+					sInfo._gentime = gentime->GetUint64();
 				}
 			}
+
+			if (d.HasMember("conditions"))
+			{
+				const rj::Value* conditions = require_snapshot_member(d, "conditions", SnapshotJsonType::Object, "$", validationError);
+				if (conditions == nullptr)
+					return false;
+				if (conditions->HasMember("settime"))
+				{
+					const rj::Value* settime = require_snapshot_member(*conditions, "settime", SnapshotJsonType::Uint64, "$.conditions", validationError);
+					if (settime == nullptr)
+						return false;
+					restoredLastCondMin = settime->GetUint64();
+				}
+				if (conditions->HasMember("items"))
+				{
+					const rj::Value* conditionItems = require_snapshot_member(*conditions, "items", SnapshotJsonType::Object, "$.conditions", validationError);
+					if (conditionItems == nullptr)
+						return false;
+					for (rj::Value::ConstMemberIterator itr = conditionItems->MemberBegin(); itr != conditionItems->MemberEnd(); ++itr)
+					{
+						const std::string codePath = "$.conditions.items." + std::string(itr->name.GetString(), itr->name.GetStringLength());
+						if (!validate_snapshot_string(itr->name, std::string::npos, codePath, validationError))
+							return false;
+						if (!itr->value.IsArray())
+						{
+							validationError = codePath + " must be an array";
+							return false;
+						}
+						for (rj::SizeType i = 0; i < itr->value.Size(); i++)
+						{
+							const rj::Value& conditionEntry = itr->value[i];
+							const std::string conditionPath = codePath + "[" + std::to_string(i) + "]";
+							CondEntrust condEntrust;
+							const rj::Value* usertag = require_snapshot_member(conditionEntry, "usertag", SnapshotJsonType::String, conditionPath, validationError);
+							const rj::Value* field = require_snapshot_member(conditionEntry, "field", SnapshotJsonType::Int, conditionPath, validationError);
+							const rj::Value* alg = require_snapshot_member(conditionEntry, "alg", SnapshotJsonType::Int, conditionPath, validationError);
+							const rj::Value* target = require_snapshot_member(conditionEntry, "target", SnapshotJsonType::Number, conditionPath, validationError);
+							const rj::Value* qty = require_snapshot_member(conditionEntry, "qty", SnapshotJsonType::Number, conditionPath, validationError);
+							const rj::Value* action = require_snapshot_member(conditionEntry, "action", SnapshotJsonType::Uint, conditionPath, validationError);
+							if (usertag == nullptr || field == nullptr || alg == nullptr || target == nullptr || qty == nullptr || action == nullptr)
+								return false;
+							if (!validate_snapshot_string(*usertag, sizeof(condEntrust._usertag) - 1, conditionPath + ".usertag", validationError))
+								return false;
+							const int fieldValue = field->GetInt();
+							if (!is_valid_snapshot_compare_field(fieldValue))
+							{
+								validationError = conditionPath + ".field has an unsupported value";
+								return false;
+							}
+							const int algValue = alg->GetInt();
+							if (!is_valid_snapshot_compare_type(algValue))
+							{
+								validationError = conditionPath + ".alg has an unsupported value";
+								return false;
+							}
+							const uint32_t actionValue = action->GetUint();
+							if (!is_valid_snapshot_action(actionValue))
+							{
+								validationError = conditionPath + ".action has an unsupported value";
+								return false;
+							}
+
+							std::memcpy(condEntrust._usertag, usertag->GetString(), usertag->GetStringLength());
+							condEntrust._usertag[usertag->GetStringLength()] = '\0';
+							condEntrust._field = (WTSCompareField)fieldValue;
+							condEntrust._alg = (WTSCompareType)algValue;
+							condEntrust._target = target->GetDouble();
+							condEntrust._qty = qty->GetDouble();
+							condEntrust._action = (char)actionValue;
+							restoredConditions[std::string(itr->name.GetString(), itr->name.GetStringLength())].push_back(condEntrust);
+						}
+					}
+				}
+			}
+
+			return true;
+		};
+
+		if (!stageSnapshot())
+		{
+			WTSLogger::warn("fail load incremental data json: {} ({})", strategyDumpFilename, validationError);
+			return;
 		}
+		restoreStrategyData = true;
 	}
-	else
+
+	const std::string tradesFilename = folder + "trades.csv";
+	const std::string closesFilename = folder + "closes.csv";
+	const std::string fundsFilename = folder + "funds.csv";
+	const std::string positionsFilename = folder + "positions.csv";
+	const std::string signalsFilename = folder + "signals.csv";
+	std::string tradesRows, closesRows, fundsRows, positionsRows, signalsRows;
+	std::string csvError;
+	auto stageCsv = [&](const std::string& filename, std::string& rows) -> bool
+	{
+		if (read_incremental_csv_rows(filename, rows, csvError))
+			return true;
+		WTSLogger::warn("fail load incremental data csv: {} ({})", filename, csvError);
+		return false;
+	};
+	if (!stageCsv(tradesFilename, tradesRows) || !stageCsv(closesFilename, closesRows) ||
+		!stageCsv(fundsFilename, fundsRows) || !stageCsv(positionsFilename, positionsRows) ||
+		!stageCsv(signalsFilename, signalsRows))
+		return;
+
+	// Build replacement log streams before committing any of the staged input.
+	std::stringstream restoredTradeLogs;
+	std::stringstream restoredCloseLogs;
+	std::stringstream restoredFundLogs;
+	std::stringstream restoredPositionLogs;
+	std::stringstream restoredSignalLogs;
+	restoredTradeLogs << _trade_logs.str() << tradesRows;
+	restoredCloseLogs << _close_logs.str() << closesRows;
+	restoredFundLogs << _fund_logs.str() << fundsRows;
+	restoredPositionLogs << _pos_logs.str() << positionsRows;
+	restoredSignalLogs << _sig_logs.str() << signalsRows;
+	if (restoredTradeLogs.bad() || restoredCloseLogs.bad() || restoredFundLogs.bad() ||
+		restoredPositionLogs.bad() || restoredSignalLogs.bad())
+	{
+		WTSLogger::warn("fail load incremental data csv: unable to stage log buffers");
+		return;
+	}
+
+	_trade_logs.swap(restoredTradeLogs);
+	_close_logs.swap(restoredCloseLogs);
+	_fund_logs.swap(restoredFundLogs);
+	_pos_logs.swap(restoredPositionLogs);
+	_sig_logs.swap(restoredSignalLogs);
+
+	if (restoreStrategyData)
+	{
+		_pos_map.swap(restoredPositions);
+		_sig_map.swap(restoredSignals);
+		_condtions.swap(restoredConditions);
+		_fund_info = restoredFundInfo;
+		_last_cond_min = restoredLastCondMin;
+	}
+	else if (!hasStrategyDump)
 	{
 		WTSLogger::warn("fail load incremental data json: {}", strategyDumpFilename);
 	}

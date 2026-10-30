@@ -14,13 +14,15 @@
  * 一律用堆上 new、故意不 delete 的 runner，绝不触碰 getRunner() 单例的 mocker 槽位。
  *
  * 注意：WtBtRunner 构造列表没有初始化 _hft_mocker/_exec_mocker/_worker/_cfg/
- * _loader_auto_trans（BUG-R46-001），堆实例只能走不读这些槽位的入口：
- * 不调用 initHftMocker()/isAutoTrans()/release()/run()，stop() 走单例静态零初始化。
+ * _loader_auto_trans（BUG-R46-001），堆实例只能走不读这些槽位的入口。除下方
+ * 专门验证 run() 失败守卫的用例外，不调用 initHftMocker()/isAutoTrans()/release()/run()；
+ * stop() 走单例静态零初始化。
  * 所有落盘都在系统临时目录的专属子目录，用例末尾 remove_all。
  */
 #include <gtest/gtest.h>
 
 #include <cstring>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -106,6 +108,62 @@ TEST(R46BtRunner, ConfigWithBrokenContentLeavesMockersEmpty)
 	EXPECT_EQ(r->cta_mocker(), nullptr);
 	EXPECT_EQ(r->sel_mocker(), nullptr);
 	EXPECT_FALSE(r->isAsync());
+}
+
+/* 生产：WtBtRunner::config 必须在回放器配置初始化失败时早退；
+ * 随后的 void run() 只能记录失败并返回，不能调用 prepare/run 或启动策略。
+ * 子进程隔离可检测旧路径继续注册策略/进入回放导致的崩溃。 */
+TEST(R46BtRunner, InvalidReplayerConfigPreventsStrategyRegistrationAndRun)
+{
+	ASSERT_EXIT(
+		{
+			WtBtRunner* r = new WtBtRunner();
+			r->config("{\"replayer\":{\"mode\":\"none\"},"
+				"\"env\":{\"mocker\":\"cta\"},"
+				"\"cta\":{\"name\":\"r46bt_invalid_replayer\",\"slippage\":0}}", false);
+			if (r->cta_mocker() != nullptr)
+				std::_Exit(2);
+			r->run(false, false);
+			std::_Exit(0);
+		},
+		::testing::ExitedWithCode(0), "");
+}
+
+/* 生产：有效配置应能完成 prepare；若 replayer 已处于准备态，后续 run 必须在
+ * prepare 返回 false 时早退，不应启动第二个 worker。 */
+TEST(R46BtRunner, PrepareFailureDoesNotStartAsyncRunAndValidPrepareRemainsUsable)
+{
+	const std::string dir = prepare_out_dir();
+	ASSERT_FALSE(dir.empty());
+	{
+		std::ofstream(dir + "/sessions.json")
+			<< "{\"TRADING\":{\"name\":\"Trading\",\"offset\":0,"
+			<< "\"sections\":[{\"from\":0,\"to\":2359}]}}";
+		std::ofstream(dir + "/commodities.json")
+			<< "{\"SHFE\":{\"rb\":{\"name\":\"Rebar\",\"session\":\"TRADING\","
+			<< "\"pricetick\":1,\"volscale\":10,\"covermode\":0,\"pricemode\":0,"
+			<< "\"trademode\":0,\"category\":1}}}";
+		std::ofstream(dir + "/contracts.json")
+			<< "{\"SHFE\":{\"rb2510\":{\"name\":\"rb2510\",\"product\":\"rb\","
+			<< "\"exchg\":\"SHFE\"}}}";
+	}
+
+	WtBtRunner* r = new_runner();
+	ASSERT_NE(r, nullptr);
+
+	const std::string cfg = "{\"replayer\":{\"mode\":\"none\",\"path\":\"" + dir
+		+ "\",\"stime\":20240102000000,\"etime\":20240103000000,\"tick\":false,"
+		+ "\"basefiles\":{\"session\":\"" + dir + "/sessions.json\",\"commodity\":\""
+		+ dir + "/commodities.json\",\"contract\":\"" + dir + "/contracts.json\"}},"
+		+ "\"env\":{\"mocker\":\"cta\"},\"cta\":{\"name\":\"r46_prepare_guard\",\"slippage\":0}}";
+	r->config(cfg.c_str(), false);
+	ASSERT_NE(r->cta_mocker(), nullptr);
+
+	ASSERT_TRUE(r->replayer().prepare());
+
+	r->run(false, true);
+	EXPECT_FALSE(r->isAsync()) << "failed prepare must not launch or mark an async run";
+	clean_dir(dir);
 }
 
 /* WtBtRunner.cpp:266-283 + 299-313：CTA mocker 二次创建会 delete 旧实例并换新 id；

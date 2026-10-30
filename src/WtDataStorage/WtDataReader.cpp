@@ -14,7 +14,52 @@
 #include "../WTSUtils/WTSCfgLoader.h"
 
 #include <rapidjson/document.h>
+#include <exception>
 namespace rj = rapidjson;
+
+namespace
+{
+	bool decode_his_compressed_items(std::string& content, std::size_t itemSize)
+	{
+		if (content.size() < sizeof(BlockHeaderV2))
+			return false;
+
+		const BlockHeaderV2* compressedHeader = (const BlockHeaderV2*)content.data();
+		if (compressedHeader->_size != content.size() - sizeof(BlockHeaderV2))
+			return false;
+
+		const void* compressedData = content.data() + sizeof(BlockHeaderV2);
+		const std::size_t compressedSize = (std::size_t)compressedHeader->_size;
+		const unsigned long long expandedSize = ZSTD_getFrameContentSize(compressedData, compressedSize);
+		if (expandedSize == ZSTD_CONTENTSIZE_ERROR ||
+			expandedSize == ZSTD_CONTENTSIZE_UNKNOWN ||
+			expandedSize > content.max_size() - sizeof(BlockHeader) ||
+			expandedSize % itemSize != 0)
+			return false;
+
+		try
+		{
+			std::string expanded = WTSCmpHelper::uncompress_data(compressedData, compressedSize);
+			if (expanded.size() != expandedSize)
+				return false;
+
+			// Build a new raw block before replacing the compressed bytes. No pointer into
+			// the old string survives this operation, even if the allocation moves.
+			std::string raw;
+			raw.reserve(sizeof(BlockHeader) + expanded.size());
+			raw.append(content.data(), sizeof(BlockHeader));
+			raw.append(expanded);
+			((BlockHeader*)raw.data())->_version = BLOCK_VERSION_RAW_V2;
+			content.swap(raw);
+		}
+		catch (const std::exception&)
+		{
+			return false;
+		}
+
+		return true;
+	}
+}
 
 //By Wesley @ 2022.01.05
 #include "../Share/fmtlib.h"
@@ -49,6 +94,9 @@ extern "C"
  */
 bool proc_block_data(std::string& content, bool isBar, bool bKeepHead /* = true */)
 {
+	if (content.size() < BLOCK_HEADER_SIZE)
+		return false;
+
 	BlockHeader* header = (BlockHeader*)content.data();
 
 	bool bCmped = header->is_compressed();
@@ -57,6 +105,10 @@ bool proc_block_data(std::string& content, bool isBar, bool bKeepHead /* = true 
 	//如果既没有压缩，也不是老版本结构体，则直接返回
 	if (!bCmped && !bOldVer)
 	{
+		if (isBar && header->_version == BLOCK_VERSION_RAW_V2 &&
+			(content.size() - BLOCK_HEADER_SIZE) % sizeof(WTSBarStruct) != 0)
+			return false;
+
 		if (!bKeepHead)
 			content.erase(0, BLOCK_HEADER_SIZE);
 		return true;
@@ -65,15 +117,42 @@ bool proc_block_data(std::string& content, bool isBar, bool bKeepHead /* = true 
 	std::string buffer;
 	if (bCmped)
 	{
+		if (content.size() < BLOCK_HEADERV2_SIZE)
+			return false;
+
 		BlockHeaderV2* blkV2 = (BlockHeaderV2*)content.c_str();
 
-		if (content.size() != (sizeof(BlockHeaderV2) + blkV2->_size))
+		if (blkV2->_size != (uint64_t)(content.size() - BLOCK_HEADERV2_SIZE))
 		{
 			return false;
 		}
 
-		//将文件头后面的数据进行解压
-		buffer = WTSCmpHelper::uncompress_data(content.data() + BLOCK_HEADERV2_SIZE, (std::size_t)blkV2->_size);
+		const void* compressedData = content.data() + BLOCK_HEADERV2_SIZE;
+		const std::size_t compressedSize = (std::size_t)blkV2->_size;
+		const unsigned long long uncompressedSize = ZSTD_getFrameContentSize(compressedData, compressedSize);
+		std::string sizeProbe;
+		if (uncompressedSize == ZSTD_CONTENTSIZE_ERROR ||
+			uncompressedSize == ZSTD_CONTENTSIZE_UNKNOWN ||
+			uncompressedSize > sizeProbe.max_size())
+			return false;
+
+		if (isBar)
+		{
+			const std::size_t barSize = bOldVer ? sizeof(WTSBarStructOld) : sizeof(WTSBarStruct);
+			if (uncompressedSize % barSize != 0)
+				return false;
+		}
+
+		// Zstd reports malformed frames through an error code, which the helper
+		// converts to an exception. Leave content untouched and report failure.
+		try
+		{
+			buffer = WTSCmpHelper::uncompress_data(compressedData, compressedSize);
+		}
+		catch (const std::exception&)
+		{
+			return false;
+		}
 	}
 	else
 	{
@@ -86,6 +165,9 @@ bool proc_block_data(std::string& content, bool isBar, bool bKeepHead /* = true 
 		}
 		else
 		{
+			if (isBar && (content.size() - BLOCK_HEADER_SIZE) % sizeof(WTSBarStructOld) != 0)
+				return false;
+
 			buffer.append(content.data() + BLOCK_HEADER_SIZE, content.size() - BLOCK_HEADER_SIZE);
 		}
 	}
@@ -139,7 +221,8 @@ bool proc_block_data(std::string& content, bool isBar, bool bKeepHead /* = true 
 WtDataReader::WtDataReader()
 	: _base_data_mgr(NULL)
 	, _hot_mgr(NULL)
-, _last_time(0)
+	, _adjust_flag(0)
+	, _last_time(0)
 	{
 }
 
@@ -151,35 +234,70 @@ WtDataReader::~WtDataReader()
 void WtDataReader::init(WTSVariant* cfg, IDataReaderSink* sink, IHisDataLoader* loader /* = NULL */)
 {
 	IDataReader::init(cfg, sink, loader);
+	_rt_dir.clear();
+	_his_dir.clear();
 
-	_base_data_mgr = sink->get_basedata_mgr();
-	_hot_mgr = sink->get_hot_mgr();
+	_base_data_mgr = sink == NULL ? NULL : sink->get_basedata_mgr();
+	_hot_mgr = sink == NULL ? NULL : sink->get_hot_mgr();
+	if (sink == NULL)
+		return;
+	if (_base_data_mgr == NULL)
+	{
+		pipe_reader_log(sink, LL_ERROR, "WtDataReader initialization failed: base data manager is unavailable");
+		return;
+	}
 
 	if (cfg == NULL)
 		return ;
 
 	WTSVariant* cfgPath = cfg->get("path");
-	if(cfgPath->isArray())
+	if (cfgPath == NULL)
+	{
+		pipe_reader_log(sink, LL_ERROR, "WtDataReader initialization failed: required path is missing");
+		return;
+	}
+
+	std::vector<std::string> rt_dirs;
+	std::vector<std::string> his_dirs;
+	if (cfgPath->isArray())
 	{
 		std::size_t cnt = cfgPath->size();
-		for(std::size_t i = 0; i < cnt; i++)
+		if (cnt == 0)
 		{
-			std::string root_dir = cfgPath->get(i)->asString();
-			root_dir = StrUtil::standardisePath(root_dir);
+			pipe_reader_log(sink, LL_ERROR, "WtDataReader initialization failed: path array is empty");
+			return;
+		}
 
-			_rt_dir.emplace_back(root_dir + "rt/");
-			_his_dir.emplace_back(root_dir + "his/");
+		for (std::size_t i = 0; i < cnt; i++)
+		{
+			WTSVariant* pathItem = cfgPath->get(i);
+			if (pathItem == NULL || pathItem->type() != WTSVariant::VT_String || pathItem->asString().empty())
+			{
+				pipe_reader_log(sink, LL_ERROR, "WtDataReader initialization failed: path array contains an empty or non-string entry at index {}", i);
+				return;
+			}
+
+			std::string root_dir = StrUtil::standardisePath(pathItem->asString());
+			rt_dirs.emplace_back(root_dir + "rt/");
+			his_dirs.emplace_back(root_dir + "his/");
 		}
 	}
 	else
 	{
-		std::string root_dir = cfgPath->asString();
-		root_dir = StrUtil::standardisePath(root_dir);
+		if (cfgPath->type() != WTSVariant::VT_String || cfgPath->asString().empty())
+		{
+			pipe_reader_log(sink, LL_ERROR, "WtDataReader initialization failed: path must be a non-empty string or non-empty array of strings");
+			return;
+		}
 
-		_rt_dir.emplace_back(root_dir + "rt/");
-		_his_dir.emplace_back(root_dir + "his/");
+		std::string root_dir = StrUtil::standardisePath(cfgPath->asString());
+		rt_dirs.emplace_back(root_dir + "rt/");
+		his_dirs.emplace_back(root_dir + "his/");
 	}
 
+	// The configured base history directories have precedence over supplemental his_path entries.
+	std::vector<std::string> ordered_his_dirs;
+	ordered_his_dirs.insert(ordered_his_dirs.end(), his_dirs.begin(), his_dirs.end());
 	WTSVariant* cfgHisPath = cfg->get("his_path");
 	if(cfgHisPath)
 	{
@@ -188,18 +306,33 @@ void WtDataReader::init(WTSVariant* cfg, IDataReaderSink* sink, IHisDataLoader* 
 			std::size_t cnt = cfgHisPath->size();
 			for (std::size_t i = 0; i < cnt; i++)
 			{
-				std::string his_dir = cfgHisPath->get(i)->asString();
-				_his_dir.emplace_back(StrUtil::standardisePath(his_dir));
+				WTSVariant* hisPathItem = cfgHisPath->get(i);
+				if (hisPathItem == NULL || hisPathItem->type() != WTSVariant::VT_String || hisPathItem->asString().empty())
+				{
+					pipe_reader_log(sink, LL_ERROR, "WtDataReader initialization failed: his_path array contains an empty or non-string entry at index {}", i);
+					return;
+				}
+
+				std::string his_dir = hisPathItem->asString();
+				ordered_his_dirs.emplace_back(StrUtil::standardisePath(his_dir));
 			}
 		}
 		else
 		{
+			if (cfgHisPath->type() != WTSVariant::VT_String || cfgHisPath->asString().empty())
+			{
+				pipe_reader_log(sink, LL_ERROR, "WtDataReader initialization failed: his_path must be a non-empty string or array of strings");
+				return;
+			}
+
 			std::string his_dir = cfgHisPath->asString();
-			_his_dir.emplace_back(StrUtil::standardisePath(his_dir));
+			ordered_his_dirs.emplace_back(StrUtil::standardisePath(his_dir));
 		}
 	}
 
 	_adjust_flag = cfg->getUInt32("adjust_flag");
+	_rt_dir.swap(rt_dirs);
+	_his_dir.swap(ordered_his_dirs);
 
 	pipe_reader_log(sink, LL_INFO, "WtDataReader initialized, rt dir is {}, hist dir is {}, adjust_flag is {}", _rt_dir[0], _his_dir[0], _adjust_flag);
 
@@ -321,6 +454,9 @@ bool WtDataReader::loadStkAdjFactorsFromFile(const char* adjfile)
 
 WTSTickSlice* WtDataReader::readTickSlice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
+	if (_rt_dir.empty() || _sink == NULL || _base_data_mgr == NULL)
+		return NULL;
+
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
 	const char* stdPID = commInfo->getFullPid();
@@ -420,7 +556,12 @@ WTSTickSlice* WtDataReader::readTickSlice(const char* stdCode, uint32_t count, u
 				return NULL;
 			}
 
-			proc_block_data(tBlkPair._buffer, false, true);			
+			if (!proc_block_data(tBlkPair._buffer, false, true))
+			{
+				pipe_reader_log(_sink, LL_ERROR, "Processing his tick data file {} failed", filename.c_str());
+				_his_tick_map.erase(key);
+				return NULL;
+			}
 			tBlkPair._block = (HisTickBlock*)tBlkPair._buffer.c_str();
 		}
 		
@@ -457,6 +598,9 @@ WTSTickSlice* WtDataReader::readTickSlice(const char* stdCode, uint32_t count, u
 
 WTSOrdQueSlice* WtDataReader::readOrdQueSlice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
+	if (_rt_dir.empty() || _sink == NULL || _base_data_mgr == NULL)
+		return NULL;
+
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
 	const char* stdPID = commInfo->getFullPid();
@@ -564,19 +708,18 @@ WTSOrdQueSlice* WtDataReader::readOrdQueSlice(const char* stdCode, uint32_t coun
 
 			HisOrdQueBlockV2* tBlockV2 = (HisOrdQueBlockV2*)hisBlkPair._buffer.c_str();
 
-			if (hisBlkPair._buffer.size() != (sizeof(HisOrdQueBlockV2) + tBlockV2->_size))
+			if (tBlockV2->_size != hisBlkPair._buffer.size() - sizeof(HisOrdQueBlockV2))
 			{
 				pipe_reader_log(_sink,LL_ERROR, "历史委托队列数据文件{}大小校验失败", filename);
 				return NULL;
 			}
 
-			//需要解压
-			std::string buf = WTSCmpHelper::uncompress_data(tBlockV2->_data, (std::size_t)tBlockV2->_size);
-
-			//将原来的buffer只保留一个头部,并将所有tick数据追加到尾部
-			hisBlkPair._buffer.resize(sizeof(HisOrdQueBlock));
-			hisBlkPair._buffer.append(buf);
-			tBlockV2->_version = BLOCK_VERSION_RAW_V2;
+			if (!decode_his_compressed_items(hisBlkPair._buffer, sizeof(WTSOrdQueStruct)))
+			{
+				pipe_reader_log(_sink, LL_ERROR, "历史委托队列数据文件{}解压或记录大小校验失败", filename);
+				hisBlkPair._buffer.clear();
+				return NULL;
+			}
 
 			hisBlkPair._block = (HisOrdQueBlock*)hisBlkPair._buffer.c_str();
 		}
@@ -599,8 +742,13 @@ WTSOrdQueSlice* WtDataReader::readOrdQueSlice(const char* stdCode, uint32_t coun
 		});
 
 		uint32_t eIdx = pTick - tBlock->_items;
-		if (pTick->action_date > eTick.action_date || pTick->action_time >= eTick.action_time)
+		if (pTick->action_date > eTick.action_date ||
+			(pTick->action_date == eTick.action_date && pTick->action_time >= eTick.action_time))
 		{
+			// Keep the historical exclusive end-time contract, but do not
+			// decrement begin() when the requested end is at/before the first item.
+			if (eIdx == 0)
+				return NULL;
 			pTick--;
 			eIdx--;
 		}
@@ -614,6 +762,9 @@ WTSOrdQueSlice* WtDataReader::readOrdQueSlice(const char* stdCode, uint32_t coun
 
 WTSOrdDtlSlice* WtDataReader::readOrdDtlSlice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
+	if (_rt_dir.empty() || _sink == NULL || _base_data_mgr == NULL)
+		return NULL;
+
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
 	const char* stdPID = commInfo->getFullPid();
@@ -687,8 +838,8 @@ WTSOrdDtlSlice* WtDataReader::readOrdDtlSlice(const char* stdCode, uint32_t coun
 		thread_local static char key[64] = { 0 };
 		fmtutil::format_to(key, "{}-{}", stdCode, endTDate);
 
-		auto it = _his_ordque_map.find(key);
-		if (it == _his_ordque_map.end())
+		auto it = _his_orddtl_map.find(key);
+		if (it == _his_orddtl_map.end())
 		{
 			//std::stringstream ss;
 			//ss << _his_dir << "orders/" << cInfo._exchg << "/" << endTDate << "/" << curCode << ".dsb";
@@ -721,19 +872,18 @@ WTSOrdDtlSlice* WtDataReader::readOrdDtlSlice(const char* stdCode, uint32_t coun
 
 			HisOrdDtlBlockV2* tBlockV2 = (HisOrdDtlBlockV2*)hisBlkPair._buffer.c_str();
 
-			if (hisBlkPair._buffer.size() != (sizeof(HisOrdDtlBlockV2) + tBlockV2->_size))
+			if (tBlockV2->_size != hisBlkPair._buffer.size() - sizeof(HisOrdDtlBlockV2))
 			{
 				pipe_reader_log(_sink,LL_ERROR, "历史逐笔委托数据文件{}大小校验失败", filename.c_str());
 				return NULL;
 			}
 
-			//需要解压
-			std::string buf = WTSCmpHelper::uncompress_data(tBlockV2->_data, (std::size_t)tBlockV2->_size);
-
-			//将原来的buffer只保留一个头部,并将所有tick数据追加到尾部
-			hisBlkPair._buffer.resize(sizeof(HisOrdDtlBlock));
-			hisBlkPair._buffer.append(buf);
-			tBlockV2->_version = BLOCK_VERSION_RAW_V2;
+			if (!decode_his_compressed_items(hisBlkPair._buffer, sizeof(WTSOrdDtlStruct)))
+			{
+				pipe_reader_log(_sink, LL_ERROR, "历史逐笔委托数据文件{}解压或记录大小校验失败", filename.c_str());
+				hisBlkPair._buffer.clear();
+				return NULL;
+			}
 
 			hisBlkPair._block = (HisOrdDtlBlock*)hisBlkPair._buffer.c_str();
 		}
@@ -756,8 +906,13 @@ WTSOrdDtlSlice* WtDataReader::readOrdDtlSlice(const char* stdCode, uint32_t coun
 		});
 
 		uint32_t eIdx = pTick - tBlock->_items;
-		if (pTick->action_date > eTick.action_date || pTick->action_time >= eTick.action_time)
+		if (pTick->action_date > eTick.action_date ||
+			(pTick->action_date == eTick.action_date && pTick->action_time >= eTick.action_time))
 		{
+			// Keep the historical exclusive end-time contract, but do not
+			// decrement begin() when the requested end is at/before the first item.
+			if (eIdx == 0)
+				return NULL;
 			pTick--;
 			eIdx--;
 		}
@@ -771,6 +926,9 @@ WTSOrdDtlSlice* WtDataReader::readOrdDtlSlice(const char* stdCode, uint32_t coun
 
 WTSTransSlice* WtDataReader::readTransSlice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
+	if (_rt_dir.empty() || _sink == NULL || _base_data_mgr == NULL)
+		return NULL;
+
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
 	const char* stdPID = commInfo->getFullPid();
@@ -844,8 +1002,8 @@ WTSTransSlice* WtDataReader::readTransSlice(const char* stdCode, uint32_t count,
 		thread_local static char key[64] = { 0 };
 		fmtutil::format_to(key, "{}-{}", stdCode, endTDate);
 
-		auto it = _his_ordque_map.find(key);
-		if (it == _his_ordque_map.end())
+		auto it = _his_trans_map.find(key);
+		if (it == _his_trans_map.end())
 		{
 			//std::stringstream ss;
 			//ss << _his_dir << "trans/" << cInfo._exchg << "/" << endTDate << "/" << curCode << ".dsb";
@@ -878,19 +1036,18 @@ WTSTransSlice* WtDataReader::readTransSlice(const char* stdCode, uint32_t count,
 
 			HisTransBlockV2* tBlockV2 = (HisTransBlockV2*)hisBlkPair._buffer.c_str();
 
-			if (hisBlkPair._buffer.size() != (sizeof(HisTransBlockV2) + tBlockV2->_size))
+			if (tBlockV2->_size != hisBlkPair._buffer.size() - sizeof(HisTransBlockV2))
 			{
 				pipe_reader_log(_sink,LL_ERROR, "历史逐笔成交数据文件{}大小校验失败", filename.c_str());
 				return NULL;
 			}
 
-			//需要解压
-			std::string buf = WTSCmpHelper::uncompress_data(tBlockV2->_data, (std::size_t)tBlockV2->_size);
-
-			//将原来的buffer只保留一个头部,并将所有tick数据追加到尾部
-			hisBlkPair._buffer.resize(sizeof(HisTransBlock));
-			hisBlkPair._buffer.append(buf);
-			tBlockV2->_version = BLOCK_VERSION_RAW_V2;
+			if (!decode_his_compressed_items(hisBlkPair._buffer, sizeof(WTSTransStruct)))
+			{
+				pipe_reader_log(_sink, LL_ERROR, "历史逐笔成交数据文件{}解压或记录大小校验失败", filename.c_str());
+				hisBlkPair._buffer.clear();
+				return NULL;
+			}
 
 			hisBlkPair._block = (HisTransBlock*)hisBlkPair._buffer.c_str();
 		}
@@ -913,8 +1070,13 @@ WTSTransSlice* WtDataReader::readTransSlice(const char* stdCode, uint32_t count,
 		});
 
 		uint32_t eIdx = pTick - tBlock->_items;
-		if (pTick->action_date > eTick.action_date || pTick->action_time >= eTick.action_time)
+		if (pTick->action_date > eTick.action_date ||
+			(pTick->action_date == eTick.action_date && pTick->action_time >= eTick.action_time))
 		{
+			// Keep the historical exclusive end-time contract, but do not
+			// decrement begin() when the requested end is at/before the first item.
+			if (eIdx == 0)
+				return NULL;
 			pTick--;
 			eIdx--;
 		}
@@ -1020,7 +1182,7 @@ bool WtDataReader::cacheIntegratedBars(void* codeInfo, const std::string& key, c
 		bool bHit = false;
 		for (const std::string& hisdir : _his_dir)
 		{
-			std::string filename = fmtutil::format("{}{}/{}.{}_{}{}.dsb", hisdir, pname, cInfo->_exchg, cInfo->_product, ruleTag, cInfo->isExright()?(cInfo->_exright == 1 ? SUFFIX_QFQ_S : SUFFIX_HFQ_S):"");
+			filename = fmtutil::format("{}{}/{}.{}_{}{}.dsb", hisdir, pname, cInfo->_exchg, cInfo->_product, ruleTag, cInfo->isExright()?(cInfo->_exright == 1 ? SUFFIX_QFQ_S : SUFFIX_HFQ_S):"");
 			if (StdFile::exists(filename.c_str()))
 			{
 				bHit = true;
@@ -1038,7 +1200,13 @@ bool WtDataReader::cacheIntegratedBars(void* codeInfo, const std::string& key, c
 			pipe_reader_log(_sink, LL_ERROR, u8"历史K线数据文件{}大小校验失败", filename);
 			break;
 		}
-		proc_block_data(content, true, false);
+		if (!proc_block_data(content, true, false) ||
+			content.size() % sizeof(WTSBarStruct) != 0)
+		{
+			pipe_reader_log(_sink, LL_ERROR, "Processing or validating wrapped {} bars from {} failed", pname.c_str(), filename.c_str());
+			_bars_cache.erase(key);
+			return false;
+		}
 
 		if (content.empty())
 			break;
@@ -1167,12 +1335,41 @@ bool WtDataReader::cacheIntegratedBars(void* codeInfo, const std::string& key, c
 			if (content.size() < sizeof(HisKlineBlock))
 			{
 				pipe_reader_log(_sink, LL_ERROR, "Sizechecking of his dta file {} failed", filename.c_str());
+				for (std::vector<WTSBarStruct>* section : barsSections)
+					delete section;
+				barsSections.clear();
+				if (hotAy != NULL)
+					delete hotAy;
+				_bars_cache.erase(key);
 				return false;
 			}
-			proc_block_data(content, true, false);	
+			if (!proc_block_data(content, true, false) ||
+				content.size() % sizeof(WTSBarStruct) != 0)
+			{
+				pipe_reader_log(_sink, LL_ERROR, "Processing or validating {} bars from {} failed", pname.c_str(), filename.c_str());
+				for (std::vector<WTSBarStruct>* section : barsSections)
+					delete section;
+				barsSections.clear();
+				if (hotAy != NULL)
+					delete hotAy;
+				_bars_cache.erase(key);
+				return false;
+			}
 			buffer.swap(content);
 		}
-		
+
+		if (buffer.size() % sizeof(WTSBarStruct) != 0)
+		{
+			pipe_reader_log(_sink, LL_ERROR, "Validating {} bars for component {} failed", pname.c_str(), curCode);
+			for (std::vector<WTSBarStruct>* section : barsSections)
+				delete section;
+			barsSections.clear();
+			if (hotAy != NULL)
+				delete hotAy;
+			_bars_cache.erase(key);
+			return false;
+		}
+
 		if(buffer.empty())
 			break;
 
@@ -1349,7 +1546,19 @@ bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, 
 			break;
 		}
 
-		proc_block_data(content, true, false);
+		if (!proc_block_data(content, true, false) ||
+			content.size() % sizeof(WTSBarStruct) != 0)
+		{
+			pipe_reader_log(_sink, LL_ERROR, "Processing or validating adjusted {} bars from {} failed", pname.c_str(), filename.c_str());
+			_bars_cache.erase(key);
+			return false;
+		}
+
+		if (content.empty())
+		{
+			pipe_reader_log(_sink, LL_ERROR, u8"缓存{}的复权数据异常：复权历史数据为空", stdCode);
+			break;
+		}
 
 		uint32_t barcnt = content.size() / sizeof(WTSBarStruct);
 
@@ -1429,11 +1638,40 @@ bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, 
 			if (content.size() < sizeof(HisKlineBlock))
 			{
 				pipe_reader_log(_sink,LL_ERROR, "历史K线数据文件{}大小校验失败", filename.c_str());
+				for (std::vector<WTSBarStruct>* section : barsSections)
+					delete section;
+				barsSections.clear();
+				if (ayAdjusted != NULL)
+					delete ayAdjusted;
+				_bars_cache.erase(key);
 				return false;
 			}
 
-			proc_block_data(content, true, false);
+			if (!proc_block_data(content, true, false) ||
+				content.size() % sizeof(WTSBarStruct) != 0)
+			{
+				pipe_reader_log(_sink, LL_ERROR, "Processing or validating {} bars from {} failed", pname.c_str(), filename.c_str());
+				for (std::vector<WTSBarStruct>* section : barsSections)
+					delete section;
+				barsSections.clear();
+				if (ayAdjusted != NULL)
+					delete ayAdjusted;
+				_bars_cache.erase(key);
+				return false;
+			}
 			buffer.swap(content);
+		}
+
+		if (buffer.size() % sizeof(WTSBarStruct) != 0)
+		{
+			pipe_reader_log(_sink, LL_ERROR, "Validating {} bars for adjusted contract {} failed", pname.c_str(), rawCode.c_str());
+			for (std::vector<WTSBarStruct>* section : barsSections)
+				delete section;
+			barsSections.clear();
+			if (ayAdjusted != NULL)
+				delete ayAdjusted;
+			_bars_cache.erase(key);
+			return false;
 		}
 
 		if(buffer.empty())
@@ -1669,12 +1907,26 @@ bool WtDataReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key, 
 			if (content.size() < sizeof(HisKlineBlock))
 			{
 				pipe_reader_log(_sink,LL_ERROR, u8"历史K线数据文件{}大小校验失败", filename.c_str());
+				_bars_cache.erase(key);
 				return false;
 			}
 
-			proc_block_data(content, true, false);
+			if (!proc_block_data(content, true, false) ||
+				content.size() % sizeof(WTSBarStruct) != 0)
+			{
+				pipe_reader_log(_sink, LL_ERROR, "Processing or validating historical {} bars from {} failed", pname.c_str(), filename.c_str());
+				_bars_cache.erase(key);
+				return false;
+			}
 			buffer.swap(content);
 		}
+	}
+
+	if (buffer.size() % sizeof(WTSBarStruct) != 0)
+	{
+		pipe_reader_log(_sink, LL_ERROR, "Validating historical {} bars failed", pname.c_str());
+		_bars_cache.erase(key);
+		return false;
 	}
 
 	if (buffer.empty())
@@ -1719,6 +1971,9 @@ bool WtDataReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key, 
 
 WTSKlineSlice* WtDataReader::readKlineSlice(const char* stdCode, WTSKlinePeriod period, uint32_t count, uint64_t etime /* = 0 */)
 {
+	if (_rt_dir.empty() || _sink == NULL || _base_data_mgr == NULL)
+		return NULL;
+
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	const char* stdPID = cInfo.stdCommID();
 
@@ -1736,7 +1991,12 @@ WTSKlineSlice* WtDataReader::readKlineSlice(const char* stdCode, WTSKlinePeriod 
 		bHasHisData = cacheFinalBarsFromLoader(&cInfo, key, stdCode, period);
 
 		if(!bHasHisData)
+		{
 			bHasHisData = cacheHisBarsFromFile(&cInfo, key, stdCode, period);
+			const bool retryAfterHistoryFailure = !bHasHisData && _bars_cache.find(key) == _bars_cache.end();
+			if (retryAfterHistoryFailure)
+				return NULL;
+		}
 	}
 	else
 	{
@@ -1907,10 +2167,41 @@ WTSKlineSlice* WtDataReader::readKlineSlice(const char* stdCode, WTSKlinePeriod 
 	else
 	{
 		rtCnt = 0;
-		hisCnt = count;
-		hisCnt = min(hisCnt, (uint32_t)barsList._bars.size());
-		head = &barsList._bars[barsList._bars.size() - hisCnt];
-		slice->appendBlock(head, hisCnt);
+		const std::vector<WTSBarStruct>& historicalBars = barsList._bars;
+		if (period == KP_DAY)
+		{
+			// Daily bars are keyed by trading date, which may differ from the
+			// calendar date for contracts with overnight sessions.
+			auto end = std::upper_bound(historicalBars.begin(), historicalBars.end(), endTDate,
+				[](uint32_t tradingDate, const WTSBarStruct& bar) {
+					return tradingDate < bar.date;
+				});
+			const size_t available = static_cast<size_t>(end - historicalBars.begin());
+			hisCnt = static_cast<uint32_t>(min(static_cast<size_t>(count), available));
+			if (hisCnt > 0)
+			{
+				head = &barsList._bars[available - hisCnt];
+				slice->appendBlock(head, hisCnt);
+			}
+		}
+		else
+		{
+			// Minute bar time is encoded as (calendarDate - 19900000) * 10000
+			// plus HHMM. Compare on that timeline so overnight bars after
+			// midnight are ordered correctly, regardless of their trading date.
+			const uint64_t endTime = TimeUtils::timeToMinBar(curDate, curTime);
+			auto end = std::upper_bound(historicalBars.begin(), historicalBars.end(), endTime,
+				[](uint64_t minuteTime, const WTSBarStruct& bar) {
+					return minuteTime < bar.time;
+				});
+			const size_t available = static_cast<size_t>(end - historicalBars.begin());
+			hisCnt = static_cast<uint32_t>(min(static_cast<size_t>(count), available));
+			if (hisCnt > 0)
+			{
+				head = &barsList._bars[available - hisCnt];
+				slice->appendBlock(head, hisCnt);
+			}
+		}
 	}
 
 	pipe_reader_log(_sink, LL_DEBUG, "His {} bars of {} loaded, {} from history, {} from realtime", PERIOD_NAME[period], stdCode, hisCnt, rtCnt);
@@ -2209,6 +2500,9 @@ WtDataReader::RTKlineBlockPair* WtDataReader::getRTKilneBlock(const char* exchg,
 
 void WtDataReader::onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t /*endTDate*/ /* = 0 */)
 {
+	if (_rt_dir.empty() || _sink == NULL || _base_data_mgr == NULL)
+		return;
+
 	//这里应该触发检查
 	uint64_t nowTime = (uint64_t)uDate * 10000 + uTime;
 	if (nowTime <= _last_time)
@@ -2346,10 +2640,16 @@ double WtDataReader::getAdjFactorByDate(const char* stdCode, uint32_t date /* = 
 	}
 }
 
+const char* WtDataReader::getStableAdjFactorLoaderKey(const std::string& key)
+{
+	std::lock_guard<std::mutex> lock(_adj_factor_loader_keys_mutex);
+	auto stableKey = _adj_factor_loader_keys.emplace(key).first;
+	return stableKey->c_str();
+}
+
 const WtDataReader::AdjFactorList& WtDataReader::getAdjFactors(const char* code, const char* exchg, const char* pid)
 {
-	thread_local static char key[20] = { 0 };
-	fmtutil::format_to(key, "{}.{}.{}", exchg, pid, code);
+	const std::string key = fmt::format("{}.{}.{}", exchg, pid, code);
 
 	auto it = _adj_factors.find(key);
 	if (it == _adj_factors.end())
@@ -2358,8 +2658,9 @@ const WtDataReader::AdjFactorList& WtDataReader::getAdjFactors(const char* code,
 		//如果没有复权因子，就从extloader按需读一次
 		if (_loader)
 		{
+			const char* loaderKey = getStableAdjFactorLoaderKey(key);
 			if(_sink) pipe_reader_log(_sink,LL_INFO, "No adjusting factors of {} cached, searching via extented loader...", key);
-			_loader->loadAdjFactors(this, key, [](void* obj, const char* stdCode, uint32_t* dates, double* factors, uint32_t count) {
+			_loader->loadAdjFactors(this, loaderKey, [](void* obj, const char* stdCode, uint32_t* dates, double* factors, uint32_t count) {
 				WtDataReader* self = (WtDataReader*)obj;
 				AdjFactorList& fctrLst = self->_adj_factors[stdCode];
 

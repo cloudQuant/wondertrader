@@ -62,6 +62,9 @@ public:
 	 */
 	virtual void init(ExecuteContext* ctx, const char* stdCode, WTSVariant* cfg) override;
 
+	// Non-virtual status for the versioned plugin adapter; keeps ExecuteUnit's vtable stable.
+	bool initializationSucceeded() const { return _initialization_succeeded; }
+
 		/**
 	 * @brief 订单回报处理
 	 * @details 处理订单状态变化的回调函数，更新订单监控器状态并在订单撤销时触发重新计算
@@ -150,6 +153,10 @@ private:
 	uint32_t	_expire_secs;
 	/// @brief 价格模式：-1最优价，0最新价，1对手价，2自动价
 	int32_t		_price_mode;
+	/// @brief 价格模式是否在支持范围内；非法配置时整个执行单元保持禁用
+	bool		_price_mode_valid;
+	/// @brief Complete initialization result for the versioned plugin adapter
+	bool		_initialization_succeeded;
 	/// @brief 发单时间间隔，单位毫秒
 	uint32_t	_entrust_span; 
 	/// @brief 是否按比例下单，如果true则使用_qty_rate，如果false则使用_order_lots
@@ -208,7 +215,7 @@ private:
 		 */
 		~_CalcFlag()
 		{
-			if (_flag)
+			if (_flag && !_result)
 				_flag->exchange(false, std::memory_order_acq_rel);
 		}
 

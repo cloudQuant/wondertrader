@@ -9,8 +9,7 @@
  *  - get_exright_factor 的 commInfo==NULL 恒 1.0 分支
  *  - update_bars 的 _rt_bars==NULL 早退、clear_subbed_bars 的空表清空、
  *    reader_log / clear_cache（_reader==NULL 取消分支）
- * 崩溃类输入（initStore 加载失败后 _reader 空指针解引用、subscribe_bar 无 reader
- * 直接取数）整类收进同一个 DISABLED_ 用例，启用用例零残留（见 BUG-Q05-001）。
+ * initStore 插件加载失败由显式错误返回覆盖；未初始化 reader 的查询路径仍不在本文件启用。
  */
 #include <gtest/gtest.h>
 
@@ -104,23 +103,29 @@ TEST_F(Q05ServoWtDataManagerTest, InitWithFalseAlignFlagStillSkipsStore)
 	cfg->release();
 }
 
-/*!
- * 崩溃类输入整类收口（默认禁用，禁止在 CI 启用）：
- *  1) initStore 传入含 store 段的配置但模块加载失败时，_reader 保持 NULL，
- *     WtDtServo/WtDataManager.cpp:87 无条件 _reader->init(cfg, this) -> 段错误。
- *  2) subscribe_bar 在未初始化 _reader 时直接 _reader->readKlineSliceByCount，
- *     同属空指针解引用一类。
- * 任何一条都会终止进程，因此二者只保留第一条作为代表（第二条不可达）。
- */
-TEST_F(Q05ServoWtDataManagerTest, DISABLED_InitStoreLoadFailureDerefsNullReader)
+TEST_F(Q05ServoWtDataManagerTest, InitStoreLoadFailureReturnsFalseWithoutDereferencingReader)
 {
 	WtDataManager dm;
 	WTSVariant* cfg = loadCfg("badstore.json",
 		R"JSON({"align_by_section": false,
 			"store": {"module": "q05_no_such_storage_module", "storedir": ""}})JSON");
 	ASSERT_NE(cfg, nullptr);
-	// 期望以段错误终止 —— 该用例的存在本身就是缺陷证明，见 BUG-Q05-001
-	dm.init(cfg, nullptr);
+	EXPECT_FALSE(dm.init(cfg, nullptr));
+	EXPECT_EQ(dm.get_tick_slices_by_range("SSE.STK.600100", 20200101090000), nullptr);
+	EXPECT_EQ(dm.get_tick_slice_by_date("SSE.STK.600100", 20200101), nullptr);
+	EXPECT_EQ(dm.get_tick_slice_by_count("SSE.STK.600100", 10), nullptr);
+	EXPECT_EQ(dm.get_order_queue_slice("SSE.STK.600100", 20200101090000), nullptr);
+	EXPECT_EQ(dm.get_order_detail_slice("SSE.STK.600100", 20200101090000), nullptr);
+	EXPECT_EQ(dm.get_transaction_slice("SSE.STK.600100", 20200101090000), nullptr);
+	EXPECT_EQ(dm.get_skline_slice_by_date("SSE.STK.600100", 30, 20200101), nullptr);
+	EXPECT_EQ(dm.get_kline_slice_by_date("SSE.STK.600100", KP_DAY, 1, 20200101), nullptr);
+	EXPECT_EQ(dm.get_kline_slice_by_range("SSE.STK.600100", KP_DAY, 1, 20200101090000), nullptr);
+	EXPECT_EQ(dm.get_kline_slice_by_range("SSE.STK.600100", KP_DAY, 5, 20200101090000), nullptr);
+	EXPECT_EQ(dm.get_kline_slice_by_count("SSE.STK.600100", KP_DAY, 1, 10), nullptr);
+	EXPECT_EQ(dm.get_kline_slice_by_count("SSE.STK.600100", KP_DAY, 5, 10), nullptr);
+	EXPECT_NO_THROW(dm.subscribe_bar("SSE.STK.600100", KP_DAY, 1));
+	// 失败后的无 reader 清理接口保持可调用，且不会伪报初始化成功。
+	dm.clear_cache();
 	cfg->release();
 }
 

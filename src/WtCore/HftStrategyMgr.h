@@ -40,6 +40,7 @@ public:
 		if (_stra)
 		{
 			_fact->deleteStrategy(_stra);
+			_stra = nullptr;
 		}
 	}
 
@@ -134,6 +135,8 @@ private:
 		{
 			_module_inst = NULL;
 			_fact = NULL;
+			_creator = NULL;
+			_remover = NULL;
 		}
 
 		/**
@@ -143,7 +146,11 @@ private:
 		~_StraFactInfo()
 		{
 			if (_fact)
-				_remover(_fact);
+			{
+				if (_remover)
+					_remover(_fact);
+				_fact = nullptr;
+			}
 		}
 	} StraFactInfo;
 	/**

@@ -1,0 +1,1 @@
+LLVM_PROFILE_FILE=/tmp/l04_006_focused_%p.profraw ./build-cov/build_x64/Debug/bin/TestUnits/CoverageTests --gtest_filter='L04ADStoreTest.MapSizeSetterFailureCleansEnvAndAllowsRoundTripRetry:L04ADStoreTest.BarsCommittedAndReadableBack' --gtest_output=xml:/tmp/l04_006_focused.xml > /tmp/l04_006_focused.log 2>&1

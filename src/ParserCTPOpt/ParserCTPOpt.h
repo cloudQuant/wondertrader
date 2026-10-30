@@ -73,10 +73,13 @@ public:
 	virtual void OnHeartBeatWarning( int nTimeLapse ) override;
 
 private:
+	typedef CThostFtdcMdApi* (*CTPCreator)(const char *, const bool, const bool);
 	/*
 	 *	发送登录请求
 	 */
 	void ReqUserLogin();
+	bool bindApi(CTPCreator creator, const char* flowPath);
+	void unloadApiLibrary();
 	/*
 	 *	订阅品种行情
 	 */
@@ -106,7 +109,6 @@ private:
 	IBaseDataMgr*		m_pBaseDataMgr;
 
 	DllHandle		m_hInstCTP;
-	typedef CThostFtdcMdApi* (*CTPCreator)(const char *, const bool, const bool);
 	CTPCreator		m_funcCreator;
 
 	uint32_t		m_uLatestTime = 0;

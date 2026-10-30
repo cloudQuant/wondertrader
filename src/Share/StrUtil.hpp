@@ -308,7 +308,8 @@ namespace StrUtil
 		std::string path = init;
 
 		std::replace( path.begin(), path.end(), '\\', '/' );
-		if (path[path.length() - 1] != '/' && bIsDir)
+		// Keep an unset path empty; turning it into "/" could redirect callers to the filesystem root.
+		if (!path.empty() && bIsDir && path.back() != '/')
 			path += '/';
 
 		return path;
@@ -316,8 +317,11 @@ namespace StrUtil
 
 	static inline void replace(std::string& str, const char* src, const char* des) noexcept
 	{
-		std::string ret = "";
 		std::size_t srcLen = strlen(src);
+		if (srcLen == 0)
+			return;
+
+		std::string ret = "";
 		std::size_t lastPos = 0;
 		std::size_t pos = str.find(src);
 		while(pos != std::string::npos)

@@ -18,6 +18,10 @@
 
 #include <algorithm>
 #include <assert.h>
+#include <cerrno>
+#include <climits>
+#include <cstdint>
+#include <cstring>
 #include <fstream>
 #include <functional>
 #include <iomanip>
@@ -35,8 +39,11 @@
  * 
  * @details 根据不同的操作系统平台，包含相应的头文件并定义路径分隔符
  */
-#if defined(WIN32) || defined(_WIN64) || defined(__WIN32__)
+#if defined(WIN32) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__)
     #include "direct.h"
+    #ifndef NOMINMAX
+        #define NOMINMAX
+    #endif
     #include <windows.h>
     /**
      * @brief Windows平台下的路径分隔符
@@ -46,6 +53,17 @@
      * @brief Windows平台下非本平台的路径分隔符，用于路径转换
      */
     #define CPPCLI_SEPARATOR_NO_TYPE "/"
+#elif defined(__APPLE__)
+    #include <mach-o/dyld.h>
+    #include <unistd.h>
+    /**
+     * @brief Unix平台下的路径分隔符
+     */
+    #define CPPCLI_SEPARATOR_TYPE    "/"
+    /**
+     * @brief Unix平台下非本平台的路径分隔符，用于路径转换
+     */
+    #define CPPCLI_SEPARATOR_NO_TYPE "\\"
 #else
     #include <unistd.h>
     /**
@@ -1579,7 +1597,7 @@ void cppcli::Option::errorExitFunc(const std::string errorInfo, int index, cppcl
     if (exitType == cppcli::EXIT_PRINT_RULE_HELPDOC)
         std::cout << buildHelpDoc();
 
-    std::exit(0);
+    std::exit(EXIT_FAILURE);
 }
 
 /**
@@ -1697,31 +1715,202 @@ cppcli::Rule *cppcli::Option::operator()(const std::string &shortParam, const st
     return _ruleVec.back();
 }
 
+namespace cppcli
+{
+namespace detail
+{
+constexpr std::size_t kPathBufferLimit = 1u << 20;
+
+static std::string currentDirectoryOrFallback(const std::string &currentDirectory)
+{
+    return currentDirectory.empty() ? "." : currentDirectory;
+}
+
+static std::string executableDirectoryOrFallback(const std::string &executablePath,
+                                                 const std::string &currentDirectory)
+{
+    if (!executablePath.empty())
+    {
+        const std::string::size_type separator = executablePath.find_last_of("/\\");
+        if (separator != std::string::npos)
+        {
+            if (separator == 0)
+                return executablePath.substr(0, 1);
+#if defined(WIN32) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__)
+            if (separator == 2 && executablePath.size() >= 3 && executablePath[1] == ':')
+                return executablePath.substr(0, 3);
+#endif
+            return executablePath.substr(0, separator);
+        }
+    }
+    return currentDirectoryOrFallback(currentDirectory);
+}
+
+#if defined(WIN32) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__)
+static bool widePathToUtf8(const wchar_t *path, std::size_t pathLength, std::string &result)
+{
+    if (path == nullptr || pathLength == 0 || pathLength > static_cast<std::size_t>(INT_MAX))
+        return false;
+
+    const int sourceLength = static_cast<int>(pathLength);
+    const int required = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, path, sourceLength,
+                                             nullptr, 0, nullptr, nullptr);
+    if (required <= 0)
+        return false;
+
+    std::vector<char> utf8(static_cast<std::size_t>(required));
+    const int converted = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, path, sourceLength,
+                                              utf8.data(), required, nullptr, nullptr);
+    if (converted != required)
+        return false;
+
+    result.assign(utf8.data(), static_cast<std::size_t>(converted));
+    return !result.empty();
+}
+#endif
+
+static bool getCurrentDirectoryPath(std::string &result)
+{
+    result.clear();
+#if defined(WIN32) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__)
+    std::size_t bufferSize = 256;
+    while (bufferSize <= kPathBufferLimit)
+    {
+        std::vector<wchar_t> buffer(bufferSize, L'\0');
+        const DWORD length = GetCurrentDirectoryW(static_cast<DWORD>(buffer.size()), buffer.data());
+        if (length == 0)
+            return false;
+        if (static_cast<std::size_t>(length) < buffer.size())
+            return widePathToUtf8(buffer.data(), static_cast<std::size_t>(length), result);
+
+        const std::size_t doubledSize = bufferSize * 2;
+        const std::size_t requiredSize = static_cast<std::size_t>(length) + 1;
+        const std::size_t nextSize = doubledSize > requiredSize ? doubledSize : requiredSize;
+        if (nextSize > kPathBufferLimit)
+            return false;
+        bufferSize = nextSize;
+    }
+    return false;
+#else
+    std::size_t bufferSize = 256;
+    while (bufferSize <= kPathBufferLimit)
+    {
+        std::vector<char> buffer(bufferSize, '\0');
+        errno = 0;
+        if (getcwd(buffer.data(), buffer.size()) != nullptr)
+        {
+            const void *terminator = std::memchr(buffer.data(), '\0', buffer.size());
+            if (terminator == nullptr)
+                return false;
+            const std::size_t length = static_cast<std::size_t>(
+                static_cast<const char *>(terminator) - buffer.data());
+            result.assign(buffer.data(), length);
+            return !result.empty();
+        }
+        if (errno != ERANGE || bufferSize > kPathBufferLimit / 2)
+            return false;
+        bufferSize *= 2;
+    }
+    return false;
+#endif
+}
+
+static bool getExecutablePath(std::string &result)
+{
+    result.clear();
+#if defined(WIN32) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__)
+    std::size_t bufferSize = 256;
+    while (bufferSize <= kPathBufferLimit)
+    {
+        std::vector<wchar_t> buffer(bufferSize, L'\0');
+        const DWORD length = GetModuleFileNameW(nullptr, buffer.data(), static_cast<DWORD>(buffer.size()));
+        if (length == 0)
+            return false;
+        if (static_cast<std::size_t>(length) < buffer.size())
+            return widePathToUtf8(buffer.data(), static_cast<std::size_t>(length), result);
+
+        if (bufferSize > kPathBufferLimit / 2)
+            return false;
+        bufferSize *= 2;
+    }
+    return false;
+#elif defined(__APPLE__)
+    std::size_t bufferSize = 256;
+    while (bufferSize <= kPathBufferLimit)
+    {
+        std::vector<char> buffer(bufferSize, '\0');
+        std::uint32_t required = static_cast<std::uint32_t>(buffer.size());
+        if (_NSGetExecutablePath(buffer.data(), &required) == 0)
+        {
+            const void *terminator = std::memchr(buffer.data(), '\0', buffer.size());
+            if (terminator == nullptr)
+                return false;
+            const std::size_t length = static_cast<std::size_t>(
+                static_cast<const char *>(terminator) - buffer.data());
+            result.assign(buffer.data(), length);
+            return !result.empty();
+        }
+
+        const std::size_t doubledSize = bufferSize * 2;
+        const std::size_t requiredSize = static_cast<std::size_t>(required);
+        const std::size_t nextSize = doubledSize > requiredSize ? doubledSize : requiredSize;
+        if (nextSize > kPathBufferLimit)
+            return false;
+        bufferSize = nextSize;
+    }
+    return false;
+#elif defined(__linux__)
+    std::size_t bufferSize = 256;
+    while (bufferSize <= kPathBufferLimit)
+    {
+        std::vector<char> buffer(bufferSize, '\0');
+        const ssize_t length = readlink("/proc/self/exe", buffer.data(), buffer.size());
+        if (length < 0)
+            return false;
+        if (static_cast<std::size_t>(length) < buffer.size())
+        {
+            buffer[static_cast<std::size_t>(length)] = '\0';
+            result.assign(buffer.data(), static_cast<std::size_t>(length));
+            return !result.empty();
+        }
+        if (bufferSize > kPathBufferLimit / 2)
+            return false;
+        bufferSize *= 2;
+    }
+    return false;
+#else
+    return false;
+#endif
+}
+} // namespace detail
+} // namespace cppcli
+
 /**
  * @brief 初始化工作路径和执行路径
  * 
  * @param argc 命令行参数个数
  * @param argv 命令行参数数组
  * 
- * @details 获取当前工作目录和可执行文件的路径，并存储在成员变量中。
+ * @details 获取当前工作目录和可执行文件的路径，并存储在成员变量中。读取失败时，
+ * 当前目录回退到"."；无法定位可执行文件目录时回退到当前目录。
  * 
- * @note 在Windows系统上使用_getcwd和GetModuleFileName函数。
- * 在Unix系统上使用getcwd和readlink函数。
+ * @note Windows使用宽字符路径 API，macOS使用_NSGetExecutablePath，Linux使用
+ * /proc/self/exe。所有系统调用都会检查返回值和缓冲区边界。
  */
 void cppcli::Option::pathInit(int argc, char *argv[])
 {
+    (void)argc;
+    (void)argv;
 
-    char execBuf[1024];
-    char workBuf[1024];
-#if defined(WIN32) || defined(_WIN64) || defined(__WIN32__)
-    _getcwd(execBuf, sizeof(execBuf));
-    GetModuleFileName(NULL, workBuf, sizeof(workBuf));
-#else
-    auto none1 = getcwd(execBuf, sizeof(execBuf));
-    auto none2 = readlink("/proc/self/exe", workBuf, sizeof(workBuf));
-#endif
-    _execPath = execBuf;
-    _workPath = std::move(cppcli::detail::pathUtil::getFileDir(workBuf));
+    std::string currentDirectory;
+    if (!cppcli::detail::getCurrentDirectoryPath(currentDirectory))
+        currentDirectory.clear();
+    _execPath = cppcli::detail::currentDirectoryOrFallback(currentDirectory);
+
+    std::string executablePath;
+    if (!cppcli::detail::getExecutablePath(executablePath))
+        executablePath.clear();
+    _workPath = cppcli::detail::executableDirectoryOrFallback(executablePath, _execPath);
 
 #ifdef CPPCLI_DEBUG
     CPPCLI_DEBUG_PRINT("execPath = ", _execPath, ", workPath = ", _workPath);

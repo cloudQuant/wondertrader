@@ -475,6 +475,35 @@ TEST(t26_ctploader_instrument, czce_option_expands_code_and_strikes_through)
 	pUserApi = NULL;
 }
 
+TEST(t26_ctploader_instrument, czce_code_without_numeric_suffix_is_skipped)
+{
+	t26::setup_defaults("i17");
+	CLASSMASK = 1;
+	MAP_NAME["SR"] = "白砂糖";
+
+	auto f = t26::make_instrument("CZCE", "SRCS", "SR", THOST_FTDC_PC_Futures);
+	auto ok = t26::ok_rsp();
+	CTraderSpi spi;
+	spi.OnRspQryInstrument(&f, &ok, 8, false);
+
+	EXPECT_TRUE(_contracts.empty());
+	EXPECT_TRUE(_commodities.empty());
+}
+
+TEST(t26_ctploader_instrument, unterminated_fixed_instrument_id_is_skipped)
+{
+	t26::setup_defaults("i18");
+	CLASSMASK = 1;
+	auto f = t26::make_instrument("CZCE", "SR510", "SR", THOST_FTDC_PC_Futures);
+	std::memset(f.InstrumentID, 'X', sizeof(f.InstrumentID));
+	auto ok = t26::ok_rsp();
+	CTraderSpi spi;
+	spi.OnRspQryInstrument(&f, &ok, 9, false);
+
+	EXPECT_TRUE(_contracts.empty());
+	EXPECT_TRUE(_commodities.empty());
+}
+
 /* ------------------------------------------------------------------ */
 /* fillCzceCode 直调（锁存语义各占一个进程）                              */
 /* ------------------------------------------------------------------ */
@@ -484,6 +513,8 @@ TEST(t26_ctploader_names, fill_czce_latches_decade_on_first_call_2025)
 	t26::setup_defaults("i15");
 	// 空码提前返回、**不消耗锁存**（L305-306 在 static 判定之前）
 	EXPECT_EQ("", fillCzceCode("", 20251027));
+	// CZCE 品种代码无月份数字时安全拒绝，不扫描越过字符串末尾。
+	EXPECT_EQ("", fillCzceCode("SRCS", 19990101));
 	// 首调用 tdate=20251027 → yearFlag=5/yearPref=2/nextY=3，此后所有调用共用该锁存
 	EXPECT_EQ("SR2510", fillCzceCode("SR510", 20251027));
 	EXPECT_EQ("MA3412", fillCzceCode("MA412", 19990101));	// 4<5 → 借下个十年位 3；第二个参数被锁存忽略

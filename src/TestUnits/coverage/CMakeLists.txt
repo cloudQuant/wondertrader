@@ -22,13 +22,10 @@ IF(NOT COV_SRCS)
 	file(GLOB_RECURSE COV_SRCS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 ENDIF()
 
-# src/Share/ModuleHelper.hpp:48 在头文件里定义了「非 inline、外部链接」的 void inst_hlp() {}，
-# 每个包含它的 TU 都会输出一份定义（TraderDD.cpp:54、TraderHTS.cpp:56 还各自又写了一份）。
-# 两个这样的 TU 一旦链进同一个测试二进制就 duplicate symbol、整个目标链不通
-# （实测：CoverageTests 主目标里 r16_logger_dll_test.cpp.o 撞 WtDtPorter.cpp.o）。
-# 本轮不改产品代码：按源文件路径哈希给每个 TU 唯一改名。getInstPath() 本身是 static、
-# 每 TU 各取自身模块地址，所以改名不改变行为。必须在其它
-# set_source_files_properties(COMPILE_DEFINITIONS) 之后调用，否则会被后写的一方覆盖。
+# ModuleHelper.hpp now uses a translation-unit-local anchor. Keep this workaround for
+# legacy product TUs such as TraderDD.cpp and TraderHTS.cpp that define their own external
+# inst_hlp() symbols. The dedicated BUG-L00-008 regression below bypasses this macro.
+# Apply after other source COMPILE_DEFINITIONS so this mapping is not overwritten.
 FUNCTION(WT_COV_ISOLATE_INST_HLP)
 	FOREACH(_s ${ARGN})
 		STRING(MD5 _h "${_s}")
@@ -329,6 +326,237 @@ FOREACH(spec ${WT_COV_SPLIT_TARGETS})
 		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 ENDFOREACH()
 
+# UFT TraderAdapter lifecycle tests use a real loadable fixture so factory,
+# init, release and delete exceptions cross the same module boundary as plugins.
+if(TARGET CoverageTests_uftcore)
+	add_library(UftLifecycleFakeTrader MODULE q04_uftcore3/fake_plugin/uft_lifecycle_trader.cpp)
+	target_include_directories(UftLifecycleFakeTrader PRIVATE "${CMAKE_SOURCE_DIR}/src")
+	set_target_properties(UftLifecycleFakeTrader PROPERTIES
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON
+		LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/uft_lifecycle_plugins"
+		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/uft_lifecycle_plugins")
+	if(WIN32)
+		set_target_properties(UftLifecycleFakeTrader PROPERTIES PREFIX "" SUFFIX ".dll")
+	elseif(APPLE)
+		set_target_properties(UftLifecycleFakeTrader PROPERTIES PREFIX "lib" SUFFIX ".dylib")
+	else()
+		set_target_properties(UftLifecycleFakeTrader PROPERTIES PREFIX "lib" SUFFIX ".so")
+	endif()
+	add_dependencies(CoverageTests_uftcore UftLifecycleFakeTrader)
+	target_compile_definitions(CoverageTests_uftcore PRIVATE
+		"WT_UFT_LIFECYCLE_FAKE_PLUGIN_PATH=\"$<TARGET_FILE:UftLifecycleFakeTrader>\"")
+endif()
+
+# R59 validates TraderAdapter credentials through a successfully initialized
+# API module. Keep the fixture outside coverage/ so its factory exports do not
+# also get linked into CoverageTests_wtcore.
+if(TARGET CoverageTests_wtcore)
+	# R160 checks the exact MQ C ABI through a deterministic loadable module.
+	# Keep the fake in its own directory so the existing inproc integration test
+	# still loads the production WtMsgQue beside the test binary.
+	add_library(R160FakeWtMsgQue MODULE "${CMAKE_SOURCE_DIR}/TestUnits/fixtures/r160_fake_wtmsgque.cpp")
+	target_include_directories(R160FakeWtMsgQue PRIVATE "${CMAKE_SOURCE_DIR}")
+	set_target_properties(R160FakeWtMsgQue PROPERTIES
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON
+		OUTPUT_NAME "WtMsgQue"
+		LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/r160_fake_mq"
+		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/r160_fake_mq")
+	if(WIN32)
+		set_target_properties(R160FakeWtMsgQue PROPERTIES PREFIX "" SUFFIX ".dll")
+	elseif(APPLE)
+		set_target_properties(R160FakeWtMsgQue PROPERTIES PREFIX "lib" SUFFIX ".dylib")
+	else()
+		set_target_properties(R160FakeWtMsgQue PROPERTIES PREFIX "lib" SUFFIX ".so")
+	endif()
+	add_dependencies(CoverageTests_wtcore R160FakeWtMsgQue)
+	target_compile_definitions(CoverageTests_wtcore PRIVATE
+		"WT_R160_FAKE_MQ_DIR=\"$<TARGET_FILE_DIR:R160FakeWtMsgQue>\"")
+
+	# R10 checks fail-closed handling when the required MQ log callback export is absent.
+	add_library(R10MissingRegisterWtMsgQue MODULE
+		"${CMAKE_SOURCE_DIR}/TestUnits/fixtures/r10_missing_register_wtmsgque.cpp")
+	target_include_directories(R10MissingRegisterWtMsgQue PRIVATE "${CMAKE_SOURCE_DIR}")
+	set_target_properties(R10MissingRegisterWtMsgQue PROPERTIES
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON
+		OUTPUT_NAME "WtMsgQue"
+		LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/r10_missing_register_mq"
+		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/r10_missing_register_mq")
+	if(WIN32)
+		set_target_properties(R10MissingRegisterWtMsgQue PROPERTIES PREFIX "" SUFFIX ".dll")
+	elseif(APPLE)
+		set_target_properties(R10MissingRegisterWtMsgQue PROPERTIES PREFIX "lib" SUFFIX ".dylib")
+	else()
+		set_target_properties(R10MissingRegisterWtMsgQue PROPERTIES PREFIX "lib" SUFFIX ".so")
+	endif()
+	add_dependencies(CoverageTests_wtcore R10MissingRegisterWtMsgQue)
+	target_compile_definitions(CoverageTests_wtcore PRIVATE
+		"WT_R10_MISSING_REGISTER_MQ_DIR=\"$<TARGET_FILE_DIR:R10MissingRegisterWtMsgQue>\"")
+
+	add_library(R59CredentialsTrader MODULE "${CMAKE_SOURCE_DIR}/TestUnits/fixtures/r59_credentials_trader.cpp")
+	target_include_directories(R59CredentialsTrader PRIVATE "${CMAKE_SOURCE_DIR}")
+	set_target_properties(R59CredentialsTrader PROPERTIES
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON
+		LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/r59_credentials_plugins"
+		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/r59_credentials_plugins")
+	if(WIN32)
+		set_target_properties(R59CredentialsTrader PROPERTIES PREFIX "" SUFFIX ".dll")
+	elseif(APPLE)
+		set_target_properties(R59CredentialsTrader PROPERTIES PREFIX "lib" SUFFIX ".dylib")
+	else()
+		set_target_properties(R59CredentialsTrader PROPERTIES PREFIX "lib" SUFFIX ".so")
+	endif()
+	add_dependencies(CoverageTests_wtcore R59CredentialsTrader)
+	target_compile_definitions(CoverageTests_wtcore PRIVATE
+		"R59_CREDENTIALS_PLUGIN_PATH=\"$<TARGET_FILE:R59CredentialsTrader>\"")
+endif()
+
+# Versioned execution-plugin loading contract: each fixture is a real loadable
+# module so the host can be tested before and after dlclose boundaries.
+set(WT_COV_EXEC_V2_PLUGIN_DIR "${CMAKE_CURRENT_BINARY_DIR}/exec_v2_plugins")
+file(MAKE_DIRECTORY "${WT_COV_EXEC_V2_PLUGIN_DIR}")
+if(APPLE)
+	# WtExecuterFactory scans .dylib on macOS (rather than CMake MODULE's .so).
+	set(WT_COV_EXEC_V2_PLUGIN_SUFFIX ".dylib")
+else()
+	set(WT_COV_EXEC_V2_PLUGIN_SUFFIX "${CMAKE_SHARED_MODULE_SUFFIX}")
+endif()
+function(WT_COV_ADD_EXEC_V2_PLUGIN target output mode)
+	add_library(${target} MODULE v2_exec_plugin/fake_exec_plugin.cpp)
+	target_include_directories(${target} PRIVATE ${WT_COV_INCS})
+	target_compile_definitions(${target} PRIVATE COV_EXEC_PLUGIN_MODE=${mode})
+	set_target_properties(${target} PROPERTIES
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON
+		PREFIX ""
+		SUFFIX "${WT_COV_EXEC_V2_PLUGIN_SUFFIX}"
+		OUTPUT_NAME "${output}"
+		LIBRARY_OUTPUT_DIRECTORY "${WT_COV_EXEC_V2_PLUGIN_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY "${WT_COV_EXEC_V2_PLUGIN_DIR}")
+endfunction()
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2BadVersion bad_version 2)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2BadSize bad_size 3)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2InitFail init_fail 4)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2BadCallback bad_callback 5)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2Abi20 abi20 6)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2NoQuiesceCapability no_quiesce_capability 7)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2NoWaitQuiesce no_wait_quiesce 8)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2NoCanWaitQuiesce no_can_wait_quiesce 9)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2ShortQuiesce short_quiesce 10)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2NoRequestQuiesce no_request_quiesce 11)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2CanWaitFalse can_wait_false 12)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2CanWaitInvalid can_wait_invalid 13)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2RequestFail request_fail 14)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2WaitFail wait_fail 15)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2RequestThrow request_throw 16)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2CanWaitThrow can_wait_throw 17)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2WaitThrow wait_throw 18)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2InitRace init_race 19)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2Abi21 abi21 20)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2ShortFactoryPreflight short_factory_preflight 21)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2NoFactoryPreflightCapability no_factory_preflight_capability 22)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2NoFactoryPreflight no_factory_preflight 23)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2FactoryPreflightFalse factory_preflight_false 24)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2FactoryPreflightInvalid factory_preflight_invalid 25)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2FactoryPreflightThrow factory_preflight_throw 26)
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2NullFactory null_factory 27)
+
+add_library(CovExecV2InitFailDrainsWorker MODULE
+	v2_exec_plugin/init_fail_drains_worker_fixture.cpp)
+target_include_directories(CovExecV2InitFailDrainsWorker PRIVATE ${WT_COV_INCS})
+set_target_properties(CovExecV2InitFailDrainsWorker PROPERTIES
+	CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON
+	PREFIX ""
+	SUFFIX "${WT_COV_EXEC_V2_PLUGIN_SUFFIX}"
+	OUTPUT_NAME "init_fail_drains_worker"
+	LIBRARY_OUTPUT_DIRECTORY "${WT_COV_EXEC_V2_PLUGIN_DIR}"
+	RUNTIME_OUTPUT_DIRECTORY "${WT_COV_EXEC_V2_PLUGIN_DIR}")
+
+# WtBtRunner shutdown tests load these fixtures by filename at runtime.
+if(TARGET CoverageTests_btporter)
+	add_dependencies(CoverageTests_btporter CovExecV2FactoryPreflightFalse CovExecV2InitFail)
+endif()
+
+add_library(CovExecV2Valid MODULE v2_exec_plugin/fake_exec_plugin.cpp)
+target_include_directories(CovExecV2Valid PRIVATE ${WT_COV_INCS})
+target_compile_definitions(CovExecV2Valid PRIVATE COV_EXEC_PLUGIN_MODE=0)
+set_target_properties(CovExecV2Valid PROPERTIES
+	CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON
+	PREFIX ""
+	SUFFIX "${WT_COV_EXEC_V2_PLUGIN_SUFFIX}"
+	OUTPUT_NAME "valid"
+	LIBRARY_OUTPUT_DIRECTORY "${WT_COV_EXEC_V2_PLUGIN_DIR}"
+	RUNTIME_OUTPUT_DIRECTORY "${WT_COV_EXEC_V2_PLUGIN_DIR}")
+add_library(CovExecLegacy MODULE v2_exec_plugin/legacy_exec_plugin.cpp)
+target_include_directories(CovExecLegacy PRIVATE ${WT_COV_INCS})
+set_target_properties(CovExecLegacy PROPERTIES
+	CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON
+	PREFIX ""
+	SUFFIX "${WT_COV_EXEC_V2_PLUGIN_SUFFIX}"
+	OUTPUT_NAME "legacy"
+	LIBRARY_OUTPUT_DIRECTORY "${WT_COV_EXEC_V2_PLUGIN_DIR}"
+	RUNTIME_OUTPUT_DIRECTORY "${WT_COV_EXEC_V2_PLUGIN_DIR}")
+
+add_executable(CoverageTests_execv2
+	v2_exec_plugin/v2_exec_plugin_factory_test.cpp
+	v2_exec_plugin/v2_exec_plugin_quiesce_lifecycle_test.cpp
+	v2_exec_plugin/init_fail_drains_worker_test.cpp)
+target_include_directories(CoverageTests_execv2 PRIVATE ${WT_COV_INCS})
+target_link_libraries(CoverageTests_execv2 PRIVATE
+	GTest::gtest_main Threads::Threads WtCore WTSTools WTSUtils boost_filesystem boost_thread)
+if(CMAKE_DL_LIBS)
+	target_link_libraries(CoverageTests_execv2 PRIVATE ${CMAKE_DL_LIBS})
+endif()
+target_compile_definitions(CoverageTests_execv2 PRIVATE
+	"WT_COV_EXEC_V2_LEGACY_PATH=\"$<TARGET_FILE:CovExecLegacy>\""
+	"WT_COV_EXEC_V2_BAD_VERSION_PATH=\"$<TARGET_FILE:CovExecV2BadVersion>\""
+	"WT_COV_EXEC_V2_BAD_SIZE_PATH=\"$<TARGET_FILE:CovExecV2BadSize>\""
+	"WT_COV_EXEC_V2_BAD_CALLBACK_PATH=\"$<TARGET_FILE:CovExecV2BadCallback>\""
+	"WT_COV_EXEC_V2_ABI20_PATH=\"$<TARGET_FILE:CovExecV2Abi20>\""
+	"WT_COV_EXEC_V2_NO_QUIESCE_CAPABILITY_PATH=\"$<TARGET_FILE:CovExecV2NoQuiesceCapability>\""
+	"WT_COV_EXEC_V2_NO_WAIT_QUIESCE_PATH=\"$<TARGET_FILE:CovExecV2NoWaitQuiesce>\""
+	"WT_COV_EXEC_V2_NO_CAN_WAIT_QUIESCE_PATH=\"$<TARGET_FILE:CovExecV2NoCanWaitQuiesce>\""
+	"WT_COV_EXEC_V2_SHORT_QUIESCE_PATH=\"$<TARGET_FILE:CovExecV2ShortQuiesce>\""
+	"WT_COV_EXEC_V2_NO_REQUEST_QUIESCE_PATH=\"$<TARGET_FILE:CovExecV2NoRequestQuiesce>\""
+	"WT_COV_EXEC_V2_CAN_WAIT_FALSE_PATH=\"$<TARGET_FILE:CovExecV2CanWaitFalse>\""
+	"WT_COV_EXEC_V2_CAN_WAIT_INVALID_PATH=\"$<TARGET_FILE:CovExecV2CanWaitInvalid>\""
+	"WT_COV_EXEC_V2_REQUEST_FAIL_PATH=\"$<TARGET_FILE:CovExecV2RequestFail>\""
+	"WT_COV_EXEC_V2_WAIT_FAIL_PATH=\"$<TARGET_FILE:CovExecV2WaitFail>\""
+	"WT_COV_EXEC_V2_REQUEST_THROW_PATH=\"$<TARGET_FILE:CovExecV2RequestThrow>\""
+	"WT_COV_EXEC_V2_CAN_WAIT_THROW_PATH=\"$<TARGET_FILE:CovExecV2CanWaitThrow>\""
+	"WT_COV_EXEC_V2_WAIT_THROW_PATH=\"$<TARGET_FILE:CovExecV2WaitThrow>\""
+	"WT_COV_EXEC_V2_INIT_RACE_PATH=\"$<TARGET_FILE:CovExecV2InitRace>\""
+	"WT_COV_EXEC_V2_ABI21_PATH=\"$<TARGET_FILE:CovExecV2Abi21>\""
+	"WT_COV_EXEC_V2_SHORT_FACTORY_PREFLIGHT_PATH=\"$<TARGET_FILE:CovExecV2ShortFactoryPreflight>\""
+	"WT_COV_EXEC_V2_NO_FACTORY_PREFLIGHT_CAPABILITY_PATH=\"$<TARGET_FILE:CovExecV2NoFactoryPreflightCapability>\""
+	"WT_COV_EXEC_V2_NO_FACTORY_PREFLIGHT_PATH=\"$<TARGET_FILE:CovExecV2NoFactoryPreflight>\""
+	"WT_COV_EXEC_V2_NULL_FACTORY_PATH=\"$<TARGET_FILE:CovExecV2NullFactory>\""
+	"WT_COV_EXEC_V2_FACTORY_PREFLIGHT_FALSE_PATH=\"$<TARGET_FILE:CovExecV2FactoryPreflightFalse>\""
+	"WT_COV_EXEC_V2_FACTORY_PREFLIGHT_INVALID_PATH=\"$<TARGET_FILE:CovExecV2FactoryPreflightInvalid>\""
+	"WT_COV_EXEC_V2_FACTORY_PREFLIGHT_THROW_PATH=\"$<TARGET_FILE:CovExecV2FactoryPreflightThrow>\""
+	"WT_COV_EXEC_V2_INIT_FAIL_DRAINS_WORKER_PATH=\"$<TARGET_FILE:CovExecV2InitFailDrainsWorker>\""
+	"WT_COV_EXEC_V2_INIT_FAIL_PATH=\"$<TARGET_FILE:CovExecV2InitFail>\""
+	"WT_COV_EXEC_V2_VALID_PATH=\"$<TARGET_FILE:CovExecV2Valid>\"")
+add_dependencies(CoverageTests_execv2
+	CovExecLegacy CovExecV2BadVersion CovExecV2BadSize CovExecV2InitFail
+	CovExecV2BadCallback CovExecV2Abi20 CovExecV2NoQuiesceCapability
+	CovExecV2NoWaitQuiesce CovExecV2NoCanWaitQuiesce CovExecV2ShortQuiesce
+	CovExecV2NoRequestQuiesce CovExecV2CanWaitFalse CovExecV2CanWaitInvalid
+	CovExecV2RequestFail CovExecV2WaitFail CovExecV2RequestThrow
+	CovExecV2CanWaitThrow CovExecV2WaitThrow CovExecV2InitRace CovExecV2Abi21
+	CovExecV2ShortFactoryPreflight CovExecV2NoFactoryPreflightCapability
+	CovExecV2NoFactoryPreflight CovExecV2FactoryPreflightFalse
+	CovExecV2FactoryPreflightInvalid CovExecV2FactoryPreflightThrow
+	CovExecV2NullFactory
+	CovExecV2InitFailDrainsWorker CovExecV2Valid)
+set_target_properties(CoverageTests_execv2 PROPERTIES
+	CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+list(APPEND MOVED_SRCS
+	"${CMAKE_CURRENT_SOURCE_DIR}/v2_exec_plugin/v2_exec_plugin_factory_test.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/v2_exec_plugin/v2_exec_plugin_quiesce_lifecycle_test.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/v2_exec_plugin/init_fail_drains_worker_test.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/v2_exec_plugin/init_fail_drains_worker_fixture.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/v2_exec_plugin/fake_exec_plugin.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/v2_exec_plugin/legacy_exec_plugin.cpp")
+
 # ---------------------------------------------------------------------------
 # 策略工厂族：需要显式控制，因为冲突形状比普通插件更细
 #
@@ -405,6 +633,71 @@ if(SELHFT_TESTS AND SELHFT_TUS)
 		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 	LIST(APPEND MOVED_SRCS ${SELHFT_TESTS})
 endif()
+
+# BUG-R31-001 / SEL factory ABI integration: build the two actual WtSelStraFact
+# production TUs as an isolated shared library. Do not link these TUs into either
+# host test executable: that would duplicate their definitions with SELHFT_TUS.
+# This mirrors src/WtSelStraFact/CMakeLists.txt's include/link/visibility contract.
+set(WT_COV_SEL_PLUGIN_TUS
+	"${CMAKE_SOURCE_DIR}/WtSelStraFact/WtSelStraFact.cpp"
+	"${CMAKE_SOURCE_DIR}/WtSelStraFact/WtStraDtSel.cpp")
+add_library(CoverageWtSelStraFactPlugin SHARED ${WT_COV_SEL_PLUGIN_TUS})
+target_include_directories(CoverageWtSelStraFactPlugin PRIVATE ${WT_COV_INCS})
+if(NOT WIN32)
+	target_link_libraries(CoverageWtSelStraFactPlugin PRIVATE ${STDCXXFS} ${CMAKE_DL_LIBS})
+endif()
+set_target_properties(CoverageWtSelStraFactPlugin PROPERTIES
+	CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON
+	CXX_VISIBILITY_PRESET hidden
+	C_VISIBILITY_PRESET hidden
+	VISIBILITY_INLINES_HIDDEN ON
+	LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/sel_plugin"
+	RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/sel_plugin")
+
+# Compile an explicit generated path into both host tests and make them depend on
+# the plugin target. Missing plugin output must fail the test, never silently skip.
+if(NOT TARGET CoverageTests_wtcore OR NOT TARGET CoverageTests_btcore)
+	message(FATAL_ERROR "SEL plugin ABI integration requires CoverageTests_wtcore and CoverageTests_btcore")
+endif()
+foreach(_sel_host_test CoverageTests_wtcore CoverageTests_btcore)
+	target_compile_definitions(${_sel_host_test} PRIVATE
+		"WT_COV_SEL_PLUGIN_PATH=\"$<TARGET_FILE:CoverageWtSelStraFactPlugin>\""
+		"WT_COV_CTA_PLUGIN_PATH=\"$<TARGET_FILE:WtCtaStraFact>\"")
+	add_dependencies(${_sel_host_test} CoverageWtSelStraFactPlugin)
+endforeach()
+
+# BUG-R202 HFT factory ABI integration: compile pristine copies of the actual
+# production factory TUs into a shared library. The originals above have global
+# source compile definitions that rename their C exports for CoverageTests_selfthft;
+# copying them into the build tree keeps those test-only renames off this plugin.
+set(WT_COV_HFT_PLUGIN_DIR "${CMAKE_CURRENT_BINARY_DIR}/hft_plugin")
+file(MAKE_DIRECTORY "${WT_COV_HFT_PLUGIN_DIR}")
+configure_file("${CMAKE_SOURCE_DIR}/WtHftStraFact/WtHftStraFact.cpp"
+	"${WT_COV_HFT_PLUGIN_DIR}/WtHftStraFact.cpp" COPYONLY)
+configure_file("${CMAKE_SOURCE_DIR}/WtHftStraFact/WtHftStraDemo.cpp"
+	"${WT_COV_HFT_PLUGIN_DIR}/WtHftStraDemo.cpp" COPYONLY)
+set(WT_COV_HFT_PLUGIN_TUS
+	"${WT_COV_HFT_PLUGIN_DIR}/WtHftStraFact.cpp"
+	"${WT_COV_HFT_PLUGIN_DIR}/WtHftStraDemo.cpp")
+set_source_files_properties(${WT_COV_HFT_PLUGIN_TUS} PROPERTIES
+	COMPILE_OPTIONS "-Wno-error;-Wno-reorder-ctor;-Wno-unused-parameter")
+add_library(CoverageWtHftStraFactPlugin SHARED ${WT_COV_HFT_PLUGIN_TUS})
+target_include_directories(CoverageWtHftStraFactPlugin PRIVATE
+	${WT_COV_INCS} "${CMAKE_SOURCE_DIR}/WtHftStraFact")
+if(NOT WIN32)
+	target_link_libraries(CoverageWtHftStraFactPlugin PRIVATE ${STDCXXFS} ${CMAKE_DL_LIBS})
+endif()
+set_target_properties(CoverageWtHftStraFactPlugin PROPERTIES
+	CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON
+	OUTPUT_NAME WtHftStraFact
+	CXX_VISIBILITY_PRESET hidden
+	C_VISIBILITY_PRESET hidden
+	VISIBILITY_INLINES_HIDDEN ON
+	LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/build_${PLATFORM}/${CMAKE_BUILD_TYPE}/bin"
+	RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/build_${PLATFORM}/${CMAKE_BUILD_TYPE}/bin")
+foreach(_hft_host_test CoverageTests_wtcore CoverageTests_btcore)
+	add_dependencies(${_hft_host_test} CoverageWtHftStraFactPlugin)
+endforeach()
 
 # ---------------------------------------------------------------------------
 # 带 main() 的可执行体（EX-14/EX-15 那一类）：用编译期重命名入口的方式纳入测试
@@ -523,12 +816,8 @@ FOREACH(t ${MAIN_PLUGIN_TUNS})
 ENDFOREACH()
 LIST(APPEND COV_SRCS ${MAIN_PLUGIN_TUNS})
 
-# 产品头 src/Share/ModuleHelper.hpp:48 在头文件里定义了「非 inline、外部链接」的
-# void inst_hlp() {}，每个包含它的 TU 都会输出一份定义。一旦两个这样的 TU 链进同一个
-# 测试二进制就直接 duplicate symbol 链不通（实测：r16_logger_dll_test.cpp.o 与
-# WtDtPorter.cpp.o，另有 TraderDD.cpp:54 / TraderHTS.cpp:56 自带的第三份）。
-# 本轮不改产品代码：按源文件路径哈希给每个 TU 一个唯一改名，只有真的包含该头的 TU 受影响，
-# getInstPath() 的语义不变（它本来就是 static、每 TU 各自取自身模块地址）。
+# Keep isolating legacy external inst_hlp() definitions in product TUs; the ModuleHelper
+# header itself no longer contributes a conflicting external symbol.
 WT_COV_ISOLATE_INST_HLP(${COV_SRCS})
 
 ADD_EXECUTABLE(CoverageTests ${COV_SRCS})
@@ -538,3 +827,32 @@ SET_TARGET_PROPERTIES(CoverageTests PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQU
 
 LIST(LENGTH COV_SRCS main_n)
 MESSAGE(STATUS "coverage: CoverageTests 主目标含 ${main_n} 个源文件；分派目标 ${WT_COV_SPLIT_TARGETS}")
+
+# Regression for BUG-L00-008. These sources live outside coverage/ so the
+# WT_COV_ISOLATE_INST_HLP source-path macro cannot rename inst_hlp here. The
+# fixture deliberately compiles two raw header-including TUs into one shared
+# module, while the test executable includes the same header in its own TU.
+# This verifies both multi-TU linking and dladdr ownership for each module.
+if(UNIX)
+	set(WT_COV_MODULE_HELPER_ODR_DIR "${CMAKE_SOURCE_DIR}/TestUnits/fixtures/module_helper_odr")
+	add_library(ModuleHelperOdrFixture SHARED
+		"${WT_COV_MODULE_HELPER_ODR_DIR}/module_helper_tu_a.cpp"
+		"${WT_COV_MODULE_HELPER_ODR_DIR}/module_helper_tu_b.cpp")
+	target_include_directories(ModuleHelperOdrFixture PRIVATE ${WT_COV_INCS})
+	set_target_properties(ModuleHelperOdrFixture PROPERTIES
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+	if(CMAKE_DL_LIBS)
+		target_link_libraries(ModuleHelperOdrFixture PRIVATE ${CMAKE_DL_LIBS})
+	endif()
+
+	add_executable(CoverageTests_modulehelper_odr
+		"${WT_COV_MODULE_HELPER_ODR_DIR}/module_helper_odr_test.cpp")
+	target_include_directories(CoverageTests_modulehelper_odr PRIVATE ${WT_COV_INCS})
+	target_link_libraries(CoverageTests_modulehelper_odr PRIVATE
+		GTest::gtest_main Threads::Threads ModuleHelperOdrFixture ${CMAKE_DL_LIBS})
+	target_compile_definitions(CoverageTests_modulehelper_odr PRIVATE
+		"MODULE_HELPER_ODR_FIXTURE_PATH=\"$<TARGET_FILE:ModuleHelperOdrFixture>\""
+		"MODULE_HELPER_ODR_TEST_PATH=\"$<TARGET_FILE:CoverageTests_modulehelper_odr>\"")
+	set_target_properties(CoverageTests_modulehelper_odr PROPERTIES
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+endif()

@@ -14,13 +14,16 @@
  *   Arbi  : cancel 成功转发 :323-344；组合匹配 :432-440；非池 set_position
  *           :457-468, 503-506；通道回调非池；自动清理非池 :878-887
  *
- * 执行单元用构建产物 libWtExeFact（WtMinImpactExeUnit），只做内存撮合，不连柜台；
- * 池任务在析构 wait() 前用短暂 sleep 让回调完成。
+ * 执行单元用构建产物 libWtExeFact（Diff 使用 WtDiffMinImpactExeUnit），只做内存撮合，不连柜台；
+ * 池任务通过 WtExecQuiesceCoordinator 完整排空后再释放 host 与 factory。
  */
 #include <gtest/gtest.h>
 
-#include <chrono>
+#include <algorithm>
+#include <cstdlib>
+#include <memory>
 #include <string>
+#include <vector>
 
 #include "../n01_wtcore_tradepaths/r71_wtcore_env.h"
 #include "r90_env.h"
@@ -29,13 +32,67 @@
 
 #include <WtCore/WtArbiExecuter.h>
 #include <WtCore/WtDiffExecuter.h>
+#include <WtCore/WtExecMgr.h>
 #include <WtCore/WtLocalExecuter.h>
+#include <WtCore/TraderAdapter.h>
 
 using namespace wtp;
 
 namespace {
 
 const char* const kCode = "SHFE.ag.2512";
+
+class R110QuiesceGuard
+{
+public:
+    explicit R110QuiesceGuard(WtExecuterMgr& manager)
+        : _manager(manager), _coordinator(std::vector<WtExecuterMgr*>{&manager})
+    {}
+
+    ~R110QuiesceGuard()
+    {
+        if (!quiesceAll())
+        {
+            ADD_FAILURE() << "executor manager did not complete coordinated quiesce";
+            std::abort();
+        }
+    }
+
+    bool quiesceAll()
+    {
+        while (!_sinks.empty())
+        {
+            if (!removeSink(_sinks.back()))
+                return false;
+        }
+        return _coordinator.quiesce_all() && _coordinator.is_complete() &&
+            _manager.wait_quiesced();
+    }
+
+    void addSink(TraderAdapter& trader, ITrdNotifySink* sink)
+    {
+        _trader = &trader;
+        _sinks.push_back(sink);
+        trader.addSink(sink);
+    }
+
+    bool removeSink(ITrdNotifySink* sink)
+    {
+        auto it = std::find(_sinks.begin(), _sinks.end(), sink);
+        if (it == _sinks.end())
+            return true;
+        if (_trader == NULL || !_trader->removeSink(sink))
+            return false;
+        _sinks.erase(it);
+        return true;
+    }
+
+private:
+    WtExecuterMgr& _manager;
+    WtExecQuiesceCoordinator _coordinator;
+    TraderAdapter* _trader = NULL;
+    std::vector<ITrdNotifySink*> _sinks;
+};
 
 class R110ExecEnv : public ::testing::Test
 {
@@ -80,12 +137,13 @@ protected:
         ASSERT_TRUE(traderEnv.build(trader, "r110_exec"));
     }
 
-    WTSVariant* cfg(uint32_t poolsize)
+    WTSVariant* cfg(uint32_t poolsize,
+        const char* unitName = "WtExeFact.WtMinImpactExeUnit")
     {
         const std::string json = "{\"scale\":1.0,\"poolsize\":" + std::to_string(poolsize)
             + ",\"clear\":{\"active\":true,\"includes\":\"SHFE.ag\"},"
             "\"groups\":{\"R110G\":{\"SHFE.rb.2510\":2.0,\"SHFE.au.2212\":2.0}},"
-            "\"policy\":{\"default\":{\"name\":\"WtExeFact.WtMinImpactExeUnit\","
+            "\"policy\":{\"default\":{\"name\":\"" + std::string(unitName) + "\","
             "\"lots\":1,\"minopenlots\":1,\"offset\":0,\"expire\":0,"
             "\"pricemode\":0,\"span\":0,\"byrate\":false}}}";
         return WTSCfgLoader::load_from_content(json.c_str());
@@ -103,53 +161,59 @@ protected:
 //////////////////////////////////////////////////////////////////
 TEST_F(R110ExecEnv, DiffPoolForwardsEverything)
 {
-    WtDiffExecuter diff(&factory, "r110_diff_pool", &dm, &traderEnv.bd);
-    diff.setStub(&stub);
-    WTSVariant* c = cfg(1);
+    WtExecuterMgr manager;
+    R110QuiesceGuard quiesce(manager);
+    auto diff = std::make_shared<WtDiffExecuter>(&factory, "r110_diff_pool", &dm, &traderEnv.bd);
+    manager.add_executer(diff);
+    diff->setStub(&stub);
+    WTSVariant* c = cfg(1, "WtExeFact.WtDiffMinImpactExeUnit");
     ASSERT_NE(nullptr, c);
-    ASSERT_TRUE(diff.init(c));
+    ASSERT_TRUE(diff->init(c));
     c->release();
-    diff.setTrader(&trader);
+    diff->setTrader(&trader);
 
     // 通道就绪后成交/撤单直接转发到 TraderAdapter
-    diff.buy(kCode, 3500.0, 1, false);
-    diff.sell(kCode, 3501.0, 1, false);
-    diff.cancel(1u);
-    diff.cancel(kCode, true, 1);
+    diff->buy(kCode, 3500.0, 1, false);
+    diff->sell(kCode, 3501.0, 1, false);
+    diff->cancel(1u);
+    diff->cancel(kCode, true, 1);
 
     // 创建 ag 单元；再对 rb/au 下发组合目标，触发组合匹配与池调度
-    diff.on_position_changed(kCode, 2.0);
+    diff->on_position_changed(kCode, 2.0);
+    const ExecUnitInitStatus diffUnitStatus = diff->queryUnitInitStatus(kCode);
+    ASSERT_EQ(diffUnitStatus.query_result, ExecUnitInitQueryResult::OK);
+    ASSERT_EQ(diffUnitStatus.state, ExecUnitInitState::READY);
 
     wt_hashmap<std::string, double> targets;
     targets["SHFE.rb.2510"] = 3.0;
     targets["SHFE.au.2212"] = 3.0;
-    diff.set_position(targets);
+    diff->set_position(targets);
 
     // 相同目标再下发一次：等值跳过
-    diff.set_position(targets);
+    diff->set_position(targets);
 
     // 0 增量早退
-    diff.on_position_changed(kCode, 0.0);
+    diff->on_position_changed(kCode, 0.0);
 
     WTSTickData* t = tick("ag2512", 3500.0, 93100000);
     ASSERT_NE(nullptr, t);
-    diff.on_tick(kCode, t);
+    diff->on_tick(kCode, t);
     t->release();
 
-    diff.on_trade(1u, kCode, true, 1, 3500.0);
-    diff.on_trade(0u, kCode, true, 1, 3500.0);  // localid==0 早退
-    diff.on_order(1u, kCode, true, 1, 0, 3500.0, false);
-    diff.on_entrust(1u, kCode, true, "ok");
-    diff.on_account("CNY", 1, 1, 1, 1, 0, 0, 0, 0, 0, 0);
+    diff->on_trade(1u, kCode, true, 1, 3500.0);
+    diff->on_trade(0u, kCode, true, 1, 3500.0);  // localid==0 早退
+    diff->on_order(1u, kCode, true, 1, 0, 3500.0, false);
+    diff->on_entrust(1u, kCode, true, "ok");
+    diff->on_account("CNY", 1, 1, 1, 1, 0, 0, 0, 0, 0, 0);
 
-    diff.on_channel_lost();
-    diff.on_channel_ready();
+    diff->on_channel_lost();
+    diff->on_channel_ready();
 
     // 清空目标：目标仓位记录里的合约逐个归零（池调度）
     wt_hashmap<std::string, double> empty;
-    diff.set_position(empty);
+    diff->set_position(empty);
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    ASSERT_TRUE(quiesce.quiesceAll());
 }
 
 //////////////////////////////////////////////////////////////////
@@ -159,64 +223,72 @@ TEST_F(R110ExecEnv, DiffPoolForwardsEverything)
 //////////////////////////////////////////////////////////////////
 TEST_F(R110ExecEnv, LocalAndArbiNonPoolBranches)
 {
+    WtExecuterMgr manager;
+    R110QuiesceGuard quiesce(manager);
+
     // ---- Local ----
-    {
-        WtLocalExecuter local(&factory, "r110_local_nopool", &dm);
-        local.setStub(&stub);
-        WTSVariant* c = cfg(0);
-        ASSERT_NE(nullptr, c);
-        ASSERT_TRUE(local.init(c));
-        c->release();
-        local.setTrader(&trader);
+    auto local = std::make_shared<WtLocalExecuter>(&factory, "r110_local_nopool", &dm);
+    manager.add_executer(local);
+    local->setStub(&stub);
+    WTSVariant* c = cfg(0);
+    ASSERT_NE(nullptr, c);
+    ASSERT_TRUE(local->init(c));
+    c->release();
+    local->setTrader(&trader);
+    quiesce.addSink(trader, local.get());
 
-        local.on_position_changed(kCode, 2.0);
+    local->on_position_changed(kCode, 2.0);
 
-        wt_hashmap<std::string, double> targets;
-        targets["SHFE.rb.2510"] = 3.0;
-        targets["SHFE.au.2212"] = 3.0;
-        local.set_position(targets);
+    wt_hashmap<std::string, double> targets;
+    targets["SHFE.rb.2510"] = 3.0;
+    targets["SHFE.au.2212"] = 3.0;
+    local->set_position(targets);
 
-        // 非池通道回调，单元已存在
-        local.on_channel_lost();
-        local.on_channel_ready();
+    // 非池通道回调，单元已存在
+    local->on_channel_lost();
+    local->on_channel_ready();
 
-        // 上一期主力 + clear include 命中 -> 非池 clear_all_position
-        traderEnv.hot.prev_ = "ag2512";
-        local.on_position(kCode, true, 0, 0, 1, 1, 20250110);
+    // 上一期主力 + clear include 命中 -> 非池 clear_all_position
+    traderEnv.hot.prev_ = "ag2512";
+    local->on_position(kCode, true, 0, 0, 1, 1, 20250110);
 
-        wt_hashmap<std::string, double> empty;
-        local.set_position(empty);
-    }
+    wt_hashmap<std::string, double> empty;
+    local->set_position(empty);
+    ASSERT_TRUE(quiesce.removeSink(local.get()));
 
     // ---- Arbi ----
-    {
-        WtArbiExecuter arbi(&factory, "r110_arbi_nopool", &dm);
-        arbi.setStub(&stub);
-        WTSVariant* c = cfg(0);
-        ASSERT_NE(nullptr, c);
-        ASSERT_TRUE(arbi.init(c));
-        c->release();
-        arbi.setTrader(&trader);
+    auto arbi = std::make_shared<WtArbiExecuter>(&factory, "r110_arbi_nopool", &dm);
+    manager.add_executer(arbi);
+    arbi->setStub(&stub);
+    c = cfg(0);
+    ASSERT_NE(nullptr, c);
+    ASSERT_TRUE(arbi->init(c));
+    c->release();
+    arbi->setTrader(&trader);
+    quiesce.addSink(trader, arbi.get());
 
-        arbi.cancel(1u);
-        arbi.cancel(kCode, true, 1);
+    arbi->cancel(1u);
+    arbi->cancel(kCode, true, 1);
 
-        arbi.on_position_changed(kCode, 2.0);
+    arbi->on_position_changed(kCode, 2.0);
 
-        wt_hashmap<std::string, double> targets;
-        targets["SHFE.rb.2510"] = 3.0;
-        targets["SHFE.au.2212"] = 3.0;
-        arbi.set_position(targets);
+    wt_hashmap<std::string, double> arbiTargets;
+    arbiTargets["SHFE.rb.2510"] = 3.0;
+    arbiTargets["SHFE.au.2212"] = 3.0;
+    arbi->set_position(arbiTargets);
 
-        arbi.on_channel_lost();
-        arbi.on_channel_ready();
+    arbi->on_channel_lost();
+    arbi->on_channel_ready();
 
-        traderEnv.hot.prev_ = "ag2512";
-        arbi.on_position(kCode, true, 0, 0, 1, 1, 20250110);
+    traderEnv.hot.prev_ = "ag2512";
+    arbi->on_position(kCode, true, 0, 0, 1, 1, 20250110);
 
-        wt_hashmap<std::string, double> empty;
-        arbi.set_position(empty);
-    }
+    wt_hashmap<std::string, double> arbiEmpty;
+    arbi->set_position(arbiEmpty);
+
+    // Both hosts share the same factory, so one coordinator call closes and
+    // drains that factory once for the complete owner set.
+    ASSERT_TRUE(quiesce.quiesceAll());
 }
 
 }  // namespace

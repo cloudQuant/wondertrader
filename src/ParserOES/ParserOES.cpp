@@ -539,6 +539,8 @@ void ParserOES::doOnMessage(SMsgHeadT *pMsgHead, void *pMsgItem)
 			WTSCommodityInfo* commInfo = ct->getCommInfo();
 
 			WTSTickData* tick = WTSTickData::create(code.c_str());
+			if (tick == NULL)
+				return;
 			tick->setContractInfo(ct);
 			WTSTickStruct& quote = tick->getTickStruct();
 			strcpy(quote.exchg, commInfo->getExchg());
@@ -684,6 +686,8 @@ void ParserOES::doOnMessage(SMsgHeadT *pMsgHead, void *pMsgItem)
 			WTSCommodityInfo* commInfo = ct->getCommInfo();
 
 			WTSTickData* tick = WTSTickData::create(code.c_str());
+			if (tick == NULL)
+				return;
 			tick->setContractInfo(ct);
 			WTSTickStruct& quote = tick->getTickStruct();
 			strcpy(quote.exchg, commInfo->getExchg());
@@ -747,6 +751,8 @@ void ParserOES::doOnMessage(SMsgHeadT *pMsgHead, void *pMsgItem)
 			WTSCommodityInfo* commInfo = ct->getCommInfo();
 
 			WTSTickData* tick = WTSTickData::create(code.c_str());
+			if (tick == NULL)
+				return;
 			tick->setContractInfo(ct);
 			WTSTickStruct& quote = tick->getTickStruct();
 			strcpy(quote.exchg, commInfo->getExchg());
@@ -809,6 +815,8 @@ void ParserOES::doOnMessage(SMsgHeadT *pMsgHead, void *pMsgItem)
 			WTSCommodityInfo* commInfo = ct->getCommInfo();
 
 			WTSTickData* tick = WTSTickData::create(code.c_str());
+			if (tick == NULL)
+				return;
 			tick->setContractInfo(ct);
 			WTSTickStruct& quote = tick->getTickStruct();
 			strcpy(quote.exchg, commInfo->getExchg());

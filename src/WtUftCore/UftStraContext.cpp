@@ -71,25 +71,30 @@ void UftStraContext::on_tick(const char* stdCode, WTSTickData* newTick)
 	auto it = _positions.find(stdCode);
 	if(it != _positions.end())
 	{
-		WTSCommodityInfo* commInfo = newTick->getContractInfo()->getCommInfo();
-		uint32_t volscale = commInfo->getVolScale();
-		PosInfo& pInfo = it->second;
-
-		for(auto i = pInfo._valid_idx; i < pInfo._details.size(); i++)
+		WTSContractInfo* cInfo = newTick == NULL ? NULL : newTick->getContractInfo();
+		WTSCommodityInfo* commInfo = cInfo == NULL ? NULL : cInfo->getCommInfo();
+		// Position marking requires commodity metadata; the quote is still forwarded below.
+		if (commInfo != NULL)
 		{
-			auto& ds = pInfo._details[i];
-			if (ds->_volume == 0)
-				ds->_position_profit = 0;
-			else
-				ds->_position_profit = (newTick->price() - ds->_open_price)*ds->_volume*volscale*(ds->_direct == 0 ? 1 : -1);
-		}
+			uint32_t volscale = commInfo->getVolScale();
+			PosInfo& pInfo = it->second;
 
-		if (decimal::gt(pInfo._volume, 0.0))
-			pInfo._dynprofit = newTick->price()*pInfo._volume*volscale - pInfo._opencost;
-		else if (decimal::lt(pInfo._volume, 0.0))
-			pInfo._dynprofit = newTick->price()*pInfo._volume*volscale + pInfo._opencost;
-		else
-			pInfo._dynprofit = 0;
+			for(auto i = pInfo._valid_idx; i < pInfo._details.size(); i++)
+			{
+				auto& ds = pInfo._details[i];
+				if (ds->_volume == 0)
+					ds->_position_profit = 0;
+				else
+					ds->_position_profit = (newTick->price() - ds->_open_price)*ds->_volume*volscale*(ds->_direct == 0 ? 1 : -1);
+			}
+
+			if (decimal::gt(pInfo._volume, 0.0))
+				pInfo._dynprofit = newTick->price()*pInfo._volume*volscale - pInfo._opencost;
+			else if (decimal::lt(pInfo._volume, 0.0))
+				pInfo._dynprofit = newTick->price()*pInfo._volume*volscale + pInfo._opencost;
+			else
+				pInfo._dynprofit = 0;
+		}
 	}
 
 	if (_strategy)
@@ -703,27 +708,32 @@ const char* UftStraContext::watch_param(const char* name, const char* val)
 
 int64_t UftStraContext::watch_param(const char* name, int64_t val)
 {
-	return *ShareManager::self().allocate_value(_name.c_str(), name, val, false, true);
+	int64_t* value = ShareManager::self().allocate_value(_name.c_str(), name, val, false, true);
+	return value ? *value : val;
 }
 
 int32_t UftStraContext::watch_param(const char* name, int32_t val)
 {
-	return *ShareManager::self().allocate_value(_name.c_str(), name, val, false, true);
+	int32_t* value = ShareManager::self().allocate_value(_name.c_str(), name, val, false, true);
+	return value ? *value : val;
 }
 
 uint64_t UftStraContext::watch_param(const char* name, uint64_t val)
 {
-	return *ShareManager::self().allocate_value(_name.c_str(), name, val, false, true);
+	uint64_t* value = ShareManager::self().allocate_value(_name.c_str(), name, val, false, true);
+	return value ? *value : val;
 }
 
 uint32_t UftStraContext::watch_param(const char* name, uint32_t val)
 {
-	return *ShareManager::self().allocate_value(_name.c_str(), name, val, false, true);
+	uint32_t* value = ShareManager::self().allocate_value(_name.c_str(), name, val, false, true);
+	return value ? *value : val;
 }
 
 double UftStraContext::watch_param(const char* name, double val)
 {
-	return *ShareManager::self().allocate_value(_name.c_str(), name, val, false, true);
+	double* value = ShareManager::self().allocate_value(_name.c_str(), name, val, false, true);
+	return value ? *value : val;
 }
 
 void UftStraContext::commit_param_watcher()

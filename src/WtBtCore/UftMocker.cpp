@@ -58,10 +58,7 @@ UftMocker::UftMocker(HisDataReplayer* replayer, const char* name)
 
 UftMocker::~UftMocker()
 {
-	if(_strategy)
-	{
-		_factory._fact->deleteStrategy(_strategy);
-	}
+	release_uft_factory();
 }
 
 void UftMocker::procTask()
@@ -129,11 +126,20 @@ void UftMocker::postTask(Task task)
 
 bool UftMocker::init_uft_factory(WTSVariant* cfg)
 {
-	if (cfg == NULL)
+	if (cfg == NULL || _factory.is_preserved() || _factory._module_inst != NULL ||
+		_factory._fact != NULL || _strategy != NULL)
 		return false;
 
 	const char* module = cfg->getCString("module");
-	
+	WTSVariant* cfgStra = cfg->get("strategy");
+	const char* strategyName = cfgStra == NULL ? NULL : cfgStra->getCString("name");
+	if (module == NULL || module[0] == '\0' || cfgStra == NULL ||
+		strategyName == NULL || strategyName[0] == '\0')
+	{
+		log_error("UFT strategy configuration requires a module and non-empty strategy name");
+		return false;
+	}
+
 	_use_newpx = cfg->getBoolean("use_newpx");
 	_error_rate = cfg->getUInt32("error_rate");
 	_match_this_tick = cfg->getBoolean("match_this_tick");
@@ -145,25 +151,139 @@ bool UftMocker::init_uft_factory(WTSVariant* cfg)
 		return false;
 
 	FuncCreateUftStraFact creator = (FuncCreateUftStraFact)DLLHelper::get_symbol(hInst, "createStrategyFact");
-	if (creator == NULL)
+	FuncDeleteUftStraFact remover = (FuncDeleteUftStraFact)DLLHelper::get_symbol(hInst, "deleteStrategyFact");
+	if (creator == NULL || remover == NULL)
 	{
+		log_error("UFT strategy module {} is missing {}", module,
+			creator == NULL ? "createStrategyFact" : "deleteStrategyFact");
 		DLLHelper::free_library(hInst);
 		return false;
 	}
 
-	_factory._module_inst = hInst;
-	_factory._module_path = module;
-	_factory._creator = creator;
-	_factory._remover = (FuncDeleteUftStraFact)DLLHelper::get_symbol(hInst, "deleteStrategyFact");
-	_factory._fact = _factory._creator();
+	return init_uft_factory_impl(cfg, hInst, module, creator, remover);
+}
+
+bool UftMocker::init_uft_factory_impl(WTSVariant* cfg, DllHandle module,
+	const std::string& modulePath, FuncCreateUftStraFact creator, FuncDeleteUftStraFact remover)
+{
+	if (cfg == NULL || modulePath.empty() || creator == NULL || remover == NULL ||
+		_factory.is_preserved() || _factory._module_inst != NULL || _factory._fact != NULL || _strategy != NULL)
+	{
+		if (module != NULL)
+			DLLHelper::free_library(module);
+		return false;
+	}
 
 	WTSVariant* cfgStra = cfg->get("strategy");
-	if(cfgStra)
+	const char* strategyName = cfgStra == NULL ? NULL : cfgStra->getCString("name");
+	if (cfgStra == NULL || strategyName == NULL || strategyName[0] == '\0')
 	{
-		_strategy = _factory._fact->createStrategy(cfgStra->getCString("name"), "uft");
-		_strategy->init(cfgStra->get("params"));
+		if (module != NULL)
+			DLLHelper::free_library(module);
+		return false;
 	}
+
+	std::string modulePathValue;
+	try
+	{
+		modulePathValue = modulePath;
+	}
+	catch (...)
+	{
+		if (module != NULL)
+			DLLHelper::free_library(module);
+		return false;
+	}
+
+	IUftStrategyFact* fact = NULL;
+	try
+	{
+		fact = creator();
+	}
+	catch (...)
+	{
+		log_error("Creating UFT strategy factory from {} threw an exception", modulePath.c_str());
+		if (module != NULL)
+			DLLHelper::free_library(module);
+		return false;
+	}
+	if (fact == NULL)
+	{
+		log_error("Creating UFT strategy factory from {} returned null", modulePath.c_str());
+		if (module != NULL)
+			DLLHelper::free_library(module);
+		return false;
+	}
+
+	_factory._module_inst = module;
+	_factory._module_path = std::move(modulePathValue);
+	_factory._creator = creator;
+	_factory._remover = remover;
+	_factory._fact = fact;
+
+	try
+	{
+		_strategy = _factory._fact->createStrategy(strategyName, "uft");
+	}
+	catch (...)
+	{
+		log_error("Creating UFT strategy {} from {} threw an exception", strategyName, modulePath.c_str());
+		_factory.pin();
+		return false;
+	}
+	if (_strategy == NULL)
+	{
+		log_error("Creating UFT strategy {} from {} failed", strategyName, modulePath.c_str());
+		release_uft_factory();
+		return false;
+	}
+
+	bool initialized = false;
+	try
+	{
+		initialized = _strategy->init(cfgStra->get("params"));
+	}
+	catch (...)
+	{
+		log_error("Initializing UFT strategy {} from {} threw an exception", strategyName, modulePath.c_str());
+		_factory.pin();
+		_strategy = NULL;
+		return false;
+	}
+	if (!initialized)
+	{
+		log_error("Initializing UFT strategy {} from {} failed", strategyName, modulePath.c_str());
+		release_uft_factory();
+		return false;
+	}
+
 	return true;
+}
+
+void UftMocker::release_uft_factory() noexcept
+{
+	if (_strategy != NULL)
+	{
+		bool strategyDeleted = false;
+		try
+		{
+			if (_factory._fact != NULL)
+				strategyDeleted = _factory._fact->deleteStrategy(_strategy);
+		}
+		catch (...)
+		{
+			log_error("UFT strategy threw during destruction; keeping its plugin loaded");
+		}
+		_strategy = NULL;
+		if (!strategyDeleted)
+		{
+			log_error("UFT strategy could not be destroyed; keeping its plugin loaded");
+			_factory.pin();
+			return;
+		}
+	}
+
+	_factory.release();
 }
 
 void UftMocker::handle_tick(const char* stdCode, WTSTickData* curTick, uint32_t /*pxType*/)
@@ -358,12 +478,14 @@ void UftMocker::on_session_begin(uint32_t curTDate)
 		}
 	}
 
-	_strategy->on_session_begin(this, curTDate);
+	if (_strategy)
+		_strategy->on_session_begin(this, curTDate);
 }
 
 void UftMocker::on_session_end(uint32_t curTDate)
 {
-	_strategy->on_session_end(this, curTDate);
+	if (_strategy)
+		_strategy->on_session_end(this, curTDate);
 
 	uint32_t curDate = curTDate;// _replayer->get_trading_date();
 
@@ -381,7 +503,7 @@ void UftMocker::on_session_end(uint32_t curTDate)
 			_pos_logs << fmt::format("{},{},LONG,{},{:.2f},{:.2f}\n", curTDate, stdCode, pInfo._long.volume(), pInfo._long._closeprofit, pInfo._long._dynprofit);
 
 		if (!decimal::eq(pInfo._short.volume(), 0.0))
-			_pos_logs << fmt::format("{},{},LONG,{},{:.2f},{:.2f}\n", curTDate, stdCode, pInfo._short.volume(), pInfo._short._closeprofit, pInfo._short._dynprofit);
+			_pos_logs << fmt::format("{},{},SHORT,{},{:.2f},{:.2f}\n", curTDate, stdCode, pInfo._short.volume(), pInfo._short._closeprofit, pInfo._short._dynprofit);
 	}
 
 	_fund_logs << fmt::format("{},{:.2f},{:.2f},{:.2f},{:.2f}\n", curDate,
@@ -397,7 +519,7 @@ double UftMocker::stra_get_undone(const char* stdCode)
 		const OrderInfoPtr& ordInfo = it->second;
 		if (strcmp(ordInfo->_code, stdCode) == 0)
 		{
-			ret += ordInfo->_left * (ordInfo->_isLong ? 1 : -1);
+			ret += ordInfo->_left * (ordInfo->_isBuy ? 1 : -1);
 		}
 	}
 
@@ -462,7 +584,8 @@ OrderIDs UftMocker::stra_cancel_all(const char* stdCode)
 		const OrderInfoPtr& ordInfo = it->second;
 		if(strcmp(ordInfo->_code, stdCode) == 0)
 		{
-			stra_cancel(it->first);
+			if (stra_cancel(it->first))
+				ret.emplace_back(it->first);
 		}
 	}
 
@@ -615,6 +738,7 @@ uint32_t UftMocker::stra_enter_long(const char* stdCode, double price, double qt
 	ordInfo->_localid = localid;
 	strcpy(ordInfo->_code, stdCode);
 	ordInfo->_isLong = true;
+	ordInfo->_isBuy = true;
 	ordInfo->_offset = 0;
 	ordInfo->_price = price;
 	ordInfo->_total = qty;
@@ -626,8 +750,7 @@ uint32_t UftMocker::stra_enter_long(const char* stdCode, double price, double qt
 		_mtx_ords.unlock();
 	}
 
-	postTask([this, localid]() {
-		const OrderInfoPtr& ordInfo = _orders[localid];
+	postTask([this, localid, ordInfo]() {
 		log_debug("order placed: open long of {} @ {} by {}", ordInfo->_code, ordInfo->_price, ordInfo->_total);
 		on_entrust(localid, ordInfo->_code, true, "entrust success");
 	});
@@ -656,6 +779,7 @@ uint32_t UftMocker::stra_enter_short(const char* stdCode, double price, double q
 	ordInfo->_localid = localid;
 	strcpy(ordInfo->_code, stdCode);
 	ordInfo->_isLong = false;
+	ordInfo->_isBuy = false;
 	ordInfo->_offset = 0;
 	ordInfo->_price = price;
 	ordInfo->_total = qty;
@@ -667,8 +791,7 @@ uint32_t UftMocker::stra_enter_short(const char* stdCode, double price, double q
 		_mtx_ords.unlock();
 	}
 
-	postTask([this, localid]() {
-		const OrderInfoPtr& ordInfo = _orders[localid];
+	postTask([this, localid, ordInfo]() {
 		log_debug("order placed: open short of {} @ {} by {}", ordInfo->_code, ordInfo->_price, ordInfo->_total);
 		on_entrust(localid, ordInfo->_code, true, "entrust success");
 	});
@@ -678,9 +801,15 @@ uint32_t UftMocker::stra_enter_short(const char* stdCode, double price, double q
 
 uint32_t UftMocker::stra_exit_long(const char* stdCode, double price, double qty, bool isToday /* = false */, int /*flag*/ /* = 0 */)
 {
+	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
+	if (commInfo == NULL)
+	{
+		log_error("Cannot find corresponding commodity info of {}", stdCode);
+		return 0;
+	}
+
 	PosInfo& pInfo = _pos_map[stdCode];
 	PosItem& pItem = pInfo._long;
-	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
 	uint32_t offset = 1;
 	if(commInfo->getCoverMode() != CM_CoverToday)
 	{
@@ -717,6 +846,7 @@ uint32_t UftMocker::stra_exit_long(const char* stdCode, double price, double qty
 	ordInfo->_localid = localid;
 	strcpy(ordInfo->_code, stdCode);
 	ordInfo->_isLong = true;
+	ordInfo->_isBuy = false;
 	ordInfo->_offset = offset;
 	ordInfo->_price = price;
 	ordInfo->_total = qty;
@@ -728,8 +858,7 @@ uint32_t UftMocker::stra_exit_long(const char* stdCode, double price, double qty
 		_mtx_ords.unlock();
 	}
 
-	postTask([this, localid]() {
-		const OrderInfoPtr& ordInfo = _orders[localid];
+	postTask([this, localid, ordInfo]() {
 		log_debug("order placed: {} long of {} @ {} by {}", OFFSET_NAMES[ordInfo->_offset], ordInfo->_code, ordInfo->_price, ordInfo->_total);
 		on_entrust(localid, ordInfo->_code, true, "entrust success");
 	});
@@ -739,9 +868,15 @@ uint32_t UftMocker::stra_exit_long(const char* stdCode, double price, double qty
 
 uint32_t UftMocker::stra_exit_short(const char* stdCode, double price, double qty, bool isToday /* = false */, int /*flag*/ /* = 0 */)
 {
+	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
+	if (commInfo == NULL)
+	{
+		log_error("Cannot find corresponding commodity info of {}", stdCode);
+		return 0;
+	}
+
 	PosInfo& pInfo = _pos_map[stdCode];
 	PosItem& pItem = pInfo._short;
-	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
 	uint32_t offset = 1;
 	if (commInfo->getCoverMode() != CM_CoverToday)
 	{
@@ -778,6 +913,7 @@ uint32_t UftMocker::stra_exit_short(const char* stdCode, double price, double qt
 	ordInfo->_localid = localid;
 	strcpy(ordInfo->_code, stdCode);
 	ordInfo->_isLong = false;
+	ordInfo->_isBuy = true;
 	ordInfo->_offset = offset;
 	ordInfo->_price = price;
 	ordInfo->_total = qty;
@@ -789,8 +925,7 @@ uint32_t UftMocker::stra_exit_short(const char* stdCode, double price, double qt
 		_mtx_ords.unlock();
 	}
 
-	postTask([this, localid]() {
-		const OrderInfoPtr& ordInfo = _orders[localid];
+	postTask([this, localid, ordInfo]() {
 		log_debug("order placed: {} short of {} @ {} by {}", OFFSET_NAMES[ordInfo->_offset], ordInfo->_code, ordInfo->_price, ordInfo->_total);
 		on_entrust(localid, ordInfo->_code, true, "entrust success");
 	});
@@ -915,13 +1050,13 @@ bool UftMocker::procOrder(uint32_t localid)
 		return false;
 
 	double curPx = curTick->price();
-	double orderQty = ordInfo->_isLong ? curTick->askqty(0) : curTick->bidqty(0);	//看对手盘的数量
+	double orderQty = ordInfo->_isBuy ? curTick->askqty(0) : curTick->bidqty(0);	//看对手盘的数量
 	if (decimal::eq(orderQty, 0.0))
 		return false;
 
 	if (!_use_newpx)
 	{
-		curPx = ordInfo->_isLong ? curTick->askprice(0) : curTick->bidprice(0);
+		curPx = ordInfo->_isBuy ? curTick->askprice(0) : curTick->bidprice(0);
 		//if (curPx == 0.0)
 		if(decimal::eq(curPx, 0.0))
 		{
@@ -934,13 +1069,13 @@ bool UftMocker::procOrder(uint32_t localid)
 	//如果没有成交条件,则退出逻辑
 	if(!decimal::eq(ordInfo->_price, 0.0))
 	{
-		if(ordInfo->_isLong && decimal::gt(curPx, ordInfo->_price))
+		if(ordInfo->_isBuy && decimal::gt(curPx, ordInfo->_price))
 		{
 			//买单,但是当前价大于限价,不成交
 			return false;
 		}
 
-		if (!ordInfo->_isLong && decimal::lt(curPx, ordInfo->_price))
+		if (!ordInfo->_isBuy && decimal::lt(curPx, ordInfo->_price))
 		{
 			//卖单,但是当前价小于限价,不成交
 			return false;
@@ -1249,7 +1384,7 @@ void UftMocker::update_position(const char* stdCode, bool isLong, uint32_t offse
 
 		//需要清理掉已经平仓完的明细
 		if (eit != pItem._details.end())
-			pItem._details.erase(pItem._details.begin(), eit);
+			pItem._details.erase(pItem._details.begin(), eit + 1);
 
 	}
 	else if (offset == 2)
@@ -1275,8 +1410,6 @@ void UftMocker::update_position(const char* stdCode, bool isLong, uint32_t offse
 			if (sit == pItem._details.end())
 				sit = it;
 
-			eit = it;
-
 			double maxProf = dInfo._max_profit * maxQty / dInfo._volume;
 			double maxLoss = dInfo._max_loss * maxQty / dInfo._volume;
 
@@ -1284,7 +1417,10 @@ void UftMocker::update_position(const char* stdCode, bool isLong, uint32_t offse
 			left -= maxQty;
 
 			if (decimal::eq(dInfo._volume, 0))
+			{
 				count++;
+				eit = it;
+			}
 
 			double profit = (trdPx - dInfo._price) * maxQty * commInfo->getVolScale();
 			if (!isLong)
@@ -1306,8 +1442,8 @@ void UftMocker::update_position(const char* stdCode, bool isLong, uint32_t offse
 		}
 
 		//需要清理掉已经平仓完的明细
-		if (sit != pItem._details.end())
-			pItem._details.erase(sit, eit);
+		if (sit != pItem._details.end() && eit != pItem._details.end())
+			pItem._details.erase(sit, eit + 1);
 	}
 
 	log_info("[{:04d}.{:05d}] {} position of {} updated: {} {} to {}", _replayer->get_min_time(), _replayer->get_secs(), pos_dir, stdCode, OFFSET_NAMES[offset], qty, pItem.volume());

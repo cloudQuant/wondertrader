@@ -10,8 +10,11 @@
  * 包含了回放各种周期的历史K线、Tick数据等，可以快速模拟交易全过程。
  */
 #pragma once
+#include <map>
 #include <string>
 #include <set>
+#include <utility>
+#include <vector>
 #include "HisDataMgr.h"
 #include "../WtDataStorage/DataDefine.h"
 
@@ -143,10 +146,13 @@ typedef void(*FuncReadFactors)(void* obj, const char* stdCode, uint32_t* dates, 
 
 /**
  * @brief Tick数据加载回调函数类型
- * @param obj 回传用的对象指针，原样返回即可
+ * @param obj 回传用的对象指针，回调必须原样返回，不得替换或保存
  * @param firstItem 第一个Tick数据指针，连续内存中的数据结构数组
  * @param count 数据条数
- * @details 用于加载逐笔行情数据，提供更高精度的回测
+ * @details 用于加载逐笔行情数据，提供更高精度的回测。回调必须在对应 loader 调用返回前完成，
+ *          不得保留 obj、回调函数或 firstItem；firstItem 仅在本次回调期间有效。count 为 0 时 firstItem 可为 NULL。
+ *          一个日期可通过多个同步回调分块返回；适配器会合并副本并按 action_date/action_time 稳定排序。
+ *          同时间记录在串行回调时保留分块顺序；并发回调之间没有可保证的同时间先后顺序，loader 若依赖该顺序应串行发送。
  */
 typedef void(*FuncReadTicks)(void* obj, WTSTickStruct* firstItem, uint32_t count);
 
@@ -234,7 +240,10 @@ public:
 	 * @param uDate 日期，格式为YYYYMMDD
 	 * @param cb 回调函数
 	 * @return 是否成功加载数据
-	 * @details 加载指定日期的历史Tick数据，用于高精度回测或模拟交易
+	 * @details 加载指定日期的历史Tick数据，用于高精度回测或模拟交易。实现必须在本函数返回前同步完成
+	 *          所有数据回调，不得保存 obj、cb 或回调数组指针；回调数组仅在 callback 执行期间有效。
+	 *          callback 必须把 obj 原样传回；错误 obj 属于 loader 合同违例，无法安全恢复。
+	 *          false 只表示 loader 未成功，旧接口不能区分无数据与读取错误；count=0 的回调表示合法空结果。
 	 */
 	virtual bool loadRawHisTicks(void* obj, const char* stdCode, uint32_t uDate, FuncReadTicks cb) = 0;
 
@@ -256,6 +265,8 @@ class HisDataReplayer
 {
 
 private:
+	friend struct HisDataReplayerTestAccess;
+
 	/**
 	 * @brief 高频数据列表模板类
 	 * @tparam T 数据类型，如WTSTickStruct、WTSOrdQueStruct等
@@ -273,6 +284,7 @@ private:
 		 * 未初始化时，游标为UINT_MAX，一旦初始化，游标必然是大于0的
 		 */
 		std::size_t		_cursor;	///< 数据遍历游标，标记当前读取位置
+		std::size_t		_query_cursor;	///< 历史查询游标，与回放事件游标隔离
 		std::size_t		_count;	///< 数据项总数
 
 		std::vector<T> _items;	///< 数据项存储容器
@@ -281,13 +293,27 @@ private:
 		 * @brief 构造函数
 		 * @details 初始化游标为UINT_MAX，计数为0，日期为0
 		 */
-		HftDataList() : _date(0),_cursor(UINT_MAX), _count(0){}
+		HftDataList() : _date(0),_cursor(UINT_MAX), _query_cursor(UINT_MAX), _count(0){}
 	};
 
 	typedef wt_hashmap<std::string, HftDataList<WTSTickStruct>>		TickCache;
 	typedef wt_hashmap<std::string, HftDataList<WTSOrdDtlStruct>>	OrdDtlCache;
 	typedef wt_hashmap<std::string, HftDataList<WTSOrdQueStruct>>	OrdQueCache;
 	typedef wt_hashmap<std::string, HftDataList<WTSTransStruct>>	TransCache;
+
+	// Replay buckets are deliberately separate from the query caches above:
+	// WTSTick/Level2 slices borrow pointers into those query-cache vectors.
+	template <typename T>
+	using ReplayDateCache = std::map<uint32_t, HftDataList<T>>;
+	template <typename T>
+	using ReplayHftCache = std::map<std::string, ReplayDateCache<T>>;
+	struct ReplaySubscriptionSnapshot
+	{
+		std::set<std::string> ticks;
+		std::set<std::string> details;
+		std::set<std::string> queues;
+		std::set<std::string> transactions;
+	};
 
 
 	typedef struct _BarsList
@@ -302,6 +328,7 @@ private:
 		uint32_t		_cursor;
 		uint32_t		_count;
 		uint32_t		_times;
+		bool			_notify_close;	// true only for a series explicitly requested by strategy code
 
 		std::vector<WTSBarStruct>	_bars;
 		double			_factor;	//最后一条复权因子
@@ -318,7 +345,7 @@ private:
 			return sizeof(WTSBarStruct)*_bars.size();
 		}
 
-		_BarsList() :_cursor(UINT_MAX), _count(0), _times(1), _factor(1), _untouch_days(0){}
+		_BarsList() :_cursor(UINT_MAX), _count(0), _times(1), _notify_close(false), _factor(1), _untouch_days(0){}
 	} BarsList;
 
 	/*
@@ -409,7 +436,7 @@ private:
 	 * @return true 缓存成功
 	 * @return false 缓存失败
 	 */
-	bool		cacheRawTicksFromBin(const std::string& key, const char* stdCode, uint32_t uDate);
+	bool		cacheRawTicksFromBin(HftDataList<WTSTickStruct>& ticksList, const char* stdCode, uint32_t uDate);
 
 	/**
 	 * @brief 从自定义数据文件缓存历史委托明细数据
@@ -420,7 +447,7 @@ private:
 	 * @return true 缓存成功
 	 * @return false 缓存失败
 	 */
-	bool		cacheRawOrdDtlFromBin(const std::string& key, const char* stdCode, uint32_t uDate);
+	bool		cacheRawOrdDtlFromBin(HftDataList<WTSOrdDtlStruct>& dataList, const char* stdCode, uint32_t uDate);
 
 	/**
 	 * @brief 从自定义数据文件缓存历史委托队列数据
@@ -431,7 +458,7 @@ private:
 	 * @return true 缓存成功
 	 * @return false 缓存失败
 	 */
-	bool		cacheRawOrdQueFromBin(const std::string& key, const char* stdCode, uint32_t uDate);
+	bool		cacheRawOrdQueFromBin(HftDataList<WTSOrdQueStruct>& dataList, const char* stdCode, uint32_t uDate);
 
 	/**
 	 * @brief 从自定义数据文件缓存历史成交明细数据
@@ -442,7 +469,7 @@ private:
 	 * @return true 缓存成功
 	 * @return false 缓存失败
 	 */
-	bool		cacheRawTransFromBin(const std::string& key, const char* stdCode, uint32_t uDate);
+	bool		cacheRawTransFromBin(HftDataList<WTSTransStruct>& dataList, const char* stdCode, uint32_t uDate);
 
 	/**
 	 * @brief 从CSV文件缓存历史Tick数据
@@ -453,7 +480,7 @@ private:
 	 * @return true 缓存成功
 	 * @return false 缓存失败
 	 */
-	bool		cacheRawTicksFromCSV(const std::string& key, const char* stdCode, uint32_t uDate);
+	bool		cacheRawTicksFromCSV(HftDataList<WTSTickStruct>& ticksList, const char* stdCode, uint32_t uDate);
 
 	/**
 	 * @brief 从外部数据加载器缓存历史K线数据
@@ -476,7 +503,7 @@ private:
 	 * @return true 缓存成功
 	 * @return false 缓存失败
 	 */
-	bool		cacheRawTicksFromLoader(const std::string& key, const char* stdCode, uint32_t uDate);
+	bool		cacheRawTicksFromLoader(HftDataList<WTSTickStruct>& dataList, const char* stdCode, uint32_t uDate);
 
 	/**
 	 * @brief 缓存整合的期货合约历史K线数据（针对.HOT和.2ND等主力合约）
@@ -513,6 +540,7 @@ private:
 	 * @param tickSimulated 是否为tick模拟的分钟线，默认为true
 	 */
 	void		onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTDate = 0, bool tickSimulated = true);
+	void		freeze_sim_tick_batch(uint32_t uDate, uint32_t uTime);
 
 	/**
 	 * @brief 从配置文件加载手续费设置
@@ -526,8 +554,8 @@ private:
 	 * 
 	 * @param stime 开始时间，格式为时间戳
 	 * @param etime 结束时间，格式为时间戳
-	 * @return true 回放成功
-	 * @return false 回放失败
+	 * @return true 当前区间内至少派发了一条通过校验的真实 Tick
+	 * @return false 当前区间内没有派发真实 Tick（Level2 回调不计入）
 	 */
 	bool		replayHftDatas(uint64_t stime, uint64_t etime);
 
@@ -537,7 +565,15 @@ private:
 	 * @param curTDate 当前交易日，格式为YYYYMMDD
 	 * @return uint64_t 返回当日最后一条数据的时间戳
 	 */
-	uint64_t	replayHftDatasByDay(uint32_t curTDate);
+	bool		replayHftDatasByDay(uint32_t curTDate, uint64_t stime, uint64_t etime);
+	bool		replayHftDatasNatural(uint64_t stime, uint64_t etime);
+	bool		replayHftInterval(uint64_t stime, uint64_t etime, bool& dispatchedRealTick,
+			const ReplaySubscriptionSnapshot& subscriptions);
+	bool		loadReplayHftDate(uint32_t tDate, const std::string& stdCode, bool ticks,
+			bool details, bool queues, bool transactions);
+	uint64_t	natural_time_from_boundary(uint64_t boundary) const;
+	uint64_t	next_hft_session_boundary(uint32_t /*tradingDate*/, uint64_t afterTime);
+	void		pruneReplayHftData(uint64_t beforeTime);
 
 	/**
 	 * @brief 使用未订阅的K线模拟Tick数据
@@ -623,13 +659,15 @@ private:
 	bool		loadStkAdjFactorsFromLoader();
 
 	/**
-	 * @brief 检查指定交易日所有合约的Tick数据是否存在
+	 * @brief 检查指定交易日的已订阅高频数据是否存在
 	 * 
 	 * @param uDate 交易日，格式为YYYYMMDD
-	 * @return true 存在所有合约的数据
-	 * @return false 存在数据缺失
+	 * @return true 至少一个已订阅高频数据流有记录
+	 * @return false 所有已订阅数据流均为空
 	 */
-	bool		checkAllTicks(uint32_t uDate);
+	bool		checkAllHftData(uint32_t uDate);
+	bool		resolve_hft_session_begin_clock(uint32_t tradingDate, uint32_t firstTradingDate,
+			uint64_t& naturalTime, bool& hasReplayableEvents);
 
 	/**
 	 * @brief 获取下一个Tick数据的时间
@@ -729,6 +767,9 @@ private:
 	 * @param bNeedDump 是否将回测进度落地到文件中，默认为false
 	 */
 	void	run_by_ticks(bool bNeedDump = false);
+	bool	get_hft_trading_date_range(uint32_t& beginTDate, uint32_t& endTDate);
+	template<typename T>
+	void	clamp_hft_cursor(HftDataList<T>& itemList);
 
 	/**
 	 * @brief 检查数据缓存中的交易日
@@ -775,15 +816,11 @@ public:
 
 	/**
 	 * @brief 设置回测时间范围
-	 * @param stime 开始时间，格式为YYYYMMDDHHMMSS
-	 * @param etime 结束时间，格式为YYYYMMDDHHMMSS
+	 * @param stime 开始时间，格式为YYYYMMDDHHMM或YYYYMMDDHHMMSS
+	 * @param etime 结束时间，格式为YYYYMMDDHHMM或YYYYMMDDHHMMSS
 	 * @details 设置回测的起止时间范围，限定回测的数据区间
 	 */
-	inline void set_time_range(uint64_t stime, uint64_t etime)
-	{
-		_begin_time = stime;
-		_end_time = etime;
-	}
+	void set_time_range(uint64_t stime, uint64_t etime);
 
 	/**
 	 * @brief 启用或禁用Tick回测
@@ -1039,6 +1076,9 @@ public:
 	inline IHotMgr*	get_hot_mgr() { return &_hot_mgr; }
 
 private:
+	bool apply_time_range(const char* stime, const char* etime, const char* source);
+	uint64_t get_daily_bar_close_time(const BarsListPtr& barsList, const WTSBarStruct& bar);
+
 	IDataSink*		_listener;		///< 数据接收器指针，用于接收回放数据
 	IBtDataLoader*	_bt_loader;		///< 回测数据加载器指针，用于加载历史数据
 	std::string		_stra_name;		///< 策略名称
@@ -1047,6 +1087,10 @@ private:
 	OrdDtlCache		_orddtl_cache;	///< 委托明细缓存，存储高级别委托数据
 	OrdQueCache		_ordque_cache;	///< 委托队列缓存，存储市场深度数据
 	TransCache		_trans_cache;	///< 成交数据缓存，存储逐笔成交数据
+	ReplayHftCache<WTSTickStruct>	_replay_ticks_cache;	///< 独立回放Tick桶，不影响历史查询切片
+	ReplayHftCache<WTSOrdDtlStruct>	_replay_orddtl_cache;	///< 独立回放委托明细桶
+	ReplayHftCache<WTSOrdQueStruct>	_replay_ordque_cache;	///< 独立回放委托队列桶
+	ReplayHftCache<WTSTransStruct>	_replay_trans_cache;	///< 独立回放成交桶
 
 	BarsCache		_bars_cache;		///< K线缓存，存储已订阅的合约K线数据
 	BarsCache		_unbars_cache;	///< 未订阅的K线缓存，存储未订阅但需要的合约K线数据
@@ -1059,7 +1103,15 @@ private:
 	std::string		_min_period;	///< 最小K线周期，用于未订阅品种的信号处理
 	std::string		_main_period;	///< 主图周期
 	bool			_tick_enabled;	///< 是否启用Tick级别回测
-	bool			_tick_simulated;	///< 是否需要模拟生成Tick数据
+	bool			_tick_simulated;	///< 当前 Tick 回调是否为模拟行情
+	std::set<std::string> _bar_real_tick_codes;	///< 当前主K区间已派发真实Tick的合约；这些合约跳过该区间OHLC模拟
+	uint64_t		_last_replay_hft_time { 0 };
+	bool			_has_last_replay_hft_time { false };
+	// Replay scheduling is monotonic in natural time. Keep completed half-open
+	// chunks for only the latest natural date; an older request must reset first.
+	uint32_t		_replay_completed_natural_date { 0 };
+	std::vector<std::pair<uint64_t, uint64_t>> _replay_completed_natural_ranges;
+	bool			_has_replay_completed_natural_date { false };
 	bool			_align_by_section;	///< 重采样分钟线是否按交易时段对齐
 	
 	/**
@@ -1071,6 +1123,10 @@ private:
 	bool			_nosim_if_notrade;	///< 如果K线没有成交量，则不模拟Tick
 	std::map<std::string, WTSTickStruct>	_day_cache;	///< 每日Tick缓存，当分钟K线回放时使用
 	std::map<std::string, std::string>		_ticker_keys;	///< 合约代码到缓存键的映射
+	bool			_sim_tick_batch_active { false };	///< 当前四阶段模拟Tick批次是否已冻结订阅
+	uint64_t		_sim_tick_batch_time { 0 };	///< 当前模拟Tick批次的自然时间
+	std::set<std::string>	_sim_tick_batch_close_keys;	///< 批次开始时显式订阅、可接收闭盘的序列
+	std::map<std::string, std::string>	_sim_tick_batch_ticker_keys;	///< 批次开始时每个合约选中的模拟Tick序列
 
 	/**
 	 * @brief 未订阅但需要的合约集合
@@ -1101,6 +1157,17 @@ private:
 	std::string		_mode;			///< 回测模式
 	uint64_t		_begin_time;	///< 回测开始时间，格式为YYYYMMDDHHMMSS
 	uint64_t		_end_time;		///< 回测结束时间，格式为YYYYMMDDHHMMSS
+	uint64_t		_bar_begin_time;	///< K线/任务分钟边界，格式为YYYYMMDDHHMM
+	uint64_t		_bar_end_time;	///< K线/任务分钟边界，格式为YYYYMMDDHHMM
+	uint64_t		_tick_begin_time;	///< Tick自然时间下界，编码为action_date * 1e9 + action_time
+	uint64_t		_tick_end_exclusive_time;	///< Tick自然时间右开上界，同上
+	uint32_t		_range_begin_date;	///< 输入范围开始日期，格式为YYYYMMDD
+	uint32_t		_range_begin_hhmm;	///< 输入范围开始时分，格式为HHMM
+	uint32_t		_range_end_date;	///< 输入范围结束日期，格式为YYYYMMDD
+	uint32_t		_range_end_hhmm;	///< 输入范围结束时分，格式为HHMM
+	bool			_time_range_valid;	///< 输入回放区间已通过精度和日历校验
+	bool			_time_range_explicit;	///< 时间范围由 set_time_range 显式提供
+	bool			_has_bar_minutes;	///< 归一化区间至少覆盖一个整分钟
 
 	uint32_t		_cache_clear_days;	///< 缓存自动清理天数，控制历史数据缓存时长
 

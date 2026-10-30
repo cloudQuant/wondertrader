@@ -145,7 +145,8 @@ TEST_F(R191MockerFixture, R191UftMocker_CoverTodayLongPreavailExitCancel)
 	// 平昨 40（offset=1）-> 撤单把 left 加回 preavail
 	uint32_t lid = m->stra_exit_long(kStk, 20.0, 40.0, false, 0);
 	ASSERT_NE(0u, lid);
-	EXPECT_DOUBLE_EQ(40.0, m->stra_get_undone(kStk));
+	// 平多为卖出，公开接口规定卖出未完成量为负数。
+	EXPECT_DOUBLE_EQ(-40.0, m->stra_get_undone(kStk));
 	pump(*m);
 	EXPECT_TRUE(m->stra_cancel(lid));
 	pump(*m);

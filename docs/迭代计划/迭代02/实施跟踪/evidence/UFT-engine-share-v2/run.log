@@ -1,0 +1,40 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 11 tests from 4 test suites.
+[----------] Global test environment set-up.
+[----------] 2 tests from UftEngineSessionGate
+[ RUN      ] UftEngineSessionGate.unknownSessionSkipsStrategyInitialization
+[       OK ] UftEngineSessionGate.unknownSessionSkipsStrategyInitialization (0 ms)
+[ RUN      ] UftEngineSessionGate.knownSessionPreservesStrategyInitialization
+[       OK ] UftEngineSessionGate.knownSessionPreservesStrategyInitialization (0 ms)
+[----------] 2 tests from UftEngineSessionGate (0 ms total)
+
+[----------] 3 tests from UftTickerLifecycle
+[ RUN      ] UftTickerLifecycle.repeatedStopCallsJoinWorkerOnce
+[       OK ] UftTickerLifecycle.repeatedStopCallsJoinWorkerOnce (0 ms)
+[ RUN      ] UftTickerLifecycle.notificationBeforeWaitIsNotLost
+[       OK ] UftTickerLifecycle.notificationBeforeWaitIsNotLost (0 ms)
+[ RUN      ] UftTickerLifecycle.callbackRequestsStopAndControllerJoinsWorker
+[       OK ] UftTickerLifecycle.callbackRequestsStopAndControllerJoinsWorker (15 ms)
+[----------] 3 tests from UftTickerLifecycle (15 ms total)
+
+[----------] 5 tests from UftEngineLifecycle
+[ RUN      ] UftEngineLifecycle.stopDrainsGatedInitializationAndCallbackWaitDoesNotSelfWait
+[       OK ] UftEngineLifecycle.stopDrainsGatedInitializationAndCallbackWaitDoesNotSelfWait (110 ms)
+[ RUN      ] UftEngineLifecycle.concurrentRunCallsInitializeStrategiesOnce
+[       OK ] UftEngineLifecycle.concurrentRunCallsInitializeStrategiesOnce (0 ms)
+[ RUN      ] UftEngineLifecycle.startupAndSessionCallbacksCanReenterEngineAndStopWakesWorker
+[       OK ] UftEngineLifecycle.startupAndSessionCallbacksCanReenterEngineAndStopWakesWorker (0 ms)
+[ RUN      ] UftEngineLifecycle.stopBeforeRunSkipsStrategyInitialization
+[       OK ] UftEngineLifecycle.stopBeforeRunSkipsStrategyInitialization (0 ms)
+[ RUN      ] UftEngineLifecycle.waitClosesQuoteAdmissionBeforeCheckingForZero
+[       OK ] UftEngineLifecycle.waitClosesQuoteAdmissionBeforeCheckingForZero (0 ms)
+[----------] 5 tests from UftEngineLifecycle (110 ms total)
+
+[----------] 1 test from R220ShareManagerLifecycle
+[ RUN      ] R220ShareManagerLifecycle.watcherEngineBorrowEndsOnlyAfterControlThreadJoin
+[       OK ] R220ShareManagerLifecycle.watcherEngineBorrowEndsOnlyAfterControlThreadJoin (15 ms)
+[----------] 1 test from R220ShareManagerLifecycle (15 ms total)
+
+[----------] Global test environment tear-down
+[==========] 11 tests from 4 test suites ran. (142 ms total)
+[  PASSED  ] 11 tests.

@@ -286,18 +286,16 @@ int TraderMocker::orderInsert(WTSEntrust* entrust)
 			ordInfo->setPriceType(entrust->getPriceType());
 			ordInfo->setOrderFlag(entrust->getOrderFlag());
 
-			if (_listener != NULL)
+			ITraderSpi* listener = get_listener();
+			if (listener != NULL)
 			{
-				_listener->onRspEntrust(entrust, NULL);
-				_listener->onPushOrder(ordInfo);
+				listener->onRspEntrust(entrust, NULL);
+				listener->onPushOrder(ordInfo);
 			}
 
 			_codes.insert(ct->getFullCode());
 
-			if(_listener)
-			{
-				write_log(_listener,LL_INFO, "共有{}个品种有待撮合订单", _codes.size());
-			}
+			write_log(listener, LL_INFO, "共有{}个品种有待撮合订单", _codes.size());
 
 			if (_orders == NULL)
 				_orders = WTSArray::create();
@@ -313,9 +311,10 @@ int TraderMocker::orderInsert(WTSEntrust* entrust)
 		else
 		{
 			WTSError* err = WTSError::create(WEC_ORDERINSERT, msg.c_str());
-			if (_listener != NULL)
+			ITraderSpi* listener = get_listener();
+			if (listener != NULL)
 			{
-				_listener->onRspEntrust(entrust, err);
+				listener->onRspEntrust(entrust, err);
 			}
 			err->release();
 		}
@@ -327,13 +326,13 @@ int TraderMocker::orderInsert(WTSEntrust* entrust)
 
 int32_t TraderMocker::match_once()
 {
-	if (_terminated || _orders == NULL || _orders->size() == 0 || _ticks == NULL)
+	if (_terminated.load(std::memory_order_acquire) || _orders == NULL || _orders->size() == 0 || _ticks == NULL)
 		return 0;
 	
 	int32_t count = 0;
 	for (const std::string& fullcode : _codes)
 	{
-		if (_terminated)
+		if (_terminated.load(std::memory_order_acquire))
 			return count;
 
 		std::string code, exchg;
@@ -361,7 +360,11 @@ int32_t TraderMocker::match_once()
 				for (auto it = _awaits->begin(); it != _awaits->end(); it++)
 				{
 					WTSOrderInfo* ordInfo = (WTSOrderInfo*)it->second;
-					if (ordInfo->getVolLeft() == 0 || strcmp(ct->getCode(), curTick->code()) != 0)
+					if (ordInfo->getVolLeft() == 0 ||
+						strcmp(ordInfo->getCode(), ct->getCode()) != 0 ||
+						strcmp(ordInfo->getExchg(), ct->getExchg()) != 0 ||
+						strcmp(ct->getCode(), curTick->code()) != 0 ||
+						strcmp(ct->getExchg(), curTick->exchg()) != 0)
 						continue;
 
 					bool isBuy = (ordInfo->getDirection() == WDT_LONG && ordInfo->getOffsetType() == WOT_OPEN) || (ordInfo->getDirection() != WDT_LONG && ordInfo->getOffsetType() != WOT_OPEN);
@@ -420,7 +423,7 @@ int32_t TraderMocker::match_once()
 
 						//更新订单数据
 						ordInfo->setVolLeft(ordInfo->getVolLeft() - curVol);
-						ordInfo->setVolTraded(ordInfo->getVolTraded() - curVol);
+						ordInfo->setVolTraded(ordInfo->getVolTraded() + curVol);
 						if (decimal::eq(ordInfo->getVolLeft(), 0))
 						{
 							ordInfo->setOrderState(WOS_AllTraded);
@@ -474,11 +477,12 @@ int32_t TraderMocker::match_once()
 						}
 						
 
-						if (_listener)
+		ITraderSpi* listener = get_listener();
+		if (listener)
 						{
 							StdUniqueLock lock(_mutex_api);
-							_listener->onPushOrder(ordInfo);
-							_listener->onPushTrade(trade);
+			listener->onPushOrder(ordInfo);
+			listener->onPushTrade(trade);
 						}
 
 						if (_trades == NULL)
@@ -585,8 +589,7 @@ void TraderMocker::load_positions()
 		}
 	}
 
-	if (_listener)
-		write_log(_listener, LL_INFO, "[TraderMocker]共加载{}条持仓数据", _positions.size());
+	write_log(get_listener(), LL_INFO, "[TraderMocker]共加载{}条持仓数据", _positions.size());
 }
 
 void TraderMocker::save_positions()
@@ -639,28 +642,30 @@ void TraderMocker::save_positions()
 
 void TraderMocker::release()
 {
-	if (_terminated)
-		return;
+	_terminated.store(true, std::memory_order_release);
 
-	_terminated = true;
-
-	if (_thrd_match)
+	if (_thrd_match && _thrd_match->joinable())
 	{
 		_thrd_match->join();
 	}
+	_thrd_match.reset();
 
 	if (_thrd_worker)
 	{
 		_io_service.stop();
-		_thrd_worker->join();
+		if (_thrd_worker->joinable())
+			_thrd_worker->join();
 	}
+	_thrd_worker.reset();
 }
 
 void TraderMocker::registerSpi(ITraderSpi *listener)
 {
 	_listener = listener;
-
-	_bd_mgr = listener->getBaseDataMgr();
+	// Keep the base-data manager until release() has stopped the worker threads.
+	// In-flight mocker tasks still use it after the SPI is detached.
+	if (listener)
+		_bd_mgr = listener->getBaseDataMgr();
 }
 
 void TraderMocker::reconn_udp()
@@ -697,22 +702,23 @@ void TraderMocker::connect()
 
 		load_positions();
 
-		if (_listener)
-			_listener->handleEvent(WTE_Connect, 0);
+		if (ITraderSpi* listener = get_listener())
+			listener->handleEvent(WTE_Connect, 0);
 	});
 }
 
 void TraderMocker::disconnect()
 {
-	if (_terminated)
+	if (_terminated.load(std::memory_order_acquire))
 		return;
 
-	_terminated = true;
+	_terminated.store(true, std::memory_order_release);
 
-	if (_thrd_match)
+	if (_thrd_match && _thrd_match->joinable())
 	{
 		_thrd_match->join();
 	}
+	_thrd_match.reset();
 }
 
 bool TraderMocker::isConnected()
@@ -723,7 +729,7 @@ bool TraderMocker::isConnected()
 int TraderMocker::login(const char* /*user*/, const char* /*pass*/, const char* /*productInfo*/)
 {
 	_thrd_match.reset(new StdThread([this]() {
-		while (!_terminated)
+		while (!_terminated.load(std::memory_order_acquire))
 		{
 			match_once();
 
@@ -735,8 +741,8 @@ int TraderMocker::login(const char* /*user*/, const char* /*pass*/, const char* 
 	boost::asio::post(_io_service, [this](){
 		StdUniqueLock lock(_mutex_api);
 
-		if (_listener)
-			_listener->onLoginResult(true, "", TimeUtils::getCurDate());
+		if (ITraderSpi* listener = get_listener())
+			listener->onLoginResult(true, "", TimeUtils::getCurDate());
 	});
 
 	return 0;
@@ -753,7 +759,7 @@ int TraderMocker::orderAction(WTSEntrustAction* action)
 	
 	boost::asio::post(_io_service, [this, action](){
 		StdUniqueLock lck(_mtx_awaits);	//一定要把awaits锁起来,不然可能会导致一边撮合一边撤单
-		WTSOrderInfo* ordInfo = (WTSOrderInfo*)_awaits->grab(action->getOrderID());
+		WTSOrderInfo* ordInfo = _awaits == NULL ? NULL : (WTSOrderInfo*)_awaits->grab(action->getOrderID());
 
 		/*
 		 *	撤单也要考虑几个问题
@@ -763,11 +769,13 @@ int TraderMocker::orderAction(WTSEntrustAction* action)
 		 */
 		if(ordInfo == NULL)
 		{
-			write_log(_listener,LL_ERROR, "订单{}不存在或者已完成", action->getOrderID());
+			ITraderSpi* listener = get_listener();
+			write_log(listener, LL_ERROR, "订单{}不存在或者已完成", action->getOrderID());
 			WTSError* err = WTSError::create(WEC_ORDERCANCEL, "订单不存在或者处于不可撤销状态");
-			if (_listener)
-				_listener->onTraderError(err);
+			if (listener)
+				listener->onTraderError(err);
 			err->release();
+			action->release();
 			return;
 		}
 
@@ -810,10 +818,10 @@ int TraderMocker::orderAction(WTSEntrustAction* action)
 		ordInfo->setOrderState(WOS_Canceled);
 		//ordInfo->setVolLeft(0);	
 
-		if (_listener)
+		if (ITraderSpi* listener = get_listener())
 		{
 			StdUniqueLock lock(_mutex_api);
-			_listener->onPushOrder(ordInfo);
+			listener->onPushOrder(ordInfo);
 		}
 
 		ordInfo->release();
@@ -847,10 +855,10 @@ int TraderMocker::queryAccount()
 
 		ay->append(accountInfo, false);
 
-		if (_listener)
+		if (ITraderSpi* listener = get_listener())
 		{
 			StdUniqueLock lock(_mutex_api);
-			_listener->onRspAccount(ay);
+			listener->onRspAccount(ay);
 		}
 
 		ay->release();
@@ -897,10 +905,10 @@ int TraderMocker::queryPositions()
 			}
 		}
 
-		if (_listener)
+		if (ITraderSpi* listener = get_listener())
 		{
 			StdUniqueLock lock(_mutex_api);
-			_listener->onRspPosition(ayPos);
+			listener->onRspPosition(ayPos);
 		}
 		ayPos->release();
 	});
@@ -913,8 +921,8 @@ int TraderMocker::queryOrders()
 	boost::asio::post(_io_service, [this](){
 		StdUniqueLock lock(_mutex_api);
 
-		if (_listener)
-			_listener->onRspOrders(_orders);
+		if (ITraderSpi* listener = get_listener())
+			listener->onRspOrders(_orders);
 	});
 
 	return 0;
@@ -925,8 +933,8 @@ int TraderMocker::queryTrades()
 	boost::asio::post(_io_service, [this](){
 		StdUniqueLock lock(_mutex_api);
 
-		if (_listener)
-			_listener->onRspTrades(_trades);
+		if (ITraderSpi* listener = get_listener())
+			listener->onRspTrades(_trades);
 	});
 
 	return 0;
@@ -936,10 +944,9 @@ void TraderMocker::handle_read(const boost::system::error_code& e, std::size_t b
 {
 	if (e)
 	{
-		if (_listener)
-			write_log(_listener,LL_ERROR, "[TraderMocker]UDP行情接收出错:{}({})", e.message().c_str(), e.value());
+	write_log(get_listener(), LL_ERROR, "[TraderMocker]UDP行情接收出错:{}({})", e.message().c_str(), e.value());
 
-		if (!_terminated)
+		if (!_terminated.load(std::memory_order_acquire))
 		{
 			std::this_thread::sleep_for(std::chrono::seconds(2));
 			reconn_udp();
@@ -947,12 +954,15 @@ void TraderMocker::handle_read(const boost::system::error_code& e, std::size_t b
 		}
 	}
 
-	if (_terminated || bytes_transferred <= 0)
+	if (_terminated.load(std::memory_order_acquire))
 		return;
 
-	extract_buffer(bytes_transferred, isBroad);
+	// Empty UDP datagrams are valid transport events, but contain no packet to parse.
+	// Keep the receive chain alive so the next market-data packet is still delivered.
+	if (bytes_transferred > 0)
+		extract_buffer(bytes_transferred, isBroad);
 
-	if (isBroad && _b_socket)
+	if (isBroad && _b_socket && !_terminated.load(std::memory_order_acquire))
 	{
 		_b_socket->async_receive_from(boost::asio::buffer(_b_buffer.data(), _b_buffer.size()), _broad_ep,
 			boost::bind(&TraderMocker::handle_read, this,
@@ -982,20 +992,30 @@ struct UDPDataPacket : UDPPacketHead
 };
 #pragma pack(pop)
 typedef UDPDataPacket<WTSTickStruct>	UDPTickPacket;
-void TraderMocker::extract_buffer(uint32_t /*length*/, bool /*isBroad*/ /* = true */)
+void TraderMocker::extract_buffer(uint32_t length, bool /*isBroad*/ /* = true */)
 {
-	UDPPacketHead* header = (UDPTickPacket*)_b_buffer.data();
+	if (length < sizeof(UDPPacketHead))
+		return;
 
-	if (header->_type == UDP_MSG_PUSHTICK)
+	UDPPacketHead header;
+	memcpy(&header, _b_buffer.data(), sizeof(header));
+
+	if (header._type == UDP_MSG_PUSHTICK)
 	{
-		UDPTickPacket* packet = (UDPTickPacket*)header;
+		// A short UDP datagram leaves the rest of _b_buffer untouched from the
+		// preceding datagram. Never interpret that stale tail as part of a tick.
+		if (length < sizeof(UDPTickPacket))
+			return;
+
+		UDPTickPacket packet;
+		memcpy(&packet, _b_buffer.data(), sizeof(packet));
 		thread_local static char fullcode[64] = { 0 };
-		fmtutil::format_to(fullcode, "{}.{}", packet->_data.exchg, packet->_data.code);
+		fmtutil::format_to(fullcode, "{}.{}", packet._data.exchg, packet._data.code);
 		auto it = _codes.find(fullcode);
 		if (it == _codes.end())
 			return;
 
-		WTSTickData* curTick = WTSTickData::create(packet->_data);
+		WTSTickData* curTick = WTSTickData::create(packet._data);
 		
 		if (_ticks == NULL)
 			_ticks = TickCache::create();

@@ -1,0 +1,68 @@
+{
+  "bug_ids": [
+    "BUG-R55-001",
+    "BUG-R55-003",
+    "BUG-L01-005"
+  ],
+  "suite": "r12_charconv_safe_test + l01_converter_charconv_test + r55_codehelper_charconv_test",
+  "platform": "macOS arm64",
+  "date": "2026-10-30",
+  "base_commit": "e453f048853c050a2811d876d87554795c26586b",
+  "worktree_sources_modified": true,
+  "binary": "build-cov/build_x64/Debug/bin/TestUnits/wt-charconv-focused",
+  "binary_sha256": "08f81b7197232358ed57c802114ed9c4544a518b6d1f459f97a6850fa037c5e5",
+  "build_log": "build-v1.log",
+  "build_log_sha256": "61e935a77e917e6d0fb7177731432a7fc9714b447248f4cb60c05e3426e57fad",
+  "run_log": "run-v1.log",
+  "run_log_sha256": "546da4f20cab9347f98f6aeea017d09a6dac1d4d310ade3453791f6147adfc51",
+  "source_sha256": {
+    "src/Share/charconv.hpp": "d6fc6614ea7ecb1917405b5945301bd92c8a80dd65a31c2c72641fd72d2144d7",
+    "src/TestUnits/coverage/r12_headers/r12_charconv_safe_test.cpp": "4e807bb0ae4bc47ca0e976d81aaa3b84392c95f14d819937452c51cc9fc0c89a",
+    "src/TestUnits/coverage/l01_share_wtsutils/l01_converter_charconv_test.cpp": "e3d112dad8c85de271e7bbe31af249fc7f37d5f1a6f2adbb4867b12a39d4a7e5",
+    "src/TestUnits/coverage/r16_share_tools/r55_codehelper_charconv_test.cpp": "91ffb866056675a24bea084900b3c0af080aae67d452e14ef0f73982b3f893d7"
+  },
+  "build_command": "/opt/homebrew/bin/ninja -C build-cov -j 2 TestUnits/coverage/CMakeFiles/CoverageTests.dir/r12_headers/r12_charconv_safe_test.cpp.o TestUnits/coverage/CMakeFiles/CoverageTests.dir/l01_share_wtsutils/l01_converter_charconv_test.cpp.o TestUnits/coverage/CMakeFiles/CoverageTests.dir/r16_share_tools/r55_codehelper_charconv_test.cpp.o",
+  "build_exit_code": 0,
+  "build_scope": "Recompiled only the three charconv test translation units.",
+  "link_command_from_build_cov": "/usr/bin/c++ -arch arm64 -fprofile-instr-generate -g -Wl,-undefined,dynamic_lookup TestUnits/coverage/CMakeFiles/CoverageTests.dir/r12_headers/r12_charconv_safe_test.cpp.o TestUnits/coverage/CMakeFiles/CoverageTests.dir/l01_share_wtsutils/l01_converter_charconv_test.cpp.o TestUnits/coverage/CMakeFiles/CoverageTests.dir/r16_share_tools/r55_codehelper_charconv_test.cpp.o /opt/homebrew/lib/libgtest_main.a /opt/homebrew/lib/libgtest.a build_x64/Debug/libs/libWTSTools.a build_x64/Debug/libs/libWTSUtils.a -L/opt/homebrew/lib -L/usr/local/lib -lboost_filesystem -lboost_thread -liconv -lpthread -o build_x64/Debug/bin/TestUnits/wt-charconv-focused",
+  "link_scope": "Focused link using existing static libraries and system GoogleTest/Boost libraries. -Wl,-undefined,dynamic_lookup allows dynamic unresolved symbols; this is not a clean rebuild or aggregate CoverageTests link.",
+  "run_command": "build-cov/build_x64/Debug/bin/TestUnits/wt-charconv-focused --gtest_color=no --gtest_filter=R55_charconv.*:r12_charconv_encoding_helper.*:l01_charconv.*",
+  "filter": "R55_charconv.*:r12_charconv_encoding_helper.*:l01_charconv.*",
+  "exit_code": 0,
+  "tests": 22,
+  "passed": 22,
+  "failures": 0,
+  "disabled": 0,
+  "test_suites": [
+    {
+      "name": "r12_charconv_encoding_helper",
+      "tests": 5,
+      "passed": 5
+    },
+    {
+      "name": "l01_charconv",
+      "tests": 10,
+      "passed": 10
+    },
+    {
+      "name": "R55_charconv",
+      "tests": 7,
+      "passed": 7
+    }
+  ],
+  "review": "主审及独立复审已完成，当前范围未发现逻辑 blocker。",
+  "fix_attribution": {
+    "BUG-R55-001": "Confirmed product issue; current source initializes needFree to false. This batch exercises null, empty, ASCII and conversion paths.",
+    "BUG-R55-003": "Confirmed product issue; current isUtf8 implementation already checks logical remaining length and valid UTF-8 scalar boundaries. This batch adds/executes coverage and does not claim a new product-code fix.",
+    "BUG-L01-005": "Confirmed product issue; current isGBK checks the logical pair boundary and advances on malformed bytes."
+  },
+  "isGBK_semantics": "Returns true when the input contains a valid GBK byte pair; it does not require every byte in the input to be valid GBK.",
+  "sanitizers": "No ASan or MSan PASS evidence; sanitizers were not run in this batch.",
+  "remaining": [
+    "Windows and other non-macOS platforms were not built or run.",
+    "No clean rebuild, aggregate CoverageTests run, or complete production/engine consumer linkage was performed.",
+    "ASan/MSan remain unverified; exact-buffer truncation cases passed only in the unsanitized focused run.",
+    "Repeated public init() on an already converted UTF8toChar/ChartoUTF8 object may retain/leak the earlier allocation and needs separate review.",
+    "Strict whole-string GBK validation is not the current isGBK contract."
+  ]
+}

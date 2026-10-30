@@ -2,7 +2,7 @@
  * n02_filter_mgr_test.cpp  (lane N02 / WtCore 后半)
  *
  * 覆盖目标: src/WtCore/WtFilterMgr.cpp
- *   load_filters            : 空文件名早退 / 文件不存在 / 首次加载 / 时间戳未变化跳过 / 时间戳前进后重载
+ *   load_filters            : 空文件名早退 / 文件不存在 / 首次加载 / 时间戳未变化跳过 / 时间戳前进后重载 / 解析失败后重试
  *   strategy_filters        : ignore / redirect / 未识别 action 跳过
  *   code_filters            : 精确合约代码命中 / 品种(交易所.品种)代码命中 / redirect 改写 / 未识别 action
  *   executer_filters        : true 屏蔽 / false 放行 / 未配置放行
@@ -11,9 +11,8 @@
  * 跳过:
  *   - _notifier != NULL 的通知分支（EventNotifier 需要 ZMQ 端点，属外部依赖）。
  *
- * 注意: load_filters 对 WTSCfgLoader::load_from_file 的返回值没有判空,
- *       空文件或语法错误会得到 NULL 并立刻 cfg->get(...) -> 空指针解引用。
- *       strategy_filters:null 会被 JSON 转换器忽略，不属于上述畸形输入，单独由启用用例覆盖。
+ * 注意: strategy_filters:null 会被 JSON 转换器忽略，根对象仍有效；坏文件解析失败时
+ *       应保留已生效规则和成功加载时间戳，以便修正文件后重新尝试加载。
  */
 #include <gtest/gtest.h>
 
@@ -28,6 +27,7 @@
 #include <memory>
 #include <string>
 #include <system_error>
+#include <vector>
 
 USING_NS_WTP;
 namespace {
@@ -68,6 +68,16 @@ public:
     {
         const fs::path p = _path / rel;
         fs::last_write_time(p, fs::last_write_time(p) + std::chrono::seconds(seconds));
+    }
+
+    fs::file_time_type lastWriteTime(const std::string& rel) const
+    {
+        return fs::last_write_time(_path / rel);
+    }
+
+    void setLastWriteTime(const std::string& rel, fs::file_time_type value) const
+    {
+        fs::last_write_time(_path / rel, value);
     }
 
 private:
@@ -301,28 +311,240 @@ TEST_F(N02FilterMgrTest, ReloadPicksUpNewContentAfterFileTimeAdvances)
 }
 
 //////////////////////////////////////////////////////////////////
-// 缺陷类: 非法配置文件 -> load_from_file 返回 NULL 后未判空
-// 见 bugs/n02_wtcore_engines.md  BUG-N02-001
-// 该类全部输入集中在本用例内, 不放进任何启用用例。
+// 坏配置重载失败安全 (BUG-N02-001)
 //////////////////////////////////////////////////////////////////
 
-TEST(N02FilterMgrDisabled, DISABLED_MalformedConfigFilesCrashLoadFilters)
+TEST_F(N02FilterMgrTest, FailedReloadPreservesRulesAndAllowsRetryAtSameTimestamp)
 {
-    const char* const malformed[] = {
-        "",                                     // 空文件
-        "{",                                    // 截断对象
-        "[1,2,3]",                              // 顶层是数组不是对象
-        "not json at all",                      // 完全非法
-    };
+    WtFilterMgr mgr;
+    const std::string path = writeFilters(kFullFilters);
+    mgr.load_filters(path.c_str());
 
-    TempRoot root("fltbad");
-    for (size_t i = 0; i < sizeof(malformed) / sizeof(malformed[0]); ++i)
+    root().write("filters.json", "{\n"); // 语法损坏，loader 返回 NULL
+    root().touchForward("filters.json", 5);
+    const fs::file_time_type failedTime = root().lastWriteTime("filters.json");
+    mgr.load_filters("");
+
+    double strategyPos = 20;
+    EXPECT_TRUE(mgr.is_filtered_by_strategy("S_IGNORE", strategyPos));
+    double redirectPos = 20;
+    EXPECT_FALSE(mgr.is_filtered_by_strategy("S_REDIRECT", redirectPos));
+    EXPECT_DOUBLE_EQ(7.5, redirectPos);
+    double codePos = 10;
+    EXPECT_TRUE(mgr.is_filtered_by_code("SSE.STK.600000", codePos));
+    EXPECT_TRUE(mgr.is_filtered_by_executer("exec_off"));
+
+    // 将修复后的内容设回失败文件的 mtime：若失败时错误推进了成功时间戳，
+    // 此次重试会被跳过，旧的 7.5 规则就不会替换为 42。
+    root().write("filters.json",
+        "{\n"
+        "  \"strategy_filters\": {\n"
+        "    \"S_REDIRECT\": { \"action\": \"redirect\", \"target\": 42 }\n"
+        "  }\n"
+        "}\n");
+    root().setLastWriteTime("filters.json", failedTime);
+    mgr.load_filters("");
+
+    double retriedPos = 20;
+    EXPECT_FALSE(mgr.is_filtered_by_strategy("S_REDIRECT", retriedPos));
+    EXPECT_DOUBLE_EQ(42, retriedPos);
+    EXPECT_FALSE(mgr.is_filtered_by_strategy("S_IGNORE", retriedPos));
+    EXPECT_FALSE(mgr.is_filtered_by_code("SSE.STK.600000", codePos));
+    EXPECT_FALSE(mgr.is_filtered_by_executer("exec_off"));
+}
+
+TEST_F(N02FilterMgrTest, FailedFirstLoadDoesNotBlockValidRetryAtSameTimestamp)
+{
+    WtFilterMgr mgr;
+    root().write("filters.json", ""); // 空文件由 loader 直接作为失败返回
+    const fs::file_time_type failedTime = root().lastWriteTime("filters.json");
+    const std::string path = root().file("filters.json");
+    mgr.load_filters(path.c_str());
+
+    double beforeRetry = 12;
+    EXPECT_FALSE(mgr.is_filtered_by_strategy("S_FIRST_RETRY", beforeRetry));
+    EXPECT_FALSE(mgr.is_filtered_by_executer("exec_off"));
+
+    root().write("filters.json",
+        "{\"strategy_filters\":{\"S_FIRST_RETRY\":{\"action\":\"redirect\",\"target\":19}}}\n");
+    root().setLastWriteTime("filters.json", failedTime);
+    mgr.load_filters("");
+
+    double afterRetry = 12;
+    EXPECT_FALSE(mgr.is_filtered_by_strategy("S_FIRST_RETRY", afterRetry));
+    EXPECT_DOUBLE_EQ(19, afterRetry);
+}
+
+TEST_F(N02FilterMgrTest, NonObjectJsonRootsPreserveRulesAndDoNotAdvanceTimestamp)
+{
+    WtFilterMgr mgr;
+    const std::string path = writeFilters(kFullFilters);
+    mgr.load_filters(path.c_str());
+
+    const std::vector<std::string> invalidRoots = { "null", "42", "[]", "[1,2,3]" };
+    const fs::file_time_type initialTime = root().lastWriteTime("filters.json");
+    fs::file_time_type lastBadTime = initialTime;
+    for (size_t i = 0; i < invalidRoots.size(); ++i)
     {
-        root.write("bad_filters.json", malformed[i]);
-        WtFilterMgr mgr;
-        // 期望: 记录错误并返回; 实际: cfg 为 NULL 时 cfg->get(...) 解引用空指针
-        mgr.load_filters(root.file("bad_filters.json").c_str());
+        root().write("filters.json", invalidRoots[i]);
+        lastBadTime = initialTime + std::chrono::seconds(5 * static_cast<int>(i + 1));
+        root().setLastWriteTime("filters.json", lastBadTime);
+        mgr.load_filters("");
+
+        double strategyPos = 20;
+        EXPECT_TRUE(mgr.is_filtered_by_strategy("S_IGNORE", strategyPos));
+        double redirectPos = 20;
+        EXPECT_FALSE(mgr.is_filtered_by_strategy("S_REDIRECT", redirectPos));
+        EXPECT_DOUBLE_EQ(7.5, redirectPos);
+        double codePos = 10;
+        EXPECT_TRUE(mgr.is_filtered_by_code("SSE.STK.600000", codePos));
+        EXPECT_TRUE(mgr.is_filtered_by_executer("exec_off"));
     }
+
+    // A valid replacement at exactly the last failed mtime must still be retried.
+    root().write("filters.json",
+        "{\"strategy_filters\":{\"S_REDIRECT\":{\"action\":\"redirect\",\"target\":42}}}\n");
+    root().setLastWriteTime("filters.json", lastBadTime);
+    mgr.load_filters("");
+
+    double retriedPos = 20;
+    EXPECT_FALSE(mgr.is_filtered_by_strategy("S_REDIRECT", retriedPos));
+    EXPECT_DOUBLE_EQ(42, retriedPos);
+    EXPECT_FALSE(mgr.is_filtered_by_strategy("S_IGNORE", retriedPos));
+}
+
+TEST_F(N02FilterMgrTest, InvalidSectionAndItemTypesPreserveRulesUntilValidRetry)
+{
+    WtFilterMgr mgr;
+    const std::string path = writeFilters(kFullFilters);
+    mgr.load_filters(path.c_str());
+
+    const std::vector<std::string> invalidStructures = {
+        "{\"strategy_filters\":[]}",
+        "{\"strategy_filters\":{\"BROKEN\":[]}}",
+        "{\"code_filters\":false}",
+        "{\"code_filters\":{\"BROKEN\":\"ignore\"}}",
+        "{\"executer_filters\":[]}",
+        "{\"executer_filters\":{\"BROKEN\":[]}}",
+    };
+    const fs::file_time_type initialTime = root().lastWriteTime("filters.json");
+    fs::file_time_type lastBadTime = initialTime;
+    for (size_t i = 0; i < invalidStructures.size(); ++i)
+    {
+        root().write("filters.json", invalidStructures[i]);
+        lastBadTime = initialTime + std::chrono::seconds(5 * static_cast<int>(i + 1));
+        root().setLastWriteTime("filters.json", lastBadTime);
+        mgr.load_filters("");
+
+        double strategyPos = 20;
+        EXPECT_TRUE(mgr.is_filtered_by_strategy("S_IGNORE", strategyPos));
+        double codePos = 10;
+        EXPECT_TRUE(mgr.is_filtered_by_code("SSE.STK.600000", codePos));
+        EXPECT_TRUE(mgr.is_filtered_by_executer("exec_off"));
+    }
+
+    root().write("filters.json",
+        "{\"strategy_filters\":{\"S_REDIRECT\":{\"action\":\"redirect\",\"target\":42}}}\n");
+    root().setLastWriteTime("filters.json", lastBadTime);
+    mgr.load_filters("");
+
+    double retriedPos = 20;
+    EXPECT_FALSE(mgr.is_filtered_by_strategy("S_REDIRECT", retriedPos));
+    EXPECT_DOUBLE_EQ(42, retriedPos);
+    EXPECT_FALSE(mgr.is_filtered_by_strategy("S_IGNORE", retriedPos));
+    EXPECT_FALSE(mgr.is_filtered_by_code("SSE.STK.600000", retriedPos));
+    EXPECT_FALSE(mgr.is_filtered_by_executer("exec_off"));
+}
+
+TEST_F(N02FilterMgrTest, MalformedYamlReloadIsSafeAndStringScalarsRemainCompatible)
+{
+    WtFilterMgr mgr;
+    const std::string path = root().file("filters.yaml");
+    root().write("filters.yaml",
+        "strategy_filters:\n"
+        "  YAML_REDIRECT:\n"
+        "    action: redirect\n"
+        "    target: 3.5\n"
+        "code_filters:\n"
+        "  SSE.STK.600000:\n"
+        "    action: ignore\n"
+        "executer_filters:\n"
+        "  exec_yaml: true\n");
+    mgr.load_filters(path.c_str());
+
+    double initialPos = 10;
+    EXPECT_FALSE(mgr.is_filtered_by_strategy("YAML_REDIRECT", initialPos));
+    EXPECT_DOUBLE_EQ(3.5, initialPos);
+    double codePos = 10;
+    EXPECT_TRUE(mgr.is_filtered_by_code("SSE.STK.600000", codePos));
+    EXPECT_TRUE(mgr.is_filtered_by_executer("exec_yaml"));
+
+    root().write("filters.yaml", "strategy_filters:\n  - action: [\n");
+    root().touchForward("filters.yaml", 5);
+    const fs::file_time_type failedTime = root().lastWriteTime("filters.yaml");
+    mgr.load_filters("");
+
+    double afterFailurePos = 10;
+    EXPECT_FALSE(mgr.is_filtered_by_strategy("YAML_REDIRECT", afterFailurePos));
+    EXPECT_DOUBLE_EQ(3.5, afterFailurePos);
+    EXPECT_TRUE(mgr.is_filtered_by_code("SSE.STK.600000", codePos));
+    EXPECT_TRUE(mgr.is_filtered_by_executer("exec_yaml"));
+
+    root().write("filters.yaml",
+        "strategy_filters:\n"
+        "  YAML_REDIRECT:\n"
+        "    action: redirect\n"
+        "    target: 19\n");
+    root().setLastWriteTime("filters.yaml", failedTime);
+    mgr.load_filters("");
+
+    double afterRetryPos = 10;
+    EXPECT_FALSE(mgr.is_filtered_by_strategy("YAML_REDIRECT", afterRetryPos));
+    EXPECT_DOUBLE_EQ(19, afterRetryPos);
+    EXPECT_FALSE(mgr.is_filtered_by_code("SSE.STK.600000", codePos));
+    EXPECT_FALSE(mgr.is_filtered_by_executer("exec_yaml"));
+}
+
+TEST_F(N02FilterMgrTest, ScalarYamlRootReloadPreservesRulesAndAllowsRetry)
+{
+    WtFilterMgr mgr;
+    const std::string path = root().file("filters.yaml");
+    root().write("filters.yaml",
+        "strategy_filters:\n"
+        "  YAML_REDIRECT:\n"
+        "    action: redirect\n"
+        "    target: 3.5\n"
+        "executer_filters:\n"
+        "  exec_yaml: true\n");
+    mgr.load_filters(path.c_str());
+
+    double initialPos = 10;
+    EXPECT_FALSE(mgr.is_filtered_by_strategy("YAML_REDIRECT", initialPos));
+    EXPECT_DOUBLE_EQ(3.5, initialPos);
+    EXPECT_TRUE(mgr.is_filtered_by_executer("exec_yaml"));
+
+    root().write("filters.yaml", "plain-string-root\n");
+    root().touchForward("filters.yaml", 5);
+    const fs::file_time_type failedTime = root().lastWriteTime("filters.yaml");
+    mgr.load_filters("");
+
+    double afterFailurePos = 10;
+    EXPECT_FALSE(mgr.is_filtered_by_strategy("YAML_REDIRECT", afterFailurePos));
+    EXPECT_DOUBLE_EQ(3.5, afterFailurePos);
+    EXPECT_TRUE(mgr.is_filtered_by_executer("exec_yaml"));
+
+    root().write("filters.yaml",
+        "strategy_filters:\n"
+        "  YAML_REDIRECT:\n"
+        "    action: redirect\n"
+        "    target: 19\n");
+    root().setLastWriteTime("filters.yaml", failedTime);
+    mgr.load_filters("");
+
+    double afterRetryPos = 10;
+    EXPECT_FALSE(mgr.is_filtered_by_strategy("YAML_REDIRECT", afterRetryPos));
+    EXPECT_DOUBLE_EQ(19, afterRetryPos);
+    EXPECT_FALSE(mgr.is_filtered_by_executer("exec_yaml"));
 }
 
 }  // namespace

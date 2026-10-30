@@ -149,6 +149,12 @@ WTSVariant* WTSCfgLoader::load_from_json(const char* content)
 	if (root.HasParseError())
 		return NULL;
 
+	// json_to_variant assumes a document root is an object or array. Reject scalar
+	// roots before its array branch calls GetArray(); array roots retain their
+	// existing object-destination failure behavior below.
+	if (!root.IsObject() && !root.IsArray())
+		return NULL;
+
 	WTSVariant* ret = WTSVariant::createObject();
 	if (!json_to_variant(root, ret))
 	{
@@ -236,7 +242,7 @@ WTSVariant* WTSCfgLoader::load_from_yaml(const char* content)
 {
 	YAML::Node root = YAML::Load(content);
 
-	if (root.IsNull())
+	if (!root.IsMap())
 		return NULL;
 
 	WTSVariant* ret = WTSVariant::createObject();

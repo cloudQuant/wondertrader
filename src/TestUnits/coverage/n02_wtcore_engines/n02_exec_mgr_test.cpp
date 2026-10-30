@@ -520,11 +520,10 @@ TEST_F(N02ExecMgrTest, RouteOfUnknownStrategyFallsBackToAll)
 }
 
 //////////////////////////////////////////////////////////////////
-// 缺陷类: 路由条目缺少 executer 节点时 itemExec 为 NULL 立刻解引用
-// 见 BUG-N02-004; 仅将实际会触发空指针解引用的输入保留为 DISABLED。
+// BUG-N02-004: validate every rule before publishing any routing changes.
 //////////////////////////////////////////////////////////////////
 
-TEST_F(N02ExecMgrTest, DISABLED_RouterRuleWithoutExecuterNodeCrashes)
+TEST_F(N02ExecMgrTest, RouterRuleWithoutExecuterNodeIsRejected)
 {
     const char* const missingExecuterConfig =
         "{\"router_rules\":[{\"strategy\":\"s\"}]}\n";
@@ -532,8 +531,70 @@ TEST_F(N02ExecMgrTest, DISABLED_RouterRuleWithoutExecuterNodeCrashes)
     ASSERT_NE(nullptr, rules);
 
     WtExecuterMgr mgr;
-    mgr.load_router_rules(rules);       // itemExec == NULL, 当前实现会在此解引用
+    EXPECT_FALSE(mgr.load_router_rules(rules));
+    const wt_hashset<std::string>& route = mgr.get_route_by_strategy("s");
+    ASSERT_EQ(1u, route.size());
+    EXPECT_NE(route.end(), route.find("ALL"));
     rules->release();
+}
+
+TEST_F(N02ExecMgrTest, MalformedRouterRulesDoNotPartiallyReplaceExistingRoutes)
+{
+    struct InvalidRuleCase
+    {
+        const char* name;
+        const char* json;
+        const char* invalidStrategy;
+    };
+    const InvalidRuleCase invalidCases[] = {
+        {"missing", "{\"router_rules\":[{\"strategy\":\"staged\",\"executer\":\"exec_staged\"},{\"strategy\":\"bad_missing\"}]}", "bad_missing"},
+        {"null", "{\"router_rules\":[{\"strategy\":\"staged\",\"executer\":\"exec_staged\"},{\"strategy\":\"bad_null\",\"executer\":null}]}", "bad_null"},
+        {"number", "{\"router_rules\":[{\"strategy\":\"staged\",\"executer\":\"exec_staged\"},{\"strategy\":\"bad_number\",\"executer\":7}]}", "bad_number"},
+        {"object", "{\"router_rules\":[{\"strategy\":\"staged\",\"executer\":\"exec_staged\"},{\"strategy\":\"bad_object\",\"executer\":{}}]}", "bad_object"},
+        {"array_number", "{\"router_rules\":[{\"strategy\":\"staged\",\"executer\":\"exec_staged\"},{\"strategy\":\"bad_array\",\"executer\":[\"exec_partial\",7]}]}", "bad_array"},
+        {"item_type", "{\"router_rules\":[{\"strategy\":\"staged\",\"executer\":\"exec_staged\"},7]}", nullptr}
+    };
+
+    WtExecuterMgr mgr;
+    WTSVariant* seed = loadRouterRules("router_seed.json",
+        "{\"router_rules\":[{\"strategy\":\"seed\",\"executer\":\"exec_seed\"}]}\n");
+    ASSERT_NE(nullptr, seed);
+    ASSERT_TRUE(mgr.load_router_rules(seed));
+    seed->release();
+
+    for (size_t i = 0; i < sizeof(invalidCases) / sizeof(invalidCases[0]); ++i)
+    {
+        const InvalidRuleCase& invalid = invalidCases[i];
+        WTSVariant* rules = loadRouterRules(
+            std::string("router_invalid_") + invalid.name + ".json", invalid.json);
+        ASSERT_NE(nullptr, rules) << invalid.name;
+        if (std::string(invalid.name) == "item_type")
+        {
+            ASSERT_GT(rules->size(), 1u);
+            ASSERT_NE(nullptr, rules->get(1));
+            EXPECT_FALSE(rules->get(1)->isObject());
+        }
+        EXPECT_FALSE(mgr.load_router_rules(rules)) << invalid.name;
+        rules->release();
+
+        const wt_hashset<std::string>& existing = mgr.get_route_by_strategy("seed");
+        ASSERT_EQ(1u, existing.size()) << invalid.name;
+        EXPECT_NE(existing.end(), existing.find("exec_seed")) << invalid.name;
+
+        const wt_hashset<std::string>& staged = mgr.get_route_by_strategy("staged");
+        ASSERT_EQ(1u, staged.size()) << invalid.name;
+        EXPECT_NE(staged.end(), staged.find("ALL")) << invalid.name;
+        EXPECT_EQ(staged.end(), staged.find("exec_staged")) << invalid.name;
+
+        if (invalid.invalidStrategy != nullptr)
+        {
+            const wt_hashset<std::string>& unpublished =
+                mgr.get_route_by_strategy(invalid.invalidStrategy);
+            ASSERT_EQ(1u, unpublished.size()) << invalid.name;
+            EXPECT_NE(unpublished.end(), unpublished.find("ALL")) << invalid.name;
+            EXPECT_EQ(unpublished.end(), unpublished.find("exec_partial")) << invalid.name;
+        }
+    }
 }
 
 TEST_F(N02ExecMgrTest, RouterRuleWithoutStrategyDoesNotDereferenceNull)

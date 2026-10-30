@@ -58,8 +58,9 @@ bool SelStrategyMgr::loadFactories(const char* path)
 		if (hInst == NULL)
 			continue;
 
-		FuncCreateSelStraFact creator = (FuncCreateSelStraFact)DLLHelper::get_symbol(hInst, "createMfStrategyFact");
-		if (creator == NULL)
+		FuncCreateSelStraFact creator = (FuncCreateSelStraFact)DLLHelper::get_symbol(hInst, "createSelStrategyFact");
+		FuncDeleteSelStraFact remover = (FuncDeleteSelStraFact)DLLHelper::get_symbol(hInst, "deleteSelStrategyFact");
+		if (creator == NULL || remover == NULL)
 		{
 			DLLHelper::free_library(hInst);
 			continue;
@@ -68,14 +69,34 @@ bool SelStrategyMgr::loadFactories(const char* path)
 		ISelStrategyFact* fact = creator();
 		if (fact != NULL)
 		{
-			StraFactInfo& fInfo = _factories[fact->getName()];
+			const char* factName = fact->getName();
+			if (factName == NULL || factName[0] == '\0')
+			{
+				remover(fact);
+				DLLHelper::free_library(hInst);
+				continue;
+			}
+
+			std::string factoryName(factName);
+			auto existing = _factories.find(factoryName);
+			if (existing != _factories.end())
+			{
+				WTSLogger::warn("SEL strategy factory[{}] already loaded from {}, skip duplicate {}",
+					factoryName, existing->second._module_path, iter->path().string());
+				remover(fact);
+				DLLHelper::free_library(hInst);
+				continue;
+			}
+
+			StraFactInfo fInfo{};
 			fInfo._module_inst = hInst;
 			fInfo._module_path = iter->path().string();
 			fInfo._creator = creator;
-			fInfo._remover = (FuncDeleteSelStraFact)DLLHelper::get_symbol(hInst, "deleteMfStrategyFact");
+			fInfo._remover = remover;
 			fInfo._fact = fact;
+			_factories.emplace(factoryName, fInfo);
 
-			WTSLogger::info("SEL strategy factory[{}] loaded", fact->getName());
+			WTSLogger::info("SEL strategy factory[{}] loaded", factoryName);
 
 			count++;
 		}

@@ -308,6 +308,48 @@ TEST(ws03_kline_slice, extract_data_rejects_range_after_all_bars)
 	slice->release();
 }
 
+TEST(ws03_kline_slice, extract_data_rejects_disjoint_ranges_and_clips_overlap)
+{
+	WTSBarStruct bars[4];
+	bars[0] = mkBar(20240102, 900, 10.0, 12.0, 9.0, 11.0, 100.0);
+	bars[1] = mkBar(20240102, 901, 11.0, 13.0, 10.0, 12.0, 200.0);
+	bars[2] = mkBar(20240102, 902, 12.0, 14.0, 11.0, 10.0, 300.0);
+	bars[3] = mkBar(20240102, 903, 13.0, 15.0, 12.0, 14.0, 400.0);
+
+	WTSKlineSlice* slice = WTSKlineSlice::create("SHFE.rb2401", KP_Minute1, 1, bars, 4);
+	ASSERT_NE(slice, nullptr);
+
+	// Negative indices count back from the end; values before the first bar
+	// remain outside the range instead of being silently folded onto bar zero.
+	WTSValueArray* before = slice->extractData(KFT_CLOSE, -10, -5);
+	EXPECT_EQ(before, nullptr);
+	if (before != nullptr)
+		before->release();
+
+	WTSValueArray* after = slice->extractData(KFT_CLOSE, 10, 20);
+	EXPECT_EQ(after, nullptr);
+	if (after != nullptr)
+		after->release();
+
+	WTSValueArray* leftOverlap = slice->extractData(KFT_CLOSE, -6, 1);
+	ASSERT_NE(leftOverlap, nullptr);
+	ASSERT_EQ(leftOverlap->size(), 2u);
+	EXPECT_DOUBLE_EQ(leftOverlap->at(0), 11.0);
+	EXPECT_DOUBLE_EQ(leftOverlap->at(1), 12.0);
+	leftOverlap->release();
+
+	// Reversing the inclusive endpoints still selects their shared interval.
+	WTSValueArray* reversed = slice->extractData(KFT_CLOSE, 2, 0);
+	ASSERT_NE(reversed, nullptr);
+	ASSERT_EQ(reversed->size(), 3u);
+	EXPECT_DOUBLE_EQ(reversed->at(0), 11.0);
+	EXPECT_DOUBLE_EQ(reversed->at(1), 12.0);
+	EXPECT_DOUBLE_EQ(reversed->at(2), 10.0);
+	reversed->release();
+
+	slice->release();
+}
+
 //////////////////////////////////////////////////////////////////////////
 // WTSKlineData
 //////////////////////////////////////////////////////////////////////////
@@ -352,6 +394,11 @@ TEST(ws03_kline_data, accessors_and_bounds)
 	ref[2] = mkBar(20240102, 902, 12.0, 14.0, 11.0, 13.0, 300.0);
 	ref[0].hold = 1000.0;
 	ref[0].add = 10.0;
+	EXPECT_DOUBLE_EQ(kd->openinterest(0), 1000.0);
+	EXPECT_DOUBLE_EQ(kd->additional(0), 10.0);
+
+	// Bid/ask are union aliases of hold/add, so assigning option prices
+	// replaces the corresponding open-interest/additional values.
 	ref[0].bid = 9.9;
 	ref[0].ask = 10.1;
 	ref[0].money = 12345.0;
@@ -361,8 +408,8 @@ TEST(ws03_kline_data, accessors_and_bounds)
 	EXPECT_DOUBLE_EQ(kd->low(2), 11.0);
 	EXPECT_DOUBLE_EQ(kd->close(2), 13.0);
 	EXPECT_DOUBLE_EQ(kd->volume(1), 200.0);
-	EXPECT_DOUBLE_EQ(kd->openinterest(0), 1000.0);
-	EXPECT_DOUBLE_EQ(kd->additional(0), 10.0);
+	EXPECT_DOUBLE_EQ(kd->openinterest(0), 9.9);
+	EXPECT_DOUBLE_EQ(kd->additional(0), 10.1);
 	EXPECT_DOUBLE_EQ(kd->bidprice(0), 9.9);
 	EXPECT_DOUBLE_EQ(kd->askprice(0), 10.1);
 	EXPECT_DOUBLE_EQ(kd->money(0), 12345.0);
@@ -767,10 +814,8 @@ TEST(ws03_his_tick_data, create_and_append_with_factor)
 	EXPECT_DOUBLE_EQ(his->at(2)->low, 6960.0);
 	his->release();
 
-	// WTSDataDef.hpp L1320(unsigned int nSize) 与 L1337(bool bValidOnly) 两个 create 重载的
-	// 默认参数集合对单字符串实参完全等价, 裸调用会产生二义性(见 bugs/l03_includes.md BUG-L03-001)。
-	// 这里用显式 static_cast 锚定到 bool 重载, 语义为"不预分配 tick 数组"。
-	WTSHisTickData* empty = WTSHisTickData::create("DCE.i2405", static_cast<bool>(false));
+	// 单参数调用应选择不预分配数组的重载。
+	WTSHisTickData* empty = WTSHisTickData::create("DCE.i2405");
 	ASSERT_NE(empty, nullptr);
 	EXPECT_EQ(empty->size(), 0u);
 	EXPECT_TRUE(empty->empty());
@@ -780,6 +825,18 @@ TEST(ws03_his_tick_data, create_and_append_with_factor)
 	EXPECT_EQ(empty->size(), 1u);
 	EXPECT_DOUBLE_EQ(empty->at(0)->price, 3500.5);
 	empty->release();
+
+	// 显式 bool 和容量参数仍分别选择原有重载。
+	WTSHisTickData* bool_option = WTSHisTickData::create("DCE.i2405", false);
+	ASSERT_NE(bool_option, nullptr);
+	EXPECT_EQ(bool_option->size(), 0u);
+	EXPECT_FALSE(bool_option->isValidOnly());
+	bool_option->release();
+
+	WTSHisTickData* preallocated = WTSHisTickData::create("DCE.i2405", static_cast<unsigned int>(2));
+	ASSERT_NE(preallocated, nullptr);
+	EXPECT_EQ(preallocated->size(), 2u);
+	preallocated->release();
 }
 
 //////////////////////////////////////////////////////////////////////////

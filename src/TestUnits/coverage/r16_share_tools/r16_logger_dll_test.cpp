@@ -132,14 +132,37 @@ TEST(r16_wtslogger, log_dyn_prefix_builds_bracket_prefix)
 	spdlog::drop("syscat");
 }
 
-TEST(r16_wtslogger, DISABLED_log_by_cat_prefix_should_format_the_message)
+TEST(r16_wtslogger, log_by_cat_prefix_should_format_the_message)
 {
-	// BUG-R16-12：log_by_cat_prefix 的形参 format/args 被注释掉了（WTSLogger.h:336-347），
-	// 只做 strcpy(m_buffer+1, catName) 就把 m_buffer 丢给 log_raw_by_cat，
-	// 用户传入的消息文本根本没被格式化，输出里只剩 "[分类名]"（外加同线程上一次调用的残留）。
-	// 触发条件：WTSLogger::log_by_cat_prefix("cat", LL_NONE, "value=%d", 5)。
-	// 未初始化路径直接 fmt::print 到 stdout，拿不到文本，因此这条用例放 DISABLED_。
-	EXPECT_NO_THROW(WTSLogger::log_by_cat_prefix("cat", LL_NONE, "value=%d", 5));
+	testing::internal::CaptureStdout();
+	WTSLogger::log_by_cat_prefix("cat", LL_NONE, "value={}", 5);
+	const std::string output = testing::internal::GetCapturedStdout();
+
+	EXPECT_NE(std::string::npos, output.find("[cat]value=5"));
+}
+
+TEST(r16_wtslogger, log_by_cat_prefix_ignores_null_category)
+{
+	testing::internal::CaptureStdout();
+	EXPECT_NO_THROW(WTSLogger::log_by_cat_prefix(nullptr, LL_NONE, "ignored"));
+	const std::string output = testing::internal::GetCapturedStdout();
+
+	EXPECT_TRUE(output.empty());
+}
+
+TEST(r16_wtslogger, log_by_cat_prefix_truncates_long_category_without_overflow)
+{
+	const std::string category(MAX_LOG_BUF_SIZE * 2, 'c');
+	const std::string body = "tail";
+	const size_t expectedCategoryLength = MAX_LOG_BUF_SIZE - 1 - 2 - body.size();
+	const std::string expected = "[" + category.substr(0, expectedCategoryLength) + "]" + body;
+
+	testing::internal::CaptureStdout();
+	EXPECT_NO_THROW(WTSLogger::log_by_cat_prefix(category.c_str(), LL_NONE, "{}", body));
+	const std::string output = testing::internal::GetCapturedStdout();
+
+	EXPECT_NE(std::string::npos, output.find(expected));
+	EXPECT_LE(output.size(), static_cast<size_t>(MAX_LOG_BUF_SIZE + 64));
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -172,12 +195,40 @@ TEST(r16_dllhelper, wrap_module_moves_leading_non_alpha_before_prefix)
 #endif
 }
 
-TEST(r16_dllhelper, DISABLED_wrap_module_without_alpha_hangs)
+TEST(r16_dllhelper, wrap_module_without_alpha_uses_numeric_prefix)
 {
-	// 触发条件（BUG-R16-13）：名字里没有任何字母，例如 ""、"123"、"_.-"。
-	// `while (!isalpha(name[idx])) idx++;` 找不到字母就一直越过 '\0' 往下读：
-	// 轻则越界读、重则死循环。整条用例隔离，不参与执行。
-	EXPECT_EQ(std::string("lib123.dylib"), DLLHelper::wrap_module("123"));
+#ifdef _WIN32
+	EXPECT_EQ(std::string("123.dll"), DLLHelper::wrap_module("123"));
+#else
+#ifdef __APPLE__
+	const char* ext = ".dylib";
+#else
+	const char* ext = ".so";
+#endif
+	EXPECT_EQ(std::string("lib123") + ext, DLLHelper::wrap_module("123"));
+#endif
+}
+
+TEST(r16_dllhelper, wrap_module_without_alpha_inputs_terminate)
+{
+#ifdef _WIN32
+	const char* ext = ".dll";
+#else
+#ifdef __APPLE__
+	const char* ext = ".dylib";
+#else
+	const char* ext = ".so";
+#endif
+#endif
+	const char nonAsciiName[] = { static_cast<char>(0xE9), '\0' };
+	const char* names[] = { "", "_.-", nonAsciiName };
+	for (const char* name : names)
+	{
+		std::string wrapped;
+		EXPECT_NO_THROW(wrapped = DLLHelper::wrap_module(name));
+		EXPECT_GE(wrapped.size(), std::strlen(ext));
+		EXPECT_EQ(std::string(ext), wrapped.substr(wrapped.size() - std::strlen(ext)));
+	}
 }
 
 TEST(r16_dllhelper, load_missing_library_returns_null_and_helpers_tolerate_it)

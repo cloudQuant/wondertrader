@@ -80,11 +80,11 @@ TEST_F(R145StateMonitorRunTest, CommodityMarkedHolidayDrivesHolidayBranchOfOrigi
 
 /*
  * StateMonitor.cpp:199-202、224-240、256-260
- * 工作日 + 非节假日品种 + offset=1、close_time=0、auction 0..0：
+ * 工作日 + 非节假日品种 + offset=1、close_time=0、auction 0..0（空竞价哨兵）：
  * offCloseTime = offsetTime(0,false) = 1，offTime = curMin+1；绝大多数分钟 offTime>=1，
- * 走 L256-260 -> SS_CLOSED。23:59 这一分钟 offTime 回绕为 0，close 分支不成立，
- * 但 auction [0,2400) 命中 -> L263-270 SS_RECEIVING；两者都不是 SS_ORIGINAL。
- * 周末 isTradingDate 恒为 false，会话按产品语义进入 SS_Holiday，用例断言该分支。
+ * 走 L256-260 -> SS_CLOSED。23:59 这一分钟 offTime 回绕为 0，close 分支不成立；
+ * 当时交易段尚未开始则保持/进入 SS_PAUSED；00:00 的 offTime=1 落入交易段后会转为
+ * SS_RECEIVING。周末 isTradingDate 恒为 false，会话按产品语义进入 SS_Holiday。
  */
 TEST_F(R145StateMonitorRunTest, ClosedSessionAfterConfiguredCloseTime)
 {
@@ -98,7 +98,8 @@ TEST_F(R145StateMonitorRunTest, ClosedSessionAfterConfiguredCloseTime)
 	mon.run();
 	bool saw = r145::wait_state(mon, "CLOSED", weekend ? SS_Holiday : SS_CLOSED);
 	if (!saw && !weekend)
-		saw = r145::wait_state(mon, "CLOSED", SS_RECEIVING);	// 23:59 的 offTime 回绕
+		saw = r145::wait_state(mon, "CLOSED", SS_PAUSED)
+			|| r145::wait_state(mon, "CLOSED", SS_RECEIVING);
 	mon.stop();
 
 	EXPECT_TRUE(saw);
@@ -109,6 +110,7 @@ TEST_F(R145StateMonitorRunTest, ClosedSessionAfterConfiguredCloseTime)
 	else
 	{
 		EXPECT_TRUE(mon.isInState("CLOSED", SS_CLOSED)
+			|| mon.isInState("CLOSED", SS_PAUSED)
 			|| mon.isInState("CLOSED", SS_RECEIVING));
 		EXPECT_FALSE(mon.isInState("CLOSED", SS_ORIGINAL));
 	}
@@ -147,7 +149,7 @@ TEST_F(R145StateMonitorRunTest, SessionWithoutAuctionReachesInitialized)
 
 /*
  * StateMonitor.cpp:261-271
- * auction 0..0 换算后为 [0,2400)，交易区间 [1,2359] 换算后为 [0,2360)：
+ * auction 0..2400 显式映射为 [0,2400)，交易区间 [1,2359] 扩展后为 [0,2400)：
  * 集合竞价已开始且 offTime 落在 _sections 内 -> L263-270 SS_RECEIVING。
  * 周末品种被判为节假日 -> SS_Holiday；用例按环境断言对应分支。
  */

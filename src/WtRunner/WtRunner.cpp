@@ -9,6 +9,9 @@
  */
 #include "WtRunner.h"
 
+#include <exception>
+#include <algorithm>
+
 #include "../WtCore/WtHelper.h"
 #include "../WtCore/CtaStraContext.h"
 #include "../WtCore/HftStraContext.h"
@@ -22,6 +25,131 @@
 #include "../Share/StrUtil.hpp"
 
 #include <boost/filesystem.hpp>
+#include <vector>
+
+namespace
+{
+struct PendingTraderBinding
+{
+	TraderAdapterPtr trader;
+	ExecCmdPtr owner; // Keep the sink alive until deferred registration.
+	ITrdNotifySink* sink;
+};
+
+struct ScopedBoolReset
+{
+	explicit ScopedBoolReset(bool& value) : _value(value) { _value = true; }
+	~ScopedBoolReset() { _value = false; }
+	bool& _value;
+};
+
+WTSVariant* loadConfigSafely(const char* path)
+{
+	try
+	{
+		return WTSCfgLoader::load_from_file(path);
+	}
+	catch (...)
+	{
+		WTSLogger::error("Parsing config file {} threw an exception", path == NULL ? "<null>" : path);
+		return NULL;
+	}
+}
+
+bool preflightArrayConfig(WTSVariant* root, const char* key, const char* label)
+{
+	WTSVariant* entry = root == NULL ? NULL : root->get(key);
+	if (entry == NULL || entry->type() == WTSVariant::VT_Array)
+		return true;
+	if (entry->type() != WTSVariant::VT_String)
+	{
+		WTSLogger::error("Invalid {} configuration", label);
+		return false;
+	}
+
+	const char* path = entry->asCString();
+	if (!StdFile::exists(path))
+	{
+		WTSLogger::error("{} configuration {} not exists", label, path);
+		return false;
+	}
+
+	WTSVariant* sideConfig = loadConfigSafely(path);
+	if (sideConfig == NULL)
+	{
+		WTSLogger::error("Loading {} configuration {} failed", label, path);
+		return false;
+	}
+	WTSVariant* items = sideConfig->get(key);
+	const bool valid = items != NULL && items->type() == WTSVariant::VT_Array;
+	if (!valid)
+		WTSLogger::error("{} configuration {} must contain an array named {}", label, path, key);
+	sideConfig->release();
+	return valid;
+}
+
+bool preflightRequiredObject(WTSVariant* root, const char* key, const char* label)
+{
+	WTSVariant* value = root == NULL ? NULL : root->get(key);
+	if (value != NULL && value->type() == WTSVariant::VT_Object)
+		return true;
+	WTSLogger::error("{} configuration must be an object", label);
+	return false;
+}
+
+bool preflightOptionalFile(WTSVariant* root, const char* key, const char* label)
+{
+	WTSVariant* value = root == NULL ? NULL : root->get(key);
+	if (value == NULL)
+		return true;
+	if (value->type() != WTSVariant::VT_String || !StdFile::exists(value->asCString()))
+	{
+		WTSLogger::error("{} configuration file is invalid or missing", label);
+		return false;
+	}
+	return true;
+}
+
+bool preflightRequiredFile(WTSVariant* root, const char* key, const char* label)
+{
+	WTSVariant* value = root == NULL ? NULL : root->get(key);
+	if (value != NULL && value->type() == WTSVariant::VT_String && StdFile::exists(value->asCString()))
+		return true;
+	WTSLogger::error("{} configuration file is invalid or missing", label);
+	return false;
+}
+
+bool hasActiveItems(WTSVariant* list)
+{
+	if (list == NULL || list->type() != WTSVariant::VT_Array)
+		return false;
+	for (uint32_t i = 0; i < list->size(); ++i)
+	{
+		WTSVariant* item = list->get(i);
+		if (item != NULL && item->getBoolean("active"))
+			return true;
+	}
+	return false;
+}
+
+bool hasActiveStrategies(WTSVariant* config)
+{
+	WTSVariant* strategies = config == NULL ? NULL : config->get("strategies");
+	if (strategies == NULL || strategies->type() != WTSVariant::VT_Object)
+		return false;
+	return hasActiveItems(strategies->get("cta")) ||
+		hasActiveItems(strategies->get("hft")) ||
+		hasActiveItems(strategies->get("sel"));
+}
+
+bool hasExecuters(WtExecuterMgr& manager)
+{
+	bool found = false;
+	manager.enum_executer([&found](ExecCmdPtr) { found = true; });
+	return found;
+}
+
+}
 
 const char* getBinDir()
 {
@@ -39,10 +167,14 @@ const char* getBinDir()
 
 
 WtRunner::WtRunner()
-	: _data_store(NULL)
+	: _config(NULL)
+	, _engine(NULL)
+	, _data_store(NULL)
 	, _is_hft(false)
 	, _is_sel(false)
 	, _to_exit(false)
+	, _runtime_started(false)
+	, _shutdown_requested(false)
 {
 	
 }
@@ -50,6 +182,86 @@ WtRunner::WtRunner()
 
 WtRunner::~WtRunner()
 {
+	if (!shutdown())
+		std::terminate();
+}
+
+bool WtRunner::shutdown()
+{
+	return shutdownRuntime(true);
+}
+
+bool WtRunner::shutdownRuntime(bool stopEngines, bool fromConfigFailure)
+{
+	std::unique_lock<std::recursive_mutex> lifecycleLock(_lifecycle_mutex, std::try_to_lock);
+	if (!lifecycleLock.owns_lock())
+	{
+		// Do not block a parser, trader, or strategy callback behind configure or
+		// startup. The active control path observes this request and fails closed.
+		_shutdown_requested.store(true, std::memory_order_release);
+		_to_exit.store(true, std::memory_order_release);
+		return false;
+	}
+	if (_shutdown_in_progress)
+		return false;
+	if ((_configuring && !fromConfigFailure) || _runtime_starting)
+	{
+		// A callback that reenters shutdown during configure/startup only records
+		// the request. The outer control path completes it after the callback exits.
+		_shutdown_requested.store(true, std::memory_order_release);
+		return false;
+	}
+	ScopedBoolReset shutdownGuard(_shutdown_in_progress);
+	_shutdown_requested.store(true, std::memory_order_release);
+	_to_exit.store(true, std::memory_order_release);
+	_traders.requestStopSinkNotifications();
+	if (_traders.isInSinkCallback())
+		return false;
+
+	// Keep this coordinator across failed attempts: it owns the stable snapshots
+	// and manager binding needed to retry the same global shutdown transaction.
+	if (!_exec_quiesce)
+	{
+		try
+		{
+			std::vector<WtExecuterMgr*> managers;
+			managers.push_back(&_cta_engine.getExecuterMgr());
+			managers.push_back(&_sel_engine.getExecuterMgr());
+			_exec_quiesce.reset(new WtExecQuiesceCoordinator(managers));
+		}
+		catch (...)
+		{
+			WTSLogger::error("Allocating executor shutdown coordinator failed; runner owners are retained");
+			return false;
+		}
+	}
+	if (!_exec_quiesce->quiesce_all())
+	{
+		WTSLogger::error("Executor shutdown is incomplete; runner owners are retained for a control-thread retry");
+		return false;
+	}
+
+	if (!_failed_parser_owners.empty())
+	{
+		WTSLogger::error("Parser initialization left an owner without a verified shutdown contract; runner owners are retained");
+		return false;
+	}
+
+	// The coordinator has closed executor ingress and drained every accepted
+	// host/plugin operation. It is now safe to stop upstream quote producers.
+	_parsers.release();
+	if (!_traders.waitSinkNotificationsStopped())
+		return false;
+
+	if (stopEngines)
+	{
+		_cta_engine.release();
+		_hft_engine.release();
+		_sel_engine.release();
+	}
+	for (const auto& item : _traders.getAdapters())
+		item.second->release();
+	return true;
 }
 
 void WtRunner::init(const std::string& filename)
@@ -66,12 +278,96 @@ void WtRunner::init(const std::string& filename)
 
 bool WtRunner::config(const std::string& filename)
 {
-	_config = WTSCfgLoader::load_from_file(filename);
-	if(_config == NULL)
+	std::lock_guard<std::recursive_mutex> lifecycleLock(_lifecycle_mutex);
+	if (_configuring)
+	{
+		WTSLogger::error("Runner configuration is already in progress");
+		return false;
+	}
+	ScopedBoolReset configuringGuard(_configuring);
+	if (_runtime_started.load(std::memory_order_acquire) ||
+		_shutdown_requested.load(std::memory_order_acquire) || _exec_quiesce)
+	{
+		WTSLogger::error("Runner cannot be configured while running or after executor shutdown has started");
+		return false;
+	}
+
+	// Loading and validating the top-level file plus its sidecar list configs is
+	// a pure preflight. A missing or malformed file must leave a previously
+	// configured runtime intact so the caller can retry with a valid path.
+	WTSVariant* newConfig = loadConfigSafely(filename.c_str());
+	if (newConfig == NULL)
 	{
 		WTSLogger::error("Loading config file {} failed", filename);
 		return false;
 	}
+	if (!preflightArrayConfig(newConfig, "parsers", "parser") ||
+		!preflightArrayConfig(newConfig, "traders", "trader"))
+	{
+		newConfig->release();
+		return false;
+	}
+	if (!preflightRequiredObject(newConfig, "basefiles", "basefiles") ||
+		!preflightRequiredObject(newConfig, "env", "environment") ||
+		!preflightRequiredObject(newConfig, "data", "data") ||
+		!preflightRequiredFile(newConfig, "bspolicy", "action policy"))
+	{
+		newConfig->release();
+		return false;
+	}
+	WTSVariant* envPreflight = newConfig->get("env");
+	const char* envNamePreflight = envPreflight->getCString("name");
+	if ((envNamePreflight == NULL || envNamePreflight[0] == '\0' ||
+		wt_stricmp(envNamePreflight, "cta") == 0 || wt_stricmp(envNamePreflight, "sel") == 0) &&
+		!preflightArrayConfig(newConfig, "executers", "executer"))
+	{
+		newConfig->release();
+		return false;
+	}
+	WTSVariant* baseFilesPreflight = newConfig->get("basefiles");
+	if (!preflightOptionalFile(baseFilesPreflight, "hot", "hot") ||
+		!preflightOptionalFile(baseFilesPreflight, "second", "second hot"))
+	{
+		newConfig->release();
+		return false;
+	}
+	WTSVariant* rulesPreflight = baseFilesPreflight->get("rules");
+	if (rulesPreflight != NULL && rulesPreflight->type() == WTSVariant::VT_Object)
+	{
+		for (const std::string& ruleTag : rulesPreflight->memberNames())
+		{
+			if (!preflightOptionalFile(rulesPreflight, ruleTag.c_str(), "custom rule"))
+			{
+				newConfig->release();
+				return false;
+			}
+		}
+	}
+	if (_engine != NULL &&
+		(!_parsers._adapters.empty() || !_traders.getAdapters().empty() ||
+			hasExecuters(_cta_engine.getExecuterMgr()) ||
+			hasExecuters(_sel_engine.getExecuterMgr()) ||
+			hasActiveStrategies(_config)))
+	{
+		WTSLogger::error("Runner cannot replace a configured runtime with active parser, trader, executor, or strategy owners");
+		newConfig->release();
+		return false;
+	}
+	if (_shutdown_requested.load(std::memory_order_acquire))
+	{
+		newConfig->release();
+		return false;
+	}
+
+	// From here on configuration mutates managers and may publish plugin
+	// owners. Any failure therefore takes the fail-closed shutdown path.
+	_config = newConfig;
+	_engine = NULL;
+	auto failConfig = [this]() {
+		shutdownRuntime(false, true);
+		_engine = NULL;
+		return false;
+	};
 
 	//基础数据文件
 	WTSVariant* cfgBF = _config->get("basefiles");
@@ -113,11 +409,17 @@ bool WtRunner::config(const std::string& filename)
 	if (cfgBF->get("holiday"))
 		_bd_mgr.loadHolidays(cfgBF->getCString("holiday"));
 
-	if (cfgBF->get("hot"))
-		_hot_mgr.loadHots(cfgBF->getCString("hot"));
+	if (cfgBF->get("hot") && !_hot_mgr.loadHots(cfgBF->getCString("hot")))
+	{
+		WTSLogger::error("Loading hot configuration {} failed", cfgBF->getCString("hot"));
+		return failConfig();
+	}
 
-	if (cfgBF->get("second"))
-		_hot_mgr.loadSeconds(cfgBF->getCString("second"));
+	if (cfgBF->get("second") && !_hot_mgr.loadSeconds(cfgBF->getCString("second")))
+	{
+		WTSLogger::error("Loading second hot configuration {} failed", cfgBF->getCString("second"));
+		return failConfig();
+	}
 
 	auto& ayHotTags = _hot_mgr.getHotTags();
 	WTSArray* ayContracts = _bd_mgr.getContracts();
@@ -145,19 +447,28 @@ bool WtRunner::config(const std::string& filename)
 		auto tags = cfgRules->memberNames();
 		for (const std::string& ruleTag : tags)
 		{
-			_hot_mgr.loadCustomRules(ruleTag.c_str(), cfgRules->getCString(ruleTag.c_str()));
+			if (!_hot_mgr.loadCustomRules(ruleTag.c_str(), cfgRules->getCString(ruleTag.c_str())))
+			{
+				WTSLogger::error("Loading {} rules from {} failed", ruleTag, cfgRules->getCString(ruleTag.c_str()));
+				return failConfig();
+			}
 			WTSLogger::info("{} rules loaded from {}", ruleTag, cfgRules->getCString(ruleTag.c_str()));
 		}
 	}
 
 	//初始化运行环境
-	initEngine();
+	if (!initEngine())
+		return failConfig();
 
 	//初始化数据管理
-	initDataMgr();
+	if (!initDataMgr())
+	{
+		WTSLogger::error("Initializing data manager failed");
+		return failConfig();
+	}
 
 	if (!initActionPolicy())
-		return false;
+		return failConfig();
 
 	//初始化行情通道
 	WTSVariant* cfgParser = _config->get("parsers");
@@ -169,28 +480,45 @@ bool WtRunner::config(const std::string& filename)
 			if (StdFile::exists(filename))
 			{
 				WTSLogger::info("Reading parser config from {}...", filename);
-				WTSVariant* var = WTSCfgLoader::load_from_file(filename);
+				WTSVariant* var = loadConfigSafely(filename);
 				if(var)
 				{
 					if (!initParsers(var->get("parsers")))
+					{
 						WTSLogger::error("Loading parsers failed");
+						var->release();
+						return failConfig();
+					}
 					var->release();
 				}
 				else
 				{
 					WTSLogger::error("Loading parser config {} failed", filename);
+					return failConfig();
 				}
 			}
 			else
 			{
 				WTSLogger::error("Parser configuration {} not exists", filename);
+				return failConfig();
 			}
 		}
 		else if (cfgParser->type() == WTSVariant::VT_Array)
 		{
-			initParsers(cfgParser);
+			if (!initParsers(cfgParser))
+			{
+				WTSLogger::error("Loading parsers failed");
+				return failConfig();
+			}
+		}
+		else
+		{
+			WTSLogger::error("Invalid parsers configuration in {}", filename);
+			return failConfig();
 		}
 	}
+	if (_shutdown_requested.load(std::memory_order_acquire))
+		return failConfig();
 
 	//初始化交易通道
 	WTSVariant* cfgTraders = _config->get("traders");
@@ -202,28 +530,45 @@ bool WtRunner::config(const std::string& filename)
 			if (StdFile::exists(filename))
 			{
 				WTSLogger::info("Reading trader config from {}...", filename);
-				WTSVariant* var = WTSCfgLoader::load_from_file(filename);
+				WTSVariant* var = loadConfigSafely(filename);
 				if (var)
 				{
 					if (!initTraders(var->get("traders")))
+					{
 						WTSLogger::error("Loading traders failed");
+						var->release();
+						return failConfig();
+					}
 					var->release();
 				}
 				else
 				{
 					WTSLogger::error("Loading trader config {} failed", filename);
+					return failConfig();
 				}
 			}
 			else
 			{
 				WTSLogger::error("Trader configuration {} not exists", filename);
+				return failConfig();
 			}
 		}
 		else if (cfgTraders->type() == WTSVariant::VT_Array)
 		{
-			initTraders(cfgTraders);
+			if (!initTraders(cfgTraders))
+			{
+				WTSLogger::error("Loading traders failed");
+				return failConfig();
+			}
+		}
+		else
+		{
+			WTSLogger::error("Invalid traders configuration in {}", filename);
+			return failConfig();
 		}
 	}
+	if (_shutdown_requested.load(std::memory_order_acquire))
+		return failConfig();
 
 	initEvtNotifier();
 
@@ -239,11 +584,15 @@ bool WtRunner::config(const std::string& filename)
 				if (StdFile::exists(filename))
 				{
 					WTSLogger::info("Reading executer config from {}...", filename);
-					WTSVariant* var = WTSCfgLoader::load_from_file(filename);
+					WTSVariant* var = loadConfigSafely(filename);
 					if (var)
 					{
 						if (!initExecuters(var->get("executers")))
-							WTSLogger::error("Loading executers failed");
+						{
+							WTSLogger::error("Loading executers from {} failed", filename);
+							var->release();
+							return failConfig();
+						}
 
 						WTSVariant* c = var->get("routers");
 						if (c != NULL)
@@ -254,16 +603,27 @@ bool WtRunner::config(const std::string& filename)
 					else
 					{
 						WTSLogger::error("Loading executer config {} failed", filename);
+						return failConfig();
 					}
 				}
 				else
 				{
-					WTSLogger::error("Trader configuration {} not exists", filename);
+					WTSLogger::error("Executer configuration {} not exists", filename);
+					return failConfig();
 				}
 			}
 			else if (cfgExec->type() == WTSVariant::VT_Array)
 			{
-				initExecuters(cfgExec);
+				if (!initExecuters(cfgExec))
+				{
+					WTSLogger::error("Loading inline executers failed");
+					return failConfig();
+				}
+			}
+			else
+			{
+				WTSLogger::error("Invalid executer configuration in {}", filename);
+				return failConfig();
 			}
 		}
 
@@ -271,11 +631,16 @@ bool WtRunner::config(const std::string& filename)
 		if (cfgRouter != NULL)
 			_cta_engine.loadRouterRules(cfgRouter);
 	}
+	if (_shutdown_requested.load(std::memory_order_acquire))
+		return failConfig();
 
-	if (!_is_hft)
-		initCtaStrategies();
-	else
-		initHftStrategies();
+	if ((!_is_hft && !initCtaStrategies()) || (_is_hft && !initHftStrategies()))
+	{
+		WTSLogger::error("Initializing configured strategies failed");
+		return failConfig();
+	}
+	if (_shutdown_requested.load(std::memory_order_acquire))
+		return failConfig();
 	
 	return true;
 }
@@ -283,11 +648,15 @@ bool WtRunner::config(const std::string& filename)
 bool WtRunner::initCtaStrategies()
 {
 	WTSVariant* cfg = _config->get("strategies");
-	if (cfg == NULL || cfg->type() != WTSVariant::VT_Object)
+	if (cfg == NULL)
+		return true;
+	if (cfg->type() != WTSVariant::VT_Object)
 		return false;
 
 	cfg = cfg->get("cta");
-	if (cfg == NULL || cfg->type() != WTSVariant::VT_Array)
+	if (cfg == NULL)
+		return true;
+	if (cfg->type() != WTSVariant::VT_Array)
 		return false;
 
 	std::string path = WtHelper::getCWD() + "cta/";
@@ -302,8 +671,31 @@ bool WtRunner::initCtaStrategies()
 		const char* id = cfgItem->getCString("id");
 		const char* name = cfgItem->getCString("name");
 		int32_t slippage = cfgItem->getInt32("slippage");
-		CtaStrategyPtr stra = _cta_stra_mgr.createStrategy(name, id);
-		stra->self()->init(cfgItem->get("params"));
+		CtaStrategyPtr stra;
+		try { stra = _cta_stra_mgr.createStrategy(name, id); }
+		catch (...)
+		{
+			WTSLogger::error("Creating CTA strategy {} ({}) threw an exception", name, id);
+			return false;
+		}
+		if (stra == NULL || stra->self() == NULL)
+		{
+			WTSLogger::error("Creating CTA strategy {} ({}) failed", name, id);
+			return false;
+		}
+		try
+		{
+			if (!stra->self()->init(cfgItem->get("params")))
+			{
+				WTSLogger::error("Initializing CTA strategy {} ({}) failed", name, id);
+				return false;
+			}
+		}
+		catch (...)
+		{
+			WTSLogger::error("Initializing CTA strategy {} ({}) threw an exception", name, id);
+			return false;
+		}
 		CtaStraContext* ctx = new CtaStraContext(&_cta_engine, id, slippage);
 		ctx->set_strategy(stra->self());
 		_cta_engine.addContext(CtaContextPtr(ctx));
@@ -315,11 +707,15 @@ bool WtRunner::initCtaStrategies()
 bool WtRunner::initHftStrategies()
 {
 	WTSVariant* cfg = _config->get("strategies");
-	if (cfg == NULL || cfg->type() != WTSVariant::VT_Object)
+	if (cfg == NULL)
+		return true;
+	if (cfg->type() != WTSVariant::VT_Object)
 		return false;
 
 	cfg = cfg->get("hft");
-	if (cfg == NULL || cfg->type() != WTSVariant::VT_Array)
+	if (cfg == NULL)
+		return true;
+	if (cfg->type() != WTSVariant::VT_Array)
 		return false;
 
 	std::string path = WtHelper::getCWD() + "hft/";
@@ -335,11 +731,31 @@ bool WtRunner::initHftStrategies()
 		const char* name = cfgItem->getCString("name");
 		bool agent = cfgItem->getBoolean("agent");
 		int32_t slippage = cfgItem->getInt32("slippage");
-		HftStrategyPtr stra = _hft_stra_mgr.createStrategy(name, id);
-		if (stra == NULL)
-			continue;
-
-		stra->self()->init(cfgItem->get("params"));
+		HftStrategyPtr stra;
+		try { stra = _hft_stra_mgr.createStrategy(name, id); }
+		catch (...)
+		{
+			WTSLogger::error("Creating HFT strategy {} ({}) threw an exception", name, id);
+			return false;
+		}
+		if (stra == NULL || stra->self() == NULL)
+		{
+			WTSLogger::error("Creating HFT strategy {} ({}) failed", name, id);
+			return false;
+		}
+		try
+		{
+			if (!stra->self()->init(cfgItem->get("params")))
+			{
+				WTSLogger::error("Initializing HFT strategy {} ({}) failed", name, id);
+				return false;
+			}
+		}
+		catch (...)
+		{
+			WTSLogger::error("Initializing HFT strategy {} ({}) threw an exception", name, id);
+			return false;
+		}
 		HftStraContext* ctx = new HftStraContext(&_hft_engine, id, agent,slippage);
 		ctx->set_strategy(stra->self());
 
@@ -348,14 +764,14 @@ bool WtRunner::initHftStrategies()
 		if(trader)
 		{
 			ctx->setTrader(trader.get());
+			_hft_engine.addContext(HftContextPtr(ctx));
 			trader->addSink(ctx);
 		}
 		else
 		{
 			WTSLogger::error("Trader {} not exists, binding trader to HFT strategy failed", traderid);
+			_hft_engine.addContext(HftContextPtr(ctx));
 		}
-
-		_hft_engine.addContext(HftContextPtr(ctx));
 	}
 
 	return true;
@@ -419,7 +835,8 @@ bool WtRunner::initDataMgr()
 	if (cfg == NULL)
 		return false;
 
-	_data_mgr.init(cfg, _engine);
+	if (!_data_mgr.init(cfg, _engine))
+		return false;
 	WTSLogger::info("Data manager initialized");
 
 	return true;
@@ -448,8 +865,56 @@ bool WtRunner::initParsers(WTSVariant* cfgParser)
 		}
 
 		ParserAdapterPtr adapter(new ParserAdapter);
-		adapter->init(realid.c_str(), cfgItem, _engine, &_bd_mgr, &_hot_mgr);
-		_parsers.addAdapter(realid.c_str(), adapter);
+		try
+		{
+			// Keep the candidate before initialization: ParserAdapter's destructor
+			// cannot release a partially initialized external API safely.
+			_failed_parser_owners.push_back(adapter);
+		}
+		catch (...)
+		{
+			WTSLogger::error("Retaining parser {} for fail-closed cleanup failed", realid);
+			return false;
+		}
+
+		bool initialized = false;
+		try { initialized = adapter->init(realid.c_str(), cfgItem, _engine, &_bd_mgr, &_hot_mgr); }
+		catch (...) { initialized = false; }
+		if (!initialized)
+		{
+			WTSLogger::error("Initializing parser {} failed", realid);
+			if (!adapter->hasApi())
+			{
+				// The adapter reports that no API or uncertain factory owner exists;
+				// its init failure path already released the module/config candidate.
+				const auto owner = std::find(_failed_parser_owners.begin(), _failed_parser_owners.end(), adapter);
+				if (owner != _failed_parser_owners.end())
+					_failed_parser_owners.erase(owner);
+				WTSLogger::error("Parser {} failed before API creation; candidate owner can be discarded safely", realid);
+			}
+			else
+			{
+				// An API (or uncertain factory owner) exists; keep its borrowed graph
+				// alive because the provider has no verified callback-drain contract.
+				WTSLogger::error("Parser {} retains an API owner after init failure; candidate is quarantined", realid);
+			}
+			return false;
+		}
+
+		bool registered = false;
+		try { registered = _parsers.addAdapter(realid.c_str(), adapter); }
+		catch (...) { registered = false; }
+		if (!registered)
+		{
+			WTSLogger::error("Registering parser {} failed", realid);
+			// Keep the initialized API alive because no shutdown contract was
+			// established for this registration failure path.
+			return false;
+		}
+
+		const auto owner = std::find(_failed_parser_owners.begin(), _failed_parser_owners.end(), adapter);
+		if (owner != _failed_parser_owners.end())
+			_failed_parser_owners.erase(owner);
 
 		count++;
 	}
@@ -466,6 +931,7 @@ bool WtRunner::initExecuters(WTSVariant* cfgExecuter)
 	std::string path = WtHelper::getCWD() + "executer/";
 	_exe_factory.loadFactories(path.c_str());
 
+	std::vector<PendingTraderBinding> pendingTraderBindings;
 	uint32_t count = 0;
 	for (uint32_t idx = 0; idx < cfgExecuter->size(); idx++)
 	{
@@ -474,73 +940,97 @@ bool WtRunner::initExecuters(WTSVariant* cfgExecuter)
 			continue;
 
 		const char* id = cfgItem->getCString("id");
+		if (id == NULL || id[0] == '\0' || _cta_engine.findExecuter(id) != NULL ||
+			_sel_engine.findExecuter(id) != NULL)
+		{
+			WTSLogger::error("Executor id is empty or already registered: {}", id == NULL ? "<null>" : id);
+			return false;
+		}
 		std::string name = cfgItem->getCString("name");	//local,diff,dist
 		if (name.empty())
 			name = "local";
 
-		if (name == "local")
+		try
 		{
-			WtLocalExecuter* executer = new WtLocalExecuter(&_exe_factory, id, &_data_mgr);
-			if (!executer->init(cfgItem))
-				return false;
-
-			const char* tid = cfgItem->getCString("trader");
-			if (strlen(tid) == 0)
+			if (name == "local")
 			{
-				WTSLogger::error("No Trader configured for Executer {}", id);
+				std::shared_ptr<WtLocalExecuter> executer(new WtLocalExecuter(&_exe_factory, id, &_data_mgr));
+				ExecCmdPtr owner = executer;
+				// Publish before init so every failed or partially initialized host is
+				// retained by the manager and covered by fail-closed quiesce.
+				_cta_engine.addExecuter(owner);
+				if (!executer->init(cfgItem))
+				{
+					WTSLogger::error("Initializing local executor {} failed", id);
+					return false;
+				}
+				const char* tid = cfgItem->getCString("trader");
+				if (tid == NULL || tid[0] == '\0')
+					WTSLogger::error("No Trader configured for Executer {}", id);
+				else if (TraderAdapterPtr trader = _traders.getAdapter(tid))
+				{
+					executer->setTrader(trader.get());
+					pendingTraderBindings.push_back({ trader, owner, executer.get() });
+				}
+				else
+					WTSLogger::error("Trader {} not exists, cannot configured for executer {}", tid, id);
+			}
+			else if (name == "diff")
+			{
+				std::shared_ptr<WtDiffExecuter> executer(new WtDiffExecuter(&_exe_factory, id, &_data_mgr, &_bd_mgr));
+				ExecCmdPtr owner = executer;
+				_cta_engine.addExecuter(owner);
+				if (!executer->init(cfgItem))
+				{
+					WTSLogger::error("Initializing diff executor {} failed", id);
+					return false;
+				}
+				const char* tid = cfgItem->getCString("trader");
+				if (tid == NULL || tid[0] == '\0')
+					WTSLogger::error("No Trader configured for Executer {}", id);
+				else if (TraderAdapterPtr trader = _traders.getAdapter(tid))
+				{
+					executer->setTrader(trader.get());
+					pendingTraderBindings.push_back({ trader, owner, executer.get() });
+				}
+				else
+					WTSLogger::error("Trader {} not exists, cannot configured for executer {}", tid, id);
+			}
+			else if (name == "dist")
+			{
+				std::shared_ptr<WtDistExecuter> executer(new WtDistExecuter(id));
+				_cta_engine.addExecuter(executer);
+				if (!executer->init(cfgItem))
+				{
+					WTSLogger::error("Initializing distributed executor {} failed", id);
+					return false;
+				}
 			}
 			else
 			{
-				TraderAdapterPtr trader = _traders.getAdapter(tid);
-				if (trader)
-				{
-					executer->setTrader(trader.get());
-					trader->addSink(executer);
-				}
-				else
-				{
-					WTSLogger::error("Trader {} not exists, cannot configured for executer {}", tid, id);
-				}
-			}
-
-			_cta_engine.addExecuter(ExecCmdPtr(executer));
-		}
-		else if (name == "diff")
-		{
-			WtDiffExecuter* executer = new WtDiffExecuter(&_exe_factory, id, &_data_mgr, &_bd_mgr);
-			if (!executer->init(cfgItem))
+				WTSLogger::error("Unknown executor kind {} for {}", name, id);
 				return false;
-
-			const char* tid = cfgItem->getCString("trader");
-			if (strlen(tid) == 0)
-			{
-				WTSLogger::error("No Trader configured for Executer {}", id);
 			}
-			else
-			{
-				TraderAdapterPtr trader = _traders.getAdapter(tid);
-				if (trader)
-				{
-					executer->setTrader(trader.get());
-					trader->addSink(executer);
-				}
-				else
-				{
-					WTSLogger::error("Trader {} not exists, cannot configured for executer {}", tid, id);
-				}
-			}
-
-			_cta_engine.addExecuter(ExecCmdPtr(executer));
 		}
-		else
+		catch (...)
 		{
-			WtDistExecuter* executer = new WtDistExecuter(id);
-			if (!executer->init(cfgItem))
-				return false;
-
-			_cta_engine.addExecuter(ExecCmdPtr(executer));
+			WTSLogger::error("Initializing executor {} threw an exception; registered owners will be quiesced", id);
+			return false;
 		}
 		count++;
+	}
+
+	// Every executor, its stub and its manager entry must exist before an
+	// already-ready adapter can synchronously replay initial readiness.
+	try
+	{
+		for (const PendingTraderBinding& binding : pendingTraderBindings)
+			binding.trader->addSink(binding.sink);
+	}
+	catch (...)
+	{
+		WTSLogger::error("Registering executor trader sinks failed; registered owners will be quiesced");
+		return false;
 	}
 
 	WTSLogger::info("{} executers loaded", count);
@@ -550,6 +1040,14 @@ bool WtRunner::initExecuters(WTSVariant* cfgExecuter)
 
 bool WtRunner::initTraders(WTSVariant* cfgTrader)
 {
+	// This configuration replaces the active set. On an invalid item, release
+	// every adapter already registered in this pass before returning failure.
+	if (!_traders.getAdapters().empty())
+	{
+		shutdownRuntime(false);
+		WTSLogger::error("Runner cannot replace traders while their sink owners are still registered");
+		return false;
+	}
 	if (cfgTrader == NULL || cfgTrader->type() != WTSVariant::VT_Array)
 		return false;
 	
@@ -563,9 +1061,19 @@ bool WtRunner::initTraders(WTSVariant* cfgTrader)
 		const char* id = cfgItem->getCString("id");
 
 		TraderAdapterPtr adapter(new TraderAdapter(&_notifier));
-		adapter->init(id, cfgItem, &_bd_mgr, &_act_policy);
+		if (!adapter->init(id, cfgItem, &_bd_mgr, &_act_policy))
+		{
+			WTSLogger::error("Initializing trader {} failed", id);
+			shutdownRuntime(false);
+			return false;
+		}
 
-		_traders.addAdapter(id, adapter);
+		if (!_traders.addAdapter(id, adapter))
+		{
+			WTSLogger::error("Registering trader {} failed", id);
+			shutdownRuntime(false);
+			return false;
+		}
 
 		count++;
 	}
@@ -577,13 +1085,51 @@ bool WtRunner::initTraders(WTSVariant* cfgTrader)
 
 void WtRunner::run(bool bAsync /* = false */)
 {
+	bool startupFailed = false;
+	{
+		std::lock_guard<std::recursive_mutex> lifecycleLock(_lifecycle_mutex);
+		if (_configuring || _shutdown_requested.load(std::memory_order_acquire) ||
+			_runtime_started.load(std::memory_order_acquire))
+		{
+			WTSLogger::error("Runner cannot start while configuration, shutdown, or another run is active");
+			return;
+		}
+		if (_engine == NULL)
+		{
+			WTSLogger::error("Runner is not configured; run skipped");
+			return;
+		}
+
+		_runtime_started.store(true, std::memory_order_release);
+		{
+			ScopedBoolReset startupGuard(_runtime_starting);
+			try
+			{
+				_parsers.run();
+				if (!_shutdown_requested.load(std::memory_order_acquire))
+					_traders.run();
+				if (!_shutdown_requested.load(std::memory_order_acquire))
+					_engine->run();
+			}
+			catch (...)
+			{
+				startupFailed = true;
+				print_stack_trace([](const char* message) {
+					WTSLogger::error(message);
+				});
+			}
+		}
+		if (startupFailed)
+			_shutdown_requested.store(true, std::memory_order_release);
+		if (startupFailed || _shutdown_requested.load(std::memory_order_acquire))
+		{
+			shutdownRuntime(true);
+			return;
+		}
+	}
+
 	try
 	{
-		_parsers.run();
-		_traders.run();
-
-		_engine->run();
-
 		/*
 		 *	By Wesley @ 2023.12.11 
 		 *	搬到这里来的原因是，用自定义的signal_handler覆盖其他模块的signal_handler
@@ -591,13 +1137,13 @@ void WtRunner::run(bool bAsync /* = false */)
 		install_signal_hooks([](const char* message) {
 			WTSLogger::error(message);
 		}, [this](bool bStopped) {
-			_to_exit = bStopped;
-			WTSLogger::info("Exit flag is {}", _to_exit);
+			_to_exit.store(bStopped, std::memory_order_release);
+			WTSLogger::info("Exit flag is {}", bStopped);
 		});
 
 		if(!bAsync)
 		{
-			while(!_to_exit)
+			while(!_to_exit.load(std::memory_order_acquire))
 			{
 				std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			}

@@ -13,12 +13,18 @@
  *    create_ext_dumper / register_extended_dumper / register_extended_hftdata_dumper
  *
  * 观测口径全部来自本用例自己注册的回调计数器，不读挂钟、不读日志。
- * 生产代码一行未改；缺陷见 docs/迭代计划/迭代01/bugs/R22_dtporter.md。
+ * createExtParser 的所有权根因见 docs/迭代计划/迭代01/bugs/R22_dtporter.md；
+ * 失败插件的最终释放仍依赖尚未提供的 provider callback-drain 证明。
  */
 #include <gtest/gtest.h>
 
+#include <atomic>
+#include <chrono>
+#include <condition_variable>
 #include <cstring>
+#include <mutex>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "Includes/FasterDefs.h"
@@ -74,10 +80,49 @@ std::vector<DumpHit>& trx_hits()	{ static std::vector<DumpHit> v; return v; }
 
 // 回调自身返回值可翻转，用来验证 WtDtRunner 是否原样透出返回值
 bool g_cb_ret = true;
+bool g_reenter_create_parser = false;
+bool g_reenter_create_result = true;
+std::atomic<uint32_t> g_concurrent_init_count { 0 };
+std::atomic<uint32_t> g_concurrent_connect_count { 0 };
+std::atomic<uint32_t> g_concurrent_blocked_init_count { 0 };
+std::atomic<uint32_t> g_concurrent_create_done { 0 };
+std::atomic<bool> g_hold_concurrent_parser_init { false };
+std::mutex g_concurrent_parser_mutex;
+std::condition_variable g_concurrent_parser_cv;
+bool g_release_concurrent_parser_init = false;
 
 void PORTER_FLAG rec_evt(WtUInt32 evtId, const char* id)
 {
 	evt_hits().push_back(EvtHit { evtId, id == NULL ? std::string() : std::string(id) });
+}
+
+void PORTER_FLAG rec_evt_reenter_create_parser(WtUInt32 evtId, const char* id)
+{
+	rec_evt(evtId, id);
+	if (evtId == EVENT_PARSER_INIT && g_reenter_create_parser)
+	{
+		g_reenter_create_parser = false;
+		g_reenter_create_result = create_ext_parser(id);
+	}
+}
+
+void PORTER_FLAG rec_evt_concurrent_create(WtUInt32 evtId, const char* /*id*/)
+{
+	if (evtId == EVENT_PARSER_INIT)
+	{
+		g_concurrent_init_count.fetch_add(1, std::memory_order_relaxed);
+		if (g_hold_concurrent_parser_init.load(std::memory_order_relaxed))
+		{
+			g_concurrent_blocked_init_count.fetch_add(1, std::memory_order_release);
+			g_concurrent_parser_cv.notify_all();
+			std::unique_lock<std::mutex> lock(g_concurrent_parser_mutex);
+			g_concurrent_parser_cv.wait(lock, [] { return g_release_concurrent_parser_init; });
+		}
+	}
+	else if (evtId == EVENT_PARSER_CONNECT)
+	{
+		g_concurrent_connect_count.fetch_add(1, std::memory_order_relaxed);
+	}
 }
 
 void PORTER_FLAG rec_sub(const char* id, const char* fullCode, bool isForSub)
@@ -152,6 +197,17 @@ void clear_all_hits()
 	dtl_hits().clear();
 	trx_hits().clear();
 	g_cb_ret = true;
+	g_reenter_create_parser = false;
+	g_reenter_create_result = true;
+	g_concurrent_init_count.store(0, std::memory_order_relaxed);
+	g_concurrent_connect_count.store(0, std::memory_order_relaxed);
+	g_concurrent_blocked_init_count.store(0, std::memory_order_relaxed);
+	g_concurrent_create_done.store(0, std::memory_order_relaxed);
+	g_hold_concurrent_parser_init.store(false, std::memory_order_relaxed);
+	{
+		std::lock_guard<std::mutex> lock(g_concurrent_parser_mutex);
+		g_release_concurrent_parser_init = false;
+	}
 }
 
 WTSTickStruct make_tick(const char* exchg, const char* code, uint32_t act_date, uint32_t trd_date)
@@ -619,4 +675,114 @@ TEST_F(R22ExtPorterTest, CApiCreateExtParserAndPushQuoteReachTheRegisteredSlots)
 	EXPECT_EQ(0, tick.action_date);
 	parser_push_quote("r22_capi_missing", &tick, 0);
 	EXPECT_EQ(1U, evt_hits().size());
+}
+
+TEST_F(R22ExtPorterTest, CApiCreateExtParserRejectsEmptyAndDuplicateIds)
+{
+	register_parser_callbacks(rec_evt, rec_sub);
+
+	// Negative controls must fail without initializing an ExpParser or emitting events.
+	EXPECT_FALSE(create_ext_parser(NULL));
+	EXPECT_FALSE(create_ext_parser(""));
+	EXPECT_TRUE(evt_hits().empty());
+
+	// Positive control, followed by a duplicate attempt. The original adapter
+	// remains registered by ParserAdapterMgr::addAdapter's unique-id contract.
+	ASSERT_TRUE(create_ext_parser("r22_capi_unique"));
+	ASSERT_EQ(1U, evt_hits().size());
+	EXPECT_EQ(EVENT_PARSER_INIT, evt_hits()[0]._evt);
+	EXPECT_EQ("r22_capi_unique", evt_hits()[0]._id);
+
+	EXPECT_FALSE(create_ext_parser("r22_capi_unique"));
+	EXPECT_EQ(1U, evt_hits().size());
+
+	// A distinct id still succeeds after the rejected requests.
+	EXPECT_TRUE(create_ext_parser("r22_capi_unique_second"));
+	ASSERT_EQ(2U, evt_hits().size());
+	EXPECT_EQ(EVENT_PARSER_INIT, evt_hits()[1]._evt);
+	EXPECT_EQ("r22_capi_unique_second", evt_hits()[1]._id);
+}
+
+TEST_F(R22ExtPorterTest, ParserInitCallbackCanReenterDuplicateCreateWithoutDeadlock)
+{
+	const char* id = "r22_capi_reentrant_unique";
+	register_parser_callbacks(rec_evt_reenter_create_parser, rec_sub);
+	g_reenter_create_parser = true;
+
+	ASSERT_TRUE(create_ext_parser(id));
+	EXPECT_FALSE(g_reenter_create_result);
+	ASSERT_EQ(1U, evt_hits().size());
+	EXPECT_EQ(EVENT_PARSER_INIT, evt_hits()[0]._evt);
+	EXPECT_EQ(id, evt_hits()[0]._id);
+}
+
+TEST_F(R22ExtPorterTest, ConcurrentCreateAndQuoteLookupUseRegistrySnapshotAndConnectAfterStart)
+{
+	WtDtRunner runner;
+	register_parser_callbacks(rec_evt_concurrent_create, rec_sub);
+	ASSERT_TRUE(runner.createExtParser("r22_concurrent_baseline"));
+	runner.start(true, true);
+	ASSERT_EQ(1U, g_concurrent_connect_count.load(std::memory_order_relaxed));
+
+	g_hold_concurrent_parser_init.store(true, std::memory_order_relaxed);
+	bool createA = false;
+	bool createB = false;
+	std::thread creatorA([&] {
+		createA = runner.createExtParser("r22_concurrent_a");
+		g_concurrent_create_done.fetch_add(1, std::memory_order_release);
+	});
+	std::thread creatorB([&] {
+		createB = runner.createExtParser("r22_concurrent_b");
+		g_concurrent_create_done.fetch_add(1, std::memory_order_release);
+	});
+
+	bool bothCallbacksEntered = false;
+	{
+		std::unique_lock<std::mutex> lock(g_concurrent_parser_mutex);
+		bothCallbacksEntered = g_concurrent_parser_cv.wait_for(lock, std::chrono::seconds(5), [] {
+			return g_concurrent_blocked_init_count.load(std::memory_order_acquire) >= 2;
+		});
+	}
+
+	std::thread quoteReader;
+	WTSTickStruct tick = make_tick("SHFE", "rb2401", 0, 0);
+	std::atomic<bool> quoteReaderStarted { false };
+	bool quoteReaderEntered = false;
+	if (bothCallbacksEntered)
+	{
+		quoteReader = std::thread([&] {
+			bool firstRead = true;
+			while (g_concurrent_create_done.load(std::memory_order_acquire) < 2)
+			{
+				runner.on_ext_parser_quote("r22_concurrent_baseline", &tick, 0);
+				if (firstRead)
+				{
+					quoteReaderStarted.store(true, std::memory_order_release);
+					g_concurrent_parser_cv.notify_all();
+					firstRead = false;
+				}
+				std::this_thread::yield();
+			}
+		});
+		std::unique_lock<std::mutex> lock(g_concurrent_parser_mutex);
+		quoteReaderEntered = g_concurrent_parser_cv.wait_for(lock, std::chrono::seconds(5), [&] {
+			return quoteReaderStarted.load(std::memory_order_acquire);
+		});
+	}
+	{
+		std::lock_guard<std::mutex> lock(g_concurrent_parser_mutex);
+		g_release_concurrent_parser_init = true;
+	}
+	g_concurrent_parser_cv.notify_all();
+	creatorA.join();
+	creatorB.join();
+	if (quoteReader.joinable())
+		quoteReader.join();
+
+	EXPECT_TRUE(bothCallbacksEntered);
+	EXPECT_TRUE(quoteReaderEntered);
+	EXPECT_TRUE(createA);
+	EXPECT_TRUE(createB);
+	EXPECT_EQ(3U, g_concurrent_init_count.load(std::memory_order_relaxed));
+	EXPECT_EQ(3U, g_concurrent_connect_count.load(std::memory_order_relaxed));
 }

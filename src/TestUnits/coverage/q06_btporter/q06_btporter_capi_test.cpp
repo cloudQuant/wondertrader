@@ -80,6 +80,17 @@ TEST(Q06BtPorterCapi, VersionStringHasPlatformPrefix)
 	EXPECT_NE(s.find("Build@"), std::string::npos) << s;
 }
 
+TEST(Q06BtPorterCapi, VersionedConfigReturnsFailureAndTerminatesDiagnostic)
+{
+	char error[8] = { 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x' };
+	const int32_t status = config_backtest_v2(
+		"/tmp/wt_q06_missing_config_v2_45f923.json", true, error, sizeof(error));
+	EXPECT_NE(0, status);
+	EXPECT_NE('\0', error[0]);
+	EXPECT_EQ('\0', error[sizeof(error) - 1]);
+	EXPECT_NE(0, config_backtest_v2(NULL, true, NULL, 0));
+}
+
 TEST(Q06BtPorterCapi, WriteLogAcceptsNamedAndEmptyCategory)
 {
 	write_log(LOG_LEVEL_DEBUG, "q06 bt debug", "");

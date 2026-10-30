@@ -11,6 +11,7 @@
 #include "../Includes/IParserApi.h"
 #include "../Share/DLLHelper.hpp"
 #include <API/CTPMini1.5.8/ThostFtdcMdApi.h>
+#include <cstddef>
 #include <map>
 
 NS_WTP_BEGIN
@@ -81,6 +82,8 @@ private:
 	 *	订阅品种行情
 	 */
 	void SubscribeMarketData();
+	void SubmitMarketDataSubscriptions(const CodeSet &codes);
+	static bool IsSubscriptionCountSupported(std::size_t count);
 	/*
 	 *	检查错误信息
 	 */

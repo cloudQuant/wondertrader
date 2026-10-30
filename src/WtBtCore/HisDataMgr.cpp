@@ -35,6 +35,12 @@ void HisDataMgr::reader_log(WTSLogLevel ll, const char* message)
  */
 bool HisDataMgr::init(WTSVariant* cfg)
 {
+	if (cfg == NULL)
+	{
+		WTSLogger::error("Initializing of backtest data reader failed: configuration is null");
+		return false;
+	}
+
 	// 获取模块名称，如果没有配置则使用默认的WtDataStorage
 	std::string module = cfg->getCString("module");
 	if (module.empty())
@@ -44,30 +50,32 @@ bool HisDataMgr::init(WTSVariant* cfg)
 
 	// 加载数据存储模块库
 	DllHandle libParser = DLLHelper::load_library(module.c_str());
-	if (libParser)
-	{
-		// 获取创建读取器的函数指针
-		FuncCreateBtDtReader pFuncCreator = (FuncCreateBtDtReader)DLLHelper::get_symbol(libParser, "createBtDtReader");
-		if (pFuncCreator == NULL)
-		{
-			WTSLogger::error("Initializing of backtest data reader failed: function createBtDtReader not found...");
-		}
-
-		// 如果函数指针获取成功，创建读取器实例
-		if (pFuncCreator)
-		{
-			_reader = pFuncCreator();
-		}
-
-		WTSLogger::debug("Back data storage module {} loaded", module);
-	}
-	else
+	if (libParser == NULL)
 	{
 		WTSLogger::error("Loading module back data storage module {} failed", module);
-
+		return false;
 	}
 
-	// 初始化读取器实例，传入配置和当前对象作为回调接收器
+	// 获取创建读取器的函数指针。
+	FuncCreateBtDtReader pFuncCreator = (FuncCreateBtDtReader)DLLHelper::get_symbol(libParser, "createBtDtReader");
+	if (pFuncCreator == NULL)
+	{
+		WTSLogger::error("Initializing of backtest data reader failed: function createBtDtReader not found...");
+		DLLHelper::free_library(libParser);
+		return false;
+	}
+
+	_reader = pFuncCreator();
+	if (_reader == NULL)
+	{
+		WTSLogger::error("Initializing of backtest data reader failed: createBtDtReader returned null");
+		DLLHelper::free_library(libParser);
+		return false;
+	}
+
+	WTSLogger::debug("Back data storage module {} loaded", module);
+
+	// 初始化读取器实例，传入配置和当前对象作为回调接收器。
 	_reader->init(cfg, this);
 
 	return true;

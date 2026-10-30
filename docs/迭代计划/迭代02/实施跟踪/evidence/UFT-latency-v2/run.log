@@ -1,0 +1,56 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 16 tests from 4 test suites.
+[----------] Global test environment set-up.
+[----------] 4 tests from r14_lazy_uft_tool
+[ RUN      ] r14_lazy_uft_tool.ctor_dtor_roundtrip_only_builds_member_managers
+[       OK ] r14_lazy_uft_tool.ctor_dtor_roundtrip_only_builds_member_managers (0 ms)
+[ RUN      ] r14_lazy_uft_tool.init_without_config_yaml_returns_false_in_empty_cwd
+[       OK ] r14_lazy_uft_tool.init_without_config_yaml_returns_false_in_empty_cwd (0 ms)
+[ RUN      ] r14_lazy_uft_tool.init_is_repeatable_and_still_false_without_config
+[       OK ] r14_lazy_uft_tool.init_is_repeatable_and_still_false_without_config (0 ms)
+[ RUN      ] r14_lazy_uft_tool.empty_cwd_is_really_empty_and_restored
+[       OK ] r14_lazy_uft_tool.empty_cwd_is_really_empty_and_restored (0 ms)
+[ DISABLED ] r14_lazy_uft_tool.DISABLED_entry_blocks_on_getchar
+[ DISABLED ] r14_lazy_uft_tool.DISABLED_init_success_needs_real_config_and_engine
+[ DISABLED ] r14_lazy_uft_tool.DISABLED_run_starts_threads_and_busy_loop
+[----------] 4 tests from r14_lazy_uft_tool (1 ms total)
+
+[----------] 3 tests from r95_ufttool_init
+[ RUN      ] r95_ufttool_init.string_basefiles_reach_all_success_stages
+[       OK ] r95_ufttool_init.string_basefiles_reach_all_success_stages (2 ms)
+[ RUN      ] r95_ufttool_init.array_basefiles_for_commodity_and_contract_are_walked
+[       OK ] r95_ufttool_init.array_basefiles_for_commodity_and_contract_are_walked (1 ms)
+[ RUN      ] r95_ufttool_init.absent_optional_basefiles_children_are_skipped
+[       OK ] r95_ufttool_init.absent_optional_basefiles_children_are_skipped (0 ms)
+[----------] 3 tests from r95_ufttool_init (4 ms total)
+
+[----------] 8 tests from r95_ufttool_run
+[ RUN      ] r95_ufttool_run.zero_ticks_after_successful_init_exercises_engine_and_parser_tail
+[       OK ] r95_ufttool_run.zero_ticks_after_successful_init_exercises_engine_and_parser_tail (1 ms)
+[ RUN      ] r95_ufttool_run.run_after_failed_init_does_not_use_parser
+[       OK ] r95_ufttool_run.run_after_failed_init_does_not_use_parser (0 ms)
+[ RUN      ] r95_ufttool_run.shutdown_after_run_stops_engine_before_releasing_parser
+[       OK ] r95_ufttool_run.shutdown_after_run_stops_engine_before_releasing_parser (1 ms)
+[ RUN      ] r95_ufttool_run.shutdown_waits_for_real_ready_callback_before_releasing_context
+[       OK ] r95_ufttool_run.shutdown_waits_for_real_ready_callback_before_releasing_context (34 ms)
+[ RUN      ] r95_ufttool_run.shutdown_waits_for_run_operation_before_releasing_parser
+[       OK ] r95_ufttool_run.shutdown_waits_for_run_operation_before_releasing_parser (36 ms)
+[ RUN      ] r95_ufttool_run.shutdown_called_from_ready_callback_defers_without_self_wait
+[       OK ] r95_ufttool_run.shutdown_called_from_ready_callback_defers_without_self_wait (1 ms)
+[ RUN      ] r95_ufttool_run.one_tick_without_contract_reports_and_returns
+[       OK ] r95_ufttool_run.one_tick_without_contract_reports_and_returns (1 ms)
+[ RUN      ] r95_ufttool_run.one_tick_with_contract_and_commodity_runs
+[       OK ] r95_ufttool_run.one_tick_with_contract_and_commodity_runs (1 ms)
+[----------] 8 tests from r95_ufttool_run (78 ms total)
+
+[----------] 1 test from r95_ufttool_entry
+[ RUN      ] r95_ufttool_entry.free_function_runs_init_and_run_with_valid_config
+[       OK ] r95_ufttool_entry.free_function_runs_init_and_run_with_valid_config (0 ms)
+[----------] 1 test from r95_ufttool_entry (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 16 tests from 4 test suites ran. (85 ms total)
+[  PASSED  ] 16 tests.
+
+  YOU HAVE 3 DISABLED TESTS
+

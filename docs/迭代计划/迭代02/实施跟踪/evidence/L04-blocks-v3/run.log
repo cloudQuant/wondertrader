@@ -1,0 +1,51 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = L04ProcBlockData.*:L04BtReaderTest.CorruptedBlockReturnsFalse:L04BtReaderTest.MisalignedRawBarsReturnFalseWithoutReadingPayload:L04BtReaderTest.MisalignedUnknownVersionBarsFailAtDataReaderConsumer:L04BtReaderTest.*History*
+[==========] Running 19 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 14 tests from L04ProcBlockData
+[ RUN      ] L04ProcBlockData.RawV2DropHead
+[       OK ] L04ProcBlockData.RawV2DropHead (0 ms)
+[ RUN      ] L04ProcBlockData.RawV2KeepHead
+[       OK ] L04ProcBlockData.RawV2KeepHead (0 ms)
+[ RUN      ] L04ProcBlockData.UnknownVersionRemainsGenericPassthrough
+[       OK ] L04ProcBlockData.UnknownVersionRemainsGenericPassthrough (0 ms)
+[ RUN      ] L04ProcBlockData.RejectsMisalignedRawBarPayloadsWithoutMutation
+[       OK ] L04ProcBlockData.RejectsMisalignedRawBarPayloadsWithoutMutation (0 ms)
+[ RUN      ] L04ProcBlockData.EmptyRawBarsAreAccepted
+[       OK ] L04ProcBlockData.EmptyRawBarsAreAccepted (0 ms)
+[ RUN      ] L04ProcBlockData.RejectsIncompleteBaseHeadersWithoutMutation
+[       OK ] L04ProcBlockData.RejectsIncompleteBaseHeadersWithoutMutation (0 ms)
+[ RUN      ] L04ProcBlockData.RejectsIncompleteCompressedHeadersWithoutMutation
+[       OK ] L04ProcBlockData.RejectsIncompleteCompressedHeadersWithoutMutation (0 ms)
+[ RUN      ] L04ProcBlockData.OldBarsUpgraded
+[       OK ] L04ProcBlockData.OldBarsUpgraded (0 ms)
+[ RUN      ] L04ProcBlockData.OldBarsUpgradedKeepHead
+[       OK ] L04ProcBlockData.OldBarsUpgradedKeepHead (0 ms)
+[ RUN      ] L04ProcBlockData.OldTicksUpgraded
+[       OK ] L04ProcBlockData.OldTicksUpgraded (0 ms)
+[ RUN      ] L04ProcBlockData.CompressedNewBarsUncompressed
+[       OK ] L04ProcBlockData.CompressedNewBarsUncompressed (0 ms)
+[ RUN      ] L04ProcBlockData.CompressedOldBarsUncompressedAndUpgraded
+[       OK ] L04ProcBlockData.CompressedOldBarsUncompressedAndUpgraded (0 ms)
+[ RUN      ] L04ProcBlockData.CompressedSizeMismatchRejected
+[       OK ] L04ProcBlockData.CompressedSizeMismatchRejected (0 ms)
+[ RUN      ] L04ProcBlockData.MalformedCompressedFramesAreRejectedWithoutMutation
+[       OK ] L04ProcBlockData.MalformedCompressedFramesAreRejectedWithoutMutation (0 ms)
+[----------] 14 tests from L04ProcBlockData (0 ms total)
+
+[----------] 5 tests from L04BtReaderTest
+[ RUN      ] L04BtReaderTest.CorruptedBlockReturnsFalse
+[       OK ] L04BtReaderTest.CorruptedBlockReturnsFalse (0 ms)
+[ RUN      ] L04BtReaderTest.MisalignedRawBarsReturnFalseWithoutReadingPayload
+[       OK ] L04BtReaderTest.MisalignedRawBarsReturnFalseWithoutReadingPayload (1 ms)
+[ RUN      ] L04BtReaderTest.MisalignedUnknownVersionBarsFailAtDataReaderConsumer
+[       OK ] L04BtReaderTest.MisalignedUnknownVersionBarsFailAtDataReaderConsumer (1 ms)
+[ RUN      ] L04BtReaderTest.PublicDataReaderRetriesAfterMisalignedHistoryIsRepaired
+[       OK ] L04BtReaderTest.PublicDataReaderRetriesAfterMisalignedHistoryIsRepaired (1 ms)
+[ RUN      ] L04BtReaderTest.FailedHistoryWithSameDayBackwardAdjustedRealtimeReturnsNull
+[       OK ] L04BtReaderTest.FailedHistoryWithSameDayBackwardAdjustedRealtimeReturnsNull (1 ms)
+[----------] 5 tests from L04BtReaderTest (6 ms total)
+
+[----------] Global test environment tear-down
+[==========] 19 tests from 2 test suites ran. (6 ms total)
+[  PASSED  ] 19 tests.

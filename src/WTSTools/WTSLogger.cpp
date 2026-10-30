@@ -129,7 +129,7 @@ inline void print_timetag(bool bWithSpace = true)
 void WTSLogger::print_message(const char* buffer)
 {
 	print_timetag(true);
-	fmt::print(buffer);
+	fmt::print("{}", buffer);
 	fmt::print("\r\n");
 }
 
@@ -365,7 +365,7 @@ void WTSLogger::log_raw_by_cat(const char* catName, WTSLogLevel ll, const char* 
 	if (!m_bInited)
 	{
 		print_timetag(true);
-		fmt::print(message);
+		fmt::print("{}", message);
 		fmt::print("\n");
 		return;
 	}

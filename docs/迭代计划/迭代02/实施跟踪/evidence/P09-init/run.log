@@ -1,0 +1,43 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = P09DataReaderTest.init_null_cfg_returns_before_any_dir_config:P09DataReaderTest.init_single_path_and_his_path_and_adjust_flag:P09DataReaderTest.init_path_array_and_adjfactor_file_is_loaded:P09DataReaderTest.init_missing_path_returns_without_partial_directories:P09DataReaderTest.init_null_sinkLeavesReaderNotReady:P09DataReaderTest.invalidReinitializationClearsPreviousReadyDirectories:P09DataReaderTest.init_emptyOrInvalidPathReturnsWithoutPartialDirectories
+[==========] Running 7 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 7 tests from P09DataReaderTest
+[ RUN      ] P09DataReaderTest.init_null_cfg_returns_before_any_dir_config
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p09_storage_readers/p09_reader_init_adjfactor_test.cpp:229: Failure
+Expected equality of these values:
+  reader._adjust_flag
+    Which is: 135382368
+  0u
+    Which is: 0
+
+[  FAILED  ] P09DataReaderTest.init_null_cfg_returns_before_any_dir_config (0 ms)
+[ RUN      ] P09DataReaderTest.init_single_path_and_his_path_and_adjust_flag
+[       OK ] P09DataReaderTest.init_single_path_and_his_path_and_adjust_flag (1 ms)
+[ RUN      ] P09DataReaderTest.init_path_array_and_adjfactor_file_is_loaded
+[       OK ] P09DataReaderTest.init_path_array_and_adjfactor_file_is_loaded (0 ms)
+[ RUN      ] P09DataReaderTest.init_missing_path_returns_without_partial_directories
+[       OK ] P09DataReaderTest.init_missing_path_returns_without_partial_directories (0 ms)
+[ RUN      ] P09DataReaderTest.init_null_sinkLeavesReaderNotReady
+[       OK ] P09DataReaderTest.init_null_sinkLeavesReaderNotReady (0 ms)
+[ RUN      ] P09DataReaderTest.invalidReinitializationClearsPreviousReadyDirectories
+[       OK ] P09DataReaderTest.invalidReinitializationClearsPreviousReadyDirectories (3 ms)
+[ RUN      ] P09DataReaderTest.init_emptyOrInvalidPathReturnsWithoutPartialDirectories
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p09_storage_readers/p09_reader_init_adjfactor_test.cpp:485: Failure
+Expected equality of these values:
+  _sink->count_of(LL_ERROR)
+    Which is: 4
+  invalidConfigs.size() + 1
+    Which is: 5
+
+[  FAILED  ] P09DataReaderTest.init_emptyOrInvalidPathReturnsWithoutPartialDirectories (1 ms)
+[----------] 7 tests from P09DataReaderTest (8 ms total)
+
+[----------] Global test environment tear-down
+[==========] 7 tests from 1 test suite ran. (8 ms total)
+[  PASSED  ] 5 tests.
+[  FAILED  ] 2 tests, listed below:
+[  FAILED  ] P09DataReaderTest.init_null_cfg_returns_before_any_dir_config
+[  FAILED  ] P09DataReaderTest.init_emptyOrInvalidPathReturnsWithoutPartialDirectories
+
+ 2 FAILED TESTS

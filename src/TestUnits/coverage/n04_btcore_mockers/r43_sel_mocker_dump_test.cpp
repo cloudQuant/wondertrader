@@ -10,9 +10,7 @@
  *   stra_* 查询族(L913-1013)      —— fund_data/day_price/sessinfo/user_data/enum_position
  * 落盘目录为 temp_directory_path()/r43_sel_out_<pid>，TearDown 清理。
  *
- * 注意：handle_replay_done 用 _total_calc_time / _emit_times 计算平均耗时，
- * _emit_times==0 时是整数除零（见 bugs/R43.md BUG-R43-001），因此启用用例都先
- * 至少调度一次；零调度场景收在文件末尾的 DISABLED_ 用例里。
+ * handle_replay_done 在零次调度时将平均耗时记为 0；零次与正常调度结束路径均有覆盖。
  */
 #include <gtest/gtest.h>
 
@@ -30,6 +28,7 @@
 #include <WtBtCore/SelMocker.h>
 #include <WtBtCore/WtHelper.h>
 #include <Includes/WTSDataDef.hpp>
+#include <Includes/WTSVariant.hpp>
 
 namespace
 {
@@ -41,6 +40,12 @@ namespace
 		std::filesystem::remove_all(path, ec);
 		std::filesystem::create_directories(path, ec);
 		return path;
+	}
+
+	std::filesystem::path r43_repo_root()
+	{
+		return std::filesystem::path(__FILE__).parent_path()
+			.parent_path().parent_path().parent_path().parent_path();
 	}
 
 	std::string r43_read_file(const std::filesystem::path& p)
@@ -91,6 +96,16 @@ namespace
 		return WTSTickData::create(ts);
 	}
 }
+
+class R43CompletionTrackingSelMocker : public SelMocker
+{
+public:
+	using SelMocker::SelMocker;
+
+	uint32_t replayDoneCalls {0};
+
+	void on_bactest_end() override { replayDoneCalls++; }
+};
 
 class R43SelMockerDumpTest : public ::testing::Test
 {
@@ -248,15 +263,41 @@ TEST_F(R43SelMockerDumpTest, loggingAndTickWithoutSignalsKeepState)
 	EXPECT_TRUE(std::filesystem::exists(_out / "r43_sel_log" / "funds.csv"));
 }
 
-/*
- * 缺陷归档（见 bugs/R43.md BUG-R43-001）：SelMocker::handle_replay_done L305-307
- * 先按 _total_calc_time / _emit_times 算平均耗时，再落盘；_emit_times==0 时
- * 整数除零（SIGFPE），回放器在没有任何 schedule 的情况下调用 handle_replay_done
- * 会直接崩掉整个测试进程。这里只保留缺陷用例，不启用。
- */
-TEST_F(R43SelMockerDumpTest, DISABLED_replayDoneWithoutScheduleDividesByZero)
+TEST_F(R43SelMockerDumpTest, replayDoneWithoutScheduleWritesArtifacts)
 {
 	HisDataReplayer replayer;
-	SelMocker mocker(&replayer, "r43_sel_div0");
-	mocker.handle_replay_done();
+	R43CompletionTrackingSelMocker mocker(&replayer, "r43_sel_div0");
+
+	WTSVariant* cfg = WTSVariant::createObject();
+	cfg->append("mode", "csv");
+	cfg->append("path", _out.string().c_str());
+	cfg->append("stime", static_cast<uint64_t>(202001020930));
+	cfg->append("etime", static_cast<uint64_t>(202001021500));
+	cfg->append("tick", false);
+	cfg->append("adjust_flag", static_cast<uint32_t>(0));
+	cfg->append("align_by_section", false);
+	cfg->append("dont_simtick_if_notrade", false);
+	cfg->append("cache_clear_days", static_cast<uint32_t>(10));
+	cfg->append("fees", "");
+
+	const std::filesystem::path root = r43_repo_root();
+	WTSVariant* basefiles = WTSVariant::createObject();
+	basefiles->append("session", (root / "dist/common/sessions.json").string().c_str());
+	basefiles->append("commodity", (root / "dist/common/stk_comms.json").string().c_str());
+	cfg->append("basefiles", basefiles);
+	basefiles->release();
+
+	const bool initialized = replayer.init(cfg);
+	cfg->release();
+	ASSERT_TRUE(initialized);
+	replayer.enable_tick(false);
+	replayer.register_sink(&mocker, "r43_sel_div0");
+	ASSERT_TRUE(replayer.prepare());
+	EXPECT_EQ(0u, mocker.replayDoneCalls);
+	replayer.run(false);
+	EXPECT_EQ(1u, mocker.replayDoneCalls);
+
+	const std::filesystem::path dir = _out / "r43_sel_div0";
+	EXPECT_TRUE(std::filesystem::exists(dir / "trades.csv"));
+	EXPECT_TRUE(std::filesystem::exists(dir / "ud_r43_sel_div0.json"));
 }

@@ -104,6 +104,12 @@ TEST(n05_riskmon, delete_guards_foreign_and_null)
 TEST(n05_simpdatamgr, empty_state_accessors)
 {
 	WtSimpDataMgr mgr;
+	// 时间/日期查询在第一笔行情前使用 0 哨兵。
+	EXPECT_EQ(mgr.get_date(), 0u);
+	EXPECT_EQ(mgr.get_min_time(), 0u);
+	EXPECT_EQ(mgr.get_secs(), 0u);
+	EXPECT_EQ(mgr.get_raw_time(), 0u);
+	EXPECT_EQ(mgr.get_trading_day(), 0u);
 	// 从未推送过行情：缓存表为空，读取安全返回空
 	EXPECT_EQ(mgr.grab_last_tick("SHFE.rb2401"), nullptr);
 	// reader 为空时切片接口返回 NULL，不应崩溃
@@ -119,11 +125,9 @@ TEST(n05_simpdatamgr, push_null_tick_is_noop)
 	EXPECT_EQ(mgr.grab_last_tick("SHFE.rb2401"), nullptr);
 }
 
-// 缺陷类覆盖（见 bugs/n05_exec_factories.md BUG-N05-001/002）：
-// 未 init 时 _s_info 为空指针，handle_push_quote 解引用 _s_info->timeToMinutes 必段错误；
-// 同时构造函数未初始化 _cur_date/_cur_min_time/_cur_secs/_cur_raw_time/_cur_tdate，读取为不确定值。
-// 该输入类会导致进程崩溃（不是挂死），按要求全部收进同一个 DISABLED_ 用例，保持禁用。
-TEST(DISABLED_n05_simpdatamgr, uninitialized_push_quote_crashes_and_getters_read_uninit)
+// BUG-N05-002：未配置有效 session 时，首笔行情会解引用空 _s_info。
+// 本用例只记录独立的 session 生命周期缺陷；未初始化时钟字段已由上面的普通用例覆盖。
+TEST(DISABLED_n05_simpdatamgr, push_quote_without_session_dereferences_null)
 {
 	WtSimpDataMgr mgr;
 	WTSTickStruct ts;
@@ -132,10 +136,7 @@ TEST(DISABLED_n05_simpdatamgr, uninitialized_push_quote_crashes_and_getters_read
 	ts.trading_date = 20240101;
 	ts.action_time = 93000000;
 	WTSTickData* tick = WTSTickData::create(ts);
-	// 以下两行在无 init 场景下分别触发：读取未初始化内存 / 解引用空 _s_info
-	uint32_t d = mgr.get_date();
-	(void)d;
+	// 未 init 时 _s_info 为空，handle_push_quote 解引用 _s_info->timeToMinutes。
 	mgr.handle_push_quote("rb2401", tick);
-	// 若修复为判空后 return，则本用例可改为断言 get_date()==0；当前保持 DISABLED
 	tick->release();
 }

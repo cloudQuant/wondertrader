@@ -204,4 +204,4 @@ public:
 //创建执行工厂
 typedef IUftStrategyFact* (*FuncCreateUftStraFact)();
 //删除执行工厂
-typedef void(*FuncDeleteUftStraFact)(IUftStrategyFact* &fact);
+typedef void(*FuncDeleteUftStraFact)(IUftStrategyFact* fact);

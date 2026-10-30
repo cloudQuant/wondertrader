@@ -10,6 +10,7 @@
 #pragma once
 #include <queue>
 #include <functional>
+#include <atomic>
 #include <stdint.h>
 
 #include "ParserAdapter.h"
@@ -311,7 +312,8 @@ protected:
 	TaskQueue		_task_queue;
 	StdUniqueMutex	_mtx_task;
 	StdCondVariable	_cond_task;
-	bool			_terminated;
+	std::atomic<bool>	_terminated;
+	StdUniqueMutex	_mtx_task_release;
 
 	typedef struct _RiskMonFactInfo
 	{

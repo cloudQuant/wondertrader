@@ -9,6 +9,12 @@
 
 #pragma once
 
+#include <atomic>
+#include <cstddef>
+#include <condition_variable>
+#include <mutex>
+#include <vector>
+
 #include "WtSimpDataMgr.h"
 
 #include "../WtCore/WtExecMgr.h"
@@ -38,6 +44,7 @@ public:
 	 * @details 初始化执行监控系统运行器，安装信号处理钩子
 	 */
 	WtExecRunner();
+	~WtExecRunner();
 
 	/**
 	 * @brief 初始化运行器
@@ -51,6 +58,7 @@ public:
 	/**
 	 * @brief 加载配置
 	 * @details 加载执行监控系统的配置，包括基础数据、解析器、交易器和执行器等
+	 *          每个 runner 只接受一次配置；部分配置失败后必须释放并重新创建 runner。
 	 * @param cfgFile 配置文件路径或内容
 	 * @param isFile 是否为文件路径，默认为true
 	 * @return 加载配置是否成功
@@ -150,7 +158,7 @@ public:
 	 * @details 实现IExecuterStub接口的方法，返回主力合约管理器
 	 * @return 主力合约管理器指针
 	 */
-	virtual IHotMgr* get_hot_mon() override { return &_hot_mgr; }
+	virtual IHotMgr* get_hot_mon() override;
 
 	/**
 	 * @brief 获取交易日
@@ -197,12 +205,50 @@ private:
 	 * @return 初始化是否成功
 	 */
 	bool initActionPolicy();
+	bool shutdownRuntime();
+	bool closeRuntimeAdmissionAndDrain();
+	bool closeContextAdmissionAndDrain();
+	bool beginConfiguration();
+
+	class RuntimeOperation
+	{
+	public:
+		enum Kind { RuntimeCall, ContextCall };
+		RuntimeOperation(WtExecRunner* runner, Kind kind);
+		~RuntimeOperation();
+		bool entered() const { return _entered; }
+		bool isNested() const { return _nested; }
+		static bool isCurrentThreadIn(const WtExecRunner* runner);
+
+	private:
+		WtExecRunner* _runner;
+		RuntimeOperation* _previous;
+		Kind _kind;
+		bool _entered;
+		bool _counted;
+		bool _nested;
+		static thread_local RuntimeOperation* _current;
+	};
 
 private:
+	std::atomic<bool>	_config_failed;  ///< Whether the latest config() call failed or shutdown is pending
+	std::atomic<bool>	_shutdown_complete;
+	std::atomic<bool>	_shutdown_in_progress;
+	mutable std::mutex _lifecycle_mutex;
+	std::condition_variable _lifecycle_condition;
+	bool _accepting_runtime_calls;
+	bool _accepting_context_calls;
+	bool _configuration_attempted;
+	bool _run_started;
+	bool _factory_operation_active;
+	std::size_t _active_runtime_calls;
+	std::size_t _active_context_calls;
 	TraderAdapterMgr	_traders;      ///< 交易适配器管理器
 	ParserAdapterMgr	_parsers;      ///< 解析器适配器管理器
+	// Failed parser initialization may leave a plugin with a registered SPI.
+	// Keep those candidates alive until a provider drain contract exists.
+	std::vector<ParserAdapterPtr> _parser_quarantine;
 	WtExecuterFactory	_exe_factory;  ///< 执行器工厂
-	WtExecuterMgr		_exe_mgr;       ///< 执行管理器
 
 	WTSVariant*			_config;        ///< 配置对象
 
@@ -211,7 +257,14 @@ private:
 	WTSBaseDataMgr		_bd_mgr;        ///< 基础数据管理器
 	WTSHotMgr			_hot_mgr;       ///< 主力合约管理器
 	ActionPolicyMgr		_act_policy;    ///< 行为策略管理器
+	// Declare the manager after the objects borrowed by its executors so its
+	// hosts are destroyed first, while the factory and execution context remain.
+	WtExecuterMgr		_exe_mgr;       ///< 执行管理器
+	// Keep the coordinator alive across failed shutdown attempts: its completion
+	// token is bound to _exe_mgr and the manager retains partial-stage owners.
+	WtExecQuiesceCoordinator _quiesce_coordinator;
 
 	wt_hashmap<std::string, double> _positions;  ///< 目标仓位缓存
+	std::mutex _positions_mutex;
 };
 

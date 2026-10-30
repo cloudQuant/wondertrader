@@ -113,8 +113,8 @@ TEST_F(R19TempDir, r19_slave_cannot_create_section_or_key)
 	EXPECT_NE(nullptr, sb().allocate_int32(domM.c_str(), "exist", "fresh", 3));
 }
 
-// commit_section 不动 block 级 _updatetime → 非强制刷新永远为 false（缺陷 BUG-R19-001）
-TEST_F(R19TempDir, r19_update_slave_ignores_commit_until_blocktime_changes)
+// commit_section 发布严格递增的 block version，slave 的非强制刷新按版本重建索引。
+TEST_F(R19TempDir, r19_update_slave_refreshes_after_commit_and_repeated_refresh_is_false)
 {
 	r19::attach_logger();
 	const std::string domM = r19::domain("b3m");
@@ -124,23 +124,19 @@ TEST_F(R19TempDir, r19_update_slave_ignores_commit_until_blocktime_changes)
 	ASSERT_TRUE(sb().init_master(domM.c_str(), path.c_str()));
 	ASSERT_NE(nullptr, sb().allocate_int32(domM.c_str(), "sec", "k", 1));
 
-	// init_slave：_blocktime = block->_updatetime（新建块 = 0）
 	ASSERT_TRUE(sb().init_slave(domS.c_str(), path.c_str()));
 
-	// master 提交了一次，block 级 _updatetime 仍然是 0（commit_section L221 只写段级）
 	ASSERT_TRUE(sb().commit_section(domM.c_str(), "sec"));
-	EXPECT_FALSE(sb().update_slave(domS.c_str(), false))
-		<< "L136-137：block->_updatetime 没变，slave 认为无需刷新";
-	// 强制刷新才会重装载（L139-162）
-	r19::attach_logger();
-	EXPECT_TRUE(sb().update_slave(domS.c_str(), true));
+	EXPECT_TRUE(sb().update_slave(domS.c_str(), false));
 	EXPECT_TRUE(r19::has_log("reloaded"));
-	// 再提交一次，block 级时间戳依旧没动 → 非强制刷新还是 false
+	EXPECT_FALSE(sb().update_slave(domS.c_str(), false));
+
 	ASSERT_TRUE(sb().commit_section(domM.c_str(), "sec"));
+	EXPECT_TRUE(sb().update_slave(domS.c_str(), false));
 	EXPECT_FALSE(sb().update_slave(domS.c_str(), false));
 }
 
-// 非强制刷新的真正触发条件：block->_updatetime 被 delete_section 改过
+// 删除发布新版本；slave 刷新后墓碑不能读，其他 live section 保留。
 TEST_F(R19TempDir, r19_update_slave_reloads_after_blocktime_change_and_release_rules)
 {
 	r19::attach_logger();
@@ -154,11 +150,17 @@ TEST_F(R19TempDir, r19_update_slave_reloads_after_blocktime_change_and_release_r
 	ASSERT_TRUE(sb().init_slave(domS.c_str(), path.c_str()));
 	EXPECT_EQ(41, sb().get_int32(domS.c_str(), "alive", "k1", -1));
 
-	// block->_updatetime 初值 0，slave 的 _blocktime 也是 0 → 非强制为 false
+	// init 后版本未变化，刷新返回 false。
 	EXPECT_FALSE(sb().update_slave(domS.c_str(), false));
 
-	// master 删段 → block->_updatetime = now（L247）→ 非强制刷新为 true
+	// master 删段 → 墓碑和新版本在同一文件锁内发布。
 	ASSERT_TRUE(sb().delete_section(domM.c_str(), "doomed"));
+	// The slave may still have the old key index before refresh; it must not
+	// reactivate the shared tombstone through an allocate/set call.
+	EXPECT_EQ(nullptr, sb().allocate_int32(domS.c_str(), "doomed", "k2", 999, true));
+	EXPECT_FALSE(sb().set_int32(domS.c_str(), "doomed", "k2", 999));
+	EXPECT_EQ(-1, sb().get_int32(domS.c_str(), "doomed", "k2", -1));
+	EXPECT_EQ(1u, sb().get_sections(domS.c_str()).size());
 	const size_t before = r19::log_count();
 	EXPECT_TRUE(sb().update_slave(domS.c_str(), false));
 	EXPECT_GE(r19::log_count(), before);
@@ -167,19 +169,19 @@ TEST_F(R19TempDir, r19_update_slave_reloads_after_blocktime_change_and_release_r
 	// 刷新后 block->_updatetime 被同步（L160）→ 再来一次非强制就是 false
 	EXPECT_FALSE(sb().update_slave(domS.c_str(), false));
 
-	// 缺陷 BUG-R19-002：L143-156 的重装载循环只看 _count==0，不看 _state，
-	// 于是 master 已经 delete（_state=2）的段在 slave 侧被重新装回缓存
-	EXPECT_EQ(42, sb().get_int32(domS.c_str(), "doomed", "k2", -1))
-		<< "被删除的段在 slave 刷新后仍可读到，说明 slave 无法感知删除";
+	EXPECT_EQ(-1, sb().get_int32(domS.c_str(), "doomed", "k2", -1))
+		<< "墓碑段不应继续可读";
+	EXPECT_EQ(0u, sb().get_section_updatetime(domS.c_str(), "doomed"));
 	auto secsS = sb().get_sections(domS.c_str());
 	ASSERT_EQ(1u, secsS.size()) << "枚举侧看得到 _state!=1 被过滤掉";
 	EXPECT_EQ("alive", secsS[0]);
 
-	// L416-419：段数与 block->_count 不一致时 get_keys 内部会强制刷新
 	ASSERT_NE(nullptr, sb().allocate_int32(domM.c_str(), "third", "k3", 43));
+	ASSERT_TRUE(sb().commit_section(domM.c_str(), "third"));
 	EXPECT_EQ(1u, sb().get_keys(domS.c_str(), "third").size())
-		<< "get_keys 检测到 size 不一致 → update_slave(domain,true) 后应能看到新段";
+		<< "get_keys 应依照已发布版本刷新 slave 索引";
 	EXPECT_EQ(43, sb().get_int32(domS.c_str(), "third", "k3", -1));
+	EXPECT_FALSE(sb().update_slave(domS.c_str(), false));
 
 	// release_slave：master 域拒绝（L174-175），slave 域成功（L177-183），未知域返回 true（L168-169）
 	EXPECT_FALSE(sb().release_slave(domM.c_str()));

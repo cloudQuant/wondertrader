@@ -6,6 +6,9 @@
  */
 #include "WtOrdMon.h"
 
+#include <tuple>
+#include <vector>
+
 /**
  * @brief 添加订单到监控器
  * @details 将一组订单ID添加到监控器中，并记录其下单时间和是否可撤销
@@ -20,9 +23,13 @@ void WtOrdMon::push_order(const uint32_t* ids, uint32_t cnt, uint64_t curTime, b
 	for (uint32_t idx = 0; idx < cnt; idx++)
 	{
 		uint32_t localid = ids[idx];
-		OrderPair& ordInfo = _orders[localid];
-		ordInfo.first = curTime;
-		ordInfo.second = bCanCancel;
+		OrderInfo& ordInfo = _orders[localid];
+		ordInfo.enterTime = curTime;
+		ordInfo.canCancel = bCanCancel;
+		ordInfo.generation = _next_generation++;
+		if (_next_generation == 0)
+			_next_generation = 1;
+		ordInfo.unverifiedTimeout = false;
 	}
 }
 
@@ -50,23 +57,58 @@ void WtOrdMon::erase_order(uint32_t localid)
  */
 void WtOrdMon::check_orders(uint32_t expiresecs, uint64_t curTime, EnumOrderCallback callback)
 {
-	if (_orders.empty())
-		return;
+	check_orders_with_generation(expiresecs, curTime,
+		[callback](uint32_t localid, uint64_t) {
+			callback(localid);
+		});
+}
 
-
-	StdLocker<StdRecurMutex> lock(_mtx_ords);
-	for (auto& m : _orders)
+void WtOrdMon::check_orders_with_generation(uint32_t expiresecs, uint64_t curTime,
+	EnumOrderGenerationCallback callback)
+{
+	std::vector<WtOrdMonTimeoutCandidate> expired;
+	const uint64_t expireMs = static_cast<uint64_t>(expiresecs) * 1000ULL;
 	{
-		OrderPair& ordInfo = m.second;
-		if (!ordInfo.second)	//如果不能撤单，则直接跳过（一般涨跌停价的挂单是不能撤单的）
-			continue;
+		StdLocker<StdRecurMutex> lock(_mtx_ords);
+		for (const auto& m : _orders)
+		{
+			const OrderInfo& ordInfo = m.second;
+			if (!ordInfo.canCancel || ordInfo.unverifiedTimeout)	// 不可撤或已经进入 fail-closed 状态
+				continue;
 
-		auto entertm = ordInfo.first;
-		if (curTime - entertm < expiresecs * 1000)
-			continue;
+			if (curTime < ordInfo.enterTime || curTime - ordInfo.enterTime < expireMs)
+				continue;
 
-		callback(m.first);
+			expired.push_back({ m.first, ordInfo.generation });
+		}
 	}
+
+	for (const WtOrdMonTimeoutCandidate& candidate : expired)
+	{
+		callback(candidate.localid, candidate.generation);
+	}
+}
+
+bool WtOrdMon::mark_unverified_timeout(uint32_t localid, uint64_t generation,
+	uint32_t expiresecs, uint64_t curTime)
+{
+	StdLocker<StdRecurMutex> lock(_mtx_ords);
+	auto it = _orders.find(localid);
+	if (it == _orders.end())
+		return false;
+
+	OrderInfo& order = it->second;
+	if (order.generation != generation || !order.canCancel || order.unverifiedTimeout)
+		return false;
+
+	const uint64_t expireMs = static_cast<uint64_t>(expiresecs) * 1000ULL;
+	if (curTime < order.enterTime || curTime - order.enterTime < expireMs)
+		return false;
+
+	order.canCancel = false;
+	order.unverifiedTimeout = true;
+	_has_unverified_timeout = true;
+	return true;
 }
 
 /**
@@ -76,17 +118,17 @@ void WtOrdMon::check_orders(uint32_t expiresecs, uint64_t curTime, EnumOrderCall
  */
 void WtOrdMon::enumOrder(EnumAllOrderCallback cb)
 {
-	if (_orders.empty())
-		return;
-
-	StdLocker<StdRecurMutex> lock(_mtx_ords);
-	for (auto& m : _orders)
+	std::vector<std::tuple<uint32_t, uint64_t, bool>> orders;
 	{
-		uint32_t localid = m.first;
-		OrderPair& ordInfo = m.second;
-		uint64_t entertm = ordInfo.first;
-		bool cancancel = ordInfo.second;
-		cb(localid, entertm, cancancel);
+		StdLocker<StdRecurMutex> lock(_mtx_ords);
+		orders.reserve(_orders.size());
+		for (const auto& m : _orders)
+			orders.emplace_back(m.first, m.second.enterTime, m.second.canCancel);
+	}
+
+	for (const auto& order : orders)
+	{
+		cb(std::get<0>(order), std::get<1>(order), std::get<2>(order));
 	}
 }
 

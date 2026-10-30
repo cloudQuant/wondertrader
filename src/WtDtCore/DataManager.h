@@ -14,6 +14,7 @@
 #include "../Includes/IDataWriter.h"
 #include "../Share/StdUtils.hpp"
 #include "../Share/BoostMappingFile.hpp"
+#include "../Share/DLLHelper.hpp"
 
 NS_WTP_BEGIN
 class WTSTickData;
@@ -222,6 +223,11 @@ private:
 	 * @details 用于将数据写入到存储介质中
 	 */
 	IDataWriter*		_writer;
+	/** Dynamic library must stay loaded while the writer is released and destroyed. */
+	DllHandle		_writer_module;
+	/** Prevent reentrant shutdown and retries after release() failed part way through. */
+	bool			_writer_release_failed;
+	bool			_writer_releasing;
 
 	/**
 	 * @brief 数据写入器删除函数

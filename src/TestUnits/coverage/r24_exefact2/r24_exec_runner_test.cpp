@@ -49,6 +49,7 @@
 #include "Share/StdUtils.hpp"
 #include "Share/TimeUtils.hpp"
 #include "Share/fmtlib.h"
+#include "WtCore/WtHelper.h"
 #include "WtExecMon/WtExecRunner.h"
 
 using namespace wtp;
@@ -236,6 +237,31 @@ WTSTickData* mkRTick(const char* code, uint32_t actDate, uint32_t actTime, doubl
 	ts.open_interest = 0;
 	return WTSTickData::create(ts);
 }
+
+void expectFailedConfigKeepsRunnerInactive(WtExecRunner& runner)
+{
+	const uint32_t oldDate = WtHelper::getDate();
+	const uint32_t oldTime = WtHelper::getTime();
+	const uint32_t oldSecs = WtHelper::getSecs();
+	const uint32_t oldTradingDate = WtHelper::getTradingDate();
+	WtHelper::setTime(20240203, 1011, 1213);
+	WtHelper::setTDate(20240205);
+
+	const int64_t timeBeforeQuote = runner.get_real_time();
+	EXPECT_NO_THROW(runner.run());
+	WTSTickData* tick = mkRTick("SHFE.rb.2405", 20240102, 103015500, 3500.0);
+	EXPECT_NO_THROW(runner.handle_push_quote(tick));
+	EXPECT_EQ(runner.get_real_time(), timeBeforeQuote);
+	EXPECT_EQ(runner.get_trading_day(), 0u);
+	EXPECT_EQ(WtHelper::getDate(), 20240203u);
+	EXPECT_EQ(WtHelper::getTime(), 1011u);
+	EXPECT_EQ(WtHelper::getSecs(), 1213u);
+	EXPECT_EQ(WtHelper::getTradingDate(), 20240205u);
+	tick->release();
+
+	WtHelper::setTime(oldDate, oldTime, oldSecs);
+	WtHelper::setTDate(oldTradingDate);
+}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -310,17 +336,19 @@ TEST(r24_runner, config_without_holiday_key_skips_holiday_loader)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// config：有 data 段、有 bspolicy -> initDataMgr（L118、L356-363）与
-// initActionPolicy（L121、L418-427）都放行；三个子配置文件都存在 -> L126-140、L144-158、
+// config：无 data 段（数据管理器可选），有 bspolicy -> initActionPolicy（L121、L418-427）放行；
+// 三个子配置文件都存在 -> L126-140、L144-158、
 // L161-175 全部进入，最后 L177 return true。
-// 这一段同时把 initParsers（L198-229）/initTraders（L329-351）/initExecuters（L234-324）
-// 的主循环走了一遍（夹具里没有 module/poolsize，不 dlopen 也不起线程）。
+// Parser/Trader sidecar 使用有效空数组，保留文件加载路径而不引入无效 API；
+// executer sidecar 仍覆盖执行器初始化路径，夹具不加载插件也不起线程。
 //////////////////////////////////////////////////////////////////////////
 TEST(r24_runner, config_full_chain_returns_true_and_keeps_base_data)
 {
 	R24Fixture fx{ "fullcfg" };
+	fx.write("parsers.json", R"({"parsers":[]})");
+	fx.write("traders.json", R"({"traders":[]})");
 	WtExecRunner runner;
-	const std::string body = fx.cfg(true, true, true, true, true);
+	const std::string body = fx.cfg(false, true, true, true, true);
 	ASSERT_TRUE(runner.config(body.c_str(), false));     // L177
 
 	IBaseDataMgr* bd = runner.get_bd_mgr();
@@ -338,6 +366,58 @@ TEST(r24_runner, config_full_chain_returns_true_and_keeps_base_data)
 }
 
 //////////////////////////////////////////////////////////////////////////
+// Explicit data configuration is fail-closed when the store or its required
+// session is absent. Configuration-only use without a data section remains valid.
+//////////////////////////////////////////////////////////////////////////
+TEST(r24_runner, config_rejects_explicit_data_without_store)
+{
+	R24Fixture fx{ "data_without_store" };
+	WtExecRunner runner;
+	std::string body = "{\"basefiles\":{\"session\":\"" + fx.f("sessions.json") + "\"}";
+	body += ",\"data\":{},\"bspolicy\":\"" + fx.f("actpolicy.json") + "\"}";
+
+	EXPECT_FALSE(runner.config(body.c_str(), false));
+	EXPECT_NO_THROW(runner.run());
+}
+
+TEST(r24_runner, config_rejects_store_without_session)
+{
+	R24Fixture fx{ "store_without_session" };
+	WtExecRunner runner;
+	ASSERT_TRUE(runner.init("./r24_missing_logcfgexec.json", true));
+	std::string body = "{\"basefiles\":{\"session\":\"" + fx.f("sessions.json") + "\"}";
+	body += ",\"data\":{\"store\":{\"path\":\"" + fx.f("storedata") + "\"}}";
+	body += ",\"bspolicy\":\"" + fx.f("actpolicy.json") + "\"}";
+
+	EXPECT_FALSE(runner.config(body.c_str(), false));
+	EXPECT_NO_THROW(runner.run());
+}
+
+TEST(r24_runner, unknown_store_sessionRejectsConfigAndQuoteWithoutStateChange)
+{
+	R24Fixture fx{ "unknown_store_session" };
+	WtExecRunner runner;
+	ASSERT_TRUE(runner.init("./r24_missing_logcfgexec.json", true));
+	std::string body = "{\"basefiles\":{\"session\":\"" + fx.f("sessions.json") + "\"}";
+	body += ",\"data\":{\"store\":{\"path\":\"" + fx.f("storedata") + "\",\"session\":\"NO_SUCH_SESSION\"}}";
+	body += ",\"bspolicy\":\"" + fx.f("actpolicy.json") + "\"}";
+	ASSERT_FALSE(runner.config(body.c_str(), false));
+
+	WtHelper::setTime(20240203, 1011, 1213);
+	WtHelper::setTDate(20240205);
+	const int64_t timeBeforeQuote = runner.get_real_time();
+	WTSTickData* tick = mkRTick("SHFE.rb.2405", 20240102, 103015500, 3500.0);
+	EXPECT_NO_THROW(runner.handle_push_quote(tick));
+	EXPECT_EQ(runner.get_trading_day(), 0u);
+	EXPECT_EQ(runner.get_real_time(), timeBeforeQuote);
+	EXPECT_EQ(WtHelper::getDate(), 20240203u);
+	EXPECT_EQ(WtHelper::getTime(), 1011u);
+	EXPECT_EQ(WtHelper::getSecs(), 1213u);
+	EXPECT_EQ(WtHelper::getTradingDate(), 20240205u);
+	tick->release();
+}
+
+//////////////////////////////////////////////////////////////////////////
 // config：parsers/traders/executers 指向不存在的文件 -> L126/L144/L161 三个 exists 判定全假，
 // 三个子初始化函数一次都不进。与上一条形成「进/不进」的差分（两条都 return true，
 // 所以这里额外断言基础数据仍在、且 config 不因缺子配置而失败）
@@ -346,7 +426,7 @@ TEST(r24_runner, config_missing_subcfg_files_are_skipped)
 {
 	R24Fixture fx{ "nosubcfg" };
 	WtExecRunner runner;
-	std::string body = fx.cfg(true, true, false, false, true);
+	std::string body = fx.cfg(false, true, false, false, true);
 	// 去掉 withSubCfgs 后根本没有这三个键：getCString 返回空串 -> StdFile::exists("") 为假
 	ASSERT_TRUE(runner.config(body.c_str(), false));
 	IBaseDataMgr* bd = runner.get_bd_mgr();
@@ -356,29 +436,25 @@ TEST(r24_runner, config_missing_subcfg_files_are_skipped)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// config：子配置文件内容非法（坏 json）-> L130 假分支 L136-139、L148 假分支 L154-157、
-// L165 假分支 L171-174。产品的行为是「只记日志，不改变 config 的返回值」，
-// 即三个子配置的加载失败对调用方完全不可见（见 bugs/R24_exefact.md BUG-R24-002）
+// config：子配置文件内容非法（坏 json）时，应向调用方报告失败，不能运行不完整配置。
 //////////////////////////////////////////////////////////////////////////
-TEST(r24_runner, config_invalid_subcfg_json_is_swallowed)
+TEST(r24_runner, config_invalid_subcfg_json_is_rejected)
 {
 	R24Fixture fx{ "badsub" };
 	WtExecRunner runner;
 	std::string body = "{";
 	body += "\"basefiles\":{\"session\":\"" + fx.f("sessions.json") + "\"}";
-	body += ",\"data\":{},\"bspolicy\":\"" + fx.f("actpolicy.json") + "\"";
+	body += ",\"bspolicy\":\"" + fx.f("actpolicy.json") + "\"";
 	body += ",\"parsers\":\"" + fx.f("bad.json") + "\"";
 	body += ",\"traders\":\"" + fx.f("bad.json") + "\"";
 	body += ",\"executers\":\"" + fx.f("bad.json") + "\"}";
-	// 三份坏配置都没让 config 失败
-	EXPECT_TRUE(runner.config(body.c_str(), false));
+	EXPECT_FALSE(runner.config(body.c_str(), false));
 	EXPECT_NE(runner.get_bd_mgr()->getSession("R24DAY"), nullptr);
-	EXPECT_NO_THROW(runner.run());
+	expectFailedConfigKeepsRunnerInactive(runner);
 }
 
 //////////////////////////////////////////////////////////////////////////
-// initParsers：配置文件里没有 "parsers" 键 -> L198-200 return false
-// （顺带 WtCore/ParserAdapter.cpp:87-88 的 cfg==NULL 分支不涉及）
+// initParsers：配置文件里没有 "parsers" 键，runner 应传播初始化失败。
 //////////////////////////////////////////////////////////////////////////
 TEST(r24_runner, config_parser_cfg_without_parsers_key_returns_false_from_initparsers)
 {
@@ -387,33 +463,28 @@ TEST(r24_runner, config_parser_cfg_without_parsers_key_returns_false_from_initpa
 	std::string body = "{";
 	body += "\"basefiles\":{\"session\":\"" + fx.f("sessions.json") + "\",";
 	body += "\"commodity\":\"" + fx.f("commodities.json") + "\"}";
-	body += ",\"data\":{},\"bspolicy\":\"" + fx.f("actpolicy.json") + "\"";
+	body += ",\"bspolicy\":\"" + fx.f("actpolicy.json") + "\"";
 	body += ",\"parsers\":\"" + fx.f("empty_parsers.json") + "\"}";   // {} -> initParsers L199-200
-	ASSERT_TRUE(runner.config(body.c_str(), false));
-	// 品种仍然加载（说明 false 只落在 initParsers 内部，没有回头影响 basefiles）
+	ASSERT_FALSE(runner.config(body.c_str(), false));
+	// 品种在后续 parser 配置失败前已加载，失败配置也不应让 runner 开始处理行情。
 	EXPECT_NE(runner.get_bd_mgr()->getCommodity("SHFE", "rb"), nullptr);
-	EXPECT_NO_THROW(runner.run());
+	expectFailedConfigKeepsRunnerInactive(runner);
 }
 
 //////////////////////////////////////////////////////////////////////////
-// initExecuters：cfg->get("executers") 不是数组 -> L235-236 return false；
-// initTraders 同形 -> L330-331。两条都用「非数组」的 executers/traders 触发。
-// 可证伪点：config 仍返回 true（返回值只由 bspolicy 决定），且没有适配器被注册
-// —— 用 run() 不抛、以及后续 handle_push_quote 不接受任何 executer 来体现。
+// 执行器子配置不是数组时，initExecuters 的失败应向上传播，且 run 不应处理行情。
 //////////////////////////////////////////////////////////////////////////
-TEST(r24_runner, config_non_array_executers_and_traders_bail_out)
+TEST(r24_runner, config_non_array_executers_are_rejected)
 {
 	R24Fixture fx{ "notarray" };
 	WtExecRunner runner;
-	fx.write("traders_obj.json", R"({"traders":{"id":"x"}})");
 	fx.write("executers_obj.json", R"({"executers":{"id":"x"}})");
 	std::string body = "{";
 	body += "\"basefiles\":{\"session\":\"" + fx.f("sessions.json") + "\"}";
-	body += ",\"data\":{},\"bspolicy\":\"" + fx.f("actpolicy.json") + "\"";
-	body += ",\"traders\":\"" + fx.f("traders_obj.json") + "\"";
+	body += ",\"bspolicy\":\"" + fx.f("actpolicy.json") + "\"";
 	body += ",\"executers\":\"" + fx.f("executers_obj.json") + "\"}";
-	EXPECT_TRUE(runner.config(body.c_str(), false));
-	EXPECT_NO_THROW(runner.run());
+	EXPECT_FALSE(runner.config(body.c_str(), false));
+	expectFailedConfigKeepsRunnerInactive(runner);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -504,12 +575,7 @@ TEST(r24_runner, handle_push_quote_after_store_ready)
 	body += ",\"data\":{\"store\":{\"module\":\"../WtDataStorage\",\"path\":\"" + fx.f("storedata") +
 		"\",\"session\":\"R24DAY\"}}";
 	body += ",\"bspolicy\":\"" + fx.f("actpolicy.json") + "\"}";
-	if (!runner.config(body.c_str(), false))
-	{
-		// initStore 走不通（dylib 找不到 / createDataReader 缺失）就不继续，
-		// 不把它记成「测试通过」
-		GTEST_SKIP() << "store module 未能初始化，handle_push_quote 留白（见 BUG-R17-004 续面）";
-	}
+	ASSERT_TRUE(runner.config(body.c_str(), false));
 
 	WTSTickData* tick = mkRTick("SHFE.rb.2405", 20240102, 103015500, 3500.0);
 	runner.handle_push_quote(tick);                       // L389-398

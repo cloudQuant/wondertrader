@@ -16,7 +16,7 @@
 // _expire_secs 一律置 0，避免走 check_orders 的超时撤单（那需要真实时间流逝，见缺陷清单）。
 //
 // 引用计数：替身创建的 tick 额外 retain 一次且用例侧不 release，避免与单元内部的
-// release 组合出「二次释放」；comm 同理（get_minOrderQty 会多 release 一次借来的指针）。
+// release 组合出「二次释放」；commodity 查询返回借用指针，所有权由 fixture 保留。
 #include <gtest/gtest.h>
 
 #include <cmath>
@@ -24,15 +24,20 @@
 #include <cstdio>
 #include <cstring>
 #include <string>
+#include <stdexcept>
 #include <unistd.h>
 #include <vector>
 
 #include "Includes/ExecuteDefs.h"
 #include "Includes/WTSVariant.hpp"
 #include "Includes/WTSContractInfo.hpp"
+#include "Includes/WTSSessionInfo.hpp"
 #include "Includes/WTSStruct.h"
 #include "Includes/WTSDataDef.hpp"
+#include "WtExeFact/WtOrdMon.h"
+#define private public
 #include "WtExeFact/WtStockMinImpactExeUnit.h"
+#undef private
 
 using namespace wtp;
 
@@ -45,6 +50,13 @@ const char* const kSmBnd = "SHSE.CBOND.113050";  // 可转债 -> min_hands 10
 class MFakeCtx : public ExecuteContext
 {
 public:
+	MFakeCtx()
+	{
+		sess = WTSSessionInfo::create("R7_TEST", "R7 test session");
+		sess->addTradingSection(900, 1500);
+	}
+	~MFakeCtx() override { if (sess) sess->release(); }
+
 	struct Rec { std::string code; double price; double qty; };
 
 	WTSTickSlice* getTicks(const char*, uint32_t, uint64_t) override { return NULL; }
@@ -78,19 +90,32 @@ public:
 			ids.push_back(nextId++);
 		return ids;
 	}
-	void writeLog(const char* l) override { logs.push_back(l ? l : ""); }
+	void writeLog(const char* l) override
+	{
+		if (throwOnLog)
+			throw std::runtime_error("writeLog failure");
+		logs.push_back(l ? l : "");
+	}
 	WTSCommodityInfo* getCommodityInfo(const char*) override { return comm; }
-	WTSSessionInfo* getSessionInfo(const char*) override { return sess; }
-	uint64_t getCurTime() override { return 20240104093000000ull; }
+	WTSSessionInfo* getSessionInfo(const char*) override
+	{
+		if (throwOnSessionLookup)
+			throw std::runtime_error("getSessionInfo failure");
+		return sess;
+	}
+	uint64_t getCurTime() override { return curTime; }
 
 	double totalPos = 0;
 	double availPos = 0;
 	double undone = 0;
+	uint64_t curTime = 20240104093000000ull;
 	uint32_t nextId = 6000;
 	uint32_t cancelBydirRetCnt = 2;
 	bool lastForce = false;
 	WTSCommodityInfo* comm = NULL;
 	WTSSessionInfo* sess = NULL;
+	bool throwOnSessionLookup = false;
+	bool throwOnLog = false;
 	std::vector<Rec> buys;
 	std::vector<Rec> sells;
 	std::vector<uint32_t> byidCancels;
@@ -114,12 +139,21 @@ struct MCommCleanup
 	~MCommCleanup() { if (ctx.comm) ctx.comm->release(); }
 };
 
+template <typename T>
+void releaseAllReferences(T* obj)
+{
+	if (!obj)
+		return;
+	const uint32_t refs = obj->retainCount();
+	for (uint32_t i = 0; i < refs; ++i)
+		obj->release();
+}
+
 WTSCommodityInfo* mkMComm(const char* product)
 {
 	// create 参数顺序是 pid/product, name, exchange, session, trading template。
 	// get_minOrderQty 按 getProduct() 区分 STK / CBOND，故产品代码必须位于第一个参数。
 	WTSCommodityInfo* c = WTSCommodityInfo::create(product, "R7SMIN", "SHSE", "NIGHT_DAY", "CHN");
-	c->retain();                     // 抵消 get_minOrderQty 的多余 release（见文件头）
 	c->setVolScale(1);
 	c->setPriceTick(0.01);
 	c->setLotsTick(1.0);
@@ -156,7 +190,7 @@ WTSTickData* mkMTick(const char* code, uint32_t actTime, double lastPx,
 // L98-133 读取的键（pricemode: -1 最优 / 0 最新 / 1 对手 / 2 自动）
 WTSVariant* mkMCfg(int32_t priceMode = 0, int32_t offset = 0, uint32_t span = 0,
 	bool byRate = false, double lots = 500.0, double rate = 0.0,
-	double minOrder = 100.0, uint32_t expire = 0)
+	double minOrder = 100.0, uint32_t expire = 0, bool includeMinOrder = true)
 {
 	WTSVariant* cfg = WTSVariant::createObject();
 	cfg->append("offset", offset);
@@ -166,7 +200,8 @@ WTSVariant* mkMCfg(int32_t priceMode = 0, int32_t offset = 0, uint32_t span = 0,
 	cfg->append("byrate", byRate);
 	cfg->append("lots", lots);
 	cfg->append("rate", rate);
-	cfg->append("min_order", minOrder);
+	if (includeMinOrder)
+		cfg->append("min_order", minOrder);
 	return cfg;
 }
 
@@ -195,6 +230,101 @@ TEST(r7_stkmin, names_and_fact_binding)
 	EXPECT_STREQ(unit.getName(), "WtStockMinImpactExeUnit");   // L70
 	EXPECT_STREQ(unit.getFactName(), "WtExeFact");             // L61
 	ctx.comm->release();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 商品信息查询返回借用指针，多次查询不能减少 fixture 持有的引用。
+//////////////////////////////////////////////////////////////////////////
+TEST(r7_stkmin, minimum_order_lookup_keeps_borrowed_commodity_alive)
+{
+	MFakeCtx ctx;
+	ctx.comm = mkMComm("STK");
+	ASSERT_EQ(ctx.comm->retainCount(), 1u);
+	{
+		WtStockMinImpactExeUnit unit;
+		WTSVariant* cfg = mkMCfg(0, 0, 0, false, 500.0, 0.0, 100.0);
+		unit.init(&ctx, kSmStk, cfg);
+		cfg->release();
+		ASSERT_TRUE(unit.initializationSucceeded());
+		ASSERT_EQ(ctx.comm->retainCount(), 2u); // fixture plus unit's owned reference
+
+		EXPECT_DOUBLE_EQ(unit.get_minOrderQty(kSmStk), 100.0);
+		EXPECT_DOUBLE_EQ(unit.get_minOrderQty(kSmStk), 100.0);
+		EXPECT_EQ(ctx.comm->retainCount(), 2u);
+		EXPECT_STREQ(ctx.comm->getProduct(), "STK");
+	}
+	EXPECT_EQ(ctx.comm->retainCount(), 1u); // unit released only its own reference
+	EXPECT_STREQ(ctx.comm->getProduct(), "STK");
+	ctx.comm->release();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Commodity lookup failure must fail closed instead of dereferencing null or using
+// the default one-unit order size.
+//////////////////////////////////////////////////////////////////////////
+TEST(r7_stkmin, minimum_order_lookup_without_commodity_fails_closed)
+{
+	WtStockMinImpactExeUnit unboundUnit;
+	EXPECT_DOUBLE_EQ(unboundUnit.get_minOrderQty(kSmStk), 0.0);
+
+	MFakeCtx lookupCtx;
+	WtStockMinImpactExeUnit lookupUnit;
+	lookupUnit.ExecuteUnit::init(&lookupCtx, kSmStk, nullptr);
+	EXPECT_DOUBLE_EQ(lookupUnit.get_minOrderQty(kSmStk), 0.0);
+	EXPECT_TRUE(lookupCtx.hasLog("commodity information is unavailable"));
+
+	MFakeCtx ctx;
+	WTSVariant* cfg = mkMCfg(0, 0, 0, false, 500.0, 0.0, 100.0);
+	WtStockMinImpactExeUnit unit;
+	unit.init(&ctx, kSmStk, cfg);
+	cfg->release();
+	EXPECT_FALSE(unit.initializationSucceeded());
+	EXPECT_TRUE(ctx.hasLog("commodity and non-empty session are required"));
+	EXPECT_TRUE(ctx.buys.empty());
+	EXPECT_TRUE(ctx.sells.empty());
+}
+
+//////////////////////////////////////////////////////////////////////////
+// min_order is required and must be positive before rounding/division can be enabled.
+//////////////////////////////////////////////////////////////////////////
+TEST(r7_stkmin, missing_zero_and_negative_min_order_disable_execution)
+{
+	struct InvalidConfig
+	{
+		const char* name;
+		double value;
+		bool include;
+	};
+	const InvalidConfig invalid[] = {
+		{ "missing", 100.0, false },
+		{ "zero", 0.0, true },
+		{ "negative", -1.0, true }
+	};
+
+	for (const InvalidConfig& testCase : invalid)
+	{
+		MFakeCtx ctx;
+		ctx.comm = mkMComm("STK");
+		{
+			WtStockMinImpactExeUnit unit;
+			WTSVariant* cfg = mkMCfg(0, 0, 0, false, 500.0, 0.0, testCase.value, 0, testCase.include);
+			unit.init(&ctx, kSmStk, cfg);
+			cfg->release();
+			EXPECT_FALSE(unit.initializationSucceeded()) << testCase.name;
+			EXPECT_TRUE(ctx.hasLog("min_order")) << testCase.name;
+
+			unit.set_position(kSmStk, 3000);
+			WTSTickData* tick = mkMTick(kSmStk, 100000000, 10.50, 10.49, 1000, 10.51, 800);
+			unit.on_tick(tick); // disabled initialization does not retain the tick
+			tick->release();
+			tick->release();
+			unit.on_channel_ready();
+			EXPECT_TRUE(ctx.buys.empty()) << testCase.name;
+			EXPECT_TRUE(ctx.sells.empty()) << testCase.name;
+		}
+		EXPECT_EQ(ctx.comm->retainCount(), 1u) << testCase.name;
+		ctx.comm->release();
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -764,33 +894,322 @@ TEST(r7_stkmin, clearing_state_rejects_zero_target)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 缺陷复现（越界读，不能启用）：pricemode 超出 -1..2 时 L155 读 PriceModeNames[越界]
-// PriceModeNames[_price_mode + 1]，pricemode=3 -> 下标 4
+// pricemode 合法范围 -1..2 映射保持不变
 //////////////////////////////////////////////////////////////////////////
-TEST(r7_stkmin, DISABLED_illegal_pricemode_reads_out_of_range_name_table)
+TEST(r7_stkmin, legal_price_modes_keep_name_mapping)
+{
+	const int32_t modes[] = { -1, 0, 1, 2 };
+	const char* names[] = { "BESTPX", "LASTPX", "MARKET", "AUTOPX" };
+	for (size_t i = 0; i < 4; ++i)
+	{
+		MFakeCtx ctx;
+		ctx.comm = mkMComm("STK");
+		{
+			WtStockMinImpactExeUnit unit;
+			WTSVariant* cfg = mkMCfg(modes[i], 0, 0, false, 500.0, 0.0, 100.0);
+			unit.init(&ctx, kSmStk, cfg);
+			cfg->release();
+			EXPECT_TRUE(unit.initializationSucceeded()) << modes[i];
+			EXPECT_TRUE(ctx.hasLog(std::string("order price: ") + names[i])) << modes[i];
+			EXPECT_FALSE(ctx.hasLog("Invalid pricemode")) << modes[i];
+		}
+		ctx.comm->release();
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 非法 pricemode 不索引名称表，且执行单元 fail-closed（不发单/撤单）
+//////////////////////////////////////////////////////////////////////////
+TEST(r7_stkmin, invalid_price_modes_disable_execution)
+{
+	const int32_t invalidModes[] = { -2, 3 };
+	for (int32_t invalidMode : invalidModes)
+	{
+		MFakeCtx ctx;
+		ctx.comm = mkMComm("STK");
+		{
+			WtStockMinImpactExeUnit unit;
+			WTSVariant* cfg = mkMCfg(invalidMode, 0, 0, false, 500.0, 0.0, 100.0);
+			unit.init(&ctx, kSmStk, cfg);
+			cfg->release();
+			EXPECT_FALSE(unit.initializationSucceeded()) << invalidMode;
+			EXPECT_TRUE(ctx.hasLog("Invalid pricemode")) << invalidMode;
+			EXPECT_TRUE(ctx.hasLog("execution disabled")) << invalidMode;
+			EXPECT_TRUE(ctx.hasLog("order price: INVALID")) << invalidMode;
+
+			ctx.undone = 100.0;
+			unit.set_position(kSmStk, 3000);
+			unit.on_channel_ready();	// 未管理订单也不得撤销
+			unit.on_tick(nullptr);
+			EXPECT_TRUE(ctx.buys.empty());
+			EXPECT_TRUE(ctx.sells.empty());
+			EXPECT_TRUE(ctx.bydirCancels.empty());
+			EXPECT_TRUE(ctx.byidCancels.empty());
+		}
+		ctx.comm->release();
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 无法解析股票代码时初始化失败，后续回调不会解引用空上下文或发单
+//////////////////////////////////////////////////////////////////////////
+TEST(r7_stkmin, invalid_stock_code_fails_initialization_safely)
 {
 	MFakeCtx ctx;
 	ctx.comm = mkMComm("STK");
-	WtStockMinImpactExeUnit unit;
-	unit.init(&ctx, kSmStk, mkMCfg(3, 0, 0, false, 500.0, 0.0, 100.0));   // BUG-R7-010
-	unit.set_position(kSmStk, 3000);
-	unit.on_tick(mkMTick(kSmStk, 100000000, 10.50, 10.49, 1000, 10.51, 800));
-	unit.on_channel_ready();
+	{
+		WtStockMinImpactExeUnit unit;
+		WTSVariant* cfg = mkMCfg();
+		unit.init(&ctx, "SHSE.600000", cfg);              // BUG-R7-009
+		cfg->release();
+		EXPECT_FALSE(unit.initializationSucceeded());
+		unit.set_position("SHSE.600000", 3000);
+		unit.on_tick(NULL);
+		unit.on_channel_ready();
+		unit.on_account("CNY", 0, 0, 0, 10000, 0, 0, 0, 0, 0, 0);
+		EXPECT_TRUE(ctx.buys.empty());
+		EXPECT_TRUE(ctx.sells.empty());
+		EXPECT_TRUE(ctx.bydirCancels.empty());
+	}
 	ctx.comm->release();
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 缺陷复现（越界/异常，不能启用）：标准股票代码只有 2 段
-// init L122 取 StrUtil::split(stdCode,".")[2]
+// 商品缺失时 initializationSucceeded 为 false 且不发单
 //////////////////////////////////////////////////////////////////////////
-TEST(r7_stkmin, DISABLED_two_segment_stock_code_out_of_range)
+TEST(r7_stkmin, missing_commodity_fails_initialization)
 {
 	MFakeCtx ctx;
 	ctx.comm = mkMComm("STK");
-	WtStockMinImpactExeUnit unit;
-	unit.init(&ctx, "SHSE.600000", mkMCfg());          // BUG-R7-009
-	unit.set_position("SHSE.600000", 3000);
-	unit.on_tick(mkMTick("SHSE.600000", 100000000, 10.50, 10.49, 1000, 10.51, 800));
-	unit.on_channel_ready();
+	{
+		WtStockMinImpactExeUnit unit;
+		WTSVariant* cfg = mkMCfg();
+		WTSCommodityInfo* comm = ctx.comm;
+		ctx.comm = NULL;
+		unit.init(&ctx, kSmStk, cfg);
+		ctx.comm = comm;
+		cfg->release();
+		EXPECT_FALSE(unit.initializationSucceeded());
+		unit.set_position(kSmStk, 1000);
+		unit.on_channel_ready();
+		unit.on_tick(NULL);
+		EXPECT_TRUE(ctx.buys.empty());
+		EXPECT_TRUE(ctx.sells.empty());
+	}
+	ctx.comm->release();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 缺少交易时段时拒绝初始化，不允许后续设置目标或通道回调
+//////////////////////////////////////////////////////////////////////////
+TEST(r7_stkmin, missing_session_fails_initialization)
+{
+	MFakeCtx ctx;
+	ctx.comm = mkMComm("STK");
+	{
+		WtStockMinImpactExeUnit invalidArguments;
+		WTSVariant* invalidCfg = mkMCfg();
+		invalidArguments.init(NULL, kSmStk, invalidCfg);
+		EXPECT_FALSE(invalidArguments.initializationSucceeded());
+		invalidArguments.init(&ctx, NULL, invalidCfg);
+		EXPECT_FALSE(invalidArguments.initializationSucceeded());
+		invalidArguments.init(&ctx, "", invalidCfg);
+		EXPECT_FALSE(invalidArguments.initializationSucceeded());
+		invalidArguments.init(&ctx, kSmStk, NULL);
+		EXPECT_FALSE(invalidArguments.initializationSucceeded());
+		invalidCfg->release();
+	}
+	{
+		WtStockMinImpactExeUnit unit;
+		WTSVariant* cfg = mkMCfg();
+		WTSSessionInfo* sess = ctx.sess;
+		ctx.sess = NULL;
+		unit.init(&ctx, kSmStk, cfg);
+		ctx.sess = sess;
+		cfg->release();
+		EXPECT_FALSE(unit.initializationSucceeded());
+		unit.set_position(kSmStk, 1000);
+		unit.on_channel_ready();
+		unit.on_tick(NULL);
+		EXPECT_TRUE(ctx.buys.empty());
+		EXPECT_TRUE(ctx.sells.empty());
+	}
+	ctx.comm->release();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 异常路径不能释放仍由上下文持有的借用 metadata。
+//////////////////////////////////////////////////////////////////////////
+TEST(r7_stkmin, metadata_references_stay_balanced_on_throw_and_success)
+{
+	MFakeCtx ctx;
+	ctx.comm = mkMComm("STK");
+	WTSCommodityInfo* comm = ctx.comm;
+	comm->retain(); // 额外哨兵引用，回归时可在错误 release 后安全检查计数
+	{
+		WtStockMinImpactExeUnit unit;
+		WTSVariant* cfg = mkMCfg();
+		ctx.throwOnSessionLookup = true;
+		EXPECT_THROW(unit.init(&ctx, kSmStk, cfg), std::runtime_error);
+		cfg->release();
+	}
+	EXPECT_EQ(comm->retainCount(), 2u);
+
+	ctx.throwOnSessionLookup = false;
+	WTSSessionInfo* originalSession = ctx.sess;
+	ctx.sess = NULL;
+	{
+		WtStockMinImpactExeUnit unit;
+		WTSVariant* cfg = mkMCfg();
+		unit.init(&ctx, kSmStk, cfg);
+		cfg->release();
+		EXPECT_FALSE(unit.initializationSucceeded());
+	}
+	EXPECT_EQ(comm->retainCount(), 2u); // ordinary missing metadata returns without releasing a borrow
+
+	WTSSessionInfo* emptySession = WTSSessionInfo::create("R7_EMPTY", "empty session");
+	emptySession->retain(); // sentinel for detecting an unowned release in the unit destructor
+	ctx.sess = emptySession;
+	ctx.throwOnLog = true;
+	{
+		WtStockMinImpactExeUnit unit;
+		WTSVariant* cfg = mkMCfg();
+		EXPECT_THROW(unit.init(&ctx, kSmStk, cfg), std::runtime_error);
+		cfg->release();
+	}
+	ctx.throwOnLog = false;
+	ctx.sess = originalSession;
+	EXPECT_EQ(comm->retainCount(), 2u);
+	EXPECT_EQ(emptySession->retainCount(), 2u);
+	releaseAllReferences(comm);
+	releaseAllReferences(emptySession);
+
+	MFakeCtx logFailure;
+	logFailure.comm = mkMComm("STK");
+	comm = logFailure.comm;
+	comm->retain();
+	WTSSessionInfo* logFailureSession = logFailure.sess;
+	logFailureSession->retain();
+	logFailure.throwOnLog = true;
+	{
+		WtStockMinImpactExeUnit unit;
+		WTSVariant* cfg = mkMCfg();
+		EXPECT_THROW(unit.init(&logFailure, kSmStk, cfg), std::runtime_error);
+		EXPECT_EQ(comm->retainCount(), 2u);
+		EXPECT_EQ(logFailureSession->retainCount(), 2u);
+		cfg->release();
+	}
+	EXPECT_EQ(comm->retainCount(), 2u);
+	EXPECT_EQ(logFailureSession->retainCount(), 2u);
+	logFailure.sess = NULL;
+	releaseAllReferences(comm);
+	releaseAllReferences(logFailureSession);
+
+	MFakeCtx success;
+	success.comm = mkMComm("STK");
+	comm = success.comm;
+	WTSSessionInfo* sess = success.sess;
+	EXPECT_EQ(comm->retainCount(), 1u);
+	EXPECT_EQ(sess->retainCount(), 1u);
+	{
+		WtStockMinImpactExeUnit unit;
+		WTSVariant* cfg = mkMCfg();
+		unit.init(&success, kSmStk, cfg);
+		cfg->release();
+		ASSERT_TRUE(unit.initializationSucceeded());
+		EXPECT_EQ(comm->retainCount(), 2u);
+		EXPECT_EQ(sess->retainCount(), 2u);
+	}
+	EXPECT_EQ(comm->retainCount(), 1u);
+	EXPECT_EQ(sess->retainCount(), 1u);
+	comm->release();
+}
+
+TEST(r7_stkmin, duplicate_init_preserves_success_and_execution)
+{
+	MFakeCtx ctx;
+	ctx.comm = mkMComm("STK");
+	WTSCommodityInfo* comm = ctx.comm;
+	WTSSessionInfo* sess = ctx.sess;
+	{
+		WtStockMinImpactExeUnit unit;
+		WTSVariant* cfg = mkMCfg();
+		unit.init(&ctx, kSmStk, cfg);
+		cfg->release();
+		ASSERT_TRUE(unit.initializationSucceeded());
+		ASSERT_EQ(comm->retainCount(), 2u);
+		ASSERT_EQ(sess->retainCount(), 2u);
+
+		WTSVariant* duplicateCfg = mkMCfg();
+		unit.init(&ctx, kSmStk, duplicateCfg);
+		duplicateCfg->release();
+		EXPECT_TRUE(unit.initializationSucceeded());
+		EXPECT_EQ(comm->retainCount(), 2u);
+		EXPECT_EQ(sess->retainCount(), 2u);
+
+		unit.set_position(kSmStk, 300.0);
+		WTSTickData* tick = mkMTick(kSmStk, 100000000, 10.50, 10.49, 1000, 10.51, 800);
+		unit.on_tick(tick);
+		unit.on_channel_ready();
+		ASSERT_EQ(ctx.buys.size(), 1u);
+		EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 300.0);
+		tick->release(); // test-owned and helper-owned references; unit retains the final reference
+		tick->release();
+	}
+	EXPECT_EQ(comm->retainCount(), 1u);
+	EXPECT_EQ(sess->retainCount(), 1u);
+	comm->release();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 订单监控超时但没有版本化身份时，拒绝裸 localid 自动撤单并保留记录。
+//////////////////////////////////////////////////////////////////////////
+TEST(r7_stkmin, timeout_without_verified_identity_keeps_monitor_and_never_cancels)
+{
+	MFakeCtx ctx;
+	ctx.comm = mkMComm("STK");
+	{
+		WtStockMinImpactExeUnit unit;
+		WTSVariant* cfg = mkMCfg(0, 0, 0, false, 500.0, 0.0, 100.0, 1);
+		unit.init(&ctx, kSmStk, cfg);
+		cfg->release();
+
+		const uint32_t id = 6351;
+		unit._orders_mon.push_order(&id, 1, ctx.curTime);
+		WTSTickData* first = mkMTick(kSmStk, 100000000, 10.50, 10.49, 1000, 10.51, 800);
+		unit.on_tick(first);
+		first->release();
+		first->release(); // test-owned reference; the unit keeps the remaining tick reference
+		EXPECT_TRUE(ctx.byidCancels.empty());
+		EXPECT_TRUE(unit._orders_mon.has_order(id));
+		EXPECT_EQ(ctx.countLog("Expired order 6351"), 0u);
+
+		ctx.curTime += 999;
+		WTSTickData* second = mkMTick(kSmStk, 100001000, 10.50, 10.49, 1000, 10.51, 800);
+		unit.on_tick(second);
+		second->release();
+		second->release();
+		EXPECT_EQ(ctx.countLog("Expired order 6351"), 0u);
+		ctx.curTime += 1;
+		WTSTickData* third = mkMTick(kSmStk, 100002000, 10.50, 10.49, 1000, 10.51, 800);
+		unit.on_tick(third);
+		third->release();
+		third->release();
+		EXPECT_TRUE(ctx.byidCancels.empty());
+		EXPECT_TRUE(ctx.bydirCancels.empty());
+		EXPECT_TRUE(unit._orders_mon.has_order(id));
+		EXPECT_EQ(ctx.countLog("Expired order 6351"), 1u);
+		unit.on_channel_ready(); // channel reconciliation may clear rows, but not the latch
+		EXPECT_TRUE(unit._orders_mon.has_unverified_timeout());
+		unit.set_position(kSmStk, 1.0);
+		WTSTickData* fourth = mkMTick(kSmStk, 100003000, 10.50, 10.49, 1000, 10.51, 800);
+		unit.on_tick(fourth);
+		fourth->release();
+		fourth->release();
+		EXPECT_TRUE(unit._orders_mon.has_unverified_timeout());
+		EXPECT_TRUE(ctx.buys.empty());
+		EXPECT_TRUE(ctx.sells.empty());
+		EXPECT_EQ(ctx.countLog("Expired order 6351"), 1u);
+	}
 	ctx.comm->release();
 }

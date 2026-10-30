@@ -18,20 +18,39 @@
  * TimeUtils::getLocalTimeNow() 在 doEntrust/doCancel 内部写入，公开接口无法注入历史时间点，
  * 本轮未打（见 bugs/R3_wtcore.md 的接缝清单）。
  */
-// BUG-L00-004：TraderAdapter.h 用了 boost::noncopyable 却没 include，必须在自己的 .cpp 里先补
-#include <boost/noncopyable.hpp>
-#include <boost/core/noncopyable.hpp>
-
 #include <cstdlib>
+#include <chrono>
+#include <cerrno>
+#include <functional>
+#include <signal.h>
+#include <spawn.h>
+#include <thread>
+#include <sys/wait.h>
+#include <vector>
+
+#include <Includes/WTSCollection.hpp>
+#include <Includes/WTSContractInfo.hpp>
+#include <Includes/WTSDataDef.hpp>
+#include <Includes/WTSTradeDef.hpp>
+#include <Includes/WTSVariant.hpp>
+#include <Share/CodeHelper.hpp>
+#include <Share/StdUtils.hpp>
+
+#define private public
+#include <WtCore/TraderAdapter.h>
+#undef private
 
 #include "../p11_wtcore_traderadapter/p11_trader_fixture.h"
 
+#include <Share/ModuleHelper.hpp>
 #include <WtCore/ActionPolicyMgr.h>
 #include <Includes/WTSSessionInfo.hpp>
 #include <rapidjson/document.h>
 
 using namespace p11fix;
 using wtp::TraderAdapter;
+
+extern char** environ;
 
 namespace {
 
@@ -132,6 +151,88 @@ static std::string r3ReadAll(const std::string& path)
     return ss.str();
 }
 
+template <typename Fn>
+static int r3RunInIsolatedProcess(const char* testName, Fn&& body)
+{
+    if (std::getenv("WT_R3_ISOLATED_CHILD") != nullptr)
+        return body();
+
+    const std::filesystem::path executablePath =
+        std::filesystem::path(getBinDir()) / "CoverageTests_wtcore";
+    const std::string executable = executablePath.string();
+    const std::string filter = std::string("--gtest_filter=") + testName;
+    char* args[] = {
+        const_cast<char*>(executable.c_str()),
+        const_cast<char*>(filter.c_str()),
+        nullptr
+    };
+
+    std::vector<std::string> environment;
+    for (char** entry = environ; entry != nullptr && *entry != nullptr; ++entry) {
+        const std::string item(*entry);
+        if (item.compare(0, sizeof("WT_R3_ISOLATED_CHILD=") - 1,
+                "WT_R3_ISOLATED_CHILD=") != 0)
+            environment.push_back(item);
+    }
+    environment.emplace_back("WT_R3_ISOLATED_CHILD=1");
+    std::vector<char*> envp;
+    envp.reserve(environment.size() + 1);
+    for (std::string& item : environment)
+        envp.push_back(item.data());
+    envp.push_back(nullptr);
+
+    pid_t child = -1;
+    const int spawnError = ::posix_spawn(&child, executable.c_str(), nullptr, nullptr, args, envp.data());
+    if (spawnError != 0)
+        return -1000 - spawnError;
+
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(30);
+    int status = 0;
+    for (;;) {
+        const pid_t waited = ::waitpid(child, &status, WNOHANG);
+        if (waited == child)
+            break;
+        if (waited < 0 && errno != EINTR)
+            return -1;
+        if (std::chrono::steady_clock::now() >= deadline) {
+            ::kill(child, SIGKILL);
+            while (::waitpid(child, &status, 0) < 0 && errno == EINTR) {}
+            for (uint32_t sequence = 1; sequence <= 16; ++sequence) {
+                const uint32_t mockerId = (uint32_t)child * 100u + sequence;
+                std::error_code ec;
+                std::filesystem::remove_all(
+                    std::filesystem::path("mocker_" + std::to_string(mockerId)), ec);
+            }
+            return -3;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+
+    for (uint32_t sequence = 1; sequence <= 16; ++sequence) {
+        const uint32_t mockerId = (uint32_t)child * 100u + sequence;
+        std::error_code ec;
+        std::filesystem::remove_all(
+            std::filesystem::path("mocker_" + std::to_string(mockerId)), ec);
+    }
+    if (WIFEXITED(status))
+        return WEXITSTATUS(status);
+    if (WIFSIGNALED(status))
+        return 128 + WTERMSIG(status);
+    return -2;
+}
+
+struct R3MockerDirCleanup
+{
+    const std::vector<uint32_t>& ids;
+
+    ~R3MockerDirCleanup()
+    {
+        std::error_code ec;
+        for (uint32_t id : ids)
+            std::filesystem::remove_all(std::filesystem::path("mocker_" + std::to_string(id)), ec);
+    }
+};
+
 /**
  * 在 p11 夹具之上补三件事，让 buy()/sell() 可达：
  *   1) 品种挂上带交易时段的 session（否则 L678-680 空指针）
@@ -144,11 +245,41 @@ protected:
     WTSSessionInfo*  sess_ = NULL;
     ActionPolicyMgr  policy_;
     std::string      dir_;
+    std::string      oldInstDir_;
+    std::string      moduleInstallDir_;
+    std::vector<uint32_t> mockerIds_;
+    uint32_t         nextMockerId_ = 1;
 
     void SetUp() override
     {
         P11TraderTest::SetUp();
         dir_ = r3TmpDir("policy");
+        oldInstDir_ = WtHelper::getInstDir();
+        moduleInstallDir_ = dir_ + "install/";
+        const std::string sourceModule = DLLHelper::wrap_module("TraderMocker");
+        const std::filesystem::path binDir(getBinDir());
+        const std::vector<std::filesystem::path> candidates = {
+            binDir / sourceModule,
+            binDir.parent_path() / sourceModule,
+            std::filesystem::current_path() / "build-cov/build_x64/Debug/bin" / sourceModule
+        };
+        std::filesystem::path sourcePath;
+        for (const auto& candidate : candidates) {
+            if (std::filesystem::exists(candidate)) {
+                sourcePath = candidate;
+                break;
+            }
+        }
+        const std::filesystem::path moduleDir = std::filesystem::path(moduleInstallDir_) / "traders";
+        std::error_code moduleEc;
+        std::filesystem::create_directories(moduleDir, moduleEc);
+        ASSERT_FALSE(sourcePath.empty()) << "TraderMocker plugin not found beside test executable";
+        ASSERT_FALSE(moduleEc);
+        const bool copied = std::filesystem::copy_file(sourcePath, moduleDir / sourceModule,
+            std::filesystem::copy_options::overwrite_existing, moduleEc);
+        ASSERT_TRUE(copied) << moduleEc.message();
+        ASSERT_FALSE(moduleEc);
+        WtHelper::setInstDir(moduleInstallDir_.c_str());
         sess_ = WTSSessionInfo::create("TRADING", "TRADING", 0);
         sess_->addTradingSection(900, 1130);
         comm_->setSessionInfo(sess_);
@@ -163,30 +294,57 @@ protected:
             sess_ = NULL;
         }
         std::error_code ec;
+        WtHelper::setInstDir(oldInstDir_.c_str());
+        for (uint32_t mockerId : mockerIds_)
+            std::filesystem::remove_all(std::filesystem::path("mocker_" + std::to_string(mockerId)), ec);
+        mockerIds_.clear();
         std::filesystem::remove_all(dir_, ec);
         P11TraderTest::TearDown();
     }
 
-    /// 写入下单/撤单频率限额配置并激活风控（无 module 段 -> init 返回 false，但风控参数已落地）
-    void enableRisk(TraderAdapter& trader, uint32_t orderBoundary, uint32_t cancelBoundary)
+    /// 使用隔离的 TraderMocker 插件成功初始化，确保风控确实激活。
+    bool enableRisk(TraderAdapter& trader, uint32_t orderBoundary, uint32_t cancelBoundary,
+        bool start = true)
     {
         std::stringstream ss;
-        ss << "{\"ignore_selfmatch\":false,\"savedata\":true,\"riskmon\":{\"active\":true,\"policy\":{"
+        const uint32_t mockerId = (uint32_t)::getpid() * 100u + nextMockerId_++;
+        mockerIds_.push_back(mockerId);
+        ss << "{\"module\":\"TraderMocker\",\"savedata\":false,\"mockerid\":" << mockerId
+           << ",\"span\":10,\"newpx\":false,\"maxqty\":100,\"minqty\":1,\"udp_port\":0,\"riskmon\":{\"active\":true,\"policy\":{"
            << "\"default\":{\"order_times_boundary\":" << orderBoundary
            << ",\"order_stat_timespan\":60,\"order_total_limits\":100"
            << ",\"cancel_times_boundary\":" << cancelBoundary
            << ",\"cancel_stat_timespan\":60,\"cancel_total_limits\":99}}}}";
         WTSVariant* cfg = r3LoadJson(dir_, "risk.json", ss.str());
-        ASSERT_NE(nullptr, cfg);
-        EXPECT_FALSE(trader.init(id_.c_str(), cfg, &bd_, NULL));
+        if (cfg == nullptr)
+            return false;
+        const bool initialized = trader.init(id_.c_str(), cfg, &bd_, NULL);
         cfg->release();
-        ASSERT_TRUE(trader.run());
+        return initialized && (!start || trader.run());
     }
 
     void loadPolicy(const std::string& body)
     {
         r3LoadJson(dir_, "policy.json", body);
         ASSERT_TRUE(policy_.init((dir_ + "policy.json").c_str()));
+    }
+
+    bool waitForOrder(TraderAdapter& trader, uint32_t localid)
+    {
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
+        while (std::chrono::steady_clock::now() < deadline) {
+            OrderMap* orders = trader.getOrders("");
+            if (orders != nullptr) {
+                WTSOrderInfo* order = (WTSOrderInfo*)orders->grab(localid);
+                orders->release();
+                if (order != nullptr) {
+                    order->release();
+                    return true;
+                }
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        }
+        return false;
     }
 };
 
@@ -195,97 +353,79 @@ protected:
 //////////////////////////////////////////////////////////////////////////
 TEST_F(R3TraderTest, order_freq_window_denies_submission_after_boundary)
 {
-    // Align the fake contract's alt code with checkOrderLimits' documented
-    // standardized-code key so this case measures the boundary logic alone.
-    ct_->setAltCode(kStdCode);
-    TraderAdapter trader;
-    ASSERT_TRUE(trader.initExt(id_.c_str(), &api_, &bd_, NULL));
-    enableRisk(trader, 2, 9);
-    ASSERT_TRUE(trader.checkOrderLimits(kStdCode));
+    const int result = r3RunInIsolatedProcess(
+        "R3TraderTest.order_freq_window_denies_submission_after_boundary", [this]() {
+        R3MockerDirCleanup cleanup{ mockerIds_ };
+        ct_->setAltCode(kStdCode);
+        TraderAdapter trader;
+        if (!enableRisk(trader, 2, 9) || !trader.checkOrderLimits(kStdCode))
+            return 10;
 
-    // boundary is the maximum successful submissions in the window. Each
-    // submission follows the caller contract: check first, then submit.
-    for (int i = 0; i < 2; i++) {
-        ASSERT_TRUE(trader.checkOrderLimits(kStdCode));
-        EXPECT_NE(UINT_MAX, trader.openLong(kStdCode, 7000.0, 1, 0));
-    }
-    ASSERT_EQ(2u, api_.n_insert_);
-    const bool thirdAllowed = trader.checkOrderLimits(kStdCode);
-    EXPECT_FALSE(thirdAllowed);
-
-    // Honor the precheck result as the caller does; a denied third submission
-    // must not reach the trader API.
-    if (thirdAllowed)
-        (void)trader.openLong(kStdCode, 7000.0, 1, 0);
-    EXPECT_EQ(2u, api_.n_insert_);
-    EXPECT_TRUE(trader.checkCancelLimits(kStdCode));
-    trader.release();
+        // Each successful API submission is preceded by the public precheck.
+        for (int i = 0; i < 2; i++) {
+            if (!trader.checkOrderLimits(kStdCode) ||
+                trader.openLong(kStdCode, 7000.0, 1, 0) == UINT_MAX)
+                return 11;
+        }
+        const bool thirdAllowed = trader.checkOrderLimits(kStdCode);
+        if (thirdAllowed)
+            (void)trader.openLong(kStdCode, 7000.0, 1, 0);
+        const bool cancelAllowed = trader.checkCancelLimits(kStdCode);
+        trader.release();
+        return thirdAllowed || !cancelAllowed ? 12 : 0;
+    });
+    EXPECT_EQ(0, result);
 }
 
 TEST_F(R3TraderTest, order_freq_window_precheck_uses_standard_code_after_raw_submission)
 {
-    // First observe how many submissions fit before this configured checker
-    // refuses a precheck when the submission key and check key are identical.
-    // This lets the alias case use the same measured boundary without pinning
-    // the current threshold arithmetic as the contract.
-    const std::string alignedStdCode = "SHFE.au.2212";
-    ct2_->setAltCode(alignedStdCode.c_str());
+    const int result = r3RunInIsolatedProcess(
+        "R3TraderTest.order_freq_window_precheck_uses_standard_code_after_raw_submission", [this]() {
+        R3MockerDirCleanup cleanup{ mockerIds_ };
+        // Compare the same standard code and policy using independently fresh
+        // adapters. Only the API-facing alias changes between the two runs.
+        ct_->setAltCode(kStdCode);
+        TraderAdapter alignedTrader;
+        if (!enableRisk(alignedTrader, 2, 9))
+            return 20;
 
-    TraderAdapter trader;
-    ASSERT_TRUE(trader.initExt(id_.c_str(), &api_, &bd_, NULL));
-    enableRisk(trader, 2, 9);
-
-    uint32_t alignedSubmissions = 0;
-    bool alignedDenied = false;
-    for (uint32_t attempt = 0; attempt < 4; ++attempt) {
-        if (!trader.checkOrderLimits(alignedStdCode.c_str())) {
-            alignedDenied = true;
-            break;
+        uint32_t alignedSubmissions = 0;
+        bool alignedDenied = false;
+        for (uint32_t attempt = 0; attempt < 8; ++attempt) {
+            if (!alignedTrader.checkOrderLimits(kStdCode)) {
+                alignedDenied = true;
+                break;
+            }
+            if (alignedTrader.openLong(kStdCode, 7000.0, 1, 0) == UINT_MAX) {
+                alignedTrader.release();
+                return 21;
+            }
+            ++alignedSubmissions;
         }
-        const uint32_t localid = trader.openLong(alignedStdCode.c_str(), 7000.0, 1, 0);
-        EXPECT_NE(UINT_MAX, localid);
-        if (localid == UINT_MAX)
-            break;
-        ++alignedSubmissions;
-        EXPECT_EQ(alignedStdCode, api_.last_code_);
-    }
-    // If the loop used all four attempts, check once more to observe whether
-    // the configured boundary has been reached.
-    if (!alignedDenied)
-        alignedDenied = !trader.checkOrderLimits(alignedStdCode.c_str());
-    EXPECT_TRUE(alignedDenied);
-    EXPECT_GT(alignedSubmissions, 0u);
-    EXPECT_LE(alignedSubmissions, 4u);
+        if (!alignedDenied)
+            alignedDenied = !alignedTrader.checkOrderLimits(kStdCode);
+        alignedTrader.release();
+        if (!alignedDenied || alignedSubmissions == 0 || alignedSubmissions > 8)
+            return 22;
 
-    // The normal caller sequence is precheck, then submit. For this contract,
-    // doEntrust changes the submitted code to the raw alt code and caches the
-    // timestamp under that raw key. Repeating the sequence for the same number
-    // of accepted submissions should exhaust the same window, so the
-    // standard-code precheck must deny the next request. The
-    // aligned control above proves when this boundary setup is reached; a pass
-    // here would isolate the raw/std key mismatch.
-    uint32_t rawSubmissions = 0;
-    for (; rawSubmissions < alignedSubmissions; ) {
-        const bool allowed = trader.checkOrderLimits(kStdCode);
-        EXPECT_TRUE(allowed);
-        if (!allowed)
-            break;
-        const uint32_t localid = trader.openLong(kStdCode, 7000.0, 1, 0);
-        EXPECT_NE(UINT_MAX, localid);
-        if (localid == UINT_MAX)
-            break;
-        ++rawSubmissions;
-        EXPECT_EQ(kRawCode, api_.last_code_);
-    }
-    EXPECT_EQ(alignedSubmissions, rawSubmissions);
-
-    const bool nextAllowed = trader.checkOrderLimits(kStdCode);
-    EXPECT_FALSE(nextAllowed);
-    if (nextAllowed)
-        (void)trader.openLong(kStdCode, 7000.0, 1, 0);
-    EXPECT_EQ(alignedSubmissions + rawSubmissions, api_.n_insert_);
-
-    trader.release();
+        ct_->setAltCode(kRawCode);
+        TraderAdapter trader;
+        if (!enableRisk(trader, 2, 9))
+            return 23;
+        uint32_t rawSubmissions = 0;
+        while (rawSubmissions < alignedSubmissions) {
+            if (!trader.checkOrderLimits(kStdCode) ||
+                trader.openLong(kStdCode, 7000.0, 1, 0) == UINT_MAX) {
+                trader.release();
+                return 24;
+            }
+            ++rawSubmissions;
+        }
+        const bool nextAllowed = trader.checkOrderLimits(kStdCode);
+        trader.release();
+        return rawSubmissions == alignedSubmissions && !nextAllowed ? 0 : 25;
+    });
+    EXPECT_EQ(0, result);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -293,40 +433,216 @@ TEST_F(R3TraderTest, order_freq_window_precheck_uses_standard_code_after_raw_sub
 //////////////////////////////////////////////////////////////////////////
 TEST_F(R3TraderTest, cancel_freq_window_denies_cancel_after_boundary)
 {
-    TraderAdapter trader;
-    ASSERT_TRUE(trader.initExt(id_.c_str(), &api_, &bd_, NULL));
-    enableRisk(trader, 9, 2);
+    const int result = r3RunInIsolatedProcess(
+        "R3TraderTest.cancel_freq_window_denies_cancel_after_boundary", [this]() {
+        R3MockerDirCleanup cleanup{ mockerIds_ };
+        ct_->setAltCode(kStdCode);
+        TraderAdapter trader;
+        if (!enableRisk(trader, 9, 2))
+            return 30;
 
-    // Seed three separately identified live orders so successful cancels are
-    // distinct operations. The test temporarily aligns the stored code with
-    // the standardized check key to keep raw/std key mapping out of the
-    // boundary assertion in this case.
-    WTSOrderInfo* order1 = r3Order(ct_, WDT_LONG, WOT_OPEN, 1, 0, "ORD1", "otp.p11a.1001");
-    WTSOrderInfo* order2 = r3Order(ct_, WDT_LONG, WOT_OPEN, 1, 0, "ORD2", "otp.p11a.1002");
-    WTSOrderInfo* order3 = r3Order(ct_, WDT_LONG, WOT_OPEN, 1, 0, "ORD3", "otp.p11a.1003");
-    WTSArray* orders = r3Array({ order1, order2, order3 });
+        uint32_t localids[3] = {};
+        for (uint32_t i = 0; i < 3; ++i) {
+            localids[i] = trader.openLong(kStdCode, 7000.0, 1, 0);
+            if (localids[i] == UINT_MAX || !waitForOrder(trader, localids[i])) {
+                trader.release();
+                return 31;
+            }
+        }
+        for (uint32_t i = 0; i < 2; ++i) {
+            if (!trader.checkCancelLimits(kStdCode) || !trader.cancel(localids[i])) {
+                trader.release();
+                return 32;
+            }
+        }
+        const bool thirdAllowed = trader.checkCancelLimits(kStdCode);
+        if (thirdAllowed)
+            (void)trader.cancel(localids[2]);
+        trader.release();
+        return thirdAllowed ? 33 : 0;
+    });
+    EXPECT_EQ(0, result);
+}
+
+TEST_F(R3TraderTest, cancel_localid_frequency_cache_uses_standardized_contract_code)
+{
+    const int result = r3RunInIsolatedProcess(
+        "R3TraderTest.cancel_localid_frequency_cache_uses_standardized_contract_code", [this]() {
+        R3MockerDirCleanup cleanup{ mockerIds_ };
+        std::vector<uint32_t> localids;
+        auto seedOrders = [this, &localids](TraderAdapter& trader, bool standardizedOrderCode) {
+            localids.clear();
+            for (uint32_t i = 0; i < 8; ++i) {
+                const uint32_t localid = trader.openLong(kStdCode, 7000.0, 1, 0);
+                if (localid == UINT_MAX || !waitForOrder(trader, localid))
+                    return false;
+                localids.push_back(localid);
+                if (standardizedOrderCode) {
+                    OrderMap* stored = trader.getOrders("");
+                    if (stored == nullptr)
+                        return false;
+                    WTSOrderInfo* order = (WTSOrderInfo*)stored->grab(localid);
+                    if (order == nullptr) {
+                        stored->release();
+                        return false;
+                    }
+                    order->setCode(kStdCode);
+                    order->release();
+                    stored->release();
+                }
+            }
+            return true;
+        };
+
+        // The control and alias run use the same actual standard contract,
+        // same policy, and independently fresh adapters.
+        ct_->setAltCode(kStdCode);
+        TraderAdapter alignedTrader;
+        if (!enableRisk(alignedTrader, 9, 2) || !seedOrders(alignedTrader, true))
+            return 40;
+        uint32_t alignedAccepted = 0;
+        bool alignedDenied = false;
+        for (uint32_t i = 0; i < 8; ++i) {
+            if (!alignedTrader.cancel(localids[i])) {
+                alignedDenied = true;
+                break;
+            }
+            ++alignedAccepted;
+        }
+        alignedTrader.release();
+        if (!alignedDenied || alignedAccepted == 0)
+            return 41;
+
+        ct_->setAltCode(kRawCode);
+        TraderAdapter trader;
+        if (!enableRisk(trader, 9, 2) || !seedOrders(trader, false))
+            return 42;
+        uint32_t rawAccepted = 0;
+        for (; rawAccepted < alignedAccepted; ++rawAccepted) {
+            if (!trader.cancel(localids[rawAccepted])) {
+                trader.release();
+                return 43;
+            }
+        }
+        const bool nextAllowed = rawAccepted >= localids.size()
+            ? true : trader.cancel(localids[rawAccepted]);
+        trader.release();
+        return rawAccepted == alignedAccepted && !nextAllowed ? 0 : 44;
+    });
+    EXPECT_EQ(0, result);
+}
+
+TEST_F(R3TraderTest, cancel_localid_rejects_inactive_or_unmapped_order_safely)
+{
+    const int result = r3RunInIsolatedProcess(
+        "R3TraderTest.cancel_localid_rejects_inactive_or_unmapped_order_safely", [this]() {
+        R3MockerDirCleanup cleanup{ mockerIds_ };
+        TraderAdapter trader;
+        if (!enableRisk(trader, 9, 2))
+            return 50;
+
+        WTSOrderInfo* inactive = r3Order(ct_, WDT_LONG, WOT_OPEN, 1, 0,
+            "INACTIVE", "otp.p11a.3101");
+        WTSOrderInfo* unmapped = r3Order(ct_, WDT_LONG, WOT_OPEN, 1, 0,
+            "UNMAPPED", "otp.p11a.3102");
+        WTSArray* orders = r3Array({ inactive, unmapped });
+        trader.onRspOrders(orders);
+        orders->release();
+        inactive->release();
+        unmapped->release();
+
+        OrderMap* seeded = trader.getOrders("");
+        if (seeded == nullptr)
+            return 51;
+        WTSOrderInfo* inactiveStored = (WTSOrderInfo*)seeded->grab(3101);
+        WTSOrderInfo* unmappedStored = (WTSOrderInfo*)seeded->grab(3102);
+        if (inactiveStored == nullptr || unmappedStored == nullptr) {
+            if (inactiveStored != nullptr)
+                inactiveStored->release();
+            if (unmappedStored != nullptr)
+                unmappedStored->release();
+            seeded->release();
+            return 52;
+        }
+        inactiveStored->setOrderState(WOS_Canceled);
+        inactiveStored->setContractInfo(NULL);
+        inactiveStored->release();
+        unmappedStored->setContractInfo(NULL);
+        unmappedStored->release();
+        seeded->release();
+
+        const bool inactiveRejected = !trader.cancel(3101);
+        const bool unmappedRejected = !trader.cancel(3102);
+        trader.release();
+        return inactiveRejected && unmappedRejected ? 0 : 53;
+    });
+    EXPECT_EQ(0, result);
+}
+
+TEST_F(R3TraderTest, cancel_localid_risk_rejection_retries_do_not_grow_cache)
+{
+    const int result = r3RunInIsolatedProcess(
+        "R3TraderTest.cancel_localid_risk_rejection_retries_do_not_grow_cache", [this]() {
+        R3MockerDirCleanup cleanup{ mockerIds_ };
+        ct_->setAltCode(kStdCode);
+        TraderAdapter trader;
+        if (!enableRisk(trader, 9, 2))
+            return 60;
+
+        const uint32_t acceptedLocalId = trader.openLong(kStdCode, 7000.0, 1, 0);
+        const uint32_t deniedLocalId = trader.openLong(kStdCode, 7000.0, 1, 0);
+        if (acceptedLocalId == UINT_MAX || deniedLocalId == UINT_MAX ||
+            !waitForOrder(trader, acceptedLocalId) || !waitForOrder(trader, deniedLocalId))
+            return 61;
+
+        // Establish one successfully submitted cancel and a live second order.
+        // Then force the already-established local risk exclusion path so the
+        // retry check does not depend on the unresolved window endpoint/clock.
+        if (!trader.cancel(acceptedLocalId))
+            return 62;
+        auto cacheIt = trader._cancel_time_cache.find(kStdCode);
+        if (cacheIt == trader._cancel_time_cache.end() || cacheIt->second.size() != 1u)
+            return 63;
+        const size_t acceptedCacheSize = cacheIt->second.size();
+
+        trader._exclude_codes.insert(kStdCode);
+        for (uint32_t retry = 0; retry < 100; ++retry) {
+            if (trader.cancel(deniedLocalId))
+                return 64;
+        }
+
+        cacheIt = trader._cancel_time_cache.find(kStdCode);
+        const bool cacheUnchanged = cacheIt != trader._cancel_time_cache.end() &&
+            cacheIt->second.size() == acceptedCacheSize;
+        trader.release();
+        return cacheUnchanged ? 0 : 65;
+    });
+    EXPECT_EQ(0, result);
+}
+
+TEST_F(R3TraderTest, cancel_localid_synchronous_api_failure_is_not_cached)
+{
+    TraderAdapter trader;
+    buildReady(trader);
+
+    WTSOrderInfo* order = r3Order(ct_, WDT_LONG, WOT_OPEN, 1, 0,
+        "SYNC_FAIL", ("otp." + id_ + ".3501").c_str());
+    WTSArray* orders = r3Array({ order });
     trader.onRspOrders(orders);
     orders->release();
-    OrderMap* seeded = trader.getOrders("");
-    ASSERT_NE(nullptr, seeded);
-    EXPECT_EQ(3u, seeded->size());
-    seeded->release();
-    order1->setCode(kStdCode);
-    order2->setCode(kStdCode);
-    order3->setCode(kStdCode);
-    order1->release();
-    order2->release();
-    order3->release();
+    order->release();
 
-    ASSERT_TRUE(trader.checkCancelLimits(kStdCode));
-    EXPECT_TRUE(trader.cancel(1001u));
-    ASSERT_TRUE(trader.checkCancelLimits(kStdCode));
-    EXPECT_TRUE(trader.cancel(1002u));
-    EXPECT_EQ(2u, api_.n_action_);
+    api_.action_ret_ = -1;
+    EXPECT_FALSE(trader.cancel(3501));
+    EXPECT_EQ(1u, api_.n_action_);
+    EXPECT_EQ(trader._cancel_time_cache.end(), trader._cancel_time_cache.find(kStdCode));
 
-    EXPECT_FALSE(trader.checkCancelLimits(kStdCode));
-    EXPECT_FALSE(trader.cancel(1003u));
-    EXPECT_EQ(2u, api_.n_action_);
+    // A synchronous API acceptance remains recorded as dispatched.
+    api_.action_ret_ = 0;
+    EXPECT_TRUE(trader.cancel(3501));
+    const auto cacheIt = trader._cancel_time_cache.find(kStdCode);
+    ASSERT_NE(trader._cancel_time_cache.end(), cacheIt);
+    EXPECT_EQ(1u, cacheIt->second.size());
     trader.release();
 }
 
@@ -618,6 +934,61 @@ TEST_F(R3TraderTest, position_and_order_tables_read_seeded_state)
     EXPECT_NE(nullptr, allTab);
     if (allTab)
         allTab->release();
+    trader.release();
+}
+
+TEST_F(R3TraderTest, get_orders_supports_standard_and_bare_codes_across_exchanges)
+{
+    TraderAdapter trader;
+    buildReady(trader);
+
+    WTSCommodityInfo* dceComm = WTSCommodityInfo::create("ag", "DCE silver", "DCE", "TRADING", "CHINA");
+    ASSERT_NE(nullptr, dceComm);
+    dceComm->setCategory(CC_Future);
+    dceComm->setCoverMode(CM_CoverToday);
+    dceComm->setTradingMode(TM_Both);
+    WTSContractInfo* dceContract = WTSContractInfo::create(kRawCode, "ag2512", "DCE", "ag");
+    ASSERT_NE(nullptr, dceContract);
+    dceContract->setAltCode(kRawCode);
+    bd_.regis(dceComm, dceContract);
+
+    WTSOrderInfo* shfeOrder = r3Order(ct_, WDT_LONG, WOT_OPEN, 1, 0,
+        "SHFE_AG", ("otp." + id_ + ".4101").c_str());
+    WTSOrderInfo* dceOrder = r3Order(dceContract, WDT_LONG, WOT_OPEN, 1, 0,
+        "DCE_AG", ("otp." + id_ + ".4102").c_str());
+    WTSArray* orders = r3OwnedArray({ shfeOrder, dceOrder });
+    trader.onRspOrders(orders);
+    orders->release();
+
+    // Canonical standard codes retain the exchange dimension.
+    OrderMap* byShfe = trader.getOrders(kStdCode);
+    ASSERT_NE(nullptr, byShfe);
+    ASSERT_EQ(1u, byShfe->size());
+    EXPECT_EQ(shfeOrder, byShfe->get(4101));
+    EXPECT_EQ(nullptr, byShfe->get(4102));
+    byShfe->release();
+
+    OrderMap* byDce = trader.getOrders("DCE.ag.2512");
+    ASSERT_NE(nullptr, byDce);
+    ASSERT_EQ(1u, byDce->size());
+    EXPECT_EQ(nullptr, byDce->get(4101));
+    EXPECT_EQ(dceOrder, byDce->get(4102));
+    byDce->release();
+
+    // Bare raw-code lookup preserves the existing exact-code behavior: with
+    // no exchange qualifier, both matching markets remain visible.
+    OrderMap* byRaw = trader.getOrders(kRawCode);
+    ASSERT_NE(nullptr, byRaw);
+    EXPECT_EQ(2u, byRaw->size());
+    EXPECT_EQ(shfeOrder, byRaw->get(4101));
+    EXPECT_EQ(dceOrder, byRaw->get(4102));
+    byRaw->release();
+
+    OrderMap* all = trader.getOrders("");
+    ASSERT_NE(nullptr, all);
+    EXPECT_EQ(2u, all->size());
+    all->release();
+
     trader.release();
 }
 

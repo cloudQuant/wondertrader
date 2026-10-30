@@ -1,0 +1,68 @@
+{
+  "archive_status": "LOCAL_FOCUSED_TEST_PASS_NOT_FULL_ACCEPTANCE",
+  "date": "2026-10-30",
+  "platform": "macOS arm64",
+  "independent_review": "PASS; no blocker in this scope",
+  "final_run": {
+    "binary": "build-cov/build_x64/Debug/bin/TestUnits/wt-replayer-bin-v8",
+    "binary_sha256": "3f7023bb43c6461358dd210cf959a26130643c7238a0a3a1c47b8e29224f9a13",
+    "log": "run-v8.log",
+    "log_sha256": "2e7ed4142f688b85da60768921d02fb9192cbd33407ddd770bd905f92aab4b74",
+    "command": "build-cov/build_x64/Debug/bin/TestUnits/wt-replayer-bin-v8 --gtest_color=no --gtest_filter=P04ReplayCsvTest.failedMainBarsLoadDoesNotPoisonReplayAndCanRetry:P04ReplayCsvTest.failedBinaryRawBarsLoadCanBeRetriedSafely",
+    "result": "PASS 2/2; no skipped tests"
+  },
+  "builds": {
+    "storage_v6": {
+      "log": "build-v6.log",
+      "log_sha256": "3555bdac7b76934258c5daf34b724c0d5e08bbf56ef9c1ec94b7f508b41cf10c",
+      "result": "WtDataStorage dylib and dependent objects rebuilt"
+    },
+    "replay_v8": {
+      "log": "build-v8.log",
+      "log_sha256": "d3121cfc30b30505554ea3ad583b973582b650b24fd785ec21bd72fbd6ce775e",
+      "result": "Final production and CoverageTests HisDataReplayer objects rebuilt"
+    },
+    "reproduction_script": "reproduce-v8.sh",
+    "scope": "Incremental Ninja compilation plus manual focused link; test dynamically loads the real WtDataStorage dylib from build-cov. Not clean or aggregate CoverageTests. Link uses -Wl,-undefined,dynamic_lookup and reuses existing gtest/Boost/zstd/iconv/project libraries. Script is archived but was not run during documentation update."
+  },
+  "historical_runs": {
+    "v6": {
+      "binary": "build-cov/build_x64/Debug/bin/TestUnits/wt-replayer-bin-v6",
+      "binary_sha256": "509c9f1021d3b4db7d39db6aa809f5b60b016192aedf5051eadd58238e85dcba",
+      "log": "run-v6.log",
+      "log_sha256": "04a8893d59f634c62e7cd66d6c33dbf3bd5a991151f0f762308ce0cc30a3238c",
+      "result": "1/2 passed; binary raw bars retry test failed because fixture time range did not match its 09:35-10:30 data"
+    },
+    "v7": {
+      "binary": "build-cov/build_x64/Debug/bin/TestUnits/wt-replayer-bin-v7",
+      "binary_sha256": "b4812877da6dbc7ed097db58cbfdb8f428edfa03b28dc2ba88658439cc2c7f4b",
+      "log": "run-v7.log",
+      "log_sha256": "2d02b91c47a8ad7a1ca2a583ad11c64e6924252130bd9959d46e03044ff1d4e0",
+      "build_log": "build-v7.log",
+      "build_log_sha256": "d1ca9f08d531d59de6996d85bffcb21ff22fc581741162b2e02dab71748c9d01",
+      "result": "PASS 2/2 after correcting fixture time boundaries and adding previous-trading-day control"
+    }
+  },
+  "storage_module": {
+    "path": "build-cov/build_x64/Debug/bin/libWtDataStorage.dylib",
+    "sha256": "bdb83ecc57bb8eb1c0d83e0f044a8eccf04d8f9b6c7e5a8bde982e8f15614dd9"
+  },
+  "source_sha256": {
+    "src/WtBtCore/HisDataReplayer.cpp": "54465f28e77bc5553757b5b29947e6dc6939a9fc33cd26605e5df9f6f48fc4f1",
+    "src/WtDataStorage/WtDataReader.cpp": "d847e1212372809b7cbe5abc5a466ff9e8d4bb8eebc17cae7165b8fe1d266f54",
+    "src/WtDataStorage/WtBtDtReader.cpp": "1d63b0cfea05b3899bf7524e603f94f58531cfc4ed40376a07791864130de150",
+    "src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp": "46ab54ea2f047b0a8599f8df2fefd35fa152b5154d97cb4d87cbd58fa532c1d1"
+  },
+  "object_sha256": {
+    "CoverageTests_btcore/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp.o": "95611c2983b7505e518fd914abba75706ab85f2c196fede109450b27a3cd1d6a",
+    "CoverageTests_btcore/__/__/WtBtCore/HisDataReplayer.cpp.o": "99336ee490c70ffcfe4a2d66c8d66007adf0700c9b03b0ca28af09e5c3ae3aa2",
+    "WtBtCore/HisDataReplayer.cpp.o": "57ed67c4235b45872885f42661c4b657acf64930436967394e3986a3ee85e0ad",
+    "WtDataStorage/WtDataReader.cpp.o": "cb3b276d4a9d59179e084e7529053ae1093eee3dc3a94dd0d79d1358c88a02af",
+    "WtDataStorage/WtBtDtReader.cpp.o": "aa7a934288a4465f2a024af514924d4c901cec811a305e0edfcda1db7f41d3af"
+  },
+  "notes": [
+    "v6 failure is retained as a test-fixture mismatch; the time window was corrected to begin at 09:30 with prior-trading-day control data. The final TEST_PASS is based only on v8.",
+    "No ASan/TSan, Windows native build/run, real market history, or complete backtest/runner integration evidence.",
+    "The test loads WtDataStorage dynamically at runtime; the focused executable does not list the dylib as a static dependency in otool -L."
+  ]
+}

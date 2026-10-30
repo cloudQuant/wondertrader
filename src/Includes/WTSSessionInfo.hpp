@@ -58,6 +58,18 @@ protected:
 	{
 		m_uOffsetMins = offset;
 	}
+
+	TradingSection makeAuctionSection(uint32_t sTime, uint32_t eTime) const
+	{
+		// Raw (0,0) is an empty auction range with a configured start threshold
+		// of 0. Keep that threshold visible; endpoint mapping would expand it to
+		// [00:00,24:00) at zero offset.
+		if (sTime == 0 && eTime == 0)
+			return TradingSection(0, 0, sTime, eTime);
+
+		return TradingSection(offsetTime(sTime, true), offsetTime(eTime, false), sTime, eTime);
+	}
+
 	virtual ~WTSSessionInfo(){}
 
 public:
@@ -78,29 +90,43 @@ public:
 	void addTradingSection(uint32_t sTime, uint32_t eTime)
 	{
 		m_tradingTimes.emplace_back(TradingSection(offsetTime(sTime, true), offsetTime(eTime, false), sTime, eTime));
+		_minutes.clear();
 	}
 
 	void setAuctionTime(uint32_t sTime, uint32_t eTime)
 	{
 		if (m_auctionTimes.empty())
 		{
-			m_auctionTimes.emplace_back(TradingSection(offsetTime(sTime, true), offsetTime(eTime, false), sTime, eTime));
+			m_auctionTimes.emplace_back(makeAuctionSection(sTime, eTime));
 		}
 		else
 		{
-			m_auctionTimes[0].first_raw = sTime;
-			m_auctionTimes[0].second_raw = eTime;
-			m_auctionTimes[0].first = offsetTime(sTime, true);
-			m_auctionTimes[0].second = offsetTime(eTime, false);
+			m_auctionTimes[0] = makeAuctionSection(sTime, eTime);
 		}
 	}
 
 	void addAuctionTime(uint32_t sTime, uint32_t eTime)
 	{
-		m_auctionTimes.emplace_back(TradingSection(offsetTime(sTime, true), offsetTime(eTime, false), sTime, eTime));
+		m_auctionTimes.emplace_back(makeAuctionSection(sTime, eTime));
 	}
 
-	void setOffsetMins(int32_t offset){m_uOffsetMins = offset;}
+	void setOffsetMins(int32_t offset)
+	{
+		m_uOffsetMins = offset;
+
+		for (TradingSection& section : m_tradingTimes)
+		{
+			section.first = offsetTime(section.first_raw, true);
+			section.second = offsetTime(section.second_raw, false);
+		}
+
+		for (TradingSection& section : m_auctionTimes)
+		{
+			section = makeAuctionSection(section.first_raw, section.second_raw);
+		}
+
+		_minutes.clear();
+	}
 
 	const TradingTimes&		getTradingSections() const{ return m_tradingTimes; }
 	const TradingTimes&		getAuctionSections() const{ return m_auctionTimes; }
@@ -150,42 +176,35 @@ public:
 			return 0;
 
 		uint32_t offTime = offsetTime(uTime, true);
-
-		uint32_t offset = 0;
-		bool bFound = false;
-		auto it = m_tradingTimes.begin();
-		for(; it != m_tradingTimes.end(); it++)
+		uint32_t totalOffset = 0;
+		uint32_t autoAdjustOffset = 0;
+		bool hasAutoAdjustOffset = false;
+		for (const TradingSection& section : m_tradingTimes)
 		{
-			TradingSection &section = *it;
 			if (section.first <= offTime && offTime <= section.second)
 			{
 				int32_t hour = offTime / 100 - section.first / 100;
 				int32_t minute = offTime % 100 - section.first % 100;
-				offset += hour*60 + minute;
-				bFound = true;
-				break;
+				return totalOffset + hour * 60 + minute;
 			}
-			else if(offTime > section.second)	//大于上边界
+
+			if (autoAdjust && !hasAutoAdjustOffset && offTime <= section.second)
 			{
-				int32_t hour = section.second/100 - section.first/100;
-				int32_t minute = section.second%100 - section.first%100;
-				offset += hour*60 + minute;
-			} 
-			else //小于下边界
-			{
-				if(autoAdjust)
-				{
-					bFound = true;
-				}
-				break;
+				// Keep the legacy first auto-adjust point while continuing to
+				// inspect later sections for an offset-time match.
+				hasAutoAdjustOffset = true;
+				autoAdjustOffset = totalOffset;
 			}
+
+			int32_t hour = section.second / 100 - section.first / 100;
+			int32_t minute = section.second % 100 - section.first % 100;
+			totalOffset += hour * 60 + minute;
 		}
 
-		//没找到就返回0
-		if(!bFound)
-			return INVALID_UINT32;
+		if (autoAdjust && hasAutoAdjustOffset)
+			return autoAdjustOffset;
 
-		return offset;
+		return INVALID_UINT32;
 	}
 
 	uint32_t minuteToTime(uint32_t uMinutes, bool bHeadFirst = false)
@@ -441,8 +460,18 @@ public:
 	 */
 	bool	isInTradingTime(uint32_t uTime, bool bStrict = false)
 	{
-		uint32_t count = timeToMinutes(uTime);
-		if(count == INVALID_UINT32)
+		const uint32_t offTime = offsetTime(uTime, true);
+		bool inTradingSection = false;
+		for (const TradingSection& section : m_tradingTimes)
+		{
+			if (section.first <= offTime && offTime <= section.second)
+			{
+				inTradingSection = true;
+				break;
+			}
+		}
+
+		if (!inTradingSection)
 			return false;
 
 		if (bStrict && isLastOfSection(uTime))

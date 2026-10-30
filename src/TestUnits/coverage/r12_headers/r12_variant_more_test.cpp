@@ -6,8 +6,13 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <clocale>
+#include <cmath>
 #include <cstdint>
+#include <limits>
+#include <locale>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "Includes/WTSVariant.hpp"
@@ -16,6 +21,47 @@ USING_NS_WTP;
 
 namespace {
 typedef WTSVariant::MemberNames Names;
+
+class CommaDecimalPoint : public std::numpunct<char>
+{
+protected:
+	char do_decimal_point() const override { return ','; }
+};
+
+class ScopedGlobalLocale
+{
+public:
+	explicit ScopedGlobalLocale(const std::locale& locale) : _previous(std::locale::global(locale)) {}
+	~ScopedGlobalLocale() { std::locale::global(_previous); }
+
+private:
+	std::locale _previous;
+};
+
+class ScopedCNumericLocale
+{
+public:
+	ScopedCNumericLocale()
+	{
+		const char* current = std::setlocale(LC_NUMERIC, nullptr);
+		if (current != nullptr)
+			_previous = current;
+	}
+
+	~ScopedCNumericLocale()
+	{
+		if (!_previous.empty())
+			std::setlocale(LC_NUMERIC, _previous.c_str());
+	}
+
+	bool trySet(const char* name)
+	{
+		return std::setlocale(LC_NUMERIC, name) != nullptr;
+	}
+
+private:
+	std::string _previous;
+};
 }
 
 TEST(r12_variant_object, append_and_read_each_scalar_type)
@@ -50,8 +96,8 @@ TEST(r12_variant_object, append_and_read_each_scalar_type)
 
 	WTSVariant* rv = obj->get("real");
 	EXPECT_EQ(rv->type(), WTSVariant::VT_Real);
-	// create(double) 用 %.10f 定标（WTSVariant.hpp:96-118）
-	EXPECT_EQ(rv->asString(), std::string("3.1415900000"));
+	// Real values use a shortest round-trip decimal representation.
+	EXPECT_EQ(rv->asString(), std::string("3.14159"));
 	EXPECT_DOUBLE_EQ(rv->asDouble(), 3.14159);
 	// 实数截断成整数
 	EXPECT_EQ(rv->asInt32(), 3);
@@ -77,6 +123,198 @@ TEST(r12_variant_object, append_and_read_each_scalar_type)
 	obj->append("n2", "NO");
 	EXPECT_FALSE(obj->getBoolean("n2"));
 	obj->release();
+}
+
+TEST(r12_variant_real, object_and_array_preserve_double_round_trip)
+{
+	const std::vector<std::pair<const char*, double>> values = {
+		{"near_one", 1.00000000001},
+		{"tiny", 1e-11},
+		{"ordinary", 12345.678901234567},
+		{"subnormal", std::numeric_limits<double>::denorm_min()},
+		{"largest", std::numeric_limits<double>::max()},
+		{"positive_zero", 0.0},
+		{"negative_zero", -0.0},
+		{"positive_infinity", std::numeric_limits<double>::infinity()},
+		{"negative_infinity", -std::numeric_limits<double>::infinity()},
+		{"nan", std::numeric_limits<double>::quiet_NaN()}
+	};
+
+	WTSVariant* object = WTSVariant::createObject();
+	WTSVariant* array = WTSVariant::createArray();
+	ASSERT_NE(object, nullptr);
+	ASSERT_NE(array, nullptr);
+	for (const auto& sample : values)
+	{
+		ASSERT_TRUE(object->append(sample.first, sample.second));
+		ASSERT_TRUE(array->append(sample.second));
+	}
+
+	for (size_t i = 0; i < values.size(); ++i)
+	{
+		const double expected = values[i].second;
+		WTSVariant* objectValue = object->get(values[i].first);
+		WTSVariant* arrayValue = array->get(static_cast<uint32_t>(i));
+		ASSERT_NE(objectValue, nullptr);
+		ASSERT_NE(arrayValue, nullptr);
+		if (std::isnan(expected))
+		{
+			EXPECT_TRUE(std::isnan(objectValue->asDouble()));
+			EXPECT_TRUE(std::isnan(arrayValue->asDouble()));
+		}
+		else
+		{
+			EXPECT_EQ(expected, objectValue->asDouble());
+			EXPECT_EQ(expected, arrayValue->asDouble());
+		}
+		if (expected == 0.0)
+		{
+			EXPECT_EQ(std::signbit(expected), std::signbit(objectValue->asDouble()));
+			EXPECT_EQ(std::signbit(expected), std::signbit(arrayValue->asDouble()));
+		}
+	}
+	EXPECT_NE("0", object->get("tiny")->asString());
+	EXPECT_NE("1", object->get("near_one")->asString());
+	EXPECT_EQ("-0", object->get("negative_zero")->asString());
+	EXPECT_EQ("inf", object->get("positive_infinity")->asString());
+	EXPECT_EQ("-inf", object->get("negative_infinity")->asString());
+
+	object->release();
+	array->release();
+}
+
+TEST(r12_variant_real, integer_accessors_truncate_and_saturate_safely)
+{
+	WTSVariant* object = WTSVariant::createObject();
+	WTSVariant* array = WTSVariant::createArray();
+	ASSERT_NE(object, nullptr);
+	ASSERT_NE(array, nullptr);
+
+	const double int32Limit = std::ldexp(1.0, std::numeric_limits<int32_t>::digits);
+	const double uint32Limit = std::ldexp(1.0, std::numeric_limits<uint32_t>::digits);
+	const double int64Limit = std::ldexp(1.0, std::numeric_limits<int64_t>::digits);
+	const double uint64Limit = std::ldexp(1.0, std::numeric_limits<uint64_t>::digits);
+	ASSERT_TRUE(object->append("tiny", 1e-5));
+	ASSERT_TRUE(object->append("million", 1e6));
+	ASSERT_TRUE(object->append("fraction", 12345.875));
+	ASSERT_TRUE(object->append("negative_fraction", -12345.875));
+	ASSERT_TRUE(object->append("int32_upper", int32Limit));
+	ASSERT_TRUE(object->append("int32_lower", -int32Limit));
+	ASSERT_TRUE(object->append("uint32_upper", uint32Limit));
+	ASSERT_TRUE(object->append("int64_upper", int64Limit));
+	ASSERT_TRUE(object->append("int64_lower", -int64Limit));
+	ASSERT_TRUE(object->append("uint64_upper", uint64Limit));
+	ASSERT_TRUE(object->append("positive_infinity", std::numeric_limits<double>::infinity()));
+	ASSERT_TRUE(object->append("negative_infinity", -std::numeric_limits<double>::infinity()));
+	ASSERT_TRUE(object->append("nan", std::numeric_limits<double>::quiet_NaN()));
+
+	EXPECT_EQ(0, object->get("tiny")->asInt32());
+	EXPECT_EQ(0u, object->get("tiny")->asUInt32());
+	EXPECT_EQ(0LL, object->get("tiny")->asInt64());
+	EXPECT_EQ(0ULL, object->get("tiny")->asUInt64());
+	EXPECT_EQ(1000000, object->get("million")->asInt32());
+	EXPECT_EQ(1000000u, object->get("million")->asUInt32());
+	EXPECT_EQ(1000000LL, object->get("million")->asInt64());
+	EXPECT_EQ(1000000ULL, object->get("million")->asUInt64());
+	EXPECT_EQ(12345, object->get("fraction")->asInt32());
+	EXPECT_EQ(12345u, object->get("fraction")->asUInt32());
+	EXPECT_EQ(12345LL, object->get("fraction")->asInt64());
+	EXPECT_EQ(12345ULL, object->get("fraction")->asUInt64());
+	EXPECT_EQ(-12345, object->get("negative_fraction")->asInt32());
+	EXPECT_EQ(-12345LL, object->get("negative_fraction")->asInt64());
+	EXPECT_EQ(0u, object->get("negative_fraction")->asUInt32());
+	EXPECT_EQ(0ULL, object->get("negative_fraction")->asUInt64());
+	EXPECT_EQ(std::numeric_limits<int32_t>::max(), object->get("int32_upper")->asInt32());
+	EXPECT_EQ(2147483648u, object->get("int32_upper")->asUInt32());
+	EXPECT_EQ(std::numeric_limits<int32_t>::min(), object->get("int32_lower")->asInt32());
+	EXPECT_EQ(0u, object->get("int32_lower")->asUInt32());
+	EXPECT_EQ(std::numeric_limits<uint32_t>::max(), object->get("uint32_upper")->asUInt32());
+	EXPECT_EQ(std::numeric_limits<int64_t>::max(), object->get("int64_upper")->asInt64());
+	EXPECT_EQ(static_cast<uint64_t>(int64Limit), object->get("int64_upper")->asUInt64());
+	EXPECT_EQ(std::numeric_limits<int64_t>::min(), object->get("int64_lower")->asInt64());
+	EXPECT_EQ(0ULL, object->get("int64_lower")->asUInt64());
+	EXPECT_EQ(std::numeric_limits<uint64_t>::max(), object->get("uint64_upper")->asUInt64());
+	EXPECT_EQ(std::numeric_limits<int64_t>::max(), object->get("uint64_upper")->asInt64());
+	EXPECT_EQ(std::numeric_limits<int32_t>::max(), object->get("positive_infinity")->asInt32());
+	EXPECT_EQ(std::numeric_limits<uint32_t>::max(), object->get("positive_infinity")->asUInt32());
+	EXPECT_EQ(std::numeric_limits<int64_t>::max(), object->get("positive_infinity")->asInt64());
+	EXPECT_EQ(std::numeric_limits<uint64_t>::max(), object->get("positive_infinity")->asUInt64());
+	EXPECT_EQ(std::numeric_limits<int32_t>::min(), object->get("negative_infinity")->asInt32());
+	EXPECT_EQ(0u, object->get("negative_infinity")->asUInt32());
+	EXPECT_EQ(std::numeric_limits<int64_t>::min(), object->get("negative_infinity")->asInt64());
+	EXPECT_EQ(0ULL, object->get("negative_infinity")->asUInt64());
+	EXPECT_EQ(0, object->get("nan")->asInt32());
+	EXPECT_EQ(0u, object->get("nan")->asUInt32());
+	EXPECT_EQ(0LL, object->get("nan")->asInt64());
+	EXPECT_EQ(0ULL, object->get("nan")->asUInt64());
+
+	ASSERT_TRUE(array->append(1e-5));
+	ASSERT_TRUE(array->append(1e6));
+	ASSERT_TRUE(array->append(12345.875));
+	ASSERT_TRUE(array->append(-12345.875));
+	EXPECT_EQ(0LL, array->get(0u)->asInt64());
+	EXPECT_EQ(0ULL, array->get(0u)->asUInt64());
+	EXPECT_EQ(1000000LL, array->get(1u)->asInt64());
+	EXPECT_EQ(1000000ULL, array->get(1u)->asUInt64());
+	EXPECT_EQ(12345LL, array->get(2u)->asInt64());
+	EXPECT_EQ(12345ULL, array->get(2u)->asUInt64());
+	EXPECT_EQ(-12345LL, array->get(3u)->asInt64());
+	EXPECT_EQ(0ULL, array->get(3u)->asUInt64());
+
+	object->release();
+	array->release();
+}
+
+TEST(r12_variant_real, formatting_and_parsing_ignore_global_cpp_locale)
+{
+	ScopedGlobalLocale locale(std::locale(std::locale::classic(), new CommaDecimalPoint()));
+	WTSVariant* object = WTSVariant::createObject();
+	ASSERT_NE(object, nullptr);
+	ASSERT_TRUE(object->append("fraction", 1234.5));
+	EXPECT_EQ("1234.5", object->get("fraction")->asString());
+	EXPECT_DOUBLE_EQ(1234.5, object->get("fraction")->asDouble());
+	EXPECT_EQ(1234, object->get("fraction")->asInt64());
+	object->release();
+}
+
+TEST(r12_variant_real, formatting_and_parsing_ignore_c_numeric_locale)
+{
+	ScopedCNumericLocale locale;
+#ifdef _WIN32
+	const char* candidates[] = {"German_Germany.1252", "French_France.1252", "de-DE", "fr-FR"};
+#else
+	const char* candidates[] = {
+		"de_DE.UTF-8", "de_DE.utf8", "de_DE",
+		"fr_FR.UTF-8", "fr_FR.utf8", "fr_FR",
+		"it_IT.UTF-8", "it_IT.utf8", "it_IT"
+	};
+#endif
+	bool commaDecimalAvailable = false;
+	for (const char* candidate : candidates)
+	{
+		if (!locale.trySet(candidate))
+			continue;
+		const std::lconv* numeric = std::localeconv();
+		if (numeric != nullptr && numeric->decimal_point != nullptr && numeric->decimal_point[0] == ',')
+		{
+			commaDecimalAvailable = true;
+			break;
+		}
+	}
+	if (!commaDecimalAvailable)
+		GTEST_SKIP() << "No installed LC_NUMERIC locale uses a comma decimal separator";
+
+	WTSVariant* object = WTSVariant::createObject();
+	ASSERT_NE(object, nullptr);
+	ASSERT_TRUE(object->append("fraction", 1234.5));
+	ASSERT_TRUE(object->append("million", 1e6));
+	ASSERT_TRUE(object->append("tiny", 1e-5));
+	EXPECT_EQ("1234.5", object->get("fraction")->asString());
+	EXPECT_DOUBLE_EQ(1234.5, object->get("fraction")->asDouble());
+	EXPECT_EQ(1234, object->get("fraction")->asInt64());
+	EXPECT_EQ(1000000, object->get("million")->asInt64());
+	EXPECT_EQ(0, object->get("tiny")->asInt64());
+	object->release();
 }
 
 TEST(r12_variant_object, missing_keys_return_defaults)
@@ -260,6 +498,10 @@ TEST(r12_variant_conversions, cross_type_numeric_conversion)
 	WTSVariant* v = obj->get("num");
 	// 字符串按 atof/strtoll/strtod 换算
 	EXPECT_DOUBLE_EQ(v->asDouble(), 12.75);
+	obj->append("num_prefix", "12.75tail");
+	EXPECT_DOUBLE_EQ(obj->get("num_prefix")->asDouble(), 12.75);
+	EXPECT_EQ(12LL, obj->get("num_prefix")->asInt64());
+	EXPECT_EQ(12ULL, obj->get("num_prefix")->asUInt64());
 	EXPECT_EQ(v->asInt32(), 12);
 	EXPECT_EQ(v->asUInt32(), 12u);
 	EXPECT_EQ(v->asInt64(), 12LL);
@@ -281,18 +523,40 @@ TEST(r12_variant_conversions, cross_type_numeric_conversion)
 	obj->release();
 }
 
-// 触发条件：WTSVariant::asBoolean()（WTSVariant.hpp:282-290）没有像同族 asInt32/
-// asDouble/asString 那样先按 _type 分支，直接 `if (_value._string)` 再
-// `_value._string->c_str()`。而 _value 是与 _map/_array 共用的 union：
-// 对 VT_Object / VT_Array 调用 asBoolean()（生产里等价于 config->getBoolean("嵌套段名")）
-// 会把 ChildrenMap/ChildrenArray 指针当 std::string* 解引用 → 崩溃或读到脏内存；
-// 另外 VT_Null 变体的 _value 从未初始化（WTSVariant.hpp:61 构造只置 _type），
-// 同样命中该分支。整类 DISABLED，避免把崩溃当覆盖。
-TEST(DISABLED_r12_variant_refcount, as_boolean_on_container_is_type_confused)
+// 直接对公开创建的 object/array 调 asBoolean，验证不会把容器 union 成员当作 string 解引用。
+// VT_Null 只能通过派生类触达受保护的默认构造；其 union 未初始化，验证此路径不读取 union。
+TEST(r12_variant_refcount, as_boolean_on_container_and_null_is_safe)
 {
 	WTSVariant* obj = WTSVariant::createObject();
-	WTSVariant* nested = WTSVariant::createObject();
-	obj->append("seg", nested, false);
-	EXPECT_FALSE(obj->get("seg")->asBoolean());
+	WTSVariant* arr = WTSVariant::createArray();
+	ASSERT_NE(obj, nullptr);
+	ASSERT_NE(arr, nullptr);
+	EXPECT_FALSE(obj->asBoolean());
+	EXPECT_FALSE(arr->asBoolean());
+
+	class NullVariantForTest : public WTSVariant
+	{
+	public:
+		NullVariantForTest() : WTSVariant() {}
+	} nullValue;
+	EXPECT_EQ(nullValue.type(), WTSVariant::VT_Null);
+	EXPECT_FALSE(nullValue.asBoolean());
+
+	// Scalar controls retain the current string/bool/numeric conversion behavior.
+	WTSVariant* scalars = WTSVariant::createObject();
+	ASSERT_NE(scalars, nullptr);
+	EXPECT_TRUE(scalars->append("bool_true", true));
+	EXPECT_TRUE(scalars->append("bool_false", false));
+	EXPECT_TRUE(scalars->append("text_yes", "YeS"));
+	EXPECT_TRUE(scalars->append("text_no", "NO"));
+	EXPECT_TRUE(scalars->append("number", (int32_t)1));
+	EXPECT_TRUE(scalars->get("bool_true")->asBoolean());
+	EXPECT_FALSE(scalars->get("bool_false")->asBoolean());
+	EXPECT_TRUE(scalars->get("text_yes")->asBoolean());
+	EXPECT_FALSE(scalars->get("text_no")->asBoolean());
+	EXPECT_FALSE(scalars->get("number")->asBoolean());
+
+	scalars->release();
+	arr->release();
 	obj->release();
 }

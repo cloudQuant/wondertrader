@@ -26,6 +26,9 @@
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 
+#include <cctype>
+#include <exception>
+
 #include <rapidjson/document.h>
 namespace rj = rapidjson;
 
@@ -36,6 +39,9 @@ USING_NS_WTP;
  */
 bool proc_block_data(std::string& content, bool isBar, bool bKeepHead /* = true */)
 {
+	if (content.size() < BLOCK_HEADER_SIZE)
+		return false;
+
 	BlockHeader* header = (BlockHeader*)content.data();
 
 	bool bCmped = header->is_compressed();
@@ -52,15 +58,44 @@ bool proc_block_data(std::string& content, bool isBar, bool bKeepHead /* = true 
 	std::string buffer;
 	if (bCmped)
 	{
+		// Compressed blocks use the extended header even when they contain an
+		// old-version payload. Do not read _size until the complete header exists.
+		if (content.size() < BLOCK_HEADERV2_SIZE)
+			return false;
+
 		BlockHeaderV2* blkV2 = (BlockHeaderV2*)content.c_str();
 
-		if (content.size() != (sizeof(BlockHeaderV2) + blkV2->_size))
+		const size_t compressedSize = content.size() - BLOCK_HEADERV2_SIZE;
+		if (blkV2->_size != compressedSize)
 		{
 			return false;
 		}
 
-		//将文件头后面的数据进行解压
-		buffer = WTSCmpHelper::uncompress_data(content.data() + BLOCK_HEADERV2_SIZE, blkV2->_size);
+		// WTSCmpHelper::uncompress_data can throw for an invalid frame (and for
+		// frames without a declared content size). Treat malformed files as a
+		// decode failure instead of letting the exception escape the reader.
+		const void* compressedData = content.data() + BLOCK_HEADERV2_SIZE;
+		const unsigned long long uncompressedSize = ZSTD_getFrameContentSize(compressedData, compressedSize);
+		std::string uncompressedBuffer;
+		if (uncompressedSize == ZSTD_CONTENTSIZE_ERROR ||
+			uncompressedSize == ZSTD_CONTENTSIZE_UNKNOWN ||
+			uncompressedSize > uncompressedBuffer.max_size())
+			return false;
+		if (isBar)
+		{
+			const size_t barSize = bOldVer ? sizeof(WTSBarStructOld) : sizeof(WTSBarStruct);
+			if (uncompressedSize % barSize != 0)
+				return false;
+		}
+
+		try
+		{
+			buffer = WTSCmpHelper::uncompress_data(compressedData, compressedSize);
+		}
+		catch (...)
+		{
+			return false;
+		}
 	}
 	else
 	{
@@ -81,6 +116,9 @@ bool proc_block_data(std::string& content, bool isBar, bool bKeepHead /* = true 
 	{
 		if (isBar)
 		{
+			if (buffer.size() % sizeof(WTSBarStructOld) != 0)
+				return false;
+
 			std::string bufV2;
 			uint32_t barcnt = buffer.size() / sizeof(WTSBarStructOld);
 			bufV2.resize(barcnt * sizeof(WTSBarStruct));
@@ -94,6 +132,9 @@ bool proc_block_data(std::string& content, bool isBar, bool bKeepHead /* = true 
 		}
 		else
 		{
+			if (buffer.size() % sizeof(WTSTickStructOld) != 0)
+				return false;
+
 			uint32_t tick_cnt = buffer.size() / sizeof(WTSTickStructOld);
 			std::string bufv2;
 			bufv2.resize(sizeof(WTSTickStruct)*tick_cnt);
@@ -105,6 +146,10 @@ bool proc_block_data(std::string& content, bool isBar, bool bKeepHead /* = true 
 			}
 			buffer.swap(bufv2);
 		}
+	}
+	else if (bCmped && isBar && buffer.size() % sizeof(WTSBarStruct) != 0)
+	{
+		return false;
 	}
 
 	if (bKeepHead)
@@ -143,23 +188,103 @@ uint32_t strToTime(const char* strTime, bool bKeepSec = false)
 	return ret;
 }
 
-uint32_t strToDate(const char* strDate)
+bool parseUnsignedDatePart(const std::string& value, uint32_t& result)
 {
-	StringVector ay = StrUtil::split(strDate, "/");
-	if (ay.size() == 1)
-		ay = StrUtil::split(strDate, "-");
-	std::stringstream ss;
-	if (ay.size() > 1)
+	if (value.empty())
+		return false;
+
+	uint32_t parsed = 0;
+	for (char ch : value)
 	{
-		auto pos = ay[2].find(" ");
-		if (pos != std::string::npos)
-			ay[2] = ay[2].substr(0, pos);
-		ss << ay[0] << (ay[1].size() == 1 ? "0" : "") << ay[1] << (ay[2].size() == 1 ? "0" : "") << ay[2];
+		if (!std::isdigit((unsigned char)ch))
+			return false;
+		parsed = parsed * 10 + (uint32_t)(ch - '0');
+	}
+	result = parsed;
+	return true;
+}
+
+bool strToDate(const char* strDate, uint32_t& result)
+{
+	if (strDate == NULL)
+		return false;
+
+	std::string date(strDate);
+	const size_t first = date.find_first_not_of(" \t\r\n");
+	if (first == std::string::npos)
+		return false;
+	const size_t last = date.find_last_not_of(" \t\r\n");
+	date = date.substr(first, last - first + 1);
+
+	// CSV sources commonly place a time suffix in the date cell; only the date
+	// portion participates in conversion, matching the historic behavior.
+	const size_t timeStart = date.find_first_of(" \t");
+	if (timeStart != std::string::npos)
+		date.resize(timeStart);
+
+	uint32_t year = 0, month = 0, day = 0;
+	const size_t slash = date.find('/');
+	const size_t hyphen = date.find('-');
+	if (slash == std::string::npos && hyphen == std::string::npos)
+	{
+		if (date.size() != 8 || !parseUnsignedDatePart(date, result))
+			return false;
+		year = result / 10000;
+		month = (result / 100) % 100;
+		day = result % 100;
 	}
 	else
-		ss << ay[0];
+	{
+		const char separator = slash != std::string::npos ? '/' : '-';
+		std::vector<std::string> parts;
+		size_t start = 0;
+		while (true)
+		{
+			const size_t separatorAt = date.find(separator, start);
+			parts.emplace_back(date.substr(start, separatorAt == std::string::npos ? std::string::npos : separatorAt - start));
+			if (separatorAt == std::string::npos)
+				break;
+			start = separatorAt + 1;
+		}
 
-	return convert::to_uint32(ss.str().c_str());
+		if (parts.size() != 3 || parts[0].size() != 4 || parts[1].empty() || parts[1].size() > 2 ||
+			parts[2].empty() || parts[2].size() > 2 ||
+			!parseUnsignedDatePart(parts[0], year) || !parseUnsignedDatePart(parts[1], month) ||
+			!parseUnsignedDatePart(parts[2], day))
+			return false;
+	}
+
+	if (year == 0 || month == 0 || month > 12)
+		return false;
+	static const uint8_t daysInMonth[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+	uint32_t maxDay = daysInMonth[month - 1];
+	if (month == 2 && ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0))
+		maxDay = 29;
+	if (day == 0 || day > maxDay)
+		return false;
+
+	result = year * 10000 + month * 100 + day;
+	return true;
+}
+
+bool readHelperFile(const std::string& path, std::string& content, FuncLogCallback cbLogger)
+{
+	try
+	{
+		StdFile::read_file_content(path.c_str(), content);
+		return true;
+	}
+	catch (const std::exception& e)
+	{
+		if (cbLogger)
+			cbLogger(fmtutil::format(u8"读取数据文件{}失败: {}", path.c_str(), e.what()));
+	}
+	catch (...)
+	{
+		if (cbLogger)
+			cbLogger(fmtutil::format(u8"读取数据文件{}失败: 未知异常", path.c_str()));
+	}
+	return false;
 }
 
 void dump_bars(WtString binFolder, WtString csvFolder, WtString /*strFilter*/ /* = "" */, FuncLogCallback cbLogger /* = NULL */)
@@ -212,7 +337,12 @@ void dump_bars(WtString binFolder, WtString csvFolder, WtString /*strFilter*/ /*
 
 		bool isDay = (bHeader->_type == BT_HIS_Day);
 
-		proc_block_data(buffer, true, false);		
+		if (!proc_block_data(buffer, true, false) || buffer.size() % sizeof(WTSBarStruct) != 0)
+		{
+			if (cbLogger)
+				cbLogger(fmtutil::format(u8"文件{}数据块校验失败，跳过转换", path.c_str()));
+			continue;
+		}
 
 		auto kcnt = buffer.size() / sizeof(WTSBarStruct);
 		if (kcnt <= 0)
@@ -306,7 +436,12 @@ void dump_ticks(WtString binFolder, WtString csvFolder, WtString /*strFilter*/ /
 			continue;
 		}
 
-		proc_block_data(buffer, false, false);
+		if (!proc_block_data(buffer, false, false) || buffer.size() % sizeof(WTSTickStruct) != 0)
+		{
+			if (cbLogger)
+				cbLogger(fmtutil::format(u8"文件{}数据块校验失败，跳过转换", path.c_str()));
+			continue;
+		}
 
 		auto tcnt = buffer.size() / sizeof(WTSTickStruct);
 		if (tcnt <= 0)
@@ -413,12 +548,19 @@ void trans_csv_bars(WtString csvFolder, WtString binFolder, WtString period, Fun
 		}
 
 		std::vector<WTSBarStruct> bars;
+		uint32_t lineNumber = 1; // CSV header occupies the first line.
 
 		while(reader.next_row())
 		{
+			++lineNumber;
 			//逐行读取
 			WTSBarStruct bs;
-			bs.date = strToDate(reader.get_string("date"));
+			if (!strToDate(reader.get_string("date"), bs.date))
+			{
+				if (cbLogger)
+					cbLogger(fmtutil::format(u8"文件{}第{}行日期无效，已跳过", path.c_str(), lineNumber));
+				continue;
+			}
 			if(kp != KP_DAY)
 				bs.time = TimeUtils::timeToMinBar(bs.date, strToTime(reader.get_string("time")));
 			bs.open = reader.get_double("open");
@@ -600,7 +742,8 @@ WtUInt32 read_dsb_ticks(WtString tickFile, FuncGetTicksCallback cb, FuncCountDat
 		cbLogger(fmtutil::format(u8"正在读取数据文件{}...", path.c_str()));
 
 	std::string content;
-	StdFile::read_file_content(path.c_str(), content);
+	if (!readHelperFile(path, content, cbLogger))
+		return 0;
 	if (content.size() < sizeof(HisTickBlock))
 	{
 		if (cbLogger)
@@ -608,7 +751,12 @@ WtUInt32 read_dsb_ticks(WtString tickFile, FuncGetTicksCallback cb, FuncCountDat
 		return 0;
 	}
 
-	proc_block_data(content, false, false);
+	if (!proc_block_data(content, false, false) || content.size() % sizeof(WTSTickStruct) != 0)
+	{
+		if (cbLogger)
+			cbLogger(fmtutil::format(u8"文件{}数据块校验失败", tickFile));
+		return 0;
+	}
 
 	if (content.empty())
 	{
@@ -635,7 +783,8 @@ WtUInt32 read_dsb_order_details(WtString dataFile, FuncGetOrdDtlCallback cb, Fun
 		cbLogger(fmtutil::format(u8"正在读取数据文件{}...", path.c_str()));
 
 	std::string content;
-	StdFile::read_file_content(path.c_str(), content);
+	if (!readHelperFile(path, content, cbLogger))
+		return 0;
 	if (content.size() < sizeof(HisOrdDtlBlock))
 	{
 		if (cbLogger)
@@ -643,7 +792,12 @@ WtUInt32 read_dsb_order_details(WtString dataFile, FuncGetOrdDtlCallback cb, Fun
 		return 0;
 	}
 
-	proc_block_data(content, false, false);
+	if (!proc_block_data(content, false, false) || content.size() % sizeof(WTSOrdDtlStruct) != 0)
+	{
+		if (cbLogger)
+			cbLogger(fmtutil::format(u8"文件{}数据块校验失败", dataFile));
+		return 0;
+	}
 
 	if (content.empty())
 	{
@@ -670,7 +824,8 @@ WtUInt32 read_dsb_order_queues(WtString dataFile, FuncGetOrdQueCallback cb, Func
 		cbLogger(fmtutil::format(u8"正在读取数据文件{}...", path.c_str()));
 
 	std::string content;
-	StdFile::read_file_content(path.c_str(), content);
+	if (!readHelperFile(path, content, cbLogger))
+		return 0;
 	if (content.size() < sizeof(HisOrdQueBlock))
 	{
 		if (cbLogger)
@@ -678,7 +833,12 @@ WtUInt32 read_dsb_order_queues(WtString dataFile, FuncGetOrdQueCallback cb, Func
 		return 0;
 	}
 
-	proc_block_data(content, false, false);
+	if (!proc_block_data(content, false, false) || content.size() % sizeof(WTSOrdQueStruct) != 0)
+	{
+		if (cbLogger)
+			cbLogger(fmtutil::format(u8"文件{}数据块校验失败", dataFile));
+		return 0;
+	}
 
 	if (content.empty())
 	{
@@ -705,7 +865,8 @@ WtUInt32 read_dsb_transactions(WtString dataFile, FuncGetTransCallback cb, FuncC
 		cbLogger(fmtutil::format(u8"正在读取数据文件{}...", path.c_str()));
 
 	std::string content;
-	StdFile::read_file_content(path.c_str(), content);
+	if (!readHelperFile(path, content, cbLogger))
+		return 0;
 	if (content.size() < sizeof(HisTransBlock))
 	{
 		if (cbLogger)
@@ -713,7 +874,12 @@ WtUInt32 read_dsb_transactions(WtString dataFile, FuncGetTransCallback cb, FuncC
 		return 0;
 	}
 
-	proc_block_data(content, false, false);
+	if (!proc_block_data(content, false, false) || content.size() % sizeof(WTSTransStruct) != 0)
+	{
+		if (cbLogger)
+			cbLogger(fmtutil::format(u8"文件{}数据块校验失败", dataFile));
+		return 0;
+	}
 
 	if (content.empty())
 	{
@@ -739,7 +905,8 @@ WtUInt32 read_dsb_bars(WtString barFile, FuncGetBarsCallback cb, FuncCountDataCa
 		cbLogger(fmtutil::format(u8"正在读取数据文件{}...", path.c_str()));
 
 	std::string content;
-	StdFile::read_file_content(path.c_str(), content);
+	if (!readHelperFile(path, content, cbLogger))
+		return 0;
 	if (content.size() < sizeof(HisKlineBlock))
 	{
 		if (cbLogger)
@@ -747,7 +914,12 @@ WtUInt32 read_dsb_bars(WtString barFile, FuncGetBarsCallback cb, FuncCountDataCa
 		return 0;
 	}
 
-	proc_block_data(content, true, false);
+	if (!proc_block_data(content, true, false) || content.size() % sizeof(WTSBarStruct) != 0)
+	{
+		if (cbLogger)
+			cbLogger(fmtutil::format(u8"文件{}数据块校验失败", barFile));
+		return 0;
+	}
 
 	if(content.empty())
 	{
@@ -771,7 +943,8 @@ WtUInt32 read_dmb_bars(WtString barFile, FuncGetBarsCallback cb, FuncCountDataCa
 	std::string path = barFile;
 
 	std::string buffer;
-	StdFile::read_file_content(path.c_str(), buffer);
+	if (!readHelperFile(path, buffer, cbLogger))
+		return 0;
 	if (buffer.size() < sizeof(RTKlineBlock))
 	{
 		if (cbLogger)
@@ -928,15 +1101,26 @@ WtUInt32 resample_bars(WtString barFile, FuncGetBarsCallback cb, FuncCountDataCa
 		cbLogger(fmtutil::format(u8"正在读取数据文件{}...", path.c_str()));
 
 	std::string buffer;
-	StdFile::read_file_content(path.c_str(), buffer);
+	if (!readHelperFile(path, buffer, cbLogger))
+	{
+		sInfo->release();
+		return 0;
+	}
 	if (buffer.size() < sizeof(HisKlineBlock))
 	{
 		if (cbLogger)
 			cbLogger(fmtutil::format(u8"文件{}头部校验失败", barFile));
+		sInfo->release();
 		return 0;
 	}
 
-	proc_block_data(buffer, true, false);
+	if (!proc_block_data(buffer, true, false) || buffer.size() % sizeof(WTSBarStruct) != 0)
+	{
+		if (cbLogger)
+			cbLogger(fmtutil::format(u8"文件{}数据块校验失败", barFile));
+		sInfo->release();
+		return 0;
+	}
 
 	auto kcnt = buffer.size() / sizeof(WTSBarStruct);
 	if (kcnt <= 0)

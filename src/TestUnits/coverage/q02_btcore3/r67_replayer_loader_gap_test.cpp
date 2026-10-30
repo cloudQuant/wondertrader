@@ -45,12 +45,14 @@ namespace
 		return bars;
 	}
 
-	std::vector<WTSBarStruct> m5_series(double basePx)
+	std::vector<WTSBarStruct> m5_series(double basePx, uint32_t date = 20200102u)
 	{
 		std::vector<WTSBarStruct> bars;
-		const uint32_t times[] = { 935u, 940u, 945u, 950u, 955u, 1000u, 1005u, 1010u };
+		// The six 5-minute bars end at 10:00 and form one complete first-hour bucket.
+		// Do not append 10:05/10:10 rows, which would make a partial 11:00 bucket.
+		const uint32_t times[] = { 935u, 940u, 945u, 950u, 955u, 1000u };
 		for (uint32_t i = 0; i < sizeof(times) / sizeof(times[0]); i++)
-			bars.push_back(r67::mk_bar(20200102u, times[i],
+			bars.push_back(r67::mk_bar(date, times[i],
 				basePx + i, basePx + 0.4 + i, basePx - 0.1 + i, basePx + 0.2 + i, 100.0 * (i + 1)));
 		return bars;
 	}
@@ -107,7 +109,7 @@ TEST_F(R67LoaderGap, ShortAutoTransDsbFallsBackToLoader)
 	loader.dayBars[kCode] = daily_series(kCode, 10.0, 3);
 
 	HisDataReplayer replayer;
-	WTSVariant* cfg = r67::make_cfg(_root, _base, 202001020930ull, 202001081500ull, false);
+	WTSVariant* cfg = r67::make_cfg(_root, _base, 202001030930ull, 202001081500ull, false);
 	ASSERT_TRUE(replayer.init(cfg, NULL, &loader));
 	cfg->release();
 
@@ -137,7 +139,7 @@ TEST_F(R67LoaderGap, AutoTransFalseIgnoresExistingDsb)
 	loader.dayBars[kCode] = daily_series(kCode, 10.0, 3);
 
 	HisDataReplayer replayer;
-	WTSVariant* cfg = r67::make_cfg(_root, _base, 202001020930ull, 202001081500ull, false);
+	WTSVariant* cfg = r67::make_cfg(_root, _base, 202001030930ull, 202001081500ull, false);
 	ASSERT_TRUE(replayer.init(cfg, NULL, &loader));
 	cfg->release();
 
@@ -161,9 +163,13 @@ TEST_F(R67LoaderGap, HourResampledFromLoaderMinuteBars)
 	r67::Loader loader;
 	loader.autoTrans = false;
 	loader.m5Bars[kCode] = m5_series(10.0);
+	const std::vector<WTSBarStruct> nextDayBars = m5_series(20.0, 20200103u);
+	loader.m5Bars[kCode].insert(loader.m5Bars[kCode].end(), nextDayBars.begin(), nextDayBars.end());
 
 	HisDataReplayer replayer;
-	WTSVariant* cfg = r67::make_cfg(_root, _base, 202001020930ull, 202001081500ull, false);
+	// Query at the next trading day's open: Jan 2's hourly bar is closed, while
+	// Jan 3 bars provide a forward boundary for the historical slice cursor.
+	WTSVariant* cfg = r67::make_cfg(_root, _base, 202001030930ull, 202001081500ull, false);
 	ASSERT_TRUE(replayer.init(cfg, NULL, &loader));
 	cfg->release();
 
@@ -173,7 +179,15 @@ TEST_F(R67LoaderGap, HourResampledFromLoaderMinuteBars)
 
 	WTSKlineSlice* slice = replayer.get_kline_slice(kCode, "h", 1, 1, true);
 	ASSERT_NE(nullptr, slice);
-	EXPECT_GT(slice->size(), 0);
+	ASSERT_EQ(1, slice->size());
+	ASSERT_NE(nullptr, slice->at(0));
+	EXPECT_EQ(20200102u, slice->at(0)->date);
+	EXPECT_EQ(1000u, static_cast<uint32_t>(slice->at(0)->time % 10000u));
+	EXPECT_DOUBLE_EQ(10.0, slice->at(0)->open);
+	EXPECT_DOUBLE_EQ(15.4, slice->at(0)->high);
+	EXPECT_DOUBLE_EQ(9.9, slice->at(0)->low);
+	EXPECT_DOUBLE_EQ(15.2, slice->at(0)->close);
+	EXPECT_DOUBLE_EQ(2100.0, slice->at(0)->vol);
 	slice->release();
 	EXPECT_EQ(1u, loader.finalCalls[kCode]);
 	EXPECT_EQ((uint32_t)KP_Minute5, (uint32_t)loader.lastFinalPeriod);
@@ -331,13 +345,12 @@ TEST_F(R67LoaderGap, CacheClearDaysEvictsUntouchedBars)
 	EXPECT_EQ(2u, loader.finalCalls[kCodeB]);
 }
 
-// DISABLED_: loader 的 loadFinalHisBars 返回 true 但一次回调都不给（count==0）时，
-// cacheFinalBarsFromLoader 无条件读取 _bars[0]/_bars[_count-1]（L3699-3700），
-// 空 vector 下标访问是未定义行为；见 bugs/R67.md BUG-R67-001。
-TEST_F(R67LoaderGap, DISABLED_EmptyLoaderSuccessDerefsEmptyBars)
+// 成功加载但返回零条数据时应当作为空结果处理，不缓存空 BarsList，
+// 也不能读取 _bars[0]/_bars[_count-1]；正常非空加载由上述 loader 用例覆盖。
+// IBtDataLoader 声明了 FuncReadBars 的类型，但未规定一个加载调用可以调用几次，
+// 也未说明多次调用是分批数据还是整表替换；本 fixture 只验证一次完整结果的约定。
+TEST_F(R67LoaderGap, EmptyLoaderSuccessReturnsNoBars)
 {
-	GTEST_SKIP() << "cacheFinalBarsFromLoader reads _bars[0] when loader returns true with 0 rows";
-
 	r67::Loader loader;
 	loader.autoTrans = false;
 	loader.emptyFinalSuccess = true;
@@ -351,4 +364,33 @@ TEST_F(R67LoaderGap, DISABLED_EmptyLoaderSuccessDerefsEmptyBars)
 	replayer.register_sink(&sink, "r67_emptyldr");
 	ASSERT_TRUE(replayer.prepare());
 	EXPECT_EQ(nullptr, replayer.get_kline_slice(kCode, "d", 3, 1, true));
+	EXPECT_EQ(1u, loader.finalCalls[kCode]);
+}
+
+// A loader failure with no callback data must not leave an empty cache entry:
+// if data becomes available later, the same replayer should retry and use it.
+TEST_F(R67LoaderGap, EmptyLoaderFailureCanRetryWhenBarsBecomeAvailable)
+{
+	r67::Loader loader;
+	loader.autoTrans = false;
+
+	HisDataReplayer replayer;
+	WTSVariant* cfg = r67::make_cfg(_root, _base, 202001030930ull, 202001081500ull, false);
+	ASSERT_TRUE(replayer.init(cfg, NULL, &loader));
+	cfg->release();
+
+	r67::Sink sink;
+	replayer.register_sink(&sink, "r67_retry_empty_ldr");
+	ASSERT_TRUE(replayer.prepare());
+
+	EXPECT_EQ(nullptr, replayer.get_kline_slice(kCode, "d", 3, 1, true));
+	EXPECT_EQ(1u, loader.finalCalls[kCode]);
+
+	loader.dayBars[kCode] = daily_series(kCode, 10.0, 3);
+	WTSKlineSlice* retried = replayer.get_kline_slice(kCode, "d", 3, 1, true);
+	ASSERT_NE(nullptr, retried);
+	EXPECT_GT(retried->size(), 0);
+	EXPECT_EQ(std::vector<double>({ 10.5 }), closes_of(retried));
+	retried->release();
+	EXPECT_EQ(2u, loader.finalCalls[kCode]);
 }

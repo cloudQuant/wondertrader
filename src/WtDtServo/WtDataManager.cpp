@@ -11,6 +11,8 @@
 #include "WtDtRunner.h"
 #include "WtHelper.h"
 
+#include <memory>
+
 #include "../Includes/WTSDataDef.hpp"
 #include "../Includes/WTSVariant.hpp"
 #include "../Includes/WTSContractInfo.hpp"
@@ -81,7 +83,15 @@ bool WtDataManager::initStore(WTSVariant* cfg)
 	else
 	{
 		WTSLogger::error("Initializing of random data reader failed: loading module {} failed...", module);
+		return false;
+	}
 
+	if (_reader == NULL)
+	{
+		WTSLogger::error("Initializing of random data reader failed: create/delete reader functions are unavailable or reader creation failed");
+		DLLHelper::free_library(libParser);
+		_remover = NULL;
+		return false;
 	}
 
 	_reader->init(cfg, this);
@@ -90,6 +100,9 @@ bool WtDataManager::initStore(WTSVariant* cfg)
 
 bool WtDataManager::init(WTSVariant* cfg, WtDtRunner* runner)
 {
+	if (cfg == NULL)
+		return false;
+
 	_runner = runner;
 	if (_runner)
 	{
@@ -111,6 +124,9 @@ void WtDataManager::reader_log(WTSLogLevel ll, const char* message)
 
 WTSTickSlice* WtDataManager::get_tick_slices_by_range(const char* stdCode,uint64_t stime, uint64_t etime /* = 0 */)
 {
+	if (_reader == NULL)
+		return NULL;
+
 	stime = stime * 100000;
 	etime = etime * 100000;
 	return _reader->readTickSliceByRange(stdCode, stime, etime);
@@ -118,11 +134,17 @@ WTSTickSlice* WtDataManager::get_tick_slices_by_range(const char* stdCode,uint64
 
 WTSTickSlice* WtDataManager::get_tick_slice_by_date(const char* stdCode, uint32_t uDate /* = 0 */)
 {
+	if (_reader == NULL)
+		return NULL;
+
 	return _reader->readTickSliceByDate(stdCode, uDate);
 }
 
 WTSOrdQueSlice* WtDataManager::get_order_queue_slice(const char* stdCode,uint64_t stime, uint64_t etime /* = 0 */)
 {
+	if (_reader == NULL)
+		return NULL;
+
 	stime = stime * 100000;
 	etime = etime * 100000;
 	return _reader->readOrdQueSliceByRange(stdCode, stime, etime);
@@ -130,6 +152,9 @@ WTSOrdQueSlice* WtDataManager::get_order_queue_slice(const char* stdCode,uint64_
 
 WTSOrdDtlSlice* WtDataManager::get_order_detail_slice(const char* stdCode,uint64_t stime, uint64_t etime /* = 0 */)
 {
+	if (_reader == NULL)
+		return NULL;
+
 	stime = stime * 100000;
 	etime = etime * 100000;
 	return _reader->readOrdDtlSliceByRange(stdCode, stime, etime);
@@ -137,6 +162,9 @@ WTSOrdDtlSlice* WtDataManager::get_order_detail_slice(const char* stdCode,uint64
 
 WTSTransSlice* WtDataManager::get_transaction_slice(const char* stdCode,uint64_t stime, uint64_t etime /* = 0 */)
 {
+	if (_reader == NULL)
+		return NULL;
+
 	stime = stime * 100000;
 	etime = etime * 100000;
 	return _reader->readTransSliceByRange(stdCode, stime, etime);
@@ -144,6 +172,9 @@ WTSTransSlice* WtDataManager::get_transaction_slice(const char* stdCode,uint64_t
 
 WTSSessionInfo* WtDataManager::get_session_info(const char* sid, bool isCode /* = false */)
 {
+	if (_bd_mgr == NULL)
+		return NULL;
+
 	if (!isCode)
 		return _bd_mgr->getSession(sid);
 
@@ -157,6 +188,9 @@ WTSSessionInfo* WtDataManager::get_session_info(const char* sid, bool isCode /* 
 
 WTSKlineSlice* WtDataManager::get_skline_slice_by_date(const char* stdCode, uint32_t secs, uint32_t uDate /* = 0 */)
 {
+	if (_reader == NULL)
+		return NULL;
+
 	std::string key = fmtutil::format<64>("{}-{}-s{}", stdCode, uDate, secs);
 
 	//只有非基础周期的会进到下面的步骤
@@ -190,6 +224,9 @@ WTSKlineSlice* WtDataManager::get_skline_slice_by_date(const char* stdCode, uint
 
 WTSKlineSlice* WtDataManager::get_kline_slice_by_date(const char* stdCode, WTSKlinePeriod period, uint32_t times, uint32_t uDate /* = 0 */)
 {
+	if (_reader == NULL || _bd_mgr == NULL)
+		return NULL;
+
 	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	uint64_t stime = _bd_mgr->getBoundaryTime(codeInfo.stdCommID(), uDate, false, true);
 	uint64_t etime = _bd_mgr->getBoundaryTime(codeInfo.stdCommID(), uDate, false, false);
@@ -198,6 +235,9 @@ WTSKlineSlice* WtDataManager::get_kline_slice_by_date(const char* stdCode, WTSKl
 
 WTSKlineSlice* WtDataManager::get_kline_slice_by_range(const char* stdCode, WTSKlinePeriod period, uint32_t times,uint64_t stime, uint64_t etime /* = 0 */)
 {
+	if (_reader == NULL)
+		return NULL;
+
 	if (times == 1)
 	{
 		return _reader->readKlineSliceByRange(stdCode, period, stime, etime);
@@ -336,6 +376,9 @@ WTSKlineSlice* WtDataManager::get_kline_slice_by_range(const char* stdCode, WTSK
 
 WTSKlineSlice* WtDataManager::get_kline_slice_by_count(const char* stdCode, WTSKlinePeriod period, uint32_t times, uint32_t count, uint64_t etime /* = 0 */)
 {
+	if (_reader == NULL)
+		return NULL;
+
 	if (times == 1)
 	{
 		return _reader->readKlineSliceByCount(stdCode, period, count, etime);
@@ -483,13 +526,16 @@ WTSKlineSlice* WtDataManager::get_kline_slice_by_count(const char* stdCode, WTSK
 
 WTSTickSlice* WtDataManager::get_tick_slice_by_count(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
+	if (_reader == NULL)
+		return NULL;
+
 	etime = etime * 100000;
 	return _reader->readTickSliceByCount(stdCode, count, etime);
 }
 
 double WtDataManager::get_exright_factor(const char* stdCode, WTSCommodityInfo* commInfo /* = NULL */)
 {
-	if (commInfo == NULL)
+	if (commInfo == NULL || _reader == NULL)
 		return 1.0;
 
 	if (commInfo->isStock())
@@ -506,6 +552,9 @@ double WtDataManager::get_exright_factor(const char* stdCode, WTSCommodityInfo* 
 
 void WtDataManager::subscribe_bar(const char* stdCode, WTSKlinePeriod period, uint32_t times)
 {
+	if (_reader == NULL)
+		return;
+
 	std::string key = fmtutil::format("{}-{}-{}", stdCode, (uint32_t)period, times);
 
 	uint32_t curDate = TimeUtils::getCurDate();
@@ -582,8 +631,22 @@ void WtDataManager::update_bars(const char* stdCode, WTSTickData* newTick)
 			sInfo = newTick->getContractInfo()->getCommInfo()->getSessionInfo();
 		else
 			sInfo = get_session_info(kData->code(), true);
-		g_dataFact.updateKlineData(kData, newTick, sInfo, _align_by_section);
+		if (kData->period() == KP_DAY || kData->period() == KP_Tick)
+		{
+			// Day and second updates return a detached heap bar when a new bucket
+			// starts. Copy it into the subscribed cache before notifying listeners.
+			std::unique_ptr<WTSBarStruct> newBar(
+				g_dataFact.updateKlineData(kData, newTick, sInfo, _align_by_section));
+			if (newBar != NULL)
+				kData->appendBar(*newBar);
+		}
+		else
+		{
+			g_dataFact.updateKlineData(kData, newTick, sInfo, _align_by_section);
+		}
 		WTSBarStruct* lastBar = kData->at(-1);
+		if (lastBar == NULL)
+			continue;
 
 		std::string speriod;
 		uint32_t times = kData->times();

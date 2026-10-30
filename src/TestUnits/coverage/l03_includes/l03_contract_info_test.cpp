@@ -4,14 +4,19 @@
 // 读取前必须先写入（见 bugs/l03_includes.md BUG-L03-002）。
 #include <gtest/gtest.h>
 
+#include <array>
+#include <chrono>
 #include <cstdint>
 #include <cstring>
+#include <filesystem>
+#include <fstream>
 #include <limits>
 #include <string>
 #include <vector>
 
 #include "Includes/WTSContractInfo.hpp"
 #include "Includes/WTSMarcos.h"
+#include "WTSTools/WTSBaseDataMgr.h"
 
 using namespace wtp;
 
@@ -38,6 +43,17 @@ WTSContractInfo* mkContract(const char* code = "rb2401", const char* pid = "rb")
 	ret->setVolScale(10);
 	ret->setVolumeLimits(500, 500);
 	return ret;
+}
+
+std::filesystem::path writeIdentityConfig(const std::string& body)
+{
+	const auto stamp = std::chrono::steady_clock::now().time_since_epoch().count();
+	const auto path = std::filesystem::temp_directory_path() /
+		("wt_l03_identity_" + std::to_string(stamp) + ".json");
+	std::ofstream output(path);
+	output << body;
+	output.close();
+	return path;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -112,6 +128,107 @@ TEST(l03_contract, alt_code_for_zce)
 	c->release();
 }
 
+TEST(l03_contract, identity_fields_reject_values_that_do_not_fit)
+{
+	const std::array<std::size_t, 4> capacities = { 32, 64, 32, 32 };
+	const std::array<const char*, 4> base = { "rb2401", "name", "SHFE", "rb" };
+	auto create = [](const std::array<const char*, 4>& fields) {
+		return WTSContractInfo::create(fields[0], fields[1], fields[2], fields[3]);
+	};
+
+	for (std::size_t field = 0; field < base.size(); ++field)
+	{
+		const std::array<std::size_t, 3> lengths = {
+			capacities[field] - 1, capacities[field], capacities[field] + 1
+		};
+		for (std::size_t delta = 0; delta < lengths.size(); ++delta)
+		{
+			const std::string value(lengths[delta], 'x');
+			auto values = base;
+			values[field] = value.c_str();
+			WTSContractInfo* info = create(values);
+			if (delta == 0)
+			{
+				ASSERT_NE(nullptr, info) << "field " << field;
+				info->release();
+			}
+			else
+			{
+				EXPECT_EQ(nullptr, info) << "field " << field << ", length " << lengths[delta];
+			}
+		}
+	}
+
+	EXPECT_EQ(nullptr, WTSContractInfo::create(nullptr, "name", "SHFE", "rb"));
+	WTSContractInfo* empty = WTSContractInfo::create("", "", "", "");
+	ASSERT_NE(nullptr, empty);
+	EXPECT_STREQ("", empty->getCode());
+	EXPECT_STREQ("", empty->getProduct());
+	empty->release();
+
+	const std::string maxContractPart(31, 'z');
+	WTSContractInfo* composite = WTSContractInfo::create(
+		maxContractPart.c_str(), std::string(63, 'n').c_str(), maxContractPart.c_str(), maxContractPart.c_str());
+	ASSERT_NE(nullptr, composite);
+	EXPECT_EQ(63u, std::strlen(composite->getFullCode()));
+	EXPECT_EQ(63u, std::strlen(composite->getFullPid()));
+	ASSERT_TRUE(composite->setAltCode(maxContractPart.c_str()));
+	EXPECT_EQ(63u, std::strlen(composite->getFullAltCode()));
+	composite->release();
+}
+
+TEST(l03_contract, alt_code_capacity_rejection_preserves_previous_identity)
+{
+	WTSContractInfo* c = mkContract();
+	ASSERT_TRUE(c->setAltCode("rb2401"));
+	EXPECT_STREQ("rb2401", c->getAltCode());
+	EXPECT_STREQ("SHFE.rb2401", c->getFullAltCode());
+
+	EXPECT_TRUE(c->setAltCode(std::string(31, 'a').c_str()));
+	EXPECT_EQ(31u, std::strlen(c->getAltCode()));
+	EXPECT_EQ(36u, std::strlen(c->getFullAltCode()));
+	const std::string prior = c->getAltCode();
+	const std::string priorFull = c->getFullAltCode();
+	EXPECT_FALSE(c->setAltCode(std::string(32, 'b').c_str()));
+	EXPECT_STREQ(prior.c_str(), c->getAltCode());
+	EXPECT_STREQ(priorFull.c_str(), c->getFullAltCode());
+	EXPECT_FALSE(c->setAltCode(std::string(33, 'c').c_str()));
+	EXPECT_STREQ(prior.c_str(), c->getAltCode());
+	EXPECT_STREQ(priorFull.c_str(), c->getFullAltCode());
+	EXPECT_FALSE(c->setAltCode(nullptr));
+	c->release();
+}
+
+TEST(l03_contract, oversized_configured_identity_is_rejected_before_registration)
+{
+	const std::string longProduct(64, 'p');
+	const auto commodityPath = writeIdentityConfig(
+		"{\"SHFE\":{\"" + longProduct + "\":{\"name\":\"product\",\"session\":\"ALLDAY\"}}}");
+	WTSBaseDataMgr commodityMgr;
+	EXPECT_FALSE(commodityMgr.loadCommodities(commodityPath.string().c_str()));
+	EXPECT_EQ(nullptr, commodityMgr.getCommodity(("SHFE." + longProduct).c_str()));
+	std::filesystem::remove(commodityPath);
+
+	const std::string longCode(32, 'c');
+	const auto contractPath = writeIdentityConfig(
+		"{\"SHFE\":{\"" + longCode +
+		"\":{\"name\":\"contract\",\"exchg\":\"SHFE\",\"rules\":{\"session\":\"ALLDAY\"}}}}");
+	WTSBaseDataMgr contractMgr;
+	EXPECT_FALSE(contractMgr.loadContracts(contractPath.string().c_str()));
+	EXPECT_EQ(nullptr, contractMgr.getContract(longCode.c_str(), "SHFE"));
+	EXPECT_EQ(nullptr, contractMgr.getCommodity("SHFE", longCode.c_str()));
+	std::filesystem::remove(contractPath);
+
+	const std::string longAltCode(32, 'a');
+	const auto altPath = writeIdentityConfig(
+		"{\"SHFE\":{\"rb2401\":{\"name\":\"contract\",\"exchg\":\"SHFE\",\"product\":\"rb\",\"altcode\":\"" +
+		longAltCode + "\"}}}");
+	WTSBaseDataMgr altMgr;
+	EXPECT_FALSE(altMgr.loadContracts(altPath.string().c_str()));
+	EXPECT_EQ(nullptr, altMgr.getContract("rb2401", "SHFE"));
+	std::filesystem::remove(altPath);
+}
+
 //////////////////////////////////////////////////////////////////////////
 // 品种挂接与保证金率解析
 //////////////////////////////////////////////////////////////////////////
@@ -168,6 +285,28 @@ TEST(l03_contract, calc_fee_delegates_to_commodity)
 	EXPECT_DOUBLE_EQ(c->calcFee(3500.0, 2.0, 0), 7.0);
 	EXPECT_DOUBLE_EQ(c->calcFee(3500.0, 2.0, 2), 14.0);
 	c->release();
+	comm->release();
+}
+
+TEST(l03_contract, calc_fee_keeps_cents_above_int32_range)
+{
+	WTSCommodityInfo* comm = mkComm(1);
+	comm->setFeeRates(1.0, 1.0, 1.0, true);
+	WTSContractInfo* contract = mkContract();
+	contract->setCommInfo(comm);
+
+	EXPECT_DOUBLE_EQ(21474836.46, comm->calcFee(1.0, 21474836.46, 0));
+	EXPECT_DOUBLE_EQ(21474836.48, comm->calcFee(1.0, 21474836.48, 0));
+	EXPECT_DOUBLE_EQ(30000000.0, comm->calcFee(1.0, 30000000.0, 0));
+	EXPECT_DOUBLE_EQ(-1.22, comm->calcFee(1.0, -1.234, 0));
+
+	contract->setFeeRates(1.0, 1.0, 1.0, true);
+	EXPECT_DOUBLE_EQ(21474836.46, contract->calcFee(1.0, 21474836.46, 0));
+	EXPECT_DOUBLE_EQ(21474836.48, contract->calcFee(1.0, 21474836.48, 0));
+	EXPECT_DOUBLE_EQ(30000000.0, contract->calcFee(1.0, 30000000.0, 0));
+	EXPECT_DOUBLE_EQ(-1.22, contract->calcFee(1.0, -1.234, 0));
+
+	contract->release();
 	comm->release();
 }
 

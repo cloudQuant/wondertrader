@@ -341,6 +341,68 @@ TEST_F(R22RunnerInitTest, MissingConfigFileReturnsBeforeLoadingBasefiles)
 	EXPECT_TRUE(got.empty());
 }
 
+TEST_F(R22RunnerInitTest, ActiveShmCasterFailureBlocksInitializationAndStart)
+{
+	const fs::path shmDir = _dir / "shm_is_a_directory";
+	fs::create_directories(shmDir);
+
+	WtDtRunner runner;
+	register_parser_callbacks(rec_evt, rec_sub);
+	ASSERT_TRUE(runner.createExtParser("r22_shm_fail_start"));
+	ASSERT_EQ(1U, evt_hits().size());
+	EXPECT_EQ(EVENT_PARSER_INIT, evt_hits()[0]._evt);
+
+	// No writer section is intentional: a failed required caster must return
+	// before DataManager::init (which dereferences that section) or parser startup.
+	std::string cfg = "{\"basefiles\":{},\"allday\":true,\"shmcaster\":{\"active\":true,\"path\":\"";
+	cfg += shmDir.string() + "\"}}";
+	runner.initialize(cfg.c_str(), _logCfg.c_str(), _dir.string().c_str(), false, false);
+	EXPECT_FALSE(runner.createExtParser("r22_shm_fail_after_init"));
+	runner.start(true, true);
+
+	// start() must stop before ParserAdapterMgr::run emits EVENT_PARSER_CONNECT.
+	ASSERT_EQ(1U, evt_hits().size());
+	EXPECT_EQ(EVENT_PARSER_INIT, evt_hits()[0]._evt);
+}
+
+TEST_F(R22RunnerInitTest, ActiveShmCasterSuccessDoesNotBlockStart)
+{
+	const fs::path shmPath = _dir / "shm_queue.bin";
+	WtDtRunner runner;
+	register_parser_callbacks(rec_evt, rec_sub);
+	ASSERT_TRUE(runner.createExtParser("r22_shm_success_start"));
+	ASSERT_EQ(1U, evt_hits().size());
+
+	std::string cfg = "{\"basefiles\":{},\"allday\":true,\"shmcaster\":{\"active\":true,\"path\":\"";
+	cfg += shmPath.string() + "\"},\"writer\":{\"module\":\"" + _absentMod + "\"}}";
+	runner.initialize(cfg.c_str(), _logCfg.c_str(), _dir.string().c_str(), false, false);
+	runner.start(true, true);
+
+	ASSERT_EQ(2U, evt_hits().size());
+	EXPECT_EQ(EVENT_PARSER_CONNECT, evt_hits()[1]._evt);
+	EXPECT_TRUE(fs::exists(shmPath));
+}
+
+TEST_F(R22RunnerInitTest, InactiveShmCasterDoesNotBlockStart)
+{
+	const fs::path ignoredPath = _dir / "shm_inactive_dir";
+	fs::create_directories(ignoredPath);
+
+	WtDtRunner runner;
+	register_parser_callbacks(rec_evt, rec_sub);
+	ASSERT_TRUE(runner.createExtParser("r22_shm_inactive_start"));
+	ASSERT_EQ(1U, evt_hits().size());
+
+	std::string cfg = "{\"basefiles\":{},\"allday\":true,\"shmcaster\":{\"active\":false,\"path\":\"";
+	cfg += ignoredPath.string() + "\"},\"writer\":{\"module\":\"" + _absentMod + "\"}}";
+	runner.initialize(cfg.c_str(), _logCfg.c_str(), _dir.string().c_str(), false, false);
+	runner.start(true, true);
+
+	ASSERT_EQ(2U, evt_hits().size());
+	EXPECT_EQ(EVENT_PARSER_CONNECT, evt_hits()[1]._evt);
+	EXPECT_TRUE(fs::is_directory(ignoredPath));
+}
+
 TEST_F(R22RunnerInitTest, IndexSectionWithAbsentFileIsReportedAndDoesNotBreakBasefiles)
 {
 	WtDtRunner runner;

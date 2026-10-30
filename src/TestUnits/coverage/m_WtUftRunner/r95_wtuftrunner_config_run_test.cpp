@@ -18,10 +18,13 @@
 #include <gtest/gtest.h>
 
 #include <csignal>
+#include <chrono>
 #include <filesystem>
 #include <fstream>
+#include <future>
 #include <string>
 #include <system_error>
+#include <thread>
 
 #include <unistd.h>
 
@@ -121,14 +124,21 @@ const char* kContractsYaml =
 	"        exchg: SHFE\n"
 	"        product: rb\n";
 
-/* A：basefiles 用 string，parsers/traders 直接给数组，strategies.uft 同时含 inactive 与 active */
+const char* kActionPolicyJson =
+	"{\n"
+	"  \"default\": {\n"
+	"    \"order\": [{\"action\":\"open\", \"limit\":100}]\n"
+	"  }\n"
+	"}\n";
+
+/* A：basefiles 用 string，parsers/traders 直接给数组；active trader 插件缺失应拒绝配置 */
 const char* kConfigA =
 	"basefiles:\n"
 	"    session: sessions.yaml\n"
 	"    commodity: commodities.yaml\n"
 	"    contract: contracts.yaml\n"
 	"    holiday: holidays_absent.yaml\n"
-	"bspolicy: actpolicy_absent.yaml\n"
+	"bspolicy: actpolicy.json\n"
 	"env:\n"
 	"    product:\n"
 	"        session: ALLDAY\n"
@@ -165,7 +175,7 @@ const char* kConfigB =
 	"    contract:\n"
 	"        - contracts.yaml\n"
 	"        - contracts_absent.yaml\n"
-	"bspolicy: actpolicy_absent.yaml\n"
+	"bspolicy: actpolicy.json\n"
 	"env:\n"
 	"    product:\n"
 	"        session: ALLDAY\n"
@@ -198,6 +208,7 @@ const char* kConfigC =
 	"        session: ALLDAY\n"
 	"data:\n"
 	"    unused: 1\n"
+	"bspolicy: actpolicy.json\n"
 	"parsers: parsers_absent.yaml\n"
 	"traders: traders_absent.yaml\n"
 	"strategies:\n"
@@ -213,6 +224,7 @@ const char* kConfigD =
 	"        session: ALLDAY\n"
 	"data:\n"
 	"    unused: 1\n"
+	"bspolicy: actpolicy.json\n"
 	"parsers: parsers.cfg\n"
 	"traders: traders.cfg\n";
 
@@ -225,6 +237,7 @@ const char* kConfigE =
 	"        session: ALLDAY\n"
 	"data:\n"
 	"    unused: 1\n"
+	"bspolicy: actpolicy.json\n"
 	"parsers: parsers_no_key.yaml\n"
 	"traders: traders_object.yaml\n"
 	"strategies:\n"
@@ -239,13 +252,28 @@ const char* kConfigRun =
 	"        session: ALLDAY\n"
 	"data:\n"
 	"    unused: 1\n"
-	"bspolicy: actpolicy_absent.yaml\n";
+	"bspolicy: actpolicy.json\n";
+
+const char* kConfigBadTrader =
+	"basefiles:\n"
+	"    session: sessions.yaml\n"
+	"env:\n"
+	"    product:\n"
+	"        session: ALLDAY\n"
+	"data:\n"
+	"    unused: 1\n"
+	"bspolicy: actpolicy.json\n"
+	"traders:\n"
+	"    - active: true\n"
+	"      id: invalid_trader\n"
+	"      module: no_such_trader\n";
 
 bool prepare_common()
 {
 	return write_text("sessions.yaml", kSessionsYaml)
 		&& write_text("commodities.yaml", kCommoditiesYaml)
-		&& write_text("contracts.yaml", kContractsYaml);
+		&& write_text("contracts.yaml", kContractsYaml)
+		&& write_text("actpolicy.json", kActionPolicyJson);
 }
 
 } // namespace
@@ -254,7 +282,7 @@ bool prepare_common()
  * 一、config() 的成功支（WtUftRunner.cpp:60-198）
  * ---------------------------------------------------------------------- */
 
-TEST(r95_uft_config, string_basefiles_and_array_modules_return_true)
+TEST(r95_uft_config, active_trader_init_failure_rejects_array_config)
 {
 	ScopedTempCwd guard("cfg_a");
 	ASSERT_TRUE(guard.ok()) << "无法进入临时工作目录";
@@ -265,15 +293,14 @@ TEST(r95_uft_config, string_basefiles_and_array_modules_return_true)
 	// :70-107 四类 basefiles 子键（session 命中、commodity/contract 走 VT_String、holiday 文件缺失）
 	// :110 initEngine(env 对象) / :113 initDataMgr(data 对象)
 	// :115 无 share_domain -> 不碰共享内存
-	// :124 bspolicy 缺失 -> init 返回 false 后继续
+	// :124 默认动作策略文件存在且含 default 组
 	// :130-160 parsers 直接数组：inactive 跳过；active 的空 id 生成 auto_parser_NNNN；
 	//         UFT ParserAdapter 因 module 不存在在 dlopen 前失败，但 initParsers 仍 addAdapter
-	// :163-193 traders 直接数组：inactive 跳过；active 条目的 TraderAdapter::init 同样在 dlopen 前失败
-	// :195/:200-251 strategies.uft 数组：inactive 跳过；active 条目因工厂目录为空 createStrategy 返回 NULL
-	EXPECT_TRUE(runner.config("cfg_a.yaml"));
+	// traders 直接数组中 active 插件加载失败，config() 必须传播失败状态。
+	EXPECT_FALSE(runner.config("cfg_a.yaml"));
 }
 
-TEST(r95_uft_config, array_basefiles_and_string_module_files_return_true)
+TEST(r95_uft_config, active_trader_init_failure_rejects_external_config)
 {
 	ScopedTempCwd guard("cfg_b");
 	ASSERT_TRUE(guard.ok());
@@ -286,11 +313,11 @@ TEST(r95_uft_config, array_basefiles_and_string_module_files_return_true)
 	// :81-87 commodity 走 VT_Array（第一个文件有效、第二个缺失）
 	// :97-103 contract 走 VT_Array
 	// :133-145 parsers 是文件名：文件存在 -> 读入 -> initParsers(var->get("parsers"))
-	// :166-177 traders 是文件名：同上
-	EXPECT_TRUE(runner.config("cfg_b.yaml"));
+	// :166-177 traders 是文件名，active 插件加载失败后整体配置失败
+	EXPECT_FALSE(runner.config("cfg_b.yaml"));
 }
 
-TEST(r95_uft_config, missing_module_files_and_object_uft_shape_return_true)
+TEST(r95_uft_config, missing_trader_config_file_rejects_startup)
 {
 	ScopedTempCwd guard("cfg_c");
 	ASSERT_TRUE(guard.ok());
@@ -299,9 +326,9 @@ TEST(r95_uft_config, missing_module_files_and_object_uft_shape_return_true)
 
 	WtUftRunner runner;
 	// :151-154 parsers 指向不存在的文件 -> 记 error 后继续
-	// :184-187 traders 指向不存在的文件 -> 记 error 后继续
+	// :184-187 traders 指向不存在的文件 -> 配置失败
 	// :206-208 strategies.uft 是对象 -> 类型不是 VT_Array，initUftStrategies 返回 false
-	EXPECT_TRUE(runner.config("cfg_c.yaml"));
+	EXPECT_FALSE(runner.config("cfg_c.yaml"));
 }
 
 TEST(r95_uft_config, unparsable_module_files_hit_load_failure_paths)
@@ -315,8 +342,8 @@ TEST(r95_uft_config, unparsable_module_files_hit_load_failure_paths)
 
 	WtUftRunner runner;
 	// :136-149 文件存在但 WTSCfgLoader 因后缀不认识返回 NULL -> :148 记 error
-	// :169-182 trader 配置文件同样 -> :181 记 error
-	EXPECT_TRUE(runner.config("cfg_d.yaml"));
+	// :169-182 trader 配置文件同样 -> config() 失败
+	EXPECT_FALSE(runner.config("cfg_d.yaml"));
 }
 
 TEST(r95_uft_config, parser_without_key_and_traders_object_are_rejected)
@@ -330,23 +357,96 @@ TEST(r95_uft_config, parser_without_key_and_traders_object_are_rejected)
 
 	WtUftRunner runner;
 	// :142 initParsers(var->get("parsers")) 收到 NULL -> :282-283 return false
-	// :175 initTraders(var->get("traders")) 收到对象 -> :315-316 return false
+	// :175 initTraders(var->get("traders")) 收到对象 -> config() return false
 	// :202-208 strategies 对象里没有 uft -> initUftStrategies 返回 false
-	EXPECT_TRUE(runner.config("cfg_e.yaml"));
+	EXPECT_FALSE(runner.config("cfg_e.yaml"));
+}
+
+TEST(r95_uft_config, configuration_is_one_shot_and_closed_runner_rejects_reconfiguration)
+{
+	ScopedTempCwd guard("config_once");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(prepare_common());
+	ASSERT_TRUE(write_text("cfg_once.yaml", kConfigRun));
+
+	WtUftRunner runner;
+	ASSERT_TRUE(runner.config("cfg_once.yaml"));
+	EXPECT_FALSE(runner.config("cfg_once.yaml"));
+	ASSERT_TRUE(runner.shutdown());
+	EXPECT_FALSE(runner.config("cfg_once.yaml"));
+}
+
+TEST(r95_uft_config, trader_init_failure_keeps_run_closed)
+{
+	ScopedTempCwd guard("bad_trader");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(prepare_common());
+	ASSERT_TRUE(write_text("cfg_bad_trader.yaml", kConfigBadTrader));
+
+	WtUftRunner runner;
+	EXPECT_FALSE(runner.config("cfg_bad_trader.yaml"));
+	EXPECT_NO_THROW(runner.run());
+}
+
+TEST(r95_uft_config, missing_default_action_policy_rejects_startup)
+{
+	ScopedTempCwd guard("missing_default_policy");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(write_text("sessions.yaml", kSessionsYaml));
+	ASSERT_TRUE(write_text("invalid_policy.json",
+		"{ \"onlygroup\": { \"order\": [{\"action\":\"open\",\"limit\":1}], \"filters\":[\"SHFE.rb\"] } }"));
+	ASSERT_TRUE(write_text("cfg_invalid_policy.yaml",
+		"basefiles:\n"
+		"    session: sessions.yaml\n"
+		"env:\n"
+		"    product:\n"
+		"        session: ALLDAY\n"
+		"data:\n"
+		"    unused: 1\n"
+		"bspolicy: invalid_policy.json\n"
+		"traders:\n"
+		"    - active: true\n"
+		"      id: t_one\n"
+		"      module: no_such_trader\n"
+		"strategies:\n"
+		"    uft:\n"
+		"        - active: true\n"
+		"          id: s_one\n"
+		"          name: s_one\n"
+		"          trader: t_one\n"));
+
+	WtUftRunner runner;
+	EXPECT_FALSE(runner.config("cfg_invalid_policy.yaml"));
+
+	// Even if a caller ignores config(false) and invokes run(), startup must
+	// return before engine, parser, trader, strategy, or wait-loop execution.
+	std::promise<void> completion;
+	std::future<void> finished = completion.get_future();
+	std::thread runThread([&]() {
+		runner.run(false);
+		completion.set_value();
+	});
+	const bool returnedBeforeSignal = finished.wait_for(std::chrono::seconds(2)) == std::future_status::ready;
+	if (!returnedBeforeSignal)
+		std::raise(SIGINT);
+	runThread.join();
+	std::signal(SIGINT, SIG_DFL);
+	EXPECT_TRUE(returnedBeforeSignal);
 }
 
 /* -------------------------------------------------------------------------
- * 二、run()（WtUftRunner.cpp:351-373）
+ * 二、run()（WtUftRunner.cpp::run）
  *
  * 先 raise(SIGINT)：构造函数在 :40-45 安装的回调把 _to_exit 置 true，
- * run() 里 engine/parsers/traders 仍会执行，但 :362-365 的 while 立即通过。
- * 无 share_domain 时 :360 start_watching(2) 因 ShareManager::_inited=false 直接返回 false。
+ * run() 里 engine/parsers/traders 仍会执行，但退出轮询立即通过。
+ * 无 share_domain 时 start_watching(2) 因 ShareManager::_inited=false 直接返回 false。
  * ---------------------------------------------------------------------- */
 TEST(r95_uft_run, signal_flag_makes_run_return_immediately)
 {
 	ScopedTempCwd guard("run");
 	ASSERT_TRUE(guard.ok());
 	ASSERT_TRUE(write_text("sessions.yaml", kSessionsYaml));
+	ASSERT_TRUE(write_text("actpolicy.json", kActionPolicyJson));
 	ASSERT_TRUE(write_text("cfg_run.yaml", kConfigRun));
 
 	WtUftRunner runner;
@@ -355,11 +455,50 @@ TEST(r95_uft_run, signal_flag_makes_run_return_immediately)
 	// :42-45 的信号回调，参数 int 隐式转 bool -> _to_exit=true
 	ASSERT_EQ(std::raise(SIGINT), 0);
 
-	// :355 _uft_engine.run()：无上下文，只创建并启动 UftRtTicker；
-	// :357-358 空的 parser/trader 管理器；:360 start_watching 未初始化返回 false；
-	// :362-365 因 _to_exit 已为 true 不进入轮询。runner 析构时 WtUftEngine 停止 ticker。
+	// 有效 ALLDAY session 允许 engine、空 parser/trader 管理器和未初始化的
+	// ShareManager 继续运行；因 _to_exit 已为 true 不进入轮询。析构时 engine 停止 ticker。
 	EXPECT_NO_THROW(runner.run(false));
 
 	// 还原默认 SIGINT 处理，避免析构后仍挂着指向本栈对象的回调
+	std::signal(SIGINT, SIG_DFL);
+}
+
+TEST(r95_uft_run, unknown_session_returns_before_starting_runner_loop)
+{
+	ScopedTempCwd guard("unknown_session_run");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(write_text("sessions.yaml", kSessionsYaml));
+	ASSERT_TRUE(write_text("cfg_unknown_session.yaml",
+		"basefiles:\n"
+		"    session: sessions.yaml\n"
+		"env:\n"
+		"    product:\n"
+		"        session: MISSING_SESSION\n"
+		"data:\n"
+		"    unused: 1\n"
+		"bspolicy: actpolicy_absent.yaml\n"));
+
+	WtUftRunner runner;
+	EXPECT_FALSE(runner.config("cfg_unknown_session.yaml"));
+
+	std::promise<void> completion;
+	std::future<void> finished = completion.get_future();
+	std::thread runThread([&]() {
+		runner.run(false);
+		completion.set_value();
+	});
+	const bool returnedBeforeSignal = finished.wait_for(std::chrono::seconds(2)) == std::future_status::ready;
+	if (!returnedBeforeSignal)
+		std::raise(SIGINT);
+	runThread.join();
+	std::signal(SIGINT, SIG_DFL);
+
+	EXPECT_TRUE(returnedBeforeSignal);
+}
+
+TEST(r95_uft_run, unconfigured_runner_returns_without_entering_loop)
+{
+	WtUftRunner runner;
+	EXPECT_NO_THROW(runner.run(false));
 	std::signal(SIGINT, SIG_DFL);
 }

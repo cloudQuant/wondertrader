@@ -143,20 +143,17 @@ public:
      * 
      * 该方法返回CSV文件的所有字段名，以逗号分隔
      */
-    const char* fields() const 
-    { 
-        static std::string s;
-        if(s.empty())
+    const char* fields() const
+    {
+        _fields_cache.clear();
+        for (const auto& item : _fields_map)
         {
-            std::stringstream ss;
-            for (auto item : _fields_map)
-                ss << item.first << ",";
-
-            s = ss.str();
-            s = s.substr(0, s.size() - 1);
+            if (!_fields_cache.empty())
+                _fields_cache += ",";
+            _fields_cache += item.first;
         }
 
-        return s.c_str();
+        return _fields_cache.c_str();
     }
 
 private:
@@ -181,4 +178,5 @@ private:
 
     std::unordered_map<std::string, int32_t> _fields_map;  ///< 字段名到列索引的映射
     std::vector<std::string> _current_cells;               ///< 当前行的单元格数据
+    mutable std::string _fields_cache;                      ///< fields() result; valid until the next call on this reader
 };

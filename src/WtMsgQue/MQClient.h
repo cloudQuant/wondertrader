@@ -26,6 +26,8 @@ class MQManager;
  */
 class MQClient
 {
+	friend struct MQClientTestAccess;
+
 public:
 	/**
 	 * @brief 构造函数

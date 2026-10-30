@@ -530,6 +530,99 @@ TEST_F(R114DumperFixture, dumper_config_accepts_array_basefiles_and_empty_trader
 	EXPECT_EQ(0u, g_adapterMgr.size());
 }
 
+TEST_F(R114DumperFixture, dumper_config_registers_successfully_initialized_mocker_without_connecting)
+{
+	g_adapterMgr.release();
+	const std::string mod_dir = find_module_dir("libTraderMocker.dylib");
+	if (mod_dir.empty())
+		GTEST_SKIP() << "libTraderMocker.dylib 不在构建目录，跳过本地 fake adapter 配置验证";
+
+	const std::string cfg = write("mocker_cfg.json", R"({
+		"basefiles": {},
+		"traders": [
+			{"active": true, "channelid": "config_mocker", "module": "TraderMocker", "mockerid": 812}
+		]
+	})");
+	Dumper d;
+	ASSERT_TRUE(d.config(cfg.c_str(), true, mod_dir.c_str()));
+	EXPECT_EQ(1u, g_adapterMgr.size());
+	TraderAdapterPtr adapter = g_adapterMgr.getAdapter("config_mocker");
+	ASSERT_TRUE(adapter != NULL);
+	EXPECT_STREQ("config_mocker", adapter->id());
+	EXPECT_TRUE(std::filesystem::exists(_dir + "/mocker_812"));
+	// init creates local state only; do not call run/connect or claim plugin unload.
+}
+
+TEST_F(R114DumperFixture, dumper_config_rejects_zero_refresh_span_before_initializing_adapter)
+{
+	g_adapterMgr.release();
+	const std::string mod_dir = find_module_dir("libTraderMocker.dylib");
+	if (mod_dir.empty())
+		GTEST_SKIP() << "libTraderMocker.dylib 不在构建目录，跳过本地 fake adapter 前置校验";
+
+	const std::string cfg = write("mocker_zero_refresh_cfg.json", R"({
+		"config": {"refresh_span": 0},
+		"basefiles": {},
+		"traders": [
+			{"active": true, "channelid": "zero_refresh_mocker", "module": "TraderMocker", "mockerid": 815}
+		]
+	})");
+	Dumper d;
+	EXPECT_FALSE(d.config(cfg.c_str(), true, mod_dir.c_str()));
+	EXPECT_EQ(0u, g_adapterMgr.size());
+	EXPECT_FALSE(std::filesystem::exists(_dir + "/mocker_815"));
+}
+
+TEST_F(R114DumperFixture, dumper_config_prevalidates_mixed_batch_before_initializing_valid_prefix)
+{
+	g_adapterMgr.release();
+	const std::string mod_dir = find_module_dir("libTraderMocker.dylib");
+	if (mod_dir.empty())
+		GTEST_SKIP() << "libTraderMocker.dylib 不在构建目录，跳过本地 fake adapter 前置校验";
+
+	const std::string cfg = write("mocker_prevalidate_cfg.json", R"({
+		"basefiles": {},
+		"traders": [
+			{"active": true, "channelid": "prevalidated_mocker", "module": "TraderMocker", "mockerid": 813},
+			{"active": true, "channelid": "missing_module", "module": ""}
+		]
+	})");
+	Dumper d;
+	EXPECT_FALSE(d.config(cfg.c_str(), true, mod_dir.c_str()));
+	EXPECT_EQ(0u, g_adapterMgr.size());
+	EXPECT_FALSE(std::filesystem::exists(_dir + "/mocker_813"));
+}
+
+TEST_F(R114DumperFixture, dumper_config_reports_late_plugin_failure_and_retains_initialized_prefix)
+{
+	g_adapterMgr.release();
+	const std::string mod_dir = find_module_dir("libTraderMocker.dylib");
+	if (mod_dir.empty())
+		GTEST_SKIP() << "libTraderMocker.dylib 不在构建目录，跳过本地 fake mixed batch";
+	g_adapterMgr.run();	// 空 manager 初始化 alive 计数，不启动任何 adapter。
+
+	const std::string cfg = write("mocker_late_failure_cfg.json", R"({
+		"config": {"refresh_span": 1},
+		"basefiles": {},
+		"traders": [
+			{"active": true, "channelid": "initialized_prefix", "module": "TraderMocker", "mockerid": 814},
+			{"active": true, "channelid": "missing_late_plugin", "module": "TraderNotBuiltForR114Mixed"}
+		]
+	})");
+	Dumper d;
+	EXPECT_FALSE(d.config(cfg.c_str(), true, mod_dir.c_str()));
+	EXPECT_EQ(1u, g_adapterMgr.size());
+	EXPECT_TRUE(g_adapterMgr.getAdapter("initialized_prefix") != NULL);
+	EXPECT_TRUE(g_adapterMgr.getAdapter("missing_late_plugin") == NULL);
+	// This demonstrates the remaining non-transactional runtime failure boundary.
+	// A false config must prevent the independent run() entry point from starting it.
+	EXPECT_FALSE(g_adapterMgr.isAnyAlive());
+	d.run(false);
+	EXPECT_FALSE(g_adapterMgr.isAnyAlive());
+	d.release();
+	g_adapterMgr.release();
+}
+
 /* ------------------------------------------------------------------ */
 /* Dumper.cpp:102-135 —— run(true) 空表立即返回；run(false) 线程可 join */
 /* ------------------------------------------------------------------ */
@@ -537,17 +630,22 @@ TEST_F(R114DumperFixture, dumper_run_once_returns_immediately_and_worker_joins)
 {
 	g_adapterMgr.release();
 	Dumper once;
-	once.run(true);		// _adapters 为空 -> isAnyAlive()=false -> 立刻 break
+	const std::string once_cfg = write("run_once_cfg.json", R"({
+		"basefiles": {},
+		"traders": []
+	})");
+	ASSERT_TRUE(once.config(once_cfg.c_str(), true, _dir.c_str()));
+	once.run(true);		// 成功配置空 manager 后立即返回
 	EXPECT_EQ(0u, g_adapterMgr.size());
 
 	const std::string cfg = write("run_cfg.json", R"({
-		"config": {"refresh_span": 0},
+		"config": {"refresh_span": 1},
 		"basefiles": {"session": "no_such_session_r114.json"},
 		"traders": []
 	})");
 	Dumper worker;
 	ASSERT_TRUE(worker.config(cfg.c_str(), true, _dir.c_str()));
-	worker.run(false);	// 唯一线程是一个 sleep(0) 的 refresh 循环，紧接着 release() join
+	worker.run(false);	// 正间隔刷新线程在 release() 后最多等待一个周期再 join
 	worker.release();
 	EXPECT_EQ(0u, g_adapterMgr.size());
 }

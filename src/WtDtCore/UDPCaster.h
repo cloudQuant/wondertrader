@@ -13,6 +13,7 @@
 #include "../Share/StdUtils.hpp"
 
 #include <boost/asio.hpp>
+#include <atomic>
 #include <queue>
 
 NS_WTP_BEGIN
@@ -85,6 +86,8 @@ private:
 	ReceiverList	m_listFlatRecver;
 	ReceiverList	m_listJsonRecver;
 	ReceiverList	m_listRawRecver;
+	// Keep io_context alive until every socket bound to it has been destroyed.
+	boost::asio::io_context		m_ioservice;
 	UDPSocketPtr	m_sktBroadcast;
 	UDPSocketPtr	m_sktSubscribe;
 
@@ -93,13 +96,19 @@ private:
 	MulticastList	m_listFlatGroup;
 	MulticastList	m_listJsonGroup;
 	MulticastList	m_listRawGroup;
-	boost::asio::io_context		m_ioservice;
+	StdUniqueMutex	m_mtxLifecycle;
+	StdCondVariable	m_condLifecycle;
+	bool			m_bStarted;
+	bool			m_bStopping;
+	bool			m_bStopped;
 	StdThreadPtr	m_thrdIO;
+	std::thread::id	m_ioThreadId;
 
 	StdThreadPtr	m_thrdCast;
+	std::thread::id	m_castThreadId;
 	StdCondVariable	m_condCast;
 	StdUniqueMutex	m_mtxCast;
-	bool			m_bTerminated;
+	std::atomic<bool>	m_bTerminated;
 
 	WTSBaseDataMgr*	m_bdMgr;
 	DataManager*	m_dtMgr;

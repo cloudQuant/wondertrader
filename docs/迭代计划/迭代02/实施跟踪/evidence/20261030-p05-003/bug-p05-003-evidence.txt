@@ -1,0 +1,27 @@
+BUG-P05-003 validation evidence
+
+Initial compile after edits:
+  Command: /opt/homebrew/bin/cmake --build build-cov --target CoverageTests_adstorage -j4
+  Exit code: 0
+  Output: /tmp/bug-p05-003-build-initial.log
+  The build compiled WtBtDtReaderAD.cpp, WtDataReaderAD.cpp, both changed test TUs, and linked libWtDataStorageAD plus CoverageTests_adstorage.
+
+Stable-state incremental compile (after parent paused concurrent WriterAD edits):
+  Command: /opt/homebrew/bin/cmake --build build-cov --target CoverageTests_adstorage -j4
+  Exit code: 0
+  Output: /tmp/bug-p05-003-build.log
+  AD reader/test objects were up to date; this incrementally linked CoverageTests_adstorage.
+
+Associated suite run:
+  Filter: P05BtReaderADTest.*:R162AdReaderTest.*
+  Exit code: 0
+  stdout: /tmp/bug-p05-003-associated.stdout.log
+  XML: /tmp/bug-p05-003-associated.xml
+  20 runnable tests passed; XML records 21 total, 0 failures, 1 disabled.
+
+Final linked binary run (after stable-state incremental build):
+  Filter: P05BtReaderADTest.*:R162AdReaderTest.*
+  Exit code: 0
+  stdout: /tmp/bug-p05-003-final-associated.stdout.log
+  XML: /tmp/bug-p05-003-final-associated.xml
+  20 runnable tests passed; XML records 21 total, 0 failures, 1 disabled (`DISABLED_R162WriterADMergedDayBarVolumeIsDoubleCounted`).

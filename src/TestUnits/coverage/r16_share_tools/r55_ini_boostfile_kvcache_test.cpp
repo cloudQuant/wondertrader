@@ -195,8 +195,8 @@ TEST(R55_kvcache, put_if_none_resizes_when_capacity_is_full)
 	r16tmp::clean("r55kv1");
 }
 
-// 文件比文件头标记的 capacity 更大：按真实尺寸回填并取 min 作为 size（WtKVCache.hpp:161-179）
-TEST(R55_kvcache, reopen_with_enlarged_file_caps_size_at_marked_capacity)
+// 文件比文件头标记的 capacity 更大：capacity 按真实尺寸恢复，size 保留持久化记录数。
+TEST(R55_kvcache, reopen_with_enlarged_file_preserves_persisted_size)
 {
 	const std::string path = r16tmp::file("r55kv2", "c.cache");
 	r16tmp::clean("r55kv2");
@@ -217,11 +217,10 @@ TEST(R55_kvcache, reopen_with_enlarged_file_caps_size_at_marked_capacity)
 		wtp::WtKVCache cache;
 		ASSERT_TRUE(cache.init(path.c_str(), kR55Date));
 		EXPECT_EQ(400u, cache.capacity());
-		// size 取 min(realCap=400, markedCap=200)
-		EXPECT_EQ(200u, cache.size());
+		EXPECT_EQ(1u, cache.size());
 		EXPECT_STREQ("v0", cache.get("k0"));
-		// 200 个槽位里只有第 0 个有键，其余空键都被重建索引收进 map
-		EXPECT_TRUE(cache.has(""));
+		// 扩容产生的空槽不能被恢复成空键记录。
+		EXPECT_FALSE(cache.has(""));
 	}
 	r16tmp::clean("r55kv2");
 }

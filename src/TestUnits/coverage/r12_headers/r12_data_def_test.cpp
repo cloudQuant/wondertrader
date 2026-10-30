@@ -8,6 +8,7 @@
 #include <cmath>
 #include <cfloat>
 #include <cstring>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -106,6 +107,7 @@ TEST(r12_value_array, negative_index_translates_from_tail)
 	EXPECT_EQ(arr->translateIdx(1), 1);
 	EXPECT_DOUBLE_EQ(arr->at((uint32_t)-1), 30.0);
 	EXPECT_DOUBLE_EQ(arr->at((uint32_t)-3), 10.0);
+	EXPECT_TRUE(isInvalid(arr->at(static_cast<uint32_t>(std::numeric_limits<int32_t>::min()))));
 	// 负向越界（|idx| > size）会翻出负数，仍落到非法值分支
 	EXPECT_TRUE(isInvalid(arr->at((uint32_t)-4)));
 	arr->release();
@@ -124,12 +126,24 @@ TEST(r12_value_array, maxvalue_minvalue_range_semantics)
 	// head/tail 传反也要能自动交换
 	EXPECT_DOUBLE_EQ(arr->maxvalue(3, 0), 7.0);
 	EXPECT_DOUBLE_EQ(arr->minvalue(3, 0), -9.0);
+	// 合法负索引按尾部翻译后参与闭区间计算。
+	EXPECT_DOUBLE_EQ(arr->maxvalue(-2, -1), 7.0);
+	EXPECT_DOUBLE_EQ(arr->minvalue(-2, -1), 2.0);
 	// 绝对值分支：|−9| 成为最大
 	EXPECT_DOUBLE_EQ(arr->maxvalue(0, 3, true), 9.0);
 	EXPECT_DOUBLE_EQ(arr->maxvalue(0, 0), 5.0);
 	// 尾部越界（end > size）走非法分支
 	EXPECT_TRUE(isInvalid(arr->maxvalue(0, 9)));
 	EXPECT_TRUE(isInvalid(arr->minvalue(0, 9)));
+	// 区间端点是闭区间：end == size 也必须拒绝，不能读取 size 下标。
+	EXPECT_TRUE(isInvalid(arr->maxvalue(0, 4)));
+	EXPECT_TRUE(isInvalid(arr->minvalue(0, 4)));
+	EXPECT_TRUE(isInvalid(arr->maxvalue(-6, -5)));
+	EXPECT_TRUE(isInvalid(arr->minvalue(-6, -5)));
+	EXPECT_TRUE(isInvalid(arr->maxvalue(std::numeric_limits<int32_t>::min(),
+		std::numeric_limits<int32_t>::min() + 1)));
+	EXPECT_TRUE(isInvalid(arr->minvalue(std::numeric_limits<int32_t>::min(),
+		std::numeric_limits<int32_t>::min() + 1)));
 	// 区间内含 INVALID_DOUBLE 时被跳过，不参与比较
 	arr->append(kInvalidD);
 	EXPECT_DOUBLE_EQ(arr->maxvalue(0, 4), 7.0);
@@ -205,8 +219,15 @@ TEST(r12_kline_slice, append_block_and_empty_slice)
 	// 空切片：size 0、at 直接 NULL
 	EXPECT_TRUE(slice->empty());
 	EXPECT_EQ(slice->at(0), nullptr);
+	EXPECT_TRUE(isInvalid(slice->maxprice(0, 0)));
+	EXPECT_TRUE(isInvalid(slice->minprice(0, 0)));
+	EXPECT_TRUE(isInvalid(slice->maxprice(std::numeric_limits<int32_t>::min(),
+		std::numeric_limits<int32_t>::min())));
+	EXPECT_TRUE(isInvalid(slice->minprice(std::numeric_limits<int32_t>::min(),
+		std::numeric_limits<int32_t>::min())));
 	// 非法块被拒绝
 	EXPECT_FALSE(slice->appendBlock(NULL, 0));
+	EXPECT_FALSE(slice->appendBlock(first.data(), 0));
 	EXPECT_TRUE(slice->empty());
 
 	EXPECT_TRUE(slice->appendBlock(first.data(), 1));
@@ -218,6 +239,84 @@ TEST(r12_kline_slice, append_block_and_empty_slice)
 	// 跨块寻址：索引 1 落在第二块的第 0 根
 	EXPECT_DOUBLE_EQ(slice->at(1)->open, 20.0);
 	EXPECT_DOUBLE_EQ(slice->at(2)->high, 25.0);
+	slice->release();
+}
+
+TEST(r12_kline_slice, create_rejects_invalid_count_or_backing)
+{
+	WTSBarStruct bar = makeBar(20240506, 930, 10.0, 12.0, 9.0, 11.0, 100.0, 1000.0);
+	EXPECT_EQ(WTSKlineSlice::create(nullptr, KP_Minute1, 1), nullptr);
+	EXPECT_EQ(WTSKlineSlice::create("DCE.i2409", KP_Minute1, 1, nullptr, 1), nullptr);
+	EXPECT_EQ(WTSKlineSlice::create("DCE.i2409", KP_Minute1, 1, &bar, -1), nullptr);
+	EXPECT_EQ(WTSKlineSlice::create("DCE.i2409", KP_Minute1, 1, nullptr, -1), nullptr);
+
+	WTSKlineSlice* empty = WTSKlineSlice::create("DCE.i2409", KP_Minute1, 1);
+	ASSERT_NE(empty, nullptr);
+	EXPECT_TRUE(empty->empty());
+	empty->release();
+
+	WTSKlineSlice* valid = WTSKlineSlice::create("DCE.i2409", KP_Minute1, 1, &bar, 1);
+	ASSERT_NE(valid, nullptr);
+	EXPECT_EQ(valid->size(), 1);
+	EXPECT_EQ(valid->at(0), &bar);
+	valid->release();
+}
+
+TEST(r12_kline_slice, extrema_skip_invalid_price_fields)
+{
+	std::vector<WTSBarStruct> bars;
+	bars.push_back(makeBar(20240506, 930, 10.0, INVALID_DOUBLE, 9.0, 10.0, 1.0, 10.0));
+	bars.push_back(makeBar(20240506, 931, 11.0, 14.0, INVALID_DOUBLE, 13.0, 1.0, 13.0));
+	WTSKlineSlice* slice = WTSKlineSlice::create("DCE.i2409", KP_Minute1, 1,
+		bars.data(), static_cast<int32_t>(bars.size()));
+	ASSERT_NE(slice, nullptr);
+	EXPECT_DOUBLE_EQ(slice->maxprice(0, 1), 14.0);
+	EXPECT_DOUBLE_EQ(slice->minprice(0, 1), 9.0);
+	slice->release();
+
+	WTSBarStruct invalid = makeBar(20240506, 932, 10.0, 12.0, 9.0, 11.0, 0.0, 0.0);
+	invalid.high = INVALID_DOUBLE;
+	invalid.low = INVALID_DOUBLE;
+	WTSKlineSlice* allInvalid = WTSKlineSlice::create("DCE.i2409", KP_Minute1, 1, &invalid, 1);
+	ASSERT_NE(allInvalid, nullptr);
+	EXPECT_TRUE(isInvalid(allInvalid->maxprice(0, 0)));
+	EXPECT_TRUE(isInvalid(allInvalid->minprice(0, 0)));
+	allInvalid->release();
+}
+
+TEST(r12_kline_slice, append_block_rejects_count_overflow_without_mutation)
+{
+	WTSBarStruct marker = makeBar(20240506, 930, 10.0, 12.0, 9.0, 11.0, 100.0, 1000.0);
+	// The pointers are only stored; no bar access is performed. Counts simulate the uint32 boundary.
+	WTSKlineSlice* slice = WTSKlineSlice::create("DCE.i2409", KP_Minute1, 1,
+		&marker, std::numeric_limits<int32_t>::max());
+	ASSERT_NE(slice, nullptr);
+	ASSERT_TRUE(slice->appendBlock(&marker, static_cast<uint32_t>(std::numeric_limits<int32_t>::max())));
+	ASSERT_EQ(slice->get_block_counts(), 2u);
+	EXPECT_FALSE(slice->empty());
+
+	EXPECT_FALSE(slice->appendBlock(&marker, 2u));
+	EXPECT_EQ(slice->get_block_counts(), 2u);
+	EXPECT_FALSE(slice->empty());
+	slice->release();
+}
+
+TEST(r12_kline_slice, negative_index_uses_wide_count_across_blocks)
+{
+	WTSBarStruct first = makeBar(20240506, 930, 10.0, 12.0, 9.0, 11.0, 1.0, 10.0);
+	WTSBarStruct last = makeBar(20240506, 931, 20.0, 22.0, 19.0, 21.0, 1.0, 20.0);
+	// The first block's logical length crosses INT32_MAX. Only index 0 of that block and
+	// index 0 of the final one-item block are dereferenced in this test.
+	WTSKlineSlice* slice = WTSKlineSlice::create("DCE.i2409", KP_Minute1, 1,
+		&first, std::numeric_limits<int32_t>::max());
+	ASSERT_NE(slice, nullptr);
+	ASSERT_TRUE(slice->appendBlock(&last, 1));
+	EXPECT_EQ(slice->at(0), &first);
+	EXPECT_EQ(slice->at(std::numeric_limits<int32_t>::max()), &last);
+	EXPECT_EQ(slice->at(-1), &last);
+	EXPECT_EQ(slice->at(std::numeric_limits<int32_t>::min()), &first);
+	const WTSKlineSlice& constSlice = *slice;
+	EXPECT_EQ(constSlice.at(-1), &last);
 	slice->release();
 }
 
@@ -235,10 +334,26 @@ TEST(r12_kline_slice, maxprice_minprice_and_setcode)
 	// 全区间
 	EXPECT_DOUBLE_EQ(slice->maxprice(0, 2), 120.0);
 	EXPECT_DOUBLE_EQ(slice->minprice(0, 2), 95.0);
+	EXPECT_DOUBLE_EQ(slice->maxprice(2, 2), 120.0);
+	EXPECT_DOUBLE_EQ(slice->minprice(2, 2), 99.0);
+	EXPECT_DOUBLE_EQ(slice->maxprice(-2, -1), 120.0);
+	EXPECT_DOUBLE_EQ(slice->minprice(-2, -1), 99.0);
 	// head>tail 也要能取到区间
 	EXPECT_DOUBLE_EQ(slice->maxprice(2, 0), 120.0);
 	// 尾部索引按 count-1 夹取
 	EXPECT_DOUBLE_EQ(slice->maxprice(0, 99), 120.0);
+	// 区间完全落在切片之后时返回 sentinel，不解引用 at() 的 NULL。
+	EXPECT_TRUE(isInvalid(slice->maxprice(3, 4)));
+	EXPECT_TRUE(isInvalid(slice->minprice(3, 4)));
+	// 负向完全越界也没有与切片相交；部分相交仍按索引语义裁剪到首元素。
+	EXPECT_TRUE(isInvalid(slice->maxprice(-100, -99)));
+	EXPECT_TRUE(isInvalid(slice->minprice(-100, -99)));
+	EXPECT_TRUE(isInvalid(slice->maxprice(std::numeric_limits<int32_t>::min(),
+		std::numeric_limits<int32_t>::min() + 1)));
+	EXPECT_TRUE(isInvalid(slice->minprice(std::numeric_limits<int32_t>::min(),
+		std::numeric_limits<int32_t>::min() + 1)));
+	EXPECT_DOUBLE_EQ(slice->maxprice(-100, 0), 110.0);
+	EXPECT_DOUBLE_EQ(slice->minprice(-100, 0), 95.0);
 
 	slice->setCode("SHFE.rb2406");
 	EXPECT_STREQ(slice->code(), "SHFE.rb2406");
@@ -342,9 +457,10 @@ TEST(r12_kline_data, property_accessors_and_sized_create)
 	EXPECT_EQ(kdata->size(), 2u);
 	EXPECT_FALSE(kdata->IsEmpty());
 
-	// 越界读取一律返回非法值而不是崩溃
+	// 正向越界返回非法值；单元素 getter 的过负索引按既有语义夹到首元素。
 	EXPECT_TRUE(isInvalid(kdata->open(2)));
-	EXPECT_TRUE(isInvalid(kdata->high(-5)));
+	EXPECT_TRUE(isInvalid(kdata->high(2)));
+	EXPECT_DOUBLE_EQ(kdata->high(-5), kdata->high(0));
 	EXPECT_TRUE(isInvalid(kdata->money(5)));
 	EXPECT_TRUE(isInvalid(kdata->additional(5)));
 	kdata->release();
@@ -417,7 +533,56 @@ TEST(r12_kline_data, maxprice_minprice_and_release_keeps_slice_refs)
 	// begin 越界 / end 越界都返回非法值
 	EXPECT_TRUE(isInvalid(kdata->maxprice(3, 4)));
 	EXPECT_TRUE(isInvalid(kdata->minprice(0, 9)));
+	// 闭区间端点必须小于 size；末元素本身仍合法。
+	EXPECT_TRUE(isInvalid(kdata->maxprice(0, 3)));
+	EXPECT_TRUE(isInvalid(kdata->minprice(0, 3)));
+	EXPECT_TRUE(isInvalid(kdata->maxprice(-100, -99)));
+	EXPECT_TRUE(isInvalid(kdata->minprice(-100, -99)));
+	EXPECT_TRUE(isInvalid(kdata->maxprice(std::numeric_limits<int32_t>::min(),
+		std::numeric_limits<int32_t>::min() + 1)));
+	EXPECT_TRUE(isInvalid(kdata->minprice(std::numeric_limits<int32_t>::min(),
+		std::numeric_limits<int32_t>::min() + 1)));
+	// A range with one valid tail index retains the existing clipping behavior.
+	EXPECT_DOUBLE_EQ(kdata->maxprice(-100, -1), 14.0);
+	EXPECT_DOUBLE_EQ(kdata->minprice(-100, -1), 9.0);
+	EXPECT_DOUBLE_EQ(kdata->maxprice(2, 2), 14.0);
+	EXPECT_DOUBLE_EQ(kdata->minprice(2, 2), 9.0);
+	EXPECT_DOUBLE_EQ(kdata->maxprice(-2, -1), 14.0);
+	EXPECT_DOUBLE_EQ(kdata->minprice(-2, -1), 9.0);
 	kdata->release();
+
+	WTSKlineData* empty = WTSKlineData::create("SHFE.rb2405", 0);
+	ASSERT_NE(empty, nullptr);
+	EXPECT_TRUE(isInvalid(empty->maxprice(0, 0)));
+	EXPECT_TRUE(isInvalid(empty->minprice(0, 0)));
+	EXPECT_TRUE(isInvalid(empty->maxprice(std::numeric_limits<int32_t>::min(),
+		std::numeric_limits<int32_t>::min())));
+	EXPECT_TRUE(isInvalid(empty->minprice(std::numeric_limits<int32_t>::min(),
+		std::numeric_limits<int32_t>::min())));
+	empty->release();
+}
+
+TEST(r12_kline_data, extrema_skip_invalid_price_fields)
+{
+	WTSKlineData* data = WTSKlineData::create("SHFE.rb2405", 2);
+	ASSERT_NE(data, nullptr);
+	data->getDataRef()[0] = makeBar(20240506, 931, 10.0, INVALID_DOUBLE, 9.0,
+		10.0, 1.0, 10.0);
+	data->getDataRef()[1] = makeBar(20240506, 932, 11.0, 14.0, INVALID_DOUBLE,
+		13.0, 1.0, 13.0);
+	EXPECT_DOUBLE_EQ(data->maxprice(0, 1), 14.0);
+	EXPECT_DOUBLE_EQ(data->minprice(0, 1), 9.0);
+	data->release();
+
+	WTSKlineData* allInvalid = WTSKlineData::create("SHFE.rb2405", 1);
+	ASSERT_NE(allInvalid, nullptr);
+	allInvalid->getDataRef()[0] = makeBar(20240506, 933, 10.0, 12.0, 9.0,
+		11.0, 0.0, 0.0);
+	allInvalid->getDataRef()[0].high = INVALID_DOUBLE;
+	allInvalid->getDataRef()[0].low = INVALID_DOUBLE;
+	EXPECT_TRUE(isInvalid(allInvalid->maxprice(0, 0)));
+	EXPECT_TRUE(isInvalid(allInvalid->minprice(0, 0)));
+	allInvalid->release();
 }
 
 TEST(r12_tick_data, create_from_struct_and_field_accessors)
@@ -482,6 +647,60 @@ TEST(r12_tick_data, create_by_code_setcode_and_limit_flag)
 	tick->release();
 }
 
+TEST(r12_tick_data, code_creation_and_checked_setter_enforce_capacity)
+{
+	EXPECT_EQ(WTSTickData::create(nullptr), nullptr);
+
+	WTSTickData* empty = WTSTickData::create("");
+	ASSERT_NE(empty, nullptr);
+	EXPECT_STREQ(empty->code(), "");
+	EXPECT_TRUE(empty->trySetCode(""));
+	EXPECT_STREQ(empty->code(), "");
+	empty->release();
+
+	WTSTickData* one = WTSTickData::create("A");
+	ASSERT_NE(one, nullptr);
+	EXPECT_STREQ(one->code(), "A");
+	EXPECT_TRUE(one->trySetCode("B", 1));
+	EXPECT_STREQ(one->code(), "B");
+	one->release();
+
+	const std::string maxCode(MAX_INSTRUMENT_LENGTH - 1, 'M');
+	WTSTickData* maxLength = WTSTickData::create(maxCode.c_str());
+	ASSERT_NE(maxLength, nullptr);
+	EXPECT_STREQ(maxLength->code(), maxCode.c_str());
+	EXPECT_TRUE(maxLength->trySetCode(maxCode.c_str(), MAX_INSTRUMENT_LENGTH - 1));
+	EXPECT_STREQ(maxLength->code(), maxCode.c_str());
+	char fixedLengthCode[MAX_INSTRUMENT_LENGTH - 1];
+	memset(fixedLengthCode, 'N', sizeof(fixedLengthCode));
+	ASSERT_TRUE(maxLength->trySetCode(fixedLengthCode, sizeof(fixedLengthCode)));
+	EXPECT_EQ(maxLength->code()[MAX_INSTRUMENT_LENGTH - 1], '\0');
+	EXPECT_EQ(std::string(maxLength->code()),
+		std::string(fixedLengthCode, sizeof(fixedLengthCode)));
+
+	ASSERT_TRUE(maxLength->trySetCode("abcdef"));
+	ASSERT_TRUE(maxLength->trySetCode(maxLength->code() + 1, 3));
+	EXPECT_STREQ(maxLength->code(), "bcd");
+	ASSERT_TRUE(maxLength->trySetCode(maxCode.c_str()));
+	EXPECT_FALSE(maxLength->trySetCode(maxCode.c_str(), MAX_INSTRUMENT_LENGTH));
+	EXPECT_STREQ(maxLength->code(), maxCode.c_str());
+
+	const std::string tooLongCode(MAX_INSTRUMENT_LENGTH, 'L');
+	EXPECT_EQ(WTSTickData::create(tooLongCode.c_str()), nullptr);
+	const std::string veryLongCode(MAX_INSTRUMENT_LENGTH * 4, 'X');
+	EXPECT_EQ(WTSTickData::create(veryLongCode.c_str()), nullptr);
+	EXPECT_FALSE(maxLength->trySetCode(nullptr));
+	EXPECT_FALSE(maxLength->trySetCode(tooLongCode.c_str()));
+	EXPECT_STREQ(maxLength->code(), maxCode.c_str());
+
+	// The legacy void API remains safe and leaves the old value on rejection.
+	maxLength->setCode(tooLongCode.c_str());
+	maxLength->setCode(tooLongCode.c_str(), MAX_INSTRUMENT_LENGTH);
+	maxLength->setCode(nullptr);
+	EXPECT_STREQ(maxLength->code(), maxCode.c_str());
+	maxLength->release();
+}
+
 TEST(r12_tick_ref, wraps_external_struct_without_copy)
 {
 	WTSTickStruct st = makeTick("i2409", 800.0, 20240507, 145900000);
@@ -494,17 +713,17 @@ TEST(r12_tick_ref, wraps_external_struct_without_copy)
 	EXPECT_DOUBLE_EQ(ref->price(), 801.5);
 	EXPECT_STREQ(ref->code(), "i2409");
 	EXPECT_STREQ(ref->exchg(), "SHFE");
-	EXPECT_DOUBLE_EQ(ref->open(), 800.5);
-	EXPECT_DOUBLE_EQ(ref->high(), 803.5);
-	EXPECT_DOUBLE_EQ(ref->low(), 799.5);
-	EXPECT_DOUBLE_EQ(ref->preclose(), 796.5);
-	EXPECT_DOUBLE_EQ(ref->presettle(), 798.5);
+	EXPECT_DOUBLE_EQ(ref->open(), 799.0);
+	EXPECT_DOUBLE_EQ(ref->high(), 802.0);
+	EXPECT_DOUBLE_EQ(ref->low(), 798.0);
+	EXPECT_DOUBLE_EQ(ref->preclose(), 795.0);
+	EXPECT_DOUBLE_EQ(ref->presettle(), 797.0);
 	EXPECT_DOUBLE_EQ(ref->preinterest(), 1500000.0);
-	EXPECT_DOUBLE_EQ(ref->upperlimit(), 851.5);
-	EXPECT_DOUBLE_EQ(ref->lowerlimit(), 751.5);
+	EXPECT_DOUBLE_EQ(ref->upperlimit(), 850.0);
+	EXPECT_DOUBLE_EQ(ref->lowerlimit(), 750.0);
 	EXPECT_DOUBLE_EQ(ref->totalvolume(), 120000.0);
 	EXPECT_DOUBLE_EQ(ref->volume(), 1000.0);
-	EXPECT_DOUBLE_EQ(ref->settlepx(), 802.0);
+	EXPECT_DOUBLE_EQ(ref->settlepx(), 800.5);
 	EXPECT_DOUBLE_EQ(ref->openinterest(), 1520000.0);
 	EXPECT_DOUBLE_EQ(ref->additional(), 20000.0);
 	EXPECT_DOUBLE_EQ(ref->totalturnover(), 800.0 * 120000.0);
@@ -564,16 +783,40 @@ TEST(r12_tick_slice, block_append_insert_and_index)
 	s2->release();
 }
 
-// 触发条件：WTSTickSlice::create(code) 不传 ticks 指针时（WTSDataDef.hpp:1394 声明
-// _count 但构造函数 WTSTickSlice(){_blocks.clear();} 只清块表），_count 从未初始化；
-// 随后 size()/empty()/at()/appendBlock() 读或累加未初始化内存，属未定义行为，
-// 断言结果不可复现，故整类 DISABLED 只做记录，不作为覆盖。
-TEST(DISABLED_r12_tick_slice, count_uninitialized_when_created_without_ticks)
+TEST(r12_tick_slice, empty_create_and_consecutive_append_counts)
 {
 	WTSTickSlice* slice = WTSTickSlice::create("SHFE.rb2405");
 	ASSERT_NE(slice, nullptr);
 	EXPECT_TRUE(slice->empty());
 	EXPECT_EQ(slice->size(), 0u);
+	EXPECT_EQ(slice->get_block_counts(), 0u);
+	EXPECT_EQ(slice->at(0), nullptr);
+
+	std::vector<WTSTickStruct> first;
+	first.push_back(makeTick("rb2405", 3500.0, 20240506, 93000000));
+	std::vector<WTSTickStruct> second;
+	second.push_back(makeTick("rb2405", 3501.0, 20240506, 93000500));
+	second.push_back(makeTick("rb2405", 3502.0, 20240506, 93001000));
+
+	// Negative control: rejected appends must leave the empty slice unchanged.
+	EXPECT_FALSE(slice->appendBlock(nullptr, 1));
+	EXPECT_FALSE(slice->appendBlock(first.data(), 0));
+	EXPECT_TRUE(slice->empty());
+	EXPECT_EQ(slice->size(), 0u);
+	EXPECT_EQ(slice->get_block_counts(), 0u);
+
+	// Positive control: successive blocks accumulate from the initialized zero count.
+	ASSERT_TRUE(slice->appendBlock(first.data(), static_cast<uint32_t>(first.size())));
+	EXPECT_EQ(slice->size(), 1u);
+	ASSERT_TRUE(slice->appendBlock(second.data(), static_cast<uint32_t>(second.size())));
+	EXPECT_EQ(slice->size(), 3u);
+	EXPECT_EQ(slice->get_block_counts(), 2u);
+	ASSERT_NE(slice->at(0), nullptr);
+	ASSERT_NE(slice->at(1), nullptr);
+	ASSERT_NE(slice->at(2), nullptr);
+	EXPECT_DOUBLE_EQ(slice->at(0)->price, 3500.0);
+	EXPECT_DOUBLE_EQ(slice->at(1)->price, 3501.0);
+	EXPECT_DOUBLE_EQ(slice->at(2)->price, 3502.0);
 	slice->release();
 }
 

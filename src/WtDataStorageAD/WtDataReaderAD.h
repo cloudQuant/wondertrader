@@ -289,7 +289,7 @@ private:
 	 * @param period K线周期
 	 * @param lastBarTime 最后K线时间，引用参数，会被更新
 	 */
-	void	update_cache_from_lmdb(BarsList& barsList, const char* exchg, const char* code, WTSKlinePeriod period, uint32_t& lastBarTime);
+	bool	update_cache_from_lmdb(BarsList& barsList, const char* exchg, const char* code, WTSKlinePeriod period, uint32_t& lastBarTime);
 
 	/**
 	 * @brief 将K线数据读入到缓冲区

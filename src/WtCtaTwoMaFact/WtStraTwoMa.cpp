@@ -7,7 +7,9 @@
  * 
  * \author Wesley
  */
+#include <algorithm>
 #include <iostream>
+#include <limits>
 #include "WtStraTwoMa.h"
 
 #include "../Includes/ICtaStraCtx.h"
@@ -81,13 +83,26 @@ bool WtStraTwoMa::init(WTSVariant* cfg)
 	if (cfg == NULL)
 		return false;
 	std::cout << "WtStraTwoMa::init  begin to init" << std::endl;
-	// 读取指标参数
-	_short_days = cfg->getUInt32("short_days");
-	_long_days = cfg->getUInt32("long_days");
+	// 读取指标参数。TwoMa 用较大的周期加一根 K 线计算前后两个窗口，
+	// 两个周期必须为正且可安全转换成下方使用的有符号索引。
+	const uint32_t short_days = cfg->getUInt32("short_days");
+	const uint32_t long_days = cfg->getUInt32("long_days");
+	const uint32_t count = cfg->getUInt32("count");
+	const uint32_t required_days = std::max(short_days, long_days);
+	const uint32_t max_index_days = static_cast<uint32_t>(std::numeric_limits<int32_t>::max() - 1);
+	if (short_days == 0 || long_days == 0 ||
+		short_days > max_index_days || long_days > max_index_days ||
+		count <= required_days)
+	{
+		return false;
+	}
+
+	_short_days = short_days;
+	_long_days = long_days;
 
 	// 读取数据周期和合约信息
 	_period = cfg->getCString("period");
-	_count = cfg->getUInt32("count");
+	_count = count;
 	_code = cfg->getCString("code");
 
 	// 读取是否为股票标的
@@ -165,6 +180,12 @@ void WtStraTwoMa::on_schedule(ICtaStraCtx* ctx, uint32_t /*curDate*/, uint32_t /
 		kline->release();
 		return;
 	}
+	const uint32_t required_days = std::max(_short_days, _long_days);
+	if (kline->size() < static_cast<int32_t>(required_days + 1))
+	{
+		kline->release();
+		return;
+	}
 
 	// 设置交易单位，股票为100股，其他为1手
 	uint32_t trdUnit = 1;
@@ -183,6 +204,13 @@ void WtStraTwoMa::on_schedule(ICtaStraCtx* ctx, uint32_t /*curDate*/, uint32_t /
 
 	// 计算指定天数内的价格
 	WTSValueArray* closes = kline->extractData(KFT_CLOSE);
+	if (closes == NULL || closes->size() < required_days + 1)
+	{
+		if (closes != NULL)
+			closes->release();
+		kline->release();
+		return;
+	}
 	double pre_short_ma = 0;
 	double pre_long_ma = 0;
 	double now_short_ma = 0;

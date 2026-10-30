@@ -1,0 +1,216 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = L00PublicHeaderTest.*:N01TraderAdapter.*:R3TraderTest.*
+[==========] Running 35 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 3 tests from L00PublicHeaderTest
+[ RUN      ] L00PublicHeaderTest.ExecMgrHeaderIsSelfContained
+[       OK ] L00PublicHeaderTest.ExecMgrHeaderIsSelfContained (0 ms)
+[ RUN      ] L00PublicHeaderTest.ScopeGuardHeaderIsSelfContained
+[       OK ] L00PublicHeaderTest.ScopeGuardHeaderIsSelfContained (0 ms)
+[ RUN      ] L00PublicHeaderTest.TraderAdapterHeaderIsSelfContained
+[       OK ] L00PublicHeaderTest.TraderAdapterHeaderIsSelfContained (0 ms)
+[----------] 3 tests from L00PublicHeaderTest (0 ms total)
+
+[----------] 19 tests from N01TraderAdapter
+[ RUN      ] N01TraderAdapter.fresh_adapter_is_not_logged_in
+[       OK ] N01TraderAdapter.fresh_adapter_is_not_logged_in (0 ms)
+[ RUN      ] N01TraderAdapter.init_rejects_null_params_without_touching_state
+[       OK ] N01TraderAdapter.init_rejects_null_params_without_touching_state (0 ms)
+[ RUN      ] N01TraderAdapter.init_accepts_no_riskmon_inactive_riskmon_and_complete_active_policy
+[       OK ] N01TraderAdapter.init_accepts_no_riskmon_inactive_riskmon_and_complete_active_policy (623 ms)
+[ RUN      ] N01TraderAdapter.active_riskmon_without_policy_is_rejected_before_state_is_committed
+[       OK ] N01TraderAdapter.active_riskmon_without_policy_is_rejected_before_state_is_committed (0 ms)
+[ RUN      ] N01TraderAdapter.active_riskmon_with_non_object_policy_is_rejected_before_state_is_committed
+[       OK ] N01TraderAdapter.active_riskmon_with_non_object_policy_is_rejected_before_state_is_committed (0 ms)
+[ RUN      ] N01TraderAdapter.init_ext_rejects_null_api
+[       OK ] N01TraderAdapter.init_ext_rejects_null_api (0 ms)
+[ RUN      ] N01TraderAdapter.init_ext_failure_releases_partial_api_state_once
+[       OK ] N01TraderAdapter.init_ext_failure_releases_partial_api_state_once (4 ms)
+[ RUN      ] N01TraderAdapter.release_unregisters_only_a_registered_spi_and_is_idempotent
+[       OK ] N01TraderAdapter.release_unregisters_only_a_registered_spi_and_is_idempotent (2 ms)
+[ RUN      ] N01TraderAdapter.missing_module_failure_releases_retained_config
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/wt_r160_missing_trader_module_80773_4/traders/libNoSuchTraderModule.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/wt_r160_missing_trader_module_80773_4/traders/libNoSuchTraderModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/wt_r160_missing_trader_module_80773_4/traders/libNoSuchTraderModule.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/wt_r160_missing_trader_module_80773_4/traders/libNoSuchTraderModule.dylib' (no such file)
+[       OK ] N01TraderAdapter.missing_module_failure_releases_retained_config (1 ms)
+[ RUN      ] N01TraderAdapter.run_and_release_and_queryfund_are_api_null_safe
+[       OK ] N01TraderAdapter.run_and_release_and_queryfund_are_api_null_safe (0 ms)
+[ RUN      ] N01TraderAdapter.empty_lookups_return_neutral_values
+[       OK ] N01TraderAdapter.empty_lookups_return_neutral_values (0 ms)
+[ RUN      ] N01TraderAdapter.risk_gates_pass_when_riskmon_disabled
+[       OK ] N01TraderAdapter.risk_gates_pass_when_riskmon_disabled (0 ms)
+[ RUN      ] N01TraderAdapter.null_payloads_on_response_callbacks_are_ignored
+[       OK ] N01TraderAdapter.null_payloads_on_response_callbacks_are_ignored (0 ms)
+[ RUN      ] N01TraderAdapter.add_sink_is_idempotent_set_membership
+[       OK ] N01TraderAdapter.add_sink_is_idempotent_set_membership (0 ms)
+[ RUN      ] N01TraderAdapter.local_order_id_concurrent_first_call_is_unique
+[       OK ] N01TraderAdapter.local_order_id_concurrent_first_call_is_unique (1 ms)
+[ RUN      ] N01TraderAdapter.local_order_id_is_monotonic
+[       OK ] N01TraderAdapter.local_order_id_is_monotonic (0 ms)
+[ RUN      ] N01TraderAdapter.mgr_rejects_null_and_empty_names
+[       OK ] N01TraderAdapter.mgr_rejects_null_and_empty_names (0 ms)
+[ RUN      ] N01TraderAdapter.mgr_registers_unique_names_and_rejects_duplicates
+[       OK ] N01TraderAdapter.mgr_registers_unique_names_and_rejects_duplicates (0 ms)
+[ RUN      ] N01TraderAdapter.mgr_run_release_and_refresh_funds_without_api
+[       OK ] N01TraderAdapter.mgr_run_release_and_refresh_funds_without_api (0 ms)
+[ DISABLED ] N01TraderAdapter.DISABLED_push_report_before_run_dereferences_null_stat_map
+[----------] 19 tests from N01TraderAdapter (634 ms total)
+
+[----------] 13 tests from R3TraderTest
+[ RUN      ] R3TraderTest.order_freq_window_denies_submission_after_boundary
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R3TraderTest.order_freq_window_denies_submission_after_boundary
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R3TraderTest
+[ RUN      ] R3TraderTest.order_freq_window_denies_submission_after_boundary
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp:377: Failure
+Expected equality of these values:
+  0
+  result
+    Which is: 12
+
+[  FAILED  ] R3TraderTest.order_freq_window_denies_submission_after_boundary (426 ms)
+[----------] 1 test from R3TraderTest (426 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (428 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R3TraderTest.order_freq_window_denies_submission_after_boundary
+
+ 1 FAILED TEST
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp:377: Failure
+Expected equality of these values:
+  0
+  result
+    Which is: 1
+
+[  FAILED  ] R3TraderTest.order_freq_window_denies_submission_after_boundary (805 ms)
+[ RUN      ] R3TraderTest.order_freq_window_precheck_uses_standard_code_after_raw_submission
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R3TraderTest.order_freq_window_precheck_uses_standard_code_after_raw_submission
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R3TraderTest
+[ RUN      ] R3TraderTest.order_freq_window_precheck_uses_standard_code_after_raw_submission
+[       OK ] R3TraderTest.order_freq_window_precheck_uses_standard_code_after_raw_submission (416 ms)
+[----------] 1 test from R3TraderTest (416 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (417 ms total)
+[  PASSED  ] 1 test.
+[       OK ] R3TraderTest.order_freq_window_precheck_uses_standard_code_after_raw_submission (780 ms)
+[ RUN      ] R3TraderTest.cancel_freq_window_denies_cancel_after_boundary
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R3TraderTest.cancel_freq_window_denies_cancel_after_boundary
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R3TraderTest
+[ RUN      ] R3TraderTest.cancel_freq_window_denies_cancel_after_boundary
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp:464: Failure
+Expected equality of these values:
+  0
+  result
+    Which is: 33
+
+[  FAILED  ] R3TraderTest.cancel_freq_window_denies_cancel_after_boundary (423 ms)
+[----------] 1 test from R3TraderTest (423 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (426 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R3TraderTest.cancel_freq_window_denies_cancel_after_boundary
+
+ 1 FAILED TEST
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp:464: Failure
+Expected equality of these values:
+  0
+  result
+    Which is: 1
+
+[  FAILED  ] R3TraderTest.cancel_freq_window_denies_cancel_after_boundary (770 ms)
+[ RUN      ] R3TraderTest.cancel_localid_frequency_cache_uses_standardized_contract_code
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R3TraderTest.cancel_localid_frequency_cache_uses_standardized_contract_code
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R3TraderTest
+[ RUN      ] R3TraderTest.cancel_localid_frequency_cache_uses_standardized_contract_code
+[       OK ] R3TraderTest.cancel_localid_frequency_cache_uses_standardized_contract_code (510 ms)
+[----------] 1 test from R3TraderTest (510 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (511 ms total)
+[  PASSED  ] 1 test.
+[       OK ] R3TraderTest.cancel_localid_frequency_cache_uses_standardized_contract_code (864 ms)
+[ RUN      ] R3TraderTest.cancel_localid_rejects_inactive_or_unmapped_order_safely
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R3TraderTest.cancel_localid_rejects_inactive_or_unmapped_order_safely
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R3TraderTest
+[ RUN      ] R3TraderTest.cancel_localid_rejects_inactive_or_unmapped_order_safely
+[       OK ] R3TraderTest.cancel_localid_rejects_inactive_or_unmapped_order_safely (422 ms)
+[----------] 1 test from R3TraderTest (422 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (424 ms total)
+[  PASSED  ] 1 test.
+[       OK ] R3TraderTest.cancel_localid_rejects_inactive_or_unmapped_order_safely (775 ms)
+[ RUN      ] R3TraderTest.cancel_localid_risk_rejection_retries_do_not_grow_cache
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R3TraderTest.cancel_localid_risk_rejection_retries_do_not_grow_cache
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R3TraderTest
+[ RUN      ] R3TraderTest.cancel_localid_risk_rejection_retries_do_not_grow_cache
+[       OK ] R3TraderTest.cancel_localid_risk_rejection_retries_do_not_grow_cache (414 ms)
+[----------] 1 test from R3TraderTest (414 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (415 ms total)
+[  PASSED  ] 1 test.
+[       OK ] R3TraderTest.cancel_localid_risk_rejection_retries_do_not_grow_cache (771 ms)
+[ RUN      ] R3TraderTest.cancel_localid_synchronous_api_failure_is_not_cached
+[       OK ] R3TraderTest.cancel_localid_synchronous_api_failure_is_not_cached (7 ms)
+[ RUN      ] R3TraderTest.save_data_writes_long_short_positions_and_fund_block
+[       OK ] R3TraderTest.save_data_writes_long_short_positions_and_fund_block (14 ms)
+[ RUN      ] R3TraderTest.four_wrappers_stamp_direction_offset_price_and_flag
+[       OK ] R3TraderTest.four_wrappers_stamp_direction_offset_price_and_flag (7 ms)
+[ RUN      ] R3TraderTest.cancel_empty_code_cancels_all_buy_orders_without_crashing
+[       OK ] R3TraderTest.cancel_empty_code_cancels_all_buy_orders_without_crashing (44 ms)
+[ RUN      ] R3TraderTest.buy_splits_by_rule_cap_and_single_order_max_volume
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp:820: Failure
+Expected equality of these values:
+  trader.getUndoneQty(kStdCode)
+    Which is: 5
+  3.0
+    Which is: 3
+
+[  FAILED  ] R3TraderTest.buy_splits_by_rule_cap_and_single_order_max_volume (10 ms)
+[ RUN      ] R3TraderTest.buy_skips_open_rule_when_daily_cap_already_consumed
+[       OK ] R3TraderTest.buy_skips_open_rule_when_daily_cap_already_consumed (7 ms)
+[ RUN      ] R3TraderTest.position_and_order_tables_read_seeded_state
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp:927: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  tab->size()
+    Which is: 0
+
+[  FAILED  ] R3TraderTest.position_and_order_tables_read_seeded_state (5 ms)
+[----------] 13 tests from R3TraderTest (4865 ms total)
+
+[----------] Global test environment tear-down
+[==========] 35 tests from 3 test suites ran. (5502 ms total)
+[  PASSED  ] 31 tests.
+[  FAILED  ] 4 tests, listed below:
+[  FAILED  ] R3TraderTest.order_freq_window_denies_submission_after_boundary
+[  FAILED  ] R3TraderTest.cancel_freq_window_denies_cancel_after_boundary
+[  FAILED  ] R3TraderTest.buy_splits_by_rule_cap_and_single_order_max_volume
+[  FAILED  ] R3TraderTest.position_and_order_tables_read_seeded_state
+
+ 4 FAILED TESTS
+  YOU HAVE 1 DISABLED TEST
+
+EXIT_CODE=1

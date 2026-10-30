@@ -51,9 +51,10 @@ inline void write_file(const fs::path& p, const std::string& content)
 /*
  * 6 个会话模板，覆盖 StateMonitor.cpp:196-296（SS_ORIGINAL）的各个出口：
  *  - HOLIDAY：没有关联品种 -> getSessionComms 返回 NULL -> L243-248 直接转 SS_Holiday；
- *  - CLOSED ：offset +1，close_time=0 -> offsetTime(0,false)=1，白盘绝大多数分钟 offTime>=1；
+ *  - CLOSED ：auction 0..0 是空竞价哨兵；offset +1，close_time=0 ->
+ *             offsetTime(0,false)=1，白盘绝大多数分钟 offTime>=1；
  *  - INIT   ：无集合竞价，close_time=2400 -> 不收盘、不进竞价分支 -> L288-292 SS_INITIALIZED；
- *  - RECV   ：auction 0..0（换算后 [0,2400)）覆盖全天 -> L263-270 SS_RECEIVING；
+ *  - RECV   ：auction 0..2400 显式覆盖全天（[0,2400)）-> L263-270 SS_RECEIVING；
  *  - PAUSE  ：auction 0..1（换算后 [0,1)），trading 0..0（换算后下溢成空区间）
  *             -> L272-279，getCloseTime(true)=2400 -> SS_PAUSED；
  *  - SETTLE ：auction 0..1，trading 0..1 -> getCloseTime(true)=1，
@@ -78,7 +79,7 @@ inline const char* sessions_json()
 		},
 		"RECV": {
 			"name": "接收会话", "offset": 0,
-			"auction": {"from": 0, "to": 0},
+			"auction": {"from": 0, "to": 2400},
 			"sections": [{"from": 1, "to": 2359}]
 		},
 		"PAUSE": {

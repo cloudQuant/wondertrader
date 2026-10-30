@@ -26,14 +26,140 @@
 
 #include "../WTSTools/WTSLogger.h"
 
+#include <exception>
+#include <chrono>
+#include <memory>
+
 USING_NS_WTP;
+
+namespace
+{
+	const uint32_t kUftRunStopRequested = 0x1;
+	const uint32_t kUftRunCallbackActive = 0x2;
+	const uint64_t kUftQuoteGateClosed = (uint64_t(1) << 63);
+	const uint64_t kUftQuoteGateCountMask = ~kUftQuoteGateClosed;
+
+	struct UftEngineCallbackFrame
+	{
+		WtUftEngine* engine;
+		UftEngineCallbackFrame* previous;
+	};
+	thread_local UftEngineCallbackFrame* active_uft_engine_callback = nullptr;
+
+	class UftEngineInitCallbackScope
+	{
+	public:
+		UftEngineInitCallbackScope(WtUftEngine* engine, std::atomic<uint32_t>& run_state)
+			: _run_state(run_state)
+			, _frame{ engine, active_uft_engine_callback }
+			, _entered(false)
+		{
+			uint32_t state = _run_state.load(std::memory_order_acquire);
+			while ((state & kUftRunStopRequested) == 0
+				&& (state & kUftRunCallbackActive) == 0)
+			{
+				if (_run_state.compare_exchange_weak(state, state | kUftRunCallbackActive,
+					std::memory_order_acq_rel, std::memory_order_acquire))
+				{
+					_entered = true;
+					active_uft_engine_callback = &_frame;
+					break;
+				}
+			}
+		}
+
+		~UftEngineInitCallbackScope()
+		{
+			if (_entered)
+			{
+				active_uft_engine_callback = _frame.previous;
+				_run_state.fetch_and(~kUftRunCallbackActive, std::memory_order_release);
+			}
+		}
+
+		bool entered() const { return _entered; }
+
+	private:
+		std::atomic<uint32_t>& _run_state;
+		UftEngineCallbackFrame _frame;
+		bool _entered;
+	};
+
+	bool is_uft_engine_callback_active(WtUftEngine* engine)
+	{
+		for (UftEngineCallbackFrame* frame = active_uft_engine_callback;
+			frame != nullptr; frame = frame->previous)
+		{
+			if (frame->engine == engine)
+				return true;
+		}
+		return false;
+	}
+
+	class UftEngineRunCompletion
+	{
+	public:
+		UftEngineRunCompletion(std::mutex& mutex,
+			std::condition_variable& condition, bool& active, std::thread::id& thread_id)
+			: _mutex(mutex), _condition(condition),
+			  _active(active), _thread_id(thread_id)
+		{}
+
+		~UftEngineRunCompletion()
+		{
+			std::lock_guard<std::mutex> lock(_mutex);
+			_active = false;
+			_thread_id = std::thread::id();
+			_condition.notify_all();
+		}
+
+	private:
+		std::mutex& _mutex;
+		std::condition_variable& _condition;
+		bool& _active;
+		std::thread::id& _thread_id;
+	};
+
+	class UftEngineQuoteCompletion
+	{
+	public:
+		UftEngineQuoteCompletion(std::atomic<uint64_t>& quote_gate, std::mutex& mutex,
+			std::condition_variable& condition)
+			: _quote_gate(quote_gate), _mutex(mutex), _condition(condition)
+		{}
+
+		~UftEngineQuoteCompletion()
+		{
+			// The waiter checks the count under this same mutex. Once it observes
+			// zero and proceeds, this completion performs no further Engine access.
+			std::lock_guard<std::mutex> lock(_mutex);
+			_quote_gate.fetch_sub(1, std::memory_order_release);
+			_condition.notify_all();
+		}
+
+	private:
+		std::atomic<uint64_t>& _quote_gate;
+		std::mutex& _mutex;
+		std::condition_variable& _condition;
+	};
+}
 
 /**
  * @brief 构造函数
  * @details 初始化UFT引擎对象，获取当前系统时间并设置初始化参数
  */
 WtUftEngine::WtUftEngine()
-	: _tm_ticker(NULL)
+	: _base_data_mgr(NULL)
+	, _tm_ticker(NULL)
+	, _stop_requested(false)
+	, _run_state(0)
+	, _run_started(false)
+	, _run_thread_id()
+	, _run_active(false)
+	, _joining(false)
+	, _quote_gate(0)
+	, _ticker_wake_generation(0)
+	, _ticker_worker_waiting(false)
 	, _cfg(NULL)
 	, _notifier(NULL)
 {
@@ -57,17 +183,116 @@ WtUftEngine::WtUftEngine()
  */
 WtUftEngine::~WtUftEngine()
 {
-	// 停止并释放时间计时器
-	if (_tm_ticker)
-	{
-		_tm_ticker->stop();
-		delete _tm_ticker;
-		_tm_ticker = NULL;
-	}
+	request_stop();
+	// The engine cannot be destroyed from its own callback: the ticker still holds
+	// this pointer until the callback unwinds and a controller joins it.
+	if (!wait_stopped())
+		std::terminate();
 
 	// 释放配置对象
 	if (_cfg)
 		_cfg->release();
+}
+
+void WtUftEngine::stop()
+{
+	request_stop();
+	wait_stopped();
+}
+
+void WtUftEngine::request_stop()
+{
+	_quote_gate.fetch_or(kUftQuoteGateClosed, std::memory_order_seq_cst);
+	_run_state.fetch_or(kUftRunStopRequested, std::memory_order_acq_rel);
+	// Stop is linearized by closing quote admission before publishing the engine
+	// stop flag, so a quote either owns an in-flight reference or is rejected.
+	_stop_requested.store(true, std::memory_order_seq_cst);
+	_lifecycle_cv.notify_all();
+	{
+		std::lock_guard<std::mutex> wake_lock(_ticker_wake_mtx);
+		++_ticker_wake_generation;
+	}
+	_ticker_wake_cv.notify_all();
+
+	// If called from a ticker callback, do not wait for or release the ticker.
+	// The controller thread will join and release it after this callback returns.
+	if (WtUftRtTicker::request_stop_for_current_callback(this))
+		return;
+}
+
+bool WtUftEngine::try_enter_quote_callback()
+{
+	uint64_t state = _quote_gate.load(std::memory_order_acquire);
+	while ((state & kUftQuoteGateClosed) == 0)
+	{
+		if ((state & kUftQuoteGateCountMask) == kUftQuoteGateCountMask)
+			return false;
+		if (_quote_gate.compare_exchange_weak(state, state + 1,
+			std::memory_order_acq_rel, std::memory_order_acquire))
+			return true;
+	}
+	return false;
+}
+
+bool WtUftEngine::wait_stopped()
+{
+	_quote_gate.fetch_or(kUftQuoteGateClosed, std::memory_order_seq_cst);
+	_run_state.fetch_or(kUftRunStopRequested, std::memory_order_acq_rel);
+	_stop_requested.store(true, std::memory_order_seq_cst);
+	_lifecycle_cv.notify_all();
+
+	// The callback thread cannot join itself. request_stop_for_current_callback
+	// also publishes the request so a direct wait from a callback is fail-safe.
+	if (WtUftRtTicker::request_stop_for_current_callback(this))
+		return false;
+	if (is_uft_engine_callback_active(this))
+		return false;
+
+	const std::thread::id caller = std::this_thread::get_id();
+	WtUftRtTicker* ticker = NULL;
+	{
+		std::unique_lock<std::mutex> lock(_ticker_mtx);
+		if (_run_active && _run_thread_id == caller)
+			return false;
+
+		_lifecycle_cv.wait(lock, [this]() { return !_joining; });
+		if (_tm_ticker == NULL && !_run_active
+			&& (_quote_gate.load(std::memory_order_acquire) & kUftQuoteGateCountMask) == 0)
+			return true;
+
+		_joining = true;
+		if (_tm_ticker != NULL)
+			_tm_ticker->request_stop();
+
+		_lifecycle_cv.wait(lock, [this]() {
+			return !_run_active
+				&& (_quote_gate.load(std::memory_order_acquire) & kUftQuoteGateCountMask) == 0;
+		});
+		ticker = _tm_ticker;
+	}
+
+	if (ticker != NULL && !ticker->wait_stopped())
+	{
+		{
+			std::lock_guard<std::mutex> lock(_ticker_mtx);
+			_joining = false;
+		}
+		_lifecycle_cv.notify_all();
+		return false;
+	}
+
+	{
+		std::lock_guard<std::mutex> lock(_ticker_mtx);
+		if (_tm_ticker == ticker)
+			_tm_ticker = NULL;
+	}
+	delete ticker;
+	{
+		std::lock_guard<std::mutex> lock(_ticker_mtx);
+		_joining = false;
+	}
+	_lifecycle_cv.notify_all();
+	return true;
 }
 
 /**
@@ -151,6 +376,9 @@ WTSContractInfo* WtUftEngine::get_contract_info(const char* stdCode)
  */
 WTSSessionInfo* WtUftEngine::get_session_info(const char* sid, bool isCode /* = false */)
 {
+	if (_base_data_mgr == NULL || sid == NULL || sid[0] == '\0')
+		return NULL;
+
 	// 如果不是合约代码，直接根据交易时段ID获取交易时段信息
 	if (!isCode)
 		return _base_data_mgr->getSession(sid);
@@ -325,29 +553,85 @@ void WtUftEngine::init(WTSVariant* cfg, IBaseDataMgr* bdMgr, WtUftDtMgr* dataMgr
  */
 void WtUftEngine::run()
 {
-	// 遍历所有策略上下文，调用其初始化方法
-	for (auto it = _ctx_map.begin(); it != _ctx_map.end(); it++)
 	{
-		UftContextPtr& ctx = (UftContextPtr&)it->second;
-		ctx->on_init();
+		std::lock_guard<std::mutex> lock(_ticker_mtx);
+		if (_run_started)
+			return;
+		_run_started = true;
+		if ((_run_state.load(std::memory_order_acquire) & kUftRunStopRequested) != 0
+			|| _stop_requested.load(std::memory_order_seq_cst))
+			return;
+		_run_active = true;
+		_run_thread_id = std::this_thread::get_id();
 	}
 
-	// 创建并初始化实时时间计时器
-	_tm_ticker = new WtUftRtTicker(this);
-	// 如果配置中有产品信息，使用产品配置中的交易时段
-	if(_cfg && _cfg->has("product"))
-	{
-		WTSVariant* cfgProd = _cfg->get("product");
-		_tm_ticker->init(cfgProd->getCString("session"));
-	}
-	else
-	{
-		// 如果没有产品信息，使用全天交易时段
-		_tm_ticker->init("ALLDAY");
-	}
+	UftEngineRunCompletion run_completion(_ticker_mtx, _lifecycle_cv,
+		_run_active, _run_thread_id);
+	auto start = [this]() {
+		if ((_run_state.load(std::memory_order_acquire) & kUftRunStopRequested) != 0
+			|| _stop_requested.load(std::memory_order_seq_cst))
+			return;
 
-	// 启动时间计时器
-	_tm_ticker->run();
+		// Validate the session before calling strategy code. Callbacks run without
+		// the lifecycle lock so they can safely reenter engine APIs.
+		const char* sessionID = "ALLDAY";
+		if (_cfg != NULL && _cfg->has("product"))
+		{
+			WTSVariant* cfgProd = _cfg->get("product");
+			sessionID = cfgProd == NULL ? "" : cfgProd->getCString("session");
+		}
+
+		if (_base_data_mgr == NULL || sessionID == NULL || sessionID[0] == '\0'
+			|| get_session_info(sessionID) == NULL)
+		{
+			WTSLogger::error("UFT engine cannot run without a valid session: {}",
+				sessionID == NULL ? "" : sessionID);
+			return;
+		}
+
+		for (auto it = _ctx_map.begin(); it != _ctx_map.end(); it++)
+		{
+			if ((_run_state.load(std::memory_order_acquire) & kUftRunStopRequested) != 0
+				|| _stop_requested.load(std::memory_order_seq_cst))
+				break;
+			UftContextPtr& ctx = (UftContextPtr&)it->second;
+			UftEngineInitCallbackScope callback_scope(this, _run_state);
+			if (!callback_scope.entered())
+				break;
+			ctx->on_init();
+		}
+
+		if ((_run_state.load(std::memory_order_acquire) & kUftRunStopRequested) != 0
+			|| _stop_requested.load(std::memory_order_seq_cst))
+			return;
+
+		std::unique_ptr<WtUftRtTicker> new_ticker(new WtUftRtTicker(this));
+		if (_cfg != NULL && _cfg->has("product"))
+		{
+			WTSVariant* cfgProd = _cfg->get("product");
+			new_ticker->init(cfgProd == NULL ? "" : cfgProd->getCString("session"));
+		}
+		else
+		{
+			new_ticker->init("ALLDAY");
+		}
+
+		WtUftRtTicker* ticker = new_ticker.get();
+		{
+			std::lock_guard<std::mutex> lock(_ticker_mtx);
+			if ((_run_state.load(std::memory_order_acquire) & kUftRunStopRequested) != 0
+				|| _stop_requested.load(std::memory_order_seq_cst) || _joining
+				|| _tm_ticker != NULL)
+				return;
+			_tm_ticker = new_ticker.release();
+		}
+
+		// run() may synchronously invoke session callbacks that call engine.run()
+		// or handle_push_quote(); neither path holds the lifecycle mutex.
+		ticker->run();
+	};
+
+	start();
 }
 
 /**
@@ -357,9 +641,26 @@ void WtUftEngine::run()
  */
 void WtUftEngine::handle_push_quote(WTSTickData* newTick)
 {
-	// 如果时间判断器存在，将新的Tick数据传递给时间判断器
-	if (_tm_ticker)
-		_tm_ticker->on_tick(newTick);
+	if (!try_enter_quote_callback())
+		return;
+	UftEngineQuoteCompletion quote_completion(_quote_gate, _ticker_mtx, _lifecycle_cv);
+	WtUftRtTicker* ticker = NULL;
+	{
+		std::unique_lock<std::mutex> lock(_ticker_mtx);
+		while (_run_active && _run_thread_id != std::this_thread::get_id()
+			&& !_stop_requested.load(std::memory_order_seq_cst) && !_joining)
+		{
+			// request_stop is nonblocking and does not take this mutex. The short
+			// timeout makes an atomic stop request observable even if its CV notify
+			// races the condition-variable wait transition.
+			_lifecycle_cv.wait_for(lock, std::chrono::milliseconds(1));
+		}
+		if (_stop_requested.load(std::memory_order_seq_cst) || _joining || _tm_ticker == NULL)
+			return;
+		ticker = _tm_ticker;
+	}
+
+	ticker->on_tick(newTick);
 }
 
 /**

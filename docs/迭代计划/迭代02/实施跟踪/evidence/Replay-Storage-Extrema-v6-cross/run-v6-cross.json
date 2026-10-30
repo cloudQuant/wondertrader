@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-30",
+  "purpose": "Final-source cross-regression after shared Variant/header changes; evidence refresh only, no execution-list status changes.",
+  "platform": "macOS arm64",
+  "build": {
+    "log": "build-v6.log",
+    "exit_code": 0,
+    "scope": "主代理提供的限定对象重编记录；不是 clean 或 aggregate build。"
+  },
+  "runs": [
+    {"name": "MatchEngine", "bug_ids": ["BUG-L06-004"], "log": "match-v6.log", "tests": 15, "passed": 15, "disabled": 0},
+    {"name": "Replay CSV retry", "bug_ids": ["BUG-P04-009"], "log": "replayer-v6.log", "tests": 2, "passed": 2, "disabled": 0},
+    {"name": "Extrema", "bug_ids": ["BUG-R12-07", "BUG-P12-003"], "log": "extrema-v6.log", "tests": 19, "passed": 19, "disabled": 0},
+    {"name": "RDM", "bug_ids": ["BUG-R23-005", "BUG-R23-007"], "log": "rdm-v6.log", "tests": 16, "passed": 16, "disabled": 0},
+    {"name": "AD reader", "bug_ids": ["BUG-L04-005"], "log": "adreader-v6.log", "tests": 18, "passed": 18, "disabled": 2}
+  ],
+  "totals": {"active_tests": 70, "passed": 70, "failures": 0, "disabled": 2},
+  "status_effect": "No status changes; these runs are cross-regression evidence for existing TEST_PASS entries.",
+  "limitations": [
+    "本机 macOS arm64 focused runs only; Windows, ASan/TSan, clean/aggregate build and full end-to-end integration remain unverified.",
+    "AD reader's same-reader fix/retry behavior and WTSKlineData size/extract above INT32_MAX remain unverified."
+  ],
+  "hash_manifest": "hashes-v6.sha256"
+}

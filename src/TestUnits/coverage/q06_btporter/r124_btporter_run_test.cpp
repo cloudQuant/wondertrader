@@ -190,7 +190,8 @@ TEST(R124BtRunnerRun, EmptySyncReplayCompletesWithoutWorker)
 		"\"commodity\":\"" + dir + "/commodities.json\","
 		"\"contract\":\"" + dir + "/contracts.json\"}},"
 		"\"env\":{\"mocker\":\"none\"}}";
-	getRunner().config(cfg.c_str(), false);
+	std::string configError;
+	ASSERT_TRUE(getRunner().config_v2(cfg.c_str(), false, &configError)) << configError;
 
 	R124EmptySink sink;
 	getRunner().replayer().register_sink(&sink, "r124_sink");
@@ -208,6 +209,92 @@ TEST(R124BtRunnerRun, EmptySyncReplayCompletesWithoutWorker)
 
 	std::error_code ec;
 	stdfs::remove_all(dir, ec);
+}
+
+TEST(R124BtRunnerRun, FailedExecConfigDoesNotReplaceExistingReplaySink)
+{
+	R124TempDir temp("exec_config_failure");
+	const std::string& dir = temp.path();
+	ASSERT_FALSE(dir.empty());
+	write_text(dir + "/sessions.json", kSessions);
+	write_text(dir + "/commodities.json", kCommodities);
+	write_text(dir + "/contracts.json", kContracts);
+
+	WtBtRunner runner;
+	R124EmptySink sentinel;
+	runner.replayer().register_sink(&sentinel, "r124_sentinel");
+	const std::string cfg = "{\"replayer\":{"
+		"\"mode\":\"none\",\"path\":\"" + dir + "\","
+		"\"stime\":20240102000000,\"etime\":20240103000000,"
+		"\"tick\":false,\"basefiles\":{"
+		"\"session\":\"" + dir + "/sessions.json\","
+		"\"commodity\":\"" + dir + "/commodities.json\","
+		"\"contract\":\"" + dir + "/contracts.json\"}},"
+		"\"env\":{\"mocker\":\"exec\"},"
+		"\"exec\":{\"name\":\"r124_exec\",\"module\":\"unused\","
+		"\"code\":\"SHFE.rb2510\",\"period\":\"m1\"}}";
+	std::string error;
+	EXPECT_FALSE(runner.config_v2(cfg.c_str(), false, &error));
+	EXPECT_NE(std::string::npos, error.find("execution unit configuration is missing"));
+
+	// The failed candidate must not replace the preinstalled sink; drive the
+	// replayer directly so this observation does not depend on runner._inited.
+	ASSERT_TRUE(runner.replayer().prepare());
+	runner.replayer().run(false);
+	EXPECT_EQ(1U, sentinel.init);
+	EXPECT_EQ(1U, sentinel.done);
+}
+
+TEST(R124BtRunnerRun, StrategyModesRejectMissingNamesAndPropagateFactoryFailure)
+{
+	R124TempDir temp("strategy_config_failure");
+	const std::string& dir = temp.path();
+	ASSERT_FALSE(dir.empty());
+	write_text(dir + "/sessions.json", kSessions);
+	write_text(dir + "/commodities.json", kCommodities);
+	write_text(dir + "/contracts.json", kContracts);
+
+	auto make_config = [&dir](const char* mode, const std::string& modeConfig) {
+		return std::string("{\"replayer\":{")
+			+ "\"mode\":\"none\",\"path\":\"" + dir + "\","
+			+ "\"stime\":20240102000000,\"etime\":20240103000000,"
+			+ "\"tick\":false,\"basefiles\":{"
+			+ "\"session\":\"" + dir + "/sessions.json\","
+			+ "\"commodity\":\"" + dir + "/commodities.json\","
+			+ "\"contract\":\"" + dir + "/contracts.json\"}},"
+			+ "\"env\":{\"mocker\":\"" + mode + "\"},"
+			+ "\"" + mode + "\":" + modeConfig + "}";
+	};
+
+	for (const char* mode : { "cta", "hft", "sel" })
+	{
+		{
+			WtBtRunner runner;
+			R124EmptySink sentinel;
+			runner.replayer().register_sink(&sentinel, "r124_sentinel");
+			std::string error;
+			EXPECT_FALSE(runner.config_v2(make_config(mode, "{}").c_str(), false, &error));
+			EXPECT_NE(std::string::npos, error.find("mode name is missing"));
+			ASSERT_TRUE(runner.replayer().prepare());
+			runner.replayer().run(false);
+			EXPECT_EQ(1U, sentinel.init);
+			EXPECT_EQ(1U, sentinel.done);
+		}
+
+		{
+			WtBtRunner runner;
+			R124EmptySink sentinel;
+			runner.replayer().register_sink(&sentinel, "r124_sentinel");
+			std::string error;
+			const std::string modeConfig = "{\"name\":\"r124_bad_factory\",\"module\":\"/tmp/r124_missing_strategy_plugin\"}";
+			EXPECT_FALSE(runner.config_v2(make_config(mode, modeConfig).c_str(), false, &error));
+			EXPECT_NE(std::string::npos, error.find("strategy factory failed"));
+			ASSERT_TRUE(runner.replayer().prepare());
+			runner.replayer().run(false);
+			EXPECT_EQ(1U, sentinel.init);
+			EXPECT_EQ(1U, sentinel.done);
+		}
+	}
 }
 
 /*

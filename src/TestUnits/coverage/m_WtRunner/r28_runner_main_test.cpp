@@ -288,6 +288,11 @@ void write_fixture(const std::string& name, const std::string& body)
 	StdFile::write_file_content(fixture_path(name).c_str(), body);
 }
 
+void write_empty_array_sidecar(const std::string& name, const char* section)
+{
+	write_fixture(name, std::string(section) + ": []\n");
+}
+
 std::unique_ptr<WtRunner> make_runner()
 {
 	/* 唯一被验证为安全的构造方式：堆。栈上构造会 SIGKILL 宿主（BUG-R28-001） */
@@ -337,8 +342,10 @@ const char* kLogCfg = R"YAML(root:
         type: daily_file_sink
 )YAML";
 
-/* 空规则组：ActionPolicyMgr::init 走到 memberNames() 空循环后 return true */
-const char* kActPolicyEmpty = R"YAML({})YAML";
+/* 空规则组：保留必需的 default 组，但不配置订单规则或过滤器 */
+const char* kActPolicyEmpty = R"YAML(default:
+    order: []
+)YAML";
 
 /* 一个有内容的规则组，覆盖 ActionPolicyMgr 的遍历体（不是 WtRunner.cpp 的行，
    但是 config() 里 `if (!initActionPolicy()) return false;` 之后才能继续往下） */
@@ -351,14 +358,14 @@ const char* kActPolicyDefault = R"YAML(default:
 )YAML";
 
 /* 基础数据段的公共部分 */
-std::string basefiles_block()
+std::string basefiles_block(const std::string& hotPath = fixture_path("hots.json"))
 {
 	return std::string("basefiles:\n")
 		+ "    session: " + fixture_path("sessions.json") + "\n"
 		+ "    commodity: " + fixture_path("commodities.json") + "\n"
 		+ "    contract: " + fixture_path("contracts.json") + "\n"
 		+ "    holiday: " + fixture_path("holidays.json") + "\n"
-		+ "    hot: " + fixture_path("hots.json") + "\n";
+		+ "    hot: " + hotPath + "\n";
 }
 
 std::string env_block(const char* engineName)
@@ -584,13 +591,20 @@ TEST(r28_wtrunner_config, empty_file_returns_false)
 TEST(r28_wtrunner_config, full_cta_config_reaches_true_and_writes_portfolio_files)
 {
 	prepare_base_fixtures();
+	write_empty_array_sidecar("parsers_empty.yaml", "parsers");
+	write_empty_array_sidecar("traders_empty.yaml", "traders");
+	write_empty_array_sidecar("executers_empty.yaml", "executers");
 	std::unique_ptr<WtRunner> runner = make_runner();
 	runner->init(fixture_path("logcfg.yaml"));      // 必须先 init，WtHelper::_inst_dir 才有值
 
-	std::string cfg = basefiles_block() + env_block("cta") + tail_block()
-		+ "parsers: " + fixture_path("absent_parsers.yaml") + "\n"
-		+ "traders: " + fixture_path("absent_traders.yaml") + "\n"
-		+ "executers: " + fixture_path("absent_executers.yaml") + "\n";
+	// 显式指定真实 WtDataStorage 模块；config 成功现要求 manager 检查
+	// createDataReader 工厂创建结果，避免用默认配置掩盖缺失插件。
+	std::string cfg = basefiles_block() + env_block("cta")
+		+ "data:\n    store:\n        module: WtDataStorage\n        path: " + fixture_path("data/") + "\n"
+		+ "bspolicy: " + fixture_path("actpolicy.yaml") + "\n"
+		+ "parsers: " + fixture_path("parsers_empty.yaml") + "\n"
+		+ "traders: " + fixture_path("traders_empty.yaml") + "\n"
+		+ "executers: " + fixture_path("executers_empty.yaml") + "\n";
 	write_fixture("cta_cfg.yaml", cfg);
 
 	// :77-152 basefiles 全段 -> :154 initEngine -> :156 initDataMgr
@@ -619,12 +633,13 @@ TEST(r28_wtrunner_config, hft_env_routes_to_hft_engine_and_skips_executers)
 TEST(r28_wtrunner_config, sel_env_routes_to_sel_engine)
 {
 	prepare_base_fixtures();
+	write_empty_array_sidecar("executers_empty.yaml", "executers");
 	std::unique_ptr<WtRunner> runner = make_runner();
 	runner->init(fixture_path("logcfg.yaml"));
 
 	// initEngine():381-384 _is_sel=true -> :397-400 _sel_engine
 	std::string cfg = basefiles_block() + env_block("sel") + tail_block()
-		+ "executers: " + fixture_path("absent_executers.yaml") + "\n";
+		+ "executers: " + fixture_path("executers_empty.yaml") + "\n";
 	write_fixture("sel_cfg.yaml", cfg);
 	EXPECT_TRUE(runner->config(fixture_path("sel_cfg.yaml")));
 }
@@ -685,6 +700,21 @@ TEST(r28_wtrunner_config, missing_data_section_makes_config_fail)
 	EXPECT_FALSE(runner->config(fixture_path("nodata_cfg.yaml")));
 }
 
+TEST(r28_wtrunner_config, invalid_data_store_module_makes_config_fail)
+{
+	prepare_base_fixtures();
+	std::unique_ptr<WtRunner> runner = make_runner();
+	runner->init(fixture_path("logcfg.yaml"));
+
+	// WtDtMgr::initStore cannot load this module. config() must propagate that
+	// failure instead of continuing as though the data manager were initialized.
+	const std::string cfg = basefiles_block() + env_block("cta")
+		+ "data:\n    store:\n        module: R28MissingDataStorage\n        path: " + fixture_path("data/") + "\n"
+		+ "bspolicy: " + fixture_path("actpolicy.yaml") + "\n";
+	write_fixture("invalid_data_store_cfg.yaml", cfg);
+	EXPECT_FALSE(runner->config(fixture_path("invalid_data_store_cfg.yaml")));
+}
+
 TEST(r28_wtrunner_config, missing_bspolicy_makes_config_return_false_early)
 {
 	prepare_base_fixtures();
@@ -701,18 +731,20 @@ TEST(r28_wtrunner_config, missing_bspolicy_makes_config_return_false_early)
 
 TEST(r28_wtrunner_config, empty_action_policy_group_still_passes_the_gate)
 {
-	write_fixture("logcfg.yaml", kLogCfg);
+	prepare_base_fixtures();
 	write_fixture("emptypolicy.yaml", kActPolicyEmpty);
 	std::unique_ptr<WtRunner> runner = make_runner();
 	runner->init(fixture_path("logcfg.yaml"));
 
-	// memberNames() 为空 -> ActionPolicyMgr::init 的 for 不进入、直接 return true
+	// default 组存在且 order 为空 -> ActionPolicyMgr::init 加载合法空规则组
 	// basefiles 只有 session/commodity/contract，没有 holiday/hot -> 跳过对应分支
 	std::string cfg = std::string("basefiles:\n")
 		+ "    session: " + fixture_path("sessions.json") + "\n"
 		+ "    commodity: " + fixture_path("commodities.json") + "\n"
 		+ "    contract: " + fixture_path("contracts.json") + "\n"
-		+ env_block("cta") + "bspolicy: " + fixture_path("emptypolicy.yaml") + "\n";
+		+ env_block("cta")
+		+ "data:\n    store:\n        path: " + fixture_path("data/") + "\n"
+		+ "bspolicy: " + fixture_path("emptypolicy.yaml") + "\n";
 	write_fixture("emptypolicy_cfg.yaml", cfg);
 	EXPECT_TRUE(runner->config(fixture_path("emptypolicy_cfg.yaml")));
 }
@@ -723,12 +755,64 @@ TEST(r28_wtrunner_config, basefiles_rules_section_loads_custom_hot_rules)
 	std::unique_ptr<WtRunner> runner = make_runner();
 	runner->init(fixture_path("logcfg.yaml"));
 
-	// config():142-151 `if(cfgBF->has("rules"))` -> loadCustomRules + info 日志
+	// Custom rules accept a valid file and propagate the WTSHotMgr result.
+	write_fixture("rule.json", kHots);
 	std::string cfg = basefiles_block()
-		+ "    rules:\n        r28rule: " + fixture_path("absent_rule.json") + "\n"
+		+ "    rules:\n        r28rule: " + fixture_path("rule.json") + "\n"
 		+ env_block("cta") + tail_block();
 	write_fixture("rules_cfg.yaml", cfg);
 	EXPECT_TRUE(runner->config(fixture_path("rules_cfg.yaml")));
+}
+
+TEST(r28_wtrunner_config, missing_hot_file_fails_and_run_is_skipped)
+{
+	prepare_base_fixtures();
+	std::unique_ptr<WtRunner> runner = make_runner();
+	runner->init(fixture_path("logcfg.yaml"));
+	const std::string cfg = basefiles_block(fixture_path("absent_hots.json"))
+		+ env_block("cta") + tail_block();
+	write_fixture("missing_hot_cfg.yaml", cfg);
+
+	EXPECT_FALSE(runner->config(fixture_path("missing_hot_cfg.yaml")));
+}
+
+TEST(r28_wtrunner_config, unparsable_hot_file_fails)
+{
+	prepare_base_fixtures();
+	write_fixture("broken_hots.json", "{ not valid json");
+	std::unique_ptr<WtRunner> runner = make_runner();
+	runner->init(fixture_path("logcfg.yaml"));
+	const std::string cfg = basefiles_block(fixture_path("broken_hots.json"))
+		+ env_block("cta") + tail_block();
+	write_fixture("broken_hot_cfg.yaml", cfg);
+
+	EXPECT_FALSE(runner->config(fixture_path("broken_hot_cfg.yaml")));
+}
+
+TEST(r28_wtrunner_config, missing_second_hot_file_fails)
+{
+	prepare_base_fixtures();
+	std::unique_ptr<WtRunner> runner = make_runner();
+	runner->init(fixture_path("logcfg.yaml"));
+	const std::string cfg = basefiles_block()
+		+ "    second: " + fixture_path("absent_seconds.json") + "\n"
+		+ env_block("cta") + tail_block();
+	write_fixture("missing_second_hot_cfg.yaml", cfg);
+
+	EXPECT_FALSE(runner->config(fixture_path("missing_second_hot_cfg.yaml")));
+}
+
+TEST(r28_wtrunner_config, missing_custom_rule_file_fails)
+{
+	prepare_base_fixtures();
+	std::unique_ptr<WtRunner> runner = make_runner();
+	runner->init(fixture_path("logcfg.yaml"));
+	const std::string cfg = basefiles_block()
+		+ "    rules:\n        r28rule: " + fixture_path("absent_rule.json") + "\n"
+		+ env_block("cta") + tail_block();
+	write_fixture("missing_rule_cfg.yaml", cfg);
+
+	EXPECT_FALSE(runner->config(fixture_path("missing_rule_cfg.yaml")));
 }
 
 TEST(r28_wtrunner_config, basefiles_session_key_absent_skips_load_sessions)
@@ -761,7 +845,6 @@ TEST(r28_wtrunner_config, contract_section_as_array_loads_each_entry)
 		+ "    commodity:\n    - " + fixture_path("commodities.json") + "\n"
 		+ "    contract:\n    - " + fixture_path("contracts.json") + "\n"
 		+ "    holiday: " + fixture_path("holidays.json") + "\n"
-		+ "    second: " + fixture_path("absent_second.json") + "\n"
 		+ env_block("cta") + tail_block();
 	write_fixture("array_cfg.yaml", cfg);
 	EXPECT_TRUE(runner->config(fixture_path("array_cfg.yaml")));
@@ -807,18 +890,19 @@ TEST(r28_wtrunner_config, parsers_side_file_loads_and_reports_failure)
 	std::string cfg = basefiles_block() + env_block("cta") + tail_block()
 		+ "parsers: " + fixture_path("parsers_side.yaml") + "\n";
 	write_fixture("parsers_side_cfg.yaml", cfg);
-	EXPECT_TRUE(runner->config(fixture_path("parsers_side_cfg.yaml")));
+	EXPECT_FALSE(runner->config(fixture_path("parsers_side_cfg.yaml")));
 }
 
 TEST(r28_wtrunner_config, notifier_section_absent_returns_false_from_init_evt_notifier)
 {
 	prepare_base_fixtures();
+	write_empty_array_sidecar("executers_empty.yaml", "executers");
 	std::unique_ptr<WtRunner> runner = make_runner();
 	runner->init(fixture_path("logcfg.yaml"));
 
 	// initEvtNotifier():632-634 `cfg==NULL` -> return false（config() 不看返回值）
 	std::string cfg = basefiles_block() + env_block("cta") + tail_block()
-		+ "executers: " + fixture_path("absent_executers.yaml") + "\n";
+		+ "executers: " + fixture_path("executers_empty.yaml") + "\n";
 	write_fixture("nonotifier_cfg.yaml", cfg);
 	EXPECT_TRUE(runner->config(fixture_path("nonotifier_cfg.yaml")));
 }
@@ -894,7 +978,19 @@ TEST(r28_wtrunner_config, parsers_side_file_exists_but_unloadable_logs_error)
 	std::string cfg = basefiles_block() + env_block("cta") + tail_block()
 		+ "parsers: " + fixture_path("parsers_unloadable.txt") + "\n";
 	write_fixture("parsers_unload_cfg.yaml", cfg);
-	EXPECT_TRUE(runner->config(fixture_path("parsers_unload_cfg.yaml")));
+	EXPECT_FALSE(runner->config(fixture_path("parsers_unload_cfg.yaml")));
+}
+
+TEST(r28_wtrunner_config, missing_parser_configuration_file_fails)
+{
+	prepare_base_fixtures();
+	std::unique_ptr<WtRunner> runner = make_runner();
+	runner->init(fixture_path("logcfg.yaml"));
+	const std::string cfg = basefiles_block() + env_block("cta") + tail_block()
+		+ "parsers: " + fixture_path("absent_parsers.yaml") + "\n";
+	write_fixture("missing_parser_cfg.yaml", cfg);
+
+	EXPECT_FALSE(runner->config(fixture_path("missing_parser_cfg.yaml")));
 }
 
 TEST(r28_wtrunner_config, traders_side_file_with_inactive_array_loads_zero)
@@ -912,6 +1008,18 @@ TEST(r28_wtrunner_config, traders_side_file_with_inactive_array_loads_zero)
 	EXPECT_TRUE(runner->config(fixture_path("traders_side_cfg.yaml")));
 }
 
+TEST(r28_wtrunner_config, missing_trader_configuration_file_fails_and_run_is_skipped)
+{
+	prepare_base_fixtures();
+	std::unique_ptr<WtRunner> runner = make_runner();
+	runner->init(fixture_path("logcfg.yaml"));
+	const std::string cfg = basefiles_block() + env_block("cta") + tail_block()
+		+ "traders: " + fixture_path("absent_traders.yaml") + "\n";
+	write_fixture("missing_trader_cfg.yaml", cfg);
+
+	EXPECT_FALSE(runner->config(fixture_path("missing_trader_cfg.yaml")));
+}
+
 TEST(r28_wtrunner_config, traders_side_file_unloadable_logs_error)
 {
 	prepare_base_fixtures();
@@ -923,7 +1031,7 @@ TEST(r28_wtrunner_config, traders_side_file_unloadable_logs_error)
 	std::string cfg = basefiles_block() + env_block("cta") + tail_block()
 		+ "traders: " + fixture_path("traders_unloadable.txt") + "\n";
 	write_fixture("traders_unload_cfg.yaml", cfg);
-	EXPECT_TRUE(runner->config(fixture_path("traders_unload_cfg.yaml")));
+	EXPECT_FALSE(runner->config(fixture_path("traders_unload_cfg.yaml")));
 }
 
 TEST(r28_wtrunner_config, executers_side_file_with_inactive_array_loads_zero)
@@ -954,12 +1062,13 @@ TEST(r28_wtrunner_config, executers_side_file_unloadable_logs_error)
 	std::string cfg = basefiles_block() + env_block("cta") + tail_block()
 		+ "executers: " + fixture_path("executers_unloadable.txt") + "\n";
 	write_fixture("executers_unload_cfg.yaml", cfg);
-	EXPECT_TRUE(runner->config(fixture_path("executers_unload_cfg.yaml")));
+	EXPECT_FALSE(runner->config(fixture_path("executers_unload_cfg.yaml")));
 }
 
 TEST(r28_wtrunner_config, notifier_inactive_entry_short_circuits_evt_notifier_init)
 {
 	prepare_base_fixtures();
+	write_empty_array_sidecar("executers_empty.yaml", "executers");
 	std::unique_ptr<WtRunner> runner = make_runner();
 	runner->init(fixture_path("logcfg.yaml"));
 
@@ -968,7 +1077,7 @@ TEST(r28_wtrunner_config, notifier_inactive_entry_short_circuits_evt_notifier_in
 	// （EventNotifier.cpp:60-62），所以不会去 dlopen WtMsgQue、也不会碰任何端口
 	std::string cfg = basefiles_block() + env_block("cta") + tail_block()
 		+ "notifier:\n    active: false\n    url: inproc://r28wt_disabled\n"
-		+ "executers: " + fixture_path("absent_executers.yaml") + "\n";
+		+ "executers: " + fixture_path("executers_empty.yaml") + "\n";
 	write_fixture("notifier_off_cfg.yaml", cfg);
 	EXPECT_TRUE(runner->config(fixture_path("notifier_off_cfg.yaml")));
 }
@@ -976,6 +1085,7 @@ TEST(r28_wtrunner_config, notifier_inactive_entry_short_circuits_evt_notifier_in
 TEST(r28_wtrunner_config, notifier_active_entry_fails_to_load_mq_module_and_returns)
 {
 	prepare_base_fixtures();
+	write_empty_array_sidecar("executers_empty.yaml", "executers");
 	std::unique_ptr<WtRunner> runner = make_runner();
 	runner->init(fixture_path("logcfg.yaml"));
 
@@ -985,7 +1095,7 @@ TEST(r28_wtrunner_config, notifier_active_entry_fails_to_load_mq_module_and_retu
 	std::string cfg = basefiles_block() + env_block("cta") + tail_block()
 		+ "notifier:\n    active: true\n    url: tcp://127.0.0.1:55661\n"
 		+ "    name: r28wt_notifier\n"
-		+ "executers: " + fixture_path("absent_executers.yaml") + "\n";
+		+ "executers: " + fixture_path("executers_empty.yaml") + "\n";
 	write_fixture("notifier_on_cfg.yaml", cfg);
 	EXPECT_TRUE(runner->config(fixture_path("notifier_on_cfg.yaml")));
 }
@@ -1020,7 +1130,7 @@ TEST(r28_wtrunner_config, traders_side_file_non_array_reports_loading_traders_fa
 	std::string cfg = basefiles_block() + env_block("cta") + tail_block()
 		+ "traders: " + fixture_path("traders_scalar.yaml") + "\n";
 	write_fixture("traders_scalar_cfg.yaml", cfg);
-	EXPECT_TRUE(runner->config(fixture_path("traders_scalar_cfg.yaml")));
+	EXPECT_FALSE(runner->config(fixture_path("traders_scalar_cfg.yaml")));
 }
 
 TEST(r28_wtrunner_config, executers_side_file_non_array_reports_loading_executers_failed)
@@ -1034,7 +1144,7 @@ TEST(r28_wtrunner_config, executers_side_file_non_array_reports_loading_executer
 	std::string cfg = basefiles_block() + env_block("cta") + tail_block()
 		+ "executers: " + fixture_path("executers_scalar.yaml") + "\n";
 	write_fixture("executers_scalar_cfg.yaml", cfg);
-	EXPECT_TRUE(runner->config(fixture_path("executers_scalar_cfg.yaml")));
+	EXPECT_FALSE(runner->config(fixture_path("executers_scalar_cfg.yaml")));
 }
 
 /* =========================================================================
@@ -1094,10 +1204,17 @@ TEST(r28_wtrunner_entry, DISABLED_bare_argv_reaches_stack_runner_and_null_engine
 	EXPECT_EQ(call_entry({"wt_runner"}), 0);
 }
 
-TEST(r28_wtrunner_entry, DISABLED_missing_config_without_help_still_runs)
+TEST(r28_wtrunner_entry, main_returns_nonzero_and_skips_run_when_hot_config_fails)
 {
-	// K1 + K4：显式 -c 一个不存在的路径，行为与裸参数同一条路
-	EXPECT_EQ(call_entry({"wt_runner", "-c", "./r28wt_absent_dtcfg.yaml"}), 0);
+	prepare_base_fixtures();
+	const std::string cfg = basefiles_block(fixture_path("absent_main_hots.json"))
+		+ env_block("cta") + tail_block();
+	write_fixture("main_bad_hot_cfg.yaml", cfg);
+
+	const ChildResult result = entry_in_child(
+		{"wt_runner", "-c", "./r28wt_main_bad_hot_cfg.yaml"}, "main_hot_failure_nonzero");
+	ASSERT_TRUE(result.exited) << "main must return after hot configuration failure; signal=" << result.signal;
+	EXPECT_EQ(result.code, 3) << "entry_in_child maps any nonzero main result to exit code 3";
 }
 
 TEST(r28_wtrunner_entry, DISABLED_unknown_long_option_segv)

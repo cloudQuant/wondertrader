@@ -81,9 +81,10 @@ private:
 	wt_hashmap<std::string, WTSContractInfo*> _maps;
 };
 
-// ParserAdapter::release() 会 delete 掉外部传入的 api, 所以计数必须存放在
-// 比 api 对象寿命更长的全局变量里, 否则就是 use-after-free。
+// ParserAdapter owns every non-null external API passed to initExt. Counters
+// live longer than each API because release() destroys the owned object.
 static int g_apiReleases = 0;
+static int g_apiDestructions = 0;
 static int g_apiConnects = 0;
 
 //////////////////////////////////////////////////////////////////////////
@@ -91,6 +92,7 @@ static int g_apiConnects = 0;
 class U3ParserApi : public IParserApi
 {
 public:
+	~U3ParserApi() override { ++g_apiDestructions; }
 	bool init(WTSVariant* cfg) override { _cfgSeen = (cfg != nullptr); return _initRet; }
 	void release() override { ++g_apiReleases; }
 	bool connect() override { ++g_apiConnects; return _connectRet; }
@@ -236,7 +238,7 @@ TEST(n03_wthelper, generated_dirs_are_created_under_configured_root)
 	EXPECT_TRUE(std::filesystem::is_directory(base, ec));
 
 	const char* output = WtHelper::getOutputDir();
-	EXPECT_STREQ("outputs/", std::strrchr(output, '/') + 1);
+	EXPECT_EQ(root + "/outputs/", output);
 	EXPECT_TRUE(std::filesystem::is_directory(output, ec));
 
 	const char* stra = WtHelper::getStraDataDir();
@@ -399,12 +401,15 @@ TEST(n03_parser_adapter, init_rejects_bad_config)
 	// NULL api
 	EXPECT_FALSE(adapter.initExt("sse", nullptr, &stub, &bdMgr));
 	EXPECT_FALSE(adapter.run());
-	// 模块缺失的 init 已经把 _bd_mgr 存下来了
-	EXPECT_EQ(&bdMgr, adapter.getBaseDataMgr());
+	// API 尚未创建时，init 的失败清理会移除借用上下文。
+	EXPECT_EQ(nullptr, adapter.getBaseDataMgr());
 }
 
 TEST(n03_parser_adapter, init_ext_subscribes_and_pushes_quote)
 {
+	g_apiReleases = 0;
+	g_apiDestructions = 0;
+	g_apiConnects = 0;
 	U3BaseDataMgr bdMgr;
 	U3ParserStub stub;
 	WTSContractInfo* cInfo = WTSContractInfo::create("600000", "浦发银行", "SSE", "SSE.600000");
@@ -415,6 +420,8 @@ TEST(n03_parser_adapter, init_ext_subscribes_and_pushes_quote)
 	api->_initRet = true;
 	ParserAdapter adapter;
 	ASSERT_TRUE(adapter.initExt("sse", api, &stub, &bdMgr));
+	EXPECT_TRUE(adapter.hasApi());
+	EXPECT_TRUE(adapter.isInitialized());
 	EXPECT_STREQ("sse", adapter.id());
 	EXPECT_EQ(&bdMgr, adapter.getBaseDataMgr());
 	// api 侧确实被注册与订阅过
@@ -458,6 +465,7 @@ TEST(n03_parser_adapter, init_ext_subscribes_and_pushes_quote)
 
 	adapter.release();
 	EXPECT_EQ(1, g_apiReleases);
+	EXPECT_EQ(1, g_apiDestructions);
 	// release 之后进入停止态, 任何推送都不再转发
 	adapter.handleParserLog(LL_INFO, "should be dropped");
 	WTSTickStruct t5 = u3Tick("SSE", "600000");
@@ -469,8 +477,76 @@ TEST(n03_parser_adapter, init_ext_subscribes_and_pushes_quote)
 	cInfo->release();
 }
 
+TEST(n03_parser_adapter, init_ext_failure_retains_api_and_borrowed_context)
+{
+	g_apiReleases = 0;
+	g_apiDestructions = 0;
+	U3BaseDataMgr bdMgr;
+	U3ParserStub stub;
+	U3ParserApi* api = new U3ParserApi();
+	api->_initRet = false;
+	ParserAdapter adapter;
+
+	EXPECT_FALSE(adapter.initExt("failed", api, &stub, &bdMgr));
+	EXPECT_TRUE(adapter.hasApi());
+	EXPECT_FALSE(adapter.isInitialized());
+	EXPECT_FALSE(adapter.run());
+	EXPECT_EQ(&bdMgr, adapter.getBaseDataMgr());
+	EXPECT_EQ(&adapter, api->_spi);
+	EXPECT_EQ(0, g_apiReleases);
+	EXPECT_EQ(0, g_apiDestructions);
+
+	// Repeating the same raw pointer must not create a second owner.
+	EXPECT_FALSE(adapter.initExt("failed-again", api, &stub, &bdMgr));
+	EXPECT_EQ(0, g_apiReleases);
+	EXPECT_EQ(0, g_apiDestructions);
+
+	// The fake provider has no asynchronous work, so the test can explicitly
+	// release it after checking that init failure itself retained ownership.
+	adapter.release();
+	EXPECT_FALSE(adapter.hasApi());
+	EXPECT_EQ(1, g_apiReleases);
+	EXPECT_EQ(1, g_apiDestructions);
+}
+
+TEST(n03_parser_adapter, init_ext_transfers_api_with_null_base_manager_and_when_busy)
+{
+	g_apiReleases = 0;
+	g_apiDestructions = 0;
+	U3ParserStub stub;
+	U3BaseDataMgr bdMgr;
+	U3ParserApi* missingBaseData = new U3ParserApi();
+	U3ParserApi* busyCandidate = new U3ParserApi();
+	ParserAdapter adapter;
+
+	EXPECT_FALSE(adapter.initExt("missing-bd", missingBaseData, &stub, nullptr));
+	EXPECT_TRUE(adapter.hasApi());
+	EXPECT_FALSE(adapter.isInitialized());
+	EXPECT_FALSE(adapter.run());
+	EXPECT_EQ(nullptr, missingBaseData->_spi);
+	EXPECT_EQ(nullptr, adapter.getBaseDataMgr());
+
+	// A distinct API passed to a busy adapter is also retained; the existing
+	// candidate and its borrowed context are not overwritten.
+	EXPECT_FALSE(adapter.initExt("busy", busyCandidate, &stub, &bdMgr));
+	EXPECT_TRUE(adapter.hasApi());
+	EXPECT_FALSE(adapter.isInitialized());
+	EXPECT_STREQ("missing-bd", adapter.id());
+	EXPECT_EQ(nullptr, busyCandidate->_spi);
+	EXPECT_EQ(0, g_apiReleases);
+	EXPECT_EQ(0, g_apiDestructions);
+
+	// Both fake providers are quiescent because neither one registered an SPI.
+	adapter.release();
+	EXPECT_FALSE(adapter.hasApi());
+	EXPECT_EQ(2, g_apiReleases);
+	EXPECT_EQ(2, g_apiDestructions);
+}
+
 TEST(n03_parser_adapter_mgr, add_get_release)
 {
+	g_apiReleases = 0;
+	g_apiDestructions = 0;
 	ParserAdapterMgr mgr;
 	ParserAdapterPtr empty;
 	EXPECT_FALSE(mgr.addAdapter("a", empty));
@@ -479,7 +555,7 @@ TEST(n03_parser_adapter_mgr, add_get_release)
 	U3BaseDataMgr bdMgr;
 	U3ParserStub stub;
 	U3ParserApi* api = new U3ParserApi();
-	api->_initRet = false;	// api 初始化失败, 走错误日志分支, 不碰合约列表
+	api->_initRet = true;	// 初始化成功，覆盖管理器注册/run/release 流程
 	ASSERT_TRUE(first->initExt("lost", api, &stub, &bdMgr));
 
 	ASSERT_TRUE(mgr.addAdapter("lost", first));

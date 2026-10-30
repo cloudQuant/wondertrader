@@ -1,0 +1,24 @@
+{
+  "scope": "本机 UFT TraderAdapter lifecycle focused GTest，使用 fake dynamic plugin/API fixtures",
+  "binary": "build-cov/build_x64/Debug/bin/TestUnits/wt-uft-trader-focused",
+  "binary_sha256": "37d200cfb4339e93f1bd2da3322894c4fd5fbde0978d9bf1b786ca25e5e9337f",
+  "run_log": "run-v3.log",
+  "capture_copy": "run-v3-capture.log",
+  "command": [
+    "./build-cov/build_x64/Debug/bin/TestUnits/wt-uft-trader-focused",
+    "--gtest_filter=UftTraderAdapterLifecycle.*"
+  ],
+  "result": "PASS",
+  "gtest": {"tests": 23, "passed": 23, "failed": 0, "disabled": 0},
+  "build_reference": "The exact build/link command paired with this focused binary was not captured in the run output. build-v2.log, combined-objects.log, and link-command.txt are retained as historical full-target/object records and are not asserted to reproduce this binary hash.",
+  "covers": [
+    "configuration reference rollback and retry on plugin/API failure",
+    "successful cleanup, idempotent release, and fail-stop on cleanup exceptions",
+    "callback admission/drain and release reentrancy cases"
+  ],
+  "acceptance_boundary": [
+    "BUG-I02-NEW-007 is TEST_PASS for its recorded local focused scope; this does not establish complete UFT lifecycle acceptance.",
+    "Fake plugin tests cannot establish that a real provider stops late ITraderSpi callbacks before/after ITraderApi::release returns.",
+    "Full legacy test suite, real API/provider, full runner/strategy chain, other platforms and production/CI are not verified."
+  ]
+}

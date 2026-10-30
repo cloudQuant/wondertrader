@@ -240,8 +240,7 @@ TEST_F(R100ReaderCrossDayTest, R100ReaderIntegratedHotLoaderAndAdjustedCatch)
 	EXPECT_EQ(hfq->size(), 2u);
 	hfq->release();
 
-	// 复权文件只有块头：cacheAdjustedStkBars 取 at(barcnt-1) 抛 out_of_range，
-	// 被 cacheHisBarsFromFile 的 catch(std::exception&) 收口，最终是空切片。
+	// 复权文件只有块头：cacheAdjustedStkBars 记录空复权数据错误，最终返回空切片。
 	ASSERT_TRUE(write_bytes("his/day/SSE/600000-.dsb",
 		make_block(BT_HIS_Day, BLOCK_VERSION_RAW_V2, string())));
 	WTSKlineSlice* empty = _reader.readKlineSlice("SSE.STK.600000-", KP_DAY, 2, 202401101500ull);

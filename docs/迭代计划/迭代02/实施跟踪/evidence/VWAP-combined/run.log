@@ -1,0 +1,267 @@
+[0/2] Re-checking globbed directories...
+ninja: no work to do.
+ninja: Entering directory `build-cov'
+[0/2] Re-checking globbed directories...
+[1/2] Building CXX object TestUnits/coverage/CMakeFiles/CoverageTests_exefact.dir/r7_exefact/r7_stock_vwap_unit_test.cpp.o
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = r7_vwap_profile.*:r7_vwap.*:r7_stkvw.*
+[==========] Running 123 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 17 tests from r7_vwap_profile
+[ RUN      ] r7_vwap_profile.dynamic_v2_profiles_match_distinct_sessions
+[       OK ] r7_vwap_profile.dynamic_v2_profiles_match_distinct_sessions (0 ms)
+[ RUN      ] r7_vwap_profile.v2_requires_exact_session_id_offset_and_raw_sections
+[       OK ] r7_vwap_profile.v2_requires_exact_session_id_offset_and_raw_sections (0 ms)
+[ RUN      ] r7_vwap_profile.v2_rejects_duplicate_matching_profile_and_wrong_value_count
+[       OK ] r7_vwap_profile.v2_rejects_duplicate_matching_profile_and_wrong_value_count (0 ms)
+[ RUN      ] r7_vwap_profile.v2_rejects_malformed_json_types_and_non_finite_values
+[       OK ] r7_vwap_profile.v2_rejects_malformed_json_types_and_non_finite_values (0 ms)
+[ RUN      ] r7_vwap_profile.legacy_csv_is_limited_to_exact_canonical_241_point_day_session
+[       OK ] r7_vwap_profile.legacy_csv_is_limited_to_exact_canonical_241_point_day_session (0 ms)
+[ RUN      ] r7_vwap_profile.empty_session_is_rejected_without_changing_output
+[       OK ] r7_vwap_profile.empty_session_is_rejected_without_changing_output (0 ms)
+[ RUN      ] r7_vwap_profile.invalid_or_unordered_sections_are_rejected_before_minute_counting
+[       OK ] r7_vwap_profile.invalid_or_unordered_sections_are_rejected_before_minute_counting (0 ms)
+[ RUN      ] r7_vwap_profile.legal_minute_borrow_sections_keep_api_minute_counts
+[       OK ] r7_vwap_profile.legal_minute_borrow_sections_keep_api_minute_counts (0 ms)
+[ RUN      ] r7_vwap_profile.v2_rejects_invalid_unselected_sections_before_counting_values
+[       OK ] r7_vwap_profile.v2_rejects_invalid_unselected_sections_before_counting_values (0 ms)
+[ RUN      ] r7_vwap_profile.offset_makes_cross_midnight_sections_ordered_and_usable
+[       OK ] r7_vwap_profile.offset_makes_cross_midnight_sections_ordered_and_usable (0 ms)
+[ RUN      ] r7_vwap_profile.day_session_boundaries_and_short_numeric_open_time_map_correctly
+[       OK ] r7_vwap_profile.day_session_boundaries_and_short_numeric_open_time_map_correctly (0 ms)
+[ RUN      ] r7_vwap_profile.adjacent_close_and_open_timestamp_is_accepted_as_new_section_start
+[       OK ] r7_vwap_profile.adjacent_close_and_open_timestamp_is_accepted_as_new_section_start (0 ms)
+[ RUN      ] r7_vwap_profile.action_time_validation_auction_and_bucket_bounds_are_fail_closed
+[       OK ] r7_vwap_profile.action_time_validation_auction_and_bucket_bounds_are_fail_closed (0 ms)
+[ RUN      ] r7_vwap_profile.offset_cross_midnight_session_maps_using_session_api
+[       OK ] r7_vwap_profile.offset_cross_midnight_session_maps_using_session_api (0 ms)
+[ RUN      ] r7_vwap_profile.zero_offset_2400_alias_is_not_guessed_from_time_only
+[       OK ] r7_vwap_profile.zero_offset_2400_alias_is_not_guessed_from_time_only (0 ms)
+[ RUN      ] r7_vwap_profile.offset_2400_close_and_2400_start_follow_api_endpoint_mapping
+[       OK ] r7_vwap_profile.offset_2400_close_and_2400_start_follow_api_endpoint_mapping (0 ms)
+[ RUN      ] r7_vwap_profile.alternate_day_session_maps_lunch_and_close_from_its_own_minutes
+[       OK ] r7_vwap_profile.alternate_day_session_maps_lunch_and_close_from_its_own_minutes (0 ms)
+[----------] 17 tests from r7_vwap_profile (2 ms total)
+
+[----------] 51 tests from r7_vwap
+[ RUN      ] r7_vwap.names_and_foreign_code_target_ignored
+[       OK ] r7_vwap.names_and_foreign_code_target_ignored (1 ms)
+[ RUN      ] r7_vwap.init_missing_distribution_file_returns_early
+[       OK ] r7_vwap.init_missing_distribution_file_returns_early (0 ms)
+[ RUN      ] r7_vwap.init_loads_distribution_and_first_bucket_buys
+[       OK ] r7_vwap.init_loads_distribution_and_first_bucket_buys (0 ms)
+[ RUN      ] r7_vwap.bucket_zero_falls_back_to_min_open_lots
+[       OK ] r7_vwap.bucket_zero_falls_back_to_min_open_lots (0 ms)
+[ RUN      ] r7_vwap.calc_price_mode_1_buy_uses_bid_price
+[       OK ] r7_vwap.calc_price_mode_1_buy_uses_bid_price (0 ms)
+[ RUN      ] r7_vwap.calc_price_mode_2_sell_uses_bid_and_sign_trick
+[       OK ] r7_vwap.calc_price_mode_2_sell_uses_bid_and_sign_trick (0 ms)
+[ RUN      ] r7_vwap.buy_price_capped_to_upper_limit
+[       OK ] r7_vwap.buy_price_capped_to_upper_limit (0 ms)
+[ RUN      ] r7_vwap.sell_price_floored_to_lower_limit
+[       OK ] r7_vwap.sell_price_floored_to_lower_limit (0 ms)
+[ RUN      ] r7_vwap.last_bucket_uses_showhand_price
+[       OK ] r7_vwap.last_bucket_uses_showhand_price (0 ms)
+[ RUN      ] r7_vwap.rejected_order_retry_waits_for_fresh_tick
+[       OK ] r7_vwap.rejected_order_retry_waits_for_fresh_tick (0 ms)
+[ RUN      ] r7_vwap.on_entrust_ignores_unknown_order
+[       OK ] r7_vwap.on_entrust_ignores_unknown_order (0 ms)
+[ RUN      ] r7_vwap.clear_target_dbl_max_exits_without_order
+[       OK ] r7_vwap.clear_target_dbl_max_exits_without_order (0 ms)
+[ RUN      ] r7_vwap.channel_ready_clears_unconfirmed_local_orders
+[       OK ] r7_vwap.channel_ready_clears_unconfirmed_local_orders (0 ms)
+[ RUN      ] r7_vwap.channel_ready_cancels_unmanaged_and_blocks_calc
+[       OK ] r7_vwap.channel_ready_cancels_unmanaged_and_blocks_calc (0 ms)
+[ RUN      ] r7_vwap.cancel_reports_decrement_cancel_cnt
+[       OK ] r7_vwap.cancel_reports_decrement_cancel_cnt (0 ms)
+[ RUN      ] r7_vwap.cancel_report_defers_refire_until_next_fresh_in_session_tick
+[       OK ] r7_vwap.cancel_report_defers_refire_until_next_fresh_in_session_tick (0 ms)
+[ RUN      ] r7_vwap.canceled_retry_recalculates_from_current_total_position_and_sellable_quantity
+[       OK ] r7_vwap.canceled_retry_recalculates_from_current_total_position_and_sellable_quantity (0 ms)
+[ RUN      ] r7_vwap.canceled_retry_waits_for_remaining_undone_quantity
+[       OK ] r7_vwap.canceled_retry_waits_for_remaining_undone_quantity (0 ms)
+[ RUN      ] r7_vwap.out_of_session_quote_advances_tick_high_water_and_blocks_delayed_session_tick
+[       OK ] r7_vwap.out_of_session_quote_advances_tick_high_water_and_blocks_delayed_session_tick (0 ms)
+[ RUN      ] r7_vwap.cancellation_callback_after_close_does_not_reuse_last_valid_tick
+[       OK ] r7_vwap.cancellation_callback_after_close_does_not_reuse_last_valid_tick (0 ms)
+[ RUN      ] r7_vwap.rejection_callback_after_close_does_not_recalculate_from_cached_tick
+[       OK ] r7_vwap.rejection_callback_after_close_does_not_recalculate_from_cached_tick (0 ms)
+[ RUN      ] r7_vwap.fire_at_once_price_mode_1_takes_ask_price
+[       OK ] r7_vwap.fire_at_once_price_mode_1_takes_ask_price (0 ms)
+[ RUN      ] r7_vwap.fire_at_once_upper_limit_cap
+[       OK ] r7_vwap.fire_at_once_upper_limit_cap (0 ms)
+[ RUN      ] r7_vwap.on_order_unknown_id_and_filled_report
+[       OK ] r7_vwap.on_order_unknown_id_and_filled_report (0 ms)
+[ RUN      ] r7_vwap.on_tick_rejects_null_and_foreign_code
+[       OK ] r7_vwap.on_tick_rejects_null_and_foreign_code (0 ms)
+[ RUN      ] r7_vwap.first_tick_skips_calc_when_target_already_covered
+[       OK ] r7_vwap.first_tick_skips_calc_when_target_already_covered (0 ms)
+[ RUN      ] r7_vwap.opposite_live_order_is_canceled_before_firing
+[       OK ] r7_vwap.opposite_live_order_is_canceled_before_firing (0 ms)
+[ RUN      ] r7_vwap.same_direction_live_order_blocks_this_round
+[       OK ] r7_vwap.same_direction_live_order_blocks_this_round (0 ms)
+[ RUN      ] r7_vwap.calc_without_tick_exits
+[       OK ] r7_vwap.calc_without_tick_exits (0 ms)
+[ RUN      ] r7_vwap.timestamp_after_close_is_rejected
+[       OK ] r7_vwap.timestamp_after_close_is_rejected (0 ms)
+[ RUN      ] r7_vwap.late_afternoon_uses_session_bucket_inside_241_value_distribution
+[       OK ] r7_vwap.late_afternoon_uses_session_bucket_inside_241_value_distribution (0 ms)
+[ RUN      ] r7_vwap.lunch_break_does_not_advance_profile_and_next_session_segment_runs
+[       OK ] r7_vwap.lunch_break_does_not_advance_profile_and_next_session_segment_runs (0 ms)
+[ RUN      ] r7_vwap.v2_profile_maps_a_noncanonical_session_from_its_sections
+[       OK ] r7_vwap.v2_profile_maps_a_noncanonical_session_from_its_sections (0 ms)
+[ RUN      ] r7_vwap.v2_profile_and_execution_window_support_offset_overnight_session
+[       OK ] r7_vwap.v2_profile_and_execution_window_support_offset_overnight_session (0 ms)
+[ RUN      ] r7_vwap.overnight_tick_with_action_date_equal_to_next_trading_date_fails_closed
+[       OK ] r7_vwap.overnight_tick_with_action_date_equal_to_next_trading_date_fails_closed (0 ms)
+[ RUN      ] r7_vwap.profile_for_a_different_session_is_rejected
+[       OK ] r7_vwap.profile_for_a_different_session_is_rejected (0 ms)
+[ RUN      ] r7_vwap.short_action_time_is_rejected_without_throw_or_order
+[       OK ] r7_vwap.short_action_time_is_rejected_without_throw_or_order (0 ms)
+[ RUN      ] r7_vwap.invalid_hour_and_minute_are_rejected_without_order
+[       OK ] r7_vwap.invalid_hour_and_minute_are_rejected_without_order (0 ms)
+[ RUN      ] r7_vwap.malformed_tick_does_not_advance_event_time_high_water
+[       OK ] r7_vwap.malformed_tick_does_not_advance_event_time_high_water (0 ms)
+[ RUN      ] r7_vwap.init_logs_total_seconds_from_begin_end_window
+[       OK ] r7_vwap.init_logs_total_seconds_from_begin_end_window (0 ms)
+[ RUN      ] r7_vwap.init_calculates_interval_from_duration_tail_and_planned_count
+[       OK ] r7_vwap.init_calculates_interval_from_duration_tail_and_planned_count (0 ms)
+[ RUN      ] r7_vwap.init_uses_trading_duration_across_lunch_break
+[       OK ] r7_vwap.init_uses_trading_duration_across_lunch_break (0 ms)
+[ RUN      ] r7_vwap.configured_interval_throttles_consecutive_ticks
+[       OK ] r7_vwap.configured_interval_throttles_consecutive_ticks (0 ms)
+[ RUN      ] r7_vwap.caller_release_tick_replacement_and_unit_destruction_preserve_ownership
+[       OK ] r7_vwap.caller_release_tick_replacement_and_unit_destruction_preserve_ownership (0 ms)
+[ RUN      ] r7_vwap.init_zero_total_times_rejected_and_inert
+[       OK ] r7_vwap.init_zero_total_times_rejected_and_inert (0 ms)
+[ RUN      ] r7_vwap.init_without_session_fails_closed
+[       OK ] r7_vwap.init_without_session_fails_closed (0 ms)
+[ RUN      ] r7_vwap.init_tail_beyond_duration_rejected_and_inert
+[       OK ] r7_vwap.init_tail_beyond_duration_rejected_and_inert (0 ms)
+[ RUN      ] r7_vwap.init_positive_total_times_control_returns
+[       OK ] r7_vwap.init_positive_total_times_control_returns (1 ms)
+[ RUN      ] r7_vwap.init_rejects_empty_distribution_and_does_not_fire
+[       OK ] r7_vwap.init_rejects_empty_distribution_and_does_not_fire (0 ms)
+[ RUN      ] r7_vwap.init_rejects_short_distribution_and_does_not_fire
+[       OK ] r7_vwap.init_rejects_short_distribution_and_does_not_fire (0 ms)
+[ RUN      ] r7_vwap.init_rejects_malformed_distribution_even_after_complete_prefix
+[       OK ] r7_vwap.init_rejects_malformed_distribution_even_after_complete_prefix (0 ms)
+[----------] 51 tests from r7_vwap (18 ms total)
+
+[----------] 55 tests from r7_stkvw
+[ RUN      ] r7_stkvw.names_and_fact_binding
+[       OK ] r7_stkvw.names_and_fact_binding (0 ms)
+[ RUN      ] r7_stkvw.fake_position_matches_execute_context_contract
+[       OK ] r7_stkvw.fake_position_matches_execute_context_contract (0 ms)
+[ RUN      ] r7_stkvw.net_zero_buy_sell_snapshot_cancels_both_and_waits_for_fresh_tick
+[       OK ] r7_stkvw.net_zero_buy_sell_snapshot_cancels_both_and_waits_for_fresh_tick (0 ms)
+[ RUN      ] r7_stkvw.missing_gross_order_snapshot_fails_closed_but_recovers_on_later_snapshot
+[       OK ] r7_stkvw.missing_gross_order_snapshot_fails_closed_but_recovers_on_later_snapshot (0 ms)
+[ RUN      ] r7_stkvw.minopenlots_optional_defaults_to_minimum_hand
+[       OK ] r7_stkvw.minopenlots_optional_defaults_to_minimum_hand (0 ms)
+[ RUN      ] r7_stkvw.zero_minopenlots_disables_orders
+[       OK ] r7_stkvw.zero_minopenlots_disables_orders (0 ms)
+[ RUN      ] r7_stkvw.normal_stock_increase_emits_positive_buy
+[       OK ] r7_stkvw.normal_stock_increase_emits_positive_buy (0 ms)
+[ RUN      ] r7_stkvw.vwap_bucket_distribution_changes_planned_buy_qty
+[       OK ] r7_stkvw.vwap_bucket_distribution_changes_planned_buy_qty (0 ms)
+[ RUN      ] r7_stkvw.kcb_stock_increase_emits_positive_buy
+[       OK ] r7_stkvw.kcb_stock_increase_emits_positive_buy (0 ms)
+[ RUN      ] r7_stkvw.convertible_bond_increase_emits_positive_buy
+[       OK ] r7_stkvw.convertible_bond_increase_emits_positive_buy (0 ms)
+[ RUN      ] r7_stkvw.convertible_bond_final_sell_keeps_existing_open_lot_cap
+[       OK ] r7_stkvw.convertible_bond_final_sell_keeps_existing_open_lot_cap (0 ms)
+[ RUN      ] r7_stkvw.convertible_bond_clear_can_sell_available_tail_below_ten
+[       OK ] r7_stkvw.convertible_bond_clear_can_sell_available_tail_below_ten (0 ms)
+[ RUN      ] r7_stkvw.flat_position_buy_target_requires_a_buy
+[       OK ] r7_stkvw.flat_position_buy_target_requires_a_buy (0 ms)
+[ RUN      ] r7_stkvw.stock_odd_lot_clear_remains_pending_without_assuming_odd_lot_legality
+[       OK ] r7_stkvw.stock_odd_lot_clear_remains_pending_without_assuming_odd_lot_legality (0 ms)
+[ RUN      ] r7_stkvw.stock_buy_sublot_remainder_stays_pending_until_executable
+[       OK ] r7_stkvw.stock_buy_sublot_remainder_stays_pending_until_executable (0 ms)
+[ RUN      ] r7_stkvw.stock_sell_sublot_remainder_stays_pending
+[       OK ] r7_stkvw.stock_sell_sublot_remainder_stays_pending (0 ms)
+[ RUN      ] r7_stkvw.insufficient_sellable_position_adjusts_target_up
+[       OK ] r7_stkvw.insufficient_sellable_position_adjusts_target_up (0 ms)
+[ RUN      ] r7_stkvw.t1_small_sellable_floor_does_not_finish_original_target
+[       OK ] r7_stkvw.t1_small_sellable_floor_does_not_finish_original_target (0 ms)
+[ RUN      ] r7_stkvw.t1_zero_sellable_same_tick_no_order_next_tick_advances
+[       OK ] r7_stkvw.t1_zero_sellable_same_tick_no_order_next_tick_advances (0 ms)
+[ RUN      ] r7_stkvw.vwap_maps_afternoon_using_session_trading_minutes
+[       OK ] r7_stkvw.vwap_maps_afternoon_using_session_trading_minutes (0 ms)
+[ RUN      ] r7_stkvw.invalid_action_time_does_not_poison_valid_tick
+[       OK ] r7_stkvw.invalid_action_time_does_not_poison_valid_tick (0 ms)
+[ RUN      ] r7_stkvw.v2_profile_selects_night_session_and_maps_tick
+[       OK ] r7_stkvw.v2_profile_selects_night_session_and_maps_tick (0 ms)
+[ RUN      ] r7_stkvw.natural_action_date_increment_keeps_midnight_retry_fresh
+[       OK ] r7_stkvw.natural_action_date_increment_keeps_midnight_retry_fresh (0 ms)
+[ RUN      ] r7_stkvw.unchanged_action_date_across_midnight_is_rejected_as_unsupported
+[       OK ] r7_stkvw.unchanged_action_date_across_midnight_is_rejected_as_unsupported (0 ms)
+[ RUN      ] r7_stkvw.trading_day_action_date_combo_from_unsupported_provider_is_rejected
+[       OK ] r7_stkvw.trading_day_action_date_combo_from_unsupported_provider_is_rejected (0 ms)
+[ RUN      ] r7_stkvw.lunch_and_post_close_ticks_do_not_submit_orders
+[       OK ] r7_stkvw.lunch_and_post_close_ticks_do_not_submit_orders (0 ms)
+[ RUN      ] r7_stkvw.execution_window_uses_configured_session_bounds
+[       OK ] r7_stkvw.execution_window_uses_configured_session_bounds (0 ms)
+[ RUN      ] r7_stkvw.mismatched_v2_profile_session_fails_initialization
+[       OK ] r7_stkvw.mismatched_v2_profile_session_fails_initialization (0 ms)
+[ RUN      ] r7_stkvw.initialization_rejects_zero_times_missing_resources_and_bad_code
+[       OK ] r7_stkvw.initialization_rejects_zero_times_missing_resources_and_bad_code (0 ms)
+[ RUN      ] r7_stkvw.price_mode_and_offset_key
+[       OK ] r7_stkvw.price_mode_and_offset_key (0 ms)
+[ RUN      ] r7_stkvw.buy_price_capped_to_upper_limit
+[       OK ] r7_stkvw.buy_price_capped_to_upper_limit (0 ms)
+[ RUN      ] r7_stkvw.sell_price_floored_to_lower_limit
+[       OK ] r7_stkvw.sell_price_floored_to_lower_limit (0 ms)
+[ RUN      ] r7_stkvw.canceled_sell_refires_with_safe_sell_quantity
+[       OK ] r7_stkvw.canceled_sell_refires_with_safe_sell_quantity (0 ms)
+[ RUN      ] r7_stkvw.canceled_order_does_not_retry_without_a_fresh_session_tick
+[       OK ] r7_stkvw.canceled_order_does_not_retry_without_a_fresh_session_tick (0 ms)
+[ RUN      ] r7_stkvw.empty_retry_order_ids_obey_configured_fire_span
+[       OK ] r7_stkvw.empty_retry_order_ids_obey_configured_fire_span (0 ms)
+[ RUN      ] r7_stkvw.zero_fire_span_empty_retry_uses_one_second_failsafe_only_for_retry
+[       OK ] r7_stkvw.zero_fire_span_empty_retry_uses_one_second_failsafe_only_for_retry (0 ms)
+[ RUN      ] r7_stkvw.canceled_retry_keeps_sublot_remainder_pending_without_invalid_order
+[       OK ] r7_stkvw.canceled_retry_keeps_sublot_remainder_pending_without_invalid_order (0 ms)
+[ RUN      ] r7_stkvw.canceled_retry_recomputes_direction_from_current_total_position
+[       OK ] r7_stkvw.canceled_retry_recomputes_direction_from_current_total_position (0 ms)
+[ RUN      ] r7_stkvw.changed_target_cancel_recalculates_latest_target_on_fresh_tick
+[       OK ] r7_stkvw.changed_target_cancel_recalculates_latest_target_on_fresh_tick (0 ms)
+[ RUN      ] r7_stkvw.shrinking_buy_target_cancels_oversized_live_order_then_keeps_sublot_pending
+[       OK ] r7_stkvw.shrinking_buy_target_cancels_oversized_live_order_then_keeps_sublot_pending (0 ms)
+[ RUN      ] r7_stkvw.t1_sell_order_oversize_uses_total_target_gap_not_executable_increment
+[       OK ] r7_stkvw.t1_sell_order_oversize_uses_total_target_gap_not_executable_increment (0 ms)
+[ RUN      ] r7_stkvw.clear_at_zero_position_cancels_pending_buy_and_does_not_retry_old_target
+[       OK ] r7_stkvw.clear_at_zero_position_cancels_pending_buy_and_does_not_retry_old_target (0 ms)
+[ RUN      ] r7_stkvw.last_tick_reference_survives_calc_replacement_and_destruction
+[       OK ] r7_stkvw.last_tick_reference_survives_calc_replacement_and_destruction (0 ms)
+[ RUN      ] r7_stkvw.zero_last_price_falls_back_to_preclose
+[       OK ] r7_stkvw.zero_last_price_falls_back_to_preclose (0 ms)
+[ RUN      ] r7_stkvw.channel_ready_branches
+[       OK ] r7_stkvw.channel_ready_branches (0 ms)
+[ RUN      ] r7_stkvw.on_order_reports_ignore_unknown_ids_and_track_fill
+[       OK ] r7_stkvw.on_order_reports_ignore_unknown_ids_and_track_fill (0 ms)
+[ RUN      ] r7_stkvw.on_trade_logs_and_on_entrust_recalculates
+[       OK ] r7_stkvw.on_trade_logs_and_on_entrust_recalculates (0 ms)
+[ RUN      ] r7_stkvw.rejected_order_defers_reverse_order_cancel_until_fresh_tick
+[       OK ] r7_stkvw.rejected_order_defers_reverse_order_cancel_until_fresh_tick (0 ms)
+[ RUN      ] r7_stkvw.set_position_guards
+[       OK ] r7_stkvw.set_position_guards (0 ms)
+[ RUN      ] r7_stkvw.clear_all_position_filters_code
+[       OK ] r7_stkvw.clear_all_position_filters_code (0 ms)
+[ RUN      ] r7_stkvw.channel_ready_before_first_tick_returns_without_orders
+[       OK ] r7_stkvw.channel_ready_before_first_tick_returns_without_orders (1 ms)
+[ RUN      ] r7_stkvw.channel_ready_after_first_tick_submits_safe_order
+[       OK ] r7_stkvw.channel_ready_after_first_tick_submits_safe_order (1 ms)
+[ RUN      ] r7_stkvw.two_segment_stock_code_fails_initialization
+[       OK ] r7_stkvw.two_segment_stock_code_fails_initialization (0 ms)
+[ RUN      ] r7_stkvw.init_zero_total_times_rejected_and_inert
+[       OK ] r7_stkvw.init_zero_total_times_rejected_and_inert (0 ms)
+[ RUN      ] r7_stkvw.init_positive_total_times_control_returns
+[       OK ] r7_stkvw.init_positive_total_times_control_returns (2 ms)
+[----------] 55 tests from r7_stkvw (21 ms total)
+
+[----------] Global test environment tear-down
+[==========] 123 tests from 3 test suites ran. (42 ms total)
+[  PASSED  ] 123 tests.

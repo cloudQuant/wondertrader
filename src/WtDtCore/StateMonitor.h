@@ -222,6 +222,11 @@ public:
 	}
 
 private:
+	friend struct R154StateMonitorTestAccess;
+
+	// curMin is HHMM; run() supplies wall-clock values and tests supply fixed values.
+	void advanceOnce(uint32_t curDate, uint32_t curMin);
+
 	StateMap		_map;        ///< 交易状态信息映射表，以交易时间段ID为键存储所有交易时间段的状态信息
 	WTSBaseDataMgr*	_bd_mgr;    ///< 基础数据管理器指针，提供交易时间段信息和交易日历
 	DataManager*	_dt_mgr;    ///< 数据管理器指针，用于处理盘后数据转换

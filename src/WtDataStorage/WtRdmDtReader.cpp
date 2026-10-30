@@ -14,8 +14,40 @@
 #include "../WTSUtils/WTSCmpHelper.hpp"
 #include "../WTSUtils/WTSCfgLoader.h"
 
+#include <exception>
+#include <memory>
 #include <rapidjson/document.h>
 namespace rj = rapidjson;
+
+// RT HFT blocks keep the last slot open while the writer may still be updating it.
+// The reader therefore only exposes the first (_size - 1) records. Resolve the
+// inclusive end of a requested range without dereferencing that open slot and
+// without decrementing begin() when etime precedes the first visible record.
+template <typename T>
+static bool hft_time_less(const T& lhs, const T& rhs)
+{
+	if (lhs.action_date != rhs.action_date)
+		return lhs.action_date < rhs.action_date;
+	return lhs.action_time < rhs.action_time;
+}
+
+template <typename T>
+static bool find_rt_hft_end_index(T* items, std::size_t count, const T& end, std::size_t& endIndex)
+{
+	if (items == NULL || count == 0)
+		return false;
+
+	// upper_bound keeps every duplicate whose timestamp equals the inclusive end.
+	T* it = std::upper_bound(items, items + count, end, [](const T& value, const T& item) {
+		return hft_time_less(value, item);
+	});
+	if (it == items)
+		return false;
+	--it;
+
+	endIndex = (std::size_t)(it - items);
+	return true;
+}
 
 //By Wesley @ 2022.01.05
 #include "../Share/fmtlib.h"
@@ -50,6 +82,48 @@ extern "C"
  *	处理块数据
  */
 extern bool proc_block_data(std::string& content, bool isBar, bool bKeepHead = true);
+
+static bool proc_his_kline_block(std::string& content, bool allowEmpty = false)
+{
+	if (content.size() < sizeof(HisKlineBlock))
+		return false;
+
+	const BlockHeader* header = (const BlockHeader*)content.data();
+	if (header->is_compressed() && content.size() < sizeof(HisKlineBlockV2))
+		return false;
+
+	try
+	{
+		if (header->is_old_version())
+		{
+			std::string oldPayload;
+			if (header->is_compressed())
+			{
+				const HisKlineBlockV2* compressed = (const HisKlineBlockV2*)content.data();
+				if (compressed->_size != content.size() - sizeof(HisKlineBlockV2))
+					return false;
+				oldPayload = WTSCmpHelper::uncompress_data(compressed->_data, (std::size_t)compressed->_size);
+			}
+			else
+			{
+				oldPayload.assign(content.data() + sizeof(HisKlineBlock), content.size() - sizeof(HisKlineBlock));
+			}
+
+			if (oldPayload.size() % sizeof(WTSBarStructOld) != 0)
+				return false;
+		}
+
+		if (!proc_block_data(content, true, false))
+			return false;
+	}
+	catch (const std::exception&)
+	{
+		return false;
+	}
+
+	return (allowEmpty && content.empty()) ||
+		(!content.empty() && content.size() % sizeof(WTSBarStruct) == 0);
+}
 
 WtRdmDtReader::WtRdmDtReader()
 	: _base_data_mgr(NULL)
@@ -301,11 +375,16 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByDate(const char* stdCode, uint32_t u
 				if (tBlkPair._buffer.size() < sizeof(HisTickBlock))
 				{
 					pipe_rdmreader_log(_sink, LL_ERROR, "Sizechecking of tick data file {} failed", filename.c_str());
-					tBlkPair._buffer.clear();
-					break;
+					_his_tick_map.erase(key);
+					return NULL;
 				}
 
-				proc_block_data(tBlkPair._buffer, false, true);
+				if (!proc_block_data(tBlkPair._buffer, false, true))
+				{
+					pipe_rdmreader_log(_sink, LL_ERROR, "Processing his tick data file {} failed", filename.c_str());
+					_his_tick_map.erase(key);
+					return NULL;
+				}
 				tBlkPair._block = (HisTickBlock*)tBlkPair._buffer.c_str();
 				bHasHisTick = true;
 				break;
@@ -362,6 +441,9 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByDate(const char* stdCode, uint32_t u
 
 WTSTickSlice* WtRdmDtReader::readTickSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime /* = 0 */)
 {
+	if (etime != 0 && stime > etime)
+		return NULL;
+
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
 	const char* stdPID = commInfo->getFullPid();
@@ -451,11 +533,18 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByRange(const char* stdCode, uint64_t 
 				if (tBlkPair._buffer.size() < sizeof(HisTickBlock))
 				{
 					pipe_rdmreader_log(_sink, LL_ERROR, "Sizechecking of tick data file {} failed", filename.c_str());
-					tBlkPair._buffer.clear();
-					break;
+					_his_tick_map.erase(key);
+					slice->release();
+					return NULL;
 				}
 
-				proc_block_data(tBlkPair._buffer, false, true);
+				if (!proc_block_data(tBlkPair._buffer, false, true))
+				{
+					pipe_rdmreader_log(_sink, LL_ERROR, "Processing his tick data file {} failed", filename.c_str());
+					_his_tick_map.erase(key);
+					slice->release();
+					return NULL;
+				}
 				tBlkPair._block = (HisTickBlock*)tBlkPair._buffer.c_str();
 				bHasHisTick = true;
 				break;
@@ -487,44 +576,33 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByRange(const char* stdCode, uint64_t 
 			if (tcnt <= 0)
 				break;
 
-			WTSTickStruct* pTick = std::lower_bound(tBlock->_ticks, tBlock->_ticks + (tcnt - 1), eTick, [](const WTSTickStruct& a, const WTSTickStruct& b) {
-				if (a.action_date != b.action_date)
-					return a.action_date < b.action_date;
-				else
-					return a.action_time < b.action_time;
-			});
-
-			std::size_t eIdx = pTick - tBlock->_ticks;
-			if (pTick->action_date > eTick.action_date || pTick->action_time >= eTick.action_time)
-			{
-				if (eIdx == 0)
-					break;
-
-				pTick--;
-				eIdx--;
-			}
+			// The range end is inclusive. upper_bound keeps all ticks sharing the
+			// requested timestamp and compares action_date before action_time.
+			WTSTickStruct* pEnd = std::upper_bound(tBlock->_ticks, tBlock->_ticks + tcnt, eTick,
+				[](const WTSTickStruct& value, const WTSTickStruct& item) {
+					return hft_time_less(value, item);
+				});
+			std::size_t eCount = pEnd - tBlock->_ticks;
+			if (eCount == 0)
+				break;
 
 			if (beginTDate != nowTDate)
 			{
 				//如果开始的交易日和当前的交易日不一致，则返回全部的tick数据
 				//WTSTickSlice* slice = WTSTickSlice::create(stdCode, tBlock->_ticks, eIdx + 1);
 				//ayTicks->append(slice, false);
-				slice->appendBlock(tBlock->_ticks, eIdx + 1);
+				slice->appendBlock(tBlock->_ticks, eCount);
 			}
 			else
 			{
 				//如果交易日相同，则查找起始的位置
-				pTick = std::lower_bound(tBlock->_ticks, tBlock->_ticks + eIdx, sTick, [](const WTSTickStruct& a, const WTSTickStruct& b) {
-					if (a.action_date != b.action_date)
-						return a.action_date < b.action_date;
-					else
-						return a.action_time < b.action_time;
-				});
+				WTSTickStruct* pTick = std::lower_bound(tBlock->_ticks, pEnd, sTick, hft_time_less<WTSTickStruct>);
 
 				std::size_t sIdx = pTick - tBlock->_ticks;
 				//WTSTickSlice* slice = WTSTickSlice::create(stdCode, tBlock->_ticks + sIdx, eIdx - sIdx + 1);
 				//ayTicks->append(slice, false);
-				slice->appendBlock(tBlock->_ticks + sIdx, eIdx - sIdx + 1);
+				if (sIdx < eCount)
+					slice->appendBlock(tBlock->_ticks + sIdx, eCount - sIdx);
 			}
 
 			break;
@@ -561,46 +639,31 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByRange(const char* stdCode, uint64_t 
 			eTick.action_time = sInfo->getCloseTime() * 100000 + 59999;
 		}
 
-		WTSTickStruct* pTick = std::lower_bound(tBlock->_ticks, tBlock->_ticks + (tBlock->_size - 1), eTick, [](const WTSTickStruct& a, const WTSTickStruct& b) {
-			if (a.action_date != b.action_date)
-				return a.action_date < b.action_date;
-			else
-				return a.action_time < b.action_time;
-		});
-
-		std::size_t eIdx = pTick - tBlock->_ticks;
-
-		//如果光标定位的tick时间比目标时间大, 则全部回退一个
-		if (pTick->action_date > eTick.action_date || pTick->action_time > eTick.action_time)
-		{
-			if (eIdx == 0)
-				break;
-
-			pTick--;
-			eIdx--;
-		}
+		// The final RT slot remains writer-owned. Resolve the inclusive range end
+		// among committed records, retaining every duplicate at etime.
+		std::size_t eIdx = 0;
+		if (!find_rt_hft_end_index(tBlock->_ticks, tBlock->_size - 1, eTick, eIdx))
+			break;
+		std::size_t eCount = eIdx + 1;
 
 		if (beginTDate != curTDate)
 		{
 			//如果开始的交易日和当前的交易日不一致，则返回全部的tick数据
 			//WTSTickSlice* slice = WTSTickSlice::create(stdCode, tBlock->_ticks, eIdx + 1);
 			//ayTicks->append(slice, false);
-			slice->appendBlock(tBlock->_ticks, eIdx + 1);
+			slice->appendBlock(tBlock->_ticks, eCount);
 		}
 		else
 		{
 			//如果交易日相同，则查找起始的位置
-			pTick = std::lower_bound(tBlock->_ticks, tBlock->_ticks + eIdx, sTick, [](const WTSTickStruct& a, const WTSTickStruct& b) {
-				if (a.action_date != b.action_date)
-					return a.action_date < b.action_date;
-				else
-					return a.action_time < b.action_time;
-			});
+			WTSTickStruct* pTick = std::lower_bound(tBlock->_ticks, tBlock->_ticks + eCount, sTick,
+				hft_time_less<WTSTickStruct>);
 
 			std::size_t sIdx = pTick - tBlock->_ticks;
 			//WTSTickSlice* slice = WTSTickSlice::create(stdCode, tBlock->_ticks + sIdx, eIdx - sIdx + 1);
 			//ayTicks->append(slice, false);
-			slice->appendBlock(tBlock->_ticks + sIdx, eIdx - sIdx + 1);
+			if (sIdx < eCount)
+				slice->appendBlock(tBlock->_ticks + sIdx, eCount - sIdx);
 		}
 		break;
 	}
@@ -610,6 +673,9 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByRange(const char* stdCode, uint64_t 
 
 WTSOrdQueSlice* WtRdmDtReader::readOrdQueSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime /* = 0 */)
 {
+	if (etime != 0 && stime > etime)
+		return NULL;
+
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
 	const char* stdPID = commInfo->getFullPid();
@@ -656,22 +722,13 @@ WTSOrdQueSlice* WtRdmDtReader::readOrdQueSliceByRange(const char* stdCode, uint6
 			return NULL;
 
 		RTOrdQueBlock* rtBlock = tPair->_block;
+		if (rtBlock->_size <= 1)
+			return NULL;
 
-		WTSOrdQueStruct* pItem = std::lower_bound(rtBlock->_queues, rtBlock->_queues + (rtBlock->_size - 1), eTick, [](const WTSOrdQueStruct& a, const WTSOrdQueStruct& b) {
-			if (a.action_date != b.action_date)
-				return a.action_date < b.action_date;
-			else
-				return a.action_time < b.action_time;
-		});
-
-		std::size_t eIdx = pItem - rtBlock->_queues;
-
-		//如果光标定位的tick时间比目标时间打, 则全部回退一个
-		if (pItem->action_date > eTick.action_date || pItem->action_time > eTick.action_time)
-		{
-			pItem--;
-			eIdx--;
-		}
+		// The final slot is still writer-owned; only the preceding entries are visible.
+		std::size_t eIdx = 0;
+		if (!find_rt_hft_end_index(rtBlock->_queues, rtBlock->_size - 1, eTick, eIdx))
+			return NULL;
 
 		if (beginTDate != endTDate)
 		{
@@ -682,12 +739,9 @@ WTSOrdQueSlice* WtRdmDtReader::readOrdQueSliceByRange(const char* stdCode, uint6
 		else
 		{
 			//如果交易日相同，则查找起始的位置
-			pItem = std::lower_bound(rtBlock->_queues, rtBlock->_queues + eIdx, sTick, [](const WTSOrdQueStruct& a, const WTSOrdQueStruct& b) {
-				if (a.action_date != b.action_date)
-					return a.action_date < b.action_date;
-				else
-					return a.action_time < b.action_time;
-			});
+			WTSOrdQueStruct* pItem = std::lower_bound(rtBlock->_queues, rtBlock->_queues + eIdx + 1, sTick, hft_time_less<WTSOrdQueStruct>);
+			if (pItem == rtBlock->_queues + eIdx + 1)
+				return NULL;
 
 			std::size_t sIdx = pItem - rtBlock->_queues;
 			WTSOrdQueSlice* slice = WTSOrdQueSlice::create(stdCode, rtBlock->_queues + sIdx, eIdx - sIdx + 1);
@@ -716,7 +770,7 @@ WTSOrdQueSlice* WtRdmDtReader::readOrdQueSliceByRange(const char* stdCode, uint6
 				return NULL;
 			}
 
-			HisOrdQueBlockV2* tBlockV2 = (HisOrdQueBlockV2*)hisBlkPair._buffer.c_str();
+			HisOrdQueBlockV2* tBlockV2 = (HisOrdQueBlockV2*)hisBlkPair._buffer.data();
 
 			if (hisBlkPair._buffer.size() != (sizeof(HisOrdQueBlockV2) + tBlockV2->_size))
 			{
@@ -728,9 +782,10 @@ WTSOrdQueSlice* WtRdmDtReader::readOrdQueSliceByRange(const char* stdCode, uint6
 			std::string buf = WTSCmpHelper::uncompress_data(tBlockV2->_data, (std::size_t)tBlockV2->_size);
 
 			//将原来的buffer只保留一个头部,并将所有tick数据追加到尾部
+			//先改头版本，后续 resize/append 可能重分配并使 tBlockV2 失效。
+			tBlockV2->_version = BLOCK_VERSION_RAW;
 			hisBlkPair._buffer.resize(sizeof(HisOrdQueBlock));
 			hisBlkPair._buffer.append(buf);
-			tBlockV2->_version = BLOCK_VERSION_RAW;
 
 			hisBlkPair._block = (HisOrdQueBlock*)hisBlkPair._buffer.c_str();
 		}
@@ -745,39 +800,28 @@ WTSOrdQueSlice* WtRdmDtReader::readOrdQueSliceByRange(const char* stdCode, uint6
 		if (tcnt <= 0)
 			return NULL;
 
-		WTSOrdQueStruct* pItem = std::lower_bound(tBlock->_items, tBlock->_items + (tcnt - 1), eTick, [](const WTSOrdQueStruct& a, const WTSOrdQueStruct& b) {
-			if (a.action_date != b.action_date)
-				return a.action_date < b.action_date;
-			else
-				return a.action_time < b.action_time;
-		});
-
-		std::size_t eIdx = pItem - tBlock->_items;
-		if (pItem->action_date > eTick.action_date || pItem->action_time >= eTick.action_time)
-		{
-			pItem--;
-			eIdx--;
-		}
+		// Historical HFT ranges are end-exclusive. lower_bound also avoids
+		// decrementing begin() when the requested end precedes the first item.
+		WTSOrdQueStruct* pEnd = std::lower_bound(tBlock->_items, tBlock->_items + tcnt, eTick, hft_time_less<WTSOrdQueStruct>);
+		std::size_t eCount = pEnd - tBlock->_items;
+		if (eCount == 0)
+			return NULL;
 
 
 		if (beginTDate != endTDate)
 		{
 			//如果开始的交易日和当前的交易日不一致，则返回全部的tick数据
-			WTSOrdQueSlice* slice = WTSOrdQueSlice::create(stdCode, tBlock->_items, eIdx + 1);
+			WTSOrdQueSlice* slice = WTSOrdQueSlice::create(stdCode, tBlock->_items, eCount);
 			return slice;
 		}
 		else
 		{
 			//如果交易日相同，则查找起始的位置
-			pItem = std::lower_bound(tBlock->_items, tBlock->_items + eIdx, sTick, [](const WTSOrdQueStruct& a, const WTSOrdQueStruct& b) {
-				if (a.action_date != b.action_date)
-					return a.action_date < b.action_date;
-				else
-					return a.action_time < b.action_time;
-			});
-
-			std::size_t sIdx = pItem - tBlock->_items;
-			WTSOrdQueSlice* slice = WTSOrdQueSlice::create(stdCode, tBlock->_items + sIdx, eIdx - sIdx + 1);
+			WTSOrdQueStruct* pStart = std::lower_bound(tBlock->_items, pEnd, sTick, hft_time_less<WTSOrdQueStruct>);
+			std::size_t sIdx = pStart - tBlock->_items;
+			if (sIdx >= eCount)
+				return NULL;
+			WTSOrdQueSlice* slice = WTSOrdQueSlice::create(stdCode, pStart, eCount - sIdx);
 			return slice;
 		}
 	}
@@ -785,6 +829,9 @@ WTSOrdQueSlice* WtRdmDtReader::readOrdQueSliceByRange(const char* stdCode, uint6
 
 WTSOrdDtlSlice* WtRdmDtReader::readOrdDtlSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime /* = 0 */)
 {
+	if (etime != 0 && stime > etime)
+		return NULL;
+
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
 	const char* stdPID = commInfo->getFullPid();
@@ -831,22 +878,13 @@ WTSOrdDtlSlice* WtRdmDtReader::readOrdDtlSliceByRange(const char* stdCode, uint6
 			return NULL;
 
 		RTOrdDtlBlock* rtBlock = tPair->_block;
+		if (rtBlock->_size <= 1)
+			return NULL;
 
-		WTSOrdDtlStruct* pItem = std::lower_bound(rtBlock->_details, rtBlock->_details + (rtBlock->_size - 1), eTick, [](const WTSOrdDtlStruct& a, const WTSOrdDtlStruct& b) {
-			if (a.action_date != b.action_date)
-				return a.action_date < b.action_date;
-			else
-				return a.action_time < b.action_time;
-		});
-
-		std::size_t eIdx = pItem - rtBlock->_details;
-
-		//如果光标定位的tick时间比目标时间打, 则全部回退一个
-		if (pItem->action_date > eTick.action_date || pItem->action_time > eTick.action_time)
-		{
-			pItem--;
-			eIdx--;
-		}
+		// The final slot is still writer-owned; only the preceding entries are visible.
+		std::size_t eIdx = 0;
+		if (!find_rt_hft_end_index(rtBlock->_details, rtBlock->_size - 1, eTick, eIdx))
+			return NULL;
 
 		if (beginTDate != endTDate)
 		{
@@ -857,12 +895,9 @@ WTSOrdDtlSlice* WtRdmDtReader::readOrdDtlSliceByRange(const char* stdCode, uint6
 		else
 		{
 			//如果交易日相同，则查找起始的位置
-			pItem = std::lower_bound(rtBlock->_details, rtBlock->_details + eIdx, sTick, [](const WTSOrdDtlStruct& a, const WTSOrdDtlStruct& b) {
-				if (a.action_date != b.action_date)
-					return a.action_date < b.action_date;
-				else
-					return a.action_time < b.action_time;
-			});
+			WTSOrdDtlStruct* pItem = std::lower_bound(rtBlock->_details, rtBlock->_details + eIdx + 1, sTick, hft_time_less<WTSOrdDtlStruct>);
+			if (pItem == rtBlock->_details + eIdx + 1)
+				return NULL;
 
 			std::size_t sIdx = pItem - rtBlock->_details;
 			WTSOrdDtlSlice* slice = WTSOrdDtlSlice::create(stdCode, rtBlock->_details + sIdx, eIdx - sIdx + 1);
@@ -873,8 +908,8 @@ WTSOrdDtlSlice* WtRdmDtReader::readOrdDtlSliceByRange(const char* stdCode, uint6
 	{
 		std::string key = fmt::format("{}-{}", stdCode, endTDate);
 
-		auto it = _his_ordque_map.find(key);
-		if (it == _his_ordque_map.end())
+		auto it = _his_orddtl_map.find(key);
+		if (it == _his_orddtl_map.end())
 		{
 			std::stringstream ss;
 			ss << _base_dir << "his/orders/" << cInfo._exchg << "/" << endTDate << "/" << curCode << ".dsb";
@@ -891,7 +926,7 @@ WTSOrdDtlSlice* WtRdmDtReader::readOrdDtlSliceByRange(const char* stdCode, uint6
 				return NULL;
 			}
 
-			HisOrdDtlBlockV2* tBlockV2 = (HisOrdDtlBlockV2*)hisBlkPair._buffer.c_str();
+			HisOrdDtlBlockV2* tBlockV2 = (HisOrdDtlBlockV2*)hisBlkPair._buffer.data();
 
 			if (hisBlkPair._buffer.size() != (sizeof(HisOrdDtlBlockV2) + tBlockV2->_size))
 			{
@@ -903,9 +938,10 @@ WTSOrdDtlSlice* WtRdmDtReader::readOrdDtlSliceByRange(const char* stdCode, uint6
 			std::string buf = WTSCmpHelper::uncompress_data(tBlockV2->_data, (std::size_t)tBlockV2->_size);
 
 			//将原来的buffer只保留一个头部,并将所有tick数据追加到尾部
+			//先改头版本，后续 resize/append 可能重分配并使 tBlockV2 失效。
+			tBlockV2->_version = BLOCK_VERSION_RAW;
 			hisBlkPair._buffer.resize(sizeof(HisOrdDtlBlock));
 			hisBlkPair._buffer.append(buf);
-			tBlockV2->_version = BLOCK_VERSION_RAW;
 
 			hisBlkPair._block = (HisOrdDtlBlock*)hisBlkPair._buffer.c_str();
 		}
@@ -920,38 +956,27 @@ WTSOrdDtlSlice* WtRdmDtReader::readOrdDtlSliceByRange(const char* stdCode, uint6
 		if (tcnt <= 0)
 			return NULL;
 
-		WTSOrdDtlStruct* pItem = std::lower_bound(tBlock->_items, tBlock->_items + (tcnt - 1), eTick, [](const WTSOrdDtlStruct& a, const WTSOrdDtlStruct& b) {
-			if (a.action_date != b.action_date)
-				return a.action_date < b.action_date;
-			else
-				return a.action_time < b.action_time;
-		});
-
-		std::size_t eIdx = pItem - tBlock->_items;
-		if (pItem->action_date > eTick.action_date || pItem->action_time >= eTick.action_time)
-		{
-			pItem--;
-			eIdx--;
-		}
+		// Historical HFT ranges are end-exclusive. lower_bound also avoids
+		// decrementing begin() when the requested end precedes the first item.
+		WTSOrdDtlStruct* pEnd = std::lower_bound(tBlock->_items, tBlock->_items + tcnt, eTick, hft_time_less<WTSOrdDtlStruct>);
+		std::size_t eCount = pEnd - tBlock->_items;
+		if (eCount == 0)
+			return NULL;
 
 		if (beginTDate != endTDate)
 		{
 			//如果开始的交易日和当前的交易日不一致，则返回全部的tick数据
-			WTSOrdDtlSlice* slice = WTSOrdDtlSlice::create(stdCode, tBlock->_items, eIdx + 1);
+			WTSOrdDtlSlice* slice = WTSOrdDtlSlice::create(stdCode, tBlock->_items, eCount);
 			return slice;
 		}
 		else
 		{
 			//如果交易日相同，则查找起始的位置
-			pItem = std::lower_bound(tBlock->_items, tBlock->_items + eIdx, sTick, [](const WTSOrdDtlStruct& a, const WTSOrdDtlStruct& b) {
-				if (a.action_date != b.action_date)
-					return a.action_date < b.action_date;
-				else
-					return a.action_time < b.action_time;
-			});
-
-			std::size_t sIdx = pItem - tBlock->_items;
-			WTSOrdDtlSlice* slice = WTSOrdDtlSlice::create(stdCode, tBlock->_items + sIdx, eIdx - sIdx + 1);
+			WTSOrdDtlStruct* pStart = std::lower_bound(tBlock->_items, pEnd, sTick, hft_time_less<WTSOrdDtlStruct>);
+			std::size_t sIdx = pStart - tBlock->_items;
+			if (sIdx >= eCount)
+				return NULL;
+			WTSOrdDtlSlice* slice = WTSOrdDtlSlice::create(stdCode, pStart, eCount - sIdx);
 			return slice;
 		}
 	}
@@ -959,6 +984,9 @@ WTSOrdDtlSlice* WtRdmDtReader::readOrdDtlSliceByRange(const char* stdCode, uint6
 
 WTSTransSlice* WtRdmDtReader::readTransSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime /* = 0 */)
 {
+	if (etime != 0 && stime > etime)
+		return NULL;
+
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
 	const char* stdPID = commInfo->getFullPid();
@@ -1005,22 +1033,13 @@ WTSTransSlice* WtRdmDtReader::readTransSliceByRange(const char* stdCode, uint64_
 			return NULL;
 
 		RTTransBlock* rtBlock = tPair->_block;
+		if (rtBlock->_size <= 1)
+			return NULL;
 
-		WTSTransStruct* pItem = std::lower_bound(rtBlock->_trans, rtBlock->_trans + (rtBlock->_size - 1), eTick, [](const WTSTransStruct& a, const WTSTransStruct& b) {
-			if (a.action_date != b.action_date)
-				return a.action_date < b.action_date;
-			else
-				return a.action_time < b.action_time;
-		});
-
-		std::size_t eIdx = pItem - rtBlock->_trans;
-
-		//如果光标定位的tick时间比目标时间打, 则全部回退一个
-		if (pItem->action_date > eTick.action_date || pItem->action_time > eTick.action_time)
-		{
-			pItem--;
-			eIdx--;
-		}
+		// The final slot is still writer-owned; only the preceding entries are visible.
+		std::size_t eIdx = 0;
+		if (!find_rt_hft_end_index(rtBlock->_trans, rtBlock->_size - 1, eTick, eIdx))
+			return NULL;
 
 		if (beginTDate != endTDate)
 		{
@@ -1031,12 +1050,9 @@ WTSTransSlice* WtRdmDtReader::readTransSliceByRange(const char* stdCode, uint64_
 		else
 		{
 			//如果交易日相同，则查找起始的位置
-			pItem = std::lower_bound(rtBlock->_trans, rtBlock->_trans + eIdx, sTick, [](const WTSTransStruct& a, const WTSTransStruct& b) {
-				if (a.action_date != b.action_date)
-					return a.action_date < b.action_date;
-				else
-					return a.action_time < b.action_time;
-			});
+			WTSTransStruct* pItem = std::lower_bound(rtBlock->_trans, rtBlock->_trans + eIdx + 1, sTick, hft_time_less<WTSTransStruct>);
+			if (pItem == rtBlock->_trans + eIdx + 1)
+				return NULL;
 
 			std::size_t sIdx = pItem - rtBlock->_trans;
 			WTSTransSlice* slice = WTSTransSlice::create(stdCode, rtBlock->_trans + sIdx, eIdx - sIdx + 1);
@@ -1047,8 +1063,8 @@ WTSTransSlice* WtRdmDtReader::readTransSliceByRange(const char* stdCode, uint64_
 	{
 		std::string key = fmt::format("{}-{}", stdCode, endTDate);
 
-		auto it = _his_ordque_map.find(key);
-		if (it == _his_ordque_map.end())
+		auto it = _his_trans_map.find(key);
+		if (it == _his_trans_map.end())
 		{
 			std::stringstream ss;
 			ss << _base_dir << "his/trans/" << cInfo._exchg << "/" << endTDate << "/" << curCode << ".dsb";
@@ -1065,7 +1081,7 @@ WTSTransSlice* WtRdmDtReader::readTransSliceByRange(const char* stdCode, uint64_
 				return NULL;
 			}
 
-			HisTransBlockV2* tBlockV2 = (HisTransBlockV2*)hisBlkPair._buffer.c_str();
+			HisTransBlockV2* tBlockV2 = (HisTransBlockV2*)hisBlkPair._buffer.data();
 
 			if (hisBlkPair._buffer.size() != (sizeof(HisTransBlockV2) + tBlockV2->_size))
 			{
@@ -1077,9 +1093,10 @@ WTSTransSlice* WtRdmDtReader::readTransSliceByRange(const char* stdCode, uint64_
 			std::string buf = WTSCmpHelper::uncompress_data(tBlockV2->_data, (std::size_t)tBlockV2->_size);
 
 			//将原来的buffer只保留一个头部,并将所有tick数据追加到尾部
+			//先改头版本，后续 resize/append 可能重分配并使 tBlockV2 失效。
+			tBlockV2->_version = BLOCK_VERSION_RAW;
 			hisBlkPair._buffer.resize(sizeof(HisTransBlock));
 			hisBlkPair._buffer.append(buf);
-			tBlockV2->_version = BLOCK_VERSION_RAW;
 
 			hisBlkPair._block = (HisTransBlock*)hisBlkPair._buffer.c_str();
 		}
@@ -1094,38 +1111,27 @@ WTSTransSlice* WtRdmDtReader::readTransSliceByRange(const char* stdCode, uint64_
 		if (tcnt <= 0)
 			return NULL;
 
-		WTSTransStruct* pItem = std::lower_bound(tBlock->_items, tBlock->_items + (tcnt - 1), eTick, [](const WTSTransStruct& a, const WTSTransStruct& b) {
-			if (a.action_date != b.action_date)
-				return a.action_date < b.action_date;
-			else
-				return a.action_time < b.action_time;
-		});
-
-		std::size_t eIdx = pItem - tBlock->_items;
-		if (pItem->action_date > eTick.action_date || pItem->action_time >= eTick.action_time)
-		{
-			pItem--;
-			eIdx--;
-		}
+		// Historical HFT ranges are end-exclusive. lower_bound also avoids
+		// decrementing begin() when the requested end precedes the first item.
+		WTSTransStruct* pEnd = std::lower_bound(tBlock->_items, tBlock->_items + tcnt, eTick, hft_time_less<WTSTransStruct>);
+		std::size_t eCount = pEnd - tBlock->_items;
+		if (eCount == 0)
+			return NULL;
 
 		if (beginTDate != endTDate)
 		{
 			//如果开始的交易日和当前的交易日不一致，则返回全部的tick数据
-			WTSTransSlice* slice = WTSTransSlice::create(stdCode, tBlock->_items, eIdx + 1);
+			WTSTransSlice* slice = WTSTransSlice::create(stdCode, tBlock->_items, eCount);
 			return slice;
 		}
 		else
 		{
 			//如果交易日相同，则查找起始的位置
-			pItem = std::lower_bound(tBlock->_items, tBlock->_items + eIdx, sTick, [](const WTSTransStruct& a, const WTSTransStruct& b) {
-				if (a.action_date != b.action_date)
-					return a.action_date < b.action_date;
-				else
-					return a.action_time < b.action_time;
-			});
-
-			std::size_t sIdx = pItem - tBlock->_items;
-			WTSTransSlice* slice = WTSTransSlice::create(stdCode, tBlock->_items + sIdx, eIdx - sIdx + 1);
+			WTSTransStruct* pStart = std::lower_bound(tBlock->_items, pEnd, sTick, hft_time_less<WTSTransStruct>);
+			std::size_t sIdx = pStart - tBlock->_items;
+			if (sIdx >= eCount)
+				return NULL;
+			WTSTransSlice* slice = WTSTransSlice::create(stdCode, pStart, eCount - sIdx);
 			return slice;
 		}
 	}
@@ -1156,13 +1162,19 @@ bool WtRdmDtReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key,
 	barList._exchg = cInfo->_exchg;
 
 	std::vector<std::vector<WTSBarStruct>*> barsSections;
+	auto releaseBarsSections = [&barsSections]()
+	{
+		for (std::vector<WTSBarStruct>* section : barsSections)
+			delete section;
+		barsSections.clear();
+	};
 
 	uint32_t realCnt = 0;
 	const char* ruleTag = cInfo->_ruletag;
 	if (strlen(ruleTag) > 0)//如果是读取期货主力连续数据
 	{
 		//先按照HOT代码进行读取, 如rb.HOT
-		std::vector<WTSBarStruct>* hotAy = NULL;
+		std::unique_ptr<std::vector<WTSBarStruct>> hotAy;
 		uint64_t lastHotTime = 0;
 		for (;;)
 		{
@@ -1177,23 +1189,23 @@ bool WtRdmDtReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key,
 
 			std::string content;
 			StdFile::read_file_content(filename.c_str(), content);
-			if (content.size() < sizeof(HisKlineBlock))
+			if (!proc_his_kline_block(content))
 			{
-				pipe_rdmreader_log(_sink, LL_ERROR, "Sizechecking of his kline data file {} failed", filename.c_str());
+				// A corrupt aggregate HOT file must not prevent recovery from the
+				// valid per-contract sections below. No data from this file has
+				// been published to hotAy or barsSections at this point.
+				pipe_rdmreader_log(_sink, LL_ERROR, "Processing HOT {} bars from {} failed; falling back to contract sections", pname.c_str(), filename.c_str());
 				break;
 			}
 
-			proc_block_data(content, true, false);
-			uint32_t barcnt = content.size() / sizeof(WTSBarStruct);
-
-			hotAy = new std::vector<WTSBarStruct>();
-			hotAy->resize(barcnt);
+			uint32_t barcnt = (uint32_t)(content.size() / sizeof(WTSBarStruct));
+			hotAy.reset(new std::vector<WTSBarStruct>(barcnt));
 			memcpy(hotAy->data(), content.data(), content.size());
 
 			if (period != KP_DAY)
-				lastHotTime = hotAy->at(barcnt - 1).time;
+				lastHotTime = hotAy->back().time;
 			else
-				lastHotTime = hotAy->at(barcnt - 1).date;
+				lastHotTime = hotAy->back().date;
 
 			pipe_rdmreader_log(_sink, LL_INFO, "{} items of back {} data of hot contract {} directly loaded", barcnt, pname.c_str(), stdCode);
 			break;
@@ -1272,13 +1284,13 @@ bool WtRdmDtReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key,
 			{
 				std::string content;
 				StdFile::read_file_content(filename.c_str(), content);
-				if (content.size() < sizeof(HisKlineBlock))
+				if (!proc_his_kline_block(content, true))
 				{
-					pipe_rdmreader_log(_sink, LL_ERROR, "Sizechecking of his kline data file {} failed", filename.c_str());
+					pipe_rdmreader_log(_sink, LL_ERROR, "Processing {} bars from {} failed", pname.c_str(), filename.c_str());
+					releaseBarsSections();
+					_bars_cache.erase(key);
 					return false;
 				}
-				
-				proc_block_data(content, true, false);
 
 				if(content.empty())
 					break;
@@ -1357,8 +1369,9 @@ bool WtRdmDtReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key,
 
 		if (hotAy)
 		{
-			barsSections.emplace_back(hotAy);
+			barsSections.emplace_back(hotAy.get());
 			realCnt += hotAy->size();
+			hotAy.release();
 		}
 	}
 	else if(cInfo->isExright() && commInfo->isStock())//如果是读取股票复权数据
@@ -1378,58 +1391,37 @@ bool WtRdmDtReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key,
 
 			std::string content;
 			StdFile::read_file_content(filename.c_str(), content);
-			if (content.size() < sizeof(HisKlineBlock))
+			// Legacy adjusted files may contain a header-only CMP block to mark
+			// an empty layer. Preserve this sentinel only on this direct-read path;
+			// all other compressed blocks must pass normal payload validation.
+			if (content.size() == sizeof(HisKlineBlockV2))
+			{
+				const HisKlineBlockV2* header = (const HisKlineBlockV2*)content.data();
+				const uint16_t expectedType = period == KP_Minute1 ? BT_HIS_Minute1 :
+					(period == KP_Minute5 ? BT_HIS_Minute5 : BT_HIS_Day);
+				if (memcmp(header->_blk_flag, BLK_FLAG, FLAG_SIZE) == 0 &&
+					header->_type == expectedType &&
+					header->_version == BLOCK_VERSION_CMP && header->_size == 0)
+					break;
+			}
+
+			if (!proc_his_kline_block(content, true))
 			{
 				pipe_rdmreader_log(_sink, LL_ERROR, "Sizechecking of his kline data file {} failed", filename.c_str());
-				break;
+				delete hotAy;
+				hotAy = NULL;
+				releaseBarsSections();
+				_bars_cache.erase(key);
+				return false;
 			}
-
-			HisKlineBlock* kBlock = (HisKlineBlock*)content.c_str();
-			uint32_t barcnt = 0;
-			std::string buffer;
-			bool bOldVer = kBlock->is_old_version();
-			if (kBlock->_version == BLOCK_VERSION_CMP)
-			{
-				if (content.size() < sizeof(HisKlineBlockV2))
-				{
-					pipe_rdmreader_log(_sink, LL_ERROR, "Sizechecking of his kline data file {} failed", filename.c_str());
-					break;
-				}
-
-				HisKlineBlockV2* kBlockV2 = (HisKlineBlockV2*)content.c_str();
-				if (kBlockV2->_size == 0)
-					break;
-
-				buffer = WTSCmpHelper::uncompress_data(kBlockV2->_data, (std::size_t)kBlockV2->_size);
-			}
-			else
-			{
-				content.erase(0, BLOCK_HEADER_SIZE);
-				buffer.swap(content);
-			}
-
-			if(buffer.empty())
+			if (content.empty())
 				break;
 
-			if(bOldVer)
-			{
-				std::string bufV2;
-				uint32_t barcnt = buffer.size() / sizeof(WTSBarStructOld);
-				bufV2.resize(barcnt * sizeof(WTSBarStruct));
-				WTSBarStruct* newBar = (WTSBarStruct*)bufV2.data();
-				WTSBarStructOld* oldBar = (WTSBarStructOld*)buffer.data();
-				for (uint32_t idx = 0; idx < barcnt; idx++)
-				{
-					newBar[idx] = oldBar[idx];
-				}
-				buffer.swap(bufV2);
-			}
-
-			barcnt = buffer.size() / sizeof(WTSBarStruct);
+			uint32_t barcnt = (uint32_t)(content.size() / sizeof(WTSBarStruct));
 
 			hotAy = new std::vector<WTSBarStruct>();
 			hotAy->resize(barcnt);
-			memcpy(hotAy->data(), buffer.data(), buffer.size());
+			memcpy(hotAy->data(), content.data(), content.size());
 
 			if (period != KP_DAY)
 				lastQTime = hotAy->at(barcnt - 1).time;
@@ -1470,13 +1462,15 @@ bool WtRdmDtReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key,
 			{
 				std::string content;
 				StdFile::read_file_content(filename.c_str(), content);
-				if (content.size() < sizeof(HisKlineBlock))
+				if (!proc_his_kline_block(content, true))
 				{
-					pipe_rdmreader_log(_sink, LL_ERROR, "Sizechecking of his kline data file {} failed", filename.c_str());
+					pipe_rdmreader_log(_sink, LL_ERROR, "Processing adjusted {} bars from {} failed", pname.c_str(), filename.c_str());
+					delete hotAy;
+					hotAy = NULL;
+					releaseBarsSections();
+					_bars_cache.erase(key);
 					return false;
 				}
-
-				proc_block_data(content, true, false);
 				if(content.empty())
 					break;
 
@@ -1577,13 +1571,13 @@ bool WtRdmDtReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key,
 			//如果有格式化的历史数据文件, 则直接读取
 			std::string content;
 			StdFile::read_file_content(filename.c_str(), content);
-			if (content.size() < sizeof(HisKlineBlock))
+			if (!proc_his_kline_block(content, true))
 			{
-				pipe_rdmreader_log(_sink, LL_ERROR, "Sizechecking of his kline data file {} failed", filename.c_str());
+				pipe_rdmreader_log(_sink, LL_ERROR, "Processing historical {} bars from {} failed", pname.c_str(), filename.c_str());
+				releaseBarsSections();
+				_bars_cache.erase(key);
 				return false;
 			}
-
-			proc_block_data(content, true, false);
 
 			if (content.empty())
 				return false;
@@ -1628,6 +1622,10 @@ bool WtRdmDtReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key,
 
 WTSBarStruct* WtRdmDtReader::indexBarFromCacheByRange(const std::string& key, uint64_t stime, uint64_t etime, uint32_t& count, bool isDay /* = false */)
 {
+	count = 0;
+	if (stime > etime)
+		return NULL;
+
 	uint32_t rDate, rTime, lDate, lTime;
 	rDate = (uint32_t)(etime / 10000);
 	rTime = (uint32_t)(etime % 10000);
@@ -1665,6 +1663,9 @@ WTSBarStruct* WtRdmDtReader::indexBarFromCacheByRange(const std::string& key, ui
 		{
 			if ((isDay && eit->date > eBar.date) || (!isDay && eit->time > eBar.time))
 			{
+				if (eit == barsList._bars.begin())
+					return NULL;
+
 				eit--;
 			}
 
@@ -1680,6 +1681,9 @@ WTSBarStruct* WtRdmDtReader::indexBarFromCacheByRange(const std::string& key, ui
 		sIdx = sit - barsList._bars.begin();
 	}
 
+	if (sIdx >= barsList._bars.size() || sIdx > eIdx)
+		return NULL;
+
 	uint32_t curCnt = eIdx - sIdx + 1;
 	count = curCnt;
 	return &barsList._bars[sIdx];
@@ -1687,13 +1691,21 @@ WTSBarStruct* WtRdmDtReader::indexBarFromCacheByRange(const std::string& key, ui
 
 WTSBarStruct* WtRdmDtReader::indexBarFromCacheByCount(const std::string& key, uint64_t etime, uint32_t& count, bool isDay /* = false */)
 {
+	const uint32_t requestedCount = count;
+	count = 0;
+	if (requestedCount == 0)
+		return NULL;
+
 	uint32_t rDate, rTime;
 	rDate = (uint32_t)(etime / 10000);
 	rTime = (uint32_t)(etime % 10000);
 
 	BarsList& barsList = _bars_cache[key];
 	if (barsList._bars.empty())
+	{
+		count = 0;
 		return NULL;
+	}
 
 	std::size_t eIdx, sIdx;
 	WTSBarStruct eBar;
@@ -1714,14 +1726,20 @@ WTSBarStruct* WtRdmDtReader::indexBarFromCacheByCount(const std::string& key, ui
 	{
 		if ((isDay && eit->date > eBar.date) || (!isDay && eit->time > eBar.time))
 		{
+			if (eit == barsList._bars.begin())
+				return NULL;
+
 			eit--;
 		}
 
 		eIdx = eit - barsList._bars.begin();
 	}
 
-	uint32_t curCnt = min((uint32_t)eIdx + 1, count);
+	uint32_t curCnt = min((uint32_t)eIdx + 1, requestedCount);
 	sIdx = eIdx + 1 - curCnt;
+	if (curCnt == 0)
+		return NULL;
+
 	count = curCnt;
 	return &barsList._bars[sIdx];
 }
@@ -1794,14 +1812,11 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByRange(const char* stdCode, WTSKlin
 
 	std::string key = fmt::format("{}#{}", stdCode, (uint32_t)period);
 	auto it = _bars_cache.find(key);
-	[[maybe_unused]] bool bHasHisData = false;
 	if (it == _bars_cache.end())
 	{
-		bHasHisData = cacheHisBarsFromFile(&cInfo, key, stdCode, period);
-	}
-	else
-	{
-		bHasHisData = true;
+		bool bHasHisData = cacheHisBarsFromFile(&cInfo, key, stdCode, period);
+		if (!bHasHisData && _bars_cache.find(key) == _bars_cache.end())
+			return NULL;
 	}
 
 	if (etime == 0)
@@ -1909,7 +1924,7 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByRange(const char* stdCode, WTSKlin
 		else
 		{
 			RTKlineBlockPair* kPair = getRTKilneBlock(cInfo._exchg, curCode, period);
-			if (kPair != NULL)
+			if (kPair != NULL && kPair->_block->_size > 0)
 			{
 				//如果是后复权，实时数据是需要单独缓存的，所以这里处理会很复杂
 				BarsList& barsList = _bars_cache[key];
@@ -1927,7 +1942,7 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByRange(const char* stdCode, WTSKlin
 						idx--;
 
 					//因为每次拷贝，最后一条K线都有可能是未闭合的，所以需要把最后一条K线覆盖
-					memcpy(&barsList._rt_bars[idx], &kPair->_block->_bars[idx], sizeof(WTSBarStruct)*(newSize - oldSize + 1));
+					memcpy(&barsList._rt_bars[idx], &kPair->_block->_bars[idx], sizeof(WTSBarStruct)*(newSize - idx));
 
 					//最后做复权处理
 					double factor = barsList._factor;
@@ -1990,8 +2005,13 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByRange(const char* stdCode, WTSKlin
 	if (hisCnt + rtCnt > 0)
 	{
 		WTSKlineSlice* slice = WTSKlineSlice::create(stdCode, period, 1, hisHead, hisCnt);
-		if (rtCnt > 0)
-			slice->appendBlock(rtHead, rtCnt);
+		if (slice == NULL)
+			return NULL;
+		if (rtCnt > 0 && !slice->appendBlock(rtHead, rtCnt))
+		{
+			slice->release();
+			return NULL;
+		}
 		return slice;
 	}
 
@@ -2225,14 +2245,11 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByCount(const char* stdCode, WTSKlin
 
 	std::string key = fmtutil::format("{}#{}", stdCode, (uint32_t)period);
 	auto it = _bars_cache.find(key);
-	[[maybe_unused]] bool bHasHisData = false;
 	if (it == _bars_cache.end())
 	{
-		bHasHisData = cacheHisBarsFromFile(&cInfo, key, stdCode, period);
-	}
-	else
-	{
-		bHasHisData = true;
+		bool bHasHisData = cacheHisBarsFromFile(&cInfo, key, stdCode, period);
+		if (!bHasHisData && _bars_cache.find(key) == _bars_cache.end())
+			return NULL;
 	}
 
 	if (etime == 0)
@@ -2377,6 +2394,8 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByCount(const char* stdCode, WTSKlin
 	{
 		hisCnt = count - rtCnt;
 		hisHead = indexBarFromCacheByCount(key, etime, hisCnt, period == KP_DAY);
+		if (hisHead == NULL)
+			hisCnt = 0;
 	}
 
 	pipe_rdmreader_log(_sink, LL_DEBUG, "His {} bars of {} loaded, {} from history, {} from realtime", PERIOD_NAME[period], stdCode, hisCnt, rtCnt);
@@ -2384,8 +2403,13 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByCount(const char* stdCode, WTSKlin
 	if (hisCnt + rtCnt > 0)
 	{
 		WTSKlineSlice* slice = WTSKlineSlice::create(stdCode, period, 1, hisHead, hisCnt);
-		if (rtCnt > 0)
-			slice->appendBlock(rtHead, rtCnt);
+		if (slice == NULL)
+			return NULL;
+		if (rtCnt > 0 && !slice->appendBlock(rtHead, rtCnt))
+		{
+			slice->release();
+			return NULL;
+		}
 		return slice;
 	}
 
@@ -2396,9 +2420,20 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByCount(const char* stdCode, uint32_t 
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
-	const char* stdPID = commInfo->getFullPid();
+	if (commInfo == NULL)
+	{
+		pipe_rdmreader_log(_sink, LL_ERROR, "Commodity {}.{} for {} is unavailable", cInfo._exchg, cInfo._product, stdCode);
+		return NULL;
+	}
 
-	WTSSessionInfo* sInfo = _base_data_mgr->getSession(_base_data_mgr->getCommodity(cInfo._exchg, cInfo._code)->getSession());
+	const char* stdPID = commInfo->getFullPid();
+	const char* sessionId = commInfo->getSession();
+	WTSSessionInfo* sInfo = sessionId == NULL ? NULL : _base_data_mgr->getSession(sessionId);
+	if (sInfo == NULL)
+	{
+		pipe_rdmreader_log(_sink, LL_ERROR, "Session for commodity {}.{} is unavailable", cInfo._exchg, cInfo._product);
+		return NULL;
+	}
 
 	uint32_t rDate, rTime, rSecs;
 	//20190807124533900
@@ -2456,7 +2491,8 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByCount(const char* stdCode, uint32_t 
 		std::size_t eIdx = pTick - tBlock->_ticks;
 
 		//如果光标定位的tick时间比目标时间大, 则全部回退一个
-		if (pTick->action_date > eTick.action_date || pTick->action_time > eTick.action_time)
+		if (pTick->action_date > eTick.action_date ||
+			(pTick->action_date == eTick.action_date && pTick->action_time > eTick.action_time))
 		{
 			if (eIdx == 0)
 				break;
@@ -2538,11 +2574,19 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByCount(const char* stdCode, uint32_t 
 				if (tBlkPair._buffer.size() < sizeof(HisTickBlock))
 				{
 					pipe_rdmreader_log(_sink, LL_ERROR, "Sizechecking of his tick data file {} failed", filename.c_str());
-					tBlkPair._buffer.clear();
-					break;
+					_his_tick_map.erase(key);
+					slice->release();
+					return NULL;
 				}
 
-				proc_block_data(tBlkPair._buffer, false, true);				
+				if (!proc_block_data(tBlkPair._buffer, false, true))
+				{
+					pipe_rdmreader_log(_sink, LL_ERROR, "Processing his tick data file {} failed", filename.c_str());
+					_his_tick_map.erase(key);
+					slice->release();
+					return NULL;
+				}
+
 				tBlkPair._block = (HisTickBlock*)tBlkPair._buffer.c_str();
 				bHasHisTick = true;
 				break;
@@ -2582,7 +2626,8 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByCount(const char* stdCode, uint32_t 
 			});
 
 			std::size_t eIdx = pTick - tBlock->_ticks;
-			if (pTick->action_date > eTick.action_date || pTick->action_time >= eTick.action_time)
+			if (pTick->action_date > eTick.action_date ||
+				(pTick->action_date == eTick.action_date && pTick->action_time > eTick.action_time))
 			{
 				if (eIdx == 0)
 					break;

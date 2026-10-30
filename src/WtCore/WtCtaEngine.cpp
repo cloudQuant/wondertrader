@@ -33,6 +33,7 @@ namespace rj = rapidjson;
 
 WtCtaEngine::WtCtaEngine()
 	: _tm_ticker(NULL)
+	, _cfg(NULL)
 {
 	
 }
@@ -485,6 +486,16 @@ void WtCtaEngine::handle_pos_change(const char* straName, const char* stdCode, d
 	const auto& exec_ids = _exec_mgr.get_route_by_strategy(straName);
 	for(auto& execid : exec_ids)
 		_exec_mgr.handle_pos_change(realCode.c_str(), targetPos, diffPos, execid.c_str());
+}
+
+ExecUnitInitStatus WtCtaEngine::queryExecUnitInitStatus(const char* executorId, const char* stdCode) const
+{
+	return _exec_mgr.query_exec_unit_init_status(executorId, stdCode);
+}
+
+ExecUnitInitClearResult WtCtaEngine::clearFailedExecUnitInitStatus(const char* executorId, const char* stdCode)
+{
+	return _exec_mgr.clear_failed_exec_unit_init_status(executorId, stdCode);
 }
 
 void WtCtaEngine::on_tick(const char* stdCode, WTSTickData* curTick)

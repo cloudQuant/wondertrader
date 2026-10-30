@@ -127,4 +127,5 @@ public:
 //创建执行工厂
 typedef ICtaStrategyFact* (*FuncCreateStraFact)();
 //删除执行工厂
-typedef void(*FuncDeleteStraFact)(ICtaStrategyFact* &fact);
+// 仓内 CTA 插件按值导出；外部已发布插件的 ABI 需独立核验，不能据此声明兼容。
+typedef void(*FuncDeleteStraFact)(ICtaStrategyFact* fact);

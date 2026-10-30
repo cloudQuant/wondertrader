@@ -20,8 +20,10 @@
 
 #include <atomic>
 #include <chrono>
+#include <cstdint>
 #include <string>
 #include <thread>
+#include <type_traits>
 
 #include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/io_context.hpp>
@@ -40,6 +42,17 @@
 #include <WTSUtils/WTSCfgLoader.h>
 
 namespace {
+
+static_assert(std::is_same<FuncCreateMQServer, WtUInt32(*)(const char*, bool)>::value,
+    "create_server function pointer must match WtMsgQue ABI");
+static_assert(std::is_same<FuncDestroyMQServer, void(*)(WtUInt32)>::value,
+    "destroy_server function pointer must match WtMsgQue ABI");
+static_assert(std::is_same<FundPublishMessage,
+    void(*)(WtUInt32, const char*, const char*, WtUInt32)>::value,
+    "publish_message function pointer must match WtMsgQue ABI");
+static_assert(std::is_same<FuncLogCallback,
+    void(PORTER_FLAG *)(WtUInt32, const char*, bool)>::value,
+    "MQ log callback must match WtMsgQue ABI");
 
 std::atomic<int> g_log{ 0 };
 std::atomic<int> g_event{ 0 };
@@ -61,6 +74,91 @@ void PORTER_FLAG on_mq_message(uint32_t /*id*/, const char* topic, const char* /
     else if (t == "CHART_INDEX") ++g_index;
     else if (t == "CHART_MARKER") ++g_marker;
     else if (t == "STRA_TRADE") ++g_stra;
+}
+
+TEST(R160EventNotifier, FakeModuleObservesExactServerAndPublishAbi)
+{
+    const std::string fakeDir = WT_R160_FAKE_MQ_DIR;
+    const std::string oldInst = WtHelper::getInstDir();
+    struct RestoreInstDir
+    {
+        std::string value;
+        ~RestoreInstDir() { WtHelper::setInstDir(value.c_str()); }
+    } restore{ oldInst };
+    WtHelper::setInstDir((fakeDir + "/").c_str());
+
+    const std::string fakePath = fakeDir + "/" + DLLHelper::wrap_module("WtMsgQue", "lib");
+    DllHandle inspector = DLLHelper::load_library(fakePath.c_str());
+    ASSERT_NE(inspector, nullptr);
+    using Reset = void(*)();
+    using Count = uint32_t(*)();
+    using Id = WtUInt32(*)();
+    using Length = WtUInt32(*)();
+    using Size = uint64_t(*)();
+    using Flag = bool(*)();
+    using Text = const char*(*)();
+    const auto reset = (Reset)DLLHelper::get_symbol(inspector, "r160_fake_reset");
+    const auto createCount = (Count)DLLHelper::get_symbol(inspector, "r160_fake_create_count");
+    const auto destroyCount = (Count)DLLHelper::get_symbol(inspector, "r160_fake_destroy_count");
+    const auto publishCount = (Count)DLLHelper::get_symbol(inspector, "r160_fake_publish_count");
+    const auto registerCount = (Count)DLLHelper::get_symbol(inspector, "r160_fake_register_count");
+    const auto serverId = (Id)DLLHelper::get_symbol(inspector, "r160_fake_server_id");
+    const auto destroyedId = (Id)DLLHelper::get_symbol(inspector, "r160_fake_destroyed_id");
+    const auto publishedId = (Id)DLLHelper::get_symbol(inspector, "r160_fake_published_id");
+    const auto dataLen = (Length)DLLHelper::get_symbol(inspector, "r160_fake_data_len");
+    const auto dataSize = (Size)DLLHelper::get_symbol(inspector, "r160_fake_data_size");
+    const auto confirm = (Flag)DLLHelper::get_symbol(inspector, "r160_fake_confirm");
+    const auto url = (Text)DLLHelper::get_symbol(inspector, "r160_fake_url");
+    const auto topic = (Text)DLLHelper::get_symbol(inspector, "r160_fake_topic");
+    ASSERT_NE(reset, nullptr);
+    ASSERT_NE(createCount, nullptr);
+    ASSERT_NE(destroyCount, nullptr);
+    ASSERT_NE(publishCount, nullptr);
+    ASSERT_NE(registerCount, nullptr);
+    ASSERT_NE(serverId, nullptr);
+    ASSERT_NE(destroyedId, nullptr);
+    ASSERT_NE(publishedId, nullptr);
+    ASSERT_NE(dataLen, nullptr);
+    ASSERT_NE(dataSize, nullptr);
+    ASSERT_NE(confirm, nullptr);
+    ASSERT_NE(url, nullptr);
+    ASSERT_NE(topic, nullptr);
+    reset();
+
+    constexpr WtUInt32 expectedId = 0xF1234567u;
+    const std::string expectedUrl = "fake://r160_abi";
+    WTSVariant* cfg = WTSCfgLoader::load_from_content(
+        ("{\"active\":true,\"url\":\"" + expectedUrl + "\"}").c_str());
+    ASSERT_NE(cfg, nullptr);
+
+    {
+        EventNotifier notifier;
+        auto guard = boost::asio::make_work_guard(notifier._asyncio);
+        ASSERT_TRUE(notifier.init(cfg));
+        EXPECT_EQ(expectedId, notifier._mq_sid);
+        EXPECT_EQ(1u, createCount());
+        EXPECT_EQ(1u, registerCount());
+        EXPECT_STREQ(expectedUrl.c_str(), url());
+        // The notifier config has no confirmation option; it explicitly uses
+        // the MQ module's non-confirming default.
+        EXPECT_FALSE(confirm());
+        EXPECT_EQ(expectedId, serverId());
+
+        notifier.notify_event("ABI payload");
+        for (int i = 0; i < 500 && publishCount() == 0; ++i)
+            std::this_thread::sleep_for(std::chrono::milliseconds(2));
+        ASSERT_EQ(1u, publishCount());
+        EXPECT_EQ(expectedId, publishedId());
+        EXPECT_STREQ("GRP_EVENT", topic());
+        EXPECT_EQ(dataSize(), static_cast<uint64_t>(dataLen()));
+        EXPECT_GT(dataLen(), 0u);
+        guard.reset();
+    }
+
+    EXPECT_EQ(1u, destroyCount());
+    EXPECT_EQ(expectedId, destroyedId());
+    cfg->release();
+    DLLHelper::free_library(inspector);
 }
 
 void reset_counts()

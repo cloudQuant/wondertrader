@@ -11,17 +11,25 @@
  * D) src/WtBtPorter/ExpHftMocker.cpp L14-111 全部包装（q06 只打了 on_init）：
  *    on_bar 的周期重算 L16-27、on_channel_ready L30-35、on_entrust L37-42、on_order L69-74、
  *    on_trade L101-106、on_session_begin/end L53-67、on_tick_updated L76-84、
- *    on_ordque/orddtl/trans_updated L86-99、on_bactest_end L108-111；
+ *    on_ordque/orddtl/trans_updated L86-99、on_bactest_end L108-111；周期另由临时 CSV
+ *    驱动真实 HisDataReplayer::run/onMinuteEnd -> ExpHftMocker -> HFT 回调链验证。
  * E) src/WtBtPorter/ExpCtaMocker.cpp L113-204、src/WtBtPorter/ExpSelMocker.cpp L86-157。
  *
  * 订阅位 _tick_subs 是 CtaMocker.h:786/1045、SelMocker.h:566/836、HftMocker.h:1216/1258 的
  * protected 成员，用测试本地派生类直接 insert，不使用 #define private public。
- * 不起线程、不跑 run/config 成功路径（见文末 DISABLED_）；缺陷见 docs/迭代计划/迭代01/bugs/R9_wtbtporter.md。
+ * 不起线程、不跑 WtBtRunner 的 run/config 成功路径（见文末 DISABLED_）；临时回放数据在系统 temp 目录。
+ * 缺陷见 docs/迭代计划/迭代01/bugs/R9_wtbtporter.md。
  */
 #include <gtest/gtest.h>
 
+#include <algorithm>
+#include <chrono>
 #include <cstring>
+#include <filesystem>
+#include <fstream>
 #include <string>
+#include <system_error>
+#include <vector>
 
 #include "WtBtPorter/PorterDefs.h"
 #include "WtBtPorter/WtBtPorter.h"
@@ -29,6 +37,8 @@
 #include "WtBtPorter/ExpCtaMocker.h"
 #include "WtBtPorter/ExpSelMocker.h"
 #include "WtBtPorter/ExpHftMocker.h"
+#include "WtBtCore/HisDataReplayer.h"
+#include "WtBtCore/WtHelper.h"
 
 #include "Includes/WTSDataDef.hpp"
 #include "Includes/WTSStruct.h"
@@ -65,6 +75,7 @@ namespace {
 		std::string	last_code;
 		std::string	last_period;
 		std::string	last_str;
+		std::vector<std::string> hft_periods;
 		double		p1 = 0, p2 = 0;
 
 		void clear() { *this = R9Probe(); }
@@ -158,6 +169,7 @@ namespace {
 		r9_init_cb(h);
 		g9.last_code = code;
 		g9.last_period = period;
+		g9.hft_periods.emplace_back(period);
 		g9.last_bar_null = (bar == NULL);
 		g9.p1 = bar == NULL ? -1.0 : bar->close;
 	}
@@ -287,6 +299,144 @@ namespace {
 		tick.price = price;
 		return tick;
 	}
+
+	const char* const kR9ReplayCode = "SSE.STK.600000";
+
+	std::filesystem::path r9_replay_root()
+	{
+		return std::filesystem::path(__FILE__).parent_path()
+			.parent_path().parent_path().parent_path().parent_path();
+	}
+
+	class R9ReplayWorkspace
+	{
+	public:
+		R9ReplayWorkspace()
+			: _previousOutput(WtHelper::getOutputDir())
+		{
+			_base = std::filesystem::temp_directory_path() /
+				("r9_hft_period_csv_" +
+					std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
+			_output = _base / "output";
+
+			std::error_code ec;
+			_ownsBase = std::filesystem::create_directory(_base, ec);
+			if (ec || !_ownsBase)
+				return;
+			if (!std::filesystem::create_directory(_base / "csv", ec) || ec)
+				return;
+			if (!std::filesystem::create_directory(_output, ec) || ec)
+				return;
+			_ready = true;
+			if (_ready)
+				WtHelper::setOutputDir(_output.string().c_str());
+		}
+
+		~R9ReplayWorkspace()
+		{
+			if (_ready)
+				WtHelper::setOutputDir(_previousOutput.c_str());
+			if (_ownsBase)
+			{
+				std::error_code ec;
+				std::filesystem::remove_all(_base, ec);
+			}
+		}
+
+		bool ready() const { return _ready; }
+		const std::filesystem::path& base() const { return _base; }
+
+	private:
+		std::filesystem::path _base;
+		std::filesystem::path _output;
+		std::string _previousOutput;
+		bool _ownsBase {false};
+		bool _ready {false};
+	};
+
+	bool write_r9_replay_bars(const std::filesystem::path& base, const char* suffix, uint32_t step)
+	{
+		std::ofstream out(base / "csv" / (std::string(kR9ReplayCode) + "_" + suffix + ".csv"));
+		if (!out.is_open())
+			return false;
+
+		out << "date,time,open,high,low,close,volume,turnover,open_interest,diff_interest,settle\n";
+		const uint32_t sessions[][2] = {{9u * 60u + 30u, 11u * 60u + 30u}, {13u * 60u, 15u * 60u}};
+		for (const auto& session : sessions)
+		{
+			for (uint32_t minute = session[0] + step; minute <= session[1]; minute += step)
+			{
+				const uint32_t hhmm = minute / 60u * 100u + minute % 60u;
+				const double close = 10.0 + static_cast<double>(minute) / 1000.0;
+				out << "20200102," << hhmm << ',' << close - 0.1 << ',' << close + 0.2 << ','
+					<< close - 0.2 << ',' << close << ",100," << close * 100.0 << ",0,0,0\n";
+			}
+		}
+		out.close();
+		return out.good();
+	}
+
+	bool write_r9_replay_daily_bar(const std::filesystem::path& base)
+	{
+		std::ofstream out(base / "csv" / (std::string(kR9ReplayCode) + "_d.csv"));
+		if (!out.is_open())
+			return false;
+		out << "date,time,open,high,low,close,volume,turnover,open_interest,diff_interest,settle\n"
+			<< "20200102,150000,10,11,9,10.5,100,1050,0,0,0\n";
+		out.close();
+		return out.good();
+	}
+
+	WTSVariant* r9_replay_config(const std::filesystem::path& root, const std::filesystem::path& base)
+	{
+		WTSVariant* cfg = WTSVariant::createObject();
+		cfg->append("mode", "csv");
+		cfg->append("path", base.string().c_str());
+		cfg->append("stime", static_cast<uint64_t>(202001020930ull));
+		cfg->append("etime", static_cast<uint64_t>(202001021500ull));
+		cfg->append("tick", false);
+		cfg->append("adjust_flag", static_cast<uint32_t>(0));
+		cfg->append("align_by_section", false);
+		cfg->append("dont_simtick_if_notrade", false);
+		cfg->append("cache_clear_days", static_cast<uint32_t>(10));
+		cfg->append("fees", "");
+		WTSVariant* basefiles = WTSVariant::createObject();
+		basefiles->append("session", (root / "dist/common/sessions.json").string().c_str());
+		basefiles->append("commodity", (root / "dist/common/stk_comms.json").string().c_str());
+		cfg->append("basefiles", basefiles);
+		basefiles->release();
+		return cfg;
+	}
+
+	class R9ReplayHft : public ExpHftMocker
+	{
+	public:
+		explicit R9ReplayHft(HisDataReplayer* replayer)
+			: ExpHftMocker(replayer, "r9_hft_period_replay")
+			, _replayer(replayer)
+		{
+		}
+
+		void on_init() override
+		{
+			ExpHftMocker::on_init();
+
+			WTSKlineSlice* main = _replayer->get_kline_slice(kR9ReplayCode, "m", 1, 1, true);
+			if (main != nullptr)
+				main->release();
+
+			const char* const periods[] = {"m1", "m5", "h1", "f1", "d1"};
+			for (const char* period : periods)
+			{
+				WTSKlineSlice* bars = stra_get_bars(kR9ReplayCode, period, 1);
+				if (bars != nullptr)
+					bars->release();
+			}
+		}
+
+	private:
+		HisDataReplayer* _replayer;
+	};
 
 	class R9Wired : public ::testing::Test
 	{
@@ -435,6 +585,44 @@ TEST_F(R9Wired, HftBarPeriodRenamedByTimes)
 	hft.on_bar("SHFE.au2406", "f", 1, &bar);
 	ASSERT_EQ(g9.hft_bar, 4U);
 	EXPECT_EQ(g9.last_period, "f1");
+}
+
+/* CSV 回放真实经过 HisDataReplayer::onMinuteEnd -> ExpHftMocker -> HFT 策略回调。 */
+TEST_F(R9Wired, HftBarPeriodsFromCsvReplayReachStrategyCallback)
+{
+	R9ReplayWorkspace workspace;
+	ASSERT_TRUE(workspace.ready());
+	ASSERT_TRUE(write_r9_replay_bars(workspace.base(), "m1", 1));
+	ASSERT_TRUE(write_r9_replay_bars(workspace.base(), "m5", 5));
+	ASSERT_TRUE(write_r9_replay_daily_bar(workspace.base()));
+
+	HisDataReplayer replayer;
+	WTSVariant* cfg = r9_replay_config(r9_replay_root(), workspace.base());
+	const bool initialized = replayer.init(cfg);
+	cfg->release();
+	ASSERT_TRUE(initialized);
+
+	R9ReplayHft hft(&replayer);
+	replayer.register_sink(&hft, "r9_hft_period_replay");
+	ASSERT_TRUE(replayer.prepare());
+	ASSERT_NE(nullptr, replayer.get_session_info(kR9ReplayCode, true));
+	replayer.run(false);
+
+	ASSERT_FALSE(g9.hft_periods.empty());
+	EXPECT_EQ(g9.hft_bar, g9.hft_periods.size());
+	const char* const expectedPeriods[] = {"m1", "m5", "h1", "f1", "d1"};
+	for (const char* expected : expectedPeriods)
+		EXPECT_NE(g9.hft_periods.end(), std::find(g9.hft_periods.begin(), g9.hft_periods.end(), expected));
+
+	for (const std::string& period : g9.hft_periods)
+	{
+		const bool knownPeriod = period == "m1" || period == "m5" || period == "h1" ||
+			period == "f1" || period == "d1";
+		EXPECT_TRUE(knownPeriod) << "unexpected period callback: " << period;
+	}
+	EXPECT_EQ(240, std::count(g9.hft_periods.begin(), g9.hft_periods.end(), "m1"));
+	EXPECT_EQ(48, std::count(g9.hft_periods.begin(), g9.hft_periods.end(), "m5"));
+	EXPECT_EQ(1, std::count(g9.hft_periods.begin(), g9.hft_periods.end(), "d1"));
 }
 
 /* on_tick_updated 先看订阅表，未订阅不得外发；订阅后把 tick 透传给 ctx_on_tick（ExpHftMocker.cpp:76-84） */

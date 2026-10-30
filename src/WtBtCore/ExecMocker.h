@@ -11,9 +11,13 @@
  */
 #pragma once
 #include <sstream>
+#include <exception>
+#include <mutex>
+#include <thread>
 #include "HisDataReplayer.h"
 
 #include "../Includes/ExecuteDefs.h"
+#include "../Includes/IExecPluginV2.h"
 #include "../Share/StdUtils.hpp"
 #include "../Share/DLLHelper.hpp"
 #include "MatchEngine.h"
@@ -259,10 +263,29 @@ public:
 	 * @return bool 初始化是否成功
 	 * @details 根据配置参数初始化执行单元模拟器，加载执行单元模块并设置其参数
 	 */
-	bool	init(WTSVariant* cfg);
+	bool	init(WTSVariant* cfg, std::string* error = NULL);
+
+	/**
+	 * @brief Request and wait for plugin-owned work to stop before destruction.
+	 * @details Each phase is retryable and must run on the same control thread.
+	 */
+	bool requestQuiesce(std::string* error = NULL);
+	bool canWaitQuiesce(std::string* error = NULL);
+	bool waitQuiesce(std::string* error = NULL);
+	bool quiesce(std::string* error = NULL);
+	/** Nonblocking preflight for the current thread before any replay stop/join. */
+	bool canStopFromCurrentThread() const;
 
 private:
+	bool beginQuiesceOperation(std::string* error);
+	void endQuiesceOperation();
+	bool isQuiesceComplete() const;
+	bool enterPluginCallback(bool allowWhenClosed = false) const;
+	void leavePluginCallback() const;
+	friend class ExecMockerPluginCallbackScope;
+
 	HisDataReplayer*	_replayer;    ///< 历史数据回放器指针
+	bool			_init_attempted; ///< 初始化仅允许尝试一次，避免覆盖已有插件资源
 
 	/**
 	 * @brief 执行器工厂信息结构体
@@ -272,9 +295,8 @@ private:
 	{
 		std::string		_module_path;    ///< 模块路径
 		DllHandle		_module_inst;    ///< 模块句柄
-		IExecuterFact*	_fact;          ///< 执行器工厂实例
-		FuncCreateExeFact	_creator;   ///< 创建执行器工厂的函数指针
-		FuncDeleteExeFact	_remover;   ///< 删除执行器工厂的函数指针
+		void*			_fact;          ///< V2 执行器工厂实例
+		const WtExecPluginApiV2* _api; ///< 已验证的 V2 回调表
 
 		/**
 		 * @brief 构造函数
@@ -284,6 +306,7 @@ private:
 		{
 			_module_inst = NULL;
 			_fact = NULL;
+			_api = NULL;
 		}
 
 		/**
@@ -292,13 +315,26 @@ private:
 		 */
 		~_ExecFactInfo()
 		{
-			if (_fact)
-				_remover(_fact);
+			// ExecMocker owns the ordered callback scopes and must clear both after
+			// explicit destruction. Never invoke plugin code from this fallback.
+			if (_fact || _module_inst)
+				std::terminate();
 		}
 	} ExecFactInfo;
 	ExecFactInfo	_factory;           ///< 执行器工厂实例
 
 	ExecuteUnit*	_exec_unit;         ///< 执行单元实例
+	bool			_unit_initialized;	 ///< 插件初始化是否成功
+	mutable std::mutex _quiesce_mutex;
+	mutable bool	_quiesce_call_active;
+	bool			_quiesce_request_attempted;
+	bool			_quiesce_requested;
+	bool			_quiesce_waited;
+	bool			_quiesce_can_wait_ready;
+	bool			_plugin_callbacks_closed;
+	mutable uint32_t	_active_plugin_callbacks;
+	std::thread::id _quiesce_thread;
+	std::thread::id _can_wait_thread;
 	std::string		_code;            ///< 合约代码
 	std::string		_period;          ///< K线周期
 	double			_volunit;           ///< 数量单位

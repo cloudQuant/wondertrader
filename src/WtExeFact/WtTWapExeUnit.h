@@ -73,6 +73,10 @@ public:
 	 */
 	virtual void init(ExecuteContext* ctx, const char* stdCode, WTSVariant* cfg) override;
 
+	// Queried by the V2 plugin callback after the single real init call.
+	// Kept non-virtual so the legacy ExecuteUnit vtable remains unchanged.
+	bool initializationSucceeded() const { return _config_valid; }
+
 	/**
 	 * @brief 处理订单回报
 	 * @details 处理订单状态变化，包括成交、撤销等情况，并更新内部订单管理状态
@@ -150,6 +154,9 @@ private:
 	/// @brief 交易通道是否就绪
 	bool			_channel_ready;
 
+	/// @brief 配置通过时间与切片参数校验后才允许执行
+	bool			_config_valid;
+
 	/// @brief 计算锁，防止多线程同时执行计算
 	StdUniqueMutex	_mtx_calc;
 
@@ -215,7 +222,7 @@ private:
 	/// @brief 本轮目标仓位，当前执行轮次的目标仓位
 	double			_this_target;
 
-	/// @brief 发单间隔，单位毫秒，两次发单之间的最小时间间隔
+	/// @brief 发单间隔，单位秒，两次发单之间的最小时间间隔
 	uint32_t		_fire_span;
 
 	/// @brief 已执行次数，当前已经执行的发单次数
@@ -258,7 +265,7 @@ private:
 		 * @brief 析构函数，释放计算锁
 		 */
 		~_CalcFlag() {
-			if (_flag)
+			if (_flag && !_result)
 				_flag->exchange(false, std::memory_order_acq_rel);
 		}
 

@@ -1,0 +1,39 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = L04ADStoreTest.*
+[==========] Running 9 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 9 tests from L04ADStoreTest
+[ RUN      ] L04ADStoreTest.BarCacheFileRoundTrip
+[       OK ] L04ADStoreTest.BarCacheFileRoundTrip (1 ms)
+[ RUN      ] L04ADStoreTest.MapSizeSetterFailureCleansEnvAndAllowsRoundTripRetry
+[       OK ] L04ADStoreTest.MapSizeSetterFailureCleansEnvAndAllowsRoundTripRetry (2 ms)
+[ RUN      ] L04ADStoreTest.TickCacheFileRoundTrip
+[       OK ] L04ADStoreTest.TickCacheFileRoundTrip (0 ms)
+[ RUN      ] L04ADStoreTest.BarsCommittedAndReadableBack
+[       OK ] L04ADStoreTest.BarsCommittedAndReadableBack (1 ms)
+[ RUN      ] L04ADStoreTest.GetLowersReturnsTailSliceWithLeftBound
+[       OK ] L04ADStoreTest.GetLowersReturnsTailSliceWithLeftBound (1 ms)
+[ RUN      ] L04ADStoreTest.GetUppersSkipsBarEqualToLastBarTime
+[       OK ] L04ADStoreTest.GetUppersSkipsBarEqualToLastBarTime (1 ms)
+[ RUN      ] L04ADStoreTest.CodesInSameDbAreIsolatedByKeyPrefix
+[       OK ] L04ADStoreTest.CodesInSameDbAreIsolatedByKeyPrefix (1 ms)
+[ RUN      ] L04ADStoreTest.TickRangeByDateUsesHftKeyOrdering
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/l04_ad_lmdb_store_test.cpp:455: Failure
+Expected equality of these values:
+  ((const WTSTickStruct*)one.data())->price
+    Which is: 4.5
+  2.5 + 5 * 0.5
+    Which is: 5
+
+[  FAILED  ] L04ADStoreTest.TickRangeByDateUsesHftKeyOrdering (2 ms)
+[ RUN      ] L04ADStoreTest.BarTimeEncodingMatchesReaderExpectation
+[       OK ] L04ADStoreTest.BarTimeEncodingMatchesReaderExpectation (0 ms)
+[----------] 9 tests from L04ADStoreTest (13 ms total)
+
+[----------] Global test environment tear-down
+[==========] 9 tests from 1 test suite ran. (13 ms total)
+[  PASSED  ] 8 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] L04ADStoreTest.TickRangeByDateUsesHftKeyOrdering
+
+ 1 FAILED TEST

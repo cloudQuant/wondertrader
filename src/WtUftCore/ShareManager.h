@@ -8,6 +8,11 @@
 #pragma once
 #include <stdint.h>
 #include <string>
+#include <atomic>
+#include <condition_variable>
+#include <exception>
+#include <mutex>
+#include <thread>
 
 #include "../Share/StdUtils.hpp"
 #include "../Includes/FasterDefs.h"
@@ -241,7 +246,7 @@ private:
 	 * 
 	 * 初始化基本属性值，实现单例模式
 	 */
-	ShareManager():_inited(false), _sync("sync"), _stopped(false), _engine(nullptr){}
+	ShareManager():_inited(false), _sync("sync"), _stopped(false), _engine(nullptr), _watch_thread_id(), _watch_join_in_progress(false), _watch_started(false){}
 	
 	/**
 	 * @brief 析构函数
@@ -250,9 +255,8 @@ private:
 	 */
 	~ShareManager()
 	{
-		_stopped = true;
-		if (_worker)
-			_worker->join();
+		if (!wait_watching_stopped())
+			std::terminate();
 	}
 
 public:
@@ -272,14 +276,25 @@ public:
 	/**
 	 * @brief 设置交易引擎对象
 	 * 
+	 * Must be called before start_watching(); startup calls must not race.
+	 * Changes are ignored after the watcher has started or stopped.
+	 *
 	 * @param engine 交易引擎指针
 	 */
-	void	set_engine(WtUftEngine* engine) { _engine = engine; }
+	void	set_engine(WtUftEngine* engine)
+	{
+		std::lock_guard<std::mutex> lock(_watch_mutex);
+		// An active or not-yet-joined worker may still hold the previous pointer.
+		if (_worker != nullptr || _watch_started || _stopped.load(std::memory_order_acquire))
+			return;
+		_engine = engine;
+	}
 
 	/**
 	 * @brief 初始化共享数据管理器
 	 * 
 	 * 加载指定的共享库模块，并获取相关函数指针
+	 * Must complete before start_watching(); initialization must not race startup.
 	 * 
 	 * @param module 共享模块完整路径
 	 * @return bool 初始化是否成功
@@ -290,6 +305,8 @@ public:
 	 * @brief 开始监控共享数据变化
 	 * 
 	 * 启动监控线程定期检查参数更新情况
+	 * initialize(), init_domain(), set_engine(), and commit_param_watcher() must
+	 * complete before this call and must not race with watcher startup.
 	 * 
 	 * @param microsecs 检查间隔微秒数，如果设为0则进入无限循环检查
 	 * @return bool 是否成功启动监控
@@ -297,9 +314,27 @@ public:
 	bool	start_watching(uint32_t microsecs);
 
 	/**
+	 * @brief Request watcher shutdown without waiting for its worker.
+	 *
+	 * This method is safe to call from the watcher callback itself. The borrowed
+	 * engine pointer remains attached until wait_watching_stopped() joins worker.
+	 */
+	bool	request_stop_watching();
+
+	/**
+	 * @brief Join the watcher and detach its borrowed engine pointer.
+	 *
+	 * Returns false when called on the watcher thread to prevent self-join. A
+	 * stopped ShareManager instance is one-shot; start_watching() will reject a
+	 * restart after shutdown has been requested.
+	 */
+	bool	wait_watching_stopped();
+
+	/**
 	 * @brief 初始化共享域
 	 * 
 	 * 使用指定标识符初始化共享域和同步域
+	 * Must complete before start_watching(); initialization must not race startup.
 	 * 
 	 * @param id 共享域标识符
 	 * @return bool 初始化是否成功
@@ -310,6 +345,7 @@ public:
 	 * @brief 提交参数监控器
 	 * 
 	 * 提交特定图片区域的更新，并记录更新时间
+	 * Register sections before start_watching(); registration must not race startup.
 	 * 
 	 * @param section 图片区域名称
 	 * @return bool 提交是否成功
@@ -550,9 +586,14 @@ private:
 
 	wt_hashmap<std::string, uint64_t>	_secnames;	/**< 图片区及其更新时间映射表 */
 
-	bool			_stopped;	/**< 是否已停止标志 */
+	std::atomic<bool>	_stopped;	/**< 是否已停止标志 */
 	StdThreadPtr	_worker;	/**< 监控线程指针 */
 	WtUftEngine*	_engine;	/**< 交易引擎指针 */
+	std::mutex		_watch_mutex;	/**< watcher 状态及图片区映射锁 */
+	std::condition_variable	_watch_condition;	/**< 并发 wait 调用通知 */
+	std::thread::id	_watch_thread_id;	/**< watcher 线程 ID，避免 join 与 get_id 并发访问 */
+	bool			_watch_join_in_progress;	/**< 是否已有控制线程负责 join */
+	bool			_watch_started;	/**< ShareManager watcher 是否曾启动（实例只启动一次） */
 
 	DllHandle		_inst;		/**< 动态库句柄 */
 	std::string		_module;	/**< 模块路径 */

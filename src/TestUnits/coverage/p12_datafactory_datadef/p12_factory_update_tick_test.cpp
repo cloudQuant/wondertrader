@@ -331,6 +331,47 @@ TEST_F(P12TickFactory, SecPathWithTimesAndUnixTime)
 	}
 }
 
+TEST_F(P12TickFactory, SecPathRejectsZeroSecondsWithoutMutation)
+{
+	newKline(KP_Tick, 0);
+	WTSBarStruct seed = {};
+	seed.date = 20240105;
+	seed.time = 90000;
+	seed.open = 3500.0;
+	seed.high = 3510.0;
+	seed.low = 3490.0;
+	seed.close = 3505.0;
+	seed.vol = 12.0;
+	seed.money = 42000.0;
+	seed.hold = 810.0;
+	seed.add = 3.0;
+	seed.settle = 3502.0;
+	m_kline->appendBar(seed);
+
+	WTSTickData* tick = keep(makeTick(3520.0, 5.0, 17600.0, 90020000));
+	EXPECT_EQ(NULL, m_factory.updateKlineData(m_kline, tick, m_sInfo));
+	ASSERT_EQ(1u, m_kline->size());
+	const WTSBarStruct* unchanged = m_kline->at(0);
+	EXPECT_EQ(seed.date, unchanged->date);
+	EXPECT_EQ(seed.time, unchanged->time);
+	EXPECT_DOUBLE_EQ(seed.open, unchanged->open);
+	EXPECT_DOUBLE_EQ(seed.high, unchanged->high);
+	EXPECT_DOUBLE_EQ(seed.low, unchanged->low);
+	EXPECT_DOUBLE_EQ(seed.close, unchanged->close);
+	EXPECT_DOUBLE_EQ(seed.vol, unchanged->vol);
+	EXPECT_DOUBLE_EQ(seed.money, unchanged->money);
+	EXPECT_DOUBLE_EQ(seed.hold, unchanged->hold);
+	EXPECT_DOUBLE_EQ(seed.add, unchanged->add);
+	EXPECT_DOUBLE_EQ(seed.settle, unchanged->settle);
+
+	// 合法 30 秒周期可正常生成对应的新 bar。
+	m_kline->setPeriod(KP_Tick, 30);
+	WTSBarStruct* thirtySecondBar = m_factory.updateKlineData(m_kline, tick, m_sInfo);
+	ASSERT_TRUE(thirtySecondBar != NULL);
+	EXPECT_EQ(90030u, thirtySecondBar->time);
+	delete thirtySecondBar;
+}
+
 TEST_F(P12TickFactory, RefCountPairedWithPoolAllocation)
 {
 	WTSTickData* tick = makeTick(3500.0, 1.0, 3500.0, 90100000);

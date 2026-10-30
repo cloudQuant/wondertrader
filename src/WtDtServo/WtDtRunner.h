@@ -12,6 +12,7 @@
  * 它封装了底层的数据存储和解析器管理，为上层应用提供统一的数据访问接口。
  */
 #pragma once
+#include <vector>
 #include "../WTSTools/WTSHotMgr.h"
 #include "../WTSTools/WTSBaseDataMgr.h"
 #include "../Share/StdUtils.hpp"
@@ -73,6 +74,16 @@ public:
 	 * 必须在initialize函数调用后才能调用该函数。
 	 */
 	void	start();
+
+	// A failed parser candidate is quarantined because its API may still call SPI.
+	// The caller must keep this runner and the raw-pointer context it owns alive
+	// until the parser provider confirms that callbacks have stopped.
+	bool	isInitialized() const { return _is_inited; }
+	uint32_t	activeParserCount() const { return _parsers.size(); }
+	bool	hasQuarantinedParser() const { return !_quarantined_parsers.empty(); }
+	// Reports adapter ownership only; it does not prove provider callback drain
+	// or that destroying this runner is safe.
+	bool	hasRetainedParserAdapters() const { return _parsers.hasRetainedAdapters() || hasQuarantinedParser(); }
 
 	/**
 	 * @brief 获取基础数据管理器
@@ -260,7 +271,7 @@ private:
 	 * @details 该函数根据配置初始化解析器，加载并初始化各个解析器模块。
 	 * 通常在initialize函数中调用。
 	 */
-	void	initParsers(WTSVariant* cfg);
+	bool	initParsers(WTSVariant* cfg);
 
 private:
 	/**
@@ -305,11 +316,16 @@ private:
 	 */
 	ParserAdapterMgr	_parsers;
 
+	// Candidates that returned failure stay out of _parsers so start() cannot
+	// connect them. Their provider callback-drain contract is not available here.
+	std::vector<ParserAdapterPtr> _quarantined_parsers;
+
 	/**
 	 * @brief 初始化标志
 	 * @details 标记数据服务运行器是否已经初始化
 	 */
 	bool			_is_inited;
+	bool			_parser_init_failed = false;
 
 	/**
 	 * @brief 订阅标志集合类型

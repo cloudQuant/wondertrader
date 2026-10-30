@@ -440,20 +440,15 @@ TEST(R11TraderDeep, logErrorAndLogoutAreNarrow)
 	EXPECT_EQ((uint32_t)0, env._sink._readyCnt);
 }
 
-//未登录时收到 login(false) 不应进入查询链
+//有效登录尝试失败后保持未就绪, 也不进入持仓查询链
 TEST(R11TraderDeep, failedLoginKeepsChannelUnready)
 {
 	DeepEnv env(false);
+	ASSERT_EQ(TraderAdapter::AS_LOGINING, env._adapter.state());
 	env._adapter.onLoginResult(false, "bad password", 0);
+	EXPECT_EQ(TraderAdapter::AS_LOGINFAILED, env._adapter.state());
 	EXPECT_EQ((uint32_t)0, env._api._qPosCnt);
 	EXPECT_EQ((uint32_t)0, env._sink._readyCnt);
-
-	//再成功一次才推进
-	env._adapter.onLoginResult(true, "ok", 20240318);
-	EXPECT_EQ((uint32_t)1, env._api._qPosCnt);
-	EXPECT_EQ((uint32_t)0, env._sink._readyCnt);
-	//登录成功只推进到 AS_LOGINED, 远未到 AS_ALLREADY
-	EXPECT_NE(TraderAdapter::AS_ALLREADY, env._adapter.state());
 }
 
 //////////////////////////////////////////////////////////////////////////

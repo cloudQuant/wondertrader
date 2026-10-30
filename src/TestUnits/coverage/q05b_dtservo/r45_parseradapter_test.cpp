@@ -5,13 +5,14 @@
  * 与 r8_parseradapter_test.cpp 互补：r8 只打了拒绝分支与 handle 守卫，
  * 本文件用 r45_fake_parserapi.h 的自用替身把「有 api」的正路径补齐：
  *  - initExt 成功链：registerSpi -> init(NULL) -> 合约集合 -> subscribe（:44-71）
- *  - initExt 的 api->init 失败分支（:74）
+ *  - initExt 的 api->init 失败分支与失败后 owner 保留
  *  - run 的 _parser_api!=NULL -> connect（:219-226）
  *  - release 的 api->release + delete（:205-217）
  *  - handleQuote 带 runner 的转发（:281-282）
  *  - handleTransaction/OrderDetail/OrderQueue 的「合约命中」尾段（:242-246/:256-260/:270-273）
  *  - ParserAdapterMgr 的 run/release 扇出（:301-309/:339-347）
- * 不加载任何插件 DLL，不建 socket/线程；所有替身对象都由适配器持有。
+ * 不加载任何插件 DLL，不建 socket/线程；堆分配的替身在 initExt 入口转交给 adapter，
+ * 由同步 fake 验证先达到 fake 专属静默点、再释放对象。
  */
 #include <gtest/gtest.h>
 
@@ -19,7 +20,9 @@
 #include <cstdint>
 #include <cstring>
 #include <fstream>
+#include <stdexcept>
 #include <string>
+#include <dlfcn.h>
 #include <unistd.h>
 #include <vector>
 
@@ -42,7 +45,197 @@ int FakeParserApi::s_deleted = 0;
 int FakeParserApi::s_release_calls = 0;
 }
 
+// Narrow friend access lets the test install a controllable module deleter
+// without building or loading a test plugin DLL.
+struct ParserAdapterTestAccess
+{
+	static void setRemover(ParserAdapter& adapter, FuncDeleteParser remover)
+	{
+		adapter._remover = remover;
+	}
+
+	static FuncDeleteParser remover(const ParserAdapter& adapter)
+	{
+		return adapter._remover;
+	}
+
+	static IParserApi* api(const ParserAdapter& adapter)
+	{
+		return adapter._parser_api;
+	}
+
+	static IParserApi* uncertainOriginalApi(const ParserAdapter& adapter)
+	{
+		return adapter._uncertain_original_api;
+	}
+
+	static bool releaseUncertain(const ParserAdapter& adapter)
+	{
+		return adapter._release_uncertain;
+	}
+
+	static void setModuleHandle(ParserAdapter& adapter, void* handle)
+	{
+		adapter._module_handle = handle;
+	}
+
+	static void* moduleHandle(const ParserAdapter& adapter)
+	{
+		return adapter._module_handle;
+	}
+
+	static void setConfig(ParserAdapter& adapter, WTSVariant* cfg)
+	{
+		adapter._cfg = cfg;
+	}
+
+	static WTSVariant* config(const ParserAdapter& adapter)
+	{
+		return adapter._cfg;
+	}
+
+	static void abandonUncertainStateForTest(ParserAdapter& adapter)
+	{
+		adapter._parser_api = nullptr;
+		adapter._uncertain_original_api = nullptr;
+		adapter._release_uncertain = false;
+		adapter._remover = nullptr;
+		adapter._module_handle = nullptr;
+		adapter._cfg = nullptr;
+	}
+};
+
 namespace {
+
+// This fake has no worker thread and cannot emit callbacks asynchronously.
+// Its release() marks this fake's callback source quiescent; this does not
+// imply that arbitrary provider release() implementations drain callbacks.
+class R45QuiescentParserApi : public r45::FakeParserApi
+{
+public:
+	explicit R45QuiescentParserApi(bool initOk = true, bool connectOk = true)
+		: r45::FakeParserApi(initOk, connectOk)
+	{
+	}
+
+	~R45QuiescentParserApi() override
+	{
+		if (!_quiescent)
+			++s_destroyed_before_quiescence;
+	}
+
+	void release() override
+	{
+		r45::FakeParserApi::release();
+		_quiescent = true;
+		++s_quiescent_releases;
+	}
+
+	static void reset()
+	{
+		s_quiescent_releases = 0;
+		s_destroyed_before_quiescence = 0;
+	}
+
+	static int s_quiescent_releases;
+	static int s_destroyed_before_quiescence;
+
+private:
+	bool _quiescent = false;
+};
+
+int R45QuiescentParserApi::s_quiescent_releases = 0;
+int R45QuiescentParserApi::s_destroyed_before_quiescence = 0;
+
+// The fake owns no worker or asynchronous callback source. The test marks the
+// fake quiescent only after a separate simulated callback-return barrier; its
+// API release() deliberately does not assert that barrier.
+class R45ControlledDeleterApi : public r45::FakeParserApi
+{
+public:
+	explicit R45ControlledDeleterApi(bool initOk = true)
+		: r45::FakeParserApi(initOk, true)
+	{
+	}
+
+	~R45ControlledDeleterApi() override
+	{
+		if (s_quiescent)
+			++s_deleted_after_quiescence;
+		else
+			++s_deleted_before_quiescence;
+	}
+
+	static void reset()
+	{
+		s_quiescent = false;
+		s_deleter_calls = 0;
+		s_deleted_before_quiescence = 0;
+		s_deleted_after_quiescence = 0;
+	}
+
+	static void markCallbacksQuiescent()
+	{
+		s_quiescent = true;
+	}
+
+	static bool s_quiescent;
+	static int s_deleter_calls;
+	static int s_deleted_before_quiescence;
+	static int s_deleted_after_quiescence;
+};
+
+bool R45ControlledDeleterApi::s_quiescent = false;
+int R45ControlledDeleterApi::s_deleter_calls = 0;
+int R45ControlledDeleterApi::s_deleted_before_quiescence = 0;
+int R45ControlledDeleterApi::s_deleted_after_quiescence = 0;
+
+void r45_pa_controlled_delete_parser(wtp::IParserApi*& api)
+{
+	++R45ControlledDeleterApi::s_deleter_calls;
+	if (api != nullptr && R45ControlledDeleterApi::s_quiescent)
+	{
+		delete api;
+		api = nullptr;
+	}
+}
+
+class R45MutatingParserDeleter
+{
+public:
+	static void reset()
+	{
+		s_replacement = nullptr;
+		s_calls = 0;
+	}
+
+	static void replacePointer(wtp::IParserApi*& api)
+	{
+		++s_calls;
+		api = s_replacement;
+	}
+
+	static wtp::IParserApi* s_replacement;
+	static int s_calls;
+};
+
+wtp::IParserApi* R45MutatingParserDeleter::s_replacement = nullptr;
+int R45MutatingParserDeleter::s_calls = 0;
+
+class R45ThrowingParserDeleter
+{
+public:
+	static void reset() { s_calls = 0; }
+	static void throwAfterCall(wtp::IParserApi*& /*api*/)
+	{
+		++s_calls;
+		throw std::runtime_error("controlled parser deleter failure");
+	}
+
+	static int s_calls;
+};
+
+int R45ThrowingParserDeleter::s_calls = 0;
 
 struct R45PaTickProbe
 {
@@ -82,6 +275,10 @@ protected:
 	{
 		_dir = r45_pa_make_tmp_dir();
 		r45::FakeParserApi::resetCounters();
+		R45QuiescentParserApi::reset();
+		R45ControlledDeleterApi::reset();
+		R45MutatingParserDeleter::reset();
+		R45ThrowingParserDeleter::reset();
 		R45PaTickProbe::codes.clear();
 
 		r45_pa_write(_dir / "sessions.json",
@@ -128,12 +325,12 @@ protected:
 };
 
 // ---------------------------------------------------------------------------
-// initExt 正路径
+// initExt 正路径与所有权
 // ---------------------------------------------------------------------------
 
 TEST_F(R45ParserAdapterFakeTest, InitExtRegistersSpiAndSubscribesAllContracts)
 {
-	r45::FakeParserApi* api = new r45::FakeParserApi(true, true);
+	R45QuiescentParserApi* api = new R45QuiescentParserApi(true, true);
 	ParserAdapter pa(&_bdMgr, nullptr);
 
 	// ParserAdapter.cpp:46-71：api 非空 -> registerSpi -> init(NULL) 成功 ->
@@ -156,27 +353,95 @@ TEST_F(R45ParserAdapterFakeTest, InitExtRegistersSpiAndSubscribesAllContracts)
 
 	// ParserAdapter.cpp:293-296 透传
 	EXPECT_EQ(pa.getBaseDataMgr(), static_cast<IBaseDataMgr*>(&_bdMgr));
+
+	pa.release();
+	EXPECT_EQ(R45QuiescentParserApi::s_quiescent_releases, 1);
+	EXPECT_EQ(R45QuiescentParserApi::s_destroyed_before_quiescence, 0);
 }
 
 TEST_F(R45ParserAdapterFakeTest, InitExtApiInitFailureSkipsSubscribe)
 {
-	r45::FakeParserApi* api = new r45::FakeParserApi(false, true);
+	R45QuiescentParserApi* api = new R45QuiescentParserApi(false, true);
 	ParserAdapter pa(&_bdMgr, nullptr);
 
-	// ParserAdapter.cpp:72-75：api->init 返回 false -> 只记 parser 日志，不订阅；
-	// initExt 自身仍返回 true（返回值不反映 api 初始化结果）
-	ASSERT_TRUE(pa.initExt("r45_ext_bad", api));
+	// Ownership transfers at entry even when init() fails. This synchronous fake
+	// has no asynchronous callback source; its release() is its test-only quiet
+	// point before the adapter destroys it.
+	EXPECT_FALSE(pa.initExt("r45_ext_bad", api));
 	EXPECT_EQ(api->init_calls, 1);
 	EXPECT_EQ(api->subscribe_calls, 0);
 	EXPECT_TRUE(api->subscribed.empty());
-	// run 不看初始化结果，仍会 connect
-	EXPECT_TRUE(pa.run());
-	EXPECT_EQ(api->connect_calls, 1);
+	EXPECT_FALSE(pa.run());
+	EXPECT_EQ(api->connect_calls, 0);
+	EXPECT_EQ(r45::FakeParserApi::s_deleted, 0);
+	EXPECT_EQ(r45::FakeParserApi::s_release_calls, 0);
+
+	pa.release();
+	EXPECT_EQ(r45::FakeParserApi::s_release_calls, 1);
+	EXPECT_EQ(r45::FakeParserApi::s_deleted, 1);
+	EXPECT_EQ(R45QuiescentParserApi::s_quiescent_releases, 1);
+	EXPECT_EQ(R45QuiescentParserApi::s_destroyed_before_quiescence, 0);
+}
+
+TEST_F(R45ParserAdapterFakeTest, InitExtTransfersNonNullApiEvenWhenIdIsInvalid)
+{
+	R45QuiescentParserApi* api = new R45QuiescentParserApi(true, true);
+	ParserAdapter pa(&_bdMgr, nullptr);
+
+	EXPECT_FALSE(pa.initExt(nullptr, api));
+	EXPECT_EQ(api->register_calls, 0);
+	EXPECT_EQ(r45::FakeParserApi::s_deleted, 0);
+
+	pa.release();
+	EXPECT_EQ(r45::FakeParserApi::s_release_calls, 1);
+	EXPECT_EQ(r45::FakeParserApi::s_deleted, 1);
+	EXPECT_EQ(R45QuiescentParserApi::s_quiescent_releases, 1);
+	EXPECT_EQ(R45QuiescentParserApi::s_destroyed_before_quiescence, 0);
+}
+
+TEST_F(R45ParserAdapterFakeTest, BusyInitExtRetainsEachUniqueTransferredApi)
+{
+	R45QuiescentParserApi* primary = new R45QuiescentParserApi(true, true);
+	R45QuiescentParserApi* rejected = new R45QuiescentParserApi(true, true);
+	ParserAdapter pa(&_bdMgr, nullptr);
+	ASSERT_TRUE(pa.initExt("r45_busy_primary", primary));
+
+	// Re-passing an already-owned pointer does not create another owner.
+	EXPECT_FALSE(pa.initExt("r45_busy_same", primary));
+	// A distinct API is transferred despite rejection; its repeated handoff is
+	// deduplicated and the API is never initialized or registered here.
+	EXPECT_FALSE(pa.initExt("r45_busy_distinct", rejected));
+	EXPECT_FALSE(pa.initExt("r45_busy_distinct_again", rejected));
+	EXPECT_EQ(rejected->register_calls, 0);
+	EXPECT_EQ(rejected->init_calls, 0);
+	EXPECT_EQ(r45::FakeParserApi::s_deleted, 0);
+
+	pa.release();
+	EXPECT_EQ(r45::FakeParserApi::s_release_calls, 2);
+	EXPECT_EQ(r45::FakeParserApi::s_deleted, 2);
+	EXPECT_EQ(R45QuiescentParserApi::s_quiescent_releases, 2);
+	EXPECT_EQ(R45QuiescentParserApi::s_destroyed_before_quiescence, 0);
+}
+
+TEST_F(R45ParserAdapterFakeTest, InitExtWithoutBaseDataManagerRetainsApi)
+{
+	R45QuiescentParserApi* api = new R45QuiescentParserApi(true, true);
+	ParserAdapter pa(nullptr, nullptr);
+
+	EXPECT_FALSE(pa.initExt("r45_no_base_data_manager", api));
+	EXPECT_EQ(api->init_calls, 1);
+	EXPECT_EQ(api->subscribe_calls, 0);
+	EXPECT_EQ(r45::FakeParserApi::s_deleted, 0);
+
+	pa.release();
+	EXPECT_EQ(r45::FakeParserApi::s_release_calls, 1);
+	EXPECT_EQ(r45::FakeParserApi::s_deleted, 1);
+	EXPECT_EQ(R45QuiescentParserApi::s_destroyed_before_quiescence, 0);
 }
 
 TEST_F(R45ParserAdapterFakeTest, ReleaseCallsApiReleaseThenDeletesIt)
 {
-	r45::FakeParserApi* api = new r45::FakeParserApi(true, true);
+	R45QuiescentParserApi* api = new R45QuiescentParserApi(true, true);
 	ParserAdapter pa(&_bdMgr, nullptr);
 	ASSERT_TRUE(pa.initExt("r45_ext_rel", api));
 
@@ -184,6 +449,8 @@ TEST_F(R45ParserAdapterFakeTest, ReleaseCallsApiReleaseThenDeletesIt)
 	pa.release();
 	EXPECT_EQ(r45::FakeParserApi::s_release_calls, 1);
 	EXPECT_EQ(r45::FakeParserApi::s_deleted, 1);
+	EXPECT_EQ(R45QuiescentParserApi::s_quiescent_releases, 1);
+	EXPECT_EQ(R45QuiescentParserApi::s_destroyed_before_quiescence, 0);
 
 	// :207 置 _stopped 后，即使再喂 tick 也不再转发
 	WTSTickData* tick = WTSTickData::create("IC2204");
@@ -194,6 +461,150 @@ TEST_F(R45ParserAdapterFakeTest, ReleaseCallsApiReleaseThenDeletesIt)
 	pa.handleQuote(tick, 0);
 	EXPECT_TRUE(R45PaTickProbe::codes.empty());
 	tick->release();
+}
+
+TEST_F(R45ParserAdapterFakeTest, ReleaseRetainsModuleContextWhenDeleterDefersSamePointer)
+{
+	void* moduleHandle = ::dlopen(nullptr, RTLD_NOW);
+	ASSERT_NE(moduleHandle, nullptr);
+	R45ControlledDeleterApi* api = new R45ControlledDeleterApi(true);
+	ParserAdapterPtr adapter(new ParserAdapter(&_bdMgr, nullptr));
+	ASSERT_TRUE(adapter->initExt("r45_deferred_delete", api));
+
+	WTSVariant* context = WTSVariant::createObject();
+	ASSERT_NE(context, nullptr);
+	context->retain(); // one ref remains with the test; one is installed as adapter context
+	ParserAdapterTestAccess::setRemover(*adapter, &r45_pa_controlled_delete_parser);
+	ParserAdapterTestAccess::setModuleHandle(*adapter, moduleHandle);
+	ParserAdapterTestAccess::setConfig(*adapter, context);
+	ParserAdapterMgr mgr;
+	ASSERT_TRUE(mgr.addAdapter("r45_deferred_delete", adapter));
+	adapter.reset(); // the manager is now the only adapter owner
+
+	// The fake deleter leaves the same API pointer while callback-stack cleanup
+	// is not yet safe. IParserApi::release() does not set the fake's quiescence bit.
+	mgr.release();
+	EXPECT_EQ(R45ControlledDeleterApi::s_deleter_calls, 1);
+	EXPECT_EQ(r45::FakeParserApi::s_release_calls, 1);
+	EXPECT_EQ(r45::FakeParserApi::s_deleted, 0);
+	EXPECT_TRUE(mgr.hasRetainedAdapters());
+	EXPECT_EQ(mgr.size(), 1u);
+	ParserAdapterPtr retained = mgr.getAdapter("r45_deferred_delete");
+	ASSERT_NE(retained.get(), nullptr);
+	EXPECT_EQ(ParserAdapterTestAccess::api(*retained), static_cast<IParserApi*>(api));
+	EXPECT_EQ(ParserAdapterTestAccess::remover(*retained), &r45_pa_controlled_delete_parser);
+	EXPECT_FALSE(ParserAdapterTestAccess::releaseUncertain(*retained));
+	EXPECT_EQ(ParserAdapterTestAccess::moduleHandle(*retained), moduleHandle);
+	EXPECT_EQ(ParserAdapterTestAccess::config(*retained), context);
+	EXPECT_EQ(context->retainCount(), 2u);
+	retained.reset();
+
+	// A separate test-controlled barrier marks callbacks drained. Retry on that
+	// safe path; successful cleanup also releases the valid process module handle.
+	R45ControlledDeleterApi::markCallbacksQuiescent();
+	mgr.release();
+	EXPECT_EQ(R45ControlledDeleterApi::s_deleter_calls, 2);
+	EXPECT_EQ(r45::FakeParserApi::s_release_calls, 2);
+	EXPECT_EQ(r45::FakeParserApi::s_deleted, 1);
+	EXPECT_EQ(R45ControlledDeleterApi::s_deleted_before_quiescence, 0);
+	EXPECT_EQ(R45ControlledDeleterApi::s_deleted_after_quiescence, 1);
+	EXPECT_FALSE(mgr.hasRetainedAdapters());
+	EXPECT_EQ(mgr.size(), 0u);
+	EXPECT_EQ(context->retainCount(), 1u);
+	context->release();
+}
+
+TEST_F(R45ParserAdapterFakeTest, ReleaseStopsWhenDeleterChangesApiPointer)
+{
+	void* moduleHandle = ::dlopen(nullptr, RTLD_NOW);
+	ASSERT_NE(moduleHandle, nullptr);
+	r45::FakeParserApi* original = new r45::FakeParserApi(true, true);
+	r45::FakeParserApi* replacement = new r45::FakeParserApi(true, true);
+	ParserAdapter pa(&_bdMgr, nullptr);
+	ASSERT_TRUE(pa.initExt("r45_uncertain_delete", original));
+
+	WTSVariant* context = WTSVariant::createObject();
+	ASSERT_NE(context, nullptr);
+	context->retain();
+	R45MutatingParserDeleter::s_replacement = replacement;
+	ParserAdapterTestAccess::setRemover(pa, &R45MutatingParserDeleter::replacePointer);
+	ParserAdapterTestAccess::setModuleHandle(pa, moduleHandle);
+	ParserAdapterTestAccess::setConfig(pa, context);
+
+	// V1 does not define a non-null replacement pointer's identity. Preserve both
+	// addresses and all context, then make later release attempts inert.
+	pa.release();
+	EXPECT_EQ(R45MutatingParserDeleter::s_calls, 1);
+	EXPECT_EQ(r45::FakeParserApi::s_release_calls, 1);
+	EXPECT_EQ(r45::FakeParserApi::s_deleted, 0);
+	EXPECT_EQ(ParserAdapterTestAccess::api(pa), static_cast<IParserApi*>(replacement));
+	EXPECT_EQ(ParserAdapterTestAccess::uncertainOriginalApi(pa), static_cast<IParserApi*>(original));
+	EXPECT_TRUE(ParserAdapterTestAccess::releaseUncertain(pa));
+	EXPECT_EQ(ParserAdapterTestAccess::moduleHandle(pa), moduleHandle);
+	EXPECT_EQ(ParserAdapterTestAccess::config(pa), context);
+	EXPECT_EQ(context->retainCount(), 2u);
+
+	pa.release();
+	EXPECT_EQ(R45MutatingParserDeleter::s_calls, 1);
+	EXPECT_EQ(r45::FakeParserApi::s_release_calls, 1);
+	EXPECT_EQ(r45::FakeParserApi::s_deleted, 0);
+	EXPECT_EQ(ParserAdapterTestAccess::moduleHandle(pa), moduleHandle);
+	EXPECT_EQ(ParserAdapterTestAccess::config(pa), context);
+
+	// The deliberately nonconforming fake left ownership identity unresolved.
+	// Detach only in test cleanup, then reclaim its two synchronous fake objects.
+	ParserAdapterTestAccess::abandonUncertainStateForTest(pa);
+	::dlclose(moduleHandle);
+	delete original;
+	delete replacement;
+	context->release(); // adapter's retained reference
+	context->release(); // test's reference
+}
+
+TEST_F(R45ParserAdapterFakeTest, ManagerRetainsAdapterWhenPluginDeleterThrows)
+{
+	r45::FakeParserApi* api = new r45::FakeParserApi(true, true);
+	ParserAdapterPtr adapter(new ParserAdapter(&_bdMgr, nullptr));
+	ASSERT_TRUE(adapter->initExt("r45_throwing_deleter", api));
+	ParserAdapterTestAccess::setRemover(*adapter, &R45ThrowingParserDeleter::throwAfterCall);
+
+	ParserAdapterMgr mgr;
+	ASSERT_TRUE(mgr.addAdapter("r45_throwing_deleter", adapter));
+	adapter.reset();
+
+	// The adapter catches the plugin exception and marks ownership uncertain;
+	// manager release must retain its sole shared owner instead of clearing it.
+	mgr.release();
+	EXPECT_TRUE(mgr.hasRetainedAdapters());
+	EXPECT_EQ(mgr.size(), 1u);
+	EXPECT_EQ(R45ThrowingParserDeleter::s_calls, 1);
+	EXPECT_EQ(r45::FakeParserApi::s_release_calls, 1);
+	EXPECT_EQ(r45::FakeParserApi::s_deleted, 0);
+	ParserAdapterPtr retained = mgr.getAdapter("r45_throwing_deleter");
+	ASSERT_NE(retained.get(), nullptr);
+	EXPECT_TRUE(ParserAdapterTestAccess::releaseUncertain(*retained));
+	EXPECT_EQ(ParserAdapterTestAccess::api(*retained), static_cast<IParserApi*>(api));
+	retained.reset();
+
+	// Sticky uncertainty blocks further provider calls until an external recovery
+	// decision; it must not silently clear the map on another shutdown pass.
+	mgr.release();
+	EXPECT_TRUE(mgr.hasRetainedAdapters());
+	EXPECT_EQ(mgr.size(), 1u);
+	EXPECT_EQ(R45ThrowingParserDeleter::s_calls, 1);
+	EXPECT_EQ(r45::FakeParserApi::s_release_calls, 1);
+	EXPECT_EQ(r45::FakeParserApi::s_deleted, 0);
+
+	// Test cleanup manually reclaims the synchronous fake after proving it stayed
+	// retained; this is not an adapter recovery path.
+	retained = mgr.getAdapter("r45_throwing_deleter");
+	ASSERT_NE(retained.get(), nullptr);
+	ParserAdapterTestAccess::abandonUncertainStateForTest(*retained);
+	delete api;
+	retained.reset();
+	mgr.release();
+	EXPECT_FALSE(mgr.hasRetainedAdapters());
+	EXPECT_EQ(mgr.size(), 0u);
 }
 
 // ---------------------------------------------------------------------------
@@ -271,8 +682,8 @@ TEST_F(R45ParserAdapterFakeTest, DetailHandlersPassContractLookup)
 
 TEST_F(R45ParserAdapterFakeTest, ManagerRunsAndReleasesLiveAdapters)
 {
-	r45::FakeParserApi* api1 = new r45::FakeParserApi(true, true);
-	r45::FakeParserApi* api2 = new r45::FakeParserApi(true, true);
+	R45QuiescentParserApi* api1 = new R45QuiescentParserApi(true, true);
+	R45QuiescentParserApi* api2 = new R45QuiescentParserApi(true, true);
 	ParserAdapterPtr pa1(new ParserAdapter(&_bdMgr, nullptr));
 	ParserAdapterPtr pa2(new ParserAdapter(&_bdMgr, nullptr));
 	ASSERT_TRUE(pa1->initExt("r45_mgr1", api1));
@@ -293,19 +704,13 @@ TEST_F(R45ParserAdapterFakeTest, ManagerRunsAndReleasesLiveAdapters)
 	mgr.release();
 	EXPECT_EQ(r45::FakeParserApi::s_release_calls, 2);
 	EXPECT_EQ(r45::FakeParserApi::s_deleted, 2);
+	EXPECT_EQ(R45QuiescentParserApi::s_quiescent_releases, 2);
+	EXPECT_EQ(R45QuiescentParserApi::s_destroyed_before_quiescence, 0);
 	EXPECT_EQ(mgr.size(), 0u);
 	EXPECT_EQ(mgr.getAdapter("r45_mgr1").get(), nullptr);
 }
 
 // ---------------------------------------------------------------------------
-// ParserAdapter 的公开生命周期只验证单次初始化；重复 initExt 合同未证明。
-// ---------------------------------------------------------------------------
-
-TEST_F(R45ParserAdapterFakeTest, DISABLED_SecondInitExtContractUnproven)
-{
-	GTEST_SKIP() << "Repeated initExt behavior is unspecified; the tested lifecycle initializes each adapter once.";
-}
-
 /*!
  * ParserAdapterMgr::release() 对登记 adapter 释放一次后清空集合；公开生命周期没有
  * 声明 ParserAdapter::release() 可重复调用。直接二次调用不据此判定为产品缺陷。

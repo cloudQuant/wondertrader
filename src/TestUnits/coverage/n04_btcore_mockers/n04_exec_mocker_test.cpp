@@ -13,12 +13,15 @@
 #include <gtest/gtest.h>
 
 #include <cfloat>
+#include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <string>
 
 #include <WtBtCore/HisDataReplayer.h>
 #include <WtBtCore/ExecMocker.h>
 #include <Includes/WTSDataDef.hpp>
+#include <Includes/WTSTradeDef.hpp>
 #include <Includes/WTSVariant.hpp>
 #include <Share/TimeUtils.hpp>
 
@@ -81,6 +84,14 @@ protected:
 		tick->release();
 	}
 
+	void expectEmptyOrders(const char* code)
+	{
+		OrderMap* orders = exec->getOrders(code);
+		ASSERT_NE(nullptr, orders);
+		EXPECT_EQ(0u, orders->size());
+		orders->release();
+	}
+
 	WTSTickData* newBook()
 	{
 		return makeTick(kStdCode, 10.0, 1000, 10.0, 500, 10.1, 600);
@@ -106,7 +117,7 @@ TEST_F(ExecMockerTest, freshUnitHasFlatAccountState)
 	EXPECT_DOUBLE_EQ(0.0, exec->getPosition(kStdCode, false, 1));
 	EXPECT_DOUBLE_EQ(0.0, exec->getPosition(kStdCode, true, 2));
 	EXPECT_DOUBLE_EQ(0.0, exec->getUndoneQty(kStdCode));
-	EXPECT_EQ(nullptr, exec->getOrders(kStdCode));
+	expectEmptyOrders(kStdCode);
 	EXPECT_EQ(nullptr, exec->grabLastTick(kStdCode));
 }
 
@@ -144,7 +155,7 @@ TEST_F(ExecMockerTest, initParsesConfigAndFailsWhenModuleMissing)
 	// init 失败不得改变账户状态
 	EXPECT_DOUBLE_EQ(0.0, exec->getPosition(kStdCode));
 	EXPECT_DOUBLE_EQ(0.0, exec->getUndoneQty(kStdCode));
-	EXPECT_EQ(nullptr, exec->getOrders(kStdCode));
+	expectEmptyOrders(kStdCode);
 }
 
 TEST_F(ExecMockerTest, buySellWithoutCachedTickCreateNoOrders)
@@ -170,8 +181,9 @@ TEST_F(ExecMockerTest, passiveBuyRegistersOrderAndTracksUndoneQty)
 
 	EXPECT_TRUE(exec->cancel(ids[0]));
 	EXPECT_DOUBLE_EQ(0.0, exec->getUndoneQty(kStdCode));
-	// 重复撤单：撮合引擎已无该订单
+	// state 9 remains pending until a later tick; a duplicate request must not debit twice.
 	EXPECT_FALSE(exec->cancel(ids[0]));
+	EXPECT_DOUBLE_EQ(0.0, exec->getUndoneQty(kStdCode));
 }
 
 TEST_F(ExecMockerTest, passiveSellUsesNegativeUndoneSign)
@@ -190,6 +202,138 @@ TEST_F(ExecMockerTest, passiveSellUsesNegativeUndoneSign)
 	OrderIDs sold = exec->cancel(kStdCode, false, 0);
 	EXPECT_EQ(1u, sold.size());
 	EXPECT_DOUBLE_EQ(0.0, exec->getUndoneQty(kStdCode));
+}
+
+TEST_F(ExecMockerTest, getOrdersReturnsIndependentGrossSnapshotsForOpposingOrders)
+{
+	feedTick(newBook());
+	OrderIDs buys = exec->buy(kStdCode, 10.0, 100);
+	OrderIDs sells = exec->sell(kStdCode, 10.1, 100);
+	ASSERT_EQ(1u, buys.size());
+	ASSERT_EQ(1u, sells.size());
+	EXPECT_DOUBLE_EQ(0.0, exec->getUndoneQty(kStdCode));
+
+	OrderMap* beforeCancel = exec->getOrders(kStdCode);
+	ASSERT_NE(nullptr, beforeCancel);
+	ASSERT_EQ(2u, beforeCancel->size());
+	WTSOrderInfo* buy = static_cast<WTSOrderInfo*>(beforeCancel->get(buys.front()));
+	WTSOrderInfo* sell = static_cast<WTSOrderInfo*>(beforeCancel->get(sells.front()));
+	ASSERT_NE(nullptr, buy);
+	ASSERT_NE(nullptr, sell);
+	EXPECT_STREQ(kStdCode, buy->getCode());
+	EXPECT_EQ(buys.front(), static_cast<uint32_t>(std::strtoul(buy->getOrderID(), nullptr, 10)));
+	EXPECT_EQ(WDT_LONG, buy->getDirection());
+	EXPECT_TRUE(buy->isBuyAction());
+	EXPECT_DOUBLE_EQ(100.0, buy->getVolume());
+	EXPECT_DOUBLE_EQ(100.0, buy->getVolLeft());
+	EXPECT_DOUBLE_EQ(0.0, buy->getVolTraded());
+	EXPECT_DOUBLE_EQ(10.0, buy->getPrice());
+	EXPECT_EQ(WOS_Submitting, buy->getOrderState());
+	EXPECT_EQ(sells.front(), static_cast<uint32_t>(std::strtoul(sell->getOrderID(), nullptr, 10)));
+	EXPECT_EQ(WDT_SHORT, sell->getDirection());
+	EXPECT_FALSE(sell->isBuyAction());
+	EXPECT_DOUBLE_EQ(100.0, sell->getVolume());
+	EXPECT_DOUBLE_EQ(100.0, sell->getVolLeft());
+
+	// Cancellation remains pending until a future tick acknowledges it. The
+	// already-returned map stays detached from subsequent matcher mutations.
+	EXPECT_TRUE(exec->cancel(buys.front()));
+	EXPECT_EQ(WOS_Submitting, buy->getOrderState());
+	OrderMap* afterCancel = exec->getOrders(kStdCode);
+	ASSERT_NE(nullptr, afterCancel);
+	ASSERT_EQ(2u, afterCancel->size());
+	WTSOrderInfo* cancelPending = static_cast<WTSOrderInfo*>(afterCancel->get(buys.front()));
+	ASSERT_NE(nullptr, cancelPending);
+	EXPECT_EQ(WOS_Cancelling, cancelPending->getOrderState());
+	EXPECT_DOUBLE_EQ(100.0, cancelPending->getVolLeft());
+
+	beforeCancel->release();
+	afterCancel->release();
+}
+
+TEST_F(ExecMockerTest, getOrdersInitializesEveryFieldAndClearsReusedPoolStorage)
+{
+	feedTick(newBook());
+	OrderIDs firstIds = exec->buy(kStdCode, 10.1, 100);
+	ASSERT_EQ(1u, firstIds.size());
+	OrderMap* firstMap = exec->getOrders(kStdCode);
+	ASSERT_NE(nullptr, firstMap);
+	WTSOrderInfo* first = static_cast<WTSOrderInfo*>(firstMap->get(firstIds.front()));
+	ASSERT_NE(nullptr, first);
+	const uintptr_t pooledAddress = reinterpret_cast<uintptr_t>(first);
+	EXPECT_STREQ("SSE", first->getExchg());
+	EXPECT_STREQ(kStdCode, first->getCode());
+	EXPECT_EQ(WDT_LONG, first->getDirection());
+	EXPECT_EQ(WPT_LIMITPRICE, first->getPriceType());
+	EXPECT_EQ(WOF_NOR, first->getOrderFlag());
+	EXPECT_EQ(WOT_OPEN, first->getOffsetType());
+	EXPECT_EQ(0u, first->getOffsetFlag());
+	EXPECT_TRUE(first->isBuyAction());
+	EXPECT_EQ(BT_CASH, first->getBusinessType());
+	EXPECT_DOUBLE_EQ(100.0, first->getVolume());
+	EXPECT_DOUBLE_EQ(10.1, first->getPrice());
+	EXPECT_STREQ("", first->getEntrustID());
+	EXPECT_STREQ("", first->getUserTag());
+	EXPECT_FALSE(first->isNet());
+	EXPECT_TRUE(first->isNetBuy());
+	EXPECT_EQ(nullptr, first->getContractInfo());
+	EXPECT_EQ(nullptr, first->getExtras());
+	EXPECT_EQ(0u, first->getOrderDate());
+	EXPECT_EQ(0u, first->getOrderTime());
+	EXPECT_DOUBLE_EQ(0.0, first->getVolTraded());
+	EXPECT_DOUBLE_EQ(100.0, first->getVolLeft());
+	EXPECT_EQ(WOS_Submitting, first->getOrderState());
+	EXPECT_EQ(WORT_Normal, first->getOrderType());
+	EXPECT_STREQ(std::to_string(firstIds.front()).c_str(), first->getOrderID());
+	EXPECT_STREQ("", first->getStateMsg());
+	EXPECT_TRUE(first->isAlive());
+	EXPECT_FALSE(first->isError());
+	EXPECT_FALSE(first->isSelfTrade());
+	firstMap->release();
+
+	// Return the first snapshot to WTSOrderInfo's object pool, then request an
+	// order with a code lacking an exchange prefix so stale pooled data is visible.
+	exec->handle_session_end(20240102);
+	const char* rawCode = "600001";
+	WTSTickData* rawTick = makeTick(rawCode, 10.0, 0, 9.9, 500, 10.1, 600);
+	exec->handle_tick(rawCode, rawTick, 0);
+	rawTick->release();
+	OrderIDs secondIds = exec->sell(rawCode, 9.9, 75);
+	ASSERT_EQ(1u, secondIds.size());
+	OrderMap* secondMap = exec->getOrders(rawCode);
+	ASSERT_NE(nullptr, secondMap);
+	WTSOrderInfo* second = static_cast<WTSOrderInfo*>(secondMap->get(secondIds.front()));
+	ASSERT_NE(nullptr, second);
+	EXPECT_EQ(pooledAddress, reinterpret_cast<uintptr_t>(second));
+	EXPECT_STREQ("", second->getExchg());
+	EXPECT_STREQ(rawCode, second->getCode());
+	EXPECT_EQ(WDT_SHORT, second->getDirection());
+	EXPECT_EQ(WPT_LIMITPRICE, second->getPriceType());
+	EXPECT_EQ(WOF_NOR, second->getOrderFlag());
+	EXPECT_EQ(WOT_OPEN, second->getOffsetType());
+	EXPECT_EQ(0u, second->getOffsetFlag());
+	EXPECT_FALSE(second->isBuyAction());
+	EXPECT_EQ(BT_CASH, second->getBusinessType());
+	EXPECT_DOUBLE_EQ(75.0, second->getVolume());
+	EXPECT_DOUBLE_EQ(9.9, second->getPrice());
+	EXPECT_STREQ("", second->getEntrustID());
+	EXPECT_STREQ("", second->getUserTag());
+	EXPECT_FALSE(second->isNet());
+	EXPECT_FALSE(second->isNetBuy());
+	EXPECT_EQ(nullptr, second->getContractInfo());
+	EXPECT_EQ(nullptr, second->getExtras());
+	EXPECT_EQ(0u, second->getOrderDate());
+	EXPECT_EQ(0u, second->getOrderTime());
+	EXPECT_DOUBLE_EQ(0.0, second->getVolTraded());
+	EXPECT_DOUBLE_EQ(75.0, second->getVolLeft());
+	EXPECT_EQ(WOS_Submitting, second->getOrderState());
+	EXPECT_EQ(WORT_Normal, second->getOrderType());
+	EXPECT_STREQ(std::to_string(secondIds.front()).c_str(), second->getOrderID());
+	EXPECT_STREQ("", second->getStateMsg());
+	EXPECT_TRUE(second->isAlive());
+	EXPECT_FALSE(second->isError());
+	EXPECT_FALSE(second->isSelfTrade());
+	secondMap->release();
 }
 
 TEST_F(ExecMockerTest, sessionEndClearsMatcherAndUndone)

@@ -41,6 +41,12 @@ static const WtUInt32	EVENT_ENGINE_SCHDL		= 4;	///<框架调度事件
 static const WtUInt32	EVENT_BACKTEST_END		= 5;	///<回测结束事件
 
 /**
+ * @brief 回测侧高频交易通道事件常量
+ * @details 使用 BT_ 前缀以避免与 WtPorter/PorterDefs.h 中的同名全局定义冲突
+ */
+static const WtUInt32	BT_CHNL_EVENT_READY		= 1000;	///<回测侧通道就绪事件
+
+/**
  * @brief 日志级别定义
  * @details 定义了回测框架中使用的各种日志级别的常量值，用于控制日志输出
  */
@@ -298,6 +304,7 @@ typedef bool(PORTER_FLAG *FuncLoadAdjFactors)(const char* stdCode);
  * @param stdCode 标准化合约代码
  * @param uDate 交易日期，格式为YYYYMMDD
  * @return 是否加载成功
- * @details 用于从外部数据源加载指定日期的原始Tick数据
+ * @details 用于从外部数据源加载指定日期的原始Tick数据。tickLoader 必须在返回前同步调用
+ *          feed_raw_ticks 完成数据交付，不得保存回调相关状态；异步加载需要另行定义版本化接口。
  */
 typedef bool(PORTER_FLAG *FuncLoadRawTicks)(const char* stdCode, uint32_t uDate);

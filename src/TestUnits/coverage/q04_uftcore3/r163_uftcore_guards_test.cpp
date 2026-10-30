@@ -7,26 +7,40 @@
  *  - WtUftEngine.cpp:209-243   get_kline_slice 同上，订阅表 _bar_sub_map 的唯一写入点不可达
  *  - WtUftEngine.cpp:584-603   on_bar 按 key 查订阅表；无订阅时只走空循环
  *  - WtUftEngine.cpp:118-168   品种/合约/时段查询的 NULL 早退
- *  - EventNotifier.cpp:58-112  init 的 inactive / 模块缺失 / 正常挂载三分支
+ *  - EventNotifier.cpp:58-122  init 的 inactive / 模块缺失 / 正常挂载及 work-guard 生命周期
  *  - EventNotifier.cpp:114-228 五个 notify 入口的 `_mq_sid == 0` 与空载荷早退
  *  - TraderAdapter.cpp:103-206 init/initExt 的 NULL 参数、无 module 早退
  *  - TraderAdapter.cpp:1857-1968 checkCancelLimits/checkOrderLimits 总量限额与排除队列
  *
  * 说明（死代码与产品缺陷）:
- *  - EventNotifier 的 worker 在首轮 run_one 时因为没有 outstanding work 会把
- *    io_context 永久 stop（BUG-R163-001），因此 notify 的任务体（L121-227）与
- *    tradeToJson/orderToJson（L230-303）在本构建里不可达；本文件的 DISABLED_
- *    用例保留“应当投递”的期望，不把失败断言转绿。
+ *  - R163 验证：先让 io_context 在无任务时 poll，再投递通知，并通过发布回调的
+ *    condition_variable 等待真实 handler 完成；全程不依赖固定睡眠。
  *  - TraderAdapter 的撤单/下单时间窗分支（L1878-1902/L1940-1964）依赖
  *    _order_time_cache/_cancel_time_cache，而两处写入在 L340/L392/L420 已注释，
  *    属既有死分支（q04 台账 BUG-Q04-004），本轮不重复登记。
  *
- * 边界: 不连柜台、不建 socket/shm；EventNotifier 的 url 固定 inproc://，
- *       析构 join 其 2ms worker；临时目录只落系统 temp 并在 TearDown 清理。
+ * 边界: 不连柜台；EventNotifier 的 url 固定 inproc://。通知测试替换 MQ publish
+ *       回调为本地同步探针；临时目录只落系统 temp 并在 TearDown 清理。
  */
 #include "r123_uft_common.h"
 
+#include <boost/asio/executor_work_guard.hpp>
+#include <boost/asio/io_context.hpp>
+#include <memory>
+#include <condition_variable>
+#include <mutex>
+#include <stdexcept>
+#include <vector>
+
+#include "Includes/WTSMarcos.h"
+#include "Includes/WTSObject.hpp"
+#include "Includes/WTSTradeDef.hpp"
+#include "Includes/WTSVariant.hpp"
+#include "Share/StdUtils.hpp"
+
+#define private public
 #include "WtUftCore/EventNotifier.h"
+#undef private
 #include "WtUftCore/WtUftDtMgr.h"
 #include "WtUftCore/WtUftEngine.h"
 #include "WtUftCore/WtHelper.h"
@@ -42,13 +56,13 @@
 #include <dlfcn.h>
 #include <unistd.h>
 
-#include <atomic>
 #include <chrono>
 #include <cstring>
+#include <atomic>
+#include <string>
+#include <vector>
 #include <filesystem>
 #include <fstream>
-#include <string>
-#include <thread>
 
 using namespace wtp;
 
@@ -101,6 +115,43 @@ void writeText(const std::string& path, const std::string& body)
 {
 	std::ofstream ofs(path.c_str(), std::ios::binary | std::ios::trunc);
 	ofs << body;
+}
+
+std::mutex g_notifierMutex;
+std::condition_variable g_notifierChanged;
+std::vector<std::string> g_notifierTopics;
+
+void capturePublish(uint32_t /*serverId*/, const char* topic, const char* /*data*/, uint32_t /*length*/)
+{
+	{
+		std::lock_guard<std::mutex> lock(g_notifierMutex);
+		g_notifierTopics.push_back(topic == nullptr ? "" : topic);
+	}
+	g_notifierChanged.notify_all();
+}
+
+void resetNotifierCapture()
+{
+	std::lock_guard<std::mutex> lock(g_notifierMutex);
+	g_notifierTopics.clear();
+}
+
+bool waitForNotifierTopic(const std::string& topic)
+{
+	std::unique_lock<std::mutex> lock(g_notifierMutex);
+	return g_notifierChanged.wait_for(lock, std::chrono::seconds(2), [&topic]() {
+		for (const std::string& published : g_notifierTopics)
+			if (published == topic)
+				return true;
+		return false;
+	});
+}
+
+void throwOnTradePublish(uint32_t serverId, const char* topic, const char* data, uint32_t length)
+{
+	if (topic != nullptr && std::string(topic) == "TRD_TRADE")
+		throw std::runtime_error("R163 test publisher failure");
+	capturePublish(serverId, topic, data, length);
 }
 
 } // namespace
@@ -205,6 +256,9 @@ TEST(R163UftNotifier, InactiveMissingModuleAndGuardLifecycle)
 	EventNotifier notifier;
 	WTSVariant* cfg = makeNotifierCfg(true);
 	ASSERT_TRUE(notifier.init(cfg));
+	const uint32_t serverId = notifier._mq_sid;
+	EXPECT_TRUE(notifier.init(cfg));
+	EXPECT_EQ(serverId, notifier._mq_sid) << "repeated init must not create another MQ server";
 	cfg->release();
 
 	WTSTradeInfo* trd = WTSTradeInfo::create("ag2406", "SHFE");
@@ -224,36 +278,70 @@ TEST(R163UftNotifier, InactiveMissingModuleAndGuardLifecycle)
 	EXPECT_EQ(ordRefs, ord->retainCount());
 	trd->release();
 	ord->release();
-	// 析构会 join worker；worker 首轮已 stop io_context（BUG-R163-001）
+	// EventNotifier 析构会 reset work guard 并 join worker。
 }
 
-/* 产品缺陷 BUG-R163-001 的可执行证据：worker 在无 outstanding work 时调用
- * run_one()，scheduler 会把 io_context 永久 stop，此后 notify 投递的任务永不执行。
- * 生产正确行为应是 init 后 500ms 内把 retain 降回 1；当前恒为 2，因此按硬约束
- * 保留 DISABLED_，不把失败断言改成成功断言。 */
-TEST(R163UftNotifier, DISABLED_WorkerDeliversPostedTradeNotification)
+/* BUG-R163-001 回归：poll 在无待办时完成一次空闲探测后，io_context 仍需保持可投递；
+ * 然后通过实际 publish 回调同步确认通知 handler 已执行，并在 worker join 后确认
+ * payload 的异步引用已释放。 */
+TEST(R163UftNotifier, WorkerSurvivesIdleAndDrainsPostedTradeNotification)
 {
 	const std::string bin = binDir();
 	if (bin.empty() || !std::filesystem::exists(bin + "libWtMsgQue.dylib"))
 		GTEST_SKIP() << "libWtMsgQue.dylib not found in this build";
 
 	InstDirGuard instdir(bin);
-	EventNotifier notifier;
-	WTSVariant* cfg = makeNotifierCfg(true);
-	ASSERT_TRUE(notifier.init(cfg));
-	cfg->release();
-
 	WTSTradeInfo* trd = WTSTradeInfo::create("ag2406", "SHFE");
 	ASSERT_NE(nullptr, trd);
-	notifier.notify("r163", 5, "SHFE.ag2406", trd);
-	ASSERT_EQ(2u, trd->retainCount());
+	bool published = false;
+	{
+		EventNotifier notifier;
+		WTSVariant* cfg = makeNotifierCfg(true);
+		ASSERT_TRUE(notifier.init(cfg));
+		cfg->release();
+		resetNotifierCapture();
+		notifier._publisher = &capturePublish;
 
-	for (int i = 0; i < 100 && trd->retainCount() > 1; i++)
-		std::this_thread::sleep_for(std::chrono::milliseconds(5));
+		// No handlers are queued yet. With a persistent work guard, poll returns
+		// without marking the io_context stopped, so the later post remains live.
+		EXPECT_EQ(0u, notifier._asyncio.poll());
+		EXPECT_FALSE(notifier._asyncio.stopped());
+
+		notifier.notify("r163", 5, "SHFE.ag2406", trd);
+		published = waitForNotifierTopic("TRD_TRADE");
+	}
+
+	EXPECT_TRUE(published);
 	EXPECT_EQ(1u, trd->retainCount());
+	trd->release();
+}
 
-	while (trd->retainCount() > 0)
-		trd->release();
+TEST(R163UftNotifier, WorkerContinuesAfterPublishHandlerThrows)
+{
+	const std::string bin = binDir();
+	if (bin.empty() || !std::filesystem::exists(bin + "libWtMsgQue.dylib"))
+		GTEST_SKIP() << "libWtMsgQue.dylib not found in this build";
+
+	InstDirGuard instdir(bin);
+	WTSTradeInfo* trd = WTSTradeInfo::create("ag2406", "SHFE");
+	ASSERT_NE(nullptr, trd);
+	bool nextHandlerPublished = false;
+	{
+		EventNotifier notifier;
+		WTSVariant* cfg = makeNotifierCfg(true);
+		ASSERT_TRUE(notifier.init(cfg));
+		cfg->release();
+		resetNotifierCapture();
+		notifier._publisher = &throwOnTradePublish;
+
+		notifier.notify("r163", 6, "SHFE.ag2406", trd);
+		notifier.notify("r163", "after handler exception");
+		nextHandlerPublished = waitForNotifierTopic("TRD_NOTIFY");
+	}
+
+	EXPECT_TRUE(nextHandlerPublished);
+	EXPECT_EQ(1u, trd->retainCount()) << "handler capture must release the trade even when publish throws";
+	trd->release();
 }
 
 // TraderAdapter.cpp:103-206 + :1857-1968

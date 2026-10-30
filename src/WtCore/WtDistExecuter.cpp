@@ -15,8 +15,41 @@
 
 #include "../Share/decimal.h"
 #include "../WTSTools/WTSLogger.h"
+#include <exception>
 
 USING_NS_WTP;
+
+struct WtDistExecuter::OperationMarker
+{
+	const WtDistExecuter* owner;
+	OperationMarker* previous;
+};
+
+thread_local WtDistExecuter::OperationMarker* WtDistExecuter::_current_operation = NULL;
+
+class WtDistExecuter::OperationLease
+{
+public:
+	explicit OperationLease(WtDistExecuter* owner)
+		: _owner(owner), _entered(owner->enterOperation(_marker))
+	{}
+
+	OperationLease(const OperationLease&) = delete;
+	OperationLease& operator=(const OperationLease&) = delete;
+
+	~OperationLease()
+	{
+		if (_entered)
+			_owner->leaveOperation(_marker);
+	}
+
+	bool entered() const { return _entered; }
+
+private:
+	WtDistExecuter* _owner;
+	OperationMarker _marker;
+	bool _entered;
+};
 
 /**
  * \brief 分布式执行器构造函数
@@ -25,6 +58,11 @@ USING_NS_WTP;
  */
 WtDistExecuter::WtDistExecuter(const char* name)
 	: IExecCommand(name)
+	, _quiesce_requested(false)
+	, _active_operations(0)
+	, _config(NULL)
+	, _initialized(false)
+	, _scale(0)
 {
 
 }
@@ -35,7 +73,15 @@ WtDistExecuter::WtDistExecuter(const char* name)
  */
 WtDistExecuter::~WtDistExecuter()
 {
+	requestQuiesce();
+	if (!waitQuiesced())
+		std::terminate();
 
+	if (_config)
+	{
+		_config->release();
+		_config = NULL;
+	}
 }
 
 /**
@@ -46,15 +92,120 @@ WtDistExecuter::~WtDistExecuter()
  */
 bool WtDistExecuter::init(WTSVariant* params)
 {
-	if (params == NULL)
+	OperationLease operation(this);
+	if (!operation.entered())
+		return false;
+	std::lock_guard<std::mutex> initLock(_init_mtx);
+
+	// Initialization is one-shot. Reject duplicate calls without changing the
+	// retained configuration or scale, so callers can safely retry only after a
+	// failed (for example, null-parameter) attempt.
+	if (params == NULL || _initialized)
 		return false;
 
+	const uint32_t scale = params->getUInt32("scale");
+	params->retain();
 	_config = params;
-	_config->retain();
-
-	_scale = params->getUInt32("scale");
+	_scale.store(scale, std::memory_order_release);
+	_initialized = true;
 
 	return true;
+}
+
+void WtDistExecuter::requestQuiesce()
+{
+	std::lock_guard<std::mutex> lock(_quiesce_mtx);
+	_quiesce_requested = true;
+	_quiesce_cv.notify_all();
+}
+
+bool WtDistExecuter::isCurrentThreadInOperation() const
+{
+	for (OperationMarker* marker = _current_operation; marker != NULL; marker = marker->previous)
+	{
+		if (marker->owner == this)
+			return true;
+	}
+	return false;
+}
+
+bool WtDistExecuter::enterOperation(OperationMarker& marker)
+{
+	const bool reentrant = isCurrentThreadInOperation();
+	std::lock_guard<std::mutex> lock(_quiesce_mtx);
+	if (_quiesce_requested && !reentrant)
+		return false;
+
+	++_active_operations;
+	marker.owner = this;
+	marker.previous = _current_operation;
+	_current_operation = &marker;
+	return true;
+}
+
+void WtDistExecuter::leaveOperation(OperationMarker& marker)
+{
+	_current_operation = marker.previous;
+	std::lock_guard<std::mutex> lock(_quiesce_mtx);
+	if (_active_operations == 0)
+		std::terminate();
+	--_active_operations;
+	if (_active_operations == 0)
+		_quiesce_cv.notify_all();
+}
+
+bool WtDistExecuter::canWaitQuiescedOnCurrentThread() const
+{
+	return !isCurrentThreadInOperation();
+}
+
+bool WtDistExecuter::waitQuiesced()
+{
+	if (!canWaitQuiescedOnCurrentThread())
+		return false;
+
+	std::unique_lock<std::mutex> lock(_quiesce_mtx);
+	if (!_quiesce_requested)
+		return false;
+	_quiesce_cv.wait(lock, [this]() { return _active_operations == 0; });
+	return true;
+}
+
+bool WtDistExecuter::preflightQuiesceOnCurrentThread() const
+{
+	return canWaitQuiescedOnCurrentThread();
+}
+
+bool WtDistExecuter::drainHostQuiesced()
+{
+	if (!preflightQuiesceOnCurrentThread())
+		return false;
+
+	std::unique_lock<std::mutex> lock(_quiesce_mtx);
+	if (!_quiesce_requested)
+		return false;
+	_quiesce_cv.wait(lock, [this]() { return _active_operations == 0; });
+	return true;
+}
+
+bool WtDistExecuter::snapshotQuiescePluginOwners(std::vector<ExecQuiesceOwnerPtr>& out) const
+{
+	out.clear();
+	std::lock_guard<std::mutex> lock(_quiesce_mtx);
+	return _quiesce_requested && _active_operations == 0;
+}
+
+bool WtDistExecuter::completeQuiesceAfterGlobalPluginWait()
+{
+	std::lock_guard<std::mutex> lock(_quiesce_mtx);
+	if (!_quiesce_requested || _active_operations != 0)
+		return false;
+	return true;
+}
+
+WtExecuterFactory* WtDistExecuter::quiesceFactory() const
+{
+	return NULL;
 }
 
 /**
@@ -64,15 +215,23 @@ bool WtDistExecuter::init(WTSVariant* params)
  */
 void WtDistExecuter::set_position(const wt_hashmap<std::string, double>& targets)
 {
+	OperationLease operation(this);
+	if (!operation.entered())
+		return;
+	const uint32_t scale = _scale.load(std::memory_order_acquire);
 	for (auto it = targets.begin(); it != targets.end(); it++)
 	{
 		const char* stdCode = it->first.c_str();
 		double newVol = it->second;
 
 		// 应用仓位缩放比例
-		newVol *= _scale;
-		double oldVol = _target_pos[stdCode];
-		_target_pos[stdCode] = newVol;
+		newVol *= scale;
+		double oldVol;
+		{
+			std::lock_guard<std::mutex> targetLock(_target_pos_mtx);
+			oldVol = _target_pos[stdCode];
+			_target_pos[stdCode] = newVol;
+		}
 		if (!decimal::eq(oldVol, newVol))
 		{
 			WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "[{}]{}目标仓位更新: {} -> {}", _name.c_str(), stdCode, oldVol, newVol);
@@ -90,11 +249,17 @@ void WtDistExecuter::set_position(const wt_hashmap<std::string, double>& targets
  */
 void WtDistExecuter::on_position_changed(const char* stdCode, double targetPos)
 {
+	OperationLease operation(this);
+	if (!operation.entered())
+		return;
 	// 应用仓位缩放比例
-	targetPos *= _scale;
-
-	double oldVol = _target_pos[stdCode];
-	_target_pos[stdCode] = targetPos;
+	targetPos *= _scale.load(std::memory_order_acquire);
+	double oldVol;
+	{
+		std::lock_guard<std::mutex> targetLock(_target_pos_mtx);
+		oldVol = _target_pos[stdCode];
+		_target_pos[stdCode] = targetPos;
+	}
 
 	if (!decimal::eq(oldVol, targetPos))
 	{
@@ -112,5 +277,8 @@ void WtDistExecuter::on_position_changed(const char* stdCode, double targetPos)
  */
 void WtDistExecuter::on_tick(const char* /*stdCode*/, WTSTickData* /*newTick*/)
 {
+	OperationLease operation(this);
+	if (!operation.entered())
+		return;
 	// 分布式执行器不需要处理ontick
 }

@@ -53,7 +53,14 @@ public:
 	 */
 	virtual ~HftMocker();
 
+	friend struct HftMockerTestAccess;
+
 private:
+	bool init_hft_factory_impl(WTSVariant* cfg, DllHandle module,
+		const std::string& modulePath, FuncCreateHftStraFact creator,
+		FuncDeleteHftStraFact remover);
+	void release_hft_factory() noexcept;
+
 	/**
 	 * @brief 记录调试级别日志
 	 * @tparam Args 参数包类型，支持可变参数模板
@@ -825,6 +832,8 @@ private:
 		{
 			_module_inst = NULL;
 			_fact = NULL;
+			_creator = NULL;
+			_remover = NULL;
 		}
 
 		/**
@@ -833,8 +842,47 @@ private:
 		 */
 		~_StraFactInfo()
 		{
+			release();
+		}
+
+		void release() noexcept
+		{
 			if (_fact)
-				_remover(_fact);
+			{
+				if (_remover == NULL)
+				{
+					pin();
+					return;
+				}
+				try
+				{
+					_remover(_fact);
+				}
+				catch (...)
+				{
+					// An uncertain plugin destroy must not be followed by dlclose.
+					pin();
+					return;
+				}
+				_fact = nullptr;
+			}
+			if (_module_inst != NULL)
+			{
+				DLLHelper::free_library(_module_inst);
+				_module_inst = NULL;
+			}
+			_creator = NULL;
+			_remover = NULL;
+		}
+
+		void pin() noexcept
+		{
+			// Lose the handle intentionally so process teardown keeps the plugin
+			// mapped when ownership could not be released safely.
+			_module_inst = NULL;
+			_fact = NULL;
+			_creator = NULL;
+			_remover = NULL;
 		}
 	} StraFactInfo;
 	/**

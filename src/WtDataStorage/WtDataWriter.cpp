@@ -16,6 +16,7 @@
 
 #include <set>
 #include <algorithm>
+#include <utility>
 
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
@@ -81,6 +82,136 @@ WtDataWriter::_TaskInfo::~_TaskInfo()
 	_obj->release(); 
 }
 
+thread_local WtDataWriter::OperationFrame* WtDataWriter::_current_operation = nullptr;
+
+WtDataWriter::OperationGuard::OperationGuard(WtDataWriter& writer, bool initialization)
+	: _initialization(initialization)
+{
+	if (!writer.beginOperation(initialization))
+		return;
+
+	_writer = &writer;
+	_frame._writer = &writer;
+	_frame._previous = WtDataWriter::_current_operation;
+	WtDataWriter::_current_operation = &_frame;
+}
+
+WtDataWriter::OperationGuard::~OperationGuard()
+{
+	if (_writer == nullptr)
+		return;
+
+	if (WtDataWriter::_current_operation == &_frame)
+		WtDataWriter::_current_operation = _frame._previous;
+	if (_initialization && !_initialization_completed)
+		_writer->finishInitialization(false);
+	_writer->endOperation();
+}
+
+bool WtDataWriter::OperationGuard::commitInitialization()
+{
+	if (_writer == nullptr || !_initialization || _initialization_completed)
+		return false;
+
+	_initialization_completed = true;
+	return _writer->finishInitialization(true);
+}
+
+bool WtDataWriter::beginOperation(bool initialization)
+{
+	StdUniqueLock lifecycleLock(_accept_mtx);
+	if (initialization)
+	{
+		if (_lifecycle_state != LifecycleState::Uninitialized)
+			return false;
+
+		_lifecycle_state = LifecycleState::Initializing;
+	}
+	else if (_lifecycle_state != LifecycleState::Ready || !_accepting)
+	{
+		return false;
+	}
+
+	++_active_operations;
+	return true;
+}
+
+bool WtDataWriter::finishInitialization(bool success)
+{
+	bool stopChecker = false;
+	bool initialized = false;
+	{
+		StdUniqueLock lifecycleLock(_accept_mtx);
+		if (_lifecycle_state != LifecycleState::Initializing)
+			return false;
+
+		if (success)
+		{
+			_lifecycle_state = LifecycleState::Ready;
+			_accepting = true;
+			initialized = true;
+		}
+		else
+		{
+			_lifecycle_state = LifecycleState::Failed;
+			_accepting = false;
+			_terminated.store(true);
+			stopChecker = true;
+		}
+	}
+
+	if (stopChecker)
+		_check_cond.notify_all();
+	return initialized;
+}
+
+void WtDataWriter::endOperation()
+{
+	bool stoppedQueues = false;
+	{
+		StdUniqueLock lifecycleLock(_accept_mtx);
+		if (_active_operations > 0)
+			--_active_operations;
+
+		if ((_lifecycle_state == LifecycleState::Failed || _lifecycle_state == LifecycleState::Closing)
+			&& _active_operations == 0)
+		{
+			stopQueuesLocked();
+			stoppedQueues = true;
+			_lifecycle_cond.notify_all();
+		}
+	}
+
+	if (stoppedQueues)
+	{
+		_task_cond.notify_all();
+		_proc_cond.notify_all();
+	}
+}
+
+bool WtDataWriter::hasCurrentOperation() const
+{
+	for (OperationFrame* frame = _current_operation; frame != nullptr; frame = frame->_previous)
+	{
+		if (frame->_writer == this)
+			return true;
+	}
+	return false;
+}
+
+void WtDataWriter::stopQueuesLocked()
+{
+	// Caller holds _accept_mtx. No callback is invoked while any lifecycle or queue lock is held.
+	{
+		StdUniqueLock taskLock(_task_mtx);
+		_task_stopping = true;
+	}
+	{
+		StdUniqueLock procLock(_proc_mtx);
+		_proc_stopping = true;
+	}
+}
+
 
 WtDataWriter::WtDataWriter()
 	: _log_group_size(1000)
@@ -102,10 +233,15 @@ WtDataWriter::WtDataWriter()
 
 WtDataWriter::~WtDataWriter()
 {
+	release();
 }
 
 bool WtDataWriter::isSessionProceeded(const char* sid)
 {
+	OperationGuard operation(*this);
+	if (!operation || sid == nullptr)
+		return false;
+
 	auto it = _proc_date.find(sid);
 	if (it == _proc_date.end())
 		return false;
@@ -116,9 +252,15 @@ bool WtDataWriter::isSessionProceeded(const char* sid)
 
 bool WtDataWriter::init(WTSVariant* params, IDataWriterSink* sink)
 {
+	OperationGuard operation(*this, true);
+	if (!operation || params == nullptr || sink == nullptr)
+		return false;
+
 	IDataWriter::init(params, sink);
 
 	_bd_mgr = sink->getBDMgr();
+	if (_bd_mgr == nullptr)
+		return false;
 	_save_tick_log = params->getBoolean("savelog");
 
 	_base_dir = StrUtil::standardisePath(params->getCString("path"));
@@ -171,49 +313,106 @@ bool WtDataWriter::init(WTSVariant* params, IDataWriterSink* sink)
 		"disable_tick: {}, disable_min1: {}, disable_min5: {}, disable_day: {}, disable_trans: {}, disable_ordque: {}, disable_orders: {}, min_price_mode: {}", 
 		_base_dir, _save_tick_log, _async_proc, _log_group_size, _disable_his, _disable_tick, 
 		_disable_min1, _disable_min5, _disable_day, _disable_trans, _disable_ordque, _disable_orddtl, _min_price_mode);
-	return true;
+	return operation.commitInitialization();
 }
 
 void WtDataWriter::release()
 {
-	_terminated = true;
-	if (_proc_thrd)
+	const std::thread::id currentThread = std::this_thread::get_id();
+	const bool calledFromOperation = hasCurrentOperation();
+	bool calledFromWorker = false;
 	{
-		_proc_cond.notify_all();
-		_proc_thrd->join();
+		// Close admission before inspecting worker state; an admitted producer may be
+		// waiting on a queue mutex and must be allowed to finish its enqueue.
+		StdUniqueLock lifecycleLock(_accept_mtx);
+		_accepting = false;
+		_lifecycle_state = LifecycleState::Closing;
+		_terminated.store(true);
+	}
+	_check_cond.notify_all();
+
+	{
+		StdUniqueLock taskLock(_task_mtx);
+		calledFromWorker = _task_worker_id == currentThread;
+	}
+	{
+		StdUniqueLock procLock(_proc_mtx);
+		calledFromWorker = calledFromWorker || _proc_worker_id == currentThread;
+	}
+	{
+		StdUniqueLock checkLock(_check_mtx);
+		calledFromWorker = calledFromWorker || _check_worker_id == currentThread;
 	}
 
-	for(auto& v : _rt_ticks_blocks)
+	// A callback/worker may request shutdown, but cannot wait for its own lease or join itself.
+	// The last active operation stops queues; an external owner must later join and reclaim resources.
+	if (calledFromWorker || calledFromOperation)
 	{
-		delete v.second;
+		bool stoppedQueues = false;
+		{
+			StdUniqueLock lifecycleLock(_accept_mtx);
+			if (_active_operations == 0)
+			{
+				stopQueuesLocked();
+				stoppedQueues = true;
+			}
+		}
+		if (stoppedQueues)
+		{
+			_task_cond.notify_all();
+			_proc_cond.notify_all();
+		}
+		return;
 	}
+
+	{
+		StdUniqueLock lifecycleLock(_accept_mtx);
+		_lifecycle_cond.wait(lifecycleLock, [this]() { return _active_operations == 0; });
+		stopQueuesLocked();
+	}
+	_task_cond.notify_all();
+	_proc_cond.notify_all();
+
+	StdUniqueLock releaseLock(_release_mtx);
+	if (_released)
+		return;
+
+	// Stop the periodic map inspector before draining queued writes.
+	if (_proc_chk != NULL && _proc_chk->joinable())
+		_proc_chk->join();
+
+	if (_task_thrd != NULL && _task_thrd->joinable())
+		_task_thrd->join();
+
+	if (_proc_thrd != NULL && _proc_thrd->joinable())
+		_proc_thrd->join();
+
+	for (auto& v : _rt_ticks_blocks)
+		delete v.second;
+	_rt_ticks_blocks.clear();
 
 	for (auto& v : _rt_trans_blocks)
-	{
 		delete v.second;
-	}
+	_rt_trans_blocks.clear();
 
 	for (auto& v : _rt_orddtl_blocks)
-	{
 		delete v.second;
-	}
+	_rt_orddtl_blocks.clear();
 
 	for (auto& v : _rt_ordque_blocks)
-	{
 		delete v.second;
-	}
+	_rt_ordque_blocks.clear();
 
 	for (auto& v : _rt_min1_blocks)
-	{
 		delete v.second;
-	}
+	_rt_min1_blocks.clear();
 
 	for (auto& v : _rt_min5_blocks)
-	{
 		delete v.second;
-	}
-}
+	_rt_min5_blocks.clear();
 
+	_released = true;
+}
 /*
 void DataManager::preloadRtCaches(const char* exchg)
 {
@@ -309,6 +508,65 @@ void WtDataWriter::loadCache()
 	}
 }
 
+bool WtDataWriter::resizeTickCache(uint32_t nCount)
+{
+	if (_tick_cache_file == NULL || _tick_cache_block == NULL)
+		return false;
+
+	if (_tick_cache_block->_capacity >= nCount)
+		return true;
+
+	const std::string filename = _tick_cache_file->filename();
+	const uint64_t uNewSize = sizeof(RTTickCache) + sizeof(TickCacheItem) * (uint64_t)nCount;
+	try
+	{
+		BoostFile f;
+		if (!f.open_existing_file(filename.c_str()))
+		{
+			pipe_writer_log(_sink, LL_ERROR, "Cannot open tick cache file {} while expanding it", filename);
+			return false;
+		}
+
+		const uint64_t uFileSize = f.get_file_size();
+		if (uFileSize < uNewSize)
+		{
+			std::string data((std::size_t)(uNewSize - uFileSize), 0);
+			if (!f.seek_to_end() || !f.write_file(data.data(), data.size()))
+			{
+				pipe_writer_log(_sink, LL_ERROR, "Cannot extend tick cache file {} to {} bytes", filename, uNewSize);
+				f.close_file();
+				return false;
+			}
+		}
+		f.close_file();
+
+		BoostMFPtr newFile(new BoostMappingFile);
+		if (!newFile->map(filename.c_str()))
+		{
+			pipe_writer_log(_sink, LL_ERROR, "Mapping expanded tick cache file {} failed", filename);
+			return false;
+		}
+
+		RTTickCache* newBlock = (RTTickCache*)newFile->addr();
+		if (newBlock == NULL)
+		{
+			pipe_writer_log(_sink, LL_ERROR, "Expanded tick cache file {} has no mapped address", filename);
+			return false;
+		}
+
+		newBlock->_capacity = nCount;
+		// Keep the old mapping alive until the block pointer is moved to the new address.
+		_tick_cache_file.swap(newFile);
+		_tick_cache_block = newBlock;
+		return true;
+	}
+	catch (std::exception& ex)
+	{
+		pipe_writer_log(_sink, LL_ERROR, "Exception occured while mapping expanded tick cache file {}: {}", filename, ex.what());
+		return false;
+	}
+}
+
 template<typename HeaderType, typename T>
 void* WtDataWriter::resizeRTBlock(BoostMFPtr& mfPtr, uint32_t nCount)
 {
@@ -365,17 +623,19 @@ void* WtDataWriter::resizeRTBlock(BoostMFPtr& mfPtr, uint32_t nCount)
 
 bool WtDataWriter::writeTick(WTSTickData* curTick, uint32_t procFlag)
 {
+	OperationGuard operation(*this);
+	if (!operation)
+		return false;
+
 	if (curTick == NULL)
 		return false;
 
 	if (_async_proc)
-		pushTask(TaskInfo(curTick, 0, procFlag));
-	else
-		procTick(curTick, procFlag);
+		return pushTask(TaskInfo(curTick, 0, procFlag));
 
+	procTick(curTick, procFlag);
 	return true;
 }
-
 void WtDataWriter::procTick(WTSTickData* curTick, uint32_t procFlag)
 {
 	do
@@ -415,17 +675,19 @@ void WtDataWriter::procTick(WTSTickData* curTick, uint32_t procFlag)
 
 bool WtDataWriter::writeOrderQueue(WTSOrdQueData* curOrdQue)
 {
+	OperationGuard operation(*this);
+	if (!operation)
+		return false;
+
 	if (curOrdQue == NULL || _disable_ordque)
 		return false;
 
 	if (_async_proc)
-		pushTask(TaskInfo(curOrdQue, 1));
-	else
-		procQueue(curOrdQue);
+		return pushTask(TaskInfo(curOrdQue, 1));
 
+	procQueue(curOrdQue);
 	return true;
 }
-
 void WtDataWriter::procQueue(WTSOrdQueData* curOrdQue)
 {
 	do
@@ -469,17 +731,19 @@ void WtDataWriter::procQueue(WTSOrdQueData* curOrdQue)
 
 bool WtDataWriter::writeOrderDetail(WTSOrdDtlData* curOrdDtl)
 {
+	OperationGuard operation(*this);
+	if (!operation)
+		return false;
+
 	if (curOrdDtl == NULL || _disable_orddtl)
 		return false;
 
 	if (_async_proc)
-		pushTask(TaskInfo(curOrdDtl, 2));
-	else
-		procOrder(curOrdDtl);
+		return pushTask(TaskInfo(curOrdDtl, 2));
 
+	procOrder(curOrdDtl);
 	return true;
 }
-
 void WtDataWriter::procOrder(WTSOrdDtlData* curOrdDtl)
 {
 	do
@@ -523,17 +787,19 @@ void WtDataWriter::procOrder(WTSOrdDtlData* curOrdDtl)
 
 bool WtDataWriter::writeTransaction(WTSTransData* curTrans)
 {
-	if (curTrans == NULL || _disable_orddtl)
+	OperationGuard operation(*this);
+	if (!operation)
+		return false;
+
+	if (curTrans == NULL || _disable_trans)
 		return false;
 
 	if (_async_proc)
-		pushTask(TaskInfo(curTrans, 3));
-	else
-		procTrans(curTrans);
+		return pushTask(TaskInfo(curTrans, 3));
 
+	procTrans(curTrans);
 	return true;
 }
-
 void WtDataWriter::procTrans(WTSTransData* curTrans)
 {
 	do
@@ -575,52 +841,84 @@ void WtDataWriter::procTrans(WTSTransData* curTrans)
 	} while (false);
 }
 
-void WtDataWriter::pushTask(const TaskInfo& task)
+bool WtDataWriter::ensureTaskThreadLocked()
 {
-	if (!_async_proc)
-		return;
+	if (_task_stopping)
+		return false;
+	if (_task_thrd != NULL)
+		return _task_thrd->joinable();
 
-	StdUniqueLock lck(_task_mtx);
-	_tasks.emplace(task);
-	_task_cond.notify_all();
-
-	if (_task_thrd == NULL)
+	try
 	{
-		_task_thrd.reset(new StdThread([this]() {
-			while (!_terminated)
-			{
-				if (_tasks.empty())
-				{
-					StdUniqueLock lck(_task_mtx);
-					_task_cond.wait(_task_mtx);
-					continue;
-				}
-
-				std::queue<TaskInfo> tempQueue;
-				{
-					StdUniqueLock lck(_task_mtx);
-					tempQueue.swap(_tasks);
-				}
-
-				while (!tempQueue.empty())
-				{
-					TaskInfo& curTask = tempQueue.front();
-					switch (curTask._type)
-					{
-					case 0: procTick((WTSTickData*)curTask._obj, curTask._flag); break;
-					case 1: procQueue((WTSOrdQueData*)curTask._obj); break;
-					case 2: procOrder((WTSOrdDtlData*)curTask._obj); break;
-					case 3: procTrans((WTSTransData*)curTask._obj); break;
-					default:
-						break;
-					}
-					tempQueue.pop();
-				}
-			}
-		}));
+		_task_thrd = std::make_shared<StdThread>(&WtDataWriter::task_loop, this);
 	}
+	catch (...)
+	{
+		return false;
+	}
+	return true;
 }
 
+bool WtDataWriter::pushTask(const TaskInfo& task)
+{
+	if (!_async_proc)
+		return false;
+
+	StdUniqueLock taskLock(_task_mtx);
+	if (!ensureTaskThreadLocked())
+		return false;
+
+	_tasks.emplace(task);
+	_task_cond.notify_one();
+	return true;
+}
+
+bool WtDataWriter::takeTaskBatch(std::queue<TaskInfo>& batch)
+{
+	StdUniqueLock taskLock(_task_mtx);
+	if (_tasks.empty() && !_task_stopping)
+	{
+		++_task_waiters;
+		_task_cond.wait(taskLock, [this]() { return _task_stopping || !_tasks.empty(); });
+		--_task_waiters;
+	}
+
+	if (_tasks.empty())
+		return false;
+
+	batch.swap(_tasks);
+	return true;
+}
+
+void WtDataWriter::task_loop()
+{
+	{
+		StdUniqueLock taskLock(_task_mtx);
+		_task_worker_id = std::this_thread::get_id();
+	}
+	std::queue<TaskInfo> batch;
+	while (takeTaskBatch(batch))
+	{
+		while (!batch.empty())
+		{
+			TaskInfo& curTask = batch.front();
+			switch (curTask._type)
+			{
+			case 0: procTick((WTSTickData*)curTask._obj, curTask._flag); break;
+			case 1: procQueue((WTSOrdQueData*)curTask._obj); break;
+			case 2: procOrder((WTSOrdDtlData*)curTask._obj); break;
+			case 3: procTrans((WTSTransData*)curTask._obj); break;
+			default:
+				break;
+			}
+			batch.pop();
+		}
+	}
+	{
+		StdUniqueLock taskLock(_task_mtx);
+		_task_worker_id = std::thread::id();
+	}
+}
 void WtDataWriter::pipeToTicks(WTSContractInfo* ct, WTSTickData* curTick)
 {
 	TickBlockPair* pBlockPair = getTickBlock(ct, curTick->tradingdate());
@@ -1417,6 +1715,10 @@ WtDataWriter::KBlockPair* WtDataWriter::getKlineBlock(WTSContractInfo* ct, WTSKl
 
 WTSTickData* WtDataWriter::getCurTick(const char* code, const char* exchg/* = ""*/)
 {
+	OperationGuard operation(*this);
+	if (!operation)
+		return NULL;
+
 	if (strlen(code) == 0)
 		return NULL;
 
@@ -1437,26 +1739,35 @@ WTSTickData* WtDataWriter::getCurTick(const char* code, const char* exchg/* = ""
 
 bool WtDataWriter::updateCache(WTSContractInfo* ct, WTSTickData* curTick, uint32_t procFlag)
 {
-	if (curTick == NULL || _tick_cache_block == NULL)
+	if (curTick == NULL)
 	{
 		pipe_writer_log(_sink, LL_ERROR, "Tick cache data not initialized");
 		return false;
 	}
 
 	SpinLock lock(_lck_tick_cache);
+	if (_tick_cache_block == NULL)
+	{
+		pipe_writer_log(_sink, LL_ERROR, "Tick cache data not initialized");
+		return false;
+	}
+
 	const char* key = ct->getFullCode();
 	uint32_t idx = 0;
 	auto it = _tick_cache_idx.find(key);
 	if (it == _tick_cache_idx.end())
 	{
 		idx = _tick_cache_block->_size;
-		_tick_cache_idx[key] = _tick_cache_block->_size;
-		_tick_cache_block->_size += 1;
-		if(_tick_cache_block->_size >= _tick_cache_block->_capacity)
+		if (_tick_cache_block->_size + 1 >= _tick_cache_block->_capacity)
 		{
-			_tick_cache_block = (RTTickCache*)resizeRTBlock<RTTickCache, TickCacheItem>(_tick_cache_file, _tick_cache_block->_capacity + CACHE_SIZE_STEP);
+			if (!resizeTickCache(_tick_cache_block->_capacity + CACHE_SIZE_STEP))
+				return false;
+
 			pipe_writer_log(_sink, LL_INFO, "Tick Cache resized to {} items", _tick_cache_block->_capacity);
 		}
+
+		_tick_cache_idx[key] = idx;
+		_tick_cache_block->_size += 1;
 	}
 	else
 	{
@@ -1566,9 +1877,46 @@ bool WtDataWriter::updateCache(WTSContractInfo* ct, WTSTickData* curTick, uint32
 	return true;
 }
 
+bool WtDataWriter::ensureProcThreadLocked()
+{
+	if (_proc_stopping)
+		return false;
+	if (_proc_thrd != NULL)
+		return _proc_thrd->joinable();
+
+	_proc_thrd = std::make_shared<StdThread>(&WtDataWriter::proc_loop, this);
+	return true;
+}
+
+bool WtDataWriter::takeProcTask(std::string& fullcode)
+{
+	StdUniqueLock procLock(_proc_mtx);
+	if (_proc_que.empty() && !_proc_stopping)
+	{
+		++_proc_waiters;
+		_proc_cond.wait(procLock, [this]() { return _proc_stopping || !_proc_que.empty(); });
+		--_proc_waiters;
+	}
+
+	if (_proc_que.empty())
+		return false;
+
+	fullcode = std::move(_proc_que.front());
+	_proc_que.pop();
+	return true;
+}
+
 void WtDataWriter::transHisData(const char* sid)
 {
-	StdUniqueLock lock(_proc_mtx);
+	OperationGuard operation(*this);
+	if (!operation)
+		return;
+
+	if (sid == NULL)
+		return;
+
+	// Collect close jobs before locking the queue; sink/manager calls can re-enter the writer.
+	std::queue<std::string> newTasks;
 	if (strcmp(sid, CMD_CLEAR_CACHE) != 0)
 	{
 		CodeSet* pCommSet = _sink->getSessionComms(sid);
@@ -1578,11 +1926,9 @@ void WtDataWriter::transHisData(const char* sid)
 		for (auto it = pCommSet->begin(); it != pCommSet->end(); it++)
 		{
 			const char* key = (*it).c_str();
-
 			const StringVector& ay = StrUtil::split(key, ".");
 			const char* exchg = ay[0].c_str();
 			const char* pid = ay[1].c_str();
-
 			WTSCommodityInfo* pCommInfo = _bd_mgr->getCommodity(exchg, pid);
 			if (pCommInfo == NULL)
 				continue;
@@ -1591,39 +1937,55 @@ void WtDataWriter::transHisData(const char* sid)
 			for (auto code : codes)
 			{
 				WTSContractInfo* ct = _bd_mgr->getContract(code.c_str(), exchg);
-				if(ct)
-					_proc_que.push(ct->getFullCode());
+				if (ct)
+					newTasks.push(ct->getFullCode());
 			}
 		}
 
-		_proc_que.push(fmtutil::format("MARK.{}", sid));
+		newTasks.push(fmtutil::format("MARK.{}", sid));
 	}
 	else
 	{
-		_proc_que.push(sid);
+		newTasks.push(sid);
 	}
 
-	if (_proc_thrd == NULL)
+	StdUniqueLock procLock(_proc_mtx);
+	if (!ensureProcThreadLocked())
+		return;
+
+	while (!newTasks.empty())
 	{
-		_proc_thrd.reset(new StdThread(boost::bind(&WtDataWriter::proc_loop, this)));
+		_proc_que.push(std::move(newTasks.front()));
+		newTasks.pop();
 	}
-	else
-	{
-		_proc_cond.notify_all();
-	}
+	_proc_cond.notify_one();
 }
-
 void WtDataWriter::check_loop()
 {
-	uint32_t expire_secs = 600;
-	while(!_terminated)
 	{
-		std::this_thread::sleep_for(std::chrono::seconds(10));
+		StdUniqueLock checkLock(_check_mtx);
+		_check_worker_id = std::this_thread::get_id();
+	}
+	uint32_t expire_secs = 600;
+	while (!_terminated.load())
+	{
+		{
+			StdUniqueLock checkLock(_check_mtx);
+			_check_cond.wait_for(checkLock, std::chrono::seconds(10),
+				[this]() { return _terminated.load(); });
+		}
+		if (_terminated.load())
+			break;
 		/*
 		 *	By Wesley @ 2022.04.18
 		 *	如果收盘作业线程已经启动，则直接退出检查线程
 		 */
-		if(_proc_thrd != NULL)
+		bool closeWorkerStarted = false;
+		{
+			StdUniqueLock procLock(_proc_mtx);
+			closeWorkerStarted = _proc_thrd != NULL;
+		}
+		if (closeWorkerStarted)
 			break;
 
 		uint64_t now = TimeUtils::getLocalTimeNow() / 1000;
@@ -1693,6 +2055,10 @@ void WtDataWriter::check_loop()
 			}
 		}
 	}
+	{
+		StdUniqueLock checkLock(_check_mtx);
+		_check_worker_id = std::thread::id();
+	}
 }
 
 uint32_t WtDataWriter::dump_bars_via_dumper(WTSContractInfo* ct)
@@ -1705,13 +2071,20 @@ uint32_t WtDataWriter::dump_bars_via_dumper(WTSContractInfo* ct)
 	uint32_t count = 0;
 
 	//从缓存中读取最新tick,更新到历史日线
-	auto it = _tick_cache_idx.find(key);
-	if (it != _tick_cache_idx.end())
+	WTSTickStruct cachedTick;
+	bool hasCachedTick = false;
 	{
-		uint32_t idx = it->second;
-
-		const TickCacheItem& tci = _tick_cache_block->_ticks[idx];
-		const WTSTickStruct& ts = tci._tick;
+		SpinLock lock(_lck_tick_cache);
+		auto it = _tick_cache_idx.find(key);
+		if (it != _tick_cache_idx.end() && _tick_cache_block != NULL)
+		{
+			cachedTick = _tick_cache_block->_ticks[it->second]._tick;
+			hasCachedTick = true;
+		}
+	}
+	if (hasCachedTick)
+	{
+		const WTSTickStruct& ts = cachedTick;
 
 		WTSBarStruct bsDay;
 		bsDay.date = ts.trading_date;
@@ -1817,7 +2190,12 @@ uint32_t WtDataWriter::dump_bars_via_dumper(WTSContractInfo* ct)
 
 bool WtDataWriter::proc_block_data(const char* tag, std::string& content, bool isBar, bool bKeepHead /* = true */)
 {
+	if (content.size() < BLOCK_HEADER_SIZE)
+		return false;
+
 	BlockHeader* header = (BlockHeader*)content.data();
+	if (memcmp(header->_blk_flag, BLK_FLAG, FLAG_SIZE) != 0)
+		return false;
 
 	bool bCmped = header->is_compressed();
 	bool bOldVer = header->is_old_version();
@@ -1833,9 +2211,12 @@ bool WtDataWriter::proc_block_data(const char* tag, std::string& content, bool i
 	std::string buffer;
 	if (bCmped)
 	{
+		if (content.size() < BLOCK_HEADERV2_SIZE)
+			return false;
+
 		BlockHeaderV2* blkV2 = (BlockHeaderV2*)content.c_str();
 
-		if (content.size() != (sizeof(BlockHeaderV2) + blkV2->_size))
+		if (blkV2->_size != content.size() - sizeof(BlockHeaderV2))
 		{
 			return false;
 		}
@@ -1950,16 +2331,34 @@ bool WtDataWriter::dump_day_data(WTSContractInfo* ct, WTSBarStruct* newBar)
 			//日线必须要检查一下
 			std::string content;
 			StdFile::read_file_content(filename.c_str(), content);
+			if (content.size() < BLOCK_HEADER_SIZE)
+			{
+				pipe_writer_log(_sink, LL_ERROR, "History day bar file {} has an invalid block header", filename.c_str());
+				f.close_file();
+				return false;
+			}
+
 			HisKlineBlock* kBlock = (HisKlineBlock*)content.data();
 			//如果老的文件已经是压缩版本,或者最终数据大小大于100条,则进行压缩
 			bool bCompressed = kBlock->is_compressed();
 
 			//先统一解压出来
-			proc_block_data(filename.c_str(), content, true, false);
+			if (!proc_block_data(filename.c_str(), content, true, false))
+			{
+				pipe_writer_log(_sink, LL_ERROR, "History day bar file {} cannot be decoded; preserving it", filename.c_str());
+				f.close_file();
+				return false;
+			}
 			
 			uint32_t barcnt = content.size() / sizeof(WTSBarStruct);
 			//开始比较K线时间标签,主要为了防止数据重复写
-			if (barcnt != 0)
+			if (barcnt == 0)
+			{
+				// 合法的空历史块可直接接收第一根日线
+				content.append((char*)newBar, sizeof(WTSBarStruct));
+				barcnt = 1;
+			}
+			else
 			{
 				WTSBarStruct& oldBS = ((WTSBarStruct*)content.data())[barcnt - 1];
 
@@ -2029,13 +2428,20 @@ uint32_t WtDataWriter::dump_bars_to_file(WTSContractInfo* ct)
 	//从缓存中读取最新tick,更新到历史日线
 	if (!_disable_day)
 	{
-		auto it = _tick_cache_idx.find(key);
-		if (it != _tick_cache_idx.end())
+		WTSTickStruct cachedTick;
+		bool hasCachedTick = false;
 		{
-			uint32_t idx = it->second;
-
-			const TickCacheItem& tci = _tick_cache_block->_ticks[idx];
-			const WTSTickStruct& ts = tci._tick;
+			SpinLock lock(_lck_tick_cache);
+			auto it = _tick_cache_idx.find(key);
+			if (it != _tick_cache_idx.end() && _tick_cache_block != NULL)
+			{
+				cachedTick = _tick_cache_block->_ticks[it->second]._tick;
+				hasCachedTick = true;
+			}
+		}
+		if (hasCachedTick)
+		{
+			const WTSTickStruct& ts = cachedTick;
 
 			WTSBarStruct bs;
 			bs.date = ts.trading_date;
@@ -2093,35 +2499,47 @@ uint32_t WtDataWriter::dump_bars_to_file(WTSContractInfo* ct)
 			if (f.create_or_open_file(filename.c_str()))
 			{
 				std::string buffer;
+				bool bCanWrite = true;
 				[[maybe_unused]] bool bOldVer = false;
 				if (!bNew)
 				{
 					std::string content;
 					StdFile::read_file_content(filename.c_str(), content);
-					proc_block_data(filename.c_str(), content, true, false);
-					buffer.swap(content);
+					if (!proc_block_data(filename.c_str(), content, true, false))
+					{
+						pipe_writer_log(_sink, LL_ERROR, "History min1 bar file {} cannot be decoded; preserving it", filename.c_str());
+						f.close_file();
+						bCanWrite = false;
+					}
+					else
+					{
+						buffer.swap(content);
+					}
 				}
 
-				//追加新的数据
-				buffer.append((const char*)kBlkPair->_block->_bars, sizeof(WTSBarStruct)*size);
+				if (bCanWrite)
+				{
+					//追加新的数据
+					buffer.append((const char*)kBlkPair->_block->_bars, sizeof(WTSBarStruct)*size);
 
-				std::string cmpData = WTSCmpHelper::compress_data(buffer.data(), buffer.size());
+					std::string cmpData = WTSCmpHelper::compress_data(buffer.data(), buffer.size());
 
-				f.truncate_file(0);
-				f.seek_to_begin(0);
+					f.truncate_file(0);
+					f.seek_to_begin(0);
 
-				BlockHeaderV2 header;
-				strcpy(header._blk_flag, BLK_FLAG);
-				header._type = BT_HIS_Minute1;
-				header._version = BLOCK_VERSION_CMP_V2;
-				header._size = cmpData.size();
-				f.write_file(&header, sizeof(header));
-				f.write_file(cmpData);
-				count += size;
+					BlockHeaderV2 header;
+					strcpy(header._blk_flag, BLK_FLAG);
+					header._type = BT_HIS_Minute1;
+					header._version = BLOCK_VERSION_CMP_V2;
+					header._size = cmpData.size();
+					f.write_file(&header, sizeof(header));
+					f.write_file(cmpData);
+					count += size;
 
-				//最后将缓存清空
-				//memset(kBlkPair->_block->_bars, 0, sizeof(WTSBarStruct)*kBlkPair->_block->_size);
-				kBlkPair->_block->_size = 0;
+					//最后将缓存清空
+					//memset(kBlkPair->_block->_bars, 0, sizeof(WTSBarStruct)*kBlkPair->_block->_size);
+					kBlkPair->_block->_size = 0;
+				}
 			}
 			else
 			{
@@ -2172,33 +2590,45 @@ uint32_t WtDataWriter::dump_bars_to_file(WTSContractInfo* ct)
 			if (f.create_or_open_file(filename.c_str()))
 			{
 				std::string buffer;
+				bool bCanWrite = true;
 				[[maybe_unused]] bool bOldVer = false;
 				if (!bNew)
 				{
 					std::string content;
 					StdFile::read_file_content(filename.c_str(), content);
-					proc_block_data(filename.c_str(), content, true, false);
-					buffer.swap(content);
+					if (!proc_block_data(filename.c_str(), content, true, false))
+					{
+						pipe_writer_log(_sink, LL_ERROR, "History min5 bar file {} cannot be decoded; preserving it", filename.c_str());
+						f.close_file();
+						bCanWrite = false;
+					}
+					else
+					{
+						buffer.swap(content);
+					}
 				}
 
-				buffer.append((const char*)kBlkPair->_block->_bars, sizeof(WTSBarStruct)*size);
+				if (bCanWrite)
+				{
+					buffer.append((const char*)kBlkPair->_block->_bars, sizeof(WTSBarStruct)*size);
 
-				std::string cmpData = WTSCmpHelper::compress_data(buffer.data(), buffer.size());
+					std::string cmpData = WTSCmpHelper::compress_data(buffer.data(), buffer.size());
 
-				f.truncate_file(0);
-				f.seek_to_begin(0);
+					f.truncate_file(0);
+					f.seek_to_begin(0);
 
-				BlockHeaderV2 header;
-				strcpy(header._blk_flag, BLK_FLAG);
-				header._type = BT_HIS_Minute5;
-				header._version = BLOCK_VERSION_CMP_V2;
-				header._size = cmpData.size();
-				f.write_file(&header, sizeof(header));
-				f.write_file(cmpData);
-				count += size;
+					BlockHeaderV2 header;
+					strcpy(header._blk_flag, BLK_FLAG);
+					header._type = BT_HIS_Minute5;
+					header._version = BLOCK_VERSION_CMP_V2;
+					header._size = cmpData.size();
+					f.write_file(&header, sizeof(header));
+					f.write_file(cmpData);
+					count += size;
 
-				//最后将缓存清空
-				kBlkPair->_block->_size = 0;
+					//最后将缓存清空
+					kBlkPair->_block->_size = 0;
+				}
 			}
 			else
 			{
@@ -2215,28 +2645,13 @@ uint32_t WtDataWriter::dump_bars_to_file(WTSContractInfo* ct)
 
 void WtDataWriter::proc_loop()
 {
-	while (!_terminated)
 	{
-		if(_proc_que.empty())
-		{
-			StdUniqueLock lock(_proc_mtx);
-			_proc_cond.wait(_proc_mtx);
-			continue;
-		}
-
-		std::string fullcode;
-		try
-		{
-			StdUniqueLock lock(_proc_mtx);
-			fullcode = _proc_que.front().c_str();
-			_proc_que.pop();
-		}
-		catch(std::exception& e)
-		{
-			pipe_writer_log(_sink, LL_ERROR, e.what());
-			continue;
-		}
-
+		StdUniqueLock procLock(_proc_mtx);
+		_proc_worker_id = std::this_thread::get_id();
+	}
+	std::string fullcode;
+	while (takeProcTask(fullcode))
+	{
 		if (fullcode.compare(CMD_CLEAR_CACHE) == 0)
 		{
 			//清理缓存
@@ -2697,5 +3112,9 @@ void WtDataWriter::proc_loop()
 		{
 			pipe_writer_log(_sink, LL_INFO, "ClosingTask of {}[{}] skipped due to history data disabled", ct->getCode(), ct->getExchg());
 		}
+	}
+	{
+		StdUniqueLock procLock(_proc_mtx);
+		_proc_worker_id = std::thread::id();
 	}
 }

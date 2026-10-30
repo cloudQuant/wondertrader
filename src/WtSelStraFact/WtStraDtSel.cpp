@@ -138,15 +138,15 @@ void WtStraDtSel::on_schedule(ISelStraCtx* ctx, uint32_t uDate, uint32_t uTime)
 		WTSKlineSlice *kline = ctx->stra_get_bars(code.c_str(), _period.c_str(), _count);
 		if (kline == NULL)
 		{
-			//没有获取到K线数据，这里可以输出一些日志
-			return;
+			// 当前品种没有 K 线数据，跳过当前品种并继续处理其他品种
+			continue;
 		}
 
-		// 如果K线数据为空，释放资源并返回
+		// 如果 K 线数据为空，释放资源后跳过当前品种
 		if (kline->size() == 0)
 		{
 			kline->release();
-			return;
+			continue;
 		}
 
 		// 设置交易单位，股票为100股，其他为1

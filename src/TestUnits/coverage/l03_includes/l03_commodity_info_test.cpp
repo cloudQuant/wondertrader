@@ -4,6 +4,7 @@
 // bugs/l03_includes.md BUG-L03-002），因此所有读取都必须先显式写入，测试严格按此约束编排。
 #include <gtest/gtest.h>
 
+#include <array>
 #include <cmath>
 #include <cstdint>
 #include <cstring>
@@ -62,14 +63,14 @@ TEST(l03_commodity, create_fills_identity_fields)
 TEST(l03_commodity, identity_field_boundary_length)
 {
 	// wt_strcpy 是无边界检查的 memcpy（见 bugs/l03_includes.md BUG-L03-006），
-	// 这里只用恰好能塞进 char[64] 的 63 字符边界值，避免越界写。
+	// identity 输入恰好使用 char[64] 可容纳的63字符；FullPid 保留 snprintf 的安全截断。
 	const std::string pid(63, 'x');
 	const std::string name(63, 'y');
 	WTSCommodityInfo* c = WTSCommodityInfo::create(pid.c_str(), name.c_str(), "SHFE", "S", "T");
 	ASSERT_NE(c, nullptr);
 	EXPECT_EQ(std::strlen(c->getProduct()), 63u);
 	EXPECT_EQ(std::strlen(c->getName()), 63u);
-	// 全品种 ID 由 snprintf 写入定长缓冲区，超长部分被安全截断
+	// 全品种 ID 由 snprintf 写入定长缓冲区，超长部分按既有策略安全截断。
 	EXPECT_EQ(std::strlen(c->getFullPid()), 63u);
 	EXPECT_EQ(std::strncmp(c->getFullPid(), "SHFE.", 5), 0);
 	c->release();
@@ -80,6 +81,36 @@ TEST(l03_commodity, identity_field_boundary_length)
 	EXPECT_STREQ(e->getProduct(), "");
 	EXPECT_STREQ(e->getFullPid(), "SHFE.");
 	e->release();
+}
+
+TEST(l03_commodity, identity_fields_reject_values_that_do_not_fit)
+{
+	const std::array<std::string, 3> lengths = { std::string(63, 'x'), std::string(64, 'x'), std::string(65, 'x') };
+	const std::array<const char*, 6> base = { "rb", "name", "SHFE", "S", "T", "CNY" };
+	auto create = [](const std::array<const char*, 6>& fields) {
+		return WTSCommodityInfo::create(fields[0], fields[1], fields[2], fields[3], fields[4], fields[5]);
+	};
+
+	for (std::size_t field = 0; field < base.size(); ++field)
+	{
+		for (std::size_t delta = 0; delta < lengths.size(); ++delta)
+		{
+			auto values = base;
+			values[field] = lengths[delta].c_str();
+			WTSCommodityInfo* info = create(values);
+			if (delta == 0)
+			{
+				ASSERT_NE(nullptr, info) << "field " << field;
+				info->release();
+			}
+			else
+			{
+				EXPECT_EQ(nullptr, info) << "field " << field << ", length " << lengths[delta].size();
+			}
+		}
+	}
+
+	EXPECT_EQ(nullptr, WTSCommodityInfo::create(nullptr, "name", "SHFE", "S", "T"));
 }
 
 //////////////////////////////////////////////////////////////////////////

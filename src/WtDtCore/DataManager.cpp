@@ -28,6 +28,10 @@
  */
 DataManager::DataManager()
 	: _writer(NULL)
+	, _writer_module(NULL)
+	, _writer_release_failed(false)
+	, _writer_releasing(false)
+	, _remover(NULL)
 	, _bd_mgr(NULL)
 	, _state_mon(NULL)
 {
@@ -40,6 +44,12 @@ DataManager::DataManager()
  */
 DataManager::~DataManager()
 {
+	release();
+	if (_writer_release_failed)
+	{
+		WTSLogger::error("DataManager is being destroyed after writer shutdown failed; writer and module are retained, "
+			"but the writer may still hold the DataManager sink pointer");
+	}
 }
 
 /**
@@ -50,7 +60,7 @@ DataManager::~DataManager()
  */
 bool DataManager::isSessionProceeded(const char* sid)
 {
-	if (_writer == NULL)
+	if (_writer == NULL || _writer_release_failed)
 		return false;
 
 	return _writer->isSessionProceeded(sid);
@@ -66,44 +76,83 @@ bool DataManager::isSessionProceeded(const char* sid)
  */
 bool DataManager::init(WTSVariant* params, WTSBaseDataMgr* bdMgr, StateMonitor* stMonitor)
 {
-	_bd_mgr = bdMgr;
-	_state_mon = stMonitor;
+	if (params == NULL)
+	{
+		WTSLogger::error("Initializing of data writer failed: configuration is null");
+		return false;
+	}
+	if (_writer != NULL || _writer_module != NULL)
+	{
+		WTSLogger::error("Initializing of data writer failed: data writer is already initialized");
+		return false;
+	}
 
-	std::string module = params->getCString("module");
+	const char* configuredModule = params->getCString("module");
+	std::string module = configuredModule ? configuredModule : "";
 	if (module.empty())
 		module = WtHelper::get_module_dir() + DLLHelper::wrap_module("WtDataStorage");
 	else
 		module = WtHelper::get_module_dir() + DLLHelper::wrap_module(module.c_str());
 	
 	DllHandle libWriter = DLLHelper::load_library(module.c_str());
-	if (libWriter)
-	{
-		FuncCreateWriter pFuncCreateWriter = (FuncCreateWriter)DLLHelper::get_symbol(libWriter, "createWriter");
-		if (pFuncCreateWriter == NULL)
-		{
-			WTSLogger::error("Initializing of data writer failed: function createWriter not found...");
-		}
-
-		FuncDeleteWriter pFuncDeleteWriter = (FuncDeleteWriter)DLLHelper::get_symbol(libWriter, "deleteWriter");
-		if (pFuncDeleteWriter == NULL)
-		{
-			WTSLogger::error("Initializing of data writer failed: function deleteWriter not found...");
-		}
-
-		if (pFuncCreateWriter && pFuncDeleteWriter)
-		{
-			_writer = pFuncCreateWriter();
-			_remover = pFuncDeleteWriter;
-		}
-		WTSLogger::info("Data storage module {} loaded", module);
-	}
-	else
+	if (libWriter == NULL)
 	{
 		WTSLogger::error("Initializing of data writer failed: loading module {} failed...", module.c_str());
 		return false;
 	}
 
-	return _writer->init(params, this);
+	FuncCreateWriter pFuncCreateWriter = (FuncCreateWriter)DLLHelper::get_symbol(libWriter, "createWriter");
+	FuncDeleteWriter pFuncDeleteWriter = (FuncDeleteWriter)DLLHelper::get_symbol(libWriter, "deleteWriter");
+	if (pFuncCreateWriter == NULL || pFuncDeleteWriter == NULL)
+	{
+		WTSLogger::error("Initializing of data writer failed: module {} is missing {}", module.c_str(),
+			pFuncCreateWriter == NULL ? "createWriter" : "deleteWriter");
+		DLLHelper::free_library(libWriter);
+		return false;
+	}
+
+	IDataWriter* writer = NULL;
+	try
+	{
+		writer = pFuncCreateWriter();
+	}
+	catch (...)
+	{
+		WTSLogger::error("Initializing of data writer failed: createWriter threw an exception in {}", module.c_str());
+		DLLHelper::free_library(libWriter);
+		return false;
+	}
+	if (writer == NULL)
+	{
+		WTSLogger::error("Initializing of data writer failed: createWriter returned null in {}", module.c_str());
+		DLLHelper::free_library(libWriter);
+		return false;
+	}
+
+	_writer = writer;
+	_remover = pFuncDeleteWriter;
+	_writer_module = libWriter;
+	_bd_mgr = bdMgr;
+	_state_mon = stMonitor;
+
+	bool initialized = false;
+	try
+	{
+		initialized = _writer->init(params, this);
+	}
+	catch (...)
+	{
+		WTSLogger::error("Initializing of data writer failed: writer initialization threw an exception in {}", module.c_str());
+	}
+	if (!initialized)
+	{
+		WTSLogger::error("Initializing of data writer failed: writer initialization rejected {}", module.c_str());
+		release();
+		return false;
+	}
+
+	WTSLogger::info("Data storage module {} loaded", module);
+	return true;
 }
 
 /**
@@ -114,7 +163,7 @@ bool DataManager::init(WTSVariant* params, WTSBaseDataMgr* bdMgr, StateMonitor* 
  */
 void DataManager::add_ext_dumper(const char* id, IHisDataDumper* dumper)
 {
-	if (_writer == NULL)
+	if (_writer == NULL || _writer_release_failed)
 		return;
 
 	_writer->add_ext_dumper(id, dumper);
@@ -126,11 +175,65 @@ void DataManager::add_ext_dumper(const char* id, IHisDataDumper* dumper)
  */
 void DataManager::release()
 {
-	if (_writer)
+	if (_writer_release_failed || _writer_releasing)
+		return;
+
+	if (_writer != NULL)
 	{
-		_writer->release();
-		_remover(_writer);
+		_writer_releasing = true;
+		try
+		{
+			_writer->release();
+		}
+		catch (...)
+		{
+			_writer_release_failed = true;
+			_writer_releasing = false;
+			WTSLogger::error("Releasing data writer failed with an exception; retaining writer and module to avoid use-after-unload");
+			return;
+		}
+		_writer_releasing = false;
 	}
+
+	IDataWriter* writer = _writer;
+	FuncDeleteWriter remover = _remover;
+	DllHandle module = _writer_module;
+	_writer = NULL;
+	_remover = NULL;
+	_writer_module = NULL;
+	_bd_mgr = NULL;
+	_state_mon = NULL;
+
+	if (writer)
+	{
+		bool writerDestroyed = false;
+		if (remover)
+		{
+			try
+			{
+				remover(writer);
+				writerDestroyed = (writer == NULL);
+			}
+			catch (...)
+			{
+				WTSLogger::error("Destroying data writer failed with an exception");
+			}
+		}
+		else
+		{
+			WTSLogger::error("Destroying data writer failed: deleteWriter is unavailable");
+		}
+
+		if (!writerDestroyed)
+		{
+			// Keep the module mapped if its object may still be alive; unloading it
+			// would leave the writer's vtable pointing into unmapped code.
+			WTSLogger::error("Data writer was not destroyed; keeping its module loaded for safety");
+			module = NULL;
+		}
+	}
+	if (module)
+		DLLHelper::free_library(module);
 }
 
 /**
@@ -142,7 +245,7 @@ void DataManager::release()
  */
 bool DataManager::writeTick(WTSTickData* curTick, uint32_t procFlag)
 {
-	if (_writer == NULL)
+	if (_writer == NULL || _writer_release_failed)
 		return false;
 
 	return _writer->writeTick(curTick, procFlag);
@@ -156,7 +259,7 @@ bool DataManager::writeTick(WTSTickData* curTick, uint32_t procFlag)
  */
 bool DataManager::writeOrderQueue(WTSOrdQueData* curOrdQue)
 {
-	if (_writer == NULL)
+	if (_writer == NULL || _writer_release_failed)
 		return false;
 
 	return _writer->writeOrderQueue(curOrdQue);
@@ -170,7 +273,7 @@ bool DataManager::writeOrderQueue(WTSOrdQueData* curOrdQue)
  */
 bool DataManager::writeOrderDetail(WTSOrdDtlData* curOrdDtl)
 {
-	if (_writer == NULL)
+	if (_writer == NULL || _writer_release_failed)
 		return false;
 
 	return _writer->writeOrderDetail(curOrdDtl);
@@ -184,7 +287,7 @@ bool DataManager::writeOrderDetail(WTSOrdDtlData* curOrdDtl)
  */
 bool DataManager::writeTransaction(WTSTransData* curTrans)
 {
-	if (_writer == NULL)
+	if (_writer == NULL || _writer_release_failed)
 		return false;
 
 	return _writer->writeTransaction(curTrans);
@@ -199,7 +302,7 @@ bool DataManager::writeTransaction(WTSTransData* curTrans)
  */
 WTSTickData* DataManager::getCurTick(const char* code, const char* exchg/* = ""*/)
 {
-	if (_writer == NULL)
+	if (_writer == NULL || _writer_release_failed)
 		return NULL;
 
 	return _writer->getCurTick(code, exchg);
@@ -212,7 +315,7 @@ WTSTickData* DataManager::getCurTick(const char* code, const char* exchg/* = ""*
  */
 void DataManager::transHisData(const char* sid)
 {
-	if (_writer)
+	if (_writer && !_writer_release_failed)
 		_writer->transHisData(sid);
 }
 

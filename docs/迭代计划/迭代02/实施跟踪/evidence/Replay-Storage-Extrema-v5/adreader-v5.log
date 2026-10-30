@@ -1,0 +1,53 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 18 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 14 tests from R4ReaderADTest
+[ RUN      ] R4ReaderADTest.InitLogsRootOnlyWhenCfgProvided
+[       OK ] R4ReaderADTest.InitLogsRootOnlyWhenCfgProvided (0 ms)
+[ RUN      ] R4ReaderADTest.FirstTickReadTakesIncrementalRangeAndKeepsLastCount
+[       OK ] R4ReaderADTest.FirstTickReadTakesIncrementalRangeAndKeepsLastCount (1 ms)
+[ RUN      ] R4ReaderADTest.RepeatTickReadPreservesDataAndAdvancesWindow
+[       OK ] R4ReaderADTest.RepeatTickReadPreservesDataAndAdvancesWindow (1 ms)
+[ RUN      ] R4ReaderADTest.TickReadAgainstEmptyDbYieldsEmptySlice
+[       OK ] R4ReaderADTest.TickReadAgainstEmptyDbYieldsEmptySlice (1 ms)
+[ RUN      ] R4ReaderADTest.KlineFirstReadLoadsLowerBarsAndChecksLatest
+[       OK ] R4ReaderADTest.KlineFirstReadLoadsLowerBarsAndChecksLatest (1 ms)
+[ RUN      ] R4ReaderADTest.KlineInitialLoadRejectsShortValueAndRetriesAfterRepair
+[       OK ] R4ReaderADTest.KlineInitialLoadRejectsShortValueAndRetriesAfterRepair (1 ms)
+[ RUN      ] R4ReaderADTest.KlineIncrementalRejectsShortValueWithoutCachePollution
+[       OK ] R4ReaderADTest.KlineIncrementalRejectsShortValueWithoutCachePollution (1 ms)
+[ RUN      ] R4ReaderADTest.SecondCodeOnSameExchangeReadsSeededBars
+[       OK ] R4ReaderADTest.SecondCodeOnSameExchangeReadsSeededBars (1 ms)
+[ RUN      ] R4ReaderADTest.KlineAppendsRtCacheBarWhenLmdbLags
+[       OK ] R4ReaderADTest.KlineAppendsRtCacheBarWhenLmdbLags (3 ms)
+[ RUN      ] R4ReaderADTest.KlineWithoutRtCacheEntryKeepsLmdbBarsOnly
+[       OK ] R4ReaderADTest.KlineWithoutRtCacheEntryKeepsLmdbBarsOnly (1 ms)
+[ RUN      ] R4ReaderADTest.DayKlineUsesDateKeyAndDaySubdir
+[       OK ] R4ReaderADTest.DayKlineUsesDateKeyAndDaySubdir (1 ms)
+[ RUN      ] R4ReaderADTest.ZeroEtimeFallsBackToSinkClock
+[       OK ] R4ReaderADTest.ZeroEtimeFallsBackToSinkClock (1 ms)
+[ RUN      ] R4ReaderADTest.OnMinuteEndGatesRepeatedAndOlderTimes
+[       OK ] R4ReaderADTest.OnMinuteEndGatesRepeatedAndOlderTimes (0 ms)
+[ RUN      ] R4ReaderADTest.UnknownPeriodHasNoDbAndReturnsNull
+[       OK ] R4ReaderADTest.UnknownPeriodHasNoDbAndReturnsNull (0 ms)
+[ DISABLED ] R4ReaderADTest.DISABLED_AdvancingEtimeAfterTwoHandlesCrashesOnNullDb
+[ DISABLED ] R4ReaderADTest.DISABLED_OnMinuteEndOnBarlessCacheEntryReadsBackOfEmptyBuffer
+[----------] 14 tests from R4ReaderADTest (20 ms total)
+
+[----------] 4 tests from ShortAndLongRawKeys/R4ReaderADRawKeyTest
+[ RUN      ] ShortAndLongRawKeys/R4ReaderADRawKeyTest.InitialLoadRejectsMalformedRawKeyAndCanRetry/ShortKey
+[       OK ] ShortAndLongRawKeys/R4ReaderADRawKeyTest.InitialLoadRejectsMalformedRawKeyAndCanRetry/ShortKey (2 ms)
+[ RUN      ] ShortAndLongRawKeys/R4ReaderADRawKeyTest.InitialLoadRejectsMalformedRawKeyAndCanRetry/LongKey
+[       OK ] ShortAndLongRawKeys/R4ReaderADRawKeyTest.InitialLoadRejectsMalformedRawKeyAndCanRetry/LongKey (2 ms)
+[ RUN      ] ShortAndLongRawKeys/R4ReaderADRawKeyTest.IncrementalUpdateRejectsMalformedRawKeyWithoutPollution/ShortKey
+[       OK ] ShortAndLongRawKeys/R4ReaderADRawKeyTest.IncrementalUpdateRejectsMalformedRawKeyWithoutPollution/ShortKey (1 ms)
+[ RUN      ] ShortAndLongRawKeys/R4ReaderADRawKeyTest.IncrementalUpdateRejectsMalformedRawKeyWithoutPollution/LongKey
+[       OK ] ShortAndLongRawKeys/R4ReaderADRawKeyTest.IncrementalUpdateRejectsMalformedRawKeyWithoutPollution/LongKey (2 ms)
+[----------] 4 tests from ShortAndLongRawKeys/R4ReaderADRawKeyTest (8 ms total)
+
+[----------] Global test environment tear-down
+[==========] 18 tests from 2 test suites ran. (28 ms total)
+[  PASSED  ] 18 tests.
+
+  YOU HAVE 2 DISABLED TESTS
+

@@ -1,4 +1,6 @@
 ﻿#pragma once
+#include <mutex>
+#include <set>
 #include <string>
 #include <stdint.h>
 
@@ -252,7 +254,13 @@ private:
 	typedef std::vector<AdjFactor> AdjFactorList;
 	typedef wt_hashmap<std::string, AdjFactorList>	AdjFactorMap;
 	AdjFactorMap	_adj_factors;
+	// The loader may retain the key pointer after loadAdjFactors returns. Keep
+	// one stable string per key until this reader is destroyed. Memory therefore
+	// grows with the number of distinct factor keys requested by this reader.
+	std::mutex		_adj_factor_loader_keys_mutex;
+	std::set<std::string> _adj_factor_loader_keys;
 
+	const char* getStableAdjFactorLoaderKey(const std::string& key);
 	const AdjFactorList& getAdjFactors(const char* code, const char* exchg, const char* pid);
 	
 };

@@ -4,7 +4,7 @@
  *
  * 覆盖（只读生产代码）:
  *  - WtDtRunner.cpp:66-71 配置未写 disable_dump 时进入的（本平台为空的）分支
- *  - WtDtRunner.cpp:152-170 parsers 以文件字符串给出且内容解析失败 -> 记错误不中断
+ *  - 显式 parsers sidecar 缺失/解析失败 -> 初始化失败且不启动；无 parsers 配置仍可选
  *  - WtDtRunner.cpp:218-239 get_bars_by_range："m7"（times 非 5 倍数）/ "d2"（非 m 开头）
  *    与 endTime==0 的默认区间
  *  - WtDtRunner.cpp:258-281 get_bars_by_date："m7" 与 uDate==0
@@ -28,11 +28,19 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <utility>
+#include <vector>
 
 namespace fs = std::filesystem;
 using namespace wtp;
 
 namespace {
+
+std::vector<WtDtRunner*>& retainedRunnerGraphs()
+{
+	static std::vector<WtDtRunner*>* runners = new std::vector<WtDtRunner*>();
+	return *runners;
+}
 
 fs::path makeTempDir(const char* tag)
 {
@@ -154,10 +162,10 @@ protected:
 
 }	// namespace
 
-// WtDtRunner.cpp:66-71 + :152-170
-TEST_F(RunnerFixture, initializes_when_parser_config_is_broken)
+// WtDtRunner.cpp:152-175
+TEST_F(RunnerFixture, parser_sidecar_errors_reject_initialization)
 {
-	// parsers 指向一个存在但内容非法的文件 -> load_from_file 返回 NULL -> 记错误继续
+	// 显式 sidecar 指向一个存在但内容非法的文件，必须失败而不是继续启动。
 	const std::string badParser = (_dir / "parsers_bad.json").string();
 	writeFile(badParser, "this is not json");
 	const std::string extra = ",\"parsers\":\"" + badParser + "\"";
@@ -166,8 +174,121 @@ TEST_F(RunnerFixture, initializes_when_parser_config_is_broken)
 	WtDtRunner runner;
 	runner.initialize(cfgFile.c_str(), true, _bin.c_str(), _logCfg.c_str(), nullptr, nullptr);
 
-	// runner 仍完成初始化：查询进入 _data_mgr（空库安全返回）
+	EXPECT_FALSE(runner.isInitialized());
+	EXPECT_EQ(runner.activeParserCount(), 0u);
+	EXPECT_FALSE(runner.hasQuarantinedParser());
+	EXPECT_FALSE(runner.hasRetainedParserAdapters());
+	runner.start();
+	EXPECT_FALSE(runner.isInitialized());
+	EXPECT_EQ(runner.activeParserCount(), 0u);
 	EXPECT_EQ(nullptr, runner.get_bars_by_count(kCode, "m7", 3, 202401021500));
+}
+
+TEST_F(RunnerFixture, missing_parser_sidecar_rejects_initialization)
+{
+	const std::string missingParser = (_dir / "no_such_parsers.json").string();
+	const std::string extra = ",\"parsers\":\"" + missingParser + "\"";
+	const std::string cfgFile = writeConfig("wtdt_missing_parser.json", true, extra);
+
+	WtDtRunner runner;
+	runner.initialize(cfgFile.c_str(), true, _bin.c_str(), _logCfg.c_str(), nullptr, nullptr);
+
+	EXPECT_FALSE(runner.isInitialized());
+	EXPECT_EQ(runner.activeParserCount(), 0u);
+	EXPECT_FALSE(runner.hasQuarantinedParser());
+	EXPECT_FALSE(runner.hasRetainedParserAdapters());
+	runner.start();
+	EXPECT_FALSE(runner.isInitialized());
+	EXPECT_EQ(runner.activeParserCount(), 0u);
+}
+
+TEST_F(RunnerFixture, parser_config_shapes_are_rejected_before_manager_mutation)
+{
+	const fs::path missingMembers = _dir / "parsers_missing_members.json";
+	const fs::path wrongShape = _dir / "parsers_wrong_shape.json";
+	writeFile(missingMembers, R"JSON({})JSON");
+	writeFile(wrongShape, R"JSON({"parsers":{}})JSON");
+
+	const std::vector<std::pair<std::string, std::string>> cases = {
+		{"wrong_top_level_type", ",\"parsers\":true"},
+		{"missing_sidecar_parsers", ",\"parsers\":\"" + missingMembers.string() + "\""},
+		{"non_array_sidecar_parsers", ",\"parsers\":\"" + wrongShape.string() + "\""},
+		{"duplicate_parser_ids", ",\"parsers\":[{\"active\":true,\"id\":\"dup\"},"
+			"{\"active\":true,\"id\":\"dup\"}]"}
+	};
+
+	for (const auto& testCase : cases)
+	{
+		const std::string cfgFile = writeConfig((testCase.first + ".json").c_str(), true, testCase.second);
+		WtDtRunner runner;
+		runner.initialize(cfgFile.c_str(), true, _bin.c_str(), _logCfg.c_str(), nullptr, nullptr);
+
+		EXPECT_FALSE(runner.isInitialized()) << testCase.first;
+		EXPECT_EQ(nullptr, runner.getBaseDataMgr().getSession("SD0930")) << testCase.first;
+		EXPECT_EQ(runner.activeParserCount(), 0u) << testCase.first;
+		EXPECT_FALSE(runner.hasQuarantinedParser()) << testCase.first;
+		EXPECT_FALSE(runner.hasRetainedParserAdapters()) << testCase.first;
+	}
+}
+
+TEST_F(RunnerFixture, corrected_parser_sidecar_can_retry_after_preflight_failure)
+{
+	const fs::path sidecar = _dir / "parsers_retry.json";
+	writeFile(sidecar, "not json");
+	const std::string extra = ",\"parsers\":\"" + sidecar.string() + "\"";
+	const std::string cfgFile = writeConfig("wtdt_retry_parser.json", true, extra);
+
+	WtDtRunner runner;
+	runner.initialize(cfgFile.c_str(), true, _bin.c_str(), _logCfg.c_str(), nullptr, nullptr);
+	EXPECT_FALSE(runner.isInitialized());
+	EXPECT_EQ(nullptr, runner.getBaseDataMgr().getSession("SD0930"));
+	EXPECT_FALSE(runner.hasQuarantinedParser());
+	EXPECT_FALSE(runner.hasRetainedParserAdapters());
+
+	// The first failure must happen before data-manager/store initialization;
+	// the corrected retry then reaches the single initDataMgr call in initialize().
+	writeFile(sidecar, R"JSON({"parsers":[]})JSON");
+	runner.initialize(cfgFile.c_str(), true, _bin.c_str(), _logCfg.c_str(), nullptr, nullptr);
+	EXPECT_TRUE(runner.isInitialized());
+	EXPECT_NE(nullptr, runner.getBaseDataMgr().getSession("SD0930"));
+	EXPECT_EQ(runner.activeParserCount(), 0u);
+	EXPECT_FALSE(runner.hasQuarantinedParser());
+	EXPECT_FALSE(runner.hasRetainedParserAdapters());
+}
+
+TEST_F(RunnerFixture, FailedParserInitializationDoesNotRegisterOrStartRunner)
+{
+	const fs::path parserSource = fs::path(_bin) / "libParserUDP.dylib";
+	ASSERT_TRUE(fs::exists(parserSource)) << parserSource.string();
+	const fs::path moduleRoot = _dir / "module_root";
+	const fs::path parserDir = moduleRoot / "parsers";
+	fs::create_directories(parserDir);
+	fs::copy_file(parserSource, parserDir / "libParserUDP.dylib",
+		fs::copy_options::overwrite_existing);
+	fs::copy_file(fs::path(_bin) / "libWtDataStorageAD.dylib",
+		moduleRoot / "libWtDataStorageAD.dylib", fs::copy_options::overwrite_existing);
+
+	const std::string parser = ",\"parsers\":[{\"active\":true,\"id\":\"r85_bad_parser\","
+		"\"module\":\"ParserUDP\",\"host\":\"not-an-ip-address\","
+		"\"bport\":31001,\"sport\":31002}]";
+	const std::string cfgFile = writeConfig("wtdt_parser_init_failure.json", true, parser);
+
+	// Keep the runner and quarantined parser graph alive for the test process:
+	// the provider has no verified callback-drain contract for destruction.
+	WtDtRunner* runner = new WtDtRunner();
+	runner->initialize(cfgFile.c_str(), true, moduleRoot.string().c_str(),
+		_logCfg.c_str(), nullptr, nullptr);
+
+	// ParserUDP rejects the host during init before connect()/worker startup.
+	// The failed candidate is kept in quarantine and never enters ParserAdapterMgr.
+	EXPECT_FALSE(runner->isInitialized());
+	EXPECT_EQ(runner->activeParserCount(), 0u);
+	EXPECT_TRUE(runner->hasQuarantinedParser());
+	EXPECT_TRUE(runner->hasRetainedParserAdapters());
+	runner->start();
+	EXPECT_FALSE(runner->isInitialized());
+	EXPECT_EQ(runner->activeParserCount(), 0u);
+	retainedRunnerGraphs().push_back(runner);
 }
 
 // WtDtRunner.cpp:218-239

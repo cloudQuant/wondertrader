@@ -1,6 +1,8 @@
 ﻿#include <iostream>
 #include <set>
 #include <stdint.h>
+#include <cctype>
+#include <cstring>
 #include <fstream>
 
 #include "../Share/StrUtil.hpp"
@@ -87,14 +89,27 @@ std::string extractProductID(const char* instrument)
 std::string extractProductName(const char* cname)
 {
 	std::string strRet;
-	auto idx = strlen(cname) - 1;
-	while (isdigit(cname[idx]) && idx > 0)
+	if (cname == NULL)
+		return strRet;
+
+	const size_t length = strlen(cname);
+	if (length == 0)
+		return strRet;
+
+	size_t prefixLength = length;
+	while (prefixLength > 1 && std::isdigit(static_cast<unsigned char>(cname[prefixLength - 1])))
 	{
-		idx--;
+		prefixLength--;
 	}
 
-	strRet.append(cname, idx + 1);
+	strRet.append(cname, prefixLength);
 	return strRet;
+}
+
+template <size_t N>
+static bool hasTerminator(const char (&value)[N])
+{
+	return std::memchr(value, '\0', N) != NULL;
 }
 
 std::set<std::string>	prod_set;
@@ -230,7 +245,19 @@ void CTraderSpi::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CTho
 	if (!IsErrorRspInfo(pRspInfo))
 	{
 		if (pInstrument)
-		{		
+		{
+			if (!hasTerminator(pInstrument->InstrumentID) ||
+				!hasTerminator(pInstrument->ExchangeID) ||
+				!hasTerminator(pInstrument->ProductID) ||
+				!hasTerminator(pInstrument->InstrumentName) ||
+				!hasTerminator(pInstrument->UnderlyingInstrID) ||
+				!hasTerminator(pInstrument->OpenDate) ||
+				!hasTerminator(pInstrument->ExpireDate))
+			{
+				std::cerr << "--->>> OnRspQryInstrument: unterminated instrument field, skipped" << std::endl;
+			}
+			else
+			{
 			bool bOption = isOption(pInstrument->ProductClass);
 			bool bFuture = isFuture(pInstrument->ProductClass);
 			bool bStock = isStock(pInstrument->ProductClass);
@@ -384,6 +411,7 @@ void CTraderSpi::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CTho
 					_contracts[key] = contract;
 				}
 			} while (false);
+			}
 		}
 	}
 
@@ -461,12 +489,21 @@ void CTraderSpi::LoadFromJson()
 				contract.m_minMktQty = pCont->getUInt32("minmarketqty");
 				contract.m_minLmtQty = pCont->getUInt32("minlimitqty");
 
-				if (pCont->has("option"))
+				// Loading incremental data may update an existing contract entry.
+				// Always reset option-only fields first so a plain contract (or a
+				// malformed option value) cannot retain metadata from an older load.
+				contract.m_optType = OT_None;
+				contract.m_strUnderlying.clear();
+				contract.m_strikePrice = 0.0;
+				contract.m_dUnderlyingScale = 0.0;
+
+				WTSVariant* pOption = pCont->get("option");
+				if (pOption && pOption->isObject())
 				{
-					contract.m_optType = (OptionType)pCont->getUInt32("optiontype");
-					contract.m_strUnderlying = pCont->getCString("underlying");
-					contract.m_strikePrice = pCont->getDouble("product");
-					contract.m_dUnderlyingScale = pCont->getDouble("underlyingscale");
+					contract.m_optType = (OptionType)pOption->getUInt32("optiontype");
+					contract.m_strUnderlying = pOption->getCString("underlying");
+					contract.m_strikePrice = pOption->getDouble("strikeprice");
+					contract.m_dUnderlyingScale = pOption->getDouble("underlyingscale");
 				}
 
 

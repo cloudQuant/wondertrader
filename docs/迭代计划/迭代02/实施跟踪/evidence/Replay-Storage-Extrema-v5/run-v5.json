@@ -1,0 +1,74 @@
+{
+  "archive_status": "LOCAL_FOCUSED_TEST_PASS_NOT_FULL_ACCEPTANCE",
+  "date": "2026-10-30",
+  "platform": "macOS arm64",
+  "independent_review": "PASS; no logical blocker reported",
+  "build_log": "build-v5.log",
+  "build_log_sha256": "ded889b6365e4ea9d4c882b9ac3ab0cb4911632693094225fcf13298a941a15b",
+  "build_scope": "Ninja incrementally compiled the listed production and focused test objects; each binary was manually linked using existing project/gtest/Boost/zstd/iconv libraries. This is not a clean rebuild or aggregate CoverageTests build. Focused link commands include -Wl,-undefined,dynamic_lookup.",
+  "script": "reproduce-v5.sh",
+  "script_scope": "Explicit Ninja object build, four manual focused links, and four focused suite runs; script is archived but was not executed during documentation update.",
+  "binaries": {
+    "BUG-L06-004": {
+      "path": "build-cov/build_x64/Debug/bin/TestUnits/wt-match-batch-v5",
+      "sha256": "4137bd6c3160ac0838b6c3e3690cd2746f61394422ff1957f9db90d04e3db7d9",
+      "log": "match-v5.log",
+      "log_sha256": "9033255be13fa0f9a0d2ff79bd08ec2a2f50037a13e81842d196adfb55a9fc67",
+      "result": "PASS 15/15",
+      "suite": "MatchEngineTest"
+    },
+    "BUG-R23-005_and_BUG-R23-007": {
+      "path": "build-cov/build_x64/Debug/bin/TestUnits/wt-rdm-batch-v5",
+      "sha256": "999ce5bdab202db4f50bff695836f9a720534206a28452c8562528de98a4661d",
+      "log": "rdm-v5.log",
+      "log_sha256": "458540c6bcf6b41a8becc5407449d535836125bca9745d86a24326c84df8424e",
+      "result": "PASS 16/16",
+      "suite": "R23RdmCountTest and R23RdmCountStrictProbe"
+    },
+    "BUG-R12-07_and_BUG-P12-003": {
+      "path": "build-cov/build_x64/Debug/bin/TestUnits/wt-extrema-batch-v5",
+      "sha256": "93df1dcf4777ca28afadf02861397e2ca88907002205ff4d8b12a3db979c8f5b",
+      "log": "extrema-v5.log",
+      "log_sha256": "467c5b3a6dbc3db889c48ac263179b1ef5c727ea5ace2ab9e6d267f99168a4d3",
+      "result": "PASS 19/19",
+      "filter": "r12_value_array.*:r12_kline_slice.*:r12_kline_data.*:P12Extract.closed_extrema_ranges_reject_end_equal_size"
+    },
+    "BUG-L04-005": {
+      "path": "build-cov/build_x64/Debug/bin/TestUnits/wt-adreader-batch-v5",
+      "sha256": "e80339e70d1999287842859c39e91ba9bbef1816f7ade01325f7b6a96a5471ea",
+      "log": "adreader-v5.log",
+      "log_sha256": "699a718f92f092e345547493ab9b02348d991553c9015cef55a287230a91652a",
+      "result": "PASS 18/18 active; 2 disabled",
+      "suite": "R4ReaderADTest and ShortAndLongRawKeys/R4ReaderADRawKeyTest"
+    }
+  },
+  "source_sha256": {
+    "src/Includes/WTSDataDef.hpp": "08362708dc4306f124d3e5b7bd34492e2e4375001dc733041f8f42f19204bbd5",
+    "src/WtBtCore/MatchEngine.cpp": "dcd263c48208a40c20f3711a1df65d590a27ee19406abbd2d4009594fb7cdc37",
+    "src/WtDataStorage/WtRdmDtReader.cpp": "c22561a1d338514ed463ecf86bbca6e633c22d57423124afda6c8225ee02b945",
+    "src/WtDataStorageAD/WtDataReaderAD.cpp": "ce3d3241e08a8f0dedde9e4e80406ee53b4a7e1b2c7c44b3524ad00a28fede85",
+    "src/TestUnits/coverage/l06_wtbtcore/l06_match_engine_test.cpp": "7bc4eff2449b808183e2851930e3bf1832f4a1551db5d5b52e162b4c3b1e82e0",
+    "src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp": "3cbbff1cbf7368f5f2419669cd4a4e2ec38f38ecf8f9cb7a6ed33d17ea46587c",
+    "src/TestUnits/coverage/r12_headers/r12_data_def_test.cpp": "e3aef842c04c513334c0fd69269cda44fe2529d015be98982c9f389bc19ec41c",
+    "src/TestUnits/coverage/p12_datafactory_datadef/p12_factory_extract_merge_test.cpp": "c317825b997c6f65beb4c79936a10245e33a40299d41fd56ac96cea6fe91da4e",
+    "src/TestUnits/coverage/p05_datastorage2/r4_reader_ad_slices_test.cpp": "45accd360ff9f9d5daacddda9667fa2487ac9183f4c657b9e9978443bd6e55e7"
+  },
+  "object_sha256": {
+    "CoverageTests_btcore/l06_wtbtcore/l06_match_engine_test.cpp.o": "cd88f1c437dfc978ae2a1b2eb76d20ffd6983e58523bc8f6173dadd1a15fda19",
+    "CoverageTests_btcore/__/__/WtBtCore/MatchEngine.cpp.o": "846e35b0235421735e3181673123792c29146a0ab7ac29d40d72cbb0617d154b",
+    "CoverageTests_btcore/__/__/WtBtCore/WtHelper.cpp.o": "994f94d23bc2cabc3f4d4b49953e737b57ba575c0834f0768218cc3714cabdee",
+    "CoverageTests/r23_storage4/r23_rdm_count_slice_test.cpp.o": "d6ef4befa04c74c6dc910b06f7e2c585b49b00f58133113c336d7a3623d58d72",
+    "CoverageTests/__/__/WtDataStorage/WtRdmDtReader.cpp.o": "8631244b9ba32ab3c7f1fa6a3124cbd320ebefeb1e7cc673fe51331a53409896",
+    "CoverageTests/__/__/WtDataStorage/WtDataReader.cpp.o": "48c3798a50cc5a9f1256b55a9e63b51195db8d41dd5e6261c79d9c82ad55b40c",
+    "CoverageTests/r12_headers/r12_data_def_test.cpp.o": "730f7e47acf306fd8f85e68c793e7536adf421b6a02ad17a1649c6f31143a3c1",
+    "CoverageTests/p12_datafactory_datadef/p12_factory_extract_merge_test.cpp.o": "d7f2fdf94cd66809a5f446c3cb7bd85eab5e9ce359e7ecedf2fe6a450c9d5ce0",
+    "CoverageTests_adstorage/p05_datastorage2/r4_reader_ad_slices_test.cpp.o": "69bbc61905c6bd9b371ff7c0b6968333fd0d830850538342f6f41cd460a61794",
+    "CoverageTests_adstorage/__/__/WtDataStorageAD/WtDataReaderAD.cpp.o": "91f41ad2ff94b5c2f133494b3a5f508463c171e9e11e1b6dbe0dcd3582bb7345"
+  },
+  "notes": [
+    "The raw Ninja console output hash is byte-identical to the archived v4 build log because the same 16-step output contains no timestamps. Current source, focused object, and v5 binary hashes are recorded separately; the v5 MatchEngine/RDM binary and their objects differ from v4. Treat the console log as a build transcript, not a standalone source-version attestation.",
+    "R23-004 adjacent test oracle was corrected: the initial short-file read expects NULL/empty instead of incorrectly expecting previous-day fallback, then a repaired file is read successfully. This does not change BUG-R23-004 status.",
+    "BUG-P04-009 remains NOT_STARTED and is not included; the same-source empty-bin issue is still being repaired.",
+    "No ASan/TSan or Windows run; AD same-reader repair/retry and WTSKlineData size/extract over INT32_MAX were not verified."
+  ]
+}

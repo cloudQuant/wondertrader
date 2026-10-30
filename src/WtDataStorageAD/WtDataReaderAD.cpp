@@ -16,6 +16,7 @@ namespace fs = boost::filesystem;
 
 //By Wesley @ 2022.01.05
 #include "../Share/fmtlib.h"
+#include <vector>
 template<typename... Args>
 inline void pipe_reader_log(IDataReaderSink* sink, WTSLogLevel ll, const char* format, const Args&... args)
 {
@@ -231,13 +232,6 @@ bool WtDataReaderAD::cacheBarsFromStorage(const std::string& key, const char* st
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	[[maybe_unused]] WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
-	std::string stdPID = fmtutil::format<64>("{}.{}", cInfo._exchg, cInfo._product);
-
-	BarsList& barList = _bars_cache[key];
-	barList._code = stdCode;
-	barList._period = period;
-	barList._exchg = cInfo._exchg;
-
 	//直接从LMDB读取
 	WtLMDBPtr db = get_k_db(cInfo._exchg, period);
 	if (db == NULL)
@@ -246,60 +240,120 @@ bool WtDataReaderAD::cacheBarsFromStorage(const std::string& key, const char* st
 	WtLMDBQuery query(*db);
 	LMDBBarKey rKey(cInfo._exchg, cInfo._code, 0xffffffff);
 	LMDBBarKey lKey(cInfo._exchg, cInfo._code, 0);
+	std::vector<WTSBarStruct> loadedBars;
+	bool valuesValid = true;
 	int cnt = query.get_lowers(std::string((const char*)&lKey, sizeof(lKey)), std::string((const char*)&rKey, sizeof(rKey)),
-		count, [&barList, &lKey](const ValueArray& ayKeys, const ValueArray& ayVals) {
-		if (ayVals.empty())
+		count, [&loadedBars, &valuesValid, &lKey](const ValueArray& ayKeys, const ValueArray& ayVals) {
+		if (ayKeys.size() != ayVals.size())
+		{
+			valuesValid = false;
 			return;
+		}
 
-		std::size_t cnt = ayVals.size();
-		for (std::size_t i = 0; i < cnt; i++)
+		for (std::size_t i = 0; i < ayVals.size(); i++)
+		{
+			if (ayKeys[i].size() != sizeof(LMDBBarKey) || ayVals[i].size() != sizeof(WTSBarStruct))
+			{
+				valuesValid = false;
+				return;
+			}
+		}
+
+		for (std::size_t i = 0; i < ayVals.size(); i++)
 		{
 			//要检查左边界
 			if(memcmp(ayKeys[i].data(), (void*)&lKey, sizeof(lKey)) < 0)
 				continue;
 
-			barList._bars.push_back(*(WTSBarStruct*)ayVals[i].data());
+			WTSBarStruct bar;
+			memcpy(&bar, ayVals[i].data(), sizeof(bar));
+			loadedBars.push_back(bar);
 		}
 	});
+	if (cnt < 0 || !valuesValid)
+	{
+		pipe_reader_log(_sink, LL_ERROR, "Malformed bar key/value in LMDB while loading {} {} bars",
+			PERIOD_NAME[period], stdCode);
+		return false;
+	}
+
+	// Only publish the new cache after every key and value has passed validation.
+	BarsList& barList = _bars_cache[key];
+	barList._bars.rset_capacity(count);
+	barList._bars.clear();
+	for (const WTSBarStruct& bar : loadedBars)
+		barList._bars.push_back(bar);
+	barList._code = stdCode;
+	barList._period = period;
+	barList._exchg = cInfo._exchg;
 
 	pipe_reader_log(_sink, LL_DEBUG, "{} {} bars of {} loaded to cache", cnt, PERIOD_NAME[period], stdCode);
 	return true;
 }
 
-void WtDataReaderAD::update_cache_from_lmdb(BarsList& barsList, const char* exchg, const char* code, WTSKlinePeriod period, uint32_t& lastBarTime)
+bool WtDataReaderAD::update_cache_from_lmdb(BarsList& barsList, const char* exchg, const char* code, WTSKlinePeriod period, uint32_t& lastBarTime)
 {
 	bool isDay = (period == KP_DAY);
 	WtLMDBPtr db = get_k_db(exchg, period);
+	if (db == NULL)
+		return false;
+
 	WtLMDBQuery query(*db);
 	LMDBBarKey lKey(exchg, code, lastBarTime);
 	LMDBBarKey rKey(exchg, code, 0xFFFFFFFF);
-	[[maybe_unused]] int cnt = query.get_uppers(std::string((const char*)&lKey, sizeof(lKey)), std::string((const char*)&rKey, sizeof(rKey)), 
-		9999, [this, &barsList, isDay, &lastBarTime](const ValueArray& ayKeys, const ValueArray& ayVals) {
+	std::vector<WTSBarStruct> newBars;
+	bool valuesValid = true;
+	int cnt = query.get_uppers(std::string((const char*)&lKey, sizeof(lKey)), std::string((const char*)&rKey, sizeof(rKey)),
+		9999, [&newBars, &valuesValid](const ValueArray& ayKeys, const ValueArray& ayVals) {
+		if (ayKeys.size() != ayVals.size())
+		{
+			valuesValid = false;
+			return;
+		}
 
-		std::size_t cnt = ayVals.size();
-		for (std::size_t idx = 0; idx < cnt; idx++)
+		for (std::size_t idx = 0; idx < ayVals.size(); idx++)
 		{
 			const std::string& item = ayVals[idx];
 			const std::string& key = ayKeys[idx];
-			[[maybe_unused]] LMDBBarKey* barKey = (LMDBBarKey*)key.data();
-			WTSBarStruct* curBar = (WTSBarStruct*)item.data();
-			uint64_t curBarTime = isDay ? curBar->date : curBar->time;
-			if (curBarTime == lastBarTime)
+			if (key.size() != sizeof(LMDBBarKey) || item.size() != sizeof(WTSBarStruct))
 			{
-				if (barsList._last_from_cache)
-					memcpy(&barsList._bars.back(), curBar, sizeof(WTSBarStruct));
+				valuesValid = false;
+				return;
 			}
-			else
-			{
-				barsList._bars.push_back(*curBar);
-				lastBarTime = (uint32_t)curBarTime;
-				_sink->on_bar(barsList._code.c_str(), barsList._period, &barsList._bars.back());
-			}
+
+			WTSBarStruct bar;
+			memcpy(&bar, item.data(), sizeof(bar));
+			newBars.push_back(bar);
 		}
 	});
+	if (cnt < 0 || !valuesValid)
+	{
+		pipe_reader_log(_sink, LL_ERROR, "Malformed bar key/value in LMDB while updating {}.{} {} bars",
+			exchg, code, PERIOD_NAME[period]);
+		return false;
+	}
+
+	uint32_t committedLastBarTime = lastBarTime;
+	for (const WTSBarStruct& curBar : newBars)
+	{
+		uint64_t curBarTime = isDay ? curBar.date : curBar.time;
+		if (curBarTime == committedLastBarTime)
+		{
+			if (barsList._last_from_cache)
+				memcpy(&barsList._bars.back(), &curBar, sizeof(WTSBarStruct));
+		}
+		else
+		{
+			barsList._bars.push_back(curBar);
+			committedLastBarTime = (uint32_t)curBarTime;
+			_sink->on_bar(barsList._code.c_str(), barsList._period, &barsList._bars.back());
+		}
+	}
+	lastBarTime = committedLastBarTime;
 
 	pipe_reader_log(_sink, LL_DEBUG, "{} bars of {}.{} updated to {}",
 		PERIOD_NAME[period], exchg, code, isDay?barsList._bars.back().date:barsList._bars.back().time);
+	return true;
 }
 
 WTSBarStruct* WtDataReaderAD::get_rt_cache_bar(const char* exchg, const char* code, WTSKlinePeriod period)
@@ -404,12 +458,11 @@ WTSKlineSlice* WtDataReaderAD::readKlineSlice(const char* stdCode, WTSKlinePerio
 
 	std::string key = fmtutil::format<64>("{}#{}", stdCode, (uint32_t)period);
 	BarsList& barsList = _bars_cache[key];
-	if (barsList._bars.capacity() < count)
+	if (barsList._bars.capacity() < count || (barsList._bars.empty() && barsList._last_req_time == 0))
 	{
 		//容量不够，全部重载
-		barsList._bars.rset_capacity(count);
-		barsList._bars.clear();	//清除原有数据
-		cacheBarsFromStorage(key, stdCode, period, count);
+		if (!cacheBarsFromStorage(key, stdCode, period, count))
+			return NULL;
 	}
 
 	//这里只需要检查一下RTBarCache的K线时间戳和etime是否一致
@@ -419,23 +472,19 @@ WTSKlineSlice* WtDataReaderAD::readKlineSlice(const char* stdCode, WTSKlinePerio
 	if (barsList._bars.empty())
 		return NULL;
 
-	//数据条数做一个修正
-	count = min((uint32_t)barsList._bars.size(), count);
-
 	bool isDay = (period == KP_DAY);
 	etime = isDay ? curDate : ((curDate - 19900000)*10000 + curTime);
 	if(barsList._last_req_time < etime)
 	{
 		//上次请求的时间，小于当前请求的时间，则要检查最后一条K线
-		WTSBarStruct& lastBar = barsList._bars.back();
-		uint32_t lastBarTime = isDay ? lastBar.date : (uint32_t)lastBar.time;
+		uint32_t lastBarTime = isDay ? barsList._bars.back().date : (uint32_t)barsList._bars.back().time;
 		if(lastBarTime < etime)
 		{
 			//如果最后一条K线的时间小于当前时间，先从数LMDB更新最新的K线
-			update_cache_from_lmdb(barsList, cInfo._exchg, curCode.c_str(), period, lastBarTime);
+			if (!update_cache_from_lmdb(barsList, cInfo._exchg, curCode.c_str(), period, lastBarTime))
+				return NULL;
 
-			lastBar = barsList._bars.back();
-			lastBarTime = isDay ? lastBar.date : (uint32_t)lastBar.time;
+			lastBarTime = isDay ? barsList._bars.back().date : (uint32_t)barsList._bars.back().time;
 		}
 
 		//从lmdb读完了以后，再检查
@@ -451,7 +500,8 @@ WTSKlineSlice* WtDataReaderAD::readKlineSlice(const char* stdCode, WTSKlinePerio
 				{
 					//缓存的K线时间戳大于截止时间，说明检查的过程中Writer已经将数据转储到lmdb中了
 					//这个时候就再读一次lmdb
-					update_cache_from_lmdb(barsList, cInfo._exchg, curCode.c_str(), period, lastBarTime);
+					if (!update_cache_from_lmdb(barsList, cInfo._exchg, curCode.c_str(), period, lastBarTime))
+						return NULL;
 					barsList._last_from_cache = false;
 				}
 				else
@@ -484,8 +534,13 @@ WTSKlineSlice* WtDataReaderAD::readKlineSlice(const char* stdCode, WTSKlinePerio
 		auto ayOne = barsList._bars.array_one();
 		auto diff = count - cnt_2;
 		auto ret = WTSKlineSlice::create(stdCode, period, 1, &barsList._bars[ayOne.second - diff], diff);
-		if (cnt_2 > 0)
-			ret->appendBlock(ayTwo.first, cnt_2);
+		if (ret == NULL)
+			return NULL;
+		if (cnt_2 > 0 && !ret->appendBlock(ayTwo.first, cnt_2))
+		{
+			ret->release();
+			return NULL;
+		}
 		return ret;
 	}
 
@@ -500,46 +555,51 @@ void WtDataReaderAD::onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTDa
 	if (nowTime <= _last_time)
 		return;
 
-	uint64_t endBarTime = (uDate - 19900000) * 10000 + uTime;
+	const uint64_t minuteEndBarTime = (uDate - 19900000) * 10000 + uTime;
+	const uint32_t dailyEndDate = uDate;
 
 	for (auto it = _bars_cache.begin(); it != _bars_cache.end(); it++)
 	{
 		BarsList& barsList = (BarsList&)it->second;
+		if (barsList._bars.empty())
+			continue;
+
 		CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(barsList._code.c_str(), _hot_mgr);
 		if (barsList._period != KP_DAY)
 		{
 			uint32_t lastBarTime = (uint32_t)barsList._bars.back().time;
 			pipe_reader_log(_sink, LL_DEBUG,
-				"Updating {} bars of {} in section ({},{}]", PERIOD_NAME[barsList._period], barsList._code, lastBarTime, endBarTime);
-			update_cache_from_lmdb(barsList, barsList._exchg.c_str(), cInfo._code, barsList._period, lastBarTime);
-			if(lastBarTime < endBarTime)
+				"Updating {} bars of {} in section ({},{}]", PERIOD_NAME[barsList._period], barsList._code, lastBarTime, minuteEndBarTime);
+			if (!update_cache_from_lmdb(barsList, barsList._exchg.c_str(), cInfo._code, barsList._period, lastBarTime))
+				continue;
+			if(lastBarTime < minuteEndBarTime)
 			{
 				WTSBarStruct* rtBar = get_rt_cache_bar(cInfo._exchg, cInfo._code, barsList._period);
-				if(rtBar->time > lastBarTime && rtBar->time <=endBarTime)
+				if (rtBar != NULL && rtBar->time > lastBarTime && rtBar->time <= minuteEndBarTime)
 				{
 					barsList._bars.push_back(*rtBar);
 					barsList._last_from_cache = true;
 					_sink->on_bar(barsList._code.c_str(), barsList._period, rtBar);
 					pipe_reader_log(_sink, LL_DEBUG,
-						"{} bars @ {} of {} updated from cache instead of lmdb in {}", PERIOD_NAME[barsList._period], endBarTime, barsList._code, __FUNCTION__);
+						"{} bars @ {} of {} updated from cache instead of lmdb in {}", PERIOD_NAME[barsList._period], minuteEndBarTime, barsList._code, __FUNCTION__);
 				}
 			}
 		}
 		else if(endTDate != 0)
 		{
 			uint32_t lastBarTime = barsList._bars.back().date;
-			endBarTime = uDate;
-			update_cache_from_lmdb(barsList, barsList._exchg.c_str(), cInfo._code, barsList._period, lastBarTime);
-			if (lastBarTime < endBarTime)
+			if (!update_cache_from_lmdb(barsList, barsList._exchg.c_str(), cInfo._code, barsList._period, lastBarTime))
+				continue;
+			if (lastBarTime < dailyEndDate)
 			{
 				WTSBarStruct* rtBar = get_rt_cache_bar(cInfo._exchg, cInfo._code, barsList._period);
-				if (rtBar->date > lastBarTime && rtBar->date <= endBarTime)
+				if (rtBar != NULL && rtBar->date > lastBarTime && rtBar->date <= dailyEndDate)
 				{
 					barsList._bars.push_back(*rtBar);
 					barsList._last_from_cache = true;
 					_sink->on_bar(barsList._code.c_str(), barsList._period, rtBar);
 					pipe_reader_log(_sink, LL_DEBUG,
-						"{} bars @  of {} updated from cache instead of lmdb in {}", PERIOD_NAME[barsList._period], endBarTime, barsList._code, __FUNCTION__);
+						"{} bars @  of {} updated from cache instead of lmdb in {}", PERIOD_NAME[barsList._period], dailyEndDate, barsList._code, __FUNCTION__);
 				}
 			}
 		}
@@ -575,7 +635,7 @@ WtDataReaderAD::WtLMDBPtr WtDataReaderAD::get_k_db(const char* exchg, WTSKlinePe
 
 	auto it = the_map->find(exchg);
 	if (it != the_map->end())
-		return std::move(it->second);
+		return it->second;
 
 	WtLMDBPtr dbPtr(new WtLMDB(true));
 	std::string path = fmtutil::format("{}{}/{}/", _base_dir.c_str(), subdir.c_str(), exchg);
@@ -599,7 +659,7 @@ WtDataReaderAD::WtLMDBPtr WtDataReaderAD::get_t_db(const char* exchg, const char
 	std::string key = fmtutil::format<64>("{}.{}", exchg, code);
 	auto it = _tick_dbs.find(key);
 	if (it != _tick_dbs.end())
-		return std::move(it->second);
+		return it->second;
 
 	WtLMDBPtr dbPtr(new WtLMDB(true));
 	std::string path = fmtutil::format("{}ticks/{}/{}", _base_dir.c_str(), exchg, code);
@@ -614,6 +674,6 @@ WtDataReaderAD::WtLMDBPtr WtDataReaderAD::get_t_db(const char* exchg, const char
 		pipe_reader_log(_sink, LL_DEBUG, "Tick db of {}.{} opened", exchg, code);
 	}
 
-	_tick_dbs[exchg] = dbPtr;
+	_tick_dbs[key] = dbPtr;
 	return dbPtr;
 }

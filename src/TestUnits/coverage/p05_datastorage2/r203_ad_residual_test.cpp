@@ -19,6 +19,22 @@ class R203AdResidualTest : public AdFixture
 {
 };
 
+void expect_bar_fields(const WTSBarStruct& actual, const WTSBarStruct& expected)
+{
+	EXPECT_EQ(actual.date, expected.date);
+	EXPECT_EQ(actual.reserve_, expected.reserve_);
+	EXPECT_EQ(actual.time, expected.time);
+	EXPECT_DOUBLE_EQ(actual.open, expected.open);
+	EXPECT_DOUBLE_EQ(actual.high, expected.high);
+	EXPECT_DOUBLE_EQ(actual.low, expected.low);
+	EXPECT_DOUBLE_EQ(actual.close, expected.close);
+	EXPECT_DOUBLE_EQ(actual.settle, expected.settle);
+	EXPECT_DOUBLE_EQ(actual.money, expected.money);
+	EXPECT_DOUBLE_EQ(actual.vol, expected.vol);
+	EXPECT_DOUBLE_EQ(actual.hold, expected.hold);
+	EXPECT_DOUBLE_EQ(actual.add, expected.add);
+}
+
 // WtDataReaderAD.cpp:450-456 / :459-461
 // 写入 09:30 / 09:35 两笔 tick：09:30 的分钟线（bar 时间 09:31）已转储 LMDB，
 // RT 缓存里是 09:36。
@@ -27,9 +43,8 @@ class R203AdResidualTest : public AdFixture
 //  - 以 09:40 截止、只取 1 条：09:36 尚未转储，追加缓存 bar 并置 _last_from_cache
 //    （459-461），返回最新的 09:36。
 //
-// 每次刷新各用一个新 reader：同一 reader 的第三次 get_k_db 命中被 std::move
-// 掏空的槽位，会在 WtLMDBQuery(*db) 崩溃（BUG-R215-001）。本用例只驱动分支，
-// 原「同一 reader、09:32/09:40/09:41 三读」的完整断言保留在下方 DISABLED_ 用例。
+// 每次刷新各用一个新 reader，隔离共享句柄缓存缺陷的影响；此用例覆盖 RT bar 加入后的
+// 返回切片数量和字段。
 TEST_F(R203AdResidualTest, R203ReaderRtCacheBranchesWithIsolatedReaders)
 {
 	WtDataWriterAD* writer = make_writer();
@@ -60,49 +75,48 @@ TEST_F(R203AdResidualTest, R203ReaderRtCacheBranchesWithIsolatedReaders)
 	s2->release();
 }
 
-// BUG-R215-001（既有 BUG-R144-002 / BUG-P05-001 / R4-BUG-02）：同一 reader 的
-// 第三次 get_k_db 命中被 std::move 掏空的 shared_ptr，WtLMDBQuery(*db) 空指针崩溃。
-// BUG-R215-004：即便换新 reader，09:32 首读内的 count 已被夹到 LMDB 的 1 根，
-// 追加 09:36 后仍按旧 count 截断，09:40 读只返回 1 根；原断言要求 2 根。
-// 原输入、原断言全部保留，产品修复后去掉 DISABLED_ 前缀即可复核。
-TEST_F(R203AdResidualTest, DISABLED_R203ReaderRtCacheAheadOfEtimeDoesNotAppendFutureBar)
+// BUG-R215-004：请求 count 大于 LMDB 当前记录数时，不能在 RT bar 追加前将 count
+// 裁到 LMDB 数量。固定 sink 时钟由 ReaderSink 提供，etime=0 避免依赖显式时间解析。
+// 最终切片应包括 LMDB 最近 bar 与 RT 最近 bar，且每个 WTSBarStruct 字段都保持原值。
+TEST_F(R203AdResidualTest, R203ReaderRtAppendPreservesRequestedCountAndBarFields)
 {
 	WtDataWriterAD* writer = make_writer();
 	ASSERT_TRUE(writer != NULL);
 	push_tick(writer, 20240110u, 93000000u, 30.0, 1.0);
 	push_tick(writer, 20240110u, 93500000u, 31.0, 2.0);
 
-	WtDataReaderAD* reader = make_reader();
+	std::unique_ptr<WtDataReaderAD> reader(make_reader());
 	ASSERT_TRUE(reader != NULL);
+	WTSKlineSlice* slice = reader->readKlineSlice("SSE.600000", KP_Minute1, 10, 0);
+	ASSERT_TRUE(slice != NULL);
+	ASSERT_EQ(bar_count(slice), 2u);
+	ASSERT_EQ(slice->get_block_counts(), 1u);
 
-	WTSKlineSlice* s1 = reader->readKlineSlice("SSE.600000", KP_Minute1, 10,
-		20240110093200000ull);
-	ASSERT_TRUE(s1 != NULL);
-	EXPECT_EQ(bar_count(s1), 1u);
-	ASSERT_GE(s1->get_block_counts(), 1u);
-	EXPECT_EQ(s1->at(0)->time, (uint64_t)TimeUtils::timeToMinBar(20240110u, 931));
-	s1->release();
+	WTSBarStruct lmdbBar;
+	lmdbBar.date = 20240110u;
+	lmdbBar.time = TimeUtils::timeToMinBar(20240110u, 931);
+	lmdbBar.open = 30.0;
+	lmdbBar.high = 30.0;
+	lmdbBar.low = 30.0;
+	lmdbBar.close = 30.0;
+	lmdbBar.money = 30.0;
+	lmdbBar.vol = 1.0;
+	lmdbBar.hold = 1001.0;
 
-	WTSKlineSlice* s2 = reader->readKlineSlice("SSE.600000", KP_Minute1, 10,
-		20240110094000000ull);
-	ASSERT_TRUE(s2 != NULL);
-	EXPECT_EQ(bar_count(s2), 2u);
-	ASSERT_GE(s2->get_block_counts(), 2u);
-	EXPECT_EQ(s2->at(1)->time, (uint64_t)TimeUtils::timeToMinBar(20240110u, 936));
-	s2->release();
+	WTSBarStruct rtBar;
+	rtBar.date = 20240110u;
+	rtBar.time = TimeUtils::timeToMinBar(20240110u, 936);
+	rtBar.open = 31.0;
+	rtBar.high = 31.0;
+	rtBar.low = 31.0;
+	rtBar.close = 31.0;
+	rtBar.money = 31.0;
+	rtBar.vol = 1.0;
+	rtBar.hold = 1002.0;
 
-	push_tick(writer, 20240110u, 94000000u, 32.0, 3.0);	// 转储 09:36
-
-	WTSKlineSlice* s3 = reader->readKlineSlice("SSE.600000", KP_Minute1, 10,
-		20240110094100000ull);
-	ASSERT_TRUE(s3 != NULL);
-	EXPECT_EQ(bar_count(s3), 3u);
-	ASSERT_GE(s3->get_block_counts(), 3u);
-	EXPECT_EQ(s3->at(1)->time, (uint64_t)TimeUtils::timeToMinBar(20240110u, 936));
-	EXPECT_EQ(s3->at(2)->time, (uint64_t)TimeUtils::timeToMinBar(20240110u, 941));
-	s3->release();
-
-	delete reader;
+	expect_bar_fields(*slice->at(0), lmdbBar);
+	expect_bar_fields(*slice->at(1), rtBar);
+	slice->release();
 }
 
 // WtRdmDtReaderAD.cpp:238-243

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="36" failures="4" disabled="1" errors="0" time="5.502" timestamp="2026-10-30T21:48:44.403" name="AllTests">
+  <testsuite name="L00PublicHeaderTest" tests="3" failures="0" disabled="0" skipped="0" errors="0" time="0." timestamp="2026-10-30T21:48:44.406">
+    <testcase name="ExecMgrHeaderIsSelfContained" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/l00_exec_mgr_header_test.cpp" line="11" status="run" result="completed" time="0." timestamp="2026-10-30T21:48:44.406" classname="L00PublicHeaderTest" />
+    <testcase name="ScopeGuardHeaderIsSelfContained" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/l00_scope_guard_header_test.cpp" line="9" status="run" result="completed" time="0." timestamp="2026-10-30T21:48:44.406" classname="L00PublicHeaderTest" />
+    <testcase name="TraderAdapterHeaderIsSelfContained" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/l00_trader_adapter_header_test.cpp" line="9" status="run" result="completed" time="0." timestamp="2026-10-30T21:48:44.406" classname="L00PublicHeaderTest" />
+  </testsuite>
+  <testsuite name="N01TraderAdapter" tests="20" failures="0" disabled="1" skipped="0" errors="0" time="0.634" timestamp="2026-10-30T21:48:44.406">
+    <testcase name="fresh_adapter_is_not_logged_in" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/n01_trader_adapter_test.cpp" line="150" status="run" result="completed" time="0." timestamp="2026-10-30T21:48:44.406" classname="N01TraderAdapter" />
+    <testcase name="init_rejects_null_params_without_touching_state" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/n01_trader_adapter_test.cpp" line="160" status="run" result="completed" time="0." timestamp="2026-10-30T21:48:44.406" classname="N01TraderAdapter" />
+    <testcase name="init_accepts_no_riskmon_inactive_riskmon_and_complete_active_policy" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/n01_trader_adapter_test.cpp" line="170" status="run" result="completed" time="0.623" timestamp="2026-10-30T21:48:44.406" classname="N01TraderAdapter" />
+    <testcase name="active_riskmon_without_policy_is_rejected_before_state_is_committed" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/n01_trader_adapter_test.cpp" line="220" status="run" result="completed" time="0." timestamp="2026-10-30T21:48:45.030" classname="N01TraderAdapter" />
+    <testcase name="active_riskmon_with_non_object_policy_is_rejected_before_state_is_committed" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/n01_trader_adapter_test.cpp" line="233" status="run" result="completed" time="0." timestamp="2026-10-30T21:48:45.030" classname="N01TraderAdapter" />
+    <testcase name="init_ext_rejects_null_api" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/n01_trader_adapter_test.cpp" line="246" status="run" result="completed" time="0." timestamp="2026-10-30T21:48:45.030" classname="N01TraderAdapter" />
+    <testcase name="init_ext_failure_releases_partial_api_state_once" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/n01_trader_adapter_test.cpp" line="253" status="run" result="completed" time="0.004" timestamp="2026-10-30T21:48:45.030" classname="N01TraderAdapter" />
+    <testcase name="release_unregisters_only_a_registered_spi_and_is_idempotent" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/n01_trader_adapter_test.cpp" line="270" status="run" result="completed" time="0.002" timestamp="2026-10-30T21:48:45.034" classname="N01TraderAdapter" />
+    <testcase name="missing_module_failure_releases_retained_config" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/n01_trader_adapter_test.cpp" line="307" status="run" result="completed" time="0.001" timestamp="2026-10-30T21:48:45.036" classname="N01TraderAdapter" />
+    <testcase name="run_and_release_and_queryfund_are_api_null_safe" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/n01_trader_adapter_test.cpp" line="324" status="run" result="completed" time="0." timestamp="2026-10-30T21:48:45.038" classname="N01TraderAdapter" />
+    <testcase name="empty_lookups_return_neutral_values" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/n01_trader_adapter_test.cpp" line="337" status="run" result="completed" time="0." timestamp="2026-10-30T21:48:45.038" classname="N01TraderAdapter" />
+    <testcase name="risk_gates_pass_when_riskmon_disabled" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/n01_trader_adapter_test.cpp" line="353" status="run" result="completed" time="0." timestamp="2026-10-30T21:48:45.038" classname="N01TraderAdapter" />
+    <testcase name="null_payloads_on_response_callbacks_are_ignored" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/n01_trader_adapter_test.cpp" line="363" status="run" result="completed" time="0." timestamp="2026-10-30T21:48:45.038" classname="N01TraderAdapter" />
+    <testcase name="add_sink_is_idempotent_set_membership" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/n01_trader_adapter_test.cpp" line="379" status="run" result="completed" time="0." timestamp="2026-10-30T21:48:45.039" classname="N01TraderAdapter" />
+    <testcase name="local_order_id_concurrent_first_call_is_unique" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/n01_trader_adapter_test.cpp" line="394" status="run" result="completed" time="0.001" timestamp="2026-10-30T21:48:45.039" classname="N01TraderAdapter" />
+    <testcase name="local_order_id_is_monotonic" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/n01_trader_adapter_test.cpp" line="425" status="run" result="completed" time="0." timestamp="2026-10-30T21:48:45.040" classname="N01TraderAdapter" />
+    <testcase name="mgr_rejects_null_and_empty_names" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/n01_trader_adapter_test.cpp" line="442" status="run" result="completed" time="0." timestamp="2026-10-30T21:48:45.040" classname="N01TraderAdapter" />
+    <testcase name="mgr_registers_unique_names_and_rejects_duplicates" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/n01_trader_adapter_test.cpp" line="455" status="run" result="completed" time="0." timestamp="2026-10-30T21:48:45.040" classname="N01TraderAdapter" />
+    <testcase name="mgr_run_release_and_refresh_funds_without_api" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/n01_trader_adapter_test.cpp" line="472" status="run" result="completed" time="0." timestamp="2026-10-30T21:48:45.040" classname="N01TraderAdapter" />
+    <testcase name="DISABLED_push_report_before_run_dereferences_null_stat_map" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/n01_trader_adapter_test.cpp" line="505" status="notrun" result="suppressed" time="0." timestamp="1970-01-01T08:00:00.000" classname="N01TraderAdapter" />
+  </testsuite>
+  <testsuite name="R3TraderTest" tests="13" failures="4" disabled="0" skipped="0" errors="0" time="4.865" timestamp="2026-10-30T21:48:45.040">
+    <testcase name="order_freq_window_denies_submission_after_boundary" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp" line="354" status="run" result="completed" time="0.805" timestamp="2026-10-30T21:48:45.040" classname="R3TraderTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp:377&#x0A;Expected equality of these values:&#x0A;  0&#x0A;  result&#x0A;    Which is: 1&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp:377
+Expected equality of these values:
+  0
+  result
+    Which is: 1
+]]></failure>
+    </testcase>
+    <testcase name="order_freq_window_precheck_uses_standard_code_after_raw_submission" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp" line="380" status="run" result="completed" time="0.78" timestamp="2026-10-30T21:48:45.846" classname="R3TraderTest" />
+    <testcase name="cancel_freq_window_denies_cancel_after_boundary" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp" line="434" status="run" result="completed" time="0.77" timestamp="2026-10-30T21:48:46.626" classname="R3TraderTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp:464&#x0A;Expected equality of these values:&#x0A;  0&#x0A;  result&#x0A;    Which is: 1&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp:464
+Expected equality of these values:
+  0
+  result
+    Which is: 1
+]]></failure>
+    </testcase>
+    <testcase name="cancel_localid_frequency_cache_uses_standardized_contract_code" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp" line="467" status="run" result="completed" time="0.864" timestamp="2026-10-30T21:48:47.397" classname="R3TraderTest" />
+    <testcase name="cancel_localid_rejects_inactive_or_unmapped_order_safely" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp" line="535" status="run" result="completed" time="0.775" timestamp="2026-10-30T21:48:48.261" classname="R3TraderTest" />
+    <testcase name="cancel_localid_risk_rejection_retries_do_not_grow_cache" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp" line="582" status="run" result="completed" time="0.771" timestamp="2026-10-30T21:48:49.037" classname="R3TraderTest" />
+    <testcase name="cancel_localid_synchronous_api_failure_is_not_cached" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp" line="623" status="run" result="completed" time="0.007" timestamp="2026-10-30T21:48:49.809" classname="R3TraderTest" />
+    <testcase name="save_data_writes_long_short_positions_and_fund_block" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp" line="652" status="run" result="completed" time="0.014" timestamp="2026-10-30T21:48:49.816" classname="R3TraderTest" />
+    <testcase name="four_wrappers_stamp_direction_offset_price_and_flag" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp" line="726" status="run" result="completed" time="0.007" timestamp="2026-10-30T21:48:49.831" classname="R3TraderTest" />
+    <testcase name="cancel_empty_code_cancels_all_buy_orders_without_crashing" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp" line="775" status="run" result="completed" time="0.044" timestamp="2026-10-30T21:48:49.838" classname="R3TraderTest" />
+    <testcase name="buy_splits_by_rule_cap_and_single_order_max_volume" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp" line="802" status="run" result="completed" time="0.01" timestamp="2026-10-30T21:48:49.883" classname="R3TraderTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp:820&#x0A;Expected equality of these values:&#x0A;  trader.getUndoneQty(kStdCode)&#x0A;    Which is: 5&#x0A;  3.0&#x0A;    Which is: 3&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp:820
+Expected equality of these values:
+  trader.getUndoneQty(kStdCode)
+    Which is: 5
+  3.0
+    Which is: 3
+]]></failure>
+    </testcase>
+    <testcase name="buy_skips_open_rule_when_daily_cap_already_consumed" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp" line="849" status="run" result="completed" time="0.007" timestamp="2026-10-30T21:48:49.893" classname="R3TraderTest" />
+    <testcase name="position_and_order_tables_read_seeded_state" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp" line="886" status="run" result="completed" time="0.005" timestamp="2026-10-30T21:48:49.900" classname="R3TraderTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp:927&#x0A;Expected equality of these values:&#x0A;  1u&#x0A;    Which is: 1&#x0A;  tab-&gt;size()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp:927
+Expected equality of these values:
+  1u
+    Which is: 1
+  tab->size()
+    Which is: 0
+]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

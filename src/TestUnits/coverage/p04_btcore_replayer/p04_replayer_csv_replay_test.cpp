@@ -14,6 +14,7 @@
 #include <gtest/gtest.h>
 
 #include <cstdint>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <functional>
@@ -28,6 +29,8 @@
 #include <WtBtCore/WtHelper.h>
 #include <Includes/WTSDataDef.hpp>
 #include <Includes/WTSVariant.hpp>
+#include <Share/DLLHelper.hpp>
+#include <WtDataStorage/DataDefine.h>
 
 namespace
 {
@@ -89,10 +92,100 @@ namespace
 		return true;
 	}
 
-	WTSVariant* replay_cfg(const std::filesystem::path& root, const std::filesystem::path& base)
+	bool write_zero_byte_daily_csv(const std::filesystem::path& base, const char* stdCode)
+	{
+		std::error_code ec;
+		std::filesystem::create_directories(base / "csv", ec);
+		std::ofstream out(base / "csv" / (std::string(stdCode) + "_d.csv"), std::ios::binary);
+		if (!out.is_open())
+			return false;
+		out.close();
+		return true;
+	}
+
+	bool write_raw_bar_dsb(const std::filesystem::path& file, BlockType type,
+		const std::vector<WTSBarStruct>& bars)
+	{
+		std::error_code ec;
+		std::filesystem::create_directories(file.parent_path(), ec);
+		if (ec)
+			return false;
+
+		std::string content(sizeof(BlockHeader) + bars.size() * sizeof(WTSBarStruct), '\0');
+		BlockHeader header{};
+		std::memcpy(header._blk_flag, BLK_FLAG, FLAG_SIZE);
+		header._type = static_cast<uint16_t>(type);
+		header._version = BLOCK_VERSION_RAW_V2;
+		std::memcpy(content.data(), &header, sizeof(header));
+		if (!bars.empty())
+			std::memcpy(content.data() + sizeof(BlockHeader), bars.data(), bars.size() * sizeof(WTSBarStruct));
+
+		std::ofstream out(file, std::ios::binary);
+		if (!out.is_open())
+			return false;
+		out.write(content.data(), static_cast<std::streamsize>(content.size()));
+		out.close();
+		return out.good();
+	}
+
+	WTSBarStruct make_bar(uint32_t date, uint32_t hhmm, double price)
+	{
+		WTSBarStruct bar;
+		bar.date = date;
+		bar.time = static_cast<uint64_t>(date - 19900000u) * 10000u + hhmm;
+		bar.open = price;
+		bar.high = price + 0.1;
+		bar.low = price - 0.1;
+		bar.close = price;
+		bar.settle = price;
+		bar.vol = 100.0;
+		bar.money = price * bar.vol;
+		return bar;
+	}
+
+	class InstDirRestore
+	{
+	public:
+		InstDirRestore() : _previous(WtHelper::getInstDir()) {}
+		~InstDirRestore() { WtHelper::setInstDir(_previous.c_str()); }
+
+	private:
+		std::string _previous;
+	};
+
+	bool use_data_storage_module_from_build(const std::filesystem::path& root)
+	{
+		const std::string module = DLLHelper::wrap_module("WtDataStorage");
+		std::vector<std::filesystem::path> candidates;
+		if (!WtHelper::getInstDir().empty())
+			candidates.emplace_back(WtHelper::getInstDir());
+		const char* const relativeDirs[] = {
+			"build-cov/build_x64/Debug/bin",
+			"build-cov/build_x64/Release/bin",
+			"build_x64/Debug/bin",
+			"build_x64/Release/bin",
+		};
+		for (const char* relativeDir : relativeDirs)
+			candidates.emplace_back(root / relativeDir);
+
+		for (const std::filesystem::path& dir : candidates)
+		{
+			std::error_code ec;
+			if (std::filesystem::exists(dir / module, ec) && !ec)
+			{
+				const std::string instDir = dir.string() + "/";
+				WtHelper::setInstDir(instDir.c_str());
+				return true;
+			}
+		}
+		return false;
+	}
+
+	WTSVariant* replay_cfg(const std::filesystem::path& root, const std::filesystem::path& base,
+		const char* mode = "csv")
 	{
 		WTSVariant* cfg = WTSVariant::createObject();
-		cfg->append("mode", "csv");
+		cfg->append("mode", mode);
 		cfg->append("path", base.string().c_str());
 		cfg->append("stime", static_cast<uint64_t>(202001020930));
 		cfg->append("etime", static_cast<uint64_t>(202001081500));
@@ -406,9 +499,121 @@ TEST_F(P04ReplayCsvTest, missingCsvFileYieldsNullSlice)
 	EXPECT_EQ(0u, sink.closedDates.size());
 }
 
+TEST_F(P04ReplayCsvTest, failedMainBarsLoadDoesNotPoisonReplayAndCanRetry)
+{
+	// Isolate the pre-fix null BarsList dereference so a regression fails this
+	// test instead of terminating the whole coverage process.
+	EXPECT_EXIT(
+		{
+			struct rlimit noCoreDumps{};
+			if (::setrlimit(RLIMIT_CORE, &noCoreDumps) != 0)
+				std::_Exit(90);
+
+			HisDataReplayer* replayer = new HisDataReplayer();
+			WTSVariant* cfg = replay_cfg(_root, _base);
+			if (cfg == nullptr)
+				std::_Exit(91);
+			const bool initialized = replayer->init(cfg);
+			cfg->release();
+			if (!initialized)
+				std::_Exit(92);
+
+			RecordingSink sink;
+			replayer->register_sink(&sink, "p04_missing_main");
+			if (!replayer->prepare())
+				std::_Exit(93);
+
+			// Marking a missing series as main used to leave _main_key set even
+			// though no cache entry existed; run() then dereferenced a null entry.
+			if (replayer->get_kline_slice("SSE.STK.000004", "d", 1, 1, true) != nullptr)
+				std::_Exit(1);
+			replayer->run(false);
+			if (sink.replayDoneCalls != 1 || !sink.closedDates.empty())
+				std::_Exit(2);
+
+			// A later successful load of that same main series must still be
+			// selectable and replay normally on the same replayer instance.
+			if (!write_daily_csv(_base, "SSE.STK.000004", true))
+				std::_Exit(3);
+			if (!replayer->prepare())
+				std::_Exit(4);
+			WTSKlineSlice* slice = replayer->get_kline_slice("SSE.STK.000004", "d", 1, 1, true);
+			if (slice != nullptr)
+				slice->release();
+			replayer->run(false);
+			if (sink.replayDoneCalls != 2 || sink.closedDates.size() != kBarCnt)
+				std::_Exit(5);
+
+			std::_Exit(0);
+		},
+		::testing::ExitedWithCode(0), "");
+}
+
+TEST_F(P04ReplayCsvTest, failedBinaryRawBarsLoadCanBeRetriedSafely)
+{
+	InstDirRestore restoreInstDir;
+	if (!use_data_storage_module_from_build(_root))
+		GTEST_SKIP() << "requires " << DLLHelper::wrap_module("WtDataStorage")
+			<< " in build-cov/build_x64/{Debug,Release}/bin or build_x64/{Debug,Release}/bin";
+
+	const std::filesystem::path minute5File = _base / "his/min5/SSE/000001.dsb";
+	ASSERT_TRUE(write_raw_bar_dsb(minute5File, BT_HIS_Minute5, {}));
+	ASSERT_TRUE(std::filesystem::exists(minute5File));
+
+	HisDataReplayer replayer;
+	WTSVariant* cfg = replay_cfg(_root, _base, "bin");
+	ASSERT_TRUE(replayer.init(cfg));
+	cfg->release();
+
+	RecordingSink sink;
+	replayer.register_sink(&sink, "p04_bin_retry");
+	ASSERT_TRUE(replayer.prepare());
+	ASSERT_NE(nullptr, replayer.get_session_info("SSE.STK.000001", true));
+
+	// A real WtDataStorage read succeeds on this header-only file but returns no
+	// records. It must not publish an empty raw cache entry.
+	EXPECT_EQ(nullptr, replayer.get_kline_slice("SSE.STK.000001", "m", 10, 10, false));
+
+	std::vector<WTSBarStruct> minuteBars;
+	for (uint32_t i = 0; i < 12; ++i)
+	{
+		const uint32_t minutes = 9 * 60 + 35 + i * 5;
+		const uint32_t hhmm = (minutes / 60) * 100 + minutes % 60;
+		minuteBars.push_back(make_bar(20200102, hhmm, 10.0 + i * 0.01));
+	}
+	ASSERT_TRUE(write_raw_bar_dsb(minute5File, BT_HIS_Minute5, minuteBars));
+
+	// Probe the raw m5 cache first. This makes a successful DSB read observable
+	// independently of the later m10 resampling and its current-time cursor.
+	WTSKlineSlice* repairedRaw = replayer.get_kline_slice("SSE.STK.000001", "m", 10, 5, false);
+	ASSERT_NE(nullptr, repairedRaw) << "same instance should reload the repaired DSB through WtDataStorage";
+	EXPECT_GT(repairedRaw->size(), 0);
+	ASSERT_NE(nullptr, repairedRaw->at(0));
+	EXPECT_DOUBLE_EQ(10.0, repairedRaw->at(0)->close);
+	repairedRaw->release();
+
+	WTSKlineSlice* recovered = replayer.get_kline_slice("SSE.STK.000001", "m", 10, 10, false);
+	ASSERT_NE(nullptr, recovered) << "same instance should retry WtDataStorage after raw bars are repaired";
+	EXPECT_GT(recovered->size(), 0);
+	recovered->release();
+
+	// A normal daily main series still loads from the same real storage reader.
+	const std::vector<WTSBarStruct> dailyBars = {
+		make_bar(20200101, 150000, 10.0),
+		make_bar(20200102, 150000, 10.5),
+		make_bar(20200103, 150000, 11.5),
+	};
+	ASSERT_TRUE(write_raw_bar_dsb(_base / "his/day/SSE/000001.dsb", BT_HIS_Day, dailyBars));
+	WTSKlineSlice* main = replayer.get_kline_slice("SSE.STK.000001", "d", 1, 1, true);
+	ASSERT_NE(nullptr, main);
+	EXPECT_EQ(1u, main->size());
+	main->release();
+}
+
 TEST_F(P04ReplayCsvTest, emptyCsvReturnsNullAndReplayCompletesInChild)
 {
 	ASSERT_TRUE(write_daily_csv(_base, "SSE.STK.000002", false));
+	ASSERT_TRUE(write_zero_byte_daily_csv(_base, "SSE.STK.000003"));
 
 	// Empty CSV handling used to index the empty bar vector. Isolate the regression
 	// check so a product crash is reported as a failed expectation, never success.
@@ -441,11 +646,15 @@ TEST_F(P04ReplayCsvTest, emptyCsvReturnsNullAndReplayCompletesInChild)
 			writeStage("PREPARE_OK\n", sizeof("PREPARE_OK\n") - 1);
 
 			writeStage("BEFORE_READ\n", sizeof("BEFORE_READ\n") - 1);
-			WTSKlineSlice* slice = replayer->get_kline_slice("SSE.STK.000002", "d", 1, 1, false);
+			WTSKlineSlice* headerOnlySlice = replayer->get_kline_slice("SSE.STK.000002", "d", 1, 1, false);
+			WTSKlineSlice* zeroByteSlice = replayer->get_kline_slice("SSE.STK.000003", "d", 1, 1, false);
 			writeStage("AFTER_READ\n", sizeof("AFTER_READ\n") - 1);
-			if (slice != nullptr)
+			if (headerOnlySlice != nullptr || zeroByteSlice != nullptr)
 				std::_Exit(1);
 			writeStage("NULL_SLICE_OK\n", sizeof("NULL_SLICE_OK\n") - 1);
+			if (std::filesystem::exists(_base / "his/day/SSE/000002.dsb") ||
+				std::filesystem::exists(_base / "his/day/SSE/000003.dsb"))
+				std::_Exit(3);
 			writeStage("BEFORE_RUN\n", sizeof("BEFORE_RUN\n") - 1);
 			replayer->run(false);
 			writeStage("AFTER_RUN\n", sizeof("AFTER_RUN\n") - 1);

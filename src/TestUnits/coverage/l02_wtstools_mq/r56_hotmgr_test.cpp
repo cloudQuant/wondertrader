@@ -72,6 +72,17 @@ TEST_F(R56HotMgr, ExplicitMissingHotRulesFileFailsWithoutInitializingManager)
 	EXPECT_FALSE(m_mgr.loadSeconds(missing.c_str()));
 	EXPECT_FALSE(m_mgr.loadHots(missing.c_str()));
 	EXPECT_FALSE(m_mgr.isInitialized());
+	EXPECT_STREQ("", m_mgr.getRawCode("SHFE", "rb", 20240115));
+
+	const std::string malformed = r56tmp::write_file(m_dir, "malformed_hots.json", "this is not json");
+	EXPECT_FALSE(m_mgr.loadHots(malformed.c_str()));
+	EXPECT_FALSE(m_mgr.isInitialized());
+	EXPECT_STREQ("", m_mgr.getRawCode("SHFE", "rb", 20240115));
+
+	// A later valid explicit path can initialize the still-empty manager.
+	ASSERT_TRUE(m_mgr.loadHots(m_file.c_str()));
+	EXPECT_TRUE(m_mgr.isInitialized());
+	EXPECT_STREQ("rb2405", m_mgr.getRawCode("SHFE", "rb", 20240115));
 }
 
 // WTSHotMgr.cpp:232-269,34-59,148-159
@@ -156,19 +167,21 @@ TEST_F(R56HotMgr, IsHotCurrentAndHistorical)
 	EXPECT_FALSE(m_mgr.isHot("SHFE", "rb2405", 20241231));
 	// 未知标签（tag 未登记）走 curHotCodes.empty() 早退，返回 false
 	EXPECT_FALSE(m_mgr.isCustomHot("NOPE", "SHFE.rb2405", 20240115));
-	// 注意：已知标签 + 未知品种的 false 语义目前被产品破坏（isCustomHot 用
-	// `return "";` 返回 bool，空串指针恒为 true），断言保留在
-	// DISABLED_UnknownProductIsNotHot 中，见 docs/迭代计划/迭代01/bugs/R64.md BUG-R64-001。
+	// 已知 HOT 标签 + 未登记品种必须走 product-map miss 并返回 false。
+	EXPECT_FALSE(m_mgr.isCustomHot("HOT", "DCE.i2405", 20240115));
 }
 
-// 产品缺陷占位：WTSHotMgr.cpp isCustomHot 的 prodMap/dtMap 落空分支写的是
-// `return "";`（bool 返回值下空串指针恒为 true），未知品种会被误判为主力。
-// 见 docs/迭代计划/迭代01/bugs/R64.md BUG-R64-001；默认不执行。
 // WTSHotMgr.cpp:378-385
-TEST_F(R56HotMgr, DISABLED_UnknownProductIsNotHot)
+TEST_F(R56HotMgr, UnknownProductIsNotHot)
 {
 	ASSERT_TRUE(m_mgr.loadHots(m_file.c_str()));
+	EXPECT_FALSE(m_mgr.isCustomHot("HOT", "DCE.i2405", 20240115));
 	EXPECT_FALSE(m_mgr.isHot("DCE", "i2405", 20240115));
+
+	// 正控：已配置品种遵守切换日前后规则。
+	EXPECT_TRUE(m_mgr.isCustomHot("HOT", "SHFE.rb2401", 20240105));
+	EXPECT_FALSE(m_mgr.isCustomHot("HOT", "SHFE.rb2405", 20240105));
+	EXPECT_TRUE(m_mgr.isCustomHot("HOT", "SHFE.rb2405", 20240110));
 }
 
 // WTSHotMgr.cpp:413-462

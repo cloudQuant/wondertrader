@@ -15,10 +15,20 @@
 #include "Includes/WTSVariant.hpp"
 #include "Includes/WTSStruct.h"
 #include "Includes/WTSTypes.h"
+#include "Includes/IBaseDataMgr.h"
+#include "Includes/IDataReader.h"
+#include "Includes/WTSContractInfo.hpp"
 #include "Share/StrUtil.hpp"
+#include "Share/CodeHelper.hpp"
+#include "Share/BoostMappingFile.hpp"
 #include "WtDataStorage/DataDefine.h"
 #include "WtDataStorage/WtBtDtReader.h"
 #include "WTSUtils/WTSCmpHelper.hpp"
+#include "../q03_storage3/q03_storage3_fixture.h"
+
+#define private public
+#include "WtDataStorage/WtDataReader.h"
+#undef private
 
 // WtDataReader.cpp 中的自由函数（外部链接，由 libWtDataStorage 导出）
 extern bool proc_block_data(std::string& content, bool isBar, bool bKeepHead);
@@ -51,6 +61,35 @@ WTSBarStructOld make_old_bar(uint32_t date, uint32_t time, double base)
 	bar.add = (int32_t)(base - 100.0);
 	return bar;
 }
+
+class L04DataReaderBaseMgr : public IBaseDataMgr
+{
+public:
+	L04DataReaderBaseMgr()
+	{
+		_commodity = WTSCommodityInfo::create("rb", "螺纹钢", "SHFE", "L04_DAY", "CHN");
+		_commodity->setCategory(CC_Future);
+	}
+
+	virtual ~L04DataReaderBaseMgr()
+	{
+		_commodity->release();
+	}
+
+	WTSCommodityInfo* getCommodity(const char*) override { return _commodity; }
+	WTSCommodityInfo* getCommodity(const char*, const char*) override { return _commodity; }
+	WTSContractInfo* getContract(const char*, const char*, uint32_t) override { return NULL; }
+	WTSArray* getContracts(const char*, uint32_t) override { return NULL; }
+	WTSSessionInfo* getSession(const char*) override { return NULL; }
+	WTSSessionInfo* getSessionByCode(const char*, const char*) override { return NULL; }
+	WTSArray* getAllSessions() override { return NULL; }
+	bool isHoliday(const char*, uint32_t, bool) override { return false; }
+	uint32_t calcTradingDate(const char*, uint32_t date, uint32_t, bool) override { return date; }
+	uint64_t getBoundaryTime(const char*, uint32_t, bool, bool) override { return 0; }
+
+private:
+	WTSCommodityInfo* _commodity = NULL;
+};
 
 class L04BtReaderTest : public ::testing::Test
 {
@@ -120,6 +159,80 @@ TEST(L04ProcBlockData, RawV2KeepHead)
 	std::string src = content;
 	ASSERT_TRUE(proc_block_data(content, true, true));
 	EXPECT_EQ(content, src);	// 未压缩且非老版本，保留头部时原样返回
+}
+
+TEST(L04ProcBlockData, UnknownVersionRemainsGenericPassthrough)
+{
+	std::string content(BLOCK_HEADER_SIZE + sizeof(WTSBarStruct) + 1, 0);
+	BlockHeader* header = (BlockHeader*)content.data();
+	fill_flag(header, BT_HIS_Minute1, 0x09);
+	const std::string payload(content.data() + BLOCK_HEADER_SIZE, content.size() - BLOCK_HEADER_SIZE);
+
+	ASSERT_TRUE(proc_block_data(content, true, false));
+	EXPECT_EQ(content, payload); // 通用 parser 保留未来版本透传合同
+}
+
+TEST(L04ProcBlockData, RejectsMisalignedRawBarPayloadsWithoutMutation)
+{
+	auto expectRejected = [](uint16_t version, std::size_t recordSize)
+	{
+		std::string content(BLOCK_HEADER_SIZE + recordSize + 1, 0);
+		BlockHeader* header = (BlockHeader*)content.data();
+		fill_flag(header, BT_HIS_Minute1, version);
+		const std::string src = content;
+
+		EXPECT_FALSE(proc_block_data(content, true, false)) << "version=" << version;
+		EXPECT_EQ(content, src) << "version=" << version;
+	};
+
+	expectRejected(BLOCK_VERSION_RAW_V2, sizeof(WTSBarStruct));
+	expectRejected(BLOCK_VERSION_RAW, sizeof(WTSBarStructOld));
+}
+
+TEST(L04ProcBlockData, EmptyRawBarsAreAccepted)
+{
+	for (uint16_t version : { (uint16_t)BLOCK_VERSION_RAW_V2, (uint16_t)BLOCK_VERSION_RAW })
+	{
+		std::string content(BLOCK_HEADER_SIZE, 0);
+		BlockHeader* header = (BlockHeader*)content.data();
+		fill_flag(header, BT_HIS_Day, version);
+
+		EXPECT_TRUE(proc_block_data(content, true, false)) << "version=" << version;
+		EXPECT_TRUE(content.empty()) << "version=" << version;
+	}
+}
+
+TEST(L04ProcBlockData, RejectsIncompleteBaseHeadersWithoutMutation)
+{
+	EXPECT_EQ(BLOCK_HEADER_SIZE, 12u);
+	EXPECT_EQ(BLOCK_HEADERV2_SIZE, 20u);
+
+	for (std::size_t size : { std::size_t(0), std::size_t(1), std::size_t(11) })
+	{
+		std::string content(size, 'x');
+		const std::string src = content;
+
+		EXPECT_FALSE(proc_block_data(content, true, false)) << "size=" << size;
+		EXPECT_EQ(content, src) << "size=" << size;
+	}
+}
+
+TEST(L04ProcBlockData, RejectsIncompleteCompressedHeadersWithoutMutation)
+{
+	for (std::size_t size = BLOCK_HEADER_SIZE; size < BLOCK_HEADERV2_SIZE; size++)
+	{
+		std::string content(BLOCK_HEADERV2_SIZE, 0);
+		BlockHeaderV2* header = (BlockHeaderV2*)content.data();
+		memcpy(header->_blk_flag, BLK_FLAG, FLAG_SIZE);
+		header->_type = BT_HIS_Ticks;
+		header->_version = BLOCK_VERSION_CMP_V2;
+		header->_size = 0;
+		content.resize(size);
+		const std::string src = content;
+
+		EXPECT_FALSE(proc_block_data(content, false, false)) << "size=" << size;
+		EXPECT_EQ(content, src) << "size=" << size;
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -279,6 +392,36 @@ TEST(L04ProcBlockData, CompressedSizeMismatchRejected)
 	EXPECT_EQ(content, src);	// 失败路径不得改写内容
 }
 
+TEST(L04ProcBlockData, MalformedCompressedFramesAreRejectedWithoutMutation)
+{
+	std::vector<std::string> malformedFrames;
+	malformedFrames.emplace_back("not a Zstd frame");
+
+	const std::string raw(256, 'z');
+	std::string truncatedFrame = WTSCmpHelper::compress_data(raw.data(), raw.size());
+	ASSERT_GT(truncatedFrame.size(), 1u);
+	truncatedFrame.pop_back();
+	ASSERT_EQ(ZSTD_getFrameContentSize(truncatedFrame.data(), truncatedFrame.size()), (unsigned long long)raw.size());
+	malformedFrames.emplace_back(truncatedFrame);
+
+	for (const std::string& frame : malformedFrames)
+	{
+		std::string content(BLOCK_HEADERV2_SIZE + frame.size(), 0);
+		BlockHeaderV2* header = (BlockHeaderV2*)content.data();
+		memcpy(header->_blk_flag, BLK_FLAG, FLAG_SIZE);
+		header->_type = BT_HIS_Ticks;
+		header->_version = BLOCK_VERSION_CMP_V2;
+		header->_size = frame.size();
+		memcpy(content.data() + BLOCK_HEADERV2_SIZE, frame.data(), frame.size());
+
+		const std::string src = content;
+		bool processed = true;
+		EXPECT_NO_THROW(processed = proc_block_data(content, false, false));
+		EXPECT_FALSE(processed);
+		EXPECT_EQ(content, src);	// 坏帧拒绝后保留完整原始块
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////
 // WtBtDtReader：文件驱动
 //////////////////////////////////////////////////////////////////////////
@@ -426,4 +569,172 @@ TEST_F(L04BtReaderTest, CorruptedBlockReturnsFalse)
 
 	std::string buffer;
 	EXPECT_FALSE(reader.read_raw_bars("CFFEX", "IF2401", KP_DAY, buffer));
+}
+
+TEST_F(L04BtReaderTest, LengthCorrectButTruncatedZstdFrameReturnsFalse)
+{
+	const std::string raw(sizeof(WTSBarStruct) * 2, 'z');
+	std::string cmped = WTSCmpHelper::compress_data(raw.data(), raw.size());
+	ASSERT_GT(cmped.size(), 1u);
+	cmped.pop_back();
+	ASSERT_EQ(ZSTD_getFrameContentSize(cmped.data(), cmped.size()), (unsigned long long)raw.size());
+
+	std::string content(BLOCK_HEADERV2_SIZE + cmped.size(), 0);
+	BlockHeaderV2* header = (BlockHeaderV2*)content.data();
+	memcpy(header->_blk_flag, BLK_FLAG, FLAG_SIZE);
+	header->_type = BT_HIS_Minute1;
+	header->_version = BLOCK_VERSION_CMP_V2;
+	header->_size = cmped.size();
+	memcpy(content.data() + BLOCK_HEADERV2_SIZE, cmped.data(), cmped.size());
+
+	const std::filesystem::path file
+		= _root / "his" / PERIOD_NAME[KP_Minute1] / "SHFE" / "rb2401.dsb";
+	write_file(file, content);
+
+	WTSVariant* cfg = WTSVariant::createObject();
+	cfg->append("path", _root.string().c_str());
+	WtBtDtReader reader;
+	reader.init(cfg, NULL);
+
+	std::string buffer;
+	bool readOk = true;
+	EXPECT_NO_THROW(readOk = reader.read_raw_bars("SHFE", "rb2401", KP_Minute1, buffer));
+	EXPECT_FALSE(readOk);
+	EXPECT_EQ(buffer, content);	// 读取层看到拒绝结果，解码失败未改写输入块
+}
+
+TEST_F(L04BtReaderTest, MisalignedRawBarsReturnFalseWithoutReadingPayload)
+{
+	std::string content(BLOCK_HEADER_SIZE + sizeof(WTSBarStruct) + 1, 0);
+	BlockHeader* header = (BlockHeader*)content.data();
+	fill_flag(header, BT_HIS_Minute1, BLOCK_VERSION_RAW_V2);
+
+	const std::filesystem::path file
+		= _root / "his" / PERIOD_NAME[KP_Minute1] / "SHFE" / "rb2401.dsb";
+	write_file(file, content);
+
+	WTSVariant* cfg = WTSVariant::createObject();
+	cfg->append("path", _root.string().c_str());
+	WtBtDtReader reader;
+	reader.init(cfg, NULL);
+
+	std::string buffer;
+	EXPECT_FALSE(reader.read_raw_bars("SHFE", "rb2401", KP_Minute1, buffer));
+	EXPECT_EQ(buffer, content);	// 记录长度错误时，文件块保持原样且不作为 K 线返回
+}
+
+TEST_F(L04BtReaderTest, MisalignedUnknownVersionBarsFailAtDataReaderConsumer)
+{
+	std::string content(BLOCK_HEADER_SIZE + sizeof(WTSBarStruct) + 1, 0);
+	BlockHeader* header = (BlockHeader*)content.data();
+	fill_flag(header, BT_HIS_Minute1, 0x09);
+
+	const std::filesystem::path file
+		= _root / "his" / PERIOD_NAME[KP_Minute1] / "SHFE" / "rb2401.dsb";
+	write_file(file, content);
+
+	L04DataReaderBaseMgr baseDataMgr;
+	WtDataReader reader;
+	reader._base_data_mgr = &baseDataMgr;
+	reader._his_dir.emplace_back((_root / "his").string() + "/");
+
+	CodeHelper::CodeInfo codeInfo;
+	std::strcpy(codeInfo._exchg, "SHFE");
+	std::strcpy(codeInfo._product, "rb");
+	std::strcpy(codeInfo._code, "rb2401");
+	const std::string key = "SHFE.rb2401#1";
+
+	// Unknown versions remain passthrough in proc_block_data, but the bar
+	// consumer rejects the misaligned payload before allocating or copying.
+	EXPECT_FALSE(reader.cacheHisBarsFromFile(&codeInfo, key, "SHFE.rb2401", KP_Minute1));
+	EXPECT_EQ(reader._bars_cache.count(key), 0u);
+}
+
+TEST_F(L04BtReaderTest, PublicDataReaderRetriesAfterMisalignedHistoryIsRepaired)
+{
+	const std::filesystem::path file
+		= _root / "his" / "day" / "SHFE" / "rb2401.dsb";
+	std::string invalid(BLOCK_HEADER_SIZE + sizeof(WTSBarStruct) + 1, 0);
+	BlockHeader* invalidHeader = (BlockHeader*)invalid.data();
+	fill_flag(invalidHeader, BT_HIS_Day, 0x09);
+	write_file(file, invalid);
+
+	q03::BaseDataMgr baseDataMgr;
+	q03::HotMgr hotMgr;
+	q03::ReaderSink sink(&baseDataMgr, &hotMgr);
+	WtDataReader reader;
+	WTSVariant* cfg = WTSVariant::createObject();
+	cfg->append("path", _root.string().c_str());
+	reader.init(cfg, &sink);
+	cfg->release();
+
+	WTSKlineSlice* first = reader.readKlineSlice("SHFE.rb.rb2401", KP_DAY, 2, 202401101500ull);
+	EXPECT_EQ(first, nullptr);
+
+	WTSBarStruct bar;
+	bar.date = 20240109;
+	bar.time = 202401091500ull;
+	bar.open = 10.0;
+	bar.high = 11.0;
+	bar.low = 9.0;
+	bar.close = 10.5;
+	std::string repaired(BLOCK_HEADER_SIZE + sizeof(WTSBarStruct), 0);
+	BlockHeader* repairedHeader = (BlockHeader*)repaired.data();
+	fill_flag(repairedHeader, BT_HIS_Day, BLOCK_VERSION_RAW_V2);
+	memcpy(repaired.data() + BLOCK_HEADER_SIZE, &bar, sizeof(bar));
+	write_file(file, repaired);
+
+	WTSKlineSlice* retried = reader.readKlineSlice("SHFE.rb.rb2401", KP_DAY, 2, 202401101500ull);
+	ASSERT_NE(retried, nullptr);
+	ASSERT_EQ(retried->size(), 1);
+	ASSERT_NE(retried->at(0), nullptr);
+	EXPECT_EQ(retried->at(0)->date, bar.date);
+	EXPECT_DOUBLE_EQ(retried->at(0)->close, bar.close);
+	retried->release();
+}
+
+TEST_F(L04BtReaderTest, MissingHistoryOnPriorDateReturnsEmptySlice)
+{
+	q03::BaseDataMgr baseDataMgr;
+	q03::HotMgr hotMgr;
+	q03::ReaderSink sink(&baseDataMgr, &hotMgr);
+	WtDataReader reader;
+	WTSVariant* cfg = WTSVariant::createObject();
+	cfg->append("path", _root.string().c_str());
+	reader.init(cfg, &sink);
+	cfg->release();
+
+	WTSKlineSlice* slice = reader.readKlineSlice("SHFE.rb.rb2401", KP_DAY, 2, 202401091500ull);
+	ASSERT_NE(slice, nullptr);
+	EXPECT_EQ(slice->size(), 0);
+	slice->release();
+}
+
+TEST_F(L04BtReaderTest, FailedHistoryWithSameDayBackwardAdjustedRealtimeReturnsNull)
+{
+	std::string invalid(BLOCK_HEADER_SIZE + sizeof(WTSBarStruct) + 1, 0);
+	BlockHeader* historyHeader = (BlockHeader*)invalid.data();
+	fill_flag(historyHeader, BT_HIS_Minute1, BLOCK_VERSION_RAW_V2);
+	write_file(_root / "his" / "min1" / "SSE" / "600000+.dsb", invalid);
+
+	std::vector<WTSBarStruct> rtBars(1);
+	rtBars[0].date = 20240110;
+	rtBars[0].time = 34101500;
+	rtBars[0].open = 10.0;
+	rtBars[0].high = 11.0;
+	rtBars[0].low = 9.0;
+	rtBars[0].close = 10.5;
+	write_file(_root / "rt" / "min1" / "SSE" / "600000.dmb",
+		q03::make_rt_block<WTSBarStruct>(BT_RT_Minute1, 20240110, 1, 1, rtBars));
+
+	q03::BaseDataMgr baseDataMgr;
+	q03::HotMgr hotMgr;
+	q03::ReaderSink sink(&baseDataMgr, &hotMgr);
+	WtDataReader reader;
+	WTSVariant* cfg = WTSVariant::createObject();
+	cfg->append("path", _root.string().c_str());
+	reader.init(cfg, &sink);
+	cfg->release();
+
+	EXPECT_EQ(reader.readKlineSlice("SSE.STK.600000+", KP_Minute1, 3, 202401101500ull), nullptr);
 }

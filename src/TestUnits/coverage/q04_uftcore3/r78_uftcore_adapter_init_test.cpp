@@ -103,6 +103,29 @@ std::string systemDylibWithoutTraderEntry()
 	return std::string();
 }
 
+std::string systemDylibWithoutParserEntry()
+{
+	const char* candidates[] = {
+		"/opt/homebrew/lib/libfmt.dylib",
+		"/opt/homebrew/lib/libspdlog.dylib",
+		"/usr/local/lib/libfmt.dylib",
+	};
+	for (const char* one : candidates)
+	{
+		std::error_code ec;
+		if (!std::filesystem::exists(one, ec))
+			continue;
+		void* h = dlopen(one, RTLD_NOW);
+		if (h == nullptr)
+			continue;
+		const bool missing = dlsym(h, "createParser") == nullptr;
+		dlclose(h);
+		if (missing)
+			return one;
+	}
+	return std::string();
+}
+
 // ParserAdapter 成功链需要至少一个合约，且 FakeBaseDataMgr::getContracts()
 // 以 append(obj,false) 返回裸指针；adapter 释放数组时会 release 元素，
 // 因此这里显式 retain，避免 fixture 析构二次 release。
@@ -124,6 +147,39 @@ struct ParserEnv
 	}
 };
 
+class NonNullSpiParserApi : public IParserApi
+{
+public:
+	static uint32_t register_calls;
+	static uint32_t null_register_calls;
+	static uint32_t release_calls;
+	static uint32_t destructor_calls;
+
+	~NonNullSpiParserApi() override { ++destructor_calls; }
+	bool init(WTSVariant* /*config*/) override { return true; }
+	void release() override { ++release_calls; }
+	void subscribe(const CodeSet& /*codes*/) override {}
+	void registerSpi(IParserSpi* spi) override
+	{
+		++register_calls;
+		if (spi == nullptr)
+			++null_register_calls;
+	}
+
+	static void reset()
+	{
+		register_calls = 0;
+		null_register_calls = 0;
+		release_calls = 0;
+		destructor_calls = 0;
+	}
+};
+
+uint32_t NonNullSpiParserApi::register_calls = 0;
+uint32_t NonNullSpiParserApi::null_register_calls = 0;
+uint32_t NonNullSpiParserApi::release_calls = 0;
+uint32_t NonNullSpiParserApi::destructor_calls = 0;
+
 }	// namespace
 
 // TraderAdapter.cpp:162-177 模块名非空、路径解析后 load_library 必然失败
@@ -142,9 +198,17 @@ TEST(R78TraderAdapterInit, unloadable_module_is_rejected)
 
 	TraderAdapter adapter;
 	EXPECT_FALSE(adapter.init("r78trader1", cfg, &bd, &policy));
-	EXPECT_STREQ("r78trader1", adapter.id());
+	EXPECT_EQ(1u, cfg->retainCount());
+	EXPECT_STREQ("", adapter.id());
+	EXPECT_EQ(nullptr, adapter.getBaseDataMgr());
 	EXPECT_EQ(TraderAdapter::AS_NOTLOGIN, adapter.state());
 	EXPECT_FALSE(adapter.run());
+
+	//失败 init 已回滚；同一实例可用独立的外部 API 路径重试。
+	EXPECT_TRUE(adapter.initExt("r78trader1-retry", &api, &bd, &policy));
+	EXPECT_TRUE(adapter.run());
+	adapter.release();
+	EXPECT_FALSE(adapter.initExt("r78trader1-closed", &api, &bd, &policy));
 
 	cfg->release();
 }
@@ -177,7 +241,9 @@ TEST(R78TraderAdapterInit, module_without_create_symbol_is_rejected)
 	{
 		TraderAdapter adapter;
 		EXPECT_FALSE(adapter.init("r78trader2", cfg, &bd, &policy));
-		EXPECT_STREQ("r78trader2", adapter.id());
+		EXPECT_EQ(1u, cfg->retainCount());
+		EXPECT_STREQ("", adapter.id());
+		EXPECT_EQ(nullptr, adapter.getBaseDataMgr());
 		EXPECT_FALSE(adapter.run());
 	}
 
@@ -241,6 +307,90 @@ TEST(R78UftParserAdapterInit, loads_udp_plugin_without_filter)
 
 	WtHelper::setInstDir("");
 	cfg->release();
+}
+
+// Missing module/entry failures occur before API creation and remain retryable.
+// ParserUDP::init only parses the endpoint; the malformed address throws before
+// connect can create sockets or asynchronous callbacks. This test explicitly
+// releases that known-quiescent candidate before retrying. That provider fact
+// does not imply IParserApi::release() drains callbacks in general.
+TEST(R78UftParserAdapterInit, precreate_failures_retry_and_quiescent_init_failure_can_be_released)
+{
+	q04::TempRoot tmp("r78parserretry");
+	std::string moduleRoot;
+	if (!linkUdpParser(tmp, moduleRoot))
+		GTEST_SKIP() << "libParserUDP.dylib not found in this build";
+	WtHelper::setInstDir(moduleRoot.c_str());
+
+	ParserEnv env;
+	ParserAdapter adapter;
+
+	WTSVariant* missingCfg = WTSVariant::createObject();
+	missingCfg->append("module", "R78NoSuchParserModule");
+	EXPECT_FALSE(adapter.init("r78parserretry", missingCfg, nullptr, &env.bd));
+	EXPECT_EQ(1u, missingCfg->retainCount());
+	EXPECT_FALSE(adapter.run());
+
+	const std::string noParserDylib = systemDylibWithoutParserEntry();
+	if (!noParserDylib.empty())
+	{
+		std::error_code ec;
+		std::filesystem::create_symlink(noParserDylib, moduleRoot + "parsers/libNoParser.dylib", ec);
+		ASSERT_FALSE(ec);
+		WTSVariant* missingEntryCfg = WTSVariant::createObject();
+		missingEntryCfg->append("module", "NoParser");
+		EXPECT_FALSE(adapter.init("r78parserretry", missingEntryCfg, nullptr, &env.bd));
+		EXPECT_EQ(1u, missingEntryCfg->retainCount());
+		EXPECT_FALSE(adapter.run());
+		missingEntryCfg->release();
+	}
+
+	WTSVariant* badEndpointCfg = WTSVariant::createObject();
+	badEndpointCfg->append("module", "ParserUDP");
+	badEndpointCfg->append("host", "not-an-ip-address");
+	badEndpointCfg->append("bport", (uint32_t)17805);
+	badEndpointCfg->append("sport", (uint32_t)17806);
+	EXPECT_FALSE(adapter.init("r78parserretry", badEndpointCfg, nullptr, &env.bd));
+	EXPECT_EQ(2u, badEndpointCfg->retainCount());
+	EXPECT_TRUE(adapter.hasApi());
+	EXPECT_FALSE(adapter.isInitialized());
+	EXPECT_FALSE(adapter.run());
+	adapter.release();
+	EXPECT_FALSE(adapter.hasApi());
+	EXPECT_EQ(1u, badEndpointCfg->retainCount());
+
+	WTSVariant* goodCfg = WTSVariant::createObject();
+	goodCfg->append("module", "ParserUDP");
+	goodCfg->append("host", "127.0.0.1");
+	goodCfg->append("bport", (uint32_t)17807);
+	goodCfg->append("sport", (uint32_t)17808);
+	EXPECT_TRUE(adapter.init("r78parserretry", goodCfg, nullptr, &env.bd));
+	EXPECT_EQ(2u, goodCfg->retainCount());
+	adapter.release();
+	EXPECT_EQ(1u, goodCfg->retainCount());
+	EXPECT_FALSE(adapter.run());
+	adapter.release();
+	EXPECT_EQ(1u, goodCfg->retainCount());
+
+	WtHelper::setInstDir("");
+	missingCfg->release();
+	badEndpointCfg->release();
+	goodCfg->release();
+}
+
+// IParserApi does not define registerSpi(NULL) as an unregister operation.
+TEST(R78UftParserAdapterInit, release_does_not_register_a_null_spi)
+{
+	NonNullSpiParserApi::reset();
+	ParserEnv env;
+	ParserAdapter adapter;
+	EXPECT_TRUE(adapter.initExt("r78parsernonnull", new NonNullSpiParserApi(), nullptr, &env.bd));
+	adapter.release();
+
+	EXPECT_EQ(1u, NonNullSpiParserApi::register_calls);
+	EXPECT_EQ(0u, NonNullSpiParserApi::null_register_calls);
+	EXPECT_EQ(1u, NonNullSpiParserApi::release_calls);
+	EXPECT_EQ(1u, NonNullSpiParserApi::destructor_calls);
 }
 
 // UftStrategyMgr.cpp:30-92 目录缺失返回 false；非 dylib/子目录跳过；

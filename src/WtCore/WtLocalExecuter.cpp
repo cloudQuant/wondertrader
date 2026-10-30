@@ -9,6 +9,7 @@
  * \details 实现了本地执行器类，用于处理交易指令的执行、仓位管理和交易回报等
  */
 #include "WtLocalExecuter.h"
+#include "WtExecuterSchedule.h"
 #include "TraderAdapter.h"
 #include "WtEngine.h"
 
@@ -20,7 +21,318 @@
 
 #include "../WTSTools/WTSLogger.h"
 
+#include <cstdio>
+#include <exception>
+#include <iterator>
+#include <utility>
+#include <vector>
+
 USING_NS_WTP;
+
+namespace
+{
+const std::size_t kLocalExecutorThreadContextDepth = 64;
+const uint64_t kLocalIngressClosedBit = uint64_t(1) << 63;
+const uint64_t kLocalIngressCountMask = ~kLocalIngressClosedBit;
+thread_local const WtLocalExecuter* g_localExecutorIngress[kLocalExecutorThreadContextDepth] = {};
+thread_local std::size_t g_localExecutorIngressDepth = 0;
+thread_local std::size_t g_localExecutorIngressOverflow = 0;
+thread_local const WtLocalExecuter* g_localExecutorCallbacks[kLocalExecutorThreadContextDepth] = {};
+thread_local std::size_t g_localExecutorCallbackDepth = 0;
+thread_local std::size_t g_localExecutorCallbackOverflow = 0;
+
+bool pushLocalExecutorThreadContext(const WtLocalExecuter* executor,
+	const WtLocalExecuter** stack, std::size_t& depth, std::size_t& overflow)
+{
+	if (depth == kLocalExecutorThreadContextDepth)
+	{
+		++overflow;
+		return false;
+	}
+	stack[depth++] = executor;
+	return true;
+}
+
+void popLocalExecutorThreadContext(const WtLocalExecuter* stack[], std::size_t& depth,
+	std::size_t& overflow, bool registered)
+{
+	if (!registered)
+	{
+		if (overflow != 0)
+			--overflow;
+		return;
+	}
+	if (depth != 0)
+		stack[--depth] = NULL;
+}
+
+bool containsLocalExecutorThreadContext(const WtLocalExecuter* executor,
+	const WtLocalExecuter* const stack[], std::size_t depth, std::size_t overflow)
+{
+	if (overflow != 0)
+		return true; // Conservatively reject waits while any frame is untracked.
+	for (std::size_t i = 0; i < depth; ++i)
+	{
+		if (stack[i] == executor)
+			return true;
+	}
+	return false;
+}
+
+class LocalExecutorCallbackScope
+{
+public:
+	explicit LocalExecutorCallbackScope(const WtLocalExecuter* executor,
+		std::atomic<std::size_t>& activeCallbackDrains, std::condition_variable& condition)
+		: _registered(pushLocalExecutorThreadContext(executor,
+			g_localExecutorCallbacks, g_localExecutorCallbackDepth, g_localExecutorCallbackOverflow))
+		, _active_callback_drains(activeCallbackDrains)
+		, _condition(condition)
+	{
+		_active_callback_drains.fetch_add(1, std::memory_order_acq_rel);
+	}
+
+	~LocalExecutorCallbackScope()
+	{
+		popLocalExecutorThreadContext(g_localExecutorCallbacks, g_localExecutorCallbackDepth,
+			g_localExecutorCallbackOverflow, _registered);
+		_active_callback_drains.fetch_sub(1, std::memory_order_acq_rel);
+		_condition.notify_all();
+	}
+
+	LocalExecutorCallbackScope(const LocalExecutorCallbackScope&) = delete;
+	LocalExecutorCallbackScope& operator=(const LocalExecutorCallbackScope&) = delete;
+
+private:
+	bool _registered;
+	std::atomic<std::size_t>& _active_callback_drains;
+	std::condition_variable& _condition;
+};
+}
+
+WtLocalExecuter::IngressLease::IngressLease(WtLocalExecuter* owner)
+	: _owner(owner), _acquired(owner != NULL && owner->beginIngress()), _thread_marker_registered(false)
+{
+	if (_acquired)
+		_thread_marker_registered = pushLocalExecutorThreadContext(_owner, g_localExecutorIngress,
+			g_localExecutorIngressDepth, g_localExecutorIngressOverflow);
+}
+
+WtLocalExecuter::IngressLease::~IngressLease()
+{
+	if (!_acquired)
+		return;
+	popLocalExecutorThreadContext(g_localExecutorIngress, g_localExecutorIngressDepth,
+		g_localExecutorIngressOverflow, _thread_marker_registered);
+	_owner->endIngress();
+}
+
+bool WtLocalExecuter::beginIngress()
+{
+	uint64_t observed = _ingress_gate.load(std::memory_order_acquire);
+	for (;;)
+	{
+		if ((observed & kLocalIngressClosedBit) != 0 ||
+			(observed & kLocalIngressCountMask) == kLocalIngressCountMask)
+			return false;
+		if (_ingress_gate.compare_exchange_weak(observed, observed + 1,
+			std::memory_order_acq_rel, std::memory_order_acquire))
+			return true;
+	}
+}
+
+void WtLocalExecuter::endIngress()
+{
+	_ingress_gate.fetch_sub(1, std::memory_order_acq_rel);
+	std::lock_guard<std::mutex> lock(_quiesce_mutex);
+	_quiesce_condition.notify_all();
+}
+
+bool WtLocalExecuter::ingressClosed() const
+{
+	return (_ingress_gate.load(std::memory_order_acquire) & kLocalIngressClosedBit) != 0;
+}
+
+uint64_t WtLocalExecuter::activeIngressCount() const
+{
+	return _ingress_gate.load(std::memory_order_acquire) & kLocalIngressCountMask;
+}
+
+void WtLocalExecuter::requestQuiesce()
+{
+	_ingress_gate.fetch_or(kLocalIngressClosedBit, std::memory_order_acq_rel);
+	_quiesce_requested.store(true, std::memory_order_release);
+}
+
+bool WtLocalExecuter::canWaitQuiescedOnCurrentThread() const
+{
+	return preflightQuiesceOnCurrentThread();
+}
+
+WtExecuterFactory* WtLocalExecuter::quiesceFactory() const
+{
+	return _factory;
+}
+
+bool WtLocalExecuter::preflightQuiesceOnCurrentThread() const
+{
+	// This host preflight is checked globally before any manager blocks. Other
+	// admitted ingress may drain later; only a wait from this same Local ingress
+	// or callback stack can wait for itself.
+	if (containsLocalExecutorThreadContext(this, g_localExecutorIngress,
+		g_localExecutorIngressDepth, g_localExecutorIngressOverflow) ||
+		containsLocalExecutorThreadContext(this, g_localExecutorCallbacks,
+			g_localExecutorCallbackDepth, g_localExecutorCallbackOverflow))
+		return false;
+	return true;
+}
+
+
+bool WtLocalExecuter::drainHostQuiesced()
+{
+	if (containsLocalExecutorThreadContext(this, g_localExecutorIngress,
+		g_localExecutorIngressDepth, g_localExecutorIngressOverflow) ||
+		containsLocalExecutorThreadContext(this, g_localExecutorCallbacks,
+			g_localExecutorCallbackDepth, g_localExecutorCallbackOverflow))
+		return false;
+	if (!ingressClosed() || !_quiesce_requested.load(std::memory_order_acquire))
+		return false;
+	{
+		std::unique_lock<std::mutex> lock(_quiesce_mutex);
+		if (_host_drained)
+			return !_quiesce_incomplete.load(std::memory_order_acquire);
+		if (_quiesce_wait_in_progress)
+		{
+			try
+			{
+				_quiesce_condition.wait(lock, [this]() {
+					return _host_drained || !_quiesce_wait_in_progress;
+				});
+			}
+			catch (...)
+			{
+				return false;
+			}
+			return _host_drained && !_quiesce_incomplete.load(std::memory_order_acquire);
+		}
+		_quiesce_wait_in_progress = true;
+		try
+		{
+			_quiesce_condition.wait(lock, [this]() {
+				return activeIngressCount() == 0;
+			});
+		}
+		catch (...)
+		{
+			_quiesce_wait_in_progress = false;
+			_quiesce_condition.notify_all();
+			return false;
+		}
+	}
+
+	// This stage owns only host queues and callback drains. It deliberately does
+	// not call plugin lifecycle hooks.
+	bool poolWaitSucceeded = true;
+	try
+	{
+		if (_pool)
+			_pool->wait();
+	}
+	catch (...)
+	{
+		poolWaitSucceeded = false;
+	}
+	const bool incomplete = _quiesce_incomplete.load(std::memory_order_acquire);
+	const bool hostDrained = poolWaitSucceeded && activeIngressCount() == 0 &&
+		_active_callback_drains.load(std::memory_order_acquire) == 0;
+
+	{
+		std::lock_guard<std::mutex> lock(_quiesce_mutex);
+		_host_drained = hostDrained;
+		_quiesce_wait_in_progress = false;
+		_quiesce_condition.notify_all();
+	}
+	return hostDrained && !incomplete;
+}
+
+bool WtLocalExecuter::snapshotQuiescePluginOwners(std::vector<ExecQuiesceOwnerPtr>& out) const
+{
+	out.clear();
+	if (!ingressClosed() || !_quiesce_requested.load(std::memory_order_acquire) ||
+		_quiesce_incomplete.load(std::memory_order_acquire) ||
+		activeIngressCount() != 0 ||
+		_active_callback_drains.load(std::memory_order_acquire) != 0)
+		return false;
+	{
+		std::lock_guard<std::mutex> lock(_quiesce_mutex);
+		if (!_host_drained || _quiesce_wait_in_progress)
+			return false;
+	}
+
+	std::vector<ExecuteUnitPtr> units;
+	{
+		SpinLock lock(_mtx_units);
+		auto appendUnique = [&units](const ExecuteUnitPtr& unit) {
+			if (unit == NULL)
+				return;
+			for (const ExecuteUnitPtr& existing : units)
+				if (existing == unit)
+					return;
+			units.push_back(unit);
+		};
+		for (const auto& item : _unit_map)
+			appendUnique(item.second);
+		for (const ExecuteUnitPtr& unit : _retained_units)
+			appendUnique(unit);
+		for (const auto& item : _unit_states)
+		{
+			const std::shared_ptr<UnitLifecycleState>& state = item.second;
+			std::lock_guard<std::mutex> stateLock(state->mutex);
+			appendUnique(state->result);
+			for (const UnitCallbackEvent& event : state->callback_events)
+				appendUnique(event.unit);
+		}
+	}
+
+	out.reserve(units.size());
+	for (const ExecuteUnitPtr& unit : units)
+		out.push_back(std::static_pointer_cast<IExecCommandQuiesce>(unit));
+	return true;
+}
+
+bool WtLocalExecuter::completeQuiesceAfterGlobalPluginWait()
+{
+	std::unique_lock<std::mutex> lock(_quiesce_mutex, std::try_to_lock);
+	if (!lock.owns_lock())
+		return false;
+	if (_quiesced)
+		return true;
+	if (!ingressClosed() || !_quiesce_requested.load(std::memory_order_acquire) || !_host_drained ||
+		_quiesce_wait_in_progress || _quiesce_incomplete.load(std::memory_order_acquire) ||
+		activeIngressCount() != 0 ||
+		_active_callback_drains.load(std::memory_order_acquire) != 0)
+		return false;
+	_quiesced = true; // Called only after the global coordinator's plugin wait-all succeeds.
+	_quiesce_condition.notify_all();
+	return true;
+}
+
+bool WtLocalExecuter::waitQuiesced()
+{
+	if (!preflightQuiesceOnCurrentThread())
+		return false;
+	{
+		std::lock_guard<std::mutex> lock(_quiesce_mutex);
+		if (_quiesced)
+			return true;
+	}
+	if (!drainHostQuiesced())
+		return false;
+	// Local owns plugin units and borrows their factory/context. Only the
+	// global staged coordinator can prove the factory and plugin wait-all and
+	// publish the acknowledgement that makes this legacy entry point succeed.
+	return false;
+}
 
 
 /**
@@ -44,12 +356,13 @@ WtLocalExecuter::WtLocalExecuter(WtExecuterFactory* factory, const char* name, I
 
 /**
  * @brief 析构函数
- * @details 清理执行器资源，如果存在线程池，会等待所有任务完成再销毁对象
+ * @details 仅在控制面确认 host 与全部插件 unit 已 quiesce 后销毁借用上下文
  */
 WtLocalExecuter::~WtLocalExecuter()
 {
-	if (_pool)
-		_pool->wait();
+	std::lock_guard<std::mutex> lock(_quiesce_mutex);
+	if (!_quiesced)
+		std::terminate();
 }
 
 /**
@@ -59,10 +372,19 @@ WtLocalExecuter::~WtLocalExecuter()
  */
 void WtLocalExecuter::setTrader(TraderAdapter* adapter)
 {
+	IngressLease ingress(this);
+	if (!ingress)
+		return;
 	_trader = adapter;
-	//设置的时候读取一下trader的状态
-	if(_trader)
-		_channel_ready = _trader->isReady();
+}
+
+void WtLocalExecuter::onUnitCreationReserved(const std::string& /*code*/)
+{
+}
+
+void WtLocalExecuter::onUnitGenerationRetainedForQuiesce(const std::string& /*code*/,
+	uint64_t /*generation*/, const ExecuteUnitPtr& /*unit*/)
+{
 }
 
 /**
@@ -74,6 +396,9 @@ void WtLocalExecuter::setTrader(TraderAdapter* adapter)
  */
 bool WtLocalExecuter::init(WTSVariant* params)
 {
+	IngressLease ingress(this);
+	if (!ingress)
+		return false;
 	if (params == NULL)
 		return false;
 
@@ -161,64 +486,928 @@ bool WtLocalExecuter::init(WTSVariant* params)
  * @brief 获取执行单元
  * @param stdCode 标准合约代码
  * @param bAutoCreate 是否自动创建，默认为true
- * @return 执行单元指针
+ * @return 执行单元是否可用
  * @details 根据标准合约代码获取相应的执行单元。如果已存在，直接返回；
  * 如果不存在且bAutoCreate为true，则创建新的执行单元并初始化。
  * 执行单元的策略配置来自配置文件中的policy部分，优先使用与商品ID匹配的策略，
  * 如果找不到对应策略，则使用default策略。
  */
-ExecuteUnitPtr WtLocalExecuter::getUnit(const char* stdCode, bool bAutoCreate /* = true */)
+bool WtLocalExecuter::getUnit(const char* stdCode, bool bAutoCreate /* = true */)
 {
-	// 提取合约信息
-	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, NULL);
-	// 获取商品ID
-	std::string commID = codeInfo.stdCommID();
-
-	// 获取策略配置
-	WTSVariant* policy = _config->get("policy");
-	// 默认使用商品ID作为策略名
-	std::string des = commID;
-	// 如果没有对应的策略，使用default策略
-	if (!policy->has(commID.c_str()))
-		des = "default";
-
-	// 锁定单元容器进行线程安全的访问
-	SpinLock lock(_mtx_units);
-
-	// 检查执行单元是否已存在
-	auto it = _unit_map.find(stdCode);
-	if(it != _unit_map.end())
+	if (stdCode == NULL || stdCode[0] == '\0')
 	{
-		return it->second;
+		WTSLogger::error("Cannot get execution unit for an empty code");
+		return false;
 	}
 
-	// 如果需要自动创建
-	if (bAutoCreate)
+	const std::string code(stdCode);
+	std::shared_ptr<UnitLifecycleState> state;
+	bool registeredDuringCreation = false;
+	bool creator = false;
+	bool externalCodeEntered = false;
+	bool unitInitialized = false;
+	auto newState = std::make_shared<UnitLifecycleState>();
 	{
-		// 获取策略配置
-		WTSVariant* cfg = policy->get(des.c_str());
-
-		// 获取执行单元类型名称
-		const char* name = cfg->getCString("name");
-		// 创建执行单元
-		ExecuteUnitPtr unit = _factory->createExeUnit(name);
-		if (unit != NULL)
+		SpinLock lock(_mtx_units);
+		auto pending = _unit_states.find(code);
+		if (pending != _unit_states.end())
 		{
-			// 将新建的执行单元添加到映射中
-			_unit_map[stdCode] = unit;
-			// 初始化执行单元
-			unit->self()->init(this, stdCode, cfg);
-
-			//如果通道已经就绪，则直接通知执行单元
-			if (_channel_ready)
-				unit->self()->on_channel_ready();
+			state = pending->second;
+			std::lock_guard<std::mutex> stateLock(state->mutex);
+			if (state->creation_complete && state->init_status == ExecUnitInitState::FAILED)
+			{
+				if (!bAutoCreate)
+					return false;
+				// An initialized generation may have emitted orders or consumed
+				// reports before its callback failed. It remains fail-closed; a new
+				// target does not establish a safe recovery snapshot. Factory,
+				// initialization, and unit callbacks are third-party code too.
+				if (state->runtime_failed || !state->callback_drain_quiesced)
+					return false;
+				state = newState;
+				state->init_generation = _next_unit_init_generation++;
+				state->creation_started = true;
+				state->creation_owner = std::this_thread::get_id();
+				pending->second = state;
+				if (_channel_ready.load())
+				{
+					std::lock_guard<std::mutex> newStateLock(state->mutex);
+					const uint64_t epoch = _channel_epoch.load();
+					enqueueUnitCallbackLocked(state, ExecuteUnitPtr(),
+						[](ExecuteUnit* target) { target->on_channel_ready(); }, true, epoch);
+				}
+				uint64_t clearRevision = 0;
+				{
+					std::lock_guard<std::mutex> positionLock(_position_state_mutex);
+					auto clearIt = _pending_clear_position.find(code);
+					if (clearIt != _pending_clear_position.end() && !clearIt->second.uncertain)
+						clearRevision = clearIt->second.revision;
+				}
+				if (clearRevision != 0)
+				{
+					std::lock_guard<std::mutex> newStateLock(state->mutex);
+					(void)enqueueClearPositionLocked(code, clearRevision, ExecuteUnitPtr(), state);
+				}
+				creator = true;
+			}
+			else if (!state->creation_complete && !state->creation_started && bAutoCreate)
+			{
+				state->creation_started = true;
+				state->creation_owner = std::this_thread::get_id();
+				creator = true;
+			}
+			else if (!state->creation_complete && !state->creation_started && !bAutoCreate)
+			{
+				return false;
+			}
+			else
+			{
+				auto mapped = _unit_map.find(code);
+				if (mapped != _unit_map.end())
+					registeredDuringCreation = true;
+			}
 		}
-		return unit;
+		else
+		{
+			auto it = _unit_map.find(code);
+			if (it != _unit_map.end())
+				return true;
+			if (!bAutoCreate)
+				return false;
+			state = newState;
+			state->init_generation = _next_unit_init_generation++;
+			state->creation_started = true;
+			state->creation_owner = std::this_thread::get_id();
+			_unit_states.emplace(code, state);
+			if (_channel_ready.load())
+			{
+				std::lock_guard<std::mutex> stateLock(state->mutex);
+				const uint64_t epoch = _channel_epoch.load();
+				enqueueUnitCallbackLocked(state, ExecuteUnitPtr(),
+					[](ExecuteUnit* target) { target->on_channel_ready(); }, true, epoch);
+			}
+			creator = true;
+		}
 	}
-	else
+
+	if (!creator)
 	{
-		return ExecuteUnitPtr();
+		std::unique_lock<std::mutex> lock(state->mutex);
+		const std::thread::id current = std::this_thread::get_id();
+		if (!state->creation_complete &&
+			(state->creation_owner == current || (state->callback_active && state->callback_owner == current)))
+		{
+			// Initialization has succeeded and the candidate is already registered.
+			// A same-thread callback may safely query it while channel notification is
+			// still being drained; before registration, reject reentry to avoid deadlock.
+			if (registeredDuringCreation)
+				return true;
+			lock.unlock();
+			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
+				"Reentrant unit creation for {} was rejected", stdCode);
+			return false;
+		}
+		// Only failures before entering third-party factory/plugin code can be
+		// replaced. Runtime failures remain FAILED even after the old wrapper drains.
+		const uint64_t waiting_generation = state->init_generation;
+		++state->waiting_callers;
+		state->condition.wait(lock, [&state]() { return state->creation_complete; });
+		--state->waiting_callers;
+		if (state->init_generation != waiting_generation)
+			return false;
+		return state->result != NULL && state->init_status == ExecUnitInitState::READY;
 	}
+
+	ExecuteUnitPtr unit;
+	auto failCreation = [&](const char* reason) -> bool
+	{
+		// Fail closed after plugin entry unless ABI 2.2 proves that a normal
+		// failed initialization was synchronously destroyed and this generation
+		// has no accepted callback work to discard. A pure config preflight
+		// failure with no queued work has no outstanding side effect to drain.
+		ExecuteUnitPtr mappedUnit;
+		std::deque<UnitCallbackEvent> discardedEvents;
+		uint64_t failedRuntimeGeneration = 0;
+		bool failedInitCleanupProven = false;
+		{
+			SpinLock lock(_mtx_units);
+			auto unitIt = _unit_map.find(code);
+			if (unitIt != _unit_map.end())
+			{
+				mappedUnit = unitIt->second;
+				retainUnitLocked(mappedUnit);
+				_unit_map.erase(unitIt);
+			}
+			std::lock_guard<std::mutex> stateLock(state->mutex);
+			const bool acceptedHostCallbacksWillBeDiscarded =
+				!state->callback_events.empty() || state->callback_active ||
+				state->callback_drain_scheduled;
+			// _target_pos and _pending_clear_position are authoritative business
+			// state retained for a later retry. Only their accepted callback work
+			// in this generation is considered discarded here.
+			const bool noOtherUnitGeneration = mappedUnit == NULL && state->result == NULL;
+			failedInitCleanupProven = externalCodeEntered && !unitInitialized && unit != NULL &&
+				unit->failedInitializationWasSafelyDestroyed() &&
+				!acceptedHostCallbacksWillBeDiscarded && !state->callback_failed &&
+				noOtherUnitGeneration;
+			if ((unitInitialized || (externalCodeEntered && unit != NULL)) &&
+				!failedInitCleanupProven)
+				retainUnitLocked(unit);
+			if (state->result)
+				retainUnitLocked(state->result);
+			for (const UnitCallbackEvent& event : state->callback_events)
+				if (event.unit)
+					retainUnitLocked(event.unit);
+			const bool runtimeFailure = unitInitialized ||
+				(externalCodeEntered && !failedInitCleanupProven) ||
+				acceptedHostCallbacksWillBeDiscarded || mappedUnit != NULL || state->result != NULL;
+			if (runtimeFailure)
+				_quiesce_incomplete.store(true, std::memory_order_release);
+			state->callback_failed = true;
+			state->runtime_failed = state->runtime_failed || runtimeFailure;
+			discardedEvents.swap(state->callback_events);
+			state->callback_drain_scheduled = false;
+			state->target_reconcile_event_queued = false;
+			state->clear_position_event_queued = false;
+			if (state->runtime_failed)
+			{
+				state->callback_drain_quiesced = false;
+				state->retired_generation = state->init_generation;
+				failedRuntimeGeneration = state->init_generation;
+			}
+		}
+		if ((unitInitialized || externalCodeEntered) && unit != NULL && !failedInitCleanupProven)
+		{
+			try { onUnitGenerationRetainedForQuiesce(code, state->init_generation, unit); }
+			catch (...) {}
+		}
+		else if (mappedUnit != NULL)
+		{
+			try { onUnitGenerationRetainedForQuiesce(code, state->init_generation, mappedUnit); }
+			catch (...) {}
+		}
+		// Any plugin unit moved into _retained_units above remains alive;
+		// discarded callback references may now be released without destroying it.
+		discardedEvents.clear();
+		unit.reset();
+		mappedUnit.reset(); // plugin destruction must happen outside the container lock
+		{
+			std::lock_guard<std::mutex> lock(state->mutex);
+			state->result.reset();
+			state->init_status = ExecUnitInitState::FAILED;
+			state->init_error = reason ? reason : "unknown execution-unit initialization failure";
+			state->creation_complete = true;
+			state->creation_owner = std::thread::id();
+			state->callback_drain_quiesced = failedRuntimeGeneration == 0;
+			state->callback_active = false;
+			state->callback_owner = std::thread::id();
+		}
+		state->condition.notify_all();
+		try
+		{
+			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
+				"Execution unit initialization for {} failed: {}", stdCode, reason ? reason : "unknown error");
+		}
+		catch (...)
+		{
+			// The reservation and waiters are already cleaned up; logging must not
+			// reopen the failed creation path or strand another caller.
+		}
+		return false;
+	};
+
+	try
+	{
+		CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, NULL);
+		const std::string commID = codeInfo.stdCommID();
+		if (_config == NULL)
+			return failCreation("executor configuration is missing");
+		WTSVariant* policy = _config->get("policy");
+		if (policy == NULL)
+			return failCreation("execution policy is missing");
+		const std::string des = policy->has(commID.c_str()) ? commID : "default";
+		WTSVariant* cfg = policy->get(des.c_str());
+		if (cfg == NULL)
+			return failCreation("policy entry is missing");
+		const char* name = cfg->getCString("name");
+		if (name == NULL || name[0] == '\0' || _factory == NULL)
+			return failCreation("execution-unit factory or name is invalid");
+
+		// Once control enters the execution-unit factory, neither factory nor
+		// plugin initialization has a no-side-effect contract. Any failure from
+		// this point is retained as fail-closed and cannot be retried in-process.
+		externalCodeEntered = true;
+		unit = _factory->createExeUnit(name);
+		if (unit == NULL)
+			return failCreation("execution-unit creation failed");
+		std::string error;
+		unitInitialized = unit->initialize(this, stdCode, cfg, error);
+		if (!unitInitialized || unit->self() == NULL)
+			return failCreation(error.empty() ? "plugin initialization failed" : error.c_str());
+
+		{
+			SpinLock lock(_mtx_units);
+			_unit_map[code] = unit;
+			std::lock_guard<std::mutex> stateLock(state->mutex);
+			bool hasTarget = false;
+			{
+				std::lock_guard<std::mutex> positionLock(_position_state_mutex);
+				hasTarget = _target_pos.find(code) != _target_pos.end();
+			}
+			if (hasTarget)
+				(void)enqueueTargetReconciliationLocked(code, unit, state);
+			uint64_t clearRevision = 0;
+			{
+				std::lock_guard<std::mutex> positionLock(_position_state_mutex);
+				auto clearIt = _pending_clear_position.find(code);
+				if (clearIt != _pending_clear_position.end() && !clearIt->second.uncertain)
+					clearRevision = clearIt->second.revision;
+			}
+			if (clearRevision != 0)
+				(void)enqueueClearPositionLocked(code, clearRevision, unit, state);
+		}
+
+		for (;;)
+		{
+			drainUnitCallbacks(code, state);
+			bool failed = false;
+			bool completed = false;
+			{
+				SpinLock lock(_mtx_units);
+				std::lock_guard<std::mutex> stateLock(state->mutex);
+				failed = state->callback_failed;
+				if (failed)
+				{
+					completed = false;
+				}
+				else if (state->callback_events.empty() && !state->callback_active &&
+					!state->callback_drain_scheduled)
+				{
+					state->result = std::move(unit);
+					state->init_status = ExecUnitInitState::READY;
+					state->init_error.clear();
+					state->creation_complete = true;
+					state->creation_owner = std::thread::id();
+					completed = true;
+				}
+			}
+			if (failed)
+				return failCreation("channel callback threw during unit initialization");
+			if (completed)
+			{
+				state->condition.notify_all();
+				return true;
+			}
+		}
+	}
+	catch (const std::exception& ex)
+	{
+		return failCreation(ex.what());
+	}
+	catch (...)
+	{
+		return failCreation("unexpected exception while creating execution unit");
+	}
+}
+
+void WtLocalExecuter::retainUnitLocked(const ExecuteUnitPtr& unit)
+{
+	if (unit == NULL)
+		return;
+	for (const ExecuteUnitPtr& retained : _retained_units)
+		if (retained == unit)
+			return;
+	_retained_units.push_back(unit);
+}
+
+ExecUnitInitStatus WtLocalExecuter::queryUnitInitStatus(const char* stdCode) const
+{
+	ExecUnitInitStatus status;
+	if (stdCode == NULL || stdCode[0] == '\0')
+	{
+		status.query_result = ExecUnitInitQueryResult::INVALID_ARGUMENT;
+		status.error = "standard code is empty";
+		return status;
+	}
+
+	SpinLock lock(_mtx_units);
+	auto it = _unit_states.find(stdCode);
+	if (it == _unit_states.end())
+	{
+		status.error = "no initialization attempt is recorded for this code";
+		return status;
+	}
+
+	const std::shared_ptr<UnitLifecycleState>& state = it->second;
+	std::lock_guard<std::mutex> stateLock(state->mutex);
+	status.state = state->init_status;
+	status.generation = state->init_generation;
+	status.waiting_callers = state->waiting_callers;
+	status.error = state->init_error;
+	return status;
+}
+
+ExecUnitInitClearResult WtLocalExecuter::clearFailedUnitInitStatus(const char* stdCode)
+{
+	IngressLease ingress(this);
+	if (!ingress)
+		return ExecUnitInitClearResult::RETRY_BLOCKED;
+	if (stdCode == NULL || stdCode[0] == '\0')
+		return ExecUnitInitClearResult::INVALID_ARGUMENT;
+
+	SpinLock lock(_mtx_units);
+	auto it = _unit_states.find(stdCode);
+	if (it == _unit_states.end())
+		return ExecUnitInitClearResult::NOT_FOUND;
+
+	const std::shared_ptr<UnitLifecycleState> state = it->second;
+	std::lock_guard<std::mutex> stateLock(state->mutex);
+	if (!state->creation_complete || state->init_status != ExecUnitInitState::FAILED)
+		return ExecUnitInitClearResult::NOT_FAILED;
+	if (state->runtime_failed)
+		return ExecUnitInitClearResult::RETRY_BLOCKED;
+	if (!state->callback_drain_quiesced)
+		return ExecUnitInitClearResult::NOT_FAILED;
+
+	_unit_states.erase(it);
+	return ExecUnitInitClearResult::CLEARED;
+}
+
+bool WtLocalExecuter::enqueueUnitCallbackLocked(
+	const std::shared_ptr<UnitLifecycleState>& state, const ExecuteUnitPtr& unit,
+	std::function<void(ExecuteUnit*)> callback, bool isChannelEvent, uint64_t channelEpoch)
+{
+	if (state == NULL || !callback || state->callback_failed ||
+		state->init_status == ExecUnitInitState::FAILED)
+		return false;
+
+	UnitCallbackEvent event;
+	event.unit = unit;
+	event.callback = std::move(callback);
+	event.init_generation = state->init_generation;
+	event.channel_epoch = channelEpoch;
+	event.is_channel_event = isChannelEvent;
+	state->callback_events.push_back(std::move(event));
+
+	if (state->creation_complete && !state->callback_active && !state->callback_drain_scheduled)
+	{
+		state->callback_drain_scheduled = true;
+		return true;
+	}
+	return false;
+}
+
+bool WtLocalExecuter::enqueueTargetReconciliationLocked(const std::string& code,
+	const ExecuteUnitPtr& unit, const std::shared_ptr<UnitLifecycleState>& state)
+{
+	if (state == NULL || state->callback_failed ||
+		state->init_status == ExecUnitInitState::FAILED || state->target_reconcile_event_queued)
+		return false;
+
+	std::weak_ptr<UnitLifecycleState> weakState = state;
+	UnitCallbackEvent event;
+	event.unit = unit;
+	event.init_generation = state->init_generation;
+	event.is_target_reconciliation = true;
+	event.callback = [this, code, weakState](ExecuteUnit* targetUnit) {
+		if (weakState.expired())
+			return;
+		bool allowed = false;
+		double target = 0.0;
+		{
+			std::lock_guard<std::mutex> positionLock(_position_state_mutex);
+			auto it = _target_pos.find(code);
+			if (it == _target_pos.end())
+				return;
+			target = it->second;
+			auto allowedIt = _target_pos_allowed.find(code);
+			allowed = allowedIt != _target_pos_allowed.end() && allowedIt->second;
+		}
+		if (!allowed)
+			return;
+		targetUnit->set_position(code.c_str(), round(target * _scale));
+	};
+	state->callback_events.push_front(std::move(event));
+	state->target_reconcile_event_queued = true;
+	if (state->creation_complete && !state->callback_active && !state->callback_drain_scheduled)
+	{
+		state->callback_drain_scheduled = true;
+		return true;
+	}
+	return false;
+}
+
+bool WtLocalExecuter::enqueueClearPositionLocked(const std::string& code, uint64_t revision,
+	const ExecuteUnitPtr& unit, const std::shared_ptr<UnitLifecycleState>& state)
+{
+	if (state == NULL || revision == 0 || state->callback_failed ||
+		state->init_status == ExecUnitInitState::FAILED)
+		return false;
+	if (state->clear_position_event_queued)
+	{
+		// A queued clear will observe the newest intent when it begins execution.
+		state->clear_position_event_revision = revision;
+		return false;
+	}
+
+	UnitCallbackEvent event;
+	event.unit = unit;
+	event.init_generation = state->init_generation;
+	event.is_clear_position = true;
+	event.clear_position_revision = revision;
+	event.callback = [code](ExecuteUnit* targetUnit) { targetUnit->clear_all_position(code.c_str()); };
+
+	auto insertAt = state->callback_events.end();
+	if (!state->creation_complete)
+	{
+		// During initialization, reconcile the authoritative target first, then
+		// channel readiness, then clear before ticks/orders queued behind them.
+		auto target = state->callback_events.end();
+		for (auto it = state->callback_events.begin(); it != state->callback_events.end(); ++it)
+			if (it->is_target_reconciliation)
+				target = it;
+		if (target != state->callback_events.end())
+			insertAt = std::next(target);
+		else
+			insertAt = state->callback_events.begin();
+		for (auto it = state->callback_events.begin(); it != state->callback_events.end(); ++it)
+		{
+			if (it->is_target_reconciliation || it->is_channel_event)
+				insertAt = std::next(it);
+			else
+				break;
+		}
+	}
+	state->callback_events.insert(insertAt, std::move(event));
+	state->clear_position_event_queued = true;
+	state->clear_position_event_revision = revision;
+	if (state->creation_complete && !state->callback_active && !state->callback_drain_scheduled)
+	{
+		state->callback_drain_scheduled = true;
+		return true;
+	}
+	return false;
+}
+
+void WtLocalExecuter::queueClearPositionIntent(const std::string& code)
+{
+	std::shared_ptr<UnitLifecycleState> state;
+	bool reserved = false;
+	bool retrySafeFailure = false;
+	bool schedule = false;
+	uint64_t revision = 0;
+	{
+		SpinLock unitsLock(_mtx_units);
+		{
+			std::lock_guard<std::mutex> positionLock(_position_state_mutex);
+			auto pending = _pending_clear_position.find(code);
+			if (pending != _pending_clear_position.end() && pending->second.uncertain)
+				return;
+			revision = _next_clear_position_revision++;
+			ClearPositionIntent intent;
+			intent.revision = revision;
+			intent.uncertain = false;
+			_pending_clear_position[code] = intent;
+		}
+
+		auto stateIt = _unit_states.find(code);
+		if (stateIt == _unit_states.end())
+		{
+			state = std::make_shared<UnitLifecycleState>();
+			state->init_generation = _next_unit_init_generation++;
+			_unit_states.emplace(code, state);
+			if (_channel_ready.load())
+			{
+				std::lock_guard<std::mutex> stateLock(state->mutex);
+				const uint64_t epoch = _channel_epoch.load();
+				(void)enqueueUnitCallbackLocked(state, ExecuteUnitPtr(),
+					[](ExecuteUnit* targetUnit) { targetUnit->on_channel_ready(); }, true, epoch);
+			}
+			reserved = true;
+		}
+		else
+			state = stateIt->second;
+
+		std::lock_guard<std::mutex> stateLock(state->mutex);
+		if (state->init_status == ExecUnitInitState::FAILED || state->callback_failed)
+			retrySafeFailure = !state->runtime_failed && state->callback_drain_quiesced;
+		else
+		{
+			auto unitIt = _unit_map.find(code);
+			const ExecuteUnitPtr unit = unitIt == _unit_map.end() ? ExecuteUnitPtr() : unitIt->second;
+			schedule = enqueueClearPositionLocked(code, revision, unit, state);
+			reserved = reserved || !state->creation_started;
+		}
+	}
+
+	if (reserved)
+	{
+		try { onUnitCreationReserved(code); } catch (...) {}
+	}
+	if (reserved || retrySafeFailure)
+		(void)getUnit(code.c_str());
+	else if (schedule)
+		scheduleUnitCallbackDrain(code, state);
+}
+
+bool WtLocalExecuter::enqueueCallbackForCode(const std::string& code,
+	std::function<void(ExecuteUnit*)> callback)
+{
+	std::shared_ptr<UnitLifecycleState> state;
+	bool schedule = false;
+	{
+		SpinLock unitsLock(_mtx_units);
+		auto stateIt = _unit_states.find(code);
+		if (stateIt == _unit_states.end())
+			return false;
+		state = stateIt->second;
+		std::lock_guard<std::mutex> stateLock(state->mutex);
+		if (state->init_status == ExecUnitInitState::FAILED || state->callback_failed)
+			return true;
+		auto unitIt = _unit_map.find(code);
+		const ExecuteUnitPtr unit = unitIt == _unit_map.end() ? ExecuteUnitPtr() : unitIt->second;
+		// Queue during initialization and while another same-code callback is
+		// running. Never wait here: plugin code may join a helper that re-enters.
+		schedule = enqueueUnitCallbackLocked(state, unit, std::move(callback));
+	}
+	if (schedule)
+		scheduleUnitCallbackDrain(code, state);
+	return true;
+}
+
+void WtLocalExecuter::scheduleUnitCallbackDrain(const std::string& code,
+	const std::shared_ptr<UnitLifecycleState>& state)
+{
+	auto drain = [this, code, state]() { drainUnitCallbacks(code, state); };
+	if (_pool)
+		WtExecuterSchedule::scheduleOrRunFallback(*_pool, drain, drain);
+	else
+		drain();
+}
+
+void WtLocalExecuter::drainUnitCallbacks(const std::string& code,
+	const std::shared_ptr<UnitLifecycleState>& state)
+{
+	if (state == NULL)
+		return;
+	LocalExecutorCallbackScope callbackScope(this, _active_callback_drains, _quiesce_condition);
+	{
+		std::lock_guard<std::mutex> lock(state->mutex);
+		if (state->callback_active)
+			return;
+		state->callback_drain_scheduled = false;
+		state->callback_active = true;
+		state->callback_drain_quiesced = false;
+		state->callback_owner = std::this_thread::get_id();
+	}
+
+	for (;;)
+	{
+		UnitCallbackEvent event;
+		{
+			std::lock_guard<std::mutex> lock(state->mutex);
+			if (state->callback_failed || state->init_status == ExecUnitInitState::FAILED ||
+				state->callback_events.empty())
+			{
+				state->callback_active = false;
+				state->callback_drain_quiesced = true;
+				state->callback_owner = std::thread::id();
+				state->condition.notify_all();
+				return;
+			}
+			else
+			{
+				event = std::move(state->callback_events.front());
+				state->callback_events.pop_front();
+				if (event.is_target_reconciliation)
+					state->target_reconcile_event_queued = false;
+				if (event.is_clear_position)
+				{
+					// Coalesce any clear intents received before dispatch into this one
+					// operation. A new request arriving during the plugin callback queues
+					// a separate later operation.
+					event.clear_position_revision = state->clear_position_event_revision;
+					state->clear_position_event_queued = false;
+				}
+			}
+		}
+		// Validate the generation and channel epoch under the same short lock
+		// used to publish channel transitions. Never hold either lock in plugin code.
+		bool current = false;
+		ExecuteUnitPtr callbackUnit;
+		{
+			SpinLock unitsLock(_mtx_units);
+			auto currentState = _unit_states.find(code);
+			if (currentState != _unit_states.end() && currentState->second == state)
+			{
+				std::lock_guard<std::mutex> stateLock(state->mutex);
+				current = event.init_generation == state->init_generation &&
+					state->init_status != ExecUnitInitState::FAILED;
+				if (current && event.is_channel_event)
+				{
+					// Preserve every channel transition in per-code FIFO order. The
+					// global epoch may already be newer while an earlier transition is
+					// blocked in another callback.
+					current = event.channel_epoch > state->last_channel_epoch;
+					if (current)
+						state->last_channel_epoch = event.channel_epoch;
+				}
+				if (current)
+				{
+					callbackUnit = event.unit;
+					if (callbackUnit == NULL)
+					{
+						auto unitIt = _unit_map.find(code);
+						if (unitIt != _unit_map.end())
+							callbackUnit = unitIt->second;
+					}
+				}
+			}
+		}
+		if (!current || callbackUnit == NULL)
+			continue;
+
+		bool callbackSucceeded = false;
+		try
+		{
+			if (callbackUnit->self() != NULL)
+			{
+				event.callback(callbackUnit->self());
+				callbackSucceeded = true;
+			}
+		}
+		catch (...)
+		{
+			// The current callback and any queued successors are not proven complete.
+			_quiesce_incomplete.store(true, std::memory_order_release);
+			bool initializing = false;
+			uint64_t failedRuntimeGeneration = 0;
+			std::deque<UnitCallbackEvent> discardedEvents;
+			ExecuteUnitPtr detachedUnit;
+			{
+				SpinLock unitsLock(_mtx_units);
+				auto stateIt = _unit_states.find(code);
+				if (callbackUnit != NULL)
+					retainUnitLocked(callbackUnit);
+				if (stateIt != _unit_states.end() && stateIt->second == state)
+				{
+					auto unitIt = _unit_map.find(code);
+					if (unitIt != _unit_map.end() && unitIt->second == callbackUnit)
+					{
+						detachedUnit = unitIt->second;
+						_unit_map.erase(unitIt);
+					}
+				}
+				std::lock_guard<std::mutex> lock(state->mutex);
+				initializing = !state->creation_complete;
+				state->callback_failed = true;
+				// The plugin callback may have emitted an order before throwing, even
+				// during initialization. Without a trade/order recovery contract this
+				// generation must remain fail-closed.
+				state->runtime_failed = true;
+				state->init_error = "execution-unit callback threw";
+				state->init_status = ExecUnitInitState::FAILED;
+				state->result.reset();
+				state->creation_complete = true;
+				state->creation_owner = std::thread::id();
+				state->retired_generation = state->init_generation;
+				state->callback_drain_quiesced = false;
+				failedRuntimeGeneration = state->init_generation;
+				state->target_reconcile_event_queued = false;
+				state->clear_position_event_queued = false;
+				discardedEvents.swap(state->callback_events);
+				state->callback_drain_scheduled = false;
+				if (event.is_clear_position)
+				{
+					std::lock_guard<std::mutex> positionLock(_position_state_mutex);
+					auto pending = _pending_clear_position.find(code);
+					if (pending != _pending_clear_position.end())
+						pending->second.uncertain = true;
+				}
+				if (initializing)
+				{
+					// The creator still owns its local ExecuteUnitPtr. Let getUnit's
+					// failure path release it and open the quiesced barrier only then.
+					state->callback_active = false;
+					state->callback_owner = std::thread::id();
+				}
+			}
+			state->condition.notify_all();
+			try
+			{
+				WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
+					"Execution-unit callback for {} threw; the unit is fail-closed", code.c_str());
+			}
+			catch (...)
+			{
+			}
+			if (failedRuntimeGeneration != 0)
+			{
+				if (!initializing)
+				{
+					try { onUnitGenerationRetainedForQuiesce(code, failedRuntimeGeneration, callbackUnit); }
+					catch (...) {}
+				}
+				// Preserve failed plugin units in _retained_units. The lifecycle
+				// coordinator may release them only after every plugin wait succeeds.
+				discardedEvents.clear();
+				detachedUnit.reset();
+				event.unit.reset();
+				callbackUnit.reset();
+				{
+					std::lock_guard<std::mutex> lock(state->mutex);
+					state->callback_active = false;
+					state->callback_owner = std::thread::id();
+				}
+				state->condition.notify_all();
+				(void)initializing;
+				return;
+			}
+		}
+		if (callbackSucceeded && event.is_clear_position)
+		{
+			bool scheduleFollowup = false;
+			uint64_t followupRevision = 0;
+			{
+				SpinLock unitsLock(_mtx_units);
+				auto stateIt = _unit_states.find(code);
+				if (stateIt != _unit_states.end() && stateIt->second == state)
+				{
+					std::lock_guard<std::mutex> stateLock(state->mutex);
+					if (state->clear_position_event_revision == event.clear_position_revision)
+						state->clear_position_event_queued = false;
+					{
+						std::lock_guard<std::mutex> positionLock(_position_state_mutex);
+						auto pending = _pending_clear_position.find(code);
+						if (pending != _pending_clear_position.end())
+						{
+							if (pending->second.revision == event.clear_position_revision)
+								_pending_clear_position.erase(pending);
+							else if (!pending->second.uncertain)
+								followupRevision = pending->second.revision;
+						}
+					}
+					if (followupRevision != 0 && !state->clear_position_event_queued)
+						scheduleFollowup = enqueueClearPositionLocked(code, followupRevision,
+							callbackUnit, state);
+				}
+			}
+			if (scheduleFollowup)
+				scheduleUnitCallbackDrain(code, state);
+		}
+	}
+}
+
+void WtLocalExecuter::queuePositionTarget(const std::string& code, double target, bool isIncrement,
+	bool bypassOrderLimits)
+{
+	const bool allowed = bypassOrderLimits || !_trader || _trader->checkOrderLimits(code.c_str());
+	double oldVol = 0.0;
+	double newVol = target;
+	bool schedule = false;
+	std::shared_ptr<UnitLifecycleState> state;
+	bool createOrRetry = false;
+	bool reserved = false;
+	bool terminalTargetNotApplied = false;
+	uint64_t failedGeneration = 0;
+	{
+		SpinLock unitsLock(_mtx_units);
+		auto stateIt = _unit_states.find(code);
+		if (stateIt != _unit_states.end())
+		{
+			state = stateIt->second;
+			std::lock_guard<std::mutex> stateLock(state->mutex);
+			{
+				std::lock_guard<std::mutex> positionLock(_position_state_mutex);
+				auto it = _target_pos.find(code);
+				oldVol = it == _target_pos.end() ? 0.0 : it->second;
+				newVol = isIncrement ? oldVol + target : target;
+				_target_pos[code] = newVol;
+				_target_pos_allowed[code] = allowed;
+			}
+
+			if (state->init_status == ExecUnitInitState::FAILED || state->callback_failed)
+			{
+				createOrRetry = true;
+				if (state->runtime_failed)
+				{
+					terminalTargetNotApplied = true;
+					failedGeneration = state->init_generation;
+					state->init_error = fmtutil::format(
+						"execution-unit callback threw; target {} retained but not applied after generation {} entered terminal FAILED",
+						newVol, failedGeneration);
+				}
+			}
+			else if (!state->creation_complete)
+			{
+				auto unitIt = _unit_map.find(code);
+				const ExecuteUnitPtr unit = unitIt == _unit_map.end() ? ExecuteUnitPtr() : unitIt->second;
+				// Keep target reconciliation at the head of the queue. It reads the
+				// latest authoritative map when dispatched, so coalesced updates cannot
+				// be overtaken by ticks or order callbacks queued during initialization.
+				schedule = enqueueTargetReconciliationLocked(code, unit, state);
+				createOrRetry = !state->creation_started;
+			}
+			else if (allowed)
+			{
+				auto unitIt = _unit_map.find(code);
+				const double traderTarget = round(newVol * _scale);
+				schedule = unitIt != _unit_map.end() && enqueueUnitCallbackLocked(state, unitIt->second,
+					[code, traderTarget](ExecuteUnit* targetUnit) {
+						targetUnit->set_position(code.c_str(), traderTarget);
+					});
+			}
+		}
+		else
+		{
+			// Reserve the lifecycle in the same critical section that publishes the
+			// authoritative target. Ticks arriving before the creator starts now join
+			// this generation and are held behind its reconciliation barrier.
+			state = std::make_shared<UnitLifecycleState>();
+			state->init_generation = _next_unit_init_generation++;
+			_unit_states.emplace(code, state);
+			{
+				std::lock_guard<std::mutex> positionLock(_position_state_mutex);
+				auto it = _target_pos.find(code);
+				oldVol = it == _target_pos.end() ? 0.0 : it->second;
+				newVol = isIncrement ? oldVol + target : target;
+				_target_pos[code] = newVol;
+				_target_pos_allowed[code] = allowed;
+			}
+			if (_channel_ready.load())
+			{
+				std::lock_guard<std::mutex> stateLock(state->mutex);
+				const uint64_t epoch = _channel_epoch.load();
+				(void)enqueueUnitCallbackLocked(state, ExecuteUnitPtr(),
+					[](ExecuteUnit* targetUnit) { targetUnit->on_channel_ready(); }, true, epoch);
+			}
+			createOrRetry = true;
+			reserved = true;
+		}
+	}
+
+	if (!decimal::eq(oldVol, newVol))
+		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO,
+			"Target position of {} changed: {} -> {} : {} with scale:{}",
+			code.c_str(), oldVol, newVol, round(newVol * _scale), _scale);
+	if (!allowed)
+		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "{} is disabled", code.c_str());
+	if (terminalTargetNotApplied)
+	{
+		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
+			"Target position for {} is retained at {} but NOT APPLIED: execution-unit generation {} is terminal FAILED after third-party code; trading callbacks remain disabled",
+			code.c_str(), newVol, failedGeneration);
+	}
+	if (createOrRetry && !terminalTargetNotApplied)
+	{
+		if (reserved)
+		{
+			try { onUnitCreationReserved(code); } catch (...) {}
+		}
+		(void)getUnit(code.c_str());
+	}
+	if (schedule)
+		scheduleUnitCallbackDrain(code, state);
 }
 
 
@@ -400,11 +1589,10 @@ OrderIDs WtLocalExecuter::cancel(const char* stdCode, bool isBuy, double qty)
 void WtLocalExecuter::writeLog(const char* message)
 {
 	// 使用线程本地存储的缓冲区，避免多线程冲突
-	static thread_local char szBuf[2048] = { 0 };
-	// 格式化消息，添加执行器名称前缀
-	fmtutil::format_to(szBuf, "[{}]", _name.c_str());
-	// 连接原始消息
-	strcat(szBuf, message);
+	static thread_local char szBuf[MAX_LOG_BUF_SIZE] = { 0 };
+	// 固定缓冲区最多保留 MAX_LOG_BUF_SIZE - 1 字节，并始终保留 NUL 终止符。
+	// 消息（以及极长名称）超出容量时由 snprintf 确定性截断。
+	std::snprintf(szBuf, sizeof(szBuf), "[%s]%s", _name.c_str(), message ? message : "");
 	// 写入日志
 	WTSLogger::log_dyn_raw("executer", _name.c_str(), LL_INFO, szBuf);
 }
@@ -464,34 +1652,12 @@ uint64_t WtLocalExecuter::getCurTime()
  */
 void WtLocalExecuter::on_position_changed(const char* stdCode, double diffPos)
 {
-	// 获取合约对应的执行单元，如果不存在会自动创建
-	ExecuteUnitPtr unit = getUnit(stdCode);
-	if (unit == NULL)
+	IngressLease ingress(this);
+	if (!ingress)
 		return;
-
-	// 计算新的目标仓位
-	double oldVol = _target_pos[stdCode];
-	double newVol = oldVol + diffPos;
-	_target_pos[stdCode] = newVol;
-
-	// 应用缩放比例并四舍五入
-	double traderTarget = round(newVol * _scale);
-
-	// 如果持仓有变化，记录日志
-	if(!decimal::eq(diffPos, 0))
-	{
-		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Target position of {} changed: {} -> {} : {} with scale:{}", stdCode, oldVol, newVol, traderTarget, _scale);
-	}
-
-	// 检查合约是否有订单限制
-	if (_trader && !_trader->checkOrderLimits(stdCode))
-	{
-		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "{} is disabled", stdCode);
+	if (stdCode == NULL || stdCode[0] == '\0')
 		return;
-	}
-
-	// 通知执行单元设置新的目标仓位
-	unit->self()->set_position(stdCode, traderTarget);
+	queuePositionTarget(stdCode, diffPos, true);
 }
 
 /**
@@ -504,6 +1670,9 @@ void WtLocalExecuter::on_position_changed(const char* stdCode, double diffPos)
  */
 void WtLocalExecuter::set_position(const wt_hashmap<std::string, double>& targets)
 {
+	IngressLease ingress(this);
+	if (!ingress)
+		return;
 	/*
 	 *	先要把目标头寒进行组合匹配
 	 */
@@ -547,112 +1716,42 @@ void WtLocalExecuter::set_position(const wt_hashmap<std::string, double>& target
 		}
 	}
 
-	// 遍历所有目标仓位，设置执行单元的目标仓位
-	for (auto it = targets.begin(); it != targets.end(); it++)
+	// 目标更新按合约串行入队；目标映射更新本身由短时锁保护。
+	for (const auto& item : targets)
+		queuePositionTarget(item.first, item.second, false);
+
+	// 获取旧目标键的快照，再在锁外查询执行单元与入队。
+	std::vector<std::string> priorTargets;
 	{
-		const char* stdCode = it->first.c_str();
-		double newVol = it->second;
-		// 获取或创建执行单元
-		ExecuteUnitPtr unit = getUnit(stdCode);
-		if (unit == NULL)
+		std::lock_guard<std::mutex> lock(_position_state_mutex);
+		priorTargets.reserve(_target_pos.size());
+		for (const auto& item : _target_pos)
+			priorTargets.push_back(item.first);
+	}
+	for (const std::string& code : priorTargets)
+	{
+		if (targets.find(code) != targets.end())
 			continue;
-
-		// 更新内部目标仓位记录
-		double oldVol = _target_pos[stdCode];
-		_target_pos[stdCode] = newVol;
-		// 账户的理论持仓要经过缩放比例修正
-		double traderTarget = round(newVol * _scale);
-
-		// 如果仓位变化，记录日志
-		if(!decimal::eq(oldVol, newVol))
-		{
-			WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Target position of {} changed: {} -> {} : {} with scale{}", stdCode, oldVol, newVol, traderTarget, _scale);
-		}
-
-		// 检查合约是否有订单限制
-		if (_trader && !_trader->checkOrderLimits(stdCode))
-		{
-			WTSLogger::log_dyn("executer", _name.c_str(), LL_WARN, "{} is disabled due to entrust limit control ", stdCode);
-			continue;
-		}
-
-		// 如果配置了线程池，使用线程池并行处理
-		if (_pool)
-		{
-			std::string code = stdCode;
-			_pool->schedule([unit, code, traderTarget](){
-				unit->self()->set_position(code.c_str(), traderTarget);
-			});
-		}
-		else
-		{
-			// 直接设置执行单元的目标仓位
-			unit->self()->set_position(stdCode, traderTarget);
-		}
+		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO,
+			"{} is not in target, set to 0 automatically", code.c_str());
+		queuePositionTarget(code, 0.0, false, true);
 	}
 
-	//在原来的目标头寒中，但是不在新的目标头寒中，则需要自动设置为0
-	for (auto it = _target_pos.begin(); it != _target_pos.end(); it++)
+	// 如果开启严格同步，则复制通道持仓快照并清理未管理合约。
+	if (_strict_sync)
 	{
-		const char* code = it->first.c_str();
-		double& pos = (double&)it->second;
-		auto tit = targets.find(code);
-		// 如果新目标中存在该合约，跳过
-		if(tit != targets.end())
-			continue;
-
-		// 旧目标中有，新目标中没有的合约，自动设置为0
-		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "{} is not in target, set to 0 automatically", code);
-
-		ExecuteUnitPtr unit = getUnit(code);
-		if (unit == NULL)
-			continue;
-
-		//unit->self()->set_position(code, 0);
-		// 如果配置了线程池，使用线程池并行处理
-		if (_pool)
+		std::vector<std::string> unmanagedHolds;
 		{
-			_pool->schedule([unit, code](){
-				unit->self()->set_position(code, 0);
-			});
+			std::lock_guard<std::mutex> lock(_position_state_mutex);
+			for (const std::string& code : _channel_holds)
+				if (_target_pos.find(code) == _target_pos.end())
+					unmanagedHolds.push_back(code);
 		}
-		else
+		for (const std::string& code : unmanagedHolds)
 		{
-			// 直接设置执行单元的目标仓位为0
-			unit->self()->set_position(code, 0);
-		}
-
-		// 更新内部目标仓位记录
-		pos = 0;
-	}
-
-	//如果开启了严格同步，则需要检查通道持仓
-	//如果通道持仓不在管理中，则直接平掉
-	if(_strict_sync)
-	{
-		for(const std::string& stdCode : _channel_holds)
-		{
-			auto it = _target_pos.find(stdCode.c_str());
-			if(it != _target_pos.end())
-				continue;
-
-			WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "{} is not in management, set to 0 due to strict sync mode", stdCode.c_str());
-
-			ExecuteUnitPtr unit = getUnit(stdCode.c_str());
-			if (unit == NULL)
-				continue;
-
-			if (_pool)
-			{
-				std::string code = stdCode.c_str();
-				_pool->schedule([unit, code]() {
-					unit->self()->set_position(code.c_str(), 0);
-				});
-			}
-			else
-			{
-				unit->self()->set_position(stdCode.c_str(), 0);
-			}
+			WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO,
+				"{} is not in management, set to 0 due to strict sync mode", code.c_str());
+			queuePositionTarget(code, 0.0, false, true);
 		}
 	}
 }
@@ -666,27 +1765,20 @@ void WtLocalExecuter::set_position(const wt_hashmap<std::string, double>& target
  */
 void WtLocalExecuter::on_tick(const char* stdCode, WTSTickData* newTick)
 {
-	// 尝试获取执行单元，但不自动创建
-	ExecuteUnitPtr unit = getUnit(stdCode, false);
-	if (unit == NULL)
+	IngressLease ingress(this);
+	if (!ingress)
 		return;
-
-	// 如果有线程池，则异步处理
-	if (_pool)
-	{
-		// 增加引用计数，防止在异步执行过程中被释放
+	if (stdCode == NULL || stdCode[0] == '\0')
+		return;
+	const std::string code = stdCode ? stdCode : "";
+	if (newTick != NULL)
 		newTick->retain();
-		_pool->schedule([unit, newTick](){
-			unit->self()->on_tick(newTick);
-			// 异步处理完成后释放
-			newTick->release();
-		});
-	}
-	else
-	{
-		// 直接同步处理
-		unit->self()->on_tick(newTick);
-	}
+	std::shared_ptr<WTSTickData> tickRef(newTick, [](WTSTickData* tick) {
+		if (tick != NULL)
+			tick->release();
+	});
+	auto callback = [tickRef](ExecuteUnit* targetUnit) { targetUnit->on_tick(tickRef.get()); };
+	(void)enqueueCallbackForCode(code, std::move(callback));
 }
 
 /**
@@ -701,25 +1793,16 @@ void WtLocalExecuter::on_tick(const char* stdCode, WTSTickData* newTick)
  */
 void WtLocalExecuter::on_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price)
 {
-	// 尝试获取执行单元，但不自动创建
-	ExecuteUnitPtr unit = getUnit(stdCode, false);
-	if (unit == NULL)
+	IngressLease ingress(this);
+	if (!ingress)
 		return;
-
-	// 如果有线程池，则异步处理
-	if (_pool)
-	{
-		// 需要复制字符串，因为在lambda中使用c_str()可能会导致内存问题
-		std::string code = stdCode;
-		_pool->schedule([localid, unit, code, isBuy, vol, price](){
-			unit->self()->on_trade(localid, code.c_str(), isBuy, vol, price);
-		});
-	}
-	else
-	{
-		// 直接同步处理
-		unit->self()->on_trade(localid, stdCode, isBuy, vol, price);
-	}
+	if (stdCode == NULL || stdCode[0] == '\0')
+		return;
+	const std::string code = stdCode;
+	auto callback = [localid, code, isBuy, vol, price](ExecuteUnit* targetUnit) {
+		targetUnit->on_trade(localid, code.c_str(), isBuy, vol, price);
+	};
+	(void)enqueueCallbackForCode(code, std::move(callback));
 }
 
 /**
@@ -734,27 +1817,19 @@ void WtLocalExecuter::on_trade(uint32_t localid, const char* stdCode, bool isBuy
  * @details 当订单状态变化时调用此函数，并将状态变化转发给相应的执行单元。
  * 如果启用了线程池，则异步处理订单状态。
  */
-void WtLocalExecuter::on_order(uint32_t localid, const char* stdCode, bool isBuy, double /*totalQty*/, double leftQty, double price, bool isCanceled /* = false */)
+void WtLocalExecuter::on_order(uint32_t localid, const char* stdCode, bool isBuy,
+	double /*totalQty*/, double leftQty, double price, bool isCanceled)
 {
-	// 尝试获取执行单元，但不自动创建
-	ExecuteUnitPtr unit = getUnit(stdCode, false);
-	if (unit == NULL)
+	IngressLease ingress(this);
+	if (!ingress)
 		return;
-
-	// 如果有线程池，则异步处理
-	if (_pool)
-	{
-		// 需要复制字符串，因为在lambda中使用c_str()可能会导致内存问题
-		std::string code = stdCode;
-		_pool->schedule([localid, unit, code, isBuy, leftQty, price, isCanceled](){
-			unit->self()->on_order(localid, code.c_str(), isBuy, leftQty, price, isCanceled);
-		});
-	}
-	else
-	{
-		// 直接同步处理
-		unit->self()->on_order(localid, stdCode, isBuy, leftQty, price, isCanceled);
-	}
+	if (stdCode == NULL || stdCode[0] == '\0')
+		return;
+	const std::string code = stdCode;
+	auto callback = [localid, code, isBuy, leftQty, price, isCanceled](ExecuteUnit* targetUnit) {
+		targetUnit->on_order(localid, code.c_str(), isBuy, leftQty, price, isCanceled);
+	};
+	(void)enqueueCallbackForCode(code, std::move(callback));
 }
 
 /**
@@ -768,26 +1843,17 @@ void WtLocalExecuter::on_order(uint32_t localid, const char* stdCode, bool isBuy
  */
 void WtLocalExecuter::on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message)
 {
-	// 尝试获取执行单元，但不自动创建
-	ExecuteUnitPtr unit = getUnit(stdCode, false);
-	if (unit == NULL)
+	IngressLease ingress(this);
+	if (!ingress)
 		return;
-
-	// 如果有线程池，则异步处理
-	if (_pool)
-	{
-		// 需要复制字符串，因为在lambda中使用c_str()可能会导致内存问题
-		std::string code = stdCode;
-		std::string msg = message;
-		_pool->schedule([unit, localid, code, bSuccess, msg](){
-			unit->self()->on_entrust(localid, code.c_str(), bSuccess, msg.c_str());
-		});
-	}
-	else
-	{
-		// 直接同步处理
-		unit->self()->on_entrust(localid, stdCode, bSuccess, message);
-	}
+	if (stdCode == NULL || stdCode[0] == '\0')
+		return;
+	const std::string code = stdCode;
+	const std::string msg = message ? message : "";
+	auto callback = [localid, code, bSuccess, msg](ExecuteUnit* targetUnit) {
+		targetUnit->on_entrust(localid, code.c_str(), bSuccess, msg.c_str());
+	};
+	(void)enqueueCallbackForCode(code, std::move(callback));
 }
 
 /**
@@ -797,30 +1863,32 @@ void WtLocalExecuter::on_entrust(uint32_t localid, const char* stdCode, bool bSu
  */
 void WtLocalExecuter::on_channel_ready()
 {
-	// 设置通道就绪状态
-	_channel_ready = true;
-	// 锁定执行单元容器以进行安全遍历
-	SpinLock lock(_mtx_units);
-	// 遍历所有执行单元
-	for (auto it = _unit_map.begin(); it != _unit_map.end(); it++)
+	IngressLease ingress(this);
+	if (!ingress)
+		return;
+	struct DrainTask
 	{
-		ExecuteUnitPtr& unitPtr = (ExecuteUnitPtr&)it->second;
-		if (unitPtr)
+		std::string code;
+		std::shared_ptr<UnitLifecycleState> state;
+	};
+	std::vector<DrainTask> drains;
+	{
+		SpinLock unitsLock(_mtx_units);
+		if (_channel_ready.exchange(true))
+			return;
+		const uint64_t epoch = _channel_epoch.fetch_add(1) + 1;
+		for (const auto& item : _unit_states)
 		{
-			// 如果有线程池，则异步处理
-			if (_pool)
-			{
-				_pool->schedule([unitPtr](){
-					unitPtr->self()->on_channel_ready();
-				});
-			}
-			else
-			{
-				// 直接同步处理
-				unitPtr->self()->on_channel_ready();
-			}
+			auto unitIt = _unit_map.find(item.first);
+			ExecuteUnitPtr unit = unitIt == _unit_map.end() ? ExecuteUnitPtr() : unitIt->second;
+			std::lock_guard<std::mutex> stateLock(item.second->mutex);
+			if (enqueueUnitCallbackLocked(item.second, unit,
+				[](ExecuteUnit* unit) { unit->on_channel_ready(); }, true, epoch))
+				drains.push_back({item.first, item.second});
 		}
 	}
+	for (const DrainTask& task : drains)
+		scheduleUnitCallbackDrain(task.code, task.state);
 }
 
 /**
@@ -830,30 +1898,32 @@ void WtLocalExecuter::on_channel_ready()
  */
 void WtLocalExecuter::on_channel_lost()
 {
-	// 设置通道断开状态
-	_channel_ready = false;
-	// 锁定执行单元容器以进行安全遍历
-	SpinLock lock(_mtx_units);
-	// 遍历所有执行单元
-	for (auto it = _unit_map.begin(); it != _unit_map.end(); it++)
+	IngressLease ingress(this);
+	if (!ingress)
+		return;
+	struct DrainTask
 	{
-		ExecuteUnitPtr& unitPtr = (ExecuteUnitPtr&)it->second;
-		if (unitPtr)
+		std::string code;
+		std::shared_ptr<UnitLifecycleState> state;
+	};
+	std::vector<DrainTask> drains;
+	{
+		SpinLock unitsLock(_mtx_units);
+		if (!_channel_ready.exchange(false))
+			return;
+		const uint64_t epoch = _channel_epoch.fetch_add(1) + 1;
+		for (const auto& item : _unit_states)
 		{
-			// 如果有线程池，则异步处理
-			if (_pool)
-			{
-				_pool->schedule([unitPtr](){
-					unitPtr->self()->on_channel_lost();
-				});
-			}
-			else
-			{
-				// 直接同步处理
-				unitPtr->self()->on_channel_lost();
-			}
+			auto unitIt = _unit_map.find(item.first);
+			ExecuteUnitPtr unit = unitIt == _unit_map.end() ? ExecuteUnitPtr() : unitIt->second;
+			std::lock_guard<std::mutex> stateLock(item.second->mutex);
+			if (enqueueUnitCallbackLocked(item.second, unit,
+				[](ExecuteUnit* unit) { unit->on_channel_lost(); }, true, epoch))
+				drains.push_back({item.first, item.second});
 		}
 	}
+	for (const DrainTask& task : drains)
+		scheduleUnitCallbackDrain(task.code, task.state);
 }
 
 /**
@@ -872,33 +1942,41 @@ void WtLocalExecuter::on_channel_lost()
  * @details 当收到账户资金变动消息时调用此函数，并将更新信息转发给所有执行单元。
  * 如果启用了线程池，则异步通知所有执行单元。
  */
-void WtLocalExecuter::on_account(const char* currency, double prebalance, double balance, double dynbalance, 
-	double avaliable, double closeprofit, double dynprofit, double margin, double fee, double deposit, double withdraw)
+void WtLocalExecuter::on_account(const char* currency, double prebalance, double balance,
+	double dynbalance, double avaliable, double closeprofit, double dynprofit, double margin,
+	double fee, double deposit, double withdraw)
 {
-	// 锁定执行单元容器以进行安全遍历
-	SpinLock lock(_mtx_units);
-	// 遍历所有执行单元
-	for (auto it = _unit_map.begin(); it != _unit_map.end(); it++)
+	IngressLease ingress(this);
+	if (!ingress)
+		return;
+	struct UnitTarget
 	{
-		ExecuteUnitPtr& unitPtr = (ExecuteUnitPtr&)it->second;
-		if (unitPtr)
+		std::string code;
+		std::shared_ptr<UnitLifecycleState> state;
+	};
+	std::vector<UnitTarget> drains;
+	const std::string cur = currency ? currency : "";
+	{
+		SpinLock unitsLock(_mtx_units);
+		drains.reserve(_unit_states.size());
+		for (const auto& item : _unit_states)
 		{
-			// 如果有线程池，则异步处理
-			if (_pool)
-			{
-				// 需要复制字符串，因为在lambda中使用c_str()可能会导致内存问题
-				std::string strCur = currency;
-				_pool->schedule([unitPtr, strCur, prebalance, balance, dynbalance, avaliable, closeprofit, dynprofit, margin, fee, deposit, withdraw]() {
-					unitPtr->self()->on_account(strCur.c_str(), prebalance, balance, dynbalance, avaliable, closeprofit, dynprofit, margin, fee, deposit, withdraw);
-				});
-			}
-			else
-			{
-				// 直接同步处理
-				unitPtr->self()->on_account(currency, prebalance, balance, dynbalance, avaliable, closeprofit, dynprofit, margin, fee, deposit, withdraw);
-			}
+			auto unitIt = _unit_map.find(item.first);
+			std::lock_guard<std::mutex> stateLock(item.second->mutex);
+			if (item.second->init_status == ExecUnitInitState::FAILED || item.second->callback_failed)
+				continue;
+			auto callback = [cur, prebalance, balance, dynbalance, avaliable, closeprofit,
+				dynprofit, margin, fee, deposit, withdraw](ExecuteUnit* targetUnit) {
+				targetUnit->on_account(cur.c_str(), prebalance, balance, dynbalance, avaliable,
+					closeprofit, dynprofit, margin, fee, deposit, withdraw);
+			};
+			const ExecuteUnitPtr unit = unitIt == _unit_map.end() ? ExecuteUnitPtr() : unitIt->second;
+			if (enqueueUnitCallbackLocked(item.second, unit, std::move(callback)))
+				drains.push_back({item.first, item.second});
 		}
 	}
+	for (const UnitTarget& target : drains)
+		scheduleUnitCallbackDrain(target.code, target.state);
 }
 
 /**
@@ -916,8 +1994,17 @@ void WtLocalExecuter::on_account(const char* currency, double prebalance, double
  */
 void WtLocalExecuter::on_position(const char* stdCode, bool /*isLong*/, double /*prevol*/, double /*preavail*/, double /*newvol*/, double /*newavail*/, uint32_t tradingday)
 {
+	IngressLease ingress(this);
+	if (!ingress)
+		return;
+    if (stdCode == NULL || stdCode[0] == '\0')
+        return;
+
     // 将合约添加到通道持仓集合中
-    _channel_holds.insert(stdCode);
+    {
+        std::lock_guard<std::mutex> lock(_position_state_mutex);
+        _channel_holds.insert(stdCode);
+    }
 
     /*
      *  By Wesley @ 2021.12.14
@@ -972,24 +2059,7 @@ void WtLocalExecuter::on_position(const char* stdCode, bool /*isLong*/, double /
 
     // 最后再进行自动清理
     WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Position of {}, as prev hot contract, will be cleared", stdCode);
-    // 获取执行单元
-    ExecuteUnitPtr unit = getUnit(stdCode);
-    if (unit)
-    {
-        // 如果有线程池，则异步处理
-        if (_pool)
-        {
-            std::string code = stdCode;
-            _pool->schedule([unit, code](){
-                unit->self()->clear_all_position(code.c_str());
-            });
-        }
-        else
-        {
-            // 直接同步处理
-            unit->self()->clear_all_position(stdCode);
-        }
-    }
+	queueClearPositionIntent(stdCode);
 }
 
 #pragma endregion 外部接口

@@ -4,14 +4,9 @@
  * 目标文件：src/ParserUDP/ParserUDP.cpp（458 行）
  *
  * 可达性口径：
- *  - `handle_read()/extract_buffer()/reconnect()/do_send()/subscribe()/doOnDisconnected()`
- *    全是私有成员，公开接口没有任何注入口；`connect()` 会真的 open/bind UDP 端口并
- *    new StdThread 跑 io_context（L254-266 + L120-171）。按门禁规则（不起线程、
- *    不绑真实端口、不 `#define private public`），报文体解析（UDP_MSG_PUSHTICK /
- *    0x201~0x203 四条分发）与「长度校验」本轮无法进入 —— 已记入 bugs 文档。
- *  - 本文件断言的都是「不需要 io_context 被驱动」就能观察到的行为：
- *    配置解析（无效地址返回初始化失败）、订阅集合幂等、Spi 替换告警、
- *    以及「提交后未 run io_context 时不得有事件回报」这条可证伪的 deferred 契约。
+ *  - 通过 ParserUDPExtractBufferTestPeer 使用生产类已声明的 friend seam 直接向私有
+ *    extract_buffer 注入内存报文；不创建 socket、不绑定端口、不启动线程。
+ *  - 覆盖 UDP 短帧和四类完整行情报文，同时保留配置、订阅、SPI 和状态用例。
  */
 #include <gtest/gtest.h>
 
@@ -24,9 +19,36 @@
 #include "ParserUDP/ParserUDP.h"
 
 #include "Includes/IBaseDataMgr.h"
+#include "Includes/WTSDataDef.hpp"
 #include "Includes/WTSVariant.hpp"
 
 USING_NS_WTP;
+
+// Friend seam for feeding complete or deliberately truncated datagrams to
+// the production parser without opening sockets or starting its I/O thread.
+struct ParserUDPExtractBufferTestPeer
+{
+	static constexpr uint32_t UDP_MSG_SUBSCRIBE = 0x100;
+	static constexpr uint32_t UDP_MSG_PUSHTICK = 0x200;
+	static constexpr uint32_t UDP_MSG_PUSHORDQUE = 0x201;
+	static constexpr uint32_t UDP_MSG_PUSHORDDTL = 0x202;
+	static constexpr uint32_t UDP_MSG_PUSHTRANS = 0x203;
+
+	static void feed_raw(ParserUDP& parser, const char* data, std::size_t length)
+	{
+		parser.extract_buffer(static_cast<uint32_t>(length), false, data);
+	}
+
+	template<typename T>
+	static void feed(ParserUDP& parser, uint32_t type, const T& payload,
+		std::size_t received_length = sizeof(uint32_t) + sizeof(T))
+	{
+		std::vector<char> frame(sizeof(uint32_t) + sizeof(T), 0);
+		std::memcpy(frame.data(), &type, sizeof(type));
+		std::memcpy(frame.data() + sizeof(type), &payload, sizeof(payload));
+		feed_raw(parser, frame.data(), received_length);
+	}
+};
 
 extern "C"
 {
@@ -49,6 +71,10 @@ namespace
 		uint32_t n_ordque_ = 0;
 		uint32_t n_trans_ = 0;
 		int last_event_ = -1;
+		WTSTickStruct last_tick_{};
+		WTSOrdDtlStruct last_orddtl_{};
+		WTSOrdQueStruct last_ordque_{};
+		WTSTransStruct last_trans_{};
 		std::vector<std::string> logs_;
 
 		virtual ~UdpSink() {}
@@ -65,15 +91,15 @@ namespace
 		}
 
 		virtual void handleQuote(WTSTickData* quote, uint32_t procFlag) override
-		{ (void)quote; (void)procFlag; ++n_quote_; }
+		{ (void)procFlag; ++n_quote_; last_tick_ = quote->getTickStruct(); }
 
 		virtual void handleSymbolList(const WTSArray* aySymbols) override { (void)aySymbols; ++n_symlist_; }
 
-		virtual void handleOrderDetail(WTSOrdDtlData* data) override { (void)data; ++n_orddtl_; }
+		virtual void handleOrderDetail(WTSOrdDtlData* data) override { ++n_orddtl_; last_orddtl_ = data->getOrdDtlStruct(); }
 
-		virtual void handleOrderQueue(WTSOrdQueData* data) override { (void)data; ++n_ordque_; }
+		virtual void handleOrderQueue(WTSOrdQueData* data) override { ++n_ordque_; last_ordque_ = data->getOrdQueStruct(); }
 
-		virtual void handleTransaction(WTSTransData* data) override { (void)data; ++n_trans_; }
+		virtual void handleTransaction(WTSTransData* data) override { ++n_trans_; last_trans_ = data->getTransStruct(); }
 	};
 
 	WTSVariant* make_cfg(const char* host, int bport, int sport, uint32_t gpsize)
@@ -265,10 +291,10 @@ TEST(t6_parserudp_state, release_and_disconnect_without_connect_are_safe)
 	UdpSink sink;
 	parser.registerSpi(&sink);
 
-	parser.release();		// L115-118：空实现
+	parser.release();		// 未连接时同步完成停止，不应产生 SPI 事件
 	EXPECT_FALSE(parser.isConnected());
 
-	// L268-281：_b_socket 为空 → 跳过 close/delete，只置 _stopped 并 post 事件
+	// 已停止状态下 disconnect 仍幂等成功，不重复投递事件。
 	EXPECT_TRUE(parser.disconnect());
 	EXPECT_TRUE(parser.disconnect());	// 重复断连仍然返回 true
 	EXPECT_FALSE(parser.isConnected());
@@ -276,12 +302,10 @@ TEST(t6_parserudp_state, release_and_disconnect_without_connect_are_safe)
 }
 
 /* ------------------------------------------------------------------ */
-/* 明确不进入的路径（整条 DISABLED_）                                     */
+/* UDP 行情报文长度与分发                                               */
 /* ------------------------------------------------------------------ */
 
-// 说明：connect() → reconnect(3) 会 new udp socket、bind(_broad_ep) 真实端口，
-// 并 new StdThread 跑 io_context（L254-266、L120-171）；违反「不绑真实端口/不起线程」，
-// 整条禁用。禁用原因不是「测不了」，而是本轮门禁不允许产生真实网络副作用。
+// 连接测试会绑定真实端口并启动 io_context worker，因此仍单独禁用。
 TEST(DISABLED_t6_parserudp_net, connect_binds_ports_and_starts_io_thread)
 {
 	ParserUDP parser;
@@ -300,11 +324,114 @@ TEST(DISABLED_t6_parserudp_net, connect_binds_ports_and_starts_io_thread)
 	parser.release();
 }
 
-// 说明：报文解析（extract_buffer，L357-441）与长度校验（handle_read L335-338）都是私有函数，
-// 且 _b_buffer/_s_buffer 也是私有成员；公开接口无法用内存 buffer 直接喂解析函数。
-// 本条只是把「需要 fake socket 注入点或把它们提为 protected」的诉求钉在用例清单里。
-TEST(DISABLED_t6_parserudp_net, extract_buffer_needs_a_seam_before_it_can_be_fed)
+TEST(t6_parserudp_packets, short_and_unknown_frames_are_ignored)
 {
 	ParserUDP parser;
-	SUCCEED() << "extract_buffer/handle_read 为私有，无注入点：见 bugs/T6_ctploader_mocker_udp.md";
+	UdpSink sink;
+	parser.registerSpi(&sink);
+	WTSVariant* cfg = make_cfg("239.0.0.1", 0, 0, 100);
+	ASSERT_TRUE(parser.init(cfg));
+	cfg->release();
+	CodeSet subs;
+	subs.insert("SHFE.ag2512");
+	parser.subscribe(subs);
+
+	const char short_header[sizeof(uint32_t) - 1] = { 0x00, 0x02, 0x00 };
+	ParserUDPExtractBufferTestPeer::feed_raw(parser, short_header, sizeof(short_header));
+	const uint32_t tick_type = ParserUDPExtractBufferTestPeer::UDP_MSG_PUSHTICK;
+	ParserUDPExtractBufferTestPeer::feed_raw(parser, reinterpret_cast<const char*>(&tick_type), sizeof(tick_type));
+
+	WTSTickStruct tick;
+	std::strcpy(tick.exchg, "SHFE");
+	std::strcpy(tick.code, "ag2512");
+	tick.price = 101.25;
+	ParserUDPExtractBufferTestPeer::feed(parser, ParserUDPExtractBufferTestPeer::UDP_MSG_PUSHTICK, tick,
+		sizeof(uint32_t) + sizeof(tick) - 1);
+
+	WTSOrdDtlStruct detail;
+	std::strcpy(detail.exchg, "SHFE");
+	std::strcpy(detail.code, "ag2512");
+	ParserUDPExtractBufferTestPeer::feed(parser, ParserUDPExtractBufferTestPeer::UDP_MSG_PUSHORDDTL, detail,
+		sizeof(uint32_t) + sizeof(detail) - 1);
+
+	WTSOrdQueStruct queue;
+	std::strcpy(queue.exchg, "SHFE");
+	std::strcpy(queue.code, "ag2512");
+	ParserUDPExtractBufferTestPeer::feed(parser, ParserUDPExtractBufferTestPeer::UDP_MSG_PUSHORDQUE, queue,
+		sizeof(uint32_t) + sizeof(queue) - 1);
+
+	WTSTransStruct transaction;
+	std::strcpy(transaction.exchg, "SHFE");
+	std::strcpy(transaction.code, "ag2512");
+	ParserUDPExtractBufferTestPeer::feed(parser, ParserUDPExtractBufferTestPeer::UDP_MSG_PUSHTRANS, transaction,
+		sizeof(uint32_t) + sizeof(transaction) - 1);
+	const uint32_t unknown_type = 0xdead;
+	ParserUDPExtractBufferTestPeer::feed_raw(parser, reinterpret_cast<const char*>(&unknown_type), sizeof(unknown_type));
+
+	EXPECT_EQ(0u, sink.n_quote_);
+	EXPECT_EQ(0u, sink.n_orddtl_);
+	EXPECT_EQ(0u, sink.n_ordque_);
+	EXPECT_EQ(0u, sink.n_trans_);
+}
+
+TEST(t6_parserudp_packets, complete_packets_dispatch_aligned_payload_fields)
+{
+	ParserUDP parser;
+	UdpSink sink;
+	parser.registerSpi(&sink);
+	WTSVariant* cfg = make_cfg("239.0.0.1", 0, 0, 100);
+	ASSERT_TRUE(parser.init(cfg));
+	cfg->release();
+	CodeSet subs;
+	subs.insert("SHFE.ag2512");
+	parser.subscribe(subs);
+
+	WTSTickStruct tick;
+	std::strcpy(tick.exchg, "SHFE");
+	std::strcpy(tick.code, "ag2512");
+	tick.price = 101.25;
+	ParserUDPExtractBufferTestPeer::feed(parser, ParserUDPExtractBufferTestPeer::UDP_MSG_PUSHTICK, tick,
+		sizeof(uint32_t) + sizeof(tick) - 1);
+	WTSTickStruct unterminated_code;
+	std::memset(&unterminated_code, 'X', sizeof(unterminated_code));
+	ParserUDPExtractBufferTestPeer::feed(parser, ParserUDPExtractBufferTestPeer::UDP_MSG_PUSHTICK, unterminated_code);
+	ParserUDPExtractBufferTestPeer::feed(parser, ParserUDPExtractBufferTestPeer::UDP_MSG_PUSHTICK, tick);
+	EXPECT_EQ(1u, sink.n_quote_);
+	EXPECT_DOUBLE_EQ(101.25, sink.last_tick_.price);
+
+	// Snapshot response packets use the subscribe type but retain the tick body.
+	tick.price = 101.75;
+	ParserUDPExtractBufferTestPeer::feed(parser, ParserUDPExtractBufferTestPeer::UDP_MSG_SUBSCRIBE, tick);
+	EXPECT_EQ(2u, sink.n_quote_);
+	EXPECT_DOUBLE_EQ(101.75, sink.last_tick_.price);
+
+	WTSOrdDtlStruct detail;
+	std::strcpy(detail.exchg, "SHFE");
+	std::strcpy(detail.code, "ag2512");
+	detail.price = 102.25;
+	detail.index = 42;
+	ParserUDPExtractBufferTestPeer::feed(parser, ParserUDPExtractBufferTestPeer::UDP_MSG_PUSHORDDTL, detail);
+	EXPECT_EQ(1u, sink.n_orddtl_);
+	EXPECT_DOUBLE_EQ(102.25, sink.last_orddtl_.price);
+	EXPECT_EQ(42u, sink.last_orddtl_.index);
+
+	WTSOrdQueStruct queue;
+	std::strcpy(queue.exchg, "SHFE");
+	std::strcpy(queue.code, "ag2512");
+	queue.price = 103.25;
+	queue.qsize = 3;
+	ParserUDPExtractBufferTestPeer::feed(parser, ParserUDPExtractBufferTestPeer::UDP_MSG_PUSHORDQUE, queue);
+	EXPECT_EQ(1u, sink.n_ordque_);
+	EXPECT_DOUBLE_EQ(103.25, sink.last_ordque_.price);
+	EXPECT_EQ(3u, sink.last_ordque_.qsize);
+
+	WTSTransStruct transaction;
+	std::strcpy(transaction.exchg, "SHFE");
+	std::strcpy(transaction.code, "ag2512");
+	transaction.price = 104.25;
+	transaction.index = 77;
+	ParserUDPExtractBufferTestPeer::feed(parser, ParserUDPExtractBufferTestPeer::UDP_MSG_PUSHTRANS, transaction);
+	EXPECT_EQ(1u, sink.n_trans_);
+	EXPECT_DOUBLE_EQ(104.25, sink.last_trans_.price);
+	EXPECT_EQ(77u, sink.last_trans_.index);
 }

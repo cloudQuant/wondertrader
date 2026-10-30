@@ -239,21 +239,36 @@ TEST(n03_action_policy, unrecognized_action_types_are_skipped)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 缺陷类整体隔离: 配置里没有任何名为 "default" 的规则组时,
-// getActionRules 先 find(gpName) 失败, 再 find("default") 仍然失败,
-// 随后的 it->second 是对 end() 迭代器解引用( NDEBUG 下 assert 被裁掉就是野指针),
-// 属于崩溃类. 与"pid 未映射""pid 为空串"是同一个缺陷类, 因此整组放进本 DISABLED_ 用例.
-// 详见 docs/迭代计划/迭代01/bugs/n03_uftcore_index.md
-TEST(DISABLED_n03_action_policy, no_default_group_deref_end_class)
+// 缺少 default 时初始化应拒绝配置；即使调用方继续查询，也应返回安全空规则。
+// 对照显式 default 组确认映射与 fallback 正常工作。
+TEST(n03_action_policy, missing_default_is_rejected_and_default_policy_works)
 {
 	N03TempDir tmp("policy_nodefault");
-	const std::string path = tmp.file("nodefault.json");
-	tmp.write(path, R"JSON({ "onlygroup": { "order":[{"action":"open","limit":1}], "filters":["SHFE.rb"] } })JSON");
+	const std::string invalidPath = tmp.file("nodefault.json");
+	tmp.write(invalidPath, R"JSON({ "onlygroup": { "order":[{"action":"open","limit":1}], "filters":["SHFE.rb"] } })JSON");
 
-	ActionPolicyMgr mgr;
-	ASSERT_TRUE(mgr.init(path.c_str()));
-	// 三类输入命中同一缺陷: 显式映射组不存在 / 未映射回退 default / 空串
-	mgr.getActionRules("SHFE.rb");
-	mgr.getActionRules("SSE.600000");
-	mgr.getActionRules("");
+	ActionPolicyMgr invalidMgr;
+	EXPECT_FALSE(invalidMgr.init(invalidPath.c_str()));
+	// WtUftRunner currently continues startup after logging init failure, so all
+	// lookup paths must remain safe and fail closed after the error.
+	EXPECT_TRUE(invalidMgr.getActionRules("SHFE.rb").empty());
+	EXPECT_TRUE(invalidMgr.getActionRules("SSE.600000").empty());
+	EXPECT_TRUE(invalidMgr.getActionRules("").empty());
+
+	const std::string validPath = tmp.file("with_default.json");
+	tmp.write(validPath, R"JSON({
+		"default": { "order":[{"action":"close","limit":7}] },
+		"onlygroup": { "order":[{"action":"open","limit":1}], "filters":["SHFE.rb"] }
+	})JSON");
+
+	ActionPolicyMgr validMgr;
+	ASSERT_TRUE(validMgr.init(validPath.c_str()));
+	const ActionRuleGroup& mapped = validMgr.getActionRules("SHFE.rb");
+	ASSERT_EQ(1u, mapped.size());
+	EXPECT_EQ(AT_Open, mapped[0]._atype);
+	EXPECT_EQ(1u, mapped[0]._limit);
+	const ActionRuleGroup& fallback = validMgr.getActionRules("SSE.600000");
+	ASSERT_EQ(1u, fallback.size());
+	EXPECT_EQ(AT_Close, fallback[0]._atype);
+	EXPECT_EQ(7u, fallback[0]._limit);
 }

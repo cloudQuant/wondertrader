@@ -16,6 +16,183 @@ const char* WEIGHT_ALGS[] =
 	"DynamicVolume"
 };
 
+namespace
+{
+	bool is_decimal_digit(char value)
+	{
+		return value >= '0' && value <= '9';
+	}
+
+	bool parse_weight_alg_string(const std::string& raw, uint32_t& weightAlg)
+	{
+		std::size_t pos = 0;
+		bool negative = false;
+		if (pos < raw.size() && (raw[pos] == '+' || raw[pos] == '-'))
+		{
+			negative = raw[pos] == '-';
+			++pos;
+		}
+
+		std::string digits;
+		while (pos < raw.size() && is_decimal_digit(raw[pos]))
+			digits.push_back(raw[pos++]);
+
+		std::size_t fractionalDigits = 0;
+		if (pos < raw.size() && raw[pos] == '.')
+		{
+			++pos;
+			while (pos < raw.size() && is_decimal_digit(raw[pos]))
+			{
+				digits.push_back(raw[pos++]);
+				++fractionalDigits;
+			}
+		}
+		if (digits.empty())
+			return false;
+
+		bool negativeExponent = false;
+		std::size_t exponentMagnitude = 0;
+		if (pos < raw.size() && (raw[pos] == 'e' || raw[pos] == 'E'))
+		{
+			++pos;
+			if (pos < raw.size() && (raw[pos] == '+' || raw[pos] == '-'))
+			{
+				negativeExponent = raw[pos] == '-';
+				++pos;
+			}
+
+			const std::size_t exponentLimit = raw.size();
+			bool hasExponentDigits = false;
+			while (pos < raw.size() && is_decimal_digit(raw[pos]))
+			{
+				hasExponentDigits = true;
+				const std::size_t digit = static_cast<std::size_t>(raw[pos++] - '0');
+				if (exponentMagnitude > exponentLimit / 10 ||
+					(exponentMagnitude == exponentLimit / 10 && digit > exponentLimit % 10))
+					exponentMagnitude = exponentLimit;
+				else
+					exponentMagnitude = exponentMagnitude * 10 + digit;
+			}
+			if (!hasExponentDigits)
+				return false;
+		}
+		if (pos != raw.size())
+			return false;
+
+		const std::size_t firstNonZero = digits.find_first_not_of('0');
+		if (firstNonZero == std::string::npos)
+		{
+			weightAlg = 0;
+			return true;
+		}
+		digits.erase(0, firstNonZero);
+		if (negative)
+			return false;
+
+		std::size_t scale = 0;
+		if (negativeExponent)
+		{
+			if (fractionalDigits >= digits.size() || exponentMagnitude >= digits.size() - fractionalDigits)
+				return false;
+			scale = fractionalDigits + exponentMagnitude;
+		}
+		else if (exponentMagnitude >= fractionalDigits)
+		{
+			if (exponentMagnitude != fractionalDigits)
+				return false;
+		}
+		else
+		{
+			scale = fractionalDigits - exponentMagnitude;
+		}
+
+		if (scale >= digits.size())
+			return false;
+		if (scale > 0)
+		{
+			const std::size_t integerEnd = digits.size() - scale;
+			for (std::size_t i = integerEnd; i < digits.size(); ++i)
+			{
+				if (digits[i] != '0')
+					return false;
+			}
+			digits.resize(integerEnd);
+		}
+
+		if (digits == "1")
+			weightAlg = 1;
+		else if (digits == "2")
+			weightAlg = 2;
+		else
+			return false;
+		return true;
+	}
+
+	bool parse_supported_weight_alg(WTSVariant* config, uint32_t& weightAlg)
+	{
+		WTSVariant* value = config->get("weight_alg");
+		if (value == NULL)
+		{
+			// Preserve the old getUInt32 default when the optional field is absent.
+			weightAlg = 0;
+			return true;
+		}
+
+		switch (value->type())
+		{
+		case WTSVariant::VT_Int32:
+		{
+			const int32_t raw = value->asInt32();
+			if (raw < 0 || raw > 2)
+				return false;
+			weightAlg = static_cast<uint32_t>(raw);
+			return true;
+		}
+		case WTSVariant::VT_Uint32:
+		{
+			const uint32_t raw = value->asUInt32();
+			if (raw > 2)
+				return false;
+			weightAlg = raw;
+			return true;
+		}
+		case WTSVariant::VT_Int64:
+		{
+			const int64_t raw = value->asInt64();
+			if (raw < 0 || raw > 2)
+				return false;
+			weightAlg = static_cast<uint32_t>(raw);
+			return true;
+		}
+		case WTSVariant::VT_Uint64:
+		{
+			const uint64_t raw = value->asUInt64();
+			if (raw > 2)
+				return false;
+			weightAlg = static_cast<uint32_t>(raw);
+			return true;
+		}
+		case WTSVariant::VT_Real:
+		{
+			const double raw = value->asDouble();
+			if (raw == 0.0 || raw == 1.0 || raw == 2.0)
+			{
+				weightAlg = static_cast<uint32_t>(raw);
+				return true;
+			}
+			return false;
+		}
+		case WTSVariant::VT_String:
+		{
+			// Preserve exact decimal/scientific integer strings without floating-point rounding.
+			return parse_weight_alg_string(value->asString(), weightAlg);
+		}
+		default:
+			return false;
+		}
+	}
+}
+
 extern const char* FACT_NAME;
 
 const char* WtBlkIdxWorker::get_fact_name()
@@ -27,6 +204,16 @@ bool WtBlkIdxWorker::init(WTSVariant* config)
 {
 	if (config == NULL)
 		return false;
+
+	// Validate before resolving contracts or subscribing to constituent ticks.
+	uint32_t weightAlg = 0;
+	if (!parse_supported_weight_alg(config, weightAlg))
+	{
+		if (_factory != NULL)
+			_factory->output_log(LL_ERROR, fmtutil::format("[{}] Invalid block-index weight algorithm; expected 0, 1, or 2", _id));
+		return false;
+	}
+	_weight_alg = weightAlg;
 
 	_exchg = config->getCString("exchg");
 	_code = config->getCString("code");
@@ -49,9 +236,6 @@ bool WtBlkIdxWorker::init(WTSVariant* config)
 		if (strlen(cInfo._ruletag) > 0)
 			_trigger = fmt::format("{}.{}", cInfo._exchg, hotMgr->getCustomRawCode(cInfo._ruletag, cInfo.stdCommID()));
 	}
-
-	//权重算法
-	_weight_alg = config->getUInt32("weight_alg");
 
 	WTSVariant* cfgComms = config->get("commodities");
 	WTSVariant* cfgCodes = config->get("codes");
@@ -295,6 +479,12 @@ void WtBlkIdxWorker::generate_tick()
 			}
 		}
 	}
+
+	// Dynamic weighting needs a non-zero open-interest or volume base. A
+	// zero-activity snapshot has no defined index price, so do not publish it.
+	// Leave the cache untouched; a later valid snapshot can still initialize it.
+	if ((_weight_alg == 1 || _weight_alg == 2) && total_base == 0.0)
+		return;
 
 	//数据做标准化
 	double index = total_value / total_base / total_weight * _stand_scale;

@@ -11,6 +11,10 @@
  *          是WonderTrader回测系统与外部组件交互的核心接口
  */
 #pragma once
+#include <condition_variable>
+#include <mutex>
+#include <string>
+#include <thread>
 #include "PorterDefs.h"
 #include "../WtBtCore/EventNotifier.h"
 #include "../WtBtCore/HisDataReplayer.h"
@@ -110,7 +114,8 @@ public:
 	 * @param uDate 日期，格式为YYYYMMDD
 	 * @param cb Tick数据读取回调函数
 	 * @return 是否成功加载
-	 * @details 重写自 IBtDataLoader 接口，用于加载指定日期的原始Tick数据
+	 * @details 重写自 IBtDataLoader 接口，用于加载指定日期的原始Tick数据。外部 loader 必须在返回前同步
+	 *          调用 feedRawTicks；不得保留 obj、cb 或数据数组指针。异步交付需要版本化生命周期接口。
 	 */
 	virtual bool loadRawHisTicks(void* obj, const char* stdCode, uint32_t uDate, FuncReadTicks cb) override;
 
@@ -135,7 +140,9 @@ public:
 	 * @brief 输入原始Tick数据
 	 * @param ticks Tick数据数组
 	 * @param count 数据数量
-	 * @details 用于将原始Tick数据直接输入到回测引擎中，通常用于实时数据或高频策略测试
+	 * @details 用于将原始Tick数据直接输入到回测引擎中，通常用于实时数据或高频策略测试。仅从
+	 *          loadRawHisTicks 的同步 loader 调用期间使用；ticks 只在本次调用中读取。该路径不重新
+	 *          获取 _feed_mtx，因为 loader 调用期间该锁已持有。
 	 */
 	void feedRawTicks(WTSTickStruct* ticks, uint32_t count);
 	/**
@@ -213,6 +220,7 @@ public:
 	 * @param bAutoTrans 是否自动转存数据，默认为true
 	 * @details 注册外部数据加载器，允许回测引擎从自定义数据源加载数据
 	 *          通过这种方式，可以将回测引擎与不同的数据来源集成，如数据库、网络或自定义文件格式
+	 *          tickLoader 必须在返回前同步调用 feedRawTicks；不得保存本次调用的 callback 状态或数据数组。
 	 */
 	void		registerExtDataLoader(FuncLoadFnlBars fnlBarLoader, FuncLoadRawBars rawBarLoader, FuncLoadAdjFactors fctLoader, FuncLoadRawTicks tickLoader, bool bAutoTrans = true)
 	{
@@ -440,6 +448,7 @@ public:
 	 *          在调用init方法之后，run方法之前必须调用此方法进行配置
 	 */
 	void	config(const char* cfgFile, bool isFile = true);
+	bool	config_v2(const char* cfgFile, bool isFile, std::string* error);
 	/**
 	 * @brief 运行回测引擎
 	 * @param bNeedDump 是否需要输出详细回测数据，默认为false
@@ -596,6 +605,15 @@ public:
 	}
 
 private:
+	bool isReplayThread() const;
+	void requestReplayStop(bool releaseRequested);
+	void finishReplayRun();
+	void waitForReplayRun();
+	bool canStopExecutionMocker();
+	bool quiesceAndDestroyExecMocker(std::string* error);
+	bool finalizeRelease(std::string* error);
+	void finalizeDeferredReleaseAtSyncBoundary();
+
 	FuncStraInitCallback	_cb_cta_init;
 	FuncSessionEvtCallback	_cb_cta_sessevt;
 	FuncStraTickCallback	_cb_cta_tick;
@@ -640,7 +658,15 @@ private:
 	EventNotifier	_notifier;
 
 	bool			_inited;
+	bool			_config_failed_permanently;
 	bool			_running;
+	bool			_release_requested;
+	bool			_released;
+	mutable std::mutex _lifecycle_mutex;
+	std::condition_variable _lifecycle_changed;
+	std::mutex _lifecycle_control_mutex;
+	std::mutex _exec_mocker_lifecycle_mutex;
+	std::thread::id _replay_thread_id;
 
 	StdThreadPtr	_worker;
 	bool			_async;

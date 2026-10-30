@@ -1,0 +1,44 @@
+$ cd /tmp && /tmp/wt_r16_15_gtest --gtest_filter='r16_boostfile.*' --gtest_output=xml:/tmp/wt-r16-15-gtest.xml
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = r16_boostfile.*
+[==========] Running 16 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 16 tests from r16_boostfile
+[ RUN      ] r16_boostfile.fresh_handle_is_invalid_and_close_is_idempotent
+[       OK ] r16_boostfile.fresh_handle_is_invalid_and_close_is_idempotent (0 ms)
+[ RUN      ] r16_boostfile.create_new_file_truncates_to_zero
+[       OK ] r16_boostfile.create_new_file_truncates_to_zero (1 ms)
+[ RUN      ] r16_boostfile.create_new_file_on_existing_clears_content
+[       OK ] r16_boostfile.create_new_file_on_existing_clears_content (1 ms)
+[ RUN      ] r16_boostfile.open_existing_missing_returns_false
+[       OK ] r16_boostfile.open_existing_missing_returns_false (1 ms)
+[ RUN      ] r16_boostfile.seek_begin_current_end_and_pointer
+[       OK ] r16_boostfile.seek_begin_current_end_and_pointer (1 ms)
+[ RUN      ] r16_boostfile.write_after_truncate_shrinks_file
+[       OK ] r16_boostfile.write_after_truncate_shrinks_file (1 ms)
+[ RUN      ] r16_boostfile.read_file_exact_length_true_short_read_false
+[       OK ] r16_boostfile.read_file_exact_length_true_short_read_false (1 ms)
+[ RUN      ] r16_boostfile.read_exact_chunking_preserves_lengths_above_4gib
+[       OK ] r16_boostfile.read_exact_chunking_preserves_lengths_above_4gib (0 ms)
+[ RUN      ] r16_boostfile.read_exact_chunking_retries_short_reads_and_rejects_eof
+[       OK ] r16_boostfile.read_exact_chunking_retries_short_reads_and_rejects_eof (0 ms)
+[ RUN      ] r16_boostfile.read_from_closed_handle_reports_failure
+[       OK ] r16_boostfile.read_from_closed_handle_reports_failure (0 ms)
+[ RUN      ] r16_boostfile.write_to_closed_handle_fails
+[       OK ] r16_boostfile.write_to_closed_handle_fails (1 ms)
+[ RUN      ] r16_boostfile.static_write_and_read_file_contents_roundtrip
+[       OK ] r16_boostfile.static_write_and_read_file_contents_roundtrip (2 ms)
+[ RUN      ] r16_boostfile.static_read_file_contents_preserves_binary_bytes
+[       OK ] r16_boostfile.static_read_file_contents_preserves_binary_bytes (1 ms)
+[ RUN      ] r16_boostfile.read_file_contents_false_for_missing_or_empty
+[       OK ] r16_boostfile.read_file_contents_false_for_missing_or_empty (1 ms)
+[ RUN      ] r16_boostfile.delete_file_true_then_false
+[       OK ] r16_boostfile.delete_file_true_then_false (0 ms)
+[ RUN      ] r16_boostfile.create_or_open_keeps_existing_size
+[       OK ] r16_boostfile.create_or_open_keeps_existing_size (1 ms)
+[----------] 16 tests from r16_boostfile (17 ms total)
+
+[----------] Global test environment tear-down
+[==========] 16 tests from 1 test suite ran. (17 ms total)
+[  PASSED  ] 16 tests.
+exit_code=0

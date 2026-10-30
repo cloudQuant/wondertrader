@@ -113,11 +113,8 @@ static const uint32_t R4_M1_934 = 3301030934u;
 //////////////////////////////////////////////////////////////////////////
 // 1. tick 库：键 =（交易日, 偏移时间），值 = 完整 WTSTickStruct
 //    正确合同是四个输入 tick 都以各自的（交易日, 偏移时间）键完整落盘。
-//    禁用原因：writeTick -> pushTask 读取未初始化的 _async_task；new_writer_zeroed()
-//    的同尺寸堆块技巧不能保证成员已初始化，故该危险写入路径暂不运行。
-//    在提供确定的同步测试接缝或修好 BUG-R4-BUG-01 后运行；正确 oracle 可复现 BUG-R4-BUG-02。
 //////////////////////////////////////////////////////////////////////////
-TEST_F(R4WriterADTest, DISABLED_TickDbStoresAllTradingDateKeyedRecords)
+TEST_F(R4WriterADTest, TickDbStoresAllTradingDateKeyedRecords)
 {
 	WTSVariant* cfg = make_writer_cfg(_root.string(), 1000, false, true, true, true);
 	init_writer(cfg);
@@ -226,11 +223,8 @@ TEST_F(R4WriterADTest, EachCodeGetsItsOwnTickDbDirectory)
 //////////////////////////////////////////////////////////////////////////
 // 4. m1 bar 滚动入库：键 = bar.time，值 = 完成的那根 bar
 //    正确合同：五个不同时刻形成四根已完成分钟线，键从 09:31 到 09:34。
-//    禁用原因同 tick 用例：writeTick -> pushTask 读取未初始化的 _async_task；
-//    new_writer_zeroed() 不能保证成员初始化，因此暂不执行落盘路径。提供确定的同步
-//    测试接缝或修好 BUG-R4-BUG-01 后运行；正确 oracle 可复现 BUG-R4-BUG-02。
 //////////////////////////////////////////////////////////////////////////
-TEST_F(R4WriterADTest, DISABLED_MinuteBarRolloverPipesAllCompletedBarsIntoMin1Db)
+TEST_F(R4WriterADTest, MinuteBarRolloverPipesAllCompletedBarsIntoMin1Db)
 {
 	WTSVariant* cfg = make_writer_cfg(_root.string(), 1000, true, false, true, true);
 	init_writer(cfg);
@@ -270,10 +264,8 @@ TEST_F(R4WriterADTest, DISABLED_MinuteBarRolloverPipesAllCompletedBarsIntoMin1Db
 
 //////////////////////////////////////////////////////////////////////////
 // 5. d1 bar 滚动入库：键 = bar.date；验证同日 volume/money 只累加一次。
-// BLOCKED by BUG-R4-BUG-01: writeTick -> pushTask reads uninitialized _async_task.
-// Enable only after _async_task is initialized deterministically or a safe test seam avoids that read.
 //////////////////////////////////////////////////////////////////////////
-TEST_F(R4WriterADTest, DISABLED_DayBarRolloverPipesIntoDayDbUsesCorrectVolumeMoneyBlockedByUninitializedAsyncTask)
+TEST_F(R4WriterADTest, DayBarRolloverPipesIntoDayDbUsesCorrectVolumeMoney)
 {
 	WTSVariant* cfg = make_writer_cfg(_root.string(), 1000, true, true, true, false);
 	init_writer(cfg);
@@ -432,14 +424,6 @@ TEST_F(R4WriterADTest, BumpedActionTimeIsPersistedToTickDb)
 	EXPECT_EQ(k1->_time, be32(93000200u));
 	const WTSTickStruct* t1 = (const WTSTickStruct*)rows[1]._val.data();
 	EXPECT_EQ(t1->action_time, 93000200u);
-}
-
-//////////////////////////////////////////////////////////////////////////
-// 10. zero-groupsize write probe remains blocked until R4-BUG-01 is fixed.
-//////////////////////////////////////////////////////////////////////////
-TEST_F(R4WriterADTest, DISABLED_GroupSizeZeroWriteProbeBlockedByAsyncTaskInitialization)
-{
-	GTEST_SKIP() << "Blocked until R4-BUG-01 initializes _async_task before writeTick is exercised.";
 }
 
 //////////////////////////////////////////////////////////////////////////

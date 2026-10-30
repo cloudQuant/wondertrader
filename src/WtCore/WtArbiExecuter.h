@@ -11,10 +11,20 @@
 #pragma once
 #include "ITrdNotifySink.h"
 #include "IExecCommand.h"
+#include "ExecCommandQuiesce.h"
+#include "ExecUnitInitStatus.h"
 #include "WtExecuterFactory.h"
 #include "../Includes/ExecuteDefs.h"
 #include <Share/threadpool.hpp>
 #include "../Share/SpinMutex.hpp"
+#include <atomic>
+#include <condition_variable>
+#include <deque>
+#include <functional>
+#include <map>
+#include <mutex>
+#include <thread>
+#include <vector>
 
 NS_WTP_BEGIN
 class WTSVariant;
@@ -28,7 +38,8 @@ class IHotMgr;
  * \details 继承自ExecuteContext、ITrdNotifySink和IExecCommand，实现执行环境、交易通知和执行命令接口
  */
 class WtArbiExecuter : public ExecuteContext,
-	public ITrdNotifySink, public IExecCommand
+		public ITrdNotifySink, public IExecCommand, public IExecUnitInitStatusProvider,
+		public IExecCommandQuiesce, public IExecCommandQuiesceStages
 {
 public:
 	/*!
@@ -60,7 +71,117 @@ public:
 	 */
 	void setTrader(TraderAdapter* adapter);
 
+	ExecUnitInitStatus queryUnitInitStatus(const char* stdCode) const override;
+	ExecUnitInitClearResult clearFailedUnitInitStatus(const char* stdCode) override;
+	void requestQuiesce() override;
+	bool waitQuiesced() override;
+	bool canWaitQuiescedOnCurrentThread() const override;
+	bool preflightQuiesceOnCurrentThread() const override;
+	WtExecuterFactory* quiesceFactory() const override;
+	bool drainHostQuiesced() override;
+	bool snapshotQuiescePluginOwners(std::vector<ExecQuiesceOwnerPtr>& out) const override;
+	bool completeQuiesceAfterGlobalPluginWait() override;
+
 private:
+	friend class WtArbiExecuterTestAccess;
+	// Stack-resident markers linked through thread-local state avoid allocation
+	// while accepting ingress or entering a callback drain.
+	struct QuiesceThreadMarker
+	{
+		const WtArbiExecuter* owner;
+		QuiesceThreadMarker* previous;
+	};
+	static QuiesceThreadMarker*& currentQuiesceMarker() noexcept;
+	class QuiesceIngress
+	{
+	public:
+		explicit QuiesceIngress(WtArbiExecuter* owner);
+		~QuiesceIngress();
+		QuiesceIngress(const QuiesceIngress&) = delete;
+		QuiesceIngress& operator=(const QuiesceIngress&) = delete;
+		explicit operator bool() const { return _accepted; }
+	private:
+		WtArbiExecuter* _owner;
+		bool _accepted;
+		QuiesceThreadMarker _marker;
+	};
+	class QuiesceDrainScope
+	{
+	public:
+		explicit QuiesceDrainScope(WtArbiExecuter* owner) noexcept;
+		~QuiesceDrainScope();
+		QuiesceDrainScope(const QuiesceDrainScope&) = delete;
+		QuiesceDrainScope& operator=(const QuiesceDrainScope&) = delete;
+	private:
+		WtArbiExecuter* _owner;
+		QuiesceThreadMarker _marker;
+	};
+	bool enterQuiesceIngress(QuiesceThreadMarker& marker);
+	void leaveQuiesceIngress(QuiesceThreadMarker& marker);
+	void reserveQuiesceDrain();
+	void finishQuiesceDrain();
+	void enterQuiesceCallback(QuiesceThreadMarker& marker) noexcept;
+	void leaveQuiesceCallback(QuiesceThreadMarker& marker) noexcept;
+	bool isOnQuiesceThread() const noexcept;
+	std::vector<ExecuteUnitPtr> snapshotQuiesceUnits() const;
+	struct UnitLifecycleState
+	{
+		std::mutex mutex;
+		std::condition_variable condition;
+		std::thread::id creation_owner;
+		bool creation_complete = false;
+		ExecuteUnitPtr result;
+		struct Event
+		{
+			std::function<void(ExecuteUnit*)> callback;
+			bool channel_ready = false;
+			uint64_t channel_epoch = 0;
+			bool target_update = false;
+			uint64_t position_sequence = 0;
+			uint64_t init_generation = 0;
+		};
+		std::deque<Event> events;
+		bool callback_active = false;
+		bool callback_drain_started = false;
+		std::thread::id callback_owner;
+		bool callback_failed = false;
+		bool side_effects_possible = false;
+		ExecUnitInitState init_status = ExecUnitInitState::INITIALIZING;
+		uint64_t init_generation = 0;
+		std::string code;
+		// A failed initialized plugin stays pinned here for quiescence even when
+		// result is cleared to keep getUnit() from exposing a failed unit.
+		ExecuteUnitPtr retained_unit;
+		uint64_t initial_target_sequence = 0;
+		uint32_t waiting_callers = 0;
+		std::string init_error;
+	};
+	void failUnitDrain(const ExecuteUnitPtr& unit,
+		const std::shared_ptr<UnitLifecycleState>& state, const char* reason) noexcept;
+	bool appendUnitEvent(const std::shared_ptr<UnitLifecycleState>& state,
+		const UnitLifecycleState::Event& event);
+	bool prependUnitEvent(const std::shared_ptr<UnitLifecycleState>& state,
+		const UnitLifecycleState::Event& event);
+	void kickUnitEventDrain(const ExecuteUnitPtr& unit,
+		const std::shared_ptr<UnitLifecycleState>& state, bool shouldDrain);
+	void enqueueUnitEvent(const ExecuteUnitPtr& unit,
+		const std::shared_ptr<UnitLifecycleState>& state,
+		const std::function<void(ExecuteUnit*)>& callback);
+	void enqueueStateEvent(const std::shared_ptr<UnitLifecycleState>& state,
+		const std::function<void(ExecuteUnit*)>& callback);
+	void drainUnitEvents(const ExecuteUnitPtr& unit,
+		const std::shared_ptr<UnitLifecycleState>& state, bool reserved = false);
+	std::shared_ptr<UnitLifecycleState> getUnitState(const char* stdCode);
+	uint64_t beginPositionBatch();
+	void set_position_with_sequence(const wt_hashmap<std::string, double>& targets,
+		uint64_t sequence);
+	std::vector<std::string> snapshotMissingTargets(
+		const wt_hashmap<std::string, double>& targets);
+	void clearMissingTargets(const std::vector<std::string>& codes,
+		const wt_hashmap<std::string, double>& targets, uint64_t sequence);
+	std::vector<std::string> snapshotUnmanagedChannelHolds();
+	void clearUnmanagedChannelHolds(const std::vector<std::string>& codes, uint64_t sequence);
+
 	/*!
 	 * \brief 获取单元执行器
 	 * \param code 合约代码
@@ -298,6 +419,7 @@ private:
 	 * \details 存储合约代码到执行单元的映射关系
 	 */
 	ExecuteUnitMap		_unit_map;
+	std::map<std::string, std::shared_ptr<UnitLifecycleState>> _unit_states;
 
 	/*!
 	 * \brief 交易适配器指针
@@ -345,13 +467,15 @@ private:
 	 * \brief 交易通道是否就绪
 	 * \details 标记当前交易通道的连接状态
 	 */
-	bool				_channel_ready;
+	std::atomic<bool>	_channel_ready;
 
 		/*!
 	 * \brief 单元互斥锁
 	 * \details 用于保护执行单元映射的线程安全访问
 	 */
-	SpinMutex			_mtx_units;
+	mutable SpinMutex	_mtx_units;
+	uint64_t			_next_unit_init_generation = 1;
+	uint64_t			_channel_epoch = 0;
 
 		/*!
 	 * \brief 代码组结构体
@@ -417,6 +541,11 @@ private:
 	 * \details 存储合约代码到目标仓位的映射关系
 	 */
 	wt_hashmap<std::string, double> _target_pos;
+	mutable std::mutex _mtx_positions;
+	std::map<std::string, uint64_t> _target_update_sequences;
+	std::map<std::string, bool> _target_dispatch_allowed;
+	uint64_t _next_position_sequence = 1;
+	uint64_t _latest_position_batch_sequence = 0;
 
 		/*!
 	 * \brief 线程池指针类型定义
@@ -428,6 +557,19 @@ private:
 	 * \details 用于执行异步任务的线程池
 	 */
 	ThreadPoolPtr		_pool;
+
+	// requestQuiesce closes public event admission for unrelated callers.
+	// Reentrant producer calls on an already accepted ingress/callback stack
+	// remain part of that work and are included in its drain reservation.
+	mutable std::mutex _quiesce_mutex;
+	std::condition_variable _quiesce_condition;
+	std::atomic<bool> _quiesce_requested{ false };
+	std::atomic<bool> _quiesce_incomplete{ false };
+	size_t _quiesce_active_ingress = 0;
+	size_t _quiesce_active_drains = 0;
+	bool _quiesce_snapshot_ready = false;
+	bool _quiesce_plugins_completed = false;
+	std::vector<ExecuteUnitPtr> _quiesce_units;
 };
 
 /*!

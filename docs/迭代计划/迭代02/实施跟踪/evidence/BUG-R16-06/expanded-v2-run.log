@@ -1,0 +1,177 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 78 tests from 5 test suites.
+[----------] Global test environment set-up.
+[----------] 12 tests from r16_inihelper
+[ RUN      ] r16_inihelper.load_sets_loaded_flag
+[       OK ] r16_inihelper.load_sets_loaded_flag (0 ms)
+[ RUN      ] r16_inihelper.read_string_int_double_bool_from_loaded_file
+[       OK ] r16_inihelper.read_string_int_double_bool_from_loaded_file (0 ms)
+[ RUN      ] r16_inihelper.read_returns_default_when_missing_or_unparsable
+[       OK ] r16_inihelper.read_returns_default_when_missing_or_unparsable (0 ms)
+[ RUN      ] r16_inihelper.read_sections_and_key_arrays
+[       OK ] r16_inihelper.read_sections_and_key_arrays (1 ms)
+[ RUN      ] r16_inihelper.write_then_save_then_reload_roundtrip
+[       OK ] r16_inihelper.write_then_save_then_reload_roundtrip (0 ms)
+[ RUN      ] r16_inihelper.save_without_filename_falls_back_to_load_path
+[       OK ] r16_inihelper.save_without_filename_falls_back_to_load_path (0 ms)
+[ RUN      ] r16_inihelper.remove_value_and_remove_section
+[       OK ] r16_inihelper.remove_value_and_remove_section (0 ms)
+[ RUN      ] r16_inihelper.write_overwrites_existing_value
+[       OK ] r16_inihelper.write_overwrites_existing_value (0 ms)
+[ RUN      ] r16_inihelper.load_missing_file_does_not_mark_loaded
+[       OK ] r16_inihelper.load_missing_file_does_not_mark_loaded (0 ms)
+[ RUN      ] r16_inihelper.load_invalid_file_does_not_mark_loaded
+[       OK ] r16_inihelper.load_invalid_file_does_not_mark_loaded (1 ms)
+[ RUN      ] r16_inihelper.load_failure_can_be_retried_successfully
+[       OK ] r16_inihelper.load_failure_can_be_retried_successfully (1 ms)
+[ RUN      ] r16_inihelper.long_distinct_section_keys_keep_independent_values
+[       OK ] r16_inihelper.long_distinct_section_keys_keep_independent_values (0 ms)
+[----------] 12 tests from r16_inihelper (10 ms total)
+
+[----------] 12 tests from r16_boostfile
+[ RUN      ] r16_boostfile.fresh_handle_is_invalid_and_close_is_idempotent
+[       OK ] r16_boostfile.fresh_handle_is_invalid_and_close_is_idempotent (0 ms)
+[ RUN      ] r16_boostfile.create_new_file_truncates_to_zero
+[       OK ] r16_boostfile.create_new_file_truncates_to_zero (0 ms)
+[ RUN      ] r16_boostfile.create_new_file_on_existing_clears_content
+[       OK ] r16_boostfile.create_new_file_on_existing_clears_content (0 ms)
+[ RUN      ] r16_boostfile.open_existing_missing_returns_false
+[       OK ] r16_boostfile.open_existing_missing_returns_false (0 ms)
+[ RUN      ] r16_boostfile.seek_begin_current_end_and_pointer
+[       OK ] r16_boostfile.seek_begin_current_end_and_pointer (0 ms)
+[ RUN      ] r16_boostfile.write_after_truncate_shrinks_file
+[       OK ] r16_boostfile.write_after_truncate_shrinks_file (0 ms)
+[ RUN      ] r16_boostfile.read_file_exact_length_true_short_read_false
+[       OK ] r16_boostfile.read_file_exact_length_true_short_read_false (0 ms)
+[ RUN      ] r16_boostfile.write_to_closed_handle_fails
+[       OK ] r16_boostfile.write_to_closed_handle_fails (0 ms)
+[ RUN      ] r16_boostfile.static_write_and_read_file_contents_roundtrip
+[       OK ] r16_boostfile.static_write_and_read_file_contents_roundtrip (1 ms)
+[ RUN      ] r16_boostfile.read_file_contents_false_for_missing_or_empty
+[       OK ] r16_boostfile.read_file_contents_false_for_missing_or_empty (0 ms)
+[ RUN      ] r16_boostfile.delete_file_true_then_false
+[       OK ] r16_boostfile.delete_file_true_then_false (0 ms)
+[ RUN      ] r16_boostfile.create_or_open_keeps_existing_size
+[       OK ] r16_boostfile.create_or_open_keeps_existing_size (0 ms)
+[----------] 12 tests from r16_boostfile (7 ms total)
+
+[----------] 24 tests from r16_strutil
+[ RUN      ] r16_strutil.trim_inplace_left_only_keeps_right_ws
+[       OK ] r16_strutil.trim_inplace_left_only_keeps_right_ws (0 ms)
+[ RUN      ] r16_strutil.trim_inplace_right_only_keeps_left_ws
+[       OK ] r16_strutil.trim_inplace_right_only_keeps_left_ws (0 ms)
+[ RUN      ] r16_strutil.trim_inplace_custom_delims
+[       OK ] r16_strutil.trim_inplace_custom_delims (0 ms)
+[ RUN      ] r16_strutil.trim_cstr_only_right
+[       OK ] r16_strutil.trim_cstr_only_right (0 ms)
+[ RUN      ] r16_strutil.trim_all_chars_removed_yields_empty
+[       OK ] r16_strutil.trim_all_chars_removed_yields_empty (0 ms)
+[ RUN      ] r16_strutil.trimAll_chained_filter_matches_doc
+[       OK ] r16_strutil.trimAll_chained_filter_matches_doc (0 ms)
+[ RUN      ] r16_strutil.trimAll_default_only_whitespace_family
+[       OK ] r16_strutil.trimAll_default_only_whitespace_family (0 ms)
+[ RUN      ] r16_strutil.find_first_of_nul_returns_length
+[       OK ] r16_strutil.find_first_of_nul_returns_length (0 ms)
+[ RUN      ] r16_strutil.find_first_not_found_is_npos
+[       OK ] r16_strutil.find_first_not_found_is_npos (0 ms)
+[ RUN      ] r16_strutil.find_last_at_end_and_absent
+[       OK ] r16_strutil.find_last_at_end_and_absent (0 ms)
+[ RUN      ] r16_strutil.split_respects_max_splits
+[       OK ] r16_strutil.split_respects_max_splits (0 ms)
+[ RUN      ] r16_strutil.split2_respects_max_splits
+[       OK ] r16_strutil.split2_respects_max_splits (0 ms)
+[ RUN      ] r16_strutil.split2_advances_by_delim_length
+[       OK ] r16_strutil.split2_advances_by_delim_length (0 ms)
+[ RUN      ] r16_strutil.split_leading_delim_yields_empty_first
+[       OK ] r16_strutil.split_leading_delim_yields_empty_first (0 ms)
+[ RUN      ] r16_strutil.split_output_version_appends_to_existing_vector
+[       OK ] r16_strutil.split_output_version_appends_to_existing_vector (0 ms)
+[ RUN      ] r16_strutil.split_empty_string_yields_one_empty_item
+[       OK ] r16_strutil.split_empty_string_yields_one_empty_item (0 ms)
+[ RUN      ] r16_strutil.replace_all_occurrences_and_longer_target
+[       OK ] r16_strutil.replace_all_occurrences_and_longer_target (0 ms)
+[ RUN      ] r16_strutil.replace_no_match_keeps_string
+[       OK ] r16_strutil.replace_no_match_keeps_string (0 ms)
+[ RUN      ] r16_strutil.replace_shrinks_target
+[       OK ] r16_strutil.replace_shrinks_target (0 ms)
+[ RUN      ] r16_strutil.replace_with_empty_target_removes_matches
+[       OK ] r16_strutil.replace_with_empty_target_removes_matches (0 ms)
+[ RUN      ] r16_strutil.replace_with_empty_source_and_nonempty_target_is_noop
+[       OK ] r16_strutil.replace_with_empty_source_and_nonempty_target_is_noop (0 ms)
+[ RUN      ] r16_strutil.replace_with_empty_source_and_empty_target_is_noop
+[       OK ] r16_strutil.replace_with_empty_source_and_empty_target_is_noop (0 ms)
+[ RUN      ] r16_strutil.standardise_path_non_dir_no_trailing_slash
+[       OK ] r16_strutil.standardise_path_non_dir_no_trailing_slash (0 ms)
+[ RUN      ] r16_strutil.standardise_path_empty_string
+[       OK ] r16_strutil.standardise_path_empty_string (0 ms)
+[----------] 24 tests from r16_strutil (0 ms total)
+
+[----------] 13 tests from r16_stdutils
+[ RUN      ] r16_stdutils.stdlocker_locks_and_releases_on_scope_exit
+[       OK ] r16_stdutils.stdlocker_locks_and_releases_on_scope_exit (0 ms)
+[ RUN      ] r16_stdutils.stdlocker_locks_once_and_unlocks_once_on_destroy
+[       OK ] r16_stdutils.stdlocker_locks_once_and_unlocks_once_on_destroy (0 ms)
+[ RUN      ] r16_stdutils.stdlocker_nested_scopes_lock_twice_unlock_twice
+[       OK ] r16_stdutils.stdlocker_nested_scopes_lock_twice_unlock_twice (0 ms)
+[ RUN      ] r16_stdutils.stdfile_write_then_read_whole_file
+[       OK ] r16_stdutils.stdfile_write_then_read_whole_file (0 ms)
+[ RUN      ] r16_stdutils.stdfile_read_missing_file_throws
+[       OK ] r16_stdutils.stdfile_read_missing_file_throws (0 ms)
+[ RUN      ] r16_stdutils.stdfile_read_offset_beyond_size_throws
+[       OK ] r16_stdutils.stdfile_read_offset_beyond_size_throws (0 ms)
+[ RUN      ] r16_stdutils.stdfile_read_offset_equal_size_returns_zero
+[       OK ] r16_stdutils.stdfile_read_offset_equal_size_returns_zero (0 ms)
+[ RUN      ] r16_stdutils.stdfile_read_clamps_length_to_file_end
+[       OK ] r16_stdutils.stdfile_read_clamps_length_to_file_end (0 ms)
+[ RUN      ] r16_stdutils.stdfile_read_partial_window
+[       OK ] r16_stdutils.stdfile_read_partial_window (0 ms)
+[ RUN      ] r16_stdutils.stdfile_write_raw_buffer_overwrites_and_reads_back
+[       OK ] r16_stdutils.stdfile_write_raw_buffer_overwrites_and_reads_back (0 ms)
+[ RUN      ] r16_stdutils.stdfile_write_to_missing_directory_throws
+[       OK ] r16_stdutils.stdfile_write_to_missing_directory_throws (0 ms)
+[ RUN      ] r16_stdutils.stdfile_exists_true_for_file_false_for_missing
+[       OK ] r16_stdutils.stdfile_exists_true_for_file_false_for_missing (0 ms)
+[ RUN      ] r16_stdutils.stdfile_empty_file_read_returns_zero
+[       OK ] r16_stdutils.stdfile_empty_file_read_returns_zero (0 ms)
+[----------] 13 tests from r16_stdutils (5 ms total)
+
+[----------] 17 tests from r16_timeutils
+[ RUN      ] r16_timeutils.fasttime_epoch_zero_utc
+[       OK ] r16_timeutils.fasttime_epoch_zero_utc (0 ms)
+[ RUN      ] r16_timeutils.fasttime_matches_libc_for_2023_epoch_with_plus8_zone
+[       OK ] r16_timeutils.fasttime_matches_libc_for_2023_epoch_with_plus8_zone (0 ms)
+[ RUN      ] r16_timeutils.fasttime_handles_minute_and_second_fields
+[       OK ] r16_timeutils.fasttime_handles_minute_and_second_fields (0 ms)
+[ RUN      ] r16_timeutils.fasttime_negative_timezone_offset
+[       OK ] r16_timeutils.fasttime_negative_timezone_offset (0 ms)
+[ RUN      ] r16_timeutils.fasttime_does_not_fill_week_or_dst_fields
+[       OK ] r16_timeutils.fasttime_does_not_fill_week_or_dst_fields (0 ms)
+[ RUN      ] r16_timeutils.fasttime_pre_epoch_seconds_floor_normalize
+[       OK ] r16_timeutils.fasttime_pre_epoch_seconds_floor_normalize (0 ms)
+[ RUN      ] r16_timeutils.time32_date_and_time_from_local_epoch
+[       OK ] r16_timeutils.time32_date_and_time_from_local_epoch (0 ms)
+[ RUN      ] r16_timeutils.time32_ctor_from_milliseconds_splits_msec
+[       OK ] r16_timeutils.time32_ctor_from_milliseconds_splits_msec (0 ms)
+[ RUN      ] r16_timeutils.time32_ctor_without_msecs_defaults_to_zero
+[       OK ] r16_timeutils.time32_ctor_without_msecs_defaults_to_zero (0 ms)
+[ RUN      ] r16_timeutils.time32_default_state_is_deterministic
+[       OK ] r16_timeutils.time32_default_state_is_deterministic (0 ms)
+[ RUN      ] r16_timeutils.time32_from_local_time_overwrites_previous_value
+[       OK ] r16_timeutils.time32_from_local_time_overwrites_previous_value (0 ms)
+[ RUN      ] r16_timeutils.time32_time_ms_is_time_times_1000_plus_msec
+[       OK ] r16_timeutils.time32_time_ms_is_time_times_1000_plus_msec (0 ms)
+[ RUN      ] r16_timeutils.time_to_string_returns_empty_for_small_negative_input
+[       OK ] r16_timeutils.time_to_string_returns_empty_for_small_negative_input (0 ms)
+[ RUN      ] r16_timeutils.time_to_string_returns_empty_for_zero
+[       OK ] r16_timeutils.time_to_string_returns_empty_for_zero (0 ms)
+[ RUN      ] r16_timeutils.time_to_string_without_millisec_has_no_dot
+[       OK ] r16_timeutils.time_to_string_without_millisec_has_no_dot (0 ms)
+[ RUN      ] r16_timeutils.time_to_string_with_millisec_appends_dot_msec
+[       OK ] r16_timeutils.time_to_string_with_millisec_appends_dot_msec (0 ms)
+[ RUN      ] r16_timeutils.tz_offset_is_cached_and_in_whole_hours
+[       OK ] r16_timeutils.tz_offset_is_cached_and_in_whole_hours (0 ms)
+[----------] 17 tests from r16_timeutils (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 78 tests from 5 test suites ran. (24 ms total)
+[  PASSED  ] 78 tests.

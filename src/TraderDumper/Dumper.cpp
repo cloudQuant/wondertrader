@@ -8,7 +8,60 @@
 
 #include "../Includes/WTSVariant.hpp"
 
+#include <limits>
+
 USING_NS_WTP;
+
+namespace
+{
+bool parse_refresh_span(WTSVariant* value, uint32_t& refreshSpan)
+{
+	if (value == NULL)
+		return false;
+
+	uint64_t parsed = 0;
+	switch (value->type())
+	{
+	case WTSVariant::VT_Int32:
+	case WTSVariant::VT_Int64:
+	{
+		const int64_t signedValue = value->asInt64();
+		if (signedValue <= 0)
+			return false;
+		parsed = static_cast<uint64_t>(signedValue);
+		break;
+	}
+	case WTSVariant::VT_Uint32:
+	case WTSVariant::VT_Uint64:
+		parsed = value->asUInt64();
+		break;
+	case WTSVariant::VT_String:
+	{
+		const std::string text = value->asString();
+		if (text.empty())
+			return false;
+		for (char digit : text)
+		{
+			if (digit < '0' || digit > '9')
+				return false;
+			const uint64_t next = parsed * 10 + static_cast<uint64_t>(digit - '0');
+			if (next > std::numeric_limits<uint32_t>::max())
+				return false;
+			parsed = next;
+		}
+		break;
+	}
+	default:
+		return false;
+	}
+
+	if (parsed == 0 || parsed > std::numeric_limits<uint32_t>::max())
+		return false;
+
+	refreshSpan = static_cast<uint32_t>(parsed);
+	return true;
+}
+}
 
 WTSBaseDataMgr		g_bdMgr;
 TraderAdapterMgr	g_adapterMgr;
@@ -20,6 +73,13 @@ void Dumper::init(const char* logProfile)
 
 bool Dumper::config(const char* cfgfile, bool isFile, const char* modDir)
 {
+	_configured = false;
+	if (cfgfile == NULL || modDir == NULL)
+	{
+		WTSLogger::error("交易数据落地模块配置路径或模块目录为空");
+		return false;
+	}
+
 	WtHelper::set_module_dir(modDir);
 
 	WTSVariant* root = NULL;
@@ -28,18 +88,94 @@ bool Dumper::config(const char* cfgfile, bool isFile, const char* modDir)
 	else
 		root = WTSCfgLoader::load_from_content(cfgfile, false);
 
-	WTSVariant* cfg = root->get("config");
-	if(cfg)
+	if (root == NULL || root->type() != WTSVariant::VT_Object)
 	{
-		if(cfg->has("refresh_span"))
+		if (root)
+			root->release();
+		WTSLogger::error("交易数据落地模块配置解析失败或根节点不是对象");
+		return false;
+	}
+
+	// basefiles and traders are required before applying configuration side effects.
+	WTSVariant* cfgBF = root->get("basefiles");
+	if (cfgBF == NULL || cfgBF->type() != WTSVariant::VT_Object)
+	{
+		WTSLogger::error("交易数据落地模块配置缺少对象 basefiles");
+		root->release();
+		return false;
+	}
+
+	WTSVariant* traders = root->get("traders");
+	if (traders == NULL || traders->type() != WTSVariant::VT_Array)
+	{
+		WTSLogger::error("交易数据落地模块配置缺少数组 traders");
+		root->release();
+		return false;
+	}
+
+	WTSVariant* cfg = root->get("config");
+	if (cfg && cfg->type() != WTSVariant::VT_Object)
+	{
+		WTSLogger::error("交易数据落地模块配置项必须是对象");
+		root->release();
+		return false;
+	}
+
+	uint32_t refreshSpan = _refresh_span;
+	if (cfg && cfg->has("refresh_span") &&
+		!parse_refresh_span(cfg->get("refresh_span"), refreshSpan))
+	{
+		WTSLogger::error("config.refresh_span 必须是 1 到 {} 之间的正整数", std::numeric_limits<uint32_t>::max());
+		root->release();
+		return false;
+	}
+
+	// Validate all deterministic trader inputs before loading files or plugins.
+	for (uint32_t idx = 0; idx < traders->size(); idx++)
+	{
+		WTSVariant* cfgItem = traders->get(idx);
+		if (cfgItem == NULL || cfgItem->type() != WTSVariant::VT_Object)
 		{
-			_refresh_span = cfg->getUInt32("refresh_span");
+			WTSLogger::error("traders[{}] 必须是对象", idx);
+			root->release();
+			return false;
 		}
-		
+
+		if (!cfgItem->getBoolean("active"))
+			continue;
+
+		WTSVariant* channel = cfgItem->get("channelid");
+		WTSVariant* module = cfgItem->get("module");
+		const char* channelid = cfgItem->getCString("channelid");
+		if (channel == NULL || channel->type() != WTSVariant::VT_String || channelid[0] == '\0' ||
+			module == NULL || module->type() != WTSVariant::VT_String || module->asString().empty())
+		{
+			WTSLogger::error("traders[{}] 缺少有效的 channelid 或 module", idx);
+			root->release();
+			return false;
+		}
+
+		if (g_adapterMgr.getAdapter(channelid))
+		{
+			WTSLogger::error("traders[{}] 的 channelid 已经登记: {}", idx, channelid);
+			root->release();
+			return false;
+		}
+
+		for (uint32_t prior = 0; prior < idx; prior++)
+		{
+			WTSVariant* priorItem = traders->get(prior);
+			if (priorItem->getBoolean("active") &&
+				strcmp(priorItem->getCString("channelid"), channelid) == 0)
+			{
+				WTSLogger::error("traders[{}] 的 channelid 重复: {}", idx, channelid);
+				root->release();
+				return false;
+			}
+		}
 	}
 
 	//基础数据文件
-	WTSVariant* cfgBF = root->get("basefiles");
 	if (cfgBF->get("session"))
 	{
 		g_bdMgr.loadSessions(cfgBF->getCString("session"));
@@ -78,21 +214,36 @@ bool Dumper::config(const char* cfgfile, bool isFile, const char* modDir)
 		}
 	}
 
-	cfg = root->get("traders");
-	for (uint32_t idx = 0; idx < cfg->size(); idx++)
+	for (uint32_t idx = 0; idx < traders->size(); idx++)
 	{
-		WTSVariant* cfgItem = cfg->get(idx);
+		WTSVariant* cfgItem = traders->get(idx);
 		if (!cfgItem->getBoolean("active"))
 			continue;
 
 		const char* channelid = cfgItem->getCString("channelid");
 
 		TraderAdapterPtr adapter(new TraderAdapter(&g_adapterMgr));
-		adapter->init(channelid, cfgItem, &g_bdMgr);
-		g_adapterMgr.addAdapter(channelid, adapter);
+		if (!adapter->init(channelid, cfgItem, &g_bdMgr))
+		{
+			WTSLogger::error("[{}] 交易适配器初始化失败，不登记该通道", channelid);
+			// ITraderApi has no general quiescence contract; earlier initialized
+			// adapters cannot be safely rolled back. _configured stays false so
+			// run() will not start this partial manager state.
+			root->release();
+			return false;
+		}
+
+		if (!g_adapterMgr.addAdapter(channelid, adapter))
+		{
+			WTSLogger::error("[{}] 交易适配器登记失败", channelid);
+			root->release();
+			return false;
+		}
 	}
 
 	root->release();
+	_refresh_span = refreshSpan;
+	_configured = true;
 
 	WTSLogger::info("交易数据落地模块初始化完成，主动刷新间隔:{}s", _refresh_span);
 
@@ -101,6 +252,12 @@ bool Dumper::config(const char* cfgfile, bool isFile, const char* modDir)
 
 void Dumper::run(bool bOnce /* = true */)
 {
+	if (!_configured)
+	{
+		WTSLogger::error("交易数据落地模块配置未成功，拒绝启动");
+		return;
+	}
+
 	g_adapterMgr.run();
 
 	if(bOnce)
@@ -129,6 +286,7 @@ void Dumper::run(bool bOnce /* = true */)
 
 void Dumper::release()
 {
+	_configured = false;
 	_stopped = true;
 	if (_worker)
 		_worker->join();

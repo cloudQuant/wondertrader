@@ -49,6 +49,7 @@
 #include "WtPorter/PorterDefs.h"
 #include "WtPorter/WtPorter.h"
 #include "WtPorter/WtRtRunner.h"
+#include "../trader_mocker_fixture.h"
 
 #include "Includes/IBaseDataMgr.h"
 #include "Includes/ITraderApi.h"
@@ -486,11 +487,20 @@ TEST(R163PorterExecuters, LocalDiffArbiBindConfiguredTraderAdapters)
 
 	WtRtRunner* r = new_runner(dir);
 	ASSERT_NE(r, nullptr);
+	wtp_test::TraderMockerFixture trader_mocker("r163");
+	if (!trader_mocker.install())
+	{
+		std::error_code ec;
+		stdfs::remove_all(dir, ec);
+		FAIL() << "Could not prepare TraderMocker from product output at "
+			<< trader_mocker.product_plugin() << ": " << trader_mocker.error();
+		return;
+	}
 
-	// trader 没有 module，TraderAdapter::init 返回 false，但 initTraders 仍把它加入
-	// _traders；随后三种执行器的 `if (trader)` 成功分支都能命中。
+	// 使用本地模拟交易 API；初始化成功但不调用 run，因此不连接柜台或启动线程。
 	const std::string cfg = cfg_plain(dir, "cta",
-		",\"traders\":[{\"active\":true,\"id\":\"r163_trd\"}],"
+		",\"traders\":[{\"active\":true,\"id\":\"r163_trd\","
+		"\"module\":\"TraderMocker\",\"mockerid\":163001,\"udp_port\":0}],"
 		"\"executers\":["
 		"{\"active\":true,\"id\":\"r163_exec_local\",\"name\":\"local\",\"trader\":\"r163_trd\"},"
 		"{\"active\":true,\"id\":\"r163_exec_diff\",\"name\":\"diff\",\"trader\":\"r163_trd\"},"
@@ -502,6 +512,7 @@ TEST(R163PorterExecuters, LocalDiffArbiBindConfiguredTraderAdapters)
 
 	std::error_code ec;
 	stdfs::remove_all(dir, ec);
+	stdfs::remove_all("mocker_163001", ec);
 }
 
 // WtPorter.cpp:2132-2138 + :2168-2174 + :2204-2210

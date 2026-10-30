@@ -72,7 +72,8 @@ int main(int argc, char* argv[])
 	else
 		filename = "./config.yaml";
 	// 加载并应用配置
-	runner.config(filename);
+	if (!runner.config(filename))
+		return 1;
 
 	// 启动UFT策略引擎（非异步模式）
 	runner.run(false);

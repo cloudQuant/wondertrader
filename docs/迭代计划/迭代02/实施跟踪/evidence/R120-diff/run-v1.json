@@ -1,0 +1,21 @@
+{
+  "suite": "R120DiffTest",
+  "binary": "build-cov/build_x64/Debug/bin/TestUnits/wt-r120-diff-focused",
+  "binary_sha256": "6f32db0caf69b9947f122779e83d31ca5c2e65031a05c440fdaa04e2ab475735",
+  "source_object": "build-cov/TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n02_wtcore_engines/r120_diff_executer_unit_test.cpp.o",
+  "shared_build_evidence": [
+    "../diff-serialization/build-v5-partial-failure.log",
+    "../diff-serialization/build-v6.log",
+    "../diff-serialization/build-v7.log"
+  ],
+  "build_note": "The v5 Ninja invocation exited 1 overall due to an unrelated unused-variable -Werror in n02_diff_concurrency_test.cpp; the R120 test-object and WtDiffExecuter.cpp.o compile steps completed successfully before the failure. WtDtMgr.cpp.o and other listed dependencies were existing artifacts used for the isolated link.",
+  "link_command": "/usr/bin/c++ -arch arm64 -g -fprofile-instr-generate -Wl,-undefined,dynamic_lookup build-cov/TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n02_wtcore_engines/r120_diff_executer_unit_test.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/WtDiffExecuter.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/WtExecuterFactory.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/TraderAdapter.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/WtHelper.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/ActionPolicyMgr.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/WtDtMgr.cpp.o /opt/homebrew/lib/libgtest_main.a /opt/homebrew/lib/libgtest.a build-cov/build_x64/Debug/libs/libWTSTools.a build-cov/build_x64/Debug/libs/libWTSUtils.a /usr/local/lib/libiconv.dylib -L/opt/homebrew/lib -lboost_filesystem -lboost_thread -lpthread -o build-cov/build_x64/Debug/bin/TestUnits/wt-r120-diff-focused",
+  "run_command": "build-cov/build_x64/Debug/bin/TestUnits/wt-r120-diff-focused",
+  "run_log": "run.log",
+  "exit": 0,
+  "tests": 2,
+  "passed": 2,
+  "failures": 0,
+  "skipped": 0,
+  "scope": "Local isolated R120 diff tests only. Together with the 13/13 WtDiffExecuter tests, evidence covers successful tombstone persistence followed by reload, snapshot persistence injection failure, and target-zero migration. It does not prove a durable intent before plugin side effects, replay prevention if the process crashes before persistence, safety under a persistently unwritable disk, fsync durability, real trading or full plugin/host integration. Code is under review."
+}

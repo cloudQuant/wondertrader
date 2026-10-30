@@ -35,6 +35,7 @@
 #include <unistd.h>
 
 #include "q04_trader_fixture.h"
+#include "r123_uft_common.h"
 
 using namespace wtp;
 
@@ -93,6 +94,68 @@ int probeOfflineNumericWatchParamFallback(int overload)
 	}
 }
 
+int probeOnlineNumericWatchParam(const char* module, const char* workDir)
+{
+	if (module == nullptr || workDir == nullptr || ::chdir(workDir) != 0)
+		return 20;
+
+	ShareManager& share = ShareManager::self();
+	if (!share.initialize(module) || !share.init_domain("r11_watch_param_online"))
+		return 21;
+
+	WtUftEngine engine;
+	engine.init(nullptr, nullptr, nullptr, nullptr);
+	UftStraContext ctx(&engine, "r11ctx_online");
+	if (ctx.watch_param("wk_i32", (int32_t)-11) != (int32_t)-11)
+		return 22;
+	int32_t* i32 = share.allocate_value("r11ctx_online", "wk_i32", (int32_t)-11, false, true);
+	if (i32 == nullptr)
+		return 23;
+	*i32 = 12;
+	if (ctx.watch_param("wk_i32", (int32_t)-11) != 12)
+		return 24;
+
+	if (ctx.watch_param("wk_i64", (int64_t)-9876543210LL) != (int64_t)-9876543210LL)
+		return 25;
+	int64_t* i64 = share.allocate_value("r11ctx_online", "wk_i64", (int64_t)-9876543210LL, false, true);
+	if (i64 == nullptr)
+		return 26;
+	*i64 = 9876543210LL;
+	if (ctx.watch_param("wk_i64", (int64_t)-9876543210LL) != 9876543210LL)
+		return 27;
+
+	if (ctx.watch_param("wk_u32", (uint32_t)4000000001U) != (uint32_t)4000000001U)
+		return 28;
+	uint32_t* u32 = share.allocate_value("r11ctx_online", "wk_u32", (uint32_t)4000000001U, false, true);
+	if (u32 == nullptr)
+		return 29;
+	*u32 = 3000000000U;
+	if (ctx.watch_param("wk_u32", (uint32_t)4000000001U) != 3000000000U)
+		return 30;
+
+	if (ctx.watch_param("wk_u64", (uint64_t)18446744073709551610ULL) != (uint64_t)18446744073709551610ULL)
+		return 31;
+	uint64_t* u64 = share.allocate_value("r11ctx_online", "wk_u64", (uint64_t)18446744073709551610ULL, false, true);
+	if (u64 == nullptr)
+		return 32;
+	*u64 = 123456789012345ULL;
+	if (ctx.watch_param("wk_u64", (uint64_t)18446744073709551610ULL) != 123456789012345ULL)
+		return 33;
+
+	if (ctx.watch_param("wk_dbl", 5.5) != 5.5)
+		return 34;
+	double* dbl = share.allocate_value("r11ctx_online", "wk_dbl", 5.5, false, true);
+	if (dbl == nullptr)
+		return 35;
+	*dbl = 7.25;
+	if (ctx.watch_param("wk_dbl", 5.5) != 7.25)
+		return 36;
+
+	std::fprintf(stderr, "R11_WATCH_PARAM_ONLINE_READY\n");
+	std::fflush(stderr);
+	return 0;
+}
+
 //////////////////////////////////////////////////////////////////////////
 //read_param 六个重载: ShareManager 未初始化时必须原样回吐默认值
 TEST(R11UftCtxParam, readParamReturnsDefaultWhenShareOffline)
@@ -140,9 +203,9 @@ TEST(R11UftCtxParam, stringWatchParamAndCommitAreNullSafe)
 	EXPECT_STREQ("again", env._ctx.read_param("wk_after", "again"));
 }
 
-//每个数值重载都放到重新启动的子进程里验证，防止已初始化的单例状态污染结果，
-//并把空指针崩溃变成测试失败，而不是终止整个测试进程。返回 initVal 是候选安全回退契约，需产品接口合同确认。
-TEST(R11UftCtxParam, numericWatchParamOfflineFallbackCandidate)
+//每个数值重载都放到重新启动的子进程里验证，防止单例状态污染结果；ShareManager
+//未初始化时 allocate_value 返回空指针，而 IUftStraCtx 的公开默认实现返回 initVal。
+TEST(R11UftCtxParam, numericWatchParamReturnsInitValWhenShareOffline)
 {
 	const std::string oldStyle = GTEST_FLAG_GET(death_test_style);
 	GTEST_FLAG_SET(death_test_style, "threadsafe");
@@ -154,6 +217,23 @@ TEST(R11UftCtxParam, numericWatchParamOfflineFallbackCandidate)
 			::testing::ExitedWithCode(0), "R11_WATCH_PARAM_READY");
 	}
 
+	GTEST_FLAG_SET(death_test_style, oldStyle);
+}
+
+// 已初始化并建立临时共享域时，首次监控返回初值，后续监控读回共享值，
+// 证明离线回退没有改变正常共享参数行为。整个过程在子进程及临时目录中运行。
+TEST(R11UftCtxParam, numericWatchParamReadsSharedValuesWhenShareOnline)
+{
+	const std::string module = r123::findLib("libWtShareHelper.dylib");
+	if (module.empty())
+		GTEST_SKIP() << "libWtShareHelper.dylib not found in this build";
+
+	q04::TempRoot tmp("r11_watch_online");
+	const std::string workDir = tmp.dir().string();
+	const std::string oldStyle = GTEST_FLAG_GET(death_test_style);
+	GTEST_FLAG_SET(death_test_style, "threadsafe");
+	EXPECT_EXIT(std::_Exit(probeOnlineNumericWatchParam(module.c_str(), workDir.c_str())),
+		::testing::ExitedWithCode(0), "R11_WATCH_PARAM_ONLINE_READY");
 	GTEST_FLAG_SET(death_test_style, oldStyle);
 }
 

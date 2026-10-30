@@ -385,45 +385,59 @@ TEST_F(XtpLoginF, second_login_resubscribes_the_very_same_codes)
 
 /* ==================== subscribe() 登录后支路 ==================== */
 
-TEST_F(XtpOnlineF, post_login_subscribe_sends_market_data_but_never_tick_by_tick)
+TEST_F(XtpOnlineF, post_login_subscribe_sends_market_data_and_tick_by_tick)
 {
 	CodeSet codes;
 	codes.insert("SSE.688981");
 	parser.subscribe(codes);
 
 	ASSERT_EQ(1u, api.mdCalls.size());
+	ASSERT_EQ(1u, api.tbtCalls.size());
 	EXPECT_EQ(XTP_EXCHANGE_SH, api.mdCalls[0].exchg);
 	EXPECT_EQ(1, api.mdCalls[0].count);
 	EXPECT_EQ("688981", api.mdCalls[0].codes[0]);
-	/* DoSubscribeMD 会订逐笔，登录后的增量订阅不会（BUG-T27-003） */
-	EXPECT_TRUE(api.tbtCalls.empty());
+	EXPECT_EQ(XTP_EXCHANGE_SH, api.tbtCalls[0].exchg);
+	EXPECT_EQ(api.mdCalls[0].count, api.tbtCalls[0].count);
+	EXPECT_EQ(joined(sorted(api.mdCalls[0])), joined(sorted(api.tbtCalls[0])));
 	EXPECT_TRUE(sink.hasLog("[ParserXTP] Market data of 1 instruments of SSE subscribed"));
+	EXPECT_TRUE(sink.hasLog("[ParserXTP] Tick_by_tick data of 1 instruments of SSE subscribed"));
 }
 
-TEST_F(XtpOnlineF, post_login_subscribe_splits_two_exchanges_into_two_calls)
+TEST_F(XtpOnlineF, post_login_subscribe_routes_same_code_by_exchange_and_preserves_counts)
 {
 	CodeSet codes;
 	codes.insert("SSE.600000");
-	codes.insert("SZSE.000001");
+	codes.insert("SZSE.600000");
 	codes.insert("SZSE.300750");
 	parser.subscribe(codes);
 
 	ASSERT_EQ(2u, api.mdCalls.size());
+	ASSERT_EQ(2u, api.tbtCalls.size());
 	EXPECT_EQ(XTP_EXCHANGE_SH, api.mdCalls[0].exchg);
 	EXPECT_EQ(1, api.mdCalls[0].count);
 	EXPECT_EQ(XTP_EXCHANGE_SZ, api.mdCalls[1].exchg);
 	EXPECT_EQ(2, api.mdCalls[1].count);
-	EXPECT_EQ("000001|300750|", joined(sorted(api.mdCalls[1])));
+	EXPECT_EQ("600000|", joined(sorted(api.mdCalls[0])));
+	EXPECT_EQ("300750|600000|", joined(sorted(api.mdCalls[1])));
+	EXPECT_EQ(XTP_EXCHANGE_SH, api.tbtCalls[0].exchg);
+	EXPECT_EQ(XTP_EXCHANGE_SZ, api.tbtCalls[1].exchg);
+	EXPECT_EQ(1, api.tbtCalls[0].count);
+	EXPECT_EQ(2, api.tbtCalls[1].count);
+	EXPECT_EQ(joined(sorted(api.mdCalls[0])), joined(sorted(api.tbtCalls[0])));
+	EXPECT_EQ(joined(sorted(api.mdCalls[1])), joined(sorted(api.tbtCalls[1])));
 	EXPECT_TRUE(sink.hasLog("[ParserXTP] Market data of 1 instruments of SSE subscribed"));
 	EXPECT_TRUE(sink.hasLog("[ParserXTP] Market data of 2 instruments of SZSE subscribed"));
-	/* 一共 2 个交易所、各 1 次调用：没有第三次 */
+	EXPECT_TRUE(sink.hasLog("[ParserXTP] Tick_by_tick data of 1 instruments of SSE subscribed"));
+	EXPECT_TRUE(sink.hasLog("[ParserXTP] Tick_by_tick data of 2 instruments of SZSE subscribed"));
+	/* 两个交易所分别下发一批 MD 和一批 TBT，ticker 和 count 一一对应。 */
 	EXPECT_EQ(2u, api.mdCalls.size());
-	EXPECT_EQ(0u, api.tbtCalls.size());
+	EXPECT_EQ(2u, api.tbtCalls.size());
 }
 
 TEST_F(XtpOnlineF, post_login_subscribe_drops_foreign_prefixes_without_any_call)
 {
 	const size_t mdBefore = api.mdCalls.size();
+	const size_t tbtBefore = api.tbtCalls.size();
 	CodeSet codes;
 	codes.insert("HK.00700");
 	codes.insert("SGX.DJI");
@@ -431,6 +445,7 @@ TEST_F(XtpOnlineF, post_login_subscribe_drops_foreign_prefixes_without_any_call)
 	parser.subscribe(codes);
 
 	EXPECT_EQ(mdBefore, api.mdCalls.size());
+	EXPECT_EQ(tbtBefore, api.tbtCalls.size());
 	EXPECT_TRUE(sink.logs.empty());
 	/* 两个空集合分支都不进 → 成员集合也不该被污染 */
 	EXPECT_EQ(1u, m->m_fitSHSubs.size());
@@ -449,14 +464,28 @@ TEST_F(XtpOnlineF, post_login_subscribe_accumulates_into_member_buffers)
 	EXPECT_EQ(2u, m->m_fitSHSubs.size());
 	EXPECT_EQ(1u, m->m_fitSHSubs.count("688981"));
 	EXPECT_EQ(2u, api.mdCalls.size());
+	EXPECT_EQ(2u, api.tbtCalls.size());
 	/* 缓存里现在是 2 只，下一次登录会按 2 只一起发 */
 	api.loginRet = 0;
 	sink.logs.clear();
 	parser.connect();
 	ASSERT_EQ(4u, api.mdCalls.size());
+	ASSERT_EQ(4u, api.tbtCalls.size());
 	EXPECT_EQ(2, api.mdCalls[2].count);
 	EXPECT_EQ("600519|688981|", joined(sorted(api.mdCalls[2])));
+	EXPECT_EQ(XTP_EXCHANGE_SZ, api.mdCalls[3].exchg);
+	EXPECT_EQ(1, api.mdCalls[3].count);
+	EXPECT_EQ("000001|", joined(sorted(api.mdCalls[3])));
+	EXPECT_EQ(XTP_EXCHANGE_SH, api.tbtCalls[2].exchg);
+	EXPECT_EQ(2, api.tbtCalls[2].count);
+	EXPECT_EQ("600519|688981|", joined(sorted(api.tbtCalls[2])));
+	EXPECT_EQ(XTP_EXCHANGE_SZ, api.tbtCalls[3].exchg);
+	EXPECT_EQ(1, api.tbtCalls[3].count);
+	EXPECT_EQ("000001|", joined(sorted(api.tbtCalls[3])));
 	EXPECT_TRUE(sink.hasLog("[ParserXTP] Market data of 2 instruments of SSE subscribed"));
+	EXPECT_TRUE(sink.hasLog("[ParserXTP] Tick_by_tick data of 2 instruments of SSE subscribed"));
+	EXPECT_TRUE(sink.hasLog("[ParserXTP] Market data of 1 instruments of SZSE subscribed"));
+	EXPECT_TRUE(sink.hasLog("[ParserXTP] Tick_by_tick data of 1 instruments of SZSE subscribed"));
 }
 
 TEST_F(XtpOnlineF, post_login_subscribe_failure_logs_the_api_return_code)
@@ -467,8 +496,10 @@ TEST_F(XtpOnlineF, post_login_subscribe_failure_logs_the_api_return_code)
 	parser.subscribe(codes);
 
 	ASSERT_EQ(1u, api.mdCalls.size());
+	ASSERT_EQ(1u, api.tbtCalls.size());
 	EXPECT_TRUE(sink.hasLog("[ParserXTP] Sending md subscribe request of SZSE failed: -3"));
 	EXPECT_FALSE(sink.hasLog("Market data of 1 instruments of SZSE subscribed"));
+	EXPECT_TRUE(sink.hasLog("[ParserXTP] Tick_by_tick data of 1 instruments of SZSE subscribed"));
 }
 
 TEST_F(XtpOnlineF, post_login_subscribe_logs_sse_failure_on_its_own_line)
@@ -480,13 +511,36 @@ TEST_F(XtpOnlineF, post_login_subscribe_logs_sse_failure_on_its_own_line)
 	parser.subscribe(codes);
 
 	ASSERT_EQ(1u, api.mdCalls.size());
+	ASSERT_EQ(1u, api.tbtCalls.size());
 	EXPECT_EQ(XTP_EXCHANGE_SH, api.mdCalls[0].exchg);
-	EXPECT_EQ(1u, sink.logs.size());
+	EXPECT_EQ(XTP_EXCHANGE_SH, api.tbtCalls[0].exchg);
+	EXPECT_EQ(2u, sink.logs.size());
 	EXPECT_EQ(LL_ERROR, sink.logs[0].first);
 	EXPECT_EQ("[ParserXTP] Sending md subscribe request of SSE failed: 11", sink.logs[0].second);
+	EXPECT_EQ(LL_INFO, sink.logs[1].first);
+	EXPECT_EQ("[ParserXTP] Tick_by_tick data of 1 instruments of SSE subscribed", sink.logs[1].second);
 	/* 失败也照样进缓存 → 下次登录会重发（见 BUG-T27-002） */
 	EXPECT_EQ(1u, m->m_fitSHSubs.count("600000"));
-	EXPECT_EQ(0u, api.tbtCalls.size());
+	EXPECT_EQ(1, api.tbtCalls[0].count);
+}
+
+TEST_F(XtpOnlineF, post_login_subscribe_tick_by_tick_failure_logs_its_own_return_code)
+{
+	api.tbtRet = -17;
+	CodeSet codes;
+	codes.insert("SZSE.000001");
+	parser.subscribe(codes);
+
+	ASSERT_EQ(1u, api.mdCalls.size());
+	ASSERT_EQ(1u, api.tbtCalls.size());
+	EXPECT_EQ(XTP_EXCHANGE_SZ, api.mdCalls[0].exchg);
+	EXPECT_EQ(XTP_EXCHANGE_SZ, api.tbtCalls[0].exchg);
+	EXPECT_EQ(1, api.mdCalls[0].count);
+	EXPECT_EQ(1, api.tbtCalls[0].count);
+	EXPECT_EQ(joined(sorted(api.mdCalls[0])), joined(sorted(api.tbtCalls[0])));
+	EXPECT_TRUE(sink.hasLog("[ParserXTP] Market data of 1 instruments of SZSE subscribed"));
+	EXPECT_TRUE(sink.hasLog("[ParserXTP] Sending tick_by_tick subscribe request of SZSE failed: -17"));
+	EXPECT_FALSE(sink.hasLog("Tick_by_tick data of 1 instruments of SZSE subscribed"));
 }
 
 TEST_F(XtpOnlineF, post_login_subscribe_without_api_buffers_only)
@@ -503,6 +557,7 @@ TEST_F(XtpOnlineF, post_login_subscribe_without_api_buffers_only)
 	/* 交易日还在（disconnect 不清 m_uTradingDate）→ 走登录后分支，但 api 判空挡住下发 */
 	EXPECT_EQ(20260105u, m->m_uTradingDate);
 	EXPECT_EQ(mdBefore, api.mdCalls.size());
+	EXPECT_EQ(0u, api.tbtCalls.size());
 	EXPECT_EQ(1u, m->m_fitSHSubs.count("688981"));
 	EXPECT_TRUE(sink.logs.empty());
 }

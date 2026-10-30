@@ -1,0 +1,63 @@
+{
+  "archive_status": "HISTORICAL_PRE_FINAL_NOT_ACCEPTANCE",
+  "note": "These v4 runs predate subsequent edits to the shared WTSDataDef.hpp. P04 also has a newly identified same-source bounds path under repair. Do not use these runs to mark any of the four execution rows TEST_PASS; all four require final rebuild and rerun.",
+  "date": "2026-10-30",
+  "base_commit": "e453f048853c050a2811d876d87554795c26586b",
+  "platform": "macOS arm64",
+  "build_log": "build-v4-pre-final.log",
+  "build_log_sha256": "ded889b6365e4ea9d4c882b9ac3ab0cb4911632693094225fcf13298a941a15b",
+  "binaries": {
+    "BUG-L06-004": {
+      "path": "build-cov/build_x64/Debug/bin/TestUnits/wt-match-batch-v4",
+      "sha256": "af4442e1e7ac47d256a72f34b4ce49ba2a222f9cb5990dfc8205afe7e7bfbf00",
+      "log": "match-v4-pre-final.log",
+      "log_sha256": "3d5e65b08ce7aff6a9a5343c4f379e312d0a3d606772b6fcee83478b3a2bdfe2",
+      "tests": 15,
+      "passed": 15,
+      "failures": 0,
+      "filter": "all MatchEngineTest tests"
+    },
+    "BUG-P04-009": {
+      "path": "build-cov/build_x64/Debug/bin/TestUnits/wt-replayer-batch-v4",
+      "sha256": "0dcd2d13fc3064b802f5f3c8f328fe582f93cfe833b76b6aae1d2e901d70e2d6",
+      "log": "replayer-v4-pre-final.log",
+      "log_sha256": "4ad266fdd536ff29197f4e4c0f4354020e084aa7823c0437bd7f11478e4fe6b4",
+      "tests": 1,
+      "passed": 1,
+      "failures": 0,
+      "filter": "P04ReplayCsvTest.failedMainBarsLoadDoesNotPoisonReplayAndCanRetry"
+    },
+    "BUG-R23-005_and_BUG-R23-007": {
+      "path": "build-cov/build_x64/Debug/bin/TestUnits/wt-rdm-batch-v4",
+      "sha256": "33720fddb725cefcd7214c299fa46b622cf26bedc0cad434665b09203ebfe86f",
+      "log": "rdm-v4-pre-final.log",
+      "log_sha256": "89968ee28e27dd3eb96c79f0afacd95ae6d796fae9f1b206415b5c0eeccfdc0f",
+      "tests": 16,
+      "passed": 16,
+      "failures": 0,
+      "filter": "all R23RdmCountTest and R23RdmCountStrictProbe tests"
+    }
+  },
+  "source_sha256_at_archive": {
+    "src/Includes/WTSDataDef.hpp": "372717c7a85be8bc17fed908746e0c89b3a6d4184eebbd82a225e2d98871a588",
+    "src/WtBtCore/MatchEngine.cpp": "dcd263c48208a40c20f3711a1df65d590a27ee19406abbd2d4009594fb7cdc37",
+    "src/WtBtCore/HisDataReplayer.cpp": "f996e160859f53b868768b57b156f667d47c4a4682348cc375714d78ed29beb7",
+    "src/WtDataStorage/WtRdmDtReader.cpp": "c22561a1d338514ed463ecf86bbca6e633c22d57423124afda6c8225ee02b945",
+    "src/TestUnits/coverage/l06_wtbtcore/l06_match_engine_test.cpp": "7bc4eff2449b808183e2851930e3bf1832f4a1551db5d5b52e162b4c3b1e82e0",
+    "src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp": "cba0a836d17d1e0994c8aec1bb51849507c3819a3a7fdb582ce57c0f664e69a3",
+    "src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp": "3cbbff1cbf7368f5f2419669cd4a4e2ec38f38ecf8f9cb7a6ed33d17ea46587c"
+  },
+  "object_sha256_at_archive": {
+    "CoverageTests_btcore/l06_wtbtcore/l06_match_engine_test.cpp.o": "7afd8dfe2d0e39fc00ab89f68586b55077a0869d12fe95872ebfc1c788c3216f",
+    "CoverageTests_btcore/__/__/WtBtCore/MatchEngine.cpp.o": "662ac3bc48ed60055f5918450547dc31d5604bf94d6c02b42748902e9babb54c",
+    "CoverageTests_btcore/__/__/WtBtCore/WtHelper.cpp.o": "994f94d23bc2cabc3f4d4b49953e737b57ba575c0834f0768218cc3714cabdee",
+    "CoverageTests_btcore/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp.o": "ddd0433cd4f613a7e7fa85dd14e3eb967f7df73e60044e81f878a04faff84ace",
+    "CoverageTests_btcore/__/__/WtBtCore/HisDataReplayer.cpp.o": "2350c3bd914e1402a9204ee8c3b728f7245acb2d145047d239917606a94f0cb8",
+    "CoverageTests/r23_storage4/r23_rdm_count_slice_test.cpp.o": "fd00812c2b02d89dfdf53466b612c45a7465f499b7a33b5ce34d74c991dcbe32",
+    "CoverageTests/__/__/WtDataStorage/WtRdmDtReader.cpp.o": "684098c9c4699a89231084eb5783243ed3f348cb96e2b22a9859c7371f78dd57",
+    "CoverageTests/__/__/WtDataStorage/WtDataReader.cpp.o": "f2a4389164c7a9b3429523f4495e90d9401a64d272d60db7710b50ba7f5895d2"
+  },
+  "build_observed": "The archived Ninja output compiled MatchEngine.cpp, HisDataReplayer.cpp, WtRdmDtReader.cpp, WtDataReader.cpp and related test objects. It predates subsequent shared-header edits.",
+  "script": "reproduce-v4-pre-final.sh",
+  "script_scope": "The script records focused build/link/run invocations. Running it later rebuilds the then-current source; it cannot reproduce these old binary hashes after source changes."
+}

@@ -1,0 +1,38 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R21ReaderADTest.FirstTickRangeReadLoadsThreeTicksInActionTimeOrder:R21ReaderADTest.RepeatReadSameWindowReturnsEachTickOnce:R21ReaderADTest.OlderBranchPrependsPreviousTradingDayTicksAndSlicesTwo:R21ReaderADTest.NewerBranchAppendsOnlyTicksAfterCachedLastKey:R21ReaderADTest.EachCodeHasItsOwnTickDbAndDoesNotLeakKeys
+[==========] Running 5 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 5 tests from R21ReaderADTest
+[ RUN      ] R21ReaderADTest.FirstTickRangeReadLoadsThreeTicksInActionTimeOrder
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/r21_rdmtick_slice_test.cpp:63: Failure
+Expected equality of these values:
+  sink()->last_log(LL_DEBUG)
+    Which is: "3 ticks between [20240102093015500,20240102110015500] of XEX.rb.rb2409 loaded to cache"
+  "3 ticks between [20240102000016430,20240102000016600] of XEX.rb.rb2409 loaded to cache"
+
+[  FAILED  ] R21ReaderADTest.FirstTickRangeReadLoadsThreeTicksInActionTimeOrder (2 ms)
+[ RUN      ] R21ReaderADTest.RepeatReadSameWindowReturnsEachTickOnce
+[       OK ] R21ReaderADTest.RepeatReadSameWindowReturnsEachTickOnce (1 ms)
+[ RUN      ] R21ReaderADTest.OlderBranchPrependsPreviousTradingDayTicksAndSlicesTwo
+[       OK ] R21ReaderADTest.OlderBranchPrependsPreviousTradingDayTicksAndSlicesTwo (1 ms)
+[ RUN      ] R21ReaderADTest.NewerBranchAppendsOnlyTicksAfterCachedLastKey
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/r21_rdmtick_slice_test.cpp:249: Failure
+Expected equality of these values:
+  sink()->count_containing("Tick db of XEX.rb.rb2409 opened")
+    Which is: 0
+  1u
+    Which is: 1
+
+[  FAILED  ] R21ReaderADTest.NewerBranchAppendsOnlyTicksAfterCachedLastKey (2 ms)
+[ RUN      ] R21ReaderADTest.EachCodeHasItsOwnTickDbAndDoesNotLeakKeys
+[       OK ] R21ReaderADTest.EachCodeHasItsOwnTickDbAndDoesNotLeakKeys (3 ms)
+[----------] 5 tests from R21ReaderADTest (11 ms total)
+
+[----------] Global test environment tear-down
+[==========] 5 tests from 1 test suite ran. (11 ms total)
+[  PASSED  ] 3 tests.
+[  FAILED  ] 2 tests, listed below:
+[  FAILED  ] R21ReaderADTest.FirstTickRangeReadLoadsThreeTicksInActionTimeOrder
+[  FAILED  ] R21ReaderADTest.NewerBranchAppendsOnlyTicksAfterCachedLastKey
+
+ 2 FAILED TESTS

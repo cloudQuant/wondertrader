@@ -784,6 +784,8 @@ private:
 	}
 
 protected:
+	void	destroy_strategy();
+
 	uint32_t			_context_id;		///<策略上下文ID，策略实例的唯一标识符
 	HisDataReplayer*	_replayer;		///<历史数据回放器，用于提供回测所需的历史数据
 
@@ -993,6 +995,7 @@ protected:
 		ICtaStrategyFact*	_fact;			///< 策略工厂接口指针
 		FuncCreateStraFact	_creator;		///< 创建工厂函数指针
 		FuncDeleteStraFact	_remover;		///< 删除工厂函数指针
+		bool			_preserve_module;	///< 清理失败时保留插件代码，避免卸载仍有活对象的模块
 
 		/**
 		 * @brief 构造函数
@@ -1002,6 +1005,54 @@ protected:
 		{
 			_module_inst = NULL;
 			_fact = NULL;
+			_creator = NULL;
+			_remover = NULL;
+			_preserve_module = false;
+		}
+
+		void preserve()
+		{
+			// Deliberately relinquish the handles. A plugin object may still depend
+			// on this module when its destructor reports failure.
+			_fact = NULL;
+			_module_inst = NULL;
+			_creator = NULL;
+			_remover = NULL;
+			_preserve_module = true;
+		}
+
+		void release()
+		{
+			if (_preserve_module)
+				return;
+
+			if (_fact != NULL)
+			{
+				if (_remover == NULL)
+				{
+					preserve();
+					return;
+				}
+				try
+				{
+					_remover(_fact);
+				}
+				catch (...)
+				{
+					preserve();
+					return;
+				}
+				_fact = NULL;
+			}
+
+			if (_module_inst != NULL)
+			{
+				DLLHelper::free_library(_module_inst);
+				_module_inst = NULL;
+			}
+			_creator = NULL;
+			_remover = NULL;
+			_module_path.clear();
 		}
 
 		/**
@@ -1010,8 +1061,7 @@ protected:
 		 */
 		~_StraFactInfo()
 		{
-			if (_fact)
-				_remover(_fact);
+			release();
 		}
 	} StraFactInfo;
 	StraFactInfo	_factory;			///< 策略工厂信息，管理策略工厂的加载和创建

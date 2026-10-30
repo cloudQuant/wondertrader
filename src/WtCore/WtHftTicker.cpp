@@ -20,7 +20,21 @@
 
 #include "../WTSTools/WTSLogger.h"
 
+#include <exception>
+
 USING_NS_WTP;
+
+namespace
+{
+	bool isSessionCloseTime(WTSSessionInfo* session, uint32_t minute)
+	{
+		const uint32_t closeTime = session->getCloseTime(true);
+		return session->offsetTime(minute, true) == closeTime ||
+			(minute == 2400 && closeTime == 2400);
+	}
+
+	thread_local WtHftRtTicker* s_hft_worker_ticker = nullptr;
+}
 
 
 WtHftRtTicker::WtHftRtTicker(WtHftEngine* engine)
@@ -31,12 +45,26 @@ WtHftRtTicker::WtHftRtTicker(WtHftEngine* engine)
 , _next_check_time(0)
 	, _last_emit_pos(0)
 	, _stopped(false)
+	, _in_session_pass_count(0)
+	, _lifecycle_state(LifecycleState::Idle)
+	, _join_waiter_count(0)
 	{
 }
 
 
 WtHftRtTicker::~WtHftRtTicker()
 {
+	if (s_hft_worker_ticker != nullptr)
+		std::terminate();
+
+	{
+		std::lock_guard<std::mutex> lock(_lifecycle_mtx);
+		if (_lifecycle_state == LifecycleState::Starting &&
+			_run_owner_id == std::this_thread::get_id())
+			std::terminate();
+	}
+
+	stop();
 }
 
 void WtHftRtTicker::init(IDataReader* store, const char* sessionID)
@@ -59,7 +87,13 @@ void WtHftRtTicker::trigger_price(WTSTickData* curTick)
 		for (const std::string& hotCode : hotCodes)
 		{
 			WTSTickData* hotTick = WTSTickData::create(curTick->getTickStruct());
-			hotTick->setCode(hotCode.c_str());
+			if (hotTick == NULL)
+				continue;
+			if (!hotTick->trySetCode(hotCode.c_str()))
+			{
+				hotTick->release();
+				continue;
+			}
 			_engine->on_tick(hotCode.c_str(), hotTick);
 			hotTick->release();
 		}
@@ -68,7 +102,12 @@ void WtHftRtTicker::trigger_price(WTSTickData* curTick)
 
 void WtHftRtTicker::on_tick(WTSTickData* curTick)
 {
-	if (_thrd == NULL)
+	bool hasWorkerThread = false;
+	{
+		std::lock_guard<std::mutex> lock(_lifecycle_mtx);
+		hasWorkerThread = _thrd != NULL;
+	}
+	if (!hasWorkerThread)
 	{
 		trigger_price(curTick);
 		return;
@@ -124,8 +163,7 @@ void WtHftRtTicker::on_tick(WTSTickData* curTick)
 
 			_engine->on_minute_end(_date, thisMin);
 
-			uint32_t offMin = _s_info->offsetTime(thisMin, true);
-			if (offMin == _s_info->getCloseTime(true))
+			if (isSessionCloseTime(_s_info, thisMin))
 			{
 				_engine->on_session_end();
 			}
@@ -156,104 +194,206 @@ void WtHftRtTicker::on_tick(WTSTickData* curTick)
 
 void WtHftRtTicker::run()
 {
-	if (_thrd)
-		return;
-
-	uint32_t curTDate = _engine->get_basedata_mgr()->calcTradingDate(_s_info->id(), _engine->get_date(), _engine->get_min_time(), true);
-	_engine->set_trading_date(curTDate);
-
-	_engine->on_init();
-
-	_engine->on_session_begin();
-
-	//先检查当前时间, 如果大于
-	uint32_t offTime = _s_info->offsetTime(_engine->get_min_time(), true);
-
-	_thrd.reset(new StdThread([this, offTime](){
-		while (!_stopped)
+	{
+		std::lock_guard<std::mutex> lock(_lifecycle_mtx);
+		if (_lifecycle_state != LifecycleState::Idle)
+			return;
+		if (_stopped.load(std::memory_order_acquire))
 		{
-			if (_time != UINT_MAX && _s_info->isInTradingTime(_time / 100000, true))
-			{
-				std::this_thread::sleep_for(std::chrono::milliseconds(10));
-				uint64_t now = TimeUtils::getLocalTimeNow();
-
-				if (now >= _next_check_time && _last_emit_pos < _cur_pos)
-				{
-					//触发数据回放模块
-					StdUniqueLock lock(_mtx);
-
-					//优先修改时间标记
-					_last_emit_pos = _cur_pos;
-
-					uint32_t thisMin = _s_info->minuteToTime(_cur_pos);
-					_time = thisMin;
-
-					//如果thisMin是0, 说明换日了
-					//这里是本地计时导致的换日, 说明日期其实还是老日期, 要自动+1
-					//同时因为时间是235959xxx, 所以也要手动置为0
-					if (thisMin == 0)
-					{
-						uint32_t lastDate = _date;
-						_date = TimeUtils::getNextDate(_date);
-						_time = 0;
-						WTSLogger::info("Data automatically changed at time 00:00: {} -> {}", lastDate, _date);
-					}
-
-					WTSLogger::info("Minute bar {}.{:04d} closed automatically", _date, thisMin);
-					if (_store)
-						_store->onMinuteEnd(_date, thisMin);
-
-					_engine->on_minute_end(_date, thisMin);
-
-					uint32_t offMin = _s_info->offsetTime(thisMin, true);
-					if (offMin >= _s_info->getCloseTime(true))
-					{
-						_engine->on_session_end();
-					}
-
-					//145959000
-					if (_engine)
-						_engine->set_date_time(_date, thisMin, 0);
-				}
-			}
-			else //if(offTime >= _s_info->getOpenTime(true) && offTime <= _s_info->getCloseTime(true))
-			{
-				//收盘以后，如果发现上次触发的位置不等于总的分钟数，说明少了最后一分钟的闭合逻辑
-				uint32_t total_mins = _s_info->getTradingMins();
-				if (_time != UINT_MAX && _last_emit_pos != 0 && _last_emit_pos < total_mins && offTime >= _s_info->getCloseTime(true))
-				{
-					WTSLogger::warn("Tradingday {} will be ended forcely, last_emit_pos: {}, time: {}", _engine->getTradingDate(), _last_emit_pos.fetch_add(0), _time);
-
-					//触发数据回放模块
-					StdUniqueLock lock(_mtx);
-
-					//优先修改时间标记
-					_last_emit_pos = total_mins;
-
-					[[maybe_unused]] bool bEndingTDate = true;
-					uint32_t thisMin = _s_info->getCloseTime(false);
-					[[maybe_unused]] uint32_t offMin = _s_info->getCloseTime(true);
-
-					WTSLogger::info("Minute bar {}.{:04d} closed automatically", _date, thisMin);
-					if (_store)
-						_store->onMinuteEnd(_date, thisMin, _engine->getTradingDate());
-
-					_engine->on_session_end();
-
-				}
-				else
-				{
-					std::this_thread::sleep_for(std::chrono::seconds(10));
-				}
-			}
-			
+			_lifecycle_state = LifecycleState::Joined;
+			_lifecycle_cv.notify_all();
+			return;
 		}
-	}));
+
+		_lifecycle_state = LifecycleState::Starting;
+		_run_owner_id = std::this_thread::get_id();
+	}
+
+	auto finishStoppedStartup = [this]() {
+		std::lock_guard<std::mutex> lock(_lifecycle_mtx);
+		_run_owner_id = std::thread::id();
+		_lifecycle_state = LifecycleState::Joined;
+		_lifecycle_cv.notify_all();
+	};
+
+	try
+	{
+		uint32_t curTDate = _engine->get_basedata_mgr()->calcTradingDate(_s_info->id(), _engine->get_date(), _engine->get_min_time(), true);
+		_engine->set_trading_date(curTDate);
+		if (_stopped.load(std::memory_order_acquire))
+		{
+			finishStoppedStartup();
+			return;
+		}
+
+		_engine->on_init();
+		if (_stopped.load(std::memory_order_acquire))
+		{
+			finishStoppedStartup();
+			return;
+		}
+
+		_engine->on_session_begin();
+
+		uint32_t offTime = _s_info->offsetTime(_engine->get_min_time(), true);
+
+		std::unique_lock<std::mutex> lock(_lifecycle_mtx);
+		_run_owner_id = std::thread::id();
+		if (_stopped.load(std::memory_order_acquire))
+		{
+			_lifecycle_state = LifecycleState::Joined;
+		}
+		else
+		{
+			_thrd = std::make_shared<StdThread>([this, offTime]() {
+				s_hft_worker_ticker = this;
+				while (!_stopped.load(std::memory_order_acquire))
+				{
+					if (_time != UINT_MAX && _s_info->isInTradingTime(_time / 100000, true))
+					{
+						uint8_t passCount = _in_session_pass_count.load(std::memory_order_relaxed);
+						if (passCount < 2)
+							_in_session_pass_count.store(passCount + 1, std::memory_order_release);
+
+						std::this_thread::sleep_for(std::chrono::milliseconds(10));
+						uint64_t now = TimeUtils::getLocalTimeNow();
+
+						if (now >= _next_check_time && _last_emit_pos < _cur_pos)
+						{
+							StdUniqueLock dataLock(_mtx);
+							_last_emit_pos = _cur_pos;
+
+							uint32_t thisMin = _s_info->minuteToTime(_cur_pos);
+							// _time uses HHMMSSmmm throughout the ticker. Keep the
+							// auto-close value in the same unit used by on_tick() and
+							// isInTradingTime(_time / 100000).
+							_time = thisMin * 100000;
+
+							if (thisMin == 0)
+							{
+								uint32_t lastDate = _date;
+								_date = TimeUtils::getNextDate(_date);
+								_time = 0;
+								WTSLogger::info("Data automatically changed at time 00:00: {} -> {}", lastDate, _date);
+							}
+
+							WTSLogger::info("Minute bar {}.{:04d} closed automatically", _date, thisMin);
+							if (_store)
+								_store->onMinuteEnd(_date, thisMin);
+
+							_engine->on_minute_end(_date, thisMin);
+
+							uint32_t offMin = _s_info->offsetTime(thisMin, true);
+							if (offMin >= _s_info->getCloseTime(true) ||
+								isSessionCloseTime(_s_info, thisMin))
+								_engine->on_session_end();
+
+							if (_engine)
+								_engine->set_date_time(_date, thisMin, 0);
+						}
+					}
+					else
+					{
+						uint32_t total_mins = _s_info->getTradingMins();
+						if (_time != UINT_MAX && _last_emit_pos != 0 && _last_emit_pos < total_mins && offTime >= _s_info->getCloseTime(true))
+						{
+							WTSLogger::warn("Tradingday {} will be ended forcely, last_emit_pos: {}, time: {}", _engine->getTradingDate(), _last_emit_pos.fetch_add(0), _time);
+							StdUniqueLock dataLock(_mtx);
+							_last_emit_pos = total_mins;
+
+							[[maybe_unused]] bool bEndingTDate = true;
+							uint32_t thisMin = _s_info->getCloseTime(false);
+							[[maybe_unused]] uint32_t offMin = _s_info->getCloseTime(true);
+
+							WTSLogger::info("Minute bar {}.{:04d} closed automatically", _date, thisMin);
+							if (_store)
+								_store->onMinuteEnd(_date, thisMin, _engine->getTradingDate());
+
+							_engine->on_session_end();
+						}
+						else
+						{
+							std::this_thread::sleep_for(std::chrono::seconds(10));
+						}
+					}
+				}
+				s_hft_worker_ticker = nullptr;
+			});
+			_lifecycle_state = LifecycleState::Running;
+		}
+
+		_lifecycle_cv.notify_all();
+	}
+	catch (...)
+	{
+		std::lock_guard<std::mutex> lock(_lifecycle_mtx);
+		if (_lifecycle_state == LifecycleState::Starting)
+		{
+			_run_owner_id = std::thread::id();
+			_lifecycle_state = LifecycleState::Joined;
+		}
+		_lifecycle_cv.notify_all();
+		throw;
+	}
 }
 
 void WtHftRtTicker::stop()
 {
-	_stopped = true;
-	if (_thrd)
-		_thrd->join();
+	_stopped.store(true, std::memory_order_release);
+
+	if (s_hft_worker_ticker != nullptr)
+		return;
+
+	std::unique_lock<std::mutex> lock(_lifecycle_mtx);
+	if (_lifecycle_state == LifecycleState::Starting &&
+		_run_owner_id == std::this_thread::get_id())
+		return;
+
+	_lifecycle_cv.wait(lock, [this]() {
+		return _lifecycle_state != LifecycleState::Starting;
+	});
+
+	if (_lifecycle_state == LifecycleState::Idle)
+	{
+		_lifecycle_state = LifecycleState::Joined;
+		_lifecycle_cv.notify_all();
+		return;
+	}
+
+	if (_lifecycle_state == LifecycleState::Joined)
+	{
+		_lifecycle_cv.wait(lock, [this]() {
+			return _join_waiter_count == 0;
+		});
+		return;
+	}
+
+	if (_lifecycle_state == LifecycleState::Joining)
+	{
+		++_join_waiter_count;
+		_lifecycle_cv.wait(lock, [this]() {
+			return _lifecycle_state == LifecycleState::Joined;
+		});
+		--_join_waiter_count;
+		_lifecycle_cv.notify_all();
+		return;
+	}
+
+	_lifecycle_state = LifecycleState::Joining;
+	StdThreadPtr worker = _thrd;
+	lock.unlock();
+
+	try
+	{
+		if (worker && worker->joinable())
+			worker->join();
+	}
+	catch (...)
+	{
+		std::terminate();
+	}
+
+	lock.lock();
+	_lifecycle_state = LifecycleState::Joined;
+	_lifecycle_cv.notify_all();
 }

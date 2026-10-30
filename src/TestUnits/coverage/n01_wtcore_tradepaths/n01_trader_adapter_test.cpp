@@ -15,15 +15,22 @@
 #include <gtest/gtest.h>
 
 #include <cstring>
+#include <atomic>
 #include <memory>
 #include <set>
 #include <string>
-
-#include <boost/core/noncopyable.hpp>
+#include <system_error>
+#include <filesystem>
+#include <thread>
+#include <vector>
 
 #include <WtCore/TraderAdapter.h>
+#include <WtCore/WtHelper.h>
 #include <WtCore/ITrdNotifySink.h>
+#include <WtCore/ActionPolicyMgr.h>
 #include <Includes/WTSVariant.hpp>
+#include "../n02_wtcore_engines/r160_common.h"
+#include "../p11_wtcore_traderadapter/p11_trader_fixture.h"
 
 USING_NS_WTP;
 
@@ -45,6 +52,97 @@ public:
 	uint32_t orders = 0;
 	uint32_t readys = 0;
 	uint32_t losts = 0;
+};
+
+WTSVariant* active_riskmon_params(bool withNonObjectPolicy = false)
+{
+	WTSVariant* params = WTSVariant::createObject();
+	WTSVariant* riskmon = WTSVariant::createObject();
+	riskmon->append("active", true);
+	if (withNonObjectPolicy)
+		riskmon->append("policy", "not-an-object");
+	params->append("riskmon", riskmon, false);
+	return params;
+}
+
+WTSVariant* trader_mocker_params(uint32_t mockerId, bool includeRiskmon, bool riskmonActive)
+{
+	WTSVariant* params = WTSVariant::createObject();
+	params->append("module", "TraderMocker");
+	params->append("mockerid", mockerId);
+	params->append("span", 50u);
+
+	if (includeRiskmon)
+	{
+		WTSVariant* riskmon = WTSVariant::createObject();
+		riskmon->append("active", riskmonActive);
+		if (riskmonActive)
+		{
+			WTSVariant* policy = WTSVariant::createObject();
+			WTSVariant* defaultRule = WTSVariant::createObject();
+			defaultRule->append("cancel_total_limits", 10u);
+			defaultRule->append("cancel_times_boundary", 10u);
+			defaultRule->append("cancel_stat_timespan", 60u);
+			defaultRule->append("order_total_limits", 10u);
+			defaultRule->append("order_times_boundary", 10u);
+			defaultRule->append("order_stat_timespan", 60u);
+			policy->append("default", defaultRule, false);
+			riskmon->append("policy", policy, false);
+		}
+		params->append("riskmon", riskmon, false);
+	}
+
+	return params;
+}
+
+class ScopedWtInstDir
+{
+public:
+	explicit ScopedWtInstDir(const std::string& path)
+		: _old(WtHelper::getInstDir())
+	{
+		WtHelper::setInstDir(path.c_str());
+	}
+
+	~ScopedWtInstDir()
+	{
+		WtHelper::setInstDir(_old.c_str());
+	}
+
+private:
+	std::string _old;
+};
+
+class ScopedTradeTestDirs
+{
+public:
+	explicit ScopedTradeTestDirs(const std::string& name)
+		: _tmp(name)
+		, _instDir(_tmp.path() + "/")
+		, _cwd(_tmp.path())
+	{
+	}
+
+	bool ok() const { return _cwd.ok(); }
+
+private:
+	r160::TempDir _tmp;
+	ScopedWtInstDir _instDir;
+	r160::ScopedCwd _cwd;
+};
+
+class ReleaseTrackingTraderApi : public ITraderApi
+{
+public:
+	bool init_ret = true;
+	uint32_t release_calls = 0;
+	uint32_t connect_calls = 0;
+	std::vector<ITraderSpi*> registered_spis;
+
+	bool init(WTSVariant*) override { return init_ret; }
+	void release() override { ++release_calls; }
+	void registerSpi(ITraderSpi* spi) override { registered_spis.push_back(spi); }
+	void connect() override { ++connect_calls; }
 };
 
 } // namespace
@@ -69,11 +167,158 @@ TEST(N01TraderAdapter, init_rejects_null_params_without_touching_state)
     EXPECT_EQ(static_cast<int>(adapter.state()), 0);
 }
 
+TEST(N01TraderAdapter, init_accepts_no_riskmon_inactive_riskmon_and_complete_active_policy)
+{
+	const std::string moduleDir = r160::find_module_dir("TraderMocker");
+	if (moduleDir.empty())
+		GTEST_SKIP() << "libTraderMocker not found next to test binary";
+
+	r160::TempDir tmp("n01_trader_riskmon_controls");
+	const std::string tradersDir = tmp.path("traders");
+	std::error_code ec;
+	std::filesystem::create_directories(tradersDir, ec);
+	ASSERT_FALSE(ec);
+
+	const std::string moduleName = DLLHelper::wrap_module("TraderMocker", "lib");
+	std::filesystem::create_symlink(
+		std::filesystem::path(moduleDir) / moduleName,
+		std::filesystem::path(tradersDir) / moduleName, ec);
+	ASSERT_FALSE(ec) << "cannot link TraderMocker into the temporary traders dir";
+
+	ScopedWtInstDir instDir(tmp.path() + "/");
+	r160::ScopedCwd cwd(tmp.path());
+	ASSERT_TRUE(cwd.ok());
+
+	WTSVariant* noRiskmonParams = trader_mocker_params(910001, false, false);
+	{
+		TraderAdapter adapter;
+		ASSERT_TRUE(adapter.init("n01_no_riskmon", noRiskmonParams, nullptr, nullptr));
+		EXPECT_STREQ(adapter.id(), "n01_no_riskmon");
+		EXPECT_EQ(static_cast<int>(adapter.state()), static_cast<int>(TraderAdapter::AS_NOTLOGIN));
+	}
+	noRiskmonParams->release();
+
+	WTSVariant* inactiveRiskmonParams = trader_mocker_params(910002, true, false);
+	{
+		TraderAdapter adapter;
+		ASSERT_TRUE(adapter.init("n01_inactive_riskmon", inactiveRiskmonParams, nullptr, nullptr));
+		EXPECT_STREQ(adapter.id(), "n01_inactive_riskmon");
+		EXPECT_EQ(static_cast<int>(adapter.state()), static_cast<int>(TraderAdapter::AS_NOTLOGIN));
+	}
+	inactiveRiskmonParams->release();
+
+	WTSVariant* activePolicyParams = trader_mocker_params(910003, true, true);
+	{
+		TraderAdapter adapter;
+		ASSERT_TRUE(adapter.init("n01_active_riskmon", activePolicyParams, nullptr, nullptr));
+		EXPECT_STREQ(adapter.id(), "n01_active_riskmon");
+		EXPECT_EQ(static_cast<int>(adapter.state()), static_cast<int>(TraderAdapter::AS_NOTLOGIN));
+	}
+	activePolicyParams->release();
+}
+
+TEST(N01TraderAdapter, active_riskmon_without_policy_is_rejected_before_state_is_committed)
+{
+	WTSVariant* params = active_riskmon_params();
+	TraderAdapter adapter;
+
+	EXPECT_FALSE(adapter.init("ctp_missing_policy", params, nullptr, nullptr));
+	EXPECT_STREQ(adapter.id(), "");
+	EXPECT_EQ(adapter.getBaseDataMgr(), nullptr);
+	EXPECT_FALSE(adapter.run());
+
+	params->release();
+}
+
+TEST(N01TraderAdapter, active_riskmon_with_non_object_policy_is_rejected_before_state_is_committed)
+{
+	WTSVariant* params = active_riskmon_params(true);
+	TraderAdapter adapter;
+
+	EXPECT_FALSE(adapter.init("ctp_invalid_policy", params, nullptr, nullptr));
+	EXPECT_STREQ(adapter.id(), "");
+	EXPECT_EQ(adapter.getBaseDataMgr(), nullptr);
+	EXPECT_FALSE(adapter.run());
+
+	params->release();
+}
+
 TEST(N01TraderAdapter, init_ext_rejects_null_api)
 {
     TraderAdapter adapter;
     EXPECT_FALSE(adapter.initExt("ctp01", nullptr, nullptr, nullptr));
     EXPECT_STREQ(adapter.id(), "");
+}
+
+TEST(N01TraderAdapter, init_ext_failure_releases_partial_api_state_once)
+{
+	ScopedTradeTestDirs dirs("n01_failed_ext");
+	ASSERT_TRUE(dirs.ok());
+	ReleaseTrackingTraderApi api;
+	api.init_ret = false;
+	{
+		TraderAdapter adapter;
+		EXPECT_FALSE(adapter.initExt("failed_ext", &api, nullptr, nullptr));
+		EXPECT_EQ(api.release_calls, 1u);
+		EXPECT_STREQ(adapter.id(), "");
+		EXPECT_FALSE(adapter.run());
+	}
+	EXPECT_EQ(api.release_calls, 1u);
+	EXPECT_TRUE(api.registered_spis.empty());
+}
+
+TEST(N01TraderAdapter, release_unregisters_only_a_registered_spi_and_is_idempotent)
+{
+	ScopedTradeTestDirs dirs("n01_release_ext");
+	ASSERT_TRUE(dirs.ok());
+	ReleaseTrackingTraderApi unstartedApi;
+	p11fix::FakeBaseDataMgr baseData;
+	ActionPolicyMgr policy;
+	{
+		TraderAdapter adapter;
+		ASSERT_TRUE(adapter.initExt("not_started", &unstartedApi, &baseData, &policy));
+		EXPECT_EQ(adapter.getBaseDataMgr(), &baseData);
+		adapter.release();
+		EXPECT_EQ(adapter.getBaseDataMgr(), nullptr);
+		adapter.release();
+	}
+	EXPECT_EQ(unstartedApi.release_calls, 1u);
+	EXPECT_TRUE(unstartedApi.registered_spis.empty());
+	EXPECT_EQ(unstartedApi.connect_calls, 0u);
+
+	ReleaseTrackingTraderApi startedApi;
+	{
+		TraderAdapter adapter;
+		ASSERT_TRUE(adapter.initExt("started", &startedApi, &baseData, &policy));
+		ASSERT_TRUE(adapter.run());
+		ASSERT_EQ(startedApi.registered_spis.size(), 1u);
+		EXPECT_NE(startedApi.registered_spis.front(), nullptr);
+		adapter.release();
+		EXPECT_EQ(adapter.getBaseDataMgr(), nullptr);
+		adapter.release();
+	}
+	EXPECT_EQ(startedApi.release_calls, 1u);
+	ASSERT_EQ(startedApi.registered_spis.size(), 2u);
+	EXPECT_NE(startedApi.registered_spis.front(), nullptr);
+	EXPECT_EQ(startedApi.registered_spis.back(), nullptr);
+	EXPECT_EQ(startedApi.connect_calls, 1u);
+}
+
+TEST(N01TraderAdapter, missing_module_failure_releases_retained_config)
+{
+	r160::TempDir tmp("missing_trader_module");
+	ScopedWtInstDir instDir(tmp.path() + "/");
+	r160::ScopedCwd cwd(tmp.path());
+	ASSERT_TRUE(cwd.ok());
+
+	WTSVariant* params = WTSVariant::createObject();
+	params->append("module", "NoSuchTraderModule");
+	TraderAdapter adapter;
+	EXPECT_FALSE(adapter.init("missing_module", params, nullptr, nullptr));
+	EXPECT_EQ(params->retainCount(), 1u);
+	EXPECT_STREQ(adapter.id(), "");
+	EXPECT_FALSE(adapter.run());
+	params->release();
 }
 
 TEST(N01TraderAdapter, run_and_release_and_queryfund_are_api_null_safe)
@@ -146,12 +391,44 @@ TEST(N01TraderAdapter, add_sink_is_idempotent_set_membership)
     a.on_account("CNY", 1, 1, 1, 1, 0, 0, 0, 0, 0, 0);
 }
 
+TEST(N01TraderAdapter, local_order_id_concurrent_first_call_is_unique)
+{
+    constexpr size_t kThreadCount = 24;
+    std::atomic<size_t> ready{ 0 };
+    std::atomic<bool> start{ false };
+    std::vector<uint32_t> ids(kThreadCount);
+    std::vector<std::thread> workers;
+    workers.reserve(kThreadCount);
+
+    for (size_t i = 0; i < kThreadCount; ++i)
+    {
+        workers.emplace_back([&, i]() {
+            ready.fetch_add(1, std::memory_order_release);
+            while (!start.load(std::memory_order_acquire))
+                std::this_thread::yield();
+            ids[i] = makeLocalOrderID();
+        });
+    }
+
+    while (ready.load(std::memory_order_acquire) != kThreadCount)
+        std::this_thread::yield();
+    start.store(true, std::memory_order_release);
+    for (std::thread& worker : workers)
+        worker.join();
+
+    std::set<uint32_t> uniqueIds(ids.begin(), ids.end());
+    EXPECT_EQ(kThreadCount, uniqueIds.size())
+        << "在新进程中并发首次生成的本地委托号必须互异";
+    EXPECT_EQ(0u, uniqueIds.count(0u)) << "0 保留为无订单哨兵";
+}
+
 TEST(N01TraderAdapter, local_order_id_is_monotonic)
 {
     // 只校验单调性与互异性，不比对任何墙钟绝对值
     uint32_t first = makeLocalOrderID();
     uint32_t second = makeLocalOrderID();
     uint32_t third = makeLocalOrderID();
+    EXPECT_NE(0u, first) << "0 保留为无订单哨兵";
     EXPECT_NE(first, UINT_MAX);
     EXPECT_EQ(second, first + 1);
     EXPECT_EQ(third, second + 1);

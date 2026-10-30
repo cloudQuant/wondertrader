@@ -45,6 +45,9 @@ ELSE(GNUCC)
 ENDIF()
 
 TARGET_LINK_LIBRARIES(WtDtPorter ${LIBS})
+add_dependencies(WtDtPorter
+	ParserCTP ParserXTP ParserFemas ParserCTPMini ParserCTPOpt
+	WtDataStorage WtDataStorageAD)
 IF (MSVC)
 ELSE (GNUCC)
 	SET_TARGET_PROPERTIES(WtDtPorter PROPERTIES
@@ -77,4 +80,3 @@ add_custom_command(TARGET WtDtPorter POST_BUILD
 		copy ${CMAKE_BINARY_DIR}/build_${PLATFORM}/${CMAKE_BUILD_TYPE}/bin/${PREFIX}WtDataStorageAD${SUFFIX} ${LIBRARY_OUTPUT_PATH}/
 
 		COMMENT "depends modules copied")
-		

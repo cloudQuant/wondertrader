@@ -1,0 +1,17 @@
+{
+  "object_build_command": "/opt/homebrew/bin/ninja -C build-cov -j 4 WtCore/CMakeFiles/WtCore.dir/TraderAdapter.cpp.o TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n01_wtcore_tradepaths/n01_trader_adapter_subscribe_concurrency_test.cpp.o",
+  "link_command": "/usr/bin/c++ -arch arm64 -g -fprofile-instr-generate -Wl,-undefined,dynamic_lookup build-cov/TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n01_wtcore_tradepaths/n01_trader_adapter_subscribe_concurrency_test.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/TraderAdapter.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/WtHelper.cpp.o /opt/homebrew/lib/libgtest_main.a /opt/homebrew/lib/libgtest.a build-cov/build_x64/Debug/libs/libWTSTools.a build-cov/build_x64/Debug/libs/libWTSUtils.a /usr/local/lib/libiconv.dylib -L/opt/homebrew/lib -lboost_filesystem -lboost_thread -lpthread -o /tmp/wt-trader-subscribe-focused",
+  "run_command": "/tmp/wt-trader-subscribe-focused",
+  "cwd": "/Users/yunjinqi/Documents/new_projects/wondertrader",
+  "exit": 0,
+  "binary_sha256": "009a559659e6f48936e8a1920b13ebd46f84d1739f7805c2160f0508c99c1612",
+  "tests": 13,
+  "passed": 13,
+  "skipped": 0,
+  "failures": 0,
+  "scope": "Local isolated TraderAdapter subscription/broadcast/concurrency GTests. Adds the manager callback thread-local nonblocking read-only query case. UFT runner wiring, plugin late-SPI callbacks, live order-query semantics, external SPI contracts, and full production chain are not verified.",
+  "new_test_cases": [
+    "N01TraderAdapterSubscribe.manager_callback_query_is_thread_local_nonblocking_and_read_only"
+  ],
+  "previous_run": "run-v1.json"
+}

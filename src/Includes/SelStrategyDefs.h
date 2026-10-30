@@ -115,5 +115,5 @@ public:
 
 //创建工厂
 typedef ISelStrategyFact* (*FuncCreateSelStraFact)();
-//删除工厂
-typedef void(*FuncDeleteSelStraFact)(ISelStrategyFact* &fact);
+//删除工厂（与 deleteSelStrategyFact 导出保持按值传递）
+typedef void(*FuncDeleteSelStraFact)(ISelStrategyFact* fact);

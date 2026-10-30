@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+cd /Users/yunjinqi/Documents/new_projects/wondertrader
+/opt/homebrew/bin/cmake --build build-cov --target WtExeFact -j 4
+/opt/homebrew/bin/ninja -C build-cov -j 4 TestUnits/coverage/CMakeFiles/CoverageTests_exefact.dir/r7_exefact/r7_vwap_profile_test.cpp.o TestUnits/coverage/CMakeFiles/CoverageTests_exefact.dir/r7_exefact/r7_vwap_unit_test.cpp.o TestUnits/coverage/CMakeFiles/CoverageTests_exefact.dir/r7_exefact/r7_stock_vwap_unit_test.cpp.o
+/usr/bin/c++ -arch arm64 -g -fprofile-instr-generate -Wl,-undefined,dynamic_lookup -Wl,-rpath,/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/WtPorter build-cov/TestUnits/coverage/CMakeFiles/CoverageTests_exefact.dir/r7_exefact/r7_vwap_profile_test.cpp.o build-cov/TestUnits/coverage/CMakeFiles/CoverageTests_exefact.dir/r7_exefact/r7_vwap_unit_test.cpp.o build-cov/TestUnits/coverage/CMakeFiles/CoverageTests_exefact.dir/r7_exefact/r7_stock_vwap_unit_test.cpp.o build-cov/WtExeFact/CMakeFiles/WtExeFact.dir/WtVWapExeUnit.cpp.o build-cov/WtExeFact/CMakeFiles/WtExeFact.dir/WtStockVWapExeUnit.cpp.o build-cov/WtExeFact/CMakeFiles/WtExeFact.dir/WtTWapExeUnit.cpp.o build-cov/WtExeFact/CMakeFiles/WtExeFact.dir/WtMinImpactExeUnit.cpp.o build-cov/WtExeFact/CMakeFiles/WtExeFact.dir/WtStockMinImpactExeUnit.cpp.o build-cov/WtExeFact/CMakeFiles/WtExeFact.dir/WtDiffMinImpactExeUnit.cpp.o build-cov/WtExeFact/CMakeFiles/WtExeFact.dir/WtExeFact.cpp.o build-cov/WtExeFact/CMakeFiles/WtExeFact.dir/WtOrdMon.cpp.o /opt/homebrew/lib/libgtest_main.a /opt/homebrew/lib/libgtest.a build-cov/build_x64/Debug/libs/libWTSTools.a build-cov/build_x64/Debug/libs/libWTSUtils.a build-cov/build_x64/Debug/bin/WtPorter/libWtExecMon.dylib /usr/local/lib/libiconv.dylib -L/opt/homebrew/lib -lboost_filesystem -lboost_thread -lpthread -o /tmp/wt-vwap-focused
+mkdir -p /tmp/wt-iter02-vwap-focused
+cd /tmp/wt-iter02-vwap-focused
+/tmp/wt-vwap-focused --gtest_filter='r7_vwap_profile.*:r7_vwap.*:r7_stkvw.*'

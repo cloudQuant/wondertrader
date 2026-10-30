@@ -11,6 +11,8 @@
 #include "WtEngine.h"
 #include "WtHelper.h"
 
+#include <memory>
+
 #include "../Share/StrUtil.hpp"
 #include "../Share/CodeHelper.hpp"
 
@@ -262,16 +264,7 @@ double WtDtMgr::get_adjusting_factor(const char* stdCode, uint32_t uDate)
 
 uint32_t WtDtMgr::get_adjusting_flag()
 {
-	static uint32_t flag = UINT_MAX;
-	if(flag == UINT_MAX)
-	{
-		if (_reader)
-			flag = _reader->getAdjustingFlag();
-		else
-			flag = 0;
-	}
-
-	return flag;
+	return _reader ? _reader->getAdjustingFlag() : 0;
 }
 
 WTSTickSlice* WtDtMgr::get_tick_slice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
@@ -303,7 +296,17 @@ WTSTickSlice* WtDtMgr::get_tick_slice(const char* stdCode, uint32_t count, uint6
 	{
 		//先读取全部tick数据
 		double factor = _engine->get_exright_factor(stdCode, NULL);
-		WTSTickSlice* slice = _reader->readTickSlice(pureStdCode.c_str(), 999999, etime);
+		std::unique_ptr<WTSTickSlice, void(*)(WTSTickSlice*)> slice(
+			_reader->readTickSlice(pureStdCode.c_str(), 999999, etime),
+			[](WTSTickSlice* readerSlice) { if (readerSlice) readerSlice->release(); });
+		if (slice == NULL)
+			return NULL;
+		if (slice->size() == 0)
+		{
+			slice.reset();
+			return NULL;
+		}
+
 		std::vector<WTSTickStruct> ayTicks;
 		ayTicks.resize(slice->size());
 		std::size_t offset = 0;
@@ -312,6 +315,8 @@ WTSTickSlice* WtDtMgr::get_tick_slice(const char* stdCode, uint32_t count, uint6
 			memcpy(&ayTicks[0] + offset, slice->get_block_addr(bIdx), slice->get_block_size(bIdx) * sizeof(WTSTickStruct));
 			offset += slice->get_block_size(bIdx);
 		}
+		// WTSTickSlice 只保存 reader block 的非拥有型指针；复制完成后释放 reader slice。
+		slice.reset();
 
 		//缓存的数据做一个复权处理
 		for (WTSTickStruct& tick : ayTicks)

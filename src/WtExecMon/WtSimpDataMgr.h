@@ -126,18 +126,21 @@ public:
 	/**
 	 * @brief 获取当前日期
 	 * @return 当前日期，格式为YYYYMMDD
+	 * @note 收到第一笔有效行情前返回 0。
 	 */
 	virtual uint32_t	get_date() override;
 
 	/**
 	 * @brief 获取当前分钟时间
 	 * @return 当前分钟时间，格式为HHMM
+	 * @note 收到第一笔有效行情前返回 0。
 	 */
 	virtual uint32_t	get_min_time()override;
 
 	/**
 	 * @brief 获取当前秒数
 	 * @return 当前秒数，格式为SSMMM
+	 * @note 收到第一笔有效行情前返回 0。
 	 */
 	virtual uint32_t	get_secs() override;
 

@@ -6,6 +6,7 @@
  */
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <cstring>
 #include <string>
 #include <vector>
@@ -322,6 +323,14 @@ TEST_F(MatchEngineTest, zeroAskQuantityDoesNotCreateSyntheticBuyFill)
 	ASSERT_EQ(1u, sink->orders.size());
 	EXPECT_EQ(ids[0], sink->orders[0].localid);
 	EXPECT_DOUBLE_EQ(30.0, sink->orders[0].leftover);
+
+	// The still-active order can fill when contra liquidity appears later.
+	WTSTickData* t3 = makeTick(code, 10.0, 1, 10.0, 100, 10.05, 2);
+	feedTick(code, t3);
+	ASSERT_EQ(1u, sink->trades.size());
+	EXPECT_DOUBLE_EQ(2.0, sink->trades[0].vol);
+	ASSERT_EQ(2u, sink->orders.size());
+	EXPECT_DOUBLE_EQ(28.0, sink->orders[1].leftover);
 }
 
 TEST_F(MatchEngineTest, zeroBidQuantityDoesNotCreateSyntheticSellFill)
@@ -344,6 +353,15 @@ TEST_F(MatchEngineTest, zeroBidQuantityDoesNotCreateSyntheticSellFill)
 	ASSERT_EQ(1u, sink->orders.size());
 	EXPECT_EQ(ids[0], sink->orders[0].localid);
 	EXPECT_DOUBLE_EQ(30.0, sink->orders[0].leftover);
+
+	// The still-active order can fill when contra liquidity appears later.
+	WTSTickData* t3 = makeTick(code, 10.0, 1, 10.0, 2, 10.05, 100);
+	feedTick(code, t3);
+	ASSERT_EQ(1u, sink->trades.size());
+	EXPECT_FALSE(sink->trades[0].isBuy);
+	EXPECT_DOUBLE_EQ(2.0, sink->trades[0].vol);
+	ASSERT_EQ(2u, sink->orders.size());
+	EXPECT_DOUBLE_EQ(28.0, sink->orders[1].leftover);
 }
 
 TEST_F(MatchEngineTest, cancelByIdMarksOrderAndReportsCancellation)
@@ -473,4 +491,167 @@ TEST_F(MatchEngineTest, queueReductionAppliesCancelRate)
 	WTSTickData* t3 = makeTick(code, 10.0, 250, 10.0, 400, 10.1, 400);
 	feedTick(code, t3);
 	EXPECT_EQ(1u, sink->trades.size());
+}
+
+TEST_F(MatchEngineTest, cancelByCodeAndSideCancelsOnlyMatchingOrdersWhenQuantityIsZero)
+{
+	setCancelRate(engine, 0.0);
+	const char* codeA = "SSE.STK.600020";
+	const char* codeB = "SSE.STK.600021";
+
+	feedTick(codeA, makeTick(codeA, 10.0, 100, 10.0, 1000, 10.1, 1000));
+	feedTick(codeB, makeTick(codeB, 20.0, 100, 20.0, 1000, 20.1, 1000));
+
+	OrderIDs codeABuy1 = engine.buy(codeA, 10.0, 10, 20240102093000001ULL);
+	OrderIDs codeABuy2 = engine.buy(codeA, 10.0, 20, 20240102093000002ULL);
+	OrderIDs codeASell = engine.sell(codeA, 10.1, 30, 20240102093000003ULL);
+	OrderIDs codeBBuy = engine.buy(codeB, 20.0, 40, 20240102093000004ULL);
+	ASSERT_EQ(1u, codeABuy1.size());
+	ASSERT_EQ(1u, codeABuy2.size());
+	ASSERT_EQ(1u, codeASell.size());
+	ASSERT_EQ(1u, codeBBuy.size());
+
+	// Activate all four orders without allowing the zero-volume ticks to fill them.
+	feedTick(codeA, makeTick(codeA, 10.0, 0, 10.0, 1000, 10.1, 1000));
+	feedTick(codeB, makeTick(codeB, 20.0, 0, 20.0, 1000, 20.1, 1000));
+
+	double callbackQty = 0.0;
+	OrderIDs canceledABuys = engine.cancel(codeA, true, 0.0,
+		[&callbackQty](double qty) { callbackQty += qty; });
+	ASSERT_EQ(2u, canceledABuys.size());
+	EXPECT_EQ(30.0, callbackQty);
+	EXPECT_NE(canceledABuys.end(), std::find(canceledABuys.begin(), canceledABuys.end(), codeABuy1[0]));
+	EXPECT_NE(canceledABuys.end(), std::find(canceledABuys.begin(), canceledABuys.end(), codeABuy2[0]));
+	EXPECT_EQ(canceledABuys.end(), std::find(canceledABuys.begin(), canceledABuys.end(), codeBBuy[0]));
+	EXPECT_EQ(canceledABuys.end(), std::find(canceledABuys.begin(), canceledABuys.end(), codeASell[0]));
+
+	callbackQty = 0.0;
+	OrderIDs canceledBSide = engine.cancel(codeB, true, 0.0,
+		[&callbackQty](double qty) { callbackQty += qty; });
+	ASSERT_EQ(1u, canceledBSide.size());
+	EXPECT_EQ(codeBBuy[0], canceledBSide[0]);
+	EXPECT_EQ(40.0, callbackQty);
+
+	callbackQty = 0.0;
+	OrderIDs canceledASell = engine.cancel(codeA, false, 0.0,
+		[&callbackQty](double qty) { callbackQty += qty; });
+	ASSERT_EQ(1u, canceledASell.size());
+	EXPECT_EQ(codeASell[0], canceledASell[0]);
+	EXPECT_EQ(-30.0, callbackQty);
+}
+
+TEST_F(MatchEngineTest, cancelPositiveQuantityUsesOldestOrdersUntilRequestedQuantityIsReached)
+{
+	setCancelRate(engine, 0.0);
+	const char* code = "SSE.STK.600022";
+	feedTick(code, makeTick(code, 10.0, 100, 10.0, 1000, 10.1, 1000));
+
+	OrderIDs oldest = engine.buy(code, 10.0, 10, 20240102093000001ULL);
+	OrderIDs next = engine.buy(code, 10.0, 20, 20240102093000002ULL);
+	OrderIDs newest = engine.buy(code, 10.0, 30, 20240102093000003ULL);
+	ASSERT_EQ(1u, oldest.size());
+	ASSERT_EQ(1u, next.size());
+	ASSERT_EQ(1u, newest.size());
+	feedTick(code, makeTick(code, 10.0, 0, 10.0, 1000, 10.1, 1000));
+
+	double callbackQty = 0.0;
+	OrderIDs canceled = engine.cancel(code, true, 15.0,
+		[&callbackQty](double qty) { callbackQty += qty; });
+	ASSERT_EQ(2u, canceled.size());
+	EXPECT_EQ(oldest[0], canceled[0]);
+	EXPECT_EQ(next[0], canceled[1]);
+	EXPECT_EQ(30.0, callbackQty);
+
+	// The newer order remains active after the oldest sufficient prefix is canceled.
+	callbackQty = 0.0;
+	OrderIDs remaining = engine.cancel(code, true, 0.0,
+		[&callbackQty](double qty) { callbackQty += qty; });
+	ASSERT_EQ(1u, remaining.size());
+	EXPECT_EQ(newest[0], remaining[0]);
+	EXPECT_EQ(30.0, callbackQty);
+}
+
+TEST_F(MatchEngineTest, cancelPositiveQuantityKeepsTimeOrderAfterMatcherErasesEarlierOrder)
+{
+	setCancelRate(engine, 0.0);
+	const char* code = "SSE.STK.600025";
+	feedTick(code, makeTick(code, 10.0, 100, 10.0, 1000, 10.05, 1000));
+
+	// The first inserted order is a one-unit aggressive filler. The following
+	// orders share a timestamp, so their creation order is the stable tie-break.
+	OrderIDs filler = engine.buy(code, 10.1, 1, 20240102093000001ULL);
+	OrderIDs oldest = engine.buy(code, 10.0, 10, 20240102093000002ULL);
+	OrderIDs next = engine.buy(code, 10.0, 20, 20240102093000002ULL);
+	OrderIDs newest = engine.buy(code, 10.0, 30, 20240102093000003ULL);
+	ASSERT_EQ(1u, filler.size());
+	ASSERT_EQ(1u, oldest.size());
+	ASSERT_EQ(1u, next.size());
+	ASSERT_EQ(1u, newest.size());
+
+	// The zero-volume tick activates every order without filling any order.
+	feedTick(code, makeTick(code, 10.0, 0, 10.0, 1000, 10.05, 1000));
+
+	// This tick fills only the aggressive filler. Erasing the first dense-map
+	// element moves the last candidate to its slot, perturbing map iteration order.
+	feedTick(code, makeTick(code, 10.0, 1, 10.0, 1000, 10.05, 1));
+	ASSERT_EQ(1u, sink->trades.size());
+	EXPECT_EQ(filler[0], sink->trades[0].localid);
+
+	double callbackQty = 0.0;
+	OrderIDs canceled = engine.cancel(code, true, 15.0,
+		[&callbackQty](double qty) { callbackQty += qty; });
+	ASSERT_EQ(2u, canceled.size());
+	EXPECT_EQ(oldest[0], canceled[0]);
+	EXPECT_EQ(next[0], canceled[1]);
+	EXPECT_EQ(30.0, callbackQty);
+
+	// The newest order remains active after the oldest sufficient prefix is canceled.
+	callbackQty = 0.0;
+	OrderIDs remaining = engine.cancel(code, true, 0.0,
+		[&callbackQty](double qty) { callbackQty += qty; });
+	ASSERT_EQ(1u, remaining.size());
+	EXPECT_EQ(newest[0], remaining[0]);
+	EXPECT_EQ(30.0, callbackQty);
+}
+
+TEST_F(MatchEngineTest, ticksActivateAndMatchOnlyOrdersForTheirOwnContract)
+{
+	setCancelRate(engine, 0.0);
+	const char* codeA = "SSE.STK.600023";
+	const char* codeB = "SSE.STK.600024";
+
+	feedTick(codeA, makeTick(codeA, 10.0, 100, 10.0, 100, 10.05, 10));
+	feedTick(codeB, makeTick(codeB, 20.0, 100, 20.0, 100, 20.05, 10));
+	OrderIDs orderA = engine.buy(codeA, 10.1, 10, 20240102093000001ULL);
+	OrderIDs orderB = engine.buy(codeB, 20.1, 10, 20240102093000002ULL);
+	ASSERT_EQ(1u, orderA.size());
+	ASSERT_EQ(1u, orderB.size());
+
+	// A's tick must activate and partially fill only A's order. B remains pending.
+	feedTick(codeA, makeTick(codeA, 10.0, 100, 10.0, 100, 10.05, 3));
+	ASSERT_EQ(1u, sink->entrusts.size());
+	EXPECT_EQ(orderA[0], sink->entrusts[0].localid);
+	EXPECT_EQ(codeA, sink->entrusts[0].code);
+	ASSERT_EQ(1u, sink->trades.size());
+	EXPECT_EQ(orderA[0], sink->trades[0].localid);
+	EXPECT_EQ(codeA, sink->trades[0].code);
+	EXPECT_DOUBLE_EQ(3.0, sink->trades[0].vol);
+	ASSERT_EQ(2u, sink->orders.size());
+	EXPECT_EQ(codeA, sink->orders[0].code);
+	EXPECT_EQ(codeA, sink->orders[1].code);
+	EXPECT_DOUBLE_EQ(7.0, sink->orders[1].leftover);
+
+	// B becomes visible only when B's own tick arrives; every callback retains B.
+	feedTick(codeB, makeTick(codeB, 20.0, 100, 20.0, 100, 20.05, 4));
+	ASSERT_EQ(2u, sink->entrusts.size());
+	EXPECT_EQ(orderB[0], sink->entrusts[1].localid);
+	EXPECT_EQ(codeB, sink->entrusts[1].code);
+	ASSERT_EQ(2u, sink->trades.size());
+	EXPECT_EQ(orderB[0], sink->trades[1].localid);
+	EXPECT_EQ(codeB, sink->trades[1].code);
+	EXPECT_DOUBLE_EQ(4.0, sink->trades[1].vol);
+	ASSERT_EQ(4u, sink->orders.size());
+	EXPECT_EQ(codeB, sink->orders[2].code);
+	EXPECT_EQ(codeB, sink->orders[3].code);
+	EXPECT_DOUBLE_EQ(6.0, sink->orders[3].leftover);
 }

@@ -350,7 +350,46 @@ TEST_F(L02SessionFixture, TradingTimeFlags)
 
 	// (0,0) 的集合竞价段会被跳过
 	m_day->addAuctionTime(0, 0);
+	ASSERT_EQ(2u, m_day->getAuctionSections().size());
+	const WTSSessionInfo::TradingSection& emptyAuctionRange = m_day->getAuctionSections().back();
+	EXPECT_EQ(0u, emptyAuctionRange.first_raw);
+	EXPECT_EQ(0u, emptyAuctionRange.second_raw);
+	EXPECT_EQ(0u, emptyAuctionRange.first);
+	EXPECT_EQ(0u, emptyAuctionRange.second);
 	EXPECT_FALSE(m_day->isInAuctionTime(0));
+	EXPECT_FALSE(m_day->isInAuctionTime(1200));
+	EXPECT_EQ(INVALID_UINT32, m_day->timeToMinutes(0));
+
+	// Changing and repeating offsets keeps the sentinel inactive while real ranges remap.
+	m_day->setOffsetMins(300);
+	EXPECT_EQ(1425u, m_day->getAuctionSections()[0].first);
+	EXPECT_EQ(1430u, m_day->getAuctionSections()[0].second);
+	EXPECT_EQ(0u, m_day->getAuctionSections().back().first);
+	EXPECT_EQ(0u, m_day->getAuctionSections().back().second);
+	EXPECT_FALSE(m_day->isInAuctionTime(0));
+	EXPECT_TRUE(m_day->isInAuctionTime(925));
+	EXPECT_TRUE(m_day->isInAuctionTime(929));
+	m_day->setOffsetMins(300);
+	EXPECT_EQ(1425u, m_day->getAuctionSections()[0].first);
+	EXPECT_EQ(1430u, m_day->getAuctionSections()[0].second);
+	EXPECT_EQ(0u, m_day->getAuctionSections().back().first);
+	EXPECT_TRUE(m_day->isInAuctionTime(925));
+	EXPECT_TRUE(m_day->isInAuctionTime(929));
+	m_day->setOffsetMins(-300);
+	EXPECT_EQ(425u, m_day->getAuctionSections()[0].first);
+	EXPECT_EQ(430u, m_day->getAuctionSections()[0].second);
+	EXPECT_EQ(0u, m_day->getAuctionSections().back().first);
+	EXPECT_EQ(0u, m_day->getAuctionSections().back().second);
+	EXPECT_FALSE(m_day->isInAuctionTime(1200));
+	EXPECT_TRUE(m_day->isInAuctionTime(925));
+	EXPECT_TRUE(m_day->isInAuctionTime(929));
+	m_day->setOffsetMins(-300);
+	EXPECT_EQ(425u, m_day->getAuctionSections()[0].first);
+	EXPECT_EQ(430u, m_day->getAuctionSections()[0].second);
+	EXPECT_EQ(0u, m_day->getAuctionSections().back().first);
+	EXPECT_TRUE(m_day->isInAuctionTime(925));
+	EXPECT_TRUE(m_day->isInAuctionTime(929));
+	m_day->setOffsetMins(0);
 }
 
 TEST_F(L02SessionFixture, NightSessionOffsetSections)
@@ -381,7 +420,7 @@ TEST_F(L02SessionFixture, NightSessionOffsetSections)
 	EXPECT_EQ(150u, night->timeToMinutes(30));
 	// 反向
 	EXPECT_EQ(2130u, night->minuteToTime(30));
-	EXPECT_EQ(30u, night->secondsToTime(30 * 60));
+	EXPECT_EQ(213000u, night->secondsToTime(30 * 60));
 }
 
 ///////////////////////////////////////////////////////// 品种 / 合约
@@ -465,6 +504,26 @@ TEST(L02ContractInfo, CommodityFeeCalculation)
 	EXPECT_DOUBLE_EQ(720.0, comm->calcFee(4000, 2, 2));
 	// 结果按分取整（四舍五入到 2 位小数）
 	EXPECT_DOUBLE_EQ(0.0, comm->calcFee(1, 1, 5));
+}
+
+TEST(L02ContractInfo, FeeCalculationBeyondInt32CentRange)
+{
+	CommHolder comm(WTSCommodityInfo::create("IF", "沪深", "CFFEX", "DAY", "CHN"));
+	comm->setVolScale(1);
+	comm->setFeeRates(1.0, 1.0, 1.0, true);
+	EXPECT_DOUBLE_EQ(21474836.46, comm->calcFee(1.0, 21474836.46, 0));
+	EXPECT_DOUBLE_EQ(21474836.48, comm->calcFee(1.0, 21474836.48, 0));
+	EXPECT_DOUBLE_EQ(30000000.0, comm->calcFee(1.0, 30000000.0, 0));
+	// Keep the existing asymmetric negative-fee rounding behavior.
+	EXPECT_DOUBLE_EQ(-1.22, comm->calcFee(1.0, -1.234, 0));
+
+	ContractHolder contract(WTSContractInfo::create("IF2107", "沪深2107", "CFFEX", "IF"));
+	contract->setCommInfo(comm.get());
+	contract->setFeeRates(1.0, 1.0, 1.0, true);
+	EXPECT_DOUBLE_EQ(21474836.46, contract->calcFee(1.0, 21474836.46, 0));
+	EXPECT_DOUBLE_EQ(21474836.48, contract->calcFee(1.0, 21474836.48, 0));
+	EXPECT_DOUBLE_EQ(30000000.0, contract->calcFee(1.0, 30000000.0, 0));
+	EXPECT_DOUBLE_EQ(-1.22, contract->calcFee(1.0, -1.234, 0));
 }
 
 TEST(L02ContractInfo, ContractBasics)

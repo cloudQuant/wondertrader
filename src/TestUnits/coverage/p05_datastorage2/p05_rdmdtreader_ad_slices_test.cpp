@@ -3,7 +3,7 @@
 // 覆盖对象：
 //  - WtRdmDtReaderAD::init（cfg==NULL / cfg!=NULL）
 //  - WtRdmDtReaderAD::readKlineSliceByRange（全量载入 / bNeedNewer 增量 / 窗口裁剪 / 未实现周期）
-//  - WtRdmDtReaderAD::readTickSliceByCount / readTickSliceByDate / readKlineSliceByCount（TODO 桩）
+//  - WtRdmDtReaderAD::readTickSliceByCount / readTickSliceByDate / readKlineSliceByCount
 //  - WtRdmDtReaderAD::readOrdDtlSliceByRange / readOrdQueSliceByRange / readTransSliceByRange
 //  - WtRdmDtReaderAD::get_k_db / get_t_db（交易所级 db + fs::create_directories 自愈）
 //  - IRdmDtReader::init / IBaseDataMgr / IHotMgr 的宿主注入面（本文件自带 mock，不引核心）
@@ -316,44 +316,33 @@ TEST_F(P05RdmReaderADTest, NullCfgLeavesEmptyBaseDirButSinksAreWired)
 
 	// cfg==NULL：IRdmDtReader::init 仍拿到 sink/basedata，只是 _base_dir 为空
 	EXPECT_EQ(_bd->last_pid(), "");
-	// R32 裁定：这里原来直接调 readKlineSliceByRange —— _base_dir 为空时
-	// get_k_db（WtRdmDtReaderAD.cpp:420）拼出的是相对路径 "day/SHFE/"，
-	// 自建空库后 0 根命中 → :353 对空 vector 取 &v[0] 且上界写成 size()-1
-	// （下溢）→ SIGSEGV（实测 CRASH rc=139）。触发条件与崩溃面整体移到下面的
-	// DISABLED_ 用例登记；缺陷本体是既有的 R21-BUG-06/R21-BUG-12 一族
-	// （见 bugs/R21_adstorage.md），不新登记。本条保留其余桩断言。
-	EXPECT_EQ(_reader->readTickSliceByCount("SHFE.rb.rb2409", 10, 20240120090000), nullptr);
-	EXPECT_EQ(_reader->readTickSliceByDate("SHFE.rb.rb2409", 20240102), nullptr);
-	EXPECT_EQ(_reader->readKlineSliceByCount("SHFE.rb.rb2409", KP_DAY, 5, 202401200000), nullptr);
-	// 桩函数不建任何目录：_base_dir 为空 ⇒ 除 CWD 外没有 LMDB 产物
+	// 不调用需要打开 LMDB 的读取方法：空配置会把路径退化为 CWD 相对路径。
 	EXPECT_EQ(_sink->count_of(LL_DEBUG), 0u);
 }
 
 // ---------------------------------------------------------------------------
-// R32 登记（启用即 SIGSEGV，rc=139）：cfg==NULL ⇒ _base_dir 为空串，
+// cfg==NULL ⇒ _base_dir 为空串，
 // readKlineSliceByRange("SHFE.rb.rb2409", KP_DAY, ...) 的 get_k_db 走
-// WtRdmDtReaderAD.cpp:420-421 的 "{}{}/{}/" → 相对路径 "day/SHFE/"（在 CWD 里
-// 自建空库，本身又是 R21-BUG-12 的无 error_code create_directories），
-// 空库 0 根命中后 :353 `&barsList._bars[0]` 对空 vector 取下标、
-// `size() - 1` 在 size()==0 时下溢成 SIZE_MAX-1 → lower_bound 解引用空指针。
-// 缺陷本体见 bugs/R21_adstorage.md R21-BUG-06（空结果集下标崩溃），不新登记。
+// 相对路径 "day/SHFE/" 并在 CWD 下自建数据库。该用例因路径副作用保留禁用；
+// 空结果保护由隔离临时目录的空库用例验证。
 // ---------------------------------------------------------------------------
-TEST_F(P05RdmReaderADTest, DISABLED_NullCfgKlineSliceOpensCwdRelativeDbAndCrashesOnEmptyBars)
+TEST_F(P05RdmReaderADTest, DISABLED_NullCfgKlineSliceUsesCwdRelativeDb)
 {
 	init_reader(false);
 
 	WTSKlineSlice* slice = _reader->readKlineSliceByRange("SHFE.rb.rb2409", KP_DAY, 202401020000, 202401200000);
-	if(slice != NULL)
+	if (slice != NULL)
+	{
+		EXPECT_EQ(slice->size(), 0);
 		slice->release();
-	// 启用即崩：走到这里说明缺陷已修复（空结果应返回空切片而不是段错误）
-	FAIL() << "R21-BUG-06：0 根命中时对空 vector 取 &v[0] → SIGSEGV";
+	}
 }
 
 TEST_F(P05RdmReaderADTest, NotProvidedSlicesReturnNull)
 {
 	init_reader(true);
 
-	// 头文件里直接 return NULL 的四个桩（钉住“未实现”，避免被当成有数据）
+	// AD reader 尚未提供的明细接口与默认复权因子行为。
 	EXPECT_EQ(_reader->readOrdDtlSliceByRange("SHFE.rb.rb2409", 202401020000, 202401200000), nullptr);
 	EXPECT_EQ(_reader->readOrdQueSliceByRange("SHFE.rb.rb2409", 202401020000, 202401200000), nullptr);
 	EXPECT_EQ(_reader->readTransSliceByRange("SHFE.rb.rb2409", 202401020000, 202401200000), nullptr);
@@ -426,20 +415,28 @@ TEST_F(P05RdmReaderADTest, WindowClippingUsesCachedBars)
 		}
 		EXPECT_TRUE(bFound) << "bar @" << out[i].date;
 	}
+	// 重复窗口查询应继续从有效的交易所级 LMDB 句柄读取并返回相同窗口。
+	WTSKlineSlice* repeated = _reader->readKlineSliceByRange("DCE.i.i2409", KP_DAY, 202401050000, 202401120000);
+	ASSERT_NE(repeated, nullptr);
+	EXPECT_EQ(repeated->get_block_size(0), cnt);
+	const WTSBarStruct* repeated_out = (const WTSBarStruct*)repeated->get_block_addr(0);
+	ASSERT_NE(repeated_out, nullptr);
+	for(uint32_t i = 0; i < cnt; i++)
+	{
+		EXPECT_EQ(repeated_out[i].date, out[i].date) << i;
+		EXPECT_DOUBLE_EQ(repeated_out[i].open, out[i].open) << i;
+	}
+	repeated->release();
 	slice->release();
-
-	// 第二次调用命中 _exchg_d1_dbs，返回语句 std::move(it->second) 会把缓存掏空 → 目前返回 NULL，
-	// 属缺陷（BUG-P05-001），理想行为见下面的 DISABLED_ 用例，这里不把它钉成“期望”。
-	WTSKlineSlice* poisoned = _reader->readKlineSliceByRange("DCE.i.i2409", KP_DAY, 202401050000, 202401120000);
-	if(poisoned != NULL)
-		poisoned->release();
 }
 
-// 修复 BUG-P05-001 以后启用：同一 (exchg, period) 的重复取数必须稳定返回同一条数。
-TEST_F(P05RdmReaderADTest, DISABLED_RepeatedKlineSlicesShouldNotReturnNull)
+// 同一交易所/周期的数据库句柄会被不同合约与重复查询共享，缓存命中应保持有效。
+TEST_F(P05RdmReaderADTest, RepeatedKlineSlicesAndCodesReuseExchangeDatabase)
 {
 	const std::vector<WTSBarStruct> bars = make_day_bars(6, 700.0);
+	const std::vector<WTSBarStruct> other_bars = make_day_bars(4, 900.0);
 	put_day_bars("GFEX", "lc2409", bars);
+	put_day_bars("GFEX", "lc2410", other_bars);
 	init_reader(true);
 
 	for(uint32_t round = 0; round < 3; round++)
@@ -450,6 +447,20 @@ TEST_F(P05RdmReaderADTest, DISABLED_RepeatedKlineSlicesShouldNotReturnNull)
 		EXPECT_EQ(slice->get_block_size(0), 6u) << round;
 		slice->release();
 	}
+
+	WTSKlineSlice* other = _reader->readKlineSliceByRange("GFEX.lc.lc2410", KP_DAY,
+		202401020000, 202401100000);
+	ASSERT_NE(other, nullptr);
+	ASSERT_EQ(other->get_block_size(0), 4u);
+	EXPECT_DOUBLE_EQ(other->get_block_addr(0)[0].open, 900.0);
+	other->release();
+
+	WTSKlineSlice* first_again = _reader->readKlineSliceByRange("GFEX.lc.lc2409", KP_DAY,
+		202401020000, 202401100000);
+	ASSERT_NE(first_again, nullptr);
+	ASSERT_EQ(first_again->get_block_size(0), 6u);
+	EXPECT_DOUBLE_EQ(first_again->get_block_addr(0)[0].open, 700.0);
+	first_again->release();
 }
 
 TEST_F(P05RdmReaderADTest, MinuteBarsUseTimeAsKeyTail)
@@ -476,7 +487,7 @@ TEST_F(P05RdmReaderADTest, MinuteBarsUseTimeAsKeyTail)
 		EXPECT_GT(out[0].time, 20240301u);
 	slice->release();
 
-	// min5 目录不存在 → db 是空的；空缓存直接下标 [0] 会崩，属于缺陷类，见 DISABLED_ 用例
+	// min5 目录不存在 → db 是空的；空结果应安全返回。
 }
 
 TEST_F(P05RdmReaderADTest, OutOfRangeEndBeforeFirstBarYieldsEmptySlice)
@@ -505,7 +516,7 @@ TEST_F(P05RdmReaderADTest, UnknownPeriodYieldsNullSlice)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// Empty-result boundaries in WtRdmDtReaderAD. Each disabled case owns a new
+// Empty-result boundaries in WtRdmDtReaderAD. Each case owns a new
 // reader and a single database setup so one failure cannot hide later cases.
 // The AD slice API represents no matching records as NULL or an empty slice.
 //////////////////////////////////////////////////////////////////////////
@@ -527,7 +538,7 @@ static void expect_empty_tick_slice(WTSTickSlice* slice)
 	slice->release();
 }
 
-TEST_F(P05RdmReaderADTest, DISABLED_EmptyDailyDatabaseReturnsEmptyKlineSlice)
+TEST_F(P05RdmReaderADTest, EmptyDailyDatabaseReturnsEmptyKlineSlice)
 {
 	init_reader(true);
 	// No prior read populates or moves the day database cache.
@@ -535,7 +546,7 @@ TEST_F(P05RdmReaderADTest, DISABLED_EmptyDailyDatabaseReturnsEmptyKlineSlice)
 		202401020000, 202401200000));
 }
 
-TEST_F(P05RdmReaderADTest, DISABLED_DailyDatabaseWithOtherContractReturnsEmptyKlineSlice)
+TEST_F(P05RdmReaderADTest, DailyDatabaseWithOtherContractReturnsEmptyKlineSlice)
 {
 	init_reader(true);
 	put_day_bars("SHFE", "hc2409", make_day_bars(4, 4000.0));
@@ -544,7 +555,7 @@ TEST_F(P05RdmReaderADTest, DISABLED_DailyDatabaseWithOtherContractReturnsEmptyKl
 		202401020000, 202401200000));
 }
 
-TEST_F(P05RdmReaderADTest, DISABLED_EmptyMinuteDatabaseReturnsEmptyKlineSlice)
+TEST_F(P05RdmReaderADTest, EmptyMinuteDatabaseReturnsEmptyKlineSlice)
 {
 	init_reader(true);
 	// get_k_db creates a valid, empty min1/CZCE database for this reader.
@@ -552,7 +563,7 @@ TEST_F(P05RdmReaderADTest, DISABLED_EmptyMinuteDatabaseReturnsEmptyKlineSlice)
 		202403010931, 202403011000));
 }
 
-TEST_F(P05RdmReaderADTest, DISABLED_EmptyTickDatabaseReturnsEmptyTickSlice)
+TEST_F(P05RdmReaderADTest, EmptyTickDatabaseReturnsEmptyTickSlice)
 {
 	init_reader(true);
 	// get_t_db creates an empty but valid database for this exact contract.
@@ -560,7 +571,7 @@ TEST_F(P05RdmReaderADTest, DISABLED_EmptyTickDatabaseReturnsEmptyTickSlice)
 		20240101090000000ull, 20240101150000000ull));
 }
 
-TEST_F(P05RdmReaderADTest, DISABLED_TickDatabaseWithoutMatchingTradingDateReturnsEmptySlice)
+TEST_F(P05RdmReaderADTest, TickDatabaseWithoutMatchingTradingDateReturnsEmptySlice)
 {
 	init_reader(true);
 	const std::filesystem::path tdir = _root / "ticks" / "SHFE" / "rb2409";

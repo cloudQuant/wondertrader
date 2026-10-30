@@ -12,6 +12,10 @@
 #include <queue>
 #include <functional>
 #include <stdint.h>
+#include <atomic>
+#include <condition_variable>
+#include <mutex>
+#include <thread>
 
 #include "ParserAdapter.h"
 
@@ -92,6 +96,15 @@ public:
 
 	void run();
 
+	// Compatibility wrapper: requests stop and waits when called by a controller.
+	// Its void return does not mean shutdown completed when called from a callback;
+	// use request_stop()/wait_stopped() when the completion result matters.
+	void stop();
+	// Nonjoining stop request; safe to call from a strategy callback.
+	void request_stop();
+	// Wait for ticker shutdown and release it. False means callback still owns the ticker.
+	bool wait_stopped();
+
 	void on_tick(const char* stdCode, WTSTickData* curTick);
 
 	void on_bar(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar);
@@ -124,6 +137,9 @@ public:
 	void sub_transaction(uint32_t sid, const char* stdCode);
 
 private:
+	friend class WtUftRtTicker;
+	friend struct UftTickerShutdownTestAccess;
+
 	uint32_t		_cur_date;	//当前日期
 	uint32_t		_cur_time;		//当前时间, 是1分钟线时间, 比如0900, 这个时候的1分钟线是0901, _cur_time也就是0901, 这个是为了CTA里面方便
 	uint32_t		_cur_raw_time;	//当前真实时间
@@ -149,7 +165,21 @@ private:
 	ContextMap		_ctx_map;
 
 	WtUftRtTicker*	_tm_ticker;
+	std::atomic<bool> _stop_requested;
+	std::atomic<uint32_t> _run_state;
+	std::mutex		_ticker_mtx;
+	bool			_run_started;
+	std::condition_variable _lifecycle_cv;
+	std::thread::id _run_thread_id;
+	bool			_run_active;
+	bool			_joining;
+	std::atomic<uint64_t> _quote_gate; // High bit closes admission; low bits count admitted quote calls.
+	std::mutex		_ticker_wake_mtx;
+	std::condition_variable _ticker_wake_cv;
+	uint64_t		_ticker_wake_generation;
+	bool			_ticker_worker_waiting;
 	WTSVariant*		_cfg;
+	bool try_enter_quote_callback();
 
 	[[maybe_unused]] bool			_dependent;	//子策略独立记账
 

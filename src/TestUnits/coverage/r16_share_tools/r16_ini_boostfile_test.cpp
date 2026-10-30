@@ -6,10 +6,13 @@
  * 只碰普通磁盘文件（临时目录，pid 隔离），不涉及共享内存/线程/socket。
  */
 #include <gtest/gtest.h>
+#include <algorithm>
 #include <string>
 #include <vector>
 #include <cstring>
+#include <cstdint>
 #include <filesystem>
+#include <limits>
 #include "Share/IniHelper.hpp"
 #include "Share/BoostFile.hpp"
 #include "r16_tmp.h"
@@ -88,15 +91,33 @@ TEST(r16_inihelper, read_returns_default_when_missing_or_unparsable)
 
 TEST(r16_inihelper, read_sections_and_key_arrays)
 {
-	const std::string path = make_sample_ini("ini4", "a.ini");
+	const std::string path = r16tmp::file("ini4", "a.ini");
+	r16tmp::clean("ini4");
+	const char* fixture =
+		"[sys]\n"
+		"name=r16\n"
+		"count=42\n"
+		"neg=-7\n"
+		"ratio=1.25\n"
+		"flag=true\n"
+		"off=0\n"
+		"bad=abc\n"
+		"[other]\n"
+		"placeholder=retained\n";
+	std::ofstream f(path, std::ios::binary | std::ios::trunc);
+	ASSERT_TRUE(f.good());
+	f << fixture;
+	f.close();
+	ASSERT_FALSE(f.fail());
+
 	IniHelper ini;
 	ini.load(path.c_str());
 	FieldArray secs;
 	int n = ini.readSections(secs);
-	EXPECT_EQ(2, n);						// sys + empty
+	EXPECT_EQ(2, n);						// sys + other
 	ASSERT_EQ((size_t)2, secs.size());
 	EXPECT_EQ(std::string("sys"), secs[0]);
-	EXPECT_EQ(std::string("empty"), secs[1]);
+	EXPECT_EQ(std::string("other"), secs[1]);
 
 	FieldArray keys;
 	int kn = ini.readSecKeyArray("sys", keys);
@@ -113,10 +134,11 @@ TEST(r16_inihelper, read_sections_and_key_arrays)
 	EXPECT_EQ(std::string("r16"), v2[0]);
 	EXPECT_EQ(std::string("42"), v2[1]);
 
-	// 空节：0 个键，数组不被污染
-	FieldArray ek;
-	EXPECT_EQ(0, ini.readSecKeyArray("empty", ek));
-	EXPECT_EQ((size_t)0, ek.size());
+	// Boost ini parser 不保留空 section；用一个非空 section 验证其键数组。
+	FieldArray otherKeys;
+	EXPECT_EQ(1, ini.readSecKeyArray("other", otherKeys));
+	ASSERT_EQ((size_t)1, otherKeys.size());
+	EXPECT_EQ(std::string("placeholder"), otherKeys[0]);
 
 	// 不存在的节：走 catch 分支返回 0
 	FieldArray nk;
@@ -219,6 +241,37 @@ TEST(r16_inihelper, load_missing_file_does_not_mark_loaded)
 	FieldArray secs;
 	EXPECT_EQ(0, ini.readSections(secs));
 	r16tmp::clean("ini9");
+}
+
+TEST(r16_inihelper, load_invalid_file_does_not_mark_loaded)
+{
+	const std::string path = r16tmp::file("ini10", "invalid.ini");
+	r16tmp::clean("ini10");
+	std::ofstream f(path, std::ios::binary | std::ios::trunc);
+	ASSERT_TRUE(f.good());
+	f << "[broken\nkey=value\n";
+	f.close();
+	ASSERT_FALSE(f.fail());
+
+	IniHelper ini;
+	ini.load(path.c_str());
+	EXPECT_FALSE(ini.isLoaded());
+	r16tmp::clean("ini10");
+}
+
+TEST(r16_inihelper, load_failure_can_be_retried_successfully)
+{
+	const std::string path = r16tmp::file("ini12", "retry.ini");
+	r16tmp::clean("ini12");
+	IniHelper ini;
+	ini.load(path.c_str());
+	EXPECT_FALSE(ini.isLoaded());
+
+	make_sample_ini("ini12", "retry.ini");
+	ini.load(path.c_str());
+	EXPECT_TRUE(ini.isLoaded());
+	EXPECT_EQ(std::string("r16"), ini.readString("sys", "name"));
+	r16tmp::clean("ini12");
 }
 
 TEST(r16_inihelper, long_distinct_section_keys_keep_independent_values)
@@ -368,6 +421,58 @@ TEST(r16_boostfile, read_file_exact_length_true_short_read_false)
 	r16tmp::clean("bf6");
 }
 
+TEST(r16_boostfile, read_exact_chunking_preserves_lengths_above_4gib)
+{
+	if (sizeof(std::size_t) < sizeof(std::uint64_t))
+		GTEST_SKIP() << "size_t cannot represent a file larger than 4 GiB";
+
+	const std::size_t total = static_cast<std::size_t>((std::numeric_limits<std::uint32_t>::max)()) + 19;
+	const std::size_t max_chunk = static_cast<std::size_t>(1) << 30;
+	std::size_t observed_offset = 0;
+	std::size_t calls = 0;
+
+	ASSERT_TRUE(boost_file_detail::read_exact_chunks(total, max_chunk,
+		[&](std::size_t offset, std::size_t requested) -> std::ptrdiff_t
+		{
+			EXPECT_EQ(observed_offset, offset);
+			EXPECT_EQ((std::min)(max_chunk, total - observed_offset), requested);
+			observed_offset += requested;
+			++calls;
+			return static_cast<std::ptrdiff_t>(requested);
+		}));
+
+	EXPECT_EQ(total, observed_offset);
+	EXPECT_EQ(5u, calls);
+	EXPECT_EQ(18u, total - 4 * max_chunk);
+}
+
+TEST(r16_boostfile, read_exact_chunking_retries_short_reads_and_rejects_eof)
+{
+	std::size_t observed_offset = 0;
+	std::size_t calls = 0;
+	EXPECT_TRUE(boost_file_detail::read_exact_chunks(11, 8,
+		[&](std::size_t offset, std::size_t requested) -> std::ptrdiff_t
+		{
+			EXPECT_EQ(observed_offset, offset);
+			const std::size_t read_count = (std::min)(requested, std::size_t(3));
+			observed_offset += read_count;
+			++calls;
+			return static_cast<std::ptrdiff_t>(read_count);
+		}));
+	EXPECT_EQ(11u, observed_offset);
+	EXPECT_EQ(4u, calls);
+	EXPECT_FALSE(boost_file_detail::read_exact_chunks(1, 8,
+		[](std::size_t, std::size_t) -> std::ptrdiff_t { return 0; }));
+}
+
+TEST(r16_boostfile, read_from_closed_handle_reports_failure)
+{
+	BoostFile bf;
+	char byte = 0;
+	EXPECT_FALSE(bf.read_file(&byte, 0));
+	EXPECT_LT(bf.read_file_length(&byte, 0), 0);
+}
+
 TEST(r16_boostfile, write_to_closed_handle_fails)
 {
 	const std::string path = r16tmp::file("bf7", "a.bin");
@@ -392,6 +497,20 @@ TEST(r16_boostfile, static_write_and_read_file_contents_roundtrip)
 	r16tmp::clean("bf8");
 }
 
+TEST(r16_boostfile, static_read_file_contents_preserves_binary_bytes)
+{
+	const std::string path = r16tmp::file("bf8_binary", "bytes.bin");
+	r16tmp::clean("bf8_binary");
+	const char bytes[] = { '\0', '\x01', '\x7f', static_cast<char>(0x80), static_cast<char>(0xff), '\0', 'A' };
+	const std::string payload(bytes, sizeof(bytes));
+	ASSERT_TRUE(BoostFile::write_file_contents(path.c_str(), payload.data(), (uint32_t)payload.size()));
+
+	std::string out = "old contents";
+	ASSERT_TRUE(BoostFile::read_file_contents(path.c_str(), out));
+	EXPECT_EQ(payload, out);
+	r16tmp::clean("bf8_binary");
+}
+
 TEST(r16_boostfile, read_file_contents_false_for_missing_or_empty)
 {
 	const std::string missing = r16tmp::file("bf9", "none.bin");
@@ -402,9 +521,11 @@ TEST(r16_boostfile, read_file_contents_false_for_missing_or_empty)
 		BoostFile e;
 		ASSERT_TRUE(e.create_new_file(emptyPath.c_str()));
 	}
-	std::string out;
+	std::string out = "preserve me";
 	EXPECT_FALSE(BoostFile::read_file_contents(missing.c_str(), out));
+	EXPECT_EQ("preserve me", out);
 	EXPECT_FALSE(BoostFile::read_file_contents(emptyPath.c_str(), out));
+	EXPECT_EQ("preserve me", out);
 	r16tmp::clean("bf9");
 }
 

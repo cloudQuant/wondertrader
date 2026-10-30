@@ -85,11 +85,13 @@ inline bool is_weekend()
 /*
  * StateMonitor 状态机模板。每个模板只挂一个品种（HOL 故意不挂），
  * 使 getSessionComms 返回的集合稳定、节假日判断互不干扰。
+ * INITEMP/CLOSEPAUSE 使用固定 09:30–15:00 交易段，由调用者用固定普通日和 09:00
+ * 推进状态，避免把 0..0 全天区间误当作空段或依赖墙钟位置。
  *
  *  - INITALL   ：交易区间 1..2359 换算成 [0,2400)，任意 HHMM 都落在区间内；
- *  - INITEMP   ：交易区间 0..0，stime-- 下溢后 isInSections 恒为 false；
+ *  - INITEMP   ：固定 09:00 在普通交易段之前 -> INITIALIZED -> PAUSED；
  *  - CLOSEPROC ：普通区间，用于 ORIGINAL->CLOSED->PROCING->PROCED->ORIGINAL；
- *  - CLOSEPAUSE：auction 0..0 提供 getAuctionStartTime()==0，区间为空；
+ *  - CLOSEPAUSE：auction 0..1 提供 getAuctionStartTime()==0，固定 09:00 在交易段之前；
  *  - HOL       ：无品种关联；
  *  - INITAUC   ：auction 2359..2359，INITIALIZED 分支的 offTime<aucStart 路径。
  */
@@ -101,8 +103,8 @@ inline const char* state_sessions_json()
 			"sections": [{"from": 1, "to": 2359}]
 		},
 		"INITEMP": {
-			"name": "空区间会话", "offset": 0,
-			"sections": [{"from": 0, "to": 0}]
+			"name": "固定区间休盘会话", "offset": 0,
+			"sections": [{"from": 930, "to": 1500}]
 		},
 		"CLOSEPROC": {
 			"name": "收盘处理会话", "offset": 0,
@@ -111,7 +113,7 @@ inline const char* state_sessions_json()
 		"CLOSEPAUSE": {
 			"name": "收盘转休盘会话", "offset": 0,
 			"auction": {"from": 0, "to": 1},
-			"sections": [{"from": 0, "to": 0}]
+			"sections": [{"from": 930, "to": 1500}]
 		},
 		"HOL": {
 			"name": "无品种会话", "offset": 0,
@@ -130,7 +132,7 @@ inline const char* state_commodities_json()
 	return R"JSON({
 		"SHFE": {
 			"IA": {"name": "全时段品种", "session": "INITALL", "holiday": "R154_NONE"},
-			"IE": {"name": "空区间品种", "session": "INITEMP", "holiday": "R154_NONE"},
+			"IE": {"name": "固定区间休盘品种", "session": "INITEMP", "holiday": "R154_NONE"},
 			"CP": {"name": "收盘处理品种", "session": "CLOSEPROC", "holiday": "R154_NONE"},
 			"CU": {"name": "收盘休盘品种", "session": "CLOSEPAUSE", "holiday": "R154_NONE"},
 			"AU": {"name": "竞价前品种", "session": "INITAUC", "holiday": "R154_NONE"}

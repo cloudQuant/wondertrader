@@ -3,25 +3,32 @@
 //           顺带驱动 src/WtExeFact/WtOrdMon.h 内联 has_order/clear_orders（missed 11 行）
 // 说明: 全部用例只引用 WtExeFact 符号；宿主替身沿用 n05 FakeExecCtx 形态（本文件自带一份，
 //       匿名命名空间隔离），额外提供 onAfterBuy 钩子制造 do_calc 重入以覆盖 CalcFlag 占用分支。
-//       超时撤单走 _ctx->getCurTime()（可注入时间），不读挂钟、不起线程。
-//       撤单回报后终态订单应退出监控；对应回归断言见 BUG-R17-001（bugs/R17_exefact.md）。
+//       超时扫描走 _ctx->getCurTime()（可注入时间），不读挂钟、不起线程；无身份令牌时只告警并保留监控。
+//       明确订单状态回报后终态订单应退出监控；相关断言见本文件的订单回报用例。
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <atomic>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <functional>
 #include <memory>
 #include <string>
+#include <stdexcept>
+#include <thread>
 #include <vector>
 
 #include "Includes/ExecuteDefs.h"
 #include "Includes/WTSVariant.hpp"
 #include "Includes/WTSContractInfo.hpp"
+#include "Includes/WTSSessionInfo.hpp"
 #include "Includes/WTSStruct.h"
 #include "Includes/WTSDataDef.hpp"
+#include "WtExeFact/WtOrdMon.h"
+#define private public
 #include "WtExeFact/WtDiffMinImpactExeUnit.h"
+#undef private
 
 using namespace wtp;
 
@@ -40,6 +47,13 @@ struct ReleaseWTSObject
 class FakeExecCtx : public ExecuteContext
 {
 public:
+	FakeExecCtx()
+	{
+		sess = WTSSessionInfo::create("R7_TEST", "R7 test session");
+		sess->addTradingSection(900, 1500);
+	}
+	~FakeExecCtx() override { if (sess) sess->release(); }
+
 	struct Rec
 	{
 		std::string code;
@@ -88,9 +102,19 @@ public:
 		return ids;
 	}
 
-	void writeLog(const char*) override {}
+	void writeLog(const char* message) override
+	{
+		if (throwOnLog)
+			throw std::runtime_error("writeLog failure");
+		logs.push_back(message ? message : "");
+	}
 	WTSCommodityInfo* getCommodityInfo(const char*) override { return comm; }
-	WTSSessionInfo* getSessionInfo(const char*) override { return sess; }
+	WTSSessionInfo* getSessionInfo(const char*) override
+	{
+		if (throwOnSessionLookup)
+			throw std::runtime_error("getSessionInfo failure");
+		return sess;
+	}
 	uint64_t getCurTime() override { return curTime; }
 
 public:
@@ -102,12 +126,23 @@ public:
 	WTSSessionInfo* sess = NULL;
 	bool cancelByIdRet = true;
 	uint32_t cancelBydirRetCnt = 1;
+	bool throwOnSessionLookup = false;
+	bool throwOnLog = false;
 	std::function<void()> onAfterBuy;
 	std::vector<Rec> buys;
 	std::vector<Rec> sells;
 	std::vector<std::pair<std::string, bool>> bydirCancels;
 	std::vector<uint32_t> byidCancels;
+	std::vector<std::string> logs;
 	OrderIDs lastIds;
+
+	bool hasLog(const std::string& needle) const
+	{
+		for (const std::string& message : logs)
+			if (message.find(needle) != std::string::npos)
+				return true;
+		return false;
+	}
 };
 
 WTSCommodityInfo* mkComm()
@@ -172,6 +207,16 @@ struct Harness
 };
 
 const char* kCode = "SHFE.rb.2405";
+
+template <typename T>
+void releaseAllReferences(T* obj)
+{
+	if (!obj)
+		return;
+	const uint32_t refs = obj->retainCount();
+	for (uint32_t i = 0; i < refs; ++i)
+		obj->release();
+}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -262,10 +307,9 @@ TEST(r17_diff_minimpact, sell_mode_minus1_and_close_cap)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// mode1 对手价：买=ask+offset，卖=bid-offset 两次（L435 与 L449 重复扣减）
-// 期望值按实际代码算：3500-1*2-1*2=3496（MinImpact 同场景是 3498）-> BUG-R17-003
+// mode1 对手价：买=ask+offset，卖=bid-offset；两侧各只应用一次 -> BUG-R17-003
 //////////////////////////////////////////////////////////////////////////
-TEST(r17_diff_minimpact, mode1_buy_single_offset_sell_double_offset)
+TEST(r17_diff_minimpact, mode1_applies_offset_once_to_both_sides)
 {
 	Harness h;
 	{
@@ -285,9 +329,69 @@ TEST(r17_diff_minimpact, mode1_buy_single_offset_sell_double_offset)
 		unit.set_position(kCode, -8);                     // 卖 8
 		WTSTickData* t2 = mkTick(kCode, 93001000, 3505, 3500, 100, 3510, 50);
 		unit.on_tick(t2);
-		// 卖：L435 sellPx=bid-2=3498 -> L449 再 -2 = 3496（双重扣减，实际行为）
+		// 卖：L435 取 bid=3500 -> L449 只扣一次 offset=2，得到 3498
 		ASSERT_EQ(h.ctx.sells.size(), 1u);
-		EXPECT_DOUBLE_EQ(h.ctx.sells[0].price, 3496.0);
+		EXPECT_DOUBLE_EQ(h.ctx.sells[0].price, 3498.0);
+		t1->release();
+		t2->release();
+	}
+	h.comm->release();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// mode1 offset=0 正向控制：保留 ask/bid 基准价，不发生额外偏移
+//////////////////////////////////////////////////////////////////////////
+TEST(r17_diff_minimpact, mode1_zero_offset_keeps_opposite_top_prices)
+{
+	Harness h;
+	{
+		WtDiffMinImpactExeUnit unit;
+		WTSVariant* cfg = mkCfg(0, 0, 1, 0, false, 3.0, 0.0);
+		unit.init(&h.ctx, kCode, cfg);
+		cfg->release();
+
+		unit.set_position(kCode, 3);
+		WTSTickData* t1 = mkTick(kCode, 93000000, 3505, 3500, 100, 3510, 50);
+		unit.on_tick(t1);
+		ASSERT_EQ(h.ctx.buys.size(), 1u);
+		EXPECT_DOUBLE_EQ(h.ctx.buys[0].price, 3510.0);
+
+		h.ctx.pos = 3;
+		unit.set_position(kCode, -3);
+		WTSTickData* t2 = mkTick(kCode, 93001000, 3506, 3501, 100, 3511, 50);
+		unit.on_tick(t2);
+		ASSERT_EQ(h.ctx.sells.size(), 1u);
+		EXPECT_DOUBLE_EQ(h.ctx.sells[0].price, 3501.0);
+		t1->release();
+		t2->release();
+	}
+	h.comm->release();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// mode1 offset=-2 反向控制：买卖两侧仍只各偏移一次
+//////////////////////////////////////////////////////////////////////////
+TEST(r17_diff_minimpact, mode1_negative_offset_is_applied_once_to_both_sides)
+{
+	Harness h;
+	{
+		WtDiffMinImpactExeUnit unit;
+		WTSVariant* cfg = mkCfg(-2, 0, 1, 0, false, 3.0, 0.0);
+		unit.init(&h.ctx, kCode, cfg);
+		cfg->release();
+
+		unit.set_position(kCode, 3);
+		WTSTickData* t1 = mkTick(kCode, 93000000, 3505, 3500, 100, 3510, 50);
+		unit.on_tick(t1);
+		ASSERT_EQ(h.ctx.buys.size(), 1u);
+		EXPECT_DOUBLE_EQ(h.ctx.buys[0].price, 3508.0);
+
+		h.ctx.pos = 3;
+		unit.set_position(kCode, -3);
+		WTSTickData* t2 = mkTick(kCode, 93001000, 3506, 3501, 100, 3511, 50);
+		unit.on_tick(t2);
+		ASSERT_EQ(h.ctx.sells.size(), 1u);
+		EXPECT_DOUBLE_EQ(h.ctx.sells[0].price, 3503.0);
 		t1->release();
 		t2->release();
 	}
@@ -633,10 +737,31 @@ TEST(r17_diff_minimpact, calc_flag_blocks_reentrant_calc)
 	h.comm->release();
 }
 
+TEST(r17_diff_minimpact, failed_concurrent_calc_guard_does_not_release_owner)
+{
+	WtDiffMinImpactExeUnit unit;
+	EXPECT_FALSE(unit._in_calc.load(std::memory_order_acquire));
+	{
+		WtDiffMinImpactExeUnit::CalcFlag owner(&unit._in_calc);
+		ASSERT_FALSE(static_cast<bool>(owner));
+
+		bool contenderSawBusy = false;
+		std::thread contender([&]() {
+			WtDiffMinImpactExeUnit::CalcFlag nested(&unit._in_calc);
+			contenderSawBusy = static_cast<bool>(nested);
+		});
+		contender.join();
+
+		EXPECT_TRUE(contenderSawBusy);
+		EXPECT_TRUE(unit._in_calc.load(std::memory_order_acquire));
+	}
+	EXPECT_FALSE(unit._in_calc.load(std::memory_order_acquire));
+}
+
 //////////////////////////////////////////////////////////////////////////
-// BUG-R17-001 回归契约：撤单回报后 id1 不应再被超时撤销；新单 id2 仍独立到期
+// 旧 localid 无法验证时，timeout 只告警、不撤单并保留监控记录。
 //////////////////////////////////////////////////////////////////////////
-TEST(r17_diff_minimpact, cancel_ack_removes_terminal_order_from_expiry_monitor)
+TEST(r17_diff_minimpact, timeout_without_verified_identity_keeps_monitor_and_never_cancels)
 {
 	Harness h;
 	std::unique_ptr<WTSCommodityInfo, ReleaseWTSObject<WTSCommodityInfo>> commOwner(h.comm);
@@ -647,74 +772,271 @@ TEST(r17_diff_minimpact, cancel_ack_removes_terminal_order_from_expiry_monitor)
 		ASSERT_NE(nullptr, cfg.get());
 		unit.init(&h.ctx, kCode, cfg.get());
 
-		unit.set_position(kCode, 5);
+		const uint32_t id = 7351;
+		unit._orders_mon.push_order(&id, 1, h.ctx.curTime);
 		std::unique_ptr<WTSTickData, ReleaseWTSObject<WTSTickData>> t1(
 			mkTick(kCode, 93000000, 3505, 3500, 100, 3510, 50));
-		unit.on_tick(t1.get());                               // 发买(id1) 监控于 T0
-		ASSERT_EQ(h.ctx.buys.size(), 1u);
-		ASSERT_EQ(h.ctx.lastIds.size(), 1u);
-		const uint32_t id1 = h.ctx.lastIds.front();
+		unit.on_tick(t1.get());
+		EXPECT_TRUE(h.ctx.byidCancels.empty());
+		EXPECT_TRUE(unit._orders_mon.has_order(id));
+		EXPECT_FALSE(h.ctx.hasLog("Expired order 7351"));
 
-		h.ctx.curTime += 1500;
+		h.ctx.curTime += 999;
 		std::unique_ptr<WTSTickData, ReleaseWTSObject<WTSTickData>> t2(
 			mkTick(kCode, 93001500, 3505, 3500, 100, 3510, 50));
-		unit.on_tick(t2.get());                               // 超时 -> 撤 id1，cancel_cnt=1
-		ASSERT_EQ(h.ctx.byidCancels.size(), 1u);
-		EXPECT_EQ(h.ctx.byidCancels.front(), id1);
-
-		unit.on_order(id1, kCode, true, 3.0, 3505, true);      // 撤单回报后应摘除 id1，do_calc 补发 id2
-		ASSERT_EQ(h.ctx.buys.size(), 2u);                       // 先验证已生成新单，再读取其 id
-		ASSERT_EQ(h.ctx.lastIds.size(), 1u);
-		const uint32_t id2 = h.ctx.lastIds.front();
-		ASSERT_NE(id1, id2);
-
-		h.ctx.curTime += 1500;
+		unit.on_tick(t2.get());
+		EXPECT_FALSE(h.ctx.hasLog("Expired order 7351"));
+		h.ctx.curTime += 1;
 		std::unique_ptr<WTSTickData, ReleaseWTSObject<WTSTickData>> t3(
-			mkTick(kCode, 93003000, 3506, 3501, 100, 3511, 50));
+			mkTick(kCode, 93003000, 3505, 3500, 100, 3510, 50));
 		unit.on_tick(t3.get());
-		// id1 撤单回报后不得再次出现；新单 id2 到期后仍应正常撤销。
-		const size_t id1CancelCount = std::count(h.ctx.byidCancels.begin(), h.ctx.byidCancels.end(), id1);
-		const size_t id2CancelCount = std::count(h.ctx.byidCancels.begin(), h.ctx.byidCancels.end(), id2);
-		EXPECT_EQ(id1CancelCount, 1u);
-		EXPECT_EQ(id2CancelCount, 1u);
-		EXPECT_EQ(h.ctx.byidCancels.size(), 2u);
-		EXPECT_EQ(h.ctx.buys.size(), 2u);                       // id2 到期撤单期间不再发新单
+		EXPECT_TRUE(h.ctx.byidCancels.empty());
+		EXPECT_TRUE(h.ctx.bydirCancels.empty());
+		EXPECT_TRUE(unit._orders_mon.has_order(id));
+		EXPECT_TRUE(unit._orders_mon.has_unverified_timeout());
+		EXPECT_EQ(h.ctx.buys.size(), 0u);
+		EXPECT_EQ(h.ctx.sells.size(), 0u);
+		EXPECT_EQ(std::count_if(h.ctx.logs.begin(), h.ctx.logs.end(), [](const std::string& line) {
+			return line.find("Expired order 7351") != std::string::npos;
+		}), 1);
+		unit.on_channel_ready(); // account reconciliation may clear the monitor entry, but not the quarantine latch
+		EXPECT_TRUE(unit._orders_mon.has_unverified_timeout());
+		unit.set_position(kCode, 1.0); // 目标更新不能解除 quarantine
+		unit.do_calc();
+		EXPECT_TRUE(h.ctx.byidCancels.empty());
+		EXPECT_TRUE(h.ctx.bydirCancels.empty());
+		EXPECT_EQ(h.ctx.buys.size(), 0u);
+		EXPECT_EQ(h.ctx.sells.size(), 0u);
 	}
 }
 
 //////////////////////////////////////////////////////////////////////////
-// DISABLED：pricemode=3 -> init L103-104 PriceModeNames[4] 越界读（同 BUG-R7-010 形态）
-// 触发条件：mkCfg(0,0,3,0,...) 后 init —— fmt 参数在调用点求值，fake writeLog 挡不住越界读
+// pricemode 合法范围 -1..2 及非法值禁用：覆盖 PriceModeNames 越界修复
 //////////////////////////////////////////////////////////////////////////
-TEST(r17_diff_minimpact, DISABLED_init_pricemode_3_reads_past_name_table)
+TEST(r17_diff_minimpact, legal_price_modes_map_safely_and_invalid_modes_disable_execution)
 {
 	Harness h;
+	const int32_t modes[] = { -1, 0, 1, 2 };
+	const char* names[] = { "BESTPX", "LASTPX", "MARKET", "AUTOPX" };
+	for (size_t i = 0; i < 4; ++i)
 	{
+		h.ctx.logs.clear();
 		WtDiffMinImpactExeUnit unit;
-		WTSVariant* cfg = mkCfg(0, 0, 3, 0, false, 2.0, 0.0);
+		WTSVariant* cfg = mkCfg(0, 0, modes[i], 0, false, 2.0, 0.0);
 		unit.init(&h.ctx, kCode, cfg);
 		cfg->release();
-		EXPECT_STREQ(unit.getName(), "WtDiffMinImpactExeUnit"); // 仅占位，复现点是 init
+		EXPECT_TRUE(unit.initializationSucceeded()) << modes[i];
+		EXPECT_TRUE(h.ctx.hasLog(std::string("order price: ") + names[i])) << modes[i];
+		EXPECT_FALSE(h.ctx.hasLog("Invalid pricemode")) << modes[i];
+	}
+
+	const int32_t invalidModes[] = { -2, 3 };
+	for (int32_t invalidMode : invalidModes)
+	{
+		h.ctx.logs.clear();
+		WtDiffMinImpactExeUnit unit;
+		WTSVariant* cfg = mkCfg(0, 0, invalidMode, 0, false, 2.0, 0.0);
+		unit.init(&h.ctx, kCode, cfg);
+		cfg->release();
+		EXPECT_FALSE(unit.initializationSucceeded()) << invalidMode;
+		EXPECT_TRUE(h.ctx.hasLog("Invalid pricemode")) << invalidMode;
+		EXPECT_TRUE(h.ctx.hasLog("execution disabled")) << invalidMode;
+		EXPECT_TRUE(h.ctx.hasLog("order price: INVALID")) << invalidMode;
+		if (invalidMode == 3)
+		{
+			h.ctx.undone = 2.0;
+			unit.set_position(kCode, 5);
+			WTSTickData* tick = mkTick(kCode, 93000000, 3505, 3500, 100, 3510, 50);
+			unit.on_channel_ready();
+			unit.on_tick(tick);
+			EXPECT_TRUE(h.ctx.buys.empty());
+			EXPECT_TRUE(h.ctx.sells.empty());
+			EXPECT_TRUE(h.ctx.bydirCancels.empty());
+			EXPECT_TRUE(h.ctx.byidCancels.empty());
+			tick->release();
+		}
 	}
 	h.comm->release();
 }
 
 //////////////////////////////////////////////////////////////////////////
-// DISABLED：_comm_info 为空（品种表缺该码）+ offset≠0 -> do_calc L448 空指针解引用
-// 触发条件：ctx.comm=NULL 后 set_position + on_tick；扩展 BUG-R7-006 到本文件
+// 商品缺失时版本化初始化失败，后续行情和目标回调不发单
 //////////////////////////////////////////////////////////////////////////
-TEST(r17_diff_minimpact, DISABLED_null_comm_info_crashes_price_offset_branch)
+TEST(r17_diff_minimpact, null_comm_info_fails_initialization_safely)
 {
 	Harness h;
-	h.ctx.comm = NULL;                                          // 让单元拿到空品种（构造的 comm 故意不 release，用例必崩）
+	WTSCommodityInfo* comm = h.ctx.comm;
+	h.ctx.comm = NULL;
 	{
 		WtDiffMinImpactExeUnit unit;
 		WTSVariant* cfg = mkCfg(2, 0, 0, 0, false, 2.0, 0.0);
 		unit.init(&h.ctx, kCode, cfg);
 		cfg->release();
+		EXPECT_FALSE(unit.initializationSucceeded());
 		unit.set_position(kCode, 4);
-		WTSTickData* t1 = mkTick(kCode, 93000000, 3505, 3500, 100, 3510, 50);
-		unit.on_tick(t1);                                       // L448 解引用 NULL -> SEGV
-		t1->release();
+		unit.on_tick(NULL);
+		unit.on_channel_ready();
+		EXPECT_TRUE(h.ctx.buys.empty());
+		EXPECT_TRUE(h.ctx.sells.empty());
+		EXPECT_TRUE(h.ctx.bydirCancels.empty());
 	}
+	h.ctx.comm = comm;
+	h.comm->release();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 无交易时段不能被当作成功初始化并接受执行回调
+//////////////////////////////////////////////////////////////////////////
+TEST(r17_diff_minimpact, missing_session_fails_initialization)
+{
+	Harness h;
+	{
+		WtDiffMinImpactExeUnit invalidArguments;
+		WTSVariant* cfg = mkCfg(0, 0, 0, 0, false, 2.0, 0.0);
+		invalidArguments.init(NULL, kCode, cfg);
+		EXPECT_FALSE(invalidArguments.initializationSucceeded());
+		invalidArguments.init(&h.ctx, NULL, cfg);
+		EXPECT_FALSE(invalidArguments.initializationSucceeded());
+		invalidArguments.init(&h.ctx, "", cfg);
+		EXPECT_FALSE(invalidArguments.initializationSucceeded());
+		invalidArguments.init(&h.ctx, kCode, NULL);
+		EXPECT_FALSE(invalidArguments.initializationSucceeded());
+		cfg->release();
+	}
+	{
+		WtDiffMinImpactExeUnit unit;
+		WTSVariant* cfg = mkCfg(0, 0, 0, 0, false, 2.0, 0.0);
+		WTSSessionInfo* sess = h.ctx.sess;
+		h.ctx.sess = NULL;
+		unit.init(&h.ctx, kCode, cfg);
+		h.ctx.sess = sess;
+		cfg->release();
+		EXPECT_FALSE(unit.initializationSucceeded());
+		unit.set_position(kCode, 3);
+		unit.on_channel_ready();
+		unit.on_tick(NULL);
+		EXPECT_TRUE(h.ctx.buys.empty());
+		EXPECT_TRUE(h.ctx.sells.empty());
+		EXPECT_TRUE(h.ctx.bydirCancels.empty());
+	}
+	h.comm->release();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 异常路径不能释放仍由上下文持有的借用 metadata。
+//////////////////////////////////////////////////////////////////////////
+TEST(r17_diff_minimpact, metadata_references_stay_balanced_on_throw_and_success)
+{
+	Harness h;
+	WTSCommodityInfo* comm = h.comm;
+	comm->retain(); // 额外哨兵引用，回归时可在错误 release 后安全检查计数
+	{
+		WtDiffMinImpactExeUnit unit;
+		WTSVariant* cfg = mkCfg(0, 0, 0, 0, false, 2.0, 0.0);
+		h.ctx.throwOnSessionLookup = true;
+		EXPECT_THROW(unit.init(&h.ctx, kCode, cfg), std::runtime_error);
+		cfg->release();
+	}
+	EXPECT_EQ(comm->retainCount(), 2u); // fixture + sentinel
+	releaseAllReferences(comm);
+
+	Harness missing;
+	comm = missing.comm;
+	comm->retain();
+	WTSSessionInfo* originalSession = missing.ctx.sess;
+	missing.ctx.sess = NULL;
+	{
+		WtDiffMinImpactExeUnit unit;
+		WTSVariant* cfg = mkCfg(0, 0, 0, 0, false, 2.0, 0.0);
+		unit.init(&missing.ctx, kCode, cfg);
+		cfg->release();
+		EXPECT_FALSE(unit.initializationSucceeded());
+	}
+	EXPECT_EQ(comm->retainCount(), 2u); // ordinary missing metadata also releases no borrowed pointer
+	WTSSessionInfo* emptySession = WTSSessionInfo::create("R7_EMPTY", "empty session");
+	emptySession->retain(); // sentinel，避免回归中的多余 release 令对象销毁后无法检查
+	missing.ctx.sess = emptySession;
+	missing.ctx.throwOnLog = true;
+	{
+		WtDiffMinImpactExeUnit unit;
+		WTSVariant* cfg = mkCfg(0, 0, 0, 0, false, 2.0, 0.0);
+		EXPECT_THROW(unit.init(&missing.ctx, kCode, cfg), std::runtime_error);
+		cfg->release();
+	}
+	missing.ctx.sess = originalSession;
+	EXPECT_EQ(comm->retainCount(), 2u);
+	EXPECT_EQ(emptySession->retainCount(), 2u);
+	releaseAllReferences(comm);
+	releaseAllReferences(emptySession);
+
+	Harness logFailure;
+	comm = logFailure.comm;
+	comm->retain();
+	WTSSessionInfo* logFailureSession = logFailure.ctx.sess;
+	logFailureSession->retain();
+	logFailure.ctx.throwOnLog = true;
+	{
+		WtDiffMinImpactExeUnit unit;
+		WTSVariant* cfg = mkCfg(0, 0, 0, 0, false, 2.0, 0.0);
+		EXPECT_THROW(unit.init(&logFailure.ctx, kCode, cfg), std::runtime_error);
+		EXPECT_EQ(comm->retainCount(), 2u);
+		EXPECT_EQ(logFailureSession->retainCount(), 2u);
+		cfg->release();
+	}
+	EXPECT_EQ(comm->retainCount(), 2u);
+	EXPECT_EQ(logFailureSession->retainCount(), 2u);
+	logFailure.ctx.sess = NULL;
+	releaseAllReferences(comm);
+	releaseAllReferences(logFailureSession);
+
+	Harness success;
+	comm = success.comm;
+	WTSSessionInfo* sess = success.ctx.sess;
+	EXPECT_EQ(comm->retainCount(), 1u);
+	EXPECT_EQ(sess->retainCount(), 1u);
+	{
+		WtDiffMinImpactExeUnit unit;
+		WTSVariant* cfg = mkCfg(0, 0, 0, 0, false, 2.0, 0.0);
+		unit.init(&success.ctx, kCode, cfg);
+		cfg->release();
+		ASSERT_TRUE(unit.initializationSucceeded());
+		EXPECT_EQ(comm->retainCount(), 2u);
+		EXPECT_EQ(sess->retainCount(), 2u);
+	}
+	EXPECT_EQ(comm->retainCount(), 1u);
+	EXPECT_EQ(sess->retainCount(), 1u);
+	comm->release();
+}
+
+TEST(r17_diff_minimpact, duplicate_init_preserves_success_and_execution)
+{
+	Harness h;
+	WTSCommodityInfo* comm = h.comm;
+	WTSSessionInfo* sess = h.ctx.sess;
+	{
+		WtDiffMinImpactExeUnit unit;
+		WTSVariant* cfg = mkCfg(0, 0, 0, 0, false, 2.0, 0.0);
+		unit.init(&h.ctx, kCode, cfg);
+		cfg->release();
+		ASSERT_TRUE(unit.initializationSucceeded());
+		ASSERT_EQ(comm->retainCount(), 2u);
+		ASSERT_EQ(sess->retainCount(), 2u);
+
+		WTSVariant* duplicateCfg = mkCfg(0, 0, 0, 0, false, 2.0, 0.0);
+		unit.init(&h.ctx, kCode, duplicateCfg);
+		duplicateCfg->release();
+		EXPECT_TRUE(unit.initializationSucceeded());
+		EXPECT_EQ(comm->retainCount(), 2u);
+		EXPECT_EQ(sess->retainCount(), 2u);
+
+		unit.set_position(kCode, 3);
+		WTSTickData* tick = mkTick(kCode, 93000000, 3505, 3500, 100, 3510, 50);
+		unit.on_tick(tick);
+		ASSERT_EQ(h.ctx.buys.size(), 1u);
+		EXPECT_DOUBLE_EQ(h.ctx.buys[0].qty, 2.0);
+		tick->release();
+	}
+	EXPECT_EQ(comm->retainCount(), 1u);
+	EXPECT_EQ(sess->retainCount(), 1u);
+	comm->release();
 }

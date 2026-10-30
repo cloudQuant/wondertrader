@@ -9,10 +9,9 @@
  */
 #pragma once
 #include <stdint.h>
-#include <sys/timeb.h>
-#ifdef _MSC_VER
 #include <time.h>
-#else
+#include <sys/timeb.h>
+#ifndef _MSC_VER
 #include <sys/time.h>
 #endif
 #include <string>
@@ -58,6 +57,10 @@ struct KUSER_SHARED_DATA
 
 namespace TimeUtils 
 {
+	// Sunday is 0, matching tm_wday. Values >= 7 indicate an invalid date or
+	// an unavailable local date when getWeekDay() is called without an argument.
+	constexpr uint32_t INVALID_WEEKDAY = 7u;
+
 	static inline int32_t getTZOffset() noexcept
 	{
 		static int32_t offset = 99;
@@ -79,28 +82,55 @@ namespace TimeUtils
 
 	constexpr static inline int fasttime(const time_t& unix_sec, struct tm* tm, int time_zone) noexcept
 	{
-		constexpr int kHoursInDay = 24;
-		constexpr int kMinutesInHour = 60;
-		constexpr int kDaysFromUnixTime = 2472632;
-		constexpr int kDaysFromYear = 153;
-		constexpr int kMagicUnkonwnFirst = 146097;
-		constexpr int kMagicUnkonwnSec = 1461;
-		tm->tm_sec = unix_sec % kMinutesInHour;
-		int i = (int)(unix_sec / kMinutesInHour);
-		tm->tm_min = i % kMinutesInHour; //nn
-		i /= kMinutesInHour;
-		tm->tm_hour = (i + time_zone) % kHoursInDay; // hh
-		tm->tm_mday = (i + time_zone) / kHoursInDay;
-		int a = tm->tm_mday + kDaysFromUnixTime;
-		int b = (a * 4 + 3) / kMagicUnkonwnFirst;
-		int c = (-b * kMagicUnkonwnFirst) / 4 + a;
-		int d = ((c * 4 + 3) / kMagicUnkonwnSec);
-		int e = -d * kMagicUnkonwnSec;
-		e = e / 4 + c;
-		int m = (5 * e + 2) / kDaysFromYear;
-		tm->tm_mday = -(kDaysFromYear * m + 2) / 5 + e + 1;
-		tm->tm_mon = (-m / 10) * 12 + m + 2;
-		tm->tm_year = b * 100 + d - 6700 + (m / 10);
+		// Split into a floor-normalized day and seconds within that day. C++ integer
+		// division truncates towards zero, which produces negative tm fields before
+		// the Unix epoch unless the remainder is normalized explicitly.
+		int64_t days = static_cast<int64_t>(unix_sec) / 86400;
+		int64_t seconds_of_day = static_cast<int64_t>(unix_sec) % 86400;
+		if (seconds_of_day < 0)
+		{
+			--days;
+			seconds_of_day += 86400;
+		}
+
+		// Apply timezone hours without multiplying an extreme int offset by 3600.
+		const int64_t zone_hours = static_cast<int64_t>(time_zone);
+		days += zone_hours / 24;
+		int64_t hour = seconds_of_day / 3600 + zone_hours % 24;
+		if (hour < 0)
+		{
+			hour += 24;
+			--days;
+		}
+		else if (hour >= 24)
+		{
+			hour -= 24;
+			++days;
+		}
+
+		// Gregorian civil date from days since 1970-01-01 (proleptic Gregorian).
+		// Use 64-bit intermediates so valid time_t values do not overflow the old
+		// 32-bit date arithmetic.
+		int64_t civil_days = days + 719468;
+		const int64_t era = (civil_days >= 0 ? civil_days : civil_days - 146096) / 146097;
+		const int64_t day_of_era = civil_days - era * 146097;
+		const int64_t year_of_era = (day_of_era - day_of_era / 1460 + day_of_era / 36524 - day_of_era / 146096) / 365;
+		int64_t year = year_of_era + era * 400;
+		const int64_t day_of_year = day_of_era - (365 * year_of_era + year_of_era / 4 - year_of_era / 100);
+		const int64_t month_prime = (5 * day_of_year + 2) / 153;
+		const int64_t day = day_of_year - (153 * month_prime + 2) / 5 + 1;
+		const int64_t month = month_prime + (month_prime < 10 ? 3 : -9);
+		year += month <= 2;
+
+		const int64_t tm_year = year - 1900;
+		if (tm_year < INT32_MIN || tm_year > INT32_MAX)
+			return -1;
+		tm->tm_hour = static_cast<int>(hour);
+		tm->tm_min = static_cast<int>((seconds_of_day % 3600) / 60);
+		tm->tm_sec = static_cast<int>(seconds_of_day % 60);
+		tm->tm_mday = static_cast<int>(day);
+		tm->tm_mon = static_cast<int>(month - 1);
+		tm->tm_year = static_cast<int>(tm_year);
 		return 0;
 	}
 
@@ -198,26 +228,59 @@ namespace TimeUtils
 		return date;
 	}
 
-	static inline uint32_t getWeekDay(uint32_t uDate = 0) noexcept
+	static inline bool tryGetWeekDay(uint32_t uDate, uint32_t& weekDay) noexcept
 	{
-		time_t ts = 0;
-		if(uDate == 0)
+		weekDay = INVALID_WEEKDAY;
+		if (uDate == 0)
 		{
-			ts = getLocalTimeNow()/1000;
-		}
-		else
-		{
-			tm t;	
-			memset(&t,0,sizeof(tm));
-			t.tm_year = uDate/10000 - 1900;
-			t.tm_mon = (uDate%10000)/100 - 1;
-			t.tm_mday = uDate % 100;
-			ts = mktime(&t);
+			// Preserve the no-argument current-local-date behavior, while checking
+			// the platform conversion result before reading the tm structure.
+			time_t now = time(NULL);
+			tm localTime = {};
+#ifdef _MSC_VER
+			if (localtime_s(&localTime, &now) != 0)
+				return false;
+#else
+			if (localtime_r(&now, &localTime) == NULL)
+				return false;
+#endif
+			const int64_t year = static_cast<int64_t>(localTime.tm_year) + 1900;
+			if (year < 1000 || year > 9999 || localTime.tm_mon < 0 || localTime.tm_mon > 11 ||
+				localTime.tm_mday < 1 || localTime.tm_mday > 31)
+				return false;
+			uDate = static_cast<uint32_t>(year * 10000 + (localTime.tm_mon + 1) * 100 + localTime.tm_mday);
 		}
 
-		struct tm* tNow = localtime(&ts);
-	
-		return tNow->tm_wday;
+		const int64_t year = static_cast<int64_t>(uDate / 10000);
+		const uint32_t month = (uDate / 100) % 100;
+		const uint32_t day = uDate % 100;
+		if (year < 1000 || year > 9999 || month < 1 || month > 12 || day < 1)
+			return false;
+
+		static const uint8_t daysInMonth[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+		uint32_t maxDay = daysInMonth[month - 1];
+		const bool isLeapYear = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
+		if (month == 2 && isLeapYear)
+			++maxDay;
+		if (day > maxDay)
+			return false;
+
+		// Count Gregorian days from 0001-01-01 (a Monday). This avoids mktime
+		// normalization and gives identical results for dates before/after 1970.
+		const int64_t previousYear = year - 1;
+		int64_t days = previousYear * 365 + previousYear / 4 - previousYear / 100 + previousYear / 400;
+		for (uint32_t currentMonth = 1; currentMonth < month; ++currentMonth)
+			days += daysInMonth[currentMonth - 1] + (currentMonth == 2 && isLeapYear ? 1 : 0);
+		days += day - 1;
+		weekDay = static_cast<uint32_t>((days + 1) % 7); // Monday=1, Sunday=0.
+		return true;
+	}
+
+	static inline uint32_t getWeekDay(uint32_t uDate = 0) noexcept
+	{
+		uint32_t weekDay = INVALID_WEEKDAY;
+		(void)tryGetWeekDay(uDate, weekDay);
+		return weekDay;
 	}
 
 	static inline uint32_t getCurMin() noexcept
@@ -298,18 +361,16 @@ namespace TimeUtils
 
 	constexpr static uint32_t getNextMinute(int32_t curTime, int32_t mins = 1) noexcept
 	{
-		int32_t curHour = curTime / 100;
-		int32_t curMin = curTime % 100;
-		int32_t totalMins = curHour * 60 + curMin;
-		totalMins += mins;
+		// HHMM is reduced to a minute-of-day, and the offset may span any number
+		// of days. 64-bit arithmetic avoids overflow for INT32_MIN/MAX offsets.
+		const int64_t cur_hour = static_cast<int64_t>(curTime) / 100;
+		const int64_t cur_min = static_cast<int64_t>(curTime) % 100;
+		int64_t total_mins = cur_hour * 60 + cur_min + static_cast<int64_t>(mins);
+		total_mins %= 1440;
+		if (total_mins < 0)
+			total_mins += 1440;
 
-		if (totalMins >= 1440)
-			totalMins -= 1440;
-		else if (totalMins < 0)
-			totalMins += 1440;
-
-		int32_t ret = (totalMins / 60) * 100 + totalMins % 60;
-		return (uint32_t)ret;
+		return static_cast<uint32_t>((total_mins / 60) * 100 + total_mins % 60);
 	}
 
     /*
@@ -318,20 +379,23 @@ namespace TimeUtils
      */
 	constexpr static uint32_t getNextMonth(uint32_t curMonth, int months = 1) noexcept
     {
-        int32_t uYear = curMonth / 100;
-        int32_t uMonth = curMonth % 100; // [1, 12]
-     
-		int32_t uAddYear = months / 12;
-        int32_t uAddMon = months % 12;
-        if (uAddMon < 0) uAddMon += 12;  // math modulus: [0, 11]
-     
-        uYear += uAddYear;
-        uMonth += uAddMon;
-        if (uMonth > 12) {
-            ++uYear;
-            uMonth -= 12;
+        // YYYYMM inputs use a one-based month. Convert to a zero-based
+        // absolute month index so negative offsets use floor normalization
+        // across year boundaries as well as positive offsets.
+        const int64_t year = static_cast<int64_t>(curMonth / 100);
+        const int64_t month = static_cast<int64_t>(curMonth % 100);
+        int64_t absolute_month = year * 12 + (month - 1) + static_cast<int64_t>(months);
+
+        int64_t result_year = absolute_month / 12;
+        int64_t result_month = absolute_month % 12;
+        if (result_month < 0)
+        {
+            --result_year;
+            result_month += 12;
         }
-        return (uint32_t) (uYear*100 + uMonth);
+        ++result_month; // Back to YYYYMM's one-based month.
+
+        return static_cast<uint32_t>(result_year * 100 + result_month);
     }
 
 	constexpr static inline uint64_t timeToMinBar(uint32_t uDate, uint32_t uTime) noexcept
@@ -351,27 +415,25 @@ namespace TimeUtils
 
 	static inline bool isWeekends(uint32_t uDate) noexcept
 	{
-		tm t;	
-		memset(&t,0,sizeof(tm));
-		t.tm_year = uDate/1/10000 - 1900;
-		t.tm_mon = (uDate/1%10000)/100 - 1;
-		t.tm_mday = uDate/1 % 100;
-
-		time_t tt = mktime(&t);
-		tm* tmt = localtime(&tt);
-		if(tmt == NULL)
-			return true;
-	
-		if(tmt->tm_wday == 0 || tmt->tm_wday==6)
-			return true;
-
-		return false;
+		const uint32_t weekDay = getWeekDay(uDate);
+		return weekDay == 0 || weekDay == 6;
 	}
 
 	class Time32
 	{
 	public:
-		Time32():_msec(0){}
+		// A default-constructed value is a deterministic 1970-01-01 00:00:00.000
+		// wall-time representation. This is an initial value, not a conversion
+		// from a local epoch; constructors taking a timestamp use local time below.
+		Time32() : t{}, _msec(0)
+		{
+			t.tm_year = 70;
+			t.tm_mon = 0;
+			t.tm_mday = 1;
+			t.tm_wday = 4;
+			t.tm_yday = 0;
+			t.tm_isdst = 0;
+		}
 
 		Time32(time_t _time, uint32_t msecs = 0)
 		{
@@ -386,7 +448,7 @@ namespace TimeUtils
 		Time32(uint64_t timeWithMSecs)
 		{
 			time_t _t = timeWithMSecs/1000;
-			_msec = (uint32_t)timeWithMSecs%1000;
+			_msec = static_cast<uint32_t>(timeWithMSecs % 1000);
 #ifdef _WIN32
 			localtime_s(&t, &_t);
 #else

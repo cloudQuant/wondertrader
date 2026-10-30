@@ -21,6 +21,7 @@
 
 #include <WtBtCore/HisDataReplayer.h>
 #include <WtBtCore/WtHelper.h>
+#include <Includes/WTSDataDef.hpp>
 #include <Includes/WTSVariant.hpp>
 
 namespace
@@ -28,7 +29,7 @@ namespace
 	std::filesystem::path lane_root()
 	{
 		return std::filesystem::path(__FILE__).parent_path()
-			.parent_path().parent_path().parent_path();
+			.parent_path().parent_path().parent_path().parent_path();
 	}
 
 	std::filesystem::path make_temp_dir(const char* tag)
@@ -140,6 +141,8 @@ protected:
 	void SetUp() override
 	{
 		_root = lane_root();
+		ASSERT_TRUE(std::filesystem::exists(_root / "dist/common/sessions.json"));
+		ASSERT_TRUE(std::filesystem::exists(_root / "dist/common/stk_comms.json"));
 		_base = make_temp_dir("data");
 		_out = make_temp_dir("out");
 		WtHelper::setOutputDir(_out.string().c_str());
@@ -210,6 +213,39 @@ TEST_F(P04ReplayTermTest, invertedTimeRangeStopsBeforeFirstBar)
 	// 时间游标没有被推进
 	EXPECT_EQ(20200102u, replayer.get_date());
 	EXPECT_EQ(930u, replayer.get_raw_time());
+}
+
+// 有序回放区间完全早于首根日线：upper-bound 定位不得在 begin() 上自减，也不得回放伪 bar。
+TEST_F(P04ReplayTermTest, orderedRangeBeforeFirstBarStopsWithoutBars)
+{
+	HisDataReplayer replayer;
+	WTSVariant* cfg = term_cfg(_root, _base, 201912310930, 201912311500, false);
+	ASSERT_TRUE(replayer.init(cfg));
+	cfg->release();
+
+	CountingSink sink;
+	WTSKlineSlice* mainSlice = nullptr;
+	replayer.register_sink(&sink, "p04_before_first");
+	sink.onInit = [&replayer, &mainSlice]() {
+		mainSlice = replayer.get_kline_slice("SSE.STK.000001", "d", 1, 1, true);
+	};
+	ASSERT_TRUE(replayer.prepare());
+	EXPECT_EQ(nullptr, mainSlice);
+
+	// The request returns no completed historical slice, but the five-row fixture
+	// must have populated the main cache before run_by_bars calls locate_barindex.
+	const std::filesystem::path cachedMainBars = _base / "his/day/SSE/000001.dsb";
+	ASSERT_TRUE(std::filesystem::exists(cachedMainBars));
+	ASSERT_GT(std::filesystem::file_size(cachedMainBars), std::uintmax_t{0});
+
+	replayer.run(false);
+
+	EXPECT_EQ(0u, sink.closeCalls);
+	EXPECT_EQ(0u, sink.beginCalls);
+	EXPECT_EQ(0u, sink.scheduleCalls);
+	EXPECT_EQ(0u, sink.sectionCalls);
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+	EXPECT_EQ(20191231u, replayer.get_date());
 }
 
 // 第二个回放对象换合约、区间只覆盖部分日线：进度循环按区间收敛

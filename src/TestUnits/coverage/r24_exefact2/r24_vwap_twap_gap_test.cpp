@@ -14,13 +14,7 @@
 //  两边的 L349-362 / L635-653（清仓兜底）是 BUG-R7-004 的死代码（L319/L319-320 先一步 return），
 //  不重复投入，见 manifest 的留白表。
 //
-// 挂单超时扫描怎么做到**不 sleep、不等挂钟**：
-//  WtOrdMon::check_orders（src/WtExeFact/WtOrdMon.cpp:61-66）的阈值是 `expiresecs * 1000`，
-//  expiresecs 是 uint32_t、乘法在 uint32 里做 → 536870912*1000 mod 2^32 == 0，
-//  于是 `curTime - entertm < 0` 恒假 → 任何挂单立刻算超时。
-//  产品侧这是缺陷（BUG-R24-003），但它是本轮唯一能在 CASE_TIMEOUT 内确定性触达
-//  L262-271 / L394-412 撤单回调体的输入；断言只断「被撤的是哪一笔、cancelcnt 变到几、
-//  本轮是否不再发新单」，不断超时阈值本身。
+// 挂单超时测试通过 fake context clock 跨过正常 1 秒阈值，不 sleep、不依赖挂钟。
 //
 // 引用计数纪律沿用 R7（见 r7_vwap_unit_test.cpp:7-11）：
 //  凡喂进 on_tick 且被单元接手的 tick，用例侧不再 release（单元 dtor 会放）；
@@ -51,7 +45,7 @@ using namespace wtp;
 
 namespace
 {
-const uint32_t kStickyOverflow = 536870912u;   // 536870912*1000 == 2^32*125 -> uint32 回绕成 0
+const uint32_t kStickySeconds = 1u;
 
 class VFakeCtx : public ExecuteContext
 {
@@ -90,10 +84,11 @@ public:
 	void writeLog(const char* log) override { logs.push_back(log ? log : ""); }
 	WTSCommodityInfo* getCommodityInfo(const char*) override { return comm; }
 	WTSSessionInfo* getSessionInfo(const char*) override { return sess; }
-	uint64_t getCurTime() override { return 20240101093000000ull; }
+	uint64_t getCurTime() override { return curTime; }
 
 	double pos = 0;
 	double undone = 0;
+	uint64_t curTime = 20240101093000000ull;
 	uint32_t nextId = 9000;
 	uint32_t cancelBydirRetCnt = 2;
 	bool cancelByIdRet = true;
@@ -294,30 +289,35 @@ TEST(r24_vwap, calc_zero_last_price_falls_back_to_preclose)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// VWAP：挂单超时扫描（L261-271）撤掉上一轮的单，并且本轮不再发新单（hasCancel 压制 L272）
-// 第二笔 tick 再进一次，同一笔 9000 又被撤一次（回调不摘单，同 BUG-R17-001 的形态）
+// VWAP：没有版本化订单身份时，超时只记录日志、禁用后续自动扫描并保留监控单。
 //////////////////////////////////////////////////////////////////////////
-TEST(r24_vwap, expired_order_scan_cancels_and_suppresses_recalc)
+TEST(r24_vwap, expired_order_without_verified_identity_fails_closed)
 {
 	const std::string name = commName("R24VSTICKY");
 	VwapFile vf(name, 25.0);
 	VFakeCtx ctx;
 	ctx.comm = mkVComm(name);
 	WtVWapExeUnit unit;
-	bootV(unit, ctx, 100, mkVCfg(5, 0, 0, 1.0, 10.0, kStickyOverflow));
+	bootV(unit, ctx, 100, mkVCfg(5, 0, 0, 1.0, 10.0, kStickySeconds));
 	unit.on_tick(mkVTick(kVCode, 100000000, 10.50, 10.49, 10.51));
 	ASSERT_EQ(ctx.buys.size(), 1u);                      // 本地单 9000 进 OMS
+	ctx.undone = ctx.buys[0].qty;                        // fake 回填活单未完成量，避免模拟出重复发单
 	EXPECT_TRUE(ctx.byidCancels.empty());
 
+	ctx.curTime += 999;
 	unit.on_tick(mkVTick(kVCode, 100100000, 10.60, 10.59, 10.61));   // 非首笔 -> L258 else
-	ASSERT_EQ(ctx.byidCancels.size(), 1u);
-	EXPECT_EQ(ctx.byidCancels[0], 9000u);
-	EXPECT_EQ(ctx.countLog("Order expired, cancelcnt updated to 1"), 1u);   // L266-267
-	EXPECT_EQ(ctx.buys.size(), 1u);                      // hasCancel -> L272 不进 do_calc
-
+	EXPECT_TRUE(ctx.byidCancels.empty());
+	EXPECT_EQ(ctx.countLog("Expired order 9000 of"), 0u);
+	ctx.curTime += 1;
 	unit.on_tick(mkVTick(kVCode, 100200000, 10.70, 10.69, 10.71));
-	EXPECT_EQ(ctx.byidCancels.size(), 2u);              // 9000 仍在监控里
-	EXPECT_EQ(ctx.countLog("Order expired, cancelcnt updated to 2"), 1u);
+	EXPECT_TRUE(ctx.byidCancels.empty());
+	EXPECT_EQ(ctx.countLog("Expired order 9000 of"), 1u);
+	EXPECT_EQ(ctx.buys.size(), 1u);                      // 仅等待订单状态，不因身份未验证而重发
+
+	ctx.curTime += 1000;
+	unit.on_tick(mkVTick(kVCode, 100300000, 10.80, 10.79, 10.81));
+	EXPECT_TRUE(ctx.byidCancels.empty());                // 超时项仍受监控，但自动扫描已禁用
+	EXPECT_EQ(ctx.countLog("Expired order 9000 of"), 1u);
 	EXPECT_EQ(ctx.buys.size(), 1u);
 	ctx.comm->release();
 }
@@ -386,7 +386,7 @@ TEST(r24_vwap, on_trade_noop_and_equal_target_set_position_keeps_fire_count)
 
 //////////////////////////////////////////////////////////////////////////
 // VWAP：do_calc 重入被 CalcFlag 挡在锁外（L301-303）
-// 钩子发在 buy() 里（L436 已经在 flag 之内），嵌套调用 on_channel_ready -> do_calc
+// 在 buy() 回调内喂入有效的后续 tick，真实触发嵌套 on_tick -> do_calc；外层仍只发一单。
 //////////////////////////////////////////////////////////////////////////
 TEST(r24_vwap, calc_flag_blocks_reentrant_do_calc)
 {
@@ -394,25 +394,33 @@ TEST(r24_vwap, calc_flag_blocks_reentrant_do_calc)
 	VwapFile vf(name, 25.0);
 	VFakeCtx ctx;
 	ctx.comm = mkVComm(name);
+	ctx.sess = mkVSess();
 	WtVWapExeUnit unit;
 	bootV(unit, ctx, 100, mkVCfg());
+	EXPECT_TRUE(unit.initializationSucceeded());
 	int hits = 0;
-	uint32_t readyLogsBeforeNested = 0;
+	uint32_t nestedTicks = 0;
 	ctx.onAfterBuy = [&]() {
 		if (++hits == 1)
 		{
-			readyLogsBeforeNested = ctx.countLog("Unrecognized condition while channle ready");
-			unit.on_channel_ready();                     // 里层 do_calc 必须在 L303 返回
+			WTSTickData* nested = mkVTick(kVCode, 104800000, 10.55, 10.54, 10.56);
+			++nestedTicks;
+			unit.on_tick(nested);                        // 10:48 在 R24DAY session 内，触发里层 do_calc
+			nested->release();                           // 单元保留缓存引用
 		}
 	};
-	unit.on_tick(mkVTick(kVCode, 100000000, 10.50, 10.49, 10.51));
+	WTSTickData* first = mkVTick(kVCode, 100000000, 10.50, 10.49, 10.51);
+	unit.on_tick(first);
+	first->release();
+	EXPECT_EQ(nestedTicks, 1u);
 	EXPECT_EQ(hits, 1);
-	// 里层没有加仓：只有一笔买；里层的 on_channel_ready 只多打一条 L219 的识别日志
+	// 后续 tick 已通过日期、session 和执行窗口校验；嵌套 do_calc 不得重复发单。
+	EXPECT_FALSE(ctx.hasLog("VWAP tick action time 104800000 rejected"));
 	ASSERT_EQ(ctx.buys.size(), 1u);
 	EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 25.0);
-	EXPECT_EQ(ctx.countLog("Unrecognized condition while channle ready"), readyLogsBeforeNested + 1);
 	ctx.onAfterBuy = nullptr;
 	ctx.comm->release();
+	ctx.sess->release();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -485,6 +493,7 @@ TEST(r24_twap, session_retained_and_first_tick_outside_section_dropped)
 
 	unit.on_tick(mkVTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	ASSERT_EQ(ctx.buys.size(), 1u);
+	ctx.undone = ctx.buys[0].qty;                         // fake 回填活单未完成量，避免模拟出重复发单
 	EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 25.0);             // max(1, round(100/4))
 	ctx.comm->release();
 	ctx.sess->release();
@@ -532,22 +541,30 @@ TEST(r24_twap, full_fill_report_resets_cancel_times_before_refire)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// TWAP：挂单超时扫描撤单（L394-412），hasCancel 压制本轮 do_calc（L415）
+// TWAP：无身份令牌的超时单留在监控中，不再通过裸 localid 自动撤单。
 //////////////////////////////////////////////////////////////////////////
-TEST(r24_twap, expired_order_scan_cancels_and_suppresses_recalc)
+TEST(r24_twap, expired_order_without_verified_identity_fails_closed)
 {
 	VFakeCtx ctx;
 	ctx.comm = mkVComm(commName("R24TSTICKY"));
 	WtTWapExeUnit unit;
-	bootT(unit, ctx, 100, mkTCfg(4, 0, 0, 1.0, 10.0, kStickyOverflow));
+	bootT(unit, ctx, 100, mkTCfg(4, 0, 0, 1.0, 10.0, kStickySeconds));
 	unit.on_tick(mkVTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	ASSERT_EQ(ctx.buys.size(), 1u);
 
+	ctx.curTime += 999;
 	unit.on_tick(mkVTick(kTCode, 100100000, 10.60, 10.59, 10.61));
-	ASSERT_EQ(ctx.byidCancels.size(), 1u);
-	EXPECT_EQ(ctx.byidCancels[0], 9000u);
-	EXPECT_EQ(ctx.countLog("Order expired, cancelcnt updated to 1"), 1u);   // L402/L405
-	EXPECT_EQ(ctx.buys.size(), 1u);                       // L415 的 !hasCancel 不成立
+	EXPECT_EQ(ctx.countLog("Expired order 9000 of"), 0u);
+	ctx.curTime += 1;
+	unit.on_tick(mkVTick(kTCode, 100200000, 10.70, 10.69, 10.71));
+	EXPECT_TRUE(ctx.byidCancels.empty());
+	EXPECT_EQ(ctx.countLog("Expired order 9000 of"), 1u);
+	EXPECT_EQ(ctx.buys.size(), 1u);                       // 等待订单状态，不能用裸 localid 超时撤单
+	ctx.curTime += 1000;
+	unit.on_tick(mkVTick(kTCode, 100300000, 10.80, 10.79, 10.81));
+	EXPECT_TRUE(ctx.byidCancels.empty());
+	EXPECT_EQ(ctx.countLog("Expired order 9000 of"), 1u);
+	EXPECT_EQ(ctx.buys.size(), 1u);
 	ctx.comm->release();
 }
 
@@ -648,8 +665,10 @@ TEST(r24_twap, calc_flag_blocks_reentrant_do_calc)
 {
 	VFakeCtx ctx;
 	ctx.comm = mkVComm(commName("R24TRE"));
+	ctx.sess = mkVSess();
 	WtTWapExeUnit unit;
 	bootT(unit, ctx, 100, mkTCfg(4));
+	EXPECT_TRUE(unit.initializationSucceeded());
 	int hits = 0;
 	uint32_t readyLogsBeforeNested = 0;
 	ctx.onAfterBuy = [&]() {
@@ -667,4 +686,5 @@ TEST(r24_twap, calc_flag_blocks_reentrant_do_calc)
 	EXPECT_EQ(ctx.countLog("Unrecognized condition while channle ready"), readyLogsBeforeNested + 1);
 	ctx.onAfterBuy = nullptr;
 	ctx.comm->release();
+	ctx.sess->release();
 }

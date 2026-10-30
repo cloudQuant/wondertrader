@@ -1,0 +1,41 @@
+{
+  "suite": "WtDiffExecuterConcurrencyTest",
+  "binary": "build-cov/build_x64/Debug/bin/TestUnits/wt-diff-focused",
+  "binary_sha256": "17ca0d66fbf6638cd591c2946c877ca3c173448a73b1d7ccdb5531f6fc2be6ae",
+  "object_build_logs": [
+    "build-v5-partial-failure.log",
+    "build-v6.log",
+    "build-v7.log"
+  ],
+  "build_notes": [
+    "The v5 Ninja invocation exited 1 because n02_diff_concurrency_test.cpp had an unrelated unused-variable -Werror. The r120 test object and WtDiffExecuter.cpp.o compile steps had succeeded before that failure.",
+    "The later v6/v7 test-object builds succeeded; v7 contains the corrected fixture test-object build."
+  ],
+  "rebuilt_objects": [
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/WtDiffExecuter.cpp.o",
+    "build-cov/TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n02_wtcore_engines/n02_diff_concurrency_test.cpp.o"
+  ],
+  "preexisting_objects": [
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/WtExecuterFactory.cpp.o",
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/TraderAdapter.cpp.o",
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/WtHelper.cpp.o",
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/ActionPolicyMgr.cpp.o"
+  ],
+  "link_command": "/usr/bin/c++ -arch arm64 -g -fprofile-instr-generate -Wl,-undefined,dynamic_lookup build-cov/TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n02_wtcore_engines/n02_diff_concurrency_test.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/WtDiffExecuter.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/WtExecuterFactory.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/TraderAdapter.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/WtHelper.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/ActionPolicyMgr.cpp.o /opt/homebrew/lib/libgtest_main.a /opt/homebrew/lib/libgtest.a build-cov/build_x64/Debug/libs/libWTSTools.a build-cov/build_x64/Debug/libs/libWTSUtils.a /usr/local/lib/libiconv.dylib -L/opt/homebrew/lib -lboost_filesystem -lboost_thread -lpthread -o build-cov/build_x64/Debug/bin/TestUnits/wt-diff-focused",
+  "run_command": "build-cov/build_x64/Debug/bin/TestUnits/wt-diff-focused",
+  "run_log": "run.log",
+  "cwd": "/Users/yunjinqi/Documents/new_projects/wondertrader",
+  "exit": 0,
+  "tests": 13,
+  "passed": 13,
+  "skipped": 0,
+  "failures": 0,
+  "previous_run": "run-v2.json",
+  "older_run": "run-v1.json",
+  "added_coverage": [
+    "A failure tombstone remains blocked after a successful persistence and reload",
+    "A snapshot-injection failure prevents position dispatch and persists the tombstone when writable",
+    "Omitted/zero target handling follows signed target delta semantics"
+  ],
+  "scope": "Local isolated WtDiffExecuter focused tests only. These tests do not prove a durable intent before plugin side effects, safe replay behavior if the process crashes before tombstone persistence, safety under a persistently unwritable disk, fsync durability, or real broker/plugin/production-chain behavior. Code is under review."
+}

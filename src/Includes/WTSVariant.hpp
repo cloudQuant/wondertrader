@@ -14,8 +14,15 @@
 #include "WTSCollection.hpp"
 
 #include <string>
+#include <cmath>
 #include <cstdio>
+#include <cstdlib>
+#include <iomanip>
+#include <locale>
+#include <locale.h>
+#include <sstream>
 #include <string.h>
+#include <limits>
 #include <vector>
 #include <map>
 
@@ -61,6 +68,197 @@ protected:
 	WTSVariant() :_type(VT_Null){}
 
 private:
+	// Own the C numeric locale only for the active operation. Independent handles
+	// avoid shared mutation, unload leaks, and static destruction-order hazards.
+	class ScopedNumericCLocale
+	{
+	public:
+		ScopedNumericCLocale()
+#ifdef _WIN32
+			: _locale(NULL)
+#else
+			: _locale((locale_t)0)
+#endif
+		{
+#ifdef _WIN32
+			_locale = _create_locale(LC_NUMERIC, "C");
+#else
+			_locale = newlocale(LC_NUMERIC_MASK, "C", (locale_t)0);
+#endif
+		}
+
+		~ScopedNumericCLocale()
+		{
+#ifdef _WIN32
+			if (_locale != NULL)
+				_free_locale(_locale);
+#else
+			if (_locale != (locale_t)0)
+				freelocale(_locale);
+#endif
+		}
+
+		ScopedNumericCLocale(const ScopedNumericCLocale&) = delete;
+		ScopedNumericCLocale& operator=(const ScopedNumericCLocale&) = delete;
+
+		bool valid() const
+		{
+#ifdef _WIN32
+			return _locale != NULL;
+#else
+			return _locale != (locale_t)0;
+#endif
+		}
+
+		double parse(const char* text, char** end) const
+		{
+#ifdef _WIN32
+			return _strtod_l(text, end, _locale);
+#else
+			return strtod_l(text, end, _locale);
+#endif
+		}
+
+	private:
+#ifdef _WIN32
+		_locale_t _locale;
+#else
+		locale_t _locale;
+#endif
+	};
+
+	static inline bool parseRealTextClassic(const std::string& text, double& value)
+	{
+		std::istringstream input(text);
+		input.imbue(std::locale::classic());
+		input >> value;
+		if (input.bad())
+			return false;
+
+		// Some standard libraries report failbit for an otherwise valid subnormal
+		// conversion. Keep the assigned value if the whole token was consumed.
+		const bool subnormalRangeResult = input.fail() && input.eof() &&
+			std::fpclassify(value) == FP_SUBNORMAL;
+		if (input.fail() && !subnormalRangeResult)
+			return false;
+		if (subnormalRangeResult)
+			input.clear(input.rdstate() & ~std::ios::failbit);
+		input >> std::ws;
+		return input.eof() && std::isfinite(value);
+	}
+
+	static inline bool parseRealText(const std::string& text, double& value, const ScopedNumericCLocale& cLocale)
+	{
+		if (text == "nan" || text == "+nan" || text == "-nan")
+		{
+			value = std::numeric_limits<double>::quiet_NaN();
+			if (text == "-nan")
+				value = std::copysign(value, -1.0);
+			return true;
+		}
+		if (text == "inf" || text == "+inf")
+		{
+			value = std::numeric_limits<double>::infinity();
+			return true;
+		}
+		if (text == "-inf")
+		{
+			value = -std::numeric_limits<double>::infinity();
+			return true;
+		}
+		if (text.empty())
+			return false;
+
+		const char* begin = text.c_str();
+		char* end = NULL;
+		if (!cLocale.valid())
+			return parseRealTextClassic(text, value);
+		value = cLocale.parse(begin, &end);
+		return end == begin + text.size() && std::isfinite(value);
+	}
+
+	static inline std::string formatReal(double value)
+	{
+		if (std::isnan(value))
+			return std::signbit(value) ? "-nan" : "nan";
+		if (std::isinf(value))
+			return std::signbit(value) ? "-inf" : "inf";
+		if (value == 0.0)
+			return std::signbit(value) ? "-0" : "0";
+
+		// Use only C++11-era locale-aware streams here: floating charconv is not
+		// available in every supported C++17 library (notably GCC 8's libstdc++).
+		// Reducing significant digits until the C-locale parser round-trips keeps
+		// the stored text short without relying on the process locale.
+		ScopedNumericCLocale cLocale;
+		std::string fallback;
+		for (int precision = 1; precision <= std::numeric_limits<double>::max_digits10; ++precision)
+		{
+			std::ostringstream output;
+			output.imbue(std::locale::classic());
+			output << std::defaultfloat << std::setprecision(precision) << value;
+			if (!output)
+				continue;
+
+			std::string candidate = output.str();
+			fallback = candidate;
+			double roundTrip = 0.0;
+			if (parseRealText(candidate, roundTrip, cLocale) && roundTrip == value)
+				return candidate;
+		}
+		return fallback;
+	}
+
+	static inline int32_t realToInt32(double value)
+	{
+		// Truncate in-range values toward zero and saturate at the destination
+		// bounds; NaN maps to zero. This avoids undefined floating-to-integer casts.
+		if (std::isnan(value))
+			return 0;
+		const double limit = std::ldexp(1.0, std::numeric_limits<int32_t>::digits);
+		if (value <= -limit)
+			return std::numeric_limits<int32_t>::min();
+		if (value >= limit)
+			return std::numeric_limits<int32_t>::max();
+		return static_cast<int32_t>(value);
+	}
+
+	static inline uint32_t realToUInt32(double value)
+	{
+		// Negative values and NaN map to zero; positive overflow saturates.
+		if (!(value > 0.0))
+			return 0;
+		const double limit = std::ldexp(1.0, std::numeric_limits<uint32_t>::digits);
+		if (value >= limit)
+			return std::numeric_limits<uint32_t>::max();
+		return static_cast<uint32_t>(value);
+	}
+
+	static inline int64_t realToInt64(double value)
+	{
+		// Truncate in-range values toward zero and saturate at the destination
+		// bounds; NaN maps to zero. This avoids undefined floating-to-integer casts.
+		if (std::isnan(value))
+			return 0;
+		const double limit = std::ldexp(1.0, std::numeric_limits<int64_t>::digits);
+		if (value <= -limit)
+			return std::numeric_limits<int64_t>::min();
+		if (value >= limit)
+			return std::numeric_limits<int64_t>::max();
+		return static_cast<int64_t>(value);
+	}
+
+	static inline uint64_t realToUInt64(double value)
+	{
+		// Negative values and NaN map to zero; positive overflow saturates.
+		if (!(value > 0.0))
+			return 0;
+		const double limit = std::ldexp(1.0, std::numeric_limits<uint64_t>::digits);
+		if (value >= limit)
+			return std::numeric_limits<uint64_t>::max();
+		return static_cast<uint64_t>(value);
+	}
+
 	static inline WTSVariant* create(int32_t i32)
 	{
 		WTSVariant* ret = new WTSVariant();
@@ -97,23 +295,7 @@ private:
 	{
 		WTSVariant* ret = new WTSVariant();
 		ret->_type = VT_Real;
-		int length = std::snprintf(nullptr, 0, "%.10f", _real);
-		if (length < 0)
-		{
-			ret->_value._string = new std::string();
-			return ret;
-		}
-
-		std::string value(static_cast<size_t>(length) + 1, '\0');
-		int written = std::snprintf(value.data(), value.size(), "%.10f", _real);
-		if (written < 0 || written > length)
-		{
-			ret->_value._string = new std::string();
-			return ret;
-		}
-
-		value.resize(static_cast<size_t>(written));
-		ret->_value._string = new std::string(value);
+		ret->_value._string = new std::string(formatReal(_real));
 		return ret;
 	}
 
@@ -172,9 +354,10 @@ public:
 		case VT_Uint32:
 		case VT_Int64:
 		case VT_Uint64:
-		case VT_Real:
 		case VT_String:
 			return _value._string ? (int32_t)atof(_value._string->c_str()) : 0;
+		case VT_Real:
+			return _value._string ? realToInt32(asDouble()) : 0;
 		default:
 			return 0;
 		}
@@ -190,9 +373,10 @@ public:
 		case VT_Uint32:
 		case VT_Int64:
 		case VT_Uint64:
-		case VT_Real:
 		case VT_String:
 			return _value._string ? (uint32_t)atof(_value._string->c_str()) : 0;
+		case VT_Real:
+			return _value._string ? realToUInt32(asDouble()) : 0;
 		default:
 			return 0;
 		}
@@ -208,9 +392,10 @@ public:
 		case VT_Uint32:
 		case VT_Int64:
 		case VT_Uint64:
-		case VT_Real:
 		case VT_String:
 			return _value._string ? strtoll(_value._string->c_str(), NULL, 10) : 0;
+		case VT_Real:
+			return _value._string ? realToInt64(asDouble()) : 0;
 		default:
 			return 0;
 		}
@@ -226,9 +411,10 @@ public:
 		case VT_Uint32:
 		case VT_Int64:
 		case VT_Uint64:
-		case VT_Real:
 		case VT_String:
 			return _value._string ? strtoull(_value._string->c_str(), NULL, 10) : 0;
+		case VT_Real:
+			return _value._string ? realToUInt64(asDouble()) : 0;
 		default:
 			return 0;
 		}
@@ -244,9 +430,16 @@ public:
 		case VT_Uint32:
 		case VT_Int64:
 		case VT_Uint64:
-		case VT_Real:
 		case VT_String:
 			return _value._string ? strtod(_value._string->c_str(), NULL) : 0.0;
+		case VT_Real:
+			if (!_value._string)
+				return 0.0;
+			{
+				ScopedNumericCLocale cLocale;
+				double value = 0.0;
+				return parseRealText(*_value._string, value, cLocale) ? value : 0.0;
+			}
 		default:
 			return 0.0;
 		}
@@ -281,12 +474,25 @@ public:
 
 	inline bool asBoolean() const
 	{
-		if (_value._string)
+		switch (_type)
 		{
-			return wt_stricmp(_value._string->c_str(), "true") == 0 || wt_stricmp(_value._string->c_str(), "yes") == 0;
+		case VT_Int32:
+		case VT_Uint32:
+		case VT_Int64:
+		case VT_Uint64:
+		case VT_String:
+		case VT_Real:
+		case VT_Boolean:
+			if (_value._string)
+				return wt_stricmp(_value._string->c_str(), "true") == 0 || wt_stricmp(_value._string->c_str(), "yes") == 0;
+			return false;
+		case VT_Null:
+		case VT_Array:
+		case VT_Object:
+		default:
+			// Container and null boolean conversion is unspecified; false is a safe fallback.
+			return false;
 		}
-
-		return false;
 	}
 
 	inline int32_t getInt32(const char* name, int32_t defVal = 0) const

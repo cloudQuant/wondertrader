@@ -140,14 +140,8 @@ TEST_F(R154ShmCasterActiveTest, ActiveInitWritesAllFourTypesIntoMappedQueue)
 	EXPECT_STREQ(queue->_items[3]._trans.code, "ag2512");
 }
 
-/*
- * 触发条件（禁用原因）：ShmCaster::init 在 active=true 时先
- * `_mapfile.reset(new BoostMappingFile)`（ShmCaster.cpp:46）销毁旧映射，再 map 新路径。
- * 若第一次 init 成功、第二次 path 指向目录，L47 抛异常，但 `_queue` 仍指向已释放的旧
- * 映射、`_inited` 仍为 true；随后 broadcast 的 `_queue==NULL || !_inited` 守卫全部放行，
- * L83/L110/L137/L164 写入已 unmap 的地址。缺陷登记：bugs/R154.md BUG-R154-002。
- */
-TEST_F(R154ShmCasterActiveTest, DISABLED_ReinitWithDirectoryPathLeavesDanglingQueue)
+/* Failed reinitialization must not discard the previous queue or leak an exception. */
+TEST_F(R154ShmCasterActiveTest, FailedReinitKeepsPreviousQueueSafe)
 {
 	const fs::path queuePath = _dir / "reinit_queue.bin";
 	r154::write_file(_dir / "reinit_good.json",
@@ -156,26 +150,70 @@ TEST_F(R154ShmCasterActiveTest, DISABLED_ReinitWithDirectoryPathLeavesDanglingQu
 	WTSVariant* good = WTSCfgLoader::load_from_file((_dir / "reinit_good.json").string().c_str());
 	ASSERT_NE(good, nullptr);
 
-	ShmCaster caster;
-	ASSERT_TRUE(caster.init(good));
-	good->release();
+	WTSTickStruct firstStruct;
+	memset(&firstStruct, 0, sizeof(firstStruct));
+	strcpy(firstStruct.code, "ag2512");
+	strcpy(firstStruct.exchg, "SHFE");
+	firstStruct.action_date = 20261028;
+	firstStruct.trading_date = 20261028;
+	firstStruct.price = 7250.5;
+	WTSTickData* firstTick = WTSTickData::create(firstStruct);
+	ASSERT_NE(firstTick, nullptr);
 
-	WTSTickData* tick = WTSTickData::create("ag2512");
-	ASSERT_NE(tick, nullptr);
-	caster.broadcast(tick);
+	WTSTickStruct secondStruct;
+	memset(&secondStruct, 0, sizeof(secondStruct));
+	strcpy(secondStruct.code, "ag2513");
+	strcpy(secondStruct.exchg, "SHFE");
+	secondStruct.action_date = 20261029;
+	secondStruct.trading_date = 20261029;
+	secondStruct.price = 7312.75;
+	WTSTickData* secondTick = WTSTickData::create(secondStruct);
+	ASSERT_NE(secondTick, nullptr);
 
-	const fs::path dirPath = _dir / "as_dir";
-	fs::create_directories(dirPath);
-	r154::write_file(_dir / "reinit_bad.json",
-		std::string(R"JSON({"active": true, "path": ")JSON")
-		+ dirPath.string() + R"JSON("})JSON");
-	WTSVariant* bad = WTSCfgLoader::load_from_file((_dir / "reinit_bad.json").string().c_str());
-	ASSERT_NE(bad, nullptr);
-	EXPECT_THROW(caster.init(bad), std::exception);
-	bad->release();
+	{
+		ShmCaster caster;
+		ASSERT_TRUE(caster.init(good));
+		good->release();
+		caster.broadcast(firstTick);
 
-	caster.broadcast(tick);	// 悬垂 _queue：写入已 unmap 的内存
-	tick->release();
+		const fs::path dirPath = _dir / "as_dir";
+		fs::create_directories(dirPath);
+		r154::write_file(_dir / "reinit_bad.json",
+			std::string(R"JSON({"active": true, "path": ")JSON")
+			+ dirPath.string() + R"JSON("})JSON");
+		WTSVariant* bad = WTSCfgLoader::load_from_file((_dir / "reinit_bad.json").string().c_str());
+		ASSERT_NE(bad, nullptr);
+		bool initialized = true;
+		EXPECT_NO_THROW(initialized = caster.init(bad));
+		EXPECT_FALSE(initialized);
+		bad->release();
+
+		// Candidate mapping failed, so the first mapping remains active and writable.
+		EXPECT_NO_THROW(caster.broadcast(secondTick));
+	}
+	firstTick->release();
+	secondTick->release();
+
+	ASSERT_TRUE(fs::exists(queuePath));
+	ASSERT_EQ(fs::file_size(queuePath), sizeof(ShmCaster::CastQueue));
+	std::unique_ptr<void, void (*)(void*)> raw(::operator new(sizeof(ShmCaster::CastQueue)),
+		[](void* p) { ::operator delete(p); });
+	{
+		std::ifstream ifs(queuePath.string(), std::ios::in | std::ios::binary);
+		ASSERT_TRUE(ifs.good());
+		ifs.read(static_cast<char*>(raw.get()), sizeof(ShmCaster::CastQueue));
+		ASSERT_EQ(ifs.gcount(), static_cast<std::streamsize>(sizeof(ShmCaster::CastQueue)));
+	}
+
+	const ShmCaster::CastQueue* queue = static_cast<const ShmCaster::CastQueue*>(raw.get());
+	EXPECT_EQ(queue->_writable, 2u);
+	EXPECT_EQ(queue->_readable, 1u);
+	EXPECT_EQ(queue->_items[0]._type, 0u);
+	EXPECT_STREQ(queue->_items[0]._tick.code, "ag2512");
+	EXPECT_DOUBLE_EQ(queue->_items[0]._tick.price, 7250.5);
+	EXPECT_EQ(queue->_items[1]._type, 0u);
+	EXPECT_STREQ(queue->_items[1]._tick.code, "ag2513");
+	EXPECT_DOUBLE_EQ(queue->_items[1]._tick.price, 7312.75);
 }
 
 }	// namespace

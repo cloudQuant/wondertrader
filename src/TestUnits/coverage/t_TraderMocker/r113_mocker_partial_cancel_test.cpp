@@ -65,3 +65,87 @@ TEST_F(R113MockerPartialCancel, R113Mocker_PartialFillThenCancelPushesCanceled)
 		EXPECT_DOUBLE_EQ(9.0, recs.back().vol_left);
 	}
 }
+
+TEST_F(R113MockerPartialCancel, TradedVolumeAccumulatesAcrossPushAndQuerySnapshots)
+{
+	const uint16_t port = r103m::pick_free_udp_port();
+	ASSERT_NE(0, port);
+	set_udp_port((int)port);
+
+	init_api(9814, (int)port);
+	connect_api();
+	login_api();
+
+	insert_order(10.0, 7000.0, WDT_LONG, WOT_OPEN);
+	const std::string order_id = sink_.last_order_id();
+	ASSERT_FALSE(order_id.empty());
+
+	auto find_order = [](const std::vector<r113m::OrderSnap>& orders, const std::string& id) {
+		for (auto it = orders.rbegin(); it != orders.rend(); ++it)
+		{
+			if (it->id == id)
+				return *it;
+		}
+		return r113m::OrderSnap{};
+	};
+	auto query_orders = [this]() {
+		const uint32_t before = sink_.n_orders_query();
+		EXPECT_EQ(0, api_.queryOrders());
+		EXPECT_TRUE(r113m::wait_until([this, before]() {
+			return sink_.n_orders_query() >= before + 1u;
+		}));
+		return sink_.queried_orders();
+	};
+
+	const r113m::OrderSnap initial_push = find_order(sink_.orders(), order_id);
+	EXPECT_EQ(order_id, initial_push.id);
+	EXPECT_DOUBLE_EQ(0.0, initial_push.vol_traded);
+	EXPECT_DOUBLE_EQ(10.0, initial_push.vol_left);
+	const r113m::OrderSnap initial_query = find_order(sink_.queried_orders(), order_id);
+	EXPECT_EQ(order_id, initial_query.id);
+	EXPECT_DOUBLE_EQ(0.0, initial_query.vol_traded);
+	EXPECT_DOUBLE_EQ(10.0, initial_query.vol_left);
+
+	/* Three separate market-data events produce three fills: 1 + 2 + 7 = 10. */
+	send_tick(7000.0, 7000.0, 1.0, 7000.0, 5.0);
+	ASSERT_TRUE(r113m::wait_until([this]() { return sink_.total_trade_volume() >= 1.0; }));
+	r113m::OrderSnap pushed = find_order(sink_.orders(), order_id);
+	EXPECT_EQ(order_id, pushed.id);
+	EXPECT_DOUBLE_EQ(1.0, pushed.vol_traded);
+	EXPECT_DOUBLE_EQ(9.0, pushed.vol_left);
+	r113m::OrderSnap queried = find_order(query_orders(), order_id);
+	EXPECT_EQ(order_id, queried.id);
+	EXPECT_DOUBLE_EQ(1.0, queried.vol_traded);
+	EXPECT_DOUBLE_EQ(9.0, queried.vol_left);
+
+	send_tick(7000.0, 7000.0, 2.0, 7000.0, 5.0);
+	ASSERT_TRUE(r113m::wait_until([this]() { return sink_.total_trade_volume() >= 3.0; }));
+	pushed = find_order(sink_.orders(), order_id);
+	EXPECT_EQ(order_id, pushed.id);
+	EXPECT_DOUBLE_EQ(3.0, pushed.vol_traded);
+	EXPECT_DOUBLE_EQ(7.0, pushed.vol_left);
+	queried = find_order(query_orders(), order_id);
+	EXPECT_EQ(order_id, queried.id);
+	EXPECT_DOUBLE_EQ(3.0, queried.vol_traded);
+	EXPECT_DOUBLE_EQ(7.0, queried.vol_left);
+
+	send_tick(7000.0, 7000.0, 7.0, 7000.0, 5.0);
+	ASSERT_TRUE(r113m::wait_until([this]() { return sink_.total_trade_volume() >= 10.0; }));
+	ASSERT_TRUE(r113m::wait_until([this]() { return sink_.has_state((int)WOS_AllTraded); }));
+	pushed = find_order(sink_.orders(), order_id);
+	EXPECT_EQ(order_id, pushed.id);
+	EXPECT_EQ((int)WOS_AllTraded, pushed.state);
+	EXPECT_DOUBLE_EQ(10.0, pushed.vol_traded);
+	EXPECT_DOUBLE_EQ(0.0, pushed.vol_left);
+	queried = find_order(query_orders(), order_id);
+	EXPECT_EQ(order_id, queried.id);
+	EXPECT_EQ((int)WOS_AllTraded, queried.state);
+	EXPECT_DOUBLE_EQ(10.0, queried.vol_traded);
+	EXPECT_DOUBLE_EQ(0.0, queried.vol_left);
+
+	const std::vector<r113m::TradeSnap> trades = sink_.trades();
+	ASSERT_GE(trades.size(), 3u);
+	EXPECT_DOUBLE_EQ(10.0, sink_.total_trade_volume());
+	for (const r113m::TradeSnap& trade : trades)
+		EXPECT_EQ(order_id, trade.ref_order);
+}

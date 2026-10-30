@@ -12,6 +12,9 @@
  */
 #include <gtest/gtest.h>
 
+#include <string>
+#include <vector>
+
 #include <WtBtCore/HftMocker.h>
 #include <WtBtCore/UftMocker.h>
 
@@ -37,6 +40,85 @@ namespace
 	}
 }
 
+struct R72EntrustNotice
+{
+	uint32_t localid;
+	std::string std_code;
+	bool success;
+	std::string message;
+	std::string user_tag;
+	double position;
+	double undone;
+};
+
+class R72RecordingHftMocker : public HftMocker
+{
+public:
+	using HftMocker::HftMocker;
+	std::vector<R72EntrustNotice> entrust_notices;
+
+	void on_entrust(uint32_t localid, const char* stdCode, bool bSuccess,
+		const char* message, const char* userTag) override
+	{
+		entrust_notices.push_back({localid, stdCode, bSuccess, message, userTag,
+			stra_get_position(stdCode), stra_get_undone(stdCode)});
+		HftMocker::on_entrust(localid, stdCode, bSuccess, message, userTag);
+	}
+};
+
+class R72RecordingUftMocker : public UftMocker
+{
+public:
+	using UftMocker::UftMocker;
+	std::vector<R72EntrustNotice> entrust_notices;
+	struct TradeNotice
+	{
+		bool is_long;
+		uint32_t offset;
+		double price;
+	};
+	std::vector<TradeNotice> trade_notices;
+	WTSTickData* match_tick { nullptr };
+
+	~R72RecordingUftMocker() override
+	{
+		if (match_tick)
+			match_tick->release();
+	}
+
+	void set_match_tick(WTSTickData* tick)
+	{
+		if (match_tick)
+			match_tick->release();
+		match_tick = tick;
+		if (match_tick)
+			match_tick->retain();
+	}
+
+	WTSTickData* stra_get_last_tick(const char* stdCode) override
+	{
+		if (!match_tick)
+			return UftMocker::stra_get_last_tick(stdCode);
+		match_tick->retain();
+		return match_tick;
+	}
+
+	void on_entrust(uint32_t localid, const char* stdCode, bool bSuccess,
+		const char* message) override
+	{
+		entrust_notices.push_back({localid, stdCode, bSuccess, message, "",
+			stra_get_position(stdCode, false, 1), stra_get_undone(stdCode)});
+		UftMocker::on_entrust(localid, stdCode, bSuccess, message);
+	}
+
+	void on_trade(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset,
+		double volume, double price) override
+	{
+		trade_notices.push_back({isLong, offset, price});
+		UftMocker::on_trade(localid, stdCode, isLong, offset, volume, price);
+	}
+};
+
 class R72HftUftPaths : public r72::Fixture
 {
 };
@@ -56,11 +138,12 @@ TEST_F(R72HftUftPaths, HftMarketOrderFillsAndDumps)
 	ASSERT_TRUE(rp.init(cfg, nullptr, &loader));
 	cfg->release();
 
-	HftMocker hft(&rp, "r72_hft");
+	R72RecordingHftMocker hft(&rp, "r72_hft");
 	rp.register_sink(&hft, "r72_hft");
 	ASSERT_TRUE(rp.prepare());
 
-	ASSERT_EQ(1u, hft.stra_buy(kCode, 0.0, 2, "buy").size());
+	auto buy_ids = hft.stra_buy(kCode, 0.0, 2, "buy");
+	ASSERT_EQ(1u, buy_ids.size());
 	EXPECT_DOUBLE_EQ(2.0, hft.stra_get_undone(kCode));
 
 	WTSTickData* t1 = r72::make_tick(kCode, 20200102u, 93000000u, 10.0, 9.99, 10.01);
@@ -70,14 +153,26 @@ TEST_F(R72HftUftPaths, HftMarketOrderFillsAndDumps)
 	EXPECT_DOUBLE_EQ(2.0, hft.stra_get_position(kCode));
 	EXPECT_DOUBLE_EQ(10.01, hft.stra_get_position_avgpx(kCode));
 	EXPECT_DOUBLE_EQ(0.0, hft.stra_get_undone(kCode));
+	ASSERT_EQ(1u, hft.entrust_notices.size());
+	EXPECT_EQ(buy_ids[0], hft.entrust_notices[0].localid);
+	EXPECT_TRUE(hft.entrust_notices[0].success);
+	EXPECT_STREQ(kCode, hft.entrust_notices[0].std_code.c_str());
+	EXPECT_DOUBLE_EQ(2.0, hft.entrust_notices[0].position);
+	EXPECT_DOUBLE_EQ(0.0, hft.entrust_notices[0].undone);
 
 	// 限价卖单：bid 9.99 >= 9.5，立即成交 1 手
-	ASSERT_EQ(1u, hft.stra_sell(kCode, 9.5, 1, "sell").size());
+	auto sell_ids = hft.stra_sell(kCode, 9.5, 1, "sell");
+	ASSERT_EQ(1u, sell_ids.size());
 	WTSTickData* t2 = r72::make_tick(kCode, 20200102u, 93100000u, 10.2, 9.99, 10.21);
 	hft.handle_tick(kCode, t2, 0);
 	t2->release();
 	EXPECT_DOUBLE_EQ(1.0, hft.stra_get_position(kCode));
 	EXPECT_DOUBLE_EQ(0.0, hft.stra_get_undone(kCode));
+	ASSERT_EQ(2u, hft.entrust_notices.size());
+	EXPECT_EQ(sell_ids[0], hft.entrust_notices[1].localid);
+	EXPECT_TRUE(hft.entrust_notices[1].success);
+	EXPECT_DOUBLE_EQ(1.0, hft.entrust_notices[1].position);
+	EXPECT_DOUBLE_EQ(0.0, hft.entrust_notices[1].undone);
 
 	hft.handle_replay_done();
 	const fs::path dir = _out / "r72_hft";
@@ -146,32 +241,101 @@ TEST_F(R72HftUftPaths, UftMarketOrderFillsAndCloses)
 	ASSERT_TRUE(rp.init(cfg, nullptr, &loader));
 	cfg->release();
 
-	UftMocker uft(&rp, "r72_uft");
+	R72RecordingUftMocker uft(&rp, "r72_uft");
 	rp.register_sink(&uft, "r72_uft");
 	ASSERT_TRUE(rp.prepare());
 
-	ASSERT_NE(0u, uft.stra_enter_long(kCode, 0.0, 2));
+	uint32_t open_id = uft.stra_enter_long(kCode, 0.0, 2);
+	ASSERT_NE(0u, open_id);
 	EXPECT_DOUBLE_EQ(2.0, uft.stra_get_undone(kCode));
 
 	WTSTickData* t1 = r72::make_tick(kCode, 20200102u, 93000000u, 10.0, 9.99, 10.01);
+	uft.set_match_tick(t1);
 	uft.handle_tick(kCode, t1, 0);
 	t1->release();
 
 	EXPECT_DOUBLE_EQ(2.0, uft.stra_get_position(kCode, false, 1));
 	EXPECT_DOUBLE_EQ(0.0, uft.stra_get_undone(kCode));
+	ASSERT_EQ(1u, uft.trade_notices.size());
+	EXPECT_TRUE(uft.trade_notices[0].is_long);
+	EXPECT_EQ(0u, uft.trade_notices[0].offset);
+	EXPECT_DOUBLE_EQ(10.01, uft.trade_notices[0].price); // 买入开多吃 ask
+	ASSERT_EQ(1u, uft.entrust_notices.size());
+	EXPECT_EQ(open_id, uft.entrust_notices[0].localid);
+	EXPECT_TRUE(uft.entrust_notices[0].success);
+	EXPECT_STREQ(kCode, uft.entrust_notices[0].std_code.c_str());
+	EXPECT_DOUBLE_EQ(2.0, uft.entrust_notices[0].position);
+	EXPECT_DOUBLE_EQ(0.0, uft.entrust_notices[0].undone);
 
-	ASSERT_NE(0u, uft.stra_exit_long(kCode, 0.0, 1));
+	uint32_t close_id = uft.stra_exit_long(kCode, 0.0, 1);
+	ASSERT_NE(0u, close_id);
+	EXPECT_DOUBLE_EQ(-1.0, uft.stra_get_undone(kCode));
 	WTSTickData* t2 = r72::make_tick(kCode, 20200102u, 93100000u, 10.2, 9.99, 10.21);
+	uft.set_match_tick(t2);
 	uft.handle_tick(kCode, t2, 0);
 	t2->release();
 
 	EXPECT_DOUBLE_EQ(1.0, uft.stra_get_position(kCode, false, 1));
 	EXPECT_DOUBLE_EQ(0.0, uft.stra_get_undone(kCode));
+	ASSERT_EQ(2u, uft.trade_notices.size());
+	EXPECT_TRUE(uft.trade_notices[1].is_long); // 回调仍表示平掉的多头持仓腿
+	EXPECT_EQ(1u, uft.trade_notices[1].offset);
+	EXPECT_DOUBLE_EQ(9.99, uft.trade_notices[1].price); // 卖出平多吃 bid
+	ASSERT_EQ(2u, uft.entrust_notices.size());
+	EXPECT_EQ(close_id, uft.entrust_notices[1].localid);
+	EXPECT_TRUE(uft.entrust_notices[1].success);
+	EXPECT_DOUBLE_EQ(1.0, uft.entrust_notices[1].position);
+	EXPECT_DOUBLE_EQ(0.0, uft.entrust_notices[1].undone);
 
 	uft.handle_replay_done();
 	const fs::path dir = _out / "r72_uft";
 	EXPECT_GE(r72::line_count(r72::read_text(dir / "trades.csv")), 3u);
 	EXPECT_GE(r72::line_count(r72::read_text(dir / "closes.csv")), 2u);
+}
+
+TEST_F(R72HftUftPaths, UftShortOpenBuysBackAtOppositeBookSides)
+{
+	r72::Loader loader;
+	init_loader(loader);
+
+	HisDataReplayer rp;
+	WTSVariant* cfg = r72::make_cfg(_root, _base, 202001020930ull, 202001021500ull, true);
+	ASSERT_TRUE(rp.init(cfg, nullptr, &loader));
+	cfg->release();
+
+	R72RecordingUftMocker uft(&rp, "r72_uft_short");
+	rp.register_sink(&uft, "r72_uft_short");
+	ASSERT_TRUE(rp.prepare());
+
+	const uint32_t open_id = uft.stra_enter_short(kCode, 0.0, 1.0);
+	ASSERT_NE(0u, open_id);
+	EXPECT_DOUBLE_EQ(-1.0, uft.stra_get_undone(kCode));
+	WTSTickData* t1 = r72::make_tick(kCode, 20200102u, 93000000u, 10.0, 9.99, 10.01);
+	uft.set_match_tick(t1);
+	uft.handle_tick(kCode, t1, 0);
+	t1->release();
+	EXPECT_DOUBLE_EQ(1.0, uft.stra_get_position(kCode, false, 2));
+	EXPECT_DOUBLE_EQ(0.0, uft.stra_get_undone(kCode));
+	ASSERT_EQ(1u, uft.trade_notices.size());
+	EXPECT_FALSE(uft.trade_notices[0].is_long);
+	EXPECT_EQ(0u, uft.trade_notices[0].offset);
+	EXPECT_DOUBLE_EQ(9.99, uft.trade_notices[0].price); // 卖出开空吃 bid
+
+	// 本 fixture 使用 T+1 股票元数据，跨 session 后旧仓才可平。
+	uft.handle_session_begin(20200103u);
+	const uint32_t close_id = uft.stra_exit_short(kCode, 0.0, 1.0);
+	ASSERT_NE(0u, close_id);
+	EXPECT_DOUBLE_EQ(1.0, uft.stra_get_undone(kCode));
+	WTSTickData* t2 = r72::make_tick(kCode, 20200102u, 93100000u, 10.2, 10.19, 10.21);
+	uft.set_match_tick(t2);
+	uft.handle_tick(kCode, t2, 0);
+	t2->release();
+	EXPECT_DOUBLE_EQ(0.0, uft.stra_get_position(kCode, false, 2));
+	EXPECT_DOUBLE_EQ(0.0, uft.stra_get_undone(kCode));
+	ASSERT_EQ(2u, uft.trade_notices.size());
+	EXPECT_FALSE(uft.trade_notices[1].is_long); // 回调仍表示平掉的空头持仓腿
+	EXPECT_EQ(1u, uft.trade_notices[1].offset);
+	EXPECT_DOUBLE_EQ(10.21, uft.trade_notices[1].price); // 买入平空吃 ask
 }
 
 /*

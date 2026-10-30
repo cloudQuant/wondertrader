@@ -7,7 +7,7 @@
 //  - 日线同交易日合并时 open/low 为 0 的补价 :638-644
 //  - updateBarCache 的日线/1 分钟线新建与合并主链 :569-758
 //
-// 写入器由 r4 夹具的 new_writer_zeroed() 构造，_async_task 残值被压成 0（R4-BUG-01）；
+// 写入器由 r4 夹具正常构造；未显式配置 async 时走同步写入；
 // 所有数据只落 temp_directory_path()/r4_wad_*。
 #include "r4_ad_fixture.h"
 

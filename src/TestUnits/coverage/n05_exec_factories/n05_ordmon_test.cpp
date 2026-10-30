@@ -3,7 +3,10 @@
 // 覆盖符号: push_order / erase_order / has_order / check_orders / clear_orders / enumOrder
 #include <gtest/gtest.h>
 
+#include <algorithm>
+#include <atomic>
 #include <cstdint>
+#include <thread>
 #include <vector>
 
 #include "WtExeFact/WtOrdMon.h"
@@ -193,4 +196,137 @@ TEST(n05_ordmon, enum_order_empty_no_callback)
 	int hits = 0;
 	mon.enumOrder([&](uint32_t, uint64_t, bool) { hits++; });
 	EXPECT_EQ(hits, 0);
+}
+
+TEST(n05_ordmon, enumeration_callbacks_can_erase_orders_reentrantly)
+{
+	WtOrdMon mon;
+	auto ids = mkIds(8101, 3);
+	mon.push_order(ids.data(), ids.size(), 100, true);
+
+	std::vector<uint32_t> enumerated;
+	mon.enumOrder([&](uint32_t lid, uint64_t, bool) {
+		enumerated.push_back(lid);
+		mon.erase_order(lid);
+	});
+
+	EXPECT_EQ(enumerated.size(), ids.size());
+	for (uint32_t id : ids)
+		EXPECT_NE(std::find(enumerated.begin(), enumerated.end(), id), enumerated.end());
+	EXPECT_FALSE(mon.has_order());
+}
+
+TEST(n05_ordmon, timeout_callbacks_can_erase_orders_reentrantly)
+{
+	WtOrdMon mon;
+	auto ids = mkIds(8201, 3);
+	mon.push_order(ids.data(), ids.size(), 0, true);
+
+	std::vector<uint32_t> expired;
+	mon.check_orders(1, 1000, [&](uint32_t lid) {
+		expired.push_back(lid);
+		mon.erase_order(lid);
+	});
+
+	EXPECT_EQ(expired.size(), ids.size());
+	EXPECT_FALSE(mon.has_order());
+}
+
+TEST(n05_ordmon, unverified_timeout_requires_same_live_generation_and_latches)
+{
+	WtOrdMon mon;
+	const uint32_t id = 8301;
+	mon.push_order(&id, 1, 1000, true);
+
+	std::vector<WtOrdMonTimeoutCandidate> beforeExpiry;
+	mon.check_orders_with_generation(1, 1999, [&](uint32_t localid, uint64_t generation) {
+		beforeExpiry.push_back({ localid, generation });
+	});
+	EXPECT_TRUE(beforeExpiry.empty());
+
+	std::vector<WtOrdMonTimeoutCandidate> expired;
+	mon.check_orders_with_generation(1, 2000, [&](uint32_t localid, uint64_t generation) {
+		expired.push_back({ localid, generation });
+	});
+	ASSERT_EQ(expired.size(), 1u);
+	EXPECT_TRUE(mon.mark_unverified_timeout(id, expired[0].generation, 1, 2000));
+	EXPECT_FALSE(mon.mark_unverified_timeout(id, expired[0].generation, 1, 2000));
+	EXPECT_TRUE(mon.has_unverified_timeout());
+
+	std::vector<WtOrdMonTimeoutCandidate> repeated;
+	mon.check_orders_with_generation(1, 10000, [&](uint32_t localid, uint64_t generation) {
+		repeated.push_back({ localid, generation });
+	});
+	EXPECT_TRUE(repeated.empty());
+	mon.clear_orders();
+	EXPECT_TRUE(mon.has_unverified_timeout()); // clear/terminal callbacks cannot unlatch
+}
+
+TEST(n05_ordmon, stale_timeout_snapshot_cannot_mark_or_resurrect_terminal_or_reused_id)
+{
+	WtOrdMon mon;
+	const uint32_t id = 8302;
+	mon.push_order(&id, 1, 1000, true);
+	bool markedAfterTerminal = true;
+	WtOrdMonTimeoutCandidate stale{};
+	mon.check_orders_with_generation(1, 2000, [&](uint32_t localid, uint64_t generation) {
+		stale = { localid, generation };
+		// 模拟终态回报在候选快照形成后、timeout callback 标记前抢先 erase。
+		mon.erase_order(localid);
+		markedAfterTerminal = mon.mark_unverified_timeout(localid, generation, 1, 2000);
+	});
+	ASSERT_EQ(stale.localid, id);
+	EXPECT_FALSE(markedAfterTerminal);
+	EXPECT_FALSE(mon.has_order(id));
+	EXPECT_FALSE(mon.has_unverified_timeout());
+
+	// 同一 localid 被新活单复用时，旧 generation 也不得污染新记录。
+	mon.push_order(&id, 1, 2000, true);
+	EXPECT_FALSE(mon.mark_unverified_timeout(id, stale.generation, 1, 3000));
+	EXPECT_TRUE(mon.has_order(id));
+	EXPECT_FALSE(mon.has_unverified_timeout());
+}
+
+TEST(n05_ordmon, concurrent_reads_writes_and_clear_are_synchronized)
+{
+	WtOrdMon mon;
+	std::atomic<uint32_t> callbacks{0};
+	std::atomic<bool> ready{false};
+	std::thread writer([&]() {
+		const uint32_t initialId = 99999;
+		mon.push_order(&initialId, 1, 0, true);
+		ready.store(true, std::memory_order_release);
+		for (uint32_t i = 0; i < 4000; ++i)
+		{
+			mon.push_order(&i, 1, i, (i % 2) == 0);
+			if ((i % 3) == 0)
+				mon.erase_order(i);
+			if ((i % 31) == 0)
+				mon.clear_orders();
+		}
+		const uint32_t finalId = 100000;
+		mon.push_order(&finalId, 1, 0, true);
+	});
+	std::thread reader([&]() {
+		while (!ready.load(std::memory_order_acquire))
+			std::this_thread::yield();
+		for (uint32_t i = 0; i < 4000; ++i)
+		{
+			(void)mon.has_order();
+			(void)mon.has_order(i);
+			mon.enumOrder([&](uint32_t lid, uint64_t, bool) {
+				++callbacks;
+				if ((lid % 7) == 0)
+					mon.erase_order(lid);
+			});
+			mon.check_orders(0, i, [&](uint32_t lid) {
+				++callbacks;
+				mon.erase_order(lid);
+			});
+		}
+	});
+
+	writer.join();
+	reader.join();
+	EXPECT_GT(callbacks.load(), 0u);
 }

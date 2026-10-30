@@ -27,30 +27,84 @@ namespace
 {
 	const char* const kRb = "SHFE.rb.2405";
 
-	WTSVariant* make_factory_cfg(const std::string& module, const char* code)
+	WTSVariant* make_factory_cfg(const std::string& module, const char* code,
+		bool includeParams = true, const char* strategyName = "DualThrust")
 	{
 		WTSVariant* cfg = WTSVariant::createObject();
 		cfg->append("module", module.c_str());
 
 		WTSVariant* stra = WTSVariant::createObject();
-		stra->append("name", "DualThrust");
+		stra->append("name", strategyName);
 		stra->append("id", "r111_cta_plug");
 
-		WTSVariant* params = WTSVariant::createObject();
-		params->append("days", static_cast<uint32_t>(2));
-		params->append("k1", 0.5);
-		params->append("k2", 0.5);
-		params->append("period", "d");
-		params->append("count", static_cast<uint32_t>(5));
-		params->append("code", code);
-		params->append("stock", false);
-		stra->append("params", params);
-		params->release();
+		if (includeParams)
+		{
+			WTSVariant* params = WTSVariant::createObject();
+			params->append("days", static_cast<uint32_t>(2));
+			params->append("k1", 0.5);
+			params->append("k2", 0.5);
+			params->append("period", "d");
+			params->append("count", static_cast<uint32_t>(5));
+			params->append("code", code);
+			params->append("stock", false);
+			stra->append("params", params);
+			params->release();
+		}
 
 		cfg->append("strategy", stra);
 		stra->release();
 		return cfg;
 	}
+
+	class FailedDeleteCtaStrategy : public CtaStrategy
+	{
+	public:
+		explicit FailedDeleteCtaStrategy(const char* id) : CtaStrategy(id) {}
+		const char* getName() override { return "FailedDelete"; }
+		const char* getFactName() override { return "FailedDeleteFact"; }
+	};
+
+	class FailedDeleteCtaFact : public ICtaStrategyFact
+	{
+	public:
+		~FailedDeleteCtaFact() override { delete _strategy; }
+		const char* getName() override { return "FailedDeleteFact"; }
+		void enumStrategy(FuncEnumStrategyCallback) override {}
+		CtaStrategy* createStrategy(const char*, const char* id) override
+		{
+			_strategy = new FailedDeleteCtaStrategy(id);
+			return _strategy;
+		}
+		bool deleteStrategy(CtaStrategy*) override
+		{
+			++_delete_attempts;
+			return false;
+		}
+		uint32_t delete_attempts() const { return _delete_attempts; }
+
+	private:
+		FailedDeleteCtaStrategy* _strategy = nullptr;
+		uint32_t _delete_attempts = 0;
+	};
+
+	class PreservedCtaMocker : public CtaMocker
+	{
+	public:
+		PreservedCtaMocker(HisDataReplayer* replayer, const char* name)
+			: CtaMocker(replayer, name, 0, false) {}
+
+		void installFailedDeleteStrategy()
+		{
+			_factory._fact = &_fact;
+			_strategy = _fact.createStrategy("FailedDelete", "r111_failed_delete");
+		}
+		void triggerStrategyDelete() { destroy_strategy(); }
+		bool pluginWasPreserved() const { return _factory._preserve_module; }
+		uint32_t deleteAttempts() const { return _fact.delete_attempts(); }
+
+	private:
+		FailedDeleteCtaFact _fact;
+	};
 }
 
 class R111CtaMocker : public r62::ReplayFixture
@@ -99,6 +153,83 @@ TEST_F(R111CtaMocker, FactoryCreateAndStrategyDispatch)
 	// 全程无信号成交，策略回调不应改变账户
 	EXPECT_DOUBLE_EQ(0.0, mocker.stra_get_position(kRb));
 }
+
+// 宿主 CtaMocker 通过 FuncDeleteStraFact 调用真实插件的按值 deleteStrategyFact，
+// 作用域结束时必须能正常释放工厂；不创建策略，隔离验证 host-factory teardown。
+TEST_F(R111CtaMocker, FactoryDestructorUsesPluginByValueDeleteAbi)
+{
+	const std::string plugin = module();
+	ASSERT_TRUE(std::filesystem::exists(plugin)) << plugin;
+
+	CtaMocker mocker(&_rp, "r111_cta_factory_dtor", 0, false);
+	WTSVariant* cfg = make_factory_cfg(plugin, kRb);
+	const bool initialized = mocker.init_cta_factory(cfg);
+	cfg->release();
+	ASSERT_TRUE(initialized);
+
+	// mocker 的析构先销毁策略，再调用真实插件工厂删除器并卸载模块。
+}
+
+TEST_F(R111CtaMocker, FactoryRejectsMissingModuleAndCanRetry)
+{
+	CtaMocker mocker(&_rp, "r111_cta_missing_module", 0, false);
+	WTSVariant* invalid = WTSVariant::createObject();
+	EXPECT_FALSE(mocker.init_cta_factory(invalid));
+	invalid->release();
+
+	WTSVariant* valid = make_factory_cfg(module(), kRb);
+	EXPECT_TRUE(mocker.init_cta_factory(valid));
+	valid->release();
+}
+
+TEST_F(R111CtaMocker, FactoryRejectsMissingStrategyAndUnknownStrategy)
+{
+	const std::string plugin = module();
+	ASSERT_TRUE(std::filesystem::exists(plugin)) << plugin;
+
+	{
+		CtaMocker mocker(&_rp, "r111_cta_no_strategy", 0, false);
+		WTSVariant* cfg = WTSVariant::createObject();
+		cfg->append("module", plugin.c_str());
+		EXPECT_FALSE(mocker.init_cta_factory(cfg));
+		cfg->release();
+	}
+	{
+		CtaMocker mocker(&_rp, "r111_cta_unknown_strategy", 0, false);
+		WTSVariant* cfg = make_factory_cfg(plugin, kRb, true, "NoSuchStrategy");
+		EXPECT_FALSE(mocker.init_cta_factory(cfg));
+		cfg->release();
+	}
+}
+
+TEST_F(R111CtaMocker, FactoryRejectsStrategyInitializationFailure)
+{
+	const std::string plugin = module();
+	ASSERT_TRUE(std::filesystem::exists(plugin)) << plugin;
+
+	CtaMocker mocker(&_rp, "r111_cta_init_failure", 0, false);
+	WTSVariant* cfg = make_factory_cfg(plugin, kRb, false);
+	EXPECT_FALSE(mocker.init_cta_factory(cfg));
+	cfg->release();
+}
+
+TEST_F(R111CtaMocker, FailedStrategyDeletePinsPluginAndRejectsInitializationRetry)
+{
+	const std::string plugin = module();
+	ASSERT_TRUE(std::filesystem::exists(plugin)) << plugin;
+
+	PreservedCtaMocker mocker(&_rp, "r111_cta_failed_delete");
+	mocker.installFailedDeleteStrategy();
+	mocker.triggerStrategyDelete();
+	EXPECT_TRUE(mocker.pluginWasPreserved());
+	EXPECT_EQ(mocker.deleteAttempts(), 1u);
+
+	WTSVariant* cfg = make_factory_cfg(plugin, kRb);
+	EXPECT_FALSE(mocker.init_cta_factory(cfg));
+	cfg->release();
+	EXPECT_EQ(mocker.deleteAttempts(), 1u);
+}
+
 
 // 比率滑点：fill = trdPx + round(slippage*trdPx/10000/pricetick)*pricetick（L1638-1651）
 TEST_F(R111CtaMocker, RatioSlippageOnSignalFill)

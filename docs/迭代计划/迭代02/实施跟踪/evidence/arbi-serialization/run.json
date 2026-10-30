@@ -1,0 +1,32 @@
+{
+  "object_build_logs": [
+    "compile.log"
+  ],
+  "rebuilt_objects": [
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/WtArbiExecuter.cpp.o",
+    "build-cov/TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n01_wtcore_tradepaths/r220_arbi_serialization_test.cpp.o"
+  ],
+  "preexisting_dependencies": [
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/WtExecuterFactory.cpp.o",
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/TraderAdapter.cpp.o",
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/WtHelper.cpp.o",
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/ActionPolicyMgr.cpp.o",
+    "build-cov/build_x64/Debug/bin/libWtExeFact.dylib"
+  ],
+  "link_command": "/usr/bin/c++ -arch arm64 -g -fprofile-instr-generate -Wl,-undefined,dynamic_lookup build-cov/TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n01_wtcore_tradepaths/r220_arbi_serialization_test.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/WtArbiExecuter.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/WtExecuterFactory.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/TraderAdapter.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/WtHelper.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/ActionPolicyMgr.cpp.o /opt/homebrew/lib/libgtest_main.a /opt/homebrew/lib/libgtest.a build-cov/build_x64/Debug/libs/libWTSTools.a build-cov/build_x64/Debug/libs/libWTSUtils.a /usr/local/lib/libiconv.dylib -L/opt/homebrew/lib -lboost_filesystem -lboost_thread -lpthread -o build-cov/build_x64/Debug/bin/TestUnits/wt-arbi-focused",
+  "run_command": "build-cov/build_x64/Debug/bin/TestUnits/wt-arbi-focused",
+  "cwd": "/Users/yunjinqi/Documents/new_projects/wondertrader",
+  "exit": 0,
+  "binary_sha256": "9add3560d56ff695b12fe957519a2b40a95e1e50a42798f3b284f10e99cbb5ba",
+  "tests": 21,
+  "passed": 21,
+  "skipped": 0,
+  "failures": 0,
+  "added_test_cases": [
+    "WtArbiExecuterSerialization.InitialDrainReservationRejectsCompetingReservedCaller",
+    "WtArbiExecuterSerialization.SupersededQueuedTargetIsSkippedButLaterEventsRemain",
+    "WtArbiExecuterSerialization.StartingNewBatchInvalidatesQueuedTargetBeforeApply"
+  ],
+  "previous_run": "run-v2.json",
+  "scope": "Local isolated Arbi test run. The v3 batch-begin-to-apply case verifies an older queued target is invalidated; earlier cases cover competing initial-drain reservation and skipped superseded targets. Independent review continues and the complete production call chain is not verified."
+}

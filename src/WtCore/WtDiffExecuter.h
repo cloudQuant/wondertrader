@@ -12,10 +12,20 @@
 
 #include "ITrdNotifySink.h"
 #include "IExecCommand.h"
+#include "ExecCommandQuiesce.h"
+#include "ExecUnitInitStatus.h"
 #include "WtExecuterFactory.h"
 #include "../Includes/ExecuteDefs.h"
 #include <Share/threadpool.hpp>
 #include "../Share/SpinMutex.hpp"
+#include <atomic>
+#include <condition_variable>
+#include <deque>
+#include <functional>
+#include <map>
+#include <mutex>
+#include <thread>
+#include <vector>
 
 NS_WTP_BEGIN
 class WTSVariant;
@@ -23,6 +33,7 @@ class IDataManager;
 class IBaseDataMgr;
 class TraderAdapter;
 class IHotMgr;
+class WtDiffExecuterConcurrencyTest;
 
 /*!
  * \brief 差价执行器类
@@ -31,7 +42,8 @@ class IHotMgr;
  *          同时处理交易通道的推送回调，如成交、委托、资金、持仓等信息
  */
 class WtDiffExecuter : public ExecuteContext,
-		public ITrdNotifySink, public IExecCommand
+		public ITrdNotifySink, public IExecCommand, public IExecUnitInitStatusProvider,
+		public IExecCommandQuiesce, public IExecCommandQuiesceStages
 {
 public:
 	/*!
@@ -61,12 +73,108 @@ public:
 
 	/*!
 	 * \brief 设置交易适配器
-	 * \details 设置执行器使用的交易适配器，并读取其当前状态以更新通道就绪状态
+	 * \details 记录执行器使用的交易适配器；通道就绪事件应在通知接收器注册后单独发送
 	 * \param adapter 交易适配器指针
 	 */
 	void setTrader(TraderAdapter* adapter);
 
+	ExecUnitInitStatus queryUnitInitStatus(const char* stdCode) const override;
+	ExecUnitInitClearResult clearFailedUnitInitStatus(const char* stdCode) override;
+	void requestQuiesce() override;
+	bool canWaitQuiescedOnCurrentThread() const override;
+	bool waitQuiesced() override;
+	WtExecuterFactory* quiesceFactory() const override;
+	bool preflightQuiesceOnCurrentThread() const override;
+	bool drainHostQuiesced() override;
+	bool snapshotQuiescePluginOwners(std::vector<ExecQuiesceOwnerPtr>& out) const override;
+	bool completeQuiesceAfterGlobalPluginWait() override;
+
 private:
+	struct QuiesceThreadMarker
+	{
+		const WtDiffExecuter* owner;
+		QuiesceThreadMarker* previous;
+	};
+	static QuiesceThreadMarker*& currentQuiesceMarker() noexcept;
+	class QuiesceIngress
+	{
+	public:
+		explicit QuiesceIngress(WtDiffExecuter* owner);
+		~QuiesceIngress();
+		QuiesceIngress(const QuiesceIngress&) = delete;
+		QuiesceIngress& operator=(const QuiesceIngress&) = delete;
+		explicit operator bool() const { return _accepted; }
+	private:
+		WtDiffExecuter* _owner;
+		bool _accepted;
+		int _uncaught_exceptions;
+		QuiesceThreadMarker _marker;
+	};
+	class QuiesceDrainScope
+	{
+	public:
+		QuiesceDrainScope(WtDiffExecuter* owner, bool reserved) noexcept;
+		~QuiesceDrainScope();
+		QuiesceDrainScope(const QuiesceDrainScope&) = delete;
+		QuiesceDrainScope& operator=(const QuiesceDrainScope&) = delete;
+		void enter() noexcept;
+	private:
+		WtDiffExecuter* _owner;
+		bool _reserved;
+		bool _entered;
+		QuiesceThreadMarker _marker;
+	};
+	bool enterQuiesceIngress(QuiesceThreadMarker& marker);
+	void leaveQuiesceIngress(QuiesceThreadMarker& marker);
+	void reserveQuiesceDrain();
+	void finishQuiesceDrain();
+	void enterQuiesceCallback(QuiesceThreadMarker& marker) noexcept;
+	void leaveQuiesceCallback(QuiesceThreadMarker& marker) noexcept;
+
+	struct UnitLifecycleState
+	{
+		std::mutex mutex;
+		std::condition_variable condition;
+		std::thread::id creation_owner;
+		bool creation_complete = false;
+		std::string std_code;
+		ExecuteUnitPtr result;
+		std::deque<std::function<void()>> callback_events;
+		bool callback_active = false;
+		bool callback_drain_scheduled = false;
+		std::thread::id callback_owner;
+		bool callback_failed = false;
+		// A failure after plugin code may have produced external side effects is
+		// terminal for this code: replaying its old target can duplicate orders.
+		bool retry_blocked = false;
+		ExecUnitInitState init_status = ExecUnitInitState::INITIALIZING;
+		uint64_t init_generation = 0;
+		uint32_t waiting_callers = 0;
+		std::string init_error;
+	};
+	void drainUnitChannelEvents(const ExecuteUnitPtr& unit,
+		const std::shared_ptr<UnitLifecycleState>& state, bool reserved = false);
+	bool enqueueUnitCallback(const std::shared_ptr<UnitLifecycleState>& state,
+		std::function<void()> callback);
+	void scheduleUnitCallbackDrain(const ExecuteUnitPtr& unit,
+		const std::shared_ptr<UnitLifecycleState>& state, bool schedule);
+	void markUnitFailed(const std::string& code,
+		const std::shared_ptr<UnitLifecycleState>& state, const std::string& reason);
+	void markUnitFailedLocked(const std::string& code,
+		const std::shared_ptr<UnitLifecycleState>& state, const std::string& reason);
+	std::shared_ptr<UnitLifecycleState> getUnitState(const char* stdCode,
+		const ExecuteUnitPtr& unit) const;
+	bool ownsCode(const std::string& code);
+	bool ownsCodeLocked(const std::string& code) const;
+	bool isRetryBlockedUnit(const std::string& code) const;
+	bool isCurrentUnit(const std::string& code, const ExecuteUnitPtr& unit,
+		const std::shared_ptr<UnitLifecycleState>& state) const;
+	void recoverUnitPosition(const std::string& code, const ExecuteUnitPtr& unit,
+		const std::shared_ptr<UnitLifecycleState>& state, uint64_t channelEpoch,
+		double diff, bool hasDiff);
+	void retainQuiesceUnit(const ExecuteUnitPtr& unit);
+	std::vector<ExecuteUnitPtr> snapshotQuiesceUnits() const;
+
 	/*!
 	 * \brief 获取执行单元
 	 * \details 根据标准合约代码获取执行单元，如果单元不存在且允许自动创建，则创建新的执行单元
@@ -78,9 +186,11 @@ private:
 
 	/*!
 	 * \brief 保存数据
-	 * \details 保存差价执行器的状态数据，包括目标仓位和差异仓位等
+	 * \details 保存目标仓位、差异仓位和不可自动重试的失败状态
+	 * \return 快照是否成功写入并原子替换
 	 */
-	void	save_data();
+	bool	save_data();
+	bool	save_data_locked();
 
 	/*!
 	 * \brief 加载数据
@@ -316,8 +426,15 @@ public:
 
 
 private:
+	friend class WtDiffExecuterConcurrencyTest;
 	//! 执行单元映射，键为合约代码，值为执行单元指针
 	ExecuteUnitMap		_unit_map;
+	std::map<std::string, std::shared_ptr<UnitLifecycleState>> _unit_states;
+	// Strong owners include live and retired initialized wrappers. A failed
+	// runtime callback may detach a unit from _unit_map, but its plugin still
+	// needs quiescence before its borrowed ExecuteContext can be destroyed.
+	std::vector<ExecuteUnitPtr> _quiesce_unit_owners;
+	std::atomic<uint64_t> _quiesce_owner_generation{ 0 };
 	//! 交易适配器指针，用于执行交易操作
 	TraderAdapter*		_trader;
 	//! 执行器工厂指针，用于创建执行单元
@@ -332,15 +449,52 @@ private:
 	//! 仓位放大倍数，用于调整实际交易数量
 	double				_scale;
 	//! 交易通道是否就绪
-	bool				_channel_ready;
+	std::atomic<bool>	_channel_ready;
 
 	//! 执行单元操作的互斥锁，用于多线程安全访问
-	SpinMutex			_mtx_units;
+	mutable SpinMutex	_mtx_units;
+	uint64_t			_next_unit_init_generation = 1;
+	std::atomic<uint64_t> _channel_epoch{0};
 
 	//! 目标仓位映射表，键为合约代码，值为目标仓位
 	wt_hashmap<std::string, double> _target_pos;
 	//! 差异仓位映射表，键为合约代码，值为仓位差异
 	wt_hashmap<std::string, double> _diff_pos;
+	mutable std::mutex _position_mutex;
+	// Serialize each state update through persistence and callback enqueueing so
+	// a later callback cannot overtake an earlier snapshot on the same executor.
+	std::mutex _position_update_mutex;
+	uint64_t _position_revision = 1;
+	uint64_t _position_batch_generation = 0;
+	// Protected by _position_mutex. Omitted-code cleanup may only reset a
+	// target whose version still matches the snapshot taken for that batch.
+	std::map<std::string, uint64_t> _target_versions;
+	uint64_t _target_update_generation = 0;
+	std::mutex _save_mutex;
+	uint64_t _saved_position_revision = 0;
+	// Private deterministic fault/barrier injection used only by the friend test.
+	std::function<bool(bool)> _save_test_hook;
+	std::function<void()> _save_after_commit_test_hook;
+	std::function<void()> _failure_mutation_test_hook;
+	std::function<void(const std::string&)> _omitted_sweep_test_hook;
+	std::function<void(const std::string&)> _unit_lookup_test_hook;
+
+	// Quiescence closes ingress, tracks accepted callers and callback drains, and
+	// never owns or waits for plugin-created threads.
+	mutable std::mutex _quiesce_mutex;
+	std::condition_variable _quiesce_condition;
+	std::atomic<bool> _quiesce_requested{ false };
+	std::atomic<bool> _quiesce_incomplete{ false };
+	size_t _quiesce_active_ingress = 0;
+	size_t _quiesce_active_drains = 0;
+	bool _quiesce_wait_in_progress = false;
+	bool _quiesced = false;
+	bool _quiesce_host_completed = false;
+	bool _quiesce_plugins_completed = false;
+	// Snapshot metadata is updated by the logically-const owner snapshot stage;
+	// both fields are protected by _quiesce_mutex.
+	mutable bool _quiesce_snapshot_taken = false;
+	mutable uint64_t _quiesce_snapshot_generation = 0;
 
 	//! 线程池指针类型定义
 	typedef std::shared_ptr<boost::threadpool::pool> ThreadPoolPtr;

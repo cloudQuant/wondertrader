@@ -40,8 +40,12 @@ void on_mq_log(unsigned long /*id*/, const char* /*message*/, bool /*bServer*/)
  */
 EventNotifier::EventNotifier()
 	: _mq_sid(0)  // 初始化消息队列服务器ID为0
+	, _creator(nullptr)
+	, _remover(nullptr)
+	, _publisher(nullptr)
+	, _register(nullptr)
 {
-	// 构造函数中无其他初始化操作，主要在init方法中完成
+	// init 前通知函数为空操作，且析构不会误调用未初始化的函数指针。
 }
 
 

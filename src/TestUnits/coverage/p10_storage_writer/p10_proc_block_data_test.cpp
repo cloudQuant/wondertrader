@@ -7,15 +7,16 @@
 //  - 老版本压缩 bar（BlockHeaderV2 + BLOCK_VERSION_CMP）：解压后升级旧结构体
 //  - 老版本未压缩 tick：WTSTickStructOld -> WTSTickStruct 升版
 //  - 未知版本号：既非压缩也非老版本 -> 直接透传
-//  - 块标志非法值候选输入（BUG-P10-003：输入契约待定，用例暂禁用）
+//  - 块标志非法值（RAW_V2/CMP_V2）：拒绝且保持原始 content 不变
 //  - WtDataWriter::isSessionProceeded（纯查表分支，_proc_date 空/命中/未命中）
 //
-// 崩溃类输入（空 content / 头部不足一个 BlockHeader）整类收进一个 DISABLED_ 用例，启用用例零残留。
+// 空输入及截断头部放入独立子进程运行，避免越界回归终止测试宿主。
 #include <gtest/gtest.h>
 
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <limits>
 #include <string>
 
 #if defined(__unix__) || defined(__APPLE__)
@@ -99,17 +100,18 @@ static std::string make_cmp_bar_block(uint32_t count, uint64_t declaredSizeOffse
 	return content;
 }
 
-static std::string make_short_cmp_v2_header()
+static std::string make_truncated_cmp_v2_header(std::size_t size)
 {
-	// Only construct the 16 bytes that exist: BlockHeader plus four bytes of
-	// the BlockHeaderV2 size field. Do not write a full BlockHeaderV2 here.
-	std::string content(16, '\0');
-	BlockHeader prefix;
-	std::memset(&prefix, 0, sizeof(prefix));
-	set_flag(prefix._blk_flag, sizeof(prefix._blk_flag));
-	prefix._type = BT_HIS_Day;
-	prefix._version = BLOCK_VERSION_CMP_V2;
-	std::memcpy(content.data(), &prefix, sizeof(prefix));
+	// Initialize the complete compressed header first, then model a file truncated
+	// at each byte boundary after the 12-byte base header.
+	std::string content(BLOCK_HEADERV2_SIZE, '\0');
+	BlockHeaderV2 header;
+	std::memset(&header, 0, sizeof(header));
+	set_flag(header._blk_flag, sizeof(header._blk_flag));
+	header._type = BT_HIS_Day;
+	header._version = BLOCK_VERSION_CMP_V2;
+	std::memcpy(content.data(), &header, sizeof(header));
+	content.resize(size);
 	return content;
 }
 
@@ -291,18 +293,22 @@ TEST_F(P10ProcBlockTest, CmpV2DecompressKeepHeadRewritesRawV2Header)
 		EXPECT_EQ(bars[i].date, 20250101u + i);
 }
 
-TEST_F(P10ProcBlockTest, CmpV2LengthMismatchRejectedAndContentPreserved)
+TEST_F(P10ProcBlockTest, CmpV2LengthMismatchesRejectedInChildren)
 {
-	// 头部声明的长度与文件实际长度不符（+8）：应直接返回 false，且 content 未被改写
-	std::string content = make_cmp_bar_block(9, 8);
-	const std::string before = content;
-	EXPECT_FALSE(_writer.proc_block_data("unit", content, true, false));
-	EXPECT_EQ(content, before);
+	// Cover a declared payload length that is too large, too small, and UINT64_MAX.
+	// Each malformed compressed block runs in its own process in case a regression
+	// reintroduces an out-of-bounds read in the decoder.
+	EXPECT_EXIT(expect_proc_block_data_rejects_without_mutation(_writer, make_cmp_bar_block(9, 8)),
+		::testing::ExitedWithCode(0), "");
 
-	std::string content2 = make_cmp_bar_block(9, (uint64_t)0 - 8);
-	const std::string before2 = content2;
-	EXPECT_FALSE(_writer.proc_block_data("unit", content2, true, false));
-	EXPECT_EQ(content2, before2);
+	EXPECT_EXIT(expect_proc_block_data_rejects_without_mutation(
+		_writer, make_cmp_bar_block(9, (uint64_t)0 - 8)),
+		::testing::ExitedWithCode(0), "");
+
+	std::string maximumSize = make_cmp_bar_block(9, 0);
+	((BlockHeaderV2*)maximumSize.data())->_size = std::numeric_limits<uint64_t>::max();
+	EXPECT_EXIT(expect_proc_block_data_rejects_without_mutation(_writer, maximumSize),
+		::testing::ExitedWithCode(0), "");
 }
 
 TEST_F(P10ProcBlockTest, OldBarBlockTransferredToNewStruct)
@@ -386,6 +392,13 @@ TEST_F(P10ProcBlockTest, BlockFlagMismatchRejectsWithoutMutatingContent)
 	const std::string before = content;
 	EXPECT_FALSE(_writer.proc_block_data("unit", content, true, false));
 	EXPECT_EQ(before, content);
+
+	std::string compressed = make_cmp_bar_block(2, 0);
+	BlockHeaderV2* compressedHdr = (BlockHeaderV2*)&compressed[0];
+	std::memcpy(compressedHdr->_blk_flag, "WRONGFLG", 8);
+	const std::string compressedBefore = compressed;
+	EXPECT_FALSE(_writer.proc_block_data("unit", compressed, true, false));
+	EXPECT_EQ(compressedBefore, compressed);
 }
 
 TEST_F(P10ProcBlockTest, OldCompressedBarBlockDecompressesAndUpgradesStruct)
@@ -444,10 +457,25 @@ TEST_F(P10ProcBlockTest, FourByteInputRejectedInChild)
 		::testing::ExitedWithCode(0), "");
 }
 
-TEST_F(P10ProcBlockTest, ShortCompressedHeaderRejectedInChild)
+TEST_F(P10ProcBlockTest, OtherIncompleteBaseHeadersRejectedInChildren)
 {
-	EXPECT_EXIT(expect_proc_block_data_rejects_without_mutation(_writer, make_short_cmp_v2_header()),
-		::testing::ExitedWithCode(0), "");
+	for (std::size_t size : { std::size_t(1), std::size_t(11) })
+	{
+		SCOPED_TRACE(size);
+		EXPECT_EXIT(expect_proc_block_data_rejects_without_mutation(_writer, std::string(size, 'x')),
+			::testing::ExitedWithCode(0), "");
+	}
+}
+
+TEST_F(P10ProcBlockTest, TruncatedCompressedHeadersRejectedInChildren)
+{
+	for (std::size_t size = BLOCK_HEADER_SIZE; size < BLOCK_HEADERV2_SIZE; ++size)
+	{
+		SCOPED_TRACE(size);
+		EXPECT_EXIT(expect_proc_block_data_rejects_without_mutation(
+			_writer, make_truncated_cmp_v2_header(size)),
+			::testing::ExitedWithCode(0), "");
+	}
 }
 
 }  // namespace

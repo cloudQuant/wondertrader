@@ -4,9 +4,13 @@
 
 #include "Share/Converter.hpp"
 #include "Share/charconv.hpp"
+#include "WTSTools/CsvHelper.h"
 
+#include <chrono>
 #include <cstdint>
 #include <cstring>
+#include <filesystem>
+#include <fstream>
 #include <string>
 #include <vector>
 
@@ -61,6 +65,24 @@ TEST(l01_convert, to_str_into_caller_buffer_terminates_each_result)
 	EXPECT_STREQ(buf, "7"); // the reserved final byte bounds the C-string read
 }
 
+TEST(l01_convert, to_str_caller_buffer_capacity_failure_is_empty)
+{
+	char oneByte[1] = { 'x' };
+	EXPECT_EQ(convert::to_str(oneByte, sizeof(oneByte), 42), oneByte);
+	EXPECT_EQ(oneByte[0], '\0');
+
+	char tooSmall[4] = { 'x', 'y', 'z', '!' };
+	EXPECT_EQ(convert::to_str(tooSmall, 3, 12345), tooSmall);
+	EXPECT_EQ(boundedCStringLength(tooSmall, 3), 0u);
+	EXPECT_EQ(tooSmall[0], '\0');
+	EXPECT_EQ(tooSmall[3], '!'); // byte beyond the supplied capacity remains untouched
+
+	char untouched[1] = { 'x' };
+	EXPECT_EQ(convert::to_str(untouched, 0, 42), untouched);
+	EXPECT_EQ(untouched[0], 'x');
+	EXPECT_EQ(convert::to_str<int>(nullptr, 4, 42), nullptr);
+}
+
 TEST(l01_convert, to_str_internal_static_buffer_max_width)
 {
 	// 20 个字符正好覆盖到缓冲区最后一个写入位，后面的字节永远是初始零
@@ -70,11 +92,10 @@ TEST(l01_convert, to_str_internal_static_buffer_max_width)
 
 TEST(l01_convert, to_str_internal_static_buffer_terminates_each_result)
 {
-	// Use one T so both calls share the same thread_local buffer; the 64-byte bound
-	// keeps the check safe even if the implementation omits the required terminator.
-	const char* first = convert::to_str<unsigned long long>(9876543210ULL);
-	EXPECT_EQ(10u, boundedCStringLength(first, 64));
-	EXPECT_EQ('\0', first[10]);
+	// Use one T so both calls share the same thread_local buffer.
+	const char* first = convert::to_str<unsigned long long>(18446744073709551615ULL);
+	EXPECT_EQ(20u, boundedCStringLength(first, 64));
+	EXPECT_EQ('\0', first[20]);
 
 	const char* second = convert::to_str<unsigned long long>(1ULL);
 	EXPECT_EQ(1u, boundedCStringLength(second, 64));
@@ -100,21 +121,24 @@ TEST(l01_convert, from_str_cstr)
 	EXPECT_EQ(convert::from_str<int32_t>("99999999999999999999"), 0);
 }
 
-// BUG-L01-011（Blocker）：convert::from_str<T>(std::string&) 这条重载在 libc++ 下
-// 根本无法实例化 —— Converter.hpp:48 把 std::string::iterator（__wrap_iter<char*>）
-// 直接传给要求 const char* 的 std::from_chars，编译期即报错：
-//   no matching function for call to 'from_chars'
-// 因此这里不能写任何调用该重载的用例，否则整个 TU 编译失败。
-// 修复方向（不在本迭代实施）：改用 str.c_str() / &str[0] + str.size()，或改成
-// 模板参数为 const std::string& 并用 std::from_chars(str.data(), str.data()+str.size(), ret)。
-// 同时注意该重载里是 `T ret;`（未初始化），失败路径读取的是不确定值，而 char* 版本是 `T ret{}`。
-TEST(l01_convert, const_char_pointer_overload_parses_signed_and_invalid_input)
+// Both overloads preserve std::from_chars prefix parsing: a valid numeric prefix
+// is returned even when the input has a trailing non-numeric suffix.
+TEST(l01_convert, from_str_std_string)
 {
-	// 只验证 const char* 重载，不能据此证明 std::string 重载可以编译。
-	EXPECT_EQ(convert::from_str<int32_t>("4567"), 4567);
-	EXPECT_EQ(convert::from_str<int32_t>("-7"), -7);
-	EXPECT_EQ(convert::from_str<int64_t>("1234567890123"), 1234567890123LL);
-	EXPECT_EQ(convert::from_str<int32_t>("ff"), 0);
+	const std::string positive = "4567";
+	const std::string negative = "-7";
+	const std::string prefix = "12abc";
+	const std::string invalid = "ff";
+	const std::string empty;
+	const std::string overflow = "99999999999999999999";
+
+	EXPECT_EQ(convert::from_str<int32_t>(positive), 4567);
+	EXPECT_EQ(convert::from_str<int32_t>(negative), -7);
+	EXPECT_EQ(convert::from_str<int32_t>(prefix), 12);
+	EXPECT_EQ(convert::from_str<int32_t>(invalid), 0);
+	EXPECT_EQ(convert::from_str<int32_t>(empty), 0);
+	EXPECT_EQ(convert::from_str<int32_t>(overflow), 0);
+	EXPECT_EQ(convert::from_str<int64_t>(std::string("1234567890123")), 1234567890123LL);
 }
 
 // ------------------------------------------------------------------ convert::to_intXXX
@@ -135,8 +159,82 @@ TEST(l01_convert, to_int32_parses_negative_decimal)
 	EXPECT_EQ(convert::to_int32("-5"), -5);
 }
 
+TEST(l01_convert, to_int_helpers_validate_signs_and_boundaries)
+{
+	int32_t i32 = 123;
+	EXPECT_TRUE(convert::try_to_int32("-5", i32));
+	EXPECT_EQ(-5, i32);
+	EXPECT_TRUE(convert::try_to_int32("+5", i32));
+	EXPECT_EQ(5, i32);
+	EXPECT_TRUE(convert::try_to_int32("2147483647", i32));
+	EXPECT_EQ(INT32_MAX, i32);
+	EXPECT_TRUE(convert::try_to_int32("-2147483648", i32));
+	EXPECT_EQ(INT32_MIN, i32);
+	EXPECT_FALSE(convert::try_to_int32("2147483648", i32));
+	EXPECT_EQ(0, i32);
+	EXPECT_FALSE(convert::try_to_int32("-2147483649", i32));
+	EXPECT_FALSE(convert::try_to_int32("12x", i32));
+	EXPECT_FALSE(convert::try_to_int32("+", i32));
+	EXPECT_FALSE(convert::try_to_int32("", i32));
+	EXPECT_FALSE(convert::try_to_int32(nullptr, i32));
+	EXPECT_EQ(0, i32);
+	EXPECT_EQ(0, convert::to_int32("12x"));
+	EXPECT_EQ(0, convert::to_int32(nullptr));
+
+	uint32_t u32 = 1;
+	EXPECT_TRUE(convert::try_to_uint32("+42", u32));
+	EXPECT_EQ(42u, u32);
+	EXPECT_TRUE(convert::try_to_uint32("4294967295", u32));
+	EXPECT_EQ(UINT32_MAX, u32);
+	EXPECT_FALSE(convert::try_to_uint32("4294967296", u32));
+	EXPECT_EQ(0u, u32);
+	EXPECT_FALSE(convert::try_to_uint32("-1", u32));
+	EXPECT_FALSE(convert::try_to_uint32("1a", u32));
+	EXPECT_EQ(0u, convert::to_uint32("4294967296"));
+
+	int64_t i64 = 0;
+	EXPECT_TRUE(convert::try_to_int64("9223372036854775807", i64));
+	EXPECT_EQ(INT64_MAX, i64);
+	EXPECT_TRUE(convert::try_to_int64("-9223372036854775808", i64));
+	EXPECT_EQ(INT64_MIN, i64);
+	EXPECT_FALSE(convert::try_to_int64("9223372036854775808", i64));
+	EXPECT_FALSE(convert::try_to_int64("-9223372036854775809", i64));
+	EXPECT_EQ(0, i64);
+
+	uint64_t u64 = 0;
+	EXPECT_TRUE(convert::try_to_uint64("18446744073709551615", u64));
+	EXPECT_EQ(UINT64_MAX, u64);
+	EXPECT_FALSE(convert::try_to_uint64("18446744073709551616", u64));
+	EXPECT_FALSE(convert::try_to_uint64("-0", u64));
+	EXPECT_EQ(0u, u64);
+	EXPECT_EQ(0u, convert::to_uint64("18446744073709551616"));
+}
+
+TEST(l01_convert, csv_reader_preserves_negative_int32)
+{
+	const auto stamp = std::chrono::steady_clock::now().time_since_epoch().count();
+	const std::filesystem::path path = std::filesystem::temp_directory_path() /
+		(std::string("wondertrader_converter_negative_") + std::to_string(stamp) + ".csv");
+	{
+		std::ofstream output(path, std::ios::binary | std::ios::trunc);
+		ASSERT_TRUE(output.good());
+		output << "amount\n-123\n";
+	}
+
+	CsvReader reader;
+	ASSERT_TRUE(reader.load_from_file(path.string().c_str()));
+	ASSERT_TRUE(reader.next_row());
+	EXPECT_EQ(-123, reader.get_int32("amount"));
+
+	std::error_code ec;
+	std::filesystem::remove(path, ec);
+}
+
 static_assert(convert::to_int32("2024") == 2024, "to_int32 must stay constexpr");
+static_assert(convert::to_int32("-2024") == -2024, "signed to_int32 must stay constexpr");
+static_assert(convert::to_int64("-9223372036854775808") == INT64_MIN, "signed to_int64 must handle its minimum value constexpr");
 static_assert(convert::to_uint64("10") == 10ull, "to_uint64 must stay constexpr");
+static_assert(convert::to_int32("23", 1) == 123, "legacy accumulator overload must stay constexpr");
 
 // ------------------------------------------------------------------ URLEncode
 TEST(l01_charconv, url_encode_ascii)
@@ -266,11 +364,9 @@ TEST(l01_charconv, encoding_helper_is_gbk)
 	EXPECT_TRUE(EncodingHelper::isGBK(mixed.data(), mixed.size()));
 }
 
-// BUG-L01-005：isGBK 在“高位字节但双字节校验失败”时既不返回 true 也不推进 i，
-// 会死循环；同时 data[i+1] 在最后一个字节时越界读。修复前不能启用。
-// 该缺陷类包含所有走失败分支的输入，不只是 0xFF —— 次字节 ==0xF7、<0x40 同样挂死
-// （实测：启用态的 encoding_helper_is_gbk 卡在 {0xD6,0xF7} 上，CPU 空转 9 分钟）。
-TEST(l01_charconv, DISABLED_encoding_helper_is_gbk_hangs)
+// Invalid GBK pairs must terminate, and a trailing lead byte must not read
+// beyond the supplied length.
+TEST(l01_charconv, encoding_helper_is_gbk_rejects_malformed_without_stalling)
 {
 	std::vector<unsigned char> bad{ 0xFF, 0xFF };
 	EXPECT_FALSE(EncodingHelper::isGBK(bad.data(), bad.size()));
@@ -280,6 +376,11 @@ TEST(l01_charconv, DISABLED_encoding_helper_is_gbk_hangs)
 
 	std::vector<unsigned char> low{ 0xD6, 0x20 };
 	EXPECT_FALSE(EncodingHelper::isGBK(low.data(), low.size()));
+
+	std::vector<unsigned char> loneLead{ 0xD6 };
+	EXPECT_FALSE(EncodingHelper::isGBK(loneLead.data(), loneLead.size()));
+	EXPECT_FALSE(EncodingHelper::isGBK(nullptr, 1));
+	EXPECT_FALSE(EncodingHelper::isGBK(nullptr, 0));
 }
 
 // ------------------------------------------------------------------ UTF8toChar / ChartoUTF8

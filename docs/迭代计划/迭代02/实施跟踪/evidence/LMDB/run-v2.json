@@ -1,0 +1,67 @@
+{
+  "bug_ids": [
+    "BUG-R16-10",
+    "BUG-R16-18"
+  ],
+  "suite": "r16_lmdb",
+  "platform": "macOS arm64",
+  "date": "2026-10-30",
+  "base_commit": "e453f048853c050a2811d876d87554795c26586b",
+  "worktree_sources_modified": true,
+  "binary": "build-cov/build_x64/Debug/bin/TestUnits/wt-lmdb-focused-v2",
+  "binary_sha256": "42d419fe70c00bda1dea88add99794ff7d09f42581258875484ff82769249329",
+  "build_log": "build-v2.log",
+  "build_log_sha256": "79c38a23789824a10d6e6d0e1da2e0b05d7a540a4b4bd69b575083af003defe6",
+  "run_log": "run-v2.log",
+  "run_log_sha256": "2fc5cc59f81c8783d5843cc0d3c2f2ea61482933c310c4259b5052a230d32d16",
+  "source_sha256": {
+    "src/WTSUtils/WtLMDB.hpp": "840ee8bcc26cdd2bd125b6a74ed03f383bf7e4fa2fbfbccbacf3ff2c6aa5d3d4",
+    "src/TestUnits/coverage/r16_share_tools/r16_lmdb_test.cpp": "93229461a33229110299e5d7a79a0bd77c7c91d125ede574cebb3c9f2b9103d6"
+  },
+  "replay_build_command": "/opt/homebrew/bin/ninja -C build-cov -j 2 TestUnits/coverage/CMakeFiles/CoverageTests.dir/r16_share_tools/r16_lmdb_test.cpp.o",
+  "build_log_scope": "The archived batch log records successful compilation of r16_lmdb_test.cpp.o plus related R23 test/reader objects; this is targeted incremental evidence, not a clean build.",
+  "link_command_from_build_cov": "/usr/bin/c++ -arch arm64 -fprofile-instr-generate -g TestUnits/coverage/CMakeFiles/CoverageTests.dir/r16_share_tools/r16_lmdb_test.cpp.o /opt/homebrew/lib/libgtest_main.a /opt/homebrew/lib/libgtest.a build_x64/Debug/libs/libWTSUtils.a -L/opt/homebrew/lib -L/usr/local/lib -lboost_filesystem -lboost_thread -liconv -lpthread -o build_x64/Debug/bin/TestUnits/wt-lmdb-focused-v2",
+  "link_scope": "Focused test link using the already-built WTSUtils library and system GoogleTest/Boost dependencies; it does not replace a clean or aggregate CoverageTests build.",
+  "run_command": "build-cov/build_x64/Debug/bin/TestUnits/wt-lmdb-focused-v2",
+  "exit_code": 0,
+  "tests": 15,
+  "passed": 15,
+  "failures": 0,
+  "disabled": 0,
+  "test_names": [
+    "open_fresh_env_sets_handle_and_no_error",
+    "put_then_get_range_returns_exact_window",
+    "get_range_compares_variable_length_binary_keys",
+    "get_uppers_walks_forward_until_count_or_upper",
+    "get_lowers_walks_backward_then_reverses",
+    "put_and_commit_variant_persists_without_destructor_commit",
+    "rollback_drops_uncommitted_writes",
+    "commit_is_idempotent_and_reuses_dbi",
+    "error_accessors_reflect_manual_errno_update",
+    "readonly_env_reports_readonly_and_rejects_put",
+    "get_looks_up_the_requested_key",
+    "get_all_returns_each_record_once",
+    "get_all_on_empty_db_returns_no_records",
+    "open_failure_updates_member_error",
+    "mapsize_failure_reports_error_closes_environment_and_can_retry"
+  ],
+  "independent_review": "Passed; no blocker reported for the reviewed changes.",
+  "prior_test_oracle_correction": {
+    "case": "get_range(\"b\", \"c\")",
+    "old_expectation": 3,
+    "actual_closed_range_count": 2,
+    "corrected_expectation": 2,
+    "note": "The range is inclusive and contains b and c only. This was a test oracle correction, separate from the two product defects."
+  },
+  "fix_attribution": {
+    "BUG-R16-10": "Product defect: open_impl now preserves set_mapsize failure in the member error state and closes/resets the partially opened environment; the injected MDB_MAP_FULL test checks error visibility and retry.",
+    "BUG-R16-18": "Product defect: compare_lmdb_keys compares the common byte prefix then the lengths; get_range uses the actual key and bound lengths for binary-safe closed-range checks."
+  },
+  "sanitizers": "No ASan PASS evidence; ASan was not run for this batch.",
+  "remaining": [
+    "ASan and other sanitizer evidence is absent.",
+    "Windows and other non-macOS platforms were not built or run.",
+    "A range callback that throws, including cursor lifetime/cleanup until transaction end, was not tested.",
+    "No clean rebuild, aggregate CoverageTests run, or broader production consumer integration was performed."
+  ]
+}

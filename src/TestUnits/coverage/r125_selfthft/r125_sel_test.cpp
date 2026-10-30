@@ -5,7 +5,7 @@
  * 覆盖依据（本轮读源码确认）：
  * - WtStraDtSel.cpp L70-97 init 参数（codes 逗号分割）；
  *   L104-112 on_init 逐 code 订阅；L121-234 on_schedule：非交易时段 continue、
- *   缺/空 K 线早退、stock 后缀与 100 股单位、无仓突破进场、多/空仓突破出场；
+ *   缺/空 K 线跳过当前品种、stock 后缀与 100 股单位、无仓突破进场、多/空仓突破出场；
  *   L243-259 on_tick/on_bar 空实现。
  * - WtSelStraFact.cpp L28-42 C 导出 createSelStrategyFact/deleteSelStrategyFact；
  *   L87-99 deleteStrategy 非本厂拒删；L108-123 enumStrategy/getName。
@@ -132,7 +132,7 @@ TEST(R125SelStrategy, InitSubscribesAllCodes)
 
 TEST(R125SelStrategy, ScheduleEarlyReturns)
 {
-	// WtStraDtSel.cpp L127-150：非交易时段 continue；缺 K 线 / 空 K 线均直接 return
+	// WtStraDtSel.cpp L127-150：非交易时段、缺 K 线和空 K 线均跳过当前品种
 	WtStraDtSel stra("r125_sel_early");
 	VarHolder cfg(makeSelCfg("SHFE.au.2005", false));
 	ASSERT_TRUE(stra.init(cfg.get()));
@@ -155,6 +155,73 @@ TEST(R125SelStrategy, ScheduleEarlyReturns)
 	stra.on_schedule(&ctx, 20240102, 1000);
 	ctx.bars = NULL;
 	EXPECT_TRUE(ctx.set_positions.empty());
+}
+
+TEST(R125SelStrategy, ScheduleContinuesAfterMissingOrEmptyBars)
+{
+	// 每次请求按调用顺序提供数据，避免对 unordered_set 的品种迭代顺序作假设。
+	const char* codes = "SHFE.au.2005,SHFE.ag.2005";
+	std::vector<WTSBarStruct> valid_store;
+
+	// 第一个被调度品种缺 K 线，后一个仍应按突破信号进场。
+	{
+		WtStraDtSel stra("r125_sel_missing_then_valid");
+		VarHolder cfg(makeSelCfg(codes, false));
+		ASSERT_TRUE(stra.init(cfg.get()));
+
+		r125_sh::SelCtx ctx;
+		ctx.bars_responses = { NULL,
+			r125_sh::make_kline(valid_store, {5, 6, 7, 8, 9}, 8.4) };
+		stra.on_schedule(&ctx, 20240102, 1000);
+
+		ASSERT_EQ(2u, ctx.bars_codes.size());
+		EXPECT_NE(ctx.bars_codes[0], ctx.bars_codes[1]);
+		ASSERT_EQ(1u, ctx.set_positions.size());
+		EXPECT_NE(std::string::npos, ctx.set_positions[0].find(
+			ctx.bars_codes[1] + ":1.000000:DT_EnterLong"));
+	}
+
+	// 第一个被调度品种返回空 slice；空 slice 被释放后，后一个仍应处理。
+	{
+		WtStraDtSel stra("r125_sel_empty_then_valid");
+		VarHolder cfg(makeSelCfg(codes, false));
+		ASSERT_TRUE(stra.init(cfg.get()));
+
+		r125_sh::SelCtx ctx;
+		ctx.bars_responses = { r125_sh::make_empty_kline(),
+			r125_sh::make_kline(valid_store, {5, 6, 7, 8, 9}, 8.4) };
+		stra.on_schedule(&ctx, 20240102, 1000);
+
+		ASSERT_EQ(2u, ctx.bars_codes.size());
+		EXPECT_NE(ctx.bars_codes[0], ctx.bars_codes[1]);
+		ASSERT_EQ(1u, ctx.set_positions.size());
+		EXPECT_NE(std::string::npos, ctx.set_positions[0].find(
+			ctx.bars_codes[1] + ":1.000000:DT_EnterLong"));
+	}
+
+	// 正控：两个品种都有 K 线时，两个独立的突破信号都被处理。
+	{
+		WtStraDtSel stra("r125_sel_all_valid");
+		VarHolder cfg(makeSelCfg(codes, false));
+		ASSERT_TRUE(stra.init(cfg.get()));
+
+		std::vector<WTSBarStruct> first_store;
+		std::vector<WTSBarStruct> second_store;
+		r125_sh::SelCtx ctx;
+		ctx.bars_responses = {
+			r125_sh::make_kline(first_store, {5, 6, 7, 8, 9}, 8.4),
+			r125_sh::make_kline(second_store, {5, 6, 7, 8, 9}, 8.4) };
+		stra.on_schedule(&ctx, 20240102, 1000);
+
+		ASSERT_EQ(2u, ctx.bars_codes.size());
+		EXPECT_NE(ctx.bars_codes[0], ctx.bars_codes[1]);
+		ASSERT_EQ(2u, ctx.set_positions.size());
+		for (const auto& requested_code : ctx.bars_codes)
+		{
+			EXPECT_TRUE(hasString(ctx.set_positions,
+				requested_code + ":1.000000:DT_EnterLong"));
+		}
+	}
 }
 
 TEST(R125SelStrategy, ScheduleBreakoutMatrix)

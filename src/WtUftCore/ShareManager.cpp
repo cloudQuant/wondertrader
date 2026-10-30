@@ -13,6 +13,8 @@
 
 #include "../Share/TimeUtils.hpp"
 
+#include <vector>
+
 
 /**
  * @brief 初始化共享数据管理器
@@ -77,40 +79,128 @@ bool ShareManager::initialize(const char* module)
  */
 bool ShareManager::start_watching(uint32_t microsecs)
 {
-	if (!_inited)
+	std::lock_guard<std::mutex> lock(_watch_mutex);
+	if (!_inited || _stopped.load(std::memory_order_acquire) || _engine == nullptr)
+		return false;
+	// Keep the historical idempotent start contract while the worker is active.
+	if (_worker != nullptr)
+		return true;
+	if (_watch_started)
 		return false;
 
-	if (_inited && !_stopped && _worker == nullptr)
-	{
-		_worker.reset(new StdThread([this, microsecs]() {
-			while (!_stopped)
+	StdThreadPtr worker(new StdThread([this, microsecs]() {
+		while (!_stopped.load(std::memory_order_acquire))
+		{
+			std::vector<std::pair<std::string, uint64_t>> sections;
+			func_get_section_updatetime getUpdate = nullptr;
+			std::string exchange;
+			WtUftEngine* engine = nullptr;
 			{
-				for(auto& v : _secnames)
-				{
-					if(_stopped)
-						break;
-
-					const char* section = v.first.c_str();
-					uint64_t& udtTime = (uint64_t&)v.second;
-
-					uint64_t lastUdtTime = _get_section_updatetime(_exchg.c_str(), section);
-					if(lastUdtTime > v.second)
-					{
-						//触发通知
-						_engine->notify_params_update(section);
-						udtTime = lastUdtTime;
-					}
-				}
-
-				//如果等待时间为0，则进入无限循环的检查中
-				if(microsecs > 0 && !_stopped)
-					std::this_thread::sleep_for(std::chrono::microseconds(microsecs));
+				std::lock_guard<std::mutex> stateLock(_watch_mutex);
+				getUpdate = _get_section_updatetime;
+				exchange = _exchg;
+				engine = _engine;
+				sections.reserve(_secnames.size());
+				for (const auto& section : _secnames)
+					sections.emplace_back(section.first, section.second);
 			}
-		}));
 
-		WTSLogger::info("Share domain is on watch");
+			for (const auto& section : sections)
+			{
+				if (_stopped.load(std::memory_order_acquire))
+					break;
+
+				if (getUpdate == nullptr || engine == nullptr)
+					break;
+
+				const uint64_t lastUpdate = getUpdate(exchange.c_str(), section.first.c_str());
+				if (lastUpdate > section.second)
+				{
+					// The engine remains borrowed until the control thread joins this worker.
+					engine->notify_params_update(section.first.c_str());
+					std::lock_guard<std::mutex> stateLock(_watch_mutex);
+					auto current = _secnames.find(section.first);
+					if (current != _secnames.end() && current->second == section.second)
+						current->second = lastUpdate;
+				}
+			}
+
+			if (microsecs > 0 && !_stopped.load(std::memory_order_acquire))
+			{
+				std::unique_lock<std::mutex> stateLock(_watch_mutex);
+				_watch_condition.wait_for(stateLock, std::chrono::microseconds(microsecs), [this]() {
+					return _stopped.load(std::memory_order_acquire);
+				});
+			}
+		}
+	}));
+	_watch_thread_id = worker->get_id();
+	_worker = worker;
+	_watch_started = true;
+
+	WTSLogger::info("Share domain is on watch");
+	return true;
+}
+
+bool ShareManager::request_stop_watching()
+{
+	{
+		std::lock_guard<std::mutex> lock(_watch_mutex);
+		_stopped.store(true, std::memory_order_release);
+	}
+	_watch_condition.notify_all();
+	return true;
+}
+
+bool ShareManager::wait_watching_stopped()
+{
+	request_stop_watching();
+	std::unique_lock<std::mutex> lock(_watch_mutex);
+	if (_worker == nullptr)
+	{
+		_engine = nullptr;
+		_watch_thread_id = std::thread::id();
+		return true;
 	}
 
+	// The watcher callback can request stop, but must never join itself.
+	if (_watch_thread_id == std::this_thread::get_id())
+		return false;
+
+	while (_watch_join_in_progress)
+	{
+		_watch_condition.wait(lock, [this]() { return !_watch_join_in_progress; });
+		if (_worker == nullptr)
+			return true;
+	}
+
+	_watch_join_in_progress = true;
+	StdThreadPtr worker = _worker;
+	lock.unlock();
+	_watch_condition.notify_all();
+
+	try
+	{
+		if (worker->joinable())
+			worker->join();
+	}
+	catch (...)
+	{
+		lock.lock();
+		_watch_join_in_progress = false;
+		_watch_condition.notify_all();
+		return false;
+	}
+
+	lock.lock();
+	if (_worker == worker)
+	{
+		_worker.reset();
+		_engine = nullptr;
+		_watch_thread_id = std::thread::id();
+	}
+	_watch_join_in_progress = false;
+	_watch_condition.notify_all();
 	return true;
 }
 
@@ -152,9 +242,16 @@ bool ShareManager::commit_param_watcher(const char* section)
 {
 	if (!_inited)
 		return false;
+	if (section == nullptr || _stopped.load(std::memory_order_acquire))
+		return false;
 
 	bool ret = _commit_section(_exchg.c_str(), section);
-	_secnames[section] = TimeUtils::getLocalTimeNow();
+	{
+		std::lock_guard<std::mutex> lock(_watch_mutex);
+		if (_stopped.load(std::memory_order_acquire))
+			return false;
+		_secnames[section] = TimeUtils::getLocalTimeNow();
+	}
 	return ret;
 }
 

@@ -463,14 +463,15 @@ TEST(ParserXTP, tickbytick_converts_entrust_and_trade_branches)
 	tbt.trade.seq = 555;
 	tbt.trade.price = 1701.0;
 	tbt.trade.qty = 100;
-	tbt.trade.trade_flag = '4';		/* 撤单标识 */
+	tbt.trade.trade_flag = 'B';		/* SH: 主动买方向；SZ 专属的 '4' 撤单标识不适用于此报文 */
 	tbt.trade.bid_no = 12;
 	tbt.trade.ask_no = 34;
 
 	parser.OnTickByTick(&tbt);
 	ASSERT_EQ(1u, spi.transCalls);
 	EXPECT_EQ(555u, spi.trans.index);
-	EXPECT_EQ(TT_Cancel, spi.trans.ttype);
+	EXPECT_EQ(TT_Match, spi.trans.ttype);
+	EXPECT_EQ(BDT_Buy, spi.trans.side);
 	EXPECT_DOUBLE_EQ(1701.0, spi.trans.price);
 	EXPECT_EQ(100u, spi.trans.volume);
 	EXPECT_EQ(12u, spi.trans.bidorder);

@@ -3,7 +3,9 @@
 */
 #include "WtVWapExeUnit.h"
 
+#include <cmath>
 #include <sstream>
+#include <limits>
 
 #include "../Share/TimeUtils.hpp"
 #include "../Includes/WTSVariant.hpp"
@@ -11,6 +13,7 @@
 #include "../Share/decimal.h"
 #include "../Share/fmtlib.h"
 #include "../Includes/WTSSessionInfo.hpp"
+#include "VwapProfile.hpp"
 
 
 extern const char* FACT_NAME;
@@ -19,19 +22,40 @@ WtVWapExeUnit::WtVWapExeUnit()
 	:_last_tick(NULL)
 	, _target_pos(0)
 	,_channel_ready(false)
+	,_channel_reconcile_pending(false)
+	,_retry_pending(false)
+	,_retry_cancel(false)
+	,_valid_tick_dispatch(false)
+	,_config_valid(false)
+	,_init_succeeded(false)
 	,_comm_info(NULL)//品种信息
+	,_sess_info(NULL)
 	, _cancel_times(0)
+	,_begin_session_minute(0)
+	,_end_session_minute(0)
 	,_cancel_cnt(0)
 	, _total_secs(0)
 	, _total_times(0)
+	,_tail_secs(0)
 	,_ord_sticky(0)
 	, _price_mode(0)
 	, _price_offset(0)
 	, _begin_time(0)
 	, _end_time(0)
+	,_min_open_lots(0)
+	,_order_lots(0)
 	,isCanCancel(true)
-, _fired_times(0)
-	, _last_fire_time(0)
+	,_fire_span(0)
+	,_fired_times(0)
+	, _last_fire_session_time_ms(0)
+	, _last_fire_session_date(0)
+	,_last_place_time(0)
+	, _last_tick_time(0)
+	,_last_valid_tick_time(0)
+	,_tick_time_high_water(0)
+	,_retry_after_tick_time(0)
+	,_Vwap_prz(0)
+	, _in_calc(false)
 	{
 }
 
@@ -42,6 +66,8 @@ WtVWapExeUnit::~WtVWapExeUnit()
 
 	if (_comm_info)
 		_comm_info->release();
+	if (_sess_info)
+		_sess_info->release();
 }
 inline double get_real_target(double _target) {
 	if (_target == DBL_MAX)
@@ -53,39 +79,159 @@ inline bool is_clear(double target)
 {
 	return (target == DBL_MAX);
 }
-inline uint32_t calTmSecs(uint32_t begintime, uint32_t endtime) //计算执行时间：s
-{
-	return   ((endtime / 100) * 3600 + (endtime % 100) * 60) - ((begintime / 100) * 3600 + (begintime % 100) * 60);
 
-}
-inline double calTmStamp(uint32_t actiontime) //计算tick时间属于哪个时间单元
+inline bool validSessionHHMM(uint32_t value)
 {
-	string timestamp = to_string(actiontime);
-	int hour = stoi(timestamp.substr(0, 2));
-	int minute = stoi(timestamp.substr(2, 2));
-	double total_minute = 0;
-	if (hour < 9 || (hour == 9 && minute < 30)) {
-		total_minute = 0;
-	}
-	else if (hour < 11 || (hour == 11 && minute <= 30)) {
-		total_minute = (hour - 9) * 60 + minute - 30;
-	}
-	else if (hour < 13 || (hour == 13 && minute < 30)) {
-		total_minute = 120 + (hour - 11) * 60 + minute;
-	}
-	else if (hour < 15 || (hour == 15 && minute <= 0)) {
-		total_minute = 240 + (hour - 13) * 60 + minute - 30;
-	}
-	else {
-		total_minute = 240;
-	}
-	if (timestamp >= "113000000" && timestamp < "130000000") {
-		total_minute = 120;
-	}
-	total_minute += stoi(timestamp.substr(4, 2)) / 60;
-	total_minute += stoi(timestamp.substr(6, 3)) / 60000;
-	return total_minute ;//这里应该+1，对应vector 所以再-1
+	return value <= 2359 && value / 100 < 24 && value % 100 < 60;
 }
+
+inline bool validActionTime(uint32_t value)
+{
+	const uint32_t hhmmss = value / 1000;
+	const uint32_t hhmm = hhmmss / 100;
+	return hhmm / 100 < 24 && hhmm % 100 < 60 && hhmmss % 100 < 60;
+}
+
+inline bool validActionDate(uint32_t value)
+{
+	const uint32_t year = value / 10000;
+	const uint32_t month = (value / 100) % 100;
+	const uint32_t day = value % 100;
+	if (year < 1900 || month == 0 || month > 12 || day == 0)
+		return false;
+	static const uint32_t monthDays[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+	uint32_t maxDay = monthDays[month - 1];
+	if (month == 2 && (year % 400 == 0 || (year % 4 == 0 && year % 100 != 0)))
+		maxDay = 29;
+	return day <= maxDay;
+}
+
+inline bool validSessionDatePair(WTSSessionInfo* session, uint32_t actionDate,
+	uint32_t tradingDate, uint32_t hhmm, uint32_t& sessionDate,
+	std::string& diagnostic)
+{
+	if (session == NULL || !validActionDate(actionDate)
+		|| (tradingDate != 0 && !validActionDate(tradingDate)))
+	{
+		diagnostic = "VWAP tick action/trading date is not a valid calendar date";
+		return false;
+	}
+	sessionDate = session->getOffsetDate(actionDate, hhmm);
+	if (!validActionDate(sessionDate))
+	{
+		diagnostic = "VWAP session-adjusted date cannot be verified";
+		return false;
+	}
+	if (tradingDate == 0)
+	{
+		if (sessionDate != actionDate)
+		{
+			diagnostic = "VWAP overnight tick has no verifiable trading_date";
+			return false;
+		}
+		return true;
+	}
+	// No exchange holiday calendar is available here. A trading date may skip
+	// any number of natural days, so only reject an impossible earlier date.
+	if (tradingDate < sessionDate)
+	{
+		diagnostic = "VWAP tick action_date and trading_date do not match the session offset; refusing ambiguous provider dates";
+		return false;
+	}
+	diagnostic.clear();
+	return true;
+}
+
+inline bool readTickSessionTime(WTSSessionInfo* session, WTSTickData* tick,
+	size_t profileSize, size_t& bucket, uint32_t& sessionDate,
+	uint64_t& sessionTimeMs, std::string& diagnostic)
+{
+	if (session == NULL || tick == NULL)
+	{
+		diagnostic = "VWAP requires a session and tick";
+		return false;
+	}
+	if (!wtp::vwap_profile::mapActionTime(*session, tick->actiontime(), profileSize, bucket, diagnostic))
+		return false;
+
+	const uint32_t hhmmss = tick->actiontime() / 1000;
+	const uint32_t hhmm = hhmmss / 100;
+	const uint32_t second = hhmmss % 100;
+	const uint32_t millisecond = tick->actiontime() % 1000;
+	const uint64_t minute = static_cast<uint64_t>(bucket);
+	if (minute > (std::numeric_limits<uint64_t>::max() - 59999) / 60000)
+	{
+		diagnostic = "VWAP session time overflows";
+		return false;
+	}
+	sessionTimeMs = minute * 60000 + second * 1000 + millisecond;
+	if (!validSessionDatePair(session, tick->actiondate(), tick->tradingdate(),
+		hhmm, sessionDate, diagnostic))
+		return false;
+	diagnostic.clear();
+	return true;
+}
+
+inline bool inConfiguredWindow(uint32_t bucket, uint32_t second, uint32_t millisecond,
+	uint32_t beginMinute, uint32_t endMinute)
+{
+	const uint64_t elapsed = static_cast<uint64_t>(bucket) * 60000 + second * 1000 + millisecond;
+	return elapsed >= static_cast<uint64_t>(beginMinute) * 60000
+		&& elapsed <= static_cast<uint64_t>(endMinute) * 60000;
+}
+
+inline double calculateVwapQuantity(double aimQty, double realPos, double diffQty,
+	double minOpenLots, bool showHand)
+{
+	if (!std::isfinite(aimQty) || !std::isfinite(realPos) || !std::isfinite(diffQty)
+		|| !std::isfinite(minOpenLots) || decimal::eq(diffQty, 0))
+		return 0;
+	const double requested = showHand ? abs(diffQty) : max(aimQty - realPos, minOpenLots);
+	const double quantity = min(abs(diffQty), max(0.0, requested));
+	return decimal::lt(diffQty, 0) ? -quantity : quantity;
+}
+
+inline bool limitVwapQuantityByAvailability(ExecuteContext* ctx, const char* code,
+	double realPos, double& quantity, std::string& diagnostic)
+{
+	if (ctx == NULL || code == NULL || !std::isfinite(realPos) || !std::isfinite(quantity))
+	{
+		diagnostic = "VWAP cannot verify current position availability";
+		return false;
+	}
+	if (decimal::gt(quantity, 0) && decimal::lt(realPos, 0))
+	{
+		const double shortPosition = abs(ctx->getPosition(code, false, 2));
+		const double availableShort = abs(ctx->getPosition(code, true, 2));
+		if (!std::isfinite(shortPosition) || !std::isfinite(availableShort))
+		{
+			diagnostic = "VWAP short position availability is invalid";
+			return false;
+		}
+		quantity = min(quantity, min(shortPosition, availableShort));
+	}
+	else if (decimal::lt(quantity, 0) && decimal::gt(realPos, 0))
+	{
+		const double longPosition = ctx->getPosition(code, false, 1);
+		const double availableLong = ctx->getPosition(code, true, 1);
+		if (!std::isfinite(longPosition) || !std::isfinite(availableLong)
+			|| decimal::lt(longPosition, 0) || decimal::lt(availableLong, 0))
+		{
+			diagnostic = "VWAP long position availability is invalid";
+			return false;
+		}
+		quantity = -min(abs(quantity), min(longPosition, availableLong));
+	}
+	diagnostic.clear();
+	return true;
+}
+
+struct ScopedFlagReset
+{
+	explicit ScopedFlagReset(bool& flag) : _flag(flag) {}
+	~ScopedFlagReset() { _flag = false; }
+	bool& _flag;
+};
 const char * WtVWapExeUnit::getFactName()
 {
 	return FACT_NAME;
@@ -98,51 +244,117 @@ const char * WtVWapExeUnit::getName()
 
 void WtVWapExeUnit::init(ExecuteContext * ctx, const char * stdCode, WTSVariant * cfg)
 {
-	ExecuteUnit::init(ctx, stdCode, cfg);
+	_init_succeeded = false;
+	_config_valid = false;
+	if (_comm_info)
+	{
+		_comm_info->release();
+		_comm_info = NULL;
+	}
+	if (_sess_info)
+	{
+		_sess_info->release();
+		_sess_info = NULL;
+	}
+	VwapAim.clear();
+	if (ctx == NULL || stdCode == NULL || stdCode[0] == '\0' || cfg == NULL)
+		return;
 
-	_comm_info = ctx->getCommodityInfo(stdCode);//获取品种参数
+	ExecuteUnit::init(ctx, stdCode, cfg);
+	_comm_info = ctx->getCommodityInfo(stdCode);
 	if (_comm_info)
 		_comm_info->retain();
-	
-	_sess_info = ctx->getSessionInfo(stdCode);//获取交易时间模板信息
+	_sess_info = ctx->getSessionInfo(stdCode);
 	if (_sess_info)
 		_sess_info->retain();
-	_begin_time = cfg->getUInt32("begin_time");
-	_end_time = cfg->getUInt32("end_time");
-	_ord_sticky = cfg->getUInt32("ord_sticky");//挂单时限
-	_tail_secs = cfg->getUInt32("tail_secs");//执行尾部时间
-	_total_times = cfg->getUInt32("total_times");//总执行次数
-	_price_mode = cfg->getUInt32("price_mode");
-	_price_offset = cfg->getUInt32("price_offset");
-	_order_lots = cfg->getDouble("lots");		//单次发单手数
-	if (cfg->has("minopenlots"))
-	_min_open_lots = cfg->getDouble("minopenlots");	//最小开仓数量
-	_fire_span = (_total_secs - _tail_secs) / _total_times;		//单次发单时间间隔,要去掉尾部时间计算,这样的话,最后剩余的数量就有一个兜底发单的机制了
-
-	ctx->writeLog(fmt::format("执行单元WtVWapExeUnit[{}] 初始化完成,订单超时 {} 秒,执行时限 {} 秒,收尾时间 {} 秒", stdCode, _ord_sticky, _total_secs, _tail_secs).c_str());
-	_total_secs = calTmSecs(_begin_time, _end_time);//执行总时间：秒
-
-	std::string filename = "Vwap_";
-	filename += _comm_info->getName();
-	filename += ".txt";
-	if (!StdFile::exists(filename.c_str()))
+	if (_comm_info == NULL || _sess_info == NULL || _sess_info->getSectionCount() == 0)
 	{
-		_ctx->writeLog(fmtutil::format("Vwap file {} not exists ,check and return.", filename.c_str()));
+		ctx->writeLog("WtVWapExeUnit initialization failed: commodity or trading session is unavailable");
 		return;
 	}
 
-	ifstream file(filename.c_str());
-	if (file.is_open()) {
-		string line;
-		while (getline(file, line)) {
-			stringstream s(line);
-			string prz;
-			while (getline(s, prz, ',')) {
-				VwapAim.push_back(stod(prz));
-			}
-		}
-		file.close();
+	_begin_time = cfg->getUInt32("begin_time");
+	_end_time = cfg->getUInt32("end_time");
+	_ord_sticky = cfg->getUInt32("ord_sticky");
+	_tail_secs = cfg->getUInt32("tail_secs");
+	_total_times = cfg->getUInt32("total_times");
+	_price_mode = cfg->getUInt32("price_mode");
+	_price_offset = cfg->getUInt32("price_offset");
+	_order_lots = cfg->getDouble("lots");
+	_min_open_lots = cfg->has("minopenlots") ? cfg->getDouble("minopenlots") : 0.0;
+	if (!std::isfinite(_order_lots) || _order_lots <= 0
+		|| !std::isfinite(_min_open_lots) || _min_open_lots < 0 || _price_mode > 2)
+	{
+		ctx->writeLog("WtVWapExeUnit initialization failed: lots or price_mode is invalid");
+		return;
 	}
+
+	if (_total_times == 0)
+	{
+		ctx->writeLog(fmt::format("执行单元WtVWapExeUnit[{}] 配置无效: total_times 必须大于0", stdCode).c_str());
+		return;
+	}
+	if (!validSessionHHMM(_begin_time) || !validSessionHHMM(_end_time)
+		|| _sess_info->isInAuctionTime(_begin_time) || _sess_info->isInAuctionTime(_end_time))
+	{
+		ctx->writeLog("WtVWapExeUnit initialization failed: begin_time/end_time is not a valid trading time");
+		return;
+	}
+	const uint32_t beginMinute = _sess_info->timeToMinutes(_begin_time, false);
+	const uint32_t endMinute = _sess_info->timeToMinutes(_end_time, false);
+	if (beginMinute == INVALID_UINT32 || endMinute == INVALID_UINT32 || endMinute <= beginMinute)
+	{
+		ctx->writeLog("WtVWapExeUnit initialization failed: execution window is not ordered within the trading session");
+		return;
+	}
+	_begin_session_minute = beginMinute;
+	_end_session_minute = endMinute;
+	const uint64_t duration = static_cast<uint64_t>(endMinute - beginMinute) * 60;
+	if (duration == 0 || duration > std::numeric_limits<uint32_t>::max())
+	{
+		ctx->writeLog("WtVWapExeUnit initialization failed: execution window duration is invalid");
+		return;
+	}
+	_total_secs = static_cast<uint32_t>(duration);
+	if (_tail_secs > _total_secs)
+	{
+		ctx->writeLog(fmt::format("执行单元WtVWapExeUnit[{}] 配置无效: tail_secs {} 超出执行时长 {} 秒", stdCode, _tail_secs, _total_secs).c_str());
+		return;
+	}
+	_fire_span = (_total_secs - _tail_secs) / _total_times;
+
+	const char* commodityName = _comm_info->getName();
+	if (commodityName == NULL || commodityName[0] == '\0')
+	{
+		ctx->writeLog("WtVWapExeUnit initialization failed: commodity name is empty");
+		return;
+	}
+	const std::string filename = std::string("Vwap_") + commodityName + ".txt";
+	std::ifstream file(filename.c_str(), std::ios::in | std::ios::binary);
+	if (!file.is_open())
+	{
+		ctx->writeLog(fmt::format("Vwap file {} cannot be opened; execution disabled.", filename).c_str());
+		return;
+	}
+	std::ostringstream contents;
+	contents << file.rdbuf();
+	if (file.bad())
+	{
+		ctx->writeLog(fmt::format("Vwap file {} cannot be read; execution disabled.", filename).c_str());
+		return;
+	}
+	std::vector<double> distribution;
+	std::string diagnostic;
+	if (!wtp::vwap_profile::loadProfile(contents.str(), *_sess_info, distribution, diagnostic))
+	{
+		ctx->writeLog(fmt::format("Vwap file {} is invalid for this session ({}); execution disabled.", filename, diagnostic).c_str());
+		return;
+	}
+
+	VwapAim.swap(distribution);
+	_config_valid = true;
+	_init_succeeded = true;
+	ctx->writeLog(fmt::format("执行单元WtVWapExeUnit[{}] 初始化完成,订单超时 {} 秒,执行时限 {} 秒,收尾时间 {} 秒,间隔时间 {} 秒", stdCode, _ord_sticky, _total_secs, _tail_secs, _fire_span).c_str());
 } 
 
 void WtVWapExeUnit::on_order(uint32_t localid, const char * stdCode, bool /*isBuy*/, double leftover, double /*price*/, bool isCanceled)
@@ -166,13 +378,15 @@ void WtVWapExeUnit::on_order(uint32_t localid, const char * stdCode, bool /*isBu
 	//如果全部订单已撤销,这个时候一般是遇到要超时撤单（挂单超时） 
 	if (isCanceled && _cancel_cnt == 0)
 	{
-		double realPos = _ctx->getPosition(stdCode);
-		if (!decimal::eq(realPos, _this_target))
+		const double realPos = _ctx->getPosition(stdCode, false);
+		const double targetPos = get_real_target(_target_pos);
+		if (!decimal::eq(realPos, targetPos))
 		{
-			_ctx->writeLog(fmtutil::format("Order {} of {} canceled, re_fire will be done", localid, stdCode));
+			_ctx->writeLog(fmtutil::format("Order {} of {} canceled; re_fire deferred until a fresh in-session tick", localid, stdCode));
 			_cancel_times++;
-			//撤单以后重发,一般是加点重发;对最小下单量的校验
-			fire_at_once(max(_min_open_lots, _this_target - realPos));
+			_retry_pending = true;
+			_retry_cancel = true;
+			_retry_after_tick_time = _last_valid_tick_time;
 		}
 	}
 
@@ -184,7 +398,19 @@ void WtVWapExeUnit::on_order(uint32_t localid, const char * stdCode, bool /*isBu
 
 void WtVWapExeUnit::on_channel_ready()
 {
+	if (!_config_valid)
+		return;
+
 	_channel_ready = true;
+	_channel_reconcile_pending = true;
+	_ctx->writeLog("WtVWapExeUnit channel reconciliation deferred until the next fresh in-session tick");
+}
+
+void WtVWapExeUnit::reconcile_channel_ready()
+{
+	if (!_channel_reconcile_pending || !_channel_ready || !_valid_tick_dispatch)
+		return;
+	_channel_reconcile_pending = false;
 	double undone = _ctx->getUndoneQty(_code.c_str());
 	if (!decimal::eq(undone, 0) && !_orders_mon.has_order())
 	{//未完成单不在监控中，撤单
@@ -219,36 +445,153 @@ void WtVWapExeUnit::on_channel_ready()
 		_ctx->writeLog(fmtutil::format("Unrecognized condition while channle ready, {:.2f} live orders of {} exists, local orders {}exist",
 			undone, _code.c_str(), _orders_mon.has_order() ? "" : "not "));
 	}
-	do_calc();
 }
 
 
 void WtVWapExeUnit::on_tick(WTSTickData * newTick)
 {
-	if (newTick == NULL || _code.compare(newTick->code()) != 0)
+	if (!_config_valid || newTick == NULL || _code.compare(newTick->code()) != 0)
 		return;
+	if (!validActionTime(newTick->actiontime()))
+	{
+		_ctx->writeLog(fmt::format("VWAP tick action time {} rejected: invalid HHMMSSmmm value", newTick->actiontime()).c_str());
+		return;
+	}
+	if (!validActionDate(newTick->actiondate())
+		|| (newTick->tradingdate() != 0 && !validActionDate(newTick->tradingdate())))
+	{
+		_ctx->writeLog(fmt::format("VWAP tick action/trading date {} / {} rejected: invalid calendar date",
+			newTick->actiondate(), newTick->tradingdate()).c_str());
+		return;
+	}
+	const int64_t tickTime = TimeUtils::makeTime(newTick->actiondate(), newTick->actiontime());
+	if (tickTime <= 0)
+	{
+		_ctx->writeLog(fmt::format("VWAP tick date/time {} {} rejected: timestamp cannot be verified",
+			newTick->actiondate(), newTick->actiontime()).c_str());
+		return;
+	}
+	const uint64_t curTickTime = static_cast<uint64_t>(tickTime);
+	if (curTickTime <= _tick_time_high_water)
+	{
+		_ctx->writeLog(fmt::format("VWAP ignored stale or out-of-order tick {} (high-water {})",
+			curTickTime, _tick_time_high_water).c_str());
+		return;
+	}
+	// Preserve event-time high-water even for a valid quote during a break or
+	// after close, so a delayed in-session tick cannot become executable later.
+	_tick_time_high_water = curTickTime;
 
-	bool isFirstTick = false;
-	//原来tick不为空 则要释放掉
-	if (_last_tick) {
+	size_t bucket = 0;
+	uint32_t sessionDate = 0;
+	uint64_t sessionTimeMs = 0;
+	std::string diagnostic;
+	if (!readTickSessionTime(_sess_info, newTick, VwapAim.size(), bucket,
+		sessionDate, sessionTimeMs, diagnostic))
+	{
+		_ctx->writeLog(fmt::format("VWAP tick action time {} rejected: {}", newTick->actiontime(), diagnostic).c_str());
+		return;
+	}
+	const uint32_t hhmmss = newTick->actiontime() / 1000;
+	if (!inConfiguredWindow(static_cast<uint32_t>(bucket), hhmmss % 100,
+		newTick->actiontime() % 1000, _begin_session_minute, _end_session_minute))
+	{
+		_ctx->writeLog(fmt::format("VWAP tick action time {} is outside the configured trading window", newTick->actiontime()).c_str());
+		return;
+	}
+
+	const bool isFirstTick = (_last_tick == NULL);
+	if (_last_tick)
 		_last_tick->release();
-	}
-	else {
-		isFirstTick = true;
-		//如果行情时间不在交易时间,这种情况一般是集合竞价的行情进来,下单会失败,所以直接过滤掉这笔行情
-		if (_sess_info != NULL && !_sess_info->isInTradingTime(newTick->actiontime() / 100000))
-			return;
-	}
-	//新的tick数据需要保留
 	_last_tick = newTick;
 	_last_tick->retain();
+	_last_valid_tick_time = curTickTime;
+	_valid_tick_dispatch = true;
+	ScopedFlagReset dispatchReset(_valid_tick_dispatch);
+
+	// The new eligible tick is the execution-time proof. Engine getCurTime()
+	// follows feed/replay time and can remain stationary while callbacks arrive.
+	reconcile_channel_ready();
+	if (_retry_pending)
+	{
+		if (!_channel_ready || curTickTime <= _retry_after_tick_time)
+			return;
+		if (_cancel_cnt != 0 || !decimal::eq(_ctx->getUndoneQty(_code.c_str()), 0))
+		{
+			_retry_after_tick_time = curTickTime;
+			_ctx->writeLog(fmt::format("{} VWAP retry deferred while cancel or unfinished quantity remains", _code).c_str());
+			return;
+		}
+		const bool retryCanceledOrder = _retry_cancel;
+		_retry_pending = false;
+		_retry_cancel = false;
+		_retry_after_tick_time = 0;
+		if (retryCanceledOrder)
+		{
+			// Rebuild the canceled slice from current target, total position,
+			// profile, and available close quantity.
+			const double realPos = _ctx->getPosition(_code.c_str(), false);
+			double targetPos = get_real_target(_target_pos);
+			double diffQty = targetPos - realPos;
+			if (decimal::eq(diffQty, 0) && is_clear(_target_pos))
+			{
+				const double availableLong = _ctx->getPosition(_code.c_str(), true, 1);
+				if (!std::isfinite(availableLong) || decimal::lt(availableLong, 0))
+				{
+					_ctx->writeLog(fmt::format("{} cannot size canceled clear retry from invalid available position", _code).c_str());
+					return;
+				}
+				if (decimal::eq(availableLong, 0))
+					return;
+				targetPos = -min(availableLong, _order_lots);
+				diffQty = targetPos - realPos;
+			}
+			if (!std::isfinite(realPos) || !std::isfinite(targetPos) || !std::isfinite(diffQty))
+			{
+				_ctx->writeLog(fmt::format("{} cannot size canceled retry from invalid target or position", _code).c_str());
+				return;
+			}
+			const uint32_t leftTimes = _fired_times >= _total_times ? 0 : _total_times - _fired_times;
+			const bool showHand = leftTimes == 0 && !decimal::eq(diffQty, 0);
+			double retryQty = calculateVwapQuantity(VwapAim[bucket], realPos,
+				diffQty, _min_open_lots, showHand);
+			std::string availabilityDiagnostic;
+			if (!limitVwapQuantityByAvailability(_ctx, _code.c_str(), realPos,
+				retryQty, availabilityDiagnostic))
+			{
+				_ctx->writeLog(fmt::format("{} canceled retry skipped: {}", _code, availabilityDiagnostic).c_str());
+				_retry_pending = true;
+				_retry_cancel = true;
+				_retry_after_tick_time = curTickTime;
+				return;
+			}
+			if (decimal::eq(retryQty, 0))
+			{
+				_ctx->writeLog(fmt::format("{} canceled retry is no longer needed or has no available quantity", _code).c_str());
+				if (!decimal::eq(diffQty, 0))
+				{
+					_retry_pending = true;
+					_retry_cancel = true;
+					_retry_after_tick_time = curTickTime;
+				}
+				return;
+			}
+			fire_at_once(retryQty);
+		}
+		else
+		{
+			// Rejected orders recalculate the scheduled slice from fresh state.
+			do_calc();
+		}
+		return;
+	}
 
 	if (isFirstTick)//如果是第一笔tick,则检查目标仓位,不符合则下单
 	{
 		double newVol = _target_pos;
 		const char* stdCode = _code.c_str();
 		double undone = _ctx->getUndoneQty(stdCode);
-		double realPos = _ctx->getPosition(stdCode);
+		double realPos = _ctx->getPosition(stdCode, false);
 		if (!decimal::eq(newVol, undone + realPos))
 		{//如果是第一笔TICK，且目标量==未完成+仓位，退出 
 			do_calc();
@@ -256,20 +599,20 @@ void WtVWapExeUnit::on_tick(WTSTickData * newTick)
 	}
 	else
 	{
-		uint64_t now = TimeUtils::getLocalTimeNow();
-		bool hasCancel = false;
+		bool intervalElapsed = _last_fire_session_date == 0 || sessionDate != _last_fire_session_date;
+		if (!intervalElapsed && sessionTimeMs >= _last_fire_session_time_ms)
+			intervalElapsed = sessionTimeMs - _last_fire_session_time_ms >= static_cast<uint64_t>(_fire_span) * 1000;
+		uint64_t now = _ctx->getCurTime();
 		if (_ord_sticky != 0 && _orders_mon.has_order())
 		{
-			_orders_mon.check_orders(_ord_sticky, now, [this, &hasCancel](uint32_t localid) {
-				if (_ctx->cancel(localid))
-				{
-					_cancel_cnt++;
-					_ctx->writeLog(fmt::format("Order expired, cancelcnt updated to {}", _cancel_cnt).c_str());//订单过期，撤单量更新
-					hasCancel = true;
-				}
+			_orders_mon.check_orders_with_generation(_ord_sticky, now, [this, now](uint32_t localid, uint64_t generation) {
+				if (!_orders_mon.mark_unverified_timeout(localid, generation, _ord_sticky, now))
+					return; // 终态或 localid 已复用；不得复活旧快照
+				_ctx->writeLog(fmt::format("Expired order {} of {} cannot be auto-canceled: legacy localid is unverified; order remains monitored",
+					localid, _code.c_str()).c_str());
 			});
 		}
-		if (!hasCancel && (now - _last_fire_time >= _fire_span * 1000))
+		if (!_orders_mon.has_unverified_timeout() && intervalElapsed)
 		{
 			do_calc();
 		}
@@ -292,21 +635,54 @@ void WtVWapExeUnit::on_entrust(uint32_t localid, const char * /*stdCode*/, bool 
 			return;
 		
 		_orders_mon.erase_order(localid);
-
-		do_calc();
+		_retry_pending = true;
+		_retry_cancel = false;
+		_retry_after_tick_time = _last_valid_tick_time;
+		_ctx->writeLog("VWAP rejected order retry deferred until a fresh in-session tick");
 	}
 }
 void WtVWapExeUnit::do_calc()
 {
+	if (_orders_mon.has_unverified_timeout())
+		return;
+	if (!_config_valid || !_valid_tick_dispatch)
+		return;
+
 	CalcFlag flag(&_in_calc);
 	if (flag)
 		return;
 
 	StdUniqueLock lock(_mtx_calc);
+	if (_last_tick == NULL)
+		return;
+	size_t bucket = 0;
+	uint32_t sessionDate = 0;
+	uint64_t sessionTimeMs = 0;
+	std::string diagnostic;
+	if (!readTickSessionTime(_sess_info, _last_tick, VwapAim.size(), bucket,
+		sessionDate, sessionTimeMs, diagnostic))
+	{
+		_ctx->writeLog(fmt::format("VWAP calculation skipped: {}", diagnostic).c_str());
+		return;
+	}
+	const uint32_t hhmmss = _last_tick->actiontime() / 1000;
+	const uint32_t second = hhmmss % 100;
+	const uint32_t millisecond = _last_tick->actiontime() % 1000;
+	if (!inConfiguredWindow(static_cast<uint32_t>(bucket), second, millisecond,
+		_begin_session_minute, _end_session_minute))
+	{
+		_ctx->writeLog("VWAP calculation skipped: tick is outside the configured trading window");
+		return;
+	}
 	const char* code = _code.c_str();
 	double undone = _ctx->getUndoneQty(code);
 	double newVol = get_real_target(_target_pos);
-	double realPos = _ctx->getPosition(code);
+	double realPos = _ctx->getPosition(code, false);
+	if (!std::isfinite(undone) || !std::isfinite(newVol) || !std::isfinite(realPos))
+	{
+		_ctx->writeLog(fmt::format("{} VWAP calculation skipped: target, position, or unfinished quantity is invalid", _code).c_str());
+		return;
+	}
 	double diffQty = newVol - realPos;//目标差
 	if (!_channel_ready)
 		return;
@@ -338,11 +714,6 @@ void WtVWapExeUnit::do_calc()
 		_ctx->writeLog(fmt::format("{}上一轮有挂单未完成,暂时退出本轮执行", _code).c_str());
 		return;
 	}
-	if (_last_tick == NULL)
-	{
-		_ctx->writeLog(fmt::format("{}没有最新的tick数据，退出执行逻辑", _code).c_str());
-		return;
-	}
 	double curPos = realPos;
 
 	if (decimal::eq(curPos, newVol))
@@ -361,34 +732,33 @@ void WtVWapExeUnit::do_calc()
 		_ctx->writeLog(fmtutil::format("Clearing process triggered, target position of {} has been set to {}", _code.c_str(), newVol));
 	}
 	//如果相比上次没有更新的tick进来，则先不下单，防止开盘前集中下单导致通道被封
-	uint64_t curTickTime = (uint64_t)_last_tick->actiondate() * 1000000000 + _last_tick->actiontime();
+	uint64_t curTickTime = static_cast<uint64_t>(TimeUtils::makeTime(_last_tick->actiondate(), _last_tick->actiontime()));
 	if (curTickTime <= _last_tick_time)
 	{
 		_ctx->writeLog(fmtutil::format("No tick of {} updated, {} <= {}, execute later", _code, curTickTime, _last_tick_time));
 		return;
 	}
 	_last_tick_time = curTickTime;
-	double InminsTm = calTmStamp(_last_tick->actiontime());//当前tick属于vwap240分钟内的第几(-1)分钟
-	double aimQty = VwapAim[InminsTm];//取到对应时刻的目标vwapaim （递增）
+	double aimQty = VwapAim[bucket];
 
-	uint32_t leftTimes = _total_times - _fired_times;
+	uint32_t leftTimes = _fired_times >= _total_times ? 0 : _total_times - _fired_times;
 	_ctx->writeLog(fmt::format("第 {} 次发单", _fired_times+1).c_str());
-	_Vwap_vol = aimQty - curPos;//若在本分钟发单，对应的VWapVol
-	bool bNeedShowHand = false;
-	double curQty = 0;
-	if (leftTimes == 0 && !decimal::eq(diffQty, 0))
+	const bool bNeedShowHand = leftTimes == 0 && !decimal::eq(diffQty, 0);
+	double curQty = calculateVwapQuantity(aimQty, curPos, diffQty,
+		_min_open_lots, bNeedShowHand);
+	std::string availabilityDiagnostic;
+	if (!limitVwapQuantityByAvailability(_ctx, code, realPos, curQty, availabilityDiagnostic))
 	{
-		bNeedShowHand = true;
-		curQty = max(diffQty, _min_open_lots);
+		_ctx->writeLog(fmt::format("{} VWAP calculation skipped: {}", _code, availabilityDiagnostic).c_str());
+		return;
 	}
-	else {
-		curQty = max(_Vwap_vol, _min_open_lots)* abs(diffQty) / diffQty;//curqty=单位预测量sum
+	if (decimal::eq(curQty, 0))
+	{
+		_ctx->writeLog(fmt::format("{} has no executable quantity after position availability checks", _code).c_str());
+		return;
 	}
-	//设定本轮目标仓位
-	_this_target = realPos + curQty;
-
 	WTSTickData* curTick = _last_tick;
-	uint64_t now = TimeUtils::getLocalTimeNow();
+	uint64_t now = _ctx->getCurTime();
 	bool isBuy = decimal::gt(diffQty, 0);
 	double targetPx = 0;
 	//根据价格模式设置,确定委托基准价格: 0-最新价,1-最优价,2-对手价
@@ -431,6 +801,8 @@ void WtVWapExeUnit::do_calc()
 		isCanCancel = false;	//如果价格被修正为涨跌停价，订单不可撤销
 	}
 	OrderIDs ids;
+	if (_orders_mon.has_unverified_timeout())
+		return;
 	if (curQty > 0)
 	{
 		ids = _ctx->buy(code, targetPx, abs(curQty));
@@ -439,20 +811,33 @@ void WtVWapExeUnit::do_calc()
 		ids = _ctx->sell(code, targetPx, abs(curQty));
 	}
 	_orders_mon.push_order(ids.data(), ids.size(), now, isCanCancel);
-	_last_fire_time = now;
+	_last_fire_session_time_ms = sessionTimeMs;
+	_last_fire_session_date = sessionDate;
 	_fired_times += 1;
 
-	curTick->release();
 }
 
 void WtVWapExeUnit::fire_at_once(double qty)
 {
-	if (decimal::eq(qty, 0))
+	if (_orders_mon.has_unverified_timeout())
+		return;
+	if (!_config_valid || !_valid_tick_dispatch || _last_tick == NULL || decimal::eq(qty, 0))
+		return;
+	size_t bucket = 0;
+	uint32_t sessionDate = 0;
+	uint64_t sessionTimeMs = 0;
+	std::string diagnostic;
+	if (!readTickSessionTime(_sess_info, _last_tick, VwapAim.size(), bucket,
+		sessionDate, sessionTimeMs, diagnostic))
+		return;
+	const uint32_t hhmmss = _last_tick->actiontime() / 1000;
+	if (!inConfiguredWindow(static_cast<uint32_t>(bucket), hhmmss % 100,
+		_last_tick->actiontime() % 1000, _begin_session_minute, _end_session_minute))
 		return;
 	_last_tick->retain();
 	WTSTickData* curTick = _last_tick;
 	const char* code = _code.c_str();
-	uint64_t now = TimeUtils::getLocalTimeNow();
+	uint64_t now = _ctx->getCurTime();
 	bool isBuy = decimal::gt(qty, 0);
 	double targetPx = 0;
 	//根据价格模式设置,确定委托基准价格: 0-最新价,1-最优价,2-对手价
@@ -483,12 +868,19 @@ void WtVWapExeUnit::fire_at_once(double qty)
 	}
 
 	OrderIDs ids;
+	if (_orders_mon.has_unverified_timeout())
+	{
+		curTick->release();
+		return;
+	}
 	if (qty > 0)
 		ids = _ctx->buy(code, targetPx, abs(qty));
 	else
 		ids = _ctx->sell(code, targetPx, abs(qty));
 
 	_orders_mon.push_order(ids.data(), ids.size(), now, isCanCancel);
+	_last_fire_session_time_ms = sessionTimeMs;
+	_last_fire_session_date = sessionDate;
 
 	curTick->release();
 }
@@ -504,10 +896,14 @@ void WtVWapExeUnit::set_position(const char * stdCode, double newVol)
 	_target_pos = newVol;
 	
 	_fired_times = 0;//已执行次数
-
-	do_calc();
+	_last_fire_session_time_ms = 0;
+	_last_fire_session_date = 0;
+	_retry_pending = false;
+	_retry_cancel = false;
+	_retry_after_tick_time = 0;
 }
 
 void WtVWapExeUnit::on_channel_lost()
 {
+	_channel_ready = false;
 }

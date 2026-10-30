@@ -45,6 +45,82 @@ WTSTickStruct tick_at(const char* exchg, const char* code, uint32_t date, uint32
 
 } // namespace
 
+class R100MixedPeriodReaderTest : public R100ADReaderTest
+{
+protected:
+	void seed_mixed_periods()
+	{
+		add_stock("EXMX", "rb2301");
+
+		// This mirrors WtDataWriterAD: day keys use date; minute keys use
+		// TimeUtils::timeToMinBar(date, HHMM). The writer's 09:39 tick produces
+		// a 09:40 unfinished m1/m5 bar, at the inclusive 09:40 cutoff.
+		vector<WTSBarStruct> day_bars;
+		day_bars.push_back(bar_at(20230102, 0, 4000.0));
+		seed_bars("day", "EXMX", "rb2301", day_bars, true);
+
+		vector<WTSBarStruct> min1_bars;
+		min1_bars.push_back(bar_at(kDate, min_bar(kDate, 935), 3900.0));
+		seed_bars("min1", "EXMX", "rb2301", min1_bars, false);
+
+		vector<WTSBarStruct> min5_bars;
+		min5_bars.push_back(bar_at(kDate, min_bar(kDate, 935), 3900.0));
+		seed_bars("min5", "EXMX", "rb2301", min5_bars, false);
+
+		vector<BarCacheItem> day_cache;
+		day_cache.push_back(r4fx::make_bar_item("EXMX", "rb2301", 20230103, 0, 4010.0));
+		write_cache("cache_d1.dmb", day_cache, 1, 4);
+
+		vector<BarCacheItem> min1_cache;
+		min1_cache.push_back(r4fx::make_bar_item("EXMX", "rb2301", kDate, min_bar(kDate, 940), 3910.0));
+		write_cache("cache_m1.dmb", min1_cache, 1, 4);
+
+		vector<BarCacheItem> min5_cache;
+		min5_cache.push_back(r4fx::make_bar_item("EXMX", "rb2301", kDate, min_bar(kDate, 940), 3910.0));
+		write_cache("cache_m5.dmb", min5_cache, 1, 4);
+	}
+
+	void load_period(WTSKlinePeriod period)
+	{
+		const uint64_t etime = period == KP_DAY ? 20230102150000000ull : 20230103093500000ull;
+		WTSKlineSlice* slice = _reader->readKlineSlice("EXMX.rb2301", period, 2, etime);
+		EXPECT_NE(slice, nullptr);
+		if (slice != NULL)
+		{
+			EXPECT_EQ(slice->size(), 1u);
+			slice->release();
+		}
+	}
+
+	void expect_cached_tail(WTSKlinePeriod period, uint32_t date, uint64_t time)
+	{
+		const uint64_t etime = period == KP_DAY ? 20230102150000000ull : 20230103093500000ull;
+		WTSKlineSlice* slice = _reader->readKlineSlice("EXMX.rb2301", period, 2, etime);
+		ASSERT_NE(slice, nullptr);
+		ASSERT_EQ(slice->size(), 2u);
+		const WTSBarStruct* bars = slice->get_block_addr(0);
+		ASSERT_NE(bars, nullptr);
+		EXPECT_EQ(bars[1].date, date);
+		EXPECT_EQ(bars[1].time, time);
+		slice->release();
+	}
+
+	void expect_minute_end_updated()
+	{
+		// Nonzero endTDate enables the daily branch. Its YYYYMMDD boundary must
+		// not replace the minute boundary (date-19900000)*10000+HHMM.
+		_reader->onMinuteEnd(kDate, 940, kDate);
+		EXPECT_EQ(_sink->all_updated(), 1u);
+		EXPECT_EQ(_sink->last_update_time(), 940u);
+		// The three seeded RT bars produce one on_bar callback per period.
+		EXPECT_EQ(_sink->bar_calls(), 3u);
+
+		expect_cached_tail(KP_DAY, 20230103, 0);
+		expect_cached_tail(KP_Minute1, kDate, min_bar(kDate, 940));
+		expect_cached_tail(KP_Minute5, kDate, min_bar(kDate, 940));
+	}
+};
+
 // WtDataReaderAD.cpp: L305-361 / L496-527
 TEST_F(R100ADReaderTest, R100ReaderADOnMinuteEndMinutes)
 {
@@ -214,6 +290,48 @@ TEST_F(R100ADReaderTest, R100ReaderADHotReloadDayAndRtCacheGrowth)
 	EXPECT_EQ(_sink->all_updated(), 1u);
 	EXPECT_EQ(_sink->bar_calls(), 1u);
 	EXPECT_EQ(_sink->last_bar().date, 20230103u);
+}
+
+// Regression for BUG-R100-001. Load order determines the dense-map traversal
+// order in the current unordered_dense implementation; cover daily-first,
+// daily-between and daily-last arrangements in the same reader.
+TEST_F(R100MixedPeriodReaderTest, R100ReaderADMixedPeriodsDailyFirstKeepsMinuteCutoff)
+{
+	seed_mixed_periods();
+	init_reader();
+
+	load_period(KP_DAY);
+	load_period(KP_Minute1);
+	load_period(KP_Minute5);
+	EXPECT_EQ(_sink->bar_calls(), 0u);
+
+	expect_minute_end_updated();
+}
+
+TEST_F(R100MixedPeriodReaderTest, R100ReaderADMixedPeriodsMinutesFirstKeepsMinuteCutoff)
+{
+	seed_mixed_periods();
+	init_reader();
+
+	load_period(KP_Minute1);
+	load_period(KP_Minute5);
+	load_period(KP_DAY);
+	EXPECT_EQ(_sink->bar_calls(), 0u);
+
+	expect_minute_end_updated();
+}
+
+TEST_F(R100MixedPeriodReaderTest, R100ReaderADMixedPeriodsDailyBetweenMinutesKeepsMinuteCutoff)
+{
+	seed_mixed_periods();
+	init_reader();
+
+	load_period(KP_Minute1);
+	load_period(KP_DAY);
+	load_period(KP_Minute5);
+	EXPECT_EQ(_sink->bar_calls(), 0u);
+
+	expect_minute_end_updated();
 }
 
 } // namespace r100fx

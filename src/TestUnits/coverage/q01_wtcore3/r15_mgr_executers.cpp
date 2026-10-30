@@ -7,7 +7,8 @@
  *   CtaStrategyMgr.cpp     L39-84（同上三段 + createStrategyFact 缺失分支）
  *   HftStrategyMgr.cpp     L39-84（同 Cta 形状）
  *   ParserAdapter.cpp      L369-372（handleParserLog 的 _stopped 守卫 + log_dyn_raw）
- *   WtLocalExecuter.cpp    L400-409（writeLog）、L803/836/879（channel_ready/lost/on_account 的 SpinLock）
+ *   WtLocalExecuter.cpp    writeLog（空/边界/超长输入）、L803/836/879（通道事件的 SpinLock）
+ *   WtArbiExecuter.cpp     writeLog（空/边界/超长输入）
  *
  * 只引用 WtCore 一族。用 libWtIndexFactory.dylib 当「可 dlopen 但不含工厂符号」的样本
  * （已 nm 验证 createExecFact/createStrategyFact 导出数 = 0），全程不起线程、不建 socket。
@@ -25,7 +26,9 @@
 #include <WtCore/CtaStrategyMgr.h>
 #include <WtCore/HftStrategyMgr.h>
 #include <WtCore/ParserAdapter.h>
+#include <WtCore/WtArbiExecuter.h>
 #include <WtCore/WtLocalExecuter.h>
+#include <WTSTools/WTSLogger.h>
 
 using namespace q01sel;
 
@@ -206,10 +209,41 @@ TEST_F(R15MgrTest, local_executer_null_init_and_empty_channel_events)
     // 空表 ⇒ 不应有任何单元回调；可证伪点：事件后三个创建口依然造不出单元（工厂为空）
     EXPECT_EQ(factory.createExeUnit("loc15", "unit").get(), nullptr);
 
-    // writeLog（L400-409）：短消息，strcat 不越界；只是转发 WTSLogger
+    // 短日志转发仍可达；空/边界/超长日志输入由独立用例覆盖。
     exe.writeLog("r15 short log");
     exe.on_channel_lost();
     EXPECT_EQ(factory.createArbiExeUnit("nothing.here").get(), nullptr);
+}
+
+template <typename Executer>
+void exerciseWriteLogBounds(Executer& exe, const char* name)
+{
+    const std::string prefix = std::string("[") + name + "]";
+    ASSERT_LT(prefix.size(), static_cast<std::size_t>(MAX_LOG_BUF_SIZE));
+
+    // 前缀 + 消息恰好占用缓冲区除 NUL 终止符外的全部容量。
+    const std::string boundary(MAX_LOG_BUF_SIZE - 1 - prefix.size(), 'b');
+    EXPECT_EQ(static_cast<std::size_t>(MAX_LOG_BUF_SIZE - 1), prefix.size() + boundary.size());
+    const std::string oneByteOver = boundary + 'x';
+    const std::string oversized(MAX_LOG_BUF_SIZE * 8, 'x');
+
+    exe.writeLog("");
+    exe.writeLog(boundary.c_str());
+    exe.writeLog(oneByteOver.c_str());
+    exe.writeLog(oversized.c_str());
+}
+
+TEST_F(R15MgrTest, local_and_arbi_executer_write_log_bounds)
+{
+    WtExecuterFactory factory;
+    WtLocalExecuter local(&factory, "r15_local_log", NULL);
+    WtArbiExecuter arbi(&factory, "r15_arbi_log", NULL);
+
+    // 调用覆盖空输入、缓冲区边界、越界一个字节及远超缓冲区的消息。
+    // ASan/UBSan 运行该用例时可直接发现任何写越界；实现合同为最多 2047 字节内容，
+    // 超长时保留从开头开始的确定性前缀并以 NUL 终止。
+    exerciseWriteLogBounds(local, "r15_local_log");
+    exerciseWriteLogBounds(arbi, "r15_arbi_log");
 }
 
 TEST_F(R15MgrTest, local_executer_getunit_via_on_tick_over_empty_unit_map)

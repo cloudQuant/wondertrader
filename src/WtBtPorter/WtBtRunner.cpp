@@ -13,6 +13,7 @@
 #include "ExpHftMocker.h"
 
 #include <iomanip>
+#include <exception>
 
 #include "../WtBtCore/ExecMocker.h"
 #include "../WtBtCore/WtHelper.h"
@@ -81,16 +82,46 @@ WtBtRunner::WtBtRunner()
 
 	, _cta_mocker(NULL)
 	, _sel_mocker(NULL)
+	, _exec_mocker(NULL)
+	, _hft_mocker(NULL)
 
 	, _inited(false)
+	, _config_failed_permanently(false)
 	, _running(false)
+	, _release_requested(false)
+	, _released(false)
 	, _async(false)
+	, _cfg(NULL)
 {
 }
 
 
 WtBtRunner::~WtBtRunner()
 {
+	if (isReplayThread())
+	{
+		requestReplayStop(true);
+		// The worker still uses this runner and its embedded replayer. Their
+		// destruction cannot be deferred from inside the worker callback.
+		std::terminate();
+	}
+
+	stop();
+	if (_exec_mocker)
+	{
+		release();
+		// The runner owns the replay context referenced by ExecMocker. If plugin
+		// quiescence cannot be completed here, destroying the context would leave
+		// a live plugin with a dangling ExecuteContext.
+		if (_exec_mocker)
+			std::terminate();
+	}
+
+	if (_cfg)
+	{
+		_cfg->release();
+		_cfg = NULL;
+	}
 }
 
 bool WtBtRunner::loadRawHisBars(void* obj, const char* stdCode, WTSKlinePeriod period, FuncReadBars cb)
@@ -209,6 +240,8 @@ void WtBtRunner::feedRawTicks(WTSTickStruct* ticks, uint32_t count)
 		return;
 	}
 
+	// The external tick loader calls this synchronously while loadRawHisTicks
+	// holds _feed_mtx. Do not reacquire the non-recursive feed lock here.
 	_feeder_ticks(_feed_obj, ticks, count);
 }
 
@@ -448,118 +481,342 @@ void WtBtRunner::init(const char* logProfile /* = "" */, bool isFile /* = true *
 
 void WtBtRunner::config(const char* cfgFile, bool isFile /* = true */)
 {
+	std::string error;
+	if (!config_v2(cfgFile, isFile, &error) && !error.empty())
+		WTSLogger::error("Backtest configuration failed: {}", error);
+}
+
+bool WtBtRunner::config_v2(const char* cfgFile, bool isFile, std::string* error)
+{
+	std::unique_lock<std::mutex> controlLock(_lifecycle_control_mutex);
+	if (error)
+		error->clear();
+	if (_released)
+	{
+		if (error) *error = "WtBtEngine has been released";
+		return false;
+	}
 	if(_inited)
 	{
-		WTSLogger::error("WtBtEngine has already been inited");
-		return;
+		if (error) *error = "WtBtEngine has already been initialized";
+		return false;
+	}
+	if (_config_failed_permanently)
+	{
+		if (error) *error = "a previous configuration attempt initialized the replayer and failed; retry is unsupported";
+		return false;
+	}
+	if (!cfgFile || cfgFile[0] == '\0')
+	{
+		if (error) *error = "configuration path or content is empty";
+		return false;
 	}
 
 	_cfg = isFile ? WTSCfgLoader::load_from_file(cfgFile) : WTSCfgLoader::load_from_content(cfgFile, false);
 	if(_cfg == NULL)
 	{
-		WTSLogger::error("Loading config failed");
-		return;
+		if (error) *error = "loading config failed";
+		return false;
 	}
 
 	//初始化事件推送器
 	initEvtNotifier(_cfg->get("notifier"));
 
-	_replayer.init(_cfg->get("replayer"), &_notifier, _ext_fnl_bar_loader != NULL ? this : NULL);
+	if (!_replayer.init(_cfg->get("replayer"), &_notifier, _ext_fnl_bar_loader != NULL ? this : NULL))
+	{
+		if (error) *error = "initializing historical data replayer failed";
+		_cfg->release();
+		_cfg = NULL;
+		return false;
+	}
 
 	WTSVariant* cfgEnv = _cfg->get("env");
-	const char* mode = cfgEnv->getCString("mocker");
+	const char* mode = cfgEnv ? cfgEnv->getCString("mocker") : NULL;
+	if (!mode || mode[0] == '\0')
+	{
+		if (error) *error = "env.mocker is missing";
+		_config_failed_permanently = true;
+		_cfg->release();
+		_cfg = NULL;
+		return false;
+	}
 	WTSVariant* cfgMode = _cfg->get(mode);
+	const bool noMockerMode = strcmp(mode, "none") == 0;
+	if (!noMockerMode && !cfgMode)
+	{
+		if (error) *error = std::string(mode) + " mode configuration is missing";
+		_config_failed_permanently = true;
+		_cfg->release();
+		_cfg = NULL;
+		return false;
+	}
+	const char* mockerName = cfgMode ? cfgMode->getCString("name") : NULL;
+	if (!noMockerMode && (!mockerName || mockerName[0] == '\0'))
+	{
+		if (error) *error = std::string(mode) + " mode name is missing";
+		_config_failed_permanently = true;
+		_cfg->release();
+		_cfg = NULL;
+		return false;
+	}
+	auto fail_mode_initialization = [this, error](const std::string& message) {
+		if (error) *error = message;
+		_config_failed_permanently = true;
+		// An ExecMocker that could not be quiesced still owns the plugin unit,
+		// factory and module. Keep its configuration/context alive for retry.
+		if (_cfg && !_exec_mocker)
+		{
+			_cfg->release();
+			_cfg = NULL;
+		}
+		return false;
+	};
 	if (strcmp(mode, "cta") == 0 && cfgMode)
 	{
-		const char* name = cfgMode->getCString("name");
 		int32_t slippage = cfgMode->getInt32("slippage");
-		_cta_mocker = new ExpCtaMocker(&_replayer, name, slippage, true, &_notifier);
-		_cta_mocker->init_cta_factory(cfgMode);
-		_replayer.register_sink(_cta_mocker, name);
+		ExpCtaMocker* candidate = new ExpCtaMocker(&_replayer, mockerName, slippage, true, &_notifier);
+		if (!candidate->init_cta_factory(cfgMode))
+		{
+			delete candidate;
+			return fail_mode_initialization("initializing CTA strategy factory failed");
+		}
+		_cta_mocker = candidate;
+		_replayer.register_sink(_cta_mocker, mockerName);
 	}
 	else if (strcmp(mode, "hft") == 0 && cfgMode)
 	{
-		const char* name = cfgMode->getCString("name");
-		_hft_mocker = new ExpHftMocker(&_replayer, name);
-		_hft_mocker->init_hft_factory(cfgMode);
-		_replayer.register_sink(_hft_mocker, name);
+		ExpHftMocker* candidate = new ExpHftMocker(&_replayer, mockerName);
+		if (!candidate->init_hft_factory(cfgMode))
+		{
+			delete candidate;
+			return fail_mode_initialization("initializing HFT strategy factory failed");
+		}
+		_hft_mocker = candidate;
+		_replayer.register_sink(_hft_mocker, mockerName);
 	}
 	else if (strcmp(mode, "sel") == 0 && cfgMode)
 	{
-		const char* name = cfgMode->getCString("name");
 		int32_t slippage = cfgMode->getInt32("slippage");
-		_sel_mocker = new ExpSelMocker(&_replayer, name, slippage);
-		_sel_mocker->init_sel_factory(cfgMode);
-		_replayer.register_sink(_sel_mocker, name);
+		ExpSelMocker* candidate = new ExpSelMocker(&_replayer, mockerName, slippage);
+		if (!candidate->init_sel_factory(cfgMode))
+		{
+			delete candidate;
+			return fail_mode_initialization("initializing SEL strategy factory failed");
+		}
+		_sel_mocker = candidate;
+		_replayer.register_sink(_sel_mocker, mockerName);
 
 		WTSVariant* cfgTask = cfgMode->get("task");
 		if(cfgTask)
 			_replayer.register_task(_sel_mocker->id(), cfgTask->getUInt32("date"), cfgTask->getUInt32("time"),
 				cfgTask->getCString("period"), cfgTask->getCString("trdtpl"), cfgTask->getCString("session"));
 	}
-	else if (strcmp(mode, "exec") == 0 && cfgMode)
+	else if (strcmp(mode, "exec") == 0)
 	{
-		const char* name = cfgMode->getCString("name");
-		_exec_mocker = new ExecMocker(&_replayer);
-		_exec_mocker->init(cfgMode);
-		_replayer.register_sink(_exec_mocker, name);
+		std::string initError;
+		bool initSucceeded = false;
+		{
+			std::lock_guard<std::mutex> execLock(_exec_mocker_lifecycle_mutex);
+			_exec_mocker = new ExecMocker(&_replayer);
+			initSucceeded = _exec_mocker->init(cfgMode, &initError);
+		}
+		if (!initSucceeded)
+		{
+			std::string quiesceError;
+			if (!quiesceAndDestroyExecMocker(&quiesceError) && !quiesceError.empty())
+			{
+				initError += "; plugin cleanup is pending: " + quiesceError;
+			}
+			return fail_mode_initialization(initError.empty() ? "initializing execution mocker failed" : initError);
+		}
+		_replayer.register_sink(_exec_mocker, mockerName);
 	}
+	else if (!noMockerMode && strcmp(mode, "cta") != 0 && strcmp(mode, "hft") != 0 && strcmp(mode, "sel") != 0)
+	{
+		if (error) *error = std::string("unsupported backtest mocker mode: ") + mode;
+		_config_failed_permanently = true;
+		_cfg->release();
+		_cfg = NULL;
+		return false;
+	}
+
+	_inited = true;
+	return true;
 }
 
 void WtBtRunner::run(bool bNeedDump /* = false */, bool bAsync /* = false */)
 {
-	if (_running)
-		return;
+	{
+		std::lock_guard<std::mutex> lock(_lifecycle_mutex);
+		if (_running || _released || _release_requested)
+			return;
+	}
 
+	// Do not wait behind prepare(), a current run, stop(), or release(). A
+	// concurrent run request must be rejected rather than replayed afterward.
+	std::unique_lock<std::mutex> controlLock(_lifecycle_control_mutex, std::try_to_lock);
+	if (!controlLock.owns_lock())
+		return;
+	if (!_inited)
+	{
+		WTSLogger::error("Backtesting cannot run before successful configuration");
+		return;
+	}
+	{
+		std::lock_guard<std::mutex> lock(_lifecycle_mutex);
+		if (_running || _released || _release_requested)
+			return;
+	}
+
+	// A false _running state means the previous worker has left replay. Join
+	// only that completed worker before replacing its thread handle.
+	if (_worker)
+	{
+		if (_worker->get_id() == std::this_thread::get_id())
+		{
+			WTSLogger::error("Backtest worker cannot join itself");
+			return;
+		}
+		if (!canStopExecutionMocker())
+		{
+			WTSLogger::error("A completed backtest worker cannot be joined from this control thread");
+			return;
+		}
+		if (_worker->joinable())
+			_worker->join();
+		_worker.reset();
+	}
+
+	{
+		std::lock_guard<std::mutex> lock(_lifecycle_mutex);
+		if (_running || _released || _release_requested)
+			return;
+		// Mark the run active before prepare()/worker launch. This makes an
+		// immediate stop visible even while the worker has not started yet.
+		_running = true;
+		_replay_thread_id = std::this_thread::get_id();
+	}
+
+	const bool previousAsync = _async;
 	_async = bAsync;
 
 	WTSLogger::info("Backtesting will run in {} mode", _async ? "async" : "sync");
+
+	bool prepared = false;
+	try
+	{
+		prepared = _replayer.prepare();
+	}
+	catch (...)
+	{
+		WTSLogger::error("Preparing historical data replayer raised an exception");
+	}
+	if (!prepared)
+	{
+		_async = previousAsync;
+		finishReplayRun();
+		controlLock.unlock();
+		finalizeDeferredReleaseAtSyncBoundary();
+		WTSLogger::error("Preparing historical data replayer failed; backtest will not run");
+		return;
+	}
 
 	if (_cta_mocker)
 		_cta_mocker->enable_hook(_async);
 	else if (_hft_mocker)
 		_hft_mocker->enable_hook(_async);
 
-	_replayer.prepare();
 	if (!bAsync)
 	{
-		_replayer.run(bNeedDump);
+		controlLock.unlock();
+		try
+		{
+			_replayer.run(bNeedDump);
+		}
+		catch (...)
+		{
+			WTSLogger::error("Exception raised while synchronous backtest was running");
+		}
+		finishReplayRun();
+		finalizeDeferredReleaseAtSyncBoundary();
 	}
 	else
 	{
-		_worker.reset(new StdThread([this, bNeedDump]() {
-			_running = true;
+		{
+			std::lock_guard<std::mutex> lock(_lifecycle_mutex);
+			_replay_thread_id = std::thread::id();
+		}
+		try
+		{
+			_worker.reset(new StdThread([this, bNeedDump]() {
+				{
+					std::lock_guard<std::mutex> lock(_lifecycle_mutex);
+					_replay_thread_id = std::this_thread::get_id();
+				}
+				try
+				{
+					_replayer.run(bNeedDump);
+				}
+				catch (...)
+				{
+					WTSLogger::error("Exception raised while worker running");
+				}
+				WTSLogger::debug("Worker thread of backtest finished");
+				finishReplayRun();
+			}));
+		}
+		catch (...)
+		{
+			WTSLogger::error("Creating asynchronous backtest worker failed; completing replay synchronously");
+			{
+				std::lock_guard<std::mutex> lock(_lifecycle_mutex);
+				_replay_thread_id = std::this_thread::get_id();
+			}
+			_async = false;
+			controlLock.unlock();
 			try
 			{
 				_replayer.run(bNeedDump);
 			}
 			catch (...)
 			{
-				WTSLogger::error("Exception raised while worker running");
-				//print_stack_trace([](const char* message) {
-				//	WTSLogger::error(message);
-				//});
+				WTSLogger::error("Exception raised while completing backtest synchronously");
 			}
-			WTSLogger::debug("Worker thread of backtest finished");
-			_running = false;
-
-		}));
+			finishReplayRun();
+			finalizeDeferredReleaseAtSyncBoundary();
+			return;
+		}
+		controlLock.unlock();
 	}
 }
 
 void WtBtRunner::stop()
 {
-	if (!_running)
+	if (!canStopExecutionMocker() || isReplayThread())
 	{
-		if (_worker)
-		{
-			_worker->join();
-			_worker.reset();
-		}
+		requestReplayStop(false);
+		WTSLogger::debug("Backtest stop deferred from a callback/replay thread");
 		return;
 	}
 
-	_replayer.stop();
+	std::unique_lock<std::mutex> controlLock(_lifecycle_control_mutex);
+	if (!canStopExecutionMocker())
+	{
+		requestReplayStop(false);
+		WTSLogger::debug("Backtest stop deferred because execution plugin preflight failed");
+		return;
+	}
+	bool wasRunning = false;
+	{
+		std::lock_guard<std::mutex> lock(_lifecycle_mutex);
+		wasRunning = _running;
+	}
+	requestReplayStop(false);
+	if (!wasRunning)
+	{
+		waitForReplayRun();
+		return;
+	}
 
 	WTSLogger::debug("Notify to finish last round");
 
@@ -571,11 +828,7 @@ void WtBtRunner::stop()
 
 	WTSLogger::debug("Last round ended");
 
-	if (_worker)
-	{
-		_worker->join();
-		_worker.reset();
-	}
+	waitForReplayRun();
 
 	WTSLogger::freeAllDynLoggers();
 
@@ -584,7 +837,160 @@ void WtBtRunner::stop()
 
 void WtBtRunner::release()
 {
+	if (!canStopExecutionMocker() || isReplayThread())
+	{
+		requestReplayStop(true);
+		WTSLogger::debug("Backtest release deferred from a callback/replay thread");
+		return;
+	}
+
+	std::unique_lock<std::mutex> controlLock(_lifecycle_control_mutex);
+	if (_released)
+		return;
+	if (!canStopExecutionMocker())
+	{
+		requestReplayStop(true);
+		WTSLogger::error("Backtest release deferred because execution plugin preflight failed; retry on the control thread");
+		return;
+	}
+
+	requestReplayStop(true);
+	waitForReplayRun();
+	std::string error;
+	if (!finalizeRelease(&error))
+	{
+		WTSLogger::error("Backtest release is pending; runner, execution plugin and replay context are retained: {}", error);
+		return;
+	}
 	WTSLogger::stop();
+}
+
+bool WtBtRunner::isReplayThread() const
+{
+	std::lock_guard<std::mutex> lock(_lifecycle_mutex);
+	return _running && _replay_thread_id == std::this_thread::get_id();
+}
+
+void WtBtRunner::requestReplayStop(bool releaseRequested)
+{
+	bool running = false;
+	{
+		std::lock_guard<std::mutex> lock(_lifecycle_mutex);
+		if (releaseRequested)
+			_release_requested = true;
+		running = _running;
+	}
+	if (running)
+		_replayer.stop();
+}
+
+void WtBtRunner::finishReplayRun()
+{
+	{
+		std::lock_guard<std::mutex> lock(_lifecycle_mutex);
+		_running = false;
+		_replay_thread_id = std::thread::id();
+	}
+	_lifecycle_changed.notify_all();
+}
+
+void WtBtRunner::waitForReplayRun()
+{
+	if (_worker)
+	{
+		if (_worker->get_id() == std::this_thread::get_id())
+		{
+			WTSLogger::error("Backtest worker cannot join itself; release remains pending");
+			return;
+		}
+		if (_worker->joinable())
+			_worker->join();
+		_worker.reset();
+		return;
+	}
+
+	std::unique_lock<std::mutex> lock(_lifecycle_mutex);
+	if (_replay_thread_id == std::this_thread::get_id())
+		return;
+	_lifecycle_changed.wait(lock, [this]() { return !_running; });
+}
+
+bool WtBtRunner::canStopExecutionMocker()
+{
+	std::unique_lock<std::mutex> execLock(_exec_mocker_lifecycle_mutex, std::try_to_lock);
+	if (!execLock.owns_lock())
+		return false;
+	return !_exec_mocker || _exec_mocker->canStopFromCurrentThread();
+}
+
+bool WtBtRunner::quiesceAndDestroyExecMocker(std::string* error)
+{
+	std::lock_guard<std::mutex> execLock(_exec_mocker_lifecycle_mutex);
+	if (!_exec_mocker)
+		return true;
+	if (!_exec_mocker->canStopFromCurrentThread())
+	{
+		if (error) *error = "execution plugin preflight rejected the current control thread";
+		return false;
+	}
+	if (!_exec_mocker->requestQuiesce(error) ||
+		!_exec_mocker->canWaitQuiesce(error) ||
+		!_exec_mocker->waitQuiesce(error))
+		return false;
+	delete _exec_mocker;
+	_exec_mocker = NULL;
+	return true;
+}
+
+bool WtBtRunner::finalizeRelease(std::string* error)
+{
+	{
+		std::lock_guard<std::mutex> lock(_lifecycle_mutex);
+		if (_running)
+		{
+			if (error) *error = "historical replay has not finished";
+			return false;
+		}
+	}
+
+	if (_exec_mocker)
+	{
+		if (!quiesceAndDestroyExecMocker(error))
+			return false;
+	}
+
+	if (_cfg)
+	{
+		_cfg->release();
+		_cfg = NULL;
+	}
+	{
+		std::lock_guard<std::mutex> lock(_lifecycle_mutex);
+		_released = true;
+	}
+	return true;
+}
+
+void WtBtRunner::finalizeDeferredReleaseAtSyncBoundary()
+{
+	bool requested = false;
+	{
+		std::lock_guard<std::mutex> lock(_lifecycle_mutex);
+		// This helper is reached only by the run/control thread at a safe
+		// boundary; the asynchronous worker never calls it.
+		requested = _release_requested && !_running;
+	}
+	if (!requested)
+		return;
+
+	std::unique_lock<std::mutex> controlLock(_lifecycle_control_mutex, std::try_to_lock);
+	if (!controlLock.owns_lock())
+		return;
+	std::string error;
+	if (!finalizeRelease(&error))
+		WTSLogger::error("Deferred synchronous backtest release remains pending: {}", error);
+	else
+		WTSLogger::stop();
 }
 
 void WtBtRunner::set_time_range(WtUInt64 stime, WtUInt64 etime)

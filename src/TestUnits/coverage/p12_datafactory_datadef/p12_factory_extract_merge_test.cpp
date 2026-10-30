@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 
 #include <cstring>
+#include <limits>
 #include <vector>
 
 #include "Includes/WTSDataDef.hpp"
@@ -320,6 +321,11 @@ TEST_F(P12Extract, TickSliceToSecBars)
 	EXPECT_EQ(NULL, m_factory.extractKlineData(empty, 30, m_sInfo));
 	empty->release();
 	EXPECT_EQ(NULL, m_factory.extractKlineData(slice, 30, NULL));
+	EXPECT_EQ(NULL, m_factory.extractKlineData(slice, 0, m_sInfo, false, false));
+	ASSERT_EQ(3u, slice->size());
+	EXPECT_DOUBLE_EQ(3500.0, slice->at(0)->price);
+	EXPECT_DOUBLE_EQ(1.0, slice->at(0)->volume);
+	EXPECT_EQ(90012500u, slice->at(0)->action_time);
 
 	WTSKlineData* ret = keep(m_factory.extractKlineData(slice, 30, m_sInfo, false, false));
 	ASSERT_TRUE(ret != NULL);
@@ -487,21 +493,52 @@ TEST_F(P12Extract, SliceAssemblyAcrossBlocks)
 	EXPECT_DOUBLE_EQ(5.0, arr->getDataRef()[3]);
 }
 
-// 越界/崩溃类输入整类收进本用例（默认不执行，仅登记缺陷）：
-// 1) WTSValueArray::maxvalue(0, size) / minvalue(0, size)：守卫写成 end > size，
-//    允许 end == size，循环 i <= end 会读取 m_vecData[size]（越界读）。
-// 2) WTSKlineSlice::maxprice/minprice：at(begin) 越界返回 NULL 后直接解引用（空指针）。
-// 3) extractKlineData(WTSTickSlice*, 0, ...)：seconds == 0 -> 整数除零。
-// 4) updateMin1Data(tick) 在时段外 tick + 空 klineData 下解引用 NULL（见 p12_factory_update_tick_test.cpp）。
+TEST_F(P12Extract, closed_extrema_ranges_reject_end_equal_size)
+{
+	WTSValueArray* values = keep(WTSValueArray::create());
+	ASSERT_NE(values, nullptr);
+	values->append(15.0);
+	values->append(21.0);
+	EXPECT_TRUE(values->maxvalue(0, 2) == INVALID_DOUBLE);
+	EXPECT_TRUE(values->minvalue(0, 2) == INVALID_DOUBLE);
+	EXPECT_TRUE(values->maxvalue(-4, -3) == INVALID_DOUBLE);
+	EXPECT_TRUE(values->minvalue(-4, -3) == INVALID_DOUBLE);
+	EXPECT_TRUE(values->maxvalue(std::numeric_limits<int32_t>::min(),
+		std::numeric_limits<int32_t>::min() + 1) == INVALID_DOUBLE);
+	EXPECT_TRUE(values->minvalue(std::numeric_limits<int32_t>::min(),
+		std::numeric_limits<int32_t>::min() + 1) == INVALID_DOUBLE);
+	EXPECT_DOUBLE_EQ(values->maxvalue(1, 1), 21.0);
+	EXPECT_DOUBLE_EQ(values->minvalue(1, 1), 21.0);
+	EXPECT_DOUBLE_EQ(values->maxvalue(-2, -1), 21.0);
+	EXPECT_DOUBLE_EQ(values->minvalue(-2, -1), 15.0);
+
+	WTSKlineData* data = keep(WTSKlineData::create(kCode, 2));
+	ASSERT_NE(data, nullptr);
+	data->getDataRef()[0] = mkBar(20240105, 900, 10.0, 12.0, 9.0, 11.0, 1.0, 11.0, 1.0, 0.0);
+	data->getDataRef()[1] = mkBar(20240105, 901, 11.0, 14.0, 8.0, 12.0, 1.0, 12.0, 1.0, 0.0);
+	EXPECT_TRUE(data->maxprice(0, 2) == INVALID_DOUBLE);
+	EXPECT_TRUE(data->minprice(0, 2) == INVALID_DOUBLE);
+	EXPECT_TRUE(data->maxprice(-100, -99) == INVALID_DOUBLE);
+	EXPECT_TRUE(data->minprice(-100, -99) == INVALID_DOUBLE);
+	EXPECT_TRUE(data->maxprice(std::numeric_limits<int32_t>::min(),
+		std::numeric_limits<int32_t>::min() + 1) == INVALID_DOUBLE);
+	EXPECT_TRUE(data->minprice(std::numeric_limits<int32_t>::min(),
+		std::numeric_limits<int32_t>::min() + 1) == INVALID_DOUBLE);
+	EXPECT_DOUBLE_EQ(data->maxprice(-100, -1), 14.0);
+	EXPECT_DOUBLE_EQ(data->minprice(-100, -1), 8.0);
+	EXPECT_DOUBLE_EQ(data->maxprice(1, 1), 14.0);
+	EXPECT_DOUBLE_EQ(data->minprice(1, 1), 8.0);
+	EXPECT_DOUBLE_EQ(data->maxprice(-2, -1), 14.0);
+	EXPECT_DOUBLE_EQ(data->minprice(-2, -1), 8.0);
+}
+
+// Remaining disabled scenarios depend on separate unresolved defects:
+// 1) extractKlineData(WTSTickSlice*, 0, ...) may divide by zero.
+// 2) updateMin1Data(tick) with an out-of-session tick and empty klineData may dereference NULL
+//    (see p12_factory_update_tick_test.cpp).
 // 详见 docs/迭代计划/迭代01/bugs/p12_datafactory_datadef.md（BUG-P12-001 ~ BUG-P12-004）。
 TEST_F(P12Extract, DISABLED_OutOfBoundsClass)
 {
-	WTSValueArray* arr = keep(WTSValueArray::create());
-	arr->append(1.0);
-	arr->append(2.0);
-	// end == size 时循环访问 m_vecData[2] -> 越界读
-	(void)arr->maxvalue(0, 2);
-
 	std::vector<WTSTickStruct> ticks;
 	ticks.push_back(mkTickStruct(3500.0, 1.0, 90012500));
 	WTSTickSlice* slice = newTickSlice(ticks);

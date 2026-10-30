@@ -191,6 +191,128 @@ TEST(XtpData27, tickbytick_szentrust_sdk_buy_code_maps_to_bdt_buy)
 	parser.registerSpi(nullptr);
 }
 
+TEST(XtpData27, tickbytick_szentrust_maps_all_documented_side_and_order_type_flags)
+{
+	FakeSink sink;
+	FakeBdMgr bd;
+	FixtureContract fc("rb", "SZSE", "000001");
+	bd.contract = fc.ct;
+	sink.bdMgr = &bd;
+	ParserXTP parser;
+	parser.registerSpi(&sink);
+
+	struct SideCase { char flag; WTSBSDirectType expected; };
+	const SideCase sides[] = {
+		{ '1', BDT_Buy }, { '2', BDT_Sell }, { 'G', BDT_Borrow }, { 'F', BDT_Lend }
+	};
+	struct TypeCase { char flag; WTSOrdDetailType expected; };
+	const TypeCase types[] = {
+		{ '1', ODT_AnyPrice }, { '2', ODT_LimitPrice }, { 'U', ODT_BestPrice }
+	};
+
+	uint32_t calls = 0;
+	for (const auto& side : sides)
+	{
+		for (const auto& type : types)
+		{
+			XTPTBT tbt = makeTbt(XTP_EXCHANGE_SZ, "000001", kDataTime, XTP_TBT_ENTRUST);
+			tbt.entrust.side = side.flag;
+			tbt.entrust.ord_type = type.flag;
+			parser.OnTickByTick(&tbt);
+
+			ASSERT_EQ(++calls, sink.ordDtlCalls);
+			EXPECT_EQ(side.expected, sink.lastOrdDtl.side);
+			EXPECT_EQ(type.expected, sink.lastOrdDtl.otype);
+		}
+	}
+
+	/* Unknown values must not be cast through to a different WTS enum. */
+	XTPTBT unknown = makeTbt(XTP_EXCHANGE_SZ, "000001", kDataTime, XTP_TBT_ENTRUST);
+	unknown.entrust.side = '?';
+	unknown.entrust.ord_type = '?';
+	parser.OnTickByTick(&unknown);
+	ASSERT_EQ(++calls, sink.ordDtlCalls);
+	EXPECT_EQ(BDT_Unknown, sink.lastOrdDtl.side);
+	EXPECT_EQ(ODT_Unknown, sink.lastOrdDtl.otype);
+	parser.registerSpi(nullptr);
+}
+
+TEST(XtpData27, tickbytick_shentrust_preserves_documented_add_delete_and_direction_flags)
+{
+	FakeSink sink;
+	FakeBdMgr bd;
+	FixtureContract fc("rb", "SSE", "600519");
+	bd.contract = fc.ct;
+	sink.bdMgr = &bd;
+	ParserXTP parser;
+	parser.registerSpi(&sink);
+
+	struct SideCase { char flag; WTSBSDirectType expected; };
+	const SideCase sides[] = { { 'B', BDT_Buy }, { 'S', BDT_Sell } };
+	struct TypeCase { char flag; WTSOrdDetailType expected; };
+	const TypeCase types[] = { { 'A', ODT_Append }, { 'D', ODT_Delete } };
+
+	uint32_t calls = 0;
+	for (const auto& side : sides)
+	{
+		for (const auto& type : types)
+		{
+			XTPTBT tbt = makeTbt(XTP_EXCHANGE_SH, "600519", kDataTime, XTP_TBT_ENTRUST);
+			tbt.entrust.side = side.flag;
+			tbt.entrust.ord_type = type.flag;
+			parser.OnTickByTick(&tbt);
+
+			ASSERT_EQ(++calls, sink.ordDtlCalls);
+			EXPECT_EQ(side.expected, sink.lastOrdDtl.side);
+			EXPECT_EQ(type.expected, sink.lastOrdDtl.otype);
+		}
+	}
+
+	XTPTBT unknown = makeTbt(XTP_EXCHANGE_SH, "600519", kDataTime, XTP_TBT_ENTRUST);
+	unknown.entrust.side = '?';
+	unknown.entrust.ord_type = '?';
+	parser.OnTickByTick(&unknown);
+	ASSERT_EQ(++calls, sink.ordDtlCalls);
+	EXPECT_EQ(BDT_Unknown, sink.lastOrdDtl.side);
+	EXPECT_EQ(ODT_Unknown, sink.lastOrdDtl.otype);
+	parser.registerSpi(nullptr);
+}
+
+TEST(XtpData27, tickbytick_shtrade_flag_maps_aggressor_side_and_unknown_direction)
+{
+	FakeSink sink;
+	FakeBdMgr bd;
+	FixtureContract fc("rb", "SSE", "600519");
+	bd.contract = fc.ct;
+	sink.bdMgr = &bd;
+	ParserXTP parser;
+	parser.registerSpi(&sink);
+
+	struct TradeCase { char flag; WTSBSDirectType side; };
+	const TradeCase trades[] = {
+		{ 'B', BDT_Buy }, { 'S', BDT_Sell }, { 'N', BDT_Unknown }
+	};
+	uint32_t calls = 0;
+	for (const auto& trade : trades)
+	{
+		XTPTBT tbt = makeTbt(XTP_EXCHANGE_SH, "600519", kDataTime, XTP_TBT_TRADE);
+		tbt.trade.trade_flag = trade.flag;
+		parser.OnTickByTick(&tbt);
+
+		ASSERT_EQ(++calls, sink.transCalls);
+		EXPECT_EQ(TT_Match, sink.lastTrans.ttype);
+		EXPECT_EQ(trade.side, sink.lastTrans.side);
+	}
+
+	XTPTBT unknown = makeTbt(XTP_EXCHANGE_SH, "600519", kDataTime, XTP_TBT_TRADE);
+	unknown.trade.trade_flag = '?';
+	parser.OnTickByTick(&unknown);
+	ASSERT_EQ(++calls, sink.transCalls);
+	EXPECT_EQ(TT_Unknown, sink.lastTrans.ttype);
+	EXPECT_EQ(BDT_Unknown, sink.lastTrans.side);
+	parser.registerSpi(nullptr);
+}
+
 TEST(XtpData27, tickbytick_sztrade_match_flag_does_not_supply_a_direction)
 {
 	FakeSink sink;
@@ -210,6 +332,13 @@ TEST(XtpData27, tickbytick_sztrade_match_flag_does_not_supply_a_direction)
 
 	ASSERT_EQ(1u, sink.transCalls);
 	EXPECT_EQ(TT_Match, sink.lastTrans.ttype);
+	EXPECT_EQ(BDT_Unknown, sink.lastTrans.side);
+
+	/* Any undocumented value must remain unknown, not default to a match. */
+	tbt.trade.trade_flag = '?';
+	parser.OnTickByTick(&tbt);
+	ASSERT_EQ(2u, sink.transCalls);
+	EXPECT_EQ(TT_Unknown, sink.lastTrans.ttype);
 	EXPECT_EQ(BDT_Unknown, sink.lastTrans.side);
 	parser.registerSpi(nullptr);
 }

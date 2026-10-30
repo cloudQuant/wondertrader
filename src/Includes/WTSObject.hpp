@@ -99,9 +99,13 @@ public:
 			uint32_t cnt = m_uRefs.fetch_sub(1);
 			if (cnt == 1)
 			{
-				_mutex->lock();
-				_pool->destroy((T*)this);
-				_mutex->unlock();
+				// Save pool state before destroy ends this object's lifetime and
+				// returns its storage to the pool.  The guard refers only to the
+				// static mutex, so unlocking never reads members through `this`.
+				PoolType* pool = _pool;
+				SpinMutex* mutex = _mutex;
+				SpinLock lock(*mutex);
+				pool->destroy(static_cast<T*>(this));
 			}
 		}
 		catch (...)

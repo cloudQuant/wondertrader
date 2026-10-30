@@ -33,6 +33,7 @@
 #include "WtPorter/PorterDefs.h"
 #include "WtPorter/WtPorter.h"
 #include "WtPorter/WtRtRunner.h"
+#include "../trader_mocker_fixture.h"
 
 USING_NS_WTP;
 
@@ -52,6 +53,7 @@ namespace {
 	{
 		std::error_code ec;
 		std::filesystem::remove_all(dir, ec);
+		std::filesystem::remove_all("mocker_46001", ec);
 	}
 
 	void write_text(const std::string& path, const std::string& body)
@@ -146,8 +148,8 @@ TEST(R46PorterConfig, SelEnvSelectsSelEngine)
 	clean_dir(dir);
 }
 
-/* WtRtRunner.cpp:1065-1089（traders 数组 + active 项，模块缺失时 init 返回 false
- * 但适配器仍入表）+ 933-1052（local/diff/arbi/dist 四条构造支，含
+/* WtRtRunner.cpp:1065-1096（traders 数组 + active 项，使用 TraderMocker 正常初始化）
+ * + 933-1052（local/diff/arbi/dist 四条构造支，含
  * 「已配置 trader」与「Trader not exists」两支）+ 321-336（HFT 绑定 trader 两分支） */
 TEST(R46PorterConfig, TradersAndEveryExecuterKindAreInstantiated)
 {
@@ -156,10 +158,19 @@ TEST(R46PorterConfig, TradersAndEveryExecuterKindAreInstantiated)
 	write_text(dir + "/actions.json", "{}");
 
 	WtRtRunner* r = new_runner(dir);
+	wtp_test::TraderMockerFixture trader_mocker("r46");
+	if (!trader_mocker.install())
+	{
+		clean_dir(dir);
+		FAIL() << "Could not prepare TraderMocker from product output at "
+			<< trader_mocker.product_plugin() << ": " << trader_mocker.error();
+		return;
+	}
 	const std::string cfg =
 		"{\"basefiles\":{},\"env\":{\"name\":\"cta\"},\"data\":{},"
 		"\"bspolicy\":\"" + dir + "/actions.json\","
-		"\"traders\":[{\"active\":true,\"id\":\"r46_trd\"}],"
+		"\"traders\":[{\"active\":true,\"id\":\"r46_trd\","
+		"\"module\":\"TraderMocker\",\"mockerid\":46001,\"udp_port\":0}],"
 		"\"executers\":["
 		"{\"active\":true,\"id\":\"r46_exe_local\",\"name\":\"local\",\"trader\":\"r46_trd\"},"
 		"{\"active\":true,\"id\":\"r46_exe_diff\",\"name\":\"diff\",\"trader\":\"r46_trd\"},"
@@ -182,9 +193,26 @@ TEST(R46PorterConfig, TradersAndEveryExecuterKindAreInstantiated)
 	clean_dir(dir);
 }
 
+TEST(R46PorterConfig, TraderInitFailureMakesConfigFailClosed)
+{
+	const std::string dir = prepare_gen_dir();
+	ASSERT_FALSE(dir.empty());
+	write_text(dir + "/actions.json", "{}");
+
+	WtRtRunner* r = new_runner(dir);
+	const std::string cfg =
+		"{\"basefiles\":{},\"env\":{\"name\":\"cta\"},\"data\":{},"
+		"\"bspolicy\":\"" + dir + "/actions.json\","
+		"\"traders\":[{\"active\":true,\"id\":\"r46_missing_trader\","
+		"\"module\":\"r46_module_that_does_not_exist\"}]}";
+
+	EXPECT_FALSE(r->config(cfg.c_str(), false));
+	clean_dir(dir);
+}
+
 /* WtRtRunner.cpp:594-624（parsers 的 array 支与「文件不存在」告警支）、
- * 627-657（traders 的 string 支，文件不存在）、665-700（executers 的 string 支，
- * 文件存在且 executers 为空表）。三个 runner 各自独立，互不共享状态。 */
+ * 627-657（traders 的 string 支，文件不存在时配置失败）、665-700
+ * （executers 的 string 支，文件存在且 executers 为空表）。 */
 TEST(R46PorterConfig, ParserAndTraderSectionsSupportInlineArrayAndExternalFile)
 {
 	const std::string dir = prepare_gen_dir();
@@ -200,7 +228,7 @@ TEST(R46PorterConfig, ParserAndTraderSectionsSupportInlineArrayAndExternalFile)
 			"\"bspolicy\":\"" + dir + "/actions.json\","
 			"\"parsers\":[{\"active\":false,\"id\":\"r46_p_inline\"}],"
 			"\"traders\":\"" + dir + "/r46_absent_traders.json\"}";
-		EXPECT_TRUE(r->config(cfg.c_str(), false));
+		EXPECT_FALSE(r->config(cfg.c_str(), false));
 		EXPECT_NE(r->getEngine(), nullptr);
 	}
 
@@ -215,6 +243,16 @@ TEST(R46PorterConfig, ParserAndTraderSectionsSupportInlineArrayAndExternalFile)
 		EXPECT_NE(r->getEngine(), nullptr);
 	}
 
+	clean_dir(dir);
+}
+
+TEST(R46PorterConfig, RunIsGuardedWhenMainConfigCannotBeLoaded)
+{
+	const std::string dir = prepare_gen_dir();
+	ASSERT_FALSE(dir.empty());
+	WtRtRunner* r = new_runner(dir);
+	ASSERT_FALSE(r->config((dir + "/missing_runner_config.json").c_str(), true));
+	EXPECT_NO_THROW(r->run(true));
 	clean_dir(dir);
 }
 

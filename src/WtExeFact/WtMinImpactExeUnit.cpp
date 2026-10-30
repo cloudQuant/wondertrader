@@ -17,6 +17,21 @@
 #include "../Share/StrUtil.hpp"
 #include "../Share//fmtlib.h"
 
+#include <memory>
+
+namespace
+{
+template <typename T>
+struct ReleaseRetainedWTSObject
+{
+	void operator()(T* obj) const
+	{
+		if (obj)
+			obj->release();
+	}
+};
+}
+
 /** @brief 外部声明的工厂名称常量 */
 extern const char* FACT_NAME;
 
@@ -66,9 +81,12 @@ WtMinImpactExeUnit::WtMinImpactExeUnit()
 	: _last_tick(NULL)
 	, _target_pos(0)
 	, _comm_info(NULL)
+	, _sess_info(NULL)
 	, _price_offset(0)
 	, _expire_secs(0)
 	, _price_mode(0)
+	, _price_mode_valid(false)
+	, _initialization_succeeded(false)
 	, _min_open_lots(1)
 , _cancel_cnt(0)
 	, _cancel_times(0)
@@ -90,6 +108,9 @@ WtMinImpactExeUnit::~WtMinImpactExeUnit()
 
 	if (_comm_info)
 		_comm_info->release();
+
+	if (_sess_info)
+		_sess_info->release();
 }
 
 /**
@@ -119,19 +140,51 @@ const char* WtMinImpactExeUnit::getName()
  */
 void WtMinImpactExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTSVariant* cfg)
 {
+	if (_ctx != NULL)
+	{
+		if (ctx)
+			ctx->writeLog("MinImpact initialization failed: init may only run once");
+		return;
+	}
+
+	_initialization_succeeded = false;
+	_price_mode_valid = false;
+	if (ctx == NULL || stdCode == NULL || stdCode[0] == '\0' || cfg == NULL)
+	{
+		if (ctx)
+			ctx->writeLog("MinImpact initialization failed: context, non-empty code, and configuration are required");
+		return;
+	}
+
+	WTSCommodityInfo* commInfo = ctx->getCommodityInfo(stdCode);//获取品种参数
+	if (commInfo)
+		commInfo->retain();
+	std::unique_ptr<WTSCommodityInfo, ReleaseRetainedWTSObject<WTSCommodityInfo>> commInfoOwner(commInfo);
+
+	WTSSessionInfo* sessInfo = ctx->getSessionInfo(stdCode);//获取交易时间模板信息
+	if (sessInfo)
+		sessInfo->retain();
+	std::unique_ptr<WTSSessionInfo, ReleaseRetainedWTSObject<WTSSessionInfo>> sessInfoOwner(sessInfo);
+	if (!commInfoOwner || !sessInfoOwner || sessInfoOwner->getSectionCount() == 0)
+	{
+		ctx->writeLog(fmtutil::format("MinImpact initialization failed for {}: commodity and non-empty session are required", stdCode));
+		return;
+	}
+
 	ExecuteUnit::init(ctx, stdCode, cfg);
 
-	_comm_info = ctx->getCommodityInfo(stdCode);//获取品种参数
-	if (_comm_info)
-		_comm_info->retain();
-
-	_sess_info = ctx->getSessionInfo(stdCode);//获取交易时间模板信息
-	if (_sess_info)
-		_sess_info->retain();
 
 	_price_offset = cfg->getInt32("offset");	//价格偏移跳数，一般和订单同方向
 	_expire_secs = cfg->getUInt32("expire");	//订单超时秒数
 	_price_mode = cfg->getInt32("pricemode");	//价格类型,0-最新价,-1-最优价,1-对手价,2-自动,默认为0
+	_price_mode_valid = (_price_mode >= -1 && _price_mode <= 2);
+	const char* priceModeName = "INVALID";
+	if (_price_mode_valid)
+		priceModeName = PriceModeNames[_price_mode + 1];
+	else
+	{
+		ctx->writeLog(fmtutil::format("Invalid pricemode {} for {}, execution disabled; valid range is [-1, 2]", _price_mode, stdCode));
+	}
 	_entrust_span = cfg->getUInt32("span");		//发单时间间隔，单位毫秒
 	_by_rate = cfg->getBoolean("byrate");		//是否按照对手的挂单数的比例下单，如果是true，则rate字段生效，如果是false则lots字段生效
 	_order_lots = cfg->getDouble("lots");		//单次发单手数
@@ -141,7 +194,10 @@ void WtMinImpactExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTSVaria
 		_min_open_lots = cfg->getDouble("minopenlots");	//最小开仓数量
 
 	ctx->writeLog(fmtutil::format("MiniImpactExecUnit of {} inited, order price @ {}±{} ticks, expired after {} secs, reorder after {} millisec, lots policy: {} @ {:.2f}, min open lots: {}",
-		stdCode, PriceModeNames[_price_mode + 1], _price_offset, _expire_secs, _entrust_span, _by_rate ? "byrate" : "byvol", _by_rate ? _qty_rate : _order_lots, _min_open_lots));
+		stdCode, priceModeName, _price_offset, _expire_secs, _entrust_span, _by_rate ? "byrate" : "byvol", _by_rate ? _qty_rate : _order_lots, _min_open_lots));
+	_comm_info = commInfoOwner.release();
+	_sess_info = sessInfoOwner.release();
+	_initialization_succeeded = _price_mode_valid;
 }
 /**
  * @brief 订单回报处理函数
@@ -156,6 +212,8 @@ void WtMinImpactExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTSVaria
  */
 void WtMinImpactExeUnit::on_order(uint32_t localid, const char* stdCode, bool /*isBuy*/, double leftover, double /*price*/, bool isCanceled)
 {
+	if (!_initialization_succeeded)
+		return;
 	{
 		if (!_orders_mon.has_order(localid)) //如果没有对应订单 返回
 			return;
@@ -190,6 +248,9 @@ void WtMinImpactExeUnit::on_order(uint32_t localid, const char* stdCode, bool /*
  */
 void WtMinImpactExeUnit::on_channel_ready()
 {
+	if (!_initialization_succeeded)
+		return;
+
 	double undone = _ctx->getUndoneQty(_code.c_str());//获取未完成数量
 
 	if(!decimal::eq(undone, 0) && !_orders_mon.has_order())
@@ -250,6 +311,9 @@ void WtMinImpactExeUnit::on_channel_lost()
  */
 void WtMinImpactExeUnit::on_tick(WTSTickData* newTick)
 {
+	if (!_initialization_succeeded)
+		return;
+
 	if (newTick == NULL || _code.compare(newTick->code()) != 0)
 		return;
 
@@ -278,16 +342,15 @@ void WtMinImpactExeUnit::on_tick(WTSTickData* newTick)
 	if(_expire_secs != 0 && _orders_mon.has_order() && _cancel_cnt==0)  //订单超时秒数！=0&&hasorder && 撤单量==0
 	{
 		uint64_t now = _ctx->getCurTime();
-
-		_orders_mon.check_orders(_expire_secs, now, [this](uint32_t localid) {
-			if (_ctx->cancel(localid))
-			{
-				_cancel_cnt++;
-				_ctx->writeLog(fmtutil::format("[{}@{}] Expired order of {} canceled, cancelcnt -> {}", __FILE__, __LINE__, _code.c_str(), _cancel_cnt));
-			}
+		_orders_mon.check_orders_with_generation(_expire_secs, now, [this, now](uint32_t localid, uint64_t generation) {
+			if (!_orders_mon.mark_unverified_timeout(localid, generation, _expire_secs, now))
+				return; // 终态或 localid 已复用；不得复活旧快照
+			_ctx->writeLog(fmtutil::format("Expired order {} of {} cannot be auto-canceled: legacy localid is unverified; order remains monitored",
+				localid, _code.c_str()));
 		});
 	}
-	
+	if (_orders_mon.has_unverified_timeout())
+		return;
 	do_calc();
 }
 /**
@@ -302,6 +365,8 @@ void WtMinImpactExeUnit::on_tick(WTSTickData* newTick)
  */
 void WtMinImpactExeUnit::on_trade(uint32_t /*localid*/, const char* /*stdCode*/, bool /*isBuy*/, double /*vol*/, double /*price*/)
 {
+	if (!_initialization_succeeded)
+		return;
 	//不用触发,这里在ontick里触发吧
 }
 
@@ -316,6 +381,8 @@ void WtMinImpactExeUnit::on_trade(uint32_t /*localid*/, const char* /*stdCode*/,
  */
 void WtMinImpactExeUnit::on_entrust(uint32_t localid, const char* /*stdCode*/, bool bSuccess, const char* /*message*/)
 {
+	if (!_initialization_succeeded)
+		return;
 	if (!bSuccess)
 	{
 		//如果不是我发出去的订单,我就不管了
@@ -340,6 +407,11 @@ void WtMinImpactExeUnit::on_entrust(uint32_t localid, const char* /*stdCode*/, b
  */
 void WtMinImpactExeUnit::do_calc()
 {
+	if (_orders_mon.has_unverified_timeout())
+		return;
+	if (!_initialization_succeeded)
+		return;
+
 	CalcFlag flag(&_in_calc);
 	if (flag)
 		return;
@@ -536,6 +608,8 @@ void WtMinImpactExeUnit::do_calc()
 		isCanCancel = false;	//如果价格被修正为涨跌停价，订单不可撤销
 	}
 
+	if (_orders_mon.has_unverified_timeout())
+		return;
 	if (isBuy)
 	{
 		OrderIDs ids = _ctx->buy(stdCode, buyPx, this_qty, bForceClose);
@@ -559,6 +633,8 @@ void WtMinImpactExeUnit::do_calc()
  */
 void WtMinImpactExeUnit::set_position(const char* stdCode, double newVol)
 {
+	if (!_initialization_succeeded || stdCode == NULL)
+		return;
 	if (_code.compare(stdCode) != 0) //code和stdcode不相等  return 
 		return;
 
@@ -591,6 +667,8 @@ void WtMinImpactExeUnit::set_position(const char* stdCode, double newVol)
  */
 void WtMinImpactExeUnit::clear_all_position(const char* stdCode)
 {
+	if (!_initialization_succeeded || stdCode == NULL)
+		return;
 	if (_code.compare(stdCode) != 0)
 		return;
 

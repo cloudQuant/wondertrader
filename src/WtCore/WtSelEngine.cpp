@@ -32,6 +32,7 @@ inline uint32_t makeTaskId()
 
 WtSelEngine::WtSelEngine()
 	: _terminated(false)
+	, _tm_ticker(NULL)
 	, _cfg(NULL)
 {
 }
@@ -485,6 +486,16 @@ void WtSelEngine::handle_pos_change(const char* straName, const char* stdCode, d
 	const auto& exec_ids = _exec_mgr.get_route_by_strategy(straName);
 	for (auto& execid : exec_ids)
 		_exec_mgr.handle_pos_change(realCode.c_str(), targetPos, diffQty, execid.c_str());
+}
+
+ExecUnitInitStatus WtSelEngine::queryExecUnitInitStatus(const char* executorId, const char* stdCode) const
+{
+	return _exec_mgr.query_exec_unit_init_status(executorId, stdCode);
+}
+
+ExecUnitInitClearResult WtSelEngine::clearFailedExecUnitInitStatus(const char* executorId, const char* stdCode)
+{
+	return _exec_mgr.clear_failed_exec_unit_init_status(executorId, stdCode);
 }
 
 WTSCommodityInfo* WtSelEngine::get_comm_info(const char* stdCode)

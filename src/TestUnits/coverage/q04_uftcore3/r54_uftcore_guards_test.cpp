@@ -183,12 +183,7 @@ TEST(R54ParserGuard, release_stops_all_handlers)
 // UftStrategyMgr.cpp:106-123 createStrategy(name,id) 成功
 // UftStrategyMgr.cpp:125-132 getStrategy 命中
 //
-// 注意：manager 故意放在堆上且不 delete。产品缺陷 BUG-R64-002：
-// UftStrategyDefs.h:207 把删除函数的类型声明为 void(*)(IUftStrategyFact*&)，
-// 而插件 WtUftStraFact.cpp:43 导出的是 void deleteStrategyFact(IUftStrategyFact*)（按值）。
-// UftStrategyMgr 析构时 `_remover(_fact)` 实际把 _fact 成员的地址传给插件，
-// 插件再 delete 这个内部地址 -> SIGSEGV。该崩溃发生在析构阶段，与 load/create 语义无关；
-// 本用例只验证登记/创建/查询，进程退出时由 OS 回收 manager，崩溃复现见下方 DISABLED 用例。
+// Load the real plugin and let the automatic manager lifetime exercise factory cleanup.
 TEST(R54StraMgr, loads_plugin_and_creates_strategy)
 {
 	const std::string plugin = findRealStrategyPlugin();
@@ -201,28 +196,26 @@ TEST(R54StraMgr, loads_plugin_and_creates_strategy)
 	std::filesystem::create_symlink(plugin, link, ec);
 	ASSERT_FALSE(ec) << "create_symlink failed: " << ec.message();
 
-	UftStrategyMgr* mgr = new UftStrategyMgr();
-	EXPECT_TRUE(mgr->loadFactories(tmp.dir().string().c_str()));
+	UftStrategyMgr mgr;
+	EXPECT_TRUE(mgr.loadFactories(tmp.dir().string().c_str()));
 
-	UftStrategyPtr p = mgr->createStrategy("WtUftStraFact.SimpleUft", "r54stra1");
+	UftStrategyPtr p = mgr.createStrategy("WtUftStraFact.SimpleUft", "r54stra1");
 	ASSERT_NE(nullptr, p);
 	ASSERT_NE(nullptr, p->self());
 	EXPECT_STREQ("UftDemoStrategy", p->self()->getName());
-	EXPECT_NE(nullptr, mgr->getStrategy("r54stra1"));
+	EXPECT_NE(nullptr, mgr.getStrategy("r54stra1"));
 
-	UftStrategyPtr p2 = mgr->createStrategy("WtUftStraFact", "SimpleUft", "r54stra2");
+	UftStrategyPtr p2 = mgr.createStrategy("WtUftStraFact", "SimpleUft", "r54stra2");
 	ASSERT_NE(nullptr, p2);
 	EXPECT_NE(nullptr, p2->self());
-	EXPECT_NE(nullptr, mgr->getStrategy("r54stra2"));
+	EXPECT_NE(nullptr, mgr.getStrategy("r54stra2"));
 
-	EXPECT_EQ(nullptr, mgr->createStrategy("MissingFact.SimpleUft", "r54stra3"));
-	EXPECT_EQ(nullptr, mgr->getStrategy("r54stra3"));
+	EXPECT_EQ(nullptr, mgr.createStrategy("MissingFact.SimpleUft", "r54stra3"));
+	EXPECT_EQ(nullptr, mgr.getStrategy("r54stra3"));
 }
 
-// 产品缺陷占位（BUG-R64-002）：真实插件 register 成功后，UftStrategyMgr 析构即 SIGSEGV。
-// 见 docs/迭代计划/迭代01/bugs/R64.md；默认不执行，避免进程崩溃。
-// UftStrategyDefs.h:207 / WtUftStraFact.cpp:43 / UftStrategyMgr.cpp:76
-TEST(R54StraMgr, DISABLED_manager_destructor_releases_factory_with_mismatched_abi)
+// The host deleter type must match the published plugin export's by-value pointer ABI.
+TEST(R54StraMgr, managerDestructorReleasesFactoryWithPublishedAbi)
 {
 	const std::string plugin = findRealStrategyPlugin();
 	if (plugin.empty())

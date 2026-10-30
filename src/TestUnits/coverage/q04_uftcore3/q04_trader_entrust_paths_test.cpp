@@ -160,6 +160,12 @@ TEST(q04_trader_entrust, insert_failure_returns_uint_max_without_counting_undone
 	EXPECT_EQ(UINT_MAX, bad);
 	//API 同步拒绝本笔委托, 未完成量不应计入未被接受的数量
 	EXPECT_DOUBLE_EQ(0.0, env._adapter.getUndoneQty(kStdAg));
+	EXPECT_EQ(UINT_MAX, env._adapter.openShort(kStdAg, 5000.0, 1.0, 0));
+	EXPECT_DOUBLE_EQ(0.0, env._adapter.getUndoneQty(kStdAg));
+	EXPECT_EQ(UINT_MAX, env._adapter.closeLong(kStdAg, 5000.0, 0.5, false, 0));
+	EXPECT_DOUBLE_EQ(0.0, env._adapter.getUndoneQty(kStdAg));
+	EXPECT_EQ(UINT_MAX, env._adapter.closeShort(kStdAg, 5000.0, 0.75, true, 0));
+	EXPECT_DOUBLE_EQ(0.0, env._adapter.getUndoneQty(kStdAg));
 	//失败单不会被登记进 _orders
 	EXPECT_EQ(nullptr, env._adapter.getOrders(""));
 
@@ -169,6 +175,29 @@ TEST(q04_trader_entrust, insert_failure_returns_uint_max_without_counting_undone
 	EXPECT_NE(UINT_MAX, good);
 	EXPECT_NE(bad, good);
 	EXPECT_DOUBLE_EQ(3.0, env._adapter.getUndoneQty(kStdAg));
+}
+
+TEST(q04_trader_entrust, rejection_without_this_adapters_usertag_does_not_change_undone)
+{
+	OrdEnv env;
+	ASSERT_NE(UINT_MAX, env._adapter.openLong(kStdAg, 5000.0, 3.0, 0));
+	ASSERT_DOUBLE_EQ(3.0, env._adapter.getUndoneQty(kStdAg));
+	const q04::FakeTraderApi::EntrustSnap snap = env._api._entrusts.back();
+	WTSError* err = WTSError::create(WEC_ORDERINSERT, "unmatched rejection");
+
+	for (const char* userTag : { "", "wtp.other.123" })
+	{
+		WTSEntrust* entrust = WTSEntrust::create(snap._code.c_str(), snap._vol, snap._price, snap._exchg.c_str());
+		entrust->setUserTag(userTag);
+		entrust->setDirection((WTSDirectionType)snap._dir);
+		entrust->setOffsetType((WTSOffsetType)snap._offset);
+		env._adapter.onRspEntrust(entrust, err);
+		EXPECT_DOUBLE_EQ(3.0, env._adapter.getUndoneQty(kStdAg));
+		EXPECT_TRUE(env._sink._entrusts.empty());
+		entrust->release();
+	}
+
+	err->release();
 }
 
 TEST(q04_trader_entrust, usertag_pattern_is_scoped_per_channel)

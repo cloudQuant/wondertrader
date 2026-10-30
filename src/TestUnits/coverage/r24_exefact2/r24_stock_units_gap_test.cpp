@@ -24,8 +24,7 @@
 //  3) 标准化代码三段式 SHSE.STK.600000：init L201 / get_minOrderQty 都取 split('.')[2]，
 //     两段串越界（BUG-R7-009），且 CodeHelper 会把两段串整段当 product。
 //
-// 超时扫描的确定性输入同 r24_vwap_twap_gap_test.cpp 顶部说明：
-// WtOrdMon::check_orders 的 `expiresecs*1000` 在 uint32 里回绕（BUG-R24-003）→ 立刻判超时。
+// 超时扫描使用可控 context clock，并按正常秒级阈值跨过到期边界。
 #include <gtest/gtest.h>
 
 #include <cmath>
@@ -51,7 +50,7 @@ using namespace wtp;
 
 namespace
 {
-const uint32_t kStickyOverflow = 536870912u;   // *1000 在 uint32 里回绕成 0
+const uint32_t kStickySeconds = 1u;            // 正常 1 秒超时阈值
 const char* const kStk = "SHSE.STK.600000";    // 普通股：<688000 -> min_hands 100
 const char* const kKcb = "SHSE.STK.688001";    // 科创板：>=688000 -> min_hands 200
 
@@ -107,12 +106,13 @@ public:
 	void writeLog(const char* l) override { logs.push_back(l ? l : ""); }
 	WTSCommodityInfo* getCommodityInfo(const char*) override { return comm; }
 	WTSSessionInfo* getSessionInfo(const char*) override { return sess; }
-	uint64_t getCurTime() override { return 20240103093000000ull; }
+	uint64_t getCurTime() override { return curTime; }
 
 	double total = 0;
 	double valid = 0;
 	double today = 0;
 	double undone = 0;
+	uint64_t curTime = 20240103093000000ull;
 	uint32_t nextId = 7000;
 	uint32_t cancelBydirRetCnt = 2;
 	uint32_t grabHits = 0;
@@ -569,10 +569,9 @@ TEST(r24_stkvw, opposite_undone_canceled_and_same_direction_blocks_round)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// StockVWap：超时撤单扫描（L425-436）+ 撤单回报把 _cancel_cnt 递减（L270-274）
-// + 未撤完就来的非撤单回报走错误返回（L299-302）
+// StockVWap：超时记录没有版本化身份时 fail-closed，保留监控，不调用裸 ID 撤单。
 //////////////////////////////////////////////////////////////////////////
-TEST(r24_stkvw, expired_scan_then_cancel_reports_drain_cancel_cnt)
+TEST(r24_stkvw, expired_scan_without_verified_identity_fails_closed)
 {
 	const std::string name = sName("R24SEXP");
 	SVwapFile vf(name, flatBuckets(30.0));
@@ -581,28 +580,24 @@ TEST(r24_stkvw, expired_scan_then_cancel_reports_drain_cancel_cnt)
 	ctx.total = 500;
 	ctx.valid = 500;
 	WtStockVWapExeUnit unit;
-	unit.init(&ctx, kStk, mkSCfg(5, 0, 0, 100.0, kStickyOverflow));
+	unit.init(&ctx, kStk, mkSCfg(5, 0, 0, 100.0, kStickySeconds));
 	unit.set_position(kStk, 200);
 	unit.on_tick(mkSTick(kStk, 100000000, 10.50, 10.49, 10.51));
 	unit.on_channel_ready();
 	ASSERT_EQ(ctx.buys.size(), 1u);               // 本地单 7000
+	ctx.undone = ctx.buys[0].qty;                 // fake 回填活单未完成量，避免模拟出重复发单
 
+	ctx.curTime += 1000;
 	unit.on_tick(mkSTick(kStk, 103000000, 10.60, 10.59, 10.61));   // 非首笔 -> L425
-	ASSERT_EQ(ctx.byidCancels.size(), 1u);
-	EXPECT_EQ(ctx.byidCancels[0], 7000u);
-	EXPECT_EQ(ctx.countLog("Order expired, cancelcnt updated to 1"), 1u);   // L431-432
-	EXPECT_EQ(ctx.buys.size(), 1u);               // hasCancel -> L439 不进 do_calc
+	EXPECT_TRUE(ctx.byidCancels.empty());
+	EXPECT_EQ(ctx.countLog("Expired order 7000 of"), 1u);
+	EXPECT_EQ(ctx.buys.size(), 1u);               // 超时身份不可验证，本轮等待订单状态
 
-	// _cancel_cnt==1 时先来一条「未撤销」的回报 -> L299-302 错误返回
-	unit.on_order(7000, kStk, true, 100, 10.50, false);
-	EXPECT_EQ(ctx.countLog("hasn't canceled, error will be return"), 1u);
+	ctx.curTime += 1000;
+	unit.on_tick(mkSTick(kStk, 104000000, 10.70, 10.69, 10.71));
+	EXPECT_TRUE(ctx.byidCancels.empty());
+	EXPECT_EQ(ctx.countLog("Expired order 7000 of"), 1u);
 	EXPECT_EQ(ctx.buys.size(), 1u);
-
-	// 撤单回报 -> L265-274 摘单并把 _cancel_cnt 降到 0
-	unit.on_order(7000, kStk, true, 100, 10.50, true);
-	EXPECT_EQ(ctx.countLog("cancelling done"), 1u);
-	unit.on_order(7000, kStk, true, 100, 10.50, true);            // 已摘除 -> L261-262
-	EXPECT_EQ(ctx.countLog("cancelling done"), 1u);
 	ctx.comm->release();
 }
 
@@ -712,7 +707,7 @@ TEST(r24_stkmin, init_optional_keys_and_pre_open_first_tick_dropped)
 	ctx.comm = mkSComm("STK", TM_Both);
 	ctx.sess = mkSSess();
 	WtStockMinImpactExeUnit unit;
-	WTSVariant* cfg = mkMinCfg(0, kStickyOverflow, 0, 100.0, 100.0, false, 0.0, true, 0);
+	WTSVariant* cfg = mkMinCfg(0, kStickySeconds, 0, 100.0, 100.0, false, 0.0, true, 0);
 	unit.init(&ctx, kStk, cfg);
 	cfg->release();
 	// L154 的初始化日志把 min_order 打出来：产品钳位 min(cfg=100, hands=100)=100
@@ -733,67 +728,74 @@ TEST(r24_stkmin, init_optional_keys_and_pre_open_first_tick_dropped)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// StockMinImpact：超时扫描的完整闭环
-// L327-330 枚举日志、L333-347 撤单 + _cancel_map 记账、L350-366 撤单次数超限强制摘单
-// 强制摘单的证据是「下一笔 tick 的枚举日志里再也看不到 7000」
+// StockMinImpact：超时扫描 fail-closed；监控仍存在，自动撤单计数与强制摘单不触发。
 //////////////////////////////////////////////////////////////////////////
-TEST(r24_stkmin, expire_scan_cancels_counts_and_force_erases)
+TEST(r24_stkmin, expire_scan_without_verified_identity_keeps_monitor)
 {
 	SFakeCtx ctx;
 	ctx.comm = mkSComm("STK", TM_Both);
 	ctx.total = 500;
 	ctx.valid = 500;
 	WtStockMinImpactExeUnit unit;
-	WTSVariant* cfg = mkMinCfg(0, kStickyOverflow, 0, 100.0, 100.0, false, 0.0, false, 0);
+	WTSVariant* cfg = mkMinCfg(0, kStickySeconds, 0, 100.0, 100.0, false, 0.0, false, 0);
 	unit.init(&ctx, kStk, cfg);
 	cfg->release();
 	unit.set_position(kStk, 500);
 	unit.on_channel_ready();
 	unit.on_tick(mkSTick(kStk, 100000000, 10.50, 10.49, 10.51));
 	ASSERT_EQ(ctx.buys.size(), 1u);               // 7000 进监控
+	ctx.undone = ctx.buys[0].qty;                 // fake 回填活单未完成量，避免模拟出重复发单
 
+	ctx.curTime += 1000;
 	unit.on_tick(mkSTick(kStk, 100100000, 10.60, 10.59, 10.61));
 	// 枚举日志（L329）
 	EXPECT_EQ(ctx.countLog("7000 entertime:"), 1u);
-	ASSERT_EQ(ctx.byidCancels.size(), 1u);
-	EXPECT_EQ(ctx.byidCancels[0], 7000u);
-	EXPECT_EQ(ctx.countLog("Expired order of"), 1u);        // L338
-	EXPECT_TRUE(ctx.hasLog("canceled by 0 times,erase forcely"));  // L364
-	// 强制摘单 + 本轮重发一笔
-	ASSERT_EQ(ctx.buys.size(), 2u);
-	EXPECT_DOUBLE_EQ(ctx.buys[1].qty, 100.0);
+	EXPECT_TRUE(ctx.byidCancels.empty());
+	EXPECT_EQ(ctx.countLog("Expired order 7000 of"), 1u);
+	EXPECT_FALSE(ctx.hasLog("erase forcely"));
+	EXPECT_EQ(ctx.buys.size(), 1u);
 
+	ctx.curTime += 1000;
 	unit.on_tick(mkSTick(kStk, 100200000, 10.70, 10.69, 10.71));
-	// 7000 已被摘掉，枚举里只剩 7001
-	EXPECT_EQ(ctx.countLog("7000 entertime:"), 1u);
-	EXPECT_EQ(ctx.countLog("7001 entertime:"), 1u);
-	EXPECT_EQ(ctx.byidCancels.size(), 2u);
+	EXPECT_EQ(ctx.countLog("7000 entertime:"), 2u); // 超时处理保留监控记录
+	EXPECT_TRUE(ctx.byidCancels.empty());
+	EXPECT_FALSE(ctx.hasLog("erase forcely"));
 	ctx.comm->release();
 }
 
 //////////////////////////////////////////////////////////////////////////
-// StockMinImpact：max_cancel_time=1 时，撤一次不强制摘（1>1 假），撤两次才摘（2>1 真）
-// 与上一条只差这个阈值 -> 阈值那行（L119、L355）是真的可证伪输入
+// StockMinImpact：max_cancel_time 不会因身份未验证的超时推进，也不会摘除监控记录。
 //////////////////////////////////////////////////////////////////////////
-TEST(r24_stkmin, max_cancel_time_one_keeps_order_until_second_cancel)
+TEST(r24_stkmin, unverified_timeout_does_not_advance_cancel_retry_counter)
 {
 	SFakeCtx ctx;
 	ctx.comm = mkSComm("STK", TM_Both);
-	ctx.total = 500;
-	ctx.valid = 500;
+	ctx.sess = mkSSess();
+	ctx.total = 0;
+	ctx.valid = 0;
 	WtStockMinImpactExeUnit unit;
-	WTSVariant* cfg = mkMinCfg(0, kStickyOverflow, 0, 100.0, 100.0, false, 0.0, false, 1);
+	WTSVariant* cfg = mkMinCfg(0, kStickySeconds, 0, 100.0, 100.0, false, 0.0, false, 1);
 	unit.init(&ctx, kStk, cfg);
 	cfg->release();
+	ASSERT_TRUE(unit.initializationSucceeded());
 	unit.set_position(kStk, 500);
 	unit.on_channel_ready();
 	unit.on_tick(mkSTick(kStk, 100000000, 10.50, 10.49, 10.51));
-	unit.on_tick(mkSTick(kStk, 100100000, 10.60, 10.59, 10.61));   // 第 1 次撤单
-	EXPECT_FALSE(ctx.hasLog("erase forcely"));                      // 1 > 1 不成立
-	unit.on_tick(mkSTick(kStk, 100200000, 10.70, 10.69, 10.71));   // 第 2 次撤单
-	EXPECT_EQ(ctx.countLog("canceled by 1 times,erase forcely"), 1u);
-	EXPECT_EQ(ctx.byidCancels.size(), 2u);
+	ASSERT_EQ(ctx.buys.size(), 1u);
+	ctx.undone = ctx.buys[0].qty;                 // fake 回填活单未完成量
+	ctx.curTime += 1000;
+	unit.on_tick(mkSTick(kStk, 100100000, 10.60, 10.59, 10.61));
+	EXPECT_TRUE(ctx.byidCancels.empty());
+	EXPECT_EQ(ctx.countLog("Expired order 7000 of"), 1u);
+	EXPECT_FALSE(ctx.hasLog("erase forcely"));
+	ctx.curTime += 1000;
+	unit.on_tick(mkSTick(kStk, 100200000, 10.70, 10.69, 10.71));
+	EXPECT_TRUE(ctx.byidCancels.empty());
+	EXPECT_EQ(ctx.countLog("Expired order 7000 of"), 1u);
+	EXPECT_FALSE(ctx.hasLog("erase forcely"));
+	EXPECT_EQ(ctx.countLog("7000 entertime:"), 2u);
 	ctx.comm->release();
+	ctx.sess->release();
 }
 
 //////////////////////////////////////////////////////////////////////////

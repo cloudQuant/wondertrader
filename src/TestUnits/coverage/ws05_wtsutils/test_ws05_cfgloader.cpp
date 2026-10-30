@@ -154,6 +154,13 @@ TEST(ws05_cfgloader, RejectJsonTopLevelArray)
 	EXPECT_EQ(doc, nullptr);
 }
 
+TEST(ws05_cfgloader, RejectJsonTopLevelScalars)
+{
+	EXPECT_EQ(WTSCfgLoader::load_from_content("null"), nullptr);
+	EXPECT_EQ(WTSCfgLoader::load_from_content("42"), nullptr);
+	EXPECT_EQ(WTSCfgLoader::load_from_content("true"), nullptr);
+}
+
 TEST(ws05_cfgloader, RejectJsonInvalidAndEmpty)
 {
 	EXPECT_EQ(WTSCfgLoader::load_from_content("{ invalid json"), nullptr);
@@ -245,6 +252,11 @@ TEST(ws05_cfgloader, RejectYamlTopLevelSequence)
 	EXPECT_EQ(doc, nullptr);
 }
 
+TEST(ws05_cfgloader, RejectYamlTopLevelScalar)
+{
+	EXPECT_EQ(WTSCfgLoader::load_from_content("plain-string\n", true), nullptr);
+}
+
 TEST(ws05_cfgloader, RejectYamlEmptyAndNull)
 {
 	EXPECT_EQ(WTSCfgLoader::load_from_content("", true), nullptr);
@@ -268,7 +280,7 @@ TEST(ws05_cfgloader, InternalYamlToVariantNullRoot)
 
 TEST(ws05_cfgloader, YamlSyntaxErrorThrows)
 {
-	// 语法错误时 yaml-cpp 抛出异常，load_from_yaml 不做捕获
+	// WTSCfgLoader 的公开合同保留 yaml-cpp 的语法异常；使用方负责处理。
 	EXPECT_THROW(WTSCfgLoader::load_from_content("a: [1, 2\n", true), YAML::ParserException);
 }
 

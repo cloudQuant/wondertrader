@@ -1,0 +1,6 @@
+Temporary focused build recipe: /tmp/wt-p08-side-run/build-focused.sh
+The recipe compiles these independent objects to /tmp: WtBtCore/UftMocker.cpp; CoverageTests_btcore UftMocker.cpp; P08 order-position test; R191 residual test; R72 UFT integration test.
+The source and test object compile commands each completed with exit 0; outputs: /tmp/wt-p08-side-src.o, /tmp/wt-p08-side-test-UftMocker.o, /tmp/wt-p08-side-p08.o, /tmp/wt-p08-side-r191.o, /tmp/wt-p08-side-r72.o.
+Relink command is generated from: /opt/homebrew/bin/ninja -C build-cov -t commands build_x64/Debug/bin/TestUnits/CoverageTests_btcore, with the four changed test/source objects redirected to /tmp; exact substitutions are in build-focused.sh.
+temporary_link_exit=0
+This links with existing build-cov objects/libraries; it is not the requested clean CMake target build.

@@ -133,13 +133,14 @@ TEST_F(R201MockerFixture, R201UftMocker_TodayCloseSkipsPriorDayAndZeroQtyDetails
 	EXPECT_DOUBLE_EQ(10.0, m.stra_get_position(kRb, false, 3));
 }
 
-// Uft 插件：短仓非零时 on_session_end 写短仓明细（384）；
+// Uft 插件：手工注入 on_trade 成交回报，验证仓位记账以及 on_session_end 输出的
+// 多空方向、数量、平仓盈亏和浮盈；不覆盖完整策略流程或真实撮合。
 // enum_position 传入不在 _pos_map 的合约，循环体 continue（1038）。
 TEST_F(R201MockerFixture, R201UftMocker_PluginEnumMismatchAndShortSessionLog)
 {
 	WTSCommodityInfo* comm = _rp.get_commodity_info(kStk);
 	ASSERT_NE(nullptr, comm);
-	comm->setTradingMode(TM_LongT1);
+	comm->setTradingMode(TM_Both);
 	comm->setCoverMode(CM_CoverToday);
 
 	// BUG-R191-001：插件工厂析构崩，故意泄漏到进程退出
@@ -149,21 +150,36 @@ TEST_F(R201MockerFixture, R201UftMocker_PluginEnumMismatchAndShortSessionLog)
 	ASSERT_TRUE(m->init_uft_factory(cfg));
 	cfg->release();
 
-	// T+1 多仓跨日解冻，保证策略回调与会话日志路径都处于真实策略上下文。
-	m->on_trade(1u, kStk, true, 0u, 100.0, 10.0);
+	// 手工注入多仓成交回报；会话开始回调仍走公开接口路径。
+	m->on_trade(1u, kStk, true, 0u, 10.0, 100.0);
 	m->handle_session_begin(20200103u);
-	EXPECT_DOUBLE_EQ(100.0, m->stra_get_position(kStk, true, 1));
+	ASSERT_DOUBLE_EQ(10.0, m->stra_get_position(kStk, false, 1));
 
-	// 开 5 股空仓（不跨日），会话结束时短仓非零。
-	m->on_trade(2u, kStk, false, 0u, 5.0, 10.0);
-	EXPECT_DOUBLE_EQ(5.0, m->stra_get_position(kStk, false, 2));
+	// 留 8 股多仓并实现 10 元平仓盈亏。
+	m->on_trade(2u, kStk, true, 1u, 2.0, 105.0);
+	ASSERT_DOUBLE_EQ(8.0, m->stra_get_position(kStk, false, 1));
+
+	// 留 4 股空仓并实现 5 元平仓盈亏。
+	m->on_trade(3u, kStk, false, 0u, 5.0, 110.0);
+	m->on_trade(4u, kStk, false, 1u, 1.0, 105.0);
+	ASSERT_DOUBLE_EQ(4.0, m->stra_get_position(kStk, false, 2));
+
+	// 多仓按 bid=106、空仓按 ask=107 更新浮盈：分别为 48 元和 12 元。
+	WTSTickData* pnlTick = r62::make_tick(kStk, 20200103u, 93100000u, 106.5, 106.0, 107.0);
+	m->handle_tick(kStk, pnlTick, 0);
+	pnlTick->release();
 
 	// kCu 不在持仓表，循环命中 continue 后返回 0。
 	EXPECT_DOUBLE_EQ(0.0, m->stra_enum_position(kCu));
 
 	m->handle_session_end(20200103u);
 	m->handle_replay_done();
-	EXPECT_TRUE(std::filesystem::exists(_out / "r201_uft_plugin" / "positions.csv"));
+	const std::string positions = r62::read_file(_out / "r201_uft_plugin" / "positions.csv");
+	EXPECT_EQ(
+		"date,code,direct,volume,closeprofit,dynprofit\n"
+		"20200103,SSE.STK.000001,LONG,8,10.00,48.00\n"
+		"20200103,SSE.STK.000001,SHORT,4,5.00,12.00\n",
+		positions);
 }
 
 // BUG-R201-001 复现占位：on_session_begin 把 PosInfo& 当 PosItem& 用，
@@ -198,19 +214,11 @@ TEST_F(R201MockerFixture, R201CtaMocker_ContextIdIsStableAndMonotonic)
 	EXPECT_DOUBLE_EQ(0.0, first.stra_get_position(kRb));
 }
 
-// HftMocker.cpp:239-245、252：module + createStrategyFact 成功、配置无 strategy
-// 段时的装载返回路径。本机构建没有 WtHftStraFact，退回同 C ABI 的 Cta 工厂；
-// 不创建策略、不解引用错误类型的工厂指针，且刻意泄漏以避开 BUG-R191-001 的析构崩溃。
-TEST_F(R201MockerFixture, R201HftMocker_FactoryLoadWithoutStrategySucceeds)
+// HftMocker 的配置必须包含非空 strategy name/id；仅有 module 时应在装载前拒绝。
+TEST_F(R201MockerFixture, R201HftMocker_RejectsFactoryConfigWithoutStrategy)
 {
-	std::string module = r111::plugin_path("WtHftStraFact");
-	if (!std::filesystem::exists(module))
-		module = r111::plugin_path("WtCtaStraFact");
-	if (!std::filesystem::exists(module))
-		GTEST_SKIP() << "no loadable strategy factory module";
-
 	auto* m = new HftMocker(&_rp, "r201_hft_module");
-	WTSVariant* cfg = r121::make_module_cfg(module);
-	EXPECT_TRUE(m->init_hft_factory(cfg));
+	WTSVariant* cfg = r121::make_module_cfg("r201_missing_strategy_module");
+	EXPECT_FALSE(m->init_hft_factory(cfg));
 	cfg->release();
 }

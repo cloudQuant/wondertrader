@@ -146,18 +146,34 @@ TEST(r16_timeutils, fasttime_does_not_fill_week_or_dst_fields)
 	EXPECT_EQ(44, out.tm_isdst);
 }
 
-TEST(r16_timeutils, DISABLED_fasttime_pre_epoch_date_is_wrong)
+TEST(r16_timeutils, fasttime_pre_epoch_seconds_floor_normalize)
 {
-	// 触发条件见 bugs/R16_share_tools.md BUG-R16-01。
-	// epoch 前 365 天是 1969-01-01T00:00:00Z；本用例与 UTC 分解结果比较。
-	time_t sec = -86400 * 365;	// 1969-01-01T00:00:00Z
-	struct tm out;
-	memset(&out, 0, sizeof(out));
-	TimeUtils::fasttime(sec, &out, 0);
-	TmRef e = utcBreak(sec);
-	EXPECT_EQ(e.year, out.tm_year);
-	EXPECT_EQ(e.mon, out.tm_mon);
-	EXPECT_EQ(e.mday, out.tm_mday);
+	struct Case { int64_t sec; int zone; };
+	const Case cases[] = {
+		{ -1, 0 },                         // 1969-12-31 23:59:59
+		{ -60, 0 },                        // 1969-12-31 23:59:00
+		{ -86400, 0 },                     // previous civil day
+		{ -86400LL * 365, 0 },             // 1969-01-01
+		{ -2208988800LL, 0 },              // 1900-01-01
+		{ -1, 8 },                         // timezone crosses to 1970-01-01
+		{ 0, -5 },                         // timezone crosses to 1969-12-31
+		{ -2208988800LL, INT32_MAX },      // large positive zone offset
+		{ 2208988800LL, INT32_MIN }        // large negative zone offset
+	};
+	for (const Case& c : cases)
+	{
+		struct tm out;
+		memset(&out, 0, sizeof(out));
+		ASSERT_EQ(0, TimeUtils::fasttime(static_cast<time_t>(c.sec), &out, c.zone));
+		const int64_t shifted = c.sec + static_cast<int64_t>(c.zone) * 3600;
+		TmRef e = utcBreak(shifted);
+		EXPECT_EQ(e.year, out.tm_year) << "sec=" << c.sec << " zone=" << c.zone;
+		EXPECT_EQ(e.mon, out.tm_mon) << "sec=" << c.sec << " zone=" << c.zone;
+		EXPECT_EQ(e.mday, out.tm_mday) << "sec=" << c.sec << " zone=" << c.zone;
+		EXPECT_EQ(e.hour, out.tm_hour) << "sec=" << c.sec << " zone=" << c.zone;
+		EXPECT_EQ(e.min, out.tm_min) << "sec=" << c.sec << " zone=" << c.zone;
+		EXPECT_EQ(e.sec, out.tm_sec) << "sec=" << c.sec << " zone=" << c.zone;
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -193,9 +209,18 @@ TEST(r16_timeutils, time32_ctor_without_msecs_defaults_to_zero)
 	EXPECT_EQ(30405000u, t.time_ms());
 }
 
+TEST(r16_timeutils, time32_default_state_is_deterministic)
+{
+	TimeUtils::Time32 t;
+	EXPECT_EQ(19700101u, t.date());
+	EXPECT_EQ(0u, t.time());
+	EXPECT_EQ(0u, t.time_ms());
+	EXPECT_STREQ("1970-01-01 00:00:00 4 001", t.fmt("%Y-%m-%d %H:%M:%S %w %j"));
+}
+
 TEST(r16_timeutils, time32_from_local_time_overwrites_previous_value)
 {
-	TimeUtils::Time32 t;	// 默认构造不初始化 tm（BUG-R16-02），只写不读
+	TimeUtils::Time32 t;	// 默认值可读；from_local_time 必须覆盖完整日期、时间及毫秒状态。
 	uint64_t e = (uint64_t)localEpoch(2022, 12, 30, 23, 59, 58) * 1000 + 999;
 	t.from_local_time(e);
 	EXPECT_EQ(20221230u, t.date());
@@ -216,7 +241,7 @@ TEST(r16_timeutils, time32_time_ms_is_time_times_1000_plus_msec)
 	TimeUtils::Time32 t(e, 13);
 	// 内部自洽性：time_ms = (h*10000+m*100+s)*1000 + msec
 	EXPECT_EQ((uint64_t)t.time() * 1000 + 13, (uint64_t)t.time_ms());
-	EXPECT_EQ(12000013u, t.time_ms());
+	EXPECT_EQ(120000013u, t.time_ms());
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -258,7 +283,6 @@ TEST(r16_timeutils, tz_offset_is_cached_and_in_whole_hours)
 	int32_t a = TimeUtils::getTZOffset();
 	int32_t b = TimeUtils::getTZOffset();
 	EXPECT_EQ(a, b);					// static 缓存
-	EXPECT_EQ(0, a % 60);				// 分钟部分被 /60 抹平
-	EXPECT_LE(-12 * 60, (int)a);		// 合法时区上界（含半时区时仍在 ±13h 内）
-	EXPECT_GE(14 * 60, (int)a);
+	EXPECT_LE(-12, a);				// 函数以小时为单位返回时区偏移
+	EXPECT_GE(14, a);				// 合法时区范围为 UTC-12 至 UTC+14
 }

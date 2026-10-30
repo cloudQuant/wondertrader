@@ -16,8 +16,8 @@
  *    会直接杀掉宿主进程 → 本文件一律用 bIsLast=false 且带非零 ErrorID 调用，只覆盖守卫。
  *    合约/费率映射主体（L348-530、L550-594）依赖 CLASSMASK/MAP_NAME/ONLYINCFG/QRYFEES 全局，
  *    且没有 fake 柜台接缝，本轮未进入，见 manifests 与 bugs 文档。
- *  - std::cerr 重定向到内存是本文件唯一的可观察通道：胶水层所有回报都走 std::cerr，
- *    所以「有没有打印某一行」就是可证伪的断言。
+ *  - CoutCapture 只捕获 TraderSpi 写入 std::cerr 的消息；run() 中的 printf 写入 stdout。
+ *    配置入口用返回值与全局状态断言，不用 stderr 捕获结果推断 stdout 是否输出。
  */
 #include <gtest/gtest.h>
 
@@ -26,6 +26,8 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <map>
+#include <set>
 #include <sstream>
 #include <string>
 
@@ -35,6 +37,26 @@ USING_NS_WTP;
 
 /// 生产入口：src/CTPLoader/CTPLoader.cpp L71（extern "C" 声明）/ L76（定义）
 extern "C" int run(const char* cfgfile, bool bAsync, bool isFile);
+
+extern std::string FRONT_ADDR;
+extern std::string BROKER_ID;
+extern std::string INVESTOR_ID;
+extern std::string PASSWORD;
+extern std::string SAVEPATH;
+extern std::string APPID;
+extern std::string AUTHCODE;
+extern uint32_t CLASSMASK;
+extern bool ONLYINCFG;
+extern bool INCREMENTAL;
+extern bool QRYFEES;
+extern std::string COMM_FILE;
+extern std::string CONT_FILE;
+extern std::string FEES_FILE;
+extern std::string MODULE_NAME;
+extern std::string FEE_FILTERS;
+extern std::map<std::string, std::string> MAP_NAME;
+extern std::map<std::string, std::string> MAP_SESSION;
+extern std::set<std::string> SET_FILTERS;
 
 /// 生产自由函数：src/CTPLoader/TraderSpi.cpp L85-96 / L98-109
 std::string extractProductID(const char* instrument);
@@ -82,6 +104,88 @@ namespace
 		std::string _cstr;
 	};
 
+	struct ConfigState
+	{
+		std::string front = FRONT_ADDR;
+		std::string broker = BROKER_ID;
+		std::string investor = INVESTOR_ID;
+		std::string password = PASSWORD;
+		std::string savepath = SAVEPATH;
+		std::string appid = APPID;
+		std::string authcode = AUTHCODE;
+		uint32_t classmask = CLASSMASK;
+		bool onlyincfg = ONLYINCFG;
+		bool incremental = INCREMENTAL;
+		bool qryfees = QRYFEES;
+		std::string commFile = COMM_FILE;
+		std::string contFile = CONT_FILE;
+		std::string feesFile = FEES_FILE;
+		std::string module = MODULE_NAME;
+		std::string feeFilters = FEE_FILTERS;
+		std::map<std::string, std::string> mapName = MAP_NAME;
+		std::map<std::string, std::string> mapSession = MAP_SESSION;
+		std::set<std::string> filters = SET_FILTERS;
+	};
+
+	void set_config_sentinel()
+	{
+		FRONT_ADDR = "sentinel-front";
+		BROKER_ID = "sentinel-broker";
+		INVESTOR_ID = "sentinel-user";
+		PASSWORD = "sentinel-password";
+		SAVEPATH = "sentinel-path";
+		APPID = "sentinel-appid";
+		AUTHCODE = "sentinel-authcode";
+		CLASSMASK = 0x5a5a;
+		ONLYINCFG = true;
+		INCREMENTAL = true;
+		QRYFEES = true;
+		COMM_FILE = "sentinel-commodities.json";
+		CONT_FILE = "sentinel-contracts.json";
+		FEES_FILE = "sentinel-fees.json";
+		MODULE_NAME = "sentinel-module";
+		FEE_FILTERS = "sentinel-filter";
+		MAP_NAME.clear();
+		MAP_NAME["sentinel-name"] = "sentinel-value";
+		MAP_SESSION.clear();
+		MAP_SESSION["sentinel-session"] = "sentinel-value";
+		SET_FILTERS.clear();
+		SET_FILTERS.insert("sentinel-filter");
+	}
+
+	void expect_config_state_unchanged(const ConfigState& before)
+	{
+		EXPECT_EQ(before.front, FRONT_ADDR);
+		EXPECT_EQ(before.broker, BROKER_ID);
+		EXPECT_EQ(before.investor, INVESTOR_ID);
+		EXPECT_EQ(before.password, PASSWORD);
+		EXPECT_EQ(before.savepath, SAVEPATH);
+		EXPECT_EQ(before.appid, APPID);
+		EXPECT_EQ(before.authcode, AUTHCODE);
+		EXPECT_EQ(before.classmask, CLASSMASK);
+		EXPECT_EQ(before.onlyincfg, ONLYINCFG);
+		EXPECT_EQ(before.incremental, INCREMENTAL);
+		EXPECT_EQ(before.qryfees, QRYFEES);
+		EXPECT_EQ(before.commFile, COMM_FILE);
+		EXPECT_EQ(before.contFile, CONT_FILE);
+		EXPECT_EQ(before.feesFile, FEES_FILE);
+		EXPECT_EQ(before.module, MODULE_NAME);
+		EXPECT_EQ(before.feeFilters, FEE_FILTERS);
+		EXPECT_EQ(before.mapName, MAP_NAME);
+		EXPECT_EQ(before.mapSession, MAP_SESSION);
+		EXPECT_EQ(before.filters, SET_FILTERS);
+	}
+
+	void expect_rejected_without_mutation(const char* cfgfile, bool isFile)
+	{
+		set_config_sentinel();
+		const ConfigState before;
+		int result = -1;
+		EXPECT_NO_THROW(result = run(cfgfile, false, isFile));
+		EXPECT_EQ(0, result);
+		expect_config_state_unchanged(before);
+	}
+
 	CThostFtdcRspInfoField make_rsp(int errId, const char* msg = "unit-test-error")
 	{
 		CThostFtdcRspInfoField rsp;
@@ -103,62 +207,84 @@ namespace
 		"config:\n"
 		"  mask: 7\n";
 }
-
 /* ------------------------------------------------------------------ */
 /* run()：三种配置来源 + 空值/必填守卫                                    */
 /* ------------------------------------------------------------------ */
 
 TEST(t6_ctploader_run, empty_inline_content_is_rejected_before_any_loading)
 {
-	CoutCapture cap;
-	// isFile=false → load_from_content("", yaml) → 空文档得到 null 根 → L87-88 return 0
-	EXPECT_EQ(0, run("", false, false));
-	// 一旦防护失效往下走，厂商装载/查询日志必然出现在 cerr 上
-	EXPECT_TRUE(cap.text().empty()) << cap.text();
+	// 空 YAML 根返回 0，且配置解析失败不能改写已有全局配置。
+	expect_rejected_without_mutation("", false);
 }
 
-TEST(t6_ctploader_run, inline_yaml_without_savepath_stops_at_required_field_guard)
+TEST(t6_ctploader_run, inline_yaml_without_savepath_leaves_global_state_unchanged)
 {
-	CoutCapture cap;
-	// 覆盖 L84-122 内联配置分支全部字段读取（含 L113-120 的 module 缺省名兜底）
-	// SAVEPATH 为空 → L201-204 返回 0，绝不创建厂商 API
-	EXPECT_EQ(0, run(kInlineYamlWithoutSavePath, false, false));
-	EXPECT_TRUE(cap.text().empty()) << cap.text();
+	// 配置结构正确但缺必填 path；失败时必须在提交全局状态前返回。
+	expect_rejected_without_mutation(kInlineYamlWithoutSavePath, false);
 }
 
 TEST(t6_ctploader_run, unparsable_inline_yaml_reports_failure_without_throwing)
 {
-	// WTSCfgLoader 文档约定解析失败返回 NULL；run() 对 NULL 根节点以 0 报告失败。
-	// 非法 YAML 应遵守同一失败协议，异常不得穿过 C ABI 入口。
-	int result = -1;
-	EXPECT_NO_THROW(result = run("[unterminated", false, false));
-	EXPECT_EQ(0, result);
+	// 非法 YAML 遵守原有失败协议，且解析失败不得部分改写现有配置。
+	expect_rejected_without_mutation("[unterminated", false);
+}
+
+TEST(t6_ctploader_config, invalid_inline_yaml_roots_and_sections_leave_global_state_unchanged)
+{
+	expect_rejected_without_mutation("- item\n", false); // root sequence
+	expect_rejected_without_mutation("config:\n  mask: 7\n", false); // missing ctp
+	expect_rejected_without_mutation("ctp: scalar\nconfig:\n  mask: 7\n", false); // wrong ctp type
+	expect_rejected_without_mutation("ctp: {}\nconfig: scalar\n", false); // wrong config type
+	expect_rejected_without_mutation("ctp: {}\n", false); // missing config
+}
+
+TEST(t6_ctploader_config, invalid_json_roots_and_sections_leave_global_state_unchanged)
+{
+	{
+		TempCfgFile f("t6_ctp_loader_bad_root.json", "[]");
+		expect_rejected_without_mutation(f.c_str(), true);
+	}
+	{
+		TempCfgFile f("t6_ctp_loader_missing_ctp.json", "{\"config\":{\"mask\":7}}");
+		expect_rejected_without_mutation(f.c_str(), true);
+	}
+	{
+		TempCfgFile f("t6_ctp_loader_wrong_config.json", "{\"ctp\":{},\"config\":[]}");
+		expect_rejected_without_mutation(f.c_str(), true);
+	}
+}
+
+TEST(t6_ctploader_config, invalid_ini_sections_and_parse_leave_global_state_unchanged)
+{
+	{
+		TempCfgFile f("t6_ctp_loader_missing_ctp.ini", "[config]\nmask=7\n");
+		expect_rejected_without_mutation(f.c_str(), true);
+	}
+	{
+		TempCfgFile f("t6_ctp_loader_missing_config.ini", "[ctp]\nfront=tcp://127.0.0.1:1\n");
+		expect_rejected_without_mutation(f.c_str(), true);
+	}
+	{
+		TempCfgFile f("t6_ctp_loader_bad_ini.ini", "not-an-ini-section\n");
+		expect_rejected_without_mutation(f.c_str(), true);
+	}
 }
 
 TEST(t6_ctploader_run, missing_config_files_are_rejected_for_both_layouts)
 {
-	CoutCapture cap;
-	// JSON 分支：文件不存在 → load_from_file 返回 NULL → L159-160 return 0
-	EXPECT_EQ(0, run("/tmp/t6_ctploader_no_such_cfg.json", false, true));
-	// ini 分支：IniHelper::load 吞掉「文件不存在」，全部取默认空串
-	// → MODULE_NAME 走 ./thosttraderapi_se.so 默认 + L196-199 traders/ 拼接 → 守卫返回 0
-	EXPECT_EQ(0, run("/tmp/t6_ctploader_no_such_file.ini", false, true));
-	EXPECT_TRUE(cap.text().empty()) << cap.text();
+	// 不存在的 JSON/INI 文件返回 0，且不得触及配置全局状态。
+	expect_rejected_without_mutation("/tmp/t6_ctploader_no_such_cfg.json", true);
+	expect_rejected_without_mutation("/tmp/t6_ctploader_no_such_file.ini", true);
 }
 
-TEST(t6_ctploader_run, json_file_with_ctp_and_config_stops_at_savepath_guard)
+TEST(t6_ctploader_run, json_file_with_ctp_and_config_without_path_leaves_state_unchanged)
 {
 	TempCfgFile f("t6_ctp_loader_cfg.json",
 		"{\"ctp\":{\"front\":\"tcp://127.0.0.1:1\",\"broker\":\"9999\",\"user\":\"88888\","
 		"\"pass\":\"secret\",\"authcode\":\"ac\"},"
-		"\"config\":{\"mask\":7,\"commfile\":\"commodities.json\",\"contfile\":\"contracts.json\","
-		"\"feesfile\":\"fees.json\",\"onlyincfg\":false,\"incremental\":false,\"qryfees\":false}}");
-	CoutCapture cap;
-
-	// 覆盖 L156-194（JSON 文件分支，含 L184-192 module 缺省名兜底）
-	// config 段没有 path → 必须在必填项守卫返回 0
-	EXPECT_EQ(0, run(f.c_str(), false, true));
-	EXPECT_TRUE(cap.text().empty()) << cap.text();
+		"\"config\":{\"mask\":7}}");
+	// 结构正确但缺 path；在全局提交前拒绝。
+	expect_rejected_without_mutation(f.c_str(), true);
 }
 
 TEST(t6_ctploader_run, ini_with_complete_ctp_but_no_savepath_is_rejected)
@@ -180,12 +306,8 @@ TEST(t6_ctploader_run, ini_with_complete_ctp_but_no_savepath_is_rejected)
 		"commfile=commodities.json\n"
 		"contfile=contracts.json\n"
 		"feesfile=fees.json\n");
-	CoutCapture cap;
-
-	// 覆盖 L124-155 全部 ini 读取（含 onlyincfg/incremental 的 true 侧）
-	// 缺 path → 仍必须在守卫处返回 0，不得进入厂商装载
-	EXPECT_EQ(0, run(f.c_str(), false, true));
-	EXPECT_TRUE(cap.text().empty()) << cap.text();
+	// Configuration parsing remains offline; missing path is rejected before global commit.
+	expect_rejected_without_mutation(f.c_str(), true);
 }
 
 TEST(t6_ctploader_run, ini_with_empty_front_is_rejected_although_savepath_present)
@@ -199,10 +321,8 @@ TEST(t6_ctploader_run, ini_with_empty_front_is_rejected_although_savepath_presen
 		"pass=secret\n"
 		"[config]\n"
 		"path=/tmp/t6_ctp_loader_out\n");
-	CoutCapture cap;
-
-	EXPECT_EQ(0, run(f.c_str(), false, true));
-	EXPECT_TRUE(cap.text().empty()) << cap.text();
+	// Required front is empty despite path being present; reject without committing config.
+	expect_rejected_without_mutation(f.c_str(), true);
 }
 
 /* ------------------------------------------------------------------ */
@@ -227,6 +347,14 @@ TEST(t6_ctp_loader_names, extract_product_name_trims_trailing_month_digits)
 	EXPECT_EQ("ab", extractProductName("ab1"));
 	EXPECT_EQ("a1x", extractProductName("a1x"));	// 尾部不是数字时原样返回
 	EXPECT_EQ("2", extractProductName("2512"));	// 全数字时因 idx>0 提前停止
+}
+
+TEST(t6_ctp_loader_names, extract_product_name_handles_empty_null_and_signed_bytes)
+{
+	EXPECT_EQ("", extractProductName(""));
+	EXPECT_EQ("", extractProductName(NULL));
+	const char signed_byte_name[] = { static_cast<char>(0xFF), '1', '\0' };
+	EXPECT_EQ(std::string(1, static_cast<char>(0xFF)), extractProductName(signed_byte_name));
 }
 
 /* ------------------------------------------------------------------ */
@@ -388,14 +516,6 @@ TEST(DISABLED_t6_ctploader_spi_exit, instrument_last_response_calls_exit_zero)
 	(void)cap;
 }
 
-// 配置里没有 ctp 段时 root->get("ctp") 返回 NULL，下一行直接 getCString（L90-91 / L162-163）。
-TEST(DISABLED_t6_ctploader_run_crash, inline_config_without_ctp_section_dereferences_null)
-{
-	CoutCapture cap;
-	run("other:\n  a: 1\n", false, false);
-	(void)cap;
-}
-
 // 五个必填项齐全后 run() 会调用厂商 CreateFtdcTraderApi + RegisterFront + Init(+Join)，
 // 起厂商线程并连前置；按门禁规则（不连柜台、不起线程）整条禁用。
 TEST(DISABLED_t6_ctploader_run_net, complete_config_reaches_vendor_api_init)
@@ -412,13 +532,4 @@ TEST(DISABLED_t6_ctploader_run_net, complete_config_reaches_vendor_api_init)
 		"  mask: 7\n";
 	(void)run(full, true, false);
 	(void)cap;
-}
-
-// extractProductName("") 里 `auto idx = strlen(cname) - 1` 得到 size_t 的 -1，
-// 随后 cname[idx] 越界读（L98-109）→ 崩溃路径，只记录不执行。
-TEST(DISABLED_t6_ctp_loader_names_crash, extract_product_name_on_empty_string_reads_out_of_bounds)
-{
-	volatile size_t n = extractProductName("").size();
-	(void)n;
-	SUCCEED();
 }

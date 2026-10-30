@@ -14,14 +14,17 @@
  * 不参与覆盖率。
  *
  * 边界：只走公开 API；ticker 用 run()+on_tick()+stop()，行情由主线程同步送入，
- * 不等待墙钟；临时目录走系统 temp；不访问 private、不镜像类布局。
+ * 不等待墙钟跨分钟，只等待 ticker 的短轮询完成；临时目录走系统 temp；
+ * 不访问 private、不镜像类布局。
  */
 #include <gtest/gtest.h>
 
 #include <atomic>
+#include <chrono>
 #include <cstring>
 #include <memory>
 #include <string>
+#include <thread>
 
 #include <unistd.h>
 
@@ -36,12 +39,14 @@
 #include <WtCore/HftStrategyMgr.h>
 #include <WtCore/SelStrategyMgr.h>
 #include <WtCore/TraderAdapter.h>
+#include <WtCore/WtCtaEngine.h>
 #include <WtCore/WtCtaTicker.h>
 #include <WtCore/WtDtMgr.h>
 #include <WtCore/WtHftEngine.h>
 #include <WtCore/WtHftTicker.h>
 #include <WtCore/WtHelper.h>
 #include <WtCore/WtSelEngine.h>
+#include <WtCore/WtSelTicker.h>
 
 // TraderAdapter.h 把 getCommodify/isTradeEnabled 声明成 inline，定义却在 .cpp；
 // 跨 TU 调用会触发 -Wundefined-inline，而本目标带 -Werror。这里只关掉该告警。
@@ -84,12 +89,48 @@ public:
     std::atomic<uint32_t> last_end{0};
 };
 
-/** 24 小时交易时段 + ag2512 合约，供 HFT ticker 使用。 */
+class R202CtaEngine : public WtCtaEngine
+{
+public:
+    void on_session_end() override
+    {
+        session_ends.fetch_add(1);
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
+    std::atomic<uint32_t> session_ends{0};
+};
+
+class R202SelEngine : public WtSelEngine
+{
+public:
+    void on_session_end() override
+    {
+        session_ends.fetch_add(1);
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
+    std::atomic<uint32_t> session_ends{0};
+};
+
+class R202HftEngine : public WtHftEngine
+{
+public:
+    void on_session_end() override
+    {
+        session_ends.fetch_add(1);
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
+    std::atomic<uint32_t> session_ends{0};
+};
+
+/** 指定交易时段 + ag2512 合约，默认全天时段。 */
 struct R202Market
 {
-    R202Market()
+    R202Market(uint32_t sessionStart = 0, uint32_t sessionEnd = 0)
     {
-        bd.regisSessionWithTime("TRADING", 0, 0);
+        bd.regisSessionWithTime("TRADING", sessionStart, sessionEnd);
         WTSCommodityInfo* comm = q01sel::makeComm("SHFE", "ag", "TRADING", TM_Both);
         comm->setSessionInfo(bd.session("TRADING"));
         bd.regis(comm, q01sel::makeCt("SHFE", "ag", "ag2512"));
@@ -105,6 +146,126 @@ struct R202Market
     q01sel::HotMgr hot;
     WtDtMgr dm;
 };
+
+void expectCtaSessionEnd(uint32_t sessionStart, uint32_t sessionEnd,
+    uint32_t actionTime, uint32_t expectedClose)
+{
+    q01sel::Q01TempEnv tmp("r202_cta_close");
+    R202Market mkt(sessionStart, sessionEnd);
+    R202Reader reader;
+    TraderAdapterMgr adapters;
+    R202CtaEngine engine;
+
+    WTSVariant* cfg = mkt.cfg();
+    ASSERT_NE(nullptr, cfg);
+    engine.init(cfg, &mkt.bd, &mkt.dm, &mkt.hot, NULL);
+    cfg->release();
+    engine.set_adapter_mgr(&adapters);
+    const uint32_t tickDate = TimeUtils::getNextDate(TimeUtils::getCurDate(), 1);
+    engine.set_date_time(tickDate, sessionStart, 0);
+    engine.set_trading_date(tickDate);
+
+    WtCtaRtTicker ticker(&engine);
+    ticker.init(&reader, "TRADING");
+    ticker.run();
+
+    WTSTickData* tick = q01sel::makeTick(
+        "SHFE", "ag2512", tickDate, tickDate, actionTime, 3500.0);
+    ASSERT_NE(nullptr, tick);
+    tick->setContractInfo(mkt.bd.getContract("ag2512", "SHFE"));
+    ticker.on_tick(tick);
+    tick->release();
+
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
+    while ((reader.count.load() == 0 || engine.session_ends.load() == 0) &&
+        std::chrono::steady_clock::now() < deadline)
+        std::this_thread::sleep_for(std::chrono::milliseconds(2));
+    ticker.stop();
+
+    EXPECT_EQ(1u, reader.count.load());
+    EXPECT_EQ(tickDate, reader.last_date.load());
+    EXPECT_EQ(expectedClose, reader.last_time.load());
+    EXPECT_EQ(1u, engine.session_ends.load());
+    EXPECT_EQ(tickDate, reader.last_end.load());
+}
+
+void expectSelSessionEnd(uint32_t sessionStart, uint32_t sessionEnd,
+    uint32_t actionTime, uint32_t expectedClose)
+{
+    q01sel::Q01TempEnv tmp("r202_sel_close");
+    R202Market mkt(sessionStart, sessionEnd);
+    R202Reader reader;
+    R202SelEngine engine;
+
+    WTSVariant* cfg = mkt.cfg();
+    ASSERT_NE(nullptr, cfg);
+    engine.init(cfg, &mkt.bd, &mkt.dm, &mkt.hot, NULL);
+    cfg->release();
+    const uint32_t tickDate = TimeUtils::getNextDate(TimeUtils::getCurDate(), 1);
+    engine.set_date_time(tickDate, sessionStart, 0);
+    engine.set_trading_date(tickDate);
+
+    WtSelRtTicker ticker(&engine);
+    ticker.init(&reader, "TRADING");
+    ticker.run();
+
+    WTSTickData* tick = q01sel::makeTick(
+        "SHFE", "ag2512", tickDate, tickDate, actionTime, 3500.0);
+    ASSERT_NE(nullptr, tick);
+    tick->setContractInfo(mkt.bd.getContract("ag2512", "SHFE"));
+    ticker.on_tick(tick);
+    tick->release();
+
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
+    while ((reader.count.load() == 0 || engine.session_ends.load() == 0) &&
+        std::chrono::steady_clock::now() < deadline)
+        std::this_thread::sleep_for(std::chrono::milliseconds(2));
+    ticker.stop();
+
+    EXPECT_EQ(1u, reader.count.load());
+    EXPECT_EQ(tickDate, reader.last_date.load());
+    EXPECT_EQ(expectedClose, reader.last_time.load());
+    EXPECT_EQ(1u, engine.session_ends.load());
+}
+
+void expectHftSessionEnd(uint32_t sessionStart, uint32_t sessionEnd,
+    uint32_t actionTime, uint32_t expectedClose)
+{
+    q01sel::Q01TempEnv tmp("r202_hft_close");
+    R202Market mkt(sessionStart, sessionEnd);
+    R202Reader reader;
+    R202HftEngine engine;
+
+    WTSVariant* cfg = mkt.cfg();
+    ASSERT_NE(nullptr, cfg);
+    engine.init(cfg, &mkt.bd, &mkt.dm, &mkt.hot, NULL);
+    cfg->release();
+    const uint32_t tickDate = TimeUtils::getNextDate(TimeUtils::getCurDate(), 1);
+    engine.set_date_time(tickDate, sessionStart, 0);
+    engine.set_trading_date(tickDate);
+
+    WtHftRtTicker ticker(&engine);
+    ticker.init(&reader, "TRADING");
+    ticker.run();
+
+    WTSTickData* tick = q01sel::makeTick(
+        "SHFE", "ag2512", tickDate, tickDate, actionTime, 3500.0);
+    ASSERT_NE(nullptr, tick);
+    tick->setContractInfo(mkt.bd.getContract("ag2512", "SHFE"));
+    ticker.on_tick(tick);
+    tick->release();
+
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
+    while ((reader.count.load() == 0 || engine.session_ends.load() == 0) &&
+        std::chrono::steady_clock::now() < deadline)
+        std::this_thread::sleep_for(std::chrono::milliseconds(2));
+    ticker.stop();
+
+    EXPECT_EQ(1u, reader.count.load());
+    EXPECT_EQ(tickDate, reader.last_date.load());
+    EXPECT_EQ(expectedClose, reader.last_time.load());
+    EXPECT_EQ(1u, engine.session_ends.load());
+}
 
 /** addExecuter 只需要一个 IExecCommand 实例；setStub 由引擎完成。 */
 class R202Exec : public IExecCommand
@@ -250,6 +411,75 @@ TEST(R202HftTicker, DataDrivenMinuteCloseReachesStore)
     ASSERT_EQ(1u, reader.count.load());
     EXPECT_EQ(tickDate, reader.last_date.load());
     EXPECT_EQ(901u, reader.last_time.load());
+}
+
+TEST(R202CtaTicker, FullDayMidnightCloseEndsSessionAndStoresTradingDate)
+{
+    expectCtaSessionEnd(0, 0, 235959999, 2400);
+}
+
+TEST(R202CtaTicker, OrdinaryCloseStillEndsSessionAndStoresTradingDate)
+{
+    const uint32_t nowHHMM = TimeUtils::getCurMin() / 100;
+    const uint32_t nowMinute = nowHHMM / 100 * 60 + nowHHMM % 100;
+    if (nowMinute < 2 || nowMinute > 1437)
+        GTEST_SKIP() << "wall clock is too close to midnight for a finite daytime session";
+
+    const uint32_t sessionStartMinute = nowMinute - 2;
+    const uint32_t sessionCloseMinute = nowMinute + 2;
+    auto minuteToHHMM = [](uint32_t minute) {
+        return minute / 60 * 100 + minute % 60;
+    };
+    const uint32_t sessionStart = minuteToHHMM(sessionStartMinute);
+    const uint32_t sessionClose = minuteToHHMM(sessionCloseMinute);
+    const uint32_t finalMinuteTime = minuteToHHMM(sessionCloseMinute - 1) * 100000 + 59999;
+    expectCtaSessionEnd(sessionStart, sessionClose, finalMinuteTime, sessionClose);
+}
+
+TEST(R202SelTicker, FullDayMidnightCloseEndsSessionOnce)
+{
+    expectSelSessionEnd(0, 0, 235959999, 2400);
+}
+
+TEST(R202SelTicker, OrdinaryCloseStillEndsSession)
+{
+    const uint32_t nowHHMM = TimeUtils::getCurMin() / 100;
+    const uint32_t nowMinute = nowHHMM / 100 * 60 + nowHHMM % 100;
+    if (nowMinute < 2 || nowMinute > 1437)
+        GTEST_SKIP() << "wall clock is too close to midnight for a finite daytime session";
+
+    const uint32_t sessionStartMinute = nowMinute - 2;
+    const uint32_t sessionCloseMinute = nowMinute + 2;
+    auto minuteToHHMM = [](uint32_t minute) {
+        return minute / 60 * 100 + minute % 60;
+    };
+    const uint32_t sessionStart = minuteToHHMM(sessionStartMinute);
+    const uint32_t sessionClose = minuteToHHMM(sessionCloseMinute);
+    const uint32_t finalMinuteTime = minuteToHHMM(sessionCloseMinute - 1) * 100000 + 59999;
+    expectSelSessionEnd(sessionStart, sessionClose, finalMinuteTime, sessionClose);
+}
+
+TEST(R202HftTicker, FullDayMidnightCloseEndsSessionOnce)
+{
+    expectHftSessionEnd(0, 0, 235959999, 2400);
+}
+
+TEST(R202HftTicker, OrdinaryCloseStillEndsSession)
+{
+    const uint32_t nowHHMM = TimeUtils::getCurMin() / 100;
+    const uint32_t nowMinute = nowHHMM / 100 * 60 + nowHHMM % 100;
+    if (nowMinute < 2 || nowMinute > 1437)
+        GTEST_SKIP() << "wall clock is too close to midnight for a finite daytime session";
+
+    const uint32_t sessionStartMinute = nowMinute - 2;
+    const uint32_t sessionCloseMinute = nowMinute + 2;
+    auto minuteToHHMM = [](uint32_t minute) {
+        return minute / 60 * 100 + minute % 60;
+    };
+    const uint32_t sessionStart = minuteToHHMM(sessionStartMinute);
+    const uint32_t sessionClose = minuteToHHMM(sessionCloseMinute);
+    const uint32_t finalMinuteTime = minuteToHHMM(sessionCloseMinute - 1) * 100000 + 59999;
+    expectHftSessionEnd(sessionStart, sessionClose, finalMinuteTime, sessionClose);
 }
 
 /* ------------------------------------------------------------------ *

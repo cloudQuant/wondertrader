@@ -9,7 +9,7 @@
 // 手法：先用公开的 WtLMDB/WtLMDBQuery 把小 mapsize 的库填满，再让 writer 用同一个
 // 小 mapsize 打开同一路径；put 返回 MDB_MAP_FULL 后只写 LL_ERROR 日志，不会崩溃。
 // 两个用例分别只压 tick 库与只压 K 线库，避免一次失败影响另一路。不启动异步线程
-// （沿用 r4 夹具把 _async_task 残值压成 0）；临时目录由夹具清理。
+// （沿用 r4 夹具的同步默认配置）；临时目录由夹具清理。
 #include "r4_ad_fixture.h"
 
 #include <filesystem>

@@ -100,6 +100,9 @@ public:
 	double position = 0.0;
 	std::string bars_code;
 	uint32_t bars_count = 0;
+	std::vector<WTSKlineSlice*> bars_responses;
+	std::vector<std::string> bars_codes;
+	std::size_t bars_response_index = 0;
 
 	std::vector<std::string> set_positions;
 	std::vector<std::string> subs;
@@ -143,6 +146,9 @@ public:
 	{
 		bars_code = code;
 		bars_count = count;
+		bars_codes.push_back(code);
+		if (bars_response_index < bars_responses.size())
+			return bars_responses[bars_response_index++];
 		return bars;
 	}
 	WTSTickSlice* stra_get_ticks(const char*, uint32_t) override { return NULL; }

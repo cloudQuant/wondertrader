@@ -23,14 +23,117 @@
 
 #include "../WTSTools/WTSLogger.h"
 
+#include <cctype>
+#include <cstddef>
+#include <cstring>
+#include <exception>
+
 USING_NS_WTP;
+
+namespace
+{
+	bool isDigits(const char* begin, const char* end)
+	{
+		if (begin == end)
+			return false;
+
+		for (const char* p = begin; p != end; ++p)
+		{
+			if (!std::isdigit(static_cast<unsigned char>(*p)))
+				return false;
+		}
+		return true;
+	}
+
+	bool isLetters(const char* begin, const char* end)
+	{
+		if (begin == end)
+			return false;
+
+		for (const char* p = begin; p != end; ++p)
+		{
+			if (!std::isalpha(static_cast<unsigned char>(*p)))
+				return false;
+		}
+		return true;
+	}
+
+	bool isHyphenatedFuturesOptionCode(const char* code)
+	{
+		if (code == NULL || *code == '\0')
+			return false;
+
+		const char* first = std::strchr(code, '-');
+		if (first == NULL)
+			return false;
+
+		const char* second = std::strchr(first + 1, '-');
+		if (second == NULL || std::strchr(second + 1, '-') != NULL)
+			return false;
+
+		const char* month = first;
+		while (month != code && std::isdigit(static_cast<unsigned char>(month[-1])))
+			--month;
+
+		return (first - month == 4)
+			&& isLetters(code, month)
+			&& second == first + 2
+			&& (first[1] == 'C' || first[1] == 'P')
+			&& isDigits(second + 1, code + std::strlen(code));
+	}
+
+	bool isCompactFuturesOptionCode(const char* code)
+	{
+		if (code == NULL || *code == '\0')
+			return false;
+
+		const char* end = code + std::strlen(code);
+		const char* strike = end;
+		while (strike != code && std::isdigit(static_cast<unsigned char>(strike[-1])))
+			--strike;
+		if (strike == code)
+			return false;
+
+		const char* optionSide = strike - 1;
+		if (*optionSide != 'C' && *optionSide != 'P')
+			return false;
+
+		const char* month = optionSide;
+		while (month != code && std::isdigit(static_cast<unsigned char>(month[-1])))
+			--month;
+
+		const std::size_t monthDigits = static_cast<std::size_t>(optionSide - month);
+		return (monthDigits == 3 || monthDigits == 4)
+			&& isLetters(code, month)
+			&& isDigits(strike, end);
+	}
+
+	bool isFuturesOptionCode(const char* code, const char* exchange)
+	{
+		if (exchange == NULL)
+			return false;
+		if (std::strcmp(exchange, "CFFEX") == 0 || std::strcmp(exchange, "DCE") == 0)
+			return isHyphenatedFuturesOptionCode(code);
+		if (std::strcmp(exchange, "SHFE") == 0 || std::strcmp(exchange, "INE") == 0
+			|| std::strcmp(exchange, "ZCE") == 0 || std::strcmp(exchange, "CZCE") == 0)
+			return isCompactFuturesOptionCode(code);
+
+		return isHyphenatedFuturesOptionCode(code) || isCompactFuturesOptionCode(code);
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////
 //ParserAdapter
 ParserAdapter::ParserAdapter()
 	: _parser_api(NULL)
 	, _remover(NULL)
+	, _module_handle(NULL)
 	, _stopped(false)
+	, _initialized(false)
+	, _api_creation_uncertain(false)
+	, _release_uncertain(false)
+	, _remover_pending(false)
+	, _check_time(false)
 	, _bd_mgr(NULL)
 	, _stub(NULL)
 	, _cfg(NULL)
@@ -42,49 +145,98 @@ ParserAdapter::~ParserAdapter()
 {
 }
 
+void ParserAdapter::retainRejectedExternalApi(IParserApi* api)
+{
+	if (api == NULL || api == _parser_api)
+		return;
+
+	for (IParserApi* retained : _rejected_external_apis)
+	{
+		if (retained == api)
+			return;
+	}
+
+	try
+	{
+		_rejected_external_apis.push_back(api);
+	}
+	catch (...)
+	{
+		// Ownership has already transferred at the call boundary. Returning
+		// would lose the only record of this owner, so fail-stop on OOM.
+		std::terminate();
+	}
+}
+
 bool ParserAdapter::initExt(const char* id, IParserApi* api, IParserStub* stub, IBaseDataMgr* bgMgr, IHotMgr* hotMgr/* = NULL*/)
 {
 	if (api == NULL)
 		return false;
 
+	if (hasApi() || _cfg != NULL || _module_handle != NULL)
+	{
+		// A non-null initExt argument transfers ownership even on this busy
+		// path. Keep a distinct candidate without replacing or stopping the
+		// adapter's currently registered API.
+		retainRejectedExternalApi(api);
+		return false;
+	}
+
 	_parser_api = api;
 	_stub = stub;
 	_bd_mgr = bgMgr;
 	_hot_mgr = hotMgr;
-	_id = id;
+	// External APIs do not provide parser configuration. Keep the documented
+	// default deterministic, even if this adapter previously failed config init.
+	_check_time = false;
+	_stopped = false;
+	_initialized = false;
 
-	if (_parser_api)
+	try
 	{
+		_id = id == NULL ? "" : id;
 		_parser_api->registerSpi(this);
-
-		if (_parser_api->init(NULL))
+		if (!_parser_api->init(NULL))
 		{
-			ContractSet contractSet;
-			WTSArray* ayContract = _bd_mgr->getContracts();
-			WTSArray::Iterator it = ayContract->begin();
-			for (; it != ayContract->end(); it++)
-			{
-				WTSContractInfo* contract = STATIC_CONVERT(*it, WTSContractInfo*);
-				contractSet.insert(contract->getFullCode());
-			}
-
-			ayContract->release();
-
-			_parser_api->subscribe(contractSet);
-			contractSet.clear();
-		}
-		else
-		{
+			_stopped = true;
 			WTSLogger::log_dyn("parser", _id.c_str(), LL_ERROR, "[{}] Parser initializing failed: api initializing failed...", _id.c_str());
+			return false;
 		}
+
+		ContractSet contractSet;
+		if (_bd_mgr != NULL)
+		{
+			WTSArray* ayContract = _bd_mgr->getContracts();
+			if (ayContract != NULL)
+			{
+				WTSArray::Iterator it = ayContract->begin();
+				for (; it != ayContract->end(); it++)
+				{
+					WTSContractInfo* contract = STATIC_CONVERT(*it, WTSContractInfo*);
+					contractSet.insert(contract->getFullCode());
+				}
+				ayContract->release();
+			}
+		}
+		_parser_api->subscribe(contractSet);
+		_initialized = true;
+		contractSet.clear();
+	}
+	catch (...)
+	{
+		// Keep the failed API owner on this adapter for the runner to quarantine.
+		// IParserApi::release() is not a callback-drain guarantee.
+		_stopped = true;
+		WTSLogger::log_dyn("parser", _id.c_str(), LL_ERROR, "[{}] Parser initialization threw an exception", _id.c_str());
+		return false;
 	}
 
-	return true;
+	return _initialized;
 }
 
 bool ParserAdapter::init(const char* id, WTSVariant* cfg, IParserStub* stub, IBaseDataMgr* bgMgr, IHotMgr* hotMgr/* = NULL*/)
 {
-	if (cfg == NULL)
+	if (cfg == NULL || hasApi() || _cfg != NULL || _module_handle != NULL)
 		return false;
 
 	_stub = stub;
@@ -97,13 +249,31 @@ bool ParserAdapter::init(const char* id, WTSVariant* cfg, IParserStub* stub, IBa
 
 	_cfg = cfg;
 	_cfg->retain();
+	_stopped = false;
+	_initialized = false;
+
+	auto failWithoutApi = [this]() {
+		if (_module_handle != NULL)
+		{
+			DLLHelper::free_library(_module_handle);
+			_module_handle = NULL;
+		}
+		_remover = NULL;
+		if (_cfg != NULL)
+		{
+			_cfg->release();
+			_cfg = NULL;
+		}
+		_filters.clear();
+		return false;
+	};
 
 	_check_time = cfg->getBoolean("check_time");
 
 	{
 		//加载模块
 		if (cfg->getString("module").empty())
-			return false;
+			return failWithoutApi();
 
 		std::string module = DLLHelper::wrap_module(cfg->getCString("module"), "lib");;
 
@@ -113,121 +283,213 @@ bool ParserAdapter::init(const char* id, WTSVariant* cfg, IParserStub* stub, IBa
 		if (!StdFile::exists(dllpath.c_str()))
 			dllpath = WtHelper::getModulePath(module.c_str(), "parsers", false);
 
-		DllHandle hInst = DLLHelper::load_library(dllpath.c_str());
-		if (hInst == NULL)
+		_module_handle = DLLHelper::load_library(dllpath.c_str());
+		if (_module_handle == NULL)
 		{
 			WTSLogger::log_dyn("parser", _id.c_str(), LL_ERROR, "[{}] Parser module {} loading failed", _id.c_str(), dllpath.c_str());
-			return false;
+			return failWithoutApi();
 		}
 		else
 		{
 			WTSLogger::log_dyn("parser", _id.c_str(), LL_INFO, "[{}] Parser module {} loaded", _id.c_str(), dllpath.c_str());
 		}
 
-		FuncCreateParser pFuncCreateParser = (FuncCreateParser)DLLHelper::get_symbol(hInst, "createParser");
+		FuncCreateParser pFuncCreateParser = (FuncCreateParser)DLLHelper::get_symbol(_module_handle, "createParser");
 		if (NULL == pFuncCreateParser)
 		{
 			WTSLogger::log_dyn("parser", _id.c_str(), LL_FATAL, "[{}] Entrance function createParser not found", _id.c_str());
-			return false;
+			return failWithoutApi();
 		}
 
-		_parser_api = pFuncCreateParser();
+		try
+		{
+			_parser_api = pFuncCreateParser();
+		}
+		catch (...)
+		{
+			WTSLogger::log_dyn("parser", _id.c_str(), LL_FATAL, "[{}] Creating parser api threw an exception", _id.c_str());
+			_api_creation_uncertain = true;
+			_stopped = true;
+			return false;
+		}
 		if (NULL == _parser_api)
 		{
 			WTSLogger::log_dyn("parser", _id.c_str(), LL_FATAL, "[{}] Creating parser api failed", _id.c_str());
+			_api_creation_uncertain = true;
+			_stopped = true;
 			return false;
 		}
 
-		_remover = (FuncDeleteParser)DLLHelper::get_symbol(hInst, "deleteParser");
+		_remover = (FuncDeleteParser)DLLHelper::get_symbol(_module_handle, "deleteParser");
 	}
-	
 
-	const std::string& strFilter = cfg->getString("filter");
-	if (!strFilter.empty())
+	try
 	{
-		const StringVector &ayFilter = StrUtil::split(strFilter, ",");
-		auto it = ayFilter.begin();
-		for (; it != ayFilter.end(); it++)
+		const std::string& strFilter = cfg->getString("filter");
+		if (!strFilter.empty())
 		{
-			_filters.insert(*it);
+			const StringVector& ayFilter = StrUtil::split(strFilter, ",");
+			for (const auto& filter : ayFilter)
+				_filters.insert(filter);
 		}
-	}
 
-	if (_parser_api)
-	{
 		_parser_api->registerSpi(this);
-
-		if (_parser_api->init(cfg))
+		if (!_parser_api->init(cfg))
 		{
-			ContractSet contractSet;
-			if (!_filters.empty())
-			{
-				WTSArray* allContracts = _bd_mgr->getContracts();
-				for (auto it = allContracts->begin(); it != allContracts->end(); it++)
-				{
-					WTSContractInfo* cInfo = STATIC_CONVERT(*it, WTSContractInfo*);
-					auto it1 = _filters.find(cInfo->getExchg());
-					auto it2 = _filters.find(cInfo->getCode());
-					auto it3 = _filters.find(cInfo->getFullCode());
-					auto it4 = _filters.find(cInfo->getFullPid());
-					auto it5 = _filters.find(cInfo->getAltCode());
-					auto it6 = _filters.find(cInfo->getFullAltCode());
+			_stopped = true;
+			WTSLogger::log_dyn("parser", _id.c_str(), LL_ERROR, "[{}] Parser initializing failed: api initializing failed...", _id.c_str());
+			return false;
+		}
 
+		ContractSet contractSet;
+		if (_bd_mgr != NULL)
+		{
+			WTSArray* contracts = _bd_mgr->getContracts();
+			if (contracts != NULL)
+			{
+				for (auto it = contracts->begin(); it != contracts->end(); ++it)
+				{
+					WTSContractInfo* contract = STATIC_CONVERT(*it, WTSContractInfo*);
+					if (_filters.empty())
+					{
+						contractSet.insert(contract->getFullAltCode());
+						continue;
+					}
+
+					auto it1 = _filters.find(contract->getExchg());
+					auto it2 = _filters.find(contract->getCode());
+					auto it3 = _filters.find(contract->getFullCode());
+					auto it4 = _filters.find(contract->getFullPid());
+					auto it5 = _filters.find(contract->getAltCode());
+					auto it6 = _filters.find(contract->getFullAltCode());
 					if (it1 != _filters.end() || it2 != _filters.end()
 						|| it3 != _filters.end() || it4 != _filters.end()
 						|| it5 != _filters.end() || it6 != _filters.end())
-						contractSet.insert(cInfo->getFullAltCode());
+						contractSet.insert(contract->getFullAltCode());
 				}
-				allContracts->release();
+				contracts->release();
 			}
-			else
-			{
-				WTSArray* ayContract =_bd_mgr->getContracts();
-				WTSArray::Iterator it = ayContract->begin();
-				for (; it != ayContract->end(); it++)
-				{
-					WTSContractInfo* contract = STATIC_CONVERT(*it, WTSContractInfo*);
-					contractSet.insert(contract->getFullAltCode());
-				}
-
-				ayContract->release();
-			}
-
-			_parser_api->subscribe(contractSet);
-			contractSet.clear();
 		}
-		else
-		{
-			WTSLogger::log_dyn("parser", _id.c_str(), LL_ERROR, "[{}] Parser initializing failed: api initializing failed...", _id.c_str());
-		}
+
+		_parser_api->subscribe(contractSet);
+		_initialized = true;
 	}
-	else
+	catch (...)
 	{
-		WTSLogger::log_dyn("parser", _id.c_str(), LL_ERROR, "[{}] Parser initializing failed: creating api failed...", _id.c_str());
+		// Do not destroy a failed candidate here: provider release is not
+		// documented as a callback-drain barrier.
+		_stopped = true;
+		WTSLogger::log_dyn("parser", _id.c_str(), LL_ERROR, "[{}] Parser initialization threw an exception", _id.c_str());
+		return false;
 	}
 
 	WTSLogger::log_dyn("parser", _id.c_str(), LL_INFO, "[{}] Parser initialzied, check_time: {}", _id.c_str(), _check_time);
 
-	return true;
+	return _initialized;
 }
 
 void ParserAdapter::release()
 {
 	_stopped = true;
+	_initialized = false;
+	if (_release_uncertain)
+		return;
+	if (_api_creation_uncertain)
+	{
+		// No handle exists to release, and the factory may have left hidden
+		// work or a callback registered before returning/throwing. Preserve the
+		// module, config and adapter's borrowed dependency graph for quarantine.
+		return;
+	}
 	if (_parser_api)
 	{
-		_parser_api->release();
-	}
+		IParserApi* api_being_released = _parser_api;
+		if (_remover_pending && _remover == NULL)
+		{
+			// A pending provider remover cannot safely be replaced with delete.
+			_release_uncertain = true;
+			return;
+		}
+		try
+		{
+			// IParserApi::release() may not be idempotent. Once a remover leaves
+			// the API pointer non-null, retry only the remover on later calls.
+			if (!_remover_pending)
+				_parser_api->release();
+			if (_remover)
+				_remover(_parser_api);
+			else
+			{
+				delete _parser_api;
+				_parser_api = NULL;
+			}
+		}
+		catch (...)
+		{
+			// release() may have partially changed provider state; a remover may
+			// also have partially destroyed the object. Preserve all remaining
+			// ownership context and never retry this teardown implicitly. Keep
+			// the original pointer value even if a throwing remover nulled it;
+			// the sticky flag prevents any future dereference or deletion.
+			_parser_api = api_being_released;
+			_release_uncertain = true;
+			return;
+		}
+		if (_remover != NULL && _parser_api != NULL)
+		{
+			if (_parser_api == api_being_released)
+			{
+				// The remover's by-reference pointer is its completion signal. A
+				// non-null result means it deferred destruction; retain the API,
+				// remover, module, config and callback dependencies for a later
+				// retry after the caller establishes a safe provider barrier.
+				_remover_pending = true;
+				return;
+			}
 
-	if (_remover)
-		_remover(_parser_api);
-	else
-		delete _parser_api;
+			// A remover is specified to null the pointer on success or preserve
+			// the same pointer when it defers. A replacement pointer is ambiguous.
+			_release_uncertain = true;
+			return;
+		}
+		_parser_api = NULL;
+		_remover_pending = false;
+	}
+	for (std::vector<IParserApi*>::iterator it = _rejected_external_apis.begin();
+		it != _rejected_external_apis.end();)
+	{
+		IParserApi* api = *it;
+		try
+		{
+			api->release();
+		}
+		catch (...)
+		{
+			// Preserve this owner and its remaining candidates if a provider
+			// cannot complete its teardown. Never retry a partial release.
+			_release_uncertain = true;
+			return;
+		}
+		delete api;
+		it = _rejected_external_apis.erase(it);
+	}
+	_remover = NULL;
+	if (_module_handle != NULL)
+	{
+		DLLHelper::free_library(_module_handle);
+		_module_handle = NULL;
+	}
+	if (_cfg != NULL)
+	{
+		_cfg->release();
+		_cfg = NULL;
+	}
+	_filters.clear();
 }
 
 bool ParserAdapter::run()
 {
-	if (_parser_api == NULL)
+	if (_parser_api == NULL || !_initialized || _stopped)
 		return false;
 
 	_parser_api->connect();
@@ -276,8 +538,18 @@ void ParserAdapter::handleQuote(WTSTickData *quote, uint32_t /*procFlag*/)
 	}
 
 	std::string stdCode;
-	if (commInfo->getCategoty() == CC_FutOption || commInfo->getCategoty() == CC_SpotOption)
+	const ContractCategory category = commInfo->getCategoty();
+	const char* exchange = cInfo->getExchg();
+	const bool cffexSpotOption = category == CC_SpotOption
+		&& exchange != NULL && std::strcmp(exchange, "CFFEX") == 0;
+	if (category == CC_FutOption || cffexSpotOption)
 	{
+		// rawFutOptCodeToStdCode assumes valid C/P fields and can underflow on
+		// malformed input. Validate the supported formats before calling it.
+		if (!isFuturesOptionCode(cInfo->getCode(), exchange)
+			|| (cffexSpotOption && !isHyphenatedFuturesOptionCode(cInfo->getCode())))
+			return;
+
 		stdCode = CodeHelper::rawFutOptCodeToStdCode(cInfo->getCode(), cInfo->getExchg());
 	}
 	else if(CodeHelper::isMonthlyCode(quote->code()))
@@ -377,12 +649,28 @@ void ParserAdapter::handleParserLog(WTSLogLevel ll, const char* message)
 //ParserAdapterMgr
 void ParserAdapterMgr::release()
 {
-	for (auto it = _adapters.begin(); it != _adapters.end(); it++)
+	for (ParserAdapterMap::iterator it = _adapters.begin(); it != _adapters.end();)
 	{
-		it->second->release();
+		ParserAdapterPtr adapter = it->second;
+		if (adapter)
+			adapter->release();
+
+		if (adapter && adapter->hasApi())
+			++it;
+		else
+			it = _adapters.erase(it);
+	}
+}
+
+bool ParserAdapterMgr::hasQuarantinedAdapters() const noexcept
+{
+	for (ParserAdapterMap::const_iterator it = _adapters.begin(); it != _adapters.end(); ++it)
+	{
+		if (it->second && it->second->hasApi())
+			return true;
 	}
 
-	_adapters.clear();
+	return false;
 }
 
 bool ParserAdapterMgr::addAdapter(const char* id, ParserAdapterPtr& adapter)

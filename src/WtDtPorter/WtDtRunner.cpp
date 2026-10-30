@@ -4,12 +4,21 @@
  *
  * \author Wesley
  * \date 2020/03/30
- * 
- * \brief 
+ *
+ * \brief
  */
 #include "WtDtRunner.h"
 #include <boost/asio/post.hpp>
 #include "ExpParser.h"
+
+#include <algorithm>
+#include <condition_variable>
+#include <exception>
+#include <memory>
+#include <map>
+#include <mutex>
+#include <set>
+#include <utility>
 
 #include "../WtDtCore/WtHelper.h"
 
@@ -25,6 +34,78 @@
 #include "../WTSTools/WTSLogger.h"
 #include "../WTSUtils/SignalHook.hpp"
 
+namespace
+{
+// ParserAdapterMgr's map, dynamic-create reservations and quarantine ownership
+// share one registry lock. Provider callbacks must run after releasing it.
+std::mutex g_parser_registry_mutex;
+std::condition_variable g_parser_registry_changed;
+std::map<const WtDtRunner*, std::set<std::string>> g_parser_creating;
+
+class ParserCreateReservation
+{
+public:
+	ParserCreateReservation(const WtDtRunner* runner, const std::string& id,
+		const bool* registryStopped, const std::atomic<bool>* exitRequested)
+		: _runner(runner)
+	{
+		try
+		{
+			_id = id;
+			std::lock_guard<std::mutex> lock(g_parser_registry_mutex);
+			if ((registryStopped != NULL && *registryStopped) ||
+				(exitRequested != NULL && exitRequested->load()))
+			{
+				_stopped = true;
+				return;
+			}
+			_acquired = g_parser_creating[_runner].insert(_id).second;
+		}
+		catch (...)
+		{
+			_failed = true;
+		}
+	}
+
+	~ParserCreateReservation()
+	{
+		if (_acquired)
+		{
+			{
+				std::lock_guard<std::mutex> lock(g_parser_registry_mutex);
+				auto it = g_parser_creating.find(_runner);
+				if (it != g_parser_creating.end())
+				{
+					it->second.erase(_id);
+					if (it->second.empty())
+						g_parser_creating.erase(it);
+				}
+			}
+			g_parser_registry_changed.notify_all();
+		}
+	}
+
+	bool acquired() const { return _acquired; }
+	bool failed() const { return _failed; }
+	bool stopped() const { return _stopped; }
+
+private:
+	const WtDtRunner* _runner;
+	std::string _id;
+	bool _acquired { false };
+	bool _failed { false };
+	bool _stopped { false };
+};
+
+bool insert_parser_adapter_locked(ParserAdapterMgr& parsers, const std::string& id,
+	const ParserAdapterPtr& adapter)
+{
+	if (adapter == NULL || id.empty())
+		return false;
+	return parsers._adapters.emplace(id, adapter).second;
+}
+}
+
 
 WtDtRunner::WtDtRunner()
 	: _dumper_for_bars(NULL)
@@ -33,6 +114,9 @@ WtDtRunner::WtDtRunner()
 	, _dumper_for_orddtl(NULL)
 	, _dumper_for_trans(NULL)
 	, _to_exit(false)
+	, _startup_blocked(false)
+	, _parser_registry_started(false)
+	, _parser_registry_stopped(false)
 {
 }
 
@@ -43,18 +127,64 @@ WtDtRunner::~WtDtRunner()
 
 void WtDtRunner::start(bool bAsync /* = false */, bool bAlldayMode /* = false */)
 {
-	_parsers.run();
+	std::vector<ParserAdapterPtr> parserSnapshot;
+	bool startupBlocked = false;
+	bool parserRegistryStopped = false;
+	try
+	{
+		std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
+		startupBlocked = _startup_blocked;
+		parserRegistryStopped = _parser_registry_stopped || _to_exit.load();
+		if (!startupBlocked && !parserRegistryStopped && !_parser_registry_started)
+		{
+			parserSnapshot.reserve(_parsers._adapters.size());
+			for (const auto& entry : _parsers._adapters)
+				parserSnapshot.emplace_back(entry.second);
+			_parser_registry_started = true;
+		}
+	}
+	catch (...)
+	{
+		WTSLogger::error("Could not snapshot data parsers; runner startup is deferred");
+		return;
+	}
+	if (startupBlocked)
+	{
+		WTSLogger::error("Data runner startup blocked after a required component failed");
+		return;
+	}
+	if (parserRegistryStopped)
+	{
+		WTSLogger::error("Data runner start rejected after its parser registry stopped");
+		return;
+	}
+	// run() invokes provider connect callbacks and may re-enter the runner.
+	for (const ParserAdapterPtr& adapter : parserSnapshot)
+	{
+		if (adapter != NULL)
+		{
+			try
+			{
+				if (!adapter->run())
+					WTSLogger::error("Parser {} did not start", adapter->id());
+			}
+			catch (...)
+			{
+				WTSLogger::error("Parser {} connect threw during startup", adapter->id());
+			}
+		}
+	}
 
     if(!bAsync)
     {
 		install_signal_hooks([this](const char* message) {
-			if(!_to_exit)
+			if(!_to_exit.load())
 				WTSLogger::error(message);
 		}, [this](bool toExit) {
-			if (_to_exit)
+			if (_to_exit.load())
 				return;
-			_to_exit = toExit;
-			WTSLogger::info("Exit flag is {}", _to_exit);
+			_to_exit.store(toExit);
+			WTSLogger::info("Exit flag is {}", _to_exit.load());
 		});
 
 		boost::asio::post(_async_io, [this, bAlldayMode]() {
@@ -66,7 +196,7 @@ void WtDtRunner::start(bool bAsync /* = false */, bool bAlldayMode /* = false */
 		});
 
 		StdThread trd([this] {
-			while (!_to_exit)
+			while (!_to_exit.load())
 			{
 				std::this_thread::sleep_for(std::chrono::milliseconds(2));
 				_async_io.run_one();
@@ -74,6 +204,14 @@ void WtDtRunner::start(bool bAsync /* = false */, bool bAlldayMode /* = false */
 		});
 
 		trd.join();
+		// Stop admitting parser creation once the runtime loop exits, then wait
+		// for admitted initializations/connects to finish before start() returns.
+		std::unique_lock<std::mutex> registryLock(g_parser_registry_mutex);
+		_parser_registry_stopped = true;
+		g_parser_registry_changed.wait(registryLock, [this] {
+			auto creating = g_parser_creating.find(this);
+			return creating == g_parser_creating.end() || creating->second.empty();
+		});
     }
 	else
 	{
@@ -174,8 +312,24 @@ void WtDtRunner::initialize(const char* cfgFile, const char* logCfg, const char*
 
 	if (config->has("shmcaster"))
 	{
-		_shm_caster.init(config->get("shmcaster"));
-		_data_mgr.add_caster(&_shm_caster);
+		WTSVariant* shmCfg = config->get("shmcaster");
+		if (_shm_caster.init(shmCfg))
+		{
+			_data_mgr.add_caster(&_shm_caster);
+		}
+		else if (shmCfg != NULL && shmCfg->getBoolean("active"))
+		{
+			// initialize() is a void API; keep the failure in runner state so
+			// start() cannot run parsers or the data writer after a required caster
+			// failed. Do not register the uninitialized caster.
+			{
+				std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
+				_startup_blocked = true;
+			}
+			WTSLogger::error("Active shared-memory caster initialization failed; runner startup is blocked");
+			config->release();
+			return;
+		}
 	}
 
 	if(config->has("broadcaster"))
@@ -261,6 +415,14 @@ void WtDtRunner::initDataMgr(WTSVariant* config, bool bAlldayMode /* = false */)
 
 void WtDtRunner::initParsers(WTSVariant* cfg)
 {
+	auto blockStartup = [this](const char* message, const std::string& id) {
+		{
+			std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
+			_startup_blocked = true;
+		}
+		WTSLogger::error(message, id);
+	};
+
 	for (uint32_t idx = 0; idx < cfg->size(); idx++)
 	{
 		WTSVariant* cfgItem = cfg->get(idx);
@@ -277,13 +439,196 @@ void WtDtRunner::initParsers(WTSVariant* cfg)
 			static uint32_t auto_parserid = 1000;
 			realid = fmtutil::format<64>("auto_parser_{}", auto_parserid++);
 		}
-		
-		ParserAdapterPtr adapter(new ParserAdapter(&_bd_mgr, &_data_mgr, &_idx_factory));
-		adapter->init(realid.c_str(), cfgItem);
-		_parsers.addAdapter(realid.c_str(), adapter);
+
+		ParserCreateReservation reservation(this, realid, &_parser_registry_stopped, &_to_exit);
+		if (!reservation.acquired())
+		{
+			if (reservation.stopped())
+			{
+				WTSLogger::error("Parser {} configuration rejected because runner has stopped", realid);
+				return;
+			}
+			blockStartup(reservation.failed() ?
+				"Parser {} configuration reservation failed; startup blocked" :
+				"Parser {} is already being created; startup blocked", realid);
+			return;
+		}
+
+		bool alreadyExists = false;
+		{
+			std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
+			alreadyExists = _parsers.getAdapter(realid.c_str()) != NULL;
+		}
+		if (alreadyExists)
+		{
+			blockStartup("Parser {} is already registered; startup blocked", realid);
+			return;
+		}
+
+		bool capacityReserved = false;
+		try
+		{
+			std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
+			auto creating = g_parser_creating.find(this);
+			const size_t pending = creating == g_parser_creating.end() ? 0 : creating->second.size();
+			if (pending <= _quarantined_ext_parsers.max_size() - _quarantined_ext_parsers.size())
+			{
+				_quarantined_ext_parsers.reserve(_quarantined_ext_parsers.size() + pending);
+				capacityReserved = true;
+			}
+		}
+		catch (...)
+		{
+			// No API has been handed to provider code yet.
+		}
+		if (!capacityReserved)
+		{
+			blockStartup("Parser {} quarantine reservation failed; startup blocked", realid);
+			return;
+		}
+
+		ParserAdapterPtr adapter;
+		try { adapter.reset(new ParserAdapter(&_bd_mgr, &_data_mgr, &_idx_factory)); }
+		catch (...)
+		{
+			blockStartup("Parser {} candidate allocation failed; startup blocked", realid);
+			return;
+		}
+		bool blockedBeforeInit = false;
+		{
+			std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
+			blockedBeforeInit = _startup_blocked || _parser_registry_stopped || _to_exit.load();
+			if (!blockedBeforeInit)
+			{
+				// Keep the adapter and its borrowed graph alive before init() can call
+				// the provider. Capacity was reserved for all current candidates.
+				_quarantined_ext_parsers.emplace_back(adapter);
+			}
+		}
+		if (blockedBeforeInit)
+		{
+			WTSLogger::error("Parser {} initialization rejected after runner shutdown or failure", realid);
+			return;
+		}
+
+		bool initialized = false;
+		try { initialized = adapter->init(realid.c_str(), cfgItem); }
+		catch (...)
+		{
+			blockStartup("Parser {} initialization threw; candidate quarantined and startup blocked", realid);
+			return;
+		}
+		if (!initialized)
+		{
+			blockStartup("Parser {} initialization failed; candidate quarantined and startup blocked", realid);
+			return;
+		}
+
+		bool added = false;
+		bool runNow = false;
+		bool blockedAtPublication = false;
+		{
+			std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
+			blockedAtPublication = _startup_blocked || _parser_registry_stopped || _to_exit.load();
+			try
+			{
+				if (!blockedAtPublication)
+					added = insert_parser_adapter_locked(_parsers, realid, adapter);
+			}
+			catch (...)
+			{
+				try
+				{
+					auto partial = _parsers._adapters.find(realid);
+					if (partial != _parsers._adapters.end() && partial->second == adapter)
+						_parsers._adapters.erase(partial);
+				}
+				catch (...)
+				{
+					std::terminate();
+				}
+			}
+			runNow = added && _parser_registry_started;
+			if (added && !runNow)
+			{
+				auto quarantined = std::find(_quarantined_ext_parsers.begin(),
+					_quarantined_ext_parsers.end(), adapter);
+				if (quarantined != _quarantined_ext_parsers.end())
+					_quarantined_ext_parsers.erase(quarantined);
+			}
+		}
+		if (!added)
+		{
+			if (!blockedAtPublication)
+				blockStartup("Parser {} registration failed; candidate quarantined and startup blocked", realid);
+			return;
+		}
+		if (runNow)
+		{
+			bool stoppedBeforeConnect = false;
+			{
+				std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
+				stoppedBeforeConnect = _parser_registry_stopped || _startup_blocked || _to_exit.load();
+				if (stoppedBeforeConnect)
+				{
+					auto registered = _parsers._adapters.find(realid);
+					if (registered != _parsers._adapters.end() && registered->second == adapter)
+						_parsers._adapters.erase(registered);
+				}
+			}
+			if (stoppedBeforeConnect)
+			{
+				WTSLogger::error("Parser {} connect rejected after runner shutdown began; candidate quarantined", realid);
+				return;
+			}
+
+			bool started = false;
+			try { started = adapter->run(); }
+			catch (...) { }
+			if (!started)
+			{
+				{
+					std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
+					auto registered = _parsers._adapters.find(realid);
+					if (registered != _parsers._adapters.end() && registered->second == adapter)
+						_parsers._adapters.erase(registered);
+					_startup_blocked = true;
+				}
+				WTSLogger::error("Parser {} connect failed; candidate quarantined and startup blocked", realid);
+				return;
+			}
+			bool stoppedAfterConnect = false;
+			{
+				std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
+				stoppedAfterConnect = _parser_registry_stopped || _startup_blocked || _to_exit.load();
+				if (stoppedAfterConnect)
+				{
+					auto registered = _parsers._adapters.find(realid);
+					if (registered != _parsers._adapters.end() && registered->second == adapter)
+						_parsers._adapters.erase(registered);
+				}
+				else
+				{
+					auto quarantined = std::find(_quarantined_ext_parsers.begin(),
+						_quarantined_ext_parsers.end(), adapter);
+					if (quarantined != _quarantined_ext_parsers.end())
+						_quarantined_ext_parsers.erase(quarantined);
+				}
+			}
+			if (stoppedAfterConnect)
+			{
+				WTSLogger::error("Parser {} completed connect after runner shutdown began; candidate quarantined", realid);
+				return;
+			}
+		}
 	}
 
-	WTSLogger::info("{} market data parsers loaded in total", _parsers.size());
+	size_t parserCount = 0;
+	{
+		std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
+		parserCount = _parsers.size();
+	}
+	WTSLogger::info("{} market data parsers loaded in total", parserCount);
 }
 
 #pragma region "Extended Parser"
@@ -333,7 +678,11 @@ void WtDtRunner::parser_unsubscribe(const char* id, const char* code)
 
 void WtDtRunner::on_ext_parser_quote(const char* id, WTSTickStruct* curTick, uint32_t uProcFlag)
 {
-	ParserAdapterPtr adapter = _parsers.getAdapter(id);
+	ParserAdapterPtr adapter;
+	{
+		std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
+		adapter = _parsers.getAdapter(id);
+	}
 	if (adapter)
 	{
 		WTSTickData* newTick = WTSTickData::create(*curTick);
@@ -348,15 +697,254 @@ void WtDtRunner::on_ext_parser_quote(const char* id, WTSTickStruct* curTick, uin
 
 bool WtDtRunner::createExtParser(const char* id)
 {
-	ParserAdapterPtr adapter(new ParserAdapter(&_bd_mgr, &_data_mgr, &_idx_factory));
-	ExpParser* parser = new ExpParser(id);
-	adapter->initExt(id, parser);
-	_parsers.addAdapter(id, adapter);
-	WTSLogger::info("Extended parser {} created", id);
+	bool startupBlocked = false;
+	bool registryStopped = false;
+	{
+		std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
+		startupBlocked = _startup_blocked;
+		registryStopped = _parser_registry_stopped || _to_exit.load();
+	}
+	if (registryStopped)
+	{
+		WTSLogger::error("Cannot create parser after runner stopped");
+		return false;
+	}
+	if (startupBlocked)
+	{
+		WTSLogger::error("Cannot create parser: data runner startup is blocked");
+		return false;
+	}
+
+	if (id == NULL || id[0] == '\0')
+	{
+		WTSLogger::error("Extended parser id must not be empty");
+		return false;
+	}
+	std::string parserId;
+	try { parserId.assign(id); }
+	catch (...)
+	{
+		WTSLogger::error("Extended parser id could not be copied");
+		return false;
+	}
+
+	// Creation is valid before start (start will snapshot this adapter) and while
+	// running (the adapter is connected before success is returned).
+	// Reserve the id before initExt: ExpParser::init forwards callbacks, which
+	// may re-enter this method, and duplicate requests must not initialize twice.
+	ParserCreateReservation reservation(this, parserId, &_parser_registry_stopped, &_to_exit);
+	if (!reservation.acquired())
+	{
+		if (reservation.stopped())
+		{
+			WTSLogger::error("Extended parser creation rejected after runner stopped");
+			return false;
+		}
+		WTSLogger::error(reservation.failed() ?
+			"Parser {} creation reservation failed" :
+			"Parser {} is already being created", parserId);
+		return false;
+	}
+
+	bool alreadyExists = false;
+	{
+		std::lock_guard<std::mutex> lock(g_parser_registry_mutex);
+		alreadyExists = _parsers.getAdapter(parserId.c_str()) != NULL;
+	}
+	if (alreadyExists)
+	{
+		WTSLogger::error("Extended parser {} already exists", parserId);
+		return false;
+	}
+
+	// Reserve enough quarantine slots for every outstanding creation on this
+	// runner before any API can retain an adapter SPI. No registry lock is held
+	// across initExt(), which invokes parser/user callbacks synchronously.
+	bool capacityOverflow = false;
+	try
+	{
+		std::lock_guard<std::mutex> lock(g_parser_registry_mutex);
+		auto creating = g_parser_creating.find(this);
+		const size_t pending = creating == g_parser_creating.end() ? 0 : creating->second.size();
+		if (pending > _quarantined_ext_parsers.max_size() - _quarantined_ext_parsers.size())
+			capacityOverflow = true;
+		else
+			_quarantined_ext_parsers.reserve(_quarantined_ext_parsers.size() + pending);
+	}
+	catch (...)
+	{
+		WTSLogger::error("Extended parser {} quarantine reservation failed before API initialization", parserId);
+		return false;
+	}
+	if (capacityOverflow)
+	{
+		WTSLogger::error("Extended parser {} quarantine capacity overflow", parserId);
+		return false;
+	}
+
+	ParserAdapterPtr adapter;
+	std::unique_ptr<ExpParser> parser;
+	try
+	{
+		adapter.reset(new ParserAdapter(&_bd_mgr, &_data_mgr, &_idx_factory));
+		parser.reset(new ExpParser(parserId.c_str()));
+	}
+	catch (...)
+	{
+		WTSLogger::error("Extended parser {} candidate allocation failed", parserId);
+		return false;
+	}
+	bool blockedBeforeInit = false;
+	{
+		// Publish the candidate to quarantine before handing over the API pointer.
+		// Capacity was reserved above for all in-flight creations, so this does
+		// not allocate after provider code can retain the adapter.
+		std::lock_guard<std::mutex> lock(g_parser_registry_mutex);
+		blockedBeforeInit = _startup_blocked || _parser_registry_stopped || _to_exit.load();
+		if (!blockedBeforeInit)
+			_quarantined_ext_parsers.emplace_back(adapter);
+	}
+	if (blockedBeforeInit)
+	{
+		WTSLogger::error("Extended parser {} initialization rejected after runner shutdown or failure", parserId);
+		return false;
+	}
+	ExpParser* api = parser.release();
+	bool initialized = false;
+	try
+	{
+		initialized = adapter->initExt(parserId.c_str(), api);
+	}
+	catch (...)
+	{
+		WTSLogger::error("Extended parser {} initialization threw; candidate quarantined", parserId);
+		return false;
+	}
+	if (!initialized)
+	{
+		WTSLogger::error("Extended parser {} initialization failed; candidate quarantined", parserId);
+		return false;
+	}
+
+	bool added = false;
+	bool registrationThrew = false;
+	bool runNow = false;
+	bool blockedAtPublication = false;
+	{
+		std::lock_guard<std::mutex> lock(g_parser_registry_mutex);
+		blockedAtPublication = _startup_blocked || _parser_registry_stopped || _to_exit.load();
+		try
+		{
+			if (!blockedAtPublication)
+				added = insert_parser_adapter_locked(_parsers, parserId, adapter);
+		}
+		catch (...)
+		{
+			registrationThrew = true;
+			// Keep a partially published adapter out of the runnable manager;
+			// the pre-existing quarantine owner remains alive for safe retry.
+			try
+			{
+				auto partial = _parsers._adapters.find(parserId);
+				if (partial != _parsers._adapters.end() && partial->second == adapter)
+					_parsers._adapters.erase(partial);
+			}
+			catch (...)
+			{
+				std::terminate();
+			}
+		}
+		if (added)
+		{
+			runNow = _parser_registry_started;
+			if (!runNow)
+			{
+				auto quarantined = std::find(_quarantined_ext_parsers.begin(),
+					_quarantined_ext_parsers.end(), adapter);
+				if (quarantined != _quarantined_ext_parsers.end())
+					_quarantined_ext_parsers.erase(quarantined);
+			}
+		}
+	}
+	if (!added)
+	{
+		WTSLogger::error("Extended parser {} publication {}; candidate quarantined", parserId,
+			blockedAtPublication ? "blocked by runner state" :
+				(registrationThrew ? "threw" : "failed"));
+		return false;
+	}
+	if (runNow)
+	{
+		bool stoppedBeforeConnect = false;
+		{
+			std::lock_guard<std::mutex> lock(g_parser_registry_mutex);
+			stoppedBeforeConnect = _parser_registry_stopped || _startup_blocked || _to_exit.load();
+			if (stoppedBeforeConnect)
+			{
+				auto registered = _parsers._adapters.find(parserId);
+				if (registered != _parsers._adapters.end() && registered->second == adapter)
+					_parsers._adapters.erase(registered);
+			}
+		}
+		if (stoppedBeforeConnect)
+		{
+			WTSLogger::error("Extended parser {} connect rejected after runner shutdown began; candidate quarantined", parserId);
+			return false;
+		}
+
+		bool started = false;
+		bool connectThrew = false;
+		try { started = adapter->run(); }
+		catch (...) { connectThrew = true; }
+		if (!started)
+		{
+			{
+				std::lock_guard<std::mutex> lock(g_parser_registry_mutex);
+				try
+				{
+					auto partial = _parsers._adapters.find(parserId);
+					if (partial != _parsers._adapters.end() && partial->second == adapter)
+						_parsers._adapters.erase(partial);
+				}
+				catch (...)
+				{
+					std::terminate();
+				}
+			}
+			WTSLogger::error("Extended parser {} connect {}; candidate quarantined", parserId,
+				connectThrew ? "threw" : "failed");
+			return false;
+		}
+		bool stoppedAfterConnect = false;
+		{
+			std::lock_guard<std::mutex> lock(g_parser_registry_mutex);
+			stoppedAfterConnect = _parser_registry_stopped || _startup_blocked || _to_exit.load();
+			if (stoppedAfterConnect)
+			{
+				auto registered = _parsers._adapters.find(parserId);
+				if (registered != _parsers._adapters.end() && registered->second == adapter)
+					_parsers._adapters.erase(registered);
+			}
+			else
+			{
+				auto quarantined = std::find(_quarantined_ext_parsers.begin(),
+					_quarantined_ext_parsers.end(), adapter);
+				if (quarantined != _quarantined_ext_parsers.end())
+					_quarantined_ext_parsers.erase(quarantined);
+			}
+		}
+		if (stoppedAfterConnect)
+		{
+			WTSLogger::error("Extended parser {} completed connect after runner shutdown began; candidate quarantined", parserId);
+			return false;
+		}
+	}
+
+	WTSLogger::info("Extended parser {} created", parserId);
 	return true;
 }
 
-#pragma endregion 
+#pragma endregion
 
 bool WtDtRunner::createExtDumper(const char* id)
 {

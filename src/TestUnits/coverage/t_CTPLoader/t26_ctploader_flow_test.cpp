@@ -10,13 +10,26 @@
  * OnRspAuthenticate → ReqUserLogin → OnRspUserLogin（FRONT_ID/SESSION_ID/ORDER_REF 这一组
  * 「会话已写入」断言必须由 OnRspUserLogin 置位，前面任何一步都不写）。
  *
- * 线程约束（实测读码，不是转述）：AppendQuery（L230-273）会起一个 boost worker；
- * worker 的内层 `while (_queries.empty()) sleep(10ms)` **不回看 _stopped**（L243-246），
- * 队列排空后析构 spi 会 join 挂死 → 凡是驱动过队列的用例都把 spi 放在堆上「不删」。
- * 门禁按一条用例一个进程跑，泄漏只活到该用例进程结束。
+ * 队列 worker 由条件变量唤醒，析构会停止并 join；队列并发与空闲停止回归由本文件的
+ * 子进程测试覆盖。其他历史用例仍沿用堆上 spi，避免扩展本次测试修改范围。
  */
 #include "t26_ctploader_common.hpp"
 #include "t26_ctp_api_stub.hpp"
+
+#include <condition_variable>
+#include <memory>
+#include <mutex>
+#include <sys/wait.h>
+#include <signal.h>
+
+struct CTraderSpiQueueTestAccess
+{
+	static bool wait_until_stopped(CTraderSpi& spi, std::chrono::milliseconds timeout)
+	{
+		std::unique_lock<std::mutex> lock(spi._mtx);
+		return spi._query_ready.wait_for(lock, timeout, [&spi]() { return spi._stopped; });
+	}
+};
 
 namespace
 {
@@ -50,6 +63,128 @@ namespace
 		auto ok = t26::ok_rsp();
 		spi.OnRspQryInstrument(&f, &ok, 20, false);
 	}
+
+	class ReentrantQueueApiStub : public T26CtpApiStub
+	{
+	public:
+		void set_spi(CTraderSpi* spi) { _spi = spi; }
+
+		int ReqQryInstrument(CThostFtdcQryInstrumentField* field, int requestID) override
+		{
+			int result = T26CtpApiStub::ReqQryInstrument(field, requestID);
+			if (_spi != NULL)
+			{
+				// Exercise a synchronous callback reentering AppendQuery while the
+				// worker is still inside the API call.
+				emit_instrument_last();
+
+				// Exercise multiple callback producers adding to the same queue.
+				std::thread first([this]() { emit_instrument_last(); });
+				std::thread second([this]() { emit_instrument_last(); });
+				first.join();
+				second.join();
+			}
+			return result;
+		}
+
+		int ReqQryInstrumentCommissionRate(CThostFtdcQryInstrumentCommissionRateField* field,
+			int requestID) override
+		{
+			int result = T26CtpApiStub::ReqQryInstrumentCommissionRate(field, requestID);
+			{
+				std::lock_guard<std::mutex> lock(_mutex);
+				++_commission_count;
+			}
+			_ready.notify_all();
+			return result;
+		}
+
+		int ReqQryInstrumentMarginRate(CThostFtdcQryInstrumentMarginRateField* field,
+			int requestID) override
+		{
+			int result = T26CtpApiStub::ReqQryInstrumentMarginRate(field, requestID);
+			{
+				std::lock_guard<std::mutex> lock(_mutex);
+				++_margin_count;
+			}
+			_ready.notify_all();
+			return result;
+		}
+
+		bool wait_for_all_rate_requests(std::chrono::milliseconds timeout)
+		{
+			std::unique_lock<std::mutex> lock(_mutex);
+			return _ready.wait_for(lock, timeout, [this]() {
+				return _commission_count == 3 && _margin_count == 3;
+			});
+		}
+
+	private:
+		void emit_instrument_last()
+		{
+			auto ok = t26::ok_rsp();
+			_spi->OnRspQryInstrument(NULL, &ok, ++_callback_id, true);
+		}
+
+		CTraderSpi* _spi = NULL;
+		std::atomic<int> _callback_id{ 100 };
+		std::mutex _mutex;
+		std::condition_variable _ready;
+		unsigned int _commission_count = 0;
+		unsigned int _margin_count = 0;
+	};
+
+	class BlockingQueueApiStub : public T26CtpApiStub
+	{
+	public:
+		int ReqQryInstrument(CThostFtdcQryInstrumentField* field, int requestID) override
+		{
+			const int result = T26CtpApiStub::ReqQryInstrument(field, requestID);
+			std::unique_lock<std::mutex> lock(_mutex);
+			_instrument_entered = true;
+			_ready.notify_all();
+			_ready.wait(lock, [this]() { return _release_instrument; });
+			return result;
+		}
+
+		int ReqQryInstrumentCommissionRate(CThostFtdcQryInstrumentCommissionRateField* field,
+			int requestID) override
+		{
+			++_rate_request_count;
+			return T26CtpApiStub::ReqQryInstrumentCommissionRate(field, requestID);
+		}
+
+		int ReqQryInstrumentMarginRate(CThostFtdcQryInstrumentMarginRateField* field,
+			int requestID) override
+		{
+			++_rate_request_count;
+			return T26CtpApiStub::ReqQryInstrumentMarginRate(field, requestID);
+		}
+
+		bool wait_until_instrument_entered(std::chrono::milliseconds timeout)
+		{
+			std::unique_lock<std::mutex> lock(_mutex);
+			return _ready.wait_for(lock, timeout, [this]() { return _instrument_entered; });
+		}
+
+		void release_instrument()
+		{
+			{
+				std::lock_guard<std::mutex> lock(_mutex);
+				_release_instrument = true;
+			}
+			_ready.notify_all();
+		}
+
+		unsigned int rate_request_count() const { return _rate_request_count.load(); }
+
+	private:
+		std::mutex _mutex;
+		std::condition_variable _ready;
+		bool _instrument_entered = false;
+		bool _release_instrument = false;
+		std::atomic<unsigned int> _rate_request_count{ 0 };
+	};
 }
 
 /* ------------------------------------------------------------------ */
@@ -209,7 +344,11 @@ TEST(t26_ctploader_flow, incremental_login_reloads_commodities_and_contracts)
 			"\"exchg\":\"CZCE\",\"product\":\"SR\",\"maxlimitqty\":500,\"maxmarketqty\":300,"
 			"\"minlimitqty\":2,\"minmarketqty\":1,\"opendate\":20240513,\"expiredate\":20250930,"
 			"\"longmarginratio\":0.08,\"shortmarginratio\":0.09,"
-			"\"option\":{\"optiontype\":49,\"underlying\":\"SR510\",\"strikeprice\":5700,\"underlyingscale\":1}}}}";
+			"\"option\":{\"optiontype\":49,\"underlying\":\"SR510\",\"strikeprice\":5700,\"underlyingscale\":1}},"
+			"\"rb2510\":{\"name\":\"螺纹2510\",\"code\":\"rb2510\",\"altcode\":\"rb2510\","
+			"\"exchg\":\"CZCE\",\"product\":\"rb\",\"maxlimitqty\":100,\"maxmarketqty\":80,"
+			"\"minlimitqty\":1,\"minmarketqty\":1,\"opendate\":20240513,\"expiredate\":20250930,"
+			"\"longmarginratio\":0.08,\"shortmarginratio\":0.09}}}";
 	}
 
 	auto rsp = make_login_rsp(1, 2, "0");
@@ -257,6 +396,15 @@ TEST(t26_ctploader_flow, incremental_login_reloads_commodities_and_contracts)
 	EXPECT_NEAR(5700.0, cont.m_strikePrice, 1e-9);
 	EXPECT_NEAR(1.0, cont.m_dUnderlyingScale, 1e-9);
 	EXPECT_EQ("SR510", cont.m_strAltCode);
+
+	// 普通合约没有 option 块时保留确定的非期权默认值，同时增量读取 altcode。
+	ASSERT_EQ(1u, _contracts.count("rb2510"));
+	const loader::Contract& future = _contracts["rb2510"];
+	EXPECT_EQ("rb2510", future.m_strAltCode);
+	EXPECT_EQ(OT_None, future.m_optType);
+	EXPECT_TRUE(future.m_strUnderlying.empty());
+	EXPECT_DOUBLE_EQ(0.0, future.m_strikePrice);
+	EXPECT_DOUBLE_EQ(0.0, future.m_dUnderlyingScale);
 	ASSERT_TRUE(t26::wait_for([&stub]() { return stub.n_qry_inst_ >= 1u; }));	// 让队列排空、worker 闭嘴
 	std::this_thread::sleep_for(std::chrono::milliseconds(250));
 	pUserApi = NULL;
@@ -329,6 +477,33 @@ TEST(t26_ctploader_flow, last_instrument_response_with_fees_switch_queues_both_r
 	EXPECT_EQ("SHFE", std::string(mq.ExchangeID));
 	EXPECT_EQ(THOST_FTDC_HF_Speculation, mq.HedgeFlag);	// L223：投机套保标志恒为投机
 	std::this_thread::sleep_for(std::chrono::milliseconds(250));	// 最后一条「queue left」落进捕获缓冲
+	pUserApi = NULL;
+}
+
+TEST(t26_ctploader_flow, rate_requests_use_loaded_altcode_when_present)
+{
+	t26::setup_defaults("f7alt");
+	T26CtpApiStub& stub = fresh_stub();
+	pUserApi = &stub;
+	QRYFEES = true;
+	MAP_NAME["rb"] = "螺纹钢";
+
+	CTraderSpi* spi = leaked_spi();
+	t26::FdRedirectGuard worker_noise(SAVEPATH + "worker_noise.log");
+	seed_shfe_future(*spi, "rb2510", "rb");
+	_contracts["rb2510"].m_strAltCode = "rb510";
+
+	auto ok = t26::ok_rsp();
+	spi->OnRspQryInstrument(NULL, &ok, 22, true);
+	ASSERT_TRUE(t26::wait_for([&stub]() {
+		return !stub.comm_reqs_.empty() && !stub.margin_reqs_.empty();
+	}));
+
+	ASSERT_EQ(1u, stub.comm_reqs_.size());
+	ASSERT_EQ(1u, stub.margin_reqs_.size());
+	EXPECT_EQ("rb510", std::string(stub.comm_reqs_[0].InstrumentID));
+	EXPECT_EQ("rb510", std::string(stub.margin_reqs_[0].InstrumentID));
+	std::this_thread::sleep_for(std::chrono::milliseconds(250));
 	pUserApi = NULL;
 }
 
@@ -459,33 +634,155 @@ TEST(t26_ctploader_flow, gbk_error_message_is_transcoded_to_utf8_before_report)
 	EXPECT_EQ(std::string::npos, out.find(gbk)) << out;
 }
 
-/* ------------------------------------------------------------------ */
-/* 明确不能启用的路径（挂死/越界，只登记）                                 */
-/* ------------------------------------------------------------------ */
-
-// AppendQuery 的 worker 在队列排空后卡死在 `while(_queries.empty())` 内层循环（L243-246），
-// 该循环不回看 _stopped → ~CTraderSpi 的 join（TraderSpi.h L24-29）永不返回。
-// 启用必 HANG(60s)，所以只登记；BUG-T26-001。
-TEST(DISABLED_t26_ctploader_flow_hang, destructor_joins_forever_after_queue_drained)
+TEST(t26_ctploader_flow, concurrent_callbacks_reenter_queue_and_worker_stops_after_drain)
 {
-	t26::setup_defaults("f12");
-	T26CtpApiStub& stub = fresh_stub();
-	pUserApi = &stub;
+	// Keep a regression for the former unbounded join in a child so a future
+	// worker-stop regression cannot hang the complete test process.
+	fflush(NULL);
+	pid_t pid = fork();
+	ASSERT_GE(pid, 0) << "fork failed";
+	if (pid == 0)
+	{
+		t26::setup_defaults("f_queue_sync");
+		ReentrantQueueApiStub stub;
+		pUserApi = &stub;
+		QRYFEES = true;
+		MAP_NAME["rb"] = "螺纹钢";
 
-	auto rsp = make_login_rsp(3, 4, "5");
-	auto ok = t26::ok_rsp();
-	CTraderSpi* spi = new CTraderSpi();
-	spi->OnRspUserLogin(&rsp, &ok, 1, true);
-	t26::wait_for([&stub]() { return stub.n_qry_inst_ >= 1u; });
-	delete spi;											// ← 挂死点：join 永不返回
+		t26::FdRedirectGuard worker_noise(SAVEPATH + "worker_noise.log");
+		std::unique_ptr<CTraderSpi> spi(new CTraderSpi());
+		stub.set_spi(spi.get());
+		seed_shfe_future(*spi, "rb2510", "rb");
+
+		auto rsp = make_login_rsp(3, 4, "5");
+		auto ok = t26::ok_rsp();
+		spi->OnRspUserLogin(&rsp, &ok, 1, true);
+
+		if (!stub.wait_for_all_rate_requests(std::chrono::seconds(12)))
+			_exit(2);
+		// Let the final API task return and the worker reach its empty-queue wait
+		// before destroying the SPI, exercising the idle stop/join path.
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+		const auto join_started = std::chrono::steady_clock::now();
+		spi.reset();
+		const auto join_elapsed = std::chrono::steady_clock::now() - join_started;
+		pUserApi = NULL;
+		_exit(join_elapsed < std::chrono::seconds(2) ? 0 : 3);
+	}
+
+	int status = 0;
+	const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(16);
+	for (;;)
+	{
+		pid_t done = waitpid(pid, &status, WNOHANG);
+		if (done == pid)
+			break;
+		if (done < 0)
+		{
+			FAIL() << "waitpid failed";
+			return;
+		}
+		if (std::chrono::steady_clock::now() >= deadline)
+		{
+			kill(pid, SIGKILL);
+			waitpid(pid, &status, 0);
+			FAIL() << "worker did not drain and join within 16 seconds";
+			return;
+		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	}
+	ASSERT_TRUE(WIFEXITED(status)) << "child did not exit normally, status=" << status;
+	EXPECT_EQ(0, WEXITSTATUS(status))
+		<< "child return code: 2=missing API requests, 3=slow stop/join";
 }
 
-// fillCzceCode 的 `for(;;) if (isdigit(code[pid_len++])) break;`（L318-324）不检查 '\0'：
-// 纯字母代码会一路越界读，直至读到随机数字或段错误。崩溃形态不可证伪，只登记；BUG-T26-002。
-TEST(DISABLED_t26_ctploader_flow_crash, fill_czce_code_on_letters_only_scans_past_terminator)
+TEST(t26_ctploader_flow, stopping_worker_drops_pending_queries_and_joins_active_call)
+{
+	fflush(NULL);
+	pid_t pid = fork();
+	ASSERT_GE(pid, 0) << "fork failed";
+	if (pid == 0)
+	{
+		t26::setup_defaults("f_queue_stop_pending");
+		BlockingQueueApiStub stub;
+		pUserApi = &stub;
+		QRYFEES = true;
+		MAP_NAME["rb"] = "螺纹钢";
+
+		t26::FdRedirectGuard worker_noise(SAVEPATH + "worker_noise.log");
+		std::unique_ptr<CTraderSpi> spi(new CTraderSpi());
+		seed_shfe_future(*spi, "rb2510", "rb");
+
+		auto rsp = make_login_rsp(3, 4, "5");
+		auto ok = t26::ok_rsp();
+		spi->OnRspUserLogin(&rsp, &ok, 1, true);
+		if (!stub.wait_until_instrument_entered(std::chrono::seconds(2)))
+			_exit(2);
+
+		// Queue fee requests behind a deliberately blocked instrument request.
+		spi->OnRspQryInstrument(NULL, &ok, 41, true);
+		CTraderSpi* spi_raw = spi.get();
+		std::mutex join_mutex;
+		std::condition_variable join_ready;
+		bool joined = false;
+		std::thread destroyer([&]() {
+			spi.reset();
+			{
+				std::lock_guard<std::mutex> lock(join_mutex);
+				joined = true;
+			}
+			join_ready.notify_all();
+		});
+
+		if (!CTraderSpiQueueTestAccess::wait_until_stopped(*spi_raw, std::chrono::seconds(2)))
+			_exit(3);
+		stub.release_instrument();
+
+		std::unique_lock<std::mutex> lock(join_mutex);
+		const bool completed = join_ready.wait_for(lock, std::chrono::seconds(1), [&]() { return joined; });
+		lock.unlock();
+		if (!completed)
+			_exit(4);
+		destroyer.join();
+		pUserApi = NULL;
+		_exit(stub.rate_request_count() == 0 ? 0 : 5);
+	}
+
+	int status = 0;
+	const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(6);
+	for (;;)
+	{
+		pid_t done = waitpid(pid, &status, WNOHANG);
+		if (done == pid)
+			break;
+		if (done < 0)
+		{
+			FAIL() << "waitpid failed";
+			return;
+		}
+		if (std::chrono::steady_clock::now() >= deadline)
+		{
+			kill(pid, SIGKILL);
+			waitpid(pid, &status, 0);
+			FAIL() << "pending-query stop/join did not finish within 6 seconds";
+			return;
+		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	}
+	ASSERT_TRUE(WIFEXITED(status)) << "child did not exit normally, status=" << status;
+	EXPECT_EQ(0, WEXITSTATUS(status))
+		<< "child return code: 2=instrument API not entered, 3=stop not observed, "
+		<< "4=join waited for pending requests, 5=pending request was sent";
+}
+
+/* ------------------------------------------------------------------ */
+/* 明确不能启用的越界路径（只登记）                                       */
+/* ------------------------------------------------------------------ */
+
+// BUG-T26-002：没有月份数字的 CZCE 代码应安全拒绝，不得扫描过字符串结尾。
+TEST(t26_ctploader_flow, fill_czce_code_on_letters_only_returns_empty)
 {
 	t26::setup_defaults("f13");
-	volatile size_t n = fillCzceCode("SRCS", 20251027).size();
-	(void)n;
-	SUCCEED();
+	EXPECT_TRUE(fillCzceCode("SRCS", 20251027).empty());
 }

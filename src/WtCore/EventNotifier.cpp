@@ -29,14 +29,17 @@ namespace rj = rapidjson;
 
 USING_NS_WTP;
 
-void on_mq_log(unsigned long /*id*/, const char* /*message*/, bool /*bServer*/)
+void PORTER_FLAG on_mq_log(WtUInt32 /*id*/, const char* /*message*/, bool /*bServer*/)
 {
 
 }
 
 EventNotifier::EventNotifier()
 	: _mq_sid(0)
+	, _creator(NULL)
+	, _remover(NULL)
 	, _publisher(NULL)
+	, _register(NULL)
 	, _stopped(false)
 {
 	
@@ -60,7 +63,7 @@ bool EventNotifier::init(WTSVariant* cfg)
 	if (!cfg->getBoolean("active"))
 		return false;
 
-	_url = cfg->getCString("url");
+	const std::string url = cfg->getCString("url");
 	std::string module = DLLHelper::wrap_module("WtMsgQue", "lib");
 	//先看工作目录下是否有对应模块
 	std::string dllpath = WtHelper::getCWD() + module;
@@ -75,23 +78,38 @@ bool EventNotifier::init(WTSVariant* cfg)
 		return false;
 	}
 
-	_creator = (FuncCreateMQServer)DLLHelper::get_symbol(dllInst, "create_server");
-	if (_creator == NULL)
+	FuncCreateMQServer creator = (FuncCreateMQServer)DLLHelper::get_symbol(dllInst, "create_server");
+	if (creator == NULL)
 	{
 		DLLHelper::free_library(dllInst);
 		WTSLogger::error("MQ module {} is not compatible", dllpath.c_str());
 		return false;
 	}
 
-	_remover = (FuncDestroyMQServer)DLLHelper::get_symbol(dllInst, "destroy_server");
-	_publisher = (FundPublishMessage)DLLHelper::get_symbol(dllInst, "publish_message");
-	_register = (FuncRegCallbacks)DLLHelper::get_symbol(dllInst, "regiter_callbacks");
+	FuncDestroyMQServer remover = (FuncDestroyMQServer)DLLHelper::get_symbol(dllInst, "destroy_server");
+	FundPublishMessage publisher = (FundPublishMessage)DLLHelper::get_symbol(dllInst, "publish_message");
+	FuncRegCallbacks registerCallbacks = (FuncRegCallbacks)DLLHelper::get_symbol(dllInst, "regiter_callbacks");
+	if (registerCallbacks == NULL)
+	{
+		DLLHelper::free_library(dllInst);
+		WTSLogger::error("MQ module {} is missing regiter_callbacks", dllpath.c_str());
+		return false;
+	}
+
+	// Keep the existing notifier intact until the candidate module has all required exports.
+	_url = url;
+	_creator = creator;
+	_remover = remover;
+	_publisher = publisher;
+	_register = registerCallbacks;
 
 	//注册回调函数
 	_register(on_mq_log);
 	
 	//创建一个MQServer
-	_mq_sid = _creator(_url.c_str());
+	// This configuration has no confirm option. Match the MQ module's default
+	// behavior explicitly so the plugin ABI receives the complete argument list.
+	_mq_sid = _creator(_url.c_str(), false);
 
 	WTSLogger::info("EventNotifier initialized with channel {}", _url.c_str());
 
@@ -136,7 +154,7 @@ void EventNotifier::notify_log(const char* tag, const char* message)
 		}
 
 		if (_publisher)
-			_publisher(_mq_sid, "LOG", data.c_str(), (unsigned long)data.size());
+			_publisher(_mq_sid, "LOG", data.c_str(), (WtUInt32)data.size());
 	});
 }
 
@@ -162,7 +180,7 @@ void EventNotifier::notify_event(const char* message)
 			data = sb.GetString();
 		}
 		if (_publisher)
-			_publisher(_mq_sid, "GRP_EVENT", data.c_str(), (unsigned long)data.size());
+			_publisher(_mq_sid, "GRP_EVENT", data.c_str(), (WtUInt32)data.size());
 	});
 }
 
@@ -190,7 +208,7 @@ void EventNotifier::notify(const char* trader, const char* message)
 			data = sb.GetString();
 		}
 		if (_publisher)
-			_publisher(_mq_sid, "TRD_NOTIFY", data.c_str(), (unsigned long)data.size());
+			_publisher(_mq_sid, "TRD_NOTIFY", data.c_str(), (WtUInt32)data.size());
 	});
 }
 
@@ -206,7 +224,7 @@ void EventNotifier::notify(const char* trader, uint32_t localid, const char* std
 		std::string data;
 		tradeToJson(strTrader.c_str(), localid, strCode.c_str(), trdInfo, data);
 		if (_publisher)
-			_publisher(_mq_sid, "TRD_TRADE", data.c_str(), (unsigned long)data.size());
+			_publisher(_mq_sid, "TRD_TRADE", data.c_str(), (WtUInt32)data.size());
 		trdInfo->release();
 	});
 }
@@ -223,7 +241,7 @@ void EventNotifier::notify(const char* trader, uint32_t localid, const char* std
 		std::string data;
 		orderToJson(strTrader.c_str(), localid, strCode.c_str(), ordInfo, data);
 		if (_publisher)
-			_publisher(_mq_sid, "TRD_ORDER", data.c_str(), (unsigned long)data.size());
+			_publisher(_mq_sid, "TRD_ORDER", data.c_str(), (WtUInt32)data.size());
 	});
 
 	
@@ -331,7 +349,7 @@ void EventNotifier::notify_chart_index(uint64_t time, const char* straId, const 
 			data = sb.GetString();
 		}
 		if (_publisher)
-			_publisher(_mq_sid, "CHART_INDEX", data.c_str(), (unsigned long)data.size());
+			_publisher(_mq_sid, "CHART_INDEX", data.c_str(), (WtUInt32)data.size());
 	});
 }
 
@@ -362,7 +380,7 @@ void EventNotifier::notify_chart_marker(uint64_t time, const char* straId, doubl
 			data = sb.GetString();
 		}
 		if (_publisher)
-			_publisher(_mq_sid, "CHART_MARKER", data.c_str(), (unsigned long)data.size());
+			_publisher(_mq_sid, "CHART_MARKER", data.c_str(), (WtUInt32)data.size());
 	});
 }
 
@@ -395,6 +413,6 @@ void EventNotifier::notify_trade(const char* straId, const char* stdCode, bool i
 			data = sb.GetString();
 		}
 		if (_publisher)
-			_publisher(_mq_sid, "STRA_TRADE", data.c_str(), (unsigned long)data.size());
+			_publisher(_mq_sid, "STRA_TRADE", data.c_str(), (WtUInt32)data.size());
 	});
 }

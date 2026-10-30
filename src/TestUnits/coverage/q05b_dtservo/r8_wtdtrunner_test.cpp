@@ -28,6 +28,8 @@
 #include <fstream>
 #include <memory>
 #include <string>
+#include <sys/wait.h>
+#include <type_traits>
 #include <vector>
 #include <unistd.h>
 
@@ -38,11 +40,18 @@
 #include <Includes/WTSVariant.hpp>
 #include <Share/CodeHelper.hpp>
 #include <WtDtServo/WtDtRunner.h>
+#include <WtDtServo/WtDtServo.h>
 #include <WtDtServo/WtHelper.h>
 
 namespace fs = std::filesystem;
 
 namespace {
+
+std::vector<WtDtRunner*>& retainedRunnerGraphs()
+{
+	static std::vector<WtDtRunner*>* runners = new std::vector<WtDtRunner*>();
+	return *runners;
+}
 
 // ---------------------------------------------------------------- 录制替身
 struct TickProbe
@@ -218,11 +227,11 @@ TEST_F(R8WtDtRunnerTest, UninitializedRunnerGuardsEveryQueryEntry)
 TEST_F(R8WtDtRunnerTest, InitializeWithMissingConfigFileStopsBeforeBasefiles)
 {
 	std::unique_ptr<WtDtRunner> runner(new WtDtRunner());
-	// WtDtRunner.cpp:58-64  文件不存在 -> load_from_file 返回 NULL -> 早退，_is_inited 仍 false
+	// WtDtRunner.cpp:58-64  文件不存在 -> load_from_file 返回 NULL -> 早退
 	runner->initialize((_dir / "no_such_cfg.json").string().c_str(), true,
 		_modDir.c_str(), _logCfg.c_str(), onTickProbe, onBarProbe);
 
-	// 守卫分支仍在（若 _is_inited 被误置 true，get_ticks_by_date 会解引用 NULL _reader 而崩）
+	// 查询入口仍受初始化状态守卫；基础配置没有加载时应返回 NULL。
 	EXPECT_EQ(runner->get_ticks_by_date("CFFEX.IC.2204", 20240102), nullptr);
 	EXPECT_EQ(runner->get_bars_by_date("CFFEX.IC.2204", "d1", 20240102), nullptr);
 
@@ -322,9 +331,9 @@ TEST_F(R8WtDtRunnerTest, InnerSubscribeDoesNotFireCallbackAndReplaceIsPerTable)
 	runner->proc_tick(tick);
 	ASSERT_EQ(TickProbe::codes.size(), 2u);
 
-	// 内部表 bReplace（:562-563）+ 外部表 bReplace（:582-583）：
-	// 用 replace 清外表后，不应再有外部回调
-	runner->sub_tick("CFFEX.IC.2204", true, false);
+	// 外部表 bReplace (:582-583) 清空旧订阅后只订阅另一有效代码；
+	// 处理原来的 IC tick 时不应再触发外部回调。内部表仍保留 IC 订阅。
+	runner->sub_tick("SSE.600000", true, false);
 	runner->proc_tick(tick);
 	EXPECT_EQ(TickProbe::codes.size(), 2u);
 
@@ -377,8 +386,10 @@ TEST_F(R8WtDtRunnerTest, MissingDataSectionStillCompletesInitialization)
 	write_file(_dir / "nodata.json", buildCfg(false));
 	runner->initialize((_dir / "nodata.json").string().c_str(), true,
 		_modDir.c_str(), _logCfg.c_str(), onTickProbe, onBarProbe);
+	EXPECT_TRUE(runner->isInitialized());
+	EXPECT_FALSE(runner->hasRetainedParserAdapters());
 
-	// 能走到 proc_tick 并触发回调，说明 initialize 跑到了 :189 的 _is_inited=true
+	// proc_tick 能触发回调，说明基础数据已加载且初始化完成。
 	runner->sub_tick("CFFEX.IC.2204", true, false);
 	WTSTickData* tick = make_ic_tick();
 	ASSERT_NE(tick, nullptr);
@@ -392,8 +403,8 @@ TEST_F(R8WtDtRunnerTest, SecondInitializeIsRejectedAndStatePreserved)
 	std::unique_ptr<WtDtRunner> runner(new WtDtRunner());
 	initRunner(*runner);
 
-	// :46-50  _is_inited 已为 true -> 第二次 initialize 只能记日志后返回，
-	// 即使传的是不存在的配置文件也不得改变已绑定的回调
+	// 已成功初始化后，第二次 initialize 只能记日志后返回；即使配置文件不存在，
+	// 也不得改变已绑定的回调。
 	runner->initialize((_dir / "no_such_cfg.json").string().c_str(), true,
 		_modDir.c_str(), _logCfg.c_str(), nullptr, nullptr);
 
@@ -408,12 +419,12 @@ TEST_F(R8WtDtRunnerTest, SecondInitializeIsRejectedAndStatePreserved)
 
 // ---------------------------------------------------------------- parsers 段（不加载真实插件）
 
-TEST_F(R8WtDtRunnerTest, UnloadableParserArrayStillCompletesStartup)
+TEST_F(R8WtDtRunnerTest, UnloadableParserArrayRejectsStartupAndIsNotRegistered)
 {
 	std::unique_ptr<WtDtRunner> runner(new WtDtRunner());
-	// parsers 数组 -> initParsers(:378-403)；模块名在空模块目录里必然加载失败
-	// (ParserAdapter.cpp:110-113)，适配器仍会登记，start() 只会让 run() 返回 false
-	// （ParserAdapter.cpp:221-222），绝不触发 connect()
+	// Parser module loading fails in the empty module directory. Initialization
+	// must remain incomplete, and the failed candidate must not enter the parser
+	// manager where start() could try to run it.
 	const std::string parsers = std::string("\"parsers\": [")
 		+ "{\"id\":\"r8p1\",\"active\":true,\"module\":\"r8_no_such_parser\",\"filter\":\"CFFEX\"}"
 		+ "]";
@@ -421,21 +432,28 @@ TEST_F(R8WtDtRunnerTest, UnloadableParserArrayStillCompletesStartup)
 	runner->initialize((_dir / "wparsers.json").string().c_str(), true,
 		_modDir.c_str(), _logCfg.c_str(), onTickProbe, onBarProbe);
 
-	runner->sub_tick("CFFEX.IC.2204", true, false);
-	WTSTickData* tick = make_ic_tick();
-	ASSERT_NE(tick, nullptr);
-	runner->proc_tick(tick);
-	// 只有跑到 :189 才算 initialize 完成，回调可用即证明 start() 已安全返回
-	EXPECT_EQ(TickProbe::codes.size(), 1u);
-	EXPECT_EQ(runner->get_bars_by_date("CFFEX.IC.2204", "d1", 20240102), nullptr);
-	tick->release();
+	EXPECT_FALSE(runner->isInitialized());
+	EXPECT_EQ(runner->activeParserCount(), 0u);
+	EXPECT_TRUE(runner->hasQuarantinedParser());
+	EXPECT_TRUE(runner->hasRetainedParserAdapters());
+
+	// start() must honor the failed initialization state and leave the failed
+	// parser out of the active manager. The no-parser positive control remains
+	// covered by MissingDataSectionStillCompletesInitialization above.
+	runner->start();
+	EXPECT_FALSE(runner->isInitialized());
+	EXPECT_EQ(runner->activeParserCount(), 0u);
+	EXPECT_TRUE(TickProbe::codes.empty());
+	// Keep the quarantined adapter's runner context alive; callback drain is unverified.
+	retainedRunnerGraphs().push_back(runner.get());
+	runner.release();
 }
 
 TEST_F(R8WtDtRunnerTest, InactiveAndAutoIdParserEntriesAreBothHandled)
 {
 	std::unique_ptr<WtDtRunner> runner(new WtDtRunner());
-	// 第 1 项 active=false -> :383-384 continue；
-	// 第 2 项没有 id -> :390-395 生成 auto_parser_<n>
+	// 第 1 项 active=false 被跳过；第 2 项没有 id，运行器会生成 auto id，
+	// 但其模块不存在，因此初始化失败并将失败 candidate 留在 quarantine。
 	const std::string parsers = std::string("\"parsers\": [")
 		+ "{\"id\":\"r8off\",\"active\":false,\"module\":\"r8_no_such_parser\"},"
 		+ "{\"active\":true,\"module\":\"r8_no_such_parser2\"}"
@@ -444,17 +462,21 @@ TEST_F(R8WtDtRunnerTest, InactiveAndAutoIdParserEntriesAreBothHandled)
 	runner->initialize((_dir / "autoid.json").string().c_str(), true,
 		_modDir.c_str(), _logCfg.c_str(), onTickProbe, onBarProbe);
 
-	runner->sub_tick("CFFEX.IC.2204", true, false);
-	WTSTickData* tick = make_ic_tick();
-	ASSERT_NE(tick, nullptr);
-	runner->proc_tick(tick);
-	EXPECT_EQ(TickProbe::codes.size(), 1u);
-	tick->release();
+	EXPECT_FALSE(runner->isInitialized());
+	EXPECT_EQ(runner->activeParserCount(), 0u);
+	EXPECT_TRUE(runner->hasQuarantinedParser());
+	EXPECT_TRUE(runner->hasRetainedParserAdapters());
+	runner->start();
+	EXPECT_FALSE(runner->isInitialized());
+	EXPECT_TRUE(TickProbe::codes.empty());
+	// Keep the quarantined adapter's runner context alive; callback drain is unverified.
+	retainedRunnerGraphs().push_back(runner.get());
+	runner.release();
 }
 
 TEST_F(R8WtDtRunnerTest, ParserConfigGivenAsExternalFileOrMissingFile)
 {
-	// 分支一：parsers 是字符串且文件存在 -> :157-171（读取后再 initParsers）
+	// 分支一：parsers sidecar 存在但包含不可加载的 parser -> 不初始化。
 	write_file(_dir / "parsers.json",
 		R"JSON({"parsers":[{"id":"r8ext","active":true,"module":"r8_no_such_parser"}]})JSON");
 	std::unique_ptr<WtDtRunner> runner(new WtDtRunner());
@@ -463,15 +485,18 @@ TEST_F(R8WtDtRunnerTest, ParserConfigGivenAsExternalFileOrMissingFile)
 	write_file(_dir / "extparsers.json", buildCfg(true, parsers));
 	runner->initialize((_dir / "extparsers.json").string().c_str(), true,
 		_modDir.c_str(), _logCfg.c_str(), onTickProbe, onBarProbe);
+	EXPECT_FALSE(runner->isInitialized());
+	EXPECT_EQ(runner->activeParserCount(), 0u);
+	EXPECT_TRUE(runner->hasQuarantinedParser());
+	EXPECT_TRUE(runner->hasRetainedParserAdapters());
+	runner->start();
+	EXPECT_FALSE(runner->isInitialized());
+	EXPECT_TRUE(TickProbe::codes.empty());
+	// The first runner owns a quarantined adapter, so retain its borrowed runner context.
+	retainedRunnerGraphs().push_back(runner.get());
+	runner.release();
 
-	runner->sub_tick("CFFEX.IC.2204", true, false);
-	WTSTickData* tick = make_ic_tick();
-	ASSERT_NE(tick, nullptr);
-	runner->proc_tick(tick);
-	ASSERT_EQ(TickProbe::codes.size(), 1u);
-	tick->release();
-
-	// 分支二：parsers 是字符串但文件不存在 -> :172-175 报错后继续
+	// 分支二：显式 parsers 路径不存在 -> 同样必须失败并阻止 start。
 	TickProbe::codes.clear();
 	std::unique_ptr<WtDtRunner> runner2(new WtDtRunner());
 	const std::string badParsers = std::string("\"parsers\": \"")
@@ -479,30 +504,108 @@ TEST_F(R8WtDtRunnerTest, ParserConfigGivenAsExternalFileOrMissingFile)
 	write_file(_dir / "badextparsers.json", buildCfg(true, badParsers));
 	runner2->initialize((_dir / "badextparsers.json").string().c_str(), true,
 		_modDir.c_str(), _logCfg.c_str(), onTickProbe, onBarProbe);
-	runner2->sub_tick("CFFEX.IC.2204", true, false);
-	WTSTickData* tick2 = make_ic_tick();
-	ASSERT_NE(tick2, nullptr);
-	runner2->proc_tick(tick2);
-	EXPECT_EQ(TickProbe::codes.size(), 1u);
-	tick2->release();
+	EXPECT_FALSE(runner2->isInitialized());
+	EXPECT_EQ(runner2->activeParserCount(), 0u);
+	EXPECT_FALSE(runner2->hasQuarantinedParser());
+	EXPECT_FALSE(runner2->hasRetainedParserAdapters());
+	runner2->start();
+	EXPECT_FALSE(runner2->isInitialized());
+	EXPECT_TRUE(TickProbe::codes.empty());
 }
 
-// ---------------------------------------------------------------- 需要接缝的形态
+TEST_F(R8WtDtRunnerTest, LegacyInitializeAndAdditiveStatusExportReportInitializationOutcome)
+{
+	using InitializeExport = void (*)(WtString, bool, WtString, FuncOnTickCallback, FuncOnBarCallback);
+	static_assert(std::is_same<decltype(&initialize), InitializeExport>::value,
+		"the existing C initialize export must retain its void ABI");
 
-/*!
- * 触发条件（启用即段错误，禁止在 CI 启用）：
- * 根配置缺少 basefiles 段 -> WtDtRunner.cpp:73 config->get("basefiles") 返回 NULL，
- * :74 紧接着 cfgBF->get("session") 解引用空指针。
- * 证据：WTSVariant::get 未命中即返回 NULL（同文件 :152-153 与
- * WtDataManager.cpp:104 都靠这个语义判空）。
- */
-TEST_F(R8WtDtRunnerTest, DISABLED_InitializeWithoutBasefilesSectionSegfaults)
+	auto run_child = [](const std::string& cfg, const std::string& logCfg, bool expected) {
+		const pid_t pid = ::fork();
+		if (pid == 0)
+		{
+			if (is_initialized())
+				::_exit(2);
+			initialize(cfg.c_str(), true, logCfg.c_str(), nullptr, nullptr);
+			::_exit(is_initialized() == expected && !has_retained_parser_adapters() ? 0 : 1);
+		}
+		if (pid < 0)
+			return false;
+
+		int status = 0;
+		return ::waitpid(pid, &status, 0) == pid
+			&& WIFEXITED(status)
+			&& WEXITSTATUS(status) == 0;
+	};
+
+	const std::string missingSidecar = (_dir / "missing_api_parsers.json").string();
+	write_file(_dir / "api_missing_sidecar.json",
+		buildCfg(false, "\"parsers\":\"" + missingSidecar + "\""));
+	EXPECT_TRUE(run_child((_dir / "api_missing_sidecar.json").string(), _logCfg, false));
+
+	const fs::path badSidecar = _dir / "api_bad_parsers.json";
+	write_file(badSidecar, "not json");
+	write_file(_dir / "api_bad_sidecar.json",
+		buildCfg(false, "\"parsers\":\"" + badSidecar.string() + "\""));
+	EXPECT_TRUE(run_child((_dir / "api_bad_sidecar.json").string(), _logCfg, false));
+
+	// No parsers member is optional: the legacy void export still succeeds and
+	// the new status export reports the resulting state.
+	write_file(_dir / "api_no_parsers.json", buildCfg(false));
+	EXPECT_TRUE(run_child((_dir / "api_no_parsers.json").string(), _logCfg, true));
+}
+
+// ---------------------------------------------------------------- basefiles 配置校验
+
+TEST_F(R8WtDtRunnerTest, MissingBasefilesRejectsStartAndAllowsFullConfigRetry)
 {
 	std::unique_ptr<WtDtRunner> runner(new WtDtRunner());
 	write_file(_dir / "nobase.json", R"JSON({"disable_dump": true})JSON");
 	runner->initialize((_dir / "nobase.json").string().c_str(), true,
 		_modDir.c_str(), _logCfg.c_str(), onTickProbe, onBarProbe);
+	EXPECT_EQ(runner->getBaseDataMgr().getSession("SD0930"), nullptr);
+	EXPECT_EQ(runner->getBaseDataMgr().getContract("IC2204", "CFFEX"), nullptr);
 	EXPECT_EQ(runner->get_bars_by_date("CFFEX.IC.2204", "d1", 20240102), nullptr);
+
+	// 失败的初始化未加载基础数据；start 可安全调用，之后可用完整配置重试。
+	runner->start();
+	EXPECT_EQ(runner->getBaseDataMgr().getContract("IC2204", "CFFEX"), nullptr);
+	initRunner(*runner);
+	ASSERT_NE(runner->getBaseDataMgr().getContract("IC2204", "CFFEX"), nullptr);
+
+	runner->sub_tick("CFFEX.IC.2204,CFFEX.IC.HOT", true, false);
+	WTSTickData* tick = make_ic_tick();
+	ASSERT_NE(tick, nullptr);
+	runner->proc_tick(tick);
+	ASSERT_EQ(TickProbe::codes.size(), 2u);
+	EXPECT_EQ(TickProbe::codes[0], "CFFEX.IC.2204");
+	EXPECT_EQ(TickProbe::codes[1], "CFFEX.IC.HOT");
+	tick->release();
+}
+
+TEST_F(R8WtDtRunnerTest, NonObjectBasefilesRejectInitializationAndAllowRetry)
+{
+	std::unique_ptr<WtDtRunner> runner(new WtDtRunner());
+	const char* invalidBasefiles[] = { "\"invalid\"", "[]", "null" };
+	for (uint32_t i = 0; i < 3; ++i)
+	{
+		const std::string cfg = std::string("{\"disable_dump\":true,\"basefiles\":")
+			+ invalidBasefiles[i] + "}";
+		const fs::path cfgPath = _dir / ("wrong_basefiles_" + std::to_string(i) + ".json");
+		write_file(cfgPath, cfg);
+		runner->initialize(cfgPath.string().c_str(), true,
+			_modDir.c_str(), _logCfg.c_str(), onTickProbe, onBarProbe);
+		EXPECT_EQ(runner->getBaseDataMgr().getSession("SD0930"), nullptr);
+		EXPECT_EQ(runner->getBaseDataMgr().getContract("IC2204", "CFFEX"), nullptr);
+		EXPECT_EQ(runner->get_bars_by_date("CFFEX.IC.2204", "d1", 20240102), nullptr);
+		runner->start();
+		EXPECT_EQ(runner->getBaseDataMgr().getContract("IC2204", "CFFEX"), nullptr);
+	}
+
+	// 完整正控：fixture 中的 session / commodity / contract / holiday / hot / second 全部存在。
+	initRunner(*runner);
+	EXPECT_NE(runner->getBaseDataMgr().getSession("SD0930"), nullptr);
+	EXPECT_NE(runner->getBaseDataMgr().getCommodity("CFFEX", "IC"), nullptr);
+	EXPECT_NE(runner->getBaseDataMgr().getContract("IC2204", "CFFEX"), nullptr);
 }
 
 /*!

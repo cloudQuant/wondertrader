@@ -18,13 +18,45 @@
 #include <WTSUtils/WTSCfgLoader.h>
 
 #include <WtCore/WtArbiExecuter.h>
+#include <WtCore/WtExecMgr.h>
 #include <WtCore/WtLocalExecuter.h>
+
+#include <cstdlib>
+#include <memory>
+#include <vector>
 
 using namespace wtp;
 
 namespace {
 
 const char* const kCode = "SHFE.ag.2512";
+
+class R90QuiesceGuard
+{
+public:
+    explicit R90QuiesceGuard(WtExecuterMgr& manager)
+        : _manager(manager), _coordinator(std::vector<WtExecuterMgr*>{&manager})
+    {}
+
+    ~R90QuiesceGuard()
+    {
+        if (!quiesceAll())
+        {
+            ADD_FAILURE() << "executor manager did not complete coordinated quiesce";
+            std::abort();
+        }
+    }
+
+    bool quiesceAll()
+    {
+        return _coordinator.quiesce_all() && _coordinator.is_complete() &&
+            _manager.wait_quiesced();
+    }
+
+private:
+    WtExecuterMgr& _manager;
+    WtExecQuiesceCoordinator _coordinator;
+};
 
 class R90ExecPool : public ::testing::Test
 {
@@ -101,50 +133,52 @@ protected:
 TEST_F(R90ExecPool, LocalPoolForwardsEverything)
 {
     const uint32_t base = traderEnv.api.n_insert;
+    WtExecuterMgr manager;
+    R90QuiesceGuard quiesce(manager);
 
-    {
-        WtLocalExecuter local(&factory, "r90_local_pool", &dm);
-        local.setStub(&stub);
-        WTSVariant* cfg = makeCfg();
-        ASSERT_NE(nullptr, cfg);
-        ASSERT_TRUE(local.init(cfg));
-        cfg->release();
-        local.setTrader(&trader);
+    auto local = std::make_shared<WtLocalExecuter>(&factory, "r90_local_pool", &dm);
+    manager.add_executer(local);
+    local->setStub(&stub);
+    WTSVariant* cfg = makeCfg();
+    ASSERT_NE(nullptr, cfg);
+    ASSERT_TRUE(local->init(cfg));
+    cfg->release();
+    local->setTrader(&trader);
 
-        // 单元创建（通道未就绪，创建时不回调）
-        local.on_position_changed(kCode, 2.0);
+    // 单元创建（通道未就绪，创建时不回调）
+    local->on_position_changed(kCode, 2.0);
 
-        // 组合匹配 + 池调度 set_position
-        wt_hashmap<std::string, double> targets;
-        targets["SHFE.rb.2510"] = 3.0;
-        targets["SHFE.au.2212"] = 3.0;
-        local.set_position(targets);
+    // 组合匹配 + 池调度 set_position
+    wt_hashmap<std::string, double> targets;
+    targets["SHFE.rb.2510"] = 3.0;
+    targets["SHFE.au.2212"] = 3.0;
+    local->set_position(targets);
 
-        // strict_sync：通道持仓不在目标里 -> 池调度清零
-        local.on_position("SHFE.cu.2510", true, 0, 0, 1, 1, 20250110);
+    // strict_sync：通道持仓不在目标里 -> 池调度清零
+    local->on_position("SHFE.cu.2510", true, 0, 0, 1, 1, 20250110);
 
-        // 过期目标清零（池调度，同时覆盖 strict_sync 的 cu）
-        wt_hashmap<std::string, double> empty;
-        local.set_position(empty);
+    // 过期目标清零（池调度，同时覆盖 strict_sync 的 cu）
+    wt_hashmap<std::string, double> empty;
+    local->set_position(empty);
 
-        WTSTickData* t = tick(kCode, 3500.0, 93100000);
-        ASSERT_NE(nullptr, t);
-        local.on_tick(kCode, t);
-        t->release();
+    WTSTickData* t = tick(kCode, 3500.0, 93100000);
+    ASSERT_NE(nullptr, t);
+    local->on_tick(kCode, t);
+    t->release();
 
-        local.on_trade(1, kCode, true, 1, 3500.0);
-        local.on_order(1, kCode, true, 1, 0, 3500.0, false);
-        local.on_entrust(1, kCode, true, "ok");
-        local.on_account("CNY", 1, 1, 1, 1, 0, 0, 0, 0, 0, 0);
-        local.on_channel_lost();
-        local.on_channel_ready();
+    local->on_trade(1, kCode, true, 1, 3500.0);
+    local->on_order(1, kCode, true, 1, 0, 3500.0, false);
+    local->on_entrust(1, kCode, true, "ok");
+    local->on_account("CNY", 1, 1, 1, 1, 0, 0, 0, 0, 0, 0);
+    local->on_channel_lost();
+    local->on_channel_ready();
 
-        // includes 命中 + 上一期主力匹配 -> 池调度 clear_all_position
-        traderEnv.hot.prev_ = "ag2512";
-        local.on_position(kCode, true, 1, 1, 1, 1, 20250110);
-    }
+    // includes 命中 + 上一期主力匹配 -> 池调度 clear_all_position
+    traderEnv.hot.prev_ = "ag2512";
+    local->on_position(kCode, true, 1, 1, 1, 1, 20250110);
 
-    // 池析构会 wait；tick 触发的最小冲击单元至少发出一笔委托
+    ASSERT_TRUE(quiesce.quiesceAll());
+    // tick 触发的最小冲击单元至少发出一笔委托
     EXPECT_GT(traderEnv.api.n_insert, base);
 }
 
@@ -156,44 +190,46 @@ TEST_F(R90ExecPool, LocalPoolForwardsEverything)
 TEST_F(R90ExecPool, ArbiPoolForwardsEverything)
 {
     const uint32_t base = traderEnv.api.n_insert;
+    WtExecuterMgr manager;
+    R90QuiesceGuard quiesce(manager);
 
-    {
-        WtArbiExecuter arbi(&factory, "r90_arbi_pool", &dm);
-        arbi.setStub(&stub);
-        WTSVariant* cfg = makeCfg();
-        ASSERT_NE(nullptr, cfg);
-        ASSERT_TRUE(arbi.init(cfg));
-        cfg->release();
-        arbi.setTrader(&trader);
+    auto arbi = std::make_shared<WtArbiExecuter>(&factory, "r90_arbi_pool", &dm);
+    manager.add_executer(arbi);
+    arbi->setStub(&stub);
+    WTSVariant* cfg = makeCfg();
+    ASSERT_NE(nullptr, cfg);
+    ASSERT_TRUE(arbi->init(cfg));
+    cfg->release();
+    arbi->setTrader(&trader);
 
-        arbi.on_position_changed(kCode, 2.0);
+    arbi->on_position_changed(kCode, 2.0);
 
-        wt_hashmap<std::string, double> targets;
-        targets["SHFE.rb.2510"] = 3.0;
-        targets["SHFE.au.2212"] = 3.0;
-        arbi.set_position(targets);
+    wt_hashmap<std::string, double> targets;
+    targets["SHFE.rb.2510"] = 3.0;
+    targets["SHFE.au.2212"] = 3.0;
+    arbi->set_position(targets);
 
-        arbi.on_position("SHFE.cu.2510", true, 0, 0, 1, 1, 20250110);
+    arbi->on_position("SHFE.cu.2510", true, 0, 0, 1, 1, 20250110);
 
-        wt_hashmap<std::string, double> empty;
-        arbi.set_position(empty);
+    wt_hashmap<std::string, double> empty;
+    arbi->set_position(empty);
 
-        WTSTickData* t = tick(kCode, 3500.0, 93100000);
-        ASSERT_NE(nullptr, t);
-        arbi.on_tick(kCode, t);
-        t->release();
+    WTSTickData* t = tick(kCode, 3500.0, 93100000);
+    ASSERT_NE(nullptr, t);
+    arbi->on_tick(kCode, t);
+    t->release();
 
-        arbi.on_trade(1, kCode, true, 1, 3500.0);
-        arbi.on_order(1, kCode, true, 1, 0, 3500.0, false);
-        arbi.on_entrust(1, kCode, true, "ok");
-        arbi.on_account("CNY", 1, 1, 1, 1, 0, 0, 0, 0, 0, 0);
-        arbi.on_channel_lost();
-        arbi.on_channel_ready();
+    arbi->on_trade(1, kCode, true, 1, 3500.0);
+    arbi->on_order(1, kCode, true, 1, 0, 3500.0, false);
+    arbi->on_entrust(1, kCode, true, "ok");
+    arbi->on_account("CNY", 1, 1, 1, 1, 0, 0, 0, 0, 0, 0);
+    arbi->on_channel_lost();
+    arbi->on_channel_ready();
 
-        traderEnv.hot.prev_ = "ag2512";
-        arbi.on_position(kCode, true, 1, 1, 1, 1, 20250110);
-    }
+    traderEnv.hot.prev_ = "ag2512";
+    arbi->on_position(kCode, true, 1, 1, 1, 1, 20250110);
 
+    ASSERT_TRUE(quiesce.quiesceAll());
     EXPECT_GT(traderEnv.api.n_insert, base);
 }
 

@@ -39,7 +39,9 @@ public:
 	 * @param engine CTA策略引擎指针
 	 */
 	WtCtaRtTicker(WtCtaEngine* engine) 
-		: _engine(engine)      // 策略引擎指针
+		: _s_info(NULL)         // 交易时间段信息对象
+		, _engine(engine)      // 策略引擎指针
+		, _store(NULL)          // 数据读取器指针
 		, _date(0)             // 当前日期，初始化为0
 		, _time(UINT_MAX)      // 当前时间，初始化为最大值
 		, _cur_pos(0), _next_check_time(0)  // 下次检查时间，初始化为0

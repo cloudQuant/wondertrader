@@ -33,6 +33,9 @@
 
 USING_NS_WTP;
 
+static_assert(BT_CHNL_EVENT_READY == 1000U,
+	"The backtest Porter header must expose the READY callback event value");
+
 extern WtBtRunner& getRunner();
 
 namespace {
@@ -416,8 +419,7 @@ TEST_F(Q06BtRunner, HftMicroAndTradeEventsPassThrough)
 
 	r.hft_on_channel_ready(84, "CTP");
 	EXPECT_EQ(g.chnl, 1U);
-	// WtBtRunner.cpp 里传的是字面量 1000（WtBtPorter/PorterDefs.h 未定义 CHNL_EVENT_READY）
-	EXPECT_EQ(g.last_evt_id, 1000U);
+	EXPECT_EQ(g.last_evt_id, BT_CHNL_EVENT_READY);
 
 	r.hft_on_entrust(85, 1001, "SHFE.au2406", true, "accepted", "tag");
 	EXPECT_EQ(g.entrust, 1U);

@@ -129,6 +129,20 @@ static const uint32_t R4_M1_940 = 3301030940u;
 	return std::string((const char*)&key, sizeof(key));
 }
 
+enum class R4RawBarKeyLength { Short, Long };
+
+static std::string raw_bar_key_str(const char* exchg, const char* code, uint32_t bt,
+	R4RawBarKeyLength length)
+{
+	LMDBBarKey key(exchg, code, bt);
+	std::string raw((const char*)&key, sizeof(key));
+	if (length == R4RawBarKeyLength::Short)
+		raw.resize(sizeof(key) - 1);
+	else
+		raw.push_back('\x7f');
+	return raw;
+}
+
 class R4ReaderADTest : public ::testing::Test
 {
 protected:
@@ -218,6 +232,31 @@ protected:
 		query.commit();
 	}
 
+	// 允许注入/修复长度错误的 value；reader 仍通过 public readKlineSlice 读取。
+	void seed_bar_values(const char* subdir, const char* exchg, const char* code,
+		const std::vector<std::pair<uint32_t, std::string>>& rows)
+	{
+		std::filesystem::create_directories(_root / subdir / exchg);
+		WtLMDB db(false);
+		ASSERT_TRUE(db.open(kline_dir(subdir, exchg).c_str(), 8 * 1024 * 1024));
+		WtLMDBQuery query(db);
+		for (const auto& row : rows)
+			ASSERT_TRUE(query.put(bar_key_str(exchg, code, row.first), row.second));
+		query.commit();
+	}
+
+	void seed_raw_bar_values(const char* subdir, const char* exchg,
+		const std::vector<std::pair<std::string, std::string>>& rows)
+	{
+		std::filesystem::create_directories(_root / subdir / exchg);
+		WtLMDB db(false);
+		ASSERT_TRUE(db.open(kline_dir(subdir, exchg).c_str(), 8 * 1024 * 1024));
+		WtLMDBQuery query(db);
+		for (const auto& row : rows)
+			ASSERT_TRUE(query.put(row.first, row.second));
+		query.commit();
+	}
+
 	static WTSTickStruct tick_at(const char* exchg, const char* code, uint32_t at, double px)
 	{
 		return make_tick(exchg, code, R4_RD1, R4_RD1, at, px, 1, 10, 5, 0, 100, 1000);
@@ -244,6 +283,10 @@ protected:
 	R4ReaderSink*			_sink = NULL;
 	std::unique_ptr<WtDataReaderAD> _reader;
 };
+
+class R4ReaderADRawKeyTest : public R4ReaderADTest,
+	public ::testing::WithParamInterface<R4RawBarKeyLength>
+{};
 
 //////////////////////////////////////////////////////////////////////////
 // 1. init：cfg==NULL 只接基础数据，不打印根目录；cfg!=NULL 打印并建目录映射
@@ -405,6 +448,259 @@ TEST_F(R4ReaderADTest, KlineFirstReadLoadsLowerBarsAndChecksLatest)
 	// 本次读取消费了两个 min1 句柄：第 1 个来自缓存（返回后被 std::move 掏空）
 	EXPECT_TRUE(std::filesystem::exists(_root / "min1" / "EXK1" / "data.mdb"));
 }
+
+//////////////////////////////////////////////////////////////////////////
+// 首次回源遇到短 value 时拒绝整个装载；关闭 reader 修复存储后，合法重读成功。
+//////////////////////////////////////////////////////////////////////////
+TEST_F(R4ReaderADTest, KlineInitialLoadRejectsShortValueAndRetriesAfterRepair)
+{
+	add_stock("EXK_BAD_LOAD", "rb2301");
+	WTSBarStruct first = bar_at("rb2301", R4_M1_931, 3900.0);
+	WTSBarStruct malformed = bar_at("rb2301", R4_M1_932, 3910.0);
+	WTSBarStruct last = bar_at("rb2301", R4_M1_933, 3920.0);
+	const std::string short_value((const char*)&malformed, sizeof(malformed) - 1);
+	seed_bar_values("min1", "EXK_BAD_LOAD", "rb2301", {
+		{R4_M1_931, std::string((const char*)&first, sizeof(first))},
+		{R4_M1_932, short_value},
+		{R4_M1_933, std::string((const char*)&last, sizeof(last))}
+		});
+	init_reader();
+
+	EXPECT_EQ(_reader->readKlineSlice("EXK_BAD_LOAD.rb2301", KP_Minute1, 3,
+		20230103100000000ull), nullptr);
+	EXPECT_NE(_sink->last_log(LL_ERROR).find("Malformed bar key/value in LMDB while loading"), std::string::npos);
+	EXPECT_EQ(_sink->bar_calls(), 0u);
+
+	// 失败的首次装载没有发布部分数据；onMinuteEnd 也应安全跳过空缓存项。
+	_reader->onMinuteEnd(R4_RD1, 1001, 0);
+	EXPECT_EQ(_sink->bar_calls(), 0u);
+	EXPECT_EQ(_sink->all_updated(), 1u);
+
+	// 初次失败后重复请求会重新回源，而不是把失败当成已装载。
+	EXPECT_EQ(_reader->readKlineSlice("EXK_BAD_LOAD.rb2301", KP_Minute1, 3,
+		20230103100000000ull), nullptr);
+	EXPECT_EQ(_sink->count_containing("Malformed bar key/value in LMDB while loading"), 2u);
+
+	// 关闭 reader 后改正坏记录，再初始化新的 public reader 验证完整合法数据。
+	_reader.reset();
+	seed_bar_values("min1", "EXK_BAD_LOAD", "rb2301", {
+		{R4_M1_932, std::string((const char*)&malformed, sizeof(malformed))}
+		});
+	init_reader();
+	WTSKlineSlice* repaired = _reader->readKlineSlice("EXK_BAD_LOAD.rb2301", KP_Minute1, 3,
+		20230103100000000ull);
+	ASSERT_NE(repaired, nullptr);
+	ASSERT_EQ(repaired->get_block_size(0), 3u);
+	const WTSBarStruct* repaired_bars = repaired->get_block_addr(0);
+	EXPECT_EQ(repaired_bars[0].time, (uint64_t)R4_M1_931);
+	EXPECT_EQ(repaired_bars[1].time, (uint64_t)R4_M1_932);
+	EXPECT_DOUBLE_EQ(repaired_bars[1].open, 3910.0);
+	EXPECT_EQ(repaired_bars[2].time, (uint64_t)R4_M1_933);
+	repaired->release();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 增量回源先校验整批 value，坏项不能先追加前面的合法项或通知 sink。
+//////////////////////////////////////////////////////////////////////////
+TEST_F(R4ReaderADTest, KlineIncrementalRejectsShortValueWithoutCachePollution)
+{
+	add_stock("EXK_BAD_UPDATE", "rb2301");
+	WTSBarStruct malformed = bar_at("rb2301", R4_M1_933, 3920.0);
+	WTSBarStruct pending = bar_at("rb2301", R4_M1_933, 3920.0);
+	WTSBarStruct cached1 = bar_at("rb2301", R4_M1_931, 3900.0);
+	WTSBarStruct cached2 = bar_at("rb2301", R4_M1_932, 3910.0);
+	const std::string short_value((const char*)&malformed, sizeof(malformed) - 1);
+	// 首读取最新两个 key (940/941)，value 的 bar.time 为 931/932；增量游标从
+	// key 932 开始，先遇到一根会被追加的合法 bar，再遇到 key 933 的短 value。
+	// 正常写入器会令 key.time == bar.time；这里的可控键值错位使 public API 能在
+	// 单一 LMDB snapshot 中验证“合法前缀 + 坏记录”不会部分提交。
+	seed_bar_values("min1", "EXK_BAD_UPDATE", "rb2301", {
+		{R4_M1_932, std::string((const char*)&pending, sizeof(pending))},
+		{R4_M1_933, short_value},
+		{R4_M1_940, std::string((const char*)&cached1, sizeof(cached1))},
+		{R4_M1_940 + 1, std::string((const char*)&cached2, sizeof(cached2))}
+		});
+	init_reader();
+
+	EXPECT_EQ(_reader->readKlineSlice("EXK_BAD_UPDATE.rb2301", KP_Minute1, 2,
+		20230103100000000ull), nullptr);
+	EXPECT_NE(_sink->last_log(LL_ERROR).find("Malformed bar key/value in LMDB while updating"), std::string::npos);
+	EXPECT_EQ(_sink->bar_calls(), 0u);
+
+	// 故障返回后，用末 bar 时间作为截止值可直接读取首装缓存；两根数据未被
+	// 增量查询中的合法前缀部分追加或覆盖。
+	WTSKlineSlice* cached = _reader->readKlineSlice("EXK_BAD_UPDATE.rb2301", KP_Minute1, 2,
+		20230103093200000ull);
+	ASSERT_NE(cached, nullptr);
+	ASSERT_EQ(cached->get_block_size(0), 2u);
+	const WTSBarStruct* cached_bars = cached->get_block_addr(0);
+	EXPECT_EQ(cached_bars[0].time, (uint64_t)R4_M1_931);
+	EXPECT_DOUBLE_EQ(cached_bars[0].open, 3900.0);
+	EXPECT_EQ(cached_bars[1].time, (uint64_t)R4_M1_932);
+	EXPECT_DOUBLE_EQ(cached_bars[1].open, 3910.0);
+	cached->release();
+	EXPECT_EQ(_sink->bar_calls(), 0u);
+
+	// onMinuteEnd 也必须将增量错误视为失败，不能再从 RT 缓存补一条绕过坏记录。
+	_reader->onMinuteEnd(R4_RD1, 1001, 0);
+	EXPECT_EQ(_sink->bar_calls(), 0u);
+
+	_reader.reset();
+	std::error_code ec;
+	std::filesystem::remove_all(_root / "min1" / "EXK_BAD_UPDATE", ec);
+	seed_bars("min1", "EXK_BAD_UPDATE", "rb2301", {
+		{R4_M1_931, bar_at("rb2301", R4_M1_931, 3900.0)},
+		{R4_M1_932, bar_at("rb2301", R4_M1_932, 3910.0)},
+		{R4_M1_933, bar_at("rb2301", R4_M1_933, 3920.0)},
+		{R4_M1_940, bar_at("rb2301", R4_M1_940, 3930.0)}
+		});
+	init_reader();
+	WTSKlineSlice* repaired = _reader->readKlineSlice("EXK_BAD_UPDATE.rb2301", KP_Minute1, 4,
+		20230103100000000ull);
+	ASSERT_NE(repaired, nullptr);
+	ASSERT_EQ(repaired->get_block_size(0), 4u);
+	const WTSBarStruct* repaired_bars = repaired->get_block_addr(0);
+	EXPECT_EQ(repaired_bars[0].time, (uint64_t)R4_M1_931);
+	EXPECT_EQ(repaired_bars[1].time, (uint64_t)R4_M1_932);
+	EXPECT_EQ(repaired_bars[2].time, (uint64_t)R4_M1_933);
+	EXPECT_EQ(repaired_bars[3].time, (uint64_t)R4_M1_940);
+	repaired->release();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// short/long raw key must be rejected by the actual first-load reader path.
+//////////////////////////////////////////////////////////////////////////
+TEST_P(R4ReaderADRawKeyTest, InitialLoadRejectsMalformedRawKeyAndCanRetry)
+{
+	const R4RawBarKeyLength keyLength = GetParam();
+	const char* exchg = keyLength == R4RawBarKeyLength::Short ? "EXKSI" : "EXKLI";
+	const std::string stdCode = std::string(exchg) + ".rb2301";
+	add_stock(exchg, "rb2301");
+	WTSBarStruct b931 = bar_at("rb2301", R4_M1_931, 3900.0);
+	WTSBarStruct b932 = bar_at("rb2301", R4_M1_932, 3910.0);
+	WTSBarStruct b933 = bar_at("rb2301", R4_M1_933, 3920.0);
+	WTSBarStruct b940 = bar_at("rb2301", R4_M1_940, 3930.0);
+	seed_raw_bar_values("min1", exchg, {
+		{bar_key_str(exchg, "rb2301", R4_M1_931), std::string((const char*)&b931, sizeof(b931))},
+		{raw_bar_key_str(exchg, "rb2301", R4_M1_932, keyLength), std::string((const char*)&b932, sizeof(b932))},
+		{bar_key_str(exchg, "rb2301", R4_M1_933), std::string((const char*)&b933, sizeof(b933))},
+		{bar_key_str(exchg, "rb2301", R4_M1_940), std::string((const char*)&b940, sizeof(b940))}
+		});
+	init_reader();
+
+	EXPECT_EQ(_reader->readKlineSlice(stdCode.c_str(), KP_Minute1, 4,
+		20230103100000000ull), nullptr);
+	EXPECT_NE(_sink->last_log(LL_ERROR).find("Malformed bar key/value in LMDB while loading"), std::string::npos);
+	EXPECT_EQ(_sink->bar_calls(), 0u);
+
+	// 同一 reader 重试一个不包含坏 key 的较窄窗口，确认失败没有污染 cache。
+	WTSKlineSlice* retry = _reader->readKlineSlice(stdCode.c_str(), KP_Minute1, 2,
+		20230103100000000ull);
+	ASSERT_NE(retry, nullptr);
+	ASSERT_EQ(retry->get_block_size(0), 2u);
+	const WTSBarStruct* retry_bars = retry->get_block_addr(0);
+	EXPECT_EQ(retry_bars[0].time, (uint64_t)R4_M1_933);
+	EXPECT_EQ(retry_bars[1].time, (uint64_t)R4_M1_940);
+	retry->release();
+	EXPECT_EQ(_sink->bar_calls(), 0u);
+
+	// LMDB 环境由 reader 持有到析构；关闭 reader 后修复记录并用完整窗口重读。
+	_reader.reset();
+	std::error_code ec;
+	std::filesystem::remove_all(_root / "min1" / exchg, ec);
+	seed_bars("min1", exchg, "rb2301", {
+		{R4_M1_931, b931}, {R4_M1_932, b932}, {R4_M1_933, b933}, {R4_M1_940, b940}
+		});
+	init_reader();
+	WTSKlineSlice* repaired = _reader->readKlineSlice(stdCode.c_str(), KP_Minute1, 4,
+		20230103100000000ull);
+	ASSERT_NE(repaired, nullptr);
+	ASSERT_EQ(repaired->get_block_size(0), 4u);
+	EXPECT_EQ(repaired->get_block_addr(0)[0].time, (uint64_t)R4_M1_931);
+	EXPECT_EQ(repaired->get_block_addr(0)[3].time, (uint64_t)R4_M1_940);
+	repaired->release();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 增量查询先遇合法前缀再遇 raw key 坏记录，验证整批校验和 cache 不污染。
+//////////////////////////////////////////////////////////////////////////
+TEST_P(R4ReaderADRawKeyTest, IncrementalUpdateRejectsMalformedRawKeyWithoutPollution)
+{
+	const R4RawBarKeyLength keyLength = GetParam();
+	const char* exchg = keyLength == R4RawBarKeyLength::Short ? "EXKSU" : "EXKLU";
+	const std::string stdCode = std::string(exchg) + ".rb2301";
+	const uint32_t badKeyTime = R4_M1_932 + 256u;
+	const uint32_t laterKey1 = badKeyTime + 256u;
+	const uint32_t laterKey2 = laterKey1 + 1u;
+	add_stock(exchg, "rb2301");
+	WTSBarStruct pending = bar_at("rb2301", R4_M1_933, 3920.0);
+	WTSBarStruct badKeyValue = bar_at("rb2301", badKeyTime, 3930.0);
+	WTSBarStruct cached1 = bar_at("rb2301", R4_M1_931, 3900.0);
+	WTSBarStruct cached2 = bar_at("rb2301", R4_M1_932, 3910.0);
+	// 反转端序后的时间键是字节序有序的：badKeyTime 的高 3 字节比游标
+	// R4_M1_932 大，因此即使短 key 少了末字节，MDB_SET_RANGE 仍会返回它；
+	// 后两根 key 更大，使首读只装载它们，随后增量查询确实经过坏 key。
+	seed_raw_bar_values("min1", exchg, {
+		{bar_key_str(exchg, "rb2301", R4_M1_932), std::string((const char*)&pending, sizeof(pending))},
+		{raw_bar_key_str(exchg, "rb2301", badKeyTime, keyLength),
+			std::string((const char*)&badKeyValue, sizeof(badKeyValue))},
+		{bar_key_str(exchg, "rb2301", laterKey1), std::string((const char*)&cached1, sizeof(cached1))},
+		{bar_key_str(exchg, "rb2301", laterKey2), std::string((const char*)&cached2, sizeof(cached2))}
+		});
+	init_reader();
+
+	EXPECT_EQ(_reader->readKlineSlice(stdCode.c_str(), KP_Minute1, 2,
+		20230103100000000ull), nullptr);
+	EXPECT_NE(_sink->last_log(LL_ERROR).find("Malformed bar key/value in LMDB while updating"), std::string::npos);
+	EXPECT_EQ(_sink->bar_calls(), 0u);
+
+	// 以末 bar 时间为截止值重读，公开切片仍只能看到最初装入的两根缓存数据。
+	WTSKlineSlice* cached = _reader->readKlineSlice(stdCode.c_str(), KP_Minute1, 2,
+		20230103093200000ull);
+	ASSERT_NE(cached, nullptr);
+	ASSERT_EQ(cached->get_block_size(0), 2u);
+	const WTSBarStruct* cached_bars = cached->get_block_addr(0);
+	EXPECT_EQ(cached_bars[0].time, (uint64_t)R4_M1_931);
+	EXPECT_DOUBLE_EQ(cached_bars[0].open, 3900.0);
+	EXPECT_EQ(cached_bars[1].time, (uint64_t)R4_M1_932);
+	EXPECT_DOUBLE_EQ(cached_bars[1].open, 3910.0);
+	cached->release();
+	EXPECT_EQ(_sink->bar_calls(), 0u);
+
+	// 再次请求同一窗口可从未污染缓存返回；更新错误依旧被隔离。
+	WTSKlineSlice* retry = _reader->readKlineSlice(stdCode.c_str(), KP_Minute1, 1,
+		20230103093200000ull);
+	ASSERT_NE(retry, nullptr);
+	EXPECT_DOUBLE_EQ(retry->get_block_addr(0)[0].open, 3910.0);
+	retry->release();
+	EXPECT_EQ(_sink->bar_calls(), 0u);
+
+	// LMDB 环境不能在此 reader 存活时由 fixture 再开 writer；关闭后修复数据，
+	// 新 reader 的完整读取作为存储修复后的重试控制。
+	_reader.reset();
+	std::error_code ec;
+	std::filesystem::remove_all(_root / "min1" / exchg, ec);
+	seed_bars("min1", exchg, "rb2301", {
+		{R4_M1_931, bar_at("rb2301", R4_M1_931, 3900.0)},
+		{R4_M1_932, bar_at("rb2301", R4_M1_932, 3910.0)},
+		{R4_M1_933, bar_at("rb2301", R4_M1_933, 3920.0)},
+		{R4_M1_940, bar_at("rb2301", R4_M1_940, 3930.0)}
+		});
+	init_reader();
+	WTSKlineSlice* repaired = _reader->readKlineSlice(stdCode.c_str(), KP_Minute1, 4,
+		20230103100000000ull);
+	ASSERT_NE(repaired, nullptr);
+	ASSERT_EQ(repaired->get_block_size(0), 4u);
+	EXPECT_EQ(repaired->get_block_addr(0)[0].time, (uint64_t)R4_M1_931);
+	EXPECT_EQ(repaired->get_block_addr(0)[3].time, (uint64_t)R4_M1_940);
+	repaired->release();
+}
+
+INSTANTIATE_TEST_SUITE_P(ShortAndLongRawKeys, R4ReaderADRawKeyTest,
+	::testing::Values(R4RawBarKeyLength::Short, R4RawBarKeyLength::Long),
+	[](const ::testing::TestParamInfo<R4RawBarKeyLength>& info) {
+		return info.param == R4RawBarKeyLength::Short ? "ShortKey" : "LongKey";
+	});
 
 //////////////////////////////////////////////////////////////////////////
 // 6. 同一交易所下第二个合约仍应读出它自己的已落盘 K 线；同合约同 etime
@@ -643,19 +939,101 @@ TEST_F(R4ReaderADTest, DISABLED_AdvancingEtimeAfterTwoHandlesCrashesOnNullDb)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 14. 登记：onMinuteEnd 会 back() 空的循环缓冲区
-//     触发条件：先让某合约进入 _bars_cache 但一条 bar 都没读到（例如回源失败），
-//     再调 onMinuteEnd → L511 barsList._bars.back() 在空缓冲区上是未定义行为。
-//     见 bugs/R4_adstorage.md R4-BUG-08。
+// onMinuteEnd guards both empty bar lists and optional RT-cache misses.
 //////////////////////////////////////////////////////////////////////////
-TEST_F(R4ReaderADTest, DISABLED_OnMinuteEndOnBarlessCacheEntryReadsBackOfEmptyBuffer)
+TEST_F(R4ReaderADTest, OnMinuteEndSkipsBarlessCacheEntry)
 {
 	add_stock("EXX2", "rb2301");
 	init_reader();
-	// min1 库不存在 → cacheBarsFromStorage 打开空库、0 条命中 → _bars_cache 有条目但为空
-	_reader->readKlineSlice("EXX2.rb2301", KP_Minute1, 2, 20230103100000000ull);
+	// 空 min1 库建立了缓存项，但没有可用 bar。
+	EXPECT_EQ(_reader->readKlineSlice("EXX2.rb2301", KP_Minute1, 2, 20230103100000000ull), nullptr);
 	_reader->onMinuteEnd(R4_RD1, 1000, 0);
-	FAIL() << "启用即在空 circular_buffer 上取 back()";
+	EXPECT_EQ(_sink->bar_calls(), 0u);
+	EXPECT_EQ(_sink->all_updated(), 1u);
+}
+
+TEST_F(R4ReaderADTest, OnMinuteEndSkipsMissingMinuteRtCacheBar)
+{
+	add_stock("EXX3", "rb2301");
+	seed_bars("min1", "EXX3", "rb2301", {
+		{R4_M1_931, bar_at("rb2301", R4_M1_931, 3900.0)}
+		});
+	init_reader();
+
+	WTSKlineSlice* slice = _reader->readKlineSlice("EXX3.rb2301", KP_Minute1, 1,
+		20230103100000000ull);
+	ASSERT_NE(slice, nullptr);
+	slice->release();
+	// No cache_m1.dmb means get_rt_cache_bar() returns NULL for this valid bar list.
+	EXPECT_NO_THROW(_reader->onMinuteEnd(R4_RD1, 1000, 0));
+	EXPECT_EQ(_sink->bar_calls(), 0u);
+	EXPECT_EQ(_sink->all_updated(), 1u);
+}
+
+TEST_F(R4ReaderADTest, OnMinuteEndSkipsMissingDailyRtCacheBar)
+{
+	add_stock("EXX4", "rb2301");
+	WTSBarStruct previous = bar_at("rb2301", 0, 3900.0);
+	previous.date = 20230102;
+	seed_bars("day", "EXX4", "rb2301", {{20230102, previous}});
+	init_reader();
+
+	WTSKlineSlice* slice = _reader->readKlineSlice("EXX4.rb2301", KP_DAY, 1,
+		20230103100000000ull);
+	ASSERT_NE(slice, nullptr);
+	slice->release();
+	// No cache_d1.dmb means the daily wrapper has no matching bar.
+	EXPECT_NO_THROW(_reader->onMinuteEnd(R4_RD1, 1000, R4_RD1));
+	EXPECT_EQ(_sink->bar_calls(), 0u);
+	EXPECT_EQ(_sink->all_updated(), 1u);
+}
+
+TEST_F(R4ReaderADTest, OnMinuteEndEmitsMinuteRtCacheBarOnce)
+{
+	add_stock("EXX5", "rb2301");
+	seed_bars("min1", "EXX5", "rb2301", {
+		{R4_M1_931, bar_at("rb2301", R4_M1_931, 3900.0)}
+		});
+	std::vector<BarCacheItem> minute_items{
+		make_bar_item("EXX5", "rb2301", R4_RD1, R4_M1_940, 3910.0)};
+	write_block_file((_root / "cache_m1.dmb").string(), BLK_FLAG, BT_RT_Cache, 1, 1, 1,
+		bar_payload(minute_items));
+	init_reader();
+
+	WTSKlineSlice* minute = _reader->readKlineSlice("EXX5.rb2301", KP_Minute1, 1,
+		20230103093100000ull);
+	ASSERT_NE(minute, nullptr);
+	minute->release();
+
+	_reader->onMinuteEnd(R4_RD1, 1000, 0);
+	EXPECT_EQ(_sink->bar_calls(), 1u);
+	EXPECT_EQ(_sink->last_bar_code(), "EXX5.rb2301");
+	EXPECT_EQ(_sink->last_period(), KP_Minute1);
+	EXPECT_EQ(_sink->all_updated(), 1u);
+}
+
+TEST_F(R4ReaderADTest, OnMinuteEndEmitsDailyRtCacheBarOnce)
+{
+	add_stock("EXX6", "rb2301");
+	WTSBarStruct previous = bar_at("rb2301", 0, 4000.0);
+	previous.date = 20230102;
+	seed_bars("day", "EXX6", "rb2301", {{20230102, previous}});
+	std::vector<BarCacheItem> daily_items{
+		make_bar_item("EXX6", "rb2301", R4_RD1, 0, 4010.0)};
+	write_block_file((_root / "cache_d1.dmb").string(), BLK_FLAG, BT_RT_Cache, 1, 1, 1,
+		bar_payload(daily_items));
+	init_reader();
+
+	WTSKlineSlice* daily = _reader->readKlineSlice("EXX6.rb2301", KP_DAY, 1,
+		20230102100000000ull);
+	ASSERT_NE(daily, nullptr);
+	daily->release();
+
+	_reader->onMinuteEnd(R4_RD1, 1000, R4_RD1);
+	EXPECT_EQ(_sink->bar_calls(), 1u);
+	EXPECT_EQ(_sink->last_bar_code(), "EXX6.rb2301");
+	EXPECT_EQ(_sink->last_period(), KP_DAY);
+	EXPECT_EQ(_sink->all_updated(), 1u);
 }
 
 }  // namespace

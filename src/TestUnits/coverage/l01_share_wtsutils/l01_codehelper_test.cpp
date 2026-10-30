@@ -1,11 +1,11 @@
-// L01 (lane Share/WTSUtils): CodeHelper.hpp coverage.
-// 只读覆盖，不修改生产代码。疑似缺陷见 docs/迭代计划/迭代01/bugs/l01_share_wtsutils.md
+// L01 (lane Share/WTSUtils): CodeHelper.hpp coverage and regression tests.
 #include <gtest/gtest.h>
 
 #include "Share/CodeHelper.hpp"
 
 #include <cstdio>
 #include <cstring>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -104,6 +104,8 @@ TEST(l01_codehelper, is_std_chn_fut_opt_code_true)
 	EXPECT_TRUE(CodeHelper::isStdChnFutOptCode("DCE.m2009.P.3000"));
 	EXPECT_TRUE(CodeHelper::isStdChnFutOptCode("GFEX.si2505.C.10000"));
 	EXPECT_TRUE(CodeHelper::isStdChnFutOptCode("CFFEX.HO2409.C.1"));
+	EXPECT_TRUE(CodeHelper::isStdChnFutOptCode("CZCE.ZC010.P.11600"));
+	EXPECT_TRUE(CodeHelper::isStdChnFutOptCode("ZCE.ZC010.P.11600"));
 }
 
 TEST(l01_codehelper, is_std_chn_fut_opt_code_false)
@@ -116,7 +118,7 @@ TEST(l01_codehelper, is_std_chn_fut_opt_code_false)
 	EXPECT_FALSE(CodeHelper::isStdChnFutOptCode(".IO2008.C.4300"));
 	// 只有两段
 	EXPECT_FALSE(CodeHelper::isStdChnFutOptCode("CFFEX.IO2008"));
-	// 月份只有 3 位
+	// 非郑商所格式仍不接受 3 位月份
 	EXPECT_FALSE(CodeHelper::isStdChnFutOptCode("CFFEX.IO208.C.4300"));
 	// 行权方向不是 C/P
 	EXPECT_FALSE(CodeHelper::isStdChnFutOptCode("CFFEX.IO2008.X.4300"));
@@ -184,8 +186,55 @@ TEST(l01_codehelper, raw_month_code_to_std_code_3_digits)
 TEST(l01_codehelper, raw_month_code_to_std_code_as_comm)
 {
 	// isComm=true 接收品种代码；不传入月合约或永续合约代码。
-	EXPECT_EQ(CodeHelper::rawMonthCodeToStdCode("ag", "SHFE", true), std::string("SHFE.ag"));
-	EXPECT_EQ(CodeHelper::rawMonthCodeToStdCode("IF", "CFFEX", true), std::string("CFFEX.IF"));
+	const std::string shfe = CodeHelper::rawMonthCodeToStdCode("ag", "SHFE", true);
+	const std::string cffex = CodeHelper::rawMonthCodeToStdCode("IF", "CFFEX", true);
+	EXPECT_EQ(std::string("SHFE.ag"), shfe);
+	EXPECT_EQ(7u, shfe.size());
+	EXPECT_EQ(std::string("CFFEX.IF"), cffex);
+	EXPECT_EQ(8u, cffex.size());
+
+	std::map<std::string, int> commoditiesByStdCode;
+	commoditiesByStdCode[shfe] = 1;
+	commoditiesByStdCode[cffex] = 2;
+	EXPECT_NE(commoditiesByStdCode.find("SHFE.ag"), commoditiesByStdCode.end());
+	EXPECT_NE(commoditiesByStdCode.find("CFFEX.IF"), commoditiesByStdCode.end());
+}
+
+TEST(l01_codehelper, raw_month_code_to_std_code_dynamic_fields_near_buffer_limit)
+{
+	const std::string exchange(31, 'E');
+
+	const std::string commAt64(32, 'P');
+	const std::string commAt65(33, 'Q');
+	const std::string expectedCommAt64 = exchange + "." + commAt64;
+	const std::string expectedCommAt65 = exchange + "." + commAt65;
+	EXPECT_EQ(64u, expectedCommAt64.size());
+	EXPECT_EQ(expectedCommAt64, CodeHelper::rawMonthCodeToStdCode(commAt64.c_str(), exchange.c_str(), true));
+	EXPECT_EQ(65u, expectedCommAt65.size());
+	EXPECT_EQ(expectedCommAt65, CodeHelper::rawMonthCodeToStdCode(commAt65.c_str(), exchange.c_str(), true));
+
+	const std::string product4(27, 'a');
+	const std::string raw4 = product4 + "1912";
+	const std::string expectedMonthlyAt64 = exchange + "." + product4 + ".1912";
+	EXPECT_EQ(64u, expectedMonthlyAt64.size());
+	EXPECT_EQ(expectedMonthlyAt64, CodeHelper::rawMonthCodeToStdCode(raw4.c_str(), exchange.c_str()));
+
+	const std::string product3(28, 'b');
+	const std::string raw3 = product3 + "123";
+	const std::string expectedMonthlyAt65 = exchange + "." + product3 + ".2123";
+	EXPECT_EQ(65u, expectedMonthlyAt65.size());
+	EXPECT_EQ(expectedMonthlyAt65, CodeHelper::rawMonthCodeToStdCode(raw3.c_str(), exchange.c_str()));
+}
+
+TEST(l01_codehelper, raw_month_code_to_std_code_null_and_short_inputs_return_empty)
+{
+	EXPECT_TRUE(CodeHelper::rawMonthCodeToStdCode(nullptr, "SHFE").empty());
+	EXPECT_TRUE(CodeHelper::rawMonthCodeToStdCode("ag1912", nullptr).empty());
+	EXPECT_TRUE(CodeHelper::rawMonthCodeToStdCode("", "SHFE").empty());
+	EXPECT_TRUE(CodeHelper::rawMonthCodeToStdCode("ag", "SHFE").empty());
+	EXPECT_TRUE(CodeHelper::rawMonthCodeToStdCode("ag12", "SHFE").empty());
+	EXPECT_TRUE(CodeHelper::rawMonthCodeToStdCode("", "SHFE", true).empty());
+	EXPECT_TRUE(CodeHelper::rawMonthCodeToStdCode("ag", "", true).empty());
 }
 
 // ----------------------------------------------- rawFlatCodeToStdCode
@@ -234,6 +283,91 @@ TEST(l01_codehelper, raw_fut_opt_code_to_std_code_unmatched)
 	// 未命中正则：郑商所/上期所格式 ZC010P11600
 	EXPECT_EQ(CodeHelper::rawFutOptCodeToStdCode("ZC010P11600", "CZCE"), std::string("CZCE.ZC010.P.11600"));
 	EXPECT_EQ(CodeHelper::rawFutOptCodeToStdCode("au2012C3400", "SHFE"), std::string("SHFE.au2012.C.3400"));
+}
+
+TEST(l01_codehelper, try_raw_fut_opt_code_to_std_code_accepts_supported_formats)
+{
+	struct Example
+	{
+		const char* raw;
+		const char* exchange;
+		const char* expected;
+	};
+	const Example examples[] = {
+		{"IO2301-P-4000", "CFFEX", "CFFEX.IO2301.P.4000"},
+		{"m2409-C-3000", "DCE", "DCE.m2409.C.3000"},
+		{"si2309-C-11000", "GFEX", "GFEX.si2309.C.11000"},
+		{"TA2308P4000", "CZCE", "CZCE.TA2308.P.4000"},
+		{"ZC010P11600", "ZCE", "ZCE.ZC010.P.11600"},
+		{"au2012C3400", "SHFE", "SHFE.au2012.C.3400"},
+		{"sc2308C400", "INE", "INE.sc2308.C.400"},
+		// The parser validates the code shape; exchange-specific shape rules belong to callers.
+		{"IO2301C4000", "CFFEX", "CFFEX.IO2301.C.4000"},
+		{"TA2308P4000", "VENDOR1", "VENDOR1.TA2308.P.4000"},
+		{"IO2301-P-4000", "GLOBAL_X", "GLOBAL_X.IO2301.P.4000"},
+	};
+
+	for (const Example& example : examples)
+	{
+		std::string actual = "stale";
+		ASSERT_TRUE(CodeHelper::tryRawFutOptCodeToStdCode(example.raw, example.exchange, actual))
+			<< example.raw << " @ " << example.exchange;
+		EXPECT_EQ(example.expected, actual);
+		EXPECT_EQ(example.expected, CodeHelper::rawFutOptCodeToStdCode(example.raw, example.exchange));
+	}
+}
+
+TEST(l01_codehelper, try_raw_fut_opt_code_to_std_code_rejects_malformed_input)
+{
+	const char nonAsciiProduct[] = {'T', 'A', static_cast<char>(0xC3), '2', '3', '0', '8', 'P', '4', '0', '0', '0', '\0'};
+	const char nonAsciiStrike[] = {'T', 'A', '2', '3', '0', '8', 'P', '4', static_cast<char>(0x80), '\0'};
+	const char nonAsciiExchange[] = {'X', static_cast<char>(0xFF), '\0'};
+	char unterminatedCode[MAX_INSTRUMENT_LENGTH];
+	char unterminatedExchange[MAX_INSTRUMENT_LENGTH];
+	std::memset(unterminatedCode, 'A', sizeof(unterminatedCode));
+	std::memset(unterminatedExchange, 'X', sizeof(unterminatedExchange));
+	const struct InvalidExample
+	{
+		const char* raw;
+		const char* exchange;
+	} examples[] = {
+		{"", "CZCE"},
+		{"123456789", "CZCE"},
+		{"P1", "CZCE"},
+		{"IO2301-X-4000", "CFFEX"},
+		{"TA2308P40x0", "CZCE"},
+		// The CTPLoader InstrumentID fixture is synthetic and does not establish
+		// SR510CS5600 as a valid raw option code or legal numeric strike format.
+		{"SR510CS5600", "CZCE"},
+		{nonAsciiProduct, "CZCE"},
+		{nonAsciiStrike, "CZCE"},
+		{nullptr, "CZCE"},
+		{"TA2308P4000", ""},
+		{"TA2308P4000", "CFF.EX"},
+		{"TA2308P4000", nonAsciiExchange},
+		{unterminatedCode, "CZCE"},
+		{"TA2308P4000", unterminatedExchange},
+	};
+
+	std::string actual;
+	actual = "stale";
+	EXPECT_FALSE(CodeHelper::tryRawFutOptCodeToStdCode(nullptr, "CZCE", actual));
+	EXPECT_TRUE(actual.empty());
+	EXPECT_TRUE(CodeHelper::rawFutOptCodeToStdCode(nullptr, "CZCE").empty());
+	actual = "stale";
+	EXPECT_FALSE(CodeHelper::tryRawFutOptCodeToStdCode("TA2308P4000", nullptr, actual));
+	EXPECT_TRUE(actual.empty());
+	EXPECT_TRUE(CodeHelper::rawFutOptCodeToStdCode("TA2308P4000", nullptr).empty());
+
+	for (std::size_t index = 0; index < sizeof(examples) / sizeof(examples[0]); ++index)
+	{
+		const InvalidExample& example = examples[index];
+		SCOPED_TRACE(std::string("invalid input example index ") + std::to_string(index));
+		actual = "stale";
+		EXPECT_FALSE(CodeHelper::tryRawFutOptCodeToStdCode(example.raw, example.exchange, actual));
+		EXPECT_TRUE(actual.empty());
+		EXPECT_TRUE(CodeHelper::rawFutOptCodeToStdCode(example.raw, example.exchange).empty());
+	}
 }
 
 // ------------------------------------------- stdCodeToStdHot/2ndCode
@@ -358,6 +492,94 @@ TEST(l01_codehelper, extract_std_code_plain_and_two_segment)
 	EXPECT_STREQ(info._code, "BTC-USDT");
 }
 
+TEST(l01_codehelper, extract_std_code_rejects_malformed_segments)
+{
+	const char* malformed[] = {
+		"", "nosuchcode", ".SSE", "SSE.", "SSE..600000", "SSE.STK.",
+		"SSE.STK.600000.", "SSE.STK.600000.EXTRA", "SSE.STK.+"
+	};
+
+	CodeHelper::CodeInfo info = CodeHelper::extractStdCode("SSE.STK.600000", nullptr);
+	ASSERT_STREQ(info._code, "600000");
+
+	for (const char* code : malformed)
+	{
+		info = CodeHelper::extractStdCode(code, nullptr);
+		EXPECT_EQ(info._exright, 0) << code;
+		EXPECT_STREQ(info._code, "") << code;
+		EXPECT_STREQ(info._exchg, "") << code;
+		EXPECT_STREQ(info._product, "") << code;
+		EXPECT_STREQ(info._ruletag, "") << code;
+		EXPECT_STREQ(info._fullpid, "") << code;
+	}
+
+	info = CodeHelper::extractStdCode(nullptr, nullptr);
+	EXPECT_EQ(info._exright, 0);
+	EXPECT_STREQ(info._code, "");
+	EXPECT_STREQ(info._exchg, "");
+	EXPECT_STREQ(info._product, "");
+}
+
+TEST(l01_codehelper, extract_std_code_rejects_fields_that_exceed_fixed_capacity)
+{
+	const std::string tooLong(MAX_INSTRUMENT_LENGTH, 'a');
+	CodeHelper::CodeInfo info = CodeHelper::extractStdCode((tooLong + ".STK.600000").c_str(), nullptr);
+	EXPECT_STREQ(info._code, "");
+	EXPECT_STREQ(info._exchg, "");
+
+	info = CodeHelper::extractStdCode(("SSE." + tooLong + ".600000").c_str(), nullptr);
+	EXPECT_STREQ(info._product, "");
+
+	info = CodeHelper::extractStdCode(("SSE.STK." + tooLong).c_str(), nullptr);
+	EXPECT_STREQ(info._code, "");
+
+	// A valid monthly code may still overflow the combined output field.
+	const std::string longProduct(29, 'a');
+	info = CodeHelper::extractStdCode(("X." + longProduct + ".2025").c_str(), nullptr);
+	EXPECT_STREQ(info._code, "");
+
+	// Each option segment and stdCommID fit, but the normalized option code does not.
+	const std::string longOption = "X." + std::string(25, 'a') + "1234.C.1234";
+	info = CodeHelper::extractStdCode(longOption.c_str(), nullptr);
+	EXPECT_STREQ(info._code, "");
+	EXPECT_STREQ(info._product, "");
+}
+
+TEST(l01_codehelper, extract_std_code_std_comm_id_capacity_boundaries)
+{
+	const std::string exchange = "EXCH";
+	const std::size_t maxPidProductLen = MAX_INSTRUMENT_LENGTH - exchange.size() - 2;
+	const std::string fitsProduct(maxPidProductLen, 'p');
+	const std::string tooLongProduct(maxPidProductLen + 1, 'p');
+	const std::string expectedFullPid = exchange + "." + fitsProduct;
+
+	// Both input shapes may fill all but the terminating NUL in _fullpid.
+	CodeHelper::CodeInfo info = CodeHelper::extractStdCode((exchange + "." + fitsProduct).c_str(), nullptr);
+	ASSERT_STREQ(info.stdCommID(), expectedFullPid.c_str());
+	EXPECT_EQ(std::strlen(info._fullpid), MAX_INSTRUMENT_LENGTH - 1);
+
+	info = CodeHelper::extractStdCode((exchange + "." + fitsProduct + ".contract").c_str(), nullptr);
+	ASSERT_STREQ(info.stdCommID(), expectedFullPid.c_str());
+	EXPECT_EQ(std::strlen(info._fullpid), MAX_INSTRUMENT_LENGTH - 1);
+
+	// A full PID whose characters would occupy the array's NUL byte is rejected.
+	info = CodeHelper::extractStdCode((exchange + "." + tooLongProduct).c_str(), nullptr);
+	EXPECT_STREQ(info._exchg, "");
+	EXPECT_STREQ(info._product, "");
+	EXPECT_STREQ(info._code, "");
+	EXPECT_STREQ(info._fullpid, "");
+	EXPECT_STREQ(info.stdCommID(), ".");
+	EXPECT_LT(std::strlen(info._fullpid), MAX_INSTRUMENT_LENGTH);
+
+	info = CodeHelper::extractStdCode((exchange + "." + tooLongProduct + ".contract").c_str(), nullptr);
+	EXPECT_STREQ(info._exchg, "");
+	EXPECT_STREQ(info._product, "");
+	EXPECT_STREQ(info._code, "");
+	EXPECT_STREQ(info._fullpid, "");
+	EXPECT_STREQ(info.stdCommID(), ".");
+	EXPECT_LT(std::strlen(info._fullpid), MAX_INSTRUMENT_LENGTH);
+}
+
 TEST(l01_codehelper, extract_std_code_fut_opt_goes_to_opt_branch)
 {
 	// 期权代码走 extractStdChnFutOptCode 分支
@@ -365,6 +587,31 @@ TEST(l01_codehelper, extract_std_code_fut_opt_goes_to_opt_branch)
 	EXPECT_STREQ(info._exchg, "CFFEX");
 	EXPECT_STREQ(info._code, "IO2008-C-4300");
 	EXPECT_STREQ(info._product, "IO");
+}
+
+TEST(l01_codehelper, extract_std_code_zce_legacy_three_digit_option_round_trip)
+{
+	const struct Example
+	{
+		const char* standardCode;
+		const char* exchange;
+		const char* expectedCode;
+		const char* expectedProduct;
+	} examples[] = {
+		{"CZCE.ZC010.P.11600", "CZCE", "ZC010P11600", "ZCP"},
+		{"ZCE.ZC010.P.11600", "ZCE", "ZC010P11600", "ZCP"},
+		{"CZCE.TA2308.P.4000", "CZCE", "TA2308P4000", "TAP"},
+		{"ZCE.TA2308.P.4000", "ZCE", "TA2308P4000", "TAP"},
+	};
+
+	for (const Example& example : examples)
+	{
+		CodeHelper::CodeInfo info = CodeHelper::extractStdCode(example.standardCode, nullptr);
+		EXPECT_STREQ(info._exchg, example.exchange);
+		EXPECT_STREQ(info._code, example.expectedCode);
+		EXPECT_STREQ(info._product, example.expectedProduct);
+		EXPECT_EQ(CodeHelper::rawFutOptCodeToStdCode(info._code, info._exchg), example.standardCode);
+	}
 }
 
 TEST(l01_codehelper, extract_std_code_exright_on_monthly_keeps_month)

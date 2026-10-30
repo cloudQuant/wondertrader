@@ -144,9 +144,9 @@ TEST(R55_charconv, utf8_helpers_handle_empty_inputs)
 	EXPECT_STREQ("", emptyBack.c_str());
 }
 
-// BLOCKED by BUG-R55-001: null-input objects leave needFree uninitialized, which
-// their destructors may read. Keep these assertions disabled until that state is safe.
-TEST(R55_charconv, DISABLED_null_inputs_keep_null_pointers)
+// Null input sets the output pointer to null; destructing either helper must
+// not inspect an indeterminate ownership flag.
+TEST(R55_charconv, null_inputs_keep_null_pointers)
 {
 	UTF8toChar nullIn(static_cast<const char*>(nullptr));
 	EXPECT_EQ(nullptr, nullIn.c_str());
@@ -174,8 +174,16 @@ TEST(R55_charconv, ascii_helpers_keep_original_pointer_and_convert_operators)
 // 合法 2 字节 UTF-8 应被接受（BUG-R55-002）。
 TEST(R55_charconv, two_byte_utf8_is_accepted)
 {
-	std::vector<unsigned char> utf8_2{ 0xC2, 0xA2 };	// U+00A2
-	EXPECT_TRUE(EncodingHelper::isUtf8(utf8_2.data(), utf8_2.size()));
+	// C2 and C3 are valid UTF-8 lead bytes; include both range endpoints and
+	// the original cent sign case.
+	std::vector<std::vector<unsigned char>> valid{
+		{ 0xC2, 0x80 },
+		{ 0xC2, 0xA2 }, // U+00A2
+		{ 0xC3, 0xA9 }, // U+00E9
+		{ 0xDF, 0xBF }
+	};
+	for (auto& bytes : valid)
+		EXPECT_TRUE(EncodingHelper::isUtf8(bytes.data(), bytes.size()));
 }
 
 // EncodingHelper 的 GBK 边界（charconv.hpp:560-669）
@@ -199,4 +207,22 @@ TEST(R55_charconv, encoding_helper_two_byte_and_gbk_boundaries)
 	// 纯 0x7F 仍是 ASCII 字节，扫描结束返回 false（L563-567）
 	std::vector<unsigned char> ascii{ 0x7F };
 	EXPECT_FALSE(EncodingHelper::isGBK(ascii.data(), ascii.size()));
+}
+
+TEST(R55_charconv, is_gbk_rejects_invalid_and_truncated_pairs)
+{
+	std::vector<unsigned char> invalidLead{ 0xFF, 0xFF };
+	std::vector<unsigned char> forbiddenTrail{ 0xD6, 0xF7 };
+	std::vector<unsigned char> lowTrail{ 0xD6, 0x20 };
+	std::vector<unsigned char> loneLead{ 0xD6 };
+	std::vector<unsigned char> badThenValid{ 0xFF, 0xD6, 0xD0 };
+
+	EXPECT_FALSE(EncodingHelper::isGBK(invalidLead.data(), invalidLead.size()));
+	EXPECT_FALSE(EncodingHelper::isGBK(forbiddenTrail.data(), forbiddenTrail.size()));
+	EXPECT_FALSE(EncodingHelper::isGBK(lowTrail.data(), lowTrail.size()));
+	EXPECT_FALSE(EncodingHelper::isGBK(loneLead.data(), loneLead.size()));
+	EXPECT_FALSE(EncodingHelper::isGBK(nullptr, 1));
+	EXPECT_FALSE(EncodingHelper::isGBK(nullptr, 0));
+	// Invalid bytes are skipped one at a time; a later valid GBK pair is found.
+	EXPECT_TRUE(EncodingHelper::isGBK(badThenValid.data(), badThenValid.size()));
 }

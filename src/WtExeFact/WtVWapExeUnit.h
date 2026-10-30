@@ -41,6 +41,7 @@ private:
 	 *          包括计算当前时间点的目标仓位、生成订单、管理订单状态等
 	 */
 	void	do_calc();
+	void	reconcile_channel_ready();
 
 	/**
 	 * @brief 立即发单
@@ -74,6 +75,8 @@ public:
 	 * @param cfg 配置参数，包含执行单元的各种设置
 	 */
 	virtual void init(ExecuteContext* ctx, const char* stdCode, WTSVariant* cfg) override;
+	// Plugin V2 reads this non-virtual status after the single init call.
+	bool initializationSucceeded() const { return _init_succeeded; }
 
 	/**
 	 * @brief 处理订单回报
@@ -153,6 +156,13 @@ private:
 	double		_target_pos;
 	/** @brief 交易通道是否就绪标志 */
 	bool		_channel_ready;
+	bool		_channel_reconcile_pending;
+	bool		_retry_pending;
+	bool		_retry_cancel;
+	bool		_valid_tick_dispatch;
+	/** @brief 执行时段、次数及VWAP分布文件是否通过初始化预检 */
+	bool		_config_valid;
+	bool		_init_succeeded;
 	/** @brief 计算锁，用于保护do_calc方法的并发调用 */
 	StdUniqueMutex	_mtx_calc;
 
@@ -162,6 +172,8 @@ private:
 	WTSSessionInfo*	_sess_info;
 	/** @brief 撤单次数统计 */
 	uint32_t	_cancel_times;
+	uint32_t	_begin_session_minute;
+	uint32_t	_end_session_minute;
 
 
 
@@ -204,20 +216,21 @@ private:
 	//////////////////////////////////////////////////////////////////////////
 	/** @name 临时变量
 	 * @{ */
-	/** @brief 本轮目标仓位，当前时间点应该达到的仓位量 */
-	double			_this_target;
-	/** @brief 发单间隔，单位毫秒，根据总执行时间和次数计算得出 */
+	/** @brief 发单间隔，单位秒，根据总执行时间和次数计算得出 */
 	uint32_t		_fire_span;
 	/** @brief 已执行次数，记录当前执行周期内已经发送的订单次数 */
 	uint32_t		_fired_times;
 	/** @brief 上次执行的时间戳，单位毫秒，用于计算下次发单时间 */
-	uint64_t		_last_fire_time;
+	uint64_t		_last_fire_session_time_ms;
+	uint32_t		_last_fire_session_date;
 	/** @brief 上个下单时间戳，单位毫秒，用于计算订单是否超时需要撤单 */
 	[[maybe_unused]] uint64_t		_last_place_time;
 	/** @brief 上个行情数据的时间戳，单位毫秒，用于判断行情数据是否有效 */
 	uint64_t		_last_tick_time;
+	uint64_t		_last_valid_tick_time;
+	uint64_t		_tick_time_high_water;
+	uint64_t		_retry_after_tick_time;
 	/** @brief VWAP单位时间下单量，根据VWAP算法计算的每个时间单元应发送的订单量 */
-	double			_Vwap_vol;
 	/** @brief VWAP价格，当前计算得到的成交量加权平均价格 */
 	[[maybe_unused]] double			_Vwap_prz;
 	/** @} */
@@ -249,7 +262,7 @@ private:
 		 * @brief 析构函数，自动释放锁
 		 */
 		~_CalcFlag() {
-			if (_flag)
+			if (_flag && !_result)
 				_flag->exchange(false, std::memory_order_acq_rel);
 		}
 

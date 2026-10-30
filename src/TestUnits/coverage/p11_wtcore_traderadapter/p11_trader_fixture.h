@@ -7,8 +7,6 @@
  *   - FakeBaseDataMgr : 只登记 SHFE.ag.2512 一张合约表
  *   - P11TraderTest   : gtest 夹具, 落盘只写 temp_directory_path()/p11_*，析构清理
  *
- * 注意(BUG-L00-004): TraderAdapter.h 里 TraderAdapterMgr 用了 boost::noncopyable 却没 include,
- * 所以本文件必须先显式包含 <boost/core/noncopyable.hpp> 再包含 TraderAdapter.h。
  */
 #pragma once
 
@@ -22,8 +20,6 @@
 #include <string>
 #include <vector>
 #include <unistd.h>
-
-#include <boost/core/noncopyable.hpp>
 
 #include <WtCore/ITrdNotifySink.h>
 #include <WtCore/TraderAdapter.h>

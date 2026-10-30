@@ -187,6 +187,16 @@ namespace
 	R93XtpApiStub* g_r93_xtp_stub = NULL;
 	XTP::API::TraderApi* r93_xtp_create(uint8_t, const char*, XTP_LOG_LEVEL) { return g_r93_xtp_stub; }
 
+	class R93XtpReleaseGuard
+	{
+	public:
+		explicit R93XtpReleaseGuard(TraderXTP& api) : api_(api) {}
+		~R93XtpReleaseGuard() { api_.release(); }
+
+	private:
+		TraderXTP& api_;
+	};
+
 	class R93XtpBlockingLoginStub : public R93XtpApiStub
 	{
 	public:
@@ -198,15 +208,17 @@ namespace
 			R93XtpApiStub::Release();
 		}
 
-		uint64_t Login(const char*, int, const char*, const char*, XTP_PROTOCOL_TYPE, const char*) override
+		uint64_t Login(const char* ip, int port, const char* user, const char* password,
+			XTP_PROTOCOL_TYPE protocol, const char* appInfo) override
 		{
+			const uint64_t result = R93XtpApiStub::Login(ip, port, user, password, protocol, appInfo);
 			if (login_hook_)
 				login_hook_();
 			std::unique_lock<std::mutex> lock(mutex_);
 			login_entered_ = true;
 			condition_.notify_all();
 			condition_.wait(lock, [this]() { return login_released_; });
-			return login_ret_;
+			return result;
 		}
 
 		bool wait_for_login(std::chrono::milliseconds timeout)
@@ -232,14 +244,36 @@ namespace
 		bool login_released_ = false;
 	};
 
-	class R93XtpAtomicReleaseStub : public R93XtpApiStub
+	class R93XtpBlockingReleaseStub : public R93XtpApiStub
 	{
 	public:
-		void Release() override { release_count_.fetch_add(1); }
+		void Release() override
+		{
+			release_count_.fetch_add(1);
+			std::unique_lock<std::mutex> lock(mutex_);
+			release_entered_ = true;
+			condition_.notify_all();
+			condition_.wait(lock, [this]() { return release_unblocked_; });
+		}
+		bool wait_for_release(std::chrono::milliseconds timeout)
+		{
+			std::unique_lock<std::mutex> lock(mutex_);
+			return condition_.wait_for(lock, timeout, [this]() { return release_entered_; });
+		}
+		void unblock_release()
+		{
+			std::lock_guard<std::mutex> lock(mutex_);
+			release_unblocked_ = true;
+			condition_.notify_all();
+		}
 		int release_count() const { return release_count_.load(); }
 
 	private:
 		std::atomic<int> release_count_{0};
+		std::mutex mutex_;
+		std::condition_variable condition_;
+		bool release_entered_ = false;
+		bool release_unblocked_ = false;
 	};
 
 	class R93XtpBlockingQueryStub : public R93XtpApiStub
@@ -312,11 +346,6 @@ namespace
 		{
 			api_.release();
 			g_r93_xtp_stub = NULL;
-			// 产品构造函数漏初始化 _state/_sessionid（BUG-R93-007）；留下确定值，
-			// 避免同进程后续用例复用这块内存时读到本用例的 ALLREADY。
-			api_._state = TraderXTP::TS_NOTLOGIN;
-			api_._sessionid = 0;
-			api_._inited = false;
 			ct_->release();
 			comm_->release();
 		}
@@ -324,6 +353,7 @@ namespace
 		void make_ready()
 		{
 			connect_stub();
+			std::lock_guard<std::mutex> lock(api_._login_state_mutex);
 			api_._state = TraderXTP::TS_ALLREADY;
 			api_._sessionid = 5555;
 			api_._tradingday = 20260105;
@@ -381,6 +411,67 @@ namespace
 		g_r93_xtp_stub = NULL;
 	}
 
+	TEST_F(R93XtpTest, connect_notification_can_login_while_reconnect_waits)
+	{
+		std::mutex event_mutex;
+		std::condition_variable event_condition;
+		bool event_entered = false;
+		bool allow_login = false;
+		std::atomic<int> event_calls(0);
+		std::atomic<int> login_result(-99);
+		R93XtpReleaseGuard release_guard(api_);
+		g_r93_xtp_stub = &stub_;
+		api_.m_funcCreator = &r93_xtp_create;
+		sink_.event_hook = [this, &event_mutex, &event_condition, &event_entered, &allow_login, &event_calls, &login_result]() {
+			if (event_calls.fetch_add(1) != 0)
+				return;
+			std::unique_lock<std::mutex> lock(event_mutex);
+			event_entered = true;
+			event_condition.notify_all();
+			event_condition.wait(lock, [&allow_login]() { return allow_login; });
+			lock.unlock();
+			login_result.store(api_.login("xtpuser", "xtppass", ""));
+		};
+
+		std::thread first_connect([&]() { api_.connect(); });
+		{
+			std::unique_lock<std::mutex> lock(event_mutex);
+			if (!event_condition.wait_for(lock, std::chrono::seconds(2), [&event_entered]() { return event_entered; }))
+			{
+				lock.unlock();
+				first_connect.join();
+				FAIL() << "WTE_Connect was not delivered to the sink";
+				return;
+			}
+		}
+
+		std::thread second_connect([&]() { api_.connect(); });
+		const auto reconfigure_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
+		bool reconfigure_entered = false;
+		while (!reconfigure_entered && std::chrono::steady_clock::now() < reconfigure_deadline)
+		{
+			{
+				std::lock_guard<std::mutex> lock(api_._api_lifecycle_mutex);
+				reconfigure_entered = api_._api_reconfiguring;
+			}
+			std::this_thread::yield();
+		}
+		{
+			std::lock_guard<std::mutex> lock(event_mutex);
+			allow_login = true;
+			event_condition.notify_all();
+		}
+		first_connect.join();
+		second_connect.join();
+
+		EXPECT_TRUE(reconfigure_entered);
+		EXPECT_EQ(0, login_result.load());
+		EXPECT_EQ(1, stub_.n_login_);
+		EXPECT_EQ(1, stub_.n_release_);
+		EXPECT_EQ(&stub_, api_._api);
+		sink_.event_hook = std::function<void()>();
+	}
+
 	TEST_F(R93XtpTest, failed_reconnect_retry_is_owned_and_cancellable)
 	{
 		g_r93_xtp_stub = NULL;
@@ -420,6 +511,7 @@ namespace
 	TEST_F(R93XtpTest, release_joins_worker_blocked_in_login)
 	{
 		R93XtpBlockingLoginStub blocking_stub;
+		R93XtpReleaseGuard release_guard(api_);
 		g_r93_xtp_stub = &blocking_stub;
 		api_.m_funcCreator = &r93_xtp_create;
 		api_._inited = true;
@@ -464,6 +556,7 @@ namespace
 	TEST_F(R93XtpTest, release_waits_for_public_login_and_callback_release_defers)
 	{
 		R93XtpBlockingLoginStub blocking_stub;
+		R93XtpReleaseGuard release_guard(api_);
 		g_r93_xtp_stub = &blocking_stub;
 		api_.m_funcCreator = &r93_xtp_create;
 		api_._inited = true;
@@ -525,32 +618,51 @@ namespace
 
 	TEST_F(R93XtpTest, concurrent_release_calls_release_api_once)
 	{
-		R93XtpAtomicReleaseStub counting_stub;
-		g_r93_xtp_stub = &counting_stub;
+		R93XtpBlockingReleaseStub blocking_stub;
+		R93XtpReleaseGuard release_guard(api_);
+		g_r93_xtp_stub = &blocking_stub;
 		api_.m_funcCreator = &r93_xtp_create;
 		api_.connect();
 
-		std::atomic<int> ready(0);
-		std::atomic<bool> start(false);
+		std::atomic<bool> first_finished(false);
 		std::thread first([&]() {
-			ready.fetch_add(1);
-			while (!start.load())
-				std::this_thread::yield();
 			api_.release();
+			first_finished.store(true);
 		});
+		if (!blocking_stub.wait_for_release(std::chrono::seconds(2)))
+		{
+			blocking_stub.unblock_release();
+			first.join();
+			g_r93_xtp_stub = NULL;
+			FAIL() << "first release did not enter the fake blocking SDK Release";
+			return;
+		}
+
+		std::atomic<bool> second_finished(false);
 		std::thread second([&]() {
-			ready.fetch_add(1);
-			while (!start.load())
-				std::this_thread::yield();
 			api_.release();
+			second_finished.store(true);
 		});
-		while (ready.load() != 2)
+		const auto wait_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
+		bool second_waiting_at_gate = false;
+		while (!second_waiting_at_gate && std::chrono::steady_clock::now() < wait_deadline)
+		{
+			{
+				std::lock_guard<std::mutex> lock(api_._api_lifecycle_mutex);
+				second_waiting_at_gate = api_._api_release_waiters == 1;
+			}
 			std::this_thread::yield();
-		start.store(true);
+		}
+		const bool releases_overlapped = !second_finished.load() && blocking_stub.release_count() == 1;
+		blocking_stub.unblock_release();
 		first.join();
 		second.join();
 
-		EXPECT_EQ(1, counting_stub.release_count());
+		EXPECT_TRUE(second_waiting_at_gate);
+		EXPECT_TRUE(releases_overlapped);
+		EXPECT_TRUE(first_finished.load());
+		EXPECT_TRUE(second_finished.load());
+		EXPECT_EQ(1, blocking_stub.release_count());
 		EXPECT_EQ(NULL, api_._api);
 		g_r93_xtp_stub = NULL;
 	}
@@ -558,6 +670,7 @@ namespace
 	TEST_F(R93XtpTest, reconnect_drains_inflight_sdk_calls_before_replacing_api)
 	{
 		R93XtpBlockingQueryStub blocking_stub;
+		R93XtpReleaseGuard release_guard(api_);
 		g_r93_xtp_stub = &blocking_stub;
 		api_.m_funcCreator = &r93_xtp_create;
 		api_.connect();
@@ -634,6 +747,53 @@ namespace
 		EXPECT_FALSE(result.succ);
 		EXPECT_EQ("bad password", result.msg);
 		EXPECT_FALSE(api_._inited);
+	}
+
+	TEST_F(R93XtpTest, concurrent_public_logins_do_not_race_credentials_or_cache_init)
+	{
+		R93XtpBlockingLoginStub blocking_stub;
+		R93XtpReleaseGuard release_guard(api_);
+		g_r93_xtp_stub = &blocking_stub;
+		api_.m_funcCreator = &r93_xtp_create;
+		api_.connect();
+
+		std::atomic<int> first_result(-99);
+		std::thread first_login([&]() {
+			first_result.store(api_.login("first-user", "first-pass", ""));
+		});
+		if (!blocking_stub.wait_for_login(std::chrono::seconds(2)))
+		{
+			blocking_stub.unblock_login();
+			first_login.join();
+			g_r93_xtp_stub = NULL;
+			FAIL() << "first public Login did not enter the fake SDK";
+			return;
+		}
+
+		const int second_result = api_.login("second-user", "second-pass", "");
+		std::string active_user;
+		std::string active_pass;
+		{
+			std::lock_guard<std::mutex> lock(api_._login_state_mutex);
+			active_user = api_._user;
+			active_pass = api_._pass;
+		}
+		const int login_calls_while_blocked = blocking_stub.n_login_;
+		blocking_stub.unblock_login();
+		first_login.join();
+
+		EXPECT_EQ(-1, second_result);
+		EXPECT_EQ("first-user", active_user);
+		EXPECT_EQ("first-pass", active_pass);
+		EXPECT_EQ(1, login_calls_while_blocked);
+		EXPECT_EQ(0, first_result.load());
+		{
+			std::lock_guard<std::mutex> lock(api_._login_state_mutex);
+			EXPECT_EQ(12345u, api_._sessionid);
+			EXPECT_EQ(20260105u, api_._tradingday);
+			EXPECT_TRUE(api_._inited);
+		}
+		g_r93_xtp_stub = NULL;
 	}
 
 	/// TraderXTP.cpp L753-817：首次成功登录初始化 eid/oid 缓存、异步置 ALLREADY；

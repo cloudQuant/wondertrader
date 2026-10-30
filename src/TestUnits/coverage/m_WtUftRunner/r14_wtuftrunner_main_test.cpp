@@ -7,11 +7,8 @@
  * 于是 main.cpp:31 的入口符号改名后与本文件的 gtest_main 同链一个二进制。
  *
  * 安全口径（本轮硬规则）：
- *  - main.cpp:31 的入口里只有 :53~54 的 -h/--help 分支能在 WtUftRunner 构造之前 return 0；
- *    其余分支（:67 runner.init -> :75 runner.config -> :78 runner.run(false)）里
- *    run() 在 WtUftRunner.cpp:355 调 _uft_engine.run()、:360 ShareManager::start_watching(2)
- *    （起看门狗线程 + 共享内存）、:362~365 while(!_to_exit) 每 10ms 轮询的死循环
- *    -> 一律 DISABLED_，不启用。
+ *  - main.cpp 的帮助分支在构造 WtUftRunner 前返回；配置失败分支现在验证非零退出，且不进入 run()。
+ *  - 有效配置会进入 WtUftRunner.cpp 的引擎、共享内存和等待循环；这些依赖真实环境，仍不启用。
  *  - WtUftRunner.cpp 侧只走「不依赖引擎 run 循环」的成员函数：构造/析构/init/config 的两条早退支。
  *  - 禁止起线程：WtUftRunner 构造里的 install_signal_hooks(WtUftRunner.cpp:40~45) 经实测
  *    （src/WTSUtils/SignalHook.hpp 全文）只做 sigaction/signal 注册，不含 std::thread/pthread_create，
@@ -21,6 +18,7 @@
  */
 #include <gtest/gtest.h>
 
+#include <iostream>
 #include <string>
 #include <vector>
 #include <unistd.h>
@@ -55,6 +53,14 @@ int call_entry(std::vector<const char*> words)
 	return wt_coverage_main_wtuftrunner(static_cast<int>(argv.size()), argv.data());
 }
 
+void call_help_entry_in_child(std::vector<const char*> words)
+{
+	// cppcli::Option::parse() writes help to stdout and calls std::exit(0).
+	// Redirect it to stderr so the GTest death-test matcher can verify the help text.
+	std::cout.rdbuf(std::cerr.rdbuf());
+	(void)call_entry(words);
+}
+
 /* 写出一个由用例完全掌控的 yaml；.yaml 后缀是 WTSCfgLoader.cpp:324 判定走 yaml 解析的前提 */
 void write_min_config()
 {
@@ -72,21 +78,25 @@ void write_min_config()
  * 一、入口 --help 分支（main.cpp:39~54）
  * ---------------------------------------------------------------------- */
 
-TEST(r14_uft_entry, short_help_returns_zero_before_constructing_runner)
+TEST(r14_uft_entry, short_help_exits_zero_before_constructing_runner)
 {
-	// main.cpp:53 if(hParam->exists()) return 0; —— :65 的 WtUftRunner runner 不执行
-	EXPECT_EQ(call_entry({"wt_uft_runner", "-h"}), 0);
+	// Help exits while parsing, before main.cpp reaches the WtUftRunner construction.
+	EXPECT_EXIT(call_help_entry_in_child({"wt_uft_runner", "-h"}),
+		::testing::ExitedWithCode(0), "options:");
 }
 
-TEST(r14_uft_entry, long_help_returns_zero)
+TEST(r14_uft_entry, long_help_exits_zero_and_prints_help)
 {
-	EXPECT_EQ(call_entry({"wt_uft_runner", "--help"}), 0);
+	EXPECT_EXIT(call_help_entry_in_child({"wt_uft_runner", "--help"}),
+		::testing::ExitedWithCode(0), "options:");
 }
 
 TEST(r14_uft_entry, help_wins_over_config_and_logcfg_words)
 {
-	// -h 与 -c/-l 同时给出：parse() 后 hParam->exists() 仍为真，早退先于日志与配置加载
-	EXPECT_EQ(call_entry({"wt_uft_runner", "-c", kAbsentCfg, "-l", kAbsentLogCfg, "-h"}), 0);
+	// -h 与 -c/-l 同时给出时，仍应输出帮助并在进入日志/配置加载前以 0 退出。
+	EXPECT_EXIT(call_help_entry_in_child(
+		{"wt_uft_runner", "-c", kAbsentCfg, "-l", kAbsentLogCfg, "-h"}),
+		::testing::ExitedWithCode(0), "options:");
 }
 
 /* -------------------------------------------------------------------------
@@ -157,18 +167,18 @@ TEST(r14_uft_config, authored_config_without_basefiles_children_walks_the_early_
 	ASSERT_TRUE(StdFile::exists(kSelfAuthoredCfg));
 
 	WtUftRunner runner;
-	// basefiles 存在，但必要的 env/data 段缺失；initEngine/initDataMgr 返回 false。
-	// config() 目前吞掉这两个失败并最终返回 true，因此这里保留 false 契约断言以暴露产品问题。
+	// basefiles 存在，但 env/data 配置缺失；配置阶段必须返回失败。
 	EXPECT_FALSE(runner.config(kSelfAuthoredCfg));
 }
 
-TEST(r14_uft_config, missing_then_authored_order_is_independent)
+TEST(r14_uft_config, missing_then_authored_configs_use_separate_runner_instances)
 {
-	WtUftRunner runner;
+	WtUftRunner missingRunner;
 	// 缺文件失败后，再验证缺少必要 env/data 的配置也应失败。
-	EXPECT_FALSE(runner.config(kAbsentCfg));
+	EXPECT_FALSE(missingRunner.config(kAbsentCfg));
 	write_min_config();
-	EXPECT_FALSE(runner.config(kSelfAuthoredCfg));
+	WtUftRunner authoredRunner;
+	EXPECT_FALSE(authoredRunner.config(kSelfAuthoredCfg));
 }
 
 /* -------------------------------------------------------------------------
@@ -198,30 +208,25 @@ TEST(r14_uft_loghandler, handleLogAppend_is_a_noop_for_every_declared_level)
 	}
 }
 
+TEST(r14_uft_entry, config_failure_returns_nonzero_without_running_engine)
+{
+	write_min_config();
+	EXPECT_NE(0, call_entry({"wt_uft_runner", "-c", kSelfAuthoredCfg, "-l", kAbsentLogCfg}));
+}
+
 /* -------------------------------------------------------------------------
  * 六、DISABLED_：需要真实引擎/共享内存/主循环的分支
  *
  * 触发条件与不启用理由：
- *  D1 main.cpp:59~78 非 -h 分支：runner.config(缺失) 返回 false 但 :78 仍无条件 runner.run(false)
- *     -> WtUftRunner.cpp:355 _uft_engine.run()（未 init 的引擎，内部 _action_policy/_env_cfg 为空）
- *     -> :360 ShareManager::self().start_watching(2) 起看门狗线程并申请共享内存
- *     -> :362 while(!_to_exit) 每 10ms 轮询，_to_exit 只能由信号回调翻转
- *     => 启用即挂死/踩空指针。
- *  D2 config() 的 env/data/parsers/traders/share_domain 齐备分支：
+ *  D1 config() 全量成功分支：
  *     :118~121 ShareManager::initialize/init_domain 需要真实 shm 段；
  *     :302/:327 ParserAdapter/TraderAdapter::init 会 dlopen 厂商库并起接收线程。
  *     可回收行数估计：WtUftRunner.cpp 的 :69~107 剩余 + :109~197 + :200~251 + :253~278
  *     + :280~338 + :340~349 + :351~373 ≈ 210 行（占该文件 285 行的绝大部分）。
- *  D3 入口无参分支（argc==1）：走默认 ./logcfg.yaml 与 ./config.yaml，
- *     是否进入 D2/D1 取决于运行目录内容，期望值无法由本用例输入算出 -> 禁用。
+ *  D2 入口无参分支（argc==1）：走默认 ./logcfg.yaml 与 ./config.yaml，
+ *     是否进入 D1 取决于运行目录内容，期望值无法由本用例输入算出 -> 禁用。
  * 另注：WtUftCore/WtUftEngine.cpp:209~213 的 return NULL 之后约 30 行是已登记的不可达段，本轮不追。
  * ---------------------------------------------------------------------- */
-
-TEST(r14_uft_entry, DISABLED_non_help_argv_reaches_engine_run_and_watchdog_thread)
-{
-	// D1/D3：见上方触发条件
-	EXPECT_EQ(call_entry({"wt_uft_runner", "-c", kSelfAuthoredCfg, "-l", kAbsentLogCfg}), 0);
-}
 
 TEST(r14_uft_runner, DISABLED_run_false_loops_until_signal)
 {

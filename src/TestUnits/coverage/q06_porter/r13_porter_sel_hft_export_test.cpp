@@ -33,6 +33,7 @@
 #include "WtPorter/PorterDefs.h"
 #include "WtPorter/WtPorter.h"
 #include "WtPorter/WtRtRunner.h"
+#include "../trader_mocker_fixture.h"
 
 #include "Includes/WTSStruct.h"
 
@@ -100,7 +101,8 @@ namespace {
 			"\"rules\":{\"R13\":\"" + dir + "/hot.json\"}},"
 			"\"env\":{\"name\":\"hft\"},\"data\":{},"
 			"\"bspolicy\":\"" + dir + "/actions.json\","
-			"\"traders\":[{\"active\":true,\"id\":\"" + traderId + "\"}]}";
+			"\"traders\":[{\"active\":true,\"id\":\"" + traderId + "\","
+			"\"module\":\"TraderMocker\",\"mockerid\":13001,\"udp_port\":0}]}";
 	}
 
 	int fail_hft_probe(int code, const char* reason)
@@ -216,11 +218,9 @@ namespace {
 	};
 
 	/*
-	 * Configure the R82 id-only local trader seam in a threadsafe death-test child.
-	 * initTraders registers the adapter object even though its empty module cannot
-	 * initialize a trading API; createHftContext then binds that object. The
-	 * hft_get_position probe only reads its empty in-memory position map. This does
-	 * not establish that a real trading connection is ready.
+	 * Configure a local TraderMocker API in a threadsafe death-test child.
+	 * The hft_get_position probe only reads its empty in-memory position map; it
+	 * does not start the mocker's connection or establish a real trading session.
 	 */
 	int run_registered_hft_getter_probe()
 	{
@@ -256,6 +256,10 @@ namespace {
 
 		const std::string traderId = "r13_registered_trader";
 		getRunner().init((dir + "/r13_absent_logcfg.yaml").c_str(), true, dir.c_str());
+		wtp_test::TraderMockerFixture trader_mocker("r13");
+		if (!trader_mocker.install())
+			return fail_hft_probe(14, trader_mocker.error().c_str());
+
 		const std::string cfg = hft_config(dir, traderId);
 		config_porter(cfg.c_str(), false);
 		if (getRunner().getEngine() == NULL)
@@ -410,11 +414,11 @@ TEST_F(R13PorterSelExport, DISABLED_sel_mutation_and_subscription_need_engine_se
 }
 
 /*
- * The id-only adapter from R82 is registered without a trading API. hft_get_position
- * confirms _trader points to that object by reading its empty position map; this
- * does not prove a real trading connection is ready. The remaining getters inspect
- * only the HFT context's own maps. Run in a threadsafe death-test child so
- * configuring the process-global Porter runner cannot alter other q06 suites.
+ * TraderMocker is initialized but not run. hft_get_position confirms _trader points
+ * to an initialized adapter by reading its empty position map; this does not prove
+ * a real trading connection is ready. The remaining getters inspect only the HFT
+ * context's own maps. Run in a threadsafe death-test child so configuring the
+ * process-global Porter runner cannot alter other q06 suites.
  *
  * Trader API-dependent order, cancellation and subscription calls remain outside
  * this fixture; BUG-R13-001 still tracks the production behavior when binding fails.

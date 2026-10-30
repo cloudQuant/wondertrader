@@ -301,16 +301,24 @@ TEST_F(R22PorterCapiTest, CreateExtDumpersWithUniqueIdsAndDirectDumperCallback)
 }
 
 //////////////////////////////////////////////////////////////////////////
-TEST_F(R22PorterCapiTest, DISABLED_write_log_with_braces_escapes_format_string)
+TEST_F(R22PorterCapiTest, WriteLogWritesRawMessagesLiterally)
 {
-	// 触发条件：write_log 的 level >= WTSLogger 默认阈值且日志未 init 时，
-	//   WTSLogger::log_raw_by_cat / log_raw 走 print_timetag + fmt::print(message) 一支，
-	//   把调用方给的 message 当成格式串使用。消息里出现 "{}" / "{" 时 fmt 抛
-	//   fmt::format_error，异常越过 extern "C" 边界 -> std::terminate，宿主进程直接没。
-	//   parser/trader 插件里任何带大括号的原始报文（JSON 片段）都能触发。
-	char msg[] = "r22 brace {not a format} message";
-	write_log((unsigned int)LL_FATAL, msg, "parser");
-	SUCCEED();
+	// 新进程中默认 m_logLevel=LL_NONE；使用该级别通过阈值守卫，覆盖未初始化 logger 的两支。
+	testing::internal::CaptureStdout();
+	EXPECT_NO_THROW(write_log((unsigned int)LL_NONE, "{}", "parser"));
+	EXPECT_NO_THROW(write_log((unsigned int)LL_NONE, "{}", ""));
+	EXPECT_NO_THROW(write_log((unsigned int)LL_NONE, "r22 plain message", "parser"));
+	EXPECT_NO_THROW(write_log((unsigned int)LL_NONE, "r22 plain message", ""));
+	const std::string output = testing::internal::GetCapturedStdout();
+
+	const auto occurrences = [&output](const std::string& text) {
+		std::size_t count = 0;
+		for (std::size_t pos = 0; (pos = output.find(text, pos)) != std::string::npos; pos += text.size())
+			++count;
+		return count;
+	};
+	EXPECT_EQ(2U, occurrences("{}"));
+	EXPECT_EQ(2U, occurrences("r22 plain message"));
 }
 
 TEST_F(R22PorterCapiTest, DISABLED_write_log_with_null_category_hits_strlen_null)

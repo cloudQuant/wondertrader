@@ -126,15 +126,23 @@ void ParserYD::notifyMarketData(const YDMarketData *pDepthMarketData)
 
 	const YDInstrument* instInfo = pDepthMarketData->m_pInstrument;
 	const YDExchange* exchgInfo = instInfo->m_pExchange;
+	std::size_t codeLength = 0;
+	while (codeLength < sizeof(instInfo->InstrumentID) && instInfo->InstrumentID[codeLength] != '\0')
+		++codeLength;
+	if (codeLength == sizeof(instInfo->InstrumentID))
+		return;
+	const std::string instrumentCode(instInfo->InstrumentID, codeLength);
 	uint32_t actDate = pDepthMarketData->TradingDay;
 	uint32_t actTime = pDepthMarketData->TimeStamp;
 	uint32_t actHour = actTime / 10000000;
 
-	WTSContractInfo* contract = m_pBaseDataMgr->getContract(instInfo->InstrumentID, exchgInfo->ExchangeID);
+	WTSContractInfo* contract = m_pBaseDataMgr->getContract(instrumentCode.c_str(), exchgInfo->ExchangeID);
 	if (contract == NULL)
 		return;
 
-	WTSTickData* tick = WTSTickData::create(instInfo->InstrumentID);
+	WTSTickData* tick = WTSTickData::create(instrumentCode.c_str());
+	if (tick == NULL)
+		return;
 	WTSTickStruct& quote = tick->getTickStruct();
 	wt_strcpy(quote.exchg, contract->getExchg());
 	tick->setContractInfo(contract);

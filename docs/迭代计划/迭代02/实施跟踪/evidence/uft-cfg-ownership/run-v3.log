@@ -1,0 +1,56 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 23 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 23 tests from UftTraderAdapterLifecycle
+[ RUN      ] UftTraderAdapterLifecycle.LateSinkReceivesCurrentReadyState
+[       OK ] UftTraderAdapterLifecycle.LateSinkReceivesCurrentReadyState (0 ms)
+[ RUN      ] UftTraderAdapterLifecycle.ReadyAndLostAreDeliveredInLinearizedOrder
+[       OK ] UftTraderAdapterLifecycle.ReadyAndLostAreDeliveredInLinearizedOrder (0 ms)
+[ RUN      ] UftTraderAdapterLifecycle.StopRequestBlocksNewCallbacksAndWaitDrainsInFlight
+[       OK ] UftTraderAdapterLifecycle.StopRequestBlocksNewCallbacksAndWaitDrainsInFlight (40 ms)
+[ RUN      ] UftTraderAdapterLifecycle.DirectReleaseFromSinkCallbackDefersApiCleanup
+[       OK ] UftTraderAdapterLifecycle.DirectReleaseFromSinkCallbackDefersApiCleanup (0 ms)
+[ RUN      ] UftTraderAdapterLifecycle.DirectReleaseFromApiCallbackDefersApiCleanup
+[       OK ] UftTraderAdapterLifecycle.DirectReleaseFromApiCallbackDefersApiCleanup (0 ms)
+[ RUN      ] UftTraderAdapterLifecycle.ManagerRequestsAllAdaptersAndDefersReleaseFromCallback
+[       OK ] UftTraderAdapterLifecycle.ManagerRequestsAllAdaptersAndDefersReleaseFromCallback (0 ms)
+[ RUN      ] UftTraderAdapterLifecycle.ManagerWaitsForEveryAdapterInFlightGate
+[       OK ] UftTraderAdapterLifecycle.ManagerWaitsForEveryAdapterInFlightGate (72 ms)
+[ RUN      ] UftTraderAdapterLifecycle.ManagerReleaseReentryDefersAndConcurrentCallerWaits
+[       OK ] UftTraderAdapterLifecycle.ManagerReleaseReentryDefersAndConcurrentCallerWaits (33 ms)
+[ RUN      ] UftTraderAdapterLifecycle.SpiCallbackReleaseReentryDefersAndDrainsBeforeManagerReturns
+[       OK ] UftTraderAdapterLifecycle.SpiCallbackReleaseReentryDefersAndDrainsBeforeManagerReturns (54 ms)
+[ RUN      ] UftTraderAdapterLifecycle.ManagerRetainsAdapterWhenProviderReleaseThrows
+[       OK ] UftTraderAdapterLifecycle.ManagerRetainsAdapterWhenProviderReleaseThrows (2 ms)
+[ RUN      ] UftTraderAdapterLifecycle.StopWaitIncludesApiConnectStartup
+[       OK ] UftTraderAdapterLifecycle.StopWaitIncludesApiConnectStartup (40 ms)
+[ RUN      ] UftTraderAdapterLifecycle.StopDuringSpiRegistrationPreventsConnectAndKeepsNotLoginState
+[       OK ] UftTraderAdapterLifecycle.StopDuringSpiRegistrationPreventsConnectAndKeepsNotLoginState (40 ms)
+[ RUN      ] UftTraderAdapterLifecycle.QueryCallLeaseBlocksReleaseAndRejectsReentrantWait
+[       OK ] UftTraderAdapterLifecycle.QueryCallLeaseBlocksReleaseAndRejectsReentrantWait (39 ms)
+[ RUN      ] UftTraderAdapterLifecycle.LoginReplyAfterCloseCannotAdvanceClosedSession
+[       OK ] UftTraderAdapterLifecycle.LoginReplyAfterCloseCannotAdvanceClosedSession (0 ms)
+[ RUN      ] UftTraderAdapterLifecycle.FailedPluginInitReleasesConfigAndAllowsRetry
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/uft_adapter_lifecycle_506170929168541/traders/libUftLifecycleMissingModule.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/uft_adapter_lifecycle_506170929168541/traders/libUftLifecycleMissingModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/uft_adapter_lifecycle_506170929168541/traders/libUftLifecycleMissingModule.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/uft_adapter_lifecycle_506170929168541/traders/libUftLifecycleMissingModule.dylib' (no such file), '/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/uft_adapter_lifecycle_506170929168541/traders/libUftLifecycleMissingModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/uft_adapter_lifecycle_506170929168541/traders/libUftLifecycleMissingModule.dylib' (no such file), '/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/uft_adapter_lifecycle_506170929168541/traders/libUftLifecycleMissingModule.dylib' (no such file)
+[       OK ] UftTraderAdapterLifecycle.FailedPluginInitReleasesConfigAndAllowsRetry (12 ms)
+[ RUN      ] UftTraderAdapterLifecycle.SuccessfulPluginReleaseIsIdempotentAndClosesAdapter
+[       OK ] UftTraderAdapterLifecycle.SuccessfulPluginReleaseIsIdempotentAndClosesAdapter (1 ms)
+[ RUN      ] UftTraderAdapterLifecycle.DestructorReleasesPluginConfigWithoutExplicitRelease
+[       OK ] UftTraderAdapterLifecycle.DestructorReleasesPluginConfigWithoutExplicitRelease (1 ms)
+[ RUN      ] UftTraderAdapterLifecycle.FailedExternalApiInitRollsBackAndAllowsRetry
+[       OK ] UftTraderAdapterLifecycle.FailedExternalApiInitRollsBackAndAllowsRetry (0 ms)
+[ RUN      ] UftTraderAdapterLifecycle.ConcurrentReleaseWaitsForSingleApiRelease
+[       OK ] UftTraderAdapterLifecycle.ConcurrentReleaseWaitsForSingleApiRelease (40 ms)
+[ RUN      ] UftTraderAdapterLifecycle.FakeFactoryThrowAndNullRollbackConfigAndAllowRetry
+[       OK ] UftTraderAdapterLifecycle.FakeFactoryThrowAndNullRollbackConfigAndAllowRetry (404 ms)
+[ RUN      ] UftTraderAdapterLifecycle.FakePluginInitFalseAndThrowRollbackInSafeOrderAndAllowRetry
+[       OK ] UftTraderAdapterLifecycle.FakePluginInitFalseAndThrowRollbackInSafeOrderAndAllowRetry (185 ms)
+[ RUN      ] UftTraderAdapterLifecycle.FailedInitCleanupFailuresRetainResourcesRejectRetryAndFailStop
+[       OK ] UftTraderAdapterLifecycle.FailedInitCleanupFailuresRetainResourcesRejectRetryAndFailStop (268 ms)
+[ RUN      ] UftTraderAdapterLifecycle.PluginCleanupThrowsAreCaughtAndDestructorFailsClosed
+[       OK ] UftTraderAdapterLifecycle.PluginCleanupThrowsAreCaughtAndDestructorFailsClosed (239 ms)
+[----------] 23 tests from UftTraderAdapterLifecycle (1478 ms total)
+
+[----------] Global test environment tear-down
+[==========] 23 tests from 1 test suite ran. (1478 ms total)
+[  PASSED  ] 23 tests.

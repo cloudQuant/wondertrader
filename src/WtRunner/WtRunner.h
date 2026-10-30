@@ -9,8 +9,12 @@
  * @details WtRunner是WonderTrader的主要运行器，负责管理交易引擎的初始化、配置和运行
  */
 #pragma once
+#include <atomic>
+#include <memory>
+#include <mutex>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "../Includes/ILogHandler.h"
 
@@ -22,6 +26,7 @@
 #include "../WtCore/WtCtaEngine.h"
 #include "../WtCore/WtHftEngine.h"
 #include "../WtCore/WtSelEngine.h"
+#include "../WtCore/WtExecMgr.h"
 #include "../WtCore/WtLocalExecuter.h"
 #include "../WtCore/WtDistExecuter.h"
 #include "../WtCore/TraderAdapter.h"
@@ -79,6 +84,14 @@ public:
 	 * @param bAsync 是否异步运行，默认为false
 	 */
 	void run(bool bAsync = false);
+
+	/**
+	 * @brief Stop this runner and quiesce every executor manager.
+	 * @details Call from a control thread. A false result leaves the runner and
+	 *          its executor owners alive; call again from a control thread after
+	 *          the active callback has returned to retry teardown.
+	 */
+	bool shutdown();
 
 private:
 	/**
@@ -140,6 +153,11 @@ private:
 	 */
 	bool initActionPolicy();
 
+	// Stops new notifications and quiesces all executor managers before releasing
+	// adapters. False leaves all runtime owners alive for a later control-thread
+	// retry; the persistent coordinator retains its manager/factory snapshots.
+	bool shutdownRuntime(bool stopEngines = true, bool fromConfigFailure = false);
+
 	/**
 	 * @brief 初始化交易引擎
 	 * @details 根据环境配置初始化交易引擎，设置相应的引擎类型（CTA、HFT或SEL）
@@ -167,6 +185,7 @@ private:
 	WtCtaEngine			_cta_engine;			//!< CTA交易引擎
 	WtHftEngine			_hft_engine;			//!< HFT高频交易引擎
 	WtSelEngine			_sel_engine;			//!< 选股交易引擎
+	std::unique_ptr<WtExecQuiesceCoordinator> _exec_quiesce; //!< Persistent coordinator for retries.
 	WtEngine*			_engine;				//!< 当前使用的交易引擎指针
 
 	[[maybe_unused]] WtDataStorage*		_data_store;			//!< 数据存储对象
@@ -185,6 +204,13 @@ private:
 	bool				_is_hft;				//!< 是否为高频交易模式
 	bool				_is_sel;				//!< 是否为选股模式
 
-	bool				_to_exit;				//!< 是否退出标志
+	std::atomic<bool> _to_exit;				//!< Exit flag shared by signal and control threads.
+	mutable std::recursive_mutex _lifecycle_mutex;
+	bool				_configuring = false;
+	bool				_runtime_starting = false;
+	bool				_shutdown_in_progress = false;
+	std::atomic<bool> _runtime_started;	//!< Runtime config is frozen after run begins.
+	std::atomic<bool> _shutdown_requested;	//!< Reject config after any shutdown attempt.
+	std::vector<ParserAdapterPtr> _failed_parser_owners; //!< Retain partial parser initializations fail-closed.
 };
 

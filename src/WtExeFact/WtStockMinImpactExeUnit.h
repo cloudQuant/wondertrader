@@ -127,6 +127,9 @@ public:
 	 */
 	virtual void init(ExecuteContext* ctx, const char* stdCode, WTSVariant* cfg) override;
 
+	// Non-virtual status for the versioned plugin adapter; keeps ExecuteUnit's vtable stable.
+	bool initializationSucceeded() const { return _initialization_succeeded; }
+
 		/**
 	 * @brief 订单状态回报处理
 	 * @details 处理订单状态变更的回报，包括撤单、成交等情况
@@ -247,6 +250,10 @@ private:
 	uint32_t	_expire_secs;
 	/** @brief 价格模式，对应BESTPX/LASTPX/MARKET/AUTOPX四种模式 */
 	int32_t		_price_mode;
+	/** @brief 价格模式是否在支持范围内；非法配置时整个执行单元保持禁用 */
+	bool		_price_mode_valid{ false };
+	/** @brief Complete initialization result for the versioned plugin adapter */
+	bool		_initialization_succeeded{ false };
 	/** @brief 发单时间间隔，单位毫秒，两次发单之间的最小时间间隔 */
 	uint32_t	_entrust_span;
 	/** @brief 是否按率下单，true表示按对手盘口数量比例下单，false表示按固定手数下单 */
@@ -331,19 +338,32 @@ public:
 		{
 			is_KC = true;
 		}
+		if (_ctx == nullptr)
+			return 0.0;
 		WTSCommodityInfo* comm_info = _ctx->getCommodityInfo(stdCode.c_str());
+		if (comm_info == nullptr)
+		{
+			_ctx->writeLog(fmt::format("StockMinImpact cannot determine minimum order quantity for {}: commodity information is unavailable", stdCode).c_str());
+			return 0.0;
+		}
+
+		const char* product = comm_info->getProduct();
+		if (product == nullptr)
+		{
+			_ctx->writeLog(fmt::format("StockMinImpact cannot determine minimum order quantity for {}: product information is unavailable", stdCode).c_str());
+			return 0.0;
+		}
+
 		double min_order = 1.0;
-		if (strcmp(comm_info->getProduct(), cbondStr) == 0)
+		if (strcmp(product, cbondStr) == 0)
 			min_order = 10.0;
-		else if (strcmp(comm_info->getProduct(), stockStr) == 0)
+		else if (strcmp(product, stockStr) == 0)
 		{
 			if (is_KC)
 				min_order = 200.0;
 			else
 				min_order = 100.0;
 		}
-		if (comm_info)
-			comm_info->release();
 		return min_order;
 	}
 };

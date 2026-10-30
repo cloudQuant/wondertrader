@@ -1,0 +1,53 @@
+{
+  "suite": "R71LocalSerialTest",
+  "binary": "build-cov/build_x64/Debug/bin/TestUnits/wt-local-focused",
+  "binary_sha256_at_archive": "cf23827a0e382544fd5669c51e7d4a18a5c179cfd4d2316048e6f7fedeb5a157",
+  "dependency_note": "The reported runs used the same focused binary and a rebuilt WtExeFact dependency.",
+  "initial_attempt": {
+    "log": "run-v3-initial-failure.log",
+    "tests_expected": 13,
+    "completed_passes_before_crash": 6,
+    "crashed_test": "R71LocalSerialTest.DifferentContractsCanRunCallbacksInParallel",
+    "exit_code": -11,
+    "signal": "SIGSEGV",
+    "stack_trace": null,
+    "diagnosis": "Undetermined; the preserved GTest output ends after the RUN line for the seventh test."
+  },
+  "same_binary_full_repeat": {
+    "log": "run-v3-full-repeat.log",
+    "tests": 13,
+    "passed": 13,
+    "failures": 0,
+    "exit_code": 0
+  },
+  "sequential_repeats": {
+    "runs": 20,
+    "tests_per_run": 13,
+    "passed_per_run": 13,
+    "failures_per_run": 0,
+    "exit_code_per_run": 0,
+    "logs": [
+      "wt-local-repeat-1.log",
+      "wt-local-repeat-2.log",
+      "wt-local-repeat-3.log",
+      "wt-local-repeat-4.log",
+      "wt-local-repeat-5.log",
+      "wt-local-repeat-6.log",
+      "wt-local-repeat-7.log",
+      "wt-local-repeat-8.log",
+      "wt-local-repeat-9.log",
+      "wt-local-repeat-10.log",
+      "wt-local-repeat-11.log",
+      "wt-local-repeat-12.log",
+      "wt-local-repeat-13.log",
+      "wt-local-repeat-14.log",
+      "wt-local-repeat-15.log",
+      "wt-local-repeat-16.log",
+      "wt-local-repeat-17.log",
+      "wt-local-repeat-18.log",
+      "wt-local-repeat-19.log",
+      "wt-local-repeat-20.log"
+    ]
+  },
+  "scope": "Local focused serialization harness only. The unexplained initial SIGSEGV remains material despite the same-binary repeat and 20 successful sequential runs. These results do not prove full production-chain, broker, sanitizer, or lifecycle acceptance."
+}

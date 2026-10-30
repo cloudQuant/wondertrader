@@ -49,6 +49,89 @@ CTPCreator		g_ctpCreator = NULL;
 // 请求编号
 int iRequestID = 0;
 
+namespace
+{
+	bool hasOnlyScalarValues(const WTSVariant* section, const char* const* fields, size_t count)
+	{
+		for (size_t i = 0; i < count; ++i)
+		{
+			WTSVariant* value = section->get(fields[i]);
+			if (value != NULL && (value->isObject() || value->isArray()))
+				return false;
+		}
+
+		return true;
+	}
+
+	bool applyVariantConfig(WTSVariant* root, std::string& map_files)
+	{
+		if (root == NULL || !root->isObject())
+			return false;
+
+		WTSVariant* ctp = root->get("ctp");
+		WTSVariant* cfg = root->get("config");
+		if (ctp == NULL || !ctp->isObject() || cfg == NULL || !cfg->isObject())
+			return false;
+
+		// Container values are not scalar configuration values. In particular,
+		// WTSVariant::asBoolean() assumes scalar storage and is unsafe for maps/arrays.
+		const char* const ctpFields[] = { "front", "broker", "user", "pass", "appid", "authcode", "onlyincfg", "incremental" };
+		const char* const configFields[] = { "path", "mask", "commfile", "contfile", "mapfiles", "module" };
+		if (!hasOnlyScalarValues(ctp, ctpFields, sizeof(ctpFields) / sizeof(ctpFields[0])) ||
+			!hasOnlyScalarValues(cfg, configFields, sizeof(configFields) / sizeof(configFields[0])))
+			return false;
+
+		// Parse all values into locals first. A malformed root/section/value must
+		// not leave the process-wide loader configuration partially overwritten.
+		std::string frontAddr = ctp->getCString("front");
+		std::string brokerId = ctp->getCString("broker");
+		std::string investorId = ctp->getCString("user");
+		std::string password = ctp->getCString("pass");
+		std::string appId = ctp->getCString("appid");
+		std::string authCode = ctp->getCString("authcode");
+		std::string savePath = cfg->getCString("path");
+		uint32_t classMask = cfg->getUInt32("mask"); //1-期货,2-期权,4-股票
+
+		std::string commFile = cfg->getCString("commfile");
+		if (commFile.empty())
+			commFile = "commodities.json";
+
+		std::string contFile = cfg->getCString("contfile");
+		if (contFile.empty())
+			contFile = "contracts.json";
+
+		std::string parsedMapFiles = cfg->getCString("mapfiles");
+		bool onlyInCfg = ctp->getBoolean("onlyincfg");
+		bool incremental = ctp->getBoolean("incremental");
+
+		std::string moduleName = cfg->getCString("module");
+		if (moduleName.empty())
+		{
+#ifdef _WIN32
+			moduleName = "./soptthosttraderapi_se.dll";
+#else
+			moduleName = "./soptthosttraderapi_se.so";
+#endif
+		}
+
+		FRONT_ADDR = frontAddr;
+		BROKER_ID = brokerId;
+		INVESTOR_ID = investorId;
+		PASSWORD = password;
+		APPID = appId;
+		AUTHCODE = authCode;
+		SAVEPATH = savePath;
+		CLASSMASK = classMask;
+		COMM_FILE = commFile;
+		CONT_FILE = contFile;
+		map_files = parsedMapFiles;
+		ONLYINCFG = onlyInCfg;
+		INCREMENTAL = incremental;
+		MODULE_NAME = moduleName;
+		return true;
+	}
+}
+
 #ifdef _MSC_VER
 #	define EXPORT_FLAG __declspec(dllexport)
 #else
@@ -77,41 +160,11 @@ int run(const char* cfgfile, bool bAsync = false, bool isFile = true)
 		WTSVariant* root = WTSCfgLoader::load_from_content(cfgfile, true);
 		if (root == NULL)
 			return 0;
-
-		WTSVariant* ctp = root->get("ctp");
-		FRONT_ADDR = ctp->getCString("front");
-		BROKER_ID = ctp->getCString("broker");
-		INVESTOR_ID = ctp->getCString("user");
-		PASSWORD = ctp->getCString("pass");
-		APPID = ctp->getCString("appid");
-		AUTHCODE = ctp->getCString("authcode");
-
-		WTSVariant* cfg = root->get("config");
-		SAVEPATH = cfg->getCString("path");
-		CLASSMASK = cfg->getUInt32("mask"); //1-期货,2-期权,4-股票
-
-		COMM_FILE = cfg->getCString("commfile");
-		if (COMM_FILE.empty())
-			COMM_FILE = "commodities.json";
-
-		CONT_FILE = cfg->getCString("contfile");
-		if (CONT_FILE.empty())
-			CONT_FILE = "contracts.json";
-
-		map_files = cfg->getCString("mapfiles");
-		ONLYINCFG = ctp->getBoolean("onlyincfg");
-		INCREMENTAL = ctp->getBoolean("incremental");
-
-		MODULE_NAME = cfg->getCString("module");
-		if (MODULE_NAME.empty())
+		if (!applyVariantConfig(root, map_files))
 		{
-#ifdef _WIN32
-			MODULE_NAME = "./soptthosttraderapi_se.dll";
-#else
-			MODULE_NAME = "./soptthosttraderapi_se.so";
-#endif
+			root->release();
+			return 0;
 		}
-
 		root->release();
 	}
 	else if (StrUtil::endsWith(cfgfile, ".ini"))
@@ -148,39 +201,10 @@ int run(const char* cfgfile, bool bAsync = false, bool isFile = true)
 		WTSVariant* root = WTSCfgLoader::load_from_file(cfgfile);
 		if (root == NULL)
 			return 0;
-
-		WTSVariant* ctp = root->get("ctp");
-		FRONT_ADDR = ctp->getCString("front");
-		BROKER_ID = ctp->getCString("broker");
-		INVESTOR_ID = ctp->getCString("user");
-		PASSWORD = ctp->getCString("pass");
-		APPID = ctp->getCString("appid");
-		AUTHCODE = ctp->getCString("authcode");
-
-		WTSVariant* cfg = root->get("config");
-		SAVEPATH = cfg->getCString("path");
-		CLASSMASK = cfg->getUInt32("mask"); //1-期货,2-期权,4-股票
-
-		COMM_FILE = cfg->getCString("commfile");
-		if (COMM_FILE.empty())
-			COMM_FILE = "commodities.json";
-
-		CONT_FILE = cfg->getCString("contfile");
-		if (CONT_FILE.empty())
-			CONT_FILE = "contracts.json";
-
-		map_files = cfg->getCString("mapfiles");
-		ONLYINCFG = ctp->getBoolean("onlyincfg");
-		INCREMENTAL = ctp->getBoolean("incremental");
-
-		MODULE_NAME = cfg->getCString("module");
-		if (MODULE_NAME.empty())
+		if (!applyVariantConfig(root, map_files))
 		{
-#ifdef _WIN32
-			MODULE_NAME = "./soptthosttraderapi_se.dll";
-#else
-			MODULE_NAME = "./soptthosttraderapi_se.so";
-#endif
+			root->release();
+			return 0;
 		}
 		root->release();
 	}

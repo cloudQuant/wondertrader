@@ -333,16 +333,28 @@ public:
 	 * @param args 参数列表
 	 */
 	template<typename... Args>
-	static void log_by_cat_prefix(const char* catName, WTSLogLevel ll, const char* /*format*/, const Args& .../*args*/)
+	static void log_by_cat_prefix(const char* catName, WTSLogLevel ll, const char* format, const Args& ...args)
 	{
-		if (m_logLevel > ll || m_bStopped)
+		if (catName == nullptr || m_logLevel > ll || m_bStopped)
 			return;
 
-		m_buffer[0] = '[';
-		strcpy(m_buffer + 1, catName);
-		auto offset = strlen(catName);
-		m_buffer[offset + 1] = ']';
-		[[maybe_unused]] char* s = m_buffer + offset + 2;
+		const auto body = fmt::format(format, args...);
+		const size_t contentCapacity = MAX_LOG_BUF_SIZE - 1;
+		const size_t bodyCapacity = contentCapacity - 2;
+		const size_t bodyLength = body.size() < bodyCapacity ? body.size() : bodyCapacity;
+		const size_t categoryCapacity = contentCapacity - bodyLength - 2;
+		size_t categoryLength = 0;
+		while (categoryLength < categoryCapacity && catName[categoryLength] != '\0')
+			++categoryLength;
+
+		size_t offset = 0;
+		m_buffer[offset++] = '[';
+		for (size_t i = 0; i < categoryLength; ++i)
+			m_buffer[offset++] = catName[i];
+		m_buffer[offset++] = ']';
+		for (size_t i = 0; i < bodyLength; ++i)
+			m_buffer[offset++] = body[i];
+		m_buffer[offset] = '\0';
 		log_raw_by_cat(catName, ll, m_buffer);
 	}
 

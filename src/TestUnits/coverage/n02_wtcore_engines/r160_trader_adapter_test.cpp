@@ -28,6 +28,45 @@ class R160TraderTest : public P11TraderTest
 {
 };
 
+class ScopedTraderPlugin
+{
+public:
+	~ScopedTraderPlugin()
+	{
+		if (_api)
+		{
+			_api->release();
+			if (_deleter)
+				_deleter(_api);
+			else
+				delete _api;
+		}
+		DLLHelper::free_library(_module);
+	}
+
+	bool load(const std::string& path)
+	{
+		_module = DLLHelper::load_library(path.c_str());
+		if (!_module)
+			return false;
+
+		FuncCreateTrader create = (FuncCreateTrader)DLLHelper::get_symbol(_module, "createTrader");
+		_deleter = (FuncDeleteTrader)DLLHelper::get_symbol(_module, "deleteTrader");
+		if (!create || !_deleter)
+			return false;
+
+		_api = create();
+		return _api != nullptr;
+	}
+
+	ITraderApi* api() const { return _api; }
+
+private:
+	DllHandle _module = nullptr;
+	ITraderApi* _api = nullptr;
+	FuncDeleteTrader _deleter = nullptr;
+};
+
 } // namespace
 
 // 走 init() 的真实插件装载链：createTrader -> api->init -> return true
@@ -68,17 +107,14 @@ TEST_F(R160TraderTest, R160InitLoadsTraderModuleAndParsesNodeConfig)
     EXPECT_EQ(static_cast<int>(adapter.state()), static_cast<int>(TraderAdapter::AS_NOTLOGIN));
     EXPECT_FALSE(adapter.isReady());
 
-    // 只验证 init 装载链；这里不能调 adapter.release()：
-    // TraderMocker::registerSpi 对 NULL 直接解引用（BUG-R175-001），release 必崩。
-    // 每用例独立进程，未 release 的 api 对象由进程回收。
+    // Adapter destruction releases and deletes the plugin-owned API.
 
     cfg->release();
     WtHelper::setInstDir(oldInst.c_str());
 }
 
-// BUG-R175-001 的可执行证据：TraderAdapter::release() 先 registerSpi(NULL)，
-// 而 TraderMocker::registerSpi 未判空（TraderMocker.cpp:659-664），必 SIGSEGV。
-TEST_F(R160TraderTest, DISABLED_R160ReleaseAfterInitCrashesInMockerRegisterSpi)
+// BUG-R175-001 回归：解除 SPI 后安全停止并销毁动态加载的插件。
+TEST_F(R160TraderTest, R160ReleaseAfterInitDetachesAndDeletesMocker)
 {
     const std::string binDir = r160::find_module_dir("TraderMocker");
     if (binDir.empty())
@@ -109,10 +145,41 @@ TEST_F(R160TraderTest, DISABLED_R160ReleaseAfterInitCrashesInMockerRegisterSpi)
     TraderAdapter adapter;
     ASSERT_TRUE(adapter.init("r160rel", cfg, &bd_, NULL));
 
-    adapter.release();   // 崩溃点：listener->getBaseDataMgr()
+	adapter.release();
+	adapter.release();   // Repeated cleanup must not release/delete the plugin twice.
 
     cfg->release();
     WtHelper::setInstDir(oldInst.c_str());
+}
+
+// disconnect() sets the termination flag but leaves the io worker alive;
+// release() must still stop and join it before the plugin object is deleted.
+TEST_F(R160TraderTest, R160DisconnectThenReleaseStillJoinsWorkers)
+{
+	const std::string moduleDir = r160::find_module_dir("TraderMocker");
+	if (moduleDir.empty())
+		GTEST_SKIP() << "libTraderMocker not found next to test binary";
+
+	r160::TempDir tmp("trader_disconnect_release");
+	r160::ScopedCwd cwd(tmp.path());
+	ASSERT_TRUE(cwd.ok());
+
+	const std::string moduleName = DLLHelper::wrap_module("TraderMocker", "lib");
+	const std::string modulePath = (std::filesystem::path(moduleDir) / moduleName).string();
+	ScopedTraderPlugin plugin;
+	ASSERT_TRUE(plugin.load(modulePath));
+
+	WTSVariant* cfg = WTSCfgLoader::load_from_content(
+		"{\"mockerid\":160162,\"span\":50,\"udp_port\":0}");
+	ASSERT_NE(cfg, nullptr);
+	ASSERT_TRUE(plugin.api()->init(cfg));
+	cfg->release();
+
+	// Port zero asks the OS for a local ephemeral UDP port. The mocker sends no
+	// packet to any remote service in this lifecycle test.
+	plugin.api()->connect();
+	plugin.api()->disconnect();
+	// ScopedTraderPlugin calls release() and deleteTrader() on scope exit.
 }
 
 // onRspEntrust 在错误回报下的三个代码形态 + close today 动作串

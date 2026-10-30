@@ -12,6 +12,7 @@
 #include "../Includes/FasterDefs.h"
 #include "../Includes/WTSCollection.hpp"
 #include <string>
+#include <vector>
 
 NS_WTP_BEGIN
 	class WTSSwitchItem;
@@ -44,6 +45,8 @@ public:
 
 	inline bool isInitialized() const {return m_bInitialized;}
 
+	// Returns this manager's tag snapshot. Element references and iterators are valid only until
+	// the next successful loadCustomRules() call or release().
 	const std::vector<std::string>& getHotTags() const;
 
 public:
@@ -92,5 +95,6 @@ private:
 	WTSCustomSwitchMap*	m_mapCustRules;
 	typedef wt_hashmap<std::string, wt_hashset<std::string>>	CustomSwitchCodes;
 	CustomSwitchCodes	m_mapCustCodes;
+	std::vector<std::string>	 m_vecHotTags;
 };
 

@@ -140,7 +140,10 @@ private:
 		~_StraFactInfo()
 		{
 			if (_fact)
+			{
 				_remover(_fact);
+				_fact = NULL;
+			}
 		}
 	} StraFactInfo;
 

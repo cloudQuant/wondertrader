@@ -10,6 +10,9 @@
 #pragma once
 #include <boost/shared_ptr.hpp>
 #include <boost/interprocess/detail/os_file_functions.hpp>
+#include <algorithm>
+#include <cstddef>
+#include <limits>
 #include <string>
 
 #if _MSC_VER
@@ -29,6 +32,47 @@ namespace bip = boost::interprocess;
 
 //struct OVERLAPPED;
 //extern "C" __declspec(dllimport) int __stdcall ReadFile(void *hnd, void *buffer, unsigned long bytes_to_write,unsigned long *bytes_written, OVERLAPPED* overlapped);
+namespace boost_file_detail
+{
+// The callback receives the destination offset and a request no larger than
+// max_chunk. It may return a short read; zero, a negative value, or a value
+// larger than the request is an error.
+template <typename ReadChunk>
+bool read_exact_chunks(std::size_t total, std::size_t max_chunk, ReadChunk&& read_chunk)
+{
+	if (total == 0)
+		return true;
+	if (max_chunk == 0)
+		return false;
+
+	std::size_t offset = 0;
+	while (offset < total)
+	{
+		const std::size_t chunk_end = offset + (std::min)(max_chunk, total - offset);
+		while (offset < chunk_end)
+		{
+			const std::size_t requested = chunk_end - offset;
+			const auto read_count = read_chunk(offset, requested);
+			if (read_count <= 0 || static_cast<std::size_t>(read_count) > requested)
+				return false;
+			offset += static_cast<std::size_t>(read_count);
+		}
+	}
+	return true;
+}
+
+inline std::size_t max_native_read_size()
+{
+	std::size_t max_size = static_cast<std::size_t>((std::numeric_limits<std::ptrdiff_t>::max)());
+#ifdef _WIN32
+	max_size = (std::min)(max_size, static_cast<std::size_t>((std::numeric_limits<DWORD>::max)()));
+#else
+	max_size = (std::min)(max_size, static_cast<std::size_t>((std::numeric_limits<ssize_t>::max)()));
+#endif
+	return max_size;
+}
+} // namespace boost_file_detail
+
 class BoostFile
 {
 public:
@@ -156,24 +200,43 @@ public:
 
 	bool read_file(void *data, std::size_t numdata)
 	{
-		unsigned long readbytes = 0;
+		if (!valid())
+			return false;
+		if (numdata == 0)
+			return true;
+		if (data == nullptr)
+			return false;
+
+		return boost_file_detail::read_exact_chunks(numdata,
+			boost_file_detail::max_native_read_size(),
+			[this, data](std::size_t offset, std::size_t requested) -> std::ptrdiff_t
+			{
 #ifdef _WIN32
-		int ret = ReadFile(_handle, data, (DWORD)numdata, &readbytes, NULL);
+				DWORD readbytes = 0;
+				if (!ReadFile(_handle, static_cast<char*>(data) + offset,
+					static_cast<DWORD>(requested), &readbytes, NULL))
+					return -1;
+				return static_cast<std::ptrdiff_t>(readbytes);
 #else
-		readbytes = read(_handle, data, (std::size_t)numdata);
+				const auto readbytes = read(_handle, static_cast<char*>(data) + offset, requested);
+				return static_cast<std::ptrdiff_t>(readbytes);
 #endif
-		return numdata == readbytes;
+			});
 	}
 
 	int read_file_length(void *data, std::size_t numdata)
 	{
 		unsigned long readbytes = 0;
 #ifdef _WIN32
-		int ret = ReadFile(_handle, data, (DWORD)numdata, &readbytes, NULL);
+		if (!ReadFile(_handle, data, (DWORD)numdata, &readbytes, NULL))
+			return -1;
 #else
-		readbytes = read(_handle, data, (std::size_t)numdata);
+		const auto result = read(_handle, data, (std::size_t)numdata);
+		if (result < 0)
+			return -1;
+		readbytes = static_cast<unsigned long>(result);
 #endif
-		return readbytes;
+		return static_cast<int>(readbytes);
 	}
 
 private:
@@ -190,11 +253,18 @@ public:
 		BoostFile bf;
 		if(!bf.open_existing_file(filename,bip::read_only))
 			return false;
-		unsigned int filesize=(unsigned int)bf.get_file_size();
-		if(filesize==0)
+		const unsigned long long filesize = bf.get_file_size();
+		if(filesize == 0 || filesize > (std::numeric_limits<std::size_t>::max)() ||
+			filesize > buffer.max_size())
 			return false;
-		buffer.resize(filesize);
-		return bf.read_file((void *)buffer.c_str(),filesize);
+		// Keep the caller's buffer unchanged when the read fails. C++17's mutable
+		// data() overload provides the writable destination expected by read_file.
+		std::string contents(static_cast<std::size_t>(filesize), '\0');
+		if (!bf.read_file(contents.data(), contents.size()))
+			return false;
+
+		buffer.swap(contents);
+		return true;
 	}
 
 	static bool write_file_contents(const char *filename,const void *pdata,uint32_t datalen)

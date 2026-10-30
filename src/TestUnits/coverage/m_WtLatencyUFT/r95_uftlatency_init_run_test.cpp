@@ -12,8 +12,8 @@
  *     （WtUftEngine::init 只在 _cfg 非空时 retain，但 run() 的 ticker 需要 env.product.session）。
  *   - env.product.session=ALLDAY，basefiles.session 指向自写时段文件；
  *     WtUftRtTicker 的 0~2400 单段让线程只做 10ms 轮询，析构 stop 时立刻 join。
- *   - TestParser/TestTrader 的 init(NULL) 取接口默认 false；UFT TraderAdapter::initExt
- *     甚至不看返回值（WtUftCore/TraderAdapter.cpp:90-101），不会 dlopen 插件、不起线程。
+ *   - TestParser 覆盖 init(NULL) 并返回 true，满足 ParserAdapter 的外部 API 所有权合同；
+ *     TestTrader 是本地替身，按顺序发送成功的空查询并可到达真实 adapter READY 状态。
  *   - run() 只对 times=0/1 取样：times=0 覆盖 TestParser::run 头尾（:41-44、:115-117）；
  *     times=1 且不加载合约，循环体在 :50-52 因 getContract 返回 NULL 早退。
  *
@@ -23,19 +23,136 @@
 
 #include <filesystem>
 #include <fstream>
+#include <atomic>
+#include <chrono>
+#include <condition_variable>
+#include <mutex>
 #include <string>
 #include <system_error>
+#include <thread>
+#include <vector>
 
 #include <unistd.h>
 
+#include "Includes/ILogHandler.h"
+#include "WTSTools/WTSLogger.h"
+#include "WtUftCore/TraderAdapter.h"
+#include "WtUftCore/UftStraContext.h"
+#include "WtUftCore/UftStrategyMgr.h"
+#include "WtUftCore/WtUftEngine.h"
+#include "WTSTools/WTSBaseDataMgr.h"
+
+#define private public
 #include "WtLatencyUFT/UftLatencyTool.h"
+#undef private
 
 /* 生产 TU UftLatencyTool.cpp:28 的自由函数（main.cpp:19 也是这样声明的） */
 void test_uft();
+namespace uft { class TestParser; }
 
 namespace {
 
 namespace stdfs = std::filesystem;
+using namespace wtp;
+
+class UftLatencyShutdownContext : public UftStraContext
+{
+public:
+	UftLatencyShutdownContext(WtUftEngine* engine) : UftStraContext(engine, "shutdown_gate"), _engine(engine) {}
+
+	void on_channel_ready(uint32_t) override
+	{
+		_owner_visible.store(_engine->getContext(id()).get() == this, std::memory_order_release);
+		std::unique_lock<std::mutex> lock(_mutex);
+		_entered = true;
+		_condition.notify_all();
+		_condition.wait(lock, [this]() { return _continue; });
+	}
+
+	bool waitUntilEntered()
+	{
+		std::unique_lock<std::mutex> lock(_mutex);
+		return _condition.wait_for(lock, std::chrono::seconds(3), [this]() { return _entered; });
+	}
+
+	void allowCallbackToReturn()
+	{
+		std::lock_guard<std::mutex> lock(_mutex);
+		_continue = true;
+		_condition.notify_all();
+	}
+
+	bool ownerWasVisible() const { return _owner_visible.load(std::memory_order_acquire); }
+
+private:
+	WtUftEngine* _engine;
+	std::atomic<bool> _owner_visible{false};
+	std::mutex _mutex;
+	std::condition_variable _condition;
+	bool _entered{false};
+	bool _continue{false};
+};
+
+class UftLatencyInitGateContext : public UftStraContext
+{
+public:
+	UftLatencyInitGateContext(WtUftEngine* engine) : UftStraContext(engine, "run_init_gate") {}
+
+	void on_init() override
+	{
+		std::unique_lock<std::mutex> lock(_mutex);
+		_entered = true;
+		_condition.notify_all();
+		_condition.wait(lock, [this]() { return _continue; });
+	}
+
+	bool waitUntilEntered()
+	{
+		std::unique_lock<std::mutex> lock(_mutex);
+		return _condition.wait_for(lock, std::chrono::seconds(3), [this]() { return _entered; });
+	}
+
+	void allowCallbackToReturn()
+	{
+		std::lock_guard<std::mutex> lock(_mutex);
+		_continue = true;
+		_condition.notify_all();
+	}
+
+private:
+	std::mutex _mutex;
+	std::condition_variable _condition;
+	bool _entered{false};
+	bool _continue{false};
+};
+
+class UftLatencySelfShutdownContext : public UftStraContext
+{
+public:
+	UftLatencySelfShutdownContext(WtUftEngine* engine, uft::UftLatencyTool* tool)
+		: UftStraContext(engine, "self_shutdown"), _engine(engine), _tool(tool) {}
+
+	void on_channel_ready(uint32_t) override
+	{
+		_shutdown_completed.store(_tool->shutdown(), std::memory_order_release);
+		_parser_preserved.store(_tool->_test_parser != nullptr, std::memory_order_release);
+		_context_preserved.store(_engine->getContext(id()).get() == this, std::memory_order_release);
+		_called.store(true, std::memory_order_release);
+	}
+
+	bool wasCalled() const { return _called.load(std::memory_order_acquire); }
+	bool shutdownCompleted() const { return _shutdown_completed.load(std::memory_order_acquire); }
+	bool parserWasPreserved() const { return _parser_preserved.load(std::memory_order_acquire); }
+	bool contextWasPreserved() const { return _context_preserved.load(std::memory_order_acquire); }
+
+private:
+	WtUftEngine* _engine;
+	uft::UftLatencyTool* _tool;
+	std::atomic<bool> _called{false};
+	std::atomic<bool> _shutdown_completed{false};
+	std::atomic<bool> _parser_preserved{false};
+	std::atomic<bool> _context_preserved{false};
+};
 
 class ScopedTempCwd
 {
@@ -84,6 +201,48 @@ private:
 	stdfs::path	m_dir;
 	bool		m_ok = false;
 };
+
+class TestLogHandler : public ILogHandler
+{
+public:
+	void handleLogAppend(WTSLogLevel level, const char* msg) override
+	{
+		if (level != LL_WARN && level != LL_ERROR)
+			return;
+		std::lock_guard<std::mutex> lock(m_mutex);
+		m_messages.emplace_back(msg != nullptr ? msg : "");
+	}
+
+	void clear()
+	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+		m_messages.clear();
+	}
+
+	std::vector<std::string> messages()
+	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+		return m_messages;
+	}
+
+private:
+	std::vector<std::string> m_messages;
+	std::mutex m_mutex;
+};
+
+TestLogHandler g_warning_log_handler;
+
+class ScopedWarningCapture
+{
+public:
+	ScopedWarningCapture() { WTSLogger::registerHandler(&g_warning_log_handler); }
+	~ScopedWarningCapture() { WTSLogger::registerHandler(nullptr); }
+};
+
+const char* kLogConfig =
+	"{\"root\":{\"level\":\"warn\",\"async\":false,\"sinks\":["
+	"{\"type\":\"basic_file_sink\",\"filename\":\"latency.log\","
+	"\"truncate\":true,\"pattern\":\"%v\"}]}}";
 
 bool write_text(const char* name, const std::string& text)
 {
@@ -189,6 +348,17 @@ const char* kConfigRunOneWithoutContract =
 	"times: 1\n"
 	"core: 0\n";
 
+const char* kConfigRunOneWithValidContract =
+	"basefiles:\n"
+	"    session: sessions.yaml\n"
+	"    commodity: commodities.yaml\n"
+	"    contract: contracts.yaml\n"
+	"env:\n"
+	"    product:\n"
+	"        session: ALLDAY\n"
+	"times: 1\n"
+	"core: 0\n";
+
 } // namespace
 
 /* -------------------------------------------------------------------------
@@ -245,31 +415,275 @@ TEST(r95_ufttool_run, zero_ticks_after_successful_init_exercises_engine_and_pars
 	ScopedTempCwd guard("run_zero");
 	ASSERT_TRUE(guard.ok());
 	ASSERT_TRUE(write_text("sessions.yaml", kSessionsYaml));
+	ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
 	ASSERT_TRUE(write_text("config.yaml", kConfigRunZero));
-
-	uft::UftLatencyTool tool;
-	ASSERT_TRUE(tool.init());
 
 	// :307-313 core==0 -> 不绑定 CPU
 	// :317/:318 parsers/traders 各一个内存适配器，connect 是接口默认空实现
 	// :320 _engine.run()：策略 on_init、启动 UftRtTicker（析构时 stop/join）
-	// :322 TestParser::run(0)：:41-44 初始化 + 跳过循环 + :115-117 计算/输出
-	EXPECT_NO_THROW(tool.run());
+	WTSLogger::init("logcfg.yaml");
+	g_warning_log_handler.clear();
+	bool init_ok = false;
+	bool repeated_init_ok = false;
+	bool run_threw = false;
+	{
+		ScopedWarningCapture capture;
+		{
+			uft::UftLatencyTool tool;
+			try
+			{
+				init_ok = tool.init();
+				if (init_ok)
+				{
+					repeated_init_ok = tool.init();
+					tool.run();
+				}
+			}
+			catch (...)
+			{
+				run_threw = true;
+			}
+		}
+	}
+	EXPECT_TRUE(init_ok);
+	EXPECT_FALSE(repeated_init_ok) << "init() is a one-shot operation";
+	EXPECT_FALSE(run_threw);
+	bool saw_no_samples = false;
+	for (const std::string& warning : g_warning_log_handler.messages())
+		saw_no_samples = saw_no_samples || warning.find("average latency unavailable (no samples)") != std::string::npos;
+	EXPECT_TRUE(saw_no_samples);
 }
 
-TEST(r95_ufttool_run, one_tick_without_contract_returns_before_tick_creation)
+TEST(r95_ufttool_run, run_after_failed_init_does_not_use_parser)
+{
+	ScopedTempCwd guard("run_failed_init");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
+	WTSLogger::init("logcfg.yaml");
+
+	g_warning_log_handler.clear();
+	bool init_ok = true;
+	{
+		ScopedWarningCapture capture;
+		{
+			uft::UftLatencyTool tool;
+			init_ok = tool.init();
+			tool.run();
+		}
+	}
+	EXPECT_FALSE(init_ok);
+	bool saw_not_initialized = false;
+	for (const std::string& message : g_warning_log_handler.messages())
+		saw_not_initialized = saw_not_initialized || message.find("before parser initialization succeeds") != std::string::npos;
+	EXPECT_TRUE(saw_not_initialized);
+}
+
+TEST(r95_ufttool_run, shutdown_after_run_stops_engine_before_releasing_parser)
+{
+	ScopedTempCwd guard("run_destroy");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(write_text("sessions.yaml", kSessionsYaml));
+	ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
+	ASSERT_TRUE(write_text("config.yaml", kConfigRunZero));
+
+	{
+		uft::UftLatencyTool tool;
+		ASSERT_TRUE(tool.init());
+		EXPECT_NO_THROW(tool.run());
+		EXPECT_NE(tool._test_parser, nullptr);
+		EXPECT_TRUE(tool.shutdown());
+		EXPECT_EQ(tool._test_parser, nullptr);
+	}
+}
+
+TEST(r95_ufttool_run, shutdown_waits_for_real_ready_callback_before_releasing_context)
+{
+	ScopedTempCwd guard("run_sink_shutdown");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(write_text("sessions.yaml", kSessionsYaml));
+	ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
+	ASSERT_TRUE(write_text("config.yaml", kConfigRunZero));
+	WTSLogger::init("logcfg.yaml");
+
+	uft::UftLatencyTool tool;
+	ASSERT_TRUE(tool.init());
+	TraderAdapterPtr adapter = tool._traders.getAdapter("trader");
+	ASSERT_NE(adapter.get(), nullptr);
+	std::shared_ptr<UftLatencyShutdownContext> context(new UftLatencyShutdownContext(&tool._engine));
+	context->setTrader(adapter.get());
+	tool._engine.addContext(UftContextPtr(context));
+	adapter->addSink(context.get());
+
+	std::thread runThread([&]() { tool.run(); });
+	const bool callbackEntered = context->waitUntilEntered();
+	if (!callbackEntered)
+	{
+		context->allowCallbackToReturn();
+		runThread.join();
+		FAIL() << "test trader did not reach a READY sink callback";
+	}
+	EXPECT_TRUE(context->ownerWasVisible());
+
+	std::atomic<bool> shutdown_done{false};
+	std::thread shutdownThread([&]() {
+		EXPECT_TRUE(tool.shutdown());
+		shutdown_done.store(true, std::memory_order_release);
+	});
+	std::this_thread::sleep_for(std::chrono::milliseconds(25));
+	EXPECT_FALSE(shutdown_done.load(std::memory_order_acquire));
+	EXPECT_NE(tool._engine.getContext(context->id()).get(), nullptr);
+
+	context->allowCallbackToReturn();
+	runThread.join();
+	shutdownThread.join();
+	EXPECT_TRUE(shutdown_done.load(std::memory_order_acquire));
+	EXPECT_NE(tool._engine.getContext(context->id()).get(), nullptr);
+	EXPECT_EQ(tool._test_parser, nullptr);
+}
+
+TEST(r95_ufttool_run, shutdown_waits_for_run_operation_before_releasing_parser)
+{
+	ScopedTempCwd guard("run_operation_shutdown");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(write_text("sessions.yaml", kSessionsYaml));
+	ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
+	ASSERT_TRUE(write_text("config.yaml", kConfigRunZero));
+	WTSLogger::init("logcfg.yaml");
+
+	uft::UftLatencyTool tool;
+	ASSERT_TRUE(tool.init());
+	std::shared_ptr<UftLatencyInitGateContext> context(new UftLatencyInitGateContext(&tool._engine));
+	tool._engine.addContext(UftContextPtr(context));
+
+	std::thread runThread([&]() { tool.run(); });
+	const bool operationEntered = context->waitUntilEntered();
+	if (!operationEntered)
+	{
+		context->allowCallbackToReturn();
+		runThread.join();
+		FAIL() << "UFT run did not enter the gated strategy initialization callback";
+	}
+
+	std::atomic<bool> shutdownDone{false};
+	std::thread shutdownThread([&]() {
+		EXPECT_TRUE(tool.shutdown());
+		shutdownDone.store(true, std::memory_order_release);
+	});
+	std::this_thread::sleep_for(std::chrono::milliseconds(25));
+	EXPECT_FALSE(shutdownDone.load(std::memory_order_acquire));
+	EXPECT_NE(tool._test_parser, nullptr);
+	EXPECT_FALSE(tool._shutdown_complete.load(std::memory_order_acquire));
+
+	context->allowCallbackToReturn();
+	runThread.join();
+	shutdownThread.join();
+	EXPECT_TRUE(shutdownDone.load(std::memory_order_acquire));
+	EXPECT_EQ(tool._test_parser, nullptr);
+	EXPECT_TRUE(tool._shutdown_complete.load(std::memory_order_acquire));
+}
+
+TEST(r95_ufttool_run, shutdown_called_from_ready_callback_defers_without_self_wait)
+{
+	ScopedTempCwd guard("run_callback_shutdown");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(write_text("sessions.yaml", kSessionsYaml));
+	ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
+	ASSERT_TRUE(write_text("config.yaml", kConfigRunZero));
+	WTSLogger::init("logcfg.yaml");
+
+	uft::UftLatencyTool tool;
+	ASSERT_TRUE(tool.init());
+	TraderAdapterPtr adapter = tool._traders.getAdapter("trader");
+	ASSERT_NE(adapter.get(), nullptr);
+	std::shared_ptr<UftLatencySelfShutdownContext> context(
+		new UftLatencySelfShutdownContext(&tool._engine, &tool));
+	context->setTrader(adapter.get());
+	tool._engine.addContext(UftContextPtr(context));
+	adapter->addSink(context.get());
+
+	EXPECT_NO_THROW(tool.run());
+	EXPECT_TRUE(context->wasCalled());
+	EXPECT_FALSE(context->shutdownCompleted());
+	EXPECT_TRUE(context->parserWasPreserved());
+	EXPECT_TRUE(context->contextWasPreserved());
+	EXPECT_TRUE(tool._shutdown_complete.load(std::memory_order_acquire));
+	EXPECT_EQ(tool._test_parser, nullptr);
+}
+
+TEST(r95_ufttool_run, one_tick_without_contract_reports_and_returns)
 {
 	ScopedTempCwd guard("run_one");
 	ASSERT_TRUE(guard.ok());
 	ASSERT_TRUE(write_text("sessions.yaml", kSessionsYaml));
+	ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
 	ASSERT_TRUE(write_text("config.yaml", kConfigRunOneWithoutContract));
+	WTSLogger::init("logcfg.yaml");
 
-	uft::UftLatencyTool tool;
-	ASSERT_TRUE(tool.init());
+	g_warning_log_handler.clear();
+	bool init_ok = false;
+	bool run_threw = false;
+	{
+		ScopedWarningCapture capture;
+		{
+			uft::UftLatencyTool tool;
+			init_ok = tool.init();
+			if (init_ok)
+			{
+				try
+				{
+					tool.run();
+				}
+				catch (...)
+				{
+					run_threw = true;
+				}
+			}
+		}
+	}
+	EXPECT_TRUE(init_ok);
+	EXPECT_FALSE(run_threw);
+	bool saw_missing_contract = false;
+	for (const std::string& warning : g_warning_log_handler.messages())
+		saw_missing_contract = saw_missing_contract || warning.find("contract SHFE.rb2205 not found") != std::string::npos;
+	EXPECT_TRUE(saw_missing_contract);
+}
 
-	// :45-52 循环进入一次，_bd_mgr->getContract("rb2205","SHFE") 为 NULL -> 直接 return，
-	// 不会创建 WTSTickData，也不会触发策略 on_tick/下单。
-	EXPECT_NO_THROW(tool.run());
+TEST(r95_ufttool_run, one_tick_with_contract_and_commodity_runs)
+{
+	ScopedTempCwd guard("run_valid_one");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(prepare_base());
+	ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
+	ASSERT_TRUE(write_text("config.yaml", kConfigRunOneWithValidContract));
+	WTSLogger::init("logcfg.yaml");
+
+	g_warning_log_handler.clear();
+	bool init_ok = false;
+	bool run_threw = false;
+	{
+		ScopedWarningCapture capture;
+		{
+			uft::UftLatencyTool tool;
+			init_ok = tool.init();
+			if (init_ok)
+			{
+				try
+				{
+					tool.run();
+				}
+				catch (...)
+				{
+					run_threw = true;
+				}
+			}
+		}
+	}
+	EXPECT_TRUE(init_ok);
+	EXPECT_FALSE(run_threw);
+	bool saw_completed_tick = false;
+	for (const std::string& warning : g_warning_log_handler.messages())
+		saw_completed_tick = saw_completed_tick || warning.find("1 ticks simulated in") != std::string::npos;
+	EXPECT_TRUE(saw_completed_tick);
 }
 
 /* -------------------------------------------------------------------------

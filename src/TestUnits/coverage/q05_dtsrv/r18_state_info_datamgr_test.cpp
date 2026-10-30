@@ -12,11 +12,11 @@
  *  （StateMonitor.h:169-222）从未被独立喂过输入。本文件用纯内存的 StateInfo /
  *  StateMonitor 直接覆盖，不读挂钟、不起线程、不 sleep。
  *
- * DataManager 侧补的是 init 的两条命名分支：
+ * DataManager 侧覆盖 init 的命名分支与 writer 插件失败清理：
  *  - 配置里没有 module -> DataManager.cpp:73-74 用 WtHelper::get_module_dir() 拼
  *    DLLHelper::wrap_module("WtDataStorage") 的默认写手名
  *  - 配置写了 module   -> :75-76 用给定名字拼路径
- * 两条都在 load_library 失败处收口（:100-104），不加载任何插件。
+ * 两条都覆盖模块路径；另验证参数为空及已加载但缺少 writer 符号的模块失败时安全收口。
  */
 #include <gtest/gtest.h>
 
@@ -210,30 +210,25 @@ TEST_F(R18StateInfoTest, DataManagerInitFailsOnMissingModuleFileBothWays)
 }
 
 /*
- * 触发条件（禁用原因）：DataManager::init（DataManager.cpp:67-72）对 params 没有判空，
- * params==NULL 时 `params->getCString("module")` 直接解引用空指针 -> SIGSEGV。
- * 缺陷登记：docs/迭代计划/迭代01/bugs/R18_wtdtcore.md BUG-R18-006。
+ * 空配置应在访问字段前明确失败，且实例仍可安全 release。
  */
-TEST_F(R18StateInfoTest, DISABLED_InitCrashesWhenParamsIsNull)
+TEST_F(R18StateInfoTest, InitRejectsNullParams)
 {
-	const fs::path binDir = _dir / "bin2";
-	fs::create_directories(binDir);
-	WtHelper::set_module_dir((binDir.string() + "/").c_str());
-
 	DataManager dm;
-	dm.init(nullptr, nullptr, nullptr);	// 崩在 :72
+	EXPECT_FALSE(dm.init(nullptr, nullptr, nullptr));
+	EXPECT_FALSE(dm.writeTick(nullptr, 0));
+	EXPECT_EQ(dm.getCurTick("600000", "SSE"), nullptr);
+	dm.release();
+	dm.release();
 }
 
 /*
- * 触发条件（禁用原因）：模块加载成功但找不到 createWriter / deleteWriter 时，
- * :84 与 :90 只打日志、:93 的 && 不成立 -> _writer 保持 NULL，
- * 而 :106 无条件执行 `_writer->init(params, this)` -> 空指针解引用 SIGSEGV。
+ * 模块已加载但缺少 createWriter / deleteWriter 时应释放动态库并返回失败，
+ * 不能继续解引用空 writer。
  * 复现材料：把任意一个真实 Mach-O dylib 复制成模块目录里的 libWtDataStorage.dylib
  * （本机没有可用第三方 dylib 时该用例自动跳过）。
- * 同样崩溃的还有 createWriter 存在但返回 NULL 的情况。
- * 缺陷登记：docs/迭代计划/迭代01/bugs/R18_wtdtcore.md BUG-R18-007。
  */
-TEST_F(R18StateInfoTest, DISABLED_InitCrashesWhenLoadedModuleHasNoWriterSymbols)
+TEST_F(R18StateInfoTest, InitRejectsLoadedModuleWithoutWriterSymbols)
 {
 	const fs::path binDir = _dir / "bin3";
 	fs::create_directories(binDir);
@@ -255,9 +250,11 @@ TEST_F(R18StateInfoTest, DISABLED_InitCrashesWhenLoadedModuleHasNoWriterSymbols)
 	WTSVariant* params = WTSCfgLoader::load_from_file((_dir / "c.json").string().c_str());
 	ASSERT_NE(params, nullptr);
 	DataManager dm;
-	// 走到 :106 即崩
-	dm.init(params, nullptr, nullptr);
+	EXPECT_FALSE(dm.init(params, nullptr, nullptr));
+	EXPECT_FALSE(dm.writeTick(nullptr, 0));
+	EXPECT_EQ(dm.getCurTick("600000", "SSE"), nullptr);
 	params->release();
+	dm.release();
 }
 
 }  // namespace

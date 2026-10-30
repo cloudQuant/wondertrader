@@ -46,6 +46,8 @@ typedef std::shared_ptr<MQClient> MQClientPtr;
  */
 class MQManager
 {
+	friend struct MQClientTestAccess;
+
 public:
 	/**
 	 * @brief 构造函数

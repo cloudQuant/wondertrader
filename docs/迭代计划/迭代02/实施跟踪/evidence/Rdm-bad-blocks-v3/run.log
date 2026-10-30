@@ -1,0 +1,56 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R94RdmBadBlockRetryTest.*:R94RdmEmptyKlineTest.*:Q03RdmTickTest.adjusted_stock_kline_rejects_fragments_and_reads_complete_raw_cmp
+[==========] Running 20 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from Q03RdmTickTest
+[ RUN      ] Q03RdmTickTest.adjusted_stock_kline_rejects_fragments_and_reads_complete_raw_cmp
+[       OK ] Q03RdmTickTest.adjusted_stock_kline_rejects_fragments_and_reads_complete_raw_cmp (2 ms)
+[----------] 1 test from Q03RdmTickTest (2 ms total)
+
+[----------] 15 tests from R94RdmBadBlockRetryTest
+[ RUN      ] R94RdmBadBlockRetryTest.tick_by_date_rejects_corrupt_block_and_same_reader_retries
+[       OK ] R94RdmBadBlockRetryTest.tick_by_date_rejects_corrupt_block_and_same_reader_retries (1 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.tick_range_discards_prior_day_slice_and_retries
+[       OK ] R94RdmBadBlockRetryTest.tick_range_discards_prior_day_slice_and_retries (1 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.tick_count_rejects_corrupt_history_and_retries
+[       OK ] R94RdmBadBlockRetryTest.tick_count_rejects_corrupt_history_and_retries (1 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.absent_tick_history_remains_an_empty_read
+[       OK ] R94RdmBadBlockRetryTest.absent_tick_history_remains_an_empty_read (0 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.plain_bar_range_rejects_corruption_and_same_reader_retries
+[       OK ] R94RdmBadBlockRetryTest.plain_bar_range_rejects_corruption_and_same_reader_retries (1 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.plain_bar_count_rejects_corruption_and_same_reader_retries
+[       OK ] R94RdmBadBlockRetryTest.plain_bar_count_rejects_corruption_and_same_reader_retries (1 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.absent_plain_bar_history_is_not_logged_as_corrupt
+[       OK ] R94RdmBadBlockRetryTest.absent_plain_bar_history_is_not_logged_as_corrupt (0 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.header_only_plain_bar_block_remains_an_empty_read
+[       OK ] R94RdmBadBlockRetryTest.header_only_plain_bar_block_remains_an_empty_read (0 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.empty_adjusted_layer_falls_back_to_base_bars_for_range
+[       OK ] R94RdmBadBlockRetryTest.empty_adjusted_layer_falls_back_to_base_bars_for_range (0 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.empty_adjusted_layer_falls_back_to_base_bars_for_count
+[       OK ] R94RdmBadBlockRetryTest.empty_adjusted_layer_falls_back_to_base_bars_for_count (0 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.legacy_empty_cmp_adjusted_layer_falls_back_for_range
+[       OK ] R94RdmBadBlockRetryTest.legacy_empty_cmp_adjusted_layer_falls_back_for_range (1 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.legacy_empty_cmp_adjusted_layer_falls_back_for_count
+[       OK ] R94RdmBadBlockRetryTest.legacy_empty_cmp_adjusted_layer_falls_back_for_count (1 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.malformed_legacy_empty_cmp_adjusted_layer_is_rejected
+[       OK ] R94RdmBadBlockRetryTest.malformed_legacy_empty_cmp_adjusted_layer_is_rejected (0 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.continuous_bar_failure_frees_prior_sections_and_retries
+[       OK ] R94RdmBadBlockRetryTest.continuous_bar_failure_frees_prior_sections_and_retries (1 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.adjusted_continuation_failure_releases_hot_buffer_and_retries
+[       OK ] R94RdmBadBlockRetryTest.adjusted_continuation_failure_releases_hot_buffer_and_retries (1 ms)
+[----------] 15 tests from R94RdmBadBlockRetryTest (16 ms total)
+
+[----------] 4 tests from R94RdmEmptyKlineTest
+[ RUN      ] R94RdmEmptyKlineTest.R94RdmCmpAdjustedFileWithZeroSizeIsEmpty
+[       OK ] R94RdmEmptyKlineTest.R94RdmCmpAdjustedFileWithZeroSizeIsEmpty (0 ms)
+[ RUN      ] R94RdmEmptyKlineTest.R94RdmRawAdjustedFileWithHeaderOnlyIsEmpty
+[       OK ] R94RdmEmptyKlineTest.R94RdmRawAdjustedFileWithHeaderOnlyIsEmpty (0 ms)
+[ RUN      ] R94RdmEmptyKlineTest.R94RdmRawContinuationFileHeaderOnlyKeepsAdjustedBars
+[       OK ] R94RdmEmptyKlineTest.R94RdmRawContinuationFileHeaderOnlyKeepsAdjustedBars (0 ms)
+[ RUN      ] R94RdmEmptyKlineTest.R94RdmPlainFileHeaderOnlyReturnsFalse
+[       OK ] R94RdmEmptyKlineTest.R94RdmPlainFileHeaderOnlyReturnsFalse (0 ms)
+[----------] 4 tests from R94RdmEmptyKlineTest (3 ms total)
+
+[----------] Global test environment tear-down
+[==========] 20 tests from 3 test suites ran. (21 ms total)
+[  PASSED  ] 20 tests.

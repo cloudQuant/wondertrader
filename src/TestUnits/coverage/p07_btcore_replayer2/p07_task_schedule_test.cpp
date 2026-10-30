@@ -44,8 +44,8 @@ namespace
 		return path;
 	}
 
-	WTSVariant* task_cfg(const std::filesystem::path& root, const std::filesystem::path& base,
-		uint64_t stime, uint64_t etime)
+	WTSVariant* task_cfg_text(const std::filesystem::path& root, const std::filesystem::path& base,
+		const char* stime, const char* etime)
 	{
 		WTSVariant* cfg = WTSVariant::createObject();
 		cfg->append("mode", "csv");
@@ -65,6 +65,14 @@ namespace
 		cfg->append("basefiles", basefiles);
 		basefiles->release();
 		return cfg;
+	}
+
+	WTSVariant* task_cfg(const std::filesystem::path& root, const std::filesystem::path& base,
+		uint64_t stime, uint64_t etime)
+	{
+		const std::string beginText = std::to_string(stime);
+		const std::string endText = std::to_string(etime);
+		return task_cfg_text(root, base, beginText.c_str(), endText.c_str());
 	}
 
 	/*
@@ -153,6 +161,24 @@ protected:
 		replayer.run(false);
 		return true;
 	}
+
+	bool run_once_text(uint32_t time, const char* stime, const char* etime, TaskSink& sink)
+	{
+		HisDataReplayer replayer;
+		WTSVariant* cfg = task_cfg_text(_root, _base, stime, etime);
+		if (!replayer.init(cfg))
+		{
+			cfg->release();
+			return false;
+		}
+		cfg->release();
+		replayer.register_sink(&sink, "p07_task_range");
+		replayer.register_task(1, 0, time, "min", "CHINA", "SD0930");
+		if (!replayer.prepare())
+			return false;
+		replayer.run(false);
+		return true;
+	}
 };
 
 /*
@@ -207,34 +233,212 @@ TEST_F(P07TaskScheduleTest, weeklyTaskFiresOnlyOnTargetWeekday)
 
 /*
  * TPT_Monthly 的公开 register_task 契约规定 day 为 1..31。
- * 在 20200102-20200103 的 SD0930 回放窗口中，每月 2 日任务应只触发
- * 20200102 一次，并在任务时间前一分钟（14:59）调度。
+ * 在 20200102-20200303 的 SD0930 回放窗口中，每月 2 日任务应触发
+ * 20200102、20200203（2 日休市后顺延）和 20200302。中间交易日不触发，
+ * 并且每个目标月份仅触发一次。
  */
 TEST_F(P07TaskScheduleTest, monthlyTaskUsesDayOfMonthContract)
 {
 	TaskSink sink;
-	ASSERT_TRUE(run_once(2, 1500, "m", 202001020930ull, 202001031500ull, sink));
+	ASSERT_TRUE(run_once(2, 1500, "m", 202001020930ull, 202003031500ull, sink));
 
-	ASSERT_EQ(1u, sink.scheduleCalls);
-	EXPECT_EQ(std::vector<uint32_t>({20200102u}), sink.scheduleDates);
+	ASSERT_EQ(3u, sink.scheduleCalls);
+	EXPECT_EQ(std::vector<uint32_t>({20200102u, 20200203u, 20200302u}), sink.scheduleDates);
+	EXPECT_EQ(std::vector<uint32_t>({TimeUtils::getNextMinute(1500, -1),
+		TimeUtils::getNextMinute(1500, -1), TimeUtils::getNextMinute(1500, -1)}), sink.scheduleTimes);
+	EXPECT_EQ(3u, sink.beginCalls);
+	EXPECT_EQ(4u, sink.endCalls);
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+}
+
+TEST_F(P07TaskScheduleTest, dailyTaskDoesNotDispatchAfterRangeEnd)
+{
+	TaskSink sink;
+	ASSERT_TRUE(run_once(0, 1500, "d", 202001020930ull, 202001021200ull, sink));
+
+	EXPECT_TRUE(sink.scheduleDates.empty());
+	EXPECT_TRUE(sink.scheduleTimes.empty());
+	EXPECT_EQ(0u, sink.tickCalls);
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+}
+
+TEST_F(P07TaskScheduleTest, dailyTaskSkipsCloseBeforeRangeStartAndFiresNextDate)
+{
+	TaskSink sink;
+	ASSERT_TRUE(run_once(0, 1500, "d", 20200102150030ull, 202001031500ull, sink));
+
+	EXPECT_EQ(std::vector<uint32_t>({20200103u}), sink.scheduleDates);
 	EXPECT_EQ(std::vector<uint32_t>({TimeUtils::getNextMinute(1500, -1)}), sink.scheduleTimes);
-	EXPECT_EQ(1u, sink.beginCalls);
-	EXPECT_EQ(2u, sink.endCalls);
+	EXPECT_EQ(0u, sink.tickCalls);
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+}
+
+TEST_F(P07TaskScheduleTest, nightSessionDailyTaskDoesNotDispatchPastNaturalDateEnd)
+{
+	TaskSink sink;
+	ASSERT_TRUE(run_once(0, 230, "d", 202001022100ull, 202001030228ull, sink, "FN0230"));
+
+	// The 02:30 daily task fires at 02:29 on the natural date after the night
+	// session starts. This range ends one minute before that event.
+	EXPECT_TRUE(sink.scheduleDates.empty());
+	EXPECT_TRUE(sink.scheduleTimes.empty());
+	EXPECT_EQ(0u, sink.tickCalls);
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+}
+
+TEST_F(P07TaskScheduleTest, minuteStepAlignedBeyondRangeEndDoesNotDispatch)
+{
+	TaskSink sink;
+	ASSERT_TRUE(run_once(0, 5, "min", 202001020932ull, 202001020932ull, sink));
+
+	EXPECT_TRUE(sink.scheduleDates.empty());
+	EXPECT_TRUE(sink.scheduleTimes.empty());
+	EXPECT_EQ(0u, sink.tickCalls);
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+}
+
+TEST_F(P07TaskScheduleTest, minuteTaskCeilsOffGridStartAndAdvancesByStep)
+{
+	TaskSink sink;
+	ASSERT_TRUE(run_once(0, 5, "min", 202001020937ull, 202001020952ull, sink));
+
+	EXPECT_EQ(std::vector<uint32_t>({20200102u, 20200102u, 20200102u}), sink.scheduleDates);
+	EXPECT_EQ(std::vector<uint32_t>({940u, 945u, 950u}), sink.scheduleTimes);
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+}
+
+TEST_F(P07TaskScheduleTest, minuteTaskStartingOnBoundaryDispatchesThatBoundary)
+{
+	TaskSink sink;
+	ASSERT_TRUE(run_once(0, 5, "min", 202001020935ull, 202001020945ull, sink));
+
+	EXPECT_EQ(std::vector<uint32_t>({20200102u, 20200102u, 20200102u}), sink.scheduleDates);
+	EXPECT_EQ(std::vector<uint32_t>({935u, 940u, 945u}), sink.scheduleTimes);
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+}
+
+TEST_F(P07TaskScheduleTest, minuteTaskSkipsLunchGapAndResumesOnSessionLinearGrid)
+{
+	TaskSink sink;
+	ASSERT_TRUE(run_once(0, 5, "min", 202001021127ull, 202001021311ull, sink));
+
+	EXPECT_EQ(std::vector<uint32_t>({20200102u, 20200102u, 20200102u}), sink.scheduleDates);
+	EXPECT_EQ(std::vector<uint32_t>({1130u, 1305u, 1310u}), sink.scheduleTimes);
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+}
+
+TEST_F(P07TaskScheduleTest, minuteTaskStartingInsideLunchMovesToNextSection)
+{
+	TaskSink sink;
+	ASSERT_TRUE(run_once(0, 5, "min", 202001021200ull, 202001021310ull, sink));
+
+	EXPECT_EQ(std::vector<uint32_t>({20200102u, 20200102u, 20200102u}), sink.scheduleDates);
+	EXPECT_EQ(std::vector<uint32_t>({1300u, 1305u, 1310u}), sink.scheduleTimes);
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+}
+
+TEST_F(P07TaskScheduleTest, minuteTaskStepGridContinuesAcrossOffsetMidnight)
+{
+	TaskSink sink;
+	ASSERT_TRUE(run_once(0, 5, "min", 202001022200ull, 202001030010ull, sink, "FN0230"));
+
+	ASSERT_EQ(27u, sink.scheduleDates.size());
+	ASSERT_EQ(27u, sink.scheduleTimes.size());
+	for (uint32_t i = 0; i < 27u; ++i)
+	{
+		const uint32_t elapsed = i * 5u;
+		const uint32_t totalMinutes = 22u * 60u + elapsed;
+		const uint32_t expectedDate = totalMinutes >= 24u * 60u ? 20200103u : 20200102u;
+		const uint32_t minuteOfDay = totalMinutes % (24u * 60u);
+		const uint32_t expectedTime = minuteOfDay / 60u * 100u + minuteOfDay % 60u;
+		EXPECT_EQ(expectedDate, sink.scheduleDates[i]) << "index " << i;
+		EXPECT_EQ(expectedTime, sink.scheduleTimes[i]) << "index " << i;
+	}
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+}
+
+TEST_F(P07TaskScheduleTest, minuteTaskOffGridStartBeforeEndDoesNotRepeatEarlierTime)
+{
+	TaskSink sink;
+	ASSERT_TRUE(run_once(0, 5, "min", 202001020937ull, 202001020939ull, sink));
+
+	EXPECT_TRUE(sink.scheduleDates.empty());
+	EXPECT_TRUE(sink.scheduleTimes.empty());
+	EXPECT_EQ(0u, sink.tickCalls);
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+}
+
+TEST_F(P07TaskScheduleTest, minuteTaskNearCloseDoesNotDispatchAfterRangeEnd)
+{
+	TaskSink sink;
+	ASSERT_TRUE(run_once(0, 5, "min", 202001021458ull, 202001021459ull, sink));
+
+	EXPECT_TRUE(sink.scheduleDates.empty());
+	EXPECT_TRUE(sink.scheduleTimes.empty());
+	EXPECT_EQ(0u, sink.tickCalls);
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+}
+
+TEST_F(P07TaskScheduleTest, minuteTaskWithZeroStepFailsClosed)
+{
+	TaskSink sink;
+	ASSERT_TRUE(run_once(0, 0, "min", 202001020930ull, 202001020932ull, sink));
+
+	EXPECT_TRUE(sink.scheduleDates.empty());
+	EXPECT_TRUE(sink.scheduleTimes.empty());
+	EXPECT_EQ(0u, sink.tickCalls);
 	EXPECT_EQ(1u, sink.replayDoneCalls);
 }
 
 /*
  * TPT_Yearly 的公开 TaskInfo 契约要求 day 为 MMDD（0101..1231）。
- * 20200101 是 CHINA 节假日，day=0101 的年度任务应顺延到 20200102 首个交易日执行一次。
+ * 连续三个年份的 0101 均为节假日/周末，任务应各自顺延到首个交易日，且每年仅触发一次。
+ * 2022-01-03 也列在 CHINA 假日表中，因此该年的首个开市日为 2022-01-04。
  */
-TEST_F(P07TaskScheduleTest, yearlyTaskFiresOnYearBoundaryCrossing)
+TEST_F(P07TaskScheduleTest, yearlyJanFirstTaskFiresOncePerYearAfterHoliday)
 {
 	TaskSink sink;
-	ASSERT_TRUE(run_once(101, 1500, "y", 202001020930ull, 202001031500ull, sink));
+	ASSERT_TRUE(run_once(101, 1500, "y", 201912300930ull, 202201051500ull, sink));
+
+	ASSERT_EQ(3u, sink.scheduleCalls);
+	EXPECT_EQ(std::vector<uint32_t>({20200102u, 20210104u, 20220104u}), sink.scheduleDates);
+	EXPECT_EQ(std::vector<uint32_t>({TimeUtils::getNextMinute(1500, -1),
+		TimeUtils::getNextMinute(1500, -1), TimeUtils::getNextMinute(1500, -1)}), sink.scheduleTimes);
+	EXPECT_EQ(3u, sink.beginCalls);
+	EXPECT_EQ(4u, sink.endCalls);
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+}
+
+TEST_F(P07TaskScheduleTest, yearlyTaskDoesNotFireBeforeNewYearTarget)
+{
+	TaskSink sink;
+	ASSERT_TRUE(run_once(101, 1500, "y", 202012290930ull, 202012311500ull, sink));
+
+	EXPECT_EQ(0u, sink.scheduleCalls);
+	EXPECT_EQ(0u, sink.beginCalls);
+	EXPECT_EQ(1u, sink.endCalls);
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+}
+
+TEST_F(P07TaskScheduleTest, yearlyTaskFiresAtLastCalendarDay)
+{
+	TaskSink sink;
+	ASSERT_TRUE(run_once(1231, 1500, "y", 202012300930ull, 202101041500ull, sink));
 
 	ASSERT_EQ(1u, sink.scheduleCalls);
-	EXPECT_EQ(20200102u, sink.scheduleDates[0]);
-	EXPECT_EQ(TimeUtils::getNextMinute(1500, -1), sink.scheduleTimes[0]);
+	EXPECT_EQ(std::vector<uint32_t>({20201231u}), sink.scheduleDates);
+	EXPECT_EQ(1u, sink.beginCalls);
+	EXPECT_EQ(2u, sink.endCalls);
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+}
+
+TEST_F(P07TaskScheduleTest, yearlyLeapDayFiresWhenTheCalendarDateExists)
+{
+	TaskSink sink;
+	ASSERT_TRUE(run_once(229, 1500, "y", 202002280930ull, 202003031500ull, sink));
+
+	ASSERT_EQ(1u, sink.scheduleCalls);
+	EXPECT_EQ(std::vector<uint32_t>({20200302u}), sink.scheduleDates);
 	EXPECT_EQ(1u, sink.beginCalls);
 	EXPECT_EQ(2u, sink.endCalls);
 	EXPECT_EQ(1u, sink.replayDoneCalls);
@@ -292,6 +496,43 @@ TEST_F(P07TaskScheduleTest, minuteTaskStepsThroughBothSections)
 	EXPECT_EQ(1u, sink.replayDoneCalls);
 	EXPECT_EQ(std::vector<uint32_t>({20200102u, 20200103u}), sink.beginTDates);
 	EXPECT_EQ(std::vector<uint32_t>({20200102u, 20200103u}), sink.endTDates);
+}
+
+TEST_F(P07TaskScheduleTest, secondPrecisionRangeRoundsTaskStartAndIncludesEndMinute)
+{
+	TaskSink sink;
+	ASSERT_TRUE(run_once_text(1, "20200102093030", "202001020932", sink));
+
+	EXPECT_EQ(std::vector<uint32_t>({20200102u, 20200102u}), sink.scheduleDates);
+	EXPECT_EQ(std::vector<uint32_t>({931u, 932u}), sink.scheduleTimes);
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+}
+
+TEST_F(P07TaskScheduleTest, secondOnlyRangeDoesNotDispatchMinuteTasks)
+{
+	TaskSink sink;
+	ASSERT_TRUE(run_once_text(1, "20200102093201", "20200102093259", sink));
+
+	EXPECT_TRUE(sink.scheduleDates.empty());
+	EXPECT_TRUE(sink.scheduleTimes.empty());
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+	EXPECT_EQ(0u, sink.beginCalls);
+}
+
+TEST_F(P07TaskScheduleTest, invalidConfigAndExplicitRangesFailClosed)
+{
+	WTSVariant* invalidConfig = task_cfg_text(_root, _base, "202002300930", "202002301000");
+	HisDataReplayer fromConfig;
+	EXPECT_FALSE(fromConfig.init(invalidConfig));
+	EXPECT_FALSE(fromConfig.prepare());
+	invalidConfig->release();
+
+	WTSVariant* validConfig = task_cfg(_root, _base, 202001020930ull, 202001021000ull);
+	HisDataReplayer fromSetter;
+	fromSetter.set_time_range(202001020932ull, 202001020931ull);
+	EXPECT_FALSE(fromSetter.init(validConfig));
+	EXPECT_FALSE(fromSetter.prepare());
+	validConfig->release();
 }
 
 /*

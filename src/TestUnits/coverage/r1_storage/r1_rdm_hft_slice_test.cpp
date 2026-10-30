@@ -5,11 +5,10 @@
 //  - readOrdDtlSliceByRange :786 非当日 his 分支 :870-955（his/orders/...）
 //  - readTransSliceByRange  :960 非当日 his 分支 :1045-1130（his/trans/...）
 //  - 尺寸校验（头不足 / _size 不符 → LL_ERROR + NULL）、跨日窗口返回全前缀、
-//    cache 命中（_his_ordque_map 按 key 复用）、文件缺失静默 NULL、当日分支缺 rt 块 → NULL
+//    各类型历史缓存隔离、文件缺失静默 NULL、当日分支缺 rt 块 → NULL
 //
 // 沙箱手法与 q03 相同：_base_dir 为空串（init(NULL,sink) 不起线程），路径退化为相对路径。
-// 已知缺陷（见 bugs/R1_wtdatastorage.md）：OrdDtl/Trans 分支用 _his_ordque_map 判缓存命中，
-// 与自身 map 不一致；本文件只断言「首次读」的正常行为，不把缺陷行为固化成期望。
+// 历史 queue/detail/trans 同 key 交叉读取时，各自 map 必须独立判缓存命中。
 #include "../q03_storage3/q03_storage3_fixture.h"
 
 #include "WtDataStorage/WtRdmDtReader.h"
@@ -211,6 +210,122 @@ TEST_F(R1RdmHftTest, trans_his_first_read_roundtrip)
 	EXPECT_DOUBLE_EQ(it->price, trs[0].price);
 	EXPECT_EQ(it->askorder, trs[0].askorder);
 	EXPECT_EQ(it->bidorder, trs[0].bidorder);
+	st->release();
+}
+
+TEST_F(R1RdmHftTest, queue_then_detail_and_trans_use_independent_history_caches)
+{
+	const char* code = "600008";
+	vector<WTSOrdQueStruct> que(1, make_ordque(20240108, 20240108, 93000000, 81));
+	ASSERT_TRUE(write_bytes(que_file(code, 20240108),
+		make_block(BT_HIS_OrdQueue, BLOCK_VERSION_CMP_V2, pack_items(que))));
+
+	WTSOrdQueSlice* sq = _reader.readOrdQueSliceByRange("SSE.STK.600008",
+		20240108090000000ull, 20240108150000000ull);
+	ASSERT_NE(sq, nullptr);
+	ASSERT_EQ(sq->size(), 1u);
+	sq->release();
+
+	// queue 命中不能伪装成 detail 文件已缓存。
+	WTSOrdDtlSlice* missingDetail = _reader.readOrdDtlSliceByRange("SSE.STK.600008",
+		20240108090000000ull, 20240108150000000ull);
+	EXPECT_EQ(nullptr, missingDetail);
+	if (missingDetail != nullptr)
+		missingDetail->release();
+	WTSTransSlice* missingTrans = _reader.readTransSliceByRange("SSE.STK.600008",
+		20240108090000000ull, 20240108150000000ull);
+	EXPECT_EQ(nullptr, missingTrans);
+	if (missingTrans != nullptr)
+		missingTrans->release();
+
+	vector<WTSOrdDtlStruct> dtl(1, make_orddtl(20240108, 20240108, 93000000, 82));
+	vector<WTSTransStruct> trs(1, make_trans(20240108, 20240108, 93000000, 83));
+	ASSERT_TRUE(write_bytes(dtl_file(code, 20240108),
+		make_block(BT_HIS_OrdDetail, BLOCK_VERSION_CMP_V2, pack_items(dtl))));
+	ASSERT_TRUE(write_bytes(trs_file(code, 20240108),
+		make_block(BT_HIS_Trnsctn, BLOCK_VERSION_CMP_V2, pack_items(trs))));
+
+	WTSOrdDtlSlice* sd = _reader.readOrdDtlSliceByRange("SSE.STK.600008",
+		20240108090000000ull, 20240108150000000ull);
+	ASSERT_NE(sd, nullptr);
+	ASSERT_EQ(sd->size(), 1u);
+	ASSERT_NE(sd->at(0), nullptr);
+	EXPECT_EQ(sd->at(0)->index, dtl[0].index);
+	sd->release();
+
+	WTSTransSlice* st = _reader.readTransSliceByRange("SSE.STK.600008",
+		20240108090000000ull, 20240108150000000ull);
+	ASSERT_NE(st, nullptr);
+	ASSERT_EQ(st->size(), 1u);
+	ASSERT_NE(st->at(0), nullptr);
+	EXPECT_EQ(st->at(0)->index, trs[0].index);
+	st->release();
+
+	// 两个自身 map 都已装载：移除文件后重复读仍应返回原类型记录。
+	std::error_code ec;
+	std::filesystem::remove(dtl_file(code, 20240108), ec);
+	std::filesystem::remove(trs_file(code, 20240108), ec);
+	sd = _reader.readOrdDtlSliceByRange("SSE.STK.600008",
+		20240108090000000ull, 20240108150000000ull);
+	ASSERT_NE(sd, nullptr);
+	EXPECT_EQ(sd->size(), 1u);
+	sd->release();
+	st = _reader.readTransSliceByRange("SSE.STK.600008",
+		20240108090000000ull, 20240108150000000ull);
+	ASSERT_NE(st, nullptr);
+	EXPECT_EQ(st->size(), 1u);
+	st->release();
+}
+
+TEST_F(R1RdmHftTest, detail_and_trans_before_queue_keep_reverse_order_caches_independent)
+{
+	const char* code = "600009";
+	vector<WTSOrdDtlStruct> dtl(1, make_orddtl(20240108, 20240108, 93000000, 91));
+	vector<WTSTransStruct> trs(1, make_trans(20240108, 20240108, 93000000, 92));
+	ASSERT_TRUE(write_bytes(dtl_file(code, 20240108),
+		make_block(BT_HIS_OrdDetail, BLOCK_VERSION_CMP_V2, pack_items(dtl))));
+	ASSERT_TRUE(write_bytes(trs_file(code, 20240108),
+		make_block(BT_HIS_Trnsctn, BLOCK_VERSION_CMP_V2, pack_items(trs))));
+
+	WTSTransSlice* st = _reader.readTransSliceByRange("SSE.STK.600009",
+		20240108090000000ull, 20240108150000000ull);
+	ASSERT_NE(st, nullptr);
+	ASSERT_EQ(st->size(), 1u);
+	ASSERT_NE(st->at(0), nullptr);
+	EXPECT_EQ(st->at(0)->index, trs[0].index);
+	st->release();
+
+	WTSOrdDtlSlice* sd = _reader.readOrdDtlSliceByRange("SSE.STK.600009",
+		20240108090000000ull, 20240108150000000ull);
+	ASSERT_NE(sd, nullptr);
+	ASSERT_EQ(sd->size(), 1u);
+	ASSERT_NE(sd->at(0), nullptr);
+	EXPECT_EQ(sd->at(0)->index, dtl[0].index);
+	sd->release();
+
+	vector<WTSOrdQueStruct> que(1, make_ordque(20240108, 20240108, 93000000, 93));
+	ASSERT_TRUE(write_bytes(que_file(code, 20240108),
+		make_block(BT_HIS_OrdQueue, BLOCK_VERSION_CMP_V2, pack_items(que))));
+	WTSOrdQueSlice* sq = _reader.readOrdQueSliceByRange("SSE.STK.600009",
+		20240108090000000ull, 20240108150000000ull);
+	ASSERT_NE(sq, nullptr);
+	ASSERT_EQ(sq->size(), 1u);
+	ASSERT_NE(sq->at(0), nullptr);
+	EXPECT_EQ(sq->at(0)->order_items, que[0].order_items);
+	sq->release();
+
+	std::error_code ec;
+	std::filesystem::remove(dtl_file(code, 20240108), ec);
+	std::filesystem::remove(trs_file(code, 20240108), ec);
+	sd = _reader.readOrdDtlSliceByRange("SSE.STK.600009",
+		20240108090000000ull, 20240108150000000ull);
+	ASSERT_NE(sd, nullptr);
+	EXPECT_EQ(sd->size(), 1u);
+	sd->release();
+	st = _reader.readTransSliceByRange("SSE.STK.600009",
+		20240108090000000ull, 20240108150000000ull);
+	ASSERT_NE(st, nullptr);
+	EXPECT_EQ(st->size(), 1u);
 	st->release();
 }
 

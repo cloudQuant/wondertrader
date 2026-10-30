@@ -1,0 +1,63 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = L00PublicHeaderTest.*:N01TraderAdapter.*
+[==========] Running 22 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 3 tests from L00PublicHeaderTest
+[ RUN      ] L00PublicHeaderTest.ExecMgrHeaderIsSelfContained
+[       OK ] L00PublicHeaderTest.ExecMgrHeaderIsSelfContained (0 ms)
+[ RUN      ] L00PublicHeaderTest.ScopeGuardHeaderIsSelfContained
+[       OK ] L00PublicHeaderTest.ScopeGuardHeaderIsSelfContained (0 ms)
+[ RUN      ] L00PublicHeaderTest.TraderAdapterHeaderIsSelfContained
+[       OK ] L00PublicHeaderTest.TraderAdapterHeaderIsSelfContained (0 ms)
+[----------] 3 tests from L00PublicHeaderTest (0 ms total)
+
+[----------] 19 tests from N01TraderAdapter
+[ RUN      ] N01TraderAdapter.fresh_adapter_is_not_logged_in
+[       OK ] N01TraderAdapter.fresh_adapter_is_not_logged_in (0 ms)
+[ RUN      ] N01TraderAdapter.init_rejects_null_params_without_touching_state
+[       OK ] N01TraderAdapter.init_rejects_null_params_without_touching_state (0 ms)
+[ RUN      ] N01TraderAdapter.init_accepts_no_riskmon_inactive_riskmon_and_complete_active_policy
+[       OK ] N01TraderAdapter.init_accepts_no_riskmon_inactive_riskmon_and_complete_active_policy (8 ms)
+[ RUN      ] N01TraderAdapter.active_riskmon_without_policy_is_rejected_before_state_is_committed
+[       OK ] N01TraderAdapter.active_riskmon_without_policy_is_rejected_before_state_is_committed (0 ms)
+[ RUN      ] N01TraderAdapter.active_riskmon_with_non_object_policy_is_rejected_before_state_is_committed
+[       OK ] N01TraderAdapter.active_riskmon_with_non_object_policy_is_rejected_before_state_is_committed (0 ms)
+[ RUN      ] N01TraderAdapter.init_ext_rejects_null_api
+[       OK ] N01TraderAdapter.init_ext_rejects_null_api (0 ms)
+[ RUN      ] N01TraderAdapter.init_ext_failure_releases_partial_api_state_once
+[       OK ] N01TraderAdapter.init_ext_failure_releases_partial_api_state_once (1 ms)
+[ RUN      ] N01TraderAdapter.release_unregisters_only_a_registered_spi_and_is_idempotent
+[       OK ] N01TraderAdapter.release_unregisters_only_a_registered_spi_and_is_idempotent (2 ms)
+[ RUN      ] N01TraderAdapter.missing_module_failure_releases_retained_config
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/wt_r160_missing_trader_module_80943_4/traders/libNoSuchTraderModule.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/wt_r160_missing_trader_module_80943_4/traders/libNoSuchTraderModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/wt_r160_missing_trader_module_80943_4/traders/libNoSuchTraderModule.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/wt_r160_missing_trader_module_80943_4/traders/libNoSuchTraderModule.dylib' (no such file)
+[       OK ] N01TraderAdapter.missing_module_failure_releases_retained_config (1 ms)
+[ RUN      ] N01TraderAdapter.run_and_release_and_queryfund_are_api_null_safe
+[       OK ] N01TraderAdapter.run_and_release_and_queryfund_are_api_null_safe (0 ms)
+[ RUN      ] N01TraderAdapter.empty_lookups_return_neutral_values
+[       OK ] N01TraderAdapter.empty_lookups_return_neutral_values (0 ms)
+[ RUN      ] N01TraderAdapter.risk_gates_pass_when_riskmon_disabled
+[       OK ] N01TraderAdapter.risk_gates_pass_when_riskmon_disabled (0 ms)
+[ RUN      ] N01TraderAdapter.null_payloads_on_response_callbacks_are_ignored
+[       OK ] N01TraderAdapter.null_payloads_on_response_callbacks_are_ignored (0 ms)
+[ RUN      ] N01TraderAdapter.add_sink_is_idempotent_set_membership
+[       OK ] N01TraderAdapter.add_sink_is_idempotent_set_membership (0 ms)
+[ RUN      ] N01TraderAdapter.local_order_id_concurrent_first_call_is_unique
+[       OK ] N01TraderAdapter.local_order_id_concurrent_first_call_is_unique (11 ms)
+[ RUN      ] N01TraderAdapter.local_order_id_is_monotonic
+[       OK ] N01TraderAdapter.local_order_id_is_monotonic (0 ms)
+[ RUN      ] N01TraderAdapter.mgr_rejects_null_and_empty_names
+[       OK ] N01TraderAdapter.mgr_rejects_null_and_empty_names (0 ms)
+[ RUN      ] N01TraderAdapter.mgr_registers_unique_names_and_rejects_duplicates
+[       OK ] N01TraderAdapter.mgr_registers_unique_names_and_rejects_duplicates (0 ms)
+[ RUN      ] N01TraderAdapter.mgr_run_release_and_refresh_funds_without_api
+[       OK ] N01TraderAdapter.mgr_run_release_and_refresh_funds_without_api (0 ms)
+[ DISABLED ] N01TraderAdapter.DISABLED_push_report_before_run_dereferences_null_stat_map
+[----------] 19 tests from N01TraderAdapter (25 ms total)
+
+[----------] Global test environment tear-down
+[==========] 22 tests from 2 test suites ran. (26 ms total)
+[  PASSED  ] 22 tests.
+
+  YOU HAVE 1 DISABLED TEST
+
+EXIT_CODE=0

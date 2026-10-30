@@ -89,9 +89,8 @@ TEST_F(R19TempDir, r19_capi_master_slave_and_all_type_wrappers)
 	EXPECT_FALSE(::set_int32(ghost.c_str(), "s", "i32", 1));
 	EXPECT_EQ(nullptr, ::allocate_int32(ghost.c_str(), "s", "nx", 1));
 
-	// L16-19 update_slave：master 域的 _blocktime 未被 init_master 赋过值
-	// （_ShmPair 构造没初始化它，见 BUG-R19-009），所以只断言强制刷新这条确定路径
-	EXPECT_TRUE(::update_slave(dom.c_str(), true));
+	// update_slave 是 slave 专用；master 不能触发 slave 索引重建。
+	EXPECT_FALSE(::update_slave(dom.c_str(), true));
 	EXPECT_FALSE(::update_slave(ghost.c_str(), true)) << "L133-134：_block 为空";
 
 	// L21-24 release_slave：slave 域可释放，master 域拒绝

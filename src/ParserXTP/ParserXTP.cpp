@@ -200,6 +200,105 @@ void ParserXTP::OnUnSubMarketData(XTPST */*ticker*/, XTPRI */*error_info*/, bool
 
 }
 
+namespace
+{
+	WTSBSDirectType mapEntrustSide(XTP_EXCHANGE_TYPE exchange, char side)
+	{
+		if (exchange == XTP_EXCHANGE_SH)
+		{
+			switch (side)
+			{
+			case 'B': return BDT_Buy;
+			case 'S': return BDT_Sell;
+			default: return BDT_Unknown;
+			}
+		}
+
+		if (exchange == XTP_EXCHANGE_SZ)
+		{
+			switch (side)
+			{
+			case '1': return BDT_Buy;
+			case '2': return BDT_Sell;
+			case 'G': return BDT_Borrow;
+			case 'F': return BDT_Lend;
+			default: return BDT_Unknown;
+			}
+		}
+
+		return BDT_Unknown;
+	}
+
+	WTSOrdDetailType mapEntrustType(XTP_EXCHANGE_TYPE exchange, char orderType)
+	{
+		if (exchange == XTP_EXCHANGE_SH)
+		{
+			switch (orderType)
+			{
+			case 'A': return ODT_Append;
+			case 'D': return ODT_Delete;
+			default: return ODT_Unknown;
+			}
+		}
+
+		if (exchange == XTP_EXCHANGE_SZ)
+		{
+			switch (orderType)
+			{
+			case '1': return ODT_AnyPrice;
+			case '2': return ODT_LimitPrice;
+			case 'U': return ODT_BestPrice;
+			default: return ODT_Unknown;
+			}
+		}
+
+		return ODT_Unknown;
+	}
+
+	WTSBSDirectType mapTradeSide(XTP_EXCHANGE_TYPE exchange, char tradeFlag)
+	{
+		if (exchange == XTP_EXCHANGE_SH)
+		{
+			switch (tradeFlag)
+			{
+			case 'B': return BDT_Buy;
+			case 'S': return BDT_Sell;
+			case 'N': return BDT_Unknown;
+			default: return BDT_Unknown;
+			}
+		}
+
+		/* SZ trade_flag describes match/cancel only; it carries no direction. */
+		return BDT_Unknown;
+	}
+
+	WTSTransType mapTradeType(XTP_EXCHANGE_TYPE exchange, char tradeFlag)
+	{
+		if (exchange == XTP_EXCHANGE_SH)
+		{
+			switch (tradeFlag)
+			{
+			case 'B':
+			case 'S':
+			case 'N': return TT_Match;
+			default: return TT_Unknown;
+			}
+		}
+
+		if (exchange == XTP_EXCHANGE_SZ)
+		{
+			switch (tradeFlag)
+			{
+			case 'F': return TT_Match;
+			case '4': return TT_Cancel;
+			default: return TT_Unknown;
+			}
+		}
+
+		return TT_Unknown;
+	}
+}
+
 void ParserXTP::OnTickByTick(XTPTBT *tbt_data)
 {
 	if (m_pBaseDataMgr == NULL)
@@ -244,8 +343,8 @@ void ParserXTP::OnTickByTick(XTPTBT *tbt_data)
 		ts.action_time = actTime;
 
 		ts.index = eInfo.seq;
-		ts.side = (WTSBSDirectType)eInfo.side;
-		ts.otype = (WTSOrdDetailType)eInfo.ord_type;
+		ts.side = mapEntrustSide(tbt_data->exchange_id, eInfo.side);
+		ts.otype = mapEntrustType(tbt_data->exchange_id, eInfo.ord_type);
 
 		ts.price = eInfo.price;
 		ts.volume = (uint32_t)eInfo.qty;
@@ -268,8 +367,8 @@ void ParserXTP::OnTickByTick(XTPTBT *tbt_data)
 		ts.action_time = actTime;
 
 		ts.index = tInfo.seq;
-		ts.side = (WTSBSDirectType)tInfo.trade_flag;
-		ts.ttype = tInfo.trade_flag == '4' ? TT_Cancel : TT_Match;
+		ts.side = mapTradeSide(tbt_data->exchange_id, tInfo.trade_flag);
+		ts.ttype = mapTradeType(tbt_data->exchange_id, tInfo.trade_flag);
 
 		ts.price = tInfo.price;
 		ts.volume = (uint32_t)tInfo.qty;
@@ -314,6 +413,8 @@ void ParserXTP::OnDepthMarketData(XTPMD *market_data, int64_t bid1_qty[], int32_
 	WTSCommodityInfo* commInfo = ct->getCommInfo();
 
 	WTSTickData* tick = WTSTickData::create(code.c_str());
+	if (tick == NULL)
+		return;
 	tick->setContractInfo(ct);
 	WTSTickStruct& quote = tick->getTickStruct();
 	strcpy(quote.exchg, commInfo->getExchg());
@@ -645,6 +746,18 @@ void ParserXTP::subscribe(const CodeSet &vecSymbols)
 					if (m_sink)
 						write_log(m_sink, LL_INFO, "[ParserXTP] Market data of {} instruments of SSE subscribed", nCount);
 				}
+
+				iResult = m_pUserAPI->SubscribeTickByTick(subscribe, nCount, XTP_EXCHANGE_SH);
+				if (iResult != 0)
+				{
+					if (m_sink)
+						write_log(m_sink, LL_ERROR, "[ParserXTP] Sending tick_by_tick subscribe request of SSE failed: {}", iResult);
+				}
+				else
+				{
+					if (m_sink)
+						write_log(m_sink, LL_INFO, "[ParserXTP] Tick_by_tick data of {} instruments of SSE subscribed", nCount);
+				}
 			}
 			delete[] subscribe;
 		}
@@ -671,6 +784,18 @@ void ParserXTP::subscribe(const CodeSet &vecSymbols)
 				{
 					if (m_sink)
 						write_log(m_sink, LL_INFO, "[ParserXTP] Market data of {} instruments of SZSE subscribed", nCount);
+				}
+
+				iResult = m_pUserAPI->SubscribeTickByTick(subscribe, nCount, XTP_EXCHANGE_SZ);
+				if (iResult != 0)
+				{
+					if (m_sink)
+						write_log(m_sink, LL_ERROR, "[ParserXTP] Sending tick_by_tick subscribe request of SZSE failed: {}", iResult);
+				}
+				else
+				{
+					if (m_sink)
+						write_log(m_sink, LL_INFO, "[ParserXTP] Tick_by_tick data of {} instruments of SZSE subscribed", nCount);
 				}
 			}
 			delete[] subscribe;

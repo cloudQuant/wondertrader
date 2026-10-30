@@ -1,0 +1,1 @@
+LLVM_PROFILE_FILE=/tmp/n02_002_cta_engine_run_%p.profraw ./build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_wtcore --gtest_filter='R130MiscTail.CtaRunStartsRiskMonitor' --gtest_output=xml:/tmp/n02_002_cta_engine_run.xml > /tmp/n02_002_cta_engine_run.log 2>&1

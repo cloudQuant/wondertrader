@@ -13,6 +13,7 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <set>
 #include <sstream>
 #include <string>
 
@@ -84,6 +85,20 @@ protected:
 	}
 };
 
+class P08CancelRejectingUftMocker : public UftMocker
+{
+public:
+	using UftMocker::UftMocker;
+	uint32_t rejected_cancel_id { 0 };
+
+	bool stra_cancel(uint32_t localid) override
+	{
+		if (localid == rejected_cancel_id)
+			return false;
+		return UftMocker::stra_cancel(localid);
+	}
+};
+
 static const char* kFut = "SHFE.rb.2405";
 
 // 构造后的空状态：无订单、无持仓、无资金，且不会触碰任何行情/策略对象
@@ -138,6 +153,7 @@ TEST_F(P08UftOrderPosition, EnterLongAssemblesOrderAndDrainsTasks)
 	EXPECT_EQ(lid, ord->_localid);
 	EXPECT_STREQ(kFut, ord->_code);
 	EXPECT_TRUE(ord->_isLong);
+	EXPECT_TRUE(ord->_isBuy);
 	EXPECT_EQ(0u, ord->_offset);			// 0 = 开仓
 	EXPECT_DOUBLE_EQ(3800.0, ord->_price);
 	EXPECT_DOUBLE_EQ(3.0, ord->_total);
@@ -182,8 +198,10 @@ TEST_F(P08UftOrderPosition, CancelShortOpenReleasesFrozenAvail)
 
 	uint32_t clid = mocker.stra_exit_short(kFut, 3710.0, 2, false, 0);
 	ASSERT_NE(0u, clid);
-	// 平空订单被标记为 _isLong=false -> 挂单量按负数累计
-	EXPECT_DOUBLE_EQ(-2.0, mocker.stra_get_undone(kFut));
+	// 平空是买入：持仓腿仍为 short，但买入挂单量按正数累计。
+	EXPECT_FALSE(mocker._orders.at(clid)->_isLong);
+	EXPECT_TRUE(mocker._orders.at(clid)->_isBuy);
+	EXPECT_DOUBLE_EQ(2.0, mocker.stra_get_undone(kFut));
 	// 平仓下单已占用 2 手可用量
 	EXPECT_DOUBLE_EQ(2.0, sItem.valid());
 	EXPECT_EQ(1u, mocker._tasks.size());
@@ -207,32 +225,67 @@ TEST_F(P08UftOrderPosition, CancelShortOpenReleasesFrozenAvail)
 	EXPECT_TRUE(mocker._orders.empty());
 }
 
-// stra_cancel_all 返回匹配合约的订单 ID，并将实际撤单排队处理。
+// stra_cancel_all 仅返回成功受理的匹配撤单 ID；取消仍由后续任务完成。
 TEST_F(P08UftOrderPosition, CancelAllScansMatchingCodeOnly)
 {
-	UftMocker mocker(&_rp, "p08_cancelall");
+	P08CancelRejectingUftMocker mocker(&_rp, "p08_cancelall");
 	uint32_t a = mocker.stra_enter_long(kFut, 3800.0, 1);
 	uint32_t b = mocker.stra_enter_long("SSE.600001", 10.0, 100);
+	uint32_t c = mocker.stra_enter_long(kFut, 3800.0, 2);
 	ASSERT_NE(0u, a);
 	ASSERT_NE(0u, b);
-	ASSERT_EQ(2u, mocker._orders.size());
+	ASSERT_NE(0u, c);
+	mocker.rejected_cancel_id = c;
+	ASSERT_EQ(3u, mocker._orders.size());
 	EXPECT_EQ(1u, mocker._orders.count(a));
 	EXPECT_EQ(1u, mocker._orders.count(b));
+	EXPECT_EQ(1u, mocker._orders.count(c));
+	mocker.procTask(); // 排空三笔下单的 entrust 通知。
+	EXPECT_TRUE(mocker._tasks.empty());
 
 	auto ids = mocker.stra_cancel_all(kFut);
 	EXPECT_EQ(1u, ids.size());
 	if (!ids.empty())
 		EXPECT_EQ(a, ids[0]);
+	EXPECT_EQ(1u, mocker._tasks.size());
 	// 撤单仍是异步任务：目标订单要等任务处理后才从册中移除。
-	EXPECT_EQ(2u, mocker._orders.size());
+	EXPECT_EQ(3u, mocker._orders.size());
 	EXPECT_EQ(1u, mocker._orders.count(a));
 	EXPECT_EQ(1u, mocker._orders.count(b));
+	EXPECT_EQ(1u, mocker._orders.count(c));
 	mocker.procTask();
 	EXPECT_EQ(0u, mocker._orders.count(a)) << "目标合约的订单应被撤掉";
 	EXPECT_EQ(1u, mocker._orders.count(b)) << "其它合约订单不受影响";
-	// 撤单后剩余订单的挂单量仍可查询
-	EXPECT_DOUBLE_EQ(0.0, mocker.stra_get_undone(kFut));
+	EXPECT_EQ(1u, mocker._orders.count(c)) << "撤单拒绝的订单仍为活动单";
+	// 返回集合仅含已受理的撤单请求；拒绝的订单仍贡献买入未完成量。
+	EXPECT_DOUBLE_EQ(2.0, mocker.stra_get_undone(kFut));
 	EXPECT_DOUBLE_EQ(100.0, mocker.stra_get_undone("SSE.600001"));
+}
+
+// 同一合约多笔撤单都被受理时，返回列表要包含每一笔订单 ID。
+TEST_F(P08UftOrderPosition, CancelAllReturnsEveryAcceptedMatchingId)
+{
+	UftMocker mocker(&_rp, "p08_cancelall_all_accepted");
+	const uint32_t a = mocker.stra_enter_long(kFut, 3800.0, 1);
+	const uint32_t b = mocker.stra_enter_long(kFut, 3800.0, 2);
+	const uint32_t other = mocker.stra_enter_long("SSE.600001", 10.0, 100);
+	ASSERT_NE(0u, a);
+	ASSERT_NE(0u, b);
+	ASSERT_NE(0u, other);
+	mocker.procTask(); // 排空下单通知，确认订单都已入册。
+
+	const auto ids = mocker.stra_cancel_all(kFut);
+	ASSERT_EQ(2u, ids.size());
+	const std::set<uint32_t> returned_ids(ids.begin(), ids.end());
+	const std::set<uint32_t> expected_ids { a, b };
+	EXPECT_EQ(expected_ids, returned_ids);
+	EXPECT_EQ(2u, mocker._tasks.size());
+	EXPECT_EQ(3u, mocker._orders.size()); // 撤单仍待异步任务处理。
+
+	mocker.procTask();
+	EXPECT_EQ(0u, mocker._orders.count(a));
+	EXPECT_EQ(0u, mocker._orders.count(b));
+	EXPECT_EQ(1u, mocker._orders.count(other));
 }
 
 // 买卖先平后开：stra_buy 先消耗空头，剩余才开多
@@ -252,11 +305,13 @@ TEST_F(P08UftOrderPosition, StraBuyCoversShortThenOpensLong)
 
 	const UftMocker::OrderInfoPtr& coverOrd = mocker._orders[ids[0]];
 	EXPECT_FALSE(coverOrd->_isLong);
+	EXPECT_TRUE(coverOrd->_isBuy);
 	EXPECT_DOUBLE_EQ(2.0, coverOrd->_total);
 	EXPECT_EQ(1u, coverOrd->_offset);	// 平昨
 
 	const UftMocker::OrderInfoPtr& openOrd = mocker._orders[ids[1]];
 	EXPECT_TRUE(openOrd->_isLong);
+	EXPECT_TRUE(openOrd->_isBuy);
 	EXPECT_EQ(0u, openOrd->_offset);
 	EXPECT_DOUBLE_EQ(3.0, openOrd->_total);
 	EXPECT_DOUBLE_EQ(3.0, openOrd->_left);
@@ -265,8 +320,43 @@ TEST_F(P08UftOrderPosition, StraBuyCoversShortThenOpensLong)
 	// 可用空头被全额占用
 	EXPECT_DOUBLE_EQ(0.0, sItem.valid());
 	EXPECT_DOUBLE_EQ(2.0, sItem.volume());
-	// 挂单量 = +3(买开) - 2(卖平)
-	EXPECT_DOUBLE_EQ(1.0, mocker.stra_get_undone(kFut));
+	// 挂单量 = +3(买开) + 2(买平)
+	EXPECT_DOUBLE_EQ(5.0, mocker.stra_get_undone(kFut));
+}
+
+TEST_F(P08UftOrderPosition, OpenAndCloseOrdersTrackTradeSideSeparatelyFromPositionLeg)
+{
+	UftMocker mocker(&_rp, "p08_order_side");
+
+	const uint32_t openShort = mocker.stra_enter_short(kFut, 3800.0, 2.0);
+	ASSERT_NE(0u, openShort);
+	EXPECT_FALSE(mocker._orders.at(openShort)->_isLong);
+	EXPECT_FALSE(mocker._orders.at(openShort)->_isBuy);
+	EXPECT_DOUBLE_EQ(-2.0, mocker.stra_get_undone(kFut));
+	mocker.procTask();
+	EXPECT_TRUE(mocker.stra_cancel(openShort));
+	mocker.procTask();
+
+	UftMocker::PosItem& shortPos = mocker._pos_map[kFut]._short;
+	shortPos._prevol = 2.0;
+	shortPos._preavail = 2.0;
+	const uint32_t closeShort = mocker.stra_exit_short(kFut, 3800.0, 2.0);
+	ASSERT_NE(0u, closeShort);
+	EXPECT_FALSE(mocker._orders.at(closeShort)->_isLong);
+	EXPECT_TRUE(mocker._orders.at(closeShort)->_isBuy);
+	EXPECT_DOUBLE_EQ(2.0, mocker.stra_get_undone(kFut));
+	mocker.procTask();
+	EXPECT_TRUE(mocker.stra_cancel(closeShort));
+	mocker.procTask();
+
+	UftMocker::PosItem& longPos = mocker._pos_map[kFut]._long;
+	longPos._prevol = 3.0;
+	longPos._preavail = 3.0;
+	const uint32_t closeLong = mocker.stra_exit_long(kFut, 3800.0, 3.0);
+	ASSERT_NE(0u, closeLong);
+	EXPECT_TRUE(mocker._orders.at(closeLong)->_isLong);
+	EXPECT_FALSE(mocker._orders.at(closeLong)->_isBuy);
+	EXPECT_DOUBLE_EQ(-3.0, mocker.stra_get_undone(kFut));
 }
 
 // 平仓可用量不足：返回 0 且不产生订单
@@ -284,6 +374,46 @@ TEST_F(P08UftOrderPosition, ExitRejectedWithoutAvailablePosition)
 	lItem._preavail = 2.0;
 	EXPECT_EQ(0u, mocker.stra_exit_long(kFut, 3800.0, 5, false, 0));
 	EXPECT_DOUBLE_EQ(2.0, lItem._preavail) << "拒绝路径不应扣减可用量";
+}
+
+// 未知商品的双向平仓都应在创建持仓条目前拒绝。
+TEST_F(P08UftOrderPosition, ExitUnknownCommodityRejectedWithoutStateMutation)
+{
+	UftMocker mocker(&_rp, "p08_exit_unknown");
+	const char* unknown = "DCE.m.2405";
+
+	EXPECT_EQ(0u, mocker.stra_exit_long(unknown, 3000.0, 1.0));
+	EXPECT_EQ(0u, mocker.stra_exit_short(unknown, 3000.0, 1.0));
+	EXPECT_EQ(0u, mocker._pos_map.count(unknown));
+	EXPECT_TRUE(mocker._orders.empty());
+	EXPECT_TRUE(mocker._tasks.empty());
+	EXPECT_DOUBLE_EQ(0.0, mocker.stra_get_undone(unknown));
+}
+
+// 已知商品的双向平仓仍正常占用对应持仓可用量并生成订单。
+TEST_F(P08UftOrderPosition, ExitLongAndShortWithKnownCommodity)
+{
+	UftMocker mocker(&_rp, "p08_exit_known");
+	UftMocker::PosInfo& pInfo = mocker._pos_map[kFut];
+	pInfo._long._prevol = 2.0;
+	pInfo._long._preavail = 2.0;
+	pInfo._short._prevol = 3.0;
+	pInfo._short._preavail = 3.0;
+
+	const uint32_t closeLong = mocker.stra_exit_long(kFut, 3800.0, 1.0);
+	ASSERT_NE(0u, closeLong);
+	const uint32_t closeShort = mocker.stra_exit_short(kFut, 3800.0, 2.0);
+	ASSERT_NE(0u, closeShort);
+
+	EXPECT_DOUBLE_EQ(1.0, pInfo._long.valid());
+	EXPECT_DOUBLE_EQ(1.0, pInfo._short.valid());
+	EXPECT_EQ(1u, mocker._orders.at(closeLong)->_offset);
+	EXPECT_TRUE(mocker._orders.at(closeLong)->_isLong);
+	EXPECT_FALSE(mocker._orders.at(closeLong)->_isBuy);
+	EXPECT_EQ(1u, mocker._orders.at(closeShort)->_offset);
+	EXPECT_FALSE(mocker._orders.at(closeShort)->_isLong);
+	EXPECT_TRUE(mocker._orders.at(closeShort)->_isBuy);
+	EXPECT_EQ(2u, mocker._tasks.size());
 }
 
 // 开仓成交回写：明细/今仓/费用/成交日志
@@ -355,6 +485,68 @@ TEST_F(P08UftOrderPosition, CloseTodayBranchScalesDynProfit)
 	EXPECT_DOUBLE_EQ(16.0, mocker._fund_info._total_fees);
 	// 全平后已无持仓明细；不保留零量条目。
 	EXPECT_TRUE(lItem._details.empty());
+}
+
+// Both close paths erase through the last fully closed detail while preserving a partial tail.
+TEST_F(P08UftOrderPosition, CloseBranchesEraseClosedDetailsAndKeepPartialTail)
+{
+	UftMocker close_yesterday(&_rp, "p08_close_yesterday_details");
+	close_yesterday.on_trade(1, kFut, true, 0, 1, 3800.0);
+	close_yesterday.on_trade(2, kFut, true, 0, 2, 3801.0);
+	UftMocker::PosItem& yesterday_item = close_yesterday._pos_map[kFut]._long;
+	ASSERT_EQ(2u, yesterday_item._details.size());
+
+	// The first detail closes fully; the final detail retains 0.5.
+	close_yesterday.on_trade(3, kFut, true, 1, 2.5, 3802.0);
+	ASSERT_EQ(1u, yesterday_item._details.size());
+	EXPECT_DOUBLE_EQ(0.5, yesterday_item._details.front()._volume);
+	close_yesterday.on_trade(4, kFut, true, 1, 0.5, 3802.0);
+	EXPECT_TRUE(yesterday_item._details.empty());
+
+	UftMocker close_today(&_rp, "p08_close_today_details");
+	close_today.on_trade(1, kFut, true, 0, 1, 3800.0);
+	close_today.on_trade(2, kFut, true, 0, 2, 3801.0);
+	UftMocker::PosItem& today_item = close_today._pos_map[kFut]._long;
+	ASSERT_EQ(2u, today_item._details.size());
+
+	// The same detail boundaries apply to offset=2; a partial final detail must remain.
+	close_today.on_trade(3, kFut, true, 2, 2.5, 3802.0);
+	ASSERT_EQ(1u, today_item._details.size());
+	EXPECT_DOUBLE_EQ(0.5, today_item._details.front()._volume);
+	close_today.on_trade(4, kFut, true, 2, 0.5, 3802.0);
+	EXPECT_TRUE(today_item._details.empty());
+}
+
+// Offset 2 only erases today's closed suffix and preserves the older-position prefix.
+TEST_F(P08UftOrderPosition, CloseTodayPreservesYesterdayDetailPrefix)
+{
+	UftMocker mocker(&_rp, "p08_close_today_keeps_yesterday");
+	_rp._cur_tdate = 20240101;
+	mocker.on_trade(1, kFut, true, 0, 1, 3800.0);
+	UftMocker::PosItem& item = mocker._pos_map[kFut]._long;
+	ASSERT_EQ(1u, item._details.size());
+	ASSERT_EQ(20240101u, item._details.front()._opentdate);
+
+	// Roll the opening position into the previous-day bucket, then add today's detail.
+	item._prevol = item._newvol;
+	item._preavail = item._newavail;
+	item._newvol = 0.0;
+	item._newavail = 0.0;
+	_rp._cur_tdate = 20240102;
+	mocker.on_trade(2, kFut, true, 0, 2, 3801.0);
+	ASSERT_EQ(2u, item._details.size());
+	ASSERT_EQ(20240102u, item._details.back()._opentdate);
+
+	mocker.on_trade(3, kFut, true, 2, 2, 3802.0);
+	ASSERT_EQ(1u, item._details.size());
+	EXPECT_EQ(20240101u, item._details.front()._opentdate);
+	EXPECT_DOUBLE_EQ(1.0, item._details.front()._volume);
+	EXPECT_DOUBLE_EQ(1.0, item.volume());
+
+	// A later previous-day close still removes the preserved prefix normally.
+	mocker.on_trade(4, kFut, true, 1, 1, 3802.0);
+	EXPECT_TRUE(item._details.empty());
+	EXPECT_DOUBLE_EQ(0.0, item.volume());
 }
 
 // 空头持仓盈亏方向取反

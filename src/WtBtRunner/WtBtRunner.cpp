@@ -25,10 +25,28 @@
 #include "../Includes/WTSVariant.hpp"
 #include "../Share/StdUtils.hpp"
 #include <Share/cppcli.hpp>
+#include <string>
 
 #ifdef _MSC_VER
 #include "../Common/mdump.h"
 #endif
+
+namespace
+{
+	bool quiesce_exec_mocker(ExecMocker* mocker, std::string* error)
+	{
+		if (!mocker)
+			return true;
+		if (!mocker->canStopFromCurrentThread())
+		{
+			if (error) *error = "execution plugin preflight rejected the current control thread";
+			return false;
+		}
+		return mocker->requestQuiesce(error) &&
+			mocker->canWaitQuiesce(error) &&
+			mocker->waitQuiesce(error);
+	}
+}
 
 /**
  * @brief 回测引擎的主函数
@@ -88,8 +106,16 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	HisDataReplayer replayer;
-	replayer.init(cfg->get("replayer"));
+	HisDataReplayer* replayer = new HisDataReplayer();
+	if (!replayer->init(cfg->get("replayer")))
+	{
+		WTSLogger::error("Initializing historical data replayer failed");
+		cfg->release();
+		delete replayer;
+		WTSLogger::stop();
+		return -1;
+	}
+	ExecMocker* execMocker = NULL;
 
 	WTSVariant* cfgEnv = cfg->get("env");
 	const char* mode = cfgEnv->getCString("mocker");
@@ -100,9 +126,17 @@ int main(int argc, char* argv[])
 	if (strcmp(mode, "cta") == 0)
 	{
 		fmt::print("---cta initialized---\n");
-		CtaMocker* mocker = new CtaMocker(&replayer, "cta", slippage);
+		CtaMocker* mocker = new CtaMocker(replayer, "cta", slippage);
 		fmt::print("---mocker initialized---\n");
-		mocker->init_cta_factory(cfg->get("cta"));
+		if (!mocker->init_cta_factory(cfg->get("cta")))
+		{
+			delete mocker;
+			WTSLogger::error("Initializing CTA strategy factory failed");
+			cfg->release();
+			delete replayer;
+			WTSLogger::stop();
+			return -1;
+		}
 		//mocker->init_cta_factory(cfg);
 		fmt::print("---cta_factory initialized---\n");
 		const char* stra_id = cfg->get("cta")->get("strategy")->getCString("id");
@@ -115,46 +149,118 @@ int main(int argc, char* argv[])
 			mocker->load_incremental_data(incremental_backtest_base);
 		}
 		fmt::print("---load_incremental_data ends---\n");
-		replayer.register_sink(mocker, stra_id);
+		replayer->register_sink(mocker, stra_id);
 		fmt::print("---cta ends---\n");
 	}
 	else if (strcmp(mode, "hft") == 0)
 	{
-		HftMocker* mocker = new HftMocker(&replayer, "hft");
-		mocker->init_hft_factory(cfg->get("hft"));
+		HftMocker* mocker = new HftMocker(replayer, "hft");
+		if (!mocker->init_hft_factory(cfg->get("hft")))
+		{
+			delete mocker;
+			WTSLogger::error("Initializing HFT strategy factory failed");
+			cfg->release();
+			delete replayer;
+			WTSLogger::stop();
+			return -1;
+		}
 		const char* stra_id = cfg->get("hft")->get("strategy")->getCString("id");
-		replayer.register_sink(mocker, stra_id);
+		replayer->register_sink(mocker, stra_id);
 	}
 	else if (strcmp(mode, "sel") == 0)
 	{
-		SelMocker* mocker = new SelMocker(&replayer, "sel", slippage);
-		mocker->init_sel_factory(cfg->get("sel"));
+		SelMocker* mocker = new SelMocker(replayer, "sel", slippage);
+		if (!mocker->init_sel_factory(cfg->get("sel")))
+		{
+			delete mocker;
+			WTSLogger::error("Initializing SEL strategy factory failed");
+			cfg->release();
+			delete replayer;
+			WTSLogger::stop();
+			return -1;
+		}
 		const char* stra_id = cfg->get("sel")->get("strategy")->getCString("id");
-		replayer.register_sink(mocker, stra_id);
+		replayer->register_sink(mocker, stra_id);
 
-		replayer.register_task(mocker->id(), cfg->get("sel")->get("task")->getUInt32("date"),
+		replayer->register_task(mocker->id(), cfg->get("sel")->get("task")->getUInt32("date"),
 			cfg->get("sel")->get("task")->getUInt32("time"), cfg->get("sel")->get("task")->getCString("period"));
 	}
 	else if (strcmp(mode, "exec") == 0)
 	{
-		ExecMocker* mocker = new ExecMocker(&replayer);
-		mocker->init(cfg->get("exec"));
-		replayer.register_sink(mocker, "exec");
+		execMocker = new ExecMocker(replayer);
+		std::string initError;
+		if (!execMocker->init(cfg->get("exec"), &initError))
+		{
+			std::string quiesceError;
+			if (quiesce_exec_mocker(execMocker, &quiesceError))
+			{
+				delete execMocker;
+				execMocker = NULL;
+				cfg->release();
+				delete replayer;
+				WTSLogger::stop();
+			}
+			else
+			{
+				WTSLogger::error("Execution mocker initialization failed and cleanup is pending: {} ({})",
+					initError, quiesceError);
+				// Retain the plugin, replay context, and configuration until process
+				// exit; unwinding these owners would invalidate a live ExecuteContext.
+			}
+			return -1;
+		}
+		replayer->register_sink(execMocker, "exec");
 	}
 	else if (strcmp(mode, "uft") == 0)
 	{
-		UftMocker* mocker = new UftMocker(&replayer, "uft");
+		UftMocker* mocker = new UftMocker(replayer, "uft");
 		mocker->init_uft_factory(cfg->get("uft"));
 		const char* stra_id = cfg->get("uft")->get("strategy")->getCString("id");
-		replayer.register_sink(mocker, stra_id);
+		replayer->register_sink(mocker, stra_id);
 	}
 
-	replayer.prepare();
+	if (!replayer->prepare())
+	{
+		WTSLogger::error("Preparing historical data replayer failed");
+		if (execMocker)
+		{
+			std::string quiesceError;
+			if (!quiesce_exec_mocker(execMocker, &quiesceError))
+			{
+				WTSLogger::error("Execution plugin cleanup is pending; replay owners are retained: {}", quiesceError);
+				return -1;
+			}
+			delete execMocker;
+			execMocker = NULL;
+		}
+		cfg->release();
+		delete replayer;
+		WTSLogger::stop();
+		return -1;
+	}
 
-	replayer.run(true);
+	replayer->run(true);
 
 	printf("press enter key to exit\r\n");
 	getchar();
+	if (execMocker)
+	{
+		std::string quiesceError;
+		if (!quiesce_exec_mocker(execMocker, &quiesceError))
+		{
+			WTSLogger::error("Execution plugin cleanup is pending; replay owners are retained: {}", quiesceError);
+			return -1;
+		}
+		delete execMocker;
+		cfg->release();
+		delete replayer;
+	}
+	else
+	{
+		cfg->release();
+		delete replayer;
+	}
 
 	WTSLogger::stop();
+	return 0;
 }

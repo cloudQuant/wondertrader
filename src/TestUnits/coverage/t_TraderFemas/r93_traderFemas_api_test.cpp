@@ -105,9 +105,11 @@ namespace
 		void setApi(CUstpFtdcTraderApi* api) { m_pUserAPI = api; }
 		void setState(WrapperState state) { m_wrapperState = state; }
 		void setStrand(boost::asio::io_context::strand* strand) { m_strandIO = strand; }
+		void setLastQueryTime(uint64_t value) { m_lastQryTime = value; }
 		void setFactory(CUstpFtdcTraderApi* (*factory)(const char*)) { m_funcCreator = factory; }
 		void setSessionID(const char* sid) { m_strSessionID = sid; }
 		WrapperState state() const { return m_wrapperState; }
+		bool queryInFlight() const { return m_bInQuery; }
 		void presetWorker()
 		{
 			// connect() 只在 m_thrdWorker==NULL 时起常驻线程；预置未启动的
@@ -444,6 +446,9 @@ namespace
 	TEST_F(R93FemasTest, position_order_trade_requests_assemble_after_manual_test_drain)
 	{
 		make_ready();
+		boost::asio::io_context ioc;
+		boost::asio::io_context::strand strand(ioc);
+		probe_.setStrand(&strand);
 
 		ASSERT_EQ(0, probe_.queryPositions());
 		ASSERT_EQ(1u, probe_.queued());
@@ -524,5 +529,59 @@ namespace
 		EXPECT_STREQ("9999", stub_.qry_trade_req_.BrokerID);
 		EXPECT_STREQ("femasuser", stub_.qry_trade_req_.UserID);
 		EXPECT_STREQ("femasuser", stub_.qry_trade_req_.InvestorID);
+	}
+
+	TEST_F(R93FemasTest, queued_queries_are_serial_and_final_error_callbacks_advance)
+	{
+		make_ready();
+		boost::asio::io_context ioc;
+		boost::asio::io_context::strand strand(ioc);
+		probe_.setStrand(&strand);
+
+		ASSERT_EQ(0, probe_.queryPositions());
+		ASSERT_EQ(0, probe_.queryOrders());
+		ASSERT_EQ(0, probe_.queryTrades());
+		EXPECT_EQ(3u, probe_.queued());
+
+		// All entry points schedule the same strand. Only the first request starts
+		// while it is in flight; the two remaining notifications must not duplicate it.
+		ioc.run();
+		EXPECT_EQ(1, stub_.n_qry_position_);
+		EXPECT_EQ(0, stub_.n_qry_order_);
+		EXPECT_EQ(0, stub_.n_qry_trade_);
+		EXPECT_EQ(2u, probe_.queued());
+		EXPECT_TRUE(probe_.queryInFlight());
+
+		CUstpFtdcRspInfoField ok = r93_femas_rsp(0, "");
+		CUstpFtdcRspInfoField failed = r93_femas_rsp(8, "query rejected");
+		probe_.OnRspQryInvestorPosition(NULL, &ok, 1, false);
+		EXPECT_EQ(0, stub_.n_qry_order_);	// Non-final response does not advance the queue.
+		EXPECT_TRUE(probe_.queryInFlight());
+
+		// A terminal error response still releases the in-flight slot and schedules
+		// the next request. Reset only the test clock anchor to avoid the 1s throttle.
+		probe_.setLastQueryTime(0);
+		probe_.OnRspQryInvestorPosition(NULL, &failed, 1, true);
+		ioc.restart();
+		ioc.run();
+		EXPECT_EQ(1, stub_.n_qry_order_);
+		EXPECT_EQ(0, stub_.n_qry_trade_);
+		EXPECT_EQ(1u, probe_.queued());
+		EXPECT_TRUE(probe_.queryInFlight());
+
+		probe_.setLastQueryTime(0);
+		probe_.OnRspQryOrder(NULL, &failed, 2, true);
+		ioc.restart();
+		ioc.run();
+		EXPECT_EQ(1, stub_.n_qry_trade_);
+		EXPECT_EQ(0u, probe_.queued());
+		EXPECT_TRUE(probe_.queryInFlight());
+
+		probe_.setLastQueryTime(0);
+		probe_.OnRspQryTrade(NULL, &failed, 3, true);
+		ioc.restart();
+		ioc.run();
+		EXPECT_EQ(0u, probe_.queued());
+		EXPECT_FALSE(probe_.queryInFlight());
 	}
 } // namespace

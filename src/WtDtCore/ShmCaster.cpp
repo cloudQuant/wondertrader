@@ -15,6 +15,9 @@
 #include "../Share/BoostFile.hpp"
 #include "../WTSTools/WTSLogger.h"
 
+#include <exception>
+#include <new>
+
 /**
  * @brief 初始化共享内存广播器
  * @details 根据配置项创建或重置共享内存队列，并进行内存映射
@@ -31,36 +34,69 @@ bool ShmCaster::init(WTSVariant* cfg)
 	if (!cfg->getBoolean("active"))
 		return false;
 
-	// 获取共享内存文件路径
-	_path = cfg->getCString("path");
-
-	// 每次启动都重置该队列，确保数据一致性
+	const char* path = cfg->getCString("path");
+	if (path == NULL || path[0] == '\0')
 	{
-		BoostFile bf;
-		bf.create_or_open_file(_path.c_str());
-		bf.truncate_file(sizeof(CastQueue));
-		bf.close_file();
+		WTSLogger::error("ShmCaster initialization failed: path is empty");
+		return false;
 	}
 
-	// 创建内存映射文件并进行映射
-	_mapfile.reset(new BoostMappingFile);
-	_mapfile->map(_path.c_str());
-	_queue = (CastQueue*)_mapfile->addr();
-	
-	// 在映射内存上调用CastQueue的构造函数，初始化队列
-	new(_mapfile->addr()) CastQueue();
+	std::string newPath;
+	MappedFilePtr mapfile;
+	CastQueue* queue = NULL;
+	try
+	{
+		newPath = path;
+		// 每次启动都重置队列，但必须确认文件创建和扩容成功后再映射。
+		BoostFile bf;
+		if (!bf.create_or_open_file(path))
+		{
+			WTSLogger::error("ShmCaster initialization failed: cannot open {}", path);
+			return false;
+		}
+		if (!bf.truncate_file(sizeof(CastQueue)))
+		{
+			WTSLogger::error("ShmCaster initialization failed: cannot size {}", path);
+			return false;
+		}
+		bf.close_file();
 
-	// 设置进程标识，根据不同平台选择不同的获取方式
+		// 先完整建立候选映射。失败时保留当前有效映射，避免悬垂的 _queue。
+		mapfile.reset(new BoostMappingFile);
+		if (!mapfile->map(path) || mapfile->addr() == NULL
+			|| mapfile->size() < sizeof(CastQueue))
+		{
+			WTSLogger::error("ShmCaster initialization failed: cannot map {}", path);
+			return false;
+		}
+
+		queue = new(mapfile->addr()) CastQueue();
+
+		// 设置进程标识，根据不同平台选择不同的获取方式
 #ifdef _MSC_VER
-	_queue->_pid = _getpid();
+		queue->_pid = _getpid();
 #else
-	_queue->_pid = getpid();
+		queue->_pid = getpid();
 #endif
 
-	// 设置初始化标记并输出日志
-	_inited = true;
-	WTSLogger::info("ShmCaste initialized @ {}", _path.c_str());
+	}
+	catch (const std::exception& e)
+	{
+		WTSLogger::error("ShmCaster initialization failed for {}: {}", path, e.what());
+	}
+	catch (...)
+	{
+		WTSLogger::error("ShmCaster initialization failed for {}", path);
+	}
 
+	if (mapfile == NULL || queue == NULL)
+		return false;
+
+	_path.swap(newPath);
+	_mapfile = mapfile;
+	_queue = queue;
+	_inited = true;
+	WTSLogger::info("ShmCaster initialized @ {}", _path.c_str());
 	return true;
 }
 

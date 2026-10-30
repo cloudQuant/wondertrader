@@ -77,6 +77,7 @@ extern "C"
 	 * @param fctLoader 复权因子加载器
 	 * @param tickLoader Tick数据加载器
 	 * @param bAutoTrans 是否自动转换数据
+	 * @details tickLoader 必须在返回前同步调用 feed_raw_ticks；不得保存本次 loader 的回调状态。
 	 */
 	EXPORT_FLAG void		register_ext_data_loader(FuncLoadFnlBars fnlBarLoader, FuncLoadRawBars rawBarLoader, FuncLoadAdjFactors fctLoader, FuncLoadRawTicks tickLoader, bool bAutoTrans);
 
@@ -90,7 +91,8 @@ extern "C"
 
 	/**
 	 * @brief 输入原始Tick数据
-	 * @details 将原始Tick数据输入到回测引擎中
+	 * @details 将原始Tick数据输入到回测引擎中。仅在 tickLoader 调用期间同步使用；tickLoader 返回后
+	 *          不得再调用此函数。ticks 数组仅需在本函数调用期间有效；count=0 时 ticks 可为 NULL。
 	 * @param ticks Tick数据数组
 	 * @param count Tick数据数量
 	 */
@@ -122,6 +124,13 @@ extern "C"
 	 * @param isFile 是否为文件，true表示cfgfile是文件路径，false表示是配置内容
 	 */
 	EXPORT_FLAG	void		config_backtest(const char* cfgfile, bool isFile);
+
+	/**
+	 * @brief Versioned configuration entry point with an observable result.
+	 * @return 0 on success, nonzero on failure. errorText is NUL terminated
+	 *         whenever errorCapacity is nonzero.
+	 */
+	EXPORT_FLAG	int32_t		config_backtest_v2(const char* cfgfile, bool isFile, char* errorText, uint32_t errorCapacity);
 
 	/**
 	 * @brief 设置回测时间范围

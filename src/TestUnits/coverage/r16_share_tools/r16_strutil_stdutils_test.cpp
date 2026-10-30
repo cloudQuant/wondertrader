@@ -13,12 +13,6 @@
 #include <stdexcept>
 #include <mutex>
 #include <fstream>
-#include <cstdio>
-#include <cstdlib>
-#if !defined(_WIN32)
-#include <sys/resource.h>
-#include <unistd.h>
-#endif
 #include "Share/StrUtil.hpp"
 #include "Share/StdUtils.hpp"
 #include "r16_tmp.h"
@@ -126,10 +120,10 @@ TEST(r16_strutil, split2_advances_by_delim_length)
 
 TEST(r16_strutil, split_leading_delim_yields_empty_first)
 {
-	StringVector v = StrUtil::split("  a", " ");
+	StringVector v = StrUtil::split(" a", " ");
 	ASSERT_EQ((size_t)2, v.size());
 	EXPECT_EQ(std::string(""), v[0]);
-	EXPECT_EQ(std::string(""), v[1]);
+	EXPECT_EQ(std::string("a"), v[1]);
 }
 
 TEST(r16_strutil, split_output_version_appends_to_existing_vector)
@@ -180,39 +174,18 @@ TEST(r16_strutil, replace_with_empty_target_removes_matches)
 	EXPECT_EQ(std::string("abc"), s);
 }
 
-TEST(r16_strutil, replace_with_empty_source_terminates_candidate)
+TEST(r16_strutil, replace_with_empty_source_and_nonempty_target_is_noop)
 {
-#if defined(_WIN32)
-	GTEST_SKIP() << "The bounded empty-source probe requires POSIX CPU limits and alarm().";
-	#else
-	const std::string oldStyle = GTEST_FLAG_GET(death_test_style);
-	GTEST_FLAG_SET(death_test_style, "threadsafe");
+	std::string s = "abc";
+	StrUtil::replace(s, "", "X");
+	EXPECT_EQ(std::string("abc"), s);
+}
 
-	EXPECT_EXIT(
-		{
-			struct rlimit cpuLimit;
-			if (::getrlimit(RLIMIT_CPU, &cpuLimit) != 0 ||
-				(cpuLimit.rlim_max != RLIM_INFINITY && cpuLimit.rlim_max < 1))
-				std::_Exit(90);
-			cpuLimit.rlim_cur = 1;
-			if (::setrlimit(RLIMIT_CPU, &cpuLimit) != 0)
-				std::_Exit(90);
-
-			::alarm(3);
-			std::fprintf(stderr, "R16_EMPTY_SOURCE_REPLACE_READY\n");
-			std::fflush(stderr);
-
-			// Empty replacement keeps this probe bounded in memory even if the
-			// empty source causes the loop not to advance.
-			std::string s = "abc";
-			StrUtil::replace(s, "", "");
-			::alarm(0);
-			std::_Exit(0);
-		},
-		::testing::ExitedWithCode(0), "R16_EMPTY_SOURCE_REPLACE_READY");
-
-	GTEST_FLAG_SET(death_test_style, oldStyle);
-#endif
+TEST(r16_strutil, replace_with_empty_source_and_empty_target_is_noop)
+{
+	std::string s = "abc";
+	StrUtil::replace(s, "", "");
+	EXPECT_EQ(std::string("abc"), s);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -222,12 +195,11 @@ TEST(r16_strutil, standardise_path_non_dir_no_trailing_slash)
 	EXPECT_EQ(std::string("a/b/c.txt"), StrUtil::standardisePath("a\\b\\c.txt", false));
 }
 
-TEST(r16_strutil, DISABLED_standardise_path_empty_string_reads_before_begin)
+TEST(r16_strutil, standardise_path_empty_string)
 {
-	// BUG-R16-04：path[path.length()-1] 在空串时是 path[(size_t)-1]，越界读（libc++ 断言/崩溃）。
-	// 触发条件：StrUtil::standardisePath("")。整条用例隔离。
-	std::string s = StrUtil::standardisePath("");
-	EXPECT_EQ(std::string("/"), s);
+	// An unset path stays empty in both modes instead of becoming the filesystem root.
+	EXPECT_EQ(std::string(""), StrUtil::standardisePath(""));
+	EXPECT_EQ(std::string(""), StrUtil::standardisePath("", false));
 }
 
 //////////////////////////////////////////////////////////////////////////

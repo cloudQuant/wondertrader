@@ -1,0 +1,71 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 25 tests from 5 test suites.
+[----------] Global test environment set-up.
+[----------] 6 tests from R76ParserUDPTest
+[ RUN      ] R76ParserUDPTest.InitAcceptsIpv6HostAndZeroPorts
+[       OK ] R76ParserUDPTest.InitAcceptsIpv6HostAndZeroPorts (0 ms)
+[ RUN      ] R76ParserUDPTest.InitIsRepeatableAndOverwritesEndpoints
+[       OK ] R76ParserUDPTest.InitIsRepeatableAndOverwritesEndpoints (0 ms)
+[ RUN      ] R76ParserUDPTest.RegisterSpiNullMakesNextRegistrationSilent
+[       OK ] R76ParserUDPTest.RegisterSpiNullMakesNextRegistrationSilent (0 ms)
+[ RUN      ] R76ParserUDPTest.SubscribeAcceptsMixedCodeShapesWithoutCallbacks
+[       OK ] R76ParserUDPTest.SubscribeAcceptsMixedCodeShapesWithoutCallbacks (0 ms)
+[ RUN      ] R76ParserUDPTest.DisconnectBeforeAndAfterRegisterSpiIsIdempotent
+[       OK ] R76ParserUDPTest.DisconnectBeforeAndAfterRegisterSpiIsIdempotent (0 ms)
+[ RUN      ] R76ParserUDPTest.FactoryDeleteWithRegisteredSinkIsSafe
+[       OK ] R76ParserUDPTest.FactoryDeleteWithRegisteredSinkIsSafe (0 ms)
+[----------] 6 tests from R76ParserUDPTest (0 ms total)
+
+[----------] 3 tests from ParserUDPQueueLockTest
+[ RUN      ] ParserUDPQueueLockTest.SuccessfulWriteReleasesQueueLockBeforeSchedulingNextSend
+[       OK ] ParserUDPQueueLockTest.SuccessfulWriteReleasesQueueLockBeforeSchedulingNextSend (0 ms)
+[ RUN      ] ParserUDPQueueLockTest.StaleWriteCompletionCannotConsumeNextEpochPacket
+[       OK ] ParserUDPQueueLockTest.StaleWriteCompletionCannotConsumeNextEpochPacket (0 ms)
+[ RUN      ] ParserUDPQueueLockTest.AsyncSendBufferLivesUntilItsCancellationCompletion
+[       OK ] ParserUDPQueueLockTest.AsyncSendBufferLivesUntilItsCancellationCompletion (0 ms)
+[----------] 3 tests from ParserUDPQueueLockTest (0 ms total)
+
+[----------] 13 tests from ParserUDPShutdownTest
+[ RUN      ] ParserUDPShutdownTest.CurrentSendErrorRecoversPairOnceAndIgnoresStaleOrAbortedCompletions
+[       OK ] ParserUDPShutdownTest.CurrentSendErrorRecoversPairOnceAndIgnoresStaleOrAbortedCompletions (0 ms)
+[ RUN      ] ParserUDPShutdownTest.ReceiveOperationsOwnDistinctBuffersAndPartialReconnectIsRejected
+[       OK ] ParserUDPShutdownTest.ReceiveOperationsOwnDistinctBuffersAndPartialReconnectIsRejected (0 ms)
+[ RUN      ] ParserUDPShutdownTest.ExternalReleaseWaitsForActiveSpiCallbackAndBlocksLaterDispatch
+[       OK ] ParserUDPShutdownTest.ExternalReleaseWaitsForActiveSpiCallbackAndBlocksLaterDispatch (1 ms)
+[ RUN      ] ParserUDPShutdownTest.SelfReleaseAndDeleteRetainOwnerForExternalRetry
+[       OK ] ParserUDPShutdownTest.SelfReleaseAndDeleteRetainOwnerForExternalRetry (1 ms)
+[ RUN      ] ParserUDPShutdownTest.ActiveUdpDisconnectEmitsOneCloseAndReconnectStartsNewEventEpoch
+[       OK ] ParserUDPShutdownTest.ActiveUdpDisconnectEmitsOneCloseAndReconnectStartsNewEventEpoch (2 ms)
+[ RUN      ] ParserUDPShutdownTest.AutomaticReconnectStartsANewCloseEventCycle
+[       OK ] ParserUDPShutdownTest.AutomaticReconnectStartsANewCloseEventCycle (0 ms)
+[ RUN      ] ParserUDPShutdownTest.ExpectedOperationAbortedDoesNotReportOrReconnect
+[       OK ] ParserUDPShutdownTest.ExpectedOperationAbortedDoesNotReportOrReconnect (0 ms)
+[ RUN      ] ParserUDPShutdownTest.ReentrantRecoveryLogDisconnectPreventsReconnectAndAllowsControlThreadRestart
+[       OK ] ParserUDPShutdownTest.ReentrantRecoveryLogDisconnectPreventsReconnectAndAllowsControlThreadRestart (0 ms)
+[ RUN      ] ParserUDPShutdownTest.PersistentSendErrorsStopAfterBoundedRecoveryAttempts
+[       OK ] ParserUDPShutdownTest.PersistentSendErrorsStopAfterBoundedRecoveryAttempts (2 ms)
+[ RUN      ] ParserUDPShutdownTest.PersistentReadErrorsStopAfterBoundedRecoveryAttempts
+[       OK ] ParserUDPShutdownTest.PersistentReadErrorsStopAfterBoundedRecoveryAttempts (0 ms)
+[ RUN      ] ParserUDPShutdownTest.SuccessfulCurrentSendResetsItsRecoveryBudget
+[       OK ] ParserUDPShutdownTest.SuccessfulCurrentSendResetsItsRecoveryBudget (0 ms)
+[ RUN      ] ParserUDPShutdownTest.OldTwoChannelReadCompletionsBelongToOneReconnectEpoch
+[       OK ] ParserUDPShutdownTest.OldTwoChannelReadCompletionsBelongToOneReconnectEpoch (2 ms)
+[ RUN      ] ParserUDPShutdownTest.BroadcastOnlyRecoveryStartsOneNewCloseCycle
+[       OK ] ParserUDPShutdownTest.BroadcastOnlyRecoveryStartsOneNewCloseCycle (0 ms)
+[----------] 13 tests from ParserUDPShutdownTest (25 ms total)
+
+[----------] 2 tests from ParserUDPSpiLockTest
+[ RUN      ] ParserUDPSpiLockTest.CallbacksSerializeReenterIoAndReplacementWaitsForTheOldSink
+[       OK ] ParserUDPSpiLockTest.CallbacksSerializeReenterIoAndReplacementWaitsForTheOldSink (0 ms)
+[ RUN      ] ParserUDPSpiLockTest.NestedParserCallbacksRetainOuterParserIdentity
+[       OK ] ParserUDPSpiLockTest.NestedParserCallbacksRetainOuterParserIdentity (0 ms)
+[----------] 2 tests from ParserUDPSpiLockTest (0 ms total)
+
+[----------] 1 test from ParserUDPReceiveTest
+[ RUN      ] ParserUDPReceiveTest.EmptyBroadcastDatagramRearmsBeforeTheNextValidTick
+[       OK ] ParserUDPReceiveTest.EmptyBroadcastDatagramRearmsBeforeTheNextValidTick (2 ms)
+[----------] 1 test from ParserUDPReceiveTest (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 25 tests from 5 test suites ran. (29 ms total)
+[  PASSED  ] 25 tests.

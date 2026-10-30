@@ -1,0 +1,62 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = n06_cta_stra.init_rejects_missing_or_zero_two_ma_periods:n06_cta_stra.init_rejects_two_ma_history_shorter_than_window:n06_cta_stra.init_rejects_two_ma_periods_outside_signed_index_range:n06_cta_ctx.twoma_short_window_needs_more_history_and_releases_slice:n06_cta_ctx.twoma_on_schedule_golden_cross_enters_long
+[==========] Running 5 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 3 tests from n06_cta_stra
+[ RUN      ] n06_cta_stra.init_rejects_missing_or_zero_two_ma_periods
+WtStraTwoMa::init  begin to init
+WtStraTwoMa::init  begin to init
+WtStraTwoMa::init  begin to init
+[       OK ] n06_cta_stra.init_rejects_missing_or_zero_two_ma_periods (0 ms)
+[ RUN      ] n06_cta_stra.init_rejects_two_ma_history_shorter_than_window
+WtStraTwoMa::init  begin to init
+WtStraTwoMa::init  begin to init
+_short_days: 3
+_long_days: 8
+_period: d1
+_count: 9
+_code: SHFE.au.2005
+WtStraTwoMa::init  begin to init
+WtStraTwoMa::init  begin to init
+_short_days: 9
+_long_days: 8
+_period: d1
+_count: 10
+_code: SHFE.au.2005
+[       OK ] n06_cta_stra.init_rejects_two_ma_history_shorter_than_window (0 ms)
+[ RUN      ] n06_cta_stra.init_rejects_two_ma_periods_outside_signed_index_range
+WtStraTwoMa::init  begin to init
+[       OK ] n06_cta_stra.init_rejects_two_ma_periods_outside_signed_index_range (0 ms)
+[----------] 3 tests from n06_cta_stra (0 ms total)
+
+[----------] 2 tests from n06_cta_ctx
+[ RUN      ] n06_cta_ctx.twoma_on_schedule_golden_cross_enters_long
+WtStraTwoMa::init  begin to init
+_short_days: 2
+_long_days: 3
+_period: d1
+_count: 10
+_code: SHFE.au.2005
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n06_strategies_mq_share/n06_cta_ctx_mock_test.cpp:312: Failure
+Value of: hasPrefix(ctx.orders, ":DT_EnterLong")
+  Actual: false
+Expected: true
+
+[  FAILED  ] n06_cta_ctx.twoma_on_schedule_golden_cross_enters_long (0 ms)
+[ RUN      ] n06_cta_ctx.twoma_short_window_needs_more_history_and_releases_slice
+WtStraTwoMa::init  begin to init
+_short_days: 9
+_long_days: 8
+_period: d1
+_count: 10
+_code: SHFE.au.2005
+[       OK ] n06_cta_ctx.twoma_short_window_needs_more_history_and_releases_slice (0 ms)
+[----------] 2 tests from n06_cta_ctx (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 5 tests from 2 test suites ran. (0 ms total)
+[  PASSED  ] 4 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] n06_cta_ctx.twoma_on_schedule_golden_cross_enters_long
+
+ 1 FAILED TEST

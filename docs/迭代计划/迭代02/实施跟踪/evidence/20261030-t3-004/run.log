@@ -1,0 +1,84 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 32 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 18 tests from femas_parser
+[ RUN      ] femas_parser.is_not_connected_without_api
+[       OK ] femas_parser.is_not_connected_without_api (0 ms)
+[ RUN      ] femas_parser.connect_without_api_reports_command_not_sent
+[       OK ] femas_parser.connect_without_api_reports_command_not_sent (0 ms)
+[ RUN      ] femas_parser.disconnect_without_api_reports_command_not_sent
+[       OK ] femas_parser.disconnect_without_api_reports_command_not_sent (0 ms)
+[ RUN      ] femas_parser.register_spi_pulls_base_data_mgr_from_sink
+[       OK ] femas_parser.register_spi_pulls_base_data_mgr_from_sink (0 ms)
+[ RUN      ] femas_parser.subscribe_before_login_only_caches_codes
+[       OK ] femas_parser.subscribe_before_login_only_caches_codes (0 ms)
+[ RUN      ] femas_parser.front_connected_emits_connect_event_then_skips_login
+[       OK ] femas_parser.front_connected_emits_connect_event_then_skips_login (0 ms)
+[ RUN      ] femas_parser.front_disconnect_reports_close_event_and_reason
+[       OK ] femas_parser.front_disconnect_reports_close_event_and_reason (0 ms)
+[ RUN      ] femas_parser.logout_rsp_emits_logout_event
+[       OK ] femas_parser.logout_rsp_emits_logout_event (0 ms)
+[ RUN      ] femas_parser.heartbeat_warning_is_logged
+[       OK ] femas_parser.heartbeat_warning_is_logged (0 ms)
+[ RUN      ] femas_parser.nonzero_rsp_error_is_reported_through_parser_log
+[       OK ] femas_parser.nonzero_rsp_error_is_reported_through_parser_log (0 ms)
+[ RUN      ] femas_parser.subscription_error_callbacks_are_safe
+[       OK ] femas_parser.subscription_error_callbacks_are_safe (0 ms)
+[ RUN      ] femas_parser.login_rsp_skipped_when_not_last
+[       OK ] femas_parser.login_rsp_skipped_when_not_last (0 ms)
+[ RUN      ] femas_parser.depth_market_data_dropped_without_data_mgr
+[       OK ] femas_parser.depth_market_data_dropped_without_data_mgr (0 ms)
+[ RUN      ] femas_parser.depth_market_data_dropped_when_contract_unknown
+[       OK ] femas_parser.depth_market_data_dropped_when_contract_unknown (0 ms)
+[ RUN      ] femas_parser.depth_market_data_converts_prices_and_times
+[       OK ] femas_parser.depth_market_data_converts_prices_and_times (0 ms)
+[ RUN      ] femas_parser.czce_turnover_multiplied_by_vol_scale
+[       OK ] femas_parser.czce_turnover_multiplied_by_vol_scale (0 ms)
+[ RUN      ] femas_parser.strtotime_strips_colons
+[       OK ] femas_parser.strtotime_strips_colons (0 ms)
+[ RUN      ] femas_parser.extern_c_factory_round_trip
+[       OK ] femas_parser.extern_c_factory_round_trip (0 ms)
+[ DISABLED ] femas_parser.DISABLED_login_rsp_last_true_calls_null_api
+[----------] 18 tests from femas_parser (0 ms total)
+
+[----------] 1 test from gate_placeholder_ParserFemas
+[ RUN      ] gate_placeholder_ParserFemas.compiles_with_module_flags
+[       OK ] gate_placeholder_ParserFemas.compiles_with_module_flags (0 ms)
+[----------] 1 test from gate_placeholder_ParserFemas (0 ms total)
+
+[----------] 13 tests from R105FemasTest
+[ RUN      ] R105FemasTest.injected_api_connect_login_and_do_subscribe
+[       OK ] R105FemasTest.injected_api_connect_login_and_do_subscribe (0 ms)
+[ RUN      ] R105FemasTest.is_connected_tracks_front_connection_callbacks
+[       OK ] R105FemasTest.is_connected_tracks_front_connection_callbacks (0 ms)
+[ RUN      ] R105FemasTest.release_clears_connection_state
+[       OK ] R105FemasTest.release_clears_connection_state (0 ms)
+[ RUN      ] R105FemasTest.login_failure_and_inline_subscribe_branches
+[       OK ] R105FemasTest.login_failure_and_inline_subscribe_branches (0 ms)
+[ RUN      ] R105FemasTest.subscribe_handles_500_and_501_contracts
+[       OK ] R105FemasTest.subscribe_handles_500_and_501_contracts (3 ms)
+[ RUN      ] R105FemasTest.login_error_is_reported_without_login_or_subscribe
+[       OK ] R105FemasTest.login_error_is_reported_without_login_or_subscribe (0 ms)
+[ RUN      ] R105FemasTest.zero_error_login_response_still_logs_in_and_subscribes
+[       OK ] R105FemasTest.zero_error_login_response_still_logs_in_and_subscribes (0 ms)
+[ RUN      ] R105FemasTest.init_flowdir_creation_failure_throws_before_vendor_symbol
+[       OK ] R105FemasTest.init_flowdir_creation_failure_throws_before_vendor_symbol (1 ms)
+[ RUN      ] R105FemasTest.init_missing_module_fails_and_release_is_repeatable
+dlopen(/private/tmp/wt-i02-t3-004/libR105DefinitelyMissingFemasModule.dylib, 0x0002): tried: '/private/tmp/wt-i02-t3-004/libR105DefinitelyMissingFemasModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/wt-i02-t3-004/libR105DefinitelyMissingFemasModule.dylib' (no such file), '/private/tmp/wt-i02-t3-004/libR105DefinitelyMissingFemasModule.dylib' (no such file)
+[       OK ] R105FemasTest.init_missing_module_fails_and_release_is_repeatable (1 ms)
+[ RUN      ] R105FemasTest.creator_symbol_and_null_factory_fail_without_api
+[       OK ] R105FemasTest.creator_symbol_and_null_factory_fail_without_api (0 ms)
+[ RUN      ] R105FemasTest.depth_null_manager_and_normal_settlement
+[       OK ] R105FemasTest.depth_null_manager_and_normal_settlement (0 ms)
+[ RUN      ] R105FemasTest.night_session_recomputes_action_date
+[       OK ] R105FemasTest.night_session_recomputes_action_date (0 ms)
+[ RUN      ] R105FemasTest.null_sink_and_no_api_guards
+[       OK ] R105FemasTest.null_sink_and_no_api_guards (0 ms)
+[----------] 13 tests from R105FemasTest (7 ms total)
+
+[----------] Global test environment tear-down
+[==========] 32 tests from 3 test suites ran. (8 ms total)
+[  PASSED  ] 32 tests.
+
+  YOU HAVE 1 DISABLED TEST
+

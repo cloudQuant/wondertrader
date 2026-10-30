@@ -21,6 +21,7 @@
 #include "../Share/Converter.hpp"
 
 #include <atomic>
+#include <mutex>
 
 #include "../WTSTools/WTSLogger.h"
 #include "../Share/TimeUtils.hpp"
@@ -29,22 +30,109 @@
 #include "../Share/StrUtil.hpp"
 
 #include <exception>
+#include <algorithm>
+#include <iterator>
+#include <utility>
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 
 namespace rj = rapidjson;
 using namespace std;
 
+namespace
+{
+thread_local std::vector<const wtp::TraderAdapter*> g_sink_notification_adapters;
+thread_local std::vector<const wtp::TraderAdapter*> g_api_call_adapters;
+thread_local std::vector<const wtp::TraderAdapter*> g_spi_callback_adapters;
+
+class SinkNotificationCallbackScope
+{
+public:
+	explicit SinkNotificationCallbackScope(const wtp::TraderAdapter* adapter)
+		: _adapter(adapter)
+	{
+		g_sink_notification_adapters.push_back(adapter);
+	}
+
+	~SinkNotificationCallbackScope()
+	{
+		if (!g_sink_notification_adapters.empty() && g_sink_notification_adapters.back() == _adapter)
+			g_sink_notification_adapters.pop_back();
+		else
+		{
+			auto it = std::find(g_sink_notification_adapters.rbegin(), g_sink_notification_adapters.rend(), _adapter);
+			if (it != g_sink_notification_adapters.rend())
+				g_sink_notification_adapters.erase(std::next(it).base());
+		}
+	}
+
+private:
+	const wtp::TraderAdapter* _adapter;
+};
+
+bool isInSinkNotificationCallback(const wtp::TraderAdapter* adapter)
+{
+	return std::find(g_sink_notification_adapters.begin(), g_sink_notification_adapters.end(), adapter) != g_sink_notification_adapters.end();
+}
+
+bool isInApiCall(const wtp::TraderAdapter* adapter)
+{
+	return std::find(g_api_call_adapters.begin(), g_api_call_adapters.end(), adapter) != g_api_call_adapters.end();
+}
+
+bool isInSpiCallback(const wtp::TraderAdapter* adapter)
+{
+	return std::find(g_spi_callback_adapters.begin(), g_spi_callback_adapters.end(), adapter) != g_spi_callback_adapters.end();
+}
+
+template<typename Cleanup>
+class ScopeExit
+{
+public:
+	explicit ScopeExit(Cleanup cleanup)
+		: _cleanup(std::move(cleanup))
+		, _active(true)
+	{}
+	~ScopeExit() noexcept
+	{
+		if (_active)
+		{
+			try { _cleanup(); }
+			catch (...) {}
+		}
+	}
+	void dismiss() { _active = false; }
+
+private:
+	Cleanup _cleanup;
+	bool _active;
+};
+
+void logAdapterException(const char* id, const char* operation) noexcept
+{
+	try
+	{
+		WTSLogger::log_dyn("trader", id, LL_ERROR,
+			"[{}] Trader adapter operation {} threw; lifecycle remains fail-closed", id, operation);
+	}
+	catch (...) {}
+}
+}
+
 inline uint32_t makeLocalOrderID()
 {
 	static std::atomic<uint32_t> _auto_order_id{ 0 };
-	if (_auto_order_id == 0)
-	{
+	// Local ID 0 is reserved as the no-order sentinel; keep initialization state separate.
+	static std::once_flag _auto_order_id_once;
+	std::call_once(_auto_order_id_once, []() {
 		uint32_t curYear = TimeUtils::getCurDate() / 10000 * 10000 + 101;
-		_auto_order_id = (uint32_t)((TimeUtils::getLocalTimeNow() - TimeUtils::makeTime(curYear, 0)) / 1000 * 50);
-	}
+		uint32_t seed = (uint32_t)((TimeUtils::getLocalTimeNow() - TimeUtils::makeTime(curYear, 0)) / 1000 * 50);
+		if (seed == 0)
+			seed = 1;
+		_auto_order_id.store(seed, std::memory_order_relaxed);
+	});
 
-	return _auto_order_id.fetch_add(1);
+	return _auto_order_id.fetch_add(1, std::memory_order_relaxed);
 }
 
 inline const char* formatAction(WTSDirectionType dType, WTSOffsetType oType)
@@ -72,7 +160,15 @@ inline const char* formatAction(WTSDirectionType dType, WTSOffsetType oType)
 TraderAdapter::TraderAdapter()
 	: _cfg(NULL)
 	, _id("")
+	, _trading_day(0)
 	, _trader_api(NULL)
+	, _remover(NULL)
+	, _dll_handle(NULL)
+	, _owns_trader_api(false)
+	, _spi_registered(false)
+	, _api_released(false)
+	, _api_release_failed(false)
+	, _plugin_delete_failed(false)
 	, _state(AS_NOTLOGIN)
 	, _orders(NULL)
 	, _stat_map(NULL)
@@ -83,37 +179,611 @@ TraderAdapter::TraderAdapter()
 
 TraderAdapter::~TraderAdapter()
 {
-	if (_stat_map)
-		_stat_map->release();
+	requestStopSinkNotifications();
+	closeSpiCallbackAdmission();
+	if (!waitSinkNotificationsStopped())
+		std::terminate();
+	{
+		std::lock_guard<std::mutex> lock(_mtx_api_lifecycle);
+		// Destruction from this object's own initialization/release callback would
+		// return into a caller that is still using the object.
+		if ((_initialization_in_progress && _initialization_thread == std::this_thread::get_id()) ||
+			(_api_release_in_progress && _api_release_thread == std::this_thread::get_id()))
+			std::terminate();
+	}
+	release();
+	if (!isReleaseComplete())
+		std::terminate();
+}
+
+void TraderAdapter::addSink(ITrdNotifySink* sink)
+{
+	if (sink == NULL)
+		return;
+
+	ChannelStatusNotification notification;
+	notification.sinks.reserve(1);
+	notification.sinks.push_back(sink);
+	notification.ready = true;
+	bool shouldDrain = false;
+	{
+		std::lock_guard<std::mutex> lock(_mtx_sink_notifications);
+		if (_sink_notifications_stop_requested)
+			return;
+
+		auto inserted = _sinks.insert(sink);
+		if (!inserted.second || !_sink_channel_ready)
+			return;
+
+		notification.trading_day = _trading_day.load(std::memory_order_acquire);
+		try
+		{
+			enqueueChannelStatusLocked(std::move(notification), shouldDrain);
+		}
+		catch (...)
+		{
+			_sinks.erase(sink);
+			throw;
+		}
+	}
+
+	if (shouldDrain)
+		drainChannelStatusNotifications();
+}
+
+void TraderAdapter::notifySinks(const SinkCallback& callback)
+{
+	std::vector<ITrdNotifySink*> sinks;
+	{
+		std::lock_guard<std::mutex> lock(_mtx_sink_notifications);
+		if (_sink_notifications_stop_requested || _sinks.empty())
+			return;
+
+		sinks.assign(_sinks.begin(), _sinks.end());
+		++_sink_notifications_in_flight;
+	}
+
+	dispatchReservedSinks(sinks, callback);
+}
+
+void TraderAdapter::notifyChannelReadyIfExpected()
+{
+	bool shouldDrain = false;
+	{
+		std::lock_guard<std::mutex> lock(_mtx_sink_notifications);
+		AdapterState expected = AS_TRADES_QRYED;
+		if (!_state.compare_exchange_strong(expected, AS_ALLREADY, std::memory_order_acq_rel))
+			return;
+
+		_sink_channel_ready = true;
+		if (_sink_notifications_stop_requested || _sinks.empty())
+			return;
+
+		ChannelStatusNotification notification;
+		notification.sinks.assign(_sinks.begin(), _sinks.end());
+		notification.ready = true;
+		notification.trading_day = _trading_day.load(std::memory_order_acquire);
+		enqueueChannelStatusLocked(std::move(notification), shouldDrain);
+	}
+
+	WTSLogger::log_dyn("trader", _id.c_str(), LL_INFO, "[{}] Trading channel ready", _id.c_str());
+	if (shouldDrain)
+		drainChannelStatusNotifications();
+}
+
+void TraderAdapter::notifyChannelLost()
+{
+	bool shouldDrain = false;
+	{
+		std::lock_guard<std::mutex> lock(_mtx_sink_notifications);
+		_sink_channel_ready = false;
+		_state.store(AS_NOTLOGIN, std::memory_order_release);
+		if (_sink_notifications_stop_requested || _sinks.empty())
+			return;
+
+		ChannelStatusNotification notification;
+		notification.sinks.assign(_sinks.begin(), _sinks.end());
+		notification.ready = false;
+		notification.trading_day = 0;
+		enqueueChannelStatusLocked(std::move(notification), shouldDrain);
+	}
+
+	if (shouldDrain)
+		drainChannelStatusNotifications();
+}
+
+void TraderAdapter::enqueueChannelStatusLocked(ChannelStatusNotification&& notification, bool& shouldDrain)
+{
+	if (notification.sinks.empty())
+		return;
+	// Ready/lost snapshots enter this queue under the same lock as the readiness flag.
+	// A single drainer preserves their order while invoking every sink without a lock.
+	_sink_channel_status_queue.push_back(std::move(notification));
+	++_sink_notifications_in_flight;
+	if (!_sink_channel_status_draining)
+	{
+		_sink_channel_status_draining = true;
+		shouldDrain = true;
+	}
+}
+
+void TraderAdapter::drainChannelStatusNotifications()
+{
+	std::exception_ptr firstException;
+	for (;;)
+	{
+		ChannelStatusNotification notification;
+		{
+			std::lock_guard<std::mutex> lock(_mtx_sink_notifications);
+			if (_sink_channel_status_queue.empty())
+			{
+				_sink_channel_status_draining = false;
+				_cv_sink_notifications.notify_all();
+				break;
+			}
+			notification = std::move(_sink_channel_status_queue.front());
+			_sink_channel_status_queue.pop_front();
+		}
+
+		try
+		{
+			SinkNotificationCallbackScope callbackScope(this);
+			for (ITrdNotifySink* sink : notification.sinks)
+			{
+				try
+				{
+					if (notification.ready)
+						sink->on_channel_ready(notification.trading_day);
+					else
+						sink->on_channel_lost();
+				}
+				catch (...)
+				{
+					if (!firstException)
+						firstException = std::current_exception();
+				}
+			}
+		}
+		catch (...)
+		{
+			if (!firstException)
+				firstException = std::current_exception();
+		}
+		finishSinkNotification();
+	}
+
+	if (firstException)
+		std::rethrow_exception(firstException);
+}
+
+void TraderAdapter::dispatchReservedSinks(const std::vector<ITrdNotifySink*>& sinks, const SinkCallback& callback)
+{
+	try
+	{
+		SinkNotificationCallbackScope callbackScope(this);
+		for (ITrdNotifySink* sink : sinks)
+			callback(sink);
+	}
+	catch (...)
+	{
+		finishSinkNotification();
+		throw;
+	}
+
+	finishSinkNotification();
+}
+
+void TraderAdapter::finishSinkNotification()
+{
+	std::lock_guard<std::mutex> lock(_mtx_sink_notifications);
+	if (_sink_notifications_in_flight > 0)
+		--_sink_notifications_in_flight;
+	if (_sink_notifications_in_flight == 0)
+	{
+		if (_sink_notifications_stop_requested)
+			_sinks.clear();
+		_cv_sink_notifications.notify_all();
+	}
+}
+
+void TraderAdapter::requestStopSinkNotifications()
+{
+	std::lock_guard<std::mutex> lock(_mtx_sink_notifications);
+	_sink_notifications_stop_requested = true;
+	_sink_channel_ready = false;
+	_state.store(AS_NOTLOGIN, std::memory_order_release);
+	while (!_sink_channel_status_queue.empty())
+	{
+		_sink_channel_status_queue.pop_front();
+		if (_sink_notifications_in_flight > 0)
+			--_sink_notifications_in_flight;
+	}
+	if (_sink_notifications_in_flight == 0)
+	{
+		_sinks.clear();
+		_cv_sink_notifications.notify_all();
+	}
+}
+
+bool TraderAdapter::waitSinkNotificationsStopped()
+{
+	if (isInSinkNotificationCallback() || isInApiCall() || isInSpiCallback())
+		return false;
+
+	std::unique_lock<std::mutex> lock(_mtx_sink_notifications);
+	if (!_sink_notifications_stop_requested)
+		return false;
+	_cv_sink_notifications.wait(lock, [this]() {
+		return _sink_notifications_in_flight == 0 && !_sink_channel_status_draining && _api_calls_in_progress == 0;
+	});
+	_sinks.clear();
+	return true;
+}
+
+bool TraderAdapter::isInSinkNotificationCallback() const
+{
+	return ::isInSinkNotificationCallback(this);
+}
+
+bool TraderAdapter::isInApiCall() const
+{
+	return ::isInApiCall(this);
+}
+
+bool TraderAdapter::isInSpiCallback() const
+{
+	return ::isInSpiCallback(this);
+}
+
+bool TraderAdapter::beginSpiCallback()
+{
+	std::lock_guard<std::mutex> lock(_mtx_spi_callbacks);
+	if (!_spi_callback_admission_open)
+		return false;
+	++_spi_callbacks_in_progress;
+	return true;
+}
+
+void TraderAdapter::finishSpiCallback()
+{
+	std::lock_guard<std::mutex> lock(_mtx_spi_callbacks);
+	if (_spi_callbacks_in_progress > 0)
+		--_spi_callbacks_in_progress;
+	_cv_spi_callbacks.notify_all();
+}
+
+void TraderAdapter::closeSpiCallbackAdmission()
+{
+	std::lock_guard<std::mutex> lock(_mtx_spi_callbacks);
+	_spi_callback_admission_open = false;
+	_cv_spi_callbacks.notify_all();
+}
+
+bool TraderAdapter::waitForSpiCallbacksStopped()
+{
+	if (isInSpiCallback())
+		return false;
+	std::unique_lock<std::mutex> lock(_mtx_spi_callbacks);
+	_cv_spi_callbacks.wait(lock, [this]() { return _spi_callbacks_in_progress == 0; });
+	return true;
+}
+
+TraderAdapter::ApiCallLease::ApiCallLease(TraderAdapter* owner, bool requireIdle, bool loginAttempt)
+	: _owner(owner)
+	, _active(owner && owner->beginApiCall(requireIdle, loginAttempt))
+{
+	if (_active)
+	{
+		try
+		{
+			g_api_call_adapters.push_back(owner);
+		}
+		catch (...)
+		{
+			_owner->finishApiCall();
+			_active = false;
+			throw;
+		}
+	}
+}
+
+TraderAdapter::ApiCallLease::~ApiCallLease()
+{
+	if (_active)
+	{
+		if (!g_api_call_adapters.empty() && g_api_call_adapters.back() == _owner)
+			g_api_call_adapters.pop_back();
+		else
+		{
+			auto it = std::find(g_api_call_adapters.rbegin(), g_api_call_adapters.rend(), _owner);
+			if (it != g_api_call_adapters.rend())
+				g_api_call_adapters.erase(std::next(it).base());
+		}
+		_owner->finishApiCall();
+	}
+}
+
+TraderAdapter::SpiCallbackLease::SpiCallbackLease(TraderAdapter* owner)
+	: _owner(owner)
+	, _active(owner && owner->beginSpiCallback())
+{
+	if (_active)
+	{
+		try
+		{
+			g_spi_callback_adapters.push_back(owner);
+		}
+		catch (...)
+		{
+			_owner->finishSpiCallback();
+			_active = false;
+			throw;
+		}
+	}
+}
+
+TraderAdapter::SpiCallbackLease::~SpiCallbackLease()
+{
+	if (_active)
+	{
+		if (!g_spi_callback_adapters.empty() && g_spi_callback_adapters.back() == _owner)
+			g_spi_callback_adapters.pop_back();
+		else
+		{
+			auto it = std::find(g_spi_callback_adapters.rbegin(), g_spi_callback_adapters.rend(), _owner);
+			if (it != g_spi_callback_adapters.rend())
+				g_spi_callback_adapters.erase(std::next(it).base());
+		}
+		_owner->finishSpiCallback();
+	}
+}
+
+bool TraderAdapter::beginApiCall(bool requireIdle, bool loginAttempt)
+{
+	std::lock_guard<std::mutex> lock(_mtx_sink_notifications);
+	if (_sink_notifications_stop_requested || (requireIdle && _api_calls_in_progress != 0))
+		return false;
+	std::lock_guard<std::mutex> lifecycleLock(_mtx_api_lifecycle);
+	if (_initialization_in_progress || _api_release_in_progress || _lifecycle_closed)
+		return false;
+	if (_trader_api == NULL)
+		return false;
+	++_api_calls_in_progress;
+	if (loginAttempt)
+		_state.store(AS_LOGINING, std::memory_order_release);
+	return true;
+}
+
+bool TraderAdapter::canContinueApiStartup() const
+{
+	std::lock_guard<std::mutex> lock(_mtx_sink_notifications);
+	return !_sink_notifications_stop_requested;
+}
+
+void TraderAdapter::finishApiCall()
+{
+	std::lock_guard<std::mutex> lock(_mtx_sink_notifications);
+	if (_api_calls_in_progress > 0)
+		--_api_calls_in_progress;
+	_cv_sink_notifications.notify_all();
+}
+
+bool TraderAdapter::beginInitialization()
+{
+	std::lock_guard<std::mutex> sinkLock(_mtx_sink_notifications);
+	if (_sink_notifications_stop_requested || _sink_notifications_in_flight != 0 ||
+		_sink_channel_status_draining || _api_calls_in_progress != 0 || !_sink_channel_status_queue.empty())
+		return false;
+
+	std::lock_guard<std::mutex> lifecycleLock(_mtx_api_lifecycle);
+	if (_lifecycle_closed || _api_release_in_progress || _initialization_in_progress ||
+		_trader_api != NULL || _cfg != NULL || _dll_handle != NULL)
+		return false;
+
+	_initialization_in_progress = true;
+	_initialization_thread = std::this_thread::get_id();
+	_api_released = false;
+	_api_release_failed = false;
+	_plugin_delete_failed = false;
+	_sink_channel_ready = false;
+	_state.store(AS_NOTLOGIN, std::memory_order_release);
+	_trading_day.store(0, std::memory_order_release);
+	{
+		std::lock_guard<std::mutex> spiLock(_mtx_spi_callbacks);
+		_spi_callback_admission_open = true;
+	}
+	return true;
+}
+
+void TraderAdapter::finishInitialization()
+{
+	std::lock_guard<std::mutex> lock(_mtx_api_lifecycle);
+	_initialization_in_progress = false;
+	_initialization_thread = std::thread::id();
+	_cv_api_lifecycle.notify_all();
+}
+
+bool TraderAdapter::cleanupApiAndConfig()
+{
+	closeSpiCallbackAdmission();
+	if (isInSpiCallback())
+		return false;
+
+	if (_trader_api != NULL)
+	{
+		if (_spi_registered)
+		{
+			try
+			{
+				_trader_api->registerSpi(NULL);
+				_spi_registered = false;
+			}
+			catch (...)
+			{
+				// Continue to API release, which may still provide the provider's stop fence.
+				logAdapterException(_id.c_str(), "registerSpi(NULL)");
+			}
+		}
+
+		if (!_api_released)
+		{
+			if (_api_release_failed)
+			{
+				logAdapterException(_id.c_str(), "ITraderApi::release previously failed");
+				return false;
+			}
+			try
+			{
+				// Admission is already closed. Drain admitted callbacks after provider
+				// release returns; calls made later through the raw SPI pointer remain
+				// outside this adapter-side barrier.
+				_trader_api->release();
+			}
+			catch (...)
+			{
+				_api_release_failed = true;
+				logAdapterException(_id.c_str(), "ITraderApi::release");
+				return false;
+			}
+			_api_released = true;
+			_spi_registered = false;
+		}
+	}
+
+	// Provider release may join callbacks already in progress. Wait only after that
+	// stop request has returned, and before deleting the API or unloading its module.
+	if (!waitForSpiCallbacksStopped())
+		return false;
+
+	if (_trader_api != NULL && _owns_trader_api)
+	{
+		if (_plugin_delete_failed || _remover == NULL)
+		{
+			logAdapterException(_id.c_str(), "deleteTrader unavailable or previously failed");
+			return false;
+		}
+		ITraderApi* api = _trader_api;
+		try
+		{
+			_remover(api);
+		}
+		catch (...)
+		{
+			// The deleter may have partially destroyed the object. Never call it twice
+			// or unload the module/config that object may still reference.
+			_plugin_delete_failed = true;
+			logAdapterException(_id.c_str(), "deleteTrader");
+			return false;
+		}
+	}
+	_trader_api = NULL;
+
+	_owns_trader_api = false;
+	_spi_registered = false;
+	if (_dll_handle != NULL)
+	{
+		DLLHelper::free_library(_dll_handle);
+		_dll_handle = NULL;
+	}
+	_remover = NULL;
+
+	// Keep the retained configuration alive until the API has stopped and the
+	// plugin-owned API object has been destroyed.
+	if (_cfg != NULL)
+	{
+		_cfg->release();
+		_cfg = NULL;
+	}
+
+	_api_released = true;
+	_state.store(AS_NOTLOGIN, std::memory_order_release);
+	_trading_day.store(0, std::memory_order_release);
+	_bd_mgr = NULL;
+	_policy_mgr = NULL;
+	_risk_params_map.clear();
+	_risk_mon_enabled = false;
+	return true;
+}
+
+void TraderAdapter::rollbackInitialization()
+{
+	bool cleanupComplete = false;
+	try
+	{
+		cleanupComplete = cleanupApiAndConfig();
+	}
+	catch (...)
+	{
+		logAdapterException(_id.c_str(), "initialization rollback");
+	}
+	if (!cleanupComplete)
+	{
+		std::lock_guard<std::mutex> lock(_mtx_api_lifecycle);
+		_lifecycle_closed = true;
+		return;
+	}
+	_id.clear();
+	_order_pattern.clear();
+}
+
+bool TraderAdapter::isReleaseComplete() const
+{
+	std::lock_guard<std::mutex> lock(_mtx_api_lifecycle);
+	if (!_lifecycle_closed || _api_release_in_progress ||
+		_trader_api != NULL || _dll_handle != NULL || _cfg != NULL)
+		return false;
+	std::lock_guard<std::mutex> spiLock(_mtx_spi_callbacks);
+	return !_spi_callback_admission_open && _spi_callbacks_in_progress == 0;
 }
 
 bool TraderAdapter::initExt(const char* id, ITraderApi* api, IBaseDataMgr* bdMgr, ActionPolicyMgr* policyMgr)
 {
+	if (api == NULL || !beginInitialization())
+		return false;
+	ScopeExit rollback([this]() {
+		rollbackInitialization();
+		finishInitialization();
+	});
+
 	_policy_mgr = policyMgr;
 	_bd_mgr = bdMgr;
 	_id = id;
-
 	_order_pattern = fmtutil::format<64>("wtp.{}", id);
-
-	api->init(NULL);
 	_trader_api = api;
+	_owns_trader_api = false;
+	_api_released = false;
+
+	bool initSucceeded = false;
+	try
+	{
+		initSucceeded = _trader_api->init(NULL);
+	}
+	catch (...)
+	{
+		logAdapterException(_id.c_str(), "ITraderApi::init (external API)");
+		return false;
+	}
+	if (!initSucceeded)
+		return false;
+
+	rollback.dismiss();
+	finishInitialization();
 	return true;
 }
 
 bool TraderAdapter::init(const char* id, WTSVariant* params, IBaseDataMgr* bdMgr, ActionPolicyMgr* policyMgr)
 {
-	if (params == NULL)
+	if (params == NULL || !beginInitialization())
 		return false;
+	ScopeExit rollback([this]() {
+		rollbackInitialization();
+		finishInitialization();
+	});
 
 	_policy_mgr = policyMgr;
 	_bd_mgr = bdMgr;
 	_id = id;
-
 	_order_pattern = fmtutil::format<64>("wtp.{}", id);
-
-	if (_cfg != NULL)
-		return false;
-
 	_cfg = params;
 	_cfg->retain();
 
@@ -124,8 +794,13 @@ bool TraderAdapter::init(const char* id, WTSVariant* params, IBaseDataMgr* bdMgr
 		if (cfgRisk->getBoolean("active"))
 		{
 			_risk_mon_enabled = true;
-
 			WTSVariant* cfgPolicy = cfgRisk->get("policy");
+			if (cfgPolicy == NULL || cfgPolicy->type() != WTSVariant::VT_Object)
+			{
+				WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR, "[{}] Active risk control requires a policy object", _id.c_str());
+				return false;
+			}
+
 			auto keys = cfgPolicy->memberNames();
 			for (auto it = keys.begin(); it != keys.end(); it++)
 			{
@@ -162,70 +837,130 @@ bool TraderAdapter::init(const char* id, WTSVariant* params, IBaseDataMgr* bdMgr
 	if (params->getString("module").empty())
 		return false;
 
-	std::string module = DLLHelper::wrap_module(params->getCString("module"), "lib");;
-
-	//先看工作目录下是否有交易模块
+	std::string module = DLLHelper::wrap_module(params->getCString("module"), "lib");
 	std::string dllpath = WtHelper::getModulePath(module.c_str(), "traders", true);
-	//如果没有,则再看模块目录,即dll同目录下
 	if (!StdFile::exists(dllpath.c_str()))
 		dllpath = WtHelper::getModulePath(module.c_str(), "traders", false);
-	DllHandle hInst = DLLHelper::load_library(dllpath.c_str());
-	if (hInst == NULL)
+	_dll_handle = DLLHelper::load_library(dllpath.c_str());
+	if (_dll_handle == NULL)
 	{
-		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR, "[{}] Loading trading module %s failed", _id.c_str(), dllpath.c_str());
-		return false;
-	}
-	else
-	{
-		WTSLogger::log_dyn("trader", _id.c_str(), LL_INFO, "[{}] Trader module {} loaded", _id.c_str(), dllpath.c_str());
-	}
-
-	FuncCreateTrader pFunCreateTrader = (FuncCreateTrader)DLLHelper::get_symbol(hInst, "createTrader");
-	if (NULL == pFunCreateTrader)
-	{
-		WTSLogger::log_dyn("trader", _id.c_str(), LL_FATAL, "[{}] Entrance function createTrader not found", _id.c_str());
+		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR, "[{}] Loading trading module {} failed", _id.c_str(), dllpath.c_str());
 		return false;
 	}
 
-	_trader_api = pFunCreateTrader();
-	if (NULL == _trader_api)
+	WTSLogger::log_dyn("trader", _id.c_str(), LL_INFO, "[{}] Trader module {} loaded", _id.c_str(), dllpath.c_str());
+	FuncCreateTrader createTrader = (FuncCreateTrader)DLLHelper::get_symbol(_dll_handle, "createTrader");
+	_remover = (FuncDeleteTrader)DLLHelper::get_symbol(_dll_handle, "deleteTrader");
+	if (createTrader == NULL || _remover == NULL)
+	{
+		WTSLogger::log_dyn("trader", _id.c_str(), LL_FATAL, "[{}] Trader module must export createTrader and deleteTrader", _id.c_str());
+		return false;
+	}
+
+	try
+	{
+		_trader_api = createTrader();
+	}
+	catch (...)
+	{
+		logAdapterException(_id.c_str(), "createTrader");
+		return false;
+	}
+	if (_trader_api == NULL)
 	{
 		WTSLogger::log_dyn("trader", _id.c_str(), LL_FATAL, "[{}] Creating trading api failed", _id.c_str());
 		return false;
 	}
+	_owns_trader_api = true;
+	_api_released = false;
 
-	_remover = (FuncDeleteTrader)DLLHelper::get_symbol(hInst, "deleteTrader");
-
-	if (!_trader_api->init(params))
+	bool initSucceeded = false;
+	try
 	{
-		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR, "[{}] Entrance function deleteTrader not found", id);
+		initSucceeded = _trader_api->init(params);
+	}
+	catch (...)
+	{
+		logAdapterException(_id.c_str(), "ITraderApi::init");
+		return false;
+	}
+	if (!initSucceeded)
+	{
+		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR, "[{}] Trader API initialization failed", _id.c_str());
 		return false;
 	}
 
+	rollback.dismiss();
+	finishInitialization();
 	return true;
 }
 
 bool TraderAdapter::run()
 {
-	if (_trader_api == NULL)
+	ApiCallLease startCall(this, true, true);
+	if (!startCall)
 		return false;
 
 	if (_stat_map == NULL)
 		_stat_map = TradeStatMap::create();
 
 	_trader_api->registerSpi(this);
-
+	_spi_registered = true;
+	if (!canContinueApiStartup())
+		return false;
 	_trader_api->connect();
-	_state = AS_LOGINING;
 	return true;
 }
 
 void TraderAdapter::release()
 {
-	if (_trader_api)
+	requestStopSinkNotifications();
+	closeSpiCallbackAdmission();
+	if (!waitSinkNotificationsStopped())
+		return;
+
 	{
-		_trader_api->registerSpi(NULL);
-		_trader_api->release();
+		std::unique_lock<std::mutex> lock(_mtx_api_lifecycle);
+		if (_initialization_in_progress && _initialization_thread == std::this_thread::get_id())
+			return;
+		_cv_api_lifecycle.wait(lock, [this]() { return !_initialization_in_progress; });
+		if (_api_release_in_progress)
+		{
+			if (_api_release_thread == std::this_thread::get_id())
+				return;
+			_cv_api_lifecycle.wait(lock, [this]() { return !_api_release_in_progress; });
+			return;
+		}
+		if (_lifecycle_closed && _trader_api == NULL && _dll_handle == NULL && _cfg == NULL)
+			return;
+
+		_lifecycle_closed = true;
+		_api_release_in_progress = true;
+		_api_release_thread = std::this_thread::get_id();
+	}
+
+	ScopeExit releaseComplete([this]() {
+		std::lock_guard<std::mutex> lock(_mtx_api_lifecycle);
+		_api_release_in_progress = false;
+		_api_release_thread = std::thread::id();
+		_cv_api_lifecycle.notify_all();
+	});
+
+	bool cleanupComplete = false;
+	try
+	{
+		cleanupComplete = cleanupApiAndConfig();
+	}
+	catch (...)
+	{
+		logAdapterException(_id.c_str(), "adapter resource cleanup");
+	}
+	if (!cleanupComplete)
+		return;
+	if (_stat_map)
+	{
+		_stat_map->release();
+		_stat_map = NULL;
 	}
 }
 
@@ -244,11 +979,10 @@ double TraderAdapter::enumPosition(const char* stdCode /* = "" */)
 			continue;
 
 		const PosItem& pItem = it->second;
-		for (auto sink : _sinks)
-		{
+		notifySinks([&](ITrdNotifySink* sink) {
 			sink->on_position(stdCode, true, pItem.l_prevol, pItem.l_preavail, pItem.l_newvol, pItem.l_newavail, _trading_day);
 			sink->on_position(stdCode, false, pItem.s_prevol, pItem.s_preavail, pItem.s_newvol, pItem.s_newavail, _trading_day);
-		}
+		});
 		ret += pItem.total_pos(true) + pItem.total_pos(false);
 	}
 
@@ -295,7 +1029,17 @@ OrderMap* TraderAdapter::getOrders(const char* stdCode)
 		uint32_t localid = it->first;
 		WTSOrderInfo* ordInfo = (WTSOrderInfo*)it->second;
 
-		if (isAll || strcmp(ordInfo->getCode(), stdCode) == 0)
+		bool matchesCode = isAll || strcmp(ordInfo->getCode(), stdCode) == 0;
+		if (!matchesCode && !isAll)
+		{
+			WTSContractInfo* cInfo = ordInfo->getContractInfo();
+			if (cInfo == NULL)
+				cInfo = _bd_mgr->getContract(ordInfo->getCode(), ordInfo->getExchg());
+
+			matchesCode = cInfo != NULL && strcmp(cInfo->getFullCode(), stdCode) == 0;
+		}
+
+		if (matchesCode)
 			ret->add(localid, ordInfo);
 	}
 	return ret;
@@ -303,13 +1047,29 @@ OrderMap* TraderAdapter::getOrders(const char* stdCode)
 
 void TraderAdapter::updateUndone(const char* stdCode, double qty)
 {
+	std::lock_guard<std::mutex> lock(_mtx_undone_qty);
 	double& undone = _undone_qty[stdCode];
 	[[maybe_unused]] double oldQty = undone;
 	undone += qty;
 }
 
+bool TraderAdapter::rollbackUndoneIfNonzero(const char* stdCode, double qty)
+{
+	std::lock_guard<std::mutex> lock(_mtx_undone_qty);
+	auto it = _undone_qty.find(stdCode);
+	if (it == _undone_qty.end() || decimal::eq(it->second, 0))
+		return false;
+
+	it->second -= qty;
+	return true;
+}
+
 uint32_t TraderAdapter::doEntrust(WTSEntrust* entrust)
 {
+	ApiCallLease apiCall(this);
+	if (!apiCall)
+		return UINT_MAX;
+
 	_trader_api->makeEntrustID(entrust->getEntrustID(), 64);
 
 	const char* stdCode = entrust->getCode();
@@ -367,6 +1127,12 @@ bool TraderAdapter::doCancel(WTSOrderInfo* ordInfo)
 	WTSEntrustAction* action = WTSEntrustAction::create(ordInfo->getCode(), cInfo->getExchg());
 	action->setEntrustID(ordInfo->getEntrustID());
 	action->setOrderID(ordInfo->getOrderID());
+	ApiCallLease apiCall(this);
+	if (!apiCall)
+	{
+		action->release();
+		return false;
+	}
 	int ret = _trader_api->orderAction(action);
 	bool isSent = (ret >= 0);
 	action->release();
@@ -1111,10 +1877,17 @@ uint32_t TraderAdapter::closeShort(const char* stdCode, double price, double qty
 #pragma region "ITraderSpi接口"
 void TraderAdapter::handleEvent(WTSTraderEvent e, int32_t ec)
 {
+	SpiCallbackLease callback(this);
+	if (!callback)
+		return;
+
 	if(e == WTE_Connect)
 	{
 		if(ec == 0)
 		{
+			ApiCallLease loginCall(this, false, true);
+			if (!loginCall)
+				return;
 			_trader_api->login(_cfg->getCString("user"), _cfg->getCString("pass"), _cfg->getCString("product"));
 		}
 		else
@@ -1125,37 +1898,66 @@ void TraderAdapter::handleEvent(WTSTraderEvent e, int32_t ec)
 	else if(e == WTE_Close)
 	{
 		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR,"[{}] Trading channel disconnected: {}", _id.c_str(), ec);
-		for (auto sink : _sinks)
-			sink->on_channel_lost();
+		notifyChannelLost();
 	}
 }
 
 void TraderAdapter::onLoginResult(bool bSucc, const char* msg, uint32_t tradingdate)
 {
+	SpiCallbackLease callback(this);
+	if (!callback)
+		return;
+
+	// Ignore a response after close unless a login attempt is currently active.
+	// The legacy SPI has no session token, so an old response arriving during a later
+	// reconnect cannot be distinguished from that reconnect's own response.
+	AdapterState expected = AS_LOGINING;
 	if(!bSucc)
 	{
-		_state = AS_LOGINFAILED;
+		if (!_state.compare_exchange_strong(expected, AS_LOGINFAILED, std::memory_order_acq_rel))
+			return;
 		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR,"[{}] Trader login failed: {}", _id.c_str(), msg);
 	}
 	else
 	{
-		_state = AS_LOGINED;
+		if (!_state.compare_exchange_strong(expected, AS_LOGINED, std::memory_order_acq_rel))
+			return;
 		WTSLogger::log_dyn("trader", _id.c_str(), LL_INFO,"[{}] Trader login succeed, trading date: {}", _id.c_str(), tradingdate);
 		_trading_day = tradingdate;
-		_trader_api->queryPositions();	//查持仓
+		ApiCallLease apiCall(this);
+		if (apiCall)
+			_trader_api->queryPositions();	//查持仓
 	}
 }
 
 void TraderAdapter::onLogout()
 {
-	
+	SpiCallbackLease callback(this);
+	if (!callback)
+		return;
+
+	WTSLogger::log_dyn("trader", _id.c_str(), LL_WARN, "[{}] Trading channel logged out", _id.c_str());
+	notifyChannelLost();
 }
 
 void TraderAdapter::onRspEntrust(WTSEntrust* entrust, WTSError *err)
 {
+	SpiCallbackLease callback(this);
+	if (!callback)
+		return;
+
 	if (err && err->getErrorCode() != WEC_NONE)
 	{
 		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR,err->getMessage());
+		const std::string userTag = entrust->getUserTag();
+		const std::string ownTagPrefix = _order_pattern + ".";
+		if (userTag.compare(0, ownTagPrefix.size(), ownTagPrefix) != 0 || userTag.size() == ownTagPrefix.size())
+		{
+			WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR,
+				"[{}] Cannot reconcile rejected entrust without this adapter's user tag; undone quantity unchanged", _id.c_str());
+			return;
+		}
+
 		WTSContractInfo* cInfo = _bd_mgr->getContract(entrust->getCode(), entrust->getExchg());
 		if (cInfo == NULL)
 			return;
@@ -1179,16 +1981,8 @@ void TraderAdapter::onRspEntrust(WTSEntrust* entrust, WTSError *err)
 		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR, 
 			"[{}] Order placing failed: {}, instrument: {}, action: {}, qty: {}", _id.c_str(), err->getMessage(), entrust->getCode(), action.c_str(), qty);
 
-		//如果下单失败, 要更新未完成数量
-		//实盘中发现错误单有时候会推送两次
-		//所以这里加一个检查未完成单的逻辑
-		//如果有错单，正常情况下未完成单一定不为0
-		//如果未完成订单为0，则说明这一次是重复通知，则不再处理了
-		double oldQty = _undone_qty[stdCode];
-		if (decimal::eq(oldQty, 0))
+		if (!rollbackUndoneIfNonzero(stdCode.c_str(), qty))
 			return;
-
-		updateUndone(stdCode.c_str(), -qty);
 
 
 		if (strlen(entrust->getUserTag()) > 0)
@@ -1197,26 +1991,29 @@ void TraderAdapter::onRspEntrust(WTSEntrust* entrust, WTSError *err)
 			userTag += _order_pattern.size() + 1;
 			uint32_t localid = convert::to_uint32(userTag);
 
-			for(auto sink : _sinks)
-				sink->on_entrust(localid, stdCode.c_str(), false, err->getMessage());
+			const std::string errorMessage = err->getMessage();
+			notifySinks([&](ITrdNotifySink* sink) {
+				sink->on_entrust(localid, stdCode.c_str(), false, errorMessage.c_str());
+			});
 		}
 	}
 }
 
 void TraderAdapter::onRspAccount(WTSArray* /*ayAccounts*/)
 {
-	if(_state == AS_TRADES_QRYED)
-	{
-		_state = AS_ALLREADY;
+	SpiCallbackLease callback(this);
+	if (!callback)
+		return;
 
-		WTSLogger::log_dyn("trader", _id.c_str(), LL_INFO, "[{}] Trading channel ready", _id.c_str());
-		for (auto sink : _sinks)
-			sink->on_channel_ready(_trading_day);
-	}
+	notifyChannelReadyIfExpected();
 }
 
 void TraderAdapter::onRspPosition(const WTSArray* ayPositions)
 {
+	SpiCallbackLease callback(this);
+	if (!callback)
+		return;
+
 	if (ayPositions && ayPositions->size() > 0)
 	{
 		for (auto it = ayPositions->begin(); it != ayPositions->end(); it++)
@@ -1250,31 +2047,36 @@ void TraderAdapter::onRspPosition(const WTSArray* ayPositions)
 			const char* stdCode = it->first.c_str();
 			const PosItem& pItem = it->second;
 			printPosition(stdCode, pItem);
-			for (auto sink : _sinks)
-			{
+			notifySinks([&](ITrdNotifySink* sink) {
 				sink->on_position(stdCode, true, pItem.l_prevol, pItem.l_preavail, pItem.l_newvol, pItem.l_newavail, _trading_day);
 				sink->on_position(stdCode, false, pItem.s_prevol, pItem.s_preavail, pItem.s_newvol, pItem.s_newavail, _trading_day);
-			}
+			});
 		}
 	}
 
 	WTSLogger::log_dyn("trader", _id.c_str(), LL_INFO,"[{}] Position data updated", _id.c_str());
 
-	if (_state == AS_LOGINED)
+	AdapterState expected = AS_LOGINED;
+	if (_state.compare_exchange_strong(expected, AS_POSITION_QRYED, std::memory_order_acq_rel))
 	{
-		_state = AS_POSITION_QRYED;
-
-		_trader_api->queryOrders();
+		ApiCallLease apiCall(this);
+		if (apiCall)
+			_trader_api->queryOrders();
 	}
 }
 
 void TraderAdapter::onRspOrders(const WTSArray* ayOrders)
 {
+	SpiCallbackLease callback(this);
+	if (!callback)
+		return;
+
 	if (ayOrders)
 	{
 		if (_orders == NULL)
 			_orders = OrderMap::create();
 
+		std::lock_guard<std::mutex> undoneLock(_mtx_undone_qty);
 		_undone_qty.clear();
 
 		for (auto it = ayOrders->begin(); it != ayOrders->end(); it++)
@@ -1390,11 +2192,12 @@ void TraderAdapter::onRspOrders(const WTSArray* ayOrders)
 		}
 	}
 
-	if (_state == AS_POSITION_QRYED)
+	AdapterState expected = AS_POSITION_QRYED;
+	if (_state.compare_exchange_strong(expected, AS_ORDERS_QRYED, std::memory_order_acq_rel))
 	{
-		_state = AS_ORDERS_QRYED;
-
-		_trader_api->queryTrades();
+		ApiCallLease apiCall(this);
+		if (apiCall)
+			_trader_api->queryTrades();
 	}
 }
 
@@ -1407,6 +2210,10 @@ void TraderAdapter::printPosition(const char* code, const PosItem& pItem)
 
 void TraderAdapter::onRspTrades(const WTSArray* ayTrades)
 {
+	SpiCallbackLease callback(this);
+	if (!callback)
+		return;
+
 	if (ayTrades)
 	{
 		for (auto it = ayTrades->begin(); it != ayTrades->end(); it++)
@@ -1463,11 +2270,12 @@ void TraderAdapter::onRspTrades(const WTSArray* ayTrades)
 		}
 	}
 
-	if (_state == AS_ORDERS_QRYED)
+	AdapterState expected = AS_ORDERS_QRYED;
+	if (_state.compare_exchange_strong(expected, AS_TRADES_QRYED, std::memory_order_acq_rel))
 	{
-		_state = AS_TRADES_QRYED;
-
-		_trader_api->queryAccount();
+		ApiCallLease apiCall(this);
+		if (apiCall)
+			_trader_api->queryAccount();
 	}
 }
 
@@ -1491,6 +2299,10 @@ inline const char* stateToName(WTSOrderState woState)
 
 void TraderAdapter::onPushOrder(WTSOrderInfo* orderInfo)
 {
+	SpiCallbackLease callback(this);
+	if (!callback)
+		return;
+
 	if (orderInfo == NULL)
 		return;
 
@@ -1728,14 +2540,23 @@ void TraderAdapter::onPushOrder(WTSOrderInfo* orderInfo)
 			offset = 2;
 
 		//通知所有监听接口
-		for (auto sink : _sinks)
-			sink->on_order(localid, fullCode, orderInfo->getDirection()==WDT_LONG, offset, 
-				orderInfo->getVolume(), orderInfo->getVolLeft(), orderInfo->getPrice(), orderInfo->getOrderState() == WOS_Canceled);
+		const bool isLong = orderInfo->getDirection() == WDT_LONG;
+		const double totalQty = orderInfo->getVolume();
+		const double leftQty = orderInfo->getVolLeft();
+		const double price = orderInfo->getPrice();
+		const bool isCanceled = orderInfo->getOrderState() == WOS_Canceled;
+		notifySinks([&](ITrdNotifySink* sink) {
+			sink->on_order(localid, fullCode, isLong, offset, totalQty, leftQty, price, isCanceled);
+		});
 	}
 }
 
 void TraderAdapter::onPushTrade(WTSTradeInfo* tradeRecord)
 {
+	SpiCallbackLease callback(this);
+	if (!callback)
+		return;
+
 	WTSContractInfo* cInfo = tradeRecord->getContractInfo();
 	cInfo = _bd_mgr->getContract(tradeRecord->getCode(), tradeRecord->getExchg());
 	if (cInfo == NULL)
@@ -1832,25 +2653,41 @@ void TraderAdapter::onPushTrade(WTSTradeInfo* tradeRecord)
 		offset = 1;
 	else
 		offset = 2;
-	for (auto sink : _sinks)
-		sink->on_trade(localid, stdCode.c_str(), isLong, offset, vol, tradeRecord->getPrice());
+	const double price = tradeRecord->getPrice();
+	notifySinks([&](ITrdNotifySink* sink) {
+		sink->on_trade(localid, stdCode.c_str(), isLong, offset, vol, price);
+	});
 
-	_trader_api->queryAccount();
+	ApiCallLease apiCall(this);
+	if (apiCall)
+		_trader_api->queryAccount();
 }
 
 void TraderAdapter::onTraderError(WTSError* err, void* /*pData*/ /* = NULL */)
 {
+	SpiCallbackLease callback(this);
+	if (!callback)
+		return;
+
 	if(err)
 		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR,"[{}] Error of trading channel occured: {}", _id.c_str(), err->getMessage());
 }
 
 IBaseDataMgr* TraderAdapter::getBaseDataMgr()
 {
+	SpiCallbackLease callback(this);
+	if (!callback)
+		return NULL;
+
 	return _bd_mgr;
 }
 
 void TraderAdapter::handleTraderLog(WTSLogLevel ll, const char* message)
 {
+	SpiCallbackLease callback(this);
+	if (!callback)
+		return;
+
 	WTSLogger::log_dyn_raw("trader", _id.c_str(), ll, message);
 }
 
@@ -1993,6 +2830,10 @@ bool TraderAdapterMgr::addAdapter(const char* tname, TraderAdapterPtr& adapter)
 	if (adapter == NULL || strlen(tname) == 0)
 		return false;
 
+	std::lock_guard<std::mutex> lock(_mtx_lifecycle);
+	if (_sink_notifications_stop_requested)
+		return false;
+
 	auto it = _adapters.find(tname);
 	if(it != _adapters.end())
 	{
@@ -2007,6 +2848,7 @@ bool TraderAdapterMgr::addAdapter(const char* tname, TraderAdapterPtr& adapter)
 
 TraderAdapterPtr TraderAdapterMgr::getAdapter(const char* tname)
 {
+	std::lock_guard<std::mutex> lock(_mtx_lifecycle);
 	auto it = _adapters.find(tname);
 	if (it != _adapters.end())
 	{
@@ -2018,20 +2860,128 @@ TraderAdapterPtr TraderAdapterMgr::getAdapter(const char* tname)
 
 void TraderAdapterMgr::run()
 {
-	for (auto it = _adapters.begin(); it != _adapters.end(); it++)
+	std::vector<TraderAdapterPtr> adapters;
 	{
-		it->second->run();
+		std::lock_guard<std::mutex> lock(_mtx_lifecycle);
+		adapters.reserve(_adapters.size());
+		for (auto it = _adapters.begin(); it != _adapters.end(); ++it)
+			adapters.push_back(it->second);
+	}
+	for (const TraderAdapterPtr& adapter : adapters)
+	{
+		adapter->run();
 	}
 
-	WTSLogger::info("{} trading channels started", _adapters.size());
+	WTSLogger::info("{} trading channels started", adapters.size());
 }
 
 void TraderAdapterMgr::release()
 {
-	for (auto it = _adapters.begin(); it != _adapters.end(); it++)
 	{
-		it->second->release();
+		std::unique_lock<std::mutex> lock(_mtx_lifecycle);
+		while (_release_in_progress)
+		{
+			bool callbackReentry = _release_thread == std::this_thread::get_id();
+			if (!callbackReentry)
+			{
+				for (auto it = _adapters.begin(); it != _adapters.end(); ++it)
+				{
+					if (it->second->isInSinkNotificationCallback() || it->second->isInApiCall() || it->second->isInSpiCallback())
+					{
+						callbackReentry = true;
+						break;
+					}
+				}
+			}
+			if (callbackReentry)
+				return;
+			_cv_lifecycle.wait(lock, [this]() { return !_release_in_progress; });
+		}
+		if (_adapters.empty())
+		{
+			_sink_notifications_stop_requested = false;
+			return;
+		}
+		_release_in_progress = true;
+		_release_thread = std::this_thread::get_id();
+	}
+	ScopeExit releaseComplete([this]() {
+		std::lock_guard<std::mutex> lock(_mtx_lifecycle);
+		_release_in_progress = false;
+		_release_thread = std::thread::id();
+		_cv_lifecycle.notify_all();
+	});
+
+	requestStopSinkNotifications();
+	std::vector<TraderAdapterPtr> adapters;
+	{
+		std::lock_guard<std::mutex> lock(_mtx_lifecycle);
+		adapters.reserve(_adapters.size());
+		for (auto it = _adapters.begin(); it != _adapters.end(); ++it)
+			adapters.push_back(it->second);
+	}
+	for (const TraderAdapterPtr& adapter : adapters)
+		adapter->closeSpiCallbackAdmission();
+	if (!waitSinkNotificationsStopped())
+		return;
+
+	for (const TraderAdapterPtr& adapter : adapters)
+	{
+		adapter->release();
+	}
+	for (const TraderAdapterPtr& adapter : adapters)
+	{
+		if (!adapter->isReleaseComplete())
+		{
+			WTSLogger::error("Trading adapter teardown failed; retaining adapter ownership");
+			return;
+		}
 	}
 
-	_adapters.clear();
+	{
+		std::lock_guard<std::mutex> lock(_mtx_lifecycle);
+		_adapters.clear();
+		_sink_notifications_stop_requested = false;
+		_release_in_progress = false;
+		_release_thread = std::thread::id();
+		_cv_lifecycle.notify_all();
+	}
+	releaseComplete.dismiss();
+}
+
+void TraderAdapterMgr::requestStopSinkNotifications()
+{
+	std::lock_guard<std::mutex> lock(_mtx_lifecycle);
+	_sink_notifications_stop_requested = true;
+	for (auto it = _adapters.begin(); it != _adapters.end(); ++it)
+		it->second->requestStopSinkNotifications();
+}
+
+bool TraderAdapterMgr::waitSinkNotificationsStopped()
+{
+	std::vector<TraderAdapterPtr> adapters;
+	{
+		std::lock_guard<std::mutex> lock(_mtx_lifecycle);
+		if (!_sink_notifications_stop_requested)
+			return false;
+		adapters.reserve(_adapters.size());
+		for (auto it = _adapters.begin(); it != _adapters.end(); ++it)
+			adapters.push_back(it->second);
+	}
+
+	// Preflight every adapter first. Waiting on one adapter before discovering that
+	// another is the current callback could deadlock cross-channel callback graphs.
+	for (const TraderAdapterPtr& adapter : adapters)
+	{
+		if (adapter->isInSinkNotificationCallback() || adapter->isInApiCall() || adapter->isInSpiCallback())
+			return false;
+	}
+
+	for (const TraderAdapterPtr& adapter : adapters)
+	{
+		if (!adapter->waitSinkNotificationsStopped())
+			return false;
+	}
+
+	return true;
 }

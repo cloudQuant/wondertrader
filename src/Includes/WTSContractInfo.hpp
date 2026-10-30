@@ -19,8 +19,19 @@ class WTSSessionInfo;
 class WTSCommodityInfo: public WTSObject
 {
 public:
+	static bool isIdentityValid(const char* pid, const char* name, const char* exchg,
+		const char* session, const char* trdtpl, const char* currency = "CNY") noexcept
+	{
+		return fitsField(pid, sizeof(m_strProduct)) && fitsField(name, sizeof(m_strName)) &&
+			fitsField(exchg, sizeof(m_strExchg)) && fitsField(currency, sizeof(m_strCurrency)) &&
+			fitsField(session, sizeof(m_strSession)) && fitsField(trdtpl, sizeof(m_strTrdTpl));
+	}
+
 	static WTSCommodityInfo* create(const char* pid, const char* name, const char* exchg, const char* session, const char* trdtpl, const char* currency = "CNY") noexcept
 	{
+		if (!isIdentityValid(pid, name, exchg, session, trdtpl, currency))
+			return nullptr;
+
 		WTSCommodityInfo* ret = new WTSCommodityInfo;
 		wt_strcpy(ret->m_strName, name);
 		wt_strcpy(ret->m_strExchg, exchg);
@@ -127,7 +138,14 @@ public:
 			}
 		}
 
-		return (int32_t)(ret * 100 + 0.5) / 100.0;
+		// Preserve the existing cent-rounding rule without narrowing a large fee
+		// through int32_t. Outside the exact, safely convertible range, retain the
+		// computed value; no finite/overflow fee policy is defined here.
+		const double cents = ret * 100.0 + 0.5;
+		constexpr double kSafeCentsLimit = 9007199254740991.0; // 2^53 - 1
+		if (!(cents > -kSafeCentsLimit && cents < kSafeCentsLimit))
+			return ret;
+		return static_cast<int64_t>(cents) / 100.0;
 	}
 
 protected:
@@ -135,6 +153,11 @@ protected:
 	virtual ~WTSCommodityInfo() {}
 
 private:
+	static bool fitsField(const char* value, size_t capacity) noexcept
+	{
+		return value != nullptr && strlen(value) < capacity;
+	}
+
 	char m_strName[64];		//品种名称
 	char m_strExchg[64];		//交易所代码
 	char m_strProduct[64];	//品种ID
@@ -168,8 +191,22 @@ private:
 class WTSContractInfo :	public WTSObject
 {
 public:
+	static bool isIdentityValid(const char* code, const char* name, const char* exchg, const char* pid) noexcept
+	{
+		return fitsField(code, sizeof(m_strCode)) && fitsField(name, sizeof(m_strName)) &&
+			fitsField(exchg, sizeof(m_strExchg)) && fitsField(pid, sizeof(m_strProduct));
+	}
+
+	static bool isAltCodeValid(const char* altCode) noexcept
+	{
+		return fitsField(altCode, sizeof(m_strAltCode));
+	}
+
 	static WTSContractInfo* create(const char* code, const char* name, const char* exchg, const char* pid)
 	{
+		if (!isIdentityValid(code, name, exchg, pid))
+			return nullptr;
+
 		WTSContractInfo* ret = new WTSContractInfo;
 		wt_strcpy(ret->m_strCode, code);
 		wt_strcpy(ret->m_strName, name);
@@ -184,10 +221,14 @@ public:
 
 	constexpr inline void	setVolScale(uint32_t volScale) noexcept { m_uVolScale = volScale; }
 
-	inline void setAltCode(const char* altCode) noexcept
+	inline bool setAltCode(const char* altCode) noexcept
 	{
+		if (!isAltCodeValid(altCode))
+			return false;
+
 		wt_strcpy(m_strAltCode, altCode);
 		snprintf(m_strFullAltCode, sizeof(m_strFullAltCode), "%s.%s", m_strExchg, altCode);
+		return true;
 	}
 
 	constexpr inline void	setVolumeLimits(uint32_t maxMarketVol, uint32_t maxLimitVol, uint32_t minMarketVol = 1, uint32_t minLimitVol = 1) noexcept
@@ -288,7 +329,13 @@ public:
 			}
 		}
 
-		return (int32_t)(ret * 100 + 0.5) / 100.0;
+		// Match WTSCommodityInfo::calcFee while avoiding an out-of-range
+		// floating-point to int32_t conversion for large fees.
+		const double cents = ret * 100.0 + 0.5;
+		constexpr double kSafeCentsLimit = 9007199254740991.0; // 2^53 - 1
+		if (!(cents > -kSafeCentsLimit && cents < kSafeCentsLimit))
+			return ret;
+		return static_cast<int64_t>(cents) / 100.0;
 	}
 
 	inline void addHotCode(const char* hotCode) noexcept
@@ -318,6 +365,11 @@ protected:
 	virtual ~WTSContractInfo(){}
 
 private:
+	static bool fitsField(const char* value, size_t capacity) noexcept
+	{
+		return value != nullptr && strlen(value) < capacity;
+	}
+
 	char	m_strCode[32];
 	char	m_strExchg[32];
 	char	m_strName[64];

@@ -54,15 +54,48 @@ TEST_F(R56Csv, HeaderOnlyFileStopsAtEof)
 	EXPECT_FALSE(reader.next_row());
 }
 
-// 短行边界探针：先成功读取一行，再访问表头合法但本行缺失的 b/c；期望返回空串/默认值。
-// 当前 check_cell 只按表头列数判界，未检查当前行长度，可能越过 _current_cells 边界，故保持禁用。
-// CsvHelper.cpp:56-75,117-123,161-170；见 BUG-R56-003。
-TEST_F(R56Csv, DISABLED_ShortRowMissingCellsReturnDefaults)
+// CsvHelper.h:146-157; fields() storage belongs to the reader, not all CsvReader instances.
+TEST_F(R56Csv, FieldsCacheIsIndependentAcrossReadersAndEmptyHeaders)
 {
-	const std::string path = r56tmp::write_file(m_dir, "short_row.csv", "a,b,c\n1\n");
+	const std::string first_path = r56tmp::write_file(m_dir, "first.csv", "alpha\n");
+	const std::string second_path = r56tmp::write_file(m_dir, "second.csv", "beta\n");
+	const std::string empty_path = r56tmp::write_file(m_dir, "empty.csv", "");
+	CsvReader first_reader;
+	CsvReader second_reader;
+	CsvReader empty_reader;
+	ASSERT_TRUE(first_reader.load_from_file(first_path.c_str()));
+	ASSERT_TRUE(second_reader.load_from_file(second_path.c_str()));
+	ASSERT_TRUE(empty_reader.load_from_file(empty_path.c_str()));
+
+	EXPECT_STREQ("alpha", first_reader.fields());
+	EXPECT_STREQ("beta", second_reader.fields());
+	EXPECT_STREQ("alpha", first_reader.fields());
+	EXPECT_STREQ("beta", second_reader.fields());
+	EXPECT_STREQ("", empty_reader.fields());
+	EXPECT_STREQ("beta", second_reader.fields());
+}
+
+// CsvHelper.cpp:56-75,117-123,161-170；BUG-R56-003 与 L02 同为短行列边界根因。
+TEST_F(R56Csv, ShortRowMissingCellsReturnDefaults)
+{
+	const std::string path = r56tmp::write_file(m_dir, "short_row.csv",
+		"a,b,c\n"
+		"1\n"
+		"\n"
+		"2,3,\n");
 	CsvReader reader;
 	ASSERT_TRUE(reader.load_from_file(path.c_str()));
 	ASSERT_TRUE(reader.next_row());
+	EXPECT_EQ(0, reader.get_int32(1));
+	EXPECT_EQ(0, reader.get_int32("b"));
+	EXPECT_EQ(0ull, reader.get_uint64(2));
+	EXPECT_EQ(0ull, reader.get_uint64("c"));
 	EXPECT_STREQ("", reader.get_string("b"));
-	EXPECT_EQ(0u, reader.get_uint32("c"));
+	EXPECT_STREQ("", reader.get_string(2));
+	// An empty physical line is skipped without losing the following row.
+	ASSERT_TRUE(reader.next_row());
+	EXPECT_EQ(2, reader.get_int32("a"));
+	EXPECT_EQ(3, reader.get_int32("b"));
+	EXPECT_STREQ("", reader.get_string("c"));
+	EXPECT_FALSE(reader.next_row());
 }

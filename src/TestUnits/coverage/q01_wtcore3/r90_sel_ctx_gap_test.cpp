@@ -55,7 +55,9 @@ protected:
         WtHelper::setGenerateDir(r90::temp_root().c_str());
         WtHelper::setTime(20250110, 931, 0);
 
-        bd.regisSession("TRADING");
+        // Execution-path fixtures below use 09:31 ticks; register that as a
+        // real trading interval so on_tick can drain the queued position signals.
+        bd.regisSessionWithTime("TRADING", 900, 1500);
         agComm = makeComm("SHFE", "ag", "TRADING", TM_Both, CC_Future);
         agComm->setSessionInfo(bd.getSession("TRADING"));
         agCt = makeCt("SHFE", "ag", "ag2512");
@@ -91,6 +93,15 @@ protected:
 
 const char* const kAg = "SHFE.ag.2512";
 const char* const kAu = "SHFE.au.2212";
+
+std::size_t count_lines(const std::string& contents)
+{
+    std::size_t count = 0;
+    for (char ch : contents)
+        if (ch == '\n')
+            ++count;
+    return count;
+}
 
 //////////////////////////////////////////////////////////////////
 // 缺省 maxprice/minprice、零仓位、T+1 冻结、负浮盈、userdata 落盘
@@ -159,7 +170,7 @@ TEST_F(R90SelCtx, LoadDefaultsFrozenAndSessionFlush)
 }
 
 //////////////////////////////////////////////////////////////////
-// 信号触发 do_set_position：开 -> 反手 -> 平；含 log_close 的错写文件
+// 信号触发 do_set_position：开 -> 反手 -> 平；成交与平仓日志分别落盘
 // src/WtCore/SelStraBaseCtx.cpp:159-168, 790-891, 944-963
 //////////////////////////////////////////////////////////////////
 TEST_F(R90SelCtx, SignalExecutionOpenReverseAndFlat)
@@ -195,7 +206,8 @@ TEST_F(R90SelCtx, SignalExecutionOpenReverseAndFlat)
     ctx.on_tick(kAg, t2, false);
     t2->release();
     EXPECT_DOUBLE_EQ(-1.0, ctx.stra_get_position(kAg));
-    EXPECT_DOUBLE_EQ(5100.0, ctx.stra_get_position_avgpx(kAg));
+    // The public short-position average price follows the signed-position contract.
+    EXPECT_DOUBLE_EQ(-5100.0, ctx.stra_get_position_avgpx(kAg));
 
     // 平空归零
     ctx.stra_set_position(kAg, 0.0, "flat");
@@ -204,12 +216,46 @@ TEST_F(R90SelCtx, SignalExecutionOpenReverseAndFlat)
     t3->release();
     EXPECT_DOUBLE_EQ(0.0, ctx.stra_get_position(kAg));
 
-    // log_close 守卫写的是 _trade_logs（BUG-Q01-001）：平仓记录落在 trades.csv
     std::string folder = std::string(WtHelper::getOutputDir()) + "r90exec/";
-    EXPECT_NE(std::string::npos, r90::read_file(folder + "trades.csv").find("CLOSE"));
-    // closes.csv 只有表头，未写入任何平仓明细（BUG-Q01-001）
-    EXPECT_EQ(std::string::npos,
-        r90::read_file(folder + "closes.csv").find("SHFE.ag.2512"));
+    const std::string trades = r90::read_file(folder + "trades.csv");
+    const std::string closes = r90::read_file(folder + "closes.csv");
+
+    // 两次开仓（反手时新开空）与两次成交平仓；详细平仓账应另有两行。
+    EXPECT_EQ(5u, count_lines(trades));  // header + 4 executions
+    EXPECT_NE(std::string::npos, trades.find(",OPEN,"));
+    EXPECT_NE(std::string::npos, trades.find(",CLOSE,"));
+    EXPECT_EQ(3u, count_lines(closes));  // header + reverse close + final flat
+    EXPECT_NE(std::string::npos, closes.find(",open,reverse\n"));
+    EXPECT_NE(std::string::npos, closes.find(",reverse,flat\n"));
+    EXPECT_EQ(std::string::npos, trades.find(",open,reverse\n"));
+    EXPECT_EQ(std::string::npos, trades.find(",reverse,flat\n"));
+}
+
+TEST_F(R90SelCtx, CloseLoggingIsSafeBeforeOutputHandlesAreInitialized)
+{
+    engine->primePrice(kAg, 5000.0);
+    SelCtx ctx(engine, "r90uninitlogs", 0);
+    // 故意不调用 on_init：trades/closes 文件句柄均未初始化。
+    // 仍通过公开下单与 tick 路径开仓、平仓，确认空句柄守卫安全。
+    WTSTickData* initial = makeTick("SHFE", "ag2512", 20250110, 20250110, 93100000, 5000.0);
+    ctx.on_tick(kAg, initial, false);
+    initial->release();
+
+    ctx.stra_set_position(kAg, 1.0, "open");
+    WTSTickData* open = makeTick("SHFE", "ag2512", 20250110, 20250110, 93100000, 5000.0);
+    ctx.on_tick(kAg, open, false);
+    open->release();
+    ASSERT_DOUBLE_EQ(1.0, ctx.stra_get_position(kAg));
+
+    ctx.stra_set_position(kAg, 0.0, "flat");
+    WTSTickData* close = makeTick("SHFE", "ag2512", 20250110, 20250110, 93101000, 5100.0);
+    ctx.on_tick(kAg, close, false);
+    close->release();
+    EXPECT_DOUBLE_EQ(0.0, ctx.stra_get_position(kAg));
+
+    const std::string folder = std::string(WtHelper::getOutputDir()) + "r90uninitlogs/";
+    EXPECT_FALSE(std::filesystem::exists(folder + "trades.csv"));
+    EXPECT_FALSE(std::filesystem::exists(folder + "closes.csv"));
 }
 
 }  // namespace

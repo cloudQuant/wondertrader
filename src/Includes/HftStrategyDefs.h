@@ -160,5 +160,6 @@ public:
 
 //创建执行工厂
 typedef IHftStrategyFact* (*FuncCreateHftStraFact)();
-//删除执行工厂
-typedef void(*FuncDeleteHftStraFact)(IHftStrategyFact* &fact);
+//删除执行工厂；参数按值与 WtHftStraFact 导出的 deleteStrategyFact ABI 保持一致。
+//使用不同签名编译的外部插件需要按此接口重新编译后再与宿主配套。
+typedef void(*FuncDeleteHftStraFact)(IHftStrategyFact* fact);

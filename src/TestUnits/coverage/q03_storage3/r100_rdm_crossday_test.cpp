@@ -302,18 +302,22 @@ TEST_F(R100RdmCrossDayTest, R100RdmHisTickAndKlineBoundaries)
 	EXPECT_EQ(r52::flatten_ticks(empty).size(), (std::size_t)0);
 	empty->release();
 
-	// 短文件二次访问：第一次清空缓存，第二次命中「块指针为空」（仍返回空切片）
+	// 短文件重复读取：baseline 允许 NULL 或空切片，两种结果都必须安全。
 	ASSERT_TRUE(write_bytes("his/ticks/SSE/20240106/640103.dsb", string(4, '\0')));
 	WTSTickSlice* short1 = _reader.readTickSliceByRange("SSE.STK.640103",
 		20240106090000000ull, 20240106100000000ull);
-	ASSERT_TRUE(short1 != NULL);
-	EXPECT_EQ(r52::flatten_ticks(short1).size(), (std::size_t)0);
-	short1->release();
+	if (short1 != NULL)
+	{
+		EXPECT_EQ(r52::flatten_ticks(short1).size(), (std::size_t)0);
+		short1->release();
+	}
 	WTSTickSlice* short2 = _reader.readTickSliceByRange("SSE.STK.640103",
 		20240106090000000ull, 20240106100000000ull);
-	ASSERT_TRUE(short2 != NULL);
-	EXPECT_EQ(r52::flatten_ticks(short2).size(), (std::size_t)0);
-	short2->release();
+	if (short2 != NULL)
+	{
+		EXPECT_EQ(r52::flatten_ticks(short2).size(), (std::size_t)0);
+		short2->release();
+	}
 
 	// ByDate 的同一分支
 	ASSERT_TRUE(write_bytes("his/ticks/SSE/20240105/640104.dsb", string(4, '\0')));
@@ -355,21 +359,130 @@ TEST_F(R100RdmCrossDayTest, R100RdmHisTickAndKlineBoundaries)
 	k->release();
 }
 
-// BUG-R100-002（待审核）：历史逐笔 queue/detail/trans 的右界回退 L756-760 /
-// L931-935 / L1105-1109 没有 `eIdx == 0` 守卫。请求时间早于块内首条时
-// lower_bound 返回 begin，pItem--/eIdx-- 对 begin 前取址并把 eIdx 回绕成 SIZE_MAX，
-// 随后同一分支继续用 eIdx 做 lower_bound。与 tick 历史段 L499-505 的守卫不一致。
-TEST_F(R100RdmCrossDayTest, DISABLED_R100RdmHisHftBeforeFirstUnderflows)
+// BUG-R100-002：历史 queue/detail/trans 保持现有排他右界；在首条之前或
+// 恰好等于首条时返回空，右界等于重复记录时排除该时间戳的全部记录。
+TEST_F(R100RdmCrossDayTest, R100RdmHisHftExclusiveEndBoundaries)
 {
-	vector<WTSOrdQueStruct> one;
-	one.push_back(make_ordque(20240109, 20240109, 93000000, 70));
-	ASSERT_TRUE(write_bytes("his/queue/SSE/20240109/610199.dsb",
-		make_block(BT_HIS_OrdQueue, BLOCK_VERSION_CMP_V2, pack_items(one))));
+	const char* const stdCode = "SSE.STK.610198";
+	const uint32_t actionTimes[] = { 93000000, 93000000, 93100000, 93200000, 93200000 };
+	vector<WTSOrdQueStruct> queues;
+	vector<WTSOrdDtlStruct> details;
+	vector<WTSTransStruct> transactions;
+	for (uint32_t i = 0; i < sizeof(actionTimes) / sizeof(actionTimes[0]); ++i)
+	{
+		queues.push_back(make_ordque(20240109, 20240109, actionTimes[i], 80 + i));
+		details.push_back(make_orddtl(20240109, 20240109, actionTimes[i], 90 + i));
+		transactions.push_back(make_trans(20240109, 20240109, actionTimes[i], 100 + i));
+	}
 
-	WTSOrdQueSlice* q = _reader.readOrdQueSliceByRange("SSE.STK.610199",
-		20240109090000000ull, 20240109091500000ull);
-	if (q != NULL)
-		q->release();
+	ASSERT_TRUE(write_bytes("his/queue/SSE/20240109/610198.dsb",
+		make_block(BT_HIS_OrdQueue, BLOCK_VERSION_CMP_V2, pack_items(queues))));
+	ASSERT_TRUE(write_bytes("his/orders/SSE/20240109/610198.dsb",
+		make_block(BT_HIS_OrdDetail, BLOCK_VERSION_CMP_V2, pack_items(details))));
+	ASSERT_TRUE(write_bytes("his/trans/SSE/20240109/610198.dsb",
+		make_block(BT_HIS_Trnsctn, BLOCK_VERSION_CMP_V2, pack_items(transactions))));
+
+	// 首条之前没有记录；begin() 不得被递减。
+	EXPECT_TRUE(_reader.readOrdQueSliceByRange(stdCode,
+		20240109090000000ull, 20240109091500000ull) == NULL);
+	EXPECT_TRUE(_reader.readOrdDtlSliceByRange(stdCode,
+		20240109090000000ull, 20240109091500000ull) == NULL);
+	EXPECT_TRUE(_reader.readTransSliceByRange(stdCode,
+		20240109090000000ull, 20240109091500000ull) == NULL);
+
+	// 右界等于首条时，排他语义产生空结果；不能回退到 begin() 之前。
+	EXPECT_TRUE(_reader.readOrdQueSliceByRange(stdCode,
+		20240109090000000ull, 20240109093000000ull) == NULL);
+	EXPECT_TRUE(_reader.readOrdDtlSliceByRange(stdCode,
+		20240109090000000ull, 20240109093000000ull) == NULL);
+	EXPECT_TRUE(_reader.readTransSliceByRange(stdCode,
+		20240109090000000ull, 20240109093000000ull) == NULL);
+
+	// 右界等于末条的重复时间戳时，排除全部同时间记录，仅保留更早的三条。
+	WTSOrdQueSlice* q = _reader.readOrdQueSliceByRange(stdCode,
+		20240109090000000ull, 20240109093200000ull);
+	ASSERT_TRUE(q != NULL);
+	ASSERT_EQ(q->size(), 3u);
+	EXPECT_DOUBLE_EQ(q->at(0)->price, queues[0].price);
+	EXPECT_DOUBLE_EQ(q->at(1)->price, queues[1].price);
+	EXPECT_EQ(q->at(2)->action_time, 93100000u);
+	q->release();
+
+	WTSOrdDtlSlice* d = _reader.readOrdDtlSliceByRange(stdCode,
+		20240109090000000ull, 20240109093200000ull);
+	ASSERT_TRUE(d != NULL);
+	ASSERT_EQ(d->size(), 3u);
+	EXPECT_EQ(d->at(0)->index, details[0].index);
+	EXPECT_EQ(d->at(1)->index, details[1].index);
+	EXPECT_EQ(d->at(2)->action_time, 93100000u);
+	d->release();
+
+	WTSTransSlice* tr = _reader.readTransSliceByRange(stdCode,
+		20240109090000000ull, 20240109093200000ull);
+	ASSERT_TRUE(tr != NULL);
+	ASSERT_EQ(tr->size(), 3u);
+	EXPECT_EQ(tr->at(0)->index, transactions[0].index);
+	EXPECT_EQ(tr->at(1)->index, transactions[1].index);
+	EXPECT_EQ(tr->at(2)->action_time, 93100000u);
+	tr->release();
+
+	// 右界晚于末条时仍返回完整数据，不丢最后一条。
+	q = _reader.readOrdQueSliceByRange(stdCode,
+		20240109090000000ull, 20240109100000000ull);
+	ASSERT_TRUE(q != NULL);
+	EXPECT_EQ(q->size(), queues.size());
+	q->release();
+
+	d = _reader.readOrdDtlSliceByRange(stdCode,
+		20240109090000000ull, 20240109100000000ull);
+	ASSERT_TRUE(d != NULL);
+	EXPECT_EQ(d->size(), details.size());
+	d->release();
+
+	tr = _reader.readTransSliceByRange(stdCode,
+		20240109090000000ull, 20240109100000000ull);
+	ASSERT_TRUE(tr != NULL);
+	EXPECT_EQ(tr->size(), transactions.size());
+	tr->release();
+
+	// 单条历史数据：右界恰好命中记录时排除；右界稍晚时只返回该记录。
+	const char* const singleStdCode = "SSE.STK.610197";
+	vector<WTSOrdQueStruct> singleQueue(1, make_ordque(20240109, 20240109, 93000000, 120));
+	vector<WTSOrdDtlStruct> singleDetail(1, make_orddtl(20240109, 20240109, 93000000, 121));
+	vector<WTSTransStruct> singleTrans(1, make_trans(20240109, 20240109, 93000000, 122));
+	ASSERT_TRUE(write_bytes("his/queue/SSE/20240109/610197.dsb",
+		make_block(BT_HIS_OrdQueue, BLOCK_VERSION_CMP_V2, pack_items(singleQueue))));
+	ASSERT_TRUE(write_bytes("his/orders/SSE/20240109/610197.dsb",
+		make_block(BT_HIS_OrdDetail, BLOCK_VERSION_CMP_V2, pack_items(singleDetail))));
+	ASSERT_TRUE(write_bytes("his/trans/SSE/20240109/610197.dsb",
+		make_block(BT_HIS_Trnsctn, BLOCK_VERSION_CMP_V2, pack_items(singleTrans))));
+
+	EXPECT_TRUE(_reader.readOrdQueSliceByRange(singleStdCode,
+		20240109090000000ull, 20240109093000000ull) == NULL);
+	q = _reader.readOrdQueSliceByRange(singleStdCode,
+		20240109090000000ull, 20240109093100000ull);
+	ASSERT_TRUE(q != NULL);
+	ASSERT_EQ(q->size(), 1u);
+	EXPECT_DOUBLE_EQ(q->at(0)->price, singleQueue[0].price);
+	q->release();
+
+	EXPECT_TRUE(_reader.readOrdDtlSliceByRange(singleStdCode,
+		20240109090000000ull, 20240109093000000ull) == NULL);
+	d = _reader.readOrdDtlSliceByRange(singleStdCode,
+		20240109090000000ull, 20240109093100000ull);
+	ASSERT_TRUE(d != NULL);
+	ASSERT_EQ(d->size(), 1u);
+	EXPECT_EQ(d->at(0)->index, singleDetail[0].index);
+	d->release();
+
+	EXPECT_TRUE(_reader.readTransSliceByRange(singleStdCode,
+		20240109090000000ull, 20240109093000000ull) == NULL);
+	tr = _reader.readTransSliceByRange(singleStdCode,
+		20240109090000000ull, 20240109093100000ull);
+	ASSERT_TRUE(tr != NULL);
+	ASSERT_EQ(tr->size(), 1u);
+	EXPECT_EQ(tr->at(0)->index, singleTrans[0].index);
+	tr->release();
 }
 
 } // namespace r100

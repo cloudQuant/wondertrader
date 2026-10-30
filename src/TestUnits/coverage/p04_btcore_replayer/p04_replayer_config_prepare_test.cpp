@@ -33,7 +33,7 @@ namespace
 	{
 		// src/TestUnits/coverage/p04_btcore_replayer -> 仓库根
 		return std::filesystem::path(__FILE__).parent_path()
-			.parent_path().parent_path().parent_path();
+			.parent_path().parent_path().parent_path().parent_path();
 	}
 
 	std::filesystem::path make_temp_dir(const char* tag)
@@ -387,8 +387,22 @@ TEST_F(P04ReplayerConfigTest, registerTaskAcceptsEveryPeriodTag)
 	EXPECT_DOUBLE_EQ(3.0, replayer.get_cur_price("SSE.STK.000001"));
 }
 
-// base_cfg 的其他字段均有效，唯一缺少的是 basefiles。将危险 init 放在子进程，
-// 验证其按 bool 接口返回失败；_Exit 避免析构过程掩盖 init 的结果。
+TEST_F(P04ReplayerConfigTest, initWithValidBasefilesStillLoadsBaseData)
+{
+	WTSVariant* cfg = base_cfg(_workdir);
+	attach_basefiles(cfg, _root, true, true);
+
+	HisDataReplayer replayer;
+	const bool initialized = replayer.init(cfg);
+	cfg->release();
+
+	ASSERT_TRUE(initialized);
+	EXPECT_NE(nullptr, replayer.get_session_info("SD0930"));
+	EXPECT_NE(nullptr, replayer.get_commodity_info("SSE.STK.000001"));
+}
+
+// base_cfg 的其他字段均有效，唯一缺少的是 basefiles。将 init 放在子进程，
+// 验证其按 bool 接口返回失败且进程不崩溃；_Exit 避免析构过程掩盖 init 结果。
 TEST_F(P04ReplayerConfigTest, initWithoutBasefilesReportsFailure)
 {
 	EXPECT_EXIT(

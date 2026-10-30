@@ -12,6 +12,7 @@
  */
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <atomic>
 #include <fstream>
 #include <string>
@@ -19,9 +20,18 @@
 
 #include <filesystem>
 
-#include <WtDtCore/StateMonitor.h>
 #include <WTSTools/WTSBaseDataMgr.h>
 #include <TimeUtils.hpp>
+#include <Share/StdUtils.hpp>
+#include <Includes/FasterDefs.h>
+#include <Includes/WTSMarcos.h>
+#include <Includes/WTSSessionInfo.hpp>
+
+// Keep the inspection seam local to this test TU so integration assertions can
+// observe the sections actually stored by StateMonitor::initialize.
+#define private public
+#include <WtDtCore/StateMonitor.h>
+#undef private
 
 namespace fs = std::filesystem;
 
@@ -94,6 +104,41 @@ const char* kR5Sessions = R"JSON({
 		"auction": {"from": 0, "to": 0},
 		"sections": [
 			{"from": 0, "to": 1500}
+		]
+	},
+	"R5ALLDAY": {
+		"name": "全天会话",
+		"offset": 0,
+		"sections": [
+			{"from": 0, "to": 2400}
+		]
+	},
+	"R5ORDINARY": {
+		"name": "普通时段会话",
+		"offset": 0,
+		"sections": [
+			{"from": 930, "to": 1130}
+		]
+	},
+	"R5MIDBEFORE": {
+		"name": "午夜前会话",
+		"offset": 0,
+		"sections": [
+			{"from": 2330, "to": 2400}
+		]
+	},
+	"R5MIDAFTER": {
+		"name": "午夜后会话",
+		"offset": 0,
+		"sections": [
+			{"from": 0, "to": 30}
+		]
+	},
+	"R5OFFSETNIGHT": {
+		"name": "偏移后单调夜盘",
+		"offset": -120,
+		"sections": [
+			{"from": 2100, "to": 2300}
 		]
 	}
 })JSON";
@@ -283,15 +328,120 @@ TEST_F(R5StateMonitorBdtTest, SessionWithoutAuctionKeepsOnlyTradingSections)
 	EXPECT_EQ(_bdMgr.getSessionComms("NOAUC"), nullptr);
 }
 
-TEST_F(R5StateMonitorBdtTest, ZeroStartSectionStillAssemblesWithoutValidation)
+TEST_F(R5StateMonitorBdtTest, InitializeSectionsDriveMembershipForMidnightAndOrdinarySessions)
 {
 	StateMonitor mon;
-	// ZEROST 的 sections from=0：L99 的 stime-- 在 uint32_t 上会下溢，实现里没有任何校验
+	fs::path cfg = initStateCfg(R"JSON({
+		"R5ALLDAY":      {"inittime": 0, "closetime": 2400, "proctime": 2400},
+		"R5ORDINARY":    {"inittime": 0, "closetime": 2400, "proctime": 2400},
+		"R5MIDBEFORE":   {"inittime": 0, "closetime": 2400, "proctime": 2400},
+		"R5MIDAFTER":    {"inittime": 0, "closetime": 2400, "proctime": 2400},
+		"R5OFFSETNIGHT": {"inittime": 0, "closetime": 2400, "proctime": 2400}
+	})JSON");
+	ASSERT_TRUE(mon.initialize(cfg.string().c_str(), &_bdMgr, nullptr));
+
+	auto allDayIt = mon._map.find("R5ALLDAY");
+	ASSERT_NE(allDayIt, mon._map.end());
+	StateInfo& allDay = *allDayIt->second;
+	ASSERT_EQ(allDay._sections.size(), 1u);
+	EXPECT_EQ(allDay._sections[0]._from, 0u);
+	EXPECT_EQ(allDay._sections[0]._end, 2400u);
+	EXPECT_TRUE(allDay.isInSections(0));
+	EXPECT_TRUE(allDay.isInSections(2359));
+	EXPECT_FALSE(allDay.isInSections(2400)); // 左闭右开，24:00 是日内上界
+
+	auto ordinaryIt = mon._map.find("R5ORDINARY");
+	ASSERT_NE(ordinaryIt, mon._map.end());
+	StateInfo& ordinary = *ordinaryIt->second;
+	ASSERT_EQ(ordinary._sections.size(), 1u);
+	EXPECT_EQ(ordinary._sections[0]._from, 929u);
+	EXPECT_EQ(ordinary._sections[0]._end, 1131u);
+	EXPECT_FALSE(ordinary.isInSections(928));
+	EXPECT_TRUE(ordinary.isInSections(929));
+	EXPECT_TRUE(ordinary.isInSections(1130));
+	EXPECT_FALSE(ordinary.isInSections(1131));
+
+	auto beforeMidnightIt = mon._map.find("R5MIDBEFORE");
+	ASSERT_NE(beforeMidnightIt, mon._map.end());
+	StateInfo& beforeMidnight = *beforeMidnightIt->second;
+	ASSERT_EQ(beforeMidnight._sections.size(), 1u);
+	EXPECT_EQ(beforeMidnight._sections[0]._from, 2329u);
+	EXPECT_EQ(beforeMidnight._sections[0]._end, 2400u);
+	EXPECT_TRUE(beforeMidnight.isInSections(2359));
+	EXPECT_FALSE(beforeMidnight.isInSections(0));
+
+	auto afterMidnightIt = mon._map.find("R5MIDAFTER");
+	ASSERT_NE(afterMidnightIt, mon._map.end());
+	StateInfo& afterMidnight = *afterMidnightIt->second;
+	ASSERT_EQ(afterMidnight._sections.size(), 1u);
+	EXPECT_EQ(afterMidnight._sections[0]._from, 0u);
+	EXPECT_EQ(afterMidnight._sections[0]._end, 31u);
+	EXPECT_TRUE(afterMidnight.isInSections(0));
+	EXPECT_TRUE(afterMidnight.isInSections(30));
+	EXPECT_FALSE(afterMidnight.isInSections(31));
+
+	auto offsetNightIt = mon._map.find("R5OFFSETNIGHT");
+	ASSERT_NE(offsetNightIt, mon._map.end());
+	StateInfo& offsetNight = *offsetNightIt->second;
+	ASSERT_EQ(offsetNight._sections.size(), 1u);
+	// offset=-120 将 21:00-23:00 映射为 19:00-21:00，保持单调后再扩边界。
+	EXPECT_EQ(offsetNight._sections[0]._from, 1859u);
+	EXPECT_EQ(offsetNight._sections[0]._end, 2101u);
+	EXPECT_FALSE(offsetNight.isInSections(1858));
+	EXPECT_TRUE(offsetNight.isInSections(1859));
+	EXPECT_TRUE(offsetNight.isInSections(2100));
+	EXPECT_FALSE(offsetNight.isInSections(2101));
+	// offset 后 from>to 的区间仍未定义：本测试不推断应拆分还是拒绝。
+}
+
+TEST_F(R5StateMonitorBdtTest, ZeroStartSectionUsesClampedMidnightPadding)
+{
+	StateMonitor mon;
+	// ZEROST 的 from=00:00：前扩一分钟夹在日内下界，不应发生 uint32_t 下溢。
 	fs::path cfg = initStateCfg(R"JSON({
 		"ZEROST": {"inittime": 0, "closetime": 0, "proctime": 0}
 	})JSON");
-	EXPECT_TRUE(mon.initialize(cfg.string().c_str(), &_bdMgr, nullptr));
-	// 越界的时间没有被拒绝，条目照常入表（缺陷见 bugs/R5_wtdtcore.md）
+	ASSERT_TRUE(mon.initialize(cfg.string().c_str(), &_bdMgr, nullptr));
+	auto zeroStartIt = mon._map.find("ZEROST");
+	ASSERT_NE(zeroStartIt, mon._map.end());
+	const auto& auctionSections = zeroStartIt->second->_sInfo->getAuctionSections();
+	ASSERT_EQ(auctionSections.size(), 1u);
+	EXPECT_EQ(auctionSections[0].first_raw, 0u);
+	EXPECT_EQ(auctionSections[0].second_raw, 0u);
+	EXPECT_EQ(auctionSections[0].first, 0u);
+	EXPECT_EQ(auctionSections[0].second, 0u);
+	EXPECT_FALSE(zeroStartIt->second->_sInfo->isInAuctionTime(0));
+	EXPECT_FALSE(zeroStartIt->second->_sInfo->isInAuctionTime(1200));
+
+	const auto tradingSection = std::find_if(
+		zeroStartIt->second->_sections.begin(), zeroStartIt->second->_sections.end(),
+		[](const StateInfo::Section& section) {
+			return section._from == 0 && section._end == 1501;
+		});
+	ASSERT_NE(tradingSection, zeroStartIt->second->_sections.end());
+	EXPECT_EQ(tradingSection->_from, 0u);
+	EXPECT_EQ(tradingSection->_end, 1501u);
+
+	// The fixture also has auction 0..0, stored separately before the trading section.
+	// Isolate each section created by initialize so its membership is tested independently.
+	auto emptyAuctionSection = std::find_if(
+		zeroStartIt->second->_sections.begin(), zeroStartIt->second->_sections.end(),
+		[](const StateInfo::Section& section) {
+			return section._from == 0 && section._end == 0;
+		});
+	ASSERT_NE(emptyAuctionSection, zeroStartIt->second->_sections.end());
+	StateInfo auctionOnly;
+	auctionOnly._sections.push_back(*emptyAuctionSection);
+	EXPECT_FALSE(auctionOnly.isInSections(0));
+	EXPECT_FALSE(auctionOnly.isInSections(1200));
+
+	StateInfo tradingOnly;
+	tradingOnly._sections.push_back(*tradingSection);
+	EXPECT_TRUE(tradingOnly.isInSections(0));
+	EXPECT_TRUE(tradingOnly.isInSections(1500));
+	EXPECT_FALSE(tradingOnly.isInSections(1501));
+
+	// initialize 将会话登记到状态表，且配置的零时刻不会把状态推进。
 	EXPECT_TRUE(mon.isInState("ZEROST", SS_ORIGINAL));
 	EXPECT_TRUE(mon.isAnyInState(SS_ORIGINAL));
 	EXPECT_FALSE(mon.isAnyInState(SS_Holiday));
@@ -306,10 +456,10 @@ TEST_F(R5StateMonitorBdtTest, NonObjectEntriesDegradeToDefaultTimes)
 	EXPECT_TRUE(mon.isInState("SSE", SS_ORIGINAL));
 	EXPECT_TRUE(mon.isInState("SHFE", SS_ORIGINAL));
 
-	// 顶层不是对象：memberNames() 为空，循环 0 次，仍然返回 true
+	// Config root must be an object; a root-level array is rejected by WTSCfgLoader.
 	StateMonitor mon2;
 	fs::path cfg2 = initStateCfg(R"JSON([{"SSE": 1}])JSON");
-	EXPECT_TRUE(mon2.initialize(cfg2.string().c_str(), &_bdMgr, nullptr));
+	EXPECT_FALSE(mon2.initialize(cfg2.string().c_str(), &_bdMgr, nullptr));
 	EXPECT_FALSE(mon2.isAnyInState(SS_ORIGINAL));
 	EXPECT_FALSE(mon2.isInState("SSE", SS_ORIGINAL));
 }

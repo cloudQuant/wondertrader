@@ -1,7 +1,7 @@
 /**
  * r10_wtcore_dtmgr.cpp —— lane R10 / src/WtCore/WtDtMgr.cpp 可达面
  *
- * 本文件只打「不依赖 WtDataStorage 插件（_reader 恒为 NULL）」的分支：
+ * 本文件覆盖不依赖 WtDataStorage 插件的分支；复权标记转发另用 IDataReader 替身直注 _reader：
  *   L26-48   构造/析构（含缓存 release）
  *   L89-102  init()：_engine/_force_cache/_align_by_section 赋值后，
  *            initStore(cfg->get("store")==NULL) 在 L52-53 早退 ⇒ init 返回 false，
@@ -12,14 +12,14 @@
  *   L104-107 on_all_bar_updated：_bar_notifies 为空 ⇒ 早退
  *   L219-240 handle_push_quote（NULL 早退 / 建 _rt_tick_map / _ticks_adjusted==NULL 跳过）
  *   L242-253 grab_last_tick（缓存未建 / 命中 retain / 未命中）
- *   L255-275 get_adjusting_factor / get_adjusting_flag（_reader==NULL 两支）
+ *   L255-275 get_adjusting_factor / get_adjusting_flag（无 reader 回退、reader 标记转发）
  *   L277-400 五个 slice 查询的 _reader==NULL 早退
  *
  * 需要接缝（登记到 bugs/R10_wtcore.md，本文件不硬闯）：
  *   L50-87 initStore 的 DLL 装载、L109-117 on_all_bar_updated 派发、L183-217 on_bar 重采样、
  *   L287-375 get_tick_slice 后复权缓存、L421-542 get_kline_slice 重采样缓存
- *   —— 全部依赖 _reader（只有 DLLHelper::load_library("WtDataStorage") 才会非空），
- *   WtDtMgr 无 reader 注入口（_reader 私有、无 setter、无虚函数）。
+ *   —— 全部依赖 _reader（生产路径通过 DLLHelper::load_library("WtDataStorage") 设置）；
+ *   本文件只为 get_adjusting_flag 用私有成员测试缝直注 IDataReader 替身，不装载插件。
  *
  * 替身：q01_wtcore3/q01_sel_env.h（BaseDataMgr/HotMgr/SelEngine/Q01TempEnv），
  *       SelEngine 派生自 WtSelEngine（ concrete，不 init/run/起线程）。
@@ -28,7 +28,13 @@
 
 #include <Includes/WTSVariant.hpp>
 #include <Includes/WTSTradeDef.hpp>
+#include <Includes/FasterDefs.h>
+#include <Includes/IDataManager.h>
+#include <Includes/IDataReader.h>
+#include <Includes/WTSCollection.hpp>
+#define private public
 #include <WtCore/WtDtMgr.h>
+#undef private
 
 using namespace q01sel;
 
@@ -38,6 +44,26 @@ USING_NS_WTP;
 
 /** WtDtMgr 需要 WtEngine*，用 q01 的裸选股引擎（已接上替身，不起线程） */
 typedef SelEngine R10Engine;
+
+/** 仅提供复权标记并满足 IDataReader 必需接口的轻量替身。 */
+class R10AdjustingReader final : public IDataReader
+{
+public:
+    explicit R10AdjustingReader(uint32_t adjusting_flag)
+        : _adjusting_flag(adjusting_flag)
+    {}
+
+    void onMinuteEnd(uint32_t, uint32_t, uint32_t = 0) override {}
+    WTSTickSlice* readTickSlice(const char*, uint32_t, uint64_t = 0) override { return NULL; }
+    WTSKlineSlice* readKlineSlice(const char*, WTSKlinePeriod, uint32_t, uint64_t = 0) override
+    {
+        return NULL;
+    }
+    uint32_t getAdjustingFlag() override { return _adjusting_flag; }
+
+private:
+    uint32_t _adjusting_flag;
+};
 
 class R10DtMgrTest : public ::testing::Test
 {
@@ -135,10 +161,49 @@ TEST_F(R10DtMgrTest, adjusting_factor_and_flag_fall_back_without_reader)
     _mgr.reset(new WtDtMgr());
     // L255-261：_reader==NULL ⇒ 因子 1.0
     EXPECT_DOUBLE_EQ(_mgr->get_adjusting_factor("SHFE.ag.2512", 20250110), 1.0);
-    // L263-275：_reader==NULL ⇒ flag 0（函数内 static 记忆化，见缺陷 BUG-R10-003）
+    // _reader==NULL ⇒ 标记回退为 0；连续调用保持同一结果
     EXPECT_EQ(_mgr->get_adjusting_flag(), 0u);
-    // 第二次调用命中 static 缓存分支
     EXPECT_EQ(_mgr->get_adjusting_flag(), 0u);
+}
+
+TEST_F(R10DtMgrTest, no_reader_call_does_not_cache_flag_for_later_reader)
+{
+    _mgr.reset(new WtDtMgr());
+    R10AdjustingReader reader(5u);
+
+    // 无 reader 的早期查询返回 0，不应影响之后绑定 reader 的结果。
+    EXPECT_EQ(_mgr->get_adjusting_flag(), 0u);
+    _mgr->_reader = &reader;
+    EXPECT_EQ(_mgr->get_adjusting_flag(), 5u);
+}
+
+TEST_F(R10DtMgrTest, alternating_managers_read_their_own_reader_flags)
+{
+    R10AdjustingReader first_reader(1u);
+    R10AdjustingReader second_reader(6u);
+    WtDtMgr first_mgr;
+    WtDtMgr second_mgr;
+    first_mgr._reader = &first_reader;
+    second_mgr._reader = &second_reader;
+
+    EXPECT_EQ(first_mgr.get_adjusting_flag(), 1u);
+    EXPECT_EQ(second_mgr.get_adjusting_flag(), 6u);
+    EXPECT_EQ(first_mgr.get_adjusting_flag(), 1u);
+    EXPECT_EQ(second_mgr.get_adjusting_flag(), 6u);
+}
+
+TEST_F(R10DtMgrTest, flag_tracks_reader_reconfiguration)
+{
+    _mgr.reset(new WtDtMgr());
+    R10AdjustingReader initial_reader(2u);
+    R10AdjustingReader replacement_reader(7u);
+
+    _mgr->_reader = &initial_reader;
+    EXPECT_EQ(_mgr->get_adjusting_flag(), 2u);
+
+    // 生产初始化会更新当前 reader；替身直注只切换该当前指针。
+    _mgr->_reader = &replacement_reader;
+    EXPECT_EQ(_mgr->get_adjusting_flag(), 7u);
 }
 
 TEST_F(R10DtMgrTest, handle_push_quote_null_tick_is_ignored)

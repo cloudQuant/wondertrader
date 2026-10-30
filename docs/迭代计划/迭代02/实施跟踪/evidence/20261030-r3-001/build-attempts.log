@@ -1,0 +1,39 @@
+Status: IN_PROGRESS (not acceptance)
+Workspace: /Users/yunjinqi/Documents/new_projects/wondertrader
+Target: WtCore CoverageTests_wtcore
+
+Attempt A
+Command: /opt/homebrew/bin/cmake --build build-cov --target WtCore CoverageTests_wtcore -j4
+Exit: 1
+Output: r3_trader_risklimit.cpp failed to compile because getBinDir was undeclared. Added explicit Share/ModuleHelper.hpp include.
+
+Attempt B
+Command: /opt/homebrew/bin/cmake --build build-cov --target WtCore CoverageTests_wtcore -j4
+Exit: 0
+Observed: rebuilt r3_trader_risklimit.cpp.o and linked CoverageTests_wtcore after the include fix.
+
+Attempt C
+Command: /opt/homebrew/bin/cmake --build build-cov --target WtCore CoverageTests_wtcore -j4
+Exit: 0
+Observed output:
+[0/2] Re-checking globbed directories...
+[1/3] Building CXX object TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/q01_wtcore3/r3_trader_risklimit.cpp.o
+[2/3] Linking CXX executable build_x64/Debug/bin/TestUnits/CoverageTests_wtcore
+
+Attempt C was run while build-cov was exclusively allocated. The source was changed later to replace fork-based isolation with posix_spawn/exec due intermittent child SIGABRT; the current test source has not yet been rebuilt.
+
+Attempt D (posix_spawn/exec isolation)
+Command: /opt/homebrew/bin/cmake --build build-cov --target WtCore CoverageTests_wtcore -j4
+Exit: 0
+Observed output:
+[0/2] Re-checking globbed directories...
+[1/9] Building CXX object TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n02_wtcore_engines/n02_executer_factory_test.cpp.o
+[2/9] Building CXX object TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/__/__/WtCore/WtExecuterFactory.cpp.o
+[3/9] Building CXX object TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/q01_wtcore3/r3_trader_risklimit.cpp.o
+[4/9] Building CXX object WtCore/CMakeFiles/WtCore.dir/WtExecuterFactory.cpp.o
+[5/9] Linking CXX static library build_x64/Debug/libs/libWtCore.a
+[6/9] Linking CXX shared library build_x64/Debug/bin/WtPorter/libWtExecMon.dylib
+[7/9] Linking CXX shared library build_x64/Debug/bin/WtPorter/libWtPorter.dylib
+[8/9] Linking CXX executable build_x64/Debug/bin/TestUnits/CoverageTests_wtcore
+
+After Attempt D, no implementation edits were made. The test helper now launches a fresh filtered test executable via posix_spawn and retains a 30-second timeout.

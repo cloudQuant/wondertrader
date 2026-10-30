@@ -30,6 +30,17 @@ static const uint32_t R4_M5_935 = 3301030935u;
 // 15:00 的 tick：minutes=360 回退成 359 → barMins=360 → minuteToTime(360)=1500
 static const uint32_t R4_M1_CLOSE = 3301031500u;
 
+static WTSVariant* make_writer_cfg_without_groupsize(const std::string& root)
+{
+	WTSVariant* cfg = WTSVariant::createObject();
+	cfg->append("path", root.c_str());
+	cfg->append("disabletick", true);
+	cfg->append("disablemin1", true);
+	cfg->append("disablemin5", true);
+	cfg->append("disableday", true);
+	return cfg;
+}
+
 //////////////////////////////////////////////////////////////////////////
 // 1. 全新目录：四个块文件按 AD 块头规范落盘
 //////////////////////////////////////////////////////////////////////////
@@ -201,6 +212,117 @@ TEST_F(R4WriterADTest, TickCacheAtCapacityResizesFileAndKeepsOldItems)
 }
 
 //////////////////////////////////////////////////////////////////////////
+// 三种 bar cache 的 remap 失败都必须保留旧索引/size，并允许恢复后重试。
+//////////////////////////////////////////////////////////////////////////
+TEST_F(R4WriterADTest, BarCacheExpansionFailureKeepsStateAndRetriesAfterFileRestore)
+{
+	struct CacheCase
+	{
+		const char* _name;
+		const char* _filename;
+		const char* _exchg;
+		const char* _failure_log;
+	};
+	const CacheCase cases[] = {
+		{"day", "cache_d1.dmb", "EXR4D", "day bar cache expansion failed"},
+		{"m1", "cache_m1.dmb", "EXR4M1", "m1 bar cache expansion failed"},
+		{"m5", "cache_m5.dmb", "EXR4M5", "m5 bar cache expansion failed"}
+	};
+	const char* barFiles[] = {"cache_d1.dmb", "cache_m1.dmb", "cache_m5.dmb"};
+
+	for (const CacheCase& cacheCase : cases)
+	{
+		if (_writer)
+		{
+			_writer->release();
+			_writer.reset();
+		}
+
+		const std::filesystem::path caseRoot = _root / cacheCase._name;
+		std::filesystem::create_directories(caseRoot);
+		const std::filesystem::path cachePath = caseRoot / cacheCase._filename;
+		const std::filesystem::path movedPath = cachePath.string() + ".offline";
+
+		std::vector<BarCacheItem> oldItems;
+		oldItems.push_back(make_bar_item(cacheCase._exchg, "rb_old", R4_TD1, R4_M1_931, 1111.0));
+		write_block_file(cachePath.string(), BLK_FLAG, BT_RT_Cache, 1, 1, 1, bar_payload(oldItems));
+
+		WTSVariant* cfg = make_writer_cfg(caseRoot.string(), 1000, true, false, false, false);
+		init_writer(cfg);
+
+		WTSCommodityInfo* comm = _bd->add_commodity(cacheCase._exchg, "rb", ContractCategory::CC_Future);
+		WTSContractInfo* oldCt = _bd->add_contract(cacheCase._exchg, "rb_old", comm);
+		WTSContractInfo* ct = _bd->add_contract(cacheCase._exchg, "rb_new", comm);
+		ASSERT_NE(nullptr, oldCt);
+		ASSERT_NE(nullptr, ct);
+
+		std::error_code ec;
+		std::filesystem::rename(cachePath, movedPath, ec);
+		ASSERT_FALSE(ec) << ec.message();
+
+		const uint32_t broadcastsBefore = _sink->bcast_tick();
+		WTSTickStruct first = make_tick(cacheCase._exchg, "rb_new", R4_TD1, R4_TD1,
+			93000000, 3901.0, 1, 10, 50, 0, 1, 10);
+		write_or_fail(tick_of(ct, first), 0);
+		EXPECT_EQ(_sink->bcast_tick(), broadcastsBefore + 1);
+		EXPECT_GE(_sink->count_containing(cacheCase._failure_log), 1u);
+
+		// The failed stream remains at its original logical size and keeps the old row.
+		R4BlkHead failedHead = read_head(movedPath.string());
+		EXPECT_EQ(failedHead._size, 1u);
+		EXPECT_EQ(failedHead._capacity, 1u);
+		BarCacheItem preserved;
+		ASSERT_TRUE(read_bar_item(movedPath.string(), cacheCase._exchg, "rb_old", preserved));
+		EXPECT_DOUBLE_EQ(preserved._bar.close, 1111.0);
+		BarCacheItem missing;
+		EXPECT_FALSE(read_bar_item(movedPath.string(), cacheCase._exchg, "rb_new", missing));
+
+		// Model the on-disk residue of a truncate-success/remap-failure: the file
+		// has the requested extent, while the mapped header and logical state stay old.
+		const std::uint64_t expandedSize = sizeof(RTBarCache) +
+			sizeof(BarCacheItem) * (1u + R4_STEP);
+		std::filesystem::resize_file(movedPath, expandedSize, ec);
+		ASSERT_FALSE(ec) << ec.message();
+		EXPECT_EQ(file_size_or_zero(movedPath.string()), expandedSize);
+		EXPECT_EQ(read_head(movedPath.string())._capacity, 1u);
+		WTSTickStruct oldIdentityTick = make_tick(cacheCase._exchg, "rb_old", R4_TD1, R4_TD1,
+			93030000, 3911.0, 1, 10, 51, 0, 2, 20);
+		write_or_fail(tick_of(oldCt, oldIdentityTick), 0);
+		EXPECT_EQ(_sink->bcast_tick(), broadcastsBefore + 2);
+		ASSERT_TRUE(read_bar_item(movedPath.string(), cacheCase._exchg, "rb_old", preserved));
+		EXPECT_DOUBLE_EQ(preserved._bar.close, 3911.0);
+
+		// Failure in one bar stream does not suppress updates to the other two streams.
+		for (const char* barFile : barFiles)
+		{
+			if (std::strcmp(barFile, cacheCase._filename) == 0)
+				continue;
+			BarCacheItem other;
+			ASSERT_TRUE(read_bar_item((caseRoot / barFile).string(), cacheCase._exchg, "rb_new", other))
+				<< barFile;
+		}
+
+		// Restore the same mapped file at its original path, then retry the same identity.
+		std::filesystem::rename(movedPath, cachePath, ec);
+		ASSERT_FALSE(ec) << ec.message();
+		WTSTickStruct retry = make_tick(cacheCase._exchg, "rb_new", R4_TD1, R4_TD1,
+			93030000, 3902.0, 1, 10, 51, 0, 2, 20);
+		write_or_fail(tick_of(ct, retry), 0);
+		EXPECT_EQ(_sink->bcast_tick(), broadcastsBefore + 3);
+
+		R4BlkHead recoveredHead = read_head(cachePath.string());
+		EXPECT_EQ(recoveredHead._size, 2u);
+		EXPECT_EQ(recoveredHead._capacity, 1u + R4_STEP);
+		EXPECT_EQ(file_size_or_zero(cachePath.string()),
+			expandedSize);
+		ASSERT_TRUE(read_bar_item(cachePath.string(), cacheCase._exchg, "rb_old", preserved));
+		EXPECT_DOUBLE_EQ(preserved._bar.close, 3911.0);
+		ASSERT_TRUE(read_bar_item(cachePath.string(), cacheCase._exchg, "rb_new", missing));
+		EXPECT_DOUBLE_EQ(missing._bar.close, 3902.0);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
 // 5. procFlag=0：同交易日连续 tick 直接整体覆盖缓存，价格/量原样落缓存
 //////////////////////////////////////////////////////////////////////////
 TEST_F(R4WriterADTest, ProcFlagZeroOverwritesCacheVerbatim)
@@ -251,11 +373,8 @@ TEST_F(R4WriterADTest, ProcFlagOneTurnsTotalsIntoDeltas)
 
 //////////////////////////////////////////////////////////////////////////
 // 7. procFlag=1 跨交易日：L907-918 用自身总量回填，并把 pre_interest 差分写入缓存
-// BLOCKED by R4-BUG-01: writeTick reads the uninitialized _async_task. Heap reuse
-// via new_writer_zeroed does not make that access deterministic; do not enable until
-// production initialization or a safe test seam removes the read.
 //////////////////////////////////////////////////////////////////////////
-TEST_F(R4WriterADTest, DISABLED_ProcFlagOneOnNewTradingDateRebaselinesCacheBlockedByR4Bug01)
+TEST_F(R4WriterADTest, ProcFlagOneOnNewTradingDateRebaselinesCache)
 {
 	init_writer_all_disabled();
 	WTSCommodityInfo* comm = _bd->add_commodity("EXN1", "rb", ContractCategory::CC_Future);
@@ -288,11 +407,8 @@ TEST_F(R4WriterADTest, DISABLED_ProcFlagOneOnNewTradingDateRebaselinesCacheBlock
 
 //////////////////////////////////////////////////////////////////////////
 // 7a. procFlag=1 完整快照边界：pre_interest=0 仍表示昨持为 0，additional 应为 60。
-// BLOCKED by R4-BUG-01: writeTick reads the uninitialized _async_task. Heap reuse
-// via new_writer_zeroed does not make that access deterministic; do not enable until
-// production initialization or a safe test seam removes the read.
 //////////////////////////////////////////////////////////////////////////
-TEST_F(R4WriterADTest, DISABLED_ProcFlagOneZeroPreInterestKeepsFullSnapshotBlockedByR4Bug01)
+TEST_F(R4WriterADTest, ProcFlagOneZeroPreInterestKeepsFullSnapshot)
 {
 	init_writer_all_disabled();
 	WTSCommodityInfo* comm = _bd->add_commodity("EXN0", "rb", ContractCategory::CC_Future);
@@ -315,10 +431,8 @@ TEST_F(R4WriterADTest, DISABLED_ProcFlagOneZeroPreInterestKeepsFullSnapshotBlock
 
 //////////////////////////////////////////////////////////////////////////
 // 8. procFlag=2：总量/总成交额为 0 时自动累加；最低价应保持 low 的最小值语义。
-//    生产代码当前以 max 更新 low（R4-BUG-04）。该路径经 writeTick 会读取未初始化的
-//    _async_task，公开 init 没有设置它，因此保留正确断言但禁用，避免起不受控线程。
 //////////////////////////////////////////////////////////////////////////
-TEST_F(R4WriterADTest, DISABLED_ProcFlagTwoAccumulatesTotals)
+TEST_F(R4WriterADTest, ProcFlagTwoAccumulatesTotals)
 {
 	init_writer_all_disabled();
 	WTSCommodityInfo* comm = _bd->add_commodity("EXP2", "rb", ContractCategory::CC_Future);
@@ -347,7 +461,16 @@ TEST_F(R4WriterADTest, DISABLED_ProcFlagTwoAccumulatesTotals)
 	// 期望值依据该公式从 3800 改为 max(3800, 3900)=3900（上一笔 3900 的 high 已在缓存里）
 	EXPECT_DOUBLE_EQ(cur->open(), 3800.0);
 	EXPECT_DOUBLE_EQ(cur->high(), 3900.0);
-	// 第二笔 price=3800、low=0 会用最新价补 low；在 low 字段语义下应取 min(3800,3900)=3800。
+	// 第二笔 price=3800、low=0 应补为 min(3800,3900)=3800。
+	EXPECT_DOUBLE_EQ(cur->low(), 3800.0);
+	cur->release();
+
+	// 后续价格高于已知最低价且 low 仍缺失时，不得把累计 low 抬高。
+	WTSTickStruct s3 = make_tick("EXP2", "rb2301", R4_TD1, R4_TD1, 93200000, 4000.0, 1, 10, 56, 0, 121, 1210);
+	s3.low = 0;
+	write_or_fail(tick_of(ct, s3), 2);
+	cur = _writer->getCurTick("rb2301", "EXP2");
+	ASSERT_TRUE(cur != NULL);
 	EXPECT_DOUBLE_EQ(cur->low(), 3800.0);
 	cur->release();
 }
@@ -475,10 +598,8 @@ TEST_F(R4WriterADTest, DecreasingTotalVolumeIsAbandoned)
 
 //////////////////////////////////////////////////////////////////////////
 // 13. updateBarCache 主干：d1/m1/m5 三个缓存项各自的 OHLCV 语义。
-// BLOCKED by BUG-R4-BUG-01: writeTick -> pushTask reads uninitialized _async_task.
-// Enable only after _async_task is initialized deterministically or a safe test seam avoids that read.
 //////////////////////////////////////////////////////////////////////////
-TEST_F(R4WriterADTest, DISABLED_BarCacheMergesTicksOfDayMinute5AndMinute1BlockedByUninitializedAsyncTask)
+TEST_F(R4WriterADTest, BarCacheMergesTicksOfDayMinute5AndMinute1)
 {
 	WTSVariant* cfg = make_writer_cfg(_root.string(), 1000, true, false, false, false);
 	init_writer(cfg);
@@ -668,7 +789,7 @@ TEST_F(R4WriterADTest, ReleaseWithoutTaskThreadIsInert)
 	write_or_fail(tick_of(ct, s1), 0);
 	ASSERT_EQ(_sink->bcast_tick(), 1u);
 
-	// _task_thrd 为空 → 不 notify、不 join；释放后仍可继续同步写入
+	// async 未开启时没有 worker；同步写入保持既有行为。
 	_writer->release();
 	WTSTickStruct s2 = make_tick("EXRL", "rb2301", R4_TD1, R4_TD1, 93100000, 3910.0, 2, 20, 0, 0, 3, 30);
 	write_or_fail(tick_of(ct, s2), 0);
@@ -678,6 +799,151 @@ TEST_F(R4WriterADTest, ReleaseWithoutTaskThreadIsInert)
 	ASSERT_TRUE(cur != NULL);
 	EXPECT_DOUBLE_EQ(cur->price(), 3910.0);
 	cur->release();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// async 键缺省时 writeTick 在返回前完成同步副作用。
+//////////////////////////////////////////////////////////////////////////
+TEST_F(R4WriterADTest, WriterDefaultsToSynchronousWhenAsyncIsMissing)
+{
+	init_writer_all_disabled();
+	WTSCommodityInfo* comm = _bd->add_commodity("EXSYN", "rb", ContractCategory::CC_Future);
+	WTSContractInfo* ct = _bd->add_contract("EXSYN", "rb2301", comm);
+	WTSTickStruct s = make_tick("EXSYN", "rb2301", R4_TD1, R4_TD1,
+		93000000, 3900.0, 1, 10, 50, 0, 1, 10);
+	WTSTickData* tick = tick_of(ct, s);
+	const bool accepted = _writer->writeTick(tick, 0);
+	tick->release();
+	ASSERT_TRUE(accepted);
+	EXPECT_EQ(_sink->bcast_tick(), 1u);
+}
+
+//////////////////////////////////////////////////////////////////////////
+// async 显式开启后，release 必须 drain 所有已接受任务；release 后的新任务应拒绝。
+//////////////////////////////////////////////////////////////////////////
+TEST_F(R4WriterADTest, AsyncWriterDrainsAcceptedTicksOnReleaseAndRejectsNewTicks)
+{
+	init_writer_all_disabled(1000, true);
+	WTSCommodityInfo* comm = _bd->add_commodity("EXASY", "rb", ContractCategory::CC_Future);
+	WTSContractInfo* ct = _bd->add_contract("EXASY", "rb2301", comm);
+	const uint32_t tick_count = 64;
+	for (uint32_t i = 0; i < tick_count; ++i)
+	{
+		const uint32_t action_time = 93000000 + (i / 60) * 100000 + (i % 60) * 1000;
+		WTSTickStruct tick = make_tick("EXASY", "rb2301", R4_TD1, R4_TD1,
+			action_time, 3900.0 + i, 1, 10, 50, 0, 100 + i, 1000 + i);
+		write_or_fail(tick_of(ct, tick), 0);
+	}
+
+	_writer->release();
+	EXPECT_EQ(_sink->bcast_tick(), tick_count);
+
+	WTSTickStruct rejected = make_tick("EXASY", "rb2301", R4_TD1, R4_TD1,
+		94000000, 4000.0, 1, 10, 50, 0, 200, 2000);
+	WTSTickData* rejected_tick = tick_of(ct, rejected);
+	EXPECT_FALSE(_writer->writeTick(rejected_tick, 0));
+	rejected_tick->release();
+	EXPECT_EQ(_sink->bcast_tick(), tick_count);
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 两个独立 writer 的异步线程并发更新进程级交易所计数，计数和分组日志不应丢失。
+//////////////////////////////////////////////////////////////////////////
+TEST_F(R4WriterADTest, AsyncWriterTickCountersAreSafeAcrossInstances)
+{
+	init_writer_all_disabled(2, true);
+	WTSCommodityInfo* comm1 = _bd->add_commodity("EXCONC", "rb", ContractCategory::CC_Future);
+	WTSContractInfo* ct1 = _bd->add_contract("EXCONC", "rb2301", comm1);
+
+	R4BaseDataMgr bd2;
+	R4WriterSink sink2(&bd2);
+	WtDataWriterAD writer2;
+	struct ReleaseOnExit
+	{
+		WtDataWriterAD& _writer;
+		~ReleaseOnExit() { _writer.release(); }
+	} release_writer2{writer2};
+
+	const std::filesystem::path root2 = _root / "writer2";
+	std::filesystem::create_directories(root2);
+	WTSVariant* cfg2 = make_writer_cfg(root2.string(), 2, true, true, true, true, true);
+	const bool init2 = writer2.init(cfg2, &sink2);
+	cfg2->release();
+	ASSERT_TRUE(init2);
+	WTSCommodityInfo* comm2 = bd2.add_commodity("EXCONC", "rb", ContractCategory::CC_Future);
+	WTSContractInfo* ct2 = bd2.add_contract("EXCONC", "rb2301", comm2);
+
+	const uint32_t tick_count_per_writer = 256;
+	for (uint32_t i = 0; i < tick_count_per_writer; ++i)
+	{
+		const uint32_t action_time = 93000000 + (i / 60) * 100000 + (i % 60) * 1000;
+		WTSTickStruct first = make_tick("EXCONC", "rb2301", R4_TD1, R4_TD1,
+			action_time, 3900.0 + i, 1, 10, 50, 0, 100 + i, 1000 + i);
+		write_or_fail(tick_of(ct1, first), 0);
+
+		WTSTickStruct second = make_tick("EXCONC", "rb2301", R4_TD1, R4_TD1,
+			action_time, 3900.0 + i, 1, 10, 50, 0, 100 + i, 1000 + i);
+		WTSTickData* tick2 = tick_of(ct2, second);
+		const bool accepted = writer2.writeTick(tick2, 0);
+		tick2->release();
+		EXPECT_TRUE(accepted) << i;
+	}
+
+	writer2.release();
+	_writer->release();
+	EXPECT_EQ(_sink->bcast_tick(), tick_count_per_writer);
+	EXPECT_EQ(sink2.bcast_tick(), tick_count_per_writer);
+	// 两个 writer 共 512 笔、同一交易所、groupsize=2，应恰有 256 条分组日志。
+	EXPECT_EQ(_sink->count_containing("ticks received from exchange")
+		+ sink2.count_containing("ticks received from exchange"), tick_count_per_writer);
+}
+
+//////////////////////////////////////////////////////////////////////////
+// groupsize 缺省沿用构造合同中的 1000；真实 writeTick 路径到达取模仍安全。
+//////////////////////////////////////////////////////////////////////////
+TEST_F(R4WriterADTest, MissingGroupSizeUsesDefaultInterval)
+{
+	init_writer(make_writer_cfg_without_groupsize(_root.string()));
+	WTSCommodityInfo* comm = _bd->add_commodity("EXGSM", "rb", ContractCategory::CC_Future);
+	WTSContractInfo* ct = _bd->add_contract("EXGSM", "rb2301", comm);
+
+	const uint32_t tick_count = 1000;
+	for (uint32_t i = 0; i < tick_count; ++i)
+	{
+		const uint32_t action_time = 93000000 + (i / 60) * 100000 + (i % 60) * 1000;
+		WTSTickStruct tick = make_tick("EXGSM", "rb2301", R4_TD1, R4_TD1,
+			action_time, 3900.0 + i, 1, 10, 50, 0, i + 1, (i + 1) * 10);
+		write_or_fail(tick_of(ct, tick), 0);
+		if (i + 1 == tick_count - 1)
+			EXPECT_EQ(_sink->count_containing("ticks received from exchange"), 0u);
+	}
+
+	EXPECT_EQ(_sink->bcast_tick(), tick_count);
+	EXPECT_EQ(_sink->count_containing("ticks received from exchange"), 1u);
+}
+
+//////////////////////////////////////////////////////////////////////////
+// groupsize=0 是配置错误：init 拒绝，未加载缓存/启动 async worker，之后 writeTick fail-closed。
+//////////////////////////////////////////////////////////////////////////
+TEST_F(R4WriterADTest, ZeroGroupSizeRejectsInitAndBlocksWrites)
+{
+	WTSVariant* cfg = make_writer_cfg(_root.string(), 0, true, true, true, true, true);
+	_writer.reset(new_writer());
+	const bool initialized = _writer->init(cfg, _sink);
+	cfg->release();
+	EXPECT_FALSE(initialized);
+	EXPECT_NE(_sink->last_log(LL_ERROR).find("groupsize"), std::string::npos);
+	EXPECT_FALSE(std::filesystem::exists(path_of("cache_tick.dmb")));
+
+	WTSCommodityInfo* comm = _bd->add_commodity("EXGS0", "rb", ContractCategory::CC_Future);
+	WTSContractInfo* ct = _bd->add_contract("EXGS0", "rb2301", comm);
+	WTSTickStruct s = make_tick("EXGS0", "rb2301", R4_TD1, R4_TD1,
+		93000000, 3900.0, 1, 10, 50, 0, 1, 10);
+	WTSTickData* tick = tick_of(ct, s);
+	const bool accepted = _writer->writeTick(tick, 0);
+	tick->release();
+	EXPECT_FALSE(accepted);
+	EXPECT_EQ(_sink->bcast_tick(), 0u);
 }
 
 //////////////////////////////////////////////////////////////////////////

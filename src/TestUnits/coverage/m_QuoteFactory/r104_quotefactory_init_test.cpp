@@ -24,7 +24,11 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <filesystem>
+#include <fstream>
+#include <iterator>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <fcntl.h>
@@ -43,8 +47,9 @@ using namespace wtp;
 const char* getBinDir();
 /* main.cpp:70 */
 void initParsers(WTSVariant* cfg);
-/* main.cpp:96 */
-void initialize(const std::string& filename);
+/* main.cpp:96 and main.cpp:264 (renamed by the coverage target) */
+bool initialize(const std::string& filename);
+int wt_coverage_main_quotefactory(int argc, char* argv[]);
 /* main.cpp:27 —— 生产 TU 里的全局适配器表，用来给 initParsers() 的落表结果做可证伪断言 */
 extern ParserAdapterMgr g_parsers;
 
@@ -52,6 +57,22 @@ extern ParserAdapterMgr g_parsers;
 extern "C" int __llvm_profile_write_file(void);
 
 namespace {
+
+namespace fs = std::filesystem;
+
+class ScopedRemoveAll
+{
+public:
+	explicit ScopedRemoveAll(fs::path path) : _path(std::move(path)) {}
+	~ScopedRemoveAll()
+	{
+		std::error_code ec;
+		fs::remove_all(_path, ec);
+	}
+
+private:
+	fs::path _path;
+};
 
 struct ChildOutcome
 {
@@ -102,11 +123,12 @@ ChildOutcome initialize_in_child(const std::string& cfg)
 		close(fds[0]);
 		close(fds[1]);
 
-		initialize(cfg);
+		const bool initialized = initialize(cfg);
 
 		/* 执行到这里 = initialize() 已经返回（没有停在 :254/:260 的线程上） */
 		const std::string line = std::string("RETURNED module_dir=")
-			+ WtHelper::get_module_dir() + "\n";
+			+ WtHelper::get_module_dir() + " initialize="
+			+ (initialized ? "true\n" : "false\n");
 		const ssize_t ignored = write(STDOUT_FILENO, line.c_str(), line.size());
 		(void)ignored;
 
@@ -253,6 +275,7 @@ TEST(r104_quote_initialize, full_allday_config_reaches_end_of_function)
 	// 可证伪观测点：只有 initialize() 真的跑到 :98 并返回，这一行才会出现
 	EXPECT_NE(r.out.find("RETURNED module_dir=" + expected_module_dir), std::string::npos)
 		<< "child stdout=" << r.out;
+	EXPECT_NE(r.out.find("initialize=true"), std::string::npos) << r.out;
 }
 
 TEST(r104_quote_initialize, array_basefiles_and_loadable_side_parser_file)
@@ -274,6 +297,7 @@ TEST(r104_quote_initialize, array_basefiles_and_loadable_side_parser_file)
 	ASSERT_TRUE(r.exited) << "signal=" << r.signal;
 	EXPECT_EQ(r.code, 0);
 	EXPECT_NE(r.out.find("RETURNED module_dir="), std::string::npos) << r.out;
+	EXPECT_NE(r.out.find("initialize=true"), std::string::npos) << r.out;
 }
 
 TEST(r104_quote_initialize, minimal_config_skips_absent_basefiles_children)
@@ -289,6 +313,57 @@ TEST(r104_quote_initialize, minimal_config_skips_absent_basefiles_children)
 	ASSERT_TRUE(r.exited) << "signal=" << r.signal;
 	EXPECT_EQ(r.code, 0);
 	EXPECT_NE(r.out.find("RETURNED module_dir="), std::string::npos) << r.out;
+	EXPECT_NE(r.out.find("initialize=true"), std::string::npos) << r.out;
+}
+
+TEST(r104_quote_initialize, inactive_shmcaster_is_skipped_without_touching_its_path)
+{
+	write_fixture("shm_inactive.bin", "KEEP");
+	write_fixture("inactive_shm.yaml", R"YAML(basefiles: {}
+allday: true
+writer:
+    module: R104NoSuchWriterModule
+shmcaster:
+    active: false
+    path: ./r104qf_shm_inactive.bin
+parsers: ./r104qf_absent_parsers.yaml
+)YAML");
+
+	ChildOutcome r = initialize_in_child(fixture("inactive_shm.yaml"));
+	ASSERT_TRUE(r.exited) << "signal=" << r.signal;
+	ASSERT_EQ(r.code, 0);
+	EXPECT_NE(r.out.find("initialize=true"), std::string::npos) << r.out;
+
+	std::ifstream ifs(fixture("shm_inactive.bin"));
+	const std::string content((std::istreambuf_iterator<char>(ifs)),
+		std::istreambuf_iterator<char>());
+	EXPECT_EQ(content, "KEEP");
+}
+
+TEST(r104_quote_initialize, active_shmcaster_mapping_failure_aborts_initialization_and_main)
+{
+	const fs::path shmDir = fixture("shm_active_failure_dir");
+	std::error_code ec;
+	fs::remove_all(shmDir, ec);
+	ASSERT_TRUE(fs::create_directory(shmDir));
+	ScopedRemoveAll cleanup(shmDir);
+	write_fixture("active_shm_failure.yaml", R"YAML(basefiles: {}
+allday: true
+shmcaster:
+    active: true
+    path: ./r104qf_shm_active_failure_dir
+)YAML");
+
+	ChildOutcome r = initialize_in_child(fixture("active_shm_failure.yaml"));
+	ASSERT_TRUE(r.exited) << "signal=" << r.signal;
+	ASSERT_EQ(r.code, 0);
+	EXPECT_NE(r.out.find("initialize=false"), std::string::npos) << r.out;
+
+	char arg0[] = "QuoteFactory";
+	char arg1[] = "-c";
+	std::string config = fixture("active_shm_failure.yaml");
+	char* argv[] = { arg0, arg1, const_cast<char*>(config.c_str()) };
+	EXPECT_EQ(wt_coverage_main_quotefactory(3, argv), 1);
 }
 
 TEST(r104_quote_initialize, unloadable_parser_side_file_logs_and_returns)

@@ -1,0 +1,37 @@
+{
+  "bug_id": "BUG-R160-003",
+  "suite": "R160HftTickerTest",
+  "platform": "macOS arm64",
+  "binary": "build-cov/build_x64/Debug/bin/TestUnits/wt-hft-ticker-focused",
+  "binary_sha256": "790558f4605bec5e8e4f7d3dbe81b583bc6c7b994e259f95b690090af02bf5fd",
+  "build_log": "build-v4.log",
+  "build_log_sha256": "9968d5051669ed26087563d29eea38e31eae79a5072ccd5e306e707d3ae36b53",
+  "run_log": "run-v4.log",
+  "run_log_sha256": "22134db50f3528d1c3fcc1b7e40da1cd9e6cd458548fb036aa68da5b9816ac70",
+  "build_command": "/opt/homebrew/bin/ninja -C build-cov WtCore/CMakeFiles/WtCore.dir/WtHftTicker.cpp.o WtCore/CMakeFiles/WtCore.dir/WtHftEngine.cpp.o TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n02_wtcore_engines/r160_hft_ticker_test.cpp.o",
+  "link_command": "/usr/bin/c++ -g -arch arm64 -fprofile-instr-generate -Wl,-undefined,dynamic_lookup build-cov/TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n02_wtcore_engines/r160_hft_ticker_test.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/WtHftTicker.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/WtHftEngine.cpp.o -o build-cov/build_x64/Debug/bin/TestUnits/wt-hft-ticker-focused -L/opt/homebrew/lib -L/usr/local/lib /opt/homebrew/lib/libgtest_main.a build-cov/build_x64/Debug/libs/libWtCore.a build-cov/build_x64/Debug/libs/libWTSTools.a build-cov/build_x64/Debug/libs/libWTSUtils.a /opt/homebrew/lib/libgtest.a /usr/local/lib/libiconv.dylib -lboost_filesystem -lboost_thread -ldl -lpthread",
+  "run_command": "build-cov/build_x64/Debug/bin/TestUnits/wt-hft-ticker-focused --gtest_color=no",
+  "link_scope": "Manual focused link of three production/test objects. This is not the aggregate CoverageTests_wtcore link; -Wl,-undefined,dynamic_lookup is intentionally used for this isolated test binary.",
+  "tests": 5,
+  "passed": 5,
+  "failures": 0,
+  "skipped": 0,
+  "exit_code": 0,
+  "test_cases": [
+    "AutoCloseKeepsDaySessionTimeEncodingForNextPass",
+    "ConcurrentRunCallsStartOnlyOneWorker",
+    "StartupStopSkipsSessionBeginAndWorkerCreation",
+    "WorkerStopBeforeTargetRunSkipsTargetCallbacks",
+    "MidnightRolloverAndConcurrentWorkerStopAreSafe"
+  ],
+  "independent_review": "独立复审未发现逻辑 blocker。",
+  "scope": "定向本机 fake-engine/常规日盘测试覆盖自动分钟闭合时间单位、下一轮交易时段判时、run/stop 生命周期并发和 worker stop；本地 focused PASS 不代表完整引擎或生产链路验收。",
+  "remaining": [
+    "未使用真实夜盘交易日验证跨夜交易日/时段行为。",
+    "未完成完整引擎联动或 CoverageTests_wtcore 聚合链接验收；本次 focused link 使用动态未解析符号选项。",
+    "未运行 ThreadSanitizer。",
+    "on_tick 锁性能没有测量。",
+    "依赖这些接口/实现的外部二进制需要重新编译。",
+    "worker 线程内析构仍受 joinable std::thread 生命周期约束，若在 worker 自身仍可 join 时销毁可能 fail-stop；本轮测试不证明该场景安全。"
+  ]
+}

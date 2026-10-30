@@ -25,7 +25,9 @@
 #include "Includes/WTSContractInfo.hpp"
 #include "Includes/WTSDataDef.hpp"
 
+#include <cmath>
 #include <cstring>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -385,6 +387,55 @@ TEST(n03_blkidx, dynamic_interest_and_dynamic_volume_algs)
 	}
 }
 
+TEST(n03_blkidx, dynamic_zero_base_skips_publish_and_recovers)
+{
+	// 动态总持为零时不发布指数; 后续总持有效时继续正常计算。
+	{
+		N03BlkIdxEnv env;
+		WTSContractInfo* c1 = env.regContract("SSE", "600000");
+		[[maybe_unused]] WTSContractInfo* c2 = env.regContract("SSE", "600519");
+		IIndexWorker* w = env.create("WtBuiltinIndex", "blk_dynamic_zero_interest");
+		WTSVariant* cfg = baseConfig(env, 1, "time");
+		env.ctx._baselines["SSE.600000"] = makeTick("SSE", "600000", 10.0);
+		env.ctx._baselines["SSE.600519"] = makeTick("SSE", "600519", 20.0);
+		ASSERT_TRUE(w->init(cfg));
+
+		WTSTickStruct zeroInterest = makeTick("SSE", "600000", 10.0, 100, 1000.0, 0.0);
+		feedTick(env, c1, zeroInterest);
+		EXPECT_TRUE(env.ctx._pushed.empty());
+
+		WTSTickStruct validInterest = makeTick("SSE", "600000", 12.0, 100, 1200.0, 500.0);
+		feedTick(env, c1, validInterest);
+		ASSERT_EQ(1u, env.ctx._pushed.size());
+		EXPECT_TRUE(std::isfinite(env.ctx._pushed[0].price));
+		EXPECT_DOUBLE_EQ(6.0, env.ctx._pushed[0].price);
+		cfg->release();
+	}
+
+	// 动态成交量为零时同样跳过; 后续有效成交量恢复发布。
+	{
+		N03BlkIdxEnv env;
+		WTSContractInfo* c1 = env.regContract("SSE", "600000");
+		[[maybe_unused]] WTSContractInfo* c2 = env.regContract("SSE", "600519");
+		IIndexWorker* w = env.create("WtBuiltinIndex", "blk_dynamic_zero_volume");
+		WTSVariant* cfg = baseConfig(env, 2, "time");
+		env.ctx._baselines["SSE.600000"] = makeTick("SSE", "600000", 10.0);
+		env.ctx._baselines["SSE.600519"] = makeTick("SSE", "600519", 20.0);
+		ASSERT_TRUE(w->init(cfg));
+
+		WTSTickStruct zeroVolume = makeTick("SSE", "600000", 10.0, 0, 1000.0, 500.0);
+		feedTick(env, c1, zeroVolume);
+		EXPECT_TRUE(env.ctx._pushed.empty());
+
+		WTSTickStruct validVolume = makeTick("SSE", "600000", 14.0, 100, 1400.0, 500.0);
+		feedTick(env, c1, validVolume);
+		ASSERT_EQ(1u, env.ctx._pushed.size());
+		EXPECT_TRUE(std::isfinite(env.ctx._pushed[0].price));
+		EXPECT_DOUBLE_EQ(7.0, env.ctx._pushed[0].price);
+		cfg->release();
+	}
+}
+
 TEST(n03_blkidx, stand_scale_scales_index)
 {
 	N03BlkIdxEnv env;
@@ -412,12 +463,22 @@ TEST(n03_blkidx, unknown_contract_is_skipped)
 	IIndexWorker* w = env.create("WtBuiltinIndex", "blk09");
 	WTSVariant* cfg = baseConfig(env, 0, "time");
 	ASSERT_TRUE(w->init(cfg));
+	ASSERT_EQ(1u, env.ctx._subscribes.size());
+	EXPECT_EQ("SSE.600000", env.ctx._subscribes[0]);
 
-	// 数据不全(600519 没有基线), 不出指数
+	std::size_t unknownContractErrors = 0;
+	for (const std::string& log : env.ctx._logs)
+	{
+		if (log.find("SSE.600519") != std::string::npos && log.find("not exists") != std::string::npos)
+			++unknownContractErrors;
+	}
+	EXPECT_EQ(1u, unknownContractErrors);
+
+	// 未知成分被跳过后, 已知成分仍按自己的基线正常计算指数。
 	WTSTickStruct t1 = makeTick("SSE", "600000", 10.0);
 	feedTick(env, c1, t1);
-	EXPECT_TRUE(env.ctx._pushed.empty());
-	EXPECT_EQ(1u, env.ctx._logs.size());
+	ASSERT_EQ(1u, env.ctx._pushed.size());
+	EXPECT_DOUBLE_EQ(10.0, env.ctx._pushed[0].price);
 	cfg->release();
 }
 
@@ -505,21 +566,119 @@ TEST(n03_blkidx, commodities_branch_without_codes)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 缺陷类整体隔离: WtBlkIdxWorker::init 末行用 WEIGHT_ALGS[_weight_alg] 打印权重算法名,
-// WEIGHT_ALGS 只有 3 个元素且 weight_alg 未做区间校验。任意 >=3 的取值都会越界读取
-// 悬垂指针, 属于同一个崩溃类, 因此整组放进同一个 DISABLED_ 用例, 默认不执行。
-// 详见 docs/迭代计划/迭代01/bugs/n03_uftcore_index.md
-TEST(DISABLED_n03_blkidx, weight_alg_out_of_range_class)
+TEST(n03_blkidx, weight_alg_validation)
 {
-	const uint32_t badAlgs[] = { 3u, 4u, 10u, 99u, 0xFFFFFFFFu };
-	for (uint32_t alg : badAlgs)
+	const uint32_t validAlgs[] = { 0u, 1u, 2u };
+	for (uint32_t alg : validAlgs)
 	{
 		N03BlkIdxEnv env;
 		env.regContract("SSE", "600000");
 		env.regContract("SSE", "600519");
 		IIndexWorker* w = env.create("WtBuiltinIndex", "blk13");
 		WTSVariant* cfg = baseConfig(env, alg, "time");
-		w->init(cfg);
+		ASSERT_TRUE(w->init(cfg));
+		EXPECT_EQ(2u, env.ctx._subscribes.size());
 		cfg->release();
+	}
+
+	// Keep all supported exact values valid when supplied as real numbers.
+	const double compatibleRealAlgs[] = { 0.0, 1.0, 2.0 };
+	for (double alg : compatibleRealAlgs)
+	{
+		N03BlkIdxEnv env;
+		env.regContract("SSE", "600000");
+		env.regContract("SSE", "600519");
+		IIndexWorker* w = env.create("WtBuiltinIndex", "blk13_real_compat");
+		WTSVariant* cfg = baseConfig(env, 0, "time");
+		cfg->append("weight_alg", alg);
+		ASSERT_TRUE(w->init(cfg));
+		EXPECT_EQ(2u, env.ctx._subscribes.size());
+		cfg->release();
+	}
+	const char* compatibleStringAlgs[] = { "2", "2.0e0" };
+	for (const char* algString : compatibleStringAlgs)
+	{
+		N03BlkIdxEnv env;
+		env.regContract("SSE", "600000");
+		env.regContract("SSE", "600519");
+		IIndexWorker* w = env.create("WtBuiltinIndex", "blk13_string_compat");
+		WTSVariant* cfg = baseConfig(env, 0, "time");
+		cfg->append("weight_alg", algString);
+		ASSERT_TRUE(w->init(cfg));
+		EXPECT_EQ(2u, env.ctx._subscribes.size());
+		cfg->release();
+	}
+
+	auto expectRejectedWithoutSubscription = [](N03BlkIdxEnv& env, WTSVariant* cfg, const char* id)
+	{
+		env.regContract("SSE", "600000");
+		env.regContract("SSE", "600519");
+		IIndexWorker* w = env.create("WtBuiltinIndex", id);
+		EXPECT_FALSE(w->init(cfg));
+		EXPECT_TRUE(env.ctx._subscribes.empty());
+		EXPECT_TRUE(env.ctx._pushed.empty());
+		cfg->release();
+	};
+
+	{
+		N03BlkIdxEnv env;
+		expectRejectedWithoutSubscription(env, baseConfig(env, 3u, "time"), "blk14");
+	}
+	{
+		N03BlkIdxEnv env;
+		expectRejectedWithoutSubscription(env, baseConfig(env, std::numeric_limits<uint32_t>::max(), "time"), "blk15");
+	}
+	{
+		N03BlkIdxEnv env;
+		WTSVariant* cfg = baseConfig(env, 0u, "time");
+		cfg->append("weight_alg", static_cast<int32_t>(-1));
+		expectRejectedWithoutSubscription(env, cfg, "blk16");
+	}
+	{
+		N03BlkIdxEnv env;
+		WTSVariant* cfg = baseConfig(env, 0u, "time");
+		cfg->append("weight_alg", (static_cast<uint64_t>(1) << 32));
+		expectRejectedWithoutSubscription(env, cfg, "blk17");
+	}
+	{
+		N03BlkIdxEnv env;
+		WTSVariant* cfg = baseConfig(env, 0u, "time");
+		cfg->append("weight_alg", std::numeric_limits<uint64_t>::max());
+		expectRejectedWithoutSubscription(env, cfg, "blk18");
+	}
+	{
+		N03BlkIdxEnv env;
+		WTSVariant* cfg = baseConfig(env, 0u, "time");
+		cfg->append("weight_alg", 1.5);
+		expectRejectedWithoutSubscription(env, cfg, "blk19");
+	}
+	{
+		N03BlkIdxEnv env;
+		WTSVariant* cfg = baseConfig(env, 0u, "time");
+		cfg->append("weight_alg", "not-an-algorithm");
+		expectRejectedWithoutSubscription(env, cfg, "blk20");
+	}
+	const char* invalidNumericStrings[] = {
+		"1.00000000000000001", "NaN", "Inf", "1e9999", "1e-9999"
+	};
+	for (const char* invalidString : invalidNumericStrings)
+	{
+		N03BlkIdxEnv env;
+		WTSVariant* cfg = baseConfig(env, 0u, "time");
+		cfg->append("weight_alg", invalidString);
+		expectRejectedWithoutSubscription(env, cfg, "blk21");
+	}
+	const double invalidRealAlgs[] = {
+		std::numeric_limits<double>::quiet_NaN(),
+		std::numeric_limits<double>::infinity(),
+		1e-11,
+		1.00000000001
+	};
+	for (double invalidReal : invalidRealAlgs)
+	{
+		N03BlkIdxEnv env;
+		WTSVariant* cfg = baseConfig(env, 0u, "time");
+		cfg->append("weight_alg", invalidReal);
+		expectRejectedWithoutSubscription(env, cfg, "blk22");
 	}
 }

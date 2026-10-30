@@ -424,7 +424,18 @@ int TraderCTP::login(const char* user, const char* pass, const char* productInfo
 	}
 
 	m_wrapperState = WS_LOGINING;
-	authenticate();
+	int iResult = authenticate();
+	if (iResult != 0)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderCTP] Sending authenticate request failed: {}", iResult);
+		m_wrapperState = WS_LOGINFAILED;
+		if (m_sink)
+		{
+			const std::string message = "CTP:认证请求发送失败: " + std::to_string(iResult);
+			m_sink->onLoginResult(false, message.c_str(), 0);
+		}
+		return -1;
+	}
 
 	return 0;
 }
@@ -441,6 +452,13 @@ int TraderCTP::doLogin()
 	if (iResult != 0)
 	{
 		write_log(m_sink, LL_ERROR, "[TraderCTP] Sending login request failed: {}", iResult);
+		m_wrapperState = WS_LOGINFAILED;
+		if (m_sink)
+		{
+			const std::string message = "CTP:登录请求发送失败: " + std::to_string(iResult);
+			m_sink->onLoginResult(false, message.c_str(), 0);
+		}
+		return -1;
 	}
 
 	return 0;
@@ -489,8 +507,12 @@ int TraderCTP::orderInsert(WTSEntrust* entrust)
 	}
 	else
 	{
-		uint32_t fid, sid, orderref;
-		extractEntrustID(entrust->getEntrustID(), fid, sid, orderref);
+		uint32_t fid = 0, sid = 0, orderref = 0;
+		if (!extractEntrustID(entrust->getEntrustID(), fid, sid, orderref))
+		{
+			write_log(m_sink, LL_ERROR, "[TraderCTP] Invalid entrust ID for order insert");
+			return -1;
+		}
 		///报单引用
 		fmt::format_to(req.OrderRef, "{}", orderref);
 	}
@@ -543,6 +565,7 @@ int TraderCTP::orderInsert(WTSEntrust* entrust)
 	if (iResult != 0)
 	{
 		write_log(m_sink, LL_ERROR, "[TraderCTP] Order inserting failed: {}", iResult);
+		return -1;
 	}
 
 	return 0;
@@ -581,6 +604,7 @@ int TraderCTP::orderAction(WTSEntrustAction* action)
 	if (iResult != 0)
 	{
 		write_log(m_sink, LL_ERROR, "[TraderCTP] Sending cancel request failed: {}", iResult);
+		return -1;
 	}
 
 	return 0;
@@ -1482,9 +1506,7 @@ int TraderCTP::authenticate()
 	//strcpy(req.UserProductInfo, m_strProdInfo.c_str());
 	wt_strcpy(req.AuthCode, m_strAuthCode.c_str(), m_strAuthCode.size());
 	wt_strcpy(req.AppID, m_strAppID.c_str(), m_strAppID.size());
-	m_pUserAPI->ReqAuthenticate(&req, genRequestID());
-
-	return 0;
+	return m_pUserAPI->ReqAuthenticate(&req, genRequestID());
 }
 
 /*

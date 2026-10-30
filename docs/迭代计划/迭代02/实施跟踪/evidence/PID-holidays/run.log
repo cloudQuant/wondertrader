@@ -1,0 +1,27 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R1BaseDataMgrTest.getTplIDByPID_malformed_and_valid_pid_holiday_semantics:R1BaseDataMgrTest.holidays_and_trading_date_arithmetic:R1BaseDataMgrTest.missing_commodity_pid_falls_back_to_empty_tpl
+[==========] Running 3 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 3 tests from R1BaseDataMgrTest
+[ RUN      ] R1BaseDataMgrTest.holidays_and_trading_date_arithmetic
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r1_storage/r1_basedatamgr_test.cpp:259: Failure
+Expected equality of these values:
+  _mgr.getPrevTDate("CHINA", 20240213, 1, true)
+    Which is: 20240212
+  20240209u
+    Which is: 20240209
+
+[  FAILED  ] R1BaseDataMgrTest.holidays_and_trading_date_arithmetic (2 ms)
+[ RUN      ] R1BaseDataMgrTest.missing_commodity_pid_falls_back_to_empty_tpl
+[       OK ] R1BaseDataMgrTest.missing_commodity_pid_falls_back_to_empty_tpl (1 ms)
+[ RUN      ] R1BaseDataMgrTest.getTplIDByPID_malformed_and_valid_pid_holiday_semantics
+[       OK ] R1BaseDataMgrTest.getTplIDByPID_malformed_and_valid_pid_holiday_semantics (1 ms)
+[----------] 3 tests from R1BaseDataMgrTest (5 ms total)
+
+[----------] Global test environment tear-down
+[==========] 3 tests from 1 test suite ran. (5 ms total)
+[  PASSED  ] 2 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R1BaseDataMgrTest.holidays_and_trading_date_arithmetic
+
+ 1 FAILED TEST

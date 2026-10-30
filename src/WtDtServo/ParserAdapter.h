@@ -31,8 +31,13 @@ public:
 public:
 	bool	init(const char* id, WTSVariant* cfg);
 
+	// Transfers ownership of every unique non-null api on entry, even when
+	// initialization is rejected or fails. Re-passing an already-owned pointer
+	// does not create a second owner; distinct APIs passed while busy are retained.
 	bool	initExt(const char* id, IParserApi* api);
 
+	// IParserApi does not promise that release() drains callbacks. The caller must
+	// stop producers and establish callback quiescence before releasing the API.
 	void	release();
 
 	bool	run();
@@ -55,16 +60,30 @@ public:
 	virtual IBaseDataMgr* getBaseDataMgr() override;
 
 private:
+	friend struct ParserAdapterTestAccess;
+	friend class ParserAdapterMgr;
+
 	IParserApi*			_parser_api;
+	IParserApi*			_uncertain_original_api;
+	bool				_release_uncertain;
 	FuncDeleteParser	_remover;
+	void*				_module_handle;
 	WTSBaseDataMgr*		_bd_mgr;
 	WtDtRunner*			_dt_runner;
 
 	bool				_stopped;
+	bool				_initialized;
+	// initExt transfers every unique non-null API passed to this adapter, even
+	// when this adapter is already busy. Rejected APIs are held until release().
+	std::vector<IParserApi*> _additional_parser_apis;
 
 	wt_hashset<std::string>			_filters;
 	WTSVariant*			_cfg;
 	std::string			_id;
+
+	bool ownsParserApi(IParserApi* api) const;
+	void retainAdditionalParserApi(IParserApi* api);
+	bool isReleased() const;
 };
 
 typedef std::shared_ptr<ParserAdapter>	ParserAdapterPtr;
@@ -78,6 +97,7 @@ public:
 	void	run();
 
 	ParserAdapterPtr getAdapter(const char* id);
+	bool hasRetainedAdapters() const { return !_adapters.empty(); }
 
 	bool	addAdapter(const char* id, ParserAdapterPtr& adapter);
 

@@ -195,9 +195,8 @@ TEST(r115_execmon, simpdata_default_store_quote_getters_and_slices)
 	store->append("session", "R115S");
 	root->append("store", store);
 
-	// 成员 _cur_* / _s_info 没在构造函数里初始化（BUG-N05-001 的同一族）；用静态存储
-	// 先零初始化再跑构造函数，使首次 handle_push_quote 的 L143 判断确定可预期。
-	static WtSimpDataMgr mgr;
+	// 使用栈对象验证构造函数提供的初始时钟状态，不依赖静态存储的隐式零初始化。
+	WtSimpDataMgr mgr;
 	ASSERT_TRUE(mgr.init(root, &runner));
 	root->release();
 	ASSERT_NE(mgr.reader(), nullptr);		// .h L155
@@ -210,17 +209,30 @@ TEST(r115_execmon, simpdata_default_store_quote_getters_and_slices)
 	EXPECT_EQ(mgr.get_min_time(), 1130u);			// L110-113 + L153-160
 	EXPECT_EQ(mgr.get_trading_day(), 20240102u);
 
+	// 较早的 tick 不应回退用于时钟查询的状态。
+	WTSTickData* olderTick = mkTick("SHFE.rb.2405", 20240102, 112959999, 3499.0);
+	mgr.handle_push_quote("SHFE.rb.2405", olderTick);
+	EXPECT_EQ(mgr.get_date(), 20240102u);
+	EXPECT_EQ(mgr.get_min_time(), 1130u);
+	EXPECT_EQ(mgr.get_secs(), 0u);
+	EXPECT_EQ(mgr.get_trading_day(), 20240102u);
+	olderTick->release();
+
 	WTSTickData* last = mgr.grab_last_tick("SHFE.rb.2405");
 	ASSERT_NE(last, nullptr);						// L169-175
 	EXPECT_DOUBLE_EQ(last->price(), 3500.0);
 	last->release();
 	EXPECT_EQ(mgr.grab_last_tick("SHFE.rb.2409"), nullptr);	// L169-171
 
-	// L183：reader 非空即透传；空库返回 NULL 属正常
-	mgr.get_tick_slice("SHFE.rb.2405", 10, 0);
-	// L192-197：times==1 的直读路径
-	EXPECT_EQ(mgr.get_kline_slice("SHFE.rb.2405", KP_Minute1, 1, 5, 0), nullptr);
-	// L200-220：times>1 的重采样入口；空库在 L218-220 返回 NULL
+	// L183：reader 非空时直接透传；若实现返回空 slice 也要释放引用。
+	WTSTickSlice* tickSlice = mgr.get_tick_slice("SHFE.rb.2405", 10, 0);
+	if (tickSlice != nullptr)
+		tickSlice->release();
+	// L192-197：times==1 直读路径保留 reader 返回的空 slice 语义。
+	WTSKlineSlice* direct = mgr.get_kline_slice("SHFE.rb.2405", KP_Minute1, 1, 5, 0);
+	ASSERT_NE(direct, nullptr);
+	direct->release();
+	// L200-220：有非空但不足以形成请求聚合窗口的数据时安全返回 NULL。
 	EXPECT_EQ(mgr.get_kline_slice("SHFE.rb.2405", KP_Minute1, 5, 4, 0), nullptr);
 
 	tick->release();

@@ -144,6 +144,9 @@ TEST_F(T2ParserXeleSktTest, init_reports_failure_for_unparsable_tcp_host)
     EXPECT_NO_THROW(initialized = bad.init(cfg));
     EXPECT_FALSE(initialized);
     EXPECT_FALSE(bad.isConnected());
+    bool connected = true;
+    EXPECT_NO_THROW(connected = bad.connect());
+    EXPECT_FALSE(connected);
     cfg->release();
 }
 
@@ -155,7 +158,37 @@ TEST_F(T2ParserXeleSktTest, init_reports_failure_when_tcp_host_is_missing)
     bool initialized = true;
     EXPECT_NO_THROW(initialized = bad.init(cfg));
     EXPECT_FALSE(initialized);
+    bool connected = true;
+    EXPECT_NO_THROW(connected = bad.connect());
+    EXPECT_FALSE(connected);
+    EXPECT_FALSE(bad.isConnected());
     cfg->release();
+}
+
+TEST_F(T2ParserXeleSktTest, init_reports_failure_for_empty_tcp_host)
+{
+    ParserXeleSkt bad;
+    WTSVariant* cfg = make_cfg("");
+    bool initialized = true;
+    EXPECT_NO_THROW(initialized = bad.init(cfg));
+    EXPECT_FALSE(initialized);
+    bool connected = true;
+    EXPECT_NO_THROW(connected = bad.connect());
+    EXPECT_FALSE(connected);
+    EXPECT_FALSE(bad.isConnected());
+    cfg->release();
+}
+
+TEST_F(T2ParserXeleSktTest, init_reports_failure_for_null_configuration)
+{
+    ParserXeleSkt bad;
+    bool initialized = true;
+    EXPECT_NO_THROW(initialized = bad.init(nullptr));
+    EXPECT_FALSE(initialized);
+    bool connected = true;
+    EXPECT_NO_THROW(connected = bad.connect());
+    EXPECT_FALSE(connected);
+    EXPECT_FALSE(bad.isConnected());
 }
 
 TEST_F(T2ParserXeleSktTest, register_spi_wires_sink_and_base_datamgr)

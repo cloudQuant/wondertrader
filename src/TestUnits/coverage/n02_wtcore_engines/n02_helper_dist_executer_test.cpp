@@ -19,17 +19,24 @@
 
 #include "WtCore/WtHelper.h"
 #include "WtCore/WtDistExecuter.h"
+#include "Includes/ILogHandler.h"
 #include "Includes/WTSVariant.hpp"
 #include "WTSUtils/WTSCfgLoader.h"
 #include "Share/StdUtils.hpp"
+#include "WTSTools/WTSLogger.h"
 
 #include <unistd.h>
 
 #include <chrono>
+#include <condition_variable>
 #include <filesystem>
+#include <future>
 #include <fstream>
+#include <mutex>
+#include <cstdlib>
 #include <string>
 #include <system_error>
+#include <thread>
 
 USING_NS_WTP;
 namespace {
@@ -199,6 +206,146 @@ private:
     std::unique_ptr<TempRoot> _root;
 };
 
+class DistOperationLogGate : public ILogHandler
+{
+public:
+	explicit DistOperationLogGate(WtDistExecuter* executer)
+		: _executer(executer), _callbacks(0), _entered(false), _released(false),
+		  _callback_can_wait(false)
+	{}
+
+	void handleLogAppend(WTSLogLevel, const char*) override
+	{
+		const bool canWait = _executer->canWaitQuiescedOnCurrentThread();
+		std::unique_lock<std::mutex> lock(_mutex);
+		++_callbacks;
+		if (_callbacks == 1)
+		{
+			_callback_can_wait = canWait;
+			_entered = true;
+			_condition.notify_all();
+			_condition.wait(lock, [this]() { return _released; });
+		}
+	}
+
+	bool waitUntilEntered(std::chrono::milliseconds timeout)
+	{
+		std::unique_lock<std::mutex> lock(_mutex);
+		return _condition.wait_for(lock, timeout, [this]() { return _entered; });
+	}
+
+	void release()
+	{
+		std::lock_guard<std::mutex> lock(_mutex);
+		_released = true;
+		_condition.notify_all();
+	}
+
+	uint32_t callbackCount() const
+	{
+		std::lock_guard<std::mutex> lock(_mutex);
+		return _callbacks;
+	}
+
+	bool callbackCanWait() const
+	{
+		std::lock_guard<std::mutex> lock(_mutex);
+		return _callback_can_wait;
+	}
+
+private:
+	WtDistExecuter* _executer;
+	mutable std::mutex _mutex;
+	std::condition_variable _condition;
+	uint32_t _callbacks;
+	bool _entered;
+	bool _released;
+	bool _callback_can_wait;
+};
+
+int runDistQuiesceDrainScenario()
+{
+	const char* loggerConfig = R"({
+		"root":{"level":"info","async":false,"sinks":[{"type":"ostream_sink","pattern":"%v"}]},
+		"dyn_pattern":{"executer":{"level":"info","async":false,"sinks":[{"type":"ostream_sink","pattern":"%v"}]}}
+	})";
+	try
+	{
+		WTSLogger::init(loggerConfig, false, NULL);
+	}
+	catch (...)
+	{
+		return 1;
+	}
+
+	WtDistExecuter executer("dist_quiesce_gate");
+	DistOperationLogGate logGate(&executer);
+	WTSLogger::registerHandler(&logGate);
+
+	TempRoot root("dist_quiesce_gate");
+	WTSVariant* cfg = loadJson(root, "dist_quiesce_gate.json", "{\n\"scale\": 1\n}\n");
+	if (cfg == NULL || !executer.init(cfg))
+	{
+		if (cfg != NULL)
+			cfg->release();
+		WTSLogger::registerHandler(NULL);
+		return 2;
+	}
+	cfg->release();
+
+	std::thread producer([&executer]() { executer.on_position_changed("XHE.000001", 1); });
+	if (!logGate.waitUntilEntered(std::chrono::seconds(2)))
+	{
+		logGate.release();
+		producer.join();
+		WTSLogger::registerHandler(NULL);
+		return 3;
+	}
+
+	executer.requestQuiesce();
+	if (!executer.canWaitQuiescedOnCurrentThread())
+	{
+		logGate.release();
+		producer.join();
+		WTSLogger::registerHandler(NULL);
+		return 4;
+	}
+
+	std::promise<void> waiterStartedPromise;
+	std::future<void> waiterStarted = waiterStartedPromise.get_future();
+	std::promise<bool> waitResultPromise;
+	std::future<bool> waitResult = waitResultPromise.get_future();
+	std::thread waiter([&executer, &waiterStartedPromise, &waitResultPromise]() {
+		waiterStartedPromise.set_value();
+		waitResultPromise.set_value(executer.waitQuiesced());
+	});
+	if (waiterStarted.wait_for(std::chrono::seconds(2)) != std::future_status::ready)
+	{
+		logGate.release();
+		producer.join();
+		waiter.join();
+		WTSLogger::registerHandler(NULL);
+		return 5;
+	}
+	const bool completedBeforeCallbackRelease =
+		waitResult.wait_for(std::chrono::milliseconds(200)) == std::future_status::ready;
+
+	// A fresh ingress after requestQuiesce must be rejected without entering the
+	// same real synchronous method's controlled broadcast callback.
+	executer.on_position_changed("XHE.000002", 2);
+	const uint32_t callbackCountBeforeRelease = logGate.callbackCount();
+	const bool callbackCanWait = logGate.callbackCanWait();
+
+	logGate.release();
+	producer.join();
+	waiter.join();
+	const bool waitSucceeded = waitResult.get();
+	WTSLogger::registerHandler(NULL);
+
+	return !completedBeforeCallbackRelease && callbackCountBeforeRelease == 1 &&
+		!callbackCanWait && waitSucceeded ? 0 : 6;
+}
+
 TEST_F(N02DistExecuterTest, NameAccessorsComeFromIExecCommand)
 {
     WtDistExecuter exec("dist_a");
@@ -214,6 +361,38 @@ TEST_F(N02DistExecuterTest, InitRejectsNullParams)
     WtDistExecuter exec("dist_nullcfg");
     EXPECT_FALSE(exec.init(nullptr));
     EXPECT_STREQ("dist_nullcfg", exec.name());
+
+    // A failed null attempt does not make the one-shot initializer unusable.
+    WTSVariant* cfg = loadJson(root(), "dist_after_null.json", "{\n\"scale\": 2\n}\n");
+    ASSERT_NE(nullptr, cfg);
+    EXPECT_TRUE(exec.init(cfg));
+    cfg->release();
+}
+
+TEST_F(N02DistExecuterTest, InitRetainsConfigurationOnceAndReleasesItOnDestruction)
+{
+    WTSVariant* cfg = loadJson(root(), "dist_lifecycle.json", "{\n\"scale\": 3\n}\n");
+    ASSERT_NE(nullptr, cfg);
+
+    {
+        WtDistExecuter exec("dist_lifecycle");
+        ASSERT_TRUE(exec.init(cfg));
+
+        // The caller owns one reference and init owns exactly one more.
+        EXPECT_EQ(3u, cfg->retain());
+        cfg->release();
+
+        // Initialization is one-shot; a duplicate call must not retain the
+        // same config again or replace the active scale/configuration.
+        EXPECT_FALSE(exec.init(cfg));
+        EXPECT_EQ(3u, cfg->retain());
+        cfg->release();
+    }
+
+    // Destruction returns ownership to the caller's original reference.
+    EXPECT_EQ(2u, cfg->retain());
+    cfg->release();
+    cfg->release();
 }
 
 TEST_F(N02DistExecuterTest, InitSucceedsWithoutScaleNode)
@@ -271,6 +450,53 @@ TEST_F(N02DistExecuterTest, OnTickIsDocumentedNoOp)
     // 分布式执行器明确不处理 tick
     exec.on_tick("SHFE.rb2310", nullptr);
     exec.on_tick(nullptr, nullptr);
+}
+
+TEST_F(N02DistExecuterTest, StagedQuiesceDrainsSynchronousWorkWithoutFactoryOwners)
+{
+    WTSVariant* cfg = loadJson(root(), "dist_quiesce.json", "{\n\"scale\": 1\n}\n");
+    ASSERT_NE(nullptr, cfg);
+
+    WtDistExecuter alreadyStopped("dist_already_stopped");
+    alreadyStopped.requestQuiesce();
+    EXPECT_FALSE(alreadyStopped.init(cfg));
+
+    WtDistExecuter exec("dist_quiesce");
+    ASSERT_TRUE(exec.init(cfg));
+    cfg->release();
+
+    exec.requestQuiesce();
+    EXPECT_TRUE(exec.canWaitQuiescedOnCurrentThread());
+    EXPECT_TRUE(exec.preflightQuiesceOnCurrentThread());
+
+    std::vector<ExecQuiesceOwnerPtr> owners;
+    EXPECT_TRUE(exec.snapshotQuiescePluginOwners(owners));
+    EXPECT_TRUE(owners.empty());
+    EXPECT_EQ(nullptr, exec.quiesceFactory());
+    EXPECT_TRUE(exec.drainHostQuiesced());
+    EXPECT_TRUE(exec.waitQuiesced());
+    EXPECT_TRUE(exec.completeQuiesceAfterGlobalPluginWait());
+
+    // Request, drain, wait and acknowledgement are retry-safe.
+    exec.requestQuiesce();
+    EXPECT_TRUE(exec.drainHostQuiesced());
+    EXPECT_TRUE(exec.waitQuiesced());
+    EXPECT_TRUE(exec.completeQuiesceAfterGlobalPluginWait());
+}
+
+TEST_F(N02DistExecuterTest, InFlightCallbackBlocksWaitAndQuiesceRejectsNewIngress)
+{
+	const std::string previousDeathTestStyle = GTEST_FLAG_GET(death_test_style);
+	GTEST_FLAG_SET(death_test_style, "threadsafe");
+	EXPECT_EXIT({
+		std::thread watchdog([]() {
+			std::this_thread::sleep_for(std::chrono::seconds(8));
+			std::_Exit(90);
+		});
+		watchdog.detach();
+		std::_Exit(runDistQuiesceDrainScenario());
+	}, ::testing::ExitedWithCode(0), ".*");
+	GTEST_FLAG_SET(death_test_style, previousDeathTestStyle);
 }
 
 TEST_F(N02DistExecuterTest, ExecuterIsUsableThroughIExecCommandBase)

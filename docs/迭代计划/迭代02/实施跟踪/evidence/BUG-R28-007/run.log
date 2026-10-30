@@ -1,0 +1,105 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = r28_wtrunner_config.*:WtRunnerQuiesceTest.*
+[==========] Running 43 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 42 tests from r28_wtrunner_config
+[ RUN      ] r28_wtrunner_config.missing_file_returns_false
+[       OK ] r28_wtrunner_config.missing_file_returns_false (1 ms)
+[ RUN      ] r28_wtrunner_config.unparsable_yaml_returns_false_without_throwing
+[       OK ] r28_wtrunner_config.unparsable_yaml_returns_false_without_throwing (0 ms)
+[ RUN      ] r28_wtrunner_config.unparsable_json_returns_false_without_throwing
+[       OK ] r28_wtrunner_config.unparsable_json_returns_false_without_throwing (0 ms)
+[ RUN      ] r28_wtrunner_config.extensionless_or_unknown_suffix_returns_false
+[       OK ] r28_wtrunner_config.extensionless_or_unknown_suffix_returns_false (0 ms)
+[ RUN      ] r28_wtrunner_config.empty_file_returns_false
+[       OK ] r28_wtrunner_config.empty_file_returns_false (0 ms)
+[ RUN      ] r28_wtrunner_config.full_cta_config_reaches_true_and_writes_portfolio_files
+[       OK ] r28_wtrunner_config.full_cta_config_reaches_true_and_writes_portfolio_files (524 ms)
+[ RUN      ] r28_wtrunner_config.hft_env_routes_to_hft_engine_and_skips_executers
+[       OK ] r28_wtrunner_config.hft_env_routes_to_hft_engine_and_skips_executers (4 ms)
+[ RUN      ] r28_wtrunner_config.sel_env_routes_to_sel_engine
+[       OK ] r28_wtrunner_config.sel_env_routes_to_sel_engine (1 ms)
+[ RUN      ] r28_wtrunner_config.env_name_empty_defaults_to_cta_branch
+[       OK ] r28_wtrunner_config.env_name_empty_defaults_to_cta_branch (1 ms)
+[ RUN      ] r28_wtrunner_config.unknown_env_name_falls_through_to_hft_else
+[       OK ] r28_wtrunner_config.unknown_env_name_falls_through_to_hft_else (1 ms)
+[ RUN      ] r28_wtrunner_config.missing_env_and_data_sections_make_config_fail
+[       OK ] r28_wtrunner_config.missing_env_and_data_sections_make_config_fail (0 ms)
+[ RUN      ] r28_wtrunner_config.missing_data_section_makes_config_fail
+[       OK ] r28_wtrunner_config.missing_data_section_makes_config_fail (0 ms)
+[ RUN      ] r28_wtrunner_config.invalid_data_store_module_makes_config_fail
+dlopen(/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/libR28MissingDataStorage.dylib, 0x0002): tried: '/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/libR28MissingDataStorage.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/libR28MissingDataStorage.dylib' (no such file), '/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/libR28MissingDataStorage.dylib' (no such file)
+[       OK ] r28_wtrunner_config.invalid_data_store_module_makes_config_fail (1 ms)
+[ RUN      ] r28_wtrunner_config.missing_bspolicy_makes_config_return_false_early
+[       OK ] r28_wtrunner_config.missing_bspolicy_makes_config_return_false_early (0 ms)
+[ RUN      ] r28_wtrunner_config.empty_action_policy_group_still_passes_the_gate
+[       OK ] r28_wtrunner_config.empty_action_policy_group_still_passes_the_gate (1 ms)
+[ RUN      ] r28_wtrunner_config.basefiles_rules_section_loads_custom_hot_rules
+[       OK ] r28_wtrunner_config.basefiles_rules_section_loads_custom_hot_rules (1 ms)
+[ RUN      ] r28_wtrunner_config.missing_hot_file_fails_and_run_is_skipped
+[       OK ] r28_wtrunner_config.missing_hot_file_fails_and_run_is_skipped (0 ms)
+[ RUN      ] r28_wtrunner_config.unparsable_hot_file_fails
+[       OK ] r28_wtrunner_config.unparsable_hot_file_fails (1 ms)
+[ RUN      ] r28_wtrunner_config.missing_second_hot_file_fails
+[       OK ] r28_wtrunner_config.missing_second_hot_file_fails (0 ms)
+[ RUN      ] r28_wtrunner_config.missing_custom_rule_file_fails
+[       OK ] r28_wtrunner_config.missing_custom_rule_file_fails (0 ms)
+[ RUN      ] r28_wtrunner_config.basefiles_session_key_absent_skips_load_sessions
+[       OK ] r28_wtrunner_config.basefiles_session_key_absent_skips_load_sessions (0 ms)
+[ RUN      ] r28_wtrunner_config.contract_section_as_array_loads_each_entry
+[       OK ] r28_wtrunner_config.contract_section_as_array_loads_each_entry (1 ms)
+[ RUN      ] r28_wtrunner_config.parsers_inline_array_with_inactive_entry_loads_zero
+[       OK ] r28_wtrunner_config.parsers_inline_array_with_inactive_entry_loads_zero (1 ms)
+[ RUN      ] r28_wtrunner_config.traders_inline_array_with_inactive_entry_loads_zero
+[       OK ] r28_wtrunner_config.traders_inline_array_with_inactive_entry_loads_zero (1 ms)
+[ RUN      ] r28_wtrunner_config.parsers_side_file_loads_and_reports_failure
+[       OK ] r28_wtrunner_config.parsers_side_file_loads_and_reports_failure (0 ms)
+[ RUN      ] r28_wtrunner_config.notifier_section_absent_returns_false_from_init_evt_notifier
+[       OK ] r28_wtrunner_config.notifier_section_absent_returns_false_from_init_evt_notifier (1 ms)
+[ RUN      ] r28_wtrunner_config.executers_inline_array_inactive_and_router_absent
+[       OK ] r28_wtrunner_config.executers_inline_array_inactive_and_router_absent (1 ms)
+[ RUN      ] r28_wtrunner_config.strategies_object_without_cta_array_returns_false_from_engine_side
+[       OK ] r28_wtrunner_config.strategies_object_without_cta_array_returns_false_from_engine_side (1 ms)
+[ RUN      ] r28_wtrunner_config.strategies_cta_inactive_entry_is_skipped
+[       OK ] r28_wtrunner_config.strategies_cta_inactive_entry_is_skipped (2 ms)
+[ RUN      ] r28_wtrunner_config.second_config_call_rereads_from_new_path
+[       OK ] r28_wtrunner_config.second_config_call_rereads_from_new_path (3 ms)
+[ RUN      ] r28_wtrunner_config.parsers_side_file_exists_but_unloadable_logs_error
+[       OK ] r28_wtrunner_config.parsers_side_file_exists_but_unloadable_logs_error (2 ms)
+[ RUN      ] r28_wtrunner_config.missing_parser_configuration_file_fails
+[       OK ] r28_wtrunner_config.missing_parser_configuration_file_fails (1 ms)
+[ RUN      ] r28_wtrunner_config.traders_side_file_with_inactive_array_loads_zero
+[       OK ] r28_wtrunner_config.traders_side_file_with_inactive_array_loads_zero (1 ms)
+[ RUN      ] r28_wtrunner_config.missing_trader_configuration_file_fails_and_run_is_skipped
+[       OK ] r28_wtrunner_config.missing_trader_configuration_file_fails_and_run_is_skipped (0 ms)
+[ RUN      ] r28_wtrunner_config.traders_side_file_unloadable_logs_error
+[       OK ] r28_wtrunner_config.traders_side_file_unloadable_logs_error (0 ms)
+[ RUN      ] r28_wtrunner_config.executers_side_file_with_inactive_array_loads_zero
+[       OK ] r28_wtrunner_config.executers_side_file_with_inactive_array_loads_zero (1 ms)
+[ RUN      ] r28_wtrunner_config.executers_side_file_unloadable_logs_error
+[       OK ] r28_wtrunner_config.executers_side_file_unloadable_logs_error (1 ms)
+[ RUN      ] r28_wtrunner_config.notifier_inactive_entry_short_circuits_evt_notifier_init
+[       OK ] r28_wtrunner_config.notifier_inactive_entry_short_circuits_evt_notifier_init (2 ms)
+[ RUN      ] r28_wtrunner_config.notifier_active_entry_fails_to_load_mq_module_and_returns
+[       OK ] r28_wtrunner_config.notifier_active_entry_fails_to_load_mq_module_and_returns (17 ms)
+[ RUN      ] r28_wtrunner_config.routers_section_reaches_load_router_rules
+[       OK ] r28_wtrunner_config.routers_section_reaches_load_router_rules (1 ms)
+[ RUN      ] r28_wtrunner_config.traders_side_file_non_array_reports_loading_traders_failed
+[       OK ] r28_wtrunner_config.traders_side_file_non_array_reports_loading_traders_failed (1 ms)
+[ RUN      ] r28_wtrunner_config.executers_side_file_non_array_reports_loading_executers_failed
+[       OK ] r28_wtrunner_config.executers_side_file_non_array_reports_loading_executers_failed (1 ms)
+[ DISABLED ] r28_wtrunner_config.DISABLED_valid_config_without_basefiles_derefs_null_section
+[ DISABLED ] r28_wtrunner_config.DISABLED_router_rule_without_executer_key_derefs_null
+[----------] 42 tests from r28_wtrunner_config (598 ms total)
+
+[----------] 1 test from WtRunnerQuiesceTest
+[ RUN      ] WtRunnerQuiesceTest.EmptyRuntimeShutdownCanBeRetried
+[       OK ] WtRunnerQuiesceTest.EmptyRuntimeShutdownCanBeRetried (0 ms)
+[----------] 1 test from WtRunnerQuiesceTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 43 tests from 2 test suites ran. (598 ms total)
+[  PASSED  ] 43 tests.
+
+  YOU HAVE 2 DISABLED TESTS
+

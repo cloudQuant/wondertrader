@@ -1,0 +1,39 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 15 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 15 tests from r16_lmdb
+[ RUN      ] r16_lmdb.open_fresh_env_sets_handle_and_no_error
+[       OK ] r16_lmdb.open_fresh_env_sets_handle_and_no_error (1 ms)
+[ RUN      ] r16_lmdb.put_then_get_range_returns_exact_window
+[       OK ] r16_lmdb.put_then_get_range_returns_exact_window (0 ms)
+[ RUN      ] r16_lmdb.get_range_compares_variable_length_binary_keys
+[       OK ] r16_lmdb.get_range_compares_variable_length_binary_keys (1 ms)
+[ RUN      ] r16_lmdb.get_uppers_walks_forward_until_count_or_upper
+[       OK ] r16_lmdb.get_uppers_walks_forward_until_count_or_upper (0 ms)
+[ RUN      ] r16_lmdb.get_lowers_walks_backward_then_reverses
+[       OK ] r16_lmdb.get_lowers_walks_backward_then_reverses (0 ms)
+[ RUN      ] r16_lmdb.put_and_commit_variant_persists_without_destructor_commit
+[       OK ] r16_lmdb.put_and_commit_variant_persists_without_destructor_commit (1 ms)
+[ RUN      ] r16_lmdb.rollback_drops_uncommitted_writes
+[       OK ] r16_lmdb.rollback_drops_uncommitted_writes (0 ms)
+[ RUN      ] r16_lmdb.commit_is_idempotent_and_reuses_dbi
+[       OK ] r16_lmdb.commit_is_idempotent_and_reuses_dbi (0 ms)
+[ RUN      ] r16_lmdb.error_accessors_reflect_manual_errno_update
+[       OK ] r16_lmdb.error_accessors_reflect_manual_errno_update (0 ms)
+[ RUN      ] r16_lmdb.readonly_env_reports_readonly_and_rejects_put
+[       OK ] r16_lmdb.readonly_env_reports_readonly_and_rejects_put (1 ms)
+[ RUN      ] r16_lmdb.get_looks_up_the_requested_key
+[       OK ] r16_lmdb.get_looks_up_the_requested_key (0 ms)
+[ RUN      ] r16_lmdb.get_all_returns_each_record_once
+[       OK ] r16_lmdb.get_all_returns_each_record_once (1 ms)
+[ RUN      ] r16_lmdb.get_all_on_empty_db_returns_no_records
+[       OK ] r16_lmdb.get_all_on_empty_db_returns_no_records (0 ms)
+[ RUN      ] r16_lmdb.open_failure_updates_member_error
+[       OK ] r16_lmdb.open_failure_updates_member_error (2 ms)
+[ RUN      ] r16_lmdb.mapsize_failure_reports_error_closes_environment_and_can_retry
+[       OK ] r16_lmdb.mapsize_failure_reports_error_closes_environment_and_can_retry (0 ms)
+[----------] 15 tests from r16_lmdb (16 ms total)
+
+[----------] Global test environment tear-down
+[==========] 15 tests from 1 test suite ran. (16 ms total)
+[  PASSED  ] 15 tests.

@@ -134,7 +134,7 @@ TEST(l03_session, offset_time_negative_offset_wrap)
 	ASSERT_NE(s, nullptr);
 
 	EXPECT_EQ(s->offsetTime(2300, true), 1400u);	// 1380-540=840
-	EXPECT_EQ(s->offsetTime(0, true), 300u);		// 0-540=-540 -> +1440=900 -> 1500? 见下
+	EXPECT_EQ(s->offsetTime(0, true), 1500u);		// 0-540=-540 -> +1440=900 分钟 -> 1500
 	s->release();
 
 	// 单独把上面这组临界值算清楚再断言
@@ -279,6 +279,43 @@ TEST_F(L03DaySessionTest, time_to_minutes_break_and_auto_adjust)
 	EXPECT_EQ(sess_->timeToMinutes(1530, true), INVALID_UINT32);
 }
 
+TEST(l03_session, time_to_minutes_offset_nonmonotonic_sections)
+{
+	WTSSessionInfo* s = WTSSessionInfo::create("L03_NONMONO", "偏移后非单调时段", 300);
+	ASSERT_NE(s, nullptr);
+	s->addTradingSection(900, 1500);
+	s->addTradingSection(2100, 2300);
+	s->addTradingSection(0, 200);
+
+	// 保留登记顺序；+300 后 HHMM 顺序为 14:00、02:00、05:00。
+	const auto& sections = s->getTradingSections();
+	ASSERT_EQ(sections.size(), 3u);
+	EXPECT_EQ(sections[0].first, 1400u);
+	EXPECT_EQ(sections[1].first, 200u);
+	EXPECT_EQ(sections[2].first, 500u);
+
+	// 各段开始、段内和闭合边界都累计声明顺序中先前段的长度。
+	EXPECT_EQ(s->timeToMinutes(900), 0u);
+	EXPECT_EQ(s->timeToMinutes(1000), 60u);
+	EXPECT_EQ(s->timeToMinutes(1500), 360u);
+	EXPECT_EQ(s->timeToMinutes(2100), 360u);
+	EXPECT_EQ(s->timeToMinutes(2200), 420u);
+	EXPECT_EQ(s->timeToMinutes(2300), 480u);
+	EXPECT_EQ(s->timeToMinutes(0), 480u);
+	EXPECT_EQ(s->timeToMinutes(100), 540u);
+	EXPECT_EQ(s->timeToMinutes(200), 600u);
+
+	// 不属于任何连续竞价段的时刻保持无映射；普通午休/开盘前调整由既有合同用例覆盖。
+	EXPECT_EQ(s->timeToMinutes(1530), INVALID_UINT32);
+	EXPECT_EQ(s->timeToMinutes(2030), INVALID_UINT32);
+	EXPECT_EQ(s->timeToMinutes(2330), INVALID_UINT32);
+
+	// 夜盘末段后的空档不作新的自动对齐约定。
+	EXPECT_EQ(s->timeToMinutes(201), INVALID_UINT32);
+
+	s->release();
+}
+
 TEST_F(L03DaySessionTest, auction_time_short_circuits_to_zero)
 {
 	sess_->setAuctionTime(855, 859);
@@ -304,7 +341,7 @@ TEST_F(L03DaySessionTest, minute_to_time_forward_and_boundary)
 	EXPECT_EQ(sess_->minuteToTime(75), 1015u);
 	// 76 进入第二段起点 + 1
 	EXPECT_EQ(sess_->minuteToTime(76), 1031u);
-	EXPECT_EQ(sess_->minuteToTime(135), 1330u);
+	EXPECT_EQ(sess_->minuteToTime(135), 1130u); // 精确落在第二段末尾，返回前段收盘时间
 	EXPECT_EQ(sess_->minuteToTime(225), 1500u);
 	// 超出总时长：落到 getCloseTime() 兜底，而不是 INVALID_UINT32
 	EXPECT_EQ(sess_->minuteToTime(226), 1500u);
@@ -423,6 +460,21 @@ TEST_F(L03DaySessionTest, trading_time_and_section_edges)
 	EXPECT_FALSE(sess_->isLastOfSection(1459));
 }
 
+TEST_F(L03DaySessionTest, auction_only_maps_minutes_and_does_not_create_trading_time)
+{
+	// Auction before the first trading section maps to minute zero, but is not
+	// itself a trading interval.
+	sess_->setAuctionTime(855, 905);
+	EXPECT_TRUE(sess_->isInAuctionTime(856));
+	EXPECT_EQ(0u, sess_->timeToMinutes(856));
+	EXPECT_FALSE(sess_->isInTradingTime(856));
+
+	// Where auction and a real trading section overlap, trading membership stays true.
+	EXPECT_TRUE(sess_->isInAuctionTime(902));
+	EXPECT_EQ(0u, sess_->timeToMinutes(902));
+	EXPECT_TRUE(sess_->isInTradingTime(902));
+}
+
 TEST(l03_session, midnight_section_raw_2400_and_0_alias)
 {
 	WTSSessionInfo* s = WTSSessionInfo::create("L03_MID", "跨零点", 0);
@@ -468,6 +520,77 @@ TEST(l03_session, auction_sections)
 	s->release();
 }
 
+TEST(l03_session, empty_auction_range_with_zero_start_threshold_survives_offsets)
+{
+	WTSSessionInfo* s = WTSSessionInfo::create("L03_AUC_ZERO", "空竞价区间起点阈值为0", 0);
+	ASSERT_NE(s, nullptr);
+
+	s->setAuctionTime(0, 0);
+	ASSERT_EQ(s->getAuctionSections().size(), 1u);
+	EXPECT_EQ(s->getAuctionStartTime(), 0u);
+	EXPECT_EQ(s->getAuctionStartTime(true), 0u);
+	EXPECT_EQ(s->getAuctionSections()[0].first_raw, 0u);
+	EXPECT_EQ(s->getAuctionSections()[0].second_raw, 0u);
+	EXPECT_EQ(s->getAuctionSections()[0].first, 0u);
+	EXPECT_EQ(s->getAuctionSections()[0].second, 0u);
+	EXPECT_FALSE(s->isInAuctionTime(0));
+	EXPECT_FALSE(s->isInAuctionTime(1200));
+
+	// Add preserves the empty range and its configured zero start threshold;
+	// set replaces only the first section.
+	s->addAuctionTime(0, 0);
+	ASSERT_EQ(s->getAuctionSections().size(), 2u);
+	EXPECT_EQ(s->getAuctionSections()[1].first, 0u);
+	EXPECT_EQ(s->getAuctionSections()[1].second, 0u);
+	s->setAuctionTime(855, 859);
+	EXPECT_EQ(s->getAuctionSections().size(), 2u);
+	EXPECT_EQ(s->getAuctionSections()[0].first, 855u);
+	EXPECT_EQ(s->getAuctionSections()[0].second, 859u);
+	EXPECT_EQ(s->getAuctionSections()[1].first, 0u);
+	EXPECT_EQ(s->getAuctionSections()[1].second, 0u);
+	EXPECT_TRUE(s->isInAuctionTime(856));
+
+	// Positive, repeated, and negative remapping keep the empty range inactive.
+	s->setOffsetMins(300);
+	EXPECT_EQ(s->getAuctionSections()[0].first, 1355u);
+	EXPECT_EQ(s->getAuctionSections()[0].second, 1359u);
+	EXPECT_EQ(s->getAuctionSections()[1].first, 0u);
+	EXPECT_EQ(s->getAuctionSections()[1].second, 0u);
+	EXPECT_TRUE(s->isInAuctionTime(856));
+	EXPECT_FALSE(s->isInAuctionTime(1200));
+	s->setOffsetMins(300);
+	EXPECT_EQ(s->getAuctionSections()[1].first, 0u);
+	EXPECT_EQ(s->getAuctionSections()[1].second, 0u);
+	EXPECT_TRUE(s->isInAuctionTime(856));
+	s->setOffsetMins(-300);
+	EXPECT_EQ(s->getAuctionSections()[0].first, 355u);
+	EXPECT_EQ(s->getAuctionSections()[0].second, 359u);
+	EXPECT_EQ(s->getAuctionSections()[1].first, 0u);
+	EXPECT_EQ(s->getAuctionSections()[1].second, 0u);
+	EXPECT_TRUE(s->isInAuctionTime(856));
+	EXPECT_FALSE(s->isInAuctionTime(1200));
+
+	// Setting the first range back to an empty interval preserves its zero threshold.
+	s->setAuctionTime(0, 0);
+	EXPECT_EQ(s->getAuctionStartTime(), 0u);
+	EXPECT_EQ(s->getAuctionStartTime(true), 0u);
+	EXPECT_EQ(s->getAuctionSections()[0].first_raw, 0u);
+	EXPECT_EQ(s->getAuctionSections()[0].second_raw, 0u);
+	EXPECT_EQ(s->getAuctionSections()[0].first, 0u);
+	EXPECT_EQ(s->getAuctionSections()[0].second, 0u);
+	EXPECT_FALSE(s->isInAuctionTime(0));
+	EXPECT_FALSE(s->isInAuctionTime(1200));
+	s->setOffsetMins(300);
+	EXPECT_EQ(s->getAuctionStartTime(), 0u);
+	EXPECT_EQ(s->getAuctionStartTime(true), 0u);
+	EXPECT_EQ(s->getAuctionSections()[0].first, 0u);
+	EXPECT_EQ(s->getAuctionSections()[0].second, 0u);
+	EXPECT_FALSE(s->isInAuctionTime(0));
+	EXPECT_FALSE(s->isInAuctionTime(1200));
+
+	s->release();
+}
+
 //////////////////////////////////////////////////////////////////////////
 // setOffsetMins keeps registered trading section times aligned with the new offset
 //////////////////////////////////////////////////////////////////////////
@@ -476,14 +599,120 @@ TEST(l03_session, set_offset_mins_keeps_registered_sections_consistent)
 	WTSSessionInfo* s = WTSSessionInfo::create("L03_STALE", "偏移变更", 0);
 	ASSERT_NE(s, nullptr);
 	s->addTradingSection(900, 1500);
+	// 夜盘以 21:00-23:00、00:00-02:00 两段登记。
+	s->addTradingSection(2100, 2300);
+	s->addTradingSection(0, 200);
+	s->setAuctionTime(855, 859);
+	s->addAuctionTime(2101, 2102);
+
+	// 先访问分钟缓存。
+	const std::vector<uint32_t> cached_minutes = s->getSecMinList();
+	ASSERT_EQ(cached_minutes.size(), 3u);
+	EXPECT_EQ(cached_minutes[0], 360u);
+	EXPECT_EQ(cached_minutes[1], 480u);
+	EXPECT_EQ(cached_minutes[2], 600u);
+	const auto& trading_before = s->getTradingSections();
+	ASSERT_EQ(trading_before.size(), 3u);
+	EXPECT_EQ(trading_before[0].first_raw, 900u);
+	EXPECT_EQ(trading_before[0].second_raw, 1500u);
+	EXPECT_EQ(trading_before[1].first_raw, 2100u);
+	EXPECT_EQ(trading_before[1].second_raw, 2300u);
+	EXPECT_EQ(trading_before[2].first_raw, 0u);
+	EXPECT_EQ(trading_before[2].second_raw, 200u);
+
 	s->setOffsetMins(300);
 	EXPECT_EQ(s->getOffsetMins(), 300);
 	EXPECT_EQ(s->getOpenTime(false), 900u);
-	EXPECT_EQ(s->getCloseTime(false), 1500u);
+	EXPECT_EQ(s->getCloseTime(false), 200u);
 	EXPECT_EQ(s->getOpenTime(true), 1400u);
-	EXPECT_EQ(s->getCloseTime(true), 2000u);
+	EXPECT_EQ(s->getCloseTime(true), 700u);
 	EXPECT_EQ(s->offsetTime(900, true), 1400u);
 	EXPECT_EQ(s->offsetTime(1500, true), 2000u);
+	const auto& trading_plus = s->getTradingSections();
+	EXPECT_EQ(trading_plus[0].first, 1400u);
+	EXPECT_EQ(trading_plus[0].second, 2000u);
+	EXPECT_EQ(trading_plus[1].first, 200u);
+	EXPECT_EQ(trading_plus[1].second, 400u);
+	EXPECT_EQ(trading_plus[2].first, 500u);
+	EXPECT_EQ(trading_plus[2].second, 700u);
+	EXPECT_EQ(trading_plus[0].first_raw, 900u);
+	EXPECT_EQ(trading_plus[0].second_raw, 1500u);
+	EXPECT_EQ(trading_plus[1].first_raw, 2100u);
+	EXPECT_EQ(trading_plus[1].second_raw, 2300u);
+	EXPECT_EQ(trading_plus[2].first_raw, 0u);
+	EXPECT_EQ(trading_plus[2].second_raw, 200u);
+	ASSERT_EQ(s->getSecMinList().size(), 3u);
+	EXPECT_EQ(s->getSecMinList()[0], 360u);
+	EXPECT_EQ(s->getSecMinList()[1], 480u);
+	EXPECT_EQ(s->getSecMinList()[2], 600u);
+
+	const auto& auction_plus = s->getAuctionSections();
+	ASSERT_EQ(auction_plus.size(), 2u);
+	EXPECT_EQ(s->getAuctionStartTime(true), 1355u);
+	EXPECT_EQ(auction_plus[0].first, 1355u);
+	EXPECT_EQ(auction_plus[0].second, 1359u);
+	EXPECT_EQ(auction_plus[1].first, 201u);
+	EXPECT_EQ(auction_plus[1].second, 202u);
+	EXPECT_EQ(auction_plus[0].first_raw, 855u);
+	EXPECT_EQ(auction_plus[0].second_raw, 859u);
+	EXPECT_EQ(auction_plus[1].first_raw, 2101u);
+	EXPECT_EQ(auction_plus[1].second_raw, 2102u);
+
+	// 再次设为相同偏移仍从原始值重建；随后改为负偏移，不会累计上次的 +300。
+	s->setOffsetMins(300);
+	EXPECT_EQ(s->getTradingSections()[0].first, 1400u);
+	EXPECT_EQ(s->getAuctionSections()[0].first, 1355u);
+	s->setOffsetMins(-300);
+	EXPECT_EQ(s->getTradingSections()[0].first, 400u);
+	EXPECT_EQ(s->getTradingSections()[0].second, 1000u);
+	EXPECT_EQ(s->getTradingSections()[1].first, 1600u);
+	EXPECT_EQ(s->getTradingSections()[1].second, 1800u);
+	EXPECT_EQ(s->getTradingSections()[2].first, 1900u);
+	EXPECT_EQ(s->getTradingSections()[2].second, 2100u);
+	EXPECT_EQ(s->getAuctionSections()[0].first, 355u);
+	EXPECT_EQ(s->getAuctionSections()[0].second, 359u);
+	EXPECT_EQ(s->getAuctionSections()[1].first, 1601u);
+	EXPECT_EQ(s->getAuctionSections()[1].second, 1602u);
+
+	// 新增交易和竞价时段继续按当前偏移生成；setAuctionTime 仍只替换第 0 段。
+	s->addTradingSection(2300, 2400);
+	s->setAuctionTime(2110, 2115);
+	s->addAuctionTime(2230, 2235);
+	ASSERT_EQ(s->getTradingSections().size(), 4u);
+	EXPECT_EQ(s->getTradingSections()[3].first, 1800u);
+	EXPECT_EQ(s->getTradingSections()[3].second, 1900u);
+	ASSERT_EQ(s->getAuctionSections().size(), 3u);
+	EXPECT_EQ(s->getAuctionSections()[0].first, 1610u);
+	EXPECT_EQ(s->getAuctionSections()[0].second, 1615u);
+	EXPECT_EQ(s->getAuctionSections()[1].first, 1601u);
+	EXPECT_EQ(s->getAuctionSections()[2].first, 1730u);
+
+	// 改回正偏移时，后续追加/替换的时段也以各自 raw 值重新映射。
+	s->setOffsetMins(300);
+	EXPECT_EQ(s->getTradingSections()[3].first, 400u);
+	EXPECT_EQ(s->getTradingSections()[3].second, 500u);
+	EXPECT_EQ(s->getAuctionSections()[0].first, 210u);
+	EXPECT_EQ(s->getAuctionSections()[0].second, 215u);
+	EXPECT_EQ(s->getAuctionSections()[2].first, 330u);
+	EXPECT_EQ(s->getAuctionSections()[2].second, 335u);
+
+	// 读取分钟缓存后再追加交易时段，缓存必须包含新段的累计分钟数。
+	const std::vector<uint32_t>& before_append = s->getSecMinList();
+	ASSERT_EQ(before_append.size(), 4u);
+	EXPECT_EQ(before_append[3], 660u);
+	s->addTradingSection(900, 915);
+	s->addAuctionTime(900, 905);
+	EXPECT_EQ(s->getTradingSections()[4].first, 1400u);
+	EXPECT_EQ(s->getTradingSections()[4].second, 1415u);
+	EXPECT_EQ(s->getAuctionSections()[3].first, 1400u);
+	EXPECT_EQ(s->getAuctionSections()[3].second, 1405u);
+	const std::vector<uint32_t>& after_append = s->getSecMinList();
+	ASSERT_EQ(after_append.size(), 5u);
+	EXPECT_EQ(after_append[0], 360u);
+	EXPECT_EQ(after_append[1], 480u);
+	EXPECT_EQ(after_append[2], 600u);
+	EXPECT_EQ(after_append[3], 660u);
+	EXPECT_EQ(after_append[4], 675u);
 	s->release();
 }
 }  // namespace

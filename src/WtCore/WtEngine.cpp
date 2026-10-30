@@ -13,6 +13,7 @@
 
 #include "../Share/TimeUtils.hpp"
 #include "../Share/StrUtil.hpp"
+#include "../Share/charconv.hpp"
 #include "../Share/decimal.h"
 #include "../Share/CodeHelper.hpp"
 
@@ -28,13 +29,42 @@
 
 #include "../WTSTools/WTSLogger.h"
 #include "../WTSUtils/WTSCfgLoader.h"
+#include "../WTSUtils/yamlcpp/yaml.h"
 
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
+#include <cctype>
+#include <cmath>
+#include <cstdlib>
+#include <exception>
+#include <vector>
 namespace rj = rapidjson;
 
 
 USING_NS_WTP;
+
+namespace
+{
+thread_local const WtEngine* g_task_loop_engine = NULL;
+
+class TaskLoopThreadMarker
+{
+public:
+	TaskLoopThreadMarker(const WtEngine* engine)
+		: _previous(g_task_loop_engine)
+	{
+		g_task_loop_engine = engine;
+	}
+
+	~TaskLoopThreadMarker()
+	{
+		g_task_loop_engine = _previous;
+	}
+
+private:
+	const WtEngine* _previous;
+};
+}
 
 WtEngine::WtEngine()
 	: _fund_udt_span(0)
@@ -658,7 +688,13 @@ void WtEngine::handle_push_quote(WTSTickData* curTick)
 		for (const std::string& hotCode : hotCodes)
 		{
 			WTSTickData* hotTick = WTSTickData::create(curTick->getTickStruct());
-			hotTick->setCode(hotCode.c_str());
+			if (hotTick == NULL)
+				continue;
+			if (!hotTick->trySetCode(hotCode.c_str()))
+			{
+				hotTick->release();
+				continue;
+			}
 			hotTick->setContractInfo(curTick->getContractInfo());
 
 			_data_mgr->handle_push_quote(hotCode.c_str(), hotTick);
@@ -771,7 +807,7 @@ double WtEngine::get_exright_factor(const char* stdCode, WTSCommodityInfo* commI
 uint32_t WtEngine::get_adjusting_flag()
 {
 	if (_data_mgr)
-		_data_mgr->get_adjusting_flag();
+		return _data_mgr->get_adjusting_flag();
 
 	return 0;
 }
@@ -830,7 +866,7 @@ void WtEngine::sub_tick(uint32_t sid, const char* stdCode)
 		{
 			length--;
 
-			flag = (stdCode[length - 1] == SUFFIX_QFQ) ? 1 : 2;
+			flag = (stdCode[length] == SUFFIX_QFQ) ? 1 : 2;
 		}
 
 		SubList& sids = _tick_sub_map[std::string(stdCode, length)];
@@ -851,24 +887,243 @@ void WtEngine::load_fees(const char* filename)
 		return;
 	}
 
-	WTSVariant* cfg = WTSCfgLoader::load_from_file(filename);
+	const bool isYamlTemplate = StrUtil::endsWith(filename, ".yaml") || StrUtil::endsWith(filename, ".yml");
+	const bool isJsonTemplate = StrUtil::endsWith(filename, ".json");
+	if (!isYamlTemplate && !isJsonTemplate)
+	{
+		WTSLogger::error("Fee templates file {} has an unsupported extension", filename);
+		return;
+	}
+
+	std::string content;
+	try
+	{
+		StdFile::read_file_content(filename, content);
+	}
+	catch (const std::exception& e)
+	{
+		WTSLogger::error("Fee templates file {} reading failed: {}", filename, e.what());
+		return;
+	}
+	if (content.empty())
+	{
+		WTSLogger::error("Fee templates file {} is empty", filename);
+		return;
+	}
+
+	WTSVariant* cfg = NULL;
+	try
+	{
+		cfg = WTSCfgLoader::load_from_content(content, isYamlTemplate);
+	}
+	catch (const YAML::Exception& e)
+	{
+		WTSLogger::error("Fee templates file {} loading failed: {}", filename, e.what());
+		return;
+	}
+	catch (const std::exception& e)
+	{
+		WTSLogger::error("Fee templates file {} loading failed: {}", filename, e.what());
+		return;
+	}
 	if (cfg == NULL)
 	{
 		WTSLogger::error("Fee templates file {} loading failed", filename);
 		return;
 	}
 
-	auto keys = cfg->memberNames();
-	for (const std::string& fullPid : keys)
+	if (cfg->type() != WTSVariant::VT_Object)
 	{
-		WTSVariant* cfgItem = cfg->get(fullPid.c_str());
+		WTSLogger::error("Fee templates file {} must contain an object", filename);
+		cfg->release();
+		return;
+	}
+
+	// WTSCfgLoader intentionally drops null-valued entries. Keep the raw keys so
+	// null entries are still recognized and skipped, matching the old
+	// memberNames()-based loader for both known and unknown commodities.
+	std::string rawContent = content;
+	const bool isUtf8 = EncodingHelper::isUtf8((unsigned char*)content.data(), content.size());
+#ifdef _WIN32
+	if (isUtf8)
+		rawContent = UTF8toChar(content);
+#else
+	if (!isUtf8)
+		rawContent = ChartoUTF8(content);
+#endif
+	if (rawContent.empty())
+		rawContent = content;
+
+	rj::Document rawJson;
+	YAML::Node rawYaml;
+	std::vector<std::string> rawKeys;
+	if (isJsonTemplate)
+	{
+		rawJson.Parse(rawContent.c_str());
+		if (rawJson.HasParseError() || !rawJson.IsObject())
+		{
+			WTSLogger::error("Fee templates file {} must contain an object", filename);
+			cfg->release();
+			return;
+		}
+		for (const auto& item : rawJson.GetObject())
+			rawKeys.emplace_back(item.name.GetString(), item.name.GetStringLength());
+	}
+	else
+	{
+		try
+		{
+			rawYaml = YAML::Load(rawContent);
+		}
+		catch (const YAML::Exception& e)
+		{
+			WTSLogger::error("Fee templates file {} loading failed: {}", filename, e.what());
+			cfg->release();
+			return;
+		}
+		if (!rawYaml.IsMap())
+		{
+			WTSLogger::error("Fee templates file {} must contain an object", filename);
+			cfg->release();
+			return;
+		}
+		for (const auto& item : rawYaml)
+			rawKeys.emplace_back(item.first.as<std::string>());
+	}
+
+	auto readNumber = [](WTSVariant* field, double& value)
+	{
+		if (field == NULL)
+		{
+			value = 0.0;
+			return true;
+		}
+
+		switch (field->type())
+		{
+		case WTSVariant::VT_Null:
+			value = 0.0;
+			break;
+		case WTSVariant::VT_Int32:
+		case WTSVariant::VT_Uint32:
+		case WTSVariant::VT_Int64:
+		case WTSVariant::VT_Uint64:
+		case WTSVariant::VT_Real:
+			value = field->asDouble();
+			break;
+		case WTSVariant::VT_String:
+		{
+			// WTSVariant has historically converted numeric strings. Keep that
+			// compatibility but reject partial parses and non-finite values.
+			const std::string text = field->asString();
+			if (text.empty())
+				return false;
+			char* end = NULL;
+			value = std::strtod(text.c_str(), &end);
+			if (end == text.c_str())
+				return false;
+			while (*end != '\0' && std::isspace(static_cast<unsigned char>(*end)))
+				++end;
+			if (end != text.c_str() + text.size())
+				return false;
+			break;
+		}
+		default:
+			return false;
+		}
+
+		return std::isfinite(value);
+	};
+	auto readBoolean = [](WTSVariant* field)
+	{
+		// Keep WTSVariant's legacy conversion: missing/null and every value
+		// other than a case-insensitive "true" or "yes" map to false.
+		return field != NULL && field->asBoolean();
+	};
+	struct StagedFee
+	{
+		WTSCommodityInfo* commodity;
+		double open;
+		double close;
+		double closeToday;
+		double margin;
+		bool byVolume;
+
+		StagedFee() : commodity(NULL), open(0.0), close(0.0), closeToday(0.0), margin(0.0), byVolume(false) {}
+	};
+	wt_hashmap<std::string, StagedFee> stagedFees;
+	std::string validationError;
+	for (const std::string& fullPid : rawKeys)
+	{
 		const StringVector& ay = StrUtil::split(fullPid, ".");
+		if (ay.size() != 2 || ay[0].empty() || ay[1].empty())
+		{
+			validationError = fmt::format("invalid commodity key '{}'", fullPid);
+			break;
+		}
 		WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(ay[0].c_str(), ay[1].c_str());
 		if (commInfo == NULL)
+		{
+			WTSLogger::warn("Fee template item '{}' skipped because the commodity is not registered", fullPid);
 			continue;
+		}
 
-		commInfo->setFeeRates(cfgItem->getDouble("open"), cfgItem->getDouble("close"), cfgItem->getDouble("closetoday"), cfgItem->getBoolean("byvolume"));
-		commInfo->setMarginRate(cfgItem->getDouble("margin"));
+		WTSVariant* cfgItem = cfg->get(fullPid.c_str());
+		// The config loader omits top-level nulls from memberNames(). The raw
+		// key list preserves them, so explicitly keep the old behavior and skip
+		// an omitted value without changing the active fee snapshot.
+		if (cfgItem == NULL)
+			continue;
+		if (cfgItem->type() != WTSVariant::VT_Object)
+		{
+			validationError = fmt::format("fee entry '{}' must be an object", fullPid);
+			break;
+		}
+
+		StagedFee& staged = stagedFees[fullPid];
+		staged.commodity = commInfo;
+		if (!readNumber(cfgItem->get("open"), staged.open))
+			validationError = fmt::format("fee entry '{}' has an invalid numeric 'open'", fullPid);
+		else if (!readNumber(cfgItem->get("close"), staged.close))
+			validationError = fmt::format("fee entry '{}' has an invalid numeric 'close'", fullPid);
+		else if (!readNumber(cfgItem->get("closetoday"), staged.closeToday))
+			validationError = fmt::format("fee entry '{}' has an invalid numeric 'closetoday'", fullPid);
+		else
+			staged.byVolume = readBoolean(cfgItem->get("byvolume"));
+
+		WTSVariant* marginItem = cfgItem->get("margin");
+		if (validationError.empty() && !readNumber(marginItem, staged.margin))
+			validationError = fmt::format("fee entry '{}' has an invalid numeric 'margin'", fullPid);
+
+		// minfee is a supported optional field in shared fee templates. This
+		// engine does not apply it, but reject malformed values rather than
+		// accepting a template that another fee consumer would interpret differently.
+		WTSVariant* minFeeItem = cfgItem->get("minfee");
+		double minFee = 0.0;
+		if (validationError.empty() && minFeeItem != NULL && !readNumber(minFeeItem, minFee))
+			validationError = fmt::format("fee entry '{}' has an invalid numeric 'minfee'", fullPid);
+
+		if (!validationError.empty())
+			break;
+	}
+	if (!validationError.empty())
+	{
+		WTSLogger::error("Fee templates file {} is invalid: {}", filename, validationError);
+		cfg->release();
+		return;
+	}
+
+	for (const auto& stagedFee : stagedFees)
+	{
+		const StagedFee& staged = stagedFee.second;
+		staged.commodity->setFeeRates(staged.open, staged.close, staged.closeToday, staged.byVolume);
+		staged.commodity->setMarginRate(staged.margin);
+
+		FeeItem& fItem = _fee_map[stagedFee.first];
+		fItem._open = staged.open;
+		fItem._close = staged.close;
+		fItem._close_today = staged.closeToday;
+		fItem._by_volume = staged.byVolume;
 	}
 
 	cfg->release();
@@ -887,32 +1142,42 @@ double WtEngine::calc_fee(const char* stdCode, double price, double qty, uint32_
 		return 0.0;
 	}
 
-	double ret = 0.0;
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(stdPID);
+	if (commInfo == NULL)
+		return 0.0;
+
 	const FeeItem& fItem = it->second;
-	if(fItem._by_volume)
+	double ret = 0.0;
+	if (fItem._by_volume)
 	{
 		switch (offset)
 		{
-		case 0: ret = fItem._open*qty; break;
-		case 1: ret = fItem._close*qty; break;
-		case 2: ret = fItem._close_today*qty; break;
+		case 0: ret = fItem._open * qty; break;
+		case 1: ret = fItem._close * qty; break;
+		case 2: ret = fItem._close_today * qty; break;
 		default: ret = 0.0; break;
 		}
 	}
 	else
 	{
-		double amount = price*qty*commInfo->getVolScale();
+		const double amount = price * qty * commInfo->getVolScale();
 		switch (offset)
 		{
-		case 0: ret = fItem._open*amount; break;
-		case 1: ret = fItem._close*amount; break;
-		case 2: ret = fItem._close_today*amount; break;
+		case 0: ret = fItem._open * amount; break;
+		case 1: ret = fItem._close * amount; break;
+		case 2: ret = fItem._close_today * amount; break;
 		default: ret = 0.0; break;
 		}
 	}
 
-	return (int32_t)(ret * 100 + 0.5) / 100.0;
+	// Match the commodity fee calculation without narrowing a large fee
+	// through int32_t. Values outside the exact safe conversion range retain
+	// their computed precision.
+	const double cents = ret * 100.0 + 0.5;
+	constexpr double kSafeCentsLimit = 9007199254740991.0; // 2^53 - 1
+	if (!(cents > -kSafeCentsLimit && cents < kSafeCentsLimit))
+		return ret;
+	return static_cast<int64_t>(cents) / 100.0;
 }
 
 void WtEngine::append_signal(const char* stdCode, double qty, bool bStandBy /* = true */)
@@ -1087,56 +1352,75 @@ void WtEngine::push_task(TaskItem task)
 {
 	{
 		StdUniqueLock lock(_mtx_task);
-		_task_queue.push(task);
-	}
-	
+		if (_terminated.load())
+			return;
 
-	if (_thrd_task == NULL)
-	{
-		_thrd_task.reset(new StdThread([this]{
-			task_loop();
-		}));
+		_task_queue.push(std::move(task));
+		if (_thrd_task == NULL)
+		{
+			_thrd_task.reset(new StdThread([this]{
+				task_loop();
+			}));
+		}
 	}
 
-	_cond_task.notify_all();
+	_cond_task.notify_one();
 }
 
 void WtEngine::task_loop()
 {
-	while (!_terminated)
+	TaskLoopThreadMarker threadMarker(this);
+	for (;;)
 	{
-		TaskQueue temp;
+		TaskItem item;
 		{
 			StdUniqueLock lock(_mtx_task);
-			if(_task_queue.empty())
-			{
-				_cond_task.wait(_mtx_task);
-				continue;
-			}
+			_cond_task.wait(lock, [this]() {
+				return _terminated.load() || !_task_queue.empty();
+			});
 
-			temp.swap(_task_queue);
+			if (_task_queue.empty())
+				return;
+
+			item = std::move(_task_queue.front());
+			_task_queue.pop();
 		}
 
-		for (;;)
-		{
-			if(temp.empty())
-				break;
-
-			TaskItem& item = temp.front();
-			item();
-			temp.pop();
-		}
+		item();
 	}
 }
 
 void WtEngine::release()
 {
-	_terminated = true;
-	_cond_task.notify_all();
-	if (_thrd_task)
+	// The worker cannot wait for the external join lock: an external release
+	// may already hold it while joining this worker. It only requests stop here;
+	// the owning thread must later call release() to join the worker.
+	if (g_task_loop_engine == this)
 	{
-		_thrd_task->join();
-		_thrd_task.reset();
+		{
+			StdUniqueLock lock(_mtx_task);
+			_terminated.store(true);
+		}
+		_cond_task.notify_all();
+		return;
+	}
+
+	StdUniqueLock releaseLock(_mtx_task_release);
+	StdThreadPtr taskThread;
+	{
+		StdUniqueLock lock(_mtx_task);
+		_terminated.store(true);
+		taskThread = _thrd_task;
+	}
+	_cond_task.notify_all();
+
+	if (taskThread != NULL && taskThread->joinable())
+		taskThread->join();
+
+	{
+		StdUniqueLock lock(_mtx_task);
+		if (_thrd_task == taskThread)
+			_thrd_task.reset();
 	}
 }
 

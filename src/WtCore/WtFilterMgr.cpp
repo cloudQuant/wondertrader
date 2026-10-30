@@ -5,6 +5,9 @@
 #include "../Includes/WTSVariant.hpp"
 #include "../WTSUtils/WTSCfgLoader.h"
 #include "../WTSTools/WTSLogger.h"
+#include "../WTSUtils/yamlcpp/yaml.h"
+
+#include <exception>
 
 USING_NS_WTP;
 
@@ -25,26 +28,106 @@ void WtFilterMgr::load_filters(const char* fileName)
 	auto lastModTime = fs::last_write_time(fs::path(_filter_file));
 	
 
-	if (!_is_first)
+	bool isReload = !_is_first;
+	if (isReload)
 	{
 		if (lastModTime <= _filter_timestamp)
 			return;
 
 		WTSLogger::info("Filters configuration file {} modified, will be reloaded", _filter_file);
-		if (_notifier)
-			_notifier->notify_event("Filter file has been reloaded");
 	}
 
-	WTSVariant* cfg = WTSCfgLoader::load_from_file(_filter_file.c_str());
+	WTSVariant* cfg = NULL;
+	try
+	{
+		cfg = WTSCfgLoader::load_from_file(_filter_file.c_str());
+	}
+	catch (const YAML::Exception& e)
+	{
+		WTSLogger::error("Failed to parse filters configuration file {}: {}", _filter_file, e.what());
+		return;
+	}
+	catch (const std::exception& e)
+	{
+		WTSLogger::error("Failed to load filters configuration file {}: {}", _filter_file, e.what());
+		return;
+	}
 
-	_filter_timestamp = lastModTime;
+	if (cfg == NULL)
+	{
+		WTSLogger::error("Failed to load filters configuration file {}", _filter_file);
+		return;
+	}
 
-	_stra_filters.clear();
-	_code_filters.clear();
-	_exec_filters.clear();
+	if (cfg->type() != WTSVariant::VT_Object)
+	{
+		WTSLogger::error("Filters configuration file {} must contain an object", _filter_file);
+		cfg->release();
+		return;
+	}
+
+	// Validate the structural containers before building replacement tables. Scalar
+	// leaf conversions stay as provided by WTSVariant so existing YAML configs keep
+	// their string-scalar behavior.
+	WTSVariant* filterStra = cfg->get("strategy_filters");
+	WTSVariant* filterCodes = cfg->get("code_filters");
+	WTSVariant* filterExecuters = cfg->get("executer_filters");
+	auto isObjectSection = [&](WTSVariant* section, const char* name)
+	{
+		if (section == NULL || section->type() == WTSVariant::VT_Object)
+			return true;
+
+		WTSLogger::error("Filter section {} in {} must be an object", name, _filter_file);
+		return false;
+	};
+	auto filterItemsAreObjects = [&](WTSVariant* section, const char* name)
+	{
+		if (section == NULL)
+			return true;
+
+		for (const std::string& key : section->memberNames())
+		{
+			WTSVariant* item = section->get(key.c_str());
+			if (item == NULL || item->type() != WTSVariant::VT_Object)
+			{
+				WTSLogger::error("Filter item {}.{} in {} must be an object", name, key, _filter_file);
+				return false;
+			}
+		}
+		return true;
+	};
+	auto executerItemsAreScalars = [&](WTSVariant* section)
+	{
+		if (section == NULL)
+			return true;
+
+		for (const std::string& key : section->memberNames())
+		{
+			WTSVariant* item = section->get(key.c_str());
+			if (item == NULL || item->type() == WTSVariant::VT_Object || item->type() == WTSVariant::VT_Array)
+			{
+				WTSLogger::error("Executer filter {} in {} must be a scalar", key, _filter_file);
+				return false;
+			}
+		}
+		return true;
+	};
+	if (!isObjectSection(filterStra, "strategy_filters") ||
+		!isObjectSection(filterCodes, "code_filters") ||
+		!isObjectSection(filterExecuters, "executer_filters") ||
+		!filterItemsAreObjects(filterStra, "strategy_filters") ||
+		!filterItemsAreObjects(filterCodes, "code_filters") ||
+		!executerItemsAreScalars(filterExecuters))
+	{
+		cfg->release();
+		return;
+	}
+
+	FilterMap straFilters;
+	FilterMap codeFilters;
+	ExecuterFilters execFilters;
 
 	//读策略过滤器
-	WTSVariant* filterStra = cfg->get("strategy_filters");
 	if (filterStra)
 	{
 		auto keys = filterStra->memberNames();
@@ -64,7 +147,7 @@ void WtFilterMgr::load_filters(const char* fileName)
 				continue;
 			}
 
-			FilterItem& fItem = _stra_filters[key];
+			FilterItem& fItem = straFilters[key];
 			fItem._key = key;
 			fItem._action = fAct;
 			fItem._target = cfgItem->getDouble("target");
@@ -74,7 +157,6 @@ void WtFilterMgr::load_filters(const char* fileName)
 	}
 
 	//读代码过滤器
-	WTSVariant* filterCodes = cfg->get("code_filters");
 	if (filterCodes)
 	{
 		auto codes = filterCodes->memberNames();
@@ -95,7 +177,7 @@ void WtFilterMgr::load_filters(const char* fileName)
 				continue;
 			}
 
-			FilterItem& fItem = _code_filters[stdCode];
+			FilterItem& fItem = codeFilters[stdCode];
 			fItem._key = stdCode;
 			fItem._action = fAct;
 			fItem._target = cfgItem->getDouble("target");
@@ -105,7 +187,6 @@ void WtFilterMgr::load_filters(const char* fileName)
 	}
 
 	//读通道过滤器
-	WTSVariant* filterExecuters = cfg->get("executer_filters");
 	if (filterExecuters)
 	{
 		auto executer_ids = filterExecuters->memberNames();
@@ -113,12 +194,18 @@ void WtFilterMgr::load_filters(const char* fileName)
 		{
 			bool bDisabled = filterExecuters->getBoolean(execid.c_str());
 			WTSLogger::info("Executer {} is {}", execid, bDisabled?"disabled":"enabled");
-			_exec_filters[execid] = bDisabled;
+			execFilters[execid] = bDisabled;
 		}
 	}
 
+	_stra_filters.swap(straFilters);
+	_code_filters.swap(codeFilters);
+	_exec_filters.swap(execFilters);
+	_filter_timestamp = lastModTime;
 	cfg->release();
 	_is_first = false;
+	if (isReload && _notifier)
+		_notifier->notify_event("Filter file has been reloaded");
 }
 
 bool WtFilterMgr::is_filtered_by_executer(const char* execid)

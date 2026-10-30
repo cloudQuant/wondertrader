@@ -21,6 +21,8 @@
 #include "../Share/decimal.h"
 #include "../Share/Converter.hpp"
 
+#include <cstdio>
+
 #include <filesystem>
 namespace fs = std::filesystem;
 
@@ -38,6 +40,25 @@ inline void write_log(ITraderSpi* sink, WTSLogLevel ll, const char* format, cons
 	const char* buffer = fmtutil::format(format, args...);
 
 	sink->handleTraderLog(ll, buffer);
+}
+
+template <size_t Capacity>
+bool isCtpMiniLoginFieldLengthValid(const std::string& value, const char* field, ITraderSpi* sink)
+{
+	if (value.size() < Capacity)
+		return true;
+
+	if (sink)
+	{
+		write_log(sink, LL_ERROR, "[TraderCTPMini] Login field '{}' exceeds SDK capacity (maximum {} bytes)",
+			field, Capacity - 1);
+	}
+	else
+	{
+		std::fprintf(stderr, "[TraderCTPMini] Login field '%s' exceeds SDK capacity (maximum %u bytes)\n",
+			field, static_cast<unsigned int>(Capacity - 1));
+	}
+	return false;
 }
 
 uint32_t strToTime(const char* strTime)
@@ -77,6 +98,7 @@ extern "C"
 TraderCTPMini::TraderCTPMini()
 	: m_bQuickStart(false)
 	//, m_hInstCTP(NULL)
+	, m_sink(NULL)
 	, m_uLastQryTime(0)
 	, m_wrapperState(WS_NOTLOGIN)
 	, m_pUserAPI(NULL)
@@ -99,13 +121,27 @@ TraderCTPMini::~TraderCTPMini()
 
 bool TraderCTPMini::init(WTSVariant* params)
 {
-	m_strFront = params->get("front")->asCString();
-	m_strBroker = params->get("broker")->asCString();
-	m_strUser = params->get("user")->asCString();
-	m_strPass = params->get("pass")->asCString();
+	const std::string broker = params->get("broker")->asCString();
+	const std::string user = params->get("user")->asCString();
+	const std::string pass = params->get("pass")->asCString();
+	const std::string appID = params->getCString("appid");
+	const std::string authCode = params->getCString("authcode");
+	if (!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcBrokerIDType)>(broker, "broker", m_sink) ||
+		!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcUserIDType)>(user, "user", m_sink) ||
+		!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcPasswordType)>(pass, "pass", m_sink) ||
+		!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcClientAppIDType)>(appID, "appid", m_sink) ||
+		!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcAuthCodeType)>(authCode, "authcode", m_sink))
+	{
+		return false;
+	}
 
-	m_strAppID = params->getCString("appid");
-	m_strAuthCode = params->getCString("authcode");
+	m_strFront = params->get("front")->asCString();
+	m_strBroker = broker;
+	m_strUser = user;
+	m_strPass = pass;
+
+	m_strAppID = appID;
+	m_strAuthCode = authCode;
 
 	m_strFlowDir = params->getCString("flowdir");
 	if (m_strFlowDir.empty())
@@ -269,9 +305,26 @@ uint32_t TraderCTPMini::genRequestID()
 
 int TraderCTPMini::login(const char* user, const char* pass, const char* productInfo)
 {
-	m_strUser = user;
-	m_strPass = pass;
-	m_strProdInfo = productInfo;
+	if (user == NULL || pass == NULL || productInfo == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderCTPMini] Login rejected because a login field is null");
+		return -1;
+	}
+
+	const std::string loginUser(user);
+	const std::string loginPass(pass);
+	const std::string loginProductInfo(productInfo);
+	if (!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcUserIDType)>(loginUser, "user", m_sink) ||
+		!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcPasswordType)>(loginPass, "pass", m_sink) ||
+		!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcProductInfoType)>(loginProductInfo, "productInfo", m_sink))
+	{
+		return -1;
+	}
+
+	/* Preserve the existing API behavior: valid credentials are retained even if no API is installed yet. */
+	m_strUser = loginUser;
+	m_strPass = loginPass;
+	m_strProdInfo = loginProductInfo;
 
 	if (m_pUserAPI == NULL)
 	{
@@ -668,16 +721,13 @@ void TraderCTPMini::OnRspOrderInsert(CThostFtdcInputOrderField *pInputOrder, CTh
 
 void TraderCTPMini::OnRspOrderAction(CThostFtdcInputOrderActionField */*pInputOrderAction*/, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
 {
-	if (IsErrorRspInfo(pRspInfo))
-	{
+	if (!IsErrorRspInfo(pRspInfo))
+		return;
 
-	}
-	else
-	{
-		WTSError* error = WTSError::create(WEC_ORDERCANCEL, pRspInfo->ErrorMsg);
-		if (m_sink)
-			m_sink->onTraderError(error);
-	}
+	WTSError* error = WTSError::create(WEC_ORDERCANCEL, pRspInfo->ErrorMsg);
+	if (m_sink)
+		m_sink->onTraderError(error);
+	error->release();
 }
 
 void TraderCTPMini::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAccount, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)

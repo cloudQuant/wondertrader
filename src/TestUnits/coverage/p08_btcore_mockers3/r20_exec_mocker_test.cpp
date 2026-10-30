@@ -114,11 +114,14 @@ protected:
 	}
 };
 
-// 构造后零值面：持仓/挂单为 0，订单表 NULL，未注册合约的 comminfo/session 均 NULL
+// 构造后零值面：持仓/挂单为 0，订单快照为空；未注册合约的 comminfo/session 均 NULL
 TEST_F(R20ExecMocker, DefaultsAfterCtor)
 {
 	ExecMocker m(&_rp);
-	EXPECT_TRUE(m.getOrders(kCode) == NULL);
+	OrderMap* orders = m.getOrders(kCode);
+	ASSERT_NE(nullptr, orders);
+	EXPECT_EQ(0u, orders->size());
+	orders->release();
 	EXPECT_DOUBLE_EQ(0.0, m.getPosition(kCode));
 	EXPECT_DOUBLE_EQ(0.0, m.getPosition(kCode, true, 1));
 	EXPECT_DOUBLE_EQ(0.0, m.getUndoneQty(kCode));
@@ -264,7 +267,10 @@ TEST_F(R20ExecMocker, NoopEventsAndWriteLogAreSideEffectFree)
 	m.writeLog("r20 executer log line");
 	EXPECT_DOUBLE_EQ(0.0, m.getPosition(kCode));
 	EXPECT_DOUBLE_EQ(0.0, m.getUndoneQty(kCode));
-	EXPECT_TRUE(m.getOrders(kCode) == NULL);
+	OrderMap* orders = m.getOrders(kCode);
+	ASSERT_NE(nullptr, orders);
+	EXPECT_EQ(0u, orders->size());
+	orders->release();
 }
 
 // init：MatchEngine::init(NULL 子配置) 安全返回 + 缺失模块 load_library==NULL → false（L51-62）
@@ -276,7 +282,10 @@ TEST_F(R20ExecMocker, InitFailsFastWhenModuleMissing)
 	// 早退发生在 _factory 装配之前；查询面保持默认值
 	EXPECT_DOUBLE_EQ(0.0, m.getPosition(kCode));
 	EXPECT_DOUBLE_EQ(0.0, m.getUndoneQty(kCode));
-	EXPECT_TRUE(m.getOrders(kCode) == NULL);
+	OrderMap* orders = m.getOrders(kCode);
+	ASSERT_NE(nullptr, orders);
+	EXPECT_EQ(0u, orders->size());
+	orders->release();
 }
 
 // 回放收尾落盘：exec/trades_.csv（_id 为空串），_trade_logs 未写表头 → 0 字节

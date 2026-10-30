@@ -222,8 +222,8 @@ public:
 
 		try
 		{
-			m_uRefs--;
-			if (m_uRefs == 0)
+			uint32_t refs = m_uRefs.fetch_sub(1);
+			if (refs == 1)
 			{
 				clear();
 				delete this;
@@ -564,8 +564,8 @@ public:
 
 		try
 		{
-			m_uRefs--;
-			if (m_uRefs == 0)
+			uint32_t refs = m_uRefs.fetch_sub(1);
+			if (refs == 1)
 			{
 				clear();
 				delete this;
@@ -736,8 +736,8 @@ public:
 
 		try
 		{
-			m_uRefs--;
-			if (m_uRefs == 0)
+			uint32_t refs = m_uRefs.fetch_sub(1);
+			if (refs == 1)
 			{
 				clear();
 				delete this;
@@ -766,7 +766,13 @@ public:
 
 	inline void pop() noexcept
 	{
+		if (_queue.empty())
+			return;
+
+		WTSObject* obj = _queue.front();
 		_queue.pop_front();
+		if (obj)
+			obj->release();
 	}
 
 	inline void push(WTSObject* obj, bool bAutoRetain = true) noexcept
@@ -783,7 +789,7 @@ public:
 			return NULL;
 
 		WTSObject* obj = _queue.front();
-		if(bRetain)
+		if (obj && bRetain)
 			obj->retain();
 
 		return obj;
@@ -795,7 +801,7 @@ public:
 			return NULL;
 
 		WTSObject* obj = _queue.back();
-		if(bRetain)
+		if (obj && bRetain)
 			obj->retain();
 
 		return obj;
@@ -812,8 +818,8 @@ public:
 
 		try
 		{
-			m_uRefs--;
-			if (m_uRefs == 0)
+			uint32_t refs = m_uRefs.fetch_sub(1);
+			if (refs == 1)
 			{
 				clear();
 				delete this;
@@ -830,7 +836,8 @@ public:
 		Iterator it = begin();
 		for(; it != end(); it++)
 		{
-			(*it)->release();
+			if (*it)
+				(*it)->release();
 		}
 		_queue.clear();
 	}

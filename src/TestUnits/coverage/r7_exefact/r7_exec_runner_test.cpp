@@ -8,22 +8,52 @@
 //  * WTSLogger 真正初始化成功后的 sink/async_logger 会创建线程（WTSLogger.cpp:193），
 //    本轮禁止起线程 -> 只用「配置缺失/非法」这条不会初始化成功的路径；
 //  * release() -> WTSLogger::stop() 会做 spdlog 关停/flush，未初始化状态下行为不确定 -> DISABLED；
-//  * initParsers/initTraders/initExecuters 会 new ParserAdapter/TraderAdapter 并 dlopen 工厂、
-//    initDataMgr 会按配置打开行情存储（可能涉及共享内存）-> 全部留给主循环评审；
+//  * initParsers/initExecuters 会 new ParserAdapter 或 dlopen 执行器工厂，initDataMgr 会按
+//    配置打开行情存储（可能涉及共享内存）-> 全部留给主循环评审；交易通道仅使用本地
+//    TraderMocker 插件做 config/init 正控，不调用 run/connect；
 //  * addExeFactories 会 dlopen executer 目录下的插件，与 WtCtaStraFact 等同名符号冲突
 //    （BUG-L00-003 实测 34 个 duplicate symbol）-> 不调用。
 #include <gtest/gtest.h>
 
 #include <cstdint>
+#include <chrono>
 #include <cstring>
+#include <filesystem>
+#include <fstream>
 #include <string>
 
 #include "Includes/WTSStruct.h"
 #include "Includes/WTSDataDef.hpp"
 #include "Includes/WTSVariant.hpp"
 #include "WtExecMon/WtExecRunner.h"
+#include "../trader_mocker_fixture.h"
 
 using namespace wtp;
+
+namespace {
+
+	std::string r7_temp_dir()
+	{
+		const auto nonce = std::chrono::steady_clock::now().time_since_epoch().count();
+		std::filesystem::path dir = std::filesystem::temp_directory_path()
+			/ ("r7_trader_init_" + std::to_string(nonce));
+		std::filesystem::create_directories(dir);
+		return dir.string();
+	}
+
+	void r7_write_text(const std::string& path, const std::string& text)
+	{
+		std::ofstream out(path, std::ios::binary | std::ios::trunc);
+		out << text;
+	}
+
+	void r7_remove_dir(const std::string& dir)
+	{
+		std::error_code ec;
+		std::filesystem::remove_all(dir, ec);
+	}
+
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 // 构造 + 基础数据未加载时的查询接口（L36-38、L434-448、L371-382）
@@ -71,6 +101,7 @@ TEST(r7_execrunner, config_missing_file_returns_false)
 	EXPECT_FALSE(runner.config("./r7_missing_execcfg.json", true));
 	// 拒绝后不应残留任何配置对象，二次调用仍然拒绝
 	EXPECT_FALSE(runner.config("./r7_missing_execcfg.json", true));
+	EXPECT_NO_THROW(runner.run());
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -81,6 +112,76 @@ TEST(r7_execrunner, config_empty_content_returns_false)
 	WtExecRunner runner;
 	EXPECT_FALSE(runner.config("", false));
 	EXPECT_FALSE(runner.config("{invalid json]", false));
+}
+
+TEST(r7_execrunner, trader_init_failure_fails_config)
+{
+	const std::string dir = r7_temp_dir();
+	r7_write_text(dir + "/actions.json", "{}");
+	r7_write_text(dir + "/traders.json",
+		"{\"traders\":[{\"active\":true,\"id\":\"r7_missing_trader\","
+		"\"module\":\"r7_module_that_does_not_exist\"}]}");
+
+	WtExecRunner runner;
+	ASSERT_TRUE(runner.init((dir + "/r7_missing_logcfg.json").c_str(), true));
+	const std::string cfg = "{\"basefiles\":{},\"bspolicy\":\"" + dir
+		+ "/actions.json\",\"traders\":\"" + dir + "/traders.json\"}";
+	EXPECT_FALSE(runner.config(cfg.c_str(), false));
+	EXPECT_NO_THROW(runner.run());
+	r7_remove_dir(dir);
+}
+
+TEST(r7_execrunner, trader_config_file_missing_or_invalid_fails_config)
+{
+	const std::string dir = r7_temp_dir();
+	r7_write_text(dir + "/actions.json", "{}");
+	r7_write_text(dir + "/bad_traders.json", "{invalid json]");
+
+	const std::string prefix = "{\"basefiles\":{},\"bspolicy\":\"" + dir
+		+ "/actions.json\",\"traders\":\"";
+	{
+		WtExecRunner runner;
+		ASSERT_TRUE(runner.init((dir + "/r7_missing_logcfg.json").c_str(), true));
+		const std::string cfg = prefix + dir + "/missing_traders.json\"}";
+		EXPECT_FALSE(runner.config(cfg.c_str(), false));
+		EXPECT_NO_THROW(runner.run());
+	}
+	{
+		WtExecRunner runner;
+		ASSERT_TRUE(runner.init((dir + "/r7_missing_logcfg.json").c_str(), true));
+		const std::string cfg = prefix + dir + "/bad_traders.json\"}";
+		EXPECT_FALSE(runner.config(cfg.c_str(), false));
+	}
+	r7_remove_dir(dir);
+}
+
+TEST(r7_execrunner, trader_mocker_initializes_and_registers_as_control)
+{
+	const std::string dir = r7_temp_dir();
+	r7_write_text(dir + "/actions.json", "{}");
+	r7_write_text(dir + "/traders.json",
+		"{\"traders\":[{\"active\":true,\"id\":\"r7_mocker_trader\","
+		"\"module\":\"TraderMocker\",\"mockerid\":70001,\"udp_port\":0}]}");
+
+	{
+		wtp_test::TraderMockerFixture trader_mocker("r7");
+		WtExecRunner runner;
+		ASSERT_TRUE(runner.init((dir + "/r7_missing_logcfg.json").c_str(), true));
+		if (!trader_mocker.install())
+		{
+			r7_remove_dir(dir);
+			FAIL() << "Could not prepare TraderMocker from product output at "
+				<< trader_mocker.product_plugin() << ": " << trader_mocker.error();
+			return;
+		}
+		const std::string cfg = "{\"basefiles\":{},\"bspolicy\":\"" + dir
+			+ "/actions.json\",\"traders\":\"" + dir + "/traders.json\"}";
+		ASSERT_TRUE(runner.config(cfg.c_str(), false));
+	}
+
+	r7_remove_dir(dir);
+	std::error_code ec;
+	std::filesystem::remove_all("mocker_70001", ec);
 }
 
 //////////////////////////////////////////////////////////////////////////

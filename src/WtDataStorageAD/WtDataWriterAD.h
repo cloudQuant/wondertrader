@@ -54,11 +54,11 @@ private:
 	 * @tparam T 数据项类型
 	 * @param mfPtr 内存映射文件指针
 	 * @param nCount 需要的数据项数量
-	 * @return void* 调整后的内存块指针
+	 * @return bool 扩容成功；失败时保留原映射
 	 * @details 当缓存容量不足时，该方法会重新分配内存并调整映射文件的大小
 	 */
 	template<typename HeaderType, typename T>
-	void* resizeRTBlock(BoostMFPtr& mfPtr, uint32_t nCount);
+	bool resizeRTBlock(BoostMFPtr& mfPtr, uint32_t nCount);
 
 public:
 	/**
@@ -423,6 +423,6 @@ private:
 	 * @param task 任务函数对象
 	 * @details 将任务添加到任务队列中，并通知处理线程执行
 	 */
-	void pushTask(TaskInfo task);
+	bool pushTask(TaskInfo task);
 };
 

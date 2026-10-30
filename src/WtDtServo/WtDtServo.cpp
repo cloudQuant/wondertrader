@@ -57,6 +57,16 @@ void initialize(WtString cfgFile, bool isFile, WtString logCfg, FuncOnTickCallba
 	getRunner().initialize(cfgFile, isFile, getBinDir(), logCfg, cbTick, cbBar);
 }
 
+bool is_initialized()
+{
+	return getRunner().isInitialized();
+}
+
+bool has_retained_parser_adapters()
+{
+	return getRunner().hasRetainedParserAdapters();
+}
+
 const char* get_version()
 {
 	static std::string _ver;

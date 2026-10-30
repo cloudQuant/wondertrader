@@ -204,11 +204,21 @@ TEST_F(R23RdmCountTest, HisWindowBoundaryKeepsTickExactlyAtEtime)
 	EXPECT_EQ(last->action_date, 20240108u);
 	EXPECT_EQ(last->action_time, 143100000u);
 	slice->release();
+
+	// 命中该历史块的末条时也保留边界记录，不从前一日补数。
+	WTSTickSlice* lastWindow = _reader.readTickSliceByCount("SSE.STK.600000", 3, 20240108143200000ull);
+	ASSERT_TRUE(lastWindow != NULL);
+	EXPECT_EQ(lastWindow->size(), 3u);
+	EXPECT_EQ(lastWindow->get_block_counts(), 1u);
+	EXPECT_EQ(lastWindow->at(0)->action_time, 143000000u);
+	EXPECT_EQ(lastWindow->at(-1)->action_date, 20240108u);
+	EXPECT_EQ(lastWindow->at(-1)->action_time, 143200000u);
+	lastWindow->release();
 }
 
 TEST_F(R23RdmCountTest, RtWindowBoundaryKeepsTickExactlyAtEtime)
 {
-	// 同一份 3 条 tick，这次放在当日 RT 块里：RT 分支判的是 `>`（:2459）→ 边界那条被保留
+	// 同样的截止点契约也适用于当日 RT 块：etime 相等的 tick 应保留。
 	const vector<WTSTickStruct> rt = day_ticks(kCurTDate, 100);
 	ASSERT_TRUE(write_bytes(rt_tick_file(), make_rt_block<WTSTickStruct>(BT_RT_Ticks, kCurTDate, 3, 10, rt)));
 
@@ -226,12 +236,45 @@ TEST_F(R23RdmCountTest, RtWindowBoundaryKeepsTickExactlyAtEtime)
 	EXPECT_DOUBLE_EQ(last->price, 30.0 + 101);
 	slice->release();
 
-	// 边界压到块内最后一条：RT 分支仍然把它算进来（`>` 不成立）
+	// 边界压到块内最后一条时，RT 路径也应将它算进来。
 	WTSTickSlice* whole = _reader.readTickSliceByCount("SSE.STK.600000", 3, 20240110143200000ull);
 	ASSERT_TRUE(whole != NULL);
 	EXPECT_EQ(whole->size(), 3u);
 	EXPECT_EQ(whole->at(-1)->action_time, 143200000u);
 	whole->release();
+}
+
+TEST_F(R23RdmCountTest, HisEarlierActionDateWithLaterClockStaysBeforeEtime)
+{
+	// action_date 早于截止日，因此即使时刻数值更大也应保留末条历史 tick。
+	vector<WTSTickStruct> history;
+	history.push_back(make_tick(20240109, 20240108, 143000000, 100));
+	history.push_back(make_tick(20240109, 20240108, 143200000, 101));
+	ASSERT_TRUE(write_his_tick_file(20240109, history));
+
+	WTSTickSlice* slice = _reader.readTickSliceByCount("SSE.STK.600000", 1, 20240109143100000ull);
+	ASSERT_TRUE(slice != NULL);
+	ASSERT_EQ(slice->size(), 1u);
+	EXPECT_EQ(slice->at(0)->action_date, 20240108u);
+	EXPECT_EQ(slice->at(0)->action_time, 143200000u);
+	slice->release();
+}
+
+TEST_F(R23RdmCountTest, RtEarlierActionDateWithLaterClockStaysBeforeEtime)
+{
+	// RT 块头属于当前交易日，但 tick 的 action_date 更早；日期优先于时刻比较。
+	vector<WTSTickStruct> rt;
+	rt.push_back(make_tick(kCurTDate, 20240109, 143000000, 100));
+	rt.push_back(make_tick(kCurTDate, 20240109, 143200000, 101));
+	ASSERT_TRUE(write_bytes(rt_tick_file(),
+		make_rt_block<WTSTickStruct>(BT_RT_Ticks, kCurTDate, (uint32_t)rt.size(), (uint32_t)rt.size(), rt)));
+
+	WTSTickSlice* slice = _reader.readTickSliceByCount("SSE.STK.600000", 1, 20240110143100000ull);
+	ASSERT_TRUE(slice != NULL);
+	ASSERT_EQ(slice->size(), 1u);
+	EXPECT_EQ(slice->at(0)->action_date, 20240109u);
+	EXPECT_EQ(slice->at(0)->action_time, 143200000u);
+	slice->release();
 }
 
 TEST_F(R23RdmCountTest, CountSizeCheckFailureCanRecoverAfterFileRepair)
@@ -246,16 +289,13 @@ TEST_F(R23RdmCountTest, CountSizeCheckFailureCanRecoverAfterFileRepair)
 	string bytes((const char*)&head, 8);        // 故意只写 8 字节
 	ASSERT_TRUE(write_bytes(bad, bytes));
 
-	const vector<WTSTickStruct> d07 = day_ticks(20240107, 300);
-	ASSERT_TRUE(write_his_tick_file(20240107, d07));
-
 	WTSTickSlice* s1 = _reader.readTickSliceByCount("SSE.STK.600000", 3, 20240110150000000ull);
-	ASSERT_TRUE(s1 != NULL);
-	// 坏文件那一天被跳过，只拿到 20240107 的 3 条
-	EXPECT_EQ(s1->size(), 3u);
+	// 短文件首次读取按失败契约返回 NULL 或稳定空切片，不跨过坏文件拼接上一日数据。
+	EXPECT_TRUE(s1 == NULL || (s1->empty() && s1->get_block_counts() == 0u));
 	EXPECT_EQ(_sink.count_of(LL_ERROR), 1u);
 	EXPECT_NE(_sink.last_log().find("Sizechecking of his tick data file"), string::npos);
-	s1->release();
+	if (s1 != NULL)
+		s1->release();
 
 	// 修复文件后同一 reader 应重新读取该日，而不是被首次失败留下的缓存条目永久挡住。
 	const vector<WTSTickStruct> repaired = day_ticks(20240108, 100);
@@ -388,23 +428,46 @@ TEST_F(R23RdmCountTest, KlineCountSplicesHisTailWithRtMin1Block)
 
 TEST_F(R23RdmCountTest, KlineCountWithNoBarsAnywhereReturnsEmptyResult)
 {
-	// 无历史、无实时 K 线时，契约允许返回 NULL 或 size()==0 的空切片；
-	// 任何非空返回值都应释放，且不能按 size() 读取没有数据块的幻影元素。
-	WTSKlineSlice* slice = _reader.readKlineSliceByCount("SSE.STK.600000", KP_Minute5, 5, 202401101500);
-	EXPECT_TRUE(slice == NULL || slice->size() == 0)
-		<< "无 bar 时不应返回 count 大于零的切片";
-	if (slice != NULL)
-		slice->release();
-
-	// barcnt==0 的有效空文件也应遵守相同的空结果契约。
+	// 有效空历史文件且没有实时 K 线时，不能把请求数当成历史条数。
 	vector<WTSBarStruct> none;
 	ASSERT_TRUE(write_bytes(his_kline_file("min5"),
 		make_block(BT_HIS_Minute5, BLOCK_VERSION_RAW_V2, pack_bars(none))));
-	WTSKlineSlice* slice2 = _reader.readKlineSliceByCount("SSE.STK.600000", KP_Minute5, 3, 202401101500);
+	WTSKlineSlice* slice = _reader.readKlineSliceByCount("SSE.STK.600000", KP_Minute5, 3, 202401101500);
+	EXPECT_TRUE(slice == NULL || slice->size() == 0)
+		<< "空历史和空实时数据不应返回 count 大于零的切片";
+	if (slice != NULL)
+		slice->release();
+
+	// 另一周期既没有历史文件也没有实时块，同样应返回空结果。
+	WTSKlineSlice* slice2 = _reader.readKlineSliceByCount("SSE.STK.600000", KP_Minute1, 5, 202401101500);
 	EXPECT_TRUE(slice2 == NULL || slice2->size() == 0)
-		<< "空 bar 文件不应生成非空幻影切片";
+		<< "无历史文件且无实时数据不应返回非空幻影切片";
 	if (slice2 != NULL)
 		slice2->release();
+}
+
+TEST_F(R23RdmCountTest, KlineCountWithEmptyHistoryKeepsRealtimeBars)
+{
+	// 历史文件合法但没有 bars；较少的实时 bars 仍应完整返回。
+	const vector<WTSBarStruct> none;
+	ASSERT_TRUE(write_bytes(his_kline_file("min1"),
+		make_block(BT_HIS_Minute1, BLOCK_VERSION_RAW_V2, pack_bars(none))));
+
+	vector<WTSBarStruct> rt;
+	rt.push_back(make_bar(kCurTDate, TimeUtils::timeToMinBar(kCurTDate, 1450), 10));
+	rt.push_back(make_bar(kCurTDate, TimeUtils::timeToMinBar(kCurTDate, 1451), 11));
+	ASSERT_TRUE(write_bytes(rt_kline_file("min1"),
+		make_rt_block<WTSBarStruct>(BT_RT_Minute1, kCurTDate, (uint32_t)rt.size(), (uint32_t)rt.size(), rt)));
+
+	WTSKlineSlice* slice = _reader.readKlineSliceByCount("SSE.STK.600000", KP_Minute1, 5, 202401101500);
+	ASSERT_TRUE(slice != NULL);
+	EXPECT_EQ(slice->size(), 2u);
+	EXPECT_EQ(slice->get_block_counts(), 1u);
+	ASSERT_TRUE(slice->at(0) != NULL);
+	ASSERT_TRUE(slice->at(-1) != NULL);
+	EXPECT_EQ(slice->at(0)->time % 10000, 1450u);
+	EXPECT_EQ(slice->at(-1)->time % 10000, 1451u);
+	slice->release();
 }
 
 // ------------------------------------------------------------------ 崩溃类收口
@@ -423,6 +486,13 @@ public:
 
 	virtual ~StrictBDMgr() { _stk->release(); }
 
+	void set_session_available(bool available) { _session_available = available; }
+
+	WTSSessionInfo* getSession(const char* sid) override
+	{
+		return _session_available ? BaseDataMgr::getSession(sid) : NULL;
+	}
+
 	WTSCommodityInfo* getCommodity(const char* exchg, const char* pid) override
 	{
 		if (exchg != NULL && pid != NULL
@@ -433,6 +503,7 @@ public:
 
 private:
 	WTSCommodityInfo*	_stk = NULL;
+	bool	_session_available = true;
 };
 
 const char* const kStrictProbeDirectoryEnv = "R23_RDM_COUNT_STRICT_BDM_DIR";
@@ -568,13 +639,34 @@ int run_strict_commodity_probe(const std::string& directory)
 		const bool valid = slice->size() == 3u
 			&& first != NULL && last != NULL
 			&& first->action_date == kCurTDate && first->action_time == 143000000u
-			&& last->action_date == kCurTDate && last->action_time == 143200000u;
+			&& last->action_date == kCurTDate && last->action_time == 143200000u
+			&& first->price == 130.0 && last->price == 132.0;
 		slice->release();
 		reader.clearCache();
 		if (!valid)
 		{
 			emit_probe_stage("R23_STAGE_SLICE_ASSERTIONS_FAILED");
 			return 15;
+		}
+
+		// The product is absent from the strict commodity map. The public reader
+		// contract is a safe NULL result rather than dereferencing a missing entry.
+		WTSTickSlice* unknown = reader.readTickSliceByCount("SSE.BAD.600000", 3, 20240110150000000ull);
+		if (unknown != NULL)
+		{
+			unknown->release();
+			reader.clearCache();
+			emit_probe_stage("R23_STAGE_UNKNOWN_COMMODITY_RETURNED_DATA");
+			return 17;
+		}
+		bd.set_session_available(false);
+		WTSTickSlice* missingSession = reader.readTickSliceByCount("SSE.STK.600000", 3, 20240110150000000ull);
+		if (missingSession != NULL)
+		{
+			missingSession->release();
+			reader.clearCache();
+			emit_probe_stage("R23_STAGE_MISSING_SESSION_RETURNED_DATA");
+			return 18;
 		}
 
 		emit_probe_stage("R23_STAGE_VALIDATION_COMPLETE");
@@ -592,7 +684,7 @@ int run_strict_commodity_probe(const std::string& directory)
 
 } // namespace
 
-TEST(R23RdmCountStrictProbe, CountByCodeShapedPidUsesProductForCommodityLookup)
+TEST(R23RdmCountStrictProbe, CountUsesProductAndSafelyRejectsUnknownCommodity)
 {
 	const bool deathTestChild = is_threadsafe_death_test_child();
 	std::string probeDirectory;

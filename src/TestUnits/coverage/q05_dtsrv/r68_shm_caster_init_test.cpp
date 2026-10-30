@@ -2,15 +2,13 @@
  * \file r68_shm_caster_init_test.cpp
  * \brief WtDtCore/ShmCaster::init 的失败形态补测（迭代01 第十三波 R68）
  *
- * 与既有 r18_shm_caster_test.cpp 的分工（只读复用，不修改）：
+ * 与既有 r18_shm_caster_test.cpp 的分工：
  *  - R18 已覆盖 DataItem/CastQueue 尺寸与默认值、cfg==NULL / active=false 两条拒绝、
  *    四个 broadcast 的未初始化守卫；
- *  - 本文件补 init(active=true) 在「path 是已存在目录」时的失败形态：BoostFile 的
- *    create/truncate 返回值被忽略、BoostMappingFile::map 抛出的 interprocess_exception
- *    没有被 init 捕获，函数没有按 bool 契约返回 false（BUG-R68-002）。
- *    该路径在 file_mapping 构造处即失败，不会建立任何映射、不创建 shm 文件。
+ *  - 本文件验证 init(active=true) 在「path 是已存在目录」和空 path 时安全返回 false；
+ *    对应 BUG-R68-002，init 必须检查文件准备/映射结果并捕获映射异常。
  *
- * 不建立真实共享内存映射；目录路径在映射前就抛异常。
+ * 不建立真实共享内存映射；目录和空路径均是本地文件系统拒绝场景。
  */
 #include <gtest/gtest.h>
 
@@ -54,14 +52,6 @@ protected:
 	fs::path _dir;
 };
 
-/*
- * ShmCaster.cpp:35-51 —— path 指向一个已存在的目录：
- *   1) BoostFile::create_or_open_file / truncate_file 均失败，但返回值被忽略（L39-43）；
- *   2) BoostMappingFile::map（L47）在 file_mapping 构造处抛 interprocess_exception。
- * init 没有 try/catch、也没有把失败转成 return false，异常直接穿透调用方。
- * 缺陷登记：docs/迭代计划/迭代01/bugs/R68.md BUG-R68-002。
- * 该路径未建立映射，也未创建/截断任何文件，因此不违反「不建真实 shm 映射」约束。
- */
 TEST_F(R68ShmCasterInitTest, InitWithDirectoryPathReturnsFalseWithoutThrowing)
 {
 	fs::path dirAsPath = _dir / "shm_dir";
@@ -78,6 +68,20 @@ TEST_F(R68ShmCasterInitTest, InitWithDirectoryPathReturnsFalseWithoutThrowing)
 	EXPECT_NO_THROW(initialized = caster.init(cfg));
 	EXPECT_FALSE(initialized);
 	cfg->release();
+}
+
+TEST_F(R68ShmCasterInitTest, InitWithEmptyPathReturnsFalseWithoutTouchingFilesystem)
+{
+	WTSVariant* cfg = loadCfg("empty_path.json", R"JSON({"active": true, "path": ""})JSON");
+	ASSERT_NE(cfg, nullptr);
+
+	ShmCaster caster;
+	bool initialized = true;
+	EXPECT_NO_THROW(initialized = caster.init(cfg));
+	EXPECT_FALSE(initialized);
+	cfg->release();
+
+	EXPECT_EQ(std::distance(fs::directory_iterator(_dir), fs::directory_iterator{}), 1);
 }
 
 // ShmCaster.cpp:31-32 —— active=false 时即使 path 指向一个已有文件，也必须原样保留

@@ -53,6 +53,28 @@ bool ActionPolicyMgr::init(const char* filename)
 
 	// 遍历配置中的所有规则组
 	auto keys = cfg->memberNames();
+	// 未初始化的管理器必须有 default 规则组，避免后续查询没有安全回退目标。
+	// 已有 default 时继续允许增量加载不含 default 的配置，保留历史累加行为。
+	if (_rules.find("default") == _rules.end())
+	{
+		bool hasDefaultGroup = false;
+		for (const std::string& key : keys)
+		{
+			if (key == "default")
+			{
+				hasDefaultGroup = true;
+				break;
+			}
+		}
+
+		if (!hasDefaultGroup)
+		{
+			WTSLogger::error("Loading action policy failed: default group is required");
+			cfg->release();
+			return false;
+		}
+	}
+
 	for (auto it = keys.begin(); it != keys.end(); it++)
 	{
 		// 获取规则组名称
@@ -154,8 +176,13 @@ const ActionRuleGroup& ActionPolicyMgr::getActionRules(const char* pid)
 			WTSLogger::error("Action policy group {} not exists, changed to default group", gpName.c_str());
 		}
 
-		// 断言默认规则组必须存在
-		assert(it != _rules.end());
+		// 即使策略配置尚未成功初始化，也安全地返回空规则组。
+		if (it == _rules.end())
+		{
+			static const ActionRuleGroup emptyGroup;
+			return emptyGroup;
+		}
+
 		// 返回规则组
 		return it->second;
 	}

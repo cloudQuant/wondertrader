@@ -2,19 +2,13 @@
  * \file r154_state_monitor_states_test.cpp
  * \brief StateMonitor 非 ORIGINAL 状态机与收盘清理（迭代01 第二十三波 R154）
  *
- * R145 只让 run() 跑完首轮（SS_ORIGINAL，L196-296）。本文件用「无论当前 HHMM
- * 是多少都落到同一出口」的会话/状态模板，让产品线程继续推进 2~4 轮，覆盖：
- *   StateMonitor.cpp:298-331  SS_INITIALIZED（RECEIVING / PAUSED / 竞价未到）
- *   StateMonitor.cpp:333-371  SS_RECEIVING（维持接收）
- *   StateMonitor.cpp:373-425  SS_PAUSED（维持休盘）
- *   StateMonitor.cpp:427-463  SS_CLOSED（PROCING / PAUSED）
- *   StateMonitor.cpp:465-467  SS_PROCING -> SS_PROCED
- *   StateMonitor.cpp:469-513  SS_PROCED / SS_Holiday（重置与保持节假日）
- *   StateMonitor.cpp:521-526  全表 PROCING 时的 CMD_CLEAR_CACHE 清理
+ * R145 只让 run() 跑完首轮（SS_ORIGINAL，L196-296）。本文件覆盖：
+ *   StateMonitor::advanceOnce  INITIALIZED / RECEIVING / PAUSED / CLOSED / PROCING / PROCED
+ *   StateMonitor::advanceOnce  Holiday 的转换与保持
+ *   StateMonitor::run          全表 PROCING 时的 CMD_CLEAR_CACHE 清理
  *
- * run() 内部按墙上时钟做 1 秒节流，因此轮次间隔无法注入；墙钟在这里只作为
- * 「等下一轮」的上限超时，断言的目标状态由模板保证与具体钟点无关。周末
- * isTradingDate 硬编码 false，非节假日序列按环境 GTEST_SKIP。
+ * 两个 PAUSED 分支通过 advanceOnce 的固定日期/HHMM seam 逐轮推进，不使用墙钟等待；
+ * 其余后台线程用例仍验证 run() 的生产节流与状态推进。
  */
 #include <gtest/gtest.h>
 
@@ -26,16 +20,27 @@
 
 #include "r154_test_util.h"
 
+struct R154StateMonitorTestAccess
+{
+	static void advanceOnce(StateMonitor& monitor, uint32_t date, uint32_t minute)
+	{
+		monitor.advanceOnce(date, minute);
+	}
+};
+
 namespace {
 
 using r154::wait_state;
+
+constexpr uint32_t kR154OrdinaryWeekday = 20261026; // Monday; fixture has no holiday entries.
+constexpr uint32_t kR154PauseTestTime = 900;
 
 class R154StateMonitorStatesTest : public r154::StateFixture
 {
 };
 
 /*
- * StateMonitor.cpp:298-331（isInSections 命中 -> RECEIVING）、333-371（维持）
+ * StateMonitor::advanceOnce（isInSections 命中 -> RECEIVING、随后维持）
  * INITALL 的区间 1..2359 换算成 [0,2400)，任意 HHMM 都在交易区间内。
  * 首轮 ORIGINAL：close=2400 不收盘、无竞价 -> INITIALIZED；
  * 第二轮 SS_INITIALIZED：isInSections 为 true -> RECEIVING；
@@ -68,38 +73,29 @@ TEST_F(R154StateMonitorStatesTest, InitializedThenReceivingStaysReceiving)
 }
 
 /*
- * StateMonitor.cpp:298-331（isInSections 未命中 -> PAUSED）、373-425（维持）
- * INITEMP 的区间 0..0 在 StateMonitor::initialize 里 stime-- 下溢，isInSections
- * 恒为 false；close=2400 使 offTime < getCloseTime 恒成立。
- * 首轮 INITIALIZED，第二轮 SS_INITIALIZED -> PAUSED，第三轮 SS_PAUSED：
- * 品种非节假日且 offTime 不在区间内 -> 维持 PAUSED。
+ * StateMonitor::advanceOnce（isInSections 未命中 -> PAUSED、随后维持）
+ * 固定普通日 2026-10-26、09:00 位于 INITEMP 的 09:30–15:00 交易段之前。
+ * 每次显式推进一轮：ORIGINAL -> INITIALIZED -> PAUSED，第三轮仍维持 PAUSED。
  */
-TEST_F(R154StateMonitorStatesTest, InitializedWithoutSectionsTransitionsToPaused)
+TEST_F(R154StateMonitorStatesTest, InitializedOutsideSectionsTransitionsToPaused)
 {
-	if (r154::is_weekend())
-		GTEST_SKIP() << "周末 isTradingDate 恒为 false，非节假日序列不可达";
-
 	StateMonitor mon;
-	r154::MonitorGuard guard(mon);
 	ASSERT_TRUE(mon.initialize(
 		state_cfg(R"JSON({"INITEMP": {"inittime": 0, "closetime": 2400, "proctime": 2400}})JSON")
 			.string().c_str(),
 		&_bdMgr, &_dtMgr));
-	mon.run();
-	guard.arm();
 
-	ASSERT_TRUE(wait_state(mon, "INITEMP", SS_INITIALIZED))
-		<< "首轮未进入 SS_INITIALIZED";
-	ASSERT_TRUE(wait_state(mon, "INITEMP", SS_PAUSED, 5000))
-		<< "SS_INITIALIZED 未推进到 SS_PAUSED";
-
-	std::this_thread::sleep_for(std::chrono::milliseconds(1200));
+	R154StateMonitorTestAccess::advanceOnce(mon, kR154OrdinaryWeekday, kR154PauseTestTime);
+	ASSERT_TRUE(mon.isInState("INITEMP", SS_INITIALIZED)) << "ORIGINAL 未推进到 SS_INITIALIZED";
+	R154StateMonitorTestAccess::advanceOnce(mon, kR154OrdinaryWeekday, kR154PauseTestTime);
+	ASSERT_TRUE(mon.isInState("INITEMP", SS_PAUSED));
+	R154StateMonitorTestAccess::advanceOnce(mon, kR154OrdinaryWeekday, kR154PauseTestTime);
 	EXPECT_TRUE(mon.isInState("INITEMP", SS_PAUSED));
 	EXPECT_FALSE(mon.isAnyInState(SS_RECEIVING));
 }
 
 /*
- * StateMonitor.cpp:427-467、469-513、521-526
+ * StateMonitor::advanceOnce 与 StateMonitor::run
  * CLOSEPROC：close=1、proc=0、init=2359（不触发 2400 的 offsetTime 回绕）。
  * 首轮 ORIGINAL -> CLOSED；第二轮 SS_CLOSED 的 offTime>=offProcTime -> PROCING，
  * 并在轮末 isAllInState(SS_PROCING) 命中时调用 CMD_CLEAR_CACHE；第三轮
@@ -133,42 +129,30 @@ TEST_F(R154StateMonitorStatesTest, ClosedProcessingProcedThenResetToOriginal)
 }
 
 /*
- * StateMonitor.cpp:427-463 的 CLOSED -> PAUSED 分支
- * CLOSEPAUSE：close=1、proc=2359，auction 0..1 使 getAuctionStartTime(true)==0，
- * 且 01:00 之后竞价位不再命中；交易区间 0..0 下溢为无效区间，isInSections=false。
- * 首轮 ORIGINAL -> CLOSED；第二轮 SS_CLOSED：offTime 未到 offProcTime=2359，
- * 却落在 [aucStart=0, getCloseTime=2400] 内且不在区间 -> PAUSED。
- * 00:00 与 23:57 之后按环境跳过（offTime 会落到 init/收盘边界）。
+ * StateMonitor::advanceOnce 的 CLOSED -> PAUSED 分支
+ * 固定普通日 2026-10-26、09:00 时，close=1 使首轮 ORIGINAL -> CLOSED；auction
+ * 0..1 提供开始阈值 0，09:00 小于 proctime=2359 且不在 09:30–15:00 交易段，
+ * 第二轮 SS_CLOSED -> PAUSED，第三轮仍维持 PAUSED。
  */
 TEST_F(R154StateMonitorStatesTest, ClosedBeforeProcTimeFallsBackToPaused)
 {
-	if (r154::is_weekend())
-		GTEST_SKIP() << "周末 isTradingDate 恒为 false，非节假日序列不可达";
-
-	const uint32_t curMin = r154::current_minute();
-	if (curMin == 0 || curMin >= 2357)
-		GTEST_SKIP() << "当前 HHMM=" << curMin << " 落在收盘/跨日边界";
-
 	StateMonitor mon;
-	r154::MonitorGuard guard(mon);
 	ASSERT_TRUE(mon.initialize(
 		state_cfg(R"JSON({"CLOSEPAUSE": {"inittime": 2359, "closetime": 1, "proctime": 2359}})JSON")
 			.string().c_str(),
 		&_bdMgr, &_dtMgr));
-	mon.run();
-	guard.arm();
 
-	ASSERT_TRUE(wait_state(mon, "CLOSEPAUSE", SS_CLOSED)) << "首轮未进入 SS_CLOSED";
-	ASSERT_TRUE(wait_state(mon, "CLOSEPAUSE", SS_PAUSED, 5000))
-		<< "SS_CLOSED 未推进到 SS_PAUSED";
-
-	std::this_thread::sleep_for(std::chrono::milliseconds(1200));
+	R154StateMonitorTestAccess::advanceOnce(mon, kR154OrdinaryWeekday, kR154PauseTestTime);
+	ASSERT_TRUE(mon.isInState("CLOSEPAUSE", SS_CLOSED)) << "ORIGINAL 未推进到 SS_CLOSED";
+	R154StateMonitorTestAccess::advanceOnce(mon, kR154OrdinaryWeekday, kR154PauseTestTime);
+	ASSERT_TRUE(mon.isInState("CLOSEPAUSE", SS_PAUSED));
+	R154StateMonitorTestAccess::advanceOnce(mon, kR154OrdinaryWeekday, kR154PauseTestTime);
 	EXPECT_TRUE(mon.isInState("CLOSEPAUSE", SS_PAUSED));
 	EXPECT_FALSE(mon.isInState("CLOSEPAUSE", SS_CLOSED));
 }
 
 /*
- * StateMonitor.cpp:469-513 的 SS_Holiday 保持分支（重置分支不可达，见清单）
+ * StateMonitor::advanceOnce 的 SS_Holiday 保持分支（重置分支不可达，见清单）
  * HOL 会话不挂任何品种：getSessionComms 返回 NULL，首轮 ORIGINAL 直接 SS_Holiday；
  * 第二轮 SS_Holiday 在 offTime<offInitTime 内，pCommSet 仍为空 -> isAllHoliday
  * 保持 true，不会重置为 ORIGINAL。
@@ -193,7 +177,7 @@ TEST_F(R154StateMonitorStatesTest, HolidaySessionStaysHolidayAcrossSecondRound)
 }
 
 /*
- * StateMonitor.cpp:298-331 的 offAucSTime==-1 反面（竞价已配置但尚未开始）
+ * StateMonitor::advanceOnce 的竞价已配置但尚未开始分支
  * INITAUC 的 auction 2359..2359 使 getAuctionStartTime(true)==2359，区间覆盖全天
  * 但竞价分支要 offTime>=2359 才进入。非 23:59 时首轮 ORIGINAL 走 init 分支
  * -> INITIALIZED；第二轮 SS_INITIALIZED 因 offTime<aucStart 不改变状态。

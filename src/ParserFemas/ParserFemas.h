@@ -12,6 +12,7 @@
 #include "../Share/DLLHelper.hpp"
 #include <API/Femas3.02/USTPFtdcMduserApi.h>
 #include <map>
+#include <mutex>
 
 NS_WTP_BEGIN
 class WTSTickData;
@@ -73,10 +74,13 @@ public:
 	virtual void OnHeartBeatWarning( int nTimeLapse ) override;
 
 private:
+	typedef CUstpFtdcMduserApi* (*FemasCreator)(const char *);
+
 	/*
 	 *	发送登录请求
 	 */
 	void ReqUserLogin();
+	bool createUserApi(DllHandle library, FemasCreator creator, const char* flowPath);
 	/*
 	 *	订阅品种行情
 	 */
@@ -90,6 +94,9 @@ private:
 private:
 	uint32_t			m_uTradingDate;
 	[[maybe_unused]] LoginStatus			m_loginState;
+	mutable std::mutex	m_connectionMutex;
+	bool				m_connectionCallbacksEnabled;
+	bool				m_connected;
 	CUstpFtdcMduserApi*	m_pUserAPI;
 
 	std::string			m_strFrontAddr;
@@ -106,7 +113,6 @@ private:
 	IBaseDataMgr*		m_pBaseDataMgr;
 
 	DllHandle		m_hInst;
-	typedef CUstpFtdcMduserApi* (*FemasCreator)(const char *);
 	FemasCreator		m_funcCreator;
 };
 

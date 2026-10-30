@@ -20,7 +20,11 @@
 #include "../Includes/IBaseDataMgr.h"
 #include "../Includes/WTSVersion.h"
 
+#include <exception>
 #include <filesystem>
+#include <limits>
+#include <system_error>
+#include <vector>
 namespace fs = std::filesystem;
 
  //By Wesley @ 2022.01.05
@@ -84,6 +88,10 @@ ParserCTPMini::ParserCTPMini()
 	:m_uTradingDate(0)
 ,m_pUserAPI(NULL)
 	,m_iRequestID(0)
+	,m_sink(NULL)
+	,m_pBaseDataMgr(NULL)
+	,m_hInstCTP(NULL)
+	,m_funcCreator(NULL)
 	{
 }
 
@@ -106,16 +114,21 @@ bool ParserCTPMini::init(WTSVariant* config)
 
 	m_strFlowDir = StrUtil::standardisePath(m_strFlowDir);
 
+	std::string path = fmtutil::format("{}/{}/{}/", m_strFlowDir.c_str(), m_strBroker.c_str(), m_strUserID.c_str());
+	std::error_code pathError;
+	fs::create_directories(fs::path(path), pathError);
+	if (pathError)
+	{
+		if (m_sink)
+			write_log(m_sink, LL_ERROR, "[ParserCTPMini] Failed to create flow directory '{}': {}", path, pathError.message());
+		return false;
+	}
+
 	std::string module = config->getCString("ctpmodule");
 	if (module.empty())
 		module = "thostmduserapi";
 	std::string dllpath = getBinDir() + DLLHelper::wrap_module(module.c_str(), "lib");;
 	m_hInstCTP = DLLHelper::load_library(dllpath.c_str());
-	std::string path = fmtutil::format("{}/{}/{}/", m_strFlowDir.c_str(), m_strBroker.c_str(), m_strUserID.c_str());
-	if (!StdFile::exists(path.c_str()))
-	{
-		fs::create_directories(fs::path(path));
-	}
 
 #ifdef _WIN32
 #	ifdef _WIN64
@@ -263,6 +276,8 @@ void ParserCTPMini::OnRtnDepthMarketData( CThostFtdcDepthMarketDataField *pDepth
 	WTSCommodityInfo* pCommInfo = contract->getCommInfo();
 
 	WTSTickData* tick = WTSTickData::create(contract->getCode());
+	if (tick == NULL)
+		return;
 	tick->setContractInfo(contract);
 	WTSTickStruct& quote = tick->getTickStruct();
 	strcpy(quote.exchg, pCommInfo->getExchg());
@@ -372,39 +387,60 @@ void ParserCTPMini::ReqUserLogin()
 
 void ParserCTPMini::SubscribeMarketData()
 {
-	CodeSet codeFilter = m_filterSubs;
-	if(codeFilter.empty())
-	{//如果订阅礼包只空的,则取出全部合约列表
+	SubmitMarketDataSubscriptions(m_filterSubs);
+}
+
+bool ParserCTPMini::IsSubscriptionCountSupported(std::size_t count)
+{
+	return count <= static_cast<std::size_t>((std::numeric_limits<int>::max)());
+}
+
+void ParserCTPMini::SubmitMarketDataSubscriptions(const CodeSet &codes)
+{
+	if (codes.empty())
+		return;
+
+	if (!IsSubscriptionCountSupported(codes.size()))
+	{
+		if (m_sink)
+			write_log(m_sink, LL_ERROR, "[ParserCTPMini] Too many contracts to subscribe: {}", codes.size());
 		return;
 	}
 
-	char ** subscribe = new char*[codeFilter.size()];
-	int nCount = 0;
-	for(auto& code : codeFilter)
+	if (m_pUserAPI == NULL)
+		return;
+
+	std::vector<char*> subscribe;
+	try
 	{
-		std::size_t pos = code.find('.');
-		if (pos != std::string::npos)
-			subscribe[nCount++] = (char*)code.c_str() + pos + 1;
-		else
-			subscribe[nCount++] = (char*)code.c_str();
+		subscribe.reserve(codes.size());
+		for (const auto& code : codes)
+		{
+			const std::size_t pos = code.find('.');
+			char* codePtr = const_cast<char*>(code.c_str());
+			if (pos != std::string::npos)
+				codePtr += pos + 1;
+			subscribe.push_back(codePtr);
+		}
+	}
+	catch (const std::exception& e)
+	{
+		if (m_sink)
+			write_log(m_sink, LL_ERROR, "[ParserCTPMini] Preparing md subscribe request failed: {}", e.what());
+		return;
 	}
 
-	if(m_pUserAPI && nCount > 0)
+	const int nCount = static_cast<int>(subscribe.size());
+	const int iResult = m_pUserAPI->SubscribeMarketData(subscribe.data(), nCount);
+	if (iResult != 0)
 	{
-		int iResult = m_pUserAPI->SubscribeMarketData(subscribe, nCount);
-		if(iResult != 0)
-		{
-			if(m_sink)
-				write_log(m_sink, LL_ERROR, "[ParserCTPMini] Sending md subscribe request failed: {}", iResult);
-		}
-		else
-		{
-			if(m_sink)
-				write_log(m_sink, LL_INFO, "[ParserCTPMini] Market data of {} contracts subscribed in total", nCount);
-		}
+		if (m_sink)
+			write_log(m_sink, LL_ERROR, "[ParserCTPMini] Sending md subscribe request failed: {}", iResult);
 	}
-	codeFilter.clear();
-	delete[] subscribe;
+	else if (m_sink)
+	{
+		write_log(m_sink, LL_INFO, "[ParserCTPMini] Market data of {} contracts subscribed in total", nCount);
+	}
 }
 
 bool ParserCTPMini::IsErrorRspInfo(CThostFtdcRspInfoField */*pRspInfo*/)
@@ -421,31 +457,7 @@ void ParserCTPMini::subscribe(const CodeSet &vecSymbols)
 	else
 	{
 		m_filterSubs = vecSymbols;
-		char * subscribe[500] = {NULL};
-		int nCount = 0;
-		for (auto& code  : vecSymbols)
-		{
-			std::size_t pos = code.find('.');
-			if (pos != std::string::npos)
-				subscribe[nCount++] = (char*)code.c_str() + pos + 1;
-			else
-				subscribe[nCount++] = (char*)code.c_str();
-		}
-
-		if(m_pUserAPI && nCount > 0)
-		{
-			int iResult = m_pUserAPI->SubscribeMarketData(subscribe, nCount);
-			if(iResult != 0)
-			{
-				if (m_sink)
-					write_log(m_sink, LL_ERROR, "[ParserCTPMini] Sending md subscribe request failed: {}", iResult);
-			}
-			else
-			{
-				if (m_sink)
-					write_log(m_sink, LL_INFO, "[ParserCTPMini] Market data of {} contracts subscribed in total", nCount);
-			}
-		}
+		SubmitMarketDataSubscriptions(m_filterSubs);
 	}
 }
 

@@ -1,0 +1,1 @@
+LLVM_PROFILE_FILE=/tmp/n02_002_cta_final_%p.profraw ./build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_wtcore --gtest_filter='N02CtaTickerTest.*:R41EngineFixture.R41CtaTickerInitWithSession:R41EngineFixture.R41CtaTickerToleratesMissingSession' --gtest_output=xml:/tmp/n02_002_cta_final.xml > /tmp/n02_002_cta_final.log 2>&1

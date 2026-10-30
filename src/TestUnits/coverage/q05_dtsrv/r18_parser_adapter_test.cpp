@@ -24,8 +24,11 @@
 #include <cstdint>
 #include <cstring>
 #include <fstream>
+#include <memory>
+#include <stdexcept>
 #include <string>
 #include <unistd.h>
+#include <vector>
 
 #include <filesystem>
 
@@ -59,11 +62,27 @@ void write_file(const fs::path& p, const std::string& content)
 	ofs.close();
 }
 
+ParserAdapterMgr& provider_release_failure_quarantine()
+{
+	// A failed provider release has no drain proof, so keep this test candidate
+	// reachable for the process lifetime just as a Runner must keep it quarantined.
+	static ParserAdapterMgr* owners = new ParserAdapterMgr();
+	return *owners;
+}
+
 struct FakeParserApiStats
 {
 	int initCnt { 0 };
+	int registerCnt { 0 };
 	int subCnt { 0 };
+	int connectCnt { 0 };
+	int releaseCnt { 0 };
 	bool initResult { true };
+	bool initThrew { false };
+	bool registerThrew { false };
+	bool subscribeThrew { false };
+	bool releaseThrew { false };
+	bool destroyed { false };
 };
 
 /*
@@ -81,6 +100,8 @@ public:
 	{
 		if (_destroyed != nullptr)
 			*_destroyed = true;
+		if (_stats != nullptr)
+			_stats->destroyed = true;
 	}
 
 	virtual bool init(WTSVariant* config) override
@@ -91,16 +112,32 @@ public:
 		{
 			_stats->initCnt++;
 			_stats->initResult = _initRet;
+			_stats->initThrew = _initThrows;
 		}
+		if (_initThrows)
+			throw std::runtime_error("fake parser init failure");
 		return _initRet;
 	}
 
 	virtual void release() override
 	{
 		_releaseCnt++;
+		if (_stats != nullptr)
+		{
+			_stats->releaseCnt++;
+			_stats->releaseThrew = _releaseThrows;
+		}
+		if (_releaseThrows)
+			throw std::runtime_error("fake parser release failure");
 	}
 
-	virtual bool connect() override { _connectCnt++; return true; }
+	virtual bool connect() override
+	{
+		_connectCnt++;
+		if (_stats != nullptr)
+			_stats->connectCnt++;
+		return true;
+	}
 
 	virtual bool disconnect() override { _disconnectCnt++; return true; }
 
@@ -111,7 +148,12 @@ public:
 		_subCnt++;
 		_subbed = setCodes;
 		if (_stats != nullptr)
+		{
 			_stats->subCnt++;
+			_stats->subscribeThrew = _subscribeThrows;
+		}
+		if (_subscribeThrows)
+			throw std::runtime_error("fake parser subscribe failure");
 	}
 
 	virtual void unsubscribe(const CodeSet& setCodes) override
@@ -124,10 +166,21 @@ public:
 	{
 		_spiRegCnt++;
 		_spi = spi;
+		if (_stats != nullptr)
+		{
+			_stats->registerCnt++;
+			_stats->registerThrew = _registerThrows;
+		}
+		if (_registerThrows)
+			throw std::runtime_error("fake parser register failure");
 	}
 
 	bool*		_destroyed { nullptr };
 	bool		_initRet { true };
+	bool		_initThrows { false };
+	bool		_registerThrows { false };
+	bool		_subscribeThrows { false };
+	bool		_releaseThrows { false };
 	FakeParserApiStats* _stats { nullptr };
 	bool		_connected { false };
 	int			_initCnt { 0 };
@@ -259,6 +312,9 @@ TEST_F(R18ParserAdapterTest, FreshAdapterIsIdleAndExposesBaseDataMgr)
 
 	// 未 init 前 _id 是空串（ParserAdapter.cpp:89 之前没人写过）
 	EXPECT_STREQ(pa.id(), "");
+	// 空 API 的早期失败不转移所有权，也不占用 adapter。
+	EXPECT_FALSE(pa.initExt("p_null", nullptr));
+	EXPECT_FALSE(pa.hasApi());
 	// 无 api 时 run() 必须在 ParserAdapter.cpp:223-224 返回 false，且不崩
 	EXPECT_FALSE(pa.run());
 	// 构造参数被原样带回（ParserAdapter.cpp:319-322）
@@ -276,31 +332,201 @@ TEST_F(R18ParserAdapterTest, FreshAdapterIsIdleAndExposesBaseDataMgr)
 
 TEST_F(R18ParserAdapterTest, InitExtReturnsFalseWhenApiInitFails)
 {
-	bool destroyed = false;
 	FakeParserApiStats stats;
-	FakeParserApi* api = new FakeParserApi(&destroyed, false, &stats);
+	FakeParserApi* api = new FakeParserApi(nullptr, false, &stats);
 	ParserAdapter pa(&_bdMgr, &_dm, nullptr);
 
-	// IParserApi::init 返回 false 时，适配器初始化也必须报告失败。
+	// Ownership transfers on entry; failed initialization leaves the API and SPI
+	// context attached for Runner quarantine and never subscribes or connects.
 	EXPECT_FALSE(pa.initExt("p1", api));
 	EXPECT_EQ(stats.initCnt, 1);
 	EXPECT_FALSE(stats.initResult);
-	EXPECT_EQ(stats.subCnt, 0);			// 初始化失败不应订阅
+	EXPECT_EQ(stats.subCnt, 0);
+	EXPECT_EQ(api->_spi, static_cast<IParserSpi*>(&pa));
+	EXPECT_TRUE(pa.hasApi());
+	EXPECT_FALSE(pa.run());
+	EXPECT_EQ(stats.connectCnt, 0);
+
+	EXPECT_EQ(stats.releaseCnt, 0);           // 失败路径不调用 provider release
+	EXPECT_FALSE(stats.destroyed);
+
+	pa.release();                            // Runner 在外部屏障后显式清理
+	EXPECT_EQ(stats.releaseCnt, 1);
+	EXPECT_TRUE(stats.destroyed);
+}
+
+TEST_F(R18ParserAdapterTest, InitExtRetainsApiWhenProviderInitThrows)
+{
+	FakeParserApiStats stats;
+	FakeParserApi* api = new FakeParserApi(nullptr, true, &stats);
+	api->_initThrows = true;
+	ParserAdapter pa(&_bdMgr, &_dm, nullptr);
+
+	EXPECT_FALSE(pa.initExt("p1_throw", api));
+	EXPECT_EQ(stats.initCnt, 1);
+	EXPECT_TRUE(stats.initThrew);
+	EXPECT_EQ(stats.subCnt, 0);
+	EXPECT_EQ(api->_spi, static_cast<IParserSpi*>(&pa));
+	EXPECT_TRUE(pa.hasApi());
+	EXPECT_FALSE(pa.run());
+	EXPECT_EQ(stats.connectCnt, 0);
+	EXPECT_EQ(stats.releaseCnt, 0);
+	EXPECT_FALSE(stats.destroyed);
 
 	pa.release();
-	// 失败后的 API 所有权策略尚未约定：允许 initExt 已清理，也允许仍由调用方清理。
-	if (!destroyed)
-	{
-		api->release();
-		delete api;
-	}
+	EXPECT_EQ(stats.releaseCnt, 1);
+	EXPECT_TRUE(stats.destroyed);
+}
+
+TEST_F(R18ParserAdapterTest, InitExtRetainsApiWhenRegisterSpiThrows)
+{
+	FakeParserApiStats stats;
+	FakeParserApi* api = new FakeParserApi(nullptr, true, &stats);
+	api->_registerThrows = true;
+	ParserAdapter pa(&_bdMgr, &_dm, nullptr);
+
+	EXPECT_FALSE(pa.initExt("p_register_throw", api));
+	EXPECT_EQ(stats.registerCnt, 1);
+	EXPECT_TRUE(stats.registerThrew);
+	EXPECT_EQ(stats.initCnt, 0);
+	EXPECT_EQ(api->_spi, static_cast<IParserSpi*>(&pa));
+	EXPECT_TRUE(pa.hasApi());
+	EXPECT_FALSE(pa.run());
+	EXPECT_EQ(stats.releaseCnt, 0);
+	EXPECT_FALSE(stats.destroyed);
+
+	pa.release();
+	EXPECT_EQ(stats.releaseCnt, 1);
+	EXPECT_TRUE(stats.destroyed);
+}
+
+TEST_F(R18ParserAdapterTest, InitExtRetainsApiWhenSubscribeThrows)
+{
+	FakeParserApiStats stats;
+	FakeParserApi* api = new FakeParserApi(nullptr, true, &stats);
+	api->_subscribeThrows = true;
+	ParserAdapter pa(&_bdMgr, &_dm, nullptr);
+
+	EXPECT_FALSE(pa.initExt("p_subscribe_throw", api));
+	EXPECT_EQ(stats.registerCnt, 1);
+	EXPECT_EQ(stats.initCnt, 1);
+	EXPECT_TRUE(stats.initResult);
+	EXPECT_EQ(stats.subCnt, 1);
+	EXPECT_TRUE(stats.subscribeThrew);
+	EXPECT_EQ(api->_spi, static_cast<IParserSpi*>(&pa));
+	EXPECT_TRUE(pa.hasApi());
+	EXPECT_FALSE(pa.run());
+	EXPECT_EQ(stats.connectCnt, 0);
+	EXPECT_EQ(stats.releaseCnt, 0);
+	EXPECT_FALSE(stats.destroyed);
+
+	pa.release();
+	EXPECT_EQ(stats.releaseCnt, 1);
+	EXPECT_TRUE(stats.destroyed);
+}
+
+TEST_F(R18ParserAdapterTest, ProviderReleaseThrowRetainsOwnerAndIsNotRetried)
+{
+	FakeParserApiStats stats;
+	FakeParserApi* api = new FakeParserApi(nullptr, true, &stats);
+	ParserAdapterPtr candidate = std::make_shared<ParserAdapter>(nullptr, nullptr, nullptr);
+	EXPECT_FALSE(candidate->initExt(nullptr, api));
+	ParserAdapterMgr& quarantine = provider_release_failure_quarantine();
+	static std::atomic<int> sequence { 0 };
+	const std::string adapterId = "r18_release_throw_" + std::to_string(sequence++);
+	ASSERT_TRUE(quarantine.addAdapter(adapterId.c_str(), candidate));
+	api->_releaseThrows = true;
+
+	quarantine.release();
+	EXPECT_TRUE(stats.releaseThrew);
+	EXPECT_EQ(stats.releaseCnt, 1);
+	EXPECT_FALSE(stats.destroyed);
+	EXPECT_TRUE(candidate->hasApi());
+	EXPECT_EQ(api->_spi, nullptr);
+	EXPECT_EQ(quarantine.size(), 1u);
+	EXPECT_FALSE(quarantine.releaseComplete());
+	EXPECT_EQ(quarantine.getAdapter(adapterId.c_str()).get(), candidate.get());
+
+	// A second call must not retry provider teardown or destroy a possibly
+	// partially released API. The process-lifetime owner remains quarantined.
+	quarantine.release();
+	EXPECT_EQ(stats.releaseCnt, 1);
+	EXPECT_FALSE(stats.destroyed);
+	EXPECT_TRUE(candidate->hasApi());
+	EXPECT_EQ(quarantine.size(), 1u);
+}
+
+TEST_F(R18ParserAdapterTest, InitExtTransfersNonNullApiBeforeArgumentValidation)
+{
+	FakeParserApiStats stats;
+	FakeParserApi* api = new FakeParserApi(nullptr, true, &stats);
+	ParserAdapter pa(&_bdMgr, &_dm, nullptr);
+
+	EXPECT_FALSE(pa.initExt(nullptr, api));
+	EXPECT_TRUE(pa.hasApi());
+	EXPECT_EQ(stats.initCnt, 0);
+	EXPECT_EQ(stats.releaseCnt, 0);
+	EXPECT_FALSE(stats.destroyed);
+
+	pa.release();
+	EXPECT_EQ(stats.releaseCnt, 1);
+	EXPECT_TRUE(stats.destroyed);
+}
+
+TEST_F(R18ParserAdapterTest, QuarantineOwnerKeepsFailedAdapterAndApiAlive)
+{
+	FakeParserApiStats stats;
+	FakeParserApi* api = new FakeParserApi(nullptr, false, &stats);
+	ParserAdapterPtr candidate = std::make_shared<ParserAdapter>(&_bdMgr, &_dm, nullptr);
+	std::weak_ptr<ParserAdapter> weakCandidate = candidate;
+	std::vector<ParserAdapterPtr> quarantine;
+
+	EXPECT_FALSE(candidate->initExt("p_quarantine", api));
+	quarantine.push_back(candidate);
+	candidate.reset();
+	EXPECT_FALSE(weakCandidate.expired());
+	EXPECT_FALSE(stats.destroyed);
+	EXPECT_TRUE(quarantine.front()->hasApi());
+
+	// This models explicit teardown after an external safety barrier. The API's
+	// release() call alone does not establish that provider callbacks drained.
+	quarantine.front()->release();
+	quarantine.clear();
+	EXPECT_TRUE(weakCandidate.expired());
+	EXPECT_EQ(stats.releaseCnt, 1);
+	EXPECT_TRUE(stats.destroyed);
+}
+
+TEST_F(R18ParserAdapterTest, RepeatedInitExtDoesNotLoseTransferredApis)
+{
+	FakeParserApiStats firstStats;
+	FakeParserApiStats secondStats;
+	FakeParserApi* first = new FakeParserApi(nullptr, false, &firstStats);
+	FakeParserApi* second = new FakeParserApi(nullptr, true, &secondStats);
+	ParserAdapter pa(&_bdMgr, &_dm, nullptr);
+
+	EXPECT_FALSE(pa.initExt("p_repeat_1", first));
+	EXPECT_FALSE(pa.initExt("p_repeat_2", second));
+	EXPECT_TRUE(pa.hasApi());
+	EXPECT_EQ(firstStats.initCnt, 1);
+	EXPECT_EQ(secondStats.initCnt, 0);          // 第二个 API 被持有但不会被初始化
+	EXPECT_FALSE(firstStats.destroyed);
+	EXPECT_FALSE(secondStats.destroyed);
+
+	pa.release();
+	EXPECT_EQ(firstStats.releaseCnt, 1);
+	EXPECT_EQ(secondStats.releaseCnt, 1);
+	EXPECT_TRUE(firstStats.destroyed);
+	EXPECT_TRUE(secondStats.destroyed);
 }
 
 TEST_F(R18ParserAdapterTest, InitExtSubscribesEveryContractFullCode)
 {
-	FakeParserApi* api = new FakeParserApi(nullptr, true);
+	FakeParserApiStats stats;
+	FakeParserApi* api = new FakeParserApi(nullptr, true, &stats);
 	ParserAdapter pa(&_bdMgr, &_dm, nullptr);
 	ASSERT_TRUE(pa.initExt("p2", api));
+	EXPECT_EQ(api->_spi, static_cast<IParserSpi*>(&pa));
 
 	// ParserAdapter.cpp:60-72 用 getFullCode()（形如 EXCHG.code），不是 altcode
 	EXPECT_EQ(api->_subCnt, 1);
@@ -310,6 +536,40 @@ TEST_F(R18ParserAdapterTest, InitExtSubscribesEveryContractFullCode)
 	EXPECT_EQ(api->_subbed.find("SSE.SH600000"), api->_subbed.end());
 
 	pa.release();
+	EXPECT_EQ(stats.releaseCnt, 1);
+	EXPECT_TRUE(stats.destroyed);
+}
+
+TEST_F(R18ParserAdapterTest, InitReleasesRetainedConfigWhenNoApiWasCreated)
+{
+	write_file(_dir / "r18_empty_module.json", R"JSON({})JSON");
+	WTSVariant* cfg = WTSCfgLoader::load_from_file((_dir / "r18_empty_module.json").string().c_str());
+	ASSERT_NE(cfg, nullptr);
+	const uint32_t baseline = cfg->retainCount();
+
+	{
+		ParserAdapter pa(&_bdMgr, &_dm, nullptr);
+		EXPECT_FALSE(pa.init("r18_cfg_empty", cfg));
+		EXPECT_EQ(cfg->retainCount(), baseline + 1);
+	}
+
+	EXPECT_EQ(cfg->retainCount(), baseline);
+	cfg->release();
+}
+
+TEST_F(R18ParserAdapterTest, ReleaseReturnsRetainedConfigWhenModuleLoadFails)
+{
+	write_file(_dir / "r18_missing_module.json", R"JSON({"module":"r18_missing_parser"})JSON");
+	WTSVariant* cfg = WTSCfgLoader::load_from_file((_dir / "r18_missing_module.json").string().c_str());
+	ASSERT_NE(cfg, nullptr);
+	const uint32_t baseline = cfg->retainCount();
+
+	ParserAdapter pa(&_bdMgr, &_dm, nullptr);
+	EXPECT_FALSE(pa.init("r18_cfg_missing", cfg));
+	EXPECT_EQ(cfg->retainCount(), baseline + 1);
+	pa.release();
+	EXPECT_EQ(cfg->retainCount(), baseline);
+	cfg->release();
 }
 
 TEST_F(R18ParserAdapterTest, InitRejectsNullCfgEmptyModuleAndMissingModule)
@@ -482,10 +742,10 @@ TEST_F(R18ParserAdapterTest, MgrRunAndReleaseDriveEveryAdapter)
 {
 	ParserAdapterMgr mgr;
 
-	bool destroyed1 = false;
-	bool destroyed2 = false;
-	FakeParserApi* api1 = new FakeParserApi(&destroyed1, true);
-	FakeParserApi* api2 = new FakeParserApi(&destroyed2, true);
+	FakeParserApiStats stats1;
+	FakeParserApiStats stats2;
+	FakeParserApi* api1 = new FakeParserApi(nullptr, true, &stats1);
+	FakeParserApi* api2 = new FakeParserApi(nullptr, true, &stats2);
 
 	ParserAdapterPtr a1 = std::make_shared<ParserAdapter>(&_bdMgr, &_dm, nullptr);
 	ParserAdapterPtr a2 = std::make_shared<ParserAdapter>(&_bdMgr, &_dm, nullptr);
@@ -502,16 +762,16 @@ TEST_F(R18ParserAdapterTest, MgrRunAndReleaseDriveEveryAdapter)
 
 	// L327-335：逐个 release 后清空
 	mgr.release();
-	EXPECT_EQ(api1->_releaseCnt, 1);
-	EXPECT_EQ(api2->_releaseCnt, 1);
-	EXPECT_TRUE(destroyed1);
-	EXPECT_TRUE(destroyed2);
+	EXPECT_EQ(stats1.releaseCnt, 1);
+	EXPECT_EQ(stats2.releaseCnt, 1);
+	EXPECT_TRUE(stats1.destroyed);
+	EXPECT_TRUE(stats2.destroyed);
 	EXPECT_EQ(mgr.size(), 0u);
 	EXPECT_EQ(mgr.getAdapter("m1"), nullptr);
 
 	// 表已清空，二次 release 不再触碰任何适配器（不会二次 delete）
 	mgr.release();
-	EXPECT_EQ(api1->_releaseCnt, 1);
+	EXPECT_EQ(stats1.releaseCnt, 1);
 }
 
 TEST_F(R18ParserAdapterTest, DISABLED_HandleQuoteCrashesWhenDataManagerIsNull)
@@ -522,21 +782,21 @@ TEST_F(R18ParserAdapterTest, DISABLED_HandleQuoteCrashesWhenDataManagerIsNull)
 	tick->release();
 }
 
-/*
- * 触发条件（禁用原因）：ParserAdapter::release()（L207-219）不调 api 后不置空
- * _parser_api/_remover，第二次 release() 会对同一对象再次 `delete`（L218）
- * ——double free，gwp-asan/`MallocDoubleFree` 直接崩。
- * 缺陷登记：bugs/R18_wtdtcore.md BUG-R18-003。
- */
-TEST_F(R18ParserAdapterTest, DISABLED_DoubleReleaseDoubleDelete)
+TEST_F(R18ParserAdapterTest, ReleaseIsIdempotent)
 {
-	bool destroyed = false;
-	FakeParserApi* api = new FakeParserApi(&destroyed, false);
+	FakeParserApiStats stats;
+	FakeParserApi* api = new FakeParserApi(nullptr, true, &stats);
 	ParserAdapter pa(&_bdMgr, &_dm, nullptr);
 	ASSERT_TRUE(pa.initExt("dup", api));
+
 	pa.release();
-	EXPECT_TRUE(destroyed);
-	pa.release();	// 第二次 delete
+	EXPECT_EQ(stats.releaseCnt, 1);
+	EXPECT_TRUE(stats.destroyed);
+	EXPECT_FALSE(pa.run());
+
+	pa.release();
+	EXPECT_EQ(stats.releaseCnt, 1);
+	EXPECT_TRUE(stats.destroyed);
 }
 
 /*

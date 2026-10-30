@@ -17,6 +17,7 @@
 #include "r160_common.h"
 
 #include <cstring>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -40,17 +41,46 @@ namespace {
 class R160FakeReader : public wtp::IDataReader
 {
 public:
+    ~R160FakeReader() override
+    {
+        if (observed_slice != NULL)
+            observed_slice->release();
+        if (empty_observed_slice != NULL)
+            empty_observed_slice->release();
+    }
+
     void onMinuteEnd(uint32_t, uint32_t, uint32_t = 0) override {}
 
     wtp::WTSTickSlice* readTickSlice(const char* stdCode, uint32_t count, uint64_t) override
     {
+        ++tick_read_count;
+        if (null_tick_reads > 0)
+        {
+            --null_tick_reads;
+            return NULL;
+        }
+        if (empty_tick_reads > 0)
+        {
+            --empty_tick_reads;
+            empty_observed_slice = wtp::WTSTickSlice::create(stdCode, _ticks.data(), 0);
+            if (empty_observed_slice != NULL)
+                empty_observed_slice->retain();
+            return empty_observed_slice;
+        }
         if (throw_mode == 1)
             throw std::runtime_error("r160 tick failure");
         if (throw_mode == 2)
             throw 42;
 
         const uint32_t n = count < _ticks.size() ? count : static_cast<uint32_t>(_ticks.size());
-        return wtp::WTSTickSlice::create(stdCode, _ticks.data(), n);
+        wtp::WTSTickSlice* slice = wtp::WTSTickSlice::create(stdCode, _ticks.data(), n);
+        if (slice != NULL)
+        {
+            // Keep one observer reference so the caller's release can be asserted safely.
+            slice->retain();
+            observed_slice = slice;
+        }
+        return slice;
     }
 
     wtp::WTSKlineSlice* readKlineSlice(const char*, wtp::WTSKlinePeriod, uint32_t, uint64_t) override
@@ -63,6 +93,11 @@ public:
     }
 
     std::vector<wtp::WTSTickStruct> _ticks;
+    uint32_t null_tick_reads = 0;
+    uint32_t empty_tick_reads = 0;
+    uint32_t tick_read_count = 0;
+    wtp::WTSTickSlice* observed_slice = NULL;
+    wtp::WTSTickSlice* empty_observed_slice = NULL;
     int throw_mode = 0;
 };
 
@@ -164,6 +199,102 @@ TEST_F(R160DtMgrTest, R160HfqTickCacheUsesEngineClockAndStepsBackOneTick)
     ASSERT_NE(last, nullptr);
     EXPECT_DOUBLE_EQ(last->price(), 3502.0);
     last->release();
+}
+
+// reader 暂时无数据时不写缓存项；后续成功读取要复制 block 并恰好释放 reader slice。
+TEST_F(R160DtMgrTest, R160HfqTickCacheRetriesNullSliceAndOwnsCopiedData)
+{
+    std::unique_ptr<wtp::WtDtMgr> mgr(new wtp::WtDtMgr());
+    R160FakeReader reader;
+    reader._ticks.resize(2);
+    for (uint32_t i = 0; i < 2; i++)
+    {
+        std::memset(&reader._ticks[i], 0, sizeof(wtp::WTSTickStruct));
+        reader._ticks[i].action_date = 20250110;
+        reader._ticks[i].trading_date = 20250110;
+        reader._ticks[i].action_time = 93000000 + i * 100000;
+        reader._ticks[i].price = 3500.0 + i;
+        std::strcpy(reader._ticks[i].exchg, "SHFE");
+        std::strcpy(reader._ticks[i].code, "ag2512");
+    }
+    reader.null_tick_reads = 1;
+    mgr->_reader = &reader;
+    mgr->_engine = &_engine;
+
+    const std::string hfqCode = std::string("SHFE.ag.2512") + SUFFIX_HFQ;
+    EXPECT_EQ(mgr->get_tick_slice(hfqCode.c_str(), 2, 20250110093100000ull), nullptr);
+    EXPECT_EQ(reader.tick_read_count, 1u);
+    ASSERT_NE(mgr->_ticks_adjusted, nullptr);
+    EXPECT_EQ(mgr->_ticks_adjusted->get("SHFE.ag.2512"), nullptr);
+
+    wtp::WTSTickSlice* result = mgr->get_tick_slice(hfqCode.c_str(), 2, 20250110093100000ull);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(reader.tick_read_count, 2u);
+    ASSERT_EQ(result->size(), 2u);
+    ASSERT_NE(reader.observed_slice, nullptr);
+    EXPECT_EQ(reader.observed_slice->retainCount(), 1u)
+        << "WtDtMgr must release the reader-owned slice exactly once after copying";
+
+    // The returned slice addresses the manager's copied cache, not the reader's block.
+    reader._ticks[0].price = 9999.0;
+    ASSERT_NE(result->at(0), nullptr);
+    EXPECT_DOUBLE_EQ(result->at(0)->price, 3500.0);
+    result->release();
+
+    // A retained cache entry survives WtDtMgr destruction and is released by this test owner.
+    wtp::WTSHisTickData* cached = static_cast<wtp::WTSHisTickData*>(
+        mgr->_ticks_adjusted->grab("SHFE.ag.2512"));
+    ASSERT_NE(cached, nullptr);
+    mgr.reset();
+    ASSERT_EQ(cached->size(), 2u);
+    ASSERT_NE(cached->at(0), nullptr);
+    EXPECT_DOUBLE_EQ(cached->at(0)->price, 3500.0);
+    cached->release();
+}
+
+// 合法的非 NULL 空 slice 不缓存，也不能对空数组取 front/back；下次有数据时可重试。
+TEST_F(R160DtMgrTest, R160HfqTickCacheRetriesEmptySliceWhenDataArrives)
+{
+    wtp::WtDtMgr mgr;
+    R160FakeReader reader;
+    reader._ticks.resize(2);
+    for (uint32_t i = 0; i < 2; i++)
+    {
+        std::memset(&reader._ticks[i], 0, sizeof(wtp::WTSTickStruct));
+        reader._ticks[i].action_date = 20250110;
+        reader._ticks[i].trading_date = 20250110;
+        reader._ticks[i].action_time = 93000000 + i * 100000;
+        reader._ticks[i].price = 3600.0 + i;
+        std::strcpy(reader._ticks[i].exchg, "SHFE");
+        std::strcpy(reader._ticks[i].code, "ag2512");
+    }
+    reader.empty_tick_reads = 1;
+    mgr._reader = &reader;
+    mgr._engine = &_engine;
+
+    const std::string hfqCode = std::string("SHFE.ag.2512") + SUFFIX_HFQ;
+    EXPECT_EQ(mgr.get_tick_slice(hfqCode.c_str(), 2, 20250110093100000ull), nullptr);
+    EXPECT_EQ(reader.tick_read_count, 1u);
+    ASSERT_NE(reader.empty_observed_slice, nullptr);
+    EXPECT_EQ(reader.empty_observed_slice->size(), 0u);
+    EXPECT_EQ(reader.empty_observed_slice->get_block_counts(), 1u)
+        << "The empty slice still carries an empty, non-owning reader block";
+    EXPECT_EQ(reader.empty_observed_slice->retainCount(), 1u)
+        << "WtDtMgr must release the non-null empty reader slice";
+    ASSERT_NE(mgr._ticks_adjusted, nullptr);
+    EXPECT_EQ(mgr._ticks_adjusted->get("SHFE.ag.2512"), nullptr);
+
+    wtp::WTSTickSlice* result = mgr.get_tick_slice(hfqCode.c_str(), 2, 20250110093100000ull);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(reader.tick_read_count, 2u);
+    ASSERT_EQ(result->size(), 2u);
+    ASSERT_NE(result->at(0), nullptr);
+    EXPECT_DOUBLE_EQ(result->at(0)->price, 3600.0);
+    ASSERT_NE(reader.observed_slice, nullptr);
+    EXPECT_EQ(reader.observed_slice->retainCount(), 1u)
+        << "WtDtMgr must release the successful reader slice after copying";
+    EXPECT_NE(mgr._ticks_adjusted->get("SHFE.ag.2512"), nullptr);
+    result->release();
 }
 
 // on_bar 对非基础周期缓存的三种 period 分支 + 前缀不匹配的 continue

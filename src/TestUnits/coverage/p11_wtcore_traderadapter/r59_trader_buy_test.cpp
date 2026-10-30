@@ -109,12 +109,12 @@ TEST_F(R59Buy, open_caps_quantity_by_remaining_long_and_total_limits)
     OrderIDs ids = t1.buy(kStdCode, 7000.0, 10.0, 0, false);
     ASSERT_EQ(1u, ids.size());
     ASSERT_EQ(1u, api2_.vols_.size());
+    EXPECT_EQ(WDT_LONG, api2_.dirs_[0]);
+    EXPECT_EQ(WOT_OPEN, api2_.offsets_[0]);
     EXPECT_DOUBLE_EQ(3.0, api2_.vols_[0]);
-    // getUndoneQty 跟踪的是「本次请求量」而非限额截断后的下单量：
-    // buy() 在进入限额循环前先 updateUndone(stdCode, qty, true)（TraderAdapter.cpp:688），
-    // 截断只影响实际委托（vols_[0]==3）；该表在 onRspOrders 里被整体重建
-    // （TraderAdapter.cpp:1611 _undone_qty.clear()）。原断言 3 与产品语义不符。
-    EXPECT_DOUBLE_EQ(10.0, t1.getUndoneQty(kStdCode));
+    // 前置成交无本系统 userTag，不计入本测试账本；Fake API 成功接收一笔买开 3 手，
+    // 因而本次未完成买量的独立真值是 +3，而不是请求的 10 手。
+    EXPECT_DOUBLE_EQ(3.0, t1.getUndoneQty(kStdCode));
 
     // limit=10、已开 2+1=3 -> 本次最多 7 手
     ActionPolicyMgr pm2;

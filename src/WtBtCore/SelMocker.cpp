@@ -54,6 +54,41 @@ SelMocker::SelMocker(HisDataReplayer* replayer, const char* name, int32_t slippa
 
 SelMocker::~SelMocker()
 {
+	release_strategy_factory();
+}
+
+void SelMocker::release_strategy_factory() noexcept
+{
+	if (_strategy != NULL)
+	{
+		bool strategyDeleted = false;
+		if (_factory._fact != NULL)
+		{
+			try
+			{
+				strategyDeleted = _factory._fact->deleteStrategy(_strategy);
+			}
+			catch (...)
+			{
+				strategyDeleted = false;
+			}
+		}
+
+		_strategy = NULL;
+		if (!strategyDeleted)
+		{
+			// Keep plugin code loaded if its factory could not destroy the strategy.
+			_factory._fact = NULL;
+			_factory._module_inst = NULL;
+			_factory._creator = NULL;
+			_factory._remover = NULL;
+			WTSLogger::error("SEL strategy could not be destroyed; retaining its plugin module");
+			return;
+		}
+	}
+
+	if (!_factory.release())
+		WTSLogger::error("SEL factory could not be destroyed; retaining its plugin module");
 }
 
 void SelMocker::dump_stradata()
@@ -233,17 +268,49 @@ void SelMocker::log_close(const char* stdCode, bool isLong, uint64_t openTime, d
 
 bool SelMocker::init_sel_factory(WTSVariant* cfg)
 {
-	if (cfg == NULL)
+	if (cfg == NULL || _factory._module_inst != NULL || _factory._fact != NULL || _strategy != NULL)
 		return false;
 
 	const char* module = cfg->getCString("module");
+	WTSVariant* cfgStra = cfg->get("strategy");
+	if (module == NULL || module[0] == '\0' || cfgStra == NULL)
+	{
+		WTSLogger::error("SEL strategy configuration requires a module and strategy object");
+		return false;
+	}
+
+	const char* strategyName = cfgStra->getCString("name");
+	const char* strategyId = cfgStra->getCString("id");
+	if (strategyName == NULL || strategyName[0] == '\0' || strategyId == NULL || strategyId[0] == '\0')
+	{
+		WTSLogger::error("SEL strategy configuration requires non-empty name and id");
+		return false;
+	}
 
 	DllHandle hInst = DLLHelper::load_library(module);
 	if (hInst == NULL)
 		return false;
 
 	FuncCreateSelStraFact creator = (FuncCreateSelStraFact)DLLHelper::get_symbol(hInst, "createSelStrategyFact");
-	if (creator == NULL)
+	FuncDeleteSelStraFact remover = (FuncDeleteSelStraFact)DLLHelper::get_symbol(hInst, "deleteSelStrategyFact");
+	if (creator == NULL || remover == NULL)
+	{
+		DLLHelper::free_library(hInst);
+		return false;
+	}
+
+	ISelStrategyFact* fact = NULL;
+	try
+	{
+		fact = creator();
+	}
+	catch (...)
+	{
+		DLLHelper::free_library(hInst);
+		WTSLogger::error("Creating SEL strategy factory from {} threw an exception", module);
+		return false;
+	}
+	if (fact == NULL)
 	{
 		DLLHelper::free_library(hInst);
 		return false;
@@ -252,21 +319,66 @@ bool SelMocker::init_sel_factory(WTSVariant* cfg)
 	_factory._module_inst = hInst;
 	_factory._module_path = module;
 	_factory._creator = creator;
-	_factory._remover = (FuncDeleteSelStraFact)DLLHelper::get_symbol(hInst, "deleteSelStrategyFact");
-	_factory._fact = _factory._creator();
+	_factory._remover = remover;
+	_factory._fact = fact;
 
-	WTSVariant* cfgStra = cfg->get("strategy");
-	if (cfgStra)
+	try
 	{
-		_strategy = _factory._fact->createStrategy(cfgStra->getCString("name"), cfgStra->getCString("id"));
-		if (_strategy)
-		{
-			WTSLogger::info("Strategy {}.{} created,strategy ID: {}", _factory._fact->getName(), _strategy->getName(), _strategy->id());
-		}
-		_strategy->init(cfgStra->get("params"));
-		_name = _strategy->id();
+		_strategy = _factory._fact->createStrategy(strategyName, strategyId);
+	}
+	catch (...)
+	{
+		WTSLogger::error("Creating SEL strategy {}.{} threw an exception", module, strategyName);
+		release_strategy_factory();
+		return false;
+	}
+	if (_strategy == NULL)
+	{
+		WTSLogger::error("Creating SEL strategy {}.{} failed", module, strategyName);
+		release_strategy_factory();
+		return false;
 	}
 
+	bool initialized = false;
+	try
+	{
+		initialized = _strategy->init(cfgStra->get("params"));
+	}
+	catch (...)
+	{
+		WTSLogger::error("Initializing SEL strategy {}.{} threw an exception", module, strategyName);
+		release_strategy_factory();
+		return false;
+	}
+	if (!initialized)
+	{
+		WTSLogger::error("Initializing SEL strategy {}.{} failed", module, strategyName);
+		release_strategy_factory();
+		return false;
+	}
+
+	const char* strategyIdFromPlugin = NULL;
+	const char* strategyNameFromPlugin = NULL;
+	try
+	{
+		strategyIdFromPlugin = _strategy->id();
+		strategyNameFromPlugin = _strategy->getName();
+	}
+	catch (...)
+	{
+		release_strategy_factory();
+		WTSLogger::error("Reading initialized SEL strategy identity threw an exception");
+		return false;
+	}
+	if (strategyIdFromPlugin == NULL || strategyIdFromPlugin[0] == '\0' || strategyNameFromPlugin == NULL)
+	{
+		release_strategy_factory();
+		WTSLogger::error("Initialized SEL strategy returned an invalid identity");
+		return false;
+	}
+
+	_name = strategyIdFromPlugin;
+	WTSLogger::info("Strategy {}.{} created,strategy ID: {}", module, strategyNameFromPlugin, strategyIdFromPlugin);
 	return true;
 }
 
@@ -302,9 +414,10 @@ void SelMocker::handle_session_end(uint32_t uCurDate)
 
 void SelMocker::handle_replay_done()
 {
+	const uint64_t avg_calc_time = _emit_times == 0 ? 0 : _total_calc_time / _emit_times;
 	WTSLogger::log_dyn("strategy", _name.c_str(), LL_INFO, 
 		"Strategy has been scheduled for {} times,totally taking {} microsecs,average of {} microsecs",
-		_emit_times, _total_calc_time, _total_calc_time / _emit_times);
+		_emit_times, _total_calc_time, avg_calc_time);
 
 	dump_outputs();
 

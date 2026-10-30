@@ -302,10 +302,12 @@ TEST_F(P11SyncReport, order_report_rebuilds_table_and_undone)
     EXPECT_EQ(nullptr, all->get(1004));        // 外部单不入表
     EXPECT_GE(o1001->retainCount(), 2u);    // 订单表确实持有该单
 
-    // 表里的 code 已被回写成原始代码, 所以按标准代码过滤取不到
+    // getOrders 的公开参数为标准化代码；过滤结果应包含这两笔 SHFE 活单。
     OrderMap* byStd = trader.getOrders(kStdCode);
     ASSERT_NE(nullptr, byStd);
-    EXPECT_EQ(0u, byStd->size());
+    EXPECT_EQ(2u, byStd->size());
+    EXPECT_EQ(o1001, byStd->get(1001));
+    EXPECT_EQ(o1002, byStd->get(1002));
     byStd->release();
 
     OrderMap* byRaw = trader.getOrders(kRawCode);

@@ -9,7 +9,13 @@
  * \details 定义了WonderTrader的实时交易运行器，用于管理和协调各类策略引擎、数据源和交易接口
  */
 #pragma once
+#include <atomic>
+#include <condition_variable>
+#include <mutex>
 #include <string>
+#include <shared_mutex>
+#include <memory>
+#include <vector>
 
 #include "PorterDefs.h"
 
@@ -27,6 +33,7 @@
 #include "../WtCore/WtDiffExecuter.h"
 #include "../WtCore/WtDistExecuter.h"
 #include "../WtCore/WtArbiExecuter.h"
+#include "../WtCore/WtExecMgr.h"
 #include "../WtCore/TraderAdapter.h"
 #include "../WtCore/ParserAdapter.h"
 #include "../WtCore/WtDtMgr.h"
@@ -53,15 +60,43 @@ typedef enum tagEngineType
 	ET_SEL			//选股引擎
 } EngineType;
 
+/** Result of the versioned execution-unit status API. Values are part of its C ABI. */
+enum ExecUnitStatusApiResult : uint32_t
+{
+	EXEC_UNIT_STATUS_API_OK = 0,
+	EXEC_UNIT_STATUS_API_INVALID_ARGUMENT = 1,
+	EXEC_UNIT_STATUS_API_NOT_READY = 2,
+	EXEC_UNIT_STATUS_API_UNSUPPORTED = 3,
+	EXEC_UNIT_STATUS_API_EXECUTOR_NOT_FOUND = 4,
+	EXEC_UNIT_STATUS_API_ENGINE_MISMATCH = 5,
+	EXEC_UNIT_STATUS_API_INTERNAL_ERROR = 6,
+	EXEC_UNIT_STATUS_API_CODE_NOT_FOUND = 7,
+	EXEC_UNIT_STATUS_API_NOT_FAILED = 8,
+	EXEC_UNIT_STATUS_API_RETRY_BLOCKED = 9
+};
+
 /**
  * @brief WonderTrader实时交易运行器类
  * @details 实现了实时交易的各种功能，包括初始化、配置、运行和回调等
  *          继承自IEngineEvtListener、ILogHandler和IHisDataLoader接口
  *          用于管理CTA、HFT和SEL等不同类型的策略引擎
  */
-class WtRtRunner : public IEngineEvtListener, public ILogHandler, public IHisDataLoader
+class WtRtRunner : public IEngineEvtListener, public ILogHandler, public IHisDataLoader, public IParserStub
 {
+	friend class WtRtRunnerTestAccess;
+
 public:
+	enum class LifecycleState : uint8_t
+	{
+		UNCONFIGURED,
+		CONFIGURING,
+		CONFIGURED,
+		STARTING,
+		RUNNING,
+		STOPPING,
+		RELEASED
+	};
+
 	/**
 	 * @brief 构造函数
 	 */
@@ -134,6 +169,13 @@ public:
 	 */
 	void feedAdjFactors(const char* stdCode, uint32_t* dates, double* factors, uint32_t count);
 
+	// ParserAdapter callbacks route through the runner so release() can identify
+	// parser-originated engine callback stacks before stopping their producers.
+	void handle_push_quote(WTSTickData* curTick) override;
+	void handle_push_order_detail(WTSOrdDtlData* curOrdDtl) override;
+	void handle_push_order_queue(WTSOrdQueData* curOrdQue) override;
+	void handle_push_transaction(WTSTransData* curTrans) override;
+
 public:
 	/**
 	 * @brief 初始化运行器
@@ -148,11 +190,17 @@ public:
 	/**
 	 * @brief 配置运行器
 	 * @details 使用指定的配置文件或内容配置运行器
+	 *          run()启动后及release()后拒绝重配置
 	 * @param cfgFile 配置文件或内容
 	 * @param isFile 是否为文件路径，true表示文件路径，false表示配置内容
 	 * @return 是否配置成功
 	 */
 	bool config(const char* cfgFile, bool isFile = true);
+
+	ExecUnitStatusApiResult queryExecUnitInitStatus(uint32_t engineType, const char* executorId,
+		const char* stdCode, ExecUnitInitStatus& status) const;
+	ExecUnitStatusApiResult clearFailedExecUnitInitStatus(uint32_t engineType, const char* executorId,
+		const char* stdCode);
 
 	/**
 	 * @brief 运行交易引擎
@@ -164,6 +212,15 @@ public:
 	/**
 	 * @brief 释放运行器资源
 	 * @details 清理并释放运行器的所有资源
+	 *          若启动回调正在执行，仅发布退出并延后 teardown，由 run() 在启动结束后完成
+	 *          teardown 进行中重入 release() 会记录诊断并立即返回，清理仍由外层调用完成
+	 *          若由交易通知回调调用，仅请求停止 trader sink 通知、保留 trader 与 engine owner 并立即返回；
+	 *          调用方须在回调返回后从控制线程再次调用 release() 完成清理。此函数返回 void，
+	 *          返回本身不表示延后的清理已经完成；回调内直接销毁 runner 不受支持。
+	 *          runner 路由的策略/事件回调和 parser 到 engine 的同步回调也会延后 teardown，
+	 *          但 native 策略直接调用 C API 的 ticker 回调尚无当前线程证明。
+	 *          失败 parser 候选在没有 provider drain 证明时会使 teardown 保持 pending，runner
+	 *          必须继续存活；一般 parser/trader 插件 release 后的迟到回调合同仍未证明。
 	 */
 	void release();
 
@@ -416,11 +473,7 @@ public:
 	 * @brief 初始化事件回调
 	 * @details IEngineEvtListener接口实现，引擎初始化事件回调
 	 */
-	virtual void on_initialize_event() override
-	{
-		if (_cb_evt)
-			_cb_evt(EVENT_ENGINE_INIT, 0, 0);
-	}
+	virtual void on_initialize_event() override;
 
 	/**
 	 * @brief 调度事件回调
@@ -428,11 +481,7 @@ public:
 	 * @param uDate 当前日期，格式为YYYYMMDD
 	 * @param uTime 当前时间，格式为HHMMSS或HHMMSS000
 	 */
-	virtual void on_schedule_event(uint32_t uDate, uint32_t uTime) override
-	{
-		if (_cb_evt)
-			_cb_evt(EVENT_ENGINE_SCHDL, uDate, uTime);
-	}
+	virtual void on_schedule_event(uint32_t uDate, uint32_t uTime) override;
 
 	/**
 	 * @brief 交易日事件回调
@@ -440,11 +489,7 @@ public:
 	 * @param uDate 交易日日期，格式为YYYYMMDD
 	 * @param isBegin 是否为开始事件，true表示开始，false表示结束
 	 */
-	virtual void on_session_event(uint32_t uDate, bool isBegin = true) override
-	{
-		if (_cb_evt)
-			_cb_evt(isBegin ? EVENT_SESSION_BEGIN : EVENT_SESSION_END, uDate, 0);
-	}
+	virtual void on_session_event(uint32_t uDate, bool isBegin = true) override;
 
 public:
 	/**
@@ -695,6 +740,9 @@ private:
 	 */
 	bool initEngine();
 
+	/** Complete teardown after the caller has claimed STOPPING and startup is finished. */
+	void completeRelease();
+
 private:
 	//CTA策略回调函数
 	/**
@@ -821,7 +869,7 @@ private:
 	/**
 	 * @brief 配置信息
 	 */
-	WTSVariant*			_config;
+	WTSVariant*			_config = NULL;
 	/**
 	 * @brief 交易适配器管理器
 	 */
@@ -830,6 +878,16 @@ private:
 	 * @brief 数据解析器管理器
 	 */
 	ParserAdapterMgr	_parsers;
+	/**
+	 * Failed parser candidates stay out of ParserAdapterMgr::run(), but remain
+	 * alive because a provider may have retained the SPI during failed init.
+	 * Their callback stubs borrow the runner-owned engine/data/base/hot managers.
+	 */
+	std::vector<ParserAdapterPtr> _quarantined_parser_owners;
+	std::mutex _parser_registry_mutex;
+	std::vector<std::string> _creating_ext_parser_ids; // reserved under _parser_registry_mutex
+	uint32_t _active_ext_parser_creations = 0; // guarded by _status_config_mutex
+	uint32_t _active_ext_parser_quotes = 0; // guarded by _status_config_mutex
 	/**
 	 * @brief 执行器工厂
 	 */
@@ -848,9 +906,14 @@ private:
 	 */
 	WtSelEngine			_sel_engine;
 	/**
+	 * @brief Runner-wide execution shutdown coordinator. It must outlive retries
+	 * so its completion token stays bound to the CTA/SEL manager owners.
+	 */
+	std::unique_ptr<WtExecQuiesceCoordinator> _exec_quiesce_coordinator;
+	/**
 	 * @brief 当前使用的引擎指针
 	 */
-	WtEngine*			_engine;
+	WtEngine*			_engine = NULL;
 
 	/**
 	 * @brief 数据存储器
@@ -901,9 +964,32 @@ private:
 	 */
 	bool				_is_sel;
 	/**
+	 * @brief 最近一次配置是否失败
+	 */
+	bool				_config_failed;
+	mutable std::shared_mutex _status_lifecycle_mutex;
+	mutable std::mutex _status_config_mutex;
+	std::condition_variable _lifecycle_changed;
+	std::mutex _run_start_mutex;
+	std::mutex _run_exit_mutex;
+	std::condition_variable _run_exit_condition;
+	std::atomic<bool> _deferred_release_requested{ false };
+	LifecycleState _lifecycle_state = LifecycleState::UNCONFIGURED;
+	bool _release_deferred_for_startup = false; // guarded by _status_config_mutex
+	bool _release_deferred_for_config = false; // guarded by _status_config_mutex
+	bool _teardown_in_progress = false; // guarded by _status_config_mutex
+	bool _teardown_pending = false; // guarded by _status_config_mutex; owners remain live until a control-thread retry
+	bool _teardown_inputs_stopped = false; // guarded by _status_config_mutex
+	bool _teardown_parsers_stopped = false; // guarded by _status_config_mutex
+	bool _teardown_engine_stopped = false; // guarded by _status_config_mutex
+	bool _teardown_exec_preflight_passed = false; // guarded by _status_config_mutex
+	bool _manager_release_in_progress = false; // guarded by _status_config_mutex
+	uint32_t _release_waiters = 0; // guarded by _status_config_mutex
+	std::atomic<bool> _status_ready{ false };
+	/**
 	 * @brief 是否退出
 	 */
-	bool				_to_exit;
+	std::atomic<bool>	_to_exit;
 
 	/**
 	 * @brief 外部最终K线数据加载器

@@ -126,6 +126,31 @@ TEST_F(R1ReaderBarsTest, day_his_cutoff_excludes_later_bar)
 	slice->release();
 }
 
+TEST_F(R1ReaderBarsTest, day_his_cutoff_is_inclusive_and_clamps_to_available_history)
+{
+	vector<WTSBarStruct> bars = {
+		make_bar(20240108, 20240108, 0),
+		make_bar(20240109, 20240109, 1),
+		make_bar(20240110, 20240110, 2)
+	};
+	ASSERT_TRUE(write_bytes(his_kline_file("day", "610010"),
+		make_block(BT_HIS_Day, BLOCK_VERSION_RAW_V2, pack_bars(bars))));
+
+	// A cutoff before the first daily bar returns an empty slice.
+	WTSKlineSlice* before = _reader.readKlineSlice("SSE.STK.610010", KP_DAY, 5, 202401071500ull);
+	ASSERT_TRUE(before != NULL);
+	EXPECT_TRUE(before->empty());
+	before->release();
+
+	// Daily bars are keyed by trading date; the cutoff date itself is included.
+	WTSKlineSlice* exact = _reader.readKlineSlice("SSE.STK.610010", KP_DAY, 5, 202401091500ull);
+	ASSERT_TRUE(exact != NULL);
+	ASSERT_EQ(exact->size(), 2);
+	expect_bar_eq(*exact->at(0), bars[0]);
+	expect_bar_eq(*exact->at(1), bars[1]);
+	exact->release();
+}
+
 TEST_F(R1ReaderBarsTest, day_size_check_failure_logs_error_and_returns_empty)
 {
 	// 比 HisKlineBlock 头还短 → cacheHisBarsFromFile return false（:1591 LL_ERROR）
@@ -154,6 +179,38 @@ TEST_F(R1ReaderBarsTest, min5_his_roundtrip_uses_min5_dir)
 	expect_bar_eq(*slice->at(0), bars[3]);
 	expect_bar_eq(*slice->at(2), bars[5]);
 	slice->release();
+}
+
+TEST_F(R1ReaderBarsTest, min1_his_cutoff_uses_encoded_calendar_time)
+{
+	vector<WTSBarStruct> bars;
+	for (uint32_t i = 0; i < 3; i++)
+		bars.push_back(make_bar(20240108, enc_min1_time(20240108, 930 + i), i));
+	ASSERT_TRUE(write_bytes(his_kline_file("min1", "610011"),
+		make_block(BT_HIS_Minute1, BLOCK_VERSION_RAW_V2, pack_bars(bars))));
+
+	// The etime minute is inclusive; a larger count is clamped to bars at or
+	// before that encoded calendar time.
+	WTSKlineSlice* exact = _reader.readKlineSlice("SSE.STK.610011", KP_Minute1, 10, 202401080931ull);
+	ASSERT_TRUE(exact != NULL);
+	ASSERT_EQ(exact->size(), 2);
+	expect_bar_eq(*exact->at(0), bars[0]);
+	expect_bar_eq(*exact->at(1), bars[1]);
+	exact->release();
+
+	// A cutoff before the first bar returns no history.
+	WTSKlineSlice* before = _reader.readKlineSlice("SSE.STK.610011", KP_Minute1, 2, 202401080929ull);
+	ASSERT_TRUE(before != NULL);
+	EXPECT_TRUE(before->empty());
+	before->release();
+
+	// After the final bar, the count limit selects the trailing two bars.
+	WTSKlineSlice* after = _reader.readKlineSlice("SSE.STK.610011", KP_Minute1, 2, 202401080933ull);
+	ASSERT_TRUE(after != NULL);
+	ASSERT_EQ(after->size(), 2);
+	expect_bar_eq(*after->at(0), bars[1]);
+	expect_bar_eq(*after->at(1), bars[2]);
+	after->release();
 }
 
 TEST_F(R1ReaderBarsTest, min1_splices_his_tail_with_rt_block_of_today)
@@ -218,6 +275,32 @@ TEST_F(R1ReaderBarsTest, missing_his_file_returns_empty_slice_not_null)
 	{
 		FAIL() << "WtDataReader::readKlineSlice 对未知代码返回了 NULL（当前实现恒返回切片对象）";
 	}
+	EXPECT_TRUE(slice->empty());
+	slice->release();
+}
+
+TEST_F(R1ReaderBarsTest, header_only_his_block_returns_empty_slice)
+{
+	// 一个合法 RAW_V2 块头、零条 bar：cacheHisBarsFromFile 应保留可读的空缓存。
+	ASSERT_TRUE(write_bytes(his_kline_file("day", "610012"),
+		make_block(BT_HIS_Day, BLOCK_VERSION_RAW_V2, pack_bars(vector<WTSBarStruct>{}))));
+
+	WTSKlineSlice* slice = _reader.readKlineSlice("SSE.STK.610012", KP_DAY, 5, 202401081500ull);
+	ASSERT_TRUE(slice != NULL);
+	EXPECT_TRUE(slice->empty());
+	slice->release();
+}
+
+TEST_F(R1ReaderBarsTest, zero_count_returns_empty_slice_for_nonempty_history)
+{
+	vector<WTSBarStruct> bars = { make_bar(20240108, 20240108, 0) };
+	ASSERT_TRUE(write_bytes(his_kline_file("day", "610013"),
+		make_block(BT_HIS_Day, BLOCK_VERSION_RAW_V2, pack_bars(bars))));
+
+	// count=0 is an empty request even when history is available; it must not
+	// form a bar address from an empty [size, size) range.
+	WTSKlineSlice* slice = _reader.readKlineSlice("SSE.STK.610013", KP_DAY, 0, 202401111500ull);
+	ASSERT_TRUE(slice != NULL);
 	EXPECT_TRUE(slice->empty());
 	slice->release();
 }

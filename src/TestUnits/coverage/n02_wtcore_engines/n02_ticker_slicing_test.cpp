@@ -12,8 +12,8 @@
  *     - init(store, sessionID) 第一步就是 _engine->get_session_info(sessionID), 传 NULL 引擎即空指针解引用;
  *     - on_tick 的切片分支要求 _thrd != NULL, 而 _thrd 只能由 run() 创建, run() 又会起后台线程并
  *       依赖 _engine->get_basedata_mgr() / 真实交易日推算 -> 属"需要真实服务端"的分支, 本 lane 跳过。
- *   此外三个 ticker 的构造函数都没有初始化 _s_info / _store, 见
- *   bugs/n02_wtcore_engines.md BUG-N02-002, 相关输入集中在唯一一个 DISABLED_ 用例里。
+ *   BUG-N02-002 仅确认 CTA ticker 的公开 session 查询在构造后、init 前读取未初始化
+ *   的 _s_info；该路径由独立启用用例覆盖。SEL/HFT 的预初始化生命周期不在本缺陷范围。
  */
 #include <gtest/gtest.h>
 
@@ -48,6 +48,14 @@ TEST(N02CtaTickerTest, StopBeforeRunIsIdempotent)
     ticker.stop();
     ticker.stop();
     ticker.on_tick(NULL);
+}
+
+TEST(N02CtaTickerTest, PreInitQueriesUseFallback)
+{
+    WtCtaRtTicker ticker(NULL);
+
+    EXPECT_FALSE(ticker.is_in_trading());
+    EXPECT_EQ(93000u, ticker.time_to_mins(93000));
 }
 
 //////////////////////////////////////////////////////////////////
@@ -90,23 +98,11 @@ TEST(N02HftTickerTest, StopBeforeRunIsIdempotent)
 }
 
 //////////////////////////////////////////////////////////////////
-// 三者共有的缺陷类: 构造后 _s_info / _store 是未初始化的野指针,
-// 任何在 init() 之前读取它们的路径都是 UB。同类输入全部收在这一个用例里。
-// 见 BUG-N02-002。
+// SEL/HFT 预初始化生命周期与 BUG-N02-002 无关，本轮不作结论。
 //////////////////////////////////////////////////////////////////
 
-TEST(N02TickerDisabled, DISABLED_UninitialisedSessionInfoIsReadBeforeInit)
+TEST(N02TickerDisabled, DISABLED_UnverifiedSelHftPreInitPaths)
 {
-    {
-        WtCtaRtTicker cta(NULL);
-        // is_in_trading / time_to_mins 都会先判 _s_info == NULL,
-        // 而 _s_info 从未被构造函数的初始化列表写入 -> 读到栈/堆上的残值
-        volatile bool inTrading = cta.is_in_trading();
-        (void)inTrading;
-        volatile uint32_t mins = cta.time_to_mins(93000);
-        (void)mins;
-        cta.on_tick(NULL);
-    }
     {
         WtSelRtTicker sel(NULL);
         sel.on_tick(NULL);

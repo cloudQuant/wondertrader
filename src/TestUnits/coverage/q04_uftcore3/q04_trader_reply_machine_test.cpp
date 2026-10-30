@@ -91,10 +91,6 @@ TEST(q04_trader_reply, login_result_drives_state_and_position_query)
 {
 	Env env;
 
-	env._adapter.onLoginResult(false, "bad password", 0);
-	EXPECT_EQ(TraderAdapter::AS_LOGINFAILED, env._adapter.state());
-	EXPECT_EQ(0u, env._api._qPosCnt);
-
 	env._adapter.onLoginResult(true, "ok", 20240315);
 	EXPECT_EQ(TraderAdapter::AS_LOGINED, env._adapter.state());
 	EXPECT_EQ(1u, env._api._qPosCnt);
@@ -103,9 +99,13 @@ TEST(q04_trader_reply, login_result_drives_state_and_position_query)
 	env._adapter.onLogout();
 	EXPECT_EQ(TraderAdapter::AS_NOTLOGIN, env._adapter.state());
 
-	//未登录前不应有持仓通知
-	env.login();
-	EXPECT_EQ(2u, env._api._qPosCnt);
+	//登出后的迟到持仓响应不得重新推进查询链。
+	WTSArray* latePositions = WTSArray::create();
+	ASSERT_NE(nullptr, latePositions);
+	env._adapter.onRspPosition(latePositions);
+	latePositions->release();
+	EXPECT_EQ(TraderAdapter::AS_NOTLOGIN, env._adapter.state());
+	EXPECT_EQ(0u, env._api._qOrdCnt);
 }
 
 TEST(q04_trader_reply, onRspPosition_fills_positions_and_notifies_sinks)
@@ -250,6 +250,71 @@ TEST(q04_trader_reply, onRspOrders_counts_stats_and_registers_alive_orders)
 	EXPECT_EQ(1u, env._api._qTrdCnt);
 
 	ay->release();
+}
+
+TEST(q04_trader_reply, getOrders_supports_raw_and_full_codes_without_cross_contract_matches)
+{
+	Env env;
+	env._bd.add("DCE", "ag", "ag2406");
+	env._bd.add("SHFE", "au", "au2406");
+
+	const uint32_t shfeAgId = env._adapter.openLong("SHFE.ag2406", 5000.0, 1.0, 0);
+	const uint32_t dceAgId = env._adapter.openLong("DCE.ag2406", 5000.0, 1.0, 0);
+	const uint32_t shfeAuId = env._adapter.openLong("SHFE.au2406", 5000.0, 1.0, 0);
+	ASSERT_NE(UINT_MAX, shfeAgId);
+	ASSERT_NE(UINT_MAX, dceAgId);
+	ASSERT_NE(UINT_MAX, shfeAuId);
+	ASSERT_EQ(3u, env._api._entrusts.size());
+
+	WTSOrderInfo* shfeAg = q04::orderFromSnap(env._api._entrusts[0], "ORD-SHFE-AG");
+	WTSOrderInfo* dceAg = q04::orderFromSnap(env._api._entrusts[1], "ORD-DCE-AG");
+	WTSOrderInfo* shfeAu = q04::orderFromSnap(env._api._entrusts[2], "ORD-SHFE-AU");
+	//本单已有合约信息时使用其 fullCode；另外两单验证缺失时按 exchange/code 回查。
+	shfeAu->setContractInfo(env._bd.getContract("au2406", "SHFE"));
+	WTSArray* ay = Env::makeArray({ shfeAg, dceAg, shfeAu });
+	env._adapter.onRspOrders(ay);
+	ay->release();
+	shfeAg->release();
+	dceAg->release();
+	shfeAu->release();
+
+	OrderMap* byShfeAg = env._adapter.getOrders("SHFE.ag2406");
+	ASSERT_NE(nullptr, byShfeAg);
+	EXPECT_EQ(1u, byShfeAg->size());
+	EXPECT_EQ(shfeAg, byShfeAg->get(shfeAgId));
+	EXPECT_EQ(nullptr, byShfeAg->get(dceAgId));
+	EXPECT_EQ(nullptr, byShfeAg->get(shfeAuId));
+	byShfeAg->release();
+
+	OrderMap* byDceAg = env._adapter.getOrders("DCE.ag2406");
+	ASSERT_NE(nullptr, byDceAg);
+	EXPECT_EQ(1u, byDceAg->size());
+	EXPECT_EQ(dceAg, byDceAg->get(dceAgId));
+	byDceAg->release();
+
+	OrderMap* byShfeAu = env._adapter.getOrders("SHFE.au2406");
+	ASSERT_NE(nullptr, byShfeAu);
+	EXPECT_EQ(1u, byShfeAu->size());
+	EXPECT_EQ(shfeAu, byShfeAu->get(shfeAuId));
+	byShfeAu->release();
+
+	//裸代码查询仍沿用精确 raw-code 匹配，会返回两个交易所各自的 ag2406。
+	OrderMap* byRawAg = env._adapter.getOrders("ag2406");
+	ASSERT_NE(nullptr, byRawAg);
+	EXPECT_EQ(2u, byRawAg->size());
+	EXPECT_EQ(shfeAg, byRawAg->get(shfeAgId));
+	EXPECT_EQ(dceAg, byRawAg->get(dceAgId));
+	byRawAg->release();
+
+	OrderMap* byUnknownFullCode = env._adapter.getOrders("CFFEX.ag2406");
+	ASSERT_NE(nullptr, byUnknownFullCode);
+	EXPECT_EQ(0u, byUnknownFullCode->size());
+	byUnknownFullCode->release();
+
+	OrderMap* all = env._adapter.getOrders("");
+	ASSERT_NE(nullptr, all);
+	EXPECT_EQ(3u, all->size());
+	all->release();
 }
 
 TEST(q04_trader_reply, onRspTrades_accumulates_stats_then_channel_ready)
@@ -403,9 +468,8 @@ TEST(q04_trader_reply, handleEvent_and_error_channels_forward_to_sinks)
 	err->release();
 }
 
-TEST(q04_trader_reply, init_parses_riskmon_and_enables_login_branch)
+TEST(q04_trader_reply, failed_config_init_rolls_back_before_external_api_init)
 {
-	q04::TempRoot tmp("init");
 	q04::FakeTraderApi api;
 	q04::FakeBaseDataMgr bd;
 	ActionPolicyMgr policy;
@@ -429,31 +493,23 @@ TEST(q04_trader_reply, init_parses_riskmon_and_enables_login_branch)
 	riskmon->append("policy", policyCfg);
 	params->append("riskmon", riskmon);
 
-	//没有 module 字段: 风控解析完成后在装载动态库之前返回 false
+	//没有 module 字段: init 在风控配置解析后失败, 但必须回滚配置和借用依赖。
 	EXPECT_FALSE(adapter.init("uft9", params, &bd, &policy));
-	//但 _cfg / _id / _bd_mgr 已经写入, 后续 initExt 补齐 API 装配
-	EXPECT_EQ(&bd, adapter.getBaseDataMgr());
-	EXPECT_STREQ("uft9", adapter.id());
+	EXPECT_EQ(1u, params->retainCount());
+	EXPECT_STREQ("", adapter.id());
+	EXPECT_EQ(nullptr, adapter.getBaseDataMgr());
 	EXPECT_FALSE(adapter.run()) << "未装配 _trader_api 时 run 必须早退";
 
+	// initExt 是另一条独立装配路径，不会继承失败 init 的 _cfg。
 	EXPECT_TRUE(adapter.initExt("uft9", &api, &bd, &policy));
 	EXPECT_TRUE(adapter.run());
-
-	//_cfg 由 init 留下, WTE_Connect(ec==0) 才会真正调用 login
-	adapter.handleEvent(WTE_Connect, 0);
-	EXPECT_EQ(1u, api._loginCnt);
-	EXPECT_STREQ("tester", api._lastUser.c_str());
-	EXPECT_STREQ("secret", api._lastPass.c_str());
-	EXPECT_STREQ("PID01", api._lastProduct.c_str());
-
-	//二次 init 因为 _cfg 已存在而直接 false
-	WTSVariant* second = WTSVariant::createObject();
-	second->append("module", "");
-	EXPECT_FALSE(adapter.init("uft9", second, &bd, &policy));
-	second->release();
+	EXPECT_EQ(&bd, adapter.getBaseDataMgr());
+	EXPECT_STREQ("uft9", adapter.id());
+	//失败的连接事件不会读取缺失的外部 API 配置，也不会调用 login。
+	adapter.handleEvent(WTE_Connect, -1);
+	EXPECT_EQ(0u, api._loginCnt);
 
 	//active=false 的分支只记日志
-	q04::TempRoot tmp2("init2");
 	TraderAdapter adapter2;
 	WTSVariant* params2 = WTSVariant::createObject();
 	WTSVariant* risk2 = WTSVariant::createObject();

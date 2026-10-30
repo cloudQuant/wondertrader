@@ -9,33 +9,40 @@
  *     L101-104 / L120-123  工厂已登记后的两个 createStrategy 重载成功支（含 _strategies 登记）
  *     L126-133  getStrategy 命中支
  *   src/WtCore/SelStrategyMgr.cpp
- *     L57-66 / L84-86  SEL 入口符号名 createMfStrategyFact 在全仓库无出处 ⇒
- *              任何可 dlopen 的插件都走 creator==NULL → free_library → continue
- *     L90-92、L97-99、L107-118、L126-133  空表各支
+ *     SEL manager factory loading against the repository's real SEL export names,
+ *     including rejection of other plugin families and duplicate factory names.
  *
- * 为什么这里只把 SelStrategyMgr 拿下失败面：见 bugs/R31_pluginload.md（BUG-R31-001，
- * SelStrategyMgr 找的导出符号与 WtSelStraFact 实际导出不一致，SEL 插件在本仓库任何一份
- * 产物里都装载不进来）。HftStrategyMgr 的「成功支」只能用跨插件同名符号 createStrategyFact
- * 把 CTA 工厂当 IHftStrategyFact 用（类型双关），属主控提示的符号复用面，收进 DISABLED_。
+ * BUG-R31-001's positive host path uses an isolated shared library built from the
+ * actual WtSelStraFact production TUs. HftStrategyMgr's “success” path only has the
+ * cross-family createStrategyFact symbol available from CTA, so it remains disabled.
  *
  * 安全边界同 r31_exe_fact_pluginload.cpp：绝对路径、只 dlopen 产品插件、
- * 插件构造函数无副作用（指针清零）、free 之后不再使用符号、缺产物则 GTEST_SKIP。
+ * 插件构造函数无副作用（指针清零）、free 之后不再使用符号；缺失构建产物直接失败。
  */
 #include <gtest/gtest.h>
 
 #include <dlfcn.h>
 #include <unistd.h>
 
+#include <cstdlib>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <memory>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include <WtCore/CtaStrategyMgr.h>
 #include <WtCore/SelStrategyMgr.h>
 #include <WtCore/HftStrategyMgr.h>
+
+#ifndef WT_COV_SEL_PLUGIN_PATH
+#error "coverage SEL host test must receive the generated plugin path from CMake"
+#endif
+#ifndef WT_COV_CTA_PLUGIN_PATH
+#error "coverage SEL negative host test must receive the real CTA plugin path from CMake"
+#endif
 
 namespace fs = std::filesystem;
 
@@ -48,15 +55,6 @@ const char* kCtaFactLib = "libWtCtaStraFact.dylib";      // 导出 createStrateg
 const char* kTwoMaLib = "libWtCtaTwoMaFact.dylib";       // 导出 createStrategyFact，工厂名 WtCtaTwoMaFact
 const char* kExeFactLib = "libWtExeFact.dylib";          // 只有 createExecFact
 const char* kIdxFactLib = "libWtIndexFactory.dylib";     // 只有 create_index_factory
-
-/** 本机全部产品插件（含子目录形态）；用于「createMfStrategyFact 无出处」的可证伪核对 */
-const char* kAllProductLibs[] = {
-    "libWtCtaStraFact.dylib", "libWtCtaTwoMaFact.dylib", "libWtExeFact.dylib",
-    "libWtRiskMonFact.dylib", "libWtIndexFactory.dylib", "libWtDataStorage.dylib",
-    "libWtDataStorageAD.dylib", "libWtMsgQue.dylib", "libWtShareHelper.dylib",
-    "WtUftRunner/libWtUftStraFact.dylib", "WtPorter/libWtRiskMonFact.dylib",
-    "WtPorter/executer/libWtExeFact.dylib"
-};
 
 const fs::path& pluginBinDir()
 {
@@ -104,6 +102,11 @@ const fs::path& pluginBinDir()
     return cached;
 }
 
+fs::path selPluginPath()
+{
+    return fs::path(WT_COV_SEL_PLUGIN_PATH);
+}
+
 class r31_stra_mgr : public ::testing::Test
 {
 protected:
@@ -134,6 +137,15 @@ protected:
         return !ec;
     }
 
+    bool stagePath(const fs::path& source, const char* stagedName)
+    {
+        if (source.empty() || !fs::is_regular_file(source))
+            return false;
+        std::error_code ec;
+        fs::create_symlink(source, _dir / stagedName, ec);
+        return !ec;
+    }
+
     void touch(const std::string& name, const std::string& content)
     {
         std::ofstream out((_dir / name).c_str(), std::ios::trunc);
@@ -161,8 +173,7 @@ protected:
 };
 
 /* ------------------------------------------------------------------ *
- * 事实核对：两份 CTA 插件各自导出 createStrategyFact，且没有任何产物导出
- * SelStrategyMgr 要找的 createMfStrategyFact。
+ * 事实核对：CTA 插件导出 CTA 入口，SEL 插件由真实模块集成用例核验。
  * ------------------------------------------------------------------ */
 TEST_F(r31_stra_mgr, cta_plugins_export_create_strategy_fact_entry)
 {
@@ -176,21 +187,72 @@ TEST_F(r31_stra_mgr, cta_plugins_export_create_strategy_fact_entry)
     EXPECT_FALSE(exportsSymbol(kIdxFactLib, "createStrategyFact"));
 }
 
-TEST_F(r31_stra_mgr, no_product_plugin_exports_the_sel_entry_symbol)
+TEST_F(r31_stra_mgr, sel_real_plugin_exports_and_accepts_the_by_value_deleter_abi)
 {
-    ASSERT_FALSE(pluginBinDir().empty()) << "cannot locate build-cov bin dir";
-    size_t seen = 0;
-    for (const char* rel : kAllProductLibs)
+    const fs::path plugin = selPluginPath();
+    ASSERT_TRUE(fs::is_regular_file(plugin)) << plugin.string();
+
+    static_assert(std::is_same<FuncDeleteSelStraFact,
+        void(*)(ISelStrategyFact*)>::value, "SEL factory deleter ABI must pass the pointer by value");
+
+    DllHandle handle = DLLHelper::load_library(plugin.string().c_str());
+    ASSERT_NE(handle, nullptr) << plugin.string();
+    struct LibraryGuard
     {
-        fs::path p = pluginBinDir() / rel;
-        std::error_code ec;
-        if (!fs::is_regular_file(p, ec))
-            continue;           // 该机器上没产出这一份，跳过而不是判失败
-        ++seen;
-        // SelStrategyMgr.cpp:61 只认这个名字；本用例证明它在本机任何产物里都不存在
-        EXPECT_FALSE(exportsSymbol(rel, "createMfStrategyFact")) << rel;
-    }
-    EXPECT_GE(seen, 6u) << "too few product plugins on this machine to make the claim";
+        DllHandle handle;
+        ~LibraryGuard() { DLLHelper::free_library(handle); }
+    } guard{ handle };
+
+    FuncCreateSelStraFact creator = (FuncCreateSelStraFact)
+        DLLHelper::get_symbol(handle, "createSelStrategyFact");
+    FuncDeleteSelStraFact remover = (FuncDeleteSelStraFact)
+        DLLHelper::get_symbol(handle, "deleteSelStrategyFact");
+    ASSERT_NE(creator, nullptr);
+    ASSERT_NE(remover, nullptr);
+
+    ISelStrategyFact* fact = creator();
+    ASSERT_NE(fact, nullptr);
+    EXPECT_STREQ("WtSelStraFact", fact->getName());
+    remover(fact);
+}
+
+TEST_F(r31_stra_mgr, sel_manager_loads_real_sel_plugin_and_creates_strategy)
+{
+    const fs::path plugin = selPluginPath();
+    ASSERT_TRUE(fs::is_regular_file(plugin)) << plugin.string();
+    const std::string stagedName = plugin.filename().string();
+    ASSERT_TRUE(stagePath(plugin, stagedName.c_str()));
+
+    SelStrategyMgr mgr;
+    ASSERT_TRUE(mgr.loadFactories(_dir.string().c_str()));
+
+    SelStrategyPtr strategy = mgr.createStrategy("WtSelStraFact", "DualThrustSelection", "sel_real");
+    ASSERT_NE(strategy.get(), nullptr);
+    ASSERT_NE(strategy->self(), nullptr);
+    EXPECT_STREQ("WtSelStraFact", strategy->self()->getFactName());
+    EXPECT_STREQ("DualThrustSelection", strategy->self()->getName());
+    EXPECT_EQ(mgr.getStrategy("sel_real").get(), strategy.get());
+    SelStrategyPtr unknown = mgr.createStrategy("WtSelStraFact", "NoSuchSelection", "sel_missing");
+    ASSERT_NE(unknown.get(), nullptr);
+    EXPECT_EQ(unknown->self(), nullptr);
+}
+
+TEST_F(r31_stra_mgr, sel_manager_handles_duplicate_factory_name_plugins)
+{
+    const fs::path plugin = selPluginPath();
+    ASSERT_TRUE(fs::is_regular_file(plugin)) << plugin.string();
+    const std::string extension = plugin.extension().string();
+    const std::string firstName = "libASelStraFact" + extension;
+    const std::string secondName = "libBSelStraFact" + extension;
+    ASSERT_TRUE(stagePath(plugin, firstName.c_str()));
+    ASSERT_TRUE(stagePath(plugin, secondName.c_str()));
+
+    SelStrategyMgr mgr;
+    ASSERT_TRUE(mgr.loadFactories(_dir.string().c_str()));
+    SelStrategyPtr strategy = mgr.createStrategy("WtSelStraFact", "DualThrustSelection", "sel_duplicate");
+    ASSERT_NE(strategy.get(), nullptr);
+    ASSERT_NE(strategy->self(), nullptr);
+    EXPECT_STREQ("WtSelStraFact", strategy->self()->getFactName());
 }
 
 /* ------------------------------------------------------------------ *
@@ -315,22 +377,21 @@ TEST_F(r31_stra_mgr, cta_reload_same_dir_overwrites_the_factory_entry)
 }
 
 /* ------------------------------------------------------------------ *
- * SelStrategyMgr：装载循环真跑，但入口符号在本仓库无出处
+ * SelStrategyMgr：错误插件族没有 SEL 专属工厂入口，应被安全忽略
  * ------------------------------------------------------------------ */
-TEST_F(r31_stra_mgr, sel_load_of_plugin_like_dir_always_misses_its_entry_symbol)
+TEST_F(r31_stra_mgr, sel_manager_skips_non_sel_factory_plugins)
 {
-    // 目录里放的是「能 dlopen、且导出别的工厂入口」的真实插件
-    ASSERT_TRUE(stage(kCtaFactLib));
-    ASSERT_TRUE(stage(kTwoMaLib));
-    ASSERT_TRUE(stage(kExeFactLib));
-    ASSERT_TRUE(stage(kIdxFactLib));
+    // A real CTA plugin has a different factory entry/type and must be ignored.
+    const fs::path ctaPlugin(WT_COV_CTA_PLUGIN_PATH);
+    ASSERT_TRUE(fs::is_regular_file(ctaPlugin)) << ctaPlugin.string();
+    const std::string stagedName = ctaPlugin.filename().string();
+    ASSERT_TRUE(stagePath(ctaPlugin, stagedName.c_str()));
 
     SelStrategyMgr mgr;
-    // L57 每次 dlopen 都成功 → L61 get_symbol("createMfStrategyFact") 恒为 NULL
-    // → L64 free_library + continue → L90（count=0）→ L92 return true
+    // CTA/执行器/指标插件没有 createSelStrategyFact + deleteSelStrategyFact 组合。
     ASSERT_TRUE(mgr.loadFactories(_dir.string().c_str()));
 
-    // 可证伪点：SEL 插件在本仓库根本装载不进来 ⇒ 任何名字、任何形态都造不出策略
+    // A same-family name or a dotted name cannot make a different factory type load.
     EXPECT_EQ(mgr.createStrategy("WtCtaStraFact", "DualThrust", "sel_1").get(), nullptr);
     EXPECT_EQ(mgr.createStrategy("WtSelStraFact.SelDemo", "sel_2").get(), nullptr);
     EXPECT_EQ(mgr.getStrategy("sel_1").get(), nullptr);

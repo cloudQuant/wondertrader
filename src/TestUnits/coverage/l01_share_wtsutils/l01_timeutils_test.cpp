@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <limits>
 #include <string>
 #include <time.h>
 
@@ -54,6 +55,26 @@ TEST(l01_timeutils, get_next_minute_normalizes_large_negative_offset)
 	EXPECT_EQ(TimeUtils::getNextMinute(0, -1500), 2300u);
 }
 
+TEST(l01_timeutils, get_next_minute_handles_multi_day_and_extreme_offsets)
+{
+	auto expected = [](int32_t hhmm, int32_t offset) -> uint32_t
+	{
+		int64_t minute_of_day = static_cast<int64_t>(hhmm / 100) * 60 + hhmm % 100 + offset;
+		minute_of_day %= 1440;
+		if (minute_of_day < 0)
+			minute_of_day += 1440;
+		return static_cast<uint32_t>((minute_of_day / 60) * 100 + minute_of_day % 60);
+	};
+	const int32_t offsets[] = {
+		4321, -4321, std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::min()
+	};
+	for (int32_t offset : offsets)
+	{
+		EXPECT_EQ(expected(2359, offset), TimeUtils::getNextMinute(2359, offset)) << "offset=" << offset;
+		EXPECT_EQ(expected(0, offset), TimeUtils::getNextMinute(0, offset)) << "offset=" << offset;
+	}
+}
+
 TEST(l01_timeutils, get_next_month)
 {
 	EXPECT_EQ(TimeUtils::getNextMonth(202412u), 202501u);
@@ -73,6 +94,15 @@ TEST(l01_timeutils, get_next_month_normalizes_negative_months)
 	EXPECT_EQ(TimeUtils::getNextMonth(202401u, -13), 202212u);
 	EXPECT_EQ(TimeUtils::getNextMonth(202406u, -18), 202212u);
 	EXPECT_EQ(TimeUtils::getNextMonth(202406u, -25), 202205u);
+}
+
+TEST(l01_timeutils, get_next_month_handles_large_offsets_within_four_digit_years)
+{
+	// Span the supported four-digit calendar years in both directions.
+	// Larger int offsets leave the documented YYYYMM year range, so their
+	// uint32_t result is not a defined calendar value to assert here.
+	EXPECT_EQ(TimeUtils::getNextMonth(10001u, 118799), 999912u);
+	EXPECT_EQ(TimeUtils::getNextMonth(999912u, -118799), 10001u);
 }
 
 TEST(l01_timeutils, min_bar_helpers)
@@ -161,6 +191,32 @@ TEST(l01_timeutils, get_week_day)
 	EXPECT_EQ(TimeUtils::getWeekDay(20240107), 0u);	// 周日
 	EXPECT_EQ(TimeUtils::getWeekDay(20200101), 3u);	// 周三
 	EXPECT_EQ(TimeUtils::getWeekDay(20241225), 3u);	// 周三
+	EXPECT_EQ(TimeUtils::getWeekDay(20000229), 2u);	// 闰日：周二
+	EXPECT_EQ(TimeUtils::getWeekDay(19691231), 3u);	// Unix epoch 前：周三
+}
+
+TEST(l01_timeutils, try_get_week_day_rejects_invalid_gregorian_dates)
+{
+	const uint32_t invalidDates[] = {
+		9991231u, 20240001u, 20241301u, 20240100u, 20240132u, 20230229u,
+		19000229u, 20240431u, 2024011u, std::numeric_limits<uint32_t>::max()
+	};
+	for (uint32_t date : invalidDates)
+	{
+		uint32_t weekDay = 0;
+		EXPECT_FALSE(TimeUtils::tryGetWeekDay(date, weekDay)) << "date=" << date;
+		EXPECT_EQ(weekDay, TimeUtils::INVALID_WEEKDAY) << "date=" << date;
+		EXPECT_EQ(TimeUtils::getWeekDay(date), TimeUtils::INVALID_WEEKDAY) << "date=" << date;
+		EXPECT_FALSE(TimeUtils::isWeekends(date)) << "invalid date is not a valid weekend";
+	}
+
+	uint32_t weekDay = 0;
+	EXPECT_TRUE(TimeUtils::tryGetWeekDay(20240229u, weekDay));
+	EXPECT_EQ(weekDay, 4u); // 闰日周四
+	EXPECT_TRUE(TimeUtils::tryGetWeekDay(10000101u, weekDay)); // 最小四位年份
+	EXPECT_EQ(weekDay, 3u);
+	EXPECT_TRUE(TimeUtils::tryGetWeekDay(99991231u, weekDay)); // 最大四位年份
+	EXPECT_LT(weekDay, 7u);
 }
 
 TEST(l01_timeutils, is_weekends)
@@ -274,7 +330,7 @@ TEST(l01_timeutils, wall_clock_helpers_are_sane)
 	// 只校验区间，避免和上面 getCurDate() 之间跨午夜造成偶发不等
 	EXPECT_GE(d, 20200101u);
 	EXPECT_LE(d, 21001231u);
-	EXPECT_LT(t, 240000u);
+	EXPECT_LT(t, 240000000u); // HHMMSSsss
 
 	const uint64_t ymdhms = TimeUtils::getYYYYMMDDhhmmss();
 	EXPECT_GE(ymdhms / 10000000000ull, 2020ull);

@@ -21,6 +21,8 @@
 #include "../Share/Converter.hpp"
 
 #include <filesystem>
+#include <limits>
+#include <vector>
 namespace fs = std::filesystem;
 
  //By Wesley @ 2022.01.05
@@ -56,24 +58,21 @@ extern "C"
 };
 
 
-static char tmp_timestr[10] = { 0 };
 constexpr inline uint32_t strToTime(const char* strTime) noexcept
 {
-	int idx = 0;
-	char* c = (char*)strTime;
-	while (*c)
+	if (strTime == NULL)
+		return 0;
+
+	uint32_t result = 0;
+	// CTPOpt's TThostFtdcTimeType is a fixed char[9] containing HH:MM:SS.
+	// Bound the scan to the eight payload bytes and keep all state local so
+	// concurrent parser instances cannot overwrite each other's conversion.
+	for (std::size_t i = 0; i < 8 && strTime[i] != '\0'; ++i)
 	{
-		if ('0' <= *c && *c <= '9')
-		{
-			tmp_timestr[idx] = *c;
-			idx++;
-		}
-
-		c = c + 1;
+		if ('0' <= strTime[i] && strTime[i] <= '9')
+			result = result * 10 + static_cast<uint32_t>(strTime[i] - '0');
 	}
-	tmp_timestr[idx] = '\0';
-
-	return convert::to_uint32(tmp_timestr);
+	return result;
 }
 
 constexpr inline double checkValid(double val) noexcept
@@ -83,8 +82,13 @@ constexpr inline double checkValid(double val) noexcept
 
 ParserCTPOpt::ParserCTPOpt()
 	:m_uTradingDate(0)
-,m_pUserAPI(NULL)
+	,m_loginState(LS_NOTLOGIN)
+	,m_pUserAPI(NULL)
 	,m_iRequestID(0)
+	,m_sink(NULL)
+	,m_pBaseDataMgr(NULL)
+	,m_hInstCTP(NULL)
+	,m_funcCreator(NULL)
 	{
 }
 
@@ -110,13 +114,19 @@ bool ParserCTPOpt::init(WTSVariant* config)
 	std::string module = config->getCString("ctpmodule");
 	if (module.empty())
 		module = "soptthostmduserapi_se";
-	std::string dllpath = getBinDir() + DLLHelper::wrap_module(module.c_str(), "");
-	m_hInstCTP = DLLHelper::load_library(dllpath.c_str());
 	std::string path = fmtutil::format("{}/{}/{}/", m_strFlowDir.c_str(), m_strBroker.c_str(), m_strUserID.c_str());
 	if (!StdFile::exists(path.c_str()))
 	{
 		fs::create_directories(fs::path(path));
 	}	
+	std::string dllpath = getBinDir() + DLLHelper::wrap_module(module.c_str(), "");
+	m_hInstCTP = DLLHelper::load_library(dllpath.c_str());
+	if (m_hInstCTP == NULL)
+	{
+		if (m_sink)
+			write_log(m_sink, LL_ERROR, "[ParserCTPOpt] Failed to load market data API module");
+		return false;
+	}
 #ifdef _WIN32
 #	ifdef _WIN64
 	const char* creatorName = "?CreateFtdcMdApi@CThostFtdcMdApi@ctp_sopt@@SAPEAV12@PEBD_N1@Z";
@@ -127,16 +137,52 @@ bool ParserCTPOpt::init(WTSVariant* config)
 	const char* creatorName = "_ZN8ctp_sopt15CThostFtdcMdApi15CreateFtdcMdApiEPKcbb";
 #endif
 	m_funcCreator = (CTPCreator)DLLHelper::get_symbol(m_hInstCTP, creatorName);
-	m_pUserAPI = m_funcCreator(path.c_str(), false, false);
-	m_pUserAPI->RegisterSpi(this);
-	m_pUserAPI->RegisterFront((char*)m_strFrontAddr.c_str());
+	if (m_funcCreator == NULL)
+	{
+		if (m_sink)
+			write_log(m_sink, LL_ERROR, "[ParserCTPOpt] Market data API creator symbol was not found");
+		unloadApiLibrary();
+		return false;
+	}
+	if (!bindApi(m_funcCreator, path.c_str()))
+	{
+		if (m_sink)
+			write_log(m_sink, LL_ERROR, "[ParserCTPOpt] Market data API creator returned null");
+		unloadApiLibrary();
+		return false;
+	}
 
 	return true;
+}
+
+bool ParserCTPOpt::bindApi(CTPCreator creator, const char* flowPath)
+{
+	if (creator == NULL)
+		return false;
+
+	m_pUserAPI = creator(flowPath, false, false);
+	if (m_pUserAPI == NULL)
+		return false;
+
+	m_pUserAPI->RegisterSpi(this);
+	m_pUserAPI->RegisterFront((char*)m_strFrontAddr.c_str());
+	return true;
+}
+
+void ParserCTPOpt::unloadApiLibrary()
+{
+	if (m_hInstCTP != NULL)
+	{
+		DLLHelper::free_library(m_hInstCTP);
+		m_hInstCTP = NULL;
+	}
+	m_funcCreator = NULL;
 }
 
 void ParserCTPOpt::release()
 {
 	disconnect();
+	unloadApiLibrary();
 }
 
 bool ParserCTPOpt::connect()
@@ -179,18 +225,28 @@ void ParserCTPOpt::OnFrontConnected()
 
 void ParserCTPOpt::OnRspUserLogin( CThostFtdcRspUserLoginField */*pRspUserLogin*/, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast )
 {
-	if(bIsLast && !IsErrorRspInfo(pRspInfo))
-	{
-		m_uTradingDate = convert::to_uint32(m_pUserAPI->GetTradingDay());
-		
-		if(m_sink)
-		{
-			m_sink->handleEvent(WPE_Login, 0);
-		}
+	if (!bIsLast)
+		return;
 
-		//订阅行情数据
-		SubscribeMarketData();
+	if (IsErrorRspInfo(pRspInfo))
+		return;
+
+	if (m_pUserAPI == NULL)
+	{
+		if (m_sink)
+			write_log(m_sink, LL_ERROR, "[ParserCTPOpt] Login response received without an active market data API");
+		return;
 	}
+
+	m_uTradingDate = convert::to_uint32(m_pUserAPI->GetTradingDay());
+
+	if(m_sink)
+	{
+		m_sink->handleEvent(WPE_Login, 0);
+	}
+
+	//订阅行情数据
+	SubscribeMarketData();
 }
 
 void ParserCTPOpt::OnRspUserLogout(CThostFtdcUserLogoutField */*pUserLogout*/, CThostFtdcRspInfoField */*pRspInfo*/, int /*nRequestID*/, bool /*bIsLast*/)
@@ -255,6 +311,8 @@ void ParserCTPOpt::OnRtnDepthMarketData( CThostFtdcDepthMarketDataField *pDepthM
 	WTSCommodityInfo* pCommInfo = cInfo->getCommInfo();
 
 	WTSTickData* tick = WTSTickData::create(cInfo->getCode());
+	if (tick == NULL)
+		return;
 	tick->setContractInfo(cInfo);
 	WTSTickStruct& quote = tick->getTickStruct();
 	strcpy(quote.exchg, pCommInfo->getExchg());
@@ -370,20 +428,27 @@ void ParserCTPOpt::SubscribeMarketData()
 		return;
 	}
 
-	char ** subscribe = new char*[codeFilter.size()];
-	int nCount = 0;
+	std::vector<char*> subscribe;
+	subscribe.reserve(codeFilter.size());
 	for(auto& code : codeFilter)
 	{
 		std::size_t pos = code.find('.');
 		if (pos != std::string::npos)
-			subscribe[nCount++] = (char*)code.c_str() + pos + 1;
+			subscribe.push_back((char*)code.c_str() + pos + 1);
 		else
-			subscribe[nCount++] = (char*)code.c_str();
+			subscribe.push_back((char*)code.c_str());
 	}
 
+	if (subscribe.size() > static_cast<std::size_t>((std::numeric_limits<int>::max)()))
+	{
+		if (m_sink)
+			write_log(m_sink, LL_ERROR, "[ParserCTPOpt] Too many contracts to subscribe: {}", subscribe.size());
+		return;
+	}
+	int nCount = static_cast<int>(subscribe.size());
 	if(m_pUserAPI && nCount > 0)
 	{
-		int iResult = m_pUserAPI->SubscribeMarketData(subscribe, nCount);
+		int iResult = m_pUserAPI->SubscribeMarketData(subscribe.data(), nCount);
 		if (iResult != 0)
 		{
 			if (m_sink)
@@ -396,12 +461,16 @@ void ParserCTPOpt::SubscribeMarketData()
 		}
 	}
 	codeFilter.clear();
-	delete[] subscribe;
 }
 
-bool ParserCTPOpt::IsErrorRspInfo(CThostFtdcRspInfoField */*pRspInfo*/)
+bool ParserCTPOpt::IsErrorRspInfo(CThostFtdcRspInfoField *pRspInfo)
 {
-	return false;
+	if (pRspInfo == NULL || pRspInfo->ErrorID == 0)
+		return false;
+
+	if (m_sink)
+		write_log(m_sink, LL_ERROR, "[ParserCTPOpt] API response failed with error id {}", pRspInfo->ErrorID);
+	return true;
 }
 
 void ParserCTPOpt::subscribe(const CodeSet &vecSymbols)
@@ -413,20 +482,28 @@ void ParserCTPOpt::subscribe(const CodeSet &vecSymbols)
 	else
 	{
 		m_filterSubs = vecSymbols;
-		char * subscribe[500] = {NULL};
-		int nCount = 0;
+		std::vector<char*> subscribe;
+		subscribe.reserve(vecSymbols.size());
 		for (auto& code  : vecSymbols)
 		{
 			std::size_t pos = code.find('.');
 			if (pos != std::string::npos)
-				subscribe[nCount++] = (char*)code.c_str() + pos + 1;
+				subscribe.push_back((char*)code.c_str() + pos + 1);
 			else
-				subscribe[nCount++] = (char*)code.c_str();
+				subscribe.push_back((char*)code.c_str());
 		}
 
-		if(m_pUserAPI && nCount > 0)
+		if(m_pUserAPI && !subscribe.empty())
 		{
-			int iResult = m_pUserAPI->SubscribeMarketData(subscribe, nCount);
+			if (subscribe.size() > static_cast<std::size_t>((std::numeric_limits<int>::max)()))
+			{
+				if (m_sink)
+					write_log(m_sink, LL_ERROR, "[ParserCTPOpt] Too many contracts to subscribe: {}", subscribe.size());
+				return;
+			}
+
+			int nCount = static_cast<int>(subscribe.size());
+			int iResult = m_pUserAPI->SubscribeMarketData(subscribe.data(), nCount);
 			if (iResult != 0)
 			{
 				if (m_sink)

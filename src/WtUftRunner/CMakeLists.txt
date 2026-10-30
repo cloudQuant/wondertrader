@@ -41,6 +41,7 @@ ENDIF()
 
 ADD_EXECUTABLE(WtUftRunner ${SRCS} ${HDRS})
 TARGET_LINK_LIBRARIES(WtUftRunner ${LIBS})
+add_dependencies(WtUftRunner TraderCTP ParserCTP)
 
 IF (MSVC)
 ELSE (GNUCC)

@@ -31,6 +31,7 @@
 #include "WtPorter/PorterDefs.h"
 #include "WtPorter/WtPorter.h"
 #include "WtPorter/WtRtRunner.h"
+#include "../trader_mocker_fixture.h"
 
 USING_NS_WTP;
 
@@ -75,6 +76,7 @@ namespace {
 	{
 		std::error_code ec;
 		std::filesystem::remove_all(dir, ec);
+		std::filesystem::remove_all("mocker_69001", ec);
 	}
 
 	void write_text(const std::string& path, const std::string& body)
@@ -90,19 +92,16 @@ namespace {
 		return r;
 	}
 
-	/* hft env + 一个 active trader（无 module，TraderAdapter::init 返回 false 但
-	 * _id 已赋值且适配器入表），供 createHftContext 绑定。 */
-	WtRtRunner* new_hft_runner(const std::string& dir)
+	/* hft env + 成功初始化的本地 TraderMocker，供 createHftContext 绑定；不调用 run。 */
+	bool configure_hft_runner(WtRtRunner* r, const std::string& dir)
 	{
 		write_text(dir + "/actions.json", "{}");
-		WtRtRunner* r = new_runner(dir);
 		const std::string cfg =
 			"{\"basefiles\":{},\"env\":{\"name\":\"hft\"},\"data\":{},"
 			"\"bspolicy\":\"" + dir + "/actions.json\","
-			"\"traders\":[{\"active\":true,\"id\":\"r69_chnl_trd\"}]}";
-		if (!r->config(cfg.c_str(), false))
-			return nullptr;
-		return r;
+			"\"traders\":[{\"active\":true,\"id\":\"r69_chnl_trd\","
+			"\"module\":\"TraderMocker\",\"mockerid\":69001,\"udp_port\":0}]}";
+		return r->config(cfg.c_str(), false);
 	}
 
 	ExpHftContext* make_bound_hft(WtRtRunner* r, const std::string& name)
@@ -137,7 +136,16 @@ TEST(R69PorterExtLifecycle, BoundHftChannelReadyCarriesTraderId)
 	const std::string dir = prepare_dir();
 	ASSERT_FALSE(dir.empty());
 
-	WtRtRunner* r = new_hft_runner(dir);
+	WtRtRunner* r = new_runner(dir);
+	wtp_test::TraderMockerFixture trader_mocker("r69_ready");
+	if (!trader_mocker.install())
+	{
+		clean_dir(dir);
+		FAIL() << "Could not prepare TraderMocker from product output at "
+			<< trader_mocker.product_plugin() << ": " << trader_mocker.error();
+		return;
+	}
+	ASSERT_TRUE(configure_hft_runner(r, dir));
 	ASSERT_NE(r, nullptr);
 	ExpHftContext* ctx = make_bound_hft(r, "r69_hft_ready");
 	ASSERT_NE(ctx, nullptr);
@@ -165,7 +173,16 @@ TEST(R69PorterExtLifecycle, BoundHftChannelLostCarriesTraderId)
 	const std::string dir = prepare_dir();
 	ASSERT_FALSE(dir.empty());
 
-	WtRtRunner* r = new_hft_runner(dir);
+	WtRtRunner* r = new_runner(dir);
+	wtp_test::TraderMockerFixture trader_mocker("r69_lost");
+	if (!trader_mocker.install())
+	{
+		clean_dir(dir);
+		FAIL() << "Could not prepare TraderMocker from product output at "
+			<< trader_mocker.product_plugin() << ": " << trader_mocker.error();
+		return;
+	}
+	ASSERT_TRUE(configure_hft_runner(r, dir));
 	ASSERT_NE(r, nullptr);
 	ExpHftContext* ctx = make_bound_hft(r, "r69_hft_lost");
 	ASSERT_NE(ctx, nullptr);
@@ -193,7 +210,16 @@ TEST(R69PorterExtLifecycle, BoundHftEventsAreSilentWithoutRegisteredCallbacks)
 	const std::string dir = prepare_dir();
 	ASSERT_FALSE(dir.empty());
 
-	WtRtRunner* r = new_hft_runner(dir);
+	WtRtRunner* r = new_runner(dir);
+	wtp_test::TraderMockerFixture trader_mocker("r69_silent");
+	if (!trader_mocker.install())
+	{
+		clean_dir(dir);
+		FAIL() << "Could not prepare TraderMocker from product output at "
+			<< trader_mocker.product_plugin() << ": " << trader_mocker.error();
+		return;
+	}
+	ASSERT_TRUE(configure_hft_runner(r, dir));
 	ASSERT_NE(r, nullptr);
 	ExpHftContext* ctx = make_bound_hft(r, "r69_hft_silent");
 	ASSERT_NE(ctx, nullptr);
@@ -217,7 +243,16 @@ TEST(R69PorterExtLifecycle, HeapRunnerHftBindingKeepsSingletonEngineEmpty)
 	const std::string dir = prepare_dir();
 	ASSERT_FALSE(dir.empty());
 
-	WtRtRunner* r = new_hft_runner(dir);
+	WtRtRunner* r = new_runner(dir);
+	wtp_test::TraderMockerFixture trader_mocker("r69_heap");
+	if (!trader_mocker.install())
+	{
+		clean_dir(dir);
+		FAIL() << "Could not prepare TraderMocker from product output at "
+			<< trader_mocker.product_plugin() << ": " << trader_mocker.error();
+		return;
+	}
+	ASSERT_TRUE(configure_hft_runner(r, dir));
 	ASSERT_NE(r, nullptr);
 	ASSERT_NE(r->getEngine(), nullptr);
 	EXPECT_NE(dynamic_cast<WtHftEngine*>(r->getEngine()), nullptr);

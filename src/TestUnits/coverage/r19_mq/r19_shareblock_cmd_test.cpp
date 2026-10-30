@@ -16,7 +16,6 @@
 #include <string>
 #include <vector>
 #include <filesystem>
-#include <unistd.h>
 
 #include "r19_support.h"
 
@@ -153,7 +152,7 @@ TEST_F(R19TempDir, r19_cmd_foreign_pid_blocks_add_and_init_normalizes_indexes)
 	const std::string domP = r19::domain("d3");
 	const std::string path = file("d3.blk");
 
-	const uint32_t foreign = (uint32_t)::getpid() + 1u;
+	const uint32_t foreign = r19::process_id() + 1u;
 	std::vector<char> buf = craft_cmd_block(5u, 5u, foreign, 5, "atFive");
 	ASSERT_TRUE(r19::write_raw_shm_block(path, buf.data(), buf.size()));
 
@@ -178,7 +177,7 @@ TEST_F(R19TempDir, r19_cmd_wrapped_block_reads_by_capacity_modulo)
 	const std::string path = file("d4.blk");
 
 	// _writable=130（=2 圈外）、_readable=3、槽 2 里放一条历史命令
-	std::vector<char> buf = craft_cmd_block(3u, 130u, (uint32_t)::getpid(), 2, "wrapped");
+	std::vector<char> buf = craft_cmd_block(3u, 130u, r19::process_id(), 2, "wrapped");
 	ASSERT_TRUE(r19::write_raw_shm_block(path, buf.data(), buf.size()));
 
 	ASSERT_TRUE(sb().init_cmder(domW.c_str(), false, path.c_str()));

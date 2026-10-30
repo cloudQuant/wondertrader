@@ -83,7 +83,24 @@ public:
 	std::vector<AccountSnap> accounts;
 
 	struct ArraySnap { uint32_t size; std::string firstCode; };
-	std::vector<ArraySnap> positions, orders, trades;
+	struct PositionItemSnap
+	{
+		std::string code;
+		WTSDirectionType direction;
+		double newPosition;
+		double prePosition;
+		double availNewPosition;
+		double availPrePosition;
+		double avgPrice;
+		uint32_t retainCount;
+	};
+	struct PositionSnap
+	{
+		bool wasNull;
+		std::vector<PositionItemSnap> items;
+	};
+	std::vector<PositionSnap> positions;
+	std::vector<ArraySnap> orders, trades;
 
 	struct OrderSnap { std::string code, exchg, entrustID, orderID; double price, vol, volTraded, volLeft;
 		WTSOrderState state; uint32_t orderDate; uint64_t orderTime; };
@@ -162,12 +179,20 @@ public:
 
 	void onRspPosition(const WTSArray* ayPositions) override
 	{
-		ArraySnap snap{};
+		PositionSnap snap{};
+		snap.wasNull = ayPositions == nullptr;
 		if (ayPositions != nullptr)
 		{
-			snap.size = ayPositions->size();
-			if (ayPositions->size() > 0)
-				snap.firstCode = const_cast<WTSArray*>(ayPositions)->at<WTSPositionItem>(0)->getCode();
+			WTSArray* positionArray = const_cast<WTSArray*>(ayPositions);
+			for (uint32_t i = 0; i < positionArray->size(); ++i)
+			{
+				WTSPositionItem* item = positionArray->at<WTSPositionItem>(i);
+				if (item == nullptr)
+					continue;
+				snap.items.push_back({item->getCode(), item->getDirection(), item->getNewPosition(),
+					item->getPrePosition(), item->getAvailNewPos(), item->getAvailPrePos(),
+					item->getAvgPrice(), item->retainCount()});
+			}
 		}
 		positions.push_back(snap);
 	}
@@ -452,12 +477,14 @@ TEST_F(TraderFemasTest, heartbeat_warning_is_routed_to_sink_log)
 TEST_F(TraderFemasTest, make_entrust_id_rejects_null_and_zero_length_buffer)
 {
 	char buf[64];
-	memset(buf, 0, sizeof(buf));
+	memset(buf, 0x5A, sizeof(buf));
 
 	EXPECT_FALSE(probe.makeEntrustID(nullptr, 32));
 	EXPECT_FALSE(probe.makeEntrustID(buf, 0));
-	// 两个守卫都在写缓冲之前返回
-	EXPECT_EQ(buf[0], '\0');
+	EXPECT_FALSE(probe.makeEntrustID(buf, -1));
+	// Invalid capacities must leave the destination untouched.
+	for (char c : buf)
+		EXPECT_EQ(c, static_cast<char>(0x5A));
 }
 
 TEST_F(TraderFemasTest, make_entrust_id_pads_local_order_id_to_twelve_digits)
@@ -467,10 +494,10 @@ TEST_F(TraderFemasTest, make_entrust_id_pads_local_order_id_to_twelve_digits)
 
 	// m_uLocalOrdID 从 1 起，fetch_add 后首个可用编号是 2
 	ASSERT_TRUE(probe.makeEntrustID(buf, static_cast<int>(sizeof(buf))));
-	EXPECT_EQ(std::string(buf), "0000000000002");
+	EXPECT_EQ(std::string(buf), "000000000002");
 
 	ASSERT_TRUE(probe.makeEntrustID(buf, static_cast<int>(sizeof(buf))));
-	EXPECT_EQ(std::string(buf), "0000000000003");
+	EXPECT_EQ(std::string(buf), "000000000003");
 }
 
 TEST_F(TraderFemasTest, make_entrust_id_prefixes_session_id)
@@ -484,6 +511,25 @@ TEST_F(TraderFemasTest, make_entrust_id_prefixes_session_id)
 
 	EXPECT_EQ(probe.genRequestID(), 1u);
 	EXPECT_EQ(probe.genRequestID(), 2u);
+}
+
+TEST_F(TraderFemasTest, make_entrust_id_accepts_exact_capacity_and_preserves_canaries)
+{
+	probe.setSessionID("12345678901234567891");
+	// Twenty session characters, twelve order-reference digits, and the NUL.
+	char storage[35];
+	memset(storage, 0x5A, sizeof(storage));
+
+	ASSERT_TRUE(probe.makeEntrustID(storage + 1, 33));
+	EXPECT_STREQ("12345678901234567891000000000002", storage + 1);
+	EXPECT_EQ(storage[0], static_cast<char>(0x5A));
+	EXPECT_EQ(storage[34], static_cast<char>(0x5A));
+
+	char short_storage[35];
+	memset(short_storage, 0x5A, sizeof(short_storage));
+	EXPECT_FALSE(probe.makeEntrustID(short_storage + 1, 32));
+	for (char c : short_storage)
+		EXPECT_EQ(c, static_cast<char>(0x5A));
 }
 
 /* ------------------------------------------------------------------ */
@@ -550,10 +596,10 @@ TEST_F(TraderFemasTest, wrap_femas_codes_back_into_wts_enums)
 	EXPECT_STREQ(probe.wrapExchg("DCE"), "DCE");
 }
 
-TEST_F(TraderFemasTest, wrap_order_state_clamps_femas_states_above_accepted_no_reply)
+TEST_F(TraderFemasTest, wrap_order_state_maps_accepted_no_reply_and_canceled)
 {
 	EXPECT_EQ(probe.wrapOrderState(static_cast<TUstpFtdcOrderStatusType>(USTP_FTDC_OS_AcceptedNoReply)), WOS_Submitting);
-	EXPECT_EQ(probe.wrapOrderState(static_cast<TUstpFtdcOrderStatusType>(USTP_FTDC_OS_Canceled)), WOS_Submitting);
+	EXPECT_EQ(probe.wrapOrderState(static_cast<TUstpFtdcOrderStatusType>(USTP_FTDC_OS_Canceled)), WOS_Canceled);
 	// 阈值之前的状态按数值直投
 	const TUstpFtdcOrderStatusType before = static_cast<TUstpFtdcOrderStatusType>(USTP_FTDC_TC_GFD - 1);
 	EXPECT_EQ(probe.wrapOrderState(before), static_cast<WTSOrderState>(static_cast<int>(before)));
@@ -619,8 +665,9 @@ TEST_F(FemasContractFixture, make_order_info_maps_vendor_order_fields)
 	// "09:30:15" 去掉冒号 -> 93015，再 *1000 交给 makeTime
 	EXPECT_EQ(info->getOrderDate(), 20240105u);
 	EXPECT_EQ(info->getOrderTime(), TimeUtils::makeTime(20240105, 93015000));
-	// UserOrderLocalID 数字非 0 -> 直接当委托号
+	// Generated/user-tag IDs may have a session prefix; preserve the whole ID.
 	EXPECT_STREQ(info->getEntrustID(), "A1000000000002");
+	EXPECT_STREQ(info->getUserTag(), "A1000000000002");
 	EXPECT_STREQ(info->getOrderID(), "OS-77");
 	// 高于 AcceptedNoReply 的状态被夹回 Submitting
 	EXPECT_EQ(info->getOrderState(), WOS_Submitting);
@@ -651,7 +698,7 @@ TEST_F(FemasContractFixture, make_order_info_falls_back_to_local_id_and_maps_fok
 
 	WTSOrderInfo* info = probe.makeOrderInfo(&ord);
 	ASSERT_NE(info, nullptr);
-	// atoi("0")==0 -> 回落到 OrderLocalID
+	// Zero sentinel -> fall back to OrderLocalID.
 	EXPECT_STREQ(info->getEntrustID(), "9527");
 	// IOC + VC_CV -> FOK
 	EXPECT_EQ(info->getOrderFlag(), WOF_FOK);
@@ -659,6 +706,24 @@ TEST_F(FemasContractFixture, make_order_info_falls_back_to_local_id_and_maps_fok
 	EXPECT_EQ(info->getOffsetType(), WOT_CLOSETODAY);
 	EXPECT_EQ(info->getOrderTime(), TimeUtils::makeTime(20240105, 134530000));
 	info->release();
+
+	const char* zeroUserOrderLocalIDs[] = {"", "0000"};
+	for (const char* zeroUserOrderLocalID : zeroUserOrderLocalIDs)
+	{
+		memset(ord.UserOrderLocalID, 0, sizeof(ord.UserOrderLocalID));
+		strncpy(ord.UserOrderLocalID, zeroUserOrderLocalID, sizeof(ord.UserOrderLocalID) - 1);
+		WTSOrderInfo* fallbackInfo = probe.makeOrderInfo(&ord);
+		ASSERT_NE(fallbackInfo, nullptr);
+		EXPECT_STREQ(fallbackInfo->getEntrustID(), "9527");
+		fallbackInfo->release();
+	}
+
+	memset(ord.UserOrderLocalID, 0, sizeof(ord.UserOrderLocalID));
+	strncpy(ord.UserOrderLocalID, "12345", sizeof(ord.UserOrderLocalID) - 1);
+	WTSOrderInfo* numericInfo = probe.makeOrderInfo(&ord);
+	ASSERT_NE(numericInfo, nullptr);
+	EXPECT_STREQ(numericInfo->getEntrustID(), "12345");
+	numericInfo->release();
 }
 
 TEST_F(FemasContractFixture, make_entrust_maps_vendor_input_order)
@@ -939,11 +1004,53 @@ TEST_F(FemasContractFixture, position_query_response_appends_the_reported_item)
 	pos.Direction = static_cast<TUstpFtdcDirectionType>(USTP_FTDC_D_Buy);
 	CUstpFtdcRspInfoField ok = makeRsp(0, "");
 
+	probe.OnRspQryInvestorPosition(&pos, &ok, 1, false);
+	EXPECT_TRUE(sink.positions.empty());
+
+	pos.Position = 8;
+	pos.YdPosition = 5;
+	pos.FrozenPosition = 2;
+	pos.PositionCost = 280000.0;
+	pos.Direction = static_cast<TUstpFtdcDirectionType>(USTP_FTDC_D_Sell);
 	probe.OnRspQryInvestorPosition(&pos, &ok, 1, true);
 
 	ASSERT_EQ(sink.positions.size(), 1u);
-	EXPECT_EQ(sink.positions[0].size, 1u);
-	EXPECT_EQ(sink.positions[0].firstCode, "rb2401");
+	ASSERT_FALSE(sink.positions[0].wasNull);
+	ASSERT_EQ(sink.positions[0].items.size(), 2u);
+	EXPECT_EQ(sink.positions[0].items[0].code, "rb2401");
+	EXPECT_EQ(sink.positions[0].items[0].direction, WDT_LONG);
+	EXPECT_DOUBLE_EQ(sink.positions[0].items[0].newPosition, 2.0);
+	EXPECT_DOUBLE_EQ(sink.positions[0].items[0].prePosition, 3.0);
+	EXPECT_DOUBLE_EQ(sink.positions[0].items[0].availNewPosition, 1.0);
+	EXPECT_DOUBLE_EQ(sink.positions[0].items[0].availPrePosition, 3.0);
+	EXPECT_DOUBLE_EQ(sink.positions[0].items[0].avgPrice, 3500.0);
+	EXPECT_EQ(sink.positions[0].items[0].retainCount, 1u);
+	EXPECT_EQ(sink.positions[0].items[1].direction, WDT_SHORT);
+	EXPECT_DOUBLE_EQ(sink.positions[0].items[1].newPosition, 3.0);
+	EXPECT_DOUBLE_EQ(sink.positions[0].items[1].prePosition, 5.0);
+	EXPECT_DOUBLE_EQ(sink.positions[0].items[1].availNewPosition, 1.0);
+	EXPECT_DOUBLE_EQ(sink.positions[0].items[1].availPrePosition, 5.0);
+	EXPECT_EQ(sink.positions[0].items[1].retainCount, 1u);
+	EXPECT_EQ(sink.m_mgr.m_getContractCalls, 2u);
+}
+
+TEST_F(FemasContractFixture, position_query_unknown_contract_returns_empty_final_array)
+{
+	CUstpFtdcRspInvestorPositionField pos;
+	memset(&pos, 0, sizeof(pos));
+	strncpy(pos.InstrumentID, "missing", sizeof(pos.InstrumentID) - 1);
+	strncpy(pos.ExchangeID, "SHFE", sizeof(pos.ExchangeID) - 1);
+	pos.Position = 5;
+	pos.YdPosition = 3;
+	pos.FrozenPosition = 1;
+	CUstpFtdcRspInfoField ok = makeRsp(0, "");
+	sink.m_mgr.m_contract = nullptr;
+
+	probe.OnRspQryInvestorPosition(&pos, &ok, 1, true);
+
+	ASSERT_EQ(sink.positions.size(), 1u);
+	EXPECT_FALSE(sink.positions[0].wasNull);
+	EXPECT_TRUE(sink.positions[0].items.empty());
 	EXPECT_EQ(sink.m_mgr.m_getContractCalls, 1u);
 }
 
@@ -1101,9 +1208,8 @@ TEST(TraderFemasDisabled, DISABLED_query_account_before_connect_dereferences_nul
 	EXPECT_EQ(probe.queryAccount(), 0);
 }
 
-TEST(TraderFemasTest, make_entrust_id_rejects_insufficient_logical_capacity)
+TEST_F(TraderFemasTest, make_entrust_id_rejects_insufficient_logical_capacity)
 {
-	FemasProbe probe;
 	probe.registerSpi(nullptr);
 	// MaxOrderLocalID is char[21], so a 20-character session is the longest
 	// value received from the Femas login response.

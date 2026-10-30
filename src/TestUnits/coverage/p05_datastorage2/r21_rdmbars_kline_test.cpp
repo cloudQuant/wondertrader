@@ -369,3 +369,44 @@ TEST_F(R21ReaderADTest, DISABLED_KlineReadWithoutAnyBarCrashesOnEmptyVectorSubsc
 		slice->release();
 	EXPECT_EQ(slice, nullptr);
 }
+
+// ---------------------------------------------------------------------------
+// 文件占用 K 线库目录时返回空结果并记录路径/错误；修复路径后同一 reader 可重试。
+// ---------------------------------------------------------------------------
+TEST_F(R21ReaderADTest, KlineDbPathOccupiedByRegularFileReturnsNullAndAllowsRetry)
+{
+	init_reader();
+
+	const std::filesystem::path occupied = _root / "day" / K2_EXCHG;
+	std::filesystem::create_directories(occupied.parent_path());
+	{
+		std::ofstream fout(occupied);
+		fout << "not a directory";
+	}
+
+	WTSKlineSlice* failed = NULL;
+	EXPECT_NO_THROW(failed = reader()->readKlineSliceByRange(K2_STD, KP_DAY,
+		202401020930ull, 202401021500ull));
+	EXPECT_EQ(failed, nullptr);
+	const std::string error = sink()->last_log(LL_ERROR);
+	EXPECT_NE(error.find("Creating day db directory"), std::string::npos);
+	EXPECT_NE(error.find(occupied.string()), std::string::npos);
+	const std::size_t failedPos = error.find("failed:");
+	ASSERT_NE(failedPos, std::string::npos);
+	EXPECT_NE(error.find_first_not_of(" \t", failedPos + 7), std::string::npos);
+
+	std::error_code ec;
+	EXPECT_TRUE(std::filesystem::remove(occupied, ec));
+	EXPECT_FALSE(ec);
+	std::vector<WTSBarStruct> bars{
+		r21_make_bar(20240102, 20240102, 700)};
+	put_bar_db("day", K2_EXCHG, K2_CODE, bars, true);
+	WTSKlineSlice* recovered = reader()->readKlineSliceByRange(K2_STD, KP_DAY,
+		202401020930ull, 202401021500ull);
+	ASSERT_NE(recovered, nullptr);
+	ASSERT_EQ(recovered->size(), 1);
+	EXPECT_EQ(recovered->at(0)->date, 20240102u);
+	EXPECT_DOUBLE_EQ(recovered->at(0)->close, 701.0);
+	recovered->release();
+	EXPECT_EQ(sink()->count_containing("day db of XEX opened"), 1u);
+}

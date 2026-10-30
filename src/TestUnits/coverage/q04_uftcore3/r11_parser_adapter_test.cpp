@@ -28,7 +28,9 @@
 
 #include <cstring>
 #include <set>
+#include <stdexcept>
 #include <string>
+#include <thread>
 
 #include "q04_trader_fixture.h"
 
@@ -41,6 +43,7 @@ struct ApiStats
 {
 	uint32_t _initCnt = 0;
 	uint32_t _releaseCnt = 0;
+	uint32_t _destroyCnt = 0;
 	uint32_t _connectCnt = 0;
 	uint32_t _disconnectCnt = 0;
 	uint32_t _subCnt = 0;
@@ -54,11 +57,18 @@ class FakeParserApi : public IParserApi
 {
 public:
 	explicit FakeParserApi(ApiStats* stats) : _stats(stats) {}
+	~FakeParserApi() override { _stats->_destroyCnt++; }
 
 	bool _initRet = true;
+	bool _releaseThrows = false;
 
 	bool init(WTSVariant* /*config*/) override { _stats->_initCnt++; return _initRet; }
-	void release() override { _stats->_releaseCnt++; }
+	void release() override
+	{
+		_stats->_releaseCnt++;
+		if (_releaseThrows)
+			throw std::runtime_error("fake parser release failure");
+	}
 	bool connect() override { _stats->_connectCnt++; return true; }
 	bool disconnect() override { _stats->_disconnectCnt++; return true; }
 	bool isConnected() override { return _stats->_connectCnt > 0; }
@@ -88,6 +98,7 @@ private:
 class FakeStub : public IParserStub
 {
 public:
+	ParserAdapter* _callbackAdapter = nullptr;
 	uint32_t _quoteCnt = 0;
 	uint32_t _oqCnt = 0;
 	uint32_t _odCnt = 0;
@@ -96,24 +107,43 @@ public:
 	std::string _lastOqCode;
 	std::string _lastOdCode;
 	std::string _lastTrCode;
+	bool _quoteCallbackScope = false;
+	bool _quoteNestedScopePreserved = false;
+	bool _quoteOtherThreadScope = true;
+	bool _oqCallbackScope = false;
+	bool _odCallbackScope = false;
+	bool _trCallbackScope = false;
 
 	void handle_push_quote(WTSTickData* curTick) override
 	{
+		_quoteCallbackScope = _callbackAdapter != nullptr && _callbackAdapter->isInParserCallbackOnCurrentThread();
+		if (_callbackAdapter != nullptr)
+		{
+			_callbackAdapter->handleSymbolList(nullptr);
+			_quoteNestedScopePreserved = _callbackAdapter->isInParserCallbackOnCurrentThread();
+			std::thread otherThread([this]() {
+				_quoteOtherThreadScope = _callbackAdapter->isInParserCallbackOnCurrentThread();
+			});
+			otherThread.join();
+		}
 		_quoteCnt++;
 		_lastCode = curTick->code();
 	}
 	void handle_push_order_queue(WTSOrdQueData* curOrdQue) override
 	{
+		_oqCallbackScope = _callbackAdapter != nullptr && _callbackAdapter->isInParserCallbackOnCurrentThread();
 		_oqCnt++;
 		_lastOqCode = curOrdQue->code();
 	}
 	void handle_push_order_detail(WTSOrdDtlData* curOrdDtl) override
 	{
+		_odCallbackScope = _callbackAdapter != nullptr && _callbackAdapter->isInParserCallbackOnCurrentThread();
 		_odCnt++;
 		_lastOdCode = curOrdDtl->code();
 	}
 	void handle_push_transaction(WTSTransData* curTrans) override
 	{
+		_trCallbackScope = _callbackAdapter != nullptr && _callbackAdapter->isInParserCallbackOnCurrentThread();
 		_trCnt++;
 		_lastTrCode = curTrans->code();
 	}
@@ -133,6 +163,33 @@ inline FakeParserApi* newApi(ApiStats* st, ParserAdapter* owner, FakeStub* stub)
 	api->setExpectSpi(owner);
 	(void)stub;
 	return api;
+}
+
+void deleteFakeParserThenThrow(IParserApi*& api)
+{
+	IParserApi* original = api;
+	api = nullptr;
+	delete original;
+	throw std::runtime_error("fake parser deleter failure after delete");
+}
+
+static uint32_t g_pendingDeleteCalls = 0;
+
+void retainParserForOneTeardownAttempt(IParserApi*& api)
+{
+	++g_pendingDeleteCalls;
+	if (g_pendingDeleteCalls == 1)
+		return;
+	IParserApi* original = api;
+	api = nullptr;
+	delete original;
+}
+
+static IParserApi* g_replacementParserApi = nullptr;
+
+void replaceParserPointerForTest(IParserApi*& api)
+{
+	api = g_replacementParserApi;
 }
 
 WTSTickData* makeTick(const char* exchg, const char* code, uint32_t actDate, uint32_t actTime)
@@ -167,9 +224,34 @@ TEST(R11ParserAdapter, initRejectsEmptyModule)
 	cfg->append("module", "");
 	ParserAdapter adapter;
 	EXPECT_FALSE(adapter.init("p2", cfg, &env._stub, &env._bd));
-	//module 检查发生在 _cfg->retain() 之后, 所以二次 init 直接被 _cfg!=NULL 拒绝
+	EXPECT_EQ(1u, cfg->retainCount());
+	// Early validation releases the adapter's retained config; the second call
+	// reaches the same empty-module check and fails cleanly again.
 	EXPECT_FALSE(adapter.init("p2", cfg, &env._stub, &env._bd));
+	EXPECT_EQ(1u, cfg->retainCount());
 	EXPECT_FALSE(adapter.run());
+	cfg->release();
+}
+
+TEST(R11ParserAdapter, preApiFailureReleasesConfigAndAllowsAdapterReuse)
+{
+	Env env;
+	WTSVariant* cfg = WTSVariant::createObject();
+	cfg->append("module", "");
+	ParserAdapter adapter;
+	EXPECT_FALSE(adapter.init("p2-preflight", cfg, &env._stub, &env._bd));
+	EXPECT_EQ(1u, cfg->retainCount());
+	EXPECT_FALSE(adapter.hasApi());
+	EXPECT_FALSE(adapter.isTeardownUncertain());
+
+	// A clean pre-API failure must release its retained configuration so this
+	// same adapter can accept a later external candidate.
+	ApiStats st;
+	FakeParserApi* api = newApi(&st, &adapter, &env._stub);
+	EXPECT_TRUE(adapter.initExt("p2-reuse", api, &env._stub, &env._bd));
+	EXPECT_EQ(1u, cfg->retainCount());
+	adapter.release();
+	EXPECT_EQ((uint32_t)1, st._destroyCnt);
 	cfg->release();
 }
 
@@ -221,19 +303,171 @@ TEST(R11ParserAdapter, initExtSubscribesAllContracts)
 	EXPECT_EQ((uint32_t)1, st._releaseCnt);
 }
 
-//api->init 失败: 仍然返回 true, 但不会订阅
-TEST(R11ParserAdapter, initExtStillReturnsTrueWhenApiInitFails)
+//api->init 失败: 返回 false, 不连接/订阅, API 仍由 adapter 持有
+TEST(R11ParserAdapter, initExtReturnsFalseAndRetainsApiWhenApiInitFails)
 {
 	Env env;
 	ParserAdapter adapter;
 	ApiStats st;
 	FakeParserApi* api = new FakeParserApi(&st);
 	api->_initRet = false;
-	EXPECT_TRUE(adapter.initExt("p6", api, &env._stub, &env._bd));
+	EXPECT_FALSE(adapter.initExt("p6", api, &env._stub, &env._bd));
+	EXPECT_TRUE(adapter.hasApi());
+	EXPECT_FALSE(adapter.isInitialized());
 	EXPECT_EQ((uint32_t)1, st._initCnt);
 	EXPECT_EQ((uint32_t)0, st._subCnt);
+	EXPECT_EQ((uint32_t)0, st._connectCnt);
+	EXPECT_EQ((uint32_t)0, st._releaseCnt);
+	EXPECT_EQ((uint32_t)0, st._destroyCnt);
+	EXPECT_FALSE(adapter.run());
+	EXPECT_EQ((uint32_t)0, st._connectCnt);
+	EXPECT_EQ(&env._bd, adapter.getBaseDataMgr());
+
+	// The fake is quiescent; this explicit release verifies the transferred
+	// object is destroyed exactly once. release() is not a provider drain signal.
 	adapter.release();
-	//api 已由 adapter->release() 里的 `delete _parser_api` 释放, 此处不得再 delete
+	EXPECT_FALSE(adapter.hasApi());
+	EXPECT_EQ((uint32_t)1, st._releaseCnt);
+	EXPECT_EQ((uint32_t)1, st._destroyCnt);
+	EXPECT_EQ((uint32_t)0, st._subCnt);
+	EXPECT_EQ((uint32_t)0, st._connectCnt);
+}
+
+TEST(R11ParserAdapter, releaseExceptionIsStickyAndManagerRetainsAdapter)
+{
+	Env env;
+	ApiStats st;
+	FakeParserApi* api = new FakeParserApi(&st);
+	api->_releaseThrows = true;
+	{
+		ParserAdapterMgr mgr;
+		ParserAdapterPtr adapter(new ParserAdapter());
+		ASSERT_TRUE(adapter->initExt("release-throw", api, &env._stub, &env._bd));
+		ASSERT_TRUE(mgr.addAdapter("release-throw", adapter));
+
+		mgr.release();
+		EXPECT_TRUE(adapter->hasApi());
+		EXPECT_TRUE(adapter->isTeardownUncertain());
+		EXPECT_TRUE(mgr.hasRetainedAdapters());
+		EXPECT_EQ(adapter, mgr.getAdapter("release-throw"));
+		EXPECT_EQ(&env._bd, adapter->getBaseDataMgr());
+		EXPECT_EQ((uint32_t)1, st._releaseCnt);
+		EXPECT_EQ((uint32_t)0, st._destroyCnt);
+
+		mgr.release();
+		EXPECT_TRUE(mgr.hasRetainedAdapters());
+		EXPECT_EQ((uint32_t)1, st._releaseCnt);
+		EXPECT_EQ((uint32_t)0, st._destroyCnt);
+	}
+
+	// This fake has no callbacks. Reclaim it after the retained test owner is
+	// gone so the test itself does not leak; production teardown stays sticky.
+	delete api;
+	EXPECT_EQ((uint32_t)1, st._destroyCnt);
+}
+
+TEST(R11ParserAdapter, throwingRemoverLeavesOpaqueTombstoneAndManagerRetainsAdapter)
+{
+	Env env;
+	ApiStats st;
+	FakeParserApi* api = new FakeParserApi(&st);
+	{
+		ParserAdapterMgr mgr;
+		ParserAdapterPtr adapter(new ParserAdapter());
+		ASSERT_TRUE(adapter->initExt("remover-throw", api, &env._stub, &env._bd, deleteFakeParserThenThrow));
+		ASSERT_TRUE(mgr.addAdapter("remover-throw", adapter));
+
+		mgr.release();
+		EXPECT_TRUE(adapter->hasApi());
+		EXPECT_TRUE(adapter->isTeardownUncertain());
+		EXPECT_TRUE(mgr.hasRetainedAdapters());
+		EXPECT_EQ(adapter, mgr.getAdapter("remover-throw"));
+		EXPECT_EQ(&env._bd, adapter->getBaseDataMgr());
+		EXPECT_EQ((uint32_t)1, st._releaseCnt);
+		EXPECT_EQ((uint32_t)1, st._destroyCnt);
+
+		mgr.release();
+		EXPECT_TRUE(mgr.hasRetainedAdapters());
+		EXPECT_EQ((uint32_t)1, st._releaseCnt);
+		EXPECT_EQ((uint32_t)1, st._destroyCnt);
+	}
+}
+
+TEST(R11ParserAdapter, nonNullRemoverResultRetainsPendingApiAndRetriesOnlyRemover)
+{
+	g_pendingDeleteCalls = 0;
+	Env env;
+	ApiStats st;
+	ParserAdapterMgr mgr;
+	ParserAdapterPtr adapter(new ParserAdapter());
+	FakeParserApi* api = new FakeParserApi(&st);
+	ASSERT_TRUE(adapter->initExt("remover-pending", api, &env._stub, &env._bd, retainParserForOneTeardownAttempt));
+	ASSERT_TRUE(mgr.addAdapter("remover-pending", adapter));
+
+	mgr.release();
+	EXPECT_TRUE(adapter->hasApi());
+	EXPECT_TRUE(adapter->isTeardownPending());
+	EXPECT_FALSE(adapter->isTeardownUncertain());
+	EXPECT_TRUE(mgr.hasRetainedAdapters());
+	EXPECT_EQ(adapter, mgr.getAdapter("remover-pending"));
+	EXPECT_EQ(&env._bd, adapter->getBaseDataMgr());
+	EXPECT_EQ((uint32_t)1, st._releaseCnt);
+	EXPECT_EQ((uint32_t)0, st._destroyCnt);
+	EXPECT_EQ((uint32_t)1, g_pendingDeleteCalls);
+
+	// The API was already released once. A later teardown attempt retries only
+	// the remover; its null pointer result completes ownership release.
+	mgr.release();
+	EXPECT_FALSE(adapter->hasApi());
+	EXPECT_FALSE(adapter->isTeardownPending());
+	EXPECT_FALSE(mgr.hasRetainedAdapters());
+	EXPECT_EQ(nullptr, mgr.getAdapter("remover-pending"));
+	EXPECT_EQ(nullptr, adapter->getBaseDataMgr());
+	EXPECT_EQ((uint32_t)1, st._releaseCnt);
+	EXPECT_EQ((uint32_t)1, st._destroyCnt);
+	EXPECT_EQ((uint32_t)2, g_pendingDeleteCalls);
+}
+
+TEST(R11ParserAdapter, removerReplacementPointerIsStickyAndNeverAutoReleased)
+{
+	Env env;
+	ApiStats originalStats;
+	ApiStats replacementStats;
+	FakeParserApi* original = new FakeParserApi(&originalStats);
+	FakeParserApi* replacement = new FakeParserApi(&replacementStats);
+	g_replacementParserApi = replacement;
+	{
+		ParserAdapterMgr mgr;
+		ParserAdapterPtr adapter(new ParserAdapter());
+		ASSERT_TRUE(adapter->initExt("remover-replacement", original, &env._stub, &env._bd, replaceParserPointerForTest));
+		ASSERT_TRUE(mgr.addAdapter("remover-replacement", adapter));
+
+		mgr.release();
+		EXPECT_TRUE(adapter->hasApi());
+		EXPECT_TRUE(adapter->isTeardownUncertain());
+		EXPECT_FALSE(adapter->isTeardownPending());
+		EXPECT_TRUE(mgr.hasRetainedAdapters());
+		EXPECT_EQ(adapter, mgr.getAdapter("remover-replacement"));
+		EXPECT_EQ(&env._bd, adapter->getBaseDataMgr());
+		EXPECT_EQ((uint32_t)1, originalStats._releaseCnt);
+		EXPECT_EQ((uint32_t)0, replacementStats._releaseCnt);
+		EXPECT_EQ((uint32_t)0, originalStats._destroyCnt);
+		EXPECT_EQ((uint32_t)0, replacementStats._destroyCnt);
+
+		mgr.release();
+		EXPECT_EQ((uint32_t)1, originalStats._releaseCnt);
+		EXPECT_EQ((uint32_t)0, replacementStats._releaseCnt);
+		EXPECT_EQ((uint32_t)0, originalStats._destroyCnt);
+		EXPECT_EQ((uint32_t)0, replacementStats._destroyCnt);
+	}
+	g_replacementParserApi = nullptr;
+
+	// Both fakes are quiescent and the adapter owner is gone; reclaim the test
+	// objects without invoking any adapter teardown on the ambiguous pointers.
+	delete original;
+	delete replacement;
+	EXPECT_EQ((uint32_t)1, originalStats._destroyCnt);
+	EXPECT_EQ((uint32_t)1, replacementStats._destroyCnt);
 }
 
 //release() 之后再 run(): api 已经不在, 但 _parser_api 仍是野指针 -> 本用例只覆盖 release 的空 api 分支
@@ -254,6 +488,7 @@ TEST(R11ParserAdapter, handleQuoteRejectAndPassThrough)
 	ApiStats st;
 	FakeParserApi* api = newApi(&st, &adapter, &env._stub);
 	ASSERT_TRUE(adapter.initExt("p7", api, &env._stub, &env._bd));
+	env._stub._callbackAdapter = &adapter;
 
 	//1) 空指针
 	adapter.handleQuote(nullptr, 0);
@@ -276,6 +511,10 @@ TEST(R11ParserAdapter, handleQuoteRejectAndPassThrough)
 	adapter.handleQuote(t4, 0);
 	EXPECT_EQ((uint32_t)1, env._stub._quoteCnt);
 	EXPECT_EQ("SHFE.ag2406", env._stub._lastCode);
+	EXPECT_TRUE(env._stub._quoteCallbackScope);
+	EXPECT_TRUE(env._stub._quoteNestedScopePreserved);
+	EXPECT_FALSE(env._stub._quoteOtherThreadScope);
+	EXPECT_FALSE(adapter.isInParserCallbackOnCurrentThread());
 	t4->release();
 
 	//5) release 之后被 _stopped 吞掉
@@ -318,6 +557,7 @@ TEST(R11ParserAdapter, orderQueueRejectAndPassThrough)
 	ApiStats st;
 	FakeParserApi* api = newApi(&st, &adapter, &env._stub);
 	ASSERT_TRUE(adapter.initExt("p9", api, &env._stub, &env._bd));
+	env._stub._callbackAdapter = &adapter;
 
 	WTSOrdQueData* oq = WTSOrdQueData::create("ag2406");
 	WTSOrdQueStruct& os = oq->getOrdQueStruct();
@@ -341,6 +581,8 @@ TEST(R11ParserAdapter, orderQueueRejectAndPassThrough)
 	adapter.handleOrderQueue(oq);
 	EXPECT_EQ((uint32_t)1, env._stub._oqCnt);
 	EXPECT_EQ("SHFE.ag2406", env._stub._lastOqCode);
+	EXPECT_TRUE(env._stub._oqCallbackScope);
+	EXPECT_FALSE(adapter.isInParserCallbackOnCurrentThread());
 
 	adapter.release();
 	oq->setCode("ag2406");
@@ -357,6 +599,7 @@ TEST(R11ParserAdapter, orderDetailRejectAndPassThrough)
 	ApiStats st;
 	FakeParserApi* api = newApi(&st, &adapter, &env._stub);
 	ASSERT_TRUE(adapter.initExt("p10", api, &env._stub, &env._bd));
+	env._stub._callbackAdapter = &adapter;
 
 	WTSOrdDtlData* od = WTSOrdDtlData::create("ag2406");
 	WTSOrdDtlStruct& ds = od->getOrdDtlStruct();
@@ -375,6 +618,8 @@ TEST(R11ParserAdapter, orderDetailRejectAndPassThrough)
 	adapter.handleOrderDetail(od);
 	EXPECT_EQ((uint32_t)1, env._stub._odCnt);
 	EXPECT_EQ("SHFE.ag2406", env._stub._lastOdCode);
+	EXPECT_TRUE(env._stub._odCallbackScope);
+	EXPECT_FALSE(adapter.isInParserCallbackOnCurrentThread());
 
 	adapter.release();
 	od->setCode("ag2406");
@@ -391,6 +636,7 @@ TEST(R11ParserAdapter, transactionRejectAndPassThrough)
 	ApiStats st;
 	FakeParserApi* api = newApi(&st, &adapter, &env._stub);
 	ASSERT_TRUE(adapter.initExt("p11", api, &env._stub, &env._bd));
+	env._stub._callbackAdapter = &adapter;
 
 	WTSTransData* tr = WTSTransData::create("ag2406");
 	WTSTransStruct& ts = tr->getTransStruct();
@@ -409,6 +655,8 @@ TEST(R11ParserAdapter, transactionRejectAndPassThrough)
 	adapter.handleTransaction(tr);
 	EXPECT_EQ((uint32_t)1, env._stub._trCnt);
 	EXPECT_EQ("SHFE.ag2406", env._stub._lastTrCode);
+	EXPECT_TRUE(env._stub._trCallbackScope);
+	EXPECT_FALSE(adapter.isInParserCallbackOnCurrentThread());
 
 	adapter.release();
 	tr->setCode("ag2406");
@@ -464,6 +712,7 @@ TEST(R11ParserAdapter, adapterMgrRegisterAndLookup)
 
 	mgr.release();
 	EXPECT_EQ((size_t)0, mgr._adapters.size());
+	EXPECT_FALSE(mgr.hasRetainedAdapters());
 	//mgr.release() 里的 adapter->release() 会 delete api1 并调用其 release()
 	EXPECT_EQ((uint32_t)1, st._releaseCnt);
 	//api1 同样由 mgr.release() -> adapter->release() 释放

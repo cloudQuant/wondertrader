@@ -47,6 +47,11 @@ namespace {
 
 namespace fs = std::filesystem;
 
+ctp_sopt::CThostFtdcMdApi* nullCtpOptCreator(const char*, bool, bool)
+{
+	return NULL;
+}
+
 struct R105OptTempDir
 {
 	std::string path;
@@ -190,13 +195,14 @@ protected:
 			comm_->release();
 	}
 
-	WTSVariant* makeCfg(const std::string& flowdir)
+	WTSVariant* makeCfg(const std::string& flowdir, const char* module = NULL)
 	{
 		const std::string content = "front: tcp://127.0.0.1:1\n"
 									"broker: 9999\n"
 									"user: r105\n"
 									"pass: secret\n"
-									"flowdir: " + flowdir + "\n";
+								"flowdir: " + flowdir + "\n" +
+								((module == NULL) ? std::string() : std::string("ctpmodule: ") + module + "\n");
 		return WTSCfgLoader::load_from_content(content, true);
 	}
 
@@ -302,6 +308,67 @@ TEST_F(R105OptTest, nonzero_login_error_does_not_report_success_or_subscribe)
 	EXPECT_FALSE(reportedSuccessfulLogin);
 	EXPECT_EQ(0, api_.sub_calls);
 	EXPECT_TRUE(api_.sub_codes.empty());
+	EXPECT_EQ(0u, parser_.m_uTradingDate);
+	EXPECT_TRUE(sink_.hasLog("API response failed with error id 404"));
+}
+
+TEST_F(R105OptTest, logged_in_subscription_handles_500_and_501_contracts)
+{
+	parser_.m_uTradingDate = 20260301;
+	CodeSet fiveHundred;
+	for (int i = 0; i < 500; ++i)
+		fiveHundred.insert("DCE.r105_" + std::to_string(i));
+
+	parser_.subscribe(fiveHundred);
+	ASSERT_EQ(1, api_.sub_calls);
+	EXPECT_EQ(500, api_.sub_count);
+	EXPECT_EQ(500u, api_.sub_codes.size());
+	EXPECT_EQ(500, api_.sub_counts.back());
+
+	api_.sub_codes.clear();
+	CodeSet fiveHundredOne = fiveHundred;
+	fiveHundredOne.insert("DCE.r105_extra");
+	ASSERT_EQ(501u, fiveHundredOne.size());
+	parser_.subscribe(fiveHundredOne);
+	ASSERT_EQ(2, api_.sub_calls);
+	EXPECT_EQ(501, api_.sub_count);
+	EXPECT_EQ(501u, api_.sub_codes.size());
+	EXPECT_EQ(501, api_.sub_counts.back());
+
+	api_.sub_codes.clear();
+	parser_.m_uTradingDate = 0;
+	parser_.subscribe(fiveHundredOne);
+	EXPECT_EQ(2, api_.sub_calls);
+	parser_.OnRspUserLogin(NULL, NULL, 9, true);
+	ASSERT_EQ(3, api_.sub_calls);
+	EXPECT_EQ(501, api_.sub_count);
+	EXPECT_EQ(501u, api_.sub_codes.size());
+}
+
+TEST_F(R105OptTest, init_fails_closed_for_missing_module_and_creator)
+{
+	R105OptTempDir tmp;
+	ASSERT_FALSE(tmp.path.empty());
+	const std::size_t suffix = tmp.path.find_last_of('_');
+	const std::string missingModule = "wt_r105_missing_ctpopt_module_" + tmp.path.substr(suffix + 1);
+	WTSVariant* cfg = makeCfg(tmp.path + "/flow", missingModule.c_str());
+	ASSERT_NE(nullptr, cfg);
+
+	ParserCTPOpt bare;
+	EXPECT_FALSE(bare.init(cfg));
+	EXPECT_FALSE(bare.isConnected());
+	EXPECT_EQ((DllHandle)NULL, bare.m_hInstCTP);
+	EXPECT_NO_THROW(bare.OnRspUserLogin(NULL, NULL, 1, true));
+	EXPECT_EQ(0u, bare.m_uTradingDate);
+	cfg->release();
+
+	ParserCTPOpt noCreator;
+	EXPECT_FALSE(noCreator.bindApi(NULL, tmp.path.c_str()));
+	EXPECT_FALSE(noCreator.isConnected());
+
+	ParserCTPOpt nullApi;
+	EXPECT_FALSE(nullApi.bindApi(&nullCtpOptCreator, tmp.path.c_str()));
+	EXPECT_FALSE(nullApi.isConnected());
 }
 
 TEST_F(R105OptTest, zero_error_login_response_reports_success_and_subscribes)

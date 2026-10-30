@@ -10,7 +10,7 @@
  *     poolsize>0 时线程池创建与析构 wait（:237-263, :49-53 等）。
  *   - WtDiffExecuter::load_data 的有效合约分支 + set_position 末尾的过期目标
  *     清理循环 + on_channel_ready 的差量恢复循环（:113-172, :597-639, :795-817）。
- *   - setTrader(已就绪通道) 后 buy/sell/cancel 真的转发到 TraderAdapter，
+ *   - setTrader -> addSink -> 通道就绪后 buy/sell/cancel 真的转发到 TraderAdapter，
  *     再 on_channel_lost 后重新拒单。
  *
  * 普通清理与空数据用例不加载插件；过期目标测试会像 r31 一样把构建产物
@@ -21,6 +21,7 @@
 #include <WtCore/WtLocalExecuter.h>
 #include <WtCore/WtArbiExecuter.h>
 #include <WtCore/WtDiffExecuter.h>
+#include <WtCore/WtExecMgr.h>
 #include <WtCore/WtExecuterFactory.h>
 #include <WtCore/WtHelper.h>
 #include <Includes/IDataManager.h>
@@ -29,6 +30,9 @@
 #include <filesystem>
 #include <iterator>
 #include <cstdlib>
+#include <map>
+#include <memory>
+#include <rapidjson/document.h>
 
 using namespace r59x;
 using wtp::ActionPolicyMgr;
@@ -48,6 +52,35 @@ const char* const kExeFactLib = "libWtExeFact.dylib";
 #else
 const char* const kExeFactLib = "libWtExeFact.so";
 #endif
+
+class R59DiffQuiesceGuard
+{
+public:
+    explicit R59DiffQuiesceGuard(const std::shared_ptr<WtDiffExecuter>& exe)
+        : exe_(exe), coordinator_({ &manager_ })
+    {
+        manager_.add_executer(wtp::ExecCmdPtr(exe_));
+    }
+
+    ~R59DiffQuiesceGuard()
+    {
+        if (!coordinator_.quiesce_all())
+        {
+            ADD_FAILURE() << "Diff executor quiesce coordinator failed";
+            std::abort();
+        }
+        if (!coordinator_.is_complete() || !manager_.wait_quiesced())
+        {
+            ADD_FAILURE() << "Diff executor quiesce completion was not published";
+            std::abort();
+        }
+    }
+
+private:
+    std::shared_ptr<WtDiffExecuter> exe_;
+    wtp::WtExecuterMgr manager_;
+    wtp::WtExecQuiesceCoordinator coordinator_;
+};
 
 const fs::path& exeFactBinDir()
 {
@@ -169,19 +202,23 @@ public:
 class R59RawCodeDiffBd : public p11fix::FakeBaseDataMgr
 {
 public:
-    WTSContractInfo* raw_contract_ = nullptr;
+    WTSContractInfo* ag_contract_ = nullptr;
+    WTSContractInfo* au_contract_ = nullptr;
     std::vector<std::string> lookups_;
 
-    virtual WTSContractInfo* getContract(const char* code, const char* exchg = "", uint32_t uDate = 0) override
+    virtual WTSContractInfo* getContract(const char* code, const char* exchg = "", uint32_t /*uDate*/ = 0) override
     {
         std::string key = code == nullptr ? "" : code;
         key += "|";
         key += exchg == nullptr ? "" : exchg;
         lookups_.push_back(key);
-        if (raw_contract_ != nullptr && code != nullptr && strcmp(code, "ag2512") == 0 &&
-            exchg != nullptr && strcmp(exchg, "SHFE") == 0)
-            return raw_contract_;
-        return p11fix::FakeBaseDataMgr::getContract(code, exchg, uDate);
+        if (code == nullptr || exchg == nullptr || strcmp(exchg, "SHFE") != 0)
+            return nullptr;
+        if (ag_contract_ != nullptr && strcmp(code, "ag2512") == 0)
+            return ag_contract_;
+        if (au_contract_ != nullptr && strcmp(code, "au2212") == 0)
+            return au_contract_;
+        return nullptr;
     }
 };
 
@@ -428,7 +465,8 @@ TEST_F(R59Exec, diff_loads_valid_targets_and_recovers_on_channel_ready)
     EXPECT_EQ(0u, reader_.slices_); // 没有调用行情接口
 }
 
-// WtLocalExecuter.cpp:60-66/328-392（setTrader 读就绪状态，buy/sell/cancel 转发）；TraderAdapter.cpp:663-762
+// WtRunner.cpp:31-41（setTrader -> addSink -> 同步通道状态）；
+// WtLocalExecuter.cpp:60-66/328-392（绑定与 buy/sell/cancel 转发）；TraderAdapter.cpp:663-762
 TEST_F(R59Exec, set_trader_forwards_orders_only_while_channel_ready)
 {
     ActionPolicyMgr pm;
@@ -437,7 +475,6 @@ TEST_F(R59Exec, set_trader_forwards_orders_only_while_channel_ready)
 
     TraderAdapter trader;
     build(trader, &pm);
-    makeReady(trader);
 
     WtLocalExecuter local(&factory_, "r59_local_fwd", &reader_);
     WtArbiExecuter arbi(&factory_, "r59_arbi_fwd", &reader_);
@@ -459,10 +496,14 @@ TEST_F(R59Exec, set_trader_forwards_orders_only_while_channel_ready)
     c2->release();
     c3->release();
 
-    // setTrader 读到 AS_ALLREADY -> 三个执行器的 _channel_ready 都为 true
+    // 与 runner 保持同一接线顺序：先绑定、再订阅，最后由订阅后的 ready 回调置位。
     local.setTrader(&trader);
     arbi.setTrader(&trader);
     diff.setTrader(&trader);
+    trader.addSink(&local);
+    trader.addSink(&arbi);
+    trader.addSink(&diff);
+    makeReady(trader);
 
     EXPECT_EQ(1u, local.buy(kStdCode, 7000.0, 1.0).size());
     EXPECT_EQ(1u, local.sell(kStdCode, 7000.0, 1.0).size());
@@ -520,13 +561,14 @@ TEST_F(R59Exec, diff_stale_target_uses_raw_code_lookup_and_clears_with_real_unit
     bd.any_ = ct_;
     wtp::WTSVariant* cfg = writeCfg("r59_diff_stale.json", kDiffUnitCfg);
     ASSERT_NE(nullptr, cfg);
-    WtDiffExecuter ex(&factory_, "r59_diff_stale", nullptr, &bd);
-    ex.setStub(&stub_);
-    ASSERT_TRUE(ex.init(cfg));
+    std::shared_ptr<WtDiffExecuter> ex(new WtDiffExecuter(&factory_, "r59_diff_stale", nullptr, &bd));
+    R59DiffQuiesceGuard quiesce(ex);
+    ex->setStub(&stub_);
+    ASSERT_TRUE(ex->init(cfg));
     cfg->release();
 
     wt_hashmap<std::string, double> empty;
-    ex.set_position(empty);
+    ex->set_position(empty);
 
     ASSERT_EQ(2u, bd.lookups_.size());
     EXPECT_EQ("ag2512|SHFE", bd.lookups_[0]); // load_data 的原始码查询
@@ -565,31 +607,44 @@ TEST_F(R59Exec, diff_stale_target_clears_with_raw_code_only_contract_lookup)
     {
         std::ofstream out(file);
         ASSERT_TRUE(out.is_open()) << file;
-        out << R"json({"targets":[{"code":"SHFE.ag.2512","target":10.0}],"diffs":[]})json";
+        out << R"json({"targets":[{"code":"SHFE.ag.2512","target":10.0},{"code":"SHFE.au.2212","target":2.0}],"diffs":[]})json";
         out.close();
         ASSERT_TRUE(out.good());
     }
 
     R59RawCodeDiffBd bd;
-    bd.raw_contract_ = ct_;
+    bd.ag_contract_ = ct_;
+    bd.au_contract_ = ct2_;
     wtp::WTSVariant* cfg = writeCfg("r59_diff_stale_strict.json", kDiffUnitCfg);
     ASSERT_NE(nullptr, cfg);
-    WtDiffExecuter ex(&factory_, "r59_diff_stale_strict", nullptr, &bd);
-    ex.setStub(&stub_);
-    ASSERT_TRUE(ex.init(cfg));
+    std::shared_ptr<WtDiffExecuter> ex(new WtDiffExecuter(&factory_, "r59_diff_stale_strict", nullptr, &bd));
+    R59DiffQuiesceGuard quiesce(ex);
+    ex->setStub(&stub_);
+    ASSERT_TRUE(ex->init(cfg));
     cfg->release();
 
-    wt_hashmap<std::string, double> empty;
-    ex.set_position(empty);
+    wt_hashmap<std::string, double> targets;
+    targets["SHFE.au.2212"] = 5.0;
+    ex->set_position(targets);
 
-    ASSERT_EQ(2u, bd.lookups_.size());
+    ASSERT_EQ(3u, bd.lookups_.size());
     EXPECT_EQ("ag2512|SHFE", bd.lookups_[0]); // load_data 以原始码和交易所装载目标
-    EXPECT_EQ("ag2512|SHFE", bd.lookups_[1]); // 清理也必须使用同一公开查询形式
+    EXPECT_EQ("au2212|SHFE", bd.lookups_[1]); // 第二个合法合约也按原始码和交易所装载
+    EXPECT_EQ("ag2512|SHFE", bd.lookups_[2]); // 清理也必须使用同一公开查询形式
 
     std::ifstream in(file);
     ASSERT_TRUE(in.is_open()) << file;
     std::string saved((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
-    EXPECT_NE(std::string::npos, saved.find("\"target\": 0"));
+    rapidjson::Document savedDoc;
+    savedDoc.Parse(saved.c_str());
+    ASSERT_FALSE(savedDoc.HasParseError());
+    ASSERT_TRUE(savedDoc.HasMember("targets"));
+    std::map<std::string, double> persistedTargets;
+    for (const rapidjson::Value& item : savedDoc["targets"].GetArray())
+        persistedTargets[item["code"].GetString()] = item["target"].GetDouble();
+    ASSERT_EQ(2u, persistedTargets.size());
+    EXPECT_DOUBLE_EQ(0.0, persistedTargets["SHFE.ag.2512"]);
+    EXPECT_DOUBLE_EQ(5.0, persistedTargets["SHFE.au.2212"]); // 合法目标保持为正控
 }
 
 } // namespace

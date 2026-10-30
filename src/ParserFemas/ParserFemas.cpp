@@ -21,6 +21,8 @@
 #include "../Share/Converter.hpp"
 
 #include <filesystem>
+#include <limits>
+#include <vector>
 namespace fs = std::filesystem;
 
  //By Wesley @ 2022.01.05
@@ -82,8 +84,15 @@ inline double checkValid(double val)
 
 ParserFemas::ParserFemas()
 	:m_uTradingDate(0)
-,m_pUserAPI(NULL)
+	,m_loginState(LS_NOTLOGIN)
+	,m_connectionCallbacksEnabled(false)
+	,m_connected(false)
+	,m_pUserAPI(NULL)
 	,m_iRequestID(0)
+	,m_sink(NULL)
+	,m_pBaseDataMgr(NULL)
+	,m_hInst(NULL)
+	,m_funcCreator(NULL)
 	{
 }
 
@@ -115,7 +124,13 @@ bool ParserFemas::init(WTSVariant* config)
 	{
 		fs::create_directories(fs::path(path));
 	}
-	m_hInst = DLLHelper::load_library(dllpath.c_str());
+	DllHandle library = DLLHelper::load_library(dllpath.c_str());
+	if (library == NULL)
+	{
+		if (m_sink)
+			write_log(m_sink, LL_ERROR, "[ParserFemas] Failed to load market data module: {}", dllpath);
+		return false;
+	}
 #ifdef _WIN32
 #	ifdef _WIN64
 	const char* creatorName = "?CreateFtdcMduserApi@CUstpFtdcMduserApi@@SAPEAV1@PEBD@Z";
@@ -125,8 +140,12 @@ bool ParserFemas::init(WTSVariant* config)
 #else
 	const char* creatorName = "_ZN18CUstpFtdcMduserApi19CreateFtdcMduserApiEPKc";
 #endif
-	m_funcCreator = (FemasCreator)DLLHelper::get_symbol(m_hInst, creatorName);
-	m_pUserAPI = m_funcCreator(path.c_str());
+	FemasCreator creator = (FemasCreator)DLLHelper::get_symbol(library, creatorName);
+	if (!createUserApi(library, creator, path.c_str()))
+	{
+		DLLHelper::free_library(library);
+		return false;
+	}
 	m_pUserAPI->RegisterSpi(this);
 	m_pUserAPI->RegisterFront((char*)m_strFrontAddr.c_str());
 
@@ -140,23 +159,69 @@ void ParserFemas::release()
 
 bool ParserFemas::connect()
 {
-	if(m_pUserAPI)
-	{
-		m_pUserAPI->Init();
-	}
+	if (m_pUserAPI == NULL)
+		return false;
 
+	{
+		std::lock_guard<std::mutex> lock(m_connectionMutex);
+		m_connectionCallbacksEnabled = true;
+		m_connected = false;
+	}
+	m_pUserAPI->Init();
 	return true;
 }
 
 bool ParserFemas::disconnect()
 {
+	bool commandSent = m_pUserAPI != NULL;
+	{
+		std::lock_guard<std::mutex> lock(m_connectionMutex);
+		m_connectionCallbacksEnabled = false;
+		m_connected = false;
+	}
 	if(m_pUserAPI)
 	{
 		m_pUserAPI->RegisterSpi(NULL);
 		m_pUserAPI->Release();
 		m_pUserAPI = NULL;
 	}
+	if (m_hInst)
+	{
+		DLLHelper::free_library(m_hInst);
+		m_hInst = NULL;
+	}
+	m_funcCreator = NULL;
 
+	return commandSent;
+}
+
+bool ParserFemas::createUserApi(DllHandle library, FemasCreator creator, const char* flowPath)
+{
+	if (library == NULL)
+	{
+		if (m_sink)
+			write_log(m_sink, LL_ERROR, "[ParserFemas] Failed to load market data module");
+		return false;
+	}
+
+	if (creator == NULL)
+	{
+		if (m_sink)
+			write_log(m_sink, LL_ERROR, "[ParserFemas] Failed to find Femas market data API creator symbol");
+		return false;
+	}
+
+	m_funcCreator = creator;
+	m_pUserAPI = m_funcCreator(flowPath);
+	if (m_pUserAPI == NULL)
+	{
+		m_funcCreator = NULL;
+		if (m_sink)
+			write_log(m_sink, LL_ERROR, "[ParserFemas] Femas market data API creator returned null");
+		return false;
+	}
+
+	m_hInst = library;
 	return true;
 }
 
@@ -167,6 +232,11 @@ void ParserFemas::OnRspError( CUstpFtdcRspInfoField *pRspInfo, int /*nRequestID*
 
 void ParserFemas::OnFrontConnected()
 {
+	{
+		std::lock_guard<std::mutex> lock(m_connectionMutex);
+		if (m_connectionCallbacksEnabled)
+			m_connected = true;
+	}
 	if(m_sink)
 	{
 		write_log(m_sink, LL_INFO, "[ParserFemas] Market data server connected");
@@ -202,6 +272,10 @@ void ParserFemas::OnRspUserLogout(CUstpFtdcRspUserLogoutField */*pUserLogout*/, 
 
 void ParserFemas::OnFrontDisconnected( int nReason )
 {
+	{
+		std::lock_guard<std::mutex> lock(m_connectionMutex);
+		m_connected = false;
+	}
 	if(m_sink)
 	{
 		write_log(m_sink, LL_ERROR, "[ParserFemas] Market data server disconnected: {}", nReason);
@@ -259,6 +333,8 @@ void ParserFemas::OnRtnDepthMarketData( CUstpFtdcDepthMarketDataField *pDepthMar
 	WTSCommodityInfo* pCommInfo = contract->getCommInfo();
 
 	WTSTickData* tick = WTSTickData::create(contract->getCode());
+	if (tick == NULL)
+		return;
 	WTSTickStruct& quote = tick->getTickStruct();
 	strcpy(quote.exchg, pCommInfo->getExchg());
 	tick->setContractInfo(contract);
@@ -372,6 +448,12 @@ void ParserFemas::SubscribeMarketData()
 	{//如果订阅礼包只空的,则取出全部合约列表
 		return;
 	}
+	if (codeFilter.size() > static_cast<std::size_t>((std::numeric_limits<int>::max)()))
+	{
+		if (m_sink)
+			write_log(m_sink, LL_ERROR, "[ParserFemas] Too many contracts to subscribe: {}", codeFilter.size());
+		return;
+	}
 
 	char ** subscribe = new char*[codeFilter.size()];
 	int nCount = 0;
@@ -402,9 +484,14 @@ void ParserFemas::SubscribeMarketData()
 	delete[] subscribe;
 }
 
-bool ParserFemas::IsErrorRspInfo(CUstpFtdcRspInfoField */*pRspInfo*/)
+bool ParserFemas::IsErrorRspInfo(CUstpFtdcRspInfoField *pRspInfo)
 {
-	return false;
+	if (pRspInfo == NULL || pRspInfo->ErrorID == 0)
+		return false;
+
+	if (m_sink)
+		write_log(m_sink, LL_ERROR, "[ParserFemas] Response error: {}", pRspInfo->ErrorID);
+	return true;
 }
 
 void ParserFemas::subscribe(const CodeSet &vecSymbols)
@@ -416,20 +503,27 @@ void ParserFemas::subscribe(const CodeSet &vecSymbols)
 	else
 	{
 		m_filterSubs = vecSymbols;
-		char * subscribe[500] = {NULL};
-		int nCount = 0;
+		if (vecSymbols.size() > static_cast<std::size_t>((std::numeric_limits<int>::max)()))
+		{
+			if (m_sink)
+				write_log(m_sink, LL_ERROR, "[ParserFemas] Too many contracts to subscribe: {}", vecSymbols.size());
+			return;
+		}
+		std::vector<char*> subscribe;
+		subscribe.reserve(vecSymbols.size());
 		for (auto& code  : vecSymbols)
 		{
 			std::size_t pos = code.find('.');
 			if (pos != std::string::npos)
-				subscribe[nCount++] = (char*)code.c_str() + pos + 1;
+				subscribe.push_back(const_cast<char*>(code.c_str() + pos + 1));
 			else
-				subscribe[nCount++] = (char*)code.c_str();
+				subscribe.push_back(const_cast<char*>(code.c_str()));
 		}
 
-		if(m_pUserAPI && nCount > 0)
+		if(m_pUserAPI && !subscribe.empty())
 		{
-			int iResult = m_pUserAPI->SubMarketData(subscribe, nCount);
+			int nCount = static_cast<int>(subscribe.size());
+			int iResult = m_pUserAPI->SubMarketData(subscribe.data(), nCount);
 			if (iResult != 0)
 			{
 				if (m_sink)
@@ -450,7 +544,8 @@ void ParserFemas::unsubscribe(const CodeSet &/*vecSymbols*/)
 
 bool ParserFemas::isConnected()
 {
-	return m_pUserAPI!=NULL;
+	std::lock_guard<std::mutex> lock(m_connectionMutex);
+	return m_connected;
 }
 
 void ParserFemas::registerSpi(IParserSpi* listener)

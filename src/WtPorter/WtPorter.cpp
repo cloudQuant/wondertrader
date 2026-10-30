@@ -15,6 +15,45 @@
 #include "../Includes/WTSTradeDef.hpp"
 #include "../Includes/WTSVersion.h"
 
+#include <cstring>
+
+namespace
+{
+	void copy_status_error(const char* message, char* buffer, uint32_t capacity) noexcept
+	{
+		if (buffer == NULL || capacity == 0)
+			return;
+
+		buffer[0] = '\0';
+		if (message == NULL)
+			return;
+
+		const size_t maxLength = static_cast<size_t>(capacity - 1);
+		const size_t messageLength = std::strlen(message);
+		const size_t copyLength = messageLength < maxLength ? messageLength : maxLength;
+		if (copyLength > 0)
+			std::memcpy(buffer, message, copyLength);
+		buffer[copyLength] = '\0';
+	}
+
+	const char* status_api_error_text(int32_t result) noexcept
+	{
+		switch (result)
+		{
+		case WT_EXEC_UNIT_STATUS_INVALID_ARGUMENT_V2: return "invalid argument";
+		case WT_EXEC_UNIT_STATUS_NOT_READY_V2: return "runner is not configured";
+		case WT_EXEC_UNIT_STATUS_UNSUPPORTED_V2: return "operation is unsupported for this engine or executor";
+		case WT_EXEC_UNIT_STATUS_EXECUTOR_NOT_FOUND_V2: return "executor is not registered";
+		case WT_EXEC_UNIT_STATUS_ENGINE_MISMATCH_V2: return "requested engine does not match the configured engine";
+		case WT_EXEC_UNIT_STATUS_CODE_NOT_FOUND_V2: return "no initialization status is recorded for this code";
+		case WT_EXEC_UNIT_STATUS_NOT_FAILED_V2: return "initialization status is not FAILED";
+		case WT_EXEC_UNIT_STATUS_RETRY_BLOCKED_V2: return "retry is blocked because plugin side effects cannot be ruled out";
+		case WT_EXEC_UNIT_STATUS_INTERNAL_ERROR_V2: return "internal error querying execution-unit status";
+		default: return "";
+		}
+	}
+}
+
 #ifdef _WIN32
 #   ifdef _WIN64
     char PLATFORM_NAME[] = "X64";
@@ -163,6 +202,75 @@ bool create_ext_parser(const char* id)
 bool create_ext_executer(const char* id)
 {
 	return getRunner().createExtExecuter(id);
+}
+
+int32_t exec_get_unit_init_status_v2(uint32_t engine_type, const char* executor_id,
+	const char* std_code, uint32_t* state, uint64_t* generation,
+	char* error_buffer, uint32_t error_capacity)
+{
+	if (error_buffer != NULL && error_capacity > 0)
+		error_buffer[0] = '\0';
+	if ((error_buffer == NULL && error_capacity != 0) || state == NULL || generation == NULL)
+	{
+		copy_status_error("state, generation, and a valid error buffer are required", error_buffer, error_capacity);
+		if (state != NULL) *state = WT_EXEC_UNIT_INIT_UNKNOWN_V2;
+		if (generation != NULL) *generation = 0;
+		return WT_EXEC_UNIT_STATUS_INVALID_ARGUMENT_V2;
+	}
+
+	*state = WT_EXEC_UNIT_INIT_UNKNOWN_V2;
+	*generation = 0;
+	try
+	{
+		ExecUnitInitStatus status;
+		const ExecUnitStatusApiResult result = getRunner().queryExecUnitInitStatus(
+			engine_type, executor_id, std_code, status);
+		if (result == EXEC_UNIT_STATUS_API_OK)
+		{
+			const uint32_t rawState = static_cast<uint32_t>(status.state);
+			if (rawState > WT_EXEC_UNIT_INIT_FAILED_V2)
+			{
+				copy_status_error("executor returned an invalid initialization state", error_buffer, error_capacity);
+				return WT_EXEC_UNIT_STATUS_INTERNAL_ERROR_V2;
+			}
+			*state = rawState;
+			*generation = status.generation;
+			copy_status_error(status.error.c_str(), error_buffer, error_capacity);
+			return WT_EXEC_UNIT_STATUS_OK_V2;
+		}
+
+		copy_status_error(status.error.empty() ? status_api_error_text(static_cast<int32_t>(result))
+			: status.error.c_str(), error_buffer, error_capacity);
+		return static_cast<int32_t>(result);
+	}
+	catch (...)
+	{
+		copy_status_error("internal exception querying execution-unit status", error_buffer, error_capacity);
+		return WT_EXEC_UNIT_STATUS_INTERNAL_ERROR_V2;
+	}
+}
+
+int32_t exec_clear_failed_unit_init_status_v2(uint32_t engine_type,
+	const char* executor_id, const char* std_code, char* error_buffer, uint32_t error_capacity)
+{
+	if (error_buffer != NULL && error_capacity > 0)
+		error_buffer[0] = '\0';
+	if (error_buffer == NULL && error_capacity != 0)
+		return WT_EXEC_UNIT_STATUS_INVALID_ARGUMENT_V2;
+
+	try
+	{
+		const ExecUnitStatusApiResult result = getRunner().clearFailedExecUnitInitStatus(
+			engine_type, executor_id, std_code);
+		if (result != EXEC_UNIT_STATUS_API_OK)
+			copy_status_error(status_api_error_text(static_cast<int32_t>(result)), error_buffer, error_capacity);
+		return static_cast<int32_t>(result);
+	}
+	catch (...)
+	{
+		copy_status_error("internal exception clearing execution-unit status", error_buffer, error_capacity);
+		return WT_EXEC_UNIT_STATUS_INTERNAL_ERROR_V2;
+	}
 }
 
 /**
@@ -2160,7 +2268,7 @@ WtString hft_buy(CtxHandler cHandle, const char* stdCode, double price, double q
 	if (ctx == NULL)
 		return "";
 
-	static std::string ret;
+	static thread_local std::string ret;
 
 	std::stringstream ss;
 	OrderIDs ids = ctx->stra_buy(stdCode, price, qty, userTag, flag);
@@ -2196,7 +2304,7 @@ WtString hft_sell(CtxHandler cHandle, const char* stdCode, double price, double 
 	if (ctx == NULL)
 		return "";
 
-	static std::string ret;
+	static thread_local std::string ret;
 
 	std::stringstream ss;
 	OrderIDs ids = ctx->stra_sell(stdCode, price, qty, userTag, flag);

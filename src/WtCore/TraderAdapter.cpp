@@ -16,6 +16,7 @@
 #include "../Includes/RiskMonDefs.h"
 
 #include <atomic>
+#include <mutex>
 
 #include "../WTSTools/WTSLogger.h"
 
@@ -41,16 +42,48 @@ namespace fs = boost::filesystem;
 
 namespace rj = rapidjson;
 
+namespace
+{
+struct SinkCallbackFrame
+{
+	SinkCallbackFrame(const TraderAdapter* value, SinkCallbackFrame* previousFrame)
+		: adapter(value), previous(previousFrame) {}
+
+	const TraderAdapter* adapter;
+	SinkCallbackFrame* previous;
+};
+
+thread_local SinkCallbackFrame* g_sink_callback_frame = NULL;
+
+uint64_t allocateOwnerRegistryInstanceId()
+{
+	static std::atomic<uint64_t> next_id(1);
+	uint64_t candidate = next_id.load(std::memory_order_relaxed);
+	while (candidate != 0)
+	{
+		const uint64_t next = candidate + 1;
+		if (next_id.compare_exchange_weak(candidate, next,
+			std::memory_order_relaxed, std::memory_order_relaxed))
+			return candidate;
+	}
+	return 0;
+}
+}
+
 uint32_t makeLocalOrderID()
 {
 	static std::atomic<uint32_t> _auto_order_id{ 0 };
-	if (_auto_order_id == 0)
-	{
+	// Local ID 0 is reserved as the no-order sentinel; keep initialization state separate.
+	static std::once_flag _auto_order_id_once;
+	std::call_once(_auto_order_id_once, []() {
 		uint32_t curYear = TimeUtils::getCurDate() / 10000 * 10000 + 101;
-		_auto_order_id = (uint32_t)((TimeUtils::getLocalTimeNow() - TimeUtils::makeTime(curYear, 0)) / 1000 * 50);
-	}
+		uint32_t seed = (uint32_t)((TimeUtils::getLocalTimeNow() - TimeUtils::makeTime(curYear, 0)) / 1000 * 50);
+		if (seed == 0)
+			seed = 1;
+		_auto_order_id.store(seed, std::memory_order_relaxed);
+	});
 
-	return _auto_order_id.fetch_add(1);
+	return _auto_order_id.fetch_add(1, std::memory_order_relaxed);
 }
 
 inline const char* formatAction(WTSDirectionType dType, WTSOffsetType oType)
@@ -79,21 +112,593 @@ TraderAdapter::TraderAdapter(EventNotifier* caster /* = NULL */)
 	: _cfg(NULL)
 	, _id("")
 	, _trader_api(NULL)
+	, _remover(NULL)
+	, _dll_handle(NULL)
+	, _owns_trader_api(false)
+	, _spi_registered(false)
+	, _api_released(false)
 	, _state(AS_NOTLOGIN)
 	, _notifier(caster)
+	, _bd_mgr(NULL)
+	, _policy_mgr(NULL)
 	, _orders(NULL)
 	, _ignore_sefmatch(false)
 , _stat_map(NULL)
 	, _risk_mon_enabled(false)
 	, _save_data(false)
 	{
+	_owner_registry_instance_id = allocateOwnerRegistryInstanceId();
 }
 
 
 TraderAdapter::~TraderAdapter()
 {
+	requestStopSinkNotifications();
+	if (!waitSinkNotificationsStopped())
+		std::terminate(); // Destroying the adapter from its own sink callback is unsupported.
+
+	// initExt() receives an externally owned API. Only clean up plugin-owned APIs
+	// here; external owners keep their existing lifetime contract.
+	if (_owns_trader_api)
+		release();
+
+	if (_cfg)
+		_cfg->release();
+
 	if (_stat_map)
 		_stat_map->release();
+}
+
+void TraderAdapter::addSink(ITrdNotifySink* sink)
+{
+	if (sink == NULL)
+		return;
+
+	bool shouldDrain = false;
+	{
+		std::lock_guard<std::mutex> lock(_sink_mutex);
+		if (_sink_notifications_stopping || _sink_registrations.find(sink) != _sink_registrations.end())
+			return;
+
+		// A completed unsubscribe can leave a barrier for an in-flight callback.
+		// Do not create a second registration until removeSink() has completed it.
+		auto retired = _retired_sink_registrations.find(sink);
+		if (retired != _retired_sink_registrations.end())
+			return;
+
+		SinkRegistrationPtr registration(new SinkRegistration(sink));
+		_sinks.insert(sink);
+		_sink_registrations[sink] = registration;
+		if (_state == AS_ALLREADY)
+		{
+			std::vector<SinkRegistrationPtr> recipients(1, registration);
+			shouldDrain = queueChannelNotificationLocked(true, recipients);
+		}
+	}
+
+	if (shouldDrain)
+		drainChannelNotifications();
+}
+
+bool TraderAdapter::configureOwnerRoutingCapabilities(const OwnerRoutingCapabilities& capabilities)
+{
+	std::lock_guard<std::mutex> lock(_sink_mutex);
+	if (_sink_notifications_stopping || !_owner_sink_registrations.empty() ||
+		!_owner_sink_classified.empty() || _sink_broadcasts_in_flight != 0)
+		return false;
+
+	_owner_routing_enabled = _owner_registry_instance_id != 0 && capabilities.complete();
+	return _owner_routing_enabled;
+}
+
+bool TraderAdapter::registerOwnerSink(const std::string& stable_owner_id, ITrdNotifySink* sink,
+	OwnerSinkRegistrationToken& token)
+{
+	if (token.valid() || stable_owner_id.empty() || sink == NULL)
+		return false;
+
+	// Prepare every string that will become registry or token state before any
+	// shared state changes. The final swaps below do not allocate.
+	std::string map_owner_id(stable_owner_id);
+	std::string registration_owner_id(stable_owner_id);
+	std::string token_owner_id(stable_owner_id);
+
+	std::lock_guard<std::mutex> lock(_sink_mutex);
+	if (_sink_notifications_stopping || !_owner_routing_enabled ||
+		_owner_registry_instance_id == 0 || _owner_sink_registrations.find(stable_owner_id) != _owner_sink_registrations.end() ||
+		_owner_sink_classified.find(sink) != _owner_sink_classified.end() || _next_owner_sink_generation == 0)
+		return false;
+
+	auto sinkIt = _sink_registrations.find(sink);
+	if (sinkIt == _sink_registrations.end())
+		return false;
+
+	const SinkRegistrationPtr& registration = sinkIt->second;
+	std::unique_lock<std::mutex> registrationLock(registration->mutex);
+	if (!registration->active || registration->owner_registered)
+		return false;
+
+	const uint64_t generation = _next_owner_sink_generation;
+	OwnerSinkRegistration ownerRegistration;
+	ownerRegistration.sink_registration = registration;
+	ownerRegistration.generation = generation;
+	auto insertedOwner = _owner_sink_registrations.end();
+	try
+	{
+		auto insertion = _owner_sink_registrations.emplace(std::move(map_owner_id), ownerRegistration);
+		if (!insertion.second)
+			return false;
+		insertedOwner = insertion.first;
+		if (!_owner_sink_classified.insert(sink).second)
+		{
+			_owner_sink_registrations.erase(insertedOwner);
+			return false;
+		}
+	}
+	catch (...)
+	{
+		if (insertedOwner != _owner_sink_registrations.end())
+			_owner_sink_registrations.erase(insertedOwner);
+		_owner_sink_classified.erase(sink);
+		throw;
+	}
+
+	registration->owner_registered = true;
+	registration->owner_id.swap(registration_owner_id);
+	registration->owner_generation = generation;
+	++_next_owner_sink_generation;
+
+	token._owner_id.swap(token_owner_id);
+	token._adapter_instance_id = _owner_registry_instance_id;
+	token._generation = generation;
+	return true;
+}
+
+bool TraderAdapter::unregisterOwnerSink(const OwnerSinkRegistrationToken& token)
+{
+	if (!token.valid() || token._adapter_instance_id != _owner_registry_instance_id)
+		return false;
+
+	SinkRegistrationPtr registration;
+	const bool reentrant = isInSinkCallback();
+	{
+		std::lock_guard<std::mutex> lock(_sink_mutex);
+		auto ownerIt = _owner_sink_registrations.find(token._owner_id);
+		if (ownerIt == _owner_sink_registrations.end() || ownerIt->second.generation != token._generation)
+			return false;
+
+		registration = ownerIt->second.sink_registration;
+		std::lock_guard<std::mutex> registrationLock(registration->mutex);
+		if (!registration->owner_registered || registration->owner_id != token._owner_id ||
+			registration->owner_generation != token._generation)
+			return false;
+		registration->owner_registered = false;
+		_owner_sink_registrations.erase(ownerIt);
+	}
+
+	if (reentrant)
+	{
+		std::lock_guard<std::mutex> registrationLock(registration->mutex);
+		return registration->owner_callbacks_in_flight == 0;
+	}
+
+	std::unique_lock<std::mutex> registrationLock(registration->mutex);
+	registration->idle.wait(registrationLock, [&registration]() {
+		return registration->owner_callbacks_in_flight == 0;
+	});
+	return true;
+}
+
+bool TraderAdapter::removeSink(ITrdNotifySink* sink)
+{
+	if (sink == NULL)
+		return true;
+
+	SinkRegistrationPtr registration;
+	const bool reentrant = isInSinkCallback();
+	{
+		std::lock_guard<std::mutex> lock(_sink_mutex);
+		auto active = _sink_registrations.find(sink);
+		if (active != _sink_registrations.end())
+		{
+			registration = active->second;
+			_sinks.erase(sink);
+			_sink_registrations.erase(active);
+			_retired_sink_registrations[sink] = registration;
+			_owner_sink_classified.erase(sink);
+		}
+		else
+		{
+			auto retired = _retired_sink_registrations.find(sink);
+			if (retired == _retired_sink_registrations.end())
+				return true;
+			registration = retired->second;
+		}
+
+		std::lock_guard<std::mutex> registrationLock(registration->mutex);
+		if (registration->owner_registered)
+		{
+			auto ownerIt = _owner_sink_registrations.find(registration->owner_id);
+			if (ownerIt != _owner_sink_registrations.end() &&
+				ownerIt->second.generation == registration->owner_generation &&
+				ownerIt->second.sink_registration == registration)
+				_owner_sink_registrations.erase(ownerIt);
+			registration->owner_registered = false;
+		}
+		registration->active = false;
+		if (!reentrant)
+			registration->removal_waiter = true;
+	}
+
+	if (reentrant)
+	{
+		{
+			std::lock_guard<std::mutex> registrationLock(registration->mutex);
+			if (registration->in_flight != 0)
+				return false;
+		}
+
+		// A sink removed reentrantly may not have an active callback that can
+		// clean up its tombstone. Clear an idle tombstone here so the same sink
+		// can be subscribed again from the callback without waiting or deadlocking.
+		std::lock_guard<std::mutex> lock(_sink_mutex);
+		auto retired = _retired_sink_registrations.find(sink);
+		if (retired != _retired_sink_registrations.end() && retired->second == registration)
+		{
+			std::lock_guard<std::mutex> registrationLock(registration->mutex);
+			if (registration->in_flight != 0)
+				return false;
+			if (!_sink_notifications_stopping && !registration->removal_waiter)
+				_retired_sink_registrations.erase(retired);
+		}
+		return true;
+	}
+
+	{
+		std::unique_lock<std::mutex> registrationLock(registration->mutex);
+		registration->idle.wait(registrationLock, [&registration]() {
+			return registration->in_flight == 0;
+		});
+		registration->removal_waiter = false;
+	}
+
+	{
+		std::lock_guard<std::mutex> lock(_sink_mutex);
+		auto retired = _retired_sink_registrations.find(sink);
+		if (!_sink_notifications_stopping && retired != _retired_sink_registrations.end() && retired->second == registration)
+			_retired_sink_registrations.erase(retired);
+	}
+	return true;
+}
+
+void TraderAdapter::requestStopSinkNotifications()
+{
+	std::lock_guard<std::mutex> lock(_sink_mutex);
+	_sink_notifications_stopping = true;
+	_state = AS_NOTLOGIN;
+	_channel_notifications.clear();
+
+	for (auto it = _sink_registrations.begin(); it != _sink_registrations.end(); ++it)
+	{
+		std::lock_guard<std::mutex> registrationLock(it->second->mutex);
+		it->second->active = false;
+	}
+	for (auto it = _retired_sink_registrations.begin(); it != _retired_sink_registrations.end(); ++it)
+	{
+		std::lock_guard<std::mutex> registrationLock(it->second->mutex);
+		it->second->active = false;
+	}
+}
+
+bool TraderAdapter::waitSinkNotificationsStopped()
+{
+	if (isInSinkCallback())
+		return false;
+
+	std::unique_lock<std::mutex> lock(_sink_mutex);
+	if (!_sink_notifications_stopping)
+		return false;
+	_sink_notifications_idle.wait(lock, [this]() { return sinkCallbacksDrainedLocked(); });
+	_sinks.clear();
+	_sink_registrations.clear();
+	_retired_sink_registrations.clear();
+	_owner_sink_registrations.clear();
+	_owner_sink_classified.clear();
+	return true;
+}
+
+void TraderAdapter::setState(AdapterState state)
+{
+	std::lock_guard<std::mutex> lock(_sink_mutex);
+	_state = state;
+}
+
+bool TraderAdapter::transitionState(AdapterState expected, AdapterState next)
+{
+	std::lock_guard<std::mutex> lock(_sink_mutex);
+	if (_state != expected)
+		return false;
+	_state = next;
+	return true;
+}
+
+void TraderAdapter::forEachSink(const std::function<void(ITrdNotifySink*)>& callback)
+{
+	std::vector<SinkRegistrationPtr> snapshot;
+	{
+		std::lock_guard<std::mutex> lock(_sink_mutex);
+		if (_sink_notifications_stopping)
+			return;
+		snapshot.reserve(_sink_registrations.size());
+		for (auto it = _sink_registrations.begin(); it != _sink_registrations.end(); ++it)
+			snapshot.push_back(it->second);
+		if (snapshot.empty())
+			return;
+		++_sink_broadcasts_in_flight;
+	}
+
+	try
+	{
+		for (const SinkRegistrationPtr& registration : snapshot)
+			invokeSink(registration, callback);
+	}
+	catch (...)
+	{
+		finishSinkBroadcast();
+		throw;
+	}
+	finishSinkBroadcast();
+}
+
+bool TraderAdapter::forEachSinkForOwner(const std::string& owner_id,
+	const std::function<void(ITrdNotifySink*)>& callback)
+{
+	struct Recipient
+	{
+		SinkRegistrationPtr registration;
+		bool owner;
+		uint64_t generation;
+	};
+
+	std::vector<Recipient> recipients;
+	bool ownerFound = false;
+	{
+		std::lock_guard<std::mutex> lock(_sink_mutex);
+		if (_sink_notifications_stopping)
+			return false;
+
+		OwnerSinkRegistration ownerRegistration;
+		if (_owner_routing_enabled)
+		{
+			auto ownerIt = _owner_sink_registrations.find(owner_id);
+			if (ownerIt != _owner_sink_registrations.end())
+			{
+				ownerRegistration = ownerIt->second;
+				ownerFound = true;
+			}
+		}
+
+		recipients.reserve(_sink_registrations.size());
+		for (auto it = _sink_registrations.begin(); it != _sink_registrations.end(); ++it)
+		{
+			if (_owner_sink_classified.find(it->first) != _owner_sink_classified.end())
+				continue;
+			Recipient recipient;
+			recipient.registration = it->second;
+			recipient.owner = false;
+			recipient.generation = 0;
+			recipients.push_back(recipient);
+		}
+
+		if (ownerFound)
+		{
+			Recipient recipient;
+			recipient.registration = ownerRegistration.sink_registration;
+			recipient.owner = true;
+			recipient.generation = ownerRegistration.generation;
+			recipients.push_back(recipient);
+		}
+
+		if (!recipients.empty())
+			++_sink_broadcasts_in_flight;
+	}
+
+	if (recipients.empty())
+		return ownerFound;
+
+	try
+	{
+		for (const Recipient& recipient : recipients)
+		{
+			if (recipient.owner)
+				invokeOwnerSink(recipient.registration, owner_id, recipient.generation, callback);
+			else
+				invokeSink(recipient.registration, callback);
+		}
+	}
+	catch (...)
+	{
+		finishSinkBroadcast();
+		throw;
+	}
+	finishSinkBroadcast();
+	return ownerFound;
+}
+
+void TraderAdapter::finishSinkBroadcast()
+{
+	std::lock_guard<std::mutex> lock(_sink_mutex);
+	if (_sink_broadcasts_in_flight > 0)
+		--_sink_broadcasts_in_flight;
+	_sink_notifications_idle.notify_all();
+}
+
+void TraderAdapter::invokeSink(const SinkRegistrationPtr& registration,
+	const std::function<void(ITrdNotifySink*)>& callback)
+{
+	{
+		std::lock_guard<std::mutex> lock(registration->mutex);
+		if (!registration->active)
+			return;
+		++registration->in_flight;
+	}
+
+	SinkCallbackFrame callbackFrame(this, g_sink_callback_frame);
+	g_sink_callback_frame = &callbackFrame;
+	try
+	{
+		callback(registration->sink);
+	}
+	catch (...)
+	{
+		g_sink_callback_frame = callbackFrame.previous;
+		finishSinkCallback(registration);
+		throw;
+	}
+	g_sink_callback_frame = callbackFrame.previous;
+	finishSinkCallback(registration);
+}
+
+void TraderAdapter::invokeOwnerSink(const SinkRegistrationPtr& registration,
+	const std::string& owner_id, uint64_t generation,
+	const std::function<void(ITrdNotifySink*)>& callback)
+{
+	{
+		std::lock_guard<std::mutex> lock(registration->mutex);
+		if (!registration->active || !registration->owner_registered ||
+			registration->owner_id != owner_id || registration->owner_generation != generation)
+			return;
+		++registration->in_flight;
+		++registration->owner_callbacks_in_flight;
+	}
+
+	SinkCallbackFrame callbackFrame(this, g_sink_callback_frame);
+	g_sink_callback_frame = &callbackFrame;
+	try
+	{
+		callback(registration->sink);
+	}
+	catch (...)
+	{
+		g_sink_callback_frame = callbackFrame.previous;
+		finishSinkCallback(registration, true);
+		throw;
+	}
+	g_sink_callback_frame = callbackFrame.previous;
+	finishSinkCallback(registration, true);
+}
+
+void TraderAdapter::finishSinkCallback(const SinkRegistrationPtr& registration, bool owner_callback)
+{
+	// Keep the in-flight count positive until all adapter-owned state is done
+	// being accessed. This lets shutdown wait for the complete callback wrapper.
+	std::lock_guard<std::mutex> lock(_sink_mutex);
+	std::lock_guard<std::mutex> registrationLock(registration->mutex);
+	if (registration->in_flight > 0)
+		--registration->in_flight;
+	if (owner_callback && registration->owner_callbacks_in_flight > 0)
+		--registration->owner_callbacks_in_flight;
+	if (owner_callback && registration->owner_callbacks_in_flight == 0)
+		registration->idle.notify_all();
+	if (registration->in_flight == 0)
+	{
+		auto retired = _retired_sink_registrations.find(registration->sink);
+		if (!_sink_notifications_stopping &&
+			retired != _retired_sink_registrations.end() && retired->second == registration &&
+			!registration->removal_waiter)
+			_retired_sink_registrations.erase(retired);
+		registration->idle.notify_all();
+	}
+	_sink_notifications_idle.notify_all();
+}
+
+bool TraderAdapter::queueChannelNotificationLocked(bool ready,
+	const std::vector<SinkRegistrationPtr>& recipients)
+{
+	if (_sink_notifications_stopping || recipients.empty())
+		return false;
+
+	ChannelNotification notification;
+	notification.version = ++_channel_event_version;
+	notification.ready = ready;
+	notification.recipients = recipients;
+	_channel_notifications.push_back(std::move(notification));
+	if (_channel_drain_active)
+		return false;
+	_channel_drain_active = true;
+	return true;
+}
+
+void TraderAdapter::drainChannelNotifications()
+{
+	for (;;)
+	{
+		ChannelNotification notification;
+		{
+			std::lock_guard<std::mutex> lock(_sink_mutex);
+			if (_channel_notifications.empty())
+			{
+				_channel_drain_active = false;
+				_sink_notifications_idle.notify_all();
+				return;
+			}
+			notification = std::move(_channel_notifications.front());
+			_channel_notifications.pop_front();
+		}
+
+		for (const SinkRegistrationPtr& registration : notification.recipients)
+		{
+			try
+			{
+				const bool ready = notification.ready;
+				invokeSink(registration, [ready](ITrdNotifySink* sink) {
+					if (ready)
+						sink->on_channel_ready();
+					else
+						sink->on_channel_lost();
+				});
+			}
+			catch (...)
+			{
+				// A third-party sink must not strand later READY/LOST notifications.
+			}
+		}
+	}
+}
+
+bool TraderAdapter::isInSinkCallback() const
+{
+	for (SinkCallbackFrame* frame = g_sink_callback_frame; frame != NULL; frame = frame->previous)
+	{
+		if (frame->adapter == this)
+			return true;
+	}
+	return false;
+}
+
+bool TraderAdapter::isInAnySinkCallback()
+{
+	return g_sink_callback_frame != NULL;
+}
+
+bool TraderAdapter::sinkCallbacksDrainedLocked() const
+{
+	if (_sink_broadcasts_in_flight != 0 || _channel_drain_active)
+		return false;
+
+	for (auto it = _sink_registrations.begin(); it != _sink_registrations.end(); ++it)
+	{
+		std::lock_guard<std::mutex> registrationLock(it->second->mutex);
+		if (it->second->in_flight != 0)
+			return false;
+	}
+	for (auto it = _retired_sink_registrations.begin(); it != _retired_sink_registrations.end(); ++it)
+	{
+		std::lock_guard<std::mutex> registrationLock(it->second->mutex);
+		if (it->second->in_flight != 0)
+			return false;
+	}
+	return true;
 }
 
 bool TraderAdapter::init(const char* id, WTSVariant* params, IBaseDataMgr* bdMgr, ActionPolicyMgr* policyMgr)
@@ -101,14 +706,33 @@ bool TraderAdapter::init(const char* id, WTSVariant* params, IBaseDataMgr* bdMgr
 	if (params == NULL)
 		return false;
 
+	if (_cfg != NULL)
+		return false;
+
+	const std::string moduleName = params->getString("module");
+	if (moduleName.empty())
+		return false;
+
+	// 风控已经启用时，policy 是必需配置。先验证再提交适配器状态，
+	// 避免配置错误留下半初始化对象或继续装载交易模块。
+	WTSVariant* cfgRisk = params->get("riskmon");
+	bool riskMonEnabled = cfgRisk && cfgRisk->getBoolean("active");
+	WTSVariant* cfgPolicy = NULL;
+	if (riskMonEnabled)
+	{
+		cfgPolicy = cfgRisk->get("policy");
+		if (cfgPolicy == NULL || cfgPolicy->type() != WTSVariant::VT_Object)
+		{
+			WTSLogger::error("[{}] Active risk control requires a policy object", id);
+			return false;
+		}
+	}
+
 	_policy_mgr = policyMgr;
 	_bd_mgr = bdMgr;
 	_id = id;
 
 	_order_pattern = fmt::format("otp.{}", id);
-
-	if (_cfg != NULL)
-		return false;
 
 	_cfg = params;
 	_cfg->retain();
@@ -119,14 +743,12 @@ bool TraderAdapter::init(const char* id, WTSVariant* params, IBaseDataMgr* bdMgr
 		initSaveData();
 
 	//这里解析流量风控参数
-	WTSVariant* cfgRisk = params->get("riskmon");
 	if (cfgRisk)
 	{
-		if (cfgRisk->getBoolean("active"))
+		if (riskMonEnabled)
 		{
 			_risk_mon_enabled = true;
 
-			WTSVariant* cfgPolicy = cfgRisk->get("policy");
 			auto keys = cfgPolicy->memberNames();
 			for (auto it = keys.begin(); it != keys.end(); it++)
 			{
@@ -160,47 +782,67 @@ bool TraderAdapter::init(const char* id, WTSVariant* params, IBaseDataMgr* bdMgr
 		WTSLogger::log_dyn("trader", _id.c_str(), LL_WARN, "[{}] No risk control rule setup of trading channel", _id.c_str());
 	}
 
-	if (params->getString("module").empty())
+	auto failInit = [this]() {
+		release();
+		_id.clear();
+		_order_pattern.clear();
+		_bd_mgr = NULL;
+		_policy_mgr = NULL;
+		_risk_params_map.clear();
+		_risk_mon_enabled = false;
+		_ignore_sefmatch = false;
+		_save_data = false;
+		_trades_log.reset();
+		_orders_log.reset();
+		_rt_data_file.clear();
 		return false;
+	};
 
-	std::string module = DLLHelper::wrap_module(params->getCString("module"), "lib");;
+	std::string module = DLLHelper::wrap_module(moduleName.c_str(), "lib");
 
 	//先看工作目录下是否有交易模块
 	std::string dllpath = WtHelper::getModulePath(module.c_str(), "traders", true);
 	//如果没有,则再看模块目录,即dll同目录下
 	if (!StdFile::exists(dllpath.c_str()))
 		dllpath = WtHelper::getModulePath(module.c_str(), "traders", false);
-	DllHandle hInst = DLLHelper::load_library(dllpath.c_str());
-	if (hInst == NULL)
+	_dll_handle = DLLHelper::load_library(dllpath.c_str());
+	if (_dll_handle == NULL)
 	{
 		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR, "[{}] Loading trading module {} failed", _id.c_str(), dllpath.c_str());
-		return false;
+		return failInit();
 	}
 	else
 	{
 		WTSLogger::log_dyn("trader", _id.c_str(), LL_INFO, "[{}] Trader module {} loaded", _id.c_str(), dllpath.c_str());
 	}
 
-	FuncCreateTrader pFunCreateTrader = (FuncCreateTrader)DLLHelper::get_symbol(hInst, "createTrader");
+	FuncCreateTrader pFunCreateTrader = (FuncCreateTrader)DLLHelper::get_symbol(_dll_handle, "createTrader");
+	_remover = (FuncDeleteTrader)DLLHelper::get_symbol(_dll_handle, "deleteTrader");
 	if (NULL == pFunCreateTrader)
 	{
 		WTSLogger::log_dyn("trader", _id.c_str(), LL_FATAL, "[{}] Entrance function createTrader not found", _id.c_str());
-		return false;
+		return failInit();
+	}
+	if (NULL == _remover)
+	{
+		WTSLogger::log_dyn("trader", _id.c_str(), LL_FATAL, "[{}] Entrance function deleteTrader not found", _id.c_str());
+		return failInit();
 	}
 
 	_trader_api = pFunCreateTrader();
 	if (NULL == _trader_api)
 	{
 		WTSLogger::log_dyn("trader", _id.c_str(), LL_FATAL, "[{}] Creating trading api failed", _id.c_str());
-		return false;
+		return failInit();
 	}
-
-	_remover = (FuncDeleteTrader)DLLHelper::get_symbol(hInst, "deleteTrader");
+	_owns_trader_api = true;
+	_spi_registered = false;
+	_api_released = false;
 
 	if (!_trader_api->init(params))
 	{
-		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR, "[{}] Entrance function deleteTrader not found", id);
-		return false;
+		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR, "[{}] Trader API initialization failed", id);
+		return failInit();
 	}
 
 	return true;
@@ -209,6 +851,8 @@ bool TraderAdapter::init(const char* id, WTSVariant* params, IBaseDataMgr* bdMgr
 bool TraderAdapter::initExt(const char* id, ITraderApi* api, IBaseDataMgr* bdMgr, ActionPolicyMgr* policyMgr)
 {
 	if (api == NULL)
+		return false;
+	if (_trader_api != NULL || _cfg != NULL)
 		return false;
 
 	_policy_mgr = policyMgr;
@@ -225,11 +869,27 @@ bool TraderAdapter::initExt(const char* id, ITraderApi* api, IBaseDataMgr* bdMgr
 		initSaveData();
 
 	_trader_api = api;
+	_spi_registered = false;
+	_api_released = false;
 	if (!_trader_api->init(NULL))
 	{
 		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR, "[{}] Trader initializing failed", id);
+		// The API is externally owned, so release its partial state but never
+		// delete it or call a plugin factory deleter from this adapter.
+		_trader_api->release();
+		_trader_api = NULL;
+		_api_released = true;
+		_id.clear();
+		_order_pattern.clear();
+		_bd_mgr = NULL;
+		_policy_mgr = NULL;
+		_save_data = false;
+		_trades_log.reset();
+		_orders_log.reset();
+		_rt_data_file.clear();
 		return false;
 	}
+	_api_released = false;
 
 	return true;
 }
@@ -405,24 +1065,67 @@ bool TraderAdapter::run()
 {
 	if (_trader_api == NULL)
 		return false;
+	if (_api_released)
+		return false;
 
 	if (_stat_map == NULL)
 		_stat_map = TradeStatMap::create();
 
+	setState(AS_LOGINING);
 	_trader_api->registerSpi(this);
+	_spi_registered = true;
 
 	_trader_api->connect();
-	_state = AS_LOGINING;
 	return true;
 }
 
 void TraderAdapter::release()
 {
-	if (_trader_api)
+	// ITraderApi::release() is not a sink-notification drain barrier. Lifecycle
+	// owners must use requestStopSinkNotifications()/waitSinkNotificationsStopped().
+	setState(AS_NOTLOGIN);
+
+	if (_trader_api && !_api_released)
 	{
-		_trader_api->registerSpi(NULL);
+		if (_spi_registered)
+		{
+			_trader_api->registerSpi(NULL);
+			_spi_registered = false;
+		}
+
 		_trader_api->release();
+		_api_released = true;
 	}
+
+	if (_owns_trader_api)
+	{
+		// init() requires both factory symbols before it creates an instance.
+		if (_trader_api && _remover)
+			_remover(_trader_api);
+		_trader_api = NULL;
+		_owns_trader_api = false;
+	}
+
+	if (_dll_handle)
+	{
+		DLLHelper::free_library(_dll_handle);
+		_dll_handle = NULL;
+	}
+	_remover = NULL;
+
+	if (_cfg)
+	{
+		_cfg->release();
+		_cfg = NULL;
+	}
+
+	setState(AS_NOTLOGIN);
+	_bd_mgr = NULL;
+	_policy_mgr = NULL;
+	_risk_params_map.clear();
+	_risk_mon_enabled = false;
+	_trades_log.reset();
+	_orders_log.reset();
 }
 
 double TraderAdapter::getPosition(const char* stdCode, bool bValidOnly, int32_t flag /* = 3 */)
@@ -478,7 +1181,29 @@ OrderMap* TraderAdapter::getOrders(const char* stdCode)
 		uint32_t localid = it->first;
 		WTSOrderInfo* ordInfo = (WTSOrderInfo*)it->second;
 
-		if (isAll || strcmp(ordInfo->getCode(), stdCode) == 0)
+		bool matchesCode = isAll || strcmp(ordInfo->getCode(), stdCode) == 0;
+		if (!matchesCode && !isAll)
+		{
+			WTSContractInfo* cInfo = ordInfo->getContractInfo();
+			if (cInfo == NULL && _bd_mgr != NULL)
+				cInfo = _bd_mgr->getContract(ordInfo->getCode(), ordInfo->getExchg());
+
+			if (cInfo != NULL)
+			{
+				WTSCommodityInfo* commInfo = cInfo->getCommInfo();
+				std::string orderStdCode;
+				if (commInfo != NULL && (commInfo->getCategoty() == CC_FutOption || commInfo->getCategoty() == CC_SpotOption))
+					orderStdCode = CodeHelper::rawFutOptCodeToStdCode(cInfo->getCode(), cInfo->getExchg());
+				else if (CodeHelper::isMonthlyCode(cInfo->getCode()))
+					orderStdCode = CodeHelper::rawMonthCodeToStdCode(cInfo->getCode(), cInfo->getExchg());
+				else if (commInfo != NULL)
+					orderStdCode = CodeHelper::rawFlatCodeToStdCode(cInfo->getCode(), cInfo->getExchg(), cInfo->getProduct());
+
+				matchesCode = !orderStdCode.empty() && orderStdCode == stdCode;
+			}
+		}
+
+		if (matchesCode)
 			ret->add(localid, ordInfo);
 	}
 	return ret;
@@ -487,6 +1212,9 @@ OrderMap* TraderAdapter::getOrders(const char* stdCode)
 uint32_t TraderAdapter::doEntrust(WTSEntrust* entrust)
 {
 	_trader_api->makeEntrustID(entrust->getEntrustID(), 64);
+	// Risk checks are performed with the caller's standardized code. Preserve
+	// that key before replacing the submitted code with the exchange alias.
+	const std::string riskCode = entrust->getCode();
 
 	WTSContractInfo* cInfo = entrust->getContractInfo();
 	if (cInfo == NULL) cInfo = getContract(entrust->getCode());
@@ -513,8 +1241,9 @@ uint32_t TraderAdapter::doEntrust(WTSEntrust* entrust)
 	}
 	else
 	{
-		int64_t now = TimeUtils::getLocalTimeNow();
-		_order_time_cache[entrust->getCode()].emplace_back(now);
+		const RiskParams* riskPara = getRiskParams(riskCode.c_str());
+		if (_risk_mon_enabled && riskPara != NULL && riskPara->_order_times_boundary != 0)
+			_order_time_cache[riskCode].emplace_back(TimeUtils::getLocalTimeNow());
 	}
 	return localid;
 }
@@ -1280,10 +2009,30 @@ bool TraderAdapter::cancel(uint32_t localid)
 		if (ordInfo == NULL)
 			return false;
 	}
+	if (!ordInfo->isAlive())
+	{
+		ordInfo->release();
+		return false;
+	}
+
+	WTSContractInfo* cInfo = ordInfo->getContractInfo();
+	if (cInfo == NULL || cInfo->getCommInfo() == NULL)
+	{
+		ordInfo->release();
+		return false;
+	}
+	WTSCommodityInfo* commInfo = cInfo->getCommInfo();
+	std::string riskCode;
+	if (commInfo->getCategoty() == CC_FutOption || commInfo->getCategoty() == CC_SpotOption)
+		riskCode = CodeHelper::rawFutOptCodeToStdCode(cInfo->getCode(), cInfo->getExchg());
+	else if (CodeHelper::isMonthlyCode(cInfo->getCode()))
+		riskCode = CodeHelper::rawMonthCodeToStdCode(cInfo->getCode(), cInfo->getExchg());
+	else
+		riskCode = CodeHelper::rawFlatCodeToStdCode(cInfo->getCode(), cInfo->getExchg(), cInfo->getProduct());
 	
 	bool bRet = doCancel(ordInfo);
-
-	_cancel_time_cache[ordInfo->getCode()].emplace_back(TimeUtils::getLocalTimeNow());
+	if (bRet)
+		_cancel_time_cache[riskCode].emplace_back(TimeUtils::getLocalTimeNow());
 
 	ordInfo->release();
 
@@ -1418,8 +2167,18 @@ void TraderAdapter::handleEvent(WTSTraderEvent e, int32_t ec)
 	else if(e == WTE_Close)
 	{
 		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR,"[{}] Trading channel disconnected: {}", _id.c_str(), ec);
-		for (auto sink : _sinks)
-			sink->on_channel_lost();
+		bool shouldDrain = false;
+		{
+			std::lock_guard<std::mutex> lock(_sink_mutex);
+			_state = AS_NOTLOGIN;
+			std::vector<SinkRegistrationPtr> recipients;
+			recipients.reserve(_sink_registrations.size());
+			for (auto it = _sink_registrations.begin(); it != _sink_registrations.end(); ++it)
+				recipients.push_back(it->second);
+			shouldDrain = queueChannelNotificationLocked(false, recipients);
+		}
+		if (shouldDrain)
+			drainChannelNotifications();
 	}
 }
 
@@ -1427,7 +2186,7 @@ void TraderAdapter::onLoginResult(bool bSucc, const char* msg, uint32_t tradingd
 {
 	if(!bSucc)
 	{
-		_state = AS_LOGINFAILED;
+		setState(AS_LOGINFAILED);
 		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR,"[{}] Trader login failed: {}", _id.c_str(), msg);
 
 		if (_notifier)
@@ -1435,7 +2194,7 @@ void TraderAdapter::onLoginResult(bool bSucc, const char* msg, uint32_t tradingd
 	}
 	else
 	{
-		_state = AS_LOGINED;
+		setState(AS_LOGINED);
 		WTSLogger::log_dyn("trader", _id.c_str(), LL_INFO,"[{}] Trader login succeed, trading date: {}", _id.c_str(), tradingdate);
 		_trading_day = tradingdate;
 		_trader_api->queryPositions();	//查持仓
@@ -1497,8 +2256,9 @@ void TraderAdapter::onRspEntrust(WTSEntrust* entrust, WTSError *err)
 			userTag += _order_pattern.size() + 1;
 			uint32_t localid = convert::to_uint32(userTag);
 
-			for(auto sink : _sinks)
+			forEachSink([&](ITrdNotifySink* sink) {
 				sink->on_entrust(localid, stdCode.c_str(), false, err->getMessage());
+			});
 
 			if (_notifier)
 				_notifier->notify(id(), fmt::format(" Order placing failed: {}", err->getMessage()).c_str());
@@ -1521,24 +2281,39 @@ void TraderAdapter::onRspAccount(WTSArray* ayAccounts)
 	if(ayAccounts)
 	{
 		//通知所有监听接口
-		for (auto sink : _sinks)
-		{
+		forEachSink([&](ITrdNotifySink* sink) {
 			for (uint32_t idx = 0; idx < ayAccounts->size(); idx++)
 			{
 				WTSAccountInfo* fundInfo = (WTSAccountInfo*)ayAccounts->at(idx);
 				sink->on_account(fundInfo->getCurrency(), fundInfo->getPreBalance(), fundInfo->getBalance(), fundInfo->getBalance() + fundInfo->getDynProfit(), fundInfo->getAvailable(),
 					fundInfo->getCloseProfit(), fundInfo->getDynProfit(), fundInfo->getMargin(), fundInfo->getCommission(), fundInfo->getDeposit(), fundInfo->getWithdraw());
 			}
+		});
+	}
+
+	bool becameReady = false;
+	bool shouldDrain = false;
+	{
+		std::lock_guard<std::mutex> lock(_sink_mutex);
+		if (_state == AS_TRADES_QRYED)
+		{
+			_state = AS_ALLREADY;
+			becameReady = true;
+			std::vector<SinkRegistrationPtr> recipients;
+			recipients.reserve(_sink_registrations.size());
+			for (auto it = _sink_registrations.begin(); it != _sink_registrations.end(); ++it)
+				recipients.push_back(it->second);
+			shouldDrain = queueChannelNotificationLocked(true, recipients);
 		}
 	}
 
-	if(_state == AS_TRADES_QRYED)
+	if (becameReady)
 	{
-		_state = AS_ALLREADY;
-
 		WTSLogger::log_dyn("trader", _id.c_str(), LL_INFO, "[{}] Trading channel ready", _id.c_str());
-		for (auto& sink : _sinks)
-			sink->on_channel_ready();
+	}
+	if (shouldDrain)
+	{
+		drainChannelNotifications();
 	}
 }
 
@@ -1583,20 +2358,17 @@ void TraderAdapter::onRspPosition(const WTSArray* ayPositions)
 			const char* stdCode = it->first.c_str();
 			const PosItem& pItem = it->second;
 			printPosition(stdCode, pItem);
-			for (auto sink : _sinks)
-			{
+			forEachSink([&](ITrdNotifySink* sink) {
 				sink->on_position(stdCode, true, pItem.l_prevol, pItem.l_preavail, pItem.l_newvol, pItem.l_newavail, _trading_day);
 				sink->on_position(stdCode, false, pItem.s_prevol, pItem.s_preavail, pItem.s_newvol, pItem.s_newavail, _trading_day);
-			}
+			});
 		}
 	}
 
 	WTSLogger::log_dyn("trader", _id.c_str(), LL_INFO,"[{}] Position data updated", _id.c_str());
 
-	if (_state == AS_LOGINED)
+	if (transitionState(AS_LOGINED, AS_POSITION_QRYED))
 	{
-		_state = AS_POSITION_QRYED;
-
 		_trader_api->queryOrders();
 	}
 }
@@ -1721,10 +2493,8 @@ void TraderAdapter::onRspOrders(const WTSArray* ayOrders)
 		}
 	}
 
-	if (_state == AS_POSITION_QRYED)
+	if (transitionState(AS_POSITION_QRYED, AS_ORDERS_QRYED))
 	{
-		_state = AS_ORDERS_QRYED;
-
 		_trader_api->queryTrades();
 	}
 }
@@ -1807,10 +2577,8 @@ void TraderAdapter::onRspTrades(const WTSArray* ayTrades)
 		}
 	}
 
-	if (_state == AS_ORDERS_QRYED)
+	if (transitionState(AS_ORDERS_QRYED, AS_TRADES_QRYED))
 	{
-		_state = AS_TRADES_QRYED;
-
 		_trader_api->queryAccount();
 	}
 }
@@ -2131,8 +2899,9 @@ void TraderAdapter::onPushOrder(WTSOrderInfo* orderInfo)
 		}
 
 		//通知所有监听接口
-		for (auto sink : _sinks)
+		forEachSink([&](ITrdNotifySink* sink) {
 			sink->on_order(localid, stdCode.c_str(), isBuy, orderInfo->getVolume(), orderInfo->getVolLeft(), orderInfo->getPrice(), orderInfo->getOrderState() == WOS_Canceled);
+		});
 	}
 
 	//不管是不是内部订单,订单结束了,都要写到日志里
@@ -2263,7 +3032,7 @@ void TraderAdapter::onPushTrade(WTSTradeInfo* tradeRecord)
 			maxVol = min(left, pItem.l_newvol);
 			if(decimal::gt(maxVol, 0))
 			{				
-				pItem.l_newvol -= left;
+				pItem.l_newvol -= maxVol;
 				left -= maxVol;
 				statItem.l_closevol += maxVol;
 			}
@@ -2287,7 +3056,7 @@ void TraderAdapter::onPushTrade(WTSTradeInfo* tradeRecord)
 			maxVol = min(left, pItem.s_newvol);
 			if (decimal::gt(maxVol, 0))
 			{
-				pItem.s_newvol -= left;
+				pItem.s_newvol -= maxVol;
 				left -= maxVol;
 				statItem.s_closevol += maxVol;
 			}
@@ -2318,8 +3087,9 @@ void TraderAdapter::onPushTrade(WTSTradeInfo* tradeRecord)
 		updateUndone(stdCode.c_str(), vol*(isBuy ? -1 : 1), true);
 	}
 
-	for (auto sink : _sinks)
+	forEachSink([&](ITrdNotifySink* sink) {
 		sink->on_trade(localid, stdCode.c_str(), isBuy, vol, tradeRecord->getPrice());
+	});
 
 	if (_save_data)
 	{
@@ -2355,7 +3125,7 @@ void TraderAdapter::handleTraderLog(WTSLogLevel ll, const char* message)
 
 void TraderAdapter::queryFund()
 {
-	if (_state != AS_ALLREADY)
+	if (!isReady())
 		return;
 
 	_trader_api->queryAccount();
@@ -2366,6 +3136,13 @@ void TraderAdapter::queryFund()
 
 //////////////////////////////////////////////////////////////////////////
 //CTPWrapperMgr
+TraderAdapterMgr::~TraderAdapterMgr()
+{
+	release();
+	if (!_adapters.empty())
+		std::terminate(); // The manager cannot be destroyed from a sink callback.
+}
+
 bool TraderAdapterMgr::addAdapter(const char* tname, TraderAdapterPtr& adapter)
 {
 	if (adapter == NULL || strlen(tname) == 0)
@@ -2406,12 +3183,69 @@ void TraderAdapterMgr::run()
 
 void TraderAdapterMgr::release()
 {
+	requestStopSinkNotifications();
+	if (TraderAdapter::isInAnySinkCallback())
+		return;
+
 	for (auto it = _adapters.begin(); it != _adapters.end(); it++)
 	{
 		it->second->release();
 	}
 
+	if (!waitSinkNotificationsStopped())
+		return;
+
 	_adapters.clear();
+}
+
+void TraderAdapterMgr::requestStopSinkNotifications()
+{
+	std::vector<TraderAdapterPtr> adapters;
+	adapters.reserve(_adapters.size());
+	for (auto it = _adapters.begin(); it != _adapters.end(); ++it)
+		adapters.push_back(it->second);
+
+	for (const TraderAdapterPtr& adapter : adapters)
+		if (adapter)
+			adapter->requestStopSinkNotifications();
+}
+
+bool TraderAdapterMgr::waitSinkNotificationsStopped()
+{
+	if (TraderAdapter::isInAnySinkCallback())
+		return false;
+
+	std::vector<TraderAdapterPtr> adapters;
+	adapters.reserve(_adapters.size());
+	for (auto it = _adapters.begin(); it != _adapters.end(); ++it)
+		adapters.push_back(it->second);
+
+	// Validate the entire set before blocking on any adapter. Manager callers
+	// must request all first so no adapter is left accepting new notifications.
+	for (const TraderAdapterPtr& adapter : adapters)
+	{
+		if (!adapter)
+			continue;
+		std::lock_guard<std::mutex> lock(adapter->_sink_mutex);
+		if (!adapter->_sink_notifications_stopping)
+			return false;
+	}
+
+	bool allStopped = true;
+	for (const TraderAdapterPtr& adapter : adapters)
+		if (adapter && !adapter->waitSinkNotificationsStopped())
+			allStopped = false;
+	return allStopped;
+}
+
+bool TraderAdapterMgr::isInSinkCallback() const
+{
+	for (auto it = _adapters.begin(); it != _adapters.end(); ++it)
+	{
+		if (it->second && it->second->isInSinkCallback())
+			return true;
+	}
+	return false;
 }
 
 void TraderAdapterMgr::refresh_funds()

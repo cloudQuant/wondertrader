@@ -51,6 +51,8 @@ protected:
 		fs::path base = fs::temp_directory_path();
 		fs::path dir = base / (std::string("n04_") + name);
 		std::error_code ec;
+		fs::remove_all(dir, ec);
+		ec.clear();
 		fs::create_directories(dir, ec);
 		_tmpDir = dir;
 		return dir;
@@ -144,27 +146,44 @@ TEST_F(HisDataMgrTest, emptyConfigYieldsDefaultModuleNameOnly)
 	cfg2->release();
 }
 
-/**
- * 缺陷类用例（禁用，见 bugs/n04_btcore_mockers.md BUG-N04-002）：
- * HisDataMgr::init 在模块装载失败或 createBtDtReader 符号缺失时不会给 _reader 赋值，
- * 但末尾无条件执行 `_reader->init(cfg, this)` -> 空指针解引用崩溃。
- * 该类的所有输入形态统一放在本禁用用例里（不要拆成启用用例，否则整轮度量会被
- * 崩溃/挂死拖走）：
- *  - 空配置（默认模块名在本机构建产物中不存在）
- *  - 显式指定不存在的模块
- *  - 指向存在但不含 createBtDtReader 符号的库
- *  - init(nullptr)
- */
-TEST_F(HisDataMgrTest, DISABLED_initCrashesWhenReaderModuleMissing)
+TEST_F(HisDataMgrTest, initRejectsNullConfig)
 {
+	const fs::path dir = tempDir("null_config");
+	const std::string instDir = dir.string() + "/";
+	WtHelper::setInstDir(instDir.c_str());
+
+	EXPECT_FALSE(mgr.init(NULL));
+	EXPECT_FALSE(mgr.load_raw_ticks(kExchg, kCode, 20201201, countingCb()));
+	EXPECT_EQ(0, callbackHits);
+}
+
+TEST_F(HisDataMgrTest, initRejectsMissingDefaultReaderModule)
+{
+	const fs::path dir = tempDir("missing_default_reader");
+	const std::string instDir = dir.string() + "/";
+	WtHelper::setInstDir(instDir.c_str());
+
 	WTSVariant* empty = WTSVariant::createObject();
-	mgr.init(empty);
+	const bool initialized = mgr.init(empty);
 	empty->release();
+	EXPECT_FALSE(initialized);
+
+	EXPECT_FALSE(mgr.load_raw_bars(kExchg, kCode, KP_DAY, countingCb()));
+	EXPECT_EQ(0, callbackHits);
+}
+
+TEST_F(HisDataMgrTest, initRejectsExplicitlyMissingReaderModule)
+{
+	const fs::path dir = tempDir("missing_named_reader");
+	const std::string instDir = dir.string() + "/";
+	WtHelper::setInstDir(instDir.c_str());
 
 	WTSVariant* bogus = WTSVariant::createObject();
-	bogus->append("module", "/nonexistent_n04_dir/wt_data_storage");
-	mgr.init(bogus);
+	bogus->append("module", "missing_reader");
+	const bool initialized = mgr.init(bogus);
 	bogus->release();
+	EXPECT_FALSE(initialized);
 
-	mgr.init(nullptr);
+	EXPECT_FALSE(mgr.load_raw_trans(kExchg, kCode, 20201201, countingCb()));
+	EXPECT_EQ(0, callbackHits);
 }

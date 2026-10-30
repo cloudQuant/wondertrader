@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -50,6 +51,18 @@ WTSVariant* makeFullCtaCfg()
 	root->append("k2", 0.5);
 	root->append("period", std::string("d1").c_str());
 	root->append("count", (uint32_t)20);
+	root->append("code", "SHFE.au.2005");
+	root->append("stock", false);
+	return root;
+}
+
+WTSVariant* makeTwoMaCfg(uint32_t shortDays, uint32_t longDays, uint32_t count)
+{
+	WTSVariant* root = WTSVariant::createObject();
+	root->append("short_days", shortDays);
+	root->append("long_days", longDays);
+	root->append("period", "d1");
+	root->append("count", count);
 	root->append("code", "SHFE.au.2005");
 	root->append("stock", false);
 	return root;
@@ -107,18 +120,50 @@ TEST(n06_cta_stra, init_full_cfg_round_trip)
 	EXPECT_TRUE(two_ma.init(cfg2.get()));
 }
 
-TEST(n06_cta_stra, init_missing_keys_fall_back_to_defaults)
+TEST(n06_cta_stra, init_rejects_missing_or_zero_two_ma_periods)
 {
-	WtStraTwoMa two_ma("id1");
-	VarHolder cfg(WTSVariant::createObject());
-	// 空配置：getUInt32/getDouble/getCString/getBoolean 全部走默认值 0/0.0/""/false
-	// TwoMa 的 init 不校验参数，直接返回 true（WtStraTwoMa.cpp L79-101）
-	EXPECT_TRUE(two_ma.init(cfg.get()));
-	EXPECT_TRUE(two_ma.init(NULL) == false);
+	VarHolder missing(WTSVariant::createObject());
+	WtStraTwoMa missingTwoMa("missing");
+	EXPECT_FALSE(missingTwoMa.init(missing.get()));
+	EXPECT_FALSE(missingTwoMa.init(NULL));
 
-	WtStraDualThrust dt("id3");
-	VarHolder cfg2(WTSVariant::createObject());
-	EXPECT_TRUE(dt.init(cfg2.get()));
+	VarHolder missingShort(makeTwoMaCfg(0, 3, 10));
+	WtStraTwoMa missingShortTwoMa("missing-short");
+	EXPECT_FALSE(missingShortTwoMa.init(missingShort.get()));
+
+	VarHolder missingLong(makeTwoMaCfg(2, 0, 10));
+	WtStraTwoMa missingLongTwoMa("missing-long");
+	EXPECT_FALSE(missingLongTwoMa.init(missingLong.get()));
+}
+
+TEST(n06_cta_stra, init_rejects_two_ma_history_shorter_than_window)
+{
+	// The larger moving-average window reads max(short_days, long_days) bars
+	// plus the current bar.
+	VarHolder shortHistory(makeTwoMaCfg(3, 8, 8));
+	WtStraTwoMa tooShort("short-history");
+	EXPECT_FALSE(tooShort.init(shortHistory.get()));
+
+	VarHolder enoughHistory(makeTwoMaCfg(3, 8, 9));
+	WtStraTwoMa valid("enough-history");
+	EXPECT_TRUE(valid.init(enoughHistory.get()));
+
+	// short_days may be greater than long_days; history must cover that window too.
+	VarHolder shortDominates(makeTwoMaCfg(9, 8, 9));
+	WtStraTwoMa shortWindowTooShort("short-window-history");
+	EXPECT_FALSE(shortWindowTooShort.init(shortDominates.get()));
+
+	VarHolder shortDominatesEnough(makeTwoMaCfg(9, 8, 10));
+	WtStraTwoMa shortWindowValid("short-window-enough-history");
+	EXPECT_TRUE(shortWindowValid.init(shortDominatesEnough.get()));
+}
+
+TEST(n06_cta_stra, init_rejects_two_ma_periods_outside_signed_index_range)
+{
+	VarHolder invalid(makeTwoMaCfg(2,
+		std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max()));
+	WtStraTwoMa twoMa("large-period");
+	EXPECT_FALSE(twoMa.init(invalid.get()));
 }
 
 // ---------------------------------------------------------------- 工厂查找与删除

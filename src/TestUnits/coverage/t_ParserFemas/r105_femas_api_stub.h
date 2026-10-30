@@ -44,13 +44,14 @@ public:
 	CUstpFtdcMduserSpi* last_spi = NULL;
 
 	const char* trading_day = "20260301";
+	int trading_day_calls = 0;
 
 	void Release() override { ++release_calls; }
 	void Init() override { ++init_calls; }
 	int Join() override { ++join_calls; return 0; }
 	void SetUseMultiChannel(bool) override {}
 	void RegisterMultiChannel(const char*) override {}
-	const char* GetTradingDay() override { return trading_day; }
+	const char* GetTradingDay() override { ++trading_day_calls; return trading_day; }
 
 	void RegisterFront(char* p) override
 	{

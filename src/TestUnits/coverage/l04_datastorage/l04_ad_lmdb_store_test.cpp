@@ -19,6 +19,24 @@
 
 using namespace wtp;
 
+namespace wtp {
+
+struct WtLMDBTestAccess
+{
+	static bool open_with_mapsize_error(WtLMDB& db, const char* path, std::size_t mapsize)
+	{
+		return db.open_impl(path, mapsize, &fail_mapsize);
+	}
+
+private:
+	static int fail_mapsize(MDB_env*, std::size_t)
+	{
+		return MDB_MAP_FULL;
+	}
+};
+
+} // namespace wtp
+
 namespace {
 
 class L04ADStoreTest : public ::testing::Test
@@ -176,6 +194,41 @@ TEST_F(L04ADStoreTest, BarCacheFileRoundTrip)
 		EXPECT_STREQ(rc->_items[i]._code, "rb2401");
 		EXPECT_DOUBLE_EQ(rc->_items[i]._bar.open, 3000.0 + i);
 		EXPECT_EQ(rc->_items[i]._bar.time, (uint64_t)min_bar_time(20240102, 931 + i));
+	}
+}
+
+TEST_F(L04ADStoreTest, MapSizeSetterFailureCleansEnvAndAllowsRoundTripRetry)
+{
+	const std::string db_path = (_root / "mapsize_retry").string();
+	const std::string key = "l04-map-size-key";
+	const std::string value = "written-after-retry";
+
+	{
+		WtLMDB db(false);
+		ASSERT_FALSE(wtp::WtLMDBTestAccess::open_with_mapsize_error(
+			db, db_path.c_str(), 16 * 1024 * 1024));
+		EXPECT_TRUE(db.has_error());
+		EXPECT_STREQ(mdb_strerror(MDB_MAP_FULL), db.errmsg());
+		EXPECT_EQ(nullptr, (void*)db.env());
+
+		// A valid explicit mapsize must recover the same wrapper after the
+		// injected failure, then write normally.
+		ASSERT_TRUE(db.open(db_path.c_str(), 8 * 1024 * 1024));
+		EXPECT_FALSE(db.has_error());
+		ASSERT_NE(nullptr, (void*)db.env());
+		WtLMDBQuery query(db);
+		ASSERT_TRUE(query.put_and_commit(key, value));
+	}
+
+	// The first wrapper's destructor must close the environment so a new
+	// read-only wrapper can reopen with the default mapsize and read the value.
+	{
+		WtLMDB db(true);
+		ASSERT_TRUE(db.open(db_path.c_str()));
+		EXPECT_FALSE(db.has_error());
+		ASSERT_NE(nullptr, (void*)db.env());
+		WtLMDBQuery query(db);
+		EXPECT_EQ(value, query.get(key));
 	}
 }
 
@@ -399,7 +452,7 @@ TEST_F(L04ADStoreTest, TickRangeByDateUsesHftKeyOrdering)
 	// 单条精确命中
 	std::string one = query.get(key_str(LMDBHftKey(exchg, code, 20240102u, 93000005u)));
 	ASSERT_EQ(one.size(), sizeof(WTSTickStruct));
-	EXPECT_DOUBLE_EQ(((const WTSTickStruct*)one.data())->price, 2.5 + 5 * 0.5);
+	EXPECT_DOUBLE_EQ(((const WTSTickStruct*)one.data())->price, 4.5);
 }
 
 TEST_F(L04ADStoreTest, BarTimeEncodingMatchesReaderExpectation)

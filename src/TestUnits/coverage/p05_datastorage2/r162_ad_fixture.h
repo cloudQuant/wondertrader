@@ -181,12 +181,21 @@ public:
 		_logs[ll]++;
 		_total++;
 		_last = message == NULL ? "" : message;
+		_messages.emplace_back(_last);
 	}
 	uint32_t get_date() override { return 20240110u; }
 	uint32_t get_min_time() override { return 1500u; }
 	uint32_t get_secs() override { return 0u; }
 
 	uint32_t bars() const { return _bars; }
+	uint32_t count_containing(const string& text) const
+	{
+		uint32_t count = 0;
+		for (const string& message : _messages)
+			if (message.find(text) != string::npos)
+				++count;
+		return count;
+	}
 	uint32_t count_of(WTSLogLevel ll) const
 	{
 		auto it = _logs.find(ll);
@@ -201,6 +210,7 @@ private:
 	uint32_t		_updated = 0;
 	uint32_t		_total = 0;
 	string			_last;
+	std::vector<string> _messages;
 	std::map<WTSLogLevel, uint32_t>	_logs;
 };
 

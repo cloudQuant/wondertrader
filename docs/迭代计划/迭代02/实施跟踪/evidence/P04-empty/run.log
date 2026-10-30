@@ -1,0 +1,95 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = P04ReplayCsvTest.emptyCsvReturnsNullAndReplayCompletesInChild:P04ReplayCsvTest.dailyBarsReplayFullTradingDayCycle
+[==========] Running 2 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 2 tests from P04ReplayCsvTest
+[ RUN      ] P04ReplayCsvTest.dailyBarsReplayFullTradingDayCycle
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:243: Failure
+Expected equality of these values:
+  kBarCnt
+    Which is: 5
+  sink.beginCalls
+    Which is: 4
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:244: Failure
+Expected equality of these values:
+  kBarCnt
+    Which is: 5
+  sink.endCalls
+    Which is: 4
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:245: Failure
+Expected equality of these values:
+  kBarCnt
+    Which is: 5
+  sink.sectionCalls
+    Which is: 4
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:246: Failure
+Expected equality of these values:
+  kBarCnt
+    Which is: 5
+  sink.scheduleCalls
+    Which is: 4
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:256: Failure
+Expected equality of these values:
+  expectDates
+    Which is: { 20200102, 20200103, 20200106, 20200107, 20200108 }
+  sink.closedDates
+    Which is: { 20200103, 20200106, 20200107, 20200108 }
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:257: Failure
+Expected equality of these values:
+  expectCloses
+    Which is: { 10.5, 11.5, 12.5, 13.5, 14.5 }
+  sink.closedPrices
+    Which is: { 11.5, 12.5, 13.5, 14.5 }
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:258: Failure
+Expected equality of these values:
+  expectDates
+    Which is: { 20200102, 20200103, 20200106, 20200107, 20200108 }
+  sink.beginTDates
+    Which is: { 20200103, 20200106, 20200107, 20200108 }
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:259: Failure
+Expected equality of these values:
+  expectDates
+    Which is: { 20200102, 20200103, 20200106, 20200107, 20200108 }
+  sink.scheduleDates
+    Which is: { 20200103, 20200106, 20200107, 20200108 }
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:260: Failure
+Expected equality of these values:
+  std::vector<uint32_t>(kBarCnt, 1500u)
+    Which is: { 1500, 1500, 1500, 1500, 1500 }
+  sink.scheduleTimes
+    Which is: { 1500, 1500, 1500, 1500 }
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:263: Failure
+Expected equality of these values:
+  kDayBars[0].date
+    Which is: 20200102
+  sink.closedDates.front()
+    Which is: 20200103
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:265: Failure
+Expected equality of these values:
+  kDayBars[0].close
+    Which is: 10.5
+  sink.closedPrices.front()
+    Which is: 11.5
+
+[  FAILED  ] P04ReplayCsvTest.dailyBarsReplayFullTradingDayCycle (4 ms)
+[ RUN      ] P04ReplayCsvTest.emptyCsvReturnsNullAndReplayCompletesInChild
+[       OK ] P04ReplayCsvTest.emptyCsvReturnsNullAndReplayCompletesInChild (3 ms)
+[----------] 2 tests from P04ReplayCsvTest (7 ms total)
+
+[----------] Global test environment tear-down
+[==========] 2 tests from 1 test suite ran. (7 ms total)
+[  PASSED  ] 1 test.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] P04ReplayCsvTest.dailyBarsReplayFullTradingDayCycle
+
+ 1 FAILED TEST

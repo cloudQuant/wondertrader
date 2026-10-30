@@ -169,6 +169,13 @@ public:
 	 */
 	virtual void init(ExecuteContext* ctx, const char* stdCode, WTSVariant* /*cfg*/){ _ctx = ctx; _code = stdCode; }
 
+	// V2 initialization failures are returned to the host before the unit is
+	// destroyed. Drop the only persistent host-owned pointer synchronously so
+	// destroy_unit can safely run after the host releases its context. These
+	// non-virtual helpers do not change the legacy vtable or object layout.
+	void clearBorrowedContext() noexcept { _ctx = NULL; }
+	bool hasBorrowedContext() const noexcept { return _ctx != NULL; }
+
 public:
 	/*
 	 *	设置新的目标仓位
@@ -279,6 +286,6 @@ public:
 //创建执行工厂
 typedef IExecuterFact* (*FuncCreateExeFact)();
 //删除执行工厂
-typedef void(*FuncDeleteExeFact)(IExecuterFact* &fact);
+typedef void(*FuncDeleteExeFact)(IExecuterFact* fact);
 
 NS_WTP_END

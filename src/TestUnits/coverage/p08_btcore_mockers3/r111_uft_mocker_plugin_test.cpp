@@ -18,6 +18,8 @@
 #include <cstdint>
 #include <filesystem>
 #include <string>
+#include <type_traits>
+#include <vector>
 
 #include <Includes/WTSContractInfo.hpp>
 #include <WtBtCore/UftMocker.h>
@@ -31,13 +33,65 @@ namespace
 	const char* const kCu = "SHFE.cu.2406";
 	const char* const kStk = "SSE.STK.000001";
 
-	WTSVariant* make_factory_cfg(const std::string& module, const char* code)
+	std::vector<std::string> g_factory_events;
+	bool g_strategy_init_result = false;
+
+	class ControlledUftStrategy final : public UftStrategy
+	{
+	public:
+		explicit ControlledUftStrategy(const char* id) : UftStrategy(id) {}
+		~ControlledUftStrategy() override { g_factory_events.emplace_back("delete_strategy"); }
+		const char* getName() override { return "ControlledUft"; }
+		const char* getFactName() override { return "ControlledUftFactory"; }
+		bool init(WTSVariant*) override
+		{
+			g_factory_events.emplace_back("init_strategy");
+			return g_strategy_init_result;
+		}
+		void on_init(IUftStraCtx*) override {}
+	};
+
+	class ControlledUftFactory final : public IUftStrategyFact
+	{
+	public:
+		~ControlledUftFactory() override { g_factory_events.emplace_back("delete_factory"); }
+		const char* getName() override { return "ControlledUftFactory"; }
+		void enumStrategy(FuncEnumUftStrategyCallback) override {}
+		UftStrategy* createStrategy(const char* name, const char* id) override
+		{
+			g_factory_events.emplace_back("create_strategy");
+			if (name == nullptr || std::string(name) != "ControlledUft")
+				return nullptr;
+			return new ControlledUftStrategy(id);
+		}
+		bool deleteStrategy(UftStrategy* strategy) override
+		{
+			g_factory_events.emplace_back("delete_strategy_request");
+			delete strategy;
+			return true;
+		}
+	};
+
+	IUftStrategyFact* create_controlled_uft_factory()
+	{
+		g_factory_events.emplace_back("create_factory");
+		return new ControlledUftFactory();
+	}
+
+	void delete_controlled_uft_factory(IUftStrategyFact* factory)
+	{
+		delete factory;
+	}
+
+	WTSVariant* make_factory_cfg(const std::string& module, const char* code,
+		const char* strategyName = "SimpleUft")
 	{
 		WTSVariant* cfg = WTSVariant::createObject();
 		cfg->append("module", module.c_str());
 
 		WTSVariant* stra = WTSVariant::createObject();
-		stra->append("name", "SimpleUft");
+		if (strategyName != nullptr)
+			stra->append("name", strategyName);
 		stra->append("id", "r111_uft_plug");
 
 		WTSVariant* params = WTSVariant::createObject();
@@ -53,7 +107,47 @@ namespace
 		stra->release();
 		return cfg;
 	}
+
+	WTSVariant* make_module_cfg(const std::string& module)
+	{
+		WTSVariant* cfg = WTSVariant::createObject();
+		cfg->append("module", module.c_str());
+		return cfg;
+	}
+
+	WTSVariant* make_controlled_uft_cfg()
+	{
+		WTSVariant* cfg = WTSVariant::createObject();
+		cfg->append("module", "controlled_fixture");
+		WTSVariant* stra = WTSVariant::createObject();
+		stra->append("name", "ControlledUft");
+		stra->append("id", "controlled_uft_id");
+		WTSVariant* params = WTSVariant::createObject();
+		stra->append("params", params);
+		params->release();
+		cfg->append("strategy", stra);
+		stra->release();
+		return cfg;
+	}
 }
+
+static_assert(std::is_same<FuncCreateUftStraFact, IUftStrategyFact*(*)()>::value,
+	"UFT factory creator must match the repository declaration");
+static_assert(std::is_same<FuncDeleteUftStraFact, void(*)(IUftStrategyFact*)>::value,
+	"UFT factory deleter must match the repository by-value declaration");
+
+struct UftMockerTestAccess
+{
+	static bool initWithCallbacks(UftMocker& mocker, WTSVariant* cfg,
+		FuncCreateUftStraFact creator, FuncDeleteUftStraFact remover)
+	{
+		return mocker.init_uft_factory_impl(cfg, nullptr, "controlled_fixture", creator, remover);
+	}
+
+	static bool hasFactory(const UftMocker& mocker) { return mocker._factory._fact != nullptr; }
+	static bool hasStrategy(const UftMocker& mocker) { return mocker._strategy != nullptr; }
+	static bool hasModule(const UftMocker& mocker) { return mocker._factory._module_inst != nullptr; }
+};
 
 class R111UftMocker : public r62::ReplayFixture
 {
@@ -72,6 +166,8 @@ TEST_F(R111UftMocker, FactoryCreateAndEventDispatch)
 	UftMocker mocker(&_rp, "r111_uft_dispatch");
 	WTSVariant* cfg = make_factory_cfg(module(), kRb);
 	ASSERT_TRUE(mocker.init_uft_factory(cfg));
+	EXPECT_TRUE(UftMockerTestAccess::hasFactory(mocker));
+	EXPECT_TRUE(UftMockerTestAccess::hasStrategy(mocker));
 	cfg->release();
 
 	// on_init：watch_param/commit/stra_get_bars/stra_sub_ticks（L340）
@@ -102,6 +198,92 @@ TEST_F(R111UftMocker, FactoryCreateAndEventDispatch)
 	mocker.on_channel_ready();
 
 	EXPECT_DOUBLE_EQ(1.0, mocker.stra_get_position(kCu));
+}
+
+TEST_F(R111UftMocker, FactoryRejectsMissingStrategyAndEmptyOrMissingName)
+{
+	const std::string plugin = module();
+	ASSERT_TRUE(std::filesystem::exists(plugin)) << plugin;
+
+	{
+		UftMocker mocker(&_rp, "r111_uft_no_strategy");
+		WTSVariant* cfg = make_module_cfg(plugin);
+		EXPECT_FALSE(mocker.init_uft_factory(cfg));
+		EXPECT_FALSE(UftMockerTestAccess::hasModule(mocker));
+		EXPECT_FALSE(UftMockerTestAccess::hasFactory(mocker));
+		EXPECT_FALSE(UftMockerTestAccess::hasStrategy(mocker));
+		cfg->release();
+	}
+	{
+		UftMocker mocker(&_rp, "r111_uft_empty_strategy_name");
+		WTSVariant* cfg = make_factory_cfg(plugin, kRb, "");
+		EXPECT_FALSE(mocker.init_uft_factory(cfg));
+		EXPECT_FALSE(UftMockerTestAccess::hasModule(mocker));
+		EXPECT_FALSE(UftMockerTestAccess::hasFactory(mocker));
+		EXPECT_FALSE(UftMockerTestAccess::hasStrategy(mocker));
+		cfg->release();
+	}
+	{
+		UftMocker mocker(&_rp, "r111_uft_missing_strategy_name");
+		WTSVariant* cfg = make_factory_cfg(plugin, kRb, nullptr);
+		EXPECT_FALSE(mocker.init_uft_factory(cfg));
+		EXPECT_FALSE(UftMockerTestAccess::hasModule(mocker));
+		EXPECT_FALSE(UftMockerTestAccess::hasFactory(mocker));
+		EXPECT_FALSE(UftMockerTestAccess::hasStrategy(mocker));
+		cfg->release();
+	}
+}
+
+TEST_F(R111UftMocker, FactoryRejectsUnknownStrategyAndCleansPlugin)
+{
+	const std::string plugin = module();
+	ASSERT_TRUE(std::filesystem::exists(plugin)) << plugin;
+
+	UftMocker mocker(&_rp, "r111_uft_unknown_strategy");
+	WTSVariant* cfg = make_factory_cfg(plugin, kRb, "NoSuchStrategy");
+	EXPECT_FALSE(mocker.init_uft_factory(cfg));
+	EXPECT_FALSE(UftMockerTestAccess::hasModule(mocker));
+	EXPECT_FALSE(UftMockerTestAccess::hasFactory(mocker));
+	EXPECT_FALSE(UftMockerTestAccess::hasStrategy(mocker));
+	cfg->release();
+}
+
+TEST_F(R111UftMocker, FactoryRejectsStrategyInitFalseAndCleansInOrder)
+{
+	g_factory_events.clear();
+	g_strategy_init_result = false;
+	WTSVariant* cfg = make_controlled_uft_cfg();
+	{
+		UftMocker mocker(nullptr, "r111_uft_init_false");
+		EXPECT_FALSE(UftMockerTestAccess::initWithCallbacks(
+			mocker, cfg, create_controlled_uft_factory, delete_controlled_uft_factory));
+		EXPECT_FALSE(UftMockerTestAccess::hasFactory(mocker));
+		EXPECT_FALSE(UftMockerTestAccess::hasStrategy(mocker));
+		EXPECT_EQ((std::vector<std::string>{
+			"create_factory", "create_strategy", "init_strategy",
+			"delete_strategy_request", "delete_strategy", "delete_factory"}), g_factory_events);
+	}
+	cfg->release();
+}
+
+TEST_F(R111UftMocker, ControlledSuccessfulInitDeletesStrategyBeforeFactory)
+{
+	g_factory_events.clear();
+	g_strategy_init_result = true;
+	WTSVariant* cfg = make_controlled_uft_cfg();
+	{
+		UftMocker mocker(nullptr, "r111_uft_controlled_success");
+		ASSERT_TRUE(UftMockerTestAccess::initWithCallbacks(
+			mocker, cfg, create_controlled_uft_factory, delete_controlled_uft_factory));
+		ASSERT_TRUE(UftMockerTestAccess::hasFactory(mocker));
+		ASSERT_TRUE(UftMockerTestAccess::hasStrategy(mocker));
+		EXPECT_EQ((std::vector<std::string>{
+			"create_factory", "create_strategy", "init_strategy"}), g_factory_events);
+	}
+	EXPECT_EQ((std::vector<std::string>{
+		"create_factory", "create_strategy", "init_strategy",
+		"delete_strategy_request", "delete_strategy", "delete_factory"}), g_factory_events);
+	cfg->release();
 }
 
 // 交易日开始释放冻结、结束写持仓/资金日志；未注册品种成交早退

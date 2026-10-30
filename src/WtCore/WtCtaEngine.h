@@ -71,6 +71,13 @@ public:
 		executer->setStub(this);
 	}
 
+	ExecUnitInitStatus queryExecUnitInitStatus(const char* executorId, const char* stdCode) const;
+	ExecUnitInitClearResult clearFailedExecUnitInitStatus(const char* executorId, const char* stdCode);
+	ExecCmdPtr findExecuter(const char* executorId) const { return _exec_mgr.find_executer(executorId); }
+	// Borrowed manager reference for runner-level quiesce coordination. The engine
+	// must remain alive until the coordinator has completed successfully.
+	WtExecuterMgr& getExecuterMgr() { return _exec_mgr; }
+
 	inline bool loadRouterRules(WTSVariant* cfg)
 	{
 		return _exec_mgr.load_router_rules(cfg);

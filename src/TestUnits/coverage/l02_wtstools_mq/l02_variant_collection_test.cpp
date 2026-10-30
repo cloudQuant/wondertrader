@@ -224,8 +224,8 @@ TEST_F(L02VariantFixture, VariantCrossTypeConversions)
 	WTSVariant* half = root->get("half");
 	ASSERT_TRUE(half != NULL);
 	EXPECT_EQ(WTSVariant::VT_Real, half->type());
-	// double 以 %.10f 格式落库
-	EXPECT_EQ("0.5000000000", half->asString());
+	// Real values use the shortest decimal representation that round-trips.
+	EXPECT_EQ("0.5", half->asString());
 	EXPECT_EQ(0, half->asInt32());
 
 	WTSVariant* flag = root->get("flag");
@@ -604,6 +604,11 @@ TEST_F(L02VariantFixture, WtsQueuePushPopFrontBack)
 	EXPECT_TRUE(q->front() == NULL);
 	EXPECT_TRUE(q->back() == NULL);
 	EXPECT_EQ(0u, q->size());
+	q->pop();
+	EXPECT_TRUE(q->empty());
+	q->push(NULL);
+	q->pop();
+	EXPECT_TRUE(q->empty());
 
 	RefProbe* p1 = new RefProbe(1);
 	RefProbe* p2 = new RefProbe(2);
@@ -624,10 +629,6 @@ TEST_F(L02VariantFixture, WtsQueuePushPopFrontBack)
 	EXPECT_EQ(1u, q->size());
 	// 出队应归还队列持有的引用，调用方自己的引用仍保留。
 	EXPECT_EQ(1u, p1->retainCount());
-	// 兼顾当前有缺陷的 pop 实现：若它漏还了队列引用，则在继续清理前补回。
-	if (p1->retainCount() > 1u)
-		p1->release();
-	EXPECT_EQ(1u, p1->retainCount());
 
 	q->clear();
 	EXPECT_EQ(0u, q->size());
@@ -635,6 +636,25 @@ TEST_F(L02VariantFixture, WtsQueuePushPopFrontBack)
 	p1->release();
 	p2->release();
 	EXPECT_EQ(2, RefProbe::s_dtor);
+	RefProbe::s_dtor = 0;
+}
+
+TEST_F(L02VariantFixture, WtsQueueReleaseClearsRetainedEntries)
+{
+	WTSQueue* q = WTSQueue::create();
+	RefProbe* p = new RefProbe(1);
+
+	q->push(p);
+	q->push(p);
+	EXPECT_EQ(3u, p->retainCount());
+
+	// Releasing the queue clears both retained entries, leaving the caller's ref.
+	q->release();
+	EXPECT_EQ(1u, p->retainCount());
+	EXPECT_EQ(0, RefProbe::s_dtor);
+
+	p->release();
+	EXPECT_EQ(1, RefProbe::s_dtor);
 	RefProbe::s_dtor = 0;
 }
 

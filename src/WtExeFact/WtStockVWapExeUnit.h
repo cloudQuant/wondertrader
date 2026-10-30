@@ -15,6 +15,8 @@
 #include "../Includes/WTSSessionInfo.hpp"
 #include "../Share/decimal.h"
 #include "../Share/fmtlib.h"
+#include "VwapProfile.hpp"
+#include <unordered_map>
 USING_NS_WTP;
 
 /**
@@ -24,6 +26,14 @@ USING_NS_WTP;
  *          最大程度地降低市场冲击，提高订单执行效率
  */
 class WtStockVWapExeUnit : public ExecuteUnit {
+public:
+	/// @brief Execution progress; a pending sub-lot remainder is not completion.
+	enum class ExecutionState
+	{
+		active = 0,
+		complete,
+		pending_remainder,
+	};
 
 private:
 	/// @brief 可转债产品代码
@@ -40,6 +50,19 @@ private:
 		stocks = 0,  ///< 股数模式，目标仓位以股数为单位
 		amount,      ///< 金额模式，目标仓位以金额为单位
 		ratio,       ///< 比例模式，目标仓位以比例为单位
+	};
+
+	enum class PendingAction
+	{
+		none = 0,
+		recalculate,
+		retry,
+	};
+
+	struct OrderTargetInfo
+	{
+		uint64_t generation{ 0 };
+		bool retryable{ true };
 	};
 
 private:
@@ -73,6 +96,10 @@ private:
 	 *          这是实现VWAP策略的核心方法，根据设定的时间和数量分布执行订单
 	 */
 	void	do_calc();
+	double	get_retry_quantity();
+	bool	uses_stock_lot_rules() const;
+	void	mark_pending_remainder(double target_remainder, double executable_remainder,
+		double sellable_position, const char* reason);
 
 	/**
 	 * @brief 立即发出订单
@@ -113,6 +140,14 @@ public:
 	 * @param cfg 执行单元配置
 	 */
 	virtual void init(ExecuteContext* ctx, const char* stdCode, WTSVariant* cfg) override;
+
+	// Non-virtual status queried by the versioned plugin adapter after init.
+	// Keep ExecuteUnit's vtable unchanged for existing plugins.
+	bool initializationSucceeded() const { return _config_valid; }
+	/// @brief Non-virtual progress observation; keeps the ExecuteUnit vtable unchanged.
+	ExecutionState executionState() const { return _execution_state; }
+	/// @brief Signed target gap while an unexecutable sub-lot remainder is pending.
+	double pendingRemainder() const { return _pending_remainder; }
 
 	/*
 	*	订单回报
@@ -215,12 +250,26 @@ public:
 	 */
 	virtual void clear_all_position(const char* stdCode) override;
 private:
+	bool map_action_time(uint32_t action_time, size_t& bucket_index,
+		std::string& diagnostic);
+
 	/// @brief 最新的市场行情数据
 	WTSTickData* _last_tick;
 	/// @brief 目标仓位（股数模式）
 	double		_target_pos;
 	/// @brief 目标金额（金额模式）
 	double		_target_amount;
+	/// @brief 订单回报后等待下一笔新有效行情再处理的动作
+	PendingAction	_pending_action{ PendingAction::none };
+	/// @brief 当前用户目标的代际；旧目标订单的撤单回报只能触发重算。
+	uint64_t		_target_generation{ 0 };
+	/// @brief 每个本地订单对应的目标代际及取消后是否允许重试原切片。
+	std::unordered_map<uint32_t, OrderTargetInfo> _order_target_generations;
+	/// @brief 空订单 ID 后按配置间隔安排的最早重试时间，使用自然行情日期计算
+	int64_t		_retry_not_before{ 0 };
+	/// @brief 交易日/自然日期合同不明确时 fail closed，直到执行单元重建
+	bool			_unsupported_date_contract{ false };
+	bool			_date_contract_warning_logged{ false };
 	/// @brief 账户可用资金
 	[[maybe_unused]] double		_avaliable{ 0 };
 	/// @brief 交易通道是否就绪
@@ -264,7 +313,9 @@ private:
 	/// @brief 结束时间（格式如：1030表示10:30）
 	uint32_t		_end_time;
 	/// @brief 最小开仓数量
-	double			_min_open_lots;
+	double			_min_open_lots{ 0 };
+	/// @brief 配置及所有依赖资源均已验证
+	bool			_config_valid{ false };
 	/// @brief 单次发单手数
 	double			_order_lots;
 	/// @brief 是否为科创板股票
@@ -281,8 +332,10 @@ private:
 	double			_start_price{ 0 };
 	/// @brief 是否支持T+0交易（转债等为true，股票为false）
 	bool			_is_t0{ false };
-	/// @brief 是否完成执行
-	bool			_is_finish;
+	/// @brief Execution state distinguishes exact completion from an unexecutable remainder.
+	ExecutionState	_execution_state{ ExecutionState::active };
+	/// @brief Signed requested target minus current total position while pending a legal lot.
+	double			_pending_remainder{ 0 };
 	/// @brief 开始执行的时间戳
 	uint64_t		_start_time;
 	//////////////////////////////////////////////////////////////////////////
@@ -298,7 +351,14 @@ private:
 	/// @brief 上个下单时间戳
 	[[maybe_unused]] uint64_t		_last_place_time;
 	/// @brief 上个tick数据的时间戳
-	uint64_t		_last_tick_time;
+	uint64_t		_last_tick_time{ 0 };
+	/// @brief 所有可解析行情时间的单调高水位，包含盘外行情
+	uint64_t		_tick_time_high_water{ 0 };
+	uint32_t		_high_water_action_date{ 0 };
+	uint32_t		_high_water_action_time{ 0 };
+	/// @brief begin/end 在该 session 的累计交易秒坐标
+	uint32_t		_begin_trading_secs{ 0 };
+	uint32_t		_end_trading_secs{ 0 };
 	/// @brief VWAP单位时间下单量
 	double			_Vwap_vol;
 	/// @brief VWAP价格
@@ -329,7 +389,7 @@ private:
 		 * @brief 析构函数，释放标志
 		 */
 		~_CalcFlag() {
-			if (_flag)
+			if (_flag && !_result)
 				_flag->exchange(false, std::memory_order_acq_rel);
 		}
 		/**

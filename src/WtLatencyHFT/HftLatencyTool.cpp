@@ -12,6 +12,7 @@
 #include "../WtCore/HftStraContext.h"
 
 #include "../Includes/WTSVariant.hpp"
+#include "../Includes/WTSCollection.hpp"
 #include "../Includes/IParserApi.h"
 #include "../Includes/ITraderApi.h"
 #include "../Includes/WTSContractInfo.hpp"
@@ -23,8 +24,21 @@
 #include "../Share/TimeUtils.hpp"
 #include "../Share/CpuHelper.hpp"
 
+#include <exception>
+#include <chrono>
+#include <condition_variable>
+#include <mutex>
+#include <thread>
+
 
 USING_NS_WTP;
+
+namespace
+{
+	// A failed external parser may still call its SPI. In that case retain the
+	// complete runner and its borrowed dependencies until process exit.
+	hft::HftLatencyTool* g_failed_parser_runner = NULL;
+}
 
 /**
  * @brief 测试HFT模块延迟性能
@@ -32,13 +46,21 @@ USING_NS_WTP;
  */
 void test_hft()
 {
-	// 创建高频交易延迟测试工具实例
-	hft::HftLatencyTool runner;
+	// Keep the runner heap-owned so a failed parser can quarantine its adapter
+	// together with the engine and managers it may still reference.
+	hft::HftLatencyTool* runner = new hft::HftLatencyTool();
 	// 初始化延迟测试工具
-	runner.init();
+	if (!runner->init())
+	{
+		if (runner == g_failed_parser_runner)
+			return; // Deliberately retain the quarantined runner until process exit.
+		delete runner;
+		return;
+	}
 
 	// 执行延迟测试
-	runner.run();
+	runner->run();
+	delete runner;
 }
 
 namespace hft
@@ -89,6 +111,11 @@ namespace hft
 	class TestParser : public IParserApi
 	{
 	public:
+		virtual bool init(WTSVariant* /*cfg*/) override
+		{
+			return true;
+		}
+
 		/**
 		 * @brief 执行测试运行
 		 * @param times 模拟生成的tick数量
@@ -96,6 +123,12 @@ namespace hft
 		 */
 		void	run(uint32_t times)
 		{
+			if (times == 0)
+			{
+				WTSLogger::warn("0 ticks simulated; average latency unavailable (no samples)");
+				return;
+			}
+
 			// 初始化随机数生成器
 			srand(time(NULL));
 			// 创建时间计数器，用于测量总耗时
@@ -111,13 +144,21 @@ namespace hft
 				// 获取铁矿石合约信息
 				WTSContractInfo* contract = _bd_mgr->getContract("rb2205", "SHFE");
 				if (contract == NULL)
+				{
+					WTSLogger::warn("Skipping latency test tick: contract {}.{} not found", "SHFE", "rb2205");
 					return;
+				}
 
 				// 生成随机数作为行情价格
 				double x = rand();
 
 				// 获取商品信息
 				WTSCommodityInfo* pCommInfo = contract->getCommInfo();
+				if (pCommInfo == NULL)
+				{
+					WTSLogger::warn("Skipping latency test tick: contract {}.{} has no commodity info", "SHFE", "rb2205");
+					return;
+				}
 
 				// 创建新的tick数据对象
 				WTSTickData* tick = WTSTickData::create("rb2205");
@@ -216,6 +257,103 @@ namespace hft
 	/** 全局测试解析器对象指针 */
 	TestParser* theParser = NULL;
 
+	namespace
+	{
+		struct ShutdownGate
+		{
+			std::mutex mutex;
+			std::condition_variable changed;
+			WtHftEngine* engine = NULL;
+			bool armed = false;
+			bool fail_trader_init = false;
+			bool entered = false;
+			bool release = false;
+			bool context_visible = false;
+			bool context_visible_after_gate = false;
+			bool callback_exited = false;
+			bool trader_release_started_during_callback = false;
+			bool trader_released_after_callback = false;
+		};
+
+		ShutdownGate shutdown_gate;
+	}
+
+	// The R95 test uses these controls to hold a real TraderAdapter sink callback
+	// while HftLatencyTool tears down its owners.
+	void armShutdownGateTest()
+	{
+		std::lock_guard<std::mutex> lock(shutdown_gate.mutex);
+		shutdown_gate.armed = true;
+		shutdown_gate.entered = false;
+		shutdown_gate.release = false;
+		shutdown_gate.context_visible = false;
+		shutdown_gate.context_visible_after_gate = false;
+		shutdown_gate.callback_exited = false;
+		shutdown_gate.trader_release_started_during_callback = false;
+		shutdown_gate.trader_released_after_callback = false;
+	}
+
+	bool waitForShutdownGateCallback(int timeout_ms)
+	{
+		std::unique_lock<std::mutex> lock(shutdown_gate.mutex);
+		return shutdown_gate.changed.wait_for(lock, std::chrono::milliseconds(timeout_ms), []() {
+			return shutdown_gate.entered;
+		});
+	}
+
+	void releaseShutdownGateCallback()
+	{
+		std::lock_guard<std::mutex> lock(shutdown_gate.mutex);
+		shutdown_gate.release = true;
+		shutdown_gate.changed.notify_all();
+	}
+
+	bool shutdownGateSawContext()
+	{
+		std::lock_guard<std::mutex> lock(shutdown_gate.mutex);
+		return shutdown_gate.context_visible && shutdown_gate.context_visible_after_gate;
+	}
+
+	bool shutdownGateSawTraderReleaseAfterCallback()
+	{
+		std::lock_guard<std::mutex> lock(shutdown_gate.mutex);
+		return shutdown_gate.trader_released_after_callback;
+	}
+
+	bool waitForTraderReleaseDuringCallback(int timeout_ms)
+	{
+		std::unique_lock<std::mutex> lock(shutdown_gate.mutex);
+		return shutdown_gate.changed.wait_for(lock, std::chrono::milliseconds(timeout_ms), []() {
+			return shutdown_gate.trader_release_started_during_callback;
+		});
+	}
+
+	bool shutdownGateSawTraderReleaseDuringCallback()
+	{
+		std::lock_guard<std::mutex> lock(shutdown_gate.mutex);
+		return shutdown_gate.trader_release_started_during_callback;
+	}
+
+	void disarmShutdownGateTest()
+	{
+		std::lock_guard<std::mutex> lock(shutdown_gate.mutex);
+		shutdown_gate.armed = false;
+		shutdown_gate.engine = NULL;
+		shutdown_gate.fail_trader_init = false;
+	}
+
+	bool shutdownGateIsArmed()
+	{
+		std::lock_guard<std::mutex> lock(shutdown_gate.mutex);
+		return shutdown_gate.armed;
+	}
+
+	void setTestTraderInitFailure(bool fail)
+	{
+		std::lock_guard<std::mutex> lock(shutdown_gate.mutex);
+		shutdown_gate.fail_trader_init = fail;
+	}
+
 	/**
 	 * @brief 测试用交易器类
 	 * @details 模拟的交易器实现，用于测试高频交易时的交易处理流程
@@ -223,6 +361,76 @@ namespace hft
 	class TestTrader : public ITraderApi
 	{
 	public:
+		bool init(WTSVariant* /*cfg*/) override
+		{
+			std::lock_guard<std::mutex> lock(shutdown_gate.mutex);
+			return !shutdown_gate.fail_trader_init;
+		}
+
+		void connect() override
+		{
+			if (!shutdownGateIsArmed())
+				return;
+
+			ITraderSpi* spi = _trader_spi;
+			_connection_thread = std::thread([spi]() {
+				if (spi != NULL)
+					spi->onLoginResult(true, "test", 20220303);
+			});
+		}
+
+		void release() override
+		{
+			{
+				std::lock_guard<std::mutex> lock(shutdown_gate.mutex);
+				if (shutdown_gate.armed && !shutdown_gate.callback_exited)
+				{
+					shutdown_gate.trader_release_started_during_callback = true;
+					shutdown_gate.changed.notify_all();
+				}
+			}
+			if (_connection_thread.joinable())
+				_connection_thread.join();
+			std::lock_guard<std::mutex> lock(shutdown_gate.mutex);
+			if (shutdown_gate.armed)
+				shutdown_gate.trader_released_after_callback = shutdown_gate.callback_exited;
+		}
+
+		int queryPositions() override
+		{
+			WTSArray* empty = WTSArray::create();
+			if (_trader_spi != NULL)
+				_trader_spi->onRspPosition(empty);
+			empty->release();
+			return 0;
+		}
+
+		int queryOrders() override
+		{
+			WTSArray* empty = WTSArray::create();
+			if (_trader_spi != NULL)
+				_trader_spi->onRspOrders(empty);
+			empty->release();
+			return 0;
+		}
+
+		int queryTrades() override
+		{
+			WTSArray* empty = WTSArray::create();
+			if (_trader_spi != NULL)
+				_trader_spi->onRspTrades(empty);
+			empty->release();
+			return 0;
+		}
+
+		int queryAccount() override
+		{
+			WTSArray* empty = WTSArray::create();
+			if (_trader_spi != NULL)
+				_trader_spi->onRspAccount(empty);
+			empty->release();
+			return 0;
+		}
 
 		/**
 		 * @brief 注册交易器回调接口
@@ -262,7 +470,8 @@ namespace hft
 		}
 
 	private:
-		ITraderSpi*	_trader_spi;  /**< 交易器回调接口指针 */
+		ITraderSpi*	_trader_spi = NULL;  /**< 交易器回调接口指针 */
+		std::thread _connection_thread;
 	};
 
 	/**
@@ -319,6 +528,28 @@ namespace hft
 			// 买入铁矿石2205合约，价格2300，数量1手，测试高频交易引擎的响应速度
 			ctx->stra_buy("SHFE.rb.2205", 2300, 1, "", HFT_OrderFlag_Nor);
 		}
+
+		void on_channel_ready(IHftStraCtx* ctx) override
+		{
+			std::unique_lock<std::mutex> lock(shutdown_gate.mutex);
+			if (!shutdown_gate.armed)
+				return;
+			WtHftEngine* engine = shutdown_gate.engine;
+			lock.unlock();
+			bool context_visible = engine != NULL && engine->getContext(ctx->id()) != NULL;
+			lock.lock();
+			shutdown_gate.context_visible = context_visible;
+			shutdown_gate.entered = true;
+			shutdown_gate.changed.notify_all();
+			shutdown_gate.changed.wait(lock, []() { return shutdown_gate.release; });
+			lock.unlock();
+
+			bool context_still_visible = engine != NULL && engine->getContext(ctx->id()) != NULL;
+			lock.lock();
+			shutdown_gate.context_visible_after_gate = context_still_visible;
+			shutdown_gate.callback_exited = true;
+			shutdown_gate.changed.notify_all();
+		}
 	};
 
 
@@ -328,6 +559,9 @@ namespace hft
 	 */
 	HftLatencyTool::HftLatencyTool()
 	{
+		theParser = NULL;
+		_init_attempted = false;
+		_shutdown_complete = false;
 	}
 
 
@@ -337,6 +571,39 @@ namespace hft
 	 */
 	HftLatencyTool::~HftLatencyTool()
 	{
+		if (!shutdown())
+		{
+			WTSLogger::error("HFT latency tool cannot be destroyed from a trader sink callback");
+			std::terminate();
+		}
+	}
+
+	bool HftLatencyTool::shutdown()
+	{
+		if (_shutdown_complete)
+			return true;
+
+		const TraderAdapterMap& adapters = _traders.getAdapters();
+		for (const auto& item : adapters)
+			item.second->requestStopSinkNotifications();
+
+		// Stop notification producers while the engine still owns every strategy context.
+		_parsers.release();
+		theParser = NULL;
+		_engine.release();
+
+		bool drained = true;
+		for (const auto& item : adapters)
+		{
+			if (!item.second->waitSinkNotificationsStopped())
+				drained = false;
+		}
+		if (!drained)
+			return false;
+
+		_traders.release();
+		_shutdown_complete = true;
+		return true;
 	}
 
 	/**
@@ -346,6 +613,15 @@ namespace hft
 	 */
 	bool HftLatencyTool::init()
 	{
+		// Reject reinitialization without mutating an already valid parser state.
+		if (_init_attempted)
+		{
+			WTSLogger::error("HFT latency tool initialization can only be attempted once");
+			return false;
+		}
+		_init_attempted = true;
+		theParser = NULL;
+
 		// 初始化日志系统
 		WTSLogger::init("logcfg.yaml");
 
@@ -411,8 +687,15 @@ namespace hft
 		WTSLogger::warn("Testing thread will be bind to core {}", _core);
 
 		initEngine(_config->get("env"));
-		initModules();
-		initStrategies();
+		if (!initModules() || !initStrategies())
+		{
+			if (g_failed_parser_runner == this)
+				WTSLogger::error("Latency parser failed initialization; retaining its adapter and borrowed owner graph until process exit");
+			else if (!shutdown())
+				WTSLogger::error("HFT latency initialization cleanup is pending until trader callbacks return");
+			_config->release();
+			return false;
+		}
 
 		_config->release();
 		return true;
@@ -429,10 +712,20 @@ namespace hft
 		ctx->set_strategy(new TestStrategy("stra"));
 
 		TraderAdapterPtr trader = _traders.getAdapter("trader");
+		if (!trader)
+		{
+			WTSLogger::error("Latency test trader adapter is unavailable");
+			return false;
+		}
 		ctx->setTrader(trader.get());
-		trader->addSink(ctx);
-
 		_engine.addContext(HftContextPtr(ctx));
+		{
+			std::lock_guard<std::mutex> lock(shutdown_gate.mutex);
+			shutdown_gate.engine = &_engine;
+		}
+		// addSink may synchronously deliver READY when the adapter is already connected.
+		// Publish the fully initialized context first so the engine can resolve callbacks.
+		trader->addSink(ctx);
 
 		return true;
 	}
@@ -461,17 +754,53 @@ namespace hft
 	bool HftLatencyTool::initModules()
 	{
 		{
-			theParser = new TestParser();
+			TestParser* parser = new TestParser();
 			ParserAdapterPtr adapter(new ParserAdapter);
-			adapter->initExt("parser", theParser, &_engine, &_bd_mgr, &_hot_mgr);
-			_parsers.addAdapter("parser", adapter);
+			// Register before ownership transfer so a failed initExt result cannot
+			// destroy the adapter while the provider may still hold its SPI pointer.
+			if (!_parsers.addAdapter("parser", adapter))
+			{
+				delete parser;
+				WTSLogger::error("Registering latency test parser adapter failed");
+				return false;
+			}
+
+			bool initialized = false;
+			try
+			{
+				initialized = adapter->initExt("parser", parser, &_engine, &_bd_mgr, &_hot_mgr);
+			}
+			catch (...)
+			{
+				initialized = false;
+			}
+			if (!initialized)
+			{
+				// initExt takes ownership as soon as this non-null API is passed.
+				// Keep the entire runner alive: release() is not a callback drain.
+				g_failed_parser_runner = this;
+				WTSLogger::error("Initializing latency test parser adapter failed; owner graph quarantined");
+				return false;
+			}
+			theParser = parser;
 		}
 
 		{
-			TestTrader * tester = new TestTrader();
+			std::unique_ptr<ITraderApi> tester(new TestTrader());
 			TraderAdapterPtr adapter(new TraderAdapter());
-			adapter->initExt("trader", tester, &_bd_mgr, &_act_mgr);
-			_traders.addAdapter("trader", adapter);
+			if (!adapter->initExt("trader", tester.get(), &_bd_mgr, &_act_mgr))
+			{
+				WTSLogger::error("Initializing latency test trader adapter failed");
+				return false;
+			}
+
+			if (!_traders.addAdapter("trader", adapter))
+			{
+				adapter->release();
+				WTSLogger::error("Registering latency test trader adapter failed");
+				return false;
+			}
+			_test_trader_api = std::move(tester);
 		}
 
 		return true;
@@ -483,6 +812,12 @@ namespace hft
 	 */
 	void HftLatencyTool::run()
 	{
+		if (theParser == NULL)
+		{
+			WTSLogger::error("Cannot run HFT latency test before parser initialization succeeds");
+			return;
+		}
+
 		if (_core != 0)
 		{
 			if (!CpuHelper::bind_core(_core - 1))

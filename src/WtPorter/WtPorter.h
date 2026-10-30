@@ -220,8 +220,46 @@ extern "C"
 	 * @details 清理并释放Porter模块占用的各种资源
 	 *          在异步运行模式下，应在程序退出前调用此函数以释放资源
 	 *          调用后不能再使用其他Porter接口函数，除非重新初始化
+	 *          从交易通知回调调用时会请求停止并保留运行器资源；回调返回后必须从控制线程再次调用。
+	 *          此void API的返回不表示延后清理已完成。
 	 */
 	EXPORT_FLAG	void		release_porter();
+
+	/* Fixed-width values used by the versioned execution-unit status API. */
+	#define WT_EXEC_ENGINE_CTA_V2 UINT32_C(999)
+	#define WT_EXEC_ENGINE_HFT_V2 UINT32_C(1000)
+	#define WT_EXEC_ENGINE_SEL_V2 UINT32_C(1001)
+
+	#define WT_EXEC_UNIT_INIT_UNKNOWN_V2       UINT32_C(0)
+	#define WT_EXEC_UNIT_INIT_INITIALIZING_V2  UINT32_C(1)
+	#define WT_EXEC_UNIT_INIT_READY_V2         UINT32_C(2)
+	#define WT_EXEC_UNIT_INIT_FAILED_V2        UINT32_C(3)
+
+	#define WT_EXEC_UNIT_STATUS_OK_V2                 INT32_C(0)
+	#define WT_EXEC_UNIT_STATUS_INVALID_ARGUMENT_V2   INT32_C(1)
+	#define WT_EXEC_UNIT_STATUS_NOT_READY_V2          INT32_C(2)
+	#define WT_EXEC_UNIT_STATUS_UNSUPPORTED_V2        INT32_C(3)
+	#define WT_EXEC_UNIT_STATUS_EXECUTOR_NOT_FOUND_V2 INT32_C(4)
+	#define WT_EXEC_UNIT_STATUS_ENGINE_MISMATCH_V2    INT32_C(5)
+	#define WT_EXEC_UNIT_STATUS_INTERNAL_ERROR_V2     INT32_C(6)
+	#define WT_EXEC_UNIT_STATUS_CODE_NOT_FOUND_V2     INT32_C(7)
+	#define WT_EXEC_UNIT_STATUS_NOT_FAILED_V2         INT32_C(8)
+	#define WT_EXEC_UNIT_STATUS_RETRY_BLOCKED_V2       INT32_C(9)
+
+	/**
+	 * Query the latest execution-unit initialization result. State and generation
+	 * are always returned separately from the API result: an init FAILED state
+	 * still returns WT_EXEC_UNIT_STATUS_OK_V2 and places its error in error_buffer.
+	 * error_buffer is optional when capacity is zero; otherwise it must be non-NULL
+	 * and is always NUL-terminated.
+	 */
+	EXPORT_FLAG int32_t exec_get_unit_init_status_v2(uint32_t engine_type, const char* executor_id,
+		const char* std_code, uint32_t* state, uint64_t* generation,
+		char* error_buffer, uint32_t error_capacity);
+
+	/** Clear a retained FAILED initialization record for one execution unit. */
+	EXPORT_FLAG int32_t exec_clear_failed_unit_init_status_v2(uint32_t engine_type,
+		const char* executor_id, const char* std_code, char* error_buffer, uint32_t error_capacity);
 
 	/**
 	 * @brief 创建外部数据解析器
@@ -1241,6 +1279,7 @@ extern "C"
 	 * @details 在高频策略中发送买入委托单
 	 *          订单会立即发送到交易所，并返回本地生成的订单ID
 	 *          高频策略需要保存该ID以进行后续的订单状态跟踪或撤单操作
+	 *          返回指针指向线程局部缓冲区；同一线程再次调用 hft_buy 后失效，需及时复制
 	 */
 	EXPORT_FLAG	WtString	hft_buy(CtxHandler cHandle, const char* stdCode, double price, double qty, const char* userTag, int flag);
 
@@ -1256,6 +1295,7 @@ extern "C"
 	 * @details 在高频策略中发送卖出委托单
 	 *          订单会立即发送到交易所，并返回本地生成的订单ID
 	 *          高频策略需要保存该ID以进行后续的订单状态跟踪或撤单操作
+	 *          返回指针指向线程局部缓冲区；同一线程再次调用 hft_sell 后失效，需及时复制
 	 */
 	EXPORT_FLAG	WtString	hft_sell(CtxHandler cHandle, const char* stdCode, double price, double qty, const char* userTag, int flag);
 

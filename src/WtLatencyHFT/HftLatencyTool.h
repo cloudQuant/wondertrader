@@ -80,7 +80,12 @@ namespace hft
 		 */
 		bool initEngine(WTSVariant* cfg);
 
+		// Stop producers and drain adapter notifications while strategy contexts remain alive.
+		// A false result means shutdown was re-entered from a sink callback; the owner must live.
+		bool shutdown();
+
 	private:
+		std::unique_ptr<ITraderApi> _test_trader_api;
 		TraderAdapterMgr	_traders;    /**< 交易适配器管理器 */
 		ParserAdapterMgr	_parsers;    /**< 解析适配器管理器 */
 		HftStrategyMgr		_stra_mgr;   /**< 策略管理器 */
@@ -94,5 +99,7 @@ namespace hft
 
 		uint32_t			_times;      /**< 测试模拟的tick数量 */
 		uint32_t			_core;       /**< 测试线程绑定的CPU核心编号 */
+		bool				_init_attempted; /**< init() is a one-shot operation */
+		bool				_shutdown_complete;
 	};
 }

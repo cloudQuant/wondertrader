@@ -116,7 +116,9 @@ double WTSHotMgr::getRuleFactor(const char* ruleTag, const char* fullPid, uint32
 #pragma region "主力接口"
 bool WTSHotMgr::loadHots(const char* filename)
 {
-	loadCustomRules("HOT", filename);
+	if (!loadCustomRules("HOT", filename))
+		return false;
+
 	m_bInitialized = true;
 	return true;
 }
@@ -147,15 +149,7 @@ bool WTSHotMgr::isHot(const char* exchg, const char* rawCode, uint32_t dt)
 
 const std::vector<std::string>& WTSHotMgr::getHotTags() const
 {
-	static std::vector<std::string> ayTags;
-	if(ayTags.empty())
-	{
-		for(auto& v : m_mapCustCodes)
-		{
-			ayTags.emplace_back(v.first);
-		}
-	}
-	return ayTags;
+	return m_vecHotTags;
 }
 
 bool WTSHotMgr::splitHotSecions(const char* exchg, const char* pid, uint32_t sDt, uint32_t eDt, HotSections& sections)
@@ -263,6 +257,13 @@ bool WTSHotMgr::loadCustomRules(const char* tag, const char* filename)
 			std::string fullCode = fmt::format("{}.{}", exchg.c_str(), lastCode.c_str());
 			m_mapCustCodes[tag].insert(fullCode);
 		}
+	}
+
+	m_vecHotTags.clear();
+	m_vecHotTags.reserve(m_mapCustCodes.size());
+	for (const auto& v : m_mapCustCodes)
+	{
+		m_vecHotTags.emplace_back(v.first);
 	}
 
 	root->release();
@@ -381,11 +382,11 @@ bool WTSHotMgr::isCustomHot(const char* tag, const char* fullCode, uint32_t dt /
 
 	WTSProductHotMap* prodMap = (WTSProductHotMap*)m_mapCustRules->get(tag);
 	if (prodMap == NULL)
-		return "";
+		return false;
 
 	WTSDateHotMap* dtMap = STATIC_CONVERT(prodMap->get(fullPid), WTSDateHotMap*);
 	if (dtMap == NULL)
-		return "";
+		return false;
 
 	WTSDateHotMap::ConstIterator cit = dtMap->lower_bound(dt);
 	if (cit != dtMap->end())
@@ -481,4 +482,7 @@ void WTSHotMgr::release()
 		m_mapCustRules->release();
 		m_mapCustRules = NULL;
 	}
+
+	m_mapCustCodes.clear();
+	m_vecHotTags.clear();
 }

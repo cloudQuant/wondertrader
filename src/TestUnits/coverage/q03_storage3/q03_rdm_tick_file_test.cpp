@@ -83,6 +83,23 @@ protected:
 		return ret;
 	}
 
+	static vector<WTSBarStruct> flatten_bars(WTSKlineSlice* slice)
+	{
+		vector<WTSBarStruct> ret;
+		if(slice == NULL)
+			return ret;
+		for(std::size_t i = 0; i < slice->get_block_counts(); i++)
+		{
+			WTSBarStruct* addr = slice->get_block_addr(i);
+			uint32_t cnt = slice->get_block_size(i);
+			if(addr == NULL)
+				continue;
+			for(uint32_t k = 0; k < cnt; k++)
+				ret.push_back(addr[k]);
+		}
+		return ret;
+	}
+
 	static vector<WTSTickStruct> expect_of(const vector<WTSTickStruct>& src, std::size_t from, std::size_t to)
 	{
 		return vector<WTSTickStruct>(src.begin() + from, src.begin() + to);
@@ -398,28 +415,128 @@ TEST_F(Q03RdmTickTest, trading_date_override_routes_to_his_branch)
 	slice->release();
 }
 
-// ---------------------------------------------------------------- 缺陷回归（不进启用集）
-// BUG-Q03-001：RAW_V2 头之后只有 50 字节，不足一条 WTSBarStruct；该损坏历史文件
-// 应安全跳过并按无可用 bars 返回 NULL。当前实现 barcnt==0 后先 resize(0)，再向空 vector
-// 的 data() memcpy 50 字节，之后还可能访问 barcnt-1。隔离运行 exit 139、无栈，不能断言抛异常；
-// 本回归保持禁用，避免默认测试进程被崩溃打断。
-TEST_F(Q03RdmTickTest, DISABLED_his_kline_hot_fragment_returns_null)
+// ---------------------------------------------------------------- BUG-Q03-001：HOT 历史 K 线损坏块过滤
+// RAW/CMP 的 header-only、短于一根 bar、整根加尾数都应报错并整块跳过；
+// 正常 RAW/CMP 多 bar 控制必须完整回读。
+TEST_F(Q03RdmTickTest, his_kline_hot_rejects_fragmented_raw_and_cmp_blocks)
 {
 	RuleTagHotMgr hot;
-	RdmSink sink2{ &_bd, &hot };
+	RdmSink sink{ &_bd, &hot };
 	WtRdmDtReader reader;
-	reader.init(NULL, &sink2);
+	reader.init(NULL, &sink);
+	const string hotFile = "his/day/SHFE/SHFE.rb_HOT.dsb";
+	const vector<WTSBarStruct> oneBar(1, make_bar(20240105, 20240105, 11));
+	const vector<WTSBarStructOld> oneOldBar(1, make_old_bar(20240105, 20240105, 12));
+	BlockHeaderV2 emptyCmpHeader;
+	memset(&emptyCmpHeader, 0, sizeof(emptyCmpHeader));
+	memcpy(emptyCmpHeader._blk_flag, BLK_FLAG, FLAG_SIZE);
+	emptyCmpHeader._type = BT_HIS_Day;
+	emptyCmpHeader._version = BLOCK_VERSION_CMP_V2;
+	const string cmpHeaderOnly((const char*)&emptyCmpHeader, sizeof(emptyCmpHeader));
+	BlockHeader truncatedCmpHeader;
+	memset(&truncatedCmpHeader, 0, sizeof(truncatedCmpHeader));
+	memcpy(truncatedCmpHeader._blk_flag, BLK_FLAG, FLAG_SIZE);
+	truncatedCmpHeader._type = BT_HIS_Day;
+	truncatedCmpHeader._version = BLOCK_VERSION_CMP_V2;
+	const string cmpHeaderTooShort((const char*)&truncatedCmpHeader, sizeof(truncatedCmpHeader));
+	const vector<string> rawAndCompressedFragments = {
+		make_block(BT_HIS_Day, BLOCK_VERSION_RAW_V2, string()),
+		make_block(BT_HIS_Day, BLOCK_VERSION_RAW_V2, string(50, 'A')),
+		make_block(BT_HIS_Day, BLOCK_VERSION_RAW_V2, pack_bars(oneBar) + "x"),
+		cmpHeaderTooShort,
+		cmpHeaderOnly,
+		make_block(BT_HIS_Day, BLOCK_VERSION_CMP_V2, string()),
+		make_block(BT_HIS_Day, BLOCK_VERSION_CMP_V2, string(50, 'A')),
+		make_block(BT_HIS_Day, BLOCK_VERSION_CMP_V2, pack_bars(oneBar) + "x"),
+		make_block(BT_HIS_Day, BLOCK_VERSION_RAW, pack_old_bars(oneOldBar) + "x"),
+		make_block(BT_HIS_Day, BLOCK_VERSION_CMP, pack_old_bars(oneOldBar) + "x")
+	};
 
-	// SHFE.rb.HOT → _ruletag="HOT"，主力历史路径为 SHFE.rb_HOT.dsb。
-	string frag = make_block(BT_HIS_Day, BLOCK_VERSION_RAW_V2, string(50, 'A'));
-	ASSERT_TRUE(write_bytes("his/day/SHFE/SHFE.rb_HOT.dsb", frag));
+	for (std::size_t i = 0; i < rawAndCompressedFragments.size(); ++i)
+	{
+		reader.clearCache();
+		ASSERT_TRUE(write_bytes(hotFile, rawAndCompressedFragments[i]));
+		const uint32_t errorsBefore = sink.count_of(LL_ERROR);
+		WTSKlineSlice* slice = reader.readKlineSliceByRange("SHFE.rb.HOT", KP_DAY,
+			202401010000ull, 202401101500ull);
+		EXPECT_EQ(nullptr, slice) << "fragment case " << i;
+		if (slice != nullptr)
+			slice->release();
+		EXPECT_GT(sink.count_of(LL_ERROR), errorsBefore) << "fragment case " << i;
+	}
 
-	WTSKlineSlice* slice = reader.readKlineSliceByRange("SHFE.rb.HOT", KP_DAY,
-		202401010000ull, 202401101500ull);
-	EXPECT_EQ(nullptr, slice);
-	if (slice != nullptr)
+	for (uint16_t version : { (uint16_t)BLOCK_VERSION_RAW_V2, (uint16_t)BLOCK_VERSION_CMP_V2 })
+	{
+		reader.clearCache();
+		vector<WTSBarStruct> validBars;
+		validBars.push_back(make_bar(20240105, 20240105, 21));
+		validBars.push_back(make_bar(20240106, 20240106, 22));
+		ASSERT_TRUE(write_bytes(hotFile, make_block(BT_HIS_Day, version, pack_bars(validBars))));
+
+		const uint32_t errorsBefore = sink.count_of(LL_ERROR);
+		WTSKlineSlice* slice = reader.readKlineSliceByRange("SHFE.rb.HOT", KP_DAY,
+			202401010000ull, 202401101500ull);
+		ASSERT_NE(nullptr, slice) << "version " << version;
+		vector<WTSBarStruct> got = flatten_bars(slice);
+		ASSERT_EQ(got.size(), validBars.size()) << "version " << version;
+		EXPECT_EQ(got[0].date, validBars[0].date);
+		EXPECT_DOUBLE_EQ(got[0].open, validBars[0].open);
+		EXPECT_EQ(got[1].date, validBars[1].date);
+		EXPECT_DOUBLE_EQ(got[1].close, validBars[1].close);
+		EXPECT_EQ(sink.count_of(LL_ERROR), errorsBefore);
 		slice->release();
+	}
 	reader.clearCache();
+}
+
+TEST_F(Q03RdmTickTest, adjusted_stock_kline_rejects_fragments_and_reads_complete_raw_cmp)
+{
+	const string adjustedFile = "his/day/SSE/600000+.dsb";
+	const vector<WTSBarStruct> oneBar(1, make_bar(20240105, 20240105, 31));
+	// RAW_V2 只有头部是合法空层，reader 会回落读取基础 bars；正控见
+	// r94_rdm_bad_block_retry_test 的 range/count 用例，不列作损坏块。
+	const vector<string> fragments = {
+		make_block(BT_HIS_Day, BLOCK_VERSION_RAW_V2, string(50, 'A')),
+		make_block(BT_HIS_Day, BLOCK_VERSION_RAW_V2, pack_bars(oneBar) + "x"),
+		make_block(BT_HIS_Day, BLOCK_VERSION_CMP_V2, string(50, 'A')),
+		make_block(BT_HIS_Day, BLOCK_VERSION_CMP_V2, pack_bars(oneBar) + "x")
+	};
+
+	for (std::size_t i = 0; i < fragments.size(); ++i)
+	{
+		_reader.clearCache();
+		ASSERT_TRUE(write_bytes(adjustedFile, fragments[i]));
+		const uint32_t errorsBefore = _sink.count_of(LL_ERROR);
+		WTSKlineSlice* slice = _reader.readKlineSliceByRange("SSE.STK.600000+", KP_DAY,
+			202401010000ull, 202401101500ull);
+		EXPECT_EQ(nullptr, slice) << "fragment case " << i;
+		if (slice != nullptr)
+			slice->release();
+		EXPECT_GT(_sink.count_of(LL_ERROR), errorsBefore) << "fragment case " << i;
+	}
+
+	for (uint16_t version : { (uint16_t)BLOCK_VERSION_RAW_V2, (uint16_t)BLOCK_VERSION_CMP_V2 })
+	{
+		_reader.clearCache();
+		vector<WTSBarStruct> validBars;
+		validBars.push_back(make_bar(20240105, 20240105, 41));
+		validBars.push_back(make_bar(20240106, 20240106, 42));
+		ASSERT_TRUE(write_bytes(adjustedFile, make_block(BT_HIS_Day, version, pack_bars(validBars))));
+
+		const uint32_t errorsBefore = _sink.count_of(LL_ERROR);
+		WTSKlineSlice* slice = _reader.readKlineSliceByRange("SSE.STK.600000+", KP_DAY,
+			202401010000ull, 202401101500ull);
+		ASSERT_NE(nullptr, slice) << "version " << version;
+		vector<WTSBarStruct> got = flatten_bars(slice);
+		ASSERT_EQ(got.size(), validBars.size()) << "version " << version;
+		EXPECT_EQ(got[0].date, validBars[0].date);
+		EXPECT_DOUBLE_EQ(got[0].open, validBars[0].open);
+		EXPECT_EQ(got[1].date, validBars[1].date);
+		EXPECT_DOUBLE_EQ(got[1].close, validBars[1].close);
+		EXPECT_EQ(_sink.count_of(LL_ERROR), errorsBefore);
+		slice->release();
+	}
+	_reader.clearCache();
 }
 
 } // namespace q03

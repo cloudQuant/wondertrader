@@ -397,10 +397,10 @@ TEST_F(P10DayDsbTest, HeaderOnlyDayFileDecodesToEmptyPayload)
 	EXPECT_EQ(content.size(), 0u);
 }
 
-TEST_F(P10DayDsbTest, AppendingToHeaderOnlyDayFileMustPersistBarOrRejectWithoutMutation)
+TEST_F(P10DayDsbTest, AppendingToHeaderOnlyDayFilePersistsFirstBar)
 {
-	// A header-only file is decodable as empty history. A new bar must either be
-	// persisted on success or the operation must explicitly reject without mutation.
+	// A valid RAW_V2 header with an empty payload represents empty history, so
+	// appending the first bar must persist it.
 	const std::string file = day_file("rb2210");
 	std::filesystem::create_directories(std::filesystem::path(file).parent_path());
 	{
@@ -416,18 +416,13 @@ TEST_F(P10DayDsbTest, AppendingToHeaderOnlyDayFileMustPersistBarOrRejectWithoutM
 	const std::string before = p10_read_file(file);
 	ASSERT_EQ(before.size(), sizeof(BlockHeader));
 	WTSBarStruct bar = p10_make_bar(20240301, 5);
-	const bool wrote = _writer->dump_day_data(_ct, &bar);
+	ASSERT_TRUE(_writer->dump_day_data(_ct, &bar));
 	const std::string after = p10_read_file(file);
-
-	if (!wrote)
-	{
-		EXPECT_EQ(after, before) << "a rejected append must leave the empty history unchanged";
-		return;
-	}
 
 	ASSERT_EQ(after.size(), sizeof(BlockHeader) + sizeof(WTSBarStruct));
 	BlockHeader storedHeader;
 	std::memcpy(&storedHeader, after.data(), sizeof(storedHeader));
+	EXPECT_EQ(std::memcmp(storedHeader._blk_flag, BLK_FLAG, sizeof(storedHeader._blk_flag)), 0);
 	EXPECT_EQ(storedHeader._type, (uint16_t)BT_HIS_Day);
 	EXPECT_EQ(storedHeader._version, (uint16_t)BLOCK_VERSION_RAW_V2);
 
@@ -439,7 +434,38 @@ TEST_F(P10DayDsbTest, AppendingToHeaderOnlyDayFileMustPersistBarOrRejectWithoutM
 	EXPECT_EQ(storedBar.date, bar.date);
 	EXPECT_EQ(storedBar.time, bar.time);
 	EXPECT_DOUBLE_EQ(storedBar.open, bar.open);
+	EXPECT_DOUBLE_EQ(storedBar.high, bar.high);
+	EXPECT_DOUBLE_EQ(storedBar.low, bar.low);
 	EXPECT_DOUBLE_EQ(storedBar.close, bar.close);
+	EXPECT_DOUBLE_EQ(storedBar.settle, bar.settle);
+	EXPECT_DOUBLE_EQ(storedBar.money, bar.money);
+	EXPECT_DOUBLE_EQ(storedBar.vol, bar.vol);
+	EXPECT_DOUBLE_EQ(storedBar.hold, bar.hold);
+	EXPECT_DOUBLE_EQ(storedBar.add, bar.add);
+}
+
+TEST_F(P10DayDsbTest, DamagedDayFileIsPreservedOnAppend)
+{
+	const std::string file = day_file("rb2210");
+	std::filesystem::create_directories(std::filesystem::path(file).parent_path());
+	{
+		std::ofstream ofs(file.c_str(), std::ios::binary | std::ios::trunc);
+		BlockHeader hdr;
+		std::memset(&hdr, 0, sizeof(hdr));
+		p10_set_flag(hdr._blk_flag, sizeof(hdr._blk_flag));
+		std::memcpy(hdr._blk_flag, "WRONGFLG", sizeof(hdr._blk_flag));
+		hdr._type = BT_HIS_Day;
+		hdr._version = BLOCK_VERSION_RAW_V2;
+		const WTSBarStruct priorBar = p10_make_bar(20240229, 4);
+		ofs.write((const char*)&hdr, sizeof(hdr));
+		ofs.write((const char*)&priorBar, sizeof(priorBar));
+	}
+
+	const std::string before = p10_read_file(file);
+	ASSERT_EQ(before.size(), sizeof(BlockHeader) + sizeof(WTSBarStruct));
+	WTSBarStruct nextBar = p10_make_bar(20240301, 5);
+	EXPECT_FALSE(_writer->dump_day_data(_ct, &nextBar));
+	EXPECT_EQ(p10_read_file(file), before);
 }
 
 }  // namespace

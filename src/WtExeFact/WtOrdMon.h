@@ -27,6 +27,15 @@ typedef std::function<void(uint32_t)> EnumOrderCallback;
  */
 typedef std::function<void(uint32_t, uint64_t, bool)> EnumAllOrderCallback;
 
+/** @brief 超时扫描候选；generation 用于拒绝已删除或被复用 localid 的旧快照 */
+struct WtOrdMonTimeoutCandidate
+{
+	uint32_t localid;
+	uint64_t generation;
+};
+
+typedef std::function<void(uint32_t, uint64_t)> EnumOrderGenerationCallback;
+
 /**
  * @brief 订单监控器类
  * @details 负责管理和跟踪交易订单的状态，包括添加、移除、查询和超时检查等功能
@@ -59,6 +68,7 @@ public:
 	 */
 	inline bool has_order(uint32_t localid = 0)
 	{
+		StdLocker<StdRecurMutex> lock(_mtx_ords);
 		if (localid == 0)
 			return !_orders.empty();
 
@@ -71,12 +81,34 @@ public:
 
 		/**
 	 * @brief 检查超时订单
-	 * @details 检查监控器中的订单，如果超过指定时间则触发回调函数进行处理
+	 * @details 超时判断基于加锁时的订单快照，回调在解锁后执行；并发移除订单后，快照中的ID仍可能被回调。
 	 * @param expiresecs 订单超时时间（秒）
 	 * @param curTime 当前时间
 	 * @param callback 处理超时订单的回调函数
 	 */
 	void check_orders(uint32_t expiresecs, uint64_t curTime, EnumOrderCallback callback);
+
+	/**
+	 * @brief 按可控时间生成带代次的超时快照。
+	 * @details 回调仍在锁外执行；调用方必须用 mark_unverified_timeout 重新校验，
+	 *          不得直接把候选当作仍存活的订单。
+	 */
+	void check_orders_with_generation(uint32_t expiresecs, uint64_t curTime,
+		EnumOrderGenerationCallback callback);
+
+	/**
+	 * @brief 仅当候选仍对应同一条可撤订单时，将其转为不可验证超时状态。
+	 * @return 只有本次成功完成状态转移时返回 true。
+	 */
+	bool mark_unverified_timeout(uint32_t localid, uint64_t generation,
+		uint32_t expiresecs, uint64_t curTime);
+
+	/** @brief 查询执行单元生命周期内是否发生过无法验证身份的超时；不随 clear_orders 清除。 */
+	inline bool has_unverified_timeout()
+	{
+		StdLocker<StdRecurMutex> lock(_mtx_ords);
+		return _has_unverified_timeout;
+	}
 
 		/**
 	 * @brief 清空所有订单
@@ -84,23 +116,32 @@ public:
 	 */
 	inline void clear_orders()
 	{
+		StdLocker<StdRecurMutex> lock(_mtx_ords);
 		_orders.clear();
 	}
 
 		/**
 	 * @brief 枚举所有订单
-	 * @details 遍历监控器中的所有订单，并通过回调函数返回订单信息
+	 * @details 回调按加锁时复制的快照执行，回调期间可以安全地增删订单。
 	 * @param cb 处理订单信息的回调函数
 	 */
 	void enumOrder(EnumAllOrderCallback cb);
 
 private:
-	/** @brief 订单信息对，包含下单时间和是否可撤销 */
-	typedef std::pair<uint64_t, bool> OrderPair;	//uint64_t - entertime, bool - cancancel
+	/** @brief 订单信息包含创建时间、撤单能力和本地代次 */
+	struct OrderInfo
+	{
+		uint64_t enterTime{ 0 };
+		bool canCancel{ true };
+		uint64_t generation{ 0 };
+		bool unverifiedTimeout{ false };
+	};
 	/** @brief 订单ID映射表，本地订单ID到订单信息的映射 */
-	typedef std::unordered_map<uint32_t, OrderPair> IDMap;
+	typedef std::unordered_map<uint32_t, OrderInfo> IDMap;
 	/** @brief 订单集合，存储所有被监控的订单 */
 	IDMap			_orders;
+	uint64_t		_next_generation{ 1 };
+	bool			_has_unverified_timeout{ false };
 	/** @brief 互斥锁，用于保护订单集合的线程安全 */
 	StdRecurMutex	_mtx_ords;
 };

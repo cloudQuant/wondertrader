@@ -29,10 +29,6 @@ static const char* const K_STD = "XEX.rb.rb2409";
 //   → 命中 3 笔；切片：eIdx=2、首条 93015500 > 93000000 → cnt = 3
 // ---------------------------------------------------------------------------
 TEST_F(R21ReaderADTest, FirstTickRangeReadLoadsThreeTicksInActionTimeOrder)
-// R32 裁定：保持红。元素顺序断言的是"无缺陷时应有"的升序切片；现实现
-// WtRdmDtReaderAD.cpp:137-141 的 curTs 是指向 _ticks.front() 的引用，
-// `curTs = tickList._ticks.back();` 会把末笔整体覆写回 _ticks[0]（静默数据损坏）。
-// 缺陷登记见 bugs/R32_adstorage.md BUG-R32-001，不改断言凑绿。
 {
 	init_reader();
 
@@ -60,11 +56,10 @@ TEST_F(R21ReaderADTest, FirstTickRangeReadLoadsThreeTicksInActionTimeOrder)
 	}
 	slice->release();
 
-	// 首尾时间回填见 bugs/R21_adstorage.md R21-BUG-01：
-	// 实现在 :138/:141 把 offsetTime(HHMM) 与 SSsss 直接相加（少乘 100000），
-	// 所以日志里的区间是 交易日*1e9 + HHMM + SSsss
+	// 缓存边界与 WtDataWriterAD::pipeToTicks 的 LMDB key 同量纲：
+	// trading_date*1e9 + offsetTime(HHMM)*100000 + SSsss。
 	EXPECT_EQ(sink()->last_log(LL_DEBUG),
-		"3 ticks between [20240102000016430,20240102000016600] of XEX.rb.rb2409 loaded to cache");
+		"3 ticks between [20240102093015500,20240102110015500] of XEX.rb.rb2409 loaded to cache");
 	EXPECT_EQ(sink()->count_containing("Tick db of XEX.rb2409 opened"), 1u);
 	// 两个交易日边界都走 calcTradingDate(stdPID, 自然日, 偏移时间, false)
 	EXPECT_EQ(bd()->pid_seen(), "XEX.rb");
@@ -94,9 +89,9 @@ TEST_F(R21ReaderADTest, SingleTickWindowYieldsOneTickSliceAndEqualBoundaryTimes)
 	EXPECT_EQ(got->action_time, 93000000u);
 	slice->release();
 
-	// R21-BUG-01：正确应为 20240102093000000，这里实测是 20240102*1e9 + 930 + 0
+	// 单笔 tick 的首末边界都应与写入键一致。
 	EXPECT_EQ(sink()->last_log(LL_DEBUG),
-		"1 ticks between [20240102000000930,20240102000000930] of XEX.rb.rb2409 loaded to cache");
+		"1 ticks between [20240102093000000,20240102093000000] of XEX.rb.rb2409 loaded to cache");
 }
 
 // ---------------------------------------------------------------------------
@@ -142,6 +137,9 @@ TEST_F(R21ReaderADTest, RepeatReadSameWindowReturnsEachTickOnce)
 		}
 	}
 	second->release();
+	EXPECT_EQ(sink()->count_containing("Tick db of XEX.rb2409 opened"), 1u);
+	EXPECT_EQ(sink()->count_containing("prev ticks"), 0u);
+	EXPECT_EQ(sink()->count_containing("newer ticks"), 0u);
 
 }
 
@@ -149,15 +147,11 @@ TEST_F(R21ReaderADTest, RepeatReadSameWindowReturnsEachTickOnce)
 // bNeedOlder 分支：跨交易日往前取数，新数据前插、老数据后接
 // 库里 5 笔：交易日 20240101 两笔（3801@93020000、3802@93120000）
 //             交易日 20240102 三笔（3901@93015500、3902@100015500、3903@110015500）
+// 首次缓存边界与写入键一致：20240102093015500 / 20240102110015500
 // 第 1 次读 [20240102093000000, 20240102150000000] → 只载入 20240102 的 3 笔
 // 第 2 次读 [20240101093000000, 20240101150000000]：
-//   bNeedOlder = 20240101093000000 < 20240102000016430 → true
-//   bNeedNewer = 20240101150000000 > 20240102000016600 → false
-//   :152 rKey.time = _first_tick_time % 1e9 = 16430、date = 20240102
-//   :153 lKey = (20240101, 93000000) → 命中 20240101 的 2 笔（20240102 那三笔键更大，
-//        循环在 93015500 > 16430 处 break）→ _ticks = 5（新 2 在前）
-//   切片：eTick=(20240101,150000000) → lower_bound 落在下标 2（交易日更大）→ 回退到 1
-//         首条 93020000 > 93000000 → cnt = 2
+//   bNeedOlder = true；旧首 tick 的 LMDB key 作排他上界，因此只前插 20240101 的 2 笔
+//   bNeedNewer = false；缓存最后一笔仍为 20240102 的 110015500
 // ---------------------------------------------------------------------------
 TEST_F(R21ReaderADTest, OlderBranchPrependsPreviousTradingDayTicksAndSlicesTwo)
 {
@@ -189,24 +183,77 @@ TEST_F(R21ReaderADTest, OlderBranchPrependsPreviousTradingDayTicksAndSlicesTwo)
 	}
 	older->release();
 
-	// :174 同样是「少乘 100000」的量纲错误（R21-BUG-01）：应为 20240101093020000
 	EXPECT_EQ(sink()->last_log(LL_DEBUG), "2 prev ticks of XEX.rb.rb2409 loaded to cache");
-	EXPECT_EQ(sink()->count_containing("Tick db of XEX.rb2409 opened"), 2u);
+	EXPECT_EQ(sink()->count_containing("Tick db of XEX.rb2409 opened"), 1u);
+
+	WTSTickSlice* all = reader()->readTickSliceByRange(K_STD,
+		20240101093000000ull, 20240102150000000ull);
+	ASSERT_TRUE(all != NULL);
+	ASSERT_EQ(all->size(), 5u);
+	const double all_prices[5] = { 3801.0, 3802.0, 3901.0, 3902.0, 3903.0 };
+	const uint32_t all_dates[5] = { 20240101u, 20240101u, 20240102u, 20240102u, 20240102u };
+	const uint32_t all_times[5] = { 93020000u, 93120000u, 93015500u, 100015500u, 110015500u };
+	for (int32_t i = 0; i < 5; i++)
+	{
+		const WTSTickStruct* got = all->at(i);
+		ASSERT_TRUE(got != NULL);
+		EXPECT_DOUBLE_EQ(got->price, all_prices[i]);
+		EXPECT_EQ(got->action_date, all_dates[i]);
+		EXPECT_EQ(got->action_time, all_times[i]);
+	}
+	all->release();
+}
+
+TEST_F(R21ReaderADTest, NewerBranchAppendsOnlyTicksAfterCachedLastKey)
+{
+	init_reader();
+
+	std::vector<WTSTickStruct> ticks;
+	ticks.push_back(r21_make_tick(K_EXCHG, K_CODE, 20240101, 20240101, 93020000, 3801));
+	ticks.push_back(r21_make_tick(K_EXCHG, K_CODE, 20240101, 20240101, 93120000, 3802));
+	ticks.push_back(r21_make_tick(K_EXCHG, K_CODE, 20240102, 20240102, 93015500, 3901));
+	ticks.push_back(r21_make_tick(K_EXCHG, K_CODE, 20240102, 20240102, 100015500, 3902));
+	ticks.push_back(r21_make_tick(K_EXCHG, K_CODE, 20240102, 20240102, 110015500, 3903));
+	put_tick_db(K_EXCHG, K_CODE, ticks);
+
+	WTSTickSlice* warm = reader()->readTickSliceByRange(K_STD,
+		20240101093000000ull, 20240101150000000ull);
+	ASSERT_TRUE(warm != NULL);
+	ASSERT_EQ(warm->size(), 2u);
+	warm->release();
+
+	WTSTickSlice* newer = reader()->readTickSliceByRange(K_STD,
+		20240102093000000ull, 20240102150000000ull);
+	ASSERT_TRUE(newer != NULL);
+	ASSERT_EQ(newer->size(), 3u);
+	EXPECT_EQ(sink()->last_log(LL_DEBUG), "3 newer ticks of XEX.rb.rb2409 loaded to cache");
+	newer->release();
+
+	WTSTickSlice* all = reader()->readTickSliceByRange(K_STD,
+		20240101093000000ull, 20240102150000000ull);
+	ASSERT_TRUE(all != NULL);
+	ASSERT_EQ(all->size(), 5u);
+	const double want_prices[5] = { 3801.0, 3802.0, 3901.0, 3902.0, 3903.0 };
+	const uint32_t want_dates[5] = { 20240101u, 20240101u, 20240102u, 20240102u, 20240102u };
+	const uint32_t want_times[5] = { 93020000u, 93120000u, 93015500u, 100015500u, 110015500u };
+	for (int32_t i = 0; i < 5; i++)
+	{
+		const WTSTickStruct* got = all->at(i);
+		ASSERT_TRUE(got != NULL);
+		EXPECT_DOUBLE_EQ(got->price, want_prices[i]);
+		EXPECT_EQ(got->action_date, want_dates[i]);
+		EXPECT_EQ(got->action_time, want_times[i]);
+	}
+	all->release();
+	EXPECT_EQ(sink()->count_containing("Tick db of XEX.rb2409 opened"), 1u);
 }
 
 // ---------------------------------------------------------------------------
-// 切片下边界走 else 分支（:238-247）：首条动作时间恰好等于请求下边界
-// 键 93000000 / 93100000 / 93200000，请求 [20240102093000000, 20240102093100000]
-//   → 区间 [93000000, 93100000] 命中 2 笔（93200000 被 break 掉）
-//   → eTick.time = 93100000：lower_bound 落在下标 1，且 :224 的 `>=` 成立 → eIdx = 0
-//   → 首条 93000000 > 93000000 不成立 → 走 :238 再取一次 lower_bound → sIdx = 0
-//   → cnt = 0 - 0 + 1 = 1
+// 切片包含起始边界；结束时间放在第二笔之后，避免依赖结束边界等于 tick 时的约定。
+// 键 93000000 / 93100000 / 93200000，请求 [20240102093000000, 20240102093115000]
+//   → 区间从 93000000 开始，返回 93000000 与 93100000 两笔，排除 93200000。
 // ---------------------------------------------------------------------------
-TEST_F(R21ReaderADTest, SliceLowerBoundTakesSecondLookupWhenFirstTickEqualsWindowStart)
-// R32 裁定：保持红。元素顺序断言的是"无缺陷时应有"的升序切片；现实现
-// WtRdmDtReaderAD.cpp:137-141 的 curTs 是指向 _ticks.front() 的引用，
-// `curTs = tickList._ticks.back();` 会把末笔整体覆写回 _ticks[0]（静默数据损坏）。
-// 缺陷登记见 bugs/R32_adstorage.md BUG-R32-001，不改断言凑绿。
+TEST_F(R21ReaderADTest, SliceIncludesExactStartAndExcludesLaterTick)
 {
 	init_reader();
 
@@ -216,18 +263,22 @@ TEST_F(R21ReaderADTest, SliceLowerBoundTakesSecondLookupWhenFirstTickEqualsWindo
 	ticks.push_back(r21_make_tick(K_EXCHG, K_CODE, 20240102, 20240102, 93200000, 4003));
 	put_tick_db(K_EXCHG, K_CODE, ticks);
 
-	WTSTickSlice* slice = reader()->readTickSliceByRange(K_STD, 20240102093000000ull, 20240102093100000ull);
+	WTSTickSlice* slice = reader()->readTickSliceByRange(K_STD, 20240102093000000ull, 20240102093115000ull);
 	ASSERT_TRUE(slice != NULL);
-	EXPECT_EQ(slice->size(), 1u);
-	const WTSTickStruct* got = slice->at(0);
-	ASSERT_TRUE(got != NULL);
-	EXPECT_EQ(got->price, 4001.0);
-	EXPECT_EQ(got->action_time, 93000000u);
+	EXPECT_EQ(slice->size(), 2u);
+	const WTSTickStruct* first = slice->at(0);
+	ASSERT_TRUE(first != NULL);
+	EXPECT_EQ(first->price, 4001.0);
+	EXPECT_EQ(first->action_time, 93000000u);
+	const WTSTickStruct* second = slice->at(1);
+	ASSERT_TRUE(second != NULL);
+	EXPECT_EQ(second->price, 4002.0);
+	EXPECT_EQ(second->action_time, 93100000u);
 	slice->release();
 
-	// 缓存区间回填自首/尾两条：93000000 → 930+0，100000000 → 1000+0
+	// 缓存区间回填自首/尾两条，与 writer key 使用相同的时间缩放。
 	EXPECT_EQ(sink()->last_log(LL_DEBUG),
-		"2 ticks between [20240102000000930,20240102000001000] of XEX.rb.rb2409 loaded to cache");
+		"2 ticks between [20240102093000000,20240102093100000] of XEX.rb.rb2409 loaded to cache");
 }
 
 // ---------------------------------------------------------------------------
@@ -317,10 +368,6 @@ TEST_F(R21ReaderADTest, RepeatedWindowReadsPreserveTickData)
 // rb2409 两笔（交易日 20240102）与 rb2410 一笔（交易日 20240102）互不串味
 // ---------------------------------------------------------------------------
 TEST_F(R21ReaderADTest, EachCodeHasItsOwnTickDbAndDoesNotLeakKeys)
-// R32 裁定：保持红。元素顺序断言的是"无缺陷时应有"的升序切片；现实现
-// WtRdmDtReaderAD.cpp:137-141 的 curTs 是指向 _ticks.front() 的引用，
-// `curTs = tickList._ticks.back();` 会把末笔整体覆写回 _ticks[0]（静默数据损坏）。
-// 缺陷登记见 bugs/R32_adstorage.md BUG-R32-001，不改断言凑绿。
 {
 	init_reader();
 
@@ -348,6 +395,16 @@ TEST_F(R21ReaderADTest, EachCodeHasItsOwnTickDbAndDoesNotLeakKeys)
 
 	EXPECT_TRUE(std::filesystem::exists(_root / "ticks" / "XEX" / "rb2409"));
 	EXPECT_TRUE(std::filesystem::exists(_root / "ticks" / "XEX" / "rb2410"));
+
+	WTSTickSlice* repeated = reader()->readTickSliceByRange("XEX.rb.rb2409",
+		20240102093000000ull, 20240102150000000ull);
+	ASSERT_TRUE(repeated != NULL);
+	ASSERT_EQ(repeated->size(), 2u);
+	EXPECT_EQ(repeated->at(0)->price, 7001.0);
+	EXPECT_EQ(repeated->at(1)->price, 7002.0);
+	repeated->release();
+	EXPECT_EQ(sink()->count_containing("Tick db of XEX.rb2409 opened"), 1u);
+	EXPECT_EQ(sink()->count_containing("Tick db of XEX.rb2410 opened"), 1u);
 }
 
 // ---------------------------------------------------------------------------
@@ -359,8 +416,10 @@ TEST_F(R21ReaderADTest, TickSliceByCountReturnsSeededTicks)
 	init_reader();
 
 	std::vector<WTSTickStruct> ticks;
+	ticks.push_back(r21_make_tick(K_EXCHG, K_CODE, 20240102, 20240102, 92915500, 8100));
 	ticks.push_back(r21_make_tick(K_EXCHG, K_CODE, 20240102, 20240102, 93015500, 8101));
 	ticks.push_back(r21_make_tick(K_EXCHG, K_CODE, 20240102, 20240102, 93045500, 8102));
+	ticks.push_back(r21_make_tick(K_EXCHG, K_CODE, 20240102, 20240102, 150115500, 8103));
 	put_tick_db(K_EXCHG, K_CODE, ticks);
 
 	WTSTickSlice* slice = reader()->readTickSliceByCount(K_STD, 2, 20240102150000000ull);
@@ -387,6 +446,7 @@ TEST_F(R21ReaderADTest, TickSliceByDateReturnsSeededTicks)
 	std::vector<WTSTickStruct> ticks;
 	ticks.push_back(r21_make_tick(K_EXCHG, K_CODE, 20240102, 20240102, 93015500, 8201));
 	ticks.push_back(r21_make_tick(K_EXCHG, K_CODE, 20240102, 20240102, 93045500, 8202));
+	ticks.push_back(r21_make_tick(K_EXCHG, K_CODE, 20240103, 20240103, 93015500, 8203));
 	put_tick_db(K_EXCHG, K_CODE, ticks);
 
 	WTSTickSlice* slice = reader()->readTickSliceByDate(K_STD, 20240102);
@@ -411,30 +471,48 @@ TEST_F(R21ReaderADTest, KlineSliceByCountReturnsSeededDayBars)
 	init_reader();
 
 	std::vector<WTSBarStruct> bars;
+	// r21_make_bar 的 close = base + 1；截至 Jan 4 的最近两根是 Jan 3/4，收盘价 93/94。
 	bars.push_back(r21_make_bar(20240102, 20240102, 91.0));
 	bars.push_back(r21_make_bar(20240103, 20240103, 92.0));
+	bars.push_back(r21_make_bar(20240104, 20240104, 93.0));
+	bars.push_back(r21_make_bar(20240105, 20240105, 94.0));
 	put_bar_db("day", K_EXCHG, K_CODE, bars, true);
 
 	WTSKlineSlice* slice = reader()->readKlineSliceByCount(
-		K_STD, KP_DAY, 2, 202401031500ull);
+		K_STD, KP_DAY, 2, 202401041500ull);
 	ASSERT_TRUE(slice != NULL);
 	EXPECT_EQ(slice->size(), 2);
 	EXPECT_GT(slice->get_block_counts(), 0u);
 	if (slice->size() == 2 && slice->get_block_counts() > 0)
 	{
-		const double want_closes[2] = { 92.0, 93.0 };
+		const double want_closes[2] = { 93.0, 94.0 };
 		for (int32_t i = 0; i < 2; i++)
 		{
 			const WTSBarStruct* got = slice->at(i);
 			EXPECT_TRUE(got != NULL);
 			if (got != NULL)
 			{
-				EXPECT_EQ(got->date, (uint32_t)(20240102 + i));
+				EXPECT_EQ(got->date, (uint32_t)(20240103 + i));
 				EXPECT_DOUBLE_EQ(got->close, want_closes[i]);
 			}
 		}
 	}
 	slice->release();
+
+	// 截止日期恰为 Jan 3：按日线日期闭合包含 Jan 3，同时排除 Jan 4。
+	WTSKlineSlice* exactEnd = reader()->readKlineSliceByCount(
+		K_STD, KP_DAY, 2, 202401031500ull);
+	ASSERT_TRUE(exactEnd != NULL);
+	ASSERT_EQ(exactEnd->size(), 2);
+	const WTSBarStruct* exactFirst = exactEnd->at(0);
+	const WTSBarStruct* exactLast = exactEnd->at(1);
+	ASSERT_TRUE(exactFirst != NULL);
+	ASSERT_TRUE(exactLast != NULL);
+	EXPECT_EQ(exactFirst->date, 20240102u);
+	EXPECT_DOUBLE_EQ(exactFirst->close, 92.0);
+	EXPECT_EQ(exactLast->date, 20240103u);
+	EXPECT_DOUBLE_EQ(exactLast->close, 93.0);
+	exactEnd->release();
 }
 
 // AD reader 是否承诺读取逐笔委托/队列/成交明细尚未确认；不把 NULL 固定为正确结果。
@@ -454,14 +532,9 @@ TEST_F(R21ReaderADTest, DISABLED_TransactionRangeSupportNeedsContract)
 }
 
 // ---------------------------------------------------------------------------
-// 缺陷用例（禁用，见 bugs/R21_adstorage.md R21-BUG-06）：
-// 区间内一条 tick 都没有时，:216 直接对空 vector 取 &v[0]，
-// 且 :216/:238 的上界写成 size()-1（size 为 0 时下溢成 SIZE_MAX-1）→
-// 解引用空指针 / 越界比较，读取一个不存在合约或空库必崩。
-// 触发条件：readTickSliceByRange("XEX.rb.rb2499", 有数据的交易日, ...) 且
-//          {base}ticks/XEX/rb2499 里没有落在 [stime,etime] 的任何键。
+// 区间内没有匹配 tick 时返回 NULL，不解引用空 vector，也不对边界迭代器回退。
 // ---------------------------------------------------------------------------
-TEST_F(R21ReaderADTest, DISABLED_TickWindowWithoutAnyMatchedRecordReadsBackOfEmptyVector)
+TEST_F(R21ReaderADTest, TickWindowWithoutAnyMatchedRecordReturnsNull)
 {
 	init_reader();
 
@@ -469,7 +542,7 @@ TEST_F(R21ReaderADTest, DISABLED_TickWindowWithoutAnyMatchedRecordReadsBackOfEmp
 	ticks.push_back(r21_make_tick(K_EXCHG, K_CODE, 20240102, 20240102, 93015500, 3901));
 	put_tick_db(K_EXCHG, K_CODE, ticks);
 
-	// rb2499 从未落库：get_t_db 会自建目录并返回可用句柄 → cnt=0 → :216 崩
+	// rb2499 从未落库：get_t_db 会自建目录并返回可用句柄，查询结果为空。
 	WTSTickSlice* slice = reader()->readTickSliceByRange("XEX.rb.rb2499",
 		20240102093000000ull, 20240102150000000ull);
 	if (slice != NULL)
@@ -478,26 +551,41 @@ TEST_F(R21ReaderADTest, DISABLED_TickWindowWithoutAnyMatchedRecordReadsBackOfEmp
 }
 
 // ---------------------------------------------------------------------------
-// 缺陷用例（禁用，见 bugs/R21_adstorage.md R21-BUG-12）：
-// :445 的 create_directories 未带 error_code 重载，
-// 路径被同名普通文件占用时抛 boost::filesystem_error 且无人接 →
-// 从 readTickSliceByRange 穿出调用栈（上层一般是策略/服务线程）→ std::terminate。
-// 触发条件：预先把 {base}ticks/{exchg}/{code} 建成一个普通文件，再读该合约。
+// 文件占用 tick 数据库目录时返回空结果并记录路径/错误；修复路径后同一 reader 可重试。
 // ---------------------------------------------------------------------------
-TEST_F(R21ReaderADTest, DISABLED_TickDbPathOccupiedByRegularFileThrowsOutOfReadTickSlice)
+TEST_F(R21ReaderADTest, TickDbPathOccupiedByRegularFileReturnsNullAndAllowsRetry)
 {
 	init_reader();
 
-	const std::filesystem::path occupied = _root / "ticks" / "XEX" / "rb2409";
+	const std::filesystem::path occupied = _root / "ticks" / "XEX";
 	std::filesystem::create_directories(occupied.parent_path());
 	{
 		std::ofstream fout(occupied);
 		fout << "not a directory";
 	}
 
-	WTSTickSlice* slice = reader()->readTickSliceByRange(K_STD,
+	WTSTickSlice* failed = NULL;
+	EXPECT_NO_THROW(failed = reader()->readTickSliceByRange(K_STD,
+		20240102093000000ull, 20240102150000000ull));
+	EXPECT_EQ(failed, nullptr);
+	const std::string error = sink()->last_log(LL_ERROR);
+	EXPECT_NE(error.find("Creating tick db directory"), std::string::npos);
+	EXPECT_NE(error.find(occupied.string()), std::string::npos);
+	const std::size_t failedPos = error.find("failed:");
+	ASSERT_NE(failedPos, std::string::npos);
+	EXPECT_NE(error.find_first_not_of(" \t", failedPos + 7), std::string::npos);
+
+	std::error_code ec;
+	EXPECT_TRUE(std::filesystem::remove(occupied, ec));
+	EXPECT_FALSE(ec);
+	std::vector<WTSTickStruct> ticks{
+		r21_make_tick(K_EXCHG, K_CODE, 20240102, 20240102, 93015500, 6001)};
+	put_tick_db(K_EXCHG, K_CODE, ticks);
+	WTSTickSlice* recovered = reader()->readTickSliceByRange(K_STD,
 		20240102093000000ull, 20240102150000000ull);
-	if (slice != NULL)
-		slice->release();
-	EXPECT_EQ(slice, nullptr);
+	ASSERT_NE(recovered, nullptr);
+	ASSERT_EQ(recovered->size(), 1u);
+	EXPECT_DOUBLE_EQ(recovered->at(0)->price, 6001.0);
+	recovered->release();
+	EXPECT_EQ(sink()->count_containing("Tick db of XEX.rb2409 opened"), 1u);
 }

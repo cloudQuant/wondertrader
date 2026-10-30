@@ -6,10 +6,11 @@
 #include <API/CTP6.3.15/ThostFtdcTraderApi.h>
 #endif
 #include "../Share/StdUtils.hpp"
-#include "../Share/SpinMutex.hpp"
 #include "../Includes/LoaderDef.hpp"
 
 #include <functional>
+#include <condition_variable>
+#include <mutex>
 #include <queue>
 #include <boost/thread.hpp>
 
@@ -21,12 +22,7 @@ class CTraderSpi : public CThostFtdcTraderSpi
 {
 public:
 	CTraderSpi():_stopped(false){}
-	~CTraderSpi()
-	{
-		_stopped = true;
-		if (_worker)
-			_worker->join();
-	}
+	~CTraderSpi();
 
 public:
 	///当客户端与交易后台建立起通信连接时（还未登录前）,该方法被调用。
@@ -71,12 +67,17 @@ private:
 	void LoadFromJson();
 
 	void AppendQuery(const QueryTask& task);
+	void RunQueryWorker();
+	bool IsQueryQueueEmpty();
 
 private:
+	friend struct CTraderSpiQueueTestAccess;
+
 	int		_trading_day;
 
 	std::queue<QueryTask>	_queries;
-	SpinMutex		_mtx;
+	std::mutex		_mtx;
+	std::condition_variable	_query_ready;
 	std::shared_ptr<boost::thread>	_worker;
 	bool			_stopped;
 };

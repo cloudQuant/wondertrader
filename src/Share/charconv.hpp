@@ -28,6 +28,81 @@
 #include <iconv.h>
 #endif
 
+#ifndef _MSC_VER
+namespace wt_charconv_detail
+{
+inline iconv_t invalidDescriptor()
+{
+	return (iconv_t)-1;
+}
+
+inline bool isValidDescriptor(iconv_t descriptor)
+{
+	return descriptor != invalidDescriptor();
+}
+
+class IconvDescriptor
+{
+public:
+	explicit IconvDescriptor(iconv_t descriptor) : _descriptor(descriptor) {}
+	~IconvDescriptor()
+	{
+		if (isValidDescriptor(_descriptor))
+			iconv_close(_descriptor);
+	}
+
+	bool valid() const { return isValidDescriptor(_descriptor); }
+	iconv_t get() const { return _descriptor; }
+
+private:
+	iconv_t _descriptor;
+	IconvDescriptor(const IconvDescriptor&);
+	IconvDescriptor& operator=(const IconvDescriptor&);
+};
+
+// Reserve one byte for the trailing NUL. On an invalid/incomplete source or
+// E2BIG, preserve any converted prefix and terminate it within the caller's
+// capacity. This seam also lets tests exercise small destination capacities.
+inline bool convertAndTerminate(iconv_t descriptor, const char* source,
+	std::size_t sourceLength, char* destination, std::size_t destinationCapacity)
+{
+	if (destination == NULL || destinationCapacity == 0)
+		return false;
+	destination[0] = '\0';
+	if (!isValidDescriptor(descriptor))
+		return false;
+	if (sourceLength == 0)
+		return true;
+	if (source == NULL)
+		return false;
+
+	char* inputCursor = const_cast<char*>(source);
+	std::size_t inputRemaining = sourceLength;
+	char* outputCursor = destination;
+	std::size_t outputRemaining = destinationCapacity - 1;
+	const std::size_t result = iconv(descriptor, &inputCursor, &inputRemaining,
+		&outputCursor, &outputRemaining);
+	const std::size_t convertedLength = (destinationCapacity - 1) - outputRemaining;
+	destination[convertedLength] = '\0';
+	return result != static_cast<std::size_t>(-1) && inputRemaining == 0;
+}
+
+inline bool convert(const char* destinationEncoding, const char* sourceEncoding,
+	const char* source, std::size_t sourceLength, char* destination,
+	std::size_t destinationCapacity)
+{
+	if (destination == NULL || destinationCapacity == 0)
+		return false;
+	destination[0] = '\0';
+	IconvDescriptor descriptor(iconv_open(destinationEncoding, sourceEncoding));
+	if (!descriptor.valid())
+		return false;
+	return convertAndTerminate(descriptor.get(), source, sourceLength,
+		destination, destinationCapacity);
+}
+}
+#endif
+
 /**
  * @brief UTF-8编码字符串转换为本地编码的工具类
  * 
@@ -115,17 +190,9 @@ public :
 			t_string[string_len * 2 + 1] = 0;
 			delete[] buffer;
 #else
-			iconv_t cd;
 			t_string = new char[dst_len];
-			char* p = t_string;
-			cd = iconv_open("gb2312", "utf-8");
-			if (cd != 0)
-			{
-				memset(t_string, 0, dst_len);
-				iconv(cd, (char**)&utf8_string, &string_len, &p, &dst_len);
-				iconv_close(cd);
-				t_string[dst_len] = '\0';
-			}
+			wt_charconv_detail::convert("gb2312", "utf-8", utf8_string,
+				string_len, t_string, dst_len);
 #endif
 		}
 	}
@@ -185,7 +252,7 @@ private :
 	 * @details 当为true时，表示转换过程中分配了新内存，需要在析构函数中释放内存。
 	 * 当为false时，表示t_string指向原始字符串或字符串常量，不需要释放内存。
 	 */
-	bool needFree;
+	bool needFree = false;
 
 	//
 	// helper utility to test if a string contains only ASCII characters
@@ -290,16 +357,9 @@ public :
 			if (w_string != (wchar_t *)t_string)
 				delete[] w_string;
 #else
-			iconv_t cd;
 			utf8_string = new char[dst_len];
-			char* p = utf8_string;
-			cd = iconv_open("utf-8", "gb2312");
-			if (cd != 0)
-			{
-				memset(utf8_string, 0, dst_len);
-				iconv(cd, (char**)&t_string, &string_len, &p, &dst_len);
-				iconv_close(cd);
-			}
+			wt_charconv_detail::convert("utf-8", "gb2312", t_string,
+				string_len, utf8_string, dst_len);
 #endif
 		}
 	}
@@ -359,7 +419,7 @@ private :
 	 * @details 当为true时，表示转换过程中分配了新内存，需要在析构函数中释放内存。
 	 * 当为false时，表示utf8_string指向原始字符串或字符串常量，不需要释放内存。
 	 */
-	bool needFree;
+	bool needFree = false;
 
 	//
 	// helper utility to test if a string contains only ASCII characters
@@ -555,28 +615,28 @@ public:
 	 * 1. 0x00~0x7F的字符是单字节编码，与ASCII兼容
 	 * 2. 0x81~0xFE范围内的字节开头，后跟0x40~0xFE范围内的字节（但不能是0xF7）组成双字节编码
 	 * 
-	 * 只要发现符合GBK编码规则的双字节序列，就认为整个字符串是GBK编码。
+	 * 只要发现符合GBK编码规则的双字节序列，就认为数据包含GBK编码。
+	 * 遇到不完整或不符合规则的高位字节时按一个字节继续扫描。
 	 */
 	static bool isGBK(unsigned char* data, std::size_t len) {
+		if (data == NULL || len == 0)
+			return false;
+
 		std::size_t i = 0;
 		while (i < len) {
 			if (data[i] <= 0x7f) {
 				//编码小于等于127,只有一个字节的编码，兼容ASCII
-				i++;
+				++i;
 				continue;
 			}
-			else {
-				//大于127的使用双字节编码
-				if (data[i] >= 0x81 &&
-					data[i] <= 0xfe &&
-					data[i + 1] >= 0x40 &&
-					data[i + 1] <= 0xfe &&
-					data[i + 1] != 0xf7) 
-				{
-					//如果有GBK编码的，就算整个字符串都是GBK编码
-					return true;
-				}
+
+			// A GBK lead byte must have a following byte inside the logical input.
+			// On any invalid pair, advance one byte so scanning always progresses.
+			if (data[i] >= 0x81 && data[i] <= 0xfe && i + 1 < len &&
+				data[i + 1] >= 0x40 && data[i + 1] <= 0xfe && data[i + 1] != 0xf7) {
+				return true;
 			}
+			++i;
 		}
 		return false;
 	}
@@ -622,48 +682,59 @@ public:
 	 * @return bool 如果数据是UTF-8编码返回true，否则返回false
 	 * 
 	 * @details 该方法通过检查字节序列是否符合UTF-8编码规范来判断数据是否为UTF-8编码。
-	 * UTF-8编码中字符的字节模式如下：
-	 * 1. 0xxx_xxxx：单字节ASCII字符
-	 * 2. 110x_xxxx 10xx_xxxx：双字节字符
-	 * 3. 1110_xxxx 10xx_xxxx 10xx_xxxx：三字节字符
-	 * 4. 1111_0xxx 10xx_xxxx 10xx_xxxx 10xx_xxxx：四字节字符
-	 * 5. 1111_10xx 10xx_xxxx 10xx_xxxx 10xx_xxxx 10xx_xxxx：五字节字符
-	 * 6. 1111_110x 10xx_xxxx 10xx_xxxx 10xx_xxxx 10xx_xxxx 10xx_xxxx：六字节字符
-	 * 
-	 * 方法判断字符串中的字节序列是否符合这些模式，特别检测多字节字符的后续字节是否都以10开头。
+	 * UTF-8 只使用 1 到 4 字节编码 Unicode 标量值。除检查续字节外，
+	 * 还拒绝过长编码、代理项以及大于 U+10FFFF 的码点。
 	 */
 	static bool isUtf8(unsigned char* data, std::size_t len) {
-		int num = 0;
+		if (len == 0)
+			return true;
+		if (data == NULL)
+			return false;
+
 		std::size_t i = 0;
 		while (i < len) {
-			if ((data[i] & 0x80) == 0x00) 
-			{
-				// 0XXX_XXXX
-				i++;
+			const unsigned char lead = data[i];
+			if (lead <= 0x7F) {
+				++i;
 				continue;
 			}
-			else if ((num = preNUm(data[i])) > 2) 
-			{
-				// 110X_XXXX 10XX_XXXX
-				// 1110_XXXX 10XX_XXXX 10XX_XXXX
-				// 1111_0XXX 10XX_XXXX 10XX_XXXX 10XX_XXXX
-				// 1111_10XX 10XX_XXXX 10XX_XXXX 10XX_XXXX 10XX_XXXX
-				// 1111_110X 10XX_XXXX 10XX_XXXX 10XX_XXXX 10XX_XXXX 10XX_XXXX
-				// preNUm() 返回首个字节8个bits中首bit前面1bit的个数，该数量也是该字符所使用的字节数        
-				i++;
-				for (int j = 0; j < num - 1; j++) {
-					//判断后面num - 1 个字节是不是都是10开
-					if ((data[i] & 0xc0) != 0x80) {
-						return false;
-					}
-					i++;
-				}
+
+			std::size_t continuationCount = 0;
+			unsigned char secondMin = 0x80;
+			unsigned char secondMax = 0xBF;
+			if (lead >= 0xC2 && lead <= 0xDF) {
+				continuationCount = 1;
 			}
-			else 
-			{
-				//其他情况说明不是utf-8
+			else if (lead >= 0xE0 && lead <= 0xEF) {
+				continuationCount = 2;
+				if (lead == 0xE0)
+					secondMin = 0xA0; // 禁止过长三字节编码
+				else if (lead == 0xED)
+					secondMax = 0x9F; // 排除 UTF-16 代理项
+			}
+			else if (lead >= 0xF0 && lead <= 0xF4) {
+				continuationCount = 3;
+				if (lead == 0xF0)
+					secondMin = 0x90; // 禁止过长四字节编码
+				else if (lead == 0xF4)
+					secondMax = 0x8F; // 最大码点为 U+10FFFF
+			}
+			else {
 				return false;
 			}
+
+			// Check the logical input boundary before reading any continuation byte.
+			if (len - i <= continuationCount)
+				return false;
+
+			const unsigned char second = data[i + 1];
+			if (second < secondMin || second > secondMax)
+				return false;
+			for (std::size_t j = 2; j <= continuationCount; ++j) {
+				if ((data[i + j] & 0xC0) != 0x80)
+					return false;
+			}
+			i += continuationCount + 1;
 		}
 		return true;
 	}

@@ -1,8 +1,9 @@
 /*
  * r105_parserfemas_api_test.cpp — lane R105：ParserFemas 的「有厂商 API」半边
  *
- * ParserFemas::init() 走 DLLHelper::load_library + dlsym（ParserFemas.cpp:109-131），
- * 本机没有可 dlopen 的 USTPmduserapiAF，init 末尾必然空指针调用（BUG-T3-001）。
+ * ParserFemas::init() 走 DLLHelper::load_library + dlsym（ParserFemas.cpp:109-150），
+ * 本机没有可 dlopen 的 USTPmduserapiAF；在线路径因此通过测试侧假 API 覆盖，
+ * 并以不存在的模块名覆盖实际 load_library 失败。
  * 因此这里用测试侧白盒（#define private public，仅本 TU）把 m_pUserAPI 指向
  * r105_femas_api_stub.h 的可控空实现，再通过公开的 connect/subscribe 与
  * OnFront / OnRsp / OnRtn 回调驱动成功/失败/空数据分支。
@@ -47,6 +48,11 @@ USING_NS_WTP;
 namespace {
 
 namespace fs = std::filesystem;
+
+CUstpFtdcMduserApi* return_null_femas_api(const char*)
+{
+	return NULL;
+}
 
 struct R105FemasTempDir
 {
@@ -189,13 +195,15 @@ protected:
 			comm_->release();
 	}
 
-	WTSVariant* makeCfg(const std::string& flowdir)
+	WTSVariant* makeCfg(const std::string& flowdir, const std::string& module = "")
 	{
-		const std::string content = "front: tcp://127.0.0.1:1\n"
+		std::string content = "front: tcp://127.0.0.1:1\n"
 									"broker: 9999\n"
 									"user: r105\n"
 									"pass: secret\n"
 									"flowdir: " + flowdir + "\n";
+		if (!module.empty())
+			content += "ctpmodule: " + module + "\n";
 		return WTSCfgLoader::load_from_content(content, true);
 	}
 
@@ -260,6 +268,7 @@ TEST_F(R105FemasTest, injected_api_connect_login_and_do_subscribe)
 
 	api_.trading_day = "20260301";
 	parser_.OnRspUserLogin(NULL, NULL, 1, true);
+	EXPECT_EQ(1, api_.trading_day_calls);
 	ASSERT_EQ(2u, sink_.events.size());
 	EXPECT_EQ((int)WPE_Login, sink_.events[1].e);
 	ASSERT_EQ(1, api_.sub_calls);
@@ -285,6 +294,18 @@ TEST_F(R105FemasTest, is_connected_tracks_front_connection_callbacks)
 	EXPECT_FALSE(parser_.isConnected());
 
 	EXPECT_TRUE(parser_.disconnect());
+	EXPECT_EQ(1, api_.release_calls);
+	EXPECT_FALSE(parser_.isConnected());
+}
+
+TEST_F(R105FemasTest, release_clears_connection_state)
+{
+	ASSERT_TRUE(parser_.connect());
+	parser_.OnFrontConnected();
+	ASSERT_TRUE(parser_.isConnected());
+
+	parser_.release();
+
 	EXPECT_EQ(1, api_.release_calls);
 	EXPECT_FALSE(parser_.isConnected());
 }
@@ -325,6 +346,65 @@ TEST_F(R105FemasTest, login_failure_and_inline_subscribe_branches)
 	parser_.m_pUserAPI = &api_;
 }
 
+TEST_F(R105FemasTest, subscribe_handles_500_and_501_contracts)
+{
+	parser_.m_uTradingDate = 20260301;
+	for (const size_t count : {size_t(500), size_t(501)})
+	{
+		CodeSet codes;
+		std::set<std::string> expected;
+		for (size_t i = 0; i < count; ++i)
+		{
+			const std::string code = "m" + std::to_string(i);
+			codes.insert(code);
+			expected.insert(code);
+		}
+
+		api_.sub_codes.clear();
+		parser_.subscribe(codes);
+		EXPECT_EQ(static_cast<int>(count), api_.sub_count);
+		EXPECT_EQ(expected, api_.sub_codes);
+	}
+	EXPECT_EQ(2, api_.sub_calls);
+}
+
+TEST_F(R105FemasTest, login_error_is_reported_without_login_or_subscribe)
+{
+	CodeSet codes;
+	codes.insert("DCE.m2401");
+	parser_.subscribe(codes);
+
+	CUstpFtdcRspInfoField rsp;
+	std::memset(&rsp, 0, sizeof(rsp));
+	rsp.ErrorID = 1001;
+	std::strncpy(rsp.ErrorMsg, "invalid credentials", sizeof(rsp.ErrorMsg) - 1);
+	parser_.OnRspUserLogin(NULL, &rsp, 1, true);
+
+	EXPECT_EQ(0u, parser_.m_uTradingDate);
+	EXPECT_EQ(0, api_.trading_day_calls);
+	EXPECT_EQ(0, api_.sub_calls);
+	EXPECT_TRUE(sink_.events.empty());
+	EXPECT_TRUE(sink_.hasLog("Response error: 1001"));
+}
+
+TEST_F(R105FemasTest, zero_error_login_response_still_logs_in_and_subscribes)
+{
+	CodeSet codes;
+	codes.insert("DCE.m2401");
+	parser_.subscribe(codes);
+
+	CUstpFtdcRspInfoField rsp;
+	std::memset(&rsp, 0, sizeof(rsp));
+	api_.trading_day = "20260301";
+	parser_.OnRspUserLogin(NULL, &rsp, 1, true);
+
+	EXPECT_EQ(20260301u, parser_.m_uTradingDate);
+	EXPECT_EQ(1, api_.trading_day_calls);
+	EXPECT_EQ(1, api_.sub_calls);
+	ASSERT_EQ(1u, sink_.events.size());
+	EXPECT_EQ((int)WPE_Login, sink_.events[0].e);
+}
+
 /* ParserFemas.cpp:96-117 — flowdir 父路径是普通文件时 init 抛异常，不触发厂商空指针 */
 TEST_F(R105FemasTest, init_flowdir_creation_failure_throws_before_vendor_symbol)
 {
@@ -342,6 +422,39 @@ TEST_F(R105FemasTest, init_flowdir_creation_failure_throws_before_vendor_symbol)
 	EXPECT_THROW(bare.init(cfg), std::filesystem::filesystem_error);
 	EXPECT_FALSE(bare.isConnected());
 	cfg->release();
+}
+
+TEST_F(R105FemasTest, init_missing_module_fails_and_release_is_repeatable)
+{
+	R105FemasTempDir tmp;
+	ASSERT_FALSE(tmp.path.empty());
+	WTSVariant* cfg = makeCfg(tmp.path + "/flow", "R105DefinitelyMissingFemasModule");
+	ASSERT_NE(nullptr, cfg);
+
+	ParserFemas bare;
+	EXPECT_FALSE(bare.init(cfg));
+	EXPECT_FALSE(bare.isConnected());
+	EXPECT_EQ(nullptr, bare.m_hInst);
+	EXPECT_NO_THROW(bare.release());
+	EXPECT_NO_THROW(bare.release());
+	cfg->release();
+}
+
+TEST_F(R105FemasTest, creator_symbol_and_null_factory_fail_without_api)
+{
+	ParserFemas bare;
+	bare.registerSpi(&sink_);
+	int library_token = 0;
+	const DllHandle library = &library_token;
+
+	EXPECT_FALSE(bare.createUserApi(NULL, NULL, "/tmp/r105"));
+	EXPECT_FALSE(bare.createUserApi(library, NULL, "/tmp/r105"));
+	EXPECT_FALSE(bare.createUserApi(library, &return_null_femas_api, "/tmp/r105"));
+	EXPECT_EQ(nullptr, bare.m_pUserAPI);
+	EXPECT_EQ(nullptr, bare.m_hInst);
+	EXPECT_TRUE(sink_.hasLog("Failed to load market data module"));
+	EXPECT_TRUE(sink_.hasLog("Failed to find Femas market data API creator symbol"));
+	EXPECT_TRUE(sink_.hasLog("creator returned null"));
 }
 
 /* ParserFemas.cpp:219-222、255-294 — 空管理器丢弃 + 正常字段映射 */

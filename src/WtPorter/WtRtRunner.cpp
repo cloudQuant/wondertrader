@@ -8,6 +8,14 @@
  * \brief 
  */
 #include "WtRtRunner.h"
+
+#include <algorithm>
+#include <csignal>
+#include <cstdlib>
+#include <exception>
+#include <mutex>
+#include <utility>
+#include <vector>
 #include "ExpCtaContext.h"
 #include "ExpSelContext.h"
 #include "ExpHftContext.h"
@@ -29,6 +37,276 @@
 
 #include "../Includes/WTSContractInfo.hpp"
 #include "../Includes/WTSVariant.hpp"
+
+namespace
+{
+	template <typename Function>
+	class ScopeExit
+	{
+	public:
+		explicit ScopeExit(Function function) : _function(std::move(function)) {}
+		~ScopeExit() noexcept { _function(); }
+		ScopeExit(const ScopeExit&) = delete;
+		ScopeExit& operator=(const ScopeExit&) = delete;
+
+	private:
+		Function _function;
+	};
+
+	struct RunnerScopeNode
+	{
+		const WtRtRunner* runner;
+		RunnerScopeNode* previous;
+	};
+
+	struct RunnerFactoryParticipant
+	{
+		const void* identity;
+		IExecFactoryQuiesceLifecycle* lifecycle;
+	};
+
+	bool preflight_runner_exec_quiesce(const std::vector<WtExecuterMgr*>& managers)
+	{
+		std::vector<ExecCmdPtr> hosts;
+		bool complete = true;
+		for (WtExecuterMgr* manager : managers)
+		{
+			if (manager == NULL)
+			{
+				complete = false;
+				continue;
+			}
+			try
+			{
+				manager->enum_executer([&hosts](ExecCmdPtr executer) {
+					hosts.push_back(executer);
+				});
+			}
+			catch (...)
+			{
+				complete = false;
+			}
+		}
+
+		// Close every host ingress before probing any participant. This stage is
+		// non-blocking; the coordinator repeats the idempotent requests and owns
+		// the later drain, factory-unit gate, and plugin waits.
+		for (const ExecCmdPtr& host : hosts)
+		{
+			IExecCommandQuiesce* quiesce = host == NULL ? NULL :
+				dynamic_cast<IExecCommandQuiesce*>(host.get());
+			IExecCommandQuiesceStages* stages = host == NULL ? NULL :
+				dynamic_cast<IExecCommandQuiesceStages*>(host.get());
+			if (quiesce == NULL || stages == NULL)
+			{
+				complete = false;
+				continue;
+			}
+			try { quiesce->requestQuiesce(); }
+			catch (...) { complete = false; }
+		}
+
+		std::vector<RunnerFactoryParticipant> factories;
+		for (const ExecCmdPtr& host : hosts)
+		{
+			IExecCommandQuiesceStages* stages = host == NULL ? NULL :
+				dynamic_cast<IExecCommandQuiesceStages*>(host.get());
+			if (stages == NULL)
+				continue;
+			WtExecuterFactory* factory = NULL;
+			try { factory = stages->quiesceFactory(); }
+			catch (...) { complete = false; continue; }
+			if (factory == NULL)
+				continue;
+			IExecFactoryQuiesceLifecycle* lifecycle =
+				dynamic_cast<IExecFactoryQuiesceLifecycle*>(factory);
+			if (lifecycle == NULL)
+			{
+				complete = false;
+				continue;
+			}
+			const void* identity = lifecycle->quiesceFactoryIdentity();
+			if (identity == NULL)
+			{
+				complete = false;
+				continue;
+			}
+			auto existing = std::find_if(factories.begin(), factories.end(),
+				[identity](const RunnerFactoryParticipant& participant) {
+					return participant.identity == identity;
+				});
+			if (existing == factories.end())
+			{
+				factories.push_back({ identity, lifecycle });
+			}
+			else if (existing->lifecycle != lifecycle)
+			{
+				complete = false;
+			}
+		}
+
+		for (const RunnerFactoryParticipant& factory : factories)
+			factory.lifecycle->closeFactoryConfigAdmissions();
+
+		// Probe all hosts and factories before release() reaches any blocking
+		// producer shutdown. A callback-stack caller stays pending for control-
+		// thread retry without self-joining its parser or executor worker.
+		for (const ExecCmdPtr& host : hosts)
+		{
+			IExecCommandQuiesceStages* stages = host == NULL ? NULL :
+				dynamic_cast<IExecCommandQuiesceStages*>(host.get());
+			if (stages == NULL)
+			{
+				complete = false;
+				continue;
+			}
+			try
+			{
+				if (!stages->preflightQuiesceOnCurrentThread())
+					complete = false;
+			}
+			catch (...)
+			{
+				complete = false;
+			}
+		}
+		for (const RunnerFactoryParticipant& factory : factories)
+		{
+			try
+			{
+				if (!factory.lifecycle->preflightQuiesceFactoriesOnCurrentThread())
+					complete = false;
+			}
+			catch (...)
+			{
+				complete = false;
+			}
+		}
+		return complete;
+	}
+
+	thread_local RunnerScopeNode* g_exec_status_call_scope = NULL;
+	thread_local RunnerScopeNode* g_runner_startup_scope = NULL;
+	thread_local RunnerScopeNode* g_runner_teardown_scope = NULL;
+	thread_local RunnerScopeNode* g_runner_callback_scope = NULL;
+	volatile std::sig_atomic_t g_runner_signal_run_active = 0;
+	volatile std::sig_atomic_t g_runner_signal_exit_requested = 0;
+	volatile std::sig_atomic_t g_runner_signal_log_requested = 0;
+
+	bool is_synchronous_fatal_signal(int signum)
+	{
+		if (signum == SIGILL || signum == SIGFPE || signum == SIGSEGV || signum == SIGABRT)
+			return true;
+#if defined(SIGABRT_COMPAT) && SIGABRT_COMPAT != SIGABRT
+		if (signum == SIGABRT_COMPAT)
+			return true;
+#endif
+#ifdef SIGBUS
+		if (signum == SIGBUS)
+			return true;
+#endif
+#ifdef SIGTRAP
+		if (signum == SIGTRAP)
+			return true;
+#endif
+#ifdef SIGSYS
+		if (signum == SIGSYS)
+			return true;
+#endif
+		return false;
+	}
+
+	void runner_signal_log_callback(const char*)
+	{
+		g_runner_signal_log_requested = 1;
+	}
+
+	// SignalHook's ExitHandler signature is void(int); the argument is signum.
+	void runner_signal_exit_callback(int signum)
+	{
+		if (is_synchronous_fatal_signal(signum))
+		{
+			// Returning from a synchronous fault can re-execute the same faulting
+			// instruction indefinitely; fail fast instead of deferring it to run().
+			std::_Exit(signum);
+		}
+		if (g_runner_signal_run_active != 0)
+		{
+			g_runner_signal_exit_requested = signum != 0 ? signum : 1;
+			return;
+		}
+
+		// SignalHook has no unregister/restore token. Preserve termination once
+		// no synchronous runner loop remains to consume the signal request.
+		std::_Exit(signum);
+	}
+
+	bool is_in_runner_scope(RunnerScopeNode* scope, const WtRtRunner* runner)
+	{
+		for (RunnerScopeNode* node = scope; node != NULL; node = node->previous)
+		{
+			if (node->runner == runner)
+				return true;
+		}
+		return false;
+	}
+
+	class ExecStatusCallScope
+	{
+	public:
+		explicit ExecStatusCallScope(const WtRtRunner* runner)
+			: _node{ runner, g_exec_status_call_scope }
+		{
+			g_exec_status_call_scope = &_node;
+		}
+		~ExecStatusCallScope() { g_exec_status_call_scope = _node.previous; }
+
+	private:
+		RunnerScopeNode _node;
+	};
+
+	class RunnerStartupScope
+	{
+	public:
+		explicit RunnerStartupScope(const WtRtRunner* runner)
+			: _node{ runner, g_runner_startup_scope }
+		{
+			g_runner_startup_scope = &_node;
+		}
+		~RunnerStartupScope() { g_runner_startup_scope = _node.previous; }
+
+	private:
+		RunnerScopeNode _node;
+	};
+
+	class RunnerTeardownScope
+	{
+	public:
+		explicit RunnerTeardownScope(const WtRtRunner* runner)
+			: _node{ runner, g_runner_teardown_scope }
+		{
+			g_runner_teardown_scope = &_node;
+		}
+		~RunnerTeardownScope() { g_runner_teardown_scope = _node.previous; }
+
+	private:
+		RunnerScopeNode _node;
+	};
+
+	class RunnerCallbackScope
+	{
+	public:
+		explicit RunnerCallbackScope(const WtRtRunner* runner)
+			: _node{ runner, g_runner_callback_scope }
+		{
+			g_runner_callback_scope = &_node;
+		}
+		~RunnerCallbackScope() { g_runner_callback_scope = _node.previous; }
+
+	private:
+		RunnerScopeNode _node;
+	};
+}
 
 #ifdef _MSC_VER
 #include "../Common/mdump.h"
@@ -90,6 +368,7 @@ WtRtRunner::WtRtRunner()
 	, _data_store(NULL)
 	, _is_hft(false)
 	, _is_sel(false)
+	, _config_failed(true)
 
 	, _to_exit(false)
 
@@ -97,11 +376,25 @@ WtRtRunner::WtRtRunner()
 	, _ext_raw_bar_loader(NULL)
 	, _ext_adj_fct_loader(NULL)
 {
+	_exec_quiesce_coordinator.reset(new WtExecQuiesceCoordinator({
+		&_cta_engine.getExecuterMgr(),
+		&_sel_engine.getExecuterMgr()
+	}));
 }
 
 
 WtRtRunner::~WtRtRunner()
 {
+	const bool hasResources = _lifecycle_state != LifecycleState::UNCONFIGURED ||
+		_engine != NULL || !_traders.getAdapters().empty() || !_parsers._adapters.empty() ||
+		!_quarantined_parser_owners.empty();
+	if (!hasResources)
+		return;
+
+	release();
+	std::lock_guard<std::mutex> lock(_status_config_mutex);
+	if (_lifecycle_state != LifecycleState::RELEASED)
+		std::terminate(); // A runner cannot be destroyed while deferred sink teardown still owns its sinks.
 }
 
 bool WtRtRunner::init(const char* logCfg /* = "logcfg.prop" */, bool isFile /* = true */, const char* genDir)
@@ -291,14 +584,203 @@ void WtRtRunner::feedRawBars(WTSBarStruct* bars, uint32_t count)
 	_feeder_bars(_feed_obj, bars, count);
 }
 
+void WtRtRunner::handle_push_quote(WTSTickData* curTick)
+{
+	RunnerCallbackScope callbackScope(this);
+	if (_engine != NULL)
+		_engine->handle_push_quote(curTick);
+}
+
+void WtRtRunner::handle_push_order_detail(WTSOrdDtlData* curOrdDtl)
+{
+	RunnerCallbackScope callbackScope(this);
+	if (_engine != NULL)
+		_engine->handle_push_order_detail(curOrdDtl);
+}
+
+void WtRtRunner::handle_push_order_queue(WTSOrdQueData* curOrdQue)
+{
+	RunnerCallbackScope callbackScope(this);
+	if (_engine != NULL)
+		_engine->handle_push_order_queue(curOrdQue);
+}
+
+void WtRtRunner::handle_push_transaction(WTSTransData* curTrans)
+{
+	RunnerCallbackScope callbackScope(this);
+	if (_engine != NULL)
+		_engine->handle_push_transaction(curTrans);
+}
+
 
 bool WtRtRunner::createExtParser(const char* id)
 {
-	ParserAdapterPtr adapter(new ParserAdapter);
-	ExpParser* parser = new ExpParser(id);
-	adapter->initExt(id, parser, _engine, _engine->get_basedata_mgr(), _engine->get_hot_mgr());
-	_parsers.addAdapter(id, adapter);
-	WTSLogger::info("Extended parser created");
+	if (id == NULL || id[0] == '\0')
+		return false;
+	std::string parserId;
+	try { parserId.assign(id); }
+	catch (...) { return false; }
+	{
+		std::lock_guard<std::mutex> configLock(_status_config_mutex);
+		if (_lifecycle_state != LifecycleState::CONFIGURED || _manager_release_in_progress)
+			return false;
+		++_active_ext_parser_creations;
+	}
+	ScopeExit creationFinished([this]() {
+		{
+			std::lock_guard<std::mutex> configLock(_status_config_mutex);
+			--_active_ext_parser_creations;
+		}
+		_lifecycle_changed.notify_all();
+	});
+	bool reservationActive = false;
+	auto eraseReservation = [this, &parserId]() {
+		auto reserved = std::find(_creating_ext_parser_ids.begin(), _creating_ext_parser_ids.end(), parserId);
+		if (reserved != _creating_ext_parser_ids.end())
+			_creating_ext_parser_ids.erase(reserved);
+	};
+	ScopeExit reservationFinished([this, &reservationActive, &eraseReservation]() {
+		if (!reservationActive)
+			return;
+		std::lock_guard<std::mutex> parserRegistryLock(_parser_registry_mutex);
+		eraseReservation();
+		reservationActive = false;
+	});
+
+	try
+	{
+		std::lock_guard<std::mutex> parserRegistryLock(_parser_registry_mutex);
+		const bool alreadyCreating = std::find(_creating_ext_parser_ids.begin(),
+			_creating_ext_parser_ids.end(), parserId) != _creating_ext_parser_ids.end();
+		if (_engine == NULL || alreadyCreating || _parsers.getAdapter(parserId.c_str()) != NULL ||
+			std::any_of(_quarantined_parser_owners.begin(), _quarantined_parser_owners.end(),
+				[](const ParserAdapterPtr& owner) { return owner != NULL && owner->hasApi(); }))
+			return false;
+		_creating_ext_parser_ids.emplace_back(parserId);
+		reservationActive = true;
+		// Each outstanding creation may need one quarantine slot if init or
+		// publication fails. Reserve before any candidate acquires a plugin API.
+		_quarantined_parser_owners.reserve(
+			_quarantined_parser_owners.size() + _creating_ext_parser_ids.size());
+	}
+	catch (...)
+	{
+		WTSLogger::error("Extended parser {} reservation failed before API initialization", parserId);
+		return false;
+	}
+
+	ParserAdapterPtr adapter;
+	try { adapter.reset(new ParserAdapter); }
+	catch (...) { return false; }
+	auto quarantineCandidate = [this, &adapter, &reservationActive, &eraseReservation]() noexcept {
+		try
+		{
+			std::lock_guard<std::mutex> parserRegistryLock(_parser_registry_mutex);
+			_quarantined_parser_owners.emplace_back(adapter);
+			eraseReservation();
+			reservationActive = false;
+		}
+		catch (...)
+		{
+			// Losing an initialized parser API would invalidate its borrowed SPI
+			// graph. Capacity was reserved before init; any failure here is fatal.
+			std::terminate();
+		}
+	};
+
+	ExpParser* parser = NULL;
+	try { parser = new ExpParser(parserId.c_str()); }
+	catch (...) { return false; }
+	bool initialized = false;
+	try
+	{
+		// ExpParser::init synchronously invokes user parser callbacks. The id is
+		// reserved above, but the registry mutex must not cross that callback.
+		initialized = adapter->initExt(parserId.c_str(), parser, this,
+			_engine->get_basedata_mgr(), _engine->get_hot_mgr());
+	}
+	catch (...)
+	{
+		quarantineCandidate();
+		WTSLogger::error("Extended parser {} initialization threw", parserId);
+		return false;
+	}
+	if (!initialized)
+	{
+		// initExt may already have transferred the API to the adapter. Keep the
+		// failed candidate separate from the runnable parser manager.
+		quarantineCandidate();
+		return false;
+	}
+
+	bool registered = false;
+	bool publishAllowed = false;
+	bool publicationThrew = false;
+	{
+		try
+		{
+			// Lock order matches quote admission: lifecycle first, registry second.
+			// This makes STOPPING and publication mutually exclusive.
+			std::unique_lock<std::mutex> configLock(_status_config_mutex);
+			std::lock_guard<std::mutex> parserRegistryLock(_parser_registry_mutex);
+			publishAllowed = _lifecycle_state == LifecycleState::CONFIGURED && !_manager_release_in_progress;
+			_quarantined_parser_owners.emplace_back(adapter);
+			if (publishAllowed)
+			{
+				try
+				{
+					registered = _parsers.addAdapter(parserId.c_str(), adapter);
+				}
+				catch (...)
+				{
+					publicationThrew = true;
+					// The candidate is already quarantined. Remove a partially
+					// inserted manager entry if the container threw after mutation.
+					try
+					{
+						auto partial = _parsers._adapters.find(parserId);
+						if (partial != _parsers._adapters.end() && partial->second == adapter)
+							_parsers._adapters.erase(partial);
+					}
+					catch (...)
+					{
+						std::terminate();
+					}
+				}
+			}
+			if (registered)
+			{
+				auto quarantined = std::find_if(_quarantined_parser_owners.begin(),
+					_quarantined_parser_owners.end(), [&adapter](const ParserAdapterPtr& owner) {
+						return owner == adapter;
+					});
+				if (quarantined == _quarantined_parser_owners.end())
+					std::terminate();
+				_quarantined_parser_owners.erase(quarantined);
+			}
+			eraseReservation();
+			reservationActive = false;
+		}
+		catch (...)
+		{
+			// The initialized candidate is already in quarantine; if the publish
+			// transaction cannot finish, continuing could lose its borrowed graph.
+			std::terminate();
+		}
+	}
+	if (!publishAllowed)
+	{
+		WTSLogger::warn("Extended parser {} initialization completed after runner teardown began; candidate quarantined", parserId);
+		return false;
+	}
+	if (!registered)
+	{
+		if (publicationThrew)
+			WTSLogger::error("Extended parser {} registration threw; candidate quarantined", parserId);
+		return false;
+	}
+	try { WTSLogger::info("Extended parser created"); }
+	catch (...) { }
 	return true;
 }
 
@@ -381,8 +863,30 @@ SelContextPtr WtRtRunner::getSelContext(uint32_t id)
 	return _sel_engine.getContext(id);
 }
 
+void WtRtRunner::on_initialize_event()
+{
+	RunnerCallbackScope callbackScope(this);
+	if (_cb_evt)
+		_cb_evt(EVENT_ENGINE_INIT, 0, 0);
+}
+
+void WtRtRunner::on_schedule_event(uint32_t uDate, uint32_t uTime)
+{
+	RunnerCallbackScope callbackScope(this);
+	if (_cb_evt)
+		_cb_evt(EVENT_ENGINE_SCHDL, uDate, uTime);
+}
+
+void WtRtRunner::on_session_event(uint32_t uDate, bool isBegin)
+{
+	RunnerCallbackScope callbackScope(this);
+	if (_cb_evt)
+		_cb_evt(isBegin ? EVENT_SESSION_BEGIN : EVENT_SESSION_END, uDate, 0);
+}
+
 void WtRtRunner::ctx_on_bar(uint32_t id, const char* stdCode, const char* period, WTSBarStruct* newBar, EngineType eType /* = ET_CTA */)
 {
+	RunnerCallbackScope callbackScope(this);
 	switch (eType)
 	{
 	case ET_CTA: if (_cb_cta_bar) _cb_cta_bar(id, stdCode, period, newBar); break;
@@ -395,6 +899,7 @@ void WtRtRunner::ctx_on_bar(uint32_t id, const char* stdCode, const char* period
 
 void WtRtRunner::ctx_on_calc(uint32_t id, uint32_t curDate, uint32_t curTime, EngineType eType /* = ET_CTA */)
 {
+	RunnerCallbackScope callbackScope(this);
 	switch (eType)
 	{
 	case ET_CTA: if (_cb_cta_calc) _cb_cta_calc(id, curDate, curTime); break;
@@ -406,6 +911,7 @@ void WtRtRunner::ctx_on_calc(uint32_t id, uint32_t curDate, uint32_t curTime, En
 
 void WtRtRunner::ctx_on_cond_triggered(uint32_t id, const char* stdCode, double target, double price, const char* usertag, EngineType eType /* = ET_CTA */)
 {
+	RunnerCallbackScope callbackScope(this);
 	switch (eType)
 	{
 	case ET_CTA: if (_cb_cta_cond_trigger) _cb_cta_cond_trigger(id, stdCode, target, price, usertag); break;
@@ -416,6 +922,7 @@ void WtRtRunner::ctx_on_cond_triggered(uint32_t id, const char* stdCode, double 
 
 void WtRtRunner::ctx_on_init(uint32_t id, EngineType eType/* = ET_CTA*/)
 {
+	RunnerCallbackScope callbackScope(this);
 	switch (eType)
 	{
 	case ET_CTA: if (_cb_cta_init) _cb_cta_init(id); break;
@@ -428,6 +935,7 @@ void WtRtRunner::ctx_on_init(uint32_t id, EngineType eType/* = ET_CTA*/)
 
 void WtRtRunner::ctx_on_session_event(uint32_t id, uint32_t curTDate, bool isBegin /* = true */, EngineType eType /* = ET_CTA */)
 {
+	RunnerCallbackScope callbackScope(this);
 	switch (eType)
 	{
 	case ET_CTA: if (_cb_cta_sessevt) _cb_cta_sessevt(id, curTDate, isBegin); break;
@@ -440,6 +948,7 @@ void WtRtRunner::ctx_on_session_event(uint32_t id, uint32_t curTDate, bool isBeg
 
 void WtRtRunner::ctx_on_tick(uint32_t id, const char* stdCode, WTSTickData* newTick, EngineType eType /* = ET_CTA */)
 {
+	RunnerCallbackScope callbackScope(this);
 	switch (eType)
 	{
 	case ET_CTA: if (_cb_cta_tick) _cb_cta_tick(id, stdCode, &newTick->getTickStruct()); break;
@@ -452,43 +961,124 @@ void WtRtRunner::ctx_on_tick(uint32_t id, const char* stdCode, WTSTickData* newT
 
 void WtRtRunner::hft_on_channel_lost(uint32_t cHandle, const char* trader)
 {
+	RunnerCallbackScope callbackScope(this);
 	if (_cb_hft_chnl)
 		_cb_hft_chnl(cHandle, trader, CHNL_EVENT_LOST);
 }
 
 void WtRtRunner::hft_on_channel_ready(uint32_t cHandle, const char* trader)
 {
+	RunnerCallbackScope callbackScope(this);
 	if (_cb_hft_chnl)
 		_cb_hft_chnl(cHandle, trader, CHNL_EVENT_READY);
 }
 
 void WtRtRunner::hft_on_entrust(uint32_t cHandle, WtUInt32 localid, const char* stdCode, bool bSuccess, const char* message, const char* userTag)
 {
+	RunnerCallbackScope callbackScope(this);
 	if (_cb_hft_entrust)
 		_cb_hft_entrust(cHandle, localid, stdCode, bSuccess, message, userTag);
 }
 
 void WtRtRunner::hft_on_order(uint32_t cHandle, WtUInt32 localid, const char* stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled, const char* userTag)
 {
+	RunnerCallbackScope callbackScope(this);
 	if (_cb_hft_ord)
 		_cb_hft_ord(cHandle, localid, stdCode, isBuy, totalQty, leftQty, price, isCanceled, userTag);
 }
 
 void WtRtRunner::hft_on_trade(uint32_t cHandle, WtUInt32 localid, const char* stdCode, bool isBuy, double vol, double price, const char* userTag)
 {
+	RunnerCallbackScope callbackScope(this);
 	if (_cb_hft_trd)
 		_cb_hft_trd(cHandle, localid, stdCode, isBuy, vol, price, userTag);
 }
 
 void WtRtRunner::hft_on_position(uint32_t cHandle, const char* stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail)
 {
+	RunnerCallbackScope callbackScope(this);
 	if (_cb_hft_position)
 		_cb_hft_position(cHandle, stdCode, isLong, prevol, preavail, newvol, newavail);
 }
 
 bool WtRtRunner::config(const char* cfgFile, bool isFile /* = true */)
 {
+	if (is_in_runner_scope(g_exec_status_call_scope, this))
+	{
+		WTSLogger::error("Runner configuration from execution-unit status provider rejected; call config after the query returns");
+		return false;
+	}
+	{
+		// Claim configuration under the state lock, then release it before any
+		// plugin/user callback. addSink() can synchronously deliver READY, and
+		// that callback may reenter release() on this same thread.
+		std::lock_guard<std::mutex> configLock(_status_config_mutex);
+		if (_lifecycle_state == LifecycleState::CONFIGURING ||
+			_lifecycle_state == LifecycleState::CONFIGURED ||
+			_lifecycle_state == LifecycleState::STARTING ||
+			_lifecycle_state == LifecycleState::RUNNING ||
+			_lifecycle_state == LifecycleState::STOPPING ||
+			_lifecycle_state == LifecycleState::RELEASED)
+		{
+			WTSLogger::error("Runtime reconfiguration is not supported after configuration has started");
+			return false;
+		}
+		if (_config != NULL)
+		{
+			// A parsed config means initialization may have created owners whose
+			// rollback is not yet transactional. Keep them intact. A failed file
+			// load leaves _config null and remains safely retryable.
+			WTSLogger::error("Runtime reconfiguration is blocked while a parsed configuration may still own runtime resources");
+			return false;
+		}
+		if (_active_ext_parser_creations != 0)
+		{
+			WTSLogger::error("Runtime reconfiguration is blocked while an external parser is being created");
+			return false;
+		}
+		if (std::any_of(_quarantined_parser_owners.begin(), _quarantined_parser_owners.end(),
+			[](const ParserAdapterPtr& owner) { return owner != NULL && owner->hasApi(); }))
+		{
+			WTSLogger::error("Runtime reconfiguration is blocked while a failed parser API owner is quarantined");
+			return false;
+		}
+		_lifecycle_state = LifecycleState::CONFIGURING;
+		_release_deferred_for_config = false;
+		_status_ready.store(false, std::memory_order_release);
+	}
+	{
+		std::unique_lock<std::shared_mutex> lifecycleLock(_status_lifecycle_mutex);
+		_config_failed = true;
+	}
+	ScopeExit finalizeConfig([this]() {
+		bool completeDeferredRelease = false;
+		{
+			std::lock_guard<std::mutex> configLock(_status_config_mutex);
+			if (_lifecycle_state == LifecycleState::CONFIGURING)
+				_lifecycle_state = LifecycleState::UNCONFIGURED;
+			if (_release_deferred_for_config)
+			{
+				_release_deferred_for_config = false;
+				_teardown_pending = false;
+				_teardown_in_progress = true;
+				completeDeferredRelease = true;
+			}
+		}
+		if (completeDeferredRelease)
+		{
+			std::unique_lock<std::shared_mutex> lifecycleLock(_status_lifecycle_mutex);
+			_config_failed = true;
+			lifecycleLock.unlock();
+			completeRelease();
+		}
+		_lifecycle_changed.notify_all();
+	});
 	_config = isFile ? WTSCfgLoader::load_from_file(cfgFile) : WTSCfgLoader::load_from_content(cfgFile, false);
+	if (_config == NULL)
+	{
+		WTSLogger::error("Loading runner config failed");
+		return false;
+	}
 
 	//基础数据文件
 	WTSVariant* cfgBF = _config->get("basefiles");
@@ -581,14 +1171,20 @@ bool WtRtRunner::config(const char* cfgFile, bool isFile /* = true */)
 
 
 	//初始化运行环境
-	initEngine();
+	if (!initEngine())
+	{
+		WTSLogger::error("Initializing runner engine failed");
+		return false;
+	}
 
 	//初始化数据管理
 	initDataMgr();
 
 	//初始化开平策略
 	if (!initActionPolicy())
+	{
 		return false;
+	}
 
 	//初始化行情通道
 	WTSVariant* cfgParser = _config->get("parsers");
@@ -604,22 +1200,34 @@ bool WtRtRunner::config(const char* cfgFile, bool isFile /* = true */)
 				if (var)
 				{
 					if (!initParsers(var->get("parsers")))
+					{
 						WTSLogger::error("Loading parsers failed");
+						var->release();
+						return false;
+					}
 					var->release();
 				}
 				else
 				{
 					WTSLogger::error("Loading parser config {} failed", filename);
+					return false;
 				}
 			}
 			else
 			{
 				WTSLogger::error("Parser configuration {} not exists", filename);
+				return false;
 			}
 		}
 		else if (cfgParser->type() == WTSVariant::VT_Array)
 		{
-			initParsers(cfgParser);
+			if (!initParsers(cfgParser))
+				return false;
+		}
+		else
+		{
+			WTSLogger::error("Parser configuration must be an array or a file path");
+			return false;
 		}
 	}
 
@@ -630,29 +1238,44 @@ bool WtRtRunner::config(const char* cfgFile, bool isFile /* = true */)
 		if (cfgTraders->type() == WTSVariant::VT_String)
 		{
 			const char* filename = cfgTraders->asCString();
-			if (StdFile::exists(filename))
+			if (filename != NULL && filename[0] != '\0' && StdFile::exists(filename))
 			{
 				WTSLogger::info("Reading trader config from {}...", filename);
 				WTSVariant* var = WTSCfgLoader::load_from_file(filename);
 				if (var)
 				{
 					if (!initTraders(var->get("traders")))
+					{
 						WTSLogger::error("Loading traders failed");
+						var->release();
+						return false;
+					}
 					var->release();
 				}
 				else
 				{
 					WTSLogger::error("Loading trader config {} failed", filename);
+					return false;
 				}
 			}
 			else
 			{
-				WTSLogger::error("Trader configuration {} not exists", filename);
+				WTSLogger::error("Trader configuration {} not exists", filename ? filename : "");
+				return false;
 			}
 		}
 		else if (cfgTraders->type() == WTSVariant::VT_Array)
 		{
-			initTraders(cfgTraders);
+			if (!initTraders(cfgTraders))
+			{
+				WTSLogger::error("Loading traders failed");
+				return false;
+			}
+		}
+		else
+		{
+			WTSLogger::error("Trader configuration must be an array or a file path");
+			return false;
 		}
 	}
 
@@ -710,7 +1333,172 @@ bool WtRtRunner::config(const char* cfgFile, bool isFile /* = true */)
 	else
 		initHftStrategies();
 	
-	return true;
+	bool releaseRequestedDuringConfig = false;
+	{
+		std::lock_guard<std::mutex> configLock(_status_config_mutex);
+		releaseRequestedDuringConfig = _release_deferred_for_config ||
+			_lifecycle_state == LifecycleState::STOPPING;
+		if (!releaseRequestedDuringConfig && _lifecycle_state == LifecycleState::CONFIGURING)
+		{
+			std::unique_lock<std::shared_mutex> lifecycleLock(_status_lifecycle_mutex);
+			_config_failed = false;
+			_status_ready.store(true, std::memory_order_release);
+			_lifecycle_state = LifecycleState::CONFIGURED;
+		}
+	}
+	_lifecycle_changed.notify_all();
+	return !releaseRequestedDuringConfig;
+}
+
+ExecUnitStatusApiResult WtRtRunner::queryExecUnitInitStatus(uint32_t engineType,
+	const char* executorId, const char* stdCode, ExecUnitInitStatus& status) const
+{
+	status = ExecUnitInitStatus();
+	if (executorId == NULL || executorId[0] == '\0' || stdCode == NULL || stdCode[0] == '\0')
+	{
+		status.error = "executor ID and standard code are required";
+		return EXEC_UNIT_STATUS_API_INVALID_ARGUMENT;
+	}
+
+	if (engineType == ET_HFT)
+	{
+		status.error = "HFT does not support execution-unit initialization status";
+		return EXEC_UNIT_STATUS_API_UNSUPPORTED;
+	}
+	if (engineType != ET_CTA && engineType != ET_SEL)
+	{
+		status.error = "unknown engine type";
+		return EXEC_UNIT_STATUS_API_INVALID_ARGUMENT;
+	}
+	if (!_status_ready.load(std::memory_order_acquire))
+	{
+		status.error = "runner is not configured";
+		return EXEC_UNIT_STATUS_API_NOT_READY;
+	}
+	if (is_in_runner_scope(g_exec_status_call_scope, this))
+	{
+		status.error = "reentrant execution-unit status query rejected";
+		return EXEC_UNIT_STATUS_API_INTERNAL_ERROR;
+	}
+
+	ExecCmdPtr executor;
+	{
+		std::shared_lock<std::shared_mutex> lifecycleLock(_status_lifecycle_mutex);
+		if (!_status_ready.load(std::memory_order_acquire) || _config_failed || _engine == NULL)
+		{
+			status.error = "runner is not configured";
+			return EXEC_UNIT_STATUS_API_NOT_READY;
+		}
+		if ((engineType == ET_CTA && (_is_hft || _is_sel)) ||
+			(engineType == ET_SEL && !_is_sel))
+		{
+			status.error = "requested engine type does not match the configured engine";
+			return EXEC_UNIT_STATUS_API_ENGINE_MISMATCH;
+		}
+		executor = engineType == ET_SEL
+			? _sel_engine.findExecuter(executorId)
+			: _cta_engine.findExecuter(executorId);
+	}
+
+	if (executor == NULL)
+	{
+		status.query_result = ExecUnitInitQueryResult::EXECUTOR_NOT_FOUND;
+		status.error = "executor is not registered";
+		return EXEC_UNIT_STATUS_API_EXECUTOR_NOT_FOUND;
+	}
+	std::shared_ptr<const IExecUnitInitStatusProvider> provider(
+		executor, dynamic_cast<const IExecUnitInitStatusProvider*>(executor.get()));
+	executor.reset();
+	if (provider == NULL)
+	{
+		status.query_result = ExecUnitInitQueryResult::UNSUPPORTED;
+		status.error = "executor does not provide unit initialization status";
+		return EXEC_UNIT_STATUS_API_UNSUPPORTED;
+	}
+
+	try
+	{
+		ExecStatusCallScope statusCallScope(this);
+		status = provider->queryUnitInitStatus(stdCode);
+	}
+	catch (...)
+	{
+		status = ExecUnitInitStatus();
+		status.error = "failed to query execution-unit initialization status";
+		return EXEC_UNIT_STATUS_API_INTERNAL_ERROR;
+	}
+
+	switch (status.query_result)
+	{
+	case ExecUnitInitQueryResult::OK:
+		return EXEC_UNIT_STATUS_API_OK;
+	case ExecUnitInitQueryResult::EXECUTOR_NOT_FOUND:
+		return EXEC_UNIT_STATUS_API_EXECUTOR_NOT_FOUND;
+	case ExecUnitInitQueryResult::UNSUPPORTED:
+		return EXEC_UNIT_STATUS_API_UNSUPPORTED;
+	case ExecUnitInitQueryResult::INVALID_ARGUMENT:
+		return EXEC_UNIT_STATUS_API_INVALID_ARGUMENT;
+	default:
+		status.error = "execution-unit manager returned an unknown query result";
+		return EXEC_UNIT_STATUS_API_INTERNAL_ERROR;
+	}
+}
+
+ExecUnitStatusApiResult WtRtRunner::clearFailedExecUnitInitStatus(uint32_t engineType,
+	const char* executorId, const char* stdCode)
+{
+	if (executorId == NULL || executorId[0] == '\0' || stdCode == NULL || stdCode[0] == '\0')
+		return EXEC_UNIT_STATUS_API_INVALID_ARGUMENT;
+	if (engineType == ET_HFT)
+		return EXEC_UNIT_STATUS_API_UNSUPPORTED;
+	if (engineType != ET_CTA && engineType != ET_SEL)
+		return EXEC_UNIT_STATUS_API_INVALID_ARGUMENT;
+	if (!_status_ready.load(std::memory_order_acquire))
+		return EXEC_UNIT_STATUS_API_NOT_READY;
+	if (is_in_runner_scope(g_exec_status_call_scope, this))
+		return EXEC_UNIT_STATUS_API_INTERNAL_ERROR;
+
+	ExecCmdPtr executor;
+	{
+		std::shared_lock<std::shared_mutex> lifecycleLock(_status_lifecycle_mutex);
+		if (!_status_ready.load(std::memory_order_acquire) || _config_failed || _engine == NULL)
+			return EXEC_UNIT_STATUS_API_NOT_READY;
+		if ((engineType == ET_CTA && (_is_hft || _is_sel)) ||
+			(engineType == ET_SEL && !_is_sel))
+			return EXEC_UNIT_STATUS_API_ENGINE_MISMATCH;
+		executor = engineType == ET_SEL
+			? _sel_engine.findExecuter(executorId)
+			: _cta_engine.findExecuter(executorId);
+	}
+
+	if (executor == NULL)
+		return EXEC_UNIT_STATUS_API_EXECUTOR_NOT_FOUND;
+	std::shared_ptr<IExecUnitInitStatusProvider> provider(
+		executor, dynamic_cast<IExecUnitInitStatusProvider*>(executor.get()));
+	executor.reset();
+	if (provider == NULL)
+		return EXEC_UNIT_STATUS_API_UNSUPPORTED;
+
+	try
+	{
+		ExecStatusCallScope statusCallScope(this);
+		ExecUnitInitClearResult result = provider->clearFailedUnitInitStatus(stdCode);
+		switch (result)
+		{
+		case ExecUnitInitClearResult::CLEARED: return EXEC_UNIT_STATUS_API_OK;
+		case ExecUnitInitClearResult::EXECUTOR_NOT_FOUND: return EXEC_UNIT_STATUS_API_EXECUTOR_NOT_FOUND;
+		case ExecUnitInitClearResult::UNSUPPORTED: return EXEC_UNIT_STATUS_API_UNSUPPORTED;
+		case ExecUnitInitClearResult::INVALID_ARGUMENT: return EXEC_UNIT_STATUS_API_INVALID_ARGUMENT;
+		case ExecUnitInitClearResult::NOT_FOUND: return EXEC_UNIT_STATUS_API_CODE_NOT_FOUND;
+		case ExecUnitInitClearResult::NOT_FAILED: return EXEC_UNIT_STATUS_API_NOT_FAILED;
+		case ExecUnitInitClearResult::RETRY_BLOCKED: return EXEC_UNIT_STATUS_API_RETRY_BLOCKED;
+		default: return EXEC_UNIT_STATUS_API_INTERNAL_ERROR;
+		}
+	}
+	catch (...)
+	{
+		return EXEC_UNIT_STATUS_API_INTERNAL_ERROR;
+	}
 }
 
 bool WtRtRunner::initCtaStrategies()
@@ -816,6 +1604,9 @@ bool WtRtRunner::initHftStrategies()
 		stra->self()->init(cfgItem->get("params"));
 		HftStraContext* ctx = new HftStraContext(&_hft_engine, id, bAgent, slippage);
 		ctx->set_strategy(stra->self());
+		// Publish the context before addSink: addSink may synchronously deliver
+		// the initial READY event when the adapter is already connected.
+		_hft_engine.addContext(HftContextPtr(ctx));
 
 		const char* traderid = cfgItem->getCString("trader");
 		TraderAdapterPtr trader = _traders.getAdapter(traderid);
@@ -828,8 +1619,6 @@ bool WtRtRunner::initHftStrategies()
 		{
 			WTSLogger::error("Trader {} not exists, Binding trader to HFT strategy failed", traderid);
 		}
-
-		_hft_engine.addContext(HftContextPtr(ctx));
 	}
 
 	return true;
@@ -897,7 +1686,7 @@ bool WtRtRunner::initDataMgr()
 
 bool WtRtRunner::initParsers(WTSVariant* cfgParsers)
 {
-	if (cfgParsers == NULL || cfgParsers->type() != WTSVariant::VT_Array)
+	if (cfgParsers == NULL || cfgParsers->type() != WTSVariant::VT_Array || _engine == NULL)
 		return false;
 
 	uint32_t count = 0;
@@ -917,10 +1706,39 @@ bool WtRtRunner::initParsers(WTSVariant* cfgParsers)
 			static uint32_t auto_parserid = 1000;
 			realid = fmt::format("auto_parser_{}", auto_parserid++);
 		}
+		if (_parsers.getAdapter(realid.c_str()) != NULL)
+		{
+			WTSLogger::error("Parser {} is already registered", realid);
+			return false;
+		}
 
 		ParserAdapterPtr adapter(new ParserAdapter);
-		adapter->init(realid.c_str(), cfgItem, _engine, _engine->get_basedata_mgr(), _engine->get_hot_mgr());
-		_parsers.addAdapter(realid.c_str(), adapter);
+		bool initialized = false;
+		try
+		{
+			initialized = adapter->init(realid.c_str(), cfgItem, this,
+				_engine->get_basedata_mgr(), _engine->get_hot_mgr());
+		}
+		catch (...)
+		{
+			_quarantined_parser_owners.emplace_back(adapter);
+			WTSLogger::error("Parser {} initialization threw", realid);
+			return false;
+		}
+		if (!initialized)
+		{
+			// Failed init can still leave an API registered to this SPI. Preserve
+			// it without making ParserAdapterMgr::run() treat it as runnable.
+			_quarantined_parser_owners.emplace_back(adapter);
+			return false;
+		}
+		if (!_parsers.addAdapter(realid.c_str(), adapter))
+		{
+			// Preserve an initialized candidate if concurrent registration made
+			// the final map insertion fail.
+			_quarantined_parser_owners.emplace_back(adapter);
+			return false;
+		}
 
 		count++;
 	}
@@ -956,6 +1774,9 @@ bool WtRtRunner::initExecuters(WTSVariant* cfgExecuter)
 			WtLocalExecuter* executer = new WtLocalExecuter(&_exe_factory, id, &_data_mgr);
 			if (!executer->init(cfgItem))
 				return false;
+			// addSink can synchronously deliver READY. Keep the executor owned by
+			// the engine before exposing its raw sink pointer to the adapter.
+			_cta_engine.addExecuter(ExecCmdPtr(executer));
 
 			const char* tid = cfgItem->getCString("trader");
 			if(strlen(tid) == 0)
@@ -975,14 +1796,13 @@ bool WtRtRunner::initExecuters(WTSVariant* cfgExecuter)
 					WTSLogger::error("Trader {} not exists, cannot configured for executer {}", tid, id);
 				}
 			}
-
-			_cta_engine.addExecuter(ExecCmdPtr(executer));
 		}
 		else if (name == "diff")
 		{
 			WtDiffExecuter* executer = new WtDiffExecuter(&_exe_factory, id, &_data_mgr, &_bd_mgr);
 			if (!executer->init(cfgItem))
 				return false;
+			_cta_engine.addExecuter(ExecCmdPtr(executer));
 
 			const char* tid = cfgItem->getCString("trader");
 			if (strlen(tid) == 0)
@@ -1002,14 +1822,13 @@ bool WtRtRunner::initExecuters(WTSVariant* cfgExecuter)
 					WTSLogger::error("Trader {} not exists, cannot configured for executer {}", tid, id);
 				}
 			}
-
-			_cta_engine.addExecuter(ExecCmdPtr(executer));
 		}
 		else if (name == "arbi")
 		{
 			WtArbiExecuter* executer = new WtArbiExecuter(&_exe_factory, id, &_data_mgr);
 			if (!executer->init(cfgItem))
 				return false;
+			_cta_engine.addExecuter(ExecCmdPtr(executer));
 
 			const char* tid = cfgItem->getCString("trader");
 			if (strlen(tid) == 0)
@@ -1029,8 +1848,6 @@ bool WtRtRunner::initExecuters(WTSVariant* cfgExecuter)
 					WTSLogger::error("Trader {} not exists, cannot configured for executer {}", tid, id);
 				}
 			}
-
-			_cta_engine.addExecuter(ExecCmdPtr(executer));
 		}
 		else
 		{
@@ -1077,9 +1894,17 @@ bool WtRtRunner::initTraders(WTSVariant* cfgTraders)
 		const char* id = cfgItem->getCString("id");
 
 		TraderAdapterPtr adapter(new TraderAdapter(&_notifier));
-		adapter->init(id, cfgItem, &_bd_mgr, &_act_policy);
+		if (!adapter->init(id, cfgItem, &_bd_mgr, &_act_policy))
+		{
+			WTSLogger::error("Initializing trader {} failed", id);
+			return false;
+		}
 
-		_traders.addAdapter(id, adapter);
+		if (!_traders.addAdapter(id, adapter))
+		{
+			WTSLogger::error("Registering trader {} failed", id);
+			return false;
+		}
 		count++;
 	}
 
@@ -1090,36 +1915,157 @@ bool WtRtRunner::initTraders(WTSVariant* cfgTraders)
 
 void WtRtRunner::run(bool bAsync /* = false */)
 {
-	try
+	if (is_in_runner_scope(g_exec_status_call_scope, this))
 	{
-		_parsers.run();
-		_traders.run();
-
-		_engine->run();
-
-		if (!bAsync)
+		WTSLogger::error("Runner start from execution-unit status provider rejected; call run after the query returns");
+		return;
+	}
+	std::unique_lock<std::mutex> startupLock;
+	{
+		std::unique_lock<std::mutex> configLock(_status_config_mutex);
+		if (_lifecycle_state != LifecycleState::CONFIGURED || _config_failed)
 		{
-			install_signal_hooks([this](const char* message) {
-				if (!_to_exit)
-					WTSLogger::error(message);
-			}, [this](bool toExit) {
-				if (_to_exit)
-					return;
-				_to_exit = toExit;
-				WTSLogger::info("Exit flag is {}", _to_exit);
-			});
-
-			while (!_to_exit)
+			WTSLogger::error("Runner is not configured or has been released; refusing to run");
+			return;
+		}
+		if (_active_ext_parser_creations != 0)
+		{
+			WTSLogger::error("Runner start is blocked while an external parser is being created");
+			return;
+		}
+		{
+			std::shared_lock<std::shared_mutex> lifecycleLock(_status_lifecycle_mutex);
+			if (!_status_ready.load(std::memory_order_acquire) || _engine == NULL)
 			{
-				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				WTSLogger::error("Runner is not configured; refusing to run");
+				return;
 			}
 		}
+		startupLock = std::unique_lock<std::mutex>(_run_start_mutex);
+		_lifecycle_state = LifecycleState::STARTING;
+		_release_deferred_for_startup = false;
+		_deferred_release_requested.store(false, std::memory_order_release);
+		{
+			std::lock_guard<std::mutex> exitLock(_run_exit_mutex);
+			_to_exit.store(false, std::memory_order_release);
+		}
 	}
-	catch (...)
+	_lifecycle_changed.notify_all();
+
+	bool startupFailed = false;
 	{
-		print_stack_trace([](const char* message) {
-			WTSLogger::error(message);
-		});
+		RunnerStartupScope startupScope(this);
+		try
+		{
+			_parsers.run();
+			if (!_to_exit.load(std::memory_order_acquire))
+				_traders.run();
+			if (!_to_exit.load(std::memory_order_acquire))
+				_engine->run();
+
+			if (!bAsync && !_to_exit.load(std::memory_order_acquire))
+			{
+				g_runner_signal_exit_requested = 0;
+				g_runner_signal_log_requested = 0;
+				g_runner_signal_run_active = 1;
+				// SignalHook is process-global and cannot be safely unregistered by
+				// one runner. These callbacks avoid runner captures and only set
+				// sig_atomic_t flags; the synchronous run thread does all work.
+				install_signal_hooks(&runner_signal_log_callback, &runner_signal_exit_callback);
+			}
+		}
+		catch (...)
+		{
+			startupFailed = true;
+			print_stack_trace([](const char* message) {
+				WTSLogger::error(message);
+			});
+		}
+	}
+
+	startupLock.unlock();
+	if (startupFailed)
+		g_runner_signal_run_active = 0;
+	bool completeDeferredRelease = false;
+	{
+		std::lock_guard<std::mutex> configLock(_status_config_mutex);
+		if (_lifecycle_state == LifecycleState::STARTING)
+			_lifecycle_state = LifecycleState::RUNNING;
+		if (_release_deferred_for_startup)
+		{
+			_release_deferred_for_startup = false;
+			_deferred_release_requested.store(false, std::memory_order_release);
+			completeDeferredRelease = true;
+		}
+	}
+	_lifecycle_changed.notify_all();
+
+	if (completeDeferredRelease)
+	{
+		{
+			std::unique_lock<std::shared_mutex> lifecycleLock(_status_lifecycle_mutex);
+			_config_failed = true;
+		}
+		completeRelease();
+	}
+
+	if (!bAsync && !startupFailed)
+	{
+		auto processSignalExit = [this](std::sig_atomic_t signum) {
+			bool requested = false;
+			{
+				std::lock_guard<std::mutex> configLock(_status_config_mutex);
+				if (_lifecycle_state != LifecycleState::STOPPING &&
+					_lifecycle_state != LifecycleState::RELEASED)
+				{
+					std::lock_guard<std::mutex> exitLock(_run_exit_mutex);
+					_to_exit.store(true, std::memory_order_release);
+					requested = true;
+				}
+			}
+			if (requested)
+			{
+				_run_exit_condition.notify_all();
+				WTSLogger::info("Exit requested by signal {}", static_cast<int>(signum));
+			}
+		};
+
+		while (!_to_exit.load(std::memory_order_acquire))
+		{
+			{
+				std::unique_lock<std::mutex> exitLock(_run_exit_mutex);
+				_run_exit_condition.wait_for(exitLock, std::chrono::milliseconds(10), [this]() {
+					return _to_exit.load(std::memory_order_acquire);
+				});
+			}
+
+			if (g_runner_signal_log_requested != 0)
+			{
+				g_runner_signal_log_requested = 0;
+				WTSLogger::info("Runner received a signal notification");
+			}
+			const std::sig_atomic_t signum = g_runner_signal_exit_requested;
+			if (signum != 0)
+			{
+				g_runner_signal_exit_requested = 0;
+				processSignalExit(signum);
+			}
+		}
+
+		// Hand off any signal that interrupted the final loop check before
+		// deactivating the signal-safe callback. Later signals use _Exit.
+		g_runner_signal_run_active = 0;
+		const std::sig_atomic_t pendingSignal = g_runner_signal_exit_requested;
+		if (pendingSignal != 0)
+		{
+			g_runner_signal_exit_requested = 0;
+			processSignalExit(pendingSignal);
+		}
+		if (g_runner_signal_log_requested != 0)
+		{
+			g_runner_signal_log_requested = 0;
+			WTSLogger::info("Runner received a signal notification");
+		}
 	}
 }
 
@@ -1140,18 +2086,428 @@ void WtRtRunner::handleLogAppend(WTSLogLevel ll, const char* msg)
 
 void WtRtRunner::release()
 {
-	//置退出标记, 同步模式下run()内的等待循环得以返回
-	_to_exit = true;
+	if (is_in_runner_scope(g_runner_teardown_scope, this))
+	{
+		WTSLogger::error("Reentrant runner release during teardown rejected");
+		return;
+	}
+	if (is_in_runner_scope(g_exec_status_call_scope, this))
+	{
+		WTSLogger::error("Reentrant runner release from execution-unit status provider rejected; call release after the query returns");
+		return;
+	}
+	bool deferredUntilStartupCompletes = false;
+	bool deferredUntilConfigCompletes = false;
+	{
+		std::unique_lock<std::mutex> configLock(_status_config_mutex);
+		if (_lifecycle_state == LifecycleState::RELEASED)
+			return;
+		if (_lifecycle_state == LifecycleState::CONFIGURING)
+		{
+			_lifecycle_state = LifecycleState::STOPPING;
+			_status_ready.store(false, std::memory_order_release);
+			_release_deferred_for_config = true;
+			_teardown_pending = false;
+			_teardown_inputs_stopped = false;
+			_teardown_parsers_stopped = false;
+			_teardown_engine_stopped = false;
+			_teardown_exec_preflight_passed = false;
+			_teardown_in_progress = false;
+			deferredUntilConfigCompletes = true;
+		}
+		else if (_manager_release_in_progress)
+		{
+			// Do not inspect the manager map while it is being cleared. A sink
+			// callback cannot remain active this late in teardown, so return safely.
+			return;
+		}
+		else
+		{
+			// The status lock serializes this read against config and the final
+			// manager release; no manager-map mutation can race the callback query.
+			const bool inTraderSinkCallback = _traders.isInSinkCallback();
+			const bool inRunnerCallback = is_in_runner_scope(g_runner_callback_scope, this);
+			const bool inProducerCallback = inTraderSinkCallback || inRunnerCallback;
+		if (_lifecycle_state == LifecycleState::STOPPING)
+		{
+			if (_release_deferred_for_config)
+				return;
+			if (_release_deferred_for_startup)
+				return;
+			if (_teardown_in_progress)
+			{
+				if (inProducerCallback)
+				{
+					WTSLogger::warn("Runner release reentered from a producer callback; active teardown will finish after the callback returns");
+					return;
+				}
+				++_release_waiters;
+				_lifecycle_changed.notify_all();
+				_lifecycle_changed.wait(configLock, [this]() {
+					return _lifecycle_state == LifecycleState::RELEASED || !_teardown_in_progress;
+				});
+				if (_lifecycle_state == LifecycleState::RELEASED)
+				{
+					--_release_waiters;
+					_lifecycle_changed.notify_all();
+					return;
+				}
+				if (!_teardown_pending)
+				{
+					--_release_waiters;
+					_lifecycle_changed.notify_all();
+					return;
+				}
+				--_release_waiters;
+				_teardown_pending = false;
+				_teardown_in_progress = true;
+				_lifecycle_changed.notify_all();
+			}
+			else if (_teardown_pending)
+			{
+				if (inProducerCallback)
+					return;
+				_teardown_pending = false;
+				_teardown_in_progress = true;
+			}
+			else
+			{
+				// A release requested during startup is completed by run() once startup exits.
+				return;
+			}
+		}
+		else
+		{
+			deferredUntilStartupCompletes = _lifecycle_state == LifecycleState::STARTING;
+			_lifecycle_state = LifecycleState::STOPPING;
+			_status_ready.store(false, std::memory_order_release);
+			_release_deferred_for_startup = deferredUntilStartupCompletes;
+			_teardown_pending = false;
+			_teardown_inputs_stopped = false;
+			_teardown_parsers_stopped = false;
+			_teardown_engine_stopped = false;
+			_teardown_exec_preflight_passed = false;
+			_teardown_in_progress = !deferredUntilStartupCompletes;
+			_deferred_release_requested.store(deferredUntilStartupCompletes,
+				std::memory_order_release);
+		}
+		}
+	}
+	_lifecycle_changed.notify_all();
+	{
+		std::lock_guard<std::mutex> exitLock(_run_exit_mutex);
+		_to_exit.store(true, std::memory_order_release);
+	}
+	_run_exit_condition.notify_all();
 
-	//停止行情/交易适配器(内部线程由各API自行管理)
-	_parsers.release();
-	_traders.release();
+	if (deferredUntilStartupCompletes)
+	{
+		if (is_in_runner_scope(g_runner_startup_scope, this))
+			WTSLogger::warn("Reentrant runner release during startup deferred until startup completes");
+		else
+			WTSLogger::warn("Runner release during startup deferred until startup completes");
+		return;
+	}
+	if (deferredUntilConfigCompletes)
+	{
+		WTSLogger::warn("Runner release requested during config; cleanup is deferred until the config callback stack unwinds");
+		return;
+	}
 
-	//停止引擎内部ticker与任务线程
-	if (_engine)
-		_engine->release();
+	// Drain in-progress engine/registry lookups. Provider callbacks run outside
+	// this lock and keep their executor alive through an ExecCmdPtr snapshot.
+	{
+		std::unique_lock<std::shared_mutex> lifecycleLock(_status_lifecycle_mutex);
+		_config_failed = true;
+	}
 
-	WTSLogger::stop();
+	// Wait for parser/trader/engine startup to finish before tearing any of them down.
+	{
+		std::unique_lock<std::mutex> startupLock(_run_start_mutex);
+	}
+	completeRelease();
+}
+
+
+void WtRtRunner::completeRelease()
+{
+	{
+		std::lock_guard<std::mutex> configLock(_status_config_mutex);
+		if (_lifecycle_state == LifecycleState::RELEASED)
+			return;
+		_teardown_in_progress = true;
+		_teardown_pending = false;
+	}
+	RunnerTeardownScope teardownScope(this);
+	// Close trader sink admission before any retryable-quarantine exit. This is
+	// non-blocking and does not release adapter or runner owners.
+	try
+	{
+		_traders.requestStopSinkNotifications();
+	}
+	catch (...)
+	{
+		{
+			std::lock_guard<std::mutex> configLock(_status_config_mutex);
+			_teardown_pending = true;
+			_teardown_in_progress = false;
+		}
+		_lifecycle_changed.notify_all();
+		WTSLogger::warn("Runner teardown is pending: trader sink shutdown request failed; owners remain alive for retry");
+		return;
+	}
+	if (is_in_runner_scope(g_runner_callback_scope, this))
+	{
+		// Registered runner callbacks and parser-to-engine forwarding can execute
+		// on parser or engine producer threads. Never stop/join a producer while
+		// its callback stack still owns this runner; require a control-thread retry.
+		{
+			std::lock_guard<std::mutex> configLock(_status_config_mutex);
+			_teardown_pending = true;
+			_teardown_in_progress = false;
+		}
+		_lifecycle_changed.notify_all();
+		WTSLogger::warn("Runner teardown is pending because release was requested from a runner callback; retry release from a control thread after the callback returns");
+		return;
+	}
+	bool parserCreationActive = false;
+	{
+		std::lock_guard<std::mutex> configLock(_status_config_mutex);
+		parserCreationActive = _active_ext_parser_creations != 0;
+	}
+	if (parserCreationActive)
+	{
+		{
+			std::lock_guard<std::mutex> configLock(_status_config_mutex);
+			_teardown_pending = true;
+			_teardown_in_progress = false;
+		}
+		_lifecycle_changed.notify_all();
+		WTSLogger::warn("Runner teardown is pending while an admitted external parser creation finishes; retry release from a control thread");
+		return;
+	}
+	const bool hasUnquiescedParserApi = std::any_of(
+		_quarantined_parser_owners.begin(), _quarantined_parser_owners.end(),
+		[](const ParserAdapterPtr& owner) { return owner != NULL && owner->hasApi(); });
+	if (hasUnquiescedParserApi)
+	{
+		// There is no ParserAdapter/IParserApi callback-drain result for a
+		// failed init candidate. Keep the candidate and its borrowed runner graph
+		// alive, and do not release parser or engine owners without that proof.
+		{
+			std::lock_guard<std::mutex> configLock(_status_config_mutex);
+			_teardown_pending = true;
+			_teardown_in_progress = false;
+		}
+		_lifecycle_changed.notify_all();
+		WTSLogger::warn("Runner teardown is pending: quarantined failed parser API owners have no callback-drain proof; runner, engine, data, base, and hot-manager owners must remain alive");
+		return;
+	}
+	bool parserQuoteActive = false;
+	{
+		std::lock_guard<std::mutex> configLock(_status_config_mutex);
+		parserQuoteActive = _active_ext_parser_quotes != 0;
+	}
+	if (parserQuoteActive)
+	{
+		{
+			std::lock_guard<std::mutex> configLock(_status_config_mutex);
+			_teardown_pending = true;
+			_teardown_in_progress = false;
+		}
+		_lifecycle_changed.notify_all();
+		WTSLogger::warn("Runner teardown is pending while an admitted external parser quote finishes; retry release from a control thread");
+		return;
+	}
+	for (const ParserAdapterPtr& owner : _quarantined_parser_owners)
+	{
+		if (owner != NULL)
+			owner->release();
+	}
+	_quarantined_parser_owners.clear();
+	if (_traders.isInSinkCallback())
+	{
+		// Do not stop/join parser or engine producers from a trader callback:
+		// either may depend on this callback thread. Keep every owner intact and
+		// let a later control-thread release perform the blocking teardown.
+		{
+			std::lock_guard<std::mutex> configLock(_status_config_mutex);
+			_teardown_pending = true;
+			_teardown_in_progress = false;
+		}
+		_lifecycle_changed.notify_all();
+		WTSLogger::warn("Runner release was requested from a trader callback; control-thread release is required to stop producers and complete teardown");
+		return;
+	}
+
+	// Drain in-flight trader callbacks before joining parser or engine workers.
+	// A callback may be waiting on work scheduled by either producer; stopping a
+	// producer first could therefore make its join wait on the callback while the
+	// callback waits on that producer. Notifications have already been closed,
+	// so a successful drain is stable while the producers are stopped afterward.
+	if (!_traders.waitSinkNotificationsStopped())
+	{
+		{
+			std::lock_guard<std::mutex> configLock(_status_config_mutex);
+			_teardown_pending = true;
+			_teardown_in_progress = false;
+		}
+		_lifecycle_changed.notify_all();
+		WTSLogger::warn("Runner teardown is pending; trader callbacks have not drained, so parser, engine, and adapter owners remain alive until release is retried from a control thread");
+		return;
+	}
+
+	bool executerPreflightPassed = _teardown_exec_preflight_passed;
+	if (!executerPreflightPassed)
+	{
+		try
+		{
+			executerPreflightPassed = preflight_runner_exec_quiesce({
+				&_cta_engine.getExecuterMgr(),
+				&_sel_engine.getExecuterMgr()
+			});
+		}
+		catch (...)
+		{
+			WTSLogger::error("Runner execution preflight threw while stopping the runtime");
+		}
+		if (executerPreflightPassed)
+		{
+			std::lock_guard<std::mutex> configLock(_status_config_mutex);
+			_teardown_exec_preflight_passed = true;
+		}
+	}
+	if (!executerPreflightPassed)
+	{
+		{
+			std::lock_guard<std::mutex> configLock(_status_config_mutex);
+			_teardown_pending = true;
+			_teardown_in_progress = false;
+		}
+		_lifecycle_changed.notify_all();
+		WTSLogger::warn("Runner teardown is pending; CTA/SEL execution preflight did not pass, so parser, engine, adapter, factory, and context owners remain alive until release is retried from a control thread");
+		return;
+	}
+
+	bool parsersStopped = true;
+	if (!_teardown_parsers_stopped)
+	{
+		// STOPPING rejects new quote admissions, and the admitted quote and
+		// creation counters were drained above. No reader can race this map clear;
+		// do not hold _parser_registry_mutex across provider release callbacks.
+		try { _parsers.release(); }
+		catch (...) { WTSLogger::error("Parser release threw while stopping the runner"); parsersStopped = false; }
+		if (parsersStopped)
+		{
+			std::lock_guard<std::mutex> configLock(_status_config_mutex);
+			_teardown_parsers_stopped = true;
+		}
+	}
+
+	if (!parsersStopped)
+	{
+		{
+			std::lock_guard<std::mutex> configLock(_status_config_mutex);
+			_teardown_pending = true;
+			_teardown_in_progress = false;
+		}
+		_lifecycle_changed.notify_all();
+		WTSLogger::warn("Runner teardown is pending; adapters and engine owners remain alive until release is retried from a control thread");
+		return;
+	}
+
+	// Stop every CTA/SEL execution host and all plugin units through one stable
+	// coordinator. A failed preflight or wait keeps the engines, API adapters,
+	// contexts, factories, and module owners alive for a control-thread retry.
+	bool executersQuiesced = false;
+	try
+	{
+		executersQuiesced = _exec_quiesce_coordinator != NULL &&
+			_exec_quiesce_coordinator->quiesce_all();
+	}
+	catch (...)
+	{
+		WTSLogger::error("Runner execution quiesce threw while stopping the runtime");
+	}
+	if (!executersQuiesced)
+	{
+		{
+			std::lock_guard<std::mutex> configLock(_status_config_mutex);
+			_teardown_pending = true;
+			_teardown_in_progress = false;
+		}
+		_lifecycle_changed.notify_all();
+		WTSLogger::warn("Runner teardown is pending; CTA/SEL executor or plugin work has not quiesced, so engine, adapter, factory, and context owners remain alive until release is retried from a control thread");
+		return;
+	}
+
+	bool engineStopped = true;
+	if (!_teardown_engine_stopped)
+	{
+		try { if (_engine) _engine->release(); }
+		catch (...) { WTSLogger::error("Engine release threw while stopping the runner"); engineStopped = false; }
+		if (engineStopped)
+		{
+			std::lock_guard<std::mutex> configLock(_status_config_mutex);
+			_teardown_engine_stopped = true;
+		}
+	}
+
+	if (!engineStopped)
+	{
+		{
+			std::lock_guard<std::mutex> configLock(_status_config_mutex);
+			_teardown_pending = true;
+			_teardown_in_progress = false;
+		}
+		_lifecycle_changed.notify_all();
+		WTSLogger::warn("Runner teardown is pending; engine owners remain alive until release is retried from a control thread");
+		return;
+	}
+
+	{
+		std::lock_guard<std::mutex> configLock(_status_config_mutex);
+		_teardown_inputs_stopped = true;
+	}
+
+	// CTA/SEL executor hosts and their registered execution plugin units have
+	// completed the runner-wide coordinator before this point. Parser and trader
+	// plugin release still rely on their own callback-drain contracts; the trader
+	// sink barrier above does not prove that a provider will never emit a late SPI
+	// callback after release returns.
+	{
+		std::lock_guard<std::mutex> configLock(_status_config_mutex);
+		_manager_release_in_progress = true;
+	}
+	bool adaptersReleased = true;
+	try { _traders.release(); }
+	catch (...) { WTSLogger::error("Trader release threw while stopping the runner"); adaptersReleased = false; }
+	{
+		std::lock_guard<std::mutex> configLock(_status_config_mutex);
+		_manager_release_in_progress = false;
+	}
+	if (!adaptersReleased)
+	{
+		{
+			std::lock_guard<std::mutex> configLock(_status_config_mutex);
+			_teardown_pending = true;
+			_teardown_in_progress = false;
+		}
+		_lifecycle_changed.notify_all();
+		return;
+	}
+	try { WTSLogger::stop(); }
+	catch (...) { }
+
+	{
+		std::lock_guard<std::mutex> configLock(_status_config_mutex);
+		_lifecycle_state = LifecycleState::RELEASED;
+		_release_deferred_for_startup = false;
+		_teardown_in_progress = false;
+		_teardown_pending = false;
+		_deferred_release_requested.store(false, std::memory_order_release);
+	}
+	_lifecycle_changed.notify_all();
 }
 
 bool WtRtRunner::initActionPolicy()
@@ -1187,18 +2543,21 @@ bool WtRtRunner::addHftFactories(const char* folder)
 
 void WtRtRunner::hft_on_order_queue(uint32_t id, const char* stdCode, WTSOrdQueData* newOrdQue)
 {
+	RunnerCallbackScope callbackScope(this);
 	if (_cb_hft_ordque)
 		_cb_hft_ordque(id, stdCode, &newOrdQue->getOrdQueStruct());
 }
 
 void WtRtRunner::hft_on_order_detail(uint32_t id, const char* stdCode, WTSOrdDtlData* newOrdDtl)
 {
+	RunnerCallbackScope callbackScope(this);
 	if (_cb_hft_orddtl)
 		_cb_hft_orddtl(id, stdCode, &newOrdDtl->getOrdDtlStruct());
 }
 
 void WtRtRunner::hft_on_transaction(uint32_t id, const char* stdCode, WTSTransData* newTrans)
 {
+	RunnerCallbackScope callbackScope(this);
 	if (_cb_hft_trans)
 		_cb_hft_trans(id, stdCode, &newTrans->getTransStruct());
 }
@@ -1206,43 +2565,75 @@ void WtRtRunner::hft_on_transaction(uint32_t id, const char* stdCode, WTSTransDa
 #pragma region "Extended Parser"
 void WtRtRunner::parser_init(const char* id)
 {
+	RunnerCallbackScope callbackScope(this);
 	if (_cb_parser_evt)
 		_cb_parser_evt(EVENT_PARSER_INIT, id);
 }
 
 void WtRtRunner::parser_connect(const char* id)
 {
+	RunnerCallbackScope callbackScope(this);
 	if (_cb_parser_evt)
 		_cb_parser_evt(EVENT_PARSER_CONNECT, id);
 }
 
 void WtRtRunner::parser_disconnect(const char* id)
 {
+	RunnerCallbackScope callbackScope(this);
 	if (_cb_parser_evt)
 		_cb_parser_evt(EVENT_PARSER_DISCONNECT, id);
 }
 
 void WtRtRunner::parser_release(const char* id)
 {
+	RunnerCallbackScope callbackScope(this);
 	if (_cb_parser_evt)
 		_cb_parser_evt(EVENT_PARSER_RELEASE, id);
 }
 
 void WtRtRunner::parser_subscribe(const char* id, const char* code)
 {
+	RunnerCallbackScope callbackScope(this);
 	if (_cb_parser_sub)
 		_cb_parser_sub(id, code, true);
 }
 
 void WtRtRunner::parser_unsubscribe(const char* id, const char* code)
 {
+	RunnerCallbackScope callbackScope(this);
 	if (_cb_parser_sub)
 		_cb_parser_sub(id, code, false);
 }
 
 void WtRtRunner::on_ext_parser_quote(const char* id, WTSTickStruct* curTick, uint32_t uProcFlag)
 {
-	ParserAdapterPtr adapter = _parsers.getAdapter(id);
+	if (id == NULL || id[0] == '\0' || curTick == NULL)
+		return;
+
+	{
+		std::lock_guard<std::mutex> configLock(_status_config_mutex);
+		if (_lifecycle_state != LifecycleState::CONFIGURED &&
+			_lifecycle_state != LifecycleState::STARTING &&
+			_lifecycle_state != LifecycleState::RUNNING)
+			return;
+		++_active_ext_parser_quotes;
+	}
+	ScopeExit quoteFinished([this]() {
+		{
+			std::lock_guard<std::mutex> configLock(_status_config_mutex);
+			--_active_ext_parser_quotes;
+		}
+		_lifecycle_changed.notify_all();
+	});
+	RunnerCallbackScope callbackScope(this);
+
+	// Copy the strong owner while holding the registry lock, then release it
+	// before any parser or engine callback can reenter the runner.
+	ParserAdapterPtr adapter;
+	{
+		std::lock_guard<std::mutex> parserRegistryLock(_parser_registry_mutex);
+		adapter = _parsers.getAdapter(id);
+	}
 	if (adapter)
 	{
 		WTSTickData* newTick = WTSTickData::create(*curTick);
@@ -1260,12 +2651,14 @@ void WtRtRunner::on_ext_parser_quote(const char* id, WTSTickStruct* curTick, uin
 #pragma region "Extended Executer"
 void WtRtRunner::executer_init(const char* id)
 {
+	RunnerCallbackScope callbackScope(this);
 	if (_cb_exec_init)
 		_cb_exec_init(id);
 }
 
 void WtRtRunner::executer_set_position(const char* id, const char* stdCode, double target)
 {
+	RunnerCallbackScope callbackScope(this);
 	if (_cb_exec_cmd)
 		_cb_exec_cmd(id, stdCode, target);
 }

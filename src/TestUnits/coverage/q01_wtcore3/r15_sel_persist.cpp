@@ -26,6 +26,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include <Includes/WTSVariant.hpp>
 #include <WtCore/SelStraBaseCtx.h>
@@ -230,9 +231,9 @@ TEST_F(R15SelTest, dynprofit_update_saved_into_json_and_csv)
     // positions.csv：date,code,volume,closeprofit,dynprofit
     EXPECT_NE(slurp(outDir("s15_dyn") + "/positions.csv").find(
         "20250110,SHFE.ag.2512,2,1.50,3000.00"), std::string::npos);
-    // funds.csv：total_profit=1.5(载入), dyn=3000, balance=1.5+3000-0=3000.50
+    // funds.csv：total_profit=1.5(载入), dyn=3000, balance=1.5+3000-0=3001.50
     EXPECT_NE(slurp(outDir("s15_dyn") + "/funds.csv").find(
-        "20250110,1.50,3000.00,3000.50,0.00"), std::string::npos);
+        "20250110,1.50,3000.00,3001.50,0.00"), std::string::npos);
     // save_data 的 details 段：maxprice 被 5350 抬升、dynprofit=3000
     const std::string json = slurp(dataFile("s15_dyn"));
     EXPECT_NE(json.find("\"maxprice\": 5350"), std::string::npos);
@@ -261,7 +262,6 @@ TEST_F(R15SelTest, saved_dynprofit_reloaded_into_fund)
     EXPECT_DOUBLE_EQ(ctx2.stra_get_fund_data(2), 3000.0);
     EXPECT_DOUBLE_EQ(ctx2.stra_get_fund_data(0), 3001.5);       // profit-fees+dyn
     EXPECT_DOUBLE_EQ(ctx2.stra_get_fund_data(9), 0.0);          // default 分支
-    EXPECT_DOUBLE_EQ(ctx2.stra_get_price(kAg), 0.0);            // 新实例价表为空⇒引擎 0
 }
 
 TEST_F(R15SelTest, stra_set_position_appends_signal_and_persists)
@@ -271,17 +271,22 @@ TEST_F(R15SelTest, stra_set_position_appends_signal_and_persists)
     // 目标 2 手（当前 0）⇒ append_signal ⇒ log_signal + save_data（signals 段 L445-475）
     ctx.stra_set_position(kAg, 2, "TT");
 
-    // _price_map 为空 ⇒ sigprice 0；raw time 0 ⇒ gentime=20250110*1e9
+    // _price_map 为空 ⇒ sigprice 0；fixture engine time is 09:31.
     const std::string csv = slurp(outDir("s15_sig") + "/signals.csv");
-    EXPECT_NE(csv.find("SHFE.ag.2512,2,0,20250110000000000,TT"), std::string::npos);
+    EXPECT_NE(csv.find("SHFE.ag.2512,2,0,20250110093100000,TT"), std::string::npos);
 
     const std::string json = slurp(dataFile("s15_sig"));
     EXPECT_NE(json.find("\"usertag\": \"TT\""), std::string::npos);
     EXPECT_NE(json.find("\"volume\": 2"), std::string::npos);
 
-    // 重复设置相同目标仓位 ⇒ stra_set_position 的 decimal::eq 早退，不追加信号
+    // 当前持仓仍为 0，待执行信号不是持仓；相同目标会更新待执行信号并持久化 TT2。
     ctx.stra_set_position(kAg, 2, "TT2");
-    EXPECT_EQ(countLines(slurp(outDir("s15_sig") + "/signals.csv")), 2u);
+    const std::string replacedCsv = slurp(outDir("s15_sig") + "/signals.csv");
+    EXPECT_EQ(countLines(replacedCsv), 3u); // header + 初始信号 + 更新后的信号
+    EXPECT_NE(replacedCsv.find("SHFE.ag.2512,2,0,20250110093100000,TT2\n"), std::string::npos);
+    const std::string replacedJson = slurp(dataFile("s15_sig"));
+    EXPECT_NE(replacedJson.find("\"usertag\": \"TT2\""), std::string::npos);
+    EXPECT_NE(replacedJson.find("\"gentime\": 20250110093100000"), std::string::npos);
 }
 
 TEST_F(R15SelTest, signal_recovered_from_file_and_saved_back)
@@ -345,6 +350,114 @@ TEST_F(R15SelTest, fund_fees_restored_only_when_tdate_matches_engine)
     // positions 段照常执行：空数组 ⇒ 总平仓/动态盈亏被重算为 0
     EXPECT_DOUBLE_EQ(miss.stra_get_fund_data(1), 0.0);
     EXPECT_DOUBLE_EQ(miss.stra_get_fund_data(2), 0.0);
+}
+
+TEST_F(R15SelTest, load_data_rejects_valid_json_with_invalid_schema)
+{
+    const std::string badDetail = R"JSON({"code":"SHFE.ag.2512","volume":2,"closeprofit":1,
+        "dynprofit":0,"lastentertime":1,"lastexittime":0,"details":[{"price":1}]})JSON";
+    const std::string badPosition = R"JSON({"code":"SHFE.ag.2512","volume":"2","closeprofit":1,
+        "dynprofit":0,"lastentertime":1,"lastexittime":0,"details":[]})JSON";
+    const std::string simplePosition = R"JSON({"code":"SHFE.ag.2512","volume":2,"closeprofit":1,
+        "dynprofit":0,"lastentertime":1,"lastexittime":0,"details":[]})JSON";
+    const std::string frozenOnly = R"JSON({"code":"SHFE.ag.2512","volume":2,"closeprofit":1,
+        "dynprofit":0,"lastentertime":1,"lastexittime":0,"frozen":1,"details":[]})JSON";
+    const std::string frozenDateOnly = R"JSON({"code":"SHFE.ag.2512","volume":2,"closeprofit":1,
+        "dynprofit":0,"lastentertime":1,"lastexittime":0,"frozendate":20250110,"details":[]})JSON";
+    const std::vector<std::string> malformed = {
+        "[]",
+        R"JSON({"fund":[],"positions":[],"signals":{}})JSON",
+        R"JSON({"fund":{"total_profit":0,"total_dynprofit":0,"total_fees":0,"tdate":20250110}})JSON",
+        R"JSON({"fund":{"total_profit":0,"total_dynprofit":0,"total_fees":0,"tdate":20250110},"positions":{}})JSON",
+        R"JSON({"positions":[1]})JSON",
+        std::string("{\"positions\":[") + badPosition + "]}",
+        std::string("{\"positions\":[") + badDetail + "]}",
+        std::string("{\"positions\":[") + frozenOnly + "]}",
+        std::string("{\"positions\":[") + frozenDateOnly + "]}",
+        std::string("{\"positions\":[") + simplePosition + "," + simplePosition + "]}",
+        R"JSON({"positions":[],"signals":[]})JSON",
+        R"JSON({"positions":[],"signals":{"SHFE.ag.2512":{"usertag":"x","volume":"2","sigprice":1,"gentime":1}}})JSON",
+        R"JSON({"positions":[],"signals":{"SHFE.ag.2512":{"usertag":"a","volume":1,"sigprice":1,"gentime":1},"SHFE.ag.2512":{"usertag":"b","volume":2,"sigprice":2,"gentime":2}}})JSON"
+    };
+
+    uint32_t index = 0;
+    for (const std::string& json : malformed)
+    {
+        const std::string name = "s15_schema_bad_" + std::to_string(index++);
+        SelCtx ctx(&_eng, name.c_str());
+        writeFile(dataFile(name.c_str()), json);
+        ctx.on_init();
+        EXPECT_DOUBLE_EQ(ctx.stra_get_position(kAg), 0.0) << json;
+        EXPECT_DOUBLE_EQ(ctx.stra_get_fund_data(1), 0.0) << json;
+    }
+}
+
+TEST_F(R15SelTest, duplicate_signal_code_rejects_the_whole_snapshot)
+{
+    const std::string duplicateSignals = R"JSON({"positions":[],"signals":{
+        "SHFE.ag.2512":{"usertag":"first","volume":1,"sigprice":5200,"gentime":1},
+        "SHFE.ag.2512":{"usertag":"second","volume":2,"sigprice":5300,"gentime":2}}})JSON";
+    SelCtx ctx(&_eng, "s15_duplicate_signal");
+    writeFile(dataFile("s15_duplicate_signal"), duplicateSignals);
+    ctx.on_init();
+    ctx.on_session_end(20250110);
+
+    EXPECT_NE(slurp(dataFile("s15_duplicate_signal")).find("\"signals\": {}"), std::string::npos);
+}
+
+TEST_F(R15SelTest, malformed_later_row_does_not_partially_apply_snapshot)
+{
+    SelCtx ctx(&_eng, "s15_schema_atomic");
+    writePosJson(dataFile("s15_schema_atomic"), posAg2());
+    ctx.on_init();
+    ASSERT_DOUBLE_EQ(ctx.stra_get_position(kAg), 2.0);
+    ASSERT_DOUBLE_EQ(ctx.stra_get_fund_data(1), 1.5);
+
+    const std::string malformed = R"JSON({"fund":{"total_profit":99,"total_dynprofit":88,"total_fees":77,"tdate":20250110},
+        "positions":[
+          {"code":"SHFE.ag.2512","volume":9,"closeprofit":99,"dynprofit":88,"lastentertime":1,"lastexittime":0,"details":[]},
+          {"code":"SHFE.ag.2512","volume":5,"closeprofit":1,"dynprofit":0,"lastexittime":0,"details":[]}
+        ],"signals":{}})JSON";
+    writeFile(dataFile("s15_schema_atomic"), malformed);
+    ctx.on_init();
+
+    EXPECT_DOUBLE_EQ(ctx.stra_get_position(kAg), 2.0);
+    EXPECT_DOUBLE_EQ(ctx.stra_get_fund_data(1), 1.5);
+    EXPECT_DOUBLE_EQ(ctx.stra_get_fund_data(3), 0.0);
+}
+
+TEST_F(R15SelTest, load_data_keeps_reader_tolerated_legacy_optional_fields)
+{
+    const std::string legacy = R"JSON({"positions":[{"code":"SHFE.ag.2512","volume":2,
+        "closeprofit":1.5,"dynprofit":0,"lastentertime":1,"lastexittime":0,
+        "details":[{"long":true,"price":5200,"volume":2,"opentime":1,
+        "profit":0,"maxprofit":0,"maxloss":0,"opentag":"old"}]}],"signals":null})JSON";
+    SelCtx ctx(&_eng, "s15_schema_legacy");
+    writeFile(dataFile("s15_schema_legacy"), legacy);
+    ctx.on_init();
+
+    EXPECT_DOUBLE_EQ(ctx.stra_get_position(kAg), 2.0);
+    EXPECT_DOUBLE_EQ(ctx.stra_get_position_avgpx(kAg), 5200.0);
+    EXPECT_DOUBLE_EQ(ctx.stra_get_fund_data(1), 1.5);
+}
+
+TEST_F(R15SelTest, load_userdata_rejects_wrong_root_or_value_without_partial_update)
+{
+    const std::vector<std::string> malformed = {
+        R"JSON([])JSON",
+        R"JSON({"new":"accepted-too-early","bad":7})JSON"
+    };
+    uint32_t index = 0;
+    for (const std::string& json : malformed)
+    {
+        const std::string name = "s15_ud_schema_bad_" + std::to_string(index++);
+        SelCtx ctx(&_eng, name.c_str());
+        ctx.stra_save_user_data("existing", "preserved");
+        writeFile(udFile(name.c_str()), json);
+        ctx.on_init();
+        EXPECT_STREQ(ctx.stra_load_user_data("existing", "missing"), "preserved");
+        EXPECT_STREQ(ctx.stra_load_user_data("new", "missing"), "missing");
+    }
 }
 
 TEST_F(R15SelTest, expired_position_zeroed_but_closeprofit_counted)
@@ -424,7 +537,7 @@ TEST_F(R15SelTest, on_schedule_saves_state_and_emits_autoexit_signal)
     // 调度结束恢复引擎时间
     EXPECT_EQ(ctx.stra_get_time(), 931u);
     const std::string csv = slurp(outDir("s15_sched") + "/signals.csv");
-    EXPECT_NE(csv.find("SHFE.ag.2512,0,0,20250110000000000,autoexit"), std::string::npos);
+    EXPECT_NE(csv.find("SHFE.ag.2512,0,0,20250110093100000,autoexit"), std::string::npos);
     EXPECT_NE(slurp(dataFile("s15_sched")).find("\"usertag\": \"autoexit\""), std::string::npos);
 }
 

@@ -5,9 +5,10 @@
  * 覆盖 UDPCaster.cpp:145-220：
  *  - 非 1024 字节报文 -> L203-216 回 "Can not indentify the command"；
  *  - 1024 字节但 _type != 0x100 -> L162 条件为 false，仅重新挂起接收；
- *  - 1024 字节订阅包 -> StrUtil::split、点号切分 code/exchg、getContract、
+ *  - 1024 字节零填充订阅包 -> 有界 NUL 定位、StrUtil::split、点号切分 code/exchg、getContract、
  *    getCurTick；DataManager 没有 writer，getCurTick 恒为 NULL，走
  *    L180-182 的 continue（tick 非空时的回包段没有公开接缝，见清单）。
+ *  - 订阅字段没有 NUL -> 不进入合约查询，接收循环继续处理后续请求。
  *
  * 只使用 127.0.0.1 回环：客户端向 UDPCaster 的临时订阅端口发包；
  * 每个“无回包”的请求后追加一个短包作为屏障，收到错误回包即证明前序请求已处理。
@@ -19,6 +20,7 @@
 #include <filesystem>
 #include <string>
 #include <vector>
+#include <atomic>
 
 #include <WtDtCore/DataManager.h>
 #include <WTSTools/WTSBaseDataMgr.h>
@@ -26,6 +28,24 @@
 #include "r164_test_util.h"
 
 namespace {
+
+class CountingBaseDataMgr : public WTSBaseDataMgr
+{
+public:
+	WTSContractInfo* getContract(const char* code, const char* exchg, uint32_t uDate) override
+	{
+		_contractLookupCount.fetch_add(1, std::memory_order_relaxed);
+		return WTSBaseDataMgr::getContract(code, exchg, uDate);
+	}
+
+	uint32_t contractLookupCount() const
+	{
+		return _contractLookupCount.load(std::memory_order_relaxed);
+	}
+
+private:
+	std::atomic<uint32_t> _contractLookupCount { 0 };
+};
 
 class R164UdpCasterReceiveTest : public ::testing::Test
 {
@@ -55,7 +75,7 @@ protected:
 	}
 
 	std::filesystem::path _dir;
-	WTSBaseDataMgr _bdMgr;
+	CountingBaseDataMgr _bdMgr;
 	DataManager _dtMgr;
 };
 
@@ -109,7 +129,8 @@ TEST_F(R164UdpCasterReceiveTest, MalformedAndSubscribeDatagramsOnLoopback)
 	ASSERT_GT(r164::recv_datagram(clientFd, reply, 3000), 0);
 	EXPECT_EQ(std::string(reply.begin(), reply.end()), r164::cannot_identify_text());
 
-	// 3) 订阅包：三种代码分别命中空 exchg、有效合约 + NULL tick、无效合约。
+	// 3) 生产端发送整包零填充；首个 NUL 之后的填充字节不得影响订阅解析。
+	const uint32_t lookupsBeforeSubscribe = _bdMgr.contractLookupCount();
 	r164::ReqPacket sub;
 	memset(&sub, 0, sizeof(sub));
 	sub._type = 0x100u;
@@ -121,6 +142,19 @@ TEST_F(R164UdpCasterReceiveTest, MalformedAndSubscribeDatagramsOnLoopback)
 		&junk, sizeof(junk)));
 	ASSERT_GT(r164::recv_datagram(clientFd, reply, 3000), 0);
 	EXPECT_EQ(std::string(reply.begin(), reply.end()), r164::cannot_identify_text());
+	EXPECT_EQ(_bdMgr.contractLookupCount(), lookupsBeforeSubscribe + 3);
+
+	// 4) 固定订阅字段无 NUL 时必须在任何 C 字符串处理或合约查询前拒绝。
+	r164::ReqPacket unterminated;
+	memset(&unterminated, 'x', sizeof(unterminated));
+	unterminated._type = 0x100u;
+	ASSERT_TRUE(r164::send_datagram(clientFd, static_cast<uint16_t>(sport),
+		&unterminated, sizeof(unterminated)));
+	ASSERT_TRUE(r164::send_datagram(clientFd, static_cast<uint16_t>(sport),
+		&junk, sizeof(junk)));
+	ASSERT_GT(r164::recv_datagram(clientFd, reply, 3000), 0);
+	EXPECT_EQ(std::string(reply.begin(), reply.end()), r164::cannot_identify_text());
+	EXPECT_EQ(_bdMgr.contractLookupCount(), lookupsBeforeSubscribe + 3);
 
 	caster.stop_once();
 	::close(clientFd);

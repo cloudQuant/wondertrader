@@ -10,16 +10,19 @@
 #pragma once
 
 #include <boost/asio/io_context.hpp>
+#include <boost/asio/executor_work_guard.hpp>
+#include <memory>
 
 #include "../Includes/WTSMarcos.h"
 #include "../Includes/WTSObject.hpp"
+#include "../Share/DLLHelper.hpp"
 #include "../Share/StdUtils.hpp"
 
-typedef unsigned long(*FuncCreateMQServer)(const char*);
-typedef void(*FuncDestroyMQServer)(unsigned long);
-typedef void(*FundPublishMessage)(unsigned long, const char*, const char*, unsigned long);
+typedef WtUInt32(*FuncCreateMQServer)(const char*, bool);
+typedef void(*FuncDestroyMQServer)(WtUInt32);
+typedef void(*FundPublishMessage)(WtUInt32, const char*, const char*, WtUInt32);
 
-typedef void(*FuncLogCallback)(unsigned long, const char*, bool);
+typedef void(PORTER_FLAG *FuncLogCallback)(WtUInt32, const char*, bool);
 typedef void(*FuncRegCallbacks)(FuncLogCallback);
 
 
@@ -32,9 +35,13 @@ class EventNotifier
 {
 public:
 	EventNotifier();
+	// The owner must stop external notify callers before destruction. Destruction
+	// must not be initiated from this notifier's publish callback: self-join and
+	// preserving the current object's lifetime cannot be made safe here.
 	~EventNotifier();
 
 private:
+	void	stopWorker();
 	void	tradeToJson(const char* trader, uint32_t localid, const char* stdCode, WTSTradeInfo* trdInfo, std::string& output);
 	void	orderToJson(const char* trader, uint32_t localid, const char* stdCode, WTSOrderInfo* ordInfo, std::string& output);
 
@@ -51,14 +58,15 @@ public:
 
 private:
 	std::string		_url;
-	uint32_t		_mq_sid;
+	DllHandle		_dll_handle; // successful MQ modules remain pinned without an ABI quiescence guarantee
+	WtUInt32		_mq_sid;
 	FuncCreateMQServer	_creator;
 	FuncDestroyMQServer	_remover;
 	FundPublishMessage	_publisher;
 	FuncRegCallbacks	_register;
 
-	bool			_stopped;
 	boost::asio::io_context		_asyncio;
+	std::unique_ptr<boost::asio::executor_work_guard<boost::asio::io_context::executor_type>> _work_guard;
 	StdThreadPtr				_worker;
 };
 

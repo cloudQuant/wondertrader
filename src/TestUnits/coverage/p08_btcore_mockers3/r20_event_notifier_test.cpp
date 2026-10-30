@@ -5,11 +5,8 @@
  * 公开面: init / notifyEvent / notifyData / notifyFund / 构造析构。
  *
  * 关键约束（读源码得出，不猜测）：
- * - EventNotifier 构造函数只初始化 _mq_sid=0，**不初始化** m_strURL 之外的
- *   _creator/_remover/_publisher/_register 四个函数指针（EventNotifier.h ctor）。
- *   因此 heap/stack 实例调用 notify* 会读野指针（UB）。本用例统一用 **static 存储期**
- *   实例：静态区在 ctor 之前已被零初始化，ctor 不写这四个成员 → _publisher 恒为 NULL，
- *   notify* 的 `if(_publisher)` 守卫是确定性的。缺陷已记 bugs/R20_wtbtcore.md。
+ * - 默认构造的函数指针均为空；自动存储期对象在 init 前调用 notify* 必须安全空转，
+ *   离开作用域时析构也不能调用未设置的 remover。
  * - init(active=true) 的正分支会在 load 成功后调用 create_server 起**真实 MQ 服务**
  *   （本机确认 build-cov 下存在 libWtMsgQue.dylib），违反「禁真实 socket」，
  *   故本轮不进入该分支，登记留白。
@@ -27,9 +24,6 @@ USING_NS_WTP;
 
 namespace
 {
-	// static 存储期 → 四个函数指针成员确定性为 NULL
-	static wtp::EventNotifier g_notifier;
-
 	WTSVariant* bool_cfg(const char* key, bool val)
 	{
 		WTSVariant* cfg = WTSVariant::createObject();
@@ -44,14 +38,15 @@ protected:
 	void SetUp() override {}
 };
 
-// ctor: 静态实例构造后 notify* 的守卫链必须为空转（_publisher==NULL 由静态零初始化保证）
-TEST_F(R20EventNotifier, CtorLeavesPublisherNullOnStaticInstance)
+// 自动存储期实例在 init 前可通知，且离开作用域时安全析构。
+TEST_F(R20EventNotifier, AutomaticStorageNotifierCanNotifyAndDestructBeforeInit)
 {
-	// notifyEvent 内部 strlen(evtType) 只在 publisher 非空时使用；
-	// 这里只验证守卫空转不崩溃、且可重复调用幂等。
-	g_notifier.notifyEvent("BT_BACKTEST_DONE");
-	g_notifier.notifyEvent("BT_BACKTEST_DONE");
-	g_notifier.notifyEvent("");
+	wtp::EventNotifier notifier;
+	notifier.notifyEvent("BT_BACKTEST_DONE");
+	notifier.notifyEvent("BT_BACKTEST_DONE");
+	notifier.notifyEvent("");
+	notifier.notifyData("BT_STRATA", nullptr, 0);
+	notifier.notifyFund("BT_FUND", 20240103, 1234.5, -67.25, 100000.0, 88.125);
 	SUCCEED();
 }
 
@@ -63,8 +58,9 @@ TEST_F(R20EventNotifier, NotifyDataDoesNotTouchBufferWithoutPublisher)
 	const char expected[16] = {
 		0x5A,0x5A,0x5A,0x5A,0x5A,0x5A,0x5A,0x5A,
 		0x5A,0x5A,0x5A,0x5A,0x5A,0x5A,0x5A,0x5A };
-	g_notifier.notifyData("BT_STRATA", payload, static_cast<uint32_t>(sizeof(payload)));
-	g_notifier.notifyData("BT_STRATA", payload, 0);
+	wtp::EventNotifier notifier;
+	notifier.notifyData("BT_STRATA", payload, static_cast<uint32_t>(sizeof(payload)));
+	notifier.notifyData("BT_STRATA", payload, 0);
 	EXPECT_EQ(0, std::memcmp(payload, expected, sizeof(payload)));
 }
 
@@ -73,26 +69,28 @@ TEST_F(R20EventNotifier, NotifyFundBuildsJsonAndNoopsWithoutPublisher)
 {
 	// 五个入参全部来自本用例；无 publisher → 无任何外部可观察副作用，
 	// 断言锚定「两次不同入参调用都不崩溃、且函数自身不改任何共享状态」。
-	g_notifier.notifyFund("BT_FUND", 20240103, 1234.5, -67.25, 100000.0, 88.125);
-	g_notifier.notifyFund("BT_FUND", 0, 0.0, 0.0, 0.0, 0.0);
-	g_notifier.notifyFund("BT_FUND", 20241231, -1.0, -2.0, -3.0, -4.0);
+	wtp::EventNotifier notifier;
+	notifier.notifyFund("BT_FUND", 20240103, 1234.5, -67.25, 100000.0, 88.125);
+	notifier.notifyFund("BT_FUND", 0, 0.0, 0.0, 0.0, 0.0);
+	notifier.notifyFund("BT_FUND", 20241231, -1.0, -2.0, -3.0, -4.0);
 	SUCCEED();
 }
 
 // init: active=false 必须在读 url / load 模块之前返回 false（L69-70）
 TEST_F(R20EventNotifier, InitReturnsFalseWhenInactive)
 {
+	wtp::EventNotifier notifier;
 	WTSVariant* cfg = bool_cfg("active", false);
-	EXPECT_FALSE(g_notifier.init(cfg));
-	// 早退不得污染静态实例的 notify* 空转语义
-	g_notifier.notifyEvent("R20_AFTER_INACTIVE");
+	EXPECT_FALSE(notifier.init(cfg));
+	// 早退不得污染通知器的空转语义
+	notifier.notifyEvent("R20_AFTER_INACTIVE");
 	SUCCEED();
 }
 
-// init 用独立 static 实例同样返回 false；两个实例互不影响（无全局单例状态）
+// init 用独立自动存储期实例同样返回 false；两个实例互不影响（无全局单例状态）
 TEST_F(R20EventNotifier, InactiveInitIsSideEffectFreeOnFreshInstance)
 {
-	static wtp::EventNotifier s_probe;
+	wtp::EventNotifier s_probe;
 	WTSVariant* cfg = bool_cfg("active", false);
 	EXPECT_FALSE(s_probe.init(cfg));
 	s_probe.notifyFund("R20_PROBE", 20240103, 1.0, 2.0, 3.0, 4.0);
@@ -100,11 +98,10 @@ TEST_F(R20EventNotifier, InactiveInitIsSideEffectFreeOnFreshInstance)
 	SUCCEED();
 }
 
-// dtor: _remover==NULL 且 _mq_sid==0 时短路，静态实例析构不触发（对象仍存活）；
-// 这里覆盖「init 失败后 _mq_sid 仍为 0」的可观察不变量。
+// dtor: inactive init 后 _mq_sid 仍为 0，自动存储期实例离开作用域时安全析构。
 TEST_F(R20EventNotifier, FailedInitLeavesServerIdZero)
 {
-	static wtp::EventNotifier s_probe2;
+	wtp::EventNotifier s_probe2;
 	WTSVariant* cfg = bool_cfg("active", false);
 	EXPECT_FALSE(s_probe2.init(cfg));
 	// _mq_sid==0 不变 → 若将来析构该实例，_remover&&_mq_sid!=0 必为假（EventNotifier.cpp L55-56）

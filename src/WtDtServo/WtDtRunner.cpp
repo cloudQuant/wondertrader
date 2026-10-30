@@ -23,7 +23,43 @@
 #include "../Share/CodeHelper.hpp"
 #include "../Share/Converter.hpp"
 
+#include <cstring>
+#include <set>
+
 USING_NS_WTP;
+
+namespace
+{
+	uint32_t g_auto_parserid = 1000;
+
+	bool isOptionCodeFormatExpected(const char* code, const char* exchange)
+	{
+		if (code == NULL || exchange == NULL)
+			return false;
+
+		const bool requireHyphenated = std::strcmp(exchange, "CFFEX") == 0
+			|| std::strcmp(exchange, "DCE") == 0;
+		const bool requireCompact = std::strcmp(exchange, "SHFE") == 0
+			|| std::strcmp(exchange, "INE") == 0
+			|| std::strcmp(exchange, "ZCE") == 0
+			|| std::strcmp(exchange, "CZCE") == 0;
+		if (!requireHyphenated && !requireCompact)
+			return true;
+
+		std::size_t hyphens = 0;
+		std::size_t length = 0;
+		while (length < MAX_INSTRUMENT_LENGTH && code[length] != '\0')
+		{
+			if (code[length] == '-')
+				++hyphens;
+			++length;
+		}
+		if (length == 0 || length >= MAX_INSTRUMENT_LENGTH)
+			return false;
+
+		return requireHyphenated ? hyphens == 2 : hyphens == 0;
+	}
+}
 
 WtDtRunner::WtDtRunner()
 	: _data_store(NULL)
@@ -48,12 +84,13 @@ void WtDtRunner::initialize(const char* cfgFile, bool isFile /* = true */, const
 		WTSLogger::error("WtDtServo has already been initialized");
 		return;
 	}
-
-	_cb_tick = cbTick;
-	_cb_bar = cbBar;
+	if (_parser_init_failed)
+	{
+		WTSLogger::error("WtDtServo cannot retry initialization while a parser candidate is quarantined");
+		return;
+	}
 
 	WTSLogger::init(logCfg);
-	WtHelper::set_module_dir(modDir);
 
 	WTSVariant* config = isFile ? WTSCfgLoader::load_from_file(cfgFile) : WTSCfgLoader::load_from_content(cfgFile, false);
 	if(config == NULL)
@@ -63,14 +100,120 @@ void WtDtRunner::initialize(const char* cfgFile, bool isFile /* = true */, const
 		return;
 	}
 
-	if(!config->getBoolean("disable_dump"))
+	WTSVariant* cfgBF = config->get("basefiles");
+	if (cfgBF == NULL || cfgBF->type() != WTSVariant::VT_Object)
+	{
+		WTSLogger::error("Invalid data service config: 'basefiles' must be an object");
+		config->release();
+		return;
+	}
+
+	WTSVariant* parserSidecar = NULL;
+	WTSVariant* parserItems = NULL;
+	WTSVariant* cfgParser = config->get("parsers");
+	auto releaseConfig = [&]() {
+		if (parserSidecar != NULL)
+		{
+			parserSidecar->release();
+			parserSidecar = NULL;
+		}
+		config->release();
+	};
+
+	// Validate the complete parser-config envelope before loading any manager.
+	// A broken explicitly configured sidecar must fail before reinitializing the
+	// data reader or partially mutating base-data/hot managers.
+	if (cfgParser != NULL)
+	{
+		if (cfgParser->type() == WTSVariant::VT_String)
+		{
+			const char* filename = cfgParser->asCString();
+			if (filename == NULL || filename[0] == '\0')
+			{
+				WTSLogger::error("Parser configuration path is empty");
+				releaseConfig();
+				return;
+			}
+			if (!StdFile::exists(filename))
+			{
+				WTSLogger::error("Parser configuration {} not exists", filename);
+				releaseConfig();
+				return;
+			}
+
+			WTSLogger::info("Reading parser config from {}...", filename);
+			parserSidecar = WTSCfgLoader::load_from_file(filename);
+			if (parserSidecar == NULL)
+			{
+				WTSLogger::error("Loading parser config {} failed", filename);
+				releaseConfig();
+				return;
+			}
+			if (parserSidecar->type() != WTSVariant::VT_Object)
+			{
+				WTSLogger::error("Invalid parser config {}: root must be an object", filename);
+				releaseConfig();
+				return;
+			}
+			parserItems = parserSidecar->get("parsers");
+		}
+		else if (cfgParser->type() == WTSVariant::VT_Array)
+		{
+			parserItems = cfgParser;
+		}
+		else
+		{
+			WTSLogger::error("Invalid data service config: 'parsers' must be an array or sidecar path");
+			releaseConfig();
+			return;
+		}
+
+		if (parserItems == NULL || parserItems->type() != WTSVariant::VT_Array)
+		{
+			WTSLogger::error("Invalid parser config: 'parsers' must be an array");
+			releaseConfig();
+			return;
+		}
+
+		std::set<std::string> parserIds;
+		uint32_t nextAutoParserId = g_auto_parserid;
+		for (uint32_t idx = 0; idx < parserItems->size(); idx++)
+		{
+			WTSVariant* cfgItem = parserItems->get(idx);
+			if (cfgItem == NULL || cfgItem->type() != WTSVariant::VT_Object)
+			{
+				WTSLogger::error("Invalid parser config: each parser entry must be an object");
+				releaseConfig();
+				return;
+			}
+			if (!cfgItem->getBoolean("active"))
+				continue;
+
+			const char* id = cfgItem->getCString("id");
+			const std::string parserId = (id == NULL || id[0] == '\0')
+				? fmtutil::format<64>("auto_parser_{}", nextAutoParserId++)
+				: std::string(id);
+			if (!parserIds.insert(parserId).second)
+			{
+				WTSLogger::error("Duplicate parser id '{}' in data service configuration", parserId.c_str());
+				releaseConfig();
+				return;
+			}
+		}
+	}
+
+	_cb_tick = cbTick;
+	_cb_bar = cbBar;
+	WtHelper::set_module_dir(modDir);
+	if (!config->getBoolean("disable_dump"))
 	{
 #ifdef _MSC_VER
 		CMiniDumper::Enable(getModuleName(), true, WtHelper::get_cwd());
 #endif
 	}
+
 	//基础数据文件
-	WTSVariant* cfgBF = config->get("basefiles");
+
 	if (cfgBF->get("session"))
 	{
 		_bd_mgr.loadSessions(cfgBF->getCString("session"));
@@ -149,44 +292,28 @@ void WtDtRunner::initialize(const char* cfgFile, bool isFile /* = true */, const
 
 	initDataMgr(config->get("data"));
 
-	WTSVariant* cfgParser = config->get("parsers");
-	if (cfgParser)
+	if (cfgParser != NULL)
 	{
-		if (cfgParser->type() == WTSVariant::VT_String)
+		if (!initParsers(parserItems))
 		{
-			const char* filename = cfgParser->asCString();
-			if (StdFile::exists(filename))
-			{
-				WTSLogger::info("Reading parser config from {}...", filename);
-				WTSVariant* var = WTSCfgLoader::load_from_file(filename);
-				if (var)
-				{
-					initParsers(var->get("parsers"));
-					var->release();
-				}
-				else
-				{
-					WTSLogger::error("Loading parser config {} failed", filename);
-				}
-			}
+			const bool quarantined = hasQuarantinedParser();
+			if (quarantined)
+				_parser_init_failed = true;
+			releaseConfig();
+			if (quarantined)
+				WTSLogger::error("WtDtServo initialization stopped because a parser failed to initialize; quarantined parser owners must remain alive");
 			else
-			{
-				WTSLogger::error("Parser configuration {} not exists", filename);
-			}
-		}
-		else if (cfgParser->type() == WTSVariant::VT_Array)
-		{
-			initParsers(cfgParser);
+				WTSLogger::error("WtDtServo initialization stopped because parser configuration could not be applied");
+			return;
 		}
 	}
 	else
 		WTSLogger::log_raw(LL_WARN, "No parsers config, skipped loading parsers");
 
-	config->release();
-
-	start();
+	releaseConfig();
 
 	_is_inited = true;
+	start();
 }
 
 void WtDtRunner::initDataMgr(WTSVariant* config)
@@ -375,8 +502,13 @@ WTSKlineSlice* WtDtRunner::get_sbars_by_date(const char* stdCode, uint32_t secs,
 	return _data_mgr.get_skline_slice_by_date(stdCode, secs, uDate);
 }
 
-void WtDtRunner::initParsers(WTSVariant* cfg)
+bool WtDtRunner::initParsers(WTSVariant* cfg)
 {
+	if (cfg == NULL || cfg->type() != WTSVariant::VT_Array)
+		return false;
+
+	std::vector<ParserAdapterPtr> candidates;
+	std::set<std::string> stagedIds;
 	for (uint32_t idx = 0; idx < cfg->size(); idx++)
 	{
 		WTSVariant* cfgItem = cfg->get(idx);
@@ -390,20 +522,48 @@ void WtDtRunner::initParsers(WTSVariant* cfg)
 		std::string realid = id;
 		if (realid.empty())
 		{
-			static uint32_t auto_parserid = 1000;
-			realid = fmtutil::format<64>("auto_parser_{}", auto_parserid++);
+			realid = fmtutil::format<64>("auto_parser_{}", g_auto_parserid++);
+		}
+		if (!stagedIds.insert(realid).second || _parsers.getAdapter(realid.c_str()) != nullptr)
+		{
+			WTSLogger::error("Duplicate parser id '{}' in data service configuration", realid.c_str());
+			_quarantined_parsers.insert(_quarantined_parsers.end(), candidates.begin(), candidates.end());
+			return false;
 		}
 
 		ParserAdapterPtr adapter(new ParserAdapter(&_bd_mgr, this));
-		adapter->init(realid.c_str(), cfgItem);
-		_parsers.addAdapter(realid.c_str(), adapter);
+		if (!adapter->init(realid.c_str(), cfgItem))
+		{
+			_quarantined_parsers.push_back(adapter);
+			_quarantined_parsers.insert(_quarantined_parsers.end(), candidates.begin(), candidates.end());
+			WTSLogger::error("Parser '{}' failed to initialize; data service will not start", realid.c_str());
+			return false;
+		}
+		candidates.push_back(adapter);
+	}
+
+	for (auto& adapter : candidates)
+	{
+		if (!_parsers.addAdapter(adapter->id(), adapter))
+		{
+			_quarantined_parsers.insert(_quarantined_parsers.end(), candidates.begin(), candidates.end());
+			WTSLogger::error("Failed to register initialized parser '{}'", adapter->id());
+			return false;
+		}
 	}
 
 	WTSLogger::info("{} market data parsers loaded in total", _parsers.size());
+	return true;
 }
 
 void WtDtRunner::start()
 {
+	if (!_is_inited)
+	{
+		WTSLogger::error("WtDtServo not initialized");
+		return;
+	}
+
 	_parsers.run();
 }
 
@@ -420,25 +580,54 @@ void WtDtRunner::proc_tick(WTSTickData* curTick)
 		return;
 
 	WTSCommodityInfo* commInfo = cInfo->getCommInfo();
+	if (commInfo == NULL)
+	{
+		WTSLogger::error("Tick contract '{}' on exchange '{}' has no commodity info, dropped",
+			cInfo->getCode(), cInfo->getExchg());
+		return;
+	}
 	[[maybe_unused]] WTSSessionInfo* sInfo = commInfo->getSessionInfo();
 
 	[[maybe_unused]] uint32_t hotflag = 0;
 
 	std::string stdCode;
-	if (commInfo->getCategoty() == CC_FutOption)
+	const ContractCategory category = commInfo->getCategoty();
+	const char* exchange = cInfo->getExchg();
+	const char* rawCode = cInfo->getCode();
+	const bool cffexSpotOption = category == CC_SpotOption
+		&& exchange != NULL && std::strcmp(exchange, "CFFEX") == 0;
+	if (category == CC_FutOption || cffexSpotOption)
 	{
-		stdCode = CodeHelper::rawFutOptCodeToStdCode(cInfo->getCode(), cInfo->getExchg());
+		if (!CodeHelper::tryRawFutOptCodeToStdCode(rawCode, exchange, stdCode)
+			|| !isOptionCodeFormatExpected(rawCode, exchange))
+		{
+			WTSLogger::error("Invalid option tick code '{}' for exchange '{}' (category {}), dropped",
+				rawCode != NULL ? rawCode : "", exchange != NULL ? exchange : "",
+				static_cast<uint32_t>(category));
+			return;
+		}
 	}
 	else if (CodeHelper::isMonthlyCode(curTick->code()))
 	{
 		//如果是分月合约，则进行主力和次主力的判断
-		stdCode = CodeHelper::rawMonthCodeToStdCode(cInfo->getCode(), cInfo->getExchg());
+		stdCode = CodeHelper::rawMonthCodeToStdCode(rawCode, exchange);
 	}
 	else
 	{
-		stdCode = CodeHelper::rawFlatCodeToStdCode(cInfo->getCode(), cInfo->getExchg(), cInfo->getProduct());
+		stdCode = CodeHelper::rawFlatCodeToStdCode(rawCode, exchange, cInfo->getProduct());
 	}
-	curTick->setCode(stdCode.c_str());
+	if (stdCode.empty())
+	{
+		WTSLogger::error("Failed to normalize tick code '{}' for exchange '{}', dropped",
+			rawCode != NULL ? rawCode : "", exchange != NULL ? exchange : "");
+		return;
+	}
+	if (!curTick->trySetCode(stdCode.c_str()))
+	{
+		WTSLogger::error("Normalized tick code '{}' for exchange '{}' is too long, dropped",
+			stdCode.c_str(), exchange != NULL ? exchange : "");
+		return;
+	}
 
 	trigger_tick(stdCode.c_str(), curTick);
 
@@ -448,7 +637,13 @@ void WtDtRunner::proc_tick(WTSTickData* curTick)
 		for (const std::string& hotCode : hotCodes)
 		{
 			WTSTickData* hotTick = WTSTickData::create(curTick->getTickStruct());
-			hotTick->setCode(hotCode.c_str());
+			if (hotTick == NULL)
+				continue;
+			if (!hotTick->trySetCode(hotCode.c_str()))
+			{
+				hotTick->release();
+				continue;
+			}
 			hotTick->setContractInfo(curTick->getContractInfo());
 
 			trigger_tick(hotCode.c_str(), hotTick);
@@ -476,6 +671,8 @@ void WtDtRunner::trigger_tick(const char* stdCode, WTSTickData* curTick)
 				else
 				{
 					std::string wCode = fmtutil::format("{}{}", stdCode, (flag == 1) ? SUFFIX_QFQ : SUFFIX_HFQ);
+					if (wCode.size() >= MAX_INSTRUMENT_LENGTH)
+						continue;
 					if (flag == 1)
 					{
 						_cb_tick(wCode.c_str(), &curTick->getTickStruct());
@@ -523,7 +720,8 @@ void WtDtRunner::trigger_tick(const char* stdCode, WTSTickData* curTick)
 			else
 			{
 				std::string wCode = fmtutil::format("{}{}", stdCode, (flag == 1) ? SUFFIX_QFQ : SUFFIX_HFQ);
-				curTick->setCode(wCode.c_str());
+				if (wCode.size() >= MAX_INSTRUMENT_LENGTH || !curTick->trySetCode(wCode.c_str()))
+					continue;
 				if (flag == 1)
 				{
 					_data_mgr.update_bars(wCode.c_str(), curTick);

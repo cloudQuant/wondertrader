@@ -1,0 +1,37 @@
+{
+  "suite": "WtDiffExecuterConcurrencyTest",
+  "binary": "build-cov/build_x64/Debug/bin/TestUnits/wt-diff-focused",
+  "binary_sha256": "af000903805cf4e7b51216eca2d1902df729dae76cd75e4354fca68dfa5c59aa",
+  "object_build_logs": [
+    "build-v9.log",
+    "build-v10.log",
+    "build-v11.log"
+  ],
+  "rebuilt_objects": [
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/WtDiffExecuter.cpp.o",
+    "build-cov/TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n02_wtcore_engines/n02_diff_concurrency_test.cpp.o"
+  ],
+  "also_rebuilt_in_batch": [
+    "build-cov/TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n02_wtcore_engines/r120_diff_executer_unit_test.cpp.o (rebuilt in build-v10.log for the separate R120 executable; not linked into this Diff test binary)"
+  ],
+  "reused_dependencies": [
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/WtExecuterFactory.cpp.o",
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/TraderAdapter.cpp.o",
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/WtHelper.cpp.o",
+    "build-cov/WtCore/CMakeFiles/WtCore.dir/ActionPolicyMgr.cpp.o"
+  ],
+  "link_command": "/usr/bin/c++ -arch arm64 -g -fprofile-instr-generate -Wl,-undefined,dynamic_lookup build-cov/TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n02_wtcore_engines/n02_diff_concurrency_test.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/WtDiffExecuter.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/WtExecuterFactory.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/TraderAdapter.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/WtHelper.cpp.o build-cov/WtCore/CMakeFiles/WtCore.dir/ActionPolicyMgr.cpp.o /opt/homebrew/lib/libgtest_main.a /opt/homebrew/lib/libgtest.a build-cov/build_x64/Debug/libs/libWTSTools.a build-cov/build_x64/Debug/libs/libWTSUtils.a /usr/local/lib/libiconv.dylib -L/opt/homebrew/lib -lboost_filesystem -lboost_thread -lpthread -o build-cov/build_x64/Debug/bin/TestUnits/wt-diff-focused",
+  "run_command": "build-cov/build_x64/Debug/bin/TestUnits/wt-diff-focused",
+  "run_log": "run-v11.log",
+  "exit": 0,
+  "tests": 18,
+  "passed": 18,
+  "skipped": 0,
+  "failures": 0,
+  "previous_run": "run-v10.json",
+  "added_coverage": [
+    "An explicit target batch preserves incremental updates for codes it has not processed yet"
+  ],
+  "review_note": "Independent review confirmed that code-version protection closes the explicit-target and omitted-target batch overwrite cases covered by this focused suite.",
+  "scope": "Local isolated WtDiffExecuter focused tests only. Code-version protection does not cover a crash after plugin/provider/executor side effects but before failure tombstone persistence, power loss, or provider/executor quiesce integration. Durable-intent/reconciliation, power-loss and fsync evidence, other platforms, real brokers, and the complete plugin/host chain remain unverified; independent review is ongoing."
+}

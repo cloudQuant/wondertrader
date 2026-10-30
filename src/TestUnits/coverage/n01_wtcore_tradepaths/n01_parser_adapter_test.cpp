@@ -3,7 +3,7 @@
  * 覆盖 src/WtCore/ParserAdapter.{h,cpp}:
  *   - 构造/析构默认值、id()、getBaseDataMgr()、handleSymbolList 空实现
  *   - init(NULL cfg) / initExt(NULL api) 的入参校验早退
- *   - init(cfg 无 module) 返回 false 但仍写入 _stub/_bd_mgr/_id/_check_time 的副作用路径
+ *   - init(cfg 无 module) 返回 false 但仍写入 _stub/_bd_mgr/_id 的副作用路径
  *   - run()/release() 在 _parser_api==NULL 时的分支
  *   - handleQuote() 的完整合约标准化链路（分月合约 / 现货 / 期权 / 未登记合约 / 停更 / 空指针）
  *   - handleOrderQueue / handleOrderDetail / handleTransaction 的空日期与 stopped 早退
@@ -81,7 +81,10 @@ public:
     {
         (void)exchg;
         (void)uDate;
-        return NULL;
+        WTSArray* contracts = WTSArray::create();
+        for (WTSContractInfo* contract : _contracts)
+            contracts->append(contract);
+        return contracts;
     }
 
     virtual WTSSessionInfo* getSession(const char* sid) override { (void)sid; return NULL; }
@@ -159,6 +162,25 @@ public:
     uint32_t details = 0;
     uint32_t trans = 0;
     std::string last_code;
+};
+
+/// Minimal owned API that lets this test deliver a quote through initExt.
+class RecordingParserApi : public IParserApi
+{
+public:
+    bool init(WTSVariant*) override { return true; }
+    void registerSpi(IParserSpi* spi) override { _spi = spi; }
+    void subscribe(const CodeSet& contracts) override { subscribed_count = contracts.size(); }
+    void publishQuote(WTSTickData* quote)
+    {
+        ASSERT_NE(_spi, nullptr);
+        _spi->handleQuote(quote, 0);
+    }
+
+private:
+    IParserSpi* _spi = nullptr;
+public:
+    std::size_t subscribed_count = 0;
 };
 
 /// 把 cfg 落到唯一临时目录并用 WTSCfgLoader 读回来，得到可用的 WTSVariant
@@ -246,7 +268,32 @@ TEST(N01ParserAdapter, init_rejects_null_cfg_and_null_api)
     EXPECT_STREQ(a2.id(), "");
 }
 
-// init 在加载模块前就 return false，但 _stub/_bd_mgr/_id/_check_time 已经写入
+TEST(N01ParserAdapter, init_ext_defaults_time_check_off_and_delivers_quote)
+{
+    RecordingStub stub;
+    FakeBaseDataMgr bd;
+    regisContract(bd, "SHFE", "rb", "rb2510", CC_Future);
+
+    ParserAdapter adapter;
+    RecordingParserApi* api = new RecordingParserApi();
+    ASSERT_TRUE(adapter.initExt("ext", api, &stub, &bd));
+    EXPECT_TRUE(adapter.isInitialized());
+    EXPECT_EQ(api->subscribed_count, 1u);
+
+    // A 2099 timestamp is rejected when check_time is enabled. initExt has no
+    // config object, so its documented default must accept it deterministically.
+    WTSTickData* future = makeTick("SHFE", "rb2510", 20990101, 20990102, 93000000, 3500.0);
+    ASSERT_NE(future, nullptr);
+    api->publishQuote(future);
+    EXPECT_EQ(stub.quotes, 1u);
+    EXPECT_EQ(stub.last_code.compare(0, 5, "SHFE."), 0);
+    future->release();
+
+    adapter.release();
+    EXPECT_FALSE(adapter.hasApi());
+}
+
+// init 在加载模块前就 return false，但 _stub/_bd_mgr/_id 已经写入
 TEST(N01ParserAdapter, init_without_module_still_wires_the_stub)
 {
     RecordingStub stub;
@@ -263,11 +310,12 @@ TEST(N01ParserAdapter, init_without_module_still_wires_the_stub)
 
     // filters 尚未被解析（init 提前返回），所以任何交易所都不会被过滤掉
     regisContract(bd, "SHFE", "rb", "rb2510", CC_Future);
-    WTSTickData* tick = makeTick("SHFE", "rb2510", 20250109, 20250110, 210000000, 3500.0);
+    // 2099 年明显晚于本地时间；显式 false 必须允许该 tick 继续进入 stub。
+    WTSTickData* tick = makeTick("SHFE", "rb2510", 20990101, 20990102, 93000000, 3500.0);
     ASSERT_NE(tick, nullptr);
     adapter.handleQuote(tick, 0);
     EXPECT_EQ(stub.quotes, 1u);
-    EXPECT_NE(stub.last_code.find("SHFE."), 0u) << "分月合约必须被标准化成 SHFE.xxx";
+    EXPECT_EQ(stub.last_code.compare(0, 5, "SHFE."), 0) << "分月合约必须被标准化成 SHFE.xxx";
     tick->release();
 
     cfg->release();
@@ -358,22 +406,22 @@ TEST(N01ParserAdapter, handle_quote_uses_category_specific_stdcode)
     ASSERT_NE(cfg, nullptr);
     ASSERT_FALSE(adapter.init("p06", cfg, &stub, &bd));
 
-    // 现货期权：代码形如 SSE.10007298 -> rawFutOptCodeToStdCode
-    WTSContractInfo* opt = regisContract(bd, "SSE", "10007", "10007298", CC_SpotOption);
-    WTSTickData* t1 = makeTick("SSE", "10007298", 20250109, 20250109, 93000000, 0.5);
+    // ASTOCK_O 映射为 STKO；上交所数字证券期权使用普通产品码+合约码格式。
+    WTSContractInfo* opt = regisContract(bd, "SSE", "STKO", "10000001", CC_SpotOption);
+    WTSTickData* t1 = makeTick("SSE", "10000001", 20250109, 20250109, 93000000, 0.5);
     ASSERT_NE(t1, nullptr);
     adapter.handleQuote(t1, 0);
     EXPECT_EQ(stub.quotes, 1u);
-    EXPECT_NE(stub.last_code.find("SSE."), 0u);
+    EXPECT_EQ(stub.last_code, "SSE.STKO.10000001");
     t1->release();
 
     // 股票（非分月）：rawFlatCodeToStdCode
-    regisContract(bd, "SSE", "stock", "600000", CC_Stock);
+    regisContract(bd, "SSE", "STK", "600000", CC_Stock);
     WTSTickData* t2 = makeTick("SSE", "600000", 20250109, 20250109, 93000001, 7.2);
     ASSERT_NE(t2, nullptr);
     adapter.handleQuote(t2, 0);
     EXPECT_EQ(stub.quotes, 2u);
-    EXPECT_EQ(stub.last_code, "SSE.600000");
+    EXPECT_EQ(stub.last_code, "SSE.STK.600000");
     t2->release();
 
     // tick 自带合约信息时不再查询 bd_mgr（这里给一个不在表里的合约对象）
@@ -386,9 +434,58 @@ TEST(N01ParserAdapter, handle_quote_uses_category_specific_stdcode)
     t3->setContractInfo(self);
     adapter.handleQuote(t3, 0);
     EXPECT_EQ(stub.quotes, 3u);
-    EXPECT_EQ(stub.last_code, "NEE.300001");
+    EXPECT_EQ(stub.last_code, "NEE.noe.300001");
     t3->release();
+
+    // CFFEX 股指期权由 CTP 标为 CC_SpotOption，C/P 代码仍需期权规范化。
+    WTSContractInfo* cffexSpotOpt = regisContract(bd, "CFFEX", "IO", "IO2510-C-4000", CC_SpotOption);
+    WTSTickData* t4 = makeTick("CFFEX", "IO2510-C-4000", 20250109, 20250109, 93000003, 66.0);
+    ASSERT_NE(t4, nullptr);
+    adapter.handleQuote(t4, 0);
+    EXPECT_EQ(stub.quotes, 4u);
+    EXPECT_EQ(stub.last_code, "CFFEX.IO2510.C.4000");
+    t4->release();
+
+    // CC_FutOption 的 C/P 代码继续走同一规范化格式。
+    WTSContractInfo* futOpt = regisContract(bd, "CFFEX", "IO", "IO2404-C-4000", CC_FutOption);
+    WTSTickData* t5 = makeTick("CFFEX", "IO2404-C-4000", 20250109, 20250109, 93000004, 66.0);
+    ASSERT_NE(t5, nullptr);
+    adapter.handleQuote(t5, 0);
+    EXPECT_EQ(stub.quotes, 5u);
+    EXPECT_EQ(stub.last_code, "CFFEX.IO2404.C.4000");
+    t5->release();
+
+    // 上期所紧凑格式也在转换 helper 的既有支持范围内。
+    WTSContractInfo* compactFutOpt = regisContract(bd, "SHFE", "au", "au2012C3400", CC_FutOption);
+    WTSTickData* t6 = makeTick("SHFE", "au2012C3400", 20250109, 20250109, 93000005, 66.0);
+    ASSERT_NE(t6, nullptr);
+    adapter.handleQuote(t6, 0);
+    EXPECT_EQ(stub.quotes, 6u);
+    EXPECT_EQ(stub.last_code, "SHFE.au2012.C.3400");
+    t6->release();
+
+    // 畸形期货期权码必须在进入不安全的转换 helper 前被拒绝。
+    WTSContractInfo* malformedFutOpt = regisContract(bd, "CFFEX", "IO", "10000001", CC_FutOption);
+    WTSTickData* t7 = makeTick("CFFEX", "10000001", 20250109, 20250109, 93000006, 66.0);
+    ASSERT_NE(t7, nullptr);
+    adapter.handleQuote(t7, 0);
+    EXPECT_EQ(stub.quotes, 6u);
+    t7->release();
+
+    // 紧凑 C/P 格式属于上期所/郑商所；CFFEX 必须使用带短横格式。
+    WTSContractInfo* wrongExchangeFormat = regisContract(bd, "CFFEX", "IO", "IO2510C4000", CC_FutOption);
+    WTSTickData* t8 = makeTick("CFFEX", "IO2510C4000", 20250109, 20250109, 93000007, 66.0);
+    ASSERT_NE(t8, nullptr);
+    adapter.handleQuote(t8, 0);
+    EXPECT_EQ(stub.quotes, 6u);
+    t8->release();
+
     opt->release();
+    cffexSpotOpt->release();
+    futOpt->release();
+    compactFutOpt->release();
+    malformedFutOpt->release();
+    wrongExchangeFormat->release();
     comm->release();
 
     cfg->release();
@@ -447,11 +544,9 @@ TEST(N01ParserAdapter, mgr_run_and_release_drains_the_table)
 }
 
 /*
- * DISABLED：同类「未 init 就喂数据导致空指针解引用」缺陷类集中在这里，启用用例一条不留。
+ * DISABLED：未初始化依赖时 level2 回调可能因空管理器解引用而崩溃。
  *
- * ParserAdapter 的构造函数没有初始化 _check_time 与 _hot_mgr（见 BUG-N01-002），
- * 且 initExt() 也不设置 _check_time；handleQuote() 里 `if (_check_time)` 读的是不确定值。
- * 更关键的是 handleOrderQueue/handleOrderDetail/handleTransaction 在
+ * handleOrderQueue/handleOrderDetail/handleTransaction 在
  * `_filters.empty()`（默认成立）时先取 ordQueData->exchg() 再查 _bd_mgr，
  * 未调用 init/initExt 时 _bd_mgr==NULL -> 段错误。
  * 同类的第四个入口是 handleQuote 里 commInfo->getSessionInfo()：
@@ -459,9 +554,9 @@ TEST(N01ParserAdapter, mgr_run_and_release_drains_the_table)
  * 上面三条都需要真实 level2 数据对象（WTSOrdQueData/WTSOrdDtlData/WTSTransData::create），
  * 且触发的是同一种「缺依赖 -> 崩」缺陷类，故统一放在这里，不参与常规度量。
  */
-TEST(N01ParserAdapter, DISABLED_uninitialized_check_time_and_null_bd_mgr_crash)
+TEST(N01ParserAdapter, DISABLED_null_bd_mgr_level2_callback_crash)
 {
-    ParserAdapter adapter;   // 未 init：_check_time 是随机值, _bd_mgr==NULL
+    ParserAdapter adapter;   // 未 init：_bd_mgr==NULL
     FakeBaseDataMgr bd;
     regisContract(bd, "SSE", "600", "600000", CC_Stock);
     // 合法日期 + 未接 _bd_mgr -> _bd_mgr->getContract 空指针

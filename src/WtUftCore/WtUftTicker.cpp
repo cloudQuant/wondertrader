@@ -18,7 +18,37 @@
 
 #include "../WTSTools/WTSLogger.h"
 
+#include <exception>
+
 USING_NS_WTP;
+
+namespace
+{
+	struct TickerCallbackFrame
+	{
+		WtUftRtTicker* ticker;
+		TickerCallbackFrame* previous;
+	};
+	thread_local TickerCallbackFrame* active_ticker_callback = nullptr;
+
+	class TickerCallbackScope
+	{
+	public:
+		explicit TickerCallbackScope(WtUftRtTicker* ticker)
+			: _frame{ ticker, active_ticker_callback }
+		{
+			active_ticker_callback = &_frame;
+		}
+
+		~TickerCallbackScope()
+		{
+			active_ticker_callback = _frame.previous;
+		}
+
+	private:
+		TickerCallbackFrame _frame;
+	};
+}
 
 
 /**
@@ -27,13 +57,19 @@ USING_NS_WTP;
  * @details 初始化实时时间控制器对象，设置初始状态和参数
  */
 WtUftRtTicker::WtUftRtTicker(WtUftEngine* engine)
-	: _engine(engine)
+	: _s_info(NULL)
+	, _engine(engine)
+	, _init_attempted(false)
 	, _date(0)
 	, _time(UINT_MAX)
 	, _cur_pos(0)
-, _next_check_time(0)
+	, _next_check_time(0)
 	, _last_emit_pos(0)
 	, _stopped(false)
+	, _worker_started(false)
+	, _run_thread_id()
+	, _worker_thread_id()
+	, _run_active(false)
 	{
 }
 
@@ -44,6 +80,9 @@ WtUftRtTicker::WtUftRtTicker(WtUftEngine* engine)
  */
 WtUftRtTicker::~WtUftRtTicker()
 {
+	request_stop();
+	if (!wait_stopped())
+		std::terminate();
 }
 
 /**
@@ -53,8 +92,21 @@ WtUftRtTicker::~WtUftRtTicker()
  */
 void WtUftRtTicker::init(const char* sessionID)
 {
+	_init_attempted = true;
+	_s_info = NULL;
+	if (_engine == NULL || sessionID == NULL || sessionID[0] == '\0')
+	{
+		WTSLogger::error("UFT ticker cannot initialize with an empty session ID");
+		return;
+	}
+
 	// 从引擎中获取指定交易时段的信息
 	_s_info = _engine->get_session_info(sessionID);
+	if (_s_info == NULL)
+	{
+		WTSLogger::error("UFT ticker session '{}' was not found", sessionID);
+		return;
+	}
 
 	// 获取当前系统日期和时间
 	TimeUtils::getDateTime(_date, _time);
@@ -67,8 +119,19 @@ void WtUftRtTicker::init(const char* sessionID)
  */
 void WtUftRtTicker::on_tick(WTSTickData* curTick)
 {
+	std::lock_guard<std::mutex> callback_lock(_callback_mtx);
+	if (_stopped.load(std::memory_order_acquire)
+		|| _engine == NULL || _engine->_stop_requested.load(std::memory_order_seq_cst))
+		return;
+
+	// 已尝试初始化但交易时段无效时，拒绝行情，避免在无时间上下文下触发策略。
+	if (_init_attempted && _s_info == NULL)
+		return;
+
+	TickerCallbackScope callback_scope(this);
+
 	// 如果线程未初始化，直接将Tick数据转发给引擎并返回
-	if (_thrd == NULL)
+	if (!_worker_started.load(std::memory_order_acquire))
 	{
 		if (_engine)
 			_engine->on_tick(curTick->code(), curTick);
@@ -79,8 +142,11 @@ void WtUftRtTicker::on_tick(WTSTickData* curTick)
 	uint32_t uDate = curTick->actiondate();
 	uint32_t uTime = curTick->actiontime();
 
-	// 如果行情时间早于当前时间，直接处理并返回
-	if (_date != 0 && (uDate < _date || (uDate == _date && uTime < _time)))
+	// 启动时本地时钟可能已晚于同日第一条行情；尚未建立分钟位置时以
+	// 该行情初始化时钟。分钟位置建立后，迟到行情只转发，不得回拨时钟。
+	const bool first_quote_before_startup_clock = _cur_pos == 0 && _date == uDate;
+	if (!first_quote_before_startup_clock && _date != 0
+		&& (uDate < _date || (uDate == _date && uTime < _time)))
 	{
 		//WTSLogger::info("行情时间{}小于本地时间{}", uTime, _time);
 		if (_engine)
@@ -88,15 +154,23 @@ void WtUftRtTicker::on_tick(WTSTickData* curTick)
 		return;
 	}
 
-	// 更新当前日期和时间
+	// 计算当前分钟和秒数
+	uint32_t curMin = uTime / 100000;
+	uint32_t curSec = uTime % 100000;
+	// 将当前时间转换为交易时段中的分钟位置
+	uint32_t minutes = _s_info->timeToMinutes(curMin);
+	if (minutes == INVALID_UINT32)
+	{
+		// 休市行情仍向引擎/策略转发，但不能更改时钟或分钟闭合基线。
+		if (_engine)
+			_engine->on_tick(curTick->code(), curTick);
+		return;
+	}
+
+	// 只有合法的交易时段映射才能推进 ticker 时钟和分钟位置。
 	_date = uDate;
 	_time = uTime;
 
-	// 计算当前分钟和秒数
-	uint32_t curMin = _time / 100000;
-	uint32_t curSec = _time % 100000;
-	// 将当前时间转换为交易时段中的分钟位置
-	uint32_t minutes = _s_info->timeToMinutes(curMin);
 	// 判断是否是交易时段的最后一分钟
 	bool isSecEnd = _s_info->isLastOfSection(curMin);
 	if (isSecEnd)
@@ -108,11 +182,17 @@ void WtUftRtTicker::on_tick(WTSTickData* curTick)
 	uint32_t rawMin = curMin;
 	curMin = _s_info->minuteToTime(minutes);
 
-	// 如果是首次设置当前分钟位置
+	// 首笔有效行情同时初始化分钟位置并送入引擎；不能只用于建立时钟基线。
 	if (_cur_pos == 0)
 	{
 		//如果当前时间是0, 则直接赋值即可
 		_cur_pos = minutes;
+		if (_engine)
+		{
+			_engine->set_date_time(_date, curMin, curSec, rawMin);
+			_engine->set_trading_date(curTick->tradingdate());
+			_engine->on_tick(curTick->code(), curTick);
+		}
 	}
 	// 如果时间向前跃进，需要触发分钟线结束事件
 	else if (_cur_pos < minutes)
@@ -163,6 +243,7 @@ void WtUftRtTicker::on_tick(WTSTickData* curTick)
 	uint32_t left_ticks = (60 - sec) * 1000 - msec;
 	// 设置下次检查时间
 	_next_check_time = TimeUtils::getLocalTimeNow() + left_ticks;
+	notify_worker();
 }
 
 /**
@@ -171,83 +252,143 @@ void WtUftRtTicker::on_tick(WTSTickData* curTick)
  */
 void WtUftRtTicker::run()
 {
-	// 如果线程已存在，直接返回
-	if (_thrd)
+	if (_engine == NULL || _s_info == NULL
+		|| _engine->_stop_requested.load(std::memory_order_seq_cst))
+	{
+		WTSLogger::error("UFT ticker cannot run without a valid session");
 		return;
+	}
 
-	// 执行引擎初始化
-	_engine->on_init();
+	{
+		std::lock_guard<std::mutex> lock(_state_mtx);
+		if (_stopped.load(std::memory_order_acquire) || _run_active || (_thrd && _thrd->joinable()))
+			return;
+		_run_active = true;
+		_run_thread_id = std::this_thread::get_id();
+	}
 
-	// 计算当前交易日期并设置到引擎中
-	uint32_t curTDate = _engine->get_basedata_mgr()->calcTradingDate(_s_info->id(), _engine->get_date(), _engine->get_min_time(), true);
-	_engine->set_trading_date(curTDate);
+	auto finish_run = [this]() {
+		std::lock_guard<std::mutex> lock(_state_mtx);
+		_run_active = false;
+		_run_thread_id = std::thread::id();
+		_state_cv.notify_all();
+	};
 
-	// 触发交易日开始事件
-	_engine->on_session_begin();
-
-
-	// 创建并启动工作线程
-	_thrd.reset(new StdThread([this](){
-		// 循环运行直到被停止
-		while (!_stopped)
+	try
+	{
+		// Synchronous strategy callbacks can also reenter engine shutdown.
 		{
-			// 如果当前时间在交易时间内
-			if (_time != UINT_MAX && _s_info->isInTradingTime(_time / 100000, true))
-			{
-				// 在交易时间内每10毫秒检查一次
-				std::this_thread::sleep_for(std::chrono::milliseconds(10));
-				uint64_t now = TimeUtils::getLocalTimeNow();
-
-				// 如果到达下次检查时间且当前分钟位置尚未触发结束事件
-				if (now >= _next_check_time && _last_emit_pos < _cur_pos)
-				{
-					// 触发数据回放模块，加锁保护
-					StdUniqueLock lock(_mtx);
-
-					// 更新上次触发位置
-					_last_emit_pos = _cur_pos;
-
-					// 获取当前分钟位置对应的实际时间
-					uint32_t thisMin = _s_info->minuteToTime(_cur_pos);
-					_time = thisMin;
-
-					// 处理日期切换（如果时间是0点）
-					if (thisMin == 0)
-					{
-						uint32_t lastDate = _date;
-						_date = TimeUtils::getNextDate(_date);
-						_time = 0;
-						WTSLogger::info("Data automatically changed at time 00:00: {} -> {}", lastDate, _date);
-					}
-
-					// 输出日志并触发分钟线结束事件
-					WTSLogger::info("Minute bar {}.{:04d} closed automatically", _date, thisMin);
-					//if (_store)
-					//	_store->onMinuteEnd(_date, thisMin);
-
-					_engine->on_minute_end(_date, thisMin);
-
-					// 如果当前时间是交易时段的收盤时间，触发交易日结束事件
-					uint32_t offMin = _s_info->offsetTime(thisMin, true);
-					if (offMin >= _s_info->getCloseTime(true))
-					{
-						_engine->on_session_end();
-					}
-
-					// 更新引擎时间
-					if (_engine)
-						_engine->set_date_time(_date, thisMin, 0);
-				}
-			}
-			else //if (offTime >= _s_info->getOpenTime(true) && offTime <= _s_info->getCloseTime(true))
-			{
-				// 不在交易时间，则休息10s再进行检查
-				// 因为这个逻辑是处理分钟线的，所以休盤时间休息10s，不会引起数据踏空的问题
-				std::this_thread::sleep_for(std::chrono::seconds(10));
-			}
-			
+			TickerCallbackScope callback_scope(this);
+			_engine->on_init();
 		}
-	}));
+
+		if (!_stopped.load(std::memory_order_acquire)
+			&& !_engine->_stop_requested.load(std::memory_order_seq_cst))
+		{
+			uint32_t curTDate = _engine->get_basedata_mgr()->calcTradingDate(
+				_s_info->id(), _engine->get_date(), _engine->get_min_time(), true);
+			_engine->set_trading_date(curTDate);
+
+			{
+				TickerCallbackScope callback_scope(this);
+				_engine->on_session_begin();
+			}
+		}
+
+		if (!_stopped.load(std::memory_order_acquire)
+			&& !_engine->_stop_requested.load(std::memory_order_seq_cst))
+		{
+			std::lock_guard<std::mutex> lock(_state_mtx);
+			if (!_stopped.load(std::memory_order_acquire))
+			{
+				_worker_started.store(true, std::memory_order_release);
+				_thrd.reset(new StdThread([this]() {
+					{
+						std::lock_guard<std::mutex> state_lock(_state_mtx);
+						_worker_thread_id = std::this_thread::get_id();
+					}
+					_state_cv.notify_all();
+
+					while (!_stopped.load(std::memory_order_acquire)
+						&& !_engine->_stop_requested.load(std::memory_order_seq_cst))
+					{
+						const uint64_t wake_generation = capture_wake_generation();
+						bool in_trading_time = false;
+						{
+							std::lock_guard<std::mutex> callback_lock(_callback_mtx);
+							if (_stopped.load(std::memory_order_acquire)
+								|| _engine->_stop_requested.load(std::memory_order_seq_cst))
+								break;
+							in_trading_time = _time != UINT_MAX
+								&& _s_info->isInTradingTime(_time / 100000, true);
+						}
+
+						const std::chrono::milliseconds interval = in_trading_time
+							? std::chrono::milliseconds(10) : std::chrono::milliseconds(10000);
+						wait_for_worker_wakeup(wake_generation, interval);
+
+						if (_stopped.load(std::memory_order_acquire)
+							|| _engine->_stop_requested.load(std::memory_order_seq_cst))
+							break;
+
+						if (in_trading_time)
+						{
+							uint64_t now = TimeUtils::getLocalTimeNow();
+							std::lock_guard<std::mutex> callback_lock(_callback_mtx);
+							if (_stopped.load(std::memory_order_acquire)
+								|| _engine->_stop_requested.load(std::memory_order_seq_cst))
+								break;
+							if (_time == UINT_MAX || !_s_info->isInTradingTime(_time / 100000, true)
+								|| now < _next_check_time || _last_emit_pos >= _cur_pos)
+								continue;
+							{
+								StdUniqueLock state_lock(_mtx);
+								if (now < _next_check_time || _last_emit_pos >= _cur_pos)
+									continue;
+
+								_last_emit_pos = _cur_pos;
+								uint32_t thisMin = _s_info->minuteToTime(_cur_pos);
+								_time = thisMin;
+								if (thisMin == 0)
+								{
+									uint32_t lastDate = _date;
+									_date = TimeUtils::getNextDate(_date);
+									_time = 0;
+									WTSLogger::info("Data automatically changed at time 00:00: {} -> {}", lastDate, _date);
+								}
+
+								WTSLogger::info("Minute bar {}.{:04d} closed automatically", _date, thisMin);
+								{
+									TickerCallbackScope callback_scope(this);
+									_engine->on_minute_end(_date, thisMin);
+
+									uint32_t offMin = _s_info->offsetTime(thisMin, true);
+									if (offMin >= _s_info->getCloseTime(true))
+										_engine->on_session_end();
+								}
+
+								_engine->set_date_time(_date, thisMin, 0);
+							}
+						}
+					}
+
+					{
+						std::lock_guard<std::mutex> state_lock(_state_mtx);
+						_worker_thread_id = std::thread::id();
+					}
+					_state_cv.notify_all();
+				}));
+			}
+		}
+	}
+	catch (...)
+	{
+		_worker_started.store(false, std::memory_order_release);
+		finish_run();
+		throw;
+	}
+
+	finish_run();
 }
 
 /**
@@ -256,9 +397,99 @@ void WtUftRtTicker::run()
  */
 void WtUftRtTicker::stop()
 {
-	// 设置停止标志
-	_stopped = true;
-	// 如果线程存在，等待其结束
-	if (_thrd)
-		_thrd->join();
+	request_stop();
+	wait_stopped();
+}
+
+void WtUftRtTicker::request_stop()
+{
+	_stopped.store(true, std::memory_order_release);
+	notify_worker();
+}
+
+uint64_t WtUftRtTicker::capture_wake_generation()
+{
+	if (_engine == NULL)
+		return 0;
+	std::lock_guard<std::mutex> lock(_engine->_ticker_wake_mtx);
+	return _engine->_ticker_wake_generation;
+}
+
+void WtUftRtTicker::notify_worker()
+{
+	if (_engine == NULL)
+		return;
+	{
+		std::lock_guard<std::mutex> lock(_engine->_ticker_wake_mtx);
+		++_engine->_ticker_wake_generation;
+	}
+	_engine->_ticker_wake_cv.notify_all();
+}
+
+bool WtUftRtTicker::wait_for_worker_wakeup(uint64_t generation, std::chrono::milliseconds timeout)
+{
+	if (_engine == NULL)
+		return false;
+	std::unique_lock<std::mutex> lock(_engine->_ticker_wake_mtx);
+	_engine->_ticker_worker_waiting = true;
+	_engine->_ticker_wake_cv.notify_all();
+	const bool woke = _engine->_ticker_wake_cv.wait_for(lock, timeout, [this, generation]() {
+		return _stopped.load(std::memory_order_acquire)
+			|| _engine->_stop_requested.load(std::memory_order_seq_cst)
+			|| _engine->_ticker_wake_generation != generation;
+	});
+	_engine->_ticker_worker_waiting = false;
+	_engine->_ticker_wake_cv.notify_all();
+	return woke;
+}
+
+bool WtUftRtTicker::wait_stopped()
+{
+	const std::thread::id caller = std::this_thread::get_id();
+	for (TickerCallbackFrame* frame = active_ticker_callback; frame != nullptr; frame = frame->previous)
+	{
+		if (frame->ticker == this)
+			return false;
+	}
+
+	{
+		std::lock_guard<std::mutex> state_lock(_state_mtx);
+		if ((_run_active && _run_thread_id == caller) || _worker_thread_id == caller)
+			return false;
+	}
+
+	std::lock_guard<std::mutex> join_lock(_join_mtx);
+	std::shared_ptr<StdThread> thread;
+	{
+		std::unique_lock<std::mutex> state_lock(_state_mtx);
+		if ((_run_active && _run_thread_id == caller) || _worker_thread_id == caller)
+			return false;
+		_state_cv.wait(state_lock, [this]() { return !_run_active; });
+		thread = _thrd;
+	}
+
+	if (thread && thread->joinable())
+	{
+		if (thread->get_id() == caller)
+			return false;
+		thread->join();
+	}
+
+	// Joining the worker does not serialize a concurrently entered quote callback.
+	// request_stop prevents new callbacks; this lock drains any one already inside.
+	std::lock_guard<std::mutex> callback_lock(_callback_mtx);
+	return true;
+}
+
+bool WtUftRtTicker::request_stop_for_current_callback(WtUftEngine* engine)
+{
+	for (TickerCallbackFrame* frame = active_ticker_callback; frame != nullptr; frame = frame->previous)
+	{
+		if (frame->ticker->_engine == engine)
+		{
+			frame->ticker->request_stop();
+			return true;
+		}
+	}
+	return false;
 }

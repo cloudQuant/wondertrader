@@ -22,6 +22,10 @@
 
 #include "r62_mocker_common.h"
 
+#ifndef WT_COV_SEL_PLUGIN_PATH
+#error "coverage SEL host test must receive the generated plugin path from CMake"
+#endif
+
 namespace
 {
 	const char* const kStk = "SSE.STK.000001";
@@ -53,6 +57,21 @@ TEST_F(R62SelMockerGap, InitFactoryRejectsNullAndMissingModule)
 	// 加载失败后上下文仍可查询，不产生持仓/信号
 	EXPECT_DOUBLE_EQ(0.0, sel.stra_get_position(kStk));
 	EXPECT_DOUBLE_EQ(0.0, sel.stra_get_fund_data(0));
+}
+
+// Load the real SEL factory through SelMocker; object teardown exercises the
+// host's FuncDeleteSelStraFact call against the plugin's by-value export.
+TEST_F(R62SelMockerGap, RealSelFactoryIsDeletedThroughItsExportedAbi)
+{
+	const std::filesystem::path plugin(WT_COV_SEL_PLUGIN_PATH);
+	ASSERT_TRUE(std::filesystem::is_regular_file(plugin)) << plugin.string();
+
+	SelMocker sel(&_rp, "r62_sel_factory_abi");
+	WTSVariant* cfg = WTSVariant::createObject();
+	cfg->append("module", plugin.string().c_str());
+	const bool loaded = sel.init_sel_factory(cfg);
+	cfg->release();
+	ASSERT_TRUE(loaded);
 }
 
 // 日线切片：prepare 后 stra_get_bars 返回真实 CSV 切片，并把最后一根收盘价

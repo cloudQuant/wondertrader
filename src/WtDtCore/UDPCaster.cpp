@@ -18,6 +18,8 @@
 #include "../WTSTools/WTSBaseDataMgr.h"
 #include "../WTSTools/WTSLogger.h"
 
+#include <cstring>
+
 
 #define UDP_MSG_SUBSCRIBE	0x100
 #define UDP_MSG_PUSHTICK	0x200
@@ -47,7 +49,10 @@ typedef UDPDataPacket<WTSOrdDtlStruct>	UDPOrdDtlPacket;
 typedef UDPDataPacket<WTSTransStruct>	UDPTransPacket;
 
 UDPCaster::UDPCaster()
-	: m_bTerminated(false)
+	: m_bStarted(false)
+	, m_bStopping(false)
+	, m_bStopped(false)
+	, m_bTerminated(false)
 	, m_bdMgr(NULL)
 	, m_dtMgr(NULL)
 {
@@ -57,6 +62,7 @@ UDPCaster::UDPCaster()
 
 UDPCaster::~UDPCaster()
 {
+	stop();
 }
 
 bool UDPCaster::init(WTSVariant* cfg, WTSBaseDataMgr* bdMgr, DataManager* dtMgr)
@@ -100,6 +106,11 @@ bool UDPCaster::init(WTSVariant* cfg, WTSBaseDataMgr* bdMgr, DataManager* dtMgr)
 
 void UDPCaster::start(int sport)
 {
+	StdUniqueLock lock(m_mtxLifecycle);
+	if (m_bStarted || m_bTerminated)
+		return;
+	m_bStarted = true;
+
 	if (!m_listFlatRecver.empty() || !m_listJsonRecver.empty() || !m_listRawRecver.empty())
 	{
 		m_sktBroadcast.reset(new UDPSocket(m_ioservice, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 0)));
@@ -116,9 +127,14 @@ void UDPCaster::start(int sport)
 		WTSLogger::error("Exception raised while start subscribing service @ port {}", sport);
 	}
 
-	do_receive();
+	if (m_sktSubscribe)
+		do_receive();
 
 	m_thrdIO.reset(new StdThread([this](){
+		{
+			StdUniqueLock lock(m_mtxLifecycle);
+			m_ioThreadId = std::this_thread::get_id();
+		}
 		try
 		{
 			m_ioservice.run();
@@ -132,24 +148,97 @@ void UDPCaster::start(int sport)
 
 void UDPCaster::stop()
 {
-	m_bTerminated = true;
-	m_ioservice.stop();
-	if (m_thrdIO)
-		m_thrdIO->join();
+	StdThreadPtr ioThread;
+	StdThreadPtr castThread;
+	{
+		StdUniqueLock lock(m_mtxLifecycle);
+		const std::thread::id currentThread = std::this_thread::get_id();
+		const bool isWorkerThread =
+			(m_thrdIO && m_ioThreadId == currentThread)
+			|| (m_thrdCast && m_castThreadId == currentThread);
+		if (isWorkerThread)
+		{
+			// A worker can request shutdown, but it cannot join itself or destroy its owner.
+			m_bTerminated = true;
+			m_ioservice.stop();
+			lock.unlock();
+			m_condCast.notify_all();
+			return;
+		}
+
+		if (m_bStopped)
+			return;
+		if (m_bStopping)
+		{
+			m_condLifecycle.wait(lock, [this]() { return !m_bStopping; });
+			return;
+		}
+
+		m_bStopping = true;
+		m_bTerminated = true;
+		m_ioservice.stop();
+		ioThread = m_thrdIO;
+		castThread = m_thrdCast;
+	}
 
 	m_condCast.notify_all();
-	if (m_thrdCast)
-		m_thrdCast->join();
+	if (ioThread && ioThread->joinable())
+		ioThread->join();
+	if (castThread && castThread->joinable())
+		castThread->join();
+
+	{
+		StdUniqueLock lock(m_mtxLifecycle);
+		{
+			StdUniqueLock castLock(m_mtxCast);
+			while (!m_dataQue.empty())
+				m_dataQue.pop();
+		}
+
+		auto closeSocket = [](UDPSocketPtr& socket)
+		{
+			if (socket)
+			{
+				boost::system::error_code ec;
+				socket->close(ec);
+				socket.reset();
+			}
+		};
+		auto closeGroups = [&closeSocket](MulticastList& groups)
+		{
+			for (MulticastPair& item : groups)
+				closeSocket(item.first);
+			groups.clear();
+		};
+
+		closeGroups(m_listFlatGroup);
+		closeGroups(m_listJsonGroup);
+		closeGroups(m_listRawGroup);
+		closeSocket(m_sktBroadcast);
+		closeSocket(m_sktSubscribe);
+
+		m_thrdIO.reset();
+		m_thrdCast.reset();
+		m_ioThreadId = std::thread::id();
+		m_castThreadId = std::thread::id();
+		m_bStopped = true;
+		m_bStopping = false;
+	}
+	m_condLifecycle.notify_all();
 }
 
 void UDPCaster::do_receive()
 {
+	if (m_bTerminated || !m_sktSubscribe || !m_sktSubscribe->is_open())
+		return;
+
 	m_sktSubscribe->async_receive_from(boost::asio::buffer(m_data, max_length), m_senderEP,
 		[this](boost::system::error_code ec, std::size_t bytes_recvd)
 	{
 		if(ec)
 		{
-			do_receive();
+			if (!m_bTerminated)
+				do_receive();
 			return;
 		}
 
@@ -161,7 +250,17 @@ void UDPCaster::do_receive()
 			//处理请求
 			if (req->_type == UDP_MSG_SUBSCRIBE)
 			{
-				const StringVector& ay = StrUtil::split(req->_data, ",");
+				const char* terminator = static_cast<const char*>(
+					std::memchr(req->_data, '\0', sizeof(req->_data)));
+				if (terminator == NULL)
+				{
+					do_receive();
+					return;
+				}
+
+				const std::string subscribeData(req->_data,
+					static_cast<std::size_t>(terminator - req->_data));
+				const StringVector& ay = StrUtil::split(subscribeData, ",");
 				std::string code, exchg;
 				for(const std::string& fullcode : ay)
 				{
@@ -181,7 +280,7 @@ void UDPCaster::do_receive()
 					if(curTick == NULL)
 						continue;
 
-					std::string* data = new std::string();
+					std::shared_ptr<std::string> data(new std::string());
 					data->resize(sizeof(UDPTickPacket), 0);
 					UDPTickPacket* pkt = (UDPTickPacket*)data->data();
 					pkt->_type = req->_type;
@@ -191,7 +290,6 @@ void UDPCaster::do_receive()
 						boost::asio::buffer(*data, data->size()), m_senderEP,
 						[data](const boost::system::error_code& ec, std::size_t /*bytes_sent*/)
 					{
-						delete data;
 						if (ec)
 						{
 							WTSLogger::error("Sending data on UDP failed: {}", ec.message().c_str());
@@ -202,12 +300,11 @@ void UDPCaster::do_receive()
 		}
 		else
 		{
-			std::string* data = new std::string("Can not indentify the command");
+			std::shared_ptr<std::string> data(new std::string("Can not indentify the command"));
 			m_sktSubscribe->async_send_to(
 				boost::asio::buffer(*data, data->size()), m_senderEP,
 				[data](const boost::system::error_code& ec, std::size_t /*bytes_sent*/)
 			{
-				delete data;
 				if (ec)
 				{
 					WTSLogger::error("Sending data on UDP failed: {}", ec.message().c_str());
@@ -287,7 +384,11 @@ void UDPCaster::broadcast(WTSTransData* curTrans)
 
 void UDPCaster::do_broadcast(WTSObject* data, uint32_t dataType)
 {
-	if(m_sktBroadcast == NULL || data == NULL || m_bTerminated)
+	if (data == NULL)
+		return;
+
+	StdUniqueLock lifecycleLock(m_mtxLifecycle);
+	if (m_sktBroadcast == NULL || m_bTerminated || m_bStopping || m_bStopped)
 		return;
 
 	{
@@ -298,19 +399,21 @@ void UDPCaster::do_broadcast(WTSObject* data, uint32_t dataType)
 	if(m_thrdCast == NULL)
 	{
 		m_thrdCast.reset(new StdThread([this](){
-
-			while (!m_bTerminated)
 			{
-				if(m_dataQue.empty())
-				{
-					StdUniqueLock lock(m_mtxCast);
-					m_condCast.wait(lock);
-					continue;
-				}	
+				StdUniqueLock lock(m_mtxLifecycle);
+				m_castThreadId = std::this_thread::get_id();
+			}
 
+			while (true)
+			{
 				std::queue<CastData> tmpQue;
 				{
 					StdUniqueLock lock(m_mtxCast);
+					m_condCast.wait(lock, [this]() {
+						return m_bTerminated || !m_dataQue.empty();
+					});
+					if (m_bTerminated)
+						return;
 					tmpQue.swap(m_dataQue);
 				}
 				
@@ -393,10 +496,7 @@ void UDPCaster::do_broadcast(WTSObject* data, uint32_t dataType)
 			}
 		}));
 	}
-	else
-	{
-		m_condCast.notify_all();
-	}
+	m_condCast.notify_all();
 }
 
 void UDPCaster::handle_send_broad(const EndPoint& ep, const boost::system::error_code& error, std::size_t /*bytes_transferred*/)

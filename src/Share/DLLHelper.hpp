@@ -8,6 +8,7 @@
  * \brief 动态库辅助类,主要是把跨平台的差异封装起来,方便调用
  */
 #pragma once
+#include <cctype>
 #include <string>
 
 #ifdef _MSC_VER
@@ -68,17 +69,25 @@ public:
 
 	static std::string wrap_module(const char* name, const char* unixPrefix = "lib")
 	{
+		if (name == nullptr)
+			return std::string();
+
 #ifdef _WIN32
 		std::string ret = name;
 		ret += ".dll";
 		return std::move(ret);
 #else
+		const std::string moduleName(name);
 		std::size_t idx = 0;
-		while (!isalpha(name[idx]))
+		while (idx < moduleName.size() && !std::isalpha(static_cast<unsigned char>(moduleName[idx])))
 			idx++;
+		// With no alphabetic character, preserve the established numeric-name form:
+		// "123" becomes "lib123.so" (or the platform equivalent).
+		if (idx == moduleName.size())
+			idx = 0;
 		std::string ret(name, idx);
 		ret.append(unixPrefix);
-		ret.append(name + idx);
+		ret.append(moduleName, idx, std::string::npos);
 #ifdef __APPLE__
 		ret += ".dylib";
 #else

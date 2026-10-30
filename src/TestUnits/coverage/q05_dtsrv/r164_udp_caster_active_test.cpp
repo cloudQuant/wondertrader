@@ -4,14 +4,11 @@
  *
  * 与既有用例的分工（只读，不修改）：
  *  - r5/r68 覆盖 active=false、坏地址、接收方分桶与未 start 的 broadcast 守卫；
- *  - r154 的三个 active 用例在 ~UDPCaster 崩溃（BUG-R164-001），实际只落到构造/守卫；
+ *  - r154 active 用例覆盖装配和回环行为；本用例补充栈对象析构生命周期。
  *  - 本文件补 UDPCaster.cpp:62-143（init/start/stop）、145-220（do_receive）、
  *    244-266（addMRecver）、268-400（四个 broadcast 与 do_broadcast 组包/发送）。
  *
- * 网络约束：接收方与客户端都只走 127.0.0.1；配置里的组播项只做 join_group，
- * 本文件的 broadcast 用例不配置 multicast，do_broadcast 不会向组播列表发送。
- * 产品对象的析构会崩（socket 晚于 io_context 销毁），因此用 LeakyCaster 只 stop 不 delete；
- * 每个用例由 case_runner 独立进程执行，进程退出即回收。
+ * 网络回归使用回环地址，sport=0 由系统动态分配；组播配置用于覆盖资源生命周期。
  */
 #include <gtest/gtest.h>
 
@@ -274,28 +271,38 @@ TEST_F(R164UdpCasterActiveTest, RegistrationBucketsAndRejectInvalid)
 }
 
 /*
- * 触发条件（禁用原因）：UDPCaster 的成员声明顺序（UDPCaster.h:88-96）使
- * m_ioservice 先于三个 socket 容器析构；active init 创建 socket 后对象析构，
- * socket 析构访问已销毁的 reactor，SIGSEGV。任何“起过 socket 的 UDPCaster”
- * 只要走到析构就会崩，与是否 stop 无关。
- * 缺陷登记：docs/迭代计划/迭代01/bugs/R164.md BUG-R164-001。
+ * active 栈对象覆盖订阅、广播及可用的组播 socket 生命周期；sport=0 由系统分配，
+ * 避免先探测再绑定造成的端口竞态。显式重复 stop 后离开作用域，析构再次 stop。
  */
-TEST_F(R164UdpCasterActiveTest, DISABLED_ActiveStartThenDestructorCrashes)
+TEST_F(R164UdpCasterActiveTest, ActiveStartRepeatedStopThenDestructorIsSafe)
 {
-	const int port = r164::pick_free_udp_port();
-	ASSERT_NE(port, 0);
-
-	WTSVariant* cfg = r164::load_cfg(_dir, "destruct_crash.json",
-		std::string(R"JSON({"active": true, "sport": )JSON")
-		+ std::to_string(port) + R"JSON(})JSON");
+	WTSVariant* cfg = r164::load_cfg(_dir, "active_stack_lifecycle.json", R"JSON({
+		"active": true,
+		"sport": 0,
+		"broadcast": [
+			{"host": "127.0.0.1", "port": 9, "type": 2}
+		],
+		"multicast": [
+			{"host": "239.255.0.10", "port": 9010, "sendport": 0, "type": 2}
+		]
+	})JSON");
 	ASSERT_NE(cfg, nullptr);
 
 	{
 		UDPCaster caster;
-		ASSERT_TRUE(caster.init(cfg, nullptr, nullptr));
+		const bool initialized = caster.init(cfg, nullptr, nullptr);
 		cfg->release();
-		caster.stop();
-	}	// ~UDPCaster: m_ioservice 已析构，m_sktSubscribe 析构时 SIGSEGV
+		ASSERT_TRUE(initialized);
+
+		WTSTickData* tick = WTSTickData::create("600000");
+		ASSERT_NE(tick, nullptr);
+		caster.broadcast(tick);
+
+		EXPECT_NO_THROW(caster.stop());
+		EXPECT_EQ(tick->retainCount(), 1u);
+		EXPECT_NO_THROW(caster.stop());
+		tick->release();
+	}	// 析构再次 stop；socket/group 均已在线程 join 后释放。
 }
 
 }	// namespace

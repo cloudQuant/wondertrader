@@ -278,6 +278,8 @@ void ParserCTP::OnRtnDepthMarketData( CThostFtdcDepthMarketDataField *pDepthMark
 	WTSCommodityInfo* pCommInfo = contract->getCommInfo();
 
 	WTSTickData* tick = WTSTickData::create(contract->getCode());
+	if (tick == NULL)
+		return;
 	tick->setContractInfo(contract);
 
 	WTSTickStruct& quote = tick->getTickStruct();

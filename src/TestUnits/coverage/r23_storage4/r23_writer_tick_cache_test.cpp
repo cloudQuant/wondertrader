@@ -6,7 +6,7 @@
 //                                  + marker.ini 读回 :154-164 + loadCache + 收尾日志
 //  - loadCache          :267-310  新建 cache.dmb（容量=getContractSize）与「已映射直接返回」与
 //                                  「已存在文件重建索引」两条分支
-//  - resizeRTBlock      :312-364  由 cache.dmb 首次越界触发（append + 重新映射 + 回写 capacity）
+//  - resizeTickCache    由 cache.dmb 首次越界触发（保留旧 mapping，映射成功后再提交新 capacity）
 //  - writeTick/procTick :366-414  NULL 拒绝、async=false 走同步 procTick、canSessionReceive 过滤、
 //                                  updateCache 失败即 break、_disable_tick 开关、groupsize 计数日志
 //  - updateCache        :1438-1567 全部 8 条分支（新交易日/procFlag 派生/交易日倒退/
@@ -430,7 +430,7 @@ TEST_F(R23WriterTest, SameOrEarlierTimestampGetsCentisecondBumpChain)
 	EXPECT_EQ(blk._size, 5u);
 }
 
-// ------------------------------------------------------------------ resizeRTBlock
+// ------------------------------------------------------------------ resizeTickCache
 TEST_F(R23WriterTest, CacheGrowsByStepWhenCapacityExhausted)
 {
 	_bd->set_contract_size(1);      // 只给 1 个槽位，第一条 tick 就会触发扩容
@@ -442,7 +442,7 @@ TEST_F(R23WriterTest, CacheGrowsByStepWhenCapacityExhausted)
 	t1.price = 3600.0;
 	write_tick(w, t1, 0);
 
-	// CACHE_SIZE_STEP=200 → 1+200=201（:1457 + resizeRTBlock:313-364）
+	// CACHE_SIZE_STEP=200 → 1+200=201（updateCache 触发 resizeTickCache）
 	const RTBlockHeader head = read_block_header<RTBlockHeader>(cache_file());
 	EXPECT_EQ(head._capacity, 201u);
 	EXPECT_EQ(head._size, 1u);
@@ -475,6 +475,71 @@ TEST_F(R23WriterTest, CacheGrowsByStepWhenCapacityExhausted)
 	EXPECT_DOUBLE_EQ(b->price(), 3601.0);
 	a->release();
 	b->release();
+}
+
+TEST_F(R23WriterTest, CacheResizeMapFailurePreservesOldCacheAndAllowsRetry)
+{
+	_bd->set_contract_size(2);
+	R23Writer* w = make_writer();
+	ASSERT_TRUE(w != NULL);
+
+	TickSpec first;
+	first.code = "rb2210";
+	first.price = 3600.0;
+	write_tick(w, first, 0);
+
+	const string original_path = cache_file();
+	const string backup_path = original_path + ".before_failed_resize";
+	std::error_code ec;
+	std::filesystem::rename(original_path, backup_path, ec);
+	ASSERT_FALSE(ec) << ec.message();
+	std::filesystem::create_symlink("/dev/null", original_path, ec);
+	ASSERT_FALSE(ec) << ec.message();
+
+	TickSpec second;
+	second.code = "rb2211";
+	second.price = 3601.0;
+	WTSTickData* retryable = make_tick_data(second);
+	const uint32_t broadcasts_before = _sink->ticks();
+	ASSERT_TRUE(w->writeTick(retryable, 0));
+
+	EXPECT_EQ(_sink->ticks(), broadcasts_before);
+	EXPECT_FALSE(file_exists(rt_tick_file("rb2211")));
+	EXPECT_TRUE(_sink->has_log("mapping expanded tick cache file", LL_ERROR));
+	const RTBlockHeader preserved = read_block_header<RTBlockHeader>(backup_path);
+	EXPECT_EQ(preserved._capacity, 2u);
+	EXPECT_EQ(preserved._size, 1u);
+	EXPECT_EQ(file_size(backup_path),
+		(uintmax_t)(sizeof(RTTickCache) + 2 * sizeof(TickCacheItem)));
+
+	// 失败后的旧映射仍可读，失败的新代码没有进入索引；两者都证明提交前没有改索引/size。
+	WTSTickData* cached_first = w->getCurTick("rb2210", "SHFE");
+	ASSERT_TRUE(cached_first != NULL);
+	EXPECT_DOUBLE_EQ(cached_first->price(), 3600.0);
+	cached_first->release();
+	EXPECT_TRUE(w->getCurTick("rb2211", "SHFE") == NULL);
+
+	// 恢复原文件名后重试同一对象，应完成映射、索引和数据提交。
+	ASSERT_TRUE(std::filesystem::remove(original_path, ec));
+	ASSERT_FALSE(ec) << ec.message();
+	std::filesystem::rename(backup_path, original_path, ec);
+	ASSERT_FALSE(ec) << ec.message();
+	ASSERT_TRUE(w->writeTick(retryable, 0));
+
+	const RTBlockHeader retried = read_block_header<RTBlockHeader>(original_path);
+	EXPECT_EQ(retried._capacity, 202u);
+	EXPECT_EQ(retried._size, 2u);
+	EXPECT_TRUE(file_exists(rt_tick_file("rb2211")));
+	EXPECT_EQ(_sink->ticks(), broadcasts_before + 1);
+
+	WTSTickData* cached_first_after_retry = w->getCurTick("rb2210", "SHFE");
+	WTSTickData* cached_second_after_retry = w->getCurTick("rb2211", "SHFE");
+	ASSERT_TRUE(cached_first_after_retry != NULL);
+	ASSERT_TRUE(cached_second_after_retry != NULL);
+	EXPECT_DOUBLE_EQ(cached_first_after_retry->price(), 3600.0);
+	EXPECT_DOUBLE_EQ(cached_second_after_retry->price(), 3601.0);
+	cached_first_after_retry->release();
+	cached_second_after_retry->release();
 }
 
 // ------------------------------------------------------------------ savelog / 开关

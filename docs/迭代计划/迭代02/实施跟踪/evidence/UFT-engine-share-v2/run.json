@@ -1,0 +1,30 @@
+{
+  "scope": "本机 UFT engine/share focused GTest；fake/local fixtures",
+  "binary": "build-cov/build_x64/Debug/bin/TestUnits/wt-uft-engine-share-focused",
+  "binary_sha256": "313ba16c835d13dacceffd6f477c2086954b6259b5e691561afaf3a18c5c1797",
+  "run_log": "run.log",
+  "result": "PASS",
+  "gtest": {
+    "tests": 11,
+    "passed": 11,
+    "failed": 0,
+    "disabled": 0,
+    "suites": [
+      {"name": "UftEngineSessionGate", "tests": 2, "passed": 2},
+      {"name": "UftTickerLifecycle", "tests": 3, "passed": 3},
+      {"name": "UftEngineLifecycle", "tests": 5, "passed": 5},
+      {"name": "R220ShareManagerLifecycle", "tests": 1, "passed": 1}
+    ]
+  },
+  "build_evidence": {
+    "wtuftcore_build_log": "wtuftcore-build.log",
+    "focused_test_objects_build_log": "focused-objects-build.log",
+    "capture_limit": "日志分别显示到 [8/9] 的 WtUftCore 静态库链接和测试对象 [2/3]，未收录整体命令终态行；本次只把它们作为构建过程记录。"
+  },
+  "acceptance_boundary": [
+    "局部 fake/test harness 结果，不代表完整 UFT runner 或供应商集成验收。",
+    "quote CAS gate 可关闭入口并排空已准入回调；不能保护 engine 析构后才开始的新 callback。",
+    "Runner 必须先停止并排空所有 parser producers；IParserApi::release 没有 drain 合同。",
+    "order detail、queue 和 transaction callbacks 不经过 quote gate；真实插件 shutdown 为 NOT_RUN。"
+  ]
+}

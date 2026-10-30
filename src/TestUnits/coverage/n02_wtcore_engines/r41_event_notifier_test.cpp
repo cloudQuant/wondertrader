@@ -30,7 +30,13 @@
 #include "Includes/WTSVariant.hpp"
 #include "Includes/WTSTradeDef.hpp"
 #include "WTSUtils/WTSCfgLoader.h"
+#include <boost/asio/io_context.hpp>
+#include "Includes/WTSMarcos.h"
+#include "Includes/WTSObject.hpp"
+#include "Share/StdUtils.hpp"
+#define private public
 #include "WtCore/EventNotifier.h"
+#undef private
 #include "WtCore/WtHelper.h"
 
 namespace {
@@ -131,6 +137,18 @@ std::string activeCfg(const std::string& url)
 // src/WtCore/EventNotifier.cpp:58-61, 114-117, 143-146, 169-172,
 // 197-200, 214-217, 307-310, 338-341, 369-372
 //////////////////////////////////////////////////////////////////
+TEST(R41EventNotifierTest, DefaultConstructorInitializesMqHooksToNull)
+{
+	EventNotifier notifier;
+
+	EXPECT_EQ(0u, notifier._mq_sid);
+	EXPECT_EQ(nullptr, notifier._creator);
+	EXPECT_EQ(nullptr, notifier._remover);
+	EXPECT_EQ(nullptr, notifier._publisher);
+	EXPECT_EQ(nullptr, notifier._register);
+	EXPECT_FALSE(notifier._stopped);
+}
+
 TEST(R41EventNotifierTest, InactiveNotifierShortCircuitsEveryNotify)
 {
     NtfTempDir tmp("inactive");
@@ -139,6 +157,10 @@ TEST(R41EventNotifierTest, InactiveNotifierShortCircuitsEveryNotify)
 
     EventNotifier notifier;
     EXPECT_FALSE(notifier.init(cfg));
+    EXPECT_EQ(nullptr, notifier._creator);
+    EXPECT_EQ(nullptr, notifier._remover);
+    EXPECT_EQ(nullptr, notifier._publisher);
+    EXPECT_EQ(nullptr, notifier._register);
     cfg->release();
 
     notifier.notify_log("TAG", "message");
@@ -171,6 +193,10 @@ TEST(R41EventNotifierTest, MissingMqModuleFailsInit)
 
     EventNotifier notifier;
     EXPECT_FALSE(notifier.init(cfg));
+    EXPECT_EQ(nullptr, notifier._creator);
+    EXPECT_EQ(nullptr, notifier._remover);
+    EXPECT_EQ(nullptr, notifier._publisher);
+    EXPECT_EQ(nullptr, notifier._register);
     cfg->release();
 
     WtHelper::setInstDir(oldInst.c_str());

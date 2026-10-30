@@ -108,10 +108,11 @@ private:
 		{
 			if (bReverse)
 			{
-				for (std::size_t idx = len - 1; idx >= 0; idx--)
+				for (std::size_t idx = len; idx > 0; idx--)
 				{
-					if (src[idx] == symbol)
-						return idx;
+					const std::size_t pos = idx - 1;
+					if (src[pos] == symbol)
+						return pos;
 				}
 			}
 			else
@@ -135,6 +136,10 @@ public:
 	 */
 	static bool	isStdChnFutOptCode(const char* code)
 	{
+		if (code == nullptr)
+			return false;
+		const bool isLegacyCzce = strncmp(code, "CZCE.", 5) == 0 || strncmp(code, "ZCE.", 4) == 0;
+
 		/* 定义正则表达式 */
 		//static cregex reg_stk = cregex::compile("^[A-Z]+.[A-z]+\\d{4}.(C|P).\\d+$");	//CFFEX.IO2007.C.4000
 		//return 	regex_match(code, reg_stk);
@@ -180,17 +185,26 @@ public:
 				else
 					return false;
 			}
-			else if (state >= 4 && state <= 6)
+			else if (state == 4 || state == 5)
 			{
 				if ('0' <= ch && ch <= '9')
 					state += 1;
 				else
 					return false;
 			}
+			else if (state == 6)
+			{
+				if ('0' <= ch && ch <= '9')
+					state = 7;
+				else if (ch == '.' && isLegacyCzce)
+					state = 8; // Legacy CZCE/ZCE options also use three-digit months.
+				else
+					return false;
+			}
 			else if (state == 7)
 			{
 				if (ch == '.')
-					state += 1;
+					state = 8;
 				else
 					return false;
 			}
@@ -285,54 +299,43 @@ public:
 	 */
 	static inline std::string rawMonthCodeToStdCode(const char* code, const char* exchg, bool isComm = false)
 	{
-		thread_local static char buffer[64] = { 0 };
-		std::size_t len = 0;
-		if(isComm)
-		{
-			len = strlen(exchg);
-			memcpy(buffer, exchg, len);
-			buffer[len] = '.';
-			len += 1;
+		if (code == nullptr || exchg == nullptr || code[0] == '\0' || exchg[0] == '\0')
+			return "";
 
-			auto clen = strlen(code);
-			memcpy(buffer+len, code, clen);
-			len += clen;
-			buffer[len] = '\0';
-			len += 1;
+		std::string result(exchg);
+		result.push_back('.');
+		if (isComm)
+		{
+			result.append(code);
+			return result;
+		}
+
+		const std::string rawCode(code);
+		const std::string pid = rawMonthCodeToRawCommID(rawCode.c_str());
+		if (pid.empty() || pid.size() >= rawCode.size())
+			return "";
+
+		const std::size_t monthLen = rawCode.size() - pid.size();
+		const char* month = rawCode.c_str() + pid.size();
+		if (monthLen == 4)
+		{
+			result.append(pid);
+			result.push_back('.');
+			result.append(month, 4);
+		}
+		else if (monthLen >= 3)
+		{
+			result.append(pid);
+			result.push_back('.');
+			result.push_back(month[0] > '5' ? '1' : '2');
+			result.append(month, 3);
 		}
 		else
 		{
-			std::string pid = rawMonthCodeToRawCommID(code);
-			len = strlen(exchg);
-			memcpy(buffer, exchg, len);
-			buffer[len] = '.';
-			len += 1;
-
-			memcpy(buffer + len, pid.c_str(), pid.size());
-			len += pid.size();
-			buffer[len] = '.';
-			len += 1;
-
-			char* s = (char*)code;
-			s += pid.size();
-			if (strlen(s) == 4)
-			{
-				wt_strcpy(buffer + len, s, 4);
-				len += 4;
-			}
-			else
-			{
-				if (s[0] > '5')
-					buffer[len] = '1';
-				else
-					buffer[len] = '2';
-				len += 1;
-				wt_strcpy(buffer + len, s, 3);
-				len += 3;
-			}
+			return "";
 		}
 
-		return std::string(buffer, len);
+		return result;
 	}
 
 	/*
@@ -440,40 +443,106 @@ public:
 	 *	标准期货期权代码格式为CFFEX.IO2008.C.4300
 	 *	-- 暂时没有地方调用 --
 	 */
-	static inline std::string rawFutOptCodeToStdCode(const char* code, const char* exchg)
+	static inline bool tryRawFutOptCodeToStdCode(const char* code, const char* exchg, std::string& out)
 	{
-		using namespace boost::xpressive;
-		/* 定义正则表达式 */
-		static cregex reg_stk = cregex::compile("^[A-z]+\\d{4}-(C|P)-\\d+$");	//中金所、大商所格式IO2013-C-4000
-		bool bMatch = regex_match(code, reg_stk);
-		if(bMatch)
+		out.clear();
+		if (code == nullptr || exchg == nullptr)
+			return false;
+
+		// Contract codes are stored in MAX_INSTRUMENT_LENGTH-sized fields. Stop
+		// at that bound rather than asking strlen/regex to scan arbitrary input.
+		std::size_t codeLen = 0;
+		while (codeLen < MAX_INSTRUMENT_LENGTH && code[codeLen] != '\0')
+			++codeLen;
+		if (codeLen == 0 || codeLen >= MAX_INSTRUMENT_LENGTH)
+			return false;
+
+		std::size_t exchgLen = 0;
+		const auto isAsciiAlpha = [](unsigned char ch) {
+			return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z');
+		};
+		const auto isAsciiDigit = [](unsigned char ch) {
+			return ch >= '0' && ch <= '9';
+		};
+		while (exchgLen < MAX_INSTRUMENT_LENGTH && exchg[exchgLen] != '\0')
 		{
-			std::string s = fmt::format("{}.{}", exchg, code);
-			StrUtil::replace(s, "-", ".");
-			return s;
+			const unsigned char ch = static_cast<unsigned char>(exchg[exchgLen]);
+			if (!isAsciiAlpha(ch) && !isAsciiDigit(ch) && ch != '_' && ch != '-')
+				return false;
+			++exchgLen;
+		}
+		if (exchgLen == 0 || exchgLen >= MAX_INSTRUMENT_LENGTH)
+			return false;
+
+		std::size_t productLen = 0;
+		while (productLen < codeLen && isAsciiAlpha(static_cast<unsigned char>(code[productLen])))
+			++productLen;
+		if (productLen == 0 || productLen == codeLen)
+			return false;
+
+		std::size_t monthLen = 0;
+		std::size_t directionPos = 0;
+		std::size_t strikePos = 0;
+		std::size_t monthEnd = productLen;
+		while (monthEnd < codeLen && isAsciiDigit(static_cast<unsigned char>(code[monthEnd])))
+			++monthEnd;
+		monthLen = monthEnd - productLen;
+		if (monthEnd >= codeLen)
+			return false;
+
+		if (code[monthEnd] == '-')
+		{
+			if (monthLen != 4 || monthEnd + 3 >= codeLen)
+				return false;
+			directionPos = monthEnd + 1;
+			if ((code[directionPos] != 'C' && code[directionPos] != 'P') ||
+				code[monthEnd + 2] != '-')
+				return false;
+			strikePos = monthEnd + 3;
 		}
 		else
 		{
-			//郑商所上期所期权代码格式ZC010P11600
-
-			//先从后往前定位到P或C的位置
-			std::size_t idx = strlen(code) - 1;
-			for(; idx >= 0; idx--)
-			{
-				if(!isdigit(code[idx]))
-					break;
-			}
-			
-			std::string s = exchg;
-			s.append(".");
-			s.append(code, idx-3);
-			s.append(&code[idx - 3], 3);
-			s.append(".");
-			s.append(&code[idx], 1);
-			s.append(".");
-			s.append(&code[idx + 1]);
-			return s;
+			if ((monthLen != 3 && monthLen != 4) ||
+				(code[monthEnd] != 'C' && code[monthEnd] != 'P'))
+				return false;
+			directionPos = monthEnd;
+			strikePos = directionPos + 1;
 		}
+
+		if (strikePos >= codeLen)
+			return false;
+		for (std::size_t idx = strikePos; idx < codeLen; ++idx)
+		{
+			if (!isAsciiDigit(static_cast<unsigned char>(code[idx])))
+				return false;
+		}
+
+		try
+		{
+			std::string parsed;
+			parsed.reserve(exchgLen + codeLen + 5);
+			parsed.append(exchg, exchgLen);
+			parsed.push_back('.');
+			parsed.append(code, productLen + monthLen);
+			parsed.push_back('.');
+			parsed.push_back(code[directionPos]);
+			parsed.push_back('.');
+			parsed.append(code + strikePos, codeLen - strikePos);
+			out.swap(parsed);
+			return true;
+		}
+		catch (...)
+		{
+			out.clear();
+			return false;
+		}
+	}
+
+	static inline std::string rawFutOptCodeToStdCode(const char* code, const char* exchg)
+	{
+		std::string result;
+		tryRawFutOptCodeToStdCode(code, exchg, result);
+		return result;
 	}
 
 	/*
@@ -485,10 +554,8 @@ public:
 		if (idx == std::string::npos)
 			return "";		
 		
-		std::string stdWrappedCode;
-		stdWrappedCode.resize(idx + strlen(SUFFIX_HOT) + 1);
-		memcpy((char*)stdWrappedCode.data(), stdCode, idx);
-		wt_strcpy((char*)stdWrappedCode.data()+idx, SUFFIX_HOT);
+		std::string stdWrappedCode(stdCode, idx);
+		stdWrappedCode.append(SUFFIX_HOT);
 		return stdWrappedCode;
 	}
 
@@ -501,10 +568,8 @@ public:
 		if (idx == std::string::npos)
 			return "";
 
-		std::string stdWrappedCode;
-		stdWrappedCode.resize(idx + strlen(SUFFIX_2ND) + 1);
-		memcpy((char*)stdWrappedCode.data(), stdCode, idx);
-		wt_strcpy((char*)stdWrappedCode.data() + idx, SUFFIX_2ND);
+		std::string stdWrappedCode(stdCode, idx);
+		stdWrappedCode.append(SUFFIX_2ND);
 		return stdWrappedCode;
 	}
 
@@ -550,7 +615,8 @@ public:
 
 		StringVector ay = StrUtil::split(stdCode, ".");
 		wt_strcpy(codeInfo._exchg, ay[0].c_str());
-		if(strcmp(codeInfo._exchg, "SHFE") == 0 || strcmp(codeInfo._exchg, "INE") == 0 || strcmp(codeInfo._exchg, "CZCE") == 0)
+		const bool isCzce = strcmp(codeInfo._exchg, "CZCE") == 0 || strcmp(codeInfo._exchg, "ZCE") == 0;
+		if(strcmp(codeInfo._exchg, "SHFE") == 0 || strcmp(codeInfo._exchg, "INE") == 0 || isCzce)
 		{
 			fmt::format_to(codeInfo._code, "{}{}{}", ay[1], ay[2], ay[3]);
 		}
@@ -568,7 +634,7 @@ public:
 
 		int mpos = indexCodeMonth(ay[1].c_str());
 
-		if(strcmp(codeInfo._exchg, "CZCE") == 0)
+		if(isCzce)
 		{
 			memcpy(codeInfo._product, ay[1].c_str(), mpos);
 			strcat(codeInfo._product, ay[2].c_str());
@@ -591,12 +657,74 @@ public:
 	 */
 	static CodeInfo extractStdCode(const char* stdCode, IHotMgr *hotMgr)
 	{
+		if (stdCode == NULL || stdCode[0] == '\0')
+			return CodeInfo();
+
+		// Standard codes contain two fields (exchange.contract), three fields
+		// (exchange.product.contract), or four fields for a recognized option.
+		// Validate every field before passing pointers or lengths to the legacy
+		// fixed-size CodeInfo fields below.
+		const char* fields[4] = {};
+		std::size_t lengths[4] = {};
+		std::size_t fieldCount = 0;
+		auto fieldEquals = [](const char* field, std::size_t length, const char* value) {
+			return strlen(value) == length && memcmp(field, value, length) == 0;
+		};
+		auto fullPidFits = [](std::size_t exchangeLen, std::size_t productLen) {
+			// stdCommID() formats "exchange.product" into a fixed-size array.
+			return exchangeLen + 1 + productLen < MAX_INSTRUMENT_LENGTH;
+		};
+		const char* fieldStart = stdCode;
+		for (const char* p = stdCode; ; ++p)
+		{
+			if (*p == '.' || *p == '\0')
+			{
+				if (fieldCount >= 4 || p == fieldStart ||
+					static_cast<std::size_t>(p - fieldStart) >= MAX_INSTRUMENT_LENGTH)
+					return CodeInfo();
+
+				fields[fieldCount] = fieldStart;
+				lengths[fieldCount] = static_cast<std::size_t>(p - fieldStart);
+				++fieldCount;
+				if (*p == '\0')
+					break;
+				fieldStart = p + 1;
+			}
+		}
+
 		//期权的代码规则和其他都不一样，所以单独判断
 		if(isStdChnFutOptCode(stdCode))
 		{
+			if (fieldCount != 4)
+				return CodeInfo();
+
+			const bool isCzce = fieldEquals(fields[0], lengths[0], "CZCE") ||
+				fieldEquals(fields[0], lengths[0], "ZCE");
+			const bool isCompactOption = fieldEquals(fields[0], lengths[0], "SHFE") ||
+				fieldEquals(fields[0], lengths[0], "INE") || isCzce;
+			const std::size_t optionCodeLen =
+				(lengths[1] + lengths[3] +
+				 (isCompactOption ? 1 : 3));
+			const std::string optionContract(fields[1], lengths[1]);
+			const int monthIndex = indexCodeMonth(optionContract.c_str());
+			if (monthIndex < 0)
+				return CodeInfo();
+			const std::size_t monthPos = static_cast<std::size_t>(monthIndex);
+			std::size_t productLen = monthPos;
+			if (isCzce)
+				productLen += 1;
+			else if (!fieldEquals(fields[0], lengths[0], "CFFEX"))
+				productLen += 2;
+			if (optionCodeLen >= MAX_INSTRUMENT_LENGTH || monthPos >= lengths[1] ||
+				productLen >= MAX_INSTRUMENT_LENGTH || !fullPidFits(lengths[0], productLen))
+				return CodeInfo();
+
 			return extractStdChnFutOptCode(stdCode);
 		}
-		else
+		if (fieldCount != 2 && fieldCount != 3)
+			return CodeInfo();
+		if (!fullPidFits(lengths[0], lengths[1]))
+			return CodeInfo();
 		{
 			/*
 			 *	By Wesley @ 2021.12.25
@@ -607,30 +735,33 @@ public:
 			 */
 			thread_local static CodeInfo codeInfo;
 			codeInfo.clear();
-			auto idx = StrUtil::findFirst(stdCode, '.');
-			wt_strcpy(codeInfo._exchg, stdCode, idx);
+			wt_strcpy(codeInfo._exchg, fields[0], lengths[0]);
 
-			auto idx2 = StrUtil::findFirst(stdCode + idx + 1, '.');
-			if (idx2 == std::string::npos)
+			if (fieldCount == 2)
 			{
-				wt_strcpy(codeInfo._product, stdCode + idx + 1);
+				wt_strcpy(codeInfo._product, fields[1], lengths[1]);
 
 				//By Wesley @ 2021.12.29
 				//如果是两段的合约代码，如OKEX.BTC-USDT
 				//则品种代码和合约代码一致
-				wt_strcpy(codeInfo._code, stdCode + idx + 1);
+				wt_strcpy(codeInfo._code, fields[1], lengths[1]);
 			}
 			else
 			{
-				wt_strcpy(codeInfo._product, stdCode + idx + 1, idx2);
-				const char* ext = stdCode + idx + idx2 + 2;
-				std::size_t extlen = strlen(ext);
+				wt_strcpy(codeInfo._product, fields[1], lengths[1]);
+				const char* ext = fields[2];
+				std::size_t extlen = lengths[2];
 				char lastCh = ext[extlen - 1];
 				if (lastCh == SUFFIX_QFQ || lastCh == SUFFIX_HFQ)
 				{
 					codeInfo._exright = (lastCh == SUFFIX_QFQ) ? 1 : 2;
 
 					extlen--;
+					if (extlen == 0)
+					{
+						codeInfo.clear();
+						return codeInfo;
+					}
 					lastCh = ext[extlen - 1];
 				}
 				
@@ -640,17 +771,30 @@ public:
 					//TODO: 这样的判断存在一个假设，最后一位是数字的一定是期货分月合约，以后可能会有问题，先注释一下
 					//那么code得加上品种id
 					//郑商所得单独处理一下，这个只能hardcode了
-					auto i = wt_strcpy(codeInfo._code, codeInfo._product);
+					if (lengths[1] + extlen >= MAX_INSTRUMENT_LENGTH)
+					{
+						codeInfo.clear();
+						return codeInfo;
+					}
+					auto i = wt_strcpy(codeInfo._code, codeInfo._product, lengths[1]);
 					wt_strcpy(codeInfo._code + i, ext, extlen);
 				}
 				else
 				{
 					const char* ruleTag = (hotMgr != NULL) ? hotMgr->getRuleTag(ext) :"";
-					if (strlen(ruleTag) == 0)
+					if (ruleTag == NULL)
+						ruleTag = "";
+					const std::size_t ruleLen = strlen(ruleTag);
+					if (ruleLen >= MAX_INSTRUMENT_LENGTH)
+					{
+						codeInfo.clear();
+						return codeInfo;
+					}
+					if (ruleLen == 0)
 						wt_strcpy(codeInfo._code, ext, extlen);
 					else
 					{
-						wt_strcpy(codeInfo._code, codeInfo._product);
+						wt_strcpy(codeInfo._code, codeInfo._product, lengths[1]);
 						wt_strcpy(codeInfo._ruletag, ruleTag);
 					}
 				}

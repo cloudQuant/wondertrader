@@ -19,6 +19,7 @@
 
 #include <queue>
 #include <map>
+#include <atomic>
 
 /*!
  * \brief Boost内存映射文件智能指针类型
@@ -166,8 +167,11 @@ public:
 	virtual bool init(WTSVariant* params, IDataWriterSink* sink) override;
 	/*!
 	 * \brief 释放数据写入器资源
-	 * 
-	 * \details 清理并释放数据写入器占用的所有资源
+	 * \details 关闭新调用，等待已入场的公开操作完成，排空异步队列并 join 工作线程。
+	 *          若由本 writer 的操作回调或工作线程重入，只请求停止；外部 owner 必须随后
+	 *          在非工作线程调用 release 或销毁对象，不能在回调中直接 delete writer。
+	 *          销毁对象前，调用方仍须停止发起新的公开操作。
+	 *          定时 checker 与工作线程对既有 block map 的并发访问不由此 admission barrier 修复。
 	 */
 	virtual void release() override;
 
@@ -454,11 +458,53 @@ private:
 		~_TaskInfo();
 
 	} TaskInfo;
+
+	struct OperationFrame
+	{
+		WtDataWriter* _writer = nullptr;
+		OperationFrame* _previous = nullptr;
+	};
+
+	class OperationGuard
+	{
+	public:
+		explicit OperationGuard(WtDataWriter& writer, bool initialization = false);
+		~OperationGuard();
+		OperationGuard(const OperationGuard&) = delete;
+		OperationGuard& operator=(const OperationGuard&) = delete;
+		explicit operator bool() const { return _writer != nullptr; }
+		bool commitInitialization();
+
+	private:
+		WtDataWriter* _writer = nullptr;
+		OperationFrame _frame;
+		bool _initialization = false;
+		bool _initialization_completed = false;
+	};
+
+	static thread_local OperationFrame* _current_operation;
+	enum class LifecycleState
+	{
+		Uninitialized,
+		Initializing,
+		Ready,
+		Failed,
+		Closing
+	};
+	bool beginOperation(bool initialization = false);
+	bool finishInitialization(bool success);
+	void endOperation();
+	bool hasCurrentOperation() const;
+	void stopQueuesLocked();
+
 	/*!
 	 * \brief 任务队列
 	 * \details 存储待处理的数据任务，由任务处理线程异步处理
 	 */
 	std::queue<TaskInfo>	_tasks;
+	bool				_task_stopping = false;
+	uint32_t		_task_waiters = 0;
+	std::thread::id	_task_worker_id;
 
 	/*!
 	 * \brief 任务处理线程
@@ -477,6 +523,19 @@ private:
 	 * \details 用于任务线程的等待和通知机制
 	 */
 	StdCondVariable			_task_cond;
+
+	// Public operations lease admission before touching writer-owned state. The lock is
+	// dropped before callbacks; release stops queues only after every admitted lease ends.
+	// Lock order is lifecycle -> queue, and callbacks are never invoked under these locks.
+	StdUniqueMutex		_accept_mtx;
+	StdCondVariable	_lifecycle_cond;
+	bool				_accepting = false;
+	LifecycleState	_lifecycle_state = LifecycleState::Uninitialized;
+	uint32_t		_active_operations = 0;
+
+	// Serializes external release calls without holding a queue lock while joining workers.
+	StdUniqueMutex		_release_mtx;
+	bool				_released = false;
 
 	/*!
 	 * \brief 基础目录
@@ -507,6 +566,8 @@ private:
 	 * \details 用于处理线程的等待和通知机制
 	 */
 	StdCondVariable	_proc_cond;
+	StdUniqueMutex	_check_mtx;
+	StdCondVariable	_check_cond;
 
 	/*!
 	 * \brief 处理队列互斥锁
@@ -519,6 +580,9 @@ private:
 	 * \details 存储待处理的文件路径或任务标识
 	 */
 	std::queue<std::string> _proc_que;
+	bool			_proc_stopping = false;
+	uint32_t	_proc_waiters = 0;
+	std::thread::id	_proc_worker_id;
 
 	/*!
 	 * \brief 处理线程
@@ -531,12 +595,13 @@ private:
 	 * \details 用于定期检查并处理历史数据的工作线程
 	 */
 	StdThreadPtr	_proc_chk;
+	std::thread::id	_check_worker_id;
 
 	/*!
 	 * \brief 是否终止标志
 	 * \details 标记线程是否应该终止，true表示需要终止线程
 	 */
-	bool			_terminated;
+	std::atomic<bool>	_terminated;
 
 	/*!
 	 * \brief 是否保存Tick日志
@@ -622,6 +687,8 @@ private:
 	 * \details 从缓存文件中加载最新的Tick数据到内存中
 	 */
 	void loadCache();
+	/*! 扩容 Tick 缓存；失败时保留旧映射与索引，可安全重试。调用方持有 _lck_tick_cache。 */
+	bool resizeTickCache(uint32_t nCount);
 
 	/*!
 	 * \brief 更新Tick缓存
@@ -720,9 +787,14 @@ private:
 	/*!
 	 * \brief 将任务添加到任务队列
 	 * \param task 任务信息
-	 * 
-	 * \details 将数据处理任务添加到异步处理队列中
+	 * \return 是否成功加入队列
+	 * \details 仅由持有 public-operation lease 的调用路径使用；release 会在 lease 全部结束后停止队列。
 	 */
-	void pushTask(const TaskInfo& task);
+	bool pushTask(const TaskInfo& task);
+	bool ensureTaskThreadLocked();
+	bool takeTaskBatch(std::queue<TaskInfo>& batch);
+	void task_loop();
+	bool ensureProcThreadLocked();
+	bool takeProcTask(std::string& fullcode);
 };
 

@@ -46,7 +46,7 @@
  * @details 解析命令行参数，初始化日志系统和配置，创建WtRunner实例并运行
  * @param argc 命令行参数数量
  * @param argv 命令行参数数组
- * @return 程序返回值，0表示正常结束
+ * @return 程序返回值，配置成功并正常运行后返回0，配置失败返回非零
  */
 int main(int argc, char* argv[])
 {
@@ -115,7 +115,8 @@ int main(int argc, char* argv[])
 	 * @brief 配置交易引擎
 	 * @details 根据配置文件初始化交易引擎，加载基础数据、策略、执行器等
 	 */
-	runner.config(filename);
+	if (!runner.config(filename))
+		return 1;
 
 	/**
 	 * @brief 运行交易引擎

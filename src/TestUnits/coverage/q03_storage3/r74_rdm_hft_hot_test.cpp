@@ -296,7 +296,7 @@ TEST_F(R74RdmHftHotTest, R74RdmHotDaySectionsEdgeCases)
 	EXPECT_EQ(g4[0].date, 20240102u);
 	s4->release();
 
-	// ---- E) HOT 包裹文件过短（:1180-1184），分段仍按正常文件装配
+	// ---- E) 损坏的 HOT 包裹文件记录错误，但回退到有效分段文件
 	_reader->clearCache();
 	ASSERT_TRUE(q03::write_bytes("his/day/SHFE/SHFE.rb_HOT.dsb", string(8, 'H')));
 	vector<WTSBarStruct> seg6;
@@ -310,9 +310,24 @@ TEST_F(R74RdmHftHotTest, R74RdmHotDaySectionsEdgeCases)
 	WTSKlineSlice* s5 = _reader->readKlineSliceByRange("SHFE.rb.HOT", KP_DAY,
 		202401010000ull, 202401051500ull);
 	ASSERT_TRUE(s5 != NULL);
-	EXPECT_EQ(r52::flatten_bars(s5).size(), (std::size_t)3);
+	vector<WTSBarStruct> g5 = r52::flatten_bars(s5);
+	ASSERT_EQ(g5.size(), (std::size_t)3);
+	EXPECT_EQ(g5[0].date, 20240102u);
+	EXPECT_DOUBLE_EQ(g5[0].open, 61.0);
+	EXPECT_DOUBLE_EQ(g5[0].close, 61.5);
+	EXPECT_EQ(g5[2].date, 20240104u);
+	EXPECT_DOUBLE_EQ(g5[2].open, 63.0);
+	EXPECT_DOUBLE_EQ(g5[2].close, 63.5);
 	EXPECT_GT(_sink.count_of(LL_ERROR), err0);
 	s5->release();
+
+	// 损坏 HOT 文件本身不得产生数据；没有有效分段时仍返回空结果。
+	_reader->clearCache();
+	std::filesystem::remove("his/day/SHFE/rb2406.dsb", ec);
+	_hot.clear_sections();
+	_hot.add_section("rb2410", 20240102, 20240105, 1.0);
+	EXPECT_TRUE(_reader->readKlineSliceByRange("SHFE.rb.HOT", KP_DAY,
+		202401010000ull, 202401051500ull) == NULL);
 
 	// ---- F) 分段文件过短 → :1276-1279 return false
 	_reader->clearCache();

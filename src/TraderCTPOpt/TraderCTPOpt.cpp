@@ -1029,13 +1029,10 @@ void TraderCTPOpt::OnRspExecOrderAction(CThostFtdcInputExecOrderActionField */*p
 {
 	if (IsErrorRspInfo(pRspInfo))
 	{
-
-	}
-	else
-	{
 		WTSError* error = WTSError::create(WEC_EXECCANCEL, pRspInfo->ErrorMsg);
 		if (m_bscSink)
 			m_bscSink->onTraderError(error);
+		error->release();
 	}
 }
 
@@ -1088,7 +1085,7 @@ void TraderCTPOpt::OnRspQryExecOrder(CThostFtdcExecOrderField *pExecOrder, CThos
 	if (bIsLast)
 	{
 		if (m_optSink)
-			m_optSink->onRspOrdersOpt(m_ayOrders);
+			m_optSink->onRspOrdersOpt(m_ayExecOrds);
 
 		if (m_ayExecOrds)
 			m_ayExecOrds->clear();
@@ -1099,13 +1096,10 @@ void TraderCTPOpt::OnRspOrderAction(CThostFtdcInputOrderActionField */*pInputOrd
 {
 	if (IsErrorRspInfo(pRspInfo))
 	{
-
-	}
-	else
-	{
 		WTSError* error = WTSError::create(WEC_ORDERCANCEL, pRspInfo->ErrorMsg);
 		if (m_bscSink)
 			m_bscSink->onTraderError(error);
+		error->release();
 	}
 }
 

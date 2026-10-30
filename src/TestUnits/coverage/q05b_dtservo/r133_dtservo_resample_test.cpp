@@ -53,6 +53,24 @@ struct R133DmReport
 	int32_t		marks = 0;
 };
 
+struct R133CapturedBar
+{
+	std::string period;
+	WTSBarStruct bar;
+};
+
+std::vector<R133CapturedBar> g_r133CapturedBars;
+
+void r133_capture_bar(const char* /*stdCode*/, const char* period, WTSBarStruct* bar)
+{
+	if (bar == NULL)
+		return;
+	R133CapturedBar item;
+	item.period = period == NULL ? "" : period;
+	item.bar = *bar;
+	g_r133CapturedBars.push_back(item);
+}
+
 #define R133_DM_CHK(rep, cond) \
 	do { if (!(cond)) { if ((rep).fail_line == 0) (rep).fail_line = __LINE__; } } while (0)
 
@@ -121,9 +139,9 @@ protected:
 		EXPECT_EQ(rep.fail_line, 0) << "子进程检查失败行 " << rep.fail_line;
 	}
 
-	bool init_dm(WtDtRunner& runner, WtDataManager& dm)
+	bool init_dm(WtDtRunner& runner, WtDataManager& dm, FuncOnBarCallback cbBar = NULL)
 	{
-		runner.initialize(_runnerCfg.c_str(), true, _bin.c_str(), _logCfg.c_str(), NULL, NULL);
+		runner.initialize(_runnerCfg.c_str(), true, _bin.c_str(), _logCfg.c_str(), NULL, cbBar);
 
 		WTSVariant* cfg = WTSCfgLoader::load_from_file((_dir / "data_default.json").string().c_str());
 		if (cfg == NULL)
@@ -327,6 +345,85 @@ TEST_F(R133WtDataManagerTest, day_range_and_count_cache_branches)
 		R133_DM_CHK(rep, rep.b > 0);
 		R133_DM_CHK(rep, rep.c > 0);
 		R133_DM_CHK(rep, rep.marks > 0);
+	});
+}
+
+// New day/second bars are detached by WTSDataFactory and must be copied into
+// WtDataManager's realtime cache before the callback observes the latest bar.
+TEST_F(R133WtDataManagerTest, realtime_day_and_second_buckets_are_cached_and_reported)
+{
+	if (!r102::storage_plugin_ready(_bin))
+		GTEST_SKIP() << "libWtDataStorage.dylib / createRdmDtReader 不可用";
+
+	run_child([this](R133DmReport& rep) {
+		g_r133CapturedBars.clear();
+		WtDtRunner runner;
+		WtDataManager dm;
+		if (!init_dm(runner, dm, r133_capture_bar))
+		{
+			rep.fail_line = __LINE__;
+			return;
+		}
+
+		dm.subscribe_bar("CFFEX.IC.2204", KP_DAY, 1);
+		dm.subscribe_bar("CFFEX.IC.2204", KP_Tick, 1);
+		WTSContractInfo* contract = runner.getBaseDataMgr().getContract("IC2204", "CFFEX");
+		if (contract == NULL)
+		{
+			rep.fail_line = __LINE__;
+			return;
+		}
+
+		auto update = [&](uint32_t actionTime, double price, double volume) {
+			WTSTickStruct ts = r102::make_tick("CFFEX", "IC2204", 20240108, actionTime, price);
+			ts.volume = volume;
+			ts.total_volume = volume;
+			ts.turn_over = price * volume;
+			ts.total_turnover = price * volume;
+			WTSTickData* tick = WTSTickData::create(ts);
+			if (tick == NULL)
+				return false;
+			tick->setContractInfo(contract);
+			dm.update_bars("CFFEX.IC.2204", tick);
+			tick->release();
+			return true;
+		};
+
+		uint64_t firstSecondBucket = 0;
+		auto checkLatest = [&](std::size_t begin, double close, double volume, bool newSecondBucket) {
+			if (g_r133CapturedBars.size() != begin + 2)
+				return false;
+			const WTSBarStruct* day = NULL;
+			const WTSBarStruct* sec = NULL;
+			for (std::size_t i = begin; i < g_r133CapturedBars.size(); ++i)
+			{
+				const WTSBarStruct& bar = g_r133CapturedBars[i].bar;
+				if (bar.time == 0)
+					day = &bar;
+				else
+					sec = &bar;
+			}
+			if (day == NULL || sec == NULL)
+				return false;
+			if (day->date != 20240108 || day->close != close || day->vol != volume)
+				return false;
+			if (sec->date != 20240108 || sec->close != close || sec->vol != volume)
+				return false;
+			if (begin == 0)
+				firstSecondBucket = sec->time;
+			else if (newSecondBucket == (sec->time == firstSecondBucket))
+				return false;
+			return g_r133CapturedBars[begin].period == "d1";
+		};
+
+		R133_DM_CHK(rep, update(93001000, 110.0, 1.0));
+		R133_DM_CHK(rep, checkLatest(0, 110.0, 1.0, false));
+		R133_DM_CHK(rep, update(93001500, 120.0, 2.0));
+		R133_DM_CHK(rep, checkLatest(2, 120.0, 3.0, false));
+		R133_DM_CHK(rep, update(93002000, 130.0, 3.0));
+		R133_DM_CHK(rep, checkLatest(4, 130.0, 6.0, true));
+		rep.a = static_cast<int32_t>(g_r133CapturedBars.size());
+		rep.marks = 1;
 	});
 }
 

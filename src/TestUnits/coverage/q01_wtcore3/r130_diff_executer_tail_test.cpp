@@ -11,11 +11,13 @@
  *   :634-637（非池 set_position 归零）
  *   :680-687（localid==0 早退）
  *
- * 执行单元来自构建产物 libWtExeFact（WtMinImpactExeUnit），只做内存计算，
+ * 执行单元来自构建产物 libWtExeFact（WtDiffMinImpactExeUnit），只做内存计算，
  * 不连柜台、不起线程。落盘目录 r90/r71 均指向系统临时目录并在进程退出时清理。
  */
 #include <gtest/gtest.h>
 
+#include <cstdlib>
+#include <memory>
 #include <string>
 
 #include "../n01_wtcore_tradepaths/r71_wtcore_env.h"
@@ -25,6 +27,7 @@
 #include <WTSUtils/WTSCfgLoader.h>
 
 #include <WtCore/WtDiffExecuter.h>
+#include <WtCore/WtExecMgr.h>
 
 using namespace wtp;
 
@@ -45,6 +48,36 @@ public:
             return alias;
         return r71::R71BaseDataMgr::getContract(code, exchg, uDate);
     }
+};
+
+class R130DiffQuiesceGuard
+{
+public:
+    explicit R130DiffQuiesceGuard(const std::shared_ptr<WtDiffExecuter>& executor)
+        : _executor(executor), _coordinator({ &_manager })
+    {
+        _manager.add_executer(ExecCmdPtr(_executor));
+    }
+
+    ~R130DiffQuiesceGuard()
+    {
+        if (!quiesceAll())
+        {
+            ADD_FAILURE() << "Diff executor quiesce coordinator failed";
+            std::abort();
+        }
+    }
+
+    bool quiesceAll()
+    {
+        return _coordinator.quiesce_all() && _coordinator.is_complete() &&
+            _manager.wait_quiesced();
+    }
+
+private:
+    std::shared_ptr<WtDiffExecuter> _executor;
+    WtExecuterMgr _manager;
+    WtExecQuiesceCoordinator _coordinator;
 };
 
 }  // namespace
@@ -83,28 +116,35 @@ TEST(R130DiffExecuterTail, NonPoolClearOldTargetAndIgnoreZeroLocalId)
     stub.hot_ = &hot;
     r71::R71DataMgr dm;
 
-    WtDiffExecuter diff(&factory, "r130_diff_nopool", &dm, &bd);
-    diff.setStub(&stub);
+    std::shared_ptr<WtDiffExecuter> diff(
+        new WtDiffExecuter(&factory, "r130_diff_nopool", &dm, &bd));
+    R130DiffQuiesceGuard quiesce(diff);
+    diff->setStub(&stub);
 
     WTSVariant* cfg = WTSCfgLoader::load_from_content(
         "{\"scale\":1.0,\"poolsize\":0,"
-        "\"policy\":{\"default\":{\"name\":\"WtExeFact.WtMinImpactExeUnit\","
+        "\"policy\":{\"default\":{\"name\":\"WtExeFact.WtDiffMinImpactExeUnit\","
         "\"lots\":1,\"minopenlots\":1,\"offset\":0,\"expire\":0,"
         "\"pricemode\":0,\"span\":0,\"byrate\":false}}}");
     ASSERT_NE(nullptr, cfg);
-    ASSERT_TRUE(diff.init(cfg));
+    ASSERT_TRUE(diff->init(cfg));
     cfg->release();
 
     // 第一次增量：auto create 单元并写入目标仓位 2
-    diff.on_position_changed(kCode, 2.0);
+    diff->on_position_changed(kCode, 2.0);
+    const ExecUnitInitStatus unitStatus = diff->queryUnitInitStatus(kCode);
+    ASSERT_EQ(unitStatus.query_result, ExecUnitInitQueryResult::OK);
+    ASSERT_EQ(unitStatus.state, ExecUnitInitState::READY);
 
     // 空目标集：_target_pos 里残留的 kCode 走非池 else 归零分支
     wt_hashmap<std::string, double> empty;
-    diff.set_position(empty);
+    diff->set_position(empty);
 
     // 单元已存在（getUnit(code,false) 命中缓存），localid==0 直接早退
-    diff.on_trade(0u, kCode, true, 1.0, 3500.0);
+    diff->on_trade(0u, kCode, true, 1.0, 3500.0);
 
     // 非 0 localid 仍能更新差量（反向确认上一步不是 getUnit 失败导致）
-    diff.on_trade(1u, kCode, false, 1.0, 3501.0);
+    diff->on_trade(1u, kCode, false, 1.0, 3501.0);
+
+    ASSERT_TRUE(quiesce.quiesceAll());
 }

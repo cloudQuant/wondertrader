@@ -9,6 +9,11 @@
  * @details 本文件定义了UFT(超高频交易)延迟测试工具类，用于测量和评估WonderTrader框架中超高频交易模块的内部延迟性能
  */
 #pragma once
+#include <atomic>
+#include <condition_variable>
+#include <memory>
+#include <mutex>
+#include <thread>
 #include "../WtUftCore/WtUftEngine.h"
 #include "../WtUftCore/UftStrategyMgr.h"
 #include "../WtUftCore/TraderAdapter.h"
@@ -22,6 +27,8 @@ NS_WTP_END
 
 namespace uft
 {
+	class TestParser;
+
 	/**
 	 * @brief 超高频交易延迟测试工具类
 	 * @details 该类实现了UFT(超高频交易)延迟测试的全流程，包括初始化环境、加载模块、创建策略和执行测试
@@ -46,6 +53,9 @@ namespace uft
 		 * @details 加载配置文件、基础数据文件，并初始化引擎、模块和策略
 		 */
 		bool init();
+		// Returns false from an active operation/callback after requesting shutdown;
+		// retry from a control thread to join inputs and release borrowed APIs.
+		bool shutdown();
 
 		/**
 		 * @brief 执行延迟测试
@@ -75,9 +85,11 @@ namespace uft
 		 * @details 初始化UFT引擎并设置适配器管理器
 		 */
 		bool initEngine(WTSVariant* cfg);
+		bool initImpl();
 
 	private:
 		TraderAdapterMgr	_traders;    /**< 交易适配器管理器 */
+		std::unique_ptr<ITraderApi> _test_trader_api; /**< owned fake API used by this tool */
 		ParserAdapterMgr	_parsers;    /**< 解析适配器管理器 */
 		UftStrategyMgr		_stra_mgr;   /**< 策略管理器 */
 
@@ -87,5 +99,17 @@ namespace uft
 
 		uint32_t			_times;      /**< 测试模拟的tick数量 */
 		uint32_t			_core;       /**< 测试线程绑定的CPU核心编号 */
+		bool				_init_attempted; /**< init() is a one-shot operation */
+		bool				_run_attempted{false};
+		bool				_operation_active{false};
+		std::thread::id		_operation_thread;
+		bool				_shutdown_in_progress{false};
+		std::thread::id		_shutdown_thread;
+		TestParser*			_test_parser{nullptr}; /**< borrowed from the registered parser adapter */
+		std::mutex			_lifecycle_mutex;
+		std::condition_variable _lifecycle_cv;
+		std::atomic<bool> _shutdown_requested{false};
+		std::atomic<bool> _inputs_stopped{false};
+		std::atomic<bool> _shutdown_complete{false};
 	};
 }

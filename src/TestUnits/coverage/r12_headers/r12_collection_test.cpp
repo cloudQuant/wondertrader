@@ -6,8 +6,12 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <atomic>
+#include <condition_variable>
 #include <cstdint>
+#include <mutex>
 #include <string>
+#include <thread>
 
 #include "Includes/WTSObject.hpp"
 #include "Includes/WTSCollection.hpp"
@@ -38,6 +42,93 @@ int32_t Item::s_dtor = 0;
 Item* newItem(int32_t tag) { return new Item(tag); }
 
 uint32_t rc(WTSObject* o) { return o->retainCount(); }
+
+class TwoPartyGate
+{
+public:
+	void arriveAndWait()
+	{
+		std::unique_lock<std::mutex> lock(m_mutex);
+		if (++m_arrived == 2)
+		{
+			m_open = true;
+			m_changed.notify_all();
+		}
+		else
+		{
+			m_changed.wait(lock, [this]() { return m_open; });
+		}
+	}
+
+private:
+	std::mutex m_mutex;
+	std::condition_variable m_changed;
+	uint32_t m_arrived = 0;
+	bool m_open = false;
+};
+
+template <typename Container>
+class ReleaseTrackedContainer final : public Container
+{
+public:
+	explicit ReleaseTrackedContainer(std::atomic<uint32_t>& destroyed)
+		: m_destroyed(destroyed)
+	{}
+
+	~ReleaseTrackedContainer() override
+	{
+		m_destroyed.fetch_add(1);
+	}
+
+private:
+	std::atomic<uint32_t>& m_destroyed;
+};
+
+class ReleaseTrackedElement final : public WTSObject
+{
+public:
+	explicit ReleaseTrackedElement(std::atomic<uint32_t>& destroyed)
+		: m_destroyed(destroyed)
+	{}
+
+	~ReleaseTrackedElement() override
+	{
+		m_destroyed.fetch_add(1);
+	}
+
+private:
+	std::atomic<uint32_t>& m_destroyed;
+};
+
+template <typename Container>
+void releaseTwoOwnedReferencesTogether(Container* container)
+{
+	container->retain();
+	TwoPartyGate gate;
+	std::thread first([container, &gate]() {
+		gate.arriveAndWait();
+		container->release();
+	});
+	std::thread second([container, &gate]() {
+		gate.arriveAndWait();
+		container->release();
+	});
+	first.join();
+	second.join();
+}
+
+template <typename Container>
+void expectConcurrentFinalReleaseDeletesOnce()
+{
+	for (uint32_t i = 0; i < 64; ++i)
+	{
+		std::atomic<uint32_t> destroyed(0);
+		ReleaseTrackedContainer<Container>* container =
+			new ReleaseTrackedContainer<Container>(destroyed);
+		releaseTwoOwnedReferencesTogether(container);
+		EXPECT_EQ(destroyed.load(), 1u) << "iteration " << i;
+	}
+}
 
 }	// namespace
 
@@ -91,8 +182,9 @@ TEST_F(R12Collection, array_append_at_grab_refcount)
 	arr->clear();
 	// clear 对每个元素 release 一次
 	EXPECT_EQ(rc(i0), 1u);
+	// i1 的唯一引用已转移给数组，因此 clear 会直接析构它。
+	EXPECT_EQ(Item::s_dtor, 1);
 	i0->release();
-	i1->release();
 	// 两个探针都已被真正析构
 	EXPECT_EQ(Item::s_dtor, 2);
 	arr->release();
@@ -135,13 +227,13 @@ TEST_F(R12Collection, array_set_replaces_and_releases_old)
 	arr->set(5, i0);
 	EXPECT_EQ(arr->size(), 2u);
 	i0->release();
-	delete i0;
-	// 探针在 clear 前引用计数为 1（i0 已手工释放）
+	EXPECT_EQ(Item::s_dtor, 1);
 	arr->clear();
 	EXPECT_EQ(rc(i1), 1u);
+	EXPECT_EQ(Item::s_dtor, 1);
 	i1->release();
-	arr->release();
 	EXPECT_EQ(Item::s_dtor, 2);
+	arr->release();
 }
 
 TEST_F(R12Collection, array_append_array_steals_without_retain)
@@ -205,7 +297,14 @@ TEST_F(R12Collection, array_sort_and_iterator)
 	// 排序不影响引用计数
 	EXPECT_EQ(rc(i0), 2u);
 	arr->release();
-	// 容器引用计数归 0 时释放全部元素
+	// 容器归零时释放各自的引用，调用方的初始引用仍然有效。
+	EXPECT_EQ(rc(i0), 1u);
+	EXPECT_EQ(rc(i1), 1u);
+	EXPECT_EQ(rc(i2), 1u);
+	EXPECT_EQ(Item::s_dtor, 0);
+	i0->release();
+	i1->release();
+	i2->release();
 	EXPECT_EQ(Item::s_dtor, 3);
 }
 
@@ -221,7 +320,41 @@ TEST_F(R12Collection, array_release_twice_is_noop)
 	EXPECT_EQ(rc(arr), 1u);
 	EXPECT_EQ(arr->size(), 1u);
 	arr->release();
+	EXPECT_EQ(rc(i0), 1u);
+	EXPECT_EQ(Item::s_dtor, 0);
+	i0->release();
 	EXPECT_EQ(Item::s_dtor, 1);
+}
+
+// Two already-owned references may be released concurrently. The gate aligns
+// release entry only; collection contents are initialized before either thread
+// starts and are never accessed concurrently by callers.
+TEST_F(R12Collection, concurrent_final_release_deletes_each_collection_once)
+{
+	expectConcurrentFinalReleaseDeletesOnce<WTSArray>();
+	expectConcurrentFinalReleaseDeletesOnce<WTSMap<int32_t> >();
+	expectConcurrentFinalReleaseDeletesOnce<StrHashMap>();
+	expectConcurrentFinalReleaseDeletesOnce<WTSQueue>();
+}
+
+// Positive control for the ordinary cleanup path: the collection owns the
+// element's final reference and releases it exactly once during final release.
+TEST_F(R12Collection, final_array_release_reclaims_element_reference_once)
+{
+	std::atomic<uint32_t> arrayDestroyed(0);
+	std::atomic<uint32_t> elementDestroyed(0);
+	ReleaseTrackedContainer<WTSArray>* array =
+		new ReleaseTrackedContainer<WTSArray>(arrayDestroyed);
+	ReleaseTrackedElement* element = new ReleaseTrackedElement(elementDestroyed);
+
+	array->append(element);
+	EXPECT_EQ(element->retainCount(), 2u);
+	element->release();
+	EXPECT_EQ(element->retainCount(), 1u);
+
+	array->release();
+	EXPECT_EQ(arrayDestroyed.load(), 1u);
+	EXPECT_EQ(elementDestroyed.load(), 1u);
 }
 
 TEST_F(R12Collection, map_add_get_grab_remove)
@@ -248,11 +381,13 @@ TEST_F(R12Collection, map_add_get_grab_remove)
 	EXPECT_EQ(rc(i2), 3u);
 	g->release();
 	EXPECT_EQ(rc(i2), 2u);
-	// 同键覆盖：旧值被释放并析构（旧值只剩容器一份引用→clear 前手工释放）
+	// 同键覆盖释放容器持有的旧值引用，调用方仍需释放自己的引用。
 	Item* i1b = newItem(12);
 	map->add(1, i1b);
 	EXPECT_EQ(rc(i1b), 2u);
 	EXPECT_EQ(rc(i1), 1u);
+	i1->release();
+	EXPECT_EQ(Item::s_dtor, 1);
 	map->remove(1);
 	// remove 后新值引用回到 1
 	EXPECT_EQ(rc(i1b), 1u);
@@ -395,8 +530,7 @@ TEST_F(R12Collection, queue_push_front_back_and_refcount)
 	EXPECT_EQ(rc(i0), 2u);
 	EXPECT_EQ(q->back(false), i1);
 	EXPECT_EQ(rc(i1), 2u);
-	// bAutoRetain=false 入队也不引用（此处不测 NULL 入队：见 bugs 里
-	// WTSQueue::clear() 对空槽解引用的缺陷，DISABLED 用例单独记录）
+	// bAutoRetain=false transfers the existing caller reference without retaining.
 	Item* i2 = newItem(3);
 	q->push(i2, false);
 	EXPECT_EQ(rc(i2), 1u);
@@ -409,15 +543,80 @@ TEST_F(R12Collection, queue_push_front_back_and_refcount)
 	EXPECT_EQ(Item::s_dtor, 3);
 }
 
-// 触发条件：WTSQueue::push(NULL, false) 允许把空槽入队（WTSCollection.hpp:772-777
-// 只在 obj 非空时才 retain），但 WTSQueue::clear()（同文件 828-836）遍历时无空槽判空，
-// 直接 (*it)->release() → 空指针解引用崩溃。生产里只要有一次 NULL 入队 + 容器清理即触发。
-TEST(DISABLED_r12_collection, queue_clear_crashes_on_null_slot)
+// Empty slots preserve queue positions but do not own an object reference.
+TEST_F(R12Collection, queue_clear_handles_null_slot)
 {
 	WTSQueue* q = WTSQueue::create();
 	q->push(NULL, false);
 	EXPECT_EQ(q->size(), 1u);
+	EXPECT_FALSE(q->empty());
+	EXPECT_EQ(q->front(), nullptr);
+	EXPECT_EQ(q->back(), nullptr);
+	EXPECT_EQ(q->front(false), nullptr);
+	EXPECT_EQ(q->back(false), nullptr);
 	q->release();
+}
+
+TEST_F(R12Collection, queue_null_slots_pop_clear_and_release_safely)
+{
+	WTSQueue* poppedNulls = WTSQueue::create();
+	poppedNulls->push(nullptr, false);
+	poppedNulls->push(nullptr, false);
+	EXPECT_EQ(poppedNulls->size(), 2u);
+	poppedNulls->pop();
+	EXPECT_EQ(poppedNulls->size(), 1u);
+	EXPECT_EQ(poppedNulls->front(), nullptr);
+	poppedNulls->clear();
+	EXPECT_EQ(poppedNulls->size(), 0u);
+	EXPECT_TRUE(poppedNulls->empty());
+	poppedNulls->release();
+
+	WTSQueue* mixed = WTSQueue::create();
+	Item* retained = newItem(1);
+	Item* borrowed = newItem(2);
+	// push(false) transfers an existing reference to the queue; retain one
+	// additional reference so the caller can safely inspect and release its own.
+	borrowed->retain();
+	mixed->push(retained);
+	mixed->push(nullptr, false);
+	mixed->push(borrowed, false);
+	EXPECT_EQ(mixed->size(), 3u);
+	EXPECT_EQ(rc(retained), 2u);
+	EXPECT_EQ(rc(borrowed), 2u);
+	auto slot = mixed->begin();
+	ASSERT_NE(slot, mixed->end());
+	EXPECT_EQ(*slot++, retained);
+	ASSERT_NE(slot, mixed->end());
+	EXPECT_EQ(*slot++, nullptr);
+	ASSERT_NE(slot, mixed->end());
+	EXPECT_EQ(*slot, borrowed);
+	WTSObject* front = mixed->front();
+	EXPECT_EQ(front, retained);
+	EXPECT_EQ(rc(retained), 3u);
+	front->release();
+	WTSObject* back = mixed->back();
+	EXPECT_EQ(back, borrowed);
+	EXPECT_EQ(rc(borrowed), 3u);
+	back->release();
+	EXPECT_EQ(rc(retained), 2u);
+	EXPECT_EQ(rc(borrowed), 2u);
+	mixed->clear();
+	EXPECT_EQ(mixed->size(), 0u);
+	EXPECT_EQ(rc(retained), 1u);
+	EXPECT_EQ(rc(borrowed), 1u);
+	retained->release();
+	borrowed->release();
+	mixed->release();
+
+	WTSQueue* finalRelease = WTSQueue::create();
+	Item* finalOwned = newItem(3);
+	finalRelease->push(finalOwned);
+	finalRelease->push(nullptr, false);
+	EXPECT_EQ(rc(finalOwned), 2u);
+	finalOwned->release();
+	EXPECT_EQ(rc(finalOwned), 1u);
+	finalRelease->release();
+	EXPECT_EQ(Item::s_dtor, 3);
 }
 
 TEST_F(R12Collection, queue_swap_and_clear_release_each_once)
@@ -442,12 +641,7 @@ TEST_F(R12Collection, queue_swap_and_clear_release_each_once)
 	b->release();
 }
 
-// 触发条件：WTSQueue::pop()（WTSCollection.hpp:767-770）只 pop_front，
-// 不对弹出的元素 release，与 WTSStack::pop() 的语义相反；
-// 在引用计数为 2 的入队元素上弹出后计数仍是 2，即元素泄漏。
-// 该行为在生产里是稳定可复现的，但断言“泄漏”会让用例长期锁死错误语义，
-// 故整类 DISABLED 只做记录，缺陷见 bugs/R12_headers_wtstools.md。
-TEST(DISABLED_r12_collection, queue_pop_does_not_release_element)
+TEST_F(R12Collection, queue_pop_releases_element_reference)
 {
 	WTSQueue* q = WTSQueue::create();
 	Item* i0 = newItem(1);
@@ -457,6 +651,21 @@ TEST(DISABLED_r12_collection, queue_pop_does_not_release_element)
 	EXPECT_EQ(q->size(), 0u);
 	EXPECT_EQ(rc(i0), 1u);
 	i0->release();
+	EXPECT_EQ(Item::s_dtor, 1);
+	q->release();
+}
+
+TEST_F(R12Collection, queue_pop_releases_transferred_final_reference)
+{
+	WTSQueue* q = WTSQueue::create();
+	Item* transferred = newItem(1);
+	q->push(transferred, false);
+	EXPECT_EQ(rc(transferred), 1u);
+
+	// pop releases the queue's transferred final reference and destroys the item.
+	q->pop();
+	EXPECT_EQ(q->size(), 0u);
+	EXPECT_EQ(Item::s_dtor, 1);
 	q->release();
 }
 
@@ -486,18 +695,20 @@ TEST_F(R12Collection, stack_lifo_top_pop_clear)
 	EXPECT_EQ(rc(i1), 1u);
 	EXPECT_EQ(st->size(), 1u);
 	i1->release();
+	EXPECT_EQ(Item::s_dtor, 1);
 	// bAutoRetain=false 入栈不引用
 	Item* i2 = newItem(3);
 	st->push(i2, false);
 	EXPECT_EQ(rc(i2), 1u);
 	EXPECT_EQ(st->top(), i2);
 	EXPECT_EQ(st->size(), 2u);
-	// clear 逐个释放：i0 计数 2→1 仍存活，i2 计数 1→0 当场析构
+	// clear 释放容器对 i0 的引用，并析构其独占的 i2 转移引用。
 	st->clear();
 	EXPECT_TRUE(st->empty());
 	EXPECT_EQ(rc(i0), 1u);
-	EXPECT_EQ(Item::s_dtor, 1);
+	EXPECT_EQ(Item::s_dtor, 2);
 	i0->release();
+	EXPECT_EQ(Item::s_dtor, 3);
 	st->release();
 }
 
@@ -509,5 +720,8 @@ TEST_F(R12Collection, stack_release_destructor_clears_elements)
 	EXPECT_EQ(rc(i0), 2u);
 	// 容器引用归 0 → 析构函数里 clear() → 元素被释放
 	st->release();
+	EXPECT_EQ(rc(i0), 1u);
+	EXPECT_EQ(Item::s_dtor, 0);
+	i0->release();
 	EXPECT_EQ(Item::s_dtor, 1);
 }

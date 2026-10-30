@@ -337,12 +337,15 @@ TEST_F(R42SelCtxTest, MetadataLogsAndDetailQueries)
         ctx->stra_get_fund_data(1) - ctx->stra_get_fund_data(3) + ctx->stra_get_fund_data(2));
 }
 
-// 缺陷占位：WtSelEngine 的 _tm_ticker 构造时未初始化，析构 -> release() 会读它。
-// 见 bugs/R42.md BUG-R42-001；默认不执行，避免未初始化指针读。
-TEST(R42SelEngineLifecycle, DISABLED_DestroyWithoutInitReadsUninitializedTicker)
+TEST(R42SelEngineLifecycle, FreshAutomaticStorageDestructionIsSafe)
 {
-    r42fakes::R42SelEngine* engine = new r42fakes::R42SelEngine();
-    delete engine;
+	WtSelEngine engine;
+}
+
+TEST(R42SelEngineLifecycle, ReleaseThenAutomaticStorageDestructionIsSafe)
+{
+	WtSelEngine engine;
+	engine.release();
 }
 
 } // namespace

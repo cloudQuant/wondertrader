@@ -519,6 +519,7 @@ TEST(ctpmini, order_action_success_does_not_push_trader_error)
 	api.registerSpi(&sink);
 
 	CThostFtdcRspInfoField good = okRsp();
+	ASSERT_EQ(0, good.ErrorID);
 	api.OnRspOrderAction(NULL, &good, 1, true);
 	EXPECT_EQ(0, sink.errorRsp);
 }
@@ -530,6 +531,7 @@ TEST(ctpmini, order_action_error_pushes_cancel_error_once)
 	api.registerSpi(&sink);
 
 	CThostFtdcRspInfoField bad = errRsp(15, "撤单失败");
+	ASSERT_NE(0, bad.ErrorID);
 	api.OnRspOrderAction(NULL, &bad, 2, true);
 	ASSERT_EQ(1, sink.errorRsp);
 	EXPECT_EQ((int32_t)WEC_ORDERCANCEL, sink.lastTraderErrorCode);

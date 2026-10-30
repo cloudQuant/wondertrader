@@ -364,6 +364,10 @@ TEST_F(Q02CtaDumpTest, strategyDumpRoundTripsIntoSecondMocker)
 	auto conditions = dump.FindMember("conditions");
 	ASSERT_NE(dump.MemberEnd(), conditions);
 	ASSERT_TRUE(conditions->value.IsObject());
+	auto settime = conditions->value.FindMember("settime");
+	ASSERT_NE(conditions->value.MemberEnd(), settime);
+	ASSERT_TRUE(settime->value.IsUint64());
+	EXPECT_EQ(202001061455ull, settime->value.GetUint64());
 	auto items = conditions->value.FindMember("items");
 	ASSERT_NE(conditions->value.MemberEnd(), items);
 	ASSERT_TRUE(items->value.IsObject());
@@ -474,6 +478,219 @@ TEST_F(Q02CtaDumpTest, jsonWithoutDetailsKeyStillLoads)
 	EXPECT_DOUBLE_EQ(0.0, mocker.stra_get_position_avgpx("SSE.STK.600000"));
 	EXPECT_EQ(0ull, mocker.stra_get_first_entertime("SSE.STK.600000"));
 	EXPECT_DOUBLE_EQ(0.75, mocker.stra_get_position_profit("SSE.STK.600000"));
+}
+
+TEST_F(Q02CtaDumpTest, missingConditionSettimeDefaultsToZero)
+{
+	const std::filesystem::path folder = _out / "q02_no_settime";
+	write_file(folder / "q02_no_settime.json", R"JSON({"conditions":{"items":{}}})JSON");
+
+	CtaMocker mocker(NULL, kStraName);
+	EXPECT_NO_THROW(mocker.load_incremental_data("q02_no_settime"));
+	mocker.handle_replay_done();
+
+	const std::string rawJson = read_file(_out / kStraName / fmtutil::format("{}.json", kStraName));
+	rapidjson::Document dump;
+	dump.Parse(rawJson.c_str());
+	ASSERT_FALSE(dump.HasParseError());
+	ASSERT_TRUE(dump.IsObject());
+	ASSERT_TRUE(dump.HasMember("conditions"));
+	const rapidjson::Value& conditions = dump["conditions"];
+	ASSERT_TRUE(conditions.IsObject());
+	ASSERT_TRUE(conditions.HasMember("settime"));
+	ASSERT_TRUE(conditions["settime"].IsUint64());
+	EXPECT_EQ(0ull, conditions["settime"].GetUint64());
+}
+
+/*
+ * Invalid JSON snapshots are rejected before CSV or in-memory restore state is
+ * changed. Each fixture has a valid record before its invalid portion so a
+ * loader that mutates as it parses would leave a visible partial update.
+ */
+TEST_F(Q02CtaDumpTest, invalidSnapshotLeavesExistingStateAndCsvLogsUntouched)
+{
+	const struct InvalidSnapshot
+	{
+		const char* name;
+		const char* json;
+	} cases[] = {
+		{"q02_bad_parse", R"JSON({"positions":[{"code":"SSE.STK.699999","volume":10,"closeprofit":1,"dynprofit":1,"lastentertime":1,"lastexittime":0},{"code":)JSON"},
+		{"q02_missing_field", R"JSON({"positions":[{"code":"SSE.STK.699999","volume":10,"closeprofit":1,"dynprofit":1,"lastentertime":1,"lastexittime":0},{"code":"SSE.STK.600000","volume":5,"dynprofit":1,"lastentertime":1,"lastexittime":0}]})JSON"},
+		{"q02_bad_type", R"JSON({"positions":[{"code":"SSE.STK.699999","volume":10,"closeprofit":1,"dynprofit":1,"lastentertime":1,"lastexittime":0},{"code":"SSE.STK.600000","volume":"bad","closeprofit":1,"dynprofit":1,"lastentertime":1,"lastexittime":0}]})JSON"},
+		{"q02_bad_settime", R"JSON({"positions":[{"code":"SSE.STK.699999","volume":10,"closeprofit":1,"dynprofit":1,"lastentertime":1,"lastexittime":0}],"conditions":{"settime":"202001061455","items":{"SSE.STK.600002":[{"usertag":"condNew","field":0,"alg":0,"target":1,"qty":2,"action":1}]}}})JSON"},
+		{"q02_long_opentag", R"JSON({"positions":[{"code":"SSE.STK.699999","volume":10,"closeprofit":1,"dynprofit":1,"lastentertime":1,"lastexittime":0,"details":[{"long":true,"price":1,"maxprice":1,"minprice":1,"volume":1,"opentime":1,"opentdate":20200101,"profit":0,"maxprofit":0,"maxloss":0,"opentag":"01234567890123456789012345678901"}]}]})JSON"},
+		{"q02_long_condition_tag", R"JSON({"conditions":{"items":{"SSE.STK.600002":[{"usertag":"condNew","field":0,"alg":0,"target":1,"qty":2,"action":1},{"usertag":"01234567890123456789012345678901","field":0,"alg":0,"target":1,"qty":2,"action":1}]}}})JSON"}
+	};
+
+	for (const InvalidSnapshot& fixture : cases)
+	{
+		CtaMocker mocker(NULL, kStraName);
+		mocker.load_incremental_data(kBaseName);
+
+		const std::filesystem::path folder = _out / fixture.name;
+		write_file(folder / fmtutil::format("{}.json", fixture.name), fixture.json);
+		write_file(folder / "trades.csv",
+			"code,time,direct,action,price,qty,tag,fee,barno\nINVALID-CSV-ROW\n");
+		EXPECT_NO_THROW(mocker.load_incremental_data(fixture.name)) << fixture.name;
+
+		EXPECT_DOUBLE_EQ(100.0, mocker.stra_get_position("SSE.STK.600000")) << fixture.name;
+		EXPECT_DOUBLE_EQ(0.0, mocker.stra_get_position("SSE.STK.699999")) << fixture.name;
+		EXPECT_DOUBLE_EQ(100.0, mocker.stra_get_fund_data(1)) << fixture.name;
+		EXPECT_DOUBLE_EQ(20.0, mocker.stra_get_fund_data(2)) << fixture.name;
+		EXPECT_DOUBLE_EQ(5.0, mocker.stra_get_fund_data(3)) << fixture.name;
+
+		mocker.handle_replay_done();
+		EXPECT_EQ(std::string(kBaseTrades), read_file(_out / kStraName / "trades.csv")) << fixture.name;
+		const std::string dumpedJson = read_file(_out / kStraName / fmtutil::format("{}.json", kStraName));
+		EXPECT_NE(std::string::npos, dumpedJson.find("cond1")) << fixture.name;
+		EXPECT_EQ(std::string::npos, dumpedJson.find("condNew")) << fixture.name;
+		EXPECT_EQ(std::string::npos, dumpedJson.find("01234567890123456789012345678901")) << fixture.name;
+	}
+}
+
+TEST_F(Q02CtaDumpTest, invalidConditionEnumsAreRejectedWithoutPartialRestore)
+{
+	struct InvalidSnapshot
+	{
+		std::string name;
+		std::string json;
+	};
+	auto conditionSnapshot = [](const std::string& invalidMembers) {
+		return std::string(R"JSON({"conditions":{"settime":202001061455,"items":{"SSE.STK.600002":[{"usertag":"condNew","field":0,"alg":0,"target":1,"qty":2,"action":1},{"usertag":"invalid",)JSON") +
+			invalidMembers + "}]}}}";
+	};
+	const std::vector<InvalidSnapshot> cases = {
+		{"q02_field_gap_4", conditionSnapshot("\"field\":4,\"alg\":0,\"target\":1,\"qty\":2,\"action\":1")},
+		{"q02_field_gap_8", conditionSnapshot("\"field\":8,\"alg\":0,\"target\":1,\"qty\":2,\"action\":1")},
+		{"q02_field_negative", conditionSnapshot("\"field\":-1,\"alg\":0,\"target\":1,\"qty\":2,\"action\":1")},
+		{"q02_alg_high", conditionSnapshot("\"field\":0,\"alg\":5,\"target\":1,\"qty\":2,\"action\":1")},
+		{"q02_alg_negative", conditionSnapshot("\"field\":0,\"alg\":-1,\"target\":1,\"qty\":2,\"action\":1")},
+		{"q02_action_high", conditionSnapshot("\"field\":0,\"alg\":0,\"target\":1,\"qty\":2,\"action\":5")},
+		{"q02_action_wrap", conditionSnapshot("\"field\":0,\"alg\":0,\"target\":1,\"qty\":2,\"action\":256")}
+	};
+
+	for (const InvalidSnapshot& fixture : cases)
+	{
+		CtaMocker mocker(NULL, kStraName);
+		mocker.load_incremental_data(kBaseName);
+		const std::filesystem::path folder = _out / fixture.name;
+		write_file(folder / fmtutil::format("{}.json", fixture.name), fixture.json);
+		EXPECT_NO_THROW(mocker.load_incremental_data(fixture.name.c_str())) << fixture.name;
+		EXPECT_DOUBLE_EQ(100.0, mocker.stra_get_position("SSE.STK.600000")) << fixture.name;
+
+		mocker.handle_replay_done();
+		const std::string dumpedJson = read_file(_out / kStraName / fmtutil::format("{}.json", kStraName));
+		EXPECT_NE(std::string::npos, dumpedJson.find("cond1")) << fixture.name;
+		EXPECT_EQ(std::string::npos, dumpedJson.find("condNew")) << fixture.name;
+	}
+}
+
+TEST_F(Q02CtaDumpTest, conditionEnumUpperBoundsAndFieldSentinelLoad)
+{
+	const std::filesystem::path folder = _out / "q02_enum_upper";
+	write_file(folder / "q02_enum_upper.json",
+		R"JSON({"conditions":{"settime":202001061455,"items":{"SSE.STK.600003":[{"usertag":"enumMax","field":9,"alg":4,"target":1,"qty":2,"action":4}]}}})JSON");
+
+	CtaMocker mocker(NULL, kStraName);
+	EXPECT_NO_THROW(mocker.load_incremental_data("q02_enum_upper"));
+	mocker.handle_replay_done();
+
+	rapidjson::Document dump;
+	const std::string rawJson = read_file(_out / kStraName / fmtutil::format("{}.json", kStraName));
+	dump.Parse(rawJson.c_str());
+	ASSERT_FALSE(dump.HasParseError());
+	ASSERT_TRUE(dump.HasMember("conditions"));
+	ASSERT_TRUE(dump["conditions"].HasMember("items"));
+	ASSERT_TRUE(dump["conditions"]["items"].HasMember("SSE.STK.600003"));
+	const rapidjson::Value& condition = dump["conditions"]["items"]["SSE.STK.600003"][0];
+	EXPECT_EQ(9, condition["field"].GetInt());
+	EXPECT_EQ(4, condition["alg"].GetInt());
+	EXPECT_EQ(4u, condition["action"].GetUint());
+}
+
+TEST_F(Q02CtaDumpTest, csvReadFailureDoesNotCommitEarlierRowsOrJsonState)
+{
+	CtaMocker mocker(NULL, kStraName);
+	mocker.load_incremental_data(kBaseName);
+
+	const std::filesystem::path folder = _out / "q02_csv_read_error";
+	write_file(folder / "trades.csv",
+		"code,time,direct,action,price,qty,tag,fee,barno\n"
+		"SSE.STK.699999,1,0,0,1,1,staged,0,0\n");
+	write_file(folder / "q02_csv_read_error.json",
+		R"JSON({"positions":[{"code":"SSE.STK.600000","volume":999,"closeprofit":1,"dynprofit":2,"lastentertime":1,"lastexittime":0}],"fund":{"total_profit":999,"total_dynprofit":999,"total_fees":999}})JSON");
+	std::filesystem::create_directories(folder / "closes.csv");
+
+	EXPECT_NO_THROW(mocker.load_incremental_data("q02_csv_read_error"));
+	EXPECT_DOUBLE_EQ(100.0, mocker.stra_get_position("SSE.STK.600000"));
+	EXPECT_DOUBLE_EQ(100.0, mocker.stra_get_fund_data(1));
+	EXPECT_DOUBLE_EQ(20.0, mocker.stra_get_fund_data(2));
+	EXPECT_DOUBLE_EQ(5.0, mocker.stra_get_fund_data(3));
+
+	mocker.handle_replay_done();
+	EXPECT_EQ(std::string(kBaseTrades), read_file(_out / kStraName / "trades.csv"));
+	const std::string dumpedJson = read_file(_out / kStraName / fmtutil::format("{}.json", kStraName));
+	rapidjson::Document dump;
+	dump.Parse(dumpedJson.c_str());
+	ASSERT_FALSE(dump.HasParseError());
+	ASSERT_TRUE(dump.IsObject());
+	ASSERT_TRUE(dump.HasMember("positions"));
+	ASSERT_TRUE(dump["positions"].IsArray());
+	bool foundOriginalPosition = false;
+	bool foundStagedPosition = false;
+	for (rapidjson::SizeType i = 0; i < dump["positions"].Size(); i++)
+	{
+		const rapidjson::Value& position = dump["positions"][i];
+		ASSERT_TRUE(position.IsObject());
+		ASSERT_TRUE(position.HasMember("code"));
+		ASSERT_TRUE(position["code"].IsString());
+		const std::string code(position["code"].GetString());
+		if (code == "SSE.STK.600000")
+		{
+			foundOriginalPosition = true;
+			ASSERT_TRUE(position.HasMember("volume"));
+			ASSERT_TRUE(position["volume"].IsNumber());
+			EXPECT_DOUBLE_EQ(100.0, position["volume"].GetDouble());
+		}
+		else if (code == "SSE.STK.699999")
+		{
+			foundStagedPosition = true;
+		}
+	}
+	EXPECT_TRUE(foundOriginalPosition);
+	EXPECT_FALSE(foundStagedPosition);
+}
+
+TEST_F(Q02CtaDumpTest, snapshotPathInspectionErrorLeavesExistingStateUntouched)
+{
+	CtaMocker mocker(NULL, kStraName);
+	mocker.load_incremental_data(kBaseName);
+
+	// POSIX filesystems reject a component longer than NAME_MAX; verify the
+	// fixture produces a filesystem error without creating or changing files.
+	const std::string tooLongBase(300, 'x');
+	const std::filesystem::path snapshotPath = _out / tooLongBase / fmtutil::format("{}.json", tooLongBase);
+	std::error_code inspectError;
+	(void)std::filesystem::exists(snapshotPath, inspectError);
+	ASSERT_TRUE(inspectError) << inspectError.message();
+
+	EXPECT_NO_THROW(mocker.load_incremental_data(tooLongBase.c_str()));
+	EXPECT_DOUBLE_EQ(100.0, mocker.stra_get_position("SSE.STK.600000"));
+	EXPECT_DOUBLE_EQ(100.0, mocker.stra_get_fund_data(1));
+	EXPECT_DOUBLE_EQ(20.0, mocker.stra_get_fund_data(2));
+	EXPECT_DOUBLE_EQ(5.0, mocker.stra_get_fund_data(3));
+
+	mocker.handle_replay_done();
+	EXPECT_EQ(std::string(kBaseTrades), read_file(_out / kStraName / "trades.csv"));
+	const std::string dumpedJson = read_file(_out / kStraName / fmtutil::format("{}.json", kStraName));
+	rapidjson::Document dump;
+	dump.Parse(dumpedJson.c_str());
+	ASSERT_FALSE(dump.HasParseError());
+	ASSERT_TRUE(dump.HasMember("conditions"));
+	ASSERT_TRUE(dump["conditions"].IsObject());
+	ASSERT_TRUE(dump["conditions"].HasMember("settime"));
+	ASSERT_TRUE(dump["conditions"]["settime"].IsUint64());
+	EXPECT_EQ(202001061455ull, dump["conditions"]["settime"].GetUint64());
 }
 
 /*

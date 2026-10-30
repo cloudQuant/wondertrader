@@ -1,0 +1,14 @@
+{
+  "scope": "本机 CoverageTests_m_WtUftRunner 全目标 GTest，不连接真实供应商",
+  "binary": "build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_m_WtUftRunner",
+  "binary_sha256": "fa08bac5d042a4c760b00254c9b4dd027e1d8dda585cc82e3aec73fb407db285",
+  "run_log": "run-v2.log",
+  "result": "PASS_WITH_DISABLED_TESTS",
+  "gtest": {"tests": 26, "passed": 26, "failed": 0, "disabled": 2},
+  "build_log": "build.log",
+  "build_capture_limit": "日志显示该目标链接步骤，但没有记录整体构建命令的最终状态。",
+  "acceptance_boundary": [
+    "本机 runner target 结果；真实 provider、真实插件关闭和生产运行未验收。",
+    "旧版 help case曾在输出帮助后以 exit 0 提前结束，未产生 GTest 总结；旧记录保存在 run-v1-help-early-exit.log，不能算测试通过。新版本将 help 执行隔离到子进程后得到本记录。"
+  ]
+}

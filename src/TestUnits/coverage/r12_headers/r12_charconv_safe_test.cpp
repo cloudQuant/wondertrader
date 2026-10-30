@@ -37,8 +37,7 @@ TEST(r12_charconv_utf8tochar, ascii_passthrough_and_empty_inputs)
 
 TEST(r12_charconv_utf8tochar, unconvertible_input_yields_empty_buffer)
 {
-	// 0xFF/0xFE 不是合法 UTF-8 首码点：iconv 不会写出任何字节，
-	// 而目标缓冲在转换前被整段 memset(0)，因此结果必定是空串。
+	// 0xFF/0xFE 不是合法 UTF-8 首码点，因此转换结果是空串。
 	unsigned char bad[] = { 0xFF, 0xFE, 0x00 };
 	UTF8toChar conv((const char*)bad);
 	ASSERT_NE(conv.c_str(), nullptr);
@@ -65,24 +64,109 @@ TEST(r12_charconv_chartoutf8, ascii_passthrough_and_empty_inputs)
 
 TEST(r12_charconv_chartoutf8, unconvertible_input_yields_empty_buffer)
 {
-	// 0xFF 不是合法 GB2312 首字节 → 目标缓冲保持 memset 后的全零
+	// 0xFF 不是合法 GB2312 首字节，因此转换结果是空串。
 	unsigned char bad[] = { 0xFF, 0x41, 0x00 };
 	ChartoUTF8 conv((const char*)bad);
 	ASSERT_NE(conv.c_str(), nullptr);
 	EXPECT_STREQ(conv.c_str(), "");
 }
 
-// 触发条件：期望值依赖本机 libiconv 是否提供 "gb2312" 别名。
-// macOS 上 iconv_open("gb2312","utf-8") 可能成功（得到 D6 D0）也可能失败
-// （失败时 charconv 仍走进 if(cd != 0) 分支，因为失败返回的是 (iconv_t)-1 而不是 0，
-// 随后 iconv() 报 EBADF、缓冲保持全零 → 结果为空串）。
-// 两种结果都可能，断言无法在当前平台唯一确定，故整类 DISABLED 只做记录。
-TEST(DISABLED_r12_charconv_utf8tochar, chinese_conversion_is_platform_dependent)
+#ifndef _MSC_VER
+TEST(r12_charconv_iconv, empty_and_valid_utf8_gb2312_round_trip)
 {
-	UTF8toChar conv("\xe4\xb8\xad");
-	const unsigned char expectGb[] = { 0xD6, 0xD0, 0x00 };
-	EXPECT_EQ(memcmp(conv.c_str(), expectGb, 3), 0);
+	char emptyOutput[1] = { 'x' };
+	EXPECT_TRUE(wt_charconv_detail::convert("UTF-8", "UTF-8", "", 0,
+		emptyOutput, sizeof(emptyOutput)));
+	EXPECT_EQ('\0', emptyOutput[0]);
+
+	const char* utf8 = "\xe4\xb8\xad"; // 中
+	wt_charconv_detail::IconvDescriptor probe(iconv_open("gb2312", "utf-8"));
+	if (!probe.valid())
+		GTEST_SKIP() << "host iconv does not provide the gb2312 encoding alias";
+	wt_charconv_detail::IconvDescriptor reverseProbe(iconv_open("utf-8", "gb2312"));
+	if (!reverseProbe.valid())
+		GTEST_SKIP() << "host iconv does not provide the reverse gb2312 encoding alias";
+
+	char gb2312[8] = { 0 };
+	ASSERT_TRUE(wt_charconv_detail::convert("gb2312", "utf-8", utf8,
+		std::strlen(utf8), gb2312, sizeof(gb2312)));
+	const char expectedGb2312[] = { static_cast<char>(0xD6), static_cast<char>(0xD0), '\0' };
+	EXPECT_EQ(0, std::memcmp(gb2312, expectedGb2312, sizeof(expectedGb2312)));
+
+	char roundTrip[8] = { 0 };
+	ASSERT_TRUE(wt_charconv_detail::convert("utf-8", "gb2312", gb2312,
+		2, roundTrip, sizeof(roundTrip)));
+	EXPECT_STREQ(utf8, roundTrip);
+
+	UTF8toChar local(utf8);
+	ASSERT_NE(local.c_str(), nullptr);
+	EXPECT_EQ(0, std::memcmp(local.c_str(), expectedGb2312, sizeof(expectedGb2312)));
+	ChartoUTF8 back(gb2312);
+	ASSERT_NE(back.c_str(), nullptr);
+	EXPECT_STREQ(utf8, back.c_str());
 }
+
+TEST(r12_charconv_iconv, invalid_incomplete_and_embedded_nul_inputs_are_terminated)
+{
+	const char* invalid = "\xff";
+	char invalidOutput[8];
+	std::memset(invalidOutput, 'x', sizeof(invalidOutput));
+	EXPECT_FALSE(wt_charconv_detail::convert("UTF-8", "UTF-8", invalid, 1,
+		invalidOutput, sizeof(invalidOutput)));
+	EXPECT_STREQ("", invalidOutput);
+	const char validPrefixThenInvalid[] = { 'A', static_cast<char>(0xFF) };
+	char prefixOutput[8];
+	std::memset(prefixOutput, 'x', sizeof(prefixOutput));
+	EXPECT_FALSE(wt_charconv_detail::convert("UTF-8", "UTF-8", validPrefixThenInvalid,
+		sizeof(validPrefixThenInvalid), prefixOutput, sizeof(prefixOutput)));
+	EXPECT_STREQ("A", prefixOutput);
+
+	const char* incomplete = "\xe2\x82";
+	char incompleteOutput[8];
+	std::memset(incompleteOutput, 'x', sizeof(incompleteOutput));
+	EXPECT_FALSE(wt_charconv_detail::convert("UTF-8", "UTF-8", incomplete, 2,
+		incompleteOutput, sizeof(incompleteOutput)));
+	EXPECT_STREQ("", incompleteOutput);
+	const char validPrefixThenIncomplete[] = {
+		'A', static_cast<char>(0xE2), static_cast<char>(0x82) };
+	char prefixIncompleteOutput[8];
+	std::memset(prefixIncompleteOutput, 'x', sizeof(prefixIncompleteOutput));
+	EXPECT_FALSE(wt_charconv_detail::convert("UTF-8", "UTF-8", validPrefixThenIncomplete,
+		sizeof(validPrefixThenIncomplete), prefixIncompleteOutput, sizeof(prefixIncompleteOutput)));
+	EXPECT_STREQ("A", prefixIncompleteOutput);
+
+	const char withNul[] = { 'A', '\0', 'B' };
+	char nulOutput[sizeof(withNul) + 1] = { 0 };
+	ASSERT_TRUE(wt_charconv_detail::convert("UTF-8", "UTF-8", withNul,
+		sizeof(withNul), nulOutput, sizeof(nulOutput)));
+	const char expected[] = { 'A', '\0', 'B', '\0' };
+	EXPECT_EQ(0, std::memcmp(nulOutput, expected, sizeof(expected)));
+}
+
+TEST(r12_charconv_iconv, output_too_small_stays_inside_destination_capacity)
+{
+	// “中” requires three bytes in UTF-8. The supplied destination has room
+	// for one data byte plus NUL, so iconv must report E2BIG without overrunning.
+	char guarded[] = { 'L', 'x', 'x', 'R' };
+	const char* utf8 = "\xe4\xb8\xad";
+	EXPECT_FALSE(wt_charconv_detail::convert("UTF-8", "UTF-8", utf8, 3,
+		guarded + 1, 2));
+	EXPECT_EQ('L', guarded[0]);
+	EXPECT_EQ('\0', guarded[1]);
+	EXPECT_EQ('x', guarded[2]);
+	EXPECT_EQ('R', guarded[3]);
+}
+
+TEST(r12_charconv_iconv, unavailable_encoding_returns_empty_without_closing_invalid_descriptor)
+{
+	char guarded[] = { 'L', 'x', 'x', 'R' };
+	EXPECT_FALSE(wt_charconv_detail::convert("wt-invalid-encoding-name",
+		"UTF-8", "hello", 5, guarded + 1, 2));
+	EXPECT_EQ('L', guarded[0]);
+	EXPECT_EQ('\0', guarded[1]);
+	EXPECT_EQ('R', guarded[3]);
+}
+#endif
 
 TEST(r12_charconv_encoding_helper, prenum_counts_leading_ones)
 {
@@ -148,10 +232,64 @@ TEST(r12_charconv_encoding_helper, isutf8_rejects_broken_sequences)
 
 TEST(r12_charconv_encoding_helper, isutf8_rejects_sequence_truncated_by_logical_length)
 {
-	// 物理缓冲区含完整合法四字节序列；只把前三字节作为输入，长度边界处应判截断。
-	// 额外的有效续字节充当 canary，避免当前实现忽略 len 时读取越过物理分配。
-	unsigned char truncated_with_canary[] = { 0xF0, 0x9F, 0x98, 0x80 };
-	EXPECT_FALSE(EncodingHelper::isUtf8(truncated_with_canary, 3));
+	// The physical arrays contain valid continuation bytes past the logical
+	// length, so only the supplied length determines whether a sequence fits.
+	unsigned char twoByteWithCanary[] = { 0xC2, 0xA2 };
+	unsigned char threeByteWithCanary[] = { 0xE4, 0xB8, 0xAD };
+	unsigned char fourByteWithCanary[] = { 0xF0, 0x9F, 0x98, 0x80 };
+	EXPECT_FALSE(EncodingHelper::isUtf8(twoByteWithCanary, 1));
+	EXPECT_FALSE(EncodingHelper::isUtf8(threeByteWithCanary, 1));
+	EXPECT_FALSE(EncodingHelper::isUtf8(threeByteWithCanary, 2));
+	EXPECT_FALSE(EncodingHelper::isUtf8(fourByteWithCanary, 1));
+	EXPECT_FALSE(EncodingHelper::isUtf8(fourByteWithCanary, 2));
+	EXPECT_FALSE(EncodingHelper::isUtf8(fourByteWithCanary, 3));
+
+	// These arrays end exactly at the logical boundary. ASan can detect any
+	// implementation that reads a missing continuation byte.
+	unsigned char exactTwoByteTruncation[] = { 0xC2 };
+	unsigned char exactThreeByteTruncation[] = { 0xE4, 0xB8 };
+	unsigned char exactFourByteTruncation[] = { 0xF0, 0x9F, 0x98 };
+	EXPECT_FALSE(EncodingHelper::isUtf8(exactTwoByteTruncation, sizeof(exactTwoByteTruncation)));
+	EXPECT_FALSE(EncodingHelper::isUtf8(exactThreeByteTruncation, sizeof(exactThreeByteTruncation)));
+	EXPECT_FALSE(EncodingHelper::isUtf8(exactFourByteTruncation, sizeof(exactFourByteTruncation)));
+}
+
+TEST(r12_charconv_encoding_helper, isutf8_enforces_unicode_scalar_boundaries)
+{
+	// The boundary code points of the valid 2, 3 and 4 byte ranges.
+	unsigned char twoByteLow[] = { 0xC2, 0x80 };
+	unsigned char twoByteHigh[] = { 0xDF, 0xBF };
+	unsigned char threeByteLow[] = { 0xE0, 0xA0, 0x80 };
+	unsigned char beforeSurrogates[] = { 0xED, 0x9F, 0xBF };
+	unsigned char afterSurrogates[] = { 0xEE, 0x80, 0x80 };
+	unsigned char fourByteLow[] = { 0xF0, 0x90, 0x80, 0x80 };
+	unsigned char fourByteHigh[] = { 0xF4, 0x8F, 0xBF, 0xBF };
+	EXPECT_TRUE(EncodingHelper::isUtf8(twoByteLow, sizeof(twoByteLow)));
+	EXPECT_TRUE(EncodingHelper::isUtf8(twoByteHigh, sizeof(twoByteHigh)));
+	EXPECT_TRUE(EncodingHelper::isUtf8(threeByteLow, sizeof(threeByteLow)));
+	EXPECT_TRUE(EncodingHelper::isUtf8(beforeSurrogates, sizeof(beforeSurrogates)));
+	EXPECT_TRUE(EncodingHelper::isUtf8(afterSurrogates, sizeof(afterSurrogates)));
+	EXPECT_TRUE(EncodingHelper::isUtf8(fourByteLow, sizeof(fourByteLow)));
+	EXPECT_TRUE(EncodingHelper::isUtf8(fourByteHigh, sizeof(fourByteHigh)));
+
+	// Overlong forms, UTF-16 surrogates and values above U+10FFFF are invalid.
+	unsigned char overlongTwo[] = { 0xC0, 0x80 };
+	unsigned char overlongThree[] = { 0xE0, 0x80, 0x80 };
+	unsigned char overlongFour[] = { 0xF0, 0x80, 0x80, 0x80 };
+	unsigned char surrogate[] = { 0xED, 0xA0, 0x80 };
+	unsigned char aboveUnicode[] = { 0xF4, 0x90, 0x80, 0x80 };
+	unsigned char invalidLead[] = { 0xF5, 0x80, 0x80, 0x80 };
+	EXPECT_FALSE(EncodingHelper::isUtf8(overlongTwo, sizeof(overlongTwo)));
+	EXPECT_FALSE(EncodingHelper::isUtf8(overlongThree, sizeof(overlongThree)));
+	EXPECT_FALSE(EncodingHelper::isUtf8(overlongFour, sizeof(overlongFour)));
+	EXPECT_FALSE(EncodingHelper::isUtf8(surrogate, sizeof(surrogate)));
+	EXPECT_FALSE(EncodingHelper::isUtf8(aboveUnicode, sizeof(aboveUnicode)));
+	EXPECT_FALSE(EncodingHelper::isUtf8(invalidLead, sizeof(invalidLead)));
+
+	unsigned char emptyStorage[] = { 0 };
+	EXPECT_TRUE(EncodingHelper::isUtf8(NULL, 0));
+	EXPECT_FALSE(EncodingHelper::isUtf8(NULL, 1));
+	EXPECT_TRUE(EncodingHelper::isUtf8(emptyStorage, 0));
 }
 
 TEST(r12_charconv_url, encode_decode_round_trip_on_ascii_subset)

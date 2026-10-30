@@ -8,12 +8,13 @@
  *   :1545-1602, :1604-1730, :1739-1816 的空指针分支）;
  *   onPushTrade 无合约信息时直接忽略（:2148-2152）;
  *   TraderAdapterMgr::addAdapter 的 NULL/空名护栏与就绪通道 refresh_funds（:2369-2422）。
- *
- * 另收 1 条 DISABLED_：净头寸模式下卖出量大于多头今仓时，TraderAdapter.cpp:2266
- * 用 left 而不是 maxVol 扣减 l_newvol，持仓被扣成负数（BUG-R59-001），
- * 正确结果应断言 0 多 / 3 空，故该用例默认不执行。
  */
 #include "r59_trader_fixture.h"
+
+#include <filesystem>
+#include <fstream>
+#include <memory>
+#include <sstream>
 
 using namespace r59x;
 using wtp::ActionPolicyMgr;
@@ -22,8 +23,86 @@ using wtp::TraderAdapterMgr;
 
 namespace {
 
+namespace fs = std::filesystem;
+
 class R59Misc : public R59TraderTest
 {
+protected:
+    void verifyNetTrade(bool isBuy, double opposingNewPosition, double tradeVolume,
+        double expectedLong, double expectedShort, const char* id)
+    {
+        const double expectedOpened = isBuy ? expectedLong : expectedShort;
+        ActionPolicyMgr pm;
+        std::string policy = std::string("{\"default\":{\"order\":[{\"action\":\"open\",\"limit_") +
+            (isBuy ? "l" : "s") + "\":" + std::to_string(static_cast<uint32_t>(expectedOpened + 1.0)) + "}]}}";
+        ASSERT_TRUE(loadPolicy(pm, (std::string("r59_net_") + id + ".json").c_str(), policy.c_str()));
+
+        TraderAdapter trader;
+        build(trader, &pm);
+        if (isBuy)
+            seedPos(trader, { makePos(ct_, WDT_SHORT, 0, 0, opposingNewPosition, opposingNewPosition) });
+        else
+            seedPos(trader, { makePos(ct_, WDT_LONG, 0, 0, opposingNewPosition, opposingNewPosition) });
+
+        WTSTradeInfo* trade = makeTrade(ct_, WDT_LONG, WOT_OPEN,
+            tradeVolume, 7000, id, "NETORDER", "");
+        trade->setNetDirection(isBuy);
+        trader.onPushTrade(trade);
+
+        EXPECT_DOUBLE_EQ(expectedLong, trader.getPosition(kStdCode, false, 1));
+        EXPECT_DOUBLE_EQ(expectedLong, trader.getPosition(kStdCode, true, 1));
+        EXPECT_DOUBLE_EQ(-expectedShort, trader.getPosition(kStdCode, false, 2));
+        EXPECT_DOUBLE_EQ(-expectedShort, trader.getPosition(kStdCode, true, 2));
+        EXPECT_DOUBLE_EQ(expectedLong - expectedShort, trader.getPosition(kStdCode, false, 3));
+
+        trader.enumPosition([&](const char* code, bool, double preVol, double preAvail,
+            double newVol, double newAvail) {
+            EXPECT_STREQ(kStdCode, code);
+            EXPECT_GE(preVol, 0.0);
+            EXPECT_GE(preAvail, 0.0);
+            EXPECT_GE(newVol, 0.0);
+            EXPECT_GE(newAvail, 0.0);
+        });
+
+        // Daily open-volume caps expose the recorded opposite-side open amount:
+        // the remaining cap must be exactly one lot after this net trade.
+        api2_.vols_.clear();
+        const uint32_t before = api2_.n_insert_;
+        OrderIDs ids = isBuy
+            ? trader.buy(kStdCode, 7000.0, 10.0, 0, false)
+            : trader.sell(kStdCode, 7000.0, 10.0, 0, false);
+        ASSERT_EQ(1u, ids.size());
+        EXPECT_EQ(before + 1, api2_.n_insert_);
+        ASSERT_EQ(1u, api2_.vols_.size());
+        EXPECT_DOUBLE_EQ(1.0, api2_.vols_[0]);
+    }
+};
+
+class R59InstDirGuard
+{
+public:
+	explicit R59InstDirGuard(const std::string& instDir)
+		: _oldInstDir(WtHelper::getInstDir())
+	{
+		WtHelper::setInstDir(instDir.c_str());
+	}
+
+	~R59InstDirGuard()
+	{
+		WtHelper::setInstDir(_oldInstDir.c_str());
+	}
+
+private:
+	std::string _oldInstDir;
+};
+
+struct R59VariantDeleter
+{
+	void operator()(WTSVariant* variant) const
+	{
+		if (variant != nullptr)
+			variant->release();
+	}
 };
 
 // TraderAdapter.cpp:209-235, 404-417（initExt 空指针/api init 失败；无 api 的 run 早退）
@@ -40,31 +119,57 @@ TEST_F(R59Misc, init_ext_guards_and_run_without_api)
     EXPECT_EQ(1u, failing.n_init_);
 }
 
-// TraderAdapter.cpp:99-207, 1405-1417（init 落地 _cfg 后 WTE_Connect 成功用配置账号登录）
+// TraderAdapter.cpp:99-207, 1405-1417（成功加载 API 后 WTE_Connect 用配置账号登录）
 TEST_F(R59Misc, connect_event_uses_cfg_credentials)
 {
-    TraderAdapter trader;
-    ASSERT_TRUE(trader.initExt(id_.c_str(), &api2_, &bd_, nullptr));
+	const fs::path moduleRoot = tmp_ / "r59_credentials_module";
+	const fs::path traderDir = moduleRoot / "traders";
+	std::error_code ec;
+	fs::create_directories(traderDir, ec);
+	ASSERT_FALSE(ec);
 
-    // 只带风控之外的最小配置：module 为空 -> init 返回 false，但 _cfg 已落地
-    auto path = tmp_ / "r59_connect.json";
-    {
-        std::ofstream out(path);
-        out << R"json({"savedata":false,"user":"r59_user","pass":"r59_pass","module":""})json";
-    }
-    wtp::WTSVariant* cfg = WTSCfgLoader::load_from_file(path.string().c_str());
-    ASSERT_NE(nullptr, cfg);
-    EXPECT_FALSE(trader.init(id_.c_str(), cfg, &bd_, nullptr));
-    cfg->release();
+	const fs::path pluginPath(R59_CREDENTIALS_PLUGIN_PATH);
+	ASSERT_TRUE(fs::is_regular_file(pluginPath, ec)) << pluginPath.string();
+	ASSERT_FALSE(ec);
+	const fs::path installedPlugin = traderDir / pluginPath.filename();
+	fs::copy_file(pluginPath, installedPlugin, fs::copy_options::overwrite_existing, ec);
+	ASSERT_FALSE(ec) << ec.message();
 
-    // 连接成功事件用 _cfg 的账号登录（不读墙钟、不联网）
-    trader.handleEvent(WTE_Connect, 0);
-    EXPECT_EQ(1u, api2_.n_login_);
-    EXPECT_EQ(TraderAdapter::AS_NOTLOGIN, trader.state());
+	R59InstDirGuard instDir(moduleRoot.string() + fs::path::preferred_separator);
+	const fs::path loginRecord = tmp_ / "r59_login_credentials.txt";
+	fs::remove(loginRecord, ec);
+	ASSERT_FALSE(ec);
 
-    // 非 0 事件码只记日志，不登录
-    trader.handleEvent(WTE_Connect, -2);
-    EXPECT_EQ(1u, api2_.n_login_);
+	std::unique_ptr<WTSVariant, R59VariantDeleter> cfg(WTSVariant::createObject());
+	ASSERT_NE(nullptr, cfg);
+	ASSERT_TRUE(cfg->append("module", "R59CredentialsTrader"));
+	ASSERT_TRUE(cfg->append("savedata", false));
+	ASSERT_TRUE(cfg->append("user", "r59_user"));
+	ASSERT_TRUE(cfg->append("pass", "r59_pass"));
+	ASSERT_TRUE(cfg->append("r59_login_record", loginRecord.string().c_str()));
+
+	TraderAdapter trader;
+	ASSERT_TRUE(trader.init(id_.c_str(), cfg.get(), &bd_, nullptr));
+	ASSERT_TRUE(trader.run());
+	EXPECT_EQ(TraderAdapter::AS_LOGINING, trader.state());
+
+	// The dynamically loaded API reports WTE_Connect from connect(); its login
+	// method records the values it actually receives through the module boundary.
+	std::ifstream recordIn(loginRecord, std::ios::binary);
+	ASSERT_TRUE(recordIn.is_open());
+	std::ostringstream record;
+	record << recordIn.rdbuf();
+	EXPECT_EQ("r59_user\nr59_pass\n", record.str());
+
+	// A failed connection event must not make another login attempt.
+	trader.handleEvent(WTE_Connect, -2);
+	std::ifstream secondRead(loginRecord, std::ios::binary);
+	ASSERT_TRUE(secondRead.is_open());
+	std::ostringstream unchanged;
+	unchanged << secondRead.rdbuf();
+	EXPECT_EQ("r59_user\nr59_pass\n", unchanged.str());
+
+	trader.release();
 }
 
 // TraderAdapter.cpp:1514-1602, 1604-1730, 1739-1816（四个回报数组为 NULL 时的状态机推进）
@@ -140,32 +245,19 @@ TEST_F(R59Misc, manager_rejects_bad_channels_and_refreshes_ready_funds)
     EXPECT_EQ(before + 1, api2_.n_qaccount_);
 }
 
-/*
- * DISABLED_：净头寸模式下平仓量大于多头今仓时持仓被扣成负数。
- * 依据 TraderAdapter.cpp:2263-2269：
- *     maxVol = min(left, pItem.l_newvol);
- *     if (decimal::gt(maxVol, 0))
- *     { pItem.l_newvol -= left; left -= maxVol; ... }
- * 应扣 maxVol(2) 却扣了 left(5)，l_newvol = 2-5 = -3；正确的净头寸结果应为
- * 多头 0 手、空头 3 手。详见 bugs/R59.md BUG-R59-001。启用后本用例会失败。
- */
-// TraderAdapter.cpp:2246-2305（净头寸先平后开；2266/2290 用 left 扣减今仓，见 BUG-R59-001）
-TEST_F(R59Misc, DISABLED_net_mode_sell_more_than_long_new_corrupts_position)
+// Net-mode fills close the opposing position first, then open only the remainder.
+TEST_F(R59Misc, net_mode_sell_clamps_long_new_and_opens_only_remainder)
 {
-    ActionPolicyMgr pm;
-    ASSERT_TRUE(loadPolicy(pm, "r59_misc_net.json",
-        R"json({"default":{"order":[{"action":"open"}]}})json"));
+    verifyNetTrade(false, 2, 5, 0, 3, "NETSELL_LESS");
+    verifyNetTrade(false, 5, 5, 0, 0, "NETSELL_EQUAL");
+    verifyNetTrade(false, 7, 5, 2, 0, "NETSELL_GREATER");
+}
 
-    TraderAdapter trader;
-    build(trader, &pm);
-    seedPos(trader, { makePos(ct_, WDT_LONG, 0, 0, 2, 2) });
-
-    WTSTradeInfo* t = makeTrade(ct_, WDT_LONG, WOT_OPEN, 5, 7000, "NET1", "NETO1", "");
-    t->setNetDirection(false);      // 净头寸卖出 5
-    trader.onPushTrade(t);
-
-    EXPECT_DOUBLE_EQ(0.0, trader.getPosition(kStdCode, false, 1));    // 多头应清零
-    EXPECT_DOUBLE_EQ(-3.0, trader.getPosition(kStdCode, false, 2));   // 剩余 3 手转空（flag=2 返回负值）
+TEST_F(R59Misc, net_mode_buy_clamps_short_new_and_opens_only_remainder)
+{
+    verifyNetTrade(true, 2, 5, 3, 0, "NETBUY_LESS");
+    verifyNetTrade(true, 5, 5, 0, 0, "NETBUY_EQUAL");
+    verifyNetTrade(true, 7, 5, 0, 2, "NETBUY_GREATER");
 }
 
 } // namespace

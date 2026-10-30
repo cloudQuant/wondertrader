@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "bundle": "Variant-UFT-Idx-UDP-v10",
+  "recorded_at": "2026-10-30",
+  "platform": "macOS arm64",
+  "review": "主代理与独立复审通过，未发现本批逻辑 blocker。",
+  "build": {
+    "command": "bash docs/迭代计划/迭代02/实施跟踪/evidence/Variant-UFT-Idx-UDP-v10/reproduce-v10.sh",
+    "exit_code": 0,
+    "scope": "Ninja 增量构建脚本列出的测试/生产对象及依赖静态库；非 clean build，非 aggregate CoverageTests 构建。",
+    "log": "build-v10.log",
+    "link_scope": "四个新版 focused binary 使用 -Wl,-undefined,dynamic_lookup，允许动态未解析符号；不能证明完整生产目标链接通过。",
+    "replay_script": "reproduce-v10.sh"
+  },
+  "runs": [
+    {
+      "name": "UFT ticker 首 tick 与 parser metadata",
+      "bug_ids": ["BUG-R11-009", "BUG-R54-002"],
+      "binary": "build-cov/build_x64/Debug/bin/TestUnits/wt-uft-batch-v10",
+      "run_log": "uft-v10.log",
+      "tests": 7,
+      "passed": 7,
+      "failures": 0,
+      "disabled": 1,
+      "exit_code": 0,
+      "scope": "Focused r54_uft_tick_metadata_test.cpp 与 r123_uft_ticker_engine_test.cpp 全部启用用例；一个既有 kline subscription 用例处于 DISABLED，不计入通过数。"
+    },
+    {
+      "name": "IndexFactory weight_alg 验证",
+      "bug_ids": ["BUG-N03-001"],
+      "binary": "build-cov/build_x64/Debug/bin/TestUnits/wt-idx-batch-v10",
+      "run_log": "idx-v10.log",
+      "tests": 13,
+      "passed": 13,
+      "failures": 0,
+      "disabled": 0,
+      "exit_code": 0,
+      "scope": "n03_idxfactory 与 n03_blkidx focused suites；包括合法 0/1/2、非法 3/UINT32_MAX、精确浮点和字符串配置。"
+    },
+    {
+      "name": "WTSVariant double 往返与转换",
+      "bug_ids": ["BUG-I02-NEW-013"],
+      "binary": "build-cov/build_x64/Debug/bin/TestUnits/wt-variant-batch-v10",
+      "run_log": "variant-v10.log",
+      "tests": 8,
+      "passed": 8,
+      "failures": 0,
+      "disabled": 0,
+      "exit_code": 0,
+      "filter": "L02VariantFixture.VariantCrossTypeConversions:r12_variant_object.append_and_read_each_scalar_type:r12_variant_real.*:r12_variant_conversions.cross_type_numeric_conversion:r195_cfg_variant.json_all_number_types_and_nested_containers",
+      "scope": "包含 C++ locale 与当前主机可用的逗号小数 LC_NUMERIC 检查。"
+    },
+    {
+      "name": "WTSVariant 仓库旧版 GTest 兼容回归",
+      "bug_ids": ["BUG-I02-NEW-013"],
+      "binary": "/tmp/wt-variant-legacy-v11",
+      "run_log": "variant-legacy-v11.log",
+      "tests": 1,
+      "passed": 1,
+      "failures": 0,
+      "disabled": 0,
+      "exit_code": 0,
+      "scope": "使用项目自带 GTest 对象和单独编译的 main；未与 Homebrew GTest 混链。"
+    },
+    {
+      "name": "ParserUDP 空 datagram 后重挂 receive",
+      "bug_ids": ["BUG-I02-NEW-014"],
+      "binary": "build-cov/build_x64/Debug/bin/TestUnits/wt-udp-batch-v10",
+      "run_log": "udp-v10.log",
+      "tests": 25,
+      "passed": 25,
+      "failures": 0,
+      "disabled": 0,
+      "exit_code": 0,
+      "scope": "完整 ParserUDP focused suite；零长度和后续合法数据报通过本机 UDP socket 与 poll_one 覆盖。"
+    }
+  ],
+  "limitations": [
+    "所有运行证据仅来自 macOS arm64；Windows、GCC 8、VS2017 未运行。",
+    "本批没有 ASan 或 TSan 通过证据。",
+    "构建是增量对象构建和 focused link，不是 clean 或 aggregate build；新版 focused link 允许动态未解析符号。",
+    "WTSVariant 实数字符串从固定十位小数改为最短往返文本，实数整数访问器对越界值改为饱和；下游字符串格式假设未全量审计，locale 分配开销未测。",
+    "UFT vendor/async drain、stop 并发、交易时段边界和完整 Runner 联动未验收；R11 的 UFT 证据不外推到 CTA/HFT。",
+    "ParserUDP worker 竞态、V1 provider drain、用户回调持锁时的跨线程互调和真实网络持续故障未验收。"
+  ],
+  "hash_manifest": "hashes-v10.sha256"
+}

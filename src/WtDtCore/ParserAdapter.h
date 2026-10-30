@@ -33,8 +33,23 @@ public:
 public:
 	bool	init(const char* id, WTSVariant* cfg);
 
+	// A non-null external API transfers to this adapter on entry, including when
+	// initialization fails. Keep this adapter quarantined with its borrowed
+	// managers until the provider is known to have stopped using the SPI; keep
+	// the API's module mapped through release() as well.
 	bool	initExt(const char* id, IParserApi* api);
+	bool	hasApi() const noexcept { return _parser_api != NULL || !_extra_parser_apis.empty(); }
+	// Reports whether all owned API/config/module handles have been released. A
+	// true result is not evidence of provider callback quiescence.
+	bool	releaseComplete() const noexcept
+	{
+		return !_release_uncertain && !_release_in_progress && !hasApi() && _cfg == NULL && _module_handle == NULL;
+	}
 
+	// Calls provider release and destroys owned APIs; release() is not a callback
+	// drain barrier. The caller must establish provider-specific quiescence first.
+	// If release or the plugin deleter throws, ownership stays here and a second
+	// call will not retry partially completed provider teardown.
 	void	release();
 
 	bool	run();
@@ -58,12 +73,16 @@ public:
 
 private:
 	IParserApi*			_parser_api;
+	std::vector<IParserApi*> _extra_parser_apis;
 	FuncDeleteParser	_remover;
+	void*				_module_handle;
 	WTSBaseDataMgr*		_bd_mgr;
 	DataManager*		_dt_mgr;
 	IndexWorkerMgr*		_idx_fact;
 
 	bool				_stopped;
+	bool				_release_uncertain;
+	bool				_release_in_progress;
 
 	typedef wt_hashset<std::string>	ExchgFilter;
 	ExchgFilter			_filters;
@@ -80,6 +99,8 @@ public:
 	void	release();
 
 	void	run();
+	// False means the map is retaining adapter owners after incomplete teardown.
+	bool	releaseComplete() const;
 
 	ParserAdapterPtr getAdapter(const char* id);
 

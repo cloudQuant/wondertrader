@@ -12,6 +12,9 @@
 
 #include <stdint.h>
 #include <atomic>
+#include <condition_variable>
+#include <mutex>
+#include <thread>
 
 #include "../Includes/WTSMarcos.h"
 #include "../Share/StdUtils.hpp"
@@ -58,16 +61,28 @@ public:
 	/**
 	 * @brief 启动定时器
 	 * @details 创建并启动定时器线程，处理定时事件
+	 * 当前实例为单次启动；停止后请创建新实例，不会在 run/init 中重置停止标志。
 	 */
 	void	run();
 
 	/**
 	 * @brief 停止定时器
 	 * @details 停止定时器线程并等待其结束
+	 * 任意 HFT worker 调用（包括跨 ticker）只发停止请求，不阻塞；owner 后续 stop/析构负责 join。
+	 * 禁止从任何 HFT worker 线程或本实例 run 初始化回调内析构；该路径会 fail-stop。
 	 */
 	void	stop();
 
 private:
+	enum class LifecycleState : uint8_t
+	{
+		Idle,
+		Starting,
+		Running,
+		Joining,
+		Joined
+	};
+
 	/**
 	 * @brief 触发行情处理
 	 * @param curTick 当前行情数据指针
@@ -124,7 +139,22 @@ private:
 	/**
 	 * @brief 是否停止标志
 	 */
-	bool			_stopped;
+	std::atomic<bool>	_stopped;
+
+	/**
+	 * @brief 活跃交易时段循环计数，饱和到2供线程测试确定观察下一轮判时
+	 */
+	std::atomic<uint8_t>	_in_session_pass_count;
+
+	/**
+	 * @brief worker 生命周期同步；锁保护 run 初始化和 join owner 选举
+	 * @details join owner 在锁外 join；并发 stop 调用等待 Joined 后返回
+	 */
+	std::mutex		_lifecycle_mtx;
+	std::condition_variable	_lifecycle_cv;
+	LifecycleState	_lifecycle_state;
+	std::thread::id	_run_owner_id;
+	uint32_t		_join_waiter_count;
 
 	/**
 	 * @brief 定时器线程指针

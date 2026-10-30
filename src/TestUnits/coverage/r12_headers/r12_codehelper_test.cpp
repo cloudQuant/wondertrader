@@ -188,20 +188,18 @@ TEST(r12_codehelper, std_code_to_hot_and_2nd_wrappers)
 	const std::string second = CodeHelper::stdCodeToStd2ndCode("DCE.m.2409");
 	EXPECT_EQ(std::string("DCE.m.2ND"), second);
 	EXPECT_EQ(9u, second.size());
-	// 无点号（BTCUSDT）会命中 CodeHelper::find 的反向死循环/越界读，
-	// 见 bugs/R12_headers_wtstools.md，已移入下面的 DISABLED_ 用例。
+	// 单段和空串没有分隔符时维持原有返回行为。
+	EXPECT_EQ(std::string(""), CodeHelper::stdCodeToStdHotCode("BTCUSDT"));
+	EXPECT_EQ(std::string(""), CodeHelper::stdCodeToStd2ndCode("BTCUSDT"));
+	EXPECT_EQ(std::string(""), CodeHelper::stdCodeToStdHotCode(""));
+	EXPECT_EQ(std::string(""), CodeHelper::stdCodeToStd2ndCode(""));
 }
 
-// 触发条件：CodeHelper::find(src, '.', true)（CodeHelper.hpp:104-133）用
-// `for (std::size_t idx = len - 1; idx >= 0; idx--)` 反向扫描。std::size_t 无符号，
-// `idx >= 0` 恒真：一旦串里没有该符号，idx 从 0 减到 SIZE_MAX 并继续读 src[SIZE_MAX]，
-// 直接越界读/崩溃。因此 stdCodeToStdHotCode / stdCodeToStd2ndCode / stdCodeToStdCommID2
-// 对任何不含点号的入参都会崩（rawFutOptCodeToStdCode 的非 CFFEX 分支是同一个写法）。
-TEST(DISABLED_r12_codehelper, dotless_input_runs_off_the_end_of_the_string)
+TEST(r12_codehelper, std_code_to_comm_id_without_delimiters)
 {
-	EXPECT_STREQ(CodeHelper::stdCodeToStdHotCode("BTCUSDT").c_str(), "");
-	EXPECT_STREQ(CodeHelper::stdCodeToStd2ndCode("BTCUSDT").c_str(), "");
-	EXPECT_EQ(CodeHelper::stdCodeToStdCommID2("600000"), std::string("600000"));
+	EXPECT_EQ(std::string("600000"), CodeHelper::stdCodeToStdCommID2("600000"));
+	EXPECT_EQ(std::string(""), CodeHelper::stdCodeToStdCommID2(""));
+	EXPECT_EQ(std::string("SSE.STK"), CodeHelper::stdCodeToStdCommID2("SSE.STK.600000"));
 }
 
 TEST(r12_codehelper, std_code_to_std_comm_id_and_opt_raw)
@@ -212,7 +210,6 @@ TEST(r12_codehelper, std_code_to_std_comm_id_and_opt_raw)
 	EXPECT_EQ(CodeHelper::stdCodeToStdCommID2("SSE.STK.600000"), std::string("SSE.STK"));
 	// 两段 SSE.STK 仍按原值返回。
 	EXPECT_EQ(CodeHelper::stdCodeToStdCommID2("SSE.STK"), std::string("SSE.STK"));
-	// 单段无点号入参会越界读，见 DISABLED_ 用例
 
 	// 中金所/大商所格式：短横换成点
 	EXPECT_EQ(CodeHelper::rawFutOptCodeToStdCode("IO2013-C-4000", "CFFEX").c_str(), std::string("CFFEX.IO2013.C.4000"));

@@ -31,28 +31,34 @@ WtTWapExeUnit::WtTWapExeUnit()
 	: _last_tick(NULL)       // 行情数据指针
 	, _target_pos(0)        // 目标仓位
 	, _channel_ready(false) // 交易通道就绪标志
+	, _config_valid(false)  // 执行配置尚未通过校验
 	, _comm_info(NULL)      // 品种信息
+	, _sess_info(NULL)      // 交易时间模板
 	, _cancel_times(0)      // 撤单次数
 	, _cancel_cnt(0)        // 撤单计数
 	, _total_secs(0)        // 总执行时间
 	, _total_times(0)       // 总执行次数
+	, _tail_secs(0)         // 收尾时间
 	, _ord_sticky(0)        // 挂单超时时间
 	, _price_mode(0)        // 价格模式
 	, _price_offset(0)      // 价格偏移
 	, _begin_time(0)        // 开始时间
 	, _end_time(0)          // 结束时间
+	, _min_open_lots(0.0)
+	, _order_lots(0.0)
 	, isCanCancel{ true }   // 订单是否可撤销
 	, _fired_times(0)       // 已执行次数
 	, _last_fire_time(0)    // 上次发单时间
 	, _last_place_time(0)   // 上个下单时间
 	, _last_tick_time(0)    // 上个tick时间
+	, _in_calc(false)
 {
 }
 
 
 /**
  * @brief TWAP执行单元的析构函数
- * @details 释放对象所持有的资源，包括行情数据和品种信息
+ * @details 释放对象所持有的行情数据、品种信息和交易时间模板引用
  */
 WtTWapExeUnit::~WtTWapExeUnit()
 {
@@ -63,6 +69,10 @@ WtTWapExeUnit::~WtTWapExeUnit()
 	// 释放品种信息资源
 	if (_comm_info)
 		_comm_info->release();
+
+	// 释放交易时间模板资源
+	if (_sess_info)
+		_sess_info->release();
 }
 
 /**
@@ -89,6 +99,11 @@ inline uint32_t calTmSecs(uint32_t begintime, uint32_t endtime)
 	// 将HHMM格式转换为总秒数：小时*3600 + 分钟*60
 	return   ((endtime / 100) * 3600 + (endtime % 100) * 60) - ((begintime / 100) * 3600 + (begintime % 100) * 60);
 
+}
+
+inline bool isValidHHMM(uint32_t time)
+{
+	return (time / 100) < 24 && (time % 100) < 60;
 }
 /**
  * @brief 检查是否为清仓状态
@@ -129,8 +144,25 @@ const char* WtTWapExeUnit::getName()
  */
 void WtTWapExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTSVariant* cfg)
 {
-	// 调用父类初始化
+	_config_valid = false;
+
+	if (ctx == NULL)
+		return;
+
+	if (stdCode == NULL || stdCode[0] == '\0')
+	{
+		ctx->writeLog("TWAP init rejected: standard code is empty");
+		return;
+	}
+
+	// 调用父类初始化前先验证 code，避免空指针进入基类字符串字段。
 	ExecuteUnit::init(ctx, stdCode, cfg);
+
+	if (cfg == NULL)
+	{
+		ctx->writeLog(fmt::format("TWAP init rejected for {}: configuration is null", stdCode).c_str());
+		return;
+	}
 
 	// 获取并保存品种信息引用
 	_comm_info = ctx->getCommodityInfo(stdCode);
@@ -142,6 +174,12 @@ void WtTWapExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTSVariant* c
 	_sess_info = ctx->getSessionInfo(stdCode);
 	if (_sess_info)
 		_sess_info->retain();
+
+	if (_comm_info == NULL || _sess_info == NULL || _sess_info->getSectionCount() == 0)
+	{
+		ctx->writeLog(fmt::format("TWAP init rejected for {}: commodity or trading session is unavailable", stdCode).c_str());
+		return;
+	}
 	
 	// 从配置中读取各项参数
 	_ord_sticky = cfg->getUInt32("ord_sticky");      // 挂单超时时间（秒）
@@ -158,12 +196,43 @@ void WtTWapExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTSVariant* c
 	if (cfg->has("minopenlots"))
 		_min_open_lots = cfg->getDouble("minopenlots");
 	
-	// 计算执行总时间（秒）
+	if (_total_times == 0)
+	{
+		ctx->writeLog(fmt::format("TWAP init rejected for {}: total_times must be greater than zero", stdCode).c_str());
+		return;
+	}
+
+	if (!cfg->has("begin_time") || !cfg->has("end_time")
+		|| !isValidHHMM(_begin_time) || !isValidHHMM(_end_time))
+	{
+		ctx->writeLog(fmt::format("TWAP init rejected for {}: begin_time/end_time must be valid HHMM values", stdCode).c_str());
+		return;
+	}
+
+	if (_end_time < _begin_time)
+	{
+		ctx->writeLog(fmt::format("TWAP init blocked for {}: overnight schedules are unsupported pending explicit session semantics", stdCode).c_str());
+		return;
+	}
+
+	// 计算执行总时间（秒）；同一开始/结束时间代表空执行窗口，不能继续下单
 	_total_secs = calTmSecs(_begin_time, _end_time);
-	
+	if (_total_secs == 0)
+	{
+		ctx->writeLog(fmt::format("TWAP init rejected for {}: execution duration must be greater than zero", stdCode).c_str());
+		return;
+	}
+
+	if (_tail_secs > _total_secs)
+	{
+		ctx->writeLog(fmt::format("TWAP init rejected for {}: tail_secs exceeds execution duration", stdCode).c_str());
+		return;
+	}
+
 	// 计算单次发单时间间隔（秒）
 	// 去掉尾部时间后均匀分配，这样最后剩余的数量就有一个兵底发单的机制
 	_fire_span = (_total_secs - _tail_secs) / _total_times;
+	_config_valid = true;
 
 	// 记录执行单元初始化完成日志
 	ctx->writeLog(fmt::format("执行单元WtTWapExeUnit[{}] 初始化完成,订单超时 {} 秒,执行时限 {} 秒,收尾时间 {} 秒,间隔时间 {} 秒", stdCode, _ord_sticky, _total_secs, _tail_secs, _fire_span).c_str());
@@ -252,6 +321,9 @@ void WtTWapExeUnit::on_order(uint32_t localid, const char* stdCode, bool /*isBuy
  */
 void WtTWapExeUnit::on_channel_ready()
 {
+	if (!_config_valid)
+		return;
+
 	// 标记交易通道为就绪状态
 	_channel_ready = true;
 	
@@ -328,6 +400,9 @@ void WtTWapExeUnit::on_channel_lost()
  */
 void WtTWapExeUnit::on_tick(WTSTickData* newTick)
 {
+	if (!_config_valid)
+		return;
+
 	// 如果行情数据为空或者合约代码不匹配，则直接返回
 	if (newTick == NULL || _code.compare(newTick->code()) != 0)
 		return;
@@ -385,34 +460,24 @@ void WtTWapExeUnit::on_tick(WTSTickData* newTick)
 	else
 	{
 		// 获取当前时间
-		uint64_t now = TimeUtils::getLocalTimeNow();
+		uint64_t now = _ctx->getCurTime();
 		
-		// 标记是否有订单被撤销
-		bool hasCancel = false;
-		
+		// 扫描裸 localid 超时；mark 会在锁内校验记录仍然存活且 generation 未变化。
 		// 如果设置了订单超时时间且有未完成订单，检查是否有订单需要撤销
 		if (_ord_sticky != 0 && _orders_mon.has_order()) 
 		{			
-			// 检查订单是否超时，并对超时订单执行撤单操作
-			_orders_mon.check_orders(_ord_sticky, now, [this, &hasCancel](uint32_t localid) {
-				// 尝试撤销超时订单
-				if (_ctx->cancel(localid))
-				{
-					// 增加撤单计数
-					_cancel_cnt++;
-					
-					// 记录订单超时撤销日志
-					_ctx->writeLog(fmt::format("Order expired, cancelcnt updated to {}", _cancel_cnt).c_str());
-					
-					// 标记有订单被撤销
-					hasCancel = true;
-				}
+			// 没有端到端订单身份令牌时，不通过旧 localid 接口发起延迟自动撤单。
+			_orders_mon.check_orders_with_generation(_ord_sticky, now, [this, now](uint32_t localid, uint64_t generation) {
+				if (!_orders_mon.mark_unverified_timeout(localid, generation, _ord_sticky, now))
+					return; // 终态或 localid 已复用；不得复活旧快照
+				_ctx->writeLog(fmt::format("Expired order {} of {} cannot be auto-canceled: legacy localid is unverified; order remains monitored",
+					localid, _code.c_str()).c_str());
 			});
 
 		}
 
-		// 如果没有订单被撤销，并且距离上次发单时间超过了设定的发单间隔，触发新一轮发单
-		if (!hasCancel && (now - _last_fire_time >= _fire_span * 1000)) 
+		// 超时记录仍在监控；本轮等待明确的订单状态回报，不重新计算发单。
+		if (!_orders_mon.has_unverified_timeout() && (now - _last_fire_time >= _fire_span * 1000)) 
 		{
 			// 执行仓位计算和发单操作
 			do_calc();
@@ -467,6 +532,12 @@ void WtTWapExeUnit::on_entrust(uint32_t localid, const char* /*stdCode*/, bool b
  */
 void WtTWapExeUnit::fire_at_once(double qty)
 {
+	if (_orders_mon.has_unverified_timeout())
+		return;
+
+	if (!_config_valid)
+		return;
+
 	// 如果数量为0，则直接返回
 	if (decimal::eq(qty, 0))
 		return;
@@ -477,7 +548,7 @@ void WtTWapExeUnit::fire_at_once(double qty)
 	
 	// 获取合约代码和当前时间
 	const char* code = _code.c_str();
-	uint64_t now = TimeUtils::getLocalTimeNow();
+	uint64_t now = _ctx->getCurTime();
 	
 	// 根据数量正负确定交易方向，正数为买入，负数为卖出
 	bool isBuy = decimal::gt(qty, 0);
@@ -525,6 +596,11 @@ void WtTWapExeUnit::fire_at_once(double qty)
 	}
 
 	OrderIDs ids;
+	if (_orders_mon.has_unverified_timeout())
+	{
+		curTick->release();
+		return;
+	}
 	if (qty > 0)
 		ids = _ctx->buy(code, targetPx, abs(qty));
 	else
@@ -543,6 +619,12 @@ void WtTWapExeUnit::fire_at_once(double qty)
  */
 void WtTWapExeUnit::do_calc()
 {
+	if (_orders_mon.has_unverified_timeout())
+		return;
+
+	if (!_config_valid)
+		return;
+
 	// 使用标记类防止重入，确保同一时间只有一个线程在执行计算
 	CalcFlag flag(&_in_calc);
 	if (flag)
@@ -710,8 +792,9 @@ void WtTWapExeUnit::do_calc()
 	// 设定本轮目标仓位（当前实际仓位 + 本次发单数量）
 	_this_target = realPos + curQty;
 
+	// Borrowed from _last_tick; the member owns this reference until the next tick or destruction.
 	WTSTickData* curTick = _last_tick;
-	uint64_t now = TimeUtils::getLocalTimeNow();
+	uint64_t now = _ctx->getCurTime();
 	bool isBuy = decimal::gt(diffQty, 0);
 	double targetPx = 0;
 	//根据价格模式设置,确定委托基准价格: 0-最新价,1-最优价,2-对手价
@@ -757,6 +840,8 @@ void WtTWapExeUnit::do_calc()
 	}
 	//最后发出指令
 	OrderIDs ids;
+	if (_orders_mon.has_unverified_timeout())
+		return;
 	if (curQty > 0)
 		ids = _ctx->buy(code, targetPx, abs(curQty));
 	else
@@ -766,7 +851,6 @@ void WtTWapExeUnit::do_calc()
 	_last_fire_time = now;
 	_fired_times += 1;
 
-	curTick->release();
 }
 
 /**

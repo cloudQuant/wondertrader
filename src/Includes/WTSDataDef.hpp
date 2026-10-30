@@ -65,19 +65,21 @@ public:
 	 */
 	inline double		at(uint32_t idx) const
 	{
-		idx = translateIdx(idx);
-
-		if(idx < 0 || idx >= m_vecData.size())
+		const int64_t rawIdx = idx <= static_cast<uint32_t>(INT32_MAX)
+			? static_cast<int64_t>(idx)
+			: static_cast<int64_t>(idx) - (static_cast<int64_t>(UINT32_MAX) + 1);
+		const int64_t translated = translateIdx(static_cast<int32_t>(rawIdx));
+		if (translated < 0 || static_cast<uint64_t>(translated) >= m_vecData.size())
 			return INVALID_DOUBLE;
 
-		return m_vecData[idx];
+		return m_vecData[static_cast<std::size_t>(translated)];
 	}
 
-	inline int32_t		translateIdx(int32_t idx) const
+	inline int64_t		translateIdx(int32_t idx) const
 	{
 		if(idx < 0)
 		{
-			return m_vecData.size()+idx;
+			return static_cast<int64_t>(m_vecData.size()) + static_cast<int64_t>(idx);
 		}
 
 		return idx;
@@ -89,25 +91,29 @@ public:
 	 */
 	double		maxvalue(int32_t head, int32_t tail, bool isAbs = false) const
 	{
-		head = translateIdx(head);
-		tail = translateIdx(tail);
+		if (m_vecData.empty())
+			return INVALID_DOUBLE;
 
-		uint32_t begin = min(head, tail);
-		uint32_t end = max(head, tail);
-
-		if(begin <0 || begin >= m_vecData.size() || end < 0 || end > m_vecData.size())
+		const int64_t headIndex = translateIdx(head);
+		const int64_t tailIndex = translateIdx(tail);
+		const int64_t begin = min(headIndex, tailIndex);
+		const int64_t end = max(headIndex, tailIndex);
+		if (begin < 0 || end < 0 || static_cast<uint64_t>(end) >= m_vecData.size())
 			return INVALID_DOUBLE;
 
 		double maxValue = INVALID_DOUBLE;
-		for(uint32_t i = begin; i <= end; i++)
+		for (std::size_t i = static_cast<std::size_t>(begin); ; ++i)
 		{
-			if(m_vecData[i] == INVALID_DOUBLE)
-				continue;
+			if (m_vecData[i] != INVALID_DOUBLE)
+			{
+				if(maxValue == INVALID_DOUBLE)
+					maxValue = isAbs?abs(m_vecData[i]):m_vecData[i];
+				else
+					maxValue = max(maxValue, isAbs?abs(m_vecData[i]):m_vecData[i]);
+			}
 
-			if(maxValue == INVALID_DOUBLE)
-				maxValue = isAbs?abs(m_vecData[i]):m_vecData[i];
-			else
-				maxValue = max(maxValue, isAbs?abs(m_vecData[i]):m_vecData[i]);
+			if (i == static_cast<std::size_t>(end))
+				break;
 		}
 
 		//if (maxValue == INVALID_DOUBLE)
@@ -122,25 +128,29 @@ public:
 	 */
 	double		minvalue(int32_t head, int32_t tail, bool isAbs = false) const
 	{
-		head = translateIdx(head);
-		tail = translateIdx(tail);
+		if (m_vecData.empty())
+			return INVALID_DOUBLE;
 
-		uint32_t begin = min(head, tail);
-		uint32_t end = max(head, tail);
-
-		if(begin <0 || begin >= m_vecData.size() || end < 0 || end > m_vecData.size())
+		const int64_t headIndex = translateIdx(head);
+		const int64_t tailIndex = translateIdx(tail);
+		const int64_t begin = min(headIndex, tailIndex);
+		const int64_t end = max(headIndex, tailIndex);
+		if (begin < 0 || end < 0 || static_cast<uint64_t>(end) >= m_vecData.size())
 			return INVALID_DOUBLE;
 
 		double minValue = INVALID_DOUBLE;
-		for(uint32_t i = begin; i <= end; i++)
+		for (std::size_t i = static_cast<std::size_t>(begin); ; ++i)
 		{
-			if (m_vecData[i] == INVALID_DOUBLE)
-				continue;
+			if (m_vecData[i] != INVALID_DOUBLE)
+			{
+				if(minValue == INVALID_DOUBLE)
+					minValue = isAbs?abs(m_vecData[i]):m_vecData[i];
+				else
+					minValue = min(minValue, isAbs?abs(m_vecData[i]):m_vecData[i]);
+			}
 
-			if(minValue == INVALID_DOUBLE)
-				minValue = isAbs?abs(m_vecData[i]):m_vecData[i];
-			else
-				minValue = min(minValue, isAbs?abs(m_vecData[i]):m_vecData[i]);
+			if (i == static_cast<std::size_t>(end))
+				break;
 		}
 
 		//if (minValue == INVALID_DOUBLE)
@@ -231,28 +241,69 @@ protected:
 		return idx;
 	}
 
+	inline int64_t translateIdxWide(int32_t idx) const
+	{
+		const int64_t translated = idx < 0
+			? static_cast<int64_t>(_count) + static_cast<int64_t>(idx)
+			: static_cast<int64_t>(idx);
+		return translated < 0 ? 0 : translated;
+	}
+
+	inline WTSBarStruct* atWide(uint64_t idx)
+	{
+		if (idx >= static_cast<uint64_t>(_count))
+			return NULL;
+
+		for (auto& block : _blocks)
+		{
+			if (idx < block.second)
+				return block.first + static_cast<std::size_t>(idx);
+			idx -= block.second;
+		}
+
+		return NULL;
+	}
+
+	inline const WTSBarStruct* atWide(uint64_t idx) const
+	{
+		if (idx >= static_cast<uint64_t>(_count))
+			return NULL;
+
+		for (const auto& block : _blocks)
+		{
+			if (idx < block.second)
+				return block.first + static_cast<std::size_t>(idx);
+			idx -= block.second;
+		}
+
+		return NULL;
+	}
+
 
 public:
 	static WTSKlineSlice* create(const char* code, WTSKlinePeriod period, uint32_t times, WTSBarStruct* bars = NULL, int32_t count = 0) noexcept
 	{
+		if (code == NULL || count < 0 || (count > 0 && bars == NULL))
+			return NULL;
+
 		WTSKlineSlice *pRet = new WTSKlineSlice;
 		wt_strcpy(pRet->_code, code);
 		pRet->_period = period;
 		pRet->_times = times;
 		if(bars)
-			pRet->_blocks.emplace_back(BarBlock(bars, count));
-		pRet->_count = count;
+			pRet->_blocks.emplace_back(BarBlock(bars, static_cast<uint32_t>(count)));
+		pRet->_count = static_cast<uint32_t>(count);
 
 		return pRet;
 	}
 
 	inline bool appendBlock(WTSBarStruct* bars, uint32_t count)
 	{
-		if (bars == NULL || count == 0)
+		if (bars == NULL || count == 0 || count > UINT32_MAX - _count)
 			return false;
 
-		_count += count;
 		_blocks.emplace_back(BarBlock(bars, count));
+		_count += count;
 		return true;
 	}
 
@@ -282,19 +333,8 @@ public:
 		if (_count == 0)
 			return NULL;
 
-		idx = translateIdx(idx);
-		do
-		{
-			for (auto& item : _blocks)
-			{
-				if ((uint32_t)idx >= item.second)
-					idx -= item.second;
-				else
-					return item.first + idx;
-			}
-		} while (false);
-
-		return NULL;
+		const uint64_t translated = static_cast<uint64_t>(translateIdxWide(idx));
+		return atWide(translated);
 	}
 
 	inline const WTSBarStruct*	at(int32_t idx) const
@@ -302,18 +342,8 @@ public:
 		if (_count == 0)
 			return NULL;
 
-		idx = translateIdx(idx);
-		do
-		{
-			for (auto& item : _blocks)
-			{
-				if ((uint32_t)idx >= item.second)
-					idx -= item.second;
-				else
-					return item.first + idx;
-			}
-		} while (false);
-		return NULL;
+		const uint64_t translated = static_cast<uint64_t>(translateIdxWide(idx));
+		return atWide(translated);
 	}
 
 
@@ -325,16 +355,32 @@ public:
 	*/
 	inline double	maxprice(int32_t head, int32_t tail) const
 	{
-		head = translateIdx(head);
-		tail = translateIdx(tail);
+		if (_count == 0)
+			return INVALID_DOUBLE;
 
-		int32_t begin = max(0,min(head, tail));
-		int32_t end = min(max(head, tail), size() - 1);
+		const int64_t count = static_cast<int64_t>(_count);
+		const int64_t headIndex = head < 0 ? count + static_cast<int64_t>(head) : head;
+		const int64_t tailIndex = tail < 0 ? count + static_cast<int64_t>(tail) : tail;
+		if (headIndex < 0 && tailIndex < 0)
+			return INVALID_DOUBLE;
 
-		double maxValue = this->at(begin)->high;
-		for (int32_t i = begin; i <= end; i++)
+		const int64_t first = min(headIndex, tailIndex);
+		const int64_t last = max(headIndex, tailIndex);
+		const int64_t begin = first < 0 ? 0 : first;
+		const int64_t end = last >= count ? count - 1 : last;
+		if (begin > end)
+			return INVALID_DOUBLE;
+
+		double maxValue = INVALID_DOUBLE;
+		for (uint64_t i = static_cast<uint64_t>(begin); ; ++i)
 		{
-			maxValue = max(maxValue, at(i)->high);
+			const WTSBarStruct* bar = atWide(i);
+			if (bar == NULL)
+				return INVALID_DOUBLE;
+			if (bar->high != INVALID_DOUBLE)
+				maxValue = maxValue == INVALID_DOUBLE ? bar->high : max(maxValue, bar->high);
+			if (i == static_cast<uint64_t>(end))
+				break;
 		}
 		return maxValue;
 	}
@@ -347,16 +393,32 @@ public:
 	*/
 	inline double	minprice(int32_t head, int32_t tail) const
 	{
-		head = translateIdx(head);
-		tail = translateIdx(tail);
+		if (_count == 0)
+			return INVALID_DOUBLE;
 
-		int32_t begin = max(0, min(head, tail));
-		int32_t end = min(max(head, tail), size() - 1);
+		const int64_t count = static_cast<int64_t>(_count);
+		const int64_t headIndex = head < 0 ? count + static_cast<int64_t>(head) : head;
+		const int64_t tailIndex = tail < 0 ? count + static_cast<int64_t>(tail) : tail;
+		if (headIndex < 0 && tailIndex < 0)
+			return INVALID_DOUBLE;
 
-		double minValue = at(begin)->low;
-		for (int32_t i = begin; i <= end; i++)
+		const int64_t first = min(headIndex, tailIndex);
+		const int64_t last = max(headIndex, tailIndex);
+		const int64_t begin = first < 0 ? 0 : first;
+		const int64_t end = last >= count ? count - 1 : last;
+		if (begin > end)
+			return INVALID_DOUBLE;
+
+		double minValue = INVALID_DOUBLE;
+		for (uint64_t i = static_cast<uint64_t>(begin); ; ++i)
 		{
-			minValue = min(minValue, at(i)->low);
+			const WTSBarStruct* bar = atWide(i);
+			if (bar == NULL)
+				return INVALID_DOUBLE;
+			if (bar->low != INVALID_DOUBLE)
+				minValue = minValue == INVALID_DOUBLE ? bar->low : min(minValue, bar->low);
+			if (i == static_cast<uint64_t>(end))
+				break;
 		}
 
 		return minValue;
@@ -386,19 +448,28 @@ public:
 		if (_count == 0)
 			return NULL;
 
-		head = translateIdx(head);
-		tail = translateIdx(tail);
-
-		int32_t begin = max(0, min(head, tail));
-		int32_t end = min(max(head, tail), size() - 1);
+		const int64_t count = static_cast<int64_t>(_count);
+		const int64_t headIndex = head < 0 ? count + static_cast<int64_t>(head) : head;
+		const int64_t tailIndex = tail < 0 ? count + static_cast<int64_t>(tail) : tail;
+		const int64_t begin = max<int64_t>(0, min(headIndex, tailIndex));
+		const int64_t end = min<int64_t>(max(headIndex, tailIndex), count - 1);
+		if (begin > end)
+			return NULL;
 
 		WTSValueArray *vArray = NULL;
 
 		vArray = WTSValueArray::create();
 
-		for (int32_t i = begin; i <= end; i++)
+		for (int64_t i = begin; i <= end; i++)
 		{
-			const WTSBarStruct& day = *at(i);
+			const WTSBarStruct* bar = atWide(static_cast<uint64_t>(i));
+			if (bar == NULL)
+			{
+				vArray->release();
+				return NULL;
+			}
+
+			const WTSBarStruct& day = *bar;
 			switch (type)
 			{
 			case KFT_OPEN:
@@ -513,19 +584,31 @@ public:
 	 */
 	inline double		maxprice(int32_t head, int32_t tail) const
 	{
-		head = translateIdx(head);
-		tail = translateIdx(tail);
-
-		uint32_t begin = min(head, tail);
-		uint32_t end = max(head, tail);
-
-		if(begin >= m_vecBarData.size() || end > m_vecBarData.size())
+		if (m_vecBarData.empty())
 			return INVALID_DOUBLE;
 
-		double maxValue = m_vecBarData[begin].high;
-		for(uint32_t i = begin; i <= end; i++)
+		const int64_t count = static_cast<int64_t>(m_vecBarData.size());
+		const int64_t headIndex = head < 0 ? count + static_cast<int64_t>(head) : head;
+		const int64_t tailIndex = tail < 0 ? count + static_cast<int64_t>(tail) : tail;
+		if (headIndex < 0 && tailIndex < 0)
+			return INVALID_DOUBLE;
+
+		const int64_t first = min(headIndex, tailIndex);
+		const int64_t last = max(headIndex, tailIndex);
+		const int64_t begin = first < 0 ? 0 : first;
+		const int64_t end = last;
+
+		if (begin > end || static_cast<uint64_t>(end) >= static_cast<uint64_t>(m_vecBarData.size()))
+			return INVALID_DOUBLE;
+
+		double maxValue = INVALID_DOUBLE;
+		for (std::size_t i = static_cast<std::size_t>(begin); ; ++i)
 		{
-			maxValue = max(maxValue, m_vecBarData[i].high);
+			const double high = m_vecBarData[i].high;
+			if (high != INVALID_DOUBLE)
+				maxValue = maxValue == INVALID_DOUBLE ? high : max(maxValue, high);
+			if (i == static_cast<std::size_t>(end))
+				break;
 		}
 
 		return maxValue;
@@ -539,19 +622,31 @@ public:
 	 */
 	inline double		minprice(int32_t head, int32_t tail) const
 	{
-		head = translateIdx(head);
-		tail = translateIdx(tail);
-
-		uint32_t begin = min(head, tail);
-		uint32_t end = max(head, tail);
-
-		if(begin >= m_vecBarData.size() || end > m_vecBarData.size())
+		if (m_vecBarData.empty())
 			return INVALID_DOUBLE;
 
-		double minValue = m_vecBarData[begin].low;
-		for(uint32_t i = begin; i <= end; i++)
+		const int64_t count = static_cast<int64_t>(m_vecBarData.size());
+		const int64_t headIndex = head < 0 ? count + static_cast<int64_t>(head) : head;
+		const int64_t tailIndex = tail < 0 ? count + static_cast<int64_t>(tail) : tail;
+		if (headIndex < 0 && tailIndex < 0)
+			return INVALID_DOUBLE;
+
+		const int64_t first = min(headIndex, tailIndex);
+		const int64_t last = max(headIndex, tailIndex);
+		const int64_t begin = first < 0 ? 0 : first;
+		const int64_t end = last;
+
+		if (begin > end || static_cast<uint64_t>(end) >= static_cast<uint64_t>(m_vecBarData.size()))
+			return INVALID_DOUBLE;
+
+		double minValue = INVALID_DOUBLE;
+		for (std::size_t i = static_cast<std::size_t>(begin); ; ++i)
 		{
-			minValue = min(minValue, m_vecBarData[i].low);
+			const double low = m_vecBarData[i].low;
+			if (low != INVALID_DOUBLE)
+				minValue = minValue == INVALID_DOUBLE ? low : min(minValue, low);
+			if (i == static_cast<std::size_t>(end))
+				break;
 		}
 
 		return minValue;
@@ -866,11 +961,22 @@ public:
 	/*
 	 *	创建一个tick数据对象
 	 *	@stdCode 合约代码
+	 *	@return 输入为空或代码长度超出目标字段容量时返回NULL
 	 */
 	static inline WTSTickData* create(const char* stdCode) noexcept
 	{
+		if (stdCode == NULL)
+			return NULL;
+
+		std::size_t len = 0;
+		while (len < MAX_INSTRUMENT_LENGTH && stdCode[len] != '\0')
+			++len;
+		if (len == MAX_INSTRUMENT_LENGTH)
+			return NULL;
+
 		WTSTickData* pRet = WTSTickData::allocate();
-		auto len = strlen(stdCode);
+		if (pRet == NULL)
+			return NULL;
 		memcpy(pRet->m_tickStruct.code, stdCode, len);
 		pRet->m_tickStruct.code[len] = 0;
 
@@ -889,9 +995,36 @@ public:
 		return pRet;
 	}
 
+	/*
+	 *	安全设置合约代码。长度为0时按C字符串读取；失败时保留原代码。
+	 */
+	inline bool trySetCode(const char* code, std::size_t len = 0) noexcept
+	{
+		if (code == NULL)
+			return false;
+
+		const std::size_t capacity = sizeof(m_tickStruct.code);
+		if (len == 0)
+		{
+			while (len < capacity && code[len] != '\0')
+				++len;
+			if (len == capacity)
+				return false;
+		}
+		else if (len >= capacity)
+		{
+			return false;
+		}
+
+		memmove(m_tickStruct.code, code, len);
+		m_tickStruct.code[len] = '\0';
+		return true;
+	}
+
+	/* 保留旧接口；需要处理拒绝结果的调用方应使用trySetCode。 */
 	inline void setCode(const char* code, std::size_t len = 0) noexcept
 	{
-		wt_strcpy(m_tickStruct.code, code, len);
+		(void)trySetCode(code, len);
 	}
 
 	/*
@@ -1317,7 +1450,7 @@ public:
 	 *	@param stdCode 合约代码
 	 *	@param nSize 预先分配的大小
 	 */
-	static inline WTSHisTickData* create(const char* stdCode, unsigned int nSize = 0, bool bValidOnly = false, double factor = 1.0)
+	static inline WTSHisTickData* create(const char* stdCode, unsigned int nSize, bool bValidOnly = false, double factor = 1.0)
 	{
 		WTSHisTickData *pRet = new WTSHisTickData;
 		wt_strcpy(pRet->m_strCode, stdCode);
@@ -1396,7 +1529,7 @@ private:
 	uint32_t		_count;
 
 protected:
-	WTSTickSlice() { _blocks.clear(); }
+	WTSTickSlice() : _count(0) { _blocks.clear(); }
 	inline int32_t		translateIdx(int32_t idx) const
 	{
 		if (idx < 0)

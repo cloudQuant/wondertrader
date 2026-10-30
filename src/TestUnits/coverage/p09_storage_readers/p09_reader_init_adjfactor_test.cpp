@@ -19,7 +19,9 @@
 #include <fstream>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <string>
+#include <thread>
 #include <unistd.h>
 #include <vector>
 
@@ -169,6 +171,72 @@ private:
 	uint32_t		_updated = 0;
 };
 
+class P09AdjFactorLoader : public IHisDataLoader
+{
+public:
+	bool loadFinalHisBars(void*, const char*, WTSKlinePeriod, FuncReadBars) override { return false; }
+	bool loadRawHisBars(void*, const char*, WTSKlinePeriod, FuncReadBars) override { return false; }
+	bool loadAllAdjFactors(void*, FuncReadFactors) override { return false; }
+	bool loadAdjFactors(void* obj, const char* stdCode, FuncReadFactors cb) override
+	{
+		bool defer = false;
+		{
+			std::lock_guard<std::mutex> lock(_mutex);
+			++_calls;
+			_keys.emplace_back(stdCode == NULL ? "" : stdCode);
+			_retained_keys.push_back(stdCode);
+			defer = _deferCallbacks;
+			if (defer)
+				_pending.push_back(Pending{ obj, stdCode, cb });
+		}
+		if (!defer)
+		{
+			uint32_t dates[] = { 20200102 };
+			double factors[] = { 0.75 };
+			cb(obj, stdCode, dates, factors, 1);
+		}
+		return true;
+	}
+
+	void deferCallbacks(bool defer)
+	{
+		std::lock_guard<std::mutex> lock(_mutex);
+		_deferCallbacks = defer;
+	}
+	void feed(size_t index)
+	{
+		Pending pending;
+		{
+			std::lock_guard<std::mutex> lock(_mutex);
+			pending = _pending.at(index);
+		}
+		uint32_t dates[] = { 20200102 };
+		double factors[] = { 0.75 };
+		pending.callback(pending.obj, pending.stdCode, dates, factors, 1);
+	}
+	uint32_t calls() const { std::lock_guard<std::mutex> lock(_mutex); return _calls; }
+	std::vector<std::string> keys() const { std::lock_guard<std::mutex> lock(_mutex); return _keys; }
+	std::vector<const char*> retainedKeys() const
+	{
+		std::lock_guard<std::mutex> lock(_mutex);
+		return _retained_keys;
+	}
+
+private:
+	struct Pending
+	{
+		void* obj;
+		const char* stdCode;
+		FuncReadFactors callback;
+	};
+	mutable std::mutex _mutex;
+	uint32_t _calls = 0;
+	bool _deferCallbacks = false;
+	std::vector<std::string> _keys;
+	std::vector<const char*> _retained_keys;
+	std::vector<Pending> _pending;
+};
+
 class P09DataReaderTest : public ::testing::Test
 {
 protected:
@@ -253,6 +321,7 @@ TEST_F(P09DataReaderTest, init_single_path_and_his_path_and_adjust_flag)
 	EXPECT_EQ(reader._rt_dir[0].substr(reader._rt_dir[0].size() - 3), "rt/");
 	EXPECT_NE(reader._rt_dir[0].find(root), std::string::npos);
 	EXPECT_EQ(reader._his_dir[0].substr(reader._his_dir[0].size() - 4), "his/");
+	EXPECT_NE(reader._his_dir[0].find(root), std::string::npos);
 	EXPECT_NE(reader._his_dir[1].find("extra_his"), std::string::npos);
 	EXPECT_EQ(reader._adjust_flag, 2u);
 	EXPECT_TRUE(reader._loader == nullptr);
@@ -356,6 +425,162 @@ TEST_F(P09DataReaderTest, load_adj_factors_key_rules_and_ordering)
 	EXPECT_TRUE(reader.getAdjFactors("000001", "SZSE", "STK").empty());
 }
 
+TEST_F(P09DataReaderTest, get_adj_factors_loader_receives_complete_dynamic_key_and_cache_hits)
+{
+	P09AdjFactorLoader loader;
+	WtDataReader reader;
+	reader.init(NULL, _sink.get(), NULL);
+	reader._loader = &loader;
+
+	struct KeyCase
+	{
+		std::string exchg;
+		std::string pid;
+		std::string code;
+		std::string expected;
+	};
+	const std::vector<KeyCase> cases = {
+		{ "A", "B", "CDEFGHIJKLMNOPQ", "A.B.CDEFGHIJKLMNOPQ" }, // 19 bytes
+		{ "A", "B", "CDEFGHIJKLMNOPQR", "A.B.CDEFGHIJKLMNOPQR" }, // 20 bytes
+		{ "LONGEXCHANGE", "PRODUCT", "INSTRUMENTCODE", "LONGEXCHANGE.PRODUCT.INSTRUMENTCODE" }, // >20 bytes
+		{ std::string(MAX_INSTRUMENT_LENGTH - 1, 'E'),
+		  std::string(MAX_INSTRUMENT_LENGTH - 1, 'P'),
+		  std::string(MAX_INSTRUMENT_LENGTH - 1, 'C'),
+		  std::string(MAX_INSTRUMENT_LENGTH - 1, 'E') + "." +
+			std::string(MAX_INSTRUMENT_LENGTH - 1, 'P') + "." +
+			std::string(MAX_INSTRUMENT_LENGTH - 1, 'C') } // maximum fixed-width component lengths
+	};
+
+	for (const KeyCase& keyCase : cases)
+	{
+		const uint32_t callsBefore = loader.calls();
+		const WtDataReader::AdjFactorList& first = reader.getAdjFactors(
+			keyCase.code.c_str(), keyCase.exchg.c_str(), keyCase.pid.c_str());
+		ASSERT_EQ(first.size(), 2u);
+		EXPECT_EQ(loader.calls(), callsBefore + 1);
+		ASSERT_EQ(loader.keys().size(), callsBefore + 1);
+		EXPECT_EQ(loader.keys().back(), keyCase.expected);
+		EXPECT_EQ(reader._adj_factors.count(keyCase.expected), 1u);
+		EXPECT_DOUBLE_EQ(first.back()._factor, 0.75);
+
+		const WtDataReader::AdjFactorList& cached = reader.getAdjFactors(
+			keyCase.code.c_str(), keyCase.exchg.c_str(), keyCase.pid.c_str());
+		EXPECT_EQ(&cached, &first);
+		EXPECT_EQ(loader.calls(), callsBefore + 1);
+	}
+}
+
+TEST_F(P09DataReaderTest, delayed_loader_key_pointer_survives_return_stack_use_and_other_keys)
+{
+	P09AdjFactorLoader loader;
+	loader.deferCallbacks(true);
+	WtDataReader reader;
+	reader.init(NULL, NULL, NULL);
+	reader._loader = &loader;
+
+	const std::string firstCode = "CDEFGHIJKLMNOPQR"; // composite key is exactly 20 bytes
+	const std::string firstExpected = "A.B." + firstCode;
+	EXPECT_TRUE(reader.getAdjFactors(firstCode.c_str(), "A", "B").empty());
+
+	std::vector<const char*> retained = loader.retainedKeys();
+	ASSERT_EQ(retained.size(), 1u);
+	const char* firstPointer = retained[0];
+	ASSERT_NE(firstPointer, nullptr);
+	EXPECT_STREQ(firstPointer, firstExpected.c_str());
+
+	// Overwrite temporary stack storage and request distinct keys. The loader
+	// still holds the first raw pointer after its loadAdjFactors call returned.
+	volatile char stackNoise[4096];
+	for (size_t i = 0; i < sizeof(stackNoise); ++i)
+		stackNoise[i] = static_cast<char>(i);
+	EXPECT_NE(stackNoise[sizeof(stackNoise) - 1], 0);
+
+	const std::vector<std::string> otherCodes = {
+		"S", "T", "UVWXYZ0123456789012345678901234"
+	};
+	for (size_t i = 0; i < otherCodes.size(); ++i)
+	{
+		const std::string exchg = "EX" + std::to_string(i);
+		EXPECT_TRUE(reader.getAdjFactors(otherCodes[i].c_str(), exchg.c_str(), "PID").empty());
+	}
+
+	retained = loader.retainedKeys();
+	ASSERT_EQ(retained.size(), 1u + otherCodes.size());
+	for (size_t i = 0; i < retained.size(); ++i)
+	{
+		ASSERT_NE(retained[i], nullptr);
+		for (size_t j = i + 1; j < retained.size(); ++j)
+			EXPECT_NE(retained[i], retained[j]);
+	}
+	EXPECT_EQ(std::string(firstPointer), firstExpected);
+	for (size_t i = 0; i < otherCodes.size(); ++i)
+	{
+		const std::string expected = "EX" + std::to_string(i) + ".PID." + otherCodes[i];
+		EXPECT_EQ(std::string(retained[i + 1]), expected);
+	}
+	loader.feed(0);
+	const WtDataReader::AdjFactorList& loaded = reader._adj_factors[firstExpected];
+	ASSERT_EQ(loaded.size(), 2u);
+	EXPECT_DOUBLE_EQ(loaded.back()._factor, 0.75);
+}
+
+TEST_F(P09DataReaderTest, concurrent_readers_keep_different_loader_key_addresses)
+{
+	P09AdjFactorLoader loader;
+	loader.deferCallbacks(true);
+	WtDataReader readerA;
+	WtDataReader readerB;
+	readerA.init(NULL, NULL, NULL);
+	readerB.init(NULL, NULL, NULL);
+	readerA._loader = &loader;
+	readerB._loader = &loader;
+
+	std::thread threadA([&]() { readerA.getAdjFactors("600000", "SSE", "STK"); });
+	std::thread threadB([&]() { readerB.getAdjFactors("000001", "SZSE", "STK"); });
+	threadA.join();
+	threadB.join();
+
+	const std::vector<std::string> keys = loader.keys();
+	const std::vector<const char*> retained = loader.retainedKeys();
+	ASSERT_EQ(keys.size(), 2u);
+	ASSERT_EQ(retained.size(), 2u);
+	std::map<std::string, const char*> keyToAddress;
+	for (size_t i = 0; i < keys.size(); ++i)
+		ASSERT_TRUE(keyToAddress.emplace(keys[i], retained[i]).second);
+	ASSERT_EQ(keyToAddress.count("SSE.STK.600000"), 1u);
+	ASSERT_EQ(keyToAddress.count("SZSE.STK.000001"), 1u);
+	const char* keyA = keyToAddress.at("SSE.STK.600000");
+	const char* keyB = keyToAddress.at("SZSE.STK.000001");
+	EXPECT_NE(keyA, keyB);
+	EXPECT_EQ(std::string(keyA), "SSE.STK.600000");
+	EXPECT_EQ(std::string(keyB), "SZSE.STK.000001");
+}
+
+TEST_F(P09DataReaderTest, concurrent_distinct_loader_keys_have_independent_stable_addresses)
+{
+	WtDataReader reader;
+	const std::vector<std::string> keys = {
+		"SSE.STK.600000", "SZSE.STK.000001", "EXCHANGE.PRODUCT.INSTRUMENT"
+	};
+	std::vector<const char*> addresses(keys.size(), nullptr);
+	std::vector<std::thread> threads;
+	threads.reserve(keys.size());
+	for (size_t i = 0; i < keys.size(); ++i)
+		threads.emplace_back([&reader, &keys, &addresses, i]() {
+			addresses[i] = reader.getStableAdjFactorLoaderKey(keys[i]);
+		});
+	for (std::thread& thread : threads)
+		thread.join();
+
+	for (size_t i = 0; i < keys.size(); ++i)
+	{
+		ASSERT_NE(addresses[i], nullptr);
+		EXPECT_EQ(std::string(addresses[i]), keys[i]);
+		for (size_t j = i + 1; j < keys.size(); ++j)
+			EXPECT_NE(addresses[i], addresses[j]);
+	}
+}
+
 TEST_F(P09DataReaderTest, get_adj_factor_by_date_branches)
 {
 	WtDataReader reader;
@@ -383,18 +608,105 @@ TEST_F(P09DataReaderTest, get_adj_factor_by_date_branches)
 	EXPECT_EQ(reader.getAdjustingFlag(), 0u);
 }
 
-// 崩溃/UB 类输入整类收进同一个 DISABLED_ 用例：
-// WtDataReader::init 对 cfg->get("path") 的返回值没有判空，缺 path 时 cfgPath->isArray() 直接空指针解引用。
-TEST_F(P09DataReaderTest, DISABLED_p09_init_without_path_crashes)
+// 缺失、空或类型错误的存储路径都必须在不生成部分目录状态的情况下安全返回。
+TEST_F(P09DataReaderTest, init_missing_path_returns_without_partial_directories)
 {
 	const std::string cfgfile = write_json("reader_nopath.json", "{\n\"adjust_flag\": 1\n}\n");
 	WTSVariant* cfg = load_cfg(cfgfile);
-	if (cfg == NULL)
-		return;
+	ASSERT_NE(cfg, nullptr);
 
 	WtDataReader reader;
-	reader.init(cfg, _sink.get(), NULL);	// <-- SIGSEGV
+	reader.init(cfg, _sink.get(), NULL);
 	cfg->release();
+
+	EXPECT_TRUE(reader._rt_dir.empty());
+	EXPECT_TRUE(reader._his_dir.empty());
+	EXPECT_EQ(_sink->count_of(LL_ERROR), 1u);
+	EXPECT_EQ(reader.readTickSlice("SSE.STK.600100", 1), nullptr);
+	EXPECT_EQ(reader.readOrdDtlSlice("SSE.STK.600100", 1), nullptr);
+	EXPECT_EQ(reader.readOrdQueSlice("SSE.STK.600100", 1), nullptr);
+	EXPECT_EQ(reader.readTransSlice("SSE.STK.600100", 1), nullptr);
+	EXPECT_EQ(reader.readKlineSlice("SSE.STK.600100", KP_DAY, 1), nullptr);
+	EXPECT_NO_THROW(reader.onMinuteEnd(20261029, 1500));
+}
+
+TEST_F(P09DataReaderTest, init_null_sinkLeavesReaderNotReady)
+{
+	const std::string cfgfile = write_json("reader_null_sink.json",
+		R"JSON({"path": "/tmp/p09_reader_null_sink"})JSON");
+	WTSVariant* cfg = load_cfg(cfgfile);
+	ASSERT_NE(cfg, nullptr);
+
+	WtDataReader reader;
+	reader.init(cfg, NULL, NULL);
+	cfg->release();
+
+	EXPECT_TRUE(reader._rt_dir.empty());
+	EXPECT_TRUE(reader._his_dir.empty());
+	EXPECT_EQ(reader.readTickSlice("SSE.STK.600100", 1), nullptr);
+	EXPECT_EQ(reader.readKlineSlice("SSE.STK.600100", KP_DAY, 1), nullptr);
+	EXPECT_NO_THROW(reader.onMinuteEnd(20261029, 1500));
+}
+
+TEST_F(P09DataReaderTest, invalidReinitializationClearsPreviousReadyDirectories)
+{
+	WTSVariant* validCfg = load_cfg(write_json("valid_reinit.json",
+		R"JSON({"path": "/tmp/p09_reader_valid_reinit"})JSON"));
+	ASSERT_NE(validCfg, nullptr);
+	WtDataReader reader;
+	reader.init(validCfg, _sink.get(), NULL);
+	validCfg->release();
+	ASSERT_EQ(reader._rt_dir.size(), 1u);
+
+	WTSVariant* invalidCfg = load_cfg(write_json("invalid_reinit.json",
+		R"JSON({"path": []})JSON"));
+	ASSERT_NE(invalidCfg, nullptr);
+	reader.init(invalidCfg, _sink.get(), NULL);
+	invalidCfg->release();
+
+	EXPECT_TRUE(reader._rt_dir.empty());
+	EXPECT_TRUE(reader._his_dir.empty());
+	EXPECT_EQ(reader.readTickSlice("SSE.STK.600100", 1), nullptr);
+	EXPECT_EQ(reader.readOrdDtlSlice("SSE.STK.600100", 1), nullptr);
+	EXPECT_EQ(reader.readOrdQueSlice("SSE.STK.600100", 1), nullptr);
+	EXPECT_EQ(reader.readTransSlice("SSE.STK.600100", 1), nullptr);
+	EXPECT_EQ(reader.readKlineSlice("SSE.STK.600100", KP_DAY, 1), nullptr);
+
+	WTSVariant* recoveredCfg = load_cfg(write_json("recovered_reinit.json",
+		R"JSON({"path": "/tmp/p09_reader_recovered_reinit"})JSON"));
+	ASSERT_NE(recoveredCfg, nullptr);
+	reader.init(recoveredCfg, _sink.get(), NULL);
+	recoveredCfg->release();
+	ASSERT_EQ(reader._rt_dir.size(), 1u);
+	EXPECT_NE(reader._rt_dir[0].find("p09_reader_recovered_reinit"), std::string::npos);
+	EXPECT_NE(reader._his_dir[0].find("p09_reader_recovered_reinit/his/"), std::string::npos);
+}
+
+TEST_F(P09DataReaderTest, init_emptyOrInvalidPathReturnsWithoutPartialDirectories)
+{
+	const std::vector<std::pair<const char*, const char*>> invalidConfigs = {
+		{ "reader_empty_array.json", R"JSON({"path": []})JSON" },
+		{ "reader_empty_string.json", R"JSON({"path": ""})JSON" },
+		{ "reader_null_path.json", R"JSON({"path": null})JSON" },
+		{ "reader_bad_array_entry.json", R"JSON({"path": ["/tmp/data", 7]})JSON" }
+	};
+
+	for (const auto& entry : invalidConfigs)
+	{
+		SCOPED_TRACE(entry.first);
+		const std::string cfgfile = write_json(entry.first, entry.second);
+		WTSVariant* cfg = load_cfg(cfgfile);
+		ASSERT_NE(cfg, nullptr);
+
+		WtDataReader reader;
+		reader.init(cfg, _sink.get(), NULL);
+		cfg->release();
+
+		EXPECT_TRUE(reader._rt_dir.empty());
+		EXPECT_TRUE(reader._his_dir.empty());
+		EXPECT_EQ(reader.readTickSlice("SSE.STK.600100", 1), nullptr);
+	}
+	EXPECT_EQ(_sink->count_of(LL_ERROR), invalidConfigs.size());
 }
 
 }

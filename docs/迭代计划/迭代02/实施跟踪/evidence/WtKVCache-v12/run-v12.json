@@ -1,0 +1,45 @@
+{
+  "bug_ids": ["BUG-R16-08", "BUG-I02-NEW-011"],
+  "suite": "r16_kvcache",
+  "platform": "macOS arm64",
+  "binary": "build-cov/build_x64/Debug/bin/TestUnits/wt-kvcache-focused-v12",
+  "binary_sha256": "ade49d87aa8fab0e5b3f6d622d414106d190253625a54f097700ab2ac69aea64",
+  "build_log": "build-v12.log",
+  "build_log_sha256": "967c21b40fa06ee44612621bb0fcd77df61c91b651782f37ceec64bf8afeaf2f",
+  "run_log": "run-v12.log",
+  "run_log_sha256": "c0b5f2f0c8d9e286b639ef136ec8327c25acd9317bf39fd05ad852d8550c79fb",
+  "build_command": "/opt/homebrew/bin/ninja -C build-cov -j 2 TestUnits/coverage/CMakeFiles/CoverageTests.dir/r16_share_tools/r16_kvcache_test.cpp.o",
+  "link_command_from_build_cov": "/usr/bin/c++ -arch arm64 -fprofile-instr-generate -g TestUnits/coverage/CMakeFiles/CoverageTests.dir/r16_share_tools/r16_kvcache_test.cpp.o /opt/homebrew/lib/libgtest_main.a /opt/homebrew/lib/libgtest.a -L/opt/homebrew/lib -L/usr/local/lib -lboost_filesystem -lboost_thread -liconv -lpthread -o build_x64/Debug/bin/TestUnits/wt-kvcache-focused-v12",
+  "run_command": "build-cov/build_x64/Debug/bin/TestUnits/wt-kvcache-focused-v12",
+  "link_scope": "Focused link only; uses existing system GoogleTest/Boost libraries. This is not a clean rebuild of production libraries or the aggregate CoverageTests suite.",
+  "tests": 30,
+  "passed": 30,
+  "failures": 0,
+  "skipped": 0,
+  "exit_code": 0,
+  "coverage_for_BUG-R16-08": [
+    "truncated_file_same_date_preserves_records_and_repairs_capacity",
+    "truncated_file_other_date_resets_without_writing_past_mapping",
+    "rejects_file_smaller_than_cache_header",
+    "rejects_file_ending_inside_cache_item",
+    "rejects_file_with_invalid_header_flag"
+  ],
+  "coverage_for_BUG-I02-NEW-011": [
+    "resize_file_and_mapping_failures_preserve_old_mapping",
+    "resize_rejects_replaced_path_before_reopen",
+    "resize_rollback_uses_original_handle_after_path_replaced",
+    "failed_rollback_keeps_old_mapping_but_restart_fails_closed",
+    "failed_rollback_with_complete_slots_recovers_actual_capacity",
+    "put_calls_reject_new_record_when_resize_open_fails",
+    "capacity_doubling_overflow_is_rejected_before_insert"
+  ],
+  "review": "主审及独立复审均已通过本次 v12 源码审查；本记录的 TEST_PASS 仅对应 macOS arm64 focused 测试范围。",
+  "asan": "没有 ASan PASS 证据；sanitizer 进程在启动阶段挂起并被终止。",
+  "remaining": [
+    "Windows 未实际编译或运行。",
+    "resize rollback 失败时不能保证恢复原文件长度；旧 mapping 在当前进程仍保持有效，但后续 init 仅接受完整槽布局，非整槽尾部需要人工恢复文件。",
+    "现有 void put/put_if_none 兼容包装不直接返回失败；新增 try_put/try_put_if_none 可返回 bool，但旧调用方仍只能依赖 logger 或迁移到新接口。",
+    "真实跨进程同时 init/resize 竞争未验证；focused 测试的竞争/替换场景不能替代多进程测试。",
+    "本次链接复用已有依赖库；clean rebuild、完整 aggregate/consumer 联动及 Windows 平台验收未完成。"
+  ]
+}

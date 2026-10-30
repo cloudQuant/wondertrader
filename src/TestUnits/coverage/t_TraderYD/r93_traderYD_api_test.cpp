@@ -550,7 +550,7 @@ namespace
 		failing->release();
 
 		WTSEntrustAction* action = WTSEntrustAction::create("ag2512", "SHFE");
-		action->setEntrustID("yduser#0000000101");
+		action->setEntrustID(eidStr.c_str());
 		action->setOrderID("8888");
 		ASSERT_EQ(0, api_.orderAction(action));
 		EXPECT_EQ(1, stub_.n_cancel_);
@@ -561,12 +561,22 @@ namespace
 		EXPECT_EQ(&stub_.account_, stub_.last_cancel_account_);
 		action->release();
 
-		WTSEntrustAction* bad = WTSEntrustAction::create("ag2512", "SHFE");
-		bad->setEntrustID("yduser#1#2");	// 两个 '#' → extractEntrustID 返回 false
-		bad->setOrderID("9999");
-		EXPECT_EQ(-1, api_.orderAction(bad));
-		EXPECT_EQ(1, stub_.n_cancel_);
-		bad->release();
+		const char* malformedEntrustIDs[] = {
+			"yduser101",        // 缺少分隔符
+			"yduser#",          // 空尾部
+			"yduser#12x",       // 非数字尾部
+			"yduser#1#2",       // 多个分隔符
+			"yduser#4294967296" // uint32_t 溢出
+		};
+		for (const char* malformedEntrustID : malformedEntrustIDs)
+		{
+			WTSEntrustAction* bad = WTSEntrustAction::create("ag2512", "SHFE");
+			bad->setEntrustID(malformedEntrustID);
+			bad->setOrderID("9999");
+			EXPECT_EQ(-1, api_.orderAction(bad)) << malformedEntrustID;
+			EXPECT_EQ(1, stub_.n_cancel_) << malformedEntrustID;
+			bad->release();
+		}
 	}
 
 	/* ------------------------------------------------------------------ */

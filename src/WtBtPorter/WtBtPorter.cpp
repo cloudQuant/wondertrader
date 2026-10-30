@@ -11,6 +11,10 @@
 #include "WtBtPorter.h"
 #include "WtBtRunner.h"
 
+#include <algorithm>
+#include <cstring>
+#include <string>
+
 #include "../WtBtCore/WtHelper.h"
 #include "../WtBtCore/CtaMocker.h"
 #include "../WtBtCore/SelMocker.h"
@@ -173,15 +177,44 @@ void init_backtest(const char* logProfile, bool isFile, const char* outDir)
  */
 void config_backtest(const char* cfgfile, bool isFile)
 {
-	static bool inited = false;
+	const char* effectiveCfg = (!cfgfile || cfgfile[0] == '\0') ? "configbt.json" : cfgfile;
+	const bool effectiveIsFile = isFile || !cfgfile || cfgfile[0] == '\0';
+	std::string error;
+	try
+	{
+		if (!getRunner().config_v2(effectiveCfg, effectiveIsFile, &error))
+			WTSLogger::error("Backtest configuration failed: {}", error);
+	}
+	catch (...)
+	{
+		WTSLogger::error("Backtest configuration raised an exception");
+	}
+}
 
-	if (inited)
-		return;
+int32_t config_backtest_v2(const char* cfgfile, bool isFile, char* errorText, uint32_t errorCapacity)
+{
+	if (errorText && errorCapacity)
+		errorText[0] = '\0';
+	std::string error;
+	try
+	{
+		if (!cfgfile || cfgfile[0] == '\0')
+			error = "configuration path or content is empty";
+		else if (getRunner().config_v2(cfgfile, isFile, &error))
+			return 0;
+	}
+	catch (...)
+	{
+		error = "backtest configuration raised an exception";
+	}
 
-	if (strlen(cfgfile) == 0)
-		getRunner().config("configbt.json", true);
-	else
-		getRunner().config(cfgfile, isFile);
+	if (errorText && errorCapacity)
+	{
+		const size_t count = (std::min)(static_cast<size_t>(errorCapacity - 1), error.size());
+		std::memcpy(errorText, error.data(), count);
+		errorText[count] = '\0';
+	}
+	return -1;
 }
 
 /**

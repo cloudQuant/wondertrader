@@ -5,8 +5,8 @@
  * 目标：src/WtPorter/WtRtRunner.cpp
  *   - basefiles 每一段：session / commodity(string|array) / contract(string|array) /
  *     holiday / hot / second / rules + 主力代码回填循环（L493-591）
- *   - parsers 外部文件：文件存在且缺 "parsers" 键（L600-608）、坏 JSON（L610-613）、
- *     内联数组合法项与 auto id（L620-623、L904-930）
+ *   - parsers：内联 inactive 项成功跳过（L620-623、L1687-1748）、active 项缺模块失败，
+ *     外部文件缺 "parsers" 键或 JSON 损坏均失败（L1190-1227）
  *   - traders 外部文件数组合法项（L630-647、L1071-1087）
  *   - executers 外部文件 + routers 两处入口（L668-685、L702-704）、文件缺失（L691-694）
  *   - initDataMgr() 空 data/no-store 配置（L884-896，config 不检查返回值）
@@ -14,7 +14,7 @@
  *   - initEvtNotifier() 对象段（L1054-1063）
  *
  * 与既有 lane 的分工：R46 已覆盖 env=cta/hft/sel 三支与 traders/executers 数组、
- * 空 strategies；本文件不重复这些，只补 R46 没碰的 basefiles 段与外部文件成功臂。
+ * 空 strategies；本文件不重复这些，只补 R46 没碰的 basefiles 段与外部文件路径。
  * 所有 runner 都在堆上 new 且故意不 delete（BUG-R46-001：构造列表漏初始化
  * _config/_engine/_feed_*），绝不动进程单例 getRunner() 的状态。
  * 临时文件只写系统临时目录的 r69_porter_cfg_<pid>，每个用例末尾 remove_all。
@@ -98,7 +98,7 @@ namespace {
 		"{\"SHFE\":{\"au\":[{\"from\":\"au2406\",\"to\":\"au2406\",\"date\":20240101,"
 		"\"oldclose\":100.0,\"newclose\":100.0}]}}";
 
-	const char* kActions = "{}";
+	const char* kActions = "{\"default\":{}}";
 
 	/* config 的公共尾巴：env/data/bspolicy。envName 为空串时命中 CTA 默认支。 */
 	std::string tail(const std::string& dir, const std::string& envName)
@@ -111,9 +111,7 @@ namespace {
 
 /* WtRtRunner.cpp:495-560 + 565-579 + 846-850：basefiles 的 session、commodity 单串、
  * contract 单串、holiday/hot/second/rules 五个可选项全部给值；env.name="" 走 CTA。
- * 主力代码回填循环（:562-580）用 WTSHotMgr::getHotTags 的静态缓存，缓存为空时
- * 会按当前实例重填，因此本用例能覆盖内层 isCustomHot 分支；但缓存非空时会沿
- * 用前序用例的标签集（R69-001），故这里不对「已回填」做断言。 */
+ * 主力代码回填循环使用当前 WTSHotMgr 实例已加载的标签。 */
 TEST(R69PorterRunnerConfig, BasefilesStringFormsAndEmptyEnvNameBuildCtaEngine)
 {
 	const std::string dir = prepare_dir();
@@ -149,10 +147,9 @@ TEST(R69PorterRunnerConfig, BasefilesStringFormsAndEmptyEnvNameBuildCtaEngine)
 	clean_dir(dir);
 }
 
-/* WtRtRunner.cpp:501-531 的 commodity/contract 数组支 + :620-623 内联 parser 数组 +
- * :904-930 initParsers 的 auto id 与 count++（模块名缺失时 ParserAdapter::init 返回
- * false，但适配器照样入表，不抛异常）。 */
-TEST(R69PorterRunnerConfig, BasefilesArrayFormsAndInlineParserUseAutoId)
+/* WtRtRunner.cpp:501-531 的 commodity/contract 数组支 + :620-623 内联 parser 数组支。
+ * inactive parser 会被跳过；basefiles 数组和 CTA engine 保持有效正向覆盖。 */
+TEST(R69PorterRunnerConfig, BasefilesArrayFormsAndInactiveInlineParserBuildCtaEngine)
 {
 	const std::string dir = prepare_dir();
 	ASSERT_FALSE(dir.empty());
@@ -170,8 +167,7 @@ TEST(R69PorterRunnerConfig, BasefilesArrayFormsAndInlineParserUseAutoId)
 		"\"session\":\"" + dir + "/sessions.json\","
 		"\"commodity\":[\"" + dir + "/commodities.json\"],"
 		"\"contract\":[\"" + dir + "/contracts.json\"]},"
-		"\"parsers\":[{\"active\":true,\"id\":\"\"},"
-		"{\"active\":false,\"id\":\"r69_parser_off\"}],"
+		"\"parsers\":[{\"active\":false,\"id\":\"r69_parser_off\"}],"
 		+ tail(dir, "cta") + "}";
 
 	ASSERT_TRUE(r->config(cfg.c_str(), false));
@@ -181,43 +177,59 @@ TEST(R69PorterRunnerConfig, BasefilesArrayFormsAndInlineParserUseAutoId)
 	clean_dir(dir);
 }
 
-/* WtRtRunner.cpp:594-624 + :898-913：parsers 外部文件存在但缺 "parsers" 键时
- * initParsers(NULL) 返回 false（:607）；坏 JSON 时 load_from_file 返回 NULL（:610-612）。
- * 两个 runner 各自独立，共用同一临时目录。 */
-TEST(R69PorterRunnerConfig, ParserFileMissingKeyAndBrokenJsonOnlyLog)
+TEST(R69PorterRunnerConfig, ActiveInlineParserWithoutModuleFailsConfig)
 {
 	const std::string dir = prepare_dir();
 	ASSERT_FALSE(dir.empty());
+	write_text(dir + "/actions.json", kActions);
 
+	WtRtRunner* r = new_runner(dir);
+	ASSERT_NE(r, nullptr);
+	const std::string cfg =
+		"{\"basefiles\":{},\"parsers\":[{\"active\":true,"
+		"\"id\":\"r69_parser_without_module\"}],"
+		+ tail(dir, "cta") + "}";
+
+	EXPECT_FALSE(r->config(cfg.c_str(), false));
+	clean_dir(dir);
+}
+
+TEST(R69PorterRunnerConfig, ParserFileMissingKeyFailsConfig)
+{
+	const std::string dir = prepare_dir();
+	ASSERT_FALSE(dir.empty());
 	write_text(dir + "/parsers_missing.json", "{}");
+	write_text(dir + "/actions.json", kActions);
+
+	WtRtRunner* r = new_runner(dir);
+	ASSERT_NE(r, nullptr);
+	const std::string cfg =
+		"{\"basefiles\":{},\"parsers\":\"" + dir + "/parsers_missing.json\","
+		+ tail(dir, "cta") + "}";
+
+	EXPECT_FALSE(r->config(cfg.c_str(), false));
+	clean_dir(dir);
+}
+
+TEST(R69PorterRunnerConfig, BrokenParserFileFailsConfig)
+{
+	const std::string dir = prepare_dir();
+	ASSERT_FALSE(dir.empty());
 	write_text(dir + "/parsers_broken.json", "{ this is not a json document");
 	write_text(dir + "/actions.json", kActions);
 
-	{
-		WtRtRunner* r = new_runner(dir);
-		ASSERT_NE(r, nullptr);
-		const std::string cfg =
-			"{\"basefiles\":{},\"parsers\":\"" + dir + "/parsers_missing.json\","
-			+ tail(dir, "cta") + "}";
-		ASSERT_TRUE(r->config(cfg.c_str(), false));
-		EXPECT_NE(r->getEngine(), nullptr);
-	}
+	WtRtRunner* r = new_runner(dir);
+	ASSERT_NE(r, nullptr);
+	const std::string cfg =
+		"{\"basefiles\":{},\"parsers\":\"" + dir + "/parsers_broken.json\","
+		+ tail(dir, "cta") + "}";
 
-	{
-		WtRtRunner* r = new_runner(dir);
-		ASSERT_NE(r, nullptr);
-		const std::string cfg =
-			"{\"basefiles\":{},\"parsers\":\"" + dir + "/parsers_broken.json\","
-			+ tail(dir, "cta") + "}";
-		ASSERT_TRUE(r->config(cfg.c_str(), false));
-		EXPECT_NE(r->getEngine(), nullptr);
-	}
+	EXPECT_FALSE(r->config(cfg.c_str(), false));
 
 	clean_dir(dir);
 }
 
-/* WtRtRunner.cpp:630-647 + :665-704：traders 外部文件（active true/false 混合，
- * 缺 module 的 TraderAdapter::init 返回 false 但适配器入表）、executers 外部文件
+/* WtRtRunner.cpp:630-647 + :665-704：traders 外部文件（inactive 项被跳过）、executers 外部文件
  * （空数组 + routers 对象）与顶层 routers 对象两个 loadRouterRules 入口。 */
 TEST(R69PorterRunnerConfig, TraderAndExecuterFilesLoadWithRouterSections)
 {
@@ -225,8 +237,7 @@ TEST(R69PorterRunnerConfig, TraderAndExecuterFilesLoadWithRouterSections)
 	ASSERT_FALSE(dir.empty());
 
 	write_text(dir + "/traders.json",
-		"{\"traders\":[{\"active\":true,\"id\":\"r69_trd_a\"},"
-		"{\"active\":false,\"id\":\"r69_trd_off\"}]}");
+		"{\"traders\":[{\"active\":false,\"id\":\"r69_trd_off\"}]}");
 	write_text(dir + "/executers.json",
 		"{\"executers\":[],\"routers\":{}}");
 	write_text(dir + "/actions.json", kActions);
@@ -244,6 +255,26 @@ TEST(R69PorterRunnerConfig, TraderAndExecuterFilesLoadWithRouterSections)
 	ASSERT_TRUE(r->config(cfg.c_str(), false));
 	ASSERT_NE(r->getEngine(), nullptr);
 
+	clean_dir(dir);
+}
+
+TEST(R69PorterRunnerConfig, TraderInitFailureInExternalFileFailsConfig)
+{
+	const std::string dir = prepare_dir();
+	ASSERT_FALSE(dir.empty());
+
+	write_text(dir + "/traders.json",
+		"{\"traders\":[{\"active\":true,\"id\":\"r69_missing_trd\","
+		"\"module\":\"r69_module_that_does_not_exist\"}]}");
+	write_text(dir + "/actions.json", kActions);
+
+	WtRtRunner* r = new_runner(dir);
+	ASSERT_NE(r, nullptr);
+	const std::string cfg =
+		"{\"basefiles\":{},\"traders\":\"" + dir + "/traders.json\","
+		+ tail(dir, "cta") + "}";
+
+	EXPECT_FALSE(r->config(cfg.c_str(), false));
 	clean_dir(dir);
 }
 
@@ -297,15 +328,9 @@ TEST(R69PorterRunnerConfig, UnknownEnvNameFallsBackToHftEngine)
 	clean_dir(dir);
 }
 
-/* 缺陷 R69-001（WTSHotMgr::getHotTags 首次结果被 static 缓存）：
- * - WTSHotMgr.cpp:148-159 把 getHotTags 的返回值做成函数内 static vector，只在
- *   该 vector 为空时按「当时那个实例」的 m_mapCustCodes 重填；
- * - WtRtRunner.cpp:562-580 每次 config 都用这个缓存做主力代码回填，于是同一个
- *   进程里先装载的标签集合会永久遮蔽后装载的标签（例如第二次 config 才出现的
- *   自定义规则）。
- * 期望：先后 loadCustomRules("R69FIRST") / ("R69LATE") 后，getHotTags() 应同时
- * 包含两个标签；当前第二次装载的标签不会出现（启用即失败）。 */
-TEST(R69PorterRunnerConfig, DISABLED_HotTagsStaticCacheHidesRulesLoadedLater)
+/* BUG-R69-001：getHotTags 返回引用，因此标签缓存必须属于当前 WTSHotMgr 实例，
+ * 并在查询时反映该实例已加载的全部规则。 */
+TEST(R69PorterRunnerConfig, HotTagsRefreshAfterRulesLoadedLater)
 {
 	const std::string dir = prepare_dir();
 	ASSERT_FALSE(dir.empty());
@@ -313,12 +338,92 @@ TEST(R69PorterRunnerConfig, DISABLED_HotTagsStaticCacheHidesRulesLoadedLater)
 
 	WTSHotMgr hot;
 	ASSERT_TRUE(hot.loadCustomRules("R69FIRST", (dir + "/hot.json").c_str()));
-	EXPECT_FALSE(hot.getHotTags().empty());	// 首次查询把当前标签集冻结进 static
+	const std::vector<std::string>& tags = hot.getHotTags();
+	ASSERT_EQ(1u, tags.size());
+	EXPECT_EQ("R69FIRST", tags[0]);
 
 	ASSERT_TRUE(hot.loadCustomRules("R69LATE", (dir + "/hot.json").c_str()));
+	const std::vector<std::string>& updatedTags = hot.getHotTags();
+	EXPECT_EQ(2u, updatedTags.size());
+	EXPECT_NE(std::find(updatedTags.begin(), updatedTags.end(), "R69FIRST"), updatedTags.end());
+	EXPECT_NE(std::find(updatedTags.begin(), updatedTags.end(), "R69LATE"), updatedTags.end())
+		<< "后装载的标签未反映到当前实例的标签列表";
+	// 旧引用指向同一实例缓存，第二次查询后也应看到刷新后的内容。
+	EXPECT_EQ(2u, tags.size());
+	EXPECT_NE(std::find(tags.begin(), tags.end(), "R69LATE"), tags.end());
+
+	clean_dir(dir);
+}
+
+TEST(R69PorterRunnerConfig, HotTagsAreIsolatedBetweenInstances)
+{
+	const std::string dir = prepare_dir();
+	ASSERT_FALSE(dir.empty());
+	write_text(dir + "/hot.json", kHotRules);
+
+	WTSHotMgr first;
+	WTSHotMgr second;
+	ASSERT_TRUE(first.loadCustomRules("R69INSTANCE_A", (dir + "/hot.json").c_str()));
+	ASSERT_TRUE(second.loadCustomRules("R69INSTANCE_B", (dir + "/hot.json").c_str()));
+
+	const std::vector<std::string>& firstTags = first.getHotTags();
+	ASSERT_EQ(1u, firstTags.size());
+	EXPECT_EQ("R69INSTANCE_A", firstTags[0]);
+	const std::vector<std::string>& secondTags = second.getHotTags();
+	ASSERT_EQ(1u, secondTags.size());
+	EXPECT_EQ("R69INSTANCE_B", secondTags[0]);
+	EXPECT_EQ("R69INSTANCE_A", firstTags[0]);
+
+	clean_dir(dir);
+}
+
+TEST(R69PorterRunnerConfig, RepeatedHotTagQueriesDoNotDuplicateTags)
+{
+	const std::string dir = prepare_dir();
+	ASSERT_FALSE(dir.empty());
+	write_text(dir + "/hot.json", kHotRules);
+
+	WTSHotMgr hot;
+	ASSERT_TRUE(hot.loadCustomRules("R69REPEAT_A", (dir + "/hot.json").c_str()));
+	ASSERT_TRUE(hot.loadCustomRules("R69REPEAT_B", (dir + "/hot.json").c_str()));
+	const std::vector<std::string> expected = hot.getHotTags();
+	ASSERT_EQ(2u, expected.size());
+
+	for (int i = 0; i < 3; ++i)
+	{
+		EXPECT_EQ(expected, hot.getHotTags());
+	}
+
+	clean_dir(dir);
+}
+
+TEST(R69PorterRunnerConfig, ReleaseClearsTagsAndHotCodesBeforeReload)
+{
+	const std::string dir = prepare_dir();
+	ASSERT_FALSE(dir.empty());
+	write_text(dir + "/hot_before_release.json", kHotRules);
+	write_text(dir + "/hot_after_release.json",
+		"{\"SHFE\":{\"au\":[{\"from\":\"au2406\",\"to\":\"au2412\","
+		"\"date\":20240101,\"oldclose\":100.0,\"newclose\":100.0}]}}");
+
+	WTSHotMgr hot;
+	ASSERT_TRUE(hot.loadCustomRules("R69_BEFORE_RELEASE",
+		(dir + "/hot_before_release.json").c_str()));
+	ASSERT_TRUE(hot.isCustomHot("R69_BEFORE_RELEASE", "SHFE.au2406", 0));
+	ASSERT_EQ(1u, hot.getHotTags().size());
+
+	hot.release();
+	EXPECT_TRUE(hot.getHotTags().empty());
+	EXPECT_FALSE(hot.isCustomHot("R69_BEFORE_RELEASE", "SHFE.au2406", 0));
+
+	ASSERT_TRUE(hot.loadCustomRules("R69_AFTER_RELEASE",
+		(dir + "/hot_after_release.json").c_str()));
 	const std::vector<std::string>& tags = hot.getHotTags();
-	EXPECT_NE(std::find(tags.begin(), tags.end(), "R69LATE"), tags.end())
-		<< "后装载的标签被 static 缓存挡住";
+	ASSERT_EQ(1u, tags.size());
+	EXPECT_EQ("R69_AFTER_RELEASE", tags[0]);
+	EXPECT_FALSE(hot.isCustomHot("R69_BEFORE_RELEASE", "SHFE.au2406", 0));
+	EXPECT_FALSE(hot.isCustomHot("R69_AFTER_RELEASE", "SHFE.au2406", 0));
+	EXPECT_TRUE(hot.isCustomHot("R69_AFTER_RELEASE", "SHFE.au2412", 0));
 
 	clean_dir(dir);
 }

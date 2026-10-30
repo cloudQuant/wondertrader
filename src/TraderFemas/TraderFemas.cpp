@@ -20,6 +20,7 @@
 #include "../Share/Converter.hpp"
 
 #include <filesystem>
+#include <cstring>
 namespace fs = std::filesystem;
 
  //By Wesley @ 2022.01.05
@@ -220,14 +221,22 @@ void TraderFemas::disconnect()
 
 bool TraderFemas::makeEntrustID(char* buffer, int length)
 {
-	if(buffer == NULL || length == 0)
+	if (buffer == NULL || length <= 0)
 		return false;
 
 	try
 	{
+		// The order reference is a uint32 and is always formatted with at least
+		// twelve digits. Reserve one additional byte for the trailing NUL.
+		if (length < 13 || m_strSessionID.size() > static_cast<size_t>(length - 13))
+			return false;
+
 		uint32_t orderref = genLocalOrdID();
-		//sprintf(buffer, "%s%012d", m_strSessionID.c_str(), orderref);
-		fmtutil::format_to(buffer, "{}{:012d}", m_strSessionID.c_str(), orderref);
+		const std::string entrustID = fmt::format("{}{:012d}", m_strSessionID, orderref);
+		if (entrustID.size() + 1 > static_cast<size_t>(length))
+			return false;
+
+		memcpy(buffer, entrustID.c_str(), entrustID.size() + 1);
 		return true;
 	}
 	catch(...)
@@ -450,15 +459,19 @@ int TraderFemas::queryPositions()
 		return -1;
 	}
 
-	StdUniqueLock lock(m_mtxQuery);
-	m_queQuery.push([this](){
-		CUstpFtdcQryInvestorPositionField req;
-		memset(&req, 0, sizeof(req));
-		strcpy(req.BrokerID, m_strBroker.c_str());
-		strcpy(req.UserID, m_strUser.c_str());
-		strcpy(req.InvestorID, m_strUser.c_str());
-		m_pUserAPI->ReqQryInvestorPosition(&req, genRequestID());
-	});
+	{
+		StdUniqueLock lock(m_mtxQuery);
+		m_queQuery.push([this](){
+			CUstpFtdcQryInvestorPositionField req;
+			memset(&req, 0, sizeof(req));
+			strcpy(req.BrokerID, m_strBroker.c_str());
+			strcpy(req.UserID, m_strUser.c_str());
+			strcpy(req.InvestorID, m_strUser.c_str());
+			m_pUserAPI->ReqQryInvestorPosition(&req, genRequestID());
+		});
+	}
+
+	triggerQuery();
 
 	return 0;
 }
@@ -470,16 +483,20 @@ int TraderFemas::queryOrders()
 		return -1;
 	}
 
-	StdUniqueLock lock(m_mtxQuery);
-	m_queQuery.push([this](){
-		CUstpFtdcQryOrderField req;
-		memset(&req, 0, sizeof(req));
-		strcpy(req.BrokerID, m_strBroker.c_str());
-		strcpy(req.UserID, m_strUser.c_str());
-		strcpy(req.InvestorID, m_strUser.c_str());
+	{
+		StdUniqueLock lock(m_mtxQuery);
+		m_queQuery.push([this](){
+			CUstpFtdcQryOrderField req;
+			memset(&req, 0, sizeof(req));
+			strcpy(req.BrokerID, m_strBroker.c_str());
+			strcpy(req.UserID, m_strUser.c_str());
+			strcpy(req.InvestorID, m_strUser.c_str());
 
-		m_pUserAPI->ReqQryOrder(&req, genRequestID());
-	});
+			m_pUserAPI->ReqQryOrder(&req, genRequestID());
+		});
+	}
+
+	triggerQuery();
 
 	return 0;
 }
@@ -491,16 +508,20 @@ int TraderFemas::queryTrades()
 		return -1;
 	}
 
-	StdUniqueLock lock(m_mtxQuery);
-	m_queQuery.push([this](){
-		CUstpFtdcQryTradeField req;
-		memset(&req, 0, sizeof(req));
-		strcpy(req.BrokerID, m_strBroker.c_str());
-		strcpy(req.UserID, m_strUser.c_str());
-		strcpy(req.InvestorID, m_strUser.c_str());
+	{
+		StdUniqueLock lock(m_mtxQuery);
+		m_queQuery.push([this](){
+			CUstpFtdcQryTradeField req;
+			memset(&req, 0, sizeof(req));
+			strcpy(req.BrokerID, m_strBroker.c_str());
+			strcpy(req.UserID, m_strUser.c_str());
+			strcpy(req.InvestorID, m_strUser.c_str());
 
-		m_pUserAPI->ReqQryTrade(&req, genRequestID());
-	});
+			m_pUserAPI->ReqQryTrade(&req, genRequestID());
+		});
+	}
+
+	triggerQuery();
 
 	return 0;
 }
@@ -725,6 +746,9 @@ void TraderFemas::OnRspQryInvestorPosition(CUstpFtdcRspInvestorPositionField *pR
 				pos->setAvailNewPos(0);
 				pos->setAvailPrePos(0);
 			}
+
+			m_ayPosition->append(pos);
+			pos->release();
 		}
 	}
 	
@@ -999,15 +1023,42 @@ WTSOrderInfo* TraderFemas::makeOrderInfo(CUstpFtdcOrderField* orderField)
 	pRet->setOrderTime(TimeUtils::makeTime(pRet->getOrderDate(), convert::to_uint32(strTime.c_str())*1000));
 	pRet->setOrderState(wrapOrderState(orderField->OrderStatus));
 
-	if (atoi(orderField->UserOrderLocalID) != 0)
-		pRet->setEntrustID(orderField->UserOrderLocalID);
+	char userOrderLocalID[sizeof(orderField->UserOrderLocalID) + 1] = {};
+	size_t userOrderLocalIDLength = 0;
+	while (userOrderLocalIDLength < sizeof(orderField->UserOrderLocalID)
+		&& orderField->UserOrderLocalID[userOrderLocalIDLength] != '\0')
+		++userOrderLocalIDLength;
+	memcpy(userOrderLocalID, orderField->UserOrderLocalID, userOrderLocalIDLength);
+
+	bool userOrderLocalIDIsAllZero = true;
+	for (size_t i = 0; i < userOrderLocalIDLength; ++i)
+	{
+		if (userOrderLocalID[i] != '0')
+		{
+			userOrderLocalIDIsAllZero = false;
+			break;
+		}
+	}
+
+	if (userOrderLocalIDLength == 0 || userOrderLocalIDIsAllZero)
+	{
+		char orderLocalID[sizeof(orderField->OrderLocalID) + 1] = {};
+		size_t orderLocalIDLength = 0;
+		while (orderLocalIDLength < sizeof(orderField->OrderLocalID)
+			&& orderField->OrderLocalID[orderLocalIDLength] != '\0')
+			++orderLocalIDLength;
+		memcpy(orderLocalID, orderField->OrderLocalID, orderLocalIDLength);
+		pRet->setEntrustID(orderLocalID);
+	}
 	else
-		pRet->setEntrustID(orderField->OrderLocalID);
+	{
+		pRet->setEntrustID(userOrderLocalID);
+	}
 	pRet->setOrderID(orderField->OrderSysID);
 
 	//pRet->setStateMsg(orderField->StatusMsg);
 
-	pRet->setUserTag(orderField->UserOrderLocalID);
+	pRet->setUserTag(userOrderLocalID);
 
 	return pRet;
 }

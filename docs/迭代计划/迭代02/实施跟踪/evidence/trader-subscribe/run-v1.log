@@ -1,0 +1,33 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 12 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 12 tests from N01TraderAdapterSubscribe
+[ RUN      ] N01TraderAdapterSubscribe.ready_replay_is_idempotent_and_close_clears_ready
+[       OK ] N01TraderAdapterSubscribe.ready_replay_is_idempotent_and_close_clears_ready (0 ms)
+[ RUN      ] N01TraderAdapterSubscribe.subscribe_ready_and_close_race_keeps_fifo_order
+[       OK ] N01TraderAdapterSubscribe.subscribe_ready_and_close_race_keeps_fifo_order (0 ms)
+[ RUN      ] N01TraderAdapterSubscribe.callback_can_reenter_subscribe_and_close
+[       OK ] N01TraderAdapterSubscribe.callback_can_reenter_subscribe_and_close (0 ms)
+[ RUN      ] N01TraderAdapterSubscribe.callback_can_unregister_without_waiting_on_itself
+[       OK ] N01TraderAdapterSubscribe.callback_can_unregister_without_waiting_on_itself (0 ms)
+[ RUN      ] N01TraderAdapterSubscribe.reentrant_remove_of_idle_sink_allows_ready_resubscribe
+[       OK ] N01TraderAdapterSubscribe.reentrant_remove_of_idle_sink_allows_ready_resubscribe (0 ms)
+[ RUN      ] N01TraderAdapterSubscribe.remove_sink_waits_for_in_flight_broadcast
+[       OK ] N01TraderAdapterSubscribe.remove_sink_waits_for_in_flight_broadcast (51 ms)
+[ RUN      ] N01TraderAdapterSubscribe.concurrent_account_broadcasts_use_safe_sink_snapshots
+[       OK ] N01TraderAdapterSubscribe.concurrent_account_broadcasts_use_safe_sink_snapshots (0 ms)
+[ RUN      ] N01TraderAdapterSubscribe.request_stop_is_idempotent_and_waits_for_broadcast
+[       OK ] N01TraderAdapterSubscribe.request_stop_is_idempotent_and_waits_for_broadcast (51 ms)
+[ RUN      ] N01TraderAdapterSubscribe.request_stop_waits_for_channel_drain_and_drops_queued_events
+[       OK ] N01TraderAdapterSubscribe.request_stop_waits_for_channel_drain_and_drops_queued_events (50 ms)
+[ RUN      ] N01TraderAdapterSubscribe.wait_from_own_callback_requests_stop_and_returns_false
+[       OK ] N01TraderAdapterSubscribe.wait_from_own_callback_requests_stop_and_returns_false (0 ms)
+[ RUN      ] N01TraderAdapterSubscribe.manager_requests_all_before_waiting_for_all_adapters
+[       OK ] N01TraderAdapterSubscribe.manager_requests_all_before_waiting_for_all_adapters (110 ms)
+[ RUN      ] N01TraderAdapterSubscribe.manager_callback_wait_failure_preserves_all_adapters
+[       OK ] N01TraderAdapterSubscribe.manager_callback_wait_failure_preserves_all_adapters (0 ms)
+[----------] 12 tests from N01TraderAdapterSubscribe (264 ms total)
+
+[----------] Global test environment tear-down
+[==========] 12 tests from 1 test suite ran. (264 ms total)
+[  PASSED  ] 12 tests.

@@ -1,0 +1,30 @@
+{
+  "issue": "BUG-R214-005",
+  "configure": {
+    "command": "/opt/homebrew/bin/cmake -S src -B /tmp/wt-r214-build -G Ninja -DCMAKE_MAKE_PROGRAM=/opt/homebrew/bin/ninja -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_BUILD_TYPE=Debug -DWT_ENABLE_COVERAGE=ON -DWT_WARNINGS_AS_ERRORS=ON -DCMAKE_C_COMPILER=/usr/bin/cc -DCMAKE_CXX_COMPILER=/usr/bin/c++",
+    "exit_code": 0
+  },
+  "initial_build": {
+    "command": "/opt/homebrew/bin/cmake --build /tmp/wt-r214-build --target TraderMocker CoverageTests_t_TraderMocker -j4",
+    "exit_code": 0,
+    "steps": "237/237",
+    "output_capture": "Tool output showed TraderMocker.cpp compilation at step 111 and r214_mocker_branch_test.cpp compilation at step 231, followed by successful CoverageTests_t_TraderMocker link at step 236; raw stdout was not redirected to a file during that invocation."
+  },
+  "incremental_build_after_shared_header_stabilized": {
+    "command": "/opt/homebrew/bin/cmake --build /tmp/wt-r214-build --target TraderMocker CoverageTests_t_TraderMocker -j4",
+    "exit_code": 0,
+    "steps": "73/73",
+    "output_capture": "Tool output showed TraderMocker.cpp recompiled at step 34 and successful test executable link at step 72; raw stdout was not redirected to a file during that invocation."
+  },
+  "captured_rebuild": {
+    "command": "set -o pipefail && /opt/homebrew/bin/cmake --build /tmp/wt-r214-build --target TraderMocker CoverageTests_t_TraderMocker --verbose -j4 2>&1 | tee /tmp/wt-r214-run/rebuild-source-and-test.log",
+    "exit_code": 0,
+    "purpose": "Explicitly forced and captured a recompile of TraderMocker.cpp and r214_mocker_branch_test.cpp, followed by relinking both targets."
+  },
+  "test": {
+    "command": "set -o pipefail && LLVM_PROFILE_FILE=/tmp/wt-r214-run/retest-%p.profraw /tmp/wt-r214-build/build_x64/Debug/bin/TestUnits/CoverageTests_t_TraderMocker --gtest_filter='R214MockerBranches.*' --gtest_output=xml:/tmp/wt-r214-run/r214.xml 2>&1 | tee /tmp/wt-r214-run/r214-run.log",
+    "exit_code": 0,
+    "result": "6/6 PASS",
+    "new_case": "R214MockerBranches.SameRawCodeOrdersAreIsolatedByExchange"
+  }
+}

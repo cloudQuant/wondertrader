@@ -10,8 +10,9 @@
  *   - env 段必须是对象（WtHftEngine::init 在 WtHftEngine.cpp:59-63 无条件 _cfg->retain()）。
  *   - run() 的 ticker 需要时段：env.product.session=ALLDAY，basefiles.session 指向自写文件。
  *   - _act_mgr.init("actpolicy.yaml") 是硬编码相对路径；用例 chdir 到临时目录，文件缺失 -> false 被忽略。
- *   - TestParser/TestTrader 的 init(NULL) 取接口默认实现返回 false，适配器只记日志、
- *     不 dlopen 插件、不起接收线程（WtCore/ParserAdapter.cpp:45-78、TraderAdapter.cpp:209-232）。
+ *   - TestParser 与 TestTrader 都成功处理 init(NULL)；HFT 工具持有 TestTrader 的所有权，
+ *     测试通道不 dlopen 插件、不启动真实柜台连接。专门的 teardown 用例会让 fake trader
+ *     异步推进到 READY，并在 sink callback 内用 gate 暂停，以核实 owner 排空顺序。
  *   - run() 只对 times=0/1 取样：times=0 走完 TestParser::run 的头尾（:97-104、:189-194）；
  *     times=1 且不加载合约，循环体在 :113-114 因 getContract 返回 NULL 立刻返回。
  *     不构造 tick，不触发策略回调与下单路径。
@@ -22,15 +23,32 @@
 
 #include <filesystem>
 #include <fstream>
+#include <mutex>
 #include <string>
 #include <system_error>
+#include <thread>
+#include <vector>
 
 #include <unistd.h>
 
+#include "Includes/ILogHandler.h"
+#include "WTSTools/WTSLogger.h"
 #include "WtLatencyHFT/HftLatencyTool.h"
 
 /* 生产 TU HftLatencyTool.cpp:33 的自由函数（main.cpp:19 也是这样声明的） */
 void test_hft();
+namespace hft { class TestParser; extern TestParser* theParser; }
+namespace hft {
+void armShutdownGateTest();
+bool waitForShutdownGateCallback(int timeout_ms);
+void releaseShutdownGateCallback();
+bool shutdownGateSawContext();
+bool shutdownGateSawTraderReleaseAfterCallback();
+bool waitForTraderReleaseDuringCallback(int timeout_ms);
+bool shutdownGateSawTraderReleaseDuringCallback();
+void disarmShutdownGateTest();
+void setTestTraderInitFailure(bool fail);
+}
 
 namespace {
 
@@ -83,6 +101,48 @@ private:
 	stdfs::path	m_dir;
 	bool		m_ok = false;
 };
+
+class TestLogHandler : public ILogHandler
+{
+public:
+	void handleLogAppend(WTSLogLevel level, const char* msg) override
+	{
+		if (level != LL_WARN && level != LL_ERROR)
+			return;
+		std::lock_guard<std::mutex> lock(m_mutex);
+		m_messages.emplace_back(msg != nullptr ? msg : "");
+	}
+
+	void clear()
+	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+		m_messages.clear();
+	}
+
+	std::vector<std::string> messages()
+	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+		return m_messages;
+	}
+
+private:
+	std::vector<std::string> m_messages;
+	std::mutex m_mutex;
+};
+
+TestLogHandler g_warning_log_handler;
+
+class ScopedWarningCapture
+{
+public:
+	ScopedWarningCapture() { WTSLogger::registerHandler(&g_warning_log_handler); }
+	~ScopedWarningCapture() { WTSLogger::registerHandler(nullptr); }
+};
+
+const char* kLogConfig =
+	"{\"root\":{\"level\":\"warn\",\"async\":false,\"sinks\":["
+	"{\"type\":\"basic_file_sink\",\"filename\":\"latency.log\","
+	"\"truncate\":true,\"pattern\":\"%v\"}]}}";
 
 bool write_text(const char* name, const std::string& text)
 {
@@ -191,6 +251,17 @@ const char* kConfigRunOneWithoutContract =
 	"times: 1\n"
 	"core: 0\n";
 
+const char* kConfigRunOneWithValidContract =
+	"basefiles:\n"
+	"    session: sessions.yaml\n"
+	"    commodity: commodities.yaml\n"
+	"    contract: contracts.yaml\n"
+	"env:\n"
+	"    product:\n"
+	"        session: ALLDAY\n"
+	"times: 1\n"
+	"core: 0\n";
+
 } // namespace
 
 /* -------------------------------------------------------------------------
@@ -253,35 +324,215 @@ TEST(r95_hft_run, zero_ticks_after_successful_init_exercises_engine_and_parser_t
 	ScopedTempCwd guard("run_zero");
 	ASSERT_TRUE(guard.ok());
 	ASSERT_TRUE(write_text("sessions.yaml", kSessionsYaml));
+	ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
 	ASSERT_TRUE(write_text("config.yaml", kConfigRunZero));
-
-	hft::HftLatencyTool tool;
-	ASSERT_TRUE(tool.init());
 
 	// :486-492 core==0 -> 不绑定 CPU
 	// :496/:497 parsers/traders 各只有一个内存适配器，connect 是接口默认空实现
 	// :499 _engine.run()：策略 on_init、写 marker.json、启动 HftRtTicker（析构时 stop/join）
-	// :501 TestParser::run(0)：:97-104 初始化 + 跳过循环 + :189-194 计算/输出
-	EXPECT_NO_THROW(tool.run());
+	WTSLogger::init("logcfg.yaml");
+	g_warning_log_handler.clear();
+	bool init_ok = false;
+	bool repeated_init_ok = false;
+	bool run_threw = false;
+	{
+		ScopedWarningCapture capture;
+		{
+			hft::HftLatencyTool tool;
+			try
+			{
+				init_ok = tool.init();
+				if (init_ok)
+				{
+					repeated_init_ok = tool.init();
+					tool.run();
+				}
+			}
+			catch (...)
+			{
+				run_threw = true;
+			}
+		}
+	}
+	EXPECT_TRUE(init_ok);
+	EXPECT_FALSE(repeated_init_ok) << "init() is a one-shot operation";
+	EXPECT_FALSE(run_threw);
+	bool saw_no_samples = false;
+	for (const std::string& warning : g_warning_log_handler.messages())
+		saw_no_samples = saw_no_samples || warning.find("average latency unavailable (no samples)") != std::string::npos;
+	EXPECT_TRUE(saw_no_samples);
 
 	EXPECT_TRUE(stdfs::exists("generated/marker.json")) << "engine.run() 没有走到写 marker 的段";
 }
 
-TEST(r95_hft_run, one_tick_without_contract_returns_before_tick_creation)
+TEST(r95_hft_run, run_after_failed_init_does_not_use_parser)
+{
+	ScopedTempCwd guard("run_failed_init");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
+	WTSLogger::init("logcfg.yaml");
+
+	g_warning_log_handler.clear();
+	bool init_ok = true;
+	{
+		ScopedWarningCapture capture;
+		{
+			hft::HftLatencyTool tool;
+			init_ok = tool.init();
+			tool.run();
+		}
+	}
+	EXPECT_FALSE(init_ok);
+	bool saw_not_initialized = false;
+	for (const std::string& message : g_warning_log_handler.messages())
+		saw_not_initialized = saw_not_initialized || message.find("before parser initialization succeeds") != std::string::npos;
+	EXPECT_TRUE(saw_not_initialized);
+}
+
+TEST(r95_hft_init, failed_test_trader_init_is_reported_and_cleaned_up)
+{
+	ScopedTempCwd guard("init_trader_failure");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(write_text("sessions.yaml", kSessionsYaml));
+	ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
+	ASSERT_TRUE(write_text("config.yaml", kConfigRunZero));
+
+	hft::setTestTraderInitFailure(true);
+	bool init_ok = true;
+	{
+		hft::HftLatencyTool tool;
+		init_ok = tool.init();
+		tool.run();
+	}
+	hft::setTestTraderInitFailure(false);
+
+	EXPECT_FALSE(init_ok);
+	EXPECT_EQ(hft::theParser, nullptr);
+}
+
+TEST(r95_hft_run, shutdown_waits_for_active_channel_callback_before_releasing_trader_and_context)
+{
+	ScopedTempCwd guard("run_destroy");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(write_text("sessions.yaml", kSessionsYaml));
+	ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
+	ASSERT_TRUE(write_text("config.yaml", kConfigRunZero));
+
+	hft::armShutdownGateTest();
+	bool init_ok = false;
+	bool callback_entered = false;
+	std::thread release_gate;
+	{
+		hft::HftLatencyTool tool;
+		init_ok = tool.init();
+		if (init_ok)
+		{
+			EXPECT_NO_THROW(tool.run());
+			callback_entered = hft::waitForShutdownGateCallback(2000);
+		}
+
+		if (callback_entered)
+		{
+			release_gate = std::thread([]() {
+				// A premature API release signals immediately; otherwise let teardown
+				// reach the adapter drain wait before opening the callback gate.
+				hft::waitForTraderReleaseDuringCallback(200);
+				hft::releaseShutdownGateCallback();
+			});
+		}
+		else
+		{
+			hft::releaseShutdownGateCallback();
+		}
+	}
+	if (release_gate.joinable())
+		release_gate.join();
+
+	EXPECT_TRUE(init_ok);
+	EXPECT_TRUE(callback_entered) << "the fake trader did not reach the channel-ready sink callback";
+	EXPECT_TRUE(hft::shutdownGateSawContext()) << "the engine context must remain available through the gated callback";
+	EXPECT_FALSE(hft::shutdownGateSawTraderReleaseDuringCallback()) << "trader release began before the active sink callback drained";
+	EXPECT_TRUE(hft::shutdownGateSawTraderReleaseAfterCallback());
+	EXPECT_EQ(hft::theParser, nullptr);
+	hft::disarmShutdownGateTest();
+}
+
+TEST(r95_hft_run, one_tick_without_contract_reports_and_returns)
 {
 	ScopedTempCwd guard("run_one");
 	ASSERT_TRUE(guard.ok());
 	ASSERT_TRUE(write_text("sessions.yaml", kSessionsYaml));
+	ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
 	ASSERT_TRUE(write_text("config.yaml", kConfigRunOneWithoutContract));
+	WTSLogger::init("logcfg.yaml");
 
-	hft::HftLatencyTool tool;
-	ASSERT_TRUE(tool.init());
-
-	// :104-114 循环进入一次，_bd_mgr->getContract("rb2205","SHFE") 为 NULL -> 直接 return，
-	// 因此不会创建 WTSTickData，也不会触发策略 on_tick/下单。
-	EXPECT_NO_THROW(tool.run());
+	g_warning_log_handler.clear();
+	bool init_ok = false;
+	bool run_threw = false;
+	{
+		ScopedWarningCapture capture;
+		{
+			hft::HftLatencyTool tool;
+			init_ok = tool.init();
+			if (init_ok)
+			{
+				try
+				{
+					tool.run();
+				}
+				catch (...)
+				{
+					run_threw = true;
+				}
+			}
+		}
+	}
+	EXPECT_TRUE(init_ok);
+	EXPECT_FALSE(run_threw);
+	bool saw_missing_contract = false;
+	for (const std::string& warning : g_warning_log_handler.messages())
+		saw_missing_contract = saw_missing_contract || warning.find("contract SHFE.rb2205 not found") != std::string::npos;
+	EXPECT_TRUE(saw_missing_contract);
 
 	EXPECT_TRUE(stdfs::exists("generated/marker.json"));
+}
+
+TEST(r95_hft_run, one_tick_with_contract_and_commodity_runs)
+{
+	ScopedTempCwd guard("run_valid_one");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(prepare_base());
+	ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
+	ASSERT_TRUE(write_text("config.yaml", kConfigRunOneWithValidContract));
+	WTSLogger::init("logcfg.yaml");
+
+	g_warning_log_handler.clear();
+	bool init_ok = false;
+	bool run_threw = false;
+	{
+		ScopedWarningCapture capture;
+		{
+			hft::HftLatencyTool tool;
+			init_ok = tool.init();
+			if (init_ok)
+			{
+				try
+				{
+					tool.run();
+				}
+				catch (...)
+				{
+					run_threw = true;
+				}
+			}
+		}
+	}
+	EXPECT_TRUE(init_ok);
+	EXPECT_FALSE(run_threw);
+	bool saw_completed_tick = false;
+	for (const std::string& warning : g_warning_log_handler.messages())
+		saw_completed_tick = saw_completed_tick || warning.find("1 ticks simulated in") != std::string::npos;
+	EXPECT_TRUE(saw_completed_tick);
 }
 
 /* -------------------------------------------------------------------------

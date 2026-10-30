@@ -819,8 +819,41 @@ protected:
 		 */
 		~_StraFactInfo()
 		{
-			if (_fact)
-				_remover(_fact);
+			release();
+		}
+
+		bool release() noexcept
+		{
+			if (_fact != NULL)
+			{
+				if (_remover == NULL)
+				{
+					// Keep the module loaded when its factory cannot be destroyed safely.
+					_fact = NULL;
+					_module_inst = NULL;
+					return false;
+				}
+
+				try
+				{
+					_remover(_fact);
+				}
+				catch (...)
+				{
+					// The factory may still be live; intentionally pin the module.
+					_fact = NULL;
+					_module_inst = NULL;
+					return false;
+				}
+				_fact = NULL;
+			}
+
+			if (_module_inst != NULL)
+				DLLHelper::free_library(_module_inst);
+			_module_inst = NULL;
+			_creator = NULL;
+			_remover = NULL;
+			return true;
 		}
 	} StraFactInfo;
 	/// @brief 策略工厂信息实例，用于管理选股策略工厂
@@ -828,6 +861,9 @@ protected:
 
 	/// @brief 选股策略指针，指向当前正在运行的选股策略实例
 	SelStrategy*	_strategy;
+
+	/** Release strategy, factory, then its module. */
+	void release_strategy_factory() noexcept;
 
 	/// @brief 当前交易日，记录当前的交易日期，格式为YYYYMMDD
 	uint32_t		_cur_tdate;

@@ -87,6 +87,13 @@ public:
 		executer->setStub(this);
 	}
 
+	ExecUnitInitStatus queryExecUnitInitStatus(const char* executorId, const char* stdCode) const;
+	ExecUnitInitClearResult clearFailedExecUnitInitStatus(const char* executorId, const char* stdCode);
+	ExecCmdPtr findExecuter(const char* executorId) const { return _exec_mgr.find_executer(executorId); }
+	// Borrowed manager reference for runner-level quiesce coordination. The engine
+	// must remain alive until the coordinator has completed successfully.
+	WtExecuterMgr& getExecuterMgr() { return _exec_mgr; }
+
 	void	on_minute_end(uint32_t uDate, uint32_t uTime);
 
 	void	handle_pos_change(const char* straName, const char* stdCode, double diffQty);

@@ -729,8 +729,11 @@ TEST_F(T25TraderCTPTest, do_login_send_failure_is_logged_without_waiting_for_res
     trader_.OnRspAuthenticate(&authf, &ok_, 1, true);
 
     EXPECT_EQ(1, api_.n_login_.load());
-    EXPECT_NE(TraderCTP::WS_LOGINING, trader_.state());
+    EXPECT_EQ(TraderCTP::WS_LOGINFAILED, trader_.state());
     EXPECT_TRUE(sink_.hasLog("Sending login request failed: 5"));
+    EXPECT_EQ(1u, sink_.n_login_result_);
+    EXPECT_FALSE(sink_.last_succ_);
+    EXPECT_NE(std::string::npos, sink_.last_msg_.find("CTP:登录请求发送失败: 5"));
 }
 
 TEST_F(T25TraderCTPTest, order_insert_and_action_send_failures_return_error_and_are_logged)
@@ -764,7 +767,11 @@ TEST_F(T25TraderCTPTest, authenticate_sync_failure_returns_error_without_waiting
     EXPECT_NE(0, trader_.login("88880001", "pwd", "prod01"));
     EXPECT_EQ(1, api_.n_auth_.load());
     EXPECT_EQ(0, api_.n_login_.load());
-    EXPECT_NE(TraderCTP::WS_LOGINING, trader_.state());
+    EXPECT_EQ(TraderCTP::WS_LOGINFAILED, trader_.state());
+    EXPECT_TRUE(sink_.hasLog("Sending authenticate request failed: 7"));
+    EXPECT_EQ(1u, sink_.n_login_result_);
+    EXPECT_FALSE(sink_.last_succ_);
+    EXPECT_NE(std::string::npos, sink_.last_msg_.find("CTP:认证请求发送失败: 7"));
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -80,7 +80,7 @@ TEST_F(R80TaskCalendar, DailyTaskCrossesSpringFestivalHoliday)
 }
 
 /*
- * 月频任务 _day=200124（即 1/24）恰好落在春节假期：
+ * 月频任务 day=24 恰好落在春节假期：
  * 2/3 复盘时 preTDate=1/23、跨月且 bHasHoliday=true，
  * 命中 L996-L999 的「跨月顺延」分支。
  */
@@ -88,7 +88,7 @@ TEST_F(R80TaskCalendar, MonthlyTaskHolidayShiftFiresOnResume)
 {
 	r80::CfgOpts opts;
 	r80::Sink sink;
-	ASSERT_TRUE(run_task(200124, 1500, "m", 202001200930ull, 202002051500ull, sink, opts));
+	ASSERT_TRUE(run_task(24, 1500, "m", 202001200930ull, 202002051500ull, sink, opts));
 
 	check_task_tail(sink, std::vector<uint32_t>({ 20200203u }));
 }
@@ -109,12 +109,16 @@ TEST_F(R80TaskCalendar, WeeklyTaskCatchUpAfterLongHoliday)
 
 /*
  * 周频任务目标周二，跨 1/27-1/28 两天休市：
- * 1/21 正常触发；1/29(周三) 复盘时 preWD(周四) > weekDay(周三) 且 weekDay > _day(周二)，
+ * 1/21 正常触发；1/29(周三) 复盘时 preWD(周五) > weekDay(周三) 且 weekDay > _day(周二)，
  * 命中 L1018-L1022 的「上一交易日在周内更靠后」分支。
  */
 TEST_F(R80TaskCalendar, WeeklyTaskCatchUpAfterHolidayGap)
 {
+	const std::filesystem::path custom = _base / "holidays_weekly_gap.json";
+	ASSERT_TRUE(r80::write_text(custom, "{\n  \"CHINA\": [20200127, 20200128]\n}\n"));
+
 	r80::CfgOpts opts;
+	opts.holiday = custom.string();
 	r80::Sink sink;
 	ASSERT_TRUE(run_task(2, 1500, "w", 202001200930ull, 202001311500ull, sink, opts));
 

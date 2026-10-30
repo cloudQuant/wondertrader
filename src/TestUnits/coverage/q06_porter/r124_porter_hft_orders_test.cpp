@@ -12,17 +12,20 @@
  * 纯本地 ITraderApi（orderInsert/orderAction 立即返回 0，无连接、无线程），
  * 因此 hft 三条导出函数拿得到非空 localid，且不需要真实柜台。
  *
- * 边界：不开线程、不跑回测；adapter 的日志目录经 WtHelper::setGenerateDir
- * 指向系统临时目录，并在用例结束删除；不触碰 src 生产目录。
+ * 边界：仅返回缓冲区回归用例使用两个本地线程，不跑回测；adapter 的日志目录经
+ * WtHelper::setGenerateDir 指向系统临时目录，并在用例结束删除；不触碰 src 生产目录。
  */
 #include <gtest/gtest.h>
 
 #include <cstdio>
+#include <condition_variable>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <mutex>
 #include <new>
 #include <string>
+#include <thread>
 
 #include <unistd.h>
 
@@ -117,6 +120,20 @@ namespace
 	/* default 组同时给出 open/close，供 buy 与 sell 分别命中。 */
 	const char* kActions =
 		"{\"default\":{\"order\":[{\"action\":\"open\"},{\"action\":\"close\"}]}}";
+
+void set_long_position(TraderAdapter& adapter, WTSContractInfo* contract)
+{
+	WTSArray* positions = WTSArray::create();
+	WTSPositionItem* position = WTSPositionItem::create("rb2510", "CNY", "SHFE");
+	position->setContractInfo(contract);
+	position->setDirection(WDT_LONG);
+	position->setNewPosition(2.0);
+	position->setAvailNewPos(2.0);
+	positions->append(position);
+	position->release();
+	adapter.onRspPosition(positions);
+	positions->release();
+}
 }
 
 /*
@@ -200,6 +217,7 @@ TEST(R124PorterHftOrders, BuySellAndCancelAllProduceLocalIds)
 	{
 		TraderAdapter adapter(NULL);
 		ASSERT_TRUE(adapter.initExt("r124_tr", &api, bdMgr, &policy));
+		ASSERT_TRUE(adapter.run());
 		ctx->setTrader(&adapter);
 
 		const char* code = "SHFE.rb.2510";
@@ -255,5 +273,139 @@ TEST(R124PorterHftOrders, BuySellAndCancelAllProduceLocalIds)
 	const std::string baseDir = WtHelper::getBaseDir();
 	std::error_code ec;
 	stdfs::remove_all(stdfs::path(baseDir) / "traders" / "r124_tr", ec);
+	stdfs::remove_all(dir, ec);
+}
+
+/*
+ * BUG-R13-005 regression: concurrent callers must not share hft_buy / hft_sell
+ * return storage. Two independent HFT contexts and fake adapters keep the
+ * underlying order paths separate. Each first thread retains the returned
+ * pointer until the second thread has called the same exported function.
+ * Returned pointers are still only valid until the next same-function call on
+ * that thread; TSan was not run for this test.
+ */
+TEST(R124PorterHftOrders, BuyAndSellReturnBuffersAreIsolatedPerThread)
+{
+	const std::string dir = prepare_dir("hfttls");
+	ASSERT_FALSE(dir.empty());
+	write_text(dir + "/actions.json", kActions);
+	write_text(dir + "/sessions.json", kSessions);
+	write_text(dir + "/commodities.json", kCommodities);
+	write_text(dir + "/contracts.json", kContracts);
+
+	WtHelper::setGenerateDir(dir.c_str());
+	reset_singleton();
+	getRunner().init((dir + "/r124_absent_logcfg.yaml").c_str(), true, dir.c_str());
+
+	const std::string cfg = "{\"basefiles\":{"
+		"\"session\":\"" + dir + "/sessions.json\","
+		"\"commodity\":\"" + dir + "/commodities.json\","
+		"\"contract\":\"" + dir + "/contracts.json\"},"
+		"\"env\":{\"name\":\"hft\"},\"data\":{},"
+		"\"bspolicy\":\"" + dir + "/actions.json\"}";
+	ASSERT_TRUE(getRunner().config(cfg.c_str(), false));
+
+	const CtxHandler firstHandle = create_hft_context("r124_hft_tls_a", "R124_TRADER_ABSENT", false, 0);
+	const CtxHandler secondHandle = create_hft_context("r124_hft_tls_b", "R124_TRADER_ABSENT", false, 0);
+	ASSERT_NE(firstHandle, 0U);
+	ASSERT_NE(secondHandle, 0U);
+	HftContextPtr firstBase = getRunner().getHftContext(firstHandle);
+	HftContextPtr secondBase = getRunner().getHftContext(secondHandle);
+	ASSERT_TRUE(firstBase != nullptr);
+	ASSERT_TRUE(secondBase != nullptr);
+	ExpHftContext* firstContext = dynamic_cast<ExpHftContext*>(firstBase.get());
+	ExpHftContext* secondContext = dynamic_cast<ExpHftContext*>(secondBase.get());
+	ASSERT_NE(firstContext, nullptr);
+	ASSERT_NE(secondContext, nullptr);
+
+	IBaseDataMgr* bdMgr = getRunner().getEngine()->get_basedata_mgr();
+	ASSERT_NE(bdMgr, nullptr);
+	WTSContractInfo* contract = bdMgr->getContract("rb2510", "SHFE");
+	ASSERT_NE(contract, nullptr);
+	ActionPolicyMgr policy;
+	ASSERT_TRUE(policy.init((dir + "/actions.json").c_str()));
+	R124FakeTraderApi firstApi;
+	R124FakeTraderApi secondApi;
+	{
+		TraderAdapter firstAdapter(NULL);
+		TraderAdapter secondAdapter(NULL);
+		ASSERT_TRUE(firstAdapter.initExt("r124_tls_a", &firstApi, bdMgr, &policy));
+		ASSERT_TRUE(secondAdapter.initExt("r124_tls_b", &secondApi, bdMgr, &policy));
+		ASSERT_TRUE(firstAdapter.run());
+		ASSERT_TRUE(secondAdapter.run());
+		firstContext->setTrader(&firstAdapter);
+		secondContext->setTrader(&secondAdapter);
+		set_long_position(firstAdapter, contract);
+		set_long_position(secondAdapter, contract);
+
+		const char* code = "SHFE.rb.2510";
+		/* makeLocalOrderID has an unsynchronized first-use seed check; initialize it
+		 * on this thread so this test isolates the exported return buffers. */
+		const char* warmupId = hft_buy(firstHandle, code, 4500.0, 1.0, "r124_tls_warmup", 0);
+		ASSERT_NE(warmupId, nullptr);
+		const std::string warmedId(warmupId);
+		ASSERT_FALSE(warmedId.empty());
+		ASSERT_NE(std::strtoul(warmedId.c_str(), NULL, 10), 0UL);
+
+		auto verify_isolated_return = [&](bool isBuy)
+		{
+			std::mutex mutex;
+			std::condition_variable cv;
+			bool firstReturned = false;
+			bool secondReturned = false;
+			std::thread::id firstThreadId;
+			std::thread::id secondThreadId;
+			std::string firstResult;
+			std::string secondResult;
+
+			std::thread firstThread([&]()
+			{
+				firstThreadId = std::this_thread::get_id();
+				const char* retained = isBuy
+					? hft_buy(firstHandle, code, 4500.0, 1.0, "r124_tls_a", 0)
+					: hft_sell(firstHandle, code, 4500.0, 1.0, "r124_tls_a", 0);
+				std::unique_lock<std::mutex> lock(mutex);
+				firstReturned = true;
+				cv.notify_all();
+				cv.wait(lock, [&]() { return secondReturned; });
+				firstResult = retained == NULL ? std::string() : std::string(retained);
+			});
+
+			std::thread secondThread([&]()
+			{
+				secondThreadId = std::this_thread::get_id();
+				{
+					std::unique_lock<std::mutex> lock(mutex);
+					cv.wait(lock, [&]() { return firstReturned; });
+				}
+				const char* returned = isBuy
+					? hft_buy(secondHandle, code, 4500.0, 1.0, "r124_tls_b", 0)
+					: hft_sell(secondHandle, code, 4500.0, 1.0, "r124_tls_b", 0);
+				std::unique_lock<std::mutex> lock(mutex);
+				secondResult = returned == NULL ? std::string() : std::string(returned);
+				secondReturned = true;
+				cv.notify_all();
+			});
+
+			firstThread.join();
+			secondThread.join();
+			EXPECT_FALSE(firstResult.empty());
+			EXPECT_FALSE(secondResult.empty());
+			EXPECT_NE(firstThreadId, secondThreadId);
+			EXPECT_NE(firstResult, secondResult);
+		};
+
+		verify_isolated_return(true);
+		verify_isolated_return(false);
+
+		firstContext->setTrader(nullptr);
+		secondContext->setTrader(nullptr);
+	}
+
+	reset_singleton();
+	const std::string baseDir = WtHelper::getBaseDir();
+	std::error_code ec;
+	stdfs::remove_all(stdfs::path(baseDir) / "traders" / "r124_tls_a", ec);
+	stdfs::remove_all(stdfs::path(baseDir) / "traders" / "r124_tls_b", ec);
 	stdfs::remove_all(dir, ec);
 }

@@ -15,6 +15,7 @@
 
 #include <set>
 #include <string>
+#include <vector>
 
 class R105CtpOptMdApiStub : public ctp_sopt::CThostFtdcMdApi
 {
@@ -32,6 +33,7 @@ public:
 	int sub_calls = 0;
 	int sub_ret = 0;
 	int sub_count = 0;
+	std::vector<int> sub_counts;
 	int unsub_calls = 0;
 
 	std::string front;
@@ -68,6 +70,7 @@ public:
 	{
 		++sub_calls;
 		sub_count = n;
+		sub_counts.push_back(n);
 		for (int i = 0; i < n; ++i)
 			sub_codes.insert((pp[i] == NULL) ? "" : pp[i]);
 		return sub_ret;

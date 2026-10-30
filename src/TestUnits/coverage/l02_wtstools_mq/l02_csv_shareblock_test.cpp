@@ -10,17 +10,30 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#ifdef _WIN32
+#include <process.h>
+#else
 #include <unistd.h>
+#endif
 
 #include "WTSTools/CsvHelper.h"
 #include "WtShareHelper/ShareBlocks.h"
 
 namespace {
 
+unsigned long current_process_id() noexcept
+{
+#ifdef _WIN32
+	return static_cast<unsigned long>(::_getpid());
+#else
+	return static_cast<unsigned long>(::getpid());
+#endif
+}
+
 std::filesystem::path g_unique_dir()
 {
 	static uint32_t s_seq = 0;
-	std::string name = "l02_csv_" + std::to_string((long)::getpid()) + "_" + std::to_string(s_seq++);
+	std::string name = "l02_csv_" + std::to_string(current_process_id()) + "_" + std::to_string(s_seq++);
 	std::filesystem::path dir = std::filesystem::temp_directory_path() / name;
 	std::error_code ec;
 	std::filesystem::remove_all(dir, ec);
@@ -127,14 +140,80 @@ TEST_F(L02CsvFixture, MissingFieldAndColumnDefaults)
 	EXPECT_STREQ("", reader.get_string(9));
 	EXPECT_DOUBLE_EQ(0.0, reader.get_double(-1));
 
-	// 非数字文本按 0 处理
-	const std::string path2 = write_file("text.csv", "v\nabc\n");
+	// Valid numeric text converts normally; malformed numeric text has no documented
+	// default-value contract for an existing cell.
+	const std::string path2 = write_file("text.csv", "v\n123\n");
 	CsvReader r2;
 	ASSERT_TRUE(r2.load_from_file(path2.c_str()));
 	ASSERT_TRUE(r2.next_row());
-	EXPECT_EQ(0, r2.get_int32("v"));
-	EXPECT_DOUBLE_EQ(0.0, r2.get_double("v"));
-	EXPECT_STREQ("abc", r2.get_string("v"));
+	EXPECT_EQ(123, r2.get_int32("v"));
+	EXPECT_DOUBLE_EQ(123.0, r2.get_double("v"));
+	EXPECT_STREQ("123", r2.get_string("v"));
+}
+
+TEST_F(L02CsvFixture, ShortRowsReturnDefaultsForMissingCells)
+{
+	const std::string path = write_file("short_rows.csv",
+		"i32,u32,i64,u64,real,text,tail\n"
+		"1,2,3,4,5.5,hello,value\n"
+		"11,22\n"
+		"\n" // Blank physical lines are skipped.
+		"31,32,33,34,35.5,world,\n"); // The final field is present but empty.
+
+	CsvReader reader;
+	ASSERT_TRUE(reader.load_from_file(path.c_str()));
+
+	ASSERT_TRUE(reader.next_row());
+	EXPECT_EQ(1, reader.get_int32(0));
+	EXPECT_EQ(1, reader.get_int32("i32"));
+	EXPECT_EQ(2u, reader.get_uint32(1));
+	EXPECT_EQ(2u, reader.get_uint32("u32"));
+	EXPECT_EQ((int64_t)3, reader.get_int64(2));
+	EXPECT_EQ((int64_t)3, reader.get_int64("i64"));
+	EXPECT_EQ(4ull, reader.get_uint64(3));
+	EXPECT_EQ(4ull, reader.get_uint64("u64"));
+	EXPECT_DOUBLE_EQ(5.5, reader.get_double(4));
+	EXPECT_DOUBLE_EQ(5.5, reader.get_double("real"));
+	EXPECT_STREQ("hello", reader.get_string(5));
+	EXPECT_STREQ("hello", reader.get_string("text"));
+
+	ASSERT_TRUE(reader.next_row());
+	// The header contains tail, but this short row only contains columns 0 and 1.
+	EXPECT_EQ(0, reader.get_int32(6));
+	EXPECT_EQ(0, reader.get_int32("tail"));
+	EXPECT_EQ(0u, reader.get_uint32(6));
+	EXPECT_EQ(0u, reader.get_uint32("tail"));
+	EXPECT_EQ((int64_t)0, reader.get_int64(6));
+	EXPECT_EQ((int64_t)0, reader.get_int64("tail"));
+	EXPECT_EQ(0ull, reader.get_uint64(6));
+	EXPECT_EQ(0ull, reader.get_uint64("tail"));
+	EXPECT_DOUBLE_EQ(0.0, reader.get_double(6));
+	EXPECT_DOUBLE_EQ(0.0, reader.get_double("tail"));
+	EXPECT_STREQ("", reader.get_string(6));
+	EXPECT_STREQ("", reader.get_string("tail"));
+
+	// The blank physical line was skipped; the next row is readable. Its trailing
+	// delimiter represents an empty final cell and follows the same default-value contract.
+	ASSERT_TRUE(reader.next_row());
+	EXPECT_EQ(31, reader.get_int32("i32"));
+	EXPECT_EQ(32u, reader.get_uint32("u32"));
+	EXPECT_EQ((int64_t)33, reader.get_int64("i64"));
+	EXPECT_EQ(34ull, reader.get_uint64("u64"));
+	EXPECT_DOUBLE_EQ(35.5, reader.get_double("real"));
+	EXPECT_STREQ("world", reader.get_string("text"));
+	EXPECT_EQ(0, reader.get_int32(6));
+	EXPECT_EQ(0, reader.get_int32("tail"));
+	EXPECT_EQ(0u, reader.get_uint32(6));
+	EXPECT_EQ(0u, reader.get_uint32("tail"));
+	EXPECT_EQ((int64_t)0, reader.get_int64(6));
+	EXPECT_EQ((int64_t)0, reader.get_int64("tail"));
+	EXPECT_EQ(0ull, reader.get_uint64(6));
+	EXPECT_EQ(0ull, reader.get_uint64("tail"));
+	EXPECT_DOUBLE_EQ(0.0, reader.get_double(6));
+	EXPECT_DOUBLE_EQ(0.0, reader.get_double("tail"));
+	EXPECT_STREQ("", reader.get_string(6));
+	EXPECT_STREQ("", reader.get_string("tail"));
+	EXPECT_FALSE(reader.next_row());
 }
 
 TEST_F(L02CsvFixture, HeaderSpecialCharsStrippedAndLowerCased)

@@ -8,7 +8,7 @@ class Dumper
 public:
 	Dumper(): 
 		_cb_account(nullptr), _cb_order(nullptr), _cb_trade(nullptr), 
-		_cb_position(nullptr), _refresh_span(10), _stopped(false){}
+		_cb_position(nullptr), _refresh_span(10), _stopped(false), _configured(false){}
 
 	void register_callbacks(FuncOnAccount cbAccount, FuncOnOrder cbOrder, FuncOnTrade cbTrade, FuncOnPosition cbPosition)
 	{
@@ -50,5 +50,6 @@ private:
 
 	uint32_t		_refresh_span;
 	bool			_stopped;
+	bool			_configured;
 };
 

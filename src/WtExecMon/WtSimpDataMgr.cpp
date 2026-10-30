@@ -28,8 +28,15 @@ WTSDataFactory g_dataFact;
 WtSimpDataMgr::WtSimpDataMgr()
 	: _reader(NULL)
 	, _runner(NULL)
+	, _s_info(NULL)
 	, _bars_cache(NULL)
 	, _rt_tick_map(NULL)
+	, _cur_date(0)
+	, _cur_act_time(0)
+	, _cur_raw_time(0)
+	, _cur_min_time(0)
+	, _cur_secs(0)
+	, _cur_tdate(0)
 {
 }
 
@@ -42,8 +49,21 @@ WtSimpDataMgr::~WtSimpDataMgr()
 
 bool WtSimpDataMgr::initStore(WTSVariant* cfg)
 {
-	if (cfg == NULL)
+	if (cfg == NULL || _runner == NULL)
 		return false;
+
+	const char* session = cfg->getCString("session");
+	if (session == NULL || session[0] == '\0')
+	{
+		WTSLogger::error("Data manager requires a trading session");
+		return false;
+	}
+	WTSSessionInfo* sessionInfo = _runner->get_session_info(session, false);
+	if (sessionInfo == NULL)
+	{
+		WTSLogger::error("Data manager session {} is unavailable", session);
+		return false;
+	}
 
 	std::string module = cfg->getCString("module");
 	if (module.empty())
@@ -75,14 +95,19 @@ bool WtSimpDataMgr::initStore(WTSVariant* cfg)
 	}
 
 	_reader->init(cfg, this);
-
-	_s_info = _runner->get_session_info(cfg->getCString("session"), false);
+	_s_info = sessionInfo;
 
 	return true;
 }
 
 bool WtSimpDataMgr::init(WTSVariant* cfg, WtExecRunner* runner)
 {
+	// Clear the session gate before every attempt so a failed reinitialization
+	// cannot accept quotes using a session from an earlier configuration.
+	_s_info = NULL;
+	if (cfg == NULL || runner == NULL)
+		return false;
+
 	_runner = runner;
 	return initStore(cfg->get("store"));
 }
@@ -129,13 +154,8 @@ void WtSimpDataMgr::on_bar(const char* /*code*/, WTSKlinePeriod /*period*/, WTSB
 
 void WtSimpDataMgr::handle_push_quote(const char* stdCode, WTSTickData* curTick)
 {
-	if (curTick == NULL)
+	if (curTick == NULL || _s_info == NULL)
 		return;
-
-	if (_rt_tick_map == NULL)
-		_rt_tick_map = DataCacheMap::create();
-
-	_rt_tick_map->add(stdCode, curTick, true);
 
 	uint32_t uDate = curTick->actiondate();
 	uint32_t uTime = curTick->actiontime();
@@ -144,6 +164,11 @@ void WtSimpDataMgr::handle_push_quote(const char* stdCode, WTSTickData* curTick)
 	{
 		return;
 	}
+
+	if (_rt_tick_map == NULL)
+		_rt_tick_map = DataCacheMap::create();
+
+	_rt_tick_map->add(stdCode, curTick, true);
 
 	_cur_date = uDate;
 	_cur_act_time = uTime;
@@ -220,8 +245,12 @@ WTSKlineSlice* WtSimpDataMgr::get_kline_slice(const char* stdCode, WTSKlinePerio
 			return NULL;
 		}
 
-		if (kData)
-			_bars_cache->add(key, kData, false);
+		// A non-null source slice can still be empty or unsuitable for resampling.
+		// In that case extractKlineData returns null and there is no cache to slice.
+		if (kData == NULL)
+			return NULL;
+
+		_bars_cache->add(key, kData, false);
 	}
 
 	int32_t sIdx = 0;

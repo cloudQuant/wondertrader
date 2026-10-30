@@ -236,7 +236,7 @@ public:
 
 	static inline WTSEntrustAction* createCancelAction(const char* eid, const char* oid) noexcept
 	{
-		WTSEntrustAction* pRet = new WTSEntrustAction;
+		WTSEntrustAction* pRet = WTSEntrustAction::allocate();
 		if(pRet)
 		{
 			wt_strcpy(pRet->m_strEnturstID, eid);

@@ -88,16 +88,28 @@ TEST_F(R121UftMocker, FactoryWithoutStrategy)
 
 	// on_init/on_channel_ready 的 _strategy 空守卫（L339、L824）
 	m.handle_init();
-	fprintf(stderr, "U4 on_trade\n");
+	fprintf(stderr, "U4 no-strategy session callbacks\n");
+
+	// Session bookkeeping remains active without a strategy: release T+1 frozen volume,
+	// then invoke both public session entrypoints without dereferencing _strategy.
+	WTSCommodityInfo* stkComm = _rp.get_commodity_info(kStk);
+	ASSERT_NE(nullptr, stkComm);
+	stkComm->setTradingMode(TM_LongT1);
+	m.on_trade(1u, kStk, true, 0u, 100.0, 10.0);
+	EXPECT_DOUBLE_EQ(0.0, m.stra_get_position(kStk, true));
+	m.handle_session_begin(20200103u);
+	EXPECT_DOUBLE_EQ(100.0, m.stra_get_position(kStk, true));
+	m.handle_session_end(20200103u);
+	fprintf(stderr, "U5 on_trade\n");
 
 	// 未注册品种成交：update_position 在 commInfo==NULL 处早退（L1170-1172）
 	m.on_trade(1u, "SHFE.xx.9999", true, 0u, 1.0, 100.0);
-	fprintf(stderr, "U5 pos\n");
+	fprintf(stderr, "U6 pos\n");
 	EXPECT_DOUBLE_EQ(0.0, m.stra_get_position("SHFE.xx.9999"));
-	fprintf(stderr, "U6 replaydone\n");
+	fprintf(stderr, "U7 replaydone\n");
 
 	m.handle_replay_done();
-	fprintf(stderr, "U7 end\n");
+	fprintf(stderr, "U8 end\n");
 }
 
 // 真实 SimpleUft 插件：工厂创建、成交回写、tick/bar/回报分发、会话冻结释放

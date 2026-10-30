@@ -202,21 +202,23 @@ protected:
 
 		// 合并形态（非数组）
 		r45_write_file(_dir / "commodities.json",
-			std::string("{") + R"("CFFEX":{"IC":{"covermode":0,"pricemode":0,"category":1,)"
-			+ R"("precision":1,"pricetick":0.2,"volscale":200,"name":"CSI500","exchg":"CFFEX",)"
-			+ R"("session":"SD0930","holiday":"CHINA"},"IO":{"covermode":0,"pricemode":0,)"
-			+ R"("category":2,"precision":1,"pricetick":0.2,"volscale":100,"name":"CSI500OPT",)"
-			+ R"("exchg":"CFFEX","session":"SD0930","holiday":"CHINA"}},)"
-			+ R"("SSE":{"600000":{"covermode":0,"pricemode":0,"category":0,"precision":2,)"
-			+ R"("pricetick":0.01,"volscale":100,"name":"SPDB","exchg":"SSE",)"
-			+ R"("session":"SD0930","holiday":"CHINA"}}})");
+			R"JSON({"CFFEX":{
+				"IC":{"covermode":0,"pricemode":0,"category":1,"precision":1,"pricetick":0.2,"volscale":200,"name":"CSI500","exchg":"CFFEX","session":"SD0930","holiday":"CHINA"},
+				"IO":{"covermode":0,"pricemode":0,"category":2,"precision":1,"pricetick":0.2,"volscale":100,"name":"CSI500OPT","exchg":"CFFEX","session":"SD0930","holiday":"CHINA"},
+				"MO":{"covermode":0,"pricemode":0,"category":6,"precision":1,"pricetick":0.2,"volscale":100,"name":"CSI1000OPT","exchg":"CFFEX","session":"SD0930","holiday":"CHINA"}},
+				"SSE":{
+				"600000":{"covermode":0,"pricemode":0,"category":0,"precision":2,"pricetick":0.01,"volscale":100,"name":"SPDB","exchg":"SSE","session":"SD0930","holiday":"CHINA"},
+				"STKO":{"covermode":0,"pricemode":0,"category":6,"precision":3,"pricetick":0.005,"volscale":1,"name":"StockOpt","exchg":"SSE","session":"SD0930","holiday":"CHINA"}}})JSON");
 		r45_write_file(_dir / "contracts.json",
-			std::string("{") + R"("CFFEX":{"IC2204":{"name":"CSI500 2204","code":"IC2204",)"
-			+ R"("exchg":"CFFEX","product":"IC","maxlimitqty":20,"maxmarketqty":10},)"
-			+ R"("IO2404-C-4000":{"name":"CSI500 2204 C4000","code":"IO2404-C-4000",)"
-			+ R"("exchg":"CFFEX","product":"IO","maxlimitqty":20,"maxmarketqty":10}},)"
-			+ R"("SSE":{"600000":{"name":"SPDB","code":"600000","exchg":"SSE",)"
-			+ R"("product":"600000","maxlimitqty":100000,"maxmarketqty":1000}}})");
+			R"JSON({"CFFEX":{
+				"IC2204":{"name":"CSI500 2204","code":"IC2204","exchg":"CFFEX","product":"IC","maxlimitqty":20,"maxmarketqty":10},
+				"IO2404-C-4000":{"name":"CSI500 2204 C4000","code":"IO2404-C-4000","exchg":"CFFEX","product":"IO","maxlimitqty":20,"maxmarketqty":10},
+				"MO2404-C-4000":{"name":"CSI1000 2204 C4000","code":"MO2404-C-4000","exchg":"CFFEX","product":"MO","maxlimitqty":20,"maxmarketqty":10},
+				"IO2404C4000":{"name":"Wrong format option","code":"IO2404C4000","exchg":"CFFEX","product":"IO","maxlimitqty":20,"maxmarketqty":10},
+				"10000001":{"name":"Malformed option","code":"10000001","exchg":"CFFEX","product":"IO","maxlimitqty":20,"maxmarketqty":10}},
+				"SSE":{
+				"600000":{"name":"SPDB","code":"600000","exchg":"SSE","product":"600000","maxlimitqty":100000,"maxmarketqty":1000},
+				"10000001":{"name":"SSE stock option","code":"10000001","exchg":"SSE","product":"STKO","maxlimitqty":100000,"maxmarketqty":1000}}})JSON");
 
 		_logCfg = (_dir / "no_such_logcfg.yaml").string();
 		_modDir = _bin;
@@ -488,6 +490,72 @@ TEST_F(R45RunnerExtraTest, ProcTickNormalizesFutOptionCode)
 	EXPECT_EQ(R45TickProbe::codes[0], "CFFEX.IO2404.C.4000");
 	EXPECT_STREQ(tick->code(), "CFFEX.IO2404.C.4000");
 	tick->release();
+}
+
+TEST_F(R45RunnerExtraTest, ProcTickNormalizesSecurityAndIndexSpotOptions)
+{
+	WtDtRunner runner;
+	initRunner(runner, false);
+	runner.sub_tick("SSE.STKO.10000001", true, false);
+	runner.sub_tick("CFFEX.MO2404.C.4000", false, false);
+
+	WTSTickData* securityOption = r45_make_tick("10000001", "SSE", 0.5);
+	ASSERT_NE(securityOption, nullptr);
+	runner.proc_tick(securityOption);
+	securityOption->release();
+
+	WTSTickData* indexOption = r45_make_tick("MO2404-C-4000", "CFFEX", 18.5);
+	ASSERT_NE(indexOption, nullptr);
+	runner.proc_tick(indexOption);
+	indexOption->release();
+
+	ASSERT_EQ(R45TickProbe::codes.size(), 2u);
+	EXPECT_EQ(R45TickProbe::codes[0], "SSE.STKO.10000001");
+	EXPECT_EQ(R45TickProbe::codes[1], "CFFEX.MO2404.C.4000");
+	EXPECT_DOUBLE_EQ(R45TickProbe::prices[0], 0.5);
+	EXPECT_DOUBLE_EQ(R45TickProbe::prices[1], 18.5);
+}
+
+TEST_F(R45RunnerExtraTest, ProcTickDropsMalformedOptionInsteadOfDispatchingEmptyCode)
+{
+	WtDtRunner runner;
+	initRunner(runner, false);
+	// Numeric code lacks option fields; compact C/P code violates the CFFEX raw format.
+	WTSTickData* malformedOption = r45_make_tick("10000001", "CFFEX", 1.0);
+	ASSERT_NE(malformedOption, nullptr);
+	runner.proc_tick(malformedOption);
+	EXPECT_STREQ(malformedOption->code(), "10000001");
+	malformedOption->release();
+
+	EXPECT_TRUE(R45TickProbe::codes.empty());
+	WTSTickData* wrongExchangeFormat = r45_make_tick("IO2404C4000", "CFFEX", 1.0);
+	ASSERT_NE(wrongExchangeFormat, nullptr);
+	runner.proc_tick(wrongExchangeFormat);
+	EXPECT_STREQ(wrongExchangeFormat->code(), "IO2404C4000");
+	EXPECT_TRUE(R45TickProbe::codes.empty());
+	wrongExchangeFormat->release();
+}
+
+TEST_F(R45RunnerExtraTest, ProcTickDropsExternalContractWithoutCommodityInfo)
+{
+	WtDtRunner runner;
+	initRunner(runner, false);
+	runner.sub_tick("CFFEX.IO2404.C.4000", true, false);
+
+	WTSContractInfo* contract = WTSContractInfo::create(
+		"IO2404-C-4000", "external option contract", "CFFEX", "IO");
+	ASSERT_NE(contract, nullptr);
+	ASSERT_EQ(contract->getCommInfo(), nullptr);
+	WTSTickData* tick = r45_make_tick("IO2404-C-4000", "CFFEX", 66.0);
+	ASSERT_NE(tick, nullptr);
+	tick->setContractInfo(contract);
+
+	runner.proc_tick(tick);
+
+	EXPECT_TRUE(R45TickProbe::codes.empty());
+	EXPECT_STREQ(tick->code(), "IO2404-C-4000");
+	tick->release();
+	contract->release();
 }
 
 // ---------------------------------------------------------------------------

@@ -23,6 +23,7 @@
 #include "../Share/ModuleHelper.hpp"
 
 #include <filesystem>
+#include <limits>
 namespace fs = std::filesystem;
 
 const char* ENTRUST_SECTION = "entrusts";
@@ -1100,13 +1101,32 @@ bool TraderYD::generateEntrustID(uint32_t orderRef, char* buffer) noexcept
 
 bool TraderYD::extractEntrustID(const char* entrustid, uint32_t &orderRef) noexcept
 {
-	//Market.FrontID.SessionID.OrderRef
-	auto idx = StrUtil::findFirst(entrustid, '#');
-	auto idx2 = StrUtil::findLast(entrustid, '#');
-	if (idx != idx2)
+	if (entrustid == NULL)
 		return false;
 
-	orderRef = convert::to_uint32(entrustid + idx + 1);
+	auto idx = StrUtil::findFirst(entrustid, '#');
+	auto idx2 = StrUtil::findLast(entrustid, '#');
+	if (idx == std::string::npos || idx != idx2)
+		return false;
+
+	const char* suffix = entrustid + idx + 1;
+	if (*suffix == '\0')
+		return false;
+
+	uint32_t parsedOrderRef = 0;
+	for (const char* p = suffix; *p != '\0'; ++p)
+	{
+		if (*p < '0' || *p > '9')
+			return false;
+
+		const uint32_t digit = static_cast<uint32_t>(*p - '0');
+		if (parsedOrderRef > (std::numeric_limits<uint32_t>::max() - digit) / 10)
+			return false;
+
+		parsedOrderRef = parsedOrderRef * 10 + digit;
+	}
+
+	orderRef = parsedOrderRef;
 
 	return true;
 }

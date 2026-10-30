@@ -1,0 +1,102 @@
+{
+  "scope": "本机 macOS arm64 定向验证；不是 CoverageTests 全量通过证明",
+  "target": "r16_inihelper.long_distinct_section_keys_keep_independent_values",
+  "binary": "build-cov/build_x64/Debug/bin/TestUnits/wt-r16-headers-focused",
+  "binary_sha256": "8123ba8838735a0639a5b2b92a6d50b517b20b124a00fd75d762b0acb4b354e9",
+  "build": {
+    "command": [
+      "/opt/homebrew/bin/ninja",
+      "-C",
+      "build-cov",
+      "TestUnits/coverage/CMakeFiles/CoverageTests.dir/r16_share_tools/r16_timeutils_test.cpp.o",
+      "TestUnits/coverage/CMakeFiles/CoverageTests.dir/r16_share_tools/r16_strutil_stdutils_test.cpp.o",
+      "TestUnits/coverage/CMakeFiles/CoverageTests.dir/r16_share_tools/r16_ini_boostfile_test.cpp.o"
+    ],
+    "exit": 0,
+    "scope": "编译本批三个 R16 测试翻译单元",
+    "evidence": "build.log",
+    "link_command": [
+      "/usr/bin/c++",
+      "-g",
+      "-arch",
+      "arm64",
+      "-fprofile-instr-generate",
+      "-Wl,-undefined,dynamic_lookup",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/TestUnits/coverage/CMakeFiles/CoverageTests.dir/r16_share_tools/r16_timeutils_test.cpp.o",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/TestUnits/coverage/CMakeFiles/CoverageTests.dir/r16_share_tools/r16_strutil_stdutils_test.cpp.o",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/TestUnits/coverage/CMakeFiles/CoverageTests.dir/r16_share_tools/r16_ini_boostfile_test.cpp.o",
+      "-o",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/wt-r16-headers-focused",
+      "-L/opt/homebrew/lib",
+      "-L/usr/local/lib",
+      "/opt/homebrew/lib/libgtest_main.a",
+      "/opt/homebrew/lib/libgtest.a",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/libs/libWTSTools.a",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/libs/libWTSUtils.a",
+      "/usr/local/lib/libiconv.dylib",
+      "-lboost_filesystem",
+      "-lboost_thread",
+      "-ldl",
+      "-lpthread"
+    ],
+    "link_note": "使用独立聚焦二进制；链接步骤随 reproduce.sh 提供。"
+  },
+  "focused_run": {
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/wt-r16-headers-focused",
+      "--gtest_filter=r16_inihelper.long_distinct_section_keys_keep_independent_values:r16_strutil.standardise_path_empty_string:r16_timeutils.time32_default_state_is_deterministic:r16_timeutils.time32_from_local_time_overwrites_previous_value"
+    ],
+    "cwd": ".",
+    "exit": 0,
+    "gtest": {
+      "tests": 4,
+      "failures": 0,
+      "disabled": 0
+    },
+    "evidence": "focused-run.log",
+    "scope_note": "本 defect 的目标用例包含在该 4 项定向批次中，目标用例通过。",
+    "binary_sha256": "355104a9cb992f0b0141b3bc248e1b5bb45d7fbe7efdfa79fac15162a35913b5"
+  },
+  "reproduction": "reproduce.sh",
+  "review": "独立复审未发现本 defect 范围内 blocker。",
+  "limitations": [
+    "本次覆盖长 section/key 独立值保存和重载；同一 IniHelper 实例并发访问未验证，未运行 TSan。"
+  ],
+  "previous_binary_sha256": "355104a9cb992f0b0141b3bc248e1b5bb45d7fbe7efdfa79fac15162a35913b5",
+  "historical_expanded_run_context": {
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/wt-r16-headers-focused"
+    ],
+    "cwd": ".",
+    "exit": 1,
+    "gtest": {
+      "tests": 78,
+      "passed": 73,
+      "failures": 5
+    },
+    "evidence": "expanded-run.log",
+    "interpretation": "初始扩大批次的 5 个失败已在后续逐项修正/核查；此日志保留历史，不代表当前结果。"
+  },
+  "latest_build": {
+    "command": "/opt/homebrew/bin/ninja -C build-cov TestUnits/coverage/CMakeFiles/CoverageTests.dir/r16_share_tools/r16_timeutils_test.cpp.o TestUnits/coverage/CMakeFiles/CoverageTests.dir/r16_share_tools/r16_strutil_stdutils_test.cpp.o TestUnits/coverage/CMakeFiles/CoverageTests.dir/r16_share_tools/r16_ini_boostfile_test.cpp.o",
+    "exit": 0,
+    "evidence": "build-v2.log",
+    "scope": "三份 R16 测试翻译单元修改后的本机重新编译；聚焦二进制随后独立链接。"
+  },
+  "latest_expanded_run": {
+    "command": [
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/TestUnits/wt-r16-headers-focused"
+    ],
+    "cwd": ".",
+    "exit": 0,
+    "binary_sha256": "8123ba8838735a0639a5b2b92a6d50b517b20b124a00fd75d762b0acb4b354e9",
+    "gtest": {
+      "tests": 78,
+      "passed": 78,
+      "failures": 0,
+      "disabled": 0
+    },
+    "evidence": "expanded-v2-run.log",
+    "scope_note": "本机 5 个 R16 share-tools 测试套件全组复测通过；不代表跨平台、TSan 或生产环境验收。"
+  }
+}

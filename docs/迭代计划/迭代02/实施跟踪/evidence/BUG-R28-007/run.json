@@ -1,0 +1,53 @@
+{
+  "scope": "本机 macOS arm64 WtRunner config/quiesce focused suite；日志含真实 WtDataStorage 插件工厂正控。结果是局部证据，不表示本项验收完结。",
+  "command": [
+    "./TestUnits/wt-runner-focused"
+  ],
+  "cwd": "build-cov/build_x64/Debug/bin",
+  "binary_sha256": "6cf5b6080546181a8c9483e291568426bdd88634063177bd9482aebc4a84afcf",
+  "gtest": {
+    "tests": 43,
+    "passed": 43,
+    "failures": 0,
+    "disabled": 2
+  },
+  "evidence_log": "run.log",
+  "build_log": {
+    "path": "build.log",
+    "note": "该归档日志输出到 [32/33]，没有包含 isolated focused binary 的 link line 或末尾 build exit status。"
+  },
+  "covered_cases": [
+    {
+      "test": "r28_wtrunner_config.missing_env_and_data_sections_make_config_fail",
+      "result": "PASS",
+      "scope_note": "env 与 data 同时缺失，不是 env-only 单项。"
+    },
+    {
+      "test": "r28_wtrunner_config.missing_data_section_makes_config_fail",
+      "result": "PASS"
+    },
+    {
+      "test": "r28_wtrunner_config.invalid_data_store_module_makes_config_fail",
+      "result": "PASS",
+      "scope_note": "缺失模块加载失败传播。"
+    },
+    {
+      "test": "r28_wtrunner_config.full_cta_config_reaches_true_and_writes_portfolio_files",
+      "result": "PASS",
+      "scope_note": "从 build-cov/build_x64/Debug/bin cwd 加载真实 WtDataStorage 插件并验证工厂创建/portfolio 文件副作用。"
+    },
+    {
+      "test": "r28_wtrunner_entry.main_returns_nonzero_and_skips_run_when_hot_config_fails",
+      "result": "PASS",
+      "scope_note": "main 对 hot 配置失败返回非零；不等价于对 env/data 初始化失败后直接调用 run 的专项验证。"
+    }
+  ],
+  "review": "独立复审无 blocker；仍保持 IN_PROGRESS，因为 env-only 和 env/data 初始化失败后的 direct run 专项验收未完成。",
+  "limitations": [
+    "env-only 缺失场景尚未独立运行测试；现有用例将 env 和 data 同时省略，另有单独的 data 缺失用例。",
+    "没有在 env/data 初始化失败后直接调用 WtRunner::run 并断言未触碰未初始化对象的专项运行用例；现有 main 热文件失败路径与 run() 的 _engine==NULL 静态保护不能替代该验收。",
+    "IDataReader::init 为 void，无法由本项验证 reader 插件内部 init 失败的传播；provider 异常、资源释放时序及同一 runner 重配置未验。",
+    "本机真实 WtDataStorage factory 创建正控通过；其他平台/ABI 和生产数据 provider 未验。",
+    "捕获的 Ninja 日志止于 [32/33]，未保存 isolated focused binary 的 link 命令或 build 退出码；运行二进制 SHA-256 已记录。"
+  ]
+}

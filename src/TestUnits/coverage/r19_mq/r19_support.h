@@ -22,7 +22,11 @@
 #include <vector>
 #include <filesystem>
 #include <system_error>
+#ifdef _WIN32
+#include <process.h>
+#else
 #include <unistd.h>
+#endif
 
 #include "WtShareHelper/ShareBlocks.h"
 
@@ -70,11 +74,26 @@ inline size_t log_count()
 	return sink().msgs.size();
 }
 
+inline uint32_t process_id() noexcept
+{
+#ifdef _WIN32
+	return static_cast<uint32_t>(::_getpid());
+#else
+	return static_cast<uint32_t>(::getpid());
+#endif
+}
+
 // ---------------------------------------------------------------- 临时目录
 inline std::string case_dir(const std::string& tag)
 {
 	static uint32_t seq = 0;
-	std::string name = std::string("r19_") + tag + "_" + std::to_string(::getpid()) +
+	const auto processId =
+#ifdef _WIN32
+		::_getpid();
+#else
+		::getpid();
+#endif
+	std::string name = std::string("r19_") + tag + "_" + std::to_string(processId) +
 		"_" + std::to_string(++seq);
 	auto p = std::filesystem::temp_directory_path() / name;
 	std::error_code ec;

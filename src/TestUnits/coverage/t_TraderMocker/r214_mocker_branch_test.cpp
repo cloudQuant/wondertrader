@@ -100,6 +100,64 @@ TEST_F(R214MockerBranches, UnregisteredOrderDoesNotTradeOnOtherContractTick)
 	EXPECT_DOUBLE_EQ(5.0, registered_trade_volume);
 }
 
+TEST_F(R214MockerBranches, SameRawCodeOrdersAreIsolatedByExchange)
+{
+	const uint16_t port = r103m::pick_free_udp_port();
+	ASSERT_NE(0, port);
+	set_udp_port((int)port);
+	init_api(9826, (int)port);
+	connect_api();
+	login_api();
+
+	/* 两个交易所登记同名合约，检验 _awaits 的候选订单也按交易所隔离。 */
+	WTSCommodityInfo* dce_comm = WTSCommodityInfo::create("ag_dce", "ag on DCE", "DCE", "TRADING", "CHINA");
+	dce_comm->setCategory(CC_Future);
+	dce_comm->setCoverMode(CM_OpenCover);
+	dce_comm->setPriceMode(PM_Both);
+	dce_comm->setTradingMode(TM_Both);
+	dce_comm->setPriceTick(1.0);
+	dce_comm->setVolScale(15);
+	WTSContractInfo* dce_ct = WTSContractInfo::create("ag2512", "ag2512 on DCE", "DCE", "ag_dce");
+	sink_.bd_.regis(dce_comm, dce_ct);
+
+	WTSEntrust* dce_entrust = r103m::make_entrust("ag2512", "DCE", dce_ct, 7000.0, 5.0,
+		WDT_LONG, WOT_OPEN);
+	const uint32_t before_dce_order = sink_.n_push_order();
+	ASSERT_EQ(0, api_.orderInsert(dce_entrust));
+	dce_entrust->release();
+	ASSERT_TRUE(r113m::wait_until([this, before_dce_order]() {
+		return sink_.n_push_order() >= before_dce_order + 1u;
+	}));
+	const std::string dce_order_id = sink_.last_order_id();
+	ASSERT_FALSE(dce_order_id.empty());
+
+	/* Same-exchange order is the positive control and is inserted after the DCE order. */
+	insert_order(5.0, 7000.0, WDT_LONG, WOT_OPEN);
+	const std::string shfe_order_id = sink_.last_order_id();
+	ASSERT_FALSE(shfe_order_id.empty());
+	ASSERT_NE(dce_order_id, shfe_order_id);
+
+	/* Only the SHFE market-data identity is published. */
+	send_tick(7000.0, 7000.0, 5.0, 7000.0, 5.0, "ag2512", "SHFE");
+	ASSERT_TRUE(r113m::wait_until([this]() {
+		return sink_.total_trade_volume() >= 5.0;
+	})) << "同交易所正控未成交";
+	api_.release();
+
+	const std::vector<r113m::TradeSnap> trades = sink_.trades();
+	ASSERT_FALSE(trades.empty());
+	double shfe_trade_volume = 0.0;
+	for (const r113m::TradeSnap& trade : trades)
+	{
+		EXPECT_EQ("ag2512", trade.code);
+		EXPECT_NE(dce_order_id, trade.ref_order)
+			<< "SHFE 行情不能成交同 raw code 的 DCE 委托";
+		EXPECT_EQ(shfe_order_id, trade.ref_order);
+		shfe_trade_volume += trade.volume;
+	}
+	EXPECT_DOUBLE_EQ(5.0, shfe_trade_volume);
+}
+
 /* 生产: TraderMocker.cpp:363-365 */
 TEST_F(R214MockerBranches, ZeroVolumeOrderIsSkipped)
 {

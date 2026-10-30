@@ -1,0 +1,85 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R4WriterADTest.*
+[==========] Running 35 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 35 tests from R4WriterADTest
+[ RUN      ] R4WriterADTest.FreshInitBuildsFourBlockFilesWithValidADHeader
+[       OK ] R4WriterADTest.FreshInitBuildsFourBlockFilesWithValidADHeader (2 ms)
+[ RUN      ] R4WriterADTest.DisableFlagsKeepTickCacheButTouchNothingElse
+[       OK ] R4WriterADTest.DisableFlagsKeepTickCacheButTouchNothingElse (1 ms)
+[ RUN      ] R4WriterADTest.ReloadExistingCacheClampsSizeAndRebuildsIndex
+[       OK ] R4WriterADTest.ReloadExistingCacheClampsSizeAndRebuildsIndex (1 ms)
+[ RUN      ] R4WriterADTest.TickCacheAtCapacityResizesFileAndKeepsOldItems
+[       OK ] R4WriterADTest.TickCacheAtCapacityResizesFileAndKeepsOldItems (2 ms)
+[ RUN      ] R4WriterADTest.BarCacheExpansionFailureKeepsStateAndRetriesAfterFileRestore
+[       OK ] R4WriterADTest.BarCacheExpansionFailureKeepsStateAndRetriesAfterFileRestore (9 ms)
+[ RUN      ] R4WriterADTest.ProcFlagZeroOverwritesCacheVerbatim
+[       OK ] R4WriterADTest.ProcFlagZeroOverwritesCacheVerbatim (1 ms)
+[ RUN      ] R4WriterADTest.ProcFlagOneTurnsTotalsIntoDeltas
+[       OK ] R4WriterADTest.ProcFlagOneTurnsTotalsIntoDeltas (1 ms)
+[ RUN      ] R4WriterADTest.ProcFlagOneOnNewTradingDateRebaselinesCache
+[       OK ] R4WriterADTest.ProcFlagOneOnNewTradingDateRebaselinesCache (1 ms)
+[ RUN      ] R4WriterADTest.ProcFlagOneZeroPreInterestKeepsFullSnapshot
+[       OK ] R4WriterADTest.ProcFlagOneZeroPreInterestKeepsFullSnapshot (1 ms)
+[ RUN      ] R4WriterADTest.ProcFlagTwoAccumulatesTotals
+[       OK ] R4WriterADTest.ProcFlagTwoAccumulatesTotals (1 ms)
+[ RUN      ] R4WriterADTest.IdenticalActionTimeIsBumpedBy200Ms
+[       OK ] R4WriterADTest.IdenticalActionTimeIsBumpedBy200Ms (4 ms)
+[ RUN      ] R4WriterADTest.OlderTradingDateThanCacheIsRejected
+[       OK ] R4WriterADTest.OlderTradingDateThanCacheIsRejected (3 ms)
+[ RUN      ] R4WriterADTest.OffsetDateAheadOfTradingDateIsAbandoned
+[       OK ] R4WriterADTest.OffsetDateAheadOfTradingDateIsAbandoned (1 ms)
+[ RUN      ] R4WriterADTest.DecreasingTotalVolumeIsAbandoned
+[       OK ] R4WriterADTest.DecreasingTotalVolumeIsAbandoned (2 ms)
+[ RUN      ] R4WriterADTest.BarCacheMergesTicksOfDayMinute5AndMinute1
+[       OK ] R4WriterADTest.BarCacheMergesTicksOfDayMinute5AndMinute1 (2 ms)
+[ RUN      ] R4WriterADTest.LastOfSectionTickRollsBackOneMinute
+[       OK ] R4WriterADTest.LastOfSectionTickRollsBackOneMinute (1 ms)
+[ RUN      ] R4WriterADTest.TickOutsideSessionUpdatesTickCacheOnly
+[       OK ] R4WriterADTest.TickOutsideSessionUpdatesTickCacheOnly (1 ms)
+[ RUN      ] R4WriterADTest.WriteTickGuardsNullTickNullContractAndClosedSession
+[       OK ] R4WriterADTest.WriteTickGuardsNullTickNullContractAndClosedSession (3 ms)
+[ RUN      ] R4WriterADTest.GetCurTickCoversEmptyUnknownMissAndHit
+[       OK ] R4WriterADTest.GetCurTickCoversEmptyUnknownMissAndHit (2 ms)
+[ RUN      ] R4WriterADTest.ReleaseWithoutTaskThreadIsInert
+[       OK ] R4WriterADTest.ReleaseWithoutTaskThreadIsInert (1 ms)
+[ RUN      ] R4WriterADTest.WriterDefaultsToSynchronousWhenAsyncIsMissing
+[       OK ] R4WriterADTest.WriterDefaultsToSynchronousWhenAsyncIsMissing (1 ms)
+[ RUN      ] R4WriterADTest.AsyncWriterDrainsAcceptedTicksOnReleaseAndRejectsNewTicks
+[       OK ] R4WriterADTest.AsyncWriterDrainsAcceptedTicksOnReleaseAndRejectsNewTicks (4 ms)
+[ RUN      ] R4WriterADTest.AsyncWriterTickCountersAreSafeAcrossInstances
+[       OK ] R4WriterADTest.AsyncWriterTickCountersAreSafeAcrossInstances (3 ms)
+[ RUN      ] R4WriterADTest.MissingGroupSizeUsesDefaultInterval
+[       OK ] R4WriterADTest.MissingGroupSizeUsesDefaultInterval (3 ms)
+[ RUN      ] R4WriterADTest.ZeroGroupSizeRejectsInitAndBlocksWrites
+[       OK ] R4WriterADTest.ZeroGroupSizeRejectsInitAndBlocksWrites (0 ms)
+[ RUN      ] R4WriterADTest.LogGroupSizeEmitsCountEveryNthTick
+[       OK ] R4WriterADTest.LogGroupSizeEmitsCountEveryNthTick (1 ms)
+[ RUN      ] R4WriterADTest.TickDbStoresAllTradingDateKeyedRecords
+[       OK ] R4WriterADTest.TickDbStoresAllTradingDateKeyedRecords (3 ms)
+[ RUN      ] R4WriterADTest.HftKeysSortChronologicallyAcrossTradingDates
+[       OK ] R4WriterADTest.HftKeysSortChronologicallyAcrossTradingDates (5 ms)
+[ RUN      ] R4WriterADTest.EachCodeGetsItsOwnTickDbDirectory
+[       OK ] R4WriterADTest.EachCodeGetsItsOwnTickDbDirectory (3 ms)
+[ RUN      ] R4WriterADTest.MinuteBarRolloverPipesAllCompletedBarsIntoMin1Db
+[       OK ] R4WriterADTest.MinuteBarRolloverPipesAllCompletedBarsIntoMin1Db (3 ms)
+[ RUN      ] R4WriterADTest.DayBarRolloverPipesIntoDayDbUsesCorrectVolumeMoney
+[       OK ] R4WriterADTest.DayBarRolloverPipesIntoDayDbUsesCorrectVolumeMoney (6 ms)
+[ RUN      ] R4WriterADTest.MinuteFiveBarPipesIntoMin5Db
+[       OK ] R4WriterADTest.MinuteFiveBarPipesIntoMin5Db (2 ms)
+[ RUN      ] R4WriterADTest.ExtendedDumperReceivesPipedTicksAndBars
+[       OK ] R4WriterADTest.ExtendedDumperReceivesPipedTicksAndBars (4 ms)
+[ RUN      ] R4WriterADTest.ExplicitMapSizesStillPipeData
+[       OK ] R4WriterADTest.ExplicitMapSizesStillPipeData (3 ms)
+[ RUN      ] R4WriterADTest.BumpedActionTimeIsPersistedToTickDb
+[       OK ] R4WriterADTest.BumpedActionTimeIsPersistedToTickDb (2 ms)
+[ DISABLED ] R4WriterADTest.DISABLED_TickDbPathOccupiedByRegularFileThrowsOutOfWriteTick
+[----------] 35 tests from R4WriterADTest (101 ms total)
+
+[----------] Global test environment tear-down
+[==========] 35 tests from 1 test suite ran. (101 ms total)
+[  PASSED  ] 35 tests.
+
+  YOU HAVE 1 DISABLED TEST
+
+EXIT_CODE=0

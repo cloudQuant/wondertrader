@@ -166,7 +166,8 @@ bool CsvReader::check_cell(int32_t col)
 	if (col < 0 || col >= (int32_t)_fields_map.size())
 		return false;
 
-	return true;
+	// A valid header column may be absent from a short data row.
+	return static_cast<size_t>(col) < _current_cells.size();
 }
 
 int32_t CsvReader::get_col_by_filed(const char* field)

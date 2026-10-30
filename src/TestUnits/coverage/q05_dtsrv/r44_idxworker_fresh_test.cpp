@@ -206,19 +206,24 @@ TEST_F(R44IndexWorkerFreshTest, GetTickWithNullCodeIsStoppedByWriterGuard)
 	EXPECT_EQ(mgr.get_tick(nullptr, nullptr), nullptr);
 }
 
-/*
- * 待确认的输入合同：loadFactories 返回 bool，不存在路径返回 false；公开接口没有
- * 说明普通文件应抛异常还是返回 false。普通文件不应被报告为成功，因此暂保留正确
- * 的 false 期望但禁用，待确定异常/返回值合同后再启用。当前 directory_iterator
- * 路径可能抛 filesystem_error，不能把异常本身当作通过。
- * 缺陷登记：bugs/R44.md BUG-R44-005。
- */
-TEST_F(R44IndexWorkerFreshTest, DISABLED_LoadFactoriesOnRegularFileReturnsFalse_ContractPending)
+// loadFactories returns false for a missing directory and true for a traversable
+// directory with zero factories (also covered in q05_idxworker_mgr_test.cpp).
+// A regular file cannot be traversed as a factory directory, so it must fail via
+// the bool result rather than allowing filesystem_error to escape.
+TEST_F(R44IndexWorkerFreshTest, LoadFactoriesOnRegularFileReturnsFalse)
 {
 	fs::path file = _dir / "not_a_dir.txt";
 	r44_write_file(file, "plain file");
 	IndexWorkerMgr mgr;
-	EXPECT_FALSE(mgr.loadFactories(file.string().c_str()));
+	EXPECT_NO_THROW(EXPECT_FALSE(mgr.loadFactories(file.string().c_str())));
+}
+
+TEST_F(R44IndexWorkerFreshTest, LoadFactoriesOnEmptyDirectorySucceeds)
+{
+	fs::path factoryDir = _dir / "empty_factories";
+	ASSERT_TRUE(fs::create_directory(factoryDir));
+	IndexWorkerMgr mgr;
+	EXPECT_NO_THROW(EXPECT_TRUE(mgr.loadFactories(factoryDir.string().c_str())));
 }
 
 /*

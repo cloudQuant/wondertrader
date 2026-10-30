@@ -10,16 +10,17 @@
 //   curQty = max(minopenlots, diffQty)（L700），价格另加 5 跳（L734）。
 // 时序：on_tick 非首笔分支用产品侧挂钟比对 _fire_span*1000。本文件把 total_secs/tail_secs
 //   配成 (19800-18000)/10 = 180 秒，或 tail==total 使 _fire_span=0，两条都能判定。
-// 引用计数：do_calc L769 / fire_at_once L535 各有一处未配对 release（与 WtVWap 同型缺陷），
-//   所以喂给 on_tick 且发过单的 tick 由单元析构收口，用例侧不再 release。
+// 引用计数：on_tick 保留一份最新 tick；回调方仍需释放自己持有的那份引用。
 #include <gtest/gtest.h>
 
+#include <atomic>
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <memory>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "Includes/ExecuteDefs.h"
@@ -27,7 +28,11 @@
 #include "Includes/WTSContractInfo.hpp"
 #include "Includes/WTSStruct.h"
 #include "Includes/WTSDataDef.hpp"
+#include "Includes/WTSSessionInfo.hpp"
+#include "WtExeFact/WtOrdMon.h"
+#define private public
 #include "WtExeFact/WtTWapExeUnit.h"
+#undef private
 #include "r7_init_probe.h"
 
 using namespace wtp;
@@ -35,11 +40,20 @@ using namespace wtp;
 namespace
 {
 const char* const kTCode = "tw2403";
+WTSSessionInfo* mkTSession();
 
 class TFakeCtx : public ExecuteContext
 {
 public:
 	struct Rec { std::string code; double price; double qty; };
+
+	TFakeCtx() : sess(mkTSession()) {}
+	~TFakeCtx() override { if (sess) sess->release(); }
+	void setSession(WTSSessionInfo* session)
+	{
+		if (sess) sess->release();
+		sess = session;
+	}
 
 	WTSTickSlice* getTicks(const char*, uint32_t, uint64_t) override { return NULL; }
 	WTSTickData* grabLastTick(const char*) override { return NULL; }
@@ -70,10 +84,11 @@ public:
 	void writeLog(const char* l) override { logs.push_back(l ? l : ""); }
 	WTSCommodityInfo* getCommodityInfo(const char*) override { return comm; }
 	WTSSessionInfo* getSessionInfo(const char*) override { return sess; }
-	uint64_t getCurTime() override { return 20240101093000000ull; }
+	uint64_t getCurTime() override { return curTime; }
 
 	double pos = 0;
 	double undone = 0;
+	uint64_t curTime = 20240101093000000ull;
 	uint32_t nextId = 8000;
 	uint32_t cancelBydirRetCnt = 2;
 	WTSCommodityInfo* comm = NULL;
@@ -128,18 +143,35 @@ WTSTickData* mkTTick(const char* code, uint32_t actTime, double lastPx,
 	return WTSTickData::create(ts);
 }
 
+WTSSessionInfo* mkTSession()
+{
+	WTSSessionInfo* session = WTSSessionInfo::create("R7_TWAP", "R7_TWAP", 0);
+	session->addTradingSection(930, 1500);
+	return session;
+}
+
+void feedTWapTick(WtTWapExeUnit& unit, WTSTickData* tick)
+{
+	unit.on_tick(tick);
+	tick->release();
+}
+
 // L147-159 实际读取的键；默认 tail_secs=total_secs(19800) 使 _fire_span=0
 WTSVariant* mkTCfg(uint32_t totalTimes = 4, uint32_t priceMode = 0, uint32_t priceOffset = 0,
 	double minOpenLots = 1.0, double lots = 10.0, uint32_t ordSticky = 0,
-	uint32_t tailSecs = 19800, uint32_t beginTime = 930, uint32_t endTime = 1500)
+	uint32_t tailSecs = 19800, uint32_t beginTime = 930, uint32_t endTime = 1500,
+	bool includeTotalTimes = true, bool includeBeginTime = true, bool includeEndTime = true)
 {
 	WTSVariant* cfg = WTSVariant::createObject();
-	cfg->append("begin_time", beginTime);
-	cfg->append("end_time", endTime);
+	if (includeBeginTime)
+		cfg->append("begin_time", beginTime);
+	if (includeEndTime)
+		cfg->append("end_time", endTime);
 	cfg->append("ord_sticky", ordSticky);
 	cfg->append("total_secs", (uint32_t)3600);          // L150 读到的值会被 L162 覆盖
 	cfg->append("tail_secs", tailSecs);
-	cfg->append("total_times", totalTimes);
+	if (includeTotalTimes)
+		cfg->append("total_times", totalTimes);
 	cfg->append("price_mode", priceMode);
 	cfg->append("price_offset", priceOffset);
 	cfg->append("lots", lots);
@@ -153,6 +185,46 @@ void bootT(WtTWapExeUnit& unit, TFakeCtx& ctx, double target, WTSVariant* cfg)
 	cfg->release();
 	unit.set_position(kTCode, target);
 	unit.on_channel_ready();
+}
+
+void expectTWapConfigRejected(WTSVariant* cfg, const char* diagnostic)
+{
+	TFakeCtx ctx;
+	ctx.comm = mkTComm();
+	ctx.undone = 3.0;
+	ctx.cancelBydirRetCnt = 1;
+	{
+		WtTWapExeUnit unit;
+		unit.init(&ctx, kTCode, cfg);
+		cfg->release();
+		unit.set_position(kTCode, 100);
+		unit.on_channel_ready();
+		feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+		EXPECT_TRUE(ctx.hasLog(diagnostic));
+		EXPECT_TRUE(ctx.buys.empty());
+		EXPECT_TRUE(ctx.sells.empty());
+		EXPECT_TRUE(ctx.bydirCancels.empty());
+	}
+	ctx.comm->release();
+}
+
+void expectTWapSessionReleased(WTSVariant* cfg, const char* diagnostic)
+{
+	TFakeCtx ctx;
+	ctx.comm = mkTComm();
+	ctx.setSession(mkTSession());
+	WTSSessionInfo* session = ctx.sess;
+	const uint32_t baseline = session->retainCount();
+	{
+		WtTWapExeUnit unit;
+		unit.init(&ctx, kTCode, cfg);
+		cfg->release();
+		EXPECT_EQ(session->retainCount(), baseline + 1);
+		if (diagnostic != NULL)
+			EXPECT_TRUE(ctx.hasLog(diagnostic));
+	}
+	EXPECT_EQ(session->retainCount(), baseline);
+	ctx.comm->release();
 }
 
 
@@ -187,11 +259,161 @@ TEST(r7_twap, names_and_init_derived_span)
 	EXPECT_STREQ(unit.getFactName(), "WtExeFact");      // L110
 	// calTmSecs(930,1500) = 54000-34200 = 19800；(19800-18000)/10 = 180
 	unit.init(&ctx, kTCode, mkTCfg(10, 0, 0, 1.0, 10.0, 0, 18000));
+	EXPECT_TRUE(unit.initializationSucceeded());
 	unit.on_channel_ready();
 	EXPECT_TRUE(ctx.hasLog("执行时限 19800 秒"));
 	EXPECT_TRUE(ctx.hasLog("间隔时间 180 秒"));
 	EXPECT_TRUE(ctx.buys.empty());
 	ctx.comm->release();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 超时订单没有版本化身份时保留监控记录，不走旧 localid 自动撤单。
+//////////////////////////////////////////////////////////////////////////
+TEST(r7_twap, timeout_without_verified_identity_keeps_monitor_and_never_cancels)
+{
+	TFakeCtx ctx;
+	ctx.comm = mkTComm();
+	{
+		WtTWapExeUnit unit;
+		WTSVariant* cfg = mkTCfg(4, 0, 0, 1.0, 10.0, 1);
+		unit.init(&ctx, kTCode, cfg);
+		cfg->release();
+		unit.set_position(kTCode, 0);
+
+		const uint32_t id = 8351;
+		unit._orders_mon.push_order(&id, 1, ctx.curTime);
+		feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+		ctx.curTime += 999;
+		feedTWapTick(unit, mkTTick(kTCode, 100001000, 10.50, 10.49, 10.51));
+		EXPECT_EQ(ctx.countLog("Expired order 8351"), 0u);
+		ctx.curTime += 1;
+		feedTWapTick(unit, mkTTick(kTCode, 100002000, 10.50, 10.49, 10.51));
+		EXPECT_TRUE(ctx.byidCancels.empty());
+		EXPECT_TRUE(ctx.bydirCancels.empty());
+		EXPECT_TRUE(unit._orders_mon.has_order(id));
+		EXPECT_EQ(ctx.countLog("Expired order 8351"), 1u);
+
+		unit.on_channel_ready(); // clear_orders may clear the local entry; it must not clear the unit quarantine
+		EXPECT_TRUE(unit._orders_mon.has_unverified_timeout());
+		unit.set_position(kTCode, 1.0);
+		unit.fire_at_once(1.0);
+		feedTWapTick(unit, mkTTick(kTCode, 100003000, 10.50, 10.49, 10.51));
+		EXPECT_TRUE(ctx.byidCancels.empty());
+		EXPECT_TRUE(ctx.bydirCancels.empty());
+		EXPECT_FALSE(unit._orders_mon.has_order(id));
+		EXPECT_TRUE(unit._orders_mon.has_unverified_timeout());
+		EXPECT_TRUE(ctx.buys.empty());
+		EXPECT_TRUE(ctx.sells.empty());
+		EXPECT_EQ(ctx.countLog("Expired order 8351"), 1u);
+	}
+	ctx.comm->release();
+}
+
+TEST(r7_twap, init_rejects_missing_commodity_or_trading_session)
+{
+	{
+		TFakeCtx ctx;
+		WtTWapExeUnit unit;
+		WTSVariant* cfg = mkTCfg(4);
+		unit.init(&ctx, kTCode, cfg);
+		cfg->release();
+		EXPECT_FALSE(unit.initializationSucceeded());
+		EXPECT_TRUE(ctx.hasLog("commodity or trading session is unavailable"));
+		unit.set_position(kTCode, 100);
+		unit.on_channel_ready();
+		feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+		EXPECT_TRUE(ctx.buys.empty());
+		EXPECT_TRUE(ctx.sells.empty());
+	}
+
+	{
+		TFakeCtx ctx;
+		ctx.comm = mkTComm();
+		ctx.setSession(NULL);
+		const uint32_t commBaseline = ctx.comm->retainCount();
+		{
+			WtTWapExeUnit unit;
+			WTSVariant* cfg = mkTCfg(4);
+			unit.init(&ctx, kTCode, cfg);
+			cfg->release();
+			EXPECT_FALSE(unit.initializationSucceeded());
+			EXPECT_TRUE(ctx.hasLog("commodity or trading session is unavailable"));
+		}
+		EXPECT_EQ(ctx.comm->retainCount(), commBaseline);
+		ctx.comm->release();
+	}
+}
+
+TEST(r7_twap, init_rejects_null_context_code_and_configuration)
+{
+	{
+		WtTWapExeUnit unit;
+		WTSVariant* cfg = mkTCfg(4);
+		unit.init(NULL, kTCode, cfg);
+		cfg->release();
+		EXPECT_FALSE(unit.initializationSucceeded());
+	}
+
+	TFakeCtx ctx;
+	ctx.comm = mkTComm();
+	{
+		WtTWapExeUnit unit;
+		WTSVariant* cfg = mkTCfg(4);
+		unit.init(&ctx, NULL, cfg);
+		cfg->release();
+		EXPECT_FALSE(unit.initializationSucceeded());
+		EXPECT_TRUE(ctx.hasLog("standard code is empty"));
+	}
+	{
+		WtTWapExeUnit unit;
+		unit.init(&ctx, kTCode, NULL);
+		EXPECT_FALSE(unit.initializationSucceeded());
+		EXPECT_TRUE(ctx.hasLog("configuration is null"));
+	}
+	ctx.comm->release();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 非法调度配置必须记录原因、公开失败状态并 fail-closed。
+//////////////////////////////////////////////////////////////////////////
+TEST(r7_twap, invalid_schedule_configs_fail_closed_without_orders)
+{
+	expectTWapConfigRejected(mkTCfg(0), "total_times must be greater than zero");
+	expectTWapConfigRejected(
+		mkTCfg(4, 0, 0, 1.0, 10.0, 0, 19800, 930, 1500, false),
+		"total_times must be greater than zero");
+	expectTWapConfigRejected(
+		mkTCfg(4, 0, 0, 1.0, 10.0, 0, 19801),
+		"tail_secs exceeds execution duration");
+	expectTWapConfigRejected(
+		mkTCfg(4, 0, 0, 1.0, 10.0, 0, 19800, 960),
+		"begin_time/end_time must be valid HHMM values");
+	expectTWapConfigRejected(
+		mkTCfg(4, 0, 0, 1.0, 10.0, 0, 19800, 930, 2400),
+		"begin_time/end_time must be valid HHMM values");
+	expectTWapConfigRejected(
+		mkTCfg(4, 0, 0, 1.0, 10.0, 0, 19800, 930, 930),
+		"execution duration must be greater than zero");
+	expectTWapConfigRejected(
+		mkTCfg(4, 0, 0, 1.0, 10.0, 0, 19800, 930, 1500, true, false),
+		"begin_time/end_time must be valid HHMM values");
+	expectTWapConfigRejected(
+		mkTCfg(4, 0, 0, 1.0, 10.0, 0, 19800, 930, 1500, true, true, false),
+		"begin_time/end_time must be valid HHMM values");
+	expectTWapConfigRejected(
+		mkTCfg(4, 0, 0, 1.0, 10.0, 0, 19800, 2100, 230),
+		"overnight schedules are unsupported pending explicit session semantics");
+}
+
+TEST(r7_twap, session_reference_released_after_invalid_config)
+{
+	expectTWapSessionReleased(mkTCfg(0), "total_times must be greater than zero");
+}
+
+TEST(r7_twap, session_reference_released_after_normal_destruction)
+{
+	expectTWapSessionReleased(mkTCfg(4), NULL);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -203,12 +425,43 @@ TEST(r7_twap, splits_remaining_qty_evenly_across_left_times)
 	ctx.comm = mkTComm();
 	WtTWapExeUnit unit;
 	bootT(unit, ctx, 100, mkTCfg(4));
-	unit.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	ASSERT_EQ(ctx.buys.size(), 1u);
 	EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 25.0);            // max(1, round(100/4)) = 25
 	EXPECT_DOUBLE_EQ(ctx.buys[0].price, 10.50);         // price_mode=0 -> 最新价（L720）
 	EXPECT_EQ(ctx.buys[0].code, kTCode);
 	EXPECT_TRUE(ctx.hasLog("第 1 次发单"));              // L680
+	ctx.comm->release();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// TWAP 保留缓存 tick 的所有权：调用方可在回调后释放自己的引用；后续 tick 替换缓存，
+// 单元析构释放最后一份引用。
+//////////////////////////////////////////////////////////////////////////
+TEST(r7_twap, tick_ownership_survives_caller_release_later_tick_and_unit_destruction)
+{
+	TFakeCtx ctx;
+	ctx.comm = mkTComm();
+	WTSTickData* finalTick = NULL;
+	{
+		WtTWapExeUnit unit;
+		bootT(unit, ctx, 100, mkTCfg(2));
+
+		WTSTickData* firstTick = mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51);
+		unit.on_tick(firstTick);
+		ASSERT_EQ(firstTick->retainCount(), 2u);            // 调用方 + TWAP 缓存
+		firstTick->release();                              // 调用方归还自己的引用
+		EXPECT_EQ(firstTick->retainCount(), 1u);            // 缓存仍持有对象
+
+		ctx.pos = 50;                                      // 模拟首单部分成交
+		finalTick = mkTTick(kTCode, 100100000, 10.60, 10.59, 10.61);
+		unit.on_tick(finalTick);                           // 替换并释放 firstTick 的缓存引用
+		ASSERT_EQ(finalTick->retainCount(), 2u);            // 调用方 + TWAP 缓存
+		EXPECT_EQ(ctx.buys.size(), 2u);
+	} // 析构释放 finalTick 的缓存引用，保留调用方引用以观察计数
+	ASSERT_NE(finalTick, nullptr);
+	EXPECT_EQ(finalTick->retainCount(), 1u);
+	finalTick->release();
 	ctx.comm->release();
 }
 
@@ -221,7 +474,7 @@ TEST(r7_twap, rounds_half_away_from_zero_when_remainder_not_even)
 	ctx.comm = mkTComm();
 	WtTWapExeUnit unit;
 	bootT(unit, ctx, 10, mkTCfg(4));
-	unit.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	ASSERT_EQ(ctx.buys.size(), 1u);
 	EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 3.0);             // max(1, round(2.5)) = 3
 	ctx.comm->release();
@@ -236,7 +489,7 @@ TEST(r7_twap, tiny_diffqty_floors_to_min_open_lots)
 	ctx.comm = mkTComm();
 	WtTWapExeUnit unit;
 	bootT(unit, ctx, 3, mkTCfg(10, 0, 0, 1.0));
-	unit.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	// round(3/10)=0 -> max(minopenlots=1, 0) = 1
 	ASSERT_EQ(ctx.buys.size(), 1u);
 	EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 1.0);
@@ -253,7 +506,7 @@ TEST(r7_twap, sell_side_keeps_sign_and_splits_evenly)
 	ctx.pos = 100;
 	WtTWapExeUnit unit;
 	bootT(unit, ctx, 20, mkTCfg(4, 2));                 // diffQty = -80, mode2 -> bid
-	unit.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	// max(1, round(80/4)) = 20 -> *(-1) = -20 -> sell 20
 	ASSERT_EQ(ctx.sells.size(), 1u);
 	EXPECT_DOUBLE_EQ(ctx.sells[0].qty, 20.0);
@@ -278,12 +531,7 @@ TEST(r7_twap, last_slice_showhand_buys_remaining_with_5_tick_premium)
 		auto releaseTick = [](WTSTickData* tick) { if (tick) tick->release(); };
 		std::unique_ptr<WTSTickData, decltype(releaseTick)> tick(rawTick, releaseTick);
 		unit.on_tick(tick.get());
-		// 临时规避 BUG-R7-015：do_calc() 错误地额外 release 借用的 _last_tick，
-		// 因此这里按回调后的引用数交接，避免这个既有缺陷干扰本用例的价格/数量断言。
-		// 这不是标准 tick 所有权契约，也不证明生命周期安全；BUG-R7-015 修复后，
-		// 应移除此规避并按正常 retain/release 契约统一回归。
-		if (tick->retainCount() == 1)
-			(void)tick.release();
+		EXPECT_EQ(tick->retainCount(), 2u);                  // 调用方 + TWAP 缓存
 	};
 	sendTick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	// 首次发单：_fired_times=0、total_times=1，leftTimes=1，常规切片为 100 手。
@@ -317,13 +565,13 @@ TEST(r7_twap, fire_span_blocks_second_tick_recalc)
 	WtTWapExeUnit unit;
 	// (19800-18000)/10 = 180 秒 -> 两条连续 tick 之间远小于 180000ms
 	bootT(unit, ctx, 100, mkTCfg(10, 0, 0, 1.0, 10.0, 0, 18000));
-	unit.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	// 首笔 tick 触发 do_calc：leftTimes=10 -> round(100/10)=10
 	ASSERT_EQ(ctx.buys.size(), 1u);
 	EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 10.0);
-	unit.on_tick(mkTTick(kTCode, 100100000, 10.60, 10.59, 10.61));
+	feedTWapTick(unit, mkTTick(kTCode, 100100000, 10.60, 10.59, 10.61));
 	EXPECT_EQ(ctx.buys.size(), 1u);                     // 间隔未到 -> 不再发单
-	unit.on_tick(mkTTick(kTCode, 100200000, 10.70, 10.69, 10.71));
+	feedTWapTick(unit, mkTTick(kTCode, 100200000, 10.70, 10.69, 10.71));
 	EXPECT_EQ(ctx.buys.size(), 1u);
 	ctx.comm->release();
 }
@@ -337,9 +585,9 @@ TEST(r7_twap, price_mode_1_buy_uses_bid_and_mode_2_uses_ask)
 	ctx.comm = mkTComm();
 	WtTWapExeUnit u1, u2;
 	bootT(u1, ctx, 40, mkTCfg(2, 1));
-	u1.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	feedTWapTick(u1, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	bootT(u2, ctx, 40, mkTCfg(2, 2));
-	u2.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	feedTWapTick(u2, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	// 两个单元共享 ctx，各自 1 笔：buys[0] 属于 mode1，buys[1] 属于 mode2
 	ASSERT_EQ(ctx.buys.size(), 2u);
 	EXPECT_DOUBLE_EQ(ctx.buys[0].price, 10.49);         // L724: isBuy -> bidprice(0)
@@ -356,13 +604,13 @@ TEST(r7_twap, price_offset_shifts_buy_up_and_sell_down)
 	ctx.comm = mkTComm();
 	WtTWapExeUnit u1;
 	bootT(u1, ctx, 100, mkTCfg(4, 0, 3));               // offset=3
-	u1.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	feedTWapTick(u1, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	ASSERT_EQ(ctx.buys.size(), 1u);
 	EXPECT_DOUBLE_EQ(ctx.buys[0].price, 10.53);         // 10.50 + 0.01*3
 	ctx.pos = 100;
 	WtTWapExeUnit u2;
 	bootT(u2, ctx, 20, mkTCfg(4, 0, 3));                // diffQty=-80 -> isBuy=false
-	u2.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	feedTWapTick(u2, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	ASSERT_EQ(ctx.sells.size(), 1u);
 	EXPECT_DOUBLE_EQ(ctx.sells[0].price, 10.47);        // 10.50 - 0.01*3
 	ctx.comm->release();
@@ -377,7 +625,7 @@ TEST(r7_twap, zero_last_price_falls_back_to_preclose)
 	ctx.comm = mkTComm();
 	WtTWapExeUnit unit;
 	bootT(unit, ctx, 100, mkTCfg(4, 0, 0, 1.0, 10.0, 0, 19800, 930, 1500));
-	unit.on_tick(mkTTick(kTCode, 100000000, 0.0, 0.0, 0.0));
+	feedTWapTick(unit, mkTTick(kTCode, 100000000, 0.0, 0.0, 0.0));
 	// price_mode=0 -> targetPx = price()=0 -> L741 命中 -> price()==0 -> preclose()=10.0
 	ASSERT_EQ(ctx.buys.size(), 1u);
 	EXPECT_DOUBLE_EQ(ctx.buys[0].price, 10.0);
@@ -393,14 +641,14 @@ TEST(r7_twap, limit_prices_cap_the_order_price)
 	ctx.comm = mkTComm();
 	WtTWapExeUnit u1;
 	bootT(u1, ctx, 100, mkTCfg(4, 0, 300));
-	u1.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51, 10.60, 0));
+	feedTWapTick(u1, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51, 10.60, 0));
 	ASSERT_EQ(ctx.buys.size(), 1u);
 	EXPECT_DOUBLE_EQ(ctx.buys[0].price, 10.60);         // 10.50+3.00 -> 涨停 10.60
 	EXPECT_TRUE(ctx.hasLog("modified to upper limit price"));
 	ctx.pos = 100;
 	WtTWapExeUnit u2;
 	bootT(u2, ctx, 20, mkTCfg(4, 0, 300));
-	u2.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51, 0, 10.20));
+	feedTWapTick(u2, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51, 0, 10.20));
 	ASSERT_EQ(ctx.sells.size(), 1u);
 	EXPECT_DOUBLE_EQ(ctx.sells[0].price, 10.20);        // 10.50-3.00 -> 跌停 10.20
 	EXPECT_TRUE(ctx.hasLog("modified to lower limit price"));
@@ -417,7 +665,7 @@ TEST(r7_twap, calc_before_channel_ready_does_nothing)
 	WtTWapExeUnit unit;
 	unit.init(&ctx, kTCode, mkTCfg(4));
 	unit.set_position(kTCode, 100);
-	unit.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	EXPECT_TRUE(ctx.buys.empty());                     // !_channel_ready -> L552 return
 	unit.on_channel_ready();                           // undone=0、OMS 空 -> L303 else 分支
 	// 就绪后 on_channel_ready 末尾的 do_calc 已经有 tick 了 -> 正常发单
@@ -479,7 +727,7 @@ TEST(r7_twap, opposite_live_order_canceled_first_without_new_order)
 	WtTWapExeUnit unit;
 	bootT(unit, ctx, 100, mkTCfg(4));                   // boot 时 undone=0 -> else 分支
 	ctx.undone = -3.0;
-	unit.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	// diffQty=100, undone=-3 -> L594 isBuy=(undone>0)=false
 	ASSERT_EQ(ctx.bydirCancels.size(), 1u);
 	EXPECT_FALSE(ctx.bydirCancels[0].second);
@@ -497,7 +745,7 @@ TEST(r7_twap, channel_ready_drops_unconfirmed_local_orders)
 	ctx.comm = mkTComm();
 	WtTWapExeUnit unit;
 	bootT(unit, ctx, 100, mkTCfg(4));
-	unit.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	ASSERT_EQ(ctx.buys.size(), 1u);                      // OMS 里有 8000
 	unit.on_channel_ready();
 	EXPECT_TRUE(ctx.hasLog("Local orders of"));
@@ -514,7 +762,7 @@ TEST(r7_twap, stale_tick_gate_and_entrust_reject)
 	ctx.comm = mkTComm();
 	WtTWapExeUnit unit;
 	bootT(unit, ctx, 100, mkTCfg(4));
-	unit.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	ASSERT_EQ(ctx.buys.size(), 1u);
 	unit.on_entrust(8000, kTCode, false, "rejected");    // erase -> do_calc -> 同一 tick 被拦
 	EXPECT_EQ(ctx.buys.size(), 1u);
@@ -556,7 +804,7 @@ TEST(r7_twap, cancel_report_refires_with_cancel_times_price_step)
 	ctx.comm = mkTComm();
 	WtTWapExeUnit unit;
 	bootT(unit, ctx, 100, mkTCfg(4, 0));
-	unit.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	ASSERT_EQ(ctx.buys.size(), 1u);                      // _this_target = 0 + 25 = 25
 	unit.on_order(8000, kTCode, true, 5, 10.50, true);   // leftover!=0 且已撤 -> L213 命中
 	// _cancel_times=1 -> fire_at_once(max(1, 25-0)=25)
@@ -578,9 +826,9 @@ TEST(r7_twap, fire_at_once_mode_1_and_2_pricing)
 	ctx.comm = mkTComm();
 	WtTWapExeUnit u1, u2;
 	bootT(u1, ctx, 100, mkTCfg(4, 1));
-	u1.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	feedTWapTick(u1, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	bootT(u2, ctx, 100, mkTCfg(4, 2));
-	u2.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	feedTWapTick(u2, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	ASSERT_EQ(ctx.buys.size(), 2u);
 	EXPECT_DOUBLE_EQ(ctx.buys[0].price, 10.49);         // u1 do_calc mode1 买入 -> bid
 	EXPECT_DOUBLE_EQ(ctx.buys[1].price, 10.51);         // u2 do_calc mode2 买入 -> ask
@@ -604,7 +852,7 @@ TEST(r7_twap, fire_at_once_unknown_price_mode_has_no_preclose_fallback)
 	ctx.comm = mkTComm();
 	WtTWapExeUnit unit;
 	bootT(unit, ctx, 100, mkTCfg(4, 3));                // price_mode=3
-	unit.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	// do_calc 的 else 分支（L726-729）仍取对手价 10.51
 	ASSERT_EQ(ctx.buys.size(), 1u);
 	EXPECT_DOUBLE_EQ(ctx.buys[0].price, 10.51);
@@ -626,7 +874,7 @@ TEST(r7_twap, unknown_price_mode_falls_into_counter_price)
 	ctx.comm = mkTComm();
 	WtTWapExeUnit unit;
 	bootT(unit, ctx, 100, mkTCfg(4, 9));                 // price_mode=9 -> else
-	unit.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	ASSERT_EQ(ctx.buys.size(), 1u);
 	EXPECT_DOUBLE_EQ(ctx.buys[0].price, 10.51);          // 买入 -> askprice(0)
 	ctx.comm->release();
@@ -652,7 +900,7 @@ TEST(r7_twap, tick_guards_and_noop_callbacks)
 	EXPECT_FALSE(ctx.hasLog("次发单"));
 	foreign->release();
 	unit.set_position("other", 100);                     // L782 代码不符 -> 丢弃
-	unit.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	ASSERT_EQ(ctx.buys.size(), 1u);
 	EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 25.0);
 	ctx.comm->release();
@@ -667,11 +915,11 @@ TEST(r7_twap, repeated_target_is_ignored)
 	ctx.comm = mkTComm();
 	WtTWapExeUnit unit;
 	bootT(unit, ctx, 100, mkTCfg(4));
-	unit.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	ASSERT_EQ(ctx.buys.size(), 1u);
 	unit.set_position(kTCode, 100);                      // 与 _target_pos 相等 -> 直接 return
 	EXPECT_EQ(ctx.countLog("第 1 次发单"), 1u);
-	unit.on_tick(mkTTick(kTCode, 100100000, 10.60, 10.59, 10.61));
+	feedTWapTick(unit, mkTTick(kTCode, 100100000, 10.60, 10.59, 10.61));
 	// _fire_span=0 -> 会重算；此时 diffQty 仍是 100（realPos 未变），_fired_times=1,
 	// total_times=4 -> leftTimes=3 -> round(100/3)=33
 	ASSERT_EQ(ctx.buys.size(), 2u);
@@ -689,7 +937,7 @@ TEST(r7_twap, clear_target_with_flat_position_does_nothing)
 	WtTWapExeUnit unit;
 	unit.init(&ctx, kTCode, mkTCfg(4));
 	unit.on_channel_ready();
-	unit.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	unit.set_position(kTCode, DBL_MAX);                  // get_real_target -> 0 == realPos
 	EXPECT_TRUE(ctx.buys.empty());
 	EXPECT_TRUE(ctx.sells.empty());
@@ -732,6 +980,27 @@ TEST(r7_twap, DISABLED_null_commodity_info_crashes_price_offset_branch)
 	unit.init(&ctx, kTCode, mkTCfg(4, 0, 3));
 	unit.set_position(kTCode, 100);
 	unit.on_channel_ready();
-	unit.on_tick(mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	EXPECT_TRUE(ctx.buys.empty());                       // 期望：崩溃（BUG-R7-006）
+}
+
+TEST(r7_twap, failed_concurrent_calc_guard_does_not_release_owner)
+{
+	WtTWapExeUnit unit;
+	EXPECT_FALSE(unit._in_calc.load(std::memory_order_acquire));
+	{
+		WtTWapExeUnit::CalcFlag owner(&unit._in_calc);
+		ASSERT_FALSE(static_cast<bool>(owner));
+
+		bool contenderSawBusy = false;
+		std::thread contender([&]() {
+			WtTWapExeUnit::CalcFlag nested(&unit._in_calc);
+			contenderSawBusy = static_cast<bool>(nested);
+		});
+		contender.join();
+
+		EXPECT_TRUE(contenderSawBusy);
+		EXPECT_TRUE(unit._in_calc.load(std::memory_order_acquire));
+	}
+	EXPECT_FALSE(unit._in_calc.load(std::memory_order_acquire));
 }

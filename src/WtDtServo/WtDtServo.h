@@ -34,6 +34,19 @@ extern "C"
 	EXPORT_FLAG void		initialize(WtString cfgFile, bool isFile, WtString logCfg, FuncOnTickCallback cbTick, FuncOnBarCallback cbBar);
 
 	/**
+	 * @brief 查询数据服务模块是否已成功初始化
+	 * @return true 表示 initialize 已成功完成，false 表示仍未初始化或初始化失败
+	 */
+	EXPORT_FLAG bool		is_initialized();
+
+	/**
+	 * @brief 查询 runner 是否仍持有 parser adapter
+	 * @return true 表示 runner 仍持有 parser adapter，需要维持其生命周期
+	 * @details 该状态不证明 provider 回调已排空；false 也不作为析构安全证明。
+	 */
+	EXPORT_FLAG bool		has_retained_parser_adapters();
+
+	/**
 	 * @brief 获取数据服务模块版本号
 	 * @return WtString 版本号字符串
 	 * 

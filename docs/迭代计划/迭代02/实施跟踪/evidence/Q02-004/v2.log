@@ -1,0 +1,33 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = Q02CtaDumpTest.incrementalLoadRestoresPositionQueries:Q02CtaDumpTest.strategyDumpRoundTripsIntoSecondMocker:Q02CtaDumpTest.jsonWithoutDetailsKeyStillLoads:Q02CtaDumpTest.missingConditionSettimeDefaultsToZero:Q02CtaDumpTest.invalidSnapshotLeavesExistingStateAndCsvLogsUntouched:Q02CtaDumpTest.invalidConditionEnumsAreRejectedWithoutPartialRestore:Q02CtaDumpTest.conditionEnumUpperBoundsAndFieldSentinelLoad:Q02CtaDumpTest.csvReadFailureDoesNotCommitEarlierRowsOrJsonState
+[==========] Running 8 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 8 tests from Q02CtaDumpTest
+[ RUN      ] Q02CtaDumpTest.incrementalLoadRestoresPositionQueries
+[       OK ] Q02CtaDumpTest.incrementalLoadRestoresPositionQueries (1 ms)
+[ RUN      ] Q02CtaDumpTest.strategyDumpRoundTripsIntoSecondMocker
+[       OK ] Q02CtaDumpTest.strategyDumpRoundTripsIntoSecondMocker (3 ms)
+[ RUN      ] Q02CtaDumpTest.jsonWithoutDetailsKeyStillLoads
+[       OK ] Q02CtaDumpTest.jsonWithoutDetailsKeyStillLoads (1 ms)
+[ RUN      ] Q02CtaDumpTest.missingConditionSettimeDefaultsToZero
+[       OK ] Q02CtaDumpTest.missingConditionSettimeDefaultsToZero (2 ms)
+[ RUN      ] Q02CtaDumpTest.invalidSnapshotLeavesExistingStateAndCsvLogsUntouched
+[       OK ] Q02CtaDumpTest.invalidSnapshotLeavesExistingStateAndCsvLogsUntouched (10 ms)
+[ RUN      ] Q02CtaDumpTest.invalidConditionEnumsAreRejectedWithoutPartialRestore
+[       OK ] Q02CtaDumpTest.invalidConditionEnumsAreRejectedWithoutPartialRestore (10 ms)
+[ RUN      ] Q02CtaDumpTest.conditionEnumUpperBoundsAndFieldSentinelLoad
+[       OK ] Q02CtaDumpTest.conditionEnumUpperBoundsAndFieldSentinelLoad (3 ms)
+[ RUN      ] Q02CtaDumpTest.csvReadFailureDoesNotCommitEarlierRowsOrJsonState
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/q02_cta_dump_incremental_test.cpp:633: Failure
+Expected: (std::string::npos) != (dumpedJson.find("\"volume\" : 100")), actual: 18446744073709551615 vs 18446744073709551615
+
+[  FAILED  ] Q02CtaDumpTest.csvReadFailureDoesNotCommitEarlierRowsOrJsonState (3 ms)
+[----------] 8 tests from Q02CtaDumpTest (37 ms total)
+
+[----------] Global test environment tear-down
+[==========] 8 tests from 1 test suite ran. (37 ms total)
+[  PASSED  ] 7 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] Q02CtaDumpTest.csvReadFailureDoesNotCommitEarlierRowsOrJsonState
+
+ 1 FAILED TEST

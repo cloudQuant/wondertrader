@@ -9,12 +9,15 @@
 #include <gtest/gtest.h>
 
 #include <cmath>
+#include <atomic>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <memory>
 #include <set>
 #include <sstream>
 #include <string>
+#include <thread>
 
 #include "Includes/WTSContractInfo.hpp"
 #include "Includes/WTSObject.hpp"
@@ -296,6 +299,37 @@ TEST_F(P08HftOrderCancel, CancelByCodeAndDirectionZeroCancelsAllMatching)
 	EXPECT_TRUE(mocker._orders.empty());
 }
 
+// A positive cancel amount below decimal::EPSINON is still a quantity request, not cancel-all.
+TEST_F(P08HftOrderCancel, CancelByTinyPositiveQtyDoesNotCancelAll)
+{
+	HftMocker mocker(&_rp, "p08_hft_cancelby_tiny_qty");
+	auto b1 = mocker.stra_buy(kCode, 3800.0, 2, "b1");
+	auto b2 = mocker.stra_buy(kCode, 3800.0, 3, "b2");
+	auto sells = mocker.stra_sell(kCode, 3810.0, 5, "s1");
+	ASSERT_EQ(1u, b1.size());
+	ASSERT_EQ(1u, b2.size());
+	ASSERT_EQ(1u, sells.size());
+
+	const double tiny_positive_qty = 1e-7;
+	EXPECT_GT(tiny_positive_qty, 0.0);
+	EXPECT_LT(tiny_positive_qty, 1e-6);
+	auto canceled = mocker.stra_cancel(kCode, true, tiny_positive_qty);
+	ASSERT_EQ(1u, canceled.size());
+	EXPECT_TRUE(canceled[0] == b1[0] || canceled[0] == b2[0]);
+	const uint32_t remaining_buy = canceled[0] == b1[0] ? b2[0] : b1[0];
+
+	mocker.procTask();
+	EXPECT_EQ(0u, mocker._orders.count(canceled[0]));
+	EXPECT_EQ(1u, mocker._orders.count(remaining_buy));
+	EXPECT_EQ(1u, mocker._orders.count(sells[0]));
+
+	// Drain this fixture without altering the assertions above.
+	mocker.stra_cancel(remaining_buy);
+	mocker.stra_cancel(sells[0]);
+	mocker.procTask();
+	EXPECT_TRUE(mocker._orders.empty());
+}
+
 // 按量撤单：qty 大于所有匹配单之和时把它们全部撤掉
 TEST_F(P08HftOrderCancel, CancelByQtyAccumulatesUntilSatisfied)
 {
@@ -486,4 +520,49 @@ TEST_F(P08HftOrderCancel, DISABLED_BlockingHookAndNullDerefFamily)
 	mocker.stra_sub_order_queues(kCode);
 	mocker.stra_sub_order_details(kCode);
 	mocker.stra_sub_transactions(kCode);
+}
+
+// Run this test alone in a fresh process to cover the first concurrent HftMocker order call.
+TEST(R203HftLocalOrderId, ConcurrentFirstBuyReturnsUniqueIds)
+{
+	constexpr size_t kThreadCount = 24;
+	HisDataReplayer replayer;
+	replayer._cur_date = 20240102;
+	replayer._cur_time = 93000;
+	replayer._cur_secs = 0;
+	replayer._cur_tdate = 20240102;
+	hft_add_comm(replayer, "SHFE", "rb", 10, 1.0, TM_Both);
+
+	std::vector<std::unique_ptr<HftMocker>> mockers;
+	mockers.reserve(kThreadCount);
+	for (size_t i = 0; i < kThreadCount; ++i)
+		mockers.emplace_back(std::make_unique<HftMocker>(&replayer, ("r203_hft_" + std::to_string(i)).c_str()));
+
+	std::atomic<size_t> ready{ 0 };
+	std::atomic<bool> start{ false };
+	std::vector<uint32_t> ids(kThreadCount, UINT_MAX);
+	std::vector<std::thread> workers;
+	workers.reserve(kThreadCount);
+	for (size_t i = 0; i < kThreadCount; ++i)
+	{
+		workers.emplace_back([&, i]() {
+			ready.fetch_add(1, std::memory_order_release);
+			while (!start.load(std::memory_order_acquire))
+				std::this_thread::yield();
+			auto placed = mockers[i]->stra_buy(kCode, 3800.0, 1.0, "r203");
+			if (placed.size() == 1)
+				ids[i] = placed[0];
+		});
+	}
+	while (ready.load(std::memory_order_acquire) != kThreadCount)
+		std::this_thread::yield();
+	start.store(true, std::memory_order_release);
+	for (std::thread& worker : workers)
+		worker.join();
+
+	std::set<uint32_t> uniqueIds(ids.begin(), ids.end());
+	EXPECT_EQ(kThreadCount, uniqueIds.size())
+		<< "并发首次通过 HftMocker::stra_buy 生成的本地委托号必须互异";
+	EXPECT_EQ(0u, uniqueIds.count(UINT_MAX)) << "所有真实下单入口都应成功返回一个 ID";
+	EXPECT_EQ(0u, uniqueIds.count(0u)) << "0 保留为无订单哨兵";
 }

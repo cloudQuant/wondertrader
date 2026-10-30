@@ -2,12 +2,14 @@
 // 覆盖：WTSEntrust 买入动作矩阵/信用业务/可变 ID、WTSEntrustAction 普通路径、
 //       WTSOrderInfo 开平标志映射/状态机/错误标记/元数据、WTSTradeInfo 开平与扩展、
 //       WTSOrderInfo/WTSTradeInfo 的合约与扩展对象绑定。
-// 说明：WTSEntrustAction::createCancelAction 的裸 new 缺陷用 DISABLED 记录（BUG-R53-001）。
+// 说明：撤单动作通过对象池分配，并由 release() 回收。
 #include <gtest/gtest.h>
 
 #include <cstdint>
 #include <cstring>
 #include <string>
+#include <thread>
+#include <vector>
 
 #include "Includes/WTSTradeDef.hpp"
 #include "Includes/WTSVariant.hpp"
@@ -69,7 +71,8 @@ TEST(r53_entrust, buy_action_credit_business_and_mutable_fields)
 	ent->setBusinessType(BT_CASH);
 	EXPECT_FALSE(ent->isCreditBusiness());
 
-	EXPECT_DOUBLE_EQ(ent->getCreditBalance(), 0.0);
+	// Price and credit balance share union storage; inspect only the member
+	// activated by the most recent setter, since reading the other is not portable.
 	ent->setCreditBalance(12345.5);
 	EXPECT_DOUBLE_EQ(ent->getCreditBalance(), 12345.5);
 
@@ -356,14 +359,53 @@ TEST(r53_trade_info, offset_flag_buy_action_and_bindings)
 	tr->release();
 }
 
-// WTSTradeDef.hpp:237-248（BUG-R53-001）：createCancelAction 用裸 new 构造池对象，
-// 未设置 WTSPoolObject::_pool/_mutex；release() 归零时经空 _pool 调 destroy 崩溃。
-// 期望：release 正常回收；实际：SIGSEGV（另一 lane 的 r12_trade_action 用例已实测 CRASH）。
-TEST(DISABLED_r53_entrust_action, cancel_action_release_uses_allocated_pool)
+// WTSTradeDef.hpp:237-248（BUG-R53-001）：撤单动作也必须经对象池分配，
+// 使 release() 能安全回收；重复创建和释放覆盖池槽复用。
+TEST(r53_entrust_action, cancel_action_release_uses_allocated_pool)
 {
-	WTSEntrustAction* act = WTSEntrustAction::createCancelAction("1001", "OID01");
-	ASSERT_NE(act, nullptr);
-	EXPECT_STREQ(act->getEntrustID(), "1001");
-	EXPECT_STREQ(act->getOrderID(), "OID01");
-	act->release();
+	for (int i = 0; i < 3; ++i)
+	{
+		const std::string eid = "100" + std::to_string(i);
+		const std::string oid = "OID0" + std::to_string(i);
+		WTSEntrustAction* act = WTSEntrustAction::createCancelAction(eid.c_str(), oid.c_str());
+		ASSERT_NE(act, nullptr);
+		EXPECT_STREQ(act->getEntrustID(), eid.c_str());
+		EXPECT_STREQ(act->getOrderID(), oid.c_str());
+		EXPECT_EQ(act->getBusinessType(), BT_CASH);
+		EXPECT_EQ(act->getActionFlag(), WAF_CANCEL);
+		act->release();
+	}
+}
+
+TEST(r53_entrust_action, pool_release_from_other_threads_and_reuse)
+{
+	std::vector<WTSEntrustAction*> actions;
+	for (int i = 0; i < 64; ++i)
+	{
+		WTSEntrustAction* act = WTSEntrustAction::createCancelAction("1001", "OID01");
+		ASSERT_NE(act, nullptr);
+		actions.push_back(act);
+	}
+
+	std::vector<std::thread> releasers;
+	for (size_t thread_idx = 0; thread_idx < 4; ++thread_idx)
+	{
+		releasers.emplace_back([&actions, thread_idx]()
+		{
+			for (size_t i = thread_idx; i < actions.size(); i += 4)
+				actions[i]->release();
+		});
+	}
+	for (std::thread& releaser : releasers)
+		releaser.join();
+
+	// Reallocate after cross-thread returns to exercise reuse of the same pool.
+	for (int i = 0; i < 64; ++i)
+	{
+		WTSEntrustAction* act = WTSEntrustAction::createCancelAction("2002", "OID02");
+		ASSERT_NE(act, nullptr);
+		EXPECT_STREQ(act->getEntrustID(), "2002");
+		EXPECT_STREQ(act->getOrderID(), "OID02");
+		act->release();
+	}
 }

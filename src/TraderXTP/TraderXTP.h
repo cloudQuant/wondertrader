@@ -107,6 +107,7 @@ private:
 	bool		beginApiCall(bool allowMissingApi);
 	void		endApiCall();
 	bool		beginApiReconfigure(bool nonblocking);
+	bool		beginApiNotification();
 	void		endApiReconfigure();
 	void		requestApiStop();
 	void		beginApiRelease();
@@ -114,6 +115,7 @@ private:
 	void		scheduleReconnect(uint64_t generation, bool login);
 	inline uint32_t			genRequestID();
 	bool					doLogin();
+	bool					doLoginLocked(const char* user, const char* pass, bool updateCredentials);
 
 	inline WTSOrderInfo*	makeOrderInfo(XTPQueryOrderRsp* orderField);
 	inline WTSEntrust*		makeEntrust(XTPOrderInfo *entrustField);
@@ -135,6 +137,8 @@ private:
 
 	std::string		_user;
 	std::string		_pass;
+	std::mutex		_login_state_mutex; // Protects credentials and login/session snapshots.
+	std::mutex		_login_mutex;
 	std::string		_flowdir;
 
 	std::string		_acckey;
@@ -174,6 +178,7 @@ private:
 	bool				_api_reconfiguring = false;
 	bool				_api_release_requested = false;
 	bool				_api_release_in_progress = false;
+	uint32_t			_api_release_waiters = 0;	// Observable waiters for deterministic lifecycle tests.
 
 	DllHandle		m_hInstXTP;
 	typedef XTP::API::TraderApi* (*XTPCreator)(uint8_t, const char*, XTP_LOG_LEVEL);

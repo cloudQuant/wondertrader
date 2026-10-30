@@ -1,0 +1,76 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 29 tests from 4 test suites.
+[----------] Global test environment set-up.
+[----------] 16 tests from V2ExecuterFactoryTest
+[ RUN      ] V2ExecuterFactoryTest.RejectsLegacyPluginBeforeCallingUnversionedFactory
+[       OK ] V2ExecuterFactoryTest.RejectsLegacyPluginBeforeCallingUnversionedFactory (364 ms)
+[ RUN      ] V2ExecuterFactoryTest.RejectsMismatchedMajorBeforeCreatingFactory
+[       OK ] V2ExecuterFactoryTest.RejectsMismatchedMajorBeforeCreatingFactory (361 ms)
+[ RUN      ] V2ExecuterFactoryTest.RejectsTruncatedApiTableBeforeCreatingFactory
+[       OK ] V2ExecuterFactoryTest.RejectsTruncatedApiTableBeforeCreatingFactory (358 ms)
+[ RUN      ] V2ExecuterFactoryTest.RejectsOldAbi20BinaryBeforeCreatingFactory
+[       OK ] V2ExecuterFactoryTest.RejectsOldAbi20BinaryBeforeCreatingFactory (376 ms)
+[ RUN      ] V2ExecuterFactoryTest.RejectsOldAbi21BinaryBeforeCreatingFactory
+[       OK ] V2ExecuterFactoryTest.RejectsOldAbi21BinaryBeforeCreatingFactory (408 ms)
+[ RUN      ] V2ExecuterFactoryTest.RejectsMissingQuiesceCapabilityBeforeCreatingFactory
+[       OK ] V2ExecuterFactoryTest.RejectsMissingQuiesceCapabilityBeforeCreatingFactory (385 ms)
+[ RUN      ] V2ExecuterFactoryTest.RejectsMissingWaitQuiesceCallbackBeforeCreatingFactory
+[       OK ] V2ExecuterFactoryTest.RejectsMissingWaitQuiesceCallbackBeforeCreatingFactory (398 ms)
+[ RUN      ] V2ExecuterFactoryTest.RejectsMissingCanWaitQuiesceCallbackBeforeCreatingFactory
+[       OK ] V2ExecuterFactoryTest.RejectsMissingCanWaitQuiesceCallbackBeforeCreatingFactory (394 ms)
+[ RUN      ] V2ExecuterFactoryTest.RejectsTableShortOfQuiesceFieldsBeforeCreatingFactory
+[       OK ] V2ExecuterFactoryTest.RejectsTableShortOfQuiesceFieldsBeforeCreatingFactory (391 ms)
+[ RUN      ] V2ExecuterFactoryTest.RejectsMissingRequestQuiesceCallbackBeforeCreatingFactory
+[       OK ] V2ExecuterFactoryTest.RejectsMissingRequestQuiesceCallbackBeforeCreatingFactory (389 ms)
+[ RUN      ] V2ExecuterFactoryTest.RejectsTableShortOfFactoryPreflightBeforeCreatingFactory
+[       OK ] V2ExecuterFactoryTest.RejectsTableShortOfFactoryPreflightBeforeCreatingFactory (387 ms)
+[ RUN      ] V2ExecuterFactoryTest.RejectsMissingFactoryPreflightCapabilityBeforeCreatingFactory
+[       OK ] V2ExecuterFactoryTest.RejectsMissingFactoryPreflightCapabilityBeforeCreatingFactory (380 ms)
+[ RUN      ] V2ExecuterFactoryTest.RejectsMissingFactoryPreflightCallbackBeforeCreatingFactory
+[       OK ] V2ExecuterFactoryTest.RejectsMissingFactoryPreflightCallbackBeforeCreatingFactory (378 ms)
+[ RUN      ] V2ExecuterFactoryTest.RejectsMissingRequiredCallbackBeforeCreatingFactory
+[       OK ] V2ExecuterFactoryTest.RejectsMissingRequiredCallbackBeforeCreatingFactory (398 ms)
+[ RUN      ] V2ExecuterFactoryTest.FailedInitializationReturnsErrorAndDestroysCandidate
+[       OK ] V2ExecuterFactoryTest.FailedInitializationReturnsErrorAndDestroysCandidate (432 ms)
+[ RUN      ] V2ExecuterFactoryTest.WrapperKeepsModuleLoadedAndDestroysUnitBeforeFactory
+[       OK ] V2ExecuterFactoryTest.WrapperKeepsModuleLoadedAndDestroysUnitBeforeFactory (382 ms)
+[----------] 16 tests from V2ExecuterFactoryTest (6189 ms total)
+
+[----------] 7 tests from V2ExecPluginQuiesceLifecycleTest
+[ RUN      ] V2ExecPluginQuiesceLifecycleTest.SuccessfulLifecycleCallsHooksInOrderBeforeDestroy
+[       OK ] V2ExecPluginQuiesceLifecycleTest.SuccessfulLifecycleCallsHooksInOrderBeforeDestroy (188 ms)
+[ RUN      ] V2ExecPluginQuiesceLifecycleTest.FactoryPreflightRunsBeforeUnitCreation
+[       OK ] V2ExecPluginQuiesceLifecycleTest.FactoryPreflightRunsBeforeUnitCreation (214 ms)
+[ RUN      ] V2ExecPluginQuiesceLifecycleTest.RequestFailureCanRetryWithoutDestroyingUnit
+[       OK ] V2ExecPluginQuiesceLifecycleTest.RequestFailureCanRetryWithoutDestroyingUnit (402 ms)
+[ RUN      ] V2ExecPluginQuiesceLifecycleTest.ThrowingRequestCanRetryWithoutDestroyingUnit
+[       OK ] V2ExecPluginQuiesceLifecycleTest.ThrowingRequestCanRetryWithoutDestroyingUnit (397 ms)
+[ RUN      ] V2ExecPluginQuiesceLifecycleTest.QuiesceRequestDuringInitializationIsNotLost
+[       OK ] V2ExecPluginQuiesceLifecycleTest.QuiesceRequestDuringInitializationIsNotLost (399 ms)
+[ RUN      ] V2ExecPluginQuiesceLifecycleTest.FailedWaitCanRetryWithoutDestroyingUnit
+[       OK ] V2ExecPluginQuiesceLifecycleTest.FailedWaitCanRetryWithoutDestroyingUnit (372 ms)
+[ RUN      ] V2ExecPluginQuiesceLifecycleTest.ThrowingWaitCanRetryWithoutDestroyingUnit
+[       OK ] V2ExecPluginQuiesceLifecycleTest.ThrowingWaitCanRetryWithoutDestroyingUnit (392 ms)
+[----------] 7 tests from V2ExecPluginQuiesceLifecycleTest (2367 ms total)
+
+[----------] 3 tests from FactoryProbeFailures/V2ExecPluginFactoryPreflightTest
+[ RUN      ] FactoryProbeFailures/V2ExecPluginFactoryPreflightTest.FailureAndThrowKeepOwnersAndCanRetryBeforeUnitRequest/0
+[       OK ] FactoryProbeFailures/V2ExecPluginFactoryPreflightTest.FailureAndThrowKeepOwnersAndCanRetryBeforeUnitRequest/0 (398 ms)
+[ RUN      ] FactoryProbeFailures/V2ExecPluginFactoryPreflightTest.FailureAndThrowKeepOwnersAndCanRetryBeforeUnitRequest/1
+[       OK ] FactoryProbeFailures/V2ExecPluginFactoryPreflightTest.FailureAndThrowKeepOwnersAndCanRetryBeforeUnitRequest/1 (380 ms)
+[ RUN      ] FactoryProbeFailures/V2ExecPluginFactoryPreflightTest.FailureAndThrowKeepOwnersAndCanRetryBeforeUnitRequest/2
+[       OK ] FactoryProbeFailures/V2ExecPluginFactoryPreflightTest.FailureAndThrowKeepOwnersAndCanRetryBeforeUnitRequest/2 (393 ms)
+[----------] 3 tests from FactoryProbeFailures/V2ExecPluginFactoryPreflightTest (1171 ms total)
+
+[----------] 3 tests from TransientFailures/V2ExecPluginQuiescePreflightTest
+[ RUN      ] TransientFailures/V2ExecPluginQuiescePreflightTest.FalseInvalidOrThrowingPreflightCanRetry/0
+[       OK ] TransientFailures/V2ExecPluginQuiescePreflightTest.FalseInvalidOrThrowingPreflightCanRetry/0 (382 ms)
+[ RUN      ] TransientFailures/V2ExecPluginQuiescePreflightTest.FalseInvalidOrThrowingPreflightCanRetry/1
+[       OK ] TransientFailures/V2ExecPluginQuiescePreflightTest.FalseInvalidOrThrowingPreflightCanRetry/1 (382 ms)
+[ RUN      ] TransientFailures/V2ExecPluginQuiescePreflightTest.FalseInvalidOrThrowingPreflightCanRetry/2
+[       OK ] TransientFailures/V2ExecPluginQuiescePreflightTest.FalseInvalidOrThrowingPreflightCanRetry/2 (377 ms)
+[----------] 3 tests from TransientFailures/V2ExecPluginQuiescePreflightTest (1142 ms total)
+
+[----------] Global test environment tear-down
+[==========] 29 tests from 4 test suites ran. (10872 ms total)
+[  PASSED  ] 29 tests.

@@ -21,7 +21,11 @@
 #include <thread>
 #include <vector>
 #include <filesystem>
+#ifdef _WIN32
+#include <process.h>
+#else
 #include <unistd.h>
+#endif
 
 #include "WtShareHelper/ShareBlocks.h"
 #include "WtMsgQue/WtMsgQue.h"
@@ -37,6 +41,15 @@ std::atomic<bool> g_mq_got_msg{ false };
 std::mutex g_msg_mtx;
 std::string g_mq_topic;
 std::string g_mq_payload;
+
+unsigned long current_process_id() noexcept
+{
+#ifdef _WIN32
+	return static_cast<unsigned long>(::_getpid());
+#else
+	return static_cast<unsigned long>(::getpid());
+#endif
+}
 
 void PORTER_FLAG mq_log_cb(WtUInt32 id, const char* message, bool bServer)
 {
@@ -56,7 +69,7 @@ void PORTER_FLAG mq_msg_cb(WtUInt32 /*id*/, const char* topic, const char* data,
 std::string n06_tmp_dir(const char* tag)
 {
 	auto p = std::filesystem::temp_directory_path() /
-		("n06_" + std::string(tag) + "_" + std::to_string(::getpid()));
+		("n06_" + std::string(tag) + "_" + std::to_string(current_process_id()));
 	std::filesystem::create_directories(p);
 	return p.string();
 }

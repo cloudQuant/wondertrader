@@ -424,6 +424,8 @@ void ParserHuaX::OnRtnMarketData(CTORATstpMarketDataField* market_data)
 	WTSCommodityInfo* commInfo = ct->getCommInfo();
 
 	WTSTickData* tick = WTSTickData::create(code.c_str());
+	if (tick == NULL)
+		return;
 	tick->setContractInfo(ct);
 	WTSTickStruct& quote = tick->getTickStruct();
 	strcpy(quote.exchg, commInfo->getExchg());

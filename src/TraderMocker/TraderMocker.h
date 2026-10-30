@@ -36,6 +36,7 @@ private:
 
 	uint32_t	makeTradeID();
 	uint32_t	makeOrderID();
+	ITraderSpi*	get_listener() const { return _listener.load(std::memory_order_acquire); }
 
 	void		load_positions();
 	void		save_positions();
@@ -43,7 +44,7 @@ private:
 
 private:
 	StdThreadPtr	_thrd_match;
-	bool			_terminated;
+	std::atomic<bool>	_terminated;
 
 	StdUniqueMutex		_mutex_api;
 
@@ -51,7 +52,7 @@ private:
 	std::atomic<uint32_t>	_auto_order_id;
 	std::atomic<uint32_t>	_auto_entrust_id;
 
-	ITraderSpi* _listener;
+	std::atomic<ITraderSpi*> _listener;
 	IBaseDataMgr*		_bd_mgr;
 
 	StdThreadPtr		_thrd_worker;

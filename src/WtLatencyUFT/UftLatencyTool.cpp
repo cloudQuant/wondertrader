@@ -10,6 +10,8 @@
 #include "UftLatencyTool.h"
 #include "../WtUftCore/UftStraContext.h"
 
+#include <exception>
+
 #include "../Includes/WTSVariant.hpp"
 #include "../Includes/IParserApi.h"
 #include "../Includes/ITraderApi.h"
@@ -38,8 +40,19 @@ namespace uft
 	class TestParser : public IParserApi
 	{
 	public:
+		virtual bool init(WTSVariant* /*cfg*/) override
+		{
+			return true;
+		}
+
 		void	run(uint32_t times)
 		{
+			if (times == 0)
+			{
+				WTSLogger::warn("0 ticks simulated; average latency unavailable (no samples)");
+				return;
+			}
+
 			srand(time(NULL));
 			TimeUtils::Ticker ticker;
 			for (uint32_t i = 0; i < times; i++)
@@ -49,11 +62,19 @@ namespace uft
 
 				WTSContractInfo* contract = _bd_mgr->getContract("rb2205", "SHFE");
 				if (contract == NULL)
+				{
+					WTSLogger::warn("Skipping latency test tick: contract {}.{} not found", "SHFE", "rb2205");
 					return;
+				}
 
 				double x = rand();
 
 				WTSCommodityInfo* pCommInfo = contract->getCommInfo();
+				if (pCommInfo == NULL)
+				{
+					WTSLogger::warn("Skipping latency test tick: contract {}.{} has no commodity info", "SHFE", "rb2205");
+					return;
+				}
 
 				WTSTickData* tick = WTSTickData::create("rb2205");
 				tick->setContractInfo(contract);
@@ -129,15 +150,52 @@ namespace uft
 		IBaseDataMgr*	_bd_mgr;
 	};
 
-	TestParser* theParser = NULL;
-
 	class TestTrader : public ITraderApi
 	{
 	public:
+		virtual bool init(WTSVariant* /*cfg*/) override { return true; }
 
 		virtual void registerSpi(ITraderSpi* listener) override
 		{
 			_trader_spi = listener;
+		}
+
+		virtual void connect() override
+		{
+			if (_trader_spi != NULL)
+				_trader_spi->onLoginResult(true, "ok", 0);
+		}
+
+		virtual int queryPositions() override
+		{
+			WTSArray* empty = WTSArray::create();
+			_trader_spi->onRspPosition(empty);
+			empty->release();
+			return 0;
+		}
+
+		virtual int queryOrders() override
+		{
+			WTSArray* empty = WTSArray::create();
+			_trader_spi->onRspOrders(empty);
+			empty->release();
+			return 0;
+		}
+
+		virtual int queryTrades() override
+		{
+			WTSArray* empty = WTSArray::create();
+			_trader_spi->onRspTrades(empty);
+			empty->release();
+			return 0;
+		}
+
+		virtual int queryAccount() override
+		{
+			WTSArray* empty = WTSArray::create();
+			_trader_spi->onRspAccount(empty);
+			empty->release();
+			return 0;
 		}
 
 		virtual bool makeEntrustID(char* buffer, int /*length*/) override
@@ -188,14 +246,147 @@ namespace uft
 
 	UftLatencyTool::UftLatencyTool()
 	{
+		_init_attempted = false;
 	}
 
 
 	UftLatencyTool::~UftLatencyTool()
 	{
+		if (!shutdown())
+			std::terminate();
+	}
+
+	bool UftLatencyTool::shutdown()
+	{
+		if (_shutdown_complete.load(std::memory_order_acquire))
+			return true;
+
+		_shutdown_requested.store(true, std::memory_order_release);
+		_traders.requestStopSinkNotifications();
+
+		{
+			std::lock_guard<std::mutex> lock(_lifecycle_mutex);
+			if (_operation_active && _operation_thread == std::this_thread::get_id())
+				return false;
+		}
+
+		// The manager preflights callback/API reentrancy before blocking. A callback
+		// that requested shutdown leaves cleanup to a control thread or operation exit.
+		if (!_traders.waitSinkNotificationsStopped())
+			return false;
+
+		{
+			std::unique_lock<std::mutex> lock(_lifecycle_mutex);
+			_lifecycle_cv.wait(lock, [this]() { return !_operation_active; });
+			if (_shutdown_complete.load(std::memory_order_acquire))
+				return true;
+		}
+
+		// Detect ticker-callback reentrancy before claiming teardown ownership. A
+		// ticker callback must return false here instead of waiting for a controller
+		// that may itself be joining this callback's worker.
+		_engine.request_stop();
+		if (!_engine.wait_stopped())
+			return false;
+
+		{
+			std::unique_lock<std::mutex> lock(_lifecycle_mutex);
+			if (_shutdown_complete.load(std::memory_order_acquire))
+				return true;
+			while (_shutdown_in_progress)
+			{
+				if (_shutdown_thread == std::this_thread::get_id())
+					return false;
+				_lifecycle_cv.wait(lock, [this]() {
+					return !_shutdown_in_progress || _shutdown_complete.load(std::memory_order_acquire);
+				});
+				if (_shutdown_complete.load(std::memory_order_acquire))
+					return true;
+			}
+			_shutdown_in_progress = true;
+			_shutdown_thread = std::this_thread::get_id();
+		}
+
+		bool stopped = false;
+		try
+		{
+			if (!_inputs_stopped.load(std::memory_order_acquire))
+			{
+				// Keep the borrowed parser alive until run() has left its operation lease.
+				_parsers.release();
+				_engine.stop();
+				{
+					std::lock_guard<std::mutex> lock(_lifecycle_mutex);
+					_test_parser = nullptr;
+				}
+				_inputs_stopped.store(true, std::memory_order_release);
+			}
+
+			if (_traders.waitSinkNotificationsStopped())
+			{
+				_traders.release();
+				_test_trader_api.reset();
+				stopped = true;
+			}
+		}
+		catch (...)
+		{
+			WTSLogger::error("UFT latency tool shutdown raised an exception; resources remain owned");
+		}
+
+		{
+			std::lock_guard<std::mutex> lock(_lifecycle_mutex);
+			if (stopped)
+				_shutdown_complete.store(true, std::memory_order_release);
+			_shutdown_in_progress = false;
+			_shutdown_thread = std::thread::id();
+		}
+		_lifecycle_cv.notify_all();
+		return stopped;
 	}
 
 	bool UftLatencyTool::init()
+	{
+		{
+			std::lock_guard<std::mutex> lock(_lifecycle_mutex);
+			// Reject reinitialization or any start after shutdown without mutating state.
+			if (_init_attempted || _shutdown_requested.load(std::memory_order_acquire)
+				|| _shutdown_complete.load(std::memory_order_acquire))
+			{
+				WTSLogger::error("UFT latency tool initialization can only be attempted once before shutdown");
+				return false;
+			}
+			_init_attempted = true;
+			_operation_active = true;
+			_operation_thread = std::this_thread::get_id();
+		}
+
+		bool initialized = false;
+		try
+		{
+			initialized = initImpl();
+		}
+		catch (...)
+		{
+			WTSLogger::error("UFT latency tool initialization raised an exception");
+			initialized = false;
+		}
+
+		{
+			std::lock_guard<std::mutex> lock(_lifecycle_mutex);
+			_operation_active = false;
+			_operation_thread = std::thread::id();
+			if (!initialized)
+				_shutdown_requested.store(true, std::memory_order_release);
+		}
+		_lifecycle_cv.notify_all();
+
+		if (!initialized || _shutdown_requested.load(std::memory_order_acquire))
+			shutdown();
+		return initialized && !_shutdown_requested.load(std::memory_order_acquire);
+	}
+
+	bool UftLatencyTool::initImpl()
 	{
 		WTSLogger::init("logcfg.yaml");
 
@@ -251,9 +442,16 @@ namespace uft
 		_core = _config->getUInt32("core");
 		WTSLogger::warn("Testing thread will be bind to core {}", _core);
 
-		initEngine(_config->get("env"));
-		initModules();
-		initStrategies();
+		if (!initEngine(_config->get("env")))
+		{
+			_config->release();
+			return false;
+		}
+		if (!initModules() || !initStrategies())
+		{
+			_config->release();
+			return false;
+		}
 
 		_config->release();
 		return true;
@@ -262,13 +460,18 @@ namespace uft
 	bool UftLatencyTool::initStrategies()
 	{
 		UftStraContext* ctx = new UftStraContext(&_engine, "stra");
+		UftContextPtr context(ctx);
 		ctx->set_strategy(new TestStrategy("stra"));
 
 		TraderAdapterPtr trader = _traders.getAdapter("trader");
+		if (!trader)
+		{
+			WTSLogger::error("Latency strategy trader adapter was not registered");
+			return false;
+		}
 		ctx->setTrader(trader.get());
+		_engine.addContext(context);
 		trader->addSink(ctx);
-
-		_engine.addContext(UftContextPtr(ctx));
 
 		return true;
 	}
@@ -286,17 +489,41 @@ namespace uft
 	bool UftLatencyTool::initModules()
 	{
 		{
-			theParser = new TestParser();
+			TestParser* parser = new TestParser();
 			ParserAdapterPtr adapter(new ParserAdapter);
-			adapter->initExt("parser", theParser, &_engine, &_bd_mgr);
-			_parsers.addAdapter("parser", adapter);
+			// initExt owns and destroys the external API on post-assignment failure.
+			// Publish the borrowed pointer only after adapter registration succeeds.
+			if (!adapter->initExt("parser", parser, &_engine, &_bd_mgr))
+			{
+				WTSLogger::error("Initializing latency test parser adapter failed");
+				return false;
+			}
+
+			if (!_parsers.addAdapter("parser", adapter))
+			{
+				adapter->release();
+				WTSLogger::error("Registering latency test parser adapter failed");
+				return false;
+			}
+			std::lock_guard<std::mutex> lock(_lifecycle_mutex);
+			_test_parser = parser;
 		}
 
 		{
-			TestTrader * tester = new TestTrader();
+			std::unique_ptr<TestTrader> tester(new TestTrader());
 			TraderAdapterPtr adapter(new TraderAdapter());
-			adapter->initExt("trader", tester, &_bd_mgr, NULL);
-			_traders.addAdapter("trader", adapter);
+			if (!adapter->initExt("trader", tester.get(), &_bd_mgr, NULL))
+			{
+				WTSLogger::error("Initializing latency test trader adapter failed");
+				return false;
+			}
+			if (!_traders.addAdapter("trader", adapter))
+			{
+				adapter->release();
+				WTSLogger::error("Registering latency test trader adapter failed");
+				return false;
+			}
+			_test_trader_api.reset(tester.release());
 		}
 
 		return true;
@@ -304,25 +531,62 @@ namespace uft
 
 	void UftLatencyTool::run()
 	{
-		if (_core != 0)
+		TestParser* parser = nullptr;
 		{
-			if(!CpuHelper::bind_core(_core-1))
+			std::lock_guard<std::mutex> lock(_lifecycle_mutex);
+			if (_test_parser == nullptr)
 			{
-				WTSLogger::error("Binding to core {} failed", _core);
+				WTSLogger::error("Cannot run UFT latency test before parser initialization succeeds");
+				return;
 			}
+			if (_shutdown_requested.load(std::memory_order_acquire)
+				|| _shutdown_complete.load(std::memory_order_acquire))
+			{
+				WTSLogger::error("Cannot run UFT latency test after shutdown has started");
+				return;
+			}
+			if (_operation_active || _run_attempted)
+			{
+				WTSLogger::error("UFT latency test run can only be started once");
+				return;
+			}
+			_run_attempted = true;
+			_operation_active = true;
+			_operation_thread = std::this_thread::get_id();
+			parser = _test_parser;
 		}
 
 		try
 		{
+			if (_core != 0)
+			{
+				if(!CpuHelper::bind_core(_core-1))
+				{
+					WTSLogger::error("Binding to core {} failed", _core);
+				}
+			}
+
 			_parsers.run();
-			_traders.run();
-
-			_engine.run();
-
-			theParser->run(_times);
+			if (!_shutdown_requested.load(std::memory_order_acquire))
+				_traders.run();
+			if (!_shutdown_requested.load(std::memory_order_acquire))
+				_engine.run();
+			if (!_shutdown_requested.load(std::memory_order_acquire))
+				parser->run(_times);
 		}
 		catch (...)
 		{
+			WTSLogger::error("UFT latency test run raised an exception");
 		}
+
+		const bool shutdownRequested = _shutdown_requested.load(std::memory_order_acquire);
+		{
+			std::lock_guard<std::mutex> lock(_lifecycle_mutex);
+			_operation_active = false;
+			_operation_thread = std::thread::id();
+		}
+		_lifecycle_cv.notify_all();
+		if (shutdownRequested)
+			shutdown();
 	}
 }

@@ -10,8 +10,13 @@
  *          包括配置加载、策略初始化、行情和交易接口连接、事件处理等功能。
  */
 #pragma once
+#include <atomic>
+#include <condition_variable>
+#include <mutex>
 #include <string>
+#include <thread>
 #include <unordered_map>
+#include <vector>
 
 #include "../Includes/ILogHandler.h"
 
@@ -64,7 +69,7 @@ public:
 	/**
 	 * @brief 加载并应用配置
 	 * @param filename 主配置文件路径
-	 * @return 配置加载是否成功
+	 * @return 配置加载是否成功；每个 runner 实例只允许尝试一次
 	 * @details 加载主配置文件并初始化各个模块，包括基础数据、数据管理器、引擎、
 	 *          行情和交易适配器等
 	 */
@@ -77,7 +82,24 @@ public:
 	 */
 	void run(bool bAsync = false);
 
+	/**
+ * Request producer shutdown, join the ticker/share watcher, and drain trader
+ * notifications. Returns false while parser callback quiescence is unproven or
+ * adapter teardown remains pending; keep the runner alive and retry after the
+ * provider-specific barrier. Parser callback calls return false immediately;
+ * retry from a control thread before destroying the runner.
+	 */
+	bool shutdown();
+
 private:
+	bool configImpl(const std::string& filename);
+	bool registerParserCandidate(const std::string& id, ParserAdapterPtr& adapter);
+	bool releaseParserCandidateIfSafe(ParserAdapterPtr& adapter);
+	bool startParsers();
+	void finishParserStart();
+	bool closeParserStartAndDrain();
+	bool isInParserCallbackOnCurrentThread() const;
+
 	/**
 	 * @brief 初始化交易适配器
 	 * @param cfgTrader 交易适配器配置
@@ -148,7 +170,23 @@ private:
 	UftStrategyMgr		_uft_stra_mgr;  ///< UFT策略管理器
 
 	ActionPolicyMgr		_act_policy;    ///< 操作策略管理器
+	std::atomic<bool>   _shutdown_requested{false};
+	std::atomic<bool>   _config_in_progress{false};
+	std::atomic<bool>   _inputs_stopped{false};
+	std::atomic<bool>   _shutdown_complete{false};
+	std::atomic_flag    _shutdown_running = ATOMIC_FLAG_INIT;
+	std::atomic<bool>   _config_attempted{false};
+	std::atomic<bool>   _config_succeeded{false};
+	std::atomic<bool>   _share_domain_attached{false};
+	std::atomic<bool>   _parser_quarantine_pending{false};
+	std::vector<ParserAdapterPtr> _quarantined_parsers;
+	std::mutex _parser_start_mutex;
+	std::condition_variable _parser_start_cv;
+	std::thread::id _parser_start_owner;
+	bool _parser_start_closed{false};
+	bool _parser_start_active{false};
+	bool _parser_start_attempted{false};
 
-	bool				_to_exit;        ///< 退出标志
+	std::atomic<bool>	_to_exit;        ///< 退出标志
 };
 

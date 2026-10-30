@@ -12,6 +12,9 @@
 #include "WtHelper.h"
 
 #include <exception>
+#include <cmath>
+#include <cstring>
+#include <utility>
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 
@@ -161,7 +164,7 @@ void SelStraBaseCtx::log_close(const char* stdCode, bool isLong, uint64_t openTi
 {
 	if (_close_logs)
 	{
-		_trade_logs->write_file(fmt::format("{},{},{},{},{},{},{},{:.2f},{:.2f},{},{}\n", stdCode,
+		_close_logs->write_file(fmt::format("{},{},{},{},{},{},{},{:.2f},{:.2f},{},{}\n", stdCode,
 			(isLong ? "LONG" : "SHORT"), openTime, openpx, closeTime, closepx, qty, profit,
 			totalprofit, enterTag, exitTag));
 	}
@@ -213,17 +216,30 @@ void SelStraBaseCtx::load_userdata()
 		return;
 
 	rj::Document root;
-	root.Parse(content.c_str());
+	root.Parse(content.c_str(), content.size());
 
-	if (root.HasParseError())
+	if (root.HasParseError() || !root.IsObject())
+	{
+		log_error("Invalid strategy userdata file {}, expected a JSON object", filename);
 		return;
+	}
 
+	StringHashMap loadedData = _user_datas;
 	for (auto& m : root.GetObject())
 	{
-		const char* key = m.name.GetString();
-		const char* val = m.value.GetString();
-		_user_datas[key] = val;
+		if (!m.value.IsString() ||
+			std::memchr(m.name.GetString(), '\0', m.name.GetStringLength()) != nullptr ||
+			std::memchr(m.value.GetString(), '\0', m.value.GetStringLength()) != nullptr)
+		{
+			log_error("Invalid strategy userdata file {}, keys and values must be strings without embedded NUL", filename);
+			return;
+		}
+
+		loadedData[std::string(m.name.GetString(), m.name.GetStringLength())] =
+			std::string(m.value.GetString(), m.value.GetStringLength());
 	}
+
+	_user_datas.swap(loadedData);
 }
 
 void SelStraBaseCtx::load_data(uint32_t /*flag*/ /* = 0xFFFFFFFF */)
@@ -243,66 +259,202 @@ void SelStraBaseCtx::load_data(uint32_t /*flag*/ /* = 0xFFFFFFFF */)
 		return;
 
 	rj::Document root;
-	root.Parse(content.c_str());
+	root.Parse(content.c_str(), content.size());
 
-	if (root.HasParseError())
-		return;
-
-	if (root.HasMember("fund"))
+	auto rejectSnapshot = [this, &filename](const char* reason)
 	{
-		//读取资金
-		const rj::Value& jFund = root["fund"];
-		if (!jFund.IsNull() && jFund.IsObject())
+		log_error("Invalid strategy state file {}, {}", filename, reason);
+	};
+	if (root.HasParseError() || !root.IsObject())
+	{
+		rejectSnapshot("expected a JSON object");
+		return;
+	}
+
+	// These optional fields were explicitly tolerated by older readers. Keep
+	// that compatibility while validating every value that will be consumed.
+	auto isFiniteNumber = [](const rj::Value& value)
+	{
+		return value.IsNumber() && std::isfinite(value.GetDouble());
+	};
+	auto hasFiniteNumber = [&isFiniteNumber](const rj::Value& object, const char* name)
+	{
+		return object.HasMember(name) && isFiniteNumber(object[name]);
+	};
+	auto hasUint = [](const rj::Value& object, const char* name)
+	{
+		return object.HasMember(name) && object[name].IsUint();
+	};
+	auto hasUint64 = [](const rj::Value& object, const char* name)
+	{
+		return object.HasMember(name) && object[name].IsUint64();
+	};
+	auto validText = [](const rj::Value& value, bool allowEmpty)
+	{
+		return value.IsString() && (allowEmpty || value.GetStringLength() != 0) &&
+			std::memchr(value.GetString(), '\0', value.GetStringLength()) == nullptr;
+	};
+
+	const bool hasFund = root.HasMember("fund") && !root["fund"].IsNull();
+	const rj::Value* jFund = hasFund ? &root["fund"] : nullptr;
+	if (jFund != nullptr && (!jFund->IsObject() ||
+		!hasFiniteNumber(*jFund, "total_profit") || !hasFiniteNumber(*jFund, "total_dynprofit") ||
+		!hasFiniteNumber(*jFund, "total_fees") || !hasUint(*jFund, "tdate")))
+	{
+		rejectSnapshot("fund must contain numeric total_profit, total_dynprofit, total_fees and uint tdate");
+		return;
+	}
+	if (!root.HasMember("positions") || (!root["positions"].IsNull() && !root["positions"].IsArray()))
+	{
+		rejectSnapshot("positions must be an array or null");
+		return;
+	}
+	const rj::Value& jPos = root["positions"];
+	if (jPos.IsArray())
+	{
+		wt_hashset<std::string> seenPositionCodes;
+		for (const rj::Value& pItem : jPos.GetArray())
 		{
-			_fund_info._total_profit = jFund["total_profit"].GetDouble();
-			_fund_info._total_dynprofit = jFund["total_dynprofit"].GetDouble();
-			uint32_t tdate = jFund["tdate"].GetUint();
-			if (tdate == _engine->get_trading_date())
-				_fund_info._total_fees = jFund["total_fees"].GetDouble();
+			if (!pItem.IsObject() || !pItem.HasMember("code") || !validText(pItem["code"], false) ||
+				!hasFiniteNumber(pItem, "volume") || !hasFiniteNumber(pItem, "closeprofit") ||
+				!hasFiniteNumber(pItem, "dynprofit") || !hasUint64(pItem, "lastentertime") ||
+				!hasUint64(pItem, "lastexittime") || !pItem.HasMember("details") ||
+				(!pItem["details"].IsNull() && !pItem["details"].IsArray()))
+			{
+				rejectSnapshot("each position requires code, numeric balances, uint64 timestamps and details array/null");
+				return;
+			}
+			const std::string positionCode(pItem["code"].GetString(), pItem["code"].GetStringLength());
+			if (seenPositionCodes.find(positionCode) != seenPositionCodes.end())
+			{
+				rejectSnapshot("positions contains a duplicate contract code");
+				return;
+			}
+			seenPositionCodes.insert(positionCode);
+
+			const bool hasFrozen = pItem.HasMember("frozen");
+			const bool hasFrozenDate = pItem.HasMember("frozendate");
+			if (hasFrozen != hasFrozenDate ||
+				(hasFrozen && (!isFiniteNumber(pItem["frozen"]) || !pItem["frozendate"].IsUint())))
+			{
+				rejectSnapshot("frozen and frozendate must be supplied together with valid types");
+				return;
+			}
+
+			const rj::Value& details = pItem["details"];
+			if (details.IsArray())
+			{
+				for (const rj::Value& dItem : details.GetArray())
+				{
+					if (!dItem.IsObject() || !dItem.HasMember("long") || !dItem["long"].IsBool() ||
+						!hasFiniteNumber(dItem, "price") || !hasFiniteNumber(dItem, "volume") ||
+						!hasUint64(dItem, "opentime") || !hasFiniteNumber(dItem, "profit") ||
+						!hasFiniteNumber(dItem, "maxprofit") || !hasFiniteNumber(dItem, "maxloss") ||
+						!dItem.HasMember("opentag") || !validText(dItem["opentag"], true) ||
+						dItem["opentag"].GetStringLength() >= sizeof(DetailInfo::_opentag))
+					{
+						rejectSnapshot("each detail requires valid typed fields and an opentag shorter than 32 bytes");
+						return;
+					}
+					if ((dItem.HasMember("opentdate") && !dItem["opentdate"].IsUint()) ||
+						(dItem.HasMember("maxprice") && !isFiniteNumber(dItem["maxprice"])) ||
+						(dItem.HasMember("minprice") && !isFiniteNumber(dItem["minprice"])))
+					{
+						rejectSnapshot("optional detail fields have invalid types");
+						return;
+					}
+				}
+			}
 		}
 	}
 
-	{//读取仓位
-		double total_profit = 0;
-		double total_dynprofit = 0;
-		const rj::Value& jPos = root["positions"];
-		if (!jPos.IsNull() && jPos.IsArray())
+	const rj::Value* jSignals = nullptr;
+	if (root.HasMember("signals") && !root["signals"].IsNull())
+	{
+		jSignals = &root["signals"];
+		if (!jSignals->IsObject())
 		{
-			for (const rj::Value& pItem : jPos.GetArray())
+			rejectSnapshot("signals must be an object or null");
+			return;
+		}
+		wt_hashset<std::string> seenSignalCodes;
+		for (auto& m : jSignals->GetObject())
+		{
+			const rj::Value& jItem = m.value;
+			const std::string signalCode(m.name.GetString(), m.name.GetStringLength());
+			if (signalCode.empty() ||
+				std::memchr(m.name.GetString(), '\0', m.name.GetStringLength()) != nullptr ||
+				!jItem.IsObject() || !jItem.HasMember("usertag") || !validText(jItem["usertag"], true) ||
+				!hasFiniteNumber(jItem, "volume") || !hasFiniteNumber(jItem, "sigprice") ||
+				!hasUint64(jItem, "gentime"))
 			{
-				const char* stdCode = pItem["code"].GetString();
-				const char* ruleTag = _engine->get_hot_mgr()->getRuleTag(stdCode);
-				bool isExpired = (strlen(ruleTag) == 0 && _engine->get_contract_info(stdCode) == NULL);
+				rejectSnapshot("each signal requires a code and typed usertag, volume, sigprice and gentime");
+				return;
+			}
+			if (seenSignalCodes.find(signalCode) != seenSignalCodes.end())
+			{
+				rejectSnapshot("signals contains a duplicate contract code");
+				return;
+			}
+			seenSignalCodes.insert(signalCode);
+		}
+	}
 
-				if (isExpired)
-					log_info("{} not exists or expired, position ignored", stdCode);
+	// Validate the whole document before changing any in-memory balances or
+	// registering tick subscriptions, so a later malformed row cannot leave a
+	// partially applied snapshot.
 
-				PosInfo& pInfo = _pos_map[stdCode];
-				pInfo._closeprofit = pItem["closeprofit"].GetDouble();
-				pInfo._last_entertime = pItem["lastentertime"].GetUint64();
-				pInfo._last_exittime = pItem["lastexittime"].GetUint64();
-				pInfo._volume = isExpired ? 0 : pItem["volume"].GetDouble();
-				if (pItem.HasMember("frozen") && !isExpired)
-				{
-					pInfo._frozen = pItem["frozen"].GetDouble();
-					pInfo._frozen_date = pItem["frozendate"].GetUint();
-				}
+	StraFundInfo loadedFund = _fund_info;
+	if (jFund != nullptr)
+	{
+		//读取资金
+		loadedFund._total_profit = (*jFund)["total_profit"].GetDouble();
+		loadedFund._total_dynprofit = (*jFund)["total_dynprofit"].GetDouble();
+		uint32_t tdate = (*jFund)["tdate"].GetUint();
+		if (tdate == _engine->get_trading_date())
+			loadedFund._total_fees = (*jFund)["total_fees"].GetDouble();
+	}
 
-				if (pInfo._volume == 0 || isExpired)
-				{
-					pInfo._dynprofit = 0;
-					pInfo._frozen = 0;
-				}
-				else
-					pInfo._dynprofit = pItem["dynprofit"].GetDouble();				
+	PositionMap loadedPositions;
+	wt_hashset<std::string> tickSubscriptions;
+	double total_profit = 0;
+	double total_dynprofit = 0;
+	if (jPos.IsArray())
+	{
+		for (const rj::Value& pItem : jPos.GetArray())
+		{
+			const std::string stdCode(pItem["code"].GetString(), pItem["code"].GetStringLength());
+			const char* ruleTag = _engine->get_hot_mgr()->getRuleTag(stdCode.c_str());
+			bool isExpired = (ruleTag == nullptr || strlen(ruleTag) == 0) && _engine->get_contract_info(stdCode.c_str()) == NULL;
 
-				total_profit += pInfo._closeprofit;
-				total_dynprofit += pInfo._dynprofit;
+			if (isExpired)
+				log_info("{} not exists or expired, position ignored", stdCode);
 
-				const rj::Value& details = pItem["details"];
-				if (details.IsNull() || !details.IsArray() || details.Size() == 0 || isExpired)
-					continue;
+			PosInfo pInfo;
+			pInfo._closeprofit = pItem["closeprofit"].GetDouble();
+			pInfo._last_entertime = pItem["lastentertime"].GetUint64();
+			pInfo._last_exittime = pItem["lastexittime"].GetUint64();
+			pInfo._volume = isExpired ? 0 : pItem["volume"].GetDouble();
+			if (pItem.HasMember("frozen") && !isExpired)
+			{
+				pInfo._frozen = pItem["frozen"].GetDouble();
+				pInfo._frozen_date = pItem["frozendate"].GetUint();
+			}
 
+			if (pInfo._volume == 0 || isExpired)
+			{
+				pInfo._dynprofit = 0;
+				pInfo._frozen = 0;
+			}
+			else
+				pInfo._dynprofit = pItem["dynprofit"].GetDouble();
+
+			total_profit += pInfo._closeprofit;
+			total_dynprofit += pInfo._dynprofit;
+
+			const rj::Value& details = pItem["details"];
+			if (details.IsArray() && !isExpired)
+			{
 				pInfo._details.resize(details.Size());
 
 				for (uint32_t i = 0; i < details.Size(); i++)
@@ -316,64 +468,59 @@ void SelStraBaseCtx::load_data(uint32_t /*flag*/ /* = 0xFFFFFFFF */)
 					if (dItem.HasMember("opentdate"))
 						dInfo._opentdate = dItem["opentdate"].GetUint();
 
-					if (dItem.HasMember("maxprice"))
-						dInfo._max_price = dItem["maxprice"].GetDouble();
-					else
-						dInfo._max_price = dInfo._price;
-
-					if (dItem.HasMember("minprice"))
-						dInfo._min_price = dItem["minprice"].GetDouble();
-					else
-						dInfo._min_price = dInfo._price;
-
+					dInfo._max_price = dItem.HasMember("maxprice") ? dItem["maxprice"].GetDouble() : dInfo._price;
+					dInfo._min_price = dItem.HasMember("minprice") ? dItem["minprice"].GetDouble() : dInfo._price;
 					dInfo._profit = dItem["profit"].GetDouble();
 					dInfo._max_profit = dItem["maxprofit"].GetDouble();
 					dInfo._max_loss = dItem["maxloss"].GetDouble();
-
-					strcpy(dInfo._opentag, dItem["opentag"].GetString());
-				}
-
-				if (!isExpired)
-				{
-					log_info("Position confirmed,{} -> {}", stdCode, pInfo._volume);
-					stra_sub_ticks(stdCode);
+					std::memcpy(dInfo._opentag, dItem["opentag"].GetString(), dItem["opentag"].GetStringLength());
+					dInfo._opentag[dItem["opentag"].GetStringLength()] = '\0';
 				}
 			}
+
+			if (!isExpired)
+			{
+				log_info("Position confirmed,{} -> {}", stdCode, pInfo._volume);
+				tickSubscriptions.insert(stdCode);
+			}
+			loadedPositions[stdCode] = std::move(pInfo);
 		}
-
-		_fund_info._total_profit = total_profit;
-		_fund_info._total_dynprofit = total_dynprofit;
 	}
+	loadedFund._total_profit = total_profit;
+	loadedFund._total_dynprofit = total_dynprofit;
 
-	if (root.HasMember("signals"))
+	SignalMap loadedSignals;
+	if (jSignals != nullptr)
 	{
 		//读取信号
-		const rj::Value& jSignals = root["signals"];
-		if (!jSignals.IsNull() && jSignals.IsObject())
+		for (auto& m : jSignals->GetObject())
 		{
-			for (auto& m : jSignals.GetObject())
+			const std::string stdCode(m.name.GetString(), m.name.GetStringLength());
+			const char* ruleTag = _engine->get_hot_mgr()->getRuleTag(stdCode.c_str());
+			if ((ruleTag == nullptr || strlen(ruleTag) == 0) && _engine->get_contract_info(stdCode.c_str()) == NULL)
 			{
-				const char* stdCode = m.name.GetString();
-				const char* ruleTag = _engine->get_hot_mgr()->getRuleTag(stdCode);
-				if (strlen(ruleTag) == 0 && _engine->get_contract_info(stdCode) == NULL)
-				{
-					log_info("{} not exists or expired, signal ignored", stdCode);
-					continue;
-				}
-
-				const rj::Value& jItem = m.value;
-
-				SigInfo& sInfo = _sig_map[stdCode];
-				sInfo._usertag = jItem["usertag"].GetString();
-				sInfo._volume = jItem["volume"].GetDouble();
-				sInfo._sigprice = jItem["sigprice"].GetDouble();
-				sInfo._gentime = jItem["gentime"].GetUint64();
-
-				log_info("{} untouched signal recovered, target pos: {}", stdCode, sInfo._volume);
-				stra_sub_ticks(stdCode);
+				log_info("{} not exists or expired, signal ignored", stdCode);
+				continue;
 			}
+
+			const rj::Value& jItem = m.value;
+
+			SigInfo& sInfo = loadedSignals[stdCode];
+			sInfo._usertag.assign(jItem["usertag"].GetString(), jItem["usertag"].GetStringLength());
+			sInfo._volume = jItem["volume"].GetDouble();
+			sInfo._sigprice = jItem["sigprice"].GetDouble();
+			sInfo._gentime = jItem["gentime"].GetUint64();
+
+			log_info("{} untouched signal recovered, target pos: {}", stdCode, sInfo._volume);
+			tickSubscriptions.insert(stdCode);
 		}
 	}
+
+	_pos_map.swap(loadedPositions);
+	_sig_map.swap(loadedSignals);
+	_fund_info = loadedFund;
+	for (const std::string& stdCode : tickSubscriptions)
+		stra_sub_ticks(stdCode.c_str());
 }
 
 void SelStraBaseCtx::save_data(uint32_t /*flag*/ /* = 0xFFFFFFFF */)
@@ -1272,4 +1419,4 @@ double SelStraBaseCtx::stra_get_detail_profit(const char* stdCode, const char* u
 	return 0.0;
 }
 
-#pragma endregion 
+#pragma endregion

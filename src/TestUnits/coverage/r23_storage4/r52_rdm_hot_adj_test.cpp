@@ -299,26 +299,58 @@ TEST_F(R52RdmTest, R52HotTickCodeProbesCustomRawFileAndRealtimeBlock)
 	today->release();
 }
 
-// ---------------------------------------------------------------- 缺陷复现（不进启用集）
-// BUG-R52-003：exright==2 首次进 RT 分支时 oldSize==0、idx==0，L1930 的
-//   memcpy(..., sizeof(WTSBarStruct) * (newSize - oldSize + 1)) 比 resize 后的
-//   vector 多写一条 → 堆越界写。
-// BUG-R52-002：尾定位用 lower_bound(begin, end) 全区间，etime 晚于全部 RT 条时
-//   idx==size，L1952 `&_rt_bars[idx]` 越界读，L1963-1964 rtCnt=idx+1=size+1 多挂一条。
-// ByRange L1922-1965 与 ByCount L2352-2369 同型；本用例走 ByRange 首次调用，两坑同时命中。
-TEST_F(R52RdmTest, DISABLED_R52ExrightRealtimeRangeBeyondTailOverrunsVector)
+// ---------------------------------------------------------------- BUG-R52-003：后复权 RT bar 首次装入及空块
+// etime 精确命中 RT 尾条，避免覆盖独立的尾定位边界问题。
+TEST_F(R52RdmTest, R52ExrightRealtimeRangeCopiesFirstSingleAndMultipleBars)
 {
-	vector<WTSBarStruct> rt;
-	for (uint32_t i = 0; i < 2; i++)
-		rt.push_back(make_bar(kCurTDate, min_bar_time(kCurTDate, 930 + i), 10 + i));
-	ASSERT_TRUE(write_bytes("rt/min1/SSE/600000.dmb",
-		make_rt_block<WTSBarStruct>(BT_RT_Minute1, kCurTDate, 2, 8, rt)));
+	const string rtFile = "rt/min1/SSE/600000.dmb";
+	vector<WTSBarStruct> single;
+	single.push_back(make_bar(kCurTDate, min_bar_time(kCurTDate, 930), 10));
+	ASSERT_TRUE(write_bytes(rtFile,
+		make_rt_block<WTSBarStruct>(BT_RT_Minute1, kCurTDate, 1, 8, single)));
 
-	WTSKlineSlice* slice = _reader.readKlineSliceByRange("SSE.STK.600000+", KP_Minute1,
-		202401010000ull, 202401101500ull);
-	if (slice != NULL)
-		slice->release();
+	WTSKlineSlice* one = _reader.readKlineSliceByRange("SSE.STK.600000+", KP_Minute1,
+		202401100900ull, 202401100930ull);
+	ASSERT_NE(nullptr, one);
+	vector<WTSBarStruct> oneGot = flatten_bars(one);
+	ASSERT_EQ(oneGot.size(), (std::size_t)1);
+	EXPECT_EQ(oneGot[0].date, single[0].date);
+	EXPECT_EQ(oneGot[0].time, single[0].time);
+	EXPECT_DOUBLE_EQ(oneGot[0].open, single[0].open);
+	EXPECT_DOUBLE_EQ(oneGot[0].close, single[0].close);
+	one->release();
+
+	// A fresh reader cache exercises the same first-load boundary with a larger block.
 	_reader.clearCache();
+	vector<WTSBarStruct> multiple;
+	multiple.push_back(make_bar(kCurTDate, min_bar_time(kCurTDate, 930), 20));
+	multiple.push_back(make_bar(kCurTDate, min_bar_time(kCurTDate, 931), 21));
+	ASSERT_TRUE(write_bytes(rtFile,
+		make_rt_block<WTSBarStruct>(BT_RT_Minute1, kCurTDate, 2, 8, multiple)));
+
+	WTSKlineSlice* two = _reader.readKlineSliceByRange("SSE.STK.600000+", KP_Minute1,
+		202401100900ull, 202401100931ull);
+	ASSERT_NE(nullptr, two);
+	vector<WTSBarStruct> twoGot = flatten_bars(two);
+	ASSERT_EQ(twoGot.size(), (std::size_t)2);
+	for (std::size_t i = 0; i < twoGot.size(); ++i)
+	{
+		EXPECT_EQ(twoGot[i].date, multiple[i].date);
+		EXPECT_EQ(twoGot[i].time, multiple[i].time);
+		EXPECT_DOUBLE_EQ(twoGot[i].open, multiple[i].open);
+		EXPECT_DOUBLE_EQ(twoGot[i].close, multiple[i].close);
+	}
+	two->release();
+}
+
+TEST_F(R52RdmTest, R52ExrightRealtimeRangeSkipsAnEmptyRealtimeBlock)
+{
+	const vector<WTSBarStruct> empty;
+	ASSERT_TRUE(write_bytes("rt/min1/SSE/600000.dmb",
+		make_rt_block<WTSBarStruct>(BT_RT_Minute1, kCurTDate, 0, 8, empty)));
+
+	EXPECT_EQ(nullptr, _reader.readKlineSliceByRange("SSE.STK.600000+", KP_Minute1,
+		202401100900ull, 202401100930ull));
 }
 
 } // namespace r52

@@ -93,7 +93,7 @@ void initParsers(WTSVariant* cfg)
 	WTSLogger::info("{} market data parsers loaded in total", g_parsers.size());
 }
 
-void initialize(const std::string& filename)
+bool initialize(const std::string& filename)
 {
 	WtHelper::set_module_dir(getBinDir());
 
@@ -101,7 +101,7 @@ void initialize(const std::string& filename)
 	if(config == NULL)
 	{
 		WTSLogger::error("Loading config file {} failed", filename);
-		return;
+		return false;
 	}
 
 	//加载市场信息
@@ -172,10 +172,21 @@ void initialize(const std::string& filename)
 		}
 	}
 
-	if (config->has("shmcaster"))
+	WTSVariant* shmCfg = config->get("shmcaster");
+	if (shmCfg && shmCfg->getBoolean("active"))
 	{
-		g_shmCaster.init(config->get("shmcaster"));
+		if (!g_shmCaster.init(shmCfg))
+		{
+			WTSLogger::error("Active ShmCaster could not be initialized; QuoteFactory startup aborted");
+			config->release();
+			return false;
+		}
+
 		g_dataMgr.add_caster(&g_shmCaster);
+	}
+	else if (shmCfg)
+	{
+		WTSLogger::info("ShmCaster is inactive; skipping registration");
 	}
 
 	if (config->has("broadcaster"))
@@ -259,6 +270,8 @@ void initialize(const std::string& filename)
 		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 		g_stateMon.run();
 	}
+
+	return true;
 }
 
 int main(int argc, char* argv[])
@@ -307,7 +320,8 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 
-	initialize(filename);
+	if (!initialize(filename))
+		return 1;
 
 	bool bExit = false;
 	install_signal_hooks([&bExit](const char* message) {

@@ -18,11 +18,19 @@
  */
 #include <gtest/gtest.h>
 
+#include <chrono>
 #include <cstring>
+#include <filesystem>
+#include <fstream>
 #include <map>
 #include <string>
 
+// Pre-include the vendor API so the access shim only exposes CTraderSpi's
+// private loader helpers to this focused round-trip test.
+#include <API/CTPOpt3.5.8/ThostFtdcTraderApi.h>
+#define private public
 #include "CTPOptLoader/TraderSpi.h"
+#undef private
 
 #include "Includes/LoaderDef.hpp"
 
@@ -55,6 +63,32 @@ std::string extractProductID(const char* instrument);
 std::string extractProductName(const char* cname);
 
 namespace {
+
+class ScopedOptionJsonDir
+{
+public:
+	ScopedOptionJsonDir()
+	{
+		const auto nonce = std::chrono::steady_clock::now().time_since_epoch().count();
+		_path = std::filesystem::temp_directory_path() /
+			("wt_ctpoptloader_option_roundtrip_" + std::to_string(nonce));
+		std::filesystem::create_directories(_path);
+	}
+
+	~ScopedOptionJsonDir()
+	{
+		std::error_code ec;
+		std::filesystem::remove_all(_path, ec);
+	}
+
+	std::string save_path() const
+	{
+		return _path.string() + std::filesystem::path::preferred_separator;
+	}
+
+private:
+	std::filesystem::path _path;
+};
 
 class CTPOptLoaderTest : public ::testing::Test
 {
@@ -113,6 +147,42 @@ CThostFtdcInstrumentField makeInstrument(const char* exchg, const char* id, cons
 	return ins;
 }
 
+void seedRunGlobalsForMalformedConfig()
+{
+	FRONT_ADDR = "sentinel-front";
+	BROKER_ID = "sentinel-broker";
+	INVESTOR_ID = "sentinel-investor";
+	PASSWORD = "sentinel-password";
+	SAVEPATH = "sentinel-path";
+	APPID = "sentinel-appid";
+	AUTHCODE = "sentinel-authcode";
+	CLASSMASK = 99;
+	ONLYINCFG = true;
+	INCREMENTAL = true;
+	COMM_FILE = "sentinel-comm";
+	CONT_FILE = "sentinel-cont";
+	MODULE_NAME = "sentinel-module";
+	pUserApi = nullptr;
+}
+
+void expectRunGlobalsUnchangedAfterMalformedConfig()
+{
+	EXPECT_EQ(FRONT_ADDR, "sentinel-front");
+	EXPECT_EQ(BROKER_ID, "sentinel-broker");
+	EXPECT_EQ(INVESTOR_ID, "sentinel-investor");
+	EXPECT_EQ(PASSWORD, "sentinel-password");
+	EXPECT_EQ(SAVEPATH, "sentinel-path");
+	EXPECT_EQ(APPID, "sentinel-appid");
+	EXPECT_EQ(AUTHCODE, "sentinel-authcode");
+	EXPECT_EQ(CLASSMASK, 99u);
+	EXPECT_TRUE(ONLYINCFG);
+	EXPECT_TRUE(INCREMENTAL);
+	EXPECT_EQ(COMM_FILE, "sentinel-comm");
+	EXPECT_EQ(CONT_FILE, "sentinel-cont");
+	EXPECT_EQ(MODULE_NAME, "sentinel-module");
+	EXPECT_EQ(pUserApi, nullptr);
+}
+
 }	// namespace
 
 /* ------------------------------------------------------------------ */
@@ -158,7 +228,13 @@ TEST(CTPOptLoaderRun, yaml_content_fills_globals_and_stops_before_module_load)
 
 TEST(CTPOptLoaderRun, yaml_content_honours_configured_names_and_flags)
 {
-	const char* cfg =
+	ScopedOptionJsonDir dir;
+	const std::string modulePath = (std::filesystem::path(dir.save_path()) / "myoptapi.so").generic_string();
+	std::ofstream moduleFile(modulePath);
+	ASSERT_TRUE(moduleFile.is_open());
+	moduleFile.close();
+
+	const std::string cfg =
 		"ctp:\n"
 		"  front: tcp://10.0.0.1:3333\n"
 		"  broker: '8888'\n"
@@ -170,13 +246,13 @@ TEST(CTPOptLoaderRun, yaml_content_honours_configured_names_and_flags)
 		"  mask: 7\n"
 		"  commfile: mycomm.json\n"
 		"  contfile: mycont.json\n"
-		"  module: ./myoptapi.so\n";
+		"  module: \"" + modulePath + "\"\n";
 
-	EXPECT_EQ(run(cfg, true, false), 0);
+	EXPECT_EQ(run(cfg.c_str(), true, false), 0);
 	EXPECT_EQ(CLASSMASK, 7u);
 	EXPECT_EQ(COMM_FILE, "mycomm.json");
 	EXPECT_EQ(CONT_FILE, "mycont.json");
-	EXPECT_EQ(MODULE_NAME, "./myoptapi.so");
+	EXPECT_EQ(MODULE_NAME, modulePath);
 	EXPECT_TRUE(ONLYINCFG);
 	EXPECT_TRUE(INCREMENTAL);
 	EXPECT_EQ(SAVEPATH, "");
@@ -240,6 +316,93 @@ TEST(CTPOptLoaderRun, yaml_content_missing_config_section_returns_zero_without_t
 	EXPECT_EQ(pUserApi, nullptr);
 }
 
+TEST(CTPOptLoaderRun, yaml_content_wrong_type_ctp_section_returns_zero_without_touching_globals)
+{
+	const char* cfg =
+		"ctp: []\n"
+		"config:\n"
+		"  path: ''\n"
+		"  mask: 7\n";
+	seedRunGlobalsForMalformedConfig();
+
+	EXPECT_EQ(run(cfg, true, false), 0);
+	expectRunGlobalsUnchangedAfterMalformedConfig();
+}
+
+TEST(CTPOptLoaderRun, yaml_content_wrong_type_config_section_returns_zero_without_touching_globals)
+{
+	const char* cfg =
+		"ctp:\n"
+		"  front: tcp://127.0.0.1:1234\n"
+		"  broker: brk9999\n"
+		"  user: inv001\n"
+		"  pass: pwd001\n"
+		"config: false\n";
+	seedRunGlobalsForMalformedConfig();
+
+	EXPECT_EQ(run(cfg, true, false), 0);
+	expectRunGlobalsUnchangedAfterMalformedConfig();
+}
+
+TEST(CTPOptLoaderRun, yaml_content_container_value_returns_zero_without_touching_globals)
+{
+	const char* cfg =
+		"ctp:\n"
+		"  front: tcp://127.0.0.1:1234\n"
+		"  broker: brk9999\n"
+		"  user: inv001\n"
+		"  pass: pwd001\n"
+		"  onlyincfg: []\n"
+		"config:\n"
+		"  path: ''\n"
+		"  mask: 7\n";
+	seedRunGlobalsForMalformedConfig();
+
+	EXPECT_EQ(run(cfg, true, false), 0);
+	expectRunGlobalsUnchangedAfterMalformedConfig();
+}
+
+TEST(CTPOptLoaderRun, json_file_applies_valid_config_before_required_path_check)
+{
+	ScopedOptionJsonDir dir;
+	const std::string configPath = (std::filesystem::path(dir.save_path()) / "config.json").string();
+	std::ofstream configFile(configPath);
+	ASSERT_TRUE(configFile.is_open());
+	configFile << R"({
+		"ctp": {
+			"front": "tcp://127.0.0.1:1234",
+			"broker": "brk9999",
+			"user": "inv001",
+			"pass": "pwd001",
+			"appid": "app-1",
+			"authcode": "auth-1",
+			"onlyincfg": true,
+			"incremental": true
+		},
+		"config": {
+			"path": "",
+			"mask": 7,
+			"commfile": "mycomm.json",
+			"contfile": "mycont.json"
+		}
+	})";
+	configFile.close();
+
+	EXPECT_EQ(run(configPath.c_str(), true, true), 0);
+	EXPECT_EQ(FRONT_ADDR, "tcp://127.0.0.1:1234");
+	EXPECT_EQ(BROKER_ID, "brk9999");
+	EXPECT_EQ(INVESTOR_ID, "inv001");
+	EXPECT_EQ(PASSWORD, "pwd001");
+	EXPECT_EQ(APPID, "app-1");
+	EXPECT_EQ(AUTHCODE, "auth-1");
+	EXPECT_EQ(CLASSMASK, 7u);
+	EXPECT_EQ(COMM_FILE, "mycomm.json");
+	EXPECT_EQ(CONT_FILE, "mycont.json");
+	EXPECT_TRUE(ONLYINCFG);
+	EXPECT_TRUE(INCREMENTAL);
+	EXPECT_EQ(pUserApi, nullptr);
+}
+
 TEST(CTPOptLoaderRun, ini_branch_applies_builtin_defaults_for_absent_file)
 {
 	// .ini 后缀走 IniHelper 分支；文件不存在时 load() 内部吞掉异常，全部取默认值
@@ -282,6 +445,14 @@ TEST(CTPOptLoaderCodes, extract_product_name_strips_trailing_digits)
 	EXPECT_EQ(extractProductName("Rebar"), "Rebar");
 	// 只剥尾部连续数字，中间数字不动
 	EXPECT_EQ(extractProductName("copper2401option9"), "copper2401option");
+}
+
+TEST(CTPOptLoaderCodes, extract_product_name_handles_empty_null_and_signed_bytes)
+{
+	EXPECT_EQ(extractProductName(""), "");
+	EXPECT_EQ(extractProductName(NULL), "");
+	const char signed_byte_name[] = { static_cast<char>(0xFF), '9', '\0' };
+	EXPECT_EQ(extractProductName(signed_byte_name), std::string(1, static_cast<char>(0xFF)));
 }
 
 /* ------------------------------------------------------------------ */
@@ -383,6 +554,102 @@ TEST_F(CTPOptLoaderTest, option_instrument_keeps_contract_level_volume_multiple)
 	EXPECT_EQ(cont.m_strName, "M-Opt");
 }
 
+TEST_F(CTPOptLoaderTest, incremental_json_roundtrips_nested_option_fields_and_plain_future)
+{
+	ScopedOptionJsonDir dir;
+	SAVEPATH = dir.save_path();
+	COMM_FILE = "commodities.json";
+	CONT_FILE = "contracts.json";
+	INCREMENTAL = true;
+
+	loader::Contract option{};
+	option.m_strCode = "m2409-C-3000";
+	option.m_strExchg = "DCE";
+	option.m_strName = "M-Call-3000";
+	option.m_strProduct = "m_o";
+	option.m_maxMktQty = 500;
+	option.m_maxLmtQty = 300;
+	option.m_minMktQty = 1;
+	option.m_minLmtQty = 2;
+	option.m_uOpenDate = 20231101;
+	option.m_uExpireDate = 20241130;
+	option.m_uVolScale = 10;
+	option.m_dLongMarginRatio = 0.09;
+	option.m_dShortMarginRatio = 0.11;
+	option.m_optType = OT_Call;
+	option.m_strUnderlying = "m2409";
+	option.m_strikePrice = 3000.5;
+	option.m_dUnderlyingScale = 0.2;
+	_contracts["DCE.m2409-C-3000"] = option;
+
+	loader::Contract future{};
+	future.m_strCode = "m2409";
+	future.m_strExchg = "DCE";
+	future.m_strName = "Methanol2409";
+	future.m_strProduct = "m";
+	future.m_maxMktQty = 400;
+	future.m_maxLmtQty = 200;
+	future.m_minMktQty = 1;
+	future.m_minLmtQty = 1;
+	future.m_uOpenDate = 20230101;
+	future.m_uExpireDate = 20241231;
+	future.m_dLongMarginRatio = 0.12;
+	future.m_dShortMarginRatio = 0.13;
+	future.m_optType = OT_None;
+	_contracts["DCE.m2409"] = future;
+
+	CTraderSpi spi;
+	spi.DumpToJson();
+	ASSERT_TRUE(std::filesystem::exists(SAVEPATH + CONT_FILE));
+	_contracts.clear();
+	spi.LoadFromJson();
+
+	ASSERT_EQ(_contracts.count("DCE.m2409-C-3000"), 1u);
+	const loader::Contract& loadedOption = _contracts.at("DCE.m2409-C-3000");
+	EXPECT_EQ(loadedOption.m_strCode, option.m_strCode);
+	EXPECT_EQ(loadedOption.m_strExchg, option.m_strExchg);
+	EXPECT_EQ(loadedOption.m_strName, option.m_strName);
+	EXPECT_EQ(loadedOption.m_strProduct, option.m_strProduct);
+	EXPECT_EQ(loadedOption.m_optType, option.m_optType);
+	EXPECT_EQ(loadedOption.m_strUnderlying, option.m_strUnderlying);
+	EXPECT_DOUBLE_EQ(loadedOption.m_strikePrice, option.m_strikePrice);
+	EXPECT_DOUBLE_EQ(loadedOption.m_dUnderlyingScale, option.m_dUnderlyingScale);
+	EXPECT_EQ(loadedOption.m_maxMktQty, option.m_maxMktQty);
+	EXPECT_EQ(loadedOption.m_maxLmtQty, option.m_maxLmtQty);
+	EXPECT_EQ(loadedOption.m_minMktQty, option.m_minMktQty);
+	EXPECT_EQ(loadedOption.m_minLmtQty, option.m_minLmtQty);
+	EXPECT_EQ(loadedOption.m_uOpenDate, option.m_uOpenDate);
+	EXPECT_EQ(loadedOption.m_uExpireDate, option.m_uExpireDate);
+	EXPECT_EQ(loadedOption.m_uVolScale, option.m_uVolScale);
+	EXPECT_DOUBLE_EQ(loadedOption.m_dLongMarginRatio, option.m_dLongMarginRatio);
+	EXPECT_DOUBLE_EQ(loadedOption.m_dShortMarginRatio, option.m_dShortMarginRatio);
+
+	ASSERT_EQ(_contracts.count("DCE.m2409"), 1u);
+	const loader::Contract& loadedFuture = _contracts.at("DCE.m2409");
+	EXPECT_EQ(loadedFuture.m_strCode, future.m_strCode);
+	EXPECT_EQ(loadedFuture.m_strProduct, future.m_strProduct);
+	EXPECT_EQ(loadedFuture.m_optType, OT_None);
+	EXPECT_TRUE(loadedFuture.m_strUnderlying.empty());
+	EXPECT_DOUBLE_EQ(loadedFuture.m_strikePrice, 0.0);
+	EXPECT_DOUBLE_EQ(loadedFuture.m_dUnderlyingScale, 0.0);
+
+	// Re-dump the same key as a plain future, retaining its loaded option fields
+	// in memory to verify LoadFromJson resets them when updating an existing row.
+	loader::Contract reusedAsFuture = _contracts.at("DCE.m2409-C-3000");
+	reusedAsFuture.m_strName = "M-Future-2409";
+	reusedAsFuture.m_strProduct = "m";
+	reusedAsFuture.m_optType = OT_None;
+	_contracts["DCE.m2409-C-3000"] = reusedAsFuture;
+	spi.DumpToJson();
+	spi.LoadFromJson();
+
+	const loader::Contract& reloadedFuture = _contracts.at("DCE.m2409-C-3000");
+	EXPECT_EQ(reloadedFuture.m_optType, OT_None);
+	EXPECT_TRUE(reloadedFuture.m_strUnderlying.empty());
+	EXPECT_DOUBLE_EQ(reloadedFuture.m_strikePrice, 0.0);
+	EXPECT_DOUBLE_EQ(reloadedFuture.m_dUnderlyingScale, 0.0);
+}
+
 TEST_F(CTPOptLoaderTest, class_mask_filters_ungranted_categories)
 {
 	CTraderSpi spi;
@@ -458,6 +725,20 @@ TEST_F(CTPOptLoaderTest, error_packet_and_null_instrument_collect_nothing)
 
 	spi.OnRspQryInstrument(&ins, &bad, 1, false);
 	spi.OnRspQryInstrument(nullptr, nullptr, 2, false);
+
+	EXPECT_TRUE(_commodities.empty());
+	EXPECT_TRUE(_contracts.empty());
+}
+
+TEST_F(CTPOptLoaderTest, unterminated_fixed_instrument_id_is_skipped)
+{
+	CTraderSpi spi;
+	CThostFtdcRspInfoField ok = makeRsp(0, "");
+	CThostFtdcInstrumentField ins =
+		makeInstrument("SHFE", "rb2401", "rb", "Rebar2401", THOST_FTDC_PC_Futures);
+	std::memset(ins.InstrumentID, 'X', sizeof(ins.InstrumentID));
+
+	spi.OnRspQryInstrument(&ins, &ok, 3, false);
 
 	EXPECT_TRUE(_commodities.empty());
 	EXPECT_TRUE(_contracts.empty());

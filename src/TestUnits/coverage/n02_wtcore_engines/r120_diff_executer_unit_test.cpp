@@ -27,10 +27,13 @@
 #include <WtCore/TraderAdapter.h>
 #include <WtCore/WtDiffExecuter.h>
 #include <WtCore/WtExecuterFactory.h>
+#include <WtCore/WtExecMgr.h>
 
 #include <rapidjson/document.h>
 
 #include <chrono>
+#include <cstdlib>
+#include <memory>
 #include <string>
 #include <thread>
 
@@ -43,6 +46,46 @@ namespace rj = rapidjson;
 const char* const kAg = "SHFE.ag.2512";
 const char* const kRb = "SHFE.rb.2510";
 const char* const kAu = "SHFE.au.2212";
+
+class R120DiffQuiesceGuard
+{
+public:
+    explicit R120DiffQuiesceGuard(const std::shared_ptr<WtDiffExecuter>& exe)
+        : exe_(exe), coordinator_({ &manager_ })
+    {
+        manager_.add_executer(ExecCmdPtr(exe_));
+    }
+
+    void bindTrader(TraderAdapter& trader)
+    {
+        trader_ = &trader;
+    }
+
+    ~R120DiffQuiesceGuard()
+    {
+        if (!coordinator_.quiesce_all())
+        {
+            ADD_FAILURE() << "Diff executor quiesce coordinator failed";
+            std::abort();
+        }
+        if (trader_ != NULL && !trader_->removeSink(exe_.get()))
+        {
+            ADD_FAILURE() << "TraderAdapter still has an active Diff executor callback";
+            std::abort();
+        }
+        if (!coordinator_.is_complete() || !manager_.wait_quiesced())
+        {
+            ADD_FAILURE() << "Diff executor quiesce completion was not published";
+            std::abort();
+        }
+    }
+
+private:
+    std::shared_ptr<WtDiffExecuter> exe_;
+    WtExecuterMgr manager_;
+    WtExecQuiesceCoordinator coordinator_;
+    TraderAdapter* trader_ = NULL;
+};
 
 /** 差量执行单元配置：name 必须是 createDiffExeUnit 认识的名字 */
 WTSVariant* makeDiffCfg(uint32_t poolsize)
@@ -158,35 +201,38 @@ protected:
 //////////////////////////////////////////////////////////////////
 TEST_F(R120DiffTest, PoolForwardsEveryCallbackAndPersistsDiff)
 {
-    WtDiffExecuter exe(&factory, "r120diff_pool", &dm, &bd);
-    exe.setStub(&stub);
+    std::shared_ptr<WtDiffExecuter> exe(new WtDiffExecuter(&factory, "r120diff_pool", &dm, &bd));
+    R120DiffQuiesceGuard quiesce(exe);
+    exe->setStub(&stub);
     WTSVariant* cfg = makeDiffCfg(2);
     ASSERT_NE(nullptr, cfg);
-    ASSERT_TRUE(exe.init(cfg));
+    ASSERT_TRUE(exe->init(cfg));
     cfg->release();
-    exe.setTrader(&trader);
+    exe->setTrader(&trader);
+    quiesce.bindTrader(trader);
+    trader.addSink(exe.get());
 
     // 通道就绪：交易适配器已登录完成
     EXPECT_TRUE(trader.isReady());
     EXPECT_STREQ("r120_diff", trader.id());
 
     // 0 增量：先建单元，再在 :509 直接返回
-    exe.on_position_changed(kAg, 0.0);
+    exe->on_position_changed(kAg, 0.0);
 
     // 非 0 增量：目标 0 -> 2，差量 0 -> 2；池调度 set_position
-    exe.on_position_changed(kAg, 2.0);
+    exe->on_position_changed(kAg, 2.0);
 
     // 组合目标：等值再下发一次，走 :567-568 continue；再归零/恢复各一次
     wt_hashmap<std::string, double> targets;
     targets[kAg] = 2.0;
-    exe.set_position(targets);
+    exe->set_position(targets);
     targets[kAg] = 0.0;
-    exe.set_position(targets);
+    exe->set_position(targets);
     targets[kAg] = 2.0;
-    exe.set_position(targets);
+    exe->set_position(targets);
 
     // 成交回报：差量 2 -> 1，并 save_data 落盘
-    exe.on_trade(11u, kAg, true, 1.0, 3500.0);
+    exe->on_trade(11u, kAg, true, 1.0, 3500.0);
 
     const std::string content = read_exec("r120diff_pool");
     ASSERT_FALSE(content.empty());
@@ -197,15 +243,15 @@ TEST_F(R120DiffTest, PoolForwardsEveryCallbackAndPersistsDiff)
     WTSTickData* tick = r71::makeTick("SHFE", "ag2512", 20250110, 20250110,
                                       93100000, 3500.0, 3499.0, 3501.0);
     ASSERT_NE(nullptr, tick);
-    exe.on_tick(kAg, tick);
+    exe->on_tick(kAg, tick);
     tick->release();
 
-    exe.on_order(11u, kAg, true, 1.0, 0.0, 3500.0, false);
-    exe.on_entrust(11u, kAg, true, "ok");
-    exe.on_account("CNY", 1000.0, 1000.0, 1000.0, 1000.0,
+    exe->on_order(11u, kAg, true, 1.0, 0.0, 3500.0, false);
+    exe->on_entrust(11u, kAg, true, "ok");
+    exe->on_account("CNY", 1000.0, 1000.0, 1000.0, 1000.0,
                    0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-    exe.on_channel_lost();
-    exe.on_channel_ready();
+    exe->on_channel_lost();
+    exe->on_channel_ready();
 
     // 池任务排空（析构还有一次 wait）
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -217,27 +263,44 @@ TEST_F(R120DiffTest, PoolForwardsEveryCallbackAndPersistsDiff)
 //////////////////////////////////////////////////////////////////
 TEST_F(R120DiffTest, SetPositionMigratesExpiredTargetToZero)
 {
-    WtDiffExecuter exe(&factory, "r120diff_migrate", &dm, &bd);
-    exe.setStub(&stub);
+    std::shared_ptr<WtDiffExecuter> exe(new WtDiffExecuter(&factory, "r120diff_migrate", &dm, &bd));
+    R120DiffQuiesceGuard quiesce(exe);
+    exe->setStub(&stub);
     WTSVariant* cfg = makeDiffCfg(1);
     ASSERT_NE(nullptr, cfg);
-    ASSERT_TRUE(exe.init(cfg));
+    ASSERT_TRUE(exe->init(cfg));
     cfg->release();
 
     wt_hashmap<std::string, double> targets;
     targets[kAg] = 5.0;
-    exe.set_position(targets);       // 建 ag 单元，目标 5，差量 5
+    exe->set_position(targets);      // 建 ag 单元，目标 5，差量 5
 
-    exe.set_position(targets);       // 等值跳过
+    exe->set_position(targets);      // 等值跳过
+
+    wt_hashmap<std::string, double> empty;
+    exe->set_position(empty);        // ag 从目标 5 迁移到 0，差量 5 -> 0
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::string content = read_exec("r120diff_migrate");
+    ASSERT_FALSE(content.empty());
+    EXPECT_DOUBLE_EQ(0.0, jsonValue(content, "targets", kAg, "target"));
+    EXPECT_DOUBLE_EQ(0.0, jsonValue(content, "diffs", kAg, "diff"));
+
+    // 恢复目标并模拟部分成交：差量 5 -> 1；再省略 ag 后应为 -4。
+    targets[kAg] = 5.0;
+    exe->set_position(targets);
+    exe->on_trade(17u, kAg, true, 4.0, 3500.0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     wt_hashmap<std::string, double> next;
     next[kRb] = 1.0;
-    exe.set_position(next);          // ag 不在新目标 -> 归零，差量 5 -> 10
+    exe->set_position(next);         // ag 不在新目标 -> 归零，差量 1 -> -4
 
-    const std::string content = read_exec("r120diff_migrate");
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    content = read_exec("r120diff_migrate");
     ASSERT_FALSE(content.empty());
     EXPECT_DOUBLE_EQ(0.0, jsonValue(content, "targets", kAg, "target"));
-    EXPECT_DOUBLE_EQ(10.0, jsonValue(content, "diffs", kAg, "diff"));
+    EXPECT_DOUBLE_EQ(-4.0, jsonValue(content, "diffs", kAg, "diff"));
     EXPECT_DOUBLE_EQ(1.0, jsonValue(content, "targets", kRb, "target"));
     EXPECT_DOUBLE_EQ(1.0, jsonValue(content, "diffs", kRb, "diff"));
 

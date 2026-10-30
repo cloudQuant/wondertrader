@@ -4,6 +4,8 @@
 #include <functional>
 #include <vector>
 #include <algorithm>
+#include <memory>
+#include <cstring>
 
 #if _WIN32
 #include <direct.h>
@@ -21,6 +23,22 @@ NS_WTP_BEGIN
 
 typedef std::vector<std::string> ValueArray;
 typedef std::function<void(const ValueArray&, const ValueArray&)> LMDBQueryCallback;
+
+inline int compare_lmdb_keys(const void* lhs, std::size_t lhs_size, const void* rhs, std::size_t rhs_size)
+{
+	const std::size_t prefix_size = (std::min)(lhs_size, rhs_size);
+	if (prefix_size != 0)
+	{
+		const int prefix_order = std::memcmp(lhs, rhs, prefix_size);
+		if (prefix_order != 0)
+			return prefix_order;
+	}
+	if (lhs_size < rhs_size)
+		return -1;
+	if (lhs_size > rhs_size)
+		return 1;
+	return 0;
+}
 
 class WtLMDB
 {
@@ -56,31 +74,7 @@ public:
 
 	bool open(const char* path, std::size_t mapsize = 16*1024*1024)
 	{
-#if _MSC_VER
-        int ret = _access(path, 0);
-#else
-        int ret = access(path, 0);
-#endif
-		if(ret != 0)
-		{
-#if _WIN32
-			_mkdir(path);
-#else
-			mkdir(path, 0777);
-#endif
-		}
-
-		int _errno = mdb_env_create(&_env);
-		if (_errno != MDB_SUCCESS)
-			return false;
-
-		_errno = mdb_env_open(_env, path, 0, 0664);
-		if (_errno != MDB_SUCCESS)
-			return false;
-
-		_errno = mdb_env_set_mapsize(_env, mapsize);
-
-		return true;
+		return open_impl(path, mapsize, &mdb_env_set_mapsize);
 	}
 
 	inline void update_errno(int error) { _errno = error; }
@@ -95,6 +89,56 @@ public:
 	}
 
 private:
+	friend struct WtLMDBTestAccess;
+	typedef int (*MapSizeSetter)(MDB_env*, std::size_t);
+
+	bool open_impl(const char* path, std::size_t mapsize, MapSizeSetter set_mapsize)
+	{
+#if _MSC_VER
+        int ret = _access(path, 0);
+#else
+        int ret = access(path, 0);
+#endif
+		if(ret != 0)
+		{
+#if _WIN32
+			_mkdir(path);
+#else
+			mkdir(path, 0777);
+#endif
+		}
+
+		_errno = mdb_env_create(&_env);
+		if (_errno != MDB_SUCCESS)
+		{
+			if (_env != NULL)
+				mdb_env_close(_env);
+			_env = NULL;
+			_dbi = 0;
+			return false;
+		}
+
+		_errno = mdb_env_open(_env, path, 0, 0664);
+		if (_errno != MDB_SUCCESS)
+		{
+			mdb_env_close(_env);
+			_env = NULL;
+			_dbi = 0;
+			return false;
+		}
+
+		_errno = set_mapsize(_env, mapsize);
+		if (_errno != MDB_SUCCESS)
+		{
+			mdb_env_close(_env);
+			_env = NULL;
+			_dbi = 0;
+			return false;
+		}
+
+		return true;
+	}
+
 	MDB_env*	_env;
 	MDB_dbi		_dbi;
 	int			_errno;
@@ -108,6 +152,8 @@ public:
 		: _db(db)
 	, _txn(NULL)
 		, _commited(false)
+		, _range_cursor_get_override(NULL)
+		, _range_cursor_get_context(NULL)
 		{
 		_readonly = db.is_readonly();
 		_db.update_errno(mdb_txn_begin(_db.env(), NULL, (_readonly ? MDB_RDONLY : 0), &_txn));
@@ -193,69 +239,140 @@ public:
 	 */
 	std::string get(void* key, std::size_t klen)
 	{
-		MDB_cursor* cursor;
-		int _errno = mdb_cursor_open(_txn, _dbi, &cursor);
+		MDB_cursor* raw_cursor = NULL;
+		int _errno = mdb_cursor_open(_txn, _dbi, &raw_cursor);
 		_db.update_errno(_errno);
 		if (_errno != MDB_SUCCESS)
 			return std::string();
+		auto close_cursor = [](MDB_cursor* cursor) { if (cursor != NULL) mdb_cursor_close(cursor); };
+		std::unique_ptr<MDB_cursor, decltype(close_cursor)> cursor(raw_cursor, close_cursor);
 
 		MDB_val mKey, mData;
 		mKey.mv_data = key;
 		mKey.mv_size = klen;
 
-		_errno = mdb_cursor_get(cursor, &mKey, &mData, MDB_NEXT);
+		_errno = mdb_cursor_get(cursor.get(), &mKey, &mData, MDB_SET);
 		_db.update_errno(_errno);
 		if (_errno != MDB_SUCCESS)
 			return std::string();
 
-		auto ret = std::string((char*)mData.mv_data, mData.mv_size);
-		mdb_cursor_close(cursor);
+		auto ret = mData.mv_size == 0 ? std::string() : std::string((char*)mData.mv_data, mData.mv_size);
 		return ret;
 	}
 
 	/*
-	 *	读取区间数据
+	 *	读取区间数据（兼容旧接口）。LMDB 迭代异常时仍按旧接口返回已读取数量
+	 *	并将已读部分传给回调；新代码应使用 get_range_checked。
 	 */
 	int get_range(const std::string& lower_key, const std::string& upper_key, LMDBQueryCallback cb)
 	{
-		MDB_cursor* cursor;
-		int _errno = mdb_cursor_open(_txn, _dbi, &cursor);
-		_db.update_errno(_errno);
-		if (_errno != MDB_SUCCESS)
+		if (upper_key.empty())
+		{
+			_db.update_errno(MDB_SUCCESS);
+			cb(ValueArray(), ValueArray());
+			return 0;
+		}
+
+		MDB_cursor* cursor = NULL;
+		int status = mdb_cursor_open(_txn, _dbi, &cursor);
+		_db.update_errno(status);
+		if (status != MDB_SUCCESS)
 			return 0;
 
-		MDB_val lKey, rKey, mData;
+		MDB_val lKey = { 0, 0 }, rKey = { 0, 0 }, mData = { 0, 0 };
 		lKey.mv_data = (void*)lower_key.data();
 		lKey.mv_size = lower_key.size();
 
 		rKey.mv_data = (void*)upper_key.data();
 		rKey.mv_size = upper_key.size();
-		
-		if (_errno != MDB_SUCCESS)
-			return 0;
 
 		int cnt = 0;
-		MDB_cursor_op op = MDB_SET_RANGE;
+		MDB_cursor_op op = lower_key.empty() ? MDB_FIRST : MDB_SET_RANGE;
 		std::vector<std::string> ayKeys, ayVals;
-		for(; (_errno = mdb_cursor_get(cursor, &lKey, &mData, op))==MDB_SUCCESS;)
+		for (; (status = mdb_cursor_get(cursor, &lKey, &mData, op)) == MDB_SUCCESS;)
 		{
-			_db.update_errno(_errno);
-			if(_errno == MDB_NOTFOUND)
+			_db.update_errno(status);
+
+			if (compare_lmdb_keys(lKey.mv_data, lKey.mv_size, rKey.mv_data, rKey.mv_size) > 0)
 				break;
 
-			if(memcmp(lKey.mv_data, rKey.mv_data, lKey.mv_size) > 0)
-				break;
-
-			//回调
-			//cb(std::string((char*)lKey.mv_data, lKey.mv_size), std::string((char*)mData.mv_data, mData.mv_size), false);
-			ayKeys.emplace_back(std::string((char*)lKey.mv_data, lKey.mv_size));
-			ayVals.emplace_back(std::string((char*)mData.mv_data, mData.mv_size));
+			ayKeys.emplace_back(lKey.mv_size == 0 ? std::string() : std::string((const char*)lKey.mv_data, lKey.mv_size));
+			ayVals.emplace_back(mData.mv_size == 0 ? std::string() : std::string((const char*)mData.mv_data, mData.mv_size));
 			cnt++;
 			op = MDB_NEXT;
-		} 
+		}
 
 		cb(ayKeys, ayVals);
 		mdb_cursor_close(cursor);
+		return cnt;
+	}
+
+	/*
+	 *	完整扫描后的安全区间读取。正常返回记录数；游标打开或扫描失败返回 -1，
+	 *	并将 LMDB 错误保存在 WtLMDB。只有扫描完整成功后才调用回调。
+	 */
+	int get_range_checked(const std::string& lower_key, const std::string& upper_key, LMDBQueryCallback cb)
+	{
+		if (upper_key.empty())
+		{
+			_db.update_errno(MDB_SUCCESS);
+			cb(ValueArray(), ValueArray());
+			return 0;
+		}
+
+		MDB_cursor* raw_cursor = NULL;
+		int status = mdb_cursor_open(_txn, _dbi, &raw_cursor);
+		_db.update_errno(status);
+		if (status != MDB_SUCCESS)
+		{
+			if (raw_cursor != NULL)
+				mdb_cursor_close(raw_cursor);
+			return -1;
+		}
+		auto close_cursor = [](MDB_cursor* cursor) { if (cursor != NULL) mdb_cursor_close(cursor); };
+		std::unique_ptr<MDB_cursor, decltype(close_cursor)> cursor(raw_cursor, close_cursor);
+
+		MDB_val lKey = { 0, 0 }, rKey = { 0, 0 }, mData = { 0, 0 };
+		lKey.mv_data = (void*)lower_key.data();
+		lKey.mv_size = lower_key.size();
+		rKey.mv_data = (void*)upper_key.data();
+		rKey.mv_size = upper_key.size();
+
+		int cnt = 0;
+		MDB_cursor_op op = lower_key.empty() ? MDB_FIRST : MDB_SET_RANGE;
+		std::vector<std::string> ayKeys, ayVals;
+		for (;;)
+		{
+			status = _range_cursor_get_override == NULL
+				? mdb_cursor_get(cursor.get(), &lKey, &mData, op)
+				: _range_cursor_get_override(_range_cursor_get_context, cursor.get(), &lKey, &mData, op);
+			if (status == MDB_NOTFOUND)
+			{
+				// End of the key space is a complete scan, not a query failure.
+				status = MDB_SUCCESS;
+				break;
+			}
+			if (status != MDB_SUCCESS)
+				break;
+
+			if (compare_lmdb_keys(lKey.mv_data, lKey.mv_size, rKey.mv_data, rKey.mv_size) > 0)
+				break;
+
+			ayKeys.emplace_back(lKey.mv_size == 0 ? std::string() : std::string((const char*)lKey.mv_data, lKey.mv_size));
+			ayVals.emplace_back(mData.mv_size == 0 ? std::string() : std::string((const char*)mData.mv_data, mData.mv_size));
+			cnt++;
+			op = MDB_NEXT;
+		}
+
+		cursor.reset();
+		if (status != MDB_SUCCESS)
+		{
+			_db.update_errno(status);
+			return -1;
+		}
+
+		_db.update_errno(MDB_SUCCESS);
+		cb(ayKeys, ayVals);
 		return cnt;
 	}
 
@@ -292,14 +409,14 @@ public:
 		for (; _errno != MDB_NOTFOUND;)
 		{
 			//往前查找，所以如果拿到的key，比右边界大，则直接往前退回一条
-			if (memcmp(rKey.mv_data, upper_key.data(), upper_key.size()) > 0)
+			if (compare_lmdb_keys(rKey.mv_data, rKey.mv_size, upper_key.data(), upper_key.size()) > 0)
 			{
 				_errno = mdb_cursor_get(cursor, &rKey, &mData, MDB_PREV);
 				_db.update_errno(_errno);
 				continue;
 			}
 
-			if (memcmp(rKey.mv_data, lower_key.data(), lower_key.size()) < 0)
+			if (compare_lmdb_keys(rKey.mv_data, rKey.mv_size, lower_key.data(), lower_key.size()) < 0)
 				break;
 
 			//回调
@@ -347,7 +464,7 @@ public:
 		_db.update_errno(_errno);
 		for (; _errno != MDB_NOTFOUND;)
 		{
-			if (memcmp(bKey.mv_data, upper_key.data(), upper_key.size()) > 0)
+			if (compare_lmdb_keys(bKey.mv_data, bKey.mv_size, upper_key.data(), upper_key.size()) > 0)
 				break;
 
 			//回调
@@ -370,31 +487,45 @@ public:
 
 	inline int get_all(LMDBQueryCallback cb)
 	{
-		MDB_cursor* cursor;
-		int _errno = mdb_cursor_open(_txn, _dbi, &cursor);
+		MDB_cursor* raw_cursor = NULL;
+		int _errno = mdb_cursor_open(_txn, _dbi, &raw_cursor);
+		_db.update_errno(_errno);
 		if (_errno != MDB_SUCCESS)
 			return 0;
+		auto close_cursor = [](MDB_cursor* cursor) { if (cursor != NULL) mdb_cursor_close(cursor); };
+		std::unique_ptr<MDB_cursor, decltype(close_cursor)> cursor(raw_cursor, close_cursor);
 
-		MDB_val bKey, mData;
+		MDB_val bKey = { 0, 0 }, mData = { 0, 0 };
 		std::vector<std::string> ayKeys, ayVals;
-		for (; _errno != MDB_NOTFOUND;)
+		_errno = mdb_cursor_get(cursor.get(), &bKey, &mData, MDB_FIRST);
+		_db.update_errno(_errno);
+		while (_errno == MDB_SUCCESS)
 		{
-			_errno = mdb_cursor_get(cursor, &bKey, &mData, MDB_NEXT);
+			ayKeys.emplace_back(bKey.mv_size == 0 ? std::string() : std::string((const char*)bKey.mv_data, bKey.mv_size));
+			ayVals.emplace_back(mData.mv_size == 0 ? std::string() : std::string((const char*)mData.mv_data, mData.mv_size));
+			_errno = mdb_cursor_get(cursor.get(), &bKey, &mData, MDB_NEXT);
 			_db.update_errno(_errno);
-
-			ayKeys.emplace_back(std::string((const char*)bKey.mv_data, bKey.mv_size));
-			ayVals.emplace_back(std::string((const char*)mData.mv_data, mData.mv_size));
 		}
+		cursor.reset();
+		if (_errno != MDB_NOTFOUND)
+			return 0;
+
+		_db.update_errno(MDB_SUCCESS);
 		cb(ayKeys, ayVals);
 		return (int)ayVals.size();
 	}
 
 private:
+	friend struct WtLMDBRangeTestAccess;
+	typedef int (*RangeCursorGetOverride)(void*, MDB_cursor*, MDB_val*, MDB_val*, MDB_cursor_op);
+
 	WtLMDB&		_db;
 	MDB_txn*	_txn;
 	MDB_dbi		_dbi;
 	bool		_readonly;
 	bool		_commited;
+	RangeCursorGetOverride _range_cursor_get_override;
+	void* _range_cursor_get_context;
 };
 
 NS_WTP_END

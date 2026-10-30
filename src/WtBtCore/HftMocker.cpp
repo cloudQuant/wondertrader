@@ -27,18 +27,23 @@ namespace fs = std::filesystem;
 
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
+#include <mutex>
 namespace rj = rapidjson;
 
 uint32_t makeLocalOrderID()
 {
 	static std::atomic<uint32_t> _auto_order_id{ 0 };
-	if (_auto_order_id == 0)
-	{
+	// Local ID 0 is reserved as the no-order sentinel; keep initialization state separate.
+	static std::once_flag _auto_order_id_once;
+	std::call_once(_auto_order_id_once, []() {
 		uint32_t curYear = TimeUtils::getCurDate() / 10000 * 10000 + 101;
-		_auto_order_id = (uint32_t)((TimeUtils::getLocalTimeNow() - TimeUtils::makeTime(curYear, 0)) / 1000 * 50);
-	}
+		uint32_t seed = (uint32_t)((TimeUtils::getLocalTimeNow() - TimeUtils::makeTime(curYear, 0)) / 1000 * 50);
+		if (seed == 0)
+			seed = 1;
+		_auto_order_id.store(seed, std::memory_order_relaxed);
+	});
 
-	return _auto_order_id.fetch_add(1);
+	return _auto_order_id.fetch_add(1, std::memory_order_relaxed);
 }
 
 std::vector<uint32_t> splitVolume(uint32_t vol)
@@ -140,8 +145,27 @@ HftMocker::~HftMocker()
 {
 	if(_strategy)
 	{
-		_factory._fact->deleteStrategy(_strategy);
+		bool released = false;
+		try
+		{
+			if (_factory._fact != NULL)
+				released = _factory._fact->deleteStrategy(_strategy);
+		}
+		catch (...)
+		{
+			released = false;
+		}
+
+		if (!released)
+		{
+			// A plugin may still own this strategy. Keep the factory/module mapped
+			// rather than unloading code that a leaked strategy could still use.
+			WTSLogger::error("HFT strategy cleanup failed; retaining its plugin module");
+			_factory.pin();
+		}
+		_strategy = nullptr;
 	}
+	release_hft_factory();
 
 	_commodities->release();
 
@@ -214,10 +238,25 @@ void HftMocker::postTask(Task task)
 
 bool HftMocker::init_hft_factory(WTSVariant* cfg)
 {
-	if (cfg == NULL)
+	if (cfg == NULL || _factory._fact != NULL || _factory._module_inst != NULL || _strategy != NULL)
 		return false;
 
 	const char* module = cfg->getCString("module");
+	if (module == NULL || module[0] == '\0')
+	{
+		WTSLogger::error("HFT strategy module is missing from configuration");
+		return false;
+	}
+
+	WTSVariant* cfgStra = cfg->get("strategy");
+	const char* strategyName = cfgStra == NULL ? NULL : cfgStra->getCString("name");
+	const char* strategyId = cfgStra == NULL ? NULL : cfgStra->getCString("id");
+	if (cfgStra == NULL || strategyName == NULL || strategyName[0] == '\0' ||
+		strategyId == NULL || strategyId[0] == '\0')
+	{
+		WTSLogger::error("HFT strategy configuration requires non-empty name and id");
+		return false;
+	}
 	
 	_use_newpx = cfg->getBoolean("use_newpx");
 	_error_rate = cfg->getUInt32("error_rate");
@@ -230,26 +269,140 @@ bool HftMocker::init_hft_factory(WTSVariant* cfg)
 		return false;
 
 	FuncCreateHftStraFact creator = (FuncCreateHftStraFact)DLLHelper::get_symbol(hInst, "createStrategyFact");
-	if (creator == NULL)
+	FuncDeleteHftStraFact remover = (FuncDeleteHftStraFact)DLLHelper::get_symbol(hInst, "deleteStrategyFact");
+	if (creator == NULL || remover == NULL)
 	{
+		WTSLogger::error("HFT strategy module {} is missing {}", module,
+			creator == NULL ? "createStrategyFact" : "deleteStrategyFact");
 		DLLHelper::free_library(hInst);
 		return false;
 	}
 
-	_factory._module_inst = hInst;
-	_factory._module_path = module;
-	_factory._creator = creator;
-	_factory._remover = (FuncDeleteHftStraFact)DLLHelper::get_symbol(hInst, "deleteStrategyFact");
-	_factory._fact = _factory._creator();
+	return init_hft_factory_impl(cfg, hInst, module, creator, remover);
+}
+
+bool HftMocker::init_hft_factory_impl(WTSVariant* cfg, DllHandle module,
+	const std::string& modulePath, FuncCreateHftStraFact creator,
+	FuncDeleteHftStraFact remover)
+{
+	if (cfg == NULL || creator == NULL || remover == NULL ||
+		_factory._fact != NULL || _factory._module_inst != NULL || _strategy != NULL)
+	{
+		DLLHelper::free_library(module);
+		return false;
+	}
 
 	WTSVariant* cfgStra = cfg->get("strategy");
-	if(cfgStra)
+	const char* strategyName = cfgStra == NULL ? NULL : cfgStra->getCString("name");
+	const char* strategyId = cfgStra == NULL ? NULL : cfgStra->getCString("id");
+	if (cfgStra == NULL || strategyName == NULL || strategyName[0] == '\0' ||
+		strategyId == NULL || strategyId[0] == '\0')
 	{
-		_strategy = _factory._fact->createStrategy(cfgStra->getCString("name"), cfgStra->getCString("id"));
-		_strategy->init(cfgStra->get("params"));
-		_name = _strategy->id();
+		DLLHelper::free_library(module);
+		return false;
 	}
-	return true;
+
+	IHftStrategyFact* fact = NULL;
+	HftStrategy* strategy = NULL;
+	bool strategyInitialized = false;
+	std::string strategyIdValue;
+	std::string modulePathValue;
+	try
+	{
+		modulePathValue = modulePath;
+		fact = creator();
+		if (fact != NULL)
+		{
+			strategy = fact->createStrategy(strategyName, strategyId);
+			if (strategy != NULL && strategy->init(cfgStra->get("params")))
+			{
+				const char* actualId = strategy->id();
+				if (actualId != NULL && actualId[0] != '\0')
+				{
+					strategyIdValue = actualId;
+					strategyInitialized = true;
+				}
+			}
+		}
+	}
+	catch (...)
+	{
+		WTSLogger::error("HFT strategy plugin {} threw during initialization", modulePath.c_str());
+	}
+
+	if (strategyInitialized)
+	{
+		_factory._module_inst = module;
+		_factory._module_path = std::move(modulePathValue);
+		_factory._creator = creator;
+		_factory._remover = remover;
+		_factory._fact = fact;
+		_strategy = strategy;
+		_name = std::move(strategyIdValue);
+		return true;
+	}
+
+	bool strategyDeleted = strategy == NULL;
+	bool strategyDeleteThrew = false;
+	if (strategy != NULL && fact != NULL)
+	{
+		try
+		{
+			strategyDeleted = fact->deleteStrategy(strategy);
+		}
+		catch (...)
+		{
+			strategyDeleted = false;
+			strategyDeleteThrew = true;
+		}
+	}
+
+	if (!strategyDeleted)
+	{
+		if (strategyDeleteThrew)
+		{
+			// The plugin may have destroyed the object before throwing. Do not call
+			// its deleter again; leak the plugin objects and keep the module mapped.
+			_factory._module_inst = module;
+			_factory._module_path = std::move(modulePathValue);
+			_factory._creator = creator;
+			_factory._remover = remover;
+			_factory._fact = fact;
+			_factory.pin();
+			return false;
+		}
+
+		// Keep ownership in the mocker so its destructor can retry cleanup. If
+		// that also fails, it will pin the module instead of unloading live code.
+		_factory._module_inst = module;
+		_factory._module_path = std::move(modulePathValue);
+		_factory._creator = creator;
+		_factory._remover = remover;
+		_factory._fact = fact;
+		_strategy = strategy;
+		return false;
+	}
+
+	if (fact != NULL)
+	{
+		try
+		{
+			remover(fact);
+		}
+		catch (...)
+		{
+			WTSLogger::error("HFT strategy factory {} threw during cleanup; retaining its module", modulePath.c_str());
+			return false; // Deliberately leave the library mapped.
+		}
+	}
+	DLLHelper::free_library(module);
+	WTSLogger::error("HFT strategy initialization failed for {}", strategyName);
+	return false;
+}
+
+void HftMocker::release_hft_factory() noexcept
+{
+	_factory.release();
 }
 
 void HftMocker::handle_tick(const char* stdCode, WTSTickData* curTick, uint32_t /*pxType*/)
@@ -575,6 +728,7 @@ OrderIDs HftMocker::stra_cancel(const char* stdCode, bool isBuy, double qty /* =
 {
 	OrderIDs ret;
 	[[maybe_unused]] uint32_t cnt = 0;
+	const bool cancel_all = qty == 0.0;
 	for (auto it = _orders.begin(); it != _orders.end(); it++)
 	{
 		OrderInfoPtr ordInfo = it->second;
@@ -584,10 +738,13 @@ OrderIDs HftMocker::stra_cancel(const char* stdCode, bool isBuy, double qty /* =
 			stra_cancel(it->first);
 			ret.emplace_back(it->first);
 			cnt++;
-			if (left < qty)
-				qty -= left;
-			else
-				break;
+			if (!cancel_all)
+			{
+				if (left < qty)
+					qty -= left;
+				else
+					break;
+			}
 		}
 	}
 
@@ -625,8 +782,8 @@ OrderIDs HftMocker::stra_buy(const char* stdCode, double price, double qty, cons
 		_orders[localid] = order;		
 	}
 
-	postTask([this, localid](){
-		const OrderInfoPtr& ordInfo = _orders[localid];
+	postTask([this, localid, order](){
+		const OrderInfoPtr& ordInfo = order;
 		on_entrust(localid, ordInfo->_code, true, "下单成功", ordInfo->_usertag);
 	});
 
@@ -828,8 +985,8 @@ OrderIDs HftMocker::stra_sell(const char* stdCode, double price, double qty, con
 		_orders[localid] = order;
 	}
 
-	postTask([this, localid]() {
-		const OrderInfoPtr& ordInfo = _orders[localid];
+	postTask([this, localid, order]() {
+		const OrderInfoPtr& ordInfo = order;
 		on_entrust(localid, ordInfo->_code, true, "下单成功", ordInfo->_usertag);
 	});
 

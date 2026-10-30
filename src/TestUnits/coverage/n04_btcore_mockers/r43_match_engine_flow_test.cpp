@@ -10,8 +10,11 @@
  */
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <cstdint>
 #include <cstring>
+#include <functional>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -43,12 +46,17 @@ namespace
 		std::vector<TradeRec> trades;
 		std::vector<OrderRec> orders;
 		uint32_t entrusts {0};
+		std::function<void(uint32_t)> onTrade;
+		std::function<void(uint32_t)> onEntrust;
+		std::function<void(uint32_t, bool)> onOrder;
 
 		void handle_trade(uint32_t localid, const char* stdCode, bool isBuy,
 			double vol, double fireprice, double price, uint64_t) override
 		{
 			(void)stdCode;
 			trades.push_back({ localid, isBuy, vol, fireprice, price });
+			if (onTrade)
+				onTrade(localid);
 		}
 
 		void handle_order(uint32_t localid, const char* stdCode, bool isBuy,
@@ -56,6 +64,8 @@ namespace
 		{
 			(void)stdCode; (void)price;
 			orders.push_back({ localid, isBuy, leftover, isCanceled });
+			if (onOrder)
+				onOrder(localid, isCanceled);
 		}
 
 		void handle_entrust(uint32_t localid, const char* stdCode, bool bSuccess,
@@ -63,6 +73,8 @@ namespace
 		{
 			(void)localid; (void)stdCode; (void)bSuccess; (void)message;
 			entrusts++;
+			if (onEntrust)
+				onEntrust(localid);
 		}
 	};
 
@@ -95,6 +107,19 @@ namespace
 		return WTSTickData::create(ts);
 	}
 }
+
+class MatchEngineTestAccess
+{
+public:
+	static const std::map<uint32_t, double>* book_items(
+		const MatchEngine& engine, const char* code)
+	{
+		auto it = engine._lmt_ord_books.find(code);
+		if (it == engine._lmt_ord_books.end())
+			return nullptr;
+		return &it->second._items;
+	}
+};
 
 class R43MatchEngineFlowTest : public ::testing::Test
 {
@@ -230,17 +255,456 @@ TEST_F(R43MatchEngineFlowTest, cancelBySideSkipsInactiveOrders)
 	EXPECT_EQ(1u, cbCalls);
 }
 
-/*
- * 缺陷归档（见 bugs/R43.md BUG-R43-002）：update_lob 在盘口只有一侧报价时，
- * `sit = lower_bound(_bid_px); if (sit->first == _bid_px) sit++;` 之后没有判 end，
- * 紧接的 `sit->first <= eit->first` 解引用 end()（未定义行为）。
- * 该路径只影响私有委托账本、没有公开读取口，无法用断言稳定证伪，
- * 因此这里只保留单侧盘口输入，默认不启用。
- */
-TEST_F(R43MatchEngineFlowTest, DISABLED_oneSidedBookDereferencesEnd)
+TEST_F(R43MatchEngineFlowTest, cancelByIdAcceptsAnUnactivatedOrderOnlyOnce)
+{
+	const char* code = "SSE.STK.610019";
+	feed(code, r43_tick(code, 10.0, 0, 9.9, 50, 10.1, 50));
+	OrderIDs ids = engine.buy(code, 9.9, 30, 20240102093000000ULL);
+	ASSERT_EQ(1u, ids.size());
+
+	// ID cancellation may cancel state 0, but once it enters state 9 the same
+	// request must not return the remaining quantity a second time.
+	EXPECT_DOUBLE_EQ(30.0, engine.cancel(ids.front()));
+	EXPECT_DOUBLE_EQ(0.0, engine.cancel(ids.front()));
+	const auto pending = engine.get_order_snapshots(code);
+	ASSERT_EQ(1u, pending.size());
+	EXPECT_EQ(9u, pending.front().state);
+	EXPECT_DOUBLE_EQ(30.0, pending.front().left);
+	EXPECT_EQ(0u, sink.entrusts);
+
+	// The first same-code tick delivers the cancel response without activating it.
+	feed(code, r43_tick(code, 10.0, 0, 9.9, 50, 10.1, 50));
+	EXPECT_TRUE(engine.get_order_snapshots(code).empty());
+	ASSERT_EQ(1u, sink.orders.size());
+	EXPECT_EQ(ids.front(), sink.orders.front().localid);
+	EXPECT_TRUE(sink.orders.front().isCanceled);
+	EXPECT_DOUBLE_EQ(0.0, engine.cancel(ids.front()));
+}
+
+TEST_F(R43MatchEngineFlowTest, oneSidedBidIsSafeAndDoesNotCreateAFillWithoutAnAsk)
 {
 	const char* code = "SSE.STK.610006";
-	// 只有买一、没有卖一 -> _items 只有一个价位，sit++ 后指向 end()
 	feed(code, r43_tick(code, 10.0, 100, 10.0, 500, 0.0, 0.0));
-	feed(code, r43_tick(code, 10.0, 100, 10.0, 500, 0.0, 0.0));
+
+	const auto* items = MatchEngineTestAccess::book_items(engine, code);
+	ASSERT_NE(nullptr, items);
+	ASSERT_EQ(1u, items->size());
+	EXPECT_DOUBLE_EQ(500.0, items->at(100000u));
+
+	// With no ask quote, a lower buy limit is passive. A later trade above
+	// that limit must not be filled using the missing ask's zero price/size.
+	OrderIDs ids = engine.buy(code, 9.9, 10, 20240102093000000ULL);
+	ASSERT_EQ(1u, ids.size());
+	feed(code, r43_tick(code, 10.2, 1000, 10.0, 250, 0.0, 0.0));
+	EXPECT_TRUE(sink.trades.empty());
+
+	items = MatchEngineTestAccess::book_items(engine, code);
+	ASSERT_NE(nullptr, items);
+	ASSERT_EQ(1u, items->size());
+	EXPECT_DOUBLE_EQ(250.0, items->at(100000u));
+}
+
+TEST_F(R43MatchEngineFlowTest, oneSidedAskAndEmptyQuoteSidesAreIteratorSafe)
+{
+	const char* code = "SSE.STK.610007";
+	feed(code, r43_tick(code, 10.0, 100, 0.0, 0.0, 10.1, 600));
+
+	const auto* items = MatchEngineTestAccess::book_items(engine, code);
+	ASSERT_NE(nullptr, items);
+	ASSERT_EQ(1u, items->size());
+	EXPECT_DOUBLE_EQ(600.0, items->at(101000u));
+
+	// Empty quote sides must not produce invalid iterator access after a book
+	// has already been created. This does not assert whether old levels should
+	// be retained or cleared; that behavior has no confirmed contract.
+	feed(code, r43_tick(code, 10.0, 0, 0.0, 0.0, 0.0, 0.0));
+	EXPECT_TRUE(sink.trades.empty());
+}
+
+TEST_F(R43MatchEngineFlowTest, bidAndAskDepthUseTheirOwnQuantities)
+{
+	const char* code = "SSE.STK.610008";
+	feed(code, r43_tick(code, 10.0, 100, 10.0, 500, 10.1, 600));
+
+	const auto* items = MatchEngineTestAccess::book_items(engine, code);
+	ASSERT_NE(nullptr, items);
+	ASSERT_EQ(2u, items->size());
+	EXPECT_DOUBLE_EQ(500.0, items->at(100000u));
+	EXPECT_DOUBLE_EQ(600.0, items->at(101000u));
+
+	feed(code, r43_tick(code, 10.0, 0, 10.0, 250, 10.1, 800));
+	items = MatchEngineTestAccess::book_items(engine, code);
+	ASSERT_NE(nullptr, items);
+	EXPECT_DOUBLE_EQ(250.0, items->at(100000u));
+	EXPECT_DOUBLE_EQ(800.0, items->at(101000u));
+}
+
+TEST_F(R43MatchEngineFlowTest, orderSnapshotsPreserveGrossStateAndDisappearAfterTerminalReport)
+{
+	const char* codeA = "SSE.STK.610009";
+	const char* codeB = "SSE.STK.610010";
+	feed(codeA, r43_tick(codeA, 10.0, 0, 9.9, 50, 10.1, 40));
+	feed(codeB, r43_tick(codeB, 20.0, 0, 19.9, 60, 20.1, 70));
+
+	OrderIDs buy = engine.buy(codeA, 10.1, 100, 20240102093000000ULL);
+	OrderIDs sell = engine.sell(codeA, 9.9, 50, 20240102093000000ULL);
+	OrderIDs otherCode = engine.sell(codeB, 20.2, 30, 20240102093000000ULL);
+	ASSERT_EQ(1u, buy.size());
+	ASSERT_EQ(1u, sell.size());
+	ASSERT_EQ(1u, otherCode.size());
+
+	auto findById = [](const std::vector<MatchEngine::OrderSnapshot>& orders, uint32_t id)
+		-> const MatchEngine::OrderSnapshot*
+	{
+		for (const MatchEngine::OrderSnapshot& order : orders)
+			if (order.localid == id)
+				return &order;
+		return nullptr;
+	};
+
+	const auto pendingA = engine.get_order_snapshots(codeA);
+	ASSERT_EQ(2u, pendingA.size());
+	const auto* pendingBuy = findById(pendingA, buy.front());
+	const auto* pendingSell = findById(pendingA, sell.front());
+	ASSERT_NE(nullptr, pendingBuy);
+	ASSERT_NE(nullptr, pendingSell);
+	EXPECT_TRUE(pendingBuy->buy);
+	EXPECT_DOUBLE_EQ(100.0, pendingBuy->qty);
+	EXPECT_DOUBLE_EQ(100.0, pendingBuy->left);
+	EXPECT_DOUBLE_EQ(0.0, pendingBuy->traded);
+	EXPECT_DOUBLE_EQ(10.1, pendingBuy->price);
+	EXPECT_EQ(0u, pendingBuy->state);
+	EXPECT_EQ(20240102093000000ULL, pendingBuy->time);
+	EXPECT_FALSE(pendingSell->buy);
+	EXPECT_EQ(0u, pendingSell->state);
+	const auto pendingB = engine.get_order_snapshots(codeB);
+	ASSERT_EQ(1u, pendingB.size());
+	EXPECT_EQ(0u, pendingB.front().state);
+	EXPECT_EQ(3u, engine.get_order_snapshots("").size());
+	EXPECT_TRUE(engine.get_order_snapshots("SSE.STK.999999").empty());
+
+	// The zero-volume tick activates both codeA orders without filling them.
+	feed(codeA, r43_tick(codeA, 10.0, 0, 9.9, 50, 10.1, 40));
+	const auto active = engine.get_order_snapshots(codeA);
+	ASSERT_EQ(2u, active.size());
+	const auto* activeBuy = findById(active, buy.front());
+	const auto* activeSell = findById(active, sell.front());
+	ASSERT_NE(nullptr, activeBuy);
+	ASSERT_NE(nullptr, activeSell);
+	EXPECT_EQ(1u, activeBuy->state);
+	EXPECT_EQ(1u, activeSell->state);
+
+	// One side is partially filled; the opposing order completes and is removed.
+	feed(codeA, r43_tick(codeA, 10.0, 1000, 9.9, 50, 10.1, 40));
+	const auto partiallyFilled = engine.get_order_snapshots(codeA);
+	ASSERT_EQ(1u, partiallyFilled.size());
+	const auto* partialBuy = findById(partiallyFilled, buy.front());
+	ASSERT_NE(nullptr, partialBuy);
+	EXPECT_EQ(1u, partialBuy->state);
+	EXPECT_DOUBLE_EQ(100.0, partialBuy->qty);
+	EXPECT_DOUBLE_EQ(60.0, partialBuy->left);
+	EXPECT_DOUBLE_EQ(40.0, partialBuy->traded);
+	EXPECT_EQ(nullptr, findById(partiallyFilled, sell.front()));
+
+	EXPECT_DOUBLE_EQ(60.0, engine.cancel(buy.front()));
+	EXPECT_DOUBLE_EQ(0.0, engine.cancel(buy.front()));
+	const auto cancelPending = engine.get_order_snapshots(codeA);
+	ASSERT_EQ(1u, cancelPending.size());
+	const auto* cancellingBuy = findById(cancelPending, buy.front());
+	ASSERT_NE(nullptr, cancellingBuy);
+	EXPECT_EQ(9u, cancellingBuy->state);
+	EXPECT_DOUBLE_EQ(60.0, cancellingBuy->left);
+	EXPECT_DOUBLE_EQ(40.0, cancellingBuy->traded);
+
+	// The next tick delivers the cancel report, after which the matcher drops it.
+	feed(codeA, r43_tick(codeA, 10.0, 0, 9.9, 50, 10.1, 40));
+	EXPECT_TRUE(engine.get_order_snapshots(codeA).empty());
+	EXPECT_DOUBLE_EQ(0.0, engine.cancel(buy.front()));
+	EXPECT_EQ(1u, engine.get_order_snapshots(codeB).size());
+}
+
+TEST_F(R43MatchEngineFlowTest, ticksActivateAndFillOnlyOrdersForTheirOwnCode)
+{
+	const char* codeA = "SSE.STK.610011";
+	const char* codeB = "SSE.STK.610012";
+	feed(codeA, r43_tick(codeA, 10.0, 0, 9.9, 50, 10.1, 50));
+	feed(codeB, r43_tick(codeB, 20.0, 0, 19.9, 50, 20.1, 50));
+
+	OrderIDs buyB = engine.buy(codeB, 20.1, 50, 20240102093000000ULL);
+	ASSERT_EQ(1u, buyB.size());
+
+	// Even a crossing A tick cannot activate or fill B's pending order.
+	feed(codeA, r43_tick(codeA, 10.0, 0, 9.9, 50, 10.1, 50));
+	feed(codeA, r43_tick(codeA, 10.0, 1000, 9.9, 50, 10.1, 50));
+	const auto stillPendingB = engine.get_order_snapshots(codeB);
+	ASSERT_EQ(1u, stillPendingB.size());
+	EXPECT_EQ(0u, stillPendingB.front().state);
+	EXPECT_TRUE(sink.trades.empty());
+	EXPECT_EQ(0u, sink.entrusts);
+
+	// The matching B tick activates and fills that same order as expected.
+	feed(codeB, r43_tick(codeB, 20.0, 1000, 19.9, 50, 20.1, 50));
+	EXPECT_TRUE(engine.get_order_snapshots(codeB).empty());
+	ASSERT_EQ(1u, sink.trades.size());
+	EXPECT_EQ(buyB.front(), sink.trades.front().localid);
+	EXPECT_DOUBLE_EQ(50.0, sink.trades.front().vol);
+	EXPECT_DOUBLE_EQ(20.1, sink.trades.front().price);
+}
+
+TEST_F(R43MatchEngineFlowTest, cancelPendingOrderWaitsForItsOwnCodeTick)
+{
+	const char* codeA = "SSE.STK.610013";
+	const char* codeB = "SSE.STK.610014";
+	feed(codeA, r43_tick(codeA, 10.0, 0, 9.9, 50, 10.1, 50));
+	feed(codeB, r43_tick(codeB, 20.0, 0, 19.9, 50, 20.1, 50));
+
+	OrderIDs buyB = engine.buy(codeB, 20.1, 50, 20240102093000000ULL);
+	ASSERT_EQ(1u, buyB.size());
+	EXPECT_DOUBLE_EQ(50.0, engine.cancel(buyB.front()));
+
+	// A tick must not deliver B's cancel response or remove its state-9 order.
+	feed(codeA, r43_tick(codeA, 10.0, 1000, 9.9, 50, 10.1, 50));
+	const auto cancelPendingB = engine.get_order_snapshots(codeB);
+	ASSERT_EQ(1u, cancelPendingB.size());
+	EXPECT_EQ(9u, cancelPendingB.front().state);
+	EXPECT_DOUBLE_EQ(50.0, cancelPendingB.front().left);
+	EXPECT_TRUE(sink.orders.empty());
+
+	// The first B tick is the cancel acknowledgement and removes the order.
+	feed(codeB, r43_tick(codeB, 20.0, 0, 19.9, 50, 20.1, 50));
+	EXPECT_TRUE(engine.get_order_snapshots(codeB).empty());
+	ASSERT_EQ(1u, sink.orders.size());
+	EXPECT_EQ(buyB.front(), sink.orders.front().localid);
+	EXPECT_TRUE(sink.orders.front().isCanceled);
+}
+
+TEST_F(R43MatchEngineFlowTest, codeScopedCancelDoesNotMarkAnotherContractsOrder)
+{
+	const char* codeA = "SSE.STK.610015";
+	const char* codeB = "SSE.STK.610016";
+	feed(codeA, r43_tick(codeA, 10.0, 0, 9.9, 50, 10.1, 50));
+	feed(codeB, r43_tick(codeB, 20.0, 0, 19.9, 50, 20.1, 50));
+	OrderIDs buyA = engine.buy(codeA, 9.9, 20, 20240102093000000ULL);
+	OrderIDs buyB = engine.buy(codeB, 19.9, 30, 20240102093000000ULL);
+	ASSERT_EQ(1u, buyA.size());
+	ASSERT_EQ(1u, buyB.size());
+	feed(codeA, r43_tick(codeA, 10.0, 0, 9.9, 50, 10.1, 50));
+	feed(codeB, r43_tick(codeB, 20.0, 0, 19.9, 50, 20.1, 50));
+
+	OrderIDs canceledA = engine.cancel(codeA, true, 0.0, [](double) {});
+	ASSERT_EQ(1u, canceledA.size());
+	EXPECT_EQ(buyA.front(), canceledA.front());
+	const auto ordersA = engine.get_order_snapshots(codeA);
+	ASSERT_EQ(1u, ordersA.size());
+	EXPECT_EQ(9u, ordersA.front().state);
+	const auto ordersB = engine.get_order_snapshots(codeB);
+	ASSERT_EQ(1u, ordersB.size());
+	EXPECT_EQ(buyB.front(), ordersB.front().localid);
+	EXPECT_EQ(1u, ordersB.front().state);
+}
+
+TEST_F(R43MatchEngineFlowTest, callbacksCanInsertOrdersDuringActivationAndMatching)
+{
+	const char* code = "SSE.STK.610017";
+	feed(code, r43_tick(code, 10.0, 0, 9.9, 50, 10.1, 20));
+	OrderIDs original = engine.buy(code, 10.1, 20, 20240102093000000ULL);
+	ASSERT_EQ(1u, original.size());
+
+	uint32_t insertedOnEntrust = 0;
+	uint32_t insertedOnTrade = 0;
+	sink.onEntrust = [&](uint32_t localid) {
+		if (localid != original.front() || insertedOnEntrust != 0)
+			return;
+		for (uint32_t i = 0; i < 128; ++i)
+		{
+			OrderIDs added = engine.buy(code, 9.9, 1, 20240102093000000ULL);
+			if (!added.empty())
+				insertedOnEntrust++;
+		}
+	};
+	sink.onTrade = [&](uint32_t localid) {
+		if (localid != original.front() || insertedOnTrade != 0)
+			return;
+		for (uint32_t i = 0; i < 128; ++i)
+		{
+			OrderIDs added = engine.sell(code, 10.2, 1, 20240102093000000ULL);
+			if (!added.empty())
+				insertedOnTrade++;
+		}
+	};
+
+	// Order insertion from handle_entrust forces map growth while activation
+	// callbacks are being dispatched. These new orders wait until the next tick.
+	feed(code, r43_tick(code, 10.0, 0, 9.9, 50, 10.1, 20));
+	EXPECT_EQ(128u, insertedOnEntrust);
+	const auto afterActivation = engine.get_order_snapshots(code);
+	ASSERT_EQ(129u, afterActivation.size());
+	uint32_t activeCount = 0;
+	uint32_t newCount = 0;
+	for (const auto& order : afterActivation)
+	{
+		if (order.localid == original.front())
+			EXPECT_EQ(1u, order.state);
+		else if (order.state == 0)
+			newCount++;
+		else if (order.state == 1)
+			activeCount++;
+	}
+	EXPECT_EQ(0u, activeCount);
+	EXPECT_EQ(128u, newCount);
+
+	// Matching another tick invokes a trade callback that grows the map again.
+	feed(code, r43_tick(code, 10.0, 1000, 9.9, 50, 10.1, 20));
+	EXPECT_EQ(128u, insertedOnTrade);
+	ASSERT_EQ(1u, sink.trades.size());
+	EXPECT_EQ(original.front(), sink.trades.front().localid);
+	const auto afterMatch = engine.get_order_snapshots(code);
+	ASSERT_EQ(256u, afterMatch.size());
+	uint32_t newSellCount = 0;
+	uint32_t stillActiveBuyCount = 0;
+	for (const auto& order : afterMatch)
+	{
+		EXPECT_NE(original.front(), order.localid);
+		if (!order.buy && order.state == 0)
+			newSellCount++;
+		if (order.buy && order.state == 1)
+			stillActiveBuyCount++;
+	}
+	EXPECT_EQ(128u, newSellCount);
+	EXPECT_EQ(128u, stillActiveBuyCount);
+}
+
+TEST_F(R43MatchEngineFlowTest, cancelCallbackCanInsertOrdersWithoutInvalidatingTraversal)
+{
+	const char* code = "SSE.STK.610018";
+	feed(code, r43_tick(code, 10.0, 0, 9.9, 50, 10.1, 50));
+	OrderIDs first = engine.buy(code, 9.9, 100, 20240102093000000ULL);
+	OrderIDs second = engine.buy(code, 9.9, 100, 20240102093000000ULL);
+	ASSERT_EQ(1u, first.size());
+	ASSERT_EQ(1u, second.size());
+	feed(code, r43_tick(code, 10.0, 0, 9.9, 50, 10.1, 50));
+
+	uint32_t callbackCount = 0;
+	uint32_t inserted = 0;
+	OrderIDs canceled = engine.cancel(code, true, 150.0, [&](double) {
+		callbackCount++;
+		if (inserted != 0)
+			return;
+		for (uint32_t i = 0; i < 64; ++i)
+		{
+			OrderIDs added = engine.buy(code, 9.9, 1, 20240102093000000ULL);
+			if (!added.empty())
+				inserted++;
+		}
+	});
+	EXPECT_EQ(2u, canceled.size());
+	EXPECT_EQ(2u, callbackCount);
+	EXPECT_EQ(64u, inserted);
+	const auto snapshot = engine.get_order_snapshots(code);
+	ASSERT_EQ(66u, snapshot.size());
+	uint32_t cancelPending = 0;
+	uint32_t inactive = 0;
+	for (const auto& order : snapshot)
+	{
+		if (order.localid == first.front() || order.localid == second.front())
+		{
+			EXPECT_EQ(9u, order.state);
+			if (order.state == 9)
+				cancelPending++;
+		}
+		else if (order.state == 0)
+			inactive++;
+	}
+	EXPECT_EQ(2u, cancelPending);
+	EXPECT_EQ(64u, inactive);
+}
+
+TEST_F(R43MatchEngineFlowTest, tradeCallbackCanCancelCurrentOrderAndDefersCancelReport)
+{
+	const char* code = "SSE.STK.610020";
+	feed(code, r43_tick(code, 10.0, 0, 9.9, 50, 10.1, 40));
+	OrderIDs ids = engine.buy(code, 10.1, 100, 20240102093000000ULL);
+	ASSERT_EQ(1u, ids.size());
+	feed(code, r43_tick(code, 10.0, 0, 9.9, 50, 10.1, 40));
+
+	double canceledQty = 0.0;
+	sink.onTrade = [&](uint32_t localid) {
+		if (localid == ids.front())
+			canceledQty = engine.cancel(localid);
+	};
+	feed(code, r43_tick(code, 10.0, 1000, 9.9, 50, 10.1, 40));
+
+	EXPECT_DOUBLE_EQ(60.0, canceledQty);
+	auto pending = engine.get_order_snapshots(code);
+	ASSERT_EQ(1u, pending.size());
+	EXPECT_EQ(ids.front(), pending.front().localid);
+	EXPECT_EQ(9u, pending.front().state);
+	EXPECT_DOUBLE_EQ(60.0, pending.front().left);
+	EXPECT_DOUBLE_EQ(40.0, pending.front().traded);
+	EXPECT_TRUE(std::none_of(sink.orders.begin(), sink.orders.end(),
+		[](const R43MatchSink::OrderRec& order) { return order.isCanceled; }));
+
+	// The cancellation was requested from inside a trade callback, so it is
+	// acknowledged only on the next tick for this contract.
+	feed(code, r43_tick(code, 10.0, 0, 9.9, 50, 10.1, 40));
+	EXPECT_TRUE(engine.get_order_snapshots(code).empty());
+	ASSERT_EQ(1u, std::count_if(sink.orders.begin(), sink.orders.end(),
+		[](const R43MatchSink::OrderRec& order) { return order.isCanceled; }));
+}
+
+TEST_F(R43MatchEngineFlowTest, cancelReportCallbackCanRepeatCancelAndClearMatcher)
+{
+	const char* code = "SSE.STK.610021";
+	feed(code, r43_tick(code, 10.0, 0, 9.9, 50, 10.1, 50));
+	OrderIDs ids = engine.buy(code, 9.9, 30, 20240102093000000ULL);
+	ASSERT_EQ(1u, ids.size());
+	EXPECT_DOUBLE_EQ(30.0, engine.cancel(ids.front()));
+
+	double repeatedCancelQty = -1.0;
+	uint32_t clearCalls = 0;
+	sink.onOrder = [&](uint32_t localid, bool isCanceled) {
+		if (localid != ids.front() || !isCanceled)
+			return;
+		repeatedCancelQty = engine.cancel(localid);
+		clearCalls++;
+		engine.clear();
+	};
+
+	feed(code, r43_tick(code, 10.0, 0, 9.9, 50, 10.1, 50));
+	EXPECT_DOUBLE_EQ(0.0, repeatedCancelQty);
+	EXPECT_EQ(1u, clearCalls);
+	EXPECT_TRUE(engine.get_order_snapshots(code).empty());
+	ASSERT_EQ(1u, sink.orders.size());
+	EXPECT_TRUE(sink.orders.front().isCanceled);
+}
+
+TEST_F(R43MatchEngineFlowTest, entrustCallbackCanCancelCurrentOrderWithoutReactivatingIt)
+{
+	const char* code = "SSE.STK.610022";
+	feed(code, r43_tick(code, 10.0, 0, 9.9, 50, 10.1, 50));
+	OrderIDs ids = engine.buy(code, 9.9, 30, 20240102093000000ULL);
+	ASSERT_EQ(1u, ids.size());
+
+	double canceledQty = 0.0;
+	sink.onEntrust = [&](uint32_t localid) {
+		if (localid == ids.front())
+			canceledQty = engine.cancel(localid);
+	};
+	feed(code, r43_tick(code, 10.0, 0, 9.9, 50, 10.1, 50));
+
+	EXPECT_DOUBLE_EQ(30.0, canceledQty);
+	auto pending = engine.get_order_snapshots(code);
+	ASSERT_EQ(1u, pending.size());
+	EXPECT_EQ(ids.front(), pending.front().localid);
+	EXPECT_EQ(9u, pending.front().state);
+	EXPECT_DOUBLE_EQ(30.0, pending.front().left);
+	EXPECT_TRUE(std::none_of(sink.orders.begin(), sink.orders.end(),
+		[](const R43MatchSink::OrderRec& order) { return order.isCanceled; }));
+
+	// State 9 is acknowledged only on the next tick, never reset to active by
+	// the remainder of the activation callback.
+	feed(code, r43_tick(code, 10.0, 0, 9.9, 50, 10.1, 50));
+	EXPECT_TRUE(engine.get_order_snapshots(code).empty());
+	ASSERT_EQ(1u, std::count_if(sink.orders.begin(), sink.orders.end(),
+		[](const R43MatchSink::OrderRec& order) { return order.isCanceled; }));
 }

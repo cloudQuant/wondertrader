@@ -42,10 +42,11 @@ BOOL APIENTRY DllMain(
 #else
 #include <dlfcn.h>
 /**
- * @brief Linux/Unix平台下的辅助函数
- * @details 空函数，仅用于获取当前模块的内存地址作为dladdr函数的参数
+ * @brief Linux/Unix平台下的模块地址锚点
+ * @details 内部链接的空函数，仅用于获取当前模块的内存地址作为dladdr函数的参数。
+ *          每个包含本头文件的翻译单元都有自己的锚点，避免多翻译单元链接冲突。
  */
-void inst_hlp() {}
+static void wt_module_helper_path_anchor() {}
 /**
  * @brief 获取当前动态库的完整路径
  * @return const std::string& 返回当前动态库的完整路径
@@ -58,7 +59,7 @@ static const std::string& getInstPath()
 	if (moduleName.empty())
 	{
 		Dl_info dl_info;
-		dladdr((void *)inst_hlp, &dl_info);
+		dladdr((void *)wt_module_helper_path_anchor, &dl_info);
 		moduleName = dl_info.dli_fname;
 	}
 

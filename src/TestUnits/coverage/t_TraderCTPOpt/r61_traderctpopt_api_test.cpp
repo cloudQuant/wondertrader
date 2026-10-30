@@ -299,6 +299,7 @@ namespace
 		bool lastOrdersNull = false;
 		uint32_t lastOrdersSize = 0;
 		std::string rspEntrustTag, pushOrderTag, pushOrderID;
+		std::vector<std::tuple<std::string, std::string, double, WTSBusinessType>> lastOrderItems;
 		void onRspEntrustOpt(WTSEntrust* entrust, WTSError*) override
 		{
 			++rspEntrusts;
@@ -310,6 +311,17 @@ namespace
 			++ordersCalls;
 			lastOrdersNull = ay == nullptr;
 			lastOrdersSize = ay == nullptr ? 0 : (uint32_t)ay->size();
+			lastOrderItems.clear();
+			if (ay != nullptr)
+			{
+				for (WTSArray::ConstIterator it = ay->begin(); it != ay->end(); ++it)
+				{
+					const WTSOrderInfo* order = static_cast<const WTSOrderInfo*>(*it);
+					if (order != nullptr)
+						lastOrderItems.emplace_back(order->getCode(), order->getOrderID(),
+							order->getVolume(), order->getBusinessType());
+				}
+			}
 		}
 		void onPushOrderOpt(WTSOrderInfo* o) override
 		{
@@ -1032,12 +1044,13 @@ TEST(R61_TraderCTPOpt, query_entries_enqueue_requests_drained_locally)
 	EXPECT_EQ(2u, sink.tradeCalls);
 	EXPECT_EQ(0u, sink.lastTradeSize);
 
-	/* 两帧各提供一条有效行权单；末帧应将两条结果交给 option sink。 */
+	/* 多帧行权查询应将不同的行权单全部交给 option sink。 */
 	CThostFtdcExecOrderField eo;
 	std::memset(&eo, 0, sizeof(eo));
 	std::snprintf(eo.InstrumentID, sizeof(eo.InstrumentID), "%s", "rb2610");
 	std::snprintf(eo.ExchangeID, sizeof(eo.ExchangeID), "%s", "SHFE");
 	std::snprintf(eo.ExecOrderRef, sizeof(eo.ExecOrderRef), "%s", "4");
+	std::snprintf(eo.ExecOrderSysID, sizeof(eo.ExecOrderSysID), "%s", "EXEC-4");
 	std::snprintf(eo.InsertTime, sizeof(eo.InsertTime), "%s", "10:10:00");
 	eo.FrontID = 1;
 	eo.SessionID = 1;
@@ -1047,10 +1060,45 @@ TEST(R61_TraderCTPOpt, query_entries_enqueue_requests_drained_locally)
 	probe.OnRspQryExecOrder(&eo, nullptr, 7, false);
 	ASSERT_NE(nullptr, probe.ayExecOrds());
 	EXPECT_EQ(1u, probe.ayExecOrds()->size());
-	probe.OnRspQryExecOrder(&eo, nullptr, 8, true);
+	CThostFtdcExecOrderField eo2 = eo;
+	std::snprintf(eo2.ExecOrderRef, sizeof(eo2.ExecOrderRef), "%s", "5");
+	std::snprintf(eo2.ExecOrderSysID, sizeof(eo2.ExecOrderSysID), "%s", "EXEC-5");
+	eo2.Volume = 2;
+	probe.OnRspQryExecOrder(&eo2, nullptr, 8, true);
 	EXPECT_EQ(1u, optSpi.ordersCalls);
 	EXPECT_FALSE(optSpi.lastOrdersNull);
 	EXPECT_EQ(2u, optSpi.lastOrdersSize);
+	ASSERT_EQ(2u, optSpi.lastOrderItems.size());
+	EXPECT_EQ("rb2610", std::get<0>(optSpi.lastOrderItems[0]));
+	EXPECT_EQ("EXEC-4", std::get<1>(optSpi.lastOrderItems[0]));
+	EXPECT_DOUBLE_EQ(1.0, std::get<2>(optSpi.lastOrderItems[0]));
+	EXPECT_EQ(BT_EXECUTE, std::get<3>(optSpi.lastOrderItems[0]));
+	EXPECT_EQ("EXEC-5", std::get<1>(optSpi.lastOrderItems[1]));
+	EXPECT_DOUBLE_EQ(2.0, std::get<2>(optSpi.lastOrderItems[1]));
+	EXPECT_EQ(BT_EXECUTE, std::get<3>(optSpi.lastOrderItems[1]));
+	EXPECT_EQ(0u, probe.ayExecOrds()->size());
+
+	/* 新查询跨两帧：失败帧携带的数据不得追加，已成功行仍须交付。 */
+	CThostFtdcExecOrderField eo3 = eo;
+	std::snprintf(eo3.ExecOrderRef, sizeof(eo3.ExecOrderRef), "%s", "6");
+	std::snprintf(eo3.ExecOrderSysID, sizeof(eo3.ExecOrderSysID), "%s", "EXEC-6");
+	probe.OnRspQryExecOrder(&eo3, nullptr, 9, false);
+	CThostFtdcExecOrderField rejected = eo;
+	std::snprintf(rejected.ExecOrderRef, sizeof(rejected.ExecOrderRef), "%s", "7");
+	std::snprintf(rejected.ExecOrderSysID, sizeof(rejected.ExecOrderSysID), "%s", "EXEC-7-REJECTED");
+	CThostFtdcRspInfoField queryErr = r61_opt_error(14, "exec query failed");
+	probe.OnRspQryExecOrder(&rejected, &queryErr, 10, true);
+	EXPECT_EQ(2u, optSpi.ordersCalls);
+	ASSERT_EQ(1u, optSpi.lastOrderItems.size());
+	EXPECT_EQ("EXEC-6", std::get<1>(optSpi.lastOrderItems[0]));
+	EXPECT_EQ(1u, optSpi.lastOrdersSize);
+
+	/* 再次查询只有失败行时，不得把上一批的行权单带到回调中。 */
+	probe.OnRspQryExecOrder(&rejected, &queryErr, 11, true);
+	EXPECT_EQ(3u, optSpi.ordersCalls);
+	EXPECT_FALSE(optSpi.lastOrdersNull);
+	EXPECT_EQ(0u, optSpi.lastOrdersSize);
+	EXPECT_TRUE(optSpi.lastOrderItems.empty());
 
 	probe.release();
 	EXPECT_EQ(1u, api.release_calls);

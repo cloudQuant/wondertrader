@@ -8,8 +8,7 @@
 //  - readKlineSlice 容量不足回源 :407-413
 //  - readTickSlice 扩容后重载 :117-180
 //
-// 每个 (交易所,周期) 只取两次 get_k_db：第三次会拿到被 std::move 掏空的句柄
-// （R4-BUG-02），本轮不触碰。RT 缓存只写 disk 文件缺失场景，不触发二次回源。
+// RT 缓存只写 disk 文件缺失场景，不触发二次回源。
 #include "r100_ad_fixture.h"
 
 #include "WtDataStorageAD/WtDataReaderAD.h"
@@ -45,11 +44,10 @@ TEST_F(R142ReaderADTest, R142ReaderADInitNullReturnsEarly)
 // 就是 rb2301，品种必须按同名注册，否则 readKlineSlice 里 commInfo 为空，
 // `commInfo->isFuture()` 直接 SIGSEGV（原崩溃根因）。
 //
-// 修正夹具后本用例暴露产品缺陷 BUG-R155-001（见 bugs/R155.md）：
-// readKlineSlice :430 用引用缓存 lastBar，update_cache_from_lmdb 追加新 bar 后
-// :437 又对同一引用赋值；环形缓冲已满回绕时该引用指向逻辑首条，于是 09:33 被
-// 09:35 覆盖，切片变成 [935,934,935]。断言与期望保持原样，按纪律禁用待修。
-TEST_F(R142ReaderADTest, DISABLED_R142ReaderADKlineIncrementalAppendAndRtMiss)
+// 修正夹具后确认产品缺陷 BUG-R155-001：容量已满时追加 LMDB bar 会使环形缓冲回绕；
+// 继续给旧 back() 引用赋值会覆写逻辑首条。固定 sink 时钟并传 etime=0，确认最近三条
+// bar 的数量与全部字段仍对应 09:33、09:34、09:35。
+TEST_F(R142ReaderADTest, R142ReaderADKlineIncrementalAppendAndRtMiss)
 {
 	WTSContractInfo* ct = add_future("EXR", "rb2301", "rb2301");
 	ASSERT_TRUE(ct != NULL);
@@ -63,8 +61,8 @@ TEST_F(R142ReaderADTest, DISABLED_R142ReaderADKlineIncrementalAppendAndRtMiss)
 	init_reader();
 
 	// 第一次：结束时间包含 09:33，容量 0<3 -> get_lowers 取 09:31/09:32/09:33
-	WTSKlineSlice* s1 = _reader->readKlineSlice("EXR.rb2301", KP_Minute1, 3,
-		20230103093300000ull);
+	_sink->set_clock(20230103, 933, 0);
+	WTSKlineSlice* s1 = _reader->readKlineSlice("EXR.rb2301", KP_Minute1, 3, 0);
 	ASSERT_TRUE(s1 != NULL);
 	ASSERT_EQ(s1->size(), 3u);
 	EXPECT_EQ(s1->at(0)->time, mt(20230103, 931));
@@ -79,17 +77,31 @@ TEST_F(R142ReaderADTest, DISABLED_R142ReaderADKlineIncrementalAppendAndRtMiss)
 
 	// 第二次：不再回源取全量，update_cache_from_lmdb 逐条追加并回调 on_bar；
 	// 09:35 仍早于 09:36，随后 get_rt_cache_bar 因 cache_m1.dmb 不存在而返回 NULL。
-	WTSKlineSlice* s2 = _reader->readKlineSlice("EXR.rb2301", KP_Minute1, 3,
-		20230103093600000ull);
+	_sink->set_clock(20230103, 936, 0);
+	WTSKlineSlice* s2 = _reader->readKlineSlice("EXR.rb2301", KP_Minute1, 3, 0);
 	ASSERT_TRUE(s2 != NULL);
 	ASSERT_EQ(s2->size(), 3u);
-	EXPECT_EQ(s2->at(0)->time, mt(20230103, 933));
-	EXPECT_EQ(s2->at(1)->time, mt(20230103, 934));
-	EXPECT_EQ(s2->at(2)->time, mt(20230103, 935));
+	auto expect_bar = [](const WTSBarStruct& actual, uint64_t time, double price) {
+		EXPECT_EQ(actual.date, 20230103u);
+		EXPECT_EQ(actual.reserve_, 0u);
+		EXPECT_EQ(actual.time, time);
+		EXPECT_DOUBLE_EQ(actual.open, price);
+		EXPECT_DOUBLE_EQ(actual.high, price);
+		EXPECT_DOUBLE_EQ(actual.low, price);
+		EXPECT_DOUBLE_EQ(actual.close, price);
+		EXPECT_DOUBLE_EQ(actual.settle, 0.0);
+		EXPECT_DOUBLE_EQ(actual.money, 0.0);
+		EXPECT_DOUBLE_EQ(actual.vol, 0.0);
+		EXPECT_DOUBLE_EQ(actual.hold, 0.0);
+		EXPECT_DOUBLE_EQ(actual.add, 0.0);
+	};
+	expect_bar(*s2->at(0), mt(20230103, 933), 12.0);
+	expect_bar(*s2->at(1), mt(20230103, 934), 13.0);
+	expect_bar(*s2->at(2), mt(20230103, 935), 14.0);
 	s2->release();
 
 	EXPECT_EQ(_sink->bar_calls(), 2u);
-	EXPECT_EQ(_sink->last_bar().time, mt(20230103, 935));
+	expect_bar(_sink->last_bar(), mt(20230103, 935), 14.0);
 	EXPECT_EQ(_sink->last_period(), KP_Minute1);
 }
 

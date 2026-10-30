@@ -11,9 +11,18 @@
 
 #include "../Includes/FasterDefs.h"
 #include "../Includes/ITraderApi.h"
+#include "../Share/DLLHelper.hpp"
 #include "../Share/StdUtils.hpp"
 #include "../Includes/WTSCollection.hpp"
 #include "../Share/SpinMutex.hpp"
+
+#include <atomic>
+#include <condition_variable>
+#include <deque>
+#include <functional>
+#include <mutex>
+#include <thread>
+#include <vector>
 
 NS_WTP_BEGIN
 class WTSVariant;
@@ -97,24 +106,84 @@ public:
 	} RiskParams;
 
 public:
+	// init retains params on success and releases that reference after API shutdown;
+	// a failed initialization rolls its retained reference back before returning.
 	bool init(const char* id, WTSVariant* params, IBaseDataMgr* bdMgr, ActionPolicyMgr* policyMgr);
 
 	bool initExt(const char* id, ITraderApi* api, IBaseDataMgr* bdMgr, ActionPolicyMgr* policyMgr);
 
+	// Permanently closes this adapter instance; a released instance cannot be reinitialized.
+	// From a sink/API/SPI callback this only requests stop and returns; it does not
+	// schedule teardown. After the callback exits, a control thread must call release()
+	// again unless another control thread is already completing teardown.
 	void release();
 
 	bool run();
 
 	inline const char* id() const{ return _id.c_str(); }
 
-	AdapterState state() const{ return _state; }
+	AdapterState state() const{ return _state.load(std::memory_order_acquire); }
 
-	void addSink(ITrdNotifySink* sink)
-	{
-		_sinks.insert(sink);
-	}
+	void addSink(ITrdNotifySink* sink);
+
+	// Stop adapter-to-sink callbacks before destroying any sink owner. The request is
+	// non-blocking; wait must run outside this adapter's sink, API, and SPI callbacks.
+	// This wait drains sink/API work; release separately drains admitted SPI callbacks.
+	void requestStopSinkNotifications();
+	bool waitSinkNotificationsStopped();
 
 private:
+	friend class TraderAdapterMgr;
+	using SinkCallback = std::function<void(ITrdNotifySink*)>;
+	class ApiCallLease
+	{
+	public:
+		ApiCallLease(TraderAdapter* owner, bool requireIdle = false, bool loginAttempt = false);
+		~ApiCallLease();
+		explicit operator bool() const { return _active; }
+	private:
+		TraderAdapter* _owner;
+		bool _active;
+	};
+	class SpiCallbackLease
+	{
+	public:
+		explicit SpiCallbackLease(TraderAdapter* owner);
+		~SpiCallbackLease();
+		explicit operator bool() const { return _active; }
+	private:
+		TraderAdapter* _owner;
+		bool _active;
+	};
+	struct ChannelStatusNotification
+	{
+		std::vector<ITrdNotifySink*> sinks;
+		bool ready;
+		uint32_t trading_day;
+	};
+	void notifySinks(const SinkCallback& callback);
+	void notifyChannelReadyIfExpected();
+	void notifyChannelLost();
+	void enqueueChannelStatusLocked(ChannelStatusNotification&& notification, bool& shouldDrain);
+	void drainChannelStatusNotifications();
+	void dispatchReservedSinks(const std::vector<ITrdNotifySink*>& sinks, const SinkCallback& callback);
+	void finishSinkNotification();
+	bool beginApiCall(bool requireIdle, bool loginAttempt = false);
+	bool canContinueApiStartup() const;
+	void finishApiCall();
+	bool isInSinkNotificationCallback() const;
+	bool isInApiCall() const;
+	bool isInSpiCallback() const;
+	bool beginSpiCallback();
+	void finishSpiCallback();
+	void closeSpiCallbackAdmission();
+	bool waitForSpiCallbacksStopped();
+	bool beginInitialization();
+	void finishInitialization();
+	void rollbackInitialization();
+	bool cleanupApiAndConfig();
+	bool isReleaseComplete() const;
+
 	uint32_t doEntrust(WTSEntrust* entrust);
 	bool	doCancel(WTSOrderInfo* ordInfo);
 
@@ -123,6 +192,7 @@ private:
 	inline WTSContractInfo* getContract(const char* stdCode);
 
 	inline void updateUndone(const char* stdCode, double qty);
+	bool rollbackUndoneIfNonzero(const char* stdCode, double qty);
 
 	const RiskParams* getRiskParams(const char* stdCode);
 
@@ -132,6 +202,7 @@ public:
 	OrderMap* getOrders(const char* stdCode);
 	inline double getUndoneQty(const char* stdCode)
 	{
+		std::lock_guard<std::mutex> lock(_mtx_undone_qty);
 		auto it = _undone_qty.find(stdCode);
 		if (it != _undone_qty.end())
 			return it->second;
@@ -224,17 +295,42 @@ public:
 	virtual void handleTraderLog(WTSLogLevel ll, const char* message) override;
 
 private:
-	WTSVariant*			_cfg;
+	WTSVariant*			_cfg; // adapter-owned retain, released only after API and plugin teardown
 	std::string			_id;
 	std::string			_order_pattern;
 
-	uint32_t			_trading_day;
+	std::atomic<uint32_t> _trading_day;
 
 	ITraderApi*			_trader_api;
 	FuncDeleteTrader	_remover;
-	AdapterState		_state;
+	DllHandle			_dll_handle;
+	bool				_owns_trader_api;
+	bool				_spi_registered;
+	bool				_api_released;
+	bool				_api_release_failed;
+	bool				_plugin_delete_failed;
+	std::atomic<AdapterState> _state;
+	mutable std::mutex _mtx_api_lifecycle;
+	std::condition_variable _cv_api_lifecycle;
+	bool _initialization_in_progress{false};
+	bool _api_release_in_progress{false};
+	bool _lifecycle_closed{false};
+	std::thread::id _initialization_thread;
+	std::thread::id _api_release_thread;
+	mutable std::mutex _mtx_spi_callbacks;
+	std::condition_variable _cv_spi_callbacks;
+	uint32_t _spi_callbacks_in_progress{0};
+	bool _spi_callback_admission_open{true};
 
 	wt_hashset<ITrdNotifySink*>	_sinks;
+	mutable std::mutex _mtx_sink_notifications;
+	std::condition_variable _cv_sink_notifications;
+	uint32_t _sink_notifications_in_flight{0};
+	bool _sink_notifications_stop_requested{false};
+	bool _sink_channel_ready{false};
+	bool _sink_channel_status_draining{false};
+	uint32_t _api_calls_in_progress{0};
+	std::deque<ChannelStatusNotification> _sink_channel_status_queue;
 
 	IBaseDataMgr*		_bd_mgr;
 	ActionPolicyMgr*	_policy_mgr;
@@ -245,6 +341,7 @@ private:
 	OrderMap*	_orders;
 	wt_hashset<std::string> _orderids;	//主要用于标记有没有处理过该订单
 
+	std::mutex	_mtx_undone_qty;
 	wt_hashmap<std::string, double> _undone_qty;	//未完成数量
 
 	typedef WTSHashMap<std::string>	TradeStatMap;
@@ -274,6 +371,8 @@ class TraderAdapterMgr
 {
 public:
 	void	release();
+	void	requestStopSinkNotifications();
+	bool	waitSinkNotificationsStopped();
 
 	void	run();
 
@@ -285,6 +384,11 @@ public:
 
 private:
 	TraderAdapterMap	_adapters;
+	mutable std::mutex _mtx_lifecycle;
+	std::condition_variable _cv_lifecycle;
+	bool _sink_notifications_stop_requested{false};
+	bool _release_in_progress{false};
+	std::thread::id _release_thread;
 };
 
 NS_WTP_END

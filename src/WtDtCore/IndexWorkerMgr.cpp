@@ -20,6 +20,8 @@
 #include "../WTSTools/WTSLogger.h"
 
 #include <filesystem>
+#include <system_error>
+#include <vector>
 namespace fs = std::filesystem;
 
 
@@ -34,32 +36,73 @@ IndexWorkerMgr::~IndexWorkerMgr()
 
 bool IndexWorkerMgr::loadFactories(const char* path)
 {
-	if (!StdFile::exists(path))
+	if (path == nullptr || path[0] == '\0')
 	{
-		WTSLogger::error("Directory {} of index worker factory not exists", path);
+		WTSLogger::error("Directory of index worker factory is empty");
 		return false;
 	}
 
-	uint32_t count = 0;
 	fs::path myPath(path);
-	fs::directory_iterator endIter;
-	for (fs::directory_iterator iter(myPath); iter != endIter; iter++)
+	std::error_code ec;
+	if (!fs::exists(myPath, ec) || ec)
 	{
-		if (fs::is_directory(iter->path()))
-			continue;
+		WTSLogger::error("Directory {} of index worker factory is unavailable: {}", path,
+			ec ? ec.message() : "path does not exist");
+		return false;
+	}
+	if (!fs::is_directory(myPath, ec) || ec)
+	{
+		WTSLogger::error("Path {} of index worker factory is not a readable directory: {}", path,
+			ec ? ec.message() : "path is not a directory");
+		return false;
+	}
+
+	// Finish the fallible filesystem scan before loading anything, so a mid-scan error
+	// does not leave a partially loaded set of factories behind.
+	std::vector<fs::path> modulePaths;
+	fs::directory_iterator endIter;
+	fs::directory_iterator iter(myPath, ec);
+	if (ec)
+	{
+		WTSLogger::error("Failed to iterate index worker directory {}: {}", path, ec.message());
+		return false;
+	}
+	while (iter != endIter)
+	{
+		const fs::path entryPath = iter->path();
+		ec.clear();
+		const bool isDirectory = fs::is_directory(entryPath, ec);
+		if (ec)
+		{
+			WTSLogger::error("Failed to inspect index worker path {}: {}", entryPath.string(), ec.message());
+			return false;
+		}
+		if (!isDirectory)
+		{
 
 #ifdef _WIN32
-		if (iter->path().extension() != ".dll")
-			continue;
+			if (entryPath.extension() == ".dll")
 #elif defined(__APPLE__)
-		if (iter->path().extension() != ".dylib")
-			continue;
+			if (entryPath.extension() == ".dylib")
 #else //_UNIX
-		if (iter->path().extension() != ".so")
-			continue;
+			if (entryPath.extension() == ".so")
 #endif
+			{
+				modulePaths.push_back(entryPath);
+			}
+		}
+		iter.increment(ec);
+		if (ec)
+		{
+			WTSLogger::error("Failed while iterating index worker directory {}: {}", path, ec.message());
+			return false;
+		}
+	}
 
-		DllHandle hInst = DLLHelper::load_library(iter->path().string().c_str());
+	uint32_t count = 0;
+	for (const fs::path& modulePath : modulePaths)
+	{
+		DllHandle hInst = DLLHelper::load_library(modulePath.string().c_str());
 		if (hInst == NULL)
 			continue;
 
@@ -75,7 +118,7 @@ bool IndexWorkerMgr::loadFactories(const char* path)
 		{
 			IdxFactInfo& fInfo = _factories[fact->get_name()];
 			fInfo._module_inst = hInst;
-			fInfo._module_path = iter->path().string();
+			fInfo._module_path = modulePath.string();
 			fInfo._creator = creator;
 			fInfo._remover = (FuncDeleteIndexFact)DLLHelper::get_symbol(hInst, "delete_index_factory");
 			fInfo._fact = fact;

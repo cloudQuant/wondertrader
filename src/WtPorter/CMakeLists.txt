@@ -37,6 +37,10 @@ ELSE(GNUCC)
 ENDIF()
 
 TARGET_LINK_LIBRARIES(WtPorter ${LIBS})
+add_dependencies(WtPorter
+	ParserUDP ParserShm
+	TraderCTP TraderXTP TraderMocker TraderCTPMini TraderCTPOpt TraderFemas
+	WtExeFact WtDataStorage WtDataStorageAD WtRiskMonFact WtMsgQue)
 IF (MSVC)
 ELSE (GNUCC)
 	SET_TARGET_PROPERTIES(WtPorter PROPERTIES

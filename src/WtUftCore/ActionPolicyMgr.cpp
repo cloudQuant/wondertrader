@@ -55,8 +55,21 @@ bool ActionPolicyMgr::init(const char* filename)
 	if (cfg == NULL)
 		return false;
 
-	// 遍历配置文件中的所有规则组
+	// Validate the documented fallback before loading any groups. UFT startup
+	// currently continues after init() fails, so a rejected first config must
+	// not leave custom groups loaded and able to authorize orders.
+	bool hasDefaultGroup = _rules.find("default") != _rules.end();
 	auto keys = cfg->memberNames();
+	for (auto it = keys.begin(); it != keys.end() && !hasDefaultGroup; ++it)
+		hasDefaultGroup = (*it == "default");
+	if (!hasDefaultGroup)
+	{
+		WTSLogger::error("Action policy configuration has no default group");
+		cfg->release();
+		return false;
+	}
+
+	// 遍历配置文件中的所有规则组
 	for (auto it = keys.begin(); it != keys.end(); it++)
 	{
 		// 获取规则组名称
@@ -154,11 +167,18 @@ const ActionRuleGroup& ActionPolicyMgr::getActionRules(const char* pid)
 		{
 			// 如果指定的规则组不存在，则使用默认规则组
 			it = _rules.find("default");
+			if (it == _rules.end())
+			{
+				// init() can fail while its caller continues startup. Keep this
+				// last-resort lookup safe and fail closed: TraderAdapter iterates
+				// these rules to authorize orders, so an empty group permits none.
+				WTSLogger::error("Action policy group {} not exists and default group is unavailable, returning empty rules", gpName.c_str());
+				static const ActionRuleGroup EMPTY_RULES;
+				return EMPTY_RULES;
+			}
 			WTSLogger::error("Action policy group {} not exists, changed to default group", gpName.c_str());
 		}
 
-		// 断言规则组必定存在，这是一个程序防御机制
-		assert(it != _rules.end());
 		return it->second; // 返回找到的规则组
 	}
 }

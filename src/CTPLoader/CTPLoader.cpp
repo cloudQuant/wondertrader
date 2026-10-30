@@ -58,6 +58,135 @@ CTPCreator		g_ctpCreator = NULL;
 // 请求编号
 int iRequestID = 0;
 
+namespace
+{
+	struct CTPConfig
+	{
+		std::string front;
+		std::string broker;
+		std::string investor;
+		std::string password;
+		std::string savepath;
+		std::string appid;
+		std::string authcode;
+		uint32_t classmask;
+		bool onlyincfg;
+		bool incremental;
+		bool qryfees;
+		std::string commFile;
+		std::string contFile;
+		std::string feesFile;
+		std::string module;
+		std::string feeFilters;
+		std::string mapFiles;
+
+		CTPConfig()
+			: classmask(0), onlyincfg(false), incremental(false), qryfees(false),
+			  commFile("commodities.json"), contFile("contracts.json"), feesFile("fees.json")
+		{}
+	};
+
+	std::string defaultModuleName()
+	{
+#ifdef _WIN32
+		return "./thosttraderapi_se.dll";
+#else
+		return "./thosttraderapi_se.so";
+#endif
+	}
+
+	bool readVariantConfig(WTSVariant* root, CTPConfig& config)
+	{
+		if (root == NULL || !root->isObject())
+			return false;
+
+		WTSVariant* ctp = root->get("ctp");
+		WTSVariant* cfg = root->get("config");
+		if (ctp == NULL || !ctp->isObject() || cfg == NULL || !cfg->isObject())
+			return false;
+
+		config.front = ctp->getCString("front");
+		config.broker = ctp->getCString("broker");
+		config.investor = ctp->getCString("user");
+		config.password = ctp->getCString("pass");
+		config.appid = ctp->getCString("appid");
+		config.authcode = ctp->getCString("authcode");
+		config.savepath = cfg->getCString("path");
+		config.classmask = cfg->getUInt32("mask");
+		config.commFile = cfg->getCString("commfile", "commodities.json");
+		config.contFile = cfg->getCString("contfile", "contracts.json");
+		config.feesFile = cfg->getCString("feesfile", "fees.json");
+		config.mapFiles = cfg->getCString("mapfiles");
+		config.onlyincfg = cfg->getBoolean("onlyincfg");
+		config.incremental = cfg->getBoolean("incremental");
+		config.qryfees = cfg->getBoolean("qryfees");
+		config.feeFilters = cfg->getCString("feefilter");
+		config.module = ctp->getCString("module");
+		if (config.module.empty())
+			config.module = defaultModuleName();
+		return true;
+	}
+
+	bool hasIniSection(IniHelper& ini, const char* section)
+	{
+		FieldArray sections;
+		ini.readSections(sections);
+		for (const std::string& name : sections)
+		{
+			if (name == section)
+				return true;
+		}
+		return false;
+	}
+
+	bool readIniConfig(const char* path, CTPConfig& config)
+	{
+		IniHelper ini;
+		ini.load(path);
+		if (!ini.isLoaded() || !hasIniSection(ini, "ctp") || !hasIniSection(ini, "config"))
+			return false;
+
+		config.front = ini.readString("ctp", "front", "");
+		config.broker = ini.readString("ctp", "broker", "");
+		config.investor = ini.readString("ctp", "user", "");
+		config.password = ini.readString("ctp", "pass", "");
+		config.appid = ini.readString("ctp", "appid", "");
+		config.authcode = ini.readString("ctp", "authcode", "");
+		config.savepath = ini.readString("config", "path", "");
+		config.classmask = ini.readUInt("config", "mask", 1 | 2 | 4);
+		config.onlyincfg = wt_stricmp(ini.readString("config", "onlyincfg", "false").c_str(), "true") == 0;
+		config.incremental = wt_stricmp(ini.readString("config", "incremental", "false").c_str(), "true") == 0;
+		config.qryfees = wt_stricmp(ini.readString("config", "qryfees", "false").c_str(), "true") == 0;
+		config.feeFilters = ini.readString("config", "feefilter", "");
+		config.commFile = ini.readString("config", "commfile", "commodities.json");
+		config.contFile = ini.readString("config", "contfile", "contracts.json");
+		config.feesFile = ini.readString("config", "feesfile", "fees.json");
+		config.mapFiles = ini.readString("config", "mapfiles", "");
+		config.module = ini.readString("ctp", "module", defaultModuleName().c_str());
+		return true;
+	}
+
+	void applyConfig(const CTPConfig& config)
+	{
+		FRONT_ADDR = config.front;
+		BROKER_ID = config.broker;
+		INVESTOR_ID = config.investor;
+		PASSWORD = config.password;
+		APPID = config.appid;
+		AUTHCODE = config.authcode;
+		SAVEPATH = config.savepath;
+		CLASSMASK = config.classmask;
+		ONLYINCFG = config.onlyincfg;
+		INCREMENTAL = config.incremental;
+		QRYFEES = config.qryfees;
+		FEE_FILTERS = config.feeFilters;
+		COMM_FILE = config.commFile;
+		CONT_FILE = config.contFile;
+		FEES_FILE = config.feesFile;
+		MODULE_NAME = config.module;
+	}
+}
+
 #ifdef _MSC_VER
 #	define EXPORT_FLAG __declspec(dllexport)
 #else
@@ -80,127 +209,65 @@ int run(const char* cfgfile, bool bAsync = false, bool isFile = true)
 #endif // _WIN32
 
 	std::string map_files;
+	if (cfgfile == NULL)
+		return 0;
+
+	CTPConfig config;
 
 	if(!isFile)
 	{
-		WTSVariant* root = WTSCfgLoader::load_from_content(cfgfile, true);
+		WTSVariant* root = NULL;
+		try
+		{
+			root = WTSCfgLoader::load_from_content(cfgfile, true);
+		}
+		catch (...)
+		{
+			return 0;
+		}
 		if (root == NULL)
 			return 0;
-
-		WTSVariant* ctp = root->get("ctp");
-		FRONT_ADDR = ctp->getCString("front");
-		BROKER_ID = ctp->getCString("broker");
-		INVESTOR_ID = ctp->getCString("user");
-		PASSWORD = ctp->getCString("pass");
-		APPID = ctp->getCString("appid");
-		AUTHCODE = ctp->getCString("authcode");
-
-		WTSVariant* cfg = root->get("config");
-		SAVEPATH = cfg->getCString("path");
-		CLASSMASK = cfg->getUInt32("mask"); //1-期货,2-期权,4-股票
-
-		COMM_FILE = cfg->getCString("commfile", "commodities.json");
-		CONT_FILE = cfg->getCString("contfile", "contracts.json");
-		FEES_FILE = cfg->getCString("feesfile", "fees.json");
-
-		map_files = cfg->getCString("mapfiles");
-		ONLYINCFG = cfg->getBoolean("onlyincfg");
-		INCREMENTAL = cfg->getBoolean("incremental");
-		QRYFEES = cfg->getBoolean("qryfees");
-		FEE_FILTERS = cfg->getCString("feefilter");
-
-		MODULE_NAME = ctp->getCString("module");
-		if (MODULE_NAME.empty())
-		{
-#ifdef _WIN32
-			MODULE_NAME = "./thosttraderapi_se.dll";
-#else
-			MODULE_NAME = "./thosttraderapi_se.so";
-#endif
-		}
-
+		bool valid = readVariantConfig(root, config);
 		root->release();
+		if (!valid)
+			return 0;
 	}
 	else if(StrUtil::endsWith(cfgfile, ".ini"))
 	{
-		IniHelper ini;
-
-		ini.load(cfgfile);
-
-		FRONT_ADDR = ini.readString("ctp", "front", "");
-		BROKER_ID = ini.readString("ctp", "broker", "");
-		INVESTOR_ID = ini.readString("ctp", "user", "");
-		PASSWORD = ini.readString("ctp", "pass", "");
-		APPID = ini.readString("ctp", "appid", "");
-		AUTHCODE = ini.readString("ctp", "authcode", "");
-
-		SAVEPATH = ini.readString("config", "path", "");
-		CLASSMASK = ini.readUInt("config", "mask", 1 | 2 | 4); //1-期货,2-期权,4-股票
-		ONLYINCFG = wt_stricmp(ini.readString("config", "onlyincfg", "false").c_str(), "true") == 0;
-		INCREMENTAL = wt_stricmp(ini.readString("config", "incremental", "false").c_str(), "true") == 0;
-		QRYFEES = wt_stricmp(ini.readString("config", "qryfees", "false").c_str(), "true") == 0;
-		FEE_FILTERS = ini.readString("config", "feefilter", "");
-
-		COMM_FILE = ini.readString("config", "commfile", "commodities.json");
-		CONT_FILE = ini.readString("config", "contfile", "contracts.json");
-		FEES_FILE = ini.readString("config", "feesfile", "fees.json");
-
-		map_files = ini.readString("config", "mapfiles", "");
-
-#ifdef _WIN32
-		MODULE_NAME = ini.readString("ctp", "module", "./thosttraderapi_se.dll");
-#else
-		MODULE_NAME = ini.readString("ctp", "module", "./thosttraderapi_se.so");
-#endif
+		if (!readIniConfig(cfgfile, config))
+			return 0;
 	}
 	else
 	{
-		WTSVariant* root = WTSCfgLoader::load_from_file(cfgfile);
+		WTSVariant* root = NULL;
+		try
+		{
+			root = WTSCfgLoader::load_from_file(cfgfile);
+		}
+		catch (...)
+		{
+			return 0;
+		}
 		if (root == NULL)
 			return 0;
-
-		WTSVariant* ctp = root->get("ctp");
-		FRONT_ADDR = ctp->getCString("front");
-		BROKER_ID = ctp->getCString("broker");
-		INVESTOR_ID = ctp->getCString("user");
-		PASSWORD = ctp->getCString("pass");
-		APPID = ctp->getCString("appid");
-		AUTHCODE = ctp->getCString("authcode");
-
-		WTSVariant* cfg = root->get("config");
-		SAVEPATH = cfg->getCString("path"); 
-		CLASSMASK = cfg->getUInt32("mask"); //1-期货,2-期权,4-股票
-
-		COMM_FILE = cfg->getCString("commfile", "commodities.json");
-		CONT_FILE = cfg->getCString("contfile", "contracts.json");
-		FEES_FILE = cfg->getCString("feesfile", "fees.json");
-
-		map_files = cfg->getCString("mapfiles");
-		ONLYINCFG = cfg->getBoolean("onlyincfg");
-		INCREMENTAL = cfg->getBoolean("incremental");
-		QRYFEES = cfg->getBoolean("qryfees");
-		FEE_FILTERS = cfg->getCString("feefilter");
-
-		MODULE_NAME = ctp->getCString("module");
-		if(MODULE_NAME.empty())
-		{
-#ifdef _WIN32
-			MODULE_NAME = "./thosttraderapi_se.dll";
-#else
-			MODULE_NAME = "./thosttraderapi_se.so";
-#endif
-		}
+		bool valid = readVariantConfig(root, config);
 		root->release();
+		if (!valid)
+			return 0;
 	}
-	
+
+	if (config.front.empty() || config.broker.empty() || config.investor.empty() ||
+		config.password.empty() || config.savepath.empty())
+	{
+		return 0;
+	}
+
+	map_files = config.mapFiles;
+	applyConfig(config);
+
 	if(!StdFile::exists(MODULE_NAME.c_str()))
 	{
 		MODULE_NAME = fmtutil::format("{}traders/{}", getBinDir(), MODULE_NAME.c_str());
-	}
-
-	if(FRONT_ADDR.empty() || BROKER_ID.empty() || INVESTOR_ID.empty() || PASSWORD.empty() || SAVEPATH.empty())
-	{
-		return 0;
 	}
 
 	SAVEPATH = StrUtil::standardisePath(SAVEPATH);

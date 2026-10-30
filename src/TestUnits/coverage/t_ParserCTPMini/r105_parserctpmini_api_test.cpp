@@ -8,7 +8,7 @@
  * OnFront / OnRsp / OnRtn 回调驱动成功/失败/空数据分支。
  *
  * 覆盖的生产行段：
- *   init 的目录/模块解析（异常路径）        ParserCTPMini.cpp:96-118
+ *   init 的目录校验（失败早退路径）          ParserCTPMini.cpp:99-126
  *   connect/disconnect/release              ParserCTPMini.cpp:137-162
  *   OnFrontConnected/OnRspUserLogin         ParserCTPMini.cpp:169-194
  *   ReqUserLogin/SubscribeMarketData        ParserCTPMini.cpp:352-408
@@ -22,6 +22,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
+#include <initializer_list>
+#include <limits>
 #include <map>
 #include <set>
 #include <string>
@@ -236,6 +238,22 @@ protected:
 	WTSContractInfo* ct_ = NULL;
 };
 
+CodeSet makeR105SubscriptionCodes(std::size_t count)
+{
+	CodeSet codes;
+	for (std::size_t i = 0; i < count; ++i)
+		codes.insert("SHFE.r105_code_" + std::to_string(i));
+	return codes;
+}
+
+void expectR105SubscriptionResult(const R105CtpMiniMdApiStub& api, std::size_t expectedCount)
+{
+	EXPECT_EQ(static_cast<int>(expectedCount), api.sub_count);
+	EXPECT_EQ(expectedCount, api.sub_codes.size());
+	for (std::size_t i = 0; i < expectedCount; ++i)
+		EXPECT_EQ(1u, api.sub_codes.count("r105_code_" + std::to_string(i)));
+}
+
 }	// namespace
 
 /* ParserCTPMini.cpp:142-150、169-194、352-408 — connect→登录→首次订阅 */
@@ -308,8 +326,51 @@ TEST_F(R105MiniTest, login_failure_and_inline_subscribe_branches)
 	parser_.m_pUserAPI = &api_;
 }
 
-/* ParserCTPMini.cpp:96-118 — flowdir 父路径是普通文件时 init 抛异常，且未触碰厂商符号 */
-TEST_F(R105MiniTest, init_flowdir_creation_failure_throws_before_vendor_symbol)
+/* ParserCTPMini.cpp:379-423 — 登录后直接订阅，动态列表覆盖 500 与 501 项 */
+TEST_F(R105MiniTest, logged_in_subscribe_handles_500_and_501_codes)
+{
+	parser_.m_uTradingDate = 20260301;
+	int expectedCalls = 0;
+	for (std::size_t count : {500u, 501u})
+	{
+		api_.sub_codes.clear();
+		CodeSet codes = makeR105SubscriptionCodes(count);
+		parser_.subscribe(codes);
+
+		++expectedCalls;
+		EXPECT_EQ(expectedCalls, api_.sub_calls);
+		expectR105SubscriptionResult(api_, count);
+	}
+}
+
+/* ParserCTPMini.cpp:183-193、379-423 — 登录前缓存的 500 与 501 项登录后完整下发 */
+TEST_F(R105MiniTest, pre_login_cache_handles_500_and_501_codes_after_login)
+{
+	int expectedCalls = 0;
+	for (std::size_t count : {500u, 501u})
+	{
+		parser_.m_uTradingDate = 0;
+		api_.sub_codes.clear();
+		CodeSet codes = makeR105SubscriptionCodes(count);
+		parser_.subscribe(codes);
+		EXPECT_EQ(expectedCalls, api_.sub_calls); 	// 登录前只缓存
+
+		parser_.OnRspUserLogin(NULL, NULL, 1, true);
+		++expectedCalls;
+		EXPECT_EQ(expectedCalls, api_.sub_calls);
+		expectR105SubscriptionResult(api_, count);
+	}
+}
+
+TEST_F(R105MiniTest, subscription_count_guard_rejects_values_above_int_max)
+{
+	const std::size_t intMax = static_cast<std::size_t>((std::numeric_limits<int>::max)());
+	EXPECT_TRUE(ParserCTPMini::IsSubscriptionCountSupported(intMax));
+	EXPECT_FALSE(ParserCTPMini::IsSubscriptionCountSupported(intMax + 1));
+}
+
+/* ParserCTPMini.cpp:99-126 — flowdir 父路径为普通文件时 init 返回失败，不加载厂商模块 */
+TEST_F(R105MiniTest, init_flowdir_creation_failure_returns_false_before_vendor_module)
 {
 	R105MiniTempDir tmp;
 	ASSERT_FALSE(tmp.path.empty());
@@ -322,7 +383,18 @@ TEST_F(R105MiniTest, init_flowdir_creation_failure_throws_before_vendor_symbol)
 	ASSERT_NE(nullptr, cfg);
 
 	ParserCTPMini bare;
-	EXPECT_THROW(bare.init(cfg), std::filesystem::filesystem_error);
+	bare.registerSpi(&sink_);
+	EXPECT_FALSE(bare.init(cfg));
+	EXPECT_FALSE(bare.isConnected());
+	EXPECT_EQ(NULL, bare.m_hInstCTP);
+	EXPECT_EQ(NULL, bare.m_funcCreator);
+	EXPECT_TRUE(sink_.hasLog("Failed to create flow directory"));
+	const std::string expectedFlowRoot = blocker + "/sub";
+	EXPECT_TRUE(sink_.hasLog(expectedFlowRoot.c_str()));
+	EXPECT_TRUE(sink_.hasLog("9999/r105/"));
+	EXPECT_FALSE(bare.init(cfg));
+	EXPECT_EQ(NULL, bare.m_hInstCTP);
+	EXPECT_EQ(NULL, bare.m_funcCreator);
 	EXPECT_FALSE(bare.isConnected());
 	cfg->release();
 }

@@ -15,6 +15,9 @@
 #include <gtest/gtest.h>
 
 #include <cstring>
+#include <filesystem>
+#include <limits>
+#include <system_error>
 #include <string>
 #include <vector>
 
@@ -105,23 +108,20 @@ TEST_F(R19TempDir, r19_init_master_compacts_dead_sections_and_hides_live_ones)
 		}
 	}
 
-	// 缺陷 BUG-R19-004：L72 把「刚从文件里读出来」的段 _state 一律置 0，
-	// 而 get_sections 只列 _state==1 的段 → 重启后所有历史段都不再可见
+	// init_master 将读入的段标为本轮尚未使用；get_sections 只枚举本轮已激活的段。
 	EXPECT_TRUE(sb().get_sections(dom.c_str()).empty())
-		<< "keep 段明明有 2 个可用 key，却因为 L72 被枚举漏掉";
+		<< "keep 尚未在本轮被激活，当前枚举口径应跳过它";
 
 	// 段级时间戳仍是从文件里读到的 12345（L199），commit 之后必须严格变大
 	EXPECT_EQ(12345u, sb().get_section_updatetime(dom.c_str(), "keep"));
 	ASSERT_TRUE(sb().commit_section(dom.c_str(), "keep"));
 	EXPECT_GT(sb().get_section_updatetime(dom.c_str(), "keep"), 12345u);
 
-	// 压缩分支把 _blocktime 同步成了新的块时间戳（L57-58）→ 非强制刷新为 false
+	// master 不得调用 slave 的索引重建路径。
 	EXPECT_FALSE(sb().update_slave(dom.c_str(), false));
-	// delete_section 改块级时间戳（L247）→ 非强制刷新转 true（L136-137 反向）
 	ASSERT_TRUE(sb().delete_section(dom.c_str(), "keep"));
-	EXPECT_TRUE(sb().update_slave(dom.c_str(), false));
-	// 重装载之后 keep 段的数据依旧可读（文件内容没被动过）
-	EXPECT_EQ(777, sb().get_int32(dom.c_str(), "keep", "a", -1));
+	EXPECT_FALSE(sb().update_slave(dom.c_str(), false));
+	EXPECT_EQ(-1, sb().get_int32(dom.c_str(), "keep", "a", -1));
 }
 
 // 同一份文件被第二个域再次 init_master 时，第一次已存在的数据必须继续可读。
@@ -153,59 +153,372 @@ TEST_F(R19TempDir, r19_second_init_master_preserves_first_domain_data)
 	ASSERT_TRUE(sb().commit_section(domX.c_str(), "p0"));
 
 	const std::string domY = r19::domain("c2y");
-	// 第二次 init_master 可以被拒绝，也可以安全共存；只验证已提交的首份数据不丢失。
-	(void)sb().init_master(domY.c_str(), path.c_str());
+	// 同一进程的第二个 master 必须被拒绝，不能把首个 master 尚未激活的段压缩掉。
+	EXPECT_FALSE(sb().init_master(domY.c_str(), path.c_str()));
 	EXPECT_EQ(101, sb().get_int32(domX.c_str(), "p0", "a", -1));
 	EXPECT_EQ(202, sb().get_int32(domX.c_str(), "p1", "b", -1));
 }
 
-// string key 的定长 64 拷贝 + 结尾 NUL：段内最后一个 key 会把 NUL 写进下一段的段名
-TEST_F(R19TempDir, r19_last_string_key_in_section_clobbers_next_section_name)
+TEST_F(R19TempDir, r19_block_version_overflow_rejects_commit_and_delete_without_mutation)
+{
+	r19::attach_logger();
+	const std::string dom = r19::domain("version_overflow");
+	const std::string path = file("version_overflow.blk");
+	ASSERT_TRUE(sb().init_master(dom.c_str(), path.c_str()));
+	ASSERT_NE(nullptr, sb().allocate_int32(dom.c_str(), "live", "value", 73));
+
+	BoostMappingFile mapping;
+	ASSERT_TRUE(mapping.map(path.c_str()));
+	ShmBlock* block = static_cast<ShmBlock*>(mapping.addr());
+	ASSERT_EQ(1u, block->_count);
+	const uint64_t sectionTimeBefore = block->_sections[0]._updatetime;
+	block->_updatetime = (std::numeric_limits<uint64_t>::max)();
+	mapping.sync();
+
+	EXPECT_FALSE(sb().commit_section(dom.c_str(), "live"));
+	EXPECT_EQ((std::numeric_limits<uint64_t>::max)(), block->_updatetime);
+	EXPECT_EQ(sectionTimeBefore, block->_sections[0]._updatetime);
+	EXPECT_FALSE(sb().delete_section(dom.c_str(), "live"));
+	EXPECT_EQ((std::numeric_limits<uint64_t>::max)(), block->_updatetime);
+	EXPECT_EQ(1u, block->_sections[0]._state);
+	EXPECT_EQ(73, sb().get_int32(dom.c_str(), "live", "value", -1));
+}
+
+// String slots accept at most 63 bytes, and a full section's final slot must not overwrite its neighbor.
+TEST_F(R19TempDir, r19_string_slot_boundaries_preserve_neighbors_and_persist)
 {
 	r19::attach_logger();
 	const std::string dom = r19::domain("c3");
 	const std::string path = file("c3.blk");
 	ASSERT_TRUE(sb().init_master(dom.c_str(), path.c_str()));
 
-	// 16 个 string key 把 _data 填满：最后一个落在 offset=960，占 960..1023
+	const std::string maxValue(63, 'L');
+	// 16 个 string key 把 _data 填满：最后一个落在 offset=960，占 960..1023。
+	// 初始化时一并覆盖空字符串、短值和 63 字节上限。
 	for (int i = 0; i < 16; i++)
 	{
 		const std::string k = "b" + std::to_string(i);
-		const std::string v = "v" + std::to_string(i);
+		std::string v = "v" + std::to_string(i);
+		if (i == 0)
+			v = maxValue;
+		else if (i == 1)
+			v.clear();
+		else if (i == 2)
+			v = "short";
 		ASSERT_NE(nullptr, sb().allocate_string(dom.c_str(), "before", k.c_str(), v.c_str()));
 	}
 	// 紧跟着建第二段（块内索引 1），段名先落成 "after"
 	ASSERT_NE(nullptr, sb().allocate_int32(dom.c_str(), "after", "k", 7));
-	auto secs0 = sb().get_sections(dom.c_str());
-	ASSERT_EQ(2u, secs0.size());
-	EXPECT_EQ("after", secs0[1]);
-
-	// 缺陷 BUG-R19-005：wt_strcpy(des, src, 64) 会 memcpy 64 字节再写 des[64]
-	// → 一共 65 字节，第 65 个字节正好越过 _data[1024] 落到下一段的 _name[0]
-	ASSERT_TRUE(sb().set_string(dom.c_str(), "before", "b15", "tail"));
+	ASSERT_TRUE(sb().set_string(dom.c_str(), "before", "b15", maxValue.c_str()));
 
 	auto secs = sb().get_sections(dom.c_str());
 	ASSERT_EQ(2u, secs.size());
 	EXPECT_EQ("before", secs[0]);
-	EXPECT_TRUE(secs[1].empty())
-		<< "after 段名的首字节被越界写的 NUL 干掉，段名在文件里已经不存在了";
-
-	// 进程内仍能按缓存名访问（缓存 key 是请求时用的字符串），所以坏点在重启后才暴露
+	EXPECT_EQ("after", secs[1]);
+	EXPECT_STREQ(maxValue.c_str(), sb().get_string(dom.c_str(), "before", "b0"));
+	EXPECT_STREQ("", sb().get_string(dom.c_str(), "before", "b1"));
+	EXPECT_STREQ("short", sb().get_string(dom.c_str(), "before", "b2"));
+	EXPECT_STREQ(maxValue.c_str(), sb().get_string(dom.c_str(), "before", "b15"));
 	EXPECT_EQ(7, sb().get_int32(dom.c_str(), "after", "k", -1));
+	ASSERT_TRUE(sb().set_string(dom.c_str(), "before", "b14", "tail"));
+	EXPECT_STREQ("tail", sb().get_string(dom.c_str(), "before", "b14"));
+	ASSERT_TRUE(sb().set_string(dom.c_str(), "before", "b14", ""));
+	EXPECT_STREQ("", sb().get_string(dom.c_str(), "before", "b14"));
+	ASSERT_TRUE(sb().set_string(dom.c_str(), "before", "b14", "tail"));
 
+	// Reject invalid values before make_valid: neither existing slots nor new section/key
+	// metadata may be touched when an overlong value is supplied.
+	BoostMappingFile snapshotMapping;
+	ASSERT_TRUE(snapshotMapping.map(path.c_str()));
+	ASSERT_EQ(sizeof(ShmBlock), snapshotMapping.size());
+	auto snapshot = [&snapshotMapping]() {
+		std::vector<char> bytes(snapshotMapping.size());
+		std::memcpy(bytes.data(), snapshotMapping.addr(), bytes.size());
+		return bytes;
+	};
+	auto expect_unchanged = [&snapshotMapping](const std::vector<char>& before) {
+		EXPECT_EQ(0, std::memcmp(before.data(), snapshotMapping.addr(), before.size()));
+	};
+
+	const std::string value64(64, 'X');
+	const std::string value80(80, 'Y');
+	auto before = snapshot();
+	EXPECT_FALSE(sb().set_string(dom.c_str(), "before", "b15", nullptr));
+	expect_unchanged(before);
+	before = snapshot();
+	EXPECT_EQ(nullptr, sb().allocate_string(dom.c_str(), "new_section", "new_key", nullptr));
+	expect_unchanged(before);
+
+	before = snapshot();
+	EXPECT_FALSE(sb().set_string(dom.c_str(), "before", "b15", value64.c_str()));
+	expect_unchanged(before);
+	EXPECT_STREQ(maxValue.c_str(), sb().get_string(dom.c_str(), "before", "b15"));
+
+	before = snapshot();
+	EXPECT_FALSE(sb().set_string(dom.c_str(), "before", "b15", value80.c_str()));
+	expect_unchanged(before);
+	EXPECT_STREQ(maxValue.c_str(), sb().get_string(dom.c_str(), "before", "b15"));
+
+	before = snapshot();
+	EXPECT_EQ(nullptr, sb().allocate_string(dom.c_str(), "after", "new_key", value64.c_str()));
+	expect_unchanged(before);
+
+	before = snapshot();
+	EXPECT_EQ(nullptr, sb().allocate_string(dom.c_str(), "new_section", "new_key", value80.c_str()));
+	expect_unchanged(before);
+	EXPECT_TRUE(r19::has_log("exceeds 63 bytes"));
+
+	// Persist the full-slot update and reload its image through a fresh mapping/domain.
+	ASSERT_TRUE(sb().commit_section(dom.c_str(), "before"));
+	ASSERT_TRUE(sb().commit_section(dom.c_str(), "after"));
+	snapshotMapping.sync();
+	snapshotMapping.close();
+	const std::string reopenedPath = file("c3-reopened.blk");
+	std::error_code copyError;
+	ASSERT_TRUE(std::filesystem::copy_file(path, reopenedPath, std::filesystem::copy_options::overwrite_existing, copyError))
+		<< copyError.message();
 	const std::string dom2 = r19::domain("c3b");
-	ASSERT_TRUE(sb().init_master(dom2.c_str(), path.c_str()));
-	EXPECT_EQ(-1, sb().get_int32(dom2.c_str(), "after", "k", -1))
-		<< "重新加载后按原名已经找不到这一段";
-	EXPECT_EQ(7, sb().get_int32(dom2.c_str(), "", "k", -1))
-		<< "它被以空段名的形式重新装进了缓存";
+	ASSERT_TRUE(sb().init_master(dom2.c_str(), reopenedPath.c_str()));
+	EXPECT_STREQ(maxValue.c_str(), sb().get_string(dom2.c_str(), "before", "b15"));
+	EXPECT_STREQ("", sb().get_string(dom2.c_str(), "before", "b1"));
+	EXPECT_EQ(7, sb().get_int32(dom2.c_str(), "after", "k", -1));
 }
 
-// 32 字节段名加结尾 NUL 会越过 _name[32]；等待产品侧长度守卫后再单独验证拒绝与邻槽完整性。
-TEST_F(R19TempDir, r19_section_name_overflow_guard_pending)
+// _name[32] reserves one byte for NUL, so 31 is the longest accepted name.
+TEST_F(R19TempDir, r19_section_name_boundary_and_overlong_rejection_preserve_block)
 {
-	GTEST_SKIP() << "Blocked until ShareBlocks rejects section names that cannot fit _name[32]. "
-				 << "31 name bytes plus NUL is the safe upper bound; rejection of 32+ bytes and "
-				 << "unchanged adjacent slots require a separate check after the product guard is fixed. "
-				 << "No overlong name is constructed by this placeholder.";
+	r19::attach_logger();
+	const std::string dom = r19::domain("c4");
+	const std::string path = file("c4.blk");
+	ASSERT_TRUE(sb().init_master(dom.c_str(), path.c_str()));
+
+	const std::string maxName(31, 'n');
+	ASSERT_NE(nullptr, sb().allocate_int32(dom.c_str(), maxName.c_str(), "value", 31));
+	ASSERT_NE(nullptr, sb().allocate_int32(dom.c_str(), "neighbor", "value", 41));
+
+	auto sections = sb().get_sections(dom.c_str());
+	ASSERT_EQ(2u, sections.size());
+	EXPECT_EQ(maxName, sections[0]);
+	EXPECT_EQ("neighbor", sections[1]);
+	EXPECT_EQ(31, sb().get_int32(dom.c_str(), maxName.c_str(), "value", -1));
+	EXPECT_EQ(41, sb().get_int32(dom.c_str(), "neighbor", "value", -1));
+
+	// Snapshot the mapped block so a rejected name must leave the count, metadata,
+	// values, and adjacent section slots byte-for-byte unchanged.
+	BoostMappingFile snapshotMapping;
+	ASSERT_TRUE(snapshotMapping.map(path.c_str()));
+	ASSERT_EQ(sizeof(ShmBlock), snapshotMapping.size());
+	std::vector<char> before(snapshotMapping.size());
+	std::memcpy(before.data(), snapshotMapping.addr(), before.size());
+
+	const std::string tooLong32(32, 'x');
+	EXPECT_EQ(nullptr, sb().allocate_int32(dom.c_str(), tooLong32.c_str(), "value", 99));
+	EXPECT_EQ(0, std::memcmp(before.data(), snapshotMapping.addr(), before.size()));
+
+	const std::string tooLong48(48, 'y');
+	EXPECT_EQ(nullptr, sb().allocate_int32(dom.c_str(), tooLong48.c_str(), "value", 100));
+	EXPECT_EQ(0, std::memcmp(before.data(), snapshotMapping.addr(), before.size()));
+
+	sections = sb().get_sections(dom.c_str());
+	ASSERT_EQ(2u, sections.size());
+	EXPECT_EQ(maxName, sections[0]);
+	EXPECT_EQ("neighbor", sections[1]);
+	EXPECT_EQ(31, sb().get_int32(dom.c_str(), maxName.c_str(), "value", -1));
+	EXPECT_EQ(41, sb().get_int32(dom.c_str(), "neighbor", "value", -1));
+	EXPECT_TRUE(r19::has_log("exceeds 31 bytes"));
+}
+
+TEST_F(R19TempDir, r19_string_entrypoints_reject_numeric_slots_without_mutation)
+{
+	r19::attach_logger();
+	const std::string dom = r19::domain("c5");
+	const std::string path = file("c5.blk");
+	ASSERT_TRUE(sb().init_master(dom.c_str(), path.c_str()));
+
+	ASSERT_NE(nullptr, sb().allocate_int32(dom.c_str(), "mixed", "left", 111));
+	ASSERT_NE(nullptr, sb().allocate_string(dom.c_str(), "mixed", "middle", "keep"));
+	ASSERT_NE(nullptr, sb().allocate_int32(dom.c_str(), "mixed", "right", 222));
+	// Put the final int32 key at offset 1016, the final allocated key with only 8 bytes left.
+	for (int i = 0; i < 118; ++i)
+	{
+		const std::string key = "d" + std::to_string(i);
+		ASSERT_NE(nullptr, sb().allocate_double(dom.c_str(), "mixed", key.c_str(), i));
+	}
+	ASSERT_NE(nullptr, sb().allocate_int32(dom.c_str(), "mixed", "tail", 5150));
+
+	auto keys = sb().get_keys(dom.c_str(), "mixed");
+	auto key_info = [&keys](const char* name) -> KeyInfo* {
+		for (KeyInfo* key : keys)
+			if (key != nullptr && std::strcmp(key->_key, name) == 0)
+				return key;
+		return nullptr;
+	};
+	ASSERT_NE(nullptr, key_info("left"));
+	ASSERT_NE(nullptr, key_info("middle"));
+	ASSERT_NE(nullptr, key_info("right"));
+	ASSERT_NE(nullptr, key_info("tail"));
+	EXPECT_EQ(0u, key_info("left")->_offset);
+	EXPECT_EQ(4u, key_info("middle")->_offset);
+	EXPECT_EQ(68u, key_info("right")->_offset);
+	EXPECT_EQ(1016u, key_info("tail")->_offset);
+
+	BoostMappingFile mapping;
+	ASSERT_TRUE(mapping.map(path.c_str()));
+	ASSERT_EQ(sizeof(ShmBlock), mapping.size());
+	auto snapshot = [&mapping]() {
+		std::vector<char> bytes(mapping.size());
+		std::memcpy(bytes.data(), mapping.addr(), bytes.size());
+		return bytes;
+	};
+	auto expect_unchanged = [&mapping](const std::vector<char>& before) {
+		EXPECT_EQ(0, std::memcmp(before.data(), mapping.addr(), before.size()));
+	};
+
+	auto before = snapshot();
+	EXPECT_FALSE(sb().set_string(dom.c_str(), "mixed", "left", "overwrite"));
+	expect_unchanged(before);
+	before = snapshot();
+	EXPECT_EQ(nullptr, sb().allocate_string(dom.c_str(), "mixed", "left", "overwrite"));
+	expect_unchanged(before);
+	before = snapshot();
+	EXPECT_EQ(nullptr, sb().allocate_string(dom.c_str(), "mixed", "left", "overwrite", true));
+	expect_unchanged(before);
+
+	before = snapshot();
+	EXPECT_FALSE(sb().set_string(dom.c_str(), "mixed", "tail", "overwrite"));
+	expect_unchanged(before);
+	before = snapshot();
+	EXPECT_EQ(nullptr, sb().allocate_string(dom.c_str(), "mixed", "tail", "overwrite"));
+	expect_unchanged(before);
+	before = snapshot();
+	EXPECT_EQ(nullptr, sb().allocate_string(dom.c_str(), "mixed", "tail", "overwrite", true));
+	expect_unchanged(before);
+
+	EXPECT_EQ(111, sb().get_int32(dom.c_str(), "mixed", "left", -1));
+	EXPECT_STREQ("keep", sb().get_string(dom.c_str(), "mixed", "middle"));
+	EXPECT_EQ(222, sb().get_int32(dom.c_str(), "mixed", "right", -1));
+	EXPECT_EQ(5150, sb().get_int32(dom.c_str(), "mixed", "tail", -1));
+}
+
+TEST_F(R19TempDir, r19_string_entrypoints_reject_out_of_range_existing_offsets)
+{
+	r19::attach_logger();
+	const std::string dom = r19::domain("c6");
+	const std::string path = file("c6.blk");
+	ASSERT_TRUE(sb().init_master(dom.c_str(), path.c_str()));
+	ASSERT_NE(nullptr, sb().allocate_string(dom.c_str(), "bad_offsets", "near_end", "near"));
+	ASSERT_NE(nullptr, sb().allocate_string(dom.c_str(), "bad_offsets", "overflow", "overflow"));
+	ASSERT_NE(nullptr, sb().allocate_int32(dom.c_str(), "bad_offsets", "neighbor", 909));
+
+	auto keys = sb().get_keys(dom.c_str(), "bad_offsets");
+	auto key_info = [&keys](const char* name) -> KeyInfo* {
+		for (KeyInfo* key : keys)
+			if (key != nullptr && std::strcmp(key->_key, name) == 0)
+				return key;
+		return nullptr;
+	};
+	ASSERT_NE(nullptr, key_info("near_end"));
+	ASSERT_NE(nullptr, key_info("overflow"));
+	key_info("near_end")->_offset = 1000;
+	key_info("overflow")->_offset = UINT32_MAX;
+
+	BoostMappingFile mapping;
+	ASSERT_TRUE(mapping.map(path.c_str()));
+	ASSERT_EQ(sizeof(ShmBlock), mapping.size());
+	auto snapshot = [&mapping]() {
+		std::vector<char> bytes(mapping.size());
+		std::memcpy(bytes.data(), mapping.addr(), bytes.size());
+		return bytes;
+	};
+	auto expect_unchanged = [&mapping](const std::vector<char>& before) {
+		EXPECT_EQ(0, std::memcmp(before.data(), mapping.addr(), before.size()));
+	};
+
+	auto before = snapshot();
+	EXPECT_FALSE(sb().set_string(dom.c_str(), "bad_offsets", "near_end", "changed"));
+	expect_unchanged(before);
+	before = snapshot();
+	EXPECT_EQ(nullptr, sb().allocate_string(dom.c_str(), "bad_offsets", "near_end", "changed"));
+	expect_unchanged(before);
+	before = snapshot();
+	EXPECT_EQ(nullptr, sb().allocate_string(dom.c_str(), "bad_offsets", "near_end", "changed", true));
+	expect_unchanged(before);
+
+	before = snapshot();
+	EXPECT_FALSE(sb().set_string(dom.c_str(), "bad_offsets", "overflow", "changed"));
+	expect_unchanged(before);
+	before = snapshot();
+	EXPECT_EQ(nullptr, sb().allocate_string(dom.c_str(), "bad_offsets", "overflow", "changed", true));
+	expect_unchanged(before);
+
+	EXPECT_EQ(909, sb().get_int32(dom.c_str(), "bad_offsets", "neighbor", -1));
+}
+
+TEST_F(R19TempDir, r19_make_valid_rejections_leave_section_state_and_block_unchanged)
+{
+	r19::attach_logger();
+	const std::string master = r19::domain("c7m");
+	const std::string slave = r19::domain("c7s");
+	const std::string path = file("c7.blk");
+	ASSERT_TRUE(sb().init_master(master.c_str(), path.c_str()));
+
+	ASSERT_NE(nullptr, sb().allocate_int32(master.c_str(), "bad_offset", "existing", 1));
+	for (int i = 0; i < 16; ++i)
+	{
+		const std::string key = "s" + std::to_string(i);
+		ASSERT_NE(nullptr, sb().allocate_string(master.c_str(), "full_space", key.c_str(), "x"));
+	}
+	for (int i = 0; i < MAX_KEY_CNT; ++i)
+	{
+		const std::string key = "k" + std::to_string(i);
+		ASSERT_NE(nullptr, sb().allocate_int32(master.c_str(), "full_keys", key.c_str(), i));
+	}
+	ASSERT_NE(nullptr, sb().allocate_int32(master.c_str(), "inactive", "existing", 9));
+
+	BoostMappingFile mapping;
+	ASSERT_TRUE(mapping.map(path.c_str()));
+	ASSERT_EQ(sizeof(ShmBlock), mapping.size());
+	ShmBlock* block = static_cast<ShmBlock*>(mapping.addr());
+	auto find_section = [block](const char* name) -> SecInfo* {
+		for (uint32_t i = 0; i < block->_count; ++i)
+			if (std::strcmp(block->_sections[i]._name, name) == 0)
+				return &block->_sections[i];
+		return nullptr;
+	};
+	ASSERT_NE(nullptr, find_section("bad_offset"));
+	ASSERT_NE(nullptr, find_section("full_space"));
+	ASSERT_NE(nullptr, find_section("full_keys"));
+	ASSERT_NE(nullptr, find_section("inactive"));
+	EXPECT_EQ(1024u, find_section("full_space")->_offset);
+	EXPECT_EQ(MAX_KEY_CNT, find_section("full_keys")->_count);
+
+	// Simulate corrupt persisted metadata and inactive sections after setup.
+	find_section("bad_offset")->_offset = UINT32_MAX;
+	find_section("bad_offset")->_state = 0;
+	find_section("full_space")->_state = 0;
+	find_section("full_keys")->_state = 0;
+	ASSERT_TRUE(sb().init_slave(slave.c_str(), path.c_str()));
+	find_section("inactive")->_state = 0;
+
+	auto snapshot = [&mapping]() {
+		std::vector<char> bytes(mapping.size());
+		std::memcpy(bytes.data(), mapping.addr(), bytes.size());
+		return bytes;
+	};
+	auto expect_unchanged = [&mapping](const std::vector<char>& before) {
+		EXPECT_EQ(0, std::memcmp(before.data(), mapping.addr(), before.size()));
+	};
+
+	auto before = snapshot();
+	EXPECT_FALSE(sb().set_int32(master.c_str(), "bad_offset", "new", 2));
+	expect_unchanged(before);
+	before = snapshot();
+	EXPECT_FALSE(sb().set_int32(master.c_str(), "full_space", "new", 2));
+	expect_unchanged(before);
+	before = snapshot();
+	EXPECT_FALSE(sb().set_int32(master.c_str(), "full_keys", "new", 2));
+	expect_unchanged(before);
+	before = snapshot();
+	EXPECT_FALSE(sb().set_int32(slave.c_str(), "inactive", "new", 2));
+	expect_unchanged(before);
 }

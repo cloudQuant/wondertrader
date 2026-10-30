@@ -1,6 +1,9 @@
 ﻿#include <iostream>
 #include <set>
 #include <stdint.h>
+#include <cstdio>
+#include <cctype>
+#include <cstring>
 #include <fstream>
 #include <exception>
 #include <filesystem>
@@ -94,14 +97,39 @@ std::string extractProductID(const char* instrument)
 std::string extractProductName(const char* cname)
 {
 	std::string strRet;
-	auto idx = strlen(cname) - 1;
-	while (isdigit(cname[idx]) && idx > 0)
+	if (cname == NULL)
+		return strRet;
+
+	const size_t length = strlen(cname);
+	if (length == 0)
+		return strRet;
+
+	size_t prefixLength = length;
+	while (prefixLength > 1 && std::isdigit(static_cast<unsigned char>(cname[prefixLength - 1])))
 	{
-		idx--;
+		prefixLength--;
 	}
 
-	strRet.append(cname, idx + 1);
+	strRet.append(cname, prefixLength);
 	return strRet;
+}
+
+template <size_t N>
+static bool hasTerminator(const char (&value)[N])
+{
+	return std::memchr(value, '\0', N) != NULL;
+}
+
+static bool hasAsciiDigit(const char* value)
+{
+	if (value == NULL)
+		return false;
+	for (const unsigned char* p = reinterpret_cast<const unsigned char*>(value); *p != '\0'; ++p)
+	{
+		if (*p >= '0' && *p <= '9')
+			return true;
+	}
+	return false;
 }
 
 std::set<std::string>	prod_set;
@@ -198,8 +226,8 @@ void CTraderSpi::ReqQryCommission(const Contract& cInfo)
 		memset(&req, 0, sizeof(req));
 		strcpy(req.BrokerID, BROKER_ID.c_str());
 		strcpy(req.InvestorID, INVESTOR_ID.c_str());
-		if(cInfo.m_strAltCode.empty())
-		strcpy(req.InstrumentID, cInfo.m_strAltCode.empty()? cInfo.m_strCode.c_str() :cInfo.m_strAltCode.c_str());
+		const std::string& instrumentId = cInfo.m_strAltCode.empty() ? cInfo.m_strCode : cInfo.m_strAltCode;
+		std::snprintf(req.InstrumentID, sizeof(req.InstrumentID), "%s", instrumentId.c_str());
 		strcpy(req.ExchangeID, cInfo.m_strExchg.c_str());
 		int iResult = pUserApi->ReqQryInstrumentCommissionRate(&req, ++iRequestID);
 		std::cerr << "--->>> Quering commission ratio: " << ((iResult == 0) ? "succeed" : "failed") << std::endl;
@@ -218,7 +246,8 @@ void CTraderSpi::ReqQryMargin(const Contract& cInfo)
 		memset(&req, 0, sizeof(req));
 		strcpy(req.BrokerID, BROKER_ID.c_str());
 		strcpy(req.InvestorID, INVESTOR_ID.c_str());
-		strcpy(req.InstrumentID, cInfo.m_strAltCode.empty() ? cInfo.m_strCode.c_str() : cInfo.m_strAltCode.c_str());
+		const std::string& instrumentId = cInfo.m_strAltCode.empty() ? cInfo.m_strCode : cInfo.m_strAltCode;
+		std::snprintf(req.InstrumentID, sizeof(req.InstrumentID), "%s", instrumentId.c_str());
 		strcpy(req.ExchangeID, cInfo.m_strExchg.c_str());
 		req.HedgeFlag = THOST_FTDC_HF_Speculation;
 		int iResult = pUserApi->ReqQryInstrumentMarginRate(&req, ++iRequestID);
@@ -229,47 +258,104 @@ void CTraderSpi::ReqQryMargin(const Contract& cInfo)
 
 void CTraderSpi::AppendQuery(const QueryTask& task)
 {
+	bool rejected = false;
 	{
-		SpinLock lock(_mtx);
-		_queries.emplace(task);
+		std::lock_guard<std::mutex> lock(_mtx);
+		if (_stopped)
+		{
+			rejected = true;
+		}
+		else
+		{
+			_queries.emplace(task);
+			if (!_worker)
+				_worker.reset(new boost::thread([this]() { RunQueryWorker(); }));
+		}
 	}
 
-	if(!_worker)
+	if (rejected)
 	{
-		_worker.reset(new boost::thread([this]() {
-			uint64_t last_qrytime = 0;
-			while (!_stopped)
-			{
-				while (_queries.empty())
-				{
-					std::this_thread::sleep_for(std::chrono::milliseconds(10));
-				}
-
-				for (;;)
-				{
-					uint64_t now = TimeUtils::getLocalTimeNow();
-					if (now - last_qrytime <= 1010)
-						std::this_thread::sleep_for(std::chrono::milliseconds(10));
-					else
-						break;
-				}
-
-
-				QueryTask& task = _queries.front();
-				bool ret = task();
-
-				{
-					SpinLock lock(_mtx);
-					_queries.pop();
-
-				}
-
-				if (ret)
-					last_qrytime = TimeUtils::getLocalTimeNow();
-				std::cerr << "--->>> Quering queue left: " << _queries.size() << std::endl;
-			}
-		}));
+		std::cerr << "--->>> Query rejected because CTP loader is stopping" << std::endl;
+		return;
 	}
+
+	_query_ready.notify_one();
+}
+
+bool CTraderSpi::IsQueryQueueEmpty()
+{
+	std::lock_guard<std::mutex> lock(_mtx);
+	return _queries.empty();
+}
+
+void CTraderSpi::RunQueryWorker()
+{
+	uint64_t last_qrytime = 0;
+	for (;;)
+	{
+		QueryTask task;
+		{
+			std::unique_lock<std::mutex> lock(_mtx);
+			_query_ready.wait(lock, [this]() { return _stopped || !_queries.empty(); });
+			if (_stopped)
+				return;
+			if (_queries.empty())
+				continue;
+
+			// Keep the active task in the queue until its API call returns. This
+			// preserves the existing queue-empty callback check while avoiding an
+			// unlocked reference into the queue during a reentrant CTP callback.
+			task = _queries.front();
+		}
+
+		for (;;)
+		{
+			uint64_t now = TimeUtils::getLocalTimeNow();
+			if (now - last_qrytime > 1010)
+				break;
+
+			std::unique_lock<std::mutex> lock(_mtx);
+			if (_query_ready.wait_for(lock, std::chrono::milliseconds(10), [this]() { return _stopped; }))
+				return;
+		}
+
+		// This lock-held check is the task's commit/active linearization point:
+		// a stop already requested cancels this pending task, while a stop set
+		// after this check may wait for this committed task to finish. Keep the
+		// API call outside the queue lock so callbacks can reenter AppendQuery.
+		{
+			std::lock_guard<std::mutex> lock(_mtx);
+			if (_stopped)
+				return;
+		}
+
+		bool ret = task();
+		size_t queueLeft = 0;
+		{
+			std::lock_guard<std::mutex> lock(_mtx);
+			if (!_queries.empty())
+				_queries.pop();
+			queueLeft = _queries.size();
+		}
+
+		if (ret)
+			last_qrytime = TimeUtils::getLocalTimeNow();
+		std::cerr << "--->>> Quering queue left: " << queueLeft << std::endl;
+	}
+}
+
+CTraderSpi::~CTraderSpi()
+{
+	std::shared_ptr<boost::thread> worker;
+	{
+		std::lock_guard<std::mutex> lock(_mtx);
+		_stopped = true;
+		worker = _worker;
+	}
+	_query_ready.notify_all();
+
+	if (worker && worker->joinable())
+		worker->join();
 }
 
 inline bool isOption(TThostFtdcProductClassType pClass)
@@ -302,11 +388,23 @@ inline ContractCategory wrapCategory(TThostFtdcProductClassType cType)
 
 std::string fillCzceCode(const char* code, uint32_t tdate)
 {
+	if (code == NULL)
+		return std::string();
 	if (strlen(code) == 0)
 		return code;
 	static uint32_t yearFlag = UINT_MAX;
 	static uint32_t yearPref = UINT_MAX;
 	static uint32_t nextYPref = UINT_MAX;
+
+	std::string ret;
+	uint32_t pid_len = 0;
+	const size_t code_len = strlen(code);
+	while (pid_len < code_len && (code[pid_len] < '0' || code[pid_len] > '9'))
+	{
+		pid_len++;
+	}
+	if (pid_len == code_len)
+		return std::string();
 	if (yearFlag == UINT_MAX)
 	{
 		yearFlag = tdate / 10000 % 10;
@@ -314,14 +412,6 @@ std::string fillCzceCode(const char* code, uint32_t tdate)
 		nextYPref = (yearPref + 1) % 10;
 	}
 
-	std::string ret;
-	uint32_t pid_len = 0;
-	for (;;)
-	{
-		if (isdigit(code[pid_len++]))
-			break;
-	}
-	pid_len--;
 	uint32_t cYFlag = code[pid_len] - 48;
 	if (yearFlag == 0 || (yearPref != 0 && cYFlag >= yearFlag))
 	{
@@ -346,6 +436,18 @@ void CTraderSpi::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CTho
 	{
 		if (pInstrument)
 		{
+			if (!hasTerminator(pInstrument->InstrumentID) ||
+				!hasTerminator(pInstrument->ExchangeID) ||
+				!hasTerminator(pInstrument->ProductID) ||
+				!hasTerminator(pInstrument->InstrumentName) ||
+				!hasTerminator(pInstrument->UnderlyingInstrID) ||
+				!hasTerminator(pInstrument->OpenDate) ||
+				!hasTerminator(pInstrument->ExpireDate))
+			{
+				std::cerr << "--->>> OnRspQryInstrument: unterminated instrument field, skipped" << std::endl;
+			}
+			else
+			{
 			std::string fullInstId = fmtutil::format<64>("{}.{}", pInstrument->ExchangeID, pInstrument->InstrumentID);
 			auto it = _contracts.find(pInstrument->InstrumentID);
 			if (it != _contracts.end())
@@ -367,6 +469,14 @@ void CTraderSpi::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CTho
 			{
 				if (isGranted)
 				{
+					if (strcmp(pInstrument->ExchangeID, "CZCE") == 0 &&
+						(!hasAsciiDigit(pInstrument->InstrumentID) ||
+						(pInstrument->UnderlyingInstrID[0] != '\0' && !hasAsciiDigit(pInstrument->UnderlyingInstrID))))
+					{
+						std::cerr << "--->>> OnRspQryInstrument: invalid CZCE code, skipped" << std::endl;
+						break;
+					}
+
 					std::string pname = MAP_NAME[pInstrument->ProductID];
 					if (pname.empty())
 					{
@@ -520,7 +630,7 @@ void CTraderSpi::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CTho
 					_contracts[pInstrument->InstrumentID] = contract;
 				}
 			} while (false);
-			
+			}
 		}
 	}
 
@@ -567,7 +677,7 @@ void CTraderSpi::OnRspQryInstrumentCommissionRate(CThostFtdcInstrumentCommission
 		}
 	}
 
-	if(_queries.empty() && QRYFEES)
+	if (IsQueryQueueEmpty() && QRYFEES)
 	{
 		DumpToJson();
 		DumpFees();
@@ -584,7 +694,7 @@ void CTraderSpi::OnRspQryInstrumentMarginRate(CThostFtdcInstrumentMarginRateFiel
 		mInfo._short = pInstrumentMarginRate->ShortMarginRatioByMoney;
 	}
 
-	if (_queries.empty() && QRYFEES)
+	if (IsQueryQueueEmpty() && QRYFEES)
 	{
 		DumpToJson();
 		DumpFees();
@@ -653,18 +763,27 @@ void CTraderSpi::LoadFromJson()
 				contract.m_strExchg = exchg_id;
 				contract.m_strName = pCont->getCString("name");
 				contract.m_strProduct = pCont->getCString("product");
+				contract.m_strAltCode = pCont->getCString("altcode");
 
 				contract.m_maxMktQty = pCont->getUInt32("maxmarketqty");
 				contract.m_maxLmtQty = pCont->getUInt32("maxlimitqty");
 				contract.m_minMktQty = pCont->getUInt32("minmarketqty");
 				contract.m_minLmtQty = pCont->getUInt32("minlimitqty");
 
-				if(pCont->has("option"))
+				// DumpToJson stores option-only fields in a nested object. Reset the
+				// optional fields before loading so a non-option contract (or a
+				// malformed option value) keeps the non-option defaults.
+				contract.m_optType = OT_None;
+				contract.m_strUnderlying.clear();
+				contract.m_strikePrice = 0.0;
+				contract.m_dUnderlyingScale = 0.0;
+				WTSVariant* pOption = pCont->get("option");
+				if (pOption != NULL && pOption->isObject())
 				{
-					contract.m_optType = (OptionType)pCont->getUInt32("optiontype");
-					contract.m_strUnderlying = pCont->getCString("underlying");
-					contract.m_strikePrice = pCont->getDouble("product");
-					contract.m_dUnderlyingScale = pCont->getDouble("underlyingscale");
+					contract.m_optType = (OptionType)pOption->getUInt32("optiontype");
+					contract.m_strUnderlying = pOption->getCString("underlying");
+					contract.m_strikePrice = pOption->getDouble("strikeprice");
+					contract.m_dUnderlyingScale = pOption->getDouble("underlyingscale");
 				}
 				
 

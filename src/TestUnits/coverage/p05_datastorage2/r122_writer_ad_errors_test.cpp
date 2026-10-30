@@ -8,7 +8,7 @@
 // 失败注入与线程纪律：
 //  - 用同名目录顶掉 data.mdb，mdb_env_open 稳定返回失败，不依赖文件权限；
 //  - updateTickCache 用例只调用 IDataWriter 基类公开 init 注入 sink，不加载缓存块，
-//    并用 r4_ad_fixture 的 new_writer_zeroed 压住 _async_task 残值（R4-BUG-01），
+//    并用 r4_ad_fixture 的正常构造 writer，缺省同步模式来自公开 init 配置合同，
 //    因此不会启动任务线程。
 #include "r4_ad_fixture.h"
 
@@ -55,7 +55,7 @@ TEST_F(R122WriterADErrorsTest, R122WriterADUpdateTickCacheUninitialized)
 	WTSCommodityInfo* comm = _bd->add_commodity("EXD", "rb", ContractCategory::CC_Future);
 	WTSContractInfo* ct = _bd->add_contract("EXD", "rb2301", comm);
 
-	_writer.reset(new_writer_zeroed());
+	_writer.reset(new_writer());
 	// 只走 IDataWriter 基类的公开 init：设置 sink，不加载 cache_tick.dmb
 	static_cast<IDataWriter*>(_writer.get())->IDataWriter::init(NULL, _sink);
 

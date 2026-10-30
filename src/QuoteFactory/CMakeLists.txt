@@ -41,6 +41,9 @@ ENDIF()
 #9. 生成可执行文件
 ADD_EXECUTABLE(QuoteFactory ${SRCS})
 TARGET_LINK_LIBRARIES(QuoteFactory ${LIBS})
+add_dependencies(QuoteFactory
+	ParserCTP ParserXTP ParserFemas ParserCTPMini
+	WtDataStorage)
 
 IF (MSVC)
 ELSE (GNUCC)

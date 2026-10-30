@@ -13,9 +13,11 @@
 #include <gtest/gtest.h>
 
 #include <cfloat>
+#include <atomic>
 #include <cstring>
 #include <set>
 #include <string>
+#include <thread>
 
 #include "Includes/IBaseDataMgr.h"
 #include "Includes/IParserApi.h"
@@ -331,6 +333,50 @@ TEST_F(T2ParserCTPOptTest, depth_tick_maps_prices_and_levels)
     EXPECT_EQ(11u, q.bid_qty[0]);
     EXPECT_EQ(55u, q.bid_qty[4]);
     EXPECT_EQ(0u, q.trading_date);            // init 未跑，交易日仍是默认值
+}
+
+TEST_F(T2ParserCTPOptTest, concurrent_parser_callbacks_keep_update_times_isolated)
+{
+    ParserCTPOpt firstParser;
+    ParserCTPOpt secondParser;
+    OptParserSink firstSink;
+    OptParserSink secondSink;
+    firstSink.bd_.regis(comm_, ct_);
+    secondSink.bd_.regis(comm_, ct_);
+    firstParser.registerSpi(&firstSink);
+    secondParser.registerSpi(&secondSink);
+
+    CThostFtdcDepthMarketDataField first;
+    CThostFtdcDepthMarketDataField second;
+    fill_basic(first);
+    fill_basic(second);
+    strcpy(first.UpdateTime, "10:30:00");
+    strcpy(second.UpdateTime, "21:45:36");
+    first.UpdateMillisec = 0;
+    second.UpdateMillisec = 0;
+
+    constexpr uint32_t count = 5000;
+    std::atomic<bool> start(false);
+    std::thread firstThread([&]() {
+        while (!start.load(std::memory_order_acquire))
+            std::this_thread::yield();
+        for (uint32_t i = 0; i < count; ++i)
+            firstParser.OnRtnDepthMarketData(&first);
+    });
+    std::thread secondThread([&]() {
+        while (!start.load(std::memory_order_acquire))
+            std::this_thread::yield();
+        for (uint32_t i = 0; i < count; ++i)
+            secondParser.OnRtnDepthMarketData(&second);
+    });
+    start.store(true, std::memory_order_release);
+    firstThread.join();
+    secondThread.join();
+
+    EXPECT_EQ(count, firstSink.n_quotes_);
+    EXPECT_EQ(count, secondSink.n_quotes_);
+    EXPECT_EQ(103000000u, firstSink.snap_.action_time);
+    EXPECT_EQ(214536000u, secondSink.snap_.action_time);
 }
 
 TEST_F(T2ParserCTPOptTest, depth_tick_invalid_values_are_zeroed)

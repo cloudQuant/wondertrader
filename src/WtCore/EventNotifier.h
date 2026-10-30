@@ -15,11 +15,11 @@
 #include "../Includes/WTSObject.hpp"
 #include "../Share/StdUtils.hpp"
 
-typedef unsigned long(*FuncCreateMQServer)(const char*);
-typedef void(*FuncDestroyMQServer)(unsigned long);
-typedef void(*FundPublishMessage)(unsigned long, const char*, const char*, unsigned long);
+typedef WtUInt32(*FuncCreateMQServer)(const char*, bool);
+typedef void(*FuncDestroyMQServer)(WtUInt32);
+typedef void(*FundPublishMessage)(WtUInt32, const char*, const char*, WtUInt32);
 
-typedef void(*FuncLogCallback)(unsigned long, const char*, bool);
+typedef void(PORTER_FLAG *FuncLogCallback)(WtUInt32, const char*, bool);
 typedef void(*FuncRegCallbacks)(FuncLogCallback);
 
 
@@ -56,7 +56,7 @@ public:
 
 private:
 	std::string		_url;
-	uint32_t		_mq_sid;
+	WtUInt32		_mq_sid;
 	FuncCreateMQServer	_creator;
 	FuncDestroyMQServer	_remover;
 	FundPublishMessage	_publisher;
