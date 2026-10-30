@@ -895,6 +895,27 @@ namespace
 	/* 撤单：开仓直接撤 + 不存在订单报错                                    */
 	/* ------------------------------------------------------------------ */
 
+	/// No successful orderInsert has allocated _awaits yet; unknown cancellation still reports once.
+	TEST_F(R60MockerTest, cancel_unknown_order_before_any_insert_reports_error)
+	{
+		init_api(9609);
+		connect_api();
+
+		EXPECT_EQ(0u, sink_.n_push_order());
+		EXPECT_EQ(0u, sink_.n_error());
+		WTSEntrustAction* missing = WTSEntrustAction::create();
+		missing->setOrderID("mo.9609.99999999");
+		missing->setEntrustID("r60-entrust-1");
+		EXPECT_EQ(0, api_.orderAction(missing));
+		missing->release();
+
+		ASSERT_TRUE(wait_until([this]() { return sink_.n_error() >= 1; }));
+		EXPECT_EQ(1u, sink_.n_error());
+		EXPECT_EQ((int)WEC_ORDERCANCEL, sink_.last_error_code());
+		EXPECT_NE(std::string::npos, sink_.last_error_msg().find("不可撤销"));
+		EXPECT_EQ(0u, sink_.n_push_order());
+	}
+
 	/// TraderMocker.cpp L750-828：开仓撤单（L781-785）、订单不存在（L764-772）、
 	/// 回报 WOS_Canceled + 从 _awaits 移除（L809-822）。
 	TEST_F(R60MockerTest, cancel_open_order_and_unknown_cancel_reports_error)
