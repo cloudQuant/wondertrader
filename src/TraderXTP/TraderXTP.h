@@ -10,9 +10,14 @@
 #pragma once
 
 #include <stdint.h>
+#include <atomic>
+#include <chrono>
+#include <condition_variable>
+#include <mutex>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/post.hpp>
 #include <boost/asio/executor_work_guard.hpp>
+#include <boost/asio/steady_timer.hpp>
 
 #include <API/XTP2.2.32.2/xtp_trader_api.h>
 
@@ -95,9 +100,20 @@ public:
 	virtual int queryTrades() override;
 
 private:
-	void		reconnect();
+	void		reconnect(bool nonblocking = false);
+	bool		startWorker();
+	bool		stopWorker(bool joinWorker = true);
+	class ApiCallLease;
+	bool		beginApiCall(bool allowMissingApi);
+	void		endApiCall();
+	bool		beginApiReconfigure(bool nonblocking);
+	void		endApiReconfigure();
+	void		requestApiStop();
+	void		beginApiRelease();
+	void		finishApiRelease();
+	void		scheduleReconnect(uint64_t generation, bool login);
 	inline uint32_t			genRequestID();
-	void					doLogin();
+	bool					doLogin();
 
 	inline WTSOrderInfo*	makeOrderInfo(XTPQueryOrderRsp* orderField);
 	inline WTSEntrust*		makeEntrust(XTPOrderInfo *entrustField);
@@ -140,9 +156,24 @@ private:
 	std::atomic<uint32_t>		_ordref;		//报单引用
 
 	boost::asio::io_context		_asyncio;
+	boost::asio::steady_timer	_reconnect_timer;
 	StdThreadPtr				_thrd_worker;
 	typedef std::shared_ptr<boost::asio::executor_work_guard<boost::asio::io_context::executor_type>> BoostWorkerPtr;
 	BoostWorkerPtr				_worker;
+	std::mutex				_worker_mutex;
+	std::condition_variable	_worker_condition;
+	bool				_worker_joining = false;
+	std::mutex				_reconnect_timer_mutex;
+	std::atomic<bool>		_worker_stopping;
+	std::atomic<uint64_t>	_worker_generation;
+	std::chrono::milliseconds	_reconnect_delay;
+	std::mutex				_api_lifecycle_mutex;
+	std::condition_variable	_api_lifecycle_condition;
+	uint32_t			_api_calls_in_flight = 0;
+	bool				_api_stopping;
+	bool				_api_reconfiguring = false;
+	bool				_api_release_requested = false;
+	bool				_api_release_in_progress = false;
 
 	DllHandle		m_hInstXTP;
 	typedef XTP::API::TraderApi* (*XTPCreator)(uint8_t, const char*, XTP_LOG_LEVEL);

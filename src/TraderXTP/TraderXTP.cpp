@@ -165,6 +165,86 @@ inline uint32_t makeRefID()
 	return auto_refid.fetch_add(1);
 }
 
+namespace
+{
+	struct TraderXTPExecutionFrame
+	{
+		const TraderXTP* owner;
+		bool reentrant_release_context;
+		TraderXTPExecutionFrame* previous;
+	};
+
+	thread_local TraderXTPExecutionFrame* g_trader_xtp_execution_frame = NULL;
+
+	class TraderXTPExecutionScope
+	{
+	public:
+		TraderXTPExecutionScope(const TraderXTP* owner, bool reentrant_release_context)
+			: _frame{ owner, reentrant_release_context, g_trader_xtp_execution_frame }
+		{
+			if (_frame.owner)
+				g_trader_xtp_execution_frame = &_frame;
+		}
+
+		~TraderXTPExecutionScope()
+		{
+			leave();
+		}
+
+		void leave()
+		{
+			if (_frame.owner)
+			{
+				g_trader_xtp_execution_frame = _frame.previous;
+				_frame.owner = NULL;
+			}
+		}
+
+	private:
+		TraderXTPExecutionFrame _frame;
+	};
+
+	bool isTraderXTPReentrantRelease(const TraderXTP* owner)
+	{
+		for (TraderXTPExecutionFrame* frame = g_trader_xtp_execution_frame; frame; frame = frame->previous)
+			if (frame->owner == owner && frame->reentrant_release_context)
+				return true;
+		return false;
+	}
+}
+
+class TraderXTP::ApiCallLease
+{
+public:
+	ApiCallLease(TraderXTP& owner, bool allowMissingApi, bool exclusive = false, bool nonblockingExclusive = false)
+		: _owner(&owner)
+		, _exclusive(exclusive)
+		, _acquired(exclusive ? owner.beginApiReconfigure(nonblockingExclusive) : owner.beginApiCall(allowMissingApi))
+		, _scope(_acquired ? &owner : NULL, true)
+	{
+	}
+
+	~ApiCallLease()
+	{
+		_scope.leave();
+		if (_acquired)
+		{
+			if (_exclusive)
+				_owner->endApiReconfigure();
+			else
+				_owner->endApiCall();
+		}
+	}
+
+	bool acquired() const { return _acquired; }
+
+private:
+	TraderXTP* _owner;
+	bool _exclusive;
+	bool _acquired;
+	TraderXTPExecutionScope _scope;
+};
+
 
 TraderXTP::TraderXTP()
 	: _api(NULL)
@@ -174,15 +254,21 @@ TraderXTP::TraderXTP()
 	, _orders(NULL)
 	, _bd_mgr(NULL)
 	, _inited(false)
-, _tradingday(0)
+	, _tradingday(0)
 	, _reqid(1)
 	, _ordref(makeRefID())
+	, _reconnect_timer(_asyncio)
+	, _worker_stopping(true)
+	, _worker_generation(0)
+	, _reconnect_delay(std::chrono::milliseconds(2000))
+	, _api_stopping(false)
 	{
 }
 
 
 TraderXTP::~TraderXTP()
 {
+	release();
 }
 
 #pragma region "XTP::API::TraderSpi"
@@ -344,24 +430,31 @@ WTSTradeInfo* TraderXTP::makeTradeInfo(XTPQueryTradeRsp* trade_info)
 
 void TraderXTP::OnDisconnected(uint64_t /*session_id*/, int reason)
 {
+	TraderXTPExecutionScope callbackScope(this, true);
 	if (_sink)
 		_sink->handleEvent(WTE_Close, reason);
 
-	boost::asio::post(_asyncio, [this](){
+	if (_worker_stopping.load())
+		return;
+	const uint64_t generation = _worker_generation.load();
+	boost::asio::post(_asyncio, [this, generation](){
+		if (_worker_stopping.load() || generation != _worker_generation.load())
+			return;
 		write_log(_sink, LL_WARN, "[TraderrXTP] Connection lost, relogin in 2 seconds...");
-		std::this_thread::sleep_for(std::chrono::seconds(2));
-		doLogin();
+		scheduleReconnect(generation, true);
 	});
 }
 
 void TraderXTP::OnError(XTPRI *error_info)
 {
+	TraderXTPExecutionScope callbackScope(this, true);
 	if (_sink && error_info)
 		write_log(_sink,LL_ERROR, error_info->error_msg);
 }
 
 void TraderXTP::OnOrderEvent(XTPOrderInfo *order_info, XTPRI *error_info, uint64_t /*session_id*/)
 {
+	TraderXTPExecutionScope callbackScope(this, true);
 	if(IsErrorInfo(error_info))
 	{
 		WTSEntrust* entrust = makeEntrust(order_info);
@@ -387,6 +480,7 @@ void TraderXTP::OnOrderEvent(XTPOrderInfo *order_info, XTPRI *error_info, uint64
 
 void TraderXTP::OnTradeEvent(XTPTradeReport *trade_info, uint64_t /*session_id*/)
 {
+	TraderXTPExecutionScope callbackScope(this, true);
 	WTSTradeInfo *trdInfo = makeTradeInfo(trade_info);
 	if (trdInfo)
 	{
@@ -399,6 +493,7 @@ void TraderXTP::OnTradeEvent(XTPTradeReport *trade_info, uint64_t /*session_id*/
 
 void TraderXTP::OnCancelOrderError(XTPOrderCancelInfo */*cancel_info*/, XTPRI *error_info, uint64_t /*session_id*/)
 {
+	TraderXTPExecutionScope callbackScope(this, true);
 	if (IsErrorInfo(error_info))
 	{
 		WTSError* error = WTSError::create(WEC_ORDERCANCEL, error_info->error_msg);
@@ -410,6 +505,7 @@ void TraderXTP::OnCancelOrderError(XTPOrderCancelInfo */*cancel_info*/, XTPRI *e
 
 void TraderXTP::OnQueryOrder(XTPQueryOrderRsp *order_info, XTPRI *error_info, int /*request_id*/, bool is_last, uint64_t /*session_id*/)
 {
+	TraderXTPExecutionScope callbackScope(this, true);
 	//if (is_last)
 	//{
 	//	m_bInQuery = false;
@@ -440,6 +536,7 @@ void TraderXTP::OnQueryOrder(XTPQueryOrderRsp *order_info, XTPRI *error_info, in
 
 void TraderXTP::OnQueryTrade(XTPQueryTradeRsp *trade_info, XTPRI *error_info, int /*request_id*/, bool is_last, uint64_t /*session_id*/)
 {
+	TraderXTPExecutionScope callbackScope(this, true);
 	//if (is_last)
 	//{
 	//	m_bInQuery = false;
@@ -470,6 +567,7 @@ void TraderXTP::OnQueryTrade(XTPQueryTradeRsp *trade_info, XTPRI *error_info, in
 
 void TraderXTP::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error_info, int /*request_id*/, bool is_last, uint64_t /*session_id*/)
 {
+	TraderXTPExecutionScope callbackScope(this, true);
 	//if (is_last)
 	//{
 	//	m_bInQuery = false;
@@ -543,6 +641,7 @@ void TraderXTP::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error_i
 
 void TraderXTP::OnQueryAsset(XTPQueryAssetRsp *asset, XTPRI *error_info, int /*request_id*/, bool is_last, uint64_t /*session_id*/)
 {
+	TraderXTPExecutionScope callbackScope(this, true);
 	//if (is_last)
 	//{
 	//	m_bInQuery = false;
@@ -620,13 +719,126 @@ bool TraderXTP::init(WTSVariant *params)
 	return true;
 }
 
+bool TraderXTP::beginApiCall(bool allowMissingApi)
+{
+	std::lock_guard<std::mutex> lock(_api_lifecycle_mutex);
+	if (_api_stopping || _api_release_in_progress || (!allowMissingApi && _api == NULL))
+		return false;
+	++_api_calls_in_flight;
+	return true;
+}
+
+void TraderXTP::endApiCall()
+{
+	std::lock_guard<std::mutex> lock(_api_lifecycle_mutex);
+	if (_api_calls_in_flight > 0)
+		--_api_calls_in_flight;
+	_api_lifecycle_condition.notify_all();
+}
+
+bool TraderXTP::beginApiReconfigure(bool nonblocking)
+{
+	std::unique_lock<std::mutex> lock(_api_lifecycle_mutex);
+	if (_api_stopping || _api_release_requested || _api_release_in_progress || _api_reconfiguring)
+		return false;
+	if (nonblocking && _api_calls_in_flight != 0)
+		return false;
+
+	_api_stopping = true;
+	_api_reconfiguring = true;
+	if (!nonblocking)
+		_api_lifecycle_condition.wait(lock, [this]() {
+			return _api_calls_in_flight == 0 || _api_release_requested || _api_release_in_progress;
+		});
+	if (_api_release_requested || _api_release_in_progress)
+	{
+		_api_reconfiguring = false;
+		_api_lifecycle_condition.notify_all();
+		return false;
+	}
+	return true;
+}
+
+void TraderXTP::endApiReconfigure()
+{
+	std::lock_guard<std::mutex> lock(_api_lifecycle_mutex);
+	_api_reconfiguring = false;
+	if (!_api_release_requested && !_api_release_in_progress)
+		_api_stopping = false;
+	_api_lifecycle_condition.notify_all();
+}
+
+void TraderXTP::requestApiStop()
+{
+	std::lock_guard<std::mutex> lock(_api_lifecycle_mutex);
+	_api_stopping = true;
+	_api_release_requested = true;
+}
+
+void TraderXTP::beginApiRelease()
+{
+	std::unique_lock<std::mutex> lock(_api_lifecycle_mutex);
+	_api_stopping = true;
+	_api_release_requested = true;
+	_api_lifecycle_condition.notify_all();
+	_api_lifecycle_condition.wait(lock, [this]() {
+		return !_api_release_in_progress && !_api_reconfiguring;
+	});
+	_api_release_in_progress = true;
+}
+
+void TraderXTP::finishApiRelease()
+{
+	std::lock_guard<std::mutex> lock(_api_lifecycle_mutex);
+	_api_release_in_progress = false;
+	_api_lifecycle_condition.notify_all();
+}
+
 void TraderXTP::release()
 {
-	if (_api)
+	if (isTraderXTPReentrantRelease(this))
 	{
-		_api->RegisterSpi(NULL);
-		_api->Release();
+		// Do not wait for this API call or SDK callback to unwind. An external owner
+		// must call release() again to complete API destruction.
+		requestApiStop();
+		stopWorker(false);
+		return;
+	}
+
+	beginApiRelease();
+	if (!stopWorker())
+	{
+		finishApiRelease();
+		return;
+	}
+
+	XTP::API::TraderApi* api = NULL;
+	{
+		std::unique_lock<std::mutex> lock(_api_lifecycle_mutex);
+		_api_lifecycle_condition.wait(lock, [this]() { return _api_calls_in_flight == 0; });
+		_state = TS_NOTLOGIN;
+		api = _api;
 		_api = NULL;
+	}
+
+	if (api)
+	{
+		try
+		{
+			api->RegisterSpi(NULL);
+		}
+		catch (...)
+		{
+			// Still attempt Release and complete the local shutdown protocol.
+		}
+		try
+		{
+			api->Release();
+		}
+		catch (...)
+		{
+			// The SDK release call has no error return; do not strand concurrent releasers.
+		}
 	}
 
 	if (_orders)
@@ -637,6 +849,8 @@ void TraderXTP::release()
 
 	if (_trades)
 		_trades->clear();
+
+	finishApiRelease();
 }
 
 void TraderXTP::registerSpi(ITraderSpi *listener)
@@ -648,8 +862,16 @@ void TraderXTP::registerSpi(ITraderSpi *listener)
 	}
 }
 
-void TraderXTP::reconnect()
+void TraderXTP::reconnect(bool nonblocking)
 {
+	ApiCallLease apiLease(*this, true, true, nonblocking);
+	if (!apiLease.acquired() || _worker_stopping.load())
+	{
+		if (nonblocking && !_worker_stopping.load())
+			scheduleReconnect(_worker_generation.load(), false);
+		return;
+	}
+
 	if (_api)
 	{
 		_api->RegisterSpi(NULL);
@@ -666,12 +888,7 @@ void TraderXTP::reconnect()
 		if (_sink)
 			_sink->handleEvent(WTE_Connect, -1);
 		write_log(_sink,LL_ERROR, "[TraderrXTP] Module initializing failed");
-
-		StdThreadPtr thrd(new StdThread([this](){
-			std::this_thread::sleep_for(std::chrono::seconds(2));
-			write_log(_sink,LL_WARN, "[TraderrXTP] {} reconnecting...", _user.c_str());
-			reconnect();
-		}));
+		scheduleReconnect(_worker_generation.load(), false);
 		return;
 	}
 
@@ -687,21 +904,117 @@ void TraderXTP::reconnect()
 
 void TraderXTP::connect()
 {
-	reconnect();
+	if (isTraderXTPReentrantRelease(this))
+		return;
+	if (!startWorker() || _worker_stopping.load())
+		return;
 
-	if (_thrd_worker == NULL)
+	reconnect();
+}
+
+bool TraderXTP::startWorker()
+{
+	std::unique_lock<std::mutex> apiLock(_api_lifecycle_mutex);
+	if (_api_release_in_progress || _api_reconfiguring)
+		return false;
+	std::lock_guard<std::mutex> lock(_worker_mutex);
+	if (_thrd_worker && _thrd_worker->joinable())
+		return !_worker_stopping.load();
+
+	_asyncio.restart();
+	_api_release_requested = false;
+	_api_stopping = false;
+	_worker_stopping.store(false);
+	_worker_generation.fetch_add(1);
+	_worker.reset(new boost::asio::executor_work_guard<boost::asio::io_context::executor_type>(
+		boost::asio::make_work_guard(_asyncio)));
+	_thrd_worker.reset(new StdThread([this]() {
+		_asyncio.run();
+	}));
+	return true;
+}
+
+bool TraderXTP::stopWorker(bool joinWorker)
+{
+	std::unique_lock<std::mutex> workerLock(_worker_mutex);
+	_worker_stopping.store(true);
+	_worker_generation.fetch_add(1);
 	{
-		//boost::asio::io_context::work work(_asyncio);
-		_worker.reset(new boost::asio::executor_work_guard<boost::asio::io_context::executor_type>(boost::asio::make_work_guard(_asyncio)));
-		_thrd_worker.reset(new StdThread([this](){
-			while (true)
-			{
-				std::this_thread::sleep_for(std::chrono::milliseconds(2));
-				_asyncio.run_one();
-				//m_asyncIO.run();
-			}
-		}));
+		std::lock_guard<std::mutex> timerLock(_reconnect_timer_mutex);
+		try
+		{
+			_reconnect_timer.cancel();
+		}
+		catch (...)
+		{
+			// Timer cancellation is best-effort during shutdown. Keep stopping and joining
+			// the worker even if this Boost version reports a cancellation error by exception.
+		}
 	}
+
+	_worker.reset();
+	_asyncio.stop();
+	if (!joinWorker)
+		return false;
+	if (_thrd_worker && _thrd_worker->joinable())
+	{
+		if (_thrd_worker->get_id() == std::this_thread::get_id())
+		{
+			// The worker cannot join itself. Leave the API alive for an external release();
+			// destruction from this worker callback is unsupported.
+			return false;
+		}
+		if (_worker_joining)
+		{
+			_worker_condition.wait(workerLock, [this]() { return !_worker_joining; });
+			return true;
+		}
+
+		_worker_joining = true;
+		StdThreadPtr worker = _thrd_worker;
+		workerLock.unlock();
+		try
+		{
+			worker->join();
+		}
+		catch (...)
+		{
+			workerLock.lock();
+			_worker_joining = false;
+			workerLock.unlock();
+			_worker_condition.notify_all();
+			return false;
+		}
+		workerLock.lock();
+		if (_thrd_worker == worker)
+			_thrd_worker.reset();
+		_worker_joining = false;
+		workerLock.unlock();
+		_worker_condition.notify_all();
+		return true;
+	}
+	_thrd_worker.reset();
+	return true;
+}
+
+void TraderXTP::scheduleReconnect(uint64_t generation, bool login)
+{
+	std::lock_guard<std::mutex> lock(_reconnect_timer_mutex);
+	if (_worker_stopping.load() || generation != _worker_generation.load())
+		return;
+
+	_reconnect_timer.expires_after(_reconnect_delay);
+	_reconnect_timer.async_wait([this, generation, login](const boost::system::error_code& ec) {
+		if (ec || _worker_stopping.load() || generation != _worker_generation.load())
+			return;
+		if (login)
+			doLogin();
+		else
+		{
+			write_log(_sink, LL_WARN, "[TraderrXTP] {} reconnecting...", _user.c_str());
+			reconnect(true);
+		}
+	});
 }
 
 void TraderXTP::disconnect()
@@ -750,8 +1063,12 @@ bool TraderXTP::makeEntrustID(char* buffer, int length)
 	return false;
 }
 
-void TraderXTP::doLogin()
+bool TraderXTP::doLogin()
 {
+	ApiCallLease apiLease(*this, false);
+	if (!apiLease.acquired())
+		return false;
+
 	_state = TS_LOGINING;
 
 	_api->SetHeartBeatInterval(_hbInterval);
@@ -762,8 +1079,12 @@ void TraderXTP::doLogin()
 		write_log(_sink, LL_ERROR, "[TraderXTP] Login failed: {}", error_info->error_msg);
 		std::string msg = error_info->error_msg;
 		_state = TS_LOGINFAILED;
-		boost::asio::post(_asyncio, [this, msg] {
-			_sink->onLoginResult(false, msg.c_str(), 0);
+		const uint64_t generation = _worker_generation.load();
+		boost::asio::post(_asyncio, [this, msg, generation] {
+			if (_worker_stopping.load() || generation != _worker_generation.load())
+				return;
+			if (_sink)
+				_sink->onLoginResult(false, msg.c_str(), 0);
 		});
 	}
 	else
@@ -803,9 +1124,13 @@ void TraderXTP::doLogin()
 
 			_state = TS_LOGINED;
 			_inited = true;
-			boost::asio::post(_asyncio, [this] {
+			const uint64_t generation = _worker_generation.load();
+			boost::asio::post(_asyncio, [this, generation] {
+				if (_worker_stopping.load() || generation != _worker_generation.load())
+					return;
 				_state = TS_ALLREADY;
-				_sink->onLoginResult(true, 0, _tradingday);				
+				if (_sink)
+					_sink->onLoginResult(true, 0, _tradingday);
 			});
 		}
 		else
@@ -814,6 +1139,7 @@ void TraderXTP::doLogin()
 			_state = TS_ALLREADY;
 		}
 	}
+	return true;
 }
 
 int TraderXTP::login(const char* user, const char* pass, const char* /*productInfo*/)
@@ -821,18 +1147,13 @@ int TraderXTP::login(const char* user, const char* pass, const char* /*productIn
 	_user = user;
 	_pass = pass;
 
-	if (_api == NULL)
-	{
-		return -1;
-	}
-
-	doLogin();
-	return 0;
+	return doLogin() ? 0 : -1;
 }
 
 int TraderXTP::logout()
 {
-	if (_api == NULL)
+	ApiCallLease apiLease(*this, false);
+	if (!apiLease.acquired())
 		return -1;
 
 	_api->Logout(_sessionid);
@@ -841,7 +1162,8 @@ int TraderXTP::logout()
 
 int TraderXTP::orderInsert(WTSEntrust* entrust)
 {
-	if (_api == NULL || _state != TS_ALLREADY)
+	ApiCallLease apiLease(*this, false);
+	if (!apiLease.acquired() || _state != TS_ALLREADY)
 	{
 		return -1;
 	}
@@ -878,7 +1200,8 @@ int TraderXTP::orderInsert(WTSEntrust* entrust)
 
 int TraderXTP::orderAction(WTSEntrustAction* action)
 {
-	if (_api == NULL || _state != TS_ALLREADY)
+	ApiCallLease apiLease(*this, false);
+	if (!apiLease.acquired() || _state != TS_ALLREADY)
 	{
 		return -1;
 	}
@@ -900,6 +1223,10 @@ uint32_t TraderXTP::genRequestID()
 
 int TraderXTP::queryAccount()
 {
+	ApiCallLease apiLease(*this, false);
+	if (!apiLease.acquired())
+		return -1;
+
 	int iResult = _api->QueryAsset(_sessionid, genRequestID());
 	if (iResult != 0)
 	{
@@ -912,6 +1239,10 @@ int TraderXTP::queryAccount()
 
 int TraderXTP::queryPositions()
 {
+	ApiCallLease apiLease(*this, false);
+	if (!apiLease.acquired())
+		return -1;
+
 	int iResult = _api->QueryPosition("", _sessionid, genRequestID());
 	if (iResult != 0)
 	{
@@ -924,6 +1255,10 @@ int TraderXTP::queryPositions()
 
 int TraderXTP::queryOrders()
 {
+	ApiCallLease apiLease(*this, false);
+	if (!apiLease.acquired())
+		return -1;
+
 	XTPQueryOrderReq req;
 	memset(&req, 0, sizeof(XTPQueryOrderReq));
 	int iResult = _api->QueryOrders(&req, _sessionid, genRequestID());
@@ -938,6 +1273,10 @@ int TraderXTP::queryOrders()
 
 int TraderXTP::queryTrades()
 {
+	ApiCallLease apiLease(*this, false);
+	if (!apiLease.acquired())
+		return -1;
+
 	XTPQueryTraderReq req;
 	memset(&req, 0, sizeof(XTPQueryTraderReq));
 	int iResult = _api->QueryTrades(&req, _sessionid, genRequestID());
