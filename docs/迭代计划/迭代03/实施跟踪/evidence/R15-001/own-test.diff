@@ -1,0 +1,137 @@
+--- /private/tmp/wt-i03-r15-tags/baseline/r15_hft_stra_context.cpp	2026-11-01 22:38:13
++++ src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp	2026-11-01 22:40:53
+@@ -57,6 +57,9 @@
+     using HftStraBaseCtx::eraseOrderTag;
+ 
+     void sub_tick_direct(const char* stdCode) { _tick_subs.insert(stdCode); }
++    // The fixture has no trader; keep position-detail and close logs active
++    // while avoiding the unrelated signal-log query through _trader.
++    void disable_signal_log_for_test() { _sig_logs.reset(); }
+ };
+ 
+ /** 策略替身：逐回调计数 + 记录关键入参 */
+@@ -482,18 +485,15 @@
+ {
+     R15HftCtx ctx(&_eng, "c15_tag", false, 0);
+ 
+-    // 默认构造上下文仍应保存已登记的订单标签；当前产品容器 capacity 为 0，
+-    // 正确契约断言会暴露标签未保存的问题（BUG-R15-001）。
++    // 默认构造上下文也必须保存已登记的订单标签。
+     ctx.setUserTag(1, "AAA");
+     EXPECT_STREQ(ctx.getOrderTag(1), "AAA");
+ }
+ 
+-TEST_F(R15CtxTest, DISABLED_order_tag_set_get_erase_with_initialized_capacity)
++TEST_F(R15CtxTest, order_tag_set_get_erase_with_default_context)
+ {
+     R15HftCtx ctx(&_eng, "c15_tag_capacity", false, 0);
+ 
+-    // 完整标签链需要非零 _orders 容量；该成员为 private，当前没有安全初始化 seam。
+-    // 保留正确的回读、精确删除和非匹配查询断言，待生产提供 seam 后再启用。
+     EXPECT_STREQ(ctx.getOrderTag(1), "");
+     ctx.eraseOrderTag(1);
+     EXPECT_STREQ(ctx.getOrderTag(1), "");
+@@ -507,13 +507,12 @@
+     ctx.eraseOrderTag(2);
+     EXPECT_STREQ(ctx.getOrderTag(1), "AAA");
+     EXPECT_STREQ(ctx.getOrderTag(3), "CCC");
+-    EXPECT_STREQ(ctx.getOrderTag(9), "");       // 大于所有 id ⇒ lower_bound 命中 end
++    EXPECT_STREQ(ctx.getOrderTag(9), "");
+ }
+ 
+-TEST_F(R15CtxTest, DISABLED_order_tag_lookup_miss_does_not_match_or_erase_neighbor)
++TEST_F(R15CtxTest, order_tag_lookup_miss_does_not_match_or_erase_neighbor)
+ {
+     // 契约按精确 localid 匹配：缺失的中间 id 查询为空，删除缺失 id 不影响后继标签。
+-    // _orders 是 private 且默认容量为零，当前测试没有安全 seam 构造非空标签集合。
+     R15HftCtx ctx(&_eng, "c15_tagmiss", false, 0);
+     ctx.setUserTag(1, "AAA");
+     ctx.setUserTag(5, "EEE");
+@@ -521,4 +520,87 @@
+     ctx.eraseOrderTag(2);
+     EXPECT_STREQ(ctx.getOrderTag(5), "EEE");
+     EXPECT_STREQ(ctx.getOrderTag(1), "AAA");
++}
++
++TEST_F(R15CtxTest, order_tags_keep_unordered_ids_and_replace_exact_duplicate)
++{
++    R15HftCtx ctx(&_eng, "c15_tag_order", false, 0);
++    ctx.setUserTag(50, "fifty");
++    ctx.setUserTag(10, "ten");
++    ctx.setUserTag(30, "thirty");
++    EXPECT_STREQ(ctx.getOrderTag(10), "ten");
++    EXPECT_STREQ(ctx.getOrderTag(30), "thirty");
++    EXPECT_STREQ(ctx.getOrderTag(50), "fifty");
++    EXPECT_STREQ(ctx.getOrderTag(20), "");
++    ctx.eraseOrderTag(20);
++    EXPECT_STREQ(ctx.getOrderTag(30), "thirty");
++    ctx.setUserTag(30, "updated");
++    EXPECT_STREQ(ctx.getOrderTag(30), "updated");
++    ctx.eraseOrderTag(30);
++    EXPECT_STREQ(ctx.getOrderTag(30), "");
++    EXPECT_STREQ(ctx.getOrderTag(10), "ten");
++    EXPECT_STREQ(ctx.getOrderTag(50), "fifty");
++}
++
++TEST_F(R15CtxTest, order_tags_do_not_silently_evict_or_truncate)
++{
++    R15HftCtx ctx(&_eng, "c15_tag_many", false, 0);
++    const std::string longTag(256, 'T');
++    ctx.setUserTag(1, longTag.c_str());
++    for (uint32_t id = 2; id <= 2048; ++id)
++        ctx.setUserTag(id, "other");
++    EXPECT_STREQ(ctx.getOrderTag(1), longTag.c_str());
++    EXPECT_STREQ(ctx.getOrderTag(2048), "other");
++    ctx.setUserTag(2049, nullptr);
++    EXPECT_STREQ(ctx.getOrderTag(2049), "");
++}
++
++TEST_F(R15CtxTest, registered_order_tag_reaches_callbacks_and_remains_after_terminal_order)
++{
++    R15HftCtx ctx(&_eng, "c15_tag_callback", false, 0);
++    R15SpyStra stra;
++    ctx.set_strategy(&stra);
++    ctx.on_init();
++    ctx.setUserTag(17, "trade-tag");
++    ctx.setUserTag(19, "other-tag");
++
++    ctx.on_order(17, kAg, true, 2, 0, 7100.0, true);
++    EXPECT_EQ(stra.n_order, 1u);
++    EXPECT_STREQ(stra.last_tag.c_str(), "trade-tag");
++    // Preserve the existing behavior: on_order does not decide when late
++    // trades are impossible and therefore does not erase the registered tag.
++    ctx.on_trade(17, kAg, true, 1, 7100.0);
++    EXPECT_EQ(stra.n_trade, 1u);
++    EXPECT_STREQ(stra.last_tag.c_str(), "trade-tag");
++    EXPECT_STREQ(ctx.getOrderTag(19), "other-tag");
+ }
++
++TEST_F(R15CtxTest, order_tags_survive_open_close_and_reverse_without_truncation)
++{
++    for (const size_t length : {size_t(31), size_t(32), size_t(256)})
++    {
++        const std::string name = "c15_tag_roundtrip_" + std::to_string(length);
++        const std::string openTag(length, 'A');
++        const std::string reverseTag(length, 'B');
++        const std::string finalTag(length, 'C');
++        {
++            R15HftCtx ctx(&_eng, name.c_str(), true, 0);
++            R15SpyStra stra;
++            ctx.set_strategy(&stra);
++            ctx.on_init();
++            ctx.disable_signal_log_for_test();
++            ctx.setUserTag(10, openTag.c_str());
++            ctx.setUserTag(20, reverseTag.c_str());
++            ctx.setUserTag(30, finalTag.c_str());
++            ctx.on_trade(10, kAg, true, 1, 7100.0);
++            EXPECT_STREQ(stra.last_tag.c_str(), openTag.c_str());
++            ctx.on_trade(20, kAg, false, 2, 7110.0);
++            EXPECT_STREQ(stra.last_tag.c_str(), reverseTag.c_str());
++            ctx.on_trade(30, kAg, true, 1, 7105.0);
++            EXPECT_STREQ(stra.last_tag.c_str(), finalTag.c_str());
++        }
++        const std::string closes = slurp(outDir(name.c_str()) + "/closes.csv");
++        EXPECT_NE(closes.find("," + openTag + "," + reverseTag + "\n"), std::string::npos);
++        EXPECT_NE(closes.find("," + reverseTag + "," + finalTag + "\n"), std::string::npos);
++    }
++}

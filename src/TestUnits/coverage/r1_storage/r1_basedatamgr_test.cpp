@@ -12,6 +12,8 @@
 // 日期基准：20240108=周一，20240106=周六，20240107=周日，20240113=周六，20240115=周一。
 #include <gtest/gtest.h>
 
+#include <algorithm>
+#include <array>
 #include <cstdint>
 #include <cstring>
 #include <filesystem>
@@ -28,12 +30,14 @@
 #include "Includes/WTSDataDef.hpp"
 #include "Includes/WTSSessionInfo.hpp"
 #include "Includes/WTSContractInfo.hpp"
+#include "Includes/ILogHandler.h"
 #include "Includes/FasterDefs.h"
 #include "Share/StrUtil.hpp"
 #include "Share/StdUtils.hpp"
 #include "Share/TimeUtils.hpp"
 #include "Share/fmtlib.h"
 #include "WTSTools/WTSBaseDataMgr.h"
+#include "WTSTools/WTSLogger.h"
 
 namespace r1 {
 
@@ -51,6 +55,95 @@ std::string write_tmp(const char* name, const std::string& body)
 	ofs.close();
 	return file.string();
 }
+
+std::string json_quote(const std::string& value)
+{
+	std::string result = "\"";
+	for (char ch : value)
+	{
+		if (ch == '\\' || ch == '"')
+			result += '\\';
+		result += ch;
+	}
+	result += '"';
+	return result;
+}
+
+struct CommodityIdentityConfig
+{
+	std::string exchg = "SHFE";
+	std::string pid = "rb";
+	std::string name = "rebar";
+	std::string session = "DAY";
+	std::string holiday = "CHINA";
+};
+
+std::string commodity_config(const CommodityIdentityConfig& fields)
+{
+	return "{" + json_quote(fields.exchg) + ":{" + json_quote(fields.pid) + ":{" +
+		"\"name\":" + json_quote(fields.name) + "," +
+		"\"session\":" + json_quote(fields.session) + "," +
+		"\"holiday\":" + json_quote(fields.holiday) + "}}}";
+}
+
+std::string session_config(const std::string& session)
+{
+	return "{" + json_quote(session) + ":{\"name\":\"boundary session\",\"offset\":0," +
+		"\"sections\":[{\"from\":900,\"to\":1500}]}}";
+}
+
+struct ContractIdentityConfig
+{
+	std::string code = "rb2401";
+	std::string name = "rebar 2401";
+	std::string exchg = "SHFE";
+	std::string product = "rb";
+	std::string altCode = "ALT";
+};
+
+std::string contract_config(const ContractIdentityConfig& fields)
+{
+	return "{\"OUTER\":{" + json_quote(fields.code) + ":{" +
+		"\"name\":" + json_quote(fields.name) + "," +
+		"\"exchg\":" + json_quote(fields.exchg) + "," +
+		"\"product\":" + json_quote(fields.product) + "," +
+		"\"altcode\":" + json_quote(fields.altCode) + "}}}";
+}
+
+class ScopedBoundaryLogCapture : public ILogHandler
+{
+public:
+	ScopedBoundaryLogCapture()
+	{
+		static const bool loggerInitialized = []() {
+			WTSLogger::init(R"({"root":{"level":"debug","async":false,"sinks":[]}})", false, nullptr);
+			return true;
+		}();
+		(void)loggerInitialized;
+		WTSLogger::registerHandler(this);
+	}
+
+	~ScopedBoundaryLogCapture()
+	{
+		WTSLogger::registerHandler(nullptr);
+	}
+
+	void handleLogAppend(WTSLogLevel, const char* message) override
+	{
+		if (message != nullptr)
+			messages.emplace_back(message);
+	}
+
+	void clear() { messages.clear(); }
+	bool contains(const char* fragment) const
+	{
+		return std::any_of(messages.begin(), messages.end(), [fragment](const std::string& message) {
+			return message.find(fragment) != std::string::npos;
+		});
+	}
+
+	std::vector<std::string> messages;
+};
 } // namespace
 
 class R1BaseDataMgrTest : public ::testing::Test
@@ -132,6 +225,265 @@ TEST_F(R1BaseDataMgrTest, loaders_reject_missing_and_broken_files)
 	EXPECT_FALSE(fresh2.loadHolidays(broken.c_str()));
 }
 
+TEST(R1BaseDataMgrOwnership, created_map_values_are_released_with_manager)
+{
+	const std::string sessions = write_tmp("ownership_sessions.json", R"({
+		"DAY":{"name":"day","offset":0,"sections":[{"from":900,"to":1500}]}
+	})");
+	const std::string commodities = write_tmp("ownership_commodities.json", R"({
+		"SHFE":{"rb":{"name":"rebar","session":"DAY","pricetick":1,"volscale":10}}
+	})");
+	const std::string contracts = write_tmp("ownership_contracts.json", R"({
+		"SHFE":{"rb2401":{"name":"rebar 2401","exchg":"SHFE","product":"rb"}}
+	})");
+
+	{
+		WTSBaseDataMgr manager;
+		ASSERT_TRUE(manager.loadSessions(sessions.c_str()));
+		ASSERT_TRUE(manager.loadCommodities(commodities.c_str()));
+		ASSERT_TRUE(manager.loadContracts(contracts.c_str()));
+		ASSERT_NE(manager.getSession("DAY"), nullptr);
+		ASSERT_NE(manager.getCommodity("SHFE.rb"), nullptr);
+		ASSERT_NE(manager.getContract("rb2401", "SHFE"), nullptr);
+	}
+}
+
+TEST(R1BaseDataMgrOwnership, commodity_session_assignment_owns_references)
+{
+	WTSCommodityInfo* commodity = WTSCommodityInfo::create("rb", "rebar", "SHFE", "DAY", "CHINA");
+	ASSERT_NE(commodity, nullptr);
+	EXPECT_EQ(commodity->getSessionInfo(), nullptr);
+	commodity->setSessionInfo(nullptr);
+	EXPECT_EQ(commodity->getSessionInfo(), nullptr);
+
+	WTSSessionInfo* first = WTSSessionInfo::create("DAY", "first", 0);
+	WTSSessionInfo* second = WTSSessionInfo::create("DAY", "second", 300);
+	ASSERT_NE(first, nullptr);
+	ASSERT_NE(second, nullptr);
+	EXPECT_EQ(first->retainCount(), 1u);
+	EXPECT_EQ(second->retainCount(), 1u);
+
+	commodity->setSessionInfo(first);
+	EXPECT_EQ(first->retainCount(), 2u);
+	commodity->setSessionInfo(first);
+	EXPECT_EQ(first->retainCount(), 2u);
+
+	commodity->setSessionInfo(second);
+	EXPECT_EQ(first->retainCount(), 1u);
+	EXPECT_EQ(second->retainCount(), 2u);
+	commodity->setSessionInfo(nullptr);
+	EXPECT_EQ(second->retainCount(), 1u);
+	EXPECT_EQ(commodity->getSessionInfo(), nullptr);
+
+	first->release();
+	second->release();
+	commodity->release();
+}
+
+TEST(R1BaseDataMgrOwnership, reload_and_external_commodity_keep_sessions_alive)
+{
+	const std::string firstSessions = write_tmp("reload_sessions_first.json", R"({
+		"DAY":{"name":"first","offset":0,"sections":[{"from":900,"to":1500}]}
+	})");
+	const std::string secondSessions = write_tmp("reload_sessions_second.json", R"({
+		"DAY":{"name":"second","offset":300,"sections":[{"from":2100,"to":2300}]}
+	})");
+	const std::string commodities = write_tmp("reload_commodities.json", R"({
+		"SHFE":{"rb":{"name":"rebar","session":"DAY","pricetick":1,"volscale":10}}
+	})");
+	struct HeldCommodity
+	{
+		WTSCommodityInfo* value = nullptr;
+		~HeldCommodity() { if (value) value->release(); }
+	} held;
+	WTSSessionInfo* firstSession = nullptr;
+	{
+		WTSBaseDataMgr manager;
+		ASSERT_TRUE(manager.loadSessions(firstSessions.c_str()));
+		ASSERT_TRUE(manager.loadCommodities(commodities.c_str()));
+		held.value = manager.getCommodity("SHFE.rb");
+		ASSERT_NE(held.value, nullptr);
+		held.value->retain();
+		firstSession = held.value->getSessionInfo();
+		ASSERT_NE(firstSession, nullptr);
+		EXPECT_EQ(firstSession->getOffsetMins(), 0);
+		EXPECT_EQ(firstSession->retainCount(), 2u); // manager map + commodity
+
+		ASSERT_TRUE(manager.loadSessions(secondSessions.c_str()));
+		EXPECT_EQ(manager.getSession("DAY")->getOffsetMins(), 300);
+		EXPECT_EQ(held.value->getSessionInfo(), firstSession);
+		EXPECT_EQ(firstSession->getOffsetMins(), 0);
+		EXPECT_EQ(firstSession->retainCount(), 1u); // commodity after map replacement
+	}
+
+	ASSERT_NE(held.value, nullptr);
+	ASSERT_NE(held.value->getSessionInfo(), nullptr);
+	EXPECT_EQ(held.value->getSessionInfo(), firstSession);
+	EXPECT_EQ(held.value->getSessionInfo()->getOffsetMins(), 0);
+}
+
+TEST(R1BaseDataMgrConfigBoundary, commodity_identity_fields_enforce_caps_and_retain_values)
+{
+	ScopedBoundaryLogCapture logs;
+	const std::array<std::size_t, 3> acceptedCaps = { 63, 64, 65 };
+	const std::array<const char*, 5> fieldNames = { "exchg", "pid", "name", "session", "holiday" };
+
+	for (std::size_t field = 0; field < fieldNames.size(); ++field)
+	{
+		for (std::size_t edge = 0; edge < 4; ++edge)
+		{
+			CommodityIdentityConfig fields;
+			const std::string value = edge == 3
+				? std::string()
+				: std::string(acceptedCaps[edge], static_cast<char>('a' + field));
+			switch (field)
+			{
+			case 0: fields.exchg = value; break;
+			case 1: fields.pid = value; break;
+			case 2: fields.name = value; break;
+			case 3: fields.session = value; break;
+			case 4: fields.holiday = value; break;
+			}
+
+			const std::string sessionId = fields.session.empty() ? "DAY" : fields.session;
+			const std::string sessionsPath = write_tmp("identity_sessions.json", session_config(sessionId));
+			const std::string commoditiesPath = write_tmp("identity_commodities.json", commodity_config(fields));
+			WTSBaseDataMgr manager;
+			ASSERT_TRUE(manager.loadSessions(sessionsPath.c_str())) << fieldNames[field] << " edge " << edge;
+			logs.clear();
+			const bool loaded = manager.loadCommodities(commoditiesPath.c_str());
+
+			const bool oversized = edge == 1 || edge == 2;
+			if (oversized)
+			{
+				EXPECT_FALSE(loaded) << fieldNames[field] << " length " << value.size();
+				EXPECT_TRUE(logs.contains("Commodity identity exceeds field capacity"))
+					<< fieldNames[field] << " length " << value.size();
+				EXPECT_EQ(nullptr, manager.getSessionComms(sessionId.c_str()));
+				continue;
+			}
+
+			if (field == 3 && edge == 3)
+			{
+				EXPECT_TRUE(loaded);
+				EXPECT_TRUE(logs.contains("No session configured"));
+				EXPECT_EQ(nullptr, manager.getSessionComms(""));
+				continue;
+			}
+
+			EXPECT_TRUE(loaded) << fieldNames[field] << " edge " << edge;
+			CodeSet* sessionComms = manager.getSessionComms(sessionId.c_str());
+			ASSERT_NE(nullptr, sessionComms) << fieldNames[field] << " edge " << edge;
+			ASSERT_EQ(1u, sessionComms->size()) << fieldNames[field] << " edge " << edge;
+			const std::string fullPid = *sessionComms->begin();
+			WTSCommodityInfo* registered = manager.getCommodity(fullPid.c_str());
+			ASSERT_NE(nullptr, registered) << fieldNames[field] << " edge " << edge;
+			EXPECT_EQ(fields.pid, registered->getProduct());
+			EXPECT_EQ(fields.name, registered->getName());
+			EXPECT_EQ(fields.exchg, registered->getExchg());
+			EXPECT_EQ(fields.session, registered->getSession());
+			EXPECT_EQ(fields.holiday, registered->getTradingTpl());
+			EXPECT_STREQ("CNY", registered->getCurrency());
+		}
+	}
+}
+
+TEST(R1BaseDataMgrConfigBoundary, contract_identity_fields_enforce_caps_and_retain_values)
+{
+	ScopedBoundaryLogCapture logs;
+	const std::array<std::size_t, 4> capacities = { 32, 64, 32, 32 };
+	const std::array<const char*, 4> fieldNames = { "code", "name", "exchg", "product" };
+
+	for (std::size_t field = 0; field < fieldNames.size(); ++field)
+	{
+		for (std::size_t edge = 0; edge < 4; ++edge)
+		{
+			ContractIdentityConfig fields;
+			const std::string value = edge == 3
+				? std::string()
+				: std::string(capacities[field] - 1 + edge, static_cast<char>('k' + field));
+			switch (field)
+			{
+			case 0: fields.code = value; break;
+			case 1: fields.name = value; break;
+			case 2: fields.exchg = value; break;
+			case 3: fields.product = value; break;
+			}
+
+			const std::string sessionsPath = write_tmp("contract_identity_sessions.json", session_config("DAY"));
+			CommodityIdentityConfig commodity;
+			commodity.exchg = fields.exchg;
+			commodity.pid = fields.product;
+			const std::string commoditiesPath = write_tmp("contract_identity_commodities.json", commodity_config(commodity));
+			const std::string contractsPath = write_tmp("identity_contracts.json", contract_config(fields));
+			WTSBaseDataMgr manager;
+			ASSERT_TRUE(manager.loadSessions(sessionsPath.c_str()));
+			ASSERT_TRUE(manager.loadCommodities(commoditiesPath.c_str())) << fieldNames[field] << " edge " << edge;
+			logs.clear();
+			const bool loaded = manager.loadContracts(contractsPath.c_str());
+
+			const bool oversized = edge == 1 || edge == 2;
+			if (oversized)
+			{
+				EXPECT_FALSE(loaded) << fieldNames[field] << " length " << value.size();
+				EXPECT_TRUE(logs.contains("Contract identity exceeds field capacity"))
+					<< fieldNames[field] << " length " << value.size();
+				EXPECT_EQ(0u, manager.getGlobalSize());
+				continue;
+			}
+
+			EXPECT_TRUE(loaded) << fieldNames[field] << " edge " << edge;
+			ASSERT_EQ(1u, manager.getGlobalSize()) << fieldNames[field] << " edge " << edge;
+			WTSContractInfo* registered = manager.getContract(fields.code.c_str(), fields.exchg.c_str());
+			ASSERT_NE(nullptr, registered) << fieldNames[field] << " edge " << edge;
+			EXPECT_EQ(fields.code, registered->getCode());
+			EXPECT_EQ(fields.name, registered->getName());
+			EXPECT_EQ(fields.exchg, registered->getExchg());
+			EXPECT_EQ(fields.product, registered->getProduct());
+			EXPECT_STREQ("ALT", registered->getAltCode());
+		}
+	}
+}
+
+TEST(R1BaseDataMgrConfigBoundary, configured_altcode_caps_and_empty_fallback_are_observable)
+{
+	ScopedBoundaryLogCapture logs;
+	const std::array<std::size_t, 3> altCodeLengths = { 31, 32, 33 };
+	for (std::size_t edge = 0; edge < 4; ++edge)
+	{
+		ContractIdentityConfig fields;
+		fields.altCode = edge == 3 ? std::string() : std::string(altCodeLengths[edge], 'z');
+		const std::string sessionsPath = write_tmp("altcode_sessions.json", session_config("DAY"));
+		CommodityIdentityConfig commodity;
+		commodity.exchg = fields.exchg;
+		commodity.pid = fields.product;
+		const std::string commoditiesPath = write_tmp("altcode_commodities.json", commodity_config(commodity));
+		const std::string contractsPath = write_tmp("altcode_contracts.json", contract_config(fields));
+		WTSBaseDataMgr manager;
+		ASSERT_TRUE(manager.loadSessions(sessionsPath.c_str()));
+		ASSERT_TRUE(manager.loadCommodities(commoditiesPath.c_str()));
+		logs.clear();
+		const bool loaded = manager.loadContracts(contractsPath.c_str());
+
+		if (edge == 1 || edge == 2)
+		{
+			EXPECT_FALSE(loaded) << "altcode length " << fields.altCode.size();
+			EXPECT_TRUE(logs.contains("Contract identity exceeds field capacity"));
+			EXPECT_EQ(0u, manager.getGlobalSize());
+			continue;
+		}
+
+		EXPECT_TRUE(loaded);
+		ASSERT_EQ(1u, manager.getGlobalSize());
+		WTSContractInfo* registered = manager.getContract(fields.code.c_str(), fields.exchg.c_str());
+		ASSERT_NE(nullptr, registered);
+		const std::string expectedAltCode = fields.altCode.empty() ? fields.code : fields.altCode;
+		EXPECT_EQ(expectedAltCode, registered->getAltCode());
+		EXPECT_EQ(registered, manager.getContract(expectedAltCode.c_str(), fields.exchg.c_str()));
+	}
+}
+
+
 TEST_F(R1BaseDataMgrTest, sessions_loaded_and_missing_sections_skipped)
 {
 	WTSSessionInfo* day0 = _mgr.getSession("DAY0");
@@ -141,10 +493,11 @@ TEST_F(R1BaseDataMgrTest, sessions_loaded_and_missing_sections_skipped)
 	EXPECT_EQ(day0->getCloseTime(), 1500u);
 	WTSSessionInfo* daya = _mgr.getSession("DAYA");
 	ASSERT_TRUE(daya != NULL);
-	// BADSEC 没有 sections：仍会创建并入库（continue 只跳过后续），查询不应崩溃
+	// BADSEC 没有 sections：loadSessions 在加入 session map 前跳过该项。
+	EXPECT_EQ(_mgr.getSession("BADSEC"), nullptr);
 	WTSArray* all = _mgr.getAllSessions();
 	ASSERT_TRUE(all != NULL);
-	// DAY0/DAYA/NIGHT/OUTER 共 4 个（BADSEC 无 sections，在 add 之前 continue，不入库）
+	// DAY0/DAYA/NIGHT/OUTER 共 4 个。
 	std::size_t expect_cnt = 4;
 	EXPECT_EQ(all->size(), expect_cnt);
 	all->release();
@@ -306,11 +659,8 @@ TEST_F(R1BaseDataMgrTest, boundary_time_offsets_and_weekend_shift)
 	// getOffsetMins()==-300 <0：isStart → tDate*10000+open(2100)；isEnd → 次日*10000+close(2359)
 	EXPECT_EQ(_mgr.getBoundaryTime("OUTER", 20240110, true, true), 202401102100ull);
 	EXPECT_EQ(_mgr.getBoundaryTime("OUTER", 20240110, true, false), 202401112359ull);
-	// BADSEC：isSession 但 getOffsetMins... offset 0 → 直接返回；无 sections 时 open/close 为 0
-	WTSSessionInfo* badsec = _mgr.getSession("BADSEC");
-	ASSERT_TRUE(badsec != NULL);
-	EXPECT_EQ(_mgr.getBoundaryTime("BADSEC", 20240110, true, true),
-		(uint64_t)20240110 * 10000 + badsec->getOpenTime());
+	// 缺少 sections 的 session 在加载时被跳过；未知 session 的边界查询返回 0。
+	EXPECT_EQ(_mgr.getBoundaryTime("BADSEC", 20240110, true, true), 0ull);
 }
 
 TEST_F(R1BaseDataMgrTest, calc_trading_date_branches)

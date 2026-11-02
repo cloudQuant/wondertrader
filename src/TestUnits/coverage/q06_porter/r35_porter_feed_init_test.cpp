@@ -318,19 +318,25 @@ TEST_F(R35PorterFeed, InitPorterStampsInstDirOnceAndSecondCallIsNoOp)
 	WtHelper::setInstDir("");
 }
 
+TEST(R35PorterRunnerLocal, UnconfiguredStackInstancesDestroySafely)
+{
+	// Keep these as ordinary automatic objects. Their destructors must not assume
+	// init/config has populated engine-owned resources.
+	{
+		WtCtaEngine engine;
+	}
+	{
+		WtRtRunner runner;
+	}
+}
+
 /*
- * 复现登记（不启用）：栈构造 WtRtRunner 必崩在**析构**，不在构造。
- * 实测证据：macOS crash report
- *   ~/Library/Logs/DiagnosticReports/CoverageTests_porter-2026-10-28-012210.ips
- *   EXC_BAD_ACCESS (KERN_INVALID_ADDRESS at 0x10)，故障线程栈顶帧序：
- *   R6PorterSilence_cta_dispatch..._Test::TestBody -> WtRtRunner::~WtRtRunner
- *   -> wtp::WtCtaEngine::~WtCtaEngine（连续两帧）。
- * 嫌疑位置：WtCore/WtCtaEngine.cpp:41-47 `if (_cfg) _cfg->release();`——
- * `_cfg`（WtCtaEngine.h:92）不在构造列表（:35-39 只初始化 _tm_ticker），栈实例=垃圾指针；
- * 有证据的只有「崩在该析构内」，`_cfg` 是否唯一成因未证明（见 BUG-R35-001）。
- * 静态单例 getRunner() 的同一批成员在构造前先被零初始化，所以本 lane 全部 21 条
- * 启用用例走单例、0 崩溃；R6 族 23 条红就是逐条在栈上 `WtRtRunner r;` 的产物，
- * 交主控处置，本 lane 不代改兄弟用例。
+ * 历史复现登记（不启用）：栈构造并 init 的 WtRtRunner 曾在析构时崩溃。
+ * macOS crash report 记录 EXC_BAD_ACCESS (0x10)，栈顶依次为
+ * R6PorterSilence_cta_dispatch..._Test::TestBody -> WtRtRunner::~WtRtRunner
+ * -> WtCtaEngine::~WtCtaEngine，但没有确定具体无效成员。当前 WtCtaEngine
+ * 构造函数已将 _cfg 初始化为空；不能再将旧栈记录表述为 _cfg 未初始化的证明。
+ * 本文件上方的活动测试只覆盖未 init/config 构造即析构，不替代这个有 init 的历史路径。
  */
 TEST(R35PorterRunnerLocal, DISABLED_stack_instance_destructor_crashes_after_testbody)
 {

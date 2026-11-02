@@ -1,0 +1,4 @@
+/tmp/wt-i03-r41-stop/flag-check.cpp:10:15: error: static assertion failed due to requirement 'std::is_same<bool, std::atomic<bool>>::value': worker stop flag must be atomic
+   10 | static_assert(std::is_same<decltype(wtp::EventNotifier::_stopped), std::atomic<bool>>::value, "worker stop flag must be atomic");
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1 error generated.

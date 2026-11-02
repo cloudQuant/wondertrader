@@ -8,10 +8,8 @@
  * 唯一的 C 入口是 extern "C" int run(cfgfile, bAsync, isFile)，
  * 因此生命周期/空参防护落在 run() 的三条配置分支 + 必填项校验上。
  *
- * 刻意不进入的面（见 bugs/T4_femas_ctploader_mini.md）：
- *  - run() 的「必填项齐全」路径：会 DLLHelper::load_library 去 dlopen 厂商期权库，
- *    且在 g_ctpCreator == NULL 时仍然直接 pUserApi = g_ctpCreator(...) → 必崩；
- *    所有用例都靠 SAVEPATH 留空来命中 L198 的必填校验，在 dlopen 之前返回；
+ * 不进入真实厂商库/网络：run() 的完整配置路径由下方隔离 CWD fake-module
+ * 回归覆盖库缺失、factory 符号缺失、creator 返回空及成功初始化；
  *  - OnRspQryInstrument(bIsLast == true)：末尾无条件 exit(0)，会带走整个测试进程；
  *  - OnFrontConnected / ReqAuth / ReqUserLogin / ReqQryInstrument / OnRspUserLogin 成功分支：
  *    都要解引用全局 pUserApi（NULL）。
@@ -24,6 +22,8 @@
 #include <fstream>
 #include <map>
 #include <string>
+#include <system_error>
+#include <vector>
 
 // Pre-include the vendor API so the access shim only exposes CTraderSpi's
 // private loader helpers to this focused round-trip test.
@@ -33,6 +33,7 @@
 #undef private
 
 #include "Includes/LoaderDef.hpp"
+#include "Share/ModuleHelper.hpp"
 
 USING_NS_WTP;
 
@@ -58,6 +59,16 @@ extern std::map<std::string, std::string> MAP_NAME;
 extern std::map<std::string, std::string> MAP_SESSION;
 extern loader::CommodityMap _commodities;
 extern loader::ContractMap _contracts;
+
+#if defined(WT_T4_CTP_OPT_MISSING_SYMBOL_FIXTURE)
+namespace t4_016_cfg_loader_probe
+{
+void reset();
+size_t count();
+std::vector<uint32_t> capturedRetainCounts();
+void releaseCapturedRoots();
+}
+#endif
 
 std::string extractProductID(const char* instrument);
 std::string extractProductName(const char* cname);
@@ -86,9 +97,54 @@ public:
 		return _path.string() + std::filesystem::path::preferred_separator;
 	}
 
+	const std::filesystem::path& path() const
+	{
+		return _path;
+	}
+
 private:
 	std::filesystem::path _path;
 };
+
+class ScopedCurrentPath
+{
+public:
+	explicit ScopedCurrentPath(const std::filesystem::path& path)
+		: _previous(std::filesystem::current_path())
+	{
+		std::filesystem::current_path(path);
+	}
+
+	~ScopedCurrentPath()
+	{
+		std::error_code ec;
+		std::filesystem::current_path(_previous, ec);
+	}
+
+private:
+	std::filesystem::path _previous;
+};
+
+std::string copyFixtureIntoCurrentDirectory(const char* fixturePath)
+{
+	const std::filesystem::path source(fixturePath);
+	const std::filesystem::path destination = std::filesystem::current_path() / source.filename();
+	std::filesystem::copy_file(source, destination, std::filesystem::copy_options::overwrite_existing);
+	return std::string("./") + destination.filename().string();
+}
+
+std::string completeLoaderConfig(const std::string& modulePath, const std::string& savePath)
+{
+	return "ctp:\n"
+		"  front: tcp://127.0.0.1:1\n"
+		"  broker: brk9999\n"
+		"  user: inv001\n"
+		"  pass: test-password\n"
+		"config:\n"
+		"  path: '" + savePath + "'\n"
+		"  mask: 7\n"
+		"  module: '" + modulePath + "'\n";
+}
 
 class CTPOptLoaderTest : public ::testing::Test
 {
@@ -108,6 +164,9 @@ protected:
 
 	void TearDown() override
 	{
+#if defined(WT_T4_CTP_OPT_MISSING_SYMBOL_FIXTURE)
+		t4_016_cfg_loader_probe::releaseCapturedRoots();
+#endif
 		_commodities.clear();
 		_contracts.clear();
 		MAP_NAME.clear();
@@ -191,6 +250,17 @@ void expectRunGlobalsUnchangedAfterMalformedConfig()
 
 TEST(CTPOptLoaderRun, yaml_content_fills_globals_and_stops_before_module_load)
 {
+	ScopedOptionJsonDir workspace;
+	ScopedCurrentPath cwd(workspace.path());
+#ifdef _WIN32
+	const char* defaultModule = "soptthosttraderapi_se.dll";
+#else
+	const char* defaultModule = "soptthosttraderapi_se.so";
+#endif
+	std::ofstream moduleMarker(defaultModule);
+	ASSERT_TRUE(moduleMarker.is_open());
+	moduleMarker.close();
+
 	// 故意不给 config.path —— 命中 L198 必填校验，在 dlopen 之前返回
 	const char* cfg =
 		"ctp:\n"
@@ -422,6 +492,83 @@ TEST(CTPOptLoaderRun, ini_branch_applies_builtin_defaults_for_absent_file)
 	EXPECT_EQ(pUserApi, nullptr);
 }
 
+TEST(CTPOptLoaderRun, complete_config_missing_library_returns_nonzero_without_flow_directory)
+{
+	ScopedOptionJsonDir workspace;
+	ScopedCurrentPath cwd(workspace.path());
+#ifdef _WIN32
+	const std::filesystem::path installedModule = std::filesystem::path(getBinDir()) / "traders" / "soptthosttraderapi_se.dll";
+	const std::string missingModule = "./missing_t4_ctpopt_library.dll";
+#else
+	const std::filesystem::path installedModule = std::filesystem::path(getBinDir()) / "traders" / "soptthosttraderapi_se.so";
+	const std::string missingModule = "./missing_t4_ctpopt_library.so";
+#endif
+	ASSERT_FALSE(std::filesystem::exists(installedModule))
+		<< "test requires the installed fallback module to be absent: " << installedModule.string();
+	std::filesystem::create_directories(workspace.path() / "output");
+	pUserApi = nullptr;
+
+	const int result = run(completeLoaderConfig(missingModule, (workspace.path() / "output").string()).c_str(), true, false);
+
+	EXPECT_NE(result, 0);
+	EXPECT_EQ(pUserApi, nullptr);
+	EXPECT_FALSE(std::filesystem::exists(workspace.path() / "CTPFlow" / "brk9999" / "inv001"));
+}
+
+TEST(CTPOptLoaderRun, missing_creator_symbol_returns_nonzero_and_unloads_module)
+{
+	ScopedOptionJsonDir workspace;
+	ScopedCurrentPath cwd(workspace.path());
+	const std::string modulePath = copyFixtureIntoCurrentDirectory(WT_T4_CTP_OPT_MISSING_SYMBOL_FIXTURE);
+	std::filesystem::create_directories(workspace.path() / "output");
+	pUserApi = nullptr;
+
+	const int result = run(completeLoaderConfig(modulePath, (workspace.path() / "output").string()).c_str(), true, false);
+
+	EXPECT_NE(result, 0);
+	EXPECT_EQ(pUserApi, nullptr);
+	EXPECT_TRUE(std::filesystem::exists(workspace.path() / "ctpopt_missing_symbol_unloaded"));
+	EXPECT_FALSE(std::filesystem::exists(workspace.path() / "CTPFlow" / "brk9999" / "inv001"));
+}
+
+TEST(CTPOptLoaderRun, null_creator_returns_nonzero_and_unloads_module)
+{
+	ScopedOptionJsonDir workspace;
+	ScopedCurrentPath cwd(workspace.path());
+	const std::string modulePath = copyFixtureIntoCurrentDirectory(WT_T4_CTP_OPT_NULL_CREATOR_FIXTURE);
+	std::filesystem::create_directories(workspace.path() / "output");
+	pUserApi = nullptr;
+
+	const int result = run(completeLoaderConfig(modulePath, (workspace.path() / "output").string()).c_str(), true, false);
+
+	EXPECT_NE(result, 0);
+	EXPECT_EQ(pUserApi, nullptr);
+	EXPECT_TRUE(std::filesystem::exists(workspace.path() / "ctpopt_null_creator_unloaded"));
+	EXPECT_TRUE(std::filesystem::exists(workspace.path() / "ctpopt_creator_saw_flow_path"));
+	EXPECT_FALSE(std::filesystem::exists(workspace.path() / "ctpopt_creator_flow_path_missing"));
+	EXPECT_TRUE(std::filesystem::exists(workspace.path() / "CTPFlow" / "brk9999" / "inv001"));
+}
+
+TEST(CTPOptLoaderRun, successful_fake_creator_initializes_api_in_isolated_directory)
+{
+	ScopedOptionJsonDir workspace;
+	ScopedCurrentPath cwd(workspace.path());
+	const std::string modulePath = copyFixtureIntoCurrentDirectory(WT_T4_CTP_OPT_SUCCESSFUL_CREATOR_FIXTURE);
+	std::filesystem::create_directories(workspace.path() / "output");
+	pUserApi = nullptr;
+
+	const int result = run(completeLoaderConfig(modulePath, (workspace.path() / "output").string()).c_str(), true, false);
+
+	ASSERT_EQ(result, 0);
+	ASSERT_NE(pUserApi, nullptr);
+	EXPECT_STREQ(pUserApi->GetTradingDay(), "20261028");
+	EXPECT_TRUE(std::filesystem::exists(workspace.path() / "ctpopt_creator_saw_flow_path"));
+	EXPECT_FALSE(std::filesystem::exists(workspace.path() / "ctpopt_creator_flow_path_missing"));
+	EXPECT_TRUE(std::filesystem::exists(workspace.path() / "CTPFlow" / "brk9999" / "inv001"));
+	pUserApi->Release();
+	pUserApi = nullptr;
+}
+
 /* ------------------------------------------------------------------ */
 /* 代码/合约换算自由函数                                                */
 /* ------------------------------------------------------------------ */
@@ -451,8 +598,9 @@ TEST(CTPOptLoaderCodes, extract_product_name_handles_empty_null_and_signed_bytes
 {
 	EXPECT_EQ(extractProductName(""), "");
 	EXPECT_EQ(extractProductName(NULL), "");
-	const char signed_byte_name[] = { static_cast<char>(0xFF), '9', '\0' };
-	EXPECT_EQ(extractProductName(signed_byte_name), std::string(1, static_cast<char>(0xFF)));
+	const char signed_byte_name[] = { 'a', static_cast<char>(0xFF), '9', '\0' };
+	EXPECT_EQ(extractProductName(signed_byte_name), std::string("a") + static_cast<char>(0xFF));
+	EXPECT_EQ(extractProductName("沪银2512"), "沪银");
 }
 
 /* ------------------------------------------------------------------ */
@@ -650,6 +798,132 @@ TEST_F(CTPOptLoaderTest, incremental_json_roundtrips_nested_option_fields_and_pl
 	EXPECT_DOUBLE_EQ(reloadedFuture.m_dUnderlyingScale, 0.0);
 }
 
+TEST_F(CTPOptLoaderTest, incremental_json_loads_contract_fields_from_the_first_parsed_root)
+{
+	ScopedOptionJsonDir dir;
+	SAVEPATH = dir.save_path();
+	COMM_FILE = "commodities.json";
+	CONT_FILE = "contracts.json";
+	INCREMENTAL = true;
+
+	{
+		std::ofstream commFile(SAVEPATH + COMM_FILE);
+		ASSERT_TRUE(commFile.is_open());
+		commFile << "{}";
+	}
+	{
+		std::ofstream contractFile(SAVEPATH + CONT_FILE);
+		ASSERT_TRUE(contractFile.is_open());
+		contractFile << R"({
+			"DCE": {
+				"m2409-C-3000": {
+					"name": "Methanol Call 3000",
+					"code": "m2409-C-3000",
+					"exchg": "DCE",
+					"product": "m_o",
+					"maxlimitqty": 300,
+					"maxmarketqty": 500,
+					"minlimitqty": 2,
+					"minmarketqty": 1,
+					"opendate": 20231101,
+					"expiredate": 20241130,
+					"volscale": 10,
+					"longmarginratio": 0.09,
+					"shortmarginratio": 0.11,
+					"option": {
+						"optiontype": 1,
+						"underlying": "m2409",
+						"strikeprice": 3000.5,
+						"underlyingscale": 0.2
+					}
+				}
+			}
+		})";
+	}
+
+	CTraderSpi spi;
+	t4_016_cfg_loader_probe::reset();
+	spi.LoadFromJson();
+	EXPECT_EQ(t4_016_cfg_loader_probe::count(), 2u);
+	const std::vector<uint32_t> retainCounts = t4_016_cfg_loader_probe::capturedRetainCounts();
+	t4_016_cfg_loader_probe::releaseCapturedRoots();
+	ASSERT_EQ(retainCounts.size(), 2u);
+	for (uint32_t retainCount : retainCounts)
+		EXPECT_EQ(retainCount, 2u);
+
+	ASSERT_EQ(_contracts.count("DCE.m2409-C-3000"), 1u);
+	const loader::Contract& option = _contracts.at("DCE.m2409-C-3000");
+	EXPECT_EQ(option.m_strCode, "m2409-C-3000");
+	EXPECT_EQ(option.m_strName, "Methanol Call 3000");
+	EXPECT_EQ(option.m_strProduct, "m_o");
+	EXPECT_EQ(option.m_optType, (OptionType)1);
+	EXPECT_EQ(option.m_strUnderlying, "m2409");
+	EXPECT_DOUBLE_EQ(option.m_strikePrice, 3000.5);
+	EXPECT_DOUBLE_EQ(option.m_dUnderlyingScale, 0.2);
+	EXPECT_EQ(option.m_maxMktQty, 500u);
+	EXPECT_EQ(option.m_maxLmtQty, 300u);
+	EXPECT_EQ(option.m_minMktQty, 1u);
+	EXPECT_EQ(option.m_minLmtQty, 2u);
+	EXPECT_EQ(option.m_uOpenDate, 20231101u);
+	EXPECT_EQ(option.m_uExpireDate, 20241130u);
+	EXPECT_EQ(option.m_uVolScale, 10u);
+	EXPECT_DOUBLE_EQ(option.m_dLongMarginRatio, 0.09);
+	EXPECT_DOUBLE_EQ(option.m_dShortMarginRatio, 0.11);
+}
+
+TEST_F(CTPOptLoaderTest, incremental_json_missing_contract_file_is_safe)
+{
+	ScopedOptionJsonDir dir;
+	SAVEPATH = dir.save_path();
+	COMM_FILE = "commodities.json";
+	CONT_FILE = "contracts.json";
+	INCREMENTAL = true;
+	{
+		std::ofstream commFile(SAVEPATH + COMM_FILE);
+		ASSERT_TRUE(commFile.is_open());
+		commFile << "{}";
+	}
+
+	CTraderSpi spi;
+	t4_016_cfg_loader_probe::reset();
+	EXPECT_NO_THROW(spi.LoadFromJson());
+	EXPECT_EQ(t4_016_cfg_loader_probe::count(), 2u);
+	const std::vector<uint32_t> retainCounts = t4_016_cfg_loader_probe::capturedRetainCounts();
+	t4_016_cfg_loader_probe::releaseCapturedRoots();
+	ASSERT_EQ(retainCounts.size(), 1u);
+	EXPECT_EQ(retainCounts[0], 2u);
+	EXPECT_TRUE(_contracts.empty());
+}
+
+TEST_F(CTPOptLoaderTest, incremental_json_invalid_contract_file_is_safe)
+{
+	ScopedOptionJsonDir dir;
+	SAVEPATH = dir.save_path();
+	COMM_FILE = "commodities.json";
+	CONT_FILE = "contracts.json";
+	INCREMENTAL = true;
+	{
+		std::ofstream commFile(SAVEPATH + COMM_FILE);
+		ASSERT_TRUE(commFile.is_open());
+		commFile << "{}";
+	}
+	{
+		std::ofstream contractFile(SAVEPATH + CONT_FILE);
+		ASSERT_TRUE(contractFile.is_open());
+		contractFile << "{";
+	}
+
+	CTraderSpi spi;
+	t4_016_cfg_loader_probe::reset();
+	EXPECT_NO_THROW(spi.LoadFromJson());
+	EXPECT_EQ(t4_016_cfg_loader_probe::count(), 2u);
+	const std::vector<uint32_t> retainCounts = t4_016_cfg_loader_probe::capturedRetainCounts();
+	t4_016_cfg_loader_probe::releaseCapturedRoots();
+	ASSERT_EQ(retainCounts.size(), 1u);
+	EXPECT_EQ(retainCounts[0], 2u);
+	EXPECT_TRUE(_contracts.empty());
+}
+
 TEST_F(CTPOptLoaderTest, class_mask_filters_ungranted_categories)
 {
 	CTraderSpi spi;
@@ -807,12 +1081,8 @@ TEST_F(CTPOptLoaderTest, DISABLED_last_instrument_packet_exits_the_process)
 	EXPECT_TRUE(_contracts.empty());
 }
 
-/*
- * BUG-T4-014：run() 的必填项齐全后就会 DLLHelper::load_library dlopen 厂商期权库，
- * 且 `if (g_ctpCreator == NULL)` 只 printf 不返回，下一行仍然 g_ctpCreator(flowPath)
- * → 空函数指针调用；同时 fs::create_directories("./CTPFlow/...") 会往 CWD 写目录。
- * 与「不 dlopen / 不写产物」约束冲突，不启用。
- */
+/* Legacy crash reproducer; the active T4-014 fake-module regressions above cover
+ * the corresponding complete-config failure and success paths without a vendor SDK. */
 TEST(CTPOptLoaderDisabled, DISABLED_complete_config_reaches_dlopen_and_null_creator)
 {
 	const char* cfg =

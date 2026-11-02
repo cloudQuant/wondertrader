@@ -23,6 +23,7 @@ NS_WTP_BEGIN
 
 typedef std::vector<std::string> ValueArray;
 typedef std::function<void(const ValueArray&, const ValueArray&)> LMDBQueryCallback;
+typedef int (*LMDBRangeCursorGetOverride)(void*, MDB_cursor*, MDB_val*, MDB_val*, MDB_cursor_op);
 
 inline int compare_lmdb_keys(const void* lhs, std::size_t lhs_size, const void* rhs, std::size_t rhs_size)
 {
@@ -156,12 +157,15 @@ public:
 		, _range_cursor_get_context(NULL)
 		{
 		_readonly = db.is_readonly();
-		_db.update_errno(mdb_txn_begin(_db.env(), NULL, (_readonly ? MDB_RDONLY : 0), &_txn));
-		_dbi = _db.update_dbi(_txn);
+		int status = mdb_txn_begin(_db.env(), NULL, (_readonly ? MDB_RDONLY : 0), &_txn);
+		_db.update_errno(status);
+		_dbi = status == MDB_SUCCESS ? _db.update_dbi(_txn) : _db.dbi();
 	}
 	
 	~WtLMDBQuery()
 	{
+		if (_txn == NULL)
+			return;
 		if (_readonly)
 			mdb_txn_abort(_txn);
 		else if(!_commited)
@@ -171,7 +175,7 @@ public:
 public:
 	inline void	rollback()
 	{
-		if (_commited)
+		if (_commited || _txn == NULL)
 			return;
 
 		mdb_txn_abort(_txn);
@@ -180,7 +184,7 @@ public:
 
 	inline void	commit()
 	{
-		if (_commited || _readonly)
+		if (_commited || _readonly || _txn == NULL)
 			return;
 
 		_db.update_errno(mdb_txn_commit(_txn));
@@ -313,6 +317,8 @@ public:
 	 */
 	int get_range_checked(const std::string& lower_key, const std::string& upper_key, LMDBQueryCallback cb)
 	{
+		if (_txn == NULL)
+			return -1;
 		if (upper_key.empty())
 		{
 			_db.update_errno(MDB_SUCCESS);
@@ -441,6 +447,108 @@ public:
 	}
 
 	/*
+	 *	带失败判定的限量向前读取。只在 cursor 完整达到 count、下边界或
+	 *	LMDB 末端后调用回调；正常空结果返回 0，任何游标错误返回 -1。
+	 */
+	int get_lowers_checked(const std::string& lower_key, const std::string& upper_key, int count, LMDBQueryCallback cb)
+	{
+		if (_txn == NULL)
+			return -1;
+		if (upper_key.empty() || count <= 0)
+		{
+			_db.update_errno(MDB_SUCCESS);
+			cb(ValueArray(), ValueArray());
+			return 0;
+		}
+
+		MDB_cursor* raw_cursor = NULL;
+		int status = mdb_cursor_open(_txn, _dbi, &raw_cursor);
+		_db.update_errno(status);
+		if (status != MDB_SUCCESS)
+		{
+			if (raw_cursor != NULL)
+				mdb_cursor_close(raw_cursor);
+			return -1;
+		}
+		auto close_cursor = [](MDB_cursor* cursor) { if (cursor != NULL) mdb_cursor_close(cursor); };
+		std::unique_ptr<MDB_cursor, decltype(close_cursor)> cursor(raw_cursor, close_cursor);
+
+		auto cursor_get = [this, &cursor](MDB_val* key, MDB_val* data, MDB_cursor_op op) {
+			return _range_cursor_get_override == NULL
+				? mdb_cursor_get(cursor.get(), key, data, op)
+				: _range_cursor_get_override(_range_cursor_get_context, cursor.get(), key, data, op);
+		};
+
+		MDB_val key = { 0, 0 }, value = { 0, 0 };
+		key.mv_data = (void*)upper_key.data();
+		key.mv_size = upper_key.size();
+
+		int cnt = 0;
+		std::vector<std::string> ayKeys, ayVals;
+		bool positioned = true;
+		status = cursor_get(&key, &value, MDB_SET_RANGE);
+		if (status == MDB_NOTFOUND)
+		{
+			status = cursor_get(&key, &value, MDB_LAST);
+			if (status == MDB_NOTFOUND)
+			{
+				status = MDB_SUCCESS;
+				positioned = false;
+			}
+		}
+		if (status != MDB_SUCCESS)
+		{
+			_db.update_errno(status);
+			return -1;
+		}
+
+		while (positioned && compare_lmdb_keys(key.mv_data, key.mv_size, upper_key.data(), upper_key.size()) > 0)
+		{
+			status = cursor_get(&key, &value, MDB_PREV);
+			if (status == MDB_NOTFOUND)
+			{
+				status = MDB_SUCCESS;
+				positioned = false;
+				break;
+			}
+			if (status != MDB_SUCCESS)
+				break;
+		}
+
+		while (positioned && status == MDB_SUCCESS)
+		{
+			if (compare_lmdb_keys(key.mv_data, key.mv_size, lower_key.data(), lower_key.size()) < 0)
+				break;
+
+			ayKeys.emplace_back(key.mv_size == 0 ? std::string() : std::string((const char*)key.mv_data, key.mv_size));
+			ayVals.emplace_back(value.mv_size == 0 ? std::string() : std::string((const char*)value.mv_data, value.mv_size));
+			cnt++;
+			if (cnt >= count)
+				break;
+
+			status = cursor_get(&key, &value, MDB_PREV);
+			if (status == MDB_NOTFOUND)
+			{
+				status = MDB_SUCCESS;
+				positioned = false;
+			}
+		}
+
+		cursor.reset();
+		if (status != MDB_SUCCESS)
+		{
+			_db.update_errno(status);
+			return -1;
+		}
+
+		std::reverse(ayKeys.begin(), ayKeys.end());
+		std::reverse(ayVals.begin(), ayVals.end());
+		_db.update_errno(MDB_SUCCESS);
+		cb(ayKeys, ayVals);
+		return cnt;
+	}
+
+	/*
 	 *	读取lower_key之后的数据，从lower_key往后找
 	 *	@lower_key	下边界
 	 *	@upper_key	上边界，这个必须要有，因为如果多个合约存一个库的话，不加的话可能会读到别的合约的数据
@@ -517,7 +625,9 @@ public:
 
 private:
 	friend struct WtLMDBRangeTestAccess;
-	typedef int (*RangeCursorGetOverride)(void*, MDB_cursor*, MDB_val*, MDB_val*, MDB_cursor_op);
+	friend struct WtLMDBCheckedLowersTestAccess;
+	friend struct WtLMDBReaderTestAccess;
+	typedef LMDBRangeCursorGetOverride RangeCursorGetOverride;
 
 	WtLMDB&		_db;
 	MDB_txn*	_txn;

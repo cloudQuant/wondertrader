@@ -21,6 +21,7 @@
 #include <memory>
 #include <unistd.h>
 #include <cstdlib>
+#include <filesystem>
 #include <atomic>
 #include <unordered_map>
 #include <boost/noncopyable.hpp>
@@ -528,9 +529,9 @@ TEST_F(TempCwd, adapter_close_event_only_logs_and_connect_failure_marks_done)
 	// _done 已经为真 → 这两个回调不会再碰空的 _trader_api
 	WTSArray* ay = WTSArray::create();
 	ad->onRspAccount(ay);
-	EXPECT_EQ(1, g_cap.accountCalls);
+	EXPECT_EQ(0, g_cap.accountCalls); // 空数组没有可转发的账户记录
 	ad->onRspPosition(ay);
-	EXPECT_EQ(1, g_cap.positionCalls);
+	EXPECT_EQ(0, g_cap.positionCalls); // 空数组没有可转发的持仓记录
 	ay->release();
 
 	EXPECT_NO_THROW(ad->onLogout());
@@ -565,6 +566,15 @@ TEST_F(TempCwd, adapter_forwards_orders_trades_and_positions_to_dumper)
 	// 先把 _done 置真，绕开空的 _trader_api
 	ad->handleEvent(WTE_Connect, 1);
 	g_cap.reset();
+	// 本用例由独立进程运行；显式注册回调，不依赖其他测试的单例状态。
+	getDumper().register_callbacks(onAccCb, onOrdCb, onTrdCb, onPosCb);
+	struct ResetDumperCallbacks
+	{
+		~ResetDumperCallbacks()
+		{
+			getDumper().register_callbacks(nullptr, nullptr, nullptr, nullptr);
+		}
+	} resetDumperCallbacks;
 
 	WTSOrderInfo* o = WTSOrderInfo::create();
 	o->setCode("ru2601");
@@ -726,15 +736,45 @@ TEST_F(TempCwd, extern_c_entries_route_to_the_singleton_dumper)
 	g_adapterMgr.release();
 }
 
-TEST(wt_helper, cwd_and_module_dir_are_round_trippable)
+TEST_F(TempCwd, cwd_handles_long_paths_and_reports_unavailable_cwd)
 {
 	WtHelper::set_module_dir("/tmp/wt_dummy_mod_dir/");
 	EXPECT_STREQ("/tmp/wt_dummy_mod_dir/", WtHelper::get_module_dir());
-	// get_cwd 走 getcwd + standardisePath（WtHelper.cpp:24-36）
+
+	// A deleted current directory makes current_path/getcwd fail without depending
+	// on permissions or a platform-specific fixed buffer size. No production call
+	// site caches this helper before this test.
+	const std::string parentCwd = std::filesystem::current_path().string();
+	const std::string deletedCwd = dir + "/deleted_cwd";
+	ASSERT_TRUE(std::filesystem::create_directory(deletedCwd));
+	ASSERT_EQ(0, chdir(deletedCwd.c_str()));
+	ASSERT_EQ(0, rmdir(deletedCwd.c_str()));
+	const char* unavailable = WtHelper::get_cwd();
+	ASSERT_NE(unavailable, nullptr);
+	EXPECT_STREQ("", unavailable);
+
+	// Failure must not be cached; a later successful lookup must work.
+	ASSERT_EQ(0, chdir(parentCwd.c_str()));
+
+	// Every component is within NAME_MAX, while the full valid cwd exceeds the
+	// old 255-byte getcwd buffer.
+	std::filesystem::path deepPath(dir);
+	for (char segment = 'a'; segment < 'e'; ++segment)
+		deepPath /= std::string(72, segment);
+	std::error_code ec;
+	ASSERT_TRUE(std::filesystem::create_directories(deepPath, ec));
+	ASSERT_FALSE(ec);
+	const std::string deepPathString = deepPath.string();
+	ASSERT_EQ(0, chdir(deepPathString.c_str()));
+	const std::string actualCwd = std::filesystem::current_path(ec).string();
+	ASSERT_FALSE(ec);
 	const char* cwd = WtHelper::get_cwd();
-	ASSERT_TRUE(cwd != NULL);
-	EXPECT_TRUE(strlen(cwd) > 0);
-	EXPECT_EQ('/', cwd[strlen(cwd) - 1]);
+	ASSERT_NE(cwd, nullptr);
+	EXPECT_STREQ((actualCwd + "/").c_str(), cwd);
+	EXPECT_GT(strlen(cwd), 255u);
+	ASSERT_EQ(0, chdir(parentCwd.c_str()));
+	std::filesystem::remove_all(deepPath, ec);
+	ASSERT_FALSE(ec);
 }
 
 //////////////////////////////////////////////////////////////////////////

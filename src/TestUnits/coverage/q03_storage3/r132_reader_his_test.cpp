@@ -254,11 +254,11 @@ TEST_F(R132ReaderHisTest, R132ReaderHisOrderQueueDetailAndTransCachesAreIndepend
 	for (uint32_t i = 0; i < 64; i++)
 	{
 		WTSOrdQueStruct item = make_ordque(20240109, 20240109, action_time(570 + i), 51 + i);
-		item.price = 50.0;
-		item.order_items = 3;
-		item.qsize = 5;
+		item.price = 50.5;
+		item.order_items = 333;
+		item.qsize = 45;
 		for (uint32_t j = 0; j < 50; j++)
-			item.volumes[j] = 10;
+			item.volumes[j] = 100 + j;
 		que.push_back(item);
 	}
 	const string quePayload = pack_items(que);
@@ -270,12 +270,12 @@ TEST_F(R132ReaderHisTest, R132ReaderHisOrderQueueDetailAndTransCachesAreIndepend
 	for (uint32_t i = 0; i < 64; i++)
 	{
 		WTSOrdDtlStruct item = make_orddtl(20240109, 20240109, action_time(600 + i), 115 + i);
-		item.index = i;
-		item.price = 51.0;
-		item.volume = 100.0;
-		item.orderid = 700000;
-		item.side = BDT_Buy;
-		item.otype = ODT_LimitPrice;
+		item.index = 1000 + i;
+		item.price = 51.25;
+		item.volume = 1234;
+		item.orderid = 700123;
+		item.side = BDT_Sell;
+		item.otype = ODT_AnyPrice;
 		dtl.push_back(item);
 	}
 	const string dtlPayload = pack_items(dtl);
@@ -287,13 +287,13 @@ TEST_F(R132ReaderHisTest, R132ReaderHisOrderQueueDetailAndTransCachesAreIndepend
 	for (uint32_t i = 0; i < 64; i++)
 	{
 		WTSTransStruct item = make_trans(20240109, 20240109, action_time(630 + i), 179 + i);
-		item.index = i;
-		item.ttype = TT_Match;
-		item.side = BDT_Buy;
-		item.price = 52.0;
-		item.volume = 200.0;
-		item.askorder = 300000;
-		item.bidorder = 400000;
+		item.index = 2000 + i;
+		item.ttype = TT_Cancel;
+		item.side = BDT_Sell;
+		item.price = 52.75;
+		item.volume = 2345;
+		item.askorder = 300123;
+		item.bidorder = 400456;
 		trans.push_back(item);
 	}
 	const string transPayload = pack_items(trans);
@@ -301,24 +301,86 @@ TEST_F(R132ReaderHisTest, R132ReaderHisOrderQueueDetailAndTransCachesAreIndepend
 	ASSERT_LT(transBlock.size() * 4, sizeof(HisTransBlock) + transPayload.size());
 	ASSERT_TRUE(write_bytes("his/trans/SSE/20240109/600041.dsb", transBlock));
 
+	const auto expectQueFields = [&](const WTSOrdQueStruct* actual, uint32_t record) {
+		if (actual == NULL)
+		{
+			ADD_FAILURE() << "missing queue record " << record;
+			return;
+		}
+		const uint32_t seq = 51 + record;
+		const string expectedCode = std::to_string(600000 + seq);
+		EXPECT_STREQ(actual->exchg, "SSE");
+		EXPECT_STREQ(actual->code, expectedCode.c_str());
+		EXPECT_EQ(actual->trading_date, 20240109u);
+		EXPECT_EQ(actual->action_date, 20240109u);
+		EXPECT_EQ(actual->action_time, action_time(570 + record));
+		EXPECT_EQ(actual->side, seq % 2 == 0 ? BDT_Buy : BDT_Sell);
+		EXPECT_DOUBLE_EQ(actual->price, 50.5);
+		EXPECT_EQ(actual->order_items, 333u);
+		EXPECT_EQ(actual->qsize, 45u);
+		for (uint32_t j = 0; j < 50; j++)
+			EXPECT_EQ(actual->volumes[j], 100u + j) << "volume index " << j;
+	};
+	const auto expectDtlFields = [&](const WTSOrdDtlStruct* actual, uint32_t record) {
+		if (actual == NULL)
+		{
+			ADD_FAILURE() << "missing detail record " << record;
+			return;
+		}
+		const uint32_t seq = 115 + record;
+		const string expectedCode = std::to_string(600000 + seq);
+		EXPECT_STREQ(actual->exchg, "SSE");
+		EXPECT_STREQ(actual->code, expectedCode.c_str());
+		EXPECT_EQ(actual->trading_date, 20240109u);
+		EXPECT_EQ(actual->action_date, 20240109u);
+		EXPECT_EQ(actual->action_time, action_time(600 + record));
+		EXPECT_EQ(actual->index, 1000u + record);
+		EXPECT_DOUBLE_EQ(actual->price, 51.25);
+		EXPECT_EQ(actual->volume, 1234u);
+		EXPECT_EQ(actual->side, BDT_Sell);
+		EXPECT_EQ(actual->otype, ODT_AnyPrice);
+		EXPECT_EQ(actual->orderid, 700123);
+	};
+	const auto expectTransFields = [&](const WTSTransStruct* actual, uint32_t record) {
+		if (actual == NULL)
+		{
+			ADD_FAILURE() << "missing transaction record " << record;
+			return;
+		}
+		const uint32_t seq = 179 + record;
+		const string expectedCode = std::to_string(600000 + seq);
+		EXPECT_STREQ(actual->exchg, "SSE");
+		EXPECT_STREQ(actual->code, expectedCode.c_str());
+		EXPECT_EQ(actual->trading_date, 20240109u);
+		EXPECT_EQ(actual->action_date, 20240109u);
+		EXPECT_EQ(actual->action_time, action_time(630 + record));
+		EXPECT_EQ(actual->index, 2000u + record);
+		EXPECT_EQ(actual->ttype, TT_Cancel);
+		EXPECT_EQ(actual->side, BDT_Sell);
+		EXPECT_DOUBLE_EQ(actual->price, 52.75);
+		EXPECT_EQ(actual->volume, 2345u);
+		EXPECT_EQ(actual->askorder, 300123);
+		EXPECT_EQ(actual->bidorder, 400456);
+	};
+
 	WTSOrdDtlSlice* sd = _reader.readOrdDtlSlice("SSE.STK.600041", 2, 20240109150000000ull);
 	ASSERT_TRUE(sd != NULL);
 	ASSERT_EQ(sd->size(), 2u);
-	EXPECT_EQ(sd->at(0)->action_time, 110200000u);
-	EXPECT_EQ(sd->at(1)->action_time, 110300000u);
+	expectDtlFields(sd->at(0), 62);
+	expectDtlFields(sd->at(1), 63);
 	sd->release();
 
 	WTSTransSlice* st = _reader.readTransSlice("SSE.STK.600041", 2, 20240109150000000ull);
 	ASSERT_TRUE(st != NULL);
 	ASSERT_EQ(st->size(), 2u);
-	EXPECT_EQ(st->at(0)->action_time, 113200000u);
-	EXPECT_EQ(st->at(1)->action_time, 113300000u);
+	expectTransFields(st->at(0), 62);
+	expectTransFields(st->at(1), 63);
 	st->release();
 	WTSOrdQueSlice* sq = _reader.readOrdQueSlice("SSE.STK.600041", 2, 20240109150000000ull);
 	ASSERT_TRUE(sq != NULL);
 	ASSERT_EQ(sq->size(), 2u);
-	EXPECT_EQ(sq->at(0)->action_time, 103200000u);
-	EXPECT_EQ(sq->at(1)->action_time, 103300000u);
+	expectQueFields(sq->at(0), 62);
+	expectQueFields(sq->at(1), 63);
 	sq->release();
 
 	// 独立 reader 对同一文件执行反向首次访问，证明先有队列缓存不会屏蔽后续类型。
@@ -331,40 +393,40 @@ TEST_F(R132ReaderHisTest, R132ReaderHisOrderQueueDetailAndTransCachesAreIndepend
 	WTSOrdQueSlice* qFirst = queueFirstReader.readOrdQueSlice("SSE.STK.600041", 2, 20240109150000000ull);
 	ASSERT_TRUE(qFirst != NULL);
 	ASSERT_EQ(qFirst->size(), 2u);
-	EXPECT_EQ(qFirst->at(0)->action_time, 103200000u);
-	EXPECT_EQ(qFirst->at(1)->action_time, 103300000u);
+	expectQueFields(qFirst->at(0), 62);
+	expectQueFields(qFirst->at(1), 63);
 	qFirst->release();
 	WTSOrdDtlSlice* dAfterQueue = queueFirstReader.readOrdDtlSlice("SSE.STK.600041", 2, 20240109150000000ull);
 	ASSERT_TRUE(dAfterQueue != NULL);
 	ASSERT_EQ(dAfterQueue->size(), 2u);
-	EXPECT_EQ(dAfterQueue->at(0)->action_time, 110200000u);
-	EXPECT_EQ(dAfterQueue->at(1)->action_time, 110300000u);
+	expectDtlFields(dAfterQueue->at(0), 62);
+	expectDtlFields(dAfterQueue->at(1), 63);
 	dAfterQueue->release();
 	WTSTransSlice* tAfterQueue = queueFirstReader.readTransSlice("SSE.STK.600041", 2, 20240109150000000ull);
 	ASSERT_TRUE(tAfterQueue != NULL);
 	ASSERT_EQ(tAfterQueue->size(), 2u);
-	EXPECT_EQ(tAfterQueue->at(0)->action_time, 113200000u);
-	EXPECT_EQ(tAfterQueue->at(1)->action_time, 113300000u);
+	expectTransFields(tAfterQueue->at(0), 62);
+	expectTransFields(tAfterQueue->at(1), 63);
 	tAfterQueue->release();
 
 	// 重复读取改按 trans/detail/queue 顺序，核对三个缓存仍各自返回原始记录。
 	WTSTransSlice* tAgain = queueFirstReader.readTransSlice("SSE.STK.600041", 2, 20240109150000000ull);
 	ASSERT_TRUE(tAgain != NULL);
 	ASSERT_EQ(tAgain->size(), 2u);
-	EXPECT_EQ(tAgain->at(0)->action_time, 113200000u);
-	EXPECT_EQ(tAgain->at(1)->action_time, 113300000u);
+	expectTransFields(tAgain->at(0), 62);
+	expectTransFields(tAgain->at(1), 63);
 	tAgain->release();
 	WTSOrdDtlSlice* dAgain = queueFirstReader.readOrdDtlSlice("SSE.STK.600041", 2, 20240109150000000ull);
 	ASSERT_TRUE(dAgain != NULL);
 	ASSERT_EQ(dAgain->size(), 2u);
-	EXPECT_EQ(dAgain->at(0)->action_time, 110200000u);
-	EXPECT_EQ(dAgain->at(1)->action_time, 110300000u);
+	expectDtlFields(dAgain->at(0), 62);
+	expectDtlFields(dAgain->at(1), 63);
 	dAgain->release();
 	WTSOrdQueSlice* qAgain = queueFirstReader.readOrdQueSlice("SSE.STK.600041", 2, 20240109150000000ull);
 	ASSERT_TRUE(qAgain != NULL);
 	ASSERT_EQ(qAgain->size(), 2u);
-	EXPECT_EQ(qAgain->at(0)->action_time, 103200000u);
-	EXPECT_EQ(qAgain->at(1)->action_time, 103300000u);
+	expectQueFields(qAgain->at(0), 62);
+	expectQueFields(qAgain->at(1), 63);
 	qAgain->release();
 }
 

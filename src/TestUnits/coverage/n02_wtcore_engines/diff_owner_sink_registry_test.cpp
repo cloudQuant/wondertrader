@@ -113,7 +113,7 @@ TEST(DiffOwnerSinkRegistry, DisabledByDefaultAndRoutesOnlyMatchingOwner)
 	}));
 	EXPECT_EQ(0u, ownerA.trade_calls.load());
 	EXPECT_EQ(0u, ownerB.trade_calls.load());
-	EXPECT_EQ(1u, ordinary.trade_calls.load());
+	EXPECT_EQ(0u, ordinary.trade_calls.load());
 
 	TraderAdapter::OwnerRoutingCapabilities incomplete;
 	EXPECT_FALSE(adapter.configureOwnerRoutingCapabilities(incomplete));
@@ -135,14 +135,21 @@ TEST(DiffOwnerSinkRegistry, DisabledByDefaultAndRoutesOnlyMatchingOwner)
 	}));
 	EXPECT_EQ(1u, ownerA.trade_calls.load());
 	EXPECT_EQ(0u, ownerB.trade_calls.load());
-	EXPECT_EQ(2u, ordinary.trade_calls.load());
+	EXPECT_EQ(0u, ordinary.trade_calls.load());
 
 	EXPECT_TRUE(adapter.forEachSinkForOwner("diff-B", [](ITrdNotifySink* sink) {
 		sink->on_trade(17, "EX.TEST", true, 1.0, 100.0);
 	}));
 	EXPECT_EQ(1u, ownerA.trade_calls.load());
 	EXPECT_EQ(1u, ownerB.trade_calls.load());
-	EXPECT_EQ(3u, ordinary.trade_calls.load());
+	EXPECT_EQ(0u, ordinary.trade_calls.load());
+
+	EXPECT_FALSE(adapter.forEachSinkForOwner("unknown-owner", [](ITrdNotifySink* sink) {
+		sink->on_trade(17, "EX.TEST", true, 1.0, 100.0);
+	}));
+	EXPECT_EQ(1u, ownerA.trade_calls.load());
+	EXPECT_EQ(1u, ownerB.trade_calls.load());
+	EXPECT_EQ(0u, ordinary.trade_calls.load());
 
 	// The legacy broadcaster still reaches every registered sink.
 	adapter.forEachSink([](ITrdNotifySink* sink) {
@@ -150,7 +157,7 @@ TEST(DiffOwnerSinkRegistry, DisabledByDefaultAndRoutesOnlyMatchingOwner)
 	});
 	EXPECT_EQ(2u, ownerA.trade_calls.load());
 	EXPECT_EQ(2u, ownerB.trade_calls.load());
-	EXPECT_EQ(4u, ordinary.trade_calls.load());
+	EXPECT_EQ(1u, ordinary.trade_calls.load());
 
 	ASSERT_TRUE(adapter.unregisterOwnerSink(tokenA));
 	EXPECT_FALSE(adapter.unregisterOwnerSink(tokenA));
@@ -158,10 +165,10 @@ TEST(DiffOwnerSinkRegistry, DisabledByDefaultAndRoutesOnlyMatchingOwner)
 		sink->on_trade(17, "EX.TEST", true, 1.0, 100.0);
 	}));
 	// The owner sink remains classified until removeSink and cannot fall back to
-	// ordinary owner-event broadcasts after its token is retired.
+	// ordinary callbacks after its token is retired.
 	EXPECT_EQ(2u, ownerA.trade_calls.load());
 	EXPECT_EQ(2u, ownerB.trade_calls.load());
-	EXPECT_EQ(5u, ordinary.trade_calls.load());
+	EXPECT_EQ(1u, ordinary.trade_calls.load());
 	EXPECT_TRUE(adapter.removeSink(&ownerA));
 	EXPECT_TRUE(adapter.removeSink(&ownerB));
 	EXPECT_TRUE(adapter.removeSink(&ordinary));
@@ -205,7 +212,7 @@ TEST(DiffOwnerSinkRegistry, ConcurrentRemoveWaitsForOwnerCallback)
 		sink->on_trade(17, "EX.TEST", true, 1.0, 100.0);
 	}));
 	EXPECT_EQ(1u, owner.trade_calls.load());
-	EXPECT_EQ(2u, ordinary.trade_calls.load());
+	EXPECT_EQ(0u, ordinary.trade_calls.load());
 	EXPECT_TRUE(adapter.removeSink(&ordinary));
 }
 
@@ -231,7 +238,7 @@ TEST(DiffOwnerSinkRegistry, ReentrantUnregisterAndRemoveDoNotHoldRoutingLocks)
 	EXPECT_FALSE(ownerUnregistered);
 	EXPECT_FALSE(sinkRemoved);
 	EXPECT_EQ(1u, owner.trade_calls.load());
-	EXPECT_EQ(1u, ordinary.trade_calls.load());
+	EXPECT_EQ(0u, ordinary.trade_calls.load());
 	EXPECT_FALSE(adapter.unregisterOwnerSink(token));
 
 	owner.trade_hook = std::function<void()>();

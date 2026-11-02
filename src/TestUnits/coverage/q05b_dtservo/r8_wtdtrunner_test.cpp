@@ -16,15 +16,15 @@
  *  - trigger_bar 有无回调两条（:637-643）、clear_cache 转发（:645-648）
  * 观察手段：initialize 传入的两个录制回调（PorterDefs.h:62 / :72），
  * 因此所有断言都可证伪（回调未触发即失败）。
- * 无 data.store 段 -> _reader 恒为 NULL，因此所有会解引用 _reader 的入口
- * （get_bars_by_range / get_bars_by_count / get_ticks_* / sub_bar）
- * 只留 DISABLED_ 用例，见 bugs/R8_wtdtservo.md。不起线程、不加载插件、不碰网络。
+ * 无 data.store 段时保持 no-reader 初始化模式；查询和订阅经 _reader==NULL
+ * 守卫安全返回。显式 store 插件不可用则初始化失败；本地插件存在时另做成功正控。
  */
 #include <gtest/gtest.h>
 
 #include <atomic>
 #include <cstdint>
 #include <cstring>
+#include <dlfcn.h>
 #include <fstream>
 #include <memory>
 #include <string>
@@ -94,6 +94,39 @@ fs::path make_tmp_dir(const char* tag)
 	return p;
 }
 
+std::string r8_bin_dir()
+{
+	Dl_info info {};
+	if (dladdr(reinterpret_cast<void*>(&onTickProbe), &info) == 0 || info.dli_fname == nullptr)
+		return std::string();
+
+	fs::path bin = fs::path(info.dli_fname).parent_path().parent_path();
+	std::string path = bin.string();
+	if (!path.empty() && path.back() != '/')
+		path.push_back('/');
+	return path;
+}
+
+bool r8_ad_store_ready(const std::string& binDir)
+{
+	if (binDir.empty())
+		return false;
+
+	const std::string path = binDir + "libWtDataStorageAD.dylib";
+	std::error_code ec;
+	if (!fs::exists(path, ec))
+		return false;
+
+	void* handle = dlopen(path.c_str(), RTLD_NOW);
+	if (handle == nullptr)
+		return false;
+
+	const bool ready = dlsym(handle, "createRdmDtReader") != nullptr
+		&& dlsym(handle, "deleteRdmDtReader") != nullptr;
+	dlclose(handle);
+	return ready;
+}
+
 class R8WtDtRunnerTest : public ::testing::Test
 {
 protected:
@@ -152,7 +185,8 @@ protected:
 	 * extraMember 用于追加 "parsers" 段；三种形态（无 parsers / 数组 / 外部文件）
 	 * 分别覆盖 WtDtRunner.cpp:152-183 的不同分支
 	 */
-	std::string buildCfg(bool withData, const std::string& extraMember = "")
+	std::string buildCfg(bool withData, const std::string& extraMember = "",
+		const std::string& storeMember = "")
 	{
 		const std::string d = _dir.string();
 		std::string s = std::string("{")
@@ -166,7 +200,10 @@ protected:
 			s += ",\"holiday\": \"" + d + "/holidays.json\"";
 			s += ",\"hot\": \"" + d + "/hots.json\"";
 			s += ",\"second\": \"" + d + "/seconds.json\"";
-			s += "},\"data\": {\"align_by_section\": false}";
+			s += "},\"data\": {\"align_by_section\": false";
+			if (!storeMember.empty())
+				s += "," + storeMember;
+			s += "}";
 		}
 		else
 			s += "}";
@@ -398,6 +435,67 @@ TEST_F(R8WtDtRunnerTest, MissingDataSectionStillCompletesInitialization)
 	tick->release();
 }
 
+TEST_F(R8WtDtRunnerTest, ConfiguredUnavailableReaderRejectsStartupAndQueriesSafely)
+{
+	std::unique_ptr<WtDtRunner> runner(new WtDtRunner());
+	const std::string store = "\"store\":{\"module\":\"r8_no_such_data_reader\"}";
+	write_file(_dir / "bad_store.json", buildCfg(true, "", store));
+	runner->initialize((_dir / "bad_store.json").string().c_str(), true,
+		_modDir.c_str(), _logCfg.c_str(), onTickProbe, onBarProbe);
+
+	EXPECT_FALSE(runner->isInitialized());
+	EXPECT_FALSE(runner->hasRetainedParserAdapters());
+	EXPECT_EQ(runner->get_bars_by_range("CFFEX.IC.2204", "m1", 202401020930, 202401021500), nullptr);
+	EXPECT_EQ(runner->get_bars_by_date("CFFEX.IC.2204", "m1", 20240102), nullptr);
+	EXPECT_EQ(runner->get_bars_by_count("CFFEX.IC.2204", "m1", 10), nullptr);
+	EXPECT_EQ(runner->get_ticks_by_range("CFFEX.IC.2204", 202401020930, 202401021500), nullptr);
+	EXPECT_EQ(runner->get_ticks_by_date("CFFEX.IC.2204", 20240102), nullptr);
+	EXPECT_EQ(runner->get_ticks_by_count("CFFEX.IC.2204", 10), nullptr);
+	EXPECT_EQ(runner->get_sbars_by_date("CFFEX.IC.2204", 30, 20240102), nullptr);
+
+	EXPECT_NO_THROW(runner->start());
+	EXPECT_NO_THROW(runner->sub_bar("CFFEX.IC.2204", "m1"));
+	EXPECT_NO_THROW(runner->clear_cache());
+	EXPECT_FALSE(runner->isInitialized());
+	EXPECT_TRUE(TickProbe::codes.empty());
+	EXPECT_TRUE(BarProbe::codes.empty());
+}
+
+TEST_F(R8WtDtRunnerTest, DataSectionWithoutStoreRemainsValidNoReaderMode)
+{
+	std::unique_ptr<WtDtRunner> runner(new WtDtRunner());
+	initRunner(*runner);
+	ASSERT_TRUE(runner->isInitialized());
+
+	EXPECT_EQ(runner->get_bars_by_range("CFFEX.IC.2204", "m1", 202401020930, 202401021500), nullptr);
+	EXPECT_EQ(runner->get_bars_by_date("CFFEX.IC.2204", "m1", 20240102), nullptr);
+	EXPECT_EQ(runner->get_bars_by_count("CFFEX.IC.2204", "m1", 10), nullptr);
+	EXPECT_EQ(runner->get_ticks_by_range("CFFEX.IC.2204", 202401020930, 202401021500), nullptr);
+	EXPECT_EQ(runner->get_ticks_by_date("CFFEX.IC.2204", 20240102), nullptr);
+	EXPECT_EQ(runner->get_ticks_by_count("CFFEX.IC.2204", 10), nullptr);
+	EXPECT_EQ(runner->get_sbars_by_date("CFFEX.IC.2204", 30, 20240102), nullptr);
+	EXPECT_NO_THROW(runner->sub_bar("CFFEX.IC.2204", "m1"));
+	EXPECT_NO_THROW(runner->clear_cache());
+}
+
+TEST_F(R8WtDtRunnerTest, ConfiguredAvailableReaderCompletesInitializationWhenPresent)
+{
+	const std::string binDir = r8_bin_dir();
+	if (!r8_ad_store_ready(binDir))
+		GTEST_SKIP() << "libWtDataStorageAD.dylib / createRdmDtReader 不可用";
+
+	std::unique_ptr<WtDtRunner> runner(new WtDtRunner());
+	const std::string store = "\"store\":{\"module\":\"WtDataStorageAD\",\"path\":\""
+		+ (_dir / "store").string() + "\"}";
+	write_file(_dir / "available_store.json", buildCfg(true, "", store));
+	runner->initialize((_dir / "available_store.json").string().c_str(), true,
+		binDir.c_str(), _logCfg.c_str(), onTickProbe, onBarProbe);
+
+	EXPECT_TRUE(runner->isInitialized());
+	EXPECT_FALSE(runner->hasRetainedParserAdapters());
+	EXPECT_NO_THROW(runner->clear_cache());
+}
+
 TEST_F(R8WtDtRunnerTest, SecondInitializeIsRejectedAndStatePreserved)
 {
 	std::unique_ptr<WtDtRunner> runner(new WtDtRunner());
@@ -606,34 +704,6 @@ TEST_F(R8WtDtRunnerTest, NonObjectBasefilesRejectInitializationAndAllowRetry)
 	EXPECT_NE(runner->getBaseDataMgr().getSession("SD0930"), nullptr);
 	EXPECT_NE(runner->getBaseDataMgr().getCommodity("CFFEX", "IC"), nullptr);
 	EXPECT_NE(runner->getBaseDataMgr().getContract("IC2204", "CFFEX"), nullptr);
-}
-
-/*!
- * 触发条件（启用即段错误，禁止在 CI 启用）：
- * runner 正常 initialize（data 段无 store -> WtDataManager.cpp:104 -> initStore(NULL)
- * 返回 false，_reader 保持 NULL）后调用 sub_bar：
- * WtDtRunner.cpp:633 -> WtDataManager.cpp:516 无条件 _reader->readKlineSliceByCount。
- */
-TEST_F(R8WtDtRunnerTest, DISABLED_SubBarWithoutReaderSegfaults)
-{
-	std::unique_ptr<WtDtRunner> runner(new WtDtRunner());
-	initRunner(*runner);
-	runner->sub_bar("CFFEX.IC.2204", "m1");
-	EXPECT_TRUE(TickProbe::codes.empty());
-}
-
-/*!
- * 触发条件（启用即段错误，禁止在 CI 启用）：
- * 同上一条根因，凡是把请求转交给 _data_mgr 的查询入口都直接解引用 _reader：
- * WtDtRunner.cpp:239 -> WtDataManager.cpp:203。因此本波里
- * get_bars_by_range、get_bars_by_count、get_ticks_by_date、get_sbars_by_date 的
- * 周期解析与缓存代码（约 120 行）在测试二进制内不可达。
- */
-TEST_F(R8WtDtRunnerTest, DISABLED_GetBarsByRangeWithoutReaderSegfaults)
-{
-	std::unique_ptr<WtDtRunner> runner(new WtDtRunner());
-	initRunner(*runner);
-	EXPECT_EQ(runner->get_bars_by_range("CFFEX.IC.2204", "m1", 202401020930, 202401021500), nullptr);
 }
 
 }  // namespace

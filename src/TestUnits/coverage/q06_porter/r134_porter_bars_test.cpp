@@ -31,6 +31,10 @@
 
 #include "Includes/WTSStruct.h"
 
+#ifndef WT_COV_R134_DATA_STORAGE_MODULE
+#error "CoverageTests_porter must pass the built WtDataStorage target file to R134"
+#endif
+
 USING_NS_WTP;
 
 extern WtRtRunner& getRunner();
@@ -119,15 +123,19 @@ namespace
 		new (&r) WtRtRunner();
 	}
 
-	/* 测试可执行文件在 bin/TestUnits，libWtDataStorage 在 bin 下。 */
-	void point_inst_dir_to_bin()
+	/* Use the exact built reader module path rather than deriving a directory from
+	 * getBinDir(), whose trailing slash makes parent_path() remain in TestUnits. */
+	bool point_inst_dir_to_data_storage()
 	{
-		stdfs::path inst(WtHelper::getInstDir());
-		stdfs::path bin = inst.parent_path();
-		std::string dir = bin.string();
+		const stdfs::path module(WT_COV_R134_DATA_STORAGE_MODULE);
+		std::error_code ec;
+		if (!stdfs::is_regular_file(module, ec) || ec)
+			return false;
+		std::string dir = module.parent_path().string();
 		if (dir.empty() || dir.back() != '/')
 			dir += '/';
 		WtHelper::setInstDir(dir.c_str());
+		return true;
 	}
 
 	const char* kSessions =
@@ -166,13 +174,15 @@ namespace
 			write_text(dir + "/sessions.json", kSessions);
 			write_text(dir + "/commodities.json", kCommodities);
 			write_text(dir + "/contracts.json", kContracts);
-			write_text(dir + "/actions.json", "{}");
+			// ActionPolicyMgr::init requires a default group in the initial policy.
+			write_text(dir + "/actions.json", "{\"default\":{}}");
 
 			clear_bars();
 			reset_singleton();
 			getRunner().init((dir + "/r134_absent_logcfg.yaml").c_str(), true, dir.c_str());
 			inst_before = WtHelper::getInstDir();
-			point_inst_dir_to_bin();
+			if (!point_inst_dir_to_data_storage())
+				return false;
 
 			register_ext_data_loader(fnl_loader, raw_loader, NULL, NULL);
 			if (!getRunner().config(make_cfg(dir, env).c_str(), false))

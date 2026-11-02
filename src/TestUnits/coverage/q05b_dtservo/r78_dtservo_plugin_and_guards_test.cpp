@@ -68,7 +68,7 @@ std::string binDir()
 	return ret;
 }
 
-bool linkUdpParser(const fs::path& tmp, std::string& moduleRoot)
+bool stageUdpParser(const fs::path& tmp, std::string& moduleRoot)
 {
 	const std::string bin = binDir();
 	if (bin.empty())
@@ -91,7 +91,8 @@ bool linkUdpParser(const fs::path& tmp, std::string& moduleRoot)
 	fs::create_directories(root / "parsers", ec);
 	if (ec)
 		return false;
-	fs::create_symlink(src, root / "parsers" / "libParserUDP.dylib", ec);
+	fs::copy_file(src, root / "parsers" / "libParserUDP.dylib",
+		fs::copy_options::overwrite_existing, ec);
 	if (ec)
 		return false;
 
@@ -207,7 +208,7 @@ void initBaseData(WTSBaseDataMgr& bd, const DtFixture& fx)
 TEST(R78DtParserInit, loads_udp_plugin_with_filter)
 {
 	DtFixture fx;
-	if (!linkUdpParser(fx._dir, fx._udpRoot))
+	if (!stageUdpParser(fx._dir, fx._udpRoot))
 		GTEST_SKIP() << "libParserUDP.dylib not found in this build";
 	WtHelper::set_module_dir(fx._udpRoot.c_str());
 
@@ -237,7 +238,7 @@ TEST(R78DtParserInit, loads_udp_plugin_with_filter)
 TEST(R78DtParserInit, loads_udp_plugin_without_filter)
 {
 	DtFixture fx;
-	if (!linkUdpParser(fx._dir, fx._udpRoot))
+	if (!stageUdpParser(fx._dir, fx._udpRoot))
 		GTEST_SKIP() << "libParserUDP.dylib not found in this build";
 	WtHelper::set_module_dir(fx._udpRoot.c_str());
 

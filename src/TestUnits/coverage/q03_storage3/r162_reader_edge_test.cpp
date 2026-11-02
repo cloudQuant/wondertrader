@@ -59,10 +59,7 @@ TEST_F(R162ReaderEdgeTest, R162ReaderContinuousCacheNonStdExceptionIsCaught)
 	cfg->release();
 
 	WTSKlineSlice* slice = reader.readKlineSlice("SSE.600000.HOT", KP_Minute1, 5, 202401101500ULL);
-	ASSERT_TRUE(slice != NULL);
-	EXPECT_EQ(slice->get_block_counts(), 0u);
-	slice->release();
-
+	EXPECT_TRUE(slice == NULL);
 	EXPECT_GE(sink.count_of(LL_ERROR), 1u);
 }
 
@@ -150,7 +147,7 @@ TEST_F(R162ReaderEdgeTest, R162RdmReaderHisTransBlocksWithMixedActionDates)
 {
 	const uint32_t date = 20240109;
 	const uint32_t prev = 20240108;
-	const uint32_t atime = 10000000u;	// 10:00:00.000
+	const uint32_t atime = 100000000u;	// HHMMSSmmm: 10:00:00.000
 
 	// 同一块内第一条的 action_date 与查询日不同，强制 lower_bound 走日期分支
 	std::vector<WTSOrdQueStruct> queues;
@@ -194,7 +191,9 @@ TEST_F(R162ReaderEdgeTest, R162RdmReaderHisTransBlocksWithMixedActionDates)
 	trPair._block = reinterpret_cast<HisTransBlock*>(&trPair._buffer[0]);
 
 	const uint64_t stime = (uint64_t)date * 1000000000ULL + atime;
-	const uint64_t etime = stime;
+	// Historical HFT ranges are end-exclusive; extend by one millisecond so the
+	// records exactly at the start timestamp are included.
+	const uint64_t etime = stime + 1;
 
 	WTSOrdQueSlice* queSlice = reader.readOrdQueSliceByRange("SSE.600000", stime, etime);
 	ASSERT_TRUE(queSlice != NULL);
@@ -221,7 +220,7 @@ TEST_F(R162ReaderEdgeTest, DISABLED_R162RdmReaderHisTransBlocksWithMixedActionDa
 {
 	const uint32_t date = 20240109;
 	const uint32_t prev = 20240108;
-	const uint32_t atime = 10000000u;
+	const uint32_t atime = 100000000u;
 
 	std::vector<WTSOrdQueStruct> queues;
 	queues.push_back(make_ordque(date, prev, atime, 1));
@@ -247,18 +246,19 @@ TEST_F(R162ReaderEdgeTest, DISABLED_R162RdmReaderHisTransBlocksWithMixedActionDa
 	reader.init(NULL, &sink);
 
 	const uint64_t stime = (uint64_t)date * 1000000000ULL + atime;
+	const uint64_t etime = stime + 1;
 
-	WTSOrdQueSlice* queSlice = reader.readOrdQueSliceByRange("SSE.600000", stime, stime);
+	WTSOrdQueSlice* queSlice = reader.readOrdQueSliceByRange("SSE.600000", stime, etime);
 	ASSERT_TRUE(queSlice != NULL);
 	EXPECT_GT(queSlice->size(), 0u);
 	queSlice->release();
 
-	WTSOrdDtlSlice* dtlSlice = reader.readOrdDtlSliceByRange("SSE.600000", stime, stime);
+	WTSOrdDtlSlice* dtlSlice = reader.readOrdDtlSliceByRange("SSE.600000", stime, etime);
 	ASSERT_TRUE(dtlSlice != NULL);
 	EXPECT_GT(dtlSlice->size(), 0u);
 	dtlSlice->release();
 
-	WTSTransSlice* trSlice = reader.readTransSliceByRange("SSE.600000", stime, stime);
+	WTSTransSlice* trSlice = reader.readTransSliceByRange("SSE.600000", stime, etime);
 	ASSERT_TRUE(trSlice != NULL);
 	EXPECT_GT(trSlice->size(), 0u);
 	trSlice->release();

@@ -1,0 +1,46 @@
+diff --git a/tmp/wt-i03-l00-posix/baseline/Share/ModuleHelper.hpp b/src/Share/ModuleHelper.hpp
+index 79c971b3..22e710cb 100644
+--- a/tmp/wt-i03-l00-posix/baseline/Share/ModuleHelper.hpp
++++ b/src/Share/ModuleHelper.hpp
+@@ -48,13 +48,14 @@ static void wt_module_helper_path_anchor() {}
+  */
+ static const std::string& getInstPath()
+ {
+-	static std::string moduleName;
+-	if (moduleName.empty())
+-	{
+-		Dl_info dl_info;
+-		dladdr((void *)wt_module_helper_path_anchor, &dl_info);
+-		moduleName = dl_info.dli_fname;
+-	}
++	// Cache failures as well as successes and let C++ initialize the result
++	// once, so concurrent first callers never write the same string.
++	static const std::string moduleName = []() -> std::string {
++		Dl_info dl_info{};
++		if (dladdr((void *)wt_module_helper_path_anchor, &dl_info) == 0 || dl_info.dli_fname == nullptr)
++			return {};
++		return dl_info.dli_fname;
++	}();
+ 
+ 	return moduleName;
+ }
+@@ -104,14 +105,11 @@ static const std::string& getInstPath()
+ 	}();
+ 	return g_bin_dir.c_str();
+ #else
+-	static std::string g_bin_dir;
+-
+-	if (g_bin_dir.empty())
+-	{
+-		g_bin_dir = getInstPath();
+-		std::size_t nPos = g_bin_dir.find_last_of('/');
+-		g_bin_dir = g_bin_dir.substr(0, nPos + 1);
+-	}
++	static const std::string g_bin_dir = []() -> std::string {
++		const std::string& path = getInstPath();
++		const std::size_t pos = path.find_last_of('/');
++		return pos == std::string::npos ? std::string() : path.substr(0, pos + 1);
++	}();
+ 
+ 	return g_bin_dir.c_str();
+ #endif

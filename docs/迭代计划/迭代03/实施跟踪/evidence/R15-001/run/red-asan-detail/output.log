@@ -1,0 +1,94 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R15CtxTest.order_tags_survive_open_close_and_reverse_without_truncation
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R15CtxTest
+[ RUN      ] R15CtxTest.order_tags_survive_open_close_and_reverse_without_truncation
+=================================================================
+==9655==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x608000001780 at pc 0x0001020bf004 bp 0x00016f366f50 sp 0x00016f366720
+READ of size 43 at 0x608000001780 thread T0
+    #0 0x0001020bf000 in strlen+0x26c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x17000)
+    #1 0x000100bac9b4 in fmt::v11::basic_string_view<char>::basic_string_view(char const*) base.h:543
+    #2 0x000100b93bc8 in fmt::v11::basic_string_view<char>::basic_string_view(char const*) base.h:540
+    #3 0x000100d66a08 in fmt::v11::basic_appender<char> fmt::v11::detail::write<char, fmt::v11::basic_appender<char>>(fmt::v11::basic_appender<char>, char const*) format.h:3437
+    #4 0x000100d574ec in void fmt::v11::detail::default_arg_formatter<char>::operator()<char const*, 0>(char const*) format.h:3476
+    #5 0x000100d567a8 in decltype(fp(0)) fmt::v11::basic_format_arg<fmt::v11::context>::visit<fmt::v11::detail::default_arg_formatter<char>>(fmt::v11::detail::default_arg_formatter<char>&&) const base.h:2531
+    #6 0x000100d567a8 in fmt::v11::detail::format_handler<char>::on_replacement_field(int, char const*) format.h:3610
+    #7 0x000100d567a8 in char const* fmt::v11::detail::parse_replacement_field<char, fmt::v11::detail::format_handler<char>&>(char const*, char const*, fmt::v11::detail::format_handler<char>&) base.h:1595
+    #8 0x000100d567a8 in void fmt::v11::detail::parse_format_string<char, fmt::v11::detail::format_handler<char>>(fmt::v11::basic_string_view<char>, fmt::v11::detail::format_handler<char>&&) base.h:1638
+    #9 0x000100d56188 in fmt::v11::detail::vformat_to(fmt::v11::detail::buffer<char>&, fmt::v11::basic_string_view<char>, fmt::v11::basic_format_args<fmt::v11::context>, fmt::v11::detail::locale_ref) format-inl.h:1457
+    #10 0x000100dbcbdc in fmt::v11::vformat(fmt::v11::basic_string_view<char>, fmt::v11::basic_format_args<fmt::v11::context>) format-inl.h:1446
+    #11 0x000100b73bfc in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> fmt::v11::format<char const*&, char const*, unsigned long long&, double&, unsigned long long&, double&, double&, double&, double&, double&, double&, char const*&, char const*&>(fmt::v11::fstring<char const*&, char const*, unsigned long long&, double&, unsigned long long&, double&, double&, double&, double&, double&, double&, char const*&, char const*&>::t, char const*&, char const*&&, unsigned long long&, double&, unsigned long long&, double&, double&, double&, double&, double&, double&, char const*&, char const*&) format.h:4200
+    #12 0x000100b73bfc in wtp::HftStraBaseCtx::log_close(char const*, bool, unsigned long long, double, unsigned long long, double, double, double, double, double, double, char const*, char const*) HftStraBaseCtx.cpp:983
+    #13 0x000100b677c4 in wtp::HftStraBaseCtx::do_set_position(char const*, double, double, char const*) HftStraBaseCtx.cpp:869
+    #14 0x000100b6546c in wtp::HftStraBaseCtx::on_trade(unsigned int, char const*, bool, double, double) HftStraBaseCtx.cpp:552
+    #15 0x000100c6ab94 in HftStraContext::on_trade(unsigned int, char const*, bool, double, double) HftStraContext.cpp:192
+    #16 0x000100ab2e28 in R15CtxTest_order_tags_survive_open_close_and_reverse_without_truncation_Test::TestBody() r15_hft_stra_context.cpp:597
+    #17 0x000100d3314c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (red-asan-tests:arm64+0x10029f14c)
+    #18 0x000100d33094 in testing::Test::Run()+0xcc (red-asan-tests:arm64+0x10029f094)
+    #19 0x000100d33c74 in testing::TestInfo::Run()+0xd0 (red-asan-tests:arm64+0x10029fc74)
+    #20 0x000100d346f8 in testing::TestSuite::Run()+0x1c4 (red-asan-tests:arm64+0x1002a06f8)
+    #21 0x000100d3fb20 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (red-asan-tests:arm64+0x1002abb20)
+    #22 0x000100d3f4cc in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (red-asan-tests:arm64+0x1002ab4cc)
+    #23 0x000100d3f430 in testing::UnitTest::Run()+0x78 (red-asan-tests:arm64+0x1002ab430)
+    #24 0x000100d207a8 in main+0x40 (red-asan-tests:arm64+0x10028c7a8)
+    #25 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+0x608000001780 is located 0 bytes after 96-byte region [0x608000001720,0x608000001780)
+allocated by thread T0 here:
+    #0 0x00010210d0e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000100c6663c in void* std::__1::__libcpp_operator_new[abi:ne200100]<wtp::HftStraBaseCtx::_DetailInfo>(unsigned long) allocate.h:55
+    #2 0x000100c66590 in wtp::HftStraBaseCtx::_DetailInfo* std::__1::__libcpp_allocate[abi:ne200100]<wtp::HftStraBaseCtx::_DetailInfo>(std::__1::__element_count, unsigned long) allocate.h:91
+    #3 0x000100c6651c in std::__1::allocator<wtp::HftStraBaseCtx::_DetailInfo>::allocate[abi:ne200100](unsigned long) allocator.h:105
+    #4 0x000100c6645c in std::__1::__allocation_result<std::__1::allocator_traits<std::__1::allocator<wtp::HftStraBaseCtx::_DetailInfo>>::pointer> std::__1::__allocate_at_least[abi:ne200100]<std::__1::allocator<wtp::HftStraBaseCtx::_DetailInfo>>(std::__1::allocator<wtp::HftStraBaseCtx::_DetailInfo>&, unsigned long) allocate_at_least.h:41
+    #5 0x000100c66084 in std::__1::__split_buffer<wtp::HftStraBaseCtx::_DetailInfo, std::__1::allocator<wtp::HftStraBaseCtx::_DetailInfo>&>::__split_buffer(unsigned long, unsigned long, std::__1::allocator<wtp::HftStraBaseCtx::_DetailInfo>&) __split_buffer:325
+    #6 0x000100c653c0 in std::__1::__split_buffer<wtp::HftStraBaseCtx::_DetailInfo, std::__1::allocator<wtp::HftStraBaseCtx::_DetailInfo>&>::__split_buffer(unsigned long, unsigned long, std::__1::allocator<wtp::HftStraBaseCtx::_DetailInfo>&) __split_buffer:321
+    #7 0x000100c6426c in wtp::HftStraBaseCtx::_DetailInfo* std::__1::vector<wtp::HftStraBaseCtx::_DetailInfo, std::__1::allocator<wtp::HftStraBaseCtx::_DetailInfo>>::__emplace_back_slow_path<wtp::HftStraBaseCtx::_DetailInfo&>(wtp::HftStraBaseCtx::_DetailInfo&) vector.h:1114
+    #8 0x000100b70584 in wtp::HftStraBaseCtx::_DetailInfo& std::__1::vector<wtp::HftStraBaseCtx::_DetailInfo, std::__1::allocator<wtp::HftStraBaseCtx::_DetailInfo>>::emplace_back<wtp::HftStraBaseCtx::_DetailInfo&>(wtp::HftStraBaseCtx::_DetailInfo&) vector.h:1136
+    #9 0x000100b67ae8 in wtp::HftStraBaseCtx::do_set_position(char const*, double, double, char const*) HftStraBaseCtx.cpp:895
+    #10 0x000100b6546c in wtp::HftStraBaseCtx::on_trade(unsigned int, char const*, bool, double, double) HftStraBaseCtx.cpp:552
+    #11 0x000100c6ab94 in HftStraContext::on_trade(unsigned int, char const*, bool, double, double) HftStraContext.cpp:192
+    #12 0x000100ab2b78 in R15CtxTest_order_tags_survive_open_close_and_reverse_without_truncation_Test::TestBody() r15_hft_stra_context.cpp:595
+    #13 0x000100d3314c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (red-asan-tests:arm64+0x10029f14c)
+    #14 0x000100d33094 in testing::Test::Run()+0xcc (red-asan-tests:arm64+0x10029f094)
+    #15 0x000100d33c74 in testing::TestInfo::Run()+0xd0 (red-asan-tests:arm64+0x10029fc74)
+    #16 0x000100d346f8 in testing::TestSuite::Run()+0x1c4 (red-asan-tests:arm64+0x1002a06f8)
+    #17 0x000100d3fb20 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (red-asan-tests:arm64+0x1002abb20)
+    #18 0x000100d3f4cc in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (red-asan-tests:arm64+0x1002ab4cc)
+    #19 0x000100d3f430 in testing::UnitTest::Run()+0x78 (red-asan-tests:arm64+0x1002ab430)
+    #20 0x000100d207a8 in main+0x40 (red-asan-tests:arm64+0x10028c7a8)
+    #21 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow base.h:543 in fmt::v11::basic_string_view<char>::basic_string_view(char const*)
+Shadow bytes around the buggy address:
+  0x608000001500: fa fa fa fa fd fd fd fd fd fd fd fd fd fd fd fd
+  0x608000001580: fa fa fa fa fd fd fd fd fd fd fd fd fd fd fd fd
+  0x608000001600: fa fa fa fa fd fd fd fd fd fd fd fd fd fd fd fa
+  0x608000001680: fa fa fa fa fd fd fd fd fd fd fd fd fd fd fd fa
+  0x608000001700: fa fa fa fa 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x608000001780:[fa]fa fa fa fd fd fd fd fd fd fd fd fd fd fd fa
+  0x608000001800: fa fa fa fa fd fd fd fd fd fd fd fd fd fd fd fa
+  0x608000001880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x608000001900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x608000001980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x608000001a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==9655==ABORTING

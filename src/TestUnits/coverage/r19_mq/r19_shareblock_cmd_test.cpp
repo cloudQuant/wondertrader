@@ -3,8 +3,7 @@
  * \brief lane R19：ShareBlocks 的命令通道（init_cmder / add_cmd / get_cmd）
  *
  * 覆盖 src/WtShareHelper/ShareBlocks.cpp：
- * - L675-718 init_cmder（建块 L685-691、容量为 0 时 placement-new L697-698、
- *            cmder 落 pid L700-705、下标归一化 L709-715）
+ * - init_cmder（建块、进程间冷启动锁、容量为 0 时 placement-new、cmder 落 pid）
  * - L720-749 add_cmd（未知域 L722-724、pid 不符 L731-737、写入与推进 L743-748）
  * - L751-791 get_cmd（未知域/空块/cmder 拒读 L753-764、冷启动 L767-771、
  *            首次对齐 L772-776、999999 接续 L777-781、追平 L782-784、跨圈取模 L786-790）
@@ -16,6 +15,9 @@
 #include <string>
 #include <vector>
 #include <filesystem>
+#ifndef _WIN32
+#include <sys/wait.h>
+#endif
 
 #include "r19_support.h"
 
@@ -147,7 +149,7 @@ TEST_F(R19TempDir, r19_cmd_cold_start_sentinel_then_delivers_first_command)
 }
 
 // 外来 pid 的命令块：add_cmd 被 pid 闸门拦下（L731-737）
-TEST_F(R19TempDir, r19_cmd_foreign_pid_blocks_add_and_init_normalizes_indexes)
+TEST_F(R19TempDir, r19_cmd_foreign_pid_blocks_add_and_init_preserves_indexes)
 {
 	const std::string domP = r19::domain("d3");
 	const std::string path = file("d3.blk");
@@ -157,7 +159,12 @@ TEST_F(R19TempDir, r19_cmd_foreign_pid_blocks_add_and_init_normalizes_indexes)
 	ASSERT_TRUE(r19::write_raw_shm_block(path, buf.data(), buf.size()));
 
 	ASSERT_TRUE(sb().init_cmder(domP.c_str(), false, path.c_str()));
-	// L709-715：5 % 128 == 5，readable 5 不大于 writable 5 → 都不动
+	BoostMappingFile inspect;
+	ASSERT_TRUE(inspect.map(path.c_str()));
+	const CmdBlock* block = static_cast<const CmdBlock*>(inspect.addr());
+	ASSERT_NE(nullptr, block);
+	EXPECT_EQ(5u, block->_writable);
+	EXPECT_EQ(5u, block->_readable);
 
 	// 不是本机 pid → 拒写
 	EXPECT_FALSE(sb().add_cmd(domP.c_str(), "nope"));
@@ -170,7 +177,7 @@ TEST_F(R19TempDir, r19_cmd_foreign_pid_blocks_add_and_init_normalizes_indexes)
 	EXPECT_EQ(5u, idx);
 }
 
-// writable 已经跨圈：init_cmder 把下标拉回「readable 之后」，读取按 capacity 取模
+// 跨圈的共享序号在 attach 后保持单调；物理槽位仍按 capacity 取模
 TEST_F(R19TempDir, r19_cmd_wrapped_block_reads_by_capacity_modulo)
 {
 	const std::string domW = r19::domain("d4");
@@ -181,7 +188,13 @@ TEST_F(R19TempDir, r19_cmd_wrapped_block_reads_by_capacity_modulo)
 	ASSERT_TRUE(r19::write_raw_shm_block(path, buf.data(), buf.size()));
 
 	ASSERT_TRUE(sb().init_cmder(domW.c_str(), false, path.c_str()));
-	// L709：130 % 128 = 2；L710-714：readable 3 > writable 2 → writable 补回 128 = 130
+	// Attach 不得把共享单调序号 130/3 改写为槽位下标 2/3。
+	BoostMappingFile inspect;
+	ASSERT_TRUE(inspect.map(path.c_str()));
+	CmdBlock* block = static_cast<CmdBlock*>(inspect.addr());
+	ASSERT_NE(nullptr, block);
+	EXPECT_EQ(130u, block->_writable);
+	EXPECT_EQ(3u, block->_readable);
 
 	uint32_t idx = 1u;
 	EXPECT_STREQ("wrapped", sb().get_cmd(domW.c_str(), idx));
@@ -197,38 +210,213 @@ TEST_F(R19TempDir, r19_cmd_wrapped_block_reads_by_capacity_modulo)
 	EXPECT_STREQ("", sb().get_cmd(domW.c_str(), idx));
 	EXPECT_EQ(130u, idx);
 
-	// 换个名字以 cmder 身份接管同一份文件：L700-705 会把 pid 改成自己，
-	// 更关键的是 L709-714 会对共享块里的下标「再归一化」一次
+	// 换个名字以 cmder 身份 attach 同一份活动队列。
 	const std::string domW2 = r19::domain("d4b");
 	ASSERT_TRUE(sb().init_cmder(domW2.c_str(), true, path.c_str()));
-	// 此刻文件里 _writable 由 131 被改成 131 % 128 = 3，_readable 由 130 改成 2；
-	// add_cmd 再写一次，_readable 直接落到 3（缺陷 BUG-R19-007）
+	EXPECT_EQ(131u, block->_writable);
+	EXPECT_EQ(130u, block->_readable);
 	EXPECT_TRUE(sb().add_cmd(domW2.c_str(), "mine"));
+	EXPECT_EQ(132u, block->_writable);
+	EXPECT_EQ(131u, block->_readable);
 
 	uint32_t idx2 = 130u;
-	EXPECT_STREQ("", sb().get_cmd(domW.c_str(), idx2))
-		<< "readable 被第二个映射改小之后，老消费者的 lastIdx 再也追不上";
-	EXPECT_EQ(130u, idx2);
-
-	// 把 lastIdx 拨回 2 反而能读到刚落在槽位 3 的命令，证明共享下标已被重置
-	idx2 = 2u;
-	EXPECT_STREQ("mine", sb().get_cmd(domW.c_str(), idx2));
-	EXPECT_EQ(3u, idx2);
+	EXPECT_STREQ("mine", sb().get_cmd(domW.c_str(), idx2))
+		<< "旧消费者应按单调序号读到 attach 后发布的命令";
+	EXPECT_EQ(131u, idx2);
+	EXPECT_STREQ("", sb().get_cmd(domW.c_str(), idx2));
+	EXPECT_EQ(131u, idx2);
 }
 
-/**
- * \DISABLED 触发条件（本轮刻意不跑，会写坏映射块/越界）：
- * add_cmd（ShareBlocks.cpp L746）用的是不受限的 strcpy，把命令拷进
- * CmdInfo::_command（char[64]，ShareBlocks.h L84）。
- * 传入长度 >= 64 字节的命令就会连续越过 _state 与下一条命令的槽位；
- * 若写入的正是最后一个槽（idx 127），还会越过映射文件尾 36 字节 → SIGSEGV。
- * 下面这条用例就是把长度 100 的命令喂进去，属于未定义行为，只能留在源码评审里。
- */
-TEST_F(R19TempDir, DISABLED_r19_cmd_longer_than_64_bytes_writes_past_the_block)
+// 两个独立进程同时冷启动同一文件时，初始化锁只允许一个进程创建/初始化块。
+#ifndef _WIN32
+TEST_F(R19TempDir, r19_cmd_concurrent_cold_initialization_is_serialized)
+{
+	const std::string readerOne = r19::domain("d6_reader_one");
+	const std::string readerTwo = r19::domain("d6_reader_two");
+	const std::string path = file("d6_cold.blk");
+	int gate[2] = { -1, -1 };
+	ASSERT_EQ(0, ::pipe(gate));
+
+	auto initialize_after_gate = [&](const std::string& domain) {
+		::close(gate[1]);
+		char start = 0;
+		if (::read(gate[0], &start, 1) != 1)
+			::_exit(2);
+		::close(gate[0]);
+		if (!sb().init_cmder(domain.c_str(), false, path.c_str()))
+			::_exit(3);
+		BoostMappingFile mapped;
+		if (!mapped.map(path.c_str()) || mapped.size() < sizeof(CmdBlock))
+			::_exit(4);
+		const CmdBlock* block = static_cast<const CmdBlock*>(mapped.addr());
+		if (block->_capacity != MAX_KEY_CNT || block->_writable != 0 || block->_readable != UINT32_MAX)
+			::_exit(5);
+		::_exit(0);
+	};
+
+	const pid_t first = ::fork();
+	if (first == 0)
+		initialize_after_gate(readerOne);
+	if (first < 0)
+	{
+		::close(gate[0]);
+		::close(gate[1]);
+		FAIL() << "fork for first initializer failed";
+	}
+
+	const pid_t second = ::fork();
+	if (second == 0)
+		initialize_after_gate(readerTwo);
+	if (second < 0)
+	{
+		::close(gate[0]);
+		const char start = 'x';
+		(void)::write(gate[1], &start, 1);
+		::close(gate[1]);
+		int status = 0;
+		(void)::waitpid(first, &status, 0);
+		FAIL() << "fork for second initializer failed";
+	}
+
+	::close(gate[0]);
+	const char starts[2] = { 'x', 'y' };
+	const ssize_t started = ::write(gate[1], starts, sizeof(starts));
+	::close(gate[1]);
+	int firstStatus = 0;
+	int secondStatus = 0;
+	ASSERT_EQ(first, ::waitpid(first, &firstStatus, 0));
+	ASSERT_EQ(second, ::waitpid(second, &secondStatus, 0));
+	ASSERT_EQ(static_cast<ssize_t>(sizeof(starts)), started);
+	ASSERT_TRUE(WIFEXITED(firstStatus));
+	ASSERT_TRUE(WIFEXITED(secondStatus));
+	EXPECT_EQ(0, WEXITSTATUS(firstStatus));
+	EXPECT_EQ(0, WEXITSTATUS(secondStatus));
+
+	BoostMappingFile inspect;
+	ASSERT_TRUE(inspect.map(path.c_str()));
+	const CmdBlock* block = static_cast<const CmdBlock*>(inspect.addr());
+	ASSERT_NE(nullptr, block);
+	EXPECT_EQ(MAX_KEY_CNT, block->_capacity);
+	EXPECT_EQ(0u, block->_writable);
+	EXPECT_EQ(UINT32_MAX, block->_readable);
+}
+
+// 新 producer 在独立进程 attach 并接管后，旧 consumer 的单调游标仍能读取下一条命令。
+TEST_F(R19TempDir, r19_cmd_cross_process_producer_takeover_preserves_consumer_cursor)
+{
+	const std::string oldProducer = r19::domain("d6_old_producer");
+	const std::string consumer = r19::domain("d6_consumer");
+	const std::string path = file("d6.blk");
+	std::vector<char> buf = craft_cmd_block(130u, 131u, r19::process_id(), 2, "beforeAttach");
+	ASSERT_TRUE(r19::write_raw_shm_block(path, buf.data(), buf.size()));
+	ASSERT_TRUE(sb().init_cmder(oldProducer.c_str(), true, path.c_str()));
+	ASSERT_TRUE(sb().init_cmder(consumer.c_str(), false, path.c_str()));
+
+	uint32_t lastIdx = 129u;
+	EXPECT_STREQ("beforeAttach", sb().get_cmd(consumer.c_str(), lastIdx));
+	ASSERT_EQ(130u, lastIdx);
+
+	const pid_t child = ::fork();
+	ASSERT_GE(child, 0);
+	if (child == 0)
+	{
+		const std::string newProducer = r19::domain("d6_new_producer");
+		if (!sb().init_cmder(newProducer.c_str(), true, path.c_str()))
+			::_exit(2);
+		if (!sb().add_cmd(newProducer.c_str(), "afterAttach"))
+			::_exit(3);
+		::_exit(0);
+	}
+
+	int childStatus = 0;
+	ASSERT_EQ(child, ::waitpid(child, &childStatus, 0));
+	ASSERT_TRUE(WIFEXITED(childStatus));
+	ASSERT_EQ(0, WEXITSTATUS(childStatus));
+
+	// The child owns the producer PID now; the prior producer is fenced out.
+	EXPECT_FALSE(sb().add_cmd(oldProducer.c_str(), "staleProducer"));
+	EXPECT_STREQ("afterAttach", sb().get_cmd(consumer.c_str(), lastIdx));
+	EXPECT_EQ(131u, lastIdx);
+
+	BoostMappingFile inspect;
+	ASSERT_TRUE(inspect.map(path.c_str()));
+	const CmdBlock* block = static_cast<const CmdBlock*>(inspect.addr());
+	ASSERT_NE(nullptr, block);
+	EXPECT_EQ(132u, block->_writable);
+	EXPECT_EQ(131u, block->_readable);
+}
+#else
+TEST_F(R19TempDir, r19_cmd_concurrent_cold_initialization_is_serialized)
+{
+	GTEST_SKIP() << "fork-based independent-process regression is unavailable on Windows";
+}
+
+TEST_F(R19TempDir, r19_cmd_cross_process_producer_takeover_preserves_consumer_cursor)
+{
+	GTEST_SKIP() << "fork-based independent-process regression is unavailable on Windows";
+}
+#endif
+
+// 命令字段是 char[64]，含 NUL 后最多存 63 字节。拒绝非法输入时，
+// readable/writable 及目标和相邻槽都必须保持不变。
+TEST_F(R19TempDir, r19_cmd_capacity_boundaries_reject_without_cursor_or_neighbor_mutation)
 {
 	const std::string domC = r19::domain("d5");
+	const std::string domK = r19::domain("d5_reader");
 	const std::string path = file("d5.blk");
 	ASSERT_TRUE(sb().init_cmder(domC.c_str(), true, path.c_str()));
-	const std::string tooLong(100, 'A');
-	EXPECT_TRUE(sb().add_cmd(domC.c_str(), tooLong.c_str()));
+	ASSERT_TRUE(sb().init_cmder(domK.c_str(), false, path.c_str()));
+
+	uint32_t lastIdx = UINT32_MAX;
+	EXPECT_STREQ("", sb().get_cmd(domK.c_str(), lastIdx));
+	EXPECT_EQ(999999u, lastIdx) << "consumer cold-start sentinel follows the existing get_cmd contract";
+
+	BoostMappingFile inspect;
+	ASSERT_TRUE(inspect.map(path.c_str()));
+	CmdBlock* block = static_cast<CmdBlock*>(inspect.addr());
+	ASSERT_NE(nullptr, block);
+	ASSERT_EQ(0u, block->_writable);
+	ASSERT_EQ(UINT32_MAX, block->_readable);
+
+	block->_commands[0]._state = 0xA1B2C3D4u;
+	std::strcpy(block->_commands[0]._command, "target-before");
+	block->_commands[1]._state = 0x11223344u;
+	std::strcpy(block->_commands[1]._command, "neighbor-before");
+
+	auto expectUnchanged = [&]() {
+		EXPECT_EQ(0u, block->_writable);
+		EXPECT_EQ(UINT32_MAX, block->_readable);
+		EXPECT_EQ(0xA1B2C3D4u, block->_commands[0]._state);
+		EXPECT_STREQ("target-before", block->_commands[0]._command);
+		EXPECT_EQ(0x11223344u, block->_commands[1]._state);
+		EXPECT_STREQ("neighbor-before", block->_commands[1]._command);
+	};
+
+	EXPECT_FALSE(sb().add_cmd(nullptr, "null-name"));
+	expectUnchanged();
+	EXPECT_FALSE(sb().add_cmd(domC.c_str(), nullptr));
+	expectUnchanged();
+
+	const std::string tooLong64(static_cast<std::size_t>(MAX_CMD_SIZE), 'B');
+	EXPECT_FALSE(sb().add_cmd(domC.c_str(), tooLong64.c_str()));
+	expectUnchanged();
+	const std::string tooLong65(static_cast<std::size_t>(MAX_CMD_SIZE + 1), 'C');
+	EXPECT_FALSE(sb().add_cmd(domC.c_str(), tooLong65.c_str()));
+	expectUnchanged();
+	EXPECT_STREQ("", sb().get_cmd(domK.c_str(), lastIdx));
+	EXPECT_EQ(999999u, lastIdx) << "rejected commands must not become readable";
+
+	const std::string maxValid(static_cast<std::size_t>(MAX_CMD_SIZE - 1), 'A');
+	ASSERT_TRUE(sb().add_cmd(domC.c_str(), maxValid.c_str()));
+	EXPECT_EQ(1u, block->_writable);
+	EXPECT_EQ(0u, block->_readable);
+	EXPECT_EQ(0u, block->_commands[0]._state);
+	EXPECT_STREQ(maxValid.c_str(), block->_commands[0]._command);
+	EXPECT_EQ('\0', block->_commands[0]._command[MAX_CMD_SIZE - 1]);
+	EXPECT_EQ(0x11223344u, block->_commands[1]._state);
+	EXPECT_STREQ("neighbor-before", block->_commands[1]._command);
+	EXPECT_STREQ(maxValid.c_str(), sb().get_cmd(domK.c_str(), lastIdx));
+	EXPECT_EQ(0u, lastIdx);
+	EXPECT_STREQ("", sb().get_cmd(domK.c_str(), lastIdx));
+	EXPECT_EQ(0u, lastIdx);
 }

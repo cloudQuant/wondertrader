@@ -81,14 +81,8 @@ TEST_F(R145DtCoreEdgesTest, DataManagerBaseCasterDefaultOverloadsAreNoops)
 	trans->release();
 }
 
-/*
- * ShmCaster.cpp:35-51 —— active=true 且 path 为空串：
- *   L40 create_or_open_file("") 失败（或直接抛），L41 truncate_file 无有效句柄，
- *   L47 BoostMappingFile::map("") 抛出；init 没有 try/catch，也没有把失败转成 false。
- * 该路径不会创建/截断任何文件，也不会建立映射，因此不违反「不建 shm 映射」约束。
- * 与 R68 的 “path 是目录” 同一缺陷，不重复登记（见 bugs/R68.md BUG-R68-002）。
- */
-TEST_F(R145DtCoreEdgesTest, ShmCasterEmptyPathThrowsAndKeepsUninitializedGuards)
+/* An active caster rejects an empty path before opening or mapping a file. */
+TEST_F(R145DtCoreEdgesTest, ShmCasterEmptyPathReturnsFalseAndKeepsUninitializedGuards)
 {
 	const fs::path cfgFile = _dir / "shm_empty_path.json";
 	r145::write_file(cfgFile, R"JSON({"active": true, "path": ""})JSON");
@@ -97,7 +91,7 @@ TEST_F(R145DtCoreEdgesTest, ShmCasterEmptyPathThrowsAndKeepsUninitializedGuards)
 	ASSERT_NE(cfg, nullptr);
 
 	ShmCaster caster;
-	EXPECT_THROW(caster.init(cfg), std::exception);
+	EXPECT_FALSE(caster.init(cfg));
 	cfg->release();
 
 	// 失败后 _queue==NULL、_inited==false：四个 broadcast 都必须在解引用队列前返回

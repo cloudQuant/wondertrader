@@ -16,6 +16,7 @@
 #include "../Includes/WTSVersion.h"
 
 #include <cstring>
+#include <exception>
 
 namespace
 {
@@ -50,6 +51,39 @@ namespace
 		case WT_EXEC_UNIT_STATUS_RETRY_BLOCKED_V2: return "retry is blocked because plugin side effects cannot be ruled out";
 		case WT_EXEC_UNIT_STATUS_INTERNAL_ERROR_V2: return "internal error querying execution-unit status";
 		default: return "";
+		}
+	}
+
+	template <typename RegisterFunction>
+	bool register_factories_from_c_api(const char* manager, const char* folder, RegisterFunction&& registerFunction) noexcept
+	{
+		try
+		{
+			return registerFunction(folder);
+		}
+		catch (const std::exception& e)
+		{
+			try
+			{
+				WTSLogger::error("Failed to load {} strategy factories from {}: {}", manager,
+					folder == nullptr ? "(null)" : folder, e.what());
+			}
+			catch (...)
+			{
+			}
+			return false;
+		}
+		catch (...)
+		{
+			try
+			{
+				WTSLogger::error("Failed to load {} strategy factories from {}: unknown plugin exception", manager,
+					folder == nullptr ? "(null)" : folder);
+			}
+			catch (...)
+			{
+			}
+			return false;
 		}
 	}
 }
@@ -459,7 +493,8 @@ void write_log(WtUInt32 level, const char* message, const char* catName)
  */
 bool reg_cta_factories(const char* factFolder)
 {
-	return getRunner().addCtaFactories(factFolder);
+	return register_factories_from_c_api("CTA", factFolder,
+		[](const char* folder) { return getRunner().addCtaFactories(folder); });
 }
 
 /**
@@ -471,7 +506,8 @@ bool reg_cta_factories(const char* factFolder)
  */
 bool reg_sel_factories(const char* factFolder)
 {
-	return getRunner().addSelFactories(factFolder);
+	return register_factories_from_c_api("SEL", factFolder,
+		[](const char* folder) { return getRunner().addSelFactories(folder); });
 }
 
 /**
@@ -483,7 +519,8 @@ bool reg_sel_factories(const char* factFolder)
  */
 bool reg_hft_factories(const char* factFolder)
 {
-	return getRunner().addHftFactories(factFolder);
+	return register_factories_from_c_api("HFT", factFolder,
+		[](const char* folder) { return getRunner().addHftFactories(folder); });
 }
 
 /**

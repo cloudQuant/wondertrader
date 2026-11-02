@@ -105,7 +105,8 @@ struct UftTickerShutdownTestAccess
 			return false;
 
 		std::lock_guard<std::mutex> callback_lock(ticker->_callback_mtx);
-		ticker->_time = UINT_MAX;
+		// Exercise a real lunch-break timestamp through isInTradingTime().
+		ticker->_time = 120000000;
 		return true;
 	}
 
@@ -599,7 +600,8 @@ TEST(UftEngineLifecycle, startupAndSessionCallbacksCanReenterEngineAndStopWakesW
 	StrictSessionBaseDataMgr bd;
 	WTSSessionInfo* session = WTSSessionInfo::create("UFT_ENGINE_REENTRANT_CALLBACKS", "engine reentry", 0);
 	ASSERT_NE(nullptr, session);
-	session->addTradingSection(0, 2400);
+	session->addTradingSection(900, 1130);
+	session->addTradingSection(1300, 1500);
 	bd._session = session;
 
 	ReentrantCallbackGate gate;

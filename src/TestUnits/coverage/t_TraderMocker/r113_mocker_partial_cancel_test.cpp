@@ -12,6 +12,27 @@
 
 using R113MockerPartialCancel = r113m::MockerTest;
 
+namespace
+{
+	class ReleasePoisonEntrustAction final : public WTSEntrustAction
+	{
+	public:
+		void release() override
+		{
+			const uint32_t refs = m_uRefs.fetch_sub(1, std::memory_order_acq_rel);
+			if (refs == 1)
+			{
+				// Keep this test-owned object alive after its final logical release,
+				// but make any later order-ID read observable to the test.
+				setOrderID("released-action-poison");
+				final_release_seen.store(true, std::memory_order_release);
+			}
+		}
+
+		std::atomic<bool> final_release_seen{ false };
+	};
+}
+
 /*
  * 生产: TraderMocker.cpp:397-434（部分成交状态）
  *       750-828（撤单查找、开仓直接撤销、状态与回报）
@@ -38,20 +59,32 @@ TEST_F(R113MockerPartialCancel, R113Mocker_PartialFillThenCancelPushesCanceled)
 	EXPECT_DOUBLE_EQ(1.0, sink_.total_trade_volume());
 	EXPECT_FALSE(sink_.has_state((int)WOS_AllTraded));
 
-	/* 撤掉剩余 9 手：orderAction 在 io 线程按 orderID 找回 _awaits 条目。
-	 * 注意 action 的引用要保留到撤单回报之后：产品代码在 lambda 里
-	 * `action->release()` 之后仍调用 `action->getOrderID()`（BUG-R113-003），
-	 * 提前释放会让该行变成 use-after-free。 */
+	/* 先阻塞 io 线程上的 query 回调，使 orderAction 入队后能确定调用方
+	 * 先释放引用，再让撤单闭包消费它持有的最后一个引用。 */
+	sink_.block_next_orders_query();
+	struct QueryUnblocker
+	{
+		r113m::Sink& sink;
+		~QueryUnblocker() { sink.unblock_orders_query(); }
+	} query_unblocker{ sink_ };
+	const uint32_t q_before = sink_.n_orders_query();
+	ASSERT_EQ(0, api_.queryOrders());
+	ASSERT_TRUE(sink_.wait_orders_query_blocked()) << "查询回调未能阻塞 io 线程";
+
 	WTSEntrustAction* action = WTSEntrustAction::create();
 	action->setOrderID(order_id.c_str());
 	action->setEntrustID("r113-entrust");
 	ASSERT_EQ(0, api_.orderAction(action));
+	/* query callback 仍阻塞 io worker，因此此时闭包持有 action 最后引用。 */
+	action->release();
+	sink_.unblock_orders_query();
+	EXPECT_TRUE(r113m::wait_until([this, q_before]() {
+		return sink_.n_orders_query() >= q_before + 1u;
+	}));
 
 	ASSERT_TRUE(r113m::wait_until([this]() {
 		return sink_.has_canceled_message("撤单成功");
 	})) << "撤单未推送 WOS_Canceled/撤单成功";
-
-	action->release();
 
 	/* 最终订单状态与成交查询都必须看到 Canceled */
 	const uint32_t q = sink_.n_orders_query();
@@ -64,6 +97,76 @@ TEST_F(R113MockerPartialCancel, R113Mocker_PartialFillThenCancelPushesCanceled)
 		EXPECT_EQ("撤单成功", recs.back().state_msg);
 		EXPECT_DOUBLE_EQ(9.0, recs.back().vol_left);
 	}
+}
+
+TEST_F(R113MockerPartialCancel, R113Mocker_CancelCopiesOrderIdBeforeFinalActionRelease)
+{
+	const uint16_t port = r103m::pick_free_udp_port();
+	ASSERT_NE(0, port);
+	set_udp_port((int)port);
+
+	init_api(9815, (int)port);
+	connect_api();
+	login_api();
+
+	insert_order(10.0, 7000.0, WDT_LONG, WOT_OPEN);
+	const std::string order_id = sink_.last_order_id();
+	ASSERT_FALSE(order_id.empty());
+	send_tick(7000.0, 7000.0, 1.0, 7000.0, 5.0);
+	ASSERT_TRUE(r113m::wait_until([this]() { return sink_.has_part_traded_left(9.0); }));
+
+	// Hold the single io worker until after the caller has released its reference.
+	sink_.block_next_orders_query();
+	struct QueryUnblocker
+	{
+		r113m::Sink& sink;
+		~QueryUnblocker() { sink.unblock_orders_query(); }
+	} query_unblocker{ sink_ };
+	const uint32_t queries_before = sink_.n_orders_query();
+	ASSERT_EQ(0, api_.queryOrders());
+	ASSERT_TRUE(sink_.wait_orders_query_blocked());
+
+	auto* action = new ReleasePoisonEntrustAction();
+	action->setOrderID(order_id.c_str());
+	action->setEntrustID("r113-poison-entrust");
+	const uint32_t pushes_before = sink_.n_push_order();
+	ASSERT_EQ(0, api_.orderAction(action));
+	action->release(); // the queued handler now owns the only logical reference
+
+	// Enqueue a second query behind the action. Its completion proves the handler
+	// returned after the final release, so the test can safely destroy its object.
+	ASSERT_EQ(0, api_.queryOrders());
+	sink_.unblock_orders_query();
+	ASSERT_TRUE(r113m::wait_until([this, queries_before]() {
+		return sink_.n_orders_query() >= queries_before + 2u;
+	}));
+	EXPECT_TRUE(action->final_release_seen.load(std::memory_order_acquire));
+	EXPECT_STREQ("released-action-poison", action->getOrderID());
+	delete action;
+
+	const auto pushes = sink_.orders();
+	uint32_t canceled_pushes = 0;
+	for (const auto& push : pushes)
+	{
+		if (push.id == order_id && push.state == (int)WOS_Canceled
+			&& push.state_msg == "撤单成功")
+			canceled_pushes++;
+	}
+	EXPECT_EQ(pushes_before + 1u, sink_.n_push_order());
+	EXPECT_EQ(1u, canceled_pushes);
+
+	// A second cancel must find the original ID removed from _awaits. If code
+	// read the poisoned ID after final release, the original await would remain.
+	const uint32_t errors_before = sink_.n_error();
+	WTSEntrustAction* duplicate = WTSEntrustAction::createCancelAction(
+		"r113-duplicate", order_id.c_str());
+	ASSERT_NE(nullptr, duplicate);
+	ASSERT_EQ(0, api_.orderAction(duplicate));
+	duplicate->release();
+	ASSERT_TRUE(r113m::wait_until([this, errors_before]() {
+		return sink_.n_error() >= errors_before + 1u;
+	}));
+	EXPECT_EQ(pushes_before + 1u, sink_.n_push_order());
 }
 
 TEST_F(R113MockerPartialCancel, TradedVolumeAccumulatesAcrossPushAndQuerySnapshots)

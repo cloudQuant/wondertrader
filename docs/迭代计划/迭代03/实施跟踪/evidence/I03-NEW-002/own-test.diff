@@ -1,0 +1,417 @@
+--- /private/tmp/wt-i03-new002/baseline/r15_hft_stra_context.cpp	2026-11-01 22:49:58
++++ src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp	2026-11-01 23:00:45
+@@ -19,8 +19,10 @@
+ #include <Includes/WTSDataDef.hpp>
+ #include <WtCore/HftStraBaseCtx.h>
+ #include <WtCore/HftStraContext.h>
++#include <WtCore/TraderAdapter.h>
+ #include <WtCore/WtDtMgr.h>
+ #include <WtCore/WtHftEngine.h>
++#include "../p11_wtcore_traderadapter/p11_trader_fixture.h"
+ 
+ using namespace q01sel;
+ 
+@@ -55,6 +57,7 @@
+     using HftStraBaseCtx::setUserTag;
+     using HftStraBaseCtx::getOrderTag;
+     using HftStraBaseCtx::eraseOrderTag;
++    using HftStraBaseCtx::get_inner_code;
+ 
+     void sub_tick_direct(const char* stdCode) { _tick_subs.insert(stdCode); }
+     // The fixture has no trader; keep position-detail and close logs active
+@@ -62,6 +65,110 @@
+     void disable_signal_log_for_test() { _sig_logs.reset(); }
+ };
+ 
++class R15UnboundTraderCtx : public R15HftCtx
++{
++public:
++    explicit R15UnboundTraderCtx(WtHftEngine* engine)
++        : R15HftCtx(engine, "c15_unbound", false, 0) {}
++
++    bool has_trader() const { return _trader != nullptr; }
++    void seed_code_mapping() { _code_map["existing"] = "owner"; }
++    bool original_code_mapping_unchanged() const
++    {
++        const auto it = _code_map.find("existing");
++        return _code_map.size() == 1 && it != _code_map.end() && it->second == "owner";
++    }
++    void force_unbound_for_test() { _trader = nullptr; }
++    void stra_log_error(const char* message) override
++    {
++        ++errors;
++        last_error = message ? message : "";
++        if (bind_on_error)
++            setTrader(bind_on_error);
++        if (reenter && !inside_error)
++        {
++            inside_error = true;
++            nested_cancel = stra_cancel(4321);
++            inside_error = false;
++        }
++    }
++    bool reenter = false;
++    bool inside_error = false;
++    bool nested_cancel = true;
++    TraderAdapter* bind_on_error = nullptr;
++    unsigned errors = 0;
++    std::string last_error;
++};
++
++class R15RebindingHotMgr : public HotMgr
++{
++public:
++    R15UnboundTraderCtx* ctx = nullptr;
++    TraderAdapter* replacement = nullptr;
++    TraderAdapter* restore = nullptr;
++    unsigned calls = 0;
++    bool rebind_in_custom = false;
++    unsigned rebind_on_call = 1;
++
++    const char* getRuleTag(const char*) override
++    {
++        ++calls;
++        if (rebind_in_custom)
++            return "HOT";
++        if (rebind_on_call != 0 && calls != rebind_on_call)
++            return "";
++        ctx->setTrader(replacement);
++        if (restore)
++            ctx->setTrader(restore);
++        return "";
++    }
++
++    const char* getCustomRawCode(const char*, const char*, uint32_t) override
++    {
++        ++calls;
++        ctx->setTrader(replacement);
++        return "ag2512";
++    }
++};
++
++class R15RebindingDataMgr : public BaseDataMgr
++{
++public:
++    BaseDataMgr* delegate = nullptr;
++    R15UnboundTraderCtx* ctx = nullptr;
++    bool rebind_on_commodity = false;
++    unsigned calls = 0;
++
++    WTSContractInfo* getContract(const char* code, const char* exchg = "", uint32_t date = 0) override
++    {
++        WTSContractInfo* result = delegate->getContract(code, exchg, date);
++        ++calls;
++        ctx->setTrader(nullptr);
++        return result;
++    }
++
++    WTSCommodityInfo* getCommodity(const char* exchg, const char* product) override
++    {
++        WTSCommodityInfo* result = delegate->getCommodity(exchg, product);
++        if (rebind_on_commodity)
++        {
++            ++calls;
++            ctx->setTrader(nullptr);
++        }
++        return result;
++    }
++};
++
++class R15StableHotMgr : public HotMgr
++{
++public:
++    unsigned rule_calls = 0;
++    unsigned custom_calls = 0;
++    const char* getRuleTag(const char*) override { ++rule_calls; return "HOT"; }
++    const char* getCustomRawCode(const char*, const char*, uint32_t) override
++    { ++custom_calls; return "ag2512"; }
++};
++
+ /** 策略替身：逐回调计数 + 记录关键入参 */
+ class R15SpyStra : public HftStrategy
+ {
+@@ -602,5 +709,284 @@
+         const std::string closes = slurp(outDir(name.c_str()) + "/closes.csv");
+         EXPECT_NE(closes.find("," + openTag + "," + reverseTag + "\n"), std::string::npos);
+         EXPECT_NE(closes.find("," + reverseTag + "," + finalTag + "\n"), std::string::npos);
++    }
++}
++
++TEST_F(R15CtxTest, unbound_trader_actions_fail_before_engine_or_mapping_side_effects)
++{
++    R15UnboundTraderCtx ctx(nullptr);
++    // Also gives the original implementation a deterministic null red control.
++    ctx.force_unbound_for_test();
++    ctx.seed_code_mapping();
++    ctx.setUserTag(77, "existing-tag");
++    EXPECT_FALSE(ctx.stra_cancel(77));
++    EXPECT_TRUE(ctx.stra_cancel(kAg, true, 1).empty());
++    EXPECT_TRUE(ctx.stra_buy(kAg, 1, 1, "tag").empty());
++    EXPECT_TRUE(ctx.stra_sell(kAg, 1, 1, "tag").empty());
++    EXPECT_EQ(ctx.stra_enter_long(kAg, 1, 1, "tag"), 0u);
++    EXPECT_EQ(ctx.stra_exit_long(kAg, 1, 1, "tag"), 0u);
++    EXPECT_EQ(ctx.stra_enter_short(kAg, 1, 1, "tag"), 0u);
++    EXPECT_EQ(ctx.stra_exit_short(kAg, 1, 1, "tag"), 0u);
++    EXPECT_EQ(ctx.errors, 8u);
++    EXPECT_NE(ctx.last_error.find("trader adapter is not bound"), std::string::npos);
++    EXPECT_TRUE(ctx.original_code_mapping_unchanged());
++    EXPECT_STREQ(ctx.getOrderTag(77), "existing-tag");
++}
++
++TEST_F(R15CtxTest, fresh_context_starts_without_a_trader)
++{
++    R15UnboundTraderCtx ctx(nullptr);
++    EXPECT_FALSE(ctx.has_trader());
++}
++
++TEST_F(R15CtxTest, unbound_trader_reentrant_diagnostic_cannot_submit_actions)
++{
++    R15UnboundTraderCtx ctx(nullptr);
++    ctx.force_unbound_for_test();
++    ctx.reenter = true;
++    EXPECT_TRUE(ctx.stra_buy(kAg, 1, 1, "tag").empty());
++    EXPECT_FALSE(ctx.nested_cancel);
++    EXPECT_EQ(ctx.errors, 2u);
++    EXPECT_FALSE(ctx.has_trader());
++}
++
++TEST_F(R15CtxTest, bound_trader_still_handles_queries_and_unknown_cancel)
++{
++    TraderAdapter trader;
++    R15UnboundTraderCtx ctx(&_eng);
++    ctx.setTrader(&trader);
++    EXPECT_TRUE(ctx.has_trader());
++    EXPECT_DOUBLE_EQ(ctx.stra_get_undone(kAg), 0.0);
++    EXPECT_FALSE(ctx.stra_cancel(4321));
++    EXPECT_EQ(ctx.errors, 0u);
++}
++
++TEST_F(R15CtxTest, bound_trader_sends_order_only_to_fake_api)
++{
++    const std::string id = "r15bind" + std::to_string(static_cast<long>(::getpid()));
++    const std::filesystem::path output = std::filesystem::path(WtHelper::getBaseDir()) / "traders" / id;
++    {
++        p11fix::FakeTraderApi api;
++        TraderAdapter trader;
++        _ct->setAltCode("ag2512");
++        ASSERT_TRUE(trader.initExt(id.c_str(), &api, &_bdm, nullptr));
++        R15UnboundTraderCtx ctx(&_eng);
++        ctx.setTrader(&trader);
++        const uint32_t order = ctx.stra_enter_long(kAg, 7100.0, 1.0, "tag");
++        EXPECT_NE(order, 0u);
++        EXPECT_NE(order, UINT_MAX);
++        EXPECT_EQ(api.n_insert_, 1u);
++        EXPECT_EQ(api.last_code_, "ag2512");
++        EXPECT_DOUBLE_EQ(api.last_price_, 7100.0);
++        EXPECT_DOUBLE_EQ(api.last_vol_, 1.0);
++        EXPECT_EQ(ctx.errors, 0u);
+     }
++    std::error_code ec;
++    std::filesystem::remove_all(output, ec);
++    EXPECT_FALSE(ec);
++}
++
++TEST_F(R15CtxTest, unbinding_a_previously_bound_trader_rejects_actions)
++{
++    TraderAdapter trader;
++    R15UnboundTraderCtx ctx(&_eng);
++    ctx.setTrader(&trader);
++    ctx.setTrader(nullptr);
++    EXPECT_FALSE(ctx.stra_cancel(4321));
++    EXPECT_EQ(ctx.errors, 1u);
++}
++
++TEST_F(R15CtxTest, reentrant_bind_during_unbound_diagnostic_does_not_submit_outer_order)
++{
++    TraderAdapter trader;
++    R15UnboundTraderCtx ctx(nullptr);
++    ctx.force_unbound_for_test();
++    ctx.bind_on_error = &trader;
++    // A bind from the diagnostic must not resume the already rejected order.
++    EXPECT_TRUE(ctx.stra_buy(kAg, 1, 1, "tag").empty());
++    EXPECT_TRUE(ctx.has_trader());
++    EXPECT_EQ(ctx.errors, 1u);
+ }
++
++TEST_F(R15CtxTest, trader_unbound_during_rule_callback_rejects_outer_order)
++{
++    TraderAdapter trader;
++    R15UnboundTraderCtx ctx(&_eng);
++    R15RebindingHotMgr hot;
++    hot.ctx = &ctx;
++    _eng.attach(&_bdm, &hot, &_dtmgr);
++    ctx.setTrader(&trader);
++    ctx.seed_code_mapping();
++    EXPECT_EQ(ctx.stra_enter_long("SHFE.ag.CUSTOM", 1, 1, "tag"), 0u);
++    EXPECT_EQ(hot.calls, 1u);
++    EXPECT_EQ(ctx.errors, 1u);
++    EXPECT_TRUE(ctx.original_code_mapping_unchanged());
++    _eng.attach(&_bdm, &_hot, &_dtmgr);
++}
++
++TEST_F(R15CtxTest, trader_replaced_during_rule_callback_rejects_outer_order)
++{
++    TraderAdapter trader;
++    TraderAdapter replacement;
++    R15UnboundTraderCtx ctx(&_eng);
++    R15RebindingHotMgr hot;
++    hot.ctx = &ctx;
++    hot.replacement = &replacement;
++    _eng.attach(&_bdm, &hot, &_dtmgr);
++    ctx.setTrader(&trader);
++    ctx.seed_code_mapping();
++    EXPECT_EQ(ctx.stra_enter_long("SHFE.ag.CUSTOM", 1, 1, "tag"), 0u);
++    EXPECT_EQ(hot.calls, 1u);
++    EXPECT_EQ(ctx.errors, 1u);
++    EXPECT_TRUE(ctx.original_code_mapping_unchanged());
++    _eng.attach(&_bdm, &_hot, &_dtmgr);
++}
++
++TEST_F(R15CtxTest, trader_unbound_then_rebound_during_rule_callback_rejects_outer_order)
++{
++    TraderAdapter trader;
++    R15UnboundTraderCtx ctx(&_eng);
++    R15RebindingHotMgr hot;
++    hot.ctx = &ctx;
++    hot.restore = &trader;
++    _eng.attach(&_bdm, &hot, &_dtmgr);
++    ctx.setTrader(&trader);
++    ctx.seed_code_mapping();
++    EXPECT_EQ(ctx.stra_enter_long("SHFE.ag.CUSTOM", 1, 1, "tag"), 0u);
++    EXPECT_EQ(hot.calls, 1u);
++    EXPECT_EQ(ctx.errors, 1u);
++    EXPECT_TRUE(ctx.has_trader());
++    EXPECT_TRUE(ctx.original_code_mapping_unchanged());
++    _eng.attach(&_bdm, &_hot, &_dtmgr);
++}
++
++TEST_F(R15CtxTest, each_entry_and_exit_rejects_reentrant_unbind_from_rule_lookup)
++{
++    TraderAdapter trader;
++    R15UnboundTraderCtx ctx(&_eng);
++    R15RebindingHotMgr hot;
++    hot.ctx = &ctx;
++    hot.rebind_on_call = 0; // Unbind during every call in this multi-action test.
++    _eng.attach(&_bdm, &hot, &_dtmgr);
++    ctx.seed_code_mapping();
++    const char* code = "SHFE.ag.CUSTOM";
++    ctx.setTrader(&trader);
++    EXPECT_TRUE(ctx.stra_buy(code, 1, 1, "tag").empty());
++    ctx.setTrader(&trader);
++    EXPECT_TRUE(ctx.stra_sell(code, 1, 1, "tag").empty());
++    ctx.setTrader(&trader);
++    EXPECT_EQ(ctx.stra_enter_long(code, 1, 1, "tag"), 0u);
++    ctx.setTrader(&trader);
++    EXPECT_EQ(ctx.stra_exit_long(code, 1, 1, "tag"), 0u);
++    ctx.setTrader(&trader);
++    EXPECT_EQ(ctx.stra_enter_short(code, 1, 1, "tag"), 0u);
++    ctx.setTrader(&trader);
++    EXPECT_EQ(ctx.stra_exit_short(code, 1, 1, "tag"), 0u);
++    EXPECT_EQ(hot.calls, 6u);
++    EXPECT_EQ(ctx.errors, 6u);
++    EXPECT_TRUE(ctx.original_code_mapping_unchanged());
++    _eng.attach(&_bdm, &_hot, &_dtmgr);
++}
++
++TEST_F(R15CtxTest, trader_unbound_during_custom_code_lookup_rejects_outer_order)
++{
++    TraderAdapter trader;
++    R15UnboundTraderCtx ctx(&_eng);
++    R15RebindingHotMgr hot;
++    hot.ctx = &ctx;
++    hot.rebind_in_custom = true;
++    _eng.attach(&_bdm, &hot, &_dtmgr);
++    ctx.setTrader(&trader);
++    ctx.seed_code_mapping();
++    EXPECT_EQ(ctx.stra_enter_long("SHFE.ag.CUSTOM", 1, 1, "tag"), 0u);
++    EXPECT_EQ(hot.calls, 2u);
++    EXPECT_EQ(ctx.errors, 1u);
++    EXPECT_TRUE(ctx.original_code_mapping_unchanged());
++    _eng.attach(&_bdm, &_hot, &_dtmgr);
++}
++
++TEST_F(R15CtxTest, trader_unbound_during_contract_lookup_rejects_outer_buy)
++{
++    TraderAdapter trader;
++    R15UnboundTraderCtx ctx(&_eng);
++    R15RebindingDataMgr data;
++    data.delegate = &_bdm;
++    data.ctx = &ctx;
++    _eng.attach(&data, &_hot, &_dtmgr);
++    ctx.setTrader(&trader);
++    ctx.seed_code_mapping();
++    EXPECT_TRUE(ctx.stra_buy(kAg, 1, 1, "tag").empty());
++    EXPECT_EQ(data.calls, 1u);
++    EXPECT_EQ(ctx.errors, 1u);
++    EXPECT_TRUE(ctx.original_code_mapping_unchanged());
++    _eng.attach(&_bdm, &_hot, &_dtmgr);
++}
++
++TEST_F(R15CtxTest, trader_unbound_during_commodity_lookup_rejects_outer_sell)
++{
++    TraderAdapter trader;
++    R15UnboundTraderCtx ctx(&_eng);
++    R15RebindingDataMgr data;
++    data.delegate = &_bdm;
++    data.ctx = &ctx;
++    data.rebind_on_commodity = true;
++    _eng.attach(&data, &_hot, &_dtmgr);
++    ctx.setTrader(&trader);
++    ctx.seed_code_mapping();
++    EXPECT_TRUE(ctx.stra_sell(kAg, 1, 1, "tag").empty());
++    EXPECT_EQ(data.calls, 1u);
++    EXPECT_EQ(ctx.errors, 1u);
++    EXPECT_TRUE(ctx.original_code_mapping_unchanged());
++    _eng.attach(&_bdm, &_hot, &_dtmgr);
++}
++
++TEST_F(R15CtxTest, trader_unbound_during_sell_position_lookup_rejects_outer_sell)
++{
++    TraderAdapter trader;
++    R15UnboundTraderCtx ctx(&_eng);
++    R15RebindingHotMgr hot;
++    hot.ctx = &ctx;
++    hot.rebind_on_call = 2; // First lookup belongs to sell, second to its position query.
++    _comm->setTradingMode(TM_Long);
++    _eng.attach(&_bdm, &hot, &_dtmgr);
++    ctx.setTrader(&trader);
++    ctx.seed_code_mapping();
++    EXPECT_TRUE(ctx.stra_sell("SHFE.ag.CUSTOM", 1, 1, "tag").empty());
++    EXPECT_EQ(hot.calls, 2u);
++    EXPECT_EQ(ctx.errors, 1u);
++    EXPECT_TRUE(ctx.original_code_mapping_unchanged());
++    _comm->setTradingMode(TM_Both);
++    _eng.attach(&_bdm, &_hot, &_dtmgr);
++}
++
++TEST_F(R15CtxTest, bound_long_only_sell_uses_existing_position_semantics)
++{
++    TraderAdapter trader;
++    R15UnboundTraderCtx ctx(&_eng);
++    ctx.setTrader(&trader);
++    _comm->setTradingMode(TM_Long);
++    EXPECT_DOUBLE_EQ(trader.getPosition(kAg, true, 3), 0.0);
++    EXPECT_TRUE(ctx.stra_sell(kAg, 1, 1, "tag").empty());
++    EXPECT_EQ(ctx.errors, 1u);
++    EXPECT_NE(ctx.last_error.find("No enough position"), std::string::npos);
++    _comm->setTradingMode(TM_Both);
++}
++
++TEST_F(R15CtxTest, bound_long_only_sell_keeps_custom_position_mapping)
++{
++    TraderAdapter trader;
++    R15UnboundTraderCtx ctx(&_eng);
++    R15StableHotMgr hot;
++    _comm->setTradingMode(TM_Long);
++    _eng.attach(&_bdm, &hot, &_dtmgr);
++    ctx.setTrader(&trader);
++    EXPECT_DOUBLE_EQ(trader.getPosition("SHFE.ag.2512", true, 3), 0.0);
++    EXPECT_TRUE(ctx.stra_sell("SHFE.ag.CUSTOM", 1, 1, "tag").empty());
++    EXPECT_EQ(hot.rule_calls, 2u);
++    EXPECT_EQ(hot.custom_calls, 1u);
++    EXPECT_EQ(ctx.errors, 1u);
++    EXPECT_NE(ctx.last_error.find("No enough position"), std::string::npos);
++    EXPECT_STREQ(ctx.get_inner_code("SHFE.ag.2512"), "SHFE.ag.CUSTOM");
++    _comm->setTradingMode(TM_Both);
++    _eng.attach(&_bdm, &_hot, &_dtmgr);
++}

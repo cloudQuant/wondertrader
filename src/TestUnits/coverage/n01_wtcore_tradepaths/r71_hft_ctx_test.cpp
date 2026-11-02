@@ -31,6 +31,80 @@ public:
     using HftStraBaseCtx::get_inner_code;
 };
 
+WTSTradeInfo* r71MakeHftTradeReport(WTSContractInfo* contract, const char* tradeId,
+	WTSDirectionType direction, WTSOffsetType offset, double price, double volume)
+{
+	if (contract == NULL)
+		return NULL;
+
+	WTSTradeInfo* trade = WTSTradeInfo::create(contract->getCode(), contract->getExchg());
+	if (trade == NULL)
+		return NULL;
+	trade->setContractInfo(contract);
+	trade->setTradeID(tradeId);
+	trade->setRefOrder(tradeId);
+	trade->setDirection(direction);
+	trade->setOffsetType(offset);
+	trade->setPrice(price);
+	trade->setVolume(volume);
+	trade->setTradeDate(20250110);
+	trade->setTradeTime(93100000);
+	return trade;
+}
+
+WTSOrderInfo* r71MakeHftOrderReport(WTSContractInfo* contract, const std::string& usertag,
+	const char* orderId, WTSDirectionType direction, WTSOffsetType offset, double price,
+	double volume, double volumeTraded, double volumeLeft, WTSOrderState state)
+{
+	if (contract == NULL)
+		return NULL;
+
+	WTSOrderInfo* order = WTSOrderInfo::create();
+	if (order == NULL)
+		return NULL;
+	order->setContractInfo(contract);
+	order->setDirection(direction);
+	order->setOffsetType(offset);
+	order->setPrice(price);
+	order->setVolume(volume);
+	order->setVolTraded(volumeTraded);
+	order->setVolLeft(volumeLeft);
+	order->setUserTag(usertag.c_str());
+	order->setOrderID(orderId);
+	order->setOrderState(state);
+	return order;
+}
+
+class R71HftSinkRegistration
+{
+public:
+	R71HftSinkRegistration(TraderAdapter& trader, ITrdNotifySink* sink)
+		: _trader(trader), _sink(sink)
+	{
+		_trader.addSink(_sink);
+	}
+
+	~R71HftSinkRegistration()
+	{
+		if (_sink != NULL)
+			_trader.removeSink(_sink);
+	}
+
+	bool remove()
+	{
+		if (_sink == NULL)
+			return true;
+		bool removed = _trader.removeSink(_sink);
+		if (removed)
+			_sink = NULL;
+		return removed;
+	}
+
+private:
+	TraderAdapter& _trader;
+	ITrdNotifySink* _sink;
+};
+
 class R71HftTest : public ::testing::Test
 {
 protected:
@@ -81,21 +155,68 @@ TEST_F(R71HftTest, TradingMethodsForwardToTraderAdapter)
     EXPECT_STREQ(traderEnv.api.last_code.c_str(), "ag2512");
     EXPECT_EQ(traderEnv.api.last_dir, WDT_LONG);
     EXPECT_EQ(traderEnv.api.last_off, WOT_OPEN);
+    EXPECT_DOUBLE_EQ(traderEnv.api.last_price, 3500.0);
+    EXPECT_DOUBLE_EQ(traderEnv.api.last_vol, 2.0);
 
     OrderIDs s = ctx->stra_sell("SHFE.ag.2512", 3501.0, 1.0, "s");
     EXPECT_EQ(s.size(), 1u);
+    EXPECT_EQ(traderEnv.api.n_insert, before + 2);
     EXPECT_EQ(traderEnv.api.last_dir, WDT_SHORT);
+    EXPECT_EQ(traderEnv.api.last_off, WOT_OPEN);
+    EXPECT_DOUBLE_EQ(traderEnv.api.last_price, 3501.0);
+    EXPECT_DOUBLE_EQ(traderEnv.api.last_vol, 1.0);
 
-    EXPECT_NE(ctx->stra_enter_long("SHFE.ag.2512", 3500.0, 1.0, "el", 0), 0u);
-    EXPECT_NE(ctx->stra_exit_long("SHFE.ag.2512", 3500.0, 1.0, "xl", true, 0), 0u);
-    EXPECT_NE(ctx->stra_enter_short("SHFE.ag.2512", 3500.0, 1.0, "es", 0), 0u);
-    EXPECT_NE(ctx->stra_exit_short("SHFE.ag.2512", 3500.0, 1.0, "xs", true, 0), 0u);
+    const uint32_t enterLong = ctx->stra_enter_long("SHFE.ag.2512", 3500.0, 1.0, "el", 0);
+    EXPECT_NE(enterLong, 0u);
+    EXPECT_EQ(traderEnv.api.n_insert, before + 3);
+    EXPECT_EQ(traderEnv.api.last_dir, WDT_LONG);
+    EXPECT_EQ(traderEnv.api.last_off, WOT_OPEN);
+    const uint32_t exitLong = ctx->stra_exit_long("SHFE.ag.2512", 3500.0, 1.0, "xl", true, 0);
+    EXPECT_NE(exitLong, 0u);
+    EXPECT_EQ(traderEnv.api.n_insert, before + 4);
+    EXPECT_EQ(traderEnv.api.last_dir, WDT_LONG);
+    EXPECT_EQ(traderEnv.api.last_off, WOT_CLOSETODAY);
+    const uint32_t enterShort = ctx->stra_enter_short("SHFE.ag.2512", 3500.0, 1.0, "es", 0);
+    EXPECT_NE(enterShort, 0u);
+    EXPECT_EQ(traderEnv.api.n_insert, before + 5);
+    EXPECT_EQ(traderEnv.api.last_dir, WDT_SHORT);
+    EXPECT_EQ(traderEnv.api.last_off, WOT_OPEN);
+    const uint32_t exitShort = ctx->stra_exit_short("SHFE.ag.2512", 3500.0, 1.0, "xs", true, 0);
+    EXPECT_NE(exitShort, 0u);
+    EXPECT_EQ(traderEnv.api.n_insert, before + 6);
+    EXPECT_EQ(traderEnv.api.last_dir, WDT_SHORT);
+    EXPECT_EQ(traderEnv.api.last_off, WOT_CLOSETODAY);
 
     EXPECT_FALSE(ctx->stra_cancel(123u));
     EXPECT_TRUE(ctx->stra_cancel("SHFE.ag.2512", true, 0.0).empty());
 
     EXPECT_DOUBLE_EQ(ctx->stra_get_position("SHFE.ag.2512"), 0.0);
-    EXPECT_DOUBLE_EQ(ctx->stra_get_undone("SHFE.ag.2512"), 0.0);
+	// Buy/sell reserve signed outstanding quantity until the adapter receives
+	// terminal order callbacks: +2 for buy and -1 for sell.
+	EXPECT_DOUBLE_EQ(ctx->stra_get_undone("SHFE.ag.2512"), 1.0);
+
+	WTSContractInfo* contract = traderEnv.bd.getContract("ag2512", "SHFE");
+	ASSERT_NE(contract, nullptr);
+	const auto reportCanceled = [&](uint32_t localid, const char* orderId,
+		WTSDirectionType direction, double volume) {
+		const std::string usertag = "otp.r71_hft." + std::to_string(localid);
+		WTSOrderInfo* pending = r71MakeHftOrderReport(contract, usertag, orderId,
+			direction, WOT_OPEN, 3500.0, volume, 0.0, volume, WOS_NotTraded_Queuing);
+		ASSERT_NE(pending, nullptr);
+		trader.onPushOrder(pending);
+		pending->release();
+
+		WTSOrderInfo* canceled = r71MakeHftOrderReport(contract, usertag, orderId,
+			direction, WOT_OPEN, 3500.0, volume, 0.0, volume, WOS_Canceled);
+		ASSERT_NE(canceled, nullptr);
+		trader.onPushOrder(canceled);
+		canceled->release();
+	};
+	ASSERT_EQ(b.size(), 1u);
+	ASSERT_EQ(s.size(), 1u);
+	reportCanceled(b[0], "R71-HFT-BUY", WDT_LONG, 2.0);
+	reportCanceled(s[0], "R71-HFT-SELL", WDT_SHORT, 1.0);
+	EXPECT_DOUBLE_EQ(ctx->stra_get_undone("SHFE.ag.2512"), 0.0);
     EXPECT_STREQ(ctx->get_inner_code("SHFE.ag.2512"), "SHFE.ag.2512");
 
     engine.prime_price("SHFE.ag.2512", 3510.0);
@@ -137,8 +258,21 @@ TEST_F(R71HftTest, CustomRuleMappingAndTradingGuards)
 TEST_F(R71HftTest, TradeAccountingAndDynProfitExtremes)
 {
     auto ctx = makeCtx("r71_hft_acct", 2);
+	R71HftSinkRegistration sinkRegistration(trader, ctx.get());
+	WTSContractInfo* contract = traderEnv.bd.getContract("ag2512", "SHFE");
+	ASSERT_NE(contract, nullptr);
+	const auto pushTrade = [&](const char* tradeId, WTSDirectionType direction,
+		WTSOffsetType offset, double price, double volume) {
+		WTSTradeInfo* trade = r71MakeHftTradeReport(contract, tradeId,
+			direction, offset, price, volume);
+		ASSERT_NE(trade, nullptr);
+		trader.onPushTrade(trade);
+		trade->release();
+	};
 
-    ctx->on_trade(0, "SHFE.ag.2512", true, 2.0, 3500.0);
+	// The adapter report updates its position and synchronously forwards the
+	// same fill to the registered strategy context for local accounting.
+	pushTrade("R71-HFT-OPEN", WDT_LONG, WOT_OPEN, 3500.0, 2.0);
     EXPECT_DOUBLE_EQ(ctx->stra_get_position("SHFE.ag.2512"), 2.0);
     EXPECT_DOUBLE_EQ(ctx->stra_get_position_avgpx("SHFE.ag.2512"), 3502.0);
 
@@ -156,11 +290,17 @@ TEST_F(R71HftTest, TradeAccountingAndDynProfitExtremes)
     down->release();
     EXPECT_DOUBLE_EQ(ctx->stra_get_position_profit("SHFE.ag.2512"), -2040.0);
 
-    // 部分平仓 -> 剩余 1 手；再全平
-    ctx->on_trade(1, "SHFE.ag.2512", false, 1.0, 3600.0);
+    // Close-long reports use the long direction with close offset; each report
+	// updates adapter holdings and flows through HftStraBaseCtx::on_trade.
+	pushTrade("R71-HFT-CLOSE-1", WDT_LONG, WOT_CLOSE, 3600.0, 1.0);
     EXPECT_DOUBLE_EQ(ctx->stra_get_position("SHFE.ag.2512"), 1.0);
-    ctx->on_trade(2, "SHFE.ag.2512", false, 1.0, 3600.0);
+	EXPECT_DOUBLE_EQ(ctx->stra_get_position_avgpx("SHFE.ag.2512"), 3502.0);
+	EXPECT_DOUBLE_EQ(ctx->stra_get_position_profit("SHFE.ag.2512"), -1020.0);
+	pushTrade("R71-HFT-CLOSE-2", WDT_LONG, WOT_CLOSE, 3600.0, 1.0);
     EXPECT_DOUBLE_EQ(ctx->stra_get_position("SHFE.ag.2512"), 0.0);
+	EXPECT_DOUBLE_EQ(ctx->stra_get_position_avgpx("SHFE.ag.2512"), 0.0);
+	EXPECT_DOUBLE_EQ(ctx->stra_get_position_profit("SHFE.ag.2512"), 0.0);
+	EXPECT_TRUE(sinkRegistration.remove());
 
     ctx->on_session_end(20250110);
     const std::string out = std::string(WtHelper::getOutputDir()) + "r71_hft_acct/";

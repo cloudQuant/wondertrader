@@ -1,0 +1,53 @@
+--- /tmp/ctpm-i03-evidence/baseline/TraderCTPMini.cpp	2026-11-01 22:36:18
++++ src/TraderCTPMini/TraderCTPMini.cpp	2026-11-01 22:08:04
+@@ -1,4 +1,4 @@
+-/*!
++﻿/*!
+  * \file TraderCTP.cpp
+  * \project	WonderTrader
+  *
+@@ -29,17 +29,17 @@
+ const char* ENTRUST_SECTION = "entrusts";
+ const char* ORDER_SECTION = "orders";
+ 
+-//By Wesley @ 2022.01.05
+-#include "../Share/fmtlib.h"
+-template<typename... Args>
+-inline void write_log(ITraderSpi* sink, WTSLogLevel ll, const char* format, const Args&... args)
+-{
+-	if (sink == NULL)
+-		return;
+-
+-	const char* buffer = fmtutil::format(format, args...);
+-
+-	sink->handleTraderLog(ll, buffer);
++//By Wesley @ 2022.01.05
++#include "../Share/fmtlib.h"
++template<typename... Args>
++inline void write_log(ITraderSpi* sink, WTSLogLevel ll, const char* format, const Args&... args)
++{
++	if (sink == NULL)
++		return;
++
++	const char* buffer = fmtutil::format(format, args...);
++
++	sink->handleTraderLog(ll, buffer);
+ }
+ 
+ template <size_t Capacity>
+@@ -180,7 +180,14 @@
+ 	if (module.empty())
+ 		module = "thosttraderapi";
+ 
+-	m_strModule = getBinDir() + DLLHelper::wrap_module(module.c_str(), "");
++	const std::string moduleFile = DLLHelper::wrap_module(module.c_str(), "");
++	const char* moduleDir = getBinDir();
++	if ((moduleDir == NULL || *moduleDir == '\0') && !fs::path(moduleFile).is_absolute())
++	{
++		write_log(m_sink, LL_ERROR, "[TraderCTPMini] Cannot locate trader module directory");
++		return false;
++	}
++	m_strModule = (moduleDir == NULL ? std::string() : std::string(moduleDir)) + moduleFile;
+ 
+ 	DllHandle candidateHandle = DLLHelper::load_library(m_strModule.c_str());
+ 	if (candidateHandle == NULL)

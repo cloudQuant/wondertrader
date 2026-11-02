@@ -80,6 +80,18 @@ namespace {
 
 } // namespace
 
+/* R46-001 生命周期对照：普通新对象的公开 engine getter 返回空；尚未配置时
+ * 扩展 parser 入口明确拒绝，离开作用域时未配置对象可正常析构。 */
+TEST(R46PorterConfig, UnconfiguredRunnerHasNoEngineRejectsParserAndDestructs)
+{
+	{
+		WtRtRunner runner;
+		EXPECT_EQ(nullptr, runner.getEngine());
+		EXPECT_FALSE(runner.createExtParser("r46_before_config"));
+	}
+	SUCCEED() << "unconfigured WtRtRunner left scope safely";
+}
+
 /* WtRtRunner.cpp:107-127 + 489-591 + 838-882(cta) + 884-896 + 1157-1166 + 716-743
  * 最小可用 cta 配置：basefiles/env/data/bspolicy 全给，parsers/traders/executers
  * 都是 active:false，strategies.cta 也是空跑，因此不会加载任何插件。 */
@@ -87,7 +99,7 @@ TEST(R46PorterConfig, CtaEnvBootstrapsEngineDataMgrAndActionPolicy)
 {
 	const std::string dir = prepare_gen_dir();
 	ASSERT_FALSE(dir.empty());
-	write_text(dir + "/actions.json", "{}");
+	write_text(dir + "/actions.json", "{\"default\":{}}");
 
 	WtRtRunner* r = new_runner(dir);
 	ASSERT_NE(r, nullptr);
@@ -113,7 +125,7 @@ TEST(R46PorterConfig, HftEnvSelectsHftEngineAndEmptyStrategyList)
 {
 	const std::string dir = prepare_gen_dir();
 	ASSERT_FALSE(dir.empty());
-	write_text(dir + "/actions.json", "{}");
+	write_text(dir + "/actions.json", "{\"default\":{}}");
 
 	WtRtRunner* r = new_runner(dir);
 	const std::string cfg =
@@ -134,7 +146,7 @@ TEST(R46PorterConfig, SelEnvSelectsSelEngine)
 {
 	const std::string dir = prepare_gen_dir();
 	ASSERT_FALSE(dir.empty());
-	write_text(dir + "/actions.json", "{}");
+	write_text(dir + "/actions.json", "{\"default\":{}}");
 
 	WtRtRunner* r = new_runner(dir);
 	const std::string cfg =
@@ -155,7 +167,7 @@ TEST(R46PorterConfig, TradersAndEveryExecuterKindAreInstantiated)
 {
 	const std::string dir = prepare_gen_dir();
 	ASSERT_FALSE(dir.empty());
-	write_text(dir + "/actions.json", "{}");
+	write_text(dir + "/actions.json", "{\"default\":{}}");
 
 	WtRtRunner* r = new_runner(dir);
 	wtp_test::TraderMockerFixture trader_mocker("r46");
@@ -197,7 +209,7 @@ TEST(R46PorterConfig, TraderInitFailureMakesConfigFailClosed)
 {
 	const std::string dir = prepare_gen_dir();
 	ASSERT_FALSE(dir.empty());
-	write_text(dir + "/actions.json", "{}");
+	write_text(dir + "/actions.json", "{\"default\":{}}");
 
 	WtRtRunner* r = new_runner(dir);
 	const std::string cfg =
@@ -217,7 +229,7 @@ TEST(R46PorterConfig, ParserAndTraderSectionsSupportInlineArrayAndExternalFile)
 {
 	const std::string dir = prepare_gen_dir();
 	ASSERT_FALSE(dir.empty());
-	write_text(dir + "/actions.json", "{}");
+	write_text(dir + "/actions.json", "{\"default\":{}}");
 	write_text(dir + "/parsers.json", "{\"parsers\":[{\"active\":false,\"id\":\"r46_p_file\"}]}");
 	write_text(dir + "/executers.json", "{\"executers\":[]}");
 
@@ -278,7 +290,7 @@ TEST(R46PorterConfig, MissingEnvMakesConfigFail)
 {
 	const std::string dir = prepare_gen_dir();
 	ASSERT_FALSE(dir.empty());
-	write_text(dir + "/actions.json", "{}");
+	write_text(dir + "/actions.json", "{\"default\":{}}");
 
 	WtRtRunner* r = new_runner(dir);
 	ASSERT_NE(r, nullptr);
@@ -287,6 +299,9 @@ TEST(R46PorterConfig, MissingEnvMakesConfigFail)
 		"\"bspolicy\":\"" + dir + "/actions.json\"}";
 
 	EXPECT_FALSE(r->config(cfg.c_str(), false));
+	EXPECT_EQ(r->getEngine(), nullptr);
+	EXPECT_NO_THROW(r->run(false));
+	EXPECT_EQ(r->getEngine(), nullptr);
 
 	clean_dir(dir);
 }
@@ -297,7 +312,7 @@ TEST(R46PorterConfig, ExtParserAndRawCodeWorkOnceEngineIsConfigured)
 {
 	const std::string dir = prepare_gen_dir();
 	ASSERT_FALSE(dir.empty());
-	write_text(dir + "/actions.json", "{}");
+	write_text(dir + "/actions.json", "{\"default\":{}}");
 
 	WtRtRunner* r = new_runner(dir);
 	const std::string cfg =

@@ -288,12 +288,18 @@ const char* WTSHotMgr::getPrevCustomRawCode(const char* tag, const char* fullPid
 	WTSDateHotMap* dtMap = STATIC_CONVERT(prodMap->get(fullPid), WTSDateHotMap*);
 	if (dtMap == NULL)
 		return "";
+	if (dtMap->size() == 0)
+		return "";
 
 	WTSDateHotMap::ConstIterator cit = dtMap->lower_bound(dt);
 	if (cit != dtMap->end())
 	{
 		if (dt < cit->first)
+		{
+			if (cit == dtMap->begin())
+				return "";
 			cit--;
+		}
 
 		if (cit == dtMap->end() || cit == dtMap->begin())
 			return "";
@@ -334,12 +340,18 @@ const char* WTSHotMgr::getCustomRawCode(const char* tag, const char* fullPid, ui
 	WTSDateHotMap* dtMap = STATIC_CONVERT(prodMap->get(fullPid), WTSDateHotMap*);
 	if (dtMap == NULL)
 		return "";
+	if (dtMap->size() == 0)
+		return "";
 
 	WTSDateHotMap::ConstIterator cit = dtMap->lower_bound(dt);
 	if (cit != dtMap->end())
 	{
 		if (dt < cit->first)
+		{
+			if (cit == dtMap->begin())
+				return "";
 			cit--;
+		}
 
 		if (cit == dtMap->end())
 			return "";
@@ -395,7 +407,11 @@ bool WTSHotMgr::isCustomHot(const char* tag, const char* fullCode, uint32_t dt /
 		//因为登记的换月日期是开始生效的交易日，如果是下午盘后确定主力的话
 		//那么dt就会是第二天，所以，dt必须大于等于切换日期
 		if (pItem->switch_date() > dt)
+		{
+			if (cit == dtMap->begin())
+				return false;
 			cit--;
+		}
 
 		pItem = STATIC_CONVERT(cit->second, WTSSwitchItem*);
 		if (strcmp(pItem->to(), rawCode) == 0)
@@ -423,6 +439,8 @@ bool WTSHotMgr::splitCustomSections(const char* tag, const char* fullPid, uint32
 	WTSDateHotMap* dtMap = STATIC_CONVERT(prodMap->get(fullPid), WTSDateHotMap*);
 	if (dtMap == NULL)
 		return false;
+	if (sDt > eDt)
+		return true;
 
 	uint32_t leftDate = sDt;
 	uint32_t lastDate = 0;
@@ -436,7 +454,12 @@ bool WTSHotMgr::splitCustomSections(const char* tag, const char* fullPid, uint32
 
 		if (curDate > eDt)
 		{
-			sections.emplace_back(HotSection(hotItem->from(), leftDate, eDt, prevFactor));
+			if (leftDate <= eDt && strlen(hotItem->from()) > 0)
+				sections.emplace_back(HotSection(hotItem->from(), leftDate, eDt, prevFactor));
+
+			// The first future rule bounds the active section; later rules cannot
+			// apply to this window, and the final section was handled above.
+			return true;
 		}
 		else if (leftDate < curDate)
 		{

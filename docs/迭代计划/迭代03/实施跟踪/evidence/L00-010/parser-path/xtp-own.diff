@@ -1,0 +1,23 @@
+--- /tmp/wt-i03-parser-path/baseline/ParserXTP.cpp	2026-11-01 21:52:20
++++ src/ParserXTP/ParserXTP.cpp	2026-11-01 21:59:01
+@@ -124,11 +124,19 @@
+ 	std::string module = config->getCString("xtpmodule");
+ 	if (module.empty())
+ 		module = "xtpquoteapi";
++
++	const std::string moduleFile = DLLHelper::wrap_module(module.c_str(), "lib");
++	const char* moduleDir = getBinDir();
++	if ((moduleDir == nullptr || moduleDir[0] == '\0') && !fs::path(moduleFile).is_absolute())
++	{
++		write_log(m_sink, LL_ERROR, "[ParserXTP] Cannot locate the parser module directory");
++		return false;
++	}
+ 
+ 	std::string path = fmtutil::format("{}/{}/", m_strFlowDir.c_str(), m_strUser.c_str());
+ 	fs::create_directories(path.c_str());
+ 
+-	std::string dllpath = getBinDir() + DLLHelper::wrap_module(module.c_str(), "lib");;
++	std::string dllpath = (moduleDir ? std::string(moduleDir) : std::string()) + moduleFile;
+ 	m_hInst = DLLHelper::load_library(dllpath.c_str());
+ 	if (m_hInst == NULL)
+ 	{

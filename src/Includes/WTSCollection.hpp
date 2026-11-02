@@ -342,7 +342,7 @@ public:
 	/*
 	 *	读取指定key对应的数据
 	 *	不增加数据的引用计数
-	 *	没有则返回NULL
+	 *	没有或映射值为NULL则返回NULL；需用find区分键是否存在
 	 */
 	inline
 	WTSObject* get(const T &_key) noexcept
@@ -373,7 +373,7 @@ public:
 	/*
 	 *	读取指定key对应的数据
 	 *	增加数据的引用计数
-	 *	没有则返回NULL
+	 *	没有或映射值为NULL则返回NULL；需用find区分键是否存在
 	 */
 	inline
 	WTSObject* grab(const T &_key) noexcept
@@ -392,6 +392,7 @@ public:
 	/*
 	 *	新增一个数据,并增加数据引用计数
 	 *	如果key存在,则将原有数据释放
+	 *	允许obj为NULL；键仍保留在容器中并计入size
 	 */
 	inline
 	void add(T _key, WTSObject* obj, bool bAutoRetain = true) noexcept
@@ -548,7 +549,8 @@ public:
 		Iterator it = _map.begin();
 		for(; it != _map.end(); it++)
 		{
-			it->second->release();
+			if (it->second)
+				it->second->release();
 		}
 		_map.clear();
 	}
@@ -625,7 +627,7 @@ public:
 	/*
 	 *	读取指定key对应的数据
 	 *	不增加数据的引用计数
-	 *	没有则返回NULL
+	 *	没有或映射值为NULL则返回NULL；需用find区分键是否存在
 	 */
 	inline WTSObject* get(const T &_key) noexcept
 	{
@@ -640,7 +642,7 @@ public:
 	/*
 	 *	读取指定key对应的数据
 	 *	增加数据的引用计数
-	 *	没有则返回NULL
+	 *	没有或映射值为NULL则返回NULL；需用find区分键是否存在
 	 */
 	inline WTSObject* grab(const T &_key) noexcept
 	{
@@ -649,13 +651,15 @@ public:
 			return NULL;
 
 		WTSObject* pRet = it->second;
-		pRet->retain();
+		if (pRet)
+			pRet->retain();
 		return pRet;
 	}
 
 	/*
 	 *	新增一个数据,并增加数据引用计数
 	 *	如果key存在,则将原有数据释放
+	 *	允许obj为NULL；键仍保留在容器中并计入size
 	 */
 	inline void add(const T &_key, WTSObject* obj, bool bAutoRetain = true) noexcept
 	{
@@ -720,7 +724,8 @@ public:
 		ConstIterator it = _map.begin();
 		for(; it != _map.end(); it++)
 		{
-			it->second->release();
+			if (it->second)
+				it->second->release();
 		}
 		_map.clear();
 	}

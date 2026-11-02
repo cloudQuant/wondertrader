@@ -169,11 +169,19 @@ struct BarsFixture
 			"\"commodity\":[\"" + root + "/dist/common/commodities.json\","
 			"\"" + root + "/dist/common/stk_comms.json\"],"
 			"\"holiday\":\"" + root + "/dist/common/holidays.json\"}},"
-			"\"env\":{\"mocker\":\"" + std::string(mode) + "\"},"
-			"\"" + std::string(mode) + "\":{\"name\":\"r194_" + std::string(mode) +
-			"_bars\",\"slippage\":0}}";
+			"\"env\":{\"mocker\":\"none\"}}";
 		getRunner().config(cfg.c_str(), false);
 
+		uint32_t mockerId = 0;
+		const std::string mockerName = std::string("r194_") + mode + "_bars";
+		if (strcmp(mode, "cta") == 0)
+			mockerId = getRunner().initCtaMocker(mockerName.c_str(), 0, false, false, false, false);
+		else if (strcmp(mode, "sel") == 0)
+			mockerId = getRunner().initSelMocker(mockerName.c_str(), 20200102, 93000, "m5");
+		else if (strcmp(mode, "hft") == 0)
+			mockerId = getRunner().initHftMocker(mockerName.c_str(), false);
+		if (mockerId == 0)
+			return false;
 		if (strcmp(mode, "cta") == 0 && getRunner().cta_mocker() == nullptr)
 			return false;
 		if (strcmp(mode, "sel") == 0 && getRunner().sel_mocker() == nullptr)

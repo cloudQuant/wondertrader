@@ -5,9 +5,10 @@
  * 与 r8_parseradapter_test.cpp 互补：r8 只打了拒绝分支与 handle 守卫，
  * 本文件用 r45_fake_parserapi.h 的自用替身把「有 api」的正路径补齐：
  *  - initExt 成功链：registerSpi -> init(NULL) -> 合约集合 -> subscribe（:44-71）
- *  - initExt 的 api->init 失败分支与失败后 owner 保留
+ *  - initExt 的 api->init false/throw 分支均失败、无 subscribe/connect
  *  - run 的 _parser_api!=NULL -> connect（:219-226）
  *  - release 的 api->release + delete（:205-217）
+ *  - 真正 WtDtRunner 动态模块路径的 init=true 正控及 false/throw 隔离
  *  - handleQuote 带 runner 的转发（:281-282）
  *  - handleTransaction/OrderDetail/OrderQueue 的「合约命中」尾段（:242-246/:256-260/:270-273）
  *  - ParserAdapterMgr 的 run/release 扇出（:301-309/:339-347）
@@ -35,6 +36,7 @@
 #include <WTSTools/WTSBaseDataMgr.h>
 #include <WtDtServo/ParserAdapter.h>
 #include <WtDtServo/WtDtRunner.h>
+#include <WtDtServo/WtHelper.h>
 
 #include "r45_fake_parserapi.h"
 
@@ -237,6 +239,86 @@ public:
 
 int R45ThrowingParserDeleter::s_calls = 0;
 
+class R45ThrowingInitParserApi : public R45QuiescentParserApi
+{
+public:
+	bool init(WTSVariant* cfg) override
+	{
+		++init_calls;
+		last_cfg = cfg;
+		throw std::runtime_error("controlled parser init failure");
+	}
+};
+
+std::vector<WtDtRunner*>& r45_retained_runner_graphs()
+{
+	static std::vector<WtDtRunner*>* runners = new std::vector<WtDtRunner*>();
+	return *runners;
+}
+
+#ifndef WT_R45_DTSERVO_PARSER_FIXTURE_PATH
+#error "R45 dtservo runner tests require the isolated parser fixture target"
+#endif
+
+struct R45DtServoParserProbe
+{
+	using Counter = uint32_t (*)();
+	using Reset = void (*)();
+
+	explicit R45DtServoParserProbe()
+		: handle(::dlopen(WT_R45_DTSERVO_PARSER_FIXTURE_PATH, RTLD_NOW))
+	{
+		if (handle == nullptr)
+			return;
+		reset = symbol<Reset>("r45_dtservo_parser_reset_counts");
+		create = symbol<Counter>("r45_dtservo_parser_create_count");
+		init = symbol<Counter>("r45_dtservo_parser_init_count");
+		register_spi = symbol<Counter>("r45_dtservo_parser_register_count");
+		subscribe = symbol<Counter>("r45_dtservo_parser_subscribe_count");
+		connect = symbol<Counter>("r45_dtservo_parser_connect_count");
+		release = symbol<Counter>("r45_dtservo_parser_release_count");
+		deletes = symbol<Counter>("r45_dtservo_parser_delete_count");
+		destroy = symbol<Counter>("r45_dtservo_parser_destroy_count");
+		unsafe_delete = symbol<Counter>("r45_dtservo_parser_unsafe_delete_count");
+		mark_quiescent = symbol<Reset>("r45_dtservo_parser_mark_quiescent");
+	}
+
+	~R45DtServoParserProbe()
+	{
+		if (handle != nullptr)
+			::dlclose(handle);
+	}
+
+	bool valid() const
+	{
+		return handle != nullptr && reset != nullptr && create != nullptr && init != nullptr
+			&& register_spi != nullptr && subscribe != nullptr && connect != nullptr
+			&& release != nullptr && deletes != nullptr && destroy != nullptr
+			&& unsafe_delete != nullptr && mark_quiescent != nullptr;
+	}
+
+	void reset_counts() const { reset(); }
+
+	template <typename T>
+	T symbol(const char* name)
+	{
+		return reinterpret_cast<T>(::dlsym(handle, name));
+	}
+
+	void* handle = nullptr;
+	Reset reset = nullptr;
+	Counter create = nullptr;
+	Counter init = nullptr;
+	Counter register_spi = nullptr;
+	Counter subscribe = nullptr;
+	Counter connect = nullptr;
+	Counter release = nullptr;
+	Counter deletes = nullptr;
+	Counter destroy = nullptr;
+	Counter unsafe_delete = nullptr;
+	Reset mark_quiescent = nullptr;
+};
+
 struct R45PaTickProbe
 {
 	static std::vector<std::string> codes;
@@ -320,6 +402,23 @@ protected:
 			(_dir / "no_such_logcfg.yaml").string().c_str(), r45_pa_on_tick, r45_pa_on_bar);
 	}
 
+	void initRunnerWithParser(WtDtRunner& runner, const char* id, const char* initMode, const char* connectMode = "true")
+	{
+		const std::string d = _dir.string();
+		const fs::path fixturePath(WT_R45_DTSERVO_PARSER_FIXTURE_PATH);
+		const std::string moduleDir = fixturePath.parent_path().parent_path().string() + "/";
+		const std::string cfg = std::string("{\"disable_dump\":true,\"basefiles\":{")
+			+ "\"session\":\"" + d + "/sessions.json\","
+			+ "\"commodity\":\"" + d + "/commodities.json\","
+			+ "\"contract\":\"" + d + "/contracts.json\"},"
+			+ "\"parsers\":[{\"id\":\"" + id + "\",\"active\":true,"
+			+ "\"module\":\"R45DtServoParserFixture\",\"r45_init_mode\":\"" + initMode
+			+ "\",\"r45_connect_mode\":\"" + connectMode + "\"}]}";
+		r45_pa_write(_dir / "wtdt_parser.json", cfg);
+		runner.initialize((_dir / "wtdt_parser.json").string().c_str(), true,
+			moduleDir.c_str(), (_dir / "no_such_logcfg.yaml").string().c_str(), r45_pa_on_tick, r45_pa_on_bar);
+	}
+
 	fs::path _dir;
 	WTSBaseDataMgr _bdMgr;
 };
@@ -359,6 +458,29 @@ TEST_F(R45ParserAdapterFakeTest, InitExtRegistersSpiAndSubscribesAllContracts)
 	EXPECT_EQ(R45QuiescentParserApi::s_destroyed_before_quiescence, 0);
 }
 
+TEST_F(R45ParserAdapterFakeTest, RunReportsConnectionCommandSubmission)
+{
+	ParserAdapter uninitialized(&_bdMgr, nullptr);
+	EXPECT_FALSE(uninitialized.run());
+	{
+		ParserAdapter pa(&_bdMgr, nullptr);
+		auto* api = new R45QuiescentParserApi(true, false);
+		ASSERT_TRUE(pa.initExt("r45_connect_failure", api));
+		EXPECT_FALSE(pa.run());
+		EXPECT_EQ(api->connect_calls, 1);
+		pa.release();
+		EXPECT_FALSE(pa.run());
+	}
+	{
+		ParserAdapter pa(&_bdMgr, nullptr);
+		auto* api = new R45QuiescentParserApi(true, true);
+		ASSERT_TRUE(pa.initExt("r45_connect_success", api));
+		EXPECT_TRUE(pa.run());
+		EXPECT_EQ(api->connect_calls, 1);
+		pa.release();
+	}
+}
+
 TEST_F(R45ParserAdapterFakeTest, InitExtApiInitFailureSkipsSubscribe)
 {
 	R45QuiescentParserApi* api = new R45QuiescentParserApi(false, true);
@@ -381,6 +503,108 @@ TEST_F(R45ParserAdapterFakeTest, InitExtApiInitFailureSkipsSubscribe)
 	EXPECT_EQ(r45::FakeParserApi::s_deleted, 1);
 	EXPECT_EQ(R45QuiescentParserApi::s_quiescent_releases, 1);
 	EXPECT_EQ(R45QuiescentParserApi::s_destroyed_before_quiescence, 0);
+}
+
+TEST_F(R45ParserAdapterFakeTest, InitExtApiInitExceptionSkipsSubscribeAndConnect)
+{
+	R45ThrowingInitParserApi* api = new R45ThrowingInitParserApi();
+	ParserAdapter pa(&_bdMgr, nullptr);
+
+	EXPECT_FALSE(pa.initExt("r45_ext_throw", api));
+	EXPECT_EQ(api->register_calls, 1);
+	EXPECT_EQ(api->init_calls, 1);
+	EXPECT_EQ(api->subscribe_calls, 0);
+	EXPECT_FALSE(pa.run());
+	EXPECT_EQ(api->connect_calls, 0);
+	EXPECT_EQ(r45::FakeParserApi::s_deleted, 0);
+	EXPECT_EQ(r45::FakeParserApi::s_release_calls, 0);
+
+	// The fake's release() is a fake-specific quiet point; this is not a claim
+	// about arbitrary IParserApi providers.
+	pa.release();
+	EXPECT_EQ(r45::FakeParserApi::s_release_calls, 1);
+	EXPECT_EQ(r45::FakeParserApi::s_deleted, 1);
+	EXPECT_EQ(R45QuiescentParserApi::s_destroyed_before_quiescence, 0);
+}
+
+TEST_F(R45ParserAdapterFakeTest, RunnerStartsInitializedFakeParser)
+{
+	R45DtServoParserProbe probe;
+	ASSERT_TRUE(probe.valid());
+	probe.reset_counts();
+
+	std::unique_ptr<WtDtRunner> runner(new WtDtRunner());
+	initRunnerWithParser(*runner, "r45_runner_ok", "true");
+
+	EXPECT_TRUE(runner->isInitialized());
+	EXPECT_EQ(runner->activeParserCount(), 1u);
+	EXPECT_FALSE(runner->hasQuarantinedParser());
+	EXPECT_EQ(probe.create(), 1u);
+	EXPECT_EQ(probe.init(), 1u);
+	EXPECT_EQ(probe.register_spi(), 1u);
+	EXPECT_EQ(probe.subscribe(), 1u);
+	EXPECT_EQ(probe.connect(), 1u);
+	EXPECT_EQ(probe.release(), 0u);
+	EXPECT_EQ(probe.deletes(), 0u);
+	EXPECT_EQ(probe.destroy(), 0u);
+	EXPECT_EQ(probe.unsafe_delete(), 0u);
+
+	// WtDtRunner has no public parser shutdown/drain API. Keep this fake graph
+	// alive through process exit so the test does not imply a generic teardown contract.
+	r45_retained_runner_graphs().push_back(runner.release());
+}
+
+TEST_F(R45ParserAdapterFakeTest, RunnerReportsConnectSubmissionFailureAndRetainsOwner)
+{
+	R45DtServoParserProbe probe;
+	ASSERT_TRUE(probe.valid());
+	probe.reset_counts();
+	std::unique_ptr<WtDtRunner> runner(new WtDtRunner());
+	initRunnerWithParser(*runner, "r45_connect_false", "true", "false");
+	EXPECT_FALSE(runner->isInitialized());
+	EXPECT_EQ(runner->activeParserCount(), 1u);
+	EXPECT_TRUE(runner->hasRetainedParserAdapters());
+	EXPECT_EQ(probe.connect(), 1u);
+	EXPECT_EQ(probe.release(), 0u);
+	EXPECT_EQ(probe.deletes(), 0u);
+	// A failed command does not prove provider callback quiescence.
+	r45_retained_runner_graphs().push_back(runner.release());
+}
+
+TEST_F(R45ParserAdapterFakeTest, RunnerQuarantinesFalseAndThrowingParserCandidates)
+{
+	for (const char* mode : { "false", "throw" })
+	{
+		R45DtServoParserProbe probe;
+		ASSERT_TRUE(probe.valid());
+		probe.reset_counts();
+
+		std::unique_ptr<WtDtRunner> runner(new WtDtRunner());
+		const char* id = std::strcmp(mode, "false") == 0 ? "r45_runner_false" : "r45_runner_throw";
+		initRunnerWithParser(*runner, id, mode);
+
+		EXPECT_FALSE(runner->isInitialized());
+		EXPECT_EQ(runner->activeParserCount(), 0u);
+		EXPECT_TRUE(runner->hasQuarantinedParser());
+		EXPECT_TRUE(runner->hasRetainedParserAdapters());
+
+		// Calling start() on a failed runner must remain inert.
+		runner->start();
+		EXPECT_EQ(probe.create(), 1u);
+		EXPECT_EQ(probe.init(), 1u);
+		EXPECT_EQ(probe.register_spi(), 1u);
+		EXPECT_EQ(probe.subscribe(), 0u);
+		EXPECT_EQ(probe.connect(), 0u);
+		EXPECT_EQ(probe.release(), 0u);
+		EXPECT_EQ(probe.deletes(), 0u);
+		EXPECT_EQ(probe.destroy(), 0u);
+		EXPECT_EQ(probe.unsafe_delete(), 0u);
+
+		// This proves only that the candidate and its borrowed runner context
+		// remain alive in this process. No provider drain/safe-destruction claim
+		// is made, and release() is deliberately not used as a drain signal.
+		r45_retained_runner_graphs().push_back(runner.release());
+	}
 }
 
 TEST_F(R45ParserAdapterFakeTest, InitExtTransfersNonNullApiEvenWhenIdIsInvalid)
@@ -708,6 +932,25 @@ TEST_F(R45ParserAdapterFakeTest, ManagerRunsAndReleasesLiveAdapters)
 	EXPECT_EQ(R45QuiescentParserApi::s_destroyed_before_quiescence, 0);
 	EXPECT_EQ(mgr.size(), 0u);
 	EXPECT_EQ(mgr.getAdapter("r45_mgr1").get(), nullptr);
+}
+
+TEST_F(R45ParserAdapterFakeTest, ManagerReportsPartialConnectSubmission)
+{
+	ParserAdapterMgr mgr;
+	EXPECT_TRUE(mgr.runWithResult());
+	auto* failedApi = new R45QuiescentParserApi(true, false);
+	auto* goodApi = new R45QuiescentParserApi(true, true);
+	ParserAdapterPtr failed(new ParserAdapter(&_bdMgr, nullptr));
+	ParserAdapterPtr good(new ParserAdapter(&_bdMgr, nullptr));
+	ASSERT_TRUE(failed->initExt("connect_failed", failedApi));
+	ASSERT_TRUE(good->initExt("connect_good", goodApi));
+	ASSERT_TRUE(mgr.addAdapter("connect_failed", failed));
+	ASSERT_TRUE(mgr.addAdapter("connect_good", good));
+	EXPECT_FALSE(mgr.runWithResult());
+	EXPECT_EQ(failedApi->connect_calls, 1);
+	EXPECT_EQ(goodApi->connect_calls, 1);
+	EXPECT_EQ(mgr.size(), 2u);
+	mgr.release();
 }
 
 // ---------------------------------------------------------------------------

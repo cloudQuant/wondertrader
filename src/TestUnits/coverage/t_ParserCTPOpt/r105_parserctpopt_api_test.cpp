@@ -1,8 +1,9 @@
 /*
  * r105_parserctpopt_api_test.cpp — lane R105：ParserCTPOpt 的「有厂商 API」半边
  *
- * ParserCTPOpt::init() 走 DLLHelper::load_library + dlsym（ParserCTPOpt.cpp:110-132），
- * 本机没有可 dlopen 的 sopt 行情库，init 末尾必然空指针调用。这里用测试侧
+ * ParserCTPOpt::init() 走 DLLHelper::load_library + dlsym。loader 失败分支用独立
+ * 动态模块覆盖缺库、缺 creator symbol、creator 返回 NULL 和成功创建；回调
+ * 行为则用测试侧
  * 白盒（#define private public，仅本 TU）把 m_pUserAPI 指向
  * r105_ctpopt_api_stub.h 的可控空实现，再通过公开的 connect/subscribe 与
  * OnFront / OnRsp / OnRtn 回调驱动成功/失败/空数据分支。
@@ -36,6 +37,10 @@
 #include "Includes/WTSVariant.hpp"
 #include "Share/DLLHelper.hpp"
 #include "WTSUtils/WTSCfgLoader.h"
+
+#ifndef WT_R105_CTP_OPT_MISSING_SYMBOL_MODULE
+#error "T2-OPT-01 loader fixture module names must be provided by coverage CMake"
+#endif
 
 #define private public
 #include "ParserCTPOpt/ParserCTPOpt.h"
@@ -312,6 +317,40 @@ TEST_F(R105OptTest, nonzero_login_error_does_not_report_success_or_subscribe)
 	EXPECT_TRUE(sink_.hasLog("API response failed with error id 404"));
 }
 
+TEST_F(R105OptTest, sdk_error_callbacks_are_logged_and_success_responses_are_quiet)
+{
+	CThostFtdcRspInfoField error;
+	std::memset(&error, 0, sizeof(error));
+
+	error.ErrorID = 401;
+	parser_.OnRspError(&error, 1, true);
+	ASSERT_EQ(1u, sink_.logs.size());
+	EXPECT_TRUE(sink_.hasLog("API response failed with error id 401"));
+
+	error.ErrorID = 402;
+	parser_.OnRspSubMarketData(NULL, &error, 2, true);
+	ASSERT_EQ(2u, sink_.logs.size());
+	EXPECT_TRUE(sink_.hasLog("API response failed with error id 402"));
+
+	error.ErrorID = 403;
+	parser_.OnRspUnSubMarketData(NULL, &error, 3, true);
+	ASSERT_EQ(3u, sink_.logs.size());
+	EXPECT_TRUE(sink_.hasLog("API response failed with error id 403"));
+	EXPECT_EQ(0u, sink_.n_quote);
+
+	const std::size_t errorLogCount = sink_.logs.size();
+	CThostFtdcRspInfoField ok;
+	std::memset(&ok, 0, sizeof(ok));
+	parser_.OnRspError(&ok, 4, true);
+	parser_.OnRspSubMarketData(NULL, &ok, 5, true);
+	parser_.OnRspUnSubMarketData(NULL, &ok, 6, true);
+	parser_.OnRspError(NULL, 7, true);
+	parser_.OnRspSubMarketData(NULL, NULL, 8, true);
+	parser_.OnRspUnSubMarketData(NULL, NULL, 9, true);
+	EXPECT_EQ(errorLogCount, sink_.logs.size());
+	EXPECT_EQ(0u, sink_.n_quote);
+}
+
 TEST_F(R105OptTest, logged_in_subscription_handles_500_and_501_contracts)
 {
 	parser_.m_uTradingDate = 20260301;
@@ -355,11 +394,15 @@ TEST_F(R105OptTest, init_fails_closed_for_missing_module_and_creator)
 	ASSERT_NE(nullptr, cfg);
 
 	ParserCTPOpt bare;
+	bare.registerSpi(&sink_);
 	EXPECT_FALSE(bare.init(cfg));
 	EXPECT_FALSE(bare.isConnected());
 	EXPECT_EQ((DllHandle)NULL, bare.m_hInstCTP);
+	EXPECT_EQ(nullptr, bare.m_funcCreator);
+	EXPECT_TRUE(sink_.hasLog("Failed to load market data API module"));
 	EXPECT_NO_THROW(bare.OnRspUserLogin(NULL, NULL, 1, true));
 	EXPECT_EQ(0u, bare.m_uTradingDate);
+	EXPECT_NO_THROW(bare.release());
 	cfg->release();
 
 	ParserCTPOpt noCreator;
@@ -369,6 +412,63 @@ TEST_F(R105OptTest, init_fails_closed_for_missing_module_and_creator)
 	ParserCTPOpt nullApi;
 	EXPECT_FALSE(nullApi.bindApi(&nullCtpOptCreator, tmp.path.c_str()));
 	EXPECT_FALSE(nullApi.isConnected());
+}
+
+TEST_F(R105OptTest, init_fails_closed_for_loaded_module_without_creator_symbol)
+{
+	R105OptTempDir tmp;
+	ASSERT_FALSE(tmp.path.empty());
+	WTSVariant* cfg = makeCfg(tmp.path + "/flow", WT_R105_CTP_OPT_MISSING_SYMBOL_MODULE);
+	ASSERT_NE(nullptr, cfg);
+
+	ParserCTPOpt parser;
+	parser.registerSpi(&sink_);
+	EXPECT_FALSE(parser.init(cfg));
+	EXPECT_FALSE(parser.isConnected());
+	EXPECT_EQ((DllHandle)NULL, parser.m_hInstCTP);
+	EXPECT_EQ(nullptr, parser.m_funcCreator);
+	EXPECT_TRUE(sink_.hasLog("Market data API creator symbol was not found"));
+	EXPECT_NO_THROW(parser.release());
+	cfg->release();
+}
+
+TEST_F(R105OptTest, init_fails_closed_when_loaded_creator_returns_null)
+{
+	R105OptTempDir tmp;
+	ASSERT_FALSE(tmp.path.empty());
+	WTSVariant* cfg = makeCfg(tmp.path + "/flow", WT_R105_CTP_OPT_NULL_CREATOR_MODULE);
+	ASSERT_NE(nullptr, cfg);
+
+	ParserCTPOpt parser;
+	parser.registerSpi(&sink_);
+	EXPECT_FALSE(parser.init(cfg));
+	EXPECT_FALSE(parser.isConnected());
+	EXPECT_EQ((DllHandle)NULL, parser.m_hInstCTP);
+	EXPECT_EQ(nullptr, parser.m_funcCreator);
+	EXPECT_TRUE(sink_.hasLog("Market data API creator returned null"));
+	EXPECT_NO_THROW(parser.release());
+	cfg->release();
+}
+
+TEST_F(R105OptTest, init_accepts_loaded_module_with_injected_api)
+{
+	R105OptTempDir tmp;
+	ASSERT_FALSE(tmp.path.empty());
+	WTSVariant* cfg = makeCfg(tmp.path + "/flow", WT_R105_CTP_OPT_SUCCESSFUL_CREATOR_MODULE);
+	ASSERT_NE(nullptr, cfg);
+
+	ParserCTPOpt parser;
+	parser.registerSpi(&sink_);
+	ASSERT_TRUE(parser.init(cfg));
+	EXPECT_TRUE(parser.isConnected());
+	EXPECT_NE((DllHandle)NULL, parser.m_hInstCTP);
+	EXPECT_NE(nullptr, parser.m_funcCreator);
+
+	parser.release();
+	EXPECT_FALSE(parser.isConnected());
+	EXPECT_EQ((DllHandle)NULL, parser.m_hInstCTP);
+	EXPECT_EQ(nullptr, parser.m_funcCreator);
+	cfg->release();
 }
 
 TEST_F(R105OptTest, zero_error_login_response_reports_success_and_subscribes)

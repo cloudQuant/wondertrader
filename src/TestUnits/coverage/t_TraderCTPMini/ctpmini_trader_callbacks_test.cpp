@@ -49,6 +49,8 @@ public:
 	using TraderCTPMini::genRequestID;
 
 	void setState(WrapperState s) { m_wrapperState = s; }
+	CThostFtdcTraderApi* api() const { return m_pUserAPI; }
+	bool workerNull() const { return m_thrdWorker == NULL; }
 	void setSession(uint32_t front, int32_t session, uint32_t ref)
 	{
 		m_frontID = front;
@@ -469,12 +471,15 @@ TEST(ctpmini, front_events_move_state_and_notify_sink)
 	ASSERT_EQ(3u, sink.events.size());
 	EXPECT_EQ((int32_t)WTE_Logout, sink.events[2].first);
 
-	// 心跳与 RspError 目前是空实现/仅日志
+	// 心跳只写诊断日志；RspError 当前是空实现。
 	api.OnHeartBeatWarning(5);
-	EXPECT_TRUE(sink.logs.empty());
+	ASSERT_EQ(1u, sink.logs.size());
+	EXPECT_EQ(LL_DEBUG, sink.logLevels[0]);
+	EXPECT_NE(std::string::npos, sink.logs[0].find("Heartbeating..."));
 	sink.mgr = NULL;
 	api.OnRspError(NULL, 1, true);
 	EXPECT_EQ(3u, sink.events.size());
+	EXPECT_EQ(1u, sink.logs.size());
 }
 
 TEST(ctpmini, register_spi_caches_bd_mgr_pointer)
@@ -818,14 +823,14 @@ TEST(ctpmini, rsp_qry_position_cover_one_computes_available)
 	// CoverOne：new=TodayPosition=4，pre=10-4=6
 	EXPECT_DOUBLE_EQ(4.0, sink.posNew);
 	EXPECT_DOUBLE_EQ(6.0, sink.posPre);
-	EXPECT_DOUBLE_EQ(14.0, sink.posTotal);
+	EXPECT_DOUBLE_EQ(10.0, sink.posTotal);
 	// availNew = 4 - ShortFrozen(0) = 4
 	EXPECT_DOUBLE_EQ(4.0, sink.posAvailNew);
-	// availPre = new+pre - longFrozen - shortFrozen - availNew = 14-3-0-4 = 7
-	EXPECT_DOUBLE_EQ(7.0, sink.posAvailPre);
+	// availPre = new+pre - longFrozen - shortFrozen - availNew = 10-3-0-4 = 3
+	EXPECT_DOUBLE_EQ(3.0, sink.posAvailPre);
 	EXPECT_DOUBLE_EQ(5000.0, sink.posMargin);
-	// avg = cost / total / volscale = 80000/14/10
-	EXPECT_DOUBLE_EQ(80000.0 / 14.0 / 10.0, sink.posAvg);
+	// avg = cost / total / volscale = 80000/10/10
+	EXPECT_DOUBLE_EQ(80000.0 / 10.0 / 10.0, sink.posAvg);
 	EXPECT_STREQ("ru2601", sink.code.c_str());
 
 	// 空头 + 今日仓：走 ShortFrozen 分支
@@ -908,12 +913,19 @@ TEST(ctpmini, release_is_safe_before_any_api_was_created)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 崩溃/起线程路径：整条 DISABLED
+// 连接初始化失败时按 ITraderApi 的 void 合同安全返回
 //////////////////////////////////////////////////////////////////////////
-TEST(ctpmini, DISABLED_init_and_connect_need_vendor_dylib)
+TEST(ctpmini, connect_without_initialized_creator_is_a_noop)
 {
-	GTEST_SKIP() << "init():132 get_symbol 失败后 m_funcCreator 为空；connect():169 直接调用 → SIGSEGV，"
-					"且 connect() 会起 StdThread 查询线程（本 lane 禁止起线程）";
+	Probe api;
+	FakeTraderSink sink;
+	api.registerSpi(&sink);
+
+	EXPECT_NO_THROW(api.connect());
+	EXPECT_EQ(nullptr, api.api());
+	EXPECT_TRUE(api.workerNull());
+	ASSERT_FALSE(sink.logs.empty());
+	EXPECT_NE(std::string::npos, sink.logs.back().find("creator is unavailable"));
 }
 
 TEST(ctpmini, DISABLED_disconnect_joins_worker_thread)

@@ -1,0 +1,29 @@
+--- /private/tmp/wt-i03-r15-tags/baseline/HftStraBaseCtx.cpp	2026-11-01 22:38:13
++++ src/WtCore/HftStraBaseCtx.cpp	2026-11-01 22:40:32
+@@ -819,7 +819,7 @@
+ 		dInfo._volume = abs(diff);
+ 		dInfo._opentime = curTm;
+ 		dInfo._opentdate = curTDate;
+-		wt_strcpy(dInfo._usertag, userTag);
++		dInfo._usertag = userTag ? userTag : "";
+ 		pInfo._details.emplace_back(dInfo);
+ 
+ 		double fee = commInfo->calcFee(trdPx, abs(diff), 0);
+@@ -866,7 +866,7 @@
+ 			//这里写成交记录
+ 			log_trade(stdCode, dInfo._long, false, curTm, trdPx, maxQty, fee, userTag);
+ 			//这里写平仓记录
+-			log_close(stdCode, dInfo._long, dInfo._opentime, dInfo._price, curTm, trdPx, maxQty, profit, maxProf, maxLoss, pInfo._closeprofit, dInfo._usertag, userTag);
++			log_close(stdCode, dInfo._long, dInfo._opentime, dInfo._price, curTm, trdPx, maxQty, profit, maxProf, maxLoss, pInfo._closeprofit, dInfo._usertag.c_str(), userTag);
+ 
+ 			if (left == 0)
+ 				break;
+@@ -891,7 +891,7 @@
+ 			dInfo._volume = abs(left);
+ 			dInfo._opentime = curTm;
+ 			dInfo._opentdate = curTDate;
+-			wt_strcpy(dInfo._usertag, userTag);
++			dInfo._usertag = userTag ? userTag : "";
+ 			pInfo._details.emplace_back(dInfo);
+ 
+ 			//这里还需要写一笔成交记录

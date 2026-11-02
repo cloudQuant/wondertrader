@@ -99,41 +99,51 @@ TEST_F(R80SliceUnsub, UnsubscribedMinuteBarsFeedSimTicks)
 	rp.register_sink(&sink, "r80_unsub");
 	sink.onInit = [&rp, &sink]() {
 		sink.slice = rp.get_kline_slice("SSE.STK.000001", "m", 1, 1, true);
+		rp.sub_tick(1, kSub);
 	};
-	rp.sub_tick(1, "SSE.STK.000002");
 
 	ASSERT_TRUE(rp.prepare());
 	ASSERT_NE(nullptr, sink.slice);
 	rp.run(false);
 
-	// 主合约分钟线：首根 930 作为历史，回放 931、932
-	ASSERT_EQ(2u, sink.bars.size());
-	EXPECT_EQ(931u, sink.bars[0].time);
-	EXPECT_EQ(932u, sink.bars[1].time);
+	// 回放起点包含 09:30，主合约的三根分钟线都应闭合回调。
+	ASSERT_EQ(3u, sink.bars.size());
+	const uint32_t mainTimes[] = { 930u, 931u, 932u };
+	const double mainCloses[] = { 20.2, 21.5, 22.5 };
+	for (uint32_t i = 0; i < 3; i++)
+	{
+		EXPECT_EQ(std::string("SSE.STK.000001"), sink.bars[i].code);
+		EXPECT_EQ(std::string("m"), sink.bars[i].period);
+		EXPECT_EQ(1u, sink.bars[i].times);
+		EXPECT_EQ(20200102u, sink.bars[i].date);
+		EXPECT_EQ(mainTimes[i], sink.bars[i].time);
+		EXPECT_DOUBLE_EQ(mainCloses[i], sink.bars[i].close);
+	}
 
-	// 未订阅合约只在 931、932 各出 4 笔 tick（930 被 checkUnbars 初始游标当历史）
+	// 未订阅合约在 09:30、09:31、09:32 各按开高低收生成 4 笔模拟 tick。
 	std::vector<r80::TickRec> subTicks;
 	for (const r80::TickRec& rec : sink.ticks)
 	{
 		if (rec.code == kSub)
 			subTicks.push_back(rec);
 	}
-	ASSERT_EQ(8u, subTicks.size());
-	for (uint32_t d = 0; d < 2; d++)
+	ASSERT_EQ(12u, subTicks.size());
+	const double ohlc[3][4] = {
+		{ 20.0, 20.5, 19.5, 20.2 },
+		{ 21.0, 22.0, 20.5, 21.5 },
+		{ 22.0, 23.0, 21.5, 22.5 }
+	};
+	for (uint32_t d = 0; d < 3; d++)
 	{
-		const uint32_t tm = (d == 0) ? 931u : 932u;
-		const double open = (d == 0) ? 21.0 : 22.0;
-		const double high = (d == 0) ? 22.0 : 23.0;
-		const double low = (d == 0) ? 20.5 : 21.5;
-		const double close = (d == 0) ? 21.5 : 22.5;
+		const uint32_t tm = mainTimes[d];
 		for (uint32_t i = 0; i < 4; i++)
 		{
 			const r80::TickRec& rec = subTicks[d * 4 + i];
+			EXPECT_EQ(std::string(kSub), rec.code);
 			EXPECT_EQ(20200102u, rec.date);
 			EXPECT_EQ(tm, rec.time);
 			EXPECT_EQ(i, rec.pxType);
-			const double want = (i == 0) ? open : (i == 1) ? high : (i == 2) ? low : close;
-			EXPECT_DOUBLE_EQ(want, rec.price);
+			EXPECT_DOUBLE_EQ(ohlc[d][i], rec.price);
 		}
 	}
 
@@ -154,7 +164,8 @@ TEST_F(R80SliceUnsub, HotRuleFutureCsvUsesRuleDsbName)
 	r80::CfgOpts opts;
 	opts.commodity = (_root / "dist/common/commodities.json").string();
 	opts.hot = (_root / "dist/common/hots.json").string();
-	WTSVariant* cfg = r80::make_cfg(_root, _base, 202001010930ull, 202001031500ull, opts);
+	// Jan01 日线作为已完成前值，回放从次交易日 Jan02 开始。
+	WTSVariant* cfg = r80::make_cfg(_root, _base, 202001020930ull, 202001031500ull, opts);
 	ASSERT_TRUE(rp.init(cfg));
 	cfg->release();
 
@@ -167,6 +178,7 @@ TEST_F(R80SliceUnsub, HotRuleFutureCsvUsesRuleDsbName)
 	ASSERT_TRUE(rp.prepare());
 	ASSERT_NE(nullptr, sink.slice);
 	EXPECT_EQ(1u, sink.slice->size());
+	EXPECT_EQ(20200101u, sink.slice->at(0)->date);
 	EXPECT_DOUBLE_EQ(100.5, sink.slice->at(0)->close);
 
 	const std::filesystem::path dsb = _base / "his" / "day" / "CFFEX" / "CFFEX.IF_HOT.dsb";
@@ -174,8 +186,22 @@ TEST_F(R80SliceUnsub, HotRuleFutureCsvUsesRuleDsbName)
 
 	rp.run(false);
 	ASSERT_EQ(8u, sink.ticks.size());
-	for (const r80::TickRec& rec : sink.ticks)
-		EXPECT_EQ(std::string("CFFEX.IF.HOT"), rec.code);
+	const double ohlc[2][4] = {
+		{ 101.0, 102.0, 100.5, 101.5 },
+		{ 102.0, 103.0, 101.5, 102.5 }
+	};
+	for (uint32_t d = 0; d < 2; d++)
+	{
+		for (uint32_t i = 0; i < 4; i++)
+		{
+			const r80::TickRec& rec = sink.ticks[d * 4 + i];
+			EXPECT_EQ(std::string("CFFEX.IF.HOT"), rec.code);
+			EXPECT_EQ(d == 0 ? 20200102u : 20200103u, rec.date);
+			EXPECT_EQ(1500u, rec.time);
+			EXPECT_EQ(i, rec.pxType);
+			EXPECT_DOUBLE_EQ(ohlc[d][i], rec.price);
+		}
+	}
 	EXPECT_EQ(1u, sink.doneCalls);
 
 	sink.slice->release();

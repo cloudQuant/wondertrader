@@ -366,7 +366,7 @@ private:
 	 * @brief 加载缓存
 	 * @details 加载或创建Tick和K线缓存文件，并初始化相关的内存结构
 	 */
-	void loadCache();
+	bool loadCache();
 
 	/**
 	 * @brief 更新Tick缓存

@@ -1,0 +1,7 @@
++ /usr/bin/c++ -std=c++17 -Wall -Wextra -Werror -Isrc src/TestUnits/fixtures/lmdb_bar_key_v2/lmdb_bar_key_v2_test.cpp -o /private/tmp/wt-i03-lmdb-v2-final2/key-test
++ perl -e 'alarm 30; exec @ARGV' -- /private/tmp/wt-i03-lmdb-v2-final2/key-test
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ -std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined -fno-omit-frame-pointer -Isrc src/TestUnits/fixtures/lmdb_bar_key_v2/lmdb_bar_key_v2_test.cpp -o /private/tmp/wt-i03-lmdb-v2-final2/key-test-sanitized
++ ASAN_OPTIONS=detect_leaks=1:halt_on_error=1
++ UBSAN_OPTIONS=halt_on_error=1
++ perl -e 'alarm 30; exec @ARGV' -- /private/tmp/wt-i03-lmdb-v2-final2/key-test-sanitized
++ set +x

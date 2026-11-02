@@ -17,6 +17,7 @@
 #include "Includes/WTSContractInfo.hpp"
 #include "Includes/WTSStruct.h"
 #include "Includes/WTSDataDef.hpp"
+#include "Includes/WTSSessionInfo.hpp"
 #include "WtExeFact/WtMinImpactExeUnit.h"
 
 using namespace wtp;
@@ -73,10 +74,17 @@ public:
 		return ids;
 	}
 
-	void writeLog(const char*) override {}
+	void writeLog(const char* log) override { logs.emplace_back(log ? log : ""); }
 	WTSCommodityInfo* getCommodityInfo(const char*) override { return comm; }
 	WTSSessionInfo* getSessionInfo(const char*) override { return sess; }
 	uint64_t getCurTime() override { return curTime; }
+	bool hasLog(const std::string& needle) const
+	{
+		for (const std::string& log : logs)
+			if (log.find(needle) != std::string::npos)
+				return true;
+		return false;
+	}
 
 public:
 	double pos = 0;
@@ -91,6 +99,7 @@ public:
 	std::vector<Rec> sells;
 	std::vector<std::pair<std::string, bool>> bydirCancels;
 	std::vector<uint32_t> byidCancels;
+	std::vector<std::string> logs;
 	OrderIDs lastIds;
 };
 
@@ -155,6 +164,14 @@ struct Harness
 	{
 		comm = mkComm();
 		ctx.comm = comm;
+		ctx.sess = WTSSessionInfo::create("N05_MINIMPACT", "N05 min impact test session");
+		ctx.sess->addTradingSection(900, 1500);
+	}
+
+	~Harness()
+	{
+		if (ctx.sess)
+			ctx.sess->release();
 	}
 };
 }
@@ -267,6 +284,8 @@ TEST(n05_minimpact, clear_all_position_forced_sell)
 		unit.init(&h.ctx, "rb2401", cfg);
 		cfg->release();
 
+		// 先将正常目标设为当前仓位，避免 tick 在显式清仓前按默认零目标发普通平仓单。
+		unit.set_position("rb2401", 10);
 		WTSTickData* tick = mkTick("rb2401", 93000000, 3505, 3500, 100, 3510, 50);
 		unit.on_tick(tick);
 		unit.clear_all_position("rb2401");
@@ -331,9 +350,9 @@ TEST(n05_minimpact, cancel_opposite_live_orders_then_reorder)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 超时撤单：on_tick 内按 expire_secs 扫描并撤单
+// 超时处理：缺少端到端订单身份时，旧 localid 接口必须 fail-closed
 //////////////////////////////////////////////////////////////////////////
-TEST(n05_minimpact, expired_order_canceled_on_next_tick)
+TEST(n05_minimpact, expired_order_fails_closed_without_verified_cancel_identity)
 {
 	Harness h;
 	{
@@ -346,18 +365,14 @@ TEST(n05_minimpact, expired_order_canceled_on_next_tick)
 		unit.set_position("rb2401", 5);
 		unit.on_tick(t1);
 		ASSERT_EQ(h.ctx.buys.size(), 1u);
-		uint32_t liveId = h.ctx.lastIds[0];
 
-		// 时间前进 2s，新 tick 进来 -> 过期订单被按 id 撤销
+		// 超时检查使用旧 localid 撤单接口，不能证明端到端订单身份，因此必须 fail-closed。
 		h.ctx.curTime += 2000;
 		WTSTickData* t2 = mkTick("rb2401", 93002000, 3506, 3501, 100, 3511, 50);
 		unit.on_tick(t2);
-		ASSERT_EQ(h.ctx.byidCancels.size(), 1u);
-		EXPECT_EQ(h.ctx.byidCancels[0], liveId);
-
-		// 撤单回报后 cancel_cnt 归零，重算发新单（同一目标仓位未达成）
-		unit.on_order(liveId, "rb2401", true, 3, 3505, true);
-		EXPECT_EQ(h.ctx.buys.size(), 2u);
+		EXPECT_TRUE(h.ctx.byidCancels.empty());
+		EXPECT_EQ(h.ctx.buys.size(), 1u);
+		EXPECT_TRUE(h.ctx.hasLog("cannot be auto-canceled: legacy localid is unverified; order remains monitored"));
 		t1->release();
 		t2->release();
 	}

@@ -209,6 +209,11 @@ void WtStockVWapExeUnit::init(ExecuteContext * ctx, const char * stdCode, WTSVar
 	_config_valid = false;
 	_execution_state = ExecutionState::active;
 	_pending_remainder = 0;
+	_pending_action = PendingAction::none;
+	_retry_not_before = 0;
+	_target_pos = 0;
+	_target_pos_valid = false;
+	_this_target = 0;
 	_target_generation = 0;
 	_order_target_generations.clear();
 	if (ctx == nullptr || stdCode == nullptr || stdCode[0] == '\0' || cfg == nullptr)
@@ -441,6 +446,11 @@ void WtStockVWapExeUnit::on_channel_ready()
 		return;
 	// 标记交易通道为就绪状态
 	_channel_ready = true;
+	if (hasUnverifiedSubmission())
+	{
+		_ctx->writeLog(fmt::format("{} submission outcome unverified; channel reconciliation and automatic actions held", _code).c_str());
+		return;
+	}
 	
 	// 获取未完成的订单数量
 	double undone = _ctx->getUndoneQty(_code.c_str());
@@ -448,6 +458,7 @@ void WtStockVWapExeUnit::on_channel_ready()
 	// 情况1: 如果有未完成订单但本地没有订单记录，需要清除未被管理的订单
 	if (!decimal::eq(undone, 0) && !_orders_mon.has_order())
 	{
+		if (!wtRunIfNoUnverifiedTimeout(_orders_mon, [this, undone]() {
 		/*
 		 *	如果未完成单不为0，而OMS没有订单
 		 *	这说明有未完成单不在监控之中,全部撤销掉
@@ -460,6 +471,8 @@ void WtStockVWapExeUnit::on_channel_ready()
 		bool isBuy = (undone > 0);
 		
 		// 撤销对应方向的所有未完成订单
+		if (hasUnverifiedSubmission())
+			return;
 		OrderIDs ids = _ctx->cancel(_code.c_str(), isBuy);
 		
 		// 将撤销的订单添加到监控器中进行跟踪
@@ -470,6 +483,8 @@ void WtStockVWapExeUnit::on_channel_ready()
 
 		// 记录撤单日志
 		_ctx->writeLog(fmtutil::format("[{}@{}]cancelcnt -> {}", __FILE__, __LINE__, _cancel_cnt));
+		}))
+			_ctx->writeLog(fmt::format("Unmanaged-order cancellation for {} suppressed after an unverified timeout", _code).c_str());
 	}
 	// 情况2: 如果没有未完成订单但本地有订单记录，需要清除本地错误订单
 	else if (decimal::eq(undone, 0) && _orders_mon.has_order())
@@ -548,6 +563,8 @@ void WtStockVWapExeUnit::on_tick(WTSTickData * newTick)
 {
 	// 检查行情数据是否有效且属于当前合约
 	if (newTick == NULL || _code.compare(newTick->code()) != 0)
+		return;
+	if (hasUnverifiedSubmission())
 		return;
 	if (!_config_valid)
 		return;
@@ -677,6 +694,12 @@ void WtStockVWapExeUnit::on_tick(WTSTickData * newTick)
 		_pending_action = PendingAction::none;
 		if (action == PendingAction::retry)
 		{
+			if (!_target_pos_valid)
+			{
+				_ctx->writeLog(fmt::format("{} canceled-order retry skipped before a stock VWAP target was established", _code).c_str());
+				return;
+			}
+
 			const int64_t tick_epoch = TimeUtils::makeTime(_last_tick->actiondate(), _last_tick->actiontime());
 			if (_retry_not_before != 0 && tick_epoch < _retry_not_before)
 			{
@@ -808,9 +831,9 @@ void WtStockVWapExeUnit::on_entrust(uint32_t localid, const char * /*stdCode*/, 
  */
 void WtStockVWapExeUnit::do_calc()
 {
-	if (_orders_mon.has_unverified_timeout())
+	if (hasUnverifiedSubmission() || _orders_mon.has_unverified_timeout())
 		return;
-	if (!_config_valid || _ctx == nullptr || _last_tick == nullptr)
+	if (!_config_valid || !_target_pos_valid || _ctx == nullptr || _last_tick == nullptr)
 		return;
 
 	// 防止重入计算
@@ -946,6 +969,8 @@ void WtStockVWapExeUnit::do_calc()
 		decimal::gt(abs(undone), abs(requestedRemainder));
 	if (oppositeLiveOrder || oversizedSameDirectionOrder)
 	{
+		if (hasUnverifiedSubmission())
+			return;
 		OrderIDs ids = _ctx->cancel(code, undoneIsBuy);
 		if (!ids.empty())
 		{
@@ -1102,7 +1127,7 @@ void WtStockVWapExeUnit::do_calc()
 		isCanCancel = false;	//如果价格被修正为涨跌停价，订单不可撤销
 	}
 	OrderIDs ids;
-	if (_orders_mon.has_unverified_timeout())
+	if (hasUnverifiedSubmission() || _orders_mon.has_unverified_timeout())
 		return;
 	if (curQty > 0)
 	{
@@ -1110,6 +1135,14 @@ void WtStockVWapExeUnit::do_calc()
 	}
 	else {
 		ids = _ctx->sell(code, targetPx, abs(curQty));
+	}
+	if (ids.empty())
+	{
+		_unverified_submission.store(true);
+		_pending_action = PendingAction::none;
+		_retry_not_before = 0;
+		_ctx->writeLog(fmt::format("{} order returned no IDs; submission outcome unverified, automatic actions held", _code).c_str());
+		return;
 	}
 	_orders_mon.push_order(ids.data(), ids.size(), now, isCanCancel);
 	for (uint32_t localid : ids)
@@ -1160,7 +1193,7 @@ double WtStockVWapExeUnit::get_retry_quantity()
  */
 void WtStockVWapExeUnit::fire_at_once(double qty)
 {
-	if (_orders_mon.has_unverified_timeout())
+	if (hasUnverifiedSubmission() || _orders_mon.has_unverified_timeout())
 		return;
 	// 如果数量为0，直接返回
 	if (decimal::eq(qty, 0) || !_config_valid || _last_tick == nullptr || _comm_info == nullptr)
@@ -1217,8 +1250,8 @@ void WtStockVWapExeUnit::fire_at_once(double qty)
 		targetPx = curTick->price();
 	}
 	else if (_price_mode == 1) {
-		// 使用最优价：买入时用卖一价，卖出时用买一价
-		targetPx = isBuy ? curTick->askprice(0) : curTick->bidprice(0);
+		// 使用本方最优价：买入时用买一价，卖出时用卖一价
+		targetPx = isBuy ? curTick->bidprice(0) : curTick->askprice(0);
 	}
 	else // if(_price_mode == 2)
 	{
@@ -1254,7 +1287,7 @@ void WtStockVWapExeUnit::fire_at_once(double qty)
 	OrderIDs ids;
 	
 	// 根据数量正负发送买入或卖出订单
-	if (_orders_mon.has_unverified_timeout())
+	if (hasUnverifiedSubmission() || _orders_mon.has_unverified_timeout())
 	{
 		curTick->release();
 		return;
@@ -1267,22 +1300,12 @@ void WtStockVWapExeUnit::fire_at_once(double qty)
 		ids = _ctx->sell(code, targetPx, abs(qty));
 	if (ids.empty())
 	{
-		_pending_action = PendingAction::retry;
+		_unverified_submission.store(true);
+		_pending_action = PendingAction::none;
 		_last_tick_time = curTickTime;
-		// Throttle only failed ID returns. _fire_span is seconds; compare against
-		// the fresh tick's calendar timestamp so midnight rollover is explicit.
-		// A zero span is otherwise valid (tail_secs may equal the duration), so
-		// use a documented 1-second fail-safe only for this failed-send path.
-		const uint32_t retry_interval_secs = _fire_span == 0 ? 1 : _fire_span;
-		const int64_t retry_tick_epoch = TimeUtils::makeTime(curTick->actiondate(), curTick->actiontime());
-		_retry_not_before = retry_tick_epoch + static_cast<int64_t>(retry_interval_secs) * 1000;
-		if (_fire_span == 0)
-			_ctx->writeLog(fmt::format("{} retry order returned no order ids; configured fire_span is zero (including tail_secs==duration), using a 1-second fail-safe retry interval",
-				_code).c_str());
-		else
-			_ctx->writeLog(fmt::format("{} retry order returned no order ids; waiting at least {} seconds per configured fire_span",
-				_code, retry_interval_secs).c_str());
+		_retry_not_before = 0;
 		curTick->release();
+		_ctx->writeLog(fmt::format("{} retry order returned no IDs; submission outcome unverified, automatic actions held", _code).c_str());
 		return;
 	}
 
@@ -1315,7 +1338,7 @@ void WtStockVWapExeUnit::set_position(const char * stdCode, double newVol)
 		return;
 
 	// 如果目标仓位与当前设置的一样，则不需要重复设置
-	if (decimal::eq(newVol, _target_pos))
+	if (_target_pos_valid && decimal::eq(newVol, _target_pos))
 		return;
 	
 	// 验证目标仓位是否合法（不能为负数）
@@ -1324,6 +1347,7 @@ void WtStockVWapExeUnit::set_position(const char * stdCode, double newVol)
 		_ctx->writeLog(fmt::format("{} is an error stock target position", newVol).c_str());
 		return;
 	}
+	_target_pos_valid = true;
 	_pending_action = PendingAction::none;
 	_retry_not_before = 0;
 	++_target_generation;
@@ -1387,6 +1411,7 @@ void WtStockVWapExeUnit::clear_all_position(const char* stdCode) {
 	
 	// 将目标仓位和目标数量设为0
 	_target_pos = 0;
+	_target_pos_valid = true;
 	_target_amount = 0;
 	
 	// 触发计算逻辑执行清仓

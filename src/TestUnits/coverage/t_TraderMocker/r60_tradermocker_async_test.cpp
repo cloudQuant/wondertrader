@@ -19,10 +19,12 @@
 #include <gtest/gtest.h>
 
 #include <atomic>
+#include <cerrno>
 #include <chrono>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <fcntl.h>
 #include <map>
 #include <mutex>
 #include <string>
@@ -30,6 +32,7 @@
 #include <vector>
 
 #include <unistd.h>
+#include <sys/wait.h>
 
 #include <boost/asio.hpp>
 
@@ -627,6 +630,34 @@ namespace
 		return port;
 	}
 
+	boost::system::error_code try_bind_udp_port(uint16_t port)
+	{
+		boost::asio::io_context io;
+		boost::asio::ip::udp::socket probe(io);
+		probe.open(boost::asio::ip::udp::v4());
+		boost::system::error_code ec;
+		probe.bind(boost::asio::ip::udp::endpoint(boost::asio::ip::address_v4::any(), port), ec);
+		return ec;
+	}
+
+	std::vector<int> open_fd_snapshot()
+	{
+		std::vector<int> open_fds;
+		const int fd_limit = getdtablesize();
+		for (int fd = 0; fd < fd_limit; ++fd)
+		{
+			int result;
+			do
+			{
+				result = fcntl(fd, F_GETFD);
+			} while (result == -1 && errno == EINTR);
+
+			if (result != -1 || errno != EBADF)
+				open_fds.push_back(fd);
+		}
+		return open_fds;
+	}
+
 	void send_udp_word(uint16_t port, uint32_t word)
 	{
 		boost::asio::io_context io;
@@ -634,6 +665,309 @@ namespace
 		sender.open(boost::asio::ip::udp::v4());
 		const boost::asio::ip::udp::endpoint ep(boost::asio::ip::address_v4::loopback(), port);
 		sender.send_to(boost::asio::buffer(&word, sizeof(word)), ep);
+	}
+
+	TEST_F(R60MockerTest, release_and_destructor_free_bound_udp_port)
+	{
+		const uint16_t releasePort = pick_free_udp_port();
+		init_api(9608, releasePort);
+		connect_api();
+
+		EXPECT_EQ(boost::asio::error::address_in_use, try_bind_udp_port(releasePort));
+		EXPECT_NO_THROW(api_.release());
+		EXPECT_NO_THROW(api_.release());
+		EXPECT_FALSE(try_bind_udp_port(releasePort)) << "release must free the UDP port";
+
+		const uint16_t destructorPort = pick_free_udp_port();
+		R60MockerSink destructorSink;
+		{
+			TraderMocker destructorApi;
+			destructorApi.registerSpi(&destructorSink);
+			WTSVariant* cfg = WTSVariant::createObject();
+			cfg->append("span", 5);
+			cfg->append("newpx", true);
+			cfg->append("mockerid", 9609);
+			cfg->append("maxqty", 10);
+			cfg->append("minqty", 1);
+			cfg->append("udp_port", destructorPort);
+			const bool initialized = destructorApi.init(cfg);
+			cfg->release();
+			ASSERT_TRUE(initialized);
+			destructorApi.connect();
+			ASSERT_TRUE(wait_until([&destructorSink]() { return destructorSink.n_event() >= 1; }));
+			EXPECT_EQ(boost::asio::error::address_in_use, try_bind_udp_port(destructorPort));
+		}
+		EXPECT_FALSE(try_bind_udp_port(destructorPort)) << "destructor must reuse the release cleanup path";
+	}
+
+	TEST_F(R60MockerTest, repeated_instance_lifecycle_does_not_grow_process_fds)
+	{
+		// Initialize the local UDP runtime before taking the baseline snapshot.
+		(void)pick_free_udp_port();
+		const std::vector<int> baseline_fds = open_fd_snapshot();
+		ASSERT_FALSE(baseline_fds.empty());
+		RecordProperty("fd_baseline_count", std::to_string(baseline_fds.size()));
+
+		const uint32_t cycle_count = 8;
+		RecordProperty("fd_cycle_count", std::to_string(cycle_count));
+		for (uint32_t cycle = 0; cycle < cycle_count; ++cycle)
+		{
+			const uint16_t port = pick_free_udp_port();
+			R60MockerSink cycle_sink;
+			{
+				TraderMocker api;
+				api.registerSpi(&cycle_sink);
+				WTSVariant* cfg = WTSVariant::createObject();
+				cfg->append("span", 5);
+				cfg->append("newpx", true);
+				cfg->append("mockerid", 9620 + cycle);
+				cfg->append("maxqty", 10);
+				cfg->append("minqty", 1);
+				cfg->append("udp_port", port);
+				const bool initialized = api.init(cfg);
+				cfg->release();
+				ASSERT_TRUE(initialized) << "cycle " << cycle;
+
+				api.connect();
+				ASSERT_TRUE(wait_until([&cycle_sink]() { return cycle_sink.n_event() >= 1; }))
+					<< "cycle " << cycle;
+				EXPECT_EQ(boost::asio::error::address_in_use, try_bind_udp_port(port)) << "cycle " << cycle;
+				EXPECT_NO_THROW(api.release()) << "cycle " << cycle;
+				EXPECT_NO_THROW(api.release()) << "cycle " << cycle;
+				EXPECT_FALSE(try_bind_udp_port(port)) << "release failed to free cycle " << cycle << " port";
+			}
+
+			EXPECT_FALSE(try_bind_udp_port(port)) << "destructor failed to free cycle " << cycle << " port";
+			const std::vector<int> current_fds = open_fd_snapshot();
+			RecordProperty("fd_cycle_" + std::to_string(cycle) + "_count", std::to_string(current_fds.size()));
+			EXPECT_EQ(baseline_fds.size(), current_fds.size()) << "cycle " << cycle;
+			EXPECT_EQ(baseline_fds, current_fds) << "open fd set changed after cycle " << cycle;
+		}
+	}
+
+	TEST_F(R60MockerTest, same_instance_reinitializes_and_delivers_each_connect)
+	{
+		(void)pick_free_udp_port();
+		const std::vector<int> baselineFds = open_fd_snapshot();
+		std::vector<int> warmedFds;
+		{
+			R60MockerSink sink;
+			TraderMocker api;
+			api.registerSpi(&sink);
+			for (int cycle = 0; cycle != 2; ++cycle)
+			{
+				const uint16_t port = pick_free_udp_port();
+				WTSVariant* cfg = WTSVariant::createObject();
+				cfg->append("span", 5);
+				cfg->append("newpx", true);
+				cfg->append("mockerid", 9690);
+				cfg->append("maxqty", 10);
+				cfg->append("minqty", 1);
+				cfg->append("udp_port", port);
+				const bool initialized = api.init(cfg);
+				cfg->release();
+				ASSERT_TRUE(initialized);
+				const uint32_t previousEvents = sink.n_event();
+				api.connect();
+				const bool connected = wait_until([&]() { return sink.n_event() == previousEvents + 1; });
+				EXPECT_TRUE(connected) << "connect event was not delivered in cycle " << cycle;
+				EXPECT_EQ(boost::asio::error::address_in_use, try_bind_udp_port(port));
+				api.release();
+				api.release();
+				EXPECT_FALSE(try_bind_udp_port(port));
+				if (cycle == 0)
+					warmedFds = open_fd_snapshot();
+				else
+					EXPECT_EQ(warmedFds, open_fd_snapshot());
+			}
+		}
+		EXPECT_EQ(baselineFds, open_fd_snapshot());
+	}
+
+	TEST_F(R60MockerTest, released_instance_does_not_deliver_old_queued_query_after_reinit)
+	{
+		init_api(9691, pick_free_udp_port());
+		connect_api();
+		api_.release();
+
+		// The existing API accepts this post while its io_context is stopped.
+		// A later lifecycle must never deliver it to the current listener.
+		api_.queryAccount();
+		init_api(9691, pick_free_udp_port());
+		api_.connect();
+		ASSERT_TRUE(wait_until([this]() { return sink_.n_event() == 2; }));
+		EXPECT_EQ(0u, sink_.n_account()) << "a query queued while released crossed into the new lifecycle";
+	}
+
+	TEST_F(R60MockerTest, release_reentered_from_connect_callback_does_not_terminate)
+	{
+		const pid_t child = ::fork();
+		ASSERT_GE(child, 0);
+		if (child == 0)
+		{
+			std::set_terminate([] { std::_Exit(88); });
+			::alarm(8);
+			class ReentrantSink : public R60MockerSink
+			{
+			public:
+				TraderMocker* api = nullptr;
+				std::atomic<bool> returned{false};
+				void handleEvent(WTSTraderEvent, int32_t) override
+				{
+					api->release();
+					returned.store(true);
+				}
+			};
+			ReentrantSink sink;
+			TraderMocker api;
+			sink.api = &api;
+			api.registerSpi(&sink);
+			WTSVariant* cfg = WTSVariant::createObject();
+			cfg->append("span", 5);
+			cfg->append("mockerid", 9692);
+			cfg->append("maxqty", 10);
+			cfg->append("minqty", 1);
+			cfg->append("udp_port", pick_free_udp_port());
+			const bool initialized = api.init(cfg);
+			cfg->release();
+			if (!initialized) std::_Exit(11);
+			api.connect();
+			if (!wait_until([&]() { return sink.returned.load(); })) std::_Exit(12);
+			api.release();
+			std::_Exit(0);
+		}
+		int status = 0;
+		ASSERT_EQ(child, ::waitpid(child, &status, 0));
+		ASSERT_TRUE(WIFEXITED(status)) << "child did not exit normally; status=" << status;
+		EXPECT_EQ(0, WEXITSTATUS(status)) << "callback reentry terminated or failed";
+	}
+
+	TEST_F(R60MockerTest, ready_requests_remain_deferred_and_run_after_connect)
+	{
+		init_api(9693, pick_free_udp_port());
+		WTSEntrust* entrust = make_entrust("ag2512", "SHFE", ag_ct_, 7000.0, 2.0, WDT_LONG, WOT_OPEN);
+		WTSEntrustAction* action = WTSEntrustAction::create("ag2512", "SHFE");
+		action->setOrderID("missing-ready-order");
+		ASSERT_EQ(1u, entrust->retainCount());
+		ASSERT_EQ(1u, action->retainCount());
+		EXPECT_EQ(0, api_.queryAccount());
+		EXPECT_EQ(0, api_.queryPositions());
+		EXPECT_EQ(0, api_.queryOrders());
+		EXPECT_EQ(0, api_.queryTrades());
+		EXPECT_EQ(0, api_.orderInsert(entrust));
+		EXPECT_EQ(0, api_.orderAction(action));
+		EXPECT_EQ(2u, entrust->retainCount());
+		EXPECT_EQ(2u, action->retainCount());
+		EXPECT_EQ(0u, sink_.n_account());
+		EXPECT_EQ(0u, sink_.n_entrust());
+		connect_api();
+		EXPECT_EQ(1u, sink_.n_account());
+		EXPECT_EQ(1u, sink_.n_position());
+		EXPECT_EQ(1u, sink_.n_orders_rsp());
+		EXPECT_EQ(1u, sink_.n_trades_rsp());
+		EXPECT_EQ(1u, sink_.n_entrust());
+		EXPECT_EQ(1u, sink_.n_error());
+		EXPECT_EQ(1u, entrust->retainCount());
+		EXPECT_EQ(1u, action->retainCount());
+		entrust->release();
+		action->release();
+	}
+
+	TEST_F(R60MockerTest, stopped_requests_are_rejected_without_retaining)
+	{
+		const uint16_t port = pick_free_udp_port();
+		init_api(9694, port);
+		api_.release();
+		WTSEntrust* entrust = make_entrust("ag2512", "SHFE", ag_ct_, 7000.0, 2.0, WDT_LONG, WOT_OPEN);
+		WTSEntrustAction* action = WTSEntrustAction::create("ag2512", "SHFE");
+		EXPECT_LT(api_.orderInsert(entrust), 0);
+		EXPECT_LT(api_.orderAction(action), 0);
+		EXPECT_LT(api_.queryAccount(), 0);
+		EXPECT_LT(api_.queryPositions(), 0);
+		EXPECT_LT(api_.queryOrders(), 0);
+		EXPECT_LT(api_.queryTrades(), 0);
+		EXPECT_EQ(1u, entrust->retainCount());
+		EXPECT_EQ(1u, action->retainCount());
+		WTSVariant* cfg = WTSVariant::createObject();
+		cfg->append("span", 5); cfg->append("mockerid", 9694);
+		cfg->append("maxqty", 10); cfg->append("minqty", 1); cfg->append("udp_port", port);
+		EXPECT_FALSE(api_.init(cfg));
+		cfg->release();
+		api_.connect();
+		EXPECT_FALSE(try_bind_udp_port(port));
+		entrust->release();
+		action->release();
+	}
+
+	TEST_F(R60MockerTest, unexecuted_order_requests_release_references_on_destruction)
+	{
+		WTSEntrust* entrust = WTSEntrust::create("ag2512", 2, 7000, "SHFE");
+		WTSEntrustAction* action = WTSEntrustAction::create("ag2512", "SHFE");
+		{
+			TraderMocker api;
+			ASSERT_EQ(0, api.orderInsert(entrust));
+			ASSERT_EQ(0, api.orderAction(action));
+			ASSERT_EQ(2u, entrust->retainCount());
+			ASSERT_EQ(2u, action->retainCount());
+			api.release();
+		}
+		EXPECT_EQ(1u, entrust->retainCount());
+		EXPECT_EQ(1u, action->retainCount());
+		entrust->release();
+		action->release();
+	}
+
+	TEST_F(R60MockerTest, stopping_closes_request_admission_before_join)
+	{
+		class BlockingSink : public R60MockerSink
+		{
+		public:
+			std::atomic<bool> entered{false};
+			std::atomic<bool> resume{false};
+			void handleEvent(WTSTraderEvent, int32_t) override
+			{
+				entered.store(true);
+				while (!resume.load()) std::this_thread::yield();
+			}
+		};
+		BlockingSink sink;
+		TraderMocker api;
+		struct Unblock { BlockingSink& sink; ~Unblock() { sink.resume.store(true); } } unblock{sink};
+		api.registerSpi(&sink);
+		WTSVariant* cfg = WTSVariant::createObject();
+		cfg->append("span", 5); cfg->append("mockerid", 9695);
+		cfg->append("maxqty", 10); cfg->append("minqty", 1); cfg->append("udp_port", pick_free_udp_port());
+		ASSERT_TRUE(api.init(cfg));
+		cfg->release();
+		api.connect();
+		ASSERT_TRUE(wait_until([&] { return sink.entered.load(); }));
+		std::atomic<bool> releaseDone{false};
+		std::thread stopper([&] { api.release(); releaseDone.store(true); });
+		const bool closed = wait_until([&] { return api.queryAccount() < 0; }, 1000);
+		EXPECT_TRUE(closed) << "release did not close admission while its callback was active";
+		EXPECT_FALSE(releaseDone.load());
+		WTSVariant* retry = WTSVariant::createObject();
+		retry->append("span", 5); retry->append("mockerid", 9695);
+		retry->append("maxqty", 10); retry->append("minqty", 1); retry->append("udp_port", 0);
+		EXPECT_FALSE(api.init(retry));
+		retry->release();
+		if (closed)
+			for (int i = 0; i != 128; ++i) EXPECT_LT(api.queryAccount(), 0);
+		WTSEntrust* entrust = WTSEntrust::create("ag2512", 2, 7000, "SHFE");
+		WTSEntrustAction* action = WTSEntrustAction::create("ag2512", "SHFE");
+		EXPECT_LT(api.orderInsert(entrust), 0);
+		EXPECT_LT(api.orderAction(action), 0);
+		EXPECT_LT(api.queryAccount(), 0);
+		EXPECT_LT(api.queryPositions(), 0);
+		EXPECT_LT(api.queryOrders(), 0);
+		EXPECT_LT(api.queryTrades(), 0);
+		EXPECT_EQ(1u, entrust->retainCount());
+		EXPECT_EQ(1u, action->retainCount());
+		entrust->release();
+		action->release();
+		sink.resume.store(true);
+		stopper.join();
+		EXPECT_TRUE(releaseDone.load());
 	}
 
 	/* ------------------------------------------------------------------ */

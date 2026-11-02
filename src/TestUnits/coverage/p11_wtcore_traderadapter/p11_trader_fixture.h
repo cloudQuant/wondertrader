@@ -259,10 +259,39 @@ protected:
     p11fix::FakeBaseDataMgr bd_;
     p11fix::RecordingSink sink_;
     wtp::WTSCommodityInfo* comm_ = NULL;
+    wtp::WTSCommodityInfo* comm2_ = NULL;
     wtp::WTSContractInfo* ct_ = NULL;
     wtp::WTSContractInfo* ct2_ = NULL;
     std::filesystem::path tmp_;
     std::string id_ = "p11a";
+
+    ~P11TraderTest() override
+    {
+        // Derived fixture members (including any TraderAdapter) are destroyed
+        // before this base destructor. The fake base-data manager stores only
+        // borrowed pointers, so release the created contracts before their
+        // borrowed commodity pointers, then release both commodity creators.
+        if (ct2_)
+        {
+            ct2_->release();
+            ct2_ = NULL;
+        }
+        if (ct_)
+        {
+            ct_->release();
+            ct_ = NULL;
+        }
+        if (comm2_)
+        {
+            comm2_->release();
+            comm2_ = NULL;
+        }
+        if (comm_)
+        {
+            comm_->release();
+            comm_ = NULL;
+        }
+    }
 
     void SetUp() override
     {
@@ -288,14 +317,14 @@ protected:
         bd_.regis(comm_, ct_);
 
         // 第二个品种，用于验证「未登记合约 / 多合约」分支
-        wtp::WTSCommodityInfo* comm2 = wtp::WTSCommodityInfo::create("au", "沪金", p11fix::kExchg, "TRADING", "CHINA");
-        comm2->setCategory(wtp::CC_Future);
-        comm2->setCoverMode(wtp::CM_OpenCover);
-        comm2->setTradingMode(wtp::TM_Long);
+        comm2_ = wtp::WTSCommodityInfo::create("au", "沪金", p11fix::kExchg, "TRADING", "CHINA");
+        comm2_->setCategory(wtp::CC_Future);
+        comm2_->setCoverMode(wtp::CM_OpenCover);
+        comm2_->setTradingMode(wtp::TM_Long);
         ct2_ = wtp::WTSContractInfo::create("au2212", "au2212", p11fix::kExchg, "au");
         ct2_->setAltCode("au2212");
         ct2_->setVolumeLimits(0, 0);
-        bd_.regis(comm2, ct2_);
+        bd_.regis(comm2_, ct2_);
     }
 
     void TearDown() override

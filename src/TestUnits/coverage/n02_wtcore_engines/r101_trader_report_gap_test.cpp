@@ -92,7 +92,8 @@ TEST_F(R101TraderReport, AutoCancelErrorAndShortCloseBranches)
             2, 0, "SC1", tag("9001"), WOF_NOR);
         trader.onPushOrder(c);
         c->release();
-        EXPECT_DOUBLE_EQ(0.0, trader.getPosition(kStdCode, true, 2));
+        // 平今只扣今仓；昨仓仍可用2手，flag=2返回空头可用净额为 -2。
+        EXPECT_DOUBLE_EQ(-2.0, trader.getPosition(kStdCode, true, 2));
     }
 
     // 4) onPushTrade（净头寸）：平 5 手，昨仓 0、今仓 3，剩余应反手开多 2 手

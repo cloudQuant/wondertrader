@@ -346,8 +346,8 @@ TEST(n03_trader_adapter, fresh_adapter_public_accessors)
 	EXPECT_DOUBLE_EQ(0.0, adapter.getPosition("SSE.600000", false, 3));
 	EXPECT_DOUBLE_EQ(0.0, adapter.getPosition("SSE.600000", true, 1));
 	EXPECT_DOUBLE_EQ(0.0, adapter.getPosition("SSE.600000", true, 2));
-	// isTradeEnabled 在头文件里声明为 inline 却只在 TraderAdapter.cpp 里定义,
-	// 其它翻译单元引用会触发 -Wundefined-inline(-Werror), 见 BUG-N03-006, 故此处不调用。
+	// 关闭风控时公开接口应允许交易；该调用也从测试翻译单元验证头文件声明可链接。
+	EXPECT_TRUE(adapter.isTradeEnabled("SSE.600000"));
 
 	// init 传 NULL 参数直接失败
 	U3BaseDataMgr bdMgr;

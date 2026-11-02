@@ -105,17 +105,81 @@ bool WtDtMgr::init(WTSVariant* cfg, WtEngine* engine, bool bForceCache /* = fals
 
 void WtDtMgr::on_all_bar_updated(uint32_t /*updateTime*/)
 {
-	if (_bar_notifies.empty())
-		return;
-
-	WTSLogger::debug("All bars updated, on_bar will be triggered");
-
-	for (const NotifyItem& item : _bar_notifies)
+	std::list<NotifyItem> pending;
 	{
-		_engine->on_bar(item._code, item._period, item._times, item._newBar);
+		std::lock_guard<std::mutex> lock(_bar_notifies_mtx);
+		if (_bar_notifies_draining)
+		{
+			_bar_redrain_requested = true;
+			return;
+		}
+		if (_bar_notifies.empty())
+		{
+			_bar_redrain_requested = false;
+			return;
+		}
+
+		_bar_notifies_draining = true;
+		// A top-level drain takes responsibility for everything currently queued,
+		// including any redrain request preserved after a prior callback exception.
+		_bar_redrain_requested = false;
+		pending.splice(pending.end(), _bar_notifies);
 	}
 
-	_bar_notifies.clear();
+	bool logged = false;
+	while (true)
+	{
+		auto current = pending.begin();
+		try
+		{
+			if (!logged)
+			{
+				WTSLogger::debug("All bars updated, on_bar will be triggered");
+				logged = true;
+			}
+			for (; current != pending.end(); ++current)
+			{
+				// 不持队列锁调用引擎。CTA 回调可能等待工作线程，工作线程中的
+				// 数据读取又可能重新入队；锁只保护批次转移和请求状态。
+				_engine->on_bar(current->_code, current->_period, current->_times,
+					current->_has_bar ? &current->_newBar : NULL);
+			}
+		}
+		catch (...)
+		{
+			std::lock_guard<std::mutex> lock(_bar_notifies_mtx);
+			// 当前回调可能已经产生部分副作用，因此保留失败项供调用方重试；
+			// 已成功前缀不重发。异常期间收到的 redrain 请求保持到下次顶层 drain。
+			// splice 不分配，并将原批次后缀排在新入队项之前。
+			_bar_notifies.splice(_bar_notifies.begin(), pending, current, pending.end());
+			_bar_notifies_draining = false;
+			throw;
+		}
+
+		// 整批回调已同步返回，当前批完成且不会进入异常恢复路径；先释放它，
+		// 再拼接 redrain 批次，避免从 pending.begin() 重放已成功通知。
+		pending.clear();
+
+		std::lock_guard<std::mutex> lock(_bar_notifies_mtx);
+		if (_bar_redrain_requested && !_bar_notifies.empty())
+		{
+			// Only explicit drain requests pull arrivals into this top-level call.
+			// Notifications that were merely enqueued remain for a future drain.
+			_bar_redrain_requested = false;
+			pending.splice(pending.end(), _bar_notifies);
+			continue;
+		}
+
+		_bar_redrain_requested = false;
+		_bar_notifies_draining = false;
+		return;
+	}
+}
+
+void WtDtMgr::enqueue_bar_notify(const char* code, char period, uint32_t times, WTSBarStruct* newBar)
+{
+	std::lock_guard<std::mutex> lock(_bar_notifies_mtx);
+	_bar_notifies.emplace_back(NotifyItem(code, period, times, newBar));
 }
 
 IBaseDataMgr* WtDtMgr::get_basedata_mgr()
@@ -175,7 +239,7 @@ void WtDtMgr::on_bar(const char* code, WTSKlinePeriod period, WTSBarStruct* newB
 		//如果是基础周期, 直接触发on_bar事件
 		//_engine->on_bar(code, speriod.c_str(), times, newBar);
 		//更新完K线以后, 统一通知交易引擎
-		_bar_notifies.emplace_back(NotifyItem(code, speriod, times, newBar));
+		enqueue_bar_notify(code, speriod, times, newBar);
 	}
 
 	//然后再处理非基础周期
@@ -202,18 +266,18 @@ void WtDtMgr::on_bar(const char* code, WTSKlinePeriod period, WTSBarStruct* newB
 				//_engine->on_bar(code, speriod.c_str(), times, lastBar);
 				//更新完K线以后, 统一通知交易引擎
 				if (kData->period() == KP_Half)
-					_bar_notifies.emplace_back(NotifyItem(code, 'f', 1, lastBar));
+					enqueue_bar_notify(code, 'f', 1, lastBar);
 				else if (kData->period() == KP_Hour)
-					_bar_notifies.emplace_back(NotifyItem(code, 'h', 1, lastBar));
+					enqueue_bar_notify(code, 'h', 1, lastBar);
 				else
-					_bar_notifies.emplace_back(NotifyItem(code, speriod, times*kData->times(), lastBar));
+					enqueue_bar_notify(code, speriod, times*kData->times(), lastBar);
 			}
 		}
 		else
 		{
 			//如果是强制缓存的一倍周期，直接压到缓存队列里
 			kData->getDataRef().emplace_back(*newBar);
-			_bar_notifies.emplace_back(NotifyItem(code, speriod, times, newBar));
+			enqueue_bar_notify(code, speriod, times, newBar);
 		}
 	}
 }

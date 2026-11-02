@@ -139,6 +139,8 @@ TEST_F(R62HftMockerGap, SubscriptionsSlicesAndUserDataDump)
 {
 	HftMocker mocker(&_rp, "r62_hft_query");
 	_rp.register_sink(&mocker, "r62_hft_query");
+	// 01-02 日线在回放起点当天尚未完成；移到下一交易日以查询目标 01-02 bar。
+	_rp.set_time_range(202001030930ull, 202001081500ull);
 	ASSERT_TRUE(_rp.prepare());
 
 	mocker.stra_sub_ticks(kCu);
@@ -148,6 +150,7 @@ TEST_F(R62HftMockerGap, SubscriptionsSlicesAndUserDataDump)
 
 	WTSKlineSlice* bars = mocker.stra_get_bars(kCu, "d1", 5);
 	ASSERT_NE(nullptr, bars);
+	EXPECT_EQ(20200102u, bars->at(-1)->date);
 	EXPECT_DOUBLE_EQ(10.0, bars->at(-1)->close);
 	bars->release();
 
@@ -158,10 +161,10 @@ TEST_F(R62HftMockerGap, SubscriptionsSlicesAndUserDataDump)
 	EXPECT_EQ(nullptr, mocker.stra_get_last_tick(kCu));
 	EXPECT_EQ(std::string(""), mocker.stra_get_rawcode(kCu));
 	ASSERT_NE(nullptr, mocker.stra_get_comminfo(kCu));
-	// prepare() 已把回放游标设到配置 stime=20200102 09:30
+	// prepare() 已把回放游标设到显式 stime=20200103 09:30
 	// （HisDataReplayer.cpp:662-664），三个 getter 直接返回 _cur_date/_cur_time
 	// （HisDataReplayer.h:887-901），因此不是 0。
-	EXPECT_EQ(20200102u, mocker.stra_get_date());
+	EXPECT_EQ(20200103u, mocker.stra_get_date());
 	EXPECT_EQ(930u, mocker.stra_get_time());
 	EXPECT_EQ(0u, mocker.stra_get_secs());
 

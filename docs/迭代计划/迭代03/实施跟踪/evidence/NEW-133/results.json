@@ -1,0 +1,47 @@
+[
+  {
+    "case": "CacheResizeMapFailurePreservesOldCacheAndAllowsRetry",
+    "label": "failure",
+    "exit": 0,
+    "cwd": "/tmp/wt-i03-new133/run-failure",
+    "argv": [
+      "perl",
+      "-e",
+      "alarm 30; exec @ARGV",
+      "--",
+      "/tmp/wt-i03-new133/focused",
+      "--gtest_filter=R23WriterTest.CacheResizeMapFailurePreservesOldCacheAndAllowsRetry",
+      "--gtest_output=xml:/tmp/wt-i03-new133/run-failure/result.xml"
+    ]
+  },
+  {
+    "case": "CacheGrowsByStepWhenCapacityExhausted",
+    "label": "success",
+    "exit": 0,
+    "cwd": "/tmp/wt-i03-new133/run-success",
+    "argv": [
+      "perl",
+      "-e",
+      "alarm 30; exec @ARGV",
+      "--",
+      "/tmp/wt-i03-new133/focused",
+      "--gtest_filter=R23WriterTest.CacheGrowsByStepWhenCapacityExhausted",
+      "--gtest_output=xml:/tmp/wt-i03-new133/run-success/result.xml"
+    ]
+  },
+  {
+    "case": "CacheResizeMapFailurePreservesOldCacheAndAllowsRetry",
+    "label": "red",
+    "exit": 1,
+    "cwd": "/tmp/wt-i03-new133/run-red",
+    "argv": [
+      "perl",
+      "-e",
+      "alarm 30; exec @ARGV",
+      "--",
+      "/tmp/wt-i03-new133/red-focused",
+      "--gtest_filter=R23WriterTest.CacheResizeMapFailurePreservesOldCacheAndAllowsRetry",
+      "--gtest_output=xml:/tmp/wt-i03-new133/run-red/result.xml"
+    ]
+  }
+]

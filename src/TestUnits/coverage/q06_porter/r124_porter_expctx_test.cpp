@@ -161,7 +161,7 @@ namespace
 TEST(R124PorterExpCta, SubscribedTickIsForwarded)
 {
 	const std::string dir = prepare_dir("cta");
-	write_text(dir + "/actions.json", "{}");
+	write_text(dir + "/actions.json", "{\"default\":{}}");
 
 	g.clear();
 	register_cta_callbacks(NULL, cta_tick_cb, NULL, NULL, NULL, NULL);
@@ -197,7 +197,7 @@ TEST(R124PorterExpCta, SubscribedTickIsForwarded)
 TEST(R124PorterExpSel, SubscribedTickIsForwarded)
 {
 	const std::string dir = prepare_dir("sel");
-	write_text(dir + "/actions.json", "{}");
+	write_text(dir + "/actions.json", "{\"default\":{}}");
 
 	g.clear();
 	register_sel_callbacks(NULL, sel_tick_cb, NULL, NULL, NULL);
@@ -235,7 +235,7 @@ TEST(R124PorterExpSel, SubscribedTickIsForwarded)
 TEST(R124PorterExpHft, SubscribedTickAndTradeAreForwarded)
 {
 	const std::string dir = prepare_dir("hft");
-	write_text(dir + "/actions.json", "{}");
+	write_text(dir + "/actions.json", "{\"default\":{}}");
 	write_text(dir + "/sessions.json", kSessions);
 	write_text(dir + "/commodities.json", kCommodities);
 	write_text(dir + "/contracts.json", kContracts);

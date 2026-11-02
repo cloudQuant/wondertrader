@@ -1,0 +1,14 @@
+--- current
++++ baseline-with-only-path-guard-removed
+@@ -651,11 +651,6 @@
+ 		module = "fasttraderapi";
+ 	const std::string moduleFile = DLLHelper::wrap_module(module.c_str(), "lib");
+ 	const char* moduleDir = getBinDir();
+-	if ((moduleDir == NULL || *moduleDir == '\0') && !fs::path(moduleFile).is_absolute())
+-	{
+-		write_log(_sink, LL_ERROR, "[TraderHuaX] Cannot locate trader module directory");
+-		return false;
+-	}
+ 	std::string dllpath = (moduleDir == NULL ? std::string() : std::string(moduleDir)) + moduleFile;
+ 
+ 	_hInstHuaX = DLLHelper::load_library(dllpath.c_str());

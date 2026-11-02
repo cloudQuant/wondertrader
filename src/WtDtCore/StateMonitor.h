@@ -11,6 +11,7 @@
  *          监控器通过后台线程定期检查各个交易时间段的状态，执行相应的操作
  */
 #pragma once
+#include <atomic>
 #include <vector>
 #include "../Share/StdUtils.hpp"
 #include "../Includes/FasterDefs.h"
@@ -18,6 +19,7 @@
 
 NS_WTP_BEGIN
 class WTSSessionInfo;
+class WTSVariant;
 NS_WTP_END
 
 USING_NS_WTP;
@@ -223,6 +225,10 @@ public:
 
 private:
 	friend struct R154StateMonitorTestAccess;
+	friend struct Q05StateMonitorConfigTestAccess;
+
+	// Takes ownership of one config reference returned by WTSCfgLoader.
+	bool initializeConfig(WTSVariant* config);
 
 	// curMin is HHMM; run() supplies wall-clock values and tests supply fixed values.
 	void advanceOnce(uint32_t curDate, uint32_t curMin);
@@ -233,5 +239,7 @@ private:
 
 	StdThreadPtr	_thrd;      ///< 监控线程智能指针，用于定期检查状态
 
-	bool			_stopped;    ///< 停止标志，用于控制监控线程的结束
+	// This flag only signals the worker loop. It does not serialize run/stop
+	// or protect the lifetime of the thread and the monitor's dependencies.
+	std::atomic<bool> _stopped;   ///< 停止标志，用于控制监控线程的结束
 };

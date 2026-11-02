@@ -12,6 +12,10 @@
 #include "../Includes/IBaseDataMgr.h"
 
 #include <boost/filesystem.hpp>
+#include <filesystem>
+#ifdef WT_DATAWRITERAD_TEST_SEAMS
+#include <atomic>
+#endif
 #include <exception>
 #include <limits>
 namespace fs = boost::filesystem;
@@ -52,6 +56,156 @@ extern "C"
 };
 
 static const uint32_t CACHE_SIZE_STEP_AD = 400;
+
+namespace
+{
+	bool getRTCacheRequiredSize(uint32_t capacity, std::size_t itemSize, uint64_t& requiredSize)
+	{
+		const uint64_t headerSize = sizeof(RTBlockHeader);
+		if (itemSize == 0 || capacity > (std::numeric_limits<uint64_t>::max)() / itemSize)
+			return false;
+
+		const uint64_t itemsSize = static_cast<uint64_t>(capacity) * itemSize;
+		if (itemsSize > (std::numeric_limits<uint64_t>::max)() - headerSize)
+			return false;
+
+		requiredSize = headerSize + itemsSize;
+		return requiredSize <= (std::numeric_limits<std::size_t>::max)();
+	}
+
+	bool validateRTCacheHeader(const RTBlockHeader& header, uint64_t fileSize,
+		std::size_t itemSize, const std::string& filename, const char* cacheName,
+		IDataWriterSink* sink)
+	{
+		if (std::memcmp(header._blk_flag, BLK_FLAG, FLAG_SIZE) != 0)
+		{
+			pipe_writer_log(sink, LL_ERROR, "Invalid {} cache file {}: bad block flag", cacheName, filename);
+			return false;
+		}
+		if (header._type != BT_RT_Cache)
+		{
+			pipe_writer_log(sink, LL_ERROR, "Invalid {} cache file {}: unexpected block type {}",
+				cacheName, filename, header._type);
+			return false;
+		}
+		if (header._version != 1)
+		{
+			pipe_writer_log(sink, LL_ERROR, "Invalid {} cache file {}: unsupported version {}",
+				cacheName, filename, header._version);
+			return false;
+		}
+		if (header._size > header._capacity)
+		{
+			pipe_writer_log(sink, LL_ERROR,
+				"Invalid {} cache file {}: size {} exceeds capacity {}",
+				cacheName, filename, header._size, header._capacity);
+			return false;
+		}
+		if (fileSize > (std::numeric_limits<std::size_t>::max)())
+		{
+			pipe_writer_log(sink, LL_ERROR, "Invalid {} cache file {}: file length is not representable",
+				cacheName, filename);
+			return false;
+		}
+
+		uint64_t requiredSize = 0;
+		if (!getRTCacheRequiredSize(header._capacity, itemSize, requiredSize))
+		{
+			pipe_writer_log(sink, LL_ERROR, "Invalid {} cache file {}: capacity {} is not representable",
+				cacheName, filename, header._capacity);
+			return false;
+		}
+		if (requiredSize > fileSize)
+		{
+			pipe_writer_log(sink, LL_ERROR,
+				"Invalid {} cache file {}: capacity {} requires {} bytes, file has {}",
+				cacheName, filename, header._capacity, requiredSize, fileSize);
+			return false;
+		}
+		return true;
+	}
+
+	bool validateExistingRTCacheFile(const std::string& filename, const char* cacheName,
+		std::size_t itemSize, IDataWriterSink* sink, bool& isNew)
+	{
+		std::error_code ec;
+		const bool exists = std::filesystem::exists(filename, ec);
+		if (ec)
+		{
+			pipe_writer_log(sink, LL_ERROR, "Cannot inspect {} cache file {}: {}",
+				cacheName, filename, ec.message());
+			return false;
+		}
+		isNew = !exists;
+		if (isNew)
+			return true;
+
+		BoostFile file;
+		if (!file.open_existing_file(filename.c_str(), bip::read_only))
+		{
+			pipe_writer_log(sink, LL_ERROR, "Cannot open {} cache file {} for validation", cacheName, filename);
+			return false;
+		}
+		const uint64_t fileSize = file.get_file_size();
+		if (fileSize < sizeof(RTBlockHeader))
+		{
+			pipe_writer_log(sink, LL_ERROR, "Invalid {} cache file {}: header is truncated",
+				cacheName, filename);
+			return false;
+		}
+
+		RTBlockHeader header = {};
+		if (!file.read_file(&header, sizeof(header)))
+		{
+			pipe_writer_log(sink, LL_ERROR, "Cannot read {} cache header from {}", cacheName, filename);
+			return false;
+		}
+		return validateRTCacheHeader(header, fileSize, itemSize, filename, cacheName, sink);
+	}
+}
+
+#ifdef WT_DATAWRITERAD_TEST_SEAMS
+namespace
+{
+	// Inert unless explicitly armed by the writer regression tests. This keeps
+	// remap failure injectable after truncate without changing normal writer behavior.
+	std::atomic<bool> g_failNextRTCacheRemapForTest(false);
+	using WriterDbCacheObserverForTest = void (*)(const char*, const char*, const void*, bool);
+	std::atomic<WriterDbCacheObserverForTest> g_writerDbCacheObserverForTest(nullptr);
+	using RTCachePreMapHookForTest = void (*)(const char*);
+	std::atomic<RTCachePreMapHookForTest> g_rtCachePreMapHookForTest(nullptr);
+
+	void observeWriterDbCacheForTest(const char* type, const char* key, const void* handle, bool cacheHit)
+	{
+		WriterDbCacheObserverForTest observer = g_writerDbCacheObserverForTest.load(std::memory_order_acquire);
+		if (observer != nullptr)
+			observer(type, key, handle, cacheHit);
+	}
+
+	void runRTCachePreMapHookForTest(const char* filename)
+	{
+		RTCachePreMapHookForTest hook = g_rtCachePreMapHookForTest.exchange(nullptr, std::memory_order_acq_rel);
+		if (hook != nullptr)
+			hook(filename);
+	}
+}
+
+extern "C" void wt_data_writer_ad_fail_next_remap_for_test()
+{
+	g_failNextRTCacheRemapForTest.store(true, std::memory_order_release);
+}
+
+extern "C" void wt_data_writer_ad_set_db_cache_observer_for_test(
+	void (*observer)(const char*, const char*, const void*, bool))
+{
+	g_writerDbCacheObserverForTest.store(observer, std::memory_order_release);
+}
+
+extern "C" void wt_data_writer_ad_set_cache_pre_map_hook_for_test(void (*hook)(const char*))
+{
+	g_rtCachePreMapHookForTest.store(hook, std::memory_order_release);
+}
+#endif
 
 
 WtDataWriterAD::WtDataWriterAD()
@@ -106,7 +260,21 @@ bool WtDataWriterAD::init(WTSVariant* params, IDataWriterSink* sink)
 	if (params->has("klinemapsize"))
 		_kline_mapsize = params->getUInt32("klinemapsize");
 
-	loadCache();
+	try
+	{
+		if (!loadCache())
+			return false;
+	}
+	catch (const std::exception& ex)
+	{
+		pipe_writer_log(_sink, LL_ERROR, "Failed to load AD writer cache: {}", ex.what());
+		return false;
+	}
+	catch (...)
+	{
+		pipe_writer_log(_sink, LL_ERROR, "Failed to load AD writer cache due to an unknown error");
+		return false;
+	}
 	if (_async_task)
 	{
 		try
@@ -167,29 +335,69 @@ void WtDataWriterAD::release()
 	}
 }
 
-void WtDataWriterAD::loadCache()
+bool WtDataWriterAD::loadCache()
 {
+	bool bNewTick = false;
+	bool bNewM1 = false;
+	bool bNewM5 = false;
+	bool bNewD1 = false;
+	const std::string tickFilename = _base_dir + _cache_file_tick;
+	const std::string m1Filename = _base_dir + _m1_cache._filename;
+	const std::string m5Filename = _base_dir + _m5_cache._filename;
+	const std::string d1Filename = _base_dir + _d1_cache._filename;
+
+	// Validate all existing files before mapping headers or creating any
+	// missing cache. A malformed file therefore fails init without rewriting peers.
+	if (!validateExistingRTCacheFile(tickFilename, "tick", sizeof(TickCacheItem), _sink, bNewTick) ||
+		!validateExistingRTCacheFile(m1Filename, "m1", sizeof(BarCacheItem), _sink, bNewM1) ||
+		!validateExistingRTCacheFile(m5Filename, "m5", sizeof(BarCacheItem), _sink, bNewM5) ||
+		!validateExistingRTCacheFile(d1Filename, "day", sizeof(BarCacheItem), _sink, bNewD1))
+		return false;
+
+#ifdef WT_DATAWRITERAD_TEST_SEAMS
+	runRTCachePreMapHookForTest(tickFilename.c_str());
+#endif
+
 	if (_tick_cache_file == NULL)
 	{
-		bool bNew = false;
-		std::string filename = _base_dir + _cache_file_tick;
-		if (!StdFile::exists(filename.c_str()))
+		if (bNewTick)
 		{
 			uint64_t uSize = sizeof(RTTickCache) + sizeof(TickCacheItem) * CACHE_SIZE_STEP_AD;
 			BoostFile bf;
-			bf.create_new_file(filename.c_str());
-			bf.truncate_file((uint32_t)uSize);
+			if (!bf.create_new_file(tickFilename.c_str()) || !bf.truncate_file((std::size_t)uSize))
+			{
+				pipe_writer_log(_sink, LL_ERROR, "Cannot create tick cache file {}", tickFilename);
+				return false;
+			}
 			bf.close_file();
-			bNew = true;
 		}
 
 		_tick_cache_file.reset(new BoostMappingFile);
-		_tick_cache_file->map(filename.c_str());
-		_tick_cache_block = (RTTickCache*)_tick_cache_file->addr();
+		if (!_tick_cache_file->map(tickFilename.c_str()))
+		{
+			pipe_writer_log(_sink, LL_ERROR, "Cannot map tick cache file {}", tickFilename);
+			_tick_cache_file.reset();
+			return false;
+		}
+		void* mappedAddr = _tick_cache_file->addr();
+		const std::size_t mappedSize = _tick_cache_file->size();
+		if (mappedAddr == NULL || mappedSize < sizeof(RTBlockHeader) ||
+			(bNewTick && mappedSize < sizeof(RTTickCache)))
+		{
+			pipe_writer_log(_sink, LL_ERROR, "Mapped tick cache file {} is shorter than its RT header", tickFilename);
+			_tick_cache_file.reset();
+			return false;
+		}
+		_tick_cache_block = (RTTickCache*)mappedAddr;
+		if (!bNewTick && !validateRTCacheHeader(*_tick_cache_block, _tick_cache_file->size(),
+			sizeof(TickCacheItem), tickFilename, "tick", _sink))
+		{
+			_tick_cache_block = NULL;
+			_tick_cache_file.reset();
+			return false;
+		}
 
-		_tick_cache_block->_size = min(_tick_cache_block->_size, _tick_cache_block->_capacity);
-
-		if (bNew)
+		if (bNewTick)
 		{
 			memset(_tick_cache_block, 0, _tick_cache_file->size());
 
@@ -212,25 +420,44 @@ void WtDataWriterAD::loadCache()
 
 	if (_m1_cache.empty())
 	{
-		bool bNew = false;
-		std::string filename = _base_dir + _m1_cache._filename;
-		if (!StdFile::exists(filename.c_str()))
+		if (bNewM1)
 		{
 			uint64_t uSize = sizeof(RTBarCache) + sizeof(BarCacheItem) * CACHE_SIZE_STEP_AD;
 			BoostFile bf;
-			bf.create_new_file(filename.c_str());
-			bf.truncate_file((uint32_t)uSize);
+			if (!bf.create_new_file(m1Filename.c_str()) || !bf.truncate_file((std::size_t)uSize))
+			{
+				pipe_writer_log(_sink, LL_ERROR, "Cannot create m1 cache file {}", m1Filename);
+				return false;
+			}
 			bf.close_file();
-			bNew = true;
 		}
 
 		_m1_cache._file_ptr.reset(new BoostMappingFile);
-		_m1_cache._file_ptr->map(filename.c_str());
-		_m1_cache._cache_block = (RTBarCache*)_m1_cache._file_ptr->addr();
+		if (!_m1_cache._file_ptr->map(m1Filename.c_str()))
+		{
+			pipe_writer_log(_sink, LL_ERROR, "Cannot map m1 cache file {}", m1Filename);
+			_m1_cache._file_ptr.reset();
+			return false;
+		}
+		void* mappedAddr = _m1_cache._file_ptr->addr();
+		const std::size_t mappedSize = _m1_cache._file_ptr->size();
+		if (mappedAddr == NULL || mappedSize < sizeof(RTBlockHeader) ||
+			(bNewM1 && mappedSize < sizeof(RTBarCache)))
+		{
+			pipe_writer_log(_sink, LL_ERROR, "Mapped m1 cache file {} is shorter than its RT header", m1Filename);
+			_m1_cache._file_ptr.reset();
+			return false;
+		}
+		_m1_cache._cache_block = (RTBarCache*)mappedAddr;
+		if (!bNewM1 && !validateRTCacheHeader(*_m1_cache._cache_block, _m1_cache._file_ptr->size(),
+			sizeof(BarCacheItem), m1Filename, "m1", _sink))
+		{
+			_m1_cache._cache_block = NULL;
+			_m1_cache._file_ptr.reset();
+			return false;
+		}
 
-		_m1_cache._cache_block->_size = min(_m1_cache._cache_block->_size, _m1_cache._cache_block->_capacity);
-
-		if (bNew)
+		if (bNewM1)
 		{
 			memset(_m1_cache._cache_block, 0, _m1_cache._file_ptr->size());
 
@@ -253,25 +480,44 @@ void WtDataWriterAD::loadCache()
 
 	if (_m5_cache.empty())
 	{
-		bool bNew = false;
-		std::string filename = _base_dir + _m5_cache._filename;
-		if (!StdFile::exists(filename.c_str()))
+		if (bNewM5)
 		{
 			uint64_t uSize = sizeof(RTBarCache) + sizeof(BarCacheItem) * CACHE_SIZE_STEP_AD;
 			BoostFile bf;
-			bf.create_new_file(filename.c_str());
-			bf.truncate_file((uint32_t)uSize);
+			if (!bf.create_new_file(m5Filename.c_str()) || !bf.truncate_file((std::size_t)uSize))
+			{
+				pipe_writer_log(_sink, LL_ERROR, "Cannot create m5 cache file {}", m5Filename);
+				return false;
+			}
 			bf.close_file();
-			bNew = true;
 		}
 
 		_m5_cache._file_ptr.reset(new BoostMappingFile);
-		_m5_cache._file_ptr->map(filename.c_str());
-		_m5_cache._cache_block = (RTBarCache*)_m5_cache._file_ptr->addr();
+		if (!_m5_cache._file_ptr->map(m5Filename.c_str()))
+		{
+			pipe_writer_log(_sink, LL_ERROR, "Cannot map m5 cache file {}", m5Filename);
+			_m5_cache._file_ptr.reset();
+			return false;
+		}
+		void* mappedAddr = _m5_cache._file_ptr->addr();
+		const std::size_t mappedSize = _m5_cache._file_ptr->size();
+		if (mappedAddr == NULL || mappedSize < sizeof(RTBlockHeader) ||
+			(bNewM5 && mappedSize < sizeof(RTBarCache)))
+		{
+			pipe_writer_log(_sink, LL_ERROR, "Mapped m5 cache file {} is shorter than its RT header", m5Filename);
+			_m5_cache._file_ptr.reset();
+			return false;
+		}
+		_m5_cache._cache_block = (RTBarCache*)mappedAddr;
+		if (!bNewM5 && !validateRTCacheHeader(*_m5_cache._cache_block, _m5_cache._file_ptr->size(),
+			sizeof(BarCacheItem), m5Filename, "m5", _sink))
+		{
+			_m5_cache._cache_block = NULL;
+			_m5_cache._file_ptr.reset();
+			return false;
+		}
 
-		_m5_cache._cache_block->_size = min(_m5_cache._cache_block->_size, _m5_cache._cache_block->_capacity);
-
-		if (bNew)
+		if (bNewM5)
 		{
 			memset(_m5_cache._cache_block, 0, _m5_cache._file_ptr->size());
 
@@ -294,25 +540,44 @@ void WtDataWriterAD::loadCache()
 
 	if (_d1_cache.empty())
 	{
-		bool bNew = false;
-		std::string filename = _base_dir + _d1_cache._filename;
-		if (!StdFile::exists(filename.c_str()))
+		if (bNewD1)
 		{
 			uint64_t uSize = sizeof(RTBarCache) + sizeof(BarCacheItem) * CACHE_SIZE_STEP_AD;
 			BoostFile bf;
-			bf.create_new_file(filename.c_str());
-			bf.truncate_file((uint32_t)uSize);
+			if (!bf.create_new_file(d1Filename.c_str()) || !bf.truncate_file((std::size_t)uSize))
+			{
+				pipe_writer_log(_sink, LL_ERROR, "Cannot create day cache file {}", d1Filename);
+				return false;
+			}
 			bf.close_file();
-			bNew = true;
 		}
 
 		_d1_cache._file_ptr.reset(new BoostMappingFile);
-		_d1_cache._file_ptr->map(filename.c_str());
-		_d1_cache._cache_block = (RTBarCache*)_d1_cache._file_ptr->addr();
+		if (!_d1_cache._file_ptr->map(d1Filename.c_str()))
+		{
+			pipe_writer_log(_sink, LL_ERROR, "Cannot map day cache file {}", d1Filename);
+			_d1_cache._file_ptr.reset();
+			return false;
+		}
+		void* mappedAddr = _d1_cache._file_ptr->addr();
+		const std::size_t mappedSize = _d1_cache._file_ptr->size();
+		if (mappedAddr == NULL || mappedSize < sizeof(RTBlockHeader) ||
+			(bNewD1 && mappedSize < sizeof(RTBarCache)))
+		{
+			pipe_writer_log(_sink, LL_ERROR, "Mapped day cache file {} is shorter than its RT header", d1Filename);
+			_d1_cache._file_ptr.reset();
+			return false;
+		}
+		_d1_cache._cache_block = (RTBarCache*)mappedAddr;
+		if (!bNewD1 && !validateRTCacheHeader(*_d1_cache._cache_block, _d1_cache._file_ptr->size(),
+			sizeof(BarCacheItem), d1Filename, "day", _sink))
+		{
+			_d1_cache._cache_block = NULL;
+			_d1_cache._file_ptr.reset();
+			return false;
+		}
 
-		_d1_cache._cache_block->_size = min(_d1_cache._cache_block->_size, _d1_cache._cache_block->_capacity);
-
-		if (bNew)
+		if (bNewD1)
 		{
 			memset(_d1_cache._cache_block, 0, _d1_cache._file_ptr->size());
 
@@ -332,6 +597,7 @@ void WtDataWriterAD::loadCache()
 			}
 		}
 	}
+	return true;
 }
 
 template<typename HeaderType, typename T>
@@ -366,6 +632,13 @@ bool WtDataWriterAD::resizeRTBlock(BoostMFPtr& mfPtr, uint32_t nCount)
 		f.close_file();
 
 		BoostMFPtr newMf(new BoostMappingFile());
+#ifdef WT_DATAWRITERAD_TEST_SEAMS
+		if (g_failNextRTCacheRemapForTest.exchange(false, std::memory_order_acq_rel))
+		{
+			pipe_writer_log(_sink, LL_ERROR, "Failed to remap expanded RT cache file {}", filename);
+			return false;
+		}
+#endif
 		if (!newMf->map(filename))
 		{
 			pipe_writer_log(_sink, LL_ERROR, "Failed to remap expanded RT cache file {}", filename);
@@ -1142,7 +1415,12 @@ WtDataWriterAD::WtLMDBPtr WtDataWriterAD::get_k_db(const char* exchg, WTSKlinePe
 
 	auto it = the_map->find(exchg);
 	if (it != the_map->end())
+	{
+#ifdef WT_DATAWRITERAD_TEST_SEAMS
+		observeWriterDbCacheForTest(subdir.c_str(), exchg, it->second.get(), true);
+#endif
 		return it->second;
+	}
 
 	WtLMDBPtr dbPtr(new WtLMDB(false));
 	std::string path = fmtutil::format("{}{}/{}/", _base_dir.c_str(), subdir.c_str(), exchg);
@@ -1154,6 +1432,9 @@ WtDataWriterAD::WtLMDBPtr WtDataWriterAD::get_k_db(const char* exchg, WTSKlinePe
 	}
 
 	(*the_map)[exchg] = dbPtr;
+#ifdef WT_DATAWRITERAD_TEST_SEAMS
+	observeWriterDbCacheForTest(subdir.c_str(), exchg, dbPtr.get(), false);
+#endif
 	return dbPtr;
 }
 
@@ -1162,7 +1443,12 @@ WtDataWriterAD::WtLMDBPtr WtDataWriterAD::get_t_db(const char* exchg, const char
 	std::string key = fmtutil::format<64>("{}.{}", exchg, code);
 	auto it = _tick_dbs.find(key);
 	if (it != _tick_dbs.end())
+	{
+#ifdef WT_DATAWRITERAD_TEST_SEAMS
+		observeWriterDbCacheForTest("tick", key.c_str(), it->second.get(), true);
+#endif
 		return it->second;
+	}
 
 	WtLMDBPtr dbPtr(new WtLMDB(false));
 	std::string path = fmtutil::format("{}ticks/{}/{}", _base_dir.c_str(), exchg, code);
@@ -1174,5 +1460,8 @@ WtDataWriterAD::WtLMDBPtr WtDataWriterAD::get_t_db(const char* exchg, const char
 	}
 
 	_tick_dbs[key] = dbPtr;
+#ifdef WT_DATAWRITERAD_TEST_SEAMS
+	observeWriterDbCacheForTest("tick", key.c_str(), dbPtr.get(), false);
+#endif
 	return dbPtr;
 }

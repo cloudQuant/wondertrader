@@ -6,7 +6,7 @@
  *   loadFactories 枚举目录内的 .dylib，dlopen 成功后 dlsym("createStrategyFact") 为空，
  *   必须 dlclose 并 continue；随后整个目录仍返回 true（跳过不是失败）。
  *
- * 边界：临时目录里只放一个指向已构建 libWtShareHelper.dylib 的符号链接，
+ * 边界：临时目录里只放一份已构建 libWtShareHelper.dylib 的实体副本，
  *      该库确实可 dlopen，但不导出策略工厂入口；不装载任何策略实现、不起线程。
  */
 #include <gtest/gtest.h>
@@ -43,8 +43,8 @@ TEST(R173UftStrategyMgr, ValidDylibWithoutStrategyFactoryIsSkipped)
 	fs::create_directories(dir, ec);
 	ASSERT_FALSE(ec) << ec.message();
 
-	// 扩展名必须是 .dylib，内容只需是一个能 dlopen 的合法 Mach-O 动态库
-	fs::create_symlink(lib, dir / "libnotastrategy.dylib", ec);
+	// 扩展名必须是 .dylib；复制有效库内容以覆盖缺少策略工厂入口的分支。
+	fs::copy_file(lib, dir / "libnotastrategy.dylib", fs::copy_options::overwrite_existing, ec);
 	ASSERT_FALSE(ec) << ec.message();
 
 	UftStrategyMgr mgr;

@@ -1,0 +1,86 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R42CtaPersistTest.MalformedSnapshotsDoNotPublishAnyStateOrSubscriptions
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R42CtaPersistTest
+[ RUN      ] R42CtaPersistTest.MalformedSnapshotsDoNotPublishAnyStateOrSubscriptions
+=================================================================
+==76051==ERROR: AddressSanitizer: container-overflow on address 0x60300000d377 at pc 0x000100b36374 bp 0x00016f68c280 sp 0x00016f68c278
+READ of size 1 at 0x60300000d377 thread T0
+    #0 0x000100b36370 in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__is_long[abi:nqe220108]() const+0x60 (focused-asan:arm64+0x1003c6370)
+    #1 0x000100b36540 in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__get_pointer[abi:nqe220108]() const+0x18 (focused-asan:arm64+0x1003c6540)
+    #2 0x000100b364ac in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::data[abi:nqe220108]() const+0x14 (focused-asan:arm64+0x1003c64ac)
+    #3 0x000100b775a4 in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::find[abi:nqe220108](char const*, unsigned long) const+0x20 (focused-asan:arm64+0x1004075a4)
+    #4 0x000100b72a18 in (anonymous namespace)::R42CtaPersistTest_MalformedSnapshotsDoNotPublishAnyStateOrSubscriptions_Test::TestBody()+0x318c (focused-asan:arm64+0x100402a18)
+    #5 0x000101200070 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (focused-asan:arm64+0x100a90070)
+    #6 0x0001011fffb8 in testing::Test::Run()+0xcc (focused-asan:arm64+0x100a8ffb8)
+    #7 0x000101200b98 in testing::TestInfo::Run()+0xd0 (focused-asan:arm64+0x100a90b98)
+    #8 0x00010120161c in testing::TestSuite::Run()+0x1c4 (focused-asan:arm64+0x100a9161c)
+    #9 0x00010120ca44 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (focused-asan:arm64+0x100a9ca44)
+    #10 0x00010120c3f0 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (focused-asan:arm64+0x100a9c3f0)
+    #11 0x00010120c354 in testing::UnitTest::Run()+0x78 (focused-asan:arm64+0x100a9c354)
+    #12 0x00010113fe50 in main+0x40 (focused-asan:arm64+0x1009cfe50)
+    #13 0x00018059bdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+0x60300000d377 is located 23 bytes inside of 24-byte region [0x60300000d360,0x60300000d378)
+allocated by thread T0 here:
+    #0 0x0001078e50e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x0001007c1fc4 in void* std::__1::__libcpp_operator_new[abi:ne200100]<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>(unsigned long)+0x14 (focused-asan:arm64+0x100051fc4)
+    #2 0x0001007c1f68 in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>* std::__1::__libcpp_allocate[abi:ne200100]<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>(std::__1::__element_count, unsigned long)+0x54 (focused-asan:arm64+0x100051f68)
+    #3 0x0001007c1f04 in std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>::allocate[abi:ne200100](unsigned long)+0x40 (focused-asan:arm64+0x100051f04)
+    #4 0x0001007c1ea0 in std::__1::__allocation_result<std::__1::allocator_traits<std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>::pointer> std::__1::__allocate_at_least[abi:ne200100]<std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>(std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>&, unsigned long)+0x1c (focused-asan:arm64+0x100051ea0)
+    #5 0x0001007c1e1c in std::__1::__split_buffer<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>&>::__split_buffer(unsigned long, unsigned long, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>&)+0x5c (focused-asan:arm64+0x100051e1c)
+    #6 0x0001007c1bc8 in std::__1::__split_buffer<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>&>::__split_buffer(unsigned long, unsigned long, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>&)+0x30 (focused-asan:arm64+0x100051bc8)
+    #7 0x000100961c70 in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>* std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>::__emplace_back_slow_path<char const*>(char const*&&)+0x54 (focused-asan:arm64+0x1001f1c70)
+    #8 0x000100961b68 in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>& std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>::emplace_back<char const*>(char const*&&)+0x5c (focused-asan:arm64+0x1001f1b68)
+    #9 0x000100b607b4 in (anonymous namespace)::R42CtaCtx::stra_log_error(char const*)+0x180 (focused-asan:arm64+0x1003f07b4)
+    #10 0x000100e7f630 in void wtp::CtaStraBaseCtx::log_error<char const*, char const*>(char const*, char const* const&, char const* const&)+0xcc (focused-asan:arm64+0x10070f630)
+    #11 0x000100e772cc in wtp::CtaStraBaseCtx::load_data(unsigned int)+0x7e0 (focused-asan:arm64+0x1007072cc)
+    #12 0x000100e86600 in wtp::CtaStraBaseCtx::on_init()+0x34 (focused-asan:arm64+0x100716600)
+    #13 0x000100b72730 in (anonymous namespace)::R42CtaPersistTest_MalformedSnapshotsDoNotPublishAnyStateOrSubscriptions_Test::TestBody()+0x2ea4 (focused-asan:arm64+0x100402730)
+    #14 0x000101200070 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (focused-asan:arm64+0x100a90070)
+    #15 0x0001011fffb8 in testing::Test::Run()+0xcc (focused-asan:arm64+0x100a8ffb8)
+    #16 0x000101200b98 in testing::TestInfo::Run()+0xd0 (focused-asan:arm64+0x100a90b98)
+    #17 0x00010120161c in testing::TestSuite::Run()+0x1c4 (focused-asan:arm64+0x100a9161c)
+    #18 0x00010120ca44 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (focused-asan:arm64+0x100a9ca44)
+    #19 0x00010120c3f0 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (focused-asan:arm64+0x100a9c3f0)
+    #20 0x00010120c354 in testing::UnitTest::Run()+0x78 (focused-asan:arm64+0x100a9c354)
+    #21 0x00010113fe50 in main+0x40 (focused-asan:arm64+0x1009cfe50)
+    #22 0x00018059bdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+HINT: if you don't care about these errors you may set ASAN_OPTIONS=detect_container_overflow=0.
+Or if supported by the container library, pass -D__SANITIZER_DISABLE_CONTAINER_OVERFLOW__ to the compiler to disable  instrumentation.
+If you suspect a false positive see also: https://github.com/google/sanitizers/wiki/AddressSanitizerContainerOverflow.
+SUMMARY: AddressSanitizer: container-overflow (focused-asan:arm64+0x1003c6370) in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__is_long[abi:nqe220108]() const+0x60
+Shadow bytes around the buggy address:
+  0x60300000d080: fa fa fd fd fd fd fa fa fd fd fd fd fa fa fd fd
+  0x60300000d100: fd fd fa fa fd fd fd fa fa fa fd fd fd fa fa fa
+  0x60300000d180: 00 00 00 00 fa fa fd fd fd fa fa fa fd fd fd fa
+  0x60300000d200: fa fa fd fd fd fa fa fa fd fd fd fa fa fa fd fd
+  0x60300000d280: fd fa fa fa fd fd fd fa fa fa fd fd fd fa fa fa
+=>0x60300000d300: fd fd fd fa fa fa fd fd fd fa fa fa fc fc[fc]fa
+  0x60300000d380: fa fa 00 00 00 fa fa fa 00 00 00 fa fa fa 00 00
+  0x60300000d400: 00 fa fa fa 00 00 00 fa fa fa 00 00 00 fa fa fa
+  0x60300000d480: 00 00 00 fa fa fa 00 00 00 fa fa fa 00 00 00 fa
+  0x60300000d500: fa fa fd fd fd fa fa fa fa fa fa fa fa fa fa fa
+  0x60300000d580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==76051==ABORTING

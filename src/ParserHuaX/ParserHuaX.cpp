@@ -57,6 +57,10 @@ ParserHuaX::ParserHuaX()
 	:_api(NULL)
 	, _iRequestID(0)
 	, _uTradingDate(0)
+	, _sink(NULL)
+	, _pBaseDataMgr(NULL)
+	, _hInst(NULL)
+	, _funcCreator(NULL)
 {
 }
 
@@ -90,10 +94,18 @@ bool ParserHuaX::init(WTSVariant* config)
 	if (module.empty())
 		module = "xfastmdapi";
 
+	const std::string moduleFile = DLLHelper::wrap_module(module.c_str(), "lib");
+	const char* moduleDir = getBinDir();
+	if ((moduleDir == NULL || *moduleDir == '\0') && !fs::path(moduleFile).is_absolute())
+	{
+		write_log(_sink, LL_ERROR, "[ParserHuaX] Cannot locate parser module directory");
+		return false;
+	}
+
 	std::string path = fmtutil::format("{}/{}/", _strFlowDir.c_str(), _strUser.c_str());
 	fs::create_directories(path.c_str());
 
-	std::string dllpath = getBinDir() + DLLHelper::wrap_module(module.c_str(), "lib");;
+	std::string dllpath = (moduleDir == NULL ? std::string() : std::string(moduleDir)) + moduleFile;
 	_hInst = DLLHelper::load_library(dllpath.c_str());
 #ifdef _WIN32
 #	ifdef _WIN64
@@ -119,6 +131,11 @@ void ParserHuaX::release()
 
 bool ParserHuaX::connect()
 {
+	if (_api == NULL)
+	{
+		write_log(_sink, LL_ERROR, "[ParserHuaX] Cannot connect without a market data API");
+		return false;
+	}
 	_api->RegisterFront((char*)_front.c_str());
 	_api->Init();
 	//_api->Join();

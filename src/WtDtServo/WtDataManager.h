@@ -330,4 +330,15 @@ private:
 	StdUniqueMutex	_mtx_rtbars;
 };
 
+#if defined(WT_P12_BAR_LIFETIME_TEST_HOOKS)
+enum WtDataManagerBarLifetimeEvent
+{
+	WT_DM_BAR_FACTORY_RETURNED = 1,
+	WT_DM_BAR_DELETED = 2
+};
+using WtDataManagerBarLifetimeHook = void (*)(uintptr_t address,
+	WtDataManagerBarLifetimeEvent event);
+void setWtDataManagerBarLifetimeHook(WtDataManagerBarLifetimeHook hook);
+#endif
+
 NS_WTP_END

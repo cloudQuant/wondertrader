@@ -1,0 +1,68 @@
+--- /tmp/ctpm-i03-evidence/baseline/ParserCTPMini.cpp	2026-11-01 22:36:18
++++ src/ParserCTPMini/ParserCTPMini.cpp	2026-11-01 22:08:04
+@@ -1,4 +1,4 @@
+-/*!
++﻿/*!
+  * \file ParserCTPMini.cpp
+  * \project	WonderTrader
+  *
+@@ -27,18 +27,18 @@
+ #include <vector>
+ namespace fs = std::filesystem;
+ 
+- //By Wesley @ 2022.01.05
+-#include "../Share/fmtlib.h"
+-template<typename... Args>
+-inline void write_log(IParserSpi* sink, WTSLogLevel ll, const char* format, const Args&... args)
+-{
+-	if (sink == NULL)
+-		return;
+-
+-	static thread_local char buffer[512] = { 0 };
+-	fmtutil::format_to(buffer, format, args...);
+-
+-	sink->handleParserLog(ll, buffer);
++ //By Wesley @ 2022.01.05
++#include "../Share/fmtlib.h"
++template<typename... Args>
++inline void write_log(IParserSpi* sink, WTSLogLevel ll, const char* format, const Args&... args)
++{
++	if (sink == NULL)
++		return;
++
++	static thread_local char buffer[512] = { 0 };
++	fmtutil::format_to(buffer, format, args...);
++
++	sink->handleParserLog(ll, buffer);
+ }
+ 
+ extern "C"
+@@ -114,6 +114,16 @@
+ 
+ 	m_strFlowDir = StrUtil::standardisePath(m_strFlowDir);
+ 
++	std::string module = config->getCString("ctpmodule");
++	if (module.empty())
++		module = "thostmduserapi";
++	const std::string moduleFile = DLLHelper::wrap_module(module.c_str(), "lib");
++	const char* moduleDir = getBinDir();
++	if ((moduleDir == NULL || *moduleDir == '\0') && !fs::path(moduleFile).is_absolute())
++	{
++		write_log(m_sink, LL_ERROR, "[ParserCTPMini] Cannot locate market data module directory");
++		return false;
++	}
+ 
+ 	std::string path = fmtutil::format("{}/{}/{}/", m_strFlowDir.c_str(), m_strBroker.c_str(), m_strUserID.c_str());
+ 	std::error_code pathError;
+@@ -125,10 +135,7 @@
+ 		return false;
+ 	}
+ 
+-	std::string module = config->getCString("ctpmodule");
+-	if (module.empty())
+-		module = "thostmduserapi";
+-	std::string dllpath = getBinDir() + DLLHelper::wrap_module(module.c_str(), "lib");;
++	std::string dllpath = (moduleDir == NULL ? std::string() : std::string(moduleDir)) + moduleFile;
+ 	m_hInstCTP = DLLHelper::load_library(dllpath.c_str());
+ 
+ #ifdef _WIN32

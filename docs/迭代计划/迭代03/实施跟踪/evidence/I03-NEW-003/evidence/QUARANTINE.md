@@ -1,0 +1,21 @@
+# ParserCTPMini: retain failed loaded modules (review follow-up)
+
+The earlier candidate at `current-final/` and its earlier README are **superseded**: it called `dlclose` after missing creator or null creator result despite no vendor quiescence guarantee. Its failure evidence is kept. `unload-baseline.cpp` reproduces that intermediate candidate by removing only the subsequent retention change; `make-unload-baseline.py` records the transformation. The original pre-initialization-fix source remains `red-src/ParserCTPMini.cpp`.
+
+Current product stores every successfully loaded library handle in `m_hInstCTP` before symbol lookup. Missing-symbol and creator-returned-null paths report the error but keep the reference. `release()` does not close it; every later init on that parser fails closed. A library-load failure or null config has no returned handle, so the same instance can retry. A successfully created API's module also remains resident; the same object cannot reinitialize after release.
+
+Commands (new output directories):
+```
+/Users/yunjinqi/opt/anaconda3/bin/conda run -n base python src/TestUnits/fixtures/ctpmini_api_init/run.py /tmp/ctpm-i03-build src/ParserCTPMini/ParserCTPMini.cpp /tmp/ctpm-i03-init/quarantine-spy
+/Users/yunjinqi/opt/anaconda3/bin/conda run -n base python src/TestUnits/fixtures/ctpmini_api_init/run.py /tmp/ctpm-i03-build /tmp/ctpm-i03-init/unload-baseline.cpp /tmp/ctpm-i03-init/unload-spy
+/Users/yunjinqi/opt/anaconda3/bin/conda run -n base python src/TestUnits/fixtures/ctpmini_api_init/run_unload.py /tmp/ctpm-i03-build src/ParserCTPMini/ParserCTPMini.cpp /tmp/ctpm-i03-init/quarantine-real
+/Users/yunjinqi/opt/anaconda3/bin/conda run -n base python src/TestUnits/fixtures/ctpmini_api_init/run_unload.py /tmp/ctpm-i03-build /tmp/ctpm-i03-init/unload-baseline.cpp /tmp/ctpm-i03-init/unload-real
+```
+
+Spy: current 6/6 PASS. Failed-loaded cases verify zero close, repeated release, rejection on the same parser, and a separate parser opening a different fake path and handle; missing-library/null-config cases retry on the same parser. Intermediate candidate fails both missing-symbol and null-API assertions (exit 10) because it calls close; remaining 4 controls pass. This different-path control is not an end-to-end retry contract.
+
+Real loader: 2/2 current PASS. Missing-symbol and null-API fake dylibs have destructors that write an unload marker: no marker exists after failure, repeated release or parser destructor; both markers appear on normal process exit. The intermediate candidate's two cases detect premature unload immediately after init (exit 31). `quarantine-real/commands.json`, `unload-real/commands.json` retain argv, statuses and marker-after-process-exit observations; corresponding logs contain checkpoints. The fake module's normal process-exit destructor does not prove real vendor callbacks have drained.
+
+Production `CoverageTests_t_ParserCTPMini` rebuilt and 3/3 directly related GTests passed (`quarantine-build.log`, `quarantine-related/output.log` and XML). No other tests ran in this step. Source hash, diffs and exact compiler commands are in the respective output dirs. This is local macOS arm64 evidence; no real SDK, sanitizer, Linux or Windows. The isolation is per parser instance only: a second instance or concurrent thread can still attempt the same module, path aliases are unresolved, and static initializers on an ultimately failing `dlopen` cannot be retained without a returned handle. Therefore the full concurrency, restart, provider and lifecycle contract remains BLOCKED.
+
+Additional deterministic same-module check: `/tmp/ctpm-i03-init/quarantine-spy-final/focused cross-instance` in an isolated directory exits 40 and logs `opens=2`: a second parser attempts the same module after the first parser's missing-symbol failure. This is retained as an **unresolved failure**, not counted among the 6/6 focused passes. The corresponding final spy positive/negative executions are in `quarantine-spy-final/` and `unload-spy-final/`; the earlier `quarantine-spy/` and `unload-spy/` outputs are retained as historical evidence. The executable has been instrumented with a fake loader; this failure is not a claim that a real SDK was contacted.

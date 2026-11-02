@@ -83,6 +83,22 @@ bool hasString(const std::vector<std::string>& values, const std::string& needle
 	return false;
 }
 
+class MissingSessionSelCtx : public r125_sh::SelCtx
+{
+public:
+	std::string missing_session_code;
+	std::vector<std::string> session_lookups;
+
+	WTSSessionInfo* stra_get_sessinfo(const char* stdCode) override
+	{
+		const std::string code = stdCode == NULL ? "" : stdCode;
+		session_lookups.push_back(code);
+		if (code == missing_session_code)
+			return NULL;
+		return r125_sh::SelCtx::stra_get_sessinfo(stdCode);
+	}
+};
+
 } // namespace
 
 TEST(R125SelFactory, CreateDeleteAndForeignReject)
@@ -128,6 +144,47 @@ TEST(R125SelStrategy, InitSubscribesAllCodes)
 
 	// init(NULL) 走 L72-73 返回 false
 	EXPECT_FALSE(stra.init(NULL));
+}
+
+TEST(R125SelStrategy, EmptyCodesAreNoOpDuringSchedule)
+{
+	WtStraDtSel stra("r125_sel_empty_codes");
+	VarHolder cfg(makeSelCfg("", false));
+	ASSERT_TRUE(stra.init(cfg.get())); // empty codes are accepted as an empty strategy set
+
+	MissingSessionSelCtx ctx;
+	ctx.missing_session_code = "";
+	stra.on_init(&ctx);
+	stra.on_schedule(&ctx, 20240102, 1000);
+
+	EXPECT_TRUE(ctx.subs.empty());
+	EXPECT_TRUE(ctx.session_lookups.empty());
+	EXPECT_TRUE(ctx.bars_codes.empty());
+	EXPECT_TRUE(ctx.set_positions.empty());
+}
+
+TEST(R125SelStrategy, MissingSessionSkipsOnlyUnknownCode)
+{
+	const char* valid_code = "SHFE.au.2005";
+	const char* unknown_code = "SHFE.unknown.2005";
+	WtStraDtSel stra("r125_sel_missing_session");
+	VarHolder cfg(makeSelCfg("SHFE.unknown.2005,SHFE.au.2005", false));
+	ASSERT_TRUE(stra.init(cfg.get()));
+
+	std::vector<WTSBarStruct> valid_store;
+	MissingSessionSelCtx ctx;
+	ctx.missing_session_code = unknown_code;
+	ctx.bars_responses = { r125_sh::make_kline(valid_store, {5, 6, 7, 8, 9}, 8.4) };
+	stra.on_schedule(&ctx, 20240102, 1000);
+
+	ASSERT_EQ(2u, ctx.session_lookups.size());
+	EXPECT_TRUE(hasString(ctx.session_lookups, unknown_code));
+	EXPECT_TRUE(hasString(ctx.session_lookups, valid_code));
+	ASSERT_EQ(1u, ctx.bars_codes.size());
+	EXPECT_EQ(valid_code, ctx.bars_codes[0]);
+	ASSERT_EQ(1u, ctx.set_positions.size());
+	EXPECT_NE(std::string::npos, ctx.set_positions[0].find(
+		std::string(valid_code) + ":1.000000:DT_EnterLong"));
 }
 
 TEST(R125SelStrategy, ScheduleEarlyReturns)

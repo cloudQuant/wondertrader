@@ -12,6 +12,7 @@
 
 #include <exception>
 #include <algorithm>
+#include <unordered_set>
 
 #include "../WtUftCore/WtHelper.h"
 #include "../WtUftCore/UftStraContext.h"
@@ -247,6 +248,17 @@ bool WtUftRunner::configImpl(const std::string& filename)
 
 	//基础数据文件
 	WTSVariant* cfgBF = _config->get("basefiles");
+	if (cfgBF == NULL)
+	{
+		WTSLogger::error("UFT basefiles configuration is missing");
+		return false;
+	}
+	if (cfgBF->type() != WTSVariant::VT_Object)
+	{
+		WTSLogger::error("UFT basefiles configuration must be an object");
+		return false;
+	}
+
 	if (cfgBF->get("session"))
 		_bd_mgr.loadSessions(cfgBF->getCString("session"));
 
@@ -435,49 +447,98 @@ bool WtUftRunner::configImpl(const std::string& filename)
 	if (!tradersOk)
 		return false;
 
-	initUftStrategies();
+	if (!initUftStrategies())
+	{
+		WTSLogger::error("UFT strategy configuration failed");
+		return false;
+	}
 	
 	return true;
 }
 
 bool WtUftRunner::initUftStrategies()
 {
-	WTSVariant* cfg = _config->get("strategies");
-	if (cfg == NULL || cfg->type() != WTSVariant::VT_Object)
+	if (_config == NULL)
 		return false;
 
-	cfg = cfg->get("uft");
-	if (cfg == NULL || cfg->type() != WTSVariant::VT_Array)
-		return false;
+	WTSVariant* strategies = _config->get("strategies");
+	if (strategies == NULL)
+		return true;
+	if (strategies->type() != WTSVariant::VT_Object)
+		return true;
+
+	WTSVariant* cfg = strategies->get("uft");
+	if (cfg == NULL)
+		return true;
+	if (cfg->type() != WTSVariant::VT_Array)
+		return true;
+
+	bool hasActiveStrategy = false;
+	std::unordered_set<std::string> activeStrategyIds;
+	for (uint32_t idx = 0; idx < cfg->size(); idx++)
+	{
+		WTSVariant* cfgItem = cfg->get(idx);
+		if (cfgItem == NULL)
+			continue;
+		if (!cfgItem->getBoolean("active"))
+			continue;
+
+		hasActiveStrategy = true;
+		const char* id = cfgItem->getCString("id");
+		const std::string strategyId = id == NULL ? "" : id;
+		if (!activeStrategyIds.insert(strategyId).second)
+		{
+			WTSLogger::error("Duplicate active UFT strategy id {}", strategyId);
+			return false;
+		}
+	}
+	if (!hasActiveStrategy)
+		return true;
 
 	std::string path = WtHelper::getCWD() + "uft/";
-	_uft_stra_mgr.loadFactories(path.c_str());
+	if (!_uft_stra_mgr.loadFactories(path.c_str()))
+	{
+		WTSLogger::error("Loading UFT strategy factories from {} failed", path);
+		return false;
+	}
+
+	struct PendingStrategyRegistration
+	{
+		std::shared_ptr<UftStraContext> context;
+		TraderAdapterPtr trader;
+	};
+	std::vector<PendingStrategyRegistration> pending;
+	pending.reserve(cfg->size());
 
 	for (uint32_t idx = 0; idx < cfg->size(); idx++)
 	{
 		WTSVariant* cfgItem = cfg->get(idx);
-		if(!cfgItem->getBoolean("active"))
+		if (cfgItem == NULL || !cfgItem->getBoolean("active"))
 			continue;
+
 		const char* id = cfgItem->getCString("id");
 		const char* name = cfgItem->getCString("name");
+
 		UftStrategyPtr stra = _uft_stra_mgr.createStrategy(name, id);
-		if (stra == NULL)
+		if (stra == NULL || stra->self() == NULL)
 		{
-			WTSLogger::error("UFT Strategy {} create failed", name);
-			continue;
+			WTSLogger::error("UFT Strategy {}({}) create failed", name, id);
+			return false;
 		}
-		else
+		WTSLogger::info("UFT Strategy {}({}) created", name, id);
+
+		if (!stra->self()->init(cfgItem->get("params")))
 		{
-			WTSLogger::info("UFT Strategy {}({}) created", name, id);
+			WTSLogger::error("UFT Strategy {}({}) initialization failed", name, id);
+			return false;
 		}
 
-		stra->self()->init(cfgItem->get("params"));
-		UftStraContext* ctx = new UftStraContext(&_uft_engine, id);
+		std::shared_ptr<UftStraContext> ctx(new UftStraContext(&_uft_engine, id));
 		ctx->set_strategy(stra->self());
 
 		const char* traderid = cfgItem->getCString("trader");
 		TraderAdapterPtr trader = _traders.getAdapter(traderid);
-		if(trader)
+		if (trader)
 		{
 			ctx->setTrader(trader.get());
 		}
@@ -486,13 +547,17 @@ bool WtUftRunner::initUftStrategies()
 			WTSLogger::error("Trader {} not exists, binding trader to UFT strategy failed", traderid);
 		}
 
-		// addSink may synchronously deliver READY for an already-connected trader.
-		// Publish the fully initialized context first so callbacks can resolve it
-		// through WtUftEngine::getContext without observing a partial registration.
-		_uft_engine.addContext(UftContextPtr(ctx));
-		if (trader)
-			trader->addSink(ctx);
+		pending.push_back({ ctx, trader });
 	}
+
+	// addSink may synchronously deliver READY. Publish every initialized context
+	// before attaching any sink so callbacks cannot observe partial registration.
+	for (const PendingStrategyRegistration& registration : pending)
+		_uft_engine.addContext(registration.context);
+
+	for (const PendingStrategyRegistration& registration : pending)
+		if (registration.trader)
+			registration.trader->addSink(registration.context.get());
 
 	return true;
 }
@@ -749,7 +814,7 @@ bool WtUftRunner::initEvtNotifier()
 	return true;
 }
 
-void WtUftRunner::run(bool /*bAsync*/ /* = false */)
+void WtUftRunner::run(bool bAsync /* = false */)
 {
 	try
 	{
@@ -816,13 +881,16 @@ void WtUftRunner::run(bool /*bAsync*/ /* = false */)
 
 		ShareManager::self().start_watching(2);
 
-		while(!_to_exit.load(std::memory_order_acquire))
+		if (!bAsync)
 		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		}
+			while (!_to_exit.load(std::memory_order_acquire))
+			{
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			}
 
-		if (!shutdown())
-			WTSLogger::warn("UFT runner shutdown is pending; keep the runner alive and retry shutdown on a control thread");
+			if (!shutdown())
+				WTSLogger::warn("UFT runner shutdown is pending; keep the runner alive and retry shutdown on a control thread");
+		}
 	}
 	catch (...)
 	{

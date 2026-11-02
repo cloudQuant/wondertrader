@@ -26,6 +26,7 @@
 #include <filesystem>
 #include <fstream>
 #include <map>
+#include <set>
 #include <sstream>
 #include <string>
 #include <system_error>
@@ -79,6 +80,24 @@ namespace
 				out.push_back(c);
 		}
 		return out;
+	}
+
+	void expect_snapshot_times(const std::string& rawJson, uint32_t expectedTDate, uint64_t expectedSettime)
+	{
+		rapidjson::Document snapshot;
+		snapshot.Parse(rawJson.c_str());
+		ASSERT_FALSE(snapshot.HasParseError());
+		ASSERT_TRUE(snapshot.IsObject());
+		ASSERT_TRUE(snapshot.HasMember("fund"));
+		ASSERT_TRUE(snapshot["fund"].IsObject());
+		ASSERT_TRUE(snapshot["fund"].HasMember("tdate"));
+		ASSERT_TRUE(snapshot["fund"]["tdate"].IsUint());
+		EXPECT_EQ(expectedTDate, snapshot["fund"]["tdate"].GetUint());
+		ASSERT_TRUE(snapshot.HasMember("conditions"));
+		ASSERT_TRUE(snapshot["conditions"].IsObject());
+		ASSERT_TRUE(snapshot["conditions"].HasMember("settime"));
+		ASSERT_TRUE(snapshot["conditions"]["settime"].IsUint64());
+		EXPECT_EQ(expectedSettime, snapshot["conditions"]["settime"].GetUint64());
 	}
 
 	const char* const kBaseName = "q02_base";
@@ -309,11 +328,22 @@ TEST_F(Q02CtaDumpTest, sessionEndFeedsDumpedCsvArtifacts)
 
 	// volume==0 的持仓被 continue 跳过（本例两笔都非零）
 	const std::string positions = read_file(folder / "positions.csv");
-	EXPECT_EQ(std::string("date,code,volume,closeprofit,dynprofit\n")
-		+ "20200103,SSE.STK.600000,60,5.00,1.00\n"
-		+ "20200106,SSE.STK.600000,100,12.50,3.25\n", positions);
-	// 空头那行也必须在（_volume=-50 非零）
-	EXPECT_NE(std::string::npos, positions.find("20200106,SZSE.STK.000001,-50,-6.00,0.00\n"));
+	std::istringstream positionLines(positions);
+	std::string positionLine;
+	ASSERT_TRUE(std::getline(positionLines, positionLine));
+	EXPECT_EQ("date,code,volume,closeprofit,dynprofit", positionLine);
+	const std::set<std::string> expectedPositions = {
+		"20200103,SSE.STK.600000,60,5.00,1.00",
+		"20200106,SSE.STK.600000,100,12.50,3.25",
+		"20200106,SZSE.STK.000001,-50,-6.00,0.00"
+	};
+	std::set<std::string> actualPositions;
+	while (std::getline(positionLines, positionLine))
+	{
+		if (!positionLine.empty())
+			EXPECT_TRUE(actualPositions.insert(positionLine).second) << "duplicate position row: " << positionLine;
+	}
+	EXPECT_EQ(expectedPositions, actualPositions);
 
 	EXPECT_EQ(std::string("code,time,direct,action,price,qty,tag,fee,barno\n")
 		+ "SSE.STK.600000,20200102093100000,0,0,10.5,60,entryA,1.2,0\n"
@@ -412,6 +442,34 @@ TEST_F(Q02CtaDumpTest, chartDumpWritesEmptyKlineAndLogHeaders)
 
 	EXPECT_EQ("bartime,index_name,line_name,value\n", read_file(folder / "indice.csv"));
 	EXPECT_EQ("bartime,price,icon,tag\n", read_file(folder / "marks.csv"));
+}
+
+TEST_F(Q02CtaDumpTest, emptyReplayDumpUsesStableZeroSessionTimes)
+{
+	CtaMocker mocker(NULL, kStraName);
+	mocker.handle_replay_done();
+
+	const std::filesystem::path dumpFile = _out / kStraName / fmtutil::format("{}.json", kStraName);
+	const std::string firstDump = read_file(dumpFile);
+	expect_snapshot_times(firstDump, 0, 0);
+
+	mocker.handle_replay_done();
+	EXPECT_EQ(firstDump, read_file(dumpFile));
+}
+
+TEST_F(Q02CtaDumpTest, sessionWithoutTicksDumpsItsTradingDateAndStableConditionTime)
+{
+	const char* const sessionName = "q02_cta_session";
+	CtaMocker mocker(NULL, sessionName);
+	mocker.handle_session_begin(20240229);
+	mocker.handle_replay_done();
+
+	const std::filesystem::path dumpFile = _out / sessionName / fmtutil::format("{}.json", sessionName);
+	const std::string firstDump = read_file(dumpFile);
+	expect_snapshot_times(firstDump, 20240229, 0);
+
+	mocker.handle_replay_done();
+	EXPECT_EQ(firstDump, read_file(dumpFile));
 }
 
 /*

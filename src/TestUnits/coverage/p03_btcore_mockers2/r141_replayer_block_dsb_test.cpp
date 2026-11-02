@@ -46,23 +46,29 @@ protected:
 		WtHelper::setOutputDir(_out.string().c_str());
 
 		// 老版本 tick dsb：<base>/bin/ticks/<stdCode>_tick_<date>.dsb
+		std::string oldTicks = r141::make_old_tick_block(2, 3800.0);
+		WTSTickStructOld* tickData = (WTSTickStructOld*)(oldTicks.data() + sizeof(BlockHeader));
+		for (uint32_t i = 0; i < 2; ++i)
+		{
+			tickData[i].action_date = 20200103u;
+			tickData[i].trading_date = 20200103u;
+		}
 		ASSERT_TRUE(r141::write_text(
 			_base / "bin" / "ticks" /
-				(std::string(kRb) + "_tick_20200102.dsb"),
-			r141::make_old_tick_block(2, 3800.0)));
+				(std::string(kRb) + "_tick_20200103.dsb"), oldTicks));
 
-		// 新版压缩日线 dsb：<base>/his/day/SHFE/2405.dsb
+		// 新版压缩日线 dsb：<base>/his/day/SHFE/rb2405.dsb
 		ASSERT_TRUE(r141::write_text(
-			_base / "his" / "day" / "SHFE" / "2405.dsb",
+			_base / "his" / "day" / "SHFE" / "rb2405.dsb",
 			r141::make_cmp_bar_block(3, 3800.0)));
 
-		// 老版本日线 dsb：<base>/his/day/SHFE/2406.dsb
+		// 老版本日线 dsb：分月合约文件名按 product + 月份拼成 cu2406。
 		ASSERT_TRUE(r141::write_text(
-			_base / "his" / "day" / "SHFE" / "2406.dsb",
+			_base / "his" / "day" / "SHFE" / "cu2406.dsb",
 			r141::make_old_bar_block(3, 70000.0)));
 
 		WTSVariant* cfg = r141::make_cfg(_root, _base,
-			202001020932ull, 202001031500ull, true);
+			202001030932ull, 202001081500ull, true);
 		ASSERT_TRUE(_rp.init(cfg));
 		cfg->release();
 
@@ -85,25 +91,29 @@ TEST_F(R141ReplayerBlockDsb, OldTickAndBothBarVersions)
 	ASSERT_NE(nullptr, _rp.get_commodity_info(kRb));
 	ASSERT_NE(nullptr, _rp.get_commodity_info(kCu));
 
-	// 老 tick 块：两笔 tick 都转成新版，09:32 的游标取到最后一笔
+	// 老 tick 块：两笔 tick 都转成新版；09:32 截止时两笔都严格早于游标。
 	WTSTickSlice* ticks = _rp.get_tick_slice(kRb, 10);
 	ASSERT_NE(nullptr, ticks);
-	ASSERT_EQ(1u, ticks->size());
-	EXPECT_DOUBLE_EQ(3801.0, ticks->at(0)->price);
-	EXPECT_EQ(20200102u, ticks->at(0)->action_date);
+	ASSERT_EQ(2u, ticks->size());
+	EXPECT_DOUBLE_EQ(3800.0, ticks->at(0)->price);
+	EXPECT_EQ(20200103u, ticks->at(0)->action_date);
+	EXPECT_DOUBLE_EQ(3801.0, ticks->at(1)->price);
+	EXPECT_EQ(20200103u, ticks->at(1)->action_date);
 	ticks->release();
 
-	// 新版压缩日线：3 根全部解压出来，当前交易日取第一根
+	// 查询日期是 01-03；01-02 的日线已完成，可见切片验证压缩块解码。
 	WTSKlineSlice* rb = _rp.get_kline_slice(kRb, "d", 10, 1, false);
 	ASSERT_NE(nullptr, rb);
-	ASSERT_EQ(1, rb->size());
+	ASSERT_EQ(1u, rb->size());
+	EXPECT_EQ(20200102u, rb->at(0)->date);
 	EXPECT_DOUBLE_EQ(3800.25, rb->at(0)->close);
 	rb->release();
 
-	// 老版本日线：3 根 WTSBarStructOld 升版，当前交易日取第一根
+	// 老版本日线：3 根 WTSBarStructOld 升版，也返回完成的 01-02 记录。
 	WTSKlineSlice* cu = _rp.get_kline_slice(kCu, "d", 10, 1, false);
 	ASSERT_NE(nullptr, cu);
-	ASSERT_EQ(1, cu->size());
+	ASSERT_EQ(1u, cu->size());
+	EXPECT_EQ(20200102u, cu->at(0)->date);
 	EXPECT_DOUBLE_EQ(70000.5, cu->at(0)->close);
 	cu->release();
 }

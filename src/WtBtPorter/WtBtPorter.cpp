@@ -149,6 +149,22 @@ void feed_raw_ticks(WTSTickStruct* ticks, WtUInt32 count)
 }
 
 /**
+ * @brief Feed external adjustment factors into the backtest engine.
+ */
+void feed_adj_factors(WtString stdCode, WtUInt32* dates, double* factors, WtUInt32 count)
+{
+	getRunner().feedAdjFactors(stdCode, dates, factors, count);
+}
+
+#ifdef WT_BT_PORTER_CAPI_TEST_HOOKS
+extern "C" EXPORT_FLAG bool wt_btporter_test_load_adj_factors(
+	void* obj, const char* stdCode, FuncReadFactors feeder)
+{
+	return getRunner().loadAdjFactors(obj, stdCode, feeder);
+}
+#endif
+
+/**
  * @brief 初始化回测引擎
  * @details 初始化回测引擎的环境，包括日志配置和输出目录等设置
  * @param logProfile 日志配置文件或内容

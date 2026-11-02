@@ -157,7 +157,7 @@ TEST_F(R74RdmInitAdjTest, R74RdmAdjustedFileSizeGuards)
 	EXPECT_GT(_sink.count_of(LL_ERROR), err0);
 	s1->release();
 
-	// 2) 复权后文件是 CMP 版本但只有 12 字节块头（不足 HisKlineBlockV2）→ :1394 的短头守卫
+	// 2) CMP 文件只有 12 字节基础头（不足 BlockHeaderV2）→ 损坏压缩块 fail-closed
 	BlockHeader cmp_head;
 	memset(&cmp_head, 0, sizeof(cmp_head));
 	memcpy(cmp_head._blk_flag, BLK_FLAG, FLAG_SIZE);
@@ -173,10 +173,8 @@ TEST_F(R74RdmInitAdjTest, R74RdmAdjustedFileSizeGuards)
 	err0 = _sink.count_of(LL_ERROR);
 	WTSKlineSlice* s2 = _reader->readKlineSliceByRange("SSE.STK.600003-", KP_DAY,
 		202401010000ull, 202401090000ull);
-	ASSERT_TRUE(s2 != NULL);
-	EXPECT_EQ(r52::flatten_bars(s2).size(), (std::size_t)2);
+	EXPECT_TRUE(s2 == NULL);
 	EXPECT_GT(_sink.count_of(LL_ERROR), err0);
-	s2->release();
 
 	// 3) 复权后文件正常、原始文件缺失 → :1468 continue，仅返回复权后的两根
 	vector<WTSBarStruct> adj4;
@@ -200,6 +198,66 @@ TEST_F(R74RdmInitAdjTest, R74RdmAdjustedFileSizeGuards)
 	EXPECT_GT(_sink.count_of(LL_ERROR), err0);
 }
 
+TEST_F(R74RdmInitAdjTest, R74RdmShortAdjustedFileFallsBackToRawAndLogsError)
+{
+	init_reader_null();
+
+	ASSERT_TRUE(q03::write_bytes("his/day/SSE/600006-.dsb", string(8, 'X')));
+	vector<WTSBarStruct> raw;
+	for (uint32_t i = 0; i < 3; i++)
+		raw.push_back(q03::make_bar(20240102 + i, 20240102 + i, i + 1));
+	ASSERT_TRUE(q03::write_bytes("his/day/SSE/600006.dsb",
+		q03::make_block(BT_HIS_Day, BLOCK_VERSION_RAW_V2, q03::pack_bars(raw))));
+
+	const uint32_t errors_before = _sink.count_of(LL_ERROR);
+	WTSKlineSlice* slice = _reader->readKlineSliceByRange("SSE.STK.600006-", KP_DAY,
+		202401010000ull, 202401090000ull);
+	ASSERT_TRUE(slice != NULL);
+	vector<WTSBarStruct> got = r52::flatten_bars(slice);
+	ASSERT_EQ(got.size(), raw.size());
+	for (std::size_t i = 0; i < raw.size(); i++)
+	{
+		EXPECT_EQ(got[i].date, raw[i].date);
+		EXPECT_DOUBLE_EQ(got[i].open, raw[i].open);
+		EXPECT_DOUBLE_EQ(got[i].close, raw[i].close);
+	}
+	EXPECT_GT(_sink.count_of(LL_ERROR), errors_before);
+	slice->release();
+}
+
+TEST_F(R74RdmInitAdjTest, R74RdmShortAdjustedWithoutRawCanRetryWhenRawAppears)
+{
+	init_reader_null();
+
+	ASSERT_TRUE(q03::write_bytes("his/day/SSE/600007-.dsb", string(8, 'X')));
+	const uint32_t errors_before = _sink.count_of(LL_ERROR);
+	WTSKlineSlice* first = _reader->readKlineSliceByRange("SSE.STK.600007-", KP_DAY,
+		202401010000ull, 202401090000ull);
+	EXPECT_TRUE(first == NULL);
+	if (first != NULL)
+		first->release();
+	EXPECT_GT(_sink.count_of(LL_ERROR), errors_before);
+
+	vector<WTSBarStruct> raw;
+	for (uint32_t i = 0; i < 3; i++)
+		raw.push_back(q03::make_bar(20240102 + i, 20240102 + i, i + 1));
+	ASSERT_TRUE(q03::write_bytes("his/day/SSE/600007.dsb",
+		q03::make_block(BT_HIS_Day, BLOCK_VERSION_RAW_V2, q03::pack_bars(raw))));
+
+	WTSKlineSlice* retry = _reader->readKlineSliceByRange("SSE.STK.600007-", KP_DAY,
+		202401010000ull, 202401090000ull);
+	ASSERT_TRUE(retry != NULL);
+	vector<WTSBarStruct> got = r52::flatten_bars(retry);
+	ASSERT_EQ(got.size(), raw.size());
+	for (std::size_t i = 0; i < raw.size(); i++)
+	{
+		EXPECT_EQ(got[i].date, raw[i].date);
+		EXPECT_DOUBLE_EQ(got[i].open, raw[i].open);
+		EXPECT_DOUBLE_EQ(got[i].close, raw[i].close);
+	}
+	retry->release();
+}
+
 // ------------------------------------------------------------------ tick 区间 RT 边界
 // WtRdmDtReader.cpp: readTickSliceByRange :389-609：eIdx==0 守卫 :499-501、pTick-- :503-505、
 //   endTDate>curTDate 的收盘时间右界 :558-562、同日裁剪 :593-604
@@ -221,14 +279,13 @@ TEST_F(R74RdmInitAdjTest, R74RdmTickRangeRtBoundaries)
 	EXPECT_TRUE(r52::flatten_ticks(empty).empty());
 	empty->release();
 
-	// etime 夹在 09:30 与 09:31 之间 → lower_bound 命中 09:31 后回退一条，取 09:30/09:31
+	// etime 夹在 09:30 与 09:31 之间 → 闭区间只保留 09:30，严格晚于 etime 的 09:31 排除
 	WTSTickSlice* clipped = _reader->readTickSliceByRange("SSE.STK.600000",
 		20240110090000000ull, 20240110093030000ull);
 	ASSERT_TRUE(clipped != NULL);
 	vector<WTSTickStruct> got = r52::flatten_ticks(clipped);
-	ASSERT_EQ(got.size(), (std::size_t)2);
+	ASSERT_EQ(got.size(), (std::size_t)1);
 	EXPECT_EQ(got[0].action_time, 93000000u);
-	EXPECT_EQ(got[1].action_time, 93100000u);
 	clipped->release();
 
 	// endTDate > curTDate：RT 右边界改用收盘时间 15:00:59.999 → 三条全取
@@ -251,13 +308,12 @@ TEST_F(R74RdmInitAdjTest, R74RdmTickRangeRtBoundaries)
 // ------------------------------------------------------------------ HOT tick 候选文件 + 按条数尾窗
 // WtRdmDtReader.cpp: readTickSliceByRange :426-456（hotCode 命中 + 短文件）:536-566（HOT 代码）；
 //   readTickSliceByCount :2435-2473（RT 尾窗/回退）:2509-2549（hotCode 回退）
-TEST_F(R74RdmInitAdjTest, R74RdmHotTickCandidatesAndCountWindows)
+TEST_F(R74RdmInitAdjTest, R74RdmHotMalformedTickFileFailsClosedThenReloads)
 {
 	_hot.set_enabled(true);
 	_hot.set_raw("rb2401");
 	init_reader_null();
 
-	// 0108 的 hot 候选文件只有 8 字节 → bHitHot=true 后走长度校验失败
 	ASSERT_TRUE(q03::write_bytes("his/ticks/SHFE/20240108/rb_HOT.dsb", string(8, 'Z')));
 	vector<WTSTickStruct> d09;
 	d09.push_back(q03::make_tick(20240109, 20240109, 93000000, 11));
@@ -266,13 +322,58 @@ TEST_F(R74RdmInitAdjTest, R74RdmHotTickCandidatesAndCountWindows)
 		q03::make_block(BT_HIS_Ticks, BLOCK_VERSION_RAW_V2, q03::pack_ticks(d09))));
 
 	uint32_t err0 = _sink.count_of(LL_ERROR);
+	WTSTickSlice* rejected = _reader->readTickSliceByRange("SHFE.rb.HOT",
+		20240108090000000ull, 20240110090000000ull);
+	if (rejected != NULL)
+	{
+		EXPECT_TRUE(r52::flatten_ticks(rejected).empty());
+		rejected->release();
+	}
+	EXPECT_GT(_sink.count_of(LL_ERROR), err0);
+
+	// 坏文件路径清掉了该日期缓存；写入完整块后同一 range 应重新读取成功。
+	vector<WTSTickStruct> d08;
+	d08.push_back(q03::make_tick(20240108, 20240108, 93000000, 7));
+	d08.push_back(q03::make_tick(20240108, 20240108, 93100000, 8));
+	ASSERT_TRUE(q03::write_bytes("his/ticks/SHFE/20240108/rb_HOT.dsb",
+		q03::make_block(BT_HIS_Ticks, BLOCK_VERSION_RAW_V2, q03::pack_ticks(d08))));
+	uint32_t err_after_rejection = _sink.count_of(LL_ERROR);
 	WTSTickSlice* range = _reader->readTickSliceByRange("SHFE.rb.HOT",
 		20240108090000000ull, 20240110090000000ull);
+	ASSERT_TRUE(range != NULL);
+	vector<WTSTickStruct> got = r52::flatten_ticks(range);
+	ASSERT_EQ(got.size(), (std::size_t)4);
+	EXPECT_EQ(got[0].action_date, 20240108u);
+	EXPECT_EQ(got[0].action_time, 93000000u);
+	EXPECT_EQ(got[1].action_time, 93100000u);
+	EXPECT_EQ(got[2].action_date, 20240109u);
+	EXPECT_EQ(got[2].action_time, 93000000u);
+	EXPECT_EQ(got[3].action_time, 93100000u);
+	EXPECT_EQ(_sink.count_of(LL_ERROR), err_after_rejection);
+	range->release();
+}
+
+TEST_F(R74RdmInitAdjTest, R74RdmHotTickCandidatesAndCountWindows)
+{
+	_hot.set_enabled(true);
+	_hot.set_raw("rb2401");
+	init_reader_null();
+
+	vector<WTSTickStruct> d09;
+	d09.push_back(q03::make_tick(20240109, 20240109, 93000000, 11));
+	d09.push_back(q03::make_tick(20240109, 20240109, 93100000, 12));
+	ASSERT_TRUE(q03::write_bytes("his/ticks/SHFE/20240109/rb_HOT.dsb",
+		q03::make_block(BT_HIS_Ticks, BLOCK_VERSION_RAW_V2, q03::pack_ticks(d09))));
+
+	// 正常 range 仅查询存在的 0109 hot 候选文件。
+	WTSTickSlice* range = _reader->readTickSliceByRange("SHFE.rb.HOT",
+		20240109090000000ull, 20240110090000000ull);
 	ASSERT_TRUE(range != NULL);
 	vector<WTSTickStruct> rgot = r52::flatten_ticks(range);
 	ASSERT_EQ(rgot.size(), (std::size_t)2);
 	EXPECT_EQ(rgot[0].action_date, 20240109u);
-	EXPECT_GE(_sink.count_of(LL_ERROR), err0 + 1);
+	EXPECT_EQ(rgot[0].action_time, 93000000u);
+	EXPECT_EQ(rgot[1].action_time, 93100000u);
 	range->release();
 
 	// ByCount：当前日无 RT，回退到 0109 的 hot 候选文件（:2517 bHitHot）

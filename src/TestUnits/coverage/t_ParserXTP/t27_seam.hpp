@@ -5,9 +5,8 @@
  * `m_pUserAPI`（私有、且只能由 `init()` 从 dlopen 的厂商库拿到）与
  * `m_uTradingDate`（只能由 `DoLogin()` 置位）上：
  *   - 本机没有 `libxtpquoteapi.dylib`（`src/API/XTP2.2.32.2/` 只有 linux/x64/x86 三份，
- *     macOS 一份都没有）→ `DLLHelper::load_library` 返回 NULL → `get_symbol` 返回 NULL →
- *     `ParserXTP.cpp:131` 直接调用空函数指针崩（T1-XTP-01，已登记）。
- *     所以 `init()` 本体不可覆盖，见 `t27_parserxtp_api_seam_test.cpp` 的 DISABLED_ 说明。
+ *     macOS 一份都没有）。T1-XTP-01 由独立的 `t1_parserxtp_loader_test.cpp` 使用受控
+ *     动态模块覆盖；本夹具仍镜像初始化后的状态，专注登录/订阅路径，不依赖部署目录。
  *   - 但 `init()` 唯一的作用就是「把 api 指针与 8 个配置字段灌进对象」。这两件事本夹具
  *     用一个只读自 `ParserXTP.h` 的**布局镜像**直接灌进去，再用公开入口
  *     （`connect/subscribe/disconnect/isConnected/OnXxx`）驱动产品代码，
@@ -84,6 +83,7 @@ namespace t27
 		boost::asio::io_context _asyncio;
 		StdThreadPtr _thrd_worker;
 		std::shared_ptr<boost::asio::executor_work_guard<boost::asio::io_context::executor_type>> _worker;
+		std::atomic<bool> _worker_stopping;
 	};
 
 	static_assert(sizeof(ParserXTPMirror) == sizeof(ParserXTP),
@@ -218,6 +218,8 @@ namespace t27
 		int loginRet = 0;
 		int mdRet = 0;
 		int tbtRet = 0;
+		int unsubMdRet = 0;
+		int unsubTbtRet = 0;
 		char tradingDay[16] = "20260105";
 		XTPRI apiErr;
 
@@ -293,12 +295,12 @@ namespace t27
 		int UnSubscribeMarketData(char* ticker[], int count, XTP_EXCHANGE_TYPE exchange_id) override
 		{
 			unsubMdCalls.push_back(capture(ticker, count, exchange_id));
-			return 0;
+			return unsubMdRet;
 		}
 		int UnSubscribeTickByTick(char* ticker[], int count, XTP_EXCHANGE_TYPE exchange_id) override
 		{
 			unsubTbtCalls.push_back(capture(ticker, count, exchange_id));
-			return 0;
+			return unsubTbtRet;
 		}
 		int SubscribeOrderBook(char* ticker[], int count, XTP_EXCHANGE_TYPE exchange_id) override
 		{

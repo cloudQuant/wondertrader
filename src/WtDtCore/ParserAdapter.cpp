@@ -372,8 +372,7 @@ bool ParserAdapter::run()
 	if (_parser_api == NULL || _stopped)
 		return false;
 
-	_parser_api->connect();
-	return true;
+	return _parser_api->connect();
 }
 
 void ParserAdapter::handleSymbolList( const WTSArray* /*aySymbols*/ )

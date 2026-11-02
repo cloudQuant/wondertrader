@@ -1,0 +1,20 @@
+--- /private/tmp/wt-i03-r15-tags/baseline/HftStraBaseCtx.h	2026-11-01 22:38:13
++++ /private/tmp/wt-i03-r15-tags/red-index-source/WtCore/HftStraBaseCtx.h	2026-11-01 22:46:55
+@@ -683,7 +683,7 @@
+ 	//用户数据
+ 	typedef wt_hashmap<std::string, std::string> StringHashMap;
+ 	StringHashMap	_user_datas;
+-	bool			_ud_modified;
++	bool			_ud_modified = false;
+ 
+ 	bool			_data_agent;	//数据托管
+ 
+@@ -771,7 +771,7 @@
+ 	} OrderTag;
+ 	//typedef wt_hashmap<uint32_t, std::string> OrderMap;
+ 	//OrderMap		_orders;
+-	boost::circular_buffer<OrderTag> _orders;
++	boost::circular_buffer<OrderTag> _orders{16};
+ 
+ 	/**
+ 	 * @brief 策略资金信息结构体

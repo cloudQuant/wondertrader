@@ -97,7 +97,6 @@ extern "C"
 
 TraderCTPMini::TraderCTPMini()
 	: m_bQuickStart(false)
-	//, m_hInstCTP(NULL)
 	, m_sink(NULL)
 	, m_uLastQryTime(0)
 	, m_wrapperState(WS_NOTLOGIN)
@@ -110,7 +109,9 @@ TraderCTPMini::TraderCTPMini()
 	, m_ayFunds(NULL)
 	, m_bInQuery(false)
 	, m_lastQryTime(0)
-, m_bStopped(false)
+	, m_bStopped(false)
+	, m_hInstCTP(NULL)
+	, m_funcCreator(NULL)
 	{
 }
 
@@ -121,9 +122,35 @@ TraderCTPMini::~TraderCTPMini()
 
 bool TraderCTPMini::init(WTSVariant* params)
 {
-	const std::string broker = params->get("broker")->asCString();
-	const std::string user = params->get("user")->asCString();
-	const std::string pass = params->get("pass")->asCString();
+	// The API does not define reinitialization. Keep a successful module loaded
+	// while its creator or API may still be in use, and reject repeated init.
+	if (m_hInstCTP != NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderCTPMini] Initialization rejected because a CTP module is already initialized");
+		return false;
+	}
+
+	if (params == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderCTPMini] Initialization rejected because config is null");
+		return false;
+	}
+
+	WTSVariant* frontParam = params->get("front");
+	WTSVariant* brokerParam = params->get("broker");
+	WTSVariant* userParam = params->get("user");
+	WTSVariant* passParam = params->get("pass");
+	if (frontParam == NULL || brokerParam == NULL || userParam == NULL || passParam == NULL)
+	{
+		const char* missingKey = frontParam == NULL ? "front" :
+			brokerParam == NULL ? "broker" : userParam == NULL ? "user" : "pass";
+		write_log(m_sink, LL_ERROR, "[TraderCTPMini] Initialization rejected because required config key '{}' is missing", missingKey);
+		return false;
+	}
+
+	const std::string broker = brokerParam->asCString();
+	const std::string user = userParam->asCString();
+	const std::string pass = passParam->asCString();
 	const std::string appID = params->getCString("appid");
 	const std::string authCode = params->getCString("authcode");
 	if (!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcBrokerIDType)>(broker, "broker", m_sink) ||
@@ -135,7 +162,7 @@ bool TraderCTPMini::init(WTSVariant* params)
 		return false;
 	}
 
-	m_strFront = params->get("front")->asCString();
+	m_strFront = frontParam->asCString();
 	m_strBroker = broker;
 	m_strUser = user;
 	m_strPass = pass;
@@ -153,9 +180,21 @@ bool TraderCTPMini::init(WTSVariant* params)
 	if (module.empty())
 		module = "thosttraderapi";
 
-	m_strModule = getBinDir() + DLLHelper::wrap_module(module.c_str(), "");
+	const std::string moduleFile = DLLHelper::wrap_module(module.c_str(), "");
+	const char* moduleDir = getBinDir();
+	if ((moduleDir == NULL || *moduleDir == '\0') && !fs::path(moduleFile).is_absolute())
+	{
+		write_log(m_sink, LL_ERROR, "[TraderCTPMini] Cannot locate trader module directory");
+		return false;
+	}
+	m_strModule = (moduleDir == NULL ? std::string() : std::string(moduleDir)) + moduleFile;
 
-	m_hInstCTP = DLLHelper::load_library(m_strModule.c_str());
+	DllHandle candidateHandle = DLLHelper::load_library(m_strModule.c_str());
+	if (candidateHandle == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderCTPMini] Failed to load CTP trader module '{}'", m_strModule);
+		return false;
+	}
 #ifdef _WIN32
 #	ifdef _WIN64
 	const char* creatorName = "?CreateFtdcTraderApi@CThostFtdcTraderApi@@SAPEAV1@PEBD@Z";
@@ -165,7 +204,19 @@ bool TraderCTPMini::init(WTSVariant* params)
 #else
 	const char* creatorName = "_ZN19CThostFtdcTraderApi19CreateFtdcTraderApiEPKc";
 #endif
-	m_funcCreator = (CTPCreator)DLLHelper::get_symbol(m_hInstCTP, creatorName);
+	CTPCreator candidateCreator = (CTPCreator)DLLHelper::get_symbol(candidateHandle, creatorName);
+	if (candidateCreator == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderCTPMini] CTP trader module '{}' is missing its creator symbol", m_strModule);
+		// No API was created from this candidate, so no callback can use it.
+		DLLHelper::free_library(candidateHandle);
+		return false;
+	}
+
+	// Keep a successfully loaded module resident for as long as its creator/API
+	// can be used. The API's callback-quiescence contract is not exposed here.
+	m_hInstCTP = candidateHandle;
+	m_funcCreator = candidateCreator;
 
 	m_bQuickStart = params->getBoolean("quick");
 
@@ -199,10 +250,22 @@ void TraderCTPMini::release()
 
 void TraderCTPMini::connect()
 {
+	if (m_funcCreator == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderCTPMini] Connect ignored because the CTP trader creator is unavailable");
+		return;
+	}
+
 	std::stringstream ss;
 	ss << m_strFlowDir << "flows/" << m_strBroker << "/" << m_strUser << "/";
 	fs::create_directories(ss.str().c_str());
 	m_pUserAPI = m_funcCreator(ss.str().c_str());
+	if (m_pUserAPI == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderCTPMini] Connect ignored because the CTP trader creator returned a null API");
+		return;
+	}
+
 	m_pUserAPI->RegisterSpi(this);
 	if (m_bQuickStart)
 	{
@@ -217,10 +280,7 @@ void TraderCTPMini::connect()
 
 	m_pUserAPI->RegisterFront((char*)m_strFront.c_str());
 
-	if (m_pUserAPI)
-	{
-		m_pUserAPI->Init();
-	}
+	m_pUserAPI->Init();
 
 	if (m_thrdWorker == NULL)
 	{

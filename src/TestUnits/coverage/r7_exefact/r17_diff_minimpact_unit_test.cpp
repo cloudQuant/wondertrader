@@ -603,11 +603,14 @@ TEST(r17_diff_minimpact, channel_ready_cancels_unmanaged_and_blocks_calc)
 
 		h.ctx.undone = 0;                                 // 两笔撤单回报逐个消耗 cancel_cnt
 		unit.on_order(ids[0], kCode, true, 3.0, 3500, true);
+		EXPECT_TRUE(h.ctx.buys.empty());                   // 仍有一笔撤单待确认
 		unit.on_order(ids[1], kCode, true, 3.0, 3500, true);
-		WTSTickData* t2 = mkTick(kCode, 93002000, 3506, 3501, 100, 3511, 50);
-		unit.on_tick(t2);                                 // cnt 归零后才发得出单
-		ASSERT_EQ(h.ctx.buys.size(), 1u);
+		ASSERT_EQ(h.ctx.buys.size(), 1u);                 // 最后一笔 ACK 到齐即用已有 tick 重算
 		EXPECT_DOUBLE_EQ(h.ctx.buys[0].qty, 2.0);
+		h.ctx.undone = 2;                                  // fake 反映刚受理的 2 手订单仍在途
+		WTSTickData* t2 = mkTick(kCode, 93002000, 3506, 3501, 100, 3511, 50);
+		unit.on_tick(t2);                                 // 在途订单存在时，新 tick 不重复下单
+		EXPECT_EQ(h.ctx.buys.size(), 1u);
 		t1->release();
 		t2->release();
 	}
@@ -1039,4 +1042,80 @@ TEST(r17_diff_minimpact, duplicate_init_preserves_success_and_execution)
 	EXPECT_EQ(comm->retainCount(), 1u);
 	EXPECT_EQ(sess->retainCount(), 1u);
 	comm->release();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 终态回报保留迟到成交关联，但订单不再参加超时扫描；通道确认无挂单后清理。
+//////////////////////////////////////////////////////////////////////////
+TEST(r17_diff_minimpact, terminal_order_keeps_late_trade_association_without_expiry)
+{
+	Harness h;
+	{
+		WtDiffMinImpactExeUnit unit;
+		WTSVariant* cfg = mkCfg(0, 1, 0, 0, false, 4.0, 0.0);
+		unit.init(&h.ctx, kCode, cfg);
+		cfg->release();
+
+		unit.set_position(kCode, 4);
+		WTSTickData* t1 = mkTick(kCode, 93000000, 3505, 3500, 100, 3510, 50);
+		unit.on_tick(t1);
+		ASSERT_EQ(h.ctx.buys.size(), 1u);
+		const uint32_t canceledId = h.ctx.lastIds[0];
+
+		unit.on_order(canceledId, kCode, true, 4.0, 3510, true);
+		EXPECT_TRUE(unit._orders_mon.has_order(canceledId));
+		unit.on_trade(canceledId, kCode, true, 1.0, 3510); // late partial fill remains associated
+		EXPECT_DOUBLE_EQ(unit._left_diff, 3.0);
+
+		h.ctx.curTime += 2000;
+		WTSTickData* t2 = mkTick(kCode, 93002000, 3506, 3501, 100, 3511, 50);
+		unit.on_tick(t2);
+		EXPECT_FALSE(unit._orders_mon.has_unverified_timeout());
+		EXPECT_TRUE(unit._orders_mon.has_order(canceledId));
+		ASSERT_EQ(h.ctx.buys.size(), 2u);
+		EXPECT_DOUBLE_EQ(h.ctx.buys[1].qty, 3.0);
+
+		const uint32_t nextId = h.ctx.lastIds[0];
+		unit.on_entrust(nextId, kCode, false, "rejected");
+		unit.on_channel_ready(); // no live orders: stale association can now be cleaned
+		EXPECT_FALSE(unit._orders_mon.has_order(canceledId));
+		t1->release();
+		t2->release();
+	}
+	h.comm->release();
+}
+
+TEST(r17_diff_minimpact, filled_order_keeps_late_trade_until_reconciliation)
+{
+	Harness h;
+	{
+		WtDiffMinImpactExeUnit unit;
+		WTSVariant* cfg = mkCfg(0, 1, 0, 0, false, 4.0, 0.0);
+		unit.init(&h.ctx, kCode, cfg);
+		cfg->release();
+
+		unit.set_position(kCode, 4);
+		WTSTickData* t1 = mkTick(kCode, 93000000, 3505, 3500, 100, 3510, 50);
+		unit.on_tick(t1);
+		ASSERT_EQ(h.ctx.buys.size(), 1u);
+		const uint32_t filledId = h.ctx.lastIds[0];
+
+		unit.on_order(filledId, kCode, true, 0.0, 3510, false);
+		EXPECT_TRUE(unit._orders_mon.has_order(filledId));
+		unit.on_trade(filledId, kCode, true, 4.0, 3510); // trade arrives after the full-fill order report
+		EXPECT_DOUBLE_EQ(unit._left_diff, 0.0);
+
+		h.ctx.curTime += 2000;
+		WTSTickData* t2 = mkTick(kCode, 93002000, 3506, 3501, 100, 3511, 50);
+		unit.on_tick(t2);
+		EXPECT_FALSE(unit._orders_mon.has_unverified_timeout());
+		EXPECT_TRUE(h.ctx.byidCancels.empty());
+		EXPECT_TRUE(unit._orders_mon.has_order(filledId));
+
+		unit.on_channel_ready();
+		EXPECT_FALSE(unit._orders_mon.has_order(filledId));
+		t1->release();
+		t2->release();
+	}
+	h.comm->release();
 }

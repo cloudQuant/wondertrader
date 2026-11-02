@@ -131,18 +131,19 @@ TEST_F(R123ShareManagerOnlineTest, initialized_wrappers_fall_back_without_domain
 	});
 }
 
-// ShareManager.cpp:83-114 start_watching：_secnames 非空 -> 工作线程遍历并查询更新时间，
-// 域不存在时返回 0（不会触发 _engine->notify_params_update）；microsecs>0 走休眠分支。
-// 子进程 exit 时单例析构 join，线程只活几毫秒。
+// initialize 成功且登记 watcher 区域，但没有设置 engine 或初始化 domain。
+// ShareManager.h 要求 init_domain() 与 set_engine() 在 start_watching() 前完成；
+// ShareManager.cpp 在缺 engine 时返回 false，且不会创建工作线程。此用例不覆盖
+// engine 有效但 domain 缺失时的合同。子进程状态仍由 run_child 的退出码与 marks 检查。
 TEST_F(R123ShareManagerOnlineTest, start_watching_without_domain)
 {
 	run_child([this](R123SmReport& r) {
 		ShareManager& sm = ShareManager::self();
 		R123_SM_CHK(r, sm.initialize(_lib.c_str()));
 		R123_SM_CHK(r, !sm.commit_param_watcher("r123_watch"));
-		R123_SM_CHK(r, sm.start_watching(5000));
-		// 重复 start 只返回 true，不重复建线程
-		R123_SM_CHK(r, sm.start_watching(5000));
+		R123_SM_CHK(r, !sm.start_watching(5000));
+		// 未满足启动前置条件，不创建线程；重复调用仍拒绝启动。
+		R123_SM_CHK(r, !sm.start_watching(5000));
 
 		r.marks = 20;
 	});

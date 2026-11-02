@@ -6,17 +6,27 @@
  *
  * 说明：WtDtPorter.cpp:33-46（getModuleName）与 :56-58（CMiniDumper::Enable）在
  * #ifdef _MSC_VER 内，本机 macOS/arm64 不参与编译，本轮不主张覆盖。
- * start(bool)（:62-65）会进 WtDtRunner::start 的线程/状态机分支 -> 整条 DISABLED_。
+ * start(false) 的同步阻塞循环仅在独立子进程中、由外部 SIGTERM 驱动退出；
+ * start(true/false) 的 configured allday 分支都在隔离子进程中覆盖，并在非全天
+ * 模式下显式停止状态监视线程。
  */
 #include <gtest/gtest.h>
 
 #include <atomic>
+#include <cerrno>
+#include <chrono>
+#include <cstdlib>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <csignal>
+#include <poll.h>
 #include <set>
 #include <string>
 #include <system_error>
+#include <thread>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <vector>
 
@@ -26,20 +36,54 @@
 #include "Includes/WTSContractInfo.hpp"
 #include "Includes/WTSVariant.hpp"
 #include "Includes/WTSTypes.h"
+#include "Share/ModuleHelper.hpp"
 #include "WTSTools/WTSBaseDataMgr.h"
 #include "WtDtCore/WtHelper.h"
+
+#include "Share/StdUtils.hpp"
+#include "WtDtCore/DataManager.h"
+#include "WtDtCore/IndexWorkerMgr.h"
+#include "WtDtCore/ParserAdapter.h"
+#include "WtDtCore/UDPCaster.h"
+#include "WtDtCore/ShmCaster.h"
+#include "WTSTools/WTSHotMgr.h"
+#include <boost/asio.hpp>
 
 #include "WtDtPorter/ExpDumper.h"
 #include "WtDtPorter/ExpParser.h"
 #include "WtDtPorter/PorterDefs.h"
 #include "WtDtPorter/WtDtPorter.h"
+#define private public
+#include "WtDtCore/StateMonitor.h"
 #include "WtDtPorter/WtDtRunner.h"
+#undef private
 
 USING_NS_WTP;
 
 namespace fs = std::filesystem;
 
 namespace {
+
+const char* const kCapiStartChildEnv = "WT_R22_CAPI_START_CHILD";
+const char* const kCapiStartSyncFdEnv = "WT_R22_CAPI_START_SYNC_FD";
+
+void swallow_early_sigterm(int)
+{
+}
+
+bool write_sync_child_event(char event)
+{
+	const char* fdText = std::getenv(kCapiStartSyncFdEnv);
+	if (fdText == NULL)
+		return false;
+	const int fd = std::atoi(fdText);
+	return fd >= 0 && ::write(fd, &event, 1) == 1;
+}
+
+std::string r22c_test_executable_path()
+{
+	return (fs::path(getBinDir()) / "CoverageTests").string();
+}
 
 std::string r22c_tmp_dir(const char* tag)
 {
@@ -99,6 +143,8 @@ void PORTER_FLAG rec_sub_c(const char* id, const char* code, bool isForSub)
 }
 
 } // namespace
+
+extern WtDtRunner& getRunner();
 
 class R22PorterCapiTest : public ::testing::Test
 {
@@ -331,14 +377,224 @@ TEST_F(R22PorterCapiTest, DISABLED_write_log_with_null_category_hits_strlen_null
 	SUCCEED();
 }
 
-TEST_F(R22PorterCapiTest, DISABLED_capi_start_always_spawns_state_monitor_thread)
+TEST_F(R22PorterCapiTest, DISABLED_capi_start_without_initialization_spawns_lifetime_monitor)
 {
-	// 触发条件：C 入口 start(false) 或 start(true)。
-	//   WtDtPorter.cpp:62-65 只把 bAsync 透传下去，形参里根本没有 allday，
-	//   所以 WtDtRunner::start 的 bAlldayMode 恒为 false ->
-	//   :63/:82 的 sleep_for(5ms) + _state_mon.run() 必然执行（StateMonitor 起线程）；
-	//   bAsync=false 时还额外 install_signal_hooks + StdThread.join() 永久阻塞。
-	//   见 BUG-R22-002。
+	// Without initialize(), the runner's default allday mode is false, so this
+	// exercises the ordinary C start path and spawns a monitor thread. It remains
+	// disabled because the monitor is intentionally process-lifetime in this path.
 	start(true);
 	SUCCEED();
+}
+
+TEST_F(R22PorterCapiTest, ConfiguredStartChildChecksStateMonitor)
+{
+	const char* childMode = std::getenv(kCapiStartChildEnv);
+	if (childMode == NULL)
+	{
+		GTEST_SKIP() << "internal child process test";
+	}
+	const bool isCapi = std::strncmp(childMode, "capi_", 5) == 0;
+	const bool directDefaultStart = std::strcmp(childMode, "runner_default") == 0;
+	const bool synchronousCapiStart = isCapi && std::strstr(childMode, "_sync") != NULL;
+	const bool allday = std::strstr(childMode, "true") != NULL;
+
+	WtDtRunner directRunner;
+	StateMonitor* monitor = NULL;
+	if (directDefaultStart)
+	{
+		// Original direct-runner positive control: the default non-allday start
+		// creates the monitor; this child stops and joins it before exit.
+		directRunner.start(true);
+		monitor = &directRunner._state_mon;
+		EXPECT_FALSE(directRunner.isAlldayMode());
+	}
+	else
+	{
+		write_text_c(_dir / "sessions.json",
+			R"({"DAY0":{"name":"day","offset":0,"sections":[{"from":0,"to":2359}]}})");
+		write_text_c(_dir / "statemonitor.json",
+			R"({"DAY0":{"inittime":0,"closetime":0,"proctime":0}})");
+		const std::string cfg = "{\"basefiles\":{\"session\":\"" + (_dir / "sessions.json").string()
+			+ "\"},\"allday\":" + (allday ? "true" : "false")
+			+ ",\"statemonitor\":\"" + (_dir / "statemonitor.json").string()
+			+ "\",\"writer\":{\"module\":\"r22_missing_writer\"},\"parsers\":[]}";
+		const std::string absentLog = (_dir / "missing_log.json").string();
+
+		if (isCapi)
+		{
+			initialize(cfg.c_str(), absentLog.c_str(), false, false);
+			if (synchronousCapiStart)
+			{
+				// The parent waits for this handshake, then sends SIGTERM repeatedly.
+				// The temporary handler safely absorbs signals until start(false)
+				// installs the runner's exit hook; a later signal releases its loop.
+				std::signal(SIGTERM, swallow_early_sigterm);
+				ASSERT_TRUE(write_sync_child_event('R'));
+				start(false);
+			}
+			else
+			{
+				start(true);
+			}
+			monitor = &getRunner()._state_mon;
+			EXPECT_EQ(allday, getRunner().isAlldayMode());
+		}
+		else
+		{
+			directRunner.initialize(cfg.c_str(), absentLog.c_str(), _dir.string().c_str(), false, false);
+			// Explicit all-day runner control does not create a monitor thread.
+			directRunner.start(true, true);
+			monitor = &directRunner._state_mon;
+			EXPECT_TRUE(directRunner.isAlldayMode());
+		}
+	}
+
+	ASSERT_NE(nullptr, monitor);
+	EXPECT_EQ(!allday, monitor->_thrd != nullptr);
+	if (!allday)
+	{
+		ASSERT_NE(nullptr, monitor->_thrd);
+		EXPECT_TRUE(monitor->_thrd->joinable());
+		monitor->stop();
+		EXPECT_FALSE(monitor->_thrd->joinable());
+	}
+	if (synchronousCapiStart)
+		ASSERT_TRUE(write_sync_child_event('D'));
+}
+
+TEST_F(R22PorterCapiTest, CapiStartHonorsConfiguredAlldayModeInIsolatedProcesses)
+{
+	const std::string executable = r22c_test_executable_path();
+	ASSERT_TRUE(fs::is_regular_file(executable)) << executable;
+	const std::string filter = "--gtest_filter=R22PorterCapiTest.ConfiguredStartChildChecksStateMonitor";
+	const std::string color = "--gtest_color=no";
+
+	auto runChild = [&](const char* mode, bool expectSynchronous = false) {
+		int syncEvents[2] = { -1, -1 };
+		if (expectSynchronous)
+			ASSERT_EQ(0, ::pipe(syncEvents)) << "pipe failed: " << std::strerror(errno);
+		const pid_t child = ::fork();
+		if (child < 0)
+		{
+			if (syncEvents[0] >= 0) ::close(syncEvents[0]);
+			if (syncEvents[1] >= 0) ::close(syncEvents[1]);
+			FAIL() << "fork failed: " << std::strerror(errno);
+			return;
+		}
+		if (child == 0)
+		{
+			if (expectSynchronous)
+			{
+				::close(syncEvents[0]);
+				::setenv(kCapiStartSyncFdEnv, std::to_string(syncEvents[1]).c_str(), 1);
+			}
+			::setenv(kCapiStartChildEnv, mode, 1);
+			char* const args[] = {
+				const_cast<char*>(executable.c_str()),
+				const_cast<char*>(filter.c_str()),
+				const_cast<char*>(color.c_str()),
+				nullptr
+			};
+			::execv(executable.c_str(), args);
+			::_exit(127);
+		}
+
+		if (expectSynchronous)
+			::close(syncEvents[1]);
+		int childStatus = 0;
+		const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(30);
+		bool ready = !expectSynchronous;
+		bool done = false;
+		auto readEvent = [&](char expected, int timeoutMs) {
+			pollfd descriptor;
+			descriptor.fd = syncEvents[0];
+			descriptor.events = POLLIN;
+			descriptor.revents = 0;
+			int polled;
+			do { polled = ::poll(&descriptor, 1, timeoutMs); } while (polled < 0 && errno == EINTR);
+			if (polled <= 0 || (descriptor.revents & POLLIN) == 0)
+				return false;
+			char event = 0;
+			return ::read(syncEvents[0], &event, 1) == 1 && event == expected;
+		};
+		if (expectSynchronous)
+		{
+			ready = readEvent('R', 5000);
+			if (!ready)
+			{
+				ADD_FAILURE() << "synchronous C API child did not reach the pre-start signal barrier: " << mode;
+				::kill(child, SIGKILL);
+				while (::waitpid(child, &childStatus, 0) == -1 && errno == EINTR) {}
+				::close(syncEvents[0]);
+				return;
+			}
+			// A correctly forwarded start(false) remains in its loop. An accidental
+			// start(true) returns within this window, before any signal is needed.
+			const bool returnedWithoutSignal = readEvent('D', 100);
+			EXPECT_FALSE(returnedWithoutSignal) << "C start(false) returned before a termination signal: " << mode;
+			const pid_t earlyExit = ::waitpid(child, &childStatus, WNOHANG);
+			EXPECT_EQ(0, earlyExit) << "synchronous C API child exited before the parent signal: " << mode;
+			if (returnedWithoutSignal || earlyExit != 0)
+			{
+				if (earlyExit == 0)
+				{
+					::kill(child, SIGKILL);
+					while (::waitpid(child, &childStatus, 0) == -1 && errno == EINTR) {}
+				}
+				::close(syncEvents[0]);
+				return;
+			}
+
+			while (std::chrono::steady_clock::now() < deadline)
+			{
+				if (::kill(child, SIGTERM) != 0 && errno != ESRCH)
+					break;
+				if (readEvent('D', 20))
+				{
+					done = true;
+					break;
+				}
+				const pid_t waited = ::waitpid(child, &childStatus, WNOHANG);
+				if (waited == child)
+					break;
+			}
+			EXPECT_TRUE(done) << "C start(false) did not return after SIGTERM: " << mode;
+			if (!done)
+			{
+				::kill(child, SIGKILL);
+				while (::waitpid(child, &childStatus, 0) == -1 && errno == EINTR) {}
+				::close(syncEvents[0]);
+				return;
+			}
+			::close(syncEvents[0]);
+		}
+		for (;;)
+		{
+			const pid_t waited = ::waitpid(child, &childStatus, WNOHANG);
+			if (waited == child)
+				break;
+			if (waited == -1 && errno != EINTR)
+			{
+				ADD_FAILURE() << "waitpid failed: " << std::strerror(errno);
+				return;
+			}
+			if (std::chrono::steady_clock::now() >= deadline)
+			{
+				::kill(child, SIGKILL);
+				while (::waitpid(child, &childStatus, 0) == -1 && errno == EINTR) {}
+				ADD_FAILURE() << "isolated C API start child exceeded 30 seconds: " << mode;
+				return;
+			}
+			std::this_thread::sleep_for(std::chrono::milliseconds(20));
+		}
+		ASSERT_TRUE(WIFEXITED(childStatus)) << "child terminated abnormally, status=" << childStatus;
+		EXPECT_EQ(0, WEXITSTATUS(childStatus)) << "child mode=" << mode;
+	};
+
+	runChild("capi_true");
+	runChild("capi_false");
+	runChild("capi_true_sync", true);
+	runChild("capi_false_sync", true);
+	runChild("runner_true");
+	runChild("runner_default");
 }

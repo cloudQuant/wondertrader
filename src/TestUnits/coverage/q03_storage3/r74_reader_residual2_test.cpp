@@ -20,6 +20,36 @@ namespace r74 {
 using std::string;
 using std::vector;
 
+static string json_escape(const string& value)
+{
+	static const char hex[] = "0123456789abcdef";
+	string escaped;
+	escaped.reserve(value.size());
+	for (unsigned char ch : value)
+	{
+		switch (ch)
+		{
+		case '"': escaped += "\\\""; break;
+		case '\\': escaped += "\\\\"; break;
+		case '\b': escaped += "\\b"; break;
+		case '\f': escaped += "\\f"; break;
+		case '\n': escaped += "\\n"; break;
+		case '\r': escaped += "\\r"; break;
+		case '\t': escaped += "\\t"; break;
+		default:
+			if (ch < 0x20)
+			{
+				escaped += "\\u00";
+				escaped += hex[ch >> 4];
+				escaped += hex[ch & 0x0f];
+			}
+			else
+				escaped += static_cast<char>(ch);
+		}
+	}
+	return escaped;
+}
+
 class R74ReaderResidualTest : public ::testing::Test
 {
 protected:
@@ -47,7 +77,7 @@ protected:
 
 	void init_reader_simple()
 	{
-		init_reader(fmtutil::format("{{\"path\":\"{}\",\"adjust_flag\":0}}", _root));
+		init_reader("{\"path\":\"" + json_escape(_root) + "\",\"adjust_flag\":0}");
 	}
 
 	std::unique_ptr<q03::Sandbox>	_sandbox;
@@ -67,9 +97,9 @@ TEST_F(R74ReaderResidualTest, R74ReaderInitPathAndHisPathArrays)
 	const string rootB = _root + "rootB/";
 	const string hisA = _root + "hisA/";
 	const string hisB = _root + "hisB/";
-	init_reader(fmtutil::format(
-		"{{\"path\":[\"{}\",\"{}\"],\"his_path\":[\"{}\",\"{}\"],\"adjust_flag\":0}}",
-		rootA, rootB, hisA, hisB));
+	init_reader("{\"path\":[\"" + json_escape(rootA) + "\",\"" + json_escape(rootB) +
+		"\"],\"his_path\":[\"" + json_escape(hisA) + "\",\"" + json_escape(hisB) +
+		"\"],\"adjust_flag\":0}");
 
 	// 历史 tick 只放在第二个 his_path 下 → 依次探测 rootA/his、rootB/his、hisA、hisB 才命中
 	vector<WTSTickStruct> his;

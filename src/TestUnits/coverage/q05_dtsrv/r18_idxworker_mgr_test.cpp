@@ -10,18 +10,23 @@
  *    「dlopen 成功但找不到 create_index_factory」（L66-71）两条真实扫描分支
  *  - init 的「indice 存在但不是数组」（L142 第二个子条件）与
  *    「indice 是空数组」（L147-148 循环 0 次 -> L167 return true）
- *  - handle_quote 同步分支的 retain 计数（L180 只 retain、L195-202 的 else 分支不 release）
+ *  - handle_quote 同步分支的 retain/release 配对及 worker 抛异常时的清理
+ *  - 用单 worker gate 确认异步任务排队/执行期间持有 tick，完成后回到调用者引用基线
  *  - output_log（L225）与 get_tick/push_tick/sub_ticks 的组合委托
  * dlopen 只用本机已存在的第三方 .dylib 做「找不到工厂符号」的负样本，不加载任何指标插件；
- * 不起线程（poolsize 恒为 0，避免 boost::threadpool 起线程）、不 sleep、不 socket、不 shm。
+ * 唯一异步用例使用可超时的本地 gate，其他用例 poolsize=0；不 socket、不 shm。
  */
 #include <gtest/gtest.h>
 
 #include <atomic>
+#include <chrono>
 #include <cstdint>
 #include <cstring>
 #include <fstream>
+#include <memory>
+#include <stdexcept>
 #include <string>
+#include <thread>
 #include <unistd.h>
 
 #include <filesystem>
@@ -36,7 +41,128 @@
 
 namespace fs = std::filesystem;
 
+struct R18IndexWorkerMgrTestAccess
+{
+	static boost::threadpool::pool* pool(IndexWorkerMgr& mgr)
+	{
+		return mgr._pool.get();
+	}
+
+	static void addWorker(IndexWorkerMgr& mgr, const char* id,
+		wtp::IIndexWorker* worker, wtp::IIndexWorkerFact* fact)
+	{
+		mgr._workers[id] = IndexWorkerPtr(new IdxWorkerWrapper(worker, fact));
+	}
+};
+
 namespace {
+
+struct R18AsyncControl
+{
+	std::atomic<bool> blockerEntered { false };
+	std::atomic<bool> releaseBlocker { false };
+	std::atomic<bool> blockerTimedOut { false };
+	std::atomic<bool> workerEntered { false };
+	std::atomic<bool> releaseWorker { false };
+	std::atomic<bool> workerTimedOut { false };
+	std::atomic<bool> dispatchComplete { false };
+	std::atomic<uint32_t> refCountOnWorkerEntry { 0 };
+	std::atomic<uint32_t> actionDateOnWorkerEntry { 0 };
+	std::atomic<uint32_t> refCountAfterDispatch { 0 };
+};
+
+bool waitForFlag(const std::atomic<bool>& flag, std::chrono::milliseconds timeout)
+{
+	const auto deadline = std::chrono::steady_clock::now() + timeout;
+	while (!flag.load(std::memory_order_acquire)
+		&& std::chrono::steady_clock::now() < deadline)
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	return flag.load(std::memory_order_acquire);
+}
+
+class R18AsyncGateCleanup
+{
+public:
+	explicit R18AsyncGateCleanup(R18AsyncControl& control) : _control(control) {}
+	~R18AsyncGateCleanup()
+	{
+		_control.releaseWorker.store(true, std::memory_order_release);
+		_control.releaseBlocker.store(true, std::memory_order_release);
+	}
+
+private:
+	R18AsyncControl& _control;
+};
+
+class R18TickRef
+{
+public:
+	explicit R18TickRef(WTSTickData* tick = nullptr) : _tick(tick) {}
+	~R18TickRef() { release(); }
+	R18TickRef(const R18TickRef&) = delete;
+	R18TickRef& operator=(const R18TickRef&) = delete;
+
+	WTSTickData* get() const { return _tick; }
+	void release()
+	{
+		if (_tick != nullptr)
+		{
+			_tick->release();
+			_tick = nullptr;
+		}
+	}
+
+private:
+	WTSTickData* _tick;
+};
+
+class R18ProbeIndexWorker final : public wtp::IIndexWorker
+{
+public:
+	R18ProbeIndexWorker(R18AsyncControl& control, bool throwOnQuote, bool waitForRelease)
+		: IIndexWorker("r18_probe"), _control(control), _throwOnQuote(throwOnQuote), _waitForRelease(waitForRelease) {}
+
+	const char* get_fact_name() override { return "r18_probe_fact"; }
+	bool init(WTSVariant*) override { return true; }
+
+	void handle_quote(WTSTickData* tick) override
+	{
+		if (_throwOnQuote)
+			throw std::runtime_error("controlled index-worker callback failure");
+
+		_control.refCountOnWorkerEntry.store(tick->retainCount(), std::memory_order_relaxed);
+		_control.actionDateOnWorkerEntry.store(tick->actiondate(), std::memory_order_relaxed);
+		_control.workerEntered.store(true, std::memory_order_release);
+		if (_waitForRelease && !waitForFlag(_control.releaseWorker, std::chrono::seconds(5)))
+			_control.workerTimedOut.store(true, std::memory_order_release);
+	}
+
+private:
+	R18AsyncControl& _control;
+	bool _throwOnQuote;
+	bool _waitForRelease;
+};
+
+class R18ProbeIndexWorkerFact final : public wtp::IIndexWorkerFact
+{
+public:
+	R18ProbeIndexWorkerFact(R18AsyncControl& control, bool throwOnQuote = false, bool waitForRelease = false)
+		: _worker(control, throwOnQuote, waitForRelease) {}
+
+	const char* get_name() override { return "r18_probe_fact"; }
+	wtp::IIndexWorker* create_worker(const char*, const char*) override { return &_worker; }
+	bool delete_worker(wtp::IIndexWorker* worker) override
+	{
+		++_deleteCount;
+		return worker == &_worker;
+	}
+	wtp::IIndexWorker* worker() { return &_worker; }
+	uint32_t deleteCount() const { return _deleteCount; }
+
+private:
+	R18ProbeIndexWorker _worker;
+	uint32_t _deleteCount { 0 };
+};
 
 fs::path make_tmp_dir(const char* tag)
 {
@@ -200,7 +326,7 @@ TEST_F(R18IdxWorkerMgrTest, InitAcceptsEmptyIndiceArrayButRejectsNonArrayIndice)
 	cfgArr->release();
 }
 
-TEST_F(R18IdxWorkerMgrTest, SyncHandleQuoteKeepsOneExtraRetainPerQuote)
+TEST_F(R18IdxWorkerMgrTest, SyncHandleQuoteReleasesTemporaryRetainForEachQuote)
 {
 	DataManager dm;
 	IndexWorkerMgr mgr;
@@ -227,17 +353,114 @@ TEST_F(R18IdxWorkerMgrTest, SyncHandleQuoteKeepsOneExtraRetainPerQuote)
 	mgr.handle_quote(nullptr);		// L172-173 守卫
 	EXPECT_EQ(tick->retainCount(), 1u);
 
-	// 已订阅 + _pool 为空 -> L195-202 的同步分支：L180 retain 一次，
-	// 但该分支里没有任何 release()（只有线程池分支的 lambda 里才 release，L192）
+	// 已订阅 + _pool 为空 -> 同步处理结束后应归还本次临时引用。
 	mgr.handle_quote(tick);
-	EXPECT_EQ(tick->retainCount(), 2u);
+	EXPECT_EQ(tick->retainCount(), 1u);
 	mgr.handle_quote(tick);
-	EXPECT_EQ(tick->retainCount(), 3u);
+	EXPECT_EQ(tick->retainCount(), 1u);
 
-	// 收尾：把本用例喂出来的 3 个引用全部还回去（1 个自有 + 2 个泄漏）
 	tick->release();
+}
+
+TEST_F(R18IdxWorkerMgrTest, SyncHandleQuoteReleasesTemporaryRetainWhenWorkerThrows)
+{
+	R18AsyncControl control;
+	R18ProbeIndexWorkerFact fact(control, true);
+	DataManager dm;
+	IndexWorkerMgr mgr;
+	write_file(_dir / "idx_pool0_throw.json", R"JSON({"poolsize": 0, "indice": []})JSON");
+	WTSVariant* cfg = WTSCfgLoader::load_from_file((_dir / "idx_pool0_throw.json").string().c_str());
+	ASSERT_NE(cfg, nullptr);
+	ASSERT_TRUE(mgr.init(cfg, nullptr, nullptr, &dm));
+	cfg->release();
+	ASSERT_EQ(mgr.sub_ticks("SSE.600000"), nullptr);
+
+	R18IndexWorkerMgrTestAccess::addWorker(mgr, "r18_throw", fact.worker(), &fact);
+	WTSTickData* tick = make_tick(_ctSse, 20240102, 20240102);
+	ASSERT_NE(tick, nullptr);
+	ASSERT_EQ(tick->retainCount(), 1u);
+
+	EXPECT_THROW(mgr.handle_quote(tick), std::runtime_error);
+	EXPECT_EQ(tick->retainCount(), 1u);
 	tick->release();
-	tick->release();
+}
+
+TEST_F(R18IdxWorkerMgrTest, AsyncQueuedDispatchKeepsTickAliveUntilWorkerCompletes)
+{
+	R18AsyncControl control;
+	R18ProbeIndexWorkerFact fact(control, false, true);
+	IndexWorkerMgr mgr;
+	R18AsyncGateCleanup gateCleanup(control);
+	DataManager dm;
+	write_file(_dir / "idx_pool1_gate.json", R"JSON({"poolsize": 1, "indice": []})JSON");
+	WTSVariant* cfg = WTSCfgLoader::load_from_file((_dir / "idx_pool1_gate.json").string().c_str());
+	ASSERT_NE(cfg, nullptr);
+	ASSERT_TRUE(mgr.init(cfg, nullptr, nullptr, &dm));
+	cfg->release();
+	ASSERT_EQ(mgr.sub_ticks("SSE.600000"), nullptr);
+	R18IndexWorkerMgrTestAccess::addWorker(mgr, "r18_gate", fact.worker(), &fact);
+
+	boost::threadpool::pool* pool = R18IndexWorkerMgrTestAccess::pool(mgr);
+	ASSERT_NE(pool, nullptr);
+	ASSERT_TRUE(pool->schedule([&control]() {
+		control.blockerEntered.store(true, std::memory_order_release);
+		if (!waitForFlag(control.releaseBlocker, std::chrono::seconds(5)))
+			control.blockerTimedOut.store(true, std::memory_order_release);
+	})) << "pool rejected the gate task";
+	ASSERT_TRUE(waitForFlag(control.blockerEntered, std::chrono::seconds(2)))
+		<< "pool worker did not enter the blocking gate";
+
+	WTSTickData* tick = make_tick(_ctSse, 20240102, 20240102);
+	ASSERT_NE(tick, nullptr);
+	R18TickRef callerRef(tick);
+	ASSERT_EQ(tick->retainCount(), 1u);
+
+	// The worker is blocked, so this frame is genuinely queued rather than racing
+	// a fast empty-worker lambda to completion.
+	mgr.handle_quote(tick);
+	EXPECT_EQ(pool->pending(), 1u);
+	EXPECT_EQ(tick->retainCount(), 2u);
+
+	// Drop the caller's ownership while the task is queued. The test observer and
+	// queued dispatch reference keep the tick alive for the subsequent callback.
+	tick->retain();
+	R18TickRef observerRef(tick);
+	callerRef.release();
+	EXPECT_EQ(observerRef.get()->retainCount(), 2u);
+
+	control.releaseBlocker.store(true, std::memory_order_release);
+	ASSERT_TRUE(waitForFlag(control.workerEntered, std::chrono::seconds(2)))
+		<< "queued index-worker callback did not start";
+	EXPECT_EQ(control.refCountOnWorkerEntry.load(std::memory_order_relaxed), 2u);
+	EXPECT_EQ(control.actionDateOnWorkerEntry.load(std::memory_order_relaxed), 20240102u);
+	EXPECT_EQ(observerRef.get()->retainCount(), 2u);
+
+	// FIFO ordering places this sentinel after the manager's callback task. Its
+	// observation proves the temporary dispatch reference was released only
+	// after the worker returned.
+	observerRef.get()->retain();
+	std::shared_ptr<WTSTickData> sentinelTick(observerRef.get(), [](WTSTickData* retained) {
+		retained->release();
+	});
+	ASSERT_TRUE(pool->schedule([&control, sentinelTick]() {
+		control.refCountAfterDispatch.store(sentinelTick->retainCount(), std::memory_order_relaxed);
+		control.dispatchComplete.store(true, std::memory_order_release);
+	})) << "pool rejected the completion sentinel";
+	control.releaseWorker.store(true, std::memory_order_release);
+	ASSERT_TRUE(waitForFlag(control.dispatchComplete, std::chrono::seconds(2)))
+		<< "completion sentinel did not run";
+	sentinelTick.reset();
+	EXPECT_FALSE(control.blockerTimedOut.load(std::memory_order_acquire));
+	EXPECT_FALSE(control.workerTimedOut.load(std::memory_order_acquire));
+	// At the sentinel observation, only its capture and the test observer remain;
+	// the manager's dispatch reference has already been released.
+	EXPECT_EQ(control.refCountAfterDispatch.load(std::memory_order_relaxed), 2u);
+	const auto refReleaseDeadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
+	while (observerRef.get()->retainCount() != 1u
+		&& std::chrono::steady_clock::now() < refReleaseDeadline)
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	EXPECT_EQ(observerRef.get()->retainCount(), 1u);
+	observerRef.release();
 }
 
 TEST_F(R18IdxWorkerMgrTest, ContextDelegatesToDataManagerAndLogger)

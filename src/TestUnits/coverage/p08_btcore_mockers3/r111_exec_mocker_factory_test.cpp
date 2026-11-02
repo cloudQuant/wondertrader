@@ -65,6 +65,38 @@ namespace
 		return cfg;
 	}
 
+	WTSVariant* make_twap_exec_cfg(const std::string& module, const char* id,
+		uint32_t totalTimes)
+	{
+		WTSVariant* cfg = WTSVariant::createObject();
+		cfg->append("module", module.c_str());
+		cfg->append("code", kRb);
+		cfg->append("period", "m1");
+		cfg->append("volunit", 1.0);
+		cfg->append("volmode", static_cast<int32_t>(1));
+
+		WTSVariant* exec = WTSVariant::createObject();
+		exec->append("name", "WtTWapExeUnit");
+		exec->append("id", id);
+
+		WTSVariant* params = WTSVariant::createObject();
+		params->append("ord_sticky", static_cast<uint32_t>(0));
+		params->append("begin_time", static_cast<uint32_t>(930));
+		params->append("end_time", static_cast<uint32_t>(1500));
+		params->append("tail_secs", static_cast<uint32_t>(18000));
+		params->append("total_times", totalTimes);
+		params->append("price_mode", static_cast<uint32_t>(0));
+		params->append("price_offset", static_cast<uint32_t>(0));
+		params->append("lots", 1.0);
+		params->append("minopenlots", 1.0);
+		exec->append("params", params);
+		params->release();
+
+		cfg->append("executer", exec);
+		exec->release();
+		return cfg;
+	}
+
 	std::string read_text(const std::filesystem::path& p)
 	{
 		std::ifstream in(p, std::ios::binary);
@@ -365,6 +397,44 @@ TEST_F(R111ExecMocker, InitWithRealExecuterAndInitSchedule)
 	m.handle_schedule(20240103u, 932u);
 	EXPECT_DOUBLE_EQ(0.0, m.getPosition(kRb));
 	EXPECT_TRUE(m.quiesce());
+}
+
+// The real built-in plugin's V2 initializer must propagate TWAP configuration
+// rejection through ExecMocker, while a positive total_times value remains
+// usable through the same dynamic-plugin host path.
+TEST_F(R111ExecMocker, BuiltInV2TwapRejectsZeroTotalTimesAndAcceptsPositiveControl)
+{
+	ASSERT_TRUE(std::filesystem::exists(module())) << module();
+
+	{
+		ExecMocker mocker(&_rp);
+		WTSVariant* cfg = make_twap_exec_cfg(module(), "r111_twap_zero_times", 0);
+		std::string error;
+		const bool initialized = mocker.init(cfg, &error);
+		cfg->release();
+		EXPECT_FALSE(initialized);
+		EXPECT_NE(std::string::npos, error.find("execution-unit configuration was rejected"))
+			<< error;
+		EXPECT_TRUE(mocker.quiesce());
+	}
+
+	{
+		ExecMocker mocker(&_rp);
+		WTSVariant* cfg = make_twap_exec_cfg(module(), "r111_twap_positive_times", 5);
+		std::string error;
+		const bool initialized = mocker.init(cfg, &error);
+		cfg->release();
+		ASSERT_TRUE(initialized) << error;
+
+		mocker.handle_init();
+		WTSTickData* tick = r62::make_tick(kRb, 20240103u, 93100000u,
+			3800.0, 3799.0, 3801.0);
+		ASSERT_NE(nullptr, tick);
+		mocker.handle_tick(kRb, tick, 0);
+		tick->release();
+		EXPECT_DOUBLE_EQ(1.0, mocker.getUndoneQty(kRb));
+		EXPECT_TRUE(mocker.quiesce());
+	}
 }
 
 // IMatchSink 三回调（L285-335）与落盘（L337-347）：撤销/成交各写一条 csv

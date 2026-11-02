@@ -17,10 +17,13 @@
 #include <gtest/gtest.h>
 
 #include <cstdlib>
+#include <chrono>
+#include <condition_variable>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -47,7 +50,51 @@ extern wtp::TraderAdapterMgr g_adapterMgr;
 // TraderDumper.cpp:6 的进程级 Dumper 单例
 Dumper& getDumper();
 
+#ifdef WT_DUMPER_TEST_HOOKS
+using DumperWorkerWaitHook = void (*)();
+void setDumperWorkerWaitHookForTest(DumperWorkerWaitHook hook);
+void setDumperUseLegacySleepForTest(bool useLegacySleep);
+#endif
+
 namespace {
+
+#ifdef WT_DUMPER_TEST_HOOKS
+std::mutex g_dumperWaitHandshakeMutex;
+std::condition_variable g_dumperWaitHandshakeCv;
+bool g_dumperWaitHandshakeReached = false;
+
+void signalDumperWaitHandshake()
+{
+	{
+		std::lock_guard<std::mutex> lock(g_dumperWaitHandshakeMutex);
+		g_dumperWaitHandshakeReached = true;
+	}
+	g_dumperWaitHandshakeCv.notify_one();
+}
+
+void resetDumperWaitHandshake()
+{
+	std::lock_guard<std::mutex> lock(g_dumperWaitHandshakeMutex);
+	g_dumperWaitHandshakeReached = false;
+}
+
+bool waitForDumperWaitHandshake()
+{
+	std::unique_lock<std::mutex> lock(g_dumperWaitHandshakeMutex);
+	return g_dumperWaitHandshakeCv.wait_for(lock, std::chrono::seconds(3), []() {
+		return g_dumperWaitHandshakeReached;
+	});
+}
+
+struct DumperWaitTestControlReset
+{
+	~DumperWaitTestControlReset()
+	{
+		setDumperWorkerWaitHookForTest(nullptr);
+		setDumperUseLegacySleepForTest(false);
+	}
+};
+#endif
 
 struct Captured
 {
@@ -639,13 +686,34 @@ TEST_F(R114DumperFixture, dumper_run_once_returns_immediately_and_worker_joins)
 	EXPECT_EQ(0u, g_adapterMgr.size());
 
 	const std::string cfg = write("run_cfg.json", R"({
-		"config": {"refresh_span": 1},
+		"config": {"refresh_span": 2},
 		"basefiles": {"session": "no_such_session_r114.json"},
 		"traders": []
 	})");
 	Dumper worker;
 	ASSERT_TRUE(worker.config(cfg.c_str(), true, _dir.c_str()));
-	worker.run(false);	// 正间隔刷新线程在 release() 后最多等待一个周期再 join
+	DumperWaitTestControlReset waitTestControlReset;
+	resetDumperWaitHandshake();
+	setDumperWorkerWaitHookForTest(signalDumperWaitHandshake);
+	worker.run(false);	// 正间隔刷新线程应可被 release() 立即唤醒
+	const bool enteredWait = waitForDumperWaitHandshake();
+	const auto stopStarted = std::chrono::steady_clock::now();
 	worker.release();
+	const auto stopElapsed = std::chrono::steady_clock::now() - stopStarted;
+	EXPECT_TRUE(enteredWait);
+	EXPECT_LT(stopElapsed, std::chrono::milliseconds(750));
 	EXPECT_EQ(0u, g_adapterMgr.size());
+
+	// The test-only legacy path proves this handshake catches the former sleep_for behavior.
+	Dumper legacySleep;
+	ASSERT_TRUE(legacySleep.config(cfg.c_str(), true, _dir.c_str()));
+	resetDumperWaitHandshake();
+	setDumperUseLegacySleepForTest(true);
+	legacySleep.run(false);
+	const bool enteredLegacySleep = waitForDumperWaitHandshake();
+	const auto legacyStopStarted = std::chrono::steady_clock::now();
+	legacySleep.release();
+	const auto legacyStopElapsed = std::chrono::steady_clock::now() - legacyStopStarted;
+	EXPECT_TRUE(enteredLegacySleep);
+	EXPECT_GE(legacyStopElapsed, std::chrono::milliseconds(1500));
 }

@@ -12,6 +12,7 @@
 #include <string>
 #include <queue>
 #include <stdint.h>
+#include <atomic>
 
 #include "../Includes/WTSTypes.h"
 #include "../Includes/ITraderApi.h"
@@ -194,11 +195,11 @@ protected:
 
 	typedef std::queue<CommonExecuter>	QueryQue;
 	QueryQue				m_queQuery;
-	bool					m_bInQuery;
+	std::atomic<bool>			m_bInQuery;
 	StdUniqueMutex			m_mtxQuery;
 	uint64_t				m_lastQryTime;
 
-	bool					m_bStopped;
+	std::atomic<bool>			m_bStopped;
 	StdThreadPtr			m_thrdWorker;
 
 	std::string		m_strModule;

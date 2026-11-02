@@ -91,9 +91,9 @@ TEST(R173BtRunnerAsync, AsyncEmptyReplayStopJoinsWorkerThenCtaStepIsSafe)
 		"\"session\":\"" + dir + "/sessions.json\","
 		"\"commodity\":\"" + dir + "/commodities.json\","
 		"\"contract\":\"" + dir + "/contracts.json\"}},"
-		"\"env\":{\"mocker\":\"cta\"},"
-		"\"cta\":{\"name\":\"r173_async_empty\",\"slippage\":0}}";
+		"\"env\":{\"mocker\":\"none\"}}";
 	getRunner().config(cfg.c_str(), false);
+	getRunner().initCtaMocker("r173_async_empty", 0, false, false, false, false);
 	ASSERT_NE(nullptr, getRunner().cta_mocker());
 
 	// 空回放：worker 会很快走到 handle_replay_done；stop 负责 join

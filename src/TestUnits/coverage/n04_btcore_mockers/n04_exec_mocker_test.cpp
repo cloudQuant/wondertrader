@@ -16,6 +16,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <exception>
 #include <string>
 
 #include <WtBtCore/HisDataReplayer.h>
@@ -97,18 +98,53 @@ protected:
 		return makeTick(kStdCode, 10.0, 1000, 10.0, 500, 10.1, 600);
 	}
 
-	static WTSVariant* baseCfg()
+	static WTSVariant* baseCfg(const char* executerName = "n04_missing_module_unit")
 	{
 		WTSVariant* cfg = WTSVariant::createObject();
 		cfg->append("code", kStdCode);
 		cfg->append("period", "m1");
 		cfg->append("volunit", 10.0);
 		cfg->append("volmode", (int32_t)0);
+		WTSVariant* executer = WTSVariant::createObject();
+		executer->append("name", executerName);
+		cfg->append("executer", executer);
+		executer->release();
 		return cfg;
 	}
 
 	HisDataReplayer replayer;
 	ExecMocker* exec;
+};
+
+class ScopedExecQuiesce
+{
+public:
+	explicit ScopedExecQuiesce(ExecMocker* mocker) : _mocker(mocker), _complete(false) {}
+
+	~ScopedExecQuiesce()
+	{
+		if (!_complete)
+		{
+			std::string error;
+			if (!finish(&error))
+				std::terminate();
+		}
+	}
+
+	bool finish(std::string* error)
+	{
+		if (_complete)
+			return true;
+		if (!_mocker->requestQuiesce(error) || !_mocker->canWaitQuiesce(error) ||
+			!_mocker->waitQuiesce(error))
+			return false;
+		_complete = true;
+		return true;
+	}
+
+private:
+	ExecMocker* _mocker;
+	bool _complete;
 };
 
 TEST_F(ExecMockerTest, freshUnitHasFlatAccountState)
@@ -140,16 +176,25 @@ TEST_F(ExecMockerTest, dataSinkQueriesFallThroughToEmptyReplayer)
 	EXPECT_EQ(exec->getCurTime(), exec->getCurTime());
 }
 
-TEST_F(ExecMockerTest, initParsesConfigAndFailsWhenModuleMissing)
+TEST_F(ExecMockerTest, initRejectsConfigWithoutModule)
 {
 	WTSVariant* empty = WTSVariant::createObject();
-	EXPECT_FALSE(exec->init(empty));
+	std::string error;
+	EXPECT_FALSE(exec->init(empty, &error));
+	EXPECT_NE(std::string::npos, error.find("execution plugin module path is missing"));
 	empty->release();
+	EXPECT_DOUBLE_EQ(0.0, exec->getPosition(kStdCode));
+	EXPECT_DOUBLE_EQ(0.0, exec->getUndoneQty(kStdCode));
+	expectEmptyOrders(kStdCode);
+}
 
-	// 模块解析成功但装载失败 -> 直接返回 false，配置字段仍被读取
+TEST_F(ExecMockerTest, initFailsWhenConfiguredModuleCannotBeLoaded)
+{
 	WTSVariant* cfg = baseCfg();
 	cfg->append("module", "/nonexistent_n04_dir/wt_fake_exec.so");
-	EXPECT_FALSE(exec->init(cfg));
+	std::string error;
+	EXPECT_FALSE(exec->init(cfg, &error));
+	EXPECT_NE(std::string::npos, error.find("loading execution plugin failed"));
 	cfg->release();
 
 	// init 失败不得改变账户状态
@@ -188,10 +233,22 @@ TEST_F(ExecMockerTest, passiveBuyRegistersOrderAndTracksUndoneQty)
 
 TEST_F(ExecMockerTest, passiveSellUsesNegativeUndoneSign)
 {
+	WTSVariant* cfg = baseCfg("BlockingUnit");
+	cfg->append("module", WT_N04_EXEC_V2_VALID_MODULE);
+	std::string initError;
+	const bool initialized = exec->init(cfg, &initError);
+	cfg->release();
+	ASSERT_TRUE(initialized) << initError;
+	ScopedExecQuiesce quiesce(exec);
+
 	feedTick(newBook());
 
 	OrderIDs ids = exec->sell(kStdCode, 10.1, 60);
 	ASSERT_EQ(1u, ids.size());
+	EXPECT_DOUBLE_EQ(-60.0, exec->getUndoneQty(kStdCode));
+	// Bulk cancel only selects active orders. This tick activates the sell order,
+	// but its trade price stays below the 10.1 sell limit, so it cannot fill.
+	feedTick(makeTick(kStdCode, 10.0, 1000, 10.0, 500, 10.1, 600));
 	EXPECT_DOUBLE_EQ(-60.0, exec->getUndoneQty(kStdCode));
 
 	// 按方向批量撤单：卖出方向无挂单，不应改变未完成量
@@ -202,6 +259,8 @@ TEST_F(ExecMockerTest, passiveSellUsesNegativeUndoneSign)
 	OrderIDs sold = exec->cancel(kStdCode, false, 0);
 	EXPECT_EQ(1u, sold.size());
 	EXPECT_DOUBLE_EQ(0.0, exec->getUndoneQty(kStdCode));
+	std::string quiesceError;
+	EXPECT_TRUE(quiesce.finish(&quiesceError)) << quiesceError;
 }
 
 TEST_F(ExecMockerTest, getOrdersReturnsIndependentGrossSnapshotsForOpposingOrders)

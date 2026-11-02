@@ -1,0 +1,10 @@
+import json,os,pathlib,subprocess
+base=pathlib.Path('/tmp/wt-i03-new053'); binary=base/'bin/fixture-asan'; tests=['P11TraderTest.init_rejects_overlong_ids_and_keeps_empty_id_accepted','P11TraderTest.init_ext_rejects_long_ids_before_touching_api_or_files','P11TraderTest.longest_representable_id_produces_a_terminated_user_tag','R59Misc.init_ext_guards_and_run_without_api']; result=[]
+for i,filt in enumerate(tests):
+ d=base/'run'/('single'+str(i));d.mkdir(parents=True,exist_ok=True); env=os.environ.copy();env.update({'TMPDIR':str(d)+'/','LLVM_PROFILE_FILE':str(d/'profile-%p.profraw'),'ASAN_OPTIONS':'detect_leaks=1:halt_on_error=1','LSAN_OPTIONS':'exitcode=23:report_objects=1','UBSAN_OPTIONS':'halt_on_error=1:print_stacktrace=1'});cmd=[str(binary),'--gtest_filter='+filt,'--gtest_output=xml:'+str(d/'result.xml')]
+ try:
+  with (d/'output.log').open('w') as f: proc=subprocess.run(cmd,cwd=d,env=env,stdout=f,stderr=subprocess.STDOUT,timeout=45)
+  rc=proc.returncode
+ except subprocess.TimeoutExpired: rc='TIMEOUT'
+ result.append({'case':filt,'command':cmd,'cwd':str(d),'exit':rc}); print(filt,rc,flush=True)
+(base/'individual-results.json').write_text(json.dumps(result,indent=2)+'\n')

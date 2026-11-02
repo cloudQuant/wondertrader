@@ -857,7 +857,7 @@ TEST(r12_detail_slices, orddtl_trans_slice_create_and_at)
 	ASSERT_NE(tsSlice, nullptr);
 	EXPECT_EQ(tsSlice->size(), 2u);
 	EXPECT_DOUBLE_EQ(tsSlice->at(0)->price, 20.0);
-	EXPECT_DOUBLE_EQ(tsSlice->at(-1)->price, 20.0);
+	EXPECT_DOUBLE_EQ(tsSlice->at(-1)->price, 20.5);
 	tsSlice->release();
 }
 

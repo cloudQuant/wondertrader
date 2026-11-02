@@ -101,7 +101,7 @@ namespace
 		"{\"SHFE\":{\"ag\":[{\"from\":\"ag2406\",\"to\":\"ag2406\",\"date\":20240101,"
 		"\"oldclose\":100.0,\"newclose\":100.0}]}}";
 
-	const char* kActions = "{}";
+	const char* kActions = "{\"default\":{}}";
 
 	void write_fixtures(const std::string& dir)
 	{
@@ -180,6 +180,56 @@ TEST(R113PorterCtaFactory, ActiveStrategyFromBuiltinFactoryIsWiredIntoEngine)
 
 	EXPECT_TRUE(r->config(cfg.c_str(), false));
 	EXPECT_NE(dynamic_cast<WtCtaEngine*>(r->getEngine()), nullptr);
+
+	clean_dir(dir);
+}
+
+TEST(R113PorterCtaFactory, UnsupportedFactoryUnitFailsBeforeContextRegistration)
+{
+	const std::string dir = prepare_dir("factory_null_unit");
+	write_fixtures(dir);
+
+	WtRtRunner* r = new_heap_runner(dir);
+	ASSERT_NE(nullptr, r);
+
+	const std::string inst = bin_dir();
+	const std::string lib = inst + "/libWtCtaStraFact.dylib";
+	if (!stdfs::exists(lib))
+		GTEST_SKIP() << "构建目录缺少 " << lib;
+	ASSERT_TRUE(r->addCtaFactories(inst.c_str()));
+
+	const std::string cfg = base_cfg(dir) +
+		",\"strategies\":{\"cta\":[{"
+		"\"active\":true,\"id\":\"r113_cta_unknown_unit\","
+		"\"name\":\"WtCtaStraFact.DoesNotExist\"}]}}";
+	EXPECT_FALSE(r->config(cfg.c_str(), false));
+
+	clean_dir(dir);
+}
+
+TEST(R113PorterCtaFactory, LaterInvalidStrategyDoesNotLeaveEarlierContextInstalled)
+{
+	const std::string dir = prepare_dir("factory_partial_context");
+	write_fixtures(dir);
+
+	WtRtRunner* r = new_heap_runner(dir);
+	ASSERT_NE(nullptr, r);
+	const std::string inst = bin_dir();
+	const std::string lib = inst + "/libWtCtaStraFact.dylib";
+	if (!stdfs::exists(lib))
+		GTEST_SKIP() << "构建目录缺少 " << lib;
+	ASSERT_TRUE(r->addCtaFactories(inst.c_str()));
+
+	const std::string cfg = base_cfg(dir) +
+		",\"strategies\":{\"cta\":[{"
+		"\"active\":true,\"id\":\"r113_cta_before_invalid\","
+		"\"name\":\"WtCtaStraFact.DualThrust\",\"slippage\":0,"
+		"\"params\":{\"days\":5,\"k1\":0.5,\"k2\":0.5,\"period\":\"d1\","
+		"\"count\":10,\"code\":\"SHFE.au.2406\",\"stock\":false}},"
+		"{\"active\":true,\"id\":\"r113_cta_after_invalid\","
+		"\"name\":\"WtCtaStraFact.DoesNotExist\"}]}}";
+	EXPECT_FALSE(r->config(cfg.c_str(), false));
+	EXPECT_EQ(nullptr, r->getCtaContext(1));
 
 	clean_dir(dir);
 }

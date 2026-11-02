@@ -69,7 +69,32 @@ inline void pipe_reader_log(IDataReaderSink* sink, WTSLogLevel ll, const char* f
 	if (sink == NULL)
 		return;
 
-	const char* buffer = fmtutil::format(format, args...);
+	// Keep the existing per-thread message lifetime while bounding formatter writes.
+	thread_local static char buffer[512];
+	try
+	{
+		const std::size_t max_output_size = sizeof(buffer) - 1;
+		const auto formatted = fmt::format_to_n(buffer, max_output_size, format, args...);
+		if (formatted.size > max_output_size)
+		{
+			constexpr char truncation_marker[] = "...[truncated]";
+			constexpr std::size_t marker_size = sizeof(truncation_marker) - 1;
+			const std::size_t marker_offset = max_output_size - marker_size;
+			for (std::size_t i = 0; i < marker_size; ++i)
+				buffer[marker_offset + i] = truncation_marker[i];
+			buffer[max_output_size] = '\0';
+		}
+		else
+		{
+			buffer[formatted.size] = '\0';
+		}
+	}
+	catch (...)
+	{
+		constexpr char fallback[] = "WtDataReader log formatting failed";
+		for (std::size_t i = 0; i < sizeof(fallback); ++i)
+			buffer[i] = fallback[i];
+	}
 
 	sink->reader_log(ll, buffer);
 }
@@ -334,7 +359,30 @@ void WtDataReader::init(WTSVariant* cfg, IDataReaderSink* sink, IHisDataLoader* 
 	_rt_dir.swap(rt_dirs);
 	_his_dir.swap(ordered_his_dirs);
 
-	pipe_reader_log(sink, LL_INFO, "WtDataReader initialized, rt dir is {}, hist dir is {}, adjust_flag is {}", _rt_dir[0], _his_dir[0], _adjust_flag);
+	if (sink != NULL)
+	{
+		std::string log_message;
+		bool log_message_ready = false;
+		try
+		{
+			log_message.append("WtDataReader initialized, rt dir is ")
+				.append(_rt_dir[0])
+				.append(", hist dir is ")
+				.append(_his_dir[0])
+				.append(", adjust_flag is ")
+				.append(std::to_string(_adjust_flag));
+			log_message_ready = true;
+		}
+		catch (...)
+		{
+			// Leave reader initialization intact when the detailed diagnostic cannot be built.
+		}
+
+		if (log_message_ready)
+			sink->reader_log(LL_INFO, log_message.c_str());
+		else
+			sink->reader_log(LL_INFO, "WtDataReader initialized; detailed path log unavailable");
+	}
 
 	/*
 	 *	By Wesley @ 2021.12.20
@@ -537,7 +585,9 @@ WTSTickSlice* WtDataReader::readTickSlice(const char* stdCode, uint32_t count, u
 			bool bHit = false;
 			for (const std::string& hisdir : _his_dir)
 			{
-				filename = fmtutil::format("{}ticks/{}/{}/{}.dsb", hisdir, cInfo._exchg, endTDate, curCode);
+				filename = hisdir;
+				filename.append("ticks/").append(cInfo._exchg).append("/")
+					.append(std::to_string(endTDate)).append("/").append(curCode).append(".dsb");
 				if (StdFile::exists(filename.c_str()))
 				{
 					bHit = true;
@@ -687,7 +737,9 @@ WTSOrdQueSlice* WtDataReader::readOrdQueSlice(const char* stdCode, uint32_t coun
 			bool bHit = false;
 			for (const std::string& hisdir : _his_dir)
 			{
-				filename = fmtutil::format("{}queue/{}/{}/{}.dsb", hisdir, cInfo._exchg, endTDate, curCode);
+				filename = hisdir;
+				filename.append("queue/").append(cInfo._exchg).append("/")
+					.append(std::to_string(endTDate)).append("/").append(curCode).append(".dsb");
 				if (StdFile::exists(filename.c_str()))
 				{
 					bHit = true;
@@ -851,7 +903,9 @@ WTSOrdDtlSlice* WtDataReader::readOrdDtlSlice(const char* stdCode, uint32_t coun
 			bool bHit = false;
 			for (const std::string& hisdir : _his_dir)
 			{
-				filename = fmtutil::format("{}orders/{}/{}/{}.dsb", hisdir, cInfo._exchg, endTDate, curCode);
+				filename = hisdir;
+				filename.append("orders/").append(cInfo._exchg).append("/")
+					.append(std::to_string(endTDate)).append("/").append(curCode).append(".dsb");
 				if (StdFile::exists(filename.c_str()))
 				{
 					bHit = true;
@@ -1015,7 +1069,9 @@ WTSTransSlice* WtDataReader::readTransSlice(const char* stdCode, uint32_t count,
 			bool bHit = false;
 			for (const std::string& hisdir : _his_dir)
 			{
-				filename = fmtutil::format("{}trans/{}/{}/{}.dsb", hisdir, cInfo._exchg, endTDate, curCode);
+				filename = hisdir;
+				filename.append("trans/").append(cInfo._exchg).append("/")
+					.append(std::to_string(endTDate)).append("/").append(curCode).append(".dsb");
 				if (StdFile::exists(filename.c_str()))
 				{
 					bHit = true;
@@ -1182,7 +1238,11 @@ bool WtDataReader::cacheIntegratedBars(void* codeInfo, const std::string& key, c
 		bool bHit = false;
 		for (const std::string& hisdir : _his_dir)
 		{
-			filename = fmtutil::format("{}{}/{}.{}_{}{}.dsb", hisdir, pname, cInfo->_exchg, cInfo->_product, ruleTag, cInfo->isExright()?(cInfo->_exright == 1 ? SUFFIX_QFQ_S : SUFFIX_HFQ_S):"");
+			filename = hisdir;
+			filename.append(pname).append("/").append(cInfo->_exchg).append(".")
+				.append(cInfo->_product).append("_").append(ruleTag)
+				.append(cInfo->isExright() ? (cInfo->_exright == 1 ? SUFFIX_QFQ_S : SUFFIX_HFQ_S) : "")
+				.append(".dsb");
 			if (StdFile::exists(filename.c_str()))
 			{
 				bHit = true;
@@ -1319,7 +1379,8 @@ bool WtDataReader::cacheIntegratedBars(void* codeInfo, const std::string& key, c
 			bool bHit = false;
 			for (const std::string& hisdir : _his_dir)
 			{
-				filename = fmtutil::format("{}{}/{}/{}.dsb", hisdir, pname, cInfo->_exchg, curCode);
+				filename = hisdir;
+				filename.append(pname).append("/").append(cInfo->_exchg).append("/").append(curCode).append(".dsb");
 				if (StdFile::exists(filename.c_str()))
 				{
 					bHit = true;
@@ -1528,7 +1589,9 @@ bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, 
 		bool bHit = false;
 		for (const std::string& hisdir : _his_dir)
 		{
-			filename = fmtutil::format("{}{}/{}/{}{}.dsb", hisdir, pname, cInfo->_exchg, cInfo->_code, flag);
+			filename = hisdir;
+			filename.append(pname).append("/").append(cInfo->_exchg).append("/").append(cInfo->_code)
+				.append(1, flag).append(".dsb");
 			if (StdFile::exists(filename.c_str()))
 			{
 				bHit = true;
@@ -1623,7 +1686,8 @@ bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, 
 			bool bHit = false;
 			for (const std::string& hisdir : _his_dir)
 			{
-				filename = fmtutil::format("{}{}/{}/{}.dsb", hisdir, pname, cInfo->_exchg, cInfo->_code);
+				filename = hisdir;
+				filename.append(pname).append("/").append(cInfo->_exchg).append("/").append(cInfo->_code).append(".dsb");
 				if (StdFile::exists(filename.c_str()))
 				{
 					bHit = true;
@@ -1836,10 +1900,12 @@ bool WtDataReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key, 
 		}
 		catch (const std::exception& ex)
 		{
+			_bars_cache.erase(key);
 			pipe_reader_log(_sink, LL_ERROR, u8"缓存{}的连续{}数据异常：{}", stdCode, ruleTag, ex.what());
 		}
 		catch(...)
 		{
+			_bars_cache.erase(key);
 			pipe_reader_log(_sink, LL_ERROR, u8"缓存{}的连续{}数据异常", stdCode, ruleTag);
 		}
 		return false;
@@ -1891,7 +1957,8 @@ bool WtDataReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key, 
 		bool bHit = false;
 		for (const std::string& hisdir : _his_dir)
 		{
-			filename = fmtutil::format("{}{}/{}/{}.dsb", hisdir, pname, cInfo->_exchg, cInfo->_code);
+			filename = hisdir;
+			filename.append(pname).append("/").append(cInfo->_exchg).append("/").append(cInfo->_code).append(".dsb");
 			if (StdFile::exists(filename.c_str()))
 			{
 				bHit = true;
@@ -2213,13 +2280,14 @@ WtDataReader::TickBlockPair* WtDataReader::getRTTickBlock(const char* exchg, con
 	thread_local static char key[64] = { 0 };
 	fmtutil::format_to(key, "{}#{}", exchg, code);
 
-	thread_local static char path[256] = { 0 };
+	std::string path;
 
 	bool bHit = false;
 	for (const std::string& rtdir : _rt_dir)
 	{
-		fmtutil::format_to(path, "{}ticks/{}/{}.dmb", rtdir, exchg, code);
-		bHit = StdFile::exists(path);
+		path = rtdir;
+		path.append("ticks/").append(exchg).append("/").append(code).append(".dmb");
+		bHit = StdFile::exists(path.c_str());
 		if(bHit)
 			break;
 	}
@@ -2235,7 +2303,7 @@ WtDataReader::TickBlockPair* WtDataReader::getRTTickBlock(const char* exchg, con
 			block._file.reset(new BoostMappingFile());
 		}
 
-		if (!block._file->map(path, boost::interprocess::read_only, boost::interprocess::read_only))
+		if (!block._file->map(path.c_str(), boost::interprocess::read_only, boost::interprocess::read_only))
 			return NULL;
 
 		block._block = (RTTickBlock*)block._file->addr();
@@ -2248,7 +2316,7 @@ WtDataReader::TickBlockPair* WtDataReader::getRTTickBlock(const char* exchg, con
 		block._last_cap = 0;
 		block._block = NULL;
 
-		if (!block._file->map(path, boost::interprocess::read_only, boost::interprocess::read_only))
+		if (!block._file->map(path.c_str(), boost::interprocess::read_only, boost::interprocess::read_only))
 			return NULL;
 
 		block._block = (RTTickBlock*)block._file->addr();
@@ -2263,7 +2331,7 @@ WtDataReader::OrdDtlBlockPair* WtDataReader::getRTOrdDtlBlock(const char* exchg,
 	thread_local static char key[64] = { 0 };
 	fmtutil::format_to(key, "{}#{}", exchg, code);
 
-	thread_local static char path[256] = { 0 };
+	std::string path;
 	//fmtutil::format_to(path, "{}orders/{}/{}.dmb", _rt_dir.c_str(), exchg, code);
 
 	//if (!StdFile::exists(path))
@@ -2272,8 +2340,9 @@ WtDataReader::OrdDtlBlockPair* WtDataReader::getRTOrdDtlBlock(const char* exchg,
 	bool bHit = false;
 	for (const std::string& rtdir : _rt_dir)
 	{
-		fmtutil::format_to(path, "{}orders/{}/{}.dmb", rtdir, exchg, code);
-		bHit = StdFile::exists(path);
+		path = rtdir;
+		path.append("orders/").append(exchg).append("/").append(code).append(".dmb");
+		bHit = StdFile::exists(path.c_str());
 		if (bHit)
 			break;
 	}
@@ -2289,7 +2358,7 @@ WtDataReader::OrdDtlBlockPair* WtDataReader::getRTOrdDtlBlock(const char* exchg,
 			block._file.reset(new BoostMappingFile());
 		}
 
-		if (!block._file->map(path, boost::interprocess::read_only, boost::interprocess::read_only))
+		if (!block._file->map(path.c_str(), boost::interprocess::read_only, boost::interprocess::read_only))
 			return NULL;
 
 		block._block = (RTOrdDtlBlock*)block._file->addr();
@@ -2302,7 +2371,7 @@ WtDataReader::OrdDtlBlockPair* WtDataReader::getRTOrdDtlBlock(const char* exchg,
 		block._last_cap = 0;
 		block._block = NULL;
 
-		if (!block._file->map(path, boost::interprocess::read_only, boost::interprocess::read_only))
+		if (!block._file->map(path.c_str(), boost::interprocess::read_only, boost::interprocess::read_only))
 			return NULL;
 
 		block._block = (RTOrdDtlBlock*)block._file->addr();
@@ -2317,7 +2386,7 @@ WtDataReader::OrdQueBlockPair* WtDataReader::getRTOrdQueBlock(const char* exchg,
 	thread_local static char key[64] = { 0 };
 	fmtutil::format_to(key, "{}#{}", exchg, code);
 
-	thread_local static char path[256] = { 0 };
+	std::string path;
 	//fmtutil::format_to(path, "{}queue/{}/{}.dmb", _rt_dir.c_str(), exchg, code);
 
 	//if (!StdFile::exists(path))
@@ -2326,8 +2395,9 @@ WtDataReader::OrdQueBlockPair* WtDataReader::getRTOrdQueBlock(const char* exchg,
 	bool bHit = false;
 	for (const std::string& rtdir : _rt_dir)
 	{
-		fmtutil::format_to(path, "{}queue/{}/{}.dmb", rtdir, exchg, code);
-		bHit = StdFile::exists(path);
+		path = rtdir;
+		path.append("queue/").append(exchg).append("/").append(code).append(".dmb");
+		bHit = StdFile::exists(path.c_str());
 		if (bHit)
 			break;
 	}
@@ -2343,7 +2413,7 @@ WtDataReader::OrdQueBlockPair* WtDataReader::getRTOrdQueBlock(const char* exchg,
 			block._file.reset(new BoostMappingFile());
 		}
 
-		if (!block._file->map(path, boost::interprocess::read_only, boost::interprocess::read_only))
+		if (!block._file->map(path.c_str(), boost::interprocess::read_only, boost::interprocess::read_only))
 			return NULL;
 
 		block._block = (RTOrdQueBlock*)block._file->addr();
@@ -2356,7 +2426,7 @@ WtDataReader::OrdQueBlockPair* WtDataReader::getRTOrdQueBlock(const char* exchg,
 		block._last_cap = 0;
 		block._block = NULL;
 
-		if (!block._file->map(path, boost::interprocess::read_only, boost::interprocess::read_only))
+		if (!block._file->map(path.c_str(), boost::interprocess::read_only, boost::interprocess::read_only))
 			return NULL;
 
 		block._block = (RTOrdQueBlock*)block._file->addr();
@@ -2371,7 +2441,7 @@ WtDataReader::TransBlockPair* WtDataReader::getRTTransBlock(const char* exchg, c
 	thread_local static char key[64] = { 0 };
 	fmtutil::format_to(key, "{}#{}", exchg, code);
 
-	thread_local static char path[256] = { 0 };
+	std::string path;
 	//fmtutil::format_to(path, "{}trans/{}/{}.dmb", _rt_dir.c_str(), exchg, code);
 
 	//if (!StdFile::exists(path))
@@ -2380,8 +2450,9 @@ WtDataReader::TransBlockPair* WtDataReader::getRTTransBlock(const char* exchg, c
 	bool bHit = false;
 	for (const std::string& rtdir : _rt_dir)
 	{
-		fmtutil::format_to(path, "{}trans/{}/{}.dmb", rtdir, exchg, code);
-		bHit = StdFile::exists(path);
+		path = rtdir;
+		path.append("trans/").append(exchg).append("/").append(code).append(".dmb");
+		bHit = StdFile::exists(path.c_str());
 		if (bHit)
 			break;
 	}
@@ -2397,7 +2468,7 @@ WtDataReader::TransBlockPair* WtDataReader::getRTTransBlock(const char* exchg, c
 			block._file.reset(new BoostMappingFile());
 		}
 
-		if (!block._file->map(path, boost::interprocess::read_only, boost::interprocess::read_only))
+		if (!block._file->map(path.c_str(), boost::interprocess::read_only, boost::interprocess::read_only))
 			return NULL;
 
 		block._block = (RTTransBlock*)block._file->addr();
@@ -2410,7 +2481,7 @@ WtDataReader::TransBlockPair* WtDataReader::getRTTransBlock(const char* exchg, c
 		block._last_cap = 0;
 		block._block = NULL;
 
-		if (!block._file->map(path, boost::interprocess::read_only, boost::interprocess::read_only))
+		if (!block._file->map(path.c_str(), boost::interprocess::read_only, boost::interprocess::read_only))
 			return NULL;
 
 		block._block = (RTTransBlock*)block._file->addr();
@@ -2446,7 +2517,7 @@ WtDataReader::RTKlineBlockPair* WtDataReader::getRTKilneBlock(const char* exchg,
 	default: break;
 	}
 
-	thread_local static char path[256] = { 0 };
+	std::string path;
 	//fmtutil::format_to(path, "{}{}/{}/{}.dmb", _rt_dir, subdir, exchg, code);
 
 	//if (!StdFile::exists(path))
@@ -2455,8 +2526,9 @@ WtDataReader::RTKlineBlockPair* WtDataReader::getRTKilneBlock(const char* exchg,
 	bool bHit = false;
 	for (const std::string& rtdir : _rt_dir)
 	{
-		fmtutil::format_to(path, "{}{}/{}/{}.dmb", rtdir, subdir, exchg, code);
-		bHit = StdFile::exists(path);
+		path = rtdir;
+		path.append(subdir).append("/").append(exchg).append("/").append(code).append(".dmb");
+		bHit = StdFile::exists(path.c_str());
 		if (bHit)
 			break;
 	}
@@ -2472,7 +2544,7 @@ WtDataReader::RTKlineBlockPair* WtDataReader::getRTKilneBlock(const char* exchg,
 			block._file.reset(new BoostMappingFile());
 		}
 
-		if (!block._file->map(path, boost::interprocess::read_only, boost::interprocess::read_only))
+		if (!block._file->map(path.c_str(), boost::interprocess::read_only, boost::interprocess::read_only))
 			return NULL;
 
 		block._block = (RTKlineBlock*)block._file->addr();
@@ -2488,7 +2560,7 @@ WtDataReader::RTKlineBlockPair* WtDataReader::getRTKilneBlock(const char* exchg,
 		block._last_cap = 0;
 		block._block = NULL;
 
-		if (!block._file->map(path, boost::interprocess::read_only, boost::interprocess::read_only))
+		if (!block._file->map(path.c_str(), boost::interprocess::read_only, boost::interprocess::read_only))
 			return NULL;
 
 		block._block = (RTKlineBlock*)block._file->addr();

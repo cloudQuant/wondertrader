@@ -21,6 +21,7 @@
 #include "../Includes/WTSContractInfo.hpp"
 #include "../WTSTools/WTSLogger.h"
 #include "../WTSUtils/WTSCfgLoader.h"
+#include "../WTSUtils/yamlcpp/yaml.h"
 #include "../WTSUtils/SignalHook.hpp"
 #include "../Share/StrUtil.hpp"
 
@@ -49,9 +50,9 @@ WTSVariant* loadConfigSafely(const char* path)
 	{
 		return WTSCfgLoader::load_from_file(path);
 	}
-	catch (...)
+	catch (const YAML::Exception& ex)
 	{
-		WTSLogger::error("Parsing config file {} threw an exception", path == NULL ? "<null>" : path);
+		WTSLogger::error("Parsing config file {} failed: {}", path == NULL ? "<null>" : path, ex.what());
 		return NULL;
 	}
 }
@@ -595,10 +596,13 @@ bool WtRunner::config(const std::string& filename)
 						}
 
 						WTSVariant* c = var->get("routers");
-						if (c != NULL)
-							_cta_engine.loadRouterRules(c);
-
+						const bool routerRulesLoaded = c == NULL || _cta_engine.loadRouterRules(c);
 						var->release();
+						if (!routerRulesLoaded)
+						{
+							WTSLogger::error("Loading router rules from {} failed", filename);
+							return failConfig();
+						}
 					}
 					else
 					{
@@ -628,8 +632,11 @@ bool WtRunner::config(const std::string& filename)
 		}
 
 		WTSVariant* cfgRouter = _config->get("routers");
-		if (cfgRouter != NULL)
-			_cta_engine.loadRouterRules(cfgRouter);
+		if (cfgRouter != NULL && !_cta_engine.loadRouterRules(cfgRouter))
+		{
+			WTSLogger::error("Loading router rules from {} failed", filename);
+			return failConfig();
+		}
 	}
 	if (_shutdown_requested.load(std::memory_order_acquire))
 		return failConfig();
@@ -662,15 +669,36 @@ bool WtRunner::initCtaStrategies()
 	std::string path = WtHelper::getCWD() + "cta/";
 	_cta_stra_mgr.loadFactories(path.c_str());
 
+	struct PendingCtaStrategy
+	{
+		WTSVariant* config;
+		const char* id;
+		const char* name;
+		int32_t slippage;
+		CtaStrategyPtr strategy;
+	};
+	std::vector<PendingCtaStrategy> pending;
+	pending.reserve(cfg->size());
+
 	for (uint32_t idx = 0; idx < cfg->size(); idx++)
 	{
 		WTSVariant* cfgItem = cfg->get(idx);
+		if (cfgItem == NULL || cfgItem->type() != WTSVariant::VT_Object)
+		{
+			WTSLogger::error("Invalid CTA strategy configuration at index {}", idx);
+			return false;
+		}
 		if (!cfgItem->getBoolean("active"))
 			continue;
 
 		const char* id = cfgItem->getCString("id");
 		const char* name = cfgItem->getCString("name");
 		int32_t slippage = cfgItem->getInt32("slippage");
+		if (id == NULL || id[0] == '\0' || name == NULL || name[0] == '\0')
+		{
+			WTSLogger::error("Creating CTA strategy failed: strategy id and name are required");
+			return false;
+		}
 		CtaStrategyPtr stra;
 		try { stra = _cta_stra_mgr.createStrategy(name, id); }
 		catch (...)
@@ -683,21 +711,26 @@ bool WtRunner::initCtaStrategies()
 			WTSLogger::error("Creating CTA strategy {} ({}) failed", name, id);
 			return false;
 		}
+		pending.push_back({ cfgItem, id, name, slippage, stra });
+	}
+
+	for (const PendingCtaStrategy& item : pending)
+	{
 		try
 		{
-			if (!stra->self()->init(cfgItem->get("params")))
+			if (!item.strategy->self()->init(item.config->get("params")))
 			{
-				WTSLogger::error("Initializing CTA strategy {} ({}) failed", name, id);
+				WTSLogger::error("Initializing CTA strategy {} ({}) failed", item.name, item.id);
 				return false;
 			}
 		}
 		catch (...)
 		{
-			WTSLogger::error("Initializing CTA strategy {} ({}) threw an exception", name, id);
+			WTSLogger::error("Initializing CTA strategy {} ({}) threw an exception", item.name, item.id);
 			return false;
 		}
-		CtaStraContext* ctx = new CtaStraContext(&_cta_engine, id, slippage);
-		ctx->set_strategy(stra->self());
+		CtaStraContext* ctx = new CtaStraContext(&_cta_engine, item.id, item.slippage);
+		ctx->set_strategy(item.strategy->self());
 		_cta_engine.addContext(CtaContextPtr(ctx));
 	}
 
@@ -721,9 +754,26 @@ bool WtRunner::initHftStrategies()
 	std::string path = WtHelper::getCWD() + "hft/";
 	_hft_stra_mgr.loadFactories(path.c_str());
 
+	struct PendingHftStrategy
+	{
+		WTSVariant* config;
+		const char* id;
+		const char* name;
+		bool agent;
+		int32_t slippage;
+		HftStrategyPtr strategy;
+	};
+	std::vector<PendingHftStrategy> pending;
+	pending.reserve(cfg->size());
+
 	for (uint32_t idx = 0; idx < cfg->size(); idx++)
 	{
 		WTSVariant* cfgItem = cfg->get(idx);
+		if (cfgItem == NULL || cfgItem->type() != WTSVariant::VT_Object)
+		{
+			WTSLogger::error("Invalid HFT strategy configuration at index {}", idx);
+			return false;
+		}
 		if (!cfgItem->getBoolean("active"))
 			continue;
 
@@ -731,6 +781,11 @@ bool WtRunner::initHftStrategies()
 		const char* name = cfgItem->getCString("name");
 		bool agent = cfgItem->getBoolean("agent");
 		int32_t slippage = cfgItem->getInt32("slippage");
+		if (id == NULL || id[0] == '\0' || name == NULL || name[0] == '\0')
+		{
+			WTSLogger::error("Creating HFT strategy failed: strategy id and name are required");
+			return false;
+		}
 		HftStrategyPtr stra;
 		try { stra = _hft_stra_mgr.createStrategy(name, id); }
 		catch (...)
@@ -743,23 +798,28 @@ bool WtRunner::initHftStrategies()
 			WTSLogger::error("Creating HFT strategy {} ({}) failed", name, id);
 			return false;
 		}
+		pending.push_back({ cfgItem, id, name, agent, slippage, stra });
+	}
+
+	for (const PendingHftStrategy& item : pending)
+	{
 		try
 		{
-			if (!stra->self()->init(cfgItem->get("params")))
+			if (!item.strategy->self()->init(item.config->get("params")))
 			{
-				WTSLogger::error("Initializing HFT strategy {} ({}) failed", name, id);
+				WTSLogger::error("Initializing HFT strategy {} ({}) failed", item.name, item.id);
 				return false;
 			}
 		}
 		catch (...)
 		{
-			WTSLogger::error("Initializing HFT strategy {} ({}) threw an exception", name, id);
+			WTSLogger::error("Initializing HFT strategy {} ({}) threw an exception", item.name, item.id);
 			return false;
 		}
-		HftStraContext* ctx = new HftStraContext(&_hft_engine, id, agent,slippage);
-		ctx->set_strategy(stra->self());
+		HftStraContext* ctx = new HftStraContext(&_hft_engine, item.id, item.agent, item.slippage);
+		ctx->set_strategy(item.strategy->self());
 
-		const char* traderid = cfgItem->getCString("trader");
+		const char* traderid = item.config->getCString("trader");
 		TraderAdapterPtr trader = _traders.getAdapter(traderid);
 		if(trader)
 		{
@@ -817,6 +877,12 @@ bool WtRunner::initEngine()
 		WTSLogger::info("Trading enviroment initialzied with engine: CTA");
 		_cta_engine.init(cfg, &_bd_mgr, &_data_mgr, &_hot_mgr, &_notifier);
 		_engine = &_cta_engine;
+	}
+	if (!_engine->fee_config_valid())
+	{
+		WTSLogger::error("Runner initialization rejected: fee template configuration is invalid");
+		_engine = NULL;
+		return false;
 	}
 
 	_engine->set_adapter_mgr(&_traders);

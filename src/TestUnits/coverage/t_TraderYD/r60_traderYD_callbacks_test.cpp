@@ -11,8 +11,7 @@
  *    ② notifyOrder 在 m_bCatchup=false 时的本地订单缓存链（建表/首推/重复单/撤单状态）；
  *    ③ 拒单错误标志（自成交 vs 普通）、FOK、AllTraded/Accepted/Canceled 状态映射；
  *    ④ 未登记合约的成交回报丢弃；⑤ release 清理订单缓存；⑥ m_sink=NULL 时回调静默。
- *  - 本机没有厂商 libyd，m_pUserAPI 恒 NULL，因此 connect()/notifyFinishInit()/notifyLogin(成功)
- *    仍是必崩面：只留 DISABLED_ 与 bugs/R60.md，不硬闯。
+ *  - 使用显式不存在的 YD 模块隔离动态库环境；缺库 init 失败后可验证 connect 安全返回。
  */
 #include <gtest/gtest.h>
 
@@ -293,7 +292,8 @@ namespace
 			cfg->append("config", "yd.conf");
 			cfg->append("user", "yduser");
 			cfg->append("pass", "ydpass");
-			ASSERT_TRUE(api_.init(cfg));
+			cfg->append("ydmodule", "yd_r60_missing_library_fixture");
+			ASSERT_FALSE(api_.init(cfg));
 			cfg->release();
 
 			comm_ = WTSCommodityInfo::create("ag", "沪银", "SHFE", "TRADING", "CHINA");
@@ -659,15 +659,14 @@ namespace
 	}
 
 	/* ------------------------------------------------------------------ */
-	/* 明确不进入的崩溃面（只留钩子，不执行）                               */
+	/* 缺少 YD 工厂时的安全返回                                            */
 	/* ------------------------------------------------------------------ */
 
-	/// TraderYD.cpp L681-688：connect() 直接调用 m_funcCreator；
-	/// 本机没有 libyd，init 后 m_funcCreator 恒 NULL → 空函数指针调用必崩。
-	/// 见 bugs/R60.md BUG-R60-004。
-	TEST_F(R60YdTest, DISABLED_connect_without_vendor_library_calls_null_creator)
+	/// BUG-R60-004：缺库导致 init 返回失败，后续 connect 安全返回而不创建 API。
+	TEST_F(R60YdTest, connect_without_vendor_library_returns_safely)
 	{
-		api_.connect();
+		EXPECT_NO_THROW(api_.connect());
+		EXPECT_FALSE(api_.isConnected());
 	}
 
 } // namespace

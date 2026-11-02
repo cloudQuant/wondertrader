@@ -10,9 +10,9 @@
  *   UftMocker.cpp:274-280     on_tick 成交后摘单
  *   UftMocker.cpp:969         procOrder 部分成交返回 false（订单保留）
  *
- * Hft/Uft 的 procOrder 通过回放器的 get_last_tick 取价，因此用 r111 的纯内存
- * TickLoader 构造已 prepare 的 tick 回放器（stime=0930 早于首笔 0931，避免
- * get_last_tick 的末笔边界，见 bugs/R151.md BUG-R151-001）。
+ * Hft/Uft 的 procOrder 通过回放器的 get_last_tick 取价。UFT 部分成交用多条纯内存
+ * tick 由 replayer 按各自 action_time 派发，使事件时间与回放器游标一致；不重复
+ * 手动投递同一笔 tick。其余 HFT 边界测试保留 09:30 起点和 09:31 tick。
  *
  * 只走公开 API；不 #define private public、不镜像类布局、不改宏。
  * 不启动线程/不读挂钟；临时文件由夹具在系统临时目录创建并清理。
@@ -22,7 +22,9 @@
 #include <cmath>
 #include <cstdint>
 #include <filesystem>
+#include <map>
 #include <string>
+#include <vector>
 
 #include <Includes/WTSContractInfo.hpp>
 #include <WtBtCore/CtaMocker.h>
@@ -41,6 +43,58 @@ namespace
 	const char* const kCu = "SHFE.cu.2406";
 	const char* const kAg = "SHFE.ag.2412";
 	const char* const kStk = "SSE.STK.000001";
+
+	class R151TickLoader : public r111::TickLoader
+	{
+	public:
+		void add_sequence_tick(const char* stdCode, uint32_t uDate, uint32_t uTimeMs,
+			double last, double bid, double ask, uint32_t bidQty, uint32_t askQty)
+		{
+			WTSTickData* data = r62::make_tick(stdCode, uDate, uTimeMs,
+				last, bid, ask, bidQty, askQty);
+			sequenceTicks[stdCode].emplace_back(data->getTickStruct());
+			data->release();
+		}
+
+		bool loadRawHisTicks(void* obj, const char* stdCode, uint32_t uDate, FuncReadTicks cb) override
+		{
+			auto it = sequenceTicks.find(stdCode);
+			if (it == sequenceTicks.end())
+				return r111::TickLoader::loadRawHisTicks(obj, stdCode, uDate, cb);
+
+			if (it->second.empty() || it->second.front().action_date != uDate)
+				return false;
+
+			cb(obj, it->second.data(), static_cast<uint32_t>(it->second.size()));
+			return true;
+		}
+
+	private:
+		std::map<std::string, std::vector<WTSTickStruct>> sequenceTicks;
+	};
+
+	class R151UftFillObserver : public UftMocker
+	{
+	public:
+		using UftMocker::UftMocker;
+
+		std::vector<uint32_t> actionTimes;
+		std::vector<double> prices;
+		std::vector<double> positions;
+		std::vector<double> undone;
+
+		void handle_tick(const char* stdCode, WTSTickData* curTick, uint32_t pxType) override
+		{
+			UftMocker::handle_tick(stdCode, curTick, pxType);
+			if (stdCode == nullptr || std::string(stdCode) != kCu)
+				return;
+
+			actionTimes.emplace_back(curTick->getTickStruct().action_time);
+			prices.emplace_back(curTick->price());
+			positions.emplace_back(stra_get_position(kCu));
+			undone.emplace_back(stra_get_undone(kCu));
+		}
+	};
 }
 
 class R151CtaSelEdges : public r62::ReplayFixture
@@ -109,7 +163,7 @@ class R151HftUftEdges : public ::testing::Test
 {
 protected:
 	HisDataReplayer _rp;
-	r111::TickLoader _loader;
+	R151TickLoader _loader;
 	r151::Sink _sink;
 	std::filesystem::path _root;
 	std::filesystem::path _base;
@@ -123,10 +177,13 @@ protected:
 		_out = r62::make_temp_dir("r151_tick_out");
 		WtHelper::setOutputDir(_out.string().c_str());
 
-		// 09:31 的首笔 tick；stime=09:30 让 get_last_tick 的 lower_bound 落在首笔
+		// HFT 的手动 tick 测试保留 09:31 首笔；UFT 多笔成交用回放器派发不同时间的事件。
 		_loader.add(kRb, 20200102u, 93100000u, 3800.0, 3799.0, 3801.0, 100, 100);
-		_loader.add(kCu, 20200102u, 93100000u, 70000.0, 69990.0, 70010.0, 100, 3);
 		_loader.add(kAg, 20200102u, 93100000u, 3500.0, 3499.0, 0.0, 100, 100);
+		_loader.add_sequence_tick(kCu, 20200102u, 93100000u, 70000.0, 69990.0, 70010.0, 100, 3);
+		_loader.add_sequence_tick(kCu, 20200102u, 93130000u, 70001.0, 69991.0, 70011.0, 100, 3);
+		_loader.add_sequence_tick(kCu, 20200102u, 93200000u, 70002.0, 69992.0, 70012.0, 100, 3);
+		_loader.add_sequence_tick(kCu, 20200102u, 93230000u, 70003.0, 69993.0, 70013.0, 100, 3);
 
 		WTSVariant* cfg = r111::make_tick_cfg(_root, _base, 202001020930ull, 202001021500ull);
 		ASSERT_TRUE(_rp.init(cfg, nullptr, &_loader));
@@ -151,13 +208,6 @@ protected:
 		t->release();
 	}
 
-	void feed_uft(UftMocker& m, const char* code, double last, double bid, double ask,
-		uint32_t bidQty, uint32_t askQty)
-	{
-		WTSTickData* t = r62::make_tick(code, 20200102u, 93100000u, last, bid, ask, bidQty, askQty);
-		m.handle_tick(code, t, 0);
-		t->release();
-	}
 };
 
 // 卖限价 4000 高于买一 3799：procOrder 不成交；随后撤单任务把 left 置 0
@@ -189,25 +239,22 @@ TEST_F(R151HftUftEdges, HftZeroCounterPriceRejectsFill)
 	EXPECT_DOUBLE_EQ(0.0, m.stra_get_position(kAg));
 }
 
-// Uft 部分成交：对手量 3 < 委托 10 -> 每笔成交 3，订单保留；第 4 笔补满后摘单
+// Uft 多笔实际回放成交：不同时间/价格的 tick 每笔对手量为 3，前三笔保留订单，第四笔补满
 TEST_F(R151HftUftEdges, UftPartialFillKeepsOrderUntilFilled)
 {
-	UftMocker m(&_rp, "r151_uft_partial");
+	R151UftFillObserver m(&_rp, "r151_uft_partial");
+	m.stra_sub_ticks(kCu);
+	_rp.register_sink(&m, "r151_uft_partial");
 	OrderIDs ids = m.stra_buy(kCu, 0.0, 10.0);
 	ASSERT_EQ(1u, ids.size());
 	EXPECT_DOUBLE_EQ(10.0, m.stra_get_undone(kCu));
 
-	feed_uft(m, kCu, 70000.0, 69990.0, 70010.0, 100, 3);
-	EXPECT_DOUBLE_EQ(3.0, m.stra_get_position(kCu));
-	EXPECT_DOUBLE_EQ(7.0, m.stra_get_undone(kCu));
+	_rp.run();
 
-	feed_uft(m, kCu, 70000.0, 69990.0, 70010.0, 100, 3);
-	EXPECT_DOUBLE_EQ(6.0, m.stra_get_position(kCu));
-
-	feed_uft(m, kCu, 70000.0, 69990.0, 70010.0, 100, 3);
-	EXPECT_DOUBLE_EQ(9.0, m.stra_get_position(kCu));
-
-	feed_uft(m, kCu, 70000.0, 69990.0, 70010.0, 100, 3);
+	EXPECT_EQ((std::vector<uint32_t>{ 93100000u, 93130000u, 93200000u, 93230000u }), m.actionTimes);
+	EXPECT_EQ((std::vector<double>{ 70000.0, 70001.0, 70002.0, 70003.0 }), m.prices);
+	EXPECT_EQ((std::vector<double>{ 3.0, 6.0, 9.0, 10.0 }), m.positions);
+	EXPECT_EQ((std::vector<double>{ 7.0, 4.0, 1.0, 0.0 }), m.undone);
 	EXPECT_DOUBLE_EQ(10.0, m.stra_get_position(kCu));
 	EXPECT_DOUBLE_EQ(0.0, m.stra_get_undone(kCu));
 }

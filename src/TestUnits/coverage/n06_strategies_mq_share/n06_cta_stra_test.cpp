@@ -209,9 +209,18 @@ TEST(n06_cta_fact, enum_strategy_reports_one_name)
 	// 当前编入的 TwoMa 工厂恰好枚举一次（cb(FACT_NAME, "TwoMa", true)）
 	ASSERT_EQ(1u, enum_result().size());
 	EXPECT_NE(std::string::npos, enum_result()[0].find(":last"));
-	// 回调里出现的策略名必须能被 createStrategy 找回
-	auto pos = enum_result()[0].find('/');
-	std::string straName = enum_result()[0].substr(pos + 1, enum_result()[0].size() - 5 - pos);
+	// 显式剥离回调记录尾部的 :last，避免把分隔冒号误带入策略名。
+	const std::string& record = enum_result()[0];
+	auto pos = record.find('/');
+	auto last = record.rfind(":last");
+	ASSERT_NE(std::string::npos, pos);
+	ASSERT_NE(std::string::npos, last);
+	ASSERT_GT(last, pos + 1);
+	EXPECT_EQ(fact.getName(), record.substr(0, pos));
+	EXPECT_EQ(":last", record.substr(last));
+	std::string straName = record.substr(pos + 1, last - pos - 1);
+	EXPECT_EQ("TwoMa", straName);
+	// The callback strategy name must be accepted by this factory.
 	CtaStrategy* stra = fact.createStrategy(straName.c_str(), "e1");
 	ASSERT_NE(nullptr, stra);
 	EXPECT_STREQ(straName.c_str(), stra->getName());

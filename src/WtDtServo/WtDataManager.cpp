@@ -28,6 +28,24 @@
 
 WTSDataFactory g_dataFact;
 
+#if defined(WT_P12_BAR_LIFETIME_TEST_HOOKS)
+namespace
+{
+thread_local wtp::WtDataManagerBarLifetimeHook g_wt_dm_bar_lifetime_hook = NULL;
+
+void notify_wt_dm_bar_lifetime(uintptr_t address, wtp::WtDataManagerBarLifetimeEvent event)
+{
+	if (g_wt_dm_bar_lifetime_hook != NULL)
+		g_wt_dm_bar_lifetime_hook(address, event);
+}
+}
+
+void wtp::setWtDataManagerBarLifetimeHook(wtp::WtDataManagerBarLifetimeHook hook)
+{
+	g_wt_dm_bar_lifetime_hook = hook;
+}
+#endif
+
 WtDataManager::WtDataManager()
 	: _reader(NULL)
 	, _bd_mgr(NULL)
@@ -57,7 +75,7 @@ bool WtDataManager::initStore(WTSVariant* cfg)
 	if (module.empty())
 		module = "WtDataStorage";
 
-	module = WtHelper::get_module_dir() + DLLHelper::wrap_module(module.c_str());
+	module = WtHelper::get_module_path(DLLHelper::wrap_module(module.c_str()));
 	DllHandle libParser = DLLHelper::load_library(module.c_str());
 	if (libParser)
 	{
@@ -289,17 +307,18 @@ WTSKlineSlice* WtDataManager::get_kline_slice_by_range(const char* stdCode, WTSK
 		{
 			for(int32_t idx = 0; idx < rawData->size(); idx ++)
 			{
+				WTSBarStruct* rawBar = rawData->at(idx);
 				uint64_t barTime = 0;
 				if (period == KP_DAY)
-					barTime = rawData->at(0)->date;
+					barTime = rawBar->date;
 				else
-					barTime = 199000000000 + rawData->at(0)->time;
+					barTime = 199000000000 + rawBar->time;
 				
 				//只有时间上次记录的最后一条时间，才可以用于更新K线
 				if(barTime <= barCache._last_bartime)
 					continue;
 
-				g_dataFact.updateKlineData(barCache._bars, rawData->at(idx), sInfo, _align_by_section);
+				g_dataFact.updateKlineData(barCache._bars, rawBar, sInfo, _align_by_section);
 			}
 
 			//不管如何，都删除最后一条K线
@@ -444,17 +463,18 @@ WTSKlineSlice* WtDataManager::get_kline_slice_by_count(const char* stdCode, WTSK
 			WTSLogger::info("{} {} bars of {} updated, adding to cache...", rawData->size(), tag, stdCode);
 			for (int32_t idx = 0; idx < rawData->size(); idx++)
 			{
+				WTSBarStruct* rawBar = rawData->at(idx);
 				uint64_t barTime = 0;
 				if (period == KP_DAY)
-					barTime = rawData->at(0)->date;
+					barTime = rawBar->date;
 				else
-					barTime = 199000000000 + rawData->at(0)->time;
+					barTime = 199000000000 + rawBar->time;
 
 				//只有时间上次记录的最后一条时间，才可以用于更新K线
 				if (barTime <= barCache._last_bartime)
 					continue;
 
-				g_dataFact.updateKlineData(barCache._bars, rawData->at(idx), sInfo, _align_by_section);
+				g_dataFact.updateKlineData(barCache._bars, rawBar, sInfo, _align_by_section);
 			}
 
 			//如果不是日线，要考虑最后一条K线是否闭合的情况
@@ -635,8 +655,21 @@ void WtDataManager::update_bars(const char* stdCode, WTSTickData* newTick)
 		{
 			// Day and second updates return a detached heap bar when a new bucket
 			// starts. Copy it into the subscribed cache before notifying listeners.
+#if defined(WT_P12_BAR_LIFETIME_TEST_HOOKS)
+			WTSBarStruct* detachedBar =
+				g_dataFact.updateKlineData(kData, newTick, sInfo, _align_by_section);
+			if (detachedBar != NULL)
+				notify_wt_dm_bar_lifetime((uintptr_t)detachedBar, WT_DM_BAR_FACTORY_RETURNED);
+			auto trackedDeleter = [](WTSBarStruct* bar) {
+				const uintptr_t address = (uintptr_t)bar;
+				delete bar;
+				notify_wt_dm_bar_lifetime(address, WT_DM_BAR_DELETED);
+			};
+			std::unique_ptr<WTSBarStruct, decltype(trackedDeleter)> newBar(detachedBar, trackedDeleter);
+#else
 			std::unique_ptr<WTSBarStruct> newBar(
 				g_dataFact.updateKlineData(kData, newTick, sInfo, _align_by_section));
+#endif
 			if (newBar != NULL)
 				kData->appendBar(*newBar);
 		}

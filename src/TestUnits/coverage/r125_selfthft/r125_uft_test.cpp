@@ -156,9 +156,11 @@ TEST(R125UftDemo, InitTickEntryAndOrderExpiry)
 
 	// 委托失败且 localid 在集合中 → 移除（L100-113）
 	demo.on_entrust(12, false, "rejected");
-	EXPECT_TRUE(ctx.cancels.empty());
 	demo.on_entrust(12, true, "ok");
 	demo.on_entrust(999, false, "unknown");
+	// The fake context retains the earlier timeout cancel; entrust callbacks add none.
+	ASSERT_EQ(1u, ctx.cancels.size());
+	EXPECT_EQ(11u, ctx.cancels[0]);
 }
 
 TEST(R125UftDemo, PositionChannelAndParamCallbacks)

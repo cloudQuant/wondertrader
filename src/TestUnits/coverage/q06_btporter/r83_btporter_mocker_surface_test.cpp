@@ -460,11 +460,27 @@ TEST(R83BtPorterHft, HftSubscriptionsUserDataAndMockerReplacementInChildProcess)
 	EXPECT_EQ(getRunner().hft_mocker(), nullptr);
 }
 
-/* WtBtPorter.cpp:338-341 -> WtBtRunner.cpp:299-313 -> HisDataReplayer.cpp:423-426：
- * init_sel_mocker 把 trdtpl/session 原样转给 register_task，后者用 strcpy 写进
- * TaskInfo 的 16 字节定长数组，既不判 NULL 也不限长。NULL 入参必然段错误，
- * 超长入参则堆越界；见 BUG-R83-001。属崩溃类，保留为 DISABLED 占位。 */
-TEST(R83BtPorterParamGuards, DISABLED_InitSelMockerNullTemplatesCrashes)
+/* init_sel_mocker 通过共享校验拒绝空指针和超长定长字段；拒绝时既不替换
+ * 当前 SEL mocker，也不覆盖其已注册任务。15 字节字段和未知非空周期仍可注册。 */
+TEST_F(R83BtPorterMockerBase, InitSelMockerBoundsTaskParametersBeforeReplacement)
 {
-	init_sel_mocker("r83_sel_null", 20240102, 93000, "d", NULL, NULL, 0, false);
+	const CtxHandler first = init_sel_mocker("r83_sel_guard", 20240102, 93000, "d");
+	ASSERT_NE(static_cast<CtxHandler>(0), first);
+	SelMocker* original = getRunner().sel_mocker();
+	ASSERT_NE(original, nullptr);
+
+	const std::string oversizedField(16, 'x');
+	EXPECT_EQ(static_cast<CtxHandler>(0),
+		init_sel_mocker("r83_sel_guard", 20240103, 93000, nullptr));
+	EXPECT_EQ(static_cast<CtxHandler>(0),
+		init_sel_mocker("r83_sel_guard", 20240103, 93000, "d", oversizedField.c_str(), "TRADING"));
+	EXPECT_EQ(static_cast<CtxHandler>(0),
+		init_sel_mocker("r83_sel_guard", 20240103, 93000, "d", "CHINA", oversizedField.c_str()));
+	EXPECT_EQ(original, getRunner().sel_mocker());
+
+	const std::string maxField(15, 'x');
+	const CtxHandler accepted = init_sel_mocker("r83_sel_unknown_period", 20240104, 93000,
+		"legacy-period", maxField.c_str(), maxField.c_str());
+	EXPECT_NE(static_cast<CtxHandler>(0), accepted)
+		<< "unknown non-empty periods and 15-byte task fields remain accepted";
 }

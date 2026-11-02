@@ -16,8 +16,10 @@
 #include <gtest/gtest.h>
 
 #include <atomic>
+#include <chrono>
 #include <fstream>
 #include <string>
+#include <thread>
 #include <unistd.h>
 
 #include <filesystem>
@@ -109,6 +111,19 @@ TEST_F(R44StateMonitorLifecycleTest, StopBeforeRunIsSafeAndIdempotent)
 	// 空表上 isAllInState 恒真（StateMonitor.h:196-210 的循环 0 次）
 	EXPECT_TRUE(mon.isAllInState(SS_ORIGINAL));
 	EXPECT_FALSE(mon.isInState("SSE", SS_ORIGINAL));
+}
+
+// Each instance owns one worker; run/stop and destruction are serialized by
+// the caller. TSan observes the stop flag while the worker is polling it.
+TEST(R22StateMonitorStop, RunningWorkerObservesStopAcrossThreads)
+{
+	for (int iteration = 0; iteration < 10; ++iteration)
+	{
+		StateMonitor monitor;
+		monitor.run();
+		std::this_thread::sleep_for(std::chrono::milliseconds(25));
+		monitor.stop();
+	}
 }
 
 // StateMonitor.cpp:40-47 —— 文件不存在时在 _bd_mgr->getSession 之前就返回，bdMgr==NULL 也安全

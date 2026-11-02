@@ -29,7 +29,7 @@ USING_NS_WTP;
  * @param bServer 是否为服务器模式
  * @details 该函数用于处理消息队列服务器的日志信息，当前实现为空
  */
-void on_mq_log(unsigned long /*id*/, const char* /*message*/, bool /*bServer*/)
+void PORTER_FLAG on_mq_log(WtUInt32 /*id*/, const char* /*message*/, bool /*bServer*/)
 {
 	// 当前实现为空，可以根据需要添加日志处理逻辑
 }
@@ -70,7 +70,7 @@ EventNotifier::~EventNotifier()
 bool EventNotifier::init(WTSVariant* cfg)
 {
 	// 检查是否启用了事件通知器
-	if (!cfg->getBoolean("active"))
+	if (!cfg || !cfg->getBoolean("active") || _mq_sid != 0)
 		return false;
 
 	// 获取服务器URL
@@ -93,8 +93,11 @@ bool EventNotifier::init(WTSVariant* cfg)
 	}
 
 	// 获取创建服务器的函数指针
-	_creator = (FuncCreateMQServer)DLLHelper::get_symbol(dllInst, "create_server");
-	if (_creator == NULL)
+	const auto creator = (FuncCreateMQServer)DLLHelper::get_symbol(dllInst, "create_server");
+	const auto remover = (FuncDestroyMQServer)DLLHelper::get_symbol(dllInst, "destroy_server");
+	const auto publisher = (FundPublishMessage)DLLHelper::get_symbol(dllInst, "publish_message");
+	const auto registerCallbacks = (FuncRegCallbacks)DLLHelper::get_symbol(dllInst, "regiter_callbacks");
+	if (!creator || !remover || !registerCallbacks)
 	{
 		// 获取函数指针失败，释放动态库并记录错误日志
 		DLLHelper::free_library(dllInst);
@@ -102,16 +105,22 @@ bool EventNotifier::init(WTSVariant* cfg)
 		return false;
 	}
 
-	// 获取其他必要的函数指针
-	_remover = (FuncDestroyMQServer)DLLHelper::get_symbol(dllInst, "destroy_server");
-	_publisher = (FundPublishMessage)DLLHelper::get_symbol(dllInst, "publish_message");
-	_register = (FuncRegCallbacks)DLLHelper::get_symbol(dllInst, "regiter_callbacks");
-
 	// 注册日志回调函数
-	_register(on_mq_log);
+	registerCallbacks(on_mq_log);
 	
 	// 创建消息队列服务器，true表示服务器模式
-	_mq_sid = _creator(m_strURL.c_str(), true);
+	const WtUInt32 sid = creator(m_strURL.c_str(), true);
+	if (sid == 0)
+	{
+		DLLHelper::free_library(dllInst);
+		WTSLogger::error("MQ server creation failed for {}", m_strURL.c_str());
+		return false;
+	}
+	_creator = creator;
+	_remover = remover;
+	_publisher = publisher;
+	_register = registerCallbacks;
+	_mq_sid = sid;
 
 	// 记录初始化成功的日志
 	WTSLogger::info("EventNotifier initialized with channel {}", m_strURL.c_str());
@@ -129,7 +138,7 @@ void EventNotifier::notifyEvent(const char* evtType)
 {
 	// 如果发布者函数存在，则发布消息
 	if (_publisher)
-		_publisher(_mq_sid, "BT_EVENT", evtType, (unsigned long)strlen(evtType));
+		_publisher(_mq_sid, "BT_EVENT", evtType, (WtUInt32)strlen(evtType));
 }
 
 /**
@@ -185,5 +194,5 @@ void EventNotifier::notifyFund(const char* topic, uint32_t uDate, double total_p
 
 	// 如果发布者函数存在，则发布消息
 	if (_publisher)
-		_publisher(_mq_sid, topic, (const char*)output.c_str(), (unsigned long)output.size());
+		_publisher(_mq_sid, topic, (const char*)output.c_str(), (WtUInt32)output.size());
 }

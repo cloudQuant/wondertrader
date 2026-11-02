@@ -57,7 +57,7 @@ std::string binDir()
 	return ret;
 }
 
-// ParserAdapter 的模块根是 <instdir>/parsers/，在临时目录里铺同名软链
+// ParserAdapter 的模块根是 <instdir>/parsers/，在临时目录里复制同名插件
 bool stageParser(const fs::path& root, const std::string& bin,
 	const char* stageName, const char* realName)
 {
@@ -68,7 +68,8 @@ bool stageParser(const fs::path& root, const std::string& bin,
 	const std::string src = bin + realName;
 	if (!fs::exists(src, ec))
 		return false;
-	fs::create_symlink(src, root / "parsers" / stageName, ec);
+	fs::copy_file(src, root / "parsers" / stageName,
+		fs::copy_options::overwrite_existing, ec);
 	return !ec;
 }
 
@@ -282,7 +283,6 @@ TEST(R85UftTicker, last_section_minute_and_worker_loop)
 		ticker.run();
 		// 给工作线程至少两次迭代（每轮 10ms 休眠 + 未到检查点）
 		std::this_thread::sleep_for(std::chrono::milliseconds(40));
-		ticker.stop();
 
 		// _thrd 仍非空：这一笔的 curMin=100 命中 isLastOfSection(第一段收市)
 		// -> minutes-- / minutes++ 的收市分钟修正
@@ -294,6 +294,17 @@ TEST(R85UftTicker, last_section_minute_and_worker_loop)
 		ticker.on_tick(t2);
 		t2->release();
 		EXPECT_EQ(20991231u, engine.get_date());
+
+		const uint32_t dateBeforeStop = engine.get_date();
+		const uint32_t minTimeBeforeStop = engine.get_min_time();
+		const uint32_t rawTimeBeforeStop = engine.get_raw_time();
+		ticker.stop();
+		WTSTickData* stoppedTick = makeTick(21000101, 10100000, 12.0);
+		ticker.on_tick(stoppedTick);
+		stoppedTick->release();
+		EXPECT_EQ(dateBeforeStop, engine.get_date());
+		EXPECT_EQ(minTimeBeforeStop, engine.get_min_time());
+		EXPECT_EQ(rawTimeBeforeStop, engine.get_raw_time());
 	}
 
 	sInfo->release();

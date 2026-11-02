@@ -76,6 +76,7 @@ WtEngine::WtEngine()
 	, _risk_date(0)
 	, _adapter_mgr(NULL)
 	, _ready(false)
+	, _fee_config_valid(true)
 {
 	TimeUtils::getDateTime(_cur_date, _cur_time);
 	_cur_secs = _cur_time % 100000;
@@ -156,7 +157,11 @@ void WtEngine::on_tick(const char* stdCode, WTSTickData* curTick)
 		{
 			WTSSessionInfo* sInfo = get_session_info(stdCode, true);
 
-			if (sInfo->isInTradingTime(_cur_raw_time, true))
+			if (sInfo == NULL)
+			{
+				WTSLogger::error("Pending position signal for {} retained: trading session metadata is unavailable", stdCode);
+			}
+			else if (sInfo->isInTradingTime(_cur_raw_time, true))
 			{
 				const SigInfo& sInfo = it->second;
 				double pos = sInfo._volume;
@@ -325,6 +330,7 @@ void WtEngine::init(WTSVariant* cfg, IBaseDataMgr* bdMgr, WtDtMgr* dataMgr, IHot
 
 	_filter_mgr.load_filters(cfg->getCString("filters"));
 
+	_fee_config_valid = true;
 	load_fees(cfg->getCString("fees"));
 
 	load_datas();
@@ -878,6 +884,7 @@ void WtEngine::sub_tick(uint32_t sid, const char* stdCode)
 
 void WtEngine::load_fees(const char* filename)
 {
+	_fee_config_valid = true;
 	if (strlen(filename) == 0)
 		return;
 
@@ -1109,6 +1116,7 @@ void WtEngine::load_fees(const char* filename)
 	if (!validationError.empty())
 	{
 		WTSLogger::error("Fee templates file {} is invalid: {}", filename, validationError);
+		_fee_config_valid = false;
 		cfg->release();
 		return;
 	}

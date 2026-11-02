@@ -10,6 +10,7 @@
  * 包含了回放各种周期的历史K线、Tick数据等，可以快速模拟交易全过程。
  */
 #pragma once
+#include <atomic>
 #include <map>
 #include <string>
 #include <set>
@@ -791,7 +792,8 @@ public:
 	/**
 	 * @brief 准备回测环境
 	 * @return 是否准备成功
-	 * @details 在执行回测前准备必要的数据和环境
+	 * @details 在执行回测前准备必要的数据和环境；须先注册非空接收器。
+	 *          缺少接收器时返回 false，调用方可以注册后重试。
 	 */
 	bool prepare();
 
@@ -852,9 +854,18 @@ public:
 	 * @param period 时间周期，可以是分钟、天、周、月、年
 	 * @param trdtpl 交易日模板，默认为"CHINA"
 	 * @param session 交易时段模板，默认为"TRADING"
-	 * @details 注册一个定时任务，用于定期执行特定操作，如信号计算、新的交易决策等
+	 * @details 注册一个定时任务，用于定期执行特定操作，如信号计算、新的交易决策等。字符串参数无效时记录错误并保留现有任务
 	 */
 	void register_task(uint32_t taskid, uint32_t date, uint32_t time, const char* period, const char* trdtpl = "CHINA", const char* session = "TRADING");
+
+	/**
+	 * @brief 检查定时任务的字符串参数是否可以安全注册
+	 * @param period 周期标识；空串或未知值仍按一次性任务处理
+	 * @param trdtpl 交易日模板，最多15字节
+	 * @param session 交易时段模板，最多15字节
+	 * @return 参数均非空且定长字段可容纳时返回true
+	 */
+	static bool validate_task_parameters(const char* period, const char* trdtpl, const char* session);
 
 	/**
 	 * @brief 获取K线切片数据
@@ -1171,8 +1182,8 @@ private:
 
 	uint32_t		_cache_clear_days;	///< 缓存自动清理天数，控制历史数据缓存时长
 
-	bool			_running;		///< 是否正在运行回测
-	bool			_terminated;	///< 是否已终止回测
+	std::atomic<bool>	_running;		///< 是否正在运行回测
+	std::atomic<bool>	_terminated;	///< 是否已终止回测
 	//////////////////////////////////////////////////////////////////////////
 	/**
 	 * @brief 手续费模板结构

@@ -1,0 +1,34 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = ParserCTPMiniFactory.lifecycle_calls_without_api_are_safe:R105MiniTest.null_sink_and_no_api_guards:R105MiniTest.injected_api_connect_login_and_do_subscribe
+[==========] Running 3 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from ParserCTPMiniFactory
+[ RUN      ] ParserCTPMiniFactory.lifecycle_calls_without_api_are_safe
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_ParserCTPMini/ctpmini_parser_test.cpp:187: Failure
+Value of: parser.connect()
+  Actual: true
+Expected: false
+
+[  FAILED  ] ParserCTPMiniFactory.lifecycle_calls_without_api_are_safe (0 ms)
+[----------] 1 test from ParserCTPMiniFactory (0 ms total)
+
+[----------] 2 tests from R105MiniTest
+[ RUN      ] R105MiniTest.injected_api_connect_login_and_do_subscribe
+[       OK ] R105MiniTest.injected_api_connect_login_and_do_subscribe (0 ms)
+[ RUN      ] R105MiniTest.null_sink_and_no_api_guards
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_ParserCTPMini/r105_parserctpmini_api_test.cpp:470: Failure
+Value of: bare.connect()
+  Actual: true
+Expected: false
+
+[  FAILED  ] R105MiniTest.null_sink_and_no_api_guards (0 ms)
+[----------] 2 tests from R105MiniTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 3 tests from 2 test suites ran. (0 ms total)
+[  PASSED  ] 1 test.
+[  FAILED  ] 2 tests, listed below:
+[  FAILED  ] ParserCTPMiniFactory.lifecycle_calls_without_api_are_safe
+[  FAILED  ] R105MiniTest.null_sink_and_no_api_guards
+
+ 2 FAILED TESTS

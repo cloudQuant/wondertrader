@@ -4,6 +4,7 @@
 #include "q03_storage3_fixture.h"
 
 #include "WtDataStorage/WtRdmDtReader.h"
+#include "../r23_storage4/r23_writer_fixture.h"
 
 namespace q03range {
 
@@ -123,7 +124,6 @@ protected:
 		const TickTime middle = { kTradingDate, 93000000 };
 		const TickTime last = { kTradingDate, 93100000 };
 		const TickTime afterLast = { kTradingDate, 93200000 };
-		const TickTime later = { kTradingDate, 93300000 };
 
 		// The block contains an overnight action date and a day-session action
 		// date, but all records remain in one trading-date file/block.
@@ -137,7 +137,7 @@ protected:
 		// End after the final committed record still returns the whole interval.
 		expect_range(code, first, afterLast, vector<uint32_t>{ 1, 2, 3, 4 });
 		// Start after the last record must produce an empty range without underflow.
-		expect_range(code, afterLast, later, vector<uint32_t>());
+		expect_range(code, afterLast, afterLast, vector<uint32_t>());
 	}
 
 	void expect_single_record_boundaries(const char* code, uint32_t date, uint32_t sequence)
@@ -182,10 +182,8 @@ TEST_F(Q03RdmTickRangeInclusiveTest, HistoricalAndRealtimeKeepInclusiveExactEndp
 	ASSERT_TRUE(write_bytes("his/ticks/SSE/20240110/600901.dsb",
 		make_block(BT_HIS_Ticks, BLOCK_VERSION_RAW_V2, pack_ticks(historical))));
 
-	// RT _size includes the final writer-owned slot. The first four records are
-	// the same committed observations as history; the open slot follows etime.
+	// RT _size is the number of actual records. Use the same records as history.
 	vector<WTSTickStruct> realtime = committed_ticks();
-	realtime.push_back(make_tick(kTradingDate, kTradingDate, 93300000, 5));
 	ASSERT_TRUE(write_bytes("rt/ticks/SSE/600902.dmb",
 		make_rt_block<WTSTickStruct>(BT_RT_Ticks, kTradingDate,
 			(uint32_t)realtime.size(), 8, realtime)));
@@ -194,9 +192,8 @@ TEST_F(Q03RdmTickRangeInclusiveTest, HistoricalAndRealtimeKeepInclusiveExactEndp
 	_bd.set_cur_tdate(kTradingDate);
 	expect_boundary_matrix("SSE.STK.600902");
 
-	// A single history record and a single committed RT record (plus the
-	// writer-owned RT slot) exercise exact/before/after bounds without relying
-	// on an adjacent record to make the index arithmetic safe.
+	// A single history record and a single RT record exercise exact/before/after
+	// bounds without relying on an adjacent record to make the index safe.
 	vector<WTSTickStruct> singleHistory;
 	singleHistory.push_back(make_tick(kTradingDate, kTradingDate, 93000000, 6));
 	ASSERT_TRUE(write_bytes("his/ticks/SSE/20240110/600903.dsb",
@@ -204,7 +201,6 @@ TEST_F(Q03RdmTickRangeInclusiveTest, HistoricalAndRealtimeKeepInclusiveExactEndp
 
 	vector<WTSTickStruct> singleRealtime = singleHistory;
 	singleRealtime[0] = make_tick(kTradingDate, kTradingDate, 93000000, 7);
-	singleRealtime.push_back(make_tick(kTradingDate, kTradingDate, 93100000, 8));
 	ASSERT_TRUE(write_bytes("rt/ticks/SSE/600904.dmb",
 		make_rt_block<WTSTickStruct>(BT_RT_Ticks, kTradingDate,
 			(uint32_t)singleRealtime.size(), 4, singleRealtime)));
@@ -224,11 +220,188 @@ TEST_F(Q03RdmTickRangeInclusiveTest, HistoricalAndRealtimeKeepInclusiveExactEndp
 	EXPECT_TRUE(_reader.readTickSliceByRange("SSE.STK.600902",
 		tick_time(crossDayStart), tick_time(crossDayEnd)) == NULL);
 
-	// etime=0 remains outside this test's oracle: IRdmDtReader declares it only
-	// as a default argument, without defining whether it means latest, now, or
-	// an empty cutoff. The current Rdm range path decodes zero as timestamp zero
-	// (previous observed result: non-NULL empty slice); do not promote that
-	// observation to a public contract without an API decision.
+	// This matrix covers finite inclusive endpoints only. The iteration-02
+	// adjudication contract for etime=0/latest is exercised separately with a
+	// fixed current trading date in ZeroEndTimeReadsLatestCommittedHistoryAndRealtimeTicks.
+}
+
+TEST_F(Q03RdmTickRangeInclusiveTest, ZeroEndTimeReadsLatestCommittedHistoryAndRealtimeTicks)
+{
+	const vector<WTSTickStruct> committed = committed_ticks();
+	ASSERT_TRUE(write_bytes("his/ticks/SSE/20240110/600905.dsb",
+		make_block(BT_HIS_Ticks, BLOCK_VERSION_RAW_V2, pack_ticks(committed))));
+
+	vector<WTSTickStruct> realtime = committed;
+	ASSERT_TRUE(write_bytes("rt/ticks/SSE/600906.dmb",
+		make_rt_block<WTSTickStruct>(BT_RT_Ticks, kTradingDate,
+			(uint32_t)realtime.size(), 8, realtime)));
+
+	// Keep stime earlier than every fixture record so this case isolates the
+	// etime=0 sentinel; same-day left clipping is covered by finite-end cases.
+	const uint64_t start = tick_time(TickTime{ kPreviousActionDate, 200000000 });
+	const uint32_t expectedDates[] = { kPreviousActionDate, kTradingDate, kTradingDate, kTradingDate };
+	const uint32_t expectedTimes[] = { 210000000, 93000000, 93000000, 93100000 };
+	auto expect_latest = [&](const char* code) {
+		WTSTickSlice* slice = _reader.readTickSliceByRange(code, start, 0);
+		ASSERT_NE(nullptr, slice) << code;
+		vector<WTSTickStruct> actual = flatten(slice);
+		slice->release();
+		ASSERT_EQ(actual.size(), committed.size()) << code;
+		for (std::size_t i = 0; i < committed.size(); ++i)
+		{
+			EXPECT_EQ(actual[i].action_date, expectedDates[i]) << code << " index=" << i;
+			EXPECT_EQ(actual[i].action_time, expectedTimes[i]) << code << " index=" << i;
+			EXPECT_DOUBLE_EQ(actual[i].price, 30.0 + i + 1) << code << " index=" << i;
+		}
+	};
+
+	// Fix the reader's current trading date through the fake base-data manager:
+	// historical latest means latest available before this controlled current date.
+	_bd.set_cur_tdate(kHistoryReaderDate);
+	expect_latest("SSE.STK.600905");
+
+	// For the controlled current trading date, latest means all actual RT records.
+	_bd.set_cur_tdate(kTradingDate);
+	expect_latest("SSE.STK.600906");
+
+	// A future left boundary must not leak current records into a future-date
+	// range, and a same-day start after the last RT tick must stay empty.
+	for (const uint64_t laterStart : {
+		tick_time(TickTime{ kTradingDate + 1, 90000000 }),
+		tick_time(TickTime{ kTradingDate, 93200000 }) })
+	{
+		WTSTickSlice* slice = _reader.readTickSliceByRange("SSE.STK.600906", laterStart, 0);
+		ASSERT_NE(nullptr, slice);
+		vector<WTSTickStruct> actual = flatten(slice);
+		slice->release();
+		EXPECT_TRUE(actual.empty()) << laterStart;
+	}
+
+	// A zero-sized RT block has no actual records.
+	vector<WTSTickStruct> emptyRealtime;
+	ASSERT_TRUE(write_bytes("rt/ticks/SSE/600907.dmb",
+		make_rt_block<WTSTickStruct>(BT_RT_Ticks, kTradingDate, 0, 4, emptyRealtime)));
+	WTSTickSlice* emptySlice = _reader.readTickSliceByRange("SSE.STK.600907", start, 0);
+	ASSERT_NE(nullptr, emptySlice);
+	EXPECT_TRUE(flatten(emptySlice).empty());
+	emptySlice->release();
+
+	// A single actual RT record remains visible to latest.
+	vector<WTSTickStruct> singleRealtime;
+	singleRealtime.push_back(make_tick(kTradingDate, kTradingDate, 93000000, 10));
+	ASSERT_TRUE(write_bytes("rt/ticks/SSE/600908.dmb",
+		make_rt_block<WTSTickStruct>(BT_RT_Ticks, kTradingDate, 1, 4, singleRealtime)));
+	WTSTickSlice* singleSlice = _reader.readTickSliceByRange("SSE.STK.600908", start, 0);
+	ASSERT_NE(nullptr, singleSlice);
+	vector<WTSTickStruct> singleActual = flatten(singleSlice);
+	singleSlice->release();
+	ASSERT_EQ(singleActual.size(), (std::size_t)1);
+	EXPECT_EQ(singleActual[0].action_time, 93000000u);
+	EXPECT_DOUBLE_EQ(singleActual[0].price, 40.0);
+}
+
+class WriterReaderSink : public IRdmDtReaderSink
+{
+public:
+	explicit WriterReaderSink(IBaseDataMgr* bd) : _bd(bd) {}
+	IBaseDataMgr* get_basedata_mgr() override { return _bd; }
+	IHotMgr* get_hot_mgr() override { return &_hot; }
+	void reader_log(WTSLogLevel, const char*) override {}
+
+private:
+	IBaseDataMgr* _bd;
+	q03::HotMgr _hot;
+};
+
+class CurrentPathScope
+{
+public:
+	explicit CurrentPathScope(const std::filesystem::path& next)
+		: _previous(std::filesystem::current_path())
+	{
+		std::filesystem::current_path(next);
+	}
+
+	~CurrentPathScope()
+	{
+		std::error_code ec;
+		std::filesystem::current_path(_previous, ec);
+	}
+
+private:
+	std::filesystem::path _previous;
+};
+
+class WriterTickRangeE2ETest : public r23::R23WriterTest
+{
+};
+
+TEST_F(WriterTickRangeE2ETest, PublishedWriterTicksAreVisibleThroughPublicRange)
+{
+	// Keep writer and reader current-date sources aligned with these fixed test ticks.
+	_bd->set_cur_tdate(kTradingDate);
+	_sink->set_tdate(kTradingDate);
+
+	r23::R23Writer* writer = make_writer(
+		"\"disablemin1\":true,\"disablemin5\":true,\"disableday\":true");
+	ASSERT_NE(nullptr, writer);
+
+	r23::TickSpec first;
+	first.code = "rb2210";
+	first.exchg = "SHFE";
+	first.trading_date = kTradingDate;
+	first.action_date = kTradingDate;
+	first.action_time = 93000000;
+	first.price = 3600.0;
+	first.total_volume = 1000.0;
+	WTSTickData* writtenFirst = write_tick(writer, first, 0);
+	ASSERT_NE(nullptr, writtenFirst);
+
+	r23::TickSpec second = first;
+	second.action_time = 93100000;
+	second.price = 3601.0;
+	second.total_volume = 1010.0;
+
+	const uint64_t start = tick_time(TickTime{ kTradingDate, 90000000 });
+	const uint64_t firstEnd = tick_time(TickTime{ kTradingDate, first.action_time });
+	const uint64_t secondEnd = tick_time(TickTime{ kTradingDate, second.action_time });
+	const vector<uint32_t> oneTime{ first.action_time };
+	const vector<double> onePrice{ first.price };
+	const vector<uint32_t> twoTimes{ first.action_time, second.action_time };
+	const vector<double> twoPrices{ first.price, second.price };
+
+	CurrentPathScope cwd(_base);
+	WriterReaderSink readerSink(_bd.get());
+	WtRdmDtReader reader;
+	reader.init(NULL, &readerSink);
+	auto expect_range = [&](uint64_t etime, const vector<uint32_t>& expectedTimes,
+		const vector<double>& expectedPrices) {
+		WTSTickSlice* slice = reader.readTickSliceByRange("SHFE.rb2210", start, etime);
+		ASSERT_NE(nullptr, slice);
+		vector<WTSTickStruct> actual = flatten(slice);
+		slice->release();
+		ASSERT_EQ(actual.size(), expectedTimes.size());
+		ASSERT_EQ(actual.size(), expectedPrices.size());
+		for (std::size_t i = 0; i < actual.size(); ++i)
+		{
+			EXPECT_EQ(actual[i].action_date, kTradingDate) << "index=" << i;
+			EXPECT_EQ(actual[i].action_time, expectedTimes[i]) << "index=" << i;
+			EXPECT_DOUBLE_EQ(actual[i].price, expectedPrices[i]) << "index=" << i;
+		}
+	};
+
+	EXPECT_EQ(r23::read_block_header<RTDayBlockHeader>(rt_tick_file("rb2210"))._size, 1u);
+	expect_range(0, oneTime, onePrice);
+	expect_range(firstEnd, oneTime, onePrice);
+
+	WTSTickData* writtenSecond = write_tick(writer, second, 0);
+	ASSERT_NE(nullptr, writtenSecond);
+	EXPECT_EQ(r23::read_block_header<RTDayBlockHeader>(rt_tick_file("rb2210"))._size, 2u);
+	expect_range(0, twoTimes, twoPrices);
+	expect_range(firstEnd, oneTime, onePrice);
+	expect_range(secondEnd, twoTimes, twoPrices);
+
+	reader.clearCache();
 }
 
 } // namespace q03range

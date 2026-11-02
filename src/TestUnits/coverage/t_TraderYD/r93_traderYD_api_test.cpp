@@ -144,6 +144,14 @@ namespace
 			double price = 0, volume = 0, amount = 0;
 		};
 
+		~R93YdSink()
+		{
+			for (WTSOrderInfo* order : retainedQueryOrders)
+				order->release();
+			for (WTSTradeInfo* trade : retainedQueryTrades)
+				trade->release();
+		}
+
 		IBaseDataMgr* getBaseDataMgr() override { return &bd_; }
 		void handleEvent(WTSTraderEvent e, int32_t ec) override { events.push_back({ (int)e, ec }); }
 		void handleTraderLog(WTSLogLevel, const char* message) override
@@ -171,10 +179,13 @@ namespace
 		}
 		void onRspPosition(const WTSArray* ay) override
 		{
-			PositionRec r;
-			if (ay && ay->size() > 0)
+			if (ay == NULL)
+				return;
+
+			for (uint32_t idx = 0; idx < ay->size(); ++idx)
 			{
-				WTSPositionItem* pos = static_cast<WTSPositionItem*>(const_cast<WTSArray*>(ay)->at(0));
+				WTSPositionItem* pos = static_cast<WTSPositionItem*>(const_cast<WTSArray*>(ay)->at(idx));
+				PositionRec r;
 				r.valid = true;
 				r.code = pos->getCode();
 				r.exchg = pos->getExchg();
@@ -187,8 +198,8 @@ namespace
 				r.avgPrice = pos->getAvgPrice();
 				r.cost = pos->getPositionCost();
 				r.dynProfit = pos->getDynProfit();
+				positions.push_back(r);
 			}
-			positions.push_back(r);
 		}
 		void onRspOrders(const WTSArray* ay) override
 		{
@@ -204,6 +215,9 @@ namespace
 				r.price = o->getPrice();
 				r.volume = o->getVolume();
 				r.state = (int)o->getOrderState();
+				o->retain();
+				retainedQueryOrders.push_back(o);
+				orderArrayCallbackRefCounts.push_back(o->retainCount());
 			}
 			orderArrays.push_back(r);
 		}
@@ -221,6 +235,9 @@ namespace
 				r.price = t->getPrice();
 				r.volume = t->getVolume();
 				r.amount = t->getAmount();
+				t->retain();
+				retainedQueryTrades.push_back(t);
+				tradeArrayCallbackRefCounts.push_back(t->retainCount());
 			}
 			tradeArrays.push_back(r);
 		}
@@ -268,6 +285,10 @@ namespace
 		std::vector<TradeRec> tradeArrays;
 		std::vector<OrderRec> pushedOrders;
 		std::vector<TradeRec> pushedTrades;
+		std::vector<WTSOrderInfo*> retainedQueryOrders;
+		std::vector<WTSTradeInfo*> retainedQueryTrades;
+		std::vector<uint32_t> orderArrayCallbackRefCounts;
+		std::vector<uint32_t> tradeArrayCallbackRefCounts;
 	};
 
 	class R93YdProbe : public TraderYD
@@ -297,6 +318,14 @@ namespace
 			StdUniqueLock lock(m_mtxQuery);
 			return m_queQuery.size();
 		}
+		WTSOrderInfo* cachedOrder(const char* orderID)
+		{
+			return m_mapOrders ? static_cast<WTSOrderInfo*>(m_mapOrders->get(orderID)) : NULL;
+		}
+		WTSTradeInfo* cachedTrade(const char* tradeID)
+		{
+			return m_mapTrades ? static_cast<WTSTradeInfo*>(m_mapTrades->get(tradeID)) : NULL;
+		}
 	};
 
 	R93YdApiStub* g_r93_yd_stub = NULL;
@@ -311,8 +340,9 @@ namespace
 			cfg->append("config", "yd_r93.conf");
 			cfg->append("user", "yduser");
 			cfg->append("pass", "ydpass");
+			cfg->append("ydmodule", "yd_r60_missing_library_fixture");
 			cfg->append("update_cache", true);
-			ASSERT_TRUE(api_.init(cfg));
+			ASSERT_FALSE(api_.init(cfg));
 			cfg->release();
 
 			comm_ = WTSCommodityInfo::create("ag", "沪银", "SHFE", "TRADING", "CHINA");
@@ -601,6 +631,9 @@ namespace
 		EXPECT_EQ("ut-42", sink_.pushedOrders[0].userTag);
 		EXPECT_EQ("9001", sink_.pushedOrders[0].orderID);
 		EXPECT_EQ("yduser#0000000107", sink_.pushedOrders[0].entrustID);
+		WTSOrderInfo* cachedOrder = api_.cachedOrder("9001");
+		ASSERT_NE((WTSOrderInfo*)NULL, cachedOrder);
+		const uint32_t orderRefBeforeQuery = cachedOrder->retainCount();
 
 		ASSERT_EQ(0, api_.queryOrders());
 		ASSERT_TRUE(api_.runNextQuery());
@@ -608,6 +641,9 @@ namespace
 		EXPECT_TRUE(sink_.orderArrays[0].valid);
 		EXPECT_EQ("ut-42", sink_.orderArrays[0].userTag);
 		EXPECT_EQ("9001", sink_.orderArrays[0].orderID);
+		ASSERT_EQ(1u, sink_.orderArrayCallbackRefCounts.size());
+		EXPECT_EQ(orderRefBeforeQuery + 2, sink_.orderArrayCallbackRefCounts[0]);
+		EXPECT_EQ(orderRefBeforeQuery + 1, cachedOrder->retainCount());
 
 		YDTrade trd;
 		memset(&trd, 0, sizeof(trd));
@@ -622,12 +658,30 @@ namespace
 		EXPECT_EQ("ut-42", sink_.pushedTrades[0].userTag);
 		EXPECT_EQ("9001", sink_.pushedTrades[0].refOrder);
 		EXPECT_DOUBLE_EQ(70000.0, sink_.pushedTrades[0].amount);	// 5 * 2 * 7000
+		WTSTradeInfo* cachedTrade = api_.cachedTrade("5001");
+		ASSERT_NE((WTSTradeInfo*)NULL, cachedTrade);
+		const uint32_t tradeRefBeforeQuery = cachedTrade->retainCount();
 
 		ASSERT_EQ(0, api_.queryTrades());
 		ASSERT_TRUE(api_.runNextQuery());
 		ASSERT_EQ(1u, sink_.tradeArrays.size());
 		EXPECT_TRUE(sink_.tradeArrays[0].valid);
 		EXPECT_EQ("ut-42", sink_.tradeArrays[0].userTag);
+		ASSERT_EQ(1u, sink_.tradeArrayCallbackRefCounts.size());
+		EXPECT_EQ(tradeRefBeforeQuery + 2, sink_.tradeArrayCallbackRefCounts[0]);
+		EXPECT_EQ(tradeRefBeforeQuery + 1, cachedTrade->retainCount());
+
+		// A missing sink must also release the temporary array and its retained items.
+		api_.registerSpi(NULL);
+		const uint32_t orderRefsWithoutSink = cachedOrder->retainCount();
+		ASSERT_EQ(0, api_.queryOrders());
+		ASSERT_TRUE(api_.runNextQuery());
+		EXPECT_EQ(orderRefsWithoutSink, cachedOrder->retainCount());
+		const uint32_t tradeRefsWithoutSink = cachedTrade->retainCount();
+		ASSERT_EQ(0, api_.queryTrades());
+		ASSERT_TRUE(api_.runNextQuery());
+		EXPECT_EQ(tradeRefsWithoutSink, cachedTrade->retainCount());
+		api_.registerSpi(&sink_);
 
 		ASSERT_EQ(0, api_.queryPositions());
 		ASSERT_TRUE(api_.runNextQuery());

@@ -150,6 +150,10 @@ TEST(l03_contract, identity_fields_reject_values_that_do_not_fit)
 			if (delta == 0)
 			{
 				ASSERT_NE(nullptr, info) << "field " << field;
+				const std::array<const char*, 4> actual = {
+					info->getCode(), info->getName(), info->getExchg(), info->getProduct()
+				};
+				EXPECT_STREQ(value.c_str(), actual[field]) << "field " << field;
 				info->release();
 			}
 			else
@@ -163,6 +167,8 @@ TEST(l03_contract, identity_fields_reject_values_that_do_not_fit)
 	WTSContractInfo* empty = WTSContractInfo::create("", "", "", "");
 	ASSERT_NE(nullptr, empty);
 	EXPECT_STREQ("", empty->getCode());
+	EXPECT_STREQ("", empty->getName());
+	EXPECT_STREQ("", empty->getExchg());
 	EXPECT_STREQ("", empty->getProduct());
 	empty->release();
 
@@ -186,6 +192,7 @@ TEST(l03_contract, alt_code_capacity_rejection_preserves_previous_identity)
 
 	EXPECT_TRUE(c->setAltCode(std::string(31, 'a').c_str()));
 	EXPECT_EQ(31u, std::strlen(c->getAltCode()));
+	EXPECT_STREQ(std::string(31, 'a').c_str(), c->getAltCode());
 	EXPECT_EQ(36u, std::strlen(c->getFullAltCode()));
 	const std::string prior = c->getAltCode();
 	const std::string priorFull = c->getFullAltCode();
@@ -227,6 +234,61 @@ TEST(l03_contract, oversized_configured_identity_is_rejected_before_registration
 	EXPECT_FALSE(altMgr.loadContracts(altPath.string().c_str()));
 	EXPECT_EQ(nullptr, altMgr.getContract("rb2401", "SHFE"));
 	std::filesystem::remove(altPath);
+}
+
+TEST(l03_contract, storage_width_contract_limits_preserve_valid_edges_and_reject_before_rules_registration)
+{
+	const std::string validExchg(MAX_EXCHANGE_LENGTH - 1, 'E');
+	const std::string longExchg(MAX_EXCHANGE_LENGTH, 'X');
+	const std::string validCode(MAX_INSTRUMENT_LENGTH - 1, 'C');
+	const std::string longCode(MAX_INSTRUMENT_LENGTH, 'D');
+	auto body = [](const std::string& group, const std::string& exchg, const std::string& code) {
+		return "{\"" + group + "\":{\"" + code +
+			"\":{\"name\":\"contract\",\"exchg\":\"" + exchg +
+			"\",\"rules\":{\"session\":\"ALLDAY\"}}}}";
+	};
+
+	const auto validFile = writeIdentityConfig(body(validExchg, validExchg, validCode));
+	WTSBaseDataMgr validMgr;
+	ASSERT_TRUE(validMgr.loadContracts(validFile.string().c_str()));
+	WTSContractInfo* valid = validMgr.getContract(validCode.c_str(), validExchg.c_str());
+	ASSERT_NE(nullptr, valid);
+	EXPECT_STREQ(validExchg.c_str(), valid->getExchg());
+	EXPECT_STREQ(validCode.c_str(), valid->getCode());
+	EXPECT_NE(nullptr, validMgr.getCommodity(validExchg.c_str(), validCode.c_str()));
+	EXPECT_EQ(1u, validMgr.getGlobalSize());
+	std::filesystem::remove(validFile);
+
+	struct Case { std::string group, exchg, code; };
+	const std::vector<Case> invalid = {
+		{longExchg, longExchg, "ABC"},
+		{longExchg, validExchg, "DEF"},
+		{validExchg, longExchg, "GHI"},
+		{validExchg, validExchg, longCode}
+	};
+	for (const auto& entry : invalid)
+	{
+		const auto file = writeIdentityConfig(body(entry.group, entry.exchg, entry.code));
+		WTSBaseDataMgr mgr;
+		EXPECT_FALSE(mgr.loadContracts(file.string().c_str()));
+		EXPECT_EQ(nullptr, mgr.getContract(entry.code.c_str(), entry.exchg.c_str()));
+		EXPECT_EQ(nullptr, mgr.getCommodity(entry.group.c_str(), entry.code.c_str()));
+		EXPECT_EQ(0u, mgr.getGlobalSize());
+		std::filesystem::remove(file);
+	}
+	const std::string mixed = "{\"" + validExchg + "\":{\"" + validCode +
+		"\":{\"name\":\"good\",\"exchg\":\"" + validExchg +
+		"\",\"rules\":{\"session\":\"ALLDAY\"}},\"" + longCode +
+		"\":{\"name\":\"bad\",\"exchg\":\"" + validExchg +
+		"\",\"rules\":{\"session\":\"ALLDAY\"}}}}";
+	const auto mixedFile = writeIdentityConfig(mixed);
+	WTSBaseDataMgr mixedMgr;
+	EXPECT_FALSE(mixedMgr.loadContracts(mixedFile.string().c_str()));
+	EXPECT_NE(nullptr, mixedMgr.getContract(validCode.c_str(), validExchg.c_str()));
+	EXPECT_EQ(nullptr, mixedMgr.getContract(longCode.c_str(), validExchg.c_str()));
+	EXPECT_EQ(nullptr, mixedMgr.getCommodity(validExchg.c_str(), longCode.c_str()));
+	EXPECT_EQ(1u, mixedMgr.getGlobalSize());
+	std::filesystem::remove(mixedFile);
 }
 
 //////////////////////////////////////////////////////////////////////////

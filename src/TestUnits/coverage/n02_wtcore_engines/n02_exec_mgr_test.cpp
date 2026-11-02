@@ -552,7 +552,9 @@ TEST_F(N02ExecMgrTest, MalformedRouterRulesDoNotPartiallyReplaceExistingRoutes)
         {"number", "{\"router_rules\":[{\"strategy\":\"staged\",\"executer\":\"exec_staged\"},{\"strategy\":\"bad_number\",\"executer\":7}]}", "bad_number"},
         {"object", "{\"router_rules\":[{\"strategy\":\"staged\",\"executer\":\"exec_staged\"},{\"strategy\":\"bad_object\",\"executer\":{}}]}", "bad_object"},
         {"array_number", "{\"router_rules\":[{\"strategy\":\"staged\",\"executer\":\"exec_staged\"},{\"strategy\":\"bad_array\",\"executer\":[\"exec_partial\",7]}]}", "bad_array"},
-        {"item_type", "{\"router_rules\":[{\"strategy\":\"staged\",\"executer\":\"exec_staged\"},7]}", nullptr}
+        {"item_type", "{\"router_rules\":[{\"strategy\":\"staged\",\"executer\":\"exec_staged\"},7]}", nullptr},
+        {"missing_strategy", "{\"router_rules\":[{\"strategy\":\"staged\",\"executer\":\"exec_staged\"},{\"executer\":\"exec_partial\"}]}", ""},
+        {"number_strategy", "{\"router_rules\":[{\"strategy\":\"staged\",\"executer\":\"exec_staged\"},{\"strategy\":7,\"executer\":\"exec_partial\"}]}", "7"}
     };
 
     WtExecuterMgr mgr;
@@ -597,7 +599,7 @@ TEST_F(N02ExecMgrTest, MalformedRouterRulesDoNotPartiallyReplaceExistingRoutes)
     }
 }
 
-TEST_F(N02ExecMgrTest, RouterRuleWithoutStrategyDoesNotDereferenceNull)
+TEST_F(N02ExecMgrTest, RouterRuleWithoutStrategyIsRejected)
 {
     const char* const missingStrategyConfig =
         "{\"router_rules\":[{\"executer\":\"e\"}]}\n";
@@ -605,9 +607,10 @@ TEST_F(N02ExecMgrTest, RouterRuleWithoutStrategyDoesNotDereferenceNull)
     ASSERT_NE(nullptr, rules);
 
     WtExecuterMgr mgr;
-    // strategy 缺失时 getCString 返回默认空串；此用例只锚定不会在该处空指针解引用，
-    // 不对缺失 strategy 的路由语义作额外约定。
-    EXPECT_NO_THROW(mgr.load_router_rules(rules));
+    EXPECT_FALSE(mgr.load_router_rules(rules));
+    const wt_hashset<std::string>& route = mgr.get_route_by_strategy("");
+    ASSERT_EQ(1u, route.size());
+    EXPECT_NE(route.end(), route.find("ALL"));
     rules->release();
 }
 

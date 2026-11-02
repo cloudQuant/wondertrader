@@ -132,6 +132,33 @@ TEST(l01_timeutils, time_to_min_bar_roundtrips_historical_and_future_dates)
 	}
 }
 
+TEST(l01_timeutils, time_to_min_bar_stays_monotonic_after_uint32_boundary)
+{
+	struct DateTime
+	{
+		uint32_t date;
+		uint32_t time;
+	};
+	const DateTime values[] = {
+		{ 20200101u, 930u },
+		{ 20321231u, 2359u },
+		{ 20330101u, 0u },
+		{ 20330101u, 930u },
+		{ 20330102u, 0u },
+		{ 20401231u, 2359u },
+	};
+	uint64_t previous = 0;
+	for (const DateTime& value : values)
+	{
+		const uint64_t bar = TimeUtils::timeToMinBar(value.date, value.time);
+		EXPECT_GT(bar, previous) << "date=" << value.date << " time=" << value.time;
+		EXPECT_EQ(TimeUtils::minBarToDate(bar), value.date) << "date=" << value.date;
+		EXPECT_EQ(TimeUtils::minBarToTime(bar), value.time) << "time=" << value.time;
+		previous = bar;
+	}
+	EXPECT_EQ(TimeUtils::timeToMinBar(20330101u, 930u), 4301010930ull);
+}
+
 // ------------------------------------------------------------------ makeTime / timeToString
 TEST(l01_timeutils, make_time_hour_minute_ms_offsets)
 {

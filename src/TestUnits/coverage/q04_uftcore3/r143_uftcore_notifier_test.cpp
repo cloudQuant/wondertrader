@@ -23,22 +23,31 @@
  */
 #include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/io_context.hpp>
+#include <boost/asio/post.hpp>
 #include <memory>
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
+#include <cmath>
 #include <filesystem>
 #include <future>
+#include <limits>
 #include <mutex>
+#include <stdexcept>
 #include <string>
 #include <thread>
 #include <type_traits>
 #include <vector>
 
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/document.h>
+
 #include "Includes/WTSMarcos.h"
 #include "Includes/WTSObject.hpp"
 #include "Includes/WTSTradeDef.hpp"
 #include "Includes/WTSVariant.hpp"
+#include "Share/DLLHelper.hpp"
 #include "Share/StdUtils.hpp"
 
 #define private public
@@ -163,6 +172,58 @@ private:
 
 BlockingPublishGate* g_blockingPublishGate = nullptr;
 
+class ThrowingPublishGate
+{
+public:
+	void throwOnOrder()
+	{
+		std::unique_lock<std::mutex> lock(_mutex);
+		_orderEntered = true;
+		_changed.notify_all();
+		_changed.wait(lock, [this]() { return _releaseOrder; });
+		throw std::runtime_error("controlled order publish failure");
+	}
+
+	void markBarrier()
+	{
+		{
+			std::lock_guard<std::mutex> lock(_mutex);
+			_barrierSeen = true;
+		}
+		_changed.notify_all();
+	}
+
+	bool waitForOrder(std::chrono::milliseconds timeout)
+	{
+		std::unique_lock<std::mutex> lock(_mutex);
+		return _changed.wait_for(lock, timeout, [this]() { return _orderEntered; });
+	}
+
+	void releaseOrder()
+	{
+		{
+			std::lock_guard<std::mutex> lock(_mutex);
+			_releaseOrder = true;
+		}
+		_changed.notify_all();
+	}
+
+	bool waitForBarrier(std::chrono::milliseconds timeout)
+	{
+		std::unique_lock<std::mutex> lock(_mutex);
+		return _changed.wait_for(lock, timeout, [this]() { return _barrierSeen; });
+	}
+
+private:
+	std::mutex _mutex;
+	std::condition_variable _changed;
+	bool _orderEntered = false;
+	bool _releaseOrder = false;
+	bool _barrierSeen = false;
+};
+
+std::atomic<ThrowingPublishGate*> g_throwingPublishGate{ nullptr };
+
 void capturePublish(uint32_t /*serverId*/, const char* topic, const char* data, uint32_t length)
 {
 	{
@@ -177,6 +238,18 @@ void blockFirstPublish(uint32_t /*serverId*/, const char* topic, const char* /*d
 {
 	if (g_blockingPublishGate != nullptr)
 		g_blockingPublishGate->publish(topic);
+}
+
+void throwOnOrderPublish(uint32_t /*serverId*/, const char* topic, const char* /*data*/, uint32_t /*length*/)
+{
+	ThrowingPublishGate* gate = g_throwingPublishGate.load(std::memory_order_acquire);
+	if (gate == nullptr || topic == nullptr)
+		return;
+
+	if (std::string(topic) == "TRD_ORDER")
+		gate->throwOnOrder();
+	else if (std::string(topic) == "TRD_NOTIFY")
+		gate->markBarrier();
 }
 
 void resetPublishedMessages()
@@ -219,6 +292,68 @@ bool makeNotifier(EventNotifier& notifier, WTSVariant*& cfg)
 }
 
 } // namespace
+
+TEST(R160UftNotifier, FakeMqReceivesDefaultConfirmAndIsDestroyed)
+{
+	const std::string fakeDir = WT_UFT_R160_FAKE_MQ_DIR;
+	const std::string moduleName = DLLHelper::wrap_module("WtMsgQue", "lib");
+	const std::string fakePath = fakeDir + "/" + moduleName;
+	InstDirGuard instdir(fakeDir + "/");
+
+	DllHandle inspector = DLLHelper::load_library(fakePath.c_str());
+	ASSERT_NE(nullptr, inspector);
+	struct InspectorGuard
+	{
+		DllHandle handle;
+		~InspectorGuard() { DLLHelper::free_library(handle); }
+	} inspectorGuard{ inspector };
+
+	using Reset = void(*)();
+	using Count = uint32_t(*)();
+	using ServerId = WtUInt32(*)();
+	using Flag = bool(*)();
+	using Text = const char*(*)();
+	const auto reset = reinterpret_cast<Reset>(DLLHelper::get_symbol(inspector, "r160_fake_reset"));
+	const auto createCount = reinterpret_cast<Count>(DLLHelper::get_symbol(inspector, "r160_fake_create_count"));
+	const auto destroyCount = reinterpret_cast<Count>(DLLHelper::get_symbol(inspector, "r160_fake_destroy_count"));
+	const auto serverId = reinterpret_cast<ServerId>(DLLHelper::get_symbol(inspector, "r160_fake_server_id"));
+	const auto destroyedId = reinterpret_cast<ServerId>(DLLHelper::get_symbol(inspector, "r160_fake_destroyed_id"));
+	const auto confirm = reinterpret_cast<Flag>(DLLHelper::get_symbol(inspector, "r160_fake_confirm"));
+	const auto observedUrl = reinterpret_cast<Text>(DLLHelper::get_symbol(inspector, "r160_fake_url"));
+	ASSERT_NE(nullptr, reset);
+	ASSERT_NE(nullptr, createCount);
+	ASSERT_NE(nullptr, destroyCount);
+	ASSERT_NE(nullptr, serverId);
+	ASSERT_NE(nullptr, destroyedId);
+	ASSERT_NE(nullptr, confirm);
+	ASSERT_NE(nullptr, observedUrl);
+	reset();
+
+	constexpr WtUInt32 expectedId = 0xF1234567u;
+	const std::string url = "fake://r160_uft_abi";
+	struct VariantGuard
+	{
+		WTSVariant* value;
+		~VariantGuard() { if (value != nullptr) value->release(); }
+	} cfg{ WTSVariant::createObject() };
+	ASSERT_NE(nullptr, cfg.value);
+	cfg.value->append("active", true);
+	cfg.value->append("url", url.c_str());
+
+	{
+		EventNotifier notifier;
+		ASSERT_TRUE(notifier.init(cfg.value));
+		EXPECT_EQ(expectedId, notifier._mq_sid);
+		EXPECT_EQ(1u, createCount());
+		EXPECT_EQ(expectedId, serverId());
+		EXPECT_STREQ(url.c_str(), observedUrl());
+		// The UFT notifier config has no confirm option; it must pass the MQ default explicitly.
+		EXPECT_FALSE(confirm());
+	}
+
+	EXPECT_EQ(1u, destroyCount());
+	EXPECT_EQ(expectedId, destroyedId());
+}
 
 // EventNotifier.cpp:119-140 + :148-166 + :174-194
 TEST(R143UftNotifier, postsTextLogEventAndTraderMessages)
@@ -322,6 +457,191 @@ TEST(R143UftNotifier, postsOrderJsonWithStateAndVolumeFields)
 	EXPECT_NE(std::string::npos, payload.find("left"));
 	EXPECT_NE(std::string::npos, payload.find("traded"));
 	EXPECT_EQ(1u, ord->retainCount()) << "TRD_ORDER handler must release its retained order after worker join";
+	ord->release();
+}
+
+TEST(R143UftNotifier, releasesRetainedOrderWhenPublisherIsMissing)
+{
+	const std::string bin = binDir();
+	if (bin.empty() || !std::filesystem::exists(bin + "libWtMsgQue.dylib"))
+		GTEST_SKIP() << "libWtMsgQue.dylib not found in this build";
+
+	WTSOrderInfo* ord = WTSOrderInfo::create();
+	ASSERT_NE(nullptr, ord);
+	ord->setCode("ag2406");
+	ord->setExchange("SHFE");
+	ASSERT_EQ(1u, ord->retainCount());
+
+	std::promise<void> drained;
+	std::future<void> drainedFuture = drained.get_future();
+	bool orderHandlerDrained = false;
+	{
+		InstDirGuard instdir(bin);
+		EventNotifier notifier;
+		WTSVariant* cfg = nullptr;
+		ASSERT_TRUE(makeNotifier(notifier, cfg));
+		cfg->release();
+		notifier._publisher = nullptr;
+
+		notifier.notify("uft1", 4006, "SHFE.ag2406", ord);
+		// The single worker runs this barrier after the earlier order handler.
+		boost::asio::post(notifier._asyncio, [&drained]() { drained.set_value(); });
+		orderHandlerDrained = drainedFuture.wait_for(std::chrono::seconds(2)) == std::future_status::ready;
+		// stopWorker joins after the barrier and drains any remaining posted work.
+		notifier.stopWorker();
+	}
+
+	EXPECT_TRUE(orderHandlerDrained);
+	EXPECT_EQ(1u, ord->retainCount());
+	ord->release();
+}
+
+TEST(R143UftNotifier, releasesRetainedOrderWhenJsonWriterRejectsNonFinitePrice)
+{
+	const std::string bin = binDir();
+	if (bin.empty() || !std::filesystem::exists(bin + "libWtMsgQue.dylib"))
+		GTEST_SKIP() << "libWtMsgQue.dylib not found in this build";
+
+	const double nonFinitePrice = std::numeric_limits<double>::quiet_NaN();
+	rapidjson::StringBuffer serialized;
+	rapidjson::Writer<rapidjson::StringBuffer> writer(serialized);
+	ASSERT_FALSE(writer.Double(nonFinitePrice)) << "the default RapidJSON writer must reject NaN";
+
+	auto releaseOrder = [](WTSOrderInfo* order) {
+		if (order != nullptr)
+			order->release();
+	};
+	std::unique_ptr<WTSOrderInfo, decltype(releaseOrder)> ord(WTSOrderInfo::create(), releaseOrder);
+	ASSERT_NE(nullptr, ord.get());
+	ord->setCode("ag2406");
+	ord->setExchange("SHFE");
+	ord->setPrice(nonFinitePrice);
+	ASSERT_EQ(1u, ord->retainCount());
+
+	std::promise<void> drained;
+	std::future<void> drainedFuture = drained.get_future();
+	bool orderHandlerDrained = false;
+	{
+		InstDirGuard instdir(bin);
+		EventNotifier notifier;
+		WTSVariant* cfg = nullptr;
+		ASSERT_TRUE(makeNotifier(notifier, cfg));
+		cfg->release();
+		// The serialization path still runs, but no partial output is observed or
+		// made part of this ownership regression's expected behavior.
+		notifier._publisher = nullptr;
+
+		notifier.notify("uft1", 4008, "SHFE.ag2406", ord.get());
+		boost::asio::post(notifier._asyncio, [&drained]() { drained.set_value(); });
+		orderHandlerDrained = drainedFuture.wait_for(std::chrono::seconds(2)) == std::future_status::ready;
+		notifier.stopWorker();
+	}
+
+	EXPECT_TRUE(orderHandlerDrained);
+	EXPECT_EQ(1u, ord->retainCount());
+}
+
+TEST(R143UftNotifier, PublishesOnlyCompleteJsonForFiniteTradeAndOrderValues)
+{
+	resetPublishedMessages();
+	EventNotifier notifier;
+	notifier._mq_sid = 42;
+	notifier._publisher = &capturePublish;
+
+	const double nonFinite = std::numeric_limits<double>::quiet_NaN();
+	WTSTradeInfo* finiteTrade = WTSTradeInfo::create("ag2406", "SHFE");
+	WTSTradeInfo* invalidTrade = WTSTradeInfo::create("ag2406", "SHFE");
+	WTSOrderInfo* finiteOrder = WTSOrderInfo::create();
+	WTSOrderInfo* invalidOrder = WTSOrderInfo::create();
+	ASSERT_NE(nullptr, finiteTrade);
+	ASSERT_NE(nullptr, invalidTrade);
+	ASSERT_NE(nullptr, finiteOrder);
+	ASSERT_NE(nullptr, invalidOrder);
+
+	finiteTrade->setVolume(2.0);
+	finiteTrade->setPrice(3500.25);
+	invalidTrade->setVolume(2.0);
+	invalidTrade->setPrice(nonFinite);
+	finiteOrder->setCode("ag2406");
+	finiteOrder->setExchange("SHFE");
+	finiteOrder->setVolume(3.0);
+	finiteOrder->setPrice(3510.75);
+	invalidOrder->setCode("ag2406");
+	invalidOrder->setExchange("SHFE");
+	invalidOrder->setVolume(3.0);
+	invalidOrder->setPrice(nonFinite);
+
+	notifier.notify("r143", 1, "SHFE.ag2406", finiteTrade);
+	notifier.notify("r143", 2, "SHFE.ag2406", invalidTrade);
+	notifier.notify("r143", 3, "SHFE.ag2406", finiteOrder);
+	notifier.notify("r143", 4, "SHFE.ag2406", invalidOrder);
+	notifier._asyncio.poll();
+
+	ASSERT_EQ(2u, g_publishedMessages.size()) << "failed writer output must not reach the publisher";
+	EXPECT_EQ("TRD_TRADE", g_publishedMessages[0].topic);
+	EXPECT_EQ("TRD_ORDER", g_publishedMessages[1].topic);
+	for (const PublishedMessage& message : g_publishedMessages)
+	{
+		rapidjson::Document parsed;
+		parsed.Parse(message.data.c_str());
+		ASSERT_FALSE(parsed.HasParseError()) << message.data;
+		ASSERT_TRUE(parsed.IsObject()) << message.data;
+		ASSERT_TRUE(parsed.HasMember("price")) << message.data;
+		EXPECT_TRUE(std::isfinite(parsed["price"].GetDouble()));
+		if (message.topic == "TRD_TRADE")
+			EXPECT_DOUBLE_EQ(3500.25, parsed["price"].GetDouble());
+		else
+			EXPECT_DOUBLE_EQ(3510.75, parsed["price"].GetDouble());
+	}
+	EXPECT_EQ(1u, finiteTrade->retainCount());
+	EXPECT_EQ(1u, invalidTrade->retainCount());
+	EXPECT_EQ(1u, finiteOrder->retainCount());
+	EXPECT_EQ(1u, invalidOrder->retainCount());
+
+	finiteTrade->release();
+	invalidTrade->release();
+	finiteOrder->release();
+	invalidOrder->release();
+}
+
+TEST(R143UftNotifier, releasesRetainedOrderWhenPublisherThrows)
+{
+	const std::string bin = binDir();
+	if (bin.empty() || !std::filesystem::exists(bin + "libWtMsgQue.dylib"))
+		GTEST_SKIP() << "libWtMsgQue.dylib not found in this build";
+
+	WTSOrderInfo* ord = WTSOrderInfo::create();
+	ASSERT_NE(nullptr, ord);
+	ord->setCode("ag2406");
+	ord->setExchange("SHFE");
+	ASSERT_EQ(1u, ord->retainCount());
+
+	ThrowingPublishGate gate;
+	bool orderPublisherEntered = false;
+	bool barrierPassed = false;
+	{
+		InstDirGuard instdir(bin);
+		EventNotifier notifier;
+		WTSVariant* cfg = nullptr;
+		ASSERT_TRUE(makeNotifier(notifier, cfg));
+		cfg->release();
+		notifier._publisher = &throwOnOrderPublish;
+		g_throwingPublishGate.store(&gate, std::memory_order_release);
+
+		notifier.notify("uft1", 4007, "SHFE.ag2406", ord);
+		orderPublisherEntered = gate.waitForOrder(std::chrono::seconds(2));
+		// Queue a barrier behind the throwing order handler so the worker must
+		// recover from the exception and finish destroying the captured owner.
+		notifier.notify("uft1", "exception recovery barrier");
+		gate.releaseOrder();
+		barrierPassed = gate.waitForBarrier(std::chrono::seconds(2));
+		notifier.stopWorker();
+	}
+	g_throwingPublishGate.store(nullptr, std::memory_order_release);
+
+	EXPECT_TRUE(orderPublisherEntered);
+	EXPECT_TRUE(barrierPassed);
+	EXPECT_EQ(1u, ord->retainCount());
 	ord->release();
 }
 

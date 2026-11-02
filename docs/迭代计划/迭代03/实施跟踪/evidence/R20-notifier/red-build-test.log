@@ -1,0 +1,82 @@
++ set -o pipefail
++ repo=/Users/yunjinqi/Documents/new_projects/wondertrader
++ out=/tmp/wt-i03-event-notifier
++ fixture=/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture
++ /usr/bin/clang++ -std=c++17 -fprofile-instr-generate -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -include /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h -I/tmp/wt-i03-event-notifier/red/src -I/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore -I/Users/yunjinqi/Documents/new_projects/wondertrader/src -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include -I/opt/homebrew/Cellar/spdlog/1.15.3/include -I/usr/local/include /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/notifier_check.cpp /tmp/wt-i03-event-notifier/red/src/WtBtCore/EventNotifier.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/WtHelper.cpp /tmp/wt-i03-r58-build/build_x64/Debug/libs/libWTSTools.a /tmp/wt-i03-r58-build/build_x64/Debug/libs/libWTSUtils.a -L/opt/homebrew/Cellar/boost/1.88.0/lib -lboost_filesystem -lboost_thread -liconv -o /tmp/wt-i03-event-notifier/red/notifier_check
++ cd /tmp/wt-i03-event-notifier/empty-cwd
++ for variant in missing-create missing-destroy missing-register missing-publish zero full retry
++ :
++ mode=missing-create
++ moddir=missing-create
++ case $variant in
++ mode=missing
++ WT_R20_MQ_LOG=/tmp/wt-i03-event-notifier/red/missing-create.log
++ /tmp/wt-i03-event-notifier/red/notifier_check missing /tmp/wt-i03-event-notifier/missing-create /tmp/wt-i03-event-notifier/full
++ rc=0
++ echo 'missing-create exit=0'
+missing-create exit=0
++ for variant in missing-create missing-destroy missing-register missing-publish zero full retry
++ :
++ mode=missing-destroy
++ moddir=missing-destroy
++ case $variant in
++ mode=missing
++ WT_R20_MQ_LOG=/tmp/wt-i03-event-notifier/red/missing-destroy.log
++ /tmp/wt-i03-event-notifier/red/notifier_check missing /tmp/wt-i03-event-notifier/missing-destroy /tmp/wt-i03-event-notifier/full
++ rc=1
++ echo 'missing-destroy exit=1'
+missing-destroy exit=1
++ for variant in missing-create missing-destroy missing-register missing-publish zero full retry
++ :
++ mode=missing-register
++ moddir=missing-register
++ case $variant in
++ mode=missing
++ WT_R20_MQ_LOG=/tmp/wt-i03-event-notifier/red/missing-register.log
++ /tmp/wt-i03-event-notifier/red/notifier_check missing /tmp/wt-i03-event-notifier/missing-register /tmp/wt-i03-event-notifier/full
+/tmp/wt-i03-event-notifier/red-test.sh: line 8: 84772 Segmentation fault: 11  WT_R20_MQ_LOG="$out/red/$variant.log" "$out/red/notifier_check" "$mode" "$out/$moddir" "$out/full" > "$out/red/$variant.stdout" 2>&1
++ rc=139
++ echo 'missing-register exit=139'
+missing-register exit=139
++ for variant in missing-create missing-destroy missing-register missing-publish zero full retry
++ :
++ mode=missing-publish
++ moddir=missing-publish
++ case $variant in
++ mode=no-publish
++ WT_R20_MQ_LOG=/tmp/wt-i03-event-notifier/red/missing-publish.log
++ /tmp/wt-i03-event-notifier/red/notifier_check no-publish /tmp/wt-i03-event-notifier/missing-publish /tmp/wt-i03-event-notifier/full
++ rc=1
++ echo 'missing-publish exit=1'
+missing-publish exit=1
++ for variant in missing-create missing-destroy missing-register missing-publish zero full retry
++ :
++ mode=zero
++ moddir=zero
++ case $variant in
++ WT_R20_MQ_LOG=/tmp/wt-i03-event-notifier/red/zero.log
++ /tmp/wt-i03-event-notifier/red/notifier_check zero /tmp/wt-i03-event-notifier/zero /tmp/wt-i03-event-notifier/full
++ rc=1
++ echo 'zero exit=1'
+zero exit=1
++ for variant in missing-create missing-destroy missing-register missing-publish zero full retry
++ :
++ mode=full
++ moddir=full
++ case $variant in
++ WT_R20_MQ_LOG=/tmp/wt-i03-event-notifier/red/full.log
++ /tmp/wt-i03-event-notifier/red/notifier_check full /tmp/wt-i03-event-notifier/full /tmp/wt-i03-event-notifier/full
++ rc=1
++ echo 'full exit=1'
+full exit=1
++ for variant in missing-create missing-destroy missing-register missing-publish zero full retry
++ :
++ mode=retry
++ moddir=retry
++ case $variant in
++ moddir=missing-create
++ WT_R20_MQ_LOG=/tmp/wt-i03-event-notifier/red/retry.log
++ /tmp/wt-i03-event-notifier/red/notifier_check retry /tmp/wt-i03-event-notifier/missing-create /tmp/wt-i03-event-notifier/full
++ rc=0
++ echo 'retry exit=0'
+retry exit=0

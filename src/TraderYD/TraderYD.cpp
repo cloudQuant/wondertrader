@@ -24,6 +24,7 @@
 
 #include <filesystem>
 #include <limits>
+#include <memory>
 namespace fs = std::filesystem;
 
 const char* ENTRUST_SECTION = "entrusts";
@@ -227,7 +228,8 @@ extern "C"
 TraderYD::TraderYD()
 	: m_bCatchup(false)
 	, m_bApiInited(false)
-, m_uLastQryTime(0)
+	, m_sink(NULL)
+	, m_uLastQryTime(0)
 	, m_wrapperState(WS_NOTLOGIN)
 	, m_pUserAPI(NULL)
 	, m_iRequestID(0)
@@ -236,6 +238,8 @@ TraderYD::TraderYD()
 	, m_mapOrders(NULL)
 	, m_ayFunds(NULL)
 	, m_bStopped(false)
+	, m_hInstYD(NULL)
+	, m_funcCreator(NULL)
 	{
 }
 
@@ -652,10 +656,23 @@ bool TraderYD::init(WTSVariant* config)
 
 	m_strModule = getBinDir() + DLLHelper::wrap_module(module.c_str(), "");
 
-	m_hInstYD = DLLHelper::load_library(m_strModule.c_str());
-	m_funcCreator = (YDCreator)DLLHelper::get_symbol(m_hInstYD, "makeYDApi");
-
 	m_cacheLogger = std::bind(&TraderYD::on_kvcache_message, this, std::placeholders::_1);
+	m_hInstYD = DLLHelper::load_library(m_strModule.c_str());
+	if (m_hInstYD == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderYD] Failed to load YD API module: {}", m_strModule.c_str());
+		return false;
+	}
+
+	m_funcCreator = (YDCreator)DLLHelper::get_symbol(m_hInstYD, "makeYDApi");
+	if (m_funcCreator == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderYD] YD API module has no makeYDApi factory: {}", m_strModule.c_str());
+		DLLHelper::free_library(m_hInstYD);
+		m_hInstYD = NULL;
+		return false;
+	}
+
 	return true;
 }
 
@@ -681,12 +698,20 @@ void TraderYD::release()
 
 void TraderYD::connect()
 {
-	m_pUserAPI = m_funcCreator(m_strCfgFile.c_str());
-
-	if (m_pUserAPI)
+	if (m_funcCreator == NULL)
 	{
-		m_pUserAPI->start(this);
+		write_log(m_sink, LL_ERROR, "[TraderYD] Cannot connect: YD API factory is unavailable");
+		return;
 	}
+
+	m_pUserAPI = m_funcCreator(m_strCfgFile.c_str());
+	if (m_pUserAPI == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderYD] YD API factory returned no API instance");
+		return;
+	}
+
+	m_pUserAPI->start(this);
 
 	if (m_thrdWorker == NULL)
 	{
@@ -923,7 +948,8 @@ int TraderYD::queryOrders()
 	{
 		StdUniqueLock lock(m_mtxQuery);
 		m_queQuery.push([this]() {
-			WTSArray* ayOrders = WTSArray::create();
+			std::unique_ptr<WTSArray, void(*)(WTSArray*)> ayOrders(
+				WTSArray::create(), [](WTSArray* ay) { if (ay) ay->release(); });
 			if(m_mapOrders)
 			{
 				for(auto it = m_mapOrders->begin(); it != m_mapOrders->end(); it++)
@@ -931,7 +957,7 @@ int TraderYD::queryOrders()
 					ayOrders->append(it->second, true);
 				}
 			}
-			if (m_sink) m_sink->onRspOrders(ayOrders);
+			if (m_sink) m_sink->onRspOrders(ayOrders.get());
 		});
 	}
 
@@ -948,7 +974,8 @@ int TraderYD::queryTrades()
 	{
 		StdUniqueLock lock(m_mtxQuery);
 		m_queQuery.push([this]() {
-			WTSArray* ayTrades = WTSArray::create();
+			std::unique_ptr<WTSArray, void(*)(WTSArray*)> ayTrades(
+				WTSArray::create(), [](WTSArray* ay) { if (ay) ay->release(); });
 			if (m_mapTrades)
 			{
 				for (auto it = m_mapTrades->begin(); it != m_mapTrades->end(); it++)
@@ -956,7 +983,7 @@ int TraderYD::queryTrades()
 					ayTrades->append(it->second, true);
 				}
 			}
-			if (m_sink) m_sink->onRspTrades(ayTrades);
+			if (m_sink) m_sink->onRspTrades(ayTrades.get());
 		});
 	}
 

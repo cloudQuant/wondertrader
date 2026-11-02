@@ -267,6 +267,7 @@ extern "C"
 	 * @return 创建成功返回true，失败返回false
 	 * @details 创建外部数据解析器实例，用于接入自定义的数据源
 	 *          需要先调用register_parser_callbacks注册相关回调对外部解析器进行处理
+	 *          还需要先成功调用config_porter完成运行器配置；未配置成功时返回false
 	 */
 	EXPORT_FLAG	bool		create_ext_parser(const char* id);
 

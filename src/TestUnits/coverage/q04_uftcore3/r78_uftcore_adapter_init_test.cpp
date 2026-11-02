@@ -52,8 +52,8 @@ std::string binDir()
 	return ret;
 }
 
-// 在临时目录里搭 <tmp>/parsers/libParserUDP.dylib，返回是否可用
-bool linkUdpParser(q04::TempRoot& tmp, std::string& moduleRoot)
+// 将插件复制到临时目录中的 <tmp>/parsers/libParserUDP.dylib，返回是否可用
+bool stageUdpParser(q04::TempRoot& tmp, std::string& moduleRoot)
 {
 	const std::string bin = binDir();
 	if (bin.empty())
@@ -79,7 +79,8 @@ bool linkUdpParser(q04::TempRoot& tmp, std::string& moduleRoot)
 	if (ec)
 		return false;
 
-	std::filesystem::create_symlink(src, root + "/parsers/libParserUDP.dylib", ec);
+	std::filesystem::copy_file(src, root + "/parsers/libParserUDP.dylib",
+		std::filesystem::copy_options::overwrite_existing, ec);
 	if (ec)
 		return false;
 
@@ -224,8 +225,9 @@ TEST(R78TraderAdapterInit, module_without_create_symbol_is_rejected)
 	std::error_code ec;
 	std::filesystem::create_directories(tmp.file("traders"), ec);
 	ASSERT_FALSE(ec);
-	std::filesystem::create_symlink(dylib, tmp.file("traders/libfmt.dylib"), ec);
-	ASSERT_FALSE(ec);
+	std::filesystem::copy_file(dylib, tmp.file("traders/libfmt.dylib"),
+		std::filesystem::copy_options::overwrite_existing, ec);
+	ASSERT_FALSE(ec) << ec.message();
 
 	WtHelper::setInstDir((tmp.dir().string() + "/").c_str());
 
@@ -256,7 +258,7 @@ TEST(R78UftParserAdapterInit, loads_udp_plugin_with_filter)
 {
 	q04::TempRoot tmp("r78parserflt");
 	std::string moduleRoot;
-	if (!linkUdpParser(tmp, moduleRoot))
+	if (!stageUdpParser(tmp, moduleRoot))
 		GTEST_SKIP() << "libParserUDP.dylib not found in this build";
 	WtHelper::setInstDir(moduleRoot.c_str());
 
@@ -286,7 +288,7 @@ TEST(R78UftParserAdapterInit, loads_udp_plugin_without_filter)
 {
 	q04::TempRoot tmp("r78parsernoflt");
 	std::string moduleRoot;
-	if (!linkUdpParser(tmp, moduleRoot))
+	if (!stageUdpParser(tmp, moduleRoot))
 		GTEST_SKIP() << "libParserUDP.dylib not found in this build";
 	WtHelper::setInstDir(moduleRoot.c_str());
 
@@ -318,7 +320,7 @@ TEST(R78UftParserAdapterInit, precreate_failures_retry_and_quiescent_init_failur
 {
 	q04::TempRoot tmp("r78parserretry");
 	std::string moduleRoot;
-	if (!linkUdpParser(tmp, moduleRoot))
+	if (!stageUdpParser(tmp, moduleRoot))
 		GTEST_SKIP() << "libParserUDP.dylib not found in this build";
 	WtHelper::setInstDir(moduleRoot.c_str());
 
@@ -335,7 +337,9 @@ TEST(R78UftParserAdapterInit, precreate_failures_retry_and_quiescent_init_failur
 	if (!noParserDylib.empty())
 	{
 		std::error_code ec;
-		std::filesystem::create_symlink(noParserDylib, moduleRoot + "parsers/libNoParser.dylib", ec);
+		std::filesystem::copy_file(noParserDylib,
+			moduleRoot + "parsers/libNoParser.dylib",
+			std::filesystem::copy_options::overwrite_existing, ec);
 		ASSERT_FALSE(ec);
 		WTSVariant* missingEntryCfg = WTSVariant::createObject();
 		missingEntryCfg->append("module", "NoParser");
@@ -415,7 +419,8 @@ TEST(R78UftStraMgr, load_factories_skips_unusable_entries)
 	const std::string dylib = systemDylibWithoutTraderEntry();
 	if (!dylib.empty())
 	{
-		std::filesystem::create_symlink(dylib, mixed + "/libNoEntry.dylib", ec);
+		std::filesystem::copy_file(dylib, mixed + "/libNoEntry.dylib",
+			std::filesystem::copy_options::overwrite_existing, ec);
 		ASSERT_FALSE(ec);
 	}
 

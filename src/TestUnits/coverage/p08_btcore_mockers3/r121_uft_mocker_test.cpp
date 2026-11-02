@@ -40,6 +40,7 @@ namespace
 	const char* const kRb = "SHFE.rb.2405";
 	const char* const kCu = "SHFE.cu.2406";
 	const char* const kStk = "SSE.STK.000001";
+	constexpr uint32_t kR121ReplayTickTime = 93200000u;
 
 	WTSVariant* make_uft_stra_cfg(const std::string& module, const char* code)
 	{
@@ -73,7 +74,7 @@ protected:
 	}
 };
 
-// 无 strategy 配置：插件工厂装载成功即可，后续回调全部走空守卫
+// 无 strategy 配置必须在公开工厂入口拒绝；后续会话/交易簿记仍可安全运行。
 TEST_F(R121UftMocker, FactoryWithoutStrategy)
 {
 	ASSERT_TRUE(std::filesystem::exists(module())) << module();
@@ -82,7 +83,7 @@ TEST_F(R121UftMocker, FactoryWithoutStrategy)
 	UftMocker m(&_rp, "r121_uft_factory");
 	WTSVariant* cfg = r121::make_module_cfg(module());
 	fprintf(stderr, "U2 init\n");
-	ASSERT_TRUE(m.init_uft_factory(cfg));
+	EXPECT_FALSE(m.init_uft_factory(cfg));
 	cfg->release();
 	fprintf(stderr, "U3 handle_init\n");
 
@@ -183,13 +184,19 @@ protected:
 		_out = r62::make_temp_dir("r121_uft_out");
 		WtHelper::setOutputDir(_out.string().c_str());
 
-		_loader.add(kRb, 20200102u, 93100000u, 3800.0, 3799.0, 3801.0, 100, 100);
+		// The replay cursor starts at 09:32; keep the sole loader tick at that instant.
+		_loader.add(kRb, 20200102u, kR121ReplayTickTime, 3800.0, 3799.0, 3801.0, 100, 100);
 		WTSVariant* cfg = r111::make_tick_cfg(_root, _base,
 			202001020932ull, 202001021500ull);
 		ASSERT_TRUE(_rp.init(cfg, nullptr, &_loader));
 		cfg->release();
 		_rp.register_sink(&_sink, "r121_uft");
 		ASSERT_TRUE(_rp.prepare());
+		WTSTickData* visibleTick = _rp.get_last_tick(kRb);
+		ASSERT_NE(nullptr, visibleTick);
+		EXPECT_EQ(20200102u, visibleTick->actiondate());
+		EXPECT_EQ(kR121ReplayTickTime, visibleTick->actiontime());
+		visibleTick->release();
 	}
 
 	void TearDown() override
@@ -203,7 +210,7 @@ protected:
 	void feed(UftMocker& m, const char* code, double last, double bid, double ask,
 		uint32_t bidQty = 100, uint32_t askQty = 100)
 	{
-		WTSTickData* t = r62::make_tick(code, 20200102u, 93100000u, last, bid, ask, bidQty, askQty);
+		WTSTickData* t = r62::make_tick(code, 20200102u, kR121ReplayTickTime, last, bid, ask, bidQty, askQty);
 		m.handle_tick(code, t, 0);
 		t->release();
 	}
@@ -253,7 +260,9 @@ TEST_F(R121UftMocker, R135ProbeMinimalDtor)
 {
 	{
 		UftMocker m(&_rp, "r135_probe1");
-		WTSVariant* cfg = r121::make_module_cfg(module());
+		// init_uft_factory requires a strategy name. Keep this as the smallest
+		// valid strategy config so the scope-exit path actually exercises cleanup.
+		WTSVariant* cfg = make_uft_stra_cfg(module(), kRb);
 		ASSERT_TRUE(m.init_uft_factory(cfg));
 		cfg->release();
 		fprintf(stderr, "PROBE1 factory only, leaving scope\n");

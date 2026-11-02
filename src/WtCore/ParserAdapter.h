@@ -52,6 +52,9 @@ public:
 	// its borrowed dependency graph quarantined; do not infer safety from release().
 	// If API release or its remover throws, hasApi() remains true and subsequent
 	// release() calls are no-ops because teardown may have partially completed.
+	// Both initialization paths require a non-null base-data manager. A non-null
+	// initExt API is still retained when that precondition fails, without calling
+	// into the provider.
 	bool	init(const char* id, WTSVariant* cfg, IParserStub* stub, IBaseDataMgr* bgMgr, IHotMgr* hotMgr = NULL);
 
 	bool	initExt(const char* id, IParserApi* api, IParserStub* stub, IBaseDataMgr* bgMgr, IHotMgr* hotMgr = NULL);

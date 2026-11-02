@@ -1,0 +1,47 @@
+[
+  {
+    "target": "wtcore",
+    "case": "N01ParserAdapter.init_ext_defaults_time_check_off_and_delivers_quote",
+    "cwd": "/tmp/wt-i03-parser-run/green/wtcore-control",
+    "argv": [
+      "perl",
+      "-e",
+      "alarm 30; exec @ARGV",
+      "--",
+      "/tmp/wt-i03-parser-run/green/wtcore-tests",
+      "--gtest_filter=N01ParserAdapter.init_ext_defaults_time_check_off_and_delivers_quote",
+      "--gtest_output=xml:/tmp/wt-i03-parser-run/green/wtcore-control/result.xml"
+    ],
+    "exit": 0
+  },
+  {
+    "target": "dtcore",
+    "case": "R18ParserAdapterTest.InitExtSubscribesEveryContractFullCode",
+    "cwd": "/tmp/wt-i03-parser-run/green/dtcore-control",
+    "argv": [
+      "perl",
+      "-e",
+      "alarm 30; exec @ARGV",
+      "--",
+      "/tmp/wt-i03-parser-run/green/dtcore-tests",
+      "--gtest_filter=R18ParserAdapterTest.InitExtSubscribesEveryContractFullCode",
+      "--gtest_output=xml:/tmp/wt-i03-parser-run/green/dtcore-control/result.xml"
+    ],
+    "exit": 0
+  },
+  {
+    "target": "dtservo",
+    "case": "R45ParserAdapterFakeTest.InitExtRegistersSpiAndSubscribesAllContracts",
+    "cwd": "/tmp/wt-i03-parser-run/green/dtservo-control",
+    "argv": [
+      "perl",
+      "-e",
+      "alarm 30; exec @ARGV",
+      "--",
+      "/tmp/wt-i03-parser-run/green/dtservo-tests",
+      "--gtest_filter=R45ParserAdapterFakeTest.InitExtRegistersSpiAndSubscribesAllContracts",
+      "--gtest_output=xml:/tmp/wt-i03-parser-run/green/dtservo-control/result.xml"
+    ],
+    "exit": 0
+  }
+]

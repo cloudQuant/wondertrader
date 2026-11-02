@@ -1,12 +1,12 @@
 // r112 / WtDataWriter：RT tick 块扩容失败的可恢复路径
 //
 // 覆盖（src/WtDataStorage/WtDataWriter.cpp）：
-//  - resizeRTBlock 的 BoostFile 写失败 catch/错误日志/返回 NULL  :329-340
-//  - pipeToTicks  扩容返回 NULL 后的 blk==NULL 守卫与 DEBUG 日志 :632-646
+//  - resizeRTBlock 检测文件无法打开、记录错误并返回 NULL
+//  - pipeToTicks 扩容失败后安全返回，不向旧容量外写入
 //
 // 手法：先把 rt/ticks/SHFE/rb2210.dmb 写成满容量（2500 条，初始 HFT_SIZE_STEP），
-// 再把该路径替换成同名目录 —— 已有 mmap 仍然有效，但 resizeRTBlock 里的
-// BoostFile::open_existing_file 会拿到 EISDIR 并抛异常，从而稳定命中 catch。
+// 再把该路径替换成同名目录 —— 已有 mmap 仍然有效，但 BoostFile 在本平台
+// 返回无效文件句柄而不抛异常；扩容必须记录打开失败并保留容量。
 // 写入器沿用 r23 纪律：init 后只 release 不 delete（check_loop 不可 join）。
 #include "r23_writer_fixture.h"
 
@@ -19,7 +19,7 @@ class R112WriterResizeFailureTest : public R23WriterTest
 {
 };
 
-// WtDataWriter.cpp: resizeRTBlock :329-340 / pipeToTicks :632-646
+// WtDataWriter.cpp: resizeRTBlock / pipeToTicks
 TEST_F(R112WriterResizeFailureTest, R112WriterTickBlockExpansionFailureIsLogged)
 {
 	R23Writer* w = make_writer("\"groupsize\":100000");
@@ -60,7 +60,7 @@ TEST_F(R112WriterResizeFailureTest, R112WriterTickBlockExpansionFailureIsLogged)
 	spec.total_volume = 1000.0 + 2500u;
 	write_tick(w, spec, 0);
 
-	EXPECT_TRUE(_sink->has_log("Exception occured while expanding RT cache file", LL_ERROR));
+	EXPECT_TRUE(_sink->has_log("Cannot open RT cache file", LL_ERROR));
 	EXPECT_GE(_sink->count_of(LL_ERROR), 1u);
 	EXPECT_GE(_sink->ticks(), 2501u);
 }

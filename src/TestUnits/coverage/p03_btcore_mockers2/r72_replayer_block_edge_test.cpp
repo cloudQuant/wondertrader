@@ -27,6 +27,29 @@ namespace
 		return bars;
 	}
 
+	std::vector<WTSBarStruct> daily_bars_with_warmup(double base)
+	{
+		std::vector<WTSBarStruct> bars;
+		bars.emplace_back(r72::make_bar(20191231u, 1500u, base - 1.0));
+		std::vector<WTSBarStruct> target = daily_bars(base);
+		bars.insert(bars.end(), target.begin(), target.end());
+		return bars;
+	}
+
+	class DateCapturingSink : public r72::Sink
+	{
+	public:
+		std::vector<uint32_t> barDates;
+
+		void handle_bar_close(const char* stdCode, const char* period,
+			uint32_t times, WTSBarStruct* newBar) override
+		{
+			r72::Sink::handle_bar_close(stdCode, period, times, newBar);
+			if (newBar != nullptr)
+				barDates.emplace_back(newBar->date);
+		}
+	};
+
 	WTSBarStructOld old_bar(uint32_t date, double close)
 	{
 		WTSBarStructOld bar;
@@ -83,7 +106,8 @@ TEST_F(R72ReplayerBlockEdge, OldRawBarBlockIsConverted)
 	ASSERT_TRUE(r72::write_old_bar_block(_base / "his/day/SSE/000001.dsb", bars));
 
 	HisDataReplayer rp;
-	WTSVariant* cfg = r72::make_cfg(_root, _base, 202001020930ull, 202001081500ull, false);
+	// 起点在 01-03；01-02 的旧结构 bar 已完成，且仍是断言目标。
+	WTSVariant* cfg = r72::make_cfg(_root, _base, 202001030930ull, 202001081500ull, false);
 	ASSERT_TRUE(rp.init(cfg, nullptr, nullptr));
 	cfg->release();
 	r72::Sink sink;
@@ -168,13 +192,14 @@ TEST_F(R72ReplayerBlockEdge, DailyBarsAtCloseUseClosedCursor)
 TEST_F(R72ReplayerBlockEdge, UpperBoundLocateStopsBeforeNextBar)
 {
 	r72::Loader loader;
-	loader.finalBars[kCode] = daily_bars(10.5);
+	// 提供查询起点前已完成的历史 bar，避免首根与当前交易日相同而使 main key 未登记。
+	loader.finalBars[kCode] = daily_bars_with_warmup(10.5);
 
 	HisDataReplayer rp;
 	WTSVariant* cfg = r72::make_cfg(_root, _base, 202001020930ull, 202001041500ull, false);
 	ASSERT_TRUE(rp.init(cfg, nullptr, &loader));
 	cfg->release();
-	r72::Sink sink;
+	DateCapturingSink sink;
 	rp.register_sink(&sink, "r72_upper");
 	ASSERT_TRUE(rp.prepare());
 
@@ -184,7 +209,7 @@ TEST_F(R72ReplayerBlockEdge, UpperBoundLocateStopsBeforeNextBar)
 
 	rp.run(false);
 	EXPECT_EQ(1u, sink.doneCalls);
-	EXPECT_EQ(1u, sink.barCalls);
+	ASSERT_EQ((std::vector<uint32_t>{ 20200102u, 20200103u }), sink.barDates);
 	EXPECT_EQ(20200103u, rp.get_date());
 }
 

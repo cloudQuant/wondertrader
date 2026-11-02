@@ -27,6 +27,8 @@
 
 #include "Includes/WTSVariant.hpp"
 
+#include "q04_trader_fixture.h"
+
 using namespace wtp;
 
 /*
@@ -51,15 +53,21 @@ TEST(R204UftContext, SliceStubsReturnNullThroughContext)
 
 /*
  * 生产: WtUftCore/ParserAdapter.cpp:57-100
- * module 缺失/装载失败在 registerSpi/init 之前早退；stub 与 bdMgr 可传空。
+ * module 缺失/装载失败在 registerSpi/init 之前早退；IBaseDataMgr 仍须有效。
  */
 TEST(R204UftParserAdapter, MissingModuleIsRejected)
 {
 	WTSVariant* cfg = WTSVariant::createObject();
 	cfg->append("module", "r204_missing_parser_module");
 
+	q04::FakeBaseDataMgr bdMgr;
+	ParserAdapter nullMgr;
+	EXPECT_FALSE(nullMgr.init("r204_null_mgr", cfg, nullptr, nullptr));
+	EXPECT_STREQ("", nullMgr.id());
+	EXPECT_EQ(1u, cfg->retainCount());
+
 	ParserAdapter pa;
-	EXPECT_FALSE(pa.init("r204_missing", cfg, nullptr, nullptr));
+	EXPECT_FALSE(pa.init("r204_missing", cfg, nullptr, &bdMgr));
 	EXPECT_STREQ("r204_missing", pa.id());
 
 	cfg->release();

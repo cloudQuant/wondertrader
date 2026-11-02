@@ -51,7 +51,7 @@ TEST_F(P11CrashClass, error_and_log_paths_are_safe)
     EXPECT_EQ(1u, api_.n_register_);
     trader.release();
     EXPECT_EQ(1u, api_.n_release_);
-    EXPECT_EQ(TraderAdapter::AS_LOGINED, trader.state());
+    EXPECT_EQ(TraderAdapter::AS_NOTLOGIN, trader.state());
 }
 
 TEST_F(P11CrashClass, mgr_holds_two_channels_with_own_apis)

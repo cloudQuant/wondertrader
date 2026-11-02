@@ -145,6 +145,7 @@ public:
     std::vector<PosSnap> pos_;
 
     uint32_t    n_rsp_orders_ = 0, orders_size_ = 0;
+    std::vector<int> rsp_order_flags_;
     uint32_t    n_rsp_trades_ = 0, trades_size_ = 0;
 
     uint32_t    n_settlement_ = 0, settle_date_ = 0;
@@ -267,7 +268,21 @@ public:
         }
     }
     virtual void onRspOrders(const WTSArray* ayOrders) override
-    { ++n_rsp_orders_; orders_size_ = ayOrders == NULL ? 0 : ayOrders->size(); }
+    {
+        ++n_rsp_orders_;
+        orders_size_ = ayOrders == NULL ? 0 : ayOrders->size();
+        rsp_order_flags_.clear();
+        if (ayOrders != NULL)
+        {
+            WTSArray* orders = const_cast<WTSArray*>(ayOrders);
+            for (uint32_t i = 0; i < orders->size(); ++i)
+            {
+                WTSOrderInfo* order = orders->at<WTSOrderInfo>(i);
+                if (order != NULL)
+                    rsp_order_flags_.push_back((int)order->getOrderFlag());
+            }
+        }
+    }
     virtual void onRspTrades(const WTSArray* ayTrades) override
     { ++n_rsp_trades_; trades_size_ = ayTrades == NULL ? 0 : ayTrades->size(); }
     virtual void onRspSettlementInfo(uint32_t uDate, const char* content) override
@@ -1146,20 +1161,23 @@ TEST_F(T25TraderCTPTest, settlement_confirm_rsp_only_acts_in_confirm_qryed_state
     EXPECT_EQ(1u, sink_.n_login_result_);
 }
 
-// ITraderSpi exposes a login-result callback but does not define how a
-// synchronous settlement-confirm send failure completes login. T25-009 lists
-// rollback, retry, or explicit login failure as alternatives; keep this local
-// stub scenario disabled until that policy is specified. In particular, do not
-// assert the current stuck state or fabricate a later successful CTP callback.
-TEST_F(T25TraderCTPTest, DISABLED_confirm_send_failure_outcome_pending_contract)
+TEST_F(T25TraderCTPTest, confirm_send_failure_fails_login_without_waiting_for_callback)
 {
     bringToLogin();
+    EXPECT_EQ(1u, trader_.drainQueries());
     api_.ret_ = 8;
 
     CThostFtdcSettlementInfoConfirmField conf;
     memset(&conf, 0, sizeof(conf));
     strcpy(conf.ConfirmDate, "20240101");         // 早于交易日 ⇒ 触发 confirm()
     trader_.OnRspQrySettlementInfoConfirm(&conf, &ok_, 3, true);
+
+    EXPECT_EQ(TraderCTP::WS_LOGINFAILED, trader_.state());
+    EXPECT_FALSE(trader_.isConnected());
+    EXPECT_EQ(1, api_.n_confirm_.load());
+    EXPECT_EQ(1u, sink_.n_login_result_);
+    EXPECT_FALSE(sink_.last_succ_);
+    EXPECT_TRUE(sink_.last_msg_.find("failed: 8") != std::string::npos);
 }
 
 TEST_F(T25TraderCTPTest, query_confirm_send_failure_is_logged_inside_worker_item)
@@ -1170,6 +1188,40 @@ TEST_F(T25TraderCTPTest, query_confirm_send_failure_is_logged_inside_worker_item
     EXPECT_EQ(1, api_.n_qry_confirm_.load());
     EXPECT_TRUE(sink_.hasLog("Sending query of settlement data confirming state failed: 7"));
     EXPECT_EQ(0, api_.n_confirm_.load());          // 只有查询失败，不该发确认
+}
+
+TEST_F(T25TraderCTPTest, query_confirm_sync_failure_clears_gate_and_worker_releases)
+{
+    bringToLogin();                                 // 先排入首次确认状态查询
+    trader_.setState(TraderCTP::WS_ALLREADY);
+    ASSERT_EQ(0, trader_.queryAccount());            // 再排普通查询，验证 worker 能继续消费
+    api_.ret_ = 7;
+    g_api_for_creator = &api_;
+    trader_.setCreator(&fakeCreator);
+
+    trader_.connect();
+    ASSERT_TRUE(trader_.hasWorker());
+    ASSERT_TRUE(waitUntil([this]() {
+        return api_.n_qry_confirm_.load() == 1 && !trader_.inQuery();
+    })) << "同步拒绝后查询 gate 未释放，后续队列项没有执行";
+
+    EXPECT_TRUE(sink_.hasLog("Sending query of settlement data confirming state failed: 7"));
+
+    api_.ret_ = 0;                                  // 下一项正常受理，等待其末帧再停机
+    ASSERT_TRUE(waitUntil([this]() {
+        return api_.n_qry_acct_.load() == 1 && trader_.inQuery();
+    })) << "同步失败后 worker 没有执行后续账户查询";
+    CThostFtdcTradingAccountField acct;
+    memset(&acct, 0, sizeof(acct));
+    trader_.OnRspQryTradingAccount(&acct, &ok_, 5, true);
+
+    const auto start = std::chrono::steady_clock::now();
+    trader_.disconnect();
+    const auto elapsed = std::chrono::steady_clock::now() - start;
+    EXPECT_LT(std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count(), 2000);
+    EXPECT_TRUE(trader_.stopped());
+    EXPECT_FALSE(trader_.hasWorker());
+    EXPECT_EQ(1, api_.n_release_.load());
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1691,6 +1743,9 @@ TEST_F(T25TraderCTPTest, qry_order_and_trade_rows_accumulate_and_clear_after_las
     trader_.OnRspQryOrder(NULL, &err, 1, true);
     EXPECT_EQ(1u, sink_.n_rsp_orders_);
     EXPECT_EQ(2u, sink_.orders_size_);
+    ASSERT_EQ(2u, sink_.rsp_order_flags_.size());
+    EXPECT_EQ((int)WOF_NOR, sink_.rsp_order_flags_[0]);   // GFD 查询映射保持普通订单
+    EXPECT_EQ((int)WOF_NOR, sink_.rsp_order_flags_[1]);
     EXPECT_EQ(0u, trader_.ordersSize());                // 数组没销毁，只是清空
     EXPECT_FALSE(trader_.inQuery());
 
@@ -1746,11 +1801,7 @@ TEST_F(T25TraderCTPTest, unsupported_time_condition_keeps_other_order_mappings)
 {
     bringToReady();
 
-    // WTSOrderInfo's default constructor does not initialize m_orderFlag, and
-    // makeOrderInfo leaves it untouched for GTD. Do not read that indeterminate
-    // value through the recording sink; keep checking the fields this callback
-    // explicitly maps.
-    sink_.capture_ord_flag_ = false;
+    // CTP GTD is valid, but WTSOrderFlag carries no expiry date; normalize it to NOR.
     CThostFtdcOrderField o;
     memset(&o, 0, sizeof(o));
     strcpy(o.InstrumentID, kCodeAg);
@@ -1770,12 +1821,18 @@ TEST_F(T25TraderCTPTest, unsupported_time_condition_keeps_other_order_mappings)
     trader_.OnRtnOrder(&o);
 
     ASSERT_EQ(1u, sink_.n_push_order_);
+    EXPECT_EQ((int)WOF_NOR, sink_.ord_flag_);
     EXPECT_EQ((int)WPT_LIMITPRICE, sink_.ord_pxtype_);
     EXPECT_EQ((int)WOT_OPEN, sink_.ord_offset_);
     EXPECT_EQ((int)WDT_LONG, sink_.ord_dir_);
 
-    // makeEntrust's non-GFD/IOC default is initialized, but this case asserts
-    // only the direction/offset/price mappings shared with the order callback.
+    trader_.OnRspQryOrder(&o, &ok_, 1, true);
+    ASSERT_EQ(1u, sink_.n_rsp_orders_);
+    ASSERT_EQ(1u, sink_.orders_size_);
+    ASSERT_EQ(1u, sink_.rsp_order_flags_.size());
+    EXPECT_EQ((int)WOF_NOR, sink_.rsp_order_flags_[0]);
+
+    // The insert error path uses makeEntrust; keep its GTD fallback explicit too.
     CThostFtdcInputOrderField io;
     memset(&io, 0, sizeof(io));
     strcpy(io.InstrumentID, kCodeAg);
@@ -1790,6 +1847,7 @@ TEST_F(T25TraderCTPTest, unsupported_time_condition_keeps_other_order_mappings)
     io.OrderPriceType = THOST_FTDC_OPT_LimitPrice;
     trader_.OnErrRtnOrderInsert(&io, &ok_);
     ASSERT_EQ(1u, sink_.n_rsp_entrust_);
+    EXPECT_EQ((int)WOF_NOR, sink_.ent_flag_);
     EXPECT_EQ((int)WPT_LIMITPRICE, sink_.ent_pxtype_);
     EXPECT_EQ((int)WOT_OPEN, sink_.ent_offset_);
     EXPECT_EQ((int)WDT_LONG, sink_.ent_dir_);
@@ -1951,11 +2009,51 @@ TEST_F(T25TraderCTPTest, login_warns_and_continues_when_cache_dir_is_not_writabl
     // L766-768 / L779-781：两个缓存各自的告警回调都被打了一次
     EXPECT_EQ(TraderCTP::WS_LOGINED, trader_.state());
     EXPECT_EQ(20240115u, trader_.tradingDate());
-    EXPECT_LE(2u, std::count(sink_.logs_.begin(), sink_.logs_.end(), std::string("Mapping cache file failed")));
+    const auto failed_mapping_logs = std::count_if(
+        sink_.logs_.begin(), sink_.logs_.end(), [](const std::string& message) {
+            return message.find("Mapping cache file failed") != std::string::npos;
+        });
+    EXPECT_LE(2, failed_mapping_logs);
     EXPECT_EQ(1u, trader_.queryDepth());                // 失败被吞掉，登录链照旧往下走
     EXPECT_EQ(0u, trader_.eidSize());                   // 缓存没建起来 ⇒ 容量 0
     EXPECT_EQ(0u, trader_.oidSize());
     EXPECT_EQ("", trader_.eidValue("012345#0000000067#001001"));   // get() 只查索引 ⇒ 安全回落空串
+}
+
+TEST_F(T25TraderCTPTest, order_insert_rejects_when_user_tag_cache_init_failed)
+{
+    namespace fs = std::filesystem;
+    fs::path dir = tmp_ / "local" / "9999";
+    std::error_code ec;
+    fs::create_directories(dir, ec);
+    ASSERT_FALSE(ec);
+    fs::permissions(dir, fs::perms::owner_read | fs::perms::owner_exec, fs::perm_options::replace);
+
+    bringToLogin();
+    fs::permissions(dir, fs::perms::all, fs::perm_options::replace);
+
+    // Finish the real settlement-confirm path instead of forcing WS_ALLREADY.
+    ASSERT_EQ(1u, trader_.queryDepth());
+    EXPECT_EQ(1u, trader_.drainQueries());
+    CThostFtdcSettlementInfoConfirmField conf;
+    memset(&conf, 0, sizeof(conf));
+    strcpy(conf.ConfirmDate, "20240115");
+    trader_.OnRspQrySettlementInfoConfirm(&conf, &ok_, 3, true);
+    ASSERT_EQ(TraderCTP::WS_ALLREADY, trader_.state());
+    ASSERT_TRUE(trader_.isConnected());
+
+    char eid[64] = { 0 };
+    ASSERT_TRUE(trader_.makeEntrustID(eid, sizeof(eid)));
+    WTSEntrust* e = WTSEntrust::create(kCodeAg, 1, 7000.0, kExchgAg);
+    e->setEntrustID(eid);
+    e->setUserTag("TAG-CACHE-FAIL");
+
+    EXPECT_LT(trader_.orderInsert(e), 0);
+    EXPECT_EQ(0, api_.n_insert_.load());
+    EXPECT_EQ(0u, trader_.eidSize());
+    EXPECT_TRUE(sink_.hasLog("Cache insertion rejected because cache is not initialized"));
+    EXPECT_TRUE(sink_.hasLog("Order insert rejected because user tag could not be persisted"));
+    e->release();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1993,34 +2091,6 @@ TEST_F(T25TraderCTPTest, DISABLED_rsp_error_with_null_sink_crashes)
     fillErr(err, 1, "boom");
     trader_.OnRspError(&err, 42, true);         // L1161 ⇒ 解引用 NULL
     ADD_FAILURE() << "走到这里说明没有崩，本条 DISABLED 的理由就不成立了";
-}
-
-/*
- * 承接上一条：缓存 init 失败只是「记一条日志 + 返回 false」，产品不接这个返回值
- * （TraderCTP.cpp:766、779）。init 失败时 _cache._block 仍是 NULL，而 WtKVCache::put
- * （WtKVCache.hpp:211-232）在索引未命中时直接读 `_cache._block->_size` ⇒ 空指针解引用。
- * 也就是说：只要 flowdir 不可写，第一笔带 usertag 的委托就会把进程打死。
- * 实测 SIGSEGV（rc=139），所以留 DISABLED_（见 BUG-T25-007）。
- */
-TEST_F(T25TraderCTPTest, DISABLED_order_insert_after_failed_cache_init_crashes)
-{
-    namespace fs = std::filesystem;
-    fs::path dir = tmp_ / "local" / "9999";
-    std::error_code ec;
-    fs::create_directories(dir, ec);
-    fs::permissions(dir, fs::perms::owner_read | fs::perms::owner_exec, fs::perm_options::replace);
-
-    bringToLogin();                         // 内部不断言缓存告警，只把状态推到 LOGINED
-    fs::permissions(dir, fs::perms::all, fs::perm_options::replace);
-    trader_.setState(TraderCTP::WS_ALLREADY);
-
-    char eid[64];
-    ASSERT_TRUE(trader_.makeEntrustID(eid, sizeof(eid)));
-    WTSEntrust* e = WTSEntrust::create(kCodeAg, 1, 7000.0, kExchgAg);
-    e->setEntrustID(eid);
-    e->setUserTag("TAG-DEAD");
-    EXPECT_EQ(0, trader_.orderInsert(e));   // L500 m_eidCache.put ⇒ 解引用 NULL block
-    e->release();
 }
 
 /*

@@ -13,6 +13,9 @@
 #include <cstdint>
 #include <filesystem>
 #include <limits>
+#if !defined(_WIN32)
+#include <sys/stat.h>
+#endif
 #include "Share/IniHelper.hpp"
 #include "Share/BoostFile.hpp"
 #include "r16_tmp.h"
@@ -444,6 +447,85 @@ TEST(r16_boostfile, read_exact_chunking_preserves_lengths_above_4gib)
 	EXPECT_EQ(total, observed_offset);
 	EXPECT_EQ(5u, calls);
 	EXPECT_EQ(18u, total - 4 * max_chunk);
+}
+
+TEST(r16_boostfile, sparse_file_offsets_above_4gib_preserve_size_seek_and_sentinels)
+{
+#if defined(_WIN32)
+	GTEST_SKIP() << "Windows sparse-file allocation is not verified in this suite";
+#else
+	constexpr unsigned long long kFourGiB = 1ULL << 32;
+	constexpr unsigned long long kSparseSize = kFourGiB + 8192;
+	constexpr unsigned long long kCrossingOffset = kFourGiB - 3;
+	constexpr unsigned long long kHighOffset = kFourGiB + 123;
+	if (std::numeric_limits<std::size_t>::max() < kSparseSize ||
+		static_cast<unsigned long long>((std::numeric_limits<bip::offset_t>::max)()) < kSparseSize)
+	{
+		GTEST_SKIP() << "native file size/offset types cannot represent a file larger than 4 GiB";
+	}
+
+	const char* tmpTag = "bf_sparse_4gib";
+	r16tmp::clean(tmpTag);
+	struct TempDirCleanup
+	{
+		const char* tag;
+		~TempDirCleanup() { r16tmp::clean(tag); }
+	} cleanup{ tmpTag };
+	const std::string path = r16tmp::file(tmpTag, "sparse.bin");
+
+	{
+		BoostFile create;
+		ASSERT_TRUE(create.create_new_file(path.c_str()));
+	}
+	std::error_code resizeError;
+	std::filesystem::resize_file(path, static_cast<std::uintmax_t>(kSparseSize), resizeError);
+	if (resizeError)
+		GTEST_SKIP() << "temporary filesystem cannot extend sparse files beyond 4 GiB: " << resizeError.message();
+
+	struct stat fileInfo = {};
+	if (::stat(path.c_str(), &fileInfo) != 0)
+		GTEST_SKIP() << "cannot inspect sparse-file allocation on this filesystem";
+	const unsigned long long allocatedBytes = static_cast<unsigned long long>(fileInfo.st_blocks) * 512ULL;
+	if (allocatedBytes >= kSparseSize / 2)
+		GTEST_SKIP() << "filesystem materialized the large file instead of retaining a sparse extent";
+	RecordProperty("sparse_logical_size_bytes", std::to_string(kSparseSize));
+	RecordProperty("sparse_allocated_before_sentinels_bytes", std::to_string(allocatedBytes));
+
+	BoostFile file;
+	ASSERT_TRUE(file.open_existing_file(path.c_str()));
+	bip::offset_t wideSize = 0;
+	ASSERT_TRUE(file.get_file_size(wideSize));
+	EXPECT_EQ(static_cast<bip::offset_t>(kSparseSize), wideSize);
+	EXPECT_EQ(kSparseSize, file.get_file_size());
+	EXPECT_EQ(kSparseSize, BoostFile::get_file_size(path.c_str()));
+	ASSERT_TRUE(file.seek_to_end());
+	EXPECT_EQ(kSparseSize, file.get_file_pointer());
+
+	const char crossingPayload[] = { 'L', 'E', 'F', 'T', '\0', 'R', 'I', 'G', 'H', 'T' };
+	ASSERT_TRUE(file.set_file_pointer(static_cast<bip::offset_t>(kCrossingOffset), bip::file_begin));
+	EXPECT_EQ(kCrossingOffset, file.get_file_pointer());
+	ASSERT_TRUE(file.write_file(crossingPayload, sizeof(crossingPayload)));
+	EXPECT_EQ(kCrossingOffset + sizeof(crossingPayload), file.get_file_pointer());
+	char crossingRead[sizeof(crossingPayload)] = {};
+	ASSERT_TRUE(file.set_file_pointer(static_cast<bip::offset_t>(kCrossingOffset), bip::file_begin));
+	ASSERT_TRUE(file.read_file(crossingRead, sizeof(crossingRead)));
+	EXPECT_EQ(0, std::memcmp(crossingPayload, crossingRead, sizeof(crossingPayload)));
+
+	const char highPayload[] = { '\0', static_cast<char>(0x80), '4', 'G', 'i', 'B' };
+	ASSERT_TRUE(file.set_file_pointer(static_cast<bip::offset_t>(kHighOffset), bip::file_begin));
+	EXPECT_EQ(kHighOffset, file.get_file_pointer());
+	ASSERT_TRUE(file.write_file(highPayload, sizeof(highPayload)));
+	char highRead[sizeof(highPayload)] = {};
+	ASSERT_TRUE(file.set_file_pointer(static_cast<bip::offset_t>(kHighOffset), bip::file_begin));
+	ASSERT_TRUE(file.read_file(highRead, sizeof(highRead)));
+	EXPECT_EQ(0, std::memcmp(highPayload, highRead, sizeof(highPayload)));
+	EXPECT_EQ(kSparseSize, file.get_file_size());
+
+	ASSERT_EQ(0, ::stat(path.c_str(), &fileInfo));
+	const unsigned long long allocatedAfterSentinels = static_cast<unsigned long long>(fileInfo.st_blocks) * 512ULL;
+	EXPECT_LT(allocatedAfterSentinels, kSparseSize / 2);
+	RecordProperty("sparse_allocated_after_sentinels_bytes", std::to_string(allocatedAfterSentinels));
+#endif
 }
 
 TEST(r16_boostfile, read_exact_chunking_retries_short_reads_and_rejects_eof)

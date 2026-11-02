@@ -22,11 +22,24 @@
 #include "../WTSTools/WTSLogger.h"
 #include "../WTSUtils/WTSCfgLoader.h"
 
+#include <memory>
+#include <vector>
+
 namespace
 {
-	// StateInfo stores HHMM without a date. This safely pads monotonic day-local
-	// intervals; an offset that makes start > end still needs a separate policy.
-	StateInfo::Section makeTradingSection(uint32_t startTime, uint32_t endTime)
+	struct WTSVariantRelease
+	{
+		void operator()(WTSVariant* value) const noexcept
+		{
+			if (value != nullptr)
+				value->release();
+		}
+	};
+
+	// StateInfo stores HHMM without a date. Pad each source interval by one minute
+	// while preserving the half-open [from, end) form. A wrapped interval is
+	// represented as its two day-local pieces because StateInfo has no date axis.
+	std::vector<StateInfo::Section> makeTradingSections(uint32_t startTime, uint32_t endTime)
 	{
 		const uint32_t minutesPerDay = 24 * 60;
 		auto toMinutes = [](uint32_t hhmm) {
@@ -38,12 +51,31 @@ namespace
 
 		uint32_t startMinutes = toMinutes(startTime);
 		uint32_t endMinutes = toMinutes(endTime);
+		const bool wrapsMidnight = startMinutes > endMinutes;
+		std::vector<StateInfo::Section> result;
 		if (startMinutes > 0)
 			--startMinutes;
 		if (endMinutes < minutesPerDay)
 			++endMinutes;
 
-		return { toHHMM(startMinutes), toHHMM(endMinutes) };
+		if (wrapsMidnight)
+		{
+			// Padding may close the overnight gap. In that case, the union of
+			// both day-local pieces is the full half-open day, including 24:00's
+			// exclusion as the right endpoint.
+			if (startMinutes <= endMinutes)
+			{
+				result.emplace_back(StateInfo::Section({ 0, toHHMM(minutesPerDay) }));
+				return result;
+			}
+
+			result.emplace_back(StateInfo::Section({ toHHMM(startMinutes), toHHMM(minutesPerDay) }));
+			result.emplace_back(StateInfo::Section({ 0, toHHMM(endMinutes) }));
+			return result;
+		}
+
+		result.emplace_back(StateInfo::Section({ toHHMM(startMinutes), toHHMM(endMinutes) }));
+		return result;
 	}
 }
 
@@ -78,10 +110,21 @@ bool StateMonitor::initialize(const char* filename, WTSBaseDataMgr* bdMgr, DataM
 		return false;
 	}
 
-	auto keys = config->memberNames();
+	return initializeConfig(config);
+}
+
+bool StateMonitor::initializeConfig(WTSVariant* config)
+{
+	// The caller transfers one reference to this helper. The config owns each
+	// child returned by get(), so only the root reference is released here.
+	std::unique_ptr<WTSVariant, WTSVariantRelease> configOwner(config);
+	if (configOwner == nullptr)
+		return false;
+
+	auto keys = configOwner->memberNames();
 	for (const std::string& sid : keys)
 	{
-		WTSVariant* jItem = config->get(sid.c_str());
+		WTSVariant* jItem = configOwner->get(sid.c_str());
 
 		WTSSessionInfo* ssInfo = _bd_mgr->getSession(sid.c_str());
 		if (ssInfo == NULL)
@@ -115,8 +158,8 @@ bool StateMonitor::initialize(const char* filename, WTSBaseDataMgr* bdMgr, DataM
 		const auto& sections = ssInfo->getTradingSections();//这里面是偏移过的时间,要注意了!!!
 		for (const auto& secInfo : sections)
 		{
-			stateInfo->_sections.emplace_back(
-				makeTradingSection(secInfo.first, secInfo.second));
+			const auto expanded = makeTradingSections(secInfo.first, secInfo.second);
+			stateInfo->_sections.insert(stateInfo->_sections.end(), expanded.begin(), expanded.end());
 		}
 
 		_map[stateInfo->_session] = stateInfo;
@@ -507,7 +550,7 @@ void StateMonitor::run()
 		_thrd.reset(new StdThread([this](){
 
 			// 主循环，直到收到停止信号
-			while (!_stopped)
+			while (!_stopped.load(std::memory_order_relaxed))
 			{
 				static uint64_t lastTime = 0; // 上次检查时间戳
 
@@ -518,7 +561,7 @@ void StateMonitor::run()
 					if(now - lastTime >= 1000) // 时间间隔达到1秒
 						break;
 
-					if(_stopped) // 如果收到停止信号，立即退出
+					if(_stopped.load(std::memory_order_relaxed)) // 如果收到停止信号，立即退出
 						break;
 
 					// 短暂休眠，避免占用过多CPU资源
@@ -526,7 +569,7 @@ void StateMonitor::run()
 				}
 
 				// 检查是否需要退出线程
-				if(_stopped)
+				if(_stopped.load(std::memory_order_relaxed))
 					break;
 
 				// 获取当前日期和分钟数
@@ -555,7 +598,7 @@ void StateMonitor::run()
  */
 void StateMonitor::stop()
 {
-	_stopped = true;  // 设置停止标志，通知线程退出
+	_stopped.store(true, std::memory_order_relaxed);  // 仅通知循环退出；join 提供线程结束同步
 
 	if (_thrd)
 		_thrd->join();  // 等待线程执行完成并安全退出

@@ -42,6 +42,7 @@ TEST_F(R103Fixture, R103Replayer_LoaderAutoTransDsbAndRuleFileName)
 	loader.dayBars[kStock] = two_day_bars(100.0);
 	loader.dayBars[kHot] = two_day_bars(200.0);
 	loader.m5Bars[kM5] = {
+		r91::mk_bar(20200102u, 925u, 9.9, 10.1, 9.8, 10.0, 90.0),
 		r91::mk_bar(20200102u, 935u, 10.0, 10.2, 9.8, 10.1, 100.0),
 		r91::mk_bar(20200102u, 940u, 10.1, 10.3, 9.9, 10.2, 110.0),
 		r91::mk_bar(20200102u, 945u, 10.2, 10.4, 10.0, 10.3, 120.0)
@@ -105,9 +106,10 @@ TEST_F(R103Fixture, R103Replayer_LoaderAutoTransDsbAndRuleFileName)
 	EXPECT_EQ(1u, loader.finalCalls[kHot]);
 
 	// m5 自动转储走 BT_HIS_Minute5 分支
-	slice = replayer.get_kline_slice(kM5, "m", 5, 1, false);
+	slice = replayer.get_kline_slice(kM5, "m", 5, 5, false);
 	ASSERT_NE(nullptr, slice);
-	EXPECT_GE(slice->size(), 1);
+	ASSERT_EQ(1, slice->size());
+	EXPECT_DOUBLE_EQ(10.0, slice->at(0)->close);
 	slice->release();
 	ASSERT_TRUE(std::filesystem::exists(_base / "his/min5/SSE/600002.dsb"));
 	EXPECT_EQ(1u, loader.finalCalls[kM5]);

@@ -120,8 +120,9 @@ TEST(R133TraderAdapterInit, loads_mocker_module_and_initializes)
 	std::error_code ec;
 	fs::create_directories(root + "/traders", ec);
 	ASSERT_FALSE(ec);
-	fs::create_symlink(bin + "libTraderMocker.dylib",
-		root + "/traders/libTraderMocker.dylib", ec);
+	fs::copy_file(bin + "libTraderMocker.dylib",
+		root + "/traders/libTraderMocker.dylib",
+		fs::copy_options::overwrite_existing, ec);
 	ASSERT_FALSE(ec);
 	InstDirGuard instdir(root + "/");
 
@@ -323,8 +324,9 @@ TEST(R133ParserAdapterGuards, filter_and_level2_early_returns)
 	ASSERT_FALSE(ec);
 	if (!fs::exists(bin + "libParserUDP.dylib"))
 		GTEST_SKIP() << "libParserUDP.dylib not found in this build";
-	fs::create_symlink(bin + "libParserUDP.dylib",
-		root + "/parsers/libParserUDP.dylib", ec);
+	fs::copy_file(bin + "libParserUDP.dylib",
+		root + "/parsers/libParserUDP.dylib",
+		fs::copy_options::overwrite_existing, ec);
 	ASSERT_FALSE(ec);
 	InstDirGuard instdir(root + "/");
 

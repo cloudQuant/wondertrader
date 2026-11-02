@@ -2,8 +2,7 @@
  * r43_match_engine_flow_test.cpp
  * Lane R43：MatchEngine.cpp 在 l06 已覆盖 95.88% 之后剩余的撮合分支：
  *   match_orders(L136-139)  —— 被动买价严格低于限价时按剩余量成交
- *   match_orders(L142-143)  —— 可成交量算出 0 时保底成交 1 手
- *   match_orders(L200-201)  —— 卖方向同样的 0 量保底
+ *   match_orders           —— 零盘口量不合成成交，后续有效量可继续撮合
  *   cancel(L364-392)        —— 按方向+数量撤单时 `left` 递减与 break 条件
  *   cancel(L370-371)        —— 未激活（state!=1）的订单不参与撤单
  * 全部输入由本文件构造，不依赖行情文件与外部服务。
@@ -30,6 +29,7 @@ namespace
 		struct TradeRec
 		{
 			uint32_t localid;
+			std::string code;
 			bool isBuy;
 			double vol;
 			double fireprice;
@@ -53,8 +53,7 @@ namespace
 		void handle_trade(uint32_t localid, const char* stdCode, bool isBuy,
 			double vol, double fireprice, double price, uint64_t) override
 		{
-			(void)stdCode;
-			trades.push_back({ localid, isBuy, vol, fireprice, price });
+			trades.push_back({ localid, stdCode, isBuy, vol, fireprice, price });
 			if (onTrade)
 				onTrade(localid);
 		}
@@ -111,6 +110,7 @@ namespace
 class MatchEngineTestAccess
 {
 public:
+	static uint64_t sequence(const MatchEngine& engine) { return engine._next_order_sequence; }
 	static const std::map<uint32_t, double>* book_items(
 		const MatchEngine& engine, const char* code)
 	{
@@ -148,6 +148,28 @@ protected:
 	R43MatchSink sink;
 };
 
+TEST_F(R43MatchEngineFlowTest, emptyBookRejectsWithoutSideEffectsAndLaterQuoteAllowsOrders)
+{
+	const char* code = "SSE.STK.610000";
+	feed(code, r43_tick(code, 10.0, 1000, 0, 0, 0, 0));
+	const auto sequence = MatchEngineTestAccess::sequence(engine);
+	EXPECT_TRUE(engine.buy(code, 10.0, 100, 1).empty());
+	EXPECT_TRUE(engine.sell(code, 10.0, 100, 1).empty());
+	EXPECT_TRUE(engine.buy(code, 11.0, 100, 1).empty());
+	EXPECT_TRUE(engine.sell(code, 9.0, 100, 1).empty());
+	EXPECT_EQ(sequence, MatchEngineTestAccess::sequence(engine));
+	EXPECT_TRUE(engine.get_order_snapshots(code).empty());
+	EXPECT_TRUE(sink.orders.empty());
+	EXPECT_TRUE(sink.trades.empty());
+	EXPECT_EQ(0u, sink.entrusts);
+	feed(code, r43_tick(code, 10.0, 1000, 9.9, 500, 10.1, 600));
+	EXPECT_EQ(1u, engine.buy(code, 10.0, 100, 2).size());
+	EXPECT_EQ(1u, engine.sell(code, 10.0, 100, 2).size());
+	EXPECT_EQ(sequence + 2, MatchEngineTestAccess::sequence(engine));
+	EXPECT_EQ(2u, engine.get_order_snapshots(code).size());
+	EXPECT_TRUE(sink.trades.empty());
+}
+
 // 被动买价严格低于限价（且不等于最新价）：按委托剩余量成交，不受盘口量限制
 TEST_F(R43MatchEngineFlowTest, passiveBuyBelowLimitFillsRemainingQty)
 {
@@ -166,7 +188,7 @@ TEST_F(R43MatchEngineFlowTest, passiveBuyBelowLimitFillsRemainingQty)
 	EXPECT_DOUBLE_EQ(0.0, sink.orders.back().leftover);
 }
 
-// 主动买遇到卖一量为 0：可成交量归零时保底成交 1 手
+// 主动买遇到卖一量为 0：不合成成交，后续盘口量可正常撮合
 TEST_F(R43MatchEngineFlowTest, activeBuyWithZeroAskQtyFillsOneLot)
 {
 	const char* code = "SSE.STK.610002";
@@ -175,15 +197,25 @@ TEST_F(R43MatchEngineFlowTest, activeBuyWithZeroAskQtyFillsOneLot)
 	OrderIDs ids = engine.buy(code, 10.1, 100, 20240102093000000ULL);
 	ASSERT_EQ(1u, ids.size());
 
+	feed(code, r43_tick(code, 10.0, 0, 10.0, 500, 10.1, 0));
+	EXPECT_TRUE(sink.trades.empty());
 	feed(code, r43_tick(code, 10.0, 1000, 10.0, 500, 10.1, 0));
+	EXPECT_TRUE(sink.trades.empty());
+	feed(code, r43_tick(code, 10.0, 1000, 10.0, 500, 10.1, 2));
 	ASSERT_EQ(1u, sink.trades.size());
-	EXPECT_DOUBLE_EQ(1.0, sink.trades[0].vol);
+	EXPECT_EQ(code, sink.trades[0].code);
+	EXPECT_DOUBLE_EQ(2.0, sink.trades[0].vol);
 	EXPECT_DOUBLE_EQ(10.1, sink.trades[0].price);
 	ASSERT_FALSE(sink.orders.empty());
-	EXPECT_DOUBLE_EQ(99.0, sink.orders.back().leftover);
+	EXPECT_DOUBLE_EQ(98.0, sink.orders.back().leftover);
+
+	feed(code, r43_tick(code, 10.0, 1000, 10.0, 500, 10.1, 200));
+	ASSERT_EQ(2u, sink.trades.size());
+	EXPECT_DOUBLE_EQ(98.0, sink.trades.back().vol);
+	EXPECT_DOUBLE_EQ(0.0, sink.orders.back().leftover);
 }
 
-// 主动卖遇到买一量为 0：同样保底 1 手，且方向为卖
+// 主动卖遇到买一量为 0：不合成成交，后续盘口量可正常撮合
 TEST_F(R43MatchEngineFlowTest, activeSellWithZeroBidQtyFillsOneLot)
 {
 	const char* code = "SSE.STK.610003";
@@ -192,13 +224,42 @@ TEST_F(R43MatchEngineFlowTest, activeSellWithZeroBidQtyFillsOneLot)
 	OrderIDs ids = engine.sell(code, 9.9, 40, 20240102093000000ULL);
 	ASSERT_EQ(1u, ids.size());
 
+	feed(code, r43_tick(code, 10.0, 0, 9.9, 0, 10.0, 500));
+	EXPECT_TRUE(sink.trades.empty());
 	feed(code, r43_tick(code, 10.0, 1000, 9.9, 0, 10.0, 500));
+	EXPECT_TRUE(sink.trades.empty());
+	feed(code, r43_tick(code, 10.0, 1000, 9.9, 3, 10.0, 500));
 	ASSERT_EQ(1u, sink.trades.size());
+	EXPECT_EQ(code, sink.trades[0].code);
 	EXPECT_FALSE(sink.trades[0].isBuy);
-	EXPECT_DOUBLE_EQ(1.0, sink.trades[0].vol);
+	EXPECT_DOUBLE_EQ(3.0, sink.trades[0].vol);
 	EXPECT_DOUBLE_EQ(9.9, sink.trades[0].price);
 	ASSERT_FALSE(sink.orders.empty());
-	EXPECT_DOUBLE_EQ(39.0, sink.orders.back().leftover);
+	EXPECT_DOUBLE_EQ(37.0, sink.orders.back().leftover);
+}
+
+TEST_F(R43MatchEngineFlowTest, zeroDepthFallbackIsScopedToTickContract)
+{
+	const char* codeA = "SSE.STK.610010";
+	const char* codeB = "SSE.STK.610011";
+	feed(codeA, r43_tick(codeA, 10.0, 1000, 10.0, 500, 10.1, 0));
+	feed(codeB, r43_tick(codeB, 10.0, 1000, 10.0, 500, 10.1, 0));
+	ASSERT_EQ(1u, engine.buy(codeA, 10.1, 2, 20240102093000000ULL).size());
+	ASSERT_EQ(1u, engine.buy(codeB, 10.1, 2, 20240102093000000ULL).size());
+
+	feed(codeA, r43_tick(codeA, 10.0, 1000, 10.0, 500, 10.1, 0));
+	EXPECT_TRUE(sink.trades.empty());
+	feed(codeA, r43_tick(codeA, 10.0, 1000, 10.0, 500, 10.1, 2));
+	ASSERT_EQ(1u, sink.trades.size());
+	EXPECT_EQ(codeA, sink.trades[0].code);
+	EXPECT_DOUBLE_EQ(2.0, sink.trades[0].vol);
+
+	feed(codeB, r43_tick(codeB, 10.0, 1000, 10.0, 500, 10.1, 0));
+	ASSERT_EQ(1u, sink.trades.size());
+	feed(codeB, r43_tick(codeB, 10.0, 1000, 10.0, 500, 10.1, 1));
+	ASSERT_EQ(2u, sink.trades.size());
+	EXPECT_EQ(codeB, sink.trades[1].code);
+	EXPECT_DOUBLE_EQ(1.0, sink.trades[1].vol);
 }
 
 // 按方向+数量撤单：数量大于单笔剩余时继续累减，两笔订单都要撤掉

@@ -28,6 +28,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <thread>
 #include <vector>
 #include <unistd.h>
@@ -70,7 +71,7 @@ extern loader::FeeMap _fees;
 extern loader::MarginMap _margins;
 
 /* 自由函数：TraderSpi.cpp L303-340（内部有 yearFlag 的 static 锁存，见用例注释） */
-std::string fillCzceCode(const char* code, uint32_t tdate);
+bool fillCzceCode(std::string_view code, uint32_t tdate, std::string& result);
 
 namespace t26
 {

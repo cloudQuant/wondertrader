@@ -169,6 +169,7 @@ class RecordingParserApi : public IParserApi
 {
 public:
     bool init(WTSVariant*) override { return true; }
+    bool connect() override { ++connect_calls; return connect_result; }
     void registerSpi(IParserSpi* spi) override { _spi = spi; }
     void subscribe(const CodeSet& contracts) override { subscribed_count = contracts.size(); }
     void publishQuote(WTSTickData* quote)
@@ -181,6 +182,8 @@ private:
     IParserSpi* _spi = nullptr;
 public:
     std::size_t subscribed_count = 0;
+    bool connect_result = false;
+    unsigned connect_calls = 0;
 };
 
 /// 把 cfg 落到唯一临时目录并用 WTSCfgLoader 读回来，得到可用的 WTSVariant
@@ -291,6 +294,24 @@ TEST(N01ParserAdapter, init_ext_defaults_time_check_off_and_delivers_quote)
 
     adapter.release();
     EXPECT_FALSE(adapter.hasApi());
+}
+
+TEST(N01ParserAdapter, run_reports_connection_command_submission)
+{
+    RecordingStub stub;
+    FakeBaseDataMgr bd;
+    ParserAdapter adapter;
+    EXPECT_FALSE(adapter.run());
+
+    auto* api = new RecordingParserApi();
+    ASSERT_TRUE(adapter.initExt("run_status", api, &stub, &bd));
+    EXPECT_FALSE(adapter.run());
+    EXPECT_EQ(api->connect_calls, 1u);
+    api->connect_result = true;
+    EXPECT_TRUE(adapter.run());
+    EXPECT_EQ(api->connect_calls, 2u);
+    adapter.release();
+    EXPECT_FALSE(adapter.run());
 }
 
 // init 在加载模块前就 return false，但 _stub/_bd_mgr/_id 已经写入

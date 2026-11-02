@@ -118,7 +118,14 @@ bool ParserFemas::init(WTSVariant* config)
 	std::string module = config->getCString("ctpmodule");
 	if (module.empty())
 		module = "USTPmduserapiAF";
-	std::string dllpath = getBinDir() + DLLHelper::wrap_module(module.c_str(), "lib");
+	const std::string moduleFile = DLLHelper::wrap_module(module.c_str(), "lib");
+	const char* moduleDir = getBinDir();
+	if ((moduleDir == nullptr || moduleDir[0] == '\0') && !fs::path(moduleFile).is_absolute())
+	{
+		write_log(m_sink, LL_ERROR, "[ParserFemas] Cannot locate the parser module directory");
+		return false;
+	}
+	std::string dllpath = (moduleDir ? std::string(moduleDir) : std::string()) + moduleFile;
 	std::string path = fmtutil::format("{}/{}/{}/", m_strFlowDir.c_str(), m_strBroker.c_str(), m_strUserID.c_str());
 	if (!StdFile::exists(path.c_str()))
 	{

@@ -1,17 +1,16 @@
 // r212 / WtDataStorage：WtDataWriter 残余分支（同步 async=false 公开入口）
 //
 // 覆盖（src/WtDataStorage/WtDataWriter.cpp）：
-//  - resizeRTBlock 的 map 失败 catch / 错误日志 / 返回 NULL：343-357
-//  - pipeToTicks 扩容失败后的 blk==NULL 守卫：645-648
+//  - resizeRTBlock 检测物理文件短于旧映射声明容量并 fail closed
+//  - pipeToTicks 扩容失败后安全返回，不写入旧映射容量以外
 //  - pipeToKlines 同一分钟内的 low==0 与 low!=0 两条低点更新分支：
 //    min1 :1164-1167，min5 :1270-1273
 //  - procQueue/procOrder/procTrans 的 canSessionReceive 拒绝守卫：441-442/495-496/549-550
 //
 // 手法：
-//  * 扩容失败用 /dev/null 符号链接替换 rt tick 块文件。BoostFile 的 open/write 对
-//    /dev/null 成功，随后 BoostMappingFile::map 因文件大小为 0 抛
-//    boost::interprocess_exception，正好落进 resizeRTBlock 的第二个 catch。
-//    （r112 用「同名目录」在本机只得到 invalid handle，不会抛异常，故不采用。）
+//  * 扩容失败时将 rt tick 块文件截断为普通零长度文件。resizeRTBlock 应在
+//    扩展或映射前拒绝短文件并保留旧映射。
+//    专门的 remap-failure 和旧映射保留/重试由 WriterResizeAfterExtendTest 覆盖。
 //  * 低点分支先写 low=0 的 tick 建 bar，同分钟再写一笔 low>0 的 tick；
 //    下一分钟再重复一次，覆盖 bar 尚未闭合时的两个 else 分支。
 //  * 拒绝分支把 sink 的 canSessionReceive 置 false，三类逐笔都应不进块文件。
@@ -27,8 +26,8 @@ class R212WriterTailTest : public R23WriterTest
 {
 };
 
-// WtDataWriter.cpp:343-357 / 645-648
-TEST_F(R212WriterTailTest, R212WriterTickResizeMapFailureIsRecoverable)
+// WtDataWriter.cpp: resizeRTBlock / pipeToTicks
+TEST_F(R212WriterTailTest, R212WriterTickResizeRejectsTruncatedFile)
 {
 	R23Writer* w = make_writer("\"groupsize\":100000");
 	ASSERT_TRUE(w != NULL);
@@ -57,19 +56,23 @@ TEST_F(R212WriterTailTest, R212WriterTickResizeMapFailureIsRecoverable)
 	ASSERT_EQ(head._size, 2500u);
 	ASSERT_EQ(head._capacity, 2500u);
 
-	// 换成 /dev/null：open/seek/write 都成功，但 map 一个 0 字节文件会抛异常
+	// 截断为普通零长度文件：长度小于旧映射声明的容量，触发短文件保护。
 	std::error_code ec;
 	ASSERT_TRUE(std::filesystem::remove(tick_file, ec)) << ec.message();
 	ASSERT_FALSE(ec) << ec.message();
-	std::filesystem::create_symlink("/dev/null", tick_file, ec);
-	ASSERT_FALSE(ec) << ec.message();
+	{
+		std::ofstream truncated(tick_file, std::ios::binary | std::ios::trunc);
+		ASSERT_TRUE(truncated.is_open());
+	}
+	ASSERT_TRUE(std::filesystem::is_regular_file(tick_file));
+	ASSERT_EQ(std::filesystem::file_size(tick_file), 0u);
 
 	spec.action_time = 90000000u + 2500u * 1000u;
 	spec.total_volume = 1000.0 + 2500u;
 	write_tick(w, spec, 0);
 
-	EXPECT_TRUE(_sink->has_log("Exception occured while mapping RT cache file", LL_ERROR));
-	EXPECT_TRUE(_sink->has_log("is not valid", LL_DEBUG));
+	EXPECT_TRUE(_sink->has_log("is shorter than its declared capacity", LL_ERROR));
+	EXPECT_TRUE(_sink->has_log("could not be expanded", LL_ERROR));
 	EXPECT_GE(_sink->count_of(LL_ERROR), 1u);
 	EXPECT_GE(_sink->ticks(), 2501u);
 }

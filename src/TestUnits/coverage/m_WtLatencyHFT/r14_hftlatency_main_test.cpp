@@ -9,7 +9,8 @@
  *   run() 里 :496 _parsers.run() / :497 _traders.run() / :499 _engine.run() 起线程，
  *   :501 theParser->run(_times) 是造 tick 的死循环；
  * 而 main.cpp:31 之后还有 `getchar()` —— 无 tty 输入时永久阻塞 gtest 宿主。
- * 所以本文件只测 hft::HftLatencyTool 的构造/析构与 init() 的配置缺失早退支。
+ * 所以本文件只测 hft::HftLatencyTool 的构造/析构与 init() 配置校验；异常配置在
+ * 进入引擎初始化前拒绝，合法 basefiles 对象作为正向控制但不调用 run()。
  *
  * 分支决定权：init() 读硬编码相对路径 "logcfg.yaml"/"config.yaml"（:350/:353），
  * 用例自己 chdir 进一个刚建的空目录，让「文件不存在」成为可证伪的前提；退出恢复原 cwd。
@@ -17,13 +18,109 @@
  */
 #include <gtest/gtest.h>
 
+#include <filesystem>
+#include <fstream>
+#include <mutex>
 #include <string>
+#include <system_error>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <vector>
 
+#include "Includes/ILogHandler.h"
+#include "WTSTools/WTSLogger.h"
 #include "WtLatencyHFT/HftLatencyTool.h"
 
+namespace hft { class TestParser; extern TestParser* theParser; }
+
 namespace {
+
+namespace stdfs = std::filesystem;
+
+const char* kLogConfig =
+	"{\"root\":{\"level\":\"warn\",\"async\":false,\"sinks\":["
+	"{\"type\":\"basic_file_sink\",\"filename\":\"r14_hft.log\","
+	"\"truncate\":true,\"pattern\":\"%v\"}]}}";
+
+const char* kConfigWithoutBasefiles =
+	"env:\n"
+	"    product:\n"
+	"        session: ALLDAY\n"
+	"times: 0\n"
+	"core: 0\n";
+
+const char* kConfigWithScalarBasefiles =
+	"basefiles: invalid\n"
+	"env:\n"
+	"    product:\n"
+	"        session: ALLDAY\n"
+	"times: 0\n"
+	"core: 0\n";
+
+const char* kConfigWithArrayBasefiles =
+	"basefiles:\n"
+	"    - sessions.yaml\n"
+	"env:\n"
+	"    product:\n"
+	"        session: ALLDAY\n"
+	"times: 0\n"
+	"core: 0\n";
+
+const char* kConfigWithValidBasefiles =
+	"basefiles:\n"
+	"    unused: 1\n"
+	"env:\n"
+	"    product:\n"
+	"        session: ALLDAY\n"
+	"times: 0\n"
+	"core: 0\n";
+
+bool write_text(const char* name, const char* content)
+{
+	std::ofstream out(name, std::ios::binary | std::ios::trunc);
+	if (!out)
+		return false;
+	out << content;
+	out.close();
+	return !out.fail();
+}
+
+class R14LogCapture : public ILogHandler
+{
+public:
+	void handleLogAppend(WTSLogLevel level, const char* message) override
+	{
+		if (level != LL_WARN && level != LL_ERROR)
+			return;
+		std::lock_guard<std::mutex> lock(m_mutex);
+		m_messages.emplace_back(message != nullptr ? message : "");
+	}
+
+	bool contains(const std::string& expected)
+	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+		for (const std::string& message : m_messages)
+			if (message.find(expected) != std::string::npos)
+				return true;
+		return false;
+	}
+
+private:
+	std::mutex m_mutex;
+	std::vector<std::string> m_messages;
+};
+
+class ScopedLogCapture
+{
+public:
+	explicit ScopedLogCapture(R14LogCapture& capture)
+	{
+		WTSLogger::init("logcfg.yaml", true, &capture);
+		WTSLogger::registerHandler(&capture);
+	}
+
+	~ScopedLogCapture() { WTSLogger::registerHandler(nullptr); }
+};
 
 class ScopedEmptyCwd
 {
@@ -58,7 +155,11 @@ public:
 		if (m_entered)
 			chdir(m_backup);
 		if (m_entered && m_enter[0] != '\0')
-			m_removed = (rmdir(m_enter) == 0);
+		{
+			std::error_code ec;
+			stdfs::remove_all(m_enter, ec);
+			m_removed = !ec;
+		}
 	}
 
 	bool ok() const { return m_entered; }
@@ -128,6 +229,71 @@ TEST(r14_lazy_hft_tool, empty_cwd_is_really_empty_and_restored)
 	EXPECT_STREQ(before, after) << "guard 退出后没有把 cwd 还原";
 }
 
+TEST(r14_lazy_hft_tool, init_rejects_missing_basefiles_and_run_does_not_start)
+{
+	ScopedEmptyCwd guard("missing_basefiles");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
+	ASSERT_TRUE(write_text("config.yaml", kConfigWithoutBasefiles));
+
+	R14LogCapture log_capture;
+	ScopedLogCapture capture(log_capture);
+	hft::HftLatencyTool tool;
+	EXPECT_FALSE(tool.init());
+	tool.run();
+	EXPECT_TRUE(tool.runFailed());
+	EXPECT_TRUE(log_capture.contains("Invalid config: required basefiles object is missing"));
+	EXPECT_TRUE(log_capture.contains("Cannot run HFT latency test before parser initialization succeeds"));
+}
+
+TEST(r14_lazy_hft_tool, init_rejects_non_object_basefiles)
+{
+	const struct InvalidConfigCase
+	{
+		const char* tag;
+		const char* config;
+	} cases[] = {
+		{ "scalar_basefiles", kConfigWithScalarBasefiles },
+		{ "array_basefiles", kConfigWithArrayBasefiles },
+	};
+
+	for (const InvalidConfigCase& test_case : cases)
+	{
+		ScopedEmptyCwd guard(test_case.tag);
+		ASSERT_TRUE(guard.ok());
+		ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
+		ASSERT_TRUE(write_text("config.yaml", test_case.config));
+
+		R14LogCapture log_capture;
+		{
+			ScopedLogCapture capture(log_capture);
+			hft::HftLatencyTool tool;
+			EXPECT_FALSE(tool.init()) << test_case.tag;
+			tool.run();
+			EXPECT_TRUE(tool.runFailed()) << test_case.tag;
+		}
+		EXPECT_TRUE(log_capture.contains("Invalid config: basefiles must be an object")) << test_case.tag;
+	}
+}
+
+TEST(r14_lazy_hft_tool, init_accepts_object_basefiles_control_without_running)
+{
+	ScopedEmptyCwd guard("valid_basefiles");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
+	ASSERT_TRUE(write_text("config.yaml", kConfigWithValidBasefiles));
+
+	R14LogCapture log_capture;
+	ScopedLogCapture capture(log_capture);
+	{
+		hft::HftLatencyTool tool;
+		EXPECT_TRUE(tool.init());
+		EXPECT_NE(hft::theParser, nullptr);
+		EXPECT_FALSE(tool.runFailed());
+	}
+	EXPECT_TRUE(stdfs::exists("generated/portfolio/trades.csv"));
+}
+
 /* -------------------------------------------------------------------------
  * 三、DISABLED_：必须起引擎才能进的分支
  *
@@ -135,11 +301,8 @@ TEST(r14_lazy_hft_tool, empty_cwd_is_really_empty_and_restored)
  *  D1 wt_coverage_main_wtlatencyhft()（main.cpp:25~32）：test_hft() -> init()+run()，
  *     之后 main.cpp:31 getchar() 在无 tty 的宿主里永久阻塞；启用即挂死。
  *     涉及行：main.cpp:25~32（5 行）+ HftLatencyTool.cpp:33~42（6 行）。
- *  D2 init() 的成功支（:360~418）：需要真实 config.yaml；且 :361~362 在 basefiles 缺失时
- *     立刻对 NULL 调 cfgBF->getBoolean("utf-8")（空指针解引用，直接打死宿主，catch 不到），
- *     配置齐备则 :405 _act_mgr.init("actpolicy.yaml")、:413 initEngine(NULL 或真配置)、
- *     :414 initModules() 的 :465/:472 ParserAdapter/TraderAdapter::initExt 会起线程。
- *     可回收行数估计：:360~418（59 行）+ :426~438（13 行）+ :446~453（8 行）+ :461~478（18 行）≈ 98 行。
+ *  D2 init() 的完整成功支（当前约 :650~715）：合法配置会继续初始化引擎、模块和策略；
+ *     R14 只用轻量对象配置验证成功 init，不调用 run()；完整 init/run 路径由 R95 覆盖。
  *  D3 run()（:484~506）：:488 CpuHelper::bind_core 需要特权、:496~501 起三个线程跑死循环，
  *     且 :503~505 catch(...) 会把引擎里的真实崩溃吞掉，断言无从建立。估计 23 行。
  *  D4 :89~325 的 TestParser/TestTrader/TestStrategy 是文件内类（头文件不暴露），
@@ -152,13 +315,6 @@ TEST(r14_lazy_hft_tool, DISABLED_entry_blocks_on_getchar)
 {
 	// D1：改名后的入口是 int wt_coverage_main_wtlatencyhft()，无参、内部 getchar()
 	EXPECT_TRUE(true);
-}
-
-TEST(r14_lazy_hft_tool, DISABLED_init_success_dereferences_null_cfgbf_without_basefiles)
-{
-	// D2：config.yaml 存在但无 basefiles 段时，:362 对 NULL 调 getBoolean -> SIGSEGV
-	hft::HftLatencyTool tool;
-	EXPECT_TRUE(tool.init());
 }
 
 TEST(r14_lazy_hft_tool, DISABLED_run_starts_threads_and_busy_loop)

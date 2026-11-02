@@ -103,10 +103,10 @@ TEST_F(R102IndexWorkerPoolTest, PoolsizeOneBuildsPoolAndAsyncDispatchReleasesTic
 	ASSERT_NE(tick, nullptr);
 	ASSERT_EQ(tick->retainCount(), 1u);
 
-	// :175-194：命中订阅 -> retain；_pool 非空 -> schedule(lambda)
-	// lambda 在 worker 线程里遍历空 _workers 后 release，引用数回到 1
-	mgr.handle_quote(tick);
-	EXPECT_EQ(tick->retainCount(), 2u);
+	// :175-194：多帧命中订阅 -> retain 并排入线程池。由于任务可在
+	// handle_quote 返回前完成，这里不对瞬时 retainCount 作竞态断言。
+	for (uint32_t frame = 0; frame < 16; ++frame)
+		mgr.handle_quote(tick);
 
 	const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
 	while (tick->retainCount() > 1u && std::chrono::steady_clock::now() < deadline)

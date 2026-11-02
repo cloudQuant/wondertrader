@@ -22,6 +22,15 @@
 
 extern uint32_t makeLocalOrderID();
 
+MatchEngine::~MatchEngine()
+{
+	if (_tick_cache != NULL)
+	{
+		_tick_cache->release();
+		_tick_cache = NULL;
+	}
+}
+
 /**
  * @brief 初始化撮合引擎
  * @details 从配置中读取撮合引擎的相关参数，如撤单率等
@@ -329,6 +338,11 @@ OrderIDs MatchEngine::buy(const char* stdCode, double price, double qty, uint64_
 	WTSTickData* lastTick = grab_last_tick(stdCode);
 	if (lastTick == NULL)
 		return OrderIDs();
+	if (lastTick->bidprice(0) == 0.0 && lastTick->askprice(0) == 0.0)
+	{
+		lastTick->release();
+		return OrderIDs();
+	}
 
 	const uint64_t creationSequence = next_order_sequence();
 	uint32_t localid = makeLocalOrderID();
@@ -376,6 +390,11 @@ OrderIDs MatchEngine::sell(const char* stdCode, double price, double qty, uint64
 	WTSTickData* lastTick = grab_last_tick(stdCode);
 	if (lastTick == NULL)
 		return OrderIDs();
+	if (lastTick->bidprice(0) == 0.0 && lastTick->askprice(0) == 0.0)
+	{
+		lastTick->release();
+		return OrderIDs();
+	}
 
 	const uint64_t creationSequence = next_order_sequence();
 	uint32_t localid = makeLocalOrderID();

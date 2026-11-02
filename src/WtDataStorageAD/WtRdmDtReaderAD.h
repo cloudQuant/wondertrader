@@ -22,6 +22,8 @@
 
 NS_WTP_BEGIN
 
+typedef void (*LMDBRangeResultsOverride)(void*, ValueArray&, ValueArray&);
+
 /** @brief Boost内存映射文件的智能指针类型 */
 typedef std::shared_ptr<BoostMappingFile> BoostMFPtr;
 
@@ -139,6 +141,9 @@ public:
 	virtual WTSTickSlice*	readTickSliceByDate(const char* stdCode, uint32_t uDate /* = 0 */) override;
 
 private:
+	friend struct WtRdmDtReaderADTestAccess;
+	static void set_test_cursor_get_override(LMDBRangeCursorGetOverride callback, void* context);
+	static void set_test_range_results_override(LMDBRangeResultsOverride callback, void* context);
 	std::string		_base_dir;        /**< 数据文件存储的基础路径 */
 	IBaseDataMgr*	_base_data_mgr;    /**< 基础数据管理器指针 */
 	IHotMgr*		_hot_mgr;          /**< 主力合约管理器指针 */

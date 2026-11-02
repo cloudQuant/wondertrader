@@ -60,6 +60,10 @@ struct PhaseResult
 	int32_t deletedValue = -1;
 	int32_t liveValue = -1;
 	int32_t sectionCount = 0;
+	// Bit order is string, int32, uint32, int64, uint64, double.
+	uint32_t initialTypedValuesMask = 0;
+	uint32_t deletedTypedDefaultsMask = 0;
+	uint32_t deletedTypedApiDefaultsMask = 0;
 };
 
 struct ScopedFd
@@ -389,6 +393,18 @@ int run_slave_child(int commandFd, int resultFd, const std::string& domain,
 	{
 		result.liveKeyCount = static_cast<int32_t>(ShareBlocks::one().get_keys(domain.c_str(), "live").size());
 		result.deletedValue = ShareBlocks::one().get_int32(domain.c_str(), "doomed", "gone", -1);
+		if (std::strcmp(ShareBlocks::one().get_string(domain.c_str(), "doomed", "text", ""), "published") == 0)
+			result.initialTypedValuesMask |= 1u << 0;
+		if (ShareBlocks::one().get_int32(domain.c_str(), "doomed", "i32", -1) == 22)
+			result.initialTypedValuesMask |= 1u << 1;
+		if (ShareBlocks::one().get_uint32(domain.c_str(), "doomed", "u32", 0) == 33u)
+			result.initialTypedValuesMask |= 1u << 2;
+		if (ShareBlocks::one().get_int64(domain.c_str(), "doomed", "i64", 0) == -44)
+			result.initialTypedValuesMask |= 1u << 3;
+		if (ShareBlocks::one().get_uint64(domain.c_str(), "doomed", "u64", 0) == 55u)
+			result.initialTypedValuesMask |= 1u << 4;
+		if (ShareBlocks::one().get_double(domain.c_str(), "doomed", "double", 0.0) == 6.25)
+			result.initialTypedValuesMask |= 1u << 5;
 	}
 	if (!write_exact(resultFd, &result, sizeof(result)) || !result.initialized)
 		return 20;
@@ -433,6 +449,34 @@ int run_slave_child(int commandFd, int resultFd, const std::string& domain,
 			result.deletedValue = ShareBlocks::one().get_int32(domain.c_str(), "doomed", "gone", -1);
 			result.liveValue = ShareBlocks::one().get_int32(domain.c_str(), "live", "base", -1);
 			result.sectionCount = static_cast<int32_t>(ShareBlocks::one().get_sections(domain.c_str()).size());
+
+			const char* deletedStringDefault = "deleted-string-default";
+			if (std::strcmp(ShareBlocks::one().get_string(domain.c_str(), "doomed", "text", deletedStringDefault),
+				deletedStringDefault) == 0)
+				result.deletedTypedDefaultsMask |= 1u << 0;
+			if (ShareBlocks::one().get_int32(domain.c_str(), "doomed", "i32", -123456) == -123456)
+				result.deletedTypedDefaultsMask |= 1u << 1;
+			if (ShareBlocks::one().get_uint32(domain.c_str(), "doomed", "u32", 0xf1234567u) == 0xf1234567u)
+				result.deletedTypedDefaultsMask |= 1u << 2;
+			if (ShareBlocks::one().get_int64(domain.c_str(), "doomed", "i64", -0x123456789LL) == -0x123456789LL)
+				result.deletedTypedDefaultsMask |= 1u << 3;
+			if (ShareBlocks::one().get_uint64(domain.c_str(), "doomed", "u64", 0xf123456789abcdefULL) == 0xf123456789abcdefULL)
+				result.deletedTypedDefaultsMask |= 1u << 4;
+			if (ShareBlocks::one().get_double(domain.c_str(), "doomed", "double", -987.625) == -987.625)
+				result.deletedTypedDefaultsMask |= 1u << 5;
+
+			if (std::strcmp(ShareBlocks::one().get_string(domain.c_str(), "doomed", "text"), "") == 0)
+				result.deletedTypedApiDefaultsMask |= 1u << 0;
+			if (ShareBlocks::one().get_int32(domain.c_str(), "doomed", "i32") == 0)
+				result.deletedTypedApiDefaultsMask |= 1u << 1;
+			if (ShareBlocks::one().get_uint32(domain.c_str(), "doomed", "u32") == 0u)
+				result.deletedTypedApiDefaultsMask |= 1u << 2;
+			if (ShareBlocks::one().get_int64(domain.c_str(), "doomed", "i64") == 0)
+				result.deletedTypedApiDefaultsMask |= 1u << 3;
+			if (ShareBlocks::one().get_uint64(domain.c_str(), "doomed", "u64") == 0u)
+				result.deletedTypedApiDefaultsMask |= 1u << 4;
+			if (ShareBlocks::one().get_double(domain.c_str(), "doomed", "double") == 0.0)
+				result.deletedTypedApiDefaultsMask |= 1u << 5;
 			result.refreshedAgain = ShareBlocks::one().update_slave(domain.c_str(), false) ? 1 : 0;
 		}
 		if (!write_exact(resultFd, &result, sizeof(result)))
@@ -544,6 +588,12 @@ TEST_F(R19TempDir, r19_clean_exec_slave_observes_commits_deletes_and_refreshes)
 	ASSERT_TRUE(ShareBlocks::one().init_master(master.c_str(), path.c_str()));
 	ASSERT_NE(nullptr, ShareBlocks::one().allocate_int32(master.c_str(), "live", "base", 11));
 	ASSERT_NE(nullptr, ShareBlocks::one().allocate_int32(master.c_str(), "doomed", "gone", 22));
+	ASSERT_NE(nullptr, ShareBlocks::one().allocate_string(master.c_str(), "doomed", "text", "published"));
+	ASSERT_NE(nullptr, ShareBlocks::one().allocate_int32(master.c_str(), "doomed", "i32", 22));
+	ASSERT_NE(nullptr, ShareBlocks::one().allocate_uint32(master.c_str(), "doomed", "u32", 33u));
+	ASSERT_NE(nullptr, ShareBlocks::one().allocate_int64(master.c_str(), "doomed", "i64", -44));
+	ASSERT_NE(nullptr, ShareBlocks::one().allocate_uint64(master.c_str(), "doomed", "u64", 55u));
+	ASSERT_NE(nullptr, ShareBlocks::one().allocate_double(master.c_str(), "doomed", "double", 6.25));
 	ASSERT_TRUE(ShareBlocks::one().commit_section(master.c_str(), "live"));
 	ASSERT_TRUE(ShareBlocks::one().commit_section(master.c_str(), "doomed"));
 
@@ -566,6 +616,7 @@ TEST_F(R19TempDir, r19_clean_exec_slave_observes_commits_deletes_and_refreshes)
 	ASSERT_EQ(1, result.initialized);
 	ASSERT_EQ(1, result.liveKeyCount);
 	ASSERT_EQ(22, result.deletedValue);
+	EXPECT_EQ(0x3fu, result.initialTypedValuesMask);
 
 	// A key allocation alone is not a published index version.
 	ASSERT_NE(nullptr, ShareBlocks::one().allocate_int32(master.c_str(), "live", "added1", 33));
@@ -614,6 +665,8 @@ TEST_F(R19TempDir, r19_clean_exec_slave_observes_commits_deletes_and_refreshes)
 	EXPECT_EQ(11, result.liveValue);
 	EXPECT_EQ(1, result.sectionCount);
 	EXPECT_EQ(0, result.refreshedAgain);
+	EXPECT_EQ(0x3fu, result.deletedTypedDefaultsMask);
+	EXPECT_EQ(0x3fu, result.deletedTypedApiDefaultsMask);
 
 	child.commandPipe.writeEnd.reset();
 	int status = 0;

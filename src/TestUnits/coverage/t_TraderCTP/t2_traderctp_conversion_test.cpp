@@ -114,6 +114,7 @@ public:
     uint32_t                  n_rsp_position_ = 0, position_size_ = 0;
     double                    pos_avg_ = 0, pos_total_ = 0, pos_avail_new_ = 0;
     uint32_t                  n_rsp_orders_ = 0, orders_size_ = 0;
+    std::vector<WTSOrderState> order_query_states_;
     uint32_t                  n_rsp_trades_ = 0, trades_size_ = 0;
     uint32_t                  n_settlement_ = 0;
     uint32_t                  settle_date_ = 0;
@@ -180,7 +181,13 @@ public:
         }
     }
     virtual void onRspOrders(const WTSArray* ayOrders) override
-    { ++n_rsp_orders_; orders_size_ = ayOrders == NULL ? 0 : ayOrders->size(); }
+    {
+        ++n_rsp_orders_;
+        orders_size_ = ayOrders == NULL ? 0 : ayOrders->size();
+        order_query_states_.clear();
+        for (uint32_t i = 0; i < orders_size_; ++i)
+            order_query_states_.push_back(((WTSArray*)ayOrders)->at<WTSOrderInfo>(i)->getOrderState());
+    }
     virtual void onRspTrades(const WTSArray* ayTrades) override
     { ++n_rsp_trades_; trades_size_ = ayTrades == NULL ? 0 : ayTrades->size(); }
     virtual void onRspSettlementInfo(uint32_t uDate, const char* content) override
@@ -296,6 +303,11 @@ public:
     { ++n_qry_settle_; last_req_id_ = id; if (p) memcpy(&qry_settle_, p, sizeof(qry_settle_)); return stub_ret_; }
 };
 
+static CThostFtdcTraderApi* nullCtpCreator(const char*)
+{
+    return NULL;
+}
+
 /// protected 面 seam（TraderCTP.h:153 起为 protected，不碰 private）
 class Probe : public TraderCTP
 {
@@ -304,6 +316,9 @@ public:
 
     void            attach(CThostFtdcTraderApi* api) { m_pUserAPI = api; }
     void            detach() { m_pUserAPI = NULL; }
+    void            setCreator(CTPCreator creator) { m_funcCreator = creator; }
+    CThostFtdcTraderApi* api() const { return m_pUserAPI; }
+    bool            hasWorker() const { return m_thrdWorker != NULL; }
     WrapperState    state() const { return m_wrapperState; }
     void            setState(WrapperState s) { m_wrapperState = s; }
     uint32_t        frontId() const { return m_frontID; }
@@ -414,12 +429,13 @@ protected:
         // 原来这里缺这一步，导致 bringToReady 之后的整串用例在 :412 的 ASSERT 上失败。
         CThostFtdcRspUserLoginField loginf;
         memset(&loginf, 0, sizeof(loginf));
-        loginf.FrontID = 1;
-        loginf.SessionID = 123456;
+        loginf.FrontID = 12345;
+        loginf.SessionID = 67;
         strcpy(loginf.BrokerID, "8888");
         strcpy(loginf.UserID, "88880001");
         strcpy(loginf.TradingDay, "20240115");
         strcpy(loginf.LoginTime, "09:30:00");
+        strcpy(loginf.MaxOrderRef, "1000");
         strcpy(loginf.SystemName, "ctp");
         trader_.OnRspUserLogin(&loginf, &ok, 2, true);
         ASSERT_EQ(TraderCTP::WS_LOGINED, trader_.state());
@@ -455,7 +471,6 @@ TEST_F(T2TraderCTPTest, init_accepts_front_array_and_quick_flag)
     arr->append("tcp://10.0.0.2:1234");
     cfg->append("front", arr, false);
     cfg->append("broker", "7777");
-    cfg->append("flowdir", tmp_.string().c_str());
     cfg->append("quick", true);
 
     Probe probe;
@@ -474,6 +489,26 @@ TEST_F(T2TraderCTPTest, release_without_api_only_marks_stopped)
     EXPECT_NO_THROW(trader_.release());
     EXPECT_TRUE(trader_.stopped());
     EXPECT_FALSE(trader_.isConnected());
+}
+
+TEST_F(T2TraderCTPTest, connect_rejects_missing_creator_without_starting_worker)
+{
+    trader_.setCreator(NULL);
+
+    EXPECT_NO_THROW(trader_.connect());
+    EXPECT_EQ(NULL, trader_.api());
+    EXPECT_FALSE(trader_.hasWorker());
+    EXPECT_NE(std::string::npos, sink_.last_log_.find("without a CTP API creator"));
+}
+
+TEST_F(T2TraderCTPTest, connect_rejects_null_api_created_by_creator)
+{
+    trader_.setCreator(&nullCtpCreator);
+
+    EXPECT_NO_THROW(trader_.connect());
+    EXPECT_EQ(NULL, trader_.api());
+    EXPECT_FALSE(trader_.hasWorker());
+    EXPECT_NE(std::string::npos, sink_.last_log_.find("creator returned a null API instance"));
 }
 
 TEST_F(T2TraderCTPTest, login_logout_and_queries_rejected_without_api)
@@ -548,7 +583,7 @@ TEST_F(T2TraderCTPTest, login_rsp_carries_credentials_and_session_params)
     EXPECT_EQ("prod01", std::string(api_.login_.UserProductInfo));
     // 就绪链路：queryConfirm 入队 -> drain 后真的发出 ReqQrySettlementInfoConfirm
     EXPECT_TRUE(trader_.isConnected());
-    EXPECT_EQ(1u, trader_.tradingDate() % 100000000u);
+    EXPECT_EQ(20240115u, trader_.tradingDate() % 100000000u);
     EXPECT_EQ(20240115u, trader_.tradingDate());
     EXPECT_EQ(12345u, trader_.frontId());
     EXPECT_EQ(67u, trader_.sessionId());
@@ -567,6 +602,14 @@ TEST_F(T2TraderCTPTest, settlement_unconfirmed_goes_through_confirm)
     CThostFtdcRspAuthenticateField authf;
     memset(&authf, 0, sizeof(authf));
     trader_.OnRspAuthenticate(&authf, &ok, 1, true);
+
+    CThostFtdcRspUserLoginField loginf;
+    memset(&loginf, 0, sizeof(loginf));
+    loginf.FrontID = 12345;
+    loginf.SessionID = 67;
+    strcpy(loginf.MaxOrderRef, "1000");
+    strcpy(loginf.TradingDay, "20240115");
+    trader_.OnRspUserLogin(&loginf, &ok, 2, true);
 
     // 登录响应后应有一个待执行的查询
     EXPECT_EQ(1u, trader_.queryDepth());
@@ -610,6 +653,19 @@ TEST_F(T2TraderCTPTest, make_entrust_id_is_fixed_width_and_increments_ref)
     ASSERT_TRUE(trader_.makeEntrustID(buf, sizeof(buf)));
     EXPECT_STREQ("012345#0000000067#001002", buf);
     EXPECT_EQ(1002u, trader_.orderRef());
+}
+
+TEST_F(T2TraderCTPTest, make_entrust_id_is_rejected_until_login_session_exists)
+{
+    char buf[64];
+    memset(buf, 'x', sizeof(buf));
+
+    EXPECT_EQ(0u, trader_.frontId());
+    EXPECT_EQ(0u, trader_.sessionId());
+    EXPECT_EQ(0u, trader_.orderRef());
+    EXPECT_FALSE(trader_.makeEntrustID(buf, sizeof(buf)));
+    EXPECT_STREQ("", buf);
+    EXPECT_EQ(0u, trader_.orderRef());
 }
 
 TEST_F(T2TraderCTPTest, order_insert_maps_types_and_ref_for_shfe)
@@ -667,7 +723,10 @@ TEST_F(T2TraderCTPTest, order_insert_cffex_anyprice_and_close_offsets)
 {
     bringToReady();
 
+    char eid[64];
+    ASSERT_TRUE(trader_.makeEntrustID(eid, sizeof(eid)));
     WTSEntrust* e = WTSEntrust::create("IF2401", 2, 3500.0, "CFFEX");
+    e->setEntrustID(eid);
     e->setUserTag("TAG-B");
     e->setDirection(WDT_SHORT);
     e->setOffsetType(WOT_CLOSETODAY);
@@ -730,7 +789,30 @@ TEST_F(T2TraderCTPTest, order_action_rejects_bad_entrust_id_and_builds_cancel)
 
 TEST_F(T2TraderCTPTest, queries_enqueue_then_send_on_drain)
 {
-    bringToReady();
+    trader_.attach(&api_);
+    CThostFtdcRspInfoField ok;
+    memset(&ok, 0, sizeof(ok));
+    ASSERT_EQ(0, trader_.login("88880001", "pwd", "prod01"));
+    CThostFtdcRspAuthenticateField authf;
+    memset(&authf, 0, sizeof(authf));
+    trader_.OnRspAuthenticate(&authf, &ok, 1, true);
+
+    CThostFtdcRspUserLoginField loginf;
+    memset(&loginf, 0, sizeof(loginf));
+    loginf.FrontID = 12345;
+    loginf.SessionID = 67;
+    strcpy(loginf.MaxOrderRef, "1000");
+    strcpy(loginf.TradingDay, "20240115");
+    trader_.OnRspUserLogin(&loginf, &ok, 2, true);
+    ASSERT_EQ(1u, trader_.queryDepth());
+    ASSERT_EQ(1u, trader_.drainQueries());
+    ASSERT_EQ(1, api_.n_qry_confirm_);
+
+    CThostFtdcSettlementInfoConfirmField conf;
+    memset(&conf, 0, sizeof(conf));
+    strcpy(conf.ConfirmDate, "20240115");
+    trader_.OnRspQrySettlementInfoConfirm(&conf, &ok, 3, true);
+    ASSERT_EQ(TraderCTP::WS_ALLREADY, trader_.state());
 
     EXPECT_EQ(0, trader_.queryAccount());
     EXPECT_EQ(0, trader_.queryPositions());
@@ -820,11 +902,103 @@ TEST_F(T2TraderCTPTest, rtn_order_conversion_maps_state_and_night_date)
     EXPECT_EQ("012345#0000000067#001002", sink_.push_order_usertag_);
 }
 
+namespace {
+struct OrderStateCase { TThostFtdcOrderStatusType ctp; WTSOrderState expected; };
+const OrderStateCase kKnownOrderStates[] = {
+    {THOST_FTDC_OST_AllTraded, WOS_AllTraded},
+    {THOST_FTDC_OST_PartTradedQueueing, WOS_PartTraded_Queuing},
+    {THOST_FTDC_OST_PartTradedNotQueueing, WOS_Canceled},
+    {THOST_FTDC_OST_NoTradeQueueing, WOS_NotTraded_Queuing},
+    {THOST_FTDC_OST_NoTradeNotQueueing, WOS_NotTraded_NotQueuing},
+    {THOST_FTDC_OST_Canceled, WOS_Canceled},
+    {THOST_FTDC_OST_Unknown, WOS_Submitting},
+    {THOST_FTDC_OST_NotTouched, WOS_Nottouched}
+};
+
+CThostFtdcOrderField makeOrderStateCase(TThostFtdcOrderStatusType state)
+{
+    CThostFtdcOrderField order{};
+    strcpy(order.InstrumentID, kRawCode);
+    strcpy(order.ExchangeID, kExchg);
+    strcpy(order.OrderRef, "1001");
+    strcpy(order.InsertDate, "20240115");
+    strcpy(order.InsertTime, "10:00:00");
+    order.FrontID = 12345;
+    order.SessionID = 67;
+    order.LimitPrice = 7000;
+    order.VolumeTotalOriginal = 4;
+    order.OrderStatus = state;
+    order.OrderSubmitStatus = THOST_FTDC_OSS_Accepted;
+    return order;
+}
+} // namespace
+
+TEST_F(T2TraderCTPTest, rtn_order_untouched_and_known_states_keep_wts_meaning)
+{
+    static_assert(THOST_FTDC_OST_NotTouched == 'b', "CTP untouched byte changed");
+    static_assert(WOS_Nottouched == 'c', "WTS untouched value changed");
+    bringToReady();
+    for (const auto& state : kKnownOrderStates)
+    {
+        CThostFtdcOrderField order = makeOrderStateCase(state.ctp);
+        const uint32_t before = sink_.n_push_order_;
+        trader_.OnRtnOrder(&order);
+        ASSERT_EQ(before + 1, sink_.n_push_order_);
+        EXPECT_EQ(state.expected, sink_.snap_state_) << "CTP status " << state.ctp;
+    }
+}
+
+TEST_F(T2TraderCTPTest, queried_order_untouched_and_known_states_keep_wts_meaning)
+{
+    bringToReady();
+    CThostFtdcRspInfoField ok{};
+    for (const auto& state : kKnownOrderStates)
+    {
+        CThostFtdcOrderField order = makeOrderStateCase(state.ctp);
+        const uint32_t before = sink_.n_rsp_orders_;
+        trader_.OnRspQryOrder(&order, &ok, 10, true);
+        ASSERT_EQ(before + 1, sink_.n_rsp_orders_);
+        ASSERT_EQ(1u, sink_.order_query_states_.size());
+        EXPECT_EQ(state.expected, sink_.order_query_states_[0]) << "CTP status " << state.ctp;
+    }
+}
+
+TEST_F(T2TraderCTPTest, instrument_statuses_keep_existing_0_to_6_mapping)
+{
+    CThostFtdcInstrumentStatusField event{};
+    strcpy(event.ExchangeID, kExchg);
+    strcpy(event.InstrumentID, kRawCode);
+    const std::pair<char, WTSTradeStatus> cases[] = {
+        {THOST_FTDC_IS_BeforeTrading, TS_BeforeTrading},
+        {THOST_FTDC_IS_NoTrading, TS_NotTrading},
+        {THOST_FTDC_IS_Continous, TS_Continous},
+        {THOST_FTDC_IS_AuctionOrdering, TS_AuctionOrdering},
+        {THOST_FTDC_IS_AuctionBalance, TS_AuctionBalance},
+        {THOST_FTDC_IS_AuctionMatch, TS_AuctionMatch},
+        {THOST_FTDC_IS_Closed, TS_Closed}
+    };
+    for (const auto& entry : cases)
+    {
+        const uint32_t before = sink_.n_inst_status_;
+        event.InstrumentStatus = entry.first;
+        trader_.OnRtnInstrumentStatus(&event);
+        ASSERT_EQ(before + 1, sink_.n_inst_status_);
+        EXPECT_EQ(static_cast<int>(entry.second), sink_.inst_status_);
+    }
+}
+
 TEST_F(T2TraderCTPTest, trade_conversion_amount_and_usertag_chain)
 {
     bringToReady();
 
-    // 先用订单回报把 orderid->usertag 写进 oid 缓存
+    char eid[64];
+    ASSERT_TRUE(trader_.makeEntrustID(eid, sizeof(eid)));
+    WTSEntrust* submitted = WTSEntrust::create(kRawCode, 4, 7000.0, kExchg);
+    submitted->setEntrustID(eid);
+    submitted->setUserTag("TAG-CHAIN");
+    ASSERT_EQ(0, trader_.orderInsert(submitted));
+
+    // 带标签的下单先登记 eid 缓存，订单回报再把系统单号映射到该标签。
     CThostFtdcOrderField o;
     memset(&o, 0, sizeof(o));
     strcpy(o.InstrumentID, kRawCode);
@@ -840,6 +1014,7 @@ TEST_F(T2TraderCTPTest, trade_conversion_amount_and_usertag_chain)
     strcpy(o.InsertTime, "09:15:00");
     trader_.OnRtnOrder(&o);
     ASSERT_EQ(1u, sink_.n_push_order_);
+    EXPECT_EQ("TAG-CHAIN", sink_.push_order_usertag_);
 
     CThostFtdcTradeField t;
     memset(&t, 0, sizeof(t));
@@ -862,14 +1037,14 @@ TEST_F(T2TraderCTPTest, trade_conversion_amount_and_usertag_chain)
     EXPECT_EQ(WOT_OPEN, sink_.trade_offset_);
     EXPECT_EQ("800009", sink_.trade_ref_);
     EXPECT_EQ(20240115u, sink_.push_trade_date_);
-    EXPECT_EQ("800009", sink_.push_trade_usertag_);   // 未经 orderInsert 登记时回落自身
-    (void)o;
+    EXPECT_EQ("TAG-CHAIN", sink_.push_trade_usertag_);
 
     // 夜盘成交日期修正
     strcpy(t.TradeTime, "21:05:00");
     trader_.OnRtnTrade(&t);
     EXPECT_EQ(2u, sink_.n_push_trade_);
     EXPECT_EQ(20240114u, sink_.push_trade_date_);
+    submitted->release();
 }
 
 TEST_F(T2TraderCTPTest, rsp_order_insert_and_action_error_paths)
@@ -918,7 +1093,7 @@ TEST_F(T2TraderCTPTest, rsp_order_insert_and_action_error_paths)
     ia.SessionID = 67;
     trader_.OnRspOrderAction(&ia, &err, 10, true);
     EXPECT_EQ(1u, sink_.n_trader_error_);
-    EXPECT_EQ("资金不足(15)", sink_.trader_error_);
+    EXPECT_EQ("资金不足", sink_.trader_error_);  // 撤单回报透传 ErrorMsg，不附加 ErrorID
 
     // 无错误码时不应推送错误
     CThostFtdcRspInfoField ok;
@@ -1023,7 +1198,7 @@ TEST_F(T2TraderCTPTest, rsp_qry_order_and_trade_arrays)
     strcpy(o.InsertTime, "10:00:00");
     trader_.OnRspQryOrder(&o, &ok, 16, false);
     EXPECT_EQ(0u, sink_.n_rsp_orders_);
-    trader_.OnRspQryOrder(&o, &ok, 16, true);
+    trader_.OnRspQryOrder(NULL, &ok, 16, true);  // 最后一帧只结束本批，不重复发送订单行
     ASSERT_EQ(1u, sink_.n_rsp_orders_);
     EXPECT_EQ(1u, sink_.orders_size_);
     EXPECT_TRUE(trader_.isConnected());
@@ -1040,9 +1215,9 @@ TEST_F(T2TraderCTPTest, rsp_qry_order_and_trade_arrays)
     strcpy(t.TradeDate, "20240115");
     strcpy(t.TradeTime, "10:00:01");
     trader_.OnRspQryTrade(&t, &ok, 17, false);
-    trader_.OnRspQryTrade(&t, &ok, 17, true);
+    trader_.OnRspQryTrade(NULL, &ok, 17, true);  // 末帧为空，前面的成交行只累计一次
     ASSERT_EQ(1u, sink_.n_rsp_trades_);
-    EXPECT_EQ(2u, sink_.trades_size_);
+    EXPECT_EQ(1u, sink_.trades_size_);
 
     // 错误回报：只清队列不追加
     CThostFtdcRspInfoField err;

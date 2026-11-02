@@ -50,6 +50,9 @@ namespace {
 
 	Probe g_p;			// 第一组探针
 	Probe g_p2;			// 第二组探针：只用来验证「再注册是覆盖不是追加」
+	uint32_t g_null_parser_evt_calls = 0;
+	uint32_t g_null_parser_evt_id = 0;
+	bool g_null_parser_evt_received_null_id = false;
 
 	/* ---- 探针 1：cta 全套 ---- */
 	void p_cta_init(CtxHandler h) { g_p.cta_init++; g_p.last_id = (WtUInt32)h; }
@@ -81,6 +84,12 @@ namespace {
 	void p_sel_bar(CtxHandler, const char*, const char*, WTSBarStruct*) { g_p.sel_bar++; }
 	void p_evt(WtUInt32 evtId, WtUInt32, WtUInt32) { g_p.evt++; g_p.last_str = std::to_string(evtId); }
 	void p_parser_evt(WtUInt32, const char*) { g_p.parser_evt++; }
+	void p_parser_evt_null_probe(WtUInt32 eventId, const char* id)
+	{
+		++g_null_parser_evt_calls;
+		g_null_parser_evt_id = eventId;
+		g_null_parser_evt_received_null_id = id == NULL;
+	}
 	void p_parser_sub(const char*, const char*, bool) { g_p.parser_sub++; }
 	void p_exec_init(const char*) { g_p.exec_init++; }
 	void p_exec_cmd(const char*, const char*, double) { g_p.exec_cmd++; }
@@ -195,7 +204,7 @@ TEST(R6PorterSilence, registering_sel_slots_leaves_cta_and_hft_silent)
 	r.ctx_on_init(7010, ET_SEL);
 	r.ctx_on_calc(7010, 20210104, 93000, ET_SEL);
 
-	EXPECT_EQ(g_p.sel_init, 2u);
+	EXPECT_EQ(g_p.sel_init, 1u);
 	EXPECT_EQ(g_p.sel_calc, 1u);
 	EXPECT_EQ(g_p.cta_init, 0u);
 	EXPECT_EQ(g_p.cta_calc, 0u);
@@ -324,26 +333,26 @@ TEST(R6PorterPassthrough, unknown_context_id_reaches_the_callback_verbatim)
 	EXPECT_EQ(g_p.last_str, "NONEXIST.R6") << "合约码在路由途中被改写";
 }
 
-/* =========================================================================
- * 5) DISABLED_：崩溃类
- *
- * D1 parser_* 的 id 参数没有任何校验：ParserAdapterMgr::getAdapter(NULL) 会用它构造
- *    std::string key -> 未定义行为。同理 on_ext_parser_quote(NULL, ...)。
- *    触发条件：任意 parser_/on_ext_parser_quote 入口传 NULL id。
- * D2 ctx_on_tick 注册回调后传 NULL WTSTickData*：`newTick->getTickStruct()` 空指针解引用
- *    （WtRtRunner.cpp:445-447）。触发条件：注册了 tick 回调再传 NULL。
- * 两条都会打死宿主进程，本轮不启用；缺陷登记见 bugs/R6_porter_runner.md（BUG-R6-004/005）。
- * ---------------------------------------------------------------------- */
-
-TEST(R6PorterNullArgs, DISABLED_parser_id_null_builds_string_from_nullptr)
+/* parser_connect(NULL) is a separate event-forwarding entry; it does not
+ * construct a parser-registry key and remains covered independently of quote validation. */
+TEST(R6PorterNullArgs, parser_connect_null_is_forwarded_as_its_own_entry)
 {
 	WtRtRunner r;
-	r.registerParserPorter(p_parser_evt, p_parser_sub);
-	r.parser_connect(NULL);			// D1
-	r.on_ext_parser_quote(NULL, NULL, 0);	// D1
-	FAIL() << "上面两行只要有一行不崩，就说明守卫加上了，届时应回到启用态";
+	g_null_parser_evt_calls = 0;
+	g_null_parser_evt_id = 0;
+	g_null_parser_evt_received_null_id = false;
+	r.registerParserPorter(p_parser_evt_null_probe, p_parser_sub);
+	r.parser_connect(NULL);
+	EXPECT_EQ(1u, g_null_parser_evt_calls);
+	EXPECT_EQ((uint32_t)EVENT_PARSER_CONNECT, g_null_parser_evt_id);
+	EXPECT_TRUE(g_null_parser_evt_received_null_id);
 }
 
+/* =========================================================================
+ * 6) DISABLED_：其它尚未验证生命周期的崩溃类
+ *
+ * ctx_on_tick 注册回调后传 NULL WTSTickData*：`newTick->getTickStruct()` 空指针解引用。
+ * ---------------------------------------------------------------------- */
 TEST(R6PorterNullArgs, DISABLED_ctx_on_tick_null_tickdata_derefs)
 {
 	WtRtRunner r;

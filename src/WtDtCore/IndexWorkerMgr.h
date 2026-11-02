@@ -68,6 +68,8 @@ public:
 	virtual void			output_log(WTSLogLevel ll, const char* message) override;
 
 private:
+	friend struct R18IndexWorkerMgrTestAccess;
+
 	typedef struct _IdxFactInfo
 	{
 		std::string			_module_path;

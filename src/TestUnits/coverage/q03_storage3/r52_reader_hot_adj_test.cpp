@@ -13,14 +13,54 @@
 //  - getRTTickBlock / getRTOrdQue/OrdDtl/Trans/KilneBlock 的容量变化重映射分支
 //
 // 手法：真实 init(cfg, sink, loader) + q03::Sandbox 临时目录；无访问权限宏。
-// 已知缺陷（见 bugs/R52.md BUG-R52-001）：cacheIntegratedBars 的 HOT 文件读取变量被内层同名
-// 变量遮蔽（L1019-1041）。相关回归按正确的数据返回契约断言，当前产品缺陷应使其失败。
+// BUG-R52-001 的历史根因是 HOT 包裹文件路径变量遮蔽。当前源代码已统一使用外层 filename；
+// 回归覆盖包裹文件读取、缓存复读、分段续接/热尾拼接，以及失败清缓存后的同 reader 重试。
 #include "r52_storage_fixture.h"
 
 #include "WTSUtils/WTSCfgLoader.h"
 #include "WtDataStorage/WtDataReader.h"
 
 namespace r52 {
+
+inline std::string json_quote(const std::string& value)
+{
+	static const char hex[] = "0123456789abcdef";
+	std::string escaped;
+	escaped.reserve(value.size());
+	for (unsigned char ch : value)
+	{
+		switch (ch)
+		{
+		case '"': escaped += "\\\""; break;
+		case '\\': escaped += "\\\\"; break;
+		case '\b': escaped += "\\b"; break;
+		case '\f': escaped += "\\f"; break;
+		case '\n': escaped += "\\n"; break;
+		case '\r': escaped += "\\r"; break;
+		case '\t': escaped += "\\t"; break;
+		default:
+			if (ch < 0x20)
+			{
+				escaped += "\\u00";
+				escaped += hex[ch >> 4];
+				escaped += hex[ch & 0x0f];
+			}
+			else
+				escaped += static_cast<char>(ch);
+		}
+	}
+	return "\"" + escaped + "\"";
+}
+
+inline std::string reader_config_json(const std::string& root, uint32_t adjust_flag,
+	const std::string& adjfactor = std::string())
+{
+	std::string json = "{\"path\":" + json_quote(root) + ",\"adjust_flag\":" + std::to_string(adjust_flag);
+	if (!adjfactor.empty())
+		json += ",\"adjfactor\":" + json_quote(adjfactor);
+	json += "}";
+	return json;
+}
 
 class R52ReaderTest : public ::testing::Test
 {
@@ -36,11 +76,10 @@ protected:
 		_sandbox.reset();
 	}
 
-	void init_reader(uint32_t adjust_flag = 0, const char* extra = "")
+	void init_reader(uint32_t adjust_flag = 0, const string& adjfactor = string())
 	{
 		const string cfgfile = _root + "reader.json";
-		const string json = fmtutil::format("{{\"path\":\"{}\",\"adjust_flag\":{}{}}}",
-			_root, adjust_flag, extra);
+		const string json = reader_config_json(_root, adjust_flag, adjfactor);
 		ASSERT_TRUE(q03::write_bytes(cfgfile, json));
 		WTSVariant* cfg = WTSCfgLoader::load_from_file(cfgfile.c_str());
 		ASSERT_TRUE(cfg != NULL);
@@ -95,6 +134,8 @@ TEST_F(R52ReaderTest, R52HotWrappedFileReadReturnsIntegratedBars)
 	slice->release();
 
 	EXPECT_EQ(_sink.count_of(LL_ERROR), 0u);
+	EXPECT_TRUE(_sink.has_log_containing("wrapped contract"));
+	EXPECT_TRUE(_sink.has_log_containing("cached"));
 	EXPECT_EQ(_hot.split_calls(), 1u);
 
 	// 第二次读取命中缓存，返回相同包裹文件 bars，且不重复切段。
@@ -112,6 +153,83 @@ TEST_F(R52ReaderTest, R52HotWrappedFileReadReturnsIntegratedBars)
 	EXPECT_EQ(_sink.count_of(LL_ERROR), 0u);
 	EXPECT_EQ(_hot.split_calls(), 1u);
 	again->release();
+}
+
+TEST_F(R52ReaderTest, R52HotWrappedFileSplicesMonthlySegmentAfterHotTail)
+{
+	_hot.set_tag("HOT");
+	_hot.set_raw_code("rb2402");
+	_hot.add_section("rb2402", 20240104, 20240108, 1.0);
+
+	vector<WTSBarStruct> hotbars;
+	hotbars.push_back(q03::make_bar(20240105, 20240105, 1));
+	hotbars.push_back(q03::make_bar(20240106, 20240106, 2));
+	ASSERT_TRUE(q03::write_bytes("his/day/SHFE.rb_HOT.dsb",
+		q03::make_block(BT_HIS_Day, BLOCK_VERSION_RAW_V2, q03::pack_bars(hotbars))));
+
+	vector<WTSBarStruct> monthly;
+	for (uint32_t i = 0; i < 5; ++i)
+		monthly.push_back(q03::make_bar(20240104 + i, 20240104 + i, 10 + i));
+	ASSERT_TRUE(q03::write_bytes("his/day/SHFE/rb2402.dsb",
+		q03::make_block(BT_HIS_Day, BLOCK_VERSION_RAW_V2, q03::pack_bars(monthly))));
+
+	init_reader();
+	WTSKlineSlice* slice = _reader.readKlineSlice("SHFE.rb.HOT", KP_DAY, 100, 202401101500ull);
+	ASSERT_NE(slice, nullptr);
+	const vector<WTSBarStruct> got = flatten_bars(slice);
+	ASSERT_EQ(got.size(), 4u);
+	EXPECT_EQ(got[0].date, 20240105u);
+	EXPECT_DOUBLE_EQ(got[0].close, 11.5);
+	EXPECT_EQ(got[1].date, 20240106u);
+	EXPECT_DOUBLE_EQ(got[1].close, 12.5);
+	EXPECT_EQ(got[2].date, 20240107u);
+	EXPECT_DOUBLE_EQ(got[2].close, 23.5);
+	EXPECT_EQ(got[3].date, 20240108u);
+	EXPECT_DOUBLE_EQ(got[3].close, 24.5);
+	EXPECT_EQ(_hot.split_calls(), 1u);
+	EXPECT_EQ(_sink.count_of(LL_ERROR), 0u);
+	EXPECT_TRUE(_sink.has_log_containing("wrapped contract"));
+	EXPECT_TRUE(_sink.has_log_containing("cached"));
+	slice->release();
+}
+
+TEST_F(R52ReaderTest, R52HotWrappedReadFailureClearsCacheAndRetriesSameReader)
+{
+	_hot.set_tag("HOT");
+	_hot.set_raw_code("rb2402");
+	_hot.add_section("rb2402", 20240104, 20240106, 1.0);
+
+	// A directory at the package path causes the wrapped-file read to throw;
+	// after replacing it with a valid package, the same reader must retry loading.
+	const string wrapped_path = "his/day/SHFE.rb_HOT.dsb";
+	std::error_code ec;
+	ASSERT_TRUE(std::filesystem::create_directories(wrapped_path, ec) || !ec);
+	ASSERT_TRUE(std::filesystem::is_directory(wrapped_path));
+	init_reader();
+
+	WTSKlineSlice* failed = _reader.readKlineSlice("SHFE.rb.HOT", KP_DAY, 100, 202401101500ull);
+	EXPECT_EQ(failed, nullptr);
+	if (failed != nullptr)
+		failed->release();
+	EXPECT_GE(_sink.count_of(LL_ERROR), 1u);
+
+	std::filesystem::remove_all(wrapped_path, ec);
+	ASSERT_FALSE(ec);
+	vector<WTSBarStruct> hotbars;
+	hotbars.push_back(q03::make_bar(20240105, 20240105, 1));
+	hotbars.push_back(q03::make_bar(20240106, 20240106, 2));
+	ASSERT_TRUE(q03::write_bytes(wrapped_path,
+		q03::make_block(BT_HIS_Day, BLOCK_VERSION_RAW_V2, q03::pack_bars(hotbars))));
+
+	WTSKlineSlice* retried = _reader.readKlineSlice("SHFE.rb.HOT", KP_DAY, 100, 202401101500ull);
+	ASSERT_NE(retried, nullptr);
+	const vector<WTSBarStruct> got = flatten_bars(retried);
+	ASSERT_EQ(got.size(), 2u);
+	EXPECT_EQ(got[0].date, 20240105u);
+	EXPECT_EQ(got[1].date, 20240106u);
+	EXPECT_EQ(_hot.split_calls(), 1u);
+	EXPECT_TRUE(_sink.has_log_containing("wrapped contract"));
+	retried->release();
 }
 
 // WtDataReader.cpp: cacheIntegratedBars L1019-1259（HOT 包裹文件不存在 → 仅按切段装配）
@@ -201,8 +319,7 @@ TEST_F(R52ReaderTest, R52AdjustedStockQfqUsesFactorFileAndAppliesAllFlagBits)
 	ASSERT_TRUE(q03::write_bytes("his/day/SSE/600000.dsb",
 		q03::make_block(BT_HIS_Day, BLOCK_VERSION_RAW_V2, q03::pack_bars(raw))));
 
-	const string extra = fmtutil::format(",\"adjfactor\":\"{}\"", adjfile);
-	init_reader(7, extra.c_str());
+	init_reader(7, adjfile);
 
 	// 没有 his/day/SSE/600000-.dsb → lastQTime=0，从原始文件头部开始按因子倒序回放
 	WTSKlineSlice* slice = _reader.readKlineSlice("SSE.STK.600000-", KP_DAY, 100, 202401081500ull);
@@ -264,7 +381,7 @@ TEST_F(R52ReaderTest, R52AdjustedStockQfqUsesFactorFileAndAppliesAllFlagBits)
 	WtDataReader reader2;
 	const string cfg2 = _root + "reader_missing.json";
 	ASSERT_TRUE(q03::write_bytes(cfg2,
-		fmtutil::format("{{\"path\":\"{}\",\"adjust_flag\":0,\"adjfactor\":\"{}nope.json\"}}", _root, _root)));
+		reader_config_json(_root, 0, _root + "nope.json")));
 	WTSVariant* v2 = WTSCfgLoader::load_from_file(cfg2.c_str());
 	ASSERT_TRUE(v2 != NULL);
 	reader2.init(v2, &sink2, NULL);
@@ -277,7 +394,7 @@ TEST_F(R52ReaderTest, R52AdjustedStockQfqUsesFactorFileAndAppliesAllFlagBits)
 	ASSERT_TRUE(q03::write_bytes(badfile, "{not-a-json"));
 	const string cfg3 = _root + "reader_bad.json";
 	ASSERT_TRUE(q03::write_bytes(cfg3,
-		fmtutil::format("{{\"path\":\"{}\",\"adjust_flag\":0,\"adjfactor\":\"{}\"}}", _root, badfile)));
+		reader_config_json(_root, 0, badfile)));
 	WTSVariant* v3 = WTSCfgLoader::load_from_file(cfg3.c_str());
 	ASSERT_TRUE(v3 != NULL);
 	reader3.init(v3, &sink3, NULL);
@@ -314,7 +431,7 @@ TEST_F(R52ReaderTest, R52LoaderSuppliesFinalRawBarsAndLazyFactors)
 
 	const string cfgfile = _root + "reader_loader.json";
 	ASSERT_TRUE(q03::write_bytes(cfgfile,
-		fmtutil::format("{{\"path\":\"{}\",\"adjust_flag\":0}}", _root)));
+		reader_config_json(_root, 0)));
 	WTSVariant* cfg = WTSCfgLoader::load_from_file(cfgfile.c_str());
 	ASSERT_TRUE(cfg != NULL);
 	_reader.init(cfg, &_sink, &_loader);

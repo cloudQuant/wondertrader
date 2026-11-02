@@ -17,18 +17,22 @@
  *
  * 订阅位 _tick_subs 是 CtaMocker.h:786/1045、SelMocker.h:566/836、HftMocker.h:1216/1258 的
  * protected 成员，用测试本地派生类直接 insert，不使用 #define private public。
- * 不起线程、不跑 WtBtRunner 的 run/config 成功路径（见文末 DISABLED_）；临时回放数据在系统 temp 目录。
+ * 异步 stop 回归使用本地 Runner 和系统 temp 目录中的临时 CSV，不依赖全局 C 导出状态。
  * 缺陷见 docs/迭代计划/迭代01/bugs/R9_wtbtporter.md。
  */
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <atomic>
 #include <chrono>
+#include <condition_variable>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <mutex>
 #include <string>
 #include <system_error>
+#include <thread>
 #include <vector>
 
 #include "WtBtPorter/PorterDefs.h"
@@ -45,6 +49,14 @@
 #include "Includes/WTSVariant.hpp"
 
 USING_NS_WTP;
+
+struct HisDataReplayerTestAccess
+{
+	static bool is_terminated(const HisDataReplayer& replayer)
+	{
+		return replayer._terminated.load();
+	}
+};
 
 extern WtBtRunner& getRunner();
 
@@ -406,6 +418,139 @@ namespace {
 		cfg->append("basefiles", basefiles);
 		basefiles->release();
 		return cfg;
+	}
+
+	std::string r9_json_escape(const std::string& value)
+	{
+		std::string escaped;
+		escaped.reserve(value.size());
+		for (char ch : value)
+		{
+			if (ch == '\\' || ch == '"')
+				escaped.push_back('\\');
+			escaped.push_back(ch);
+		}
+		return escaped;
+	}
+
+	std::string r9_runner_config(const std::filesystem::path& base)
+	{
+		const std::filesystem::path root = r9_replay_root();
+		return "{\"replayer\":{\"mode\":\"csv\",\"path\":\"" +
+			r9_json_escape(base.string()) +
+			"\",\"stime\":202001020932,\"etime\":202001021500,\"tick\":false,\"fees\":\"\",\"basefiles\":{\"session\":\"" +
+			r9_json_escape((root / "dist/common/sessions.json").string()) +
+			"\",\"commodity\":\"" +
+			r9_json_escape((root / "dist/common/stk_comms.json").string()) +
+			"\"}},\"env\":{\"mocker\":\"none\"}}";
+	}
+
+	class R9InitGate
+	{
+	public:
+		void enter_and_wait()
+		{
+			std::unique_lock<std::mutex> lock(_mutex);
+			_entered = true;
+			_changed.notify_all();
+			_changed.wait(lock, [this]() { return _opened; });
+		}
+
+		bool wait_until_entered()
+		{
+			std::unique_lock<std::mutex> lock(_mutex);
+			return _changed.wait_for(lock, std::chrono::seconds(5), [this]() { return _entered; });
+		}
+
+		void open()
+		{
+			std::lock_guard<std::mutex> lock(_mutex);
+			_opened = true;
+			_changed.notify_all();
+		}
+
+	private:
+		std::mutex _mutex;
+		std::condition_variable _changed;
+		bool _entered{false};
+		bool _opened{false};
+	};
+
+	class StopDuringPrepareSink : public IDataSink
+	{
+	public:
+		StopDuringPrepareSink(WtBtRunner& runner, R9InitGate& gate) : _runner(runner), _gate(gate) {}
+
+		void handle_tick(const char*, WTSTickData*, uint32_t) override {}
+		void handle_bar_close(const char*, const char*, uint32_t, WTSBarStruct*) override
+		{
+			++barCloseCount;
+		}
+		void handle_schedule(uint32_t, uint32_t) override {}
+		void handle_init() override
+		{
+			WTSKlineSlice* bars = _runner.replayer().get_kline_slice(kR9ReplayCode, "m", 1, 1, true);
+			if (bars != nullptr)
+			{
+				loadedBars = bars->size();
+				bars->release();
+			}
+
+			// prepare() invokes handle_init before WtBtRunner launches its async
+			// worker. Hold the callback until the external stop flag is visible.
+			_gate.enter_and_wait();
+		}
+		void handle_session_begin(uint32_t) override {}
+		void handle_session_end(uint32_t) override {}
+		void handle_replay_done() override { ++replayDoneCount; }
+
+		std::atomic<uint32_t> loadedBars{0};
+		std::atomic<uint32_t> barCloseCount{0};
+		std::atomic<uint32_t> replayDoneCount{0};
+
+	private:
+		WtBtRunner& _runner;
+		R9InitGate& _gate;
+	};
+
+	class R9CountingSink : public IDataSink
+	{
+	public:
+		explicit R9CountingSink(WtBtRunner& runner) : _runner(runner) {}
+
+		void handle_tick(const char*, WTSTickData*, uint32_t) override {}
+		void handle_bar_close(const char*, const char*, uint32_t, WTSBarStruct*) override
+		{
+			++barCloseCount;
+		}
+		void handle_schedule(uint32_t, uint32_t) override {}
+		void handle_init() override
+		{
+			WTSKlineSlice* bars = _runner.replayer().get_kline_slice(kR9ReplayCode, "m", 1, 1, true);
+			if (bars != nullptr)
+				bars->release();
+		}
+		void handle_session_begin(uint32_t) override {}
+		void handle_session_end(uint32_t) override {}
+		void handle_replay_done() override { ++replayDoneCount; }
+
+		std::atomic<uint32_t> barCloseCount{0};
+		std::atomic<uint32_t> replayDoneCount{0};
+
+	private:
+		WtBtRunner& _runner;
+	};
+
+	bool wait_until_replayer_stopped(HisDataReplayer& replayer)
+	{
+		const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+		while (std::chrono::steady_clock::now() < deadline)
+		{
+			if (HisDataReplayerTestAccess::is_terminated(replayer))
+				return true;
+			std::this_thread::yield();
+		}
+		return HisDataReplayerTestAccess::is_terminated(replayer);
 	}
 
 	class R9ReplayHft : public ExpHftMocker
@@ -927,15 +1072,70 @@ TEST_F(R9Wired, SelInitSessionBeginAndBacktestEnd)
 	EXPECT_EQ(g9.evt_id, (uint32_t)EVENT_BACKTEST_END);
 }
 
-/*
- * 跳过目标（触发条件，逐条见 manifest）：
- * - WtBtRunner::run(bAsync=false)：_replayer.prepare()+run() 会打开行情存储并同步回放整段区间，
- *   未 config 成功时直接进 IO/断言；bAsync=true 还会起线程并需要 stop() join。
- * - init_sel_mocker：内部 register_task 需要交易时段表 trdtpl/session。
- * - init_backtest：WTSLogger::init 会按 outDir 建目录并接管全局日志单例。
- * - WtBtRunner::stop()：_running 为假时也要 join 可能存在的 _worker。
- */
-TEST_F(R9Wired, DISABLED_RunConfigSuccessPathsNeedStorageAndThreads)
+	/* Stop is observed while prepare is gated, before the async worker can replay. */
+TEST(WtBtRunnerR9Stop, StopDuringPrepareIsForwardedBeforeAsyncWorkerReplays)
 {
-	EXPECT_TRUE(true);
+	R9ReplayWorkspace workspace;
+	ASSERT_TRUE(workspace.ready());
+	ASSERT_TRUE(write_r9_replay_bars(workspace.base(), "m1", 1));
+
+	WtBtRunner runner;
+	runner.init("", false, workspace.base().string().c_str());
+	std::string error;
+	ASSERT_TRUE(runner.config_v2(r9_runner_config(workspace.base()).c_str(), false, &error)) << error;
+	R9InitGate gate;
+	StopDuringPrepareSink sink(runner, gate);
+	runner.replayer().register_sink(&sink, "r9_stop_before_worker");
+
+	std::atomic<bool> runReturned{false};
+	std::atomic<bool> stopReturned{false};
+	std::thread runThread([&]() {
+		runner.run(false, true);
+		runReturned = true;
+	});
+	const bool enteredPrepareCallback = gate.wait_until_entered();
+	std::thread stopThread;
+	bool stopRequestObserved = false;
+	if (enteredPrepareCallback)
+	{
+		stopThread = std::thread([&]() {
+			runner.stop();
+			stopReturned = true;
+		});
+		stopRequestObserved = wait_until_replayer_stopped(runner.replayer());
+	}
+	gate.open();
+	runThread.join();
+	if (stopThread.joinable())
+		stopThread.join();
+
+	EXPECT_TRUE(enteredPrepareCallback);
+	EXPECT_TRUE(stopRequestObserved);
+	EXPECT_TRUE(runReturned.load());
+	EXPECT_TRUE(stopReturned.load());
+	EXPECT_GT(sink.loadedBars.load(), 0U);
+	EXPECT_EQ(0U, sink.barCloseCount.load());
+	EXPECT_EQ(1U, sink.replayDoneCount.load());
+	runner.release();
+}
+
+TEST(WtBtRunnerR9Stop, InactiveStopDoesNotCancelNextRun)
+{
+	R9ReplayWorkspace workspace;
+	ASSERT_TRUE(workspace.ready());
+	ASSERT_TRUE(write_r9_replay_bars(workspace.base(), "m1", 1));
+
+	WtBtRunner runner;
+	runner.init("", false, workspace.base().string().c_str());
+	std::string error;
+	ASSERT_TRUE(runner.config_v2(r9_runner_config(workspace.base()).c_str(), false, &error)) << error;
+	R9CountingSink sink(runner);
+	runner.replayer().register_sink(&sink, "r9_stop_inactive");
+
+	runner.stop();
+	runner.run(false, false);
+
+	EXPECT_GT(sink.barCloseCount.load(), 0U);
+	EXPECT_EQ(1U, sink.replayDoneCount.load());
+	runner.release();
 }

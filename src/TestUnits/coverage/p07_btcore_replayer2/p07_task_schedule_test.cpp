@@ -181,6 +181,44 @@ protected:
 	}
 };
 
+TEST_F(P07TaskScheduleTest, taskParametersAreBoundedAndInvalidReregistrationPreservesTask)
+{
+	const std::string maxField(15, 'x');
+	const std::string oversizedField(16, 'x');
+	EXPECT_TRUE(HisDataReplayer::validate_task_parameters("legacy-period", maxField.c_str(), maxField.c_str()));
+	EXPECT_FALSE(HisDataReplayer::validate_task_parameters(nullptr, "CHINA", "SD0930"));
+	EXPECT_FALSE(HisDataReplayer::validate_task_parameters("d", nullptr, "SD0930"));
+	EXPECT_FALSE(HisDataReplayer::validate_task_parameters("d", "CHINA", nullptr));
+	EXPECT_FALSE(HisDataReplayer::validate_task_parameters("d", oversizedField.c_str(), "SD0930"));
+	EXPECT_FALSE(HisDataReplayer::validate_task_parameters("d", "CHINA", oversizedField.c_str()));
+	EXPECT_TRUE(HisDataReplayer::validate_task_parameters("", "CHINA", "SD0930"));
+
+	HisDataReplayer replayer;
+	WTSVariant* cfg = task_cfg(_root, _base, 202001020930ull, 202001021500ull);
+	ASSERT_NE(cfg, nullptr);
+	if (!replayer.init(cfg))
+	{
+		cfg->release();
+		FAIL() << "replayer initialization failed";
+		return;
+	}
+	cfg->release();
+
+	TaskSink sink;
+	replayer.register_sink(&sink, "p07_task_invalid_registration");
+	replayer.register_task(1, 0, 1500, "d", "CHINA", "SD0930");
+	replayer.register_task(2, 0, 900, nullptr, "CHINA", "SD0930");
+	replayer.register_task(2, 0, 900, "d", nullptr, "SD0930");
+	replayer.register_task(2, 0, 900, "d", "CHINA", nullptr);
+	replayer.register_task(2, 0, 900, "d", oversizedField.c_str(), "SD0930");
+	replayer.register_task(2, 0, 900, "d", "CHINA", oversizedField.c_str());
+
+	ASSERT_TRUE(replayer.prepare());
+	replayer.run(false);
+	EXPECT_EQ(std::vector<uint32_t>({20200102u}), sink.scheduleDates);
+	EXPECT_EQ(std::vector<uint32_t>({TimeUtils::getNextMinute(1500, -1)}), sink.scheduleTimes);
+}
+
 /*
  * TPT_Daily：每个非节假日的交易日在 endtime = getNextMinute(1500, -1) 触发一次。
  * 20200102/20200103 两个交易日都在区间内 -> 2 次调度；

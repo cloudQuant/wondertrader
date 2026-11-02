@@ -15,7 +15,15 @@
 #include <gtest/gtest.h>
 
 #include <cstring>
+#include <filesystem>
 #include <string>
+#include <vector>
+
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
 
 #include "WtBtPorter/PorterDefs.h"
 #include "WtBtPorter/WtBtPorter.h"
@@ -28,6 +36,130 @@ USING_NS_WTP;
 extern WtBtRunner& getRunner();
 
 namespace {
+
+	using FeedAdjFactorsFn = void (*)(WtString, WtUInt32*, double*, WtUInt32);
+	using RegisterExtDataLoaderFn = void (*)(FuncLoadFnlBars, FuncLoadRawBars,
+		FuncLoadAdjFactors, FuncLoadRawTicks, bool);
+	using BeginAdjFactorLoadFn = bool (*)(void*, const char*, FuncReadFactors);
+
+	struct BtPorterDso
+	{
+		std::string error;
+#ifdef _WIN32
+		HMODULE handle = nullptr;
+#else
+		void* handle = nullptr;
+#endif
+
+		bool open()
+		{
+#ifdef _WIN32
+			handle = LoadLibraryA(WT_COV_BTPORTER_LIBRARY_PATH);
+			if (handle == nullptr)
+				error = "LoadLibraryA failed";
+#else
+			handle = dlopen(WT_COV_BTPORTER_LIBRARY_PATH, RTLD_NOW | RTLD_LOCAL);
+			if (handle == nullptr)
+			{
+				const char* loadError = dlerror();
+				error = loadError == nullptr ? "dlopen failed" : loadError;
+			}
+#endif
+			return handle != nullptr;
+		}
+
+		void* symbol(const char* name)
+		{
+			if (handle == nullptr)
+				return nullptr;
+#ifdef _WIN32
+			FARPROC proc = GetProcAddress(handle, name);
+			if (proc == nullptr)
+				error = std::string("GetProcAddress failed: ") + name;
+			return reinterpret_cast<void*>(proc);
+#else
+			dlerror();
+			void* result = dlsym(handle, name);
+			const char* symbolError = dlerror();
+			if (symbolError != nullptr)
+				error = symbolError;
+			return result;
+#endif
+		}
+
+		std::string ownerPath(void* address)
+		{
+#ifdef _WIN32
+			HMODULE owner = nullptr;
+			if (!GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+				GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+				reinterpret_cast<LPCSTR>(address), &owner))
+				return std::string();
+			char path[MAX_PATH] = {};
+			const DWORD length = GetModuleFileNameA(owner, path, MAX_PATH);
+			return length == 0 ? std::string() : std::string(path, length);
+#else
+			Dl_info info{};
+			if (dladdr(address, &info) == 0 || info.dli_fname == nullptr)
+				return std::string();
+			return info.dli_fname;
+#endif
+		}
+
+		static std::string canonicalPath(const std::string& path)
+		{
+			std::error_code ec;
+			const std::filesystem::path canonical = std::filesystem::canonical(path, ec);
+			return ec ? path : canonical.string();
+		}
+
+		bool isFromRequestedDso(void* address, std::string& owner)
+		{
+			owner = ownerPath(address);
+			return !owner.empty() &&
+				canonicalPath(owner) == canonicalPath(WT_COV_BTPORTER_LIBRARY_PATH);
+		}
+	};
+
+	FeedAdjFactorsFn g_dso_feed_adj_factors = nullptr;
+	uint32_t g_adj_loader_calls = 0;
+	std::string g_adj_loader_code;
+
+	struct CapturedAdjFactors
+	{
+		uint32_t calls = 0;
+		std::string stdCode;
+		std::vector<uint32_t> dates;
+		std::vector<double> factors;
+	};
+
+	void capture_adj_factors(void* obj, const char* stdCode, uint32_t* dates,
+		double* factors, uint32_t count)
+	{
+		CapturedAdjFactors* captured = static_cast<CapturedAdjFactors*>(obj);
+		if (captured == nullptr)
+			return;
+		captured->calls++;
+		captured->stdCode = stdCode == nullptr ? "<null>" : stdCode;
+		if (dates != nullptr && factors != nullptr)
+		{
+			captured->dates.assign(dates, dates + count);
+			captured->factors.assign(factors, factors + count);
+		}
+	}
+
+	bool load_adj_factors_from_fixture(const char* stdCode)
+	{
+		g_adj_loader_calls++;
+		g_adj_loader_code = stdCode == nullptr ? "<null>" : stdCode;
+		if (g_dso_feed_adj_factors == nullptr || stdCode == nullptr)
+			return false;
+
+		WtUInt32 dates[2] = { 20240301, 20240701 };
+		double factors[2] = { 1.25, 0.8 };
+		g_dso_feed_adj_factors(stdCode, dates, factors, 2);
+		return true;
+	}
 
 	const CtxHandler kAnyHandle = 0x00AA00AAUL;	// 回测侧句柄本身就被忽略，这里只保证非 0
 
@@ -114,10 +246,65 @@ TEST(Q06BtPorterCapi, FeedEntriesRefuseWithoutExtLoader)
 	memset(&tick, 0, sizeof(tick));
 	feed_raw_ticks(&tick, 1);
 
+	BtPorterDso dso;
+	ASSERT_TRUE(dso.open()) << dso.error;
+	auto registerLoader = reinterpret_cast<RegisterExtDataLoaderFn>(
+		dso.symbol("register_ext_data_loader"));
+	ASSERT_NE(registerLoader, nullptr) << dso.error;
+	auto feedFactors = reinterpret_cast<FeedAdjFactorsFn>(dso.symbol("feed_adj_factors"));
+	ASSERT_NE(feedFactors, nullptr) << dso.error;
+	std::string owner;
+	ASSERT_TRUE(dso.isFromRequestedDso(reinterpret_cast<void*>(feedFactors), owner)) << owner;
+	RecordProperty("feed_adj_factors_owner", owner);
+
+	// Clear the loader on the same DSO whose exported feed function is called.
+	registerLoader(NULL, NULL, NULL, NULL, false);
 	uint32_t dates[1] = { 20240601 };
 	double factors[1] = { 1.0 };
-	feed_adj_factors("SSE.600000", dates, factors, 1);
+	feedFactors("SSE.600000", dates, factors, 1);
 	SUCCEED();
+}
+
+TEST(Q06BtPorterCapi, AdjFactorExportUsesItsOwnRunnerAndFeedsData)
+{
+	BtPorterDso dso;
+	ASSERT_TRUE(dso.open()) << dso.error;
+	void* feedSymbol = dso.symbol("feed_adj_factors");
+	ASSERT_NE(feedSymbol, nullptr) << dso.error;
+	std::string feedOwner;
+	ASSERT_TRUE(dso.isFromRequestedDso(feedSymbol, feedOwner)) << feedOwner;
+	RecordProperty("feed_adj_factors_owner", feedOwner);
+	g_dso_feed_adj_factors = reinterpret_cast<FeedAdjFactorsFn>(feedSymbol);
+
+	auto registerLoader = reinterpret_cast<RegisterExtDataLoaderFn>(
+		dso.symbol("register_ext_data_loader"));
+	ASSERT_NE(registerLoader, nullptr) << dso.error;
+	void* hookSymbol = dso.symbol("wt_btporter_test_load_adj_factors");
+	ASSERT_NE(hookSymbol, nullptr) << dso.error;
+	std::string hookOwner;
+	ASSERT_TRUE(dso.isFromRequestedDso(hookSymbol, hookOwner)) << hookOwner;
+	RecordProperty("load_adj_factors_hook_owner", hookOwner);
+	auto beginLoad = reinterpret_cast<BeginAdjFactorLoadFn>(hookSymbol);
+
+	g_adj_loader_calls = 0;
+	g_adj_loader_code.clear();
+	registerLoader(NULL, NULL, &load_adj_factors_from_fixture, NULL, false);
+	CapturedAdjFactors captured;
+	ASSERT_TRUE(beginLoad(&captured, "SSE.600000", &capture_adj_factors));
+	EXPECT_EQ(g_adj_loader_calls, 1U);
+	EXPECT_EQ(g_adj_loader_code, "SSE.600000");
+	EXPECT_EQ(captured.calls, 1U);
+	EXPECT_EQ(captured.stdCode, "SSE.600000");
+	ASSERT_EQ(captured.dates.size(), 2U);
+	ASSERT_EQ(captured.factors.size(), 2U);
+	EXPECT_EQ(captured.dates[0], 20240301U);
+	EXPECT_EQ(captured.dates[1], 20240701U);
+	EXPECT_DOUBLE_EQ(captured.factors[0], 1.25);
+	EXPECT_DOUBLE_EQ(captured.factors[1], 0.8);
+
+	// Leave this DSO in a no-loader state for any later C API case in the binary.
+	registerLoader(NULL, NULL, NULL, NULL, false);
+	g_dso_feed_adj_factors = nullptr;
 }
 
 /* CTA 族：cta_mocker() 为空时的中性返回值 */

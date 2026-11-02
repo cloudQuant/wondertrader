@@ -337,9 +337,26 @@ TEST_F(R172AdTest, R172BtADKlineDbOpenFailureReturnsFalse)
 	string buffer;
 	EXPECT_FALSE(reader.read_raw_bars("SSE", "600000", KP_Minute1, buffer));
 	EXPECT_TRUE(buffer.empty());
-	EXPECT_TRUE(sink.has_log("Opening min1 db "));
-	EXPECT_TRUE(sink.has_log("SSE failed"));
+	EXPECT_TRUE(sink.has_log("Opening min1 db of SSE failed: "));
 	EXPECT_GE(sink.count_of(LL_ERROR), 1u);
+}
+
+// WtRdmDtReaderAD.cpp:423-426：非法 data.mdb 稳定触发只读 LMDB open 失败，
+// 并确认错误日志指出周期库及交易所。
+TEST_F(R172AdTest, R172RdmADKlineDbOpenFailureIdentifiesDatabaseAndExchange)
+{
+	ASSERT_TRUE(write_blob(base() + "min1/SSE/data.mdb", string(64, 'X')));
+
+	std::unique_ptr<WtRdmDtReaderAD> reader(make_rdm_reader());
+	ASSERT_TRUE(reader != NULL);
+	WTSKlineSlice* slice = reader->readKlineSliceByRange("SSE.600000", KP_Minute1,
+		(uint64_t)20240110 * 10000ULL + 930ULL, (uint64_t)20240110 * 10000ULL + 932ULL);
+	EXPECT_TRUE(slice == NULL);
+	if (slice != NULL)
+		slice->release();
+
+	const string error_log = _qsink->last_log();
+	EXPECT_NE(error_log.find("Opening min1 db of SSE failed: "), string::npos);
 }
 
 } // namespace r172ad

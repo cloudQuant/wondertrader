@@ -411,6 +411,18 @@ namespace
 		g_r93_xtp_stub = NULL;
 	}
 
+	TEST_F(R93XtpTest, logout_before_successful_login_is_rejected_without_sdk_call)
+	{
+		connect_stub();
+		EXPECT_EQ(TraderXTP::TS_NOTLOGIN, api_._state);
+		EXPECT_EQ(0u, api_._sessionid);
+		EXPECT_FALSE(api_.isConnected());
+
+		EXPECT_EQ(-1, api_.logout());
+		EXPECT_EQ(0, stub_.n_logout_);
+		EXPECT_EQ(0u, stub_.logout_session_);
+	}
+
 	TEST_F(R93XtpTest, connect_notification_can_login_while_reconnect_waits)
 	{
 		std::mutex event_mutex;
@@ -796,6 +808,44 @@ namespace
 		g_r93_xtp_stub = NULL;
 	}
 
+	TEST_F(R93XtpTest, logout_during_login_is_rejected_then_successful_session_can_logout)
+	{
+		R93XtpBlockingLoginStub blocking_stub;
+		R93XtpReleaseGuard release_guard(api_);
+		g_r93_xtp_stub = &blocking_stub;
+		api_.m_funcCreator = &r93_xtp_create;
+		api_.connect();
+
+		std::atomic<int> login_result(-99);
+		std::thread login_thread([&]() {
+			login_result.store(api_.login("xtpuser", "xtppass", ""));
+		});
+		if (!blocking_stub.wait_for_login(std::chrono::seconds(2)))
+		{
+			blocking_stub.unblock_login();
+			login_thread.join();
+			g_r93_xtp_stub = NULL;
+			FAIL() << "Login did not enter the fake SDK";
+			return;
+		}
+
+		{
+			std::lock_guard<std::mutex> stateLock(api_._login_state_mutex);
+			EXPECT_EQ(TraderXTP::TS_LOGINING, api_._state);
+			EXPECT_EQ(0u, api_._sessionid);
+		}
+		EXPECT_EQ(-1, api_.logout());
+		EXPECT_EQ(0, blocking_stub.n_logout_);
+
+		blocking_stub.unblock_login();
+		login_thread.join();
+		EXPECT_EQ(0, login_result.load());
+		EXPECT_EQ(0, api_.logout());
+		EXPECT_EQ(1, blocking_stub.n_logout_);
+		EXPECT_EQ(12345u, blocking_stub.logout_session_);
+		g_r93_xtp_stub = NULL;
+	}
+
 	/// TraderXTP.cpp L753-817：首次成功登录初始化 eid/oid 缓存、异步置 ALLREADY；
 	/// 第二次登录走「Connection recovered」分支；logout 传 session_id。
 	TEST_F(R93XtpTest, login_success_then_recovery_and_logout)
@@ -879,6 +929,26 @@ namespace
 		ASSERT_FALSE(sink_.logs.empty());
 		EXPECT_NE(std::string::npos, sink_.logs.back().find("no counter"));
 		fail->release();
+	}
+
+	TEST_F(R93XtpTest, order_insert_encodes_close_yesterday_offset_in_effect_field)
+	{
+		make_ready();
+
+		char eid[64] = { 0 };
+		ASSERT_TRUE(api_.makeEntrustID(eid, sizeof(eid)));
+		WTSEntrust* ent = WTSEntrust::create("510050C2601", 1, 0.123, "SSE");
+		ent->setEntrustID(eid);
+		ent->setDirection(WDT_SHORT);
+		ent->setOffsetType(WOT_CLOSEYESTERDAY);
+
+		// Verify only the mapping field; orderInsert currently selects CASH, so
+		// this does not establish that the SDK accepts an option order request.
+		ASSERT_EQ(0, api_.orderInsert(ent));
+		ASSERT_EQ(1, stub_.n_insert_);
+		EXPECT_STREQ("510050C2601", stub_.insert_req_.ticker);
+		EXPECT_EQ(XTP_POSITION_EFFECT_CLOSEYESTERDAY, stub_.insert_req_.position_effect);
+		ent->release();
 	}
 
 	/* ------------------------------------------------------------------ */

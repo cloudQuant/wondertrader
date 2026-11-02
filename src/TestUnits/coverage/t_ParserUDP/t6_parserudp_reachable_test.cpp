@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "ParserUDP/ParserUDP.h"
+#include "WtCore/ParserAdapter.h"
 
 #include "Includes/IBaseDataMgr.h"
 #include "Includes/WTSDataDef.hpp"
@@ -59,6 +60,23 @@ extern "C"
 
 namespace
 {
+	class InitExtBaseDataMgr : public IBaseDataMgr
+	{
+	public:
+		WTSCommodityInfo* getCommodity(const char*) override { return nullptr; }
+		WTSCommodityInfo* getCommodity(const char*, const char*) override { return nullptr; }
+		WTSContractInfo* getContract(const char*, const char*, uint32_t) override { return nullptr; }
+		WTSArray* getContracts(const char*, uint32_t) override { return WTSArray::create(); }
+		WTSSessionInfo* getSession(const char*) override { return nullptr; }
+		WTSSessionInfo* getSessionByCode(const char*, const char*) override { return nullptr; }
+		WTSArray* getAllSessions() override { return WTSArray::create(); }
+		bool isHoliday(const char*, uint32_t, bool) override { return false; }
+		uint32_t calcTradingDate(const char*, uint32_t tradingDate, uint32_t, bool) override
+		{ return tradingDate; }
+		uint64_t getBoundaryTime(const char*, uint32_t tradingDate, bool, bool) override
+		{ return tradingDate; }
+	};
+
 	/// IParserSpi 替身：只记录回调，不接行情源
 	class UdpSink : public IParserSpi
 	{
@@ -190,6 +208,25 @@ TEST(t6_parserudp_init, missing_host_reports_initialization_failure)
 	EXPECT_NO_THROW(initialized = parser.init(cfg));
 	EXPECT_FALSE(initialized);
 	cfg->release();
+}
+
+TEST(t6_parserudp_init, wtcore_parser_adapter_init_ext_passes_null_and_releases_real_parser)
+{
+	InitExtBaseDataMgr bdMgr;
+	IParserStub stub;
+	ParserAdapter adapter;
+	IParserApi* parser = createParser();
+	ASSERT_NE(nullptr, parser);
+
+	EXPECT_FALSE(adapter.initExt("t6_null_init_ext", parser, &stub, &bdMgr));
+	EXPECT_FALSE(adapter.isInitialized());
+	EXPECT_TRUE(adapter.hasApi());
+
+	// initExt transfers ownership even when ParserUDP rejects the NULL config.
+	// It has not connected or started a worker, so release can drain synchronously.
+	adapter.release();
+	parser = nullptr;
+	EXPECT_FALSE(adapter.hasApi());
 }
 
 TEST(t6_parserudp_init, init_can_be_reapplied_with_a_different_host)

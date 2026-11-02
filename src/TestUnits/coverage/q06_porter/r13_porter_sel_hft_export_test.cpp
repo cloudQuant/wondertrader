@@ -33,6 +33,7 @@
 #include "WtPorter/PorterDefs.h"
 #include "WtPorter/WtPorter.h"
 #include "WtPorter/WtRtRunner.h"
+#include "WtCore/WtHftEngine.h"
 #include "../trader_mocker_fixture.h"
 
 #include "Includes/WTSStruct.h"
@@ -251,7 +252,7 @@ namespace {
 			|| !write_text(dir + "/commodities.json", kHftCommodities)
 			|| !write_text(dir + "/contracts.json", kHftContracts)
 			|| !write_text(dir + "/hot.json", kHftRules)
-			|| !write_text(dir + "/actions.json", "{}"))
+			|| !write_text(dir + "/actions.json", "{\"default\":{}}"))
 			return fail_hft_probe(4, "could not write temporary config files");
 
 		const std::string traderId = "r13_registered_trader";
@@ -262,7 +263,7 @@ namespace {
 
 		const std::string cfg = hft_config(dir, traderId);
 		config_porter(cfg.c_str(), false);
-		if (getRunner().getEngine() == NULL)
+		if (dynamic_cast<WtHftEngine*>(getRunner().getEngine()) == NULL)
 			return fail_hft_probe(5, "HFT engine config did not initialize");
 
 		const CtxHandler h = create_hft_context("r13_hft_registered", traderId.c_str(), false, 1);

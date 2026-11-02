@@ -258,6 +258,21 @@ WTSVariant* makeCfg(const char* priceKey, int32_t offset, uint32_t expire, int32
 	cfg->append("minopenlots", minOpenLots);
 	return cfg;
 }
+
+std::string r115V2VwapBody(double value)
+{
+	std::string body = "{\"version\":2,\"profiles\":[{\"session_id\":\"R115DAY\",\"offset_minutes\":0,"
+		"\"sections\":[{\"from\":900,\"to\":1500}],\"bucket_unit\":\"trading_minute\","
+		"\"value_mode\":\"cumulative\",\"close_inclusive\":true,\"values\":[";
+	for (uint32_t i = 0; i <= 360; ++i)
+	{
+		if (i != 0)
+			body += ",";
+		body += std::to_string((long long)value);
+	}
+	body += "]}]}";
+	return body;
+}
 }	// namespace
 
 //////////////////////////////////////////////////////////////////////////
@@ -414,20 +429,13 @@ TEST(r115_exefact, minimpact_auto_down_lower_limit_fill_and_rate_floor)
 TEST(r115_exefact, vwap_time_buckets_and_cancel_refire_upper_limit)
 {
 	TempCwd cwd("vwap");
-	{
-		std::string body;
-		for (uint32_t i = 0; i < 400; i++)
-		{
-			if (i)
-				body += ",";
-			body += "1000";
-		}
-		cwd.write("Vwap_R115VW.txt", body);
-	}
+	cwd.write("Vwap_R115VW.txt", r115V2VwapBody(1000));
 
 	Env env;
 	env.comm = makeFutComm("rb", "R115VW");
+	env.sess = makeDaySession(900, 1500);
 	env.ctx.comm = env.comm;
+	env.ctx.sess = env.sess;
 	{
 		WtVWapExeUnit unit;
 		WTSVariant* cfg = WTSVariant::createObject();
@@ -442,6 +450,7 @@ TEST(r115_exefact, vwap_time_buckets_and_cancel_refire_upper_limit)
 		cfg->append("minopenlots", 100.0);
 		unit.init(&env.ctx, kCode, cfg);
 		cfg->release();
+		ASSERT_TRUE(env.ctx.hasLog("初始化完成"));
 
 		unit.set_position(kCode, 1000.0);	// 无 tick：L341-345
 		unit.on_channel_ready();			// 无 tick：L341-345
@@ -466,14 +475,17 @@ TEST(r115_exefact, vwap_time_buckets_and_cancel_refire_upper_limit)
 		ASSERT_EQ(env.ctx.buys.size(), 3u);
 		EXPECT_DOUBLE_EQ(env.ctx.buys[2].price, 3900.0);
 
-		// 撤单回报 -> fire_at_once；cancel_times=1 使价格 4001，仍高于涨停 -> L473-477
+		// 撤单回报后等待新行情再重试；cancel_times=1 使价格 4001，仍高于涨停 -> L473-477
 		unit.on_order(env.ctx.lastId, kCode, true, 0.0, 3900.0, true);
+		WTSTickData* t4 = makeTick(kCode, 20240102, 140001000, 4000, 3400, 3999, 100, 4001, 100, 3900, 3000);
+		unit.on_tick(t4);
 		ASSERT_EQ(env.ctx.buys.size(), 4u);
 		EXPECT_DOUBLE_EQ(env.ctx.buys[3].price, 3900.0);
 
 		t1->release();
 		t2->release();
 		t3->release();
+		t4->release();
 	}
 }
 

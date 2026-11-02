@@ -159,6 +159,18 @@ TEST_F(R171ReplayFixture, R171Uft_EnumPositionEmptyAndPrice)
 TEST_F(R171ReplayFixture, R171Uft_EnumPositionMismatchSkipsEntry)
 {
 	UftMocker uft(&_rp, "r171_uft_enum_mismatch");
+	// UftMocker::procOrder 会查询 replayer 的 last tick；手工传给 handle_tick 的 tick
+	// 不会替代该查询。补一条位于当前 09:32 游标的历史记录，保证买单成交后再测异合约过滤。
+	const std::filesystem::path tickFile = _base / "bin" / "ticks" /
+		(std::string(kFut1) + "_tick_20200102.dsb");
+	std::string tickBlock = r141::make_old_tick_block(2, 800.0);
+	WTSTickStructOld* historicalTicks = (WTSTickStructOld*)(tickBlock.data() + sizeof(BlockHeader));
+	historicalTicks[1].action_time = 93200000u;
+	ASSERT_TRUE(r141::write_text(tickFile, tickBlock));
+	WTSTickData* available = _rp.get_last_tick(kFut1);
+	ASSERT_NE(nullptr, available);
+	EXPECT_EQ(93200000u, available->actiontime());
+	available->release();
 
 	ASSERT_EQ(1u, uft.stra_buy(kFut1, 0.0, 1).size());
 	WTSTickData* t = r141::make_tick(kFut1, 20200102u, 93200000u, 800.0, 799.0, 801.0);
@@ -192,17 +204,21 @@ TEST_F(R171ReplayFixture, R171HisData_ResampleTimesZeroRejected)
 }
 
 // 生产: HisDataReplayer.cpp:2899-2904（get_last_tick 的 lower_bound 跨日比较；2901）
-// 同一个 tick 块里放 20200102/20200103 两笔，当前日期为 20200102 时，
-// lower_bound 会比较到不同 action_date 的元素并执行 2901 的日期分支。
+// 当前回放游标为 20200102 09:32；第一笔放在当前游标，第二笔属于未来交易日。
+// lower_bound 先比较跨日元素，再返回当前日期记录，不能把未来日期当成当前 last tick。
 TEST_F(R171ReplayFixture, R171HisData_LastTickCrossDateComparator)
 {
+	std::string content = r171::make_cross_date_tick_block(20200103u, 70000.0);
+	WTSTickStructOld* ticks = (WTSTickStructOld*)(content.data() + sizeof(BlockHeader));
+	ticks[0].action_time = 93200000u;
 	ASSERT_TRUE(r141::write_text(
-		_base / "bin" / "ticks" / (std::string(kCu) + "_tick_20200102.dsb"),
-		r171::make_cross_date_tick_block(20200103u, 70000.0)));
+		_base / "bin" / "ticks" / (std::string(kCu) + "_tick_20200102.dsb"), content));
 
 	WTSTickData* last = _rp.get_last_tick(kCu);
 	ASSERT_NE(nullptr, last);
-	EXPECT_DOUBLE_EQ(70001.0, last->price());
+	EXPECT_EQ(20200102u, last->actiondate());
+	EXPECT_EQ(93200000u, last->actiontime());
+	EXPECT_DOUBLE_EQ(70000.0, last->price());
 	last->release();
 }
 

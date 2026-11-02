@@ -142,7 +142,8 @@ TEST_F(R71CtaTest, LoadDataOptionalDefaultsAndZeroVolumeQueries)
      "lastentertime": 0, "lastexittime": 0,
      "details": [{"long": true, "price": 3000, "volume": 0, "opentime": 0,
                   "profit": 0.0, "maxprofit": 0.0, "maxloss": 0.0, "opentag": "Z"}]}
-  ]
+  ],
+  "conditions": {"settime": 0, "items": {}}
 })json";
     ASSERT_TRUE(r71::write_file(r71::stra_data_file("r71_cta_optional"), json));
 
@@ -247,17 +248,18 @@ TEST_F(R71CtaTest, CloseReverseSlippageAndEarlyExitsWriteLogs)
      "details": [{"long": false, "price": 4000, "maxprice": 4000, "minprice": 4000,
                   "volume": 3, "opentime": 1, "opentdate": 20250110, "profit": 0,
                   "maxprofit": 0, "maxloss": 0, "opentag": "B", "openbarno": 0}]}
-  ]
+  ],
+  "conditions": {"settime": 0, "items": {}}
 })json";
     ASSERT_TRUE(r71::write_file(r71::stra_data_file("r71_cta_close"), json));
     ctx->on_init();
 
-    // 多头全平：滑点 +2 * priceTick(1)
+    // 多头全平为卖出，滑点向下：3500 - 2 * priceTick(1) = 3498
     ctx->stra_set_position("SHFE.rb.2510", 0.0, "X");
     feed(*ctx, "SHFE.rb.2510", 3500.0);
     EXPECT_DOUBLE_EQ(ctx->stra_get_position("SHFE.rb.2510"), 0.0);
     EXPECT_DOUBLE_EQ(ctx->stra_get_position_profit("SHFE.rb.2510"), 0.0);
-    EXPECT_DOUBLE_EQ(ctx->stra_get_fund_data(1), 10040.0); // (3502-3000)*2*10
+    EXPECT_DOUBLE_EQ(ctx->stra_get_fund_data(1), 9960.0); // (3498-3000)*2*10
 
     // 0 -> -1：空仓反手开空
     ctx->stra_set_position("SHFE.rb.2510", -1.0, "Y");
@@ -305,7 +307,9 @@ TEST_F(R71CtaTest, ScheduleEmitsTwentyTimesAndPersistsCondition)
     ctx->emit_condition = true;
     ctx->cond_code = "SHFE.rb.2510";
 
-    ASSERT_NE(ctx->stra_get_bars("SHFE.rb.2510", "m", 3, true), nullptr);
+    WTSKlineSlice* mainBars = ctx->stra_get_bars("SHFE.rb.2510", "m1", 3, true);
+    ASSERT_NE(mainBars, nullptr);
+    mainBars->release();
 
     WTSBarStruct bar;
     memset(&bar, 0, sizeof(bar));
@@ -399,7 +403,8 @@ TEST_F(R71CtaTest, ExitAndSetPositionConditionBranches)
      "details": [{"long": false, "price": 4000, "maxprice": 4000, "minprice": 4000, "volume": 4,
                   "opentime": 1, "opentdate": 20250110, "profit": 0, "maxprofit": 0,
                   "maxloss": 0, "opentag": "C", "openbarno": 0}]}
-  ]
+  ],
+  "conditions": {"settime": 0, "items": {}}
 })json";
     ASSERT_TRUE(r71::write_file(r71::stra_data_file("r71_cta_exit"), json));
     ctx->on_init();

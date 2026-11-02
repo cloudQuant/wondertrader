@@ -98,7 +98,7 @@ TEST(ws01_strutil, split_vector)
 	EXPECT_EQ(v[2], "c,d");
 
 	// Trailing delimiter.
-	v = StrUtil::split("a,");
+	v = StrUtil::split("a,", ",");
 	ASSERT_EQ(v.size(), 2u);
 	EXPECT_EQ(v[0], "a");
 	EXPECT_EQ(v[1], "");
@@ -135,7 +135,7 @@ TEST(ws01_strutil, split2)
 	EXPECT_EQ(v[1], "b");
 	EXPECT_EQ(v[2], "c");
 
-	v = StrUtil::split2(",a");
+	v = StrUtil::split2(",a", ",");
 	ASSERT_EQ(v.size(), 2u);
 	EXPECT_EQ(v[0], "");
 	EXPECT_EQ(v[1], "a");

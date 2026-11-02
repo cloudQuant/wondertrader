@@ -14,21 +14,35 @@
  */
 #include <gtest/gtest.h>
 
+#include <cerrno>
+#include <chrono>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <regex>
 #include <sstream>
 #include <string>
 #include <system_error>
+#include <thread>
 #include <vector>
+#include <signal.h>
+#include <spawn.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
+#include <Includes/ILogHandler.h>
 #include <WtBtCore/HisDataReplayer.h>
 #include <WtBtCore/SelMocker.h>
 #include <WtBtCore/WtHelper.h>
 #include <Includes/WTSDataDef.hpp>
 #include <Includes/WTSVariant.hpp>
+#include <WTSTools/WTSLogger.h>
+
+USING_NS_WTP;
+
+extern char** environ;
 
 namespace
 {
@@ -104,8 +118,190 @@ public:
 
 	uint32_t replayDoneCalls {0};
 
+	uint32_t emitTimes() const { return _emit_times; }
+	uint32_t scheduleTimes() const { return _schedule_times; }
+	uint64_t totalCalcTime() const { return _total_calc_time; }
+
 	void on_bactest_end() override { replayDoneCalls++; }
 };
+
+class R43LogCapture : public ILogHandler
+{
+public:
+	std::string messages;
+
+	void handleLogAppend(WTSLogLevel, const char* msg) override
+	{
+		if (msg != nullptr)
+			messages.append(msg).push_back('\n');
+	}
+};
+
+class R43ScopedLogHandler
+{
+public:
+	explicit R43ScopedLogHandler(ILogHandler* handler) { WTSLogger::registerHandler(handler); }
+	~R43ScopedLogHandler() { WTSLogger::registerHandler(nullptr); }
+
+	R43ScopedLogHandler(const R43ScopedLogHandler&) = delete;
+	R43ScopedLogHandler& operator=(const R43ScopedLogHandler&) = delete;
+};
+
+namespace
+{
+	constexpr const char* kR43ScheduleStatsChildEnv = "WT_R43_SCHEDULE_STATS_CHILD";
+	const char* const kR43ScheduleStatsLoggerConfig = R"({
+		"root":{"level":"info","async":false,"sinks":[]},
+		"dyn_pattern":{"strategy":{"level":"info","async":false,"sinks":[]}}
+	})";
+
+	void verifyR43ScheduledStatsInChild()
+	{
+		WTSLogger::init(kR43ScheduleStatsLoggerConfig, false, nullptr);
+		R43LogCapture logCapture;
+		R43ScopedLogHandler logHandler(&logCapture);
+
+		HisDataReplayer replayer;
+		R43CompletionTrackingSelMocker mocker(&replayer, "r43_sel_stats_child");
+		mocker.handle_schedule(20200106u, 930u);
+		mocker.handle_schedule(20200106u, 931u);
+		mocker.handle_replay_done();
+
+		EXPECT_EQ(2u, mocker.scheduleTimes());
+		EXPECT_EQ(2u, mocker.emitTimes());
+		EXPECT_EQ(1u, mocker.replayDoneCalls);
+
+		const std::regex statsPattern(
+			"Strategy has been scheduled for ([0-9]+) times,totally taking ([0-9]+) microsecs,average of ([0-9]+) microsecs");
+		std::smatch stats;
+		ASSERT_TRUE(std::regex_search(logCapture.messages, stats, statsPattern)) << logCapture.messages;
+		const uint64_t loggedEmitTimes = std::stoull(stats[1].str());
+		const uint64_t loggedTotalTime = std::stoull(stats[2].str());
+		const uint64_t loggedAverageTime = std::stoull(stats[3].str());
+		ASSERT_NE(0u, loggedEmitTimes);
+		EXPECT_EQ(mocker.emitTimes(), loggedEmitTimes);
+		EXPECT_EQ(mocker.totalCalcTime(), loggedTotalTime);
+		EXPECT_EQ(loggedTotalTime / loggedEmitTimes, loggedAverageTime);
+	}
+
+	void verifyR43ZeroStatsInChild(const std::filesystem::path& out)
+	{
+		WTSLogger::init(kR43ScheduleStatsLoggerConfig, false, nullptr);
+		R43LogCapture logCapture;
+		R43ScopedLogHandler logHandler(&logCapture);
+
+		HisDataReplayer replayer;
+		R43CompletionTrackingSelMocker mocker(&replayer, "r43_sel_zero_stats_child");
+		WTSVariant* cfg = WTSVariant::createObject();
+		cfg->append("mode", "csv");
+		cfg->append("path", out.string().c_str());
+		cfg->append("stime", static_cast<uint64_t>(202001020930));
+		cfg->append("etime", static_cast<uint64_t>(202001021500));
+		cfg->append("tick", false);
+		cfg->append("adjust_flag", static_cast<uint32_t>(0));
+		cfg->append("align_by_section", false);
+		cfg->append("dont_simtick_if_notrade", false);
+		cfg->append("cache_clear_days", static_cast<uint32_t>(10));
+		cfg->append("fees", "");
+
+		const std::filesystem::path root = r43_repo_root();
+		WTSVariant* basefiles = WTSVariant::createObject();
+		basefiles->append("session", (root / "dist/common/sessions.json").string().c_str());
+		basefiles->append("commodity", (root / "dist/common/stk_comms.json").string().c_str());
+		cfg->append("basefiles", basefiles);
+		basefiles->release();
+
+		const bool initialized = replayer.init(cfg);
+		cfg->release();
+		ASSERT_TRUE(initialized);
+		replayer.enable_tick(false);
+		replayer.register_sink(&mocker, "r43_sel_zero_stats_child");
+		ASSERT_TRUE(replayer.prepare());
+		EXPECT_EQ(0u, mocker.scheduleTimes());
+		EXPECT_EQ(0u, mocker.emitTimes());
+		replayer.run(false);
+		EXPECT_EQ(1u, mocker.replayDoneCalls);
+		EXPECT_EQ(0u, mocker.scheduleTimes());
+		EXPECT_EQ(0u, mocker.emitTimes());
+		EXPECT_EQ(0u, mocker.totalCalcTime());
+
+		const std::regex statsPattern(
+			"Strategy has been scheduled for ([0-9]+) times,totally taking ([0-9]+) microsecs,average of ([0-9]+) microsecs");
+		std::smatch stats;
+		ASSERT_TRUE(std::regex_search(logCapture.messages, stats, statsPattern)) << logCapture.messages;
+		EXPECT_EQ(0u, std::stoull(stats[1].str()));
+		EXPECT_EQ(0u, std::stoull(stats[2].str()));
+		EXPECT_EQ(0u, std::stoull(stats[3].str()));
+
+		const std::filesystem::path dir = out / "r43_sel_zero_stats_child";
+		EXPECT_TRUE(std::filesystem::exists(dir / "trades.csv"));
+		EXPECT_TRUE(std::filesystem::exists(dir / "ud_r43_sel_zero_stats_child.json"));
+	}
+
+	int runR43StatsChild(const char* mode, const char* testFilter)
+	{
+		const std::vector<std::string> args = testing::internal::GetArgvs();
+		if (args.empty() || args[0].empty())
+			return 125;
+
+		const std::string executable = std::filesystem::absolute(args[0]).string();
+		const std::string filter = std::string("--gtest_filter=") + testFilter;
+		const std::string color = "--gtest_color=no";
+		std::vector<char*> childArgs = {
+			const_cast<char*>(executable.c_str()),
+			const_cast<char*>(filter.c_str()),
+			const_cast<char*>(color.c_str()),
+			nullptr
+		};
+
+		std::vector<std::string> envStorage;
+		const std::string childEnvPrefix = std::string(kR43ScheduleStatsChildEnv) + "=";
+		for (char** item = environ; item != nullptr && *item != nullptr; ++item)
+		{
+			if (std::strncmp(*item, childEnvPrefix.c_str(), childEnvPrefix.size()) != 0)
+				envStorage.emplace_back(*item);
+		}
+		envStorage.emplace_back(childEnvPrefix + mode);
+
+		std::vector<char*> childEnv;
+		childEnv.reserve(envStorage.size() + 1);
+		for (std::string& item : envStorage)
+			childEnv.push_back(const_cast<char*>(item.c_str()));
+		childEnv.push_back(nullptr);
+
+		pid_t child = 0;
+		const int spawnResult = posix_spawn(&child, executable.c_str(), nullptr, nullptr,
+			childArgs.data(), childEnv.data());
+		if (spawnResult != 0)
+			return 125;
+
+		const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
+		int status = 0;
+		for (;;)
+		{
+			const pid_t waited = waitpid(child, &status, WNOHANG);
+			if (waited == child)
+				break;
+			if (waited == -1 && errno != EINTR)
+			{
+				kill(child, SIGKILL);
+				waitpid(child, &status, 0);
+				return 125;
+			}
+			if (std::chrono::steady_clock::now() >= deadline)
+			{
+				kill(child, SIGKILL);
+				waitpid(child, &status, 0);
+				return 124;
+			}
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		}
+
+		if (WIFEXITED(status))
+			return WEXITSTATUS(status);
+		return 128 + (WIFSIGNALED(status) ? WTERMSIG(status) : 0);
+	}
+}
 
 class R43SelMockerDumpTest : public ::testing::Test
 {
@@ -128,8 +324,18 @@ protected:
 // 调度推进 + 回放结束落盘：六个 csv 与两个 json 都必须生成，且 json 含三段结构
 TEST_F(R43SelMockerDumpTest, scheduleThenReplayDoneWritesAllArtifacts)
 {
+	const char* childMode = std::getenv(kR43ScheduleStatsChildEnv);
+	if (childMode != nullptr && std::strcmp(childMode, "scheduled") == 0)
+	{
+		verifyR43ScheduledStatsInChild();
+		return;
+	}
+
+	ASSERT_EQ(0, runR43StatsChild("scheduled", "R43SelMockerDumpTest.scheduleThenReplayDoneWritesAllArtifacts"))
+		<< "isolated scheduled-stats subprocess failed or timed out";
+
 	HisDataReplayer replayer;
-	SelMocker mocker(&replayer, "r43_sel_dump");
+	R43CompletionTrackingSelMocker mocker(&replayer, "r43_sel_dump");
 	const char* code = "SSE.STK.000001";
 
 	// 没有K线标签时 on_schedule 仍会推进 _schedule_times/_emit_times
@@ -137,6 +343,10 @@ TEST_F(R43SelMockerDumpTest, scheduleThenReplayDoneWritesAllArtifacts)
 	mocker.handle_schedule(20200106u, 931u);
 
 	mocker.handle_replay_done();
+
+	EXPECT_EQ(2u, mocker.scheduleTimes());
+	EXPECT_EQ(2u, mocker.emitTimes());
+	EXPECT_EQ(1u, mocker.replayDoneCalls);
 
 	const std::filesystem::path dir = _out / "r43_sel_dump";
 	ASSERT_TRUE(std::filesystem::exists(dir / "trades.csv"));
@@ -265,6 +475,16 @@ TEST_F(R43SelMockerDumpTest, loggingAndTickWithoutSignalsKeepState)
 
 TEST_F(R43SelMockerDumpTest, replayDoneWithoutScheduleWritesArtifacts)
 {
+	const char* childMode = std::getenv(kR43ScheduleStatsChildEnv);
+	if (childMode != nullptr && std::strcmp(childMode, "zero") == 0)
+	{
+		verifyR43ZeroStatsInChild(_out);
+		return;
+	}
+
+	ASSERT_EQ(0, runR43StatsChild("zero", "R43SelMockerDumpTest.replayDoneWithoutScheduleWritesArtifacts"))
+		<< "isolated zero-schedule stats subprocess failed or timed out";
+
 	HisDataReplayer replayer;
 	R43CompletionTrackingSelMocker mocker(&replayer, "r43_sel_div0");
 

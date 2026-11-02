@@ -5,7 +5,7 @@
  *
  * 覆盖行段：:78-84（库可 dlopen 但不导出 create_server）
  *
- * 做法：在系统临时目录放一个 libWtMsgQue 符号链接，指向构建目录里
+ * 做法：在系统临时目录放一个 libWtMsgQue 文件副本，内容来自构建目录里
  * 确实存在但并不导出 create_server 的 libWtDataStorage；init 成功 dlopen
  * 后 get_symbol 失败，走兼容性拒绝分支。不起 worker、不建端口。
  */
@@ -41,8 +41,8 @@ TEST_F(R101EventNotifierLoader, IncompatibleModuleRejected)
     std::error_code ec;
     fs::remove_all(dir, ec);
     fs::create_directories(dir, ec);
-    fs::create_symlink(src, dir + wrapped, ec);
-    ASSERT_FALSE(ec);
+    fs::copy_file(src, dir + wrapped, fs::copy_options::overwrite_existing, ec);
+    ASSERT_FALSE(ec) << ec.message();
 
     const std::string oldInst = WtHelper::getInstDir();
     WtHelper::setInstDir(dir.c_str());

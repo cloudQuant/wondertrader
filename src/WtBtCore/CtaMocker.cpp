@@ -238,6 +238,7 @@ CtaMocker::CtaMocker(HisDataReplayer* replayer, const char* name, int32_t slippa
 	, _in_backtest(false)
 	, _wait_calc(false)
 	, _persist_data(persistData)
+	, _cur_tdate(0)
 	, _last_cond_min(0)
 {
 	_context_id = makeCtxId();
@@ -352,6 +353,8 @@ void CtaMocker::dump_stradata()
 
 			jItem.AddMember("volume", sInfo._volume, allocator);
 			jItem.AddMember("sigprice", sInfo._sigprice, allocator);
+			jItem.AddMember("desprice", sInfo._desprice, allocator);
+			jItem.AddMember("sigtype", sInfo._sigtype, allocator);
 			jItem.AddMember("gentime", sInfo._gentime, allocator);
 
 			jSigs.AddMember(rj::Value(stdCode, allocator), jItem, allocator);
@@ -914,6 +917,21 @@ void CtaMocker::load_incremental_data(const char* incremental_backtest_base)
 					const rj::Value* gentime = require_snapshot_member(signalEntry, "gentime", SnapshotJsonType::Uint64, signalPath, validationError);
 					if (usertag == nullptr || volume == nullptr || sigprice == nullptr || gentime == nullptr)
 						return false;
+
+					const rj::Value* desprice = nullptr;
+					if (signalEntry.HasMember("desprice"))
+					{
+						desprice = require_snapshot_member(signalEntry, "desprice", SnapshotJsonType::Number, signalPath, validationError);
+						if (desprice == nullptr)
+							return false;
+					}
+					const rj::Value* sigtype = nullptr;
+					if (signalEntry.HasMember("sigtype"))
+					{
+						sigtype = require_snapshot_member(signalEntry, "sigtype", SnapshotJsonType::Uint, signalPath, validationError);
+						if (sigtype == nullptr)
+							return false;
+					}
 					if (!validate_snapshot_string(*usertag, std::string::npos, signalPath + ".usertag", validationError))
 						return false;
 
@@ -922,6 +940,10 @@ void CtaMocker::load_incremental_data(const char* incremental_backtest_base)
 					sInfo._usertag.assign(usertag->GetString(), usertag->GetStringLength());
 					sInfo._volume = volume->GetDouble();
 					sInfo._sigprice = sigprice->GetDouble();
+					if (desprice != nullptr)
+						sInfo._desprice = desprice->GetDouble();
+					if (sigtype != nullptr)
+						sInfo._sigtype = sigtype->GetUint();
 					sInfo._gentime = gentime->GetUint64();
 				}
 			}

@@ -11,6 +11,9 @@
 #include "../Share/StrUtil.hpp"
 
 #include <boost/bind.hpp>
+#include <chrono>
+#include <cmath>
+#include <cstdio>
 #include <filesystem>
 namespace fs = std::filesystem;
 
@@ -49,10 +52,28 @@ extern "C"
 	}
 }
 
-std::vector<uint32_t> splitVolume(uint32_t vol, uint32_t minQty = 1, uint32_t maxQty = 100)
+namespace
 {
-	uint32_t length = maxQty - minQty + 1;
+uint32_t makeSplitSeed()
+{
+	try
+	{
+		return std::random_device{}();
+	}
+	catch (...)
+	{
+		return static_cast<uint32_t>(std::chrono::steady_clock::now().time_since_epoch().count());
+	}
+}
+
+std::vector<uint32_t> splitVolumeWithRng(uint32_t vol, uint32_t minQty, uint32_t maxQty, std::mt19937& rng)
+{
 	std::vector<uint32_t> ret;
+	// Invalid ranges have no valid split. In particular, minQty == 0 can
+	// otherwise spin forever and the full uint32 range makes length wrap to 0.
+	if (minQty == 0 || maxQty < minQty)
+		return ret;
+	uint32_t length = maxQty - minQty + 1;
 	if (vol <= minQty)
 	{
 		ret.emplace_back(vol);
@@ -60,10 +81,9 @@ std::vector<uint32_t> splitVolume(uint32_t vol, uint32_t minQty = 1, uint32_t ma
 	else
 	{
 		uint32_t left = vol;
-		srand((uint32_t)time(NULL));
 		while (left > 0)
 		{
-			uint32_t curVol = minQty + (uint32_t)rand() % length;
+			uint32_t curVol = minQty + rng() % length;
 
 			if (curVol >= left)
 				curVol = left;
@@ -78,8 +98,25 @@ std::vector<uint32_t> splitVolume(uint32_t vol, uint32_t minQty = 1, uint32_t ma
 
 	return ret;
 }
+}
+
+// Preserve the pre-existing free symbol used by standalone callers. Real
+// matching uses the per-TraderMocker engine below.
+std::vector<uint32_t> splitVolume(uint32_t vol, uint32_t minQty = 1, uint32_t maxQty = 100)
+{
+	std::mt19937 rng(makeSplitSeed());
+	return splitVolumeWithRng(vol, minQty, maxQty, rng);
+}
+
+std::vector<uint32_t> TraderMocker::split_volume(uint32_t vol, uint32_t minQty, uint32_t maxQty)
+{
+	std::lock_guard<std::mutex> lock(_split_rng_mutex);
+	return splitVolumeWithRng(vol, minQty, maxQty, _split_rng);
+}
+
 TraderMocker::TraderMocker()
-	: _terminated(false)
+	: _split_rng(makeSplitSeed())
+	, _terminated(false)
 	, _listener(NULL)
 	, _orders(NULL)
 	, _trades(NULL)
@@ -97,6 +134,8 @@ TraderMocker::TraderMocker()
 
 TraderMocker::~TraderMocker()
 {
+	release();
+
 	if (_orders)
 		_orders->release();
 
@@ -137,6 +176,9 @@ bool TraderMocker::makeEntrustID(char* buffer, int length)
 
 int TraderMocker::orderInsert(WTSEntrust* entrust)
 {	
+	std::lock_guard<std::mutex> requestLock(_request_mutex);
+	if (_requests_closed)
+		return -1;
 	if (entrust == NULL)
 	{
 		return 0;
@@ -400,7 +442,7 @@ int32_t TraderMocker::match_once()
 					count++;
 
 					double maxVolume = min(uVolume, ordInfo->getVolLeft());
-					std::vector<uint32_t> ayVol = splitVolume((uint32_t)maxVolume, (uint32_t)_min_qty, (uint32_t)_max_qty);
+					std::vector<uint32_t> ayVol = split_volume((uint32_t)maxVolume, (uint32_t)_min_qty, (uint32_t)_max_qty);
 					for (uint32_t curVol : ayVol)
 					{
 
@@ -521,22 +563,53 @@ int32_t TraderMocker::match_once()
 
 bool TraderMocker::init(WTSVariant *params)
 {
+	{
+		std::lock_guard<std::mutex> requestLock(_request_mutex);
+		if (_requests_closed)
+			return false;
+	}
+	if (params == NULL)
+		return false;
+
+	double maxQty = params->getDouble("maxqty");
+	double minQty = params->getDouble("minqty");
+	// Preserve the existing near-zero defaults, then require all other values
+	// to convert safely to the nonzero integer range used by match_once.
+	const double uint32Limit = 4294967296.0;
+	const bool finiteQty = std::isfinite(minQty) && std::isfinite(maxQty);
+	if (finiteQty && decimal::eq(maxQty, 0)) maxQty = 100.0;
+	if (finiteQty && decimal::eq(minQty, 0)) minQty = 1.0;
+	if (!finiteQty ||
+		minQty < 1.0 || maxQty < 1.0 || minQty >= uint32Limit ||
+		maxQty >= uint32Limit ||
+		static_cast<uint32_t>(maxQty) < static_cast<uint32_t>(minQty))
+	{
+		ITraderSpi* listener = get_listener();
+		if (listener != NULL)
+			write_log(listener, LL_ERROR, "[TraderMocker] Invalid quantity range: minqty={} maxqty={}", minQty, maxQty);
+		else
+			std::fprintf(stderr, "[TraderMocker] Invalid quantity range: minqty=%g maxqty=%g\n", minQty, maxQty);
+		return false;
+	}
+
+	// Optional deterministic sequence for a fresh mocker. With no seed, the
+	// constructor's per-instance non-fixed seed remains in use.
+	if (params->has("rng_seed"))
+	{
+		std::lock_guard<std::mutex> lock(_split_rng_mutex);
+		_split_rng.seed(params->getUInt32("rng_seed"));
+	}
+
 	_millisecs = params->getUInt32("span");
 	_use_newpx = params->getBoolean("newpx");
 	_mocker_id = params->getUInt32("mockerid");
-	_max_qty = params->getDouble("maxqty");
-	_min_qty = params->getDouble("minqty");
+	_max_qty = maxQty;
+	_min_qty = minQty;
 
 	_udp_port = params->getInt32("udp_port");
 
 	boost::asio::ip::address addr = boost::asio::ip::make_address("0.0.0.0");
 	_broad_ep = boost::asio::ip::udp::endpoint(addr, _udp_port);
-
-	if (decimal::eq(_max_qty, 0))
-		_max_qty = 100;
-
-	if (decimal::eq(_min_qty, 0))
-		_min_qty = 1;
 
 	//加载持仓数据
 	std::stringstream ss;
@@ -547,6 +620,13 @@ bool TraderMocker::init(WTSVariant *params)
 	_pos_file = path;
 	_pos_file += "positions.json";
 
+	// Release can run while validation or directory creation is in progress.
+	// Never report a successful reinitialization after admission was closed.
+	{
+		std::lock_guard<std::mutex> requestLock(_request_mutex);
+		if (_requests_closed)
+			return false;
+	}
 	return true;
 }
 
@@ -642,6 +722,10 @@ void TraderMocker::save_positions()
 
 void TraderMocker::release()
 {
+	{
+		std::lock_guard<std::mutex> requestLock(_request_mutex);
+		_requests_closed = true;
+	}
 	_terminated.store(true, std::memory_order_release);
 
 	if (_thrd_match && _thrd_match->joinable())
@@ -657,6 +741,16 @@ void TraderMocker::release()
 			_thrd_worker->join();
 	}
 	_thrd_worker.reset();
+
+	// The socket belongs to this adapter. Stop and join the io worker before
+	// closing it so no in-flight receive handler can access the socket object.
+	if (_b_socket != NULL)
+	{
+		boost::system::error_code ec;
+		_b_socket->close(ec);
+		delete _b_socket;
+		_b_socket = NULL;
+	}
 }
 
 void TraderMocker::registerSpi(ITraderSpi *listener)
@@ -693,6 +787,13 @@ void TraderMocker::reconn_udp()
 
 void TraderMocker::connect()
 {
+	std::unique_lock<std::mutex> requestLock(_request_mutex);
+	if (_requests_closed)
+	{
+		requestLock.unlock();
+		std::fprintf(stderr, "[TraderMocker] Cannot connect after release\n");
+		return;
+	}
 	reconn_udp();
 
 	_thrd_worker.reset(new StdThread(boost::bind(&boost::asio::io_context::run, &_io_service)));
@@ -755,11 +856,15 @@ int TraderMocker::logout()
 
 int TraderMocker::orderAction(WTSEntrustAction* action)
 {
+	std::lock_guard<std::mutex> requestLock(_request_mutex);
+	if (_requests_closed)
+		return -1;
 	action->retain();
 	
 	boost::asio::post(_io_service, [this, action](){
 		StdUniqueLock lck(_mtx_awaits);	//一定要把awaits锁起来,不然可能会导致一边撮合一边撤单
-		WTSOrderInfo* ordInfo = _awaits == NULL ? NULL : (WTSOrderInfo*)_awaits->grab(action->getOrderID());
+		const std::string order_id = action->getOrderID();
+		WTSOrderInfo* ordInfo = _awaits == NULL ? NULL : (WTSOrderInfo*)_awaits->grab(order_id.c_str());
 
 		/*
 		 *	撤单也要考虑几个问题
@@ -770,7 +875,7 @@ int TraderMocker::orderAction(WTSEntrustAction* action)
 		if(ordInfo == NULL)
 		{
 			ITraderSpi* listener = get_listener();
-			write_log(listener, LL_ERROR, "订单{}不存在或者已完成", action->getOrderID());
+			write_log(listener, LL_ERROR, "订单{}不存在或者已完成", order_id);
 			WTSError* err = WTSError::create(WEC_ORDERCANCEL, "订单不存在或者处于不可撤销状态");
 			if (listener)
 				listener->onTraderError(err);
@@ -825,9 +930,8 @@ int TraderMocker::orderAction(WTSEntrustAction* action)
 		}
 
 		ordInfo->release();
+		_awaits->remove(order_id.c_str());
 		action->release();
-
-		_awaits->remove(action->getOrderID());
 
 		save_positions();
 	});
@@ -837,6 +941,9 @@ int TraderMocker::orderAction(WTSEntrustAction* action)
 
 int TraderMocker::queryAccount()
 {
+	std::lock_guard<std::mutex> requestLock(_request_mutex);
+	if (_requests_closed)
+		return -1;
 	boost::asio::post(_io_service, [this](){
 		WTSArray* ay = WTSArray::create();
 		WTSAccountInfo* accountInfo = WTSAccountInfo::create();
@@ -869,6 +976,9 @@ int TraderMocker::queryAccount()
 
 int TraderMocker::queryPositions()
 {
+	std::lock_guard<std::mutex> requestLock(_request_mutex);
+	if (_requests_closed)
+		return -1;
 	boost::asio::post(_io_service, [this](){
 		WTSArray* ayPos = WTSArray::create();
 
@@ -918,6 +1028,9 @@ int TraderMocker::queryPositions()
 
 int TraderMocker::queryOrders()
 {
+	std::lock_guard<std::mutex> requestLock(_request_mutex);
+	if (_requests_closed)
+		return -1;
 	boost::asio::post(_io_service, [this](){
 		StdUniqueLock lock(_mutex_api);
 
@@ -930,6 +1043,9 @@ int TraderMocker::queryOrders()
 
 int TraderMocker::queryTrades()
 {
+	std::lock_guard<std::mutex> requestLock(_request_mutex);
+	if (_requests_closed)
+		return -1;
 	boost::asio::post(_io_service, [this](){
 		StdUniqueLock lock(_mutex_api);
 

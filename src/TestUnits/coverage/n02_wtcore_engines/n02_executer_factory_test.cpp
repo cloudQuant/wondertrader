@@ -394,7 +394,7 @@ TEST(N02ExecuterFactoryTest, FakeUnitCallbacksAreReachableThroughBasePointer)
     EXPECT_TRUE(probe->_lastCanceled);
     EXPECT_FALSE(probe->_lastEntrustOk);
 
-    EXPECT_EQ(1, fact._diffCalls + fact._arbiCalls);   // 0, 上面只创建了普通单元
+    EXPECT_EQ(0, fact._diffCalls + fact._arbiCalls);   // 上面只创建了普通单元
 }
 
 TEST(N02ExecuterFactoryTest, FactCanReturnNullForUnknownUnitName)

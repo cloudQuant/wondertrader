@@ -154,6 +154,8 @@ private:
 	WTSTickData* _last_tick;
 	/** @brief 目标仓位，正数表示多头，负数表示空头 */
 	double		_target_pos;
+	/** @brief 用户目标已明确设置；构造时的默认零仓位不能作为执行目标 */
+	bool		_target_pos_valid;
 	/** @brief 交易通道是否就绪标志 */
 	bool		_channel_ready;
 	bool		_channel_reconcile_pending;

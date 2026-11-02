@@ -317,6 +317,15 @@ WTSCommodityInfo* mkSComm(const char* product)
 	return c;
 }
 
+void releaseAllSCommReferences(WTSCommodityInfo* comm)
+{
+	if (comm == nullptr)
+		return;
+	const uint32_t refs = comm->retainCount();
+	for (uint32_t i = 0; i < refs; ++i)
+		comm->release();
+}
+
 WTSTickData* mkSTick(const char* code, uint32_t actTime, double lastPx,
 	double bidPx, double askPx, double upper = 0, double lower = 0,
 	uint32_t actionDate = 20240103, uint32_t tradingDate = 20240103)
@@ -747,6 +756,50 @@ TEST(r7_stkvw, vwap_bucket_distribution_changes_planned_buy_qty)
 	EXPECT_GT(c2.buys[0].price, 0.0);
 	c1.comm->release();
 	c2.comm->release();
+}
+
+TEST(r7_stkvw, vwap_bucket_distribution_changes_planned_sell_qty)
+{
+	SFakeCtx c1, c2;
+	c1.comm = mkSComm("STK");
+	c2.comm = mkSComm("STK");
+	c1.pos = c2.pos = 1000;
+	c1.avail = c2.avail = 1000;
+	WtStockVWapExeUnit u1, u2;
+	{
+		SVwapFile vfA(1300.0);
+		bootS(u1, c1, kStk, 500, mkSCfg());       // diffQty=-500; same current position
+	}
+	{
+		SVwapFile vfB(1400.0);
+		bootS(u2, c2, kStk, 500, mkSCfg());       // same target/position, different cumulative profile
+	}
+	ASSERT_EQ(c1.sells.size(), 1u);
+	ASSERT_EQ(c2.sells.size(), 1u);
+	EXPECT_GT(c1.sells[0].qty, 0.0);
+	EXPECT_GT(c2.sells[0].qty, c1.sells[0].qty);
+	EXPECT_LE(c1.sells[0].qty, 500.0);
+	EXPECT_LE(c2.sells[0].qty, 500.0);
+	EXPECT_LE(c1.sells[0].qty, c1.avail);
+	EXPECT_LE(c2.sells[0].qty, c2.avail);
+	EXPECT_TRUE(c1.buys.empty());
+	EXPECT_TRUE(c2.buys.empty());
+	c1.comm->release();
+	c2.comm->release();
+}
+
+TEST(r7_stkvw, target_equal_to_position_has_zero_delta_and_sends_no_order)
+{
+	SVwapFile vf(25.0);
+	SFakeCtx ctx;
+	ctx.comm = mkSComm("STK");
+	ctx.pos = ctx.avail = 1000;
+	WtStockVWapExeUnit unit;
+	bootS(unit, ctx, kStk, 1000, mkSCfg());
+	EXPECT_TRUE(ctx.buys.empty());
+	EXPECT_TRUE(ctx.sells.empty());
+	EXPECT_EQ(unit.executionState(), WtStockVWapExeUnit::ExecutionState::complete);
+	ctx.comm->release();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1297,6 +1350,100 @@ TEST(r7_stkvw, initialization_rejects_zero_times_missing_resources_and_bad_code)
 	}
 }
 
+TEST(r7_stkvw, missing_commodity_or_session_fails_closed_without_orders)
+{
+	SVwapFile vf(25.0);
+	{
+		SFakeCtx ctx; // The fixture supplies a valid session; commodity metadata is absent.
+		WtStockVWapExeUnit unit;
+		WTSVariant* cfg = mkSCfg();
+		unit.init(&ctx, kStk, cfg);
+		cfg->release();
+		EXPECT_FALSE(unit.initializationSucceeded());
+		EXPECT_TRUE(ctx.hasLog("commodity information is unavailable"));
+		unit.set_position(kStk, 1000);
+		WTSTickData* tick = mkSTick(kStk, 100000000, 10.50, 10.49, 10.51);
+		unit.on_tick(tick);
+		tick->release();
+		unit.on_channel_ready();
+		EXPECT_TRUE(ctx.buys.empty());
+		EXPECT_TRUE(ctx.sells.empty());
+		EXPECT_TRUE(ctx.byidCancels.empty());
+		EXPECT_TRUE(ctx.bydirCancels.empty());
+	}
+	{
+		SFakeCtx ctx;
+		ctx.comm = mkSComm("STK");
+		ctx.setSession(nullptr);
+		WtStockVWapExeUnit unit;
+		WTSVariant* cfg = mkSCfg();
+		unit.init(&ctx, kStk, cfg);
+		cfg->release();
+		EXPECT_FALSE(unit.initializationSucceeded());
+		EXPECT_TRUE(ctx.hasLog("trading session is unavailable"));
+		unit.set_position(kStk, 1000);
+		WTSTickData* tick = mkSTick(kStk, 100000000, 10.50, 10.49, 10.51);
+		unit.on_tick(tick);
+		tick->release();
+		unit.on_channel_ready();
+		EXPECT_TRUE(ctx.buys.empty());
+		EXPECT_TRUE(ctx.sells.empty());
+		EXPECT_TRUE(ctx.byidCancels.empty());
+		EXPECT_TRUE(ctx.bydirCancels.empty());
+		ctx.comm->release();
+	}
+}
+
+TEST(r7_stkvw, minimum_order_lookup_keeps_borrowed_commodity_alive_across_units)
+{
+	SVwapFile vf(25.0);
+	SFakeCtx ctx;
+	ctx.comm = mkSComm("STK");
+	WTSCommodityInfo* comm = ctx.comm;
+	ASSERT_NE(comm, nullptr);
+	for (int i = 0; i < 5; ++i)
+		comm->retain(); // Keep a buggy helper from destroying the borrowed object mid-test.
+	const uint32_t fixtureRefs = comm->retainCount();
+	EXPECT_EQ(fixtureRefs, 6u);
+
+	for (int i = 0; i < 2; ++i)
+	{
+		{
+			WtStockVWapExeUnit unit;
+			WTSVariant* cfg = mkSCfg();
+			unit.init(&ctx, kStk, cfg);
+			cfg->release();
+			EXPECT_TRUE(unit.initializationSucceeded());
+			EXPECT_EQ(comm->retainCount(), fixtureRefs + 1); // unit owns one retained reference
+			EXPECT_DOUBLE_EQ(unit.get_minOrderQty(kStk), 100.0);
+			EXPECT_DOUBLE_EQ(unit.get_minOrderQty(kStk), 100.0);
+			EXPECT_EQ(comm->retainCount(), fixtureRefs + 1); // helper only borrows; unit still alive
+		}
+		EXPECT_EQ(comm->retainCount(), fixtureRefs); // destruction drops only the unit reference
+		EXPECT_STREQ(comm->getProduct(), "STK");
+	}
+
+	ctx.comm = nullptr;
+	releaseAllSCommReferences(comm);
+}
+
+TEST(r7_stkvw, minimum_order_lookup_fails_closed_without_context_or_commodity)
+{
+	WtStockVWapExeUnit unboundUnit;
+	EXPECT_DOUBLE_EQ(unboundUnit.get_minOrderQty(kStk), 0.0);
+
+	SVwapFile vf(25.0);
+	SFakeCtx ctx; // Public initialization must reject unavailable commodity metadata.
+	WtStockVWapExeUnit unit;
+	WTSVariant* cfg = mkSCfg();
+	unit.init(&ctx, kStk, cfg);
+	cfg->release();
+	EXPECT_FALSE(unit.initializationSucceeded());
+	EXPECT_TRUE(ctx.hasLog("commodity information is unavailable"));
+	EXPECT_DOUBLE_EQ(unit.get_minOrderQty(kStk), 0.0);
+	EXPECT_TRUE(ctx.hasLog("minimum order quantity"));
+}
+
 //////////////////////////////////////////////////////////////////////////
 // 价格模式与偏移：增仓路径覆盖 mode1 和 "offset" 键（不是 "price_offset"）。
 //////////////////////////////////////////////////////////////////////////
@@ -1319,6 +1466,65 @@ TEST(r7_stkvw, price_mode_and_offset_key)
 	EXPECT_DOUBLE_EQ(c2.buys[0].price, 10.53);
 	c1.comm->release();
 	c2.comm->release();
+}
+
+TEST(r7_stkvw, price_mode_matrix_matches_initial_and_canceled_retry_prices)
+{
+	SVwapFile vf(25.0);
+	const double buyInitial[] = { 10.50, 10.49, 10.51 };
+	const double sellInitial[] = { 10.50, 10.51, 10.49 };
+	const double buyRetry[] = { 10.61, 10.60, 10.62 };
+	const double sellRetry[] = { 10.59, 10.60, 10.58 };
+	for (uint32_t mode = 0; mode <= 2; ++mode)
+	{
+		for (int side = 0; side < 2; ++side)
+		{
+			const bool isBuy = side == 0;
+			SCOPED_TRACE(::testing::Message() << "price_mode=" << mode << ", isBuy=" << isBuy);
+			SFakeCtx ctx;
+			ctx.comm = mkSComm("STK");
+			ctx.pos = ctx.avail = 1000;
+			WtStockVWapExeUnit unit;
+			bootS(unit, ctx, kStk, isBuy ? 1500 : 100, mkSCfg(5, mode, 0, 100.0, 1000.0));
+			const auto& initialOrders = isBuy ? ctx.buys : ctx.sells;
+			ASSERT_EQ(initialOrders.size(), 1u);
+			EXPECT_DOUBLE_EQ(initialOrders[0].price, isBuy ? buyInitial[mode] : sellInitial[mode]);
+			unit.on_order(7000, kStk, isBuy, 50, initialOrders[0].price, true);
+			unit.on_tick(mkSTick(kStk, 100100000, 10.60, 10.59, 10.61));
+			const auto& retryOrders = isBuy ? ctx.buys : ctx.sells;
+			ASSERT_EQ(retryOrders.size(), 2u);
+			EXPECT_DOUBLE_EQ(retryOrders[1].price, isBuy ? buyRetry[mode] : sellRetry[mode]);
+			EXPECT_TRUE(isBuy ? ctx.sells.empty() : ctx.buys.empty());
+			ctx.comm->release();
+		}
+	}
+}
+
+TEST(r7_stkvw, canceled_retry_keeps_upper_and_lower_limit_caps)
+{
+	SVwapFile vf(25.0);
+	for (int side = 0; side < 2; ++side)
+	{
+		const bool isBuy = side == 0;
+		SCOPED_TRACE(::testing::Message() << "isBuy=" << isBuy);
+		SFakeCtx ctx;
+		ctx.comm = mkSComm("STK");
+		ctx.pos = ctx.avail = 1000;
+		WtStockVWapExeUnit unit;
+		bootS(unit, ctx, kStk, isBuy ? 1500 : 100, mkSCfg(5, 2, 0, 100.0, 1000.0));
+		const auto& initialOrders = isBuy ? ctx.buys : ctx.sells;
+		ASSERT_EQ(initialOrders.size(), 1u);
+		unit.on_order(7000, kStk, isBuy, 50, initialOrders[0].price, true);
+		if (isBuy)
+			unit.on_tick(mkSTick(kStk, 100100000, 10.60, 10.59, 10.60, 10.60, 0));
+		else
+			unit.on_tick(mkSTick(kStk, 100100000, 10.20, 10.19, 10.21, 0, 10.20));
+		const auto& retryOrders = isBuy ? ctx.buys : ctx.sells;
+		ASSERT_EQ(retryOrders.size(), 2u);
+		EXPECT_DOUBLE_EQ(retryOrders[1].price, isBuy ? 10.60 : 10.20);
+		EXPECT_TRUE(ctx.hasLog(isBuy ? "modified to upper limit price" : "modified to lower limit price"));
+		ctx.comm->release();
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1416,61 +1622,87 @@ TEST(r7_stkvw, canceled_order_does_not_retry_without_a_fresh_session_tick)
 	ctx.comm->release();
 }
 
-TEST(r7_stkvw, empty_retry_order_ids_obey_configured_fire_span)
+TEST(r7_stkvw, empty_retry_ids_quarantine_across_ticks_and_reconnect)
 {
 	SVwapFile vf(25.0);
 	SFakeCtx ctx;
 	ctx.comm = mkSComm("STK");
 	ctx.pos = ctx.avail = 1000;
 	WtStockVWapExeUnit unit;
-	WTSVariant* cfg = mkSCfg(3, 0, 0, 100.0, 1000.0, 0, 0, true, 1000, 1100);
-	bootS(unit, ctx, kStk, 100, cfg);
+	bootS(unit, ctx, kStk, 100, mkSCfg(3, 0, 0, 100.0, 1000.0, 0, 0, true, 1000, 1100));
 	ASSERT_EQ(ctx.sells.size(), 1u);
+	const auto fired = unit._fired_times;
+	const auto lastFire = unit._last_fire_time;
 	unit.on_order(7000, kStk, false, 50, 10.50, true);
-
 	ctx.returnEmptyOrderIds = true;
 	unit.on_tick(mkSTick(kStk, 100100000, 10.50, 10.49, 10.51));
-	EXPECT_EQ(ctx.sells.size(), 1u);
-	EXPECT_EQ(ctx.emptyOrderIdAttempts, 1u);
-	EXPECT_TRUE(ctx.hasLog("at least 1200 seconds per configured fire_span"));
-	unit.on_tick(mkSTick(kStk, 100200000, 10.50, 10.49, 10.51));
-	EXPECT_EQ(ctx.emptyOrderIdAttempts, 1u); // every new quote does not cause another retry
-	unit.on_tick(mkSTick(kStk, 102059000, 10.50, 10.49, 10.51));
-	EXPECT_EQ(ctx.emptyOrderIdAttempts, 1u); // one second short of fire_span
-	unit.on_tick(mkSTick(kStk, 102100000, 10.50, 10.49, 10.51)); // interval elapsed: second empty response
-	EXPECT_EQ(ctx.emptyOrderIdAttempts, 2u);
-	unit.on_tick(mkSTick(kStk, 102200000, 10.50, 10.49, 10.51));
-	EXPECT_EQ(ctx.emptyOrderIdAttempts, 2u); // second empty response also starts a new interval
-
+	ASSERT_EQ(ctx.emptyOrderIdAttempts, 1u);
+	EXPECT_TRUE(unit.hasUnverifiedSubmission());
+	EXPECT_EQ(unit._fired_times, fired);
+	EXPECT_EQ(unit._last_fire_time, lastFire);
+	const uint32_t expiredId = 8888;
+	unit._orders_mon.push_order(&expiredId, 1, ctx.curTime);
+	unit._orders_mon.check_orders_with_generation(1, ctx.curTime + 1000,
+		[&](uint32_t id, uint64_t generation) {
+			EXPECT_TRUE(unit._orders_mon.mark_unverified_timeout(id, generation, 1, ctx.curTime + 1000));
+		});
+	EXPECT_TRUE(unit._orders_mon.has_unverified_timeout());
 	ctx.returnEmptyOrderIds = false;
-	unit.on_tick(mkSTick(kStk, 104100000, 10.50, 10.49, 10.51)); // second interval elapsed: normal retry control
-	ASSERT_EQ(ctx.sells.size(), 2u);
-	EXPECT_GT(ctx.sells[1].qty, 0.0);
-	EXPECT_LE(ctx.sells[1].qty, 100.0);
+	unit.on_tick(mkSTick(kStk, 104100000, 10.50, 10.49, 10.51));
+	unit.on_tick(mkSTick(kStk, 100100000, 10.50, 10.49, 10.51, 0, 0, 20240104, 20240104));
+	ctx.undone = 100;
+	unit.on_channel_lost();
+	unit.on_channel_ready();
+	unit.set_position(kStk, 500);
+	unit.clear_all_position(kStk);
+	unit.fire_at_once(100);
+	EXPECT_EQ(ctx.emptyOrderIdAttempts, 1u);
+	EXPECT_EQ(ctx.sells.size(), 1u);
+	EXPECT_TRUE(ctx.buys.empty());
+	EXPECT_TRUE(ctx.bydirCancels.empty());
+	EXPECT_TRUE(ctx.byidCancels.empty());
+	EXPECT_TRUE(unit.hasUnverifiedSubmission());
+	EXPECT_TRUE(unit._orders_mon.has_unverified_timeout());
+	EXPECT_EQ(unit._fired_times, 0u); // explicit target updates reset the normal execution counter
+	EXPECT_TRUE(ctx.hasLog("submission outcome unverified"));
 	ctx.comm->release();
 }
 
-TEST(r7_stkvw, zero_fire_span_empty_retry_uses_one_second_failsafe_only_for_retry)
+TEST(r7_stkvw, empty_initial_ids_quarantine_without_counting_or_auto_cancellation)
 {
 	SVwapFile vf(25.0);
 	SFakeCtx ctx;
 	ctx.comm = mkSComm("STK");
-	ctx.pos = ctx.avail = 1000;
-	WtStockVWapExeUnit unit;
-	WTSVariant* cfg = mkSCfg(1, 0, 0, 100.0, 1000.0, 0, 3600, true, 1000, 1100);
-	bootS(unit, ctx, kStk, 100, cfg); // tail_secs == duration is valid and yields fire_span == 0
-	ASSERT_EQ(ctx.sells.size(), 1u);
-	unit.on_order(7000, kStk, false, 50, 10.50, true);
 	ctx.returnEmptyOrderIds = true;
-	unit.on_tick(mkSTick(kStk, 100010000, 10.50, 10.49, 10.51)); // 10:00:10
+	WtStockVWapExeUnit unit;
+	bootS(unit, ctx, kStk, 1000, mkSCfg(1, 0, 0, 100.0, 1000.0, 0, 3600, true, 1000, 1100));
 	ASSERT_EQ(ctx.emptyOrderIdAttempts, 1u);
-	EXPECT_TRUE(ctx.hasLog("using a 1-second fail-safe retry interval"));
-	unit.on_tick(mkSTick(kStk, 100010500, 10.50, 10.49, 10.51)); // 500 ms later
-	EXPECT_EQ(ctx.emptyOrderIdAttempts, 1u);
+	EXPECT_TRUE(unit.hasUnverifiedSubmission());
+	EXPECT_EQ(unit._fired_times, 0u);
+	EXPECT_EQ(unit._last_fire_time, 0u);
 	ctx.returnEmptyOrderIds = false;
-	unit.on_tick(mkSTick(kStk, 100011000, 10.50, 10.49, 10.51)); // one second elapsed
-	ASSERT_EQ(ctx.sells.size(), 2u);
-	EXPECT_LE(ctx.sells[1].qty, 100.0);
+	ctx.undone = 100;
+	unit.on_channel_lost();
+	unit.on_channel_ready();
+	unit.on_tick(mkSTick(kStk, 100010000, 10.50, 10.49, 10.51));
+	unit.do_calc();
+	unit.fire_at_once(100);
+	EXPECT_EQ(ctx.emptyOrderIdAttempts, 1u);
+	EXPECT_TRUE(ctx.buys.empty());
+	EXPECT_TRUE(ctx.sells.empty());
+	EXPECT_TRUE(ctx.bydirCancels.empty());
+	EXPECT_TRUE(ctx.byidCancels.empty());
+	EXPECT_EQ(unit._fired_times, 0u);
+	EXPECT_TRUE(ctx.hasLog("submission outcome unverified"));
+	WTSVariant* cfg = mkSCfg();
+	unit.init(&ctx, kStk, cfg);
+	cfg->release();
+	unit.set_position(kStk, 1000);
+	unit.on_channel_ready();
+	unit.on_tick(mkSTick(kStk, 100100000, 10.50, 10.49, 10.51));
+	EXPECT_TRUE(unit.hasUnverifiedSubmission());
+	EXPECT_TRUE(ctx.buys.empty());
+	EXPECT_TRUE(ctx.bydirCancels.empty());
 	ctx.comm->release();
 }
 
@@ -1949,4 +2181,35 @@ TEST(r7_stkvw, failed_concurrent_calc_guard_does_not_release_owner)
 		EXPECT_TRUE(unit._in_calc.load(std::memory_order_acquire));
 	}
 	EXPECT_FALSE(unit._in_calc.load(std::memory_order_acquire));
+}
+
+TEST(r7_stkvw, startup_cancel_without_explicit_target_does_not_recalculate_default_zero)
+{
+	SVwapFile vf(25.0);
+	SFakeCtx ctx;
+	ctx.comm = mkSComm("STK");
+	ctx.pos = 1000.0;
+	ctx.avail = 1000.0;
+	ctx.undone = 100.0;
+	ctx.cancelBydirRetCnt = 1;
+	{
+		WtStockVWapExeUnit unit;
+		WTSVariant* cfg = mkSCfg();
+		unit.init(&ctx, kStk, cfg);
+		cfg->release();
+		ASSERT_TRUE(unit.initializationSucceeded());
+		unit.on_channel_ready();
+		ASSERT_EQ(ctx.bydirCancels.size(), 1u);
+		ASSERT_EQ(unit._cancel_cnt, 1u);
+		EXPECT_FALSE(unit._target_pos_valid);
+
+		ctx.undone = 0.0;
+		unit.on_order(7000, kStk, true, 100.0, 10.50, true);
+		unit.on_tick(mkSTick(kStk, 100100000, 10.50, 10.49, 10.51));
+		EXPECT_EQ(unit._cancel_cnt, 0u);
+		EXPECT_FALSE(unit._target_pos_valid);
+		EXPECT_TRUE(ctx.buys.empty());
+		EXPECT_TRUE(ctx.sells.empty());
+	}
+	ctx.comm->release();
 }

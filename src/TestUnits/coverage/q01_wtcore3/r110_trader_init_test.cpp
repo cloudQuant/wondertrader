@@ -6,7 +6,7 @@
  *
  * 覆盖行段：:99-207（模块装载、createTrader、deleteTrader、api->init 成功）
  *
- * 接缝：构建产物 libTraderMocker.dylib 软链到临时模块根的 traders/ 下；
+ * 接缝：构建产物 libTraderMocker.dylib 复制到临时模块根的 traders/ 下；
  * TraderMocker::init 只在当前目录创建 mocker_<id>/ 并构造 UDP endpoint，
  * 不建 socket、不连柜台。用例期间把 cwd 切到临时目录，结束后恢复并整棵删除。
  */
@@ -82,7 +82,8 @@ TEST(R110TraderInit, LoadsTraderModuleAndCreatesApi)
         GTEST_SKIP() << "libTraderMocker lacks trader entry symbols";
 
     fs::remove(root / "traders" / "libTraderMocker.dylib", ec);
-    fs::create_symlink(src, root / "traders" / "libTraderMocker.dylib", ec);
+    fs::copy_file(src, root / "traders" / "libTraderMocker.dylib",
+        fs::copy_options::overwrite_existing, ec);
     ASSERT_FALSE(ec);
 
     const std::string oldInst = WtHelper::getInstDir();

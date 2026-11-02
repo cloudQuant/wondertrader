@@ -38,8 +38,8 @@ void expect_bar_fields(const WTSBarStruct& actual, const WTSBarStruct& expected)
 // WtDataReaderAD.cpp:450-456 / :459-461
 // 写入 09:30 / 09:35 两笔 tick：09:30 的分钟线（bar 时间 09:31）已转储 LMDB，
 // RT 缓存里是 09:36。
-//  - 以 09:30 截止（早于 LMDB 的 09:31）：`lastBarTime < etime` 为假，直接检查
-//    RT 缓存；缓存 bar 晚于 etime，重读 LMDB 且不追加 09:36（450-456）。
+//  - 以 09:31 截止（包含 LMDB 的 09:31 bar）：RT 缓存里的 09:36 晚于 etime，
+//    不追加未来 bar。
 //  - 以 09:40 截止、只取 1 条：09:36 尚未转储，追加缓存 bar 并置 _last_from_cache
 //    （459-461），返回最新的 09:36。
 //
@@ -56,7 +56,7 @@ TEST_F(R203AdResidualTest, R203ReaderRtCacheBranchesWithIsolatedReaders)
 	ASSERT_TRUE(reader1 != NULL);
 
 	WTSKlineSlice* s1 = reader1->readKlineSlice("SSE.600000", KP_Minute1, 10,
-		20240110093000000ull);
+		20240110093100000ull);
 	ASSERT_TRUE(s1 != NULL);
 	EXPECT_EQ(bar_count(s1), 1u);
 	ASSERT_GE(s1->get_block_counts(), 1u);

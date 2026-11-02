@@ -39,15 +39,15 @@ protected:
 		_sandbox.reset();
 	}
 
-	static string his_path(const char* kind, uint32_t date, const char* code = "600000")
+	static string his_path(const char* kind, const char* exchg, uint32_t date, const char* code = "600000")
 	{
-		// reader 侧是绝对路径（cfg 注入），用例沙箱里等价地写相对路径的同一份文件
-		return fmtutil::format("his/{}/{}/{}.dsb", kind, date, code);
+		// reader 侧的历史文件按 his/<kind>/<exchange>/<date>/<code>.dsb 查找。
+		return fmtutil::format("his/{}/{}/{}/{}.dsb", kind, exchg, date, code);
 	}
 
 	void write_his(uint32_t date, uint16_t version, const string& payload, const char* kind = "ticks")
 	{
-		ASSERT_TRUE(write_bytes(his_path(kind, date), make_block(BT_HIS_Ticks, version, payload)));
+		ASSERT_TRUE(write_bytes(his_path(kind, "SSE", date), make_block(BT_HIS_Ticks, version, payload)));
 	}
 
 	void write_rt(const string& rel, const string& bytes)
@@ -150,7 +150,7 @@ TEST_F(Q03ReaderFileTest, his_tick_version_matrix)
 TEST_F(Q03ReaderFileTest, his_tick_size_check_and_tail_fragment)
 {
 	// 6 字节 < sizeof(HisTickBlock)(12) → :418 Sizechecking → NULL
-	write_his(20240108, BLOCK_VERSION_RAW_V2, string(6, 'X'));
+	ASSERT_TRUE(write_bytes(his_path("ticks", "SSE", 20240108), string(6, 'X')));
 	EXPECT_TRUE(_reader.readTickSlice("SSE.STK.600000", 10, 20240108150000000ull) == NULL);
 	EXPECT_GE(_sink.count_of(LL_ERROR), 1u);
 
@@ -200,7 +200,7 @@ TEST_F(Q03ReaderFileTest, order_queue_detail_and_transaction_files)
 	que.push_back(make_ordque(20240108, 20240108, 93000000, 1));
 	que.push_back(make_ordque(20240108, 20240108, 143000000, 2));
 	string f_que = "his/queue/SSE/20240108/600000.dsb";
-	ASSERT_TRUE(write_bytes(f_que, make_block(BT_HIS_OrdQueue, BLOCK_VERSION_RAW_V2, pack_items(que))));
+	ASSERT_TRUE(write_bytes(f_que, make_block(BT_HIS_OrdQueue, BLOCK_VERSION_CMP_V2, pack_items(que))));
 
 	WTSOrdQueSlice* sq = _reader.readOrdQueSlice("SSE.STK.600000", 10, 20240108150000000ull);
 	ASSERT_TRUE(sq != NULL);
@@ -241,7 +241,7 @@ TEST_F(Q03ReaderFileTest, order_queue_detail_and_transaction_files)
 	trs.push_back(make_trans(20240108, 20240108, 93000000, 4));
 	trs.push_back(make_trans(20240108, 20240108, 143000000, 5));
 	string f_trs = "his/trans/SSE/20240108/600000.dsb";
-	ASSERT_TRUE(write_bytes(f_trs, make_block(BT_HIS_Trnsctn, BLOCK_VERSION_RAW_V2, pack_items(trs))));
+	ASSERT_TRUE(write_bytes(f_trs, make_block(BT_HIS_Trnsctn, BLOCK_VERSION_CMP_V2, pack_items(trs))));
 	WTSTransSlice* st = _reader.readTransSlice("SSE.STK.600000", 10, 20240108150000000ull);
 	ASSERT_TRUE(st != NULL);
 	ASSERT_EQ(st->size(), 2u);

@@ -14,12 +14,41 @@
  *     :1434, :1504, :2145, :2332, :2343, :1372, :1390
  */
 #include "../p11_wtcore_traderadapter/r59_trader_fixture.h"
+#include "r90_env.h"
 
 #include <WtCore/EventNotifier.h>
+
+#include <initializer_list>
+#include <memory>
 
 namespace {
 
 using namespace r59x;
+
+template <typename T>
+struct R90Release
+{
+	void operator()(T* value) const noexcept
+	{
+		if (value)
+			value->release();
+	}
+};
+
+template <typename T>
+using R90Owner = std::unique_ptr<T, R90Release<T>>;
+
+template <typename T>
+R90Owner<WTSArray> makeOwnedArray(std::initializer_list<T*> items)
+{
+	WTSArray* array = makeArray(items);
+	for (T* item : items)
+	{
+		if (item)
+			item->release(); // Transfer each newly-created object's reference to the array.
+	}
+	return R90Owner<WTSArray>(array);
+}
 
 WTSOrderInfo* extOrder(WTSContractInfo* ct, WTSDirectionType dir, WTSOffsetType off,
     WTSOrderState st, double vol, double traded, const char* oid, WTSOrderFlag flag,
@@ -52,14 +81,15 @@ TEST_F(R90TraderReport, OrderReportStatsAndStateNames)
     buildPlain(trader_);
 
     // 买 × 错单 / 普通撤单 / 自动撤单；卖 × 错单 / 普通撤单 / 自动撤单
-    trader_.onRspOrders(makeArray({
+    R90Owner<WTSArray> orderReports = makeOwnedArray({
         extOrder(ct_, WDT_LONG, WOT_OPEN, WOS_Canceled, 5, 2, "BE1", WOF_NOR, true),
         extOrder(ct_, WDT_LONG, WOT_OPEN, WOS_Canceled, 4, 1, "BC1", WOF_NOR, false),
         extOrder(ct_, WDT_LONG, WOT_OPEN, WOS_Canceled, 3, 1, "BA1", WOF_FAK, false),
         extOrder(ct_, WDT_SHORT, WOT_CLOSE, WOS_Canceled, 6, 2, "SE1", WOF_NOR, true),
         extOrder(ct_, WDT_SHORT, WOT_CLOSE, WOS_Canceled, 5, 2, "SC1", WOF_NOR, false),
         extOrder(ct_, WDT_SHORT, WOT_CLOSE, WOS_Canceled, 2, 0, "SA1", WOF_FOK, false),
-    }));
+    });
+    trader_.onRspOrders(orderReports.get());
 
     // 外部委托不进内部订单表
     wtp::OrderMap* tab = trader_.getOrders("");
@@ -68,8 +98,9 @@ TEST_F(R90TraderReport, OrderReportStatsAndStateNames)
     tab->release();
 
     // 空头平今成交统计（onRspTrades 的 s_closetvol 分支）
-    trader_.onRspTrades(makeArray({
-        makeTrade(ct_, WDT_SHORT, WOT_CLOSETODAY, 2, 7000, "TCT", "OCT", "EXT.TCT") }));
+    R90Owner<WTSArray> tradeReports = makeOwnedArray({
+        makeTrade(ct_, WDT_SHORT, WOT_CLOSETODAY, 2, 7000, "TCT", "OCT", "EXT.TCT") });
+    trader_.onRspTrades(tradeReports.get());
 
     // stateToName：Nottouched -> UnSmt；非法枚举 -> Error
     WTSOrderInfo* nt = makeOrder(ct_, WDT_LONG, WOT_OPEN, WOS_Nottouched, 1, 0,
@@ -102,18 +133,21 @@ TEST_F(R90TraderReport, ShortCloseCancelAndNetTrades)
         makePos(ct_, WDT_SHORT, 2, 2, 2, 2) });
 
     // 首次推送：空头平昨 3 手 -> 先扣昨仓可用，再扣今仓可用
-    trader_.onPushOrder(makeOrder(ct_, WDT_SHORT, WOT_CLOSE, WOS_Submitting,
-        3, 0, "SC1", "otp.p11a.9001"));
+    R90Owner<WTSOrderInfo> submitting = R90Owner<WTSOrderInfo>(makeOrder(ct_, WDT_SHORT, WOT_CLOSE,
+        WOS_Submitting, 3, 0, "SC1", "otp.p11a.9001"));
+    trader_.onPushOrder(submitting.get());
     EXPECT_DOUBLE_EQ(-1.0, trader_.getPosition(kStdCode, true, 2));
 
     // 二次推送且撤单：回补 3 手，昨仓上限 2，溢出 1 手回到今仓
-    trader_.onPushOrder(makeOrder(ct_, WDT_SHORT, WOT_CLOSE, WOS_Canceled,
-        3, 0, "SC1", "otp.p11a.9001"));
+    R90Owner<WTSOrderInfo> canceled = R90Owner<WTSOrderInfo>(makeOrder(ct_, WDT_SHORT, WOT_CLOSE,
+        WOS_Canceled, 3, 0, "SC1", "otp.p11a.9001"));
+    trader_.onPushOrder(canceled.get());
     EXPECT_DOUBLE_EQ(-4.0, trader_.getPosition(kStdCode, true, 2));
 
     // 空头平今成交：今仓 2 -> 0，昨仓不变
-    trader_.onPushTrade(makeTrade(ct_, WDT_SHORT, WOT_CLOSETODAY, 2, 7000,
-        "ST1", "SO1", "otp.p11a.9002"));
+    R90Owner<WTSTradeInfo> closeTrade = R90Owner<WTSTradeInfo>(makeTrade(ct_, WDT_SHORT,
+        WOT_CLOSETODAY, 2, 7000, "ST1", "SO1", "otp.p11a.9002"));
+    trader_.onPushTrade(closeTrade.get());
     EXPECT_DOUBLE_EQ(-2.0, trader_.getPosition(kStdCode, false, 2));
 
     // 净头寸卖出：多头今仓 3 - 2 -> 1（不触发反手）
@@ -121,9 +155,10 @@ TEST_F(R90TraderReport, ShortCloseCancelAndNetTrades)
         wtp::TraderAdapter t2;
         buildPlain(t2);
         seedPos(t2, { makePos(ct_, WDT_LONG, 0, 0, 3, 3) });
-        WTSTradeInfo* t = makeTrade(ct_, WDT_SHORT, WOT_OPEN, 2, 7000, "N1", "N1", "");
+        R90Owner<WTSTradeInfo> t = R90Owner<WTSTradeInfo>(
+            makeTrade(ct_, WDT_SHORT, WOT_OPEN, 2, 7000, "N1", "N1", ""));
         t->setNetDirection(false);
-        t2.onPushTrade(t);
+        t2.onPushTrade(t.get());
         EXPECT_DOUBLE_EQ(1.0, t2.getPosition(kStdCode, false, 1));
         EXPECT_DOUBLE_EQ(0.0, t2.getPosition(kStdCode, false, 2));
     }
@@ -132,9 +167,10 @@ TEST_F(R90TraderReport, ShortCloseCancelAndNetTrades)
     {
         wtp::TraderAdapter t3;
         buildPlain(t3);
-        WTSTradeInfo* t = makeTrade(ct_, WDT_SHORT, WOT_OPEN, 2, 7000, "N2", "N2", "");
+        R90Owner<WTSTradeInfo> t = R90Owner<WTSTradeInfo>(
+            makeTrade(ct_, WDT_SHORT, WOT_OPEN, 2, 7000, "N2", "N2", ""));
         t->setNetDirection(false);
-        t3.onPushTrade(t);
+        t3.onPushTrade(t.get());
         EXPECT_DOUBLE_EQ(-2.0, t3.getPosition(kStdCode, false, 2));
     }
 
@@ -143,9 +179,10 @@ TEST_F(R90TraderReport, ShortCloseCancelAndNetTrades)
         wtp::TraderAdapter t4;
         buildPlain(t4);
         seedPos(t4, { makePos(ct_, WDT_SHORT, 2, 2, 0, 0) });
-        WTSTradeInfo* t = makeTrade(ct_, WDT_LONG, WOT_OPEN, 1, 7000, "N3", "N3", "");
+        R90Owner<WTSTradeInfo> t = R90Owner<WTSTradeInfo>(
+            makeTrade(ct_, WDT_LONG, WOT_OPEN, 1, 7000, "N3", "N3", ""));
         t->setNetDirection(true);
-        t4.onPushTrade(t);
+        t4.onPushTrade(t.get());
         EXPECT_DOUBLE_EQ(-1.0, t4.getPosition(kStdCode, false, 2));
     }
 
@@ -153,9 +190,10 @@ TEST_F(R90TraderReport, ShortCloseCancelAndNetTrades)
     {
         wtp::TraderAdapter t5;
         buildPlain(t5);
-        WTSTradeInfo* t = makeTrade(ct_, WDT_LONG, WOT_OPEN, 2, 7000, "N4", "N4", "");
+        R90Owner<WTSTradeInfo> t = R90Owner<WTSTradeInfo>(
+            makeTrade(ct_, WDT_LONG, WOT_OPEN, 2, 7000, "N4", "N4", ""));
         t->setNetDirection(true);
-        t5.onPushTrade(t);
+        t5.onPushTrade(t.get());
         EXPECT_DOUBLE_EQ(2.0, t5.getPosition(kStdCode, false, 1));
     }
 }
@@ -180,9 +218,10 @@ TEST_F(R90TraderReport, InactiveNotifierGuardsAndMarketCloses)
     err->release();
 
     // 建立未完成量，供错单回报走 updateUndone + notify 分支
-    trader.onRspOrders(makeArray({
+    R90Owner<WTSArray> orderReports = makeOwnedArray({
         makeOrder(ct_, WDT_LONG, WOT_OPEN, WOS_NotTraded_Queuing, 2, 0,
-            "G1", "otp.p11a.7001") }));
+            "G1", "otp.p11a.7001") });
+    trader.onRspOrders(orderReports.get());
 
     WTSEntrust* ent = WTSEntrust::create("ag2512", 1, 7000.0);
     ent->setContractInfo(ct_);
@@ -196,10 +235,12 @@ TEST_F(R90TraderReport, InactiveNotifierGuardsAndMarketCloses)
     ent->release();
 
     // 委托/成交推送：_notifier 守卫
-    trader.onPushOrder(makeOrder(ct_, WDT_LONG, WOT_OPEN, WOS_Submitting,
-        1, 0, "G2", "otp.p11a.7003"));
-    trader.onPushTrade(makeTrade(ct_, WDT_LONG, WOT_OPEN, 1, 7000,
-        "G3", "G2", "otp.p11a.7003"));
+    R90Owner<WTSOrderInfo> pushedOrder = R90Owner<WTSOrderInfo>(
+        makeOrder(ct_, WDT_LONG, WOT_OPEN, WOS_Submitting, 1, 0, "G2", "otp.p11a.7003"));
+    trader.onPushOrder(pushedOrder.get());
+    R90Owner<WTSTradeInfo> pushedTrade = R90Owner<WTSTradeInfo>(
+        makeTrade(ct_, WDT_LONG, WOT_OPEN, 1, 7000, "G3", "G2", "otp.p11a.7003"));
+    trader.onPushTrade(pushedTrade.get());
 
     // 平多/平空价格 0 -> WPT_ANYPRICE
     uint32_t before = api2_.n_insert_;
@@ -208,6 +249,69 @@ TEST_F(R90TraderReport, InactiveNotifierGuardsAndMarketCloses)
     EXPECT_NE(UINT_MAX, trader.closeShort(kStdCode, 0.0, 1, false, 0));
     EXPECT_EQ(WPT_ANYPRICE, api2_.last_pxtype_);
     EXPECT_EQ(before + 2, api2_.n_insert_);
+}
+
+TEST_F(R90TraderReport, NormalInitWithoutRiskmonAllowsSuccessfulOrder)
+{
+    namespace fs = std::filesystem;
+    const std::string moduleDir = r90::find_bin_dir();
+    if (moduleDir.empty())
+        GTEST_SKIP() << "build bin dir with TraderMocker not found";
+
+    const std::string instRoot = r90::temp_root() + "r90_no_riskmon/";
+    const fs::path tradersDir = fs::path(instRoot) / "traders";
+    std::error_code ec;
+    fs::create_directories(tradersDir, ec);
+    ASSERT_FALSE(ec);
+
+    const std::string moduleName = DLLHelper::wrap_module("TraderMocker", "lib");
+    const fs::path modulePath = fs::path(moduleDir) / moduleName;
+    if (!fs::exists(modulePath))
+        GTEST_SKIP() << "TraderMocker plugin not found: " << modulePath.string();
+    fs::copy_file(modulePath, tradersDir / moduleName, fs::copy_options::overwrite_existing, ec);
+    ASSERT_FALSE(ec) << "cannot copy TraderMocker into the temporary traders dir: " << ec.message();
+
+    struct ScopedInstDir
+    {
+        explicit ScopedInstDir(const std::string& path) : previous(WtHelper::getInstDir())
+        {
+            WtHelper::setInstDir(path.c_str());
+        }
+        ~ScopedInstDir() { WtHelper::setInstDir(previous.c_str()); }
+        std::string previous;
+    } instDir(instRoot);
+
+    const uint32_t mockerId = static_cast<uint32_t>(::getpid()) * 100u + 909u;
+    struct ScopedMockerDir
+    {
+        explicit ScopedMockerDir(uint32_t id) : mockerId(id) {}
+        ~ScopedMockerDir()
+        {
+            std::error_code ec;
+            fs::remove_all(fs::path("mocker_" + std::to_string(mockerId)), ec);
+        }
+        uint32_t mockerId;
+    } mockerDir(mockerId);
+
+    WTSVariant* params = WTSVariant::createObject();
+    params->append("module", "TraderMocker");
+    params->append("mockerid", mockerId);
+    params->append("span", 50u);
+    params->append("udp_port", 0u);
+    params->append("savedata", false);
+    struct ScopedVariant
+    {
+        explicit ScopedVariant(WTSVariant* value) : params(value) {}
+        ~ScopedVariant() { if (params != nullptr) params->release(); }
+        WTSVariant* params;
+    } paramsOwner(params);
+
+    wtp::TraderAdapter trader;
+    ASSERT_TRUE(trader.init(id_.c_str(), params, &bd_, nullptr));
+    ASSERT_TRUE(trader.run());
+
+    EXPECT_NE(UINT_MAX, trader.openLong(kStdCode, 7000.0, 1, 0));
+    trader.release();
 }
 
 }  // namespace

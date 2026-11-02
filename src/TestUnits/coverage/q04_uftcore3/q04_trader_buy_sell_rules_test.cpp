@@ -9,6 +9,7 @@
  * 统计限额(l_openvol/s_openvol)由 onRspTrades 推进, 用后续 buy 的可开量反证。
  */
 #include "q04_trader_fixture.h"
+#include "WtUftCore/UftStraContext.h"
 
 #include <string>
 #include <vector>
@@ -140,6 +141,49 @@ TEST(q04_trader_buysell, zero_quantity_returns_empty_without_touching_channel)
 	EXPECT_TRUE(env._adapter.buy(kAg, 5000.0, 0.0, 0, false).empty());
 	EXPECT_TRUE(env._adapter.sell(kAg, 5000.0, 0.0, 0, false).empty());
 	EXPECT_EQ(0u, env._api._entrusts.size());
+}
+
+TEST(q04_trader_buysell, malformed_standard_codes_fail_before_contract_lookup)
+{
+	BuyEnv env;
+	const std::string exchange15(15, 'X');
+	const std::string exchange16(16, 'X');
+	const std::string instrument15(15, 'A');
+	const std::string instrument16(16, 'A');
+	const std::string valid31 = exchange15 + "." + instrument15;
+	const std::string invalid32 = exchange15 + "." + instrument16;
+	const std::string invalidExchange16 = exchange16 + ".A";
+	const char* invalidCodes[] = {
+		"ag2406", ".ag2406", "SHFE.", "SHFE..ag2406",
+		invalidExchange16.c_str(), invalid32.c_str()
+	};
+
+	ASSERT_EQ(15u, exchange15.size());
+	ASSERT_EQ(16u, exchange16.size());
+	ASSERT_EQ(31u, valid31.size());
+	ASSERT_EQ(32u, invalid32.size());
+	for (const char* code : invalidCodes)
+	{
+		const std::size_t orderInsertCalls = env._api._entrusts.size();
+		const uint32_t makeEntrustIdCalls = env._api._mkEidCnt;
+		EXPECT_TRUE(env._adapter.buy(code, 5000.0, 1.0, 0, false).empty()) << code;
+		EXPECT_TRUE(env._adapter.sell(code, 5000.0, 1.0, 0, false).empty()) << code;
+		EXPECT_EQ(orderInsertCalls, env._api._entrusts.size()) << code;
+		EXPECT_EQ(makeEntrustIdCalls, env._api._mkEidCnt) << code;
+	}
+
+	// 15-byte exchange + 15-byte instrument exactly fills a 31-byte full code.
+	// Both buy and sell must parse it and reach the fake vendor with split fields.
+	env._bd.add(exchange15.c_str(), instrument15.c_str(), instrument15.c_str());
+	OrderIDs buyIds = env._adapter.buy(valid31.c_str(), 5000.0, 1.0, 0, false);
+	OrderIDs sellIds = env._adapter.sell(valid31.c_str(), 5000.0, 1.0, 0, false);
+	ASSERT_EQ(1u, buyIds.size());
+	ASSERT_EQ(1u, sellIds.size());
+	ASSERT_EQ(2u, env._api._entrusts.size());
+	EXPECT_EQ(exchange15, env._api._entrusts[0]._exchg);
+	EXPECT_EQ(instrument15, env._api._entrusts[0]._code);
+	EXPECT_EQ(exchange15, env._api._entrusts[1]._exchg);
+	EXPECT_EQ(instrument15, env._api._entrusts[1]._code);
 }
 
 TEST(q04_trader_buysell, open_rule_respects_max_limit_volume_per_order)
@@ -331,13 +375,14 @@ TEST(q04_trader_buysell, total_limit_shares_the_quota_between_both_directions)
 	EXPECT_EQ(0u, env._adapter.sell(kRb, 3500.0, 1.0, 0, false).size());
 }
 
-TEST(q04_trader_buysell, unknown_stdcode_without_contract_info_is_rejected_before_rule_loop)
+TEST(q04_trader_buysell, registered_contract_with_explicit_info_reaches_close_first_rules)
 {
 	BuyEnv env;
 
-	//基础数据里没有的合约: getContract 返回 NULL, buy/sell 直接解引用
-	//属于已判定崩溃支, 这里只验证 cInfo 显式传入时不查基础数据
+	// cu2406 is registered in the fixture; this verifies the close-first path
+	// when the caller explicitly supplies its contract info.
 	WTSContractInfo* cu = env._bd.getContract("cu2406", "SHFE");
+	ASSERT_NE(nullptr, cu);
 	env.loadPosition("SHFE", "cu2406", 0, 0, 0, 0, 2, 2, 0, 0);
 	OrderIDs ids = env._adapter.buy(kCu, 5100.0, 5.0, 0, false, cu);
 	//规则组 closefirst: 平昨 min(5, s_preavail=2)=2, 平今 0(今仓不可平), 开 3
@@ -347,15 +392,41 @@ TEST(q04_trader_buysell, unknown_stdcode_without_contract_info_is_rejected_befor
 	EXPECT_EQ((int)WOT_OPEN, env._api._entrusts[1]._offset);
 }
 
-//已判定崩溃/越界的输入整类收在这里
-TEST(DISABLED_q04_trader_buysell, null_contract_and_missing_default_class)
+TEST(q04_trader_buysell, unknown_contract_is_rejected_through_strategy_context)
 {
 	BuyEnv env;
+	UftStraContext context(nullptr, "q04_unknown_contract");
+	context.setTrader(&env._adapter);
+	IUftStraCtx& strategy = context;
+	const char* unknown = "SHFE.unknown";
 
-	//1) 合约不在基础数据里: buy 里 cInfo==NULL 后直接 cInfo->getCommInfo()
-	env._adapter.buy("SHFE.unknown", 5000.0, 1.0, 0, false);
+	ASSERT_EQ(nullptr, env._bd.getContract("unknown", "SHFE"));
+	const TraderAdapter::AdapterState stateBefore = env._adapter.state();
+	EXPECT_TRUE(strategy.stra_buy(unknown, 5000.0, 1.0).empty());
+	EXPECT_TRUE(strategy.stra_sell(unknown, 5000.0, 1.0).empty());
+	EXPECT_TRUE(env._api._entrusts.empty());
+	EXPECT_EQ(0u, env._api._mkEidCnt);
+	EXPECT_DOUBLE_EQ(0.0, env._adapter.getPosition(unknown, false));
+	EXPECT_DOUBLE_EQ(0.0, env._adapter.getUndoneQty(unknown));
+	EXPECT_EQ(0u, env._adapter.getInfos(unknown));
+	EXPECT_EQ(stateBefore, env._adapter.state());
 
-	//2) 品种没有任何动作规则且没有 default 组:
+	// Registered-contract controls travel through the same public strategy API.
+	OrderIDs buyIds = strategy.stra_buy(kAg, 5000.0, 1.0);
+	OrderIDs sellIds = strategy.stra_sell(kAg, 5000.0, 1.0);
+	ASSERT_EQ(1u, buyIds.size());
+	ASSERT_EQ(1u, sellIds.size());
+	ASSERT_EQ(2u, env._api._entrusts.size());
+	EXPECT_EQ("ag2406", env._api._entrusts[0]._code);
+	EXPECT_EQ("SHFE", env._api._entrusts[0]._exchg);
+	EXPECT_EQ("ag2406", env._api._entrusts[1]._code);
+	EXPECT_EQ("SHFE", env._api._entrusts[1]._exchg);
+}
+
+// The missing-default action-rule case remains disabled and separate.
+TEST(DISABLED_q04_trader_buysell, missing_default_action_group)
+{
+	// 品种没有任何动作规则且没有 default 组:
 	//   ActionPolicyMgr::getActionRules 返回 _rules.end() 解引用(BUG-N03-002 同源)
 	q04::TempRoot tmp2("cls3");
 	q04::FakeTraderApi api2;

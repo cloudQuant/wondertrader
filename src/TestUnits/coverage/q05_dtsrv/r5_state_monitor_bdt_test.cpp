@@ -140,6 +140,48 @@ const char* kR5Sessions = R"JSON({
 		"sections": [
 			{"from": 2100, "to": 2300}
 		]
+	},
+	"R5CROSSRAW": {
+		"name": "原始跨午夜时段",
+		"offset": 0,
+		"sections": [
+			{"from": 2300, "to": 100}
+		]
+	},
+	"R5CROSSPLUS": {
+		"name": "正偏移后跨午夜时段",
+		"offset": 120,
+		"sections": [
+			{"from": 2100, "to": 2300}
+		]
+	},
+	"R5CROSSMINUS": {
+		"name": "负偏移后跨午夜时段",
+		"offset": -120,
+		"sections": [
+			{"from": 100, "to": 300}
+		]
+	},
+	"R5CROSSOVERLAP": {
+		"name": "填充重叠的午夜跨段",
+		"offset": -1440,
+		"sections": [
+			{"from": 1, "to": 0}
+		]
+	},
+	"R5CROSSTOUCH": {
+		"name": "填充相接的午夜跨段",
+		"offset": -1440,
+		"sections": [
+			{"from": 3, "to": 1}
+		]
+	},
+	"R5EQUAL": {
+		"name": "相等端点普通段",
+		"offset": 0,
+		"sections": [
+			{"from": 120, "to": 120}
+		]
 	}
 })JSON";
 
@@ -391,7 +433,94 @@ TEST_F(R5StateMonitorBdtTest, InitializeSectionsDriveMembershipForMidnightAndOrd
 	EXPECT_TRUE(offsetNight.isInSections(1859));
 	EXPECT_TRUE(offsetNight.isInSections(2100));
 	EXPECT_FALSE(offsetNight.isInSections(2101));
-	// offset 后 from>to 的区间仍未定义：本测试不推断应拆分还是拒绝。
+}
+
+TEST_F(R5StateMonitorBdtTest, CrossMidnightSectionsSplitAndKeepHalfOpenBoundaries)
+{
+	StateMonitor mon;
+	fs::path cfg = initStateCfg(R"JSON({
+		"R5CROSSRAW":   {"inittime": 0, "closetime": 2400, "proctime": 2400},
+		"R5CROSSPLUS":  {"inittime": 0, "closetime": 2400, "proctime": 2400},
+		"R5CROSSMINUS": {"inittime": 0, "closetime": 2400, "proctime": 2400}
+	})JSON");
+	ASSERT_TRUE(mon.initialize(cfg.string().c_str(), &_bdMgr, nullptr));
+
+	for (const char* sid : { "R5CROSSRAW", "R5CROSSPLUS", "R5CROSSMINUS" })
+	{
+		auto it = mon._map.find(sid);
+		ASSERT_NE(it, mon._map.end()) << sid;
+		StateInfo& state = *it->second;
+		ASSERT_EQ(state._sections.size(), 2u) << sid;
+		EXPECT_EQ(state._sections[0]._from, 2259u) << sid;
+		EXPECT_EQ(state._sections[0]._end, 2400u) << sid;
+		EXPECT_EQ(state._sections[1]._from, 0u) << sid;
+		EXPECT_EQ(state._sections[1]._end, 101u) << sid;
+
+		EXPECT_FALSE(state.isInSections(2258)) << sid;
+		EXPECT_TRUE(state.isInSections(2259)) << sid;
+		EXPECT_TRUE(state.isInSections(2359)) << sid;
+		EXPECT_TRUE(state.isInSections(0)) << sid;
+		EXPECT_TRUE(state.isInSections(100)) << sid;
+		EXPECT_FALSE(state.isInSections(101)) << sid;
+		EXPECT_FALSE(state.isInSections(2400)) << sid;
+	}
+
+	// These two sections have the same normalized endpoints before StateMonitor padding:
+	// raw 23:00–01:00, +120 offset of 21:00–23:00, and -120 offset of 01:00–03:00.
+	EXPECT_EQ(2300u, _bdMgr.getSession("R5CROSSPLUS")->getTradingSections()[0].first);
+	EXPECT_EQ(100u, _bdMgr.getSession("R5CROSSPLUS")->getTradingSections()[0].second);
+	EXPECT_EQ(2300u, _bdMgr.getSession("R5CROSSMINUS")->getTradingSections()[0].first);
+	EXPECT_EQ(100u, _bdMgr.getSession("R5CROSSMINUS")->getTradingSections()[0].second);
+}
+
+TEST_F(R5StateMonitorBdtTest, CrossMidnightPaddingOverlapCollapsesToFullDay)
+{
+	StateMonitor mon;
+	fs::path cfg = initStateCfg(R"JSON({
+		"R5CROSSOVERLAP":{"inittime": 0, "closetime": 2400, "proctime": 2400},
+		"R5CROSSTOUCH": {"inittime": 0, "closetime": 2400, "proctime": 2400},
+		"R5EQUAL":      {"inittime": 0, "closetime": 2400, "proctime": 2400}
+	})JSON");
+	ASSERT_TRUE(mon.initialize(cfg.string().c_str(), &_bdMgr, nullptr));
+
+	// These two offsets expose normalized endpoint pairs 0001->0000 and 0003->0001.
+	// The offsets only arrange helper inputs; this test does not define an offset range.
+	for (const char* sid : { "R5CROSSOVERLAP", "R5CROSSTOUCH" })
+	{
+		const bool overlapCase = std::string(sid) == "R5CROSSOVERLAP";
+		const auto& sections = _bdMgr.getSession(sid)->getTradingSections();
+		ASSERT_EQ(sections.size(), 1u) << sid;
+		EXPECT_EQ(sections[0].first, overlapCase ? 1u : 3u) << sid;
+		EXPECT_EQ(sections[0].second, overlapCase ? 0u : 1u) << sid;
+
+		auto it = mon._map.find(sid);
+		ASSERT_NE(it, mon._map.end()) << sid;
+		StateInfo& state = *it->second;
+		ASSERT_EQ(state._sections.size(), 1u) << sid;
+		EXPECT_EQ(state._sections[0]._from, 0u) << sid;
+		EXPECT_EQ(state._sections[0]._end, 2400u) << sid;
+		EXPECT_TRUE(state.isInSections(0)) << sid;
+		EXPECT_TRUE(state.isInSections(1)) << sid;
+		EXPECT_TRUE(state.isInSections(1200)) << sid;
+		EXPECT_TRUE(state.isInSections(2359)) << sid;
+		EXPECT_FALSE(state.isInSections(2400)) << sid;
+	}
+
+	// A non-cross-midnight equal endpoint retains the pre-existing one-minute padding behavior.
+	const auto& equalSessionSections = _bdMgr.getSession("R5EQUAL")->getTradingSections();
+	ASSERT_EQ(equalSessionSections.size(), 1u);
+	EXPECT_EQ(equalSessionSections[0].first, 120u);
+	EXPECT_EQ(equalSessionSections[0].second, 120u);
+	auto equalIt = mon._map.find("R5EQUAL");
+	ASSERT_NE(equalIt, mon._map.end());
+	StateInfo& equal = *equalIt->second;
+	ASSERT_EQ(equal._sections.size(), 1u);
+	EXPECT_EQ(equal._sections[0]._from, 119u);
+	EXPECT_EQ(equal._sections[0]._end, 121u);
+	EXPECT_FALSE(equal.isInSections(118));
+	EXPECT_TRUE(equal.isInSections(119));
+	EXPECT_TRUE(equal.isInSections(120));
+	EXPECT_FALSE(equal.isInSections(121));
 }
 
 TEST_F(R5StateMonitorBdtTest, ZeroStartSectionUsesClampedMidnightPadding)

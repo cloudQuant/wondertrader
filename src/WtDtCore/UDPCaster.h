@@ -58,7 +58,7 @@ private:
 
 public:
 	bool	init(WTSVariant* cfg, WTSBaseDataMgr* bdMgr, DataManager* dtMgr);
-	void	start(int bport);
+	bool	start(int bport);
 	void	stop();
 
 	bool	addBRecver(const char* remote, int port, int type = 0);

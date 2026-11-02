@@ -83,6 +83,15 @@ stdfs::path repo_root()
 
 bool prepare_inst_dir()
 {
+#ifdef WT_COV_BTPORTER_DATA_STORAGE_MODULE
+	const stdfs::path modulePath(WT_COV_BTPORTER_DATA_STORAGE_MODULE);
+	std::error_code moduleEc;
+	if (!stdfs::is_regular_file(modulePath, moduleEc) || moduleEc)
+		return false;
+	const std::string dir = modulePath.parent_path().string();
+	WtHelper::setInstDir((dir + "/").c_str());
+	return true;
+#else
 	const std::string module = DLLHelper::wrap_module("WtDataStorage");
 	const char* const rels[] = {
 		"build-cov/build_x64/Debug/bin",
@@ -101,6 +110,7 @@ bool prepare_inst_dir()
 		}
 	}
 	return false;
+#endif
 }
 
 struct L2Boom {};
@@ -229,9 +239,9 @@ TEST(R214BtPorterLevel2, ThrowingLevel2CallbacksAreCaught)
 		"\"commodity\":[\"" + root + "/dist/common/commodities.json\","
 		"\"" + root + "/dist/common/stk_comms.json\"],"
 		"\"holiday\":\"" + root + "/dist/common/holidays.json\"}},"
-		"\"env\":{\"mocker\":\"hft\"},"
-		"\"hft\":{\"name\":\"r214_l2\",\"module\":\"\"}}";
+		"\"env\":{\"mocker\":\"none\"}}";
 	getRunner().config(cfg.c_str(), false);
+	ASSERT_NE(0U, getRunner().initHftMocker("r214_l2", false));
 	ASSERT_NE(nullptr, getRunner().hft_mocker());
 	ASSERT_TRUE(getRunner().replayer().prepare());
 
@@ -279,9 +289,9 @@ TEST(R214BtPorterAsync, HftStepWithoutMockerReturnsInAsyncMode)
 		"\"session\":\"" + dir + "/sessions.json\","
 		"\"commodity\":\"" + dir + "/commodities.json\","
 		"\"contract\":\"" + dir + "/contracts.json\"}},"
-		"\"env\":{\"mocker\":\"cta\"},"
-		"\"cta\":{\"name\":\"r214_async_empty\",\"slippage\":0}}";
+		"\"env\":{\"mocker\":\"none\"}}";
 	getRunner().config(cfg.c_str(), false);
+	ASSERT_NE(0U, getRunner().initCtaMocker("r214_async_empty", 0, false, false, false, false));
 	ASSERT_NE(nullptr, getRunner().cta_mocker());
 	ASSERT_EQ(nullptr, getRunner().hft_mocker());
 

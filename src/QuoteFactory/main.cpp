@@ -106,6 +106,13 @@ bool initialize(const std::string& filename)
 
 	//加载市场信息
 	WTSVariant* cfgBF = config->get("basefiles");
+	if (cfgBF == NULL || cfgBF->type() != WTSVariant::VT_Object)
+	{
+		WTSLogger::error("QuoteFactory config requires basefiles to be an object");
+		config->release();
+		return false;
+	}
+
 	if (cfgBF->get("session"))
 	{
 		g_baseDataMgr.loadSessions(cfgBF->getCString("session"));
@@ -316,8 +323,8 @@ int main(int argc, char* argv[])
 
 	if(!StdFile::exists(filename.c_str()))
 	{
-		fmt::print("confiture {} not exists", filename);
-		return 0;
+		fmt::print("Configuration file {} does not exist\n", filename);
+		return 1;
 	}
 
 	if (!initialize(filename))

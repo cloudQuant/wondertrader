@@ -255,6 +255,11 @@ public:
         set_trading_date(tdate);
     }
 
+    bool has_tick_subscription(const char* code)
+    {
+        return _tick_sub_map.find(code) != _tick_sub_map.end();
+    }
+
     /**
      * 只在测试侧预置引擎的实时价格缓存。
      * CtaStraBaseCtx::do_set_position 会把变化量回提交给 WtCtaEngine::handle_pos_change，
@@ -276,6 +281,34 @@ public:
         : CtaStraBaseCtx(engine, name, slippage) {}
 
     virtual ~P01CtaCtx() {}
+
+    bool has_pending_signal(const char* code) const
+    {
+        return _sig_map.find(code) != _sig_map.end();
+    }
+
+    double pending_signal_target(const char* code) const
+    {
+        auto it = _sig_map.find(code);
+        return it == _sig_map.end() ? 0.0 : it->second._volume;
+    }
+
+    double accounted_position(const char* code) const
+    {
+        auto it = _pos_map.find(code);
+        return it == _pos_map.end() ? 0.0 : it->second._volume;
+    }
+
+    std::string pending_signal_tag(const char* code) const
+    {
+        auto it = _sig_map.find(code);
+        return it == _sig_map.end() ? std::string() : it->second._usertag;
+    }
+
+    bool has_condition(const char* code) const
+    {
+        return _condtions.find(code) != _condtions.end();
+    }
 
     virtual void on_tick_updated(const char* stdCode, WTSTickData* newTick) override
     {

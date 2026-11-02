@@ -61,6 +61,12 @@ void WtCtaEngine::release()
 
 void WtCtaEngine::run()
 {
+	if (!fee_config_valid())
+	{
+		WTSLogger::error("CTA engine start rejected: fee template configuration is invalid");
+		return;
+	}
+
 	_tm_ticker = new WtCtaRtTicker(this);
 	WTSVariant* cfgProd = _cfg->get("product");
 	_tm_ticker->init(_data_mgr->reader(), cfgProd->getCString("session"));

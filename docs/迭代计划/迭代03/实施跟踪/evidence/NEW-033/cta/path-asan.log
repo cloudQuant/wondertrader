@@ -1,0 +1,207 @@
++ CXX=/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++
++ boost=/opt/homebrew/Cellar/boost/1.88.0/include
++ fmt=/opt/homebrew/Cellar/fmt/11.2.0/include
++ spdlog=/opt/homebrew/Cellar/spdlog/1.15.3/include
++ case $(uname -s) in
+++ uname -s
++ ext=dylib
++ shared_flag=-dynamiclib
++ dl_lib=
++ mkdir -p /private/tmp/wt-i03-cta-quarantine/path-asan/run.HxrtZViT/plugins /private/tmp/wt-i03-cta-quarantine/path-asan/run.HxrtZViT/logs
++ deep_rel=deep
++ for part in 01 02 03 04 05
++ deep_rel=deep/01_abcdefghijklmnopqrstuvwxyz0123456789
++ for part in 01 02 03 04 05
++ deep_rel=deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789
++ for part in 01 02 03 04 05
++ deep_rel=deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789
++ for part in 01 02 03 04 05
++ deep_rel=deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789/04_abcdefghijklmnopqrstuvwxyz0123456789
++ for part in 01 02 03 04 05
++ deep_rel=deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789/04_abcdefghijklmnopqrstuvwxyz0123456789/05_abcdefghijklmnopqrstuvwxyz0123456789
++ mkdir -p /private/tmp/wt-i03-cta-quarantine/path-asan/run.HxrtZViT/deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789/04_abcdefghijklmnopqrstuvwxyz0123456789/05_abcdefghijklmnopqrstuvwxyz0123456789
++ shasum -a 256 /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/CtaStrategyMgr.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/CtaStrategyMgr.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/WTSTools/WTSLogger.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmtlib.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/factory.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/check.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/logger_stub.cpp /private/tmp/wt-i03-cta-path-before/CtaStrategyMgr.cpp
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ --version
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ -std=c++17 -pthread -fPIC -fsanitize=address -fno-omit-frame-pointer -dynamiclib /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/factory.cpp -o /private/tmp/wt-i03-cta-quarantine/path-asan/run.HxrtZViT/plugins/fixture.dylib
++ cp /private/tmp/wt-i03-cta-quarantine/path-asan/run.HxrtZViT/plugins/fixture.dylib /private/tmp/wt-i03-cta-quarantine/path-asan/run.HxrtZViT/deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789/04_abcdefghijklmnopqrstuvwxyz0123456789/05_abcdefghijklmnopqrstuvwxyz0123456789/fixture.dylib
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ -std=c++17 -g -O1 -pthread -fsanitize=address -fno-omit-frame-pointer -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include -I/opt/homebrew/Cellar/spdlog/1.15.3/include -include /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/CtaStrategyMgr.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/logger_stub.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/check.cpp -o /private/tmp/wt-i03-cta-quarantine/path-asan/run.HxrtZViT/current
+In file included from <built-in>:1:
+In file included from /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h:3:
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:747:28: error: use of undeclared identifier 'malloc'
+  747 |     T* p = static_cast<T*>(malloc(n * sizeof(T)));
+      |                            ^~~~~~
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:752:35: error: call to function 'free' that is neither visible in the template definition nor found by argument-dependent lookup
+  752 |   void deallocate(T* p, size_t) { free(p); }
+      |                                   ^
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:812:46: note: in instantiation of member function 'fmt::detail::allocator<int>::deallocate' requested here
+  812 |     if (old_data != self.store_) self.alloc_.deallocate(old_data, old_capacity);
+      |                                              ^
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:821:27: note: in instantiation of member function 'fmt::basic_memory_buffer<int>::grow' requested here
+  821 |       : detail::buffer<T>(grow), alloc_(alloc) {
+      |                           ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/malloc/_malloc.h:56:7: note: 'free' should be declared prior to the call site
+   56 | void  free(void * __unsafe_indexable);
+      |       ^
+In file included from <built-in>:1:
+In file included from /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h:3:
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:752:35: error: call to function 'free' that is neither visible in the template definition nor found by argument-dependent lookup
+  752 |   void deallocate(T* p, size_t) { free(p); }
+      |                                   ^
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:812:46: note: in instantiation of member function 'fmt::detail::allocator<char>::deallocate' requested here
+  812 |     if (old_data != self.store_) self.alloc_.deallocate(old_data, old_capacity);
+      |                                              ^
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:821:27: note: in instantiation of member function 'fmt::basic_memory_buffer<char>::grow' requested here
+  821 |       : detail::buffer<T>(grow), alloc_(alloc) {
+      |                           ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/malloc/_malloc.h:56:7: note: 'free' should be declared prior to the call site
+   56 | void  free(void * __unsafe_indexable);
+      |       ^
+In file included from <built-in>:1:
+In file included from /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h:3:
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:752:35: error: call to function 'free' that is neither visible in the template definition nor found by argument-dependent lookup
+  752 |   void deallocate(T* p, size_t) { free(p); }
+      |                                   ^
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:812:46: note: in instantiation of member function 'fmt::detail::allocator<unsigned int>::deallocate' requested here
+  812 |     if (old_data != self.store_) self.alloc_.deallocate(old_data, old_capacity);
+      |                                              ^
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:821:27: note: in instantiation of member function 'fmt::basic_memory_buffer<unsigned int, 32>::grow' requested here
+  821 |       : detail::buffer<T>(grow), alloc_(alloc) {
+      |                           ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/malloc/_malloc.h:56:7: note: 'free' should be declared prior to the call site
+   56 | void  free(void * __unsafe_indexable);
+      |       ^
+In file included from <built-in>:1:
+In file included from /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h:3:
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:752:35: error: call to function 'free' that is neither visible in the template definition nor found by argument-dependent lookup
+  752 |   void deallocate(T* p, size_t) { free(p); }
+      |                                   ^
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:812:46: note: in instantiation of member function 'fmt::detail::allocator<wchar_t>::deallocate' requested here
+  812 |     if (old_data != self.store_) self.alloc_.deallocate(old_data, old_capacity);
+      |                                              ^
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:821:27: note: in instantiation of member function 'fmt::basic_memory_buffer<wchar_t>::grow' requested here
+  821 |       : detail::buffer<T>(grow), alloc_(alloc) {
+      |                           ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/malloc/_malloc.h:56:7: note: 'free' should be declared prior to the call site
+   56 | void  free(void * __unsafe_indexable);
+      |       ^
+5 errors generated.
+In file included from <built-in>:1:
+In file included from /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h:3:
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:747:28: error: use of undeclared identifier 'malloc'
+  747 |     T* p = static_cast<T*>(malloc(n * sizeof(T)));
+      |                            ^~~~~~
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:752:35: error: call to function 'free' that is neither visible in the template definition nor found by argument-dependent lookup
+  752 |   void deallocate(T* p, size_t) { free(p); }
+      |                                   ^
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:812:46: note: in instantiation of member function 'fmt::detail::allocator<int>::deallocate' requested here
+  812 |     if (old_data != self.store_) self.alloc_.deallocate(old_data, old_capacity);
+      |                                              ^
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:821:27: note: in instantiation of member function 'fmt::basic_memory_buffer<int>::grow' requested here
+  821 |       : detail::buffer<T>(grow), alloc_(alloc) {
+      |                           ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/malloc/_malloc.h:56:7: note: 'free' should be declared prior to the call site
+   56 | void  free(void * __unsafe_indexable);
+      |       ^
+In file included from <built-in>:1:
+In file included from /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h:3:
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:752:35: error: call to function 'free' that is neither visible in the template definition nor found by argument-dependent lookup
+  752 |   void deallocate(T* p, size_t) { free(p); }
+      |                                   ^
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:812:46: note: in instantiation of member function 'fmt::detail::allocator<char>::deallocate' requested here
+  812 |     if (old_data != self.store_) self.alloc_.deallocate(old_data, old_capacity);
+      |                                              ^
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:821:27: note: in instantiation of member function 'fmt::basic_memory_buffer<char>::grow' requested here
+  821 |       : detail::buffer<T>(grow), alloc_(alloc) {
+      |                           ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/malloc/_malloc.h:56:7: note: 'free' should be declared prior to the call site
+   56 | void  free(void * __unsafe_indexable);
+      |       ^
+In file included from <built-in>:1:
+In file included from /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h:3:
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:752:35: error: call to function 'free' that is neither visible in the template definition nor found by argument-dependent lookup
+  752 |   void deallocate(T* p, size_t) { free(p); }
+      |                                   ^
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:812:46: note: in instantiation of member function 'fmt::detail::allocator<unsigned int>::deallocate' requested here
+  812 |     if (old_data != self.store_) self.alloc_.deallocate(old_data, old_capacity);
+      |                                              ^
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:821:27: note: in instantiation of member function 'fmt::basic_memory_buffer<unsigned int, 32>::grow' requested here
+  821 |       : detail::buffer<T>(grow), alloc_(alloc) {
+      |                           ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/malloc/_malloc.h:56:7: note: 'free' should be declared prior to the call site
+   56 | void  free(void * __unsafe_indexable);
+      |       ^
+In file included from <built-in>:1:
+In file included from /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h:3:
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:752:35: error: call to function 'free' that is neither visible in the template definition nor found by argument-dependent lookup
+  752 |   void deallocate(T* p, size_t) { free(p); }
+      |                                   ^
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:812:46: note: in instantiation of member function 'fmt::detail::allocator<wchar_t>::deallocate' requested here
+  812 |     if (old_data != self.store_) self.alloc_.deallocate(old_data, old_capacity);
+      |                                              ^
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:821:27: note: in instantiation of member function 'fmt::basic_memory_buffer<wchar_t>::grow' requested here
+  821 |       : detail::buffer<T>(grow), alloc_(alloc) {
+      |                           ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/malloc/_malloc.h:56:7: note: 'free' should be declared prior to the call site
+   56 | void  free(void * __unsafe_indexable);
+      |       ^
+5 errors generated.
+In file included from <built-in>:1:
+In file included from /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h:3:
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:747:28: error: use of undeclared identifier 'malloc'
+  747 |     T* p = static_cast<T*>(malloc(n * sizeof(T)));
+      |                            ^~~~~~
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:752:35: error: call to function 'free' that is neither visible in the template definition nor found by argument-dependent lookup
+  752 |   void deallocate(T* p, size_t) { free(p); }
+      |                                   ^
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:812:46: note: in instantiation of member function 'fmt::detail::allocator<int>::deallocate' requested here
+  812 |     if (old_data != self.store_) self.alloc_.deallocate(old_data, old_capacity);
+      |                                              ^
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:821:27: note: in instantiation of member function 'fmt::basic_memory_buffer<int>::grow' requested here
+  821 |       : detail::buffer<T>(grow), alloc_(alloc) {
+      |                           ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/malloc/_malloc.h:56:7: note: 'free' should be declared prior to the call site
+   56 | void  free(void * __unsafe_indexable);
+      |       ^
+In file included from <built-in>:1:
+In file included from /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h:3:
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:752:35: error: call to function 'free' that is neither visible in the template definition nor found by argument-dependent lookup
+  752 |   void deallocate(T* p, size_t) { free(p); }
+      |                                   ^
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:812:46: note: in instantiation of member function 'fmt::detail::allocator<char>::deallocate' requested here
+  812 |     if (old_data != self.store_) self.alloc_.deallocate(old_data, old_capacity);
+      |                                              ^
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:821:27: note: in instantiation of member function 'fmt::basic_memory_buffer<char>::grow' requested here
+  821 |       : detail::buffer<T>(grow), alloc_(alloc) {
+      |                           ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/malloc/_malloc.h:56:7: note: 'free' should be declared prior to the call site
+   56 | void  free(void * __unsafe_indexable);
+      |       ^
+In file included from <built-in>:1:
+In file included from /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h:3:
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:752:35: error: call to function 'free' that is neither visible in the template definition nor found by argument-dependent lookup
+  752 |   void deallocate(T* p, size_t) { free(p); }
+      |                                   ^
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:812:46: note: in instantiation of member function 'fmt::detail::allocator<unsigned int>::deallocate' requested here
+  812 |     if (old_data != self.store_) self.alloc_.deallocate(old_data, old_capacity);
+      |                                              ^
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:821:27: note: in instantiation of member function 'fmt::basic_memory_buffer<unsigned int, 32>::grow' requested here
+  821 |       : detail::buffer<T>(grow), alloc_(alloc) {
+      |                           ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/malloc/_malloc.h:56:7: note: 'free' should be declared prior to the call site
+   56 | void  free(void * __unsafe_indexable);
+      |       ^
+In file included from <built-in>:1:
+In file included from /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h:3:
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:752:35: error: call to function 'free' that is neither visible in the template definition nor found by argument-dependent lookup
+  752 |   void deallocate(T* p, size_t) { free(p); }
+      |                                   ^
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:812:46: note: in instantiation of member function 'fmt::detail::allocator<wchar_t>::deallocate' requested here
+  812 |     if (old_data != self.store_) self.alloc_.deallocate(old_data, old_capacity);
+      |                                              ^
+/opt/homebrew/Cellar/fmt/11.2.0/include/fmt/format.h:821:27: note: in instantiation of member function 'fmt::basic_memory_buffer<wchar_t>::grow' requested here
+  821 |       : detail::buffer<T>(grow), alloc_(alloc) {
+      |                           ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/malloc/_malloc.h:56:7: note: 'free' should be declared prior to the call site
+   56 | void  free(void * __unsafe_indexable);
+      |       ^
+5 errors generated.

@@ -38,6 +38,7 @@ public:
 public:
 	void	initialize(const char* cfgFile, const char* logCfg, const char* modDir = "", bool bCfgFile = true, bool bLogCfgFile = true);
 	void	start(bool bAsync = false, bool bAlldayMode = false);
+	bool	isAlldayMode() const { return _allday_mode; }
 
 	bool	createExtParser(const char* id);
 
@@ -110,6 +111,7 @@ private:
 	ExpDumpers		_dumpers;
 
 	std::atomic<bool> _to_exit;
+	bool _allday_mode;
 	bool _startup_blocked; // guarded by parser registry mutex; required init failed
 	bool _parser_registry_started; // guarded with ParserAdapterMgr by registry mutex
 	bool _parser_registry_stopped; // guarded with ParserAdapterMgr by registry mutex

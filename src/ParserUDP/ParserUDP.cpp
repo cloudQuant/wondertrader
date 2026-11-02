@@ -406,39 +406,57 @@ void ParserUDP::subscribe()
 	data.resize(sizeof(UDPReqPacket), 0);
 	UDPReqPacket* req = (UDPReqPacket*)data.data();
 	req->_type = UDP_MSG_SUBSCRIBE;
-	uint32_t length = 0;
+	std::size_t length = 0;
+	std::size_t skipped_long_symbols = 0;
+	const std::size_t max_payload_length = sizeof(req->_data) - 1;
 	for (auto& code : _set_subs)
 	{
-		if (length > 0)
+		const std::size_t pos = code.find('.');
+		const char* symbol = pos == std::string::npos ? code.data() : code.data() + pos + 1;
+		const std::size_t symbol_length = pos == std::string::npos ? code.size() : code.size() - pos - 1;
+		if (symbol_length == 0)
+			continue;
+
+		if (symbol_length > max_payload_length)
 		{
-			req->_data[length] = ',';
-			length++;
+			++skipped_long_symbols;
+			continue;
 		}
 
-		std::size_t pos = code.find('.');
-		if (pos != std::string::npos)
-			strcpy(req->_data + length, (char*)code.c_str() + pos + 1);
-		else
-			strcpy(req->_data + length, code.c_str());
-
-		length += code.size();
-
-		if (length > 1000)
+		const std::size_t separator_length = length == 0 ? 0 : 1;
+		if (length + separator_length + symbol_length > max_payload_length)
 		{
-			StdUniqueLock lock(_mtx_queue);
-			_send_queue.push(data);
+			{
+				StdUniqueLock lock(_mtx_queue);
+				_send_queue.push(data);
+			}
 
-			data.resize(sizeof(UDPReqPacket), 0);
+			data.assign(sizeof(UDPReqPacket), 0);
 			req = (UDPReqPacket*)data.data();
 			req->_type = UDP_MSG_SUBSCRIBE;
 			length = 0;
 		}
+
+		if (length > 0)
+			req->_data[length++] = ',';
+		std::memcpy(req->_data + length, symbol, symbol_length);
+		length += symbol_length;
 	}
 
-    if (length > 0) {
-        StdUniqueLock lock(_mtx_queue);
-        _send_queue.push(data);
-    }
+	if (length > 0)
+	{
+		StdUniqueLock lock(_mtx_queue);
+		_send_queue.push(data);
+	}
+
+	if (skipped_long_symbols > 0)
+	{
+		with_spi([&](IParserSpi* sink)
+		{
+			write_log(sink, LL_ERROR, "[ParserUDP] Skipped {} subscription code(s) that exceed packet capacity",
+				static_cast<uint32_t>(skipped_long_symbols));
+		});
+	}
 
 	do_send();
 }

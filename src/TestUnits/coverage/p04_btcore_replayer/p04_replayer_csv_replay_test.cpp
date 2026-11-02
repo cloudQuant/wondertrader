@@ -157,6 +157,9 @@ namespace
 	{
 		const std::string module = DLLHelper::wrap_module("WtDataStorage");
 		std::vector<std::filesystem::path> candidates;
+		const char* testModuleDir = std::getenv("WT_P04_DATA_STORAGE_DIR");
+		if (testModuleDir != nullptr && *testModuleDir != '\0')
+			candidates.emplace_back(testModuleDir);
 		if (!WtHelper::getInstDir().empty())
 			candidates.emplace_back(WtHelper::getInstDir());
 		const char* const relativeDirs[] = {
@@ -561,6 +564,10 @@ TEST_F(P04ReplayCsvTest, failedBinaryRawBarsLoadCanBeRetriedSafely)
 	ASSERT_TRUE(std::filesystem::exists(minute5File));
 
 	HisDataReplayer replayer;
+	// The first repaired bar is at 09:35. Start at 09:40 so it is observable
+	// as historical data; get_kline_slice intentionally returns null when the
+	// first available minute bar is still in the future.
+	replayer.set_time_range(202001020940, 202001081500);
 	WTSVariant* cfg = replay_cfg(_root, _base, "bin");
 	ASSERT_TRUE(replayer.init(cfg));
 	cfg->release();
@@ -569,6 +576,8 @@ TEST_F(P04ReplayCsvTest, failedBinaryRawBarsLoadCanBeRetriedSafely)
 	replayer.register_sink(&sink, "p04_bin_retry");
 	ASSERT_TRUE(replayer.prepare());
 	ASSERT_NE(nullptr, replayer.get_session_info("SSE.STK.000001", true));
+	if (const char* testModuleDir = std::getenv("WT_P04_DATA_STORAGE_DIR"))
+		EXPECT_EQ(std::filesystem::path(testModuleDir).string() + "/", WtHelper::getInstDir());
 
 	// A real WtDataStorage read succeeds on this header-only file but returns no
 	// records. It must not publish an empty raw cache entry.

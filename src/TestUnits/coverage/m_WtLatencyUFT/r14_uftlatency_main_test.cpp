@@ -9,7 +9,7 @@
  *   run() 里 :317 _parsers.run() / :318 _traders.run() / :320 _engine.run() 起线程，
  *   :322 theParser->run(_times) 是造 tick 的死循环；
  * 而 main.cpp:31 之后还有 `getchar()` —— 没有 tty 输入时直接阻塞整个 gtest 宿主。
- * 所以本文件只测 uft::UftLatencyTool 的构造/析构与 init() 的配置缺失早退支。
+ * 所以本文件只测 uft::UftLatencyTool 的构造/析构、配置缺失/类型错误早退和 object 控制支；不调用 run()。
  *
  * 分支决定权：init() 读的是硬编码相对路径 "logcfg.yaml"/"config.yaml"（:200/:204），
  * 结果完全取决于运行目录里有没有这两个文件 —— 用例自己 chdir 进一个刚建的空目录，
@@ -18,15 +18,20 @@
  */
 #include <gtest/gtest.h>
 
+#include <fstream>
+#include <mutex>
 #include <string>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <vector>
 
+#include "Includes/ILogHandler.h"
+#include "WTSTools/WTSLogger.h"
 #include "WtLatencyUFT/UftLatencyTool.h"
 
 namespace {
 
-/* 把进程 cwd 换到一个空的私有目录，析构时恢复并删除 */
+/* 把进程 cwd 换到一个私有目录，析构时恢复并清理测试配置 */
 class ScopedEmptyCwd
 {
 private:
@@ -61,7 +66,12 @@ public:
 		if (m_entered)
 			chdir(m_backup);
 		if (m_entered && m_enter[0] != '\0')
+		{
+			unlink((std::string(m_enter) + "/config.yaml").c_str());
+			unlink((std::string(m_enter) + "/logcfg.yaml").c_str());
+			unlink((std::string(m_enter) + "/latency.log").c_str());
 			m_removed = (rmdir(m_enter) == 0);
+		}
 	}
 
 	bool ok() const { return m_entered; }
@@ -70,6 +80,92 @@ public:
 	ScopedEmptyCwd(const ScopedEmptyCwd&) = delete;
 	ScopedEmptyCwd& operator=(const ScopedEmptyCwd&) = delete;
 };
+
+} // namespace
+
+namespace {
+
+bool writeFile(const char* name, const char* text)
+{
+	std::ofstream file(name);
+	if (!file)
+		return false;
+	file << text;
+	return file.good();
+}
+
+class TestLogHandler : public ILogHandler
+{
+public:
+	void handleLogAppend(WTSLogLevel, const char* message) override
+	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+		m_messages.emplace_back(message != nullptr ? message : "");
+	}
+
+	bool contains(const char* expected)
+	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+		for (const std::string& message : m_messages)
+			if (message.find(expected) != std::string::npos)
+				return true;
+		return false;
+	}
+
+private:
+	std::mutex m_mutex;
+	std::vector<std::string> m_messages;
+};
+
+class ScopedLogCapture
+{
+public:
+	explicit ScopedLogCapture(TestLogHandler* handler)
+	{
+		WTSLogger::init("logcfg.yaml");
+		WTSLogger::registerHandler(handler);
+	}
+
+	~ScopedLogCapture() { WTSLogger::registerHandler(nullptr); }
+	ScopedLogCapture(const ScopedLogCapture&) = delete;
+	ScopedLogCapture& operator=(const ScopedLogCapture&) = delete;
+};
+
+const char* kLogConfig =
+	"{\"root\":{\"level\":\"warn\",\"async\":false,\"sinks\":["
+	"{\"type\":\"basic_file_sink\",\"filename\":\"latency.log\","
+	"\"truncate\":true,\"pattern\":\"%v\"}]}}";
+
+const char* kMissingBasefilesConfig =
+	"env:\n"
+	"    product:\n"
+	"        session: ALLDAY\n"
+	"times: 0\n"
+	"core: 0\n";
+
+const char* kArrayBasefilesConfig =
+	"basefiles: []\n"
+	"env:\n"
+	"    product:\n"
+	"        session: ALLDAY\n"
+	"times: 0\n"
+	"core: 0\n";
+
+const char* kScalarBasefilesConfig =
+	"basefiles: invalid\n"
+	"env:\n"
+	"    product:\n"
+	"        session: ALLDAY\n"
+	"times: 0\n"
+	"core: 0\n";
+
+const char* kObjectBasefilesConfig =
+	"basefiles: {}\n"
+	"env:\n"
+	"    product:\n"
+	"        session: ALLDAY\n"
+	"times: 0\n"
+	"core: 0\n";
 
 } // namespace
 
@@ -111,6 +207,60 @@ TEST(r14_lazy_uft_tool, init_is_repeatable_and_still_false_without_config)
 	// 两次调用喂的是同一份「不存在」的输入 -> 结论必须一致，不能因为第一次失败就改变状态
 	EXPECT_FALSE(tool.init());
 	EXPECT_FALSE(tool.init());
+}
+
+TEST(r14_lazy_uft_tool, init_rejects_missing_basefiles_before_run)
+{
+	ScopedEmptyCwd guard("missing_basefiles");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(writeFile("logcfg.yaml", kLogConfig));
+	ASSERT_TRUE(writeFile("config.yaml", kMissingBasefilesConfig));
+	TestLogHandler logs;
+	ScopedLogCapture capture(&logs);
+
+	uft::UftLatencyTool tool;
+	// init 早退；本用例不调用 run，避免配置校验失败后触发任何引擎/解析器工作。
+	EXPECT_FALSE(tool.init());
+	EXPECT_TRUE(logs.contains("Basefiles config section is missing"));
+}
+
+TEST(r14_lazy_uft_tool, init_rejects_array_basefiles_before_run)
+{
+	ScopedEmptyCwd guard("array_basefiles");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(writeFile("logcfg.yaml", kLogConfig));
+	ASSERT_TRUE(writeFile("config.yaml", kArrayBasefilesConfig));
+	TestLogHandler logs;
+	ScopedLogCapture capture(&logs);
+
+	uft::UftLatencyTool tool;
+	EXPECT_FALSE(tool.init());
+	EXPECT_TRUE(logs.contains("Basefiles config section must be an object"));
+}
+
+TEST(r14_lazy_uft_tool, init_rejects_scalar_basefiles_before_run)
+{
+	ScopedEmptyCwd guard("scalar_basefiles");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(writeFile("logcfg.yaml", kLogConfig));
+	ASSERT_TRUE(writeFile("config.yaml", kScalarBasefilesConfig));
+	TestLogHandler logs;
+	ScopedLogCapture capture(&logs);
+
+	uft::UftLatencyTool tool;
+	EXPECT_FALSE(tool.init());
+	EXPECT_TRUE(logs.contains("Basefiles config section must be an object"));
+}
+
+TEST(r14_lazy_uft_tool, init_accepts_object_basefiles_without_entering_run)
+{
+	ScopedEmptyCwd guard("object_basefiles");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(writeFile("config.yaml", kObjectBasefilesConfig));
+
+	uft::UftLatencyTool tool;
+	// 空 object 是有效配置合同，子键可选；仅初始化，不启动线程或执行 run。
+	EXPECT_TRUE(tool.init());
 }
 
 TEST(r14_lazy_uft_tool, empty_cwd_is_really_empty_and_restored)

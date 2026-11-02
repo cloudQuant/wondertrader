@@ -11,27 +11,22 @@
 
 #include "../Share/StrUtil.hpp"
 
-#ifdef _MSC_VER
-#include <direct.h>
-#else	//UNIX
-#include <unistd.h>
-#endif
+#include <filesystem>
+#include <system_error>
 
 std::string WtHelper::_bin_dir;
 
 const char* WtHelper::get_cwd()
 {
 	static std::string _cwd;
-	if(_cwd.empty())
+	if (_cwd.empty())
 	{
-		char   buffer[255];
-#ifdef _MSC_VER
-		_getcwd(buffer, 255);
-#else	//UNIX
-		getcwd(buffer, 255);
-#endif
-		_cwd = buffer;
-		_cwd = StrUtil::standardisePath(_cwd);
+		std::error_code ec;
+		const std::filesystem::path cwd = std::filesystem::current_path(ec);
+		if (ec)
+			return "";
+
+		_cwd = StrUtil::standardisePath(cwd.string());
 	}	
 	return _cwd.c_str();
 }

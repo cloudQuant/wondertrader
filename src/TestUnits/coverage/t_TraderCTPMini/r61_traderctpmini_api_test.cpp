@@ -129,6 +129,8 @@ namespace
 		const std::string& authcode() const { return m_strAuthCode; }
 		const std::string& module() const { return m_strModule; }
 		bool quickStart() const { return m_bQuickStart; }
+		bool creatorReady() const { return m_funcCreator != nullptr; }
+		bool moduleLoaded() const { return m_hInstCTP != NULL; }
 		void setQuick(bool quick) { m_bQuickStart = quick; }
 		void setCreator(CTPCreator creator) { m_funcCreator = creator; }
 		void setDummyWorker() { m_thrdWorker.reset(new StdThread([]() {})); }
@@ -411,15 +413,17 @@ namespace
 	}
 
 	WTSVariant* r61_mini_config(const std::string& broker = "9999", const std::string& user = "tester",
-		const std::string& pass = "secret", const std::string& appid = "app", const std::string& authcode = "auth")
+		const std::string& pass = "secret", const std::string& appid = "app", const std::string& authcode = "auth",
+		const std::string& module = "", const std::string& missingKey = "")
 	{
 		WTSVariant* cfg = WTSVariant::createObject();
-		cfg->append("front", "tcp://127.0.0.1:1");
-		cfg->append("broker", broker.c_str());
-		cfg->append("user", user.c_str());
-		cfg->append("pass", pass.c_str());
+		if (missingKey != "front") cfg->append("front", "tcp://127.0.0.1:1");
+		if (missingKey != "broker") cfg->append("broker", broker.c_str());
+		if (missingKey != "user") cfg->append("user", user.c_str());
+		if (missingKey != "pass") cfg->append("pass", pass.c_str());
 		cfg->append("appid", appid.c_str());
 		cfg->append("authcode", authcode.c_str());
+		if (!module.empty()) cfg->append("ctpmodule", module.c_str());
 		return cfg;
 	}
 }
@@ -444,7 +448,8 @@ TEST(R61_TraderCTPMini, init_reads_config_and_applies_defaults)
 	cfg->append("broker", "9999");
 	cfg->append("user", "tester");
 	cfg->append("pass", "secret");
-	EXPECT_TRUE(probe.init(cfg));
+	const bool initResult = probe.init(cfg);
+	EXPECT_EQ(initResult, probe.creatorReady());
 	EXPECT_EQ("tcp://1.2.3.4:1234", probe.front());
 	EXPECT_EQ("9999", probe.broker());
 	EXPECT_EQ("tester", probe.user());
@@ -464,15 +469,152 @@ TEST(R61_TraderCTPMini, init_reads_config_and_applies_defaults)
 	cfg2->append("appid", "app2");
 	cfg2->append("authcode", "auth2");
 	cfg2->append("flowdir", "r61miniflow");
-	cfg2->append("ctpmodule", "r61customapi");
+	cfg2->append("ctpmodule", WT_T3_006_CTPMINI_SUCCESS_MODULE);
 	cfg2->append("quick", true);
 	EXPECT_TRUE(custom.init(cfg2));
 	EXPECT_NE(std::string::npos, custom.flowDir().find("r61miniflow"));
-	EXPECT_NE(std::string::npos, custom.module().find("r61customapi"));
+	EXPECT_NE(std::string::npos, custom.module().find(WT_T3_006_CTPMINI_SUCCESS_MODULE));
 	EXPECT_EQ("app2", custom.appid());
 	EXPECT_EQ("auth2", custom.authcode());
 	EXPECT_TRUE(custom.quickStart());
 	cfg2->release();
+}
+
+TEST(T3_006_TraderCTPMini, init_rejects_each_missing_required_config_key)
+{
+	for (const char* key : {"front", "broker", "user", "pass"})
+	{
+		R61MiniProbe probe;
+		R61MiniSink sink;
+		probe.harden();
+		probe.registerSpi(&sink);
+		WTSVariant* cfg = r61_mini_config("9999", "tester", "secret", "app", "auth", "", key);
+		EXPECT_FALSE(probe.init(cfg)) << key;
+		EXPECT_FALSE(probe.creatorReady()) << key;
+		EXPECT_TRUE(sink.hasLog(key)) << key;
+		cfg->release();
+	}
+
+	R61MiniProbe nullParams;
+	EXPECT_FALSE(nullParams.init(nullptr));
+}
+
+TEST(T3_006_TraderCTPMini, init_rejects_missing_module_and_creator_symbol)
+{
+	struct ModuleCase
+	{
+		const char* module;
+		const char* diagnostic;
+	};
+	const ModuleCase cases[] = {
+		{"wt_t3_006_ctpmini_missing_library_unique", "Failed to load CTP trader module"},
+		{WT_T3_006_CTPMINI_MISSING_SYMBOL_MODULE, "missing its creator symbol"}
+	};
+
+	for (const auto& item : cases)
+	{
+		R61MiniProbe probe;
+		R61MiniSink sink;
+		probe.harden();
+		probe.registerSpi(&sink);
+		WTSVariant* cfg = r61_mini_config("9999", "tester", "secret", "app", "auth", item.module);
+		EXPECT_FALSE(probe.init(cfg)) << item.module;
+		EXPECT_FALSE(probe.creatorReady()) << item.module;
+		EXPECT_FALSE(probe.moduleLoaded()) << item.module;
+		EXPECT_TRUE(sink.hasLog(item.diagnostic)) << item.module;
+		EXPECT_NO_THROW(probe.connect());
+		EXPECT_TRUE(sink.hasLog("creator is unavailable")) << item.module;
+		EXPECT_TRUE(probe.workerNull());
+		EXPECT_EQ(nullptr, probe.api());
+		cfg->release();
+	}
+}
+
+TEST(T3_006_TraderCTPMini, connect_rejects_null_creator_result_without_starting_worker)
+{
+	R61MiniTempDir tmp;
+	ASSERT_FALSE(tmp.path.empty());
+	R61MiniProbe probe;
+	R61MiniSink sink;
+	probe.harden();
+	probe.registerSpi(&sink);
+	WTSVariant* cfg = r61_mini_config("9999", "tester", "secret", "app", "auth",
+		WT_T3_006_CTPMINI_NULL_CREATOR_MODULE);
+	ASSERT_TRUE(probe.init(cfg));
+	probe.setFlowDir(tmp.path + "/");
+	EXPECT_NO_THROW(probe.connect());
+	EXPECT_EQ(nullptr, probe.api());
+	EXPECT_TRUE(probe.workerNull());
+	EXPECT_TRUE(sink.hasLog("creator returned a null API"));
+	cfg->release();
+}
+
+TEST(T3_006_TraderCTPMini, successful_fake_module_creates_and_releases_stub_api)
+{
+	R61MiniTempDir tmp;
+	ASSERT_FALSE(tmp.path.empty());
+	R61MiniProbe probe;
+	R61MiniSink sink;
+	probe.harden();
+	probe.registerSpi(&sink);
+	WTSVariant* cfg = r61_mini_config("9999", "tester", "secret", "app", "auth",
+		WT_T3_006_CTPMINI_SUCCESS_MODULE);
+	ASSERT_TRUE(probe.init(cfg));
+	ASSERT_TRUE(probe.moduleLoaded());
+	probe.setFlowDir(tmp.path + "/");
+
+	WTSVariant* retryBeforeConnect = WTSVariant::createObject();
+	EXPECT_FALSE(probe.init(retryBeforeConnect));
+	EXPECT_TRUE(probe.moduleLoaded());
+	EXPECT_TRUE(probe.creatorReady());
+	ASSERT_FALSE(sink.logs.empty());
+	EXPECT_NE(std::string::npos, sink.logs.back().second.find("module is already initialized"));
+	retryBeforeConnect->release();
+
+	probe.setDummyWorker();
+	probe.connect();
+	ASSERT_NE(nullptr, probe.api());
+	R61CtpMiniApiStub* api = static_cast<R61CtpMiniApiStub*>(probe.api());
+	EXPECT_EQ(5u, api->n_calls_);
+
+	WTSVariant* retryWhileConnected = WTSVariant::createObject();
+	EXPECT_FALSE(probe.init(retryWhileConnected));
+	EXPECT_EQ(api, probe.api());
+	EXPECT_TRUE(probe.moduleLoaded());
+	retryWhileConnected->release();
+
+	probe.disconnect();
+	probe.drainQueue();
+	EXPECT_EQ(nullptr, probe.api());
+	EXPECT_EQ(6u, api->n_calls_);
+	cfg->release();
+}
+
+TEST(T3_006_TraderCTPMini, failed_module_init_can_retry_with_a_valid_module)
+{
+	R61MiniTempDir tmp;
+	ASSERT_FALSE(tmp.path.empty());
+	R61MiniProbe probe;
+	probe.harden();
+	WTSVariant* badCfg = r61_mini_config("9999", "tester", "secret", "app", "auth",
+		WT_T3_006_CTPMINI_MISSING_SYMBOL_MODULE);
+	EXPECT_FALSE(probe.init(badCfg));
+	EXPECT_FALSE(probe.moduleLoaded());
+	EXPECT_FALSE(probe.creatorReady());
+	badCfg->release();
+
+	WTSVariant* goodCfg = r61_mini_config("9999", "tester", "secret", "app", "auth",
+		WT_T3_006_CTPMINI_SUCCESS_MODULE);
+	ASSERT_TRUE(probe.init(goodCfg));
+	ASSERT_TRUE(probe.moduleLoaded());
+	probe.setFlowDir(tmp.path + "/");
+	probe.setDummyWorker();
+	probe.connect();
+	ASSERT_NE(nullptr, probe.api());
+	probe.disconnect();
+	probe.drainQueue();
+	EXPECT_EQ(nullptr, probe.api());
+	goodCfg->release();
 }
 
 TEST(R61_TraderCTPMini, init_accepts_sdk_capacity_and_rejects_overlength_config_fields)
@@ -484,7 +626,8 @@ TEST(R61_TraderCTPMini, init_accepts_sdk_capacity_and_rejects_overlength_config_
 	const std::string authcode(sizeof(TThostFtdcAuthCodeType) - 1, 'c');
 	R61MiniProbe exact;
 	exact.harden();
-	WTSVariant* exactCfg = r61_mini_config(broker, user, pass, appid, authcode);
+	WTSVariant* exactCfg = r61_mini_config(broker, user, pass, appid, authcode,
+		WT_T3_006_CTPMINI_SUCCESS_MODULE);
 	EXPECT_TRUE(exact.init(exactCfg));
 	EXPECT_EQ(broker, exact.broker());
 	EXPECT_EQ(user, exact.user());

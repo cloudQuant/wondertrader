@@ -83,6 +83,9 @@ public:
 	 */
 	WtStockVWapExeUnit();
 
+	// An empty provider response does not establish whether the order was accepted.
+	bool hasUnverifiedSubmission() const { return _unverified_submission.load(); }
+
 	/**
 	 * @brief 析构函数
 	 * @details 清理所有分配的资源，包括行情数据和商品信息
@@ -257,6 +260,8 @@ private:
 	WTSTickData* _last_tick;
 	/// @brief 目标仓位（股数模式）
 	double		_target_pos;
+	/// @brief 用户目标已明确设置；构造时的默认零仓位不能作为执行目标
+	bool		_target_pos_valid{ false };
 	/// @brief 目标金额（金额模式）
 	double		_target_amount;
 	/// @brief 订单回报后等待下一笔新有效行情再处理的动作
@@ -341,7 +346,7 @@ private:
 	//////////////////////////////////////////////////////////////////////////
 	/// @brief 临时变量
 	/// @brief 本轮目标仓位
-	double			_this_target;
+	double			_this_target{ 0.0 };
 	/// @brief 发单间隔，单位毫秒
 	uint32_t		_fire_span;
 	/// @brief 已执行次数
@@ -366,6 +371,8 @@ private:
 	
 	/// @brief 原子变量，标记是否在计算过程中，用于防止多线程竞争
 	std::atomic<bool> _in_calc;
+	// Process-local quarantine: no automatic recovery without trusted reconciliation.
+	std::atomic<bool> _unverified_submission{ false };
 
 	/**
 	 * @brief 计算标记结构体
@@ -416,10 +423,13 @@ private:
 	 *          对于股票，普通股最小单位为100股，科创板股票为200股
 	 *          对于可转债，最小单位为10张
 	 * @param stdCode 标准化合约代码
-	 * @return 最小下单数量
+	 * @return 最小下单数量；上下文或商品元数据不可用时返回 0
 	 */
 	inline double get_minOrderQty(std::string stdCode)
 	{
+		if (_ctx == nullptr)
+			return 0.0;
+
 		// 从合约代码中提取股票代码部分
 		int code = std::stoi(StrUtil::split(stdCode, ".")[2]);
 		bool is_KC = false;
@@ -428,22 +438,31 @@ private:
 		{
 			is_KC = true;
 		}
-		// 获取商品信息
+		// ExecuteContext returns a borrowed commodity pointer; this helper only reads it.
 		WTSCommodityInfo* comm_info = _ctx->getCommodityInfo(stdCode.c_str());
+		if (comm_info == nullptr)
+		{
+			_ctx->writeLog(fmt::format("StockVWap cannot determine minimum order quantity for {}: commodity information is unavailable", stdCode).c_str());
+			return 0.0;
+		}
+		const char* product = comm_info->getProduct();
+		if (product == nullptr)
+		{
+			_ctx->writeLog(fmt::format("StockVWap cannot determine minimum order quantity for {}: product information is unavailable", stdCode).c_str());
+			return 0.0;
+		}
+
 		double min_order = 1.0;
 		// 根据产品类型设置最小下单数量
-		if (strcmp(comm_info->getProduct(), cbondStr) == 0)
+		if (strcmp(product, cbondStr) == 0)
 			min_order = 10.0;  // 可转债最小下单数量为10张
-		else if (strcmp(comm_info->getProduct(), stockStr) == 0)
+		else if (strcmp(product, stockStr) == 0)
 		{
 			if (is_KC)
 				min_order = 200.0;  // 科创板股票最小下单数量为200股
 			else
 				min_order = 100.0;
 		}  // 普通股票最小下单数量为100股
-		// 释放商品信息对象
-		if (comm_info)
-			comm_info->release();
 		return min_order;
 	}
 };

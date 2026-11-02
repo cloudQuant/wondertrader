@@ -1,0 +1,26 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R60MockerTest.same_instance_reinitializes_and_delivers_each_connect:R60MockerTest.released_instance_does_not_deliver_old_queued_query_after_reinit
+[==========] Running 2 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 2 tests from R60MockerTest
+[ RUN      ] R60MockerTest.same_instance_reinitializes_and_delivers_each_connect
+[       OK ] R60MockerTest.same_instance_reinitializes_and_delivers_each_connect (4072 ms)
+[ RUN      ] R60MockerTest.released_instance_does_not_deliver_old_queued_query_after_reinit
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp:798: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  sink_.n_account()
+    Which is: 1
+a query queued while released crossed into the new lifecycle
+
+[  FAILED  ] R60MockerTest.released_instance_does_not_deliver_old_queued_query_after_reinit (4018 ms)
+[----------] 2 tests from R60MockerTest (8091 ms total)
+
+[----------] Global test environment tear-down
+[==========] 2 tests from 1 test suite ran. (8091 ms total)
+[  PASSED  ] 1 test.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R60MockerTest.released_instance_does_not_deliver_old_queued_query_after_reinit
+
+ 1 FAILED TEST

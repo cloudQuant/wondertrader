@@ -9,11 +9,27 @@
 #include "../Includes/WTSVariant.hpp"
 
 #include <limits>
+#ifdef WT_DUMPER_TEST_HOOKS
+#include <atomic>
+#endif
 
 USING_NS_WTP;
 
 namespace
 {
+#ifdef WT_DUMPER_TEST_HOOKS
+using DumperWorkerWaitHook = void (*)();
+std::atomic<DumperWorkerWaitHook> g_dumperWorkerWaitHookForTest{nullptr};
+std::atomic<bool> g_dumperUseLegacySleepForTest{false};
+
+void notify_dumper_worker_wait_for_test()
+{
+	DumperWorkerWaitHook hook = g_dumperWorkerWaitHookForTest.load();
+	if (hook != nullptr)
+		hook();
+}
+#endif
+
 bool parse_refresh_span(WTSVariant* value, uint32_t& refreshSpan)
 {
 	if (value == NULL)
@@ -62,6 +78,18 @@ bool parse_refresh_span(WTSVariant* value, uint32_t& refreshSpan)
 	return true;
 }
 }
+
+#ifdef WT_DUMPER_TEST_HOOKS
+void setDumperWorkerWaitHookForTest(DumperWorkerWaitHook hook)
+{
+	g_dumperWorkerWaitHookForTest.store(hook);
+}
+
+void setDumperUseLegacySleepForTest(bool useLegacySleep)
+{
+	g_dumperUseLegacySleepForTest.store(useLegacySleep);
+}
+#endif
 
 WTSBaseDataMgr		g_bdMgr;
 TraderAdapterMgr	g_adapterMgr;
@@ -272,14 +300,38 @@ void Dumper::run(bool bOnce /* = true */)
 	}
 	else
 	{
-		_worker.reset(new StdThread([this]() {
-			
-			while(!_stopped)
+		std::lock_guard<std::mutex> workerGuard(_worker_mutex);
+		_stopped = false;
+		const uint32_t refreshSpan = _refresh_span;
+		_worker.reset(new StdThread([this, refreshSpan]() {
+			std::unique_lock<std::mutex> workerLock(_worker_mutex);
+			while (!_stopped)
 			{
-				std::this_thread::sleep_for(std::chrono::seconds(_refresh_span));
+#ifdef WT_DUMPER_TEST_HOOKS
+				if (g_dumperUseLegacySleepForTest.load())
+				{
+					notify_dumper_worker_wait_for_test();
+					workerLock.unlock();
+					std::this_thread::sleep_for(std::chrono::seconds(refreshSpan));
+					workerLock.lock();
+				}
+				else
+#endif
+				{
+#ifdef WT_DUMPER_TEST_HOOKS
+					notify_dumper_worker_wait_for_test();
+					// release() uses this mutex, so it cannot set the stop predicate
+					// until wait_for atomically releases the mutex and enters the wait.
+#endif
+					if (_worker_cv.wait_for(workerLock, std::chrono::seconds(refreshSpan), [this]() {
+						return _stopped;
+					}))
+						break;
+				}
+				workerLock.unlock();
 				g_adapterMgr.refresh();
+				workerLock.lock();
 			}
-			
 		}));
 	}
 }
@@ -287,7 +339,11 @@ void Dumper::run(bool bOnce /* = true */)
 void Dumper::release()
 {
 	_configured = false;
-	_stopped = true;
+	{
+		std::lock_guard<std::mutex> workerGuard(_worker_mutex);
+		_stopped = true;
+	}
+	_worker_cv.notify_all();
 	if (_worker)
 		_worker->join();
 }

@@ -13,6 +13,7 @@
 #include "ReplayTimeRange.hpp"
 
 #include <algorithm>
+#include <cstring>
 #include <fstream>
 #include <limits>
 #include <mutex>
@@ -301,6 +302,7 @@ HisDataReplayer::HisDataReplayer()
 	, _has_bar_minutes(false)
 	, _cache_clear_days(0)
 	, _running(false)
+	, _terminated(false)
 	, _notifier(NULL)
 	{
 }
@@ -459,20 +461,37 @@ bool HisDataReplayer::init(WTSVariant* cfg, EventNotifier* notifier /* = NULL */
 
 	//基础数据文件
 	if (cfgBF->get("session"))
-		_bd_mgr.loadSessions(cfgBF->getCString("session"));
+	{
+		const char* sessionFile = cfgBF->getCString("session");
+		if (!_bd_mgr.loadSessions(sessionFile))
+		{
+			WTSLogger::error("Failed to load required trading sessions file {}", sessionFile);
+			return false;
+		}
+	}
 
 	WTSVariant* cfgItem = cfgBF->get("commodity");
 	if (cfgItem)
 	{
 		if (cfgItem->type() == WTSVariant::VT_String)
 		{
-			_bd_mgr.loadCommodities(cfgItem->asCString());
+			const char* commodityFile = cfgItem->asCString();
+			if (!_bd_mgr.loadCommodities(commodityFile))
+			{
+				WTSLogger::error("Failed to load required commodities file {}", commodityFile);
+				return false;
+			}
 		}
 		else if (cfgItem->type() == WTSVariant::VT_Array)
 		{
 			for(uint32_t i = 0; i < cfgItem->size(); i ++)
 			{
-				_bd_mgr.loadCommodities(cfgItem->get(i)->asCString());
+				const char* commodityFile = cfgItem->get(i)->asCString();
+				if (!_bd_mgr.loadCommodities(commodityFile))
+				{
+					WTSLogger::error("Failed to load required commodities file {}", commodityFile);
+					return false;
+				}
 			}
 		}
 	}
@@ -514,6 +533,15 @@ bool HisDataReplayer::init(WTSVariant* cfg, EventNotifier* notifier /* = NULL */
 	}
 
 	loadFees(cfg->getCString("fees"));
+	for (const auto& feeEntry : _fee_map)
+	{
+		if (!feeEntry.second._by_volume && _bd_mgr.getCommodity(feeEntry.first.c_str()) == NULL)
+		{
+			WTSLogger::error("Amount-based fee template for {} requires commodity metadata; replayer initialization failed",
+				feeEntry.first.c_str());
+			return false;
+		}
+	}
 
 	/*
 	 *	By Wesley @ 2021.12.20
@@ -633,8 +661,23 @@ bool HisDataReplayer::loadStkAdjFactorsFromFile(const char* adjfile)
 	return true;
 }
 
+bool HisDataReplayer::validate_task_parameters(const char* period, const char* trdtpl, const char* session)
+{
+	if (period == nullptr || trdtpl == nullptr || session == nullptr)
+		return false;
+
+	return std::strlen(trdtpl) < sizeof(((TaskInfo*)nullptr)->_trdtpl) &&
+		std::strlen(session) < sizeof(((TaskInfo*)nullptr)->_session);
+}
+
 void HisDataReplayer::register_task(uint32_t taskid, uint32_t date, uint32_t time, const char* period, const char* trdtpl /* = "CHINA" */, const char* session /* = "TRADING" */)
 {
+	if (!validate_task_parameters(period, trdtpl, session))
+	{
+		WTSLogger::error("Timed task registration rejected: period, trading template, or session is invalid");
+		return;
+	}
+
 	TaskPeriodType ptype;
 	if (wt_stricmp(period, "d") == 0)
 		ptype = TPT_Daily;
@@ -649,15 +692,16 @@ void HisDataReplayer::register_task(uint32_t taskid, uint32_t date, uint32_t tim
 	else
 		ptype = TPT_None;
 
-	_task.reset(new TaskInfo);
-	strcpy(_task->_name, "sel");
-	strcpy(_task->_trdtpl, trdtpl);
-	strcpy(_task->_session, session);
-	_task->_day = date;
-	_task->_time = time;
-	_task->_id = taskid;
-	_task->_period = ptype;
-	_task->_strict_time = true;
+	TaskInfoPtr task(new TaskInfo);
+	strcpy(task->_name, "sel");
+	strcpy(task->_trdtpl, trdtpl);
+	strcpy(task->_session, session);
+	task->_day = date;
+	task->_time = time;
+	task->_id = taskid;
+	task->_period = ptype;
+	task->_strict_time = true;
+	_task = task;
 
 	WTSLogger::info("Timed task registration succeed, frequency: {}", period);
 }
@@ -920,16 +964,15 @@ uint64_t HisDataReplayer::get_daily_bar_close_time(const BarsListPtr& barsList, 
 
 void HisDataReplayer::stop()
 {
-	if(!_running)
+	if (!_running.load())
 	{
 		WTSLogger::log_raw(LL_ERROR, "Backtesting is not running, no need to stop");
 		return;
 	}
 
-	if (_terminated)
+	if (_terminated.exchange(true))
 		return;
 
-	_terminated = true;
 	WTSLogger::log_raw(LL_WARN, "Terminating flag reset to true, backtesting will quit at next round");
 }
 
@@ -941,14 +984,25 @@ bool HisDataReplayer::prepare()
 		return false;
 	}
 
-	if (_running)
+	if (_running.load())
 	{
 		WTSLogger::log_raw(LL_ERROR, "Cannot run more than one backtesting task at the same time");
 		return false;
 	}
 
-	_running = true;
-	_terminated = false;
+	// The initialization callback is mandatory. Reject before publishing the
+	// running state, resetting replay data, or emitting BT_START, so callers can
+	// register a sink and retry after a configuration error.
+	if (_listener == NULL)
+	{
+		WTSLogger::error("Cannot prepare replayer without a registered data sink");
+		return false;
+	}
+
+	// Clear the previous run's termination state before publishing that a new
+	// replay is active. A concurrent stop then cannot be overwritten by prepare.
+	_terminated.store(false);
+	_running.store(true);
 	reset();
 
 	_cur_date = _range_begin_date;
@@ -1540,14 +1594,18 @@ void HisDataReplayer::run_by_bars(bool bNeedDump /* = false */)
 								_terminated = true;
 								break;
 							}
-							useHftClock = hasHftEvents;
-							if (useHftClock)
+							if (!hasHftEvents)
 							{
-								sessionDate = static_cast<uint32_t>(hftNaturalTime / 1000000000);
-								const uint32_t actionTime = static_cast<uint32_t>(hftNaturalTime % 1000000000);
-								sessionTime = actionTime / 100000;
-								sessionSecs = actionTime % 100000;
+								const uint64_t beginBoundary = _bd_mgr.getBoundaryTime(sInfo->id(), nextTDate, true, true);
+								// With an empty HFT bucket, keep the regular session open boundary
+								// while preventing it from preceding the already-published replay clock.
+								hftNaturalTime = std::max(hftNaturalTime, natural_time_from_boundary(beginBoundary));
 							}
+							useHftClock = true;
+							sessionDate = static_cast<uint32_t>(hftNaturalTime / 1000000000);
+							const uint32_t actionTime = static_cast<uint32_t>(hftNaturalTime % 1000000000);
+							sessionTime = actionTime / 100000;
+							sessionSecs = actionTime % 100000;
 						}
 					}
 
@@ -1698,13 +1756,14 @@ void HisDataReplayer::run_by_bars(bool bNeedDump /* = false */)
 								_terminated = true;
 								break;
 							}
-							if (hasHftEvents)
-							{
-								sessionDate = static_cast<uint32_t>(hftNaturalTime / 1000000000);
-								const uint32_t actionTime = static_cast<uint32_t>(hftNaturalTime % 1000000000);
-								sessionTime = actionTime / 100000;
-								sessionSecs = actionTime % 100000;
-							}
+							if (!hasHftEvents)
+								// Retain the ordinary boundary when it is later than the
+								// current clock; otherwise keep the resolver's monotonic time.
+								hftNaturalTime = std::max(hftNaturalTime, natural_time_from_boundary(beginTime));
+							sessionDate = static_cast<uint32_t>(hftNaturalTime / 1000000000);
+							const uint32_t actionTime = static_cast<uint32_t>(hftNaturalTime % 1000000000);
+							sessionTime = actionTime / 100000;
+							sessionSecs = actionTime % 100000;
 						}
 						_cur_date = sessionDate;
 						_cur_time = sessionTime;
@@ -3053,7 +3112,19 @@ bool HisDataReplayer::loadReplayHftDate(uint32_t tDate, const std::string& stdCo
 				loaded = cacheRawTicksFromBin(dataList, stdCode.c_str(), tDate);
 			if (!loaded)
 			{
-				failedReadIsFatal(0);
+				if (_terminated)
+					return false;
+				if (_bt_loader != NULL)
+				{
+					WTSLogger::error("Extended HFT loader failed to load {} on {}; stopping replay",
+						stdCode.c_str(), tDate);
+					_terminated = true;
+					return false;
+				}
+				else
+					failedReadIsFatal(0);
+				if (_terminated)
+					return false;
 				dataList._items.clear();
 			}
 			sortItems(dataList);
@@ -4310,11 +4381,14 @@ WTSTickSlice* HisDataReplayer::get_tick_slice(const char* stdCode, uint32_t coun
 
 WTSOrdDtlSlice* HisDataReplayer::get_order_detail_slice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
+	if (count == 0)
+		return NULL;
+
 	if (!checkOrderDetails(stdCode, _cur_tdate))
 		return NULL;
 
 	auto& dataList = _orddtl_cache[stdCode];
-	if (dataList._items.empty() || dataList._count == 0 || dataList._query_cursor == 0)
+	if (dataList._items.empty() || dataList._count == 0)
 		return NULL;
 
 	dataList._query_cursor = UINT_MAX;
@@ -4333,37 +4407,38 @@ WTSOrdDtlSlice* HisDataReplayer::get_order_detail_slice(const char* stdCode, uin
 		curItem.action_date = uDate;
 		curItem.action_time = uTime;
 
-		auto tit = std::lower_bound(dataList._items.begin(), dataList._items.end(), curItem, [](const WTSOrdDtlStruct& a, const WTSOrdDtlStruct& b) {
-			if (a.action_date != b.action_date)
-				return a.action_date < b.action_date;
+		auto tit = std::upper_bound(dataList._items.begin(), dataList._items.end(), curItem, [](const WTSOrdDtlStruct& value, const WTSOrdDtlStruct& item) {
+			if (value.action_date != item.action_date)
+				return value.action_date < item.action_date;
 			else
-				return a.action_time < b.action_time;
+				return value.action_time < item.action_time;
 		});
 
-		std::size_t idx = tit - dataList._items.begin();
-		dataList._query_cursor = idx + 1;
+		dataList._query_cursor = static_cast<std::size_t>(tit - dataList._items.begin());
 	}
 
-	uint32_t eIdx = dataList._query_cursor - 1;
-	uint32_t sIdx = 0;
-	if (eIdx >= count - 1)
-		sIdx = eIdx + 1 - count;
-
-	uint32_t realCnt = eIdx - sIdx + 1;
+	const std::size_t visibleCount = dataList._query_cursor;
+	const std::size_t realCnt = std::min<std::size_t>(count, visibleCount);
 	if (realCnt == 0)
 		return NULL;
+	const std::size_t sIdx = visibleCount - realCnt;
+	if (sIdx > dataList._items.size() || realCnt > dataList._items.size() - sIdx)
+		return NULL;
 
-	WTSOrdDtlSlice* ticks = WTSOrdDtlSlice::create(stdCode, dataList._items.data() + sIdx, realCnt);
+	WTSOrdDtlSlice* ticks = WTSOrdDtlSlice::create(stdCode, dataList._items.data() + sIdx, static_cast<uint32_t>(realCnt));
 	return ticks;
 }
 
 WTSOrdQueSlice* HisDataReplayer::get_order_queue_slice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
+	if (count == 0)
+		return NULL;
+
 	if (!checkOrderQueues(stdCode, _cur_tdate))
 		return NULL;
 
 	auto& dataList = _ordque_cache[stdCode];
-	if (dataList._items.empty() || dataList._count == 0 || dataList._query_cursor == 0)
+	if (dataList._items.empty() || dataList._count == 0)
 		return NULL;
 
 	dataList._query_cursor = UINT_MAX;
@@ -4382,37 +4457,38 @@ WTSOrdQueSlice* HisDataReplayer::get_order_queue_slice(const char* stdCode, uint
 		curItem.action_date = uDate;
 		curItem.action_time = uTime;
 
-		auto tit = std::lower_bound(dataList._items.begin(), dataList._items.end(), curItem, [](const WTSOrdQueStruct& a, const WTSOrdQueStruct& b) {
-			if (a.action_date != b.action_date)
-				return a.action_date < b.action_date;
+		auto tit = std::upper_bound(dataList._items.begin(), dataList._items.end(), curItem, [](const WTSOrdQueStruct& value, const WTSOrdQueStruct& item) {
+			if (value.action_date != item.action_date)
+				return value.action_date < item.action_date;
 			else
-				return a.action_time < b.action_time;
+				return value.action_time < item.action_time;
 		});
 
-		std::size_t idx = tit - dataList._items.begin();
-		dataList._query_cursor = idx + 1;
+		dataList._query_cursor = static_cast<std::size_t>(tit - dataList._items.begin());
 	}
 
-	uint32_t eIdx = dataList._query_cursor - 1;
-	uint32_t sIdx = 0;
-	if (eIdx >= count - 1)
-		sIdx = eIdx + 1 - count;
-
-	uint32_t realCnt = eIdx - sIdx + 1;
+	const std::size_t visibleCount = dataList._query_cursor;
+	const std::size_t realCnt = std::min<std::size_t>(count, visibleCount);
 	if (realCnt == 0)
 		return NULL;
+	const std::size_t sIdx = visibleCount - realCnt;
+	if (sIdx > dataList._items.size() || realCnt > dataList._items.size() - sIdx)
+		return NULL;
 
-	WTSOrdQueSlice* ticks = WTSOrdQueSlice::create(stdCode, dataList._items.data() + sIdx, realCnt);
+	WTSOrdQueSlice* ticks = WTSOrdQueSlice::create(stdCode, dataList._items.data() + sIdx, static_cast<uint32_t>(realCnt));
 	return ticks;
 }
 
 WTSTransSlice* HisDataReplayer::get_transaction_slice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
+	if (count == 0)
+		return NULL;
+
 	if (!checkTransactions(stdCode, _cur_tdate))
 		return NULL;
 
 	auto& dataList = _trans_cache[stdCode];
-	if (dataList._items.empty() || dataList._count == 0 || dataList._query_cursor == 0)
+	if (dataList._items.empty() || dataList._count == 0)
 		return NULL;
 
 	dataList._query_cursor = UINT_MAX;
@@ -4431,27 +4507,25 @@ WTSTransSlice* HisDataReplayer::get_transaction_slice(const char* stdCode, uint3
 		curItem.action_date = uDate;
 		curItem.action_time = uTime;
 
-		auto tit = std::lower_bound(dataList._items.begin(), dataList._items.end(), curItem, [](const WTSTransStruct& a, const WTSTransStruct& b) {
-			if (a.action_date != b.action_date)
-				return a.action_date < b.action_date;
+		auto tit = std::upper_bound(dataList._items.begin(), dataList._items.end(), curItem, [](const WTSTransStruct& value, const WTSTransStruct& item) {
+			if (value.action_date != item.action_date)
+				return value.action_date < item.action_date;
 			else
-				return a.action_time < b.action_time;
+				return value.action_time < item.action_time;
 		});
 
-		std::size_t idx = tit - dataList._items.begin();
-		dataList._query_cursor = idx + 1;
+		dataList._query_cursor = static_cast<std::size_t>(tit - dataList._items.begin());
 	}
 
-	std::size_t eIdx = dataList._query_cursor - 1;
-	std::size_t sIdx = 0;
-	if (eIdx >= count - 1)
-		sIdx = eIdx + 1 - count;
-
-	std::size_t realCnt = eIdx - sIdx + 1;
+	const std::size_t visibleCount = dataList._query_cursor;
+	const std::size_t realCnt = std::min<std::size_t>(count, visibleCount);
 	if (realCnt == 0)
 		return NULL;
+	const std::size_t sIdx = visibleCount - realCnt;
+	if (sIdx > dataList._items.size() || realCnt > dataList._items.size() - sIdx)
+		return NULL;
 
-	WTSTransSlice* ticks = WTSTransSlice::create(stdCode, dataList._items.data() + sIdx, realCnt);
+	WTSTransSlice* ticks = WTSTransSlice::create(stdCode, dataList._items.data() + sIdx, static_cast<uint32_t>(realCnt));
 	return ticks;
 }
 
@@ -4721,7 +4795,7 @@ WTSTickData* HisDataReplayer::get_last_tick(const char* stdCode)
 		return NULL;
 
 	auto& tickList = _ticks_cache[stdCode];
-	if (tickList._items.empty() || tickList._count == 0 || tickList._query_cursor == 0)
+	if (tickList._items.empty() || tickList._count == 0)
 		return NULL;
 
 	tickList._query_cursor = UINT_MAX;
@@ -5407,7 +5481,8 @@ bool HisDataReplayer::cacheRawTicksFromCSV(HftDataList<WTSTickStruct>& ticksList
 		}
 
 		WTSLogger::info("Processing file content of {}...", filename);
-		proc_block_data(filename.c_str(), content, false, false);
+		if (!proc_block_data(filename.c_str(), content, false, false))
+			return false;
 		if (content.size() % sizeof(WTSTickStruct) != 0)
 		{
 			WTSLogger::error("Tick data file {} has a truncated record", filename.c_str());
@@ -6149,8 +6224,11 @@ bool HisDataReplayer::cacheIntegratedFutBarsFromBin(void* codeInfo, const std::s
 
 const HisDataReplayer::AdjFactorList& HisDataReplayer::getAdjFactors(const char* code, const char* exchg, const char* pid /* = "" */)
 {
-	static char key[20] = { 0 };
-	fmtutil::format_to(key, "{}.{}.{}", exchg, pid, code);
+	std::string key(exchg);
+	key.push_back('.');
+	key.append(pid);
+	key.push_back('.');
+	key.append(code);
 
 	auto it = _adj_factors.find(key);
 	if (it == _adj_factors.end())
@@ -6160,7 +6238,7 @@ const HisDataReplayer::AdjFactorList& HisDataReplayer::getAdjFactors(const char*
 		if (_bt_loader)
 		{
             WTSLogger::info("No adjusting factors of {} cached, searching via extented loader...", key);
-			_bt_loader->loadAdjFactors(this, key, [](void* obj, const char* stdCode, uint32_t* dates, double* factors, uint32_t count) {
+			_bt_loader->loadAdjFactors(this, key.c_str(), [](void* obj, const char* stdCode, uint32_t* dates, double* factors, uint32_t count) {
 				HisDataReplayer* self = (HisDataReplayer*)obj;
 				AdjFactorList& fctrLst = self->_adj_factors[stdCode];
 

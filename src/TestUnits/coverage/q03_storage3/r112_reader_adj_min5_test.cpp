@@ -126,11 +126,11 @@ TEST_F(R112ReaderAdjustedMin5Test, R112ReaderAdjustedMin5ContinuationAndGuards)
 	EXPECT_EQ(r52::flatten_bars(s3).size(), (std::size_t)2);
 	s3->release();
 
-	// 4) 原始文件过短 -> cacheAdjustedStkBars 返回 false，缓存为空
+	// 4) 原始文件过短 -> cacheAdjustedStkBars fail-closed 并返回 false，切片返回 NULL
+	const uint32_t errorsBeforeShortRaw = _sink.count_of(LL_ERROR);
 	WTSKlineSlice* s4 = _reader.readKlineSlice("SSE.STK.600903-", KP_Minute5, 100, 202401051500ull);
-	ASSERT_TRUE(s4 != NULL);
-	EXPECT_EQ(s4->size(), 0u);
-	s4->release();
+	EXPECT_TRUE(s4 == NULL);
+	EXPECT_GT(_sink.count_of(LL_ERROR), errorsBeforeShortRaw);
 
 	// 5) 原始文件空载荷 -> break，保留复权段 2 条
 	WTSKlineSlice* s5 = _reader.readKlineSlice("SSE.STK.600904-", KP_Minute5, 100, 202401051500ull);

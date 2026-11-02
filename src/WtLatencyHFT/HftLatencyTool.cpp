@@ -25,6 +25,10 @@
 #include "../Share/CpuHelper.hpp"
 
 #include <exception>
+#include <new>
+#ifdef WT_LATENCY_TOOL_TEST_HOOKS
+#include <stdexcept>
+#endif
 #include <chrono>
 #include <condition_variable>
 #include <mutex>
@@ -44,7 +48,7 @@ namespace
  * @brief 测试HFT模块延迟性能
  * @details 创建并初始化HftLatencyTool实例，然后运行高频交易延迟测试流程
  */
-void test_hft()
+bool test_hft()
 {
 	// Keep the runner heap-owned so a failed parser can quarantine its adapter
 	// together with the engine and managers it may still reference.
@@ -53,18 +57,61 @@ void test_hft()
 	if (!runner->init())
 	{
 		if (runner == g_failed_parser_runner)
-			return; // Deliberately retain the quarantined runner until process exit.
+			return false; // Deliberately retain the quarantined runner until process exit.
 		delete runner;
-		return;
+		return false;
 	}
 
 	// 执行延迟测试
 	runner->run();
+	const bool success = !runner->runFailed();
 	delete runner;
+	return success;
 }
 
 namespace hft
 {
+#ifdef WT_LATENCY_TOOL_TEST_HOOKS
+	namespace
+	{
+		std::atomic<int> g_test_run_failure_stage{ 0 };
+		std::atomic<bool> g_test_run_failure_unknown{ false };
+		std::atomic<bool> g_test_tick_create_failure{ false };
+
+		WTSTickData* createLatencyTick(const char* code)
+		{
+			if (g_test_tick_create_failure.exchange(false, std::memory_order_acq_rel))
+				return nullptr;
+			return WTSTickData::create(code);
+		}
+
+		void maybeThrowTestRunFailure(int stage, const char* stageName)
+		{
+			if (g_test_run_failure_stage.load(std::memory_order_acquire) != stage)
+				return;
+			if (g_test_run_failure_unknown.load(std::memory_order_acquire))
+				throw 42;
+			throw std::runtime_error(std::string("injected ") + stageName + " exception");
+		}
+	}
+
+	void setTestRunFailureForTesting(int stage, bool unknown)
+	{
+		g_test_run_failure_unknown.store(unknown, std::memory_order_release);
+		g_test_run_failure_stage.store(stage, std::memory_order_release);
+	}
+#define WT_LATENCY_CREATE_TICK(code) createLatencyTick(code)
+
+	void setTestTickCreateFailureForTesting(bool fail)
+	{
+		g_test_tick_create_failure.store(fail, std::memory_order_release);
+	}
+#define WT_LATENCY_TEST_THROW(stage, name) maybeThrowTestRunFailure(stage, name)
+#else
+#define WT_LATENCY_CREATE_TICK(code) WTSTickData::create(code)
+#define WT_LATENCY_TEST_THROW(stage, name) ((void)0)
+#endif
+
 	/**
 	 * @brief 检查浮点数值是否有效
 	 * @param x 输入的浮点数值
@@ -116,6 +163,12 @@ namespace hft
 			return true;
 		}
 
+		bool connect() override
+		{
+			WT_LATENCY_TEST_THROW(1, "parser");
+			return true;
+		}
+
 		/**
 		 * @brief 执行测试运行
 		 * @param times 模拟生成的tick数量
@@ -161,7 +214,12 @@ namespace hft
 				}
 
 				// 创建新的tick数据对象
-				WTSTickData* tick = WTSTickData::create("rb2205");
+				WTSTickData* tick = WT_LATENCY_CREATE_TICK("rb2205");
+				if (tick == NULL)
+				{
+					WTSLogger::error("HFT latency test failed to create tick SHFE.rb2205");
+					throw std::bad_alloc();
+				}
 				// 设置合约信息
 				tick->setContractInfo(contract);
 
@@ -369,6 +427,7 @@ namespace hft
 
 		void connect() override
 		{
+			WT_LATENCY_TEST_THROW(2, "trader");
 			if (!shutdownGateIsArmed())
 				return;
 
@@ -510,6 +569,7 @@ namespace hft
 		 */
 		virtual void on_init(IHftStraCtx* ctx) override
 		{
+			WT_LATENCY_TEST_THROW(3, "engine");
 			// 订阅铁矿石2205合约的tick数据
 			ctx->stra_sub_ticks("SHFE.rb.2205");
 		}
@@ -635,6 +695,15 @@ namespace hft
 
 		//基础数据文件
 		WTSVariant* cfgBF = _config->get("basefiles");
+		if (cfgBF == NULL || !cfgBF->isObject())
+		{
+			WTSLogger::log_raw(LL_ERROR, cfgBF == NULL
+				? "Invalid config: required basefiles object is missing"
+				: "Invalid config: basefiles must be an object");
+			_config->release();
+			return false;
+		}
+		// Child paths are optional; only the basefiles container itself is required.
 		[[maybe_unused]] bool isUTF8 = cfgBF->getBoolean("utf-8");
 		if (cfgBF->get("session"))
 			_bd_mgr.loadSessions(cfgBF->getCString("session"));
@@ -740,6 +809,11 @@ namespace hft
 	{
 		WTSLogger::warn("Trading enviroment initialzied with engine: HFT");
 		_engine.init(cfg, &_bd_mgr, &_dt_mgr, &_hot_mgr, NULL);
+		if (!_engine.fee_config_valid())
+		{
+			WTSLogger::error("Latency test engine initialization rejected: fee template configuration is invalid");
+			return false;
+		}
 		_engine.set_adapter_mgr(&_traders);
 
 		return true;
@@ -812,6 +886,7 @@ namespace hft
 	 */
 	void HftLatencyTool::run()
 	{
+		_run_failed.store(true, std::memory_order_release);
 		if (theParser == NULL)
 		{
 			WTSLogger::error("Cannot run HFT latency test before parser initialization succeeds");
@@ -834,9 +909,19 @@ namespace hft
 			_engine.run();
 
 			theParser->run(_times);
+			_run_failed.store(false, std::memory_order_release);
+		}
+		catch (const std::exception& e)
+		{
+			_run_failed.store(true, std::memory_order_release);
+			WTSLogger::error("HFT latency test run failed with exception: {}", e.what());
 		}
 		catch (...)
 		{
+			_run_failed.store(true, std::memory_order_release);
+			WTSLogger::error("HFT latency test run failed with unknown exception");
 		}
 	}
 }
+#undef WT_LATENCY_TEST_THROW
+#undef WT_LATENCY_CREATE_TICK

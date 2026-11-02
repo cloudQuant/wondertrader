@@ -16,6 +16,7 @@
 
 #include <cstdint>
 #include <filesystem>
+#include <fstream>
 #include <string>
 
 #include <Includes/WTSDataDef.hpp>
@@ -28,6 +29,31 @@
 namespace
 {
 	const char* const kRb = "SHFE.rb.2405";
+
+	bool write_daily_csv_with_warmup(const std::filesystem::path& base, const char* stdCode)
+	{
+		std::error_code ec;
+		std::filesystem::create_directories(base / "csv", ec);
+		if (ec)
+			return false;
+
+		std::ofstream out(base / "csv" / (std::string(stdCode) + "_d.csv"));
+		if (!out.is_open())
+			return false;
+
+		out << "date,time,open,high,low,close,volume,turnover,open_interest,diff_interest,settle\n";
+		const auto writeBar = [&out](uint32_t date, double close, uint32_t volume)
+		{
+			out << date << ",150000," << (close - 0.2) << "," << (close + 0.4) << ","
+				<< (close - 0.5) << "," << close << "," << volume << ","
+				<< volume * close << ",0,0,0\n";
+		};
+		writeBar(20191231u, 9.5, 999u);
+		const uint32_t dates[5] = { 20200102u, 20200103u, 20200106u, 20200107u, 20200108u };
+		for (uint32_t i = 0; i < 5; ++i)
+			writeBar(dates[i], 10.0 + i * 0.5, 1000u + i);
+		return out.good();
+	}
 
 	class R111Sink : public IDataSink
 	{
@@ -67,7 +93,7 @@ protected:
 		_out = r62::make_temp_dir("r111_out");
 		WtHelper::setOutputDir(_out.string().c_str());
 
-		ASSERT_TRUE(r62::write_daily_csv(_base, kRb));
+		ASSERT_TRUE(write_daily_csv_with_warmup(_base, kRb));
 
 		WTSVariant* ncfg = WTSVariant::createObject();
 		ncfg->append("active", false);

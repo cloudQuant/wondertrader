@@ -13,10 +13,13 @@
 #include "Includes/WTSDataDef.hpp"
 #include "WtDataStorage/DataDefine.h"
 
+#include <algorithm>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <signal.h>
 #include <string>
+#include <sys/resource.h>
 #include <unistd.h>
 #include <vector>
 
@@ -50,7 +53,7 @@ namespace {
 
 	void t_log_cb(WtString message)
 	{
-		t_log_sink().assign(1, message == NULL ? std::string("<null>") : std::string(message));
+		t_log_sink().emplace_back(message == NULL ? std::string("<null>") : std::string(message));
 	}
 
 	void ticks_cb(WTSTickStruct* tick, WtUInt32 count, bool isLast)
@@ -143,6 +146,50 @@ namespace {
 		return items;
 	}
 
+	class ScopedFileSizeLimit
+	{
+	public:
+		ScopedFileSizeLimit()
+		{
+			if (::getrlimit(RLIMIT_FSIZE, &_oldLimit) != 0 ||
+				(_oldLimit.rlim_max != RLIM_INFINITY && _oldLimit.rlim_max < 1))
+				return;
+
+			struct sigaction ignoreAction = {};
+			ignoreAction.sa_handler = SIG_IGN;
+			sigemptyset(&ignoreAction.sa_mask);
+			if (::sigaction(SIGXFSZ, &ignoreAction, &_oldAction) != 0)
+				return;
+			_signalChanged = true;
+
+			struct rlimit limited = _oldLimit;
+			limited.rlim_cur = 1;
+			if (::setrlimit(RLIMIT_FSIZE, &limited) != 0)
+			{
+				::sigaction(SIGXFSZ, &_oldAction, NULL);
+				_signalChanged = false;
+				return;
+			}
+			_active = true;
+		}
+
+		~ScopedFileSizeLimit()
+		{
+			if (_active)
+				::setrlimit(RLIMIT_FSIZE, &_oldLimit);
+			if (_signalChanged)
+				::sigaction(SIGXFSZ, &_oldAction, NULL);
+		}
+
+		bool active() const { return _active; }
+
+	private:
+		struct rlimit _oldLimit = {};
+		struct sigaction _oldAction = {};
+		bool _active = false;
+		bool _signalChanged = false;
+	};
+
 } // namespace
 
 class L05HelperTickTest : public ::testing::Test
@@ -184,6 +231,100 @@ TEST_F(L05HelperTickTest, StoreTicksRejectsZeroCount)
 	EXPECT_FALSE(std::filesystem::exists(_root / "none.dst"));
 }
 
+TEST_F(L05HelperTickTest, StoreLevel2TypesReportMissingParentDirectoryFailure)
+{
+	WTSTickStruct tick = make_tick(93000, 3000);
+	auto details = make_pattern_items<WTSOrdDtlStruct>(1);
+	auto queues = make_pattern_items<WTSOrdQueStruct>(1);
+	auto transactions = make_pattern_items<WTSTransStruct>(1);
+	const std::filesystem::path missingDir = _root / "missing_parent";
+	ASSERT_FALSE(std::filesystem::exists(missingDir));
+	t_log_sink().clear();
+
+	EXPECT_FALSE(store_ticks((missingDir / "ticks.dsb").string().c_str(), &tick, 1, t_log_cb));
+	EXPECT_FALSE(store_order_details((missingDir / "details.dsb").string().c_str(),
+		details.data(), (int)details.size(), t_log_cb));
+	EXPECT_FALSE(store_order_queues((missingDir / "queues.dsb").string().c_str(),
+		queues.data(), (int)queues.size(), t_log_cb));
+	EXPECT_FALSE(store_transactions((missingDir / "transactions.dsb").string().c_str(),
+		transactions.data(), (int)transactions.size(), t_log_cb));
+	EXPECT_EQ((size_t)std::count_if(t_log_sink().begin(), t_log_sink().end(), [](const std::string& message) {
+		return message.find("创建失败") != std::string::npos;
+	}), 4u);
+	EXPECT_FALSE(t_any_log_has("写入文件成功"));
+	EXPECT_FALSE(t_any_log_has("succeed"));
+	EXPECT_FALSE(t_any_log_has("succeedd"));
+}
+
+TEST_F(L05HelperTickTest, StoreLevel2TypesReportReadOnlyFileFailure)
+{
+	if (::geteuid() == 0)
+		GTEST_SKIP() << "root can bypass file mode write permissions";
+
+	const std::vector<std::string> names = {
+		"readonly_ticks.dsb", "readonly_details.dsb", "readonly_queues.dsb", "readonly_transactions.dsb"
+	};
+	for (const std::string& name : names)
+	{
+		std::ofstream seed(file(name), std::ios::binary | std::ios::trunc);
+		ASSERT_TRUE(seed.is_open());
+		seed << name;
+		seed.close();
+		std::error_code ec;
+		std::filesystem::permissions(file(name), std::filesystem::perms::owner_read,
+			std::filesystem::perm_options::replace, ec);
+		ASSERT_FALSE(ec);
+	}
+
+	WTSTickStruct tick = make_tick(93000, 3000);
+	auto details = make_pattern_items<WTSOrdDtlStruct>(1);
+	auto queues = make_pattern_items<WTSOrdQueStruct>(1);
+	auto transactions = make_pattern_items<WTSTransStruct>(1);
+	t_log_sink().clear();
+	EXPECT_FALSE(store_ticks(file(names[0]).c_str(), &tick, 1, t_log_cb));
+	EXPECT_FALSE(store_order_details(file(names[1]).c_str(), details.data(), (int)details.size(), t_log_cb));
+	EXPECT_FALSE(store_order_queues(file(names[2]).c_str(), queues.data(), (int)queues.size(), t_log_cb));
+	EXPECT_FALSE(store_transactions(file(names[3]).c_str(), transactions.data(), (int)transactions.size(), t_log_cb));
+	EXPECT_EQ((size_t)std::count_if(t_log_sink().begin(), t_log_sink().end(), [](const std::string& message) {
+		return message.find("创建失败") != std::string::npos;
+	}), 4u);
+	EXPECT_FALSE(t_any_log_has("写入文件成功"));
+	EXPECT_FALSE(t_any_log_has("succeed"));
+	EXPECT_FALSE(t_any_log_has("succeedd"));
+
+	for (const std::string& name : names)
+	{
+		std::ifstream input(file(name), std::ios::binary);
+		std::string saved((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+		EXPECT_EQ(saved, name);
+	}
+}
+
+TEST_F(L05HelperTickTest, StoreLevel2TypesReportWriteFailure)
+{
+	WTSTickStruct tick = make_tick(93000, 3000);
+	auto details = make_pattern_items<WTSOrdDtlStruct>(1);
+	auto queues = make_pattern_items<WTSOrdQueStruct>(1);
+	auto transactions = make_pattern_items<WTSTransStruct>(1);
+	ScopedFileSizeLimit fileLimit;
+	ASSERT_TRUE(fileLimit.active());
+	t_log_sink().clear();
+
+	EXPECT_FALSE(store_ticks(file("write_ticks.dsb").c_str(), &tick, 1, t_log_cb));
+	EXPECT_FALSE(store_order_details(file("write_details.dsb").c_str(),
+		details.data(), (int)details.size(), t_log_cb));
+	EXPECT_FALSE(store_order_queues(file("write_queues.dsb").c_str(),
+		queues.data(), (int)queues.size(), t_log_cb));
+	EXPECT_FALSE(store_transactions(file("write_transactions.dsb").c_str(),
+		transactions.data(), (int)transactions.size(), t_log_cb));
+	EXPECT_EQ((size_t)std::count_if(t_log_sink().begin(), t_log_sink().end(), [](const std::string& message) {
+		return message.find("写入失败") != std::string::npos;
+	}), 4u);
+	EXPECT_FALSE(t_any_log_has("写入文件成功"));
+	EXPECT_FALSE(t_any_log_has("succeed"));
+	EXPECT_FALSE(t_any_log_has("succeedd"));
+}
+
 TEST_F(L05HelperTickTest, StoreAndReadTicksRoundtrip)
 {
 	std::vector<WTSTickStruct> ticks;
@@ -203,7 +344,7 @@ TEST_F(L05HelperTickTest, StoreAndReadTicksRoundtrip)
 	EXPECT_STREQ(tick_sink()[0].exchg, "SHFE");
 	EXPECT_STREQ(tick_sink()[2].code, "rb2010");
 	EXPECT_DOUBLE_EQ(tick_sink()[3].price, 3003);
-	EXPECT_DOUBLE_EQ(tick_sink()[1].bid_prices[0], 3001.5);
+	EXPECT_DOUBLE_EQ(tick_sink()[1].bid_prices[0], 3000.5);
 	EXPECT_EQ(tick_sink()[0].action_time, 93000u);
 	EXPECT_TRUE(t_any_log_has("读取完成"));
 }
@@ -333,13 +474,20 @@ TEST_F(L05HelperTickTest, DumpTicksWritesCsvAndSkipsInvalid)
 		std::ofstream ofs((_root / "broken.dsb").string(), std::ios::binary | std::ios::trunc);
 		ofs << "xy";
 	}
+	{
+		std::ofstream ofs((_root / "second_broken.dsb").string(), std::ios::binary | std::ios::trunc);
+		ofs << "short";
+	}
 	std::ofstream ignore((_root / "ignore.txt").string());
 	ignore << "ignored";
 	std::filesystem::create_directories(_root / "sub_dir");
 
 	const std::string csvDir = (_root / "tick_csv").string();
 	dump_ticks(_root.string().c_str(), csvDir.c_str(), "", t_log_cb);
-	EXPECT_TRUE(t_any_log_has("头部校验失败"));
+	const std::string brokenHeader = "文件" + (_root / "broken.dsb").string() + "头部校验失败";
+	const std::string secondBrokenHeader = "文件" + (_root / "second_broken.dsb").string() + "头部校验失败";
+	EXPECT_TRUE(t_any_log_has(brokenHeader.c_str())) << brokenHeader;
+	EXPECT_TRUE(t_any_log_has(secondBrokenHeader.c_str())) << secondBrokenHeader;
 	EXPECT_TRUE(t_any_log_has("导出完成"));
 
 	const std::string csv = (_root / "tick_csv" / "SHFE.rb2010.csv").string();

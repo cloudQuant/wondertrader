@@ -193,9 +193,8 @@ bool ParserAdapter::init(const char* id, WTSVariant* cfg)
 
 		if (!StdFile::exists(module.c_str()))
 		{
-			module = WtHelper::get_module_dir();
-			module += "parsers/";
-			module += DLLHelper::wrap_module(cfg->getCString("module"), "lib");
+			module = WtHelper::get_module_path(
+				std::string("parsers/") + DLLHelper::wrap_module(cfg->getCString("module"), "lib"));
 		}
 
 		_module_handle = DLLHelper::load_library(module.c_str());
@@ -406,8 +405,7 @@ bool ParserAdapter::run()
 	if (_parser_api == NULL || !_initialized || _stopped)
 		return false;
 
-	_parser_api->connect();
-	return true;
+	return _parser_api->connect();
 }
 
 void ParserAdapter::handleSymbolList( const WTSArray* /*aySymbols*/ )
@@ -537,10 +535,31 @@ ParserAdapterPtr ParserAdapterMgr::getAdapter(const char* id)
 
 void ParserAdapterMgr::run()
 {
-	for (auto it = _adapters.begin(); it != _adapters.end(); it++)
-	{
-		it->second->run();
-	}
+	(void)runWithResult();
+}
 
-	WTSLogger::info("{} parsers started", _adapters.size());
+bool ParserAdapterMgr::runWithResult()
+{
+	bool allSubmitted = true;
+	for (const auto& entry : _adapters)
+	{
+		bool submitted = false;
+		try
+		{
+			if (entry.second)
+				submitted = entry.second->run();
+		}
+		catch (...)
+		{
+			WTSLogger::error("Parser '{}' connect command threw", entry.first.c_str());
+		}
+		if (!submitted)
+		{
+			allSubmitted = false;
+			WTSLogger::error("Parser '{}' connect command was not submitted", entry.first.c_str());
+		}
+	}
+	if (allSubmitted)
+		WTSLogger::info("Connect commands submitted for {} parsers", _adapters.size());
+	return allSubmitted;
 }

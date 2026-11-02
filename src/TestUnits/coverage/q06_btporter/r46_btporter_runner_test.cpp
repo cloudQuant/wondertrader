@@ -13,10 +13,8 @@
  * 在报告里仍未覆盖。q06 的 config 用例还会断言单例 mockers 为空，所以本文件
  * 一律用堆上 new、故意不 delete 的 runner，绝不触碰 getRunner() 单例的 mocker 槽位。
  *
- * 注意：WtBtRunner 构造列表没有初始化 _hft_mocker/_exec_mocker/_worker/_cfg/
- * _loader_auto_trans（BUG-R46-001），堆实例只能走不读这些槽位的入口。除下方
- * 专门验证 run() 失败守卫的用例外，不调用 initHftMocker()/isAutoTrans()/release()/run()；
- * stop() 走单例静态零初始化。
+ * 新实例回归会直接读取初始化后的 isAutoTrans()；run() 只在 _inited=false 的
+ * 失败守卫用例中调用。其余生命周期行为由各自的 runner lifecycle 用例覆盖。
  * 所有落盘都在系统临时目录的专属子目录，用例末尾 remove_all。
  */
 #include <gtest/gtest.h>
@@ -26,6 +24,16 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <utility>
+#include <vector>
+
+#ifdef _WIN32
+#include <windows.h>
+#elif defined(__APPLE__)
+#include <mach-o/dyld.h>
+#else
+#include <unistd.h>
+#endif
 
 #include "WtBtPorter/WtBtPorter.h"
 #include "WtBtPorter/WtBtRunner.h"
@@ -37,6 +45,7 @@ USING_NS_WTP;
 extern WtBtRunner& getRunner();
 
 namespace {
+	namespace fs = std::filesystem;
 
 	const char* kOutLeaf = "wt_r46_btporter_out";
 
@@ -54,15 +63,102 @@ namespace {
 		std::filesystem::remove_all(dir, ec);
 	}
 
+	void write_session_fixture(const std::string& dir)
+	{
+		std::ofstream(dir + "/sessions.json")
+			<< "{\"TRADING\":{\"name\":\"Trading\",\"offset\":0,"
+			<< "\"sections\":[{\"from\":0,\"to\":2359}]}}";
+	}
+
+	std::string replayer_with_session(const std::string& dir)
+	{
+		return "\"replayer\":{\"mode\":\"none\",\"path\":\"" + dir +
+			"\",\"stime\":20240102000000,\"etime\":20240103000000,"
+			"\"basefiles\":{\"session\":\"" + dir + "/sessions.json\"}}";
+	}
+
+	std::string none_mode_config(const std::string& dir)
+	{
+		return "{" + replayer_with_session(dir) + ",\"env\":{\"mocker\":\"none\"}}";
+	}
+
+	fs::path executable_dir()
+	{
+#ifdef _WIN32
+		char path[MAX_PATH] = { 0 };
+		const DWORD size = GetModuleFileNameA(NULL, path, MAX_PATH);
+		return size == 0 ? fs::current_path() : fs::path(path).parent_path();
+#elif defined(__APPLE__)
+		uint32_t size = 0;
+		_NSGetExecutablePath(NULL, &size);
+		std::vector<char> path(size + 1, 0);
+		if (_NSGetExecutablePath(path.data(), &size) != 0)
+			return fs::current_path();
+		return fs::path(path.data()).parent_path();
+#else
+		char path[4096] = { 0 };
+		const ssize_t size = ::readlink("/proc/self/exe", path, sizeof(path) - 1);
+		return size <= 0 ? fs::current_path()
+			: fs::path(std::string(path, static_cast<size_t>(size))).parent_path();
+#endif
+	}
+
+	std::string exec_valid_plugin_path()
+	{
+#ifdef _WIN32
+		const char* suffix = ".dll";
+#elif defined(__APPLE__)
+		const char* suffix = ".dylib";
+#else
+		const char* suffix = ".so";
+#endif
+		fs::path dir = executable_dir();
+		for (int depth = 0; depth != 8 && !dir.empty(); ++depth)
+		{
+			const fs::path candidates[] = {
+				dir / "exec_v2_plugins" / (std::string("valid") + suffix),
+				dir / "coverage" / "exec_v2_plugins" / (std::string("valid") + suffix),
+				dir / "TestUnits" / "coverage" / "exec_v2_plugins" / (std::string("valid") + suffix),
+				dir / "src" / "TestUnits" / "coverage" / "exec_v2_plugins" / (std::string("valid") + suffix)
+			};
+			for (const fs::path& candidate : candidates)
+				if (fs::exists(candidate))
+					return candidate.string();
+			dir = dir.parent_path();
+		}
+		return std::string();
+	}
+
+	std::string cta_strategy_plugin_path()
+	{
+#ifdef _WIN32
+		const char* filename = "WtCtaStraFact.dll";
+#elif defined(__APPLE__)
+		const char* filename = "libWtCtaStraFact.dylib";
+#else
+		const char* filename = "libWtCtaStraFact.so";
+#endif
+		fs::path dir = executable_dir();
+		for (int depth = 0; depth != 8 && !dir.empty(); ++depth)
+		{
+			const fs::path candidates[] = {
+				dir / filename,
+				dir / "bin" / filename
+			};
+			for (const fs::path& candidate : candidates)
+				if (fs::exists(candidate))
+					return candidate.string();
+			dir = dir.parent_path();
+		}
+		return std::string();
+	}
+
 	std::string tail_char(const std::string& s)
 	{
 		return s.empty() ? std::string() : s.substr(s.size() - 1);
 	}
 
-	/*
-	 * 堆上构造、永不 delete：析构会释放 _cta_mocker 等槽位，但这些槽位中有的是
-	 * 未初始化指针（BUG-R46-001）。不析构即可安全驱动不读它们的入口。
-	 */
+	/* 堆实例与进程级 C API 单例隔离；此配置 fixture 不主动运行 release/析构路径。 */
 	WtBtRunner* new_runner()
 	{
 		return new WtBtRunner();
@@ -70,9 +166,25 @@ namespace {
 
 } // namespace
 
-/* WtBtRunner.cpp:449-471 + 500-507：replayer 段给全（mode=none、basefiles 空对象、
- * 显式 path），env.mocker 给一个不存在的模式，config 不建任何 mocker。 */
-TEST(R46BtRunner, ConfigWithUnknownMockerBuildsOnlyTheReplayer)
+/* IBtDataLoader 和 registerExtDataLoader 的默认值均为 true；新对象需有相同的
+ * 确定默认值，注册时显式 false/true 可覆盖，省略 bAutoTrans 时使用 true。 */
+TEST(R46BtRunner, LoaderAutoTransHasDefinedDefaultAndSetterBehavior)
+{
+	WtBtRunner* r = new_runner();
+	ASSERT_NE(r, nullptr);
+
+	EXPECT_TRUE(r->isAutoTrans());
+	r->registerExtDataLoader(nullptr, nullptr, nullptr, nullptr, false);
+	EXPECT_FALSE(r->isAutoTrans());
+	r->registerExtDataLoader(nullptr, nullptr, nullptr, nullptr, true);
+	EXPECT_TRUE(r->isAutoTrans());
+	r->registerExtDataLoader(nullptr, nullptr, nullptr, nullptr);
+	EXPECT_TRUE(r->isAutoTrans());
+}
+
+/* WtBtRunner.cpp: config_v2 accepts the supported no-mocker mode without a
+ * mocker-specific section, while still completing replayer initialization. */
+TEST(R46BtRunner, ConfigWithNoneMockerBuildsOnlyTheReplayer)
 {
 	const std::string dir = prepare_out_dir();
 	ASSERT_FALSE(dir.empty());
@@ -84,10 +196,12 @@ TEST(R46BtRunner, ConfigWithUnknownMockerBuildsOnlyTheReplayer)
 	EXPECT_FALSE(r->isAsync());
 
 	const std::string cfg =
-		"{\"replayer\":{\"mode\":\"none\",\"basefiles\":{},\"path\":\"" + dir + "\"},"
+		"{\"replayer\":{\"mode\":\"none\",\"basefiles\":{},\"path\":\"" + dir +
+		"\",\"stime\":20240102000000,\"etime\":20240103000000},"
 		"\"env\":{\"mocker\":\"none\"}}";
 
-	r->config(cfg.c_str(), false);
+	std::string error;
+	ASSERT_TRUE(r->config_v2(cfg.c_str(), false, &error)) << error;
 
 	EXPECT_EQ(r->cta_mocker(), nullptr);
 	EXPECT_EQ(r->sel_mocker(), nullptr);
@@ -150,13 +264,20 @@ TEST(R46BtRunner, PrepareFailureDoesNotStartAsyncRunAndValidPrepareRemainsUsable
 
 	WtBtRunner* r = new_runner();
 	ASSERT_NE(r, nullptr);
+	const std::string module = cta_strategy_plugin_path();
+	ASSERT_FALSE(module.empty()) << "missing local CTA strategy plugin";
 
 	const std::string cfg = "{\"replayer\":{\"mode\":\"none\",\"path\":\"" + dir
 		+ "\",\"stime\":20240102000000,\"etime\":20240103000000,\"tick\":false,"
 		+ "\"basefiles\":{\"session\":\"" + dir + "/sessions.json\",\"commodity\":\""
 		+ dir + "/commodities.json\",\"contract\":\"" + dir + "/contracts.json\"}},"
-		+ "\"env\":{\"mocker\":\"cta\"},\"cta\":{\"name\":\"r46_prepare_guard\",\"slippage\":0}}";
-	r->config(cfg.c_str(), false);
+		+ "\"env\":{\"mocker\":\"cta\"},\"cta\":{\"name\":\"r46_prepare_guard\","
+		+ "\"module\":\"" + module + "\",\"slippage\":0,\"strategy\":{"
+		+ "\"name\":\"DualThrust\",\"id\":\"r46_prepare_guard\",\"params\":{"
+		+ "\"days\":2,\"k1\":0.5,\"k2\":0.5,\"period\":\"d\",\"count\":5,"
+		+ "\"code\":\"SHFE.rb2510\",\"stock\":false}}}}";
+	std::string error;
+	ASSERT_TRUE(r->config_v2(cfg.c_str(), false, &error)) << error;
 	ASSERT_NE(r->cta_mocker(), nullptr);
 
 	ASSERT_TRUE(r->replayer().prepare());
@@ -214,32 +335,114 @@ TEST(R46BtRunner, InitStampsInstanceAndOutputDirectories)
 	clean_dir(dir);
 }
 
-/* WtBtRunner.cpp:469-471 对 env 段、467 对 replayer 段都没有 NULL 守卫：
- * 只要配置里漏掉其中一段，下一行就解引用空 WTSVariant。两条都会打死 gtest 宿主
- * （SIGSEGV，catch(...) 抓不到），故整条 DISABLED_。缺陷见 bugs/R46.md BUG-R46-003。 */
-TEST(R46BtRunner, DISABLED_ConfigWithoutEnvSectionDerefsNull)
+/* Missing env must be rejected before the real replayer init loads sessions.
+ * Then the runner's run guard safely rejects the unconfigured instance, and a
+ * corrected config remains retryable because no replay state was initialized. */
+TEST(R46BtRunner, ConfigWithoutEnvRejectsBeforeReplayerInitAndAllowsRetry)
 {
-	WtBtRunner* r = new_runner();
-	ASSERT_NE(r, nullptr);
-
 	const std::string dir = prepare_out_dir();
-	const std::string cfg =
-		"{\"replayer\":{\"mode\":\"none\",\"basefiles\":{},\"path\":\"" + dir + "\"}}";
-	r->config(cfg.c_str(), false);
+	ASSERT_FALSE(dir.empty());
+	write_session_fixture(dir);
+	const std::string cfg = "{" + replayer_with_session(dir) + "}";
+	const std::string validCfg = none_mode_config(dir);
+
+	ASSERT_EXIT(
+		{
+			WtBtRunner* r = new WtBtRunner();
+			std::string error;
+			if (r->config_v2(cfg.c_str(), false, &error) ||
+				error.find("env must be an object") == std::string::npos)
+				std::_Exit(2);
+			if (r->replayer().get_session_info("TRADING") != nullptr)
+				std::_Exit(3); // proves HisDataReplayer::init did not load the valid file
+			r->run(false, false);
+			if (r->isAsync())
+				std::_Exit(4);
+			if (!r->config_v2(validCfg.c_str(), false, &error))
+				std::_Exit(5);
+			if (r->replayer().get_session_info("TRADING") == nullptr)
+				std::_Exit(6);
+			std::_Exit(0);
+		},
+		::testing::ExitedWithCode(0), "");
+
+	clean_dir(dir);
 }
 
-TEST(R46BtRunner, DISABLED_ConfigWithoutReplayerSectionDerefsNull)
+TEST(R46BtRunner, MissingReplayerEnvAndMockerStructuresFailClosed)
 {
-	WtBtRunner* r = new_runner();
-	ASSERT_NE(r, nullptr);
+	const std::string dir = prepare_out_dir();
+	ASSERT_FALSE(dir.empty());
+	write_session_fixture(dir);
+	const std::string replay = replayer_with_session(dir);
+	const std::vector<std::pair<std::string, std::string>> invalidConfigs = {
+		{"{\"env\":{\"mocker\":\"none\"}}", "replayer must be an object"},
+		{"{\"replayer\":null,\"env\":{\"mocker\":\"none\"}}", "replayer must be an object"},
+		{"{" + replay + "}", "env must be an object"},
+		{"{" + replay + ",\"env\":null}", "env must be an object"},
+		{"{" + replay + ",\"env\":{}}", "env.mocker must be a string"},
+		{"{" + replay + ",\"env\":{\"mocker\":3}}", "env.mocker must be a string"},
+		{"{" + replay + ",\"env\":{\"mocker\":\"\"}}", "env.mocker is missing"},
+		{"{" + replay + ",\"env\":{\"mocker\":\"unknown\"}}", "unsupported backtest mocker mode"},
+		{"{" + replay + ",\"env\":{\"mocker\":\"cta\"},\"cta\":[]}", "mode configuration is missing or invalid"},
+		{"{" + replay + ",\"env\":{\"mocker\":\"cta\"},\"cta\":{}}", "cta mode name is missing"}
+	};
 
-	r->config("{\"env\":{\"mocker\":\"none\"}}", false);
+	ASSERT_EXIT(
+		{
+			for (size_t i = 0; i < invalidConfigs.size(); ++i)
+			{
+				WtBtRunner* r = new WtBtRunner();
+				std::string error;
+				if (r->config_v2(invalidConfigs[i].first.c_str(), false, &error) ||
+					error.find(invalidConfigs[i].second) == std::string::npos)
+					std::_Exit(static_cast<int>(10 + i));
+				if (r->replayer().get_session_info("TRADING") != nullptr)
+					std::_Exit(static_cast<int>(30 + i));
+				r->run(false, false);
+				if (r->isAsync())
+					std::_Exit(static_cast<int>(50 + i));
+			}
+			std::_Exit(0);
+		},
+		::testing::ExitedWithCode(0), "");
+
+	clean_dir(dir);
 }
 
-/* WtBtRunner.cpp:472-479：env.mocker=="cta" 时按 cta 段创建 ExpCtaMocker 并注册到
- * replayer；cta 段没有 module，init_cta_factory 在 dlopen 失败处早退，但不影响
- * mocker 槽位已经建立。 */
-TEST(R46BtRunner, ConfigCtaModeCreatesCtaMockerSlot)
+/* A valid exec configuration is a non-none supported-mode positive control.
+ * The fixture is built as a dependency of CoverageTests_btporter. */
+TEST(R46BtRunner, ValidExecModePassesPreflightAndCompletesConfiguration)
+{
+	const std::string dir = prepare_out_dir();
+	ASSERT_FALSE(dir.empty());
+	const std::string module = exec_valid_plugin_path();
+	ASSERT_FALSE(module.empty()) << "missing coverage execution-plugin fixture valid";
+	const std::string cfg = "{\"replayer\":{\"mode\":\"none\",\"path\":\"" + dir +
+		"\",\"stime\":20240102000000,\"etime\":20240103000000,"
+		"\"basefiles\":{}},\"env\":{\"mocker\":\"exec\"},"
+		"\"exec\":{\"name\":\"r46_exec\",\"module\":\"" + module +
+		"\",\"code\":\"SHFE.rb2510\",\"period\":\"m1\",\"volunit\":0,\"volmode\":0,"
+		"\"executer\":{\"name\":\"R46Unit\",\"id\":\"r46_exec\",\"params\":{}},"
+		"\"matcher\":{\"cancelrate\":0}}}";
+
+	ASSERT_EXIT(
+		{
+			WtBtRunner* r = new WtBtRunner();
+			std::string error;
+			if (!r->config_v2(cfg.c_str(), false, &error))
+				std::_Exit(2);
+			std::_Exit(0);
+		},
+		::testing::ExitedWithCode(0), "");
+
+	clean_dir(dir);
+}
+
+/* A CTA mode without the required strategy module must fail in its factory
+ * initializer; the test observes the existing product contract instead of
+ * expecting a mocker slot that is assigned only after successful init. */
+TEST(R46BtRunner, CtaModeWithoutStrategyModuleDoesNotCreateMocker)
 {
 	const std::string dir = prepare_out_dir();
 	ASSERT_FALSE(dir.empty());
@@ -248,14 +451,18 @@ TEST(R46BtRunner, ConfigCtaModeCreatesCtaMockerSlot)
 	ASSERT_NE(r, nullptr);
 
 	const std::string cfg =
-		"{\"replayer\":{\"mode\":\"none\",\"basefiles\":{},\"path\":\"" + dir + "\"},"
+		"{\"replayer\":{\"mode\":\"none\",\"basefiles\":{},\"path\":\"" + dir +
+		"\",\"stime\":20240102000000,\"etime\":20240103000000},"
 		"\"env\":{\"mocker\":\"cta\"},"
 		"\"cta\":{\"name\":\"r46bt_cta_cfg\",\"slippage\":0}}";
 
-	r->config(cfg.c_str(), false);
+	std::string error;
+	EXPECT_FALSE(r->config_v2(cfg.c_str(), false, &error));
+	EXPECT_NE(error.find("strategy factory failed"), std::string::npos) << error;
 
-	EXPECT_NE(r->cta_mocker(), nullptr) << "cta 模式应在 config 内建好 mocker 槽位";
+	EXPECT_EQ(r->cta_mocker(), nullptr);
 	EXPECT_EQ(r->sel_mocker(), nullptr);
+	EXPECT_FALSE(r->isAsync());
 
 	clean_dir(dir);
 }

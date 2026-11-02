@@ -2,8 +2,8 @@
  * 覆盖率用例：src/ParserXTP（lane T1 / 第六波·收发族）
  * 形状参照 t_TraderMocker/seam_tradermocker_test.cpp：直接构造 adapter、走公开接口、
  * 用自造 fake IParserSpi / IBaseDataMgr 驱动厂商回调结构体。
- * 注意：ParserXTP::init()/connect() 依赖真实 xtpquoteapi 动态库与不可停止的 worker 线程，
- * 在无库环境下必崩，见 docs/迭代计划/迭代01/bugs/T1_ctpopt_parserxtp.md，对应用例以 DISABLED_ 保留。
+ * init 的 dlopen/dlsym 路径由 t1_parserxtp_loader_test.cpp 的受控动态模块覆盖；
+ * worker 启停则由 t27_parserxtp_api_seam_test.cpp 的 FakeApi 定向覆盖，不连接真实柜台。
  */
 #include <gtest/gtest.h>
 
@@ -16,13 +16,10 @@
 
 #include <WTSDataDef.hpp>
 #include <WTSContractInfo.hpp>
-#include <WTSVariant.hpp>
 #include <IBaseDataMgr.h>
 
 USING_NS_WTP;
 
-/* ParserXTP.cpp 中的文件级 inline 函数（外部链接、弱符号），可直接跨 TU 声明调用 */
-uint32_t strToTime(const char* strTime);
 double checkValid(double val);
 
 namespace
@@ -520,30 +517,10 @@ TEST(ParserXTP, subscribe_before_login_only_buffers_without_api_calls)
 	parser.registerSpi(nullptr);
 }
 
-TEST(ParserXTP, time_and_price_helpers_strip_colons_and_guard_sentinels)
+TEST(ParserXTP, price_helper_guards_sentinels)
 {
-	EXPECT_EQ(93001u, strToTime("09:30:01"));
-	EXPECT_EQ(145959999u, strToTime("14:59:59.999"));
-	EXPECT_EQ(0u, strToTime(""));
-	EXPECT_EQ(120000u, strToTime("120000"));
-
 	EXPECT_DOUBLE_EQ(0.0, checkValid(DBL_MAX));
 	EXPECT_DOUBLE_EQ(0.0, checkValid(FLT_MAX));
 	EXPECT_DOUBLE_EQ(3.5, checkValid(3.5));
 	EXPECT_DOUBLE_EQ(0.0, checkValid(0.0));
-}
-
-/*
- * 触发条件见 bug 文档：ParserXTP::init 会 dlopen 厂商库并无判空地调用 m_funcCreator，
- * 无 xtpquoteapi 库的 CI 环境里直接崩；connect() 又会拉起 while(true) 不可停止线程，
- * release/disconnect 不回收它，进程无法退出。整条用例保持 DISABLED_。
- */
-TEST(DISABLED_ParserXTP, init_and_connect_require_vendor_lib_and_leak_thread)
-{
-	ParserXTP parser;
-	WTSVariant* cfg = WTSVariant::createObject();
-	ASSERT_NE(nullptr, cfg);
-	parser.init(cfg);
-	EXPECT_TRUE(parser.connect());
-	parser.release();
 }

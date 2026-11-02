@@ -10,10 +10,11 @@
  *  - onPushOrder 平今扣减/撤单回补/昨仓回夹、onPushTrade 平今
  *  - checkCancelLimits 总量排除 + getRiskParams 品种键命中
  *
- * 替身全部来自 q04_trader_fixture.h + r54_trader_fixture.h, 不接柜台/不起线程。
+ * 交易回报替身来自 q04/r54 fixture；风险配置用本地 UFT 假插件完成真实初始化，不接柜台。
  */
 #include "r54_trader_fixture.h"
 
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -21,7 +22,53 @@ using namespace wtp;
 
 namespace {
 
+#ifndef WT_UFT_LIFECYCLE_FAKE_PLUGIN_PATH
+#error "CoverageTests_uftcore must wire the UFT lifecycle fake plugin"
+#endif
+
 const char* kAg = "SHFE.ag2406";
+
+class ScopedRiskInstDir
+{
+public:
+	explicit ScopedRiskInstDir(const std::filesystem::path& path)
+		: _old(WtHelper::getInstDir())
+	{
+		std::string instDir = path.string();
+		if (!instDir.empty() && instDir.back() != '/' && instDir.back() != '\\')
+			instDir.push_back('/');
+		WtHelper::setInstDir(instDir.c_str());
+	}
+	~ScopedRiskInstDir() { WtHelper::setInstDir(_old.c_str()); }
+	ScopedRiskInstDir(const ScopedRiskInstDir&) = delete;
+	ScopedRiskInstDir& operator=(const ScopedRiskInstDir&) = delete;
+private:
+	std::string _old;
+};
+
+std::string riskFakeTraderLibraryName()
+{
+#if defined(_WIN32)
+	return "N03RiskFakeTrader.dll";
+#elif defined(__APPLE__)
+	return "libN03RiskFakeTrader.dylib";
+#else
+	return "libN03RiskFakeTrader.so";
+#endif
+}
+
+bool stageRiskFakeTrader(const std::filesystem::path& root)
+{
+	const std::filesystem::path source(WT_UFT_LIFECYCLE_FAKE_PLUGIN_PATH);
+	const std::filesystem::path tradersDir = root / "traders";
+	std::error_code ec;
+	std::filesystem::create_directories(tradersDir, ec);
+	if (ec)
+		return false;
+	std::filesystem::copy_file(source, tradersDir / riskFakeTraderLibraryName(),
+		std::filesystem::copy_options::overwrite_existing, ec);
+	return !ec;
+}
 
 WTSOrderInfo* makeOrder(const char* code, const char* exchg, WTSContractInfo* cInfo,
 	WTSDirectionType dir, WTSOffsetType offset, double vol, WTSOrderState st,
@@ -51,8 +98,9 @@ WTSOrderInfo* makeOrder(const char* code, const char* exchg, WTSContractInfo* cI
 TEST(R54TraderCallback, risk_exclude_and_product_key_match)
 {
 	q04::TempRoot tmp("r54risk");
+	ScopedRiskInstDir instDir(tmp.dir());
+	ASSERT_TRUE(stageRiskFakeTrader(tmp.dir()));
 	q04::FakeBaseDataMgr bd;
-	q04::FakeTraderApi api;
 	ActionPolicyMgr policy;
 	q04::FakeSink sink;
 	bd.add("SHFE", "ag", "ag2406");
@@ -62,7 +110,7 @@ TEST(R54TraderCallback, risk_exclude_and_product_key_match)
 	ASSERT_TRUE(policy.init(path.c_str()));
 
 	WTSVariant* params = WTSVariant::createObject();
-	params->append("module", "");
+	params->append("module", "N03RiskFakeTrader");
 	WTSVariant* riskmon = WTSVariant::createObject();
 	riskmon->append("active", true);
 	WTSVariant* policyCfg = WTSVariant::createObject();
@@ -88,8 +136,7 @@ TEST(R54TraderCallback, risk_exclude_and_product_key_match)
 
 	{
 		TraderAdapter adapter;
-		EXPECT_FALSE(adapter.init("r54risk", params, &bd, &policy));
-		EXPECT_TRUE(adapter.initExt("r54risk", &api, &bd, &policy));
+		ASSERT_TRUE(adapter.init("r54risk", params, &bd, &policy));
 		adapter.addSink(&sink);
 		EXPECT_TRUE(adapter.run());
 		adapter.onLoginResult(true, "ok", 20240315);
@@ -502,11 +549,9 @@ TEST(R54TraderCallback, query_filter_and_dead_orders)
 	ord->release();
 }
 
-// TraderAdapter.cpp:1414-1418 onRspTrades 只认 tInfo->getContractInfo(),
-// 不像 onRspOrders(1286-1288)/onPushTrade(1739-1740) 会回落 _bd_mgr;
-// 柜台查询回报不带 ContractInfo 时整条成交被丢弃, 风控统计永远不会推进。
-// BUG-R54-001, 启用会稳定失败, 故整条 DISABLED。
-TEST(DISABLED_R54TraderCallback, onRspTrades_without_contract_info_drops_stats)
+// HTS 查询回报会带 raw code/exchange, 但没有嵌入 ContractInfo；登记合约可从
+// base data manager 恢复，成交应进入与附带 ContractInfo 回报相同的限额统计。
+TEST(R54TraderCallback, onRspTrades_looks_up_registered_contract_without_embedded_info)
 {
 	const char* kLimited = R"JSON({
 	"default": {
@@ -518,6 +563,7 @@ TEST(DISABLED_R54TraderCallback, onRspTrades_without_contract_info_drops_stats)
 	env.add("SHFE", "ag", "ag2406");
 
 	WTSTradeInfo* t = WTSTradeInfo::create("ag2406", "SHFE");
+	ASSERT_EQ(nullptr, t->getContractInfo());
 	t->setDirection(WDT_LONG);
 	t->setOffsetType(WOT_OPEN);
 	t->setVolume(2);
@@ -528,7 +574,7 @@ TEST(DISABLED_R54TraderCallback, onRspTrades_without_contract_info_drops_stats)
 	ay->release();
 	t->release();
 
-	// 已开 2 手, limit_l=1 应把后续 1 手全部拦下; 实际统计为 0, 仍会发单
+	// 已开 2 手, limit_l=1 应把后续 1 手全部拦下。
 	EXPECT_TRUE(env.adapter.buy(kAg, 5000.0, 1.0, 0, false).empty());
 	EXPECT_EQ(0u, env.api._entrusts.size());
 }

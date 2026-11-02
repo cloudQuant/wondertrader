@@ -19,6 +19,8 @@
 #include "../Includes/WTSSessionInfo.hpp"
 /***---end---23.5.18---zhaoyk***/
 #include <math.h>
+#include <cmath>
+#include <limits>
 
 
 extern const char* FACT_NAME;
@@ -30,6 +32,7 @@ extern const char* FACT_NAME;
 WtTWapExeUnit::WtTWapExeUnit()
 	: _last_tick(NULL)       // 行情数据指针
 	, _target_pos(0)        // 目标仓位
+	, _target_pos_valid(false)
 	, _channel_ready(false) // 交易通道就绪标志
 	, _config_valid(false)  // 执行配置尚未通过校验
 	, _comm_info(NULL)      // 品种信息
@@ -145,6 +148,10 @@ const char* WtTWapExeUnit::getName()
 void WtTWapExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTSVariant* cfg)
 {
 	_config_valid = false;
+	_target_pos = 0.0;
+	_target_pos_valid = false;
+	_this_target = 0.0;
+	_this_target_valid = false;
 
 	if (ctx == NULL)
 		return;
@@ -187,7 +194,17 @@ void WtTWapExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTSVariant* c
 	_end_time = cfg->getUInt32("end_time");         // 结束时间（HHMM格式）
 	_total_secs = cfg->getUInt32("total_secs");     // 总执行时间（秒）
 	_tail_secs = cfg->getUInt32("tail_secs");       // 收尾时间（秒）
-	_total_times = cfg->getUInt32("total_times");   // 总执行次数
+	// WTSVariant::asUInt32 converts via floating point; out-of-range and
+	// negative inputs must be rejected before that conversion can occur.
+	WTSVariant* totalTimesValue = cfg->get("total_times");
+	const double totalTimes = totalTimesValue ? totalTimesValue->asDouble() : 0.0;
+	if (!std::isfinite(totalTimes) || totalTimes < 1.0 ||
+		totalTimes > static_cast<double>(std::numeric_limits<uint32_t>::max()))
+	{
+		ctx->writeLog(fmt::format("TWAP init rejected for {}: total_times must be greater than zero and fit in uint32", stdCode).c_str());
+		return;
+	}
+	_total_times = static_cast<uint32_t>(totalTimes); // 总执行次数
 	_price_mode = cfg->getUInt32("price_mode");     // 价格模式（0-最新价,1-最优价,2-对手价）
 	_price_offset = cfg->getUInt32("price_offset"); // 价格偏移
 	_order_lots = cfg->getDouble("lots");           // 单次发单手数
@@ -281,6 +298,13 @@ void WtTWapExeUnit::on_order(uint32_t localid, const char* stdCode, bool /*isBuy
 	// 如果所有订单已撤销（撤单计数为0），处理超时撤单情况
 	if (isCanceled && _cancel_cnt == 0)
 	{
+		if (!_this_target_valid)
+		{
+			_ctx->writeLog(fmt::format("Order {} of {} canceled before a TWAP slice target was established; retry skipped",
+				localid, stdCode).c_str());
+			return;
+		}
+
 		// 获取当前实际仓位
 		double realPos = _ctx->getPosition(stdCode);
 		
@@ -335,6 +359,7 @@ void WtTWapExeUnit::on_channel_ready()
 	//if (undone != 0 && !_orders_mon.has_order())
 	/***---end---23.5.18---zhaoyk***/
 	{
+		if (!wtRunIfNoUnverifiedTimeout(_orders_mon, [this, undone]() {
 		// 这说明有未完成订单不在监控中，需要先撤销
 		_ctx->writeLog(fmt::format("{} unmanaged orders of {}, cancel all", undone, _code).c_str());
 
@@ -352,6 +377,8 @@ void WtTWapExeUnit::on_channel_ready()
 
 		// 记录撤单日志
 		_ctx->writeLog(fmt::format("Unmanaged order updated cancelcnt to {}", _cancel_cnt).c_str());
+		}))
+			_ctx->writeLog(fmt::format("Unmanaged-order cancellation for {} suppressed after an unverified timeout", _code).c_str());
 	}
 	/***---begin---23.5.18---zhaoyk***/
 	// 情况2: 如果没有未完成订单但本地有订单记录，需要清除本地错误订单
@@ -532,6 +559,9 @@ void WtTWapExeUnit::on_entrust(uint32_t localid, const char* /*stdCode*/, bool b
  */
 void WtTWapExeUnit::fire_at_once(double qty)
 {
+	if (!_this_target_valid)
+		return;
+
 	if (_orders_mon.has_unverified_timeout())
 		return;
 
@@ -623,6 +653,8 @@ void WtTWapExeUnit::do_calc()
 		return;
 
 	if (!_config_valid)
+		return;
+	if (!_target_pos_valid)
 		return;
 
 	// 使用标记类防止重入，确保同一时间只有一个线程在执行计算
@@ -848,6 +880,8 @@ void WtTWapExeUnit::do_calc()
 		ids = _ctx->sell(code, targetPx, abs(curQty));
 
 	_orders_mon.push_order(ids.data(), ids.size(), now, isCanCancel);
+	if (!ids.empty())
+		_this_target_valid = true;
 	_last_fire_time = now;
 	_fired_times += 1;
 
@@ -868,11 +902,13 @@ void WtTWapExeUnit::set_position(const char* stdCode, double newVol)
 
 	// 检查新的目标仓位是否与当前目标仓位相同，相同则直接返回
 	//double diff = newVol - _target_pos;
-	if (decimal::eq(newVol, _target_pos))
+	if (_target_pos_valid && decimal::eq(newVol, _target_pos))
 		return;
 
 	// 更新目标仓位
+	_this_target_valid = false;
 	_target_pos = newVol;
+	_target_pos_valid = true;
 
 	// 重置发单次数计数，开始新一轮的仓位调整
 	_fired_times = 0;

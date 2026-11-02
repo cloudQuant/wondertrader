@@ -95,6 +95,8 @@ public:
 	void	release();
 
 	void	run();
+	// Reports command submission only; false can follow partial submission.
+	bool	runWithResult();
 
 	ParserAdapterPtr getAdapter(const char* id);
 	bool hasRetainedAdapters() const { return !_adapters.empty(); }

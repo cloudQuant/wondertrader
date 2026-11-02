@@ -60,6 +60,7 @@ uint32_t HftStraBaseCtx::id()
 void HftStraBaseCtx::setTrader(TraderAdapter* trader)
 {
 	_trader = trader;
+	++_trader_binding_epoch;
 }
 
 void HftStraBaseCtx::init_outputs()
@@ -187,16 +188,34 @@ void HftStraBaseCtx::on_bar(const char* /*stdCode*/, const char* /*period*/, uin
 
 bool HftStraBaseCtx::stra_cancel(uint32_t localid)
 {
-	return _trader->cancel(localid);
+	TraderAdapter* const trader = _trader;
+	if (trader == nullptr)
+	{
+		log_error("Cannot cancel: trader adapter is not bound");
+		return false;
+	}
+
+	return trader->cancel(localid);
 }
 
 OrderIDs HftStraBaseCtx::stra_cancel(const char* stdCode, bool isBuy, double qty)
 {
+	TraderAdapter* const trader = _trader;
+	const uint64_t traderEpoch = _trader_binding_epoch;
+	if (trader == nullptr)
+	{
+		log_error("Cannot cancel: trader adapter is not bound");
+		return OrderIDs();
+	}
+
 	//撤单频率检查
-	if (!_trader->checkCancelLimits(stdCode))
+	if (!trader->checkCancelLimits(stdCode))
 		return OrderIDs();
 
-	return _trader->cancel(stdCode, isBuy, qty);
+	if (!traderBindingUnchanged(trader, traderEpoch, "cancel"))
+		return OrderIDs();
+
+	return trader->cancel(stdCode, isBuy, qty);
 }
 
 const char* HftStraBaseCtx::get_inner_code(const char* stdCode)
@@ -210,28 +229,45 @@ const char* HftStraBaseCtx::get_inner_code(const char* stdCode)
 
 OrderIDs HftStraBaseCtx::stra_buy(const char* stdCode, double price, double qty, const char* userTag, int flag /* = 0 */, bool bForceClose /* = false */)
 {
+	TraderAdapter* const trader = _trader;
+	const uint64_t traderEpoch = _trader_binding_epoch;
+	if (trader == nullptr)
+	{
+		log_error("Cannot buy: trader adapter is not bound");
+		return OrderIDs();
+	}
+
 	/*
 	 *	By Wesley @ 2022.05.26
 	 *	如果找到匹配自定义规则，则进行映射处理
 	 */
 	 //const char* ruleTag = _engine->get_hot_mgr()->getRuleTag(stdCode);
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _engine->get_hot_mgr());
+	if (!traderBindingUnchanged(trader, traderEpoch, "buy"))
+		return OrderIDs();
 	if (strlen(cInfo._ruletag) > 0)
 	{
 		std::string code = _engine->get_hot_mgr()->getCustomRawCode(cInfo._ruletag, cInfo.stdCommID(), _engine->get_trading_date());
+		if (!traderBindingUnchanged(trader, traderEpoch, "buy"))
+			return OrderIDs();
 		std::string realCode = CodeHelper::rawMonthCodeToStdCode(code.c_str(), cInfo._exchg);
 
 		WTSContractInfo* ct = _engine->get_basedata_mgr()->getContract(code.c_str(), cInfo._exchg);
+		if (!traderBindingUnchanged(trader, traderEpoch, "buy"))
+			return OrderIDs();
 
 		_code_map[realCode] = stdCode;
 
-		if (_trader && !_trader->checkOrderLimits(realCode.c_str()))
+		if (trader && !trader->checkOrderLimits(realCode.c_str()))
 		{
 			log_info("{} is forbidden to trade", realCode.c_str());
 			return OrderIDs();
 		}
 
-		auto ids = _trader->buy(realCode.c_str(), price, qty, flag, bForceClose, ct);
+		if (!traderBindingUnchanged(trader, traderEpoch, "buy"))
+			return OrderIDs();
+
+		auto ids = trader->buy(realCode.c_str(), price, qty, flag, bForceClose, ct);
 		for (auto localid : ids)
 			setUserTag(localid, userTag);
 
@@ -240,19 +276,24 @@ OrderIDs HftStraBaseCtx::stra_buy(const char* stdCode, double price, double qty,
 	else
 	{
 		WTSContractInfo* ct = _engine->get_basedata_mgr()->getContract(cInfo._code, cInfo._exchg);
+		if (!traderBindingUnchanged(trader, traderEpoch, "buy"))
+			return OrderIDs();
 		if (ct == NULL)
 		{
 			log_error("Cannot find corresponding contract info of {}", stdCode);
 			return OrderIDs();
 		}
 
-		if (!_trader->checkOrderLimits(stdCode))
+		if (!trader->checkOrderLimits(stdCode))
 		{
 			log_info("{} is forbidden to trade", stdCode);
 			return OrderIDs();
 		}
 
-		auto ids = _trader->buy(stdCode, price, qty, flag, bForceClose, ct);
+		if (!traderBindingUnchanged(trader, traderEpoch, "buy"))
+			return OrderIDs();
+
+		auto ids = trader->buy(stdCode, price, qty, flag, bForceClose, ct);
 		for (auto localid : ids)
 			setUserTag(localid, userTag);
 		return ids;
@@ -261,13 +302,27 @@ OrderIDs HftStraBaseCtx::stra_buy(const char* stdCode, double price, double qty,
 
 OrderIDs HftStraBaseCtx::stra_sell(const char* stdCode, double price, double qty, const char* userTag, int flag /* = 0 */, bool bForceClose /* = false */)
 {
+	TraderAdapter* const trader = _trader;
+	const uint64_t traderEpoch = _trader_binding_epoch;
+	if (trader == nullptr)
+	{
+		log_error("Cannot sell: trader adapter is not bound");
+		return OrderIDs();
+	}
+
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _engine->get_hot_mgr());
+	if (!traderBindingUnchanged(trader, traderEpoch, "sell"))
+		return OrderIDs();
 	WTSCommodityInfo* commInfo = _engine->get_basedata_mgr()->getCommodity(cInfo._exchg, cInfo._product);
+	if (!traderBindingUnchanged(trader, traderEpoch, "sell"))
+		return OrderIDs();
 
 	//如果不能做空，则要看可用持仓
 	if (!commInfo->canShort())
 	{
-		double curPos = stra_get_position(stdCode, true);//只读可用持仓
+		double curPos = 0;
+		if (!tryGetBoundPosition(stdCode, true, 3, trader, traderEpoch, curPos))
+			return OrderIDs();
 		if (decimal::gt(qty, curPos))
 		{
 			log_error("No enough position of {} to sell", stdCode);
@@ -283,19 +338,26 @@ OrderIDs HftStraBaseCtx::stra_sell(const char* stdCode, double price, double qty
 	if (strlen(cInfo._ruletag) > 0)
 	{
 		std::string code = _engine->get_hot_mgr()->getCustomRawCode(cInfo._ruletag, cInfo.stdCommID(), _engine->get_trading_date());
+		if (!traderBindingUnchanged(trader, traderEpoch, "sell"))
+			return OrderIDs();
 		std::string realCode = CodeHelper::rawMonthCodeToStdCode(code.c_str(), cInfo._exchg);
 
 		WTSContractInfo* ct = _engine->get_basedata_mgr()->getContract(code.c_str(), cInfo._exchg);
+		if (!traderBindingUnchanged(trader, traderEpoch, "sell"))
+			return OrderIDs();
 
 		_code_map[realCode] = stdCode;
 
-		if (_trader && !_trader->checkOrderLimits(realCode.c_str()))
+		if (trader && !trader->checkOrderLimits(realCode.c_str()))
 		{
 			log_info("{} is forbidden to trade", realCode.c_str());
 			return OrderIDs();
 		}
 
-		auto ids = _trader->sell(realCode.c_str(), price, qty, flag, bForceClose, ct);
+		if (!traderBindingUnchanged(trader, traderEpoch, "sell"))
+			return OrderIDs();
+
+		auto ids = trader->sell(realCode.c_str(), price, qty, flag, bForceClose, ct);
 		for (auto localid : ids)
 			setUserTag(localid, userTag);
 		return ids;
@@ -303,19 +365,24 @@ OrderIDs HftStraBaseCtx::stra_sell(const char* stdCode, double price, double qty
 	else
 	{
 		WTSContractInfo* ct = _engine->get_basedata_mgr()->getContract(cInfo._code, cInfo._exchg);
+		if (!traderBindingUnchanged(trader, traderEpoch, "sell"))
+			return OrderIDs();
 		if (ct == NULL)
 		{
 			log_error("Cannot find corresponding contract info of {}", stdCode);
 			return OrderIDs();
 		}
 
-		if (_trader && !_trader->checkOrderLimits(stdCode))
+		if (trader && !trader->checkOrderLimits(stdCode))
 		{
 			log_info("{} is forbidden to trade", stdCode);
 			return OrderIDs();
 		}
 
-		auto ids = _trader->sell(stdCode, price, qty, flag, bForceClose, ct);
+		if (!traderBindingUnchanged(trader, traderEpoch, "sell"))
+			return OrderIDs();
+
+		auto ids = trader->sell(stdCode, price, qty, flag, bForceClose, ct);
 		for (auto localid : ids)
 			setUserTag(localid, userTag);
 		return ids;
@@ -324,40 +391,82 @@ OrderIDs HftStraBaseCtx::stra_sell(const char* stdCode, double price, double qty
 
 uint32_t HftStraBaseCtx::stra_enter_long(const char* stdCode, double price, double qty, const char* /*userTag*/, int flag/* = 0*/)
 {
+	TraderAdapter* const trader = _trader;
+	const uint64_t traderEpoch = _trader_binding_epoch;
+	if (trader == nullptr)
+	{
+		log_error("Cannot enter_long: trader adapter is not bound");
+		return 0;
+	}
+
 	std::string realCode = stdCode;
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _engine->get_hot_mgr());
+	if (!traderBindingUnchanged(trader, traderEpoch, "enter_long"))
+		return 0;
 	if (strlen(cInfo._ruletag) > 0)
 	{
 		std::string code = _engine->get_hot_mgr()->getCustomRawCode(cInfo._ruletag, cInfo.stdCommID(), _engine->get_trading_date());
+		if (!traderBindingUnchanged(trader, traderEpoch, "enter_long"))
+			return 0;
 		realCode = CodeHelper::rawMonthCodeToStdCode(code.c_str(), cInfo._exchg);
 		_code_map[realCode] = stdCode;
 	}
 
-	return _trader->openLong(realCode.c_str(), price, qty, flag);
+	if (!traderBindingUnchanged(trader, traderEpoch, "enter_long"))
+		return 0;
+
+	return trader->openLong(realCode.c_str(), price, qty, flag);
 }
 
 uint32_t HftStraBaseCtx::stra_exit_long(const char* stdCode, double price, double qty, const char* /*userTag*/, bool isToday/* = false*/, int flag/* = 0*/)
 {
+	TraderAdapter* const trader = _trader;
+	const uint64_t traderEpoch = _trader_binding_epoch;
+	if (trader == nullptr)
+	{
+		log_error("Cannot exit_long: trader adapter is not bound");
+		return 0;
+	}
+
 	std::string realCode = stdCode;
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _engine->get_hot_mgr());
+	if (!traderBindingUnchanged(trader, traderEpoch, "exit_long"))
+		return 0;
 	if (strlen(cInfo._ruletag) > 0)
 	{
 		std::string code = _engine->get_hot_mgr()->getCustomRawCode(cInfo._ruletag, cInfo.stdCommID(), _engine->get_trading_date());
+		if (!traderBindingUnchanged(trader, traderEpoch, "exit_long"))
+			return 0;
 		realCode = CodeHelper::rawMonthCodeToStdCode(code.c_str(), cInfo._exchg);
 
 		_code_map[realCode] = stdCode;
 	}
 
-	return _trader->closeLong(realCode.c_str(), price, qty, isToday, flag);
+	if (!traderBindingUnchanged(trader, traderEpoch, "exit_long"))
+		return 0;
+
+	return trader->closeLong(realCode.c_str(), price, qty, isToday, flag);
 }
 
 uint32_t HftStraBaseCtx::stra_enter_short(const char* stdCode, double price, double qty, const char* /*userTag*/, int flag/* = 0*/)
 {
+	TraderAdapter* const trader = _trader;
+	const uint64_t traderEpoch = _trader_binding_epoch;
+	if (trader == nullptr)
+	{
+		log_error("Cannot enter_short: trader adapter is not bound");
+		return 0;
+	}
+
 	std::string realCode = stdCode;
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _engine->get_hot_mgr());
+	if (!traderBindingUnchanged(trader, traderEpoch, "enter_short"))
+		return 0;
 	if (strlen(cInfo._ruletag) > 0)
 	{
 		std::string code = _engine->get_hot_mgr()->getCustomRawCode(cInfo._ruletag, cInfo.stdCommID(), _engine->get_trading_date());
+		if (!traderBindingUnchanged(trader, traderEpoch, "enter_short"))
+			return 0;
 		realCode = CodeHelper::rawMonthCodeToStdCode(code.c_str(), cInfo._exchg);
 
 		_code_map[realCode] = stdCode;
@@ -379,16 +488,31 @@ uint32_t HftStraBaseCtx::stra_enter_short(const char* stdCode, double price, dou
 	//	_code_map[realCode] = stdCode;
 	//}
 
-	return _trader->openShort(realCode.c_str(), price, qty, flag);
+	if (!traderBindingUnchanged(trader, traderEpoch, "enter_short"))
+		return 0;
+
+	return trader->openShort(realCode.c_str(), price, qty, flag);
 }
 
 uint32_t HftStraBaseCtx::stra_exit_short(const char* stdCode, double price, double qty, const char* /*userTag*/, bool isToday/* = false*/, int flag/* = 0*/)
 {
+	TraderAdapter* const trader = _trader;
+	const uint64_t traderEpoch = _trader_binding_epoch;
+	if (trader == nullptr)
+	{
+		log_error("Cannot exit_short: trader adapter is not bound");
+		return 0;
+	}
+
 	std::string realCode = stdCode;
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _engine->get_hot_mgr());
+	if (!traderBindingUnchanged(trader, traderEpoch, "exit_short"))
+		return 0;
 	if (strlen(cInfo._ruletag) > 0)
 	{
 		std::string code = _engine->get_hot_mgr()->getCustomRawCode(cInfo._ruletag, cInfo.stdCommID(), _engine->get_trading_date());
+		if (!traderBindingUnchanged(trader, traderEpoch, "exit_short"))
+			return 0;
 		realCode = CodeHelper::rawMonthCodeToStdCode(code.c_str(), cInfo._exchg);
 
 		_code_map[realCode] = stdCode;
@@ -410,7 +534,10 @@ uint32_t HftStraBaseCtx::stra_exit_short(const char* stdCode, double price, doub
 	//	_code_map[realCode] = stdCode;
 	//}
 
-	return _trader->closeShort(realCode.c_str(), price, qty, isToday, flag);
+	if (!traderBindingUnchanged(trader, traderEpoch, "exit_short"))
+		return 0;
+
+	return trader->closeShort(realCode.c_str(), price, qty, isToday, flag);
 }
 
 WTSCommodityInfo* HftStraBaseCtx::stra_get_comminfo(const char* stdCode)
@@ -628,6 +755,26 @@ double HftStraBaseCtx::stra_get_position_avgpx(const char* stdCode)
 	return amount / pInfo._volume;
 }
 
+bool HftStraBaseCtx::tryGetBoundPosition(const char* stdCode, bool onlyValid, int flag,
+	TraderAdapter* expected, uint64_t epoch, double& position)
+{
+	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _engine->get_hot_mgr());
+	if (!traderBindingUnchanged(expected, epoch, "sell"))
+		return false;
+	if (strlen(cInfo._ruletag) > 0)
+	{
+		std::string code = _engine->get_hot_mgr()->getCustomRawCode(cInfo._ruletag, cInfo.stdCommID(), _engine->get_trading_date());
+		if (!traderBindingUnchanged(expected, epoch, "sell"))
+			return false;
+		std::string realCode = CodeHelper::rawMonthCodeToStdCode(code.c_str(), cInfo._exchg);
+		_code_map[realCode] = stdCode;
+		position = expected->getPosition(realCode.c_str(), onlyValid, flag);
+	}
+	else
+		position = expected->getPosition(stdCode, onlyValid, flag);
+	return traderBindingUnchanged(expected, epoch, "sell");
+}
+
 double HftStraBaseCtx::stra_get_position(const char* stdCode, bool bOnlyValid /* = false */, int flag /* = 3*/)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _engine->get_hot_mgr());
@@ -819,7 +966,7 @@ void HftStraBaseCtx::do_set_position(const char* stdCode, double qty, double pri
 		dInfo._volume = abs(diff);
 		dInfo._opentime = curTm;
 		dInfo._opentdate = curTDate;
-		wt_strcpy(dInfo._usertag, userTag);
+		dInfo._usertag = userTag ? userTag : "";
 		pInfo._details.emplace_back(dInfo);
 
 		double fee = commInfo->calcFee(trdPx, abs(diff), 0);
@@ -866,7 +1013,7 @@ void HftStraBaseCtx::do_set_position(const char* stdCode, double qty, double pri
 			//这里写成交记录
 			log_trade(stdCode, dInfo._long, false, curTm, trdPx, maxQty, fee, userTag);
 			//这里写平仓记录
-			log_close(stdCode, dInfo._long, dInfo._opentime, dInfo._price, curTm, trdPx, maxQty, profit, maxProf, maxLoss, pInfo._closeprofit, dInfo._usertag, userTag);
+			log_close(stdCode, dInfo._long, dInfo._opentime, dInfo._price, curTm, trdPx, maxQty, profit, maxProf, maxLoss, pInfo._closeprofit, dInfo._usertag.c_str(), userTag);
 
 			if (left == 0)
 				break;
@@ -891,7 +1038,7 @@ void HftStraBaseCtx::do_set_position(const char* stdCode, double qty, double pri
 			dInfo._volume = abs(left);
 			dInfo._opentime = curTm;
 			dInfo._opentdate = curTDate;
-			wt_strcpy(dInfo._usertag, userTag);
+			dInfo._usertag = userTag ? userTag : "";
 			pInfo._details.emplace_back(dInfo);
 
 			//这里还需要写一笔成交记录

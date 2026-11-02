@@ -150,6 +150,8 @@ private:
 
 	/// @brief 目标仓位
 	double			_target_pos;
+	/// @brief 用户目标已明确设置；默认零仓位不能作为执行目标
+	bool			_target_pos_valid;
 
 	/// @brief 交易通道是否就绪
 	bool			_channel_ready;
@@ -220,7 +222,9 @@ private:
 	/// @brief 临时变量
 
 	/// @brief 本轮目标仓位，当前执行轮次的目标仓位
-	double			_this_target;
+	double			_this_target{ 0.0 };
+	/// @brief 本轮目标仓位已由可执行切片建立
+	bool			_this_target_valid{ false };
 
 	/// @brief 发单间隔，单位秒，两次发单之间的最小时间间隔
 	uint32_t		_fire_span;

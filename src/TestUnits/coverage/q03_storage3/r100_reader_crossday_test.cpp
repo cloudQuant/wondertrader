@@ -111,6 +111,8 @@ TEST_F(R100ReaderCrossDayTest, R100ReaderRtHftCrossDateAndMissing)
 	ASSERT_TRUE(write_bytes("rt/trans/SSE/630000.dmb",
 		make_rt_block<WTSTransStruct>(BT_RT_Trnsctn, kCurTDate, 3, 8, cross_trans(kCurTDate, 20240109, 10))));
 
+	init_reader();
+
 	// 截止 10:00 落在 09:30 与 10:30 之间：lower_bound 命中末条后回退一条
 	WTSTickSlice* ts = _reader.readTickSlice("SSE.STK.600000", 2, 20240110100000000ull);
 	ASSERT_TRUE(ts != NULL);
@@ -149,6 +151,8 @@ TEST_F(R100ReaderCrossDayTest, R100ReaderHisHftCrossDateShortAndEmpty)
 		make_block(BT_HIS_OrdDetail, BLOCK_VERSION_CMP_V2, pack_items(cross_dtls(20240109, 20240108, 23)))));
 	ASSERT_TRUE(write_bytes("his/trans/SSE/20240109/631100.dsb",
 		make_block(BT_HIS_Trnsctn, BLOCK_VERSION_CMP_V2, pack_items(cross_trans(20240109, 20240108, 26)))));
+
+	init_reader();
 
 	WTSOrdQueSlice* q = _reader.readOrdQueSlice("SSE.STK.611100", 2, 20240109100000000ull);
 	ASSERT_TRUE(q != NULL);

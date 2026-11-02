@@ -20,9 +20,30 @@
 #include "../WTSTools/WTSLogger.h"
 
 #include <filesystem>
+#include <memory>
 #include <system_error>
 #include <vector>
 namespace fs = std::filesystem;
+
+namespace
+{
+	class TickReleaseGuard
+	{
+	public:
+		explicit TickReleaseGuard(WTSTickData* tick) : _tick(tick) {}
+		~TickReleaseGuard()
+		{
+			if (_tick != nullptr)
+				_tick->release();
+		}
+
+		TickReleaseGuard(const TickReleaseGuard&) = delete;
+		TickReleaseGuard& operator=(const TickReleaseGuard&) = delete;
+
+	private:
+		WTSTickData* _tick;
+	};
+}
 
 
 IndexWorkerMgr::IndexWorkerMgr()
@@ -105,6 +126,24 @@ bool IndexWorkerMgr::loadFactories(const char* path)
 		DllHandle hInst = DLLHelper::load_library(modulePath.string().c_str());
 		if (hInst == NULL)
 			continue;
+
+		// Loading a module already owned by this manager adds a loader reference.
+		// Balance only that new reference and keep the original factory/worker
+		// ownership untouched; invoking creator again would overwrite its owner.
+		bool alreadyLoaded = false;
+		for (const auto& entry : _factories)
+		{
+			if (entry.second._module_inst == hInst)
+			{
+				alreadyLoaded = true;
+				break;
+			}
+		}
+		if (alreadyLoaded)
+		{
+			DLLHelper::free_library(hInst);
+			continue;
+		}
 
 		FuncCreateIndexFact creator = (FuncCreateIndexFact)DLLHelper::get_symbol(hInst, "create_index_factory");
 		if (creator == NULL)
@@ -220,23 +259,26 @@ void IndexWorkerMgr::handle_quote(WTSTickData* newTick)
 	if (it == _subbed.end())
 		return;
 
-	newTick->retain();
-
 	if (_pool)
 	{
-		_pool->schedule([this, newTick]() {
+		newTick->retain();
+		std::shared_ptr<WTSTickData> retainedTick(newTick, [](WTSTickData* tick) {
+			if (tick != nullptr)
+				tick->release();
+		});
+		_pool->schedule([this, retainedTick]() {
 
 			for (auto& v : _workers)
 			{
 				auto& worker = v.second;
-				worker->self()->handle_quote(newTick);
+				worker->self()->handle_quote(retainedTick.get());
 			}
-			//这里加一个处理
-			newTick->release();
 		});
 	}
 	else
 	{
+		newTick->retain();
+		TickReleaseGuard retainedTick(newTick);
 		for (auto& v : _workers)
 		{
 			auto& worker = v.second;

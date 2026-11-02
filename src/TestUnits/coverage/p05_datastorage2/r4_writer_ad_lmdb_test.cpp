@@ -10,7 +10,66 @@
 // 且所有校验都在临时目录里完成（写入器析构、LMDB 环境关闭以后才回读，避免同进程重复开环）。
 #include "r4_ad_fixture.h"
 
+#ifdef WT_DATAWRITERAD_TEST_SEAMS
+#include <map>
+
+extern "C" void wt_data_writer_ad_set_db_cache_observer_for_test(
+	void (*observer)(const char*, const char*, const void*, bool));
+#endif
+
 namespace {
+
+#ifdef WT_DATAWRITERAD_TEST_SEAMS
+struct R4DbCacheSlotTrace
+{
+	const void* _handle = nullptr;
+	uint32_t _opens = 0;
+	uint32_t _hits = 0;
+	bool _sameHandle = true;
+	bool _sawNull = false;
+};
+
+static std::map<std::string, R4DbCacheSlotTrace>* g_r4_db_cache_trace = nullptr;
+
+static void r4_observe_db_cache(const char* type, const char* key, const void* handle, bool cacheHit)
+{
+	if (g_r4_db_cache_trace == nullptr)
+		return;
+
+	const std::string slot = std::string(type) + "|" + key;
+	R4DbCacheSlotTrace& trace = (*g_r4_db_cache_trace)[slot];
+	if (handle == nullptr)
+		trace._sawNull = true;
+	if (trace._handle == nullptr)
+		trace._handle = handle;
+	else if (trace._handle != handle)
+		trace._sameHandle = false;
+	if (cacheHit)
+		++trace._hits;
+	else
+		++trace._opens;
+}
+
+class R4ScopedDbCacheTrace
+{
+public:
+	explicit R4ScopedDbCacheTrace(std::map<std::string, R4DbCacheSlotTrace>& trace)
+		: _trace(trace)
+	{
+		g_r4_db_cache_trace = &_trace;
+		wt_data_writer_ad_set_db_cache_observer_for_test(r4_observe_db_cache);
+	}
+
+	~R4ScopedDbCacheTrace()
+	{
+		wt_data_writer_ad_set_db_cache_observer_for_test(nullptr);
+		g_r4_db_cache_trace = nullptr;
+	}
+
+private:
+	std::map<std::string, R4DbCacheSlotTrace>& _trace;
+};
+#endif
 
 struct R4DbEntry
 {
@@ -150,6 +209,85 @@ TEST_F(R4WriterADTest, TickDbStoresAllTradingDateKeyedRecords)
 		const WTSTickStruct* tick = (const WTSTickStruct*)rows[i]._val.data();
 		EXPECT_DOUBLE_EQ(tick->price, px[i]);
 		EXPECT_EQ(tick->trading_date, R4_D1);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 1a. 交错复用 tick 合约级与 m1 交易所级 LMDB map 槽位，命中后仍须可写
+//////////////////////////////////////////////////////////////////////////
+TEST_F(R4WriterADTest, InterleavedTickAndM1WritesReuseDatabaseCacheSlots)
+{
+	WTSVariant* cfg = make_writer_cfg(_root.string(), 1000, false, false, true, true);
+	init_writer(cfg);
+#ifdef WT_DATAWRITERAD_TEST_SEAMS
+	std::map<std::string, R4DbCacheSlotTrace> cacheTrace;
+	R4ScopedDbCacheTrace observeCacheHits(cacheTrace);
+#endif
+
+	WTSCommodityInfo* commA = _bd->add_commodity("EXCA", "rb", ContractCategory::CC_Future);
+	WTSContractInfo* ctA = _bd->add_contract("EXCA", "rb2301", commA);
+	WTSCommodityInfo* commB = _bd->add_commodity("EXCB", "rb", ContractCategory::CC_Future);
+	WTSContractInfo* ctB = _bd->add_contract("EXCB", "rb2301", commB);
+	const uint32_t at[] = {93000000, 93100000, 93200000, 93300000};
+
+	for (uint32_t i = 0; i < 4; ++i)
+	{
+		WTSTickStruct tickA = make_tick("EXCA", "rb2301", R4_D1, R4_D1, at[i],
+			3900.0 + i, 1, 10, 5, 0, 100 + i, 1000 + i);
+		write_or_fail(tick_of(ctA, tickA), 0);
+
+		WTSTickStruct tickB = make_tick("EXCB", "rb2301", R4_D1, R4_D1, at[i],
+			4900.0 + i, 1, 10, 5, 0, 200 + i, 2000 + i);
+		write_or_fail(tick_of(ctB, tickB), 0);
+	}
+
+	_writer.reset();
+#ifdef WT_DATAWRITERAD_TEST_SEAMS
+	EXPECT_EQ(cacheTrace.size(), (std::size_t)4);
+	auto expectSlot = [&cacheTrace](const std::string& slot, uint32_t expectedHits) {
+		auto it = cacheTrace.find(slot);
+		ASSERT_NE(it, cacheTrace.end()) << slot;
+		EXPECT_EQ(it->second._opens, 1u) << slot;
+		EXPECT_EQ(it->second._hits, expectedHits) << slot;
+		EXPECT_NE(it->second._handle, nullptr) << slot;
+		EXPECT_FALSE(it->second._sawNull) << slot;
+		EXPECT_TRUE(it->second._sameHandle) << slot;
+	};
+	expectSlot("tick|EXCA.rb2301", 3);
+	expectSlot("tick|EXCB.rb2301", 3);
+	expectSlot("min1|EXCA", 2);
+	expectSlot("min1|EXCB", 2);
+#endif
+	for (const auto& item : std::vector<std::pair<const char*, double>>{
+		{"EXCA", 3900.0}, {"EXCB", 4900.0}})
+	{
+		const std::string tickDir = (_root / "ticks" / item.first / "rb2301").string();
+		const std::string m1Dir = (_root / "min1" / item.first).string();
+		auto ticks = r4_read_db(tickDir);
+		auto bars = r4_read_db(m1Dir);
+		ASSERT_EQ(ticks.size(), (std::size_t)4) << item.first;
+		ASSERT_EQ(bars.size(), (std::size_t)3) << item.first;
+
+		for (std::size_t i = 0; i < ticks.size(); ++i)
+		{
+			ASSERT_EQ(ticks[i]._key.size(), sizeof(LMDBHftKey));
+			const LMDBHftKey* key = (const LMDBHftKey*)ticks[i]._key.data();
+			EXPECT_STREQ(key->_exchg, item.first);
+			EXPECT_STREQ(key->_code, "rb2301");
+			EXPECT_EQ(key->_time, be32(at[i]));
+			const WTSTickStruct* tick = (const WTSTickStruct*)ticks[i]._val.data();
+			EXPECT_DOUBLE_EQ(tick->price, item.second + i);
+		}
+
+		const uint32_t barTimes[] = {R4_M1_931, R4_M1_932, R4_M1_933};
+		for (std::size_t i = 0; i < bars.size(); ++i)
+		{
+			ASSERT_EQ(bars[i]._key.size(), sizeof(LMDBBarKey));
+			const LMDBBarKey* key = (const LMDBBarKey*)bars[i]._key.data();
+			EXPECT_STREQ(key->_exchg, item.first);
+			EXPECT_STREQ(key->_code, "rb2301");
+			EXPECT_EQ(key->_bartime, be32(barTimes[i]));
+		}
 	}
 }
 

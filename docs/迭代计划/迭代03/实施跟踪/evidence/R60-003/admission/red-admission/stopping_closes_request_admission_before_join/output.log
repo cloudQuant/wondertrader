@@ -1,0 +1,54 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R60MockerTest.stopping_closes_request_admission_before_join
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R60MockerTest
+[ RUN      ] R60MockerTest.stopping_closes_request_admission_before_join
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp:929: Failure
+Value of: closed
+  Actual: false
+Expected: true
+release did not close admission while its callback was active
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp:933: Failure
+Expected: (api.orderInsert(entrust)) < (0), actual: 0 vs 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp:934: Failure
+Expected: (api.orderAction(action)) < (0), actual: 0 vs 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp:935: Failure
+Expected: (api.queryAccount()) < (0), actual: 0 vs 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp:936: Failure
+Expected: (api.queryPositions()) < (0), actual: 0 vs 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp:937: Failure
+Expected: (api.queryOrders()) < (0), actual: 0 vs 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp:938: Failure
+Expected: (api.queryTrades()) < (0), actual: 0 vs 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp:939: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  entrust->retainCount()
+    Which is: 2
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp:940: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  action->retainCount()
+    Which is: 2
+
+[  FAILED  ] R60MockerTest.stopping_closes_request_admission_before_join (1005 ms)
+[----------] 1 test from R60MockerTest (1005 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (1005 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R60MockerTest.stopping_closes_request_admission_before_join
+
+ 1 FAILED TEST

@@ -313,7 +313,9 @@ bool stageLifecycleTrader(const LifecycleTempRoot& root)
 	std::error_code ec;
 	if (!std::filesystem::exists(source, ec) || ec)
 		return false;
-	std::filesystem::create_symlink(source, root.path() / "traders" / lifecycleTraderLibraryName(), ec);
+	std::filesystem::copy_file(source,
+		root.path() / "traders" / lifecycleTraderLibraryName(),
+		std::filesystem::copy_options::overwrite_existing, ec);
 	return !ec;
 }
 
@@ -931,6 +933,54 @@ TEST(UftTraderAdapterLifecycle, FailedPluginInitReleasesConfigAndAllowsRetry)
 
 	missingModule->release();
 	validModule->release();
+}
+
+TEST(UftTraderAdapterLifecycle, NullAndOversizedIdsAreRejectedBeforeInitializationSideEffects)
+{
+	const std::string tooLongId(49, 'x');
+
+	UftLifecycleTestApi externalApi;
+	TraderAdapter externalAdapter;
+	EXPECT_FALSE(externalAdapter.initExt(nullptr, &externalApi, nullptr, nullptr));
+	EXPECT_FALSE(externalAdapter.initExt(tooLongId.c_str(), &externalApi, nullptr, nullptr));
+	EXPECT_EQ(TraderAdapter::AS_NOTLOGIN, externalAdapter.state());
+	EXPECT_STREQ("", externalAdapter.id());
+	EXPECT_EQ(0u, externalApi._initCount.load());
+
+	ASSERT_TRUE(externalAdapter.initExt("valid-retry", &externalApi, nullptr, nullptr));
+	EXPECT_EQ(1u, externalApi._initCount.load());
+	externalAdapter.release();
+	EXPECT_EQ(1u, externalApi._releaseCount.load());
+
+	LifecycleTempRoot root;
+	if (!stageLifecycleFakeTrader(root))
+		GTEST_SKIP() << "UFT lifecycle fake module is unavailable";
+	LifecycleInstDirGuard instDir(root.path().string() + "/");
+	LifecycleCwdGuard cwd;
+	std::filesystem::current_path(root.path());
+	const std::filesystem::path logPath = root.path() / "events.log";
+	LifecycleEnvGuard environment;
+	environment.set("WT_UFT_LIFECYCLE_LOG", logPath.string());
+	resetLifecycleLog(logPath);
+
+	WTSVariant* params = makeLifecycleFakeConfig("ok", logPath);
+	ASSERT_NE(nullptr, params);
+	TraderAdapter ownedAdapter;
+	EXPECT_FALSE(ownedAdapter.init(nullptr, params, nullptr, nullptr));
+	EXPECT_FALSE(ownedAdapter.init(tooLongId.c_str(), params, nullptr, nullptr));
+	EXPECT_EQ(TraderAdapter::AS_NOTLOGIN, ownedAdapter.state());
+	EXPECT_STREQ("", ownedAdapter.id());
+	EXPECT_EQ(1u, params->retainCount());
+	EXPECT_TRUE(readLifecycleLog(logPath).empty());
+
+	ASSERT_TRUE(ownedAdapter.init("valid-owned-retry", params, nullptr, nullptr));
+	EXPECT_EQ(2u, params->retainCount());
+	const std::vector<std::string> eventsAfterInit = readLifecycleLog(logPath);
+	ASSERT_FALSE(eventsAfterInit.empty());
+	EXPECT_EQ("factory.create", eventsAfterInit.front());
+	ownedAdapter.release();
+	EXPECT_EQ(1u, params->retainCount());
+	params->release();
 }
 
 TEST(UftTraderAdapterLifecycle, SuccessfulPluginReleaseIsIdempotentAndClosesAdapter)

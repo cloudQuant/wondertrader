@@ -1,0 +1,47 @@
+[
+  {
+    "target": "wtcore",
+    "case": "N01ParserAdapter.run_reports_connection_command_submission",
+    "cwd": "/tmp/wt-i03-parser-run/red/wtcore-run",
+    "argv": [
+      "perl",
+      "-e",
+      "alarm 30; exec @ARGV",
+      "--",
+      "/tmp/wt-i03-parser-run/red/wtcore-tests",
+      "--gtest_filter=N01ParserAdapter.run_reports_connection_command_submission",
+      "--gtest_output=xml:/tmp/wt-i03-parser-run/red/wtcore-run/result.xml"
+    ],
+    "exit": 1
+  },
+  {
+    "target": "dtcore",
+    "case": "R18ParserAdapterTest.RunReportsConnectionCommandSubmission",
+    "cwd": "/tmp/wt-i03-parser-run/red/dtcore-run",
+    "argv": [
+      "perl",
+      "-e",
+      "alarm 30; exec @ARGV",
+      "--",
+      "/tmp/wt-i03-parser-run/red/dtcore-tests",
+      "--gtest_filter=R18ParserAdapterTest.RunReportsConnectionCommandSubmission",
+      "--gtest_output=xml:/tmp/wt-i03-parser-run/red/dtcore-run/result.xml"
+    ],
+    "exit": 1
+  },
+  {
+    "target": "dtservo",
+    "case": "R45ParserAdapterFakeTest.RunReportsConnectionCommandSubmission",
+    "cwd": "/tmp/wt-i03-parser-run/red/dtservo-run",
+    "argv": [
+      "perl",
+      "-e",
+      "alarm 30; exec @ARGV",
+      "--",
+      "/tmp/wt-i03-parser-run/red/dtservo-tests",
+      "--gtest_filter=R45ParserAdapterFakeTest.RunReportsConnectionCommandSubmission",
+      "--gtest_output=xml:/tmp/wt-i03-parser-run/red/dtservo-run/result.xml"
+    ],
+    "exit": 1
+  }
+]

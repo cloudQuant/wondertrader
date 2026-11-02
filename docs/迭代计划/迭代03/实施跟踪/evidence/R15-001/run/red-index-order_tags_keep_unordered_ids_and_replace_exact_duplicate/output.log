@@ -1,0 +1,52 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R15CtxTest.order_tags_keep_unordered_ids_and_replace_exact_duplicate
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R15CtxTest
+[ RUN      ] R15CtxTest.order_tags_keep_unordered_ids_and_replace_exact_duplicate
+/private/tmp/wt-i03-r15-tags/red-index-source/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:531: Failure
+Expected equality of these values:
+  ctx.getOrderTag(10)
+    Which is: "fifty"
+  "ten"
+
+/private/tmp/wt-i03-r15-tags/red-index-source/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:533: Failure
+Expected equality of these values:
+  ctx.getOrderTag(50)
+    Which is: ""
+  "fifty"
+
+/private/tmp/wt-i03-r15-tags/red-index-source/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:534: Failure
+Expected equality of these values:
+  ctx.getOrderTag(20)
+    Which is: "thirty"
+  ""
+
+/private/tmp/wt-i03-r15-tags/red-index-source/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:536: Failure
+Expected equality of these values:
+  ctx.getOrderTag(30)
+    Which is: ""
+  "thirty"
+
+/private/tmp/wt-i03-r15-tags/red-index-source/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:541: Failure
+Expected equality of these values:
+  ctx.getOrderTag(10)
+    Which is: "fifty"
+  "ten"
+
+/private/tmp/wt-i03-r15-tags/red-index-source/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:542: Failure
+Expected equality of these values:
+  ctx.getOrderTag(50)
+    Which is: ""
+  "fifty"
+
+[  FAILED  ] R15CtxTest.order_tags_keep_unordered_ids_and_replace_exact_duplicate (0 ms)
+[----------] 1 test from R15CtxTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R15CtxTest.order_tags_keep_unordered_ids_and_replace_exact_duplicate
+
+ 1 FAILED TEST

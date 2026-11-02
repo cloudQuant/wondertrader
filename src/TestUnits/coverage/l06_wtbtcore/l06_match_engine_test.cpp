@@ -9,11 +9,17 @@
 #include <algorithm>
 #include <cstring>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include <WtBtCore/MatchEngine.h>
 #include <Includes/WTSDataDef.hpp>
 #include <Includes/WTSVariant.hpp>
+
+static_assert(!std::is_copy_constructible<MatchEngine>::value, "MatchEngine owns its tick cache");
+static_assert(!std::is_copy_assignable<MatchEngine>::value, "MatchEngine owns its tick cache");
+static_assert(!std::is_move_constructible<MatchEngine>::value, "MatchEngine cache ownership is not movable");
+static_assert(!std::is_move_assignable<MatchEngine>::value, "MatchEngine cache ownership is not movable");
 
 class RecordingMatchSink : public IMatchSink
 {
@@ -147,6 +153,37 @@ TEST_F(MatchEngineTest, buySellWithoutCachedTickReturnEmpty)
 	OrderIDs sellIds = engine.sell("SSE.STK.600000", 10.1, 100, 20240102093000000ULL);
 	EXPECT_TRUE(buyIds.empty());
 	EXPECT_TRUE(sellIds.empty());
+}
+
+TEST_F(MatchEngineTest, TickCacheReleasedOnDestruction)
+{
+	const char* codeA = "SSE.STK.600000";
+	const char* codeB = "SSE.STK.600001";
+	WTSTickData* tickA = makeTick(codeA, 10.0, 100, 9.99, 100, 10.01, 100);
+	WTSTickData* tickB = makeTick(codeB, 20.0, 200, 19.99, 200, 20.01, 200);
+	ASSERT_NE(nullptr, tickA);
+	ASSERT_NE(nullptr, tickB);
+
+	// Exercise repeated cache allocation/destruction while retaining the two
+	// caller-owned ticks, so every iteration can verify ownership restoration.
+	constexpr int kIterations = 1000;
+	for (int iteration = 0; iteration < kIterations; ++iteration)
+	{
+		{
+			MatchEngine matcher;
+			matcher.handle_tick(codeA, tickA);
+			matcher.handle_tick(codeB, tickB);
+			EXPECT_EQ(2u, tickA->retainCount()); // caller + this contract's cache entry
+			EXPECT_EQ(2u, tickB->retainCount());
+		}
+
+		// Destroying the matcher releases both cache entries without affecting the caller.
+		EXPECT_EQ(1u, tickA->retainCount());
+		EXPECT_EQ(1u, tickB->retainCount());
+	}
+
+	tickA->release();
+	tickB->release();
 }
 
 TEST_F(MatchEngineTest, passiveBuyQueuesBehindBookAndFillsInTwoSteps)

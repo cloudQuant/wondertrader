@@ -15,6 +15,7 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <atomic>
 #include <cstdint>
 #include <cstring>
 #include <filesystem>
@@ -40,8 +41,12 @@ namespace
 {
 	std::filesystem::path lane_root()
 	{
+	#ifdef WT_COV_P07_FIXTURE_ROOT
+		return std::filesystem::path(WT_COV_P07_FIXTURE_ROOT);
+	#else
 		return std::filesystem::path(__FILE__).parent_path()
 			.parent_path().parent_path().parent_path().parent_path();
+	#endif
 	}
 
 	std::filesystem::path make_temp_dir(const char* tag)
@@ -120,6 +125,7 @@ namespace
 		uint32_t	_adjOneCalls {0};
 		bool		_giveTicks {true};
 		bool		_failRepeatedTickLoads {false};
+		bool		_failAfterPartialTickCallback {false};
 		bool		_invalidNonemptyTickCallback {false};
 		bool		_emptyNullTickCallback {false};
 		bool		_multiTickCallbacks {false};
@@ -230,8 +236,9 @@ namespace
 			}
 			if (!_giveTicks)
 			{
+				cb(obj, nullptr, 0u);
 				_lastTickLoadReturned = true;
-				return false;
+				return true;
 			}
 
 			std::vector<WTSTickStruct> ticks;
@@ -255,6 +262,15 @@ namespace
 
 			if (ticks.empty())
 			{
+				cb(obj, nullptr, 0u);
+				_lastTickLoadReturned = true;
+				return true;
+			}
+
+			if (_failAfterPartialTickCallback)
+			{
+				const std::size_t partialCount = std::min<std::size_t>(2, ticks.size());
+				cb(obj, ticks.data(), static_cast<uint32_t>(partialCount));
 				_lastTickLoadReturned = true;
 				return false;
 			}
@@ -301,6 +317,73 @@ namespace
 		}
 
 		bool isAutoTrans() override { return _autoTrans; }
+	};
+
+	// Every chunk is an independent temporary buffer: it is overwritten and
+	// destroyed immediately after its callback returns. Concurrent mode joins
+	// both callback threads before the loader returns, as the API requires.
+	class ExpiringChunkLoader : public StubBtLoader
+	{
+	public:
+		bool concurrent {false};
+		uint32_t expiredChunks {0};
+
+		bool loadRawHisTicks(void* obj, const char*, uint32_t uDate, FuncReadTicks cb) override
+		{
+			++_tickCalls;
+			_loadedTickDates.push_back(uDate);
+			_lastTickLoadReturned = false;
+			_lastTickCallbackHadObj = obj != nullptr;
+			std::vector<WTSTickStruct> ticks;
+			for (const TickRow& row : kTicks)
+			{
+				if (row.date != uDate)
+					continue;
+				WTSTickStruct tick{};
+				std::snprintf(tick.code, sizeof(tick.code), "%s", "600000");
+				tick.action_date = row.date;
+				tick.action_time = row.hhmm * 100000;
+				tick.open = row.open;
+				tick.high = row.high;
+				tick.low = row.low;
+				tick.price = row.price;
+				tick.volume = row.volume;
+				tick.total_volume = row.volume;
+				ticks.push_back(tick);
+			}
+			if (ticks.size() != 5)
+			{
+				cb(obj, nullptr, 0);
+				_lastTickLoadReturned = true;
+				return true;
+			}
+			std::atomic<uint32_t> expired{0};
+			auto deliver = [&](std::size_t begin, std::size_t end) {
+				std::vector<WTSTickStruct> chunk(ticks.begin() + begin, ticks.begin() + end);
+				cb(obj, chunk.data(), static_cast<uint32_t>(chunk.size()));
+				volatile unsigned char* bytes = reinterpret_cast<volatile unsigned char*>(chunk.data());
+				for (std::size_t i = 0; i < chunk.size() * sizeof(WTSTickStruct); ++i)
+					bytes[i] = 0xa5; // Do not let an optimizer elide the overwrite before destruction.
+				++expired;
+			};
+			deliver(0, 2);
+			cb(obj, nullptr, 0);
+			if (concurrent)
+			{
+				std::thread a([&]() { deliver(2, 3); });
+				std::thread b([&]() { deliver(3, 5); });
+				a.join();
+				b.join();
+			}
+			else
+			{
+				deliver(2, 3);
+				deliver(3, 5);
+			}
+			expiredChunks = expired.load();
+			_lastTickLoadReturned = true;
+			return true;
+		}
 	};
 
 	WTSVariant* loader_cfg(const std::filesystem::path& root, const std::filesystem::path& base,
@@ -373,6 +456,17 @@ namespace
 	bool set_data_storage_inst_dir(const std::filesystem::path& root)
 	{
 		const std::string module = DLLHelper::wrap_module("WtDataStorage");
+	#ifdef WT_COV_P07_DATA_STORAGE_MODULE
+		(void)root;
+		const std::filesystem::path configuredModule(WT_COV_P07_DATA_STORAGE_MODULE);
+		std::error_code ec;
+		if (configuredModule.filename() != module || !std::filesystem::exists(configuredModule, ec) || ec)
+			return false;
+		const std::string configuredDir =
+			configuredModule.parent_path().string() + std::filesystem::path::preferred_separator;
+		WtHelper::setInstDir(configuredDir.c_str());
+		return true;
+	#else
 		const char* const relativeDirs[] = {
 			"build-cov/build_x64/Debug/bin",
 			"build-cov/build_x64/Release/bin",
@@ -390,6 +484,7 @@ namespace
 			}
 		}
 		return false;
+	#endif
 	}
 
 	class InstDirRestore
@@ -466,6 +561,8 @@ namespace
 		uint32_t initCalls {0};
 		uint32_t beginCalls {0};
 		uint32_t endCalls {0};
+		std::vector<uint32_t> sessionBeginDates;
+		std::vector<uint32_t> sessionEndDates;
 		uint32_t scheduleCalls {0};
 		uint32_t replayDoneCalls {0};
 
@@ -474,6 +571,11 @@ namespace
 		std::vector<double> tickOpens;
 		std::vector<double> tickHighs;
 		std::vector<double> tickLows;
+		std::vector<uint32_t> lastTickDates;
+		std::vector<uint32_t> lastTickActionTimes;
+		std::vector<double> lastTickOpens;
+		std::vector<double> lastTickHighs;
+		std::vector<double> lastTickLows;
 		std::vector<double> lastTickPrices;
 		std::vector<double> dayOpen;
 		std::vector<double> dayHigh;
@@ -538,9 +640,26 @@ namespace
 					dayLow.push_back(rp->get_day_price(probeCode.c_str(), 2));
 					dayLast.push_back(rp->get_day_price(probeCode.c_str(), 3));
 					WTSTickData* last = rp->get_last_tick(probeCode.c_str());
-					lastTickPrices.push_back(last == nullptr ? 0.0 : last->getTickStruct().price);
-					if (last != NULL)
+					if (last == nullptr)
+					{
+						lastTickDates.push_back(0);
+						lastTickActionTimes.push_back(0);
+						lastTickOpens.push_back(0.0);
+						lastTickHighs.push_back(0.0);
+						lastTickLows.push_back(0.0);
+						lastTickPrices.push_back(0.0);
+					}
+					else
+					{
+						const WTSTickStruct& lastTick = last->getTickStruct();
+						lastTickDates.push_back(lastTick.action_date);
+						lastTickActionTimes.push_back(lastTick.action_time);
+						lastTickOpens.push_back(lastTick.open);
+						lastTickHighs.push_back(lastTick.high);
+						lastTickLows.push_back(lastTick.low);
+						lastTickPrices.push_back(lastTick.price);
 						last->release();
+					}
 				}
 			}
 			if (onTickProbe)
@@ -606,8 +725,16 @@ namespace
 		}
 
 		void handle_schedule(uint32_t, uint32_t) override { scheduleCalls++; }
-		void handle_session_begin(uint32_t) override { beginCalls++; }
-		void handle_session_end(uint32_t) override { endCalls++; }
+		void handle_session_begin(uint32_t tradingDate) override
+		{
+			beginCalls++;
+			sessionBeginDates.push_back(tradingDate);
+		}
+		void handle_session_end(uint32_t tradingDate) override
+		{
+			endCalls++;
+			sessionEndDates.push_back(tradingDate);
+		}
 		void handle_replay_done() override { replayDoneCalls++; }
 	};
 }
@@ -757,6 +884,36 @@ TEST_F(P07TickLoaderTest, externalTickLoaderAccumulatesSynchronousConcurrentChun
 	EXPECT_EQ(1u, sink.beginCalls);
 	EXPECT_EQ(1u, sink.endCalls);
 	EXPECT_EQ(1u, sink.replayDoneCalls);
+}
+
+TEST_F(P07TickLoaderTest, externalTickLoaderCopiesEachExpiringCallbackChunk)
+{
+	for (const bool concurrent : {false, true})
+	{
+		SCOPED_TRACE(concurrent ? "concurrent callbacks" : "sequential callbacks");
+		ExpiringChunkLoader loader;
+		loader.concurrent = concurrent;
+		loader._autoTrans = false;
+		HisDataReplayer replayer;
+		WTSVariant* cfg = loader_cfg(_root, _base, 202001020930ull, 202001021500ull, true, "");
+		ASSERT_TRUE(replayer.init(cfg, NULL, &loader));
+		cfg->release();
+		bool replayAfterLoad = true;
+		TickSink sink;
+		sink.onInit = [&replayer]() { replayer.sub_tick(11u, "SSE.STK.600000"); };
+		sink.onTickProbe = [&](uint32_t) { replayAfterLoad = replayAfterLoad && loader._lastTickLoadReturned; };
+		replayer.register_sink(&sink, "p07_loader_expiring_chunks");
+		ASSERT_TRUE(replayer.prepare());
+		replayer.run(false);
+
+		EXPECT_EQ(1u, loader._tickCalls);
+		EXPECT_EQ(3u, loader.expiredChunks);
+		EXPECT_TRUE(loader._lastTickLoadReturned);
+		EXPECT_TRUE(replayAfterLoad);
+		EXPECT_EQ(std::vector<uint32_t>({931u, 932u, 933u, 1458u, 1459u}), sink.tickTimes);
+		EXPECT_EQ(std::vector<double>({10.2, 10.8, 11.5, 11.6, 12.0}), sink.tickPrices);
+		EXPECT_EQ(1u, sink.replayDoneCalls);
+	}
 }
 
 TEST_F(P07TickLoaderTest, externalTickLoaderChunksAreAvailableInHistoricalSlice)
@@ -940,9 +1097,36 @@ TEST_F(P07TickLoaderTest, emptyNullTickLoaderCallbackIsAValidEmptyBucket)
 	EXPECT_EQ(1u, loader._tickCalls);
 	EXPECT_TRUE(loader._lastTickLoadReturned);
 	EXPECT_TRUE(loader._lastTickCallbackHadObj);
+	EXPECT_FALSE(HisDataReplayerTestAccess::replay_terminated(replayer));
 	EXPECT_TRUE(sink.tickTimes.empty());
 	EXPECT_EQ(0u, sink.beginCalls);
 	EXPECT_EQ(0u, sink.endCalls);
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+}
+
+TEST_F(P07TickLoaderTest, failedTickLoaderResultFailsClosedWithoutDispatchingPartialChunk)
+{
+	StubBtLoader loader;
+	loader._failAfterPartialTickCallback = true;
+	HisDataReplayer replayer;
+	WTSVariant* cfg = loader_cfg(_root, _base, 202001020930ull, 202001021500ull, true, "");
+	ASSERT_TRUE(replayer.init(cfg, NULL, &loader));
+	cfg->release();
+	TickSink sink;
+	sink.onInit = [&replayer]() { replayer.sub_tick(1u, "SSE.STK.600000"); };
+	replayer.register_sink(&sink, "p07_loader_failed_after_partial_chunk");
+	ASSERT_TRUE(replayer.prepare());
+	replayer.run(false);
+
+	EXPECT_EQ(1u, loader._tickCalls);
+	EXPECT_TRUE(loader._lastTickLoadReturned);
+	EXPECT_TRUE(loader._lastTickCallbackHadObj);
+	EXPECT_TRUE(HisDataReplayerTestAccess::replay_terminated(replayer));
+	EXPECT_FALSE(HisDataReplayerTestAccess::has_completed_hft_ranges(replayer));
+	EXPECT_TRUE(sink.tickTimes.empty());
+	EXPECT_EQ(0u, sink.beginCalls);
+	EXPECT_EQ(0u, sink.endCalls);
+	EXPECT_EQ(0u, sink.scheduleCalls);
 	EXPECT_EQ(1u, sink.replayDoneCalls);
 }
 
@@ -962,6 +1146,7 @@ TEST_F(P07TickLoaderTest, emptyReplayBucketsStayBoundedAcrossLongNoDataRange)
 
 	EXPECT_GT(loader._tickCalls, 30u);
 	EXPECT_LE(HisDataReplayerTestAccess::replay_tick_bucket_count(replayer), 10u);
+	EXPECT_FALSE(HisDataReplayerTestAccess::replay_terminated(replayer));
 	EXPECT_TRUE(sink.tickTimes.empty());
 	EXPECT_EQ(0u, sink.beginCalls);
 	EXPECT_EQ(0u, sink.endCalls);
@@ -1162,10 +1347,26 @@ TEST_F(P07TickLoaderTest, continuous24HourNegativeOffsetUsesNaturalDateCut)
 	atCut.trading_date = 20200104u;
 	atCut.action_time = p07_action_time(500u);
 	atCut.price = 2.0;
+	WTSTickStruct lastIncluded = atCut;
+	lastIncluded.action_time = p07_action_time(500u, 0u, 999u);
+	lastIncluded.price = 2.1;
+	WTSTickStruct afterEnd = atCut;
+	afterEnd.action_time = p07_action_time(501u);
+	afterEnd.price = 2.2;
 	ASSERT_TRUE(write_raw_block(_base / "his/ticks/CRY/20200103/BTC.dsb", BT_HIS_Ticks,
 		std::vector<WTSTickStruct>{beforeCut}));
 	ASSERT_TRUE(write_raw_block(_base / "his/ticks/CRY/20200104/BTC.dsb", BT_HIS_Ticks,
-		std::vector<WTSTickStruct>{atCut}));
+		std::vector<WTSTickStruct>{atCut, lastIncluded, afterEnd}));
+	// At natural 20200104 05:00, offset -300 maps the contract to trading date
+	// 20200104, while the default TRADING session's +300 offset maps this
+	// Saturday boundary to Monday 20200106. This later bucket must not open an
+	// extra session beyond the subscribed contract's end trading date.
+	WTSTickStruct laterTradingDate = beforeCut;
+	laterTradingDate.action_date = laterTradingDate.trading_date = 20200106u;
+	laterTradingDate.action_time = p07_action_time(501u);
+	laterTradingDate.price = 3.0;
+	ASSERT_TRUE(write_raw_block(_base / "his/ticks/CRY/20200106/BTC.dsb", BT_HIS_Ticks,
+		std::vector<WTSTickStruct>{laterTradingDate}));
 
 	HisDataReplayer replayer;
 	WTSVariant* cfg = bin_tick_cfg(_root, _base, 20200104045900ull, 20200104050000ull,
@@ -1175,17 +1376,21 @@ TEST_F(P07TickLoaderTest, continuous24HourNegativeOffsetUsesNaturalDateCut)
 	ASSERT_NE(nullptr, replayer.get_session_info("CRY.COIN.BTC", true));
 	TickSink sink;
 	sink.onInit = [&replayer]() { replayer.sub_tick(1u, "CRY.COIN.BTC"); };
-	replayer.register_sink(&sink, "p07_continuous_negative_offset_natural_cut");
+	replayer.register_sink(&sink, "p07_continuous_negative_offset_end_cut");
 	ASSERT_TRUE(replayer.prepare());
 	replayer.run(false);
 
-	EXPECT_EQ(std::vector<uint32_t>({20200104u, 20200104u}), sink.tickDates);
-	EXPECT_EQ(std::vector<uint32_t>({459u, 500u}), sink.tickTimes);
-	EXPECT_EQ(std::vector<uint32_t>({p07_action_time(459u, 59u, 999u), p07_action_time(500u)}),
+	EXPECT_EQ(std::vector<uint32_t>({20200104u, 20200104u, 20200104u}), sink.tickDates);
+	EXPECT_EQ(std::vector<uint32_t>({459u, 500u, 500u}), sink.tickTimes);
+	EXPECT_EQ(std::vector<uint32_t>({p07_action_time(459u, 59u, 999u), p07_action_time(500u),
+		p07_action_time(500u, 0u, 999u)}),
 		sink.tickActionTimes);
-	EXPECT_EQ(std::vector<double>({1.9, 2.0}), sink.tickPrices);
+	EXPECT_EQ(std::vector<double>({1.9, 2.0, 2.1}), sink.tickPrices);
+	EXPECT_EQ(std::vector<uint32_t>({20200103u, 20200104u}), sink.sessionBeginDates);
+	EXPECT_EQ(std::vector<uint32_t>({20200103u, 20200104u}), sink.sessionEndDates);
 	EXPECT_EQ(2u, sink.beginCalls);
 	EXPECT_EQ(2u, sink.endCalls);
+	EXPECT_EQ(1u, sink.replayDoneCalls);
 }
 
 TEST_F(P07TickLoaderTest, missingHftDateIsSkippedBeforeLaterValidDate)
@@ -1571,6 +1776,73 @@ TEST_F(P07TickLoaderTest, fourHftStreamsHonorInclusiveSecondRangeAndStableOrder)
 	EXPECT_EQ(1u, sink.replayDoneCalls);
 }
 
+TEST_F(P07TickLoaderTest, minuteEndIncludesLastSecondAndEndsFinalTradingDateOnce)
+{
+	InstDirRestore restoreInstDir;
+	ASSERT_TRUE(set_data_storage_inst_dir(_root)) << "WtDataStorage module is not available in the configured build output";
+
+	const std::filesystem::path sessions = _base / "p07_minute_end_sessions.json";
+	const std::filesystem::path commodities = _base / "p07_minute_end_commodities.json";
+	{
+		std::ofstream out(sessions);
+		ASSERT_TRUE(out.is_open());
+		out << R"({"P07_24H":{"name":"continuous","offset":0,"sections":[{"from":0,"to":2400}]}})";
+	}
+	{
+		std::ofstream out(commodities);
+		ASSERT_TRUE(out.is_open());
+		out << R"({"CRY":{"COIN":{"category":1,"covermode":0,"exchg":"CRY","holiday":"CHINA","name":"continuous","precision":2,"pricemode":1,"pricetick":0.01,"session":"P07_24H","volscale":1}}})";
+	}
+
+	auto makeTick = [](uint32_t actionDate, uint32_t tradingDate, uint32_t hhmm,
+		uint32_t second, uint32_t millisecond, double price)
+	{
+		WTSTickStruct tick{};
+		std::strcpy(tick.exchg, "CRY");
+		std::strcpy(tick.code, "BTC");
+		tick.action_date = actionDate;
+		tick.trading_date = tradingDate;
+		tick.action_time = p07_action_time(hhmm, second, millisecond);
+		tick.open = tick.high = tick.low = tick.price = price;
+		tick.volume = tick.total_volume = 1.0;
+		return tick;
+	};
+	ASSERT_TRUE(write_raw_block(_base / "his/ticks/CRY/20200102/BTC.dsb", BT_HIS_Ticks,
+		std::vector<WTSTickStruct>{
+			makeTick(20200102u, 20200102u, 2059u, 59u, 999u, 0.9),
+			makeTick(20200102u, 20200102u, 2100u, 0u, 0u, 1.0),
+			makeTick(20200102u, 20200102u, 2100u, 59u, 999u, 1.1),
+			makeTick(20200102u, 20200102u, 2101u, 0u, 0u, 1.2),
+		}));
+	// 21:00 maps to trading date 20200103 in the default TRADING session, but
+	// this subscribed zero-offset 24-hour contract still ends on 20200102.
+	ASSERT_TRUE(write_raw_block(_base / "his/ticks/CRY/20200103/BTC.dsb", BT_HIS_Ticks,
+		std::vector<WTSTickStruct>{makeTick(20200103u, 20200103u, 931u, 0u, 0u, 2.0)}));
+
+	HisDataReplayer replayer;
+	WTSVariant* cfg = bin_tick_cfg(_root, _base, 202001022059ull, 202001022100ull,
+		"stk_comms.json", sessions, commodities);
+	ASSERT_TRUE(replayer.init(cfg));
+	cfg->release();
+	ASSERT_NE(nullptr, replayer.get_session_info("CRY.COIN.BTC", true));
+	TickSink sink;
+	sink.onInit = [&replayer]() { replayer.sub_tick(1u, "CRY.COIN.BTC"); };
+	replayer.register_sink(&sink, "p07_minute_end_once");
+	ASSERT_TRUE(replayer.prepare());
+	replayer.run(false);
+
+	EXPECT_EQ(std::vector<uint32_t>({20200102u, 20200102u, 20200102u}), sink.tickDates);
+	EXPECT_EQ(std::vector<uint32_t>({2059u, 2100u, 2100u}), sink.tickTimes);
+	EXPECT_EQ(std::vector<uint32_t>({p07_action_time(2059u, 59u, 999u), p07_action_time(2100u),
+		p07_action_time(2100u, 59u, 999u)}), sink.tickActionTimes);
+	EXPECT_EQ(std::vector<double>({0.9, 1.0, 1.1}), sink.tickPrices);
+	EXPECT_EQ(std::vector<uint32_t>({20200102u}), sink.sessionBeginDates);
+	EXPECT_EQ(std::vector<uint32_t>({20200102u}), sink.sessionEndDates);
+	EXPECT_EQ(1u, sink.beginCalls);
+	EXPECT_EQ(1u, sink.endCalls);
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+}
+
 TEST_F(P07TickLoaderTest, sameTimestampOrdersRoundsAcrossCodesAndTradingDateBuckets)
 {
 	InstDirRestore restoreInstDir;
@@ -1808,7 +2080,7 @@ TEST_F(P07TickLoaderTest, finalBarHftDrainKeepsPreloadedTransactionsWhenOtherStr
 		replayer.sub_order_detail(1u, "SSE.STK.600000");
 		replayer.sub_order_queue(2u, "SSE.STK.600000");
 		replayer.sub_transaction(3u, "SSE.STK.600000");
-		WTSTransSlice* slice = replayer.get_transaction_slice("SSE.STK.600000", 1u, 202001021500ull);
+		WTSTransSlice* slice = replayer.get_transaction_slice("SSE.STK.600000", 1u, 202001021501ull);
 		transactionSliceLoaded = slice != nullptr && slice->size() == 1 && slice->at(0)->price == 15.4;
 		if (slice != nullptr)
 			slice->release();
@@ -2625,9 +2897,8 @@ TEST_F(P07TickLoaderTest, emptyLevel2StreamsDoNotBlockTickReplay)
 
 /*
  * 回调收到的 tick 应是当前最新行情；tick 模式的 get_last_tick 和
- * get_day_price(0..3) 都应对应这同一条 tick。总回调数由上面的
- * tickOnlyReplayDrivesHftLoopPerDay 单独检查，本用例按实际收到的每个回调比较字段，
- * 避免尾笔数量问题掩盖 getter 是否错位。
+ * get_day_price(0..3) 都应对应这同一条 tick。本用例固定检查当天全部五笔，
+ * 并比较每笔的 date/time/OHLC/price，避免尾笔数量问题掩盖 getter 是否错位。
  */
 TEST_F(P07TickLoaderTest, lastTickAndDayPriceMatchCurrentCallbackTick)
 {
@@ -2660,16 +2931,45 @@ TEST_F(P07TickLoaderTest, lastTickAndDayPriceMatchCurrentCallbackTick)
 	EXPECT_TRUE(loader._lastTickLoadReturned);
 	EXPECT_TRUE(loader._lastTickCallbackHadObj);
 	EXPECT_TRUE(strategySawLoaderReturn);
-	ASSERT_FALSE(sink.tickPrices.empty());
+	ASSERT_EQ(static_cast<std::size_t>(kDay1Ticks), sink.tickPrices.size());
+	const std::vector<uint32_t> expectedDates(kDay1Ticks, 20200102u);
+	const std::vector<uint32_t> expectedTimes({ 931u, 932u, 933u, 1458u, 1459u });
+	const std::vector<uint32_t> expectedActionTimes({ p07_action_time(931u), p07_action_time(932u),
+		p07_action_time(933u), p07_action_time(1458u), p07_action_time(1459u) });
+	const std::vector<double> expectedPrices({ 10.2, 10.8, 11.5, 11.6, 12.0 });
+	const std::vector<double> expectedOpens({ 10.0, 10.2, 10.8, 11.5, 11.6 });
+	const std::vector<double> expectedHighs({ 10.5, 11.0, 12.0, 11.8, 12.5 });
+	const std::vector<double> expectedLows({ 9.8, 10.1, 10.6, 11.2, 11.4 });
+	EXPECT_EQ(expectedDates, sink.tickDates);
+	EXPECT_EQ(expectedTimes, sink.tickTimes);
+	EXPECT_EQ(expectedActionTimes, sink.tickActionTimes);
+	EXPECT_EQ(expectedPrices, sink.tickPrices);
+	EXPECT_EQ(expectedOpens, sink.tickOpens);
+	EXPECT_EQ(expectedHighs, sink.tickHighs);
+	EXPECT_EQ(expectedLows, sink.tickLows);
+
+	// Pin both ends explicitly so this getter test cannot pass if the final event is omitted.
 	EXPECT_EQ(20200102u, sink.tickDates.front());
-	EXPECT_EQ(931u, sink.tickTimes.front());
-	EXPECT_DOUBLE_EQ(10.2, sink.tickPrices.front());
+	EXPECT_EQ(p07_action_time(931u), sink.tickActionTimes.front());
 	EXPECT_DOUBLE_EQ(10.0, sink.tickOpens.front());
 	EXPECT_DOUBLE_EQ(10.5, sink.tickHighs.front());
 	EXPECT_DOUBLE_EQ(9.8, sink.tickLows.front());
+	EXPECT_DOUBLE_EQ(10.2, sink.tickPrices.front());
+	EXPECT_EQ(20200102u, sink.tickDates.back());
+	EXPECT_EQ(p07_action_time(1459u), sink.tickActionTimes.back());
+	EXPECT_DOUBLE_EQ(11.6, sink.tickOpens.back());
+	EXPECT_DOUBLE_EQ(12.5, sink.tickHighs.back());
+	EXPECT_DOUBLE_EQ(11.4, sink.tickLows.back());
+	EXPECT_DOUBLE_EQ(12.0, sink.tickPrices.back());
+
 	ASSERT_EQ(sink.tickPrices.size(), sink.tickOpens.size());
 	ASSERT_EQ(sink.tickPrices.size(), sink.tickHighs.size());
 	ASSERT_EQ(sink.tickPrices.size(), sink.tickLows.size());
+	ASSERT_EQ(sink.tickPrices.size(), sink.lastTickDates.size());
+	ASSERT_EQ(sink.tickPrices.size(), sink.lastTickActionTimes.size());
+	ASSERT_EQ(sink.tickPrices.size(), sink.lastTickOpens.size());
+	ASSERT_EQ(sink.tickPrices.size(), sink.lastTickHighs.size());
+	ASSERT_EQ(sink.tickPrices.size(), sink.lastTickLows.size());
 	ASSERT_EQ(sink.tickPrices.size(), sink.lastTickPrices.size());
 	ASSERT_EQ(sink.tickPrices.size(), sink.dayOpen.size());
 	ASSERT_EQ(sink.tickPrices.size(), sink.dayHigh.size());
@@ -2678,6 +2978,11 @@ TEST_F(P07TickLoaderTest, lastTickAndDayPriceMatchCurrentCallbackTick)
 	ASSERT_EQ(sink.tickPrices.size(), sink.curPrices.size());
 
 	// 每次回调中的 last tick 与 day-price 字段必须来自回调本身的当前 tick。
+	EXPECT_EQ(sink.tickDates, sink.lastTickDates);
+	EXPECT_EQ(sink.tickActionTimes, sink.lastTickActionTimes);
+	EXPECT_EQ(sink.tickOpens, sink.lastTickOpens);
+	EXPECT_EQ(sink.tickHighs, sink.lastTickHighs);
+	EXPECT_EQ(sink.tickLows, sink.lastTickLows);
 	EXPECT_EQ(sink.tickPrices, sink.lastTickPrices);
 	EXPECT_EQ(sink.tickOpens, sink.dayOpen);
 	EXPECT_EQ(sink.tickHighs, sink.dayHigh);

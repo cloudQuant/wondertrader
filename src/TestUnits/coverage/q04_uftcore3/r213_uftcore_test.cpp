@@ -27,6 +27,8 @@
 
 #include "Includes/WTSVariant.hpp"
 
+#include "q04_trader_fixture.h"
+
 USING_NS_WTP;
 
 /*
@@ -54,25 +56,32 @@ TEST(R213UftEngine, TimeAccessorsAndInertOnBar)
 
 /*
  * 生产: WtUftCore/ParserAdapter.cpp:55-100、150-161
- * NULL 配置、空 module、缺模块、二次 init、initExt 空 API、无 API run
- * 都必须返回 false；首次 init 的 id 在模块检查之前写入，不对失败重入保留旧 id 作假设；
- * release 在无 api 时是空操作。
+ * NULL 配置与空 IBaseDataMgr 在最早守卫拒绝；有效 manager 下，空 module、缺模块、
+ * 二次 init、initExt 空 API、无 API run 都必须返回 false。release 在无 api 时是空操作。
  */
 TEST(R213UftParserAdapter, GuardsBeforeModuleLoad)
 {
-	ParserAdapter pa;
-	EXPECT_FALSE(pa.init("r213_uft_null", nullptr, nullptr, nullptr));
+	ParserAdapter nullCfg;
+	EXPECT_FALSE(nullCfg.init("r213_uft_null", nullptr, nullptr, nullptr));
 
+	q04::FakeBaseDataMgr bdMgr;
 	WTSVariant* cfgEmpty = WTSVariant::createObject();
-	EXPECT_FALSE(pa.init("r213_uft_empty", cfgEmpty, nullptr, nullptr));
+	ParserAdapter nullMgr;
+	EXPECT_FALSE(nullMgr.init("r213_uft_null_mgr", cfgEmpty, nullptr, nullptr));
+	EXPECT_STREQ("", nullMgr.id());
+	EXPECT_EQ(1u, cfgEmpty->retainCount());
+
+	ParserAdapter pa;
+	EXPECT_FALSE(pa.init("r213_uft_empty", cfgEmpty, nullptr, &bdMgr));
 	EXPECT_STREQ("r213_uft_empty", pa.id());
-	EXPECT_FALSE(pa.init("r213_uft_second", cfgEmpty, nullptr, nullptr));
+	EXPECT_FALSE(pa.init("r213_uft_second", cfgEmpty, nullptr, &bdMgr));
+	EXPECT_STREQ("r213_uft_second", pa.id());
 	cfgEmpty->release();
 
 	WTSVariant* cfgMissing = WTSVariant::createObject();
 	cfgMissing->append("module", "r213_no_such_uft_parser_module");
 	ParserAdapter pb;
-	EXPECT_FALSE(pb.init("r213_uft_missing", cfgMissing, nullptr, nullptr));
+	EXPECT_FALSE(pb.init("r213_uft_missing", cfgMissing, nullptr, &bdMgr));
 	EXPECT_STREQ("r213_uft_missing", pb.id());
 	cfgMissing->release();
 

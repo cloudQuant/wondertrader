@@ -77,6 +77,11 @@ const char* WtUftStraDemo::getFactName()
  */
 bool WtUftStraDemo::init(WTSVariant* cfg)
 {
+	// This strategy requires the parameter object for its instrument and order settings.
+	// Reject a missing object before reading any fields instead of dereferencing null.
+	if (cfg == nullptr)
+		return false;
+
 	//这里演示一下外部传入参数的获取
 	_code = cfg->getCString("code");      // 获取交易品种代码
 	_secs = cfg->getUInt32("second");     // 获取订单超时时间（秒）

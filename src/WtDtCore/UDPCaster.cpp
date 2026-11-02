@@ -19,6 +19,8 @@
 #include "../WTSTools/WTSLogger.h"
 
 #include <cstring>
+#include <exception>
+#include <limits>
 
 
 #define UDP_MSG_SUBSCRIBE	0x100
@@ -26,6 +28,18 @@
 #define UDP_MSG_PUSHORDQUE	0x201	//委托队列
 #define UDP_MSG_PUSHORDDTL	0x202	//委托明细
 #define UDP_MSG_PUSHTRANS	0x203	//逐笔成交
+
+namespace {
+
+constexpr int kMaxUdpPort = static_cast<int>(
+	std::numeric_limits<boost::asio::ip::port_type>::max());
+
+bool isValidUdpPort(int port)
+{
+	return port >= 0 && port <= kMaxUdpPort;
+}
+
+} // namespace
 
 #pragma pack(push,1)
 //UDP请求包
@@ -99,36 +113,65 @@ bool UDPCaster::init(WTSVariant* cfg, WTSBaseDataMgr* bdMgr, DataManager* dtMgr)
 	int32_t sport = cfg->getInt32("sport");
 	if (sport == 0)
 		sport = cfg->getInt32("bport");
-	start(sport);
-
-	return true;
+	return start(sport);
 }
 
-void UDPCaster::start(int sport)
+bool UDPCaster::start(int sport)
 {
 	StdUniqueLock lock(m_mtxLifecycle);
-	if (m_bStarted || m_bTerminated)
-		return;
-	m_bStarted = true;
+	if (m_bTerminated)
+		return false;
+	if (m_bStarted)
+		return true;
 
-	if (!m_listFlatRecver.empty() || !m_listJsonRecver.empty() || !m_listRawRecver.empty())
+	UDPSocketPtr broadcastSocket;
+	UDPSocketPtr subscribeSocket;
+	auto closeGroups = [](MulticastList& groups)
 	{
-		m_sktBroadcast.reset(new UDPSocket(m_ioservice, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 0)));
-		boost::asio::socket_base::broadcast option(true);
-		m_sktBroadcast->set_option(option);
-	}
+		for (MulticastPair& item : groups)
+		{
+			if (item.first)
+			{
+				boost::system::error_code ec;
+				item.first->close(ec);
+			}
+		}
+		groups.clear();
+	};
 
 	try
 	{
-		m_sktSubscribe.reset(new UDPSocket(m_ioservice, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), sport)));
+		if (!m_listFlatRecver.empty() || !m_listJsonRecver.empty() || !m_listRawRecver.empty())
+		{
+			broadcastSocket.reset(new UDPSocket(m_ioservice,
+				boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 0)));
+			boost::asio::socket_base::broadcast option(true);
+			broadcastSocket->set_option(option);
+		}
+
+		subscribeSocket.reset(new UDPSocket(m_ioservice,
+			boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), sport)));
 	}
-	catch(...)
+	catch (const std::exception& e)
 	{
-		WTSLogger::error("Exception raised while start subscribing service @ port {}", sport);
+		WTSLogger::error("Failed to create UDP caster socket while starting @ port {}: {}", sport, e.what());
+		closeGroups(m_listFlatGroup);
+		closeGroups(m_listJsonGroup);
+		closeGroups(m_listRawGroup);
+		return false;
+	}
+	catch (...)
+	{
+		WTSLogger::error("Unknown exception while creating UDP caster socket @ port {}", sport);
+		closeGroups(m_listFlatGroup);
+		closeGroups(m_listJsonGroup);
+		closeGroups(m_listRawGroup);
+		return false;
 	}
 
-	if (m_sktSubscribe)
-		do_receive();
+	m_sktBroadcast = broadcastSocket;
+	m_sktSubscribe = subscribeSocket;
+	do_receive();
 
 	m_thrdIO.reset(new StdThread([this](){
 		{
@@ -144,6 +187,8 @@ void UDPCaster::start(int sport)
 			m_ioservice.stop();
 		}
 	}));
+	m_bStarted = true;
+	return true;
 }
 
 void UDPCaster::stop()
@@ -318,6 +363,18 @@ void UDPCaster::do_receive()
 
 bool UDPCaster::addBRecver(const char* remote, int port, int type /* = 0 */)
 {
+	if (!isValidUdpPort(port))
+	{
+		WTSLogger::error("Invalid UDP receiver port: {}", port);
+		return false;
+	}
+
+	if (type < 0 || type > 2)
+	{
+		WTSLogger::error("Unsupported UDP receiver type: {}", type);
+		return false;
+	}
+
 	try
 	{
 		boost::asio::ip::address_v4 addr = boost::asio::ip::make_address_v4(remote);
@@ -340,6 +397,18 @@ bool UDPCaster::addBRecver(const char* remote, int port, int type /* = 0 */)
 
 bool UDPCaster::addMRecver(const char* remote, int port, int sendport, int type /* = 0 */)
 {
+	if (!isValidUdpPort(port) || !isValidUdpPort(sendport))
+	{
+		WTSLogger::error("Invalid UDP multicast receiver ports: port={}, sendport={}", port, sendport);
+		return false;
+	}
+
+	if (type < 0 || type > 2)
+	{
+		WTSLogger::error("Unsupported UDP receiver type: {}", type);
+		return false;
+	}
+
 	try
 	{
 		boost::asio::ip::address_v4 addr = boost::asio::ip::make_address_v4(remote);

@@ -17,15 +17,20 @@
 #include "q01_sel_env.h"
 
 #include <cstring>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
+#include <memory>
 #include <string>
+#include <vector>
 
+#include <Includes/ILogHandler.h>
 #include <Includes/WTSVariant.hpp>
 #include <WtCore/WtExecuterFactory.h>
 #include <WtCore/CtaStrategyMgr.h>
 #include <WtCore/HftStrategyMgr.h>
 #include <WtCore/ParserAdapter.h>
+#include <WtCore/WtExecMgr.h>
 #include <WtCore/WtArbiExecuter.h>
 #include <WtCore/WtLocalExecuter.h>
 #include <WTSTools/WTSLogger.h>
@@ -79,6 +84,102 @@ protected:
     std::unique_ptr<Q01TempEnv> _env;
     std::filesystem::path _dir;
 };
+
+class R15LogCapture : public ILogHandler
+{
+public:
+    std::vector<std::string> messages;
+
+    void handleLogAppend(WTSLogLevel, const char* message) override
+    {
+        messages.emplace_back(message ? message : "");
+    }
+};
+
+class R15QuiesceGuard
+{
+public:
+    explicit R15QuiesceGuard(WtExecuterMgr& manager)
+        : _manager(manager), _coordinator(std::vector<WtExecuterMgr*>{&manager})
+    {}
+
+    ~R15QuiesceGuard()
+    {
+        if (!quiesceAll())
+        {
+            ADD_FAILURE() << "executor manager did not complete coordinated quiesce";
+            std::abort();
+        }
+    }
+
+    bool quiesceAll()
+    {
+        return _coordinator.quiesce_all() && _coordinator.is_complete() &&
+            _manager.wait_quiesced();
+    }
+
+private:
+    WtExecuterMgr& _manager;
+    WtExecQuiesceCoordinator _coordinator;
+};
+
+int runArbiWriteLogBoundsScenario()
+{
+    const char* loggerConfig = R"({
+        "root": {"level":"info","async":false,"sinks":[]},
+        "dyn_pattern": {
+            "executer": {"level":"info","async":false,"sinks":[]}
+        }
+    })";
+
+    R15LogCapture capture;
+    try
+    {
+        WTSLogger::init(loggerConfig, false, &capture);
+    }
+    catch (...)
+    {
+        return 1;
+    }
+    WTSLogger::registerHandler(&capture);
+
+    WtExecuterFactory factory;
+    WtArbiExecuter exe(&factory, "r15_arbi_observable", NULL);
+    const std::string prefix = "[r15_arbi_observable]";
+    if (prefix.size() >= MAX_LOG_BUF_SIZE)
+        return 2;
+
+    const std::string boundary(MAX_LOG_BUF_SIZE - 1 - prefix.size(), 'b');
+    const std::string oneByteOver = boundary + 'x';
+    const std::string oversized(MAX_LOG_BUF_SIZE * 8, 'x');
+
+    exe.writeLog("short");
+    exe.writeLog(NULL);
+    exe.writeLog(boundary.c_str());
+    exe.writeLog(oneByteOver.c_str());
+    exe.writeLog(oversized.c_str());
+
+    if (capture.messages.size() != 5u)
+        return 3;
+    if (capture.messages[0] != prefix + "short")
+        return 4;
+    if (capture.messages[1] != prefix)
+        return 5;
+    if (capture.messages[2] != prefix + boundary)
+        return 6;
+    if (capture.messages[3] != prefix + boundary)
+        return 7;
+    const std::string truncatedOversized = prefix +
+        std::string(MAX_LOG_BUF_SIZE - 1 - prefix.size(), 'x');
+    if (capture.messages[4] != truncatedOversized)
+        return 8;
+    for (const std::string& message : capture.messages)
+    {
+        if (message.size() > MAX_LOG_BUF_SIZE - 1)
+            return 9;
+    }
+    return 0;
+}
 
 } // namespace
 
@@ -197,22 +298,27 @@ public:
 TEST_F(R15MgrTest, local_executer_null_init_and_empty_channel_events)
 {
     WtExecuterFactory factory;
-    R15LocalExecuter exe(&factory, "loc15", NULL);
+    WtExecuterMgr manager;
+    R15QuiesceGuard quiesce(manager);
+    auto exe = std::make_shared<R15LocalExecuter>(&factory, "loc15", nullptr);
+    manager.add_executer(exe);
 
     // 与 arbi/diff 同形：params==NULL ⇒ false（不置 _config）
-    EXPECT_FALSE(exe.init(NULL));
+    EXPECT_FALSE(exe->init(NULL));
 
     // 三个通道事件都只是 _channel_ready 赋值 + 空 _unit_map 的 SpinLock 遍历（L803/836/879）
-    exe.on_channel_ready();
-    exe.on_channel_lost();
-    exe.on_account("CNY", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    exe->on_channel_ready();
+    exe->on_channel_lost();
+    exe->on_account("CNY", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
     // 空表 ⇒ 不应有任何单元回调；可证伪点：事件后三个创建口依然造不出单元（工厂为空）
     EXPECT_EQ(factory.createExeUnit("loc15", "unit").get(), nullptr);
 
     // 短日志转发仍可达；空/边界/超长日志输入由独立用例覆盖。
-    exe.writeLog("r15 short log");
-    exe.on_channel_lost();
+    exe->writeLog("r15 short log");
+    exe->on_channel_lost();
     EXPECT_EQ(factory.createArbiExeUnit("nothing.here").get(), nullptr);
+
+    ASSERT_TRUE(quiesce.quiesceAll());
 }
 
 template <typename Executer>
@@ -236,20 +342,32 @@ void exerciseWriteLogBounds(Executer& exe, const char* name)
 TEST_F(R15MgrTest, local_and_arbi_executer_write_log_bounds)
 {
     WtExecuterFactory factory;
-    WtLocalExecuter local(&factory, "r15_local_log", NULL);
+    WtExecuterMgr manager;
+    R15QuiesceGuard quiesce(manager);
+    auto local = std::make_shared<WtLocalExecuter>(&factory, "r15_local_log", nullptr);
+    manager.add_executer(local);
     WtArbiExecuter arbi(&factory, "r15_arbi_log", NULL);
 
-    // 调用覆盖空输入、缓冲区边界、越界一个字节及远超缓冲区的消息。
+    // 调用覆盖空字符串、缓冲区边界、越界一个字节及远超缓冲区的消息。
     // ASan/UBSan 运行该用例时可直接发现任何写越界；实现合同为最多 2047 字节内容，
     // 超长时保留从开头开始的确定性前缀并以 NUL 终止。
-    exerciseWriteLogBounds(local, "r15_local_log");
+    exerciseWriteLogBounds(*local, "r15_local_log");
     exerciseWriteLogBounds(arbi, "r15_arbi_log");
+
+    ASSERT_TRUE(quiesce.quiesceAll());
 }
 
-TEST_F(R15MgrTest, local_executer_getunit_via_on_tick_over_empty_unit_map)
+TEST_F(R15MgrTest, arbi_write_log_bounds_and_null_are_observable)
 {
-    // L186 的 SpinLock 在 getUnit 内部：getUnit 是 private，但 on_tick 会以
-    // bAutoCreate=false 调它（L667-672），只需 _config 带 policy.default（BUG-R10-001 形态）
+    EXPECT_EXIT(
+        { std::_Exit(runArbiWriteLogBoundsScenario()); },
+        ::testing::ExitedWithCode(0), "");
+}
+
+TEST_F(R15MgrTest, local_executer_on_tick_is_safe_with_empty_unit_state_map)
+{
+    // on_tick only queues callbacks for existing _unit_states; an empty state map
+    // returns without entering unit creation. The empty factory probes confirm no unit was created.
     WTSVariant* root = WTSVariant::createObject();
     WTSVariant* policy = WTSVariant::createObject();
     WTSVariant* def = WTSVariant::createObject();
@@ -258,18 +376,23 @@ TEST_F(R15MgrTest, local_executer_getunit_via_on_tick_over_empty_unit_map)
     root->append("policy", policy);
 
     WtExecuterFactory factory;
-    WtLocalExecuter exe(&factory, "loc15b", NULL);
-    ASSERT_TRUE(exe.init(root));
+    WtExecuterMgr manager;
+    R15QuiesceGuard quiesce(manager);
+    auto exe = std::make_shared<WtLocalExecuter>(&factory, "loc15b", nullptr);
+    manager.add_executer(exe);
+    ASSERT_TRUE(exe->init(root));
     root->release();
 
     WTSTickData* tk = makeTick("SHFE", "ag2512", 20250110, 20250110, 93145, 7100.0);
     ASSERT_NE(tk, nullptr);
     // 工厂为空 ⇒ getUnit 建不出单元 ⇒ on_tick 早退；可证伪点：三个创建口仍拿不到单元
-    exe.on_tick("SHFE.ag.2512", tk);
+    exe->on_tick("SHFE.ag.2512", tk);
     EXPECT_EQ(factory.createExeUnit("R15NoSuchUnit").get(), nullptr);
     EXPECT_EQ(factory.createDiffExeUnit("R15NoSuchUnit").get(), nullptr);
     EXPECT_EQ(factory.createArbiExeUnit("R15NoSuchUnit").get(), nullptr);
 
-    exe.on_channel_ready();      // 单元表仍空 ⇒ L803 遍历零次
+    exe->on_channel_ready();      // 单元表仍空 ⇒ L803 遍历零次
     tk->release();
+
+    ASSERT_TRUE(quiesce.quiesceAll());
 }

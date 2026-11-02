@@ -1,0 +1,80 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = r7_stkvw.empty_retry_ids_quarantine_across_ticks_and_reconnect:r7_stkvw.empty_initial_ids_quarantine_without_counting_or_auto_cancellation
+[==========] Running 2 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 2 tests from r7_stkvw
+[ RUN      ] r7_stkvw.empty_retry_ids_quarantine_across_ticks_and_reconnect
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1640: Failure
+Value of: unit.hasUnverifiedSubmission()
+  Actual: false
+Expected: true
+
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1664: Failure
+Value of: unit.hasUnverifiedSubmission()
+  Actual: false
+Expected: true
+
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1667: Failure
+Value of: ctx.hasLog("submission outcome unverified")
+  Actual: false
+Expected: true
+
+[  FAILED  ] r7_stkvw.empty_retry_ids_quarantine_across_ticks_and_reconnect (1 ms)
+[ RUN      ] r7_stkvw.empty_initial_ids_quarantine_without_counting_or_auto_cancellation
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1680: Failure
+Value of: unit.hasUnverifiedSubmission()
+  Actual: false
+Expected: true
+
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1681: Failure
+Expected equality of these values:
+  unit._fired_times
+    Which is: 1
+  0u
+    Which is: 0
+
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1682: Failure
+Expected equality of these values:
+  unit._last_fire_time
+    Which is: 20240103093000000
+  0u
+    Which is: 0
+
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1693: Failure
+Value of: ctx.bydirCancels.empty()
+  Actual: false
+Expected: true
+
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1695: Failure
+Expected equality of these values:
+  unit._fired_times
+    Which is: 1
+  0u
+    Which is: 0
+
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1696: Failure
+Value of: ctx.hasLog("submission outcome unverified")
+  Actual: false
+Expected: true
+
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1703: Failure
+Value of: unit.hasUnverifiedSubmission()
+  Actual: false
+Expected: true
+
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1705: Failure
+Value of: ctx.bydirCancels.empty()
+  Actual: false
+Expected: true
+
+[  FAILED  ] r7_stkvw.empty_initial_ids_quarantine_without_counting_or_auto_cancellation (0 ms)
+[----------] 2 tests from r7_stkvw (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 2 tests from 1 test suite ran. (2 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 2 tests, listed below:
+[  FAILED  ] r7_stkvw.empty_retry_ids_quarantine_across_ticks_and_reconnect
+[  FAILED  ] r7_stkvw.empty_initial_ids_quarantine_without_counting_or_auto_cancellation
+
+ 2 FAILED TESTS

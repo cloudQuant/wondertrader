@@ -63,15 +63,155 @@ LIST(APPEND WT_COV_SHARED_LIBS boost_filesystem boost_thread)
 # 于是测试 TU 用 1.81 头编、链 1.88 库，符号形不对（path::compare_v3/extension_v3/stem_v3、
 # detail::directory_iterator_construct 全未定义，实测 CoverageTests_dtcore 链失败）。
 # 解法不能用「再补一次 -I」，也不能靠摘 INTERFACE_SYSTEM 属性（那是产品库的接口属性，
-# 改了会波及其他可执行目标的告警面）。改用一个只作用于测试目标的软链接目录：
-# clang 只对*同一个路径串*去重，所以 <builddir>/cov_boost_include/boost → Homebrew boost
-# 以 -I 形态进搜索链，先于内置 /usr/local/include 命中，头与库就一致了（实测 1_88）。
-SET(WT_COV_BOOST_BRIDGE "${CMAKE_CURRENT_BINARY_DIR}/cov_boost_include/boost")
-IF(NOT Boost_INCLUDE_DIR)
-	MESSAGE(FATAL_ERROR "coverage: Boost_INCLUDE_DIR 为空，无法钉住 boost 头版本（find_package(Boost) 是否在 src/CMakeLists 执行？）")
+# 改了会波及其他可执行目标的告警面）。把已验证版本的真实 Boost 头目录复制到 build：
+# 先解析 Boost_INCLUDE_DIR/boost 的真实路径，避免复制 Homebrew include 下的入口链接。
+# 副本以 -I 形态进搜索链，仍排在内置 /usr/local/include 之前；重复 configure 复用副本。
+SET(WT_COV_BOOST_BRIDGE_PARENT "${CMAKE_CURRENT_BINARY_DIR}/cov_boost_include")
+SET(WT_COV_BOOST_BRIDGE "${WT_COV_BOOST_BRIDGE_PARENT}/boost")
+SET(WT_COV_BOOST_BRIDGE_STATE "${WT_COV_BOOST_BRIDGE_PARENT}/.wt_cov_boost_bridge")
+
+FUNCTION(WT_COV_BOOST_ASSERT_NO_SYMLINKS root description)
+    FILE(GLOB_RECURSE _entries LIST_DIRECTORIES TRUE "${root}/*")
+    FOREACH(_entry ${_entries})
+        IF(IS_SYMLINK "${_entry}")
+            MESSAGE(FATAL_ERROR "coverage: Boost ${description} 含符号链接，拒绝生成不封闭的 bridge：${_entry}")
+        ENDIF()
+    ENDFOREACH()
+ENDFUNCTION()
+
+FUNCTION(WT_COV_BOOST_TREE_SHA256 root out_var)
+    FILE(GLOB_RECURSE _files LIST_DIRECTORIES FALSE "${root}/*")
+    LIST(SORT _files)
+    SET(_manifest "")
+    FOREACH(_file IN LISTS _files)
+        FILE(RELATIVE_PATH _relative "${root}" "${_file}")
+        FILE(SHA256 "${_file}" _file_hash)
+        STRING(APPEND _manifest "${_relative}\n${_file_hash}\n")
+    ENDFOREACH()
+    STRING(SHA256 _tree_hash "${_manifest}")
+    SET(${out_var} "${_tree_hash}" PARENT_SCOPE)
+ENDFUNCTION()
+
+IF(NOT Boost_INCLUDE_DIR OR NOT IS_DIRECTORY "${Boost_INCLUDE_DIR}/boost")
+    MESSAGE(FATAL_ERROR "coverage: Boost_INCLUDE_DIR 缺少 boost 子目录，无法钉住版本")
 ENDIF()
-file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/cov_boost_include")
-file(CREATE_LINK "${Boost_INCLUDE_DIR}/boost" "${WT_COV_BOOST_BRIDGE}" SYMBOLIC)
+GET_FILENAME_COMPONENT(_WT_COV_BOOST_SOURCE "${Boost_INCLUDE_DIR}/boost" REALPATH)
+IF(NOT IS_DIRECTORY "${_WT_COV_BOOST_SOURCE}" OR NOT EXISTS "${_WT_COV_BOOST_SOURCE}/version.hpp")
+    MESSAGE(FATAL_ERROR "coverage: Boost 头目录真实路径无效：${_WT_COV_BOOST_SOURCE}")
+ENDIF()
+WT_COV_BOOST_ASSERT_NO_SYMLINKS("${_WT_COV_BOOST_SOURCE}" "source tree")
+FILE(STRINGS "${_WT_COV_BOOST_SOURCE}/version.hpp" _boost_version_defines
+    REGEX "^[ ]*#[ ]*define[ ]+BOOST_VERSION[ ]+[0-9]+$")
+FILE(STRINGS "${_WT_COV_BOOST_SOURCE}/version.hpp" _boost_lib_version_defines
+    REGEX "^[ ]*#[ ]*define[ ]+BOOST_LIB_VERSION")
+LIST(LENGTH _boost_version_defines _boost_version_define_count)
+LIST(LENGTH _boost_lib_version_defines _boost_lib_version_define_count)
+IF(NOT _boost_version_define_count EQUAL 1 OR NOT _boost_lib_version_define_count EQUAL 1)
+    MESSAGE(FATAL_ERROR "coverage: 无法从 Boost version.hpp 唯一解析版本")
+ENDIF()
+STRING(REGEX MATCH "BOOST_VERSION[ ]+([0-9]+)" _boost_version_match "${_boost_version_defines}")
+SET(_boost_version_number "${CMAKE_MATCH_1}")
+STRING(REGEX MATCH "[0-9]+_[0-9]+" _boost_lib_version "${_boost_lib_version_defines}")
+IF(NOT _boost_version_number OR NOT _boost_lib_version)
+    MESSAGE(FATAL_ERROR "coverage: Boost version.hpp 内容无效")
+ENDIF()
+MATH(EXPR _boost_major "${_boost_version_number} / 100000")
+MATH(EXPR _boost_minor "(${_boost_version_number} / 100) % 1000")
+MATH(EXPR _boost_patch "${_boost_version_number} % 100")
+SET(_WT_COV_BOOST_VERSION "${_boost_major}.${_boost_minor}.${_boost_patch}")
+STRING(REPLACE "." "_" _boost_lib_version_from_header "${_boost_major}.${_boost_minor}")
+IF(NOT _boost_lib_version STREQUAL _boost_lib_version_from_header)
+    MESSAGE(FATAL_ERROR "coverage: BOOST_LIB_VERSION 与 BOOST_VERSION 不一致")
+ENDIF()
+
+SET(_WT_COV_BOOST_PACKAGE_VERSION_FOUND FALSE)
+IF(DEFINED Boost_VERSION_STRING AND NOT "${Boost_VERSION_STRING}" STREQUAL "")
+    IF(NOT Boost_VERSION_STRING STREQUAL _WT_COV_BOOST_VERSION)
+        MESSAGE(FATAL_ERROR "coverage: find_package(Boost) 版本 ${Boost_VERSION_STRING} 与头文件 ${_WT_COV_BOOST_VERSION} 不一致")
+    ENDIF()
+    SET(_WT_COV_BOOST_PACKAGE_VERSION_FOUND TRUE)
+ENDIF()
+IF(DEFINED Boost_VERSION AND NOT "${Boost_VERSION}" STREQUAL "")
+    IF(Boost_VERSION MATCHES "^[0-9]+$")
+        IF(NOT Boost_VERSION STREQUAL _boost_version_number)
+            MESSAGE(FATAL_ERROR "coverage: find_package(Boost) 版本号 ${Boost_VERSION} 与头文件 ${_boost_version_number} 不一致")
+        ENDIF()
+    ELSEIF(NOT Boost_VERSION STREQUAL _WT_COV_BOOST_VERSION)
+        MESSAGE(FATAL_ERROR "coverage: find_package(Boost) 版本 ${Boost_VERSION} 与头文件 ${_WT_COV_BOOST_VERSION} 不一致")
+    ENDIF()
+    SET(_WT_COV_BOOST_PACKAGE_VERSION_FOUND TRUE)
+ENDIF()
+IF(NOT _WT_COV_BOOST_PACKAGE_VERSION_FOUND)
+    MESSAGE(FATAL_ERROR "coverage: find_package(Boost) 未提供可验证版本")
+ENDIF()
+IF(DEFINED Boost_LIB_VERSION AND NOT "${Boost_LIB_VERSION}" STREQUAL "" AND
+    NOT Boost_LIB_VERSION STREQUAL _boost_lib_version)
+    MESSAGE(FATAL_ERROR "coverage: find_package(Boost) 库版本 ${Boost_LIB_VERSION} 与头文件 ${_boost_lib_version} 不一致")
+ENDIF()
+
+WT_COV_BOOST_TREE_SHA256("${_WT_COV_BOOST_SOURCE}" _WT_COV_BOOST_SOURCE_TREE_HASH)
+STRING(CONCAT _WT_COV_BOOST_EXPECTED_STATE
+    "format=3\n"
+    "source=${_WT_COV_BOOST_SOURCE}\n"
+    "version=${_WT_COV_BOOST_VERSION}\n"
+    "tree_sha256=${_WT_COV_BOOST_SOURCE_TREE_HASH}\n"
+    "Boost_VERSION=${Boost_VERSION}\n"
+    "Boost_VERSION_STRING=${Boost_VERSION_STRING}\n"
+    "Boost_LIB_VERSION=${Boost_LIB_VERSION}\n"
+    "Boost_DIR=${Boost_DIR}\n"
+    "Boost_INCLUDE_DIR=${Boost_INCLUDE_DIR}\n"
+    "Boost_LIBRARY_DIRS=${Boost_LIBRARY_DIRS}\n"
+    "Boost_LIBRARIES=${Boost_LIBRARIES}\n")
+
+IF(IS_SYMLINK "${WT_COV_BOOST_BRIDGE_PARENT}" OR
+    (EXISTS "${WT_COV_BOOST_BRIDGE_PARENT}" AND NOT IS_DIRECTORY "${WT_COV_BOOST_BRIDGE_PARENT}"))
+    MESSAGE(FATAL_ERROR "coverage: Boost bridge parent 是非预期实体，拒绝触碰：${WT_COV_BOOST_BRIDGE_PARENT}")
+ENDIF()
+FILE(MAKE_DIRECTORY "${WT_COV_BOOST_BRIDGE_PARENT}")
+IF(IS_SYMLINK "${WT_COV_BOOST_BRIDGE_STATE}" OR IS_DIRECTORY "${WT_COV_BOOST_BRIDGE_STATE}")
+    MESSAGE(FATAL_ERROR "coverage: Boost bridge state 是非预期实体，拒绝覆盖：${WT_COV_BOOST_BRIDGE_STATE}")
+ENDIF()
+SET(_WT_COV_BOOST_STATE_EXISTS FALSE)
+IF(EXISTS "${WT_COV_BOOST_BRIDGE_STATE}")
+    FILE(READ "${WT_COV_BOOST_BRIDGE_STATE}" _WT_COV_BOOST_STATE_CONTENT)
+    IF(NOT _WT_COV_BOOST_STATE_CONTENT STREQUAL _WT_COV_BOOST_EXPECTED_STATE)
+        MESSAGE(FATAL_ERROR "coverage: Boost find_package 来源或版本变化；拒绝覆盖现有 bridge")
+    ENDIF()
+    SET(_WT_COV_BOOST_STATE_EXISTS TRUE)
+ENDIF()
+SET(_WT_COV_BOOST_NEEDS_COPY TRUE)
+IF(IS_SYMLINK "${WT_COV_BOOST_BRIDGE}")
+    GET_FILENAME_COMPONENT(_WT_COV_BOOST_EXISTING_TARGET "${WT_COV_BOOST_BRIDGE}" REALPATH)
+    IF(NOT IS_DIRECTORY "${WT_COV_BOOST_BRIDGE}" OR
+        NOT _WT_COV_BOOST_EXISTING_TARGET STREQUAL _WT_COV_BOOST_SOURCE)
+        MESSAGE(FATAL_ERROR "coverage: 现有 Boost bridge 链接不指向当前预期头目录，拒绝移除：${WT_COV_BOOST_BRIDGE}")
+    ENDIF()
+    FILE(REMOVE "${WT_COV_BOOST_BRIDGE}")
+ELSEIF(EXISTS "${WT_COV_BOOST_BRIDGE}")
+    IF(NOT IS_DIRECTORY "${WT_COV_BOOST_BRIDGE}")
+        MESSAGE(FATAL_ERROR "coverage: 现有 Boost bridge 是非预期实体，拒绝覆盖：${WT_COV_BOOST_BRIDGE}")
+    ENDIF()
+    IF(NOT _WT_COV_BOOST_STATE_EXISTS)
+        MESSAGE(FATAL_ERROR "coverage: 现有 Boost bridge 无生成标记，拒绝覆盖用户目录：${WT_COV_BOOST_BRIDGE}")
+    ENDIF()
+    SET(_WT_COV_BOOST_NEEDS_COPY FALSE)
+ELSEIF(_WT_COV_BOOST_STATE_EXISTS)
+    MESSAGE(FATAL_ERROR "coverage: Boost bridge 标记存在但目录缺失，拒绝自动重建")
+ENDIF()
+IF(_WT_COV_BOOST_NEEDS_COPY)
+    FILE(COPY "${_WT_COV_BOOST_SOURCE}" DESTINATION "${WT_COV_BOOST_BRIDGE_PARENT}")
+ENDIF()
+IF(IS_SYMLINK "${WT_COV_BOOST_BRIDGE}" OR NOT IS_DIRECTORY "${WT_COV_BOOST_BRIDGE}")
+    MESSAGE(FATAL_ERROR "coverage: Boost bridge 不是已生成的真实目录")
+ENDIF()
+WT_COV_BOOST_ASSERT_NO_SYMLINKS("${WT_COV_BOOST_BRIDGE}" "bridge copy")
+WT_COV_BOOST_TREE_SHA256("${WT_COV_BOOST_BRIDGE}" _WT_COV_BOOST_BRIDGE_TREE_HASH)
+IF(NOT _WT_COV_BOOST_SOURCE_TREE_HASH STREQUAL _WT_COV_BOOST_BRIDGE_TREE_HASH)
+    MESSAGE(FATAL_ERROR "coverage: Boost bridge 与当前源头文件树摘要不一致；拒绝复用")
+ENDIF()
+IF(NOT _WT_COV_BOOST_STATE_EXISTS)
+    FILE(WRITE "${WT_COV_BOOST_BRIDGE_STATE}" "${_WT_COV_BOOST_EXPECTED_STATE}")
+ENDIF()
 
 # 桥接目录放最前，保证 boost 头先以 -I 命中
 SET(WT_COV_INCS
@@ -157,7 +297,7 @@ SET(WT_COV_SPLIT_TARGETS
 	# WtDataStorage 的 TU 留在主目标（l04 用例用它），AD 单独成目标。
 	"adstorage|WtDataStorageAD|dir:p05_datastorage2"
 	"idxfactory|WtIndexFactory|n03b_idxfactory/n03_idxfactory_worker_test.cpp"
-	"exefact|WtExeFact,WtExecMon|n05_exec_factories/n05_exe_fact_test.cpp+n05_exec_factories/n05_minimpact_calc_test.cpp+n05_exec_factories/n05_channel_ready_test.cpp+n05_exec_factories/n05_ordmon_test.cpp+dir:r7_exefact+dir:r24_exefact2"
+	"exefact|WtExeFact,WtExecMon|n05_exec_factories/n05_exe_fact_test.cpp+n05_exec_factories/n05_minimpact_calc_test.cpp+n05_exec_factories/n05_channel_ready_test.cpp+n05_exec_factories/n05_unmanaged_cancel_latch_test.cpp+n05_exec_factories/n05_ordmon_test.cpp+dir:r7_exefact+dir:r24_exefact2"
 	"riskmon|WtRiskMonFact,WtExecMon|n05_exec_factories/n05_riskmon_datamgr_test.cpp"
 	"mqshare|WtShareHelper,WtMsgQue|n06_strategies_mq_share/n06_mq_share_test.cpp+dir:r19_mq")
 
@@ -250,6 +390,14 @@ FOREACH(spec ${WT_COV_SPLIT_TARGETS})
 	WT_COV_ISOLATE_INST_HLP(${tus})
 	ADD_EXECUTABLE(CoverageTests_${suffix} ${srcs} ${tus})
 	TARGET_INCLUDE_DIRECTORIES(CoverageTests_${suffix} PRIVATE ${WT_COV_INCS})
+	IF(suffix STREQUAL "dtservo")
+		TARGET_COMPILE_DEFINITIONS(CoverageTests_${suffix} PRIVATE WT_P12_BAR_LIFETIME_TEST_HOOKS)
+	ENDIF()
+	IF(suffix STREQUAL "t_TraderDumper")
+		# Only the isolated test executable gets a deterministic worker-wait handshake
+		# and legacy sleep control; the production TraderDumper target has no test API.
+		TARGET_COMPILE_DEFINITIONS(CoverageTests_${suffix} PRIVATE WT_DUMPER_TEST_HOOKS)
+	ENDIF()
 	# 厂商头二级 include（<mds_api/…>、<trade/…>）：从模块源码的 #include <API/…> 反查目录
 	WT_COV_VENDOR_INCS(_vincs ${tus})
 	IF(_vincs)
@@ -326,6 +474,405 @@ FOREACH(spec ${WT_COV_SPLIT_TARGETS})
 		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 ENDFOREACH()
 
+# P07 resolves WtDataStorage through WtHelper's real module loader. The test's
+# __FILE__ path identifies the source tree, so inject the exact out-of-source
+# artifact instead of guessing a build directory relative to the source root.
+if(NOT TARGET CoverageTests_btcore OR NOT TARGET WtDataStorage)
+	message(FATAL_ERROR "P07 tick loader tests require CoverageTests_btcore and WtDataStorage")
+endif()
+set(WT_COV_P07_FIXTURE_ROOT "${CMAKE_SOURCE_DIR}/.." CACHE PATH
+	"Root containing dist/common inputs required by P07 tick loader tests")
+target_compile_definitions(CoverageTests_btcore PRIVATE
+	"WT_COV_P07_FIXTURE_ROOT=\"${WT_COV_P07_FIXTURE_ROOT}\""
+	"WT_COV_P07_DATA_STORAGE_MODULE=\"$<TARGET_FILE:WtDataStorage>\"")
+add_dependencies(CoverageTests_btcore WtDataStorage)
+
+# Q06 verifies the backtest factor-feed export through the exact WtBtPorter DSO
+# handle. This test-only entry starts loadAdjFactors on that DSO's own runner so
+# the external loader can exercise the exported feed function end to end.
+IF(TARGET CoverageTests_btporter AND TARGET WtBtPorter)
+	TARGET_COMPILE_DEFINITIONS(WtBtPorter PRIVATE WT_BT_PORTER_CAPI_TEST_HOOKS)
+	TARGET_COMPILE_DEFINITIONS(CoverageTests_btporter PRIVATE
+		"WT_COV_BTPORTER_LIBRARY_PATH=\"$<TARGET_FILE:WtBtPorter>\"")
+	ADD_DEPENDENCIES(CoverageTests_btporter WtBtPorter)
+	IF(CMAKE_DL_LIBS)
+		TARGET_LINK_LIBRARIES(CoverageTests_btporter PRIVATE ${CMAKE_DL_LIBS})
+	ENDIF()
+ENDIF()
+
+# R205/R214 exercise WtBtPorter's real binary replay loader. Resolve the module
+# through the exact build target so out-of-source coverage builds need no path guesses.
+if(TARGET CoverageTests_btporter AND TARGET WtDataStorage)
+	target_compile_definitions(CoverageTests_btporter PRIVATE
+		"WT_COV_BTPORTER_DATA_STORAGE_MODULE=\"$<TARGET_FILE:WtDataStorage>\"")
+	add_dependencies(CoverageTests_btporter WtDataStorage)
+endif()
+
+# Q05 covers WtDataManager's real dlopen path. Put the null-reader fixture beside
+# the storage/index plugins, where WtHelper's module directory resolves names.
+if(TARGET CoverageTests_dtservo)
+	set(WT_COV_Q05_READER_DIR "${CMAKE_BINARY_DIR}/build_${PLATFORM}/${CMAKE_BUILD_TYPE}/bin")
+	add_library(Q05NullReaderFixture MODULE
+		"${CMAKE_SOURCE_DIR}/TestUnits/fixtures/q05_null_reader_fixture.cpp")
+	target_include_directories(Q05NullReaderFixture PRIVATE "${CMAKE_SOURCE_DIR}")
+	set_target_properties(Q05NullReaderFixture PROPERTIES
+		OUTPUT_NAME "q05_null_reader"
+		LIBRARY_OUTPUT_DIRECTORY "${WT_COV_Q05_READER_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY "${WT_COV_Q05_READER_DIR}"
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+	if(WIN32)
+		set_target_properties(Q05NullReaderFixture PROPERTIES SUFFIX ".dll")
+	elseif(APPLE)
+		set_target_properties(Q05NullReaderFixture PROPERTIES SUFFIX ".dylib")
+	else()
+		set_target_properties(Q05NullReaderFixture PROPERTIES SUFFIX ".so")
+	endif()
+	add_dependencies(CoverageTests_dtservo Q05NullReaderFixture)
+	target_compile_definitions(CoverageTests_dtservo PRIVATE
+		"WT_Q05_READER_MODULE_DIR=\"$<TARGET_FILE_DIR:WtIndexFactory>/\""
+		"WT_Q05_NULL_READER_MODULE=\"q05_null_reader\"")
+endif()
+
+# R18-002 exercises DataManager's real writer dlopen/dlsym/init/release path.
+# Each behavior is a separate DSO so symbol omission is verified by the OS
+# loader rather than by a test-side mock of DLLHelper.
+if(TARGET CoverageTests_dtcore)
+	set(WT_COV_R18_WRITER_DIR "${CMAKE_BINARY_DIR}/build_${PLATFORM}/${CMAKE_BUILD_TYPE}/bin")
+	set(WT_COV_R18_WRITER_FIXTURE "${CMAKE_SOURCE_DIR}/TestUnits/fixtures/r18_writer_fixture.cpp")
+
+	function(WT_COV_R18_WRITER_TARGET target output)
+		add_library(${target} MODULE "${WT_COV_R18_WRITER_FIXTURE}")
+		target_include_directories(${target} PRIVATE "${CMAKE_SOURCE_DIR}")
+		set_target_properties(${target} PROPERTIES
+			OUTPUT_NAME "${output}"
+			LIBRARY_OUTPUT_DIRECTORY "${WT_COV_R18_WRITER_DIR}"
+			RUNTIME_OUTPUT_DIRECTORY "${WT_COV_R18_WRITER_DIR}"
+			CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+		if(WIN32)
+			set_target_properties(${target} PROPERTIES SUFFIX ".dll")
+		elseif(APPLE)
+			set_target_properties(${target} PROPERTIES SUFFIX ".dylib")
+		else()
+			set_target_properties(${target} PROPERTIES SUFFIX ".so")
+		endif()
+	endfunction()
+
+	WT_COV_R18_WRITER_TARGET(R18WriterSuccessFixture "r18_writer_success")
+	WT_COV_R18_WRITER_TARGET(R18WriterInitFalseFixture "r18_writer_init_false")
+	target_compile_definitions(R18WriterInitFalseFixture PRIVATE WT_R18_WRITER_INIT_FALSE)
+	WT_COV_R18_WRITER_TARGET(R18WriterNullFactoryFixture "r18_writer_null_factory")
+	target_compile_definitions(R18WriterNullFactoryFixture PRIVATE WT_R18_WRITER_NULL_FACTORY)
+	WT_COV_R18_WRITER_TARGET(R18WriterMissingCreateFixture "r18_writer_missing_create")
+	target_compile_definitions(R18WriterMissingCreateFixture PRIVATE WT_R18_WRITER_OMIT_CREATE)
+	WT_COV_R18_WRITER_TARGET(R18WriterMissingDeleteFixture "r18_writer_missing_delete")
+	target_compile_definitions(R18WriterMissingDeleteFixture PRIVATE WT_R18_WRITER_OMIT_DELETE)
+
+	add_dependencies(CoverageTests_dtcore
+		R18WriterSuccessFixture R18WriterInitFalseFixture R18WriterNullFactoryFixture
+		R18WriterMissingCreateFixture R18WriterMissingDeleteFixture)
+	target_compile_definitions(CoverageTests_dtcore PRIVATE
+		"WT_R18_WRITER_MODULE_DIR=\"$<TARGET_FILE_DIR:R18WriterSuccessFixture>/\""
+		"WT_R18_WRITER_SUCCESS_MODULE=\"r18_writer_success\""
+		"WT_R18_WRITER_INIT_FALSE_MODULE=\"r18_writer_init_false\""
+		"WT_R18_WRITER_NULL_FACTORY_MODULE=\"r18_writer_null_factory\""
+		"WT_R18_WRITER_MISSING_CREATE_MODULE=\"r18_writer_missing_create\""
+		"WT_R18_WRITER_MISSING_DELETE_MODULE=\"r18_writer_missing_delete\"")
+endif()
+
+# R68 uses an isolated counting plugin to check that reloading the same module
+# neither recreates the factory nor invalidates an already active worker.
+if(UNIX AND TARGET CoverageTests_dtcore)
+	add_subdirectory("${CMAKE_SOURCE_DIR}/TestUnits/fixtures/r68_index_factory"
+		"${CMAKE_CURRENT_BINARY_DIR}/r68_index_factory")
+endif()
+
+# R45 exercises WtDtServo's actual parser-module path with a deterministic fake
+# IParserApi. Keep the module separate from the coverage executable so its
+# createParser/deleteParser exports are only visible through dlopen/dlsym.
+if(TARGET CoverageTests_dtservo)
+	set(WT_COV_R45_DTSERVO_PARSER_ROOT "${CMAKE_CURRENT_BINARY_DIR}/r45_dtservo_parser_fixture")
+	add_library(R45DtServoParserFixture MODULE
+		"${CMAKE_SOURCE_DIR}/TestUnits/fixtures/r45_dtservo_parser_fixture.cpp")
+	target_include_directories(R45DtServoParserFixture PRIVATE ${WT_COV_INCS})
+	set_target_properties(R45DtServoParserFixture PROPERTIES
+		OUTPUT_NAME "R45DtServoParserFixture"
+		LIBRARY_OUTPUT_DIRECTORY "${WT_COV_R45_DTSERVO_PARSER_ROOT}/parsers"
+		RUNTIME_OUTPUT_DIRECTORY "${WT_COV_R45_DTSERVO_PARSER_ROOT}/parsers"
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+	if(WIN32)
+		set_target_properties(R45DtServoParserFixture PROPERTIES PREFIX "" SUFFIX ".dll")
+	elseif(APPLE)
+		set_target_properties(R45DtServoParserFixture PROPERTIES PREFIX "lib" SUFFIX ".dylib")
+	else()
+		set_target_properties(R45DtServoParserFixture PROPERTIES PREFIX "lib" SUFFIX ".so")
+	endif()
+	add_dependencies(CoverageTests_dtservo R45DtServoParserFixture)
+	target_compile_definitions(CoverageTests_dtservo PRIVATE
+		"WT_R45_DTSERVO_PARSER_FIXTURE_PATH=\"$<TARGET_FILE:R45DtServoParserFixture>\"")
+endif()
+
+# T2-OPT-01 exercises ParserCTPOpt's real dlopen/dlsym path. These controlled
+# modules are placed beside the coverage executable because the parser resolves
+# ctpmodule relative to getBinDir(); only the success/null modules export the
+# vendor creator symbol.
+if(TARGET CoverageTests_t_ParserCTPOpt)
+	set(WT_COV_T2_OPT_LOADER_DIR "${CMAKE_BINARY_DIR}/build_${PLATFORM}/${CMAKE_BUILD_TYPE}/bin/TestUnits")
+	set(WT_COV_T2_OPT_LOADER_FIXTURE "${CMAKE_SOURCE_DIR}/TestUnits/fixtures/t2_opt01_loader_fixture.cpp")
+	set(WT_COV_T2_OPT_MISSING_SYMBOL_FIXTURE "${CMAKE_SOURCE_DIR}/TestUnits/fixtures/t2_opt01_missing_symbol_fixture.cpp")
+
+	add_library(T2Opt01MissingSymbol MODULE "${WT_COV_T2_OPT_MISSING_SYMBOL_FIXTURE}")
+	set_target_properties(T2Opt01MissingSymbol PROPERTIES
+		PREFIX "" OUTPUT_NAME "wt_r105_ctpopt_missing_symbol"
+		LIBRARY_OUTPUT_DIRECTORY "${WT_COV_T2_OPT_LOADER_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY "${WT_COV_T2_OPT_LOADER_DIR}"
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+
+	add_library(T2Opt01NullCreator MODULE "${WT_COV_T2_OPT_LOADER_FIXTURE}")
+	target_include_directories(T2Opt01NullCreator PRIVATE "${CMAKE_SOURCE_DIR}")
+	target_compile_definitions(T2Opt01NullCreator PRIVATE WT_R105_CTP_OPT_NULL_CREATOR)
+	set_target_properties(T2Opt01NullCreator PROPERTIES
+		PREFIX "" OUTPUT_NAME "wt_r105_ctpopt_null_creator"
+		LIBRARY_OUTPUT_DIRECTORY "${WT_COV_T2_OPT_LOADER_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY "${WT_COV_T2_OPT_LOADER_DIR}"
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+
+	add_library(T2Opt01SuccessfulCreator MODULE "${WT_COV_T2_OPT_LOADER_FIXTURE}")
+	target_include_directories(T2Opt01SuccessfulCreator PRIVATE "${CMAKE_SOURCE_DIR}")
+	set_target_properties(T2Opt01SuccessfulCreator PROPERTIES
+		PREFIX "" OUTPUT_NAME "wt_r105_ctpopt_successful_creator"
+		LIBRARY_OUTPUT_DIRECTORY "${WT_COV_T2_OPT_LOADER_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY "${WT_COV_T2_OPT_LOADER_DIR}"
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+
+	if(WIN32)
+		target_compile_definitions(T2Opt01NullCreator PRIVATE ISLIB LIB_MD_API_EXPORT)
+		target_compile_definitions(T2Opt01SuccessfulCreator PRIVATE ISLIB LIB_MD_API_EXPORT)
+		set_target_properties(T2Opt01MissingSymbol T2Opt01NullCreator T2Opt01SuccessfulCreator PROPERTIES SUFFIX ".dll")
+	elseif(APPLE)
+		set_target_properties(T2Opt01MissingSymbol T2Opt01NullCreator T2Opt01SuccessfulCreator PROPERTIES SUFFIX ".dylib")
+	else()
+		set_target_properties(T2Opt01MissingSymbol T2Opt01NullCreator T2Opt01SuccessfulCreator PROPERTIES SUFFIX ".so")
+	endif()
+
+	add_dependencies(CoverageTests_t_ParserCTPOpt
+		T2Opt01MissingSymbol T2Opt01NullCreator T2Opt01SuccessfulCreator)
+	target_compile_definitions(CoverageTests_t_ParserCTPOpt PRIVATE
+		"WT_R105_CTP_OPT_MISSING_SYMBOL_MODULE=\"wt_r105_ctpopt_missing_symbol\""
+		"WT_R105_CTP_OPT_NULL_CREATOR_MODULE=\"wt_r105_ctpopt_null_creator\""
+		"WT_R105_CTP_OPT_SUCCESSFUL_CREATOR_MODULE=\"wt_r105_ctpopt_successful_creator\"")
+endif()
+
+# T1-XTP-01 exercises ParserXTP's real dlopen/dlsym path with local modules.
+# The loader resolves modules beside the coverage executable; the test target
+# therefore depends on these fixtures being placed in that same directory.
+if(TARGET CoverageTests_t_ParserXTP)
+	set(WT_COV_T1_XTP_LOADER_DIR "${CMAKE_BINARY_DIR}/build_${PLATFORM}/${CMAKE_BUILD_TYPE}/bin/TestUnits")
+	set(WT_COV_T1_XTP_FIXTURE_DIR "${CMAKE_SOURCE_DIR}/TestUnits/fixtures/t1_xtp")
+	set(WT_COV_T1_XTP_UNIX_PREFIX "lib")
+	if(WIN32)
+		set(WT_COV_T1_XTP_UNIX_PREFIX "")
+	endif()
+
+	add_library(T1XtpLoaderMissingSymbol MODULE "${WT_COV_T1_XTP_FIXTURE_DIR}/missing_symbol.cpp")
+	set_target_properties(T1XtpLoaderMissingSymbol PROPERTIES
+		PREFIX "" OUTPUT_NAME "${WT_COV_T1_XTP_UNIX_PREFIX}t1_xtp_missing_symbol"
+		LIBRARY_OUTPUT_DIRECTORY "${WT_COV_T1_XTP_LOADER_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY "${WT_COV_T1_XTP_LOADER_DIR}"
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+
+	add_library(T1XtpLoaderNullCreator MODULE "${WT_COV_T1_XTP_FIXTURE_DIR}/creator_fixture.cpp")
+	target_include_directories(T1XtpLoaderNullCreator PRIVATE "${CMAKE_SOURCE_DIR}")
+	target_compile_definitions(T1XtpLoaderNullCreator PRIVATE WT_T1_XTP_NULL_CREATOR)
+	set_target_properties(T1XtpLoaderNullCreator PROPERTIES
+		PREFIX "" OUTPUT_NAME "${WT_COV_T1_XTP_UNIX_PREFIX}t1_xtp_null_creator"
+		LIBRARY_OUTPUT_DIRECTORY "${WT_COV_T1_XTP_LOADER_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY "${WT_COV_T1_XTP_LOADER_DIR}"
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+
+	add_library(T1XtpLoaderSuccessfulCreator MODULE "${WT_COV_T1_XTP_FIXTURE_DIR}/creator_fixture.cpp")
+	target_include_directories(T1XtpLoaderSuccessfulCreator PRIVATE "${CMAKE_SOURCE_DIR}")
+	set_target_properties(T1XtpLoaderSuccessfulCreator PROPERTIES
+		PREFIX "" OUTPUT_NAME "${WT_COV_T1_XTP_UNIX_PREFIX}t1_xtp_successful_creator"
+		LIBRARY_OUTPUT_DIRECTORY "${WT_COV_T1_XTP_LOADER_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY "${WT_COV_T1_XTP_LOADER_DIR}"
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+
+	if(WIN32)
+		target_compile_definitions(T1XtpLoaderNullCreator PRIVATE ISLIB LIB_MD_API_EXPORT)
+		target_compile_definitions(T1XtpLoaderSuccessfulCreator PRIVATE ISLIB LIB_MD_API_EXPORT)
+		set_target_properties(T1XtpLoaderMissingSymbol T1XtpLoaderNullCreator T1XtpLoaderSuccessfulCreator PROPERTIES SUFFIX ".dll")
+	elseif(APPLE)
+		set_target_properties(T1XtpLoaderMissingSymbol T1XtpLoaderNullCreator T1XtpLoaderSuccessfulCreator PROPERTIES SUFFIX ".dylib")
+	else()
+		set_target_properties(T1XtpLoaderMissingSymbol T1XtpLoaderNullCreator T1XtpLoaderSuccessfulCreator PROPERTIES SUFFIX ".so")
+	endif()
+
+	add_dependencies(CoverageTests_t_ParserXTP
+		T1XtpLoaderMissingSymbol T1XtpLoaderNullCreator T1XtpLoaderSuccessfulCreator)
+	target_compile_definitions(CoverageTests_t_ParserXTP PRIVATE
+		"WT_T1_XTP_MISSING_SYMBOL_MODULE=\"t1_xtp_missing_symbol\""
+		"WT_T1_XTP_NULL_CREATOR_MODULE=\"t1_xtp_null_creator\""
+		"WT_T1_XTP_SUCCESSFUL_CREATOR_MODULE=\"t1_xtp_successful_creator\"")
+endif()
+
+# T4-007 exercises TraderFemas' real dlopen/dlsym path. Keep controlled modules
+# next to its coverage executable, which resolves ctpmodule relative to getBinDir().
+if(TARGET CoverageTests_t_TraderFemas)
+	set(WT_COV_T4_FEMAS_FIXTURE_DIR "${CMAKE_SOURCE_DIR}/TestUnits/fixtures/t4_femas")
+	set(WT_COV_T4_FEMAS_TEST_DIR "${CMAKE_BINARY_DIR}/build_${PLATFORM}/${CMAKE_BUILD_TYPE}/bin/TestUnits")
+
+	add_library(T4FemasMissingSymbolFixture MODULE "${WT_COV_T4_FEMAS_FIXTURE_DIR}/missing_symbol.cpp")
+	set_target_properties(T4FemasMissingSymbolFixture PROPERTIES
+		PREFIX "" OUTPUT_NAME "wt_t4_femas_missing_symbol"
+		LIBRARY_OUTPUT_DIRECTORY "${WT_COV_T4_FEMAS_TEST_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY "${WT_COV_T4_FEMAS_TEST_DIR}"
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+
+	add_library(T4FemasNullCreatorFixture MODULE "${WT_COV_T4_FEMAS_FIXTURE_DIR}/creator_fixture.cpp")
+	target_include_directories(T4FemasNullCreatorFixture PRIVATE ${WT_COV_INCS} "${CMAKE_CURRENT_SOURCE_DIR}/t_TraderFemas")
+	target_compile_definitions(T4FemasNullCreatorFixture PRIVATE WT_T4_FEMAS_NULL_CREATOR)
+	set_target_properties(T4FemasNullCreatorFixture PROPERTIES
+		PREFIX "" OUTPUT_NAME "wt_t4_femas_null_creator"
+		LIBRARY_OUTPUT_DIRECTORY "${WT_COV_T4_FEMAS_TEST_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY "${WT_COV_T4_FEMAS_TEST_DIR}"
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+
+	add_library(T4FemasSuccessfulCreatorFixture MODULE "${WT_COV_T4_FEMAS_FIXTURE_DIR}/creator_fixture.cpp")
+	target_include_directories(T4FemasSuccessfulCreatorFixture PRIVATE ${WT_COV_INCS} "${CMAKE_CURRENT_SOURCE_DIR}/t_TraderFemas")
+	target_compile_definitions(T4FemasSuccessfulCreatorFixture PRIVATE WT_T4_FEMAS_SUCCESSFUL_CREATOR)
+	set_target_properties(T4FemasSuccessfulCreatorFixture PROPERTIES
+		PREFIX "" OUTPUT_NAME "wt_t4_femas_successful_creator"
+		LIBRARY_OUTPUT_DIRECTORY "${WT_COV_T4_FEMAS_TEST_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY "${WT_COV_T4_FEMAS_TEST_DIR}"
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+
+	if(WIN32)
+		target_compile_definitions(T4FemasNullCreatorFixture PRIVATE LIB_TRADER_API_EXPORT)
+		target_compile_definitions(T4FemasSuccessfulCreatorFixture PRIVATE LIB_TRADER_API_EXPORT)
+		set_target_properties(T4FemasMissingSymbolFixture T4FemasNullCreatorFixture T4FemasSuccessfulCreatorFixture PROPERTIES SUFFIX ".dll")
+	elseif(APPLE)
+		set_target_properties(T4FemasMissingSymbolFixture T4FemasNullCreatorFixture T4FemasSuccessfulCreatorFixture PROPERTIES SUFFIX ".dylib")
+	else()
+		set_target_properties(T4FemasMissingSymbolFixture T4FemasNullCreatorFixture T4FemasSuccessfulCreatorFixture PROPERTIES SUFFIX ".so")
+	endif()
+
+	add_dependencies(CoverageTests_t_TraderFemas
+		T4FemasMissingSymbolFixture T4FemasNullCreatorFixture T4FemasSuccessfulCreatorFixture)
+	target_compile_definitions(CoverageTests_t_TraderFemas PRIVATE
+		"WT_T4_FEMAS_MISSING_SYMBOL_MODULE=\"wt_t4_femas_missing_symbol\""
+		"WT_T4_FEMAS_NULL_CREATOR_MODULE=\"wt_t4_femas_null_creator\""
+		"WT_T4_FEMAS_SUCCESSFUL_CREATOR_MODULE=\"wt_t4_femas_successful_creator\""
+		"WT_T4_FEMAS_MISSING_LIBRARY_MODULE=\"wt_t4_femas_module_absent\"")
+endif()
+
+# T4-014 exercises CTPOptLoader's complete-config dlopen/dlsym/factory path with
+# isolated fake modules. Each test copies its selected module into a temporary
+# working directory, so no vendor library or flow output can escape the fixture.
+if(TARGET CoverageTests_t_CTPOptLoader)
+	set(WT_COV_T4_CTP_OPT_FIXTURE_DIR "${CMAKE_SOURCE_DIR}/TestUnits/fixtures/t4_ctpopt_loader")
+	set(WT_COV_T4_CTP_OPT_TEST_DIR "${CMAKE_BINARY_DIR}/build_${PLATFORM}/${CMAKE_BUILD_TYPE}/bin/TestUnits")
+
+	add_library(T4CtpOptMissingSymbolFixture MODULE "${WT_COV_T4_CTP_OPT_FIXTURE_DIR}/missing_symbol.cpp")
+	set_target_properties(T4CtpOptMissingSymbolFixture PROPERTIES
+		PREFIX "" OUTPUT_NAME "wt_t4_ctpopt_missing_symbol"
+		LIBRARY_OUTPUT_DIRECTORY "${WT_COV_T4_CTP_OPT_TEST_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY "${WT_COV_T4_CTP_OPT_TEST_DIR}"
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+	target_compile_definitions(T4CtpOptMissingSymbolFixture PRIVATE
+		"WT_T4_CTP_OPT_UNLOAD_MARKER=\"ctpopt_missing_symbol_unloaded\"")
+
+	add_library(T4CtpOptNullCreatorFixture MODULE "${WT_COV_T4_CTP_OPT_FIXTURE_DIR}/creator_fixture.cpp")
+	target_include_directories(T4CtpOptNullCreatorFixture PRIVATE
+		${WT_COV_INCS} "${CMAKE_CURRENT_SOURCE_DIR}/t_CTPOptLoader")
+	target_compile_definitions(T4CtpOptNullCreatorFixture PRIVATE
+		WT_T4_CTP_OPT_NULL_CREATOR
+		"WT_T4_CTP_OPT_UNLOAD_MARKER=\"ctpopt_null_creator_unloaded\"")
+	set_target_properties(T4CtpOptNullCreatorFixture PROPERTIES
+		PREFIX "" OUTPUT_NAME "wt_t4_ctpopt_null_creator"
+		LIBRARY_OUTPUT_DIRECTORY "${WT_COV_T4_CTP_OPT_TEST_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY "${WT_COV_T4_CTP_OPT_TEST_DIR}"
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+
+	add_library(T4CtpOptSuccessfulCreatorFixture MODULE "${WT_COV_T4_CTP_OPT_FIXTURE_DIR}/creator_fixture.cpp")
+	target_include_directories(T4CtpOptSuccessfulCreatorFixture PRIVATE
+		${WT_COV_INCS} "${CMAKE_CURRENT_SOURCE_DIR}/t_CTPOptLoader")
+	set_target_properties(T4CtpOptSuccessfulCreatorFixture PROPERTIES
+		PREFIX "" OUTPUT_NAME "wt_t4_ctpopt_successful_creator"
+		LIBRARY_OUTPUT_DIRECTORY "${WT_COV_T4_CTP_OPT_TEST_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY "${WT_COV_T4_CTP_OPT_TEST_DIR}"
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+
+	if(WIN32)
+		set_target_properties(T4CtpOptMissingSymbolFixture T4CtpOptNullCreatorFixture T4CtpOptSuccessfulCreatorFixture PROPERTIES SUFFIX ".dll")
+	elseif(APPLE)
+		set_target_properties(T4CtpOptMissingSymbolFixture T4CtpOptNullCreatorFixture T4CtpOptSuccessfulCreatorFixture PROPERTIES SUFFIX ".dylib")
+	else()
+		set_target_properties(T4CtpOptMissingSymbolFixture T4CtpOptNullCreatorFixture T4CtpOptSuccessfulCreatorFixture PROPERTIES SUFFIX ".so")
+	endif()
+
+	add_dependencies(CoverageTests_t_CTPOptLoader
+		T4CtpOptMissingSymbolFixture T4CtpOptNullCreatorFixture T4CtpOptSuccessfulCreatorFixture)
+	target_compile_definitions(CoverageTests_t_CTPOptLoader PRIVATE
+		"WT_T4_CTP_OPT_MISSING_SYMBOL_FIXTURE=\"$<TARGET_FILE:T4CtpOptMissingSymbolFixture>\""
+		"WT_T4_CTP_OPT_NULL_CREATOR_FIXTURE=\"$<TARGET_FILE:T4CtpOptNullCreatorFixture>\""
+		"WT_T4_CTP_OPT_SUCCESSFUL_CREATOR_FIXTURE=\"$<TARGET_FILE:T4CtpOptSuccessfulCreatorFixture>\"")
+endif()
+
+# T3-006 exercises TraderCTPMini's real dlopen/dlsym path with controlled
+# creator fixtures located beside CoverageTests_t_TraderCTPMini, as required by
+# getBinDir(). Keep these fixtures outside coverage/ so their factory symbols
+# are not linked into another coverage executable.
+if(TARGET CoverageTests_t_TraderCTPMini)
+	set(WT_T3_006_CTPMINI_FIXTURE "${CMAKE_SOURCE_DIR}/TestUnits/fixtures/t3_006_ctpmini_api.cpp")
+	set(WT_T3_006_CTPMINI_DIR "${CMAKE_BINARY_DIR}/build_${PLATFORM}/${CMAKE_BUILD_TYPE}/bin/TestUnits")
+	set(WT_T3_006_CTPMINI_TEST_INCS
+		"${CMAKE_SOURCE_DIR}"
+		"${CMAKE_CURRENT_SOURCE_DIR}/t_TraderCTPMini")
+
+	add_library(T3_006MiniMissingSymbol MODULE "${WT_T3_006_CTPMINI_FIXTURE}")
+	target_include_directories(T3_006MiniMissingSymbol PRIVATE ${WT_T3_006_CTPMINI_TEST_INCS})
+	target_compile_definitions(T3_006MiniMissingSymbol PRIVATE WT_T3_006_CTPMINI_MISSING_SYMBOL)
+	set_target_properties(T3_006MiniMissingSymbol PROPERTIES
+		PREFIX "" OUTPUT_NAME "wt_t3_006_ctpmini_missing_symbol"
+		LIBRARY_OUTPUT_DIRECTORY "${WT_T3_006_CTPMINI_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY "${WT_T3_006_CTPMINI_DIR}"
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+
+	add_library(T3_006MiniNullCreator MODULE "${WT_T3_006_CTPMINI_FIXTURE}")
+	target_include_directories(T3_006MiniNullCreator PRIVATE ${WT_T3_006_CTPMINI_TEST_INCS})
+	target_compile_definitions(T3_006MiniNullCreator PRIVATE WT_T3_006_CTPMINI_NULL_CREATOR)
+	set_target_properties(T3_006MiniNullCreator PROPERTIES
+		PREFIX "" OUTPUT_NAME "wt_t3_006_ctpmini_null_creator"
+		LIBRARY_OUTPUT_DIRECTORY "${WT_T3_006_CTPMINI_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY "${WT_T3_006_CTPMINI_DIR}"
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+
+	add_library(T3_006MiniSuccessfulCreator MODULE "${WT_T3_006_CTPMINI_FIXTURE}")
+	target_include_directories(T3_006MiniSuccessfulCreator PRIVATE ${WT_T3_006_CTPMINI_TEST_INCS})
+	set_target_properties(T3_006MiniSuccessfulCreator PROPERTIES
+		PREFIX "" OUTPUT_NAME "wt_t3_006_ctpmini_success"
+		LIBRARY_OUTPUT_DIRECTORY "${WT_T3_006_CTPMINI_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY "${WT_T3_006_CTPMINI_DIR}"
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+
+	if(WIN32)
+		target_compile_definitions(T3_006MiniNullCreator PRIVATE ISLIB LIB_MD_API_EXPORT)
+		target_compile_definitions(T3_006MiniSuccessfulCreator PRIVATE ISLIB LIB_MD_API_EXPORT)
+		set_target_properties(T3_006MiniMissingSymbol T3_006MiniNullCreator T3_006MiniSuccessfulCreator PROPERTIES SUFFIX ".dll")
+	elseif(APPLE)
+		set_target_properties(T3_006MiniMissingSymbol T3_006MiniNullCreator T3_006MiniSuccessfulCreator PROPERTIES SUFFIX ".dylib")
+	else()
+		set_target_properties(T3_006MiniMissingSymbol T3_006MiniNullCreator T3_006MiniSuccessfulCreator PROPERTIES SUFFIX ".so")
+	endif()
+
+	add_dependencies(CoverageTests_t_TraderCTPMini
+		T3_006MiniMissingSymbol T3_006MiniNullCreator T3_006MiniSuccessfulCreator)
+	target_compile_definitions(CoverageTests_t_TraderCTPMini PRIVATE
+		"WT_T3_006_CTPMINI_MISSING_SYMBOL_MODULE=\"wt_t3_006_ctpmini_missing_symbol\""
+		"WT_T3_006_CTPMINI_NULL_CREATOR_MODULE=\"wt_t3_006_ctpmini_null_creator\""
+		"WT_T3_006_CTPMINI_SUCCESS_MODULE=\"wt_t3_006_ctpmini_success\"")
+endif()
+
 # UFT TraderAdapter lifecycle tests use a real loadable fixture so factory,
 # init, release and delete exceptions cross the same module boundary as plugins.
 if(TARGET CoverageTests_uftcore)
@@ -371,6 +918,12 @@ if(TARGET CoverageTests_wtcore)
 	add_dependencies(CoverageTests_wtcore R160FakeWtMsgQue)
 	target_compile_definitions(CoverageTests_wtcore PRIVATE
 		"WT_R160_FAKE_MQ_DIR=\"$<TARGET_FILE_DIR:R160FakeWtMsgQue>\"")
+	if(TARGET CoverageTests_uftcore)
+		# Reuse the ABI fixture to observe the UFT notifier's create/destroy calls and confirm argument.
+		add_dependencies(CoverageTests_uftcore R160FakeWtMsgQue)
+		target_compile_definitions(CoverageTests_uftcore PRIVATE
+			"WT_UFT_R160_FAKE_MQ_DIR=\"$<TARGET_FILE_DIR:R160FakeWtMsgQue>\"")
+	endif()
 
 	# R10 checks fail-closed handling when the required MQ log callback export is absent.
 	add_library(R10MissingRegisterWtMsgQue MODULE
@@ -392,6 +945,47 @@ if(TARGET CoverageTests_wtcore)
 	target_compile_definitions(CoverageTests_wtcore PRIVATE
 		"WT_R10_MISSING_REGISTER_MQ_DIR=\"$<TARGET_FILE_DIR:R10MissingRegisterWtMsgQue>\"")
 
+	# R10 also verifies the required create_server export is checked before any
+	# plugin callback or worker is started. Keep this controlled module separate
+	# from the missing-register module so each fixture omits exactly one export.
+	add_library(R10MissingCreateWtMsgQue MODULE
+		"${CMAKE_SOURCE_DIR}/TestUnits/fixtures/r10_missing_create_wtmsgque.cpp")
+	target_include_directories(R10MissingCreateWtMsgQue PRIVATE "${CMAKE_SOURCE_DIR}")
+	set_target_properties(R10MissingCreateWtMsgQue PROPERTIES
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON
+		OUTPUT_NAME "WtMsgQue"
+		LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/r10_missing_create_mq"
+		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/r10_missing_create_mq")
+	if(WIN32)
+		set_target_properties(R10MissingCreateWtMsgQue PROPERTIES PREFIX "" SUFFIX ".dll")
+	elseif(APPLE)
+		set_target_properties(R10MissingCreateWtMsgQue PROPERTIES PREFIX "lib" SUFFIX ".dylib")
+	else()
+		set_target_properties(R10MissingCreateWtMsgQue PROPERTIES PREFIX "lib" SUFFIX ".so")
+	endif()
+	add_dependencies(CoverageTests_wtcore R10MissingCreateWtMsgQue)
+	target_compile_definitions(CoverageTests_wtcore PRIVATE
+		"WT_R10_MISSING_CREATE_MQ_DIR=\"$<TARGET_FILE_DIR:R10MissingCreateWtMsgQue>\"")
+
+	# R6 verifies that plugin creator exceptions stop at the exported strategy-factory C API.
+	add_library(R6ThrowingStrategyFactory MODULE
+		"${CMAKE_SOURCE_DIR}/TestUnits/fixtures/r6_throwing_strategy_factory.cpp")
+	set_target_properties(R6ThrowingStrategyFactory PROPERTIES
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON
+		OUTPUT_NAME "r6_throwing_strategy_factory"
+		LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/r6_throwing_factory"
+		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/r6_throwing_factory")
+	if(WIN32)
+		set_target_properties(R6ThrowingStrategyFactory PROPERTIES PREFIX "" SUFFIX ".dll")
+	elseif(APPLE)
+		set_target_properties(R6ThrowingStrategyFactory PROPERTIES PREFIX "lib" SUFFIX ".dylib")
+	else()
+		set_target_properties(R6ThrowingStrategyFactory PROPERTIES PREFIX "lib" SUFFIX ".so")
+	endif()
+	add_dependencies(CoverageTests_porter R6ThrowingStrategyFactory)
+	target_compile_definitions(CoverageTests_porter PRIVATE
+		"WT_R6_THROWING_FACTORY_DIR=\"$<TARGET_FILE_DIR:R6ThrowingStrategyFactory>\"")
+
 	add_library(R59CredentialsTrader MODULE "${CMAKE_SOURCE_DIR}/TestUnits/fixtures/r59_credentials_trader.cpp")
 	target_include_directories(R59CredentialsTrader PRIVATE "${CMAKE_SOURCE_DIR}")
 	set_target_properties(R59CredentialsTrader PROPERTIES
@@ -408,6 +1002,53 @@ if(TARGET CoverageTests_wtcore)
 	add_dependencies(CoverageTests_wtcore R59CredentialsTrader)
 	target_compile_definitions(CoverageTests_wtcore PRIVATE
 		"R59_CREDENTIALS_PLUGIN_PATH=\"$<TARGET_FILE:R59CredentialsTrader>\"")
+
+	# P11 risk tests use the real TraderMocker API with a temporary install dir.
+	add_dependencies(CoverageTests_wtcore TraderMocker)
+	target_compile_definitions(CoverageTests_wtcore PRIVATE
+		"WT_P11_TRADERMOCKER_PATH=\"$<TARGET_FILE:TraderMocker>\"")
+
+	# R81 risk rejection tests need an init()-based local trader plugin and
+	# observable insert/cancel counts without starting a real or simulated session.
+	add_library(R81RiskFakeTrader MODULE
+		"${CMAKE_SOURCE_DIR}/TestUnits/fixtures/r81_risk_fake_trader.cpp")
+	target_include_directories(R81RiskFakeTrader PRIVATE "${CMAKE_SOURCE_DIR}")
+	set_target_properties(R81RiskFakeTrader PROPERTIES
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON
+		OUTPUT_NAME "R81RiskFakeTrader"
+		LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/r81_risk_plugins"
+		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/r81_risk_plugins")
+	if(WIN32)
+		set_target_properties(R81RiskFakeTrader PROPERTIES PREFIX "" SUFFIX ".dll")
+	elseif(APPLE)
+		set_target_properties(R81RiskFakeTrader PROPERTIES PREFIX "lib" SUFFIX ".dylib")
+	else()
+		set_target_properties(R81RiskFakeTrader PROPERTIES PREFIX "lib" SUFFIX ".so")
+	endif()
+	add_dependencies(CoverageTests_wtcore R81RiskFakeTrader)
+	target_compile_definitions(CoverageTests_wtcore PRIVATE
+		"WT_R81_RISK_FAKE_TRADER_PATH=\"$<TARGET_FILE:R81RiskFakeTrader>\"")
+
+	# R130 verifies WtCore ParserAdapter config ownership through its real
+	# loadable-module path with a deterministic, non-threaded parser API.
+	add_library(R130ParserLifecycle MODULE
+		"${CMAKE_SOURCE_DIR}/TestUnits/fixtures/r130_parser_lifecycle.cpp")
+	target_include_directories(R130ParserLifecycle PRIVATE "${CMAKE_SOURCE_DIR}")
+	set_target_properties(R130ParserLifecycle PROPERTIES
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON
+		OUTPUT_NAME "R130LifecycleParser"
+		LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/r130_parser_plugins"
+		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/r130_parser_plugins")
+	if(WIN32)
+		set_target_properties(R130ParserLifecycle PROPERTIES PREFIX "" SUFFIX ".dll")
+	elseif(APPLE)
+		set_target_properties(R130ParserLifecycle PROPERTIES PREFIX "lib" SUFFIX ".dylib")
+	else()
+		set_target_properties(R130ParserLifecycle PROPERTIES PREFIX "lib" SUFFIX ".so")
+	endif()
+	add_dependencies(CoverageTests_wtcore R130ParserLifecycle)
+	target_compile_definitions(CoverageTests_wtcore PRIVATE
+		"WT_R130_PARSER_PLUGIN_PATH=\"$<TARGET_FILE:R130ParserLifecycle>\"")
 endif()
 
 # Versioned execution-plugin loading contract: each fixture is a real loadable
@@ -485,6 +1126,14 @@ set_target_properties(CovExecV2Valid PROPERTIES
 	OUTPUT_NAME "valid"
 	LIBRARY_OUTPUT_DIRECTORY "${WT_COV_EXEC_V2_PLUGIN_DIR}"
 	RUNTIME_OUTPUT_DIRECTORY "${WT_COV_EXEC_V2_PLUGIN_DIR}")
+if(TARGET CoverageTests_btcore)
+	add_dependencies(CoverageTests_btcore CovExecV2Valid)
+	target_compile_definitions(CoverageTests_btcore PRIVATE
+		"WT_N04_EXEC_V2_VALID_MODULE=\"$<TARGET_FILE:CovExecV2Valid>\"")
+endif()
+if(TARGET CoverageTests_btporter)
+	add_dependencies(CoverageTests_btporter CovExecV2Valid)
+endif()
 add_library(CovExecLegacy MODULE v2_exec_plugin/legacy_exec_plugin.cpp)
 target_include_directories(CovExecLegacy PRIVATE ${WT_COV_INCS})
 set_target_properties(CovExecLegacy PROPERTIES
@@ -699,6 +1348,21 @@ foreach(_hft_host_test CoverageTests_wtcore CoverageTests_btcore)
 	add_dependencies(${_hft_host_test} CoverageWtHftStraFactPlugin)
 endforeach()
 
+# BUG-R6-008 positive C API registration controls use actual built plugins.
+# This block follows all three targets so CMake can attach build dependencies.
+add_dependencies(CoverageTests_porter
+	WtCtaStraFact CoverageWtSelStraFactPlugin CoverageWtHftStraFactPlugin)
+target_compile_definitions(CoverageTests_porter PRIVATE
+	"WT_R6_CTA_FACTORY_PLUGIN=\"$<TARGET_FILE:WtCtaStraFact>\""
+	"WT_R6_SEL_FACTORY_PLUGIN=\"$<TARGET_FILE:CoverageWtSelStraFactPlugin>\""
+	"WT_R6_HFT_FACTORY_PLUGIN=\"$<TARGET_FILE:CoverageWtHftStraFactPlugin>\"")
+
+# R134 loads the actual WtDataStorage module through WtDtMgr; provide its exact
+# built location instead of deriving it from the test executable's directory.
+add_dependencies(CoverageTests_porter WtDataStorage)
+target_compile_definitions(CoverageTests_porter PRIVATE
+	"WT_COV_R134_DATA_STORAGE_MODULE=\"$<TARGET_FILE:WtDataStorage>\"")
+
 # ---------------------------------------------------------------------------
 # 带 main() 的可执行体（EX-14/EX-15 那一类）：用编译期重命名入口的方式纳入测试
 # 实测通路（2026-10-27）：用构建系统自身命令加 -Dmain=<模块>_coverage_main 编译
@@ -707,6 +1371,22 @@ endforeach()
 # 这样不必为了测试去改产品构建（OBJECT 化与否仍可由评审另行决定）。
 # 用例目录约定：src/TestUnits/coverage/m_<模块名>/*.cpp，空目录自动跳过。
 SET(WT_MAIN_MODULES WtRunner WtBtRunner WtUftRunner LoaderRunner QuoteFactory WtLatencyHFT WtLatencyUFT)
+# R95 exercises WtUftRunner's dynamic UFT strategy loading boundary. Keep the
+# fake factory in a separate module so its C exports are reached only by dlopen.
+ADD_LIBRARY(R95UftStrategy MODULE "${CMAKE_SOURCE_DIR}/TestUnits/fixtures/r95_uft_strategy.cpp")
+TARGET_INCLUDE_DIRECTORIES(R95UftStrategy PRIVATE ${WT_COV_INCS})
+SET_TARGET_PROPERTIES(R95UftStrategy PROPERTIES
+	OUTPUT_NAME "r95_uft_strategy"
+	LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/r95_uft_strategy_fixture"
+	RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/r95_uft_strategy_fixture"
+	CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+IF(WIN32)
+	SET_TARGET_PROPERTIES(R95UftStrategy PROPERTIES PREFIX "" SUFFIX ".dll")
+ELSEIF(APPLE)
+	SET_TARGET_PROPERTIES(R95UftStrategy PROPERTIES PREFIX "lib" SUFFIX ".dylib")
+ELSE()
+	SET_TARGET_PROPERTIES(R95UftStrategy PROPERTIES PREFIX "lib" SUFFIX ".so")
+ENDIF()
 FOREACH(mod ${WT_MAIN_MODULES})
 	file(GLOB mod_tus CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/${mod}/*.cpp")
 	file(GLOB mod_tests CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/m_${mod}/*.cpp")
@@ -736,8 +1416,18 @@ FOREACH(mod ${WT_MAIN_MODULES})
 	ENDFOREACH()
 	MESSAGE(STATUS "coverage: CoverageTests_m_${mod} 附加核心静态库 [${WT_M_CORES}]")
 	ADD_EXECUTABLE(CoverageTests_m_${mod} ${mod_tests} ${mod_tus})
+	IF(mod STREQUAL "QuoteFactory")
+		# R14 launches the actual executable, so build it with its isolated coverage test.
+		ADD_DEPENDENCIES(CoverageTests_m_${mod} QuoteFactory)
+	ENDIF()
 	TARGET_INCLUDE_DIRECTORIES(CoverageTests_m_${mod} PRIVATE ${WT_COV_INCS})
 	IF(mod STREQUAL "WtRunner")
+		# R6's real entry success control loads the local storage module from the isolated child cwd.
+		add_dependencies(CoverageTests_m_${mod} WtDataStorage WtCtaStraFact)
+		target_compile_definitions(CoverageTests_m_${mod} PRIVATE
+			"WT_R28_CTA_FACTORY_PLUGIN_PATH=\"$<TARGET_FILE:WtCtaStraFact>\"")
+		target_compile_definitions(CoverageTests_m_${mod} PRIVATE
+			"WT_R28_DATA_STORAGE_PLUGIN_PATH=\"$<TARGET_FILE:WtDataStorage>\"")
 		# Match WtRunner's product link set; in particular, do not bring in
 		# WtBtPorter/WtBtCore or other global coverage libraries that can supply
 		# a conflicting EventNotifier implementation.
@@ -796,6 +1486,29 @@ FOREACH(mod ${WT_MAIN_MODULES})
 	ENDIF()
 	SET_TARGET_PROPERTIES(CoverageTests_m_${mod} PROPERTIES
 		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+	IF(mod STREQUAL "WtLatencyHFT" OR mod STREQUAL "WtLatencyUFT")
+		TARGET_COMPILE_DEFINITIONS(CoverageTests_m_${mod} PRIVATE WT_LATENCY_TOOL_TEST_HOOKS)
+	ENDIF()
+	IF(mod STREQUAL "WtBtRunner")
+		TARGET_COMPILE_DEFINITIONS(CoverageTests_m_${mod} PRIVATE
+			"WT_COV_SEL_PLUGIN_PATH=\"$<TARGET_FILE:CoverageWtSelStraFactPlugin>\"")
+		ADD_DEPENDENCIES(CoverageTests_m_${mod} CoverageWtSelStraFactPlugin)
+	ENDIF()
+	IF(mod STREQUAL "WtUftRunner" AND TARGET UftLifecycleFakeTrader)
+		ADD_DEPENDENCIES(CoverageTests_m_${mod} UftLifecycleFakeTrader)
+		TARGET_COMPILE_DEFINITIONS(CoverageTests_m_${mod} PRIVATE
+			"WT_UFT_LIFECYCLE_FAKE_PLUGIN_PATH=\"$<TARGET_FILE:UftLifecycleFakeTrader>\"")
+	ENDIF()
+	IF(mod STREQUAL "WtUftRunner" AND TARGET R130ParserLifecycle)
+		ADD_DEPENDENCIES(CoverageTests_m_${mod} R130ParserLifecycle)
+		TARGET_COMPILE_DEFINITIONS(CoverageTests_m_${mod} PRIVATE
+			"WT_R95_PARSER_PLUGIN_PATH=\"$<TARGET_FILE:R130ParserLifecycle>\"")
+	ENDIF()
+		IF(mod STREQUAL "WtUftRunner")
+			ADD_DEPENDENCIES(CoverageTests_m_${mod} R95UftStrategy)
+			TARGET_COMPILE_DEFINITIONS(CoverageTests_m_${mod} PRIVATE
+				"WT_R95_UFT_STRATEGY_PLUGIN_PATH=\"$<TARGET_FILE:R95UftStrategy>\"")
+		ENDIF()
 	LIST(APPEND MOVED_SRCS ${mod_tests})
 	MESSAGE(STATUS "coverage: CoverageTests_m_${mod} 建立，用例 ${mod_tests}")
 ENDFOREACH()
@@ -823,6 +1536,7 @@ WT_COV_ISOLATE_INST_HLP(${COV_SRCS})
 ADD_EXECUTABLE(CoverageTests ${COV_SRCS})
 TARGET_INCLUDE_DIRECTORIES(CoverageTests PRIVATE ${WT_COV_INCS})
 TARGET_LINK_LIBRARIES(CoverageTests PRIVATE ${WT_COV_SHARED_LIBS} WtDtCore WtCore)
+TARGET_COMPILE_DEFINITIONS(CoverageTests PRIVATE WT_DATA_WRITER_TEST_HOOKS WT_RDM_DT_READER_TEST_HOOKS)
 SET_TARGET_PROPERTIES(CoverageTests PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 
 LIST(LENGTH COV_SRCS main_n)
@@ -854,5 +1568,80 @@ if(UNIX)
 		"MODULE_HELPER_ODR_FIXTURE_PATH=\"$<TARGET_FILE:ModuleHelperOdrFixture>\""
 		"MODULE_HELPER_ODR_TEST_PATH=\"$<TARGET_FILE:CoverageTests_modulehelper_odr>\"")
 	set_target_properties(CoverageTests_modulehelper_odr PROPERTIES
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+elseif(MSVC)
+	# BUG-L00-010: two Windows DLLs exercise multi-TU ownership, executable
+	# ownership, static initialization and unload/reload independently.
+	add_subdirectory("${CMAKE_SOURCE_DIR}/TestUnits/fixtures/module_helper_odr/windows"
+		"${CMAKE_CURRENT_BINARY_DIR}/module_helper_windows")
+endif()
+
+# Controlled YD module fixtures for BUG-R60-004. Keep them beside the TraderYD
+# test executable because TraderYD resolves modules relative to its own binary.
+if(TARGET CoverageTests_t_TraderYD)
+	set(WT_COV_R60_YD_FIXTURE_DIR "${CMAKE_SOURCE_DIR}/TestUnits/fixtures/r60_yd")
+	set(WT_COV_R60_YD_TEST_DIR "${CMAKE_BINARY_DIR}/build_${PLATFORM}/${CMAKE_BUILD_TYPE}/bin/TestUnits")
+	add_library(R60YdFactoryFixture SHARED "${WT_COV_R60_YD_FIXTURE_DIR}/r60_yd_factory_fixture.cpp")
+	target_include_directories(R60YdFactoryFixture PRIVATE ${WT_COV_INCS} "${CMAKE_CURRENT_SOURCE_DIR}/t_TraderYD")
+	set_target_properties(R60YdFactoryFixture PROPERTIES
+		PREFIX "" OUTPUT_NAME "yd_r60_factory_fixture"
+		LIBRARY_OUTPUT_DIRECTORY "${WT_COV_R60_YD_TEST_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY "${WT_COV_R60_YD_TEST_DIR}"
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+
+	add_library(R60YdMissingSymbolFixture SHARED "${WT_COV_R60_YD_FIXTURE_DIR}/r60_yd_missing_symbol_fixture.cpp")
+	set_target_properties(R60YdMissingSymbolFixture PROPERTIES
+		PREFIX "" OUTPUT_NAME "yd_r60_missing_symbol_fixture"
+		LIBRARY_OUTPUT_DIRECTORY "${WT_COV_R60_YD_TEST_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY "${WT_COV_R60_YD_TEST_DIR}"
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+
+	add_dependencies(CoverageTests_t_TraderYD R60YdFactoryFixture R60YdMissingSymbolFixture)
+endif()
+
+# T1-CTPOpt-05 verifies TraderCTPOpt's own dlopen/dlsym guards. The missing
+# creator fixture is placed beside its test executable because getBinDir()
+# resolves modules from that directory.
+if(TARGET CoverageTests_t_TraderCTPOpt)
+	set(WT_COV_T1_CTPOPT_FIXTURE_DIR "${CMAKE_SOURCE_DIR}/TestUnits/fixtures/t1_ctpopt_init")
+	set(WT_COV_T1_CTPOPT_TEST_DIR "${CMAKE_BINARY_DIR}/build_${PLATFORM}/${CMAKE_BUILD_TYPE}/bin/TestUnits")
+	add_library(T1CtpOptMissingSymbolFixture MODULE "${WT_COV_T1_CTPOPT_FIXTURE_DIR}/missing_symbol.cpp")
+	set_target_properties(T1CtpOptMissingSymbolFixture PROPERTIES
+		PREFIX "" OUTPUT_NAME "wt_t1_ctpopt_missing_symbol"
+		LIBRARY_OUTPUT_DIRECTORY "${WT_COV_T1_CTPOPT_TEST_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY "${WT_COV_T1_CTPOPT_TEST_DIR}"
+		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+	if(WIN32)
+		set_target_properties(T1CtpOptMissingSymbolFixture PROPERTIES SUFFIX ".dll")
+	elseif(APPLE)
+		set_target_properties(T1CtpOptMissingSymbolFixture PROPERTIES SUFFIX ".dylib")
+	else()
+		set_target_properties(T1CtpOptMissingSymbolFixture PROPERTIES SUFFIX ".so")
+	endif()
+	add_dependencies(CoverageTests_t_TraderCTPOpt T1CtpOptMissingSymbolFixture)
+	target_compile_definitions(CoverageTests_t_TraderCTPOpt PRIVATE
+		"WT_T1_CTPOPT_MISSING_SYMBOL_MODULE=\"wt_t1_ctpopt_missing_symbol\"")
+endif()
+
+# Isolated positive YAML startup test for CTPLoader. The executable compiles the
+# loader source directly and supplies a test-only definition of
+# CThostFtdcTraderApi::CreateFtdcTraderApi; it deliberately does not link the
+# vendor CTP archive, so the successful run cannot create a real API or connect.
+if(APPLE)
+	set(T6_CTP_YAML_FIXTURE_DIR "${CMAKE_SOURCE_DIR}/TestUnits/fixtures")
+	set(T6_CTP_YAML_TEST_DIR "${CMAKE_BINARY_DIR}/build_${PLATFORM}/${CMAKE_BUILD_TYPE}/bin/TestUnits")
+	add_executable(CoverageTests_t_CTPLoaderYamlPositive
+		"${CMAKE_SOURCE_DIR}/CTPLoader/CTPLoader.cpp"
+		"${CMAKE_SOURCE_DIR}/CTPLoader/TraderSpi.cpp"
+		"${T6_CTP_YAML_FIXTURE_DIR}/t6_ctploader_yaml_factory_stub.cpp"
+		"${T6_CTP_YAML_FIXTURE_DIR}/t6_ctploader_yaml_factory_test.cpp")
+	target_include_directories(CoverageTests_t_CTPLoaderYamlPositive PRIVATE
+		${WT_COV_INCS}
+		"${CMAKE_SOURCE_DIR}/API/CTP6.6.9")
+	target_link_libraries(CoverageTests_t_CTPLoaderYamlPositive PRIVATE
+		GTest::gtest_main Threads::Threads WTSTools WTSUtils
+		boost_filesystem boost_thread ${CMAKE_DL_LIBS} ${ICONV_LIBRARY})
+	set_target_properties(CoverageTests_t_CTPLoaderYamlPositive PROPERTIES
+		RUNTIME_OUTPUT_DIRECTORY "${T6_CTP_YAML_TEST_DIR}"
 		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 endif()

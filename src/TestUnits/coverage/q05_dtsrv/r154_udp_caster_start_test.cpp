@@ -85,6 +85,35 @@ int bind_udp_loopback(uint16_t* boundPort)
 	return fd;
 }
 
+int bind_udp_any(uint16_t* boundPort)
+{
+	const int fd = ::socket(AF_INET, SOCK_DGRAM, 0);
+	if (fd < 0)
+		return -1;
+
+	sockaddr_in addr;
+	memset(&addr, 0, sizeof(addr));
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	addr.sin_port = 0;
+	if (::bind(fd, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) != 0)
+	{
+		::close(fd);
+		return -1;
+	}
+
+	socklen_t len = sizeof(addr);
+	if (::getsockname(fd, reinterpret_cast<sockaddr*>(&addr), &len) != 0)
+	{
+		::close(fd);
+		return -1;
+	}
+
+	if (boundPort != nullptr)
+		*boundPort = ntohs(addr.sin_port);
+	return fd;
+}
+
 int pick_free_udp_port()
 {
 	// 与 UDPCaster::start() 的 bind 形态保持一致（0.0.0.0），避免探测端口与
@@ -170,6 +199,45 @@ protected:
 
 	fs::path _dir;
 };
+
+TEST_F(R154UdpCasterTest, SubscriptionBindFailureReturnsFalseAndCanRetry)
+{
+	uint16_t occupiedPort = 0;
+	const int blocker = bind_udp_any(&occupiedPort);
+	ASSERT_GE(blocker, 0);
+	ASSERT_NE(occupiedPort, 0);
+
+	WTSVariant* cfg = loadCfg("occupied_subscribe.json",
+		std::string(R"JSON({
+		"active": true,
+		"sport": )JSON") + std::to_string(occupiedPort) + R"JSON(,
+		"broadcast": [
+			{"host": "127.0.0.1", "port": 9, "type": 2}
+		]
+	})JSON");
+	ASSERT_NE(cfg, nullptr);
+
+	r154::LeakyCaster caster;
+	caster.arm();
+	EXPECT_FALSE(caster->init(cfg, nullptr, nullptr));
+	cfg->release();
+
+	// start failed before receive registration or thread launch; after the external
+	// owner releases the port, the same caster can start and answer a loopback probe.
+	::close(blocker);
+	ASSERT_TRUE(caster->start(occupiedPort));
+
+	const int clientFd = bind_udp_loopback(nullptr);
+	ASSERT_GE(clientFd, 0);
+	const uint32_t junk = 0x12345678u;
+	ASSERT_TRUE(send_datagram(clientFd, occupiedPort, &junk, sizeof(junk)));
+	std::vector<char> reply;
+	ASSERT_GT(recv_datagram(clientFd, reply, 3000), 0);
+	EXPECT_EQ(std::string(reply.begin(), reply.end()), "Can not indentify the command");
+
+	caster.stop_once();
+	::close(clientFd);
+}
 
 /*
  * UDPCaster.cpp:62-143

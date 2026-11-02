@@ -85,6 +85,22 @@ class ReaderSink : public q03::ReaderSink
 public:
 	ReaderSink(IBaseDataMgr* bd, IHotMgr* hot) : q03::ReaderSink(bd, hot) {}
 
+	void reader_log(WTSLogLevel ll, const char* message) override
+	{
+		q03::ReaderSink::reader_log(ll, message);
+		_messages.emplace_back(message == NULL ? "" : message);
+	}
+
+	bool has_log_containing(const string& needle) const
+	{
+		for (const string& message : _messages)
+		{
+			if (message.find(needle) != string::npos)
+				return true;
+		}
+		return false;
+	}
+
 	void on_bar(const char* stdCode, WTSKlinePeriod period, WTSBarStruct* bar) override
 	{
 		_bar_cnt++;
@@ -104,6 +120,7 @@ private:
 	string			_last_code;
 	WTSKlinePeriod	_last_period = KP_DAY;
 	WTSBarStruct	_last_bar = WTSBarStruct();
+	vector<string>	_messages;
 };
 
 // ---------------------------------------------------------------- 历史数据加载器替身

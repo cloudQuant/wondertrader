@@ -1,0 +1,9 @@
+#!/bin/zsh
+set -eu
+compiler=/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++
+common=(-std=c++17 -O0 -g -fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all -nostdinc++ -isystem /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include -I/opt/homebrew/Cellar/spdlog/1.15.3/include -I/opt/homebrew/Cellar/googletest/1.17.0/include -I/usr/local/include -Isrc -include src/Share/fmt_enum_compat.h)
+for item in 'src/WtCore/HftStraBaseCtx.cpp:base' 'src/WtCore/HftStraContext.cpp:ctx' 'src/WtCore/WtHftEngine.cpp:engine' 'src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:test'; do
+ source=${item%%:*}; name=${item#*:}
+ "$compiler" $common -c "$source" -o /private/tmp/wt-i03-r15-tags/asan-${name}.o > /private/tmp/wt-i03-r15-tags/asan-${name}-build.log 2>&1
+done
+"$compiler" -g -fsanitize=address,undefined -fprofile-instr-generate -Wl,-undefined,dynamic_lookup -Wl,-no_warn_duplicate_libraries /private/tmp/wt-i03-r15-tags/asan-{test,base,ctx,engine}.o -o /private/tmp/wt-i03-r15-tags/asan-tests /opt/homebrew/Cellar/googletest/1.17.0/lib/libgtest_main.a /opt/homebrew/Cellar/googletest/1.17.0/lib/libgtest.a /private/tmp/wt-r14-resume/build/build_x64/Debug/libs/libWtCore.a /private/tmp/wt-r14-resume/build/build_x64/Debug/libs/libWTSTools.a /private/tmp/wt-r14-resume/build/build_x64/Debug/libs/libWTSUtils.a /private/tmp/wt-r14-resume/build/build_x64/Debug/bin/libWtShareHelper.dylib /usr/local/lib/libnanomsg.6.0.1.dylib /opt/homebrew/Cellar/boost/1.88.0/lib/libboost_filesystem.dylib /opt/homebrew/Cellar/boost/1.88.0/lib/libboost_thread.dylib -liconv -lpthread -Wl,-rpath,/private/tmp/wt-r14-resume/build/build_x64/Debug/bin -Wl,-rpath,/private/tmp/wt-i03-r15-tags/libs > /private/tmp/wt-i03-r15-tags/asan-link.log 2>&1

@@ -531,6 +531,54 @@ TEST_F(L02VariantFixture, WtsArrayMergeIterateAndSort)
 	RefProbe::s_dtor = 0;
 }
 
+//////////////////////////////////////////////////////////////// WTSMap
+TEST_F(L02VariantFixture, WtsMapNullAndOwnedValuesAcrossClear)
+{
+	WTSMap<int>* map = WTSMap<int>::create();
+	RefProbe* owned = new RefProbe(11);
+	map->add(1, NULL);
+	map->add(2, owned);
+	EXPECT_EQ(2u, map->size());
+	EXPECT_NE(map->end(), map->find(1));
+	EXPECT_EQ(nullptr, map->get(1));
+	EXPECT_EQ(nullptr, (*map)[1]);
+	EXPECT_EQ(nullptr, map->grab(1));
+	EXPECT_EQ(map->end(), map->find(3));
+	EXPECT_EQ(2u, owned->retainCount());
+
+	map->add(1, owned);
+	EXPECT_EQ(3u, owned->retainCount());
+	WTSObject* grabbed = map->grab(1);
+	ASSERT_EQ(owned, grabbed);
+	EXPECT_EQ(4u, owned->retainCount());
+	grabbed->release();
+	map->add(1, NULL);
+	EXPECT_EQ(2u, owned->retainCount());
+	map->remove(1);
+	EXPECT_EQ(1u, map->size());
+	map->add(3, NULL);
+
+	map->clear();  // Release the live entry, skip the null entry.
+	EXPECT_EQ(0u, map->size());
+	EXPECT_EQ(1u, owned->retainCount());
+	map->release();
+	owned->release();
+	EXPECT_EQ(1, RefProbe::s_dtor);
+	RefProbe::s_dtor = 0;
+}
+
+TEST_F(L02VariantFixture, WtsMapFinalReleaseSkipsNullAndReleasesTransferredValue)
+{
+	WTSMap<int>* map = WTSMap<int>::create();
+	RefProbe* transferred = new RefProbe(12);
+	map->add(1, NULL);
+	map->add(2, transferred, false);  // Transfer the caller's reference.
+	EXPECT_EQ(1u, transferred->retainCount());
+	map->release();
+	EXPECT_EQ(1, RefProbe::s_dtor);
+	RefProbe::s_dtor = 0;
+}
+
 //////////////////////////////////////////////////////////////// WTSHashMap
 TEST_F(L02VariantFixture, WtsHashMapAddGetGrabRemove)
 {
@@ -593,6 +641,51 @@ TEST_F(L02VariantFixture, WtsHashMapClearReleasesEntries)
 	map->release();
 	p->release();
 	EXPECT_EQ(1, RefProbe::s_dtor);
+	RefProbe::s_dtor = 0;
+}
+
+TEST_F(L02VariantFixture, WtsHashMapNullValuesRemainSafeAcrossLifecycle)
+{
+	StrHashMap* map = StrHashMap::create();
+	map->add("remove-null", NULL);
+	EXPECT_EQ(1u, map->size());
+	StrHashMap::ConstIterator null_it = map->find("remove-null");
+	ASSERT_NE(null_it, map->end());
+	EXPECT_EQ(nullptr, null_it->second);
+	EXPECT_EQ(nullptr, map->get("remove-null"));
+	EXPECT_EQ(nullptr, map->grab("remove-null"));
+	EXPECT_EQ(map->end(), map->find("missing"));
+	map->remove("remove-null");
+	EXPECT_EQ(0u, map->size());
+
+	map->add("clear-null", NULL);
+	map->clear();
+	EXPECT_EQ(0u, map->size());
+	EXPECT_EQ(map->end(), map->find("clear-null"));
+
+	RefProbe* replaced = new RefProbe(1);
+	map->add("replace-null", NULL);
+	map->add("replace-null", replaced);
+	EXPECT_EQ(2u, replaced->retainCount());
+	map->add("replace-null", NULL);
+	EXPECT_EQ(1u, replaced->retainCount());
+	EXPECT_EQ(1u, map->size());
+	EXPECT_NE(map->end(), map->find("replace-null"));
+	EXPECT_EQ(nullptr, map->get("replace-null"));
+
+	RefProbe* cleared = new RefProbe(2);
+	map->add("owned", cleared);
+	EXPECT_EQ(2u, cleared->retainCount());
+	map->clear();	// Must skip the null value and release the owned object once.
+	EXPECT_EQ(0u, map->size());
+	EXPECT_EQ(1u, replaced->retainCount());
+	EXPECT_EQ(1u, cleared->retainCount());
+
+	map->add("release-null", NULL);
+	map->release();	// Final release delegates to clear and must also tolerate NULL.
+	replaced->release();
+	cleared->release();
+	EXPECT_EQ(2, RefProbe::s_dtor);
 	RefProbe::s_dtor = 0;
 }
 

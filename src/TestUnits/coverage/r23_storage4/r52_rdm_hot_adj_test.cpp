@@ -353,4 +353,117 @@ TEST_F(R52RdmTest, R52ExrightRealtimeRangeSkipsAnEmptyRealtimeBlock)
 		202401100900ull, 202401100930ull));
 }
 
+// ---------------------------------------------------------------- BUG-R52-002：后复权 RT 查询的 etime 边界
+// etime 是包含式上界；早于首条时不选 RT bar，晚于末条时最多选到实际末条。
+TEST_F(R52RdmTest, R52ExrightRealtimeRangeBoundsBeforeHitAndAfterLast)
+{
+	const string rtFile = "rt/min1/SSE/600000.dmb";
+	auto install_bars = [&](const vector<WTSBarStruct>& bars)
+	{
+		_reader.clearCache();
+		return write_bytes(rtFile,
+			make_rt_block<WTSBarStruct>(BT_RT_Minute1, kCurTDate,
+				(uint32_t)bars.size(), 8, bars));
+	};
+
+	const uint64_t start = 202401100900ull;
+	vector<WTSBarStruct> single{
+		make_bar(kCurTDate, min_bar_time(kCurTDate, 930), 10)};
+	ASSERT_TRUE(install_bars(single));
+	EXPECT_EQ(nullptr, _reader.readKlineSliceByRange("SSE.STK.600000+", KP_Minute1,
+		start, 202401100929ull));
+
+	WTSKlineSlice* exactSingle = _reader.readKlineSliceByRange("SSE.STK.600000+", KP_Minute1,
+		start, 202401100930ull);
+	ASSERT_NE(nullptr, exactSingle);
+	ASSERT_EQ(exactSingle->size(), 1u);
+	EXPECT_EQ(exactSingle->at(0)->time, single[0].time);
+	exactSingle->release();
+
+	WTSKlineSlice* afterSingle = _reader.readKlineSliceByRange("SSE.STK.600000+", KP_Minute1,
+		start, 202401100931ull);
+	ASSERT_NE(nullptr, afterSingle);
+	ASSERT_EQ(afterSingle->size(), 1u);
+	EXPECT_EQ(afterSingle->at(0)->time, single[0].time);
+	afterSingle->release();
+
+	vector<WTSBarStruct> multiple{
+		make_bar(kCurTDate, min_bar_time(kCurTDate, 930), 20),
+		make_bar(kCurTDate, min_bar_time(kCurTDate, 931), 21),
+		make_bar(kCurTDate, min_bar_time(kCurTDate, 932), 22)};
+	ASSERT_TRUE(install_bars(multiple));
+	EXPECT_EQ(nullptr, _reader.readKlineSliceByRange("SSE.STK.600000+", KP_Minute1,
+		start, 202401100929ull));
+
+	WTSKlineSlice* exactMiddle = _reader.readKlineSliceByRange("SSE.STK.600000+", KP_Minute1,
+		start, 202401100931ull);
+	ASSERT_NE(nullptr, exactMiddle);
+	ASSERT_EQ(exactMiddle->size(), 2u);
+	EXPECT_EQ(exactMiddle->at(0)->time, multiple[0].time);
+	EXPECT_EQ(exactMiddle->at(1)->time, multiple[1].time);
+	exactMiddle->release();
+
+	WTSKlineSlice* afterMultiple = _reader.readKlineSliceByRange("SSE.STK.600000+", KP_Minute1,
+		start, 202401100933ull);
+	ASSERT_NE(nullptr, afterMultiple);
+	ASSERT_EQ(afterMultiple->size(), 3u);
+	EXPECT_EQ(afterMultiple->at(2)->time, multiple[2].time);
+	afterMultiple->release();
+}
+
+TEST_F(R52RdmTest, R52ExrightRealtimeCountBoundsBeforeHitAndAfterLast)
+{
+	const string rtFile = "rt/min1/SSE/600000.dmb";
+	auto install_bars = [&](const vector<WTSBarStruct>& bars)
+	{
+		_reader.clearCache();
+		return write_bytes(rtFile,
+			make_rt_block<WTSBarStruct>(BT_RT_Minute1, kCurTDate,
+				(uint32_t)bars.size(), 8, bars));
+	};
+
+	vector<WTSBarStruct> single{
+		make_bar(kCurTDate, min_bar_time(kCurTDate, 930), 30)};
+	ASSERT_TRUE(install_bars(single));
+	EXPECT_EQ(nullptr, _reader.readKlineSliceByCount("SSE.STK.600000+", KP_Minute1, 1,
+		202401100929ull));
+
+	WTSKlineSlice* exactSingle = _reader.readKlineSliceByCount("SSE.STK.600000+", KP_Minute1, 1,
+		202401100930ull);
+	ASSERT_NE(nullptr, exactSingle);
+	ASSERT_EQ(exactSingle->size(), 1u);
+	EXPECT_EQ(exactSingle->at(0)->time, single[0].time);
+	exactSingle->release();
+
+	WTSKlineSlice* afterSingle = _reader.readKlineSliceByCount("SSE.STK.600000+", KP_Minute1, 1,
+		202401100931ull);
+	ASSERT_NE(nullptr, afterSingle);
+	ASSERT_EQ(afterSingle->size(), 1u);
+	EXPECT_EQ(afterSingle->at(0)->time, single[0].time);
+	afterSingle->release();
+
+	vector<WTSBarStruct> multiple{
+		make_bar(kCurTDate, min_bar_time(kCurTDate, 930), 40),
+		make_bar(kCurTDate, min_bar_time(kCurTDate, 931), 41),
+		make_bar(kCurTDate, min_bar_time(kCurTDate, 932), 42)};
+	ASSERT_TRUE(install_bars(multiple));
+	EXPECT_EQ(nullptr, _reader.readKlineSliceByCount("SSE.STK.600000+", KP_Minute1, 3,
+		202401100929ull));
+
+	WTSKlineSlice* exactMiddle = _reader.readKlineSliceByCount("SSE.STK.600000+", KP_Minute1, 3,
+		202401100931ull);
+	ASSERT_NE(nullptr, exactMiddle);
+	ASSERT_EQ(exactMiddle->size(), 2u);
+	EXPECT_EQ(exactMiddle->at(0)->time, multiple[0].time);
+	EXPECT_EQ(exactMiddle->at(1)->time, multiple[1].time);
+	exactMiddle->release();
+
+	WTSKlineSlice* afterMultiple = _reader.readKlineSliceByCount("SSE.STK.600000+", KP_Minute1, 3,
+		202401100933ull);
+	ASSERT_NE(nullptr, afterMultiple);
+	ASSERT_EQ(afterMultiple->size(), 3u);
+	EXPECT_EQ(afterMultiple->at(2)->time, multiple[2].time);
+	afterMultiple->release();
+}
+
 } // namespace r52

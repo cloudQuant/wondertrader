@@ -6,22 +6,22 @@
  * p03 用 #define private public + 手工塞 _bd_mgr/_fee_map 覆盖了成交推进；
  * 本文件只用公开接口，并且专挑 p03/p08 未走的「委托到 _replayer」的查询面。
  *
- * 说明（不虚构断言）：
- *   CtaMocker::proc_tick 是 private（CtaMocker.h L233 位于 private 段），
- *   成交回写只能由 handle_tick(WTSTickData*) 驱动，而 WTSTickData 没有可安全构造的公开入口
- *   （p08 已论证，伪造对象有 release 错池风险）；故本文件不驱动真实成交，
- *   只固化「信号量即持仓」的 append_signal 语义与条件单登记语义。
- *   真实成交回写由 p03（手工夹具）与本 lane 的 DISABLED_ 归档共同说明。
+ * 说明：
+ *   CtaMocker::proc_tick 是 private；本文件通过公开 WTSTickData::create(WTSTickStruct&)
+ *   创建池对象，再调用 handle_tick 驱动待处理信号成交，并按同一池 release。
+ *   测试覆盖信号/条件单登记、增量恢复以及成交回调；真实行情源驱动与阻塞 hook 家族仍禁用。
  *
  * 落盘：temp_directory_path()/q02_ctaint_*，TearDown remove_all；dist/ 只读。
  */
 #include <gtest/gtest.h>
+#include <rapidjson/document.h>
 
 #include <cstdint>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <map>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <system_error>
@@ -39,7 +39,7 @@ namespace
 	std::filesystem::path lane_root()
 	{
 		return std::filesystem::path(__FILE__).parent_path()
-			.parent_path().parent_path().parent_path();
+			.parent_path().parent_path().parent_path().parent_path();
 	}
 
 	std::filesystem::path make_temp_dir(const char* tag)
@@ -61,8 +61,9 @@ namespace
 		double close;
 	};
 
-	// 20200102 ~ 20200108 五个交易日
+	// 包含起始日之前的一根已收盘 bar，供回测开始时的历史切片查询。
 	const DayBar kDayBars[] = {
+		{20191231u,  9.0, 10.0,  8.9,  9.5},
 		{20200102u,  9.5, 11.0,  9.4, 10.5},
 		{20200103u, 10.5, 12.0, 10.4, 11.5},
 		{20200106u, 11.5, 13.0, 11.4, 12.5},
@@ -141,6 +142,42 @@ namespace
 			if (c == '\n') n++;
 		return n;
 	}
+
+	class ConditionRecordingCtaMocker : public CtaMocker
+	{
+	public:
+		using CtaMocker::CtaMocker;
+
+		void on_condition_triggered(const char* stdCode, double target, double price, const char* usertag) override
+		{
+			++callback_count;
+			callback_code = stdCode != nullptr ? stdCode : "";
+			callback_target = target;
+			callback_price = price;
+			callback_usertag = usertag != nullptr ? usertag : "";
+		}
+
+		uint32_t callback_count = 0;
+		std::string callback_code;
+		double callback_target = 0.0;
+		double callback_price = 0.0;
+		std::string callback_usertag;
+	};
+
+	WTSTickData* make_tick(uint32_t date, uint32_t time, double price)
+	{
+		WTSTickStruct tick{};
+		std::strncpy(tick.exchg, "SSE", sizeof(tick.exchg) - 1);
+		std::strncpy(tick.code, "000001", sizeof(tick.code) - 1);
+		tick.trading_date = date;
+		tick.action_date = date;
+		tick.action_time = time;
+		tick.price = price;
+		tick.open = price;
+		tick.high = price;
+		tick.low = price;
+		return WTSTickData::create(tick);
+	}
 }
 
 class Q02CtaIntegrationTest : public ::testing::Test
@@ -157,30 +194,53 @@ protected:
 		WTSVariant* cfg = replay_cfg(_root, _base);
 		ASSERT_TRUE(_replayer.init(cfg));
 		cfg->release();
-		ASSERT_TRUE(_replayer.prepare());
+		ASSERT_TRUE(std::filesystem::exists(_root / "dist/common/stk_comms.json")) << _root;
+		ASSERT_NE(nullptr, _replayer.get_commodity_info(kCode));
+		_fixture_sink = std::make_unique<CtaMocker>(&_replayer, "q02_fixture_sink");
+		_replayer.register_sink(_fixture_sink.get(), "q02_fixture_sink");
 	}
 
 	void TearDown() override
 	{
+		// Test-local sinks are destroyed before TearDown; keep the replayer's
+		// listener valid until the replayer itself is destroyed.
+		if (_fixture_sink != nullptr)
+			_replayer.register_sink(_fixture_sink.get(), "q02_fixture_sink");
 		std::error_code ec;
 		std::filesystem::remove_all(_base, ec);
 		std::filesystem::remove_all(_out, ec);
 	}
 
+	bool register_and_prepare(CtaMocker& sink, const char* name, bool requestMainBars = true)
+	{
+		_replayer.register_sink(&sink, name);
+		if (!_replayer.prepare())
+			return false;
+		if (requestMainBars)
+		{
+			WTSKlineSlice* bars = sink.stra_get_bars(kCode, "d", kBarCnt, true);
+			if (bars == nullptr)
+				return false;
+			bars->release();
+		}
+		return true;
+	}
+
 	std::filesystem::path _root;
 	std::filesystem::path _base;
 	std::filesystem::path _out;
+	std::unique_ptr<CtaMocker> _fixture_sink;
 	HisDataReplayer _replayer;
 };
 
 /*
  * CtaMocker 的只读查询全部是对 _replayer 的委托：
- * 时间口径一致、合约信息来自底座、rawcode 去掉交易所与品类前缀。
+ * 时间口径与合约信息来自底座；rawcode 的非 rule 代码合同由上层另行裁定。
  */
 TEST_F(Q02CtaIntegrationTest, queriesDelegateToReplayer)
 {
 	CtaMocker mocker(&_replayer, "q02_qry");
-	_replayer.register_sink(&mocker, "q02_qry");
+	ASSERT_TRUE(register_and_prepare(mocker, "q02_qry"));
 
 	ASSERT_NE(nullptr, mocker.stra_get_comminfo(kCode));
 	EXPECT_EQ(nullptr, mocker.stra_get_comminfo("DCE.FUTU.999999"));
@@ -192,7 +252,7 @@ TEST_F(Q02CtaIntegrationTest, queriesDelegateToReplayer)
 	EXPECT_TRUE(_replayer.is_tick_enabled() == false);
 
 	// 主K线登记（isMain=true -> replayer 记住 _main_key/_main_period）
-	WTSKlineSlice* sli = mocker.stra_get_bars(kCode, "d", 5, true);
+	WTSKlineSlice* sli = mocker.stra_get_bars(kCode, "d", 5, false);
 	ASSERT_NE(nullptr, sli);
 	EXPECT_GE(static_cast<uint32_t>(sli->size()), 1u);
 	sli->release();
@@ -222,8 +282,7 @@ TEST_F(Q02CtaIntegrationTest, queriesDelegateToReplayer)
 TEST_F(Q02CtaIntegrationTest, marketSignalQueuesAndDumpsWithoutFill)
 {
 	CtaMocker mocker(&_replayer, "q02_mkt", 0, true);
-	_replayer.register_sink(&mocker, "q02_mkt");
-	mocker.stra_get_bars(kCode, "d", 5, true);
+	ASSERT_TRUE(register_and_prepare(mocker, "q02_mkt"));
 
 	mocker.stra_enter_long(kCode, 100, "tagA", 0.0, 0.0);
 	// 有信号 -> stra_get_position 取信号量
@@ -241,7 +300,7 @@ TEST_F(Q02CtaIntegrationTest, marketSignalQueuesAndDumpsWithoutFill)
 	EXPECT_DOUBLE_EQ(100.0, got[kCode]);
 
 	// 空头信号覆盖多头信号（同一合约只保留最后一条）
-	mocker.stra_enter_short(kCode, -30, "tagB", 0.0, 0.0);
+	mocker.stra_enter_short(kCode, 30, "tagB", 0.0, 0.0);
 	EXPECT_DOUBLE_EQ(-30.0, mocker.stra_get_position(kCode));
 
 	mocker.handle_session_end(_replayer.get_trading_date());
@@ -251,7 +310,8 @@ TEST_F(Q02CtaIntegrationTest, marketSignalQueuesAndDumpsWithoutFill)
 	// 没有成交 -> 交易/平仓日志只有表头
 	EXPECT_EQ(1u, count_lines(read_file(folder / "trades.csv")));
 	EXPECT_EQ(1u, count_lines(read_file(folder / "closes.csv")));
-	EXPECT_EQ(1u, count_lines(read_file(folder / "signals.csv")));
+	// signals.csv records both commands even though the snapshot keeps only the last signal.
+	EXPECT_EQ(3u, count_lines(read_file(folder / "signals.csv")));
 	// 结算行仍然落地（持仓为空的合约被 continue 跳过）
 	EXPECT_EQ(std::string("date,closeprofit,positionprofit,dynbalance,fee\n")
 		+ std::to_string(_replayer.get_trading_date()) + ",0.00,0.00,0.00,0.00\n",
@@ -266,6 +326,114 @@ TEST_F(Q02CtaIntegrationTest, marketSignalQueuesAndDumpsWithoutFill)
 	EXPECT_NE(std::string::npos, sdata.find("\"positions\":[]"));
 }
 
+TEST_F(Q02CtaIntegrationTest, incrementalSignalRestoresDesiredPriceAndConditionCallback)
+{
+	const char* const seedName = "q02_signal_seed";
+	const char* const resumedName = "q02_signal_resumed";
+	ConditionRecordingCtaMocker source(&_replayer, seedName);
+	ASSERT_TRUE(register_and_prepare(source, seedName));
+
+	source.stra_enter_long(kCode, 25, "conditional-resume", 11.0, 0.0);
+	WTSTickData* triggerTick = make_tick(20200102, 93000000, 10.5);
+	ASSERT_NE(nullptr, triggerTick);
+	source.handle_tick(kCode, triggerTick, 3);
+	triggerTick->release();
+	EXPECT_DOUBLE_EQ(25.0, source.stra_get_position(kCode));
+
+	// pxType=3 lets the condition-generated signal remain pending for this dump.
+	source.handle_replay_done();
+	const std::string snapshotText = read_file(_out / seedName / (std::string(seedName) + ".json"));
+	rapidjson::Document snapshot;
+	snapshot.Parse(snapshotText.c_str());
+	ASSERT_FALSE(snapshot.HasParseError());
+	ASSERT_TRUE(snapshot.IsObject());
+	ASSERT_TRUE(snapshot.HasMember("signals"));
+	ASSERT_TRUE(snapshot["signals"].IsObject());
+	ASSERT_TRUE(snapshot["signals"].HasMember(kCode));
+	const rapidjson::Value& savedSignal = snapshot["signals"][kCode];
+	ASSERT_TRUE(savedSignal.IsObject());
+	ASSERT_TRUE(savedSignal.HasMember("desprice"));
+	ASSERT_TRUE(savedSignal["desprice"].IsNumber());
+	EXPECT_DOUBLE_EQ(10.5, savedSignal["desprice"].GetDouble());
+	ASSERT_TRUE(savedSignal.HasMember("sigtype"));
+	ASSERT_TRUE(savedSignal["sigtype"].IsUint());
+	EXPECT_EQ(2u, savedSignal["sigtype"].GetUint());
+
+	ConditionRecordingCtaMocker resumed(&_replayer, resumedName);
+	_replayer.register_sink(&resumed, resumedName);
+	resumed.load_incremental_data(seedName);
+	EXPECT_DOUBLE_EQ(25.0, resumed.stra_get_position(kCode));
+
+	WTSTickData* sourceFillTick = make_tick(20200102, 93100000, 12.5);
+	ASSERT_NE(nullptr, sourceFillTick);
+	source.handle_tick(kCode, sourceFillTick, 3);
+	sourceFillTick->release();
+	WTSTickData* resumedFillTick = make_tick(20200102, 93100000, 12.5);
+	ASSERT_NE(nullptr, resumedFillTick);
+	resumed.handle_tick(kCode, resumedFillTick, 3);
+	resumedFillTick->release();
+
+	for (ConditionRecordingCtaMocker* mocker : { &source, &resumed })
+	{
+		EXPECT_EQ(1u, mocker->callback_count);
+		EXPECT_EQ(std::string(kCode), mocker->callback_code);
+		EXPECT_DOUBLE_EQ(25.0, mocker->callback_target);
+		EXPECT_DOUBLE_EQ(12.5, mocker->callback_price);
+		EXPECT_EQ(std::string("conditional-resume"), mocker->callback_usertag);
+		EXPECT_DOUBLE_EQ(25.0, mocker->stra_get_position(kCode));
+		EXPECT_DOUBLE_EQ(10.5, mocker->stra_get_position_avgpx(kCode));
+	}
+
+	source.handle_replay_done();
+	resumed.handle_replay_done();
+	const std::string sourceTrades = read_file(_out / seedName / "trades.csv");
+	const std::string resumedTrades = read_file(_out / resumedName / "trades.csv");
+	EXPECT_EQ(sourceTrades, resumedTrades);
+	EXPECT_NE(std::string::npos, resumedTrades.find(",LONG,OPEN,10.5,25,conditional-resume,"));
+	for (const char* name : { seedName, resumedName })
+	{
+		const std::string finalSnapshotText = read_file(_out / name / (std::string(name) + ".json"));
+		rapidjson::Document finalSnapshot;
+		finalSnapshot.Parse(finalSnapshotText.c_str());
+		ASSERT_FALSE(finalSnapshot.HasParseError());
+		ASSERT_TRUE(finalSnapshot.IsObject());
+		ASSERT_TRUE(finalSnapshot.HasMember("signals"));
+		ASSERT_TRUE(finalSnapshot["signals"].IsObject());
+		EXPECT_EQ(0u, finalSnapshot["signals"].MemberCount());
+	}
+}
+
+TEST_F(Q02CtaIntegrationTest, legacyIncrementalSignalDefaultsToMarketFillWithoutConditionCallback)
+{
+	const char* const legacyName = "q02_legacy_signal";
+	const char* const resumedName = "q02_legacy_resumed";
+	const std::filesystem::path legacyFolder = _out / legacyName;
+	std::error_code ec;
+	std::filesystem::create_directories(legacyFolder, ec);
+	ASSERT_FALSE(ec);
+	std::ofstream legacyDump(legacyFolder / (std::string(legacyName) + ".json"));
+	ASSERT_TRUE(legacyDump.is_open());
+	legacyDump << R"JSON({"signals":{"SSE.STK.000001":{"usertag":"legacy-signal","volume":25,"sigprice":10.5,"gentime":20200102093000000}}})JSON";
+	legacyDump.close();
+
+	ConditionRecordingCtaMocker resumed(&_replayer, resumedName);
+	ASSERT_TRUE(register_and_prepare(resumed, resumedName));
+	resumed.load_incremental_data(legacyName);
+	EXPECT_DOUBLE_EQ(25.0, resumed.stra_get_position(kCode));
+
+	WTSTickData* fillTick = make_tick(20200102, 93100000, 12.5);
+	ASSERT_NE(nullptr, fillTick);
+	resumed.handle_tick(kCode, fillTick, 3);
+	fillTick->release();
+	EXPECT_EQ(0u, resumed.callback_count);
+	EXPECT_DOUBLE_EQ(25.0, resumed.stra_get_position(kCode));
+	EXPECT_DOUBLE_EQ(12.5, resumed.stra_get_position_avgpx(kCode));
+
+	resumed.handle_replay_done();
+	const std::string trades = read_file(_out / resumedName / "trades.csv");
+	EXPECT_NE(std::string::npos, trades.find(",LONG,OPEN,12.5,25,legacy-signal,"));
+}
+
 /*
  * 限价条件单：stra_enter_long(L1323-L1347) 带 limitprice 时只登记 _condtions，
  * 不产生信号 -> stra_get_position 必须为 0，且 dump 的 conditions 段带回 target/action。
@@ -273,8 +441,7 @@ TEST_F(Q02CtaIntegrationTest, marketSignalQueuesAndDumpsWithoutFill)
 TEST_F(Q02CtaIntegrationTest, limitPriceRegistersConditionOnly)
 {
 	CtaMocker mocker(&_replayer, "q02_cond", 0, true);
-	_replayer.register_sink(&mocker, "q02_cond");
-	mocker.stra_get_bars(kCode, "d", 5, true);
+	ASSERT_TRUE(register_and_prepare(mocker, "q02_cond"));
 
 	mocker.stra_enter_long(kCode, 10, "cond1", 11.0, 0.0);
 	EXPECT_DOUBLE_EQ(0.0, mocker.stra_get_position(kCode));
@@ -316,7 +483,7 @@ TEST_F(Q02CtaIntegrationTest, limitPriceRegistersConditionOnly)
 TEST_F(Q02CtaIntegrationTest, unknownCodeAndFlatQueriesAreSafe)
 {
 	CtaMocker mocker(&_replayer, "q02_unk");
-	_replayer.register_sink(&mocker, "q02_unk");
+	ASSERT_TRUE(register_and_prepare(mocker, "q02_unk"));
 
 	mocker.stra_enter_long("DCE.FUTU.999999", 10, "x", 0.0, 0.0);
 	mocker.stra_enter_short("DCE.FUTU.999999", 10, "x", 0.0, 0.0);
@@ -359,7 +526,7 @@ TEST_F(Q02CtaIntegrationTest, unknownCodeAndFlatQueriesAreSafe)
 TEST_F(Q02CtaIntegrationTest, DISABLED_RealTickAndBlockingHookFamily)
 {
 	CtaMocker mocker(&_replayer, "q02_disabled");
-	_replayer.register_sink(&mocker, "q02_disabled");
+	ASSERT_TRUE(register_and_prepare(mocker, "q02_disabled"));
 	WTSBarStruct bar;
 	memset(&bar, 0, sizeof(bar));
 	bar.date = 20200102u;

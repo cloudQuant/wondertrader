@@ -4,11 +4,9 @@
  * 生产 TU：src/CTPOptLoader/CTPOptLoader.cpp（268 行）+ TraderSpi.cpp（623 行），
  * 与既有 ctpopt_loader_test.cpp 一起编进 CoverageTests_t_CTPOptLoader。
  *
- * 与 T4 的差异：本文件用 r114_ctpopt_api_stub.h 给出
- * ctp_sopt::CThostFtdcTraderApi::CreateFtdcTraderApi 的强定义，并把配置里的
- * module 指向测试可执行文件自身。macOS 的 dlopen 可执行文件 + dlsym 能取到该
- * 全局符号，因此 run() 的 203-267 正路径无需厂商 dylib、也不会有空 creator；
- * 所有 mock 方法只记调用，不起线程、不连柜台。
+ * 本文件用 r114_ctpopt_api_stub.h 驱动 TraderSpi 回调；配置解析用例会在隔离
+ * CWD 放置 marker 文件，避免 Loader 将不存在的显式 module 路径回退到安装目录。
+ * 这些用例的 path 留空，因此在 dlopen 前返回；mock 方法只记调用，不起线程、不连柜台。
  */
 #include <gtest/gtest.h>
 
@@ -179,6 +177,7 @@ protected:
 /* ------------------------------------------------------------------ */
 TEST_F(R114OptFixture, run_json_file_branch_reads_all_ctp_and_config_keys)
 {
+	write("json_opt_module.so", "test marker: run returns before dlopen");
 	const std::string cfg = write("opt.json", R"({
 		"ctp": {
 			"front": "tcp://10.2.3.4:5678",
@@ -222,6 +221,7 @@ TEST_F(R114OptFixture, run_json_file_branch_reads_all_ctp_and_config_keys)
 /* ------------------------------------------------------------------ */
 TEST_F(R114OptFixture, run_ini_file_branch_reads_explicit_values)
 {
+	write("ini_opt_module.so", "test marker: run returns before dlopen");
 	const std::string cfg = write("opt.ini",
 		"[ctp]\n"
 		"front=tcp://127.0.0.1:19001\n"

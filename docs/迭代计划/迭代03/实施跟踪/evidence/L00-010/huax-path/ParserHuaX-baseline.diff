@@ -1,0 +1,14 @@
+--- current
++++ baseline-with-only-path-guard-removed
+@@ -96,11 +96,6 @@
+ 
+ 	const std::string moduleFile = DLLHelper::wrap_module(module.c_str(), "lib");
+ 	const char* moduleDir = getBinDir();
+-	if ((moduleDir == NULL || *moduleDir == '\0') && !fs::path(moduleFile).is_absolute())
+-	{
+-		write_log(_sink, LL_ERROR, "[ParserHuaX] Cannot locate parser module directory");
+-		return false;
+-	}
+ 
+ 	std::string path = fmtutil::format("{}/{}/", _strFlowDir.c_str(), _strUser.c_str());
+ 	fs::create_directories(path.c_str());

@@ -95,8 +95,8 @@ int main(int argc, char* argv[])
 
 	if (!StdFile::exists(filename.c_str()))
 	{
-		fmt::print("confiture {} not exists", filename);
-		return 0;
+		fmt::print("Configuration file {} does not exist\n", filename);
+		return 1;
 	}
 
 	WTSVariant* cfg = WTSCfgLoader::load_from_file(filename.c_str());
@@ -105,6 +105,23 @@ int main(int argc, char* argv[])
 		WTSLogger::info("Loading configuration file {} failed", filename);
 		return -1;
 	}
+
+	WTSVariant* cfgEnv = cfg->get("env");
+	const char* mode = cfgEnv && cfgEnv->isObject()
+		? cfgEnv->getCString("mocker", NULL)
+		: NULL;
+	auto reject_mocker_config = [cfg](const std::string& message) {
+		WTSLogger::error("{}", message);
+		cfg->release();
+		WTSLogger::stop();
+		return -1;
+	};
+	if (!mode || mode[0] == '\0')
+		return reject_mocker_config("Backtest configuration requires env.mocker");
+	if (strcmp(mode, "cta") != 0 && strcmp(mode, "hft") != 0 && strcmp(mode, "sel") != 0 &&
+		strcmp(mode, "exec") != 0 && strcmp(mode, "uft") != 0)
+		return reject_mocker_config(std::string("Unsupported backtest mocker mode: ") + mode);
+	const int32_t slippage = cfgEnv->getInt32("slippage");
 
 	HisDataReplayer* replayer = new HisDataReplayer();
 	if (!replayer->init(cfg->get("replayer")))
@@ -117,9 +134,6 @@ int main(int argc, char* argv[])
 	}
 	ExecMocker* execMocker = NULL;
 
-	WTSVariant* cfgEnv = cfg->get("env");
-	const char* mode = cfgEnv->getCString("mocker");
-	int32_t slippage = cfgEnv->getInt32("slippage");
 	//std::cout << "cfg initialized" << std::endl;
 	fmt::print("---cfg initialized---\n");
 
@@ -169,8 +183,23 @@ int main(int argc, char* argv[])
 	}
 	else if (strcmp(mode, "sel") == 0)
 	{
+		WTSVariant* selConfig = cfg->get("sel");
+		WTSVariant* taskConfig = selConfig ? selConfig->get("task") : NULL;
+		const char* taskPeriod = taskConfig ? taskConfig->getCString("period") : NULL;
+		// The standalone CLI historically registers only the period and uses these defaults.
+		const char* taskTradingTemplate = "CHINA";
+		const char* taskSession = "TRADING";
+		if (!HisDataReplayer::validate_task_parameters(taskPeriod, taskTradingTemplate, taskSession))
+		{
+			WTSLogger::error("Invalid SEL task configuration");
+			cfg->release();
+			delete replayer;
+			WTSLogger::stop();
+			return -1;
+		}
+
 		SelMocker* mocker = new SelMocker(replayer, "sel", slippage);
-		if (!mocker->init_sel_factory(cfg->get("sel")))
+		if (!mocker->init_sel_factory(selConfig))
 		{
 			delete mocker;
 			WTSLogger::error("Initializing SEL strategy factory failed");
@@ -179,11 +208,11 @@ int main(int argc, char* argv[])
 			WTSLogger::stop();
 			return -1;
 		}
-		const char* stra_id = cfg->get("sel")->get("strategy")->getCString("id");
+		const char* stra_id = selConfig->get("strategy")->getCString("id");
 		replayer->register_sink(mocker, stra_id);
 
-		replayer->register_task(mocker->id(), cfg->get("sel")->get("task")->getUInt32("date"),
-			cfg->get("sel")->get("task")->getUInt32("time"), cfg->get("sel")->get("task")->getCString("period"));
+		replayer->register_task(mocker->id(), taskConfig->getUInt32("date"),
+			taskConfig->getUInt32("time"), taskPeriod, taskTradingTemplate, taskSession);
 	}
 	else if (strcmp(mode, "exec") == 0)
 	{

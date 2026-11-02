@@ -1,0 +1,60 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R15CtxTest.order_tags_survive_open_close_and_reverse_without_truncation
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R15CtxTest
+[ RUN      ] R15CtxTest.order_tags_survive_open_close_and_reverse_without_truncation
+src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:596: Failure
+Expected equality of these values:
+  stra.last_tag.c_str()
+    Which is: ""
+  openTag.c_str()
+    Which is: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+
+src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:598: Failure
+Expected equality of these values:
+  stra.last_tag.c_str()
+    Which is: ""
+  reverseTag.c_str()
+    Which is: "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+
+src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:600: Failure
+Expected equality of these values:
+  stra.last_tag.c_str()
+    Which is: ""
+  finalTag.c_str()
+    Which is: "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+
+src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:603: Failure
+Expected: (closes.find("," + openTag + "," + reverseTag + "\n")) != (std::string::npos), actual: 18446744073709551615 vs 18446744073709551615
+
+src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:604: Failure
+Expected: (closes.find("," + reverseTag + "," + finalTag + "\n")) != (std::string::npos), actual: 18446744073709551615 vs 18446744073709551615
+
+src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:596: Failure
+Expected equality of these values:
+  stra.last_tag.c_str()
+    Which is: ""
+  openTag.c_str()
+    Which is: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+
+src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:598: Failure
+Expected equality of these values:
+  stra.last_tag.c_str()
+    Which is: ""
+  reverseTag.c_str()
+    Which is: "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+
+src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:600: Failure
+Expected equality of these values:
+  stra.last_tag.c_str()
+    Which is: ""
+  finalTag.c_str()
+    Which is: "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+
+src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:603: Failure
+Expected: (closes.find("," + openTag + "," + reverseTag + "\n")) != (std::string::npos), actual: 18446744073709551615 vs 18446744073709551615
+
+src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:604: Failure
+Expected: (closes.find("," + reverseTag + "," + finalTag + "\n")) != (std::string::npos), actual: 18446744073709551615 vs 18446744073709551615
+

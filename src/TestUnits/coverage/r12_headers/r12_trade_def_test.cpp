@@ -185,12 +185,12 @@ TEST(r12_trade_order, create_from_entrust_copies_fields)
 	EXPECT_EQ(ord->getExtras(), nullptr);
 	ent->release();
 
-	// 空委托创建得到全零订单对象
+	// 空委托创建保留订单结构体的默认提交状态
 	WTSOrderInfo* ord2 = WTSOrderInfo::create();
 	EXPECT_STREQ(ord2->getCode(), "");
 	EXPECT_DOUBLE_EQ(ord2->getVolume(), 0.0);
 	EXPECT_DOUBLE_EQ(ord2->getVolLeft(), 0.0);
-	EXPECT_EQ(ord2->getOrderState(), (WTSOrderState)0);
+	EXPECT_EQ(ord2->getOrderState(), WOS_Submitting);
 	// 报单日期/时间可由 setter 显式写入
 	ord2->setCode("CFFEX.IF2406", 12);
 	ord2->setExchange("CFFEX", 5);

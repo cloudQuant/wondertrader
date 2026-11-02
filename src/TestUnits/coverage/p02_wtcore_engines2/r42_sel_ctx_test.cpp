@@ -19,6 +19,7 @@
 #include "r42_core_fakes.h"
 
 #include <WtCore/SelStraBaseCtx.h>
+#include <Includes/WTSVariant.hpp>
 
 using namespace wtp;
 
@@ -92,13 +93,17 @@ protected:
     r42fakes::R42GenDir    gen;
     r42fakes::R42BaseDataMgr bd;
     r42fakes::R42HotMgr    hot;
-    // 注意：WtSelEngine 的 _tm_ticker 在构造时未初始化，析构里的 release() 会读它，
-    // 这里故意不 delete（进程级测试），避免触发未初始化指针读。见 bugs/R42.md BUG-R42-001。
-    r42fakes::R42SelEngine* engine = nullptr;
+    std::unique_ptr<r42fakes::R42SelEngine> engine;
     std::unique_ptr<R42SelCtx> ctx;
 
     void SetUp() override
     {
+        // The generated directory is shared by cases in this process. Start
+        // each context test without persisted state left by an earlier case.
+        std::error_code ec;
+        std::filesystem::remove(data_file("r42_sel_ctx"), ec);
+        std::filesystem::remove(ud_file("r42_sel_ctx"), ec);
+
         bd.regisSession("TRADING");
         WTSSessionInfo* sess = bd.session("TRADING");
         ASSERT_NE(sess, nullptr);
@@ -116,9 +121,9 @@ protected:
         of->setSessionInfo(sess);
         bd.regis(of, r42fakes::makeCt("SZSE", "of", "of159915"));
 
-        engine = new r42fakes::R42SelEngine();
+        engine.reset(new r42fakes::R42SelEngine());
         engine->attach(&bd, &hot);
-        ctx.reset(new R42SelCtx(engine, "r42_sel_ctx", 0));
+        ctx.reset(new R42SelCtx(engine.get(), "r42_sel_ctx", 0));
     }
 
     std::string data_file(const char* name) const
@@ -234,7 +239,7 @@ TEST_F(R42SelCtxTest, SaveDataRoundTripAndSetPositionGuards)
 
     ctx->on_session_end(20250110);
 
-    R42SelCtx reloaded(engine, "r42_sel_ctx", 0);
+    R42SelCtx reloaded(engine.get(), "r42_sel_ctx", 0);
     reloaded.on_init();
     EXPECT_DOUBLE_EQ(reloaded.stra_get_position(kSelCode), 3.0);
     EXPECT_DOUBLE_EQ(reloaded.stra_get_position_avgpx(kSelCode), 3500.0);
@@ -292,7 +297,7 @@ TEST_F(R42SelCtxTest, TickAccountingAndSessionBeginReleasesFrozen)
     EXPECT_DOUBLE_EQ(ctx->stra_get_position(kSelT1Code, true), 3.0);
     EXPECT_NE(r42_sel_read(ud_file("r42_sel_ctx")).find("\"flag\""), std::string::npos);
 
-    R42SelCtx reloaded(engine, "r42_sel_ctx", 0);
+    R42SelCtx reloaded(engine.get(), "r42_sel_ctx", 0);
     reloaded.on_init();
     EXPECT_STREQ(reloaded.stra_load_user_data("flag"), "on");
 }
@@ -346,6 +351,48 @@ TEST(R42SelEngineLifecycle, ReleaseThenAutomaticStorageDestructionIsSafe)
 {
 	WtSelEngine engine;
 	engine.release();
+}
+
+TEST(R42SelEngineLifecycle, InvalidFeeInitializationCanRunFailClosedAndReleaseConfig)
+{
+	r42fakes::R42GenDir gen;
+	const std::string feeFile = r42fakes::gen_dir() + "r42_invalid_fees.json";
+	ASSERT_TRUE(r42_sel_write(feeFile, R"({"invalid-key":{}})"));
+
+	WTSVariant* cfg = WTSVariant::createObject();
+	cfg->append("fees", feeFile.c_str());
+	cfg->retain(); // Keep an observer reference while checking the engine-owned retain.
+	EXPECT_EQ(2u, cfg->retainCount());
+	{
+		WtSelEngine engine;
+		engine.init(cfg, nullptr, nullptr, nullptr, nullptr);
+		EXPECT_FALSE(engine.fee_config_valid());
+		EXPECT_EQ(3u, cfg->retainCount());
+		engine.run(); // Invalid fee configuration must fail closed before creating a ticker.
+		cfg->release(); // Release the caller's reference; the engine and observer remain.
+		EXPECT_EQ(2u, cfg->retainCount());
+	}
+	EXPECT_EQ(1u, cfg->retainCount());
+	cfg->release();
+}
+
+TEST(R42SelEngineLifecycle, SuccessfulInitializationReleasesConfigAfterDestruction)
+{
+	r42fakes::R42GenDir gen;
+	WTSVariant* cfg = WTSVariant::createObject();
+	cfg->append("fees", "");
+	cfg->retain(); // Keep an observer reference while checking the engine-owned retain.
+	EXPECT_EQ(2u, cfg->retainCount());
+	{
+		WtSelEngine engine;
+		engine.init(cfg, nullptr, nullptr, nullptr, nullptr);
+		EXPECT_TRUE(engine.fee_config_valid());
+		EXPECT_EQ(3u, cfg->retainCount());
+		cfg->release();
+		EXPECT_EQ(2u, cfg->retainCount());
+	}
+	EXPECT_EQ(1u, cfg->retainCount());
+	cfg->release();
 }
 
 } // namespace

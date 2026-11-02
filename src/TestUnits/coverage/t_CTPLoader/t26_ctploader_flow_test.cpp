@@ -22,8 +22,23 @@
 #include <sys/wait.h>
 #include <signal.h>
 
+#ifdef WT_T26_LOADJSON_TEST_HOOKS
+namespace t26_test::load_json_test_hook
+{
+	void reset();
+	size_t loads();
+	size_t releases();
+	bool every_loaded_variant_released_once();
+}
+#endif
+
 struct CTraderSpiQueueTestAccess
 {
+	static void load_from_json(CTraderSpi& spi)
+	{
+		spi.LoadFromJson();
+	}
+
 	static bool wait_until_stopped(CTraderSpi& spi, std::chrono::milliseconds timeout)
 	{
 		std::unique_lock<std::mutex> lock(spi._mtx);
@@ -355,7 +370,15 @@ TEST(t26_ctploader_flow, incremental_login_reloads_commodities_and_contracts)
 	auto ok = t26::ok_rsp();
 	CTraderSpi* spi = leaked_spi();
 	t26::FdRedirectGuard worker_noise(SAVEPATH + "worker_noise.log");	// 同上：worker 噪声走 fd 重定向
+#ifdef WT_T26_LOADJSON_TEST_HOOKS
+	t26_test::load_json_test_hook::reset();
+#endif
 	spi->OnRspUserLogin(&rsp, &ok, 1, true);				// L173 → LoadFromJson（L595-682）
+#ifdef WT_T26_LOADJSON_TEST_HOOKS
+	EXPECT_EQ(2u, t26_test::load_json_test_hook::loads());		// commodities/contracts 各解析一次
+	EXPECT_EQ(2u, t26_test::load_json_test_hook::releases());	// 两个解析结果各释放一次
+	EXPECT_TRUE(t26_test::load_json_test_hook::every_loaded_variant_released_once());
+#endif
 
 	// —— 品种侧：字段逐项读回；session 只认 MAP_SESSION，文件里的 "session" 被忽略（L619）
 	ASSERT_EQ(1u, _commodities.count("SHFE.rb"));
@@ -408,6 +431,60 @@ TEST(t26_ctploader_flow, incremental_login_reloads_commodities_and_contracts)
 	ASSERT_TRUE(t26::wait_for([&stub]() { return stub.n_qry_inst_ >= 1u; }));	// 让队列排空、worker 闭嘴
 	std::this_thread::sleep_for(std::chrono::milliseconds(250));
 	pUserApi = NULL;
+}
+
+TEST(t26_ctploader_flow, incremental_load_missing_contract_file_releases_only_loaded_commodity_root)
+{
+	t26::setup_defaults("f6_missing_contracts");
+	INCREMENTAL = true;
+	{
+		std::ofstream ofs(SAVEPATH + COMM_FILE);
+		ofs << "{\"SHFE\":{\"rb\":{\"name\":\"steel\",\"category\":1,\"volscale\":10,"
+			"\"pricetick\":1.0,\"covermode\":1,\"pricemode\":1,\"trademode\":0,\"precision\":0}}}";
+	}
+
+#ifdef WT_T26_LOADJSON_TEST_HOOKS
+	t26_test::load_json_test_hook::reset();
+#endif
+	CTraderSpi spi;
+	CTraderSpiQueueTestAccess::load_from_json(spi);
+
+	ASSERT_EQ(1u, _commodities.count("SHFE.rb"));
+	EXPECT_TRUE(_contracts.empty());
+#ifdef WT_T26_LOADJSON_TEST_HOOKS
+	EXPECT_EQ(2u, t26_test::load_json_test_hook::loads());		// 第二次真实 load 返回 NULL
+	EXPECT_EQ(1u, t26_test::load_json_test_hook::releases());	// 只释放成功解析的 commodity root
+	EXPECT_TRUE(t26_test::load_json_test_hook::every_loaded_variant_released_once());
+#endif
+}
+
+TEST(t26_ctploader_flow, incremental_load_invalid_contract_json_releases_only_loaded_commodity_root)
+{
+	t26::setup_defaults("f6_invalid_contracts");
+	INCREMENTAL = true;
+	{
+		std::ofstream ofs(SAVEPATH + COMM_FILE);
+		ofs << "{\"SHFE\":{\"rb\":{\"name\":\"steel\",\"category\":1,\"volscale\":10,"
+			"\"pricetick\":1.0,\"covermode\":1,\"pricemode\":1,\"trademode\":0,\"precision\":0}}}";
+	}
+	{
+		std::ofstream ofs(SAVEPATH + CONT_FILE);
+		ofs << "{\"SHFE\":";
+	}
+
+#ifdef WT_T26_LOADJSON_TEST_HOOKS
+	t26_test::load_json_test_hook::reset();
+#endif
+	CTraderSpi spi;
+	CTraderSpiQueueTestAccess::load_from_json(spi);
+
+	ASSERT_EQ(1u, _commodities.count("SHFE.rb"));
+	EXPECT_TRUE(_contracts.empty());
+#ifdef WT_T26_LOADJSON_TEST_HOOKS
+	EXPECT_EQ(2u, t26_test::load_json_test_hook::loads());		// 坏 JSON 的 load 返回 NULL
+	EXPECT_EQ(1u, t26_test::load_json_test_hook::releases());	// 只释放成功解析的 commodity root
+	EXPECT_TRUE(t26_test::load_json_test_hook::every_loaded_variant_released_once());
+#endif
 }
 
 /* ------------------------------------------------------------------ */
@@ -784,5 +861,7 @@ TEST(t26_ctploader_flow, stopping_worker_drops_pending_queries_and_joins_active_
 TEST(t26_ctploader_flow, fill_czce_code_on_letters_only_returns_empty)
 {
 	t26::setup_defaults("f13");
-	EXPECT_TRUE(fillCzceCode("SRCS", 20251027).empty());
+	std::string expanded;
+	EXPECT_FALSE(fillCzceCode(std::string_view("SRCS", sizeof("SRCS")), 20251027, expanded));
+	EXPECT_TRUE(expanded.empty());
 }

@@ -142,7 +142,7 @@ protected:
         if (source.empty() || !fs::is_regular_file(source))
             return false;
         std::error_code ec;
-        fs::create_symlink(source, _dir / stagedName, ec);
+        fs::copy_file(source, _dir / stagedName, fs::copy_options::overwrite_existing, ec);
         return !ec;
     }
 

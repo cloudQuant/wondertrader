@@ -15,7 +15,7 @@
  * @brief 测试HFT模块延迟的外部函数声明
  * @details 该函数在HftLatencyTool.cpp中实现，主要用于执行高频交易延迟测试流程
  */
-extern void test_hft();
+extern bool test_hft();
 
 /**
  * @brief 程序入口函数
@@ -25,7 +25,11 @@ extern void test_hft();
 int main()
 {
 	// 执行高频交易延迟测试
-	test_hft();
+	if (!test_hft())
+	{
+		fprintf(stderr, "HFT latency test failed\r\n");
+		return 1;
+	}
 	// 提示用户按任意键退出
 	printf("press enter key to exit\r\n");
 	getchar();

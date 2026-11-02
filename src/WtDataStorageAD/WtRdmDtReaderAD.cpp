@@ -11,10 +11,318 @@
 #include "../Includes/IBaseDataMgr.h"
 #include "../Includes/IHotMgr.h"
 #include "../Includes/WTSDataDef.hpp"
+#include "../Includes/WTSStruct.h"
 
 #include <algorithm>
+#include <cstddef>
+#include <cstring>
+#include <type_traits>
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
+
+namespace wtp {
+
+struct WtLMDBReaderTestAccess
+{
+	static void set_cursor_get_override(WtLMDBQuery& query, LMDBRangeCursorGetOverride callback, void* context)
+	{
+		query._range_cursor_get_override = callback;
+		query._range_cursor_get_context = context;
+	}
+};
+
+} // namespace wtp
+
+namespace {
+thread_local LMDBRangeCursorGetOverride rdm_query_cursor_get_override = NULL;
+thread_local void* rdm_query_cursor_get_context = NULL;
+thread_local LMDBRangeResultsOverride rdm_query_range_results_override = NULL;
+thread_local void* rdm_query_range_results_context = NULL;
+}
+
+template<typename... Args>
+inline void pipe_rdmreader_log(IRdmDtReaderSink* sink, WTSLogLevel ll, const char* format, const Args&... args);
+
+namespace {
+
+// These are historical LMDB value ABIs already supported by the BT reader.
+// Keep them reader-local; disk keys and public data structures are unchanged.
+#pragma pack(push, 1)
+struct WTSBarStructPackedV2
+{
+	uint32_t date;
+	uint64_t time;
+	double open;
+	double high;
+	double low;
+	double close;
+	double settle;
+	double money;
+	double vol;
+	double hold;
+	double add;
+};
+
+struct WTSTickStructPackedV2
+{
+	char exchg[MAX_EXCHANGE_LENGTH];
+	char code[MAX_INSTRUMENT_LENGTH];
+	double price;
+	double open;
+	double high;
+	double low;
+	double settle_price;
+	double upper_limit;
+	double lower_limit;
+	double total_volume;
+	double volume;
+	double total_turnover;
+	double turn_over;
+	double open_interest;
+	double diff_interest;
+	uint32_t trading_date;
+	uint32_t action_date;
+	uint32_t action_time;
+	double pre_close;
+	double pre_settle;
+	double pre_interest;
+	double bid_prices[10];
+	double ask_prices[10];
+	double bid_qty[10];
+	double ask_qty[10];
+};
+#pragma pack(pop)
+
+static_assert(sizeof(WTSBarStructPackedV2) == 84, "12098b5b packed bar ABI changed");
+static_assert(sizeof(WTSTickStructPackedV2) == 508, "12098b5b packed tick ABI changed");
+
+struct MalformedRecord
+{
+	bool invalid = false;
+	std::size_t key_size = 0;
+	std::size_t value_size = 0;
+	std::string key;
+};
+
+template<typename SourceBar>
+void copy_bar_fields(const SourceBar& source, WTSBarStruct& target)
+{
+	target.date = source.date;
+	target.time = source.time;
+	target.open = source.open;
+	target.high = source.high;
+	target.low = source.low;
+	target.close = source.close;
+	target.settle = source.settle;
+	target.money = source.money;
+	target.vol = source.vol;
+	target.hold = source.hold;
+	target.add = source.add;
+}
+
+template<typename SourceTick>
+void copy_tick_fields(const SourceTick& source, WTSTickStruct& target)
+{
+	const std::size_t exchg_size = (std::min)(sizeof(source.exchg), sizeof(target.exchg));
+	const std::size_t code_size = (std::min)(sizeof(source.code), sizeof(target.code));
+	std::memcpy(target.exchg, source.exchg, exchg_size);
+	std::memcpy(target.code, source.code, code_size);
+	target.price = source.price;
+	target.open = source.open;
+	target.high = source.high;
+	target.low = source.low;
+	target.settle_price = source.settle_price;
+	target.upper_limit = source.upper_limit;
+	target.lower_limit = source.lower_limit;
+	target.total_volume = source.total_volume;
+	target.volume = source.volume;
+	target.total_turnover = source.total_turnover;
+	target.turn_over = source.turn_over;
+	target.open_interest = source.open_interest;
+	target.diff_interest = source.diff_interest;
+	target.trading_date = source.trading_date;
+	target.action_date = source.action_date;
+	target.action_time = source.action_time;
+	target.pre_close = source.pre_close;
+	target.pre_settle = source.pre_settle;
+	target.pre_interest = source.pre_interest;
+	for (std::size_t level = 0; level < 10; ++level)
+	{
+		target.bid_prices[level] = source.bid_prices[level];
+		target.ask_prices[level] = source.ask_prices[level];
+		target.bid_qty[level] = source.bid_qty[level];
+		target.ask_qty[level] = source.ask_qty[level];
+	}
+}
+
+bool decode_records(const ValueArray& keys, const ValueArray& values,
+	std::vector<WTSBarStruct>& decoded, MalformedRecord& malformed)
+{
+	if (keys.size() != values.size())
+	{
+		malformed.invalid = true;
+		malformed.key_size = keys.empty() ? 0 : keys.front().size();
+		malformed.value_size = values.empty() ? 0 : values.front().size();
+		malformed.key = keys.empty() ? std::string() : keys.front();
+		return false;
+	}
+
+	if (values.size() > decoded.max_size())
+	{
+		malformed.invalid = true;
+		return false;
+	}
+	for (std::size_t i = 0; i < values.size(); ++i)
+	{
+		if (keys[i].size() != sizeof(LMDBBarKey) ||
+			(values[i].size() != sizeof(WTSBarStruct) &&
+				values[i].size() != sizeof(WTSBarStructPackedV2) &&
+				values[i].size() != sizeof(WTSBarStructOld)))
+		{
+			malformed.invalid = true;
+			malformed.key_size = keys[i].size();
+			malformed.value_size = values[i].size();
+			malformed.key = keys[i];
+			return false;
+		}
+	}
+
+	std::vector<WTSBarStruct> result;
+	result.reserve(values.size());
+	for (const std::string& item : values)
+	{
+		WTSBarStruct bar;
+		if (item.size() == sizeof(WTSBarStruct))
+			std::memcpy(&bar, item.data(), sizeof(bar));
+		else if (item.size() == sizeof(WTSBarStructPackedV2))
+		{
+			WTSBarStructPackedV2 packed = {};
+			std::memcpy(&packed, item.data(), sizeof(packed));
+			copy_bar_fields(packed, bar);
+		}
+		else
+		{
+			WTSBarStructOld old_bar;
+			std::memcpy(&old_bar, item.data(), sizeof(old_bar));
+			copy_bar_fields(old_bar, bar);
+		}
+		result.emplace_back(bar);
+	}
+	decoded.swap(result);
+	return true;
+}
+
+bool decode_records(const ValueArray& keys, const ValueArray& values,
+	std::vector<WTSTickStruct>& decoded, MalformedRecord& malformed)
+{
+	if (keys.size() != values.size())
+	{
+		malformed.invalid = true;
+		malformed.key_size = keys.empty() ? 0 : keys.front().size();
+		malformed.value_size = values.empty() ? 0 : values.front().size();
+		malformed.key = keys.empty() ? std::string() : keys.front();
+		return false;
+	}
+
+	if (values.size() > decoded.max_size())
+	{
+		malformed.invalid = true;
+		return false;
+	}
+	for (std::size_t i = 0; i < values.size(); ++i)
+	{
+		if (keys[i].size() != sizeof(LMDBHftKey) ||
+			(values[i].size() != sizeof(WTSTickStruct) &&
+				values[i].size() != sizeof(WTSTickStructPackedV2) &&
+				values[i].size() != sizeof(WTSTickStructOld)))
+		{
+			malformed.invalid = true;
+			malformed.key_size = keys[i].size();
+			malformed.value_size = values[i].size();
+			malformed.key = keys[i];
+			return false;
+		}
+	}
+
+	std::vector<WTSTickStruct> result;
+	result.reserve(values.size());
+	for (const std::string& item : values)
+	{
+		WTSTickStruct tick;
+		if (item.size() == sizeof(WTSTickStruct))
+			std::memcpy(&tick, item.data(), sizeof(tick));
+		else if (item.size() == sizeof(WTSTickStructPackedV2))
+		{
+			WTSTickStructPackedV2 packed = {};
+			std::memcpy(&packed, item.data(), sizeof(packed));
+			copy_tick_fields(packed, tick);
+		}
+		else
+		{
+			WTSTickStructOld old_tick;
+			std::memcpy(&old_tick, item.data(), sizeof(old_tick));
+			copy_tick_fields(old_tick, tick);
+		}
+		result.emplace_back(tick);
+	}
+	decoded.swap(result);
+	return true;
+}
+
+template<typename Key, typename Value>
+bool read_checked_range(WtLMDB& db, const Key& lower_key, const Key& upper_key,
+	std::vector<Value>& decoded, MalformedRecord& malformed)
+{
+	WtLMDBQuery query(db);
+	if (rdm_query_cursor_get_override != NULL)
+		WtLMDBReaderTestAccess::set_cursor_get_override(query, rdm_query_cursor_get_override, rdm_query_cursor_get_context);
+	std::vector<Value> result;
+	bool values_valid = true;
+	const int count = query.get_range_checked(
+		std::string((const char*)&lower_key, sizeof(lower_key)),
+		std::string((const char*)&upper_key, sizeof(upper_key)),
+		[&result, &values_valid, &malformed](const ValueArray& keys, const ValueArray& values) {
+			if (rdm_query_range_results_override == NULL)
+				values_valid = decode_records(keys, values, result, malformed);
+			else
+			{
+				// Keep fault injection isolated to private copies of the checked query result.
+				ValueArray test_keys(keys);
+				ValueArray test_values(values);
+				rdm_query_range_results_override(rdm_query_range_results_context, test_keys, test_values);
+				values_valid = decode_records(test_keys, test_values, result, malformed);
+			}
+		});
+	if (count < 0 || !values_valid || (std::size_t)count != result.size())
+		return false;
+	decoded.swap(result);
+	return true;
+}
+
+template<typename Value>
+void log_malformed_range(IRdmDtReaderSink* sink, const char* kind,
+	const char* exchg, const char* code, const MalformedRecord& malformed)
+{
+	pipe_rdmreader_log(sink, LL_ERROR,
+		"Malformed LMDB {} record for {}.{}: key bytes={}, value size={} (expected key size {}, value size {}, {} or {})",
+		kind, exchg, code, malformed.key_size, malformed.value_size,
+		std::is_same<Value, WTSBarStruct>::value ? sizeof(LMDBBarKey) : sizeof(LMDBHftKey),
+		sizeof(Value), std::is_same<Value, WTSBarStruct>::value ? sizeof(WTSBarStructPackedV2) : sizeof(WTSTickStructPackedV2),
+		std::is_same<Value, WTSBarStruct>::value ? sizeof(WTSBarStructOld) : sizeof(WTSTickStructOld));
+}
+
+template<typename Value>
+void log_range_failure(IRdmDtReaderSink* sink, const char* kind,
+	const char* exchg, const char* code, WtLMDB& db, const MalformedRecord& malformed)
+{
+	if (malformed.invalid)
+		log_malformed_range<Value>(sink, kind, exchg, code, malformed);
+	else
+		pipe_rdmreader_log(sink, LL_ERROR, "LMDB {} range read failed for {}.{}: {}",
+			kind, exchg, code, db.errmsg());
+}
+
+} // namespace
 
 //By Wesley @ 2022.01.05
 #include "../Share/fmtlib.h"
@@ -58,6 +366,18 @@ WtRdmDtReaderAD::~WtRdmDtReaderAD()
 {
 }
 
+void WtRdmDtReaderAD::set_test_cursor_get_override(LMDBRangeCursorGetOverride callback, void* context)
+{
+	rdm_query_cursor_get_override = callback;
+	rdm_query_cursor_get_context = context;
+}
+
+void WtRdmDtReaderAD::set_test_range_results_override(LMDBRangeResultsOverride callback, void* context)
+{
+	rdm_query_range_results_override = callback;
+	rdm_query_range_results_context = context;
+}
+
 void WtRdmDtReaderAD::init(WTSVariant* cfg, IRdmDtReaderSink* sink)
 {
 	IRdmDtReader::init(cfg, sink);
@@ -87,29 +407,39 @@ WTSTickSlice* WtRdmDtReaderAD::readTickSliceByCount(const char* stdCode, uint32_
 
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	const std::string cacheKey = std::string(stdCode) + "#count-history";
-	TicksList& tickList = _ticks_cache[cacheKey];
-	if (tickList._ticks.empty())
+	auto cacheIt = _ticks_cache.find(cacheKey);
+	if (cacheIt == _ticks_cache.end() || cacheIt->second._ticks.empty())
 	{
 		WtLMDBPtr db = get_t_db(cInfo._exchg, cInfo._code);
 		if (db == NULL)
 			return NULL;
 
-		WtLMDBQuery query(*db);
 		LMDBHftKey lKey(cInfo._exchg, cInfo._code, 0, 0);
 		LMDBHftKey rKey(cInfo._exchg, cInfo._code, UINT32_MAX, UINT32_MAX);
-		query.get_range(std::string((const char*)&lKey, sizeof(lKey)),
-			std::string((const char*)&rKey, sizeof(rKey)), [&tickList](const ValueArray& /*ayKeys*/, const ValueArray& ayVals) {
-			tickList._ticks.resize(ayVals.size());
-			for (std::size_t i = 0; i < ayVals.size(); i++)
-				memcpy(&tickList._ticks[i], ayVals[i].data(), ayVals[i].size());
-		});
-		std::stable_sort(tickList._ticks.begin(), tickList._ticks.end(), [](const WTSTickStruct& a, const WTSTickStruct& b) {
+		std::vector<WTSTickStruct> loaded;
+		MalformedRecord malformed;
+		if (!read_checked_range(*db, lKey, rKey, loaded, malformed))
+		{
+			log_range_failure<WTSTickStruct>(_sink, "tick", cInfo._exchg, cInfo._code, *db, malformed);
+			return NULL;
+		}
+		if (loaded.empty())
+			return NULL;
+
+		std::stable_sort(loaded.begin(), loaded.end(), [](const WTSTickStruct& a, const WTSTickStruct& b) {
 			if (a.action_date != b.action_date)
 				return a.action_date < b.action_date;
 			return a.action_time < b.action_time;
 		});
+		TicksList candidate;
+		candidate._ticks.swap(loaded);
+		if (cacheIt == _ticks_cache.end())
+			cacheIt = _ticks_cache.emplace(cacheKey, std::move(candidate)).first;
+		else
+			cacheIt->second = std::move(candidate);
 	}
 
+	TicksList& tickList = cacheIt->second;
 	if (tickList._ticks.empty())
 		return NULL;
 
@@ -155,47 +485,33 @@ WTSTickSlice* WtRdmDtReaderAD::readTickSliceByRange(const char* stdCode, uint64_
 
 	std::string key = stdCode;
 
-	//先检查缓存
-	TicksList& tickList = _ticks_cache[key];
-
-	bool isEmpty = tickList._ticks.empty();
-	bool bNeedOlder = stime < tickList._first_tick_time;
-	bool bNeedNewer = etime > tickList._last_tick_time;
+	// Stage cache data and both possible LMDB reads before publishing any change.
+	auto cacheIt = _ticks_cache.find(key);
+	TicksList candidate;
+	if (cacheIt != _ticks_cache.end())
+		candidate = cacheIt->second;
+	const bool isEmpty = candidate._ticks.empty();
+	const bool bNeedOlder = stime < candidate._first_tick_time;
+	const bool bNeedNewer = etime > candidate._last_tick_time;
 
 	//这里要改成从lmdb读取
 	WtLMDBPtr db = get_t_db(cInfo._exchg, cInfo._code);
 	if (db == NULL)
 		return NULL;
 
+	std::vector<WTSTickStruct> initialTicks;
+	std::vector<WTSTickStruct> olderTicks;
+	std::vector<WTSTickStruct> newerTicks;
 	if (isEmpty)
 	{
 		//按照区间加载即可
-		WtLMDBQuery query(*db);
 		LMDBHftKey lKey(cInfo._exchg, cInfo._code, beginTDate, lTime * 100000 + lSecs);
 		LMDBHftKey rKey(cInfo._exchg, cInfo._code, endTDate, rTime * 100000 + rSecs);
-		int cnt = query.get_range(std::string((const char*)&lKey, sizeof(lKey)),
-			std::string((const char*)&rKey, sizeof(rKey)), [&tickList](const ValueArray& /*ayKeys*/, const ValueArray& ayVals) {
-			tickList._ticks.resize(ayVals.size());
-			std::size_t idx = 0;
-			for (const std::string& item : ayVals)
-			{
-				memcpy(&tickList._ticks[idx], item.data(), item.size());
-				idx++;
-			}
-		});
-
-		if (cnt > 0)
+		MalformedRecord malformed;
+		if (!read_checked_range(*db, lKey, rKey, initialTicks, malformed))
 		{
-			const WTSTickStruct& firstTick = tickList._ticks.front();
-			const WTSTickStruct& lastTick = tickList._ticks.back();
-			tickList._first_tick_time = (uint64_t)firstTick.trading_date * 1000000000ull
-				+ (uint64_t)sInfo->offsetTime(firstTick.action_time / 100000, true) * 100000ull
-				+ firstTick.action_time % 100000;
-			tickList._last_tick_time = (uint64_t)lastTick.trading_date * 1000000000ull
-				+ (uint64_t)sInfo->offsetTime(lastTick.action_time / 100000, true) * 100000ull
-				+ lastTick.action_time % 100000;
-
-			pipe_rdmreader_log(_sink, LL_DEBUG, "{} ticks between [{},{}] of {} loaded to cache", cnt, tickList._first_tick_time, tickList._last_tick_time, stdCode);
+			log_range_failure<WTSTickStruct>(_sink, "tick", cInfo._exchg, cInfo._code, *db, malformed);
+			return NULL;
 		}
 	}
 	else
@@ -203,9 +519,8 @@ WTSTickSlice* WtRdmDtReaderAD::readTickSliceByRange(const char* stdCode, uint64_
 		if (bNeedOlder)
 		{
 			//读取更早的数据
-			WtLMDBQuery query(*db);
-			uint32_t firstKeyDate = (uint32_t)(tickList._first_tick_time / 1000000000ull);
-			uint32_t firstKeyTime = (uint32_t)(tickList._first_tick_time % 1000000000ull);
+			uint32_t firstKeyDate = (uint32_t)(candidate._first_tick_time / 1000000000ull);
+			uint32_t firstKeyTime = (uint32_t)(candidate._first_tick_time % 1000000000ull);
 			if (firstKeyTime > 0)
 				--firstKeyTime;
 			else if (firstKeyDate > 0)
@@ -215,40 +530,19 @@ WTSTickSlice* WtRdmDtReaderAD::readTickSliceByRange(const char* stdCode, uint64_
 			}
 			LMDBHftKey rKey(cInfo._exchg, cInfo._code, firstKeyDate, firstKeyTime);
 			LMDBHftKey lKey(cInfo._exchg, cInfo._code, beginTDate, lTime * 100000 + lSecs);
-			int cnt = query.get_range(std::string((const char*)&lKey, sizeof(lKey)), std::string((const char*)&rKey, sizeof(rKey)),
-				[&tickList](const ValueArray& /*ayKeys*/, const ValueArray& ayVals) {
-				std::vector<WTSTickStruct> ayTicks;
-				ayTicks.resize(ayVals.size() + tickList._ticks.size());
-				std::size_t idx = 0;
-				for (const std::string& item : ayVals)
-				{
-					[[maybe_unused]] WTSTickStruct* curTick = (WTSTickStruct*)item.data();
-					memcpy(&ayTicks[idx], item.data(), item.size());
-					idx++;
-				}
-
-				//将原来的数据拷贝到后面，再做一个swap即可
-				memcpy(&ayTicks[idx], tickList._ticks.data(), sizeof(WTSTickStruct)*tickList._ticks.size());
-				tickList._ticks.swap(ayTicks);
-			});
-
-			if(cnt > 0)
+			MalformedRecord malformed;
+			if (!read_checked_range(*db, lKey, rKey, olderTicks, malformed))
 			{
-				const WTSTickStruct& curTs = tickList._ticks.front();
-				tickList._first_tick_time = (uint64_t)curTs.trading_date * 1000000000ull
-					+ (uint64_t)sInfo->offsetTime(curTs.action_time / 100000, true) * 100000ull
-					+ curTs.action_time % 100000;
-
-				pipe_rdmreader_log(_sink, LL_DEBUG, "{} prev ticks of {} loaded to cache", cnt, stdCode);
+				log_range_failure<WTSTickStruct>(_sink, "tick", cInfo._exchg, cInfo._code, *db, malformed);
+				return NULL;
 			}
 		}
 
 		if (bNeedNewer)
 		{
 			//读取更新的数据
-			WtLMDBQuery query(*db);
-			uint32_t lastKeyDate = (uint32_t)(tickList._last_tick_time / 1000000000ull);
-			uint32_t lastKeyTime = (uint32_t)(tickList._last_tick_time % 1000000000ull);
+			uint32_t lastKeyDate = (uint32_t)(candidate._last_tick_time / 1000000000ull);
+			uint32_t lastKeyTime = (uint32_t)(candidate._last_tick_time % 1000000000ull);
 			if (lastKeyTime < UINT32_MAX)
 				++lastKeyTime;
 			else
@@ -258,26 +552,86 @@ WTSTickSlice* WtRdmDtReaderAD::readTickSliceByRange(const char* stdCode, uint64_
 			}
 			LMDBHftKey lKey(cInfo._exchg, cInfo._code, lastKeyDate, lastKeyTime);
 			LMDBHftKey rKey(cInfo._exchg, cInfo._code, endTDate, rTime * 100000 + rSecs);
-			int cnt = query.get_range(std::string((const char*)&lKey, sizeof(lKey)), std::string((const char*)&rKey, sizeof(rKey)),
-				[&tickList](const ValueArray& /*ayKeys*/, const ValueArray& ayVals) {
-				for (const std::string& item : ayVals)
-				{
-					WTSTickStruct* curTick = (WTSTickStruct*)item.data();
-					tickList._ticks.emplace_back(*curTick);
-				}
-			});
-
-			if (cnt > 0)
+			MalformedRecord malformed;
+			if (!read_checked_range(*db, lKey, rKey, newerTicks, malformed))
 			{
-				const WTSTickStruct& curTs = tickList._ticks.back();
-				tickList._last_tick_time = (uint64_t)curTs.trading_date * 1000000000ull
-					+ (uint64_t)sInfo->offsetTime(curTs.action_time / 100000, true) * 100000ull
-					+ curTs.action_time % 100000;
-
-				pipe_rdmreader_log(_sink, LL_DEBUG, "{} newer ticks of {} loaded to cache", cnt, stdCode);
+				log_range_failure<WTSTickStruct>(_sink, "tick", cInfo._exchg, cInfo._code, *db, malformed);
+				return NULL;
 			}
 		}
 	}
+
+	if (isEmpty)
+		candidate._ticks.swap(initialTicks);
+	else if (!olderTicks.empty() || !newerTicks.empty())
+	{
+		std::vector<WTSTickStruct> updated;
+		const std::size_t max_size = updated.max_size();
+		if (candidate._ticks.size() > max_size ||
+			olderTicks.size() > max_size - candidate._ticks.size() ||
+			newerTicks.size() > max_size - candidate._ticks.size() - olderTicks.size())
+		{
+			pipe_rdmreader_log(_sink, LL_ERROR, "Tick cache range is too large for {}", stdCode);
+			return NULL;
+		}
+		updated.reserve(olderTicks.size() + candidate._ticks.size() + newerTicks.size());
+		updated.insert(updated.end(), olderTicks.begin(), olderTicks.end());
+		updated.insert(updated.end(), candidate._ticks.begin(), candidate._ticks.end());
+		updated.insert(updated.end(), newerTicks.begin(), newerTicks.end());
+		candidate._ticks.swap(updated);
+	}
+
+	if (!candidate._ticks.empty())
+	{
+		auto cache_time = [sInfo](const WTSTickStruct& tick) {
+			return (uint64_t)tick.trading_date * 1000000000ull
+				+ (uint64_t)sInfo->offsetTime(tick.action_time / 100000, true) * 100000ull
+				+ tick.action_time % 100000;
+		};
+		if (isEmpty)
+		{
+			candidate._first_tick_time = cache_time(candidate._ticks.front());
+			candidate._last_tick_time = cache_time(candidate._ticks.back());
+			pipe_rdmreader_log(_sink, LL_DEBUG, "{} ticks between [{},{}] of {} loaded to cache",
+				candidate._ticks.size(), candidate._first_tick_time, candidate._last_tick_time, stdCode);
+		}
+		else
+		{
+			if (!olderTicks.empty())
+			{
+				candidate._first_tick_time = cache_time(candidate._ticks.front());
+				pipe_rdmreader_log(_sink, LL_DEBUG, "{} prev ticks of {} loaded to cache", olderTicks.size(), stdCode);
+			}
+			if (!newerTicks.empty())
+			{
+				candidate._last_tick_time = cache_time(candidate._ticks.back());
+				pipe_rdmreader_log(_sink, LL_DEBUG, "{} newer ticks of {} loaded to cache", newerTicks.size(), stdCode);
+			}
+		}
+	}
+
+	if (candidate._ticks.empty())
+		return NULL;
+	if (cacheIt == _ticks_cache.end())
+		cacheIt = _ticks_cache.emplace(key, std::move(candidate)).first;
+	else if (isEmpty || !olderTicks.empty())
+	{
+		// The old path swapped the vector after loading older ticks.
+		cacheIt->second._ticks.swap(candidate._ticks);
+		cacheIt->second._first_tick_time = candidate._first_tick_time;
+		cacheIt->second._last_tick_time = candidate._last_tick_time;
+	}
+	else if (!newerTicks.empty())
+	{
+		// Append at the end, matching the existing slice-pointer behavior when no reallocation is needed.
+		std::vector<WTSTickStruct>& cachedTicks = cacheIt->second._ticks;
+		const std::size_t old_size = cachedTicks.size();
+		cachedTicks.resize(candidate._ticks.size());
+		std::copy(candidate._ticks.begin() + old_size, candidate._ticks.end(), cachedTicks.begin() + old_size);
+		cacheIt->second._first_tick_time = candidate._first_tick_time;
+		cacheIt->second._last_tick_time = candidate._last_tick_time;
+	}
+	TicksList& tickList = cacheIt->second;
 
 	//全部读取完成以后，再生成切片
 	{
@@ -289,9 +643,6 @@ WTSTickSlice* WtRdmDtReaderAD::readTickSliceByRange(const char* stdCode, uint64_
 		eTick.action_time = (uint32_t)(etime % 1000000000);
 
 		std::size_t cnt = 0;
-
-		if (tickList._ticks.empty())
-			return NULL;
 
 		auto lessTick = [](const WTSTickStruct& a, const WTSTickStruct& b) {
 			if (a.action_date != b.action_date)
@@ -322,24 +673,34 @@ WTSKlineSlice* WtRdmDtReaderAD::readKlineSliceByCount(const char* stdCode, WTSKl
 
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	const std::string key = fmtutil::format<64>("{}#{}", stdCode, (uint32_t)period);
-	BarsList& barsList = _bars_cache[key];
-	if (barsList._bars.empty())
+	auto cacheIt = _bars_cache.find(key);
+	if (cacheIt == _bars_cache.end() || cacheIt->second._bars.empty())
 	{
 		WtLMDBPtr db = get_k_db(cInfo._exchg, period);
 		if (db == NULL)
 			return NULL;
 
-		WtLMDBQuery query(*db);
 		LMDBBarKey lKey(cInfo._exchg, cInfo._code, 0);
 		LMDBBarKey rKey(cInfo._exchg, cInfo._code, UINT32_MAX);
-		query.get_range(std::string((const char*)&lKey, sizeof(lKey)),
-			std::string((const char*)&rKey, sizeof(rKey)), [&barsList](const ValueArray& /*ayKeys*/, const ValueArray& ayVals) {
-			barsList._bars.resize(ayVals.size());
-			for (std::size_t i = 0; i < ayVals.size(); i++)
-				memcpy(&barsList._bars[i], ayVals[i].data(), ayVals[i].size());
-		});
+		std::vector<WTSBarStruct> loaded;
+		MalformedRecord malformed;
+		if (!read_checked_range(*db, lKey, rKey, loaded, malformed))
+		{
+			log_range_failure<WTSBarStruct>(_sink, "bar", cInfo._exchg, cInfo._code, *db, malformed);
+			return NULL;
+		}
+		if (loaded.empty())
+			return NULL;
+
+		BarsList candidate;
+		candidate._bars.swap(loaded);
+		if (cacheIt == _bars_cache.end())
+			cacheIt = _bars_cache.emplace(key, std::move(candidate)).first;
+		else
+			cacheIt->second = std::move(candidate);
 	}
 
+	BarsList& barsList = cacheIt->second;
 	if (barsList._bars.empty())
 		return NULL;
 
@@ -370,29 +731,39 @@ WTSTickSlice* WtRdmDtReaderAD::readTickSliceByDate(const char* stdCode, uint32_t
 	}
 
 	const std::string cacheKey = std::string(stdCode) + "#date#" + std::to_string(uDate);
-	TicksList& tickList = _ticks_cache[cacheKey];
-	if (tickList._ticks.empty())
+	auto cacheIt = _ticks_cache.find(cacheKey);
+	if (cacheIt == _ticks_cache.end() || cacheIt->second._ticks.empty())
 	{
 		WtLMDBPtr db = get_t_db(cInfo._exchg, cInfo._code);
 		if (db == NULL)
 			return NULL;
 
-		WtLMDBQuery query(*db);
 		LMDBHftKey lKey(cInfo._exchg, cInfo._code, uDate, 0);
 		LMDBHftKey rKey(cInfo._exchg, cInfo._code, uDate, UINT32_MAX);
-		query.get_range(std::string((const char*)&lKey, sizeof(lKey)),
-			std::string((const char*)&rKey, sizeof(rKey)), [&tickList](const ValueArray& /*ayKeys*/, const ValueArray& ayVals) {
-			tickList._ticks.resize(ayVals.size());
-			for (std::size_t i = 0; i < ayVals.size(); i++)
-				memcpy(&tickList._ticks[i], ayVals[i].data(), ayVals[i].size());
-		});
-		std::stable_sort(tickList._ticks.begin(), tickList._ticks.end(), [](const WTSTickStruct& a, const WTSTickStruct& b) {
+		std::vector<WTSTickStruct> loaded;
+		MalformedRecord malformed;
+		if (!read_checked_range(*db, lKey, rKey, loaded, malformed))
+		{
+			log_range_failure<WTSTickStruct>(_sink, "tick", cInfo._exchg, cInfo._code, *db, malformed);
+			return NULL;
+		}
+		if (loaded.empty())
+			return NULL;
+
+		std::stable_sort(loaded.begin(), loaded.end(), [](const WTSTickStruct& a, const WTSTickStruct& b) {
 			if (a.action_date != b.action_date)
 				return a.action_date < b.action_date;
 			return a.action_time < b.action_time;
 		});
+		TicksList candidate;
+		candidate._ticks.swap(loaded);
+		if (cacheIt == _ticks_cache.end())
+			cacheIt = _ticks_cache.emplace(cacheKey, std::move(candidate)).first;
+		else
+			cacheIt->second = std::move(candidate);
 	}
 
+	TicksList& tickList = cacheIt->second;
 	if (tickList._ticks.empty())
 		return NULL;
 	return WTSTickSlice::create(stdCode, tickList._ticks.data(), (uint32_t)tickList._ticks.size());
@@ -419,58 +790,60 @@ WTSKlineSlice* WtRdmDtReaderAD::readKlineSliceByRange(const char* stdCode, WTSKl
 
 	//暂时不考虑HOT之类的，只针对7×24小时品种做一个实现
 	std::string key = fmtutil::format<64>("{}#{}", stdCode, (uint32_t)period);
-	BarsList& barsList = _bars_cache[key];
-
-	bool bNeedNewer = (etime > barsList._last_bar_time);
+	auto cacheIt = _bars_cache.find(key);
+	BarsList candidate;
+	if (cacheIt != _bars_cache.end())
+		candidate = cacheIt->second;
+	const bool isEmpty = candidate._bars.empty();
+	bool bNeedNewer = (etime > candidate._last_bar_time);
 
 	//全部重载
 	WtLMDBPtr db = get_k_db(cInfo._exchg, period);
 	if (db == NULL)
 		return NULL;
 
-	if (barsList._bars.empty())
+	std::vector<WTSBarStruct> loaded;
+	if (isEmpty)
 	{
 		pipe_rdmreader_log(_sink, LL_DEBUG, "Reading back {} bars of {}.{}...", PERIOD_NAME[period], cInfo._exchg, cInfo._code);
-		WtLMDBQuery query(*db);
 		LMDBBarKey rKey(cInfo._exchg, cInfo._code, 0xffffffff);
 		LMDBBarKey lKey(cInfo._exchg, cInfo._code, 0);
-		[[maybe_unused]] int cnt = query.get_range(std::string((const char*)&lKey, sizeof(lKey)), std::string((const char*)&rKey, sizeof(rKey)),
-			[&barsList](const ValueArray& /*ayKeys*/, const ValueArray& ayVals) {
-			if (ayVals.empty())
-				return;
-
-			std::size_t cnt = ayVals.size();
-			barsList._bars.resize(cnt);
-			std::size_t idx = 0;
-			for (const std::string& item : ayVals)
-			{
-				memcpy(&barsList._bars[idx], item.data(), item.size());
-				idx++;
-			}
-		});
+		MalformedRecord malformed;
+		if (!read_checked_range(*db, lKey, rKey, loaded, malformed))
+		{
+			log_range_failure<WTSBarStruct>(_sink, "bar", cInfo._exchg, cInfo._code, *db, malformed);
+			return NULL;
+		}
 	}
 	else if(bNeedNewer)
 	{
 		//加载更新的数据
 		pipe_rdmreader_log(_sink, LL_DEBUG, "Reading back {} bars of {}.{}...", PERIOD_NAME[period], cInfo._exchg, cInfo._code);
-		WtLMDBQuery query(*db);
 		LMDBBarKey rKey(cInfo._exchg, cInfo._code, 0xffffffff);
-		LMDBBarKey lKey(cInfo._exchg, cInfo._code, (uint32_t)barsList._last_bar_time);
-		[[maybe_unused]] int cnt = query.get_range(std::string((const char*)&lKey, sizeof(lKey)), std::string((const char*)&rKey, sizeof(rKey)),
-			[&barsList](const ValueArray& /*ayKeys*/, const ValueArray& ayVals) {
-			if (ayVals.empty())
-				return;
-
-			std::size_t cnt = ayVals.size();
-			barsList._bars.resize(cnt);
-			std::size_t idx = 0;
-			for (const std::string& item : ayVals)
-			{
-				memcpy(&barsList._bars[idx], item.data(), item.size());
-				idx++;
-			}
-		});
+		LMDBBarKey lKey(cInfo._exchg, cInfo._code, (uint32_t)candidate._last_bar_time);
+		MalformedRecord malformed;
+		if (!read_checked_range(*db, lKey, rKey, loaded, malformed))
+		{
+			log_range_failure<WTSBarStruct>(_sink, "bar", cInfo._exchg, cInfo._code, *db, malformed);
+			return NULL;
+		}
 	}
+	if (!loaded.empty())
+		candidate._bars.swap(loaded);
+	if (!candidate._bars.empty())
+	{
+		if (cacheIt == _bars_cache.end())
+			cacheIt = _bars_cache.emplace(key, std::move(candidate)).first;
+		else if (isEmpty || !loaded.empty())
+		{
+			std::vector<WTSBarStruct>& cachedBars = cacheIt->second._bars;
+			cachedBars.resize(candidate._bars.size());
+			std::copy(candidate._bars.begin(), candidate._bars.end(), cachedBars.begin());
+		}
+	}
+	if (cacheIt == _bars_cache.end())
+		return NULL;
+	BarsList& barsList = cacheIt->second;
 
 	//
 	{
@@ -528,6 +901,11 @@ WtRdmDtReaderAD::WtLMDBPtr WtRdmDtReaderAD::get_k_db(const char* exchg, WTSKline
 	}
 	else
 		return WtLMDBPtr();
+	if (_base_dir.empty())
+	{
+		pipe_rdmreader_log(_sink, LL_ERROR, "Cannot open {} db: base data path is not configured", subdir);
+		return WtLMDBPtr();
+	}
 
 	auto it = the_map->find(exchg);
 	if (it != the_map->end())
@@ -545,7 +923,7 @@ WtRdmDtReaderAD::WtLMDBPtr WtRdmDtReaderAD::get_k_db(const char* exchg, WTSKline
 	}
 	if (!dbPtr->open(path.c_str()))
 	{
-		pipe_rdmreader_log(_sink, LL_ERROR, "Opening {} db if {} failed: {}", subdir, exchg, dbPtr->errmsg());
+		pipe_rdmreader_log(_sink, LL_ERROR, "Opening {} db of {} failed: {}", subdir, exchg, dbPtr->errmsg());
 		return WtLMDBPtr();
 	}
 	else
@@ -559,6 +937,12 @@ WtRdmDtReaderAD::WtLMDBPtr WtRdmDtReaderAD::get_k_db(const char* exchg, WTSKline
 
 WtRdmDtReaderAD::WtLMDBPtr WtRdmDtReaderAD::get_t_db(const char* exchg, const char* code)
 {
+	if (_base_dir.empty())
+	{
+		pipe_rdmreader_log(_sink, LL_ERROR, "Cannot open tick db: base data path is not configured");
+		return WtLMDBPtr();
+	}
+
 	std::string key = fmtutil::format<64>("{}.{}", exchg, code);
 	auto it = _tick_dbs.find(key);
 	if (it != _tick_dbs.end())

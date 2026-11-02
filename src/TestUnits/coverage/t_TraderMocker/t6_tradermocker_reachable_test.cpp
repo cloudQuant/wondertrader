@@ -22,11 +22,15 @@
 #include <cstdint>
 #include <cstring>
 #include <cstdlib>
+#include <chrono>
 #include <filesystem>
+#include <limits>
 #include <string>
 #include <vector>
 
 #include "TraderMocker/TraderMocker.h"
+#include "WtCore/TraderAdapter.h"
+#include "WtCore/WtHelper.h"
 
 #include "Includes/IBaseDataMgr.h"
 #include "Includes/WTSVariant.hpp"
@@ -37,6 +41,16 @@ USING_NS_WTP;
 /// 生产符号：src/TraderMocker/TraderMocker.cpp L52-80（撮合拆量内核）
 /// 声明处不给默认实参，调用侧一律显式传三个参数
 std::vector<uint32_t> splitVolume(uint32_t vol, uint32_t minQty, uint32_t maxQty);
+
+struct TraderMockerRngTestAccess
+{
+	static std::vector<uint32_t> split(TraderMocker& mocker, uint32_t vol, uint32_t minQty, uint32_t maxQty)
+	{
+		return mocker.split_volume(vol, minQty, maxQty);
+	}
+	static double minQty(const TraderMocker& mocker) { return mocker._min_qty; }
+	static double maxQty(const TraderMocker& mocker) { return mocker._max_qty; }
+};
 
 extern "C"
 {
@@ -120,6 +134,36 @@ namespace
 
 	private:
 		std::string _dir;
+	};
+
+	class AdapterTraderDirGuard
+	{
+	public:
+		AdapterTraderDirGuard()
+		{
+			const auto base = std::chrono::steady_clock::now().time_since_epoch().count();
+			const std::filesystem::path tradersDir = std::filesystem::path(WtHelper::getBaseDir()) / "traders";
+			for (uint32_t suffix = 0; ; ++suffix)
+			{
+				_id = "t6_init_null_" + std::to_string(base) + "_" + std::to_string(suffix);
+				_dir = tradersDir / _id;
+				if (!std::filesystem::exists(_dir))
+					break;
+			}
+		}
+
+		~AdapterTraderDirGuard()
+		{
+			std::error_code ec;
+			std::filesystem::remove_all(_dir, ec);
+		}
+
+		const std::string& id() const { return _id; }
+		const std::filesystem::path& path() const { return _dir; }
+
+	private:
+		std::string _id;
+		std::filesystem::path _dir;
 	};
 
 	WTSVariant* make_cfg(uint32_t mockerId, int span, uint32_t maxQty, uint32_t minQty, int udpPort, bool newpx)
@@ -217,6 +261,173 @@ TEST(t6_split_volume, tail_part_is_clamped_and_uniform_when_max_equals_min)
 		EXPECT_EQ(4u, p);
 }
 
+TEST(R113MockerSplitVolume, ExplicitSeedReplaysAndInstancesStayIndependent)
+{
+	TraderMocker first, second, unrelated;
+	WTSVariant* cfg = WTSVariant::createObject();
+	cfg->append("mockerid", uint32_t(11301));
+	cfg->append("rng_seed", uint32_t(123456));
+	ASSERT_TRUE(first.init(cfg));
+	ASSERT_TRUE(second.init(cfg));
+	ASSERT_TRUE(unrelated.init(cfg));
+	cfg->release();
+
+	const auto firstDraw = TraderMockerRngTestAccess::split(first, 1000, 1, 100);
+	(void)TraderMockerRngTestAccess::split(unrelated, 2000, 1, 100);
+	EXPECT_EQ(firstDraw, TraderMockerRngTestAccess::split(second, 1000, 1, 100));
+	const auto nextDraw = TraderMockerRngTestAccess::split(first, 1000, 1, 100);
+	EXPECT_NE(firstDraw, nextDraw);
+	(void)TraderMockerRngTestAccess::split(unrelated, 2000, 1, 100);
+	EXPECT_EQ(nextDraw, TraderMockerRngTestAccess::split(second, 1000, 1, 100));
+}
+
+TEST(R113MockerSplitVolume, ConservesQuantityAndDoesNotChangeHostCRandomState)
+{
+	std::srand(1949);
+	const int expectedFirst = std::rand();
+	const int expectedSecond = std::rand();
+	std::srand(1949);
+	TraderMocker mocker;
+	WTSVariant* cfg = WTSVariant::createObject();
+	cfg->append("mockerid", uint32_t(11302));
+	cfg->append("rng_seed", uint32_t(0));
+	ASSERT_TRUE(mocker.init(cfg));
+	cfg->release();
+	EXPECT_EQ(expectedFirst, std::rand());
+	const auto parts = TraderMockerRngTestAccess::split(mocker, 737, 50, 100);
+	(void)splitVolume(300, 1, 100);
+	EXPECT_EQ(expectedSecond, std::rand());
+
+	uint64_t sum = 0;
+	for (size_t i = 0; i < parts.size(); ++i)
+	{
+		EXPECT_GT(parts[i], 0u);
+		EXPECT_LE(parts[i], 100u);
+		if (i + 1 < parts.size()) EXPECT_GE(parts[i], 50u);
+		sum += parts[i];
+	}
+	EXPECT_EQ(sum, 737u);
+	EXPECT_EQ(TraderMockerRngTestAccess::split(mocker, 0, 1, 100), (std::vector<uint32_t>{0}));
+	EXPECT_EQ(TraderMockerRngTestAccess::split(mocker, 3, 5, 100), (std::vector<uint32_t>{3}));
+	EXPECT_EQ(TraderMockerRngTestAccess::split(mocker, 12, 4, 4), (std::vector<uint32_t>{4, 4, 4}));
+	const uint32_t largest = std::numeric_limits<uint32_t>::max();
+	EXPECT_EQ(TraderMockerRngTestAccess::split(mocker, largest, largest, largest),
+		(std::vector<uint32_t>{largest}));
+	const auto wide = TraderMockerRngTestAccess::split(mocker, 4, 1, largest);
+	uint64_t wideSum = 0;
+	for (const uint32_t part : wide) wideSum += part;
+	EXPECT_EQ(wideSum, 4u);
+}
+
+TEST(I03MockerQuantity, InvalidConfigurationFailsBeforeSideEffects)
+{
+	struct Range { double min; double max; };
+	const double inf = std::numeric_limits<double>::infinity();
+	const double nan = std::numeric_limits<double>::quiet_NaN();
+	const std::vector<Range> invalid = {
+		{0.5, 10}, {1, 0.5}, {-1, 10}, {1, -1}, {0.000001, 10}, {-0.000001, 10},
+		{nan, 10}, {1, nan}, {inf, 10}, {1, inf}, {-inf, 10},
+		{4294967296.0, 4294967296.0}, {1, 4294967296.0},
+		{4, 3}, {2.1, 1.9}
+	};
+	uint32_t id = 113100;
+	for (const Range& range : invalid)
+	{
+		MockerDirGuard dir(id);
+		MockerSink sink;
+		TraderMocker mocker;
+		mocker.registerSpi(&sink);
+		WTSVariant* cfg = WTSVariant::createObject();
+		cfg->append("mockerid", id++);
+		cfg->append("minqty", range.min);
+		cfg->append("maxqty", range.max);
+		cfg->append("rng_seed", uint32_t(33));
+		EXPECT_FALSE(mocker.init(cfg)) << range.min << ", " << range.max;
+		EXPECT_FALSE(dir.exists());
+		ASSERT_EQ(sink.logs_.size(), 1u);
+		EXPECT_NE(sink.logs_[0].find("Invalid quantity range"), std::string::npos);
+		cfg->release();
+	}
+}
+
+TEST(I03MockerQuantity, DefaultsAndConvertibleFractionsRemainValid)
+{
+	MockerDirGuard defaultDir(113201), fractionalDir(113202), upperDir(113203), equivalentDir(113206), nearZeroDir(113207);
+	TraderMocker defaults, fractional, upper, equivalent, nearZero;
+	WTSVariant* cfg = WTSVariant::createObject();
+	cfg->append("mockerid", uint32_t(113201));
+	cfg->append("minqty", 0.0);
+	cfg->append("maxqty", 0.0);
+	ASSERT_TRUE(defaults.init(cfg));
+	cfg->release();
+	EXPECT_DOUBLE_EQ(TraderMockerRngTestAccess::minQty(defaults), 1.0);
+	EXPECT_DOUBLE_EQ(TraderMockerRngTestAccess::maxQty(defaults), 100.0);
+	EXPECT_TRUE(defaultDir.exists());
+	cfg = WTSVariant::createObject();
+	cfg->append("mockerid", uint32_t(113202));
+	cfg->append("minqty", 1.9);
+	cfg->append("maxqty", 5.9);
+	ASSERT_TRUE(fractional.init(cfg));
+	cfg->release();
+	EXPECT_DOUBLE_EQ(TraderMockerRngTestAccess::minQty(fractional), 1.9);
+	EXPECT_DOUBLE_EQ(TraderMockerRngTestAccess::maxQty(fractional), 5.9);
+	cfg = WTSVariant::createObject();
+	cfg->append("mockerid", uint32_t(113203));
+	cfg->append("minqty", 1.0);
+	cfg->append("maxqty", 4294967295.75);
+	ASSERT_TRUE(upper.init(cfg));
+	cfg->release();
+	EXPECT_TRUE(upperDir.exists());
+	cfg = WTSVariant::createObject();
+	cfg->append("mockerid", uint32_t(113206));
+	cfg->append("minqty", 1.9);
+	cfg->append("maxqty", 1.1);
+	ASSERT_TRUE(equivalent.init(cfg));
+	cfg->release();
+	EXPECT_DOUBLE_EQ(TraderMockerRngTestAccess::minQty(equivalent), 1.9);
+	EXPECT_DOUBLE_EQ(TraderMockerRngTestAccess::maxQty(equivalent), 1.1);
+	EXPECT_EQ(TraderMockerRngTestAccess::split(equivalent, 3, 1, 1), (std::vector<uint32_t>{1, 1, 1}));
+	cfg = WTSVariant::createObject();
+	cfg->append("mockerid", uint32_t(113207));
+	cfg->append("minqty", -0.0000005);
+	cfg->append("maxqty", 0.0000005);
+	ASSERT_TRUE(nearZero.init(cfg));
+	cfg->release();
+	EXPECT_DOUBLE_EQ(TraderMockerRngTestAccess::minQty(nearZero), 1.0);
+	EXPECT_DOUBLE_EQ(TraderMockerRngTestAccess::maxQty(nearZero), 100.0);
+	EXPECT_TRUE(nearZeroDir.exists());
+}
+
+TEST(I03MockerQuantity, InvalidIntegerRangesReturnEmptyWithoutLoopingOrDividingByZero)
+{
+	const uint32_t largest = std::numeric_limits<uint32_t>::max();
+	EXPECT_TRUE(splitVolume(10, 0, 0).empty());
+	EXPECT_TRUE(splitVolume(10, 0, largest).empty());
+	EXPECT_TRUE(splitVolume(10, 5, 4).empty());
+	EXPECT_TRUE(splitVolume(0, 0, 0).empty());
+}
+
+TEST(I03MockerQuantity, RejectedReinitDoesNotReseedExistingInstance)
+{
+	MockerDirGuard validDir(113204), invalidDir(113205);
+	TraderMocker first, second;
+	WTSVariant* cfg = WTSVariant::createObject();
+	cfg->append("mockerid", uint32_t(113204));
+	cfg->append("rng_seed", uint32_t(777));
+	ASSERT_TRUE(first.init(cfg));
+	ASSERT_TRUE(second.init(cfg));
+	cfg->release();
+	cfg = WTSVariant::createObject();
+	cfg->append("mockerid", uint32_t(113205));
+	cfg->append("rng_seed", uint32_t(222));
+	cfg->append("minqty", 0.5);
+	EXPECT_FALSE(first.init(cfg));
+	cfg->release();
+	EXPECT_FALSE(invalidDir.exists());
+	EXPECT_EQ(TraderMockerRngTestAccess::split(first, 500, 1, 100),
+		TraderMockerRngTestAccess::split(second, 500, 1, 100));
+}
+
 /* ------------------------------------------------------------------ */
 /* makeEntrustID：参数防护 + 编号推进                                    */
 /* ------------------------------------------------------------------ */
@@ -267,6 +478,32 @@ TEST(t6_init, explicit_config_creates_mocker_dir_and_keeps_given_id)
 
 	// L538-544：init 按 mocker_<id>/ 建落盘目录，_pos_file 指向其中 positions.json
 	EXPECT_TRUE(dir.exists());
+}
+
+TEST(t6_init, rejects_null_config_before_creating_mocker_state)
+{
+	MockerDirGuard dir(0);
+	TraderMocker api;
+
+	EXPECT_FALSE(api.init(nullptr));
+	EXPECT_FALSE(api.isConnected());
+	EXPECT_FALSE(dir.exists());
+}
+
+TEST(t6_init, wtcore_init_ext_rejects_tradermocker_null_config)
+{
+	AdapterTraderDirGuard dir;
+	TraderMocker api;
+	{
+		TraderAdapter adapter;
+		EXPECT_FALSE(adapter.initExt(dir.id().c_str(), &api, nullptr, nullptr));
+	}
+
+	// initExt opens its per-adapter logs before passing NULL to the external API;
+	// reaching these files plus a false result proves the safe local integration path.
+	EXPECT_TRUE(std::filesystem::is_regular_file(dir.path() / "trades.csv"));
+	EXPECT_TRUE(std::filesystem::is_regular_file(dir.path() / "orders.csv"));
+	EXPECT_FALSE(api.isConnected());
 }
 
 TEST(t6_init, missing_keys_fall_back_to_qty_defaults_and_zero_id)

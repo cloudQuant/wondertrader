@@ -31,6 +31,12 @@ namespace wtp {
 // Narrow test seam to prove failed connect cleanup without adding a runtime API.
 struct MQClientTestAccess
 {
+	static MQServerPtr find_server(const MQManager& manager, WtUInt32 id)
+	{
+		auto it = manager._servers.find(id);
+		return it == manager._servers.end() ? MQServerPtr() : it->second;
+	}
+
 	static MQClientPtr find_client(const MQManager& manager, WtUInt32 id)
 	{
 		auto it = manager._clients.find(id);
@@ -117,25 +123,57 @@ TEST(r19_mq_server, bind_destroy_and_rebind_same_inproc_endpoint)
 	destroy_server(id2);
 }
 
-// 非法协议：init 失败被记进日志，但 MQManager 仍然把句柄注册并返回给调用方
-TEST(r19_mq_server, invalid_protocol_logs_bind_failure_but_handle_still_returned)
+// 同一 inproc endpoint 已被占用时，第二次 bind 必须失败且不登记失败对象。
+TEST(r19_mq_server, duplicate_inproc_bind_returns_zero_and_does_not_register)
 {
 	reset_mq_log();
+	MQManager manager;
+	manager.regiter_callbacks(mq_log_cb);
+	const std::string url = "inproc://r19_bind_conflict";
+
+	const WtUInt32 first = manager.create_server(url.c_str(), false);
+	ASSERT_GT(first, 1000u);
+	ASSERT_TRUE(wtp::MQClientTestAccess::find_server(manager, first) != NULL);
+
+	reset_mq_log();
+	const WtUInt32 duplicate = manager.create_server(url.c_str(), false);
+	EXPECT_EQ(0u, duplicate);
+	EXPECT_TRUE(mq_has("binding url " + url));
+	EXPECT_TRUE(mq_has("failed"));	// 第二个 socket 对已占用 endpoint 的真实 bind 失败
+	EXPECT_TRUE(wtp::MQClientTestAccess::find_server(manager, first) != NULL);
+	EXPECT_TRUE(wtp::MQClientTestAccess::find_server(manager, duplicate) == NULL);
+
+	manager.destroy_server(first);
+	const WtUInt32 rebound = manager.create_server(url.c_str(), false);
+	EXPECT_GT(rebound, first);	// 首个 server 销毁后，同一 endpoint 可重新绑定
+	EXPECT_TRUE(wtp::MQClientTestAccess::find_server(manager, rebound) != NULL);
+	manager.destroy_server(rebound);
+}
+
+// 非法协议：失败返回 0，且不登记服务端实例
+TEST(r19_mq_server, invalid_protocol_returns_zero_and_does_not_register)
+{
+	reset_mq_log();
+	MQManager manager;
+	manager.regiter_callbacks(mq_log_cb);
 	const std::string url = "r19bogus://r19_ep";
 
-	const WtUInt32 id = create_server(url.c_str(), false);
+	const WtUInt32 id = manager.create_server(url.c_str(), false);
+	EXPECT_EQ(0u, id);
 	EXPECT_TRUE(mq_has("binding url " + url)) << "MQServer.cpp L94 的失败日志";
 	EXPECT_TRUE(mq_has("failed"));
-	EXPECT_GT(id, 1000u) << "L6-18：init 返回值被忽略，失败的句柄照样入表并回给调用方";
+	EXPECT_TRUE(wtp::MQClientTestAccess::find_server(manager, id) == NULL);
 
-	// 该服务端 _sock 已被置回 -1（L96）→ publish 走 L111-115 的「还没初始化」分支
+	// 0 是无效句柄；失败对象未登记，后续按 ID 调用走缺失句柄路径。
 	reset_mq_log();
-	publish_message(id, "t", "payload", 7);
-	EXPECT_EQ(1u, count_of("has not been initialized yet"));
-	EXPECT_FALSE(mq_has("not exists")) << "句柄确实在表里，只是没绑定成功";
+	manager.publish_message(id, "t", "payload", 7);
+	EXPECT_EQ(1u, count_of("S0|MQServer 0 not exists"));
+	EXPECT_EQ(0u, count_of("has not been initialized yet"));
 
-	destroy_server(id);
-	EXPECT_EQ(1u, count_of("has been destroyed"));
+	reset_mq_log();
+	manager.destroy_server(id);
+	EXPECT_EQ(1u, count_of("S0|MQServer 0 not exists"));
+	EXPECT_EQ(0u, count_of("has been destroyed"));
 }
 
 // 空数据/NULL 数据必须在入队之前早退（否则产品侧会起广播线程）
@@ -161,11 +199,11 @@ TEST(r19_mq_server, publish_with_empty_payload_logs_nothing_and_starts_no_thread
 	publish_message(999995u, "t", "x", 1);
 	EXPECT_EQ(5u, count_of("not exists"));
 	// 服务端/客户端两条日志通道靠 bServer 区分（MQManager.cpp L46-56）
-	EXPECT_EQ(1u, count_of("S999999|not exists"));   // destroy_server
-	EXPECT_EQ(1u, count_of("S999995|not exists"));   // publish_message
-	EXPECT_EQ(1u, count_of("C999998|not exists"));   // destroy_client
-	EXPECT_EQ(1u, count_of("C999997|not exists"));   // subscribe_topic
-	EXPECT_EQ(1u, count_of("C999996|not exists"));   // start_client
+	EXPECT_EQ(1u, count_of("S999999|MQServer 999999 not exists"));   // destroy_server
+	EXPECT_EQ(1u, count_of("S999995|MQServer 999995 not exists"));   // publish_message
+	EXPECT_EQ(1u, count_of("C999998|MQClient 999998 not exists"));   // destroy_client
+	EXPECT_EQ(1u, count_of("C999997|MQClient 999997 not exists"));   // subscribe_topic
+	EXPECT_EQ(1u, count_of("C999996|MQClient 999996 not exists"));   // start_client
 	g_recv_calls = 0;
 	EXPECT_EQ(0, g_recv_calls);
 
@@ -211,33 +249,24 @@ TEST(r19_mq_client, invalid_protocol_create_start_destroy_is_safe_and_logger_can
 	const std::string url = "r19bogus://r19_direct";
 
 	const WtUInt32 c = manager.create_client(url.c_str(), mq_msg_cb);
+	EXPECT_EQ(0u, c);
 	EXPECT_TRUE(mq_has("connecting url " + url));
 	EXPECT_TRUE(mq_has("failed"));
-	{
-		MQClientPtr failed_client = wtp::MQClientTestAccess::find_client(manager, c);
-		if (failed_client)
-		{
-			EXPECT_EQ(-1, wtp::MQClientTestAccess::socket(*failed_client))
-				<< "connect 失败后 nn_close 并将 _sock 复位，避免遗留 nanomsg socket";
-			EXPECT_FALSE(wtp::MQClientTestAccess::ready(*failed_client));
-			EXPECT_FALSE(wtp::MQClientTestAccess::has_receiver_thread(*failed_client));
-		}
-		else
-		{
-			SUCCEED() << "manager 未保留失败对象；失败 ID 哨兵语义仍待公开合同裁定";
-		}
-	}
+	EXPECT_TRUE(wtp::MQClientTestAccess::find_client(manager, c) == NULL)
+		<< "connect 失败后对象不登记，socket 已由 init 失败分支关闭";
 
 	g_recv_calls = 0;
 	reset_mq_log();
 	manager.start_client(c);
 	EXPECT_FALSE(mq_has("has started successfully"));
-	EXPECT_TRUE(mq_has("has not been initialized yet") || mq_has("not exists"));
+	EXPECT_TRUE(mq_has("C0|MQClient 0 not exists"));
+	EXPECT_FALSE(mq_has("has not been initialized yet"));
 	EXPECT_EQ(0, g_recv_calls);
 
 	reset_mq_log();
 	manager.destroy_client(c);
-	EXPECT_TRUE(mq_has("has been destroyed") || mq_has("not exists"));
+	EXPECT_TRUE(mq_has("C0|MQClient 0 not exists"));
+	EXPECT_FALSE(mq_has("has been destroyed"));
 
 	reset_mq_log();
 	// 注销日志回调之后，MQManager 的 log_server/log_client（L48/L54）必须静默

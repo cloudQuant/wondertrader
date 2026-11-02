@@ -59,7 +59,8 @@ bool stageTrader(const fs::path& root, const std::string& bin, const char* name)
 	const std::string src = bin + name;
 	if (!fs::exists(src, ec))
 		return false;
-	fs::create_symlink(src, root / "traders" / name, ec);
+	fs::copy_file(src, root / "traders" / name,
+		fs::copy_options::overwrite_existing, ec);
 	return !ec;
 }
 

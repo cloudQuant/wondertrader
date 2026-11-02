@@ -89,9 +89,12 @@ bool WtStraDtSel::init(WTSVariant* cfg)
 	std::string codes = cfg->getCString("codes");
 	// 将逗号分隔的代码字符串分割为列表
 	auto ayCodes = StrUtil::split(codes, ",");
-	// 将每个代码加入代码集合
+	// 仅将非空代码加入集合，空配置保持为空策略
 	for (auto& code : ayCodes)
-		_codes.insert(code);
+	{
+		if (!code.empty())
+			_codes.insert(code);
+	}
 
 	return true;
 }
@@ -125,8 +128,8 @@ void WtStraDtSel::on_schedule(ISelStraCtx* ctx, uint32_t uDate, uint32_t uTime)
 	{
 		// 获取交易品种的交易时间信息
 		WTSSessionInfo* sInfo = ctx->stra_get_sessinfo(curCode.c_str());
-		// 如果当前不在交易时间内，则跳过处理
-		if(!sInfo->isInTradingTime(uTime))
+		// 未知代码可能没有交易时段信息；跳过当前代码并继续处理其他代码
+		if (sInfo == NULL || !sInfo->isInTradingTime(uTime))
 			continue;
 
 		// 构建标准化代码，股票需要添加"-"

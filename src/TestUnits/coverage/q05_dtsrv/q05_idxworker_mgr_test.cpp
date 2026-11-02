@@ -171,8 +171,8 @@ TEST_F(Q05IdxWorkerMgrTest, HandleQuoteNullUnsubscribedAndSubscribed)
 	ASSERT_NE(fullCode, nullptr);
 	mgr.handle_quote(tick);
 
-	// 3) 已订阅但 _workers 为空：retain -> 空循环 -> （_pool 为空不 release）
-	//    注意：无 _pool 的同步分支不 release，引用计数由调用方管理
+	// 3) 已订阅但 _workers 为空：同步路径短暂 retain，返回前归还临时引用；
+	//    当前用例保留调用方的原始引用并在结尾释放。
 	EXPECT_EQ(mgr.sub_ticks(fullCode), nullptr);
 	mgr.handle_quote(tick);
 

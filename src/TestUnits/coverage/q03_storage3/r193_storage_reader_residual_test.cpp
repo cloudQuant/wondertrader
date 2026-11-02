@@ -70,7 +70,7 @@ TEST_F(R193StorageReaderTest, R193LoaderUnknownPeriodUsesDayName)
 {
 	r52::Loader loader;
 	vector<WTSBarStruct> bars;
-	bars.push_back(make_bar(20240108, 202401081500, 1));
+	bars.push_back(make_bar(20240108, TimeUtils::timeToMinBar(20240108, 1500), 1));
 	loader.add_final("SSE.STK.600030", bars);
 	init_reader(&loader);
 

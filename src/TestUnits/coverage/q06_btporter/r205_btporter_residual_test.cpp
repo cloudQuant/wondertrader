@@ -110,10 +110,19 @@ void write_min_basefiles(const std::string& dir)
 }
 
 /* HisDataMgr 按 WtHelper::getInstDir() + libWtDataStorage.dylib 装载模块。
- * 测试可执行体在 bin/TestUnits 下，模块在上一级 bin 下；沿用 r91 的做法，
- * 在构建目录候选里找到模块后把 inst_dir 钉过去。 */
+ * CoverageTests_btporter 的专用编译宏来自 CMake 的 TARGET_FILE，定位 out-of-source
+ * 构建产物后把 inst_dir 钉到其所在目录。 */
 bool prepare_inst_dir()
 {
+#ifdef WT_COV_BTPORTER_DATA_STORAGE_MODULE
+	const stdfs::path modulePath(WT_COV_BTPORTER_DATA_STORAGE_MODULE);
+	std::error_code moduleEc;
+	if (!stdfs::is_regular_file(modulePath, moduleEc) || moduleEc)
+		return false;
+	const std::string dir = modulePath.parent_path().string();
+	WtHelper::setInstDir((dir + "/").c_str());
+	return true;
+#else
 	const std::string module = DLLHelper::wrap_module("WtDataStorage");
 	const char* const rels[] = {
 		"build-cov/build_x64/Debug/bin",
@@ -132,6 +141,7 @@ bool prepare_inst_dir()
 		}
 	}
 	return false;
+#endif
 }
 
 /* ------------------------------------------------------------------ 合成 m5 */
@@ -250,17 +260,25 @@ protected:
 		const std::string root = repo_root().string();
 		const std::string cfg =
 			"{\"replayer\":{\"mode\":\"csv\",\"path\":\"" + dir_ + "\","
-			"\"stime\":202001020930,\"etime\":202001021500,\"tick\":false,"
+			"\"stime\":202001021030,\"etime\":202001021500,\"tick\":false,"
 			"\"basefiles\":{"
 			"\"session\":\"" + root + "/dist/common/sessions.json\","
 			"\"commodity\":[\"" + root + "/dist/common/commodities.json\","
 			"\"" + root + "/dist/common/stk_comms.json\"],"
 			"\"holiday\":\"" + root + "/dist/common/holidays.json\"}},"
-			"\"env\":{\"mocker\":\"" + std::string(mode) + "\"},"
-			"\"" + std::string(mode) + "\":{\"name\":\"r205_" + std::string(tag) +
-			"\",\"slippage\":0}}";
+			"\"env\":{\"mocker\":\"none\"}}";
 		getRunner().config(cfg.c_str(), false);
 
+		uint32_t mockerId = 0;
+		const std::string mockerName = std::string("r205_") + tag;
+		if (strcmp(mode, "cta") == 0)
+			mockerId = getRunner().initCtaMocker(mockerName.c_str(), 0, false, false, false, false);
+		else if (strcmp(mode, "sel") == 0)
+			mockerId = getRunner().initSelMocker(mockerName.c_str(), 20200102, 93000, "m5");
+		else if (strcmp(mode, "hft") == 0)
+			mockerId = getRunner().initHftMocker(mockerName.c_str(), false);
+		if (mockerId == 0)
+			return false;
 		if (strcmp(mode, "cta") == 0 && getRunner().cta_mocker() == nullptr)
 			return false;
 		if (strcmp(mode, "sel") == 0 && getRunner().sel_mocker() == nullptr)
@@ -397,9 +415,9 @@ TEST(R205BtPorterLevel2, HftLevel2GettersServeStoredBlocksAndRejectMissing)
 		"\"commodity\":[\"" + root + "/dist/common/commodities.json\","
 		"\"" + root + "/dist/common/stk_comms.json\"],"
 		"\"holiday\":\"" + root + "/dist/common/holidays.json\"}},"
-		"\"env\":{\"mocker\":\"hft\"},"
-		"\"hft\":{\"name\":\"r205_l2\",\"module\":\"\"}}";
+		"\"env\":{\"mocker\":\"none\"}}";
 	getRunner().config(cfg.c_str(), false);
+	ASSERT_NE(0U, getRunner().initHftMocker("r205_l2", false));
 	ASSERT_NE(nullptr, getRunner().hft_mocker());
 	ASSERT_TRUE(getRunner().replayer().prepare());
 
@@ -481,9 +499,9 @@ TEST(R205BtPorterLevel2, HftOrderQueueQueryAfterLastStoredRecordDoesNotOvercount
 		"\"commodity\":[\"" + root + "/dist/common/commodities.json\","
 		"\"" + root + "/dist/common/stk_comms.json\"],"
 		"\"holiday\":\"" + root + "/dist/common/holidays.json\"}},"
-		"\"env\":{\"mocker\":\"hft\"},"
-		"\"hft\":{\"name\":\"r205_l2_after_last\",\"module\":\"\"}}";
+		"\"env\":{\"mocker\":\"none\"}}";
 	getRunner().config(cfg.c_str(), false);
+	ASSERT_NE(0U, getRunner().initHftMocker("r205_l2_after_last", false));
 	ASSERT_NE(nullptr, getRunner().hft_mocker());
 	ASSERT_TRUE(getRunner().replayer().prepare());
 
@@ -539,9 +557,9 @@ TEST(R205BtPorterLevel2, DISABLED_QueueMissPoisonsTransCacheAndHidesLaterTransFi
 		"\"commodity\":[\"" + root + "/dist/common/commodities.json\","
 		"\"" + root + "/dist/common/stk_comms.json\"],"
 		"\"holiday\":\"" + root + "/dist/common/holidays.json\"}},"
-		"\"env\":{\"mocker\":\"hft\"},"
-		"\"hft\":{\"name\":\"r205_l2_poison\",\"module\":\"\"}}";
+		"\"env\":{\"mocker\":\"none\"}}";
 	getRunner().config(cfg.c_str(), false);
+	ASSERT_NE(0U, getRunner().initHftMocker("r205_l2_poison", false));
 	ASSERT_NE(nullptr, getRunner().hft_mocker());
 	ASSERT_TRUE(getRunner().replayer().prepare());
 
@@ -587,9 +605,9 @@ TEST(R205BtRunnerAsync, BacktestEndThrowIsCaughtInsideWorker)
 		"\"session\":\"" + dir + "/sessions.json\","
 		"\"commodity\":\"" + dir + "/commodities.json\","
 		"\"contract\":\"" + dir + "/contracts.json\"}},"
-		"\"env\":{\"mocker\":\"cta\"},"
-		"\"cta\":{\"name\":\"r205_evt_throw\",\"slippage\":0}}";
+		"\"env\":{\"mocker\":\"none\"}}";
 	getRunner().config(cfg.c_str(), false);
+	ASSERT_NE(0U, getRunner().initCtaMocker("r205_evt_throw", 0, false, false, false, false));
 	ASSERT_NE(nullptr, getRunner().cta_mocker());
 
 	register_evt_callback(&throwing_evt_cb);
@@ -629,9 +647,9 @@ TEST(R205BtRunnerAsync, HftMockerAsyncHookAndStepTick)
 		"\"session\":\"" + dir + "/sessions.json\","
 		"\"commodity\":\"" + dir + "/commodities.json\","
 		"\"contract\":\"" + dir + "/contracts.json\"}},"
-		"\"env\":{\"mocker\":\"hft\"},"
-		"\"hft\":{\"name\":\"r205_hft_async\",\"module\":\"\"}}";
+		"\"env\":{\"mocker\":\"none\"}}";
 	getRunner().config(cfg.c_str(), false);
+	ASSERT_NE(0U, getRunner().initHftMocker("r205_hft_async", false));
 	ASSERT_NE(nullptr, getRunner().hft_mocker());
 
 	run_backtest(false, true);
@@ -684,42 +702,49 @@ TEST(R205BtRunnerLoader, UnsupportedPeriodsFallThroughToDefault)
 	EXPECT_TRUE(runner.loadRawHisTicks(NULL, "SHFE.rb2510", 20240102, &read_ticks_noop));
 }
 
-/* 产品缺陷 BUG-R205-001：WtBtRunner::config 的 `_inited` 只读不写（与
- * WtBtPorter::config_backtest 的 static `inited` 同样），文档承诺的“只初始化
- * 一次”守卫永远为 false。启用本用例即可看到第二次 config 仍会新建 hft_mocker。
- * 当前实现下 EXPECT_EQ(hft_mocker(), nullptr) 会失败，故保持 DISABLED_，
- * 不修改生产代码换取通过。 */
-TEST(R205BtRunnerConfig, DISABLED_SecondConfigIsNotIgnoredBecauseInitedIsNeverSet)
+/* 回归 BUG-R205-001：成功配置后拒绝第二次配置，避免重建 replayer 或覆盖运行时状态。
+ * 旧用例的 SEL 配置缺少 module/strategy，首次配置实际上失败；它的 disabled 状态和
+ * “_inited 从未置位”注释均已过时。这里使用无需插件的有效 none 配置，并检查 API 错误。 */
+TEST(R205BtRunnerConfig, SuccessfulConfigRejectsASecondConfig)
 {
 	const std::string dir = prepare_dir("cfg_guard");
 	ASSERT_FALSE(dir.empty());
-	write_min_basefiles(dir);
+	const auto make_config = [&dir](uint64_t stime) {
+		return std::string("{\"replayer\":{\"mode\":\"none\",\"path\":\"") + dir +
+			"\",\"stime\":" + std::to_string(stime) +
+			",\"etime\":20240103000000,\"tick\":false,\"basefiles\":{}},"
+			"\"env\":{\"mocker\":\"none\"}}";
+	};
 
-	reset_singleton();
-	getRunner().init((dir + "/r205_absent_logcfg.yaml").c_str(), true, dir.c_str());
+	WtBtRunner runner;
+	std::string error;
+	const std::string first = make_config(20240102000000ull);
+	ASSERT_TRUE(runner.config_v2(first.c_str(), false, &error)) << error;
 
-	const std::string sel = "{\"replayer\":{\"mode\":\"none\",\"path\":\"" + dir + "\","
-		"\"stime\":20240102000000,\"etime\":20240103000000,\"tick\":false,"
-		"\"basefiles\":{\"session\":\"" + dir + "/sessions.json\","
-		"\"commodity\":\"" + dir + "/commodities.json\","
-		"\"contract\":\"" + dir + "/contracts.json\"}},"
-		"\"env\":{\"mocker\":\"sel\"},\"sel\":{\"name\":\"r205_sel_cfg\",\"slippage\":0}}";
-	getRunner().config(sel.c_str(), false);
-	ASSERT_NE(nullptr, getRunner().sel_mocker());
+	// A distinct, otherwise-valid configuration would succeed if the one-shot
+	// guard were absent; rejection must occur before the replayer sees it.
+	const std::string duplicate = make_config(20240101000000ull);
+	EXPECT_FALSE(runner.config_v2(duplicate.c_str(), false, &error));
+	EXPECT_NE(std::string::npos, error.find("already been initialized")) << error;
 
-	const std::string hft = "{\"replayer\":{\"mode\":\"none\",\"path\":\"" + dir + "\","
-		"\"stime\":20240102000000,\"etime\":20240103000000,\"tick\":false,"
-		"\"basefiles\":{\"session\":\"" + dir + "/sessions.json\","
-		"\"commodity\":\"" + dir + "/commodities.json\","
-		"\"contract\":\"" + dir + "/contracts.json\"}},"
-		"\"env\":{\"mocker\":\"hft\"},\"hft\":{\"name\":\"r205_hft_cfg\",\"module\":\"\"}}";
-	getRunner().config(hft.c_str(), false);
+	std::error_code ec;
+	stdfs::remove_all(dir, ec);
+}
 
-	/* 若 _inited 守卫生效：第二次 config 应整体早退，sel 保留且 hft 仍为空 */
-	EXPECT_NE(nullptr, getRunner().sel_mocker());
-	EXPECT_EQ(nullptr, getRunner().hft_mocker());
+TEST(R205BtRunnerConfig, PreflightFailureCanBeRetriedWithAValidConfig)
+{
+	const std::string dir = prepare_dir("cfg_preflight_retry");
+	ASSERT_FALSE(dir.empty());
+	const std::string valid = "{\"replayer\":{\"mode\":\"none\",\"path\":\"" + dir +
+		"\",\"stime\":20240102000000,\"etime\":20240103000000,\"basefiles\":{}},"
+		"\"env\":{\"mocker\":\"none\"}}";
 
-	reset_singleton();
+	WtBtRunner runner;
+	std::string error;
+	EXPECT_FALSE(runner.config_v2("{\"replayer\":{},\"env\":{\"mocker\":3}}", false, &error));
+	EXPECT_NE(std::string::npos, error.find("env.mocker must be a string")) << error;
+	EXPECT_TRUE(runner.config_v2(valid.c_str(), false, &error)) << error;
+
 	std::error_code ec;
 	stdfs::remove_all(dir, ec);
 }

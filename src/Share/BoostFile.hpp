@@ -11,6 +11,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/interprocess/detail/os_file_functions.hpp>
 #include <algorithm>
+#include <cerrno>
 #include <cstddef>
 #include <limits>
 #include <string>
@@ -119,11 +120,18 @@ public:
 
 	void close_file()
 	{
-		if(!is_invalid_file())
-		{
-			bip::ipcdetail::close_file(_handle);
-			_handle=bip::ipcdetail::invalid_file();
-		}
+		(void)close_file_checked();
+	}
+
+	// A failed native close is not retried: on POSIX the descriptor may
+	// already have been released even when close reports an error.
+	bool close_file_checked()
+	{
+		if (is_invalid_file())
+			return true;
+		const bip::file_handle_t handle = _handle;
+		_handle = bip::ipcdetail::invalid_file();
+		return bip::ipcdetail::close_file(handle);
 	}
 
 	bool truncate_file (std::size_t size)
@@ -157,7 +165,17 @@ public:
 
 	bool set_file_pointer(bip::offset_t off, bip::file_pos_t pos)
 	{
+	#ifdef _WIN32
 		return bip::ipcdetail::set_file_pointer(_handle,off,pos);
+	#else
+		bip::offset_t result = 0;
+		do
+		{
+			result = ::lseek(_handle, off, static_cast<int>(pos));
+		}
+		while (result == static_cast<bip::offset_t>(-1) && errno == EINTR);
+		return result != static_cast<bip::offset_t>(-1);
+	#endif
 	}
 
 	bool seek_to_begin(int offsize=0)
@@ -177,7 +195,20 @@ public:
 
 	bool get_file_pointer(bip::offset_t &off)
 	{
+	#ifdef _WIN32
 		return bip::ipcdetail::get_file_pointer(_handle,off);
+	#else
+		bip::offset_t result = 0;
+		do
+		{
+			result = ::lseek(_handle, 0, SEEK_CUR);
+		}
+		while (result == static_cast<bip::offset_t>(-1) && errno == EINTR);
+		if (result == static_cast<bip::offset_t>(-1))
+			return false;
+		off = result;
+		return true;
+	#endif
 	}
 
 	unsigned long long get_file_pointer()
@@ -190,12 +221,25 @@ public:
 
 	bool write_file(const void *data, std::size_t numdata)
 	{
+	#ifdef _WIN32
+		// Boost checks only WriteFile's BOOL and narrows size_t to DWORD.
+		if (!valid() || numdata > (std::numeric_limits<DWORD>::max)())
+			return false;
+		if (numdata == 0)
+			return true;
+		if (data == nullptr)
+			return false;
+		DWORD written = 0;
+		return WriteFile(_handle, data, static_cast<DWORD>(numdata), &written, NULL) != 0
+			&& written == numdata;
+	#else
 		return bip::ipcdetail::write_file(_handle,data,numdata);
+	#endif
 	}
 
 	bool write_file(const std::string& data)
 	{
-		return bip::ipcdetail::write_file(_handle, data.data(), data.size());
+		return write_file(data.data(), data.size());
 	}
 
 	bool read_file(void *data, std::size_t numdata)

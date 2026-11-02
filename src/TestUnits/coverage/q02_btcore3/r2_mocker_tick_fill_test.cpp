@@ -41,7 +41,7 @@ namespace
 	std::filesystem::path lane_root()
 	{
 		return std::filesystem::path(__FILE__).parent_path()
-			.parent_path().parent_path().parent_path();
+			.parent_path().parent_path().parent_path().parent_path();
 	}
 
 	std::filesystem::path make_temp_dir(const char* tag)
@@ -66,6 +66,8 @@ namespace
 		if (!out.is_open())
 			return false;
 		out << "date,time,open,high,low,close,volume,turnover,open_interest,diff_interest,settle\n";
+		// Jan 02 09:30 is before that day's daily-bar close; include the prior completed bar for history.
+		out << "20191231,150000,9.0,10.0,8.5,9.5,900,9000,0,0,0\n";
 		for (uint32_t i = 0; i < kBarCnt; i++)
 		{
 			out << kDates[i] << ",150000,"
@@ -181,15 +183,16 @@ TEST_F(R2TickTest, marketSignalFilledByTickAndDumpsTrade)
 {
 	CtaMocker mocker(&_replayer, "r2_mkt_fill", 0, true);
 	_replayer.register_sink(&mocker, "r2_mkt_fill");
+	ASSERT_TRUE(_replayer.prepare());
 	WTSKlineSlice* bars = mocker.stra_get_bars(kCode, "d1", kBarCnt, true);
 	ASSERT_NE(nullptr, bars);
 	bars->release();
-	ASSERT_TRUE(_replayer.prepare());
 
 	mocker.handle_session_begin(_replayer.get_trading_date());
 
 	// 下单前先确认最新价与持仓都是空的
 	WTSTickData* px0 = make_tick(kCode, 20200102, 93000000, 10.6);
+	_replayer.update_price(kCode, 10.6);
 	mocker.handle_tick(kCode, px0, 0);
 	px0->release();
 	EXPECT_DOUBLE_EQ(10.6, mocker.stra_get_price(kCode));
@@ -203,6 +206,7 @@ TEST_F(R2TickTest, marketSignalFilledByTickAndDumpsTrade)
 
 	// 真实成交：11.0 的 tick 触发 proc_tick -> do_set_position
 	WTSTickData* fill = make_tick(kCode, 20200102, 93100000, 11.0);
+	_replayer.update_price(kCode, 11.0);
 	mocker.handle_tick(kCode, fill, 1);
 	fill->release();
 
@@ -218,6 +222,7 @@ TEST_F(R2TickTest, marketSignalFilledByTickAndDumpsTrade)
 
 	// 价格上移到 13.0 -> 浮动盈亏必须为正（update_dyn_profit + stra_get_position_profit）
 	WTSTickData* up = make_tick(kCode, 20200102, 93200000, 13.0);
+	_replayer.update_price(kCode, 13.0);
 	mocker.handle_tick(kCode, up, 1);
 	up->release();
 	EXPECT_GT(mocker.stra_get_position_profit(kCode), 0.0);
@@ -246,17 +251,19 @@ TEST_F(R2TickTest, signalWithDespriceFillsAtTargetNotLastPrice)
 {
 	CtaMocker mocker(&_replayer, "r2_des_px", 0, true);
 	_replayer.register_sink(&mocker, "r2_des_px");
+	ASSERT_TRUE(_replayer.prepare());
 	WTSKlineSlice* bars = mocker.stra_get_bars(kCode, "d1", kBarCnt, true);
 	ASSERT_NE(nullptr, bars);
 	bars->release();
-	ASSERT_TRUE(_replayer.prepare());
 
 	WTSTickData* px0 = make_tick(kCode, 20200102, 93000000, 10.6);
+	_replayer.update_price(kCode, 10.6);
 	mocker.handle_tick(kCode, px0, 0);
 	px0->release();
 
 	mocker.stra_enter_long(kCode, 200, "tagL", 10.8, 0.0);
 	WTSTickData* fill = make_tick(kCode, 20200102, 93100000, 11.5);
+	_replayer.update_price(kCode, 11.5);
 	mocker.handle_tick(kCode, fill, 1);
 	fill->release();
 
@@ -283,18 +290,20 @@ TEST_F(R2TickTest, exitLongSignalClosesPartOfPosition)
 {
 	CtaMocker mocker(&_replayer, "r2_close_pos", 0, true);
 	_replayer.register_sink(&mocker, "r2_close_pos");
+	ASSERT_TRUE(_replayer.prepare());
 	WTSKlineSlice* bars = mocker.stra_get_bars(kCode, "d1", kBarCnt, true);
 	ASSERT_NE(nullptr, bars);
 	bars->release();
-	ASSERT_TRUE(_replayer.prepare());
 	mocker.handle_session_begin(_replayer.get_trading_date());
 
 	WTSTickData* t1 = make_tick(kCode, 20200102, 93000000, 11.0);
+	_replayer.update_price(kCode, 11.0);
 	mocker.handle_tick(kCode, t1, 0);
 	t1->release();
 
 	mocker.stra_enter_long(kCode, 100, "tagO", 0.0, 0.0);
 	WTSTickData* t2 = make_tick(kCode, 20200102, 93100000, 12.0);
+	_replayer.update_price(kCode, 12.0);
 	mocker.handle_tick(kCode, t2, 1);
 	t2->release();
 	ASSERT_DOUBLE_EQ(100.0, mocker.stra_get_position(kCode));
@@ -306,12 +315,13 @@ TEST_F(R2TickTest, exitLongSignalClosesPartOfPosition)
 	EXPECT_DOUBLE_EQ(12.0, mocker.stra_get_position_avgpx(kCode));
 
 	WTSTickData* t3 = make_tick(kCode, 20200102, 93200000, 12.5);
+	_replayer.update_price(kCode, 12.5);
 	mocker.handle_tick(kCode, t3, 1);
 	t3->release();
 
 	EXPECT_DOUBLE_EQ(60.0, mocker.stra_get_position(kCode));
 	// 剩余持仓的均价仍按原开仓价，明细开仓时间不变
-	EXPECT_DOUBLE_EQ(12.0, mocker.stra_get_detail_cost(kCode, "tagO") / 60.0);
+	EXPECT_DOUBLE_EQ(12.0, mocker.stra_get_detail_cost(kCode, "tagO"));
 	EXPECT_EQ(openTime, mocker.stra_get_detail_entertime(kCode, "tagO"));
 	// 已平掉的部分不该再被查成持仓
 	EXPECT_DOUBLE_EQ(60.0, mocker.stra_get_position(kCode, false));
@@ -338,10 +348,10 @@ TEST_F(R2TickTest, selHftUftTickUpdatesPriceMapWithoutStrategy)
 	UftMocker uft(&_replayer, "r2_uft_tick");
 
 	_replayer.register_sink(&sel, "r2_sel_tick");
+	ASSERT_TRUE(_replayer.prepare());
 	WTSKlineSlice* bars = sel.stra_get_bars(kCode, "d1", kBarCnt);
 	ASSERT_NE(nullptr, bars);
 	bars->release();
-	ASSERT_TRUE(_replayer.prepare());
 
 	const uint32_t tdate = _replayer.get_trading_date();
 	ASSERT_EQ(20200102u, tdate);
@@ -359,6 +369,7 @@ TEST_F(R2TickTest, selHftUftTickUpdatesPriceMapWithoutStrategy)
 	EXPECT_DOUBLE_EQ(0.0, uft.stra_get_price(kCode));
 
 	WTSTickData* t1 = make_tick(kCode, 20200102, 93000000, 11.25);
+	_replayer.update_price(kCode, 11.25);
 	sel.handle_tick(kCode, t1, 0);
 	WTSTickData* t2 = make_tick(kCode, 20200102, 93000000, 11.25);
 	hft.handle_tick(kCode, t2, 0);
@@ -371,6 +382,7 @@ TEST_F(R2TickTest, selHftUftTickUpdatesPriceMapWithoutStrategy)
 
 	// 第二笔 tick 覆盖最新价，旧 tick 各自 release 回池
 	WTSTickData* t4 = make_tick(kCode, 20200102, 93100000, 12.75);
+	_replayer.update_price(kCode, 12.75);
 	sel.handle_tick(kCode, t4, 1);
 	WTSTickData* t5 = make_tick(kCode, 20200102, 93100000, 12.75);
 	uft.handle_tick(kCode, t5, 1);

@@ -11,20 +11,26 @@
  *  - main.cpp 里可启用的分支只有：
  *      B1 :271~276  -h/--help -> hParam->exists() -> return 0（在 WTSLogger::init 之前）
  *      B2 :278~283  日志配置分支（缺文件 -> WTSLogger::init 内部告警后返回）
- *      B3 :299~308  -c 指向不存在的配置 -> StdFile::exists 为假 -> fmt::print + return 0
- *    B3 是刻意用「显式 -c 不存在路径」而不是「不给 -c」：不给时默认 ./dtcfg.yaml，
- *    一旦运行目录恰好有该文件（产品仓库的 dist/ 里就有），:310 initialize() 就会
+ *      B3 :299~308  -c 指向不存在的配置 -> StdFile::exists 为假 -> 诊断 + return 1
+ *    默认路径和显式路径均在隔离的空临时目录中检查，避免意外加载仓库内配置后
  *    在 :254 g_parsers.run() 起解析线程、:260 g_stateMon.run() 起状态机线程，
- *    并且末尾 :324 while(!bExit) 是每 10ms 一轮的死循环 —— 启用用例里等于挂死，
- *    所以 :310~327 全部只登记为 DISABLED_。
+ *    并进入末尾 :324 的永久轮询 —— 有效运行配置仍只登记为 DISABLED_；
+ *    缺失或错误类型的 basefiles 由入口用例验证受控失败，且不会进入该路径。
  *  - 自由函数 getBinDir()（:50~61）不依赖任何运行期服务，可直接断言。
  *
  * 期望值一律由本用例自己喂进去的 argv / 自己取的工作目录算出，不读挂钟。
  */
 #include <gtest/gtest.h>
 
-#include <string>
+#include <sys/wait.h>
 #include <unistd.h>
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <filesystem>
+#include <fstream>
+#include <string>
 #include <vector>
 
 /* initialize() 里 :98 用的是 WtDtCore 这份 WtHelper（与 WtUftCore/WtCore 侧同名不同实现） */
@@ -41,8 +47,151 @@ bool initialize(const std::string& filename);
 
 namespace {
 
-const char* kAbsentLogCfg = "./r14_qf_definitely_absent_logcfg.yaml";
 const char* kAbsentDtCfg = "./r14_qf_definitely_absent_dtcfg.yaml";
+const char* kConsoleLogCfg = R"YAML(root:
+    async: false
+    level: error
+    sinks:
+    -   type: console_sink
+        pattern: '%v'
+)YAML";
+
+struct ChildResult
+{
+	bool exited = false;
+	int code = -1;
+	int signal = -1;
+	std::string output;
+};
+
+class TempDirectory
+{
+public:
+	TempDirectory()
+	{
+		const std::string pattern = (std::filesystem::temp_directory_path() / "r14-qf-XXXXXX").string();
+		std::vector<char> writable(pattern.begin(), pattern.end());
+		writable.push_back('\0');
+		char* created = mkdtemp(writable.data());
+		if (created != nullptr)
+			_path = created;
+	}
+
+	~TempDirectory()
+	{
+		if (!_path.empty())
+			std::filesystem::remove_all(_path);
+	}
+
+	const std::string& path() const { return _path; }
+
+private:
+	std::string _path;
+};
+
+bool write_text_file(const std::string& path, const std::string& contents)
+{
+	std::ofstream output(path);
+	output << contents;
+	return output.good();
+}
+
+ChildResult call_entry_in_child(const std::vector<std::string>& words, const std::string& cwd)
+{
+	ChildResult result;
+	int fds[2];
+	if (pipe(fds) != 0)
+		return result;
+
+	const pid_t pid = fork();
+	if (pid < 0)
+	{
+		close(fds[0]);
+		close(fds[1]);
+		return result;
+	}
+
+	if (pid == 0)
+	{
+		close(fds[0]);
+		dup2(fds[1], STDOUT_FILENO);
+		dup2(fds[1], STDERR_FILENO);
+		close(fds[1]);
+		if (!cwd.empty() && chdir(cwd.c_str()) != 0)
+			_exit(120);
+		// If a regression lets a valid config reach main's permanent wait loop,
+		// bound the child so the test reports a failure instead of hanging.
+		alarm(3);
+
+		std::vector<char*> argv;
+		argv.reserve(words.size());
+		for (const std::string& word : words)
+			argv.push_back(const_cast<char*>(word.c_str()));
+		const int rc = wt_coverage_main_quotefactory(static_cast<int>(argv.size()), argv.data());
+		fflush(nullptr);
+		_exit(rc);
+	}
+
+	close(fds[1]);
+	char buffer[2048];
+	ssize_t count = 0;
+	while ((count = read(fds[0], buffer, sizeof(buffer))) > 0)
+		result.output.append(buffer, static_cast<size_t>(count));
+	close(fds[0]);
+
+	int status = 0;
+	if (waitpid(pid, &status, 0) >= 0)
+	{
+		result.exited = WIFEXITED(status);
+		result.code = result.exited ? WEXITSTATUS(status) : -1;
+		result.signal = WIFSIGNALED(status) ? WTERMSIG(status) : -1;
+	}
+	return result;
+}
+
+ChildResult call_initialize_in_child(const std::string& config_path)
+{
+	ChildResult result;
+	int fds[2];
+	if (pipe(fds) != 0)
+		return result;
+
+	const pid_t pid = fork();
+	if (pid < 0)
+	{
+		close(fds[0]);
+		close(fds[1]);
+		return result;
+	}
+
+	if (pid == 0)
+	{
+		close(fds[0]);
+		dup2(fds[1], STDOUT_FILENO);
+		close(fds[1]);
+		alarm(3);
+		const bool initialized = initialize(config_path);
+		const char* outcome = initialized ? "initialize=true\n" : "initialize=false\n";
+		(void)write(STDOUT_FILENO, outcome, std::strlen(outcome));
+		_exit(initialized ? 0 : 1);
+	}
+
+	close(fds[1]);
+	char buffer[2048];
+	ssize_t count = 0;
+	while ((count = read(fds[0], buffer, sizeof(buffer))) > 0)
+		result.output.append(buffer, static_cast<size_t>(count));
+	close(fds[0]);
+
+	int status = 0;
+	if (waitpid(pid, &status, 0) >= 0)
+	{
+		result.exited = WIFEXITED(status);
+		result.code = result.exited ? WEXITSTATUS(status) : -1;
+		result.signal = WIFSIGNALED(status) ? WTERMSIG(status) : -1;
+	}
+	return result;
+}
 
 /* 用受控 argv 调入口；argv[0] 只是程序名，cppcli 不校验它 */
 int call_entry(std::vector<const char*> words)
@@ -62,38 +211,133 @@ int call_entry(std::vector<const char*> words)
 
 TEST(r14_quote_entry, short_help_returns_zero_before_any_logging_init)
 {
-	// main.cpp:275 if(hParam->exists()) return 0; —— 后面的 WTSLogger::init/initialize 都不执行
-	EXPECT_EQ(call_entry({"quote_factory", "-h"}), 0);
+	TempDirectory cwd;
+	ASSERT_FALSE(cwd.path().empty());
+	const ChildResult result = call_entry_in_child({"quote_factory", "-h"}, cwd.path());
+	ASSERT_TRUE(result.exited) << "signal=" << result.signal << " output=" << result.output;
+	EXPECT_EQ(result.code, 0);
+	EXPECT_NE(result.output.find("-c | --config"), std::string::npos) << result.output;
 }
 
 TEST(r14_quote_entry, long_help_returns_zero)
 {
-	EXPECT_EQ(call_entry({"quote_factory", "--help"}), 0);
+	TempDirectory cwd;
+	ASSERT_FALSE(cwd.path().empty());
+	const ChildResult result = call_entry_in_child({"quote_factory", "--help"}, cwd.path());
+	ASSERT_TRUE(result.exited) << "signal=" << result.signal << " output=" << result.output;
+	EXPECT_EQ(result.code, 0);
+	EXPECT_NE(result.output.find("gain help doc"), std::string::npos) << result.output;
 }
 
 TEST(r14_quote_entry, help_wins_over_config_and_logcfg_words)
 {
-	// -h 与 -c/-l 同时给出：parse() 后 hParam->exists() 仍为真，早退先于任何文件访问
-	EXPECT_EQ(call_entry({"quote_factory", "-c", kAbsentDtCfg, "-l", kAbsentLogCfg, "-h"}), 0);
+	TempDirectory cwd;
+	ASSERT_FALSE(cwd.path().empty());
+	const std::string absent_config = cwd.path() + "/absent.yaml";
+	const std::string absent_log = cwd.path() + "/absent-log.yaml";
+	const ChildResult result = call_entry_in_child(
+		{"quote_factory", "-c", absent_config, "-l", absent_log, "-h"}, cwd.path());
+	ASSERT_TRUE(result.exited) << "signal=" << result.signal << " output=" << result.output;
+	EXPECT_EQ(result.code, 0);
+	EXPECT_EQ(result.output.find("does not exist"), std::string::npos) << result.output;
 }
 
 /* -------------------------------------------------------------------------
  * 二、B2+B3 —— 日志初始化后配置缺失早退（main.cpp:278~308）
  * ---------------------------------------------------------------------- */
 
-TEST(r14_quote_entry, missing_config_path_returns_zero_via_explicit_c)
+TEST(r14_quote_entry, missing_config_path_returns_nonzero_via_explicit_c)
 {
-	// lParam 不存在 -> :282 filename="./logcfgdt.yaml"；cParam 存在 -> :300 取显式路径
-	// :304 StdFile::exists(不存在的路径) 为假 -> :306 打印 -> :307 return 0
-	int rc = call_entry({"quote_factory", "-c", kAbsentDtCfg});
-	EXPECT_EQ(rc, 0);
+	TempDirectory cwd;
+	ASSERT_FALSE(cwd.path().empty());
+	const std::string absent_config = cwd.path() + "/absent.yaml";
+	const ChildResult result = call_entry_in_child({"quote_factory", "-c", absent_config}, cwd.path());
+	ASSERT_TRUE(result.exited) << "signal=" << result.signal << " output=" << result.output;
+	EXPECT_NE(result.code, 0);
+	EXPECT_NE(result.output.find("Configuration file"), std::string::npos) << result.output;
+	EXPECT_NE(result.output.find("does not exist"), std::string::npos) << result.output;
+	EXPECT_NE(result.output.find(absent_config), std::string::npos) << result.output;
 }
 
-TEST(r14_quote_entry, both_c_and_l_given_still_returns_zero_when_files_absent)
+TEST(r14_quote_entry, both_c_and_l_given_still_returns_nonzero_when_files_absent)
 {
-	// 两条分支都取「存在」一侧：:280 filename=lParam->get<std::string>()，:300 同理
-	int rc = call_entry({"quote_factory", "-c", kAbsentDtCfg, "-l", kAbsentLogCfg});
-	EXPECT_EQ(rc, 0);
+	TempDirectory cwd;
+	ASSERT_FALSE(cwd.path().empty());
+	const std::string absent_config = cwd.path() + "/absent.yaml";
+	const std::string absent_log = cwd.path() + "/absent-log.yaml";
+	const ChildResult result = call_entry_in_child(
+		{"quote_factory", "-c", absent_config, "-l", absent_log}, cwd.path());
+	ASSERT_TRUE(result.exited) << "signal=" << result.signal << " output=" << result.output;
+	EXPECT_NE(result.code, 0);
+	EXPECT_NE(result.output.find("Configuration file"), std::string::npos) << result.output;
+	EXPECT_NE(result.output.find(absent_config), std::string::npos) << result.output;
+}
+
+TEST(r14_quote_entry, missing_default_config_returns_nonzero_in_empty_directory)
+{
+	TempDirectory cwd;
+	ASSERT_FALSE(cwd.path().empty());
+	const ChildResult result = call_entry_in_child({"quote_factory"}, cwd.path());
+	ASSERT_TRUE(result.exited) << "signal=" << result.signal << " output=" << result.output;
+	EXPECT_NE(result.code, 0);
+	EXPECT_NE(result.output.find("./dtcfg.yaml"), std::string::npos) << result.output;
+	EXPECT_NE(result.output.find("does not exist"), std::string::npos) << result.output;
+}
+
+TEST(r14_quote_entry, valid_syntax_without_basefiles_fails_before_runner_start)
+{
+	TempDirectory cwd;
+	ASSERT_FALSE(cwd.path().empty());
+	const std::string config_path = cwd.path() + "/missing-basefiles.yaml";
+	const std::string log_path = cwd.path() + "/console-log.yaml";
+	ASSERT_TRUE(write_text_file(config_path, "allday: true\n"));
+	ASSERT_TRUE(write_text_file(log_path, kConsoleLogCfg));
+
+	const ChildResult result = call_entry_in_child(
+		{"quote_factory", "-c", config_path, "-l", log_path}, cwd.path());
+	ASSERT_TRUE(result.exited) << "signal=" << result.signal << " output=" << result.output;
+	EXPECT_EQ(result.code, 1) << result.output;
+	EXPECT_NE(result.output.find("QuoteFactory config requires basefiles to be an object"), std::string::npos)
+		<< result.output;
+	EXPECT_EQ(result.output.find("parsers started"), std::string::npos) << result.output;
+	EXPECT_EQ(result.output.find("Exit flag is"), std::string::npos) << result.output;
+}
+
+TEST(r14_quote_entry, non_object_basefiles_fails_before_runner_start)
+{
+	TempDirectory cwd;
+	ASSERT_FALSE(cwd.path().empty());
+	const std::string config_path = cwd.path() + "/array-basefiles.yaml";
+	const std::string log_path = cwd.path() + "/console-log.yaml";
+	ASSERT_TRUE(write_text_file(config_path, "basefiles: []\nallday: true\n"));
+	ASSERT_TRUE(write_text_file(log_path, kConsoleLogCfg));
+
+	const ChildResult result = call_entry_in_child(
+		{"quote_factory", "-c", config_path, "-l", log_path}, cwd.path());
+	ASSERT_TRUE(result.exited) << "signal=" << result.signal << " output=" << result.output;
+	EXPECT_EQ(result.code, 1) << result.output;
+	EXPECT_NE(result.output.find("QuoteFactory config requires basefiles to be an object"), std::string::npos)
+		<< result.output;
+	EXPECT_EQ(result.output.find("parsers started"), std::string::npos) << result.output;
+	EXPECT_EQ(result.output.find("Exit flag is"), std::string::npos) << result.output;
+}
+
+TEST(r14_quote_initialize, valid_basefiles_object_remains_accepted)
+{
+	TempDirectory cwd;
+	ASSERT_FALSE(cwd.path().empty());
+	const std::string config_path = cwd.path() + "/valid-basefiles.yaml";
+	ASSERT_TRUE(write_text_file(config_path,
+		"basefiles: {}\n"
+		"allday: true\n"
+		"writer:\n"
+		"    module: R14NoSuchWriterModule\n"
+		"parsers: []\n"));
+
+	const ChildResult result = call_initialize_in_child(config_path);
+	ASSERT_TRUE(result.exited) << "signal=" << result.signal << " output=" << result.output;
+	EXPECT_EQ(result.code, 0) << result.output;
+	EXPECT_NE(result.output.find("initialize=true"), std::string::npos) << result.output;
 }
 
 /* -------------------------------------------------------------------------
@@ -153,24 +397,24 @@ TEST(r14_quote_initialize, missing_config_stamps_module_dir_then_returns)
  *
  * 触发条件与不启用理由：
  *  D1 main.cpp:304 为假分支的反面（配置存在）-> :310 initialize(filename)，
- *     里面 :109 cfgBF->get("session") 在 basefiles 缺失时对 NULL 解引用（空指针崩宿主），
- *     配置齐备时则 :254 g_parsers.run() / :260 g_stateMon.run() 起线程，
- *     且 :324 while(!bExit) 每 10ms 轮询永不退出 -> 启用即挂死。
- *     可回收行数估计：:96~262（initialize）+ :310~327 ≈ 185 行。
- *  D2 :271 之后不给出 -c/-l/-h 的裸 argv（argc==1）走默认 ./dtcfg.yaml，
- *     是否进入 D1 完全取决于运行目录里有没有该文件 —— 结论不可证伪，禁用。
+ *     若包含会启动的 parser，:254 g_parsers.run() / :260 g_stateMon.run() 会起线程，
+ *     且 :324 while(!bExit) 每 10ms 轮询永不退出 -> 不适合作为普通用例启用。
+ *     缺失/非对象 basefiles 已由上方入口测试验证受控返回；空对象正向对照单独调用
+ *     initialize() 并使用空 parser 列表，不进入 main 的永久轮询。
+ *  D2 默认路径的缺文件分支已在隔离的空目录中启用验证；只有运行目录存在
+ *     可加载配置时才可能进入 D1，因此真实配置/线程路径仍禁用。
  *  D3 :313 install_signal_hooks 会注册 SIGINT/SIGTERM 处理器并可能起监听线程，
  *     违反「禁止起线程」，只能等主控裁定进程外采样。
  * ---------------------------------------------------------------------- */
 
 TEST(r14_quote_entry, DISABLED_existing_config_enters_parsers_run_and_endless_loop)
 {
-	// D1：需要一个真实可加载的 dtcfg.yaml + shm 目录；见上方触发条件
+	// 需要能加载真实 parser 的 dtcfg.yaml + shm 目录；可能启动线程并进入永久轮询
 	EXPECT_EQ(call_entry({"quote_factory", "-c", "./dtcfg.yaml"}), 0);
 }
 
-TEST(r14_quote_entry, DISABLED_bare_argv_depends_on_cwd_contents)
+TEST(r14_quote_entry, DISABLED_bare_argv_with_existing_config_enters_runner)
 {
-	// D2：默认 ./dtcfg.yaml 是否存在取决于运行目录，断言无法由本用例输入算出
+	// 需要真实可加载配置；可能启动解析/状态机线程并进入永久轮询
 	EXPECT_EQ(call_entry({"quote_factory"}), 0);
 }

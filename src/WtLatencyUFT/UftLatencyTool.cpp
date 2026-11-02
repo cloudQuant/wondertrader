@@ -11,10 +11,18 @@
 #include "../WtUftCore/UftStraContext.h"
 
 #include <exception>
+#include <new>
+#include <string>
+#ifdef WT_LATENCY_TOOL_TEST_HOOKS
+#include <stdexcept>
+#endif
 
 #include "../Includes/WTSVariant.hpp"
 #include "../Includes/IParserApi.h"
 #include "../Includes/ITraderApi.h"
+#ifdef WT_LATENCY_TOOL_TEST_HOOKS
+#include "../Includes/WTSTradeDef.hpp"
+#endif
 #include "../Includes/WTSContractInfo.hpp"
 
 #include "../WTSTools/WTSLogger.h"
@@ -27,21 +35,87 @@
 
 USING_NS_WTP;
 
-void test_uft()
+bool test_uft()
 {
 	uft::UftLatencyTool runner;
-	runner.init();
+	if (!runner.init())
+		return false;
 
 	runner.run();
+	return !runner.runFailed();
 }
 
 namespace uft
 {
+#ifdef WT_LATENCY_TOOL_TEST_HOOKS
+	namespace
+	{
+		std::atomic<int> g_test_run_failure_stage{ 0 };
+		std::atomic<bool> g_test_run_failure_unknown{ false };
+		std::atomic<bool> g_test_tick_create_failure{ false };
+		std::mutex g_test_order_insert_mutex;
+		std::string g_test_order_exchange;
+		std::string g_test_order_code;
+
+		WTSTickData* createLatencyTick(const char* code)
+		{
+			if (g_test_tick_create_failure.exchange(false, std::memory_order_acq_rel))
+				return nullptr;
+			return WTSTickData::create(code);
+		}
+
+		void maybeThrowTestRunFailure(int stage, const char* stageName)
+		{
+			if (g_test_run_failure_stage.load(std::memory_order_acquire) != stage)
+				return;
+			if (g_test_run_failure_unknown.load(std::memory_order_acquire))
+				throw 42;
+			throw std::runtime_error(std::string("injected ") + stageName + " exception");
+		}
+	}
+
+	void setTestRunFailureForTesting(int stage, bool unknown)
+	{
+		g_test_run_failure_unknown.store(unknown, std::memory_order_release);
+		g_test_run_failure_stage.store(stage, std::memory_order_release);
+	}
+#define WT_LATENCY_CREATE_TICK(code) createLatencyTick(code)
+
+	void setTestTickCreateFailureForTesting(bool fail)
+	{
+		g_test_tick_create_failure.store(fail, std::memory_order_release);
+	}
+
+	void clearTestOrderInsertForTesting()
+	{
+		std::lock_guard<std::mutex> lock(g_test_order_insert_mutex);
+		g_test_order_exchange.clear();
+		g_test_order_code.clear();
+	}
+
+	void getTestOrderInsertForTesting(std::string& exchange, std::string& code)
+	{
+		std::lock_guard<std::mutex> lock(g_test_order_insert_mutex);
+		exchange = g_test_order_exchange;
+		code = g_test_order_code;
+	}
+#define WT_LATENCY_TEST_THROW(stage, name) maybeThrowTestRunFailure(stage, name)
+#else
+#define WT_LATENCY_CREATE_TICK(code) WTSTickData::create(code)
+#define WT_LATENCY_TEST_THROW(stage, name) ((void)0)
+#endif
+
 	class TestParser : public IParserApi
 	{
 	public:
 		virtual bool init(WTSVariant* /*cfg*/) override
 		{
+			return true;
+		}
+
+		bool connect() override
+		{
+			WT_LATENCY_TEST_THROW(1, "parser");
 			return true;
 		}
 
@@ -76,7 +150,12 @@ namespace uft
 					return;
 				}
 
-				WTSTickData* tick = WTSTickData::create("rb2205");
+				WTSTickData* tick = WT_LATENCY_CREATE_TICK("rb2205");
+				if (tick == NULL)
+				{
+					WTSLogger::error("UFT latency test failed to create tick SHFE.rb2205");
+					throw std::bad_alloc();
+				}
 				tick->setContractInfo(contract);
 
 				WTSTickStruct& quote = tick->getTickStruct();
@@ -162,6 +241,7 @@ namespace uft
 
 		virtual void connect() override
 		{
+			WT_LATENCY_TEST_THROW(2, "trader");
 			if (_trader_spi != NULL)
 				_trader_spi->onLoginResult(true, "ok", 0);
 		}
@@ -204,9 +284,18 @@ namespace uft
 			return true;
 		}
 
-		virtual int orderInsert(WTSEntrust* /*eutrust*/) override
+		virtual int orderInsert(WTSEntrust* entrust) override
 		{
-			//WTSLogger::debug("{}", __FUNCTION__);
+		#ifdef WT_LATENCY_TOOL_TEST_HOOKS
+			if (entrust != nullptr)
+			{
+				std::lock_guard<std::mutex> lock(g_test_order_insert_mutex);
+				g_test_order_exchange = entrust->getExchg();
+				g_test_order_code = entrust->getCode();
+			}
+		#else
+			(void)entrust;
+		#endif
 			return 0;
 		}
 
@@ -232,6 +321,7 @@ namespace uft
 
 		virtual void on_init(IUftStraCtx* ctx) override
 		{
+			WT_LATENCY_TEST_THROW(3, "engine");
 			ctx->stra_sub_ticks("SHFE.rb2205");
 		}
 
@@ -401,6 +491,18 @@ namespace uft
 
 		//基础数据文件
 		WTSVariant* cfgBF = _config->get("basefiles");
+		if (cfgBF == NULL)
+		{
+			WTSLogger::error("Basefiles config section is missing");
+			_config->release();
+			return false;
+		}
+		if (!cfgBF->isObject())
+		{
+			WTSLogger::error("Basefiles config section must be an object");
+			_config->release();
+			return false;
+		}
 		if (cfgBF->get("session"))
 			_bd_mgr.loadSessions(cfgBF->getCString("session"));
 
@@ -531,6 +633,7 @@ namespace uft
 
 	void UftLatencyTool::run()
 	{
+		_run_failed.store(true, std::memory_order_release);
 		TestParser* parser = nullptr;
 		{
 			std::lock_guard<std::mutex> lock(_lifecycle_mutex);
@@ -573,10 +676,16 @@ namespace uft
 				_engine.run();
 			if (!_shutdown_requested.load(std::memory_order_acquire))
 				parser->run(_times);
+			if (!_shutdown_requested.load(std::memory_order_acquire))
+				_run_failed.store(false, std::memory_order_release);
+		}
+		catch (const std::exception& e)
+		{
+			WTSLogger::error("UFT latency test run failed with exception: {}", e.what());
 		}
 		catch (...)
 		{
-			WTSLogger::error("UFT latency test run raised an exception");
+			WTSLogger::error("UFT latency test run failed with unknown exception");
 		}
 
 		const bool shutdownRequested = _shutdown_requested.load(std::memory_order_acquire);
@@ -590,3 +699,5 @@ namespace uft
 			shutdown();
 	}
 }
+#undef WT_LATENCY_TEST_THROW
+#undef WT_LATENCY_CREATE_TICK

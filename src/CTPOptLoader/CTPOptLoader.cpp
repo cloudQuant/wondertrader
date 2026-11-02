@@ -261,7 +261,12 @@ int run(const char* cfgfile, bool bAsync = false, bool isFile = true)
 	// 初始化UserApi
 	DllHandle dllInst = DLLHelper::load_library(MODULE_NAME.c_str());
 	if (dllInst == NULL)
+	{
 		printf("Loading module %s failed\r\n", MODULE_NAME.c_str());
+		g_ctpCreator = NULL;
+		pUserApi = NULL;
+		return 1;
+	}
 #ifdef _WIN32
 #	ifdef _WIN64
 	g_ctpCreator = (CTPCreator)DLLHelper::get_symbol(dllInst, "?CreateFtdcTraderApi@CThostFtdcTraderApi@ctp_sopt@@SAPEAV12@PEBD@Z");
@@ -272,11 +277,23 @@ int run(const char* cfgfile, bool bAsync = false, bool isFile = true)
 	g_ctpCreator = (CTPCreator)DLLHelper::get_symbol(dllInst, "_ZN8ctp_sopt19CThostFtdcTraderApi19CreateFtdcTraderApiEPKc");
 #endif
 	if (g_ctpCreator == NULL)
+	{
 		printf("Loading CreateFtdcTraderApi failed\r\n");
+		DLLHelper::free_library(dllInst);
+		pUserApi = NULL;
+		return 1;
+	}
 
 	std::string flowPath = fmtutil::format("./CTPFlow/{}/{}/", BROKER_ID, INVESTOR_ID);
 	fs::create_directories(flowPath.c_str());
 	pUserApi = g_ctpCreator(flowPath.c_str());
+	if (pUserApi == NULL)
+	{
+		printf("CreateFtdcTraderApi returned NULL\r\n");
+		g_ctpCreator = NULL;
+		DLLHelper::free_library(dllInst);
+		return 1;
+	}
 	CTraderSpi* pUserSpi = new CTraderSpi();
 	pUserApi->RegisterSpi((CThostFtdcTraderSpi*)pUserSpi);			// 注册事件类
 	pUserApi->SubscribePublicTopic(THOST_TERT_QUICK);					// 注册公有流

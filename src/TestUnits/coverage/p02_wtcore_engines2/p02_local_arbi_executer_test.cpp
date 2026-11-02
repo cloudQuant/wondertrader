@@ -20,6 +20,7 @@
  *   需要真实柜台回报的分支(on_entrust 成功后驱动 unit、on_channel_ready 后的补单)全部跳过。
  */
 #include <gtest/gtest.h>
+#include "p02_test_environment.h"
 
 #include <boost/noncopyable.hpp>
 
@@ -53,24 +54,8 @@ namespace fs = std::filesystem;
 //////////////////////////////////////////////////////////////////
 std::string p02_tmp_root()
 {
-    static std::string root = []() {
-        std::string name = "p02_wtcore_" + std::to_string(static_cast<long long>(::getpid()));
-        fs::path path = fs::temp_directory_path() / name;
-        std::error_code ec;
-        fs::remove_all(path, ec);
-        fs::create_directories(path, ec);
-        return path.string() + "/";
-    }();
-    return root;
+    return p02test::temp_root();
 }
-
-// WtHelper 的 *_dir 接口内部是 static std::string, 进程内只算一次,
-// 因此在静态对象构造期(早于任何用例)就把生成目录固定下来
-struct P02GenDirGuard
-{
-    P02GenDirGuard() { WtHelper::setGenerateDir(p02_tmp_root().c_str()); }
-};
-const P02GenDirGuard g_p02_gen_dir;
 
 std::string write_cfg(const std::string& rel, const char* content)
 {

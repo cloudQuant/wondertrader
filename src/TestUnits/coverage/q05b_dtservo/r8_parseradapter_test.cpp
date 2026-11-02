@@ -36,6 +36,8 @@
 #include <WtDtServo/ParserAdapter.h>
 #include <WtDtServo/WtHelper.h>
 
+#include "r45_fake_parserapi.h"
+
 namespace fs = std::filesystem;
 
 namespace {
@@ -96,7 +98,7 @@ TEST_F(R8ParserAdapterTest, InitWithNullCfgRejectsAndKeepsIdEmpty)
 	EXPECT_EQ(pa.getBaseDataMgr(), static_cast<IBaseDataMgr*>(&_bdMgr));
 }
 
-TEST_F(R8ParserAdapterTest, InitWithEmptyModuleRejectsButStillBindsIdAndCfg)
+TEST_F(R8ParserAdapterTest, FailedEmptyModuleInitCanRetryAfterCleanup)
 {
 	ParserAdapter pa(&_bdMgr, nullptr);
 	// 无 module 字段 -> getString("module").empty() -> ParserAdapter.cpp:97-98 return false
@@ -107,15 +109,32 @@ TEST_F(R8ParserAdapterTest, InitWithEmptyModuleRejectsButStillBindsIdAndCfg)
 	// ParserAdapter.cpp:87-93：_id 赋值与 _cfg 暂存都发生在 module 判空之前
 	EXPECT_STREQ(pa.id(), "pa_nomod");
 
-	// 第二次 init 走 _cfg!=NULL 的拒绝分支（:89-90），
-	// 但该分支同样在 _id=id 之后，于是 id 被覆盖成第二个名字（见 BUG-R8-002）
+	// 空 module 失败会同步清理 _cfg；下次调用是安全重试，会尝试新的 id/config。
 	WTSVariant* cfg2 = loadCfg("nomodule2.json", R"JSON({"id":"r8b"})JSON");
 	ASSERT_NE(cfg2, nullptr);
 	EXPECT_FALSE(pa.init("pa_second", cfg2));
 	EXPECT_STREQ(pa.id(), "pa_second");
 
-	// _cfg!=NULL 但 _parser_api 仍为 NULL -> run 只能 false（:221）
+	// 上一次失败已清理 _cfg，且未加载 parser API，所以 run 返回 false（:221）。
 	EXPECT_FALSE(pa.run());
+}
+
+TEST_F(R8ParserAdapterTest, BusyInitExtRejectsWithoutChangingFirstId)
+{
+	auto* firstApi = new r45::FakeParserApi(true, true);
+	auto* rejectedApi = new r45::FakeParserApi(true, true);
+	ParserAdapter pa(&_bdMgr, nullptr);
+	ASSERT_TRUE(pa.initExt("pa_active", firstApi));
+
+	// A distinct API is accepted into adapter ownership, but rejected while the
+	// active API remains installed. The first adapter identity must stay intact.
+	EXPECT_FALSE(pa.initExt("pa_second", rejectedApi));
+	EXPECT_STREQ(pa.id(), "pa_active");
+	EXPECT_EQ(rejectedApi->register_calls, 0);
+	EXPECT_EQ(rejectedApi->init_calls, 0);
+
+	// This deterministic fake has no worker or asynchronous callback source.
+	pa.release();
 }
 
 TEST_F(R8ParserAdapterTest, InitWithUnloadableModuleReturnsFalse)

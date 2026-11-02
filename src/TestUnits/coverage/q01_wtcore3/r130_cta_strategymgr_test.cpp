@@ -12,7 +12,7 @@
  *   getStrategy：命中/未命中 :129-137
  *   CtaStraWrapper：self :46、析构 deleteStrategy :35-40
  *
- * 只 dlopen 本机构建产物 `libWtCtaStraFact.dylib` 的软链，不联网、不起线程。
+ * 只 dlopen 本机构建产物 `libWtCtaStraFact.dylib` 的副本，不联网、不起线程。
  * 临时目录由 r130::TempEnv 管理，析构整棵删除。
  */
 #include <gtest/gtest.h>
@@ -33,7 +33,7 @@ namespace {
 
 namespace sfs = std::filesystem;
 
-/// 临时目录里只放一个 CTA 策略工厂软链，避免 loadFactories 误加载其他插件
+/// 临时目录里只放一个 CTA 策略工厂副本，避免 loadFactories 误加载其他插件
 bool makeFactoryDir(const std::string& dir, std::string& outDir)
 {
     std::error_code ec;
@@ -51,7 +51,7 @@ bool makeFactoryDir(const std::string& dir, std::string& outDir)
 
     sfs::path dst = sfs::path(dir) / "libWtCtaStraFact.dylib";
     sfs::remove(dst, ec);
-    sfs::create_symlink(src, dst, ec);
+    sfs::copy_file(src, dst, sfs::copy_options::overwrite_existing, ec);
     if (ec)
         return false;
 

@@ -241,6 +241,50 @@ TEST_F(Q03RdmKlineTest, day_window_out_of_range_returns_null)
 		202401010000ull, 202401020000ull - 1) == NULL);
 }
 
+TEST_F(Q03RdmKlineTest, day_range_and_count_handle_first_cached_bar_boundaries)
+{
+	vector<WTSBarStruct> bars;
+	bars.push_back(make_bar(20240105, 20240105, 1));
+	write_his_bars("day", BLOCK_VERSION_RAW_V2, bars);
+
+	const uint64_t before_first = 202401040000ull;
+	const uint64_t first_bar = 202401050000ull;
+	const uint64_t after_first = 202401060000ull;
+
+	// A range wholly before the first cached bar is empty; the first bar itself
+	// is included, while a range wholly after this one-bar cache is empty.
+	EXPECT_EQ(nullptr, _reader.readKlineSliceByRange("SSE.STK.600000", KP_DAY,
+		before_first, before_first));
+	WTSKlineSlice* first_range = _reader.readKlineSliceByRange("SSE.STK.600000", KP_DAY,
+		first_bar, first_bar);
+	ASSERT_NE(nullptr, first_range);
+	vector<WTSBarStruct> first_range_bars = flatten(first_range);
+	ASSERT_EQ(first_range_bars.size(), (std::size_t)1);
+	expect_bar_eq(first_range_bars[0], bars[0]);
+	first_range->release();
+	EXPECT_EQ(nullptr, _reader.readKlineSliceByRange("SSE.STK.600000", KP_DAY,
+		after_first, after_first));
+
+	// Count lookup before the first bar is empty. At and after it, the only
+	// available bar is returned with all of its fields intact.
+	EXPECT_EQ(nullptr, _reader.readKlineSliceByCount("SSE.STK.600000", KP_DAY, 1,
+		before_first));
+	WTSKlineSlice* first_count = _reader.readKlineSliceByCount("SSE.STK.600000", KP_DAY, 1,
+		first_bar);
+	ASSERT_NE(nullptr, first_count);
+	vector<WTSBarStruct> first_count_bars = flatten(first_count);
+	ASSERT_EQ(first_count_bars.size(), (std::size_t)1);
+	expect_bar_eq(first_count_bars[0], bars[0]);
+	first_count->release();
+	WTSKlineSlice* later_count = _reader.readKlineSliceByCount("SSE.STK.600000", KP_DAY, 2,
+		after_first);
+	ASSERT_NE(nullptr, later_count);
+	vector<WTSBarStruct> later_count_bars = flatten(later_count);
+	ASSERT_EQ(later_count_bars.size(), (std::size_t)1);
+	expect_bar_eq(later_count_bars[0], bars[0]);
+	later_count->release();
+}
+
 TEST_F(Q03RdmKlineTest, min1_splices_his_block_with_rt_block)
 {
 	// his/min1 两根（20240108 全天）+ rt/min1 两根（20240110 当日）
@@ -312,6 +356,167 @@ TEST_F(Q03RdmKlineTest, min1_right_window_drops_late_bars)
 	for(std::size_t i = 0; i < got.size(); i++)
 		expect_bar_eq(got[i], rt[i]);
 	slice->release();
+}
+
+TEST_F(Q03RdmKlineTest, empty_rt_blocks_fall_back_to_history_for_range_and_count)
+{
+	struct PeriodCase
+	{
+		WTSKlinePeriod period;
+		const char* subdir;
+		uint16_t rt_type;
+		uint16_t his_type;
+		const char* empty_code;
+		const char* history_code;
+		const char* single_code;
+	};
+	const PeriodCase cases[] = {
+		{ KP_Minute1, "min1", BT_RT_Minute1, BT_HIS_Minute1, "600010", "600012", "600014" },
+		{ KP_Minute5, "min5", BT_RT_Minute5, BT_HIS_Minute5, "600011", "600013", "600015" }
+	};
+	const uint32_t kCurDate = 20240110;
+	const uint64_t kStart = 202401100900ull;
+	const uint64_t kEnd = 202401101500ull;
+	const uint64_t kHistoryStart = 202401090000ull;
+
+	for (const PeriodCase& test_case : cases)
+	{
+		const vector<WTSBarStruct> empty;
+		const string empty_rt_path = fmtutil::format("rt/{}/SSE/{}.dmb", test_case.subdir, test_case.empty_code);
+		ASSERT_TRUE(write_bytes(empty_rt_path, make_rt_block<WTSBarStruct>(
+			test_case.rt_type, kCurDate, 0, 8, empty)));
+
+		const string empty_std_code = fmtutil::format("SSE.STK.{}", test_case.empty_code);
+		WTSKlineSlice* no_data_range = _reader.readKlineSliceByRange(
+			empty_std_code.c_str(), test_case.period, kStart, kEnd);
+		EXPECT_TRUE(no_data_range == NULL || no_data_range->size() == 0u);
+		if (no_data_range != NULL)
+			no_data_range->release();
+		WTSKlineSlice* no_data_count = _reader.readKlineSliceByCount(
+			empty_std_code.c_str(), test_case.period, 3, kEnd);
+		EXPECT_TRUE(no_data_count == NULL || no_data_count->size() == 0u);
+		if (no_data_count != NULL)
+			no_data_count->release();
+
+		vector<WTSBarStruct> historical;
+		historical.push_back(make_bar(20240109, min_bar_time(20240109, 1455), 31));
+		const string history_rt_path = fmtutil::format("rt/{}/SSE/{}.dmb", test_case.subdir, test_case.history_code);
+		ASSERT_TRUE(write_bytes(history_rt_path, make_rt_block<WTSBarStruct>(
+			test_case.rt_type, kCurDate, 0, 8, empty)));
+		const string history_path = fmtutil::format("his/{}/SSE/{}.dsb", test_case.subdir, test_case.history_code);
+		ASSERT_TRUE(write_bytes(history_path, make_block(
+			test_case.his_type, BLOCK_VERSION_RAW_V2, pack_bars(historical))));
+
+		const string history_std_code = fmtutil::format("SSE.STK.{}", test_case.history_code);
+		WTSKlineSlice* history_range = _reader.readKlineSliceByRange(
+			history_std_code.c_str(), test_case.period, kHistoryStart, kEnd);
+		ASSERT_NE(history_range, nullptr);
+		vector<WTSBarStruct> range_bars = flatten(history_range);
+		ASSERT_EQ(range_bars.size(), (std::size_t)1);
+		expect_bar_eq(range_bars[0], historical[0]);
+		history_range->release();
+
+		WTSKlineSlice* history_count = _reader.readKlineSliceByCount(
+			history_std_code.c_str(), test_case.period, 3, kEnd);
+		ASSERT_NE(history_count, nullptr);
+		vector<WTSBarStruct> count_bars = flatten(history_count);
+		ASSERT_EQ(count_bars.size(), (std::size_t)1);
+		expect_bar_eq(count_bars[0], historical[0]);
+		history_count->release();
+
+		vector<WTSBarStruct> single_rt;
+		single_rt.push_back(make_bar(kCurDate, min_bar_time(kCurDate, 1450), 41));
+		const string single_rt_path = fmtutil::format("rt/{}/SSE/{}.dmb", test_case.subdir, test_case.single_code);
+		ASSERT_TRUE(write_bytes(single_rt_path, make_rt_block<WTSBarStruct>(
+			test_case.rt_type, kCurDate, 1, 8, single_rt)));
+		const string single_std_code = fmtutil::format("SSE.STK.{}", test_case.single_code);
+		WTSKlineSlice* single_range = _reader.readKlineSliceByRange(
+			single_std_code.c_str(), test_case.period, kStart, kEnd);
+		ASSERT_NE(single_range, nullptr);
+		ASSERT_EQ(single_range->size(), 1u);
+		ASSERT_NE(single_range->at(0), nullptr);
+		expect_bar_eq(*single_range->at(0), single_rt[0]);
+		single_range->release();
+
+		WTSKlineSlice* single_count = _reader.readKlineSliceByCount(
+			single_std_code.c_str(), test_case.period, 1, kEnd);
+		ASSERT_NE(single_count, nullptr);
+		ASSERT_EQ(single_count->size(), 1u);
+		ASSERT_NE(single_count->at(0), nullptr);
+		expect_bar_eq(*single_count->at(0), single_rt[0]);
+		single_count->release();
+	}
+}
+
+TEST_F(Q03RdmKlineTest, min1_before_first_rt_bar_falls_back_to_history_for_range_and_count)
+{
+	const char* code = "600016";
+	const uint32_t cur_date = 20240110;
+	const uint64_t rt_first = 202401100930ull;
+	const uint64_t before_first = 202401100929ull;
+	const uint64_t after_first = 202401100931ull;
+	vector<WTSBarStruct> historical;
+	historical.push_back(make_bar(20240109, min_bar_time(20240109, 1455), 51));
+	vector<WTSBarStruct> realtime;
+	realtime.push_back(make_bar(cur_date, min_bar_time(cur_date, 930), 61));
+
+	ASSERT_TRUE(write_bytes("his/min1/SSE/600016.dsb", make_block(
+		BT_HIS_Minute1, BLOCK_VERSION_RAW_V2, pack_bars(historical))));
+	ASSERT_TRUE(write_bytes("rt/min1/SSE/600016.dmb", make_rt_block<WTSBarStruct>(
+		BT_RT_Minute1, cur_date, 1, 8, realtime)));
+
+	const string std_code = fmtutil::format("SSE.STK.{}", code);
+
+	// A request ending before the first RT bar must retain only eligible history.
+	WTSKlineSlice* before_range = _reader.readKlineSliceByRange(
+		std_code.c_str(), KP_Minute1, 202401090000ull, before_first);
+	ASSERT_NE(nullptr, before_range);
+	vector<WTSBarStruct> before_range_bars = flatten(before_range);
+	ASSERT_EQ(before_range_bars.size(), (std::size_t)1);
+	expect_bar_eq(before_range_bars[0], historical[0]);
+	before_range->release();
+
+	// Equal and later right edges include the RT bar without underflowing the index.
+	WTSKlineSlice* equal_range = _reader.readKlineSliceByRange(
+		std_code.c_str(), KP_Minute1, rt_first, rt_first);
+	ASSERT_NE(nullptr, equal_range);
+	vector<WTSBarStruct> equal_range_bars = flatten(equal_range);
+	ASSERT_EQ(equal_range_bars.size(), (std::size_t)1);
+	expect_bar_eq(equal_range_bars[0], realtime[0]);
+	equal_range->release();
+
+	WTSKlineSlice* after_range = _reader.readKlineSliceByRange(
+		std_code.c_str(), KP_Minute1, rt_first, after_first);
+	ASSERT_NE(nullptr, after_range);
+	vector<WTSBarStruct> after_range_bars = flatten(after_range);
+	ASSERT_EQ(after_range_bars.size(), (std::size_t)1);
+	expect_bar_eq(after_range_bars[0], realtime[0]);
+	after_range->release();
+
+	// Count lookups before the first RT bar fall back to history; equal/later use RT.
+	WTSKlineSlice* before_count = _reader.readKlineSliceByCount(
+		std_code.c_str(), KP_Minute1, 2, before_first);
+	ASSERT_NE(nullptr, before_count);
+	vector<WTSBarStruct> before_count_bars = flatten(before_count);
+	ASSERT_EQ(before_count_bars.size(), (std::size_t)1);
+	expect_bar_eq(before_count_bars[0], historical[0]);
+	before_count->release();
+
+	WTSKlineSlice* equal_count = _reader.readKlineSliceByCount(
+		std_code.c_str(), KP_Minute1, 1, rt_first);
+	ASSERT_NE(nullptr, equal_count);
+	vector<WTSBarStruct> equal_count_bars = flatten(equal_count);
+	ASSERT_EQ(equal_count_bars.size(), (std::size_t)1);
+	expect_bar_eq(equal_count_bars[0], realtime[0]);
+	equal_count->release();
+
+	WTSKlineSlice* after_count = _reader.readKlineSliceByCount(
+		std_code.c_str(), KP_Minute1, 1, after_first);
+	ASSERT_NE(nullptr, after_count);
+	vector<WTSBarStruct> after_count_bars = flatten(after_count);
+	ASSERT_EQ(after_count_bars.size(), (std::size_t)1);
+	expect_bar_eq(after_count_bars[0], realtime[0]);
+	after_count->release();
 }
 
 TEST_F(Q03RdmKlineTest, clear_cache_forces_rebuild_from_file)

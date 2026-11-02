@@ -59,12 +59,13 @@ namespace
 		/* 注意：queryConfirm()/confirm() 在 TraderCTPOpt.h 中是 private（L49-55），
 		   继承缝不可达；其守卫分支只经 OnRspQrySettlementInfoConfirm 内部调用间接覆盖。 */
 
-		void harden()
+		void harden(bool initializeExecOrders = true)
 		{
 			m_frontID = 0;
 			m_sessionID = 0;
 			m_orderRef = 0;
-			m_ayExecOrds = NULL;
+			if (initializeExecOrders)
+				m_ayExecOrds = NULL;
 			m_bdMgr = NULL;
 			m_mapPosition = NULL;
 			m_ayTrades = NULL;
@@ -99,6 +100,7 @@ namespace
 		bool quickStart() const { return m_bQuickStart; }
 		uint32_t tradeDate() const { return m_lDate; }
 		IBaseDataMgr* bdMgr() const { return m_bdMgr; }
+		ITraderSpi* traderSink() const { return m_bscSink; }
 		TraderCTPOpt::PositionMap* mapPos() const { return m_mapPosition; }
 		WTSArray* ayExecOrds() const { return m_ayExecOrds; }
 		WTSArray* ayOrders() const { return m_ayOrders; }
@@ -278,6 +280,16 @@ namespace
 			ordersOptCalls++;
 			lastOrdersOptNull = (ayOrders == NULL);
 			lastOrdersOptSize = (ayOrders == NULL) ? 0u : ayOrders->size();
+			lastOrdersOptItems.clear();
+			if (ayOrders != NULL)
+			{
+				for (WTSArray::ConstIterator it = ayOrders->begin(); it != ayOrders->end(); ++it)
+				{
+					const WTSOrderInfo* order = static_cast<const WTSOrderInfo*>(*it);
+					if (order != NULL)
+						lastOrdersOptItems.emplace_back(order->getOrderID(), order->getVolume());
+				}
+			}
 		}
 		void onPushOrderOpt(WTSOrderInfo* orderInfo) override
 		{
@@ -299,6 +311,7 @@ namespace
 		uint32_t ordersOptCalls = 0;
 		bool lastOrdersOptNull = false;
 		uint32_t lastOrdersOptSize = 0;
+		std::vector<std::pair<std::string, double>> lastOrdersOptItems;
 	};
 
 	class CtpBaseDataMgr : public IBaseDataMgr
@@ -378,7 +391,7 @@ TEST(TraderCTPOpt, factory_entries_create_and_delete_trader)
 	EXPECT_EQ(nullptr, nullTrader);
 }
 
-TEST(TraderCTPOpt, init_reads_config_with_documented_defaults)
+TEST(TraderCTPOpt, init_reads_defaults_before_reporting_missing_sdk_module)
 {
 	CtpProbe probe;
 	probe.harden();
@@ -390,8 +403,8 @@ TEST(TraderCTPOpt, init_reads_config_with_documented_defaults)
 	cfg->append("pass", "pwd123");
 	cfg->append("appid", "testapp");
 	cfg->append("authcode", "auth42");
-	/* flowdir / ctpmodule / quick 均缺省 → 走默认分支 */
-	EXPECT_TRUE(probe.init(cfg));
+	/* 默认项可读；测试目录没有厂商 SDK，因此 init 应报告模块加载失败。 */
+	EXPECT_FALSE(probe.init(cfg));
 	probe.release();
 
 	EXPECT_EQ("tcp://1.2.3.4:1234", probe.front());
@@ -407,7 +420,7 @@ TEST(TraderCTPOpt, init_reads_config_with_documented_defaults)
 	cfg->release();
 }
 
-TEST(TraderCTPOpt, init_honours_custom_flowdir_module_and_quickstart)
+TEST(TraderCTPOpt, init_reads_custom_paths_before_reporting_missing_sdk_module)
 {
 	CtpProbe probe;
 	probe.harden();
@@ -419,12 +432,11 @@ TEST(TraderCTPOpt, init_honours_custom_flowdir_module_and_quickstart)
 	cfg->append("pass", "p2");
 	cfg->append("flowdir", "myctpflow");
 	cfg->append("ctpmodule", "customapi");
-	cfg->append("quick", true);
-	EXPECT_TRUE(probe.init(cfg));
+	/* 路径配置被解析，但没有厂商 SDK 模块时不能把 init 报告为成功。 */
+	EXPECT_FALSE(probe.init(cfg));
 
 	EXPECT_NE(std::string::npos, probe.flowdir().find("myctpflow"));
 	EXPECT_NE(std::string::npos, probe.module().find("customapi"));
-	EXPECT_TRUE(probe.quickStart());
 	probe.release();
 	cfg->release();
 }
@@ -473,9 +485,9 @@ TEST(TraderCTPOpt, register_spi_wires_basedata_mgr_and_opt_spi)
 	EXPECT_EQ(&fx.bd, probe.bdMgr());
 	EXPECT_NE(nullptr, probe.bdMgr());
 
-	/* 空 sink 也必须可安全注册 */
+	/* Null unregister clears the callback sink; the cached base-data manager is not public contract. */
 	probe.registerSpi(NULL);
-	EXPECT_EQ(nullptr, probe.bdMgr());
+	EXPECT_EQ(nullptr, probe.traderSink());
 }
 
 TEST(TraderCTPOpt, unlogged_state_rejects_every_request_with_minus_one)
@@ -531,6 +543,66 @@ TEST(TraderCTPOpt, request_ids_increment_monotonically)
 	EXPECT_EQ(3u, probe.genRequestID());
 }
 
+TEST(TraderCTPOpt, exec_order_query_uses_constructor_initialized_array_and_starts_fresh_batches)
+{
+	CtpProbe probe;
+	EXPECT_EQ(nullptr, probe.ayExecOrds());	/* Observe the production constructor before test setup. */
+	probe.harden(false);	/* Initialize unrelated state while preserving the constructor value. */
+	CtpFixture fx;
+	probe.registerSpi(&fx.spi);
+
+	CThostFtdcExecOrderField first;
+	std::memset(&first, 0, sizeof(first));
+	std::snprintf(first.InstrumentID, sizeof(first.InstrumentID), "%s", "rb2610");
+	std::snprintf(first.ExchangeID, sizeof(first.ExchangeID), "%s", "SSE");
+	std::snprintf(first.ExecOrderRef, sizeof(first.ExecOrderRef), "%s", "41");
+	std::snprintf(first.ExecOrderSysID, sizeof(first.ExecOrderSysID), "%s", "EXEC-41");
+	first.FrontID = 1;
+	first.SessionID = 1;
+	first.Volume = 1;
+	first.PosiDirection = THOST_FTDC_PD_Long;
+	first.OffsetFlag = THOST_FTDC_OF_Open;
+	probe.OnRspQryExecOrder(&first, nullptr, 1, false);
+	ASSERT_NE(nullptr, probe.ayExecOrds());
+	ASSERT_EQ(1u, probe.ayExecOrds()->size());
+	EXPECT_EQ(0u, fx.opt.ordersOptCalls);
+
+	CThostFtdcExecOrderField second = first;
+	std::snprintf(second.ExecOrderRef, sizeof(second.ExecOrderRef), "%s", "42");
+	std::snprintf(second.ExecOrderSysID, sizeof(second.ExecOrderSysID), "%s", "EXEC-42");
+	second.Volume = 2;
+	probe.OnRspQryExecOrder(&second, nullptr, 2, true);
+	ASSERT_EQ(1u, fx.opt.ordersOptCalls);
+	EXPECT_FALSE(fx.opt.lastOrdersOptNull);
+	EXPECT_EQ(2u, fx.opt.lastOrdersOptSize);
+	ASSERT_EQ(2u, fx.opt.lastOrdersOptItems.size());
+	EXPECT_EQ("EXEC-41", fx.opt.lastOrdersOptItems[0].first);
+	EXPECT_DOUBLE_EQ(1.0, fx.opt.lastOrdersOptItems[0].second);
+	EXPECT_EQ("EXEC-42", fx.opt.lastOrdersOptItems[1].first);
+	EXPECT_DOUBLE_EQ(2.0, fx.opt.lastOrdersOptItems[1].second);
+	EXPECT_EQ(0u, probe.ayExecOrds()->size());
+
+	CThostFtdcExecOrderField next = first;
+	std::snprintf(next.ExecOrderRef, sizeof(next.ExecOrderRef), "%s", "43");
+	std::snprintf(next.ExecOrderSysID, sizeof(next.ExecOrderSysID), "%s", "EXEC-43");
+	probe.OnRspQryExecOrder(&next, nullptr, 3, true);
+	EXPECT_EQ(2u, fx.opt.ordersOptCalls);
+	EXPECT_EQ(1u, fx.opt.lastOrdersOptSize);
+	ASSERT_EQ(1u, fx.opt.lastOrdersOptItems.size());
+	EXPECT_EQ("EXEC-43", fx.opt.lastOrdersOptItems[0].first);
+
+	/* release() must discard an incomplete batch, as it does for the other response arrays. */
+	probe.OnRspQryExecOrder(&first, nullptr, 4, false);
+	ASSERT_EQ(1u, probe.ayExecOrds()->size());
+	probe.release();
+	EXPECT_EQ(0u, probe.ayExecOrds()->size());
+	probe.OnRspQryExecOrder(&next, nullptr, 5, true);
+	EXPECT_EQ(3u, fx.opt.ordersOptCalls);
+	EXPECT_EQ(1u, fx.opt.lastOrdersOptSize);
+	ASSERT_EQ(1u, fx.opt.lastOrdersOptItems.size());
+	EXPECT_EQ("EXEC-43", fx.opt.lastOrdersOptItems[0].first);
+}
+
 TEST(TraderCTPOpt, front_lifecycle_events_forward_to_sink)
 {
 	CtpProbe probe;
@@ -541,7 +613,6 @@ TEST(TraderCTPOpt, front_lifecycle_events_forward_to_sink)
 	probe.OnFrontConnected();
 	probe.OnFrontDisconnected(42);
 	probe.OnHeartBeatWarning(100);
-	probe.OnRspError(NULL, 0, true);
 
 	ASSERT_EQ(2u, fx.spi.events.size());
 	EXPECT_EQ(WTE_Connect, fx.spi.events[0].first);
@@ -550,12 +621,37 @@ TEST(TraderCTPOpt, front_lifecycle_events_forward_to_sink)
 	EXPECT_EQ(42, fx.spi.events[1].second);
 	EXPECT_EQ(TraderCTPOpt::WS_NOTLOGIN, probe.state());
 	EXPECT_FALSE(probe.isConnected());
-	ASSERT_EQ(1u, fx.spi.logs.size());	/* 仅心跳日志；OnRspError 是显式空实现 */
+	ASSERT_EQ(1u, fx.spi.logs.size());	/* 仅心跳日志；错误回调正反例单独覆盖。 */
 	EXPECT_TRUE(fx.spi.hasLog("Heartbeating"));
 
 	probe.registerSpi(NULL);
 	probe.OnFrontConnected();			/* 空 sink 不得崩溃、不得产生事件 */
 	EXPECT_EQ(2u, fx.spi.events.size());
+}
+
+TEST(TraderCTPOpt, generic_error_response_logs_nonzero_error_and_keeps_success_quiet)
+{
+	CtpProbe probe;
+	probe.harden();
+	CtpFixture fx;
+	probe.registerSpi(&fx.spi);
+
+	CThostFtdcRspInfoField success = makeRsp(0, "");
+	probe.OnRspError(&success, 17, true);
+	EXPECT_TRUE(fx.spi.logs.empty());
+
+	CThostFtdcRspInfoField error = makeRsp(42, "generic response failed");
+	probe.OnRspError(&error, 17, false);
+	ASSERT_EQ(1u, fx.spi.logs.size());
+	EXPECT_EQ(LL_ERROR, fx.spi.logs[0].first);
+	EXPECT_NE(std::string::npos, fx.spi.logs[0].second.find("17 rsp error: 42 : generic response failed"));
+
+	probe.OnRspError(nullptr, 18, true);
+	EXPECT_EQ(1u, fx.spi.logs.size());	/* Defensive local no-op; this does not assert SDK callback guarantees. */
+
+	probe.registerSpi(nullptr);
+	probe.OnRspError(&error, 19, true);
+	EXPECT_EQ(1u, fx.spi.logs.size());	/* Empty sink has no observer to receive a log. */
 }
 
 TEST(TraderCTPOpt, authentication_and_login_failure_branches_report_to_sink)
@@ -586,8 +682,9 @@ TEST(TraderCTPOpt, authentication_and_login_failure_branches_report_to_sink)
 	/* 登出回报：状态复位 + WTE_Logout 事件 */
 	probe.OnRspUserLogout(NULL, NULL, 3, true);
 	EXPECT_EQ(TraderCTPOpt::WS_NOTLOGIN, probe.state());
-	ASSERT_EQ(3u, fx.spi.events.size() + 0);	/* 前两个事件 + 一个 logout 事件 */
-	EXPECT_EQ(WTE_Logout, fx.spi.events[2].first);
+	ASSERT_EQ(1u, fx.spi.events.size());	/* 登录成功/失败走 onLoginResult，不是 handleEvent。 */
+	EXPECT_EQ(WTE_Logout, fx.spi.events[0].first);
+	EXPECT_EQ(0, fx.spi.events[0].second);
 
 	probe.registerSpi(NULL);
 }

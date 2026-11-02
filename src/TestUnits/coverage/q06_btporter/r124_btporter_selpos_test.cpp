@@ -7,7 +7,8 @@
  *
  * 既有 R83 只覆盖 sel 空表/空 mocker；R113 只覆盖 cta_get_all_position 的信号枚举。
  * 本用例按 R113 的底座配置装载 sessions/commodities/contracts，再通过公开
- * sel_set_position 写入一条信号，使 enum_position 真正进入回调体。
+ * sel_set_position 写入一条信号，使 enum_position 真正进入回调体。标准合约代码
+ * 用三段式 "SHFE.rb.2510"，避免 HisDataReplayer 无法解析两段式简称。
  *
  * 边界：同步、无行情回放、无线程；只写系统临时目录并清理。
  */
@@ -32,13 +33,17 @@ extern WtBtRunner& getRunner();
 namespace
 {
 	namespace stdfs = std::filesystem;
+	const char* kCode = "SHFE.rb.2510";
 
 	struct EnumRec
 	{
 		int		calls = 0;
+		int		entries = 0;
 		bool	last = false;
-		double	qty = 0.0;
-		std::string code;
+		double	entryQty = 0.0;
+		double	terminalQty = 0.0;
+		std::string entryCode;
+		std::string terminalCode;
 
 		void clear() { *this = EnumRec(); }
 	};
@@ -48,9 +53,18 @@ namespace
 	void enum_cb(CtxHandler, const char* code, double qty, bool isLast)
 	{
 		g_enum.calls++;
-		g_enum.last = isLast;
-		g_enum.qty = qty;
-		g_enum.code = code ? code : "";
+		if (isLast)
+		{
+			g_enum.last = true;
+			g_enum.terminalQty = qty;
+			g_enum.terminalCode = code ? code : "";
+		}
+		else
+		{
+			g_enum.entries++;
+			g_enum.entryQty = qty;
+			g_enum.entryCode = code ? code : "";
+		}
 	}
 
 	void reset_singleton()
@@ -103,26 +117,31 @@ TEST(R124BtPorterSelPositions, SelSetPositionEnumeratesOneSignal)
 	getRunner().init((dir + "/r124_absent_logcfg.yaml").c_str(), true, dir.c_str());
 
 	const std::string cfg = "{\"replayer\":{\"mode\":\"none\",\"path\":\"" + dir + "\","
+		"\"stime\":20240102000000,\"etime\":20240103000000,"
 		"\"basefiles\":{"
 		"\"session\":\"" + dir + "/sessions.json\","
 		"\"commodity\":\"" + dir + "/commodities.json\","
 		"\"contract\":\"" + dir + "/contracts.json\"}},"
 		"\"env\":{\"mocker\":\"none\"}}";
-	getRunner().config(cfg.c_str(), false);
+	std::string configError;
+	ASSERT_TRUE(getRunner().config_v2(cfg.c_str(), false, &configError)) << configError;
 
 	const CtxHandler h = init_sel_mocker("r124_sel_pos", 20240102, 93000, "d");
 	ASSERT_NE(h, 0U);
 	ASSERT_NE(getRunner().sel_mocker(), nullptr);
 
-	sel_set_position(h, "SHFE.rb2510", 3.0, "r124");
+	sel_set_position(h, kCode, 3.0, "r124");
 
 	g_enum.clear();
 	sel_get_all_position(h, enum_cb);
 
 	EXPECT_EQ(2, g_enum.calls);
+	EXPECT_EQ(1, g_enum.entries);
 	EXPECT_TRUE(g_enum.last);
-	EXPECT_EQ(std::string("SHFE.rb2510"), g_enum.code);
-	EXPECT_DOUBLE_EQ(3.0, g_enum.qty);
+	EXPECT_EQ(std::string(kCode), g_enum.entryCode);
+	EXPECT_DOUBLE_EQ(3.0, g_enum.entryQty);
+	EXPECT_TRUE(g_enum.terminalCode.empty());
+	EXPECT_DOUBLE_EQ(0.0, g_enum.terminalQty);
 
 	reset_singleton();
 

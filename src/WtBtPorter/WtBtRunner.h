@@ -263,7 +263,7 @@ public:
 	 * @param session 交易时段，默认为"TRADING"
 	 * @param slippage 回测中的滑点设置，默认为0
 	 * @param isRatioSlp 滑点是否为百分比模式，默认为false
-	 * @return 返回策略上下文ID
+	 * @return 返回策略上下文ID；参数无效时返回0且保留已有SEL模拟器
 	 * @details 初始化选股策略回测模拟器，创建并配置一个选股策略的回测环境
 	 *          实际创建的是SelMocker对象，用于模拟多标的筛选和资产配置策略
 	 */
@@ -660,6 +660,7 @@ private:
 	bool			_inited;
 	bool			_config_failed_permanently;
 	bool			_running;
+	bool			_stop_requested;
 	bool			_release_requested;
 	bool			_released;
 	mutable std::mutex _lifecycle_mutex;

@@ -1678,46 +1678,68 @@ void WtLocalExecuter::set_position(const wt_hashmap<std::string, double>& target
 	 */
 	// 创建实际目标仓位的副本，用于处理组合合约
 	auto real_targets = targets;
-	// 遍历所有的合约组合
-	for(auto& v : _groups)
+	// Only transform the currently defined, unambiguous integer case. Group
+	// direction, fractional quantities, and overlapping groups need an explicit
+	// contract; preserve the caller's targets for those inputs.
+	bool nonnegativeIntegerTargets = true;
+	for (const auto& target : targets)
 	{
-		const CodeGroupPtr& gpInfo = v.second;
-		bool bHit = false;
-		double gpQty = DBL_MAX;
-		// 检查组合中的每个合约是否存在于目标仓位中
-		for(auto& vi : gpInfo->_items)
+		if (!decimal::ge(target.second, 0.0) || !decimal::eq(target.second, round(target.second)))
 		{
-			double unit = vi.second;
-			auto it = real_targets.find(vi.first);
-			if (it == real_targets.end())
-			{
-				bHit = false;
-				break;
-			}
-			else
-			{
-				bHit = true;
-				//计算最小的组合单位数量
-				gpQty = std::min(gpQty, decimal::mod(it->second, unit));
-			}
+			nonnegativeIntegerTargets = false;
+			break;
 		}
-
-		// 如果组合成功匹配且数量大于0
-		if(bHit && decimal::gt(gpQty, 0))
+	}
+	if (_groups.size() == 1 && nonnegativeIntegerTargets)
+	{
+		const CodeGroupPtr& gpInfo = _groups.begin()->second;
+		if (gpInfo != nullptr && !gpInfo->_items.empty() &&
+			targets.find(gpInfo->_name) == targets.end() &&
+			gpInfo->_items.find(gpInfo->_name) == gpInfo->_items.end())
 		{
-			// 设置组合合约的目标仓位
-			real_targets[gpInfo->_name] = gpQty;
-			// 从原始合约中减去组合合约占用的部分
-			for (auto& vi : gpInfo->_items)
+			bool bHit = true;
+			double gpQty = DBL_MAX;
+			// Require non-negative integer targets and positive integer member
+			// quantities, so this path never invents fractional or signed lots.
+			for (const auto& item : gpInfo->_items)
 			{
-				double unit = vi.second;
-				real_targets[vi.first] -= gpQty * unit;
+				const double unit = item.second;
+				auto target = targets.find(item.first);
+				if (target == targets.end() || !decimal::gt(unit, 0.0) ||
+					!decimal::eq(unit, round(unit)) || !decimal::ge(target->second, 0.0) ||
+					!decimal::eq(target->second, round(target->second)))
+				{
+					bHit = false;
+					break;
+				}
+				gpQty = std::min(gpQty, target->second / unit);
+			}
+
+			if (bHit && decimal::gt(gpQty, 0.0) && decimal::eq(gpQty, round(gpQty)))
+			{
+				bool integerResiduals = true;
+				for (const auto& item : gpInfo->_items)
+				{
+					const double residual = targets.find(item.first)->second - gpQty * item.second;
+					if (!decimal::ge(residual, 0.0) || !decimal::eq(residual, round(residual)))
+					{
+						integerResiduals = false;
+						break;
+					}
+				}
+
+				if (integerResiduals)
+				{
+					real_targets[gpInfo->_name] = gpQty;
+					for (const auto& item : gpInfo->_items)
+						real_targets[item.first] = targets.find(item.first)->second - gpQty * item.second;
+				}
 			}
 		}
 	}
 
 	// 目标更新按合约串行入队；目标映射更新本身由短时锁保护。
-	for (const auto& item : targets)
+	for (const auto& item : real_targets)
 		queuePositionTarget(item.first, item.second, false);
 
 	// 获取旧目标键的快照，再在锁外查询执行单元与入队。
@@ -1730,7 +1752,7 @@ void WtLocalExecuter::set_position(const wt_hashmap<std::string, double>& target
 	}
 	for (const std::string& code : priorTargets)
 	{
-		if (targets.find(code) != targets.end())
+		if (real_targets.find(code) != real_targets.end())
 			continue;
 		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO,
 			"{} is not in target, set to 0 automatically", code.c_str());

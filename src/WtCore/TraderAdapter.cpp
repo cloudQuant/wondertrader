@@ -16,6 +16,8 @@
 #include "../Includes/RiskMonDefs.h"
 
 #include <atomic>
+#include <cstring>
+#include <limits>
 #include <mutex>
 
 #include "../WTSTools/WTSLogger.h"
@@ -67,6 +69,25 @@ uint64_t allocateOwnerRegistryInstanceId()
 			return candidate;
 	}
 	return 0;
+}
+
+bool canFormatOrderPattern(const char* id)
+{
+	if (id == NULL)
+		return false;
+
+	constexpr std::size_t userTagSize = sizeof(((WTSEntrust*)NULL)->m_strUserTag);
+	constexpr std::size_t localIdDigits = std::numeric_limits<uint32_t>::digits10 + 1;
+	constexpr std::size_t fixedTagBytes = (sizeof("otp.") - 1) + 1 + localIdDigits + 1;
+	static_assert(fixedTagBytes < userTagSize, "WTSEntrust user tag cannot hold the order pattern");
+
+	const std::size_t maxIdBytes = userTagSize - fixedTagBytes;
+	for (std::size_t i = 0; i <= maxIdBytes; ++i)
+	{
+		if (id[i] == '\0')
+			return true;
+	}
+	return false;
 }
 }
 
@@ -453,68 +474,25 @@ void TraderAdapter::forEachSink(const std::function<void(ITrdNotifySink*)>& call
 bool TraderAdapter::forEachSinkForOwner(const std::string& owner_id,
 	const std::function<void(ITrdNotifySink*)>& callback)
 {
-	struct Recipient
-	{
-		SinkRegistrationPtr registration;
-		bool owner;
-		uint64_t generation;
-	};
-
-	std::vector<Recipient> recipients;
-	bool ownerFound = false;
+	SinkRegistrationPtr registration;
+	uint64_t generation = 0;
 	{
 		std::lock_guard<std::mutex> lock(_sink_mutex);
-		if (_sink_notifications_stopping)
+		if (_sink_notifications_stopping || !_owner_routing_enabled)
 			return false;
 
-		OwnerSinkRegistration ownerRegistration;
-		if (_owner_routing_enabled)
-		{
-			auto ownerIt = _owner_sink_registrations.find(owner_id);
-			if (ownerIt != _owner_sink_registrations.end())
-			{
-				ownerRegistration = ownerIt->second;
-				ownerFound = true;
-			}
-		}
+		auto ownerIt = _owner_sink_registrations.find(owner_id);
+		if (ownerIt == _owner_sink_registrations.end())
+			return false;
 
-		recipients.reserve(_sink_registrations.size());
-		for (auto it = _sink_registrations.begin(); it != _sink_registrations.end(); ++it)
-		{
-			if (_owner_sink_classified.find(it->first) != _owner_sink_classified.end())
-				continue;
-			Recipient recipient;
-			recipient.registration = it->second;
-			recipient.owner = false;
-			recipient.generation = 0;
-			recipients.push_back(recipient);
-		}
-
-		if (ownerFound)
-		{
-			Recipient recipient;
-			recipient.registration = ownerRegistration.sink_registration;
-			recipient.owner = true;
-			recipient.generation = ownerRegistration.generation;
-			recipients.push_back(recipient);
-		}
-
-		if (!recipients.empty())
-			++_sink_broadcasts_in_flight;
+		registration = ownerIt->second.sink_registration;
+		generation = ownerIt->second.generation;
+		++_sink_broadcasts_in_flight;
 	}
-
-	if (recipients.empty())
-		return ownerFound;
 
 	try
 	{
-		for (const Recipient& recipient : recipients)
-		{
-			if (recipient.owner)
-				invokeOwnerSink(recipient.registration, owner_id, recipient.generation, callback);
-			else
-				invokeSink(recipient.registration, callback);
-		}
+		invokeOwnerSink(registration, owner_id, generation, callback);
 	}
 	catch (...)
 	{
@@ -522,7 +500,7 @@ bool TraderAdapter::forEachSinkForOwner(const std::string& owner_id,
 		throw;
 	}
 	finishSinkBroadcast();
-	return ownerFound;
+	return true;
 }
 
 void TraderAdapter::finishSinkBroadcast()
@@ -703,6 +681,9 @@ bool TraderAdapter::sinkCallbacksDrainedLocked() const
 
 bool TraderAdapter::init(const char* id, WTSVariant* params, IBaseDataMgr* bdMgr, ActionPolicyMgr* policyMgr)
 {
+	if (!canFormatOrderPattern(id))
+		return false;
+
 	if (params == NULL)
 		return false;
 
@@ -724,6 +705,13 @@ bool TraderAdapter::init(const char* id, WTSVariant* params, IBaseDataMgr* bdMgr
 		if (cfgPolicy == NULL || cfgPolicy->type() != WTSVariant::VT_Object)
 		{
 			WTSLogger::error("[{}] Active risk control requires a policy object", id);
+			return false;
+		}
+
+		WTSVariant* defaultRule = cfgPolicy->get("default");
+		if (defaultRule == NULL || defaultRule->type() != WTSVariant::VT_Object)
+		{
+			WTSLogger::error("[{}] Active risk control requires a default policy rule", id);
 			return false;
 		}
 	}
@@ -850,6 +838,9 @@ bool TraderAdapter::init(const char* id, WTSVariant* params, IBaseDataMgr* bdMgr
 
 bool TraderAdapter::initExt(const char* id, ITraderApi* api, IBaseDataMgr* bdMgr, ActionPolicyMgr* policyMgr)
 {
+	if (!canFormatOrderPattern(id))
+		return false;
+
 	if (api == NULL)
 		return false;
 	if (_trader_api != NULL || _cfg != NULL)
@@ -1241,9 +1232,12 @@ uint32_t TraderAdapter::doEntrust(WTSEntrust* entrust)
 	}
 	else
 	{
-		const RiskParams* riskPara = getRiskParams(riskCode.c_str());
-		if (_risk_mon_enabled && riskPara != NULL && riskPara->_order_times_boundary != 0)
-			_order_time_cache[riskCode].emplace_back(TimeUtils::getLocalTimeNow());
+		if (_risk_mon_enabled)
+		{
+			const RiskParams* riskPara = getRiskParams(riskCode.c_str());
+			if (riskPara != NULL && riskPara->_order_times_boundary != 0)
+				_order_time_cache[riskCode].emplace_back(TimeUtils::getLocalTimeNow());
+		}
 	}
 	return localid;
 }
@@ -2515,6 +2509,8 @@ void TraderAdapter::onRspTrades(const WTSArray* ayTrades)
 			WTSTradeInfo* tInfo = (WTSTradeInfo*)(*it);
 
 			WTSContractInfo* cInfo = tInfo->getContractInfo();
+			if (cInfo == NULL && _bd_mgr != NULL)
+				cInfo = _bd_mgr->getContract(tInfo->getCode(), tInfo->getExchg());
 			if (cInfo == NULL)
 				continue;
 
@@ -2885,9 +2881,10 @@ void TraderAdapter::onPushOrder(WTSOrderInfo* orderInfo)
 	{
 		{
 			SpinLock lock(_mtx_orders);
-			if (!orderInfo->isAlive() && _orders)
+			if (!orderInfo->isAlive())
 			{
-				_orders->remove(localid);
+				if (_orders)
+					_orders->remove(localid);
 			}
 			else
 			{
@@ -2917,6 +2914,8 @@ void TraderAdapter::onPushOrder(WTSOrderInfo* orderInfo)
 void TraderAdapter::onPushTrade(WTSTradeInfo* tradeRecord)
 {
 	WTSContractInfo* cInfo = tradeRecord->getContractInfo();
+	if (cInfo == NULL && _bd_mgr != NULL)
+		cInfo = _bd_mgr->getContract(tradeRecord->getCode(), tradeRecord->getExchg());
 	if (cInfo == NULL)
 		return;
 

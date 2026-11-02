@@ -181,6 +181,7 @@ TEST(R130EngineFee, LoadFeesMakesTemplateAvailableForEngineCalculation)
     EXPECT_DOUBLE_EQ(0.1, comm->getMarginRate());
     EXPECT_DOUBLE_EQ(3.0, comm->calcFee(3500.0, 2.0, 0));
     EXPECT_DOUBLE_EQ(3.0, engine.calc_fee(kAg, 3500.0, 2.0, 0));
+    EXPECT_TRUE(engine.fee_config_valid());
     EXPECT_DOUBLE_EQ(4.0, dceComm->calcFee(3500.0, 2.0, 0));
     EXPECT_DOUBLE_EQ(4.0, engine.calc_fee("DCE.a.2512", 3500.0, 2.0, 0));
     EXPECT_DOUBLE_EQ(0.3, dceComm->getMarginRate());
@@ -356,6 +357,48 @@ TEST(R130EngineFee, LoadFeesMakesTemplateAvailableForEngineCalculation)
     EXPECT_DOUBLE_EQ(0.0, comm->getMarginRate());
     EXPECT_DOUBLE_EQ(4.0, engine.calc_fee("DCE.a.2512", 3500.0, 2.0, 0));
     EXPECT_DOUBLE_EQ(0.3, dceComm->getMarginRate());
+
+    std::error_code ec;
+    sfs::remove(sfs::path(path), ec);
+    sfs::remove(sfs::path(path).parent_path(), ec);
+}
+
+TEST(R130EngineFee, MalformedKeysRejectInitializationWithoutApplyingValidPrefix)
+{
+    r130::TempEnv env("r130fee_bad_key");
+    q01sel::BaseDataMgr bd;
+    q01sel::HotMgr hot;
+    prepareEnv(bd, hot);
+
+    const std::string path = writeFeeFile(
+        "{\"SHFE.ag\":{\"open\":99.0,\"close\":99.0,\"closetoday\":99.0,"
+        "\"byvolume\":true,\"margin\":0.9},"
+        "\"broken\":{\"open\":10.0,\"close\":10.0,\"closetoday\":10.0,"
+        "\"byvolume\":true,\"margin\":0.8}}",
+        "fees_bad_key.json");
+
+    R130FeeEngine engine;
+    engine.attach(&bd, &hot);
+    initEngine(engine, bd, hot, path.c_str());
+
+    WTSCommodityInfo* comm = bd.getCommodity("SHFE", "ag");
+    ASSERT_NE(nullptr, comm);
+    EXPECT_FALSE(engine.fee_config_valid());
+    EXPECT_DOUBLE_EQ(0.0, engine.calc_fee(kAg, 3500.0, 2.0, 0));
+    EXPECT_DOUBLE_EQ(0.0, comm->calcFee(3500.0, 2.0, 0));
+    EXPECT_DOUBLE_EQ(0.0, comm->getMarginRate());
+
+    // A single-segment key is rejected on the same validation path; the valid
+    // prefix remains unapplied after each failed reload.
+    overwriteFeeFile(path,
+        "{\"SHFE.ag\":{\"open\":88.0,\"close\":88.0,\"closetoday\":88.0,"
+        "\"byvolume\":true,\"margin\":0.7},"
+        "\"SHFE\":{\"open\":77.0}}");
+    engine.reloadFees(path.c_str());
+    EXPECT_FALSE(engine.fee_config_valid());
+    EXPECT_DOUBLE_EQ(0.0, engine.calc_fee(kAg, 3500.0, 2.0, 0));
+    EXPECT_DOUBLE_EQ(0.0, comm->calcFee(3500.0, 2.0, 0));
+    EXPECT_DOUBLE_EQ(0.0, comm->getMarginRate());
 
     std::error_code ec;
     sfs::remove(sfs::path(path), ec);

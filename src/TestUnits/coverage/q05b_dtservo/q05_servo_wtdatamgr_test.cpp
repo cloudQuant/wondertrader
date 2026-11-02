@@ -9,7 +9,8 @@
  *  - get_exright_factor 的 commInfo==NULL 恒 1.0 分支
  *  - update_bars 的 _rt_bars==NULL 早退、clear_subbed_bars 的空表清空、
  *    reader_log / clear_cache（_reader==NULL 取消分支）
- * initStore 插件加载失败由显式错误返回覆盖；未初始化 reader 的查询路径仍不在本文件启用。
+ * initStore 覆盖缺模块、已加载模块缺符号、工厂返回 NULL 三种失败路径，并验证失败后查询安全；
+ * WtDataStorage 成功路径由同目标的 R102WtDataManagerTest 正控覆盖。
  */
 #include <gtest/gtest.h>
 
@@ -23,12 +24,33 @@
 #include <filesystem>
 
 #include <Includes/WTSVariant.hpp>
+#include <Share/DLLHelper.hpp>
 #include <WtDtServo/WtDataManager.h>
+#include <WtDtServo/WtHelper.h>
 #include <WTSUtils/WTSCfgLoader.h>
 
 namespace fs = std::filesystem;
 
 namespace {
+
+void expectUninitializedReaderQueriesAreSafe(WtDataManager& dm)
+{
+	EXPECT_EQ(dm.get_tick_slices_by_range("SSE.STK.600100", 20200101090000), nullptr);
+	EXPECT_EQ(dm.get_tick_slice_by_date("SSE.STK.600100", 20200101), nullptr);
+	EXPECT_EQ(dm.get_tick_slice_by_count("SSE.STK.600100", 10), nullptr);
+	EXPECT_EQ(dm.get_order_queue_slice("SSE.STK.600100", 20200101090000), nullptr);
+	EXPECT_EQ(dm.get_order_detail_slice("SSE.STK.600100", 20200101090000), nullptr);
+	EXPECT_EQ(dm.get_transaction_slice("SSE.STK.600100", 20200101090000), nullptr);
+	EXPECT_EQ(dm.get_skline_slice_by_date("SSE.STK.600100", 30, 20200101), nullptr);
+	EXPECT_EQ(dm.get_kline_slice_by_date("SSE.STK.600100", KP_DAY, 1, 20200101), nullptr);
+	EXPECT_EQ(dm.get_kline_slice_by_range("SSE.STK.600100", KP_DAY, 1, 20200101090000), nullptr);
+	EXPECT_EQ(dm.get_kline_slice_by_range("SSE.STK.600100", KP_DAY, 5, 20200101090000), nullptr);
+	EXPECT_EQ(dm.get_kline_slice_by_count("SSE.STK.600100", KP_DAY, 1, 10), nullptr);
+	EXPECT_EQ(dm.get_kline_slice_by_count("SSE.STK.600100", KP_DAY, 5, 10), nullptr);
+	EXPECT_DOUBLE_EQ(dm.get_exright_factor("SSE.STK.600100"), 1.0);
+	EXPECT_NO_THROW(dm.subscribe_bar("SSE.STK.600100", KP_DAY, 1));
+	EXPECT_NO_THROW(dm.clear_cache());
+}
 
 fs::path make_tmp_dir(const char* tag)
 {
@@ -42,10 +64,16 @@ fs::path make_tmp_dir(const char* tag)
 class Q05ServoWtDataManagerTest : public ::testing::Test
 {
 protected:
-	void SetUp() override { _dir = make_tmp_dir("q05_srvodm"); }
+	void SetUp() override
+	{
+		_dir = make_tmp_dir("q05_srvodm");
+		_originalModuleDir = WtHelper::get_module_dir();
+		WtHelper::set_module_dir(WT_Q05_READER_MODULE_DIR);
+	}
 
 	void TearDown() override
 	{
+		WtHelper::set_module_dir(_originalModuleDir.c_str());
 		std::error_code ec;
 		fs::remove_all(_dir, ec);
 	}
@@ -60,6 +88,7 @@ protected:
 	}
 
 	fs::path _dir;
+	std::string _originalModuleDir;
 };
 
 TEST_F(Q05ServoWtDataManagerTest, FreshInstanceGuardsReturnDefaults)
@@ -111,21 +140,50 @@ TEST_F(Q05ServoWtDataManagerTest, InitStoreLoadFailureReturnsFalseWithoutDerefer
 			"store": {"module": "q05_no_such_storage_module", "storedir": ""}})JSON");
 	ASSERT_NE(cfg, nullptr);
 	EXPECT_FALSE(dm.init(cfg, nullptr));
-	EXPECT_EQ(dm.get_tick_slices_by_range("SSE.STK.600100", 20200101090000), nullptr);
-	EXPECT_EQ(dm.get_tick_slice_by_date("SSE.STK.600100", 20200101), nullptr);
-	EXPECT_EQ(dm.get_tick_slice_by_count("SSE.STK.600100", 10), nullptr);
-	EXPECT_EQ(dm.get_order_queue_slice("SSE.STK.600100", 20200101090000), nullptr);
-	EXPECT_EQ(dm.get_order_detail_slice("SSE.STK.600100", 20200101090000), nullptr);
-	EXPECT_EQ(dm.get_transaction_slice("SSE.STK.600100", 20200101090000), nullptr);
-	EXPECT_EQ(dm.get_skline_slice_by_date("SSE.STK.600100", 30, 20200101), nullptr);
-	EXPECT_EQ(dm.get_kline_slice_by_date("SSE.STK.600100", KP_DAY, 1, 20200101), nullptr);
-	EXPECT_EQ(dm.get_kline_slice_by_range("SSE.STK.600100", KP_DAY, 1, 20200101090000), nullptr);
-	EXPECT_EQ(dm.get_kline_slice_by_range("SSE.STK.600100", KP_DAY, 5, 20200101090000), nullptr);
-	EXPECT_EQ(dm.get_kline_slice_by_count("SSE.STK.600100", KP_DAY, 1, 10), nullptr);
-	EXPECT_EQ(dm.get_kline_slice_by_count("SSE.STK.600100", KP_DAY, 5, 10), nullptr);
-	EXPECT_NO_THROW(dm.subscribe_bar("SSE.STK.600100", KP_DAY, 1));
-	// 失败后的无 reader 清理接口保持可调用，且不会伪报初始化成功。
-	dm.clear_cache();
+	expectUninitializedReaderQueriesAreSafe(dm);
+	cfg->release();
+}
+
+TEST_F(Q05ServoWtDataManagerTest, InitStoreLoadedModuleMissingReaderSymbolsReturnsFalse)
+{
+	const std::string modulePath = std::string(WT_Q05_READER_MODULE_DIR)
+		+ DLLHelper::wrap_module("WtIndexFactory");
+	DllHandle handle = DLLHelper::load_library(modulePath.c_str());
+	ASSERT_NE(handle, nullptr) << "expected real module to load: " << modulePath;
+	EXPECT_EQ(DLLHelper::get_symbol(handle, "createRdmDtReader"), nullptr);
+	EXPECT_EQ(DLLHelper::get_symbol(handle, "deleteRdmDtReader"), nullptr);
+	DLLHelper::free_library(handle);
+
+	WtDataManager dm;
+	WTSVariant* cfg = loadCfg("missing_reader_symbols.json",
+		R"JSON({"align_by_section": false,
+			"store": {"module": "WtIndexFactory", "storedir": ""}})JSON");
+	ASSERT_NE(cfg, nullptr);
+	EXPECT_FALSE(dm.init(cfg, nullptr));
+	expectUninitializedReaderQueriesAreSafe(dm);
+	EXPECT_NO_THROW(dm.reader_log(LL_INFO, "q05 missing reader symbols"));
+	cfg->release();
+}
+
+TEST_F(Q05ServoWtDataManagerTest, InitStoreFactoryReturningNullReturnsFalse)
+{
+	const std::string modulePath = std::string(WT_Q05_READER_MODULE_DIR)
+		+ DLLHelper::wrap_module(WT_Q05_NULL_READER_MODULE);
+	DllHandle handle = DLLHelper::load_library(modulePath.c_str());
+	ASSERT_NE(handle, nullptr) << "expected null-reader fixture to load: " << modulePath;
+	EXPECT_NE(DLLHelper::get_symbol(handle, "createRdmDtReader"), nullptr);
+	EXPECT_NE(DLLHelper::get_symbol(handle, "deleteRdmDtReader"), nullptr);
+	DLLHelper::free_library(handle);
+
+	WtDataManager dm;
+	WTSVariant* cfg = loadCfg("null_reader.json",
+		std::string(R"JSON({"align_by_section": false,
+			"store": {"module": ")JSON") + WT_Q05_NULL_READER_MODULE
+			+ R"JSON(", "storedir": ""}})JSON");
+	ASSERT_NE(cfg, nullptr);
+	EXPECT_FALSE(dm.init(cfg, nullptr));
+	expectUninitializedReaderQueriesAreSafe(dm);
+	EXPECT_NO_THROW(dm.reader_log(LL_INFO, "q05 null reader factory"));
 	cfg->release();
 }
 

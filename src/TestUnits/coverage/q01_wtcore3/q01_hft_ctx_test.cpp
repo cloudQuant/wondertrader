@@ -84,7 +84,7 @@ TEST_F(Q01HftCtxTest, id_name_and_time_passthrough)
     EXPECT_GE(ctx.id(), 6000u);              // makeHftCtxId 起点
     EXPECT_STREQ(ctx.name(), "h_id");
     EXPECT_EQ(ctx.stra_get_date(), 20250110u);
-    EXPECT_EQ(ctx.stra_get_time(), 0u);      // get_raw_time（attach 未设 rawTime -> 0）
+    EXPECT_EQ(ctx.stra_get_time(), 931u);   // get_raw_time falls back to curTime when rawTime is omitted
     EXPECT_EQ(ctx.stra_get_secs(), 55u);
 
     // setTrader 只赋值，不触发任何调用

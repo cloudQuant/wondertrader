@@ -214,11 +214,12 @@ TEST_F(ParserCTPTest, register_spi_pulls_base_data_manager)
 	parser_.OnFrontDisconnected(7);
 	ASSERT_EQ(1u, sink_.events_.size());
 	EXPECT_EQ((int)WPE_Close, sink_.events_[0].e);
+	const size_t oldSinkEventCount = sink_.events_.size();
 
 	CTPSink other;
 	parser_.registerSpi(&other);
 	parser_.OnRspUserLogout(NULL, NULL, 0, true);
-	EXPECT_EQ(0u, sink_.events_.size());   // 旧 sink 不再收事件
+	EXPECT_EQ(oldSinkEventCount, sink_.events_.size()); // 旧 sink 不再收新事件
 	ASSERT_EQ(1u, other.events_.size());
 	parser_.registerSpi(&sink_);
 }

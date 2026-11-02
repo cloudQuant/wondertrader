@@ -1,0 +1,509 @@
+[
+  {
+    "name": "ParserHuaX-test-compile",
+    "argv": [
+      "/usr/bin/clang++",
+      "-std=c++17",
+      "-O0",
+      "-g",
+      "-DFMT_HEADER_ONLY",
+      "-DSPDLOG_FMT_EXTERNAL",
+      "-I",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src",
+      "-I",
+      "/opt/homebrew/Cellar/boost/1.88.0/include",
+      "-I",
+      "/opt/homebrew/Cellar/fmt/11.2.0/include",
+      "-I",
+      "/opt/homebrew/Cellar/spdlog/1.15.3/include",
+      "-I",
+      "/usr/local/include",
+      "-include",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h",
+      "-DWT_MKT_SH_A=HUAX_TEST_SH",
+      "-DWT_MKT_SZ_A=HUAX_TEST_SZ",
+      "-DWT_HUAX_PARSER",
+      "-c",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/huax_module_path/path_test.cpp",
+      "-o",
+      "/private/tmp/wt-huax-focused-final/ParserHuaX-test.o"
+    ],
+    "cwd": "/Users/yunjinqi/Documents/new_projects/wondertrader",
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "ParserHuaX-without-spy-compile",
+    "argv": [
+      "/usr/bin/clang++",
+      "-std=c++17",
+      "-O0",
+      "-g",
+      "-DFMT_HEADER_ONLY",
+      "-DSPDLOG_FMT_EXTERNAL",
+      "-I",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src",
+      "-I",
+      "/opt/homebrew/Cellar/boost/1.88.0/include",
+      "-I",
+      "/opt/homebrew/Cellar/fmt/11.2.0/include",
+      "-I",
+      "/opt/homebrew/Cellar/spdlog/1.15.3/include",
+      "-I",
+      "/usr/local/include",
+      "-include",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h",
+      "-I",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/ParserHuaX",
+      "-c",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/ParserHuaX/ParserHuaX.cpp",
+      "-o",
+      "/private/tmp/wt-huax-focused-final/ParserHuaX-production.o"
+    ],
+    "cwd": "/Users/yunjinqi/Documents/new_projects/wondertrader",
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "ParserHuaX-baseline-compile",
+    "argv": [
+      "/usr/bin/clang++",
+      "-std=c++17",
+      "-O0",
+      "-g",
+      "-DFMT_HEADER_ONLY",
+      "-DSPDLOG_FMT_EXTERNAL",
+      "-I",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src",
+      "-I",
+      "/opt/homebrew/Cellar/boost/1.88.0/include",
+      "-I",
+      "/opt/homebrew/Cellar/fmt/11.2.0/include",
+      "-I",
+      "/opt/homebrew/Cellar/spdlog/1.15.3/include",
+      "-I",
+      "/usr/local/include",
+      "-include",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h",
+      "-I",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/ParserHuaX",
+      "-Ddladdr=huax_spy_dladdr",
+      "-Ddlopen=huax_spy_dlopen",
+      "-Ddlsym=huax_spy_dlsym",
+      "-Ddlclose=huax_spy_dlclose",
+      "-c",
+      "/private/tmp/wt-huax-focused-final/baseline/ParserHuaX.cpp",
+      "-o",
+      "/private/tmp/wt-huax-focused-final/ParserHuaX-baseline.o"
+    ],
+    "cwd": "/Users/yunjinqi/Documents/new_projects/wondertrader",
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "ParserHuaX-baseline-link",
+    "argv": [
+      "/usr/bin/clang++",
+      "-Wl,-undefined,dynamic_lookup",
+      "/private/tmp/wt-huax-focused-final/ParserHuaX-baseline.o",
+      "/private/tmp/wt-huax-focused-final/ParserHuaX-test.o",
+      "/opt/homebrew/Cellar/boost/1.88.0/lib/libboost_filesystem.a",
+      "/opt/homebrew/Cellar/boost/1.88.0/lib/libboost_system.a",
+      "/opt/homebrew/Cellar/boost/1.88.0/lib/libboost_thread.a",
+      "-o",
+      "/private/tmp/wt-huax-focused-final/ParserHuaX-baseline"
+    ],
+    "cwd": "/Users/yunjinqi/Documents/new_projects/wondertrader",
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "ParserHuaX-baseline-empty",
+    "argv": [
+      "/private/tmp/wt-huax-focused-final/ParserHuaX-baseline",
+      "empty"
+    ],
+    "cwd": "/private/tmp/wt-huax-focused-final/ParserHuaX-baseline-empty",
+    "exit": 2,
+    "expected": 2
+  },
+  {
+    "name": "ParserHuaX-baseline-default",
+    "argv": [
+      "/private/tmp/wt-huax-focused-final/ParserHuaX-baseline",
+      "default"
+    ],
+    "cwd": "/private/tmp/wt-huax-focused-final/ParserHuaX-baseline-default",
+    "exit": 2,
+    "expected": 2
+  },
+  {
+    "name": "ParserHuaX-baseline-good",
+    "argv": [
+      "/private/tmp/wt-huax-focused-final/ParserHuaX-baseline",
+      "good"
+    ],
+    "cwd": "/private/tmp/wt-huax-focused-final/ParserHuaX-baseline-good",
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "ParserHuaX-baseline-absolute",
+    "argv": [
+      "/private/tmp/wt-huax-focused-final/ParserHuaX-baseline",
+      "absolute"
+    ],
+    "cwd": "/private/tmp/wt-huax-focused-final/ParserHuaX-baseline-absolute",
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "ParserHuaX-current-compile",
+    "argv": [
+      "/usr/bin/clang++",
+      "-std=c++17",
+      "-O0",
+      "-g",
+      "-DFMT_HEADER_ONLY",
+      "-DSPDLOG_FMT_EXTERNAL",
+      "-I",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src",
+      "-I",
+      "/opt/homebrew/Cellar/boost/1.88.0/include",
+      "-I",
+      "/opt/homebrew/Cellar/fmt/11.2.0/include",
+      "-I",
+      "/opt/homebrew/Cellar/spdlog/1.15.3/include",
+      "-I",
+      "/usr/local/include",
+      "-include",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h",
+      "-I",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/ParserHuaX",
+      "-Ddladdr=huax_spy_dladdr",
+      "-Ddlopen=huax_spy_dlopen",
+      "-Ddlsym=huax_spy_dlsym",
+      "-Ddlclose=huax_spy_dlclose",
+      "-c",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/ParserHuaX/ParserHuaX.cpp",
+      "-o",
+      "/private/tmp/wt-huax-focused-final/ParserHuaX-current.o"
+    ],
+    "cwd": "/Users/yunjinqi/Documents/new_projects/wondertrader",
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "ParserHuaX-current-link",
+    "argv": [
+      "/usr/bin/clang++",
+      "-Wl,-undefined,dynamic_lookup",
+      "/private/tmp/wt-huax-focused-final/ParserHuaX-current.o",
+      "/private/tmp/wt-huax-focused-final/ParserHuaX-test.o",
+      "/opt/homebrew/Cellar/boost/1.88.0/lib/libboost_filesystem.a",
+      "/opt/homebrew/Cellar/boost/1.88.0/lib/libboost_system.a",
+      "/opt/homebrew/Cellar/boost/1.88.0/lib/libboost_thread.a",
+      "-o",
+      "/private/tmp/wt-huax-focused-final/ParserHuaX-current"
+    ],
+    "cwd": "/Users/yunjinqi/Documents/new_projects/wondertrader",
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "ParserHuaX-current-empty",
+    "argv": [
+      "/private/tmp/wt-huax-focused-final/ParserHuaX-current",
+      "empty"
+    ],
+    "cwd": "/private/tmp/wt-huax-focused-final/ParserHuaX-current-empty",
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "ParserHuaX-current-default",
+    "argv": [
+      "/private/tmp/wt-huax-focused-final/ParserHuaX-current",
+      "default"
+    ],
+    "cwd": "/private/tmp/wt-huax-focused-final/ParserHuaX-current-default",
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "ParserHuaX-current-good",
+    "argv": [
+      "/private/tmp/wt-huax-focused-final/ParserHuaX-current",
+      "good"
+    ],
+    "cwd": "/private/tmp/wt-huax-focused-final/ParserHuaX-current-good",
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "ParserHuaX-current-absolute",
+    "argv": [
+      "/private/tmp/wt-huax-focused-final/ParserHuaX-current",
+      "absolute"
+    ],
+    "cwd": "/private/tmp/wt-huax-focused-final/ParserHuaX-current-absolute",
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "TraderHuaX-test-compile",
+    "argv": [
+      "/usr/bin/clang++",
+      "-std=c++17",
+      "-O0",
+      "-g",
+      "-DFMT_HEADER_ONLY",
+      "-DSPDLOG_FMT_EXTERNAL",
+      "-I",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src",
+      "-I",
+      "/opt/homebrew/Cellar/boost/1.88.0/include",
+      "-I",
+      "/opt/homebrew/Cellar/fmt/11.2.0/include",
+      "-I",
+      "/opt/homebrew/Cellar/spdlog/1.15.3/include",
+      "-I",
+      "/usr/local/include",
+      "-include",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h",
+      "-DWT_MKT_SH_A=HUAX_TEST_SH",
+      "-DWT_MKT_SZ_A=HUAX_TEST_SZ",
+      "-c",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/huax_module_path/path_test.cpp",
+      "-o",
+      "/private/tmp/wt-huax-focused-final/TraderHuaX-test.o"
+    ],
+    "cwd": "/Users/yunjinqi/Documents/new_projects/wondertrader",
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "TraderHuaX-without-spy-compile",
+    "argv": [
+      "/usr/bin/clang++",
+      "-std=c++17",
+      "-O0",
+      "-g",
+      "-DFMT_HEADER_ONLY",
+      "-DSPDLOG_FMT_EXTERNAL",
+      "-I",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src",
+      "-I",
+      "/opt/homebrew/Cellar/boost/1.88.0/include",
+      "-I",
+      "/opt/homebrew/Cellar/fmt/11.2.0/include",
+      "-I",
+      "/opt/homebrew/Cellar/spdlog/1.15.3/include",
+      "-I",
+      "/usr/local/include",
+      "-include",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h",
+      "-I",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/TraderHuaX",
+      "-include",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/huax_module_path/posix_strcpy_compat.hpp",
+      "-c",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/TraderHuaX/TraderHuaX.cpp",
+      "-o",
+      "/private/tmp/wt-huax-focused-final/TraderHuaX-production.o"
+    ],
+    "cwd": "/Users/yunjinqi/Documents/new_projects/wondertrader",
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "TraderHuaX-baseline-compile",
+    "argv": [
+      "/usr/bin/clang++",
+      "-std=c++17",
+      "-O0",
+      "-g",
+      "-DFMT_HEADER_ONLY",
+      "-DSPDLOG_FMT_EXTERNAL",
+      "-I",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src",
+      "-I",
+      "/opt/homebrew/Cellar/boost/1.88.0/include",
+      "-I",
+      "/opt/homebrew/Cellar/fmt/11.2.0/include",
+      "-I",
+      "/opt/homebrew/Cellar/spdlog/1.15.3/include",
+      "-I",
+      "/usr/local/include",
+      "-include",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h",
+      "-I",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/TraderHuaX",
+      "-include",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/huax_module_path/posix_strcpy_compat.hpp",
+      "-Ddladdr=huax_spy_dladdr",
+      "-Ddlopen=huax_spy_dlopen",
+      "-Ddlsym=huax_spy_dlsym",
+      "-Ddlclose=huax_spy_dlclose",
+      "-c",
+      "/private/tmp/wt-huax-focused-final/baseline/TraderHuaX.cpp",
+      "-o",
+      "/private/tmp/wt-huax-focused-final/TraderHuaX-baseline.o"
+    ],
+    "cwd": "/Users/yunjinqi/Documents/new_projects/wondertrader",
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "TraderHuaX-baseline-link",
+    "argv": [
+      "/usr/bin/clang++",
+      "-Wl,-undefined,dynamic_lookup",
+      "/private/tmp/wt-huax-focused-final/TraderHuaX-baseline.o",
+      "/private/tmp/wt-huax-focused-final/TraderHuaX-test.o",
+      "/opt/homebrew/Cellar/boost/1.88.0/lib/libboost_filesystem.a",
+      "/opt/homebrew/Cellar/boost/1.88.0/lib/libboost_system.a",
+      "/opt/homebrew/Cellar/boost/1.88.0/lib/libboost_thread.a",
+      "-o",
+      "/private/tmp/wt-huax-focused-final/TraderHuaX-baseline"
+    ],
+    "cwd": "/Users/yunjinqi/Documents/new_projects/wondertrader",
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "TraderHuaX-baseline-empty",
+    "argv": [
+      "/private/tmp/wt-huax-focused-final/TraderHuaX-baseline",
+      "empty"
+    ],
+    "cwd": "/private/tmp/wt-huax-focused-final/TraderHuaX-baseline-empty",
+    "exit": 2,
+    "expected": 2
+  },
+  {
+    "name": "TraderHuaX-baseline-default",
+    "argv": [
+      "/private/tmp/wt-huax-focused-final/TraderHuaX-baseline",
+      "default"
+    ],
+    "cwd": "/private/tmp/wt-huax-focused-final/TraderHuaX-baseline-default",
+    "exit": 2,
+    "expected": 2
+  },
+  {
+    "name": "TraderHuaX-baseline-good",
+    "argv": [
+      "/private/tmp/wt-huax-focused-final/TraderHuaX-baseline",
+      "good"
+    ],
+    "cwd": "/private/tmp/wt-huax-focused-final/TraderHuaX-baseline-good",
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "TraderHuaX-baseline-absolute",
+    "argv": [
+      "/private/tmp/wt-huax-focused-final/TraderHuaX-baseline",
+      "absolute"
+    ],
+    "cwd": "/private/tmp/wt-huax-focused-final/TraderHuaX-baseline-absolute",
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "TraderHuaX-current-compile",
+    "argv": [
+      "/usr/bin/clang++",
+      "-std=c++17",
+      "-O0",
+      "-g",
+      "-DFMT_HEADER_ONLY",
+      "-DSPDLOG_FMT_EXTERNAL",
+      "-I",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src",
+      "-I",
+      "/opt/homebrew/Cellar/boost/1.88.0/include",
+      "-I",
+      "/opt/homebrew/Cellar/fmt/11.2.0/include",
+      "-I",
+      "/opt/homebrew/Cellar/spdlog/1.15.3/include",
+      "-I",
+      "/usr/local/include",
+      "-include",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h",
+      "-I",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/TraderHuaX",
+      "-include",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/huax_module_path/posix_strcpy_compat.hpp",
+      "-Ddladdr=huax_spy_dladdr",
+      "-Ddlopen=huax_spy_dlopen",
+      "-Ddlsym=huax_spy_dlsym",
+      "-Ddlclose=huax_spy_dlclose",
+      "-c",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/TraderHuaX/TraderHuaX.cpp",
+      "-o",
+      "/private/tmp/wt-huax-focused-final/TraderHuaX-current.o"
+    ],
+    "cwd": "/Users/yunjinqi/Documents/new_projects/wondertrader",
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "TraderHuaX-current-link",
+    "argv": [
+      "/usr/bin/clang++",
+      "-Wl,-undefined,dynamic_lookup",
+      "/private/tmp/wt-huax-focused-final/TraderHuaX-current.o",
+      "/private/tmp/wt-huax-focused-final/TraderHuaX-test.o",
+      "/opt/homebrew/Cellar/boost/1.88.0/lib/libboost_filesystem.a",
+      "/opt/homebrew/Cellar/boost/1.88.0/lib/libboost_system.a",
+      "/opt/homebrew/Cellar/boost/1.88.0/lib/libboost_thread.a",
+      "-o",
+      "/private/tmp/wt-huax-focused-final/TraderHuaX-current"
+    ],
+    "cwd": "/Users/yunjinqi/Documents/new_projects/wondertrader",
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "TraderHuaX-current-empty",
+    "argv": [
+      "/private/tmp/wt-huax-focused-final/TraderHuaX-current",
+      "empty"
+    ],
+    "cwd": "/private/tmp/wt-huax-focused-final/TraderHuaX-current-empty",
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "TraderHuaX-current-default",
+    "argv": [
+      "/private/tmp/wt-huax-focused-final/TraderHuaX-current",
+      "default"
+    ],
+    "cwd": "/private/tmp/wt-huax-focused-final/TraderHuaX-current-default",
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "TraderHuaX-current-good",
+    "argv": [
+      "/private/tmp/wt-huax-focused-final/TraderHuaX-current",
+      "good"
+    ],
+    "cwd": "/private/tmp/wt-huax-focused-final/TraderHuaX-current-good",
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "TraderHuaX-current-absolute",
+    "argv": [
+      "/private/tmp/wt-huax-focused-final/TraderHuaX-current",
+      "absolute"
+    ],
+    "cwd": "/private/tmp/wt-huax-focused-final/TraderHuaX-current-absolute",
+    "exit": 0,
+    "expected": 0
+  }
+]

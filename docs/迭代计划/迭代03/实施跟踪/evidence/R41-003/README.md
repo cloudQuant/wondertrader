@@ -1,0 +1,17 @@
+# BUG-R41-003 WtCore EventNotifier stop flag (local subfix)
+
+Scope: WtCore/EventNotifier only, macOS arm64. Existing pending order/trade captures already use shared_ptr with release deleters; this change preserves those paths. `_stopped` was a plain bool read by the init-created worker and written by the destructor without synchronization. The header now uses `std::atomic<bool>`, with relaxed load/store in the worker and destructor; no other data is published through this flag. This does not add a callback drain or change stop order.
+
+## Build and tests
+
+`bash /tmp/wt-i03-r41-stop/build.sh` compiles current EventNotifier.cpp, WtCore/WtHelper.cpp and r160_event_notifier_test.cpp, plus a physical fake MQ dylib from `src/TestUnits/fixtures/r160_fake_wtmsgque.cpp`; exact commands are in build.sh and build.log. The first link failed for missing `__llvm_profile_runtime` because the two prebuilt libraries were coverage-instrumented; build-first.log is retained. Adding the profile runtime flag to the link produced a successful second build. `libWTSTools.a` and `libWTSUtils.a` were copied from the separate `/tmp/ctpm-i03-build` into an isolated directory; their hashes and the selected current source hashes are in source-before.sha256, and source-check.log confirms they did not change during this build and test. They are not a clean rebuild of all dependencies. No symlink was created; symlinks.log is empty.
+
+`bash /tmp/wt-i03-r41-stop/run.sh`: eight selected R160 cases, each isolated and with 30-second timeout, 8/8 PASS, no selected skip. They include fake plugin ABI, existing async order normal completion, old discard reference control, new last-reference discard and throwing publisher controls, real init-created worker completing a blocked pending order before destructor returns, and the corresponding existing trade discard/throw controls. Individual stdout/XML in runs/. `bash /tmp/wt-i03-r41-stop/repeat.sh`: the init-created worker stop case 10/10 PASS in independent processes. The work guard is explicitly released before destruction in that test; it does not prove shutdown is bounded while other code holds a work guard.
+
+The same type assertion compiled against a temporary copy of the current header with only this atomic field changed back to bool fails as expected (`red-flag-exit.txt` 1, red-flag.log), while the current header passes (`green-flag-exit.txt` 0). This is a compile-time red control, not a dynamic reproduction of the race.
+
+## Sanitizer controls and remaining risk
+
+System Apple clang TSan built a known-race smoke program and an empty main; both processes exited 139 without a report, see tsan-smoke-* and tsan-benign-*. The empty Apple ASan control was terminated by the 20-second alarm (exit 142; asan-benign-*). Therefore neither sanitizer produced usable results here and no TSan/ASan pass or TSan race-red is claimed. The test binary links other non-TSan/ASan static dependencies, and other platforms were not run.
+
+The destructor can still block with an outstanding work guard, callback or publisher, and concurrent notify versus destruction, self-join/reentrant destruction, exception escaping the real worker, plugin drain/unload and bounded shutdown are not established. No SDK, real market connection, full-tree build, full regression or final acceptance was performed. `git diff --check` for the three owned files passed (diff-check.log).

@@ -75,7 +75,7 @@ TEST(r12_session, original_time_is_inverse_of_offset)
 	// 偏移分钟数非 0 时按 -offset 反算
 	EXPECT_EQ(info->originalTime(30), 2130u);
 	EXPECT_EQ(info->originalTime(0), 2100u);
-	EXPECT_EQ(info->originalTime(1400), 2320u);
+	EXPECT_EQ(info->originalTime(1400), 1100u);
 	info->release();
 
 	WTSSessionInfo* zero = WTSSessionInfo::create("S", "S", 0);
@@ -221,7 +221,7 @@ TEST(r12_session, night_session_minute_mapping_with_offset)
 	// 反向映射要还原成原始时间（originalTime 反算偏移）
 	EXPECT_EQ(info->minuteToTime(0), 2100u);
 	EXPECT_EQ(info->minuteToTime(30), 2130u);
-	EXPECT_EQ(info->getTradingMins(), 200u);
+	EXPECT_EQ(info->getTradingMins(), 120u);
 	info->release();
 }
 

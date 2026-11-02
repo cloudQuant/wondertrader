@@ -49,20 +49,21 @@ static std::string make_raw_bar_block(uint16_t version, uint32_t count)
 	hdr->_type = BT_HIS_Day;
 	hdr->_version = version;
 
-	WTSBarStruct* bars = (WTSBarStruct*)(content.data() + sizeof(BlockHeader));
 	for (uint32_t i = 0; i < count; i++)
 	{
-		bars[i].date = 20240101 + i;
-		bars[i].time = 93000 + i;
-		bars[i].open = 100.0 + i;
-		bars[i].high = 110.0 + i;
-		bars[i].low = 90.0 + i;
-		bars[i].close = 105.0 + i;
-		bars[i].settle = 104.0 + i;
-		bars[i].money = 1000.0 + i;
-		bars[i].vol = 10 + i;
-		bars[i].hold = 20 + i;
-		bars[i].add = 30 + i;
+		WTSBarStruct bar{};
+		bar.date = 20240101 + i;
+		bar.time = 93000 + i;
+		bar.open = 100.0 + i;
+		bar.high = 110.0 + i;
+		bar.low = 90.0 + i;
+		bar.close = 105.0 + i;
+		bar.settle = 104.0 + i;
+		bar.money = 1000.0 + i;
+		bar.vol = 10 + i;
+		bar.hold = 20 + i;
+		bar.add = 30 + i;
+		std::memcpy(content.data() + sizeof(BlockHeader) + i * sizeof(bar), &bar, sizeof(bar));
 	}
 	return content;
 }
@@ -149,20 +150,21 @@ static std::string make_old_bar_block(uint32_t count)
 	hdr->_type = BT_HIS_Day;
 	hdr->_version = BLOCK_VERSION_RAW;
 
-	WTSBarStructOld* bars = (WTSBarStructOld*)(content.data() + sizeof(BlockHeader));
 	for (uint32_t i = 0; i < count; i++)
 	{
-		bars[i].date = 20190101 + i;
-		bars[i].time = 80000 + i;
-		bars[i].open = 11.0 + i;
-		bars[i].high = 12.0 + i;
-		bars[i].low = 10.0 + i;
-		bars[i].close = 11.5 + i;
-		bars[i].settle = 11.25 + i;
-		bars[i].money = 2000.0 + i;
-		bars[i].vol = 100 + i;
-		bars[i].hold = 200 + i;
-		bars[i].add = -5 + (int32_t)i;
+		WTSBarStructOld bar{};
+		bar.date = 20190101 + i;
+		bar.time = 80000 + i;
+		bar.open = 11.0 + i;
+		bar.high = 12.0 + i;
+		bar.low = 10.0 + i;
+		bar.close = 11.5 + i;
+		bar.settle = 11.25 + i;
+		bar.money = 2000.0 + i;
+		bar.vol = 100 + i;
+		bar.hold = 200 + i;
+		bar.add = -5 + (int32_t)i;
+		std::memcpy(content.data() + sizeof(BlockHeader) + i * sizeof(bar), &bar, sizeof(bar));
 	}
 	return content;
 }
@@ -197,23 +199,24 @@ static std::string make_old_tick_block(uint32_t count)
 	hdr->_type = BT_HIS_Ticks;
 	hdr->_version = BLOCK_VERSION_RAW;
 
-	WTSTickStructOld* ticks = (WTSTickStructOld*)(content.data() + sizeof(BlockHeader));
 	for (uint32_t i = 0; i < count; i++)
 	{
-		snprintf(ticks[i].exchg, sizeof(ticks[i].exchg), "%s", "SHFE");
-		snprintf(ticks[i].code, sizeof(ticks[i].code), "%s", "rb2210");
-		ticks[i].price = 5000.0 + i;
-		ticks[i].open = 4990.0 + i;
-		ticks[i].high = 5010.0 + i;
-		ticks[i].low = 4980.0 + i;
-		ticks[i].settle_price = 5005.0 + i;
-		ticks[i].total_volume = 1000 + i;
-		ticks[i].volume = 10 + i;
-		ticks[i].open_interest = 20000 + i;
-		ticks[i].trading_date = 20190101 + i;
-		ticks[i].action_date = 20190101 + i;
-		ticks[i].action_time = 93000000 + i;
-		ticks[i].pre_interest = 19000 + i;
+		WTSTickStructOld tick{};
+		snprintf(tick.exchg, sizeof(tick.exchg), "%s", "SHFE");
+		snprintf(tick.code, sizeof(tick.code), "%s", "rb2210");
+		tick.price = 5000.0 + i;
+		tick.open = 4990.0 + i;
+		tick.high = 5010.0 + i;
+		tick.low = 4980.0 + i;
+		tick.settle_price = 5005.0 + i;
+		tick.total_volume = 1000 + i;
+		tick.volume = 10 + i;
+		tick.open_interest = 20000 + i;
+		tick.trading_date = 20190101 + i;
+		tick.action_date = 20190101 + i;
+		tick.action_time = 93000000 + i;
+		tick.pre_interest = 19000 + i;
+		std::memcpy(content.data() + sizeof(BlockHeader) + i * sizeof(tick), &tick, sizeof(tick));
 	}
 	return content;
 }
@@ -288,9 +291,13 @@ TEST_F(P10ProcBlockTest, CmpV2DecompressKeepHeadRewritesRawV2Header)
 	EXPECT_FALSE(hdr.is_old_version());
 	EXPECT_EQ(std::memcmp(hdr._blk_flag, BLK_FLAG, sizeof(hdr._blk_flag)), 0);
 
-	const WTSBarStruct* bars = (const WTSBarStruct*)(content.data() + sizeof(BlockHeader));
+	const char* payload = content.data() + sizeof(BlockHeader);
 	for (uint32_t i = 0; i < count; i++)
-		EXPECT_EQ(bars[i].date, 20250101u + i);
+	{
+		WTSBarStruct bar{};
+		std::memcpy(&bar, payload + i * sizeof(bar), sizeof(bar));
+		EXPECT_EQ(bar.date, 20250101u + i);
+	}
 }
 
 TEST_F(P10ProcBlockTest, CmpV2LengthMismatchesRejectedInChildren)
@@ -430,16 +437,31 @@ TEST_F(P10ProcBlockTest, OldCompressedBarBlockDecompressesAndUpgradesStruct)
 	}
 }
 
-TEST_F(P10ProcBlockTest, IsSessionProceededOnEmptyTable)
+class P10ReadyWriterForSessionTest : public WtDataWriter
 {
-	EXPECT_FALSE(_writer.isSessionProceeded("P10_SESS"));
-	_writer._proc_date["P10_SESS"] = 20240101;
-	EXPECT_FALSE(_writer.isSessionProceeded("P10_UNKNOWN"));
-	// 已记录日期 >= 今天 才算处理过；用确定的过去/未来日期两侧断言
-	_writer._proc_date["P10_OLD"] = 19700101;
-	EXPECT_FALSE(_writer.isSessionProceeded("P10_OLD"));
-	_writer._proc_date["P10_FUTURE"] = 29991231;
-	EXPECT_TRUE(_writer.isSessionProceeded("P10_FUTURE"));
+public:
+	void activateForTest()
+	{
+		StdUniqueLock lock(_accept_mtx);
+		_lifecycle_state = LifecycleState::Ready;
+		_accepting = true;
+	}
+};
+
+TEST_F(P10ProcBlockTest, IsSessionProceededUsesReadyWriterDateState)
+{
+	P10ReadyWriterForSessionTest writer;
+	EXPECT_FALSE(writer.isSessionProceeded("P10_SESS"));
+
+	// 先通过生命周期门禁，再检查空表、缺失项、旧日期和未来日期。
+	writer.activateForTest();
+	EXPECT_FALSE(writer.isSessionProceeded("P10_SESS"));
+	writer._proc_date["P10_SESS"] = 20240101;
+	EXPECT_FALSE(writer.isSessionProceeded("P10_UNKNOWN"));
+	writer._proc_date["P10_OLD"] = 19700101;
+	EXPECT_FALSE(writer.isSessionProceeded("P10_OLD"));
+	writer._proc_date["P10_FUTURE"] = 29991231;
+	EXPECT_TRUE(writer.isSessionProceeded("P10_FUTURE"));
 }
 
 // 崩溃类输入整类收口（缺陷记录见 bugs/p10_storage_writer.md BUG-P10-001/002）。

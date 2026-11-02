@@ -103,6 +103,34 @@ std::string nextUrl()
 		+ "_" + std::to_string(++seq);
 }
 
+#ifndef WT_UFT_LIFECYCLE_FAKE_PLUGIN_PATH
+#error "CoverageTests_uftcore must wire the UFT lifecycle fake plugin"
+#endif
+
+std::string riskFakeTraderLibraryName()
+{
+#if defined(_WIN32)
+	return "N03RiskFakeTrader.dll";
+#elif defined(__APPLE__)
+	return "libN03RiskFakeTrader.dylib";
+#else
+	return "libN03RiskFakeTrader.so";
+#endif
+}
+
+bool stageRiskFakeTrader(const std::filesystem::path& root)
+{
+	const std::filesystem::path source(WT_UFT_LIFECYCLE_FAKE_PLUGIN_PATH);
+	const std::filesystem::path tradersDir = root / "traders";
+	std::error_code ec;
+	std::filesystem::create_directories(tradersDir, ec);
+	if (ec)
+		return false;
+	std::filesystem::copy_file(source, tradersDir / riskFakeTraderLibraryName(),
+		std::filesystem::copy_options::overwrite_existing, ec);
+	return !ec;
+}
+
 WTSVariant* makeNotifierCfg(bool active)
 {
 	WTSVariant* cfg = WTSVariant::createObject();
@@ -347,7 +375,8 @@ TEST(R163UftNotifier, WorkerContinuesAfterPublishHandlerThrows)
 // TraderAdapter.cpp:103-206 + :1857-1968
 TEST(R163UftTrader, InitGuardsAndRiskTotalLimits){
 	q04::TempRoot tmp("r163_risk");
-	q04::FakeTraderApi api;
+	InstDirGuard instDir(tmp.dir().string() + "/");
+	ASSERT_TRUE(stageRiskFakeTrader(tmp.dir()));
 	q04::FakeBaseDataMgr bd;
 	ActionPolicyMgr policy;
 	q04::FakeSink sink;
@@ -367,16 +396,23 @@ TEST(R163UftTrader, InitGuardsAndRiskTotalLimits){
 	WTSVariant* cfg = WTSCfgLoader::load_from_file(riskPath.c_str());
 	ASSERT_NE(nullptr, cfg);
 
-	TraderAdapter adapter;
-	// 162-163: 无 module 字段，风控表装配完成后返回 false
-	EXPECT_FALSE(adapter.init("r163", cfg, &bd, &policy));
-	cfg->release();
-
 	const std::string policyPath = tmp.file("policy.json");
 	writeText(policyPath, q04::policyJsonOpenCloseLimited());
 	ASSERT_TRUE(policy.init(policyPath.c_str()));
 	bd.add("SHFE", "ag", "ag2406");
-	ASSERT_TRUE(adapter.initExt("r163", &api, &bd, &policy));
+
+	TraderAdapter adapter;
+	// 保留无 module 的早退负控，再在失败回滚后补上真实本地假模块，
+	// 让后续限额断言基于一次成功装配的 riskmon 配置。
+	EXPECT_FALSE(adapter.init("r163", cfg, &bd, &policy));
+	const bool moduleAdded = cfg->append("module", "N03RiskFakeTrader");
+	bool retryInitialized = false;
+	if (moduleAdded)
+		retryInitialized = adapter.init("r163", cfg, &bd, &policy);
+	cfg->release();
+	ASSERT_TRUE(moduleAdded);
+	ASSERT_TRUE(retryInitialized);
+
 	adapter.addSink(&sink);
 	ASSERT_TRUE(adapter.run());
 	adapter.onLoginResult(true, "ok", 20240315);

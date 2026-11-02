@@ -628,11 +628,14 @@ ExecuteUnitPtr WtArbiExecuter::getUnit(const char* stdCode, bool bAutoCreate /* 
 	ExecuteUnitPtr unit;
 	auto failCreation = [&](const char* reason) -> ExecuteUnitPtr
 	{
+		const bool failedInitCleanupProven = unit != NULL &&
+			unit->failedInitializationWasSafelyDestroyed();
 		ExecuteUnitPtr mappedUnit;
 		ExecuteUnitPtr retainedUnit = unit;
 		std::deque<UnitLifecycleState::Event> discardedEvents;
 		std::string failureDiagnostic;
 		bool releaseUnstartedDrain = false;
+		bool retrySafe = false;
 		bool initializedUnit = unit != NULL && unit->self() != NULL;
 		{
 			SpinLock lock(_mtx_units);
@@ -652,6 +655,12 @@ ExecuteUnitPtr WtArbiExecuter::getUnit(const char* stdCode, bool bAutoCreate /* 
 		}
 		{
 			std::lock_guard<std::mutex> lock(state->mutex);
+			const bool acceptedHostWork = !state->events.empty() || state->callback_active ||
+				state->callback_drain_started || state->callback_failed || state->result != NULL;
+			retrySafe = failedInitCleanupProven && !initializedUnit && mappedUnit == NULL &&
+				!acceptedHostWork;
+			if (retrySafe)
+				state->side_effects_possible = false;
 			if (initializedUnit)
 				state->retained_unit = retainedUnit;
 			state->result.reset();
@@ -670,10 +679,10 @@ ExecuteUnitPtr WtArbiExecuter::getUnit(const char* stdCode, bool bAutoCreate /* 
 			state->creation_owner = std::thread::id();
 			discardedEvents.swap(state->events);
 		}
-		// The ingress that initiated this creation cannot deliver its event to
-		// an initialized unit, and any startup callbacks queued on this state are
-		// discarded. Keep quiesce incomplete even if the queue itself was empty.
-		_quiesce_incomplete.store(true);
+		// Keep the executor quiesce-incomplete when failed plugin cleanup could
+		// not be proven or this generation had accepted host callback work.
+		if (!retrySafe)
+			_quiesce_incomplete.store(true, std::memory_order_release);
 		if (releaseUnstartedDrain)
 			finishQuiesceDrain();
 		state->condition.notify_all();
@@ -758,7 +767,6 @@ ExecuteUnitPtr WtArbiExecuter::getUnit(const char* stdCode, bool bAutoCreate /* 
 					std::lock_guard<std::mutex> stateLock(state->mutex);
 					state->initial_target_sequence = targetSequence;
 				}
-				UnitLifecycleState::Event targetEvent;
 				const double traderTarget = round(targetIt->second * _scale);
 				targetEvent.callback = [code, traderTarget](ExecuteUnit* target) {
 					target->set_position(code.c_str(), traderTarget);
@@ -1335,42 +1343,69 @@ void WtArbiExecuter::set_position_with_sequence(
 	 *	先要把目标头寸进行组合匹配
 	 */
 	auto real_targets = targets;
-	for(auto& v : _groups)
+	// Only transform the currently defined, unambiguous integer case. Group
+	// direction, fractional quantities, and overlapping groups need an explicit
+	// contract; preserve the caller's targets for those inputs.
+	bool nonnegativeIntegerTargets = true;
+	for (const auto& target : targets)
 	{
-		const CodeGroupPtr& gpInfo = v.second;
-		bool bHit = false;
-		double gpQty = DBL_MAX;
-		for(auto& vi : gpInfo->_items)
+		if (!decimal::ge(target.second, 0.0) || !decimal::eq(target.second, round(target.second)))
 		{
-			double unit = vi.second;
-			auto it = real_targets.find(vi.first);
-			if (it == real_targets.end())
-			{
-				bHit = false;
-				break;
-			}
-			else
-			{
-				bHit = true;
-				//计算最小的组合单位数量
-				gpQty = std::min(gpQty, decimal::mod(it->second, unit));
-			}
+			nonnegativeIntegerTargets = false;
+			break;
 		}
-
-		if(bHit && decimal::gt(gpQty, 0))
+	}
+	if (_groups.size() == 1 && nonnegativeIntegerTargets)
+	{
+		const CodeGroupPtr& gpInfo = _groups.begin()->second;
+		if (gpInfo != nullptr && !gpInfo->_items.empty() &&
+			targets.find(gpInfo->_name) == targets.end() &&
+			gpInfo->_items.find(gpInfo->_name) == gpInfo->_items.end())
 		{
-			real_targets[gpInfo->_name] = gpQty;
-			for (auto& vi : gpInfo->_items)
+			bool bHit = true;
+			double gpQty = DBL_MAX;
+			// Require non-negative integer targets and positive integer member
+			// quantities, so this path never invents fractional or signed lots.
+			for (const auto& item : gpInfo->_items)
 			{
-				double unit = vi.second;
-				real_targets[vi.first] -= gpQty * unit;
+				const double unit = item.second;
+				auto target = targets.find(item.first);
+				if (target == targets.end() || !decimal::gt(unit, 0.0) ||
+					!decimal::eq(unit, round(unit)) || !decimal::ge(target->second, 0.0) ||
+					!decimal::eq(target->second, round(target->second)))
+				{
+					bHit = false;
+					break;
+				}
+				gpQty = std::min(gpQty, target->second / unit);
+			}
+
+			if (bHit && decimal::gt(gpQty, 0.0) && decimal::eq(gpQty, round(gpQty)))
+			{
+				bool integerResiduals = true;
+				for (const auto& item : gpInfo->_items)
+				{
+					const double residual = targets.find(item.first)->second - gpQty * item.second;
+					if (!decimal::ge(residual, 0.0) || !decimal::eq(residual, round(residual)))
+					{
+						integerResiduals = false;
+						break;
+					}
+				}
+
+				if (integerResiduals)
+				{
+					real_targets[gpInfo->_name] = gpQty;
+					for (const auto& item : gpInfo->_items)
+						real_targets[item.first] = targets.find(item.first)->second - gpQty * item.second;
+				}
 			}
 		}
 	}
 
 
 	bool superseded = false;
-	for (auto it = targets.begin(); it != targets.end(); it++)
+	for (auto it = real_targets.begin(); it != real_targets.end(); it++)
 	{
 		const char* stdCode = it->first.c_str();
 		double newVol = it->second;
@@ -1473,7 +1508,7 @@ void WtArbiExecuter::set_position_with_sequence(
 		return;
 
 	//在原来的目标头寸中，但是不在新的目标头寸中，则需要自动设置为0
-	clearMissingTargets(snapshotMissingTargets(targets), targets, batchSequence);
+	clearMissingTargets(snapshotMissingTargets(real_targets), real_targets, batchSequence);
 
 	//如果开启了严格同步，则需要检查通道持仓
 	//如果通道持仓不在管理中，则直接平掉

@@ -1,0 +1,82 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R42CtaPersistTest.MalformedSnapshotsDoNotPublishAnyStateOrSubscriptions
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R42CtaPersistTest
+[ RUN      ] R42CtaPersistTest.MalformedSnapshotsDoNotPublishAnyStateOrSubscriptions
+=================================================================
+==77285==ERROR: AddressSanitizer: container-overflow on address 0x6040000149a7 at pc 0x0001006ce428 bp 0x00016faf3e20 sp 0x00016faf3e18
+READ of size 1 at 0x6040000149a7 thread T0
+    #0 0x0001006ce424 in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__is_long[abi:nqe220108]() const+0x60 (focused-asan:arm64+0x1003c6424)
+    #1 0x0001006ce5f4 in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__get_pointer[abi:nqe220108]() const+0x18 (focused-asan:arm64+0x1003c65f4)
+    #2 0x0001006ce560 in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::data[abi:nqe220108]() const+0x14 (focused-asan:arm64+0x1003c6560)
+    #3 0x0001006ea880 in std::__1::basic_ostream<char, std::__1::char_traits<char>>& std::__1::operator<<[abi:nqe220108]<char, std::__1::char_traits<char>, std::__1::allocator<char>>(std::__1::basic_ostream<char, std::__1::char_traits<char>>&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&)+0x20 (focused-asan:arm64+0x1003e2880)
+    #4 0x0001006f9278 in (anonymous namespace)::r42_write_file(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&)+0x314 (focused-asan:arm64+0x1003f1278)
+    #5 0x00010070a488 in (anonymous namespace)::R42CtaPersistTest_MalformedSnapshotsDoNotPublishAnyStateOrSubscriptions_Test::TestBody()+0x4d08 (focused-asan:arm64+0x100402488)
+    #6 0x000100d98170 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (focused-asan:arm64+0x100a90170)
+    #7 0x000100d980b8 in testing::Test::Run()+0xcc (focused-asan:arm64+0x100a900b8)
+    #8 0x000100d98c98 in testing::TestInfo::Run()+0xd0 (focused-asan:arm64+0x100a90c98)
+    #9 0x000100d9971c in testing::TestSuite::Run()+0x1c4 (focused-asan:arm64+0x100a9171c)
+    #10 0x000100da4b44 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (focused-asan:arm64+0x100a9cb44)
+    #11 0x000100da44f0 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (focused-asan:arm64+0x100a9c4f0)
+    #12 0x000100da4454 in testing::UnitTest::Run()+0x78 (focused-asan:arm64+0x100a9c454)
+    #13 0x000100cd7f50 in main+0x40 (focused-asan:arm64+0x1009cff50)
+    #14 0x00018059bdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+0x6040000149a7 is located 23 bytes inside of 48-byte region [0x604000014990,0x6040000149c0)
+allocated by thread T0 here:
+    #0 0x0001074990e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x00010072e8c4 in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>* std::__1::__libcpp_allocate[abi:nqe220108]<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>(std::__1::__element_count, unsigned long)+0x54 (focused-asan:arm64+0x1004268c4)
+    #2 0x00010072e824 in std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>::allocate[abi:nqe220108](unsigned long)+0x44 (focused-asan:arm64+0x100426824)
+    #3 0x00010072e664 in std::__1::__allocation_result<std::__1::allocator_traits<std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>::pointer, std::__1::allocator_traits<std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>::size_type> std::__1::__allocate_at_least[abi:nqe220108]<std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator_traits<std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>>(std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>&, unsigned long)+0x114 (focused-asan:arm64+0x100426664)
+    #4 0x00010072e054 in std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>::__vallocate[abi:nqe220108](unsigned long)+0x5c (focused-asan:arm64+0x100426054)
+    #5 0x00010072dcec in void std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>::__init_with_size[abi:nqe220108]<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const*, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const*>(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const*, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const*, unsigned long)+0x178 (focused-asan:arm64+0x100425cec)
+    #6 0x00010072daec in std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>::vector[abi:nqe220108](std::initializer_list<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>)+0x1ec (focused-asan:arm64+0x100425aec)
+    #7 0x00010070e124 in std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>::vector[abi:nqe220108](std::initializer_list<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>)+0x28 (focused-asan:arm64+0x100406124)
+    #8 0x00010070a1b0 in (anonymous namespace)::R42CtaPersistTest_MalformedSnapshotsDoNotPublishAnyStateOrSubscriptions_Test::TestBody()+0x4a30 (focused-asan:arm64+0x1004021b0)
+    #9 0x000100d98170 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (focused-asan:arm64+0x100a90170)
+    #10 0x000100d980b8 in testing::Test::Run()+0xcc (focused-asan:arm64+0x100a900b8)
+    #11 0x000100d98c98 in testing::TestInfo::Run()+0xd0 (focused-asan:arm64+0x100a90c98)
+    #12 0x000100d9971c in testing::TestSuite::Run()+0x1c4 (focused-asan:arm64+0x100a9171c)
+    #13 0x000100da4b44 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (focused-asan:arm64+0x100a9cb44)
+    #14 0x000100da44f0 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (focused-asan:arm64+0x100a9c4f0)
+    #15 0x000100da4454 in testing::UnitTest::Run()+0x78 (focused-asan:arm64+0x100a9c454)
+    #16 0x000100cd7f50 in main+0x40 (focused-asan:arm64+0x1009cff50)
+    #17 0x00018059bdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+HINT: if you don't care about these errors you may set ASAN_OPTIONS=detect_container_overflow=0.
+Or if supported by the container library, pass -D__SANITIZER_DISABLE_CONTAINER_OVERFLOW__ to the compiler to disable  instrumentation.
+If you suspect a false positive see also: https://github.com/google/sanitizers/wiki/AddressSanitizerContainerOverflow.
+SUMMARY: AddressSanitizer: container-overflow (focused-asan:arm64+0x1003c6424) in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__is_long[abi:nqe220108]() const+0x60
+Shadow bytes around the buggy address:
+  0x604000014700: fa fa fd fd fd fd fd fd fa fa fd fd fd fd fd fd
+  0x604000014780: fa fa fd fd fd fd fd fd fa fa fd fd fd fd fd fd
+  0x604000014800: fa fa fd fd fd fd fd fd fa fa fd fd fd fd fd fd
+  0x604000014880: fa fa fd fd fd fd fd fd fa fa fd fd fd fd fd fd
+  0x604000014900: fa fa fd fd fd fd fd fd fa fa fd fd fd fd fd fd
+=>0x604000014980: fa fa fc fc[fc]fc fc fc fa fa fa fa fa fa fa fa
+  0x604000014a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x604000014a80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x604000014b00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x604000014b80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x604000014c00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==77285==ABORTING

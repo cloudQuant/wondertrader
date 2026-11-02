@@ -32,6 +32,8 @@
 #include <string>
 
 #include "CTPLoader/TraderSpi.h"
+#include "Includes/WTSVariant.hpp"
+#include "WTSUtils/WTSCfgLoader.h"
 
 USING_NS_WTP;
 
@@ -229,6 +231,32 @@ TEST(t6_ctploader_run, unparsable_inline_yaml_reports_failure_without_throwing)
 	expect_rejected_without_mutation("[unterminated", false);
 }
 
+TEST(t6_ctploader_run, unparsable_yaml_file_reports_failure_without_throwing)
+{
+	TempCfgFile f("t6_ctp_loader_unparsable.yaml", "[unterminated");
+	// .yaml 文件路径必须与内联 YAML 一样将解析异常转成失败状态，且不改全局配置。
+	expect_rejected_without_mutation(f.c_str(), true);
+}
+
+TEST(t6_ctploader_run, valid_yaml_file_without_savepath_is_rejected_without_mutation)
+{
+	TempCfgFile f("t6_ctp_loader_yaml_without_path.yaml", kInlineYamlWithoutSavePath);
+	WTSVariant* parsed = WTSCfgLoader::load_from_file(f.c_str());
+	bool parsedExpectedShape = false;
+	if (parsed != NULL)
+	{
+		WTSVariant* ctp = parsed->get("ctp");
+		WTSVariant* cfg = parsed->get("config");
+		parsedExpectedShape = ctp != NULL && ctp->isObject()
+			&& cfg != NULL && cfg->isObject() && !cfg->has("path");
+		parsed->release();
+	}
+	ASSERT_TRUE(parsedExpectedShape) << "fixture must successfully parse as YAML with only the required path absent";
+
+	// 文件 YAML 已成功解析；缺少必填 path 时在全局提交/加载柜台 API 前受控失败。
+	expect_rejected_without_mutation(f.c_str(), true);
+}
+
 TEST(t6_ctploader_config, invalid_inline_yaml_roots_and_sections_leave_global_state_unchanged)
 {
 	expect_rejected_without_mutation("- item\n", false); // root sequence
@@ -353,8 +381,9 @@ TEST(t6_ctp_loader_names, extract_product_name_handles_empty_null_and_signed_byt
 {
 	EXPECT_EQ("", extractProductName(""));
 	EXPECT_EQ("", extractProductName(NULL));
-	const char signed_byte_name[] = { static_cast<char>(0xFF), '1', '\0' };
-	EXPECT_EQ(std::string(1, static_cast<char>(0xFF)), extractProductName(signed_byte_name));
+	const char signed_byte_name[] = { 'a', static_cast<char>(0xFF), '1', '\0' };
+	EXPECT_EQ(std::string("a") + static_cast<char>(0xFF), extractProductName(signed_byte_name));
+	EXPECT_EQ("沪银", extractProductName("沪银2512"));
 }
 
 /* ------------------------------------------------------------------ */

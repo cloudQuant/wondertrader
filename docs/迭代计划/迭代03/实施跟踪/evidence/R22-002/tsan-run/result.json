@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/tmp/wt-i03-r22-focused/monitor-tsan"
+  ],
+  "cwd": "/tmp/wt-i03-r22-focused/tsan-run",
+  "environment": {
+    "TSAN_OPTIONS": "halt_on_error=1:exitcode=66"
+  },
+  "timeout_seconds": 20,
+  "exit": -6,
+  "tsan_data_race": true,
+  "state_monitor_stop": true,
+  "state_monitor_run": true
+}

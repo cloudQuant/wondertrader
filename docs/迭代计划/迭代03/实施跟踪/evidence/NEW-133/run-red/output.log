@@ -1,0 +1,69 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R23WriterTest.CacheResizeMapFailurePreservesOldCacheAndAllowsRetry
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R23WriterTest
+[ RUN      ] R23WriterTest.CacheResizeMapFailurePreservesOldCacheAndAllowsRetry
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_writer_tick_cache_test.cpp:513: Failure
+Expected equality of these values:
+  _sink->ticks()
+    Which is: 2
+  broadcasts_before
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_writer_tick_cache_test.cpp:514: Failure
+Value of: file_exists(rt_tick_file("rb2211"))
+  Actual: true
+Expected: false
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_writer_tick_cache_test.cpp:515: Failure
+Value of: failure.pending
+  Actual: true
+Expected: false
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_writer_tick_cache_test.cpp:516: Failure
+Value of: failure.retained
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_writer_tick_cache_test.cpp:517: Failure
+Value of: _sink->has_log("Injected mapping failure after extending tick cache file", LL_ERROR)
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_writer_tick_cache_test.cpp:519: Failure
+Expected equality of these values:
+  preserved._capacity
+    Which is: 202
+  2u
+    Which is: 2
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_writer_tick_cache_test.cpp:520: Failure
+Expected equality of these values:
+  preserved._size
+    Which is: 2
+  1u
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_writer_tick_cache_test.cpp:530: Failure
+Value of: w->getCurTick("rb2211", "SHFE") == __null
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_writer_tick_cache_test.cpp:539: Failure
+Expected equality of these values:
+  _sink->ticks()
+    Which is: 3
+  broadcasts_before + 1
+    Which is: 2
+
+[  FAILED  ] R23WriterTest.CacheResizeMapFailurePreservesOldCacheAndAllowsRetry (9 ms)
+[----------] 1 test from R23WriterTest (9 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (9 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R23WriterTest.CacheResizeMapFailurePreservesOldCacheAndAllowsRetry
+
+ 1 FAILED TEST

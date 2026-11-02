@@ -145,7 +145,7 @@ TEST_F(R80ConfigTick, DumpStateUsesMinutePeriodNames)
 		r80::Sink sink;
 		rp.register_sink(&sink, "r80_dump_m5");
 		sink.onInit = [&rp, &sink]() {
-			sink.slice = rp.get_kline_slice("SSE.STK.000001", "m", 5, 1, true);
+			sink.slice = rp.get_kline_slice("SSE.STK.000001", "m", 1, 5, true);
 		};
 		ASSERT_TRUE(rp.prepare());
 		ASSERT_NE(nullptr, sink.slice);

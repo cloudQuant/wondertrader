@@ -149,7 +149,7 @@ TEST(N01ActionPolicy, init_action_name_is_case_insensitive)
         "order": [
             { "action": "OPEN",         "limit": 1 },
             { "action": "Close",        "limit": 2 },
-            { "action": "CLOSESTODAY",  "limit": 3 },
+            { "action": "CLOSETODAY",  "limit": 3 },
             { "action": "closeYeStoday","limit": 4 }
         ]
     }

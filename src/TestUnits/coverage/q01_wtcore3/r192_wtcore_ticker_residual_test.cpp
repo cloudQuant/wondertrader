@@ -32,6 +32,7 @@
 #include <Share/TimeUtils.hpp>
 #include <WTSUtils/WTSCfgLoader.h>
 #include <WtCore/WtCtaEngine.h>
+#include <WtCore/TraderAdapter.h>
 #include <WtCore/WtCtaTicker.h>
 #include <WtCore/WtDtMgr.h>
 #include <WtCore/WtHftEngine.h>
@@ -175,11 +176,14 @@ TEST(R192CtaTicker, RunRollsDateAtMidnight)
     R192Market mkt(0, 0);
     R192Reader reader;
 
+    // The on_schedule task uses this manager; keep it alive through engine.release().
+    TraderAdapterMgr adapterMgr;
     R192CtaEngine engine;
     WTSVariant* cfg = mkt.cfg();
     ASSERT_NE(nullptr, cfg);
     engine.init(cfg, &mkt.bd, &mkt.dm, &mkt.hot, NULL);
     cfg->release();
+    engine.set_adapter_mgr(&adapterMgr);
     engine.set_date_time(20250110, 930, 0);
     engine.set_trading_date(20250110);
 
@@ -194,6 +198,7 @@ TEST(R192CtaTicker, RunRollsDateAtMidnight)
 
     const bool closed = r192_wait_count(reader, 1);
     ticker.stop();
+    engine.release(); // joins all queued fund-refresh tasks before adapterMgr leaves scope
 
     EXPECT_TRUE(closed) << "CTA ticker did not close the 00:00 minute";
     EXPECT_EQ(1u, reader.count.load());
@@ -217,11 +222,14 @@ TEST(R192CtaTicker, RunEndsSessionAtLastMinute)
     R192Market mkt(0, 2359);
     R192Reader reader;
 
+    // The on_schedule task uses this manager; keep it alive through engine.release().
+    TraderAdapterMgr adapterMgr;
     R192CtaEngine engine;
     WTSVariant* cfg = mkt.cfg();
     ASSERT_NE(nullptr, cfg);
     engine.init(cfg, &mkt.bd, &mkt.dm, &mkt.hot, NULL);
     cfg->release();
+    engine.set_adapter_mgr(&adapterMgr);
     engine.set_date_time(20250110, 930, 0);
     engine.set_trading_date(20250110);
 
@@ -236,10 +244,12 @@ TEST(R192CtaTicker, RunEndsSessionAtLastMinute)
 
     const bool closed = r192_wait_count(reader, 1);
     ticker.stop();
+    engine.release(); // joins all queued fund-refresh tasks before adapterMgr leaves scope
 
     EXPECT_TRUE(closed) << "CTA ticker did not close 23:59";
     EXPECT_EQ(2359u, reader.last_time.load());
-    EXPECT_EQ(tickDate, reader.last_end.load());
+    EXPECT_EQ(20250110u, reader.last_end.load());
+    EXPECT_EQ(20250110u, engine.getTradingDate());
     EXPECT_EQ(2359u, engine.get_min_time());
     EXPECT_EQ(1u, engine.session_ends);
 }
@@ -258,11 +268,14 @@ TEST(R192CtaTicker, RunForcedCloseAfterMissedLastMinute)
     R192Market mkt(0, 2359);
     R192Reader reader;
 
+    // The on_schedule task uses this manager; keep it alive through engine.release().
+    TraderAdapterMgr adapterMgr;
     R192CtaEngine engine;
     WTSVariant* cfg = mkt.cfg();
     ASSERT_NE(nullptr, cfg);
     engine.init(cfg, &mkt.bd, &mkt.dm, &mkt.hot, NULL);
     cfg->release();
+    engine.set_adapter_mgr(&adapterMgr);
     // run() 读一次 get_min_time() 作为 offTime，需 >= close(2359)
     engine.set_date_time(20250110, 2359, 0);
     engine.set_trading_date(20250110);
@@ -283,6 +296,7 @@ TEST(R192CtaTicker, RunForcedCloseAfterMissedLastMinute)
 
     const bool forced = r192_wait_count(reader, 2);
     ticker.stop();
+    engine.release(); // joins all queued fund-refresh tasks before adapterMgr leaves scope
 
     EXPECT_TRUE(first) << "CTA ticker did not close 23:58";
     EXPECT_TRUE(forced) << "CTA ticker did not force-close the trading day";

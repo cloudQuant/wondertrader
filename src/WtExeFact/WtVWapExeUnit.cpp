@@ -21,6 +21,7 @@ extern const char* FACT_NAME;
 WtVWapExeUnit::WtVWapExeUnit()
 	:_last_tick(NULL)
 	, _target_pos(0)
+	, _target_pos_valid(false)
 	,_channel_ready(false)
 	,_channel_reconcile_pending(false)
 	,_retry_pending(false)
@@ -246,6 +247,11 @@ void WtVWapExeUnit::init(ExecuteContext * ctx, const char * stdCode, WTSVariant 
 {
 	_init_succeeded = false;
 	_config_valid = false;
+	_target_pos = 0;
+	_target_pos_valid = false;
+	_retry_pending = false;
+	_retry_cancel = false;
+	_retry_after_tick_time = 0;
 	if (_comm_info)
 	{
 		_comm_info->release();
@@ -378,6 +384,13 @@ void WtVWapExeUnit::on_order(uint32_t localid, const char * stdCode, bool /*isBu
 	//如果全部订单已撤销,这个时候一般是遇到要超时撤单（挂单超时） 
 	if (isCanceled && _cancel_cnt == 0)
 	{
+		if (!_target_pos_valid)
+		{
+			_ctx->writeLog(fmt::format("Order {} of {} canceled before a VWAP target was established; retry skipped",
+				localid, stdCode).c_str());
+			return;
+		}
+
 		const double realPos = _ctx->getPosition(stdCode, false);
 		const double targetPos = get_real_target(_target_pos);
 		if (!decimal::eq(realPos, targetPos))
@@ -414,6 +427,7 @@ void WtVWapExeUnit::reconcile_channel_ready()
 	double undone = _ctx->getUndoneQty(_code.c_str());
 	if (!decimal::eq(undone, 0) && !_orders_mon.has_order())
 	{//未完成单不在监控中，撤单
+		if (!wtRunIfNoUnverifiedTimeout(_orders_mon, [this, undone]() {
 		/*
 		 *	如果未完成单不为0，而OMS没有订单
 		 *	这说明有未完成单不在监控之中,全部撤销掉
@@ -428,6 +442,8 @@ void WtVWapExeUnit::reconcile_channel_ready()
 		_cancel_cnt += ids.size();
 
 		_ctx->writeLog(fmtutil::format("[{}@{}]cancelcnt -> {}", __FILE__, __LINE__, _cancel_cnt));
+		}))
+			_ctx->writeLog(fmt::format("Unmanaged-order cancellation for {} suppressed after an unverified timeout", _code).c_str());
 	}
 	else if (decimal::eq(undone, 0) && _orders_mon.has_order())
 	{	/*
@@ -645,7 +661,7 @@ void WtVWapExeUnit::do_calc()
 {
 	if (_orders_mon.has_unverified_timeout())
 		return;
-	if (!_config_valid || !_valid_tick_dispatch)
+	if (!_config_valid || !_valid_tick_dispatch || !_target_pos_valid)
 		return;
 
 	CalcFlag flag(&_in_calc);
@@ -845,7 +861,7 @@ void WtVWapExeUnit::fire_at_once(double qty)
 		targetPx = curTick->price();
 	}
 	else if (_price_mode == 1) {
-		targetPx = isBuy ? curTick->askprice(0) : curTick->bidprice(0);
+		targetPx = isBuy ? curTick->bidprice(0) : curTick->askprice(0);
 	}
 	else // if(_price_mode == 2)
 	{
@@ -890,10 +906,11 @@ void WtVWapExeUnit::set_position(const char * stdCode, double newVol)
 	if (_code.compare(stdCode) != 0)
 		return;
 
-	if (decimal::eq(newVol, _target_pos))
+	if (_target_pos_valid && decimal::eq(newVol, _target_pos))
 		return;
 	
 	_target_pos = newVol;
+	_target_pos_valid = true;
 	
 	_fired_times = 0;//已执行次数
 	_last_fire_session_time_ms = 0;

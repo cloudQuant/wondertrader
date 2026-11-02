@@ -1,0 +1,14 @@
+--- /tmp/wt-i03-r60-lifecycle/baseline/TraderMocker.h	2026-11-01 23:00:34
++++ src/TraderMocker/TraderMocker.h	2026-11-01 23:19:15
+@@ -53,6 +53,11 @@
+ private:
+ 	StdThreadPtr	_thrd_match;
+ 	std::atomic<bool>	_terminated;
++	// Serializes stop admission with each request's retain and post. Once
++	// released, this instance cannot be restarted until old work has an
++	// ownership-safe generation boundary.
++	std::mutex		_request_mutex;
++	bool			_requests_closed = false;
+ 
+ 	StdUniqueMutex		_mutex_api;
+ 

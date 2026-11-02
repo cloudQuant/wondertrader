@@ -197,10 +197,12 @@ TEST_F(R84bStateMonitorPositiveOffsetTest, PositiveOffsetMultipleCommoditiesShar
 	ASSERT_FALSE(_bdMgr.isTradingDate("POS.aa", today));
 	ASSERT_FALSE(_bdMgr.isTradingDate("POS.bb", today));
 
-	_bdMgr.setTradingDate("POS.aa", 20200101, false);
-	_bdMgr.setTradingDate("POS.bb", 20200102, false);
-	ASSERT_EQ(_bdMgr.getTradingDate("POS.aa"), 20200101u);
-	ASSERT_EQ(_bdMgr.getTradingDate("POS.bb"), 20200102u);
+	// Both commodities use POS60_H, so their trading-date cache is shared.
+	constexpr uint32_t sentinelDate = 20200101;
+	_bdMgr.setTradingDate("POS.aa", sentinelDate, false);
+	_bdMgr.setTradingDate("POS.bb", sentinelDate, false);
+	ASSERT_EQ(_bdMgr.getTradingDate("POS.aa"), sentinelDate);
+	ASSERT_EQ(_bdMgr.getTradingDate("POS.bb"), sentinelDate);
 
 	StateMonitor mon;
 	fs::path cfg = initCfg(R"JSON({
@@ -211,8 +213,10 @@ TEST_F(R84bStateMonitorPositiveOffsetTest, PositiveOffsetMultipleCommoditiesShar
 	EXPECT_TRUE(mon.isInState("POS60", SS_ORIGINAL));
 	EXPECT_TRUE(mon.isAllInState(SS_ORIGINAL));
 	EXPECT_FALSE(mon.isInState("POS120", SS_ORIGINAL));
-	EXPECT_NE(_bdMgr.getTradingDate("POS.aa"), 20200101u);
-	EXPECT_NE(_bdMgr.getTradingDate("POS.bb"), 20200102u);
+	const uint32_t aaTradingDate = _bdMgr.getTradingDate("POS.aa");
+	const uint32_t bbTradingDate = _bdMgr.getTradingDate("POS.bb");
+	EXPECT_EQ(aaTradingDate, bbTradingDate);
+	EXPECT_NE(aaTradingDate, sentinelDate);
 }
 
 // StateMonitor.cpp:56-135 —— 两个正向偏移会话各自独立的节假日模板：

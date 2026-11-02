@@ -16,13 +16,11 @@
 
 #include <exception>
 #include <memory>
+#include <stdexcept>
 #include <rapidjson/document.h>
 namespace rj = rapidjson;
 
-// RT HFT blocks keep the last slot open while the writer may still be updating it.
-// The reader therefore only exposes the first (_size - 1) records. Resolve the
-// inclusive end of a requested range without dereferencing that open slot and
-// without decrementing begin() when etime precedes the first visible record.
+// Compare HFT records by their action timestamp.
 template <typename T>
 static bool hft_time_less(const T& lhs, const T& rhs)
 {
@@ -37,7 +35,8 @@ static bool find_rt_hft_end_index(T* items, std::size_t count, const T& end, std
 	if (items == NULL || count == 0)
 		return false;
 
-	// upper_bound keeps every duplicate whose timestamp equals the inclusive end.
+	// `count` is the caller-provided range. upper_bound includes duplicates at the
+	// requested endpoint; return false rather than stepping before begin().
 	T* it = std::upper_bound(items, items + count, end, [](const T& value, const T& item) {
 		return hft_time_less(value, item);
 	});
@@ -62,6 +61,50 @@ inline void pipe_rdmreader_log(IRdmDtReaderSink* sink, WTSLogLevel ll, const cha
 
 	sink->reader_log(ll, buffer);
 }
+
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+namespace
+{
+thread_local wtp::RdmDtReaderBufferRebuildHook g_rdm_dt_reader_buffer_rebuild_hook = nullptr;
+thread_local uint16_t g_rdm_dt_reader_transform_failure_type = 0;
+thread_local wtp::RdmDtReaderTransformFailureStage g_rdm_dt_reader_transform_failure_stage =
+	wtp::RdmDtReaderTransformFailureStage::None;
+}
+
+void wtp::setRdmDtReaderBufferRebuildHook(wtp::RdmDtReaderBufferRebuildHook hook)
+{
+	g_rdm_dt_reader_buffer_rebuild_hook = hook;
+}
+
+void wtp::setRdmDtReaderTransformFailure(uint16_t blockType,
+	wtp::RdmDtReaderTransformFailureStage stage)
+{
+	g_rdm_dt_reader_transform_failure_type = blockType;
+	g_rdm_dt_reader_transform_failure_stage = stage;
+}
+
+static void maybe_fail_rdm_dt_reader_transform(uint16_t blockType,
+	wtp::RdmDtReaderTransformFailureStage stage)
+{
+	if (g_rdm_dt_reader_transform_failure_type == blockType
+		&& g_rdm_dt_reader_transform_failure_stage == stage)
+	{
+		g_rdm_dt_reader_transform_failure_type = 0;
+		g_rdm_dt_reader_transform_failure_stage = wtp::RdmDtReaderTransformFailureStage::None;
+		throw std::runtime_error("injected RDM block transform failure");
+	}
+}
+
+static void notify_rdm_dt_reader_buffer_rebuilt(uint16_t blockType,
+	uintptr_t oldDataAddress, uintptr_t newDataAddress,
+	std::size_t oldCapacity, std::size_t newCapacity, std::size_t rebuiltSize,
+	uint16_t rebuiltVersion)
+{
+	if (g_rdm_dt_reader_buffer_rebuild_hook != nullptr)
+		g_rdm_dt_reader_buffer_rebuild_hook(blockType, oldDataAddress, newDataAddress,
+			oldCapacity, newCapacity, rebuiltSize, rebuiltVersion);
+}
+#endif
 
 extern "C"
 {
@@ -639,12 +682,26 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByRange(const char* stdCode, uint64_t 
 			eTick.action_time = sInfo->getCloseTime() * 100000 + 59999;
 		}
 
-		// The final RT slot remains writer-owned. Resolve the inclusive range end
-		// among committed records, retaining every duplicate at etime.
-		std::size_t eIdx = 0;
-		if (!find_rt_hft_end_index(tBlock->_ticks, tBlock->_size - 1, eTick, eIdx))
+		// RTBlockHeader::_size is the number of records written into this block;
+		// use all entries for both the inclusive finite cutoff and latest sentinel.
+		const std::size_t recordCount = tBlock->_size;
+		std::size_t eCount = 0;
+		if (etime == 0)
+		{
+			// A future trading-date start lies beyond the latest current RT snapshot.
+			if (beginTDate > curTDate)
+				break;
+			eCount = recordCount;
+		}
+		else
+		{
+			std::size_t eIdx = 0;
+			if (!find_rt_hft_end_index(tBlock->_ticks, recordCount, eTick, eIdx))
+				break;
+			eCount = eIdx + 1;
+		}
+		if (eCount == 0)
 			break;
-		std::size_t eCount = eIdx + 1;
 
 		if (beginTDate != curTDate)
 		{
@@ -766,26 +823,71 @@ WTSOrdQueSlice* WtRdmDtReader::readOrdQueSliceByRange(const char* stdCode, uint6
 			if (hisBlkPair._buffer.size() < sizeof(HisOrdQueBlockV2))
 			{
 				pipe_rdmreader_log(_sink, LL_ERROR, "Sizechecking of orderqueue data file {} failed", filename.c_str());
-				hisBlkPair._buffer.clear();
+				_his_ordque_map.erase(key);
 				return NULL;
 			}
 
 			HisOrdQueBlockV2* tBlockV2 = (HisOrdQueBlockV2*)hisBlkPair._buffer.data();
 
-			if (hisBlkPair._buffer.size() != (sizeof(HisOrdQueBlockV2) + tBlockV2->_size))
+			const std::size_t queue_header_size = sizeof(HisOrdQueBlockV2);
+			if (hisBlkPair._buffer.size() < queue_header_size
+				|| tBlockV2->_size != hisBlkPair._buffer.size() - queue_header_size)
 			{
 				pipe_rdmreader_log(_sink, LL_ERROR, "Sizechecking of orderqueue data file {} failed", filename.c_str());
+				_his_ordque_map.erase(key);
 				return NULL;
 			}
 
-			//需要解压
-			std::string buf = WTSCmpHelper::uncompress_data(tBlockV2->_data, (std::size_t)tBlockV2->_size);
+			//需要解压；畸形 zstd frame 可能在 helper 中抛异常，不能越过 reader 接口。
+			std::string buf;
+			try
+			{
+				buf = WTSCmpHelper::uncompress_data(tBlockV2->_data, (std::size_t)tBlockV2->_size);
+			}
+			catch (const std::exception& e)
+			{
+				pipe_rdmreader_log(_sink, LL_ERROR, "Uncompressing orderqueue data file {} failed: {}", filename.c_str(), e.what());
+				_his_ordque_map.erase(key);
+				return NULL;
+			}
+			if (buf.size() % sizeof(WTSOrdQueStruct) != 0)
+			{
+				pipe_rdmreader_log(_sink, LL_ERROR, "Uncompressed orderqueue data file {} has an incomplete record", filename.c_str());
+				_his_ordque_map.erase(key);
+				return NULL;
+			}
 
 			//将原来的buffer只保留一个头部,并将所有tick数据追加到尾部
 			//先改头版本，后续 resize/append 可能重分配并使 tBlockV2 失效。
-			tBlockV2->_version = BLOCK_VERSION_RAW;
-			hisBlkPair._buffer.resize(sizeof(HisOrdQueBlock));
-			hisBlkPair._buffer.append(buf);
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+			const uintptr_t oldDataAddress = (uintptr_t)hisBlkPair._buffer.data();
+			const std::size_t oldCapacity = hisBlkPair._buffer.capacity();
+#endif
+			try
+			{
+				tBlockV2->_version = BLOCK_VERSION_RAW;
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+				maybe_fail_rdm_dt_reader_transform(BT_HIS_OrdQueue,
+					wtp::RdmDtReaderTransformFailureStage::BeforeResize);
+#endif
+				hisBlkPair._buffer.resize(sizeof(HisOrdQueBlock));
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+				maybe_fail_rdm_dt_reader_transform(BT_HIS_OrdQueue,
+					wtp::RdmDtReaderTransformFailureStage::BeforeAppend);
+#endif
+				hisBlkPair._buffer.append(buf);
+			}
+			catch (const std::exception& e)
+			{
+				pipe_rdmreader_log(_sink, LL_ERROR, "Rebuilding orderqueue data file {} failed: {}", filename.c_str(), e.what());
+				_his_ordque_map.erase(key);
+				return NULL;
+			}
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+			notify_rdm_dt_reader_buffer_rebuilt(BT_HIS_OrdQueue, oldDataAddress,
+				(uintptr_t)hisBlkPair._buffer.data(), oldCapacity, hisBlkPair._buffer.capacity(),
+				hisBlkPair._buffer.size(), ((const BlockHeader*)hisBlkPair._buffer.data())->_version);
+#endif
 
 			hisBlkPair._block = (HisOrdQueBlock*)hisBlkPair._buffer.c_str();
 		}
@@ -922,26 +1024,71 @@ WTSOrdDtlSlice* WtRdmDtReader::readOrdDtlSliceByRange(const char* stdCode, uint6
 			if (hisBlkPair._buffer.size() < sizeof(HisOrdDtlBlockV2))
 			{
 				pipe_rdmreader_log(_sink, LL_ERROR, "Sizechecking of orderdetail data file {} failed", filename.c_str());
-				hisBlkPair._buffer.clear();
+				_his_orddtl_map.erase(key);
 				return NULL;
 			}
 
 			HisOrdDtlBlockV2* tBlockV2 = (HisOrdDtlBlockV2*)hisBlkPair._buffer.data();
 
-			if (hisBlkPair._buffer.size() != (sizeof(HisOrdDtlBlockV2) + tBlockV2->_size))
+			const std::size_t detail_header_size = sizeof(HisOrdDtlBlockV2);
+			if (hisBlkPair._buffer.size() < detail_header_size
+				|| tBlockV2->_size != hisBlkPair._buffer.size() - detail_header_size)
 			{
 				pipe_rdmreader_log(_sink, LL_ERROR, "Sizechecking of orderdetail data file {} failed", filename.c_str());
+				_his_orddtl_map.erase(key);
 				return NULL;
 			}
 
-			//需要解压
-			std::string buf = WTSCmpHelper::uncompress_data(tBlockV2->_data, (std::size_t)tBlockV2->_size);
+			//需要解压；畸形 zstd frame 可能在 helper 中抛异常，不能越过 reader 接口。
+			std::string buf;
+			try
+			{
+				buf = WTSCmpHelper::uncompress_data(tBlockV2->_data, (std::size_t)tBlockV2->_size);
+			}
+			catch (const std::exception& e)
+			{
+				pipe_rdmreader_log(_sink, LL_ERROR, "Uncompressing orderdetail data file {} failed: {}", filename.c_str(), e.what());
+				_his_orddtl_map.erase(key);
+				return NULL;
+			}
+			if (buf.size() % sizeof(WTSOrdDtlStruct) != 0)
+			{
+				pipe_rdmreader_log(_sink, LL_ERROR, "Uncompressed orderdetail data file {} has an incomplete record", filename.c_str());
+				_his_orddtl_map.erase(key);
+				return NULL;
+			}
 
 			//将原来的buffer只保留一个头部,并将所有tick数据追加到尾部
 			//先改头版本，后续 resize/append 可能重分配并使 tBlockV2 失效。
-			tBlockV2->_version = BLOCK_VERSION_RAW;
-			hisBlkPair._buffer.resize(sizeof(HisOrdDtlBlock));
-			hisBlkPair._buffer.append(buf);
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+			const uintptr_t oldDataAddress = (uintptr_t)hisBlkPair._buffer.data();
+			const std::size_t oldCapacity = hisBlkPair._buffer.capacity();
+#endif
+			try
+			{
+				tBlockV2->_version = BLOCK_VERSION_RAW;
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+				maybe_fail_rdm_dt_reader_transform(BT_HIS_OrdDetail,
+					wtp::RdmDtReaderTransformFailureStage::BeforeResize);
+#endif
+				hisBlkPair._buffer.resize(sizeof(HisOrdDtlBlock));
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+				maybe_fail_rdm_dt_reader_transform(BT_HIS_OrdDetail,
+					wtp::RdmDtReaderTransformFailureStage::BeforeAppend);
+#endif
+				hisBlkPair._buffer.append(buf);
+			}
+			catch (const std::exception& e)
+			{
+				pipe_rdmreader_log(_sink, LL_ERROR, "Rebuilding orderdetail data file {} failed: {}", filename.c_str(), e.what());
+				_his_orddtl_map.erase(key);
+				return NULL;
+			}
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+			notify_rdm_dt_reader_buffer_rebuilt(BT_HIS_OrdDetail, oldDataAddress,
+				(uintptr_t)hisBlkPair._buffer.data(), oldCapacity, hisBlkPair._buffer.capacity(),
+				hisBlkPair._buffer.size(), ((const BlockHeader*)hisBlkPair._buffer.data())->_version);
+#endif
 
 			hisBlkPair._block = (HisOrdDtlBlock*)hisBlkPair._buffer.c_str();
 		}
@@ -1077,26 +1224,71 @@ WTSTransSlice* WtRdmDtReader::readTransSliceByRange(const char* stdCode, uint64_
 			if (hisBlkPair._buffer.size() < sizeof(HisTransBlockV2))
 			{
 				pipe_rdmreader_log(_sink, LL_ERROR, "Sizechecking of transaction data file {} failed", filename.c_str());
-				hisBlkPair._buffer.clear();
+				_his_trans_map.erase(key);
 				return NULL;
 			}
 
 			HisTransBlockV2* tBlockV2 = (HisTransBlockV2*)hisBlkPair._buffer.data();
 
-			if (hisBlkPair._buffer.size() != (sizeof(HisTransBlockV2) + tBlockV2->_size))
+			const std::size_t trans_header_size = sizeof(HisTransBlockV2);
+			if (hisBlkPair._buffer.size() < trans_header_size
+				|| tBlockV2->_size != hisBlkPair._buffer.size() - trans_header_size)
 			{
 				pipe_rdmreader_log(_sink, LL_ERROR, "Sizechecking of transaction data file {} failed", filename.c_str());
+				_his_trans_map.erase(key);
 				return NULL;
 			}
 
-			//需要解压
-			std::string buf = WTSCmpHelper::uncompress_data(tBlockV2->_data, (std::size_t)tBlockV2->_size);
+			//需要解压；畸形 zstd frame 可能在 helper 中抛异常，不能越过 reader 接口。
+			std::string buf;
+			try
+			{
+				buf = WTSCmpHelper::uncompress_data(tBlockV2->_data, (std::size_t)tBlockV2->_size);
+			}
+			catch (const std::exception& e)
+			{
+				pipe_rdmreader_log(_sink, LL_ERROR, "Uncompressing transaction data file {} failed: {}", filename.c_str(), e.what());
+				_his_trans_map.erase(key);
+				return NULL;
+			}
+			if (buf.size() % sizeof(WTSTransStruct) != 0)
+			{
+				pipe_rdmreader_log(_sink, LL_ERROR, "Uncompressed transaction data file {} has an incomplete record", filename.c_str());
+				_his_trans_map.erase(key);
+				return NULL;
+			}
 
 			//将原来的buffer只保留一个头部,并将所有tick数据追加到尾部
 			//先改头版本，后续 resize/append 可能重分配并使 tBlockV2 失效。
-			tBlockV2->_version = BLOCK_VERSION_RAW;
-			hisBlkPair._buffer.resize(sizeof(HisTransBlock));
-			hisBlkPair._buffer.append(buf);
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+			const uintptr_t oldDataAddress = (uintptr_t)hisBlkPair._buffer.data();
+			const std::size_t oldCapacity = hisBlkPair._buffer.capacity();
+#endif
+			try
+			{
+				tBlockV2->_version = BLOCK_VERSION_RAW;
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+				maybe_fail_rdm_dt_reader_transform(BT_HIS_Trnsctn,
+					wtp::RdmDtReaderTransformFailureStage::BeforeResize);
+#endif
+				hisBlkPair._buffer.resize(sizeof(HisTransBlock));
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+				maybe_fail_rdm_dt_reader_transform(BT_HIS_Trnsctn,
+					wtp::RdmDtReaderTransformFailureStage::BeforeAppend);
+#endif
+				hisBlkPair._buffer.append(buf);
+			}
+			catch (const std::exception& e)
+			{
+				pipe_rdmreader_log(_sink, LL_ERROR, "Rebuilding transaction data file {} failed: {}", filename.c_str(), e.what());
+				_his_trans_map.erase(key);
+				return NULL;
+			}
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+			notify_rdm_dt_reader_buffer_rebuilt(BT_HIS_Trnsctn, oldDataAddress,
+				(uintptr_t)hisBlkPair._buffer.data(), oldCapacity, hisBlkPair._buffer.capacity(),
+				hisBlkPair._buffer.size(), ((const BlockHeader*)hisBlkPair._buffer.data())->_version);
+#endif
 
 			hisBlkPair._block = (HisTransBlock*)hisBlkPair._buffer.c_str();
 		}
@@ -1156,6 +1348,7 @@ bool WtRdmDtReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key,
 	default: pname = "day"; break;
 	}
 
+	const bool hadBarsCacheEntry = _bars_cache.find(key) != _bars_cache.end();
 	BarsList& barList = _bars_cache[key];
 	barList._code = stdCode;
 	barList._period = period;
@@ -1170,6 +1363,7 @@ bool WtRdmDtReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key,
 	};
 
 	uint32_t realCnt = 0;
+	bool shortAdjustedFile = false;
 	const char* ruleTag = cInfo->_ruletag;
 	if (strlen(ruleTag) > 0)//如果是读取期货主力连续数据
 	{
@@ -1391,6 +1585,12 @@ bool WtRdmDtReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key,
 
 			std::string content;
 			StdFile::read_file_content(filename.c_str(), content);
+			if (content.size() < sizeof(HisKlineBlock))
+			{
+				pipe_rdmreader_log(_sink, LL_ERROR, "Sizechecking of his kline data file {} failed", filename.c_str());
+				shortAdjustedFile = true;
+				break;
+			}
 			// Legacy adjusted files may contain a header-only CMP block to mark
 			// an empty layer. Preserve this sentinel only on this direct-read path;
 			// all other compressed blocks must pass normal payload validation.
@@ -1599,6 +1799,13 @@ bool WtRdmDtReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key,
 				barsSections.emplace_back(tempAy);
 			}
 		}
+	}
+
+	if (shortAdjustedFile && !hadBarsCacheEntry && realCnt == 0)
+	{
+		releaseBarsSections();
+		_bars_cache.erase(key);
+		return false;
 	}
 
 	if (realCnt > 0)
@@ -1884,47 +2091,54 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByRange(const char* stdCode, WTSKlin
 			if (kPair != NULL)
 			{
 				StdUniqueLock lock(*kPair->_mtx);
-				//读取当日的数据
-				WTSBarStruct* pBar = std::lower_bound(kPair->_block->_bars, kPair->_block->_bars + (kPair->_block->_size - 1), eBar, [isDay](const WTSBarStruct& a, const WTSBarStruct& b) {
-					if (isDay)
-						return a.date < b.date;
-					else
-						return a.time < b.time;
-				});
-				std::size_t idx = pBar - kPair->_block->_bars;
-				if ((isDay && pBar->date > eBar.date) || (!isDay && pBar->time > eBar.time))
+				if (kPair->_block != NULL && kPair->_block->_size > 0)
 				{
-					pBar--;
-					idx--;
-				}
+					WTSBarStruct* pFirst = &kPair->_block->_bars[0];
+					if ((isDay && pFirst->date <= eBar.date) || (!isDay && pFirst->time <= eBar.time))
+					{
+						//读取当日的数据
+						WTSBarStruct* pBar = std::lower_bound(kPair->_block->_bars, kPair->_block->_bars + (kPair->_block->_size - 1), eBar, [isDay](const WTSBarStruct& a, const WTSBarStruct& b) {
+							if (isDay)
+								return a.date < b.date;
+							else
+								return a.time < b.time;
+						});
+						std::size_t idx = pBar - kPair->_block->_bars;
+						if ((isDay && pBar->date > eBar.date) || (!isDay && pBar->time > eBar.time))
+						{
+							pBar--;
+							idx--;
+						}
 
-				pBar = &kPair->_block->_bars[0];
-				//如果第一条实时K线的时间大于开始日期，则实时K线要全部包含进去
-				if ((isDay && pBar->date > sBar.date) || (!isDay && pBar->time > sBar.time))
-				{
-					rtHead = &kPair->_block->_bars[0];
-					rtCnt = idx + 1;
-				}
-				else
-				{
-					pBar = std::lower_bound(kPair->_block->_bars, kPair->_block->_bars + idx, sBar, [isDay](const WTSBarStruct& a, const WTSBarStruct& b) {
-						if (isDay)
-							return a.date < b.date;
+						pBar = &kPair->_block->_bars[0];
+						//如果第一条实时K线的时间大于开始日期，则实时K线要全部包含进去
+						if ((isDay && pBar->date > sBar.date) || (!isDay && pBar->time > sBar.time))
+						{
+							rtHead = &kPair->_block->_bars[0];
+							rtCnt = idx + 1;
+						}
 						else
-							return a.time < b.time;
-					});
+						{
+							pBar = std::lower_bound(kPair->_block->_bars, kPair->_block->_bars + idx, sBar, [isDay](const WTSBarStruct& a, const WTSBarStruct& b) {
+								if (isDay)
+									return a.date < b.date;
+								else
+									return a.time < b.time;
+							});
 
-					std::size_t sIdx = pBar - kPair->_block->_bars;
-					rtHead = pBar;
-					rtCnt = idx - sIdx + 1;
-					bNeedHisData = false;
+							std::size_t sIdx = pBar - kPair->_block->_bars;
+							rtHead = pBar;
+							rtCnt = idx - sIdx + 1;
+							bNeedHisData = false;
+						}
+					}
 				}
 			}
 		}
 		else
 		{
 			RTKlineBlockPair* kPair = getRTKilneBlock(cInfo._exchg, curCode, period);
-			if (kPair != NULL && kPair->_block->_size > 0)
+			if (kPair != NULL && kPair->_block != NULL && kPair->_block->_size > 0)
 			{
 				//如果是后复权，实时数据是需要单独缓存的，所以这里处理会很复杂
 				BarsList& barsList = _bars_cache[key];
@@ -1956,41 +2170,43 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByRange(const char* stdCode, WTSKlin
 					}
 				}
 
-				//最后做一个定位
-				auto it = std::lower_bound(barsList._rt_bars.begin(), barsList._rt_bars.end(), eBar, [isDay](const WTSBarStruct& a, const WTSBarStruct& b) {
+				//最后做一个定位。etime 是包含式上界，转换成 endCount 后再做索引，
+				//避免 lower_bound 返回 begin/end 时进行指针回退或越界解引用。
+				auto bar_less = [isDay](const WTSBarStruct& a, const WTSBarStruct& b) {
 					if (isDay)
 						return a.date < b.date;
 					else
 						return a.time < b.time;
-				});
-				std::size_t idx = it - barsList._rt_bars.begin();
-				WTSBarStruct* pBar = &barsList._rt_bars[idx];
-				if ((isDay && pBar->date > eBar.date) || (!isDay && pBar->time > eBar.time))
+				};
+				if (!barsList._rt_bars.empty())
 				{
-					pBar--;
-					idx--;
-				}
+					auto first = barsList._rt_bars.begin();
+					auto last = barsList._rt_bars.end();
+					auto endIt = std::lower_bound(first, last, eBar, bar_less);
+					std::size_t endCount = (std::size_t)(endIt - first);
+					if (endIt != last && !bar_less(eBar, *endIt))
+						++endCount;
 
-				pBar = &barsList._rt_bars[0];
-				//如果第一条实时K线的时间大于开始日期，则实时K线要全部包含进去
-				if ((isDay && pBar->date > sBar.date) || (!isDay && pBar->time > sBar.time))
-				{
-					rtHead = &barsList._rt_bars[0];
-					rtCnt = idx + 1;
-				}
-				else
-				{
-					it = std::lower_bound(barsList._rt_bars.begin(), barsList._rt_bars.begin() + idx, sBar, [isDay](const WTSBarStruct& a, const WTSBarStruct& b) {
-						if (isDay)
-							return a.date < b.date;
+					if (endCount > 0)
+					{
+						// stime 早于首根 RT bar 时仍让历史路径补齐此前数据。
+						if (bar_less(sBar, *first))
+						{
+							rtHead = &*first;
+							rtCnt = (uint32_t)endCount;
+						}
 						else
-							return a.time < b.time;
-					});
-
-					std::size_t sIdx = it - barsList._rt_bars.begin();
-					rtHead = &barsList._rt_bars[sIdx];
-					rtCnt = idx - sIdx + 1;
-					bNeedHisData = false;
+						{
+							auto startIt = std::lower_bound(first, first + endCount, sBar, bar_less);
+							std::size_t startIdx = (std::size_t)(startIt - first);
+							if (startIdx < endCount)
+							{
+								rtHead = &*startIt;
+								rtCnt = (uint32_t)(endCount - startIdx);
+								bNeedHisData = false;
+							}
+						}
+					}
 				}
 			}
 		}	
@@ -2309,31 +2525,38 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByCount(const char* stdCode, WTSKlin
 			if (kPair != NULL)
 			{
 				StdUniqueLock lock(*(kPair->_mtx));
-				//读取当日的数据
-				WTSBarStruct* pBar = std::lower_bound(kPair->_block->_bars, kPair->_block->_bars + (kPair->_block->_size - 1), eBar, [isDay](const WTSBarStruct& a, const WTSBarStruct& b) {
-					if (isDay)
-						return a.date < b.date;
-					else
-						return a.time < b.time;
-				});
-				std::size_t idx = pBar - kPair->_block->_bars;
-				if ((isDay && pBar->date > eBar.date) || (!isDay && pBar->time > eBar.time))
+				if (kPair->_block != NULL && kPair->_block->_size > 0)
 				{
-					pBar--;
-					idx--;
-				}
+					WTSBarStruct* pFirst = &kPair->_block->_bars[0];
+					if ((isDay && pFirst->date <= eBar.date) || (!isDay && pFirst->time <= eBar.time))
+					{
+						//读取当日的数据
+						WTSBarStruct* pBar = std::lower_bound(kPair->_block->_bars, kPair->_block->_bars + (kPair->_block->_size - 1), eBar, [isDay](const WTSBarStruct& a, const WTSBarStruct& b) {
+							if (isDay)
+								return a.date < b.date;
+							else
+								return a.time < b.time;
+						});
+						std::size_t idx = pBar - kPair->_block->_bars;
+						if ((isDay && pBar->date > eBar.date) || (!isDay && pBar->time > eBar.time))
+						{
+							pBar--;
+							idx--;
+						}
 
-				//如果第一条实时K线的时间大于开始日期，则实时K线要全部包含进去
-				rtCnt = min((uint32_t)idx + 1, count);
-				std::size_t sIdx = idx + 1 - rtCnt;
-				rtHead = kPair->_block->_bars + sIdx;
-				bNeedHisData = (rtCnt < count);
+						//请求在首根 RT bar 之后时再计算 RT 数量；早于首根时保留历史回退路径。
+						rtCnt = min((uint32_t)idx + 1, count);
+						std::size_t sIdx = idx + 1 - rtCnt;
+						rtHead = kPair->_block->_bars + sIdx;
+						bNeedHisData = (rtCnt < count);
+					}
+				}
 			}
 		}
 		else
 		{
 			RTKlineBlockPair* kPair = getRTKilneBlock(cInfo._exchg, curCode, period);
-			if (kPair != NULL)
+			if (kPair != NULL && kPair->_block != NULL && kPair->_block->_size > 0)
 			{
 				//如果是后复权，实时数据是需要单独缓存的，所以这里处理会很复杂
 				BarsList& barsList = _bars_cache[key];
@@ -2365,26 +2588,31 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByCount(const char* stdCode, WTSKlin
 					}
 				}
 
-				//最后做一个定位
-				auto it = std::lower_bound(barsList._rt_bars.begin(), barsList._rt_bars.end(), eBar, [isDay](const WTSBarStruct& a, const WTSBarStruct& b) {
+				//最后做一个定位。etime 是包含式上界；begin 之前没有 RT 数据，
+				//end 之后则将可用数量限制在缓存实际长度内。
+				auto bar_less = [isDay](const WTSBarStruct& a, const WTSBarStruct& b) {
 					if (isDay)
 						return a.date < b.date;
 					else
 						return a.time < b.time;
-				});
-				std::size_t idx = it - barsList._rt_bars.begin();
-				WTSBarStruct* pBar = &barsList._rt_bars[idx];
-				if ((isDay && pBar->date > eBar.date) || (!isDay && pBar->time > eBar.time))
+				};
+				if (!barsList._rt_bars.empty() && count > 0)
 				{
-					pBar--;
-					idx--;
-				}
+					auto first = barsList._rt_bars.begin();
+					auto last = barsList._rt_bars.end();
+					auto endIt = std::lower_bound(first, last, eBar, bar_less);
+					std::size_t endCount = (std::size_t)(endIt - first);
+					if (endIt != last && !bar_less(eBar, *endIt))
+						++endCount;
 
-				//如果第一条实时K线的时间大于开始日期，则实时K线要全部包含进去
-				rtCnt = min((uint32_t)idx + 1, count);
-				std::size_t sIdx = idx + 1 - rtCnt;
-				rtHead = &barsList._rt_bars[sIdx];
-				bNeedHisData = (rtCnt < count);
+					if (endCount > 0)
+					{
+						rtCnt = min((uint32_t)endCount, count);
+						std::size_t startIdx = endCount - rtCnt;
+						rtHead = &barsList._rt_bars[startIdx];
+						bNeedHisData = (rtCnt < count);
+					}
+				}
 			}
 		}
 	}

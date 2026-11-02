@@ -14,6 +14,8 @@
 
 #include <cstring>
 #include <filesystem>
+#include <functional>
+#include <stdexcept>
 #include <string>
 #include <thread>
 #include <vector>
@@ -79,7 +81,12 @@ namespace
 	{
 	public:
 		IBaseDataMgr* getBaseDataMgr() override { return &bd_; }
-		void handleEvent(WTSTraderEvent e, int32_t ec) override { events.push_back({ (int)e, ec }); }
+		void handleEvent(WTSTraderEvent e, int32_t ec) override
+		{
+			events.push_back({ (int)e, ec });
+			if (on_event)
+				on_event(e);
+		}
 		void handleTraderLog(WTSLogLevel, const char* message) override
 		{
 			logs.push_back(message ? message : "");
@@ -87,6 +94,8 @@ namespace
 		void onLoginResult(bool succ, const char* msg, uint32_t date) override
 		{
 			logins.push_back({ succ, msg ? msg : "", date });
+			if (on_login_result)
+				on_login_result(succ);
 		}
 		void onLogout() override { ++n_logout_; }
 
@@ -96,6 +105,8 @@ namespace
 		std::vector<std::pair<int, int32_t>> events;
 		std::vector<std::string> logs;
 		std::vector<LoginRec> logins;
+		std::function<void(WTSTraderEvent)> on_event;
+		std::function<void(bool)> on_login_result;
 		int n_logout_ = 0;
 	};
 
@@ -103,13 +114,21 @@ namespace
 	{
 	public:
 		void setApi(CUstpFtdcTraderApi* api) { m_pUserAPI = api; }
+		CUstpFtdcTraderApi* api() const { return m_pUserAPI; }
+		CUstpFtdcTraderApi* createFromFactory() { return m_funcCreator == NULL ? NULL : m_funcCreator(""); }
+		bool hasModule() const { return m_hInstCTP != NULL; }
+		bool hasCreator() const { return m_funcCreator != NULL; }
+		bool workerNull() const { return m_thrdWorker == NULL; }
 		void setState(WrapperState state) { m_wrapperState = state; }
+		void setQryOnline(bool value) { m_bQryOnline = value; }
 		void setStrand(boost::asio::io_context::strand* strand) { m_strandIO = strand; }
 		void setLastQueryTime(uint64_t value) { m_lastQryTime = value; }
 		void setFactory(CUstpFtdcTraderApi* (*factory)(const char*)) { m_funcCreator = factory; }
 		void setSessionID(const char* sid) { m_strSessionID = sid; }
 		WrapperState state() const { return m_wrapperState; }
 		bool queryInFlight() const { return m_bInQuery; }
+		bool strandNull() const { return m_strandIO == NULL; }
+		size_t runOneIo() { return m_asyncIO.poll_one(); }
 		void presetWorker()
 		{
 			// connect() 只在 m_thrdWorker==NULL 时起常驻线程；预置未启动的
@@ -135,6 +154,56 @@ namespace
 
 	R93FemasApiStub* g_r93_femas_stub = NULL;
 	CUstpFtdcTraderApi* r93_femas_create(const char*) { return g_r93_femas_stub; }
+	CUstpFtdcRspInfoField r93_femas_rsp(int errId, const char* msg);
+
+	class R93FemasInitCallbackApiStub : public R93FemasApiStub
+	{
+	public:
+		enum CallbackMode { NO_CALLBACK, LOGIN_SUCCESS, LOGIN_FAILURE, THROW_INIT };
+		CallbackMode callback_mode_ = NO_CALLBACK;
+
+		void Init() override
+		{
+			++n_init_;
+			if (callback_mode_ == THROW_INIT)
+				throw std::runtime_error("fake Init failure");
+			if (spi_ == NULL || callback_mode_ == NO_CALLBACK)
+				return;
+
+			// Connect and authenticate synchronously through the same callback chain
+			// that can reach onLoginResult() while Init() is still on the stack.
+			spi_->OnFrontConnected();
+		}
+
+		int ReqDSUserCertification(CUstpFtdcDSUserInfoField* request, int requestId) override
+		{
+			R93FemasApiStub::ReqDSUserCertification(request, requestId);
+			CUstpFtdcDSUserCertRspDataField cert = {};
+			CUstpFtdcRspInfoField response = r93_femas_rsp(0, "");
+			if (spi_ != NULL)
+				spi_->OnRspDSUserCertification(&cert, &response, requestId, true);
+			return stub_ret_;
+		}
+
+		int ReqUserLogin(CUstpFtdcReqUserLoginField* request, int requestId) override
+		{
+			R93FemasApiStub::ReqUserLogin(request, requestId);
+			CUstpFtdcRspUserLoginField login = {};
+			strncpy(login.MaxOrderLocalID, "00000042", sizeof(login.MaxOrderLocalID) - 1);
+			CUstpFtdcRspInfoField response = r93_femas_rsp(
+				callback_mode_ == LOGIN_FAILURE ? 1 : 0,
+				callback_mode_ == LOGIN_FAILURE ? "fake synchronous login failure" : "");
+			if (spi_ != NULL)
+				spi_->OnRspUserLogin(&login, &response, requestId, true);
+			if (spi_ != NULL && callback_mode_ != LOGIN_FAILURE && callback_mode_ != THROW_INIT)
+			{
+				CUstpFtdcRspUserLoginField queryLogin = {};
+				CUstpFtdcRspInfoField queryResponse = r93_femas_rsp(0, "");
+				spi_->OnRspQueryUserLogin(&queryLogin, &queryResponse, requestId, true);
+			}
+			return stub_ret_;
+		}
+	};
 
 	CUstpFtdcRspInfoField r93_femas_rsp(int errId, const char* msg)
 	{
@@ -143,6 +212,21 @@ namespace
 		rsp.ErrorID = errId;
 		strncpy(rsp.ErrorMsg, msg ? msg : "", sizeof(rsp.ErrorMsg) - 1);
 		return rsp;
+	}
+
+	WTSVariant* r93_femas_config(const std::string& flowDir, const char* module)
+	{
+		WTSVariant* cfg = WTSVariant::createObject();
+		cfg->append("front", "tcp://127.0.0.1:17001");
+		cfg->append("query", "tcp://127.0.0.1:17002");
+		cfg->append("broker", "9999");
+		cfg->append("user", "femasuser");
+		cfg->append("pass", "femaspass");
+		cfg->append("appid", "APP-93");
+		cfg->append("authcode", "AUTH-93");
+		cfg->append("flowdir", flowDir.c_str());
+		cfg->append("ctpmodule", module);
+		return cfg;
 	}
 
 	class R93FemasTest : public ::testing::Test
@@ -160,15 +244,7 @@ namespace
 
 			probe_.registerSpi(&sink_);
 
-			WTSVariant* cfg = WTSVariant::createObject();
-			cfg->append("front", "tcp://127.0.0.1:17001");
-			cfg->append("query", "tcp://127.0.0.1:17002");
-			cfg->append("broker", "9999");
-			cfg->append("user", "femasuser");
-			cfg->append("pass", "femaspass");
-			cfg->append("appid", "APP-93");
-			cfg->append("authcode", "AUTH-93");
-			cfg->append("flowdir", temp_.path("flow_base").c_str());
+			WTSVariant* cfg = r93_femas_config(temp_.path("flow_base"), WT_T4_FEMAS_SUCCESSFUL_CREATOR_MODULE);
 			ASSERT_TRUE(probe_.init(cfg));
 			cfg->release();
 		}
@@ -187,6 +263,16 @@ namespace
 			probe_.setState(TraderFemas::WS_ALLREADY);
 			probe_.setSessionID("S1");
 		}
+
+	bool logs_contain(const R93FemasSink& sink, const char* fragment) const
+	{
+		for (const std::string& log : sink.logs)
+		{
+			if (log.find(fragment) != std::string::npos)
+				return true;
+		}
+		return false;
+	}
 
 		R93FemasTempDir temp_;
 		WTSCommodityInfo* comm_ = NULL;
@@ -225,6 +311,272 @@ namespace
 		EXPECT_EQ(nullptr, stub_.spi_);
 	}
 
+	TEST_F(R93FemasTest, connect_init_sync_success_can_reenter_query_account)
+	{
+		R93FemasInitCallbackApiStub initStub;
+		initStub.callback_mode_ = R93FemasInitCallbackApiStub::LOGIN_SUCCESS;
+		g_r93_femas_stub = &initStub;
+		probe_.setFactory(&r93_femas_create);
+		probe_.presetWorker();
+		int queryResult = -99;
+		sink_.on_event = [this](WTSTraderEvent event) {
+			if (event == WTE_Connect)
+				probe_.login("femasuser", "femaspass", "r93-init-sync");
+		};
+		sink_.on_login_result = [this, &queryResult](bool success) {
+			if (success)
+				queryResult = probe_.queryAccount();
+		};
+
+		probe_.connect();
+		ASSERT_EQ(1, initStub.n_init_);
+		ASSERT_EQ(1, initStub.n_auth_);
+		ASSERT_EQ(1, initStub.n_login_);
+		ASSERT_EQ(1u, sink_.logins.size());
+		ASSERT_TRUE(sink_.logins.front().succ);
+		EXPECT_EQ(0, queryResult);
+		EXPECT_FALSE(probe_.strandNull());
+		ASSERT_EQ(1u, probe_.queued());
+
+		// The fake executor drains the work after Init has returned, matching the
+		// production worker's first run while avoiding an unbounded test thread.
+		EXPECT_EQ(1u, probe_.runOneIo());
+		EXPECT_EQ(1, initStub.n_qry_account_);
+		EXPECT_EQ(0u, probe_.queued());
+
+		sink_.on_login_result = nullptr;
+		sink_.on_event = nullptr;
+		probe_.release();
+		g_r93_femas_stub = NULL;
+	}
+
+	TEST_F(R93FemasTest, connect_init_sync_failed_login_does_not_reenter_query)
+	{
+		R93FemasInitCallbackApiStub initStub;
+		initStub.callback_mode_ = R93FemasInitCallbackApiStub::LOGIN_FAILURE;
+		g_r93_femas_stub = &initStub;
+		probe_.setFactory(&r93_femas_create);
+		probe_.presetWorker();
+		int reentrantQueries = 0;
+		sink_.on_event = [this](WTSTraderEvent event) {
+			if (event == WTE_Connect)
+				probe_.login("femasuser", "femaspass", "r93-init-sync");
+		};
+		sink_.on_login_result = [&reentrantQueries](bool success) {
+			if (success)
+				++reentrantQueries;
+		};
+
+		probe_.connect();
+		ASSERT_EQ(1, initStub.n_init_);
+		ASSERT_EQ(1, initStub.n_auth_);
+		ASSERT_EQ(1, initStub.n_login_);
+		ASSERT_EQ(1u, sink_.logins.size());
+		EXPECT_FALSE(sink_.logins.front().succ);
+		EXPECT_EQ(TraderFemas::WS_LOGINFAILED, probe_.state());
+		EXPECT_EQ(0, reentrantQueries);
+		EXPECT_FALSE(probe_.strandNull());
+		EXPECT_EQ(0u, probe_.queued());
+		EXPECT_EQ(0, initStub.n_qry_account_);
+
+		sink_.on_login_result = nullptr;
+		sink_.on_event = nullptr;
+		probe_.release();
+		g_r93_femas_stub = NULL;
+	}
+
+	TEST_F(R93FemasTest, connect_init_without_callback_allows_post_init_async_query)
+	{
+		R93FemasInitCallbackApiStub initStub;
+		g_r93_femas_stub = &initStub;
+		probe_.setFactory(&r93_femas_create);
+		probe_.presetWorker();
+		int queryResult = -99;
+		sink_.on_event = [this](WTSTraderEvent event) {
+			if (event == WTE_Connect)
+				probe_.login("femasuser", "femaspass", "r93-init-async");
+		};
+		sink_.on_login_result = [this, &queryResult](bool success) {
+			if (success)
+				queryResult = probe_.queryAccount();
+		};
+
+		probe_.connect();
+		EXPECT_EQ(1, initStub.n_init_);
+		EXPECT_TRUE(sink_.logins.empty());
+		EXPECT_FALSE(probe_.strandNull());
+		EXPECT_EQ(0u, probe_.queued());
+
+		ASSERT_NE(nullptr, initStub.spi_);
+		initStub.spi_->OnFrontConnected();
+		ASSERT_EQ(1u, sink_.logins.size());
+		EXPECT_TRUE(sink_.logins.front().succ);
+		EXPECT_EQ(0, queryResult);
+		ASSERT_EQ(1u, probe_.queued());
+		EXPECT_EQ(1u, probe_.runOneIo());
+		EXPECT_EQ(1, initStub.n_qry_account_);
+		EXPECT_EQ(0u, probe_.queued());
+
+		sink_.on_login_result = nullptr;
+		sink_.on_event = nullptr;
+		probe_.release();
+		g_r93_femas_stub = NULL;
+	}
+
+	TEST_F(R93FemasTest, connect_init_exception_does_not_start_a_waiting_worker)
+	{
+		R93FemasInitCallbackApiStub initStub;
+		initStub.callback_mode_ = R93FemasInitCallbackApiStub::THROW_INIT;
+		g_r93_femas_stub = &initStub;
+		probe_.setFactory(&r93_femas_create);
+
+		EXPECT_THROW(probe_.connect(), std::runtime_error);
+		EXPECT_EQ(1, initStub.n_init_);
+		EXPECT_TRUE(probe_.workerNull());
+		EXPECT_FALSE(probe_.strandNull());
+		EXPECT_EQ(static_cast<CUstpFtdcTraderApi*>(&initStub), probe_.api());
+
+		probe_.release();
+		EXPECT_EQ(1, initStub.n_release_);
+		EXPECT_EQ(nullptr, initStub.spi_);
+		EXPECT_EQ(nullptr, probe_.api());
+		g_r93_femas_stub = NULL;
+	}
+
+	TEST_F(R93FemasTest, init_missing_module_fails_and_void_connect_stops_with_diagnostic)
+	{
+		R93FemasProbe probe;
+		R93FemasSink sink;
+		probe.registerSpi(&sink);
+		WTSVariant* cfg = r93_femas_config(temp_.path("missing_module"), WT_T4_FEMAS_MISSING_LIBRARY_MODULE);
+
+		EXPECT_FALSE(probe.init(cfg));
+		cfg->release();
+		EXPECT_FALSE(probe.hasModule());
+		EXPECT_FALSE(probe.hasCreator());
+		EXPECT_TRUE(logs_contain(sink, "Failed to load trader API module"));
+
+		EXPECT_NO_THROW(probe.connect());
+		EXPECT_EQ(nullptr, probe.api());
+		EXPECT_TRUE(probe.workerNull());
+		EXPECT_TRUE(logs_contain(sink, "creator is unavailable"));
+		probe.release();
+	}
+
+	TEST_F(R93FemasTest, init_missing_creator_symbol_fails_and_connect_does_not_call_api)
+	{
+		R93FemasProbe probe;
+		R93FemasSink sink;
+		probe.registerSpi(&sink);
+		WTSVariant* cfg = r93_femas_config(temp_.path("missing_symbol"), WT_T4_FEMAS_MISSING_SYMBOL_MODULE);
+
+		EXPECT_FALSE(probe.init(cfg));
+		cfg->release();
+		EXPECT_FALSE(probe.hasModule());
+		EXPECT_FALSE(probe.hasCreator());
+		EXPECT_TRUE(logs_contain(sink, "creator symbol not found"));
+
+		EXPECT_NO_THROW(probe.connect());
+		EXPECT_EQ(nullptr, probe.api());
+		EXPECT_TRUE(probe.workerNull());
+		EXPECT_TRUE(logs_contain(sink, "creator is unavailable"));
+		probe.release();
+	}
+
+	TEST_F(R93FemasTest, connect_creator_returning_null_fails_closed_with_diagnostic)
+	{
+		R93FemasProbe probe;
+		R93FemasSink sink;
+		probe.registerSpi(&sink);
+		WTSVariant* cfg = r93_femas_config(temp_.path("null_creator"), WT_T4_FEMAS_NULL_CREATOR_MODULE);
+
+		ASSERT_TRUE(probe.init(cfg));
+		cfg->release();
+		ASSERT_TRUE(probe.hasModule());
+		ASSERT_TRUE(probe.hasCreator());
+		EXPECT_NO_THROW(probe.connect());
+		EXPECT_EQ(nullptr, probe.api());
+		EXPECT_TRUE(probe.workerNull());
+		EXPECT_TRUE(logs_contain(sink, "creator returned null"));
+		probe.release();
+	}
+
+	TEST_F(R93FemasTest, repeated_init_is_rejected_without_replacing_loaded_creator)
+	{
+		R93FemasProbe probe;
+		R93FemasSink sink;
+		probe.registerSpi(&sink);
+		probe.presetWorker();
+		WTSVariant* cfg = r93_femas_config(temp_.path("reinit_first"), WT_T4_FEMAS_SUCCESSFUL_CREATOR_MODULE);
+		ASSERT_TRUE(probe.init(cfg));
+		cfg->release();
+		EXPECT_FALSE(probe.init(nullptr));
+		EXPECT_TRUE(probe.hasModule());
+		EXPECT_TRUE(probe.hasCreator());
+
+		WTSVariant* rejected = r93_femas_config(temp_.path("reinit_rejected"), WT_T4_FEMAS_MISSING_LIBRARY_MODULE);
+		EXPECT_FALSE(probe.init(rejected));
+		rejected->release();
+		EXPECT_TRUE(probe.hasModule());
+		EXPECT_TRUE(probe.hasCreator());
+		EXPECT_TRUE(logs_contain(sink, "Cannot initialize an API instance more than once"));
+
+		probe.connect();
+		ASSERT_NE(nullptr, probe.api());
+		probe.release();
+	}
+
+	TEST_F(R93FemasTest, failed_init_can_be_retried_with_valid_module)
+	{
+		R93FemasProbe probe;
+		R93FemasSink sink;
+		probe.registerSpi(&sink);
+		probe.presetWorker();
+		WTSVariant* missing = r93_femas_config(temp_.path("retry_missing"), WT_T4_FEMAS_MISSING_LIBRARY_MODULE);
+		EXPECT_FALSE(probe.init(missing));
+		missing->release();
+		EXPECT_FALSE(probe.hasModule());
+		EXPECT_FALSE(probe.hasCreator());
+
+		WTSVariant* valid = r93_femas_config(temp_.path("retry_valid"), WT_T4_FEMAS_SUCCESSFUL_CREATOR_MODULE);
+		ASSERT_TRUE(probe.init(valid));
+		valid->release();
+		EXPECT_TRUE(probe.hasModule());
+		EXPECT_TRUE(probe.hasCreator());
+		probe.connect();
+		ASSERT_NE(nullptr, probe.api());
+		probe.release();
+	}
+
+	TEST_F(R93FemasTest, dynamic_creator_success_connects_fake_api_as_positive_control)
+	{
+		R93FemasProbe probe;
+		R93FemasSink sink;
+		probe.registerSpi(&sink);
+		probe.presetWorker();
+		WTSVariant* cfg = r93_femas_config(temp_.path("successful_creator"), WT_T4_FEMAS_SUCCESSFUL_CREATOR_MODULE);
+
+		ASSERT_TRUE(probe.init(cfg));
+		cfg->release();
+		ASSERT_TRUE(probe.hasModule());
+		ASSERT_TRUE(probe.hasCreator());
+		R93FemasApiStub* api = static_cast<R93FemasApiStub*>(probe.createFromFactory());
+		ASSERT_NE(nullptr, api);
+		const int initBefore = api->n_init_;
+		const int releaseBefore = api->n_release_;
+		probe.connect();
+
+		ASSERT_NE(nullptr, probe.api());
+		EXPECT_EQ(initBefore + 1, api->n_init_);
+		EXPECT_EQ(static_cast<CUstpFtdcTraderSpi*>(&probe), api->spi_);
+		EXPECT_EQ(USTP_TERT_RESUME, api->public_topic_);
+		EXPECT_EQ(USTP_TERT_RESUME, api->private_topic_);
+
+		probe.release();
+		EXPECT_EQ(releaseBefore + 1, api->n_release_);
+		EXPECT_EQ(nullptr, api->spi_);
+	}
+
 	/// TraderFemas.cpp L169-212 的 quick 分支：SubscribePublic/Private 使用 USTP_TERT_QUICK。
 	TEST_F(R93FemasTest, quick_connect_subscribes_quick_topics)
 	{
@@ -240,6 +592,7 @@ namespace
 		cfg->append("pass", "femaspass");
 		cfg->append("quick", true);
 		cfg->append("flowdir", temp_.path("flow_quick").c_str());
+		cfg->append("ctpmodule", WT_T4_FEMAS_SUCCESSFUL_CREATOR_MODULE);
 		ASSERT_TRUE(probe.init(cfg));
 		cfg->release();
 		probe.setFactory(&r93_femas_create);
@@ -417,6 +770,121 @@ namespace
 
 		ASSERT_EQ(0, probe_.logout());
 		EXPECT_NE(std::string::npos, sink_.logs.back().find("Sending logout request failed: -4"));
+	}
+
+	TEST_F(R93FemasTest, order_insert_accepts_maximum_sdk_tag_and_rejects_overlong_without_api_call)
+	{
+		make_ready();
+		const std::size_t maxTagLength = sizeof(stub_.order_req_.UserOrderLocalID) - 1;
+		const std::string maxTag(maxTagLength, 'T');
+		WTSEntrust* valid = WTSEntrust::create("rb2401", 1, 3500.0, "SHFE");
+		valid->setContractInfo(ct_);
+		valid->setUserTag(maxTag.c_str());
+		ASSERT_EQ(0, probe_.orderInsert(valid));
+		EXPECT_EQ(1, stub_.n_order_insert_);
+		EXPECT_STREQ(maxTag.c_str(), stub_.order_req_.UserOrderLocalID);
+		valid->release();
+
+		const std::string overlongTag(maxTagLength + 1, 'T');
+		WTSEntrust* invalid = WTSEntrust::create("rb2401", 1, 3500.0, "SHFE");
+		invalid->setContractInfo(ct_);
+		invalid->setUserTag(overlongTag.c_str());
+		EXPECT_EQ(-1, probe_.orderInsert(invalid));
+		EXPECT_EQ(1, stub_.n_order_insert_);
+		invalid->release();
+	}
+
+	TEST_F(R93FemasTest, order_insert_checks_generated_session_and_local_id_capacity)
+	{
+		make_ready();
+		probe_.setSessionID("12345678");
+		WTSEntrust* valid = WTSEntrust::create("rb2401", 1, 3500.0, "SHFE");
+		valid->setContractInfo(ct_);
+		ASSERT_EQ(0, probe_.orderInsert(valid));
+		EXPECT_EQ(1, stub_.n_order_insert_);
+		EXPECT_EQ(20u, std::strlen(stub_.order_req_.UserOrderLocalID));
+		const std::string firstOrderLocalID = stub_.order_req_.UserOrderLocalID;
+		EXPECT_EQ("12345678", firstOrderLocalID.substr(0, 8));
+		const std::string firstOrderSequence = firstOrderLocalID.substr(8);
+		ASSERT_EQ(12u, firstOrderSequence.size());
+		const unsigned long firstOrderSequenceNumber = std::stoul(firstOrderSequence);
+		valid->release();
+
+		probe_.setSessionID("123456789");
+		WTSEntrust* invalid = WTSEntrust::create("rb2401", 1, 3500.0, "SHFE");
+		invalid->setContractInfo(ct_);
+		EXPECT_EQ(-1, probe_.orderInsert(invalid));
+		EXPECT_EQ(1, stub_.n_order_insert_);
+		invalid->release();
+
+		probe_.setSessionID("12345678");
+		WTSEntrust* nextValid = WTSEntrust::create("rb2401", 1, 3500.0, "SHFE");
+		nextValid->setContractInfo(ct_);
+		ASSERT_EQ(0, probe_.orderInsert(nextValid));
+		EXPECT_EQ(2, stub_.n_order_insert_);
+		const std::string nextOrderLocalID = stub_.order_req_.UserOrderLocalID;
+		EXPECT_EQ("12345678", nextOrderLocalID.substr(0, 8));
+		const std::string nextOrderSequence = nextOrderLocalID.substr(8);
+		ASSERT_EQ(12u, nextOrderSequence.size());
+		EXPECT_EQ(firstOrderSequenceNumber + 1, std::stoul(nextOrderSequence));
+		nextValid->release();
+	}
+
+	TEST_F(R93FemasTest, order_action_accepts_maximum_identifiers_and_rejects_overlong_without_api_call)
+	{
+		make_ready();
+		probe_.setSessionID("12345678");
+		const std::string maxEntrustID(sizeof(stub_.action_req_.UserOrderLocalID) - 1, 'E');
+		const std::string maxOrderID(sizeof(stub_.action_req_.OrderSysID) - 1, 'O');
+		WTSEntrustAction* valid = WTSEntrustAction::create("rb2401", "SHFE");
+		valid->setEntrustID(maxEntrustID.c_str());
+		valid->setOrderID(maxOrderID.c_str());
+		ASSERT_EQ(0, probe_.orderAction(valid));
+		EXPECT_EQ(1, stub_.n_order_action_);
+		EXPECT_STREQ(maxEntrustID.c_str(), stub_.action_req_.UserOrderLocalID);
+		EXPECT_STREQ(maxOrderID.c_str(), stub_.action_req_.OrderSysID);
+		const std::string firstActionLocalID = stub_.action_req_.UserOrderActionLocalID;
+		EXPECT_EQ("12345678", firstActionLocalID.substr(0, 8));
+		const std::string firstActionSequence = firstActionLocalID.substr(8);
+		ASSERT_EQ(12u, firstActionSequence.size());
+		const unsigned long firstActionSequenceNumber = std::stoul(firstActionSequence);
+		valid->release();
+
+		const int callsBeforeRejects = stub_.n_order_action_;
+		WTSEntrustAction* overlongEntrustID = WTSEntrustAction::create("rb2401", "SHFE");
+		overlongEntrustID->setEntrustID(std::string(maxEntrustID.size() + 1, 'E').c_str());
+		overlongEntrustID->setOrderID("ORDER-1");
+		EXPECT_EQ(-1, probe_.orderAction(overlongEntrustID));
+		EXPECT_EQ(callsBeforeRejects, stub_.n_order_action_);
+		overlongEntrustID->release();
+
+		WTSEntrustAction* overlongOrderID = WTSEntrustAction::create("rb2401", "SHFE");
+		overlongOrderID->setEntrustID("EID-1");
+		overlongOrderID->setOrderID(std::string(maxOrderID.size() + 1, 'O').c_str());
+		EXPECT_EQ(-1, probe_.orderAction(overlongOrderID));
+		EXPECT_EQ(callsBeforeRejects, stub_.n_order_action_);
+		overlongOrderID->release();
+
+		probe_.setSessionID("123456789");
+		WTSEntrustAction* overlongGeneratedID = WTSEntrustAction::create("rb2401", "SHFE");
+		overlongGeneratedID->setEntrustID("EID-2");
+		overlongGeneratedID->setOrderID("ORDER-2");
+		EXPECT_EQ(-1, probe_.orderAction(overlongGeneratedID));
+		EXPECT_EQ(callsBeforeRejects, stub_.n_order_action_);
+		overlongGeneratedID->release();
+
+		probe_.setSessionID("12345678");
+		WTSEntrustAction* nextValid = WTSEntrustAction::create("rb2401", "SHFE");
+		nextValid->setEntrustID("EID-3");
+		nextValid->setOrderID("ORDER-3");
+		ASSERT_EQ(0, probe_.orderAction(nextValid));
+		EXPECT_EQ(callsBeforeRejects + 1, stub_.n_order_action_);
+		const std::string nextActionLocalID = stub_.action_req_.UserOrderActionLocalID;
+		EXPECT_EQ("12345678", nextActionLocalID.substr(0, 8));
+		const std::string nextActionSequence = nextActionLocalID.substr(8);
+		ASSERT_EQ(12u, nextActionSequence.size());
+		EXPECT_EQ(firstActionSequenceNumber + 1, std::stoul(nextActionSequence));
+		nextValid->release();
 	}
 
 	/* ------------------------------------------------------------------ */

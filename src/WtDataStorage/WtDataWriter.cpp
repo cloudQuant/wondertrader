@@ -16,10 +16,73 @@
 
 #include <set>
 #include <algorithm>
+#include <exception>
+#include <limits>
 #include <utility>
+#if defined(WT_DATA_WRITER_TEST_HOOKS)
+#include "../TestUnits/coverage/p10_storage_writer/p10_writer_test_hooks.h"
+#include <mutex>
+#include <unordered_map>
+#endif
 
 #include <boost/filesystem.hpp>
+#include <memory>
+#include <type_traits>
 namespace fs = boost::filesystem;
+
+#if defined(WT_DATA_WRITER_TEST_HOOKS)
+namespace
+{
+	std::mutex g_p10_test_hooks_mtx;
+	std::unordered_map<::WtDataWriter*, p10_writer_test_hooks::Hooks> g_p10_test_hooks;
+
+	bool copy_p10_test_hooks(::WtDataWriter* writer, p10_writer_test_hooks::Hooks& hooks) noexcept
+	{
+		try
+		{
+			std::lock_guard<std::mutex> guard(g_p10_test_hooks_mtx);
+			auto it = g_p10_test_hooks.find(writer);
+			if (it == g_p10_test_hooks.end())
+				return false;
+			hooks = it->second;
+			return true;
+		}
+		catch (...)
+		{
+			return false;
+		}
+	}
+}
+
+namespace p10_writer_test_hooks
+{
+	bool install(::WtDataWriter* writer, const Hooks& hooks) noexcept
+	{
+		try
+		{
+			std::lock_guard<std::mutex> guard(g_p10_test_hooks_mtx);
+			g_p10_test_hooks[writer] = hooks;
+			return true;
+		}
+		catch (...)
+		{
+			return false;
+		}
+	}
+
+	void uninstall(::WtDataWriter* writer) noexcept
+	{
+		try
+		{
+			std::lock_guard<std::mutex> guard(g_p10_test_hooks_mtx);
+			g_p10_test_hooks.erase(writer);
+		}
+		catch (...)
+		{
+		}
+	}
+}
+#endif
 
 //By Wesley @ 2022.01.05
 #include "../Share/fmtlib.h"
@@ -32,6 +95,13 @@ inline void pipe_writer_log(IDataWriterSink* sink, WTSLogLevel ll, const char* f
 	const char* buffer = fmtutil::format(format, args...);
 
 	sink->outputLog(ll, buffer);
+}
+
+template<typename Lease, typename... Args>
+inline void defer_writer_log(Lease& lease, WTSLogLevel ll, const char* format, const Args&... args)
+{
+	const char* buffer = fmtutil::format(format, args...);
+	lease.deferLog(ll, buffer);
 }
 
 /*
@@ -387,28 +457,17 @@ void WtDataWriter::release()
 	if (_proc_thrd != NULL && _proc_thrd->joinable())
 		_proc_thrd->join();
 
-	for (auto& v : _rt_ticks_blocks)
-		delete v.second;
+	StdUniqueLock blockMapLock(_rt_blocks_map_mtx);
 	_rt_ticks_blocks.clear();
 
-	for (auto& v : _rt_trans_blocks)
-		delete v.second;
 	_rt_trans_blocks.clear();
 
-	for (auto& v : _rt_orddtl_blocks)
-		delete v.second;
 	_rt_orddtl_blocks.clear();
 
-	for (auto& v : _rt_ordque_blocks)
-		delete v.second;
 	_rt_ordque_blocks.clear();
 
-	for (auto& v : _rt_min1_blocks)
-		delete v.second;
 	_rt_min1_blocks.clear();
 
-	for (auto& v : _rt_min5_blocks)
-		delete v.second;
 	_rt_min5_blocks.clear();
 
 	_released = true;
@@ -540,6 +599,16 @@ bool WtDataWriter::resizeTickCache(uint32_t nCount)
 		}
 		f.close_file();
 
+#if defined(WT_DATA_WRITER_TEST_HOOKS)
+		p10_writer_test_hooks::Hooks hooks;
+		if (copy_p10_test_hooks(this, hooks)
+			&& hooks.fail_next_tick_cache_resize_map != nullptr
+			&& hooks.fail_next_tick_cache_resize_map(hooks.context, _tick_cache_file != nullptr))
+		{
+			pipe_writer_log(_sink, LL_ERROR, "Injected mapping failure after extending tick cache file {}", filename);
+			return false;
+		}
+#endif
 		BoostMFPtr newFile(new BoostMappingFile);
 		if (!newFile->map(filename.c_str()))
 		{
@@ -579,16 +648,131 @@ void* WtDataWriter::resizeRTBlock(BoostMFPtr& mfPtr, uint32_t nCount)
 		return mfPtr->addr();
 
 	std::string filename = mfPtr->filename();
-	uint64_t uOldSize = sizeof(HeaderType) + sizeof(T)*tBlock->_capacity;
-	uint64_t uNewSize = sizeof(HeaderType) + sizeof(T)*nCount;
-	std::string data;
-	data.resize((std::size_t)(uNewSize - uOldSize), 0);
+	const uint64_t uOldSize = sizeof(HeaderType) + sizeof(T) * (uint64_t)tBlock->_capacity;
+	const uint64_t uNewSize = sizeof(HeaderType) + sizeof(T) * (uint64_t)nCount;
 	try
 	{
 		BoostFile f;
-		f.open_existing_file(filename.c_str());
-		f.seek_to_end();
-		f.write_file(data.c_str(), data.size());
+		if (!f.open_existing_file(filename.c_str()))
+		{
+			pipe_writer_log(_sink, LL_ERROR, "Cannot open RT cache file {} while expanding it", filename);
+			return NULL;
+		}
+
+		boost::interprocess::offset_t signedFileSize = 0;
+		if (!f.get_file_size(signedFileSize) || signedFileSize < 0)
+		{
+			pipe_writer_log(_sink, LL_ERROR, "Cannot get RT cache file size for {} while expanding it", filename);
+			return NULL;
+		}
+		const uint64_t originalFileSize = (uint64_t)signedFileSize;
+		if (originalFileSize < uOldSize)
+		{
+			pipe_writer_log(_sink, LL_ERROR,
+				"RT cache file {} is shorter than its declared capacity ({} < {})",
+				filename, originalFileSize, uOldSize);
+			return NULL;
+		}
+
+		// A previous failed remap may already have extended the file. Reuse that
+		// space instead of appending the old logical capacity delta again.
+		if (originalFileSize < uNewSize)
+		{
+			if (originalFileSize > (uint64_t)(std::numeric_limits<std::size_t>::max)())
+			{
+				pipe_writer_log(_sink, LL_ERROR,
+					"RT cache file {} is too large to extend safely", filename);
+				return NULL;
+			}
+
+			if (!f.seek_to_end())
+			{
+				pipe_writer_log(_sink, LL_ERROR, "Cannot seek to end of RT cache file {} while expanding it", filename);
+				return NULL;
+			}
+			boost::interprocess::offset_t writeOffset = 0;
+			if (!f.get_file_pointer(writeOffset) || writeOffset < 0
+				|| (uint64_t)writeOffset != originalFileSize)
+			{
+				pipe_writer_log(_sink, LL_ERROR,
+					"RT cache file {} changed while preparing expansion; refusing to append", filename);
+				return NULL;
+			}
+
+			const uint64_t extensionSize = uNewSize - originalFileSize;
+			if (extensionSize > (uint64_t)(std::numeric_limits<std::size_t>::max)())
+			{
+				pipe_writer_log(_sink, LL_ERROR,
+					"RT cache file {} expansion is too large to allocate safely", filename);
+				return NULL;
+			}
+			std::string data((std::size_t)extensionSize, 0);
+
+			auto rollbackExtension = [&]() -> bool
+			{
+				boost::interprocess::offset_t currentSize = 0;
+				if (!f.get_file_size(currentSize) || currentSize < 0
+					|| (uint64_t)currentSize < originalFileSize
+					|| (uint64_t)currentSize > uNewSize)
+				{
+					pipe_writer_log(_sink, LL_ERROR,
+						"Cannot safely roll back RT cache extension for {}; file size changed outside the expected append range",
+						filename);
+					return false;
+				}
+				if ((uint64_t)currentSize == originalFileSize)
+					return true;
+				if (!f.truncate_file((std::size_t)originalFileSize))
+				{
+					pipe_writer_log(_sink, LL_ERROR,
+						"Failed to roll back partial RT cache extension for {}; capacity remains unpublished", filename);
+					return false;
+				}
+				boost::interprocess::offset_t restoredSize = 0;
+				if (!f.get_file_size(restoredSize) || restoredSize < 0
+					|| (uint64_t)restoredSize != originalFileSize)
+				{
+					pipe_writer_log(_sink, LL_ERROR,
+						"Could not verify rollback of RT cache extension for {}; capacity remains unpublished", filename);
+					return false;
+				}
+				return true;
+			};
+
+			bool writeSucceeded = false;
+			try
+			{
+	#if defined(WT_DATA_WRITER_TEST_HOOKS)
+				p10_writer_test_hooks::Hooks hooks;
+				const bool simulateShortWrite = copy_p10_test_hooks(this, hooks)
+					&& hooks.simulate_next_rt_resize_short_write != nullptr
+					&& hooks.simulate_next_rt_resize_short_write(
+						hooks.context, filename.c_str(), originalFileSize, uNewSize);
+				writeSucceeded = !simulateShortWrite && f.write_file(data);
+	#else
+			writeSucceeded = f.write_file(data);
+	#endif
+			}
+			catch (...)
+			{
+				const bool rolledBack = rollbackExtension();
+				pipe_writer_log(_sink, LL_ERROR,
+				"Exception while extending RT cache file {}; capacity remains unpublished{}",
+					filename, rolledBack ? " and partial bytes were rolled back" : " and rollback could not be verified");
+				return NULL;
+			}
+
+			boost::interprocess::offset_t actualFileSize = 0;
+			const bool sizeRead = f.get_file_size(actualFileSize) && actualFileSize >= 0;
+			if (!writeSucceeded || !sizeRead || (uint64_t)actualFileSize < uNewSize)
+			{
+				const bool rolledBack = rollbackExtension();
+				pipe_writer_log(_sink, LL_ERROR,
+					"RT cache extension for {} failed{}; capacity remains unpublished",
+					filename, rolledBack ? " and partial bytes were rolled back" : " and rollback could not be verified");
+				return NULL;
+			}
+		}
 		f.close_file();
 	}
 	catch(std::exception& ex)
@@ -598,13 +782,21 @@ void* WtDataWriter::resizeRTBlock(BoostMFPtr& mfPtr, uint32_t nCount)
 	}
 
 
-	mfPtr.reset();
-	BoostMappingFile* pNewMf = new BoostMappingFile();
+	BoostMFPtr pNewMf(new BoostMappingFile());
+	#if defined(WT_DATA_WRITER_TEST_HOOKS)
+	p10_writer_test_hooks::Hooks hooks;
+	if (copy_p10_test_hooks(this, hooks)
+		&& hooks.fail_next_rt_resize_map != nullptr
+		&& hooks.fail_next_rt_resize_map(hooks.context, mfPtr != nullptr))
+	{
+		pipe_writer_log(_sink, LL_ERROR, "Injected mapping failure after extending RT cache file {}", filename);
+		return NULL;
+	}
+	#endif
 	try
 	{
 		if (!pNewMf->map(filename.c_str()))
 		{
-			delete pNewMf;
 			return NULL;
 		}
 	}
@@ -614,10 +806,23 @@ void* WtDataWriter::resizeRTBlock(BoostMFPtr& mfPtr, uint32_t nCount)
 		return NULL;
 	}	
 
-	mfPtr.reset(pNewMf);
+	const uint64_t mappedSize = pNewMf->size();
+	if (mappedSize < uNewSize)
+	{
+		pipe_writer_log(_sink, LL_ERROR,
+			"Mapped RT cache file {} is shorter than the requested capacity ({} < {})",
+			filename, mappedSize, uNewSize);
+		return NULL;
+	}
 
+	RTBlockHeader* newBlock = (RTBlockHeader*)pNewMf->addr();
+	if (newBlock == NULL)
+		return NULL;
+	newBlock->_capacity = nCount;
+	// Keep the previous mapping alive until the expanded file is mapped and
+	// validated. A failed remap must not discard the writer's last usable view.
+	mfPtr.swap(pNewMf);
 	tBlock = (RTBlockHeader*)mfPtr->addr();
-	tBlock->_capacity = nCount;
 	return mfPtr->addr();
 }
 
@@ -699,19 +904,23 @@ void WtDataWriter::procQueue(WTSOrdQueData* curOrdQue)
 		if (!_sink->canSessionReceive(commInfo->getSession()))
 			break;
 
-		OrdQueBlockPair* pBlockPair = getOrdQueBlock(ct, curOrdQue->tradingdate());
-		if (pBlockPair == NULL)
+		BlockLease<OrdQueBlockPair> pBlockPair = getOrdQueBlock(ct, curOrdQue->tradingdate());
+		if (!pBlockPair)
 			break;
-
-		SpinLock lock(pBlockPair->_mutex);
 
 		//先检查容量够不够,不够要扩
 		RTOrdQueBlock* blk = pBlockPair->_block;
 		if (blk->_size >= blk->_capacity)
 		{
 			pBlockPair->_file->sync();
-			pBlockPair->_block = (RTOrdQueBlock*)resizeRTBlock<RTDayBlockHeader, WTSOrdQueStruct>(pBlockPair->_file, blk->_capacity * 2);
-			blk = pBlockPair->_block;
+			RTOrdQueBlock* expanded = (RTOrdQueBlock*)resizeRTBlock<RTDayBlockHeader, WTSOrdQueStruct>(pBlockPair->_file, blk->_capacity * 2);
+			if (expanded == NULL)
+			{
+				pipe_writer_log(_sink, LL_ERROR, "RT order-queue block of {} could not be expanded", ct->getFullCode());
+				break;
+			}
+			pBlockPair->_block = expanded;
+			blk = expanded;
 		}
 
 		memcpy(&blk->_queues[blk->_size], &curOrdQue->getOrdQueStruct(), sizeof(WTSOrdQueStruct));
@@ -755,19 +964,23 @@ void WtDataWriter::procOrder(WTSOrdDtlData* curOrdDtl)
 		if (!_sink->canSessionReceive(commInfo->getSession()))
 			break;
 
-		OrdDtlBlockPair* pBlockPair = getOrdDtlBlock(ct, curOrdDtl->tradingdate());
-		if (pBlockPair == NULL)
+		BlockLease<OrdDtlBlockPair> pBlockPair = getOrdDtlBlock(ct, curOrdDtl->tradingdate());
+		if (!pBlockPair)
 			break;
-
-		SpinLock lock(pBlockPair->_mutex);
 
 		//先检查容量够不够,不够要扩
 		RTOrdDtlBlock* blk = pBlockPair->_block;
 		if (blk->_size >= blk->_capacity)
 		{
 			pBlockPair->_file->sync();
-			pBlockPair->_block = (RTOrdDtlBlock*)resizeRTBlock<RTDayBlockHeader, WTSOrdDtlStruct>(pBlockPair->_file, blk->_capacity * 2);
-			blk = pBlockPair->_block;
+			RTOrdDtlBlock* expanded = (RTOrdDtlBlock*)resizeRTBlock<RTDayBlockHeader, WTSOrdDtlStruct>(pBlockPair->_file, blk->_capacity * 2);
+			if (expanded == NULL)
+			{
+				pipe_writer_log(_sink, LL_ERROR, "RT order-detail block of {} could not be expanded", ct->getFullCode());
+				break;
+			}
+			pBlockPair->_block = expanded;
+			blk = expanded;
 		}
 
 		memcpy(&blk->_details[blk->_size], &curOrdDtl->getOrdDtlStruct(), sizeof(WTSOrdDtlStruct));
@@ -811,19 +1024,23 @@ void WtDataWriter::procTrans(WTSTransData* curTrans)
 		if (!_sink->canSessionReceive(commInfo->getSession()))
 			break;
 
-		TransBlockPair* pBlockPair = getTransBlock(ct, curTrans->tradingdate());
-		if (pBlockPair == NULL)
+		BlockLease<TransBlockPair> pBlockPair = getTransBlock(ct, curTrans->tradingdate());
+		if (!pBlockPair)
 			break;
-
-		SpinLock lock(pBlockPair->_mutex);
 
 		//先检查容量够不够,不够要扩
 		RTTransBlock* blk = pBlockPair->_block;
 		if (blk->_size >= blk->_capacity)
 		{
 			pBlockPair->_file->sync();
-			pBlockPair->_block = (RTTransBlock*)resizeRTBlock<RTDayBlockHeader, WTSTransStruct>(pBlockPair->_file, blk->_capacity * 2);
-			blk = pBlockPair->_block;
+			RTTransBlock* expanded = (RTTransBlock*)resizeRTBlock<RTDayBlockHeader, WTSTransStruct>(pBlockPair->_file, blk->_capacity * 2);
+			if (expanded == NULL)
+			{
+				pipe_writer_log(_sink, LL_ERROR, "RT transaction block of {} could not be expanded", ct->getFullCode());
+				break;
+			}
+			pBlockPair->_block = expanded;
+			blk = expanded;
 		}
 
 		memcpy(&blk->_trans[blk->_size], &curTrans->getTransStruct(), sizeof(WTSTransStruct));
@@ -921,20 +1138,24 @@ void WtDataWriter::task_loop()
 }
 void WtDataWriter::pipeToTicks(WTSContractInfo* ct, WTSTickData* curTick)
 {
-	TickBlockPair* pBlockPair = getTickBlock(ct, curTick->tradingdate());
-	if (pBlockPair == NULL)
+	BlockLease<TickBlockPair> pBlockPair = getTickBlock(ct, curTick->tradingdate());
+	if (!pBlockPair)
 		return;
-
-	SpinLock lock(pBlockPair->_mutex);
 
 	//先检查容量够不够,不够要扩
 	RTTickBlock* blk = pBlockPair->_block;
 	if(blk && blk->_size >= blk->_capacity)
 	{
 		pBlockPair->_file->sync();
-		pBlockPair->_block = (RTTickBlock*)resizeRTBlock<RTDayBlockHeader, WTSTickStruct>(pBlockPair->_file, blk->_capacity * 2);
-		blk = pBlockPair->_block;
-		if(blk) pipe_writer_log(_sink, LL_DEBUG, "RT tick block of {} resized to {}", ct->getFullCode(), blk->_capacity);
+		RTTickBlock* expanded = (RTTickBlock*)resizeRTBlock<RTDayBlockHeader, WTSTickStruct>(pBlockPair->_file, blk->_capacity * 2);
+		if (expanded == NULL)
+		{
+			pipe_writer_log(_sink, LL_ERROR, "RT tick block of {} could not be expanded", ct->getFullCode());
+			return;
+		}
+		pBlockPair->_block = expanded;
+		blk = expanded;
+		pipe_writer_log(_sink, LL_DEBUG, "RT tick block of {} resized to {}", ct->getFullCode(), blk->_capacity);
 	}
 	
 	if (blk == NULL)
@@ -963,21 +1184,28 @@ void WtDataWriter::pipeToTicks(WTSContractInfo* ct, WTSTickData* curTick)
 	}
 }
 
-WtDataWriter::OrdQueBlockPair* WtDataWriter::getOrdQueBlock(WTSContractInfo* ct, uint32_t curDate, bool bAutoCreate /* = true */)
+WtDataWriter::BlockLease<WtDataWriter::OrdQueBlockPair> WtDataWriter::getOrdQueBlock(WTSContractInfo* ct, uint32_t curDate, bool bAutoCreate /* = true */)
 {
 	if (ct == NULL)
-		return NULL;
+		return {};
 
-	OrdQueBlockPair* pBlock = NULL;
 	const char* key = ct->getFullCode();
-	pBlock = _rt_ordque_blocks[key];
-	if(pBlock == NULL)
+	std::shared_ptr<OrdQueBlockPair> pBlock;
 	{
-		pBlock = new OrdQueBlockPair();
-		_rt_ordque_blocks[key] = pBlock;
+		StdUniqueLock mapLock(_rt_blocks_map_mtx);
+		auto it = _rt_ordque_blocks.find(key);
+		if (it == _rt_ordque_blocks.end())
+		{
+			auto inserted = _rt_ordque_blocks.emplace(key, std::make_shared<OrdQueBlockPair>());
+			pBlock = inserted.first->second;
+		}
+		else
+			pBlock = it->second;
 	}
-
-	if (pBlock->_block == NULL)
+	BlockLease<OrdQueBlockPair> lease(pBlock, _sink);
+	if (pBlock == nullptr)
+		return {};
+	if(pBlock->_block == NULL)
 	{
 		std::string path = fmt::format("{}rt/queue/{}/", _base_dir.c_str(), ct->getExchg());
 		if (bAutoCreate)
@@ -989,9 +1217,9 @@ WtDataWriter::OrdQueBlockPair* WtDataWriter::getOrdQueBlock(WTSContractInfo* ct,
 		if (!StdFile::exists(path.c_str()))
 		{
 			if (!bAutoCreate)
-				return NULL;
+				return {};
 
-			pipe_writer_log(_sink, LL_INFO, "Data file {} not exists, initializing...", path.c_str());
+			defer_writer_log(lease, LL_INFO, "Data file {} not exists, initializing...", path.c_str());
 
 			uint64_t uSize = sizeof(RTDayBlockHeader) + sizeof(WTSOrdQueStruct) * HFT_SIZE_STEP;
 
@@ -1006,15 +1234,15 @@ WtDataWriter::OrdQueBlockPair* WtDataWriter::getOrdQueBlock(WTSContractInfo* ct,
 		pBlock->_file.reset(new BoostMappingFile);
 		if (!pBlock->_file->map(path.c_str()))
 		{
-			pipe_writer_log(_sink, LL_INFO, "Mapping file {} failed", path.c_str());
+			defer_writer_log(lease, LL_INFO, "Mapping file {} failed", path.c_str());
 			pBlock->_file.reset();
-			return NULL;
+			return {};
 		}
 		pBlock->_block = (RTOrdQueBlock*)pBlock->_file->addr();
 
 		if (!isNew &&  pBlock->_block->_date != curDate)
 		{
-			pipe_writer_log(_sink, LL_INFO, "date[{}] of orderqueue cache block[{}] is different from current date[{}], reinitializing...", pBlock->_block->_date, path.c_str(), curDate);
+			defer_writer_log(lease, LL_INFO, "date[{}] of orderqueue cache block[{}] is different from current date[{}], reinitializing...", pBlock->_block->_date, path.c_str(), curDate);
 			pBlock->_block->_size = 0;
 			pBlock->_block->_date = curDate;
 
@@ -1040,12 +1268,26 @@ WtDataWriter::OrdQueBlockPair* WtDataWriter::getOrdQueBlock(WTSContractInfo* ct,
 				if (oldSize != uSize)
 				{
 					uint32_t oldCnt = (uint32_t)((oldSize - sizeof(RTDayBlockHeader)) / sizeof(WTSOrdQueStruct));
-					//文件大小不匹配,一般是因为capacity改了,但是实际没扩容
-					//这是做一次扩容即可
-					pBlock->_block->_capacity = oldCnt;
-					pBlock->_block->_size = oldCnt;
-
-					pipe_writer_log(_sink, LL_WARN, "Oderqueue cache file of {} on date {} repaired", ct->getCode(), curDate);
+					const uint32_t markedCapacity = pBlock->_block->_capacity;
+					const uint32_t markedSize = pBlock->_block->_size;
+					if (oldSize >= uSize && oldCnt >= markedCapacity && markedSize <= markedCapacity)
+					{
+						// A larger file may be an uncommitted tail from a failed remap.
+						// Reuse its physical capacity, but trust only the committed header size.
+						pBlock->_block->_capacity = oldCnt;
+						defer_writer_log(lease,
+							LL_WARN,
+							"Orderqueue cache file of {} on date {} has an uncommitted tail; preserving {} records",
+							ct->getCode(), curDate, markedSize);
+					}
+					else
+					{
+						// Keep the existing recovery behavior for truncated files or invalid headers.
+						pBlock->_block->_capacity = oldCnt;
+						pBlock->_block->_size = oldCnt;
+						defer_writer_log(lease, LL_WARN,
+							"Oderqueue cache file of {} on date {} repaired", ct->getCode(), curDate);
+					}
 				}
 
 			} while (false);
@@ -1054,23 +1296,45 @@ WtDataWriter::OrdQueBlockPair* WtDataWriter::getOrdQueBlock(WTSContractInfo* ct,
 	}
 
 	pBlock->_lasttime = TimeUtils::getLocalTimeNow() / 1000;
-	return pBlock;
+	return lease;
 }
 
-WtDataWriter::OrdDtlBlockPair* WtDataWriter::getOrdDtlBlock(WTSContractInfo* ct, uint32_t curDate, bool bAutoCreate /* = true */)
+WtDataWriter::BlockLease<WtDataWriter::OrdDtlBlockPair> WtDataWriter::getOrdDtlBlock(WTSContractInfo* ct, uint32_t curDate, bool bAutoCreate /* = true */)
 {
 	if (ct == NULL)
-		return NULL;
+		return {};
 
-	OrdDtlBlockPair* pBlock = NULL;
 	const char* key = ct->getFullCode();
-	pBlock = _rt_orddtl_blocks[key];
-	if (pBlock == NULL)
+	std::shared_ptr<OrdDtlBlockPair> pBlock;
+#if defined(WT_DATA_WRITER_TEST_HOOKS)
+	bool insertedNewPair = false;
+#endif
 	{
-		pBlock = new OrdDtlBlockPair();
-		_rt_orddtl_blocks[key] = pBlock;
-	}
+		StdUniqueLock mapLock(_rt_blocks_map_mtx);
+		auto it = _rt_orddtl_blocks.find(key);
+		if (it == _rt_orddtl_blocks.end())
+		{
+			auto inserted = _rt_orddtl_blocks.emplace(key, std::make_shared<OrdDtlBlockPair>());
+			pBlock = inserted.first->second;
+#if defined(WT_DATA_WRITER_TEST_HOOKS)
+			insertedNewPair = inserted.second;
+#endif
+		}
+		else
+			pBlock = it->second;
 
+#if defined(WT_DATA_WRITER_TEST_HOOKS)
+		if (insertedNewPair)
+		{
+			p10_writer_test_hooks::Hooks hooks;
+			if (copy_p10_test_hooks(this, hooks) && hooks.after_order_detail_insert != nullptr)
+				hooks.after_order_detail_insert(hooks.context);
+		}
+#endif
+	}
+	BlockLease<OrdDtlBlockPair> lease(pBlock, _sink);
+	if (pBlock == nullptr)
+		return {};
 	if (pBlock->_block == NULL)
 	{
 		std::string path = fmt::format("{}rt/orders/{}/", _base_dir.c_str(), ct->getExchg());
@@ -1083,9 +1347,9 @@ WtDataWriter::OrdDtlBlockPair* WtDataWriter::getOrdDtlBlock(WTSContractInfo* ct,
 		if (!StdFile::exists(path.c_str()))
 		{
 			if (!bAutoCreate)
-				return NULL;
+				return {};
 
-			pipe_writer_log(_sink, LL_INFO, "Data file {} not exists, initializing...", path.c_str());
+			defer_writer_log(lease, LL_INFO, "Data file {} not exists, initializing...", path.c_str());
 
 			uint64_t uSize = sizeof(RTDayBlockHeader) + sizeof(WTSOrdDtlStruct) * HFT_SIZE_STEP;
 
@@ -1100,15 +1364,15 @@ WtDataWriter::OrdDtlBlockPair* WtDataWriter::getOrdDtlBlock(WTSContractInfo* ct,
 		pBlock->_file.reset(new BoostMappingFile);
 		if (!pBlock->_file->map(path.c_str()))
 		{
-			pipe_writer_log(_sink, LL_INFO, "Mapping file {} failed", path.c_str());
+			defer_writer_log(lease, LL_INFO, "Mapping file {} failed", path.c_str());
 			pBlock->_file.reset();
-			return NULL;
+			return {};
 		}
 		pBlock->_block = (RTOrdDtlBlock*)pBlock->_file->addr();
 
 		if (!isNew &&  pBlock->_block->_date != curDate)
 		{
-			pipe_writer_log(_sink, LL_INFO, "date[{}] of orderdetail cache block[{}] is different from current date[{}], reinitializing...", pBlock->_block->_date, path.c_str(), curDate);
+			defer_writer_log(lease, LL_INFO, "date[{}] of orderdetail cache block[{}] is different from current date[{}], reinitializing...", pBlock->_block->_date, path.c_str(), curDate);
 			pBlock->_block->_size = 0;
 			pBlock->_block->_date = curDate;
 
@@ -1134,12 +1398,24 @@ WtDataWriter::OrdDtlBlockPair* WtDataWriter::getOrdDtlBlock(WTSContractInfo* ct,
 				if (oldSize != uSize)
 				{
 					uint32_t oldCnt = (uint32_t)((oldSize - sizeof(RTDayBlockHeader)) / sizeof(WTSOrdDtlStruct));
-					//文件大小不匹配,一般是因为capacity改了,但是实际没扩容
-					//这是做一次扩容即可
-					pBlock->_block->_capacity = oldCnt;
-					pBlock->_block->_size = oldCnt;
-
-					pipe_writer_log(_sink, LL_WARN, "Orderdetail cache file of {} on date {} repaired", ct->getCode(), curDate);
+					const uint32_t markedCapacity = pBlock->_block->_capacity;
+					const uint32_t markedSize = pBlock->_block->_size;
+					if (oldSize >= uSize && oldCnt >= markedCapacity && markedSize <= markedCapacity)
+					{
+						pBlock->_block->_capacity = oldCnt;
+						defer_writer_log(lease,
+							LL_WARN,
+							"Orderdetail cache file of {} on date {} has an uncommitted tail; preserving {} records",
+							ct->getCode(), curDate, markedSize);
+					}
+					else
+					{
+						pBlock->_block->_capacity = oldCnt;
+						pBlock->_block->_size = oldCnt;
+						defer_writer_log(lease,
+							LL_WARN,
+							"Orderdetail cache file of {} on date {} repaired", ct->getCode(), curDate);
+					}
 				}
 
 				break;
@@ -1149,23 +1425,30 @@ WtDataWriter::OrdDtlBlockPair* WtDataWriter::getOrdDtlBlock(WTSContractInfo* ct,
 	}
 
 	pBlock->_lasttime = TimeUtils::getLocalTimeNow() / 1000;
-	return pBlock;
+	return lease;
 }
 
-WtDataWriter::TransBlockPair* WtDataWriter::getTransBlock(WTSContractInfo* ct, uint32_t curDate, bool bAutoCreate /* = true */)
+WtDataWriter::BlockLease<WtDataWriter::TransBlockPair> WtDataWriter::getTransBlock(WTSContractInfo* ct, uint32_t curDate, bool bAutoCreate /* = true */)
 {
 	if (ct == NULL)
-		return NULL;
+		return {};
 
-	TransBlockPair* pBlock = NULL;
 	const char* key = ct->getFullCode();
-	pBlock = _rt_trans_blocks[key];
-	if (pBlock == NULL)
+	std::shared_ptr<TransBlockPair> pBlock;
 	{
-		pBlock = new TransBlockPair();
-		_rt_trans_blocks[key] = pBlock;
+		StdUniqueLock mapLock(_rt_blocks_map_mtx);
+		auto it = _rt_trans_blocks.find(key);
+		if (it == _rt_trans_blocks.end())
+		{
+			auto inserted = _rt_trans_blocks.emplace(key, std::make_shared<TransBlockPair>());
+			pBlock = inserted.first->second;
+		}
+		else
+			pBlock = it->second;
 	}
-
+	BlockLease<TransBlockPair> lease(pBlock, _sink);
+	if (pBlock == nullptr)
+		return {};
 	if (pBlock->_block == NULL)
 	{
 		std::string path = fmt::format("{}rt/trans/{}/", _base_dir.c_str(), ct->getExchg());
@@ -1178,9 +1461,9 @@ WtDataWriter::TransBlockPair* WtDataWriter::getTransBlock(WTSContractInfo* ct, u
 		if (!StdFile::exists(path.c_str()))
 		{
 			if (!bAutoCreate)
-				return NULL;
+				return {};
 
-			pipe_writer_log(_sink, LL_INFO, "Data file {} not exists, initializing...", path.c_str());
+			defer_writer_log(lease, LL_INFO, "Data file {} not exists, initializing...", path.c_str());
 
 			uint64_t uSize = sizeof(RTDayBlockHeader) + sizeof(WTSTransStruct) * HFT_SIZE_STEP;
 
@@ -1195,15 +1478,15 @@ WtDataWriter::TransBlockPair* WtDataWriter::getTransBlock(WTSContractInfo* ct, u
 		pBlock->_file.reset(new BoostMappingFile);
 		if (!pBlock->_file->map(path.c_str()))
 		{
-			pipe_writer_log(_sink, LL_INFO, "Mapping file {} failed", path.c_str());
+			defer_writer_log(lease, LL_INFO, "Mapping file {} failed", path.c_str());
 			pBlock->_file.reset();
-			return NULL;
+			return {};
 		}
 		pBlock->_block = (RTTransBlock*)pBlock->_file->addr();
 
 		if (!isNew &&  pBlock->_block->_date != curDate)
 		{
-			pipe_writer_log(_sink, LL_INFO, "date[{}] of transaction cache block[{}] is different from current date[{}], reinitializing...", pBlock->_block->_date, path.c_str(), curDate);
+			defer_writer_log(lease, LL_INFO, "date[{}] of transaction cache block[{}] is different from current date[{}], reinitializing...", pBlock->_block->_date, path.c_str(), curDate);
 			pBlock->_block->_size = 0;
 			pBlock->_block->_date = curDate;
 
@@ -1229,12 +1512,24 @@ WtDataWriter::TransBlockPair* WtDataWriter::getTransBlock(WTSContractInfo* ct, u
 				if (oldSize != uSize)
 				{
 					uint32_t oldCnt = (uint32_t)((oldSize - sizeof(RTDayBlockHeader)) / sizeof(WTSTransStruct));
-					//文件大小不匹配,一般是因为capacity改了,但是实际没扩容
-					//这是做一次扩容即可
-					pBlock->_block->_capacity = oldCnt;
-					pBlock->_block->_size = oldCnt;
-
-					pipe_writer_log(_sink, LL_WARN, "Transaction cache file of {} on date {} repaired", ct->getCode(), curDate);
+					const uint32_t markedCapacity = pBlock->_block->_capacity;
+					const uint32_t markedSize = pBlock->_block->_size;
+					if (oldSize >= uSize && oldCnt >= markedCapacity && markedSize <= markedCapacity)
+					{
+						pBlock->_block->_capacity = oldCnt;
+						defer_writer_log(lease,
+							LL_WARN,
+							"Transaction cache file of {} on date {} has an uncommitted tail; preserving {} records",
+							ct->getCode(), curDate, markedSize);
+					}
+					else
+					{
+						pBlock->_block->_capacity = oldCnt;
+						pBlock->_block->_size = oldCnt;
+						defer_writer_log(lease,
+							LL_WARN,
+							"Transaction cache file of {} on date {} repaired", ct->getCode(), curDate);
+					}
 				}
 
 				break;
@@ -1244,23 +1539,30 @@ WtDataWriter::TransBlockPair* WtDataWriter::getTransBlock(WTSContractInfo* ct, u
 	}
 
 	pBlock->_lasttime = TimeUtils::getLocalTimeNow() / 1000;
-	return pBlock;
+	return lease;
 }
 
-WtDataWriter::TickBlockPair* WtDataWriter::getTickBlock(WTSContractInfo* ct, uint32_t curDate, bool bAutoCreate /* = true */)
+WtDataWriter::BlockLease<WtDataWriter::TickBlockPair> WtDataWriter::getTickBlock(WTSContractInfo* ct, uint32_t curDate, bool bAutoCreate /* = true */)
 {
 	if (ct == NULL)
-		return NULL;
+		return {};
 
-	TickBlockPair* pBlock = NULL;
 	const char* key = ct->getFullCode();
-	pBlock = _rt_ticks_blocks[key];
-	if (pBlock == NULL)
+	std::shared_ptr<TickBlockPair> pBlock;
 	{
-		pBlock = new TickBlockPair();
-		_rt_ticks_blocks[key] = pBlock;
+		StdUniqueLock mapLock(_rt_blocks_map_mtx);
+		auto it = _rt_ticks_blocks.find(key);
+		if (it == _rt_ticks_blocks.end())
+		{
+			auto inserted = _rt_ticks_blocks.emplace(key, std::make_shared<TickBlockPair>());
+			pBlock = inserted.first->second;
+		}
+		else
+			pBlock = it->second;
 	}
-
+	BlockLease<TickBlockPair> lease(pBlock, _sink);
+	if (pBlock == nullptr)
+		return {};
 	if(pBlock->_block == NULL)
 	{
 		std::string path = fmt::format("{}rt/ticks/{}/", _base_dir.c_str(), ct->getExchg());
@@ -1282,9 +1584,9 @@ WtDataWriter::TickBlockPair* WtDataWriter::getTickBlock(WTSContractInfo* ct, uin
 		if (!StdFile::exists(path.c_str()))
 		{
 			if (!bAutoCreate)
-				return NULL;
+				return {};
 
-			pipe_writer_log(_sink, LL_INFO, "Data file {} not exists, initializing...", path.c_str());
+			defer_writer_log(lease, LL_INFO, "Data file {} not exists, initializing...", path.c_str());
 			
 			uint64_t uSize = sizeof(RTTickBlock) + sizeof(WTSTickStruct) * HFT_SIZE_STEP;
 			BoostFile bf;
@@ -1298,15 +1600,15 @@ WtDataWriter::TickBlockPair* WtDataWriter::getTickBlock(WTSContractInfo* ct, uin
 		pBlock->_file.reset(new BoostMappingFile);
 		if(!pBlock->_file->map(path.c_str()))
 		{
-			pipe_writer_log(_sink, LL_ERROR, "Mapping file {} failed", path.c_str());
+			defer_writer_log(lease, LL_ERROR, "Mapping file {} failed", path.c_str());
 			pBlock->_file.reset();
-			return NULL;
+			return {};
 		}
 		pBlock->_block = (RTTickBlock*)pBlock->_file->addr();
 
 		if (!isNew &&  pBlock->_block->_date != curDate)
 		{
-			pipe_writer_log(_sink, LL_INFO, "date[{}] of tick cache block[{}] is different from current date[{}], reinitializing...", pBlock->_block->_date, path.c_str(), curDate);
+			defer_writer_log(lease, LL_INFO, "date[{}] of tick cache block[{}] is different from current date[{}], reinitializing...", pBlock->_block->_date, path.c_str(), curDate);
 			pBlock->_block->_size = 0;
 			pBlock->_block->_date = curDate;
 
@@ -1333,13 +1635,15 @@ WtDataWriter::TickBlockPair* WtDataWriter::getTickBlock(WTSContractInfo* ct, uin
 				{
 					uint32_t realCap = (uint32_t)((realSz - sizeof(RTTickBlock)) / sizeof(WTSTickStruct));
 					uint32_t markedCap = pBlock->_block->_capacity;
-					pipe_writer_log(_sink, LL_WARN, "Tick cache file of {} on {} repaired, real capiacity:{}, marked capacity:{}",
+					uint32_t markedSize = pBlock->_block->_size;
+					defer_writer_log(lease, LL_WARN, "Tick cache file of {} on {} repaired, real capiacity:{}, marked capacity:{}",
 						ct->getCode(), curDate, realCap, markedCap);
 
-					//文件大小不匹配,一般是因为capacity改了,但是实际没扩容
-					//这是做一次扩容即可
 					pBlock->_block->_capacity = realCap;
-					pBlock->_block->_size = min(realCap,markedCap);
+					if (realSz >= uSize && realCap >= markedCap && markedSize <= markedCap)
+						pBlock->_block->_size = markedSize;
+					else
+						pBlock->_block->_size = min(realCap, markedCap);
 				}
 				
 			} while (false);
@@ -1348,7 +1652,7 @@ WtDataWriter::TickBlockPair* WtDataWriter::getTickBlock(WTSContractInfo* ct, uin
 	}
 
 	pBlock->_lasttime = TimeUtils::getLocalTimeNow() / 1000;
-	return pBlock;
+	return lease;
 }
 
 void WtDataWriter::pipeToKlines(WTSContractInfo* ct, WTSTickData* curTick)
@@ -1383,16 +1687,21 @@ void WtDataWriter::pipeToKlines(WTSContractInfo* ct, WTSTickData* curTick)
 	//更新1分钟线
 	if (!_disable_min1)
 	{
-		KBlockPair* pBlockPair = getKlineBlock(ct, KP_Minute1);
+		BlockLease<KBlockPair> pBlockPair = getKlineBlock(ct, KP_Minute1);
 		if (pBlockPair && pBlockPair->_block)
 		{
-			SpinLock lock(pBlockPair->_mutex);
 			RTKlineBlock* blk = pBlockPair->_block;
 			if (blk->_size == blk->_capacity)
 			{
 				pBlockPair->_file->sync();
-				pBlockPair->_block = (RTKlineBlock*)resizeRTBlock<RTKlineBlock, WTSBarStruct>(pBlockPair->_file, blk->_capacity * 2);
-				blk = pBlockPair->_block;
+				RTKlineBlock* expanded = (RTKlineBlock*)resizeRTBlock<RTKlineBlock, WTSBarStruct>(pBlockPair->_file, blk->_capacity * 2);
+				if (expanded == NULL)
+				{
+					pipe_writer_log(_sink, LL_ERROR, "RT 1-minute block of {} could not be expanded", ct->getFullCode());
+					return;
+				}
+				pBlockPair->_block = expanded;
+				blk = expanded;
 			}
 
 			WTSBarStruct* lastBar = NULL;
@@ -1490,16 +1799,21 @@ void WtDataWriter::pipeToKlines(WTSContractInfo* ct, WTSTickData* curTick)
 	//更新5分钟线
 	if (!_disable_min5)
 	{
-		KBlockPair* pBlockPair = getKlineBlock(ct, KP_Minute5);
+		BlockLease<KBlockPair> pBlockPair = getKlineBlock(ct, KP_Minute5);
 		if (pBlockPair && pBlockPair->_block)
 		{
-			SpinLock lock(pBlockPair->_mutex);
 			RTKlineBlock* blk = pBlockPair->_block;
 			if (blk->_size == blk->_capacity)
 			{
 				pBlockPair->_file->sync();
-				pBlockPair->_block = (RTKlineBlock*)resizeRTBlock<RTKlineBlock, WTSBarStruct>(pBlockPair->_file, blk->_capacity * 2);
-				blk = pBlockPair->_block;
+				RTKlineBlock* expanded = (RTKlineBlock*)resizeRTBlock<RTKlineBlock, WTSBarStruct>(pBlockPair->_file, blk->_capacity * 2);
+				if (expanded == NULL)
+				{
+					pipe_writer_log(_sink, LL_ERROR, "RT 5-minute block of {} could not be expanded", ct->getFullCode());
+					return;
+				}
+				pBlockPair->_block = expanded;
+				blk = expanded;
 			}
 
 			WTSBarStruct* lastBar = NULL;
@@ -1595,23 +1909,16 @@ void WtDataWriter::pipeToKlines(WTSContractInfo* ct, WTSTickData* curTick)
 }
 
 template<typename T>
-void WtDataWriter::releaseBlock(T* block)
+void WtDataWriter::releaseBlock(BlockLease<T>& block)
 {
-	if (block == NULL || block->_file == NULL)
-		return;
-
-	SpinLock lock(block->_mutex);
-	block->_block = NULL;
-	block->_file.reset();
-	block->_lasttime = 0;
+	block.closeBlock();
 }
 
-WtDataWriter::KBlockPair* WtDataWriter::getKlineBlock(WTSContractInfo* ct, WTSKlinePeriod period, bool bAutoCreate /* = true */)
+WtDataWriter::BlockLease<WtDataWriter::KBlockPair> WtDataWriter::getKlineBlock(WTSContractInfo* ct, WTSKlinePeriod period, bool bAutoCreate /* = true */)
 {
 	if (ct == NULL)
-		return NULL;
+		return {};
 
-	KBlockPair* pBlock = NULL;
 	const char* key = ct->getFullCode();
 
 	//读取交易的分钟数
@@ -1637,15 +1944,23 @@ WtDataWriter::KBlockPair* WtDataWriter::getKlineBlock(WTSContractInfo* ct, WTSKl
 	}
 
 	if (cache_map == NULL)
-		return NULL;
+		return {};
 
-	pBlock = (*cache_map)[key];
-	if (pBlock == NULL)
+	std::shared_ptr<KBlockPair> pBlock;
 	{
-		pBlock = new KBlockPair();
-		(*cache_map)[key] = pBlock;
+		StdUniqueLock mapLock(_rt_blocks_map_mtx);
+		auto it = cache_map->find(key);
+		if (it == cache_map->end())
+		{
+			auto inserted = cache_map->emplace(key, std::make_shared<KBlockPair>());
+			pBlock = inserted.first->second;
+		}
+		else
+			pBlock = it->second;
 	}
-
+	BlockLease<KBlockPair> lease(pBlock, _sink);
+	if (pBlock == nullptr)
+		return {};
 	if (pBlock->_block == NULL)
 	{
 		thread_local static char path[256] = { 0 };
@@ -1664,9 +1979,9 @@ WtDataWriter::KBlockPair* WtDataWriter::getKlineBlock(WTSContractInfo* ct, WTSKl
 		if (!StdFile::exists(path))
 		{
 			if (!bAutoCreate)
-				return NULL;
+				return {};
 
-			pipe_writer_log(_sink, LL_INFO, "Data file {} not exists, initializing...", path);
+			defer_writer_log(lease, LL_INFO, "Data file {} not exists, initializing...", path);
 
 			uint64_t uSize = sizeof(RTKlineBlock) + sizeof(WTSBarStruct) * totalMins;	//预分配按照K线条数分配
 			BoostFile bf;
@@ -1684,9 +1999,9 @@ WtDataWriter::KBlockPair* WtDataWriter::getKlineBlock(WTSContractInfo* ct, WTSKl
 		}
 		else
 		{
-			pipe_writer_log(_sink, LL_ERROR, "Mapping file {} failed", path);
+			defer_writer_log(lease, LL_ERROR, "Mapping file {} failed", path);
 			pBlock->_file.reset();
-			return NULL;
+			return {};
 		}
 
 		//if(pBlock->_block->_date != uDate)
@@ -1710,7 +2025,80 @@ WtDataWriter::KBlockPair* WtDataWriter::getKlineBlock(WTSContractInfo* ct, WTSKl
 	}
 
 	pBlock->_lasttime = TimeUtils::getLocalTimeNow() / 1000;
-	return pBlock;
+	return lease;
+}
+
+WtDataWriter::RtBlocksSnapshot WtDataWriter::snapshotRtBlocks()
+{
+	RtBlocksSnapshot snapshot;
+#if defined(WT_DATA_WRITER_TEST_HOOKS)
+	StdUniqueLock mapLock(_rt_blocks_map_mtx, std::defer_lock);
+	p10_writer_test_hooks::Hooks hooks;
+	if (copy_p10_test_hooks(this, hooks) && hooks.snapshot_map_lock_contended != nullptr)
+	{
+		if (!mapLock.try_lock())
+		{
+			hooks.snapshot_map_lock_contended(hooks.context);
+			mapLock.lock();
+		}
+	}
+	else
+		mapLock.lock();
+#else
+	StdUniqueLock mapLock(_rt_blocks_map_mtx);
+#endif
+	auto copyEntries = [](const auto& source, auto& destination)
+	{
+		destination.reserve(source.size());
+		for (const auto& entry : source)
+			destination.emplace_back(entry.first, entry.second);
+	};
+	copyEntries(_rt_ticks_blocks, snapshot.ticks);
+	copyEntries(_rt_trans_blocks, snapshot.trans);
+	copyEntries(_rt_orddtl_blocks, snapshot.order_details);
+#if defined(WT_DATA_WRITER_TEST_HOOKS)
+	if (!snapshot.order_details.empty()
+		&& copy_p10_test_hooks(this, hooks)
+		&& hooks.after_order_details_copied != nullptr)
+	{
+		std::weak_ptr<void> pairLifetime(snapshot.order_details.front().second);
+		hooks.after_order_details_copied(hooks.context,
+			snapshot.order_details.front().second.use_count(), pairLifetime);
+	}
+#endif
+	copyEntries(_rt_ordque_blocks, snapshot.order_queues);
+	copyEntries(_rt_min1_blocks, snapshot.min1);
+	copyEntries(_rt_min5_blocks, snapshot.min5);
+	return snapshot;
+}
+
+void WtDataWriter::closeExpiredBlocks(const RtBlocksSnapshot& snapshot, uint64_t now, uint32_t expire_secs)
+{
+	auto closeExpired = [this, now, expire_secs](const auto& entries, const char* message)
+	{
+		for (const auto& entry : entries)
+		{
+			using Pair = typename std::remove_reference<decltype(*entry.second)>::type;
+			bool closed = false;
+			{
+				BlockLease<Pair> lease(entry.second, _sink);
+				const uint64_t lastTime = lease ? lease->_lasttime : 0;
+				if (lastTime != 0 && now > lastTime && now - lastTime > expire_secs)
+				{
+					lease.closeBlock();
+					closed = true;
+				}
+			}
+			if (closed)
+				pipe_writer_log(_sink, LL_INFO, message, entry.first.c_str());
+		}
+	};
+	closeExpired(snapshot.ticks, "tick cache of {} mapping expired, automatically closed");
+	closeExpired(snapshot.trans, "trans cache of {} mapping expired, automatically closed");
+	closeExpired(snapshot.order_details, "order cache of {} mapping expired, automatically closed");
+	closeExpired(snapshot.order_queues, "queue cache of {} mapping expired, automatically closed");
+	closeExpired(snapshot.min1, "min1 cache of {} mapping expired, automatically closed");
+	closeExpired(snapshot.min5, "min5 cache of {} mapping expired, automatically closed");
 }
 
 WTSTickData* WtDataWriter::getCurTick(const char* code, const char* exchg/* = ""*/)
@@ -1967,8 +2355,21 @@ void WtDataWriter::check_loop()
 		_check_worker_id = std::this_thread::get_id();
 	}
 	uint32_t expire_secs = 600;
+#if defined(WT_DATA_WRITER_TEST_HOOKS)
+	bool firstCheckCycle = true;
+#endif
 	while (!_terminated.load())
 	{
+#if defined(WT_DATA_WRITER_TEST_HOOKS)
+		bool skipWait = false;
+		if (firstCheckCycle)
+		{
+			p10_writer_test_hooks::Hooks hooks;
+			skipWait = copy_p10_test_hooks(this, hooks) && hooks.skip_initial_check_wait;
+		}
+		firstCheckCycle = false;
+		if (!skipWait)
+#endif
 		{
 			StdUniqueLock checkLock(_check_mtx);
 			_check_cond.wait_for(checkLock, std::chrono::seconds(10),
@@ -1988,71 +2389,23 @@ void WtDataWriter::check_loop()
 		if (closeWorkerStarted)
 			break;
 
-		uint64_t now = TimeUtils::getLocalTimeNow() / 1000;
-		for (auto it = _rt_ticks_blocks.begin(); it != _rt_ticks_blocks.end(); it++)
+		try
 		{
-			const char* key = it->first.c_str();
-			TickBlockPair* tBlk = (TickBlockPair*)it->second;
-			if (tBlk->_lasttime != 0 && (now - tBlk->_lasttime > expire_secs))
-			{
-				pipe_writer_log(_sink, LL_INFO, "tick cache of {} mapping expired, automatically closed", key);
-				releaseBlock<TickBlockPair>(tBlk);
-			}
+			uint64_t now = TimeUtils::getLocalTimeNow() / 1000;
+			const RtBlocksSnapshot snapshot = snapshotRtBlocks();
+			closeExpiredBlocks(snapshot, now, expire_secs);
 		}
-
-		for (auto it = _rt_trans_blocks.begin(); it != _rt_trans_blocks.end(); it++)
+		catch (const std::exception& ex)
 		{
-			const char* key = it->first.c_str();
-			TransBlockPair* tBlk = (TransBlockPair*)it->second;
-			if (tBlk->_lasttime != 0 && (now - tBlk->_lasttime > expire_secs))
-			{
-				pipe_writer_log(_sink, LL_INFO, "trans cache o {} mapping expired, automatically closed", key);
-				releaseBlock<TransBlockPair>(tBlk);
-			}
+			// Snapshot allocation and log formatting can fail. Keep the checker alive
+			// and retry on the next interval instead of escaping the thread entry point.
+			try { pipe_writer_log(_sink, LL_ERROR, "RT block checker failed: {}", ex.what()); }
+			catch (...) {}
 		}
-
-		for (auto it = _rt_orddtl_blocks.begin(); it != _rt_orddtl_blocks.end(); it++)
+		catch (...)
 		{
-			const char* key = it->first.c_str();
-			OrdDtlBlockPair* tBlk = (OrdDtlBlockPair*)it->second;
-			if (tBlk->_lasttime != 0 && (now - tBlk->_lasttime > expire_secs))
-			{
-				pipe_writer_log(_sink, LL_INFO, "order cache of {} mapping expired, automatically closed", key);
-				releaseBlock<OrdDtlBlockPair>(tBlk);
-			}
-		}
-
-		for (auto& v : _rt_ordque_blocks)
-		{
-			const char* key = v.first.c_str();
-			OrdQueBlockPair* tBlk = (OrdQueBlockPair*)v.second;
-			if (tBlk->_lasttime != 0 && (now - tBlk->_lasttime > expire_secs))
-			{
-				pipe_writer_log(_sink, LL_INFO, "queue cache of {} mapping expired, automatically closed", key);
-				releaseBlock<OrdQueBlockPair>(tBlk);
-			}
-		}
-
-		for (auto it = _rt_min1_blocks.begin(); it != _rt_min1_blocks.end(); it++)
-		{
-			const char* key = it->first.c_str();
-			KBlockPair* kBlk = (KBlockPair*)it->second;
-			if (kBlk->_lasttime != 0 && (now - kBlk->_lasttime > expire_secs))
-			{
-				pipe_writer_log(_sink, LL_INFO, "min1 cache of {} mapping expired, automatically closed", key);
-				releaseBlock<KBlockPair>(kBlk);
-			}
-		}
-
-		for (auto it = _rt_min5_blocks.begin(); it != _rt_min5_blocks.end(); it++)
-		{
-			const char* key = it->first.c_str();
-			KBlockPair* kBlk = (KBlockPair*)it->second;
-			if (kBlk->_lasttime != 0 && (now - kBlk->_lasttime > expire_secs))
-			{
-				pipe_writer_log(_sink, LL_INFO, "min5 cache of {} mapping expired, automatically closed", key);
-				releaseBlock<KBlockPair>(kBlk);
-			}
+			try { pipe_writer_log(_sink, LL_ERROR, "RT block checker failed with an unknown exception"); }
+			catch (...) {}
 		}
 	}
 	{
@@ -2118,12 +2471,12 @@ uint32_t WtDataWriter::dump_bars_via_dumper(WTSContractInfo* ct)
 	}
 
 	//转移实时1分钟线
-	KBlockPair* kBlkPair = getKlineBlock(ct, KP_Minute1, false);
-	if (kBlkPair != NULL && kBlkPair->_block->_size > 0)
+	{
+	BlockLease<KBlockPair> kBlkPair = getKlineBlock(ct, KP_Minute1, false);
+	if (kBlkPair && kBlkPair->_block != nullptr && kBlkPair->_block->_size > 0)
 	{
 		uint32_t size = kBlkPair->_block->_size;
 		pipe_writer_log(_sink, LL_INFO, "Transfering min1 bars of {}...", ct->getFullCode());
-		SpinLock lock(kBlkPair->_mutex);
 
 		for (auto& item : _dumpers)
 		{
@@ -2150,14 +2503,15 @@ uint32_t WtDataWriter::dump_bars_via_dumper(WTSContractInfo* ct)
 
 	if (kBlkPair)
 		releaseBlock(kBlkPair);
+	}
 
 	//第四步,转移实时5分钟线
-	kBlkPair = getKlineBlock(ct, KP_Minute5, false);
-	if (kBlkPair != NULL && kBlkPair->_block->_size > 0)
+	{
+	BlockLease<KBlockPair> kBlkPair = getKlineBlock(ct, KP_Minute5, false);
+	if (kBlkPair && kBlkPair->_block != nullptr && kBlkPair->_block->_size > 0)
 	{
 		uint32_t size = kBlkPair->_block->_size;
 		pipe_writer_log(_sink, LL_INFO, "Transfering min5 bars of {}...", ct->getFullCode());
-		SpinLock lock(kBlkPair->_mutex);
 
 		for (auto& item : _dumpers)
 		{
@@ -2184,6 +2538,7 @@ uint32_t WtDataWriter::dump_bars_via_dumper(WTSContractInfo* ct)
 
 	if (kBlkPair)
 		releaseBlock(kBlkPair);
+	}
 
 	return count;
 }
@@ -2292,7 +2647,13 @@ bool WtDataWriter::dump_day_data(WTSContractInfo* ct, WTSBarStruct* newBar)
 	std::stringstream ss;
 	ss << _base_dir << "his/day/" << ct->getExchg() << "/";
 	std::string path = ss.str();
-	fs::create_directories(ss.str().c_str());
+	boost::system::error_code directoryError;
+	fs::create_directories(path, directoryError);
+	if (directoryError)
+	{
+		pipe_writer_log(_sink, LL_ERROR, "Failed to create history day directory");
+		return false;
+	}
 
 	std::string filename = fmtutil::format("{}{}.dsb", path, ct->getCode());
 	/*
@@ -2463,12 +2824,11 @@ uint32_t WtDataWriter::dump_bars_to_file(WTSContractInfo* ct)
 	//转移实时1分钟线
 	if (!_disable_min1)
 	{
-		KBlockPair* kBlkPair = getKlineBlock(ct, KP_Minute1, false);
-		if (kBlkPair != NULL && kBlkPair->_block->_size > 0)
+		BlockLease<KBlockPair> kBlkPair = getKlineBlock(ct, KP_Minute1, false);
+		if (kBlkPair && kBlkPair->_block != nullptr && kBlkPair->_block->_size > 0)
 		{
 			uint32_t size = kBlkPair->_block->_size;
 			pipe_writer_log(_sink, LL_INFO, "Transfering min1 bars of {}...", ct->getFullCode());
-			SpinLock lock(kBlkPair->_mutex);
 
 			std::stringstream ss;
 			ss << _base_dir << "his/min1/" << ct->getExchg() << "/";
@@ -2554,12 +2914,11 @@ uint32_t WtDataWriter::dump_bars_to_file(WTSContractInfo* ct)
 	//第四步,转移实时5分钟线
 	if (!_disable_min5)
 	{
-		KBlockPair* kBlkPair = getKlineBlock(ct, KP_Minute5, false);
-		if (kBlkPair != NULL && kBlkPair->_block->_size > 0)
+		BlockLease<KBlockPair> kBlkPair = getKlineBlock(ct, KP_Minute5, false);
+		if (kBlkPair && kBlkPair->_block != nullptr && kBlkPair->_block->_size > 0)
 		{
 			uint32_t size = kBlkPair->_block->_size;
 			pipe_writer_log(_sink, LL_INFO, "Transfering min5 bar of {}...", ct->getFullCode());
-			SpinLock lock(kBlkPair->_mutex);
 
 			std::stringstream ss;
 			ss << _base_dir << "his/min5/" << ct->getExchg() << "/";
@@ -2833,16 +3192,15 @@ void WtDataWriter::proc_loop()
 			//转移实时tick数据
 			if (!_disable_tick)
 			{
-				TickBlockPair *tBlkPair = getTickBlock(ct, uDate, false);
-				if (tBlkPair != NULL)
+				BlockLease<TickBlockPair> tBlkPair = getTickBlock(ct, uDate, false);
+				if (tBlkPair)
 				{
 					if (tBlkPair->_fstream)
 						tBlkPair->_fstream.reset();
 
-					if (tBlkPair->_block->_size > 0)
+					if (tBlkPair->_block != nullptr && tBlkPair->_block->_size > 0)
 					{
 						pipe_writer_log(_sink, LL_INFO, "Transfering tick data of {}...", fullcode.c_str());
-						SpinLock lock(tBlkPair->_mutex);
 
 						for (auto& item : _dumpers)
 						{
@@ -2906,11 +3264,10 @@ void WtDataWriter::proc_loop()
 			//转移实时trans数据
 			if (!_disable_trans)
 			{
-				TransBlockPair *tBlkPair = getTransBlock(ct, uDate, false);
-				if (tBlkPair != NULL && tBlkPair->_block->_size > 0)
+				BlockLease<TransBlockPair> tBlkPair = getTransBlock(ct, uDate, false);
+				if (tBlkPair && tBlkPair->_block != nullptr && tBlkPair->_block->_size > 0)
 				{
 					pipe_writer_log(_sink, LL_INFO, "Transfering transaction data of {}...", fullcode.c_str());
-					SpinLock lock(tBlkPair->_mutex);
 
 					for (auto& item : _dumpers)
 					{
@@ -2972,11 +3329,10 @@ void WtDataWriter::proc_loop()
 			//转移实时order数据
 			if (!_disable_orddtl)
 			{
-				OrdDtlBlockPair *tBlkPair = getOrdDtlBlock(ct, uDate, false);
-				if (tBlkPair != NULL && tBlkPair->_block->_size > 0)
+				BlockLease<OrdDtlBlockPair> tBlkPair = getOrdDtlBlock(ct, uDate, false);
+				if (tBlkPair && tBlkPair->_block != nullptr && tBlkPair->_block->_size > 0)
 				{
 					pipe_writer_log(_sink, LL_INFO, "Transfering order detail data of {}...", fullcode.c_str());
-					SpinLock lock(tBlkPair->_mutex);
 
 					for (auto& item : _dumpers)
 					{
@@ -3038,11 +3394,10 @@ void WtDataWriter::proc_loop()
 			//转移实时queue数据
 			if (!_disable_ordque)
 			{
-				OrdQueBlockPair *tBlkPair = getOrdQueBlock(ct, uDate, false);
-				if (tBlkPair != NULL && tBlkPair->_block->_size > 0)
+				BlockLease<OrdQueBlockPair> tBlkPair = getOrdQueBlock(ct, uDate, false);
+				if (tBlkPair && tBlkPair->_block != nullptr && tBlkPair->_block->_size > 0)
 				{
 					pipe_writer_log(_sink, LL_INFO, "Transfering order queue data of {}...", fullcode.c_str());
-					SpinLock lock(tBlkPair->_mutex);
 
 					for (auto& item : _dumpers)
 					{

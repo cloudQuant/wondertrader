@@ -12,8 +12,8 @@
  * 三段式 SHFE.rb.2510（既有 R113/R124 用两段式 SHFE.rb2510，commodity 解析不到，
  * 信号/委托表一直为空，见 bugs/R134.md BUG-R134-003）。
  *
- * 边界：同步、无行情回放、无线程；mocker 由 config 根据 env.mocker 建立；
- * 临时目录用完清理；每个用例 reset 单例。
+ * 边界：同步、无行情回放、无线程；config 只初始化回放器，随后通过公开
+ * init*Mocker API 建立无策略插件的空 mocker；临时目录用完清理；每个用例 reset 单例。
  */
 #include <gtest/gtest.h>
 
@@ -93,23 +93,15 @@ namespace
 	const char* kContracts =
 		"{\"SHFE\":{\"rb2510\":{\"name\":\"rb2510\",\"product\":\"rb\",\"exchg\":\"SHFE\"}}}";
 
-	std::string make_cfg(const std::string& dir, const char* mode)
+	std::string make_cfg(const std::string& dir)
 	{
-		std::string section;
-		if (strcmp(mode, "hft") == 0)
-			section = "\"hft\":{\"name\":\"r134_hft_ord\"}";
-		else
-			section = "\"" + std::string(mode) + "\":{\"name\":\"r134_" +
-				std::string(mode) + "_pos\",\"slippage\":0}";
-
 		return "{\"replayer\":{\"mode\":\"none\",\"path\":\"" + dir + "\","
 			"\"stime\":20240103000000,\"etime\":20240104000000,\"tick\":false,"
 			"\"basefiles\":{"
 			"\"session\":\"" + dir + "/sessions.json\","
 			"\"commodity\":\"" + dir + "/commodities.json\","
 			"\"contract\":\"" + dir + "/contracts.json\"}},"
-			"\"env\":{\"mocker\":\"" + std::string(mode) + "\"},"
-			+ section + "}";
+			"\"env\":{\"mocker\":\"none\"}}";
 	}
 
 	struct OrderFixture
@@ -129,7 +121,14 @@ namespace
 			g_pos.clear();
 			reset_singleton();
 			getRunner().init((dir + "/r134_absent_logcfg.yaml").c_str(), true, dir.c_str());
-			getRunner().config(make_cfg(dir, mode).c_str(), false);
+			getRunner().config(make_cfg(dir).c_str(), false);
+
+			if (strcmp(mode, "cta") == 0)
+				getRunner().initCtaMocker(tag, 0, false, false, false, false);
+			else if (strcmp(mode, "sel") == 0)
+				getRunner().initSelMocker(tag, 20240103, 93000, "d");
+			else if (strcmp(mode, "hft") == 0)
+				getRunner().initHftMocker(tag, false);
 
 			if (strcmp(mode, "cta") == 0)
 				return getRunner().cta_mocker() != nullptr;

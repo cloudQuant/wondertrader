@@ -94,14 +94,20 @@ protected:
 
 	void expect_cached_tail(WTSKlinePeriod period, uint32_t date, uint64_t time)
 	{
-		const uint64_t etime = period == KP_DAY ? 20230102150000000ull : 20230103093500000ull;
+		// Query at the minute-end update's inclusive boundary. Querying at the
+		// earlier load_period cutoff must exclude the newly appended future bar.
+		const uint64_t etime = period == KP_DAY ? 20230103150000000ull : 20230103094000000ull;
 		WTSKlineSlice* slice = _reader->readKlineSlice("EXMX.rb2301", period, 2, etime);
 		ASSERT_NE(slice, nullptr);
 		ASSERT_EQ(slice->size(), 2u);
-		const WTSBarStruct* bars = slice->get_block_addr(0);
-		ASSERT_NE(bars, nullptr);
-		EXPECT_EQ(bars[1].date, date);
-		EXPECT_EQ(bars[1].time, time);
+		const WTSBarStruct* first = slice->at(0);
+		const WTSBarStruct* tail = slice->at(1);
+		ASSERT_NE(first, nullptr);
+		ASSERT_NE(tail, nullptr);
+		EXPECT_DOUBLE_EQ(first->close, period == KP_DAY ? 4000.5 : 3900.5);
+		EXPECT_EQ(tail->date, date);
+		EXPECT_EQ(tail->time, time);
+		EXPECT_DOUBLE_EQ(tail->close, period == KP_DAY ? 4010.0 : 3910.0);
 		slice->release();
 	}
 
@@ -149,19 +155,36 @@ TEST_F(R100ADReaderTest, R100ReaderADOnMinuteEndMinutes)
 
 	init_reader();
 
-	// min1：count=2, etime=09:31 -> get_lowers 取最后 2 根（09:31/09:32），
-	// 末条不早于 etime，因此本次读不再访问 LMDB（避免第三次 get_k_db 的空句柄缺陷）。
-	WTSKlineSlice* s1 = _reader->readKlineSlice("EXM1.rb2301", KP_Minute1, 2, 20230103093100000ull);
+	// min1：09:32 是本次请求的 inclusive cutoff，恰好包含 09:31/09:32；
+	// 末条等于 cutoff，因此本次读不再访问 LMDB 更新（避免第三次 get_k_db 的空句柄缺陷）。
+	WTSKlineSlice* s1 = _reader->readKlineSlice("EXM1.rb2301", KP_Minute1, 2, 20230103093200000ull);
 	ASSERT_TRUE(s1 != NULL);
 	EXPECT_EQ(s1->size(), 2u);
+	ASSERT_NE(s1->at(0), nullptr);
+	ASSERT_NE(s1->at(1), nullptr);
+	EXPECT_EQ(s1->at(0)->time, min_bar(kDate, 931));
+	EXPECT_EQ(s1->at(1)->time, min_bar(kDate, 932));
+	EXPECT_DOUBLE_EQ(s1->at(0)->close, 3900.5);
+	EXPECT_DOUBLE_EQ(s1->at(1)->close, 3910.5);
 	s1->release();
 	EXPECT_EQ(_sink->bar_calls(), 0u);
 
-	// min5：count=3, etime=09:30 -> 只做一次 get_k_db，供随后的 onMinuteEnd 使用第二次
-	WTSKlineSlice* s5 = _reader->readKlineSlice("EXM1.rb2301", KP_Minute5, 3, 20230103093000000ull);
+	// min5：09:45 是 inclusive cutoff，恰好包含 LMDB 中的三根；本次读
+	// 只做一次 get_k_db，供随后的 onMinuteEnd 使用相同缓存句柄。
+	WTSKlineSlice* s5 = _reader->readKlineSlice("EXM1.rb2301", KP_Minute5, 3, 20230103094500000ull);
 	ASSERT_TRUE(s5 != NULL);
 	EXPECT_EQ(s5->size(), 3u);
+	ASSERT_NE(s5->at(0), nullptr);
+	ASSERT_NE(s5->at(1), nullptr);
+	ASSERT_NE(s5->at(2), nullptr);
+	EXPECT_EQ(s5->at(0)->time, min_bar(kDate, 930));
+	EXPECT_EQ(s5->at(1)->time, min_bar(kDate, 935));
+	EXPECT_EQ(s5->at(2)->time, min_bar(kDate, 945));
+	EXPECT_DOUBLE_EQ(s5->at(0)->close, 3900.5);
+	EXPECT_DOUBLE_EQ(s5->at(1)->close, 3910.5);
+	EXPECT_DOUBLE_EQ(s5->at(2)->close, 3945.5);
 	s5->release();
+	EXPECT_EQ(_sink->bar_calls(), 0u);
 
 	// onMinuteEnd 处理 min1 时缓存 09:40 追加并回调；min5 只做等值检查。
 	_reader->onMinuteEnd(kDate, 1000, 0);

@@ -119,7 +119,14 @@ inline WTSArray* makeArray(std::initializer_list<T*> items)
 
 inline void seedPos(wtp::TraderAdapter& trader, std::initializer_list<WTSPositionItem*> items)
 {
-    trader.onRspPosition(makeArray(items));
+    WTSArray* positions = makeArray(items);
+    for (WTSPositionItem* item : items)
+    {
+        if (item)
+            item->release(); // Transfer each creator reference to the array.
+    }
+    trader.onRspPosition(positions);
+    positions->release();
 }
 
 } // namespace r59x
@@ -140,6 +147,10 @@ protected:
         comm_->setSessionInfo(sess);
         ct_->getCommInfo()->setSessionInfo(sess);
         ct2_->getCommInfo()->setSessionInfo(sess);
+        // Both fixture commodities retained the session. Drop the creator
+        // reference now; P11TraderTest releases the commodities after derived
+        // adapters have been destroyed.
+        sess->release();
         WtHelper::setTime(20240510, 1000, 0);
     }
 

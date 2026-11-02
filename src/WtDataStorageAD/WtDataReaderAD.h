@@ -73,7 +73,7 @@ public:
 	 * 
 	 * @param stdCode 标准合约代码
 	 * @param count 请求的数据条数
-	 * @param etime 结束时间，格式YYYYMMDDHHMMSSmmm，默认为0（表示当前时间）
+	 * @param etime 结束时间，格式 YYYYMMDDHHMMSSmmm，默认为0（表示当前时间）
 	 * @return WTSTickSlice* Tick数据切片指针，需要用户释放
 	 */
 	virtual WTSTickSlice*	readTickSlice(const char* stdCode, uint32_t count, uint64_t etime = 0) override;
@@ -84,12 +84,15 @@ public:
 	 * @param stdCode 标准合约代码
 	 * @param period K线周期，支持日线、1分钟、5分钟
 	 * @param count 请求的数据条数
-	 * @param etime 结束时间，格式YYYYMMDDHHMMSSmmm，默认为0（表示当前时间）
+	 * @param etime 结束时间，支持 YYYYMMDDHHMM 与 YYYYMMDDHHMMSSmmm；0 表示当前时间
 	 * @return WTSKlineSlice* K线数据切片指针，需要用户释放
 	 */
 	virtual WTSKlineSlice*	readKlineSlice(const char* stdCode, WTSKlinePeriod period, uint32_t count, uint64_t etime = 0) override;
 
 private:
+	friend struct WtDataReaderADTestAccess;
+	static void set_test_cursor_get_override(LMDBRangeCursorGetOverride callback, void* context);
+
 	/**
 	 * @brief 数据存储的基础目录
 	 */
@@ -275,10 +278,12 @@ private:
 	 * @param stdCode 标准合约代码
 	 * @param period K线周期
 	 * @param count 请求的数据条数
+	 * @param cutoff 周期对应的包含式 LMDB K 线键上界
 	 * @return true 缓存成功
 	 * @return false 缓存失败
 	 */
-	bool	cacheBarsFromStorage(const std::string& key, const char* stdCode, WTSKlinePeriod period, uint32_t count);
+	bool	cacheBarsFromStorage(const std::string& key, const char* stdCode, WTSKlinePeriod period,
+		uint32_t count, uint32_t cutoff);
 
 	/**
 	 * @brief 从LMDB数据库中更新缓存的数据
@@ -288,8 +293,10 @@ private:
 	 * @param code 合约代码
 	 * @param period K线周期
 	 * @param lastBarTime 最后K线时间，引用参数，会被更新
+	 * @param cutoff 周期对应的包含式 LMDB K 线键上界
 	 */
-	bool	update_cache_from_lmdb(BarsList& barsList, const char* exchg, const char* code, WTSKlinePeriod period, uint32_t& lastBarTime);
+	bool	update_cache_from_lmdb(BarsList& barsList, const char* exchg, const char* code,
+		WTSKlinePeriod period, uint32_t& lastBarTime, uint32_t cutoff);
 
 	/**
 	 * @brief 将K线数据读入到缓冲区
@@ -297,9 +304,13 @@ private:
 	 * @param exchg 交易所代码
 	 * @param code 合约代码
 	 * @param period K线周期
-	 * @return std::string 包含K线数据的字符串缓冲区
+	 * @return std::string 包含K线数据的字符串缓冲区；旧接口无法区分空结果和失败
 	 */
 	std::string	read_bars_to_buffer(const char* exchg, const char* code, WTSKlinePeriod period);
+	// An empty successful result replaces buffer with an empty string. On any
+	// query, key or value failure, return false and leave buffer untouched.
+	bool read_bars_to_buffer(const char* exchg, const char* code, WTSKlinePeriod period,
+		std::string& buffer);
 
 	/**
 	 * @brief 获取实时缓存中的K线数据

@@ -49,6 +49,8 @@ TEST_F(R122RdmByRangeTest, R122RdmOrdQueByRangeCrossDateAndMissing)
 	rt.push_back(make_ordque(20240110, 20240109, 143000000, 42));
 	rt.push_back(make_ordque(20240110, 20240110, 93000000, 43));
 	rt.push_back(make_ordque(20240110, 20240110, 103000000, 44));
+	// The final RT slot is owned by the writer and is excluded by range readers.
+	rt.push_back(make_ordque(20240110, 20240110, 113000000, 45));
 	ASSERT_TRUE(write_bytes("rt/queue/SSE/600801.dmb",
 		make_rt_block<WTSOrdQueStruct>(BT_RT_OrdQueue, 20240110, (uint32_t)rt.size(), 8, rt)));
 
@@ -99,6 +101,8 @@ TEST_F(R122RdmByRangeTest, R122RdmDtlTransByRangeCrossDateAndMissing)
 	rt_dtl.push_back(make_orddtl(20240110, 20240109, 143000000, 52));
 	rt_dtl.push_back(make_orddtl(20240110, 20240110, 93000000, 53));
 	rt_dtl.push_back(make_orddtl(20240110, 20240110, 103000000, 54));
+	// The final RT slot is reserved for the writer's in-progress record.
+	rt_dtl.push_back(make_orddtl(20240110, 20240110, 113000000, 55));
 	ASSERT_TRUE(write_bytes("rt/orders/SSE/600804.dmb",
 		make_rt_block<WTSOrdDtlStruct>(BT_RT_OrdDetail, 20240110, (uint32_t)rt_dtl.size(), 8, rt_dtl)));
 
@@ -143,6 +147,8 @@ TEST_F(R122RdmByRangeTest, R122RdmDtlTransByRangeCrossDateAndMissing)
 	rt_trs.push_back(make_trans(20240110, 20240109, 143000000, 62));
 	rt_trs.push_back(make_trans(20240110, 20240110, 93000000, 63));
 	rt_trs.push_back(make_trans(20240110, 20240110, 103000000, 64));
+	// Keep one writer-owned final slot beyond the two query-visible records.
+	rt_trs.push_back(make_trans(20240110, 20240110, 113000000, 65));
 	ASSERT_TRUE(write_bytes("rt/trans/SSE/600808.dmb",
 		make_rt_block<WTSTransStruct>(BT_RT_Trnsctn, 20240110, (uint32_t)rt_trs.size(), 8, rt_trs)));
 

@@ -17,6 +17,8 @@
 #include <gtest/gtest.h>
 
 #include <atomic>
+#include <algorithm>
+#include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <string>
@@ -55,21 +57,16 @@ protected:
 		fs::remove_all(_dir, ec);
 	}
 
-	// 在独立子目录里放一个 libWtIndexFactory.dylib 的符号链接（失败时退化为复制），
+	// 在独立子目录里复制一个 libWtIndexFactory.dylib，
 	// 让 loadFactories 只扫描这一个模块，不碰 bin 目录里的其他插件。
 	fs::path makePluginDir(const fs::path& plugin)
 	{
 		static std::atomic<int> seq { 0 };
 		fs::path d = _dir / ("fact_" + std::to_string(seq++));
 		fs::create_directories(d);
-		fs::path link = d / "libWtIndexFactory.dylib";
+		fs::path stagedPlugin = d / "libWtIndexFactory.dylib";
 		std::error_code ec;
-		fs::create_symlink(plugin, link, ec);
-		if (ec)
-		{
-			ec.clear();
-			fs::copy_file(plugin, link, fs::copy_options::overwrite_existing, ec);
-		}
+		fs::copy_file(plugin, stagedPlugin, fs::copy_options::overwrite_existing, ec);
 		return ec ? fs::path() : d;
 	}
 
@@ -179,13 +176,12 @@ TEST_F(R68IndexWorkerFactoryTest, InitCreatesBuiltinWorkerAndInitializesIt)
 	EXPECT_EQ(mgr.sub_ticks("SSE.600000"), nullptr);
 
 	// IndexWorkerMgr.cpp:180-202：已订阅 -> retain；_pool 为空 -> 同步遍历 _workers，
-	// 工厂产出的 WtBlkIdxWorker 对空权重表直接返回。同步分支不配对 release（BUG-R18-007）。
+	// 工厂产出的 WtBlkIdxWorker 对空权重表直接返回；同步处理结束后临时引用归还。
 	WTSTickData* tick = makeTick("600000", "SSE");
 	ASSERT_NE(tick, nullptr);
 	ASSERT_EQ(tick->retainCount(), 1u);
 	mgr.handle_quote(tick);
-	EXPECT_EQ(tick->retainCount(), 2u);
-	tick->release();
+	EXPECT_EQ(tick->retainCount(), 1u);
 	tick->release();
 }
 
@@ -227,10 +223,75 @@ TEST_F(R68IndexWorkerFactoryTest, RepeatedLoadKeepsFactoryUsable)
 	WTSTickData* tick = makeTick("rb2410", "SHFE");
 	ASSERT_NE(tick, nullptr);
 	mgr.handle_quote(tick);
-	// 同步分支的 retain 泄漏（BUG-R18-007）：自有 1 + 该分支 1
-	EXPECT_EQ(tick->retainCount(), 2u);
+	// 同步分发结束后应归还本次临时 retain。
+	EXPECT_EQ(tick->retainCount(), 1u);
 	tick->release();
+}
+
+TEST_F(R68IndexWorkerFactoryTest, RepeatedSameModuleDoesNotRecreateFactoryOrInvalidateWorker)
+{
+	const char* fixture = std::getenv("WT_R68_COUNTING_PLUGIN");
+	if (fixture == nullptr || fixture[0] == '\0')
+	{
+#ifdef WT_R68_COUNTING_PLUGIN_PATH
+		fixture = WT_R68_COUNTING_PLUGIN_PATH;
+#else
+		FAIL() << "counting fixture unavailable: build its target or set WT_R68_COUNTING_PLUGIN";
+#endif
+	}
+	std::error_code ec;
+	ASSERT_TRUE(fs::is_regular_file(fs::symlink_status(fixture, ec)));
+	ASSERT_FALSE(ec);
+	const fs::path factDir = _dir / "counted";
+	ASSERT_TRUE(fs::create_directories(factDir));
+#ifdef __APPLE__
+	const fs::path plugin = factDir / "libR68Counter.dylib";
+#else
+	const fs::path plugin = factDir / "libR68Counter.so";
+#endif
+	ASSERT_TRUE(fs::copy_file(fixture, plugin, fs::copy_options::none, ec));
+	ASSERT_FALSE(ec);
+	const std::string log = (_dir / "factory-events.txt").string();
+	const char* oldEnv = std::getenv("WT_R68_FACTORY_EVENTS");
+	const bool hadEnv = oldEnv != nullptr;
+	const std::string previous = hadEnv ? oldEnv : "";
+	struct EnvRestore
+	{
+		bool hadValue;
+		std::string value;
+		~EnvRestore() { if (hadValue) setenv("WT_R68_FACTORY_EVENTS", value.c_str(), 1); else unsetenv("WT_R68_FACTORY_EVENTS"); }
+	} envRestore{hadEnv, previous};
+	ASSERT_EQ(0, setenv("WT_R68_FACTORY_EVENTS", log.c_str(), 1));
+
+	WTSVariant* cfg = loadCfg("counted.json", R"JSON({
+		"poolsize":0,"indice":[{"active":true,"id":"counted","name":"R68Counter.Counter"}]
+	})JSON");
+	ASSERT_NE(cfg, nullptr);
+	WTSBaseDataMgr bdMgr;
+	DataManager dm;
+	IndexWorkerMgr mgr;
+	ASSERT_TRUE(mgr.loadFactories(factDir.string().c_str()));
+	ASSERT_TRUE(mgr.init(cfg, nullptr, &bdMgr, &dm));
+	cfg->release();
+	EXPECT_EQ(nullptr, mgr.sub_ticks("SHFE.rb2410"));
+	WTSTickData* tick = makeTick("rb2410", "SHFE");
+	ASSERT_NE(tick, nullptr);
+	mgr.handle_quote(tick);
+	ASSERT_TRUE(mgr.loadFactories(factDir.string().c_str()));
+	mgr.handle_quote(tick);
+	EXPECT_EQ(1u, tick->retainCount());
 	tick->release();
+
+	std::ifstream input(log);
+	std::vector<std::string> events;
+	for (std::string line; std::getline(input, line);)
+		events.push_back(line);
+	EXPECT_EQ(1, std::count(events.begin(), events.end(), "module-loaded"));
+	EXPECT_EQ(1, std::count(events.begin(), events.end(), "factory-created"));
+	EXPECT_EQ(1, std::count(events.begin(), events.end(), "worker-created"));
+	EXPECT_EQ(1, std::count(events.begin(), events.end(), "worker-initialized"));
+	EXPECT_EQ(2, std::count(events.begin(), events.end(), "worker-quote"));
+	EXPECT_EQ(0, std::count(events.begin(), events.end(), "module-unloaded"));
 }
 
 }	// namespace

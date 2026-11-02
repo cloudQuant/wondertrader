@@ -22,6 +22,7 @@
  *   本 lane 不构造 WTSCommodityInfo/WTSContractInfo, 因此只走 get_commodity_info 的 NULL 分支。
  */
 #include <gtest/gtest.h>
+#include "p02_test_environment.h"
 
 #include <boost/noncopyable.hpp>
 
@@ -50,21 +51,8 @@ namespace fs = std::filesystem;
 
 std::string p02_engine_tmp_root()
 {
-    static std::string root = []() {
-        std::string name = "p02_wtcore_" + std::to_string(static_cast<long long>(::getpid()));
-        fs::path path = fs::temp_directory_path() / name;
-        std::error_code ec;
-        fs::create_directories(path, ec);
-        return path.string() + "/";
-    }();
-    return root;
+    return p02test::temp_root();
 }
-
-struct P02EngineGenDirGuard
-{
-    P02EngineGenDirGuard() { WtHelper::setGenerateDir(p02_engine_tmp_root().c_str()); }
-};
-const P02EngineGenDirGuard g_p02_engine_gen_dir;
 
 std::string portfolio_data_file()
 {

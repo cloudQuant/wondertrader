@@ -148,7 +148,7 @@ public:
 			uTime /= 100000;
 		}
 
-		int32_t curMinute = (uTime / 100) * 60 + uTime % 100;
+		int64_t curMinute = static_cast<int64_t>(uTime / 100) * 60 + uTime % 100;
 		curMinute += m_uOffsetMins;
 
 		if (curMinute >= 1440)
@@ -535,7 +535,7 @@ public:
 	 */
 	inline uint32_t	offsetTime(uint32_t uTime, bool bAlignLeft) const
 	{
-		int32_t curMinute = (uTime/100)*60 + uTime%100;
+		int64_t curMinute = static_cast<int64_t>(uTime/100)*60 + uTime%100;
 		curMinute += m_uOffsetMins;
 		if(bAlignLeft)
 		{
@@ -560,7 +560,7 @@ public:
 		if (m_uOffsetMins == 0)
 			return uTime;
 
-		int32_t curMinute = (uTime/100)*60 + uTime%100;
+		int64_t curMinute = static_cast<int64_t>(uTime/100)*60 + uTime%100;
 		curMinute -= m_uOffsetMins;
 		if(curMinute >= 1440)
 			curMinute -= 1440;

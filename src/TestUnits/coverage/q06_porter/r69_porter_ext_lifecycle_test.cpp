@@ -95,7 +95,7 @@ namespace {
 	/* hft env + 成功初始化的本地 TraderMocker，供 createHftContext 绑定；不调用 run。 */
 	bool configure_hft_runner(WtRtRunner* r, const std::string& dir)
 	{
-		write_text(dir + "/actions.json", "{}");
+		write_text(dir + "/actions.json", "{\"default\":{}}");
 		const std::string cfg =
 			"{\"basefiles\":{},\"env\":{\"name\":\"hft\"},\"data\":{},"
 			"\"bspolicy\":\"" + dir + "/actions.json\","

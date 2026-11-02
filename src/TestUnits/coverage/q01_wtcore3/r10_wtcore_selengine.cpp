@@ -47,6 +47,7 @@
 #include <WtCore/SelStraBaseCtx.h>
 #include <WtCore/WtDtMgr.h>
 #include <WtCore/WtSelEngine.h>
+#include <Share/TimeUtils.hpp>
 
 using namespace q01sel;
 
@@ -242,12 +243,13 @@ TEST_F(R10SelEngineTest, comm_sess_and_real_time_from_engine_members)
     EXPECT_EQ(_eng.get_sess_info(kStock), nullptr);
     EXPECT_EQ(_eng.get_sess_info(kAg), _comm->getSessionInfo());
 
-    // L506-509：makeTime(_cur_date, _cur_raw_time*100000 + _cur_secs)
-    // attachEx 里 raw=0、secs=0 ⇒ 秒字段全 0
-    EXPECT_EQ(_eng.get_real_time(), 20250110000000000ull);
+    // L506-509：与 R41 一样，用 TimeUtils 计算毫秒时间戳期望值。
+    // attachEx 的 curTime=931、curSecs=0，rawTime 默认回退到 curTime。
+    uint64_t expect = TimeUtils::makeTime(20250110, 931 * 100000);
+    EXPECT_EQ(expect, _eng.get_real_time());
     _eng.set_date_time(20250110, 931, 45, 931);
-    // 931*100000 + 45 = 93100045 ⇒ 20250110 093100045
-    EXPECT_EQ(_eng.get_real_time(), 20250110093100045ull);
+    expect = TimeUtils::makeTime(20250110, 931 * 100000 + 45);
+    EXPECT_EQ(expect, _eng.get_real_time());
 }
 
 TEST_F(R10SelEngineTest, add_context_registers_and_duplicate_is_rejected)
@@ -263,7 +265,9 @@ TEST_F(R10SelEngineTest, add_context_registers_and_duplicate_is_rejected)
     EXPECT_EQ(got.get(), raw);      // _ctx_map[sid] 由 addContext 写入（L415）
 
     // 同一个 id 重复注册 => L396-400 报重复并直接返回
-    _eng.addContext(SelContextPtr(raw), 20250110, 940, TPT_None);
+    // Reuse the fixture's shared_ptr control block instead of creating a second owner from raw.
+    SelContextPtr duplicate = _ctx;
+    _eng.addContext(duplicate, 20250110, 940, TPT_None);
     SelContextPtr again = _eng.getContext(raw->id());
     EXPECT_EQ(again.get(), raw);
 }
@@ -301,14 +305,14 @@ TEST_F(R10SelEngineTest, on_bar_dispatches_only_to_subscribed_context)
     EXPECT_EQ(raw->n_on_bar, 1u);
     EXPECT_EQ(raw->_bar_key, std::string("SHFE.ag.2512-m"));
 
-    // 日线的日志分支取 bar->date（L102）
-    _eng.on_bar(kAg, "d", 1, &bar);
-    EXPECT_EQ(raw->n_on_bar, 1u);   // 没订阅 "…-d-1" => 不再分发
-
-    // 订阅过但 ctx 已被摘掉的情形：用未注册的 sid
-    _eng.subBar(888888u, kAg, "m", 1, 0);
+    // 重复发送相同的已订阅 key 应再次分发给已注册 context。
     _eng.on_bar(kAg, "m", 1, &bar);
-    EXPECT_EQ(raw->n_on_bar, 1u);
+    EXPECT_EQ(raw->n_on_bar, 2u);
+
+    // 与 m 不同的 d key 仅包含未知 sid；未知订阅被跳过，已有 context 不增加。
+    _eng.subBar(888888u, kAg, "d", 1, 0);
+    _eng.on_bar(kAg, "d", 1, &bar);
+    EXPECT_EQ(raw->n_on_bar, 2u);
 }
 
 TEST_F(R10SelEngineTest, on_tick_pushes_data_and_dispatches_raw_code)

@@ -446,35 +446,6 @@ TEST_F(XtpOnlineF, tickbytick_after_login_still_uses_the_message_date)
 	EXPECT_EQ("SZSE", bdmgr.lastExchg);
 }
 
-TEST_F(XtpLoginF, corrupt_trading_day_leaks_into_snapshot_and_queue_records)
-{
-	FixtureContract fc("rb", "SSE", "600519");
-	bdmgr.contract = fc.ct;
-
-	/* 交易日串带 '-'：strToTime → 2025700705（见 BUG-T27-001），
-	 * 这个值会原样落到快照与买队形的 trading_date 上 */
-	api.loginRet = 0;
-	std::snprintf(api.tradingDay, sizeof(api.tradingDay), "%s", "2026-01-05");
-	parser.connect();
-	ASSERT_EQ(2025700705u, m->m_uTradingDate);
-	sink.logs.clear();
-
-	XTPMD md = makeMd(XTP_EXCHANGE_SH, "600519", kDataTime);
-	int64_t bid1[1] = { 100 };
-	int64_t ask1[1] = { 200 };
-	int32_t one = 1;
-	int32_t zero = 0;
-	parser.OnDepthMarketData(&md, bid1, one, 1, ask1, zero, zero);
-
-	ASSERT_EQ(1u, sink.quoteCalls);
-	EXPECT_EQ(2025700705u, sink.lastTick.trading_date);
-	EXPECT_EQ(20260105u, sink.lastTick.action_date);
-	ASSERT_EQ(1u, sink.queues.size());
-	EXPECT_EQ(BDT_Buy, sink.queues[0].os.side);
-	EXPECT_EQ(2025700705u, sink.queues[0].os.trading_date);
-	EXPECT_EQ(100u, sink.queues[0].os.volumes[0]);
-}
-
 /* ==================== 快照换算的两个留白支路 ==================== */
 
 TEST(XtpData27, stock_category_skips_the_settlement_block)

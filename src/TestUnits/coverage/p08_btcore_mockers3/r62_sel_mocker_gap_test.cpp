@@ -16,6 +16,7 @@
 #include <cstdint>
 #include <cstring>
 #include <filesystem>
+#include <fstream>
 #include <string>
 
 #include <WtBtCore/SelMocker.h>
@@ -29,6 +30,31 @@
 namespace
 {
 	const char* const kStk = "SSE.STK.000001";
+
+	WTSVariant* makeRealSelFactoryConfig(const std::string& plugin)
+	{
+		WTSVariant* cfg = WTSVariant::createObject();
+		cfg->append("module", plugin.c_str());
+
+		WTSVariant* strategy = WTSVariant::createObject();
+		strategy->append("name", "DualThrustSelection");
+		strategy->append("id", "r62_sel_factory_abi");
+
+		WTSVariant* params = WTSVariant::createObject();
+		params->append("days", static_cast<uint32_t>(2));
+		params->append("k1", 0.5);
+		params->append("k2", 0.5);
+		params->append("period", "d");
+		params->append("count", static_cast<uint32_t>(5));
+		params->append("stock", false);
+		params->append("codes", "");
+		strategy->append("params", params);
+		params->release();
+
+		cfg->append("strategy", strategy);
+		strategy->release();
+		return cfg;
+	}
 }
 
 class R62SelMockerGap : public r62::ReplayFixture
@@ -67,8 +93,7 @@ TEST_F(R62SelMockerGap, RealSelFactoryIsDeletedThroughItsExportedAbi)
 	ASSERT_TRUE(std::filesystem::is_regular_file(plugin)) << plugin.string();
 
 	SelMocker sel(&_rp, "r62_sel_factory_abi");
-	WTSVariant* cfg = WTSVariant::createObject();
-	cfg->append("module", plugin.string().c_str());
+	WTSVariant* cfg = makeRealSelFactoryConfig(plugin.string());
 	const bool loaded = sel.init_sel_factory(cfg);
 	cfg->release();
 	ASSERT_TRUE(loaded);
@@ -78,14 +103,25 @@ TEST_F(R62SelMockerGap, RealSelFactoryIsDeletedThroughItsExportedAbi)
 // 写进 SelMocker 自己的价格表（L815-859 的 daily 分支）
 TEST_F(R62SelMockerGap, BarsLoadDailySliceAndSeedPrice)
 {
+	// The configured replay starts on 20200102 before that day's daily bar has
+	// closed. Provide a prior completed bar so this slice has historical data.
+	std::ofstream daily(_base / "csv" / "SSE.STK.000001_d.csv");
+	ASSERT_TRUE(daily.is_open());
+	daily << "date,time,open,high,low,close,volume,turnover,open_interest,diff_interest,settle\n"
+		<< "20191231,150000,9.3,9.8,9.1,9.5,1000,9500,0,0,0\n"
+		<< "20200102,150000,9.8,10.4,9.5,10.0,1000,10000,0,0,0\n";
+	daily.close();
+	ASSERT_TRUE(daily.good());
+
 	SelMocker sel(&_rp, "r62_sel_bars");
 	_rp.register_sink(&sel, "r62_sel_bars");
 	ASSERT_TRUE(_rp.prepare());
 
 	WTSKlineSlice* bars = sel.stra_get_bars(kStk, "d1", 5);
 	ASSERT_NE(nullptr, bars);
-	// 回放起点 20200102：切片只含已到当前交易日的第一根，close = 10.0
-	EXPECT_DOUBLE_EQ(10.0, bars->at(-1)->close);
+	// 回放起点 20200102：当天日线未收盘，切片应返回此前已完成的日线。
+	EXPECT_EQ(20191231u, bars->at(-1)->date);
+	EXPECT_DOUBLE_EQ(9.5, bars->at(-1)->close);
 	bars->release();
 
 	// 切片接口在 tick 回测关闭时返回空；品种/时段可查，原始码为空

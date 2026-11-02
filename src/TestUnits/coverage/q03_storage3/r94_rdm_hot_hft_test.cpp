@@ -60,20 +60,23 @@ TEST_F(R94RdmHotHftTest, R94RdmTodayHftUsesCustomRawCode)
 	vector<WTSOrdQueStruct> ques;
 	ques.push_back(make_ordque(kCurTDate, kCurTDate, 93000000, 1));
 	ques.push_back(make_ordque(kCurTDate, kCurTDate, 93100000, 2));
+	ques.push_back(make_ordque(kCurTDate, kCurTDate, 93300000, 3)); // writer-owned final slot
 	ASSERT_TRUE(write_bytes(rt_hft_file("queue"),
-		make_rt_block<WTSOrdQueStruct>(BT_RT_OrdQueue, kCurTDate, 2, 8, ques)));
+		make_rt_block<WTSOrdQueStruct>(BT_RT_OrdQueue, kCurTDate, (uint32_t)ques.size(), 8, ques)));
 
 	vector<WTSOrdDtlStruct> dtls;
 	dtls.push_back(make_orddtl(kCurTDate, kCurTDate, 93000000, 11));
 	dtls.push_back(make_orddtl(kCurTDate, kCurTDate, 93100000, 12));
+	dtls.push_back(make_orddtl(kCurTDate, kCurTDate, 93300000, 13)); // writer-owned final slot
 	ASSERT_TRUE(write_bytes(rt_hft_file("orders"),
-		make_rt_block<WTSOrdDtlStruct>(BT_RT_OrdDetail, kCurTDate, 2, 8, dtls)));
+		make_rt_block<WTSOrdDtlStruct>(BT_RT_OrdDetail, kCurTDate, (uint32_t)dtls.size(), 8, dtls)));
 
 	vector<WTSTransStruct> trs;
 	trs.push_back(make_trans(kCurTDate, kCurTDate, 93000000, 21));
 	trs.push_back(make_trans(kCurTDate, kCurTDate, 93100000, 22));
+	trs.push_back(make_trans(kCurTDate, kCurTDate, 93300000, 23)); // writer-owned final slot
 	ASSERT_TRUE(write_bytes(rt_hft_file("trans"),
-		make_rt_block<WTSTransStruct>(BT_RT_Trnsctn, kCurTDate, 2, 8, trs)));
+		make_rt_block<WTSTransStruct>(BT_RT_Trnsctn, kCurTDate, (uint32_t)trs.size(), 8, trs)));
 
 	WTSOrdQueSlice* sq = _reader.readOrdQueSliceByRange("SHFE.rb.HOT",
 		20240110093000000ull, 20240110093200000ull);

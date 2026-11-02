@@ -312,12 +312,15 @@ TEST_F(R73TraderReportTest, ReportTolerantItemsAndPreReadyQueries)
     ASSERT_TRUE(trader.run());
     trader.onLoginResult(true, "ok", 20250110);
 
+    // Position reports are delivered through registered sinks; unregister after this synchronous callback.
+    trader.addSink(&sink_);
     WTSArray* pos = makeArray<WTSPositionItem>({
         makePosNoContract(WDT_LONG),
         makePos(ct_, WDT_LONG, 1, 1, 1, 1)
     });
     trader.onRspPosition(pos);
     EXPECT_EQ(2u, sink_.poss_.size()); // 两条方向都发，NULL 合约项不参与
+    EXPECT_TRUE(trader.removeSink(&sink_));
 
     WTSArray* orders = makeArray<WTSOrderInfo>({
         makeOrder(NULL, WDT_LONG, WOT_OPEN, WOS_NotTraded_Queuing, 1, 0, "N1", "x"),

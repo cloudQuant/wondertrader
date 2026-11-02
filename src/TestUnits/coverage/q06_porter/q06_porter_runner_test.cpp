@@ -277,6 +277,26 @@ namespace {
 		return g_load_ret;
 	}
 
+	WTSBarStruct g_loader_bars[2];
+
+	bool fnl_bar_loader_feeds_bars(const char* stdCode, const char* period)
+	{
+		g_fnl_calls++;
+		g_load_code = stdCode;
+		g_load_period = period;
+		getRunner().feedRawBars(g_loader_bars, 2);
+		return g_load_ret;
+	}
+
+	bool raw_bar_loader_feeds_bars(const char* stdCode, const char* period)
+	{
+		g_raw_calls++;
+		g_load_code = stdCode;
+		g_load_period = period;
+		getRunner().feedRawBars(g_loader_bars, 2);
+		return g_load_ret;
+	}
+
 	bool adj_fct_loader(const char* stdCode)
 	{
 		g_fct_calls++;
@@ -316,6 +336,7 @@ namespace {
 			g_feeder_bar_ptr = NULL;
 			g_feeder_bar_cnt = 0;
 			g_feeder_fct_cnt = 0;
+			memset(g_loader_bars, 0, sizeof(g_loader_bars));
 			g_load_ret = true;
 
 			WtRtRunner& r = getRunner();
@@ -629,16 +650,51 @@ TEST_F(Q06PorterRunner, FeedRawBarsUsesRawOnlyLoader)
 {
 	WtRtRunner& r = getRunner();
 	// Keep the raw loader active while explicitly leaving the final loader absent.
-	r.registerExtDataLoader(NULL, raw_bar_loader, adj_fct_loader, NULL);
-	WTSBarStruct bar = makeBar();
+	r.registerExtDataLoader(NULL, raw_bar_loader_feeds_bars, adj_fct_loader, NULL);
+	g_loader_bars[0] = makeBar();
+	g_loader_bars[0].close = 333.5;
+	g_loader_bars[1] = makeBar();
+	g_loader_bars[1].close = 334.5;
 
 	ASSERT_TRUE(r.loadRawHisBars(NULL, "SSE.600000", KP_DAY, bars_feeder));
 	EXPECT_EQ(g_raw_calls, 1U);
+	EXPECT_EQ(g_fnl_calls, 0U);
 	EXPECT_EQ(g_load_period, "d1");
+	EXPECT_EQ(g_feeder_bar_cnt, 2U);
+	ASSERT_EQ(g_feeder_bar_ptr, g_loader_bars);
+	EXPECT_DOUBLE_EQ(g_feeder_bar_ptr[0].close, 333.5);
+	EXPECT_DOUBLE_EQ(g_feeder_bar_ptr[1].close, 334.5);
+}
 
-	r.feedRawBars(&bar, 1);
-	EXPECT_EQ(g_feeder_bar_cnt, 1U);
-	EXPECT_EQ(g_feeder_bar_ptr, &bar);
+TEST_F(Q06PorterRunner, FeedRawBarsWorksWhenBothLoaderKindsAreRegistered)
+{
+	WtRtRunner& r = getRunner();
+	r.registerExtDataLoader(fnl_bar_loader_feeds_bars, raw_bar_loader_feeds_bars, adj_fct_loader, NULL);
+	g_loader_bars[0] = makeBar();
+	g_loader_bars[1] = makeBar();
+
+	ASSERT_TRUE(r.loadRawHisBars(NULL, "SSE.600000", KP_DAY, bars_feeder));
+	EXPECT_EQ(g_raw_calls, 1U);
+	EXPECT_EQ(g_fnl_calls, 0U);
+	EXPECT_EQ(g_feeder_bar_cnt, 2U);
+	ASSERT_EQ(g_feeder_bar_ptr, g_loader_bars);
+
+	ASSERT_TRUE(r.loadFinalHisBars(NULL, "SSE.600000", KP_DAY, bars_feeder));
+	EXPECT_EQ(g_raw_calls, 1U);
+	EXPECT_EQ(g_fnl_calls, 1U);
+	EXPECT_EQ(g_feeder_bar_cnt, 2U);
+	EXPECT_EQ(g_feeder_bar_ptr, g_loader_bars);
+}
+
+TEST_F(Q06PorterRunner, FeedRawBarsWithNullFeederReturnsSafely)
+{
+	WtRtRunner& r = getRunner();
+	r.registerExtDataLoader(NULL, raw_bar_loader_feeds_bars, adj_fct_loader, NULL);
+
+	EXPECT_TRUE(r.loadRawHisBars(NULL, "SSE.600000", KP_DAY, NULL));
+	EXPECT_EQ(g_raw_calls, 1U);
+	EXPECT_EQ(g_fnl_calls, 0U);
+	EXPECT_EQ(g_feeder_bar_cnt, 0U);
 }
 
 TEST(Q06PorterRunnerNoLoader, LoaderFreePathsReturnFalseOrWarn)
@@ -657,6 +713,16 @@ TEST(Q06PorterRunnerNoLoader, LoaderFreePathsReturnFalseOrWarn)
 	WTSBarStruct bar = makeBar();
 	r.feedRawBars(&bar, 1);
 	SUCCEED();
+}
+
+TEST(Q06PorterRunnerNoLoader, RegisteredLoaderWithoutLoadedFeederReturnsSafely)
+{
+	WtRtRunner runner;
+	runner.registerExtDataLoader(NULL, raw_bar_loader, NULL, NULL);
+
+	WTSBarStruct bar;
+	memset(&bar, 0, sizeof(bar));
+	runner.feedRawBars(&bar, 1);
 }
 
 /* 句柄表：create*Context 只写入 map，不起线程 */

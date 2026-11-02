@@ -9,9 +9,30 @@
  *   - cacheIntegratedFutBarsFromBin 主力连续合并     :3900-4190
  *   - run_by_bars 日线推进/闭盘                      :771-938
  *
- * 只使用公开 API；不碰私有 bin/cache*FromBin 声明，不镜像类布局。
+ * 主体使用公开 API；R2 key 用例仅开放 getAdjFactors 本身以隔离查询键行为，不镜像类布局。
  */
+#include <gtest/gtest.h>
+
+#include <chrono>
+#include <condition_variable>
+#include <mutex>
+#include <string>
+#include <thread>
+
+#include <Share/CodeHelper.hpp>
+#include <WtBtCore/HisDataMgr.h>
+#include <WtDataStorage/DataDefine.h>
+#include <Includes/FasterDefs.h>
+#include <Includes/WTSMarcos.h>
+#include <Includes/WTSTypes.h>
+#include <WTSTools/WTSHotMgr.h>
+#include <WTSTools/WTSBaseDataMgr.h>
+#define private public
+#include <WtBtCore/HisDataReplayer.h>
+#undef private
+
 #include "r91_common.h"
+
 
 using R91Fixture = r91::Fixture;
 
@@ -22,6 +43,56 @@ namespace
 	const uint32_t kDay2 = 20200103u;	// 周五
 	const uint32_t kDay3 = 20200106u;	// 周一
 	const uint32_t kDay4 = 20200107u;	// 周二
+
+	class R2AdjFactorRaceLoader : public IBtDataLoader
+	{
+	public:
+		HisDataReplayer* first { nullptr };
+		HisDataReplayer* second { nullptr };
+		std::string firstKey;
+		std::string secondKey;
+
+		bool loadFinalHisBars(void*, const char*, WTSKlinePeriod, FuncReadBars) override { return false; }
+		bool loadRawHisBars(void*, const char*, WTSKlinePeriod, FuncReadBars) override { return false; }
+		bool loadAllAdjFactors(void*, FuncReadFactors) override { return false; }
+		bool loadRawHisTicks(void*, const char*, uint32_t, FuncReadTicks) override { return false; }
+		bool isAutoTrans() override { return false; }
+
+		bool loadAdjFactors(void* obj, const char* stdCode, FuncReadFactors) override
+		{
+			std::unique_lock<std::mutex> lock(_mutex);
+			if (obj == first)
+			{
+				_firstEntered = true;
+				_cv.notify_all();
+				_cv.wait_for(lock, std::chrono::seconds(5), [this]() { return _secondEntered; });
+				firstKey = stdCode;
+				return false;
+			}
+
+			if (obj == second)
+			{
+				secondKey = stdCode;
+				_secondEntered = true;
+				_cv.notify_all();
+				return false;
+			}
+
+			return false;
+		}
+
+		bool waitForFirstCall()
+		{
+			std::unique_lock<std::mutex> lock(_mutex);
+			return _cv.wait_for(lock, std::chrono::seconds(5), [this]() { return _firstEntered; });
+		}
+
+	private:
+		std::mutex _mutex;
+		std::condition_variable _cv;
+		bool _firstEntered { false };
+		bool _secondEntered { false };
+	};
 
 	const r91::BarRec* bar_of(const r91::Sink& sink, uint32_t date)
 	{
@@ -109,6 +180,55 @@ TEST_F(R91Fixture, R91BinBars_MissingBinBarsYieldNullSlice)
 	EXPECT_EQ(kDay1, replayer.get_date());
 	EXPECT_EQ(kDay1, replayer.get_trading_date());
 	EXPECT_EQ(0u, sink.bars.size());
+
+	// With no valid subscribed series and tick replay disabled, run must end
+	// cleanly and notify completion exactly once.
+	replayer.run(false);
+	EXPECT_TRUE(sink.bars.empty());
+	EXPECT_EQ(1u, sink.doneCalls);
+}
+
+TEST_F(R91Fixture, R91BinBars_MissingMinuteBarsDoNotBlockValidDailyAutoReplay)
+{
+	std::vector<WTSBarStruct> dailyBars;
+	dailyBars.push_back(r91::mk_bar(20191231u, 1500u, 99.0, 100.0, 98.0, 100.0, 10.0));
+	dailyBars.push_back(r91::mk_bar(kDay1, 1500u, 100.0, 102.0, 99.0, 101.0, 20.0));
+	dailyBars.push_back(r91::mk_bar(kDay2, 1500u, 101.0, 103.0, 100.0, 102.0, 30.0));
+	ASSERT_TRUE(r91::write_bars(_base, "SSE", "600000", "day", dailyBars));
+
+	r91::CfgOpts opts;
+	opts.mode = "bin";
+	opts.tick = false;
+	WTSVariant* cfg = r91::make_cfg(_root, _base, 202001020930ull, 202001031500ull, opts);
+
+	HisDataReplayer replayer;
+	ASSERT_TRUE(replayer.init(cfg, NULL, NULL));
+	cfg->release();
+
+	r91::Sink sink;
+	replayer.register_sink(&sink, "r91_missing_minute_auto_daily");
+	ASSERT_TRUE(replayer.prepare());
+
+	// A missing minute file must not poison auto selection of the valid daily
+	// series requested immediately afterward.
+	EXPECT_EQ(nullptr, replayer.get_kline_slice(kStock, "m", 10, 1, false));
+	WTSKlineSlice* daily = replayer.get_kline_slice(kStock, "d", 3, 1, false);
+	ASSERT_NE(nullptr, daily);
+	ASSERT_EQ(1, daily->size());
+	// The historical slice excludes the not-yet-closed current trading day.
+	EXPECT_DOUBLE_EQ(100.0, daily->at(0)->close);
+	daily->release();
+
+	replayer.run(false);
+
+	ASSERT_EQ(2u, sink.bars.size());
+	ASSERT_EQ(1u, sink.doneCalls);
+	const r91::BarRec* first = bar_of(sink, kDay1);
+	const r91::BarRec* second = bar_of(sink, kDay2);
+	ASSERT_NE(nullptr, first);
+	ASSERT_NE(nullptr, second);
+	EXPECT_DOUBLE_EQ(101.0, first->close);
+	EXPECT_DOUBLE_EQ(102.0, second->close);
 }
 
 /*
@@ -245,6 +365,67 @@ TEST_F(R91Fixture, R91BinBars_AdjustedBackwardBarsApplyFactorAndSkipMissingAdjus
 		ASSERT_EQ(1u, sink.bars.size());
 		EXPECT_DOUBLE_EQ(20.0, sink.bars[0].close);
 	}
+}
+
+TEST_F(R91Fixture, R2AdjFactors_LongLegalKeyAndShortKeyLookup)
+{
+	const std::string contract = "C123456789";
+	const std::string adjustedCode = "EXCHLONG01.PRDABCDE." + contract + "+";
+	const std::string longKey = "EXCHLONG01.PRDABCDE." + contract;
+	ASSERT_EQ(31u, adjustedCode.size());
+	ASSERT_EQ(30u, longKey.size());
+
+	CodeHelper::CodeInfo parsed = CodeHelper::extractStdCode(adjustedCode.c_str(), nullptr);
+	ASSERT_STREQ("EXCHLONG01", parsed._exchg);
+	ASSERT_STREQ("PRDABCDE", parsed._product);
+	ASSERT_STREQ(contract.c_str(), parsed._code);
+	ASSERT_EQ(2u, parsed._exright);
+
+	r91::Loader loader;
+	loader.factors[longKey].push_back(std::make_pair(20191230u, 0.5));
+	loader.factors["SSE.STK.600003"].push_back(std::make_pair(20191230u, 0.5));
+
+	HisDataReplayer replayer;
+	replayer._bt_loader = &loader;
+	const HisDataReplayer::AdjFactorList& longFactors =
+		replayer.getAdjFactors(parsed._code, parsed._exchg, parsed._product);
+	ASSERT_EQ(2u, longFactors.size());
+	EXPECT_EQ(19900101u, longFactors[0]._date);
+	EXPECT_DOUBLE_EQ(1.0, longFactors[0]._factor);
+	EXPECT_EQ(20191230u, longFactors[1]._date);
+	EXPECT_DOUBLE_EQ(0.5, longFactors[1]._factor);
+
+	const HisDataReplayer::AdjFactorList& shortFactors = replayer.getAdjFactors("600003", "SSE", "STK");
+	ASSERT_EQ(2u, shortFactors.size());
+	EXPECT_EQ(19900101u, shortFactors[0]._date);
+	EXPECT_DOUBLE_EQ(1.0, shortFactors[0]._factor);
+	EXPECT_EQ(20191230u, shortFactors[1]._date);
+	EXPECT_DOUBLE_EQ(0.5, shortFactors[1]._factor);
+}
+
+TEST_F(R91Fixture, R2AdjFactors_IndependentReplayCallsKeepTheirOwnLoaderKey)
+{
+	R2AdjFactorRaceLoader loader;
+	HisDataReplayer first;
+	HisDataReplayer second;
+	loader.first = &first;
+	loader.second = &second;
+	first._bt_loader = &loader;
+	second._bt_loader = &loader;
+
+	std::thread firstQuery([&]() { first.getAdjFactors("600004", "SSE", "STK"); });
+	if (!loader.waitForFirstCall())
+	{
+		firstQuery.join();
+		FAIL() << "first independent replayer did not reach loadAdjFactors";
+		return;
+	}
+	std::thread secondQuery([&]() { second.getAdjFactors("600005", "SSE", "STK"); });
+	firstQuery.join();
+	secondQuery.join();
+
+	EXPECT_EQ("SSE.STK.600004", loader.firstKey);
+	EXPECT_EQ("SSE.STK.600005", loader.secondKey);
 }
 
 /*

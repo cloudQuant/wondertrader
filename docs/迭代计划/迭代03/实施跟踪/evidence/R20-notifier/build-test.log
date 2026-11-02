@@ -1,0 +1,131 @@
++ set -o pipefail
++ repo=/Users/yunjinqi/Documents/new_projects/wondertrader
++ out=/tmp/wt-i03-event-notifier
++ fixture=/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture
++ includes=(-I"$repo/src" -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include -I/opt/homebrew/Cellar/spdlog/1.15.3/include -I/usr/local/include)
++ for mode in full missing-create missing-destroy missing-register missing-publish zero
++ mkdir -p /tmp/wt-i03-event-notifier/full
++ defines=()
++ case $mode in
++ /usr/bin/clang++ -std=c++17 -dynamiclib -I/Users/yunjinqi/Documents/new_projects/wondertrader/src -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include -I/opt/homebrew/Cellar/spdlog/1.15.3/include -I/usr/local/include /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/fake_mq.cpp -o /tmp/wt-i03-event-notifier/full/libWtMsgQue.dylib
++ for mode in full missing-create missing-destroy missing-register missing-publish zero
++ mkdir -p /tmp/wt-i03-event-notifier/missing-create
++ defines=()
++ case $mode in
++ defines=(-DOMIT_CREATE)
++ /usr/bin/clang++ -std=c++17 -dynamiclib -I/Users/yunjinqi/Documents/new_projects/wondertrader/src -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include -I/opt/homebrew/Cellar/spdlog/1.15.3/include -I/usr/local/include -DOMIT_CREATE /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/fake_mq.cpp -o /tmp/wt-i03-event-notifier/missing-create/libWtMsgQue.dylib
++ for mode in full missing-create missing-destroy missing-register missing-publish zero
++ mkdir -p /tmp/wt-i03-event-notifier/missing-destroy
++ defines=()
++ case $mode in
++ defines=(-DOMIT_DESTROY)
++ /usr/bin/clang++ -std=c++17 -dynamiclib -I/Users/yunjinqi/Documents/new_projects/wondertrader/src -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include -I/opt/homebrew/Cellar/spdlog/1.15.3/include -I/usr/local/include -DOMIT_DESTROY /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/fake_mq.cpp -o /tmp/wt-i03-event-notifier/missing-destroy/libWtMsgQue.dylib
++ for mode in full missing-create missing-destroy missing-register missing-publish zero
++ mkdir -p /tmp/wt-i03-event-notifier/missing-register
++ defines=()
++ case $mode in
++ defines=(-DOMIT_REGISTER)
++ /usr/bin/clang++ -std=c++17 -dynamiclib -I/Users/yunjinqi/Documents/new_projects/wondertrader/src -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include -I/opt/homebrew/Cellar/spdlog/1.15.3/include -I/usr/local/include -DOMIT_REGISTER /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/fake_mq.cpp -o /tmp/wt-i03-event-notifier/missing-register/libWtMsgQue.dylib
++ for mode in full missing-create missing-destroy missing-register missing-publish zero
++ mkdir -p /tmp/wt-i03-event-notifier/missing-publish
++ defines=()
++ case $mode in
++ defines=(-DOMIT_PUBLISH)
++ /usr/bin/clang++ -std=c++17 -dynamiclib -I/Users/yunjinqi/Documents/new_projects/wondertrader/src -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include -I/opt/homebrew/Cellar/spdlog/1.15.3/include -I/usr/local/include -DOMIT_PUBLISH /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/fake_mq.cpp -o /tmp/wt-i03-event-notifier/missing-publish/libWtMsgQue.dylib
++ for mode in full missing-create missing-destroy missing-register missing-publish zero
++ mkdir -p /tmp/wt-i03-event-notifier/zero
++ defines=()
++ case $mode in
++ defines=(-DFAIL_CREATE)
++ /usr/bin/clang++ -std=c++17 -dynamiclib -I/Users/yunjinqi/Documents/new_projects/wondertrader/src -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include -I/opt/homebrew/Cellar/spdlog/1.15.3/include -I/usr/local/include -DFAIL_CREATE /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/fake_mq.cpp -o /tmp/wt-i03-event-notifier/zero/libWtMsgQue.dylib
++ /usr/bin/clang++ -std=c++17 -fprofile-instr-generate -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -include /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h -I/Users/yunjinqi/Documents/new_projects/wondertrader/src -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include -I/opt/homebrew/Cellar/spdlog/1.15.3/include -I/usr/local/include /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/notifier_check.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/EventNotifier.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/WtHelper.cpp /tmp/wt-i03-r58-build/build_x64/Debug/libs/libWTSTools.a /tmp/wt-i03-r58-build/build_x64/Debug/libs/libWTSUtils.a -L/opt/homebrew/Cellar/boost/1.88.0/lib -lboost_filesystem -lboost_thread -liconv -o /tmp/wt-i03-event-notifier/notifier_check
++ mkdir -p /tmp/wt-i03-event-notifier/empty-cwd
++ cd /tmp/wt-i03-event-notifier/empty-cwd
++ for variant in missing-create missing-destroy missing-register missing-publish zero full retry retry-zero full-single no-publish-single
++ :
++ mode=missing-create
++ moddir=missing-create
++ case $variant in
++ mode=missing
++ WT_R20_MQ_LOG=/tmp/wt-i03-event-notifier/missing-create.log
++ /tmp/wt-i03-event-notifier/notifier_check missing /tmp/wt-i03-event-notifier/missing-create /tmp/wt-i03-event-notifier/full
+PASS missing
++ for variant in missing-create missing-destroy missing-register missing-publish zero full retry retry-zero full-single no-publish-single
++ :
++ mode=missing-destroy
++ moddir=missing-destroy
++ case $variant in
++ mode=missing
++ WT_R20_MQ_LOG=/tmp/wt-i03-event-notifier/missing-destroy.log
++ /tmp/wt-i03-event-notifier/notifier_check missing /tmp/wt-i03-event-notifier/missing-destroy /tmp/wt-i03-event-notifier/full
+PASS missing
++ for variant in missing-create missing-destroy missing-register missing-publish zero full retry retry-zero full-single no-publish-single
++ :
++ mode=missing-register
++ moddir=missing-register
++ case $variant in
++ mode=missing
++ WT_R20_MQ_LOG=/tmp/wt-i03-event-notifier/missing-register.log
++ /tmp/wt-i03-event-notifier/notifier_check missing /tmp/wt-i03-event-notifier/missing-register /tmp/wt-i03-event-notifier/full
+PASS missing
++ for variant in missing-create missing-destroy missing-register missing-publish zero full retry retry-zero full-single no-publish-single
++ :
++ mode=missing-publish
++ moddir=missing-publish
++ case $variant in
++ mode=no-publish
++ WT_R20_MQ_LOG=/tmp/wt-i03-event-notifier/missing-publish.log
++ /tmp/wt-i03-event-notifier/notifier_check no-publish /tmp/wt-i03-event-notifier/missing-publish /tmp/wt-i03-event-notifier/full
+PASS no-publish
++ for variant in missing-create missing-destroy missing-register missing-publish zero full retry retry-zero full-single no-publish-single
++ :
++ mode=zero
++ moddir=zero
++ case $variant in
++ WT_R20_MQ_LOG=/tmp/wt-i03-event-notifier/zero.log
++ /tmp/wt-i03-event-notifier/notifier_check zero /tmp/wt-i03-event-notifier/zero /tmp/wt-i03-event-notifier/full
+PASS zero
++ for variant in missing-create missing-destroy missing-register missing-publish zero full retry retry-zero full-single no-publish-single
++ :
++ mode=full
++ moddir=full
++ case $variant in
++ WT_R20_MQ_LOG=/tmp/wt-i03-event-notifier/full.log
++ /tmp/wt-i03-event-notifier/notifier_check full /tmp/wt-i03-event-notifier/full /tmp/wt-i03-event-notifier/full
+PASS full
++ for variant in missing-create missing-destroy missing-register missing-publish zero full retry retry-zero full-single no-publish-single
++ :
++ mode=retry
++ moddir=retry
++ case $variant in
++ moddir=missing-register
++ WT_R20_MQ_LOG=/tmp/wt-i03-event-notifier/retry.log
++ /tmp/wt-i03-event-notifier/notifier_check retry /tmp/wt-i03-event-notifier/missing-register /tmp/wt-i03-event-notifier/full
+PASS retry
++ for variant in missing-create missing-destroy missing-register missing-publish zero full retry retry-zero full-single no-publish-single
++ :
++ mode=retry-zero
++ moddir=retry-zero
++ case $variant in
++ moddir=zero
++ WT_R20_MQ_LOG=/tmp/wt-i03-event-notifier/retry-zero.log
++ /tmp/wt-i03-event-notifier/notifier_check retry-zero /tmp/wt-i03-event-notifier/zero /tmp/wt-i03-event-notifier/full
+PASS retry-zero
++ for variant in missing-create missing-destroy missing-register missing-publish zero full retry retry-zero full-single no-publish-single
++ :
++ mode=full-single
++ moddir=full-single
++ case $variant in
++ moddir=full
++ WT_R20_MQ_LOG=/tmp/wt-i03-event-notifier/full-single.log
++ /tmp/wt-i03-event-notifier/notifier_check full-single /tmp/wt-i03-event-notifier/full /tmp/wt-i03-event-notifier/full
+PASS full-single
++ for variant in missing-create missing-destroy missing-register missing-publish zero full retry retry-zero full-single no-publish-single
++ :
++ mode=no-publish-single
++ moddir=no-publish-single
++ case $variant in
++ moddir=missing-publish
++ WT_R20_MQ_LOG=/tmp/wt-i03-event-notifier/no-publish-single.log
++ /tmp/wt-i03-event-notifier/notifier_check no-publish-single /tmp/wt-i03-event-notifier/missing-publish /tmp/wt-i03-event-notifier/full
+PASS no-publish-single

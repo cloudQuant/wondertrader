@@ -56,6 +56,7 @@ namespace uft
 		// Returns false from an active operation/callback after requesting shutdown;
 		// retry from a control thread to join inputs and release borrowed APIs.
 		bool shutdown();
+		bool runFailed() const noexcept { return _run_failed.load(std::memory_order_acquire); }
 
 		/**
 		 * @brief 执行延迟测试
@@ -101,6 +102,7 @@ namespace uft
 		uint32_t			_core;       /**< 测试线程绑定的CPU核心编号 */
 		bool				_init_attempted; /**< init() is a one-shot operation */
 		bool				_run_attempted{false};
+		std::atomic<bool> _run_failed{false};
 		bool				_operation_active{false};
 		std::thread::id		_operation_thread;
 		bool				_shutdown_in_progress{false};

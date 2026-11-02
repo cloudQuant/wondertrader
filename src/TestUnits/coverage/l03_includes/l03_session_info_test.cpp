@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 
 #include <cstdint>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -172,6 +173,41 @@ TEST(l03_session, original_time_inverse_mapping)
 	EXPECT_EQ(zero->originalTime(1500), 1500u);
 	EXPECT_EQ(zero->originalTime(0), 0u);
 	zero->release();
+}
+
+TEST(l03_session, offset_arithmetic_keeps_valid_offsets_and_avoids_int32_overflow)
+{
+	struct OffsetCase { int32_t offset; uint32_t start; uint32_t end; };
+	const OffsetCase cases[] = {
+		{0, 900, 1000}, {-420, 200, 300}, {500, 1720, 1820}, {-1300, 1120, 1220}
+	};
+	for (const OffsetCase& tc : cases)
+	{
+		WTSSessionInfo* s = WTSSessionInfo::create("L03_SAFE", "valid", tc.offset);
+		ASSERT_NE(s, nullptr);
+		EXPECT_EQ(tc.start, s->offsetTime(900, true));
+		EXPECT_EQ(tc.start, s->offsetTime(900, false));
+		EXPECT_EQ(tc.end, s->offsetTime(1000, true));
+		EXPECT_EQ(tc.end, s->offsetTime(1000, false));
+		EXPECT_EQ(900u, s->originalTime(tc.start));
+		EXPECT_EQ(1000u, s->originalTime(tc.end));
+		s->release();
+	}
+
+	// These calls exist solely to expose integer UB under UBSan. Multi-day
+	// offset validity and associated date semantics are not established.
+	for (const int32_t offset : { (std::numeric_limits<int32_t>::min)(),
+		(std::numeric_limits<int32_t>::max)() })
+	{
+		WTSSessionInfo* s = WTSSessionInfo::create("L03_EXTREME", "extreme", offset);
+		ASSERT_NE(s, nullptr);
+		volatile uint32_t left = s->offsetTime(900, true);
+		volatile uint32_t right = s->offsetTime(1000, false);
+		volatile uint32_t original = s->originalTime(900);
+		volatile uint32_t date = s->getOffsetDate(20261101, 900);
+		(void)left; (void)right; (void)original; (void)date;
+		s->release();
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////

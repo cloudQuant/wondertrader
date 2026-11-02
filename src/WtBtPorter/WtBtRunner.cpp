@@ -79,6 +79,7 @@ WtBtRunner::WtBtRunner()
 	, _ext_raw_bar_loader(NULL)
 	, _ext_adj_fct_loader(NULL)
 	, _ext_tick_loader(NULL)
+	, _loader_auto_trans(true)
 
 	, _cta_mocker(NULL)
 	, _sel_mocker(NULL)
@@ -88,9 +89,11 @@ WtBtRunner::WtBtRunner()
 	, _inited(false)
 	, _config_failed_permanently(false)
 	, _running(false)
+	, _stop_requested(false)
 	, _release_requested(false)
 	, _released(false)
 	, _async(false)
+	, _feeder_bars(NULL)
 	, _cfg(NULL)
 {
 }
@@ -217,6 +220,11 @@ void WtBtRunner::feedRawBars(WTSBarStruct* bars, uint32_t count)
 		WTSLogger::error("Cannot feed bars because of no extented bar loader registered.");
 		return;
 	}
+	if (_feeder_bars == NULL)
+	{
+		WTSLogger::error("Cannot feed bars because no bar feeder is loaded.");
+		return;
+	}
 
 	_feeder_bars(_feed_obj, bars, count);
 }
@@ -332,6 +340,9 @@ uint32_t WtBtRunner::initHftMocker(const char* name, bool hook/* = false*/)
 uint32_t WtBtRunner::initSelMocker(const char* name, uint32_t date, uint32_t time, const char* period, 
 	const char* trdtpl /* = "CHINA" */, const char* session /* = "TRADING" */, int32_t slippage /* = 0 */, bool isRatioSlp /* = false */)
 {
+	if (name == nullptr || !HisDataReplayer::validate_task_parameters(period, trdtpl, session))
+		return 0;
+
 	if (_sel_mocker)
 	{
 		delete _sel_mocker;
@@ -518,11 +529,44 @@ bool WtBtRunner::config_v2(const char* cfgFile, bool isFile, std::string* error)
 		if (error) *error = "loading config failed";
 		return false;
 	}
+	auto fail_preflight = [this, error](const std::string& message) {
+		if (error) *error = message;
+		_cfg->release();
+		_cfg = NULL;
+		return false;
+	};
 
-	//初始化事件推送器
-	initEvtNotifier(_cfg->get("notifier"));
+	// Validate the configuration boundary before initializing the replayer. Its
+	// init() mutates replay state and may load base files, so malformed mocker
+	// configuration must not leave a partially initialized runner behind.
+	WTSVariant* cfgReplayer = _cfg->get("replayer");
+	if (!cfgReplayer || !cfgReplayer->isObject())
+		return fail_preflight("replayer must be an object");
 
-	if (!_replayer.init(_cfg->get("replayer"), &_notifier, _ext_fnl_bar_loader != NULL ? this : NULL))
+	WTSVariant* cfgEnv = _cfg->get("env");
+	if (!cfgEnv || !cfgEnv->isObject())
+		return fail_preflight("env must be an object");
+
+	WTSVariant* cfgMockerMode = cfgEnv->get("mocker");
+	if (!cfgMockerMode || cfgMockerMode->type() != WTSVariant::VT_String)
+		return fail_preflight("env.mocker must be a string");
+	const char* mode = cfgMockerMode->asCString();
+	if (!mode || mode[0] == '\0')
+		return fail_preflight("env.mocker is missing");
+
+	const bool noMockerMode = strcmp(mode, "none") == 0;
+	if (!noMockerMode && strcmp(mode, "cta") != 0 && strcmp(mode, "hft") != 0 &&
+		strcmp(mode, "sel") != 0 && strcmp(mode, "exec") != 0)
+		return fail_preflight(std::string("unsupported backtest mocker mode: ") + mode);
+
+	WTSVariant* cfgMode = _cfg->get(mode);
+	if (!noMockerMode && (!cfgMode || !cfgMode->isObject()))
+		return fail_preflight(std::string(mode) + " mode configuration is missing or invalid");
+	const char* mockerName = cfgMode ? cfgMode->getCString("name") : NULL;
+	if (!noMockerMode && (!mockerName || mockerName[0] == '\0'))
+		return fail_preflight(std::string(mode) + " mode name is missing");
+
+	if (!_replayer.init(cfgReplayer, &_notifier, _ext_fnl_bar_loader != NULL ? this : NULL))
 	{
 		if (error) *error = "initializing historical data replayer failed";
 		_cfg->release();
@@ -530,35 +574,11 @@ bool WtBtRunner::config_v2(const char* cfgFile, bool isFile, std::string* error)
 		return false;
 	}
 
-	WTSVariant* cfgEnv = _cfg->get("env");
-	const char* mode = cfgEnv ? cfgEnv->getCString("mocker") : NULL;
-	if (!mode || mode[0] == '\0')
-	{
-		if (error) *error = "env.mocker is missing";
-		_config_failed_permanently = true;
-		_cfg->release();
-		_cfg = NULL;
-		return false;
-	}
-	WTSVariant* cfgMode = _cfg->get(mode);
-	const bool noMockerMode = strcmp(mode, "none") == 0;
-	if (!noMockerMode && !cfgMode)
-	{
-		if (error) *error = std::string(mode) + " mode configuration is missing";
-		_config_failed_permanently = true;
-		_cfg->release();
-		_cfg = NULL;
-		return false;
-	}
-	const char* mockerName = cfgMode ? cfgMode->getCString("name") : NULL;
-	if (!noMockerMode && (!mockerName || mockerName[0] == '\0'))
-	{
-		if (error) *error = std::string(mode) + " mode name is missing";
-		_config_failed_permanently = true;
-		_cfg->release();
-		_cfg = NULL;
-		return false;
-	}
+	// Replayer initialization is retryable on failure. Initialize the notifier
+	// only after it succeeds, so a failed attempt cannot create a server that a
+	// corrected retry would overwrite in EventNotifier.
+	initEvtNotifier(_cfg->get("notifier"));
+
 	auto fail_mode_initialization = [this, error](const std::string& message) {
 		if (error) *error = message;
 		_config_failed_permanently = true;
@@ -596,6 +616,23 @@ bool WtBtRunner::config_v2(const char* cfgFile, bool isFile, std::string* error)
 	}
 	else if (strcmp(mode, "sel") == 0 && cfgMode)
 	{
+		WTSVariant* cfgTask = cfgMode->get("task");
+		uint32_t taskDate = 0;
+		uint32_t taskTime = 0;
+		const char* taskPeriod = nullptr;
+		const char* taskTradingTemplate = nullptr;
+		const char* taskSession = nullptr;
+		if (cfgTask)
+		{
+			taskDate = cfgTask->getUInt32("date");
+			taskTime = cfgTask->getUInt32("time");
+			taskPeriod = cfgTask->getCString("period");
+			taskTradingTemplate = cfgTask->getCString("trdtpl");
+			taskSession = cfgTask->getCString("session");
+			if (!HisDataReplayer::validate_task_parameters(taskPeriod, taskTradingTemplate, taskSession))
+				return fail_mode_initialization("invalid SEL task parameters");
+		}
+
 		int32_t slippage = cfgMode->getInt32("slippage");
 		ExpSelMocker* candidate = new ExpSelMocker(&_replayer, mockerName, slippage);
 		if (!candidate->init_sel_factory(cfgMode))
@@ -606,10 +643,8 @@ bool WtBtRunner::config_v2(const char* cfgFile, bool isFile, std::string* error)
 		_sel_mocker = candidate;
 		_replayer.register_sink(_sel_mocker, mockerName);
 
-		WTSVariant* cfgTask = cfgMode->get("task");
-		if(cfgTask)
-			_replayer.register_task(_sel_mocker->id(), cfgTask->getUInt32("date"), cfgTask->getUInt32("time"),
-				cfgTask->getCString("period"), cfgTask->getCString("trdtpl"), cfgTask->getCString("session"));
+		if (cfgTask)
+			_replayer.register_task(_sel_mocker->id(), taskDate, taskTime, taskPeriod, taskTradingTemplate, taskSession);
 	}
 	else if (strcmp(mode, "exec") == 0)
 	{
@@ -694,6 +729,7 @@ void WtBtRunner::run(bool bNeedDump /* = false */, bool bAsync /* = false */)
 		// Mark the run active before prepare()/worker launch. This makes an
 		// immediate stop visible even while the worker has not started yet.
 		_running = true;
+		_stop_requested = false;
 		_replay_thread_id = std::this_thread::get_id();
 	}
 
@@ -720,6 +756,17 @@ void WtBtRunner::run(bool bNeedDump /* = false */, bool bAsync /* = false */)
 		WTSLogger::error("Preparing historical data replayer failed; backtest will not run");
 		return;
 	}
+
+	// stop() can arrive after the runner is marked active but before the
+	// replayer's prepare() publishes its own running state. Preserve that request
+	// and forward it once prepare is complete, before an async worker can replay.
+	bool stopRequested = false;
+	{
+		std::lock_guard<std::mutex> lock(_lifecycle_mutex);
+		stopRequested = _stop_requested;
+	}
+	if (stopRequested)
+		_replayer.stop();
 
 	if (_cta_mocker)
 		_cta_mocker->enable_hook(_async);
@@ -798,6 +845,11 @@ void WtBtRunner::stop()
 		WTSLogger::debug("Backtest stop deferred from a callback/replay thread");
 		return;
 	}
+
+	// Register the stop before waiting for lifecycle control. run() holds that
+	// lock while prepare() invokes strategy callbacks, so waiting first can make
+	// an external stop miss the window before an asynchronous worker starts.
+	requestReplayStop(false);
 
 	std::unique_lock<std::mutex> controlLock(_lifecycle_control_mutex);
 	if (!canStopExecutionMocker())
@@ -879,6 +931,8 @@ void WtBtRunner::requestReplayStop(bool releaseRequested)
 		if (releaseRequested)
 			_release_requested = true;
 		running = _running;
+		if (running)
+			_stop_requested = true;
 	}
 	if (running)
 		_replayer.stop();
@@ -889,6 +943,7 @@ void WtBtRunner::finishReplayRun()
 	{
 		std::lock_guard<std::mutex> lock(_lifecycle_mutex);
 		_running = false;
+		_stop_requested = false;
 		_replay_thread_id = std::thread::id();
 	}
 	_lifecycle_changed.notify_all();

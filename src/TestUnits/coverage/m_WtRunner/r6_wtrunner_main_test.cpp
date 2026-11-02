@@ -11,10 +11,9 @@
  *    R28 实测更正 —— cppcli 在 parse() 内部就 std::exit(0)（Share/cppcli.hpp:1897-1900），
  *    main.cpp:86-87 的 return 0 是死代码，所以本文件的三条 help 用例已转 DISABLED_，
  *    help 分支的覆盖改由 r28_runner_main_test.cpp 用 fork 子进程钉住；
- *  - 其余入口分支（无参/有 -c 无 -l/配置缺失）会继续走到 runner.run(false)：
- *      run() 里 _engine 从未被 initEngine() 赋值（config() 提前 return false）→ 空指针调用，
- *      且 _parsers.run()/_traders.run() 会起线程、末尾 while(!_to_exit) 睡 10ms 死循环。
- *    这些一律 DISABLED_，触发条件写在名字下面的注释里。
+ *  - 当前 main() 会检查 runner.config() 的返回值；配置失败时返回 1，不调用 run()。
+ *    缺省/显式缺失配置的入口行为由文件末尾的子进程回归覆盖，避免在 gtest
+ *    宿主内触碰 runner 生命周期。
  *  - WtRunner.cpp 侧只走「不依赖 libWtCore 运行期」的成员函数（构造/析构/init/config 早退），
  *    并且必须堆上构造（见下方 BUG-R28-001 说明）。
  *
@@ -22,12 +21,30 @@
  */
 #include <gtest/gtest.h>
 
+#ifndef _WIN32
+#include <dlfcn.h>
+#include <signal.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#endif
+
+#include <cstdio>
+#include <cstdlib>
+#include <cerrno>
+#ifndef _WIN32
+#include <chrono>
+#include <filesystem>
+#include <fstream>
+#include <iterator>
+#include <thread>
+#endif
 #include <memory>
 #include <string>
 #include <vector>
 
 #include "WtCore/WtHelper.h"
 #include "WtRunner/WtRunner.h"
+#include "Share/DLLHelper.hpp"
 
 /* 生产 TU（main.cpp）经 -Dmain=... 改名后的入口；与测试自己的 gtest_main 不冲突 */
 int wt_coverage_main_wtrunner(int argc, char* argv[]);
@@ -49,6 +66,164 @@ int call_entry(std::vector<const char*> words)
 		argv.push_back(const_cast<char*>(w));
 	return wt_coverage_main_wtrunner(static_cast<int>(argv.size()), argv.data());
 }
+
+#ifndef _WIN32
+struct ChildResult
+{
+	bool exited = false;
+	int code = -1;
+	int signal = -1;
+	bool engine_marker_created = false;
+	bool parent_watchdog_timed_out = false;
+	std::string output;
+};
+
+ChildResult call_entry_in_child(const std::vector<std::string>& words, bool use_success_config = false)
+{
+	ChildResult result;
+	char directoryTemplate[] = "/tmp/wt-r6-011-XXXXXX";
+	char* directory = mkdtemp(directoryTemplate);
+	if (directory == nullptr)
+		return result;
+
+	const std::string outputPath = std::string(directory) + "/child-output.log";
+	std::ofstream logConfig(std::string(directory) + "/logcfg.yaml");
+	logConfig << "root:\n"
+		"    async: false\n"
+		"    level: error\n"
+		"    sinks:\n"
+		"    -   type: console_sink\n"
+		"        pattern: '%v'\n";
+	logConfig.close();
+	if (!logConfig)
+	{
+		std::filesystem::remove_all(directory);
+		return result;
+	}
+	if (use_success_config)
+	{
+		Dl_info binaryInfo = {};
+		if (dladdr(reinterpret_cast<const void*>(wt_coverage_main_wtrunner), &binaryInfo) == 0 ||
+			binaryInfo.dli_fname == nullptr)
+		{
+			std::filesystem::remove_all(directory);
+			return result;
+		}
+		const std::filesystem::path pluginSource =
+			std::filesystem::path(binaryInfo.dli_fname).parent_path().parent_path() /
+			DLLHelper::wrap_module("WtDataStorage");
+		std::error_code copyError;
+		std::filesystem::copy_file(pluginSource,
+			std::filesystem::path(directory) / DLLHelper::wrap_module("WtDataStorage"),
+			std::filesystem::copy_options::overwrite_existing, copyError);
+		if (copyError)
+		{
+			std::filesystem::remove_all(directory);
+			return result;
+		}
+
+		std::ofstream sessions(std::string(directory) + "/sessions.json");
+		sessions << R"JSON({"SD0930":{"name":"r6","offset":0,"sections":[{"from":930,"to":1500}]}})JSON";
+		sessions.close();
+		std::ofstream policy(std::string(directory) + "/actpolicy.yaml");
+		policy << "default:\n    order: []\n";
+		policy.close();
+		std::filesystem::create_directory(std::string(directory) + "/data");
+		std::ofstream config(std::string(directory) + "/config.yaml");
+		config << "basefiles:\n"
+			"    session: ./sessions.json\n"
+			"env:\n"
+			"    name: cta\n"
+			"    fees: ./absent_fees.json\n"
+			"    filters: ./absent_filters.yaml\n"
+			"    poolsize: 0\n"
+			"    product:\n"
+			"        session: SD0930\n"
+			"data:\n"
+			"    store:\n"
+			"        module: WtDataStorage\n"
+			"        path: ./data\n"
+			"bspolicy: ./actpolicy.yaml\n";
+		config.close();
+		if (!sessions || !policy || !config)
+		{
+			std::filesystem::remove_all(directory);
+			return result;
+		}
+	}
+
+	const pid_t child = fork();
+	if (child == 0)
+	{
+		alarm(5);
+		if (chdir(directory) != 0)
+			_exit(120);
+		FILE* output = std::freopen(outputPath.c_str(), "w", stdout);
+		if (output == nullptr || std::freopen(outputPath.c_str(), "a", stderr) == nullptr)
+			_exit(121);
+
+		std::vector<char*> argv;
+		argv.reserve(words.size());
+		for (const std::string& word : words)
+			argv.push_back(const_cast<char*>(word.c_str()));
+		const int code = wt_coverage_main_wtrunner(static_cast<int>(argv.size()), argv.data());
+		fflush(nullptr);
+		_exit(code);
+	}
+
+	if (child > 0)
+	{
+		int status = 0;
+		pid_t waited = 0;
+		if (use_success_config)
+		{
+			// run(false) is expected to block. The child alarm asks the runner to stop
+			// gracefully; this independent deadline still reaps it if signal handlers
+			// change or runner shutdown hangs.
+			const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(20);
+			for (;;)
+			{
+				waited = waitpid(child, &status, WNOHANG);
+				if (waited == child)
+					break;
+				if (waited < 0 && errno != EINTR)
+					break;
+				if (std::chrono::steady_clock::now() >= deadline)
+				{
+					result.parent_watchdog_timed_out = true;
+					(void)kill(child, SIGKILL);
+					do
+					{
+						waited = waitpid(child, &status, 0);
+					} while (waited < 0 && errno == EINTR);
+					break;
+				}
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			}
+		}
+		else
+		{
+			waited = waitpid(child, &status, 0);
+		}
+		if (waited == child)
+		{
+			result.exited = WIFEXITED(status);
+			result.code = result.exited ? WEXITSTATUS(status) : -1;
+			result.signal = WIFSIGNALED(status) ? WTERMSIG(status) : -1;
+		}
+	}
+	std::ifstream input(outputPath);
+	result.output.assign(std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>());
+	if (use_success_config)
+	{
+		std::error_code ec;
+		result.engine_marker_created = std::filesystem::is_regular_file(
+			std::string(directory) + "/generated/marker.json", ec) && !ec;
+	}
+	std::filesystem::remove_all(directory);
+	return result;
+}
+#endif
 
 } // namespace
 
@@ -157,41 +332,40 @@ TEST(r6_wtrunner_config, config_error_path_leaves_object_reusable)
 	EXPECT_FALSE(runner->config("./r6_another_absent_cfg.yaml"));
 }
 
-/* -------------------------------------------------------------------------
- * 五、DISABLED_：入口的其余分支
- *
- * 触发条件（任一成立即不能在启用用例里跑）：
- *  D0 (R28 实测补充) 只要 main.cpp:104 的 `WtRunner runner;` 被执行到，进程就被
- *     **SIGKILL(9)** 打死（0.1s 内消失、无 core、peak RSS 只 32MB，不是栈溢出，
- *     sizeof(WtRunner)=5232）。堆上 new 同一个类则完全正常 → BUG-R28-001。
- *     也就是说下面 D1~D3 描述的「到底走到哪一步」在本机根本观察不到，
- *     进程在更早的位置就没了。
- *  D1 argc==1 或只给 -c/-l：hParam 不存在 -> 落到 runner.config(filename)；
- *     配置文件不存在 -> config() 在 :74 return false（_config 保持 NULL）
- *     -> main.cpp:125 runner.run(false) -> :585 _engine->run()，_engine 从未赋值（NULL）
- *     -> 段错误，直接打死 gtest 宿主进程（catch(...) 抓不到 SIGSEGV）。
- *  D2 配置解析成功但缺 basefiles -> WtRunner.cpp:77~78 cfgBF 为 NULL 后立刻
- *     cfgBF->get("session") -> 空指针解引用，同样打死宿主。
- *  D3 配置齐备 -> initEngine()/run() 起引擎线程 + while(!_to_exit) 每 10ms 轮询的死循环，
- *     且需要真实 shm 与行情源；启用用例里等于挂死。
- * 这些分支的覆盖率只能留给主控裁定（进程外采样或改产品注入点）。
- * ---------------------------------------------------------------------- */
-
-TEST(r6_wtrunner_entry, DISABLED_bare_argv_falls_through_to_null_engine_run)
-{
-	// D1：无参数 -> ./logcfg.yaml + ./config.yaml -> run(false) 空指针；见上方触发条件
-	EXPECT_EQ(call_entry({"wt_runner"}), 0);
-}
-
-TEST(r6_wtrunner_entry, DISABLED_missing_config_file_still_runs)
-{
-	// D1：显式给一个不存在的 -c，行为与裸参数同路径
-	EXPECT_EQ(call_entry({"wt_runner", "-c", "./r6_absent_dtcfg.yaml"}), 0);
-}
-
+/* Historical disabled case for the separate required-basefiles configuration path. */
 TEST(r6_wtrunner_config, DISABLED_empty_object_config_derefs_null_basefiles)
 {
-	// D2：{} 是合法 YAML，_config 非空；缺 "basefiles" -> WtRunner.cpp:78 空指针
 	WtRunner runner;
 	EXPECT_FALSE(runner.config("./r6_empty_cfg.yaml"));
 }
+
+#ifndef _WIN32
+TEST(r6_wtrunner_entry, missing_default_config_exits_nonzero_without_starting_runner)
+{
+	const ChildResult result = call_entry_in_child({"wt_runner"});
+	ASSERT_TRUE(result.exited) << "signal=" << result.signal << " output=" << result.output;
+	EXPECT_EQ(result.code, 1) << result.output;
+	EXPECT_NE(result.output.find("Loading config file ./config.yaml failed"), std::string::npos) << result.output;
+}
+
+TEST(r6_wtrunner_entry, missing_explicit_config_exits_nonzero_without_starting_runner)
+{
+	const ChildResult result = call_entry_in_child({"wt_runner", "-c", "./missing-config.yaml"});
+	ASSERT_TRUE(result.exited) << "signal=" << result.signal << " output=" << result.output;
+	EXPECT_EQ(result.code, 1) << result.output;
+	EXPECT_NE(result.output.find("Loading config file ./missing-config.yaml failed"), std::string::npos) << result.output;
+}
+
+TEST(r6_wtrunner_entry, valid_config_reaches_engine_run_before_main_blocks)
+{
+	const ChildResult result = call_entry_in_child(
+		{"wt_runner", "-l", "./logcfg.yaml", "-c", "./config.yaml"}, true);
+	ASSERT_FALSE(result.parent_watchdog_timed_out) << result.output;
+	ASSERT_TRUE(result.exited) << "the watchdog should let the synchronous runner stop; signal="
+		<< result.signal << " output=" << result.output;
+	EXPECT_EQ(result.code, 0) << result.output;
+	EXPECT_TRUE(result.engine_marker_created)
+		<< "the CTA engine marker is written only after main passes config() and calls run(); output="
+		<< result.output;
+}
+#endif

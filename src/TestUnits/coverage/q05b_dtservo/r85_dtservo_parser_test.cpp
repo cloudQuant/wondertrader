@@ -68,8 +68,11 @@ TEST(R85DtParserInit, module_without_create_symbol_is_rejected)
 	const std::string real = bin + "libWtDataStorageAD.dylib";
 	if (!fs::exists(real, ec))
 		GTEST_SKIP() << "libWtDataStorageAD.dylib not found in this build";
-	fs::create_symlink(real, dir / "parsers" / "libNoParser.dylib", ec);
-	ASSERT_FALSE(ec);
+	// Copy the real data-storage module under a parser-like name. Loading must
+	// still fail because the copied module does not export createParser.
+	fs::copy_file(real, dir / "parsers" / "libNoParser.dylib",
+		fs::copy_options::overwrite_existing, ec);
+	ASSERT_FALSE(ec) << ec.message();
 
 	WtHelper::set_module_dir((dir.string() + "/").c_str());
 

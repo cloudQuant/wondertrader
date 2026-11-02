@@ -114,12 +114,20 @@ bool ParserCTPOpt::init(WTSVariant* config)
 	std::string module = config->getCString("ctpmodule");
 	if (module.empty())
 		module = "soptthostmduserapi_se";
+	const std::string moduleFile = DLLHelper::wrap_module(module.c_str(), "");
+	const char* moduleDir = getBinDir();
+	const bool noModuleDir = moduleDir == NULL || moduleDir[0] == '\0';
+	if (noModuleDir && !fs::path(moduleFile).is_absolute())
+	{
+		write_log(m_sink, LL_ERROR, "[ParserCTPOpt] Failed to determine market data API module directory");
+		return false;
+	}
 	std::string path = fmtutil::format("{}/{}/{}/", m_strFlowDir.c_str(), m_strBroker.c_str(), m_strUserID.c_str());
 	if (!StdFile::exists(path.c_str()))
 	{
 		fs::create_directories(fs::path(path));
 	}	
-	std::string dllpath = getBinDir() + DLLHelper::wrap_module(module.c_str(), "");
+	std::string dllpath = noModuleDir ? moduleFile : moduleDir + moduleFile;
 	m_hInstCTP = DLLHelper::load_library(dllpath.c_str());
 	if (m_hInstCTP == NULL)
 	{
@@ -266,9 +274,9 @@ void ParserCTPOpt::OnFrontDisconnected( int nReason )
 	}
 }
 
-void ParserCTPOpt::OnRspUnSubMarketData( CThostFtdcSpecificInstrumentField */*pSpecificInstrument*/, CThostFtdcRspInfoField */*pRspInfo*/, int /*nRequestID*/, bool /*bIsLast*/ )
+void ParserCTPOpt::OnRspUnSubMarketData( CThostFtdcSpecificInstrumentField */*pSpecificInstrument*/, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/ )
 {
-
+	IsErrorRspInfo(pRspInfo);
 }
 
 void ParserCTPOpt::OnRtnDepthMarketData( CThostFtdcDepthMarketDataField *pDepthMarketData )

@@ -541,4 +541,23 @@ private:
 	}
 };
 
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+// Test-target-only observation of the real CMP_V2 rebuild buffer. This declaration
+// is absent from production builds, so it does not change the product ABI.
+using RdmDtReaderBufferRebuildHook = void (*)(uint16_t blockType,
+	uintptr_t oldDataAddress, uintptr_t newDataAddress,
+	std::size_t oldCapacity, std::size_t newCapacity, std::size_t rebuiltSize,
+	uint16_t rebuiltVersion);
+void setRdmDtReaderBufferRebuildHook(RdmDtReaderBufferRebuildHook hook);
+
+enum class RdmDtReaderTransformFailureStage : uint8_t
+{
+	None = 0,
+	BeforeResize,
+	BeforeAppend
+};
+void setRdmDtReaderTransformFailure(uint16_t blockType,
+	RdmDtReaderTransformFailureStage stage);
+#endif
+
 NS_WTP_END

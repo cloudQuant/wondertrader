@@ -1,0 +1,13 @@
+# BUG-I02-NEW-133: tick cache map-failure fixture
+
+The previous fixture renamed the cache and created a `/dev/null` symlink; this run never invokes that method or creates a symlink. A new test-only per-writer callback (declared in `p10_writer_test_hooks.h`) injects one failure after file extension and before mapping. This changes neither production behavior when `WT_DATA_WRITER_TEST_HOOKS` is absent nor the existing RT block hook. The file may physically grow on this path; logical capacity and size remain unpublished.
+
+Current WtDataWriter.cpp, tick-cache test and relevant header were compiled in isolation, as was the RT control test. Other product objects, dynamic libraries and target configuration were reused from v8, so this is not a clean full-tree build. The Boost bridge used for compilation is a physical directory with no symlink descendants. Actual source and binary hashes before/after compilation and tests: `hashes.json`; the RT-control TU before/after hash is in `rt-results.json`. Precise argv/cwd: `commands.json`, `red-commands.json`, `rt-results.json`. Build/run entry scripts: `build.py`, `red_run.py`, `rt_control.py`; each Python invocation uses `/Users/yunjinqi/opt/anaconda3/bin/conda run -n base python`.
+
+- `R23WriterTest.CacheResizeMapFailurePreservesOldCacheAndAllowsRetry`: PASS 1/1, exit 0 (`run-failure/`). Assertions check callback fired with old mapping retained, old mapping remains readable, old logical capacity/size and index unchanged, no broadcast/RT file published, extended physical size, and retry commits both records.
+- `R23WriterTest.CacheGrowsByStepWhenCapacityExhausted`: PASS 1/1, exit 0 (`run-success/`); the preexisting normal expansion test supplies the non-injected positive control.
+- `WriterResizeAfterExtendTest.RemapFailureAfterFileExtensionKeepsOldTicksAndCanRetry`: PASS 1/1, exit 0 (`run-rt/`); existing RT hook is still exercised.
+- Isolated negative control builds a temp copy of current writer with ONLY the new injection block removed; the failure test FAILS as expected, exit 1 (`run-red/`). This validates the test detects a missing injection; it is not an old-product defect reproduction.
+- Product `WtDataWriter.cpp` compiled with the test macro removed (`build-2.log`), and `nm -g production.o` has no test-hook namespace symbols (`production-nm-check.txt`).
+
+The fault is a controlled test injection, not a real operating-system mmap failure; no ASan/TSan, Windows, real storage-fault, fresh whole-tree build, whole regression, or release acceptance is claimed. Per-case subprocesses use isolated cwd/TMPDIR and process alarms.

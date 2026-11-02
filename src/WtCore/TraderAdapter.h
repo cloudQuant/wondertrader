@@ -62,6 +62,8 @@ typedef std::function<void(const char*, bool, double, double, double, double)> F
 class TraderAdapter : public ITraderSpi
 {
 public:
+	friend struct N01TraderAdapterRiskTestAccess;
+
 	/*!
 	 * \brief 构造函数
 	 * \param caster 事件通知器指针，默认为NULL
@@ -352,8 +354,8 @@ private:
 	void setState(AdapterState state);
 	bool transitionState(AdapterState expected, AdapterState next);
 	void forEachSink(const std::function<void(ITrdNotifySink*)>& callback);
-	// Returns whether owner_id was registered at snapshot time. Ordinary sinks
-	// still receive the callback; other registered owner sinks are excluded.
+	// Routes only to the registered sink for owner_id. Unknown or disabled owner
+	// routing fails closed without notifying ordinary sinks.
 	bool forEachSinkForOwner(const std::string& owner_id,
 		const std::function<void(ITrdNotifySink*)>& callback);
 	void invokeSink(const SinkRegistrationPtr& registration,
@@ -516,7 +518,7 @@ public:
 	 * \param stdCode 标准化合约代码
 	 * \return 是否允许交易
 	 */
-	inline bool	isTradeEnabled(const char* stdCode) const;
+	bool	isTradeEnabled(const char* stdCode) const;
 
 		/*!
 	 * \brief 检查撤单限制

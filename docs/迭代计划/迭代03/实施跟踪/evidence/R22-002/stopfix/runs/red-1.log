@@ -1,0 +1,29 @@
+==================
+WARNING: ThreadSanitizer: data race (pid=55917)
+  Write of size 1 at 0x00016b81ae40 by main thread:
+    #0 StateMonitor::stop() <null> (monitor-tsan:arm64+0x10000d90c)
+    #1 main <null> (monitor-tsan:arm64+0x100006ee4)
+
+  Previous read of size 1 at 0x00016b81ae40 by thread T1:
+    #0 StateMonitor::run()::$_0::operator()() const <null> (monitor-tsan:arm64+0x10005cbc0)
+    #1 std::__1::__invoke_result_impl<void, StateMonitor::run()::$_0>::type std::__1::__invoke[abi:nqe220108]<StateMonitor::run()::$_0>(StateMonitor::run()::$_0&&) <null> (monitor-tsan:arm64+0x10005caf8)
+    #2 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, StateMonitor::run()::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, StateMonitor::run()::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) <null> (monitor-tsan:arm64+0x10005ca1c)
+    #3 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, StateMonitor::run()::$_0>>(void*) <null> (monitor-tsan:arm64+0x10005c330)
+
+  As if synchronized via sleep:
+    #0 nanosleep <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x301f4)
+    #1 std::__1::this_thread::sleep_for(std::__1::chrono::duration<long long, std::__1::ratio<1l, 1000000000l>> const&) <null> (libc++.1.dylib:arm64e+0x8f10)
+    #2 main <null> (monitor-tsan:arm64+0x100006ed8)
+
+  Location is stack of main thread.
+
+  Thread T1 (tid=44420811, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) <null> (monitor-tsan:arm64+0x10005c294)
+    #2 std::__1::thread::thread[abi:nqe220108]<StateMonitor::run()::$_0, 0>(StateMonitor::run()::$_0&&) <null> (monitor-tsan:arm64+0x10005c02c)
+    #3 std::__1::thread::thread[abi:nqe220108]<StateMonitor::run()::$_0, 0>(StateMonitor::run()::$_0&&) <null> (monitor-tsan:arm64+0x10000d8a8)
+    #4 StateMonitor::run() <null> (monitor-tsan:arm64+0x10000d700)
+    #5 main <null> (monitor-tsan:arm64+0x100006ea8)
+
+SUMMARY: ThreadSanitizer: data race (monitor-tsan:arm64+0x10000d90c) in StateMonitor::stop()+0x38
+==================

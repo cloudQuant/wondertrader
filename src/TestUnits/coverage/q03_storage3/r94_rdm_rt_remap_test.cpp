@@ -44,20 +44,23 @@ protected:
 		vector<WTSOrdQueStruct> ques;
 		ques.push_back(make_ordque(kCurTDate, kCurTDate, 93000000, 1));
 		ques.push_back(make_ordque(kCurTDate, kCurTDate, 93100000, 2));
+		ques.push_back(make_ordque(kCurTDate, kCurTDate, 93300000, 3)); // writer-owned final slot
 		ASSERT_TRUE(write_bytes("rt/queue/SSE/600000.dmb",
-			make_rt_block<WTSOrdQueStruct>(BT_RT_OrdQueue, kCurTDate, 2, 8, ques)));
+			make_rt_block<WTSOrdQueStruct>(BT_RT_OrdQueue, kCurTDate, (uint32_t)ques.size(), 8, ques)));
 
 		vector<WTSOrdDtlStruct> dtls;
 		dtls.push_back(make_orddtl(kCurTDate, kCurTDate, 93000000, 3));
 		dtls.push_back(make_orddtl(kCurTDate, kCurTDate, 93100000, 4));
+		dtls.push_back(make_orddtl(kCurTDate, kCurTDate, 93300000, 5)); // writer-owned final slot
 		ASSERT_TRUE(write_bytes("rt/orders/SSE/600000.dmb",
-			make_rt_block<WTSOrdDtlStruct>(BT_RT_OrdDetail, kCurTDate, 2, 8, dtls)));
+			make_rt_block<WTSOrdDtlStruct>(BT_RT_OrdDetail, kCurTDate, (uint32_t)dtls.size(), 8, dtls)));
 
 		vector<WTSTransStruct> trs;
 		trs.push_back(make_trans(kCurTDate, kCurTDate, 93000000, 5));
 		trs.push_back(make_trans(kCurTDate, kCurTDate, 93100000, 6));
+		trs.push_back(make_trans(kCurTDate, kCurTDate, 93300000, 7)); // writer-owned final slot
 		ASSERT_TRUE(write_bytes("rt/trans/SSE/600000.dmb",
-			make_rt_block<WTSTransStruct>(BT_RT_Trnsctn, kCurTDate, 2, 8, trs)));
+			make_rt_block<WTSTransStruct>(BT_RT_Trnsctn, kCurTDate, (uint32_t)trs.size(), 8, trs)));
 
 		vector<WTSBarStruct> bars;
 		bars.push_back(make_bar(kCurTDate, r52::min_bar_time(kCurTDate, 930), 1));

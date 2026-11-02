@@ -275,6 +275,14 @@ TEST(R124BtRunnerRun, StrategyModesRejectMissingNamesAndPropagateFactoryFailure)
 			std::string error;
 			EXPECT_FALSE(runner.config_v2(make_config(mode, "{}").c_str(), false, &error));
 			EXPECT_NE(std::string::npos, error.find("mode name is missing"));
+			EXPECT_EQ(nullptr, runner.replayer().get_session_info("TRADING"));
+			EXPECT_FALSE(runner.replayer().prepare());
+
+			// Missing mode names fail preflight before replay initialization. A
+			// corrected no-mocker config remains retryable and keeps the sink.
+			std::string retryError;
+			ASSERT_TRUE(runner.config_v2(make_config("none", "{}").c_str(), false, &retryError))
+				<< retryError;
 			ASSERT_TRUE(runner.replayer().prepare());
 			runner.replayer().run(false);
 			EXPECT_EQ(1U, sentinel.init);
@@ -289,6 +297,7 @@ TEST(R124BtRunnerRun, StrategyModesRejectMissingNamesAndPropagateFactoryFailure)
 			const std::string modeConfig = "{\"name\":\"r124_bad_factory\",\"module\":\"/tmp/r124_missing_strategy_plugin\"}";
 			EXPECT_FALSE(runner.config_v2(make_config(mode, modeConfig).c_str(), false, &error));
 			EXPECT_NE(std::string::npos, error.find("strategy factory failed"));
+			EXPECT_NE(nullptr, runner.replayer().get_session_info("TRADING"));
 			ASSERT_TRUE(runner.replayer().prepare());
 			runner.replayer().run(false);
 			EXPECT_EQ(1U, sentinel.init);

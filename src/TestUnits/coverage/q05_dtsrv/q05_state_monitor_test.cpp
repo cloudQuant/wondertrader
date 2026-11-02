@@ -13,6 +13,8 @@
 #include <atomic>
 #include <cstdio>
 #include <fstream>
+#include <memory>
+#include <stdexcept>
 #include <string>
 #include <unistd.h>
 
@@ -25,7 +27,51 @@
 
 namespace fs = std::filesystem;
 
+struct Q05StateMonitorConfigTestAccess
+{
+	static bool initializeWithOwnedConfig(StateMonitor& monitor, WTSVariant* config,
+		WTSBaseDataMgr* bdMgr)
+	{
+		monitor._bd_mgr = bdMgr;
+		monitor._dt_mgr = nullptr;
+		return monitor.initializeConfig(config);
+	}
+};
+
 namespace {
+
+void release_q05_variant(WTSVariant* value)
+{
+	if (value != nullptr)
+		value->release();
+}
+
+using Q05VariantObserver = std::unique_ptr<WTSVariant, decltype(&release_q05_variant)>;
+
+Q05VariantObserver make_observed_config(const std::string& content)
+{
+	WTSVariant* config = WTSCfgLoader::load_from_content(content);
+	if (config != nullptr)
+		config->retain(); // one observer reference plus one reference transferred to the helper
+	return Q05VariantObserver(config, &release_q05_variant);
+}
+
+class ThrowOnSecondSessionLookup final : public WTSBaseDataMgr
+{
+public:
+	explicit ThrowOnSecondSessionLookup(WTSBaseDataMgr& source) : _source(source) {}
+
+	WTSSessionInfo* getSession(const char* sid) override
+	{
+		if (++_lookupCount == 2)
+			throw std::runtime_error("controlled session lookup failure");
+		return _source.getSession(sid);
+	}
+
+private:
+	WTSBaseDataMgr& _source;
+	uint32_t _lookupCount { 0 };
+};
 
 std::filesystem::path make_tmp_dir(const char* tag)
 {
@@ -121,6 +167,46 @@ TEST_F(Q05StateMonitorTest, InitializeMalformedJsonReturnsFalse)
 	fs::path cfg = initStateCfg("{ this is ] not json [");
 	EXPECT_FALSE(mon.initialize(cfg.string().c_str(), &_bdMgr, nullptr));
 	EXPECT_FALSE(mon.isAnyInState(SS_ORIGINAL));
+}
+
+TEST_F(Q05StateMonitorTest, ConfigReferenceReturnsToObserverAfterEmptyAndPopulatedSuccess)
+{
+	Q05VariantObserver empty = make_observed_config("{}");
+	ASSERT_NE(empty.get(), nullptr);
+	ASSERT_EQ(empty->retainCount(), 2u);
+	StateMonitor emptyMonitor;
+	EXPECT_TRUE(Q05StateMonitorConfigTestAccess::initializeWithOwnedConfig(
+		emptyMonitor, empty.get(), &_bdMgr));
+	EXPECT_EQ(empty->retainCount(), 1u);
+	EXPECT_FALSE(emptyMonitor.isAnyInState(SS_ORIGINAL));
+
+	Q05VariantObserver populated = make_observed_config(
+		R"JSON({"SSE": {"inittime": 900, "closetime": 1510, "proctime": 1530}})JSON");
+	ASSERT_NE(populated.get(), nullptr);
+	ASSERT_EQ(populated->retainCount(), 2u);
+	StateMonitor populatedMonitor;
+	EXPECT_TRUE(Q05StateMonitorConfigTestAccess::initializeWithOwnedConfig(
+		populatedMonitor, populated.get(), &_bdMgr));
+	EXPECT_EQ(populated->retainCount(), 1u);
+	EXPECT_TRUE(populatedMonitor.isInState("SSE", SS_ORIGINAL));
+}
+
+TEST_F(Q05StateMonitorTest, ConfigReferenceReturnsToObserverAfterMidSessionException)
+{
+	Q05VariantObserver config = make_observed_config(R"JSON({
+		"SSE":  {"inittime": 900, "closetime": 1510, "proctime": 1530},
+		"SHFE": {"inittime": 900, "closetime": 1510, "proctime": 1530}
+	})JSON");
+	ASSERT_NE(config.get(), nullptr);
+	ASSERT_EQ(config->retainCount(), 2u);
+
+	ThrowOnSecondSessionLookup throwingMgr(_bdMgr);
+	StateMonitor monitor;
+	EXPECT_THROW(Q05StateMonitorConfigTestAccess::initializeWithOwnedConfig(
+		monitor, config.get(), &throwingMgr), std::runtime_error);
+	EXPECT_EQ(config->retainCount(), 1u);
+	// The first known session row was processed before the fake throws on row two.
+	EXPECT_TRUE(monitor.isAnyInState(SS_ORIGINAL));
 }
 
 TEST_F(Q05StateMonitorTest, InitializeEmptyObjectSucceedsWithNoSessions)

@@ -47,10 +47,18 @@ namespace
 {
 const uint32_t kStickySeconds = 1u;
 
+WTSSessionInfo* mkVSess();
+
 class VFakeCtx : public ExecuteContext
 {
 public:
 	struct Rec { std::string code; double price; double qty; };
+
+	~VFakeCtx()
+	{
+		if (defaultSess != NULL)
+			defaultSess->release();
+	}
 
 	WTSTickSlice* getTicks(const char*, uint32_t, uint64_t) override { return NULL; }
 	WTSTickData* grabLastTick(const char*) override { return NULL; }
@@ -83,7 +91,14 @@ public:
 	}
 	void writeLog(const char* log) override { logs.push_back(log ? log : ""); }
 	WTSCommodityInfo* getCommodityInfo(const char*) override { return comm; }
-	WTSSessionInfo* getSessionInfo(const char*) override { return sess; }
+	WTSSessionInfo* getSessionInfo(const char*) override
+	{
+		if (sess != NULL)
+			return sess;
+		if (defaultSess == NULL)
+			defaultSess = mkVSess();
+		return defaultSess;
+	}
 	uint64_t getCurTime() override { return curTime; }
 
 	double pos = 0;
@@ -94,6 +109,7 @@ public:
 	bool cancelByIdRet = true;
 	WTSCommodityInfo* comm = NULL;
 	WTSSessionInfo* sess = NULL;
+	WTSSessionInfo* defaultSess = NULL; // context owns the fallback session reference
 	std::function<void()> onAfterBuy;              // 重入钩子（CalcFlag 用例）
 	std::vector<Rec> buys;
 	std::vector<Rec> sells;
@@ -141,7 +157,7 @@ private:
 
 WTSCommodityInfo* mkVComm(const std::string& name)
 {
-	WTSCommodityInfo* c = WTSCommodityInfo::create("tv", name.c_str(), "CFFEX", "NIGHT_DAY", "CHN");
+	WTSCommodityInfo* c = WTSCommodityInfo::create("tv", name.c_str(), "CFFEX", "R24DAY", "CHN");
 	c->setVolScale(1);
 	c->setPriceTick(0.01);
 	c->setLotsTick(1.0);
@@ -338,6 +354,7 @@ TEST(r24_vwap, on_order_with_pending_cancel_cnt_returns_error)
 	unit.init(&ctx, kVCode, mkVCfg());
 	unit.set_position(kVCode, 100);
 	unit.on_channel_ready();                             // 撤 9001/9002，_cancel_cnt=2
+	unit.on_tick(mkVTick(kVCode, 100000000, 10.50, 10.49, 10.51)); // 通道撤单在首个有效行情到达时协调
 	ASSERT_EQ(ctx.bydirCancels.size(), 1u);
 	EXPECT_TRUE(ctx.hasLog("cancelcnt -> 2"));
 
@@ -359,7 +376,7 @@ TEST(r24_vwap, on_trade_noop_and_equal_target_set_position_keeps_fire_count)
 	VFakeCtx ctx;
 	ctx.comm = mkVComm(name);
 	WtVWapExeUnit unit;
-	bootV(unit, ctx, 100, mkVCfg(5, 0, 0, 1.0, 10.0, 0, 0, 930, 1500));
+	bootV(unit, ctx, 100, mkVCfg(5, 0, 0, 1.0, 10.0, 0, 14400, 930, 1500)); // span=0，测试连续发单计数
 	unit.on_tick(mkVTick(kVCode, 100000000, 10.50, 10.49, 10.51));
 	ASSERT_EQ(ctx.buys.size(), 1u);
 	EXPECT_EQ(ctx.countLog("第 1 次发单"), 1u);
@@ -424,10 +441,9 @@ TEST(r24_vwap, calc_flag_blocks_reentrant_do_calc)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// VWAP：撤单后重发的量被 minopenlots=0 夹成 0 -> fire_at_once 立刻返回（L450-451）
-// 前置：do_calc 已下 25 手（_this_target=25），随后实仓涨到 40（超过本轮目标）
+// VWAP：撤单后在新鲜行情上重算切片；可执行量为 0 时不重复发单。
 //////////////////////////////////////////////////////////////////////////
-TEST(r24_vwap, fire_at_once_zero_qty_returns_without_order)
+TEST(r24_vwap, canceled_retry_with_zero_vwap_slice_does_not_send_order)
 {
 	const std::string name = commName("R24VQ0");
 	VwapFile vf(name, 25.0);
@@ -439,10 +455,12 @@ TEST(r24_vwap, fire_at_once_zero_qty_returns_without_order)
 	ASSERT_EQ(ctx.buys.size(), 1u);                      // curQty = max(25,0)*1 = 25
 	EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 25.0);
 
-	ctx.pos = 40;                                        // 实仓 40 > 本轮目标 25
-	unit.on_order(9000, kVCode, true, 5, 10.50, true);   // 撤单回报 -> cancel_cnt==0 -> 重发
-	EXPECT_TRUE(ctx.hasLog("re_fire will be done"));     // L172 进了重发分支
-	EXPECT_EQ(ctx.buys.size(), 1u);                      // L451：qty=max(0,-15)=0 -> 不发
+	ctx.pos = 40;                                        // 撤单后按实际持仓重算，本轮可执行量为 0
+	unit.on_order(9000, kVCode, true, 5, 10.50, true);   // 撤单重试延迟到新鲜时段内行情
+	EXPECT_TRUE(ctx.hasLog("re_fire deferred until a fresh in-session tick"));
+	EXPECT_EQ(ctx.buys.size(), 1u);                      // 收到新行情前不重发
+	unit.on_tick(mkVTick(kVCode, 100100000, 10.60, 10.59, 10.61));
+	EXPECT_EQ(ctx.buys.size(), 1u);                      // 切片量为0时仅保留原始订单记录，不产生重发
 	EXPECT_TRUE(ctx.sells.empty());
 	ctx.comm->release();
 }
@@ -458,17 +476,20 @@ TEST(r24_vwap, fire_at_once_sell_uses_counter_price_and_lower_limit)
 	VFakeCtx ctx;
 	ctx.comm = mkVComm(name);
 	WtVWapExeUnit unit;
-	bootV(unit, ctx, 100, mkVCfg(5, 2, 0, -5.0));        // price_mode=2
-	unit.on_tick(mkVTick(kVCode, 100000000, 10.50, 10.49, 10.51, 0, 10.50));
+	bootV(unit, ctx, 100, mkVCfg(5, 2, 0, 1.0));         // 合法的非负 minopenlots
+	ASSERT_TRUE(unit.initializationSucceeded());
+	unit.on_tick(mkVTick(kVCode, 100000000, 10.50, 10.49, 10.51));
 	ASSERT_EQ(ctx.buys.size(), 1u);                      // 买向：mode2 -> ask 10.51
 	EXPECT_DOUBLE_EQ(ctx.buys[0].price, 10.51);
 
-	ctx.pos = 40;
+	ctx.pos = 140;                                       // 实仓超过目标，撤单后的新差值为负
 	unit.on_order(9000, kVCode, true, 5, 10.51, true);
-	// fire_at_once(qty=-5)：isBuy=false -> L467 bidprice(0)=10.49
-	// L470：10.49 - 0.01*1（_cancel_times=1）= 10.48 < 跌停 10.50 -> L480-482 收敛到 10.50
+	EXPECT_TRUE(ctx.hasLog("re_fire deferred until a fresh in-session tick"));
+	EXPECT_TRUE(ctx.sells.empty());                    // 撤单重试需等待新鲜时段内行情
+	unit.on_tick(mkVTick(kVCode, 100100000, 10.60, 10.49, 10.61, 0, 10.50));
+	// 合法 retryQty 为负：isBuy=false -> bid 10.49；撤单加一跳后低于跌停，收敛到 10.50。
 	ASSERT_EQ(ctx.sells.size(), 1u);
-	EXPECT_DOUBLE_EQ(ctx.sells[0].qty, 5.0);             // abs(-5)
+	EXPECT_DOUBLE_EQ(ctx.sells[0].qty, 1.0);
 	EXPECT_DOUBLE_EQ(ctx.sells[0].price, 10.50);
 	EXPECT_TRUE(ctx.hasLog("modified to lower limit price"));
 	EXPECT_EQ(ctx.buys.size(), 1u);
@@ -551,6 +572,7 @@ TEST(r24_twap, expired_order_without_verified_identity_fails_closed)
 	bootT(unit, ctx, 100, mkTCfg(4, 0, 0, 1.0, 10.0, kStickySeconds));
 	unit.on_tick(mkVTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	ASSERT_EQ(ctx.buys.size(), 1u);
+	ctx.undone = ctx.buys[0].qty;                         // fake 回填活单，避免下一 tick 重复发单
 
 	ctx.curTime += 999;
 	unit.on_tick(mkVTick(kTCode, 100100000, 10.60, 10.59, 10.61));

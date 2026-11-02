@@ -1,6 +1,9 @@
 #include "Includes/ITraderApi.h"
+#include "Includes/WTSTradeDef.hpp"
 #include "Includes/WTSVariant.hpp"
 
+#include <atomic>
+#include <cstdio>
 #include <cstdlib>
 #include <fstream>
 #include <mutex>
@@ -58,6 +61,37 @@ public:
 			return false;
 		}
 		return true;
+	}
+
+	void registerSpi(wtp::ITraderSpi* listener) override
+	{
+		record(listener == nullptr ? "api.unregisterSpi" : "api.registerSpi");
+	}
+
+	void connect() override
+	{
+		record("api.connect");
+	}
+
+	bool makeEntrustID(char* buffer, int length) override
+	{
+		if (buffer == nullptr || length <= 0)
+			return false;
+		static std::atomic<uint32_t> sequence{ 0 };
+		int written = std::snprintf(buffer, static_cast<size_t>(length), "RF%06u", ++sequence);
+		return written >= 0 && written < length;
+	}
+
+	int orderInsert(wtp::WTSEntrust* /*entrust*/) override
+	{
+		record("api.orderInsert");
+		return _params == nullptr ? -1 : _params->getInt32("fake_order_insert_ret", -1);
+	}
+
+	int orderAction(wtp::WTSEntrustAction* /*action*/) override
+	{
+		record("api.orderAction");
+		return _params == nullptr ? -1 : _params->getInt32("fake_order_action_ret", -1);
 	}
 
 	void release() override

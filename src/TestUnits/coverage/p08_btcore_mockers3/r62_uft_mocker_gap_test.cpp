@@ -130,6 +130,8 @@ TEST_F(R62UftMockerGap, SubscriptionsAndSliceQueries)
 {
 	UftMocker mocker(&_rp, "r62_uft_query");
 	_rp.register_sink(&mocker, "r62_uft_query");
+	// 01-02 日线在回放起点当天尚未完成；移到下一交易日以查询目标 01-02 bar。
+	_rp.set_time_range(202001030930ull, 202001081500ull);
 	ASSERT_TRUE(_rp.prepare());
 
 	mocker.stra_sub_ticks(kCu);
@@ -139,6 +141,7 @@ TEST_F(R62UftMockerGap, SubscriptionsAndSliceQueries)
 
 	WTSKlineSlice* bars = mocker.stra_get_bars(kCu, "d1", 5);
 	ASSERT_NE(nullptr, bars);
+	EXPECT_EQ(20200102u, bars->at(-1)->date);
 	EXPECT_DOUBLE_EQ(10.0, bars->at(-1)->close);
 	bars->release();
 

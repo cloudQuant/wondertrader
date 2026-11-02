@@ -21,19 +21,25 @@
 #include "WtUftCore/ParserAdapter.h"
 #include "WtUftCore/UftStraContext.h"
 #include "WtUftCore/WtUftEngine.h"
+#include "WtUftCore/WtUftDtMgr.h"
 
 #include "Includes/WTSVariant.hpp"
+
+#include "q04_trader_fixture.h"
 
 USING_NS_WTP;
 
 /*
  * 生产: WtUftEngine.cpp:179-183、192-195、209-243（两处 return NULL 之后的死代码）
- * 公开切片入口在无数据管理器时也必须返回 NULL；on_bar 在订阅表为空时是空循环。
+ * kline/tick 切片入口当前直接返回 NULL；L2 切片委托给有效但空的 WtUftDtMgr，
+ * 其切片接口返回 NULL；on_bar 在订阅表为空时是空循环。
  */
 TEST(R194UftEngine, SliceEntriesAreNullStubsAndOnBarIsInert)
 {
+	WtUftDtMgr dataMgr;
 	WtUftEngine engine;
-	engine.init(nullptr, nullptr, nullptr, nullptr);
+	engine.init(nullptr, nullptr, &dataMgr, nullptr);
+	ASSERT_TRUE(dataMgr.init(nullptr, &engine));
 
 	EXPECT_EQ(nullptr, engine.get_kline_slice(1, "SHFE.rb.2510", "d", 5));
 	EXPECT_EQ(nullptr, engine.get_tick_slice(1, "SHFE.rb.2510", 5));
@@ -42,19 +48,26 @@ TEST(R194UftEngine, SliceEntriesAreNullStubsAndOnBarIsInert)
 	EXPECT_EQ(nullptr, engine.get_transaction_slice(1, "SHFE.rb.2510", 5));
 
 	engine.on_bar("SHFE.rb.2510", "d", 1, nullptr);
+	EXPECT_TRUE(dataMgr.init(nullptr, nullptr));
 }
 
 /*
  * 生产: WtUftCore/ParserAdapter.cpp:57-100（module 缺失/装载失败早退）
- * 不存在的 module 只触发 load_library 失败；早退前不使用 stub/bgMgr，故可传空。
+ * 不存在的 module 触发 load_library 失败；IBaseDataMgr 仍是 init 前置条件。
  */
 TEST(R194UftParserAdapter, MissingModuleIsRejected)
 {
 	WTSVariant* cfg = WTSVariant::createObject();
 	cfg->append("module", "r194_missing_parser_module");
 
+	q04::FakeBaseDataMgr bdMgr;
+	ParserAdapter nullMgr;
+	EXPECT_FALSE(nullMgr.init("r194_null_mgr", cfg, nullptr, nullptr));
+	EXPECT_STREQ("", nullMgr.id());
+	EXPECT_EQ(1u, cfg->retainCount());
+
 	ParserAdapter pa;
-	EXPECT_FALSE(pa.init("r194", cfg, nullptr, nullptr));
+	EXPECT_FALSE(pa.init("r194", cfg, nullptr, &bdMgr));
 	EXPECT_STREQ("r194", pa.id());
 
 	cfg->release();

@@ -14,6 +14,9 @@
  */
 #include "r91_common.h"
 
+#include <initializer_list>
+#include <memory>
+
 using R91Fixture = r91::Fixture;
 
 namespace
@@ -45,6 +48,16 @@ namespace
 		}
 		return ret;
 	}
+
+	template <typename T>
+	struct SliceReleaser
+	{
+		void operator()(T* slice) const
+		{
+			if (slice != NULL)
+				slice->release();
+		}
+	};
 }
 
 /*
@@ -114,12 +127,8 @@ TEST_F(R91Fixture, R91BinHft_Level2SlicesLoadFromBin)
 	EXPECT_DOUBLE_EQ(11.0, tickSlice->at(1)->price);
 	tickSlice->release();
 
-	// 游标停在 933 之后，get_last_tick 必须返回 933（L2890-2912）
-	WTSTickData* last = replayer.get_last_tick(kCode);
-	ASSERT_NE(nullptr, last);
-	EXPECT_EQ(933u, last->actiontime() / 100000u);
-	EXPECT_DOUBLE_EQ(12.0, last->price());
-	last->release();
+	// get_tick_slice 查询历史前缀，不推进 replay clock；prepare 后尚无已回放 tick。
+	EXPECT_EQ(nullptr, replayer.get_last_tick(kCode));
 
 	WTSOrdDtlSlice* detailSlice = replayer.get_order_detail_slice(kCode, 3u, 202001020933ull);
 	ASSERT_NE(nullptr, detailSlice);
@@ -424,18 +433,127 @@ TEST_F(R91Fixture, R91BinHft_TransactionSliceLoadsWithoutOrderDetailMiss)
 	slice->release();
 }
 
-/*
- * 生产: HisDataReplayer.cpp:2731-2738（checkOrderDetails 无数据时写 _trans_cache）
- *       2773-2780（checkOrderQueues 同样写 _trans_cache）、2786-2825（checkTransactions）
- *
- * 缺陷归档：orddtl 缺失会把 trans 缓存设为空并标成当日已加载；后续成交查询跳过磁盘加载，
- * 却可能按空数组构造非空切片。禁用用例保留正确的两条成交契约预期，不把越界路径当作通过。
- * 详见 docs/迭代计划/迭代01/bugs/R91.md BUG-R91-001。
- */
-TEST_F(R91Fixture, DISABLED_R91BinHft_OrderDetailCacheMissPoisonsTransactionCache)
+TEST_F(R91Fixture, R91BinHft_OrderDetailSliceLoadsFromBin)
 {
-	// 暂时禁用：缺订单明细会把空 trans 缓存标记为当日已加载；随后查询在空数组上
-	// 得到非零切片长度，可能构造越界 view。不能运行此未定义行为路径来充当成功结果。
+	const char* const code = "SSE.STK.000005";
+	std::vector<WTSOrdDtlStruct> details;
+	details.push_back(r91::mk_orddtl(kDay1, 931u, 40.1, 41u, "000005"));
+	details.push_back(r91::mk_orddtl(kDay1, 932u, 40.2, 42u, "000005"));
+	ASSERT_TRUE(r91::write_orddtl(_base, "SSE", "000005", kDay1, details));
+
+	r91::CfgOpts opts;
+	opts.mode = "bin";
+	WTSVariant* cfg = r91::make_cfg(_root, _base, 202001020930ull, 202001021500ull, opts);
+
+	HisDataReplayer replayer;
+	ASSERT_TRUE(replayer.init(cfg, NULL, NULL));
+	cfg->release();
+
+	r91::Sink sink;
+	replayer.register_sink(&sink, "r91_detail_direct");
+	ASSERT_TRUE(replayer.prepare());
+	replayer.sub_order_detail(2u, code);
+
+	WTSOrdDtlSlice* slice = replayer.get_order_detail_slice(code, 2u, 202001020932ull);
+	ASSERT_NE(nullptr, slice);
+	ASSERT_EQ(2u, slice->size());
+	EXPECT_DOUBLE_EQ(40.1, slice->at(0)->price);
+	EXPECT_EQ(41u, slice->at(0)->volume);
+	EXPECT_DOUBLE_EQ(40.2, slice->at(1)->price);
+	EXPECT_EQ(42u, slice->at(1)->volume);
+	slice->release();
+}
+
+TEST_F(R91Fixture, R91BinHft_OrderQueueSliceLoadsFromBin)
+{
+	const char* const code = "SSE.STK.000006";
+	std::vector<WTSOrdQueStruct> queues;
+	queues.push_back(r91::mk_ordque(kDay1, 931u, 50.1, 51u, "000006"));
+	queues.push_back(r91::mk_ordque(kDay1, 932u, 50.2, 52u, "000006"));
+	ASSERT_TRUE(r91::write_ordque(_base, "SSE", "000006", kDay1, queues));
+
+	r91::CfgOpts opts;
+	opts.mode = "bin";
+	WTSVariant* cfg = r91::make_cfg(_root, _base, 202001020930ull, 202001021500ull, opts);
+
+	HisDataReplayer replayer;
+	ASSERT_TRUE(replayer.init(cfg, NULL, NULL));
+	cfg->release();
+
+	r91::Sink sink;
+	replayer.register_sink(&sink, "r91_queue_direct");
+	ASSERT_TRUE(replayer.prepare());
+	replayer.sub_order_queue(3u, code);
+
+	WTSOrdQueSlice* slice = replayer.get_order_queue_slice(code, 2u, 202001020932ull);
+	ASSERT_NE(nullptr, slice);
+	ASSERT_EQ(2u, slice->size());
+	EXPECT_DOUBLE_EQ(50.1, slice->at(0)->price);
+	EXPECT_EQ(51u, slice->at(0)->qsize);
+	EXPECT_DOUBLE_EQ(50.2, slice->at(1)->price);
+	EXPECT_EQ(52u, slice->at(1)->qsize);
+	slice->release();
+}
+
+TEST_F(R91Fixture, R91BinHft_AllLevel2SlicesLoadWithoutTickCursor)
+{
+	const char* const code = "SSE.STK.000007";
+	std::vector<WTSOrdDtlStruct> details;
+	details.push_back(r91::mk_orddtl(kDay1, 931u, 60.1, 61u, "000007"));
+	details.push_back(r91::mk_orddtl(kDay1, 932u, 60.2, 62u, "000007"));
+	ASSERT_TRUE(r91::write_orddtl(_base, "SSE", "000007", kDay1, details));
+
+	std::vector<WTSOrdQueStruct> queues;
+	queues.push_back(r91::mk_ordque(kDay1, 931u, 59.9, 71u, "000007"));
+	queues.push_back(r91::mk_ordque(kDay1, 932u, 59.8, 72u, "000007"));
+	ASSERT_TRUE(r91::write_ordque(_base, "SSE", "000007", kDay1, queues));
+
+	std::vector<WTSTransStruct> trans;
+	trans.push_back(r91::mk_trans(kDay1, 931u, 60.05, 81u, "000007"));
+	trans.push_back(r91::mk_trans(kDay1, 932u, 60.15, 82u, "000007"));
+	ASSERT_TRUE(r91::write_trans(_base, "SSE", "000007", kDay1, trans));
+
+	r91::CfgOpts opts;
+	opts.mode = "bin";
+	WTSVariant* cfg = r91::make_cfg(_root, _base, 202001020930ull, 202001021500ull, opts);
+
+	HisDataReplayer replayer;
+	ASSERT_TRUE(replayer.init(cfg, NULL, NULL));
+	cfg->release();
+
+	r91::Sink sink;
+	replayer.register_sink(&sink, "r91_level2_direct");
+	ASSERT_TRUE(replayer.prepare());
+	replayer.sub_order_detail(2u, code);
+	replayer.sub_order_queue(3u, code);
+	replayer.sub_transaction(4u, code);
+
+	WTSOrdDtlSlice* detailSlice = replayer.get_order_detail_slice(code, 2u, 202001020932ull);
+	ASSERT_NE(nullptr, detailSlice);
+	ASSERT_EQ(2u, detailSlice->size());
+	EXPECT_DOUBLE_EQ(60.1, detailSlice->at(0)->price);
+	EXPECT_EQ(61u, detailSlice->at(0)->volume);
+	detailSlice->release();
+
+	WTSOrdQueSlice* queueSlice = replayer.get_order_queue_slice(code, 2u, 202001020932ull);
+	ASSERT_NE(nullptr, queueSlice);
+	ASSERT_EQ(2u, queueSlice->size());
+	EXPECT_DOUBLE_EQ(59.9, queueSlice->at(0)->price);
+	EXPECT_EQ(72u, queueSlice->at(1)->qsize);
+	queueSlice->release();
+
+	WTSTransSlice* transSlice = replayer.get_transaction_slice(code, 2u, 202001020932ull);
+	ASSERT_NE(nullptr, transSlice);
+	ASSERT_EQ(2u, transSlice->size());
+	EXPECT_DOUBLE_EQ(60.05, transSlice->at(0)->price);
+	EXPECT_EQ(82u, transSlice->at(1)->volume);
+	transSlice->release();
+}
+
+// Regression for BUG-R91-001: a missing detail file must only affect the detail cache.
+// A later transaction query must still load the real records from the transaction file.
+TEST_F(R91Fixture, R91BinHft_OrderDetailCacheMissDoesNotPoisonTransactionCache)
+{
 	const char* const code = "SSE.STK.000003";
 	std::vector<WTSTransStruct> trans;
 	trans.push_back(r91::mk_trans(kDay1, 931u, 20.1, 1u, "000003"));
@@ -457,7 +575,8 @@ TEST_F(R91Fixture, DISABLED_R91BinHft_OrderDetailCacheMissPoisonsTransactionCach
 
 	replayer.sub_transaction(1u, code);
 
-	// orders 目录没有 000003.dsb：返回 NULL，同时把 _trans_cache[code] 置空并标成当日
+	// orders 目录没有 000003.dsb：detail 返回 NULL，重复查询仍安全且不能修改 trans cache。
+	EXPECT_EQ(nullptr, replayer.get_order_detail_slice(code, 2u, 202001020933ull));
 	EXPECT_EQ(nullptr, replayer.get_order_detail_slice(code, 2u, 202001020933ull));
 
 	// 正确的行为是此刻从磁盘装载两条成交
@@ -467,4 +586,151 @@ TEST_F(R91Fixture, DISABLED_R91BinHft_OrderDetailCacheMissPoisonsTransactionCach
 	EXPECT_DOUBLE_EQ(20.1, slice->at(0)->price);
 	EXPECT_DOUBLE_EQ(20.2, slice->at(1)->price);
 	slice->release();
+}
+
+TEST_F(R91Fixture, R91BinHft_OrderQueueCacheMissDoesNotPoisonTransactionCache)
+{
+	const char* const code = "SSE.STK.000008";
+	std::vector<WTSTransStruct> trans;
+	trans.push_back(r91::mk_trans(kDay1, 931u, 70.1, 81u, "000008"));
+	trans.push_back(r91::mk_trans(kDay1, 932u, 70.2, 82u, "000008"));
+	ASSERT_TRUE(r91::write_trans(_base, "SSE", "000008", kDay1, trans));
+
+	r91::CfgOpts opts;
+	opts.mode = "bin";
+	WTSVariant* cfg = r91::make_cfg(_root, _base, 202001020930ull, 202001021500ull, opts);
+
+	HisDataReplayer replayer;
+	ASSERT_TRUE(replayer.init(cfg, NULL, NULL));
+	cfg->release();
+
+	r91::Sink sink;
+	replayer.register_sink(&sink, "r91_queue_miss");
+	ASSERT_TRUE(replayer.prepare());
+	replayer.sub_transaction(4u, code);
+
+	EXPECT_EQ(nullptr, replayer.get_order_queue_slice(code, 2u, 202001020933ull));
+	EXPECT_EQ(nullptr, replayer.get_order_queue_slice(code, 2u, 202001020933ull));
+
+	WTSTransSlice* slice = replayer.get_transaction_slice(code, 2u, 202001020932ull);
+	ASSERT_NE(nullptr, slice);
+	ASSERT_EQ(2u, slice->size());
+	EXPECT_DOUBLE_EQ(70.1, slice->at(0)->price);
+	EXPECT_EQ(81u, slice->at(0)->volume);
+	EXPECT_DOUBLE_EQ(70.2, slice->at(1)->price);
+	EXPECT_EQ(82u, slice->at(1)->volume);
+	slice->release();
+}
+
+TEST_F(R91Fixture, R91BinHft_Level2SlicesRespectInclusiveEndAndCount)
+{
+	const char* const code = "SSE.STK.000009";
+	const uint32_t times[] = { 931u, 933u, 935u };
+	std::vector<WTSOrdDtlStruct> details;
+	std::vector<WTSOrdQueStruct> queues;
+	std::vector<WTSTransStruct> trans;
+	for (uint32_t i = 0; i < 3; ++i)
+	{
+		details.push_back(r91::mk_orddtl(kDay1, times[i], 10.11 + i * 0.22, 101u + i * 2u, "000009"));
+		queues.push_back(r91::mk_ordque(kDay1, times[i], 20.11 + i * 0.22, 201u + i * 2u, "000009"));
+		trans.push_back(r91::mk_trans(kDay1, times[i], 30.11 + i * 0.22, 301u + i * 2u, "000009"));
+	}
+	ASSERT_TRUE(r91::write_orddtl(_base, "SSE", "000009", kDay1, details));
+	ASSERT_TRUE(r91::write_ordque(_base, "SSE", "000009", kDay1, queues));
+	ASSERT_TRUE(r91::write_trans(_base, "SSE", "000009", kDay1, trans));
+
+	r91::CfgOpts opts;
+	opts.mode = "bin";
+	WTSVariant* cfg = r91::make_cfg(_root, _base, 202001020930ull, 202001021500ull, opts);
+	HisDataReplayer replayer;
+	ASSERT_TRUE(replayer.init(cfg, NULL, NULL));
+	cfg->release();
+	r91::Sink sink;
+	replayer.register_sink(&sink, "r91_level2_boundaries");
+	ASSERT_TRUE(replayer.prepare());
+	replayer.sub_order_detail(1u, code);
+	replayer.sub_order_queue(2u, code);
+	replayer.sub_transaction(3u, code);
+
+	const auto assertDetail = [&](uint64_t etime, uint32_t count, std::initializer_list<std::size_t> expected) {
+		std::unique_ptr<WTSOrdDtlSlice, SliceReleaser<WTSOrdDtlSlice>> slice(
+			replayer.get_order_detail_slice(code, count, etime));
+		if (expected.size() == 0)
+		{
+			EXPECT_EQ(nullptr, slice.get());
+			return;
+		}
+		ASSERT_NE(nullptr, slice.get());
+		ASSERT_EQ(expected.size(), slice->size());
+		std::size_t out = 0;
+		for (std::size_t index : expected)
+		{
+			const WTSOrdDtlStruct* item = slice->at(static_cast<int32_t>(out++));
+			ASSERT_NE(nullptr, item);
+			EXPECT_STREQ("000009", item->code);
+			EXPECT_EQ(kDay1, item->action_date);
+			EXPECT_EQ(times[index] * 100000u, item->action_time);
+			EXPECT_DOUBLE_EQ(10.11 + index * 0.22, item->price);
+			EXPECT_EQ(101u + index * 2u, item->volume);
+		}
+	};
+	const auto assertQueue = [&](uint64_t etime, uint32_t count, std::initializer_list<std::size_t> expected) {
+		std::unique_ptr<WTSOrdQueSlice, SliceReleaser<WTSOrdQueSlice>> slice(
+			replayer.get_order_queue_slice(code, count, etime));
+		if (expected.size() == 0)
+		{
+			EXPECT_EQ(nullptr, slice.get());
+			return;
+		}
+		ASSERT_NE(nullptr, slice.get());
+		ASSERT_EQ(expected.size(), slice->size());
+		std::size_t out = 0;
+		for (std::size_t index : expected)
+		{
+			const WTSOrdQueStruct* item = slice->at(static_cast<int32_t>(out++));
+			ASSERT_NE(nullptr, item);
+			EXPECT_STREQ("000009", item->code);
+			EXPECT_EQ(kDay1, item->action_date);
+			EXPECT_EQ(times[index] * 100000u, item->action_time);
+			EXPECT_DOUBLE_EQ(20.11 + index * 0.22, item->price);
+			EXPECT_EQ(201u + index * 2u, item->qsize);
+		}
+	};
+	const auto assertTrans = [&](uint64_t etime, uint32_t count, std::initializer_list<std::size_t> expected) {
+		std::unique_ptr<WTSTransSlice, SliceReleaser<WTSTransSlice>> slice(
+			replayer.get_transaction_slice(code, count, etime));
+		if (expected.size() == 0)
+		{
+			EXPECT_EQ(nullptr, slice.get());
+			return;
+		}
+		ASSERT_NE(nullptr, slice.get());
+		ASSERT_EQ(expected.size(), slice->size());
+		std::size_t out = 0;
+		for (std::size_t index : expected)
+		{
+			const WTSTransStruct* item = slice->at(static_cast<int32_t>(out++));
+			ASSERT_NE(nullptr, item);
+			EXPECT_STREQ("000009", item->code);
+			EXPECT_EQ(kDay1, item->action_date);
+			EXPECT_EQ(times[index] * 100000u, item->action_time);
+			EXPECT_DOUBLE_EQ(30.11 + index * 0.22, item->price);
+			EXPECT_EQ(301u + index * 2u, item->volume);
+		}
+	};
+
+	// The end timestamp is inclusive: exact hits are included, while a gap stops
+	// before the next record. Repeated queries must recompute the visible prefix.
+	const auto verify = [&](auto assertSlice) {
+		assertSlice(202001020930ull, 8u, {});       // before first
+		assertSlice(202001020931ull, 8u, { 0u });   // exact first
+		assertSlice(202001020932ull, 8u, { 0u });   // gap before the next record
+		assertSlice(202001020935ull, 8u, { 0u, 1u, 2u }); // exact last
+		assertSlice(202001020936ull, 8u, { 0u, 1u, 2u }); // after last
+		assertSlice(202001020936ull, 2u, { 1u, 2u }); // count limits the visible suffix
+		assertSlice(202001020936ull, 0u, {});       // zero count is empty
+	};
+	verify(assertDetail);
+	verify(assertQueue);
+	verify(assertTrans);
 }

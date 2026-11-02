@@ -23,6 +23,8 @@
 
 #include <filesystem>
 #include <fstream>
+#include <cmath>
+#include <cstdio>
 #include <mutex>
 #include <string>
 #include <system_error>
@@ -36,7 +38,8 @@
 #include "WtLatencyHFT/HftLatencyTool.h"
 
 /* 生产 TU HftLatencyTool.cpp:33 的自由函数（main.cpp:19 也是这样声明的） */
-void test_hft();
+bool test_hft();
+int wt_coverage_main_wtlatencyhft();
 namespace hft { class TestParser; extern TestParser* theParser; }
 namespace hft {
 void armShutdownGateTest();
@@ -48,11 +51,31 @@ bool waitForTraderReleaseDuringCallback(int timeout_ms);
 bool shutdownGateSawTraderReleaseDuringCallback();
 void disarmShutdownGateTest();
 void setTestTraderInitFailure(bool fail);
+void setTestRunFailureForTesting(int stage, bool unknown);
+void setTestTickCreateFailureForTesting(bool fail);
 }
 
 namespace {
 
 namespace stdfs = std::filesystem;
+
+constexpr int kRunFailureParser = 1;
+constexpr int kRunFailureTrader = 2;
+constexpr int kRunFailureEngine = 3;
+
+class ScopedRunFailure
+{
+public:
+	ScopedRunFailure(int stage, bool unknown) { hft::setTestRunFailureForTesting(stage, unknown); }
+	~ScopedRunFailure() { hft::setTestRunFailureForTesting(0, false); }
+};
+
+class ScopedTickCreateFailure
+{
+public:
+	ScopedTickCreateFailure() { hft::setTestTickCreateFailureForTesting(true); }
+	~ScopedTickCreateFailure() { hft::setTestTickCreateFailureForTesting(false); }
+};
 
 class ScopedTempCwd
 {
@@ -154,6 +177,14 @@ bool write_text(const char* name, const std::string& text)
 	return !out.fail();
 }
 
+bool parse_latency_summary(const std::string& message, unsigned int& samples,
+	double& total_ns, double& average_ns)
+{
+	return std::sscanf(message.c_str(),
+		"%u ticks simulated in %lf ns, HftEngine Innner Latency: %lf ns",
+		&samples, &total_ns, &average_ns) == 3;
+}
+
 /* 0~2400 单段：任何 hhmm 都在交易时段内，ticker 线程只做 10ms 轮询，stop 后立刻 join */
 const char* kSessionsYaml =
 	"ALLDAY:\n"
@@ -239,6 +270,15 @@ const char* kConfigRunZero =
 	"    product:\n"
 	"        session: ALLDAY\n"
 	"times: 0\n"
+	"core: 0\n";
+
+/* 缺省 times：WTSVariant::getUInt32(name, defVal=0) 应回退为 0 */
+const char* kConfigRunTimesOmitted =
+	"basefiles:\n"
+	"    session: sessions.yaml\n"
+	"env:\n"
+	"    product:\n"
+	"        session: ALLDAY\n"
 	"core: 0\n";
 
 /* run() 用：只加载 session，times=1 且没有合约 -> 循环体在 getContract 处早退 */
@@ -335,6 +375,7 @@ TEST(r95_hft_run, zero_ticks_after_successful_init_exercises_engine_and_parser_t
 	bool init_ok = false;
 	bool repeated_init_ok = false;
 	bool run_threw = false;
+	bool run_failed = true;
 	{
 		ScopedWarningCapture capture;
 		{
@@ -346,6 +387,7 @@ TEST(r95_hft_run, zero_ticks_after_successful_init_exercises_engine_and_parser_t
 				{
 					repeated_init_ok = tool.init();
 					tool.run();
+					run_failed = tool.runFailed();
 				}
 			}
 			catch (...)
@@ -357,12 +399,77 @@ TEST(r95_hft_run, zero_ticks_after_successful_init_exercises_engine_and_parser_t
 	EXPECT_TRUE(init_ok);
 	EXPECT_FALSE(repeated_init_ok) << "init() is a one-shot operation";
 	EXPECT_FALSE(run_threw);
+	EXPECT_FALSE(run_failed);
 	bool saw_no_samples = false;
 	for (const std::string& warning : g_warning_log_handler.messages())
 		saw_no_samples = saw_no_samples || warning.find("average latency unavailable (no samples)") != std::string::npos;
 	EXPECT_TRUE(saw_no_samples);
+	bool saw_latency_summary = false;
+	for (const std::string& warning : g_warning_log_handler.messages())
+	{
+		unsigned int samples = 0;
+		double total_ns = 0.0;
+		double average_ns = 0.0;
+		saw_latency_summary = saw_latency_summary ||
+			parse_latency_summary(warning, samples, total_ns, average_ns);
+	}
+	EXPECT_FALSE(saw_latency_summary) << "zero samples must not emit an average latency";
 
 	EXPECT_TRUE(stdfs::exists("generated/marker.json")) << "engine.run() 没有走到写 marker 的段";
+}
+
+TEST(r95_hft_run, missing_times_uses_zero_default_and_reports_no_samples)
+{
+	ScopedTempCwd guard("run_times_omitted");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(write_text("sessions.yaml", kSessionsYaml));
+	ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
+	ASSERT_TRUE(write_text("config.yaml", kConfigRunTimesOmitted));
+	WTSLogger::init("logcfg.yaml");
+
+	g_warning_log_handler.clear();
+	bool init_ok = false;
+	bool run_threw = false;
+	bool run_failed = true;
+	{
+		ScopedWarningCapture capture;
+		{
+			hft::HftLatencyTool tool;
+			try
+			{
+				init_ok = tool.init();
+				if (init_ok)
+				{
+					tool.run();
+					run_failed = tool.runFailed();
+				}
+			}
+			catch (...)
+			{
+				run_threw = true;
+			}
+		}
+	}
+	EXPECT_TRUE(init_ok);
+	EXPECT_FALSE(run_threw);
+	EXPECT_FALSE(run_failed);
+
+	bool saw_zero_default = false;
+	bool saw_no_samples = false;
+	bool saw_latency_summary = false;
+	for (const std::string& warning : g_warning_log_handler.messages())
+	{
+		saw_zero_default = saw_zero_default || warning.find("0 ticks will be simulated") != std::string::npos;
+		saw_no_samples = saw_no_samples || warning.find("average latency unavailable (no samples)") != std::string::npos;
+		unsigned int samples = 0;
+		double total_ns = 0.0;
+		double average_ns = 0.0;
+		saw_latency_summary = saw_latency_summary ||
+			parse_latency_summary(warning, samples, total_ns, average_ns);
+	}
+	EXPECT_TRUE(saw_zero_default);
+	EXPECT_TRUE(saw_no_samples);
+	EXPECT_FALSE(saw_latency_summary);
 }
 
 TEST(r95_hft_run, run_after_failed_init_does_not_use_parser)
@@ -469,6 +576,7 @@ TEST(r95_hft_run, one_tick_without_contract_reports_and_returns)
 	g_warning_log_handler.clear();
 	bool init_ok = false;
 	bool run_threw = false;
+	bool run_failed = true;
 	{
 		ScopedWarningCapture capture;
 		{
@@ -479,6 +587,7 @@ TEST(r95_hft_run, one_tick_without_contract_reports_and_returns)
 				try
 				{
 					tool.run();
+					run_failed = tool.runFailed();
 				}
 				catch (...)
 				{
@@ -489,6 +598,7 @@ TEST(r95_hft_run, one_tick_without_contract_reports_and_returns)
 	}
 	EXPECT_TRUE(init_ok);
 	EXPECT_FALSE(run_threw);
+	EXPECT_FALSE(run_failed);
 	bool saw_missing_contract = false;
 	for (const std::string& warning : g_warning_log_handler.messages())
 		saw_missing_contract = saw_missing_contract || warning.find("contract SHFE.rb2205 not found") != std::string::npos;
@@ -509,6 +619,7 @@ TEST(r95_hft_run, one_tick_with_contract_and_commodity_runs)
 	g_warning_log_handler.clear();
 	bool init_ok = false;
 	bool run_threw = false;
+	bool run_failed = true;
 	{
 		ScopedWarningCapture capture;
 		{
@@ -519,6 +630,7 @@ TEST(r95_hft_run, one_tick_with_contract_and_commodity_runs)
 				try
 				{
 					tool.run();
+					run_failed = tool.runFailed();
 				}
 				catch (...)
 				{
@@ -529,10 +641,106 @@ TEST(r95_hft_run, one_tick_with_contract_and_commodity_runs)
 	}
 	EXPECT_TRUE(init_ok);
 	EXPECT_FALSE(run_threw);
-	bool saw_completed_tick = false;
+	EXPECT_FALSE(run_failed);
+	unsigned int summaries = 0;
+	unsigned int observed_samples = 0;
+	double observed_total_ns = 0.0;
+	double observed_average_ns = 0.0;
 	for (const std::string& warning : g_warning_log_handler.messages())
-		saw_completed_tick = saw_completed_tick || warning.find("1 ticks simulated in") != std::string::npos;
-	EXPECT_TRUE(saw_completed_tick);
+	{
+		unsigned int samples = 0;
+		double total_ns = 0.0;
+		double average_ns = 0.0;
+		if (parse_latency_summary(warning, samples, total_ns, average_ns))
+		{
+			++summaries;
+			observed_samples = samples;
+			observed_total_ns = total_ns;
+			observed_average_ns = average_ns;
+		}
+	}
+	EXPECT_EQ(1u, summaries);
+	EXPECT_EQ(1u, observed_samples) << "the configured positive sample count must be reported";
+	EXPECT_TRUE(std::isfinite(observed_total_ns));
+	EXPECT_TRUE(std::isfinite(observed_average_ns));
+	EXPECT_GE(observed_total_ns, 0.0);
+	EXPECT_GE(observed_average_ns, 0.0);
+}
+
+TEST(r95_hft_run, tick_creation_failure_is_reported_and_fails_run)
+{
+	ScopedTempCwd guard("run_tick_create_failure");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(prepare_base());
+	ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
+	ASSERT_TRUE(write_text("config.yaml", kConfigRunOneWithValidContract));
+	WTSLogger::init("logcfg.yaml");
+
+	g_warning_log_handler.clear();
+	bool init_ok = false;
+	bool run_threw = false;
+	bool run_failed = false;
+	{
+		ScopedWarningCapture capture;
+		{
+			hft::HftLatencyTool tool;
+			init_ok = tool.init();
+			if (init_ok)
+			{
+				ScopedTickCreateFailure injected;
+				try
+				{
+					tool.run();
+					run_failed = tool.runFailed();
+				}
+				catch (...)
+				{
+					run_threw = true;
+				}
+			}
+		}
+	}
+	EXPECT_TRUE(init_ok);
+	EXPECT_FALSE(run_threw);
+	EXPECT_TRUE(run_failed);
+	bool saw_tick_create_failure = false;
+	for (const std::string& message : g_warning_log_handler.messages())
+		saw_tick_create_failure = saw_tick_create_failure ||
+			message.find("HFT latency test failed to create tick SHFE.rb2205") != std::string::npos;
+	EXPECT_TRUE(saw_tick_create_failure);
+}
+
+TEST(r95_hft_run, reports_parser_trader_and_engine_exceptions)
+{
+	ScopedTempCwd guard("run_exceptions");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(prepare_base());
+	ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
+	ASSERT_TRUE(write_text("config.yaml", kConfigRunZero));
+	WTSLogger::init("logcfg.yaml");
+
+	struct FailureCase { int stage; bool unknown; const char* diagnostic; };
+	const FailureCase cases[] = {
+		{ kRunFailureParser, false, "injected parser exception" },
+		{ kRunFailureTrader, false, "injected trader exception" },
+		{ kRunFailureEngine, true, "unknown exception" },
+	};
+	ScopedWarningCapture capture;
+	for (const FailureCase& failure : cases)
+	{
+		g_warning_log_handler.clear();
+		{
+			ScopedRunFailure injected(failure.stage, failure.unknown);
+			hft::HftLatencyTool tool;
+			ASSERT_TRUE(tool.init());
+			EXPECT_NO_THROW(tool.run());
+			EXPECT_TRUE(tool.runFailed());
+		}
+		bool saw_diagnostic = false;
+		for (const std::string& message : g_warning_log_handler.messages())
+			saw_diagnostic = saw_diagnostic || message.find(failure.diagnostic) != std::string::npos;
+		EXPECT_TRUE(saw_diagnostic) << "missing diagnostic: " << failure.diagnostic;
+	}
 }
 
 /* -------------------------------------------------------------------------
@@ -547,6 +755,19 @@ TEST(r95_hft_entry, free_function_runs_init_and_run_with_valid_config)
 
 	// :36 栈上构造 HftLatencyTool；:38 init()（配置有效 -> true）；
 	// :41 run()（times=0，引擎/解析器/交易器同上）；出作用域走工具析构，ticker stop/join。
-	EXPECT_NO_THROW(test_hft());
+	EXPECT_TRUE(test_hft());
 	EXPECT_TRUE(stdfs::exists("generated/marker.json"));
+}
+
+TEST(r95_hft_entry, injected_run_failure_reaches_executable_status)
+{
+	ScopedTempCwd guard("entry_run_failure");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(write_text("sessions.yaml", kSessionsYaml));
+	ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
+	ASSERT_TRUE(write_text("config.yaml", kConfigRunZero));
+	WTSLogger::init("logcfg.yaml");
+
+	ScopedRunFailure injected(kRunFailureParser, false);
+	EXPECT_EQ(1, wt_coverage_main_wtlatencyhft());
 }

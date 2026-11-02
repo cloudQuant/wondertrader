@@ -56,17 +56,17 @@ TEST_F(R142ReaderHftHisTest, R142ReaderHisHftCountBacksOffPastLastItem)
 	const uint32_t kT = 20240109;
 	const uint32_t kPrev = 20240108;
 
-	// 两条记录都比 15:00 早：lower_bound 的搜索区间是 [begin, begin+(tcnt-1))，
-	// 命中末条后 action_time >= eTick.action_time，必须回退一格。
+	// 第一条的 action_date 早于查询日；第二条在查询日但晚于 15:00 截止点。
+	// lower_bound 命中末条后应回退一格，只保留第一条。
 	vector<WTSOrdQueStruct> que;
 	que.push_back(noisy_ordque(kT, kPrev, 200000000, 31));
-	que.push_back(noisy_ordque(kT, kPrev, 210000000, 34));
+	que.push_back(noisy_ordque(kT, kT, 151000000, 34));
 	ASSERT_TRUE(write_bytes("his/queue/SSE/20240109/610901.dsb",
 		make_block(BT_HIS_OrdQueue, BLOCK_VERSION_CMP_V2, pack_items(que))));
 
 	vector<WTSTransStruct> trans;
 	trans.push_back(noisy_trans(kT, kPrev, 200000000, 41));
-	trans.push_back(noisy_trans(kT, kPrev, 210000000, 44));
+	trans.push_back(noisy_trans(kT, kT, 151000000, 44));
 	ASSERT_TRUE(write_bytes("his/trans/SSE/20240109/630901.dsb",
 		make_block(BT_HIS_Trnsctn, BLOCK_VERSION_CMP_V2, pack_items(trans))));
 

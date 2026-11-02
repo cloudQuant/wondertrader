@@ -172,6 +172,8 @@ constexpr static inline WTSOrderState wrapOrderState(TThostFtdcOrderStatusType o
 		return WOS_Canceled;
 	case THOST_FTDC_OST_Unknown:
 		return WOS_Submitting;
+	case THOST_FTDC_OST_NotTouched:
+		return WOS_Nottouched;
 	default:
 		return (WTSOrderState)orderState;
 	}
@@ -202,7 +204,12 @@ extern "C"
 
 TraderCTP::TraderCTP()
 	: m_bQuickStart(false)
+	, m_sink(NULL)
 	, m_uLastQryTime(0)
+	, m_lDate(0)
+	, m_frontID(0)
+	, m_sessionID(0)
+	, m_orderRef(0)
 	, m_wrapperState(WS_NOTLOGIN)
 	, m_pUserAPI(NULL)
 	, m_iRequestID(0)
@@ -210,9 +217,12 @@ TraderCTP::TraderCTP()
 	, m_ayTrades(NULL)
 	, m_ayOrders(NULL)
 	, m_ayPosDetail(NULL)
+	, m_bdMgr(NULL)
 	, m_bInQuery(false)
 	, m_lastQryTime(0)
-, m_bStopped(false)
+	, m_bStopped(false)
+	, m_hInstCTP(NULL)
+	, m_funcCreator(NULL)
 	{
 }
 
@@ -261,6 +271,11 @@ bool TraderCTP::init(WTSVariant* params)
 	m_strModule = getBinDir() + DLLHelper::wrap_module(module.c_str(), "");
 
 	m_hInstCTP = DLLHelper::load_library(m_strModule.c_str());
+	if (m_hInstCTP == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderCTP] Failed to load CTP API module: {}", m_strModule.c_str());
+		return false;
+	}
 #ifdef _WIN32
 #	ifdef _WIN64
 	const char* creatorName = "?CreateFtdcTraderApi@CThostFtdcTraderApi@@SAPEAV1@PEBD@Z";
@@ -271,7 +286,19 @@ bool TraderCTP::init(WTSVariant* params)
 	const char* creatorName = "_ZN19CThostFtdcTraderApi19CreateFtdcTraderApiEPKc";
 #endif
 	m_funcCreator = (CTPCreator)DLLHelper::get_symbol(m_hInstCTP, creatorName);
+	if (m_funcCreator == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderCTP] CTP API creator symbol is missing: {}", creatorName);
+		DLLHelper::free_library(m_hInstCTP);
+		m_hInstCTP = NULL;
+		return false;
+	}
 #endif
+	if (m_funcCreator == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderCTP] CTP API creator is unavailable");
+		return false;
+	}
 
 	m_bQuickStart = params->getBoolean("quick");
 
@@ -304,10 +331,27 @@ void TraderCTP::release()
 
 void TraderCTP::connect()
 {
+	if (m_funcCreator == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderCTP] Cannot connect without a CTP API creator");
+		return;
+	}
+
 	std::stringstream ss;
 	ss << m_strFlowDir << "flows/" << m_strBroker << "/" << m_strUser << "/";
 	fs::create_directories(ss.str().c_str());
 	m_pUserAPI = m_funcCreator(ss.str().c_str());
+	if (m_pUserAPI == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderCTP] CTP API creator returned a null API instance");
+#ifndef __APPLE__
+		DLLHelper::free_library(m_hInstCTP);
+		m_hInstCTP = NULL;
+		m_funcCreator = NULL;
+#endif
+		return;
+	}
+
 	m_pUserAPI->RegisterSpi(this);
 	if (m_bQuickStart)
 	{
@@ -323,7 +367,7 @@ void TraderCTP::connect()
 	for (std::string front : m_strFront)
 	{
 		m_pUserAPI->RegisterFront((char*)front.c_str());
-		m_sink->handleTraderLog(LL_INFO, fmtutil::format("registerFront: {}", front));
+		write_log(m_sink, LL_INFO, "registerFront: {}", front.c_str());
 	}
 
 	if (m_pUserAPI)
@@ -336,28 +380,39 @@ void TraderCTP::connect()
 		m_thrdWorker.reset(new StdThread([this](){
 			while (!m_bStopped)
 			{
-				if(m_queQuery.empty() || m_bInQuery)
+				if (m_bInQuery)
 				{
 					std::this_thread::sleep_for(std::chrono::milliseconds(1));
 					continue;
 				}
 
-				uint64_t curTime = TimeUtils::getLocalTimeNow();
-				if (curTime - m_lastQryTime < 1000)
+				CommonExecuter handler;
+				bool waitForInterval = false;
 				{
-					std::this_thread::sleep_for(std::chrono::milliseconds(50));
+					StdUniqueLock lock(m_mtxQuery);
+					if (!m_queQuery.empty())
+					{
+						uint64_t curTime = TimeUtils::getLocalTimeNow();
+						if (curTime - m_lastQryTime < 1000)
+						{
+							waitForInterval = true;
+						}
+						else
+						{
+							handler = m_queQuery.front();
+							m_queQuery.pop();
+							m_bInQuery = true;
+						}
+					}
+				}
+
+				if (!handler)
+				{
+					std::this_thread::sleep_for(std::chrono::milliseconds(waitForInterval ? 50 : 1));
 					continue;
 				}
 
-
-				m_bInQuery = true;
-				CommonExecuter& handler = m_queQuery.front();
 				handler();
-
-				{
-					StdUniqueLock lock(m_mtxQuery);
-					m_queQuery.pop();
-				}
 
 				m_lastQryTime = TimeUtils::getLocalTimeNow();
 			}
@@ -367,9 +422,12 @@ void TraderCTP::connect()
 
 void TraderCTP::disconnect()
 {
-	m_queQuery.push([this]() {
-		release();
-	});
+	{
+		StdUniqueLock lock(m_mtxQuery);
+		m_queQuery.push([this]() {
+			release();
+		});
+	}
 
 	if (m_thrdWorker)
 	{
@@ -380,12 +438,15 @@ void TraderCTP::disconnect()
 
 bool TraderCTP::makeEntrustID(char* buffer, int length)
 {
-	if (buffer == NULL || length == 0)
+	if (buffer == NULL || length <= 0)
+		return false;
+
+	memset(buffer, 0, length);
+	if (m_wrapperState == WS_NOTLOGIN || m_wrapperState == WS_LOGINING || m_wrapperState == WS_LOGINFAILED)
 		return false;
 
 	try
 	{
-		memset(buffer, 0, length);
 		uint32_t orderref = m_orderRef.fetch_add(1) + 1;
 		fmt::format_to(buffer, "{:06d}#{:010d}#{:06d}", m_frontID, (uint32_t)m_sessionID, orderref);
 		return true;
@@ -519,7 +580,11 @@ int TraderCTP::orderInsert(WTSEntrust* entrust)
 
 	if (strlen(entrust->getUserTag()) > 0)
 	{
-		m_eidCache.put(entrust->getEntrustID(), entrust->getUserTag(), 0);
+		if (!m_eidCache.try_put(entrust->getEntrustID(), entrust->getUserTag(), 0))
+		{
+			write_log(m_sink, LL_ERROR, "[TraderCTP] Order insert rejected because user tag could not be persisted");
+			return -1;
+		}
 	}
 
 	///报单价格条件: 限价
@@ -1237,6 +1302,11 @@ WTSOrderInfo* TraderCTP::makeOrderInfo(CThostFtdcOrderField* orderField)
 		else
 			pRet->setOrderFlag(WOF_FOK);
 	}
+	else
+	{
+		// WTSOrderFlag does not preserve GTD expiry or other time-condition details.
+		pRet->setOrderFlag(WOF_NOR);
+	}
 
 	pRet->setVolTraded(orderField->VolumeTraded);
 	pRet->setVolLeft(orderField->VolumeTotalOriginal - orderField->VolumeTraded);//要保证撤单的时候，剩余数量=挂单总数-已成交
@@ -1312,6 +1382,11 @@ WTSEntrust* TraderCTP::makeEntrust(CThostFtdcInputOrderField *entrustField)
 			pRet->setOrderFlag(WOF_FAK);
 		else
 			pRet->setOrderFlag(WOF_FOK);
+	}
+	else
+	{
+		// WTSOrderFlag does not preserve GTD expiry or other time-condition details.
+		pRet->setOrderFlag(WOF_NOR);
 	}
 
 	//pRet->setEntrustID(generateEntrustID(m_frontID, m_sessionID, atoi(entrustField->OrderRef)).c_str());
@@ -1461,6 +1536,7 @@ int TraderCTP::queryConfirm()
 			int iResult = m_pUserAPI->ReqQrySettlementInfoConfirm(&req, genRequestID());
 			if (iResult != 0)
 			{
+				m_bInQuery = false;
 				write_log(m_sink, LL_ERROR, "[TraderCTP][{}-{}] Sending query of settlement data confirming state failed: {}", m_strBroker.c_str(), m_strUser.c_str(), iResult);
 			}
 		});
@@ -1490,7 +1566,13 @@ int TraderCTP::confirm()
 	int iResult = m_pUserAPI->ReqSettlementInfoConfirm(&req, genRequestID());
 	if (iResult != 0)
 	{
+		m_wrapperState = WS_LOGINFAILED;
 		write_log(m_sink, LL_ERROR, "[TraderCTP][{}-{}] Sending confirming of settlement data failed: {}", m_strBroker.c_str(), m_strUser.c_str(), iResult);
+		if (m_sink)
+		{
+			std::string message = fmtutil::format("Sending confirming of settlement data failed: {}", iResult);
+			m_sink->onLoginResult(false, message.c_str(), 0);
+		}
 		return -1;
 	}
 

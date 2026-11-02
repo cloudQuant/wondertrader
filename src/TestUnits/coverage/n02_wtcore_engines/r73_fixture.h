@@ -9,7 +9,7 @@
  *   - R73Stub：IExecuterStub 替身
  *   - R73CtaEngine / R73HftEngine：只接 bd/hot/data_mgr 与固定时钟的引擎替身
  *   - R73CtaCtx / R73HftCtx：策略上下文具体子类（记录回调/暴露 protected 入口）
- *   - R73PluginDir：只含一个插件符号链接的临时目录
+ *   - R73PluginDir：只含一个复制插件文件的临时目录
  *
  * 所有替身都在用例内构造，晚于被测算例对象析构；不启动线程、不联网。
  */
@@ -595,8 +595,18 @@ public:
 
         fs::path src = fs::path(bin_dir()) / wrapped;
         fs::path dst = _dir / wrapped;
-        fs::create_symlink(src, dst, ec);
-        _ok = !ec && fs::exists(dst);
+        const fs::file_status srcStatus = fs::symlink_status(src, ec);
+        if (!ec && fs::is_regular_file(srcStatus))
+        {
+            ec.clear();
+            fs::copy_file(src, dst, fs::copy_options::overwrite_existing, ec);
+        }
+
+        if (!ec)
+        {
+            const fs::file_status dstStatus = fs::symlink_status(dst, ec);
+            _ok = !ec && fs::is_regular_file(dstStatus);
+        }
     }
 
     ~PluginDir()

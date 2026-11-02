@@ -111,10 +111,8 @@ TEST_F(R182ReaderIntegratedTest, R182ShortSectionFileLogsAndFails)
 	init_reader();
 
 	WTSKlineSlice* slice = _reader.readKlineSlice("SHFE.rb.HOT", KP_Minute1, 100, 202401101500ull);
-	ASSERT_TRUE(slice != NULL);
-	EXPECT_EQ(slice->size(), 0u);
+	EXPECT_TRUE(slice == NULL);
 	EXPECT_GE(_sink.count_of(LL_ERROR), 1u);
-	slice->release();
 }
 
 // WtDataReader.cpp:1196-1199；切段左边界晚于文件内全部K线 -> lower_bound 落在末根后 continue

@@ -1,5 +1,8 @@
 ﻿#pragma once
 #include <atomic>
+#include <mutex>
+#include <random>
+#include <vector>
 
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
@@ -29,6 +32,11 @@ public:
 	~TraderMocker();
 
 private:
+	friend struct TraderMockerRngTestAccess;
+	std::vector<uint32_t> split_volume(uint32_t vol, uint32_t minQty, uint32_t maxQty);
+	std::mt19937 _split_rng;
+	std::mutex _split_rng_mutex;
+
 	/*
 	*	撮合 定时器
 	*/
@@ -45,6 +53,11 @@ private:
 private:
 	StdThreadPtr	_thrd_match;
 	std::atomic<bool>	_terminated;
+	// Serializes stop admission with each request's retain and post. Once
+	// released, this instance cannot be restarted until old work has an
+	// ownership-safe generation boundary.
+	std::mutex		_request_mutex;
+	bool			_requests_closed = false;
 
 	StdUniqueMutex		_mutex_api;
 

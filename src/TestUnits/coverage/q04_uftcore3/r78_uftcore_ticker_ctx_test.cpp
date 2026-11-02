@@ -160,7 +160,6 @@ TEST(R78UftTicker, run_stop_and_full_tick_flow)
 
 	// 线程在 0-2400 时段内只做一次 10ms 休眠，stop() 立即 join
 	ticker.run();
-	ticker.stop();
 
 	WTSTickData* t1 = makeTick(20991231, 93000000, 10.0);
 	ticker.on_tick(t1);
@@ -189,6 +188,15 @@ TEST(R78UftTicker, run_stop_and_full_tick_flow)
 	ticker.on_tick(t4);
 	t4->release();
 	EXPECT_EQ(20991231u, env._engine.get_date());
+	EXPECT_DOUBLE_EQ(13.0, env._engine.get_cur_price("SHFE.ag2406"));
+
+	ticker.stop();
+	WTSTickData* stoppedTick = makeTick(20991231, 93200000, 14.0);
+	ticker.on_tick(stoppedTick);
+	stoppedTick->release();
+	EXPECT_EQ(20991231u, env._engine.get_date());
+	EXPECT_EQ(932u, env._engine.get_min_time());
+	EXPECT_EQ(931u, env._engine.get_raw_time());
 	EXPECT_DOUBLE_EQ(13.0, env._engine.get_cur_price("SHFE.ag2406"));
 }
 

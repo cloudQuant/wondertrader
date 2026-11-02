@@ -7,25 +7,33 @@
  *   on_trade 的脏用户数据落盘、do_set_position 的开仓/平仓/反手与空头盈亏取反
  *   load_userdata 的空文件早退
  *
- * 风控开关通过 TraderAdapter 公有 initExt -> init(riskmon, module 为空) -> run 装配，
- * 不加载任何交易插件、不连接柜台、不起线程。
+ * 风控通过成功的 TraderAdapter::init(riskmon + 本地计数 fake trader plugin) 装配，
+ * 只用进程内接口回报，不连接柜台、不启交易线程或网络 socket。
  */
 #include "r81_env.h"
 
 #include <memory>
 #include <string>
+#include <filesystem>
+#include <system_error>
 
+#include <Share/DLLHelper.hpp>
 #include <WtCore/ActionPolicyMgr.h>
 #include <WtCore/TraderAdapter.h>
 
 using namespace wtp;
 
+#ifndef WT_R81_RISK_FAKE_TRADER_PATH
+#error "CoverageTests_wtcore must provide the R81 risk fake trader plugin"
+#endif
+
 namespace {
 
-WTSVariant* makeRiskParams(uint32_t orderLimit)
+WTSVariant* makeRiskParams(uint32_t orderLimit, const std::string& moduleName)
 {
     WTSVariant* params = WTSVariant::createObject();
-    params->append("module", "");
+    params->append("module", moduleName.c_str());
+    params->append("savedata", false);
 
     WTSVariant* riskmon = WTSVariant::createObject();
     riskmon->append("active", true);
@@ -45,6 +53,155 @@ WTSVariant* makeRiskParams(uint32_t orderLimit)
     return params;
 }
 
+class ScopedR81RiskPluginEnvironment
+{
+public:
+	ScopedR81RiskPluginEnvironment()
+		: _old_cwd(std::filesystem::current_path())
+		, _old_inst_dir(WtHelper::getInstDir())
+	{
+	}
+
+	~ScopedR81RiskPluginEnvironment()
+	{
+		if (_inst_dir_changed)
+			WtHelper::setInstDir(_old_inst_dir.c_str());
+		if (_cwd_changed)
+		{
+			std::error_code ec;
+			std::filesystem::current_path(_old_cwd, ec);
+		}
+	}
+
+	bool prepare(const std::string& moduleName)
+	{
+		const std::filesystem::path cachedCwd(WtHelper::getCWD());
+		std::error_code ec;
+		if (!std::filesystem::equivalent(cachedCwd, _old_cwd, ec) || ec)
+		{
+			_error = "WtHelper CWD cache differs from the process CWD";
+			if (ec)
+				_error += ": " + ec.message();
+			return false;
+		}
+
+		const std::filesystem::path source(WT_R81_RISK_FAKE_TRADER_PATH);
+		if (!std::filesystem::is_regular_file(source))
+		{
+			_error = "R81 fake trader plugin missing: " + source.string();
+			return false;
+		}
+
+		const std::string libraryName = DLLHelper::wrap_module(moduleName.c_str(), "lib");
+		const std::filesystem::path cwdModule = cachedCwd / "traders" / libraryName;
+		if (std::filesystem::exists(cwdModule))
+		{
+			_error = "CWD contains a shadowing R81 fake trader plugin: " + cwdModule.string();
+			return false;
+		}
+
+		const std::filesystem::path root = std::filesystem::path(r81::temp_root()) / moduleName;
+		const std::filesystem::path tradersDir = root / "traders";
+		std::filesystem::create_directories(tradersDir, ec);
+		if (ec)
+		{
+			_error = "cannot create temporary traders directory: " + ec.message();
+			return false;
+		}
+
+		const std::string instDir = root.string() + "/";
+		_plugin_path = std::filesystem::path(instDir + "traders/" + libraryName);
+		std::filesystem::copy_file(source, _plugin_path,
+			std::filesystem::copy_options::overwrite_existing, ec);
+		if (ec || !std::filesystem::is_regular_file(_plugin_path))
+		{
+			_error = "cannot stage R81 fake trader plugin";
+			if (ec)
+				_error += ": " + ec.message();
+			return false;
+		}
+
+		std::filesystem::current_path(root, ec);
+		if (ec)
+		{
+			_error = "cannot switch to temporary R81 plugin CWD: " + ec.message();
+			return false;
+		}
+		_cwd_changed = true;
+
+		WtHelper::setInstDir(instDir.c_str());
+		_inst_dir_changed = true;
+		return true;
+	}
+
+	const std::filesystem::path& plugin_path() const { return _plugin_path; }
+	const std::string& error() const { return _error; }
+
+private:
+	std::filesystem::path _old_cwd;
+	std::string _old_inst_dir;
+	std::filesystem::path _plugin_path;
+	std::string _error;
+	bool _cwd_changed = false;
+	bool _inst_dir_changed = false;
+};
+
+class R81RiskFakePluginProbe
+{
+public:
+	using Counter = uint32_t (*)();
+
+	~R81RiskFakePluginProbe()
+	{
+		if (_module != nullptr)
+			DLLHelper::free_library(_module);
+	}
+
+	bool load(const std::filesystem::path& path)
+	{
+		_module = DLLHelper::load_library(path.string().c_str());
+		if (_module == nullptr)
+			return false;
+		_order_insert_count = (Counter)DLLHelper::get_symbol(_module, "r81RiskFakeOrderInsertCount");
+		_order_action_count = (Counter)DLLHelper::get_symbol(_module, "r81RiskFakeOrderActionCount");
+		return _order_insert_count != nullptr && _order_action_count != nullptr;
+	}
+
+	uint32_t order_insert_count() const { return _order_insert_count(); }
+	uint32_t order_action_count() const { return _order_action_count(); }
+
+private:
+	DllHandle _module = nullptr;
+	Counter _order_insert_count = nullptr;
+	Counter _order_action_count = nullptr;
+};
+
+class ScopedR81TradingTime
+{
+public:
+	ScopedR81TradingTime()
+		: _date(WtHelper::getDate())
+		, _time(WtHelper::getTime())
+		, _secs(WtHelper::getSecs())
+		, _trading_date(WtHelper::getTradingDate())
+	{
+		WtHelper::setTime(20250110, 931, 0);
+		WtHelper::setTDate(20250110);
+	}
+
+	~ScopedR81TradingTime()
+	{
+		WtHelper::setTime(_date, _time, _secs);
+		WtHelper::setTDate(_trading_date);
+	}
+
+private:
+	uint32_t _date;
+	uint32_t _time;
+	uint32_t _secs;
+	uint32_t _trading_date;
+};
+
 WTSOrderInfo* makeOrder(WTSContractInfo* cInfo, const char* orderid)
 {
     WTSOrderInfo* o = WTSOrderInfo::create();
@@ -55,7 +212,9 @@ WTSOrderInfo* makeOrder(WTSContractInfo* cInfo, const char* orderid)
     o->setOffsetType(WOT_OPEN);
     o->setVolume(1);
     o->setVolLeft(1);
-    o->setOrderState(WOS_AllTraded);
+    o->setEntrustID("R81-ENTRUST-1");
+    o->setUserTag("otp.r81_hft_risk.77");
+    o->setOrderState(WOS_NotTraded_Queuing);
     o->setOrderID(orderid);
     return o;
 }
@@ -93,23 +252,27 @@ protected:
 // 262-323 stra_sell 两条拒绝
 TEST_F(R81HftTest, RiskRejectsCancelBuyAndSellBranches)
 {
+    [[maybe_unused]] ScopedR81TradingTime tradingTime;
     std::string policyFile = r81::temp_root() + "r81_policy.json";
     ASSERT_TRUE(r81::write_file(policyFile, R"json({"default":{"order":[{"action":"open"}]}})json"));
     ActionPolicyMgr policy;
     ASSERT_TRUE(policy.init(policyFile.c_str()));
 
-    r81::R81FakeTraderApi api;
-    TraderAdapter trader;
+    const std::string moduleName = "R81RiskFakeTrader_" + std::to_string(::getpid());
+    ScopedR81RiskPluginEnvironment pluginEnv;
+    ASSERT_TRUE(pluginEnv.prepare(moduleName)) << pluginEnv.error();
+    R81RiskFakePluginProbe apiProbe;
+    ASSERT_TRUE(apiProbe.load(pluginEnv.plugin_path()));
 
-    // 先给适配器一个进程内 API，再用 module 为空的配置打开 riskmon；
-    // init 在解析完 riskmon 后于空 module 处返回 false，但 _trader_api/_bd_mgr 已就绪。
-    ASSERT_TRUE(trader.initExt("r81_hft_risk", &api, &bd, &policy));
-    WTSVariant* params = makeRiskParams(1);
-    EXPECT_FALSE(trader.init("r81_hft_risk", params, &bd, &policy));
+    TraderAdapter trader;
+	WTSVariant* params = makeRiskParams(1, moduleName);
+	ASSERT_NE(params, nullptr);
+	const bool initialized = trader.init("r81_hft_risk", params, &bd, &policy);
     params->release();
+	ASSERT_TRUE(initialized);
     ASSERT_TRUE(trader.run());
 
-    // 推一笔订单，把 SHFE.ag.2512 的 total_orders 顶到 1（限额 1）
+    // 进程内推送一笔活单：total_orders 达到限额 1，且供撤单拒绝分支使用。
     WTSOrderInfo* order = makeOrder(agCt, "R81-ORDER-1");
     trader.onPushOrder(order);
     order->release();
@@ -127,7 +290,8 @@ TEST_F(R81HftTest, RiskRejectsCancelBuyAndSellBranches)
     EXPECT_TRUE(ctx.stra_sell("SHFE.ag.HOT", 3500.0, 1.0, "s2").empty());
     // 已拉黑 -> checkCancelLimits 直接 false
     EXPECT_TRUE(ctx.stra_cancel("SHFE.ag.2512", true, 0.0).empty());
-    EXPECT_EQ(api.n_insert, 0u);
+    EXPECT_EQ(apiProbe.order_insert_count(), 0u);
+    EXPECT_EQ(apiProbe.order_action_count(), 0u);
 }
 
 // 覆盖 HftStraBaseCtx.cpp:631-685 规则/非规则仓量查询、262-310 卖单合约缺失

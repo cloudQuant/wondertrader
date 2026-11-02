@@ -27,7 +27,12 @@
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 #include <algorithm>
+#include <cmath>
+#include <cstring>
 #include <exception>
+#include <filesystem>
+#include <limits>
+#include <map>
 #include <vector>
 #include <cstdio>
 #ifdef _WIN32
@@ -64,8 +69,101 @@ bool replaceDiffFileAtomically(const std::string& source, const std::string& tar
 	return std::rename(source.c_str(), target.c_str()) == 0;
 #endif
 }
+
+const rj::Value* getUniqueMember(const rj::Value& object, const char* key)
+{
+	if (!object.IsObject())
+		return NULL;
+
+	const rj::Value* value = NULL;
+	for (rj::Value::ConstMemberIterator it = object.MemberBegin(); it != object.MemberEnd(); ++it)
+	{
+		if (it->name.IsString() && it->name.GetStringLength() == strlen(key) &&
+			memcmp(it->name.GetString(), key, it->name.GetStringLength()) == 0)
+		{
+			if (value != NULL)
+				return NULL;
+			value = &it->value;
+		}
+	}
+	return value;
 }
 
+bool hasAtMostOneMember(const rj::Value& object, const char* key)
+{
+	if (!object.IsObject())
+		return false;
+
+	unsigned count = 0;
+	for (rj::Value::ConstMemberIterator it = object.MemberBegin(); it != object.MemberEnd(); ++it)
+	{
+		if (it->name.IsString() && it->name.GetStringLength() == strlen(key) &&
+			memcmp(it->name.GetString(), key, it->name.GetStringLength()) == 0 && ++count > 1)
+			return false;
+	}
+	return true;
+}
+
+bool parseDiffPositionSection(const rj::Value& section, const char* valueKey,
+	std::map<std::string, double>& out, std::string& error)
+{
+	if (section.IsObject())
+	{
+		for (rj::Value::ConstMemberIterator it = section.MemberBegin(); it != section.MemberEnd(); ++it)
+		{
+			if (!it->name.IsString() || it->name.GetStringLength() == 0 || !it->value.IsNumber())
+			{
+				error = "object-map entries must have a non-empty code and numeric value";
+				return false;
+			}
+			const std::string code(it->name.GetString(), it->name.GetStringLength());
+			const double value = it->value.GetDouble();
+			if (code.find('\0') != std::string::npos || !std::isfinite(value) ||
+				!out.emplace(code, value).second)
+			{
+				error = "object-map contains an invalid or duplicate code/value";
+				return false;
+			}
+		}
+		return true;
+	}
+
+	if (!section.IsArray())
+	{
+		error = "expected an array of records or a historical object-map";
+		return false;
+	}
+
+	for (const rj::Value& item : section.GetArray())
+	{
+		const rj::Value* codeValue = getUniqueMember(item, "code");
+		const rj::Value* positionValue = getUniqueMember(item, valueKey);
+		if (!item.IsObject() || codeValue == NULL || !codeValue->IsString() ||
+			codeValue->GetStringLength() == 0 || positionValue == NULL || !positionValue->IsNumber())
+		{
+			error = std::string("array records require string code and numeric ") + valueKey;
+			return false;
+		}
+
+		const std::string code(codeValue->GetString(), codeValue->GetStringLength());
+		const double value = positionValue->GetDouble();
+		if (code.find('\0') != std::string::npos || !std::isfinite(value) ||
+			!out.emplace(code, value).second)
+		{
+			error = "array records contain an invalid or duplicate code/value";
+			return false;
+		}
+	}
+	return true;
+}
+}
+
+namespace wtp
+{
+std::size_t (*WtDiffExecuter::_save_write_test_hook)(void*, const void*, std::size_t) = NULL;
+int (*WtDiffExecuter::_save_flush_test_hook)(void*) = NULL;
+int (*WtDiffExecuter::_save_close_test_hook)(void*) = NULL;
+}
 
 /**
  * @brief 差量执行器构造函数
@@ -560,7 +658,13 @@ bool WtDiffExecuter::init(WTSVariant* params)
 		_pool.reset(new boost::threadpool::pool(poolsize));
 	}
 
-	load_data();
+	if (!load_data())
+	{
+		_config->release();
+		_config = NULL;
+		_pool.reset();
+		return false;
+	}
 
 	WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "[{}] Diff executer inited, scale: {}, thread poolsize: {}", _name, _scale, poolsize);
 
@@ -573,109 +677,191 @@ bool WtDiffExecuter::init(WTSVariant* params)
  * @details 从文件中读取执行器的目标仓位和差量数据
  *          数据存储在JSON格式的文件中，包含“targets”和“diffs”两部分
  */
-void WtDiffExecuter::load_data()
+bool WtDiffExecuter::load_data()
 {
-	//读取执行器的理论部位，以及待执行的差量
+	// Load into temporary containers and publish only after the complete snapshot
+	// (including optional failure tombstones) has passed schema validation.
 	std::string filename = WtHelper::getExecDataDir();
 	filename += _name + ".json";
 
-	if (!StdFile::exists(filename.c_str()))
+	std::error_code existsError;
+	const bool exists = std::filesystem::exists(filename, existsError);
+	if (existsError)
 	{
-		return;
+		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
+			"[{}] Cannot inspect Diff snapshot {}: {}", _name, filename, existsError.message());
+		return false;
 	}
+	if (!exists)
+		return true;
 
 	std::string content;
-	StdFile::read_file_content(filename.c_str(), content);
-	if (content.empty())
-		return;
+	try
+	{
+		StdFile::read_file_content(filename.c_str(), content);
+	}
+	catch (const std::exception& error)
+	{
+		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
+			"[{}] Cannot read Diff snapshot {}: {}", _name, filename, error.what());
+		return false;
+	}
 
 	rj::Document root;
-	root.Parse(content.c_str());
+	root.Parse(content.data(), content.size());
 
+	std::map<std::string, double> parsedTargets;
+	std::map<std::string, double> parsedDiffs;
+	std::map<std::string, std::shared_ptr<UnitLifecycleState>> parsedBlockedUnits;
+	std::string schemaError;
+	const rj::Value* jTargets = NULL;
+	const rj::Value* jDiffs = NULL;
 	if (root.HasParseError())
-		return;
-
-	if (root.HasMember("targets") && root["targets"].IsArray())
 	{
-		const rj::Value& jTargets = root["targets"];
-		for (const rj::Value& jItem : jTargets.GetArray())
+		schemaError = "invalid JSON syntax";
+	}
+	else if (!root.IsObject())
+	{
+		schemaError = "snapshot root must be an object";
+	}
+	else
+	{
+		jTargets = getUniqueMember(root, "targets");
+		jDiffs = getUniqueMember(root, "diffs");
+		if (jTargets == NULL || jDiffs == NULL)
 		{
-			if (!jItem.IsObject() || !jItem.HasMember("code") || !jItem["code"].IsString() ||
-				!jItem.HasMember("target") || !jItem["target"].IsNumber())
-				continue;
-			const char* stdCode = jItem["code"].GetString();
-			CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, NULL);
-			WTSContractInfo* ct = _bd_mgr ? _bd_mgr->getContract(cInfo._code, cInfo._exchg) : NULL;
-			if (ct == NULL)
+			schemaError = "required targets and diffs members must each appear exactly once";
+		}
+		else if (jTargets->IsArray() != jDiffs->IsArray() ||
+			jTargets->IsObject() != jDiffs->IsObject())
+		{
+			schemaError = "targets and diffs must use the same supported snapshot format";
+		}
+		else if (!parseDiffPositionSection(*jTargets, "target", parsedTargets, schemaError) ||
+			!parseDiffPositionSection(*jDiffs, "diff", parsedDiffs, schemaError))
+		{
+			// Preserve the first schema error reported by the section parser.
+		}
+		else if (!hasAtMostOneMember(root, "blocked_units"))
+		{
+			schemaError = "blocked_units member must not be duplicated";
+		}
+		else
+		{
+			const rj::Value* jBlockedUnits = getUniqueMember(root, "blocked_units");
+			if (jBlockedUnits != NULL && !jBlockedUnits->IsArray())
 			{
-				WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "[{}] Ticker {} is not valid", _name, stdCode);
-				continue;
+				schemaError = "blocked_units must be an array when present";
 			}
-
-			double pos = jItem["target"].GetDouble();
+			else if (jBlockedUnits != NULL)
 			{
-				std::lock_guard<std::mutex> lock(_position_mutex);
-				_target_pos[stdCode] = pos;
-				_target_versions[stdCode] = ++_target_update_generation;
+				for (const rj::Value& item : jBlockedUnits->GetArray())
+				{
+					const rj::Value* codeValue = getUniqueMember(item, "code");
+					const rj::Value* generationValue = getUniqueMember(item, "generation");
+					const rj::Value* errorValue = getUniqueMember(item, "error");
+					if (!item.IsObject() || codeValue == NULL || !codeValue->IsString() ||
+						codeValue->GetStringLength() == 0 ||
+						!hasAtMostOneMember(item, "generation") ||
+						!hasAtMostOneMember(item, "error") ||
+						(generationValue != NULL && (!generationValue->IsUint64() || generationValue->GetUint64() == 0)) ||
+						(errorValue != NULL && !errorValue->IsString()))
+					{
+						schemaError = "blocked_units entries require a unique string code and valid optional generation/error";
+						break;
+					}
+
+					const std::string code(codeValue->GetString(), codeValue->GetStringLength());
+					if (code.find('\0') != std::string::npos || parsedBlockedUnits.find(code) != parsedBlockedUnits.end())
+					{
+						schemaError = "blocked_units contains an invalid or duplicate code";
+						break;
+					}
+
+					auto state = std::make_shared<UnitLifecycleState>();
+					state->std_code = code;
+					state->creation_complete = true;
+					state->callback_failed = true;
+					state->retry_blocked = true;
+					state->init_status = ExecUnitInitState::FAILED;
+					state->init_generation = generationValue != NULL ? generationValue->GetUint64() : 1;
+					state->init_error = errorValue != NULL ?
+						std::string(errorValue->GetString(), errorValue->GetStringLength()) :
+						"persisted failure tombstone; automatic retry disabled";
+					parsedBlockedUnits.emplace(code, state);
+				}
 			}
 		}
 	}
 
-	if (root.HasMember("diffs") && root["diffs"].IsArray())
+	if (!schemaError.empty())
 	{
-		const rj::Value& jDiffs = root["diffs"];
-		for (const rj::Value& jItem : jDiffs.GetArray())
-		{
-			if (!jItem.IsObject() || !jItem.HasMember("code") || !jItem["code"].IsString() ||
-				!jItem.HasMember("diff") || !jItem["diff"].IsNumber())
-				continue;
-			const char* stdCode = jItem["code"].GetString();
-			CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, NULL);
-			WTSContractInfo* ct = _bd_mgr ? _bd_mgr->getContract(cInfo._code, cInfo._exchg) : NULL;
-			if (ct == NULL)
-			{
-				WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "[{}] Ticker {} is not valid", _name, stdCode);
-				continue;
-			}
-
-			double pos = jItem["diff"].GetDouble();
-			{
-				std::lock_guard<std::mutex> lock(_position_mutex);
-				_diff_pos[stdCode] = pos;
-			}
-		}
+		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
+			"[{}] Rejected Diff snapshot {}: {}", _name, filename, schemaError);
+		return false;
 	}
 
-	// Failure tombstones are independent of contract discovery. A restart must
-	// retain the fail-closed state even when the current base-data set is partial.
-	if (root.HasMember("blocked_units") && root["blocked_units"].IsArray())
+	// Retain the established behavior for structurally valid entries whose
+	// contract is absent from the current base-data set, but make all parsing
+	// failures above atomic and fail the executor initialization visibly.
+	wt_hashmap<std::string, double> loadedTargets;
+	wt_hashmap<std::string, double> loadedDiffs;
+	for (const auto& item : parsedTargets)
 	{
+		CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(item.first.c_str(), NULL);
+		WTSContractInfo* contract = codeInfo._code[0] != '\0' && codeInfo._exchg[0] != '\0' && _bd_mgr ?
+			_bd_mgr->getContract(codeInfo._code, codeInfo._exchg) : NULL;
+		if (contract == NULL)
+		{
+			WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO,
+				"[{}] Ticker {} is not valid", _name, item.first);
+			continue;
+		}
+		loadedTargets.emplace(item.first, item.second);
+	}
+	for (const auto& item : parsedDiffs)
+	{
+		CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(item.first.c_str(), NULL);
+		WTSContractInfo* contract = codeInfo._code[0] != '\0' && codeInfo._exchg[0] != '\0' && _bd_mgr ?
+			_bd_mgr->getContract(codeInfo._code, codeInfo._exchg) : NULL;
+		if (contract == NULL)
+		{
+			WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO,
+				"[{}] Ticker {} is not valid", _name, item.first);
+			continue;
+		}
+		loadedDiffs.emplace(item.first, item.second);
+	}
+
+	std::map<std::string, uint64_t> loadedTargetVersions;
+	uint64_t targetGeneration = 0;
+	for (const auto& item : loadedTargets)
+		loadedTargetVersions.emplace(item.first, ++targetGeneration);
+
+	uint64_t nextUnitGeneration = 1;
+	for (const auto& item : parsedBlockedUnits)
+	{
+		const uint64_t generation = item.second->init_generation;
+		if (generation == (std::numeric_limits<uint64_t>::max)())
+		{
+			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
+				"[{}] Rejected Diff snapshot {}: blocked unit generation overflows", _name, filename);
+			return false;
+		}
+		nextUnitGeneration = (std::max)(nextUnitGeneration, generation + 1);
+	}
+
+	{
+		std::lock_guard<std::mutex> positionsLock(_position_mutex);
 		SpinLock unitsLock(_mtx_units);
-		for (const rj::Value& item : root["blocked_units"].GetArray())
-		{
-			if (!item.IsObject() || !item.HasMember("code") || !item["code"].IsString())
-				continue;
-			const std::string code = item["code"].GetString();
-			if (code.empty())
-				continue;
-
-			auto state = std::make_shared<UnitLifecycleState>();
-			state->std_code = code;
-			state->creation_complete = true;
-			state->callback_failed = true;
-			state->retry_blocked = true;
-			state->init_status = ExecUnitInitState::FAILED;
-			state->init_generation = item.HasMember("generation") && item["generation"].IsUint64() ?
-				item["generation"].GetUint64() : 1;
-			state->init_error = item.HasMember("error") && item["error"].IsString() ?
-				item["error"].GetString() : "persisted failure tombstone; automatic retry disabled";
-			if (_unit_states.find(code) != _unit_states.end())
-				continue;
-			_unit_states.emplace(code, state);
-			_next_unit_init_generation = std::max(_next_unit_init_generation,
-				state->init_generation + 1);
-		}
+		_target_pos.swap(loadedTargets);
+		_diff_pos.swap(loadedDiffs);
+		_target_versions.swap(loadedTargetVersions);
+		_target_update_generation = targetGeneration;
+		_unit_states.swap(parsedBlockedUnits);
+		_next_unit_init_generation = nextUnitGeneration;
 	}
+	return true;
 }
 
 /**
@@ -794,16 +980,19 @@ bool WtDiffExecuter::save_data_locked()
 	const std::string tempFilename = makeDiffTempFilename(filename);
 	bool writeSucceeded = false;
 	{
-		BoostFile bf;
-		if (bf.create_new_file(tempFilename.c_str()))
+		std::FILE* output = std::fopen(tempFilename.c_str(), "wb");
+		if (output != NULL)
 		{
-			writeSucceeded = bf.write_file(sb.GetString(), sb.GetSize());
-			// BoostFile's Windows implementation checks WriteFile's BOOL result,
-			// but not its written-byte count. Verify the resulting file length
-			// before allowing the temporary snapshot to replace the saved one.
-			if (writeSucceeded)
-				writeSucceeded = bf.get_file_size() == sb.GetSize();
-			bf.close_file();
+			const std::size_t bytesWrittenCount = _save_write_test_hook ?
+				_save_write_test_hook(output, sb.GetString(), sb.GetSize()) :
+				std::fwrite(sb.GetString(), 1, sb.GetSize(), output);
+			const bool bytesWritten = bytesWrittenCount == sb.GetSize();
+			const int flushResult = _save_flush_test_hook ?
+				_save_flush_test_hook(output) : std::fflush(output);
+			const bool flushed = flushResult == 0;
+			const int closeResult = _save_close_test_hook ?
+				_save_close_test_hook(output) : std::fclose(output);
+			writeSucceeded = bytesWritten && flushed && closeResult == 0;
 		}
 	}
 	if (!writeSucceeded)
@@ -1848,7 +2037,12 @@ void WtDiffExecuter::set_position(const wt_hashmap<std::string, double>& targets
 		CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, NULL);
 		WTSContractInfo* cInfo = _bd_mgr ? _bd_mgr->getContract(codeInfo._code, codeInfo._exchg) : NULL;
 		if (cInfo == NULL)
+		{
+			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
+				"[{}] Omitted target for {} cannot be cleared because contract metadata is unavailable; existing target and diff are retained",
+				_name, stdCode);
 			continue;
+		}
 
 		ExecuteUnitPtr unit = getUnit(stdCode);
 		std::shared_ptr<UnitLifecycleState> state = unit ? getUnitState(stdCode, unit) :

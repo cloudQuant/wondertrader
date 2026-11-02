@@ -143,6 +143,25 @@ TEST(q04_uftctx_local, manual_positions_are_imported_then_file_is_renamed)
 	ctx.removeOwnFolder();
 }
 
+TEST(q04_uftctx_local, manual_unknown_contract_does_not_hide_later_valid_details)
+{
+	CtxEnv ctx("q04ctx_manual_unknown_first");
+	ctx.removeOwnFolder();
+	std::filesystem::create_directories(ctx.straFolder());
+	ctx._tmp.write(ctx.straFolder() + "mannual.yaml", R"JSON({
+		"details": [
+			{"exchg":"DCE","code":"unknown","direct":0,"volume":1,"openprice":100},
+			{"exchg":"SHFE","code":"ag2406","direct":0,"volume":3,"openprice":5000},
+			{"exchg":"DCE","code":"unknown2","direct":0,"volume":1,"openprice":100},
+			{"exchg":"SHFE","code":"ag2406","direct":0,"volume":2,"openprice":5100}
+		]
+	})JSON");
+	ctx._ctx.on_channel_ready(20240315);
+	EXPECT_DOUBLE_EQ(5.0, ctx._ctx.stra_get_local_position(kAg));
+	EXPECT_FALSE(std::filesystem::exists(ctx.straFolder() + "mannual.yaml"));
+	ctx.removeOwnFolder();
+}
+
 TEST(q04_uftctx_local, trade_reports_advance_position_and_round_profit)
 {
 	CtxEnv ctx("q04ctx_trade");

@@ -44,6 +44,7 @@ TEST_F(R103Fixture, R103Replayer_LoaderThrowsAndRawAdjustedBars)
 	loader.factors[kAdjDay] = { std::make_pair(20200102u, 1.0) };
 
 	loader.rawBars[kAdjMin] = {
+		r91::mk_bar(20200102u, 929u, 9.8, 10.1, 9.6, 10.0, 0.5),
 		r91::mk_bar(20200102u, 931u, 10.0, 10.2, 9.8, 10.0, 1.0),
 		r91::mk_bar(20200102u, 932u, 20.0, 20.2, 19.8, 20.0, 2.0)
 	};
@@ -89,6 +90,7 @@ TEST_F(R103Fixture, R103Replayer_LoaderThrowsAndRawAdjustedBars)
 	ASSERT_NE(nullptr, slice);
 	ASSERT_EQ(1, slice->size());
 	EXPECT_DOUBLE_EQ(10.0, slice->at(0)->close);
+	EXPECT_EQ(929u, static_cast<uint32_t>(slice->at(0)->time % 10000u));
 	slice->release();
 	EXPECT_EQ(1u, loader.rawCalls[kAdjMin]);
 

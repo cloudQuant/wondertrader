@@ -122,6 +122,13 @@ public:
 	,_cancelrate(0), _tick_cache(NULL), _next_order_sequence(0){
 		
 	}
+	~MatchEngine();
+
+	MatchEngine(const MatchEngine&) = delete;
+	MatchEngine& operator=(const MatchEngine&) = delete;
+	MatchEngine(MatchEngine&&) = delete;
+	MatchEngine& operator=(MatchEngine&&) = delete;
+
 private:
 	friend class MatchEngineTestAccess;
 

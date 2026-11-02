@@ -62,8 +62,8 @@ public:
     void handle_push_quote(WTSTickData*) override {}
 };
 
-/** 把某个构建产物按指定模块名软链到 <root>/<subdir>/ 下 */
-bool link_module(const std::string& root, const char* subdir,
+/** 把某个构建产物按指定模块名复制到 <root>/<subdir>/ 下 */
+bool copy_module(const std::string& root, const char* subdir,
                  const char* srcModule, const char* dstModule)
 {
     std::error_code ec;
@@ -73,8 +73,8 @@ bool link_module(const std::string& root, const char* subdir,
     fs::remove(dst, ec);
     if (!fs::exists(src, ec))
         return false;
-    fs::create_symlink(src, dst, ec);
-    return !ec && fs::exists(dst, ec);
+    fs::copy_file(src, dst, fs::copy_options::overwrite_existing, ec);
+    return !ec && fs::is_regular_file(dst, ec);
 }
 
 class R120ParserTest : public ::testing::Test
@@ -109,7 +109,7 @@ protected:
 //////////////////////////////////////////////////////////////////
 TEST_F(R120ParserTest, InitParsesFilterAndSubscribesContracts)
 {
-    ASSERT_TRUE(link_module(root, "parsers", "ParserUDP", "ParserUDP"));
+    ASSERT_TRUE(copy_module(root, "parsers", "ParserUDP", "ParserUDP"));
 
     R120ParserBd bd;
     bd.regisSessionWithTime("TRADING", 900, 1500);
@@ -143,7 +143,7 @@ TEST_F(R120ParserTest, InitParsesFilterAndSubscribesContracts)
 //////////////////////////////////////////////////////////////////
 TEST_F(R120ParserTest, InitRejectsModuleWithoutCreateParser)
 {
-    ASSERT_TRUE(link_module(root, "parsers", "WtDataStorage", "NoParserHere"));
+    ASSERT_TRUE(copy_module(root, "parsers", "WtDataStorage", "NoParserHere"));
 
     R120ParserBd bd;
     WTSVariant* cfg = WTSCfgLoader::load_from_content(
@@ -170,7 +170,7 @@ std::string make_strategy_dir(const std::string& root, const char* tag)
         ofs << "not a module";
     }
     fs::create_directories(dir + "subdir", ec);
-    link_module(dir, "", "WtDataStorage", "WtBogusFact");
+    copy_module(dir, "", "WtDataStorage", "WtBogusFact");
     return dir;
 }
 

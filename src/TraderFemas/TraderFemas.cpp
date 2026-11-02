@@ -21,6 +21,7 @@
 
 #include <filesystem>
 #include <cstring>
+#include <string>
 namespace fs = std::filesystem;
 
  //By Wesley @ 2022.01.05
@@ -69,9 +70,44 @@ inline uint32_t strToTime(const char* strTime)
 	return convert::to_uint32(str.c_str());
 }
 
+namespace
+{
+	template <std::size_t N>
+	bool copyCStringToSdkField(char (&destination)[N], const char* source)
+	{
+		if (source == NULL)
+			return false;
+
+		const char* terminator = static_cast<const char*>(std::memchr(source, '\0', N));
+		if (terminator == NULL)
+			return false;
+
+		const std::size_t length = static_cast<std::size_t>(terminator - source);
+		std::memcpy(destination, source, length + 1);
+		return true;
+	}
+
+	template <std::size_t N>
+	bool formatSessionLocalOrderID(char (&destination)[N], const std::string& sessionID, uint32_t localOrderID)
+	{
+		constexpr std::size_t localOrderIDDigits = 12;
+		if (N <= localOrderIDDigits || sessionID.size() > N - localOrderIDDigits - 1)
+			return false;
+
+		const std::string value = fmt::format("{}{:012d}", sessionID, localOrderID);
+		if (value.size() + 1 > N)
+			return false;
+
+		std::memcpy(destination, value.c_str(), value.size() + 1);
+		return true;
+	}
+}
+
 TraderFemas::TraderFemas()
 	: m_bQuickStart(false)
+	, m_sink(NULL)
 	, m_uLastQryTime(0)
+	, m_lDate(0)
 	, m_uLocalOrdID(1)
 	, m_wrapperState(WS_NOTLOGIN)
 	, m_pUserAPI(NULL)
@@ -80,11 +116,14 @@ TraderFemas::TraderFemas()
 	, m_ayTrades(NULL)
 	, m_ayOrders(NULL)
 	, m_ayPosDetail(NULL)
+	, m_bdMgr(NULL)
 	, m_bQryOnline(false)
 	, m_bStopped(false)
 	, m_strandIO(NULL)
 	, m_bInQuery(false)
 	, m_lastQryTime(0)
+	, m_hInstCTP(NULL)
+	, m_funcCreator(NULL)
 {
 }
 
@@ -95,6 +134,18 @@ TraderFemas::~TraderFemas()
 
 bool TraderFemas::init(WTSVariant* params)
 {
+	if (m_hInstCTP != NULL || m_pUserAPI != NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderFemas] Cannot initialize an API instance more than once");
+		return false;
+	}
+
+	if (params == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderFemas] Cannot initialize with null configuration");
+		return false;
+	}
+
 	m_strFront = params->getCString("front");
 	m_strBroker = params->getCString("broker");
 	m_strUser = params->getCString("user");
@@ -119,11 +170,26 @@ bool TraderFemas::init(WTSVariant* params)
 
 	WTSVariant* param = params->get("ctpmodule");
 	if (param != NULL)
-		m_strModule = getBinDir() + DLLHelper::wrap_module(param->asCString(), "");
+	{
+		const std::string wrappedModule = DLLHelper::wrap_module(param->asCString(), "");
+		const char* moduleDir = getBinDir();
+		if ((moduleDir == NULL || *moduleDir == '\0') && !fs::path(wrappedModule).is_absolute())
+		{
+			write_log(m_sink, LL_ERROR, "[TraderFemas] Cannot locate trader module directory");
+			return false;
+		}
+		m_strModule = (moduleDir == NULL ? std::string() : std::string(moduleDir)) + wrappedModule;
+	}
 	else
 		m_strModule = DLLHelper::wrap_module("USTPtraderapiAF", "lib");
 
 	m_hInstCTP = DLLHelper::load_library(m_strModule.c_str());
+	if (m_hInstCTP == NULL)
+	{
+		m_funcCreator = NULL;
+		write_log(m_sink, LL_ERROR, "[TraderFemas] Failed to load trader API module: {}", m_strModule);
+		return false;
+	}
 #ifdef _WIN32
 #	ifdef _WIN64
 	const char* creatorName = "?CreateFtdcTraderApi@CUstpFtdcTraderApi@@SAPEAV1@PEBD@Z";
@@ -134,6 +200,13 @@ bool TraderFemas::init(WTSVariant* params)
 	const char* creatorName = "_ZN18CUstpFtdcTraderApi19CreateFtdcTraderApiEPKc";
 #endif
 	m_funcCreator = (APICreator)DLLHelper::get_symbol(m_hInstCTP, creatorName);
+	if (m_funcCreator == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderFemas] Trader API creator symbol not found in {}: {}", m_strModule, creatorName);
+		DLLHelper::free_library(m_hInstCTP);
+		m_hInstCTP = NULL;
+		return false;
+	}
 
 	return true;
 }
@@ -169,11 +242,29 @@ void TraderFemas::release()
 
 void TraderFemas::connect()
 {
+	if (m_funcCreator == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderFemas] Cannot connect: trader API creator is unavailable; init must succeed first");
+		return;
+	}
+
 	std::stringstream ss;
 	ss << m_strFlowDir << "flows/" << m_strBroker << "/" << m_strUser << "/";
 	std::string path = ss.str();
 	fs::create_directories(path.c_str());
-	m_pUserAPI = m_funcCreator(path.c_str());
+	CUstpFtdcTraderApi* userAPI = m_funcCreator(path.c_str());
+	if (userAPI == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderFemas] Trader API creator returned null; connection aborted");
+		return;
+	}
+	m_pUserAPI = userAPI;
+	// Init() may invoke SPI callbacks before it returns. A successful login callback
+	// can synchronously reenter queryAccount(), whose triggerQuery() posts to this
+	// strand, so publish the strand before registering the SPI or starting the API.
+	if (m_strandIO == NULL)
+		m_strandIO = new boost::asio::io_context::strand(m_asyncIO);
+
 	m_pUserAPI->RegisterSpi(this);
 	if(m_bQuickStart)
 	{
@@ -197,9 +288,10 @@ void TraderFemas::connect()
 
 	m_pUserAPI->Init();
 
+	// Start dispatching only after Init() returns. A callback invoked on the Init()
+	// stack may queue a query, which the worker will process after API setup ends.
 	if (m_thrdWorker == NULL)
 	{
-		m_strandIO = new boost::asio::io_context::strand(m_asyncIO);
 		auto work = boost::asio::make_work_guard(m_asyncIO);
 		m_thrdWorker.reset(new StdThread([this](){
 			while (true)
@@ -333,13 +425,37 @@ int TraderFemas::logout()
 
 int TraderFemas::orderInsert(WTSEntrust* entrust)
 {
-	if(m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
+	if (entrust == NULL || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
 	{
 		return -1;
 	}
 
-	CUstpFtdcInputOrderField req;
-	memset(&req, 0, sizeof(req));
+	WTSContractInfo* ct = entrust->getContractInfo();
+	if (ct == NULL)
+		return -1;
+
+	CUstpFtdcInputOrderField req = {};
+	if (entrust->getUserTag()[0] == '\0')
+	{
+		constexpr std::size_t localOrderIDDigits = 12;
+		if (sizeof(req.UserOrderLocalID) <= localOrderIDDigits + 1
+			|| m_strSessionID.size() > sizeof(req.UserOrderLocalID) - localOrderIDDigits - 1
+			|| !formatSessionLocalOrderID(req.UserOrderLocalID, m_strSessionID, genLocalOrdID()))
+		{
+			write_log(m_sink, LL_ERROR,
+				"[TraderFemas] Generated user order local ID does not fit SDK field capacity ({} bytes)",
+				sizeof(req.UserOrderLocalID) - 1);
+			return -1;
+		}
+	}
+	else if (!copyCStringToSdkField(req.UserOrderLocalID, entrust->getUserTag()))
+	{
+		write_log(m_sink, LL_ERROR,
+			"[TraderFemas] User tag cannot be represented in SDK UserOrderLocalID (maximum {} bytes)",
+			sizeof(req.UserOrderLocalID) - 1);
+		return -1;
+	}
+
 	///经纪公司代码
 	strcpy(req.BrokerID, m_strBroker.c_str());
 	///投资者代码
@@ -348,21 +464,7 @@ int TraderFemas::orderInsert(WTSEntrust* entrust)
 	///合约代码
 	strcpy(req.InstrumentID, entrust->getCode());
 
-	WTSContractInfo* ct = entrust->getContractInfo();
-	if (ct == NULL)
-		return -1;
-
 	strcpy(req.ExchangeID, wrapExchg(ct->getExchg()));
-
-	if(strlen(entrust->getUserTag()) == 0)
-	{
-		///报单引用
-		fmtutil::format_to(req.UserOrderLocalID, "{}{:012d}", m_strSessionID.c_str(), genLocalOrdID());
-	}
-	else
-	{
-		strcpy(req.UserOrderLocalID, entrust->getUserTag());
-	}
 	//生成本地委托单号
 	//entrust->setEntrustID(req.UserOrderLocalID);
 
@@ -402,23 +504,44 @@ int TraderFemas::orderInsert(WTSEntrust* entrust)
 
 int TraderFemas::orderAction( WTSEntrustAction* action )
 {
-	if(m_wrapperState != WS_ALLREADY)
+	if (action == NULL || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
 		return -1;
 
 	//uint32_t frontid, sessionid, orderref;
 	//if(!extractEntrustID(action->getEntrustID(), frontid, sessionid, orderref))
 	//	return -1;
 
-	CUstpFtdcOrderActionField req;
-	memset(&req, 0, sizeof(req));
+	CUstpFtdcOrderActionField req = {};
+	if (!copyCStringToSdkField(req.UserOrderLocalID, action->getEntrustID()))
+	{
+		write_log(m_sink, LL_ERROR,
+			"[TraderFemas] Entrust ID cannot be represented in SDK UserOrderLocalID (maximum {} bytes)",
+			sizeof(req.UserOrderLocalID) - 1);
+		return -1;
+	}
+	if (!copyCStringToSdkField(req.OrderSysID, action->getOrderID()))
+	{
+		write_log(m_sink, LL_ERROR,
+			"[TraderFemas] Order ID cannot be represented in SDK OrderSysID (maximum {} bytes)",
+		sizeof(req.OrderSysID) - 1);
+		return -1;
+	}
+	constexpr std::size_t localOrderIDDigits = 12;
+	if (sizeof(req.UserOrderActionLocalID) <= localOrderIDDigits + 1
+		|| m_strSessionID.size() > sizeof(req.UserOrderActionLocalID) - localOrderIDDigits - 1
+		|| !formatSessionLocalOrderID(req.UserOrderActionLocalID, m_strSessionID, genLocalOrdID()))
+	{
+		write_log(m_sink, LL_ERROR,
+			"[TraderFemas] Generated user order action local ID does not fit SDK field capacity ({} bytes)",
+		sizeof(req.UserOrderActionLocalID) - 1);
+		return -1;
+	}
+
 	strcpy(req.BrokerID, m_strBroker.c_str());
 	strcpy(req.InvestorID, m_strUser.c_str());
 	strcpy(req.UserID, m_strUser.c_str());
-	strcpy(req.UserOrderLocalID, action->getEntrustID());
-	fmtutil::format_to(req.UserOrderActionLocalID, "{}{:012d}", m_strSessionID.c_str(), genLocalOrdID());
 	req.ActionFlag = wrapActionFlag(action->getActionFlag());
 
-	strcpy(req.OrderSysID, action->getOrderID());
 	strcpy(req.ExchangeID, wrapExchg(action->getExchg()));
 
 	int iResult = m_pUserAPI->ReqOrderAction(&req, genRequestID());

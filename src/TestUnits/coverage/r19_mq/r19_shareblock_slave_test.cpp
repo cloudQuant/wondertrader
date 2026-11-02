@@ -13,6 +13,7 @@
  */
 #include <gtest/gtest.h>
 
+#include <cstring>
 #include <string>
 #include <vector>
 
@@ -76,6 +77,43 @@ TEST_F(R19TempDir, r19_init_slave_missing_file_false_and_reads_master_kv)
 	EXPECT_EQ(3u, sb().get_keys(domS.c_str(), "kv").size());
 	// L421-423：段不在缓存里 → 空
 	EXPECT_EQ(0u, sb().get_keys(domS.c_str(), "nosection").size());
+}
+
+// 初始共享块由独立 fixture 提供：slave 初次索引只收录 live section，忽略 tombstone。
+TEST_F(R19TempDir, r19_init_slave_skips_initial_tombstone_sections)
+{
+	r19::attach_logger();
+	const std::string domS = r19::domain("b1_initial_tombstone");
+	const std::string path = file("b1_initial_tombstone.blk");
+	std::vector<char> raw = r19::make_zero_block();
+	ShmBlock* block = reinterpret_cast<ShmBlock*>(raw.data());
+	block->_count = 2;
+	block->_updatetime = 123456u;
+
+	SecInfo& tombstone = r19::sec_at(raw.data(), 0);
+	std::strncpy(tombstone._name, "deleted", sizeof(tombstone._name) - 1);
+	tombstone._count = 1;
+	tombstone._state = 2;
+	r19::put_int32_key(tombstone, 0, "old_key", 17, 0);
+
+	SecInfo& live = r19::sec_at(raw.data(), 1);
+	std::strncpy(live._name, "live", sizeof(live._name) - 1);
+	live._count = 1;
+	live._state = 1;
+	r19::put_int32_key(live, 0, "current_key", 23, 0);
+
+	ASSERT_TRUE(r19::write_raw_shm_block(path, raw.data(), raw.size()));
+	ASSERT_TRUE(sb().init_slave(domS.c_str(), path.c_str()));
+
+	auto sections = sb().get_sections(domS.c_str());
+	ASSERT_EQ(1u, sections.size());
+	EXPECT_EQ("live", sections[0]);
+	EXPECT_TRUE(sb().get_keys(domS.c_str(), "deleted").empty());
+	auto liveKeys = sb().get_keys(domS.c_str(), "live");
+	ASSERT_EQ(1u, liveKeys.size());
+	EXPECT_STREQ("current_key", liveKeys[0]->_key);
+	EXPECT_EQ(23, sb().get_int32(domS.c_str(), "live", "current_key", -1));
+	EXPECT_FALSE(sb().update_slave(domS.c_str(), false));
 }
 
 // slave 只能读：建不了新段，也建不了新 key
@@ -155,6 +193,8 @@ TEST_F(R19TempDir, r19_update_slave_reloads_after_blocktime_change_and_release_r
 
 	// master 删段 → 墓碑和新版本在同一文件锁内发布。
 	ASSERT_TRUE(sb().delete_section(domM.c_str(), "doomed"));
+	EXPECT_TRUE(sb().get_keys(domM.c_str(), "doomed").empty())
+		<< "master 删除段后，墓碑不应继续从本地 key 索引枚举";
 	// The slave may still have the old key index before refresh; it must not
 	// reactivate the shared tombstone through an allocate/set call.
 	EXPECT_EQ(nullptr, sb().allocate_int32(domS.c_str(), "doomed", "k2", 999, true));
@@ -165,6 +205,8 @@ TEST_F(R19TempDir, r19_update_slave_reloads_after_blocktime_change_and_release_r
 	EXPECT_TRUE(sb().update_slave(domS.c_str(), false));
 	EXPECT_GE(r19::log_count(), before);
 	EXPECT_TRUE(r19::has_log("reloaded"));
+	EXPECT_TRUE(sb().get_keys(domS.c_str(), "doomed").empty())
+		<< "slave 刷新后墓碑的 key 索引应被移除";
 
 	// 刷新后 block->_updatetime 被同步（L160）→ 再来一次非强制就是 false
 	EXPECT_FALSE(sb().update_slave(domS.c_str(), false));

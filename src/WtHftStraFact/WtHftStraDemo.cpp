@@ -76,6 +76,9 @@ const char* WtHftStraDemo::getFactName()
  */
 bool WtHftStraDemo::init(WTSVariant* cfg)
 {
+	if (cfg == NULL)
+		return false;
+
 	//这里演示一下外部传入参数的获取
 	_code = cfg->getCString("code");
 	_secs = cfg->getUInt32("second");

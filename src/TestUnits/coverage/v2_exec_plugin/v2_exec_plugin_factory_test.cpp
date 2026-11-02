@@ -2,6 +2,8 @@
 
 #include "WtCore/WtExecuterFactory.h"
 #include "Includes/IExecPluginV2.h"
+#include "Includes/ExecuteDefs.h"
+#include "Share/DLLHelper.hpp"
 
 #include <cstdlib>
 #include <cstddef>
@@ -11,8 +13,24 @@
 #include <iterator>
 #include <string>
 #include <system_error>
+#include <type_traits>
+#include <vector>
 
 #include <unistd.h>
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#endif
+
+extern "C"
+{
+wtp::IExecuterFact* createExecFact();
+void deleteExecFact(wtp::IExecuterFact* fact);
+}
+
+static_assert(std::is_same<decltype(&createExecFact), wtp::FuncCreateExeFact>::value,
+	"the legacy create export declaration must match FuncCreateExeFact");
+static_assert(std::is_same<decltype(&deleteExecFact), wtp::FuncDeleteExeFact>::value,
+	"the legacy delete export declaration must match FuncDeleteExeFact");
 
 #ifndef WT_COV_EXEC_V2_LEGACY_PATH
 #error WT_COV_EXEC_V2_LEGACY_PATH must name the legacy plugin fixture
@@ -244,6 +262,119 @@ size_t countEvents(const std::string& log, const std::string& event)
 	return count;
 }
 
+std::string currentExecutablePath()
+{
+#ifdef __APPLE__
+	uint32_t capacity = 0;
+	if (_NSGetExecutablePath(NULL, &capacity) != -1 || capacity == 0)
+		return std::string();
+	std::vector<char> path(static_cast<size_t>(capacity) + 1, '\0');
+	if (_NSGetExecutablePath(path.data(), &capacity) != 0)
+		return std::string();
+	std::error_code ec;
+	const fs::path canonical = fs::weakly_canonical(fs::path(path.data()), ec);
+	return ec ? fs::path(path.data()).string() : canonical.string();
+#else
+	char path[4096] = { 0 };
+	const ssize_t length = ::readlink("/proc/self/exe", path, sizeof(path) - 1);
+	if (length <= 0)
+		return std::string();
+	std::error_code ec;
+	const fs::path raw(std::string(path, static_cast<size_t>(length)));
+	const fs::path canonical = fs::weakly_canonical(raw, ec);
+	return ec ? raw.string() : canonical.string();
+#endif
+}
+
+class ScopedKnownV1Plugin
+{
+public:
+	~ScopedKnownV1Plugin()
+	{
+		if (_unit != NULL && _factory != NULL && !deleteUnit())
+			return;
+		if (_factory != NULL && _delete_factory != NULL && !deleteFactory())
+			return;
+		if (_module != NULL)
+			unload();
+	}
+
+	bool open(const std::string& path)
+	{
+		_module = DLLHelper::load_library(path.c_str());
+		if (_module == NULL)
+			return false;
+		_create_factory = reinterpret_cast<wtp::FuncCreateExeFact>(
+			DLLHelper::get_symbol(_module, "createExecFact"));
+		_delete_factory = reinterpret_cast<wtp::FuncDeleteExeFact>(
+			DLLHelper::get_symbol(_module, "deleteExecFact"));
+		return _create_factory != NULL && _delete_factory != NULL;
+	}
+
+	wtp::IExecuterFact* createFactory()
+	{
+		_factory = _create_factory ? _create_factory() : NULL;
+		return _factory;
+	}
+
+	wtp::ExecuteUnit* createUnit(const char* name)
+	{
+		_unit = _factory ? _factory->createExeUnit(name) : NULL;
+		return _unit;
+	}
+
+	bool deleteUnit()
+	{
+		if (_unit == NULL || _factory == NULL)
+			return false;
+		const bool deleted = _factory->deleteExeUnit(_unit);
+		++_unit_delete_calls;
+		if (!deleted)
+			return false;
+		_unit = NULL;
+		return true;
+	}
+
+	bool deleteFactory()
+	{
+		if (_factory == NULL || _delete_factory == NULL)
+			return false;
+		_delete_factory(_factory);
+		_factory = NULL;
+		++_factory_delete_calls;
+		return true;
+	}
+
+	bool unload()
+	{
+		if (_unit != NULL || _factory != NULL || _module == NULL)
+			return false;
+#ifdef _MSC_VER
+		DLLHelper::free_library(_module);
+#else
+		if (::dlclose(_module) != 0)
+			return false;
+#endif
+		_module = NULL;
+		++_module_close_calls;
+		return true;
+	}
+
+	unsigned unitDeleteCalls() const { return _unit_delete_calls; }
+	unsigned factoryDeleteCalls() const { return _factory_delete_calls; }
+	unsigned moduleCloseCalls() const { return _module_close_calls; }
+
+private:
+	DllHandle _module = NULL;
+	wtp::FuncCreateExeFact _create_factory = NULL;
+	wtp::FuncDeleteExeFact _delete_factory = NULL;
+	wtp::IExecuterFact* _factory = NULL;
+	wtp::ExecuteUnit* _unit = NULL;
+	unsigned _unit_delete_calls = 0;
+	unsigned _factory_delete_calls = 0;
+	unsigned _module_close_calls = 0;
+};
+
 void expectRejectedBeforeFactoryCall(const char* pluginPath, const char* expectedLog)
 {
 	TempPluginDir root;
@@ -259,6 +390,36 @@ void expectRejectedBeforeFactoryCall(const char* pluginPath, const char* expecte
 TEST(V2ExecuterFactoryTest, RejectsLegacyPluginBeforeCallingUnversionedFactory)
 {
 	expectRejectedBeforeFactoryCall(WT_COV_EXEC_V2_LEGACY_PATH, "module_loaded\n");
+}
+
+TEST(V2ExecuterFactoryTest, KnownBuiltInLegacyExportsUseExactTypesAndReleaseHandleAfterDeletion)
+{
+	const std::string executable = currentExecutablePath();
+	ASSERT_FALSE(executable.empty());
+	const fs::path pluginPath = fs::path(executable).parent_path().parent_path() /
+		DLLHelper::wrap_module("WtExeFact");
+	ASSERT_TRUE(fs::is_regular_file(pluginPath)) << pluginPath.string();
+
+	ScopedKnownV1Plugin plugin;
+	ASSERT_TRUE(plugin.open(pluginPath.string())) << pluginPath.string();
+	wtp::IExecuterFact* factory = plugin.createFactory();
+	ASSERT_NE(nullptr, factory);
+	ASSERT_STREQ("WtExeFact", factory->getName());
+
+	wtp::ExecuteUnit* unit = plugin.createUnit("WtMinImpactExeUnit");
+	ASSERT_NE(nullptr, unit);
+	EXPECT_STREQ("WtMinImpactExeUnit", unit->getName());
+	EXPECT_STREQ("WtExeFact", unit->getFactName());
+	ASSERT_TRUE(plugin.deleteUnit()) << "the unit must be destroyed through its owning factory";
+	ASSERT_TRUE(plugin.deleteFactory()) << "the v1 factory deleter must be called once";
+	ASSERT_TRUE(plugin.unload()) << "the module handle may close only after both objects are destroyed";
+	EXPECT_EQ(1u, plugin.unitDeleteCalls());
+	EXPECT_EQ(1u, plugin.factoryDeleteCalls());
+	EXPECT_EQ(1u, plugin.moduleCloseCalls());
+
+	// macOS documents that dylibs with thread-local variables may remain mapped
+	// after their last dlclose; WtExeFact's linked image contains TLS. This checks
+	// exactly-once object destruction and successful handle close, not physical unmap.
 }
 
 TEST(V2ExecuterFactoryTest, RejectsMismatchedMajorBeforeCreatingFactory)

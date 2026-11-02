@@ -1,0 +1,37 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R15CtxTest.each_entry_and_exit_rejects_reentrant_unbind_from_rule_lookup
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R15CtxTest
+[ RUN      ] R15CtxTest.each_entry_and_exit_rejects_reentrant_unbind_from_rule_lookup
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==17892==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x00010072bc70 bp 0x00016fa0d340 sp 0x00016fa0d260 T0)
+==17892==The signal is caused by a READ memory access.
+==17892==Hint: address points to the zero page.
+    #0 0x00010072bc70 in wtp::TraderAdapter::getContract(char const*) TraderAdapter.cpp:1258
+    #1 0x00010072f8d8 in wtp::TraderAdapter::openLong(char const*, double, double, int, wtp::WTSContractInfo*) TraderAdapter.cpp:2077
+    #2 0x0001004ed9e8 in wtp::HftStraBaseCtx::stra_enter_long(char const*, double, double, char const*, int) HftStraBaseCtx.cpp:418
+    #3 0x00010041e368 in R15CtxTest_each_entry_and_exit_rejects_reentrant_unbind_from_rule_lookup_Test::TestBody() r15_hft_stra_context.cpp:877
+    #4 0x0001006baff8 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (asan-tests:arm64+0x1002caff8)
+    #5 0x0001006baf40 in testing::Test::Run()+0xcc (asan-tests:arm64+0x1002caf40)
+    #6 0x0001006bbb20 in testing::TestInfo::Run()+0xd0 (asan-tests:arm64+0x1002cbb20)
+    #7 0x0001006bc5a4 in testing::TestSuite::Run()+0x1c4 (asan-tests:arm64+0x1002cc5a4)
+    #8 0x0001006c79cc in testing::internal::UnitTestImpl::RunAllTests()+0x52c (asan-tests:arm64+0x1002d79cc)
+    #9 0x0001006c7378 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (asan-tests:arm64+0x1002d7378)
+    #10 0x0001006c72dc in testing::UnitTest::Run()+0x78 (asan-tests:arm64+0x1002d72dc)
+    #11 0x0001006a8654 in main+0x40 (asan-tests:arm64+0x1002b8654)
+    #12 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+==17892==Register values:
+ x[0] = 0x0000000000000000   x[1] = 0x000000016fa0d3ee   x[2] = 0x0000000000000000   x[3] = 0x0000624000002400  
+ x[4] = 0x0000624000002440   x[5] = 0x0000000000000000   x[6] = 0x000000000000004d   x[7] = 0x0000000000000001  
+ x[8] = 0x000000016fa0d820   x[9] = 0x000000016fa0d297  x[10] = 0x00000cc80002047f  x[11] = 0x00000c480000047f  
+x[12] = 0x00000c480000047f  x[13] = 0x0000000000000000  x[14] = 0x0000000000000000  x[15] = 0x000010800001ffff  
+x[16] = 0x00000000000002fa  x[17] = 0x0000624000002100  x[18] = 0x0000000000000000  x[19] = 0x000000016fa0d5a0  
+x[20] = 0x0000000000000001  x[21] = 0x000061c000000080  x[22] = 0x000061c000000080  x[23] = 0x000000000000001d  
+x[24] = 0x0000000100ac2000  x[25] = 0x0000000000000000  x[26] = 0x0000000000000000  x[27] = 0x000000016fa0eb10  
+x[28] = 0x0000000000000001     fp = 0x000000016fa0d340     lr = 0x000000010072bc64     sp = 0x000000016fa0d260  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV TraderAdapter.cpp:1258 in wtp::TraderAdapter::getContract(char const*)
+==17892==ABORTING

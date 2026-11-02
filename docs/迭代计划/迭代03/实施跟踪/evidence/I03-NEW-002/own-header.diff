@@ -1,0 +1,30 @@
+--- /private/tmp/wt-i03-new002/baseline/HftStraBaseCtx.h	2026-11-01 22:49:58
++++ src/WtCore/HftStraBaseCtx.h	2026-11-01 22:59:23
+@@ -651,12 +651,26 @@
+ 	inline void eraseOrderTag(uint32_t localid)
+ 	{
+ 		_orders.erase(localid);
++	}
++
++	// Detect synchronous rebinding while a trading action calls into other
++	// components. This does not synchronize concurrent access or own the adapter.
++	bool traderBindingUnchanged(TraderAdapter* expected, uint64_t epoch, const char* action)
++	{
++		if (_trader == expected && _trader_binding_epoch == epoch)
++			return true;
++		log_error("Cannot {}: trader adapter binding changed", action);
++		return false;
+ 	}
+ 
++	bool tryGetBoundPosition(const char* stdCode, bool onlyValid, int flag,
++		TraderAdapter* expected, uint64_t epoch, double& position);
++
+ protected:
+ 	uint32_t		_context_id;
+ 	WtHftEngine*	_engine;
+-	TraderAdapter*	_trader;
++	TraderAdapter*	_trader = nullptr;
++	uint64_t		_trader_binding_epoch = 0;
+ 	int32_t			_slippage;
+ 
+ 	wt_hashmap<std::string, std::string> _code_map;

@@ -312,7 +312,8 @@ TEST(R211StrategyMgr, NonPluginDirectoryLoadsNothing)
     fs::create_directories(dir, ec);
     ASSERT_FALSE(ec) << ec.message();
 
-    fs::create_symlink(bin / "libWtShareHelper.dylib", dir / "libnotastrategy.dylib", ec);
+    fs::copy_file(bin / "libWtShareHelper.dylib", dir / "libnotastrategy.dylib",
+        fs::copy_options::overwrite_existing, ec);
     ASSERT_FALSE(ec) << ec.message();
 
     SelStrategyMgr sel;
@@ -405,7 +406,8 @@ TEST(R211HftStrategyMgr, DISABLED_CtaPluginTypePunCrashesOnRegistration)
     fs::create_directories(dir, ec);
     ASSERT_FALSE(ec) << ec.message();
 
-    fs::create_symlink(bin / "libWtCtaStraFact.dylib", dir / "libctafact.dylib", ec);
+    fs::copy_file(bin / "libWtCtaStraFact.dylib", dir / "libctafact.dylib",
+        fs::copy_options::overwrite_existing, ec);
     ASSERT_FALSE(ec) << ec.message();
 
     HftStrategyMgr mgr;

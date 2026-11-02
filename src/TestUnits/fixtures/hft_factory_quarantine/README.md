@@ -1,0 +1,15 @@
+# HFT strategy factory quarantine focused fixture
+
+Run from the repository root (C++17, Perl, physical Boost/fmt/spdlog headers required):
+
+```sh
+src/TestUnits/fixtures/hft_factory_quarantine/run.sh /private/tmp/hft-factory-quarantine
+```
+
+The script builds the current HFT manager and physical fake dynamic modules in a fresh directory and executes only its 17 focused scenarios. It does not create symbolic links or contact a provider. Set `WT_BOOST_INCLUDE`, `WT_FMT_INCLUDE` or `WT_SPDLOG_INCLUDE` if the default Homebrew Cellar paths do not apply. The real `WTSLogger` template and `fmtutil` formatting path are enabled, but the output sink and logger static state are test substitutes; the complete logging backend and C API are not tested.
+
+If a saved pre-change source **and matching header** are available, set `WT_HFT_BASELINE_DIR` to their directory to build and run six expected-failing historical controls and a healthy positive control. The directory must contain `HftStrategyMgr.cpp` and `HftStrategyMgr.h`. Set `WT_HFT_LONG_PATH_RED=1` when running under ASan to include the overlong-directory historical control. Without the baseline, the baseline cases are explicitly recorded as NOT RUN. The snapshot used during this implementation was taken from the dirty workspace before the change, not from Git HEAD.
+
+Current tests cover creator/getName exceptions, null/empty results, duplicate names, healthy rescan and cross-manager conflicts, same-handle concurrent and reentrant loading, bounded display of two distinct long names with identical prefixes, missing creator with static background activity, recovery via a healthy module, and successful strategy creation. A valid real directory longer than the display limit is still loaded through its complete path; an invalid 4096-byte path exercises bounded error logging. The `owner-lifetime` case registers two distinct factories and verifies neither factory is deleted during map insertion/growth and each is deleted exactly once after its manager-owned strategies. It deliberately does not claim safety for an external strategy wrapper that outlives the manager.
+
+The manager retains failed factories and a loader reference for this manager-code copy's lifetime, including modules with no creator export, because the ABI provides no way to prove their background work has stopped. A local name conflict keeps its unregistered instance and module reference but does not prohibit another manager loading that healthy module. This consumes resources until process exit. Separate DSO copies or reloading the host module do not share the registry. The platform loader may run static initializers before it returns a handle; that interval cannot be quarantined by this code. Plugin multi-instance safety, manager/wrapper lifetime, reentrant remover calls during manager destruction, arbitrary concurrent strategy-map access, real C API/logger/provider behavior, Linux/Windows and complete tree/regression are not established by this fixture.

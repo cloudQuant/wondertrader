@@ -123,6 +123,7 @@ public:
 	uint32_t get_adjusting_flag();
 
 	double calc_fee(const char* stdCode, double price, double qty, uint32_t offset);
+	inline bool fee_config_valid() const { return _fee_config_valid; }
 
 	inline void setRiskMonitor(WtRiskMonPtr& monitor)
 	{
@@ -337,5 +338,8 @@ protected:
 
 	//用于标记是否可以推送tickle
 	bool			_ready;
+	// init() keeps its existing virtual ABI; concrete runners inspect this state
+	// after initialization before accepting the engine for execution.
+	bool			_fee_config_valid;
 };
 NS_WTP_END

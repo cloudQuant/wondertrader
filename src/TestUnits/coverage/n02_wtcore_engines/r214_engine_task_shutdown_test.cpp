@@ -10,6 +10,7 @@
 #endif
 #include <cstdlib>
 #include <future>
+#include <memory>
 #include <thread>
 
 using namespace wtp;
@@ -62,6 +63,11 @@ TEST(R214EngineTaskShutdown, releaseCannotLoseWakeBetweenIdleCheckAndWait)
 }
 
 TEST(R214EngineTaskShutdown, externalReleaseDrainsAcceptedTasksAndSerializesCallers)
+{
+	GTEST_SKIP() << "The bounded alarm child-process probe requires POSIX.";
+}
+
+TEST(R214EngineTaskShutdown, stoppedEngineDoesNotRunTaskAndReleasesCapture)
 {
 	GTEST_SKIP() << "The bounded alarm child-process probe requires POSIX.";
 }
@@ -157,6 +163,42 @@ TEST(R214EngineTaskShutdown, externalReleaseDrainsAcceptedTasksAndSerializesCall
 
 			if (completed.load() != 33)
 				failChild(3);
+			failChild(0);
+		},
+		::testing::ExitedWithCode(0), "");
+}
+
+TEST(R214EngineTaskShutdown, stoppedEngineDoesNotRunTaskAndReleasesCapture)
+{
+	ASSERT_EXIT(
+		{
+			alarm(8);
+			R214TaskEngine engine;
+			std::promise<void> workerStarted;
+			auto started = workerStarted.get_future();
+			engine.schedule([&workerStarted]() { workerStarted.set_value(); });
+			if (started.wait_for(std::chrono::seconds(2)) != std::future_status::ready)
+				failChild(2);
+
+			// Join the worker before submitting, so the submission is unambiguously
+			// after stop. push_task returns void; rejection is observed through the
+			// absence of invocation and release of the rejected task's capture.
+			engine.release();
+			std::atomic<uint32_t> executed(0);
+			auto capture = std::make_shared<uint32_t>(7);
+			std::weak_ptr<uint32_t> captureLifetime(capture);
+			engine.schedule([&executed, capture]() { ++executed; });
+			capture.reset();
+			if (!captureLifetime.expired())
+				failChild(3);
+
+			// A repeated owner release also joins any worker a regression might
+			// incorrectly start after stop.
+			engine.release();
+			if (executed.load() != 0)
+				failChild(4);
+			if (!captureLifetime.expired())
+				failChild(5);
 			failChild(0);
 		},
 		::testing::ExitedWithCode(0), "");

@@ -74,7 +74,7 @@ TEST(R183UftFactory, DylibWithoutFactoryEntryIsSkipped)
 
 	const fs::path dir = make_tmp_dir("fact");
 	std::error_code ec;
-	fs::create_symlink(lib, dir / "libnofactory.dylib", ec);
+	fs::copy_file(lib, dir / "libnofactory.dylib", fs::copy_options::overwrite_existing, ec);
 	ASSERT_FALSE(ec) << ec.message();
 
 	UftStrategyMgr mgr;

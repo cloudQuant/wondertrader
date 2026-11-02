@@ -103,6 +103,19 @@ ParserCTPMini::~ParserCTPMini()
 
 bool ParserCTPMini::init(WTSVariant* config)
 {
+	if (config == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[ParserCTPMini] Cannot initialize without configuration");
+		return false;
+	}
+	// Any previously loaded module may still have vendor work in flight.
+	// Keep its reference resident and do not retry on this parser instance.
+	if (m_hInstCTP != NULL || m_pUserAPI != NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[ParserCTPMini] Market data API module is already loaded; initialization disabled");
+		return false;
+	}
+
 	m_strFrontAddr = config->getCString("front");
 	m_strBroker = config->getCString("broker");
 	m_strUserID = config->getCString("user");
@@ -114,6 +127,17 @@ bool ParserCTPMini::init(WTSVariant* config)
 
 	m_strFlowDir = StrUtil::standardisePath(m_strFlowDir);
 
+	std::string module = config->getCString("ctpmodule");
+	if (module.empty())
+		module = "thostmduserapi";
+	const std::string moduleFile = DLLHelper::wrap_module(module.c_str(), "lib");
+	const char* moduleDir = getBinDir();
+	if ((moduleDir == NULL || *moduleDir == '\0') && !fs::path(moduleFile).is_absolute())
+	{
+		write_log(m_sink, LL_ERROR, "[ParserCTPMini] Cannot locate market data module directory");
+		return false;
+	}
+
 	std::string path = fmtutil::format("{}/{}/{}/", m_strFlowDir.c_str(), m_strBroker.c_str(), m_strUserID.c_str());
 	std::error_code pathError;
 	fs::create_directories(fs::path(path), pathError);
@@ -124,11 +148,18 @@ bool ParserCTPMini::init(WTSVariant* config)
 		return false;
 	}
 
-	std::string module = config->getCString("ctpmodule");
-	if (module.empty())
-		module = "thostmduserapi";
-	std::string dllpath = getBinDir() + DLLHelper::wrap_module(module.c_str(), "lib");;
-	m_hInstCTP = DLLHelper::load_library(dllpath.c_str());
+	std::string dllpath = (moduleDir == NULL ? std::string() : std::string(moduleDir)) + moduleFile;
+	const std::string logPath = dllpath.size() > 128 ? dllpath.substr(0, 128) + "..." : dllpath;
+	DllHandle library = DLLHelper::load_library(dllpath.c_str());
+	if (library == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[ParserCTPMini] Failed to load market data API module: {}", logPath);
+		return false;
+	}
+	// Loading a library can already run vendor initialization. Keep its loader
+	// reference even when symbol lookup or API creation fails: neither path has
+	// a documented callback/thread quiescence guarantee.
+	m_hInstCTP = library;
 
 #ifdef _WIN32
 #	ifdef _WIN64
@@ -139,8 +170,20 @@ bool ParserCTPMini::init(WTSVariant* config)
 #else
 	const char* creatorName = "_ZN15CThostFtdcMdApi15CreateFtdcMdApiEPKcbb";
 #endif
-	m_funcCreator = (CTPCreator)DLLHelper::get_symbol(m_hInstCTP, creatorName);
-	m_pUserAPI = m_funcCreator(path.c_str(), false, false);
+	CTPCreator creator = (CTPCreator)DLLHelper::get_symbol(library, creatorName);
+	if (creator == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[ParserCTPMini] Market data API creator symbol not found; module retained: {}", creatorName);
+		return false;
+	}
+	CThostFtdcMdApi* api = creator(path.c_str(), false, false);
+	if (api == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[ParserCTPMini] Market data API creator returned null; module retained: {}", logPath);
+		return false;
+	}
+	m_funcCreator = creator;
+	m_pUserAPI = api;
 	m_pUserAPI->RegisterSpi(this);
 	m_pUserAPI->RegisterFront((char*)m_strFrontAddr.c_str());
 
@@ -154,11 +197,9 @@ void ParserCTPMini::release()
 
 bool ParserCTPMini::connect()
 {
-	if(m_pUserAPI)
-	{
-		m_pUserAPI->Init();
-	}
-
+	if (m_pUserAPI == NULL)
+		return false;
+	m_pUserAPI->Init();
 	return true;
 }
 

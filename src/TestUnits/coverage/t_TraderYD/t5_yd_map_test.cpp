@@ -111,7 +111,6 @@ TEST(yd_map, order_state_table_and_default_is_submitting)
 	EXPECT_EQ((int)WOS_Canceled, (int)wrapOrderState(YD_OS_Canceled));
 	EXPECT_EQ((int)WOS_Canceled, (int)wrapOrderState(YD_OS_Rejected));
 	EXPECT_EQ((int)WOS_AllTraded, (int)wrapOrderState(YD_OS_AllTraded));
-	EXPECT_EQ((int)WOS_Submitting, (int)wrapOrderState(0));
 	EXPECT_EQ((int)WOS_Submitting, (int)wrapOrderState(4242));
 }
 

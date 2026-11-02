@@ -34,6 +34,18 @@ namespace rj = rapidjson;
 
 USING_NS_WTP;
 
+#ifdef WT_DT_HELPER_CLOSE_TEST_HOOKS
+namespace
+{
+	thread_local bool g_fail_next_block_close_for_test = false;
+}
+
+extern "C" void wt_dt_helper_fail_next_close_for_test()
+{
+	g_fail_next_block_close_for_test = true;
+}
+#endif
+
 /*
  *	处理块数据
  */
@@ -322,7 +334,7 @@ void dump_bars(WtString binFolder, WtString csvFolder, WtString /*strFilter*/ /*
 		if (buffer.size() < sizeof(HisKlineBlock))
 		{
 			if (cbLogger)
-				cbLogger(fmtutil::format(u8"文件{}头部校验失败", binFolder));
+				cbLogger(fmtutil::format(u8"文件{}头部校验失败", path.c_str()));
 			continue;
 		}
 
@@ -331,7 +343,7 @@ void dump_bars(WtString binFolder, WtString csvFolder, WtString /*strFilter*/ /*
 		if(bHeader->_type < BT_HIS_Minute1 || bHeader->_type > BT_HIS_Day)
 		{
 			if (cbLogger)
-				cbLogger(fmtutil::format(u8"文件{}不是K线数据，跳过转换", binFolder));
+				cbLogger(fmtutil::format(u8"文件{}不是K线数据，跳过转换", path.c_str()));
 			continue;
 		}
 
@@ -432,7 +444,7 @@ void dump_ticks(WtString binFolder, WtString csvFolder, WtString /*strFilter*/ /
 		if (buffer.size() < sizeof(HisTickBlock))
 		{
 			if (cbLogger)
-				cbLogger(fmtutil::format(u8"文件{}头部校验失败", binFolder));
+				cbLogger(fmtutil::format(u8"文件{}头部校验失败", path.c_str()));
 			continue;
 		}
 
@@ -508,13 +520,103 @@ void dump_ticks(WtString binFolder, WtString csvFolder, WtString /*strFilter*/ /
 		cbLogger(fmtutil::format(u8"目录{}全部导出完成...", binFolder));
 }
 
+namespace
+{
+	void log_path_message(FuncLogCallback cbLogger, const char* prefix,
+		WtString filename, const char* suffix)
+	{
+		if (!cbLogger)
+			return;
+
+		std::string message;
+		try
+		{
+			message = prefix;
+			message += filename == nullptr ? "" : filename;
+			message += suffix;
+		}
+		catch (...)
+		{
+			cbLogger(u8"数据文件操作日志生成失败");
+			return;
+		}
+		cbLogger(message.c_str());
+	}
+
+	bool write_block_file(WtString filename, const std::string& content,
+		FuncLogCallback cbLogger, const char* successMessage, bool successIncludesPath = false)
+	{
+		BoostFile bf;
+		if (!bf.create_new_file(filename))
+		{
+			bf.close_file();
+			log_path_message(cbLogger, u8"数据文件", filename, u8"创建失败");
+			return false;
+		}
+
+		if (!bf.write_file(content))
+		{
+			bf.close_file();
+			log_path_message(cbLogger, u8"数据文件", filename, u8"写入失败");
+			return false;
+		}
+
+		bool closed = bf.close_file_checked();
+#ifdef WT_DT_HELPER_CLOSE_TEST_HOOKS
+		// Test-only injection happens after the real close, so the handle is not
+		// leaked; it tests propagation rather than a real operating-system fault.
+		if (g_fail_next_block_close_for_test)
+		{
+			g_fail_next_block_close_for_test = false;
+			closed = false;
+		}
+#endif
+		if (!closed)
+		{
+			log_path_message(cbLogger, u8"数据文件", filename, u8"关闭失败");
+			return false;
+		}
+		if (cbLogger)
+		{
+			if (successIncludesPath)
+				log_path_message(cbLogger, successMessage, filename, "");
+			else
+				cbLogger(successMessage);
+		}
+		return true;
+	}
+}
+
 void trans_csv_bars(WtString csvFolder, WtString binFolder, WtString period, FuncLogCallback cbLogger /* = NULL */)
 {
 	if (!StdFile::exists(csvFolder))
 		return;
 
 	if (!StdFile::exists(binFolder))
-		fs::create_directories(binFolder);
+	{
+		try
+		{
+			fs::create_directories(binFolder);
+		}
+		catch (const fs::filesystem_error& e)
+		{
+			if (cbLogger)
+			{
+				std::string message;
+				try
+				{
+					message = fmt::format(u8"创建输出目录{}失败: {}", binFolder, e.what());
+				}
+				catch (...)
+				{
+					cbLogger(u8"创建输出目录失败");
+					return;
+				}
+				cbLogger(message.c_str());
+			}
+			return;
+		}
+	}
 
 	WTSKlinePeriod kp = KP_DAY;
 	if (wt_stricmp(period, "m1") == 0)
@@ -603,15 +705,10 @@ void trans_csv_bars(WtString csvFolder, WtString binFolder, WtString period, Fun
 		filename += iter->path().stem().string();
 		filename += ".dsb";
 
-		BoostFile bf;
-		if (bf.create_new_file(filename.c_str()))
-		{
-			bf.write_file(&kBlock, sizeof(HisKlineBlockV2));
-		}
-		bf.write_file(cmprsData);
-		bf.close_file();
-		if (cbLogger)
-			cbLogger(fmtutil::format(u8"数据已转储至{}", filename.c_str()));
+		std::string content;
+		content.append((const char*)&kBlock, sizeof(HisKlineBlockV2));
+		content.append(cmprsData);
+		write_block_file(filename.c_str(), content, cbLogger, u8"数据已转储至", true);
 	}
 }
 
@@ -1072,28 +1169,53 @@ WtUInt32 resample_bars(WtString barFile, FuncGetBarsCallback cb, FuncCountDataCa
 			return 0;
 		}
 
-		int32_t offset = root["offset"].GetInt();
-
-		sInfo = WTSSessionInfo::create("tmp", "tmp", offset);
-
-		if (!root["auction"].IsNull())
-		{
-			const rj::Value& jAuc = root["auction"];
-			sInfo->setAuctionTime(jAuc["from"].GetUint(), jAuc["to"].GetUint());
-		}
-
-		const rj::Value& jSecs = root["sections"];
-		if (jSecs.IsNull() || !jSecs.IsArray())
+		if (!root.IsObject() || !root.HasMember("offset") || !root["offset"].IsInt() ||
+			!root.HasMember("sections") || !root["sections"].IsArray())
 		{
 			if (cbLogger)
 				cbLogger(u8"交易时间模板格式错误");
 			return 0;
 		}
 
+		int32_t offset = root["offset"].GetInt();
+		bool hasAuction = false;
+		uint32_t auctionFrom = 0;
+		uint32_t auctionTo = 0;
+		if (root.HasMember("auction") && !root["auction"].IsNull())
+		{
+			const rj::Value& jAuc = root["auction"];
+			if (!jAuc.IsObject() || !jAuc.HasMember("from") || !jAuc["from"].IsUint() ||
+				!jAuc.HasMember("to") || !jAuc["to"].IsUint())
+			{
+				if (cbLogger)
+					cbLogger(u8"交易时间模板格式错误");
+				return 0;
+			}
+
+			hasAuction = true;
+			auctionFrom = jAuc["from"].GetUint();
+			auctionTo = jAuc["to"].GetUint();
+		}
+
+		const rj::Value& jSecs = root["sections"];
 		for (const rj::Value& jSec : jSecs.GetArray())
 		{
-			sInfo->addTradingSection(jSec["from"].GetUint(), jSec["to"].GetUint());
+			if (!jSec.IsObject() || !jSec.HasMember("from") || !jSec["from"].IsUint() ||
+				!jSec.HasMember("to") || !jSec["to"].IsUint())
+			{
+				if (cbLogger)
+					cbLogger(u8"交易时间模板格式错误");
+				return 0;
+			}
 		}
+
+		// Create the session only after the complete JSON structure is validated,
+		// so malformed input cannot leak a partially initialized session object.
+		sInfo = WTSSessionInfo::create("tmp", "tmp", offset);
+		if (hasAuction)
+			sInfo->setAuctionTime(auctionFrom, auctionTo);
+		for (const rj::Value& jSec : jSecs.GetArray())
+			sInfo->addTradingSection(jSec["from"].GetUint(), jSec["to"].GetUint());
 	}
 
 	std::string path = barFile;
@@ -1258,16 +1380,7 @@ bool store_bars(WtString barFile, WTSBarStruct* firstBar, int count, WtString pe
 	block->_size = cmp_data.size();
 	content.append(cmp_data);
 
-	BoostFile bf;
-	if (bf.create_new_file(barFile))
-	{
-		bf.write_file(content);
-	}
-	bf.close_file();
-
-	if (cbLogger)
-		cbLogger(u8"K线数据写入文件成功");
-	return true;
+	return write_block_file(barFile, content, cbLogger, u8"K线数据写入文件成功");
 }
 
 bool store_ticks(WtString tickFile, WTSTickStruct* firstTick, int count, FuncLogCallback cbLogger/* = NULL*/)
@@ -1297,17 +1410,7 @@ bool store_ticks(WtString tickFile, WTSTickStruct* firstTick, int count, FuncLog
 	block->_size = cmp_data.size();
 	content.append(cmp_data);
 
-	BoostFile bf;
-	if (bf.create_new_file(tickFile))
-	{
-		bf.write_file(content);
-	}
-	bf.close_file();
-
-	if (cbLogger)
-		cbLogger(u8"Tick数据写入文件成功");
-
-	return true;
+	return write_block_file(tickFile, content, cbLogger, u8"Tick数据写入文件成功");
 }
 
 bool store_order_details(WtString tickFile, WTSOrdDtlStruct* firstItem, int count, FuncLogCallback cbLogger/* = NULL*/)
@@ -1337,17 +1440,7 @@ bool store_order_details(WtString tickFile, WTSOrdDtlStruct* firstItem, int coun
 	block->_size = cmp_data.size();
 	content.append(cmp_data);
 
-	BoostFile bf;
-	if (bf.create_new_file(tickFile))
-	{
-		bf.write_file(content);
-	}
-	bf.close_file();
-
-	if (cbLogger)
-		cbLogger("Writing order details succeed");
-
-	return true;
+	return write_block_file(tickFile, content, cbLogger, "Writing order details succeed");
 }
 
 bool store_order_queues(WtString tickFile, WTSOrdQueStruct* firstItem, int count, FuncLogCallback cbLogger/* = NULL*/)
@@ -1377,17 +1470,7 @@ bool store_order_queues(WtString tickFile, WTSOrdQueStruct* firstItem, int count
 	block->_size = cmp_data.size();
 	content.append(cmp_data);
 
-	BoostFile bf;
-	if (bf.create_new_file(tickFile))
-	{
-		bf.write_file(content);
-	}
-	bf.close_file();
-
-	if (cbLogger)
-		cbLogger("Writing order queues to file succeedd");
-
-	return true;
+	return write_block_file(tickFile, content, cbLogger, "Writing order queues to file succeedd");
 }
 
 bool store_transactions(WtString tickFile, WTSTransStruct* firstItem, int count, FuncLogCallback cbLogger/* = NULL*/)
@@ -1417,15 +1500,5 @@ bool store_transactions(WtString tickFile, WTSTransStruct* firstItem, int count,
 	block->_size = cmp_data.size();
 	content.append(cmp_data);
 
-	BoostFile bf;
-	if (bf.create_new_file(tickFile))
-	{
-		bf.write_file(content);
-	}
-	bf.close_file();
-
-	if (cbLogger)
-		cbLogger("Write transactions to file succeedd");
-
-	return true;
+	return write_block_file(tickFile, content, cbLogger, "Write transactions to file succeedd");
 }

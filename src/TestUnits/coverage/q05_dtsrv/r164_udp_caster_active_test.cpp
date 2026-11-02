@@ -239,11 +239,10 @@ TEST_F(R164UdpCasterActiveTest, ActiveWithRawReceiverBroadcastsAllFourTypes)
 /*
  * UDPCaster.cpp:222-266
  * 注册表的增删面：产品只提供 addBRecver/addMRecver，没有删除接口。
- *  - addBRecver 对坏地址返回 false；合法地址按 type=0/1/2 入桶并返回 true；
- *    未知 type=7 也返回 true 但不入桶（分桶 if 链没有 else）。
+ *  - addBRecver 对坏地址和超出 0/1/2 的 type 返回 false；合法地址按 type 入桶。
  *  - addMRecver 对坏地址在 make_address_v4 处抛异常并被 catch 转 false；
- *    合法组地址会 new UDPSocket 并 join_group，join 成功与否依赖本机网卡，
- *    用例只断言“不抛异常”，不把环境差异写成失败。
+ *    超范围 type 在创建 socket 前返回 false；合法组地址会尝试 join_group，
+ *    join 成功与否依赖本机网卡，用例只断言“不抛异常”。
  * 不调用 init/start，也没有任何报文发送。
  */
 TEST_F(R164UdpCasterActiveTest, RegistrationBucketsAndRejectInvalid)
@@ -254,13 +253,13 @@ TEST_F(R164UdpCasterActiveTest, RegistrationBucketsAndRejectInvalid)
 	EXPECT_TRUE(caster->addBRecver("127.0.0.1", 9000, 0));
 	EXPECT_TRUE(caster->addBRecver("127.0.0.1", 9000, 1));
 	EXPECT_TRUE(caster->addBRecver("127.0.0.1", 9000, 2));
-	EXPECT_TRUE(caster->addBRecver("127.0.0.1", 9000, 7));
+	EXPECT_FALSE(caster->addBRecver("127.0.0.1", 9000, 7));
 
 	EXPECT_FALSE(caster->addMRecver("not-an-ip", 9001, 0, 0));
 	EXPECT_NO_THROW(caster->addMRecver("239.255.0.20", 9002, 0, 0));
 	EXPECT_NO_THROW(caster->addMRecver("239.255.0.21", 9003, 0, 1));
 	EXPECT_NO_THROW(caster->addMRecver("239.255.0.22", 9004, 0, 2));
-	EXPECT_NO_THROW(caster->addMRecver("239.255.0.23", 9005, 0, 7));
+	EXPECT_FALSE(caster->addMRecver("239.255.0.23", 9005, 0, 7));
 
 	// 没有 broadcast socket，四个重载都在 L290 的首个条件处返回。
 	WTSTickData* tick = WTSTickData::create("600000");

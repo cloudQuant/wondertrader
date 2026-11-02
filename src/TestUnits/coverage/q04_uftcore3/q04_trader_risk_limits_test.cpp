@@ -2,19 +2,26 @@
  * \file q04_trader_risk_limits_test.cpp
  * \brief TraderAdapter 流量风控参数装配与限额判定(迭代01 第五波 q04)
  *
- * 覆盖: init() 的 riskmon 解析(激活/未激活/无配置/无 default 告警)、
- * getRiskParams 的品种键推导、checkCancelLimits / checkOrderLimits 的
- *
- * 说明: 两个 check* 函数的“时间窗频率”分支在当前实现里是死代码
- * (写入 _order_time_cache/_cancel_time_cache 的语句全部被注释掉了), 因此不可覆盖,
- * 见 q04_uftcore3.md BUG-Q04-004。
+ * 覆盖: riskmon 初始化、check* 总量/频率判定，以及真实 adapter 下单/撤单入口。
+ * 频率回归通过动态假 API 记录 SDK 调用，覆盖成功/失败返回、窗口边界和 inactive 配置。
  */
 #include "q04_trader_fixture.h"
 
 #include "WTSUtils/WTSCfgLoader.h"
+#include "WtUftCore/WtHelper.h"
 
+#include <algorithm>
+#include <filesystem>
+#include <chrono>
+#include <cstdlib>
+#include <fstream>
 #include <string>
+#include <thread>
 #include <vector>
+
+#ifndef WT_UFT_LIFECYCLE_FAKE_PLUGIN_PATH
+#error "CoverageTests_uftcore must wire the UFT lifecycle fake plugin"
+#endif
 
 using namespace wtp;
 
@@ -30,30 +37,152 @@ WTSVariant* writeRiskCfg(q04::TempRoot& tmp, const char* name, const std::string
 	return WTSCfgLoader::load_from_file(path.c_str());
 }
 
-//default 组的总量限额由参数决定, ag 组刻意设得更严
+//default 组的总量限额由参数决定, ag24 组刻意设得更严
 std::string riskJson(uint32_t defaultCancelLimit, uint32_t defaultOrderLimit,
 	uint32_t agCancelLimit = 1)
 {
-	return std::string("{\"riskmon\":{\"active\":true,\"policy\":{")
+	return std::string("{\"module\":\"N03RiskFakeTrader\",\"riskmon\":{\"active\":true,\"policy\":{")
 		+ "\"default\":{\"cancel_total_limits\":" + std::to_string(defaultCancelLimit)
 		+ ",\"cancel_times_boundary\":3,\"cancel_stat_timespan\":60,"
 		+ "\"order_total_limits\":" + std::to_string(defaultOrderLimit)
 		+ ",\"order_times_boundary\":5,\"order_stat_timespan\":30},"
-		+ "\"ag\":{\"cancel_total_limits\":" + std::to_string(agCancelLimit)
+		+ "\"ag24\":{\"cancel_total_limits\":" + std::to_string(agCancelLimit)
 		+ ",\"cancel_times_boundary\":3,\"cancel_stat_timespan\":60,"
 		+ "\"order_total_limits\":1000,\"order_times_boundary\":5,\"order_stat_timespan\":30}"
 		+ "}}}";
 }
 
+std::string customOnlyRiskJson(uint32_t agCancelLimit, uint32_t agOrderLimit)
+{
+	return std::string("{\"module\":\"N03RiskFakeTrader\",\"riskmon\":{\"active\":true,\"policy\":{")
+		+ "\"ag24\":{\"cancel_total_limits\":" + std::to_string(agCancelLimit)
+		+ ",\"cancel_times_boundary\":3,\"cancel_stat_timespan\":60,"
+		+ "\"order_total_limits\":" + std::to_string(agOrderLimit)
+		+ ",\"order_times_boundary\":5,\"order_stat_timespan\":30}"
+		+ "}}}";
+}
+
+std::string frequencyRiskJson(bool active, uint32_t orderBoundary, uint32_t orderWindow,
+	uint32_t cancelBoundary, uint32_t cancelWindow, int insertRet = 0, int actionRet = 0)
+{
+	return std::string("{\"module\":\"N03RiskFakeTrader\",\"fake_order_insert_ret\":")
+		+ std::to_string(insertRet) + ",\"fake_order_action_ret\":" + std::to_string(actionRet)
+		+ ",\"riskmon\":{\"active\":" + (active ? "true" : "false") + ",\"policy\":{\"default\":{"
+		+ "\"cancel_total_limits\":0,\"cancel_times_boundary\":" + std::to_string(cancelBoundary)
+		+ ",\"cancel_stat_timespan\":" + std::to_string(cancelWindow)
+		+ ",\"order_total_limits\":0,\"order_times_boundary\":" + std::to_string(orderBoundary)
+		+ ",\"order_stat_timespan\":" + std::to_string(orderWindow) + "}}}}";
+}
+
+void setTestEnvironment(const char* name, const char* value)
+{
+#if defined(_WIN32)
+	_putenv_s(name, value == nullptr ? "" : value);
+#else
+	if (value == nullptr)
+		unsetenv(name);
+	else
+		setenv(name, value, 1);
+#endif
+}
+
+class ScopedRiskPluginLog
+{
+public:
+	explicit ScopedRiskPluginLog(const std::filesystem::path& path)
+		: _hadPrevious(std::getenv("WT_UFT_LIFECYCLE_LOG") != nullptr)
+		, _previous(_hadPrevious ? std::getenv("WT_UFT_LIFECYCLE_LOG") : "")
+		, _path(path)
+	{
+		std::filesystem::remove(_path);
+		setTestEnvironment("WT_UFT_LIFECYCLE_LOG", _path.string().c_str());
+	}
+
+	~ScopedRiskPluginLog()
+	{
+		setTestEnvironment("WT_UFT_LIFECYCLE_LOG", _hadPrevious ? _previous.c_str() : nullptr);
+	}
+
+	std::vector<std::string> events() const
+	{
+		std::vector<std::string> result;
+		std::ifstream input(_path);
+		std::string line;
+		while (std::getline(input, line))
+			result.push_back(line);
+		return result;
+	}
+
+private:
+	bool _hadPrevious;
+	std::string _previous;
+	std::filesystem::path _path;
+};
+
+std::size_t countPluginEvents(const ScopedRiskPluginLog& log, const char* event)
+{
+	const std::vector<std::string> events = log.events();
+	return static_cast<std::size_t>(std::count(events.begin(), events.end(), event));
+}
+
+std::string riskFakeLibraryName()
+{
+#if defined(_WIN32)
+	return "N03RiskFakeTrader.dll";
+#elif defined(__APPLE__)
+	return "libN03RiskFakeTrader.dylib";
+#else
+	return "libN03RiskFakeTrader.so";
+#endif
+}
+
+bool stageRiskFakeTrader(const q04::TempRoot& tmp)
+{
+	const std::filesystem::path source(WT_UFT_LIFECYCLE_FAKE_PLUGIN_PATH);
+	const std::filesystem::path tradersDir = tmp.dir() / "traders";
+	std::error_code ec;
+	std::filesystem::create_directories(tradersDir, ec);
+	if (ec)
+		return false;
+	std::filesystem::copy_file(source, tradersDir / riskFakeLibraryName(),
+		std::filesystem::copy_options::overwrite_existing, ec);
+	return !ec;
+}
+
+class ScopedRiskInstDir
+{
+public:
+	explicit ScopedRiskInstDir(const std::filesystem::path& path)
+		: _old(WtHelper::getInstDir())
+	{
+		std::string instDir = path.string();
+		if (!instDir.empty() && instDir.back() != '/' && instDir.back() != '\\')
+			instDir.push_back('/');
+		WtHelper::setInstDir(instDir.c_str());
+	}
+
+	~ScopedRiskInstDir()
+	{
+		WtHelper::setInstDir(_old.c_str());
+	}
+
+	ScopedRiskInstDir(const ScopedRiskInstDir&) = delete;
+	ScopedRiskInstDir& operator=(const ScopedRiskInstDir&) = delete;
+
+private:
+	std::string _old;
+};
+
 struct RiskEnv
 {
 	q04::TempRoot			_tmp{ "risk" };
-	q04::FakeTraderApi		_api;
+	ScopedRiskInstDir		_instDir{ _tmp.dir() };
 	q04::FakeBaseDataMgr	_bd;
 	ActionPolicyMgr			_policy;
 	q04::FakeSink			_sink;
 	WTSVariant*				_cfg = nullptr;
 	TraderAdapter			_adapter;
+	bool					_pluginStaged = false;
 
 	~RiskEnv()
 	{
@@ -61,20 +190,20 @@ struct RiskEnv
 			_cfg->release();
 	}
 
-	RiskEnv() = default;
+	RiskEnv() { _pluginStaged = stageRiskFakeTrader(_tmp); }
 
 	RiskEnv(const RiskEnv&) = delete;
 	RiskEnv& operator=(const RiskEnv&) = delete;
 
-	//装配一份风控配置; 没有 module 字段所以 init 返回 false, 但风控表已经建好
+	// 通过真实动态模块入口成功初始化，避免在失败 init 回滚后误测残留风控表。
 	bool loadRisk(const std::string& json)
 	{
+		if (!_pluginStaged)
+			return false;
 		_cfg = writeRiskCfg(_tmp, "trader.json", json);
 		if (_cfg == nullptr)
 			return false;
-		//没有 module 字段, init 解析完风控参数后返回 false, 但 _cfg/风控表已留下
-		EXPECT_FALSE(_adapter.init("uft1", _cfg, &_bd, &_policy));
-		return true;
+		return _adapter.init("uft1", _cfg, &_bd, &_policy);
 	}
 
 	void finish()
@@ -83,7 +212,6 @@ struct RiskEnv
 		_tmp.write(path, q04::policyJsonOpenCloseLimited());
 		EXPECT_TRUE(_policy.init(path.c_str()));
 		_bd.add("SHFE", "ag", "ag2406");
-		EXPECT_TRUE(_adapter.initExt("uft1", &_api, &_bd, &_policy));
 		_adapter.addSink(&_sink);
 		EXPECT_TRUE(_adapter.run());
 		_adapter.onLoginResult(true, "ok", 20240315);
@@ -105,6 +233,30 @@ struct RiskEnv
 		_adapter.onPushOrder(ord);
 		ord->release();
 	}
+
+	void pushAliveOrder(uint32_t localid, const char* orderid, const char* code = "ag2406",
+		const char* exchg = "SHFE", const char* product = "ag")
+	{
+		if (_bd.getContract(code, exchg) == nullptr)
+			_bd.add(exchg, product, code);
+		WTSOrderInfo* ord = WTSOrderInfo::create();
+		ord->setCode(code);
+		ord->setExchange(exchg);
+		ord->setDirection(WDT_LONG);
+		ord->setOffsetType(WOT_OPEN);
+		ord->setOrderFlag(WOF_NOR);
+		ord->setVolume(1);
+		ord->setVolLeft(1);
+		ord->setOrderState(WOS_NotTraded_Queuing);
+		ord->setOrderID(orderid);
+		const std::string userTag = std::string("wtp.uft1.") + std::to_string(localid);
+		ord->setUserTag(userTag.c_str());
+		WTSArray* orders = WTSArray::create();
+		orders->append(ord);
+		_adapter.onRspOrders(orders);
+		orders->release();
+		ord->release();
+	}
 };
 
 }	// namespace
@@ -121,24 +273,18 @@ TEST(q04_trader_risk, riskmon_parsing_switches_the_monitor_on_and_off)
 
 	RiskEnv off;
 	//active=false 只记日志
-	WTSVariant* cfg = writeRiskCfg(off._tmp, "inactive.json",
-		R"({"riskmon":{"active":false,"policy":{"default":{"cancel_total_limits":1}}}})");
-	ASSERT_NE(nullptr, cfg);
-	EXPECT_FALSE(off._adapter.init("uft1", cfg, &off._bd, &off._policy));
-	cfg->release();
-	off._bd.add("SHFE", "ag", "ag2406");
-	ASSERT_TRUE(off._adapter.initExt("uft1", &off._api, &off._bd, &off._policy));
-	off._adapter.run();
-	//风控未激活时 _risk_params_map 是空的, 限额判定会走到 getRiskParams 的
-	//end() 解引用支(见 DISABLED 用例与 BUG-Q04-005), 这里只验证装配本身
-	EXPECT_STREQ("uft1", off._adapter.id());
+	ASSERT_TRUE(off.loadRisk(
+		R"({"module":"N03RiskFakeTrader","riskmon":{"active":false,"policy":{"default":{"cancel_total_limits":1}}}})"));
+	off.finish();
+	EXPECT_TRUE(off._adapter.checkCancelLimits(kAg));
+	EXPECT_TRUE(off._adapter.checkOrderLimits(kAg));
 
 	//完全没有 riskmon 配置
 	RiskEnv none;
-	WTSVariant* noneCfg = writeRiskCfg(none._tmp, "none.json", R"({"user":"u"})");
-	ASSERT_NE(nullptr, noneCfg);
-	EXPECT_FALSE(none._adapter.init("uft1", noneCfg, &none._bd, &none._policy));
-	noneCfg->release();
+	ASSERT_TRUE(none.loadRisk(R"({"module":"N03RiskFakeTrader","user":"u"})"));
+	none.finish();
+	EXPECT_TRUE(none._adapter.checkCancelLimits(kAg));
+	EXPECT_TRUE(none._adapter.checkOrderLimits(kAg));
 }
 
 TEST(q04_trader_risk, cancel_total_limit_moves_the_code_into_the_excluding_list)
@@ -167,7 +313,10 @@ TEST(q04_trader_risk, order_total_limit_is_counted_from_order_reports)
 {
 	RiskEnv env;
 	//default 的下单总量限额 = 2
-	ASSERT_TRUE(env.loadRisk(riskJson(1000000, 2)));
+	ASSERT_TRUE(env.loadRisk(
+		R"({"module":"N03RiskFakeTrader","riskmon":{"active":true,"policy":{"default":{
+		"cancel_total_limits":1000000,"cancel_times_boundary":3,"cancel_stat_timespan":60,
+		"order_total_limits":2,"order_times_boundary":5,"order_stat_timespan":30}}}})"));
 	env.finish();
 
 	EXPECT_TRUE(env._adapter.checkOrderLimits(kAg));
@@ -208,7 +357,7 @@ TEST(q04_trader_risk, order_total_limit_is_counted_from_order_reports)
 TEST(q04_trader_risk, product_cancel_limit_overrides_permissive_default)
 {
 	RiskEnv env;
-	//ag 组限额 1, default 组放宽到 1000000
+	//ag24 组限额 1, default 组放宽到 1000000
 	ASSERT_TRUE(env.loadRisk(riskJson(1000000, 1000000, 1)));
 	env.finish();
 	ASSERT_TRUE(env._adapter.checkCancelLimits(kAg));
@@ -216,7 +365,7 @@ TEST(q04_trader_risk, product_cancel_limit_overrides_permissive_default)
 	env.pushCanceledBuyOrder("PK-1");
 	ASSERT_EQ(2u, env._adapter.getInfos(kAg)) << "一张普通撤单回报应计入订单与撤单信息量";
 
-	//标准码 SHFE.ag2406 应命中 ag 组；已计入的一次普通撤单达到限额 1。
+	//标准码 SHFE.ag2406 应命中 ag24 组；已计入的一次普通撤单达到限额 1。
 	EXPECT_FALSE(env._adapter.checkCancelLimits(kAg));
 }
 
@@ -224,13 +373,10 @@ TEST(q04_trader_risk, risk_params_default_group_is_used_for_unlisted_products)
 {
 	RiskEnv env;
 	//只有 default 组, 撤单总量限额 1
-	WTSVariant* cfg = writeRiskCfg(env._tmp, "onlydefault.json",
-		R"({"riskmon":{"active":true,"policy":{"default":{
+	ASSERT_TRUE(env.loadRisk(
+		R"({"module":"N03RiskFakeTrader","riskmon":{"active":true,"policy":{"default":{
 		"cancel_total_limits":1,"cancel_times_boundary":3,"cancel_stat_timespan":60,
-		"order_total_limits":1,"order_times_boundary":5,"order_stat_timespan":30}}}})");
-	ASSERT_NE(nullptr, cfg);
-	EXPECT_FALSE(env._adapter.init("uft1", cfg, &env._bd, &env._policy));
-	cfg->release();
+		"order_total_limits":1,"order_times_boundary":5,"order_stat_timespan":30}}}})"));
 	env.finish();
 
 	//未列出的品种回落到 default: 一张撤单就命中限额
@@ -240,34 +386,153 @@ TEST(q04_trader_risk, risk_params_default_group_is_used_for_unlisted_products)
 	EXPECT_FALSE(env._adapter.checkOrderLimits(kAg));
 }
 
-//崩溃/未定义行为类输入整类收在这里
-TEST(DISABLED_q04_trader_risk, no_default_group_and_null_statmap_class)
+TEST(q04_trader_risk, custom_only_policy_matches_configured_products_and_leaves_unknown_products_unmonitored)
 {
-	q04::TempRoot tmp("riskcls");
-	q04::FakeTraderApi api;
-	q04::FakeBaseDataMgr bd;
-	ActionPolicyMgr policy;
+	RiskEnv unknown;
+	ASSERT_TRUE(unknown.loadRisk(customOnlyRiskJson(1, 1000)));
+	unknown.finish();
+	// Existing warning documents that a custom-only policy does not monitor codes
+	// without an explicit rule; a miss must return safely without inheriting garbage.
+	EXPECT_TRUE(unknown._adapter.checkCancelLimits("SSE.600000"));
+	EXPECT_TRUE(unknown._adapter.checkOrderLimits("SSE.600000"));
 
-	//1) 只有非 default 组: getRiskParams 回落时 `return &it->second;` 解引用 end()
-	//   (与 BUG-N03-002 getActionRules 同一类)
-	WTSVariant* cfg = writeRiskCfg(tmp, "nodefault.json",
-		R"({"riskmon":{"active":true,"policy":{"ag":{"cancel_total_limits":1}}}})");
-	TraderAdapter adapter;
-	adapter.init("uft1", cfg, &bd, &policy);
-	cfg->release();
-	adapter.initExt("uft1", &api, &bd, &policy);
-	adapter.checkCancelLimits("SHFE.ag2406");
+	RiskEnv customCancel;
+	ASSERT_TRUE(customCancel.loadRisk(customOnlyRiskJson(1, 1000)));
+	customCancel.finish();
+	EXPECT_TRUE(customCancel._adapter.checkCancelLimits(kAg));
+	customCancel.pushCanceledBuyOrder("NC-1");
+	EXPECT_FALSE(customCancel._adapter.checkCancelLimits(kAg));
 
-	//2) 未 run(): _stat_map 为 NULL, 限额判定直接解引用
-	TraderAdapter noStat;
-	noStat.initExt("uft1", &api, &bd, &policy);
-	noStat.checkOrderLimits("SHFE.ag2406");
+	RiskEnv customOrder;
+	ASSERT_TRUE(customOrder.loadRisk(customOnlyRiskJson(1000, 1)));
+	customOrder.finish();
+	EXPECT_TRUE(customOrder._adapter.checkOrderLimits(kAg));
+	WTSOrderInfo* order = WTSOrderInfo::create();
+	ASSERT_NE(nullptr, order);
+	order->setCode("ag2406");
+	order->setExchange("SHFE");
+	order->setDirection(WDT_LONG);
+	order->setOffsetType(WOT_OPEN);
+	order->setOrderFlag(WOF_NOR);
+	order->setVolume(1);
+	order->setVolLeft(1);
+	order->setOrderState(WOS_NotTraded_Queuing);
+	order->setOrderID("NO-1");
+	WTSArray* orders = WTSArray::create();
+	ASSERT_NE(nullptr, orders);
+	orders->append(order);
+	customOrder._adapter.onRspOrders(orders);
+	orders->release();
+	EXPECT_FALSE(customOrder._adapter.checkOrderLimits(kAg));
+	order->release();
+}
 
-	//3) 风控未激活(或 policy 为空): _risk_params_map 为空,
-	//   getRiskParams 回落时对 end() 取地址(BUG-Q04-005)
-	TraderAdapter noRiskCfg;
-	noRiskCfg.initExt("uft1", &api, &bd, &policy);
-	noRiskCfg.run();
-	noRiskCfg.checkCancelLimits("SHFE.ag2406");
-	noRiskCfg.checkOrderLimits("SHFE.ag2406");
+TEST(q04_trader_risk, order_frequency_limits_allow_the_configured_maximum_then_exclude_only_that_contract)
+{
+	RiskEnv env;
+	ScopedRiskPluginLog log(env._tmp.file("plugin.log"));
+	ASSERT_TRUE(env.loadRisk(frequencyRiskJson(true, 2, 60, 2, 60)));
+	// No reports or timestamp entries yet; checks remain safe before run() initializes statistics.
+	EXPECT_TRUE(env._adapter.checkOrderLimits(kAg));
+	EXPECT_TRUE(env._adapter.checkCancelLimits(kAg));
+	env._bd.add("SHFE", "cu", "cu2406");
+	env.finish();
+
+	EXPECT_NE(UINT_MAX, env._adapter.openLong(kAg, 5000, 1, 0));
+	EXPECT_NE(UINT_MAX, env._adapter.openLong("SHFE.cu2406", 70000, 1, 0));
+	EXPECT_NE(UINT_MAX, env._adapter.openLong(kAg, 5000, 1, 0));
+	EXPECT_EQ(UINT_MAX, env._adapter.openLong(kAg, 5000, 5, 0));
+
+	EXPECT_EQ(3u, countPluginEvents(log, "api.orderInsert"));
+	EXPECT_DOUBLE_EQ(2.0, env._adapter.getUndoneQty(kAg)) << "a rate-limited order must release its pre-reserved quantity";
+	EXPECT_FALSE(env._adapter.checkOrderLimits(kAg));
+	EXPECT_TRUE(env._adapter.checkOrderLimits("SHFE.cu2406"));
+}
+
+TEST(q04_trader_risk, order_frequency_window_expires_before_the_next_eligible_order)
+{
+	RiskEnv env;
+	ScopedRiskPluginLog log(env._tmp.file("plugin.log"));
+	ASSERT_TRUE(env.loadRisk(frequencyRiskJson(true, 1, 1, 1, 1)));
+	env.finish();
+
+	EXPECT_NE(UINT_MAX, env._adapter.openLong(kAg, 5000, 1, 0));
+	std::this_thread::sleep_for(std::chrono::milliseconds(1100));
+	EXPECT_NE(UINT_MAX, env._adapter.openLong(kAg, 5000, 1, 0));
+	EXPECT_EQ(2u, countPluginEvents(log, "api.orderInsert"));
+	EXPECT_FALSE(env._adapter.checkOrderLimits(kAg)) << "the second successful request fills the one-request window";
+}
+
+TEST(q04_trader_risk, failed_sdk_order_is_not_counted_in_the_frequency_window)
+{
+	RiskEnv env;
+	ScopedRiskPluginLog log(env._tmp.file("plugin.log"));
+	ASSERT_TRUE(env.loadRisk(frequencyRiskJson(true, 1, 60, 1, 60, -1, -1)));
+	env.finish();
+
+	EXPECT_EQ(UINT_MAX, env._adapter.openLong(kAg, 5000, 1, 0));
+	EXPECT_EQ(UINT_MAX, env._adapter.openLong(kAg, 5000, 1, 0));
+	EXPECT_EQ(2u, countPluginEvents(log, "api.orderInsert"));
+	EXPECT_TRUE(env._adapter.checkOrderLimits(kAg));
+}
+
+TEST(q04_trader_risk, cancel_frequency_limits_record_only_successful_sdk_actions)
+{
+	RiskEnv env;
+	ScopedRiskPluginLog log(env._tmp.file("plugin.log"));
+	ASSERT_TRUE(env.loadRisk(frequencyRiskJson(true, 5, 60, 1, 60, 0, 0)));
+	env.finish();
+	env.pushAliveOrder(1001, "RF-CANCEL-1");
+	env.pushAliveOrder(1002, "RF-CANCEL-2");
+
+	EXPECT_TRUE(env._adapter.cancel(1001));
+	EXPECT_FALSE(env._adapter.cancel(1002));
+	EXPECT_EQ(1u, countPluginEvents(log, "api.orderAction"));
+	EXPECT_FALSE(env._adapter.checkCancelLimits(kAg));
+}
+
+TEST(q04_trader_risk, failed_sdk_cancel_is_not_counted_and_cancel_all_uses_the_same_guard)
+{
+	RiskEnv failed;
+	ScopedRiskPluginLog failedLog(failed._tmp.file("plugin.log"));
+	ASSERT_TRUE(failed.loadRisk(frequencyRiskJson(true, 5, 60, 1, 60, 0, -1)));
+	failed.finish();
+	failed.pushAliveOrder(1101, "RF-CANCEL-FAIL-1");
+	failed.pushAliveOrder(1102, "RF-CANCEL-FAIL-2");
+	EXPECT_FALSE(failed._adapter.cancel(1101));
+	EXPECT_FALSE(failed._adapter.cancel(1102));
+	EXPECT_EQ(2u, countPluginEvents(failedLog, "api.orderAction"));
+	EXPECT_TRUE(failed._adapter.checkCancelLimits(kAg));
+
+	RiskEnv cancelAll;
+	ScopedRiskPluginLog cancelAllLog(cancelAll._tmp.file("plugin.log"));
+	ASSERT_TRUE(cancelAll.loadRisk(frequencyRiskJson(true, 5, 60, 1, 60, 0, 0)));
+	cancelAll.finish();
+	cancelAll.pushAliveOrder(1201, "RF-CANCEL-ALL-1");
+	OrderIDs accepted = cancelAll._adapter.cancelAll(kAg);
+	ASSERT_EQ((OrderIDs{ 1201 }), accepted);
+	OrderIDs overLimit = cancelAll._adapter.cancelAll(kAg);
+	EXPECT_TRUE(overLimit.empty());
+	EXPECT_EQ(1u, countPluginEvents(cancelAllLog, "api.orderAction"));
+	EXPECT_FALSE(cancelAll._adapter.checkCancelLimits(kAg));
+}
+
+TEST(q04_trader_risk, inactive_frequency_policy_does_not_change_order_or_cancel_paths)
+{
+	RiskEnv env;
+	ScopedRiskPluginLog log(env._tmp.file("plugin.log"));
+	ASSERT_TRUE(env.loadRisk(frequencyRiskJson(false, 1, 60, 1, 60, 0, 0)));
+	env.finish();
+
+	EXPECT_NE(UINT_MAX, env._adapter.openLong(kAg, 5000, 1, 0));
+	EXPECT_NE(UINT_MAX, env._adapter.openLong(kAg, 5000, 1, 0));
+	env.pushAliveOrder(1301, "RF-INACTIVE-CANCEL-1");
+	env.pushAliveOrder(1302, "RF-INACTIVE-CANCEL-2");
+	EXPECT_TRUE(env._adapter.cancel(1301));
+	EXPECT_TRUE(env._adapter.cancel(1302));
+
+	EXPECT_EQ(2u, countPluginEvents(log, "api.orderInsert"));
+	EXPECT_EQ(2u, countPluginEvents(log, "api.orderAction"));
+	EXPECT_TRUE(env._adapter.checkOrderLimits(kAg));
+	EXPECT_TRUE(env._adapter.checkCancelLimits(kAg));
 }

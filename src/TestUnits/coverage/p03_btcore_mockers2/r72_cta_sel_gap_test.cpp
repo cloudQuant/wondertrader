@@ -80,6 +80,9 @@ TEST_F(R72CtaSelGap, CtaNonSimulatedConditionMatrix)
 {
 	r72::Loader loader;
 	std::vector<WTSBarStruct> bars;
+	// A completed daily bar before the replay start is needed as history: the
+	// 20200102 bar is still open at the configured 09:30 start.
+	bars.emplace_back(r72::make_bar(20191231u, 1500u, 10.0));
 	for (uint32_t i = 0; i < 5; i++)
 	{
 		bars.emplace_back(r72::make_bar(kDates[i], 1500u, 10.5 + i));

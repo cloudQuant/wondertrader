@@ -29,6 +29,7 @@
 #endif
 
 #include "WtCore/ExecUnitInitStatus.h"
+#include "WtCore/ExecCommandQuiesce.h"
 #include "WtCore/IExecCommand.h"
 #include "WtCore/WtCtaEngine.h"
 #include "WtCore/WtSelEngine.h"
@@ -100,6 +101,27 @@ const char* kReadyCode = "SHFE.rb.2510";
 const char* kFailedCode = "SHFE.ag.2512";
 const char* kMissingCode = "SHFE.cu.2512";
 const char* kFailureText = "controlled unit initialization failure";
+
+// These fakes answer status calls synchronously and own no plugin units or
+// background command work. CrossThreadReleaseStatusExecutor's helper thread is
+// test orchestration and is explicitly joined by its test after the query.
+class NoopStatusCommandQuiesce : public IExecCommandQuiesce,
+	public IExecCommandQuiesceStages
+{
+public:
+	void requestQuiesce() override {}
+	bool canWaitQuiescedOnCurrentThread() const override { return true; }
+	bool waitQuiesced() override { return true; }
+	bool preflightQuiesceOnCurrentThread() const override { return true; }
+	bool drainHostQuiesced() override { return true; }
+	bool snapshotQuiescePluginOwners(std::vector<ExecQuiesceOwnerPtr>& out) const override
+	{
+		out.clear();
+		return true;
+	}
+	bool completeQuiesceAfterGlobalPluginWait() override { return true; }
+	WtExecuterFactory* quiesceFactory() const override { return nullptr; }
+};
 
 class StartupBarrier
 {
@@ -202,7 +224,8 @@ void PORTER_FLAG spawn_child_release_on_parser_release(uint32_t eventId, const c
 	releaseThread.join();
 }
 
-class ControlledStatusExecutor : public IExecCommand, public IExecUnitInitStatusProvider
+class ControlledStatusExecutor : public IExecCommand, public IExecUnitInitStatusProvider,
+	public NoopStatusCommandQuiesce
 {
 public:
 	explicit ControlledStatusExecutor(const char* id) : IExecCommand(id) {}
@@ -262,7 +285,8 @@ private:
 	std::set<std::string> _retry_blocked;
 };
 
-class ReentrantStatusExecutor : public IExecCommand, public IExecUnitInitStatusProvider
+class ReentrantStatusExecutor : public IExecCommand, public IExecUnitInitStatusProvider,
+	public NoopStatusCommandQuiesce
 {
 public:
 	explicit ReentrantStatusExecutor(const char* id) : IExecCommand(id) {}
@@ -303,7 +327,8 @@ private:
 	mutable std::atomic<bool> _release_returned{ false };
 };
 
-class BlockingStatusExecutor : public IExecCommand, public IExecUnitInitStatusProvider
+class BlockingStatusExecutor : public IExecCommand, public IExecUnitInitStatusProvider,
+	public NoopStatusCommandQuiesce
 {
 public:
 	BlockingStatusExecutor(const char* id, StartupBarrier& barrier)
@@ -333,7 +358,8 @@ struct SnapshotLifetimeObservation
 	std::atomic<bool> module_unloaded{ false };
 };
 
-class SnapshotLifetimeStatusExecutor : public IExecCommand, public IExecUnitInitStatusProvider
+class SnapshotLifetimeStatusExecutor : public IExecCommand, public IExecUnitInitStatusProvider,
+	public NoopStatusCommandQuiesce
 {
 public:
 	SnapshotLifetimeStatusExecutor(const char* id, StartupBarrier& barrier,
@@ -372,7 +398,8 @@ struct CrossThreadReleaseObservation
 	bool release_done_before_provider_return = false;
 };
 
-class CrossThreadReleaseStatusExecutor : public IExecCommand, public IExecUnitInitStatusProvider
+class CrossThreadReleaseStatusExecutor : public IExecCommand, public IExecUnitInitStatusProvider,
+	public NoopStatusCommandQuiesce
 {
 public:
 	explicit CrossThreadReleaseStatusExecutor(const char* id)
@@ -454,7 +481,7 @@ protected:
 		ASSERT_FALSE(static_cast<bool>(ec));
 
 		std::ofstream actions(_dir / "actions.json", std::ios::binary | std::ios::trunc);
-		actions << "{}";
+		actions << "{\"default\":{}}";
 		ASSERT_TRUE(actions.good());
 
 		std::ofstream sessions(_dir / "sessions.yaml", std::ios::binary | std::ios::trunc);
@@ -661,6 +688,70 @@ protected:
 
 	void expect_sync_fault_fail_fast()
 	{
+		// The OS can report a write to PROT_NONE as SIGSEGV or SIGBUS.
+		// Observe the exact same fault with default handlers in a separate child
+		// so the runner must exit with the signal actually delivered here.
+		int probe_events[2];
+		ASSERT_EQ(0, pipe(probe_events));
+		const pid_t probe = fork();
+		if (probe < 0)
+		{
+			close(probe_events[0]);
+			close(probe_events[1]);
+			FAIL() << "fault probe fork failed";
+			return;
+		}
+		if (probe == 0)
+		{
+			close(probe_events[0]);
+			const rlimit no_core = { 0, 0 };
+			setrlimit(RLIMIT_CORE, &no_core);
+			if (signal(SIGSEGV, SIG_DFL) == SIG_ERR || signal(SIGBUS, SIG_DFL) == SIG_ERR)
+				std::_Exit(10);
+			const long page_size = sysconf(_SC_PAGESIZE);
+			if (page_size <= 0)
+				std::_Exit(11);
+#if defined(MAP_ANONYMOUS)
+			const int anonymous_map = MAP_ANONYMOUS;
+#else
+			const int anonymous_map = MAP_ANON;
+#endif
+			void* fault_page = mmap(NULL, static_cast<size_t>(page_size), PROT_NONE,
+				MAP_PRIVATE | anonymous_map, -1, 0);
+			if (fault_page == MAP_FAILED)
+				std::_Exit(12);
+			const char ready = 'F';
+			if (write(probe_events[1], &ready, 1) != 1)
+				std::_Exit(13);
+			*static_cast<volatile int*>(fault_page) = 1;
+			std::_Exit(20);
+		}
+		close(probe_events[1]);
+		pollfd probe_fd = { probe_events[0], POLLIN, 0 };
+		int probe_poll;
+		do { probe_poll = poll(&probe_fd, 1, 3000); }
+		while (probe_poll < 0 && errno == EINTR);
+		char probe_ready = 0;
+		const bool probe_reached_fault = probe_poll > 0 && (probe_fd.revents & POLLIN) != 0 &&
+			read(probe_events[0], &probe_ready, 1) == 1 && probe_ready == 'F';
+		probe_fd.events = POLLHUP;
+		probe_fd.revents = 0;
+		do { probe_poll = poll(&probe_fd, 1, 3000); }
+		while (probe_poll < 0 && errno == EINTR);
+		const bool probe_finished = probe_poll > 0 && (probe_fd.revents & POLLHUP) != 0;
+		if (!probe_finished)
+			kill(probe, SIGKILL);
+		int probe_status = 0;
+		const pid_t probe_waited = waitpid(probe, &probe_status, 0);
+		close(probe_events[0]);
+		ASSERT_TRUE(probe_reached_fault);
+		ASSERT_TRUE(probe_finished);
+		ASSERT_EQ(probe, probe_waited);
+		ASSERT_TRUE(WIFSIGNALED(probe_status));
+		const int expected_signal = WTERMSIG(probe_status);
+		ASSERT_TRUE(expected_signal == SIGSEGV || expected_signal == SIGBUS);
+		RecordProperty("fault_probe_signal", expected_signal);
+
 		int events[2];
 		ASSERT_EQ(0, pipe(events));
 		const pid_t child = fork();
@@ -699,6 +790,9 @@ protected:
 				MAP_PRIVATE | anonymous_map, -1, 0);
 			if (fault_page == MAP_FAILED)
 				std::_Exit(14);
+			const char faulting = 'F';
+			if (write(events[1], &faulting, 1) != 1)
+				std::_Exit(15);
 			*static_cast<volatile int*>(fault_page) = 1;
 			std::_Exit(20); // Reached only if the fault handler returned.
 		}
@@ -720,20 +814,30 @@ protected:
 			return read(events[0], &event, 1) == 1 && event == 'R';
 		}();
 
-		bool exited_after_fault = false;
+		bool fault_ready = false;
 		if (run_ready)
 		{
 			pollfd descriptor;
 			descriptor.fd = events[0];
-			descriptor.events = POLLIN | POLLHUP;
+			descriptor.events = POLLIN;
 			descriptor.revents = 0;
 			int poll_result;
 			do
 			{
 				poll_result = poll(&descriptor, 1, 3000);
 			} while (poll_result < 0 && errno == EINTR);
-			exited_after_fault = poll_result > 0 &&
-				(descriptor.revents & POLLHUP) != 0;
+			char event = 0;
+			fault_ready = poll_result > 0 && (descriptor.revents & POLLIN) != 0 &&
+				read(events[0], &event, 1) == 1 && event == 'F';
+		}
+		bool exited_after_fault = false;
+		if (fault_ready)
+		{
+			pollfd descriptor = { events[0], POLLHUP, 0 };
+			int poll_result;
+			do { poll_result = poll(&descriptor, 1, 3000); }
+			while (poll_result < 0 && errno == EINTR);
+			exited_after_fault = poll_result > 0 && (descriptor.revents & POLLHUP) != 0;
 		}
 		if (!exited_after_fault)
 			kill(child, SIGKILL);
@@ -741,10 +845,11 @@ protected:
 		const pid_t waited = waitpid(child, &child_status, 0);
 		close(events[0]);
 		EXPECT_TRUE(run_ready);
+		EXPECT_TRUE(fault_ready);
 		EXPECT_TRUE(exited_after_fault);
 		ASSERT_EQ(child, waited);
 		ASSERT_TRUE(WIFEXITED(child_status));
-		EXPECT_EQ(SIGSEGV, WEXITSTATUS(child_status));
+		EXPECT_EQ(expected_signal, WEXITSTATUS(child_status));
 	}
 #endif
 

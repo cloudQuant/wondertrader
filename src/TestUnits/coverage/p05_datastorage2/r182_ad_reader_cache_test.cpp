@@ -38,23 +38,32 @@ TEST_F(R182AdReaderTest, R182RdmADTickRangeReusesEarlierCache)
 
 	WTSTickSlice* first = rdm->readTickSliceByRange("SSE.600000",
 		(uint64_t)date * 1000000000ULL + 93000000ULL,
-		(uint64_t)date * 1000000000ULL + 93200000ULL);
+		(uint64_t)date * 1000000000ULL + 93300000ULL);
 	ASSERT_TRUE(first != NULL);
-	EXPECT_EQ(tick_count(first), 3u);
+	ASSERT_EQ(tick_count(first), 3u);
+	ASSERT_NE(first->at(0), nullptr);
+	ASSERT_NE(first->at(1), nullptr);
+	ASSERT_NE(first->at(2), nullptr);
+	EXPECT_EQ(first->at(0)->action_time, 93000000u);
+	EXPECT_EQ(first->at(1)->action_time, 93100000u);
+	EXPECT_EQ(first->at(2)->action_time, 93200000u);
 	first->release();
 
-	// 缓存首笔 09:30 早于新起点 09:35 -> else 分支的第二次 lower_bound
+	// 缓存首笔 09:30 早于新起点 09:31 -> else 分支的第二次 lower_bound；
+	// 09:31/09:32 都严格早于终点 09:33，不依赖上界的包含规则。
 	WTSTickSlice* second = rdm->readTickSliceByRange("SSE.600000",
-		(uint64_t)date * 1000000000ULL + 93500000ULL,
-		(uint64_t)date * 1000000000ULL + 93600000ULL);
+		(uint64_t)date * 1000000000ULL + 93100000ULL,
+		(uint64_t)date * 1000000000ULL + 93300000ULL);
 	ASSERT_TRUE(second != NULL);
-	ASSERT_EQ(tick_count(second), 1u);
+	ASSERT_EQ(tick_count(second), 2u);
 	ASSERT_TRUE(second->at(0) != NULL);
-	EXPECT_EQ(second->at(0)->action_time, 93200000u);
+	ASSERT_TRUE(second->at(1) != NULL);
+	EXPECT_EQ(second->at(0)->action_time, 93100000u);
+	EXPECT_EQ(second->at(1)->action_time, 93200000u);
 	second->release();
 }
 
-// WtRdmDtReaderAD.cpp:317-338；第二次请求截止时间前移，LMDB 增量补 09:32 分钟线
+// WtRdmDtReaderAD.cpp:317-338；第二次请求上界后移，LMDB 增量补 09:33 分钟线
 TEST_F(R182AdReaderTest, R182RdmADKlineRangeLoadsNewerBars)
 {
 	const uint32_t date = 20240110;
@@ -72,13 +81,16 @@ TEST_F(R182AdReaderTest, R182RdmADKlineRangeLoadsNewerBars)
 	EXPECT_EQ(bar_count(k1), 1u);
 	k1->release();
 
-	push_tick(w, date, 93300000u, 33.0, 3.0);	// 09:32 分钟线转储
+	push_tick(w, date, 93300000u, 33.0, 3.0); // writer 推进到 09:34 bar，转储 09:33 bar
 
 	WTSKlineSlice* k2 = rdm->readKlineSliceByRange("SSE.600000", KP_Minute1,
 		(uint64_t)date * 10000ULL + 931ULL, (uint64_t)date * 10000ULL + 933ULL);
 	ASSERT_TRUE(k2 != NULL);
 	ASSERT_EQ(bar_count(k2), 2u);
-	EXPECT_EQ(k2->at(1)->time, (uint64_t)TimeUtils::timeToMinBar(date, 932));
+	ASSERT_NE(k2->at(0), nullptr);
+	ASSERT_NE(k2->at(1), nullptr);
+	EXPECT_EQ(k2->at(0)->time, (uint64_t)TimeUtils::timeToMinBar(date, 932));
+	EXPECT_EQ(k2->at(1)->time, (uint64_t)TimeUtils::timeToMinBar(date, 933));
 	k2->release();
 }
 

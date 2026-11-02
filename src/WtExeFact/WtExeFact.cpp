@@ -20,6 +20,7 @@
 
 #include <cstring>
 #include <mutex>
+#include <type_traits>
 #include <unordered_set>
 /**
  * @brief 工厂名称常量
@@ -299,6 +300,11 @@ extern "C"
 			delete fact;
 	}
 };
+
+static_assert(std::is_same<decltype(&createExecFact), FuncCreateExeFact>::value,
+	"createExecFact must exactly match the legacy factory function typedef");
+static_assert(std::is_same<decltype(&deleteExecFact), FuncDeleteExeFact>::value,
+	"deleteExecFact must exactly match the legacy factory deleter typedef");
 
 
 /**

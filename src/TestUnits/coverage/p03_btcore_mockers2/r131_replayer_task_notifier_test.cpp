@@ -12,6 +12,7 @@
  */
 #include <gtest/gtest.h>
 
+#include <fstream>
 #include <Includes/WTSVariant.hpp>
 #include <WtBtCore/EventNotifier.h>
 #include <WtBtCore/HisDataReplayer.h>
@@ -21,6 +22,29 @@
 namespace
 {
 	const char* const kRb = "SHFE.rb.2405";
+
+	bool write_m5_csv_with_warmup(const std::filesystem::path& base, const char* stdCode)
+	{
+		std::error_code ec;
+		std::filesystem::create_directories(base / "csv", ec);
+		if (ec)
+			return false;
+		std::ofstream out(base / "csv" / (std::string(stdCode) + "_m5.csv"));
+		if (!out.is_open())
+			return false;
+
+		out << "date,time,open,high,low,close,volume,turnover,open_interest,diff_interest,settle\n";
+		out << "20200102,92500,3797,3801,3796,3798,99,376002,0,0,0\n";
+		const uint32_t hhmm[5] = { 93100u, 93200u, 93500u, 93600u, 93700u };
+		for (uint32_t i = 0; i < 5; ++i)
+		{
+			const double close = 3800.0 + i;
+			out << "20200102," << hhmm[i] << "," << (close - 1.0) << ","
+				<< (close + 2.0) << "," << (close - 2.0) << "," << close << ","
+				<< (100 + i) << "," << (100 + i) * close << ",0,0,0\n";
+		}
+		return out.good();
+	}
 }
 
 class R131Replayer : public r62::ReplayFixture
@@ -74,7 +98,7 @@ TEST_F(R131Replayer, MinuteTaskNotifiesEndWithoutMq)
 // 生产: HisDataReplayer.cpp:569-575（notify_state 的 KP_Minute5 -> "m"{times*5}）
 TEST_F(R131Replayer, Minute5BarReplayNotifiesM5State)
 {
-	ASSERT_TRUE(r131::write_m5_csv(_base, kRb));
+	ASSERT_TRUE(write_m5_csv_with_warmup(_base, kRb));
 
 	Rig r;
 	static EventNotifier notifier;

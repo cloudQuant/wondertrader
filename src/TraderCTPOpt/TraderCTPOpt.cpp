@@ -226,12 +226,16 @@ TraderCTPOpt::TraderCTPOpt()
 	, m_pUserAPI(NULL)
 	, m_iRequestID(0)
 	, m_mapPosition(NULL)
+	, m_bPositionQueryIncomplete(false)
 	, m_ayTrades(NULL)
 	, m_ayOrders(NULL)
+	, m_ayExecOrds(NULL)
 	, m_ayPosDetail(NULL)
 	, m_bInQuery(false)
 	, m_lastQryTime(0)
-, m_bStopped(false)
+	, m_bStopped(false)
+	, m_hInstCTP(NULL)
+	, m_funcCreator(NULL)
 	{
 }
 
@@ -242,6 +246,18 @@ TraderCTPOpt::~TraderCTPOpt()
 
 bool TraderCTPOpt::init(WTSVariant* params)
 {
+	if (params == NULL)
+	{
+		write_log(m_bscSink, LL_ERROR, "[TraderCTPOpt] Init failed: missing configuration");
+		return false;
+	}
+
+	if (m_hInstCTP != NULL || m_pUserAPI != NULL)
+	{
+		write_log(m_bscSink, LL_ERROR, "[TraderCTPOpt] Init failed: module or API is already active");
+		return false;
+	}
+
 	m_strFront = params->getCString("front");
 	m_strBroker = params->getCString("broker");
 	m_strUser = params->getCString("user");
@@ -261,9 +277,24 @@ bool TraderCTPOpt::init(WTSVariant* params)
 	if (module.empty())
 		module = "soptthosttraderapi_se";
 
-	m_strModule = getBinDir() + DLLHelper::wrap_module(module.c_str(), "");
+	const std::string moduleFile = DLLHelper::wrap_module(module.c_str(), "");
+	const char* moduleDir = getBinDir();
+	const bool noModuleDir = moduleDir == NULL || moduleDir[0] == '\0';
+	if (noModuleDir && !fs::path(moduleFile).is_absolute())
+	{
+		write_log(m_bscSink, LL_ERROR, "[TraderCTPOpt] Failed to determine CTPOpt API module directory");
+		return false;
+	}
+
+	m_strModule = noModuleDir ? moduleFile : moduleDir + moduleFile;
 
 	m_hInstCTP = DLLHelper::load_library(m_strModule.c_str());
+	if (m_hInstCTP == NULL)
+	{
+		m_funcCreator = NULL;
+		write_log(m_bscSink, LL_ERROR, "[TraderCTPOpt] Failed to load CTPOpt API module: {}", m_strModule);
+		return false;
+	}
 #ifdef _WIN32
 #	ifdef _WIN64
 	const char* creatorName = "?CreateFtdcTraderApi@CThostFtdcTraderApi@ctp_sopt@@SAPEAV12@PEBD@Z";
@@ -274,6 +305,13 @@ bool TraderCTPOpt::init(WTSVariant* params)
 	const char* creatorName = "_ZN8ctp_sopt19CThostFtdcTraderApi19CreateFtdcTraderApiEPKc";
 #endif
 	m_funcCreator = (CTPCreator)DLLHelper::get_symbol(m_hInstCTP, creatorName);
+	if (m_funcCreator == NULL)
+	{
+		write_log(m_bscSink, LL_ERROR, "[TraderCTPOpt] CTPOpt API creator symbol is missing: {}", m_strModule);
+		DLLHelper::free_library(m_hInstCTP);
+		m_hInstCTP = NULL;
+		return false;
+	}
 
 	m_bQuickStart = params->getBoolean("quick");
 
@@ -284,9 +322,10 @@ void TraderCTPOpt::release()
 {
 	if (m_pUserAPI)
 	{
-		//m_pUserAPI->RegisterSpi(NULL);
-		m_pUserAPI->Release();
+		CThostFtdcTraderApi* api = m_pUserAPI;
 		m_pUserAPI = NULL;
+		//m_pUserAPI->RegisterSpi(NULL);
+		api->Release();
 	}
 
 	if (m_ayOrders)
@@ -297,18 +336,41 @@ void TraderCTPOpt::release()
 
 	if (m_mapPosition)
 		m_mapPosition->clear();
+	m_bPositionQueryIncomplete = false;
 
 	if (m_ayTrades)
 		m_ayTrades->clear();
+
+	if (m_ayExecOrds)
+		m_ayExecOrds->clear();
 }
 
 void TraderCTPOpt::connect()
 {
+	if (m_funcCreator == NULL)
+	{
+		write_log(m_bscSink, LL_ERROR, "[TraderCTPOpt] Connect failed: CTPOpt API creator is unavailable");
+		if (m_bscSink)
+			m_bscSink->handleEvent(WTE_Connect, -1);
+		return;
+	}
+
 	std::stringstream ss;
 	ss << m_strFlowDir << "flows/" << m_strBroker << "/" << m_strUser << "/";
 	if(!StdFile::exists(ss.str().c_str()))
 		fs::create_directories(ss.str().c_str());
-	m_pUserAPI = m_funcCreator(ss.str().c_str());
+	CThostFtdcTraderApi* api = m_funcCreator(ss.str().c_str());
+	if (api == NULL)
+	{
+		write_log(m_bscSink, LL_ERROR, "[TraderCTPOpt] Connect failed: CTPOpt API creator returned NULL");
+		if (m_bscSink)
+			m_bscSink->handleEvent(WTE_Connect, -1);
+		return;
+	}
+
+	m_pUserAPI = api;
+	m_wrapperState = WS_NOTLOGIN;
+	m_bStopped.store(false);
 	m_pUserAPI->RegisterSpi(this);
 	if (m_bQuickStart)
 	{
@@ -331,7 +393,7 @@ void TraderCTPOpt::connect()
 	if (m_thrdWorker == NULL)
 	{
 		m_thrdWorker.reset(new StdThread([this]() {
-			while (!m_bStopped)
+			while (!m_bStopped.load())
 			{
 				if (m_queQuery.empty() || m_bInQuery)
 				{
@@ -364,15 +426,13 @@ void TraderCTPOpt::connect()
 
 void TraderCTPOpt::disconnect()
 {
-	m_queQuery.push([this]() {
-		release();
-	});
-
+	m_bStopped.store(true);
 	if (m_thrdWorker)
 	{
 		m_thrdWorker->join();
 		m_thrdWorker = NULL;
 	}
+	release();
 }
 
 bool TraderCTPOpt::makeEntrustID(char* buffer, int length)
@@ -530,7 +590,7 @@ int TraderCTPOpt::orderInsertOpt(WTSEntrust* entrust)
 
 int TraderCTPOpt::orderActionOpt(WTSEntrustAction* action)
 {
-	if (m_wrapperState != WS_ALLREADY)
+	if (action == NULL || m_wrapperState != WS_ALLREADY)
 		return -1;
 
 	if (action->getBusinessType() != BT_EXECUTE)
@@ -563,6 +623,9 @@ int TraderCTPOpt::orderActionOpt(WTSEntrustAction* action)
 
 	strcpy(req.ExecOrderSysID, action->getOrderID());
 	strcpy(req.ExchangeID, action->getExchg());
+
+	if (m_pUserAPI == NULL)
+		return -1;
 
 	int iResult = m_pUserAPI->ReqExecOrderAction(&req, genRequestID());
 	if (iResult != 0)
@@ -703,7 +766,7 @@ int TraderCTPOpt::orderInsert(WTSEntrust* entrust)
 
 int TraderCTPOpt::orderAction(WTSEntrustAction* action)
 {
-	if (m_wrapperState != WS_ALLREADY)
+	if (action == NULL || m_wrapperState != WS_ALLREADY)
 		return -1;
 
 	uint32_t frontid, sessionid, orderref;
@@ -729,6 +792,9 @@ int TraderCTPOpt::orderAction(WTSEntrustAction* action)
 
 	strcpy(req.OrderSysID, action->getOrderID());
 	strcpy(req.ExchangeID, action->getExchg());
+
+	if (m_pUserAPI == NULL)
+		return -1;
 
 	int iResult = m_pUserAPI->ReqOrderAction(&req, genRequestID());
 	if (iResult != 0)
@@ -1163,14 +1229,34 @@ void TraderCTPOpt::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pIn
 		//triggerQuery();
 	}
 
-	if (!IsErrorRspInfo(pRspInfo) && pInvestorPosition)
+	const bool hasError = IsErrorRspInfo(pRspInfo);
+	if (hasError)
+	{
+		m_bPositionQueryIncomplete = true;
+		write_log(m_bscSink, LL_ERROR, "[TraderCTPOpt] Position query response failed: {} : {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg);
+	}
+
+	if (!hasError && pInvestorPosition)
 	{
 		if (NULL == m_mapPosition)
 			m_mapPosition = PositionMap::create();
 
 		WTSContractInfo* contract = m_bdMgr->getContract(pInvestorPosition->InstrumentID, pInvestorPosition->ExchangeID);
 		if (contract == NULL)
+		{
+			m_bPositionQueryIncomplete = true;
+			write_log(m_bscSink, LL_ERROR, "[TraderCTPOpt] Unknown contract in position query: {}@{}", pInvestorPosition->InstrumentID, pInvestorPosition->ExchangeID);
+			if (bIsLast)
+			{
+				if (m_mapPosition)
+				{
+					m_mapPosition->release();
+					m_mapPosition = NULL;
+				}
+				m_bPositionQueryIncomplete = false;
+			}
 			return;
+		}
 
 		WTSCommodityInfo* commInfo = contract->getCommInfo();
 		if (contract)
@@ -1282,6 +1368,16 @@ void TraderCTPOpt::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pIn
 
 	if (bIsLast)
 	{
+		if (m_bPositionQueryIncomplete)
+		{
+			if (m_mapPosition)
+			{
+				m_mapPosition->release();
+				m_mapPosition = NULL;
+			}
+			m_bPositionQueryIncomplete = false;
+			return;
+		}
 
 		WTSArray* ayPos = WTSArray::create();
 
@@ -1301,6 +1397,7 @@ void TraderCTPOpt::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pIn
 			m_mapPosition->release();
 			m_mapPosition = NULL;
 		}
+		m_bPositionQueryIncomplete = false;
 
 		ayPos->release();
 	}
@@ -1366,9 +1463,12 @@ void TraderCTPOpt::OnRspQryOrder(CThostFtdcOrderField *pOrder, CThostFtdcRspInfo
 	}
 }
 
-void TraderCTPOpt::OnRspError(CThostFtdcRspInfoField */*pRspInfo*/, int /*nRequestID*/, bool /*bIsLast*/)
+void TraderCTPOpt::OnRspError(CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool /*bIsLast*/)
 {
-	[[maybe_unused]] int x = 0;
+	if (pRspInfo == NULL || pRspInfo->ErrorID == 0 || m_bscSink == NULL)
+		return;
+
+	m_bscSink->handleTraderLog(LL_ERROR, fmtutil::format("{} rsp error: {} : {}", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg));
 }
 
 void TraderCTPOpt::OnRtnOrder(CThostFtdcOrderField *pOrder)

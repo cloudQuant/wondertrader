@@ -28,6 +28,7 @@
 #include "Includes/IBaseDataMgr.h"
 #include "Includes/WTSDataDef.hpp"
 #include "Includes/WTSContractInfo.hpp"
+#include "Includes/WTSSessionInfo.hpp"
 #include "Includes/WTSStruct.h"
 #include "Includes/WTSMarcos.h"
 
@@ -44,6 +45,12 @@ namespace {
 class P06BaseDataMgr : public IBaseDataMgr
 {
 public:
+	~P06BaseDataMgr()
+	{
+		if (_session != nullptr)
+			_session->release();
+	}
+
 	WTSCommodityInfo* getCommodity(const char*) override { return nullptr; }
 	WTSCommodityInfo* getCommodity(const char*, const char*) override { return nullptr; }
 
@@ -60,7 +67,8 @@ public:
 	{
 		_lastSessionId = sid == nullptr ? "" : sid;
 		++_sessionCalls;
-		return nullptr;
+		return _session != nullptr && sid != nullptr && std::strcmp(_session->id(), sid) == 0
+			? _session : nullptr;
 	}
 
 	WTSSessionInfo* getSessionByCode(const char*, const char* = "") override { return nullptr; }
@@ -70,10 +78,17 @@ public:
 	uint64_t getBoundaryTime(const char*, uint32_t, bool = false, bool = true) override { return 0; }
 
 	void reg(WTSContractInfo* cInfo) { _maps[std::string(cInfo->getFullCode())] = cInfo; }
+	void setSession(WTSSessionInfo* session)
+	{
+		if (_session != session && _session != nullptr)
+			_session->release();
+		_session = session;
+	}
 
 	int _contractCalls = 0;
 	int _sessionCalls = 0;
 	std::string _lastSessionId;
+	WTSSessionInfo* _session = nullptr;
 
 private:
 	wt_hashmap<std::string, WTSContractInfo*> _maps;
@@ -377,9 +392,13 @@ TEST(p06_uft_ticker, init_and_forward_before_thread_start)
 	fx.engine.addContext(ctx);
 	fx.engine.sub_tick(ctx->id(), "SSE.600000");
 
+	WTSSessionInfo* session = WTSSessionInfo::create("ALLDAY", "p06 allday", 0);
+	ASSERT_NE(nullptr, session);
+	session->addTradingSection(0, 2400);
+	fx.bdMgr.setSession(session);
+
 	WtUftRtTicker ticker(&fx.engine);
-	// 假基础数据管理器的 getSession 返回 NULL，_s_info 也为 NULL；
-	// init 只赋值时段并取系统日期，不触碰 _s_info，因此可安全调用。
+	// 使用有效的全天交易时段，使 init 后 on_tick 能走未启动线程的转发分支。
 	ticker.init("ALLDAY");
 	EXPECT_EQ("ALLDAY", fx.bdMgr._lastSessionId);
 
@@ -387,7 +406,7 @@ TEST(p06_uft_ticker, init_and_forward_before_thread_start)
 	WTSTickStruct ts;
 	memset(&ts, 0, sizeof(WTSTickStruct));
 	wt_strcpy(ts.exchg, "SSE");
-	wt_strcpy(ts.code, "600000");
+	wt_strcpy(ts.code, "SSE.600000");
 	ts.trading_date = 20240301;
 	ts.action_date = 20240301;
 	ts.action_time = 93015500;

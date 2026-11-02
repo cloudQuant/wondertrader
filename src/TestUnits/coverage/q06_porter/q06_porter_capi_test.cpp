@@ -252,6 +252,15 @@ TEST(Q06PorterCapi, ParserPushQuoteIgnoresUnknownParserId)
 	SUCCEED();
 }
 
+TEST(Q06PorterCapi, CreateExtParserRejectsBeforeConfiguredEngine)
+{
+	// Initialize the public C API with a nonexistent log profile; WTSLogger's
+	// missing-file guard keeps this test independent of a background log thread.
+	init_porter("./q06_absent_logcfg.yaml", true, "./");
+	register_parser_callbacks(NULL, NULL);
+	EXPECT_FALSE(create_ext_parser("q06_before_config"));
+}
+
 /*
  * 注册族入口只做赋值（WtRtRunner::registerXxx 六个函数），
  * 传 NULL 也应安全落地；真正的分发在 q06_porter_runner_test.cpp 验证。

@@ -483,7 +483,7 @@ TEST(R163PorterExecuters, LocalDiffArbiBindConfiguredTraderAdapters)
 {
 	const std::string dir = prepare_dir("executers");
 	ASSERT_FALSE(dir.empty());
-	write_text(dir + "/actions.json", "{}");
+	write_text(dir + "/actions.json", kActions);
 
 	WtRtRunner* r = new_runner(dir);
 	ASSERT_NE(r, nullptr);

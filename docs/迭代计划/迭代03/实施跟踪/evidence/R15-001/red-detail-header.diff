@@ -1,0 +1,20 @@
+--- src/WtCore/HftStraBaseCtx.h	2026-11-01 22:44:40
++++ /private/tmp/wt-i03-r15-tags/red-source/WtCore/HftStraBaseCtx.h	2026-11-01 22:45:20
+@@ -691,15 +691,13 @@
+ 		double		_max_profit; ///< 最大盈利
+ 		double		_max_loss;   ///< 最大亏损
+ 		double		_profit;     ///< 当前盈亏
+-		std::string _usertag; ///< 用户自定义标签
++		char _usertag[32]; ///< 用户自定义标签
+ 
+ 		/**
+ 		 * @brief 构造函数
+ 		 * @details 初始化所有成员变量为0
+ 		 */
+-		_DetailInfo()
+-			: _long(false), _price(0), _volume(0), _opentime(0), _opentdate(0),
+-			  _max_profit(0), _max_loss(0), _profit(0) {}
++		_DetailInfo() { memset(this, 0, sizeof(_DetailInfo)); }
+ 	} DetailInfo;
+ 
+ 	/**

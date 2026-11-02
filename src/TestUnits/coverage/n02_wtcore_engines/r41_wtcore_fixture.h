@@ -151,12 +151,16 @@ public:
 
     WTSSessionInfo* getSession(const char* sid) override
     {
-        if (sid != NULL && _session->id() != NULL && std::string(sid) == _session->id())
+        if (_session_available && sid != NULL && _session->id() != NULL &&
+            std::string(sid) == _session->id())
             return _session;
         return NULL;
     }
 
-    WTSSessionInfo* getSessionByCode(const char*, const char*) override { return _session; }
+    WTSSessionInfo* getSessionByCode(const char*, const char*) override
+    {
+        return _session_available ? _session : NULL;
+    }
 
     WTSArray* getAllSessions() override { return NULL; }
 
@@ -173,8 +177,10 @@ public:
     WTSSessionInfo* session() { return _session; }
     WTSContractInfo* contract() { return _rbContract; }
     WTSCommodityInfo* commodity() { return _rb; }
+    void setSessionAvailable(bool available) { _session_available = available; }
 
 private:
+    bool _session_available = true;
     WTSSessionInfo* _session = nullptr;
     WTSCommodityInfo* _rb = nullptr;
     WTSContractInfo* _rbContract = nullptr;

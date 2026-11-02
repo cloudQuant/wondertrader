@@ -5,14 +5,21 @@
 
 #include <algorithm>
 #include <atomic>
+#include <chrono>
 #include <cstdint>
+#include <condition_variable>
+#include <mutex>
 #include <thread>
+#include <type_traits>
 #include <vector>
 
 #include "WtExeFact/WtOrdMon.h"
 
 namespace
 {
+static_assert(!std::is_copy_constructible<WtOrdMon>::value, "WtOrdMon instance namespace must not be copied");
+static_assert(!std::is_move_constructible<WtOrdMon>::value, "WtOrdMon instance namespace must not be moved");
+
 // 构造一组连续本地订单号
 std::vector<uint32_t> mkIds(uint32_t begin, uint32_t cnt)
 {
@@ -285,6 +292,129 @@ TEST(n05_ordmon, stale_timeout_snapshot_cannot_mark_or_resurrect_terminal_or_reu
 	EXPECT_FALSE(mon.mark_unverified_timeout(id, stale.generation, 1, 3000));
 	EXPECT_TRUE(mon.has_order(id));
 	EXPECT_FALSE(mon.has_unverified_timeout());
+}
+
+TEST(n05_ordmon, stale_identity_snapshot_cannot_mark_or_erase_reused_order)
+{
+	WtOrdMon mon;
+	const uint32_t id = 8303;
+	WtOrdMonOrderIdentity oldIdentity = mon.push_order_with_identity(id, 1000, true);
+	ASSERT_TRUE(oldIdentity.valid());
+
+	std::mutex gateMutex;
+	std::condition_variable gate;
+	bool snapshotCaptured = false;
+	bool replacementReady = false;
+	bool markedByStaleCallback = true;
+	bool erasedByStaleCallback = true;
+	std::thread checker([&]() {
+		mon.check_orders_with_identity(1, 2000,
+			[&](uint32_t localid, WtOrdMonOrderIdentity snapshotIdentity) {
+				EXPECT_EQ(localid, id);
+				{
+					std::unique_lock<std::mutex> lock(gateMutex);
+					snapshotCaptured = true;
+					gate.notify_all();
+					gate.wait(lock, [&]() { return replacementReady; });
+				}
+				// 旧 callback 在被同步屏障暂停期间，旧单已终结且 localid 已复用。
+				markedByStaleCallback = mon.mark_unverified_timeout(snapshotIdentity, 1, 3000);
+				erasedByStaleCallback = mon.erase_order(snapshotIdentity);
+			});
+	});
+
+	{
+		std::unique_lock<std::mutex> lock(gateMutex);
+		const bool captured = gate.wait_for(lock, std::chrono::seconds(5),
+			[&]() { return snapshotCaptured; });
+		EXPECT_TRUE(captured);
+	}
+	EXPECT_TRUE(mon.erase_order(oldIdentity));
+	(void)mon.push_order_with_identity(id, 2000, true);
+	WtOrdMonOrderIdentity newIdentity;
+	const bool gotNewIdentity = mon.get_order_identity(id, newIdentity);
+	{
+		std::lock_guard<std::mutex> lock(gateMutex);
+		replacementReady = true;
+	}
+	gate.notify_all();
+	checker.join();
+
+	EXPECT_TRUE(gotNewIdentity);
+	EXPECT_TRUE(newIdentity.valid());
+	EXPECT_FALSE(markedByStaleCallback);
+	EXPECT_FALSE(erasedByStaleCallback);
+	EXPECT_TRUE(mon.has_order(id)); // 旧 callback 没有污染或删除复用后的新单
+	EXPECT_FALSE(mon.has_unverified_timeout());
+	EXPECT_TRUE(mon.erase_order(newIdentity)); // 未复用的新身份正常通过身份匹配删除
+	EXPECT_FALSE(mon.has_order(id));
+}
+
+TEST(n05_ordmon, identity_timeout_latch_persists_across_timeout_rounds)
+{
+	WtOrdMon mon;
+	const uint32_t id = 8304;
+	WtOrdMonOrderIdentity identity = mon.push_order_with_identity(id, 1000, true);
+	ASSERT_TRUE(identity.valid());
+	WtOrdMonOrderIdentity lookedUpIdentity;
+	ASSERT_TRUE(mon.get_order_identity(id, lookedUpIdentity));
+	ASSERT_TRUE(lookedUpIdentity.valid());
+
+	std::vector<WtOrdMonOrderIdentity> beforeExpiry;
+	mon.check_orders_with_identity(1, 1999, [&](uint32_t, WtOrdMonOrderIdentity candidate) {
+		beforeExpiry.push_back(candidate);
+	});
+	EXPECT_TRUE(beforeExpiry.empty());
+
+	std::vector<WtOrdMonOrderIdentity> expired;
+	mon.check_orders_with_identity(1, 2000, [&](uint32_t, WtOrdMonOrderIdentity candidate) {
+		expired.push_back(candidate);
+	});
+	ASSERT_EQ(expired.size(), 1u);
+	EXPECT_TRUE(mon.mark_unverified_timeout(expired[0], 1, 2000));
+	EXPECT_FALSE(mon.mark_unverified_timeout(identity, 1, 2000));
+	EXPECT_TRUE(mon.has_unverified_timeout());
+	EXPECT_TRUE(mon.has_order(id));
+
+	for (uint64_t now : { 3000ULL, 10000ULL, 60000ULL })
+	{
+		std::vector<WtOrdMonOrderIdentity> repeated;
+		mon.check_orders_with_identity(1, now, [&](uint32_t, WtOrdMonOrderIdentity candidate) {
+			repeated.push_back(candidate);
+		});
+		EXPECT_TRUE(repeated.empty());
+		EXPECT_TRUE(mon.has_unverified_timeout());
+		EXPECT_TRUE(mon.has_order(id));
+	}
+	EXPECT_TRUE(mon.erase_order(lookedUpIdentity)); // 查询取得的身份仍与当前记录匹配
+	mon.clear_orders();
+	EXPECT_TRUE(mon.has_unverified_timeout());
+}
+
+TEST(n05_ordmon, identity_rejects_replay_across_monitors_with_same_localid_and_sequence)
+{
+	WtOrdMon first;
+	WtOrdMon second;
+	const uint32_t id = 8305;
+	WtOrdMonOrderIdentity firstIdentity = first.push_order_with_identity(id, 1000, true);
+	WtOrdMonOrderIdentity secondIdentity = second.push_order_with_identity(id, 1000, true);
+	ASSERT_TRUE(firstIdentity.valid());
+	ASSERT_TRUE(secondIdentity.valid());
+
+	// Each monitor's first order has sequence 1; only the hidden instance namespace differs.
+	EXPECT_FALSE(first.mark_unverified_timeout(secondIdentity, 1, 2000));
+	EXPECT_FALSE(first.erase_order(secondIdentity));
+	EXPECT_FALSE(second.mark_unverified_timeout(firstIdentity, 1, 2000));
+	EXPECT_FALSE(second.erase_order(firstIdentity));
+	EXPECT_TRUE(first.has_order(id));
+	EXPECT_TRUE(second.has_order(id));
+	EXPECT_FALSE(first.has_unverified_timeout());
+	EXPECT_FALSE(second.has_unverified_timeout());
+
+	EXPECT_TRUE(first.mark_unverified_timeout(firstIdentity, 1, 2000));
+	EXPECT_TRUE(second.mark_unverified_timeout(secondIdentity, 1, 2000));
+	EXPECT_TRUE(first.erase_order(firstIdentity));
+	EXPECT_TRUE(second.erase_order(secondIdentity));
 }
 
 TEST(n05_ordmon, concurrent_reads_writes_and_clear_are_synchronized)

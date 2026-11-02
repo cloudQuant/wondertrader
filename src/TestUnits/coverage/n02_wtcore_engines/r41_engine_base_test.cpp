@@ -207,6 +207,43 @@ TEST_F(R41EngineFixture, R41StandbySignalFiresOnNextTick)
     tick->release();
 }
 
+TEST_F(R41EngineFixture, R58LegacyPositionWithoutSessionKeepsStandbySignalPending)
+{
+    writePortfolio("datas.json", kDatasJson);
+    _bd->setSessionAvailable(false);
+
+    WTSVariant* cfg = makeCfg();
+    ASSERT_NE(nullptr, cfg);
+
+    WtCtaEngine engine;
+    engine.set_adapter_mgr(&_adapter_mgr);
+    engine.init(cfg, _bd.get(), _dt.get(), _hot.get(), NULL);
+    engine.set_date_time(20231010, 930, 0);
+    engine.set_trading_date(20231010);
+
+    // With no strategy target, on_schedule queues a zero target for the
+    // non-flat portfolio position. The pending signal must wait for metadata.
+    engine.on_schedule(20231010, 930);
+    WTSTickData* missingSessionTick = makeTick(kCode, 3507.0);
+    engine.WtEngine::on_tick(kCode, missingSessionTick);
+    missingSessionTick->release();
+
+    EXPECT_EQ(std::string::npos, readPortfolio("trades.csv").find("CLOSE"));
+    EXPECT_NE(std::string::npos, readPortfolio("datas.json").find("\"volume\": 2"));
+
+    // Restoring the session lookup and receiving another in-session tick must
+    // trigger the same signal, demonstrating that the missing-session tick did
+    // not consume it.
+    _bd->setSessionAvailable(true);
+    engine.set_date_time(20231010, 931, 0);
+    WTSTickData* resumedTick = makeTick(kCode, 3508.0, 1, 20231010, 93100000);
+    engine.WtEngine::on_tick(kCode, resumedTick);
+    resumedTick->release();
+
+    EXPECT_NE(std::string::npos, readPortfolio("trades.csv").find("CLOSE"));
+    EXPECT_NE(std::string::npos, readPortfolio("datas.json").find("\"volume\": 0"));
+}
+
 //////////////////////////////////////////////////////////////////
 // 行情/价格/周期切片访问面
 // src/WtCore/WtEngine.cpp:104-115, 239-245, 592-777

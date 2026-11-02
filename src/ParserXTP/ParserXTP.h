@@ -8,6 +8,7 @@
  * \brief 
  */
 #pragma once
+#include <atomic>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/post.hpp>
 #include <boost/asio/executor_work_guard.hpp>
@@ -128,5 +129,7 @@ private:
 	StdThreadPtr				_thrd_worker;
 	typedef std::shared_ptr<boost::asio::executor_work_guard<boost::asio::io_context::executor_type>> BoostWorkerPtr;
 	BoostWorkerPtr				_worker;
+	std::atomic<bool>			_worker_stopping;
+	bool stopWorker();
 };
 

@@ -208,7 +208,7 @@ namespace shareblock
 			typedef wt_hashmap<std::string, KVPair>	SectionMap;
 			SectionMap	_sections;
 
-			_ShmPair() :_block(nullptr),_master(false)
+			_ShmPair() :_block(nullptr),_master(false),_blocktime(0)
 			{
 			}
 		}ShmPair;

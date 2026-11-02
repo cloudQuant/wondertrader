@@ -1,17 +1,18 @@
 /*!
  * \file r174_udp_caster_guards_test.cpp
- * \brief UDPCaster 在「不建真实 socket」前提下的剩余公开守卫
+ * \brief UDPCaster 剩余公开守卫及端口验证
  *        （迭代01 第二十五波 R174）
  *
  * 最新 profdata 中 UDPCaster.cpp 剩余 65 行全部落在真实 socket 路径
  * （start 的 bind/catch、do_receive 回调、订阅回包、组播发送、dead code），
- * 与本 lane「不启动真实 socket」的硬约束冲突。本文件只锁住无需 socket 的公开面：
+ * 与本 lane「不启动 socket 线程、不发送数据」的边界冲突。本文件覆盖无需 socket 的拒绝面，
+ * 并单独用本机 UDP socket 验证合法组播端口边界：
  *   UDPCaster.cpp:67-68   active=false 直接返回，broadcast/multicast 数组不解析
  *   UDPCaster.cpp:222-241 addBRecver 只解析地址，坏地址 catch 返回 false
  *   UDPCaster.cpp:244-263 addMRecver 在地址解析失败时先于 socket 构造返回 false
  *   UDPCaster.cpp:288-291 m_sktBroadcast==NULL / m_bTerminated 的广播守卫
  *   UDPCaster.cpp:133-143 stop() 在未 start 时只置位并唤醒条件变量
- * 对象全程没有 socket/线程，析构不会触发 BUG-R164-001。
+ * 非法组播输入必须在 socket 构造前拒绝；合法边界用例只创建本机 socket，不启动线程。
  */
 #include <gtest/gtest.h>
 
@@ -62,10 +63,14 @@ TEST_F(R174UdpCasterGuardTest, InactiveInitAndPreStartBroadcastStayOffline)
 	EXPECT_TRUE(caster.addBRecver("127.0.0.1", 9100, 0));
 	EXPECT_TRUE(caster.addBRecver("127.0.0.1", 9101, 1));
 	EXPECT_TRUE(caster.addBRecver("127.0.0.1", 9102, 2));
-	EXPECT_TRUE(caster.addBRecver("127.0.0.1", 9103, 3));
+	EXPECT_FALSE(caster.addBRecver("127.0.0.1", 9103, 3));
+	EXPECT_FALSE(caster.addBRecver("127.0.0.1", 9104, 99));
 	EXPECT_FALSE(caster.addBRecver("not-an-address", 9104, 0));
 	// 地址解析先失败，不会走到 new UDPSocket；不产生 socket。
 	EXPECT_FALSE(caster.addMRecver("not-an-address", 9105, 0, 0));
+	// 合法组地址搭配未知 type 也必须在 socket 创建之前拒绝。
+	EXPECT_FALSE(caster.addMRecver("239.255.0.99", 9106, 0, 3));
+	EXPECT_FALSE(caster.addMRecver("239.255.0.99", 9107, 0, 99));
 
 	WTSTickData* tick = WTSTickData::create("600000");
 	WTSOrdQueData* que = WTSOrdQueData::create("600000");
@@ -95,6 +100,23 @@ TEST_F(R174UdpCasterGuardTest, InactiveInitAndPreStartBroadcastStayOffline)
 	que->release();
 	dtl->release();
 	trans->release();
+}
+
+TEST_F(R174UdpCasterGuardTest, MulticastPortValidationAndBoundaryControls)
+{
+	UDPCaster caster;
+	const char* const group = "239.255.0.100";
+
+	// 地址有效；端口非法时应在创建 UDPSocket 前拒绝。
+	EXPECT_FALSE(caster.addMRecver(group, -1, 0, 0));
+	EXPECT_FALSE(caster.addMRecver(group, 65536, 0, 1));
+	EXPECT_FALSE(caster.addMRecver(group, 8000, -1, 2));
+	EXPECT_FALSE(caster.addMRecver(group, 8001, 65536, 0));
+
+	// 0 与 65535 是合法边界。只绑定本机 UDP socket，不启动 IO 线程或发送数据。
+	EXPECT_TRUE(caster.addMRecver("239.255.0.101", 0, 0, 0));
+	EXPECT_TRUE(caster.addMRecver("239.255.0.102", 65535, 0, 1));
+	EXPECT_TRUE(caster.addMRecver("239.255.0.103", 0, 65535, 2));
 }
 
 }	// namespace

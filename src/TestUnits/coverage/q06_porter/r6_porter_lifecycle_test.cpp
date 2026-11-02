@@ -18,9 +18,13 @@
  */
 #include <gtest/gtest.h>
 
+#include <chrono>
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
+#include <fstream>
 #include <string>
+#include <system_error>
 
 #include "WtCore/WtHelper.h"
 #include "WtPorter/PorterDefs.h"
@@ -37,6 +41,35 @@ extern WtRtRunner& getRunner();
 extern const char* LOG_TAGS[];
 
 namespace {
+	namespace std_fs = std::filesystem;
+
+	class EmptyFactoryDir
+	{
+	public:
+		EmptyFactoryDir()
+		{
+			const auto nonce = std::chrono::steady_clock::now().time_since_epoch().count();
+			_path = std_fs::temp_directory_path() / ("r6_factory_dir_" + std::to_string(nonce));
+			std::error_code ec;
+			_ok = std_fs::create_directory(_path, ec) && !ec;
+		}
+
+		~EmptyFactoryDir()
+		{
+			if (!_ok)
+				return;
+			std::error_code ec;
+			std_fs::permissions(_path, std_fs::perms::owner_all, std_fs::perm_options::add, ec);
+			std_fs::remove_all(_path, ec);
+		}
+
+		bool ok() const { return _ok; }
+		const std_fs::path& path() const { return _path; }
+
+	private:
+		std_fs::path _path;
+		bool _ok = false;
+	};
 
 	/* 与 q06 的 Recorder 同形状、不同用途：这里只统计「扩展 parser/executer」通道 */
 	struct ExtRec
@@ -72,6 +105,61 @@ namespace {
 	const char* kAbsentDir = "./r6_absent_factory_dir_zzz/";
 	const char* kAbsentCfg = "./r6_absent_dtcfg_zzz.yaml";
 	const char* kAbsentLogCfg = "./r6_absent_logcfg_zzz.yaml";
+
+	class R6ConfigTempDir
+	{
+	public:
+		R6ConfigTempDir()
+		{
+			const auto nonce = std::chrono::steady_clock::now().time_since_epoch().count();
+			_path = std_fs::temp_directory_path() / ("r6_config_" + std::to_string(nonce));
+			std::error_code ec;
+			_ok = std_fs::create_directories(_path, ec) && !ec;
+		}
+
+		~R6ConfigTempDir()
+		{
+			if (_ok)
+			{
+				std::error_code ec;
+				std_fs::remove_all(_path, ec);
+			}
+		}
+
+		bool ok() const { return _ok; }
+		const std_fs::path& path() const { return _path; }
+
+	private:
+		std_fs::path _path;
+		bool _ok = false;
+	};
+
+	bool write_r6_file(const std_fs::path& path, const std::string& content)
+	{
+		std::ofstream file(path);
+		if (!file.is_open())
+			return false;
+		file << content;
+		return file.good();
+	}
+
+	WtRtRunner* new_r6_runner(const std::string& genDir)
+	{
+		WtRtRunner* runner = new WtRtRunner();
+		runner->init(kAbsentLogCfg, true, genDir.c_str());
+		return runner;
+	}
+
+	std::string minimal_r6_cta_config(const std::string& dir)
+	{
+		return "{\"basefiles\":{},\"env\":{\"name\":\"cta\"},\"data\":{},"
+			"\"bspolicy\":\"" + dir + "/actions.json\","
+			"\"parsers\":[{\"active\":false,\"id\":\"r6_p_off\"}],"
+			"\"traders\":[{\"active\":false,\"id\":\"r6_t_off\"}],"
+			"\"executers\":[{\"active\":false,\"id\":\"r6_e_off\"}],"
+			"\"strategies\":{\"cta\":[{\"active\":false,\"id\":\"r6_s_off\","
+			"\"name\":\"r6_n_off\"}]}}";
+	}
 
 	std::string tail_slash(const std::string& s)
 	{
@@ -147,25 +235,112 @@ TEST(R6PorterFactories, executer_factory_absent_dir_returns_false)
 	EXPECT_FALSE(r.addExeFactories(kAbsentDir));
 }
 
-TEST(R6PorterFactories, factory_path_pointing_at_a_file_does_not_return_cleanly)
+TEST(R6PorterFactories, cta_empty_directory_is_accepted)
 {
-	// 文件不是工厂目录；bool 接口应不抛异常并返回失败。runner 在子进程堆分配，
-	// 不 delete，由 _Exit 隔离析构；本用例不验证 runner 析构。
-	EXPECT_EXIT(
-		{
-			WtRtRunner* r = nullptr;
-			try
-			{
-				r = new WtRtRunner();
-				const bool ret = r->addCtaFactories(__FILE__);
-				std::_Exit(ret ? 1 : 0);
-			}
-			catch (...)
-			{
-				std::_Exit(2);
-			}
-		},
-		::testing::ExitedWithCode(0), "");
+	EmptyFactoryDir dir;
+	ASSERT_TRUE(dir.ok());
+	const std::string path = dir.path().string();
+	WtRtRunner r;
+	EXPECT_TRUE(r.addCtaFactories(path.c_str()));
+}
+
+TEST(R6PorterFactories, sel_empty_directory_is_accepted)
+{
+	EmptyFactoryDir dir;
+	ASSERT_TRUE(dir.ok());
+	const std::string path = dir.path().string();
+	WtRtRunner r;
+	EXPECT_TRUE(r.addSelFactories(path.c_str()));
+}
+
+TEST(R6PorterFactories, hft_empty_directory_is_accepted)
+{
+	EmptyFactoryDir dir;
+	ASSERT_TRUE(dir.ok());
+	const std::string path = dir.path().string();
+	WtRtRunner r;
+	EXPECT_TRUE(r.addHftFactories(path.c_str()));
+}
+
+TEST(R6PorterFactories, cta_regular_file_is_rejected)
+{
+	WtRtRunner r;
+	bool loaded = true;
+	EXPECT_NO_THROW(loaded = r.addCtaFactories(__FILE__));
+	EXPECT_FALSE(loaded);
+}
+
+TEST(R6PorterFactories, sel_regular_file_is_rejected)
+{
+	WtRtRunner r;
+	bool loaded = true;
+	EXPECT_NO_THROW(loaded = r.addSelFactories(__FILE__));
+	EXPECT_FALSE(loaded);
+}
+
+TEST(R6PorterFactories, hft_regular_file_is_rejected)
+{
+	WtRtRunner r;
+	bool loaded = true;
+	EXPECT_NO_THROW(loaded = r.addHftFactories(__FILE__));
+	EXPECT_FALSE(loaded);
+}
+
+TEST(R6PorterFactories, cta_unreadable_directory_enumeration_failure_returns_false)
+{
+	EmptyFactoryDir dir;
+	ASSERT_TRUE(dir.ok());
+	std::error_code ec;
+	std_fs::permissions(dir.path(), std_fs::perms::none, std_fs::perm_options::replace, ec);
+	ASSERT_FALSE(ec) << ec.message();
+
+	std_fs::directory_iterator probe(dir.path(), ec);
+	if (!ec)
+		GTEST_SKIP() << "The current user can enumerate a directory with no permission bits";
+	const std::string path = dir.path().string();
+
+	WtRtRunner r;
+	bool loaded = true;
+	EXPECT_NO_THROW(loaded = r.addCtaFactories(path.c_str()));
+	EXPECT_FALSE(loaded);
+}
+
+TEST(R6PorterFactories, sel_unreadable_directory_enumeration_failure_returns_false)
+{
+	EmptyFactoryDir dir;
+	ASSERT_TRUE(dir.ok());
+	std::error_code ec;
+	std_fs::permissions(dir.path(), std_fs::perms::none, std_fs::perm_options::replace, ec);
+	ASSERT_FALSE(ec) << ec.message();
+
+	std_fs::directory_iterator probe(dir.path(), ec);
+	if (!ec)
+		GTEST_SKIP() << "The current user can enumerate a directory with no permission bits";
+	const std::string path = dir.path().string();
+
+	WtRtRunner r;
+	bool loaded = true;
+	EXPECT_NO_THROW(loaded = r.addSelFactories(path.c_str()));
+	EXPECT_FALSE(loaded);
+}
+
+TEST(R6PorterFactories, hft_unreadable_directory_enumeration_failure_returns_false)
+{
+	EmptyFactoryDir dir;
+	ASSERT_TRUE(dir.ok());
+	std::error_code ec;
+	std_fs::permissions(dir.path(), std_fs::perms::none, std_fs::perm_options::replace, ec);
+	ASSERT_FALSE(ec) << ec.message();
+
+	std_fs::directory_iterator probe(dir.path(), ec);
+	if (!ec)
+		GTEST_SKIP() << "The current user can enumerate a directory with no permission bits";
+	const std::string path = dir.path().string();
+
+	WtRtRunner r;
+	bool loaded = true;
+	EXPECT_NO_THROW(loaded = r.addHftFactories(path.c_str()));
+	EXPECT_FALSE(loaded);
 }
 
 /* -------------------------------------------------------------------------
@@ -254,15 +429,11 @@ TEST(R6PorterExtExecuter, executer_callbacks_fire_on_the_runner_that_registered_
 }
 
 /* -------------------------------------------------------------------------
- * DISABLED_ 组：崩溃 / 挂死 / 进程级副作用
+ * DISABLED_ 组：尚未转为安全回归测试的崩溃 / 挂死 / 进程级副作用
  *
  * 触发条件：
- *  C1 config()（489~494）对 _config 与 basefiles 都没有 NULL 守卫：
- *     不存在的文件 -> load_from_file 返回 NULL -> 第 494 行 _config->get 段错误；
- *     合法但缺 "basefiles" 的内容 -> cfgBF 为 NULL -> 第 495 行 cfgBF->get 段错误。
- *     两条都会打死 gtest 宿主，catch(...) 抓不到 SIGSEGV。
- *  C2 createExtParser()（295~303）无条件 `_engine->get_basedata_mgr()`，
- *     未 config 过时 _engine==NULL -> 段错误。
+ *  C1 config() 的空配置和必需 basefiles 检查已有启用用例，失败后 run() 安全拒绝。
+ *  C2 createExtParser() 在未配置时已有 false 返回守卫；由本地与公开 C API 用例覆盖。
  *  C3 get_raw_stdcode()（361~366）同理解引用 _engine —— 同族缺陷已由
  *     q06 侧 BUG-Q06-002 登记，这里只保留用例形状。
  *  C4 feedAdjFactors()（277~280）不判空即调 _feeder_fcts（构造列表里没有它）
@@ -274,22 +445,53 @@ TEST(R6PorterExtExecuter, executer_callbacks_fire_on_the_runner_that_registered_
  *     只能在「每用例一进程」的采样口径下跑，本轮按约束留给主控裁定。
  * ---------------------------------------------------------------------- */
 
-TEST(R6PorterConfig, DISABLED_missing_config_file_derefs_null_config)
+TEST(R6PorterConfig, missing_config_file_returns_false_and_run_is_rejected)
 {
 	WtRtRunner r;
-	EXPECT_FALSE(r.config(kAbsentCfg, true));		// C1
+	bool configured = true;
+	EXPECT_NO_THROW(configured = r.config(kAbsentCfg, true));
+	EXPECT_FALSE(configured);
+	EXPECT_NO_THROW(r.run(false));
+
+	R6ConfigTempDir dir;
+	ASSERT_TRUE(dir.ok());
+	const std_fs::path emptyConfig = dir.path() / "empty.json";
+	ASSERT_TRUE(write_r6_file(emptyConfig, ""));
+	configured = true;
+	EXPECT_NO_THROW(configured = r.config(emptyConfig.string().c_str(), true));
+	EXPECT_FALSE(configured);
+	EXPECT_NO_THROW(r.run(false));
 }
 
-TEST(R6PorterConfig, DISABLED_valid_content_without_basefiles_derefs_null_section)
+TEST(R6PorterConfig, invalid_basefiles_is_rejected_and_configuration_can_be_retried)
 {
-	WtRtRunner r;
-	EXPECT_FALSE(r.config("{}", false));			// C1 第二支
+	R6ConfigTempDir dir;
+	ASSERT_TRUE(dir.ok());
+	ASSERT_TRUE(write_r6_file(dir.path() / "actions.json", "{\"default\":{}}"));
+
+	// Keep this runner for process lifetime: successful configuration loads global
+	// managers, and this test target intentionally avoids global logger teardown.
+	WtRtRunner* runner = new_r6_runner(dir.path().string());
+	ASSERT_NE(runner, nullptr);
+
+	EXPECT_FALSE(runner->config("{}", false));
+	EXPECT_NO_THROW(runner->run(false));
+
+	EXPECT_FALSE(runner->config("{\"basefiles\":[]}", false));
+	EXPECT_NO_THROW(runner->run(false));
+	EXPECT_FALSE(runner->config("{\"basefiles\":\"not-an-object\"}", false));
+	EXPECT_NO_THROW(runner->run(false));
+
+	const std::string validConfig = minimal_r6_cta_config(dir.path().string());
+	ASSERT_TRUE(runner->config(validConfig.c_str(), false))
+		<< "failed basefiles validation must release the parsed config and leave retry available";
+	EXPECT_NE(runner->getEngine(), nullptr);
 }
 
-TEST(R6PorterExtParser, DISABLED_create_ext_parser_without_engine_crashes)
+TEST(R6PorterExtParser, create_ext_parser_without_engine_returns_false)
 {
 	WtRtRunner r;
-	EXPECT_TRUE(r.createExtParser("r6parser"));		// C2
+	EXPECT_FALSE(r.createExtParser("r6parser"));
 }
 
 TEST(R6PorterRawCode, DISABLED_get_raw_stdcode_without_engine_crashes)

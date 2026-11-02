@@ -179,9 +179,19 @@ TEST_F(R56HotMgr, UnknownProductIsNotHot)
 	EXPECT_FALSE(m_mgr.isHot("DCE", "i2405", 20240115));
 
 	// 正控：已配置品种遵守切换日前后规则。
+	// 首条切换日之前没有生效合约；切换日当天首合约生效。
+	EXPECT_FALSE(m_mgr.isCustomHot("HOT", "SHFE.rb2401", 20240101));
+	EXPECT_FALSE(m_mgr.isHot("SHFE", "rb2401", 20240101));
+	EXPECT_TRUE(m_mgr.isCustomHot("HOT", "SHFE.rb2401", 20240102));
+	EXPECT_TRUE(m_mgr.isHot("SHFE", "rb2401", 20240102));
+
+	// 已知后续规则的正负控：切换前后分别只命中对应合约。
 	EXPECT_TRUE(m_mgr.isCustomHot("HOT", "SHFE.rb2401", 20240105));
 	EXPECT_FALSE(m_mgr.isCustomHot("HOT", "SHFE.rb2405", 20240105));
 	EXPECT_TRUE(m_mgr.isCustomHot("HOT", "SHFE.rb2405", 20240110));
+	EXPECT_FALSE(m_mgr.isCustomHot("HOT", "SHFE.rb2401", 20240110));
+	EXPECT_TRUE(m_mgr.isCustomHot("HOT", "SHFE.rb2410", 20240120));
+	EXPECT_FALSE(m_mgr.isCustomHot("HOT", "SHFE.rb2405", 20240120));
 }
 
 // WTSHotMgr.cpp:413-462
@@ -266,12 +276,117 @@ TEST_F(R56HotMgr, ReleaseResetsCustomRules)
 	m_mgr.release();	// 二次 release 必须安全
 }
 
-// 产品缺陷占位：切换日之前查询会在 begin() 上执行 cit--（std::map 迭代器下越界）。
-// 见 docs/迭代计划/迭代01/bugs/R56.md BUG-R56-001；默认不执行，避免进程崩溃。
-// WTSHotMgr.cpp:291-295,337-341
-TEST_F(R56HotMgr, DISABLED_RawCodeBeforeFirstSwitchDate)
+// WTSHotMgr.cpp:273-358
+TEST_F(R56HotMgr, CustomRawCodeDateBoundaries)
 {
 	ASSERT_TRUE(m_mgr.loadHots(m_file.c_str()));
+
+	// 查询早于首条切换日时无历史段，两个接口都返回空值。
+	EXPECT_STREQ("", m_mgr.getCustomRawCode("HOT", "SHFE.rb", 20240101));
+	EXPECT_STREQ("", m_mgr.getPrevCustomRawCode("HOT", "SHFE.rb", 20240101));
+
+	// 首条切换日当天生效；首段没有上一合约。
+	EXPECT_STREQ("rb2401", m_mgr.getCustomRawCode("HOT", "SHFE.rb", 20240102));
+	EXPECT_STREQ("", m_mgr.getPrevCustomRawCode("HOT", "SHFE.rb", 20240102));
+
+	// 首条与第二条切换日之间仍是首段，上一主力为空。
+	EXPECT_STREQ("rb2401", m_mgr.getCustomRawCode("HOT", "SHFE.rb", 20240105));
+	EXPECT_STREQ("", m_mgr.getPrevCustomRawCode("HOT", "SHFE.rb", 20240105));
+
+	// 第二条切换日之后，当前与上一主力都回退到各自区间。
+	EXPECT_STREQ("rb2405", m_mgr.getCustomRawCode("HOT", "SHFE.rb", 20240110));
+	EXPECT_STREQ("rb2401", m_mgr.getPrevCustomRawCode("HOT", "SHFE.rb", 20240110));
+	EXPECT_STREQ("rb2405", m_mgr.getCustomRawCode("HOT", "SHFE.rb", 20240115));
+	EXPECT_STREQ("rb2401", m_mgr.getPrevCustomRawCode("HOT", "SHFE.rb", 20240115));
+
+	// 尾后查询稳定返回最后主力及其前一主力。
+	EXPECT_STREQ("rb2410", m_mgr.getCustomRawCode("HOT", "SHFE.rb", 20241231));
+	EXPECT_STREQ("rb2405", m_mgr.getPrevCustomRawCode("HOT", "SHFE.rb", 20241231));
+
+	// 公开主力包装入口使用相同日期语义。
 	EXPECT_STREQ("", m_mgr.getRawCode("SHFE", "rb", 20240101));
 	EXPECT_STREQ("", m_mgr.getPrevRawCode("SHFE", "rb", 20240101));
+}
+
+TEST_F(R56HotMgr, EmptyCustomRuleMapReturnsEmptyAndNonEmptyMapStillWorks)
+{
+	const std::string emptyRules = r56tmp::write_file(
+		m_dir, "empty_product_hots.json", R"({"SHFE":{"rb":[]}})");
+	ASSERT_TRUE(m_mgr.loadCustomRules("EMPTY", emptyRules.c_str()));
+
+	EXPECT_STREQ("", m_mgr.getCustomRawCode("EMPTY", "SHFE.rb", 20240115));
+	EXPECT_STREQ("", m_mgr.getPrevCustomRawCode("EMPTY", "SHFE.rb", 20240115));
+	EXPECT_FALSE(m_mgr.isCustomHot("EMPTY", "SHFE.rb2401", 20240115));
+
+	// 正控：非空规则仍按正常日期区间选择当前与上一主力。
+	ASSERT_TRUE(m_mgr.loadHots(m_file.c_str()));
+	EXPECT_STREQ("rb2405", m_mgr.getCustomRawCode("HOT", "SHFE.rb", 20240115));
+	EXPECT_STREQ("rb2401", m_mgr.getPrevCustomRawCode("HOT", "SHFE.rb", 20240115));
+}
+
+TEST_F(R56HotMgr, SplitSectionsUsesOnlyTheFirstFutureRuleAndSkipsEmptyInitialFrom)
+{
+	const std::string futureRules = r56tmp::write_file(m_dir, "future_hots.json", R"({
+		"SHFE": {
+			"rb": [
+				{"date": 20240102, "from": "",       "to": "rb2401", "oldclose": 0.0,   "newclose": 100.0},
+				{"date": 20240110, "from": "rb2401", "to": "rb2405", "oldclose": 100.0, "newclose": 50.0},
+				{"date": 20240120, "from": "rb2405", "to": "rb2410", "oldclose": 200.0, "newclose": 100.0},
+				{"date": 20240130, "from": "rb2410", "to": "rb2415", "oldclose": 100.0, "newclose": 50.0}
+			]
+		}
+	})");
+	ASSERT_TRUE(m_mgr.loadCustomRules("HOT", futureRules.c_str()));
+
+	// 首条规则前没有有效的 from 合约；未来规则的 from 不能回填这个空档。
+	HotSections beforeFirstSwitch;
+	ASSERT_TRUE(m_mgr.splitHotSecions("SHFE", "rb", 20240101, 20240101, beforeFirstSwitch));
+	EXPECT_TRUE(beforeFirstSwitch.empty());
+
+	// 2024-01-10 的规则使 rb2405 生效至 2024-01-19。
+	// 后续切换日期也在请求区间之后，不得再为同一日期范围添加重叠区段。
+	HotSections betweenSwitches;
+	betweenSwitches.emplace_back(HotSection("existing", 20231201, 20231202, 7.0));
+	ASSERT_TRUE(m_mgr.splitHotSecions("SHFE", "rb", 20240111, 20240119, betweenSwitches));
+	ASSERT_EQ(2u, betweenSwitches.size());
+	EXPECT_EQ("existing", betweenSwitches[0]._code);
+	EXPECT_EQ(20231201u, betweenSwitches[0]._s_date);
+	EXPECT_EQ(20231202u, betweenSwitches[0]._e_date);
+	EXPECT_DOUBLE_EQ(7.0, betweenSwitches[0]._factor);
+	EXPECT_EQ("rb2405", betweenSwitches[1]._code);
+	EXPECT_EQ(20240111u, betweenSwitches[1]._s_date);
+	EXPECT_EQ(20240119u, betweenSwitches[1]._e_date);
+	EXPECT_DOUBLE_EQ(2.0, betweenSwitches[1]._factor);
+
+	// 窗口终点恰逢切换日：旧合约截止前一日，新合约从切换日开始。
+	HotSections endingOnSwitch;
+	ASSERT_TRUE(m_mgr.splitHotSecions("SHFE", "rb", 20240111, 20240120, endingOnSwitch));
+	ASSERT_EQ(2u, endingOnSwitch.size());
+	EXPECT_EQ("rb2405", endingOnSwitch[0]._code);
+	EXPECT_EQ(20240111u, endingOnSwitch[0]._s_date);
+	EXPECT_EQ(20240119u, endingOnSwitch[0]._e_date);
+	EXPECT_DOUBLE_EQ(2.0, endingOnSwitch[0]._factor);
+	EXPECT_EQ("rb2410", endingOnSwitch[1]._code);
+	EXPECT_EQ(20240120u, endingOnSwitch[1]._s_date);
+	EXPECT_EQ(20240120u, endingOnSwitch[1]._e_date);
+	EXPECT_DOUBLE_EQ(4.0, endingOnSwitch[1]._factor);
+
+	// 所有已配置切换都早于窗口时，整个窗口都属于最后一份合约。
+	HotSections afterAllSwitches;
+	ASSERT_TRUE(m_mgr.splitHotSecions("SHFE", "rb", 20240201, 20240205, afterAllSwitches));
+	ASSERT_EQ(1u, afterAllSwitches.size());
+	EXPECT_EQ("rb2415", afterAllSwitches[0]._code);
+	EXPECT_EQ(20240201u, afterAllSwitches[0]._s_date);
+	EXPECT_EQ(20240205u, afterAllSwitches[0]._e_date);
+	EXPECT_DOUBLE_EQ(8.0, afterAllSwitches[0]._factor);
+
+	// 反向区间不生成新段，也不清除调用方已有内容。
+	HotSections reversed;
+	reversed.emplace_back(HotSection("existing", 20231201, 20231202, 7.0));
+	ASSERT_TRUE(m_mgr.splitHotSecions("SHFE", "rb", 20240120, 20240119, reversed));
+	ASSERT_EQ(1u, reversed.size());
+	EXPECT_EQ("existing", reversed[0]._code);
+	EXPECT_EQ(20231201u, reversed[0]._s_date);
+	EXPECT_EQ(20231202u, reversed[0]._e_date);
+	EXPECT_DOUBLE_EQ(7.0, reversed[0]._factor);
 }

@@ -85,28 +85,38 @@ TEST_F(R103Fixture, R103Replayer_IntegratedMinuteHotBars)
 	ASSERT_EQ(1, slice->size());
 	EXPECT_DOUBLE_EQ(100.0, slice->at(0)->close);
 	slice->release();
-
-	// 0106 09:30 早于主力最后一根 10:00 -> bAllCovered，分段只取 IF2002 的 14:00 一根
-	replayer.run(false);
-
-	ASSERT_EQ(3u, sink.bars.size());
-	EXPECT_EQ(kDay1, sink.bars[0].date);
-	EXPECT_EQ(1500u, sink.bars[0].time);
-	EXPECT_DOUBLE_EQ(105.0, sink.bars[0].close);
-	EXPECT_EQ(kDay2, sink.bars[1].date);
-	EXPECT_EQ(1000u, sink.bars[1].time);
-	EXPECT_DOUBLE_EQ(110.0, sink.bars[1].close);
-	EXPECT_EQ(kDay2, sink.bars[2].date);
-	EXPECT_EQ(1400u, sink.bars[2].time);
-	EXPECT_DOUBLE_EQ(410.0, sink.bars[2].close);
 	EXPECT_EQ(1u, loader.rawCalls["CFFEX.IF.2002"]);
 	EXPECT_EQ(0u, loader.rawCalls["CFFEX.IF.2001"]);
 
-	// 后复权（+）：走 L4004 的 _factor 记录，主段不缩放、分段按 0.75 缩放
+	// 0106 09:30 早于主力最后一根 10:00 -> bAllCovered 裁掉重叠的 09:30；保留 14:00 与区间内 0107 09:30
+	replayer.run(false);
+
+	ASSERT_EQ(5u, sink.bars.size());
+	EXPECT_EQ(kDay1, sink.bars[0].date);
+	EXPECT_EQ(930u, sink.bars[0].time);
+	EXPECT_DOUBLE_EQ(100.0, sink.bars[0].close);
+	EXPECT_EQ(kDay1, sink.bars[1].date);
+	EXPECT_EQ(1500u, sink.bars[1].time);
+	EXPECT_DOUBLE_EQ(105.0, sink.bars[1].close);
+	EXPECT_EQ(kDay2, sink.bars[2].date);
+	EXPECT_EQ(1000u, sink.bars[2].time);
+	EXPECT_DOUBLE_EQ(110.0, sink.bars[2].close);
+	EXPECT_EQ(kDay2, sink.bars[3].date);
+	EXPECT_EQ(1400u, sink.bars[3].time);
+	EXPECT_DOUBLE_EQ(410.0, sink.bars[3].close);
+	EXPECT_EQ(20200107u, sink.bars[4].date);
+	EXPECT_EQ(930u, sink.bars[4].time);
+	EXPECT_DOUBLE_EQ(420.0, sink.bars[4].close);
+	// run_by_bars 的 checkUnbars 还会加载无后缀原始流，查询到 IF2001/IF2002 两段。
+	EXPECT_EQ(2u, loader.rawCalls["CFFEX.IF.2002"]);
+	EXPECT_EQ(1u, loader.rawCalls["CFFEX.IF.2001"]);
+
+	// 后复权（+）：oldclose/newclose 为 4/3，主段不缩放、IF2002 分段按 4/3 放大
 	slice = replayer.get_kline_slice(kHotPlus, "m", 10, 1, false);
 	ASSERT_NE(nullptr, slice);
-	ASSERT_EQ(4, slice->size());
+	ASSERT_EQ(5, slice->size());
 	EXPECT_DOUBLE_EQ(100.0, slice->at(0)->close);
-	EXPECT_DOUBLE_EQ(307.5, slice->at(3)->close);
+	EXPECT_DOUBLE_EQ(410.0 * (400.0 / 300.0), slice->at(3)->close);
+	EXPECT_DOUBLE_EQ(420.0 * (400.0 / 300.0), slice->at(4)->close);
 	slice->release();
 }

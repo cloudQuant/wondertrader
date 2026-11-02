@@ -10,7 +10,6 @@
 #include "q04_trader_fixture.h"
 
 #include <string>
-#include <vector>
 
 using namespace wtp;
 
@@ -54,6 +53,56 @@ struct OrdEnv
 		_adapter.onRspOrders(ay);
 		ay->release();
 		ord->release();
+	}
+};
+
+struct DetachedOrderCancelEnv
+{
+	q04::TempRoot			_tmp{ "cancel_missing_contract" };
+	q04::FakeTraderApi		_api;
+	q04::FakeBaseDataMgr	_bd;
+	ActionPolicyMgr		_policy;
+	q04::FakeSink			_sink;
+	TraderAdapter			_adapter;
+	std::string			_id;
+
+	bool init(const char* id, IBaseDataMgr* bdMgr)
+	{
+		_id = id;
+		const std::string path = _tmp.file("policy.json");
+		_tmp.write(path, q04::policyJsonOpenCloseLimited());
+		if (!_policy.init(path.c_str()) || !_adapter.initExt(_id.c_str(), &_api, bdMgr, &_policy))
+			return false;
+		_adapter.addSink(&_sink);
+		if (!_adapter.run())
+			return false;
+		_adapter.onLoginResult(true, "ok", 20240315);
+		return true;
+	}
+
+	void registerOrderWithoutRetainingContract(uint32_t localid, WTSContractInfo* cInfo)
+	{
+		WTSOrderInfo* order = WTSOrderInfo::create();
+		order->setCode(cInfo->getCode());
+		order->setExchange(cInfo->getExchg());
+		order->setDirection(WDT_LONG);
+		order->setOffsetType(WOT_OPEN);
+		order->setOrderFlag(WOF_NOR);
+		order->setVolume(1);
+		order->setVolLeft(1);
+		order->setOrderState(WOS_NotTraded_Queuing);
+		order->setOrderID("ORD-MISSING-CONTRACT");
+		const std::string userTag = std::string("wtp.") + _id + "." + std::to_string(localid);
+		order->setUserTag(userTag.c_str());
+		order->setContractInfo(cInfo);
+		WTSArray* orders = WTSArray::create();
+		orders->append(order);
+		_adapter.onRspOrders(orders);
+		orders->release();
+		// onRspOrders uses this metadata to register the live order; clear it so
+		// cancel() must resolve the contract through the configured data manager.
+		order->setContractInfo(nullptr);
+		order->release();
 	}
 };
 
@@ -149,6 +198,45 @@ TEST(q04_trader_entrust, price_type_and_order_flag_mapping)
 	EXPECT_EQ((int)WOF_FAK, env._api._entrusts[3]._oflag);
 	EXPECT_EQ((int)WPT_ANYPRICE, env._api._entrusts[4]._ptype);
 	EXPECT_EQ((int)WOT_CLOSETODAY, env._api._entrusts[4]._offset);
+}
+
+TEST(q04_trader_entrust, malformed_standard_codes_fail_before_vendor_calls)
+{
+	OrdEnv env;
+	const std::string tooLongExchange = std::string(16, 'X') + ".ag2406";
+	const std::string tooLongFullCode = std::string("SHFE.") + std::string(MAX_INSTRUMENT_LENGTH - 5, 'x');
+	const char* invalidCodes[] = {
+		"ag2406", ".ag2406", "SHFE.", "SHFE..ag2406", "SHFE.ag.2406.10.C",
+		tooLongExchange.c_str(), tooLongFullCode.c_str()
+	};
+
+	for (const char* code : invalidCodes)
+	{
+		const uint32_t makeEntrustIdCalls = env._api._mkEidCnt;
+		const std::size_t orderInsertCalls = env._api._entrusts.size();
+		EXPECT_EQ(UINT_MAX, env._adapter.openLong(code, 5000.0, 1.0, 0)) << code;
+		EXPECT_EQ(UINT_MAX, env._adapter.openShort(code, 5000.0, 1.0, 0)) << code;
+		EXPECT_EQ(UINT_MAX, env._adapter.closeLong(code, 5000.0, 1.0, false, 0)) << code;
+		EXPECT_EQ(UINT_MAX, env._adapter.closeShort(code, 5000.0, 1.0, false, 0)) << code;
+		EXPECT_EQ(makeEntrustIdCalls, env._api._mkEidCnt) << code;
+		EXPECT_EQ(orderInsertCalls, env._api._entrusts.size()) << code;
+		EXPECT_DOUBLE_EQ(0.0, env._adapter.getUndoneQty(code)) << code;
+	}
+
+	const uint32_t normalId = env._adapter.openLong(kStdAg, 5000.0, 1.0, 0);
+	const uint32_t dottedInstrumentId = env._adapter.openLong("SHFE.rb.2406", 5000.0, 1.0, 0);
+	const uint32_t optionId = env._adapter.openLong("CFFEX.IO2007.C.4000", 5000.0, 1.0, 0);
+	ASSERT_NE(UINT_MAX, normalId);
+	ASSERT_NE(UINT_MAX, dottedInstrumentId);
+	ASSERT_NE(UINT_MAX, optionId);
+	ASSERT_EQ(3u, env._api._mkEidCnt);
+	ASSERT_EQ(3u, env._api._entrusts.size());
+	EXPECT_EQ("SHFE", env._api._entrusts[0]._exchg);
+	EXPECT_EQ("ag2406", env._api._entrusts[0]._code);
+	EXPECT_EQ("SHFE", env._api._entrusts[1]._exchg);
+	EXPECT_EQ("rb.2406", env._api._entrusts[1]._code);
+	EXPECT_EQ("CFFEX", env._api._entrusts[2]._exchg);
+	EXPECT_EQ("IO2007.C.4000", env._api._entrusts[2]._code);
 }
 
 TEST(q04_trader_entrust, insert_failure_returns_uint_max_without_counting_undone)
@@ -328,6 +416,25 @@ TEST(q04_trader_entrust, cancel_single_order_goes_through_doCancel)
 	orders->release();
 }
 
+TEST(q04_trader_entrust, cancel_single_order_fails_closed_without_manager_or_contract)
+{
+	DetachedOrderCancelEnv noManager;
+	ASSERT_TRUE(noManager.init("uft_no_bd", nullptr));
+	WTSContractInfo* managerOnlyContract = WTSContractInfo::create("ag2406", "ag2406", "SHFE", "ag");
+	noManager.registerOrderWithoutRetainingContract(7101, managerOnlyContract);
+	managerOnlyContract->release();
+	EXPECT_FALSE(noManager._adapter.cancel(7101));
+	EXPECT_TRUE(noManager._api._actions.empty());
+
+	DetachedOrderCancelEnv unknownContract;
+	ASSERT_TRUE(unknownContract.init("uft_unknown_contract", &unknownContract._bd));
+	WTSContractInfo* unknown = WTSContractInfo::create("zz9999", "zz9999", "SHFE", "zz");
+	unknownContract.registerOrderWithoutRetainingContract(7102, unknown);
+	unknown->release();
+	EXPECT_FALSE(unknownContract._adapter.cancel(7102));
+	EXPECT_TRUE(unknownContract._api._actions.empty());
+}
+
 TEST(q04_trader_entrust, cancel_all_filters_alive_orders_by_full_code)
 {
 	OrdEnv env;
@@ -383,10 +490,9 @@ TEST(q04_trader_entrust, cancel_all_filters_alive_orders_by_full_code)
 	deadAg->release();
 }
 
-//cancelAll 的非空标准码过滤需要逐项读取 ContractInfo。onRspOrders 虽能从
-//_bd_mgr 回查合约并统计订单，但当前实现没有把回查结果写回 OrderInfo，故这里保留
-//一条精确的契约回归。产品修复前它会在 cancelAll(kStdAg) 处触发空指针，暂禁用。
-TEST(DISABLED_q04_trader_entrust, cancel_all_with_lookup_only_contract_info)
+//onRspOrders 会用基础数据回查合约以登记订单，但不会把结果回填到 OrderInfo。
+//cancelAll 必须在非空代码过滤时再次回查该订单的合约。
+TEST(q04_trader_entrust, cancel_all_with_lookup_only_contract_info)
 {
 	OrdEnv env;
 	uint32_t localid = env._adapter.openLong(kStdAg, 5000.0, 1.0, 0);
@@ -418,6 +524,43 @@ TEST(DISABLED_q04_trader_entrust, cancel_all_with_lookup_only_contract_info)
 	ASSERT_EQ(1u, env._api._actions.size());
 	EXPECT_EQ("ORD-LOOKUP", env._api._actions[0]._code);
 	noComm->release();
+}
+
+TEST(q04_trader_entrust, cancel_all_skips_unknown_contract_and_cancels_known_orders)
+{
+	OrdEnv env;
+	const uint32_t unknownId = env._adapter.openLong(kStdAg, 5000.0, 1.0, 0);
+	const uint32_t knownId = env._adapter.openShort(kStdCu, 70000.0, 1.0, 0);
+	ASSERT_NE(UINT_MAX, unknownId);
+	ASSERT_NE(UINT_MAX, knownId);
+
+	WTSOrderInfo* unknown = q04::orderFromSnap(env._api._entrusts[0], "ORD-UNKNOWN");
+	WTSOrderInfo* known = q04::orderFromSnap(env._api._entrusts[1], "ORD-KNOWN");
+	ASSERT_EQ(nullptr, unknown->getContractInfo());
+	ASSERT_EQ(nullptr, known->getContractInfo());
+	WTSArray* ay = WTSArray::create();
+	ay->append(unknown);
+	ay->append(known);
+	env._adapter.onRspOrders(ay);
+	ay->release();
+
+	OrderMap* orders = env._adapter.getOrders("");
+	ASSERT_NE(nullptr, orders);
+	ASSERT_EQ(2u, orders->size());
+	orders->release();
+
+	//订单能在基础数据存在时进入 _orders，但后续回查可能失败。空代码的全撤
+	//也必须先校验合约，跳过未知单，同时撤销仍可回查的已知单。
+	ASSERT_TRUE(env._bd.removeContract("SHFE", "ag2406"));
+	OrderIDs ids = env._adapter.cancelAll("");
+	ASSERT_EQ(1u, ids.size());
+	EXPECT_EQ(knownId, ids[0]);
+	ASSERT_EQ(1u, env._api._actions.size());
+	EXPECT_EQ("ORD-KNOWN", env._api._actions[0]._code);
+	EXPECT_EQ("EU000002", env._api._actions[0]._exchg);
+
+	unknown->release();
+	known->release();
 }
 
 // 裸代码输入保留为单独禁用探针。initExt 所需 ITraderApi 是必需依赖，nullptr

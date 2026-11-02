@@ -19,6 +19,7 @@
 #include <Share/threadpool.hpp>
 #include "../Share/SpinMutex.hpp"
 #include <atomic>
+#include <cstddef>
 #include <condition_variable>
 #include <deque>
 #include <functional>
@@ -34,6 +35,7 @@ class IBaseDataMgr;
 class TraderAdapter;
 class IHotMgr;
 class WtDiffExecuterConcurrencyTest;
+class P02DiffExecuterTestAccess;
 
 /*!
  * \brief 差价执行器类
@@ -196,7 +198,7 @@ private:
 	 * \brief 加载数据
 	 * \details 从存储中读取差价执行器的状态数据，恢复运行状态
 	 */
-	void	load_data();
+	bool	load_data();
 
 public:
 	//////////////////////////////////////////////////////////////////////////
@@ -427,6 +429,7 @@ public:
 
 private:
 	friend class WtDiffExecuterConcurrencyTest;
+	friend class P02DiffExecuterTestAccess;
 	//! 执行单元映射，键为合约代码，值为执行单元指针
 	ExecuteUnitMap		_unit_map;
 	std::map<std::string, std::shared_ptr<UnitLifecycleState>> _unit_states;
@@ -475,6 +478,10 @@ private:
 	// Private deterministic fault/barrier injection used only by the friend test.
 	std::function<bool(bool)> _save_test_hook;
 	std::function<void()> _save_after_commit_test_hook;
+	// Static syscall seams keep fault injection out of executor object layout.
+	static std::size_t (*_save_write_test_hook)(void*, const void*, std::size_t);
+	static int (*_save_flush_test_hook)(void*);
+	static int (*_save_close_test_hook)(void*);
 	std::function<void()> _failure_mutation_test_hook;
 	std::function<void(const std::string&)> _omitted_sweep_test_hook;
 	std::function<void(const std::string&)> _unit_lookup_test_hook;

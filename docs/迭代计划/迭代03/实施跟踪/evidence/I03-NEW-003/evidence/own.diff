@@ -1,0 +1,63 @@
+--- /tmp/ctpm-i03-init/red-src/ParserCTPMini.cpp	2026-11-01 22:43:03
++++ src/ParserCTPMini/ParserCTPMini.cpp	2026-11-01 22:44:06
+@@ -103,6 +103,19 @@
+ 
+ bool ParserCTPMini::init(WTSVariant* config)
+ {
++	if (config == NULL)
++	{
++		write_log(m_sink, LL_ERROR, "[ParserCTPMini] Cannot initialize without configuration");
++		return false;
++	}
++	// A successful API may still have vendor callbacks in flight after release.
++	// Keep its module resident and do not replace it with another instance.
++	if (m_hInstCTP != NULL || m_pUserAPI != NULL)
++	{
++		write_log(m_sink, LL_ERROR, "[ParserCTPMini] Market data API is already initialized");
++		return false;
++	}
++
+ 	m_strFrontAddr = config->getCString("front");
+ 	m_strBroker = config->getCString("broker");
+ 	m_strUserID = config->getCString("user");
+@@ -136,7 +149,13 @@
+ 	}
+ 
+ 	std::string dllpath = (moduleDir == NULL ? std::string() : std::string(moduleDir)) + moduleFile;
+-	m_hInstCTP = DLLHelper::load_library(dllpath.c_str());
++	const std::string logPath = dllpath.size() > 128 ? dllpath.substr(0, 128) + "..." : dllpath;
++	DllHandle library = DLLHelper::load_library(dllpath.c_str());
++	if (library == NULL)
++	{
++		write_log(m_sink, LL_ERROR, "[ParserCTPMini] Failed to load market data API module: {}", logPath);
++		return false;
++	}
+ 
+ #ifdef _WIN32
+ #	ifdef _WIN64
+@@ -147,8 +166,23 @@
+ #else
+ 	const char* creatorName = "_ZN15CThostFtdcMdApi15CreateFtdcMdApiEPKcbb";
+ #endif
+-	m_funcCreator = (CTPCreator)DLLHelper::get_symbol(m_hInstCTP, creatorName);
+-	m_pUserAPI = m_funcCreator(path.c_str(), false, false);
++	CTPCreator creator = (CTPCreator)DLLHelper::get_symbol(library, creatorName);
++	if (creator == NULL)
++	{
++		write_log(m_sink, LL_ERROR, "[ParserCTPMini] Market data API creator symbol not found: {}", creatorName);
++		DLLHelper::free_library(library);
++		return false;
++	}
++	CThostFtdcMdApi* api = creator(path.c_str(), false, false);
++	if (api == NULL)
++	{
++		write_log(m_sink, LL_ERROR, "[ParserCTPMini] Market data API creator returned null: {}", logPath);
++		DLLHelper::free_library(library);
++		return false;
++	}
++	m_hInstCTP = library;
++	m_funcCreator = creator;
++	m_pUserAPI = api;
+ 	m_pUserAPI->RegisterSpi(this);
+ 	m_pUserAPI->RegisterFront((char*)m_strFrontAddr.c_str());
+ 

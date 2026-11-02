@@ -221,19 +221,19 @@ TEST_F(P10DayDsbTest, SameDateIdenticalBarIsNoOp)
 
 TEST_F(P10DayDsbTest, OlderThanLastDateIsIgnored)
 {
-	WTSBarStruct b2 = p10_make_bar(20240105, 2);
-	WTSBarStruct b1 = p10_make_bar(20240108, 1);
-	ASSERT_TRUE(_writer->dump_day_data(_ct, &b2));
-	// 20240105 < 20240108，既不追加也不替换
-	ASSERT_TRUE(_writer->dump_day_data(_ct, &b1));
+	WTSBarStruct latest = p10_make_bar(20240108, 8);
+	WTSBarStruct older = p10_make_bar(20240105, 5);
+	ASSERT_TRUE(_writer->dump_day_data(_ct, &latest));
+	// 较旧数据应忽略，不追加也不替换最新日期。
+	ASSERT_TRUE(_writer->dump_day_data(_ct, &older));
 
 	const std::string file = day_file("rb2210");
 	std::string content = p10_read_file(file);
 	ASSERT_EQ(content.size(), sizeof(BlockHeader) + sizeof(WTSBarStruct));
 	ASSERT_TRUE(_writer->proc_block_data(file.c_str(), content, true, false));
 	const WTSBarStruct* bars = (const WTSBarStruct*)content.data();
-	EXPECT_EQ(bars[0].date, 20240105u);
-	EXPECT_EQ(std::memcmp(&bars[0], &b2, sizeof(b2)), 0);
+	EXPECT_EQ(bars[0].date, 20240108u);
+	EXPECT_EQ(std::memcmp(&bars[0], &latest, sizeof(latest)), 0);
 }
 
 TEST_F(P10DayDsbTest, OverOneHundredBarsSwitchesToCompressedV2)
@@ -346,14 +346,22 @@ TEST_F(P10DayDsbTest, AltCodeFileRenamedBeforeWrite)
 	EXPECT_FALSE(std::filesystem::exists(oldFile));
 	ASSERT_TRUE(std::filesystem::exists(newFile));
 	std::string content = p10_read_file(newFile);
-	ASSERT_EQ(content.size(), sizeof(BlockHeader) + sizeof(WTSBarStruct));
+	ASSERT_EQ(content.size(), sizeof(BlockHeader) + 4 * sizeof(WTSBarStruct));
 	BlockHeader hdr;
 	std::memcpy(&hdr, content.data(), sizeof(hdr));
 	EXPECT_EQ(hdr._type, (uint16_t)BT_HIS_Day);
 	EXPECT_EQ(hdr._version, (uint16_t)BLOCK_VERSION_RAW_V2);
-	WTSBarStruct stored;
-	std::memcpy(&stored, content.data() + sizeof(BlockHeader), sizeof(stored));
-	EXPECT_EQ(std::memcmp(&stored, &bar, sizeof(bar)), 0);
+	ASSERT_TRUE(_writer->proc_block_data(newFile.c_str(), content, true, false));
+	ASSERT_EQ(content.size(), 4 * sizeof(WTSBarStruct));
+	const WTSBarStruct* stored = reinterpret_cast<const WTSBarStruct*>(content.data());
+	for (uint32_t i = 0; i < 3; ++i)
+	{
+		WTSBarStruct historical = p10_make_bar(20240101 + i, i);
+		EXPECT_EQ(stored[i].date, historical.date);
+		EXPECT_EQ(std::memcmp(&stored[i], &historical, sizeof(historical)), 0);
+	}
+	EXPECT_EQ(stored[3].date, bar.date);
+	EXPECT_EQ(std::memcmp(&stored[3], &bar, sizeof(bar)), 0);
 }
 
 TEST_F(P10DayDsbTest, UnwritableBaseDirRejected)

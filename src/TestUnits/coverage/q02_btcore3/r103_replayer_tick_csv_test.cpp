@@ -45,8 +45,13 @@ TEST_F(R103Fixture, R103Replayer_CsvTickDsbAndSliceFallback)
 	replayer.register_sink(&sink, "r103_csv_tick");
 	ASSERT_TRUE(replayer.prepare());
 
-	// 09:32 落在两笔之间：lower_bound 命中 09:33，回退后 cursor==1 -> NULL
-	EXPECT_EQ(nullptr, replayer.get_tick_slice(kCode, 2u, 202001020932ull));
+	// 09:32 落在两笔之间：严格早于 cutoff 的可见前缀只有 09:31，返回部分 slice。
+	WTSTickSlice* between = replayer.get_tick_slice(kCode, 2u, 202001020932ull);
+	ASSERT_NE(nullptr, between);
+	ASSERT_EQ(1u, between->size());
+	EXPECT_EQ(931u, between->at(0)->action_time / 100000u);
+	EXPECT_DOUBLE_EQ(10.0, between->at(0)->price);
+	between->release();
 	// 复位 tick 缓存后按 09:33 重新定位，取回 09:31 一笔
 	replayer.clear_cache();
 	WTSTickSlice* slice = replayer.get_tick_slice(kCode, 2u, 202001020933ull);

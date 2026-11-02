@@ -2,8 +2,7 @@
 //
 // 覆盖对象（src/WtDataStorageAD/WtDataWriterAD.cpp）：
 //  - init（L73-104）：路径标准化/建目录、四个缓存文件名、groupsize、四个 disable 开关
-//  - loadCache（L116-281）：新建块的块头（BLK_FLAG/BT_RT_Cache/version=1/capacity=400）、
-//    已有块的 _size 夹取与索引重建（tick/m1/m5/d1 四段同构）
+//  - loadCache（L116-281）：新建块头；已有块头/版本/size/capacity/文件长度校验与索引重建
 //  - resizeRTBlock（L283-325）：容量不足时扩文件 + 重新映射 + _capacity 回写
 //  - writeTick/pushTask（L327-414）：NULL tick、空合约、会话拒收、同步分支
 //  - updateTickCache（L862-1014）：交易日回退/未来日期/量递减三类拒收、
@@ -13,9 +12,27 @@
 // 块内容一律通过回读自己临时目录下的 .dmb 文件来断言（不使用 private public）。
 #include "r4_ad_fixture.h"
 
+#include <limits>
+
+#ifdef WT_DATAWRITERAD_TEST_SEAMS
+extern "C" void wt_data_writer_ad_fail_next_remap_for_test();
+extern "C" void wt_data_writer_ad_set_cache_pre_map_hook_for_test(void (*hook)(const char*));
+#endif
+
 namespace {
 
 static_assert(sizeof(R4BlkHead) == sizeof(RTBlockHeader), "块头回读布局必须与生产一致");
+
+#ifdef WT_DATAWRITERAD_TEST_SEAMS
+bool g_cachePreMapTruncateSucceeded = false;
+
+void truncateCacheAfterPreflightForTest(const char* filename)
+{
+	std::error_code ec;
+	std::filesystem::resize_file(filename, sizeof(RTBlockHeader) - 1, ec);
+	g_cachePreMapTruncateSucceeded = !ec;
+}
+#endif
 
 // d1 缓存项的 time 字段被写成交易日本身（WtDataWriterAD.cpp:601/620）
 static const uint32_t R4_TD1 = 20230103;
@@ -110,15 +127,17 @@ TEST_F(R4WriterADTest, DisableFlagsKeepTickCacheButTouchNothingElse)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 3. 已有缓存块：_size 夹到 _capacity，并按 item 的 exchg.code 重建索引
+// 3. 已有合法缓存块：按 item 的 exchg.code 重建索引
 //////////////////////////////////////////////////////////////////////////
-TEST_F(R4WriterADTest, ReloadExistingCacheClampsSizeAndRebuildsIndex)
+TEST_F(R4WriterADTest, ReloadExistingCacheRebuildsIndex)
 {
 	std::vector<TickCacheItem> items;
 	items.push_back(make_tick_item("EXR3", "rb2301", R4_TD1, 3811.0));
 	items.push_back(make_tick_item("EXR3", "rb2302", R4_TD1, 3812.0));
-	// 故意写 size=5 > capacity=2：L136 的 min(size, capacity) 必须夹回 2
-	write_block_file(path_of("cache_tick.dmb"), BLK_FLAG, BT_RT_Cache, 1, 5, 2, tick_payload(items));
+	write_block_file(path_of("cache_tick.dmb"), BLK_FLAG, BT_RT_Cache, 1, 2, 2, tick_payload(items));
+	const uint64_t tickFileSize = file_size_or_zero(path_of("cache_tick.dmb"));
+	// A failed remap may leave a longer physical file with the old valid capacity.
+	std::filesystem::resize_file(path_of("cache_tick.dmb"), tickFileSize + 17);
 
 	// K 线三段同样给已有文件，走 L191/232/273 的索引重建分支
 	std::vector<BarCacheItem> bar_items;
@@ -131,6 +150,7 @@ TEST_F(R4WriterADTest, ReloadExistingCacheClampsSizeAndRebuildsIndex)
 	R4BlkHead head = read_head(path_of("cache_tick.dmb"));
 	EXPECT_EQ(head._size, 2u);
 	EXPECT_EQ(head._capacity, 2u);
+	EXPECT_EQ(file_size_or_zero(path_of("cache_tick.dmb")), tickFileSize + 17);
 	EXPECT_EQ(read_head(path_of("cache_m1.dmb"))._size, 1u);
 
 	// 索引来自文件里的 item，而不是新写入：两条都能取到，且价格与落盘一致
@@ -153,6 +173,161 @@ TEST_F(R4WriterADTest, ReloadExistingCacheClampsSizeAndRebuildsIndex)
 	WTSTickData* c3 = _writer->getCurTick("rb2399", "EXR3");
 	EXPECT_TRUE(c3 == NULL);
 }
+
+//////////////////////////////////////////////////////////////////////////
+// 3a. 损坏/越界块拒绝初始化，并且在所有文件预检前不改写任何缓存文件
+//////////////////////////////////////////////////////////////////////////
+TEST_F(R4WriterADTest, RejectsMalformedCacheFilesWithoutModifyingAnyCache)
+{
+	enum class Corruption
+	{
+		ShortHeader,
+		BadFlag,
+		BadType,
+		BadVersion,
+		SizeExceedsCapacity,
+		PayloadShorterThanCapacity,
+		ExtremeCapacity
+	};
+	struct CacheCase
+	{
+		const char* _name;
+		const char* _target;
+		Corruption _corruption;
+	};
+	const CacheCase cases[] = {
+		{"short_header", "cache_tick.dmb", Corruption::ShortHeader},
+		{"bad_flag", "cache_m1.dmb", Corruption::BadFlag},
+		{"bad_type", "cache_m5.dmb", Corruption::BadType},
+		{"bad_version", "cache_d1.dmb", Corruption::BadVersion},
+		{"size_over_capacity", "cache_tick.dmb", Corruption::SizeExceedsCapacity},
+		{"payload_short", "cache_m1.dmb", Corruption::PayloadShorterThanCapacity},
+		{"extreme_capacity", "cache_m5.dmb", Corruption::ExtremeCapacity}
+	};
+	const char* cacheNames[] = {"cache_tick.dmb", "cache_m1.dmb", "cache_m5.dmb", "cache_d1.dmb"};
+
+	for (const CacheCase& cacheCase : cases)
+	{
+		const std::filesystem::path caseRoot = _root / cacheCase._name;
+		std::filesystem::create_directories(caseRoot);
+		std::vector<TickCacheItem> tickItems;
+		tickItems.push_back(make_tick_item("EXR4", "rb2301", R4_TD1, 3901.0));
+		std::vector<BarCacheItem> barItems;
+		barItems.push_back(make_bar_item("EXR4", "rb2301", R4_TD1, R4_M1_931, 3901.0));
+		write_block_file((caseRoot / cacheNames[0]).string(), BLK_FLAG, BT_RT_Cache, 1, 1, 1,
+			tick_payload(tickItems));
+		for (size_t i = 1; i < 4; ++i)
+			write_block_file((caseRoot / cacheNames[i]).string(), BLK_FLAG, BT_RT_Cache, 1, 1, 1,
+				bar_payload(barItems));
+
+		const std::filesystem::path target = caseRoot / cacheCase._target;
+		if (cacheCase._corruption == Corruption::ShortHeader)
+		{
+			std::ofstream truncated(target, std::ios::binary | std::ios::trunc);
+			truncated.write("short", 5);
+			ASSERT_TRUE(truncated.good()) << target.string();
+		}
+		else
+		{
+			std::fstream file(target, std::ios::binary | std::ios::in | std::ios::out);
+			ASSERT_TRUE(file.good()) << target.string();
+			R4BlkHead header = {};
+			file.read((char*)&header, sizeof(header));
+			ASSERT_EQ(file.gcount(), static_cast<std::streamsize>(sizeof(header))) << target.string();
+			switch (cacheCase._corruption)
+			{
+			case Corruption::BadFlag:
+				header._blk_flag[0] = 'X';
+				break;
+			case Corruption::BadType:
+				header._type = 0;
+				break;
+			case Corruption::BadVersion:
+				header._version = 2;
+				break;
+			case Corruption::SizeExceedsCapacity:
+				header._size = 2;
+				break;
+			case Corruption::PayloadShorterThanCapacity:
+				header._capacity = 2;
+				break;
+			case Corruption::ExtremeCapacity:
+				header._capacity = (std::numeric_limits<uint32_t>::max)();
+				header._size = 0;
+				break;
+			case Corruption::ShortHeader:
+				break;
+			}
+			file.seekp(0, std::ios::beg);
+			file.write((const char*)&header, sizeof(header));
+			file.flush();
+			ASSERT_TRUE(file.good()) << target.string();
+		}
+
+		auto readBytes = [](const std::filesystem::path& path) {
+			std::ifstream input(path, std::ios::binary);
+			if (!input)
+				return std::string();
+			input.seekg(0, std::ios::end);
+			const std::streamoff length = input.tellg();
+			if (length < 0)
+				return std::string();
+			std::string bytes(static_cast<size_t>(length), '\0');
+			input.seekg(0, std::ios::beg);
+			if (!bytes.empty())
+				input.read(&bytes[0], static_cast<std::streamsize>(bytes.size()));
+			return input || bytes.empty() ? bytes : std::string();
+		};
+		std::vector<std::string> before;
+		for (const char* cacheName : cacheNames)
+		{
+			before.push_back(readBytes(caseRoot / cacheName));
+			ASSERT_FALSE(before.back().empty()) << cacheName;
+		}
+
+		const uint32_t invalidLogCount = _sink->count_containing("Invalid");
+		WtDataWriterAD candidate;
+		WTSVariant* cfg = make_writer_cfg(caseRoot.string(), 1000, true, true, true, true);
+		const bool initialized = candidate.init(cfg, _sink);
+		cfg->release();
+		EXPECT_FALSE(initialized) << cacheCase._name;
+		EXPECT_GT(_sink->count_containing("Invalid"), invalidLogCount) << cacheCase._name;
+
+		for (size_t i = 0; i < 4; ++i)
+			EXPECT_EQ(readBytes(caseRoot / cacheNames[i]), before[i])
+				<< cacheNames[i] << " / " << cacheCase._name;
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 宏专用竞态注入：预检通过后、map 前缩短 tick 文件，验证先检查映射长度再读头。
+//////////////////////////////////////////////////////////////////////////
+#ifdef WT_DATAWRITERAD_TEST_SEAMS
+TEST_F(R4WriterADTest, RejectsCacheShortenedBetweenPreflightAndMap)
+{
+	std::vector<TickCacheItem> tickItems;
+	tickItems.push_back(make_tick_item("EXR5", "rb2301", R4_TD1, 3901.0));
+	write_block_file(path_of("cache_tick.dmb"), BLK_FLAG, BT_RT_Cache, 1, 1, 1, tick_payload(tickItems));
+	std::vector<BarCacheItem> barItems;
+	barItems.push_back(make_bar_item("EXR5", "rb2301", R4_TD1, R4_M1_931, 3901.0));
+	for (const char* cacheName : {"cache_m1.dmb", "cache_m5.dmb", "cache_d1.dmb"})
+		write_block_file(path_of(cacheName), BLK_FLAG, BT_RT_Cache, 1, 1, 1, bar_payload(barItems));
+
+	g_cachePreMapTruncateSucceeded = false;
+	const uint32_t shortMapLogCount = _sink->count_containing("shorter than its RT header");
+	wt_data_writer_ad_set_cache_pre_map_hook_for_test(truncateCacheAfterPreflightForTest);
+	WtDataWriterAD candidate;
+	WTSVariant* cfg = make_writer_cfg(_root.string(), 1000, true, true, true, true);
+	const bool initialized = candidate.init(cfg, _sink);
+	cfg->release();
+	wt_data_writer_ad_set_cache_pre_map_hook_for_test(nullptr);
+
+	EXPECT_FALSE(initialized);
+	EXPECT_TRUE(g_cachePreMapTruncateSucceeded);
+	EXPECT_EQ(file_size_or_zero(path_of("cache_tick.dmb")), sizeof(RTBlockHeader) - 1);
+	EXPECT_GT(_sink->count_containing("shorter than its RT header"), shortMapLogCount);
+}
+#endif
 
 //////////////////////////////////////////////////////////////////////////
 // 4. 容量已满：扩文件 + 重映射 + capacity 回写，且原有条目仍在
@@ -212,7 +387,7 @@ TEST_F(R4WriterADTest, TickCacheAtCapacityResizesFileAndKeepsOldItems)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 三种 bar cache 的 remap 失败都必须保留旧索引/size，并允许恢复后重试。
+// 默认构建保留 rename 后 open_existing_file 失败的回归及文件恢复路径。
 //////////////////////////////////////////////////////////////////////////
 TEST_F(R4WriterADTest, BarCacheExpansionFailureKeepsStateAndRetriesAfterFileRestore)
 {
@@ -267,7 +442,7 @@ TEST_F(R4WriterADTest, BarCacheExpansionFailureKeepsStateAndRetriesAfterFileRest
 		EXPECT_EQ(_sink->bcast_tick(), broadcastsBefore + 1);
 		EXPECT_GE(_sink->count_containing(cacheCase._failure_log), 1u);
 
-		// The failed stream remains at its original logical size and keeps the old row.
+		// The missing original path fails before truncate; preserve the old mapped state.
 		R4BlkHead failedHead = read_head(movedPath.string());
 		EXPECT_EQ(failedHead._size, 1u);
 		EXPECT_EQ(failedHead._capacity, 1u);
@@ -277,8 +452,7 @@ TEST_F(R4WriterADTest, BarCacheExpansionFailureKeepsStateAndRetriesAfterFileRest
 		BarCacheItem missing;
 		EXPECT_FALSE(read_bar_item(movedPath.string(), cacheCase._exchg, "rb_new", missing));
 
-		// Model the on-disk residue of a truncate-success/remap-failure: the file
-		// has the requested extent, while the mapped header and logical state stay old.
+		// Model the disk residue from the separate truncate-success/remap-failure case.
 		const std::uint64_t expandedSize = sizeof(RTBarCache) +
 			sizeof(BarCacheItem) * (1u + R4_STEP);
 		std::filesystem::resize_file(movedPath, expandedSize, ec);
@@ -313,6 +487,110 @@ TEST_F(R4WriterADTest, BarCacheExpansionFailureKeepsStateAndRetriesAfterFileRest
 		R4BlkHead recoveredHead = read_head(cachePath.string());
 		EXPECT_EQ(recoveredHead._size, 2u);
 		EXPECT_EQ(recoveredHead._capacity, 1u + R4_STEP);
+		EXPECT_EQ(file_size_or_zero(cachePath.string()), expandedSize);
+		ASSERT_TRUE(read_bar_item(cachePath.string(), cacheCase._exchg, "rb_old", preserved));
+		EXPECT_DOUBLE_EQ(preserved._bar.close, 3911.0);
+		ASSERT_TRUE(read_bar_item(cachePath.string(), cacheCase._exchg, "rb_new", missing));
+		EXPECT_DOUBLE_EQ(missing._bar.close, 3902.0);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 宏专用故障注入：实际 truncate 成功后让 remap 返回失败，再原位重试。
+//////////////////////////////////////////////////////////////////////////
+#ifdef WT_DATAWRITERAD_TEST_SEAMS
+TEST_F(R4WriterADTest, BarCacheRemapFailureKeepsStateAndRetriesInPlace)
+{
+	struct CacheCase
+	{
+		const char* _name;
+		const char* _filename;
+		const char* _exchg;
+		const char* _failure_log;
+	};
+	const CacheCase cases[] = {
+		{"day", "cache_d1.dmb", "EXR4D", "day bar cache expansion failed"},
+		{"m1", "cache_m1.dmb", "EXR4M1", "m1 bar cache expansion failed"},
+		{"m5", "cache_m5.dmb", "EXR4M5", "m5 bar cache expansion failed"}
+	};
+	const char* barFiles[] = {"cache_d1.dmb", "cache_m1.dmb", "cache_m5.dmb"};
+
+	for (const CacheCase& cacheCase : cases)
+	{
+		if (_writer)
+		{
+			_writer->release();
+			_writer.reset();
+		}
+
+		const std::filesystem::path caseRoot = _root / cacheCase._name;
+		std::filesystem::create_directories(caseRoot);
+		const std::filesystem::path cachePath = caseRoot / cacheCase._filename;
+
+		std::vector<BarCacheItem> oldItems;
+		oldItems.push_back(make_bar_item(cacheCase._exchg, "rb_old", R4_TD1, R4_M1_931, 1111.0));
+		write_block_file(cachePath.string(), BLK_FLAG, BT_RT_Cache, 1, 1, 1, bar_payload(oldItems));
+
+		WTSVariant* cfg = make_writer_cfg(caseRoot.string(), 1000, true, false, false, false);
+		init_writer(cfg);
+
+		WTSCommodityInfo* comm = _bd->add_commodity(cacheCase._exchg, "rb", ContractCategory::CC_Future);
+		WTSContractInfo* oldCt = _bd->add_contract(cacheCase._exchg, "rb_old", comm);
+		WTSContractInfo* ct = _bd->add_contract(cacheCase._exchg, "rb_new", comm);
+		ASSERT_NE(nullptr, oldCt);
+		ASSERT_NE(nullptr, ct);
+
+		const uint32_t broadcastsBefore = _sink->bcast_tick();
+		WTSTickStruct first = make_tick(cacheCase._exchg, "rb_new", R4_TD1, R4_TD1,
+			93000000, 3901.0, 1, 10, 50, 0, 1, 10);
+#ifdef WT_DATAWRITERAD_TEST_SEAMS
+		wt_data_writer_ad_fail_next_remap_for_test();
+#endif
+		write_or_fail(tick_of(ct, first), 0);
+		EXPECT_EQ(_sink->bcast_tick(), broadcastsBefore + 1);
+		EXPECT_GE(_sink->count_containing(cacheCase._failure_log), 1u);
+
+		// truncate succeeded before the injected remap failure: physical extent grew,
+		// while the old mapped header, logical size, and index remain unchanged.
+		const std::uint64_t expandedSize = sizeof(RTBarCache) +
+			sizeof(BarCacheItem) * (1u + R4_STEP);
+		EXPECT_EQ(file_size_or_zero(cachePath.string()), expandedSize);
+		EXPECT_GE(_sink->count_containing("Failed to remap expanded RT cache file"), 1u);
+		R4BlkHead failedHead = read_head(cachePath.string());
+		EXPECT_EQ(failedHead._size, 1u);
+		EXPECT_EQ(failedHead._capacity, 1u);
+		BarCacheItem preserved;
+		ASSERT_TRUE(read_bar_item(cachePath.string(), cacheCase._exchg, "rb_old", preserved));
+		EXPECT_DOUBLE_EQ(preserved._bar.close, 1111.0);
+		BarCacheItem missing;
+		EXPECT_FALSE(read_bar_item(cachePath.string(), cacheCase._exchg, "rb_new", missing));
+		WTSTickStruct oldIdentityTick = make_tick(cacheCase._exchg, "rb_old", R4_TD1, R4_TD1,
+			93030000, 3911.0, 1, 10, 51, 0, 2, 20);
+		write_or_fail(tick_of(oldCt, oldIdentityTick), 0);
+		EXPECT_EQ(_sink->bcast_tick(), broadcastsBefore + 2);
+		ASSERT_TRUE(read_bar_item(cachePath.string(), cacheCase._exchg, "rb_old", preserved));
+		EXPECT_DOUBLE_EQ(preserved._bar.close, 3911.0);
+
+		// Failure in one bar stream does not suppress updates to the other two streams.
+		for (const char* barFile : barFiles)
+		{
+			if (std::strcmp(barFile, cacheCase._filename) == 0)
+				continue;
+			BarCacheItem other;
+			ASSERT_TRUE(read_bar_item((caseRoot / barFile).string(), cacheCase._exchg, "rb_new", other))
+				<< barFile;
+		}
+
+		// Retry the same identity at the unchanged path. The previously extended file
+		// should now remap successfully and commit the new cache slot.
+		WTSTickStruct retry = make_tick(cacheCase._exchg, "rb_new", R4_TD1, R4_TD1,
+			93030000, 3902.0, 1, 10, 51, 0, 2, 20);
+		write_or_fail(tick_of(ct, retry), 0);
+		EXPECT_EQ(_sink->bcast_tick(), broadcastsBefore + 3);
+
+		R4BlkHead recoveredHead = read_head(cachePath.string());
+		EXPECT_EQ(recoveredHead._size, 2u);
+		EXPECT_EQ(recoveredHead._capacity, 1u + R4_STEP);
 		EXPECT_EQ(file_size_or_zero(cachePath.string()),
 			expandedSize);
 		ASSERT_TRUE(read_bar_item(cachePath.string(), cacheCase._exchg, "rb_old", preserved));
@@ -321,6 +599,7 @@ TEST_F(R4WriterADTest, BarCacheExpansionFailureKeepsStateAndRetriesAfterFileRest
 		EXPECT_DOUBLE_EQ(missing._bar.close, 3902.0);
 	}
 }
+#endif
 
 //////////////////////////////////////////////////////////////////////////
 // 5. procFlag=0：同交易日连续 tick 直接整体覆盖缓存，价格/量原样落缓存

@@ -15,6 +15,7 @@
 #include <fstream>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <sstream>
 #include <string>
 #include <unistd.h>
@@ -32,6 +33,39 @@ struct WtLocalExecuterTestAccess
 			return false;
 		SpinLock lock(executer._mtx_units);
 		return executer._unit_map.find(std::string(code)) != executer._unit_map.end();
+	}
+
+	static void registerUnit(WtLocalExecuter& executer, const std::string& code,
+		ExecuteUnit* rawUnit, IExecuterFact* fact)
+	{
+		ExecuteUnitPtr unit(new ExeUnitWrapper(rawUnit, fact));
+		std::shared_ptr<WtLocalExecuter::UnitLifecycleState> state(
+			new WtLocalExecuter::UnitLifecycleState());
+		state->creation_complete = true;
+		state->result = unit;
+		state->init_status = ExecUnitInitState::READY;
+		state->init_generation = 1;
+		SpinLock lock(executer._mtx_units);
+		executer._unit_map[code] = unit;
+		executer._unit_states[code] = state;
+	}
+
+	static double target(const WtLocalExecuter& executer, const std::string& code)
+	{
+		std::lock_guard<std::mutex> lock(executer._position_state_mutex);
+		auto it = executer._target_pos.find(code);
+		return it == executer._target_pos.end() ? 0.0 : it->second;
+	}
+
+	static void unregisterUnits(WtLocalExecuter& executer,
+		const std::vector<std::string>& codes)
+	{
+		SpinLock lock(executer._mtx_units);
+		for (const std::string& code : codes)
+		{
+			executer._unit_map.erase(code);
+			executer._unit_states.erase(code);
+		}
 	}
 };
 
@@ -133,6 +167,64 @@ public:
 	std::vector<std::string> logs;
 };
 
+class LocalGroupPositionProbe
+{
+public:
+	void record(const char* code, double target)
+	{
+		std::lock_guard<std::mutex> lock(_mutex);
+		_positions.emplace_back(code == nullptr ? "" : code, target);
+	}
+
+	std::vector<std::pair<std::string, double>> snapshot() const
+	{
+		std::lock_guard<std::mutex> lock(_mutex);
+		return _positions;
+	}
+
+private:
+	mutable std::mutex _mutex;
+	std::vector<std::pair<std::string, double>> _positions;
+};
+
+class LocalGroupPositionUnit : public ExecuteUnit
+{
+public:
+	explicit LocalGroupPositionUnit(std::shared_ptr<LocalGroupPositionProbe> probe)
+		: _probe(std::move(probe)) {}
+	const char* getName() override { return "LocalGroupPositionUnit"; }
+	const char* getFactName() override { return "LocalGroupPositionFact"; }
+	void set_position(const char* code, double target) override { _probe->record(code, target); }
+	void on_tick(WTSTickData*) override {}
+	void on_trade(uint32_t, const char*, bool, double, double) override {}
+	void on_order(uint32_t, const char*, bool, double, double, bool) override {}
+	void on_entrust(uint32_t, const char*, bool, const char*) override {}
+	void on_channel_ready() override {}
+	void on_channel_lost() override {}
+
+private:
+	std::shared_ptr<LocalGroupPositionProbe> _probe;
+};
+
+class LocalGroupPositionFact : public IExecuterFact
+{
+public:
+	const char* getName() override { return "LocalGroupPositionFact"; }
+	void enumExeUnit(FuncEnumUnitCallback callback) override
+	{
+		if (callback != nullptr)
+			callback(getName(), "LocalGroupPositionUnit", true);
+	}
+	ExecuteUnit* createExeUnit(const char*) override { return nullptr; }
+	ExecuteUnit* createDiffExeUnit(const char*) override { return nullptr; }
+	ExecuteUnit* createArbiExeUnit(const char*) override { return nullptr; }
+	bool deleteExeUnit(ExecuteUnit* unit) override
+	{
+		delete unit;
+		return true;
+	}
+};
+
 class R7VwapV2LocalIntegration : public ::testing::Test
 {
 protected:
@@ -175,13 +267,15 @@ protected:
 
 	void addInstrument(const char* exchange, const char* product, const char* rawCode,
 		const char* standardCode, const char* sessionId, TradingMode tradingMode,
-		ContractCategory category, WTSSessionInfo* session)
+		ContractCategory category, WTSSessionInfo* session,
+		bool exposeCommodity = true, bool exposeSession = true)
 	{
 		WTSCommodityInfo* commodity = r71::makeComm(exchange, product, sessionId, tradingMode, category);
 		commodity->setSessionInfo(session);
 		WTSContractInfo* contract = r71::makeCt(exchange, product, rawCode);
 		_bd.regis(commodity, contract);
-		_stub.bind(standardCode, commodity, session);
+		_stub.bind(standardCode, exposeCommodity ? commodity : nullptr,
+			exposeSession ? session : nullptr);
 	}
 
 	static std::string profileForSession(WTSSessionInfo& session)
@@ -381,6 +475,253 @@ TEST_F(R7VwapV2LocalIntegration, InvalidStockConfigurationFailsAndDoesNotRegiste
 		sawInvalidConfiguration = sawInvalidConfiguration ||
 			log.find("total_times must be greater than zero") != std::string::npos;
 	EXPECT_TRUE(sawInvalidConfiguration) << "the built-in stock unit should report total_times validation";
+}
+
+TEST_F(R7VwapV2LocalIntegration, MissingCommodityOrSessionFailsClosedForAllV2Units)
+{
+	WTSSessionInfo* futureSession = makeSession("FUTURE_TEST",
+		{ { 900, 1100 }, { 1300, 1500 } });
+	WTSSessionInfo* stockSession = makeSession("STOCK_TEST",
+		{ { 930, 1030 }, { 1300, 1500 } });
+	ASSERT_NE(futureSession, nullptr);
+	ASSERT_NE(stockSession, nullptr);
+
+	// Keep the registered contract/commodity realistic, but make each missing
+	// metadata value observable through the same ExecuteContext getters used by
+	// the built-in V2 units.
+	addInstrument("SHFE", "ag", "ag2513", "SHFE.ag.2513", "FUTURE_TEST",
+		TM_Both, CC_Future, futureSession, false, true);
+	addInstrument("SHFE", "ag", "ag2514", "SHFE.ag.2514", "FUTURE_TEST",
+		TM_Both, CC_Future, futureSession, true, false);
+	addInstrument("SSE", "STK", "600001", "SSE.STK.600001", "STOCK_TEST",
+		TM_LongT1, CC_Stock, stockSession, false, true);
+	addInstrument("SSE", "STK", "600002", "SSE.STK.600002", "STOCK_TEST",
+		TM_LongT1, CC_Stock, stockSession, true, false);
+
+	auto expectFailedAndUnregistered = [this](const char* executorId, const char* unitName,
+		uint32_t beginTime, const char* code, double target, const char* diagnostic) {
+		std::shared_ptr<CapturingLocalExecuter> local = makeLocal(
+			executorId, unitName, beginTime, 1500);
+		if (local == nullptr)
+		{
+			ADD_FAILURE() << executorId << " local executor failed to initialize";
+			return;
+		}
+		local->on_position_changed(code, target);
+		const ExecUnitInitStatus status = query(executorId, code);
+		EXPECT_EQ(status.query_result, ExecUnitInitQueryResult::OK) << executorId;
+		EXPECT_EQ(status.state, ExecUnitInitState::FAILED) << executorId;
+		EXPECT_FALSE(WtLocalExecuterTestAccess::hasUnit(*local, code)) << executorId;
+		bool sawDiagnostic = false;
+		for (const std::string& log : local->logs)
+			sawDiagnostic = sawDiagnostic || log.find(diagnostic) != std::string::npos;
+		EXPECT_TRUE(sawDiagnostic) << executorId << " did not report: " << diagnostic;
+	};
+
+	const char* const twap = "WtExeFact.WtTWapExeUnit";
+	const char* const vwap = "WtExeFact.WtVWapExeUnit";
+	const char* const stockVwap = "WtExeFact.WtStockVWapExeUnit";
+	const char* const futureMissingCommodity = "commodity or trading session is unavailable";
+	const char* const stockMissingCommodity = "commodity information is unavailable";
+	const char* const stockMissingSession = "trading session is unavailable";
+
+	expectFailedAndUnregistered("r7_v2_twap_missing_commodity", twap, 900,
+		"SHFE.ag.2513", 1.0, futureMissingCommodity);
+	expectFailedAndUnregistered("r7_v2_twap_missing_session", twap, 900,
+		"SHFE.ag.2514", 1.0, futureMissingCommodity);
+	expectFailedAndUnregistered("r7_v2_vwap_missing_commodity", vwap, 900,
+		"SHFE.ag.2513", 1.0, futureMissingCommodity);
+	expectFailedAndUnregistered("r7_v2_vwap_missing_session", vwap, 900,
+		"SHFE.ag.2514", 1.0, futureMissingCommodity);
+	expectFailedAndUnregistered("r7_v2_stock_missing_commodity", stockVwap, 930,
+		"SSE.STK.600001", 100.0, stockMissingCommodity);
+	expectFailedAndUnregistered("r7_v2_stock_missing_session", stockVwap, 930,
+		"SSE.STK.600002", 100.0, stockMissingSession);
+}
+
+TEST_F(R7VwapV2LocalIntegration, MatchingTwapCommodityAndSessionRegisterUnit)
+{
+	WTSSessionInfo* session = makeSession("FUTURE_TEST",
+		{ { 900, 1100 }, { 1300, 1500 } });
+	ASSERT_NE(session, nullptr);
+	addInstrument("SHFE", "ag", "ag2512", "SHFE.ag.2512", "FUTURE_TEST",
+		TM_Both, CC_Future, session);
+
+	std::shared_ptr<CapturingLocalExecuter> local = makeLocal("r7_v2_twap_match",
+		"WtExeFact.WtTWapExeUnit", 900, 1500);
+	ASSERT_NE(local, nullptr);
+	local->on_position_changed("SHFE.ag.2512", 1.0);
+
+	const ExecUnitInitStatus status = query("r7_v2_twap_match", "SHFE.ag.2512");
+	EXPECT_EQ(status.query_result, ExecUnitInitQueryResult::OK);
+	EXPECT_EQ(status.state, ExecUnitInitState::READY);
+	EXPECT_TRUE(status.error.empty());
+	EXPECT_TRUE(WtLocalExecuterTestAccess::hasUnit(*local, "SHFE.ag.2512"));
+}
+
+TEST_F(R7VwapV2LocalIntegration, LocalGroupTargetsDispatchStablyAndClearOnEmptyInput)
+{
+	LocalGroupPositionFact fact;
+	std::shared_ptr<CapturingLocalExecuter> local(new CapturingLocalExecuter(
+		&_factory, "r7_local_group_targets", &_data_manager));
+	_manager.add_executer(std::static_pointer_cast<IExecCommand>(local));
+	_executors.push_back(local);
+	local->setStub(&_stub);
+
+	std::shared_ptr<WTSVariant> config(WTSCfgLoader::load_from_content(
+		R"json({"scale":1.0,"poolsize":0,"strict_sync":false,
+		"groups":{"SHFE.ags":{"SHFE.rb.2510":2.0,"SHFE.au.2212":2.0}},
+		"policy":{"default":{"name":"LocalGroupPositionFact.LocalGroupPositionUnit"}}})json"),
+		[](WTSVariant* value) { if (value) value->release(); });
+	ASSERT_NE(config.get(), nullptr);
+	ASSERT_TRUE(local->init(config.get()));
+
+	const std::string groupCode = "SHFE.ags";
+	const std::string rbCode = "SHFE.rb.2510";
+	const std::string auCode = "SHFE.au.2212";
+	auto groupProbe = std::make_shared<LocalGroupPositionProbe>();
+	auto rbProbe = std::make_shared<LocalGroupPositionProbe>();
+	auto auProbe = std::make_shared<LocalGroupPositionProbe>();
+	WtLocalExecuterTestAccess::registerUnit(*local, groupCode,
+		new LocalGroupPositionUnit(groupProbe), &fact);
+	WtLocalExecuterTestAccess::registerUnit(*local, rbCode,
+		new LocalGroupPositionUnit(rbProbe), &fact);
+	WtLocalExecuterTestAccess::registerUnit(*local, auCode,
+		new LocalGroupPositionUnit(auProbe), &fact);
+
+	auto expectLastTarget = [](const std::shared_ptr<LocalGroupPositionProbe>& probe,
+		const std::string& code, double expected, size_t expectedCount) {
+		const auto positions = probe->snapshot();
+		ASSERT_EQ(positions.size(), expectedCount);
+		EXPECT_EQ(positions.back().first, code);
+		EXPECT_DOUBLE_EQ(positions.back().second, expected);
+	};
+
+	wt_hashmap<std::string, double> negativeTargets;
+	negativeTargets[rbCode] = -6.0;
+	negativeTargets[auCode] = -8.0;
+	local->set_position(negativeTargets);
+	EXPECT_TRUE(groupProbe->snapshot().empty());
+	expectLastTarget(rbProbe, rbCode, -6.0, 1);
+	expectLastTarget(auProbe, auCode, -8.0, 1);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, rbCode), -6.0);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, auCode), -8.0);
+
+	// Fractional member targets stay on the original path; the existing Local
+	// dispatch rounds unit callbacks while the target ledger retains precision.
+	wt_hashmap<std::string, double> fractionalGroupTargets;
+	fractionalGroupTargets[rbCode] = 7.5;
+	fractionalGroupTargets[auCode] = 8.0;
+	local->set_position(fractionalGroupTargets);
+	EXPECT_TRUE(groupProbe->snapshot().empty());
+	expectLastTarget(rbProbe, rbCode, 8.0, 2);
+	expectLastTarget(auProbe, auCode, 8.0, 2);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, rbCode), 7.5);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, auCode), 8.0);
+
+	// Integer member targets may also imply a fractional group count.
+	wt_hashmap<std::string, double> fractionalCountTargets;
+	fractionalCountTargets[rbCode] = 7.0;
+	fractionalCountTargets[auCode] = 8.0;
+	local->set_position(fractionalCountTargets);
+	EXPECT_TRUE(groupProbe->snapshot().empty());
+	expectLastTarget(rbProbe, rbCode, 7.0, 3);
+	expectLastTarget(auProbe, auCode, 8.0, 3);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, rbCode), 7.0);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, auCode), 8.0);
+
+	wt_hashmap<std::string, double> targets;
+	targets[rbCode] = 6.0;
+	targets[auCode] = 8.0;
+	local->set_position(targets);
+
+	expectLastTarget(groupProbe, groupCode, 3.0, 1);
+	expectLastTarget(rbProbe, rbCode, 0.0, 4);
+	expectLastTarget(auProbe, auCode, 2.0, 4);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, groupCode), 3.0);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, rbCode), 0.0);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, auCode), 2.0);
+
+	local->set_position(targets);
+	expectLastTarget(groupProbe, groupCode, 3.0, 2);
+	expectLastTarget(rbProbe, rbCode, 0.0, 5);
+	expectLastTarget(auProbe, auCode, 2.0, 5);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, groupCode), 3.0);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, rbCode), 0.0);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, auCode), 2.0);
+
+	wt_hashmap<std::string, double> empty;
+	local->set_position(empty);
+	expectLastTarget(groupProbe, groupCode, 0.0, 3);
+	expectLastTarget(rbProbe, rbCode, 0.0, 6);
+	expectLastTarget(auProbe, auCode, 0.0, 6);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, groupCode), 0.0);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, rbCode), 0.0);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, auCode), 0.0);
+	WtLocalExecuterTestAccess::unregisterUnits(*local, { groupCode, rbCode, auCode });
+}
+
+TEST_F(R7VwapV2LocalIntegration, OverlappingGroupsPreserveOriginalTargets)
+{
+	LocalGroupPositionFact fact;
+	std::shared_ptr<CapturingLocalExecuter> local(new CapturingLocalExecuter(
+		&_factory, "r7_local_overlapping_group_targets", &_data_manager));
+	_manager.add_executer(std::static_pointer_cast<IExecCommand>(local));
+	_executors.push_back(local);
+	local->setStub(&_stub);
+
+	std::shared_ptr<WTSVariant> config(WTSCfgLoader::load_from_content(
+		R"json({"scale":1.0,"poolsize":0,"strict_sync":false,
+		"groups":{"SHFE.ags":{"SHFE.rb.2510":2.0,"SHFE.au.2212":2.0},
+		"SHFE.agc":{"SHFE.rb.2510":1.0,"SHFE.cu.2212":1.0}},
+		"policy":{"default":{"name":"LocalGroupPositionFact.LocalGroupPositionUnit"}}})json"),
+		[](WTSVariant* value) { if (value) value->release(); });
+	ASSERT_NE(config.get(), nullptr);
+	ASSERT_TRUE(local->init(config.get()));
+
+	const std::string firstGroupCode = "SHFE.ags";
+	const std::string secondGroupCode = "SHFE.agc";
+	const std::string rbCode = "SHFE.rb.2510";
+	const std::string auCode = "SHFE.au.2212";
+	const std::string cuCode = "SHFE.cu.2212";
+	auto firstGroupProbe = std::make_shared<LocalGroupPositionProbe>();
+	auto secondGroupProbe = std::make_shared<LocalGroupPositionProbe>();
+	auto rbProbe = std::make_shared<LocalGroupPositionProbe>();
+	auto auProbe = std::make_shared<LocalGroupPositionProbe>();
+	auto cuProbe = std::make_shared<LocalGroupPositionProbe>();
+	WtLocalExecuterTestAccess::registerUnit(*local, firstGroupCode,
+		new LocalGroupPositionUnit(firstGroupProbe), &fact);
+	WtLocalExecuterTestAccess::registerUnit(*local, secondGroupCode,
+		new LocalGroupPositionUnit(secondGroupProbe), &fact);
+	WtLocalExecuterTestAccess::registerUnit(*local, rbCode,
+		new LocalGroupPositionUnit(rbProbe), &fact);
+	WtLocalExecuterTestAccess::registerUnit(*local, auCode,
+		new LocalGroupPositionUnit(auProbe), &fact);
+	WtLocalExecuterTestAccess::registerUnit(*local, cuCode,
+		new LocalGroupPositionUnit(cuProbe), &fact);
+
+	wt_hashmap<std::string, double> targets;
+	targets[rbCode] = 6.0;
+	targets[auCode] = 8.0;
+	targets[cuCode] = 5.0;
+	local->set_position(targets);
+
+	EXPECT_TRUE(firstGroupProbe->snapshot().empty());
+	EXPECT_TRUE(secondGroupProbe->snapshot().empty());
+	const auto rbPositions = rbProbe->snapshot();
+	const auto auPositions = auProbe->snapshot();
+	const auto cuPositions = cuProbe->snapshot();
+	ASSERT_EQ(rbPositions.size(), 1u);
+	ASSERT_EQ(auPositions.size(), 1u);
+	ASSERT_EQ(cuPositions.size(), 1u);
+	EXPECT_DOUBLE_EQ(rbPositions.back().second, 6.0);
+	EXPECT_DOUBLE_EQ(auPositions.back().second, 8.0);
+	EXPECT_DOUBLE_EQ(cuPositions.back().second, 5.0);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, rbCode), 6.0);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, auCode), 8.0);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, cuCode), 5.0);
+	WtLocalExecuterTestAccess::unregisterUnits(*local,
+		{ firstGroupCode, secondGroupCode, rbCode, auCode, cuCode });
 }
 
 } // namespace

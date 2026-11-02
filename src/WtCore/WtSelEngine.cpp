@@ -41,6 +41,12 @@ WtSelEngine::WtSelEngine()
 WtSelEngine::~WtSelEngine()
 {
 	release();
+
+	if (_cfg)
+	{
+		_cfg->release();
+		_cfg = NULL;
+	}
 }
 
 void WtSelEngine::release()
@@ -339,6 +345,12 @@ void WtSelEngine::on_minute_end(uint32_t curDate, uint32_t curTime)
 
 void WtSelEngine::run()
 {
+	if (!fee_config_valid())
+	{
+		WTSLogger::error("SEL engine start rejected: fee template configuration is invalid");
+		return;
+	}
+
 	WTSVariant* cfgProd = _cfg->get("product");
 	_tm_ticker = new WtSelRtTicker(this);
 	_tm_ticker->init(_data_mgr->reader(), cfgProd->getCString("session"));

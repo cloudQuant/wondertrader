@@ -39,7 +39,7 @@ namespace
 	std::filesystem::path lane_root()
 	{
 		return std::filesystem::path(__FILE__).parent_path()
-			.parent_path().parent_path().parent_path();
+			.parent_path().parent_path().parent_path().parent_path();
 	}
 
 	std::filesystem::path make_temp_dir(const char* tag)
@@ -66,9 +66,28 @@ namespace
 		return ret;
 	}
 
+	std::vector<double> expected_prestart_history_closes()
+	{
+		return { 9.5 };
+	}
+
 	std::vector<WTSBarStruct> make_daily_bars()
 	{
 		std::vector<WTSBarStruct> ret;
+		// Replay starts at 2020-01-02 09:30. Keep one already-closed bar
+		// before that point so the opening historical slice is non-empty.
+		WTSBarStruct prior;
+		prior.date = 20191231u;
+		prior.time = 150000;
+		prior.open = 9.0;
+		prior.high = 10.0;
+		prior.low = 8.5;
+		prior.close = 9.5;
+		prior.settle = 9.5;
+		prior.money = 9500.0;
+		prior.vol = 1000;
+		ret.push_back(prior);
+
 		for (uint32_t i = 0; i < kBarCnt; i++)
 		{
 			WTSBarStruct bar;
@@ -302,6 +321,20 @@ namespace
 		std::sort(ret.begin(), ret.end());
 		return ret;
 	}
+
+	std::vector<uint32_t> slice_dates(WTSKlineSlice* sli)
+	{
+		std::vector<uint32_t> ret;
+		if (sli == NULL)
+			return ret;
+		for (int32_t i = 0; i < sli->size(); i++)
+		{
+			WTSBarStruct* bar = sli->at(i);
+			if (bar != NULL)
+				ret.push_back(bar->date);
+		}
+		return ret;
+	}
 }
 
 class R2LoaderTest : public ::testing::Test
@@ -350,14 +383,16 @@ TEST_F(R2LoaderTest, finalBarsFromLoaderCachedOnce)
 	EXPECT_EQ(std::string(kCode), loader._lastCode);
 	EXPECT_EQ((uint32_t)KP_DAY, loader._lastFinalPeriod);
 	std::vector<double> first = slice_closes(sli);
+	EXPECT_EQ(expected_prestart_history_closes(), first);
+	EXPECT_EQ((std::vector<uint32_t>{ 20191231u }), slice_dates(sli));
 	sli->release();
-	EXPECT_GE(first.size(), 1u);
 
 	// 第二次：缓存命中，加载器不应被再次调用
 	WTSKlineSlice* sli2 = replayer.get_kline_slice(kCode, "d1", 3, 1, false);
 	ASSERT_NE(nullptr, sli2);
 	EXPECT_EQ(1u, loader._finalCalls);
 	EXPECT_EQ(first, slice_closes(sli2));
+	EXPECT_EQ((std::vector<uint32_t>{ 20191231u }), slice_dates(sli2));
 	sli2->release();
 
 	// 未知合约：加载器返回 false -> 切片为 NULL，且确实调用过
@@ -390,8 +425,9 @@ TEST_F(R2LoaderTest, autoTransDumpsDsbAndSecondReplayerHitsDsb)
 		WTSKlineSlice* sli = replayer.get_kline_slice(kCode, "d1", kBarCnt, 1, false);
 		ASSERT_NE(nullptr, sli);
 		std::vector<double> dumped = slice_closes(sli);
+		EXPECT_EQ(expected_prestart_history_closes(), dumped);
+		EXPECT_EQ((std::vector<uint32_t>{ 20191231u }), slice_dates(sli));
 		sli->release();
-		EXPECT_EQ(expected_closes(), dumped);
 		EXPECT_EQ(1u, loader._finalCalls);
 	}
 
@@ -416,7 +452,8 @@ TEST_F(R2LoaderTest, autoTransDumpsDsbAndSecondReplayerHitsDsb)
 	ASSERT_NE(nullptr, hit);
 	// dsb 命中：extloader 完全没被调用
 	EXPECT_EQ(0u, loader2._finalCalls);
-	EXPECT_EQ(expected_closes(), slice_closes(hit));
+	EXPECT_EQ(expected_prestart_history_closes(), slice_closes(hit));
+	EXPECT_EQ((std::vector<uint32_t>{ 20191231u }), slice_dates(hit));
 	hit->release();
 }
 
@@ -438,6 +475,8 @@ TEST_F(R2LoaderTest, loaderBackedDailyReplayEmitsBarsAndDumpsState)
 
 	WTSKlineSlice* main = replayer.get_kline_slice(kCode, "d1", kBarCnt, 1, true);
 	ASSERT_NE(nullptr, main);
+	EXPECT_EQ(expected_prestart_history_closes(), slice_closes(main));
+	EXPECT_EQ((std::vector<uint32_t>{ 20191231u }), slice_dates(main));
 	main->release();
 
 	replayer.run(true);
@@ -446,7 +485,7 @@ TEST_F(R2LoaderTest, loaderBackedDailyReplayEmitsBarsAndDumpsState)
 	EXPECT_EQ(kBarCnt, sink._barClose);
 	EXPECT_EQ(sink._sessBegin, sink._sessEnd);
 	EXPECT_GE(sink._sessBegin, 1u);
-	EXPECT_EQ(std::string("d1"), sink._lastPeriod);
+	EXPECT_EQ(std::string("d"), sink._lastPeriod);
 	EXPECT_DOUBLE_EQ(14.5, sink._lastBarClose);
 	EXPECT_EQ(20200108u, sink._lastBarDate);
 
@@ -504,9 +543,12 @@ TEST_F(R2LoaderTest, ticksFromLoaderFeedTickSliceAndLastTick)
 	const uint32_t cachedDate = loader._lastTickDate;
 	EXPECT_TRUE(cachedDate == 20200103u || cachedDate == 20200102u);
 
+	// The slice's explicit 09:32 cutoff does not advance the replay clock.
+	// At the prepared 09:30 clock, the latest available tick is the 09:30 item.
 	WTSTickData* last = replayer.get_last_tick(kCode);
 	ASSERT_NE(nullptr, last);
-	EXPECT_DOUBLE_EQ(12.0, last->price());
+	EXPECT_DOUBLE_EQ(10.0, last->price());
+	EXPECT_EQ(93000000u, last->actiontime());
 	EXPECT_EQ(cachedDate, last->actiondate());
 	last->release();
 
@@ -562,6 +604,9 @@ TEST_F(R2LoaderTest, binModeWithLoaderCachesBarsViaRawInterface)
 {
 	R2BtLoader loader;
 	loader._autoTrans = true;
+	// The generic loader hook is tried first; decline final bars to exercise
+	// bin mode's raw-loader fallback below.
+	loader._finalRet = false;
 	HisDataReplayer replayer;
 	WTSVariant* cfg = loader_cfg(_root, _base, "bin", false);
 	ASSERT_TRUE(replayer.init(cfg, NULL, &loader));
@@ -576,13 +621,16 @@ TEST_F(R2LoaderTest, binModeWithLoaderCachesBarsViaRawInterface)
 	EXPECT_EQ(1u, loader._rawCalls);
 	EXPECT_EQ(std::string(kCode), loader._lastCode);
 	EXPECT_EQ((uint32_t)KP_DAY, loader._lastRawPeriod);
-	EXPECT_EQ(expected_closes(), slice_closes(sli));
+	EXPECT_EQ(expected_prestart_history_closes(), slice_closes(sli));
+	EXPECT_EQ((std::vector<uint32_t>{ 20191231u }), slice_dates(sli));
 	sli->release();
 
 	// 缓存命中后不再调用
 	WTSKlineSlice* again = replayer.get_kline_slice(kCode, "d1", kBarCnt, 1, false);
 	ASSERT_NE(nullptr, again);
 	EXPECT_EQ(1u, loader._rawCalls);
+	EXPECT_EQ(expected_prestart_history_closes(), slice_closes(again));
+	EXPECT_EQ((std::vector<uint32_t>{ 20191231u }), slice_dates(again));
 	again->release();
 }
 

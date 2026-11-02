@@ -288,6 +288,30 @@ details:
 	env.ready(0);
 }
 
+TEST(R54UftCtx, manual_file_without_details_is_ignored_and_renamed)
+{
+	CtxEnv env("manual_no_details");
+	std::error_code ec;
+	std::filesystem::create_directories(env.folder, ec);
+	ASSERT_TRUE(std::filesystem::is_directory(env.folder, ec));
+
+	env.tmp.write(env.mannualFile(), "unrelated: value\n");
+	env.ready(20240315);
+
+	EXPECT_FALSE(std::filesystem::exists(env.mannualFile(), ec));
+	bool archived = false;
+	for (const auto& entry : std::filesystem::directory_iterator(env.folder, ec))
+	{
+		const std::string filename = entry.path().filename().string();
+		if (filename.find("mannual.yaml.") == 0)
+			archived = true;
+	}
+	EXPECT_TRUE(archived);
+	EXPECT_DOUBLE_EQ(0.0, env.ctx.stra_get_local_position(kAg));
+	EXPECT_EQ(0u, env.stra.posCnt);
+	EXPECT_EQ(1u, env.stra.readyCnt);
+}
+
 // UftStraContext.cpp:592-594  on_trade 转发策略
 // UftStraContext.cpp:604-624  on_order 建块 + 撤单状态 + 策略转发
 // UftStraContext.cpp:631-656 同日二次 ready 的幂等/持仓通知

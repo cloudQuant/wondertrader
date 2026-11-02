@@ -148,6 +148,20 @@ protected:
 		return ok;
 	}
 
+	bool seed_extended_minute_bars()
+	{
+		std::vector<WTSBarStruct> bars;
+		for (uint32_t minute = 31; minute <= 55; ++minute)
+		{
+			const uint32_t hhmm = 900 + minute;
+			const double px = minute <= 40
+				? 50.0 + (minute - 31)
+				: 100.0 + (minute - 41);
+			bars.push_back(r102::make_min_bar(20240102, hhmm, px));
+		}
+		return r102::seed_min_bars(_store, "min1", "CFFEX", "IC2204", bars);
+	}
+
 	fs::path		_dir;
 	std::string		_bin;
 	std::string		_store;
@@ -224,6 +238,12 @@ TEST_F(R102WtDataManagerTest, KlineRangeCountCacheAssemblyAndIncremental)
 			rep.fail_line = __LINE__;
 			return;
 		}
+		// 按日期的 7x 聚合需要足够的完整分钟组，避免 fixture 裁尾后为空。
+		if (!seed_extended_minute_bars())
+		{
+			rep.fail_line = __LINE__;
+			return;
+		}
 
 		// :199-204 times==1 日线直读
 		WTSKlineSlice* dayOne = dm.get_kline_slice_by_range("CFFEX.IC.2204",
@@ -271,6 +291,19 @@ TEST_F(R102WtDataManagerTest, KlineRangeCountCacheAssemblyAndIncremental)
 		WTSKlineSlice* byDate = dm.get_kline_slice_by_date("CFFEX.IC.2204",
 			KP_Minute1, 7, 20240102);
 		rep.g = byDate == NULL ? -1 : (int32_t)byDate->size();
+		R102_DM_CHK(rep, byDate != NULL);
+		if (byDate != NULL)
+		{
+			R102_DM_CHK(rep, byDate->size() == 2);
+			if (byDate->size() == 2)
+			{
+				const WTSBarStruct* bars = (const WTSBarStruct*)byDate->get_block_addr(0);
+				R102_DM_CHK(rep, bars[0].time == TimeUtils::timeToMinBar(20240102, 937));
+				R102_DM_CHK(rep, bars[0].close == 56.0 && bars[0].vol == 35.0);
+				R102_DM_CHK(rep, bars[1].time == TimeUtils::timeToMinBar(20240102, 944));
+				R102_DM_CHK(rep, bars[1].close == 103.0 && bars[1].vol == 35.0);
+			}
+		}
 		if (byDate != NULL)
 			byDate->release();
 
@@ -339,16 +372,8 @@ TEST_F(R102WtDataManagerTest, SubscribeBarsAndUpdateFromTick)
 	});
 }
 
-/*!
- * 触发条件（启用即断言失败，缺陷证据，禁止在 CI 打开）：
- * `get_kline_slice_by_range` / `get_kline_slice_by_count` 的增量分支用
- * `rawData->at(0)`（:254/:256、:406/:408）判断整批 bar 的时间，而 reader 从
- * `_last_bartime` 起读，首条必然等于上界 -> 整批 continue，后面的新 bar 全部丢失，
- * 随后还 erase 掉缓存最后一条。期望：跳过首条后处理 09:43，缓存末条为 09:42；
- * 实际：两条都被跳过，缓存末条退到 09:39。
- * 缺陷登记：bugs/R102.md BUG-R102-001。
- */
-TEST_F(R102WtDataManagerTest, DISABLED_IncrementalKlineUsesFirstBarTimeForAll)
+// Reader range 起点包含缓存最后一条；该重叠 bar 需跳过，后续每根基础 bar 都参与重采样。
+TEST_F(R102WtDataManagerTest, IncrementalRangeProcessesBarsAfterOverlappingBoundary)
 {
 	if (!r102::storage_plugin_ready(_bin))
 		GTEST_SKIP() << "libWtDataStorage.dylib / createRdmDtReader 不可用";
@@ -362,33 +387,98 @@ TEST_F(R102WtDataManagerTest, DISABLED_IncrementalKlineUsesFirstBarTimeForAll)
 			return;
 		}
 
-		// 首次装配 10 根 1 分钟 -> 5 分钟，缓存 09:35/09:40（09:40 正好闭合）
+		// 首次装配 10 根 1 分钟 -> 5 分钟，缓存 09:35/09:40。
 		WTSKlineSlice* base = dm.get_kline_slice_by_count("CFFEX.IC.2204",
-			KP_Minute1, 5, 5, 202401021000);
-		if (base != NULL)
-			base->release();
+			KP_Minute1, 5, 10, 202401021000);
+		R102_DM_CHK(rep, base != NULL);
+		if (base == NULL)
+			return;
+		R102_DM_CHK(rep, base->size() == 2);
+		if (base->size() == 2)
+		{
+			const WTSBarStruct* bars = (const WTSBarStruct*)base->get_block_addr(0);
+			R102_DM_CHK(rep, bars[0].time == TimeUtils::timeToMinBar(20240102, 935));
+			R102_DM_CHK(rep, bars[1].time == TimeUtils::timeToMinBar(20240102, 940));
+			R102_DM_CHK(rep, bars[1].vol == 25.0);
+		}
+		base->release();
 
-		// 追加 09:41..09:43 三根原始 1 分钟线，并清掉 reader 缓存（DM 缓存保留）
-		std::vector<WTSBarStruct> mins1;
-		for (uint32_t i = 0; i < 13; i++)
-			mins1.push_back(r102::make_min_bar(20240102, 931 + i, 50.0 + i));
-		r102::seed_min_bars(_store, "min1", "CFFEX", "IC2204", mins1);
+		// 追加到 09:55，形成 09:45/09:50/09:55 三根新 5 分钟 bar。
+		R102_DM_CHK(rep, seed_extended_minute_bars());
 		dm.clear_cache();
 
-		// 增量：reader 从 _last_bartime(09:40) 起返回 09:40..09:43
+		// 增量 reader 从 _last_bartime(09:40) 起返回，首根与缓存尾 bar 重叠。
 		WTSKlineSlice* inc = dm.get_kline_slice_by_range("CFFEX.IC.2204",
 			KP_Minute1, 5, 202401020930, 202401021000);
-		rep.a = inc == NULL ? -1 : (int32_t)inc->size();
-		rep.b = 0;
-		if (inc != NULL && inc->size() > 0)
+		R102_DM_CHK(rep, inc != NULL);
+		if (inc == NULL)
+			return;
+		R102_DM_CHK(rep, inc->size() == 4);
+		if (inc->size() == 4)
 		{
 			const WTSBarStruct* bars = (const WTSBarStruct*)inc->get_block_addr(0);
-			rep.b = (int32_t)bars[inc->size() - 1].time;
-			inc->release();
+			R102_DM_CHK(rep, bars[0].time == TimeUtils::timeToMinBar(20240102, 935));
+			R102_DM_CHK(rep, bars[1].time == TimeUtils::timeToMinBar(20240102, 940));
+			R102_DM_CHK(rep, bars[1].vol == 25.0); // 重叠的 09:40 未被重复计入。
+			R102_DM_CHK(rep, bars[2].time == TimeUtils::timeToMinBar(20240102, 945));
+			R102_DM_CHK(rep, bars[2].close == 104.0 && bars[2].vol == 25.0);
+			R102_DM_CHK(rep, bars[3].time == TimeUtils::timeToMinBar(20240102, 950));
+			R102_DM_CHK(rep, bars[3].close == 109.0 && bars[3].vol == 25.0);
+		}
+		inc->release();
+	});
+}
+
+TEST_F(R102WtDataManagerTest, IncrementalCountProcessesBarsAfterOverlappingBoundary)
+{
+	if (!r102::storage_plugin_ready(_bin))
+		GTEST_SKIP() << "libWtDataStorage.dylib / createRdmDtReader 不可用";
+
+	run_child([this](R102DmReport& rep) {
+		WtDtRunner runner;
+		WtDataManager dm;
+		if (!init_dm(runner, dm, "data_default.json"))
+		{
+			rep.fail_line = __LINE__;
+			return;
 		}
 
-		R102_DM_CHK(rep, rep.a == 2);
-		R102_DM_CHK(rep, rep.b == (int32_t)TimeUtils::timeToMinBar(20240102, 940));
+		WTSKlineSlice* base = dm.get_kline_slice_by_count("CFFEX.IC.2204",
+			KP_Minute1, 5, 10, 202401021000);
+		R102_DM_CHK(rep, base != NULL);
+		if (base == NULL)
+			return;
+		R102_DM_CHK(rep, base->size() == 2);
+		if (base->size() == 2)
+		{
+			const WTSBarStruct* bars = (const WTSBarStruct*)base->get_block_addr(0);
+			R102_DM_CHK(rep, bars[1].time == TimeUtils::timeToMinBar(20240102, 940));
+			R102_DM_CHK(rep, bars[1].vol == 25.0);
+		}
+		base->release();
+
+		R102_DM_CHK(rep, seed_extended_minute_bars());
+		dm.clear_cache();
+
+		WTSKlineSlice* inc = dm.get_kline_slice_by_count("CFFEX.IC.2204",
+			KP_Minute1, 5, 10, 202401021000);
+		R102_DM_CHK(rep, inc != NULL);
+		if (inc == NULL)
+			return;
+		R102_DM_CHK(rep, inc->size() == 5);
+		if (inc->size() == 5)
+		{
+			const WTSBarStruct* bars = (const WTSBarStruct*)inc->get_block_addr(0);
+			R102_DM_CHK(rep, bars[1].time == TimeUtils::timeToMinBar(20240102, 940));
+			R102_DM_CHK(rep, bars[1].vol == 25.0); // 重叠的 09:40 未被重复计入。
+			R102_DM_CHK(rep, bars[2].time == TimeUtils::timeToMinBar(20240102, 945));
+			R102_DM_CHK(rep, bars[2].close == 104.0 && bars[2].vol == 25.0);
+			R102_DM_CHK(rep, bars[3].time == TimeUtils::timeToMinBar(20240102, 950));
+			R102_DM_CHK(rep, bars[3].close == 109.0 && bars[3].vol == 25.0);
+			R102_DM_CHK(rep, bars[4].time == TimeUtils::timeToMinBar(20240102, 955));
+			R102_DM_CHK(rep, bars[4].close == 114.0 && bars[4].vol == 25.0);
+		}
+		inc->release();
 	});
 }
 

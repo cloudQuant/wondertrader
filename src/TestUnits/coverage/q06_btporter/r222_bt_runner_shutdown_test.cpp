@@ -88,6 +88,21 @@ namespace
 		GateStage _stage;
 	};
 
+	class N04ReplaySentinel : public IDataSink
+	{
+	public:
+		uint32_t init = 0;
+		uint32_t done = 0;
+
+		void handle_tick(const char*, WTSTickData*, uint32_t) override {}
+		void handle_bar_close(const char*, const char*, uint32_t, WTSBarStruct*) override {}
+		void handle_schedule(uint32_t, uint32_t) override {}
+		void handle_init() override { ++init; }
+		void handle_session_begin(uint32_t) override {}
+		void handle_session_end(uint32_t) override {}
+		void handle_replay_done() override { ++done; }
+	};
+
 	fs::path prepare_dir(const char* tag)
 	{
 		const auto stamp = std::chrono::steady_clock::now().time_since_epoch().count();
@@ -145,7 +160,8 @@ namespace
 		return cfg.str();
 	}
 
-	std::string exec_config(const fs::path& root, const std::string& module)
+	std::string exec_config(const fs::path& root, const std::string& module,
+		const std::string& execUnit = "WtMinImpactExeUnit", bool csvReplay = false)
 	{
 		const std::string rootPath = json_escape(root.string());
 		const std::string sessionsPath = json_escape((root / "sessions.json").string());
@@ -153,8 +169,10 @@ namespace
 		const std::string contractsPath = json_escape((root / "contracts.json").string());
 		std::ostringstream cfg;
 		cfg << "{\"replayer\":{"
-			<< "\"mode\":\"none\",\"path\":\"" << rootPath << "\","
-			<< "\"stime\":20240102000000,\"etime\":20240103000000,\"tick\":false,"
+			<< "\"mode\":\"" << (csvReplay ? "csv" : "none") << "\",\"path\":\"" << rootPath << "\","
+			<< "\"stime\":" << (csvReplay ? "20240102093000" : "20240102000000")
+			<< ",\"etime\":" << (csvReplay ? "20240102093200" : "20240103000000")
+			<< ",\"tick\":" << (csvReplay ? "true" : "false") << ","
 			<< "\"basefiles\":{\"session\":\"" << sessionsPath
 			<< "\",\"commodity\":\"" << commoditiesPath
 			<< "\",\"contract\":\"" << contractsPath << "\"}},"
@@ -162,7 +180,7 @@ namespace
 			<< "\"exec\":{\"name\":\"r222_exec\",\"module\":\"" << json_escape(module)
 			<< "\",\"code\":\"SHFE.rb.2510\",\"period\":\"m1\","
 			<< "\"volunit\":0,\"volmode\":0,"
-			<< "\"executer\":{\"name\":\"WtMinImpactExeUnit\",\"id\":\"r222_exec\","
+			<< "\"executer\":{\"name\":\"" << json_escape(execUnit) << "\",\"id\":\"r222_exec\","
 			<< "\"params\":{\"offset\":0,\"expire\":0,\"pricemode\":0,\"span\":0,"
 			<< "\"byrate\":false,\"lots\":1,\"rate\":1,\"minopenlots\":1}},"
 			<< "\"matcher\":{\"cancelrate\":0}}}";
@@ -422,7 +440,7 @@ TEST(WtBtRunnerShutdown, FailedFactoryPreflightRetainsExecOwnersUntilRetry)
 	fs::remove_all(root, ec);
 }
 
-TEST(WtBtRunnerShutdown, FailedExecInitializationDestroysRejectedUnitAndFactory)
+TEST(N04ExecMocker, InitFailureIsNotRegisteredWithReplayer)
 {
 	const std::string module = plugin_path("init_fail");
 	ASSERT_FALSE(module.empty()) << "missing coverage execution-plugin fixture init_fail";
@@ -431,11 +449,19 @@ TEST(WtBtRunnerShutdown, FailedExecInitializationDestroysRejectedUnitAndFactory)
 	write_basefiles(root);
 	const fs::path callbackLog = root / "plugin_callbacks.log";
 	ScopedEnvironment callbackLogEnv("WT_COV_EXEC_V2_LOG", callbackLog.string());
+	N04ReplaySentinel sentinel;
 	WtBtRunner runner;
+	runner.replayer().register_sink(&sentinel, "n04_exec_failure_sentinel");
 	runner.init((root / "missing_log.json").string().c_str(), true, root.string().c_str());
 	std::string error;
 	EXPECT_FALSE(runner.config_v2(exec_config(root, module).c_str(), false, &error));
 	EXPECT_NE(std::string::npos, error.find("controlled initialization failure"));
+
+	// The public Runner failure path must leave the preinstalled replay sink in place.
+	ASSERT_TRUE(runner.replayer().prepare());
+	runner.replayer().run(false);
+	EXPECT_EQ(1U, sentinel.init);
+	EXPECT_EQ(1U, sentinel.done);
 
 	const std::string events = read_text(callbackLog);
 	EXPECT_LT(events.find("create_unit"), events.find("initialize_unit"));
@@ -443,6 +469,54 @@ TEST(WtBtRunnerShutdown, FailedExecInitializationDestroysRejectedUnitAndFactory)
 	EXPECT_LT(events.find("destroy_unit"), events.find("destroy_factory"));
 	EXPECT_EQ(std::string::npos, events.find("request_quiesce"));
 	EXPECT_EQ(std::string::npos, events.find("wait_quiesce"));
+	std::error_code ec;
+	fs::remove_all(root, ec);
+}
+
+TEST(N04ExecMocker, SuccessfulRunnerReplayCallsPluginAndClosesSafely)
+{
+	const std::string module = plugin_path("valid");
+	ASSERT_FALSE(module.empty()) << "missing coverage execution-plugin fixture valid";
+
+	const fs::path root = prepare_dir("successful_replay");
+	write_basefiles(root);
+	fs::create_directories(root / "csv");
+	write_text(root / "csv" / "SHFE.rb.2510_m1.csv",
+		"date,time,open,high,low,close,volume,turnover,open_interest,diff_interest,settle\n"
+		"20240102,931,100,102,99,101,1,101,0,0,101\n");
+	const fs::path callbackLog = root / "plugin_callbacks.log";
+	ScopedEnvironment callbackLogEnv("WT_COV_EXEC_V2_LOG", callbackLog.string());
+	ScopedEnvironment tickGateEnv("WT_COV_EXEC_V2_TICK_GATE", "");
+	WtBtRunner runner;
+	runner.init((root / "missing_log.json").string().c_str(), true, root.string().c_str());
+	std::string error;
+	ASSERT_TRUE(runner.config_v2(exec_config(root, module, "BlockingUnit", true).c_str(), false, &error)) << error;
+
+	// Synchronous run returns only after the replay and plugin tick callbacks finish.
+	runner.run(false, false);
+	runner.release();
+
+	const std::string events = read_text(callbackLog);
+	const size_t replayCallback = events.find("blocking_on_tick_enter");
+	const size_t factoryPreflight = events.find("can_wait_factory_quiesce");
+	const size_t requestQuiesce = events.find("request_quiesce");
+	const size_t canWaitQuiesce = events.find("can_wait_quiesce");
+	const size_t waitQuiesce = events.find("wait_quiesce");
+	const size_t destroyUnit = events.find("destroy_unit");
+	const size_t destroyFactory = events.find("destroy_factory");
+	ASSERT_NE(std::string::npos, replayCallback);
+	ASSERT_NE(std::string::npos, factoryPreflight);
+	ASSERT_NE(std::string::npos, requestQuiesce);
+	ASSERT_NE(std::string::npos, canWaitQuiesce);
+	ASSERT_NE(std::string::npos, waitQuiesce);
+	ASSERT_NE(std::string::npos, destroyUnit);
+	ASSERT_NE(std::string::npos, destroyFactory);
+	EXPECT_LT(replayCallback, factoryPreflight);
+	EXPECT_LT(factoryPreflight, requestQuiesce);
+	EXPECT_LT(requestQuiesce, canWaitQuiesce);
+	EXPECT_LT(canWaitQuiesce, waitQuiesce);
+	EXPECT_LT(waitQuiesce, destroyUnit);
+	EXPECT_LT(destroyUnit, destroyFactory);
 	std::error_code ec;
 	fs::remove_all(root, ec);
 }

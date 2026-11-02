@@ -1,0 +1,46 @@
+[
+  {
+    "target": "CTPLoader",
+    "filter": "t6_ctp_loader_names.extract_product_name_*",
+    "command": [
+      "/tmp/wt-i03-t6-005/CTPLoader/CoverageTests_t_CTPLoader",
+      "--gtest_filter=t6_ctp_loader_names.extract_product_name_*",
+      "--gtest_output=xml:/tmp/wt-i03-t6-005/CTPLoader/run/result.xml",
+      "--gtest_color=no"
+    ],
+    "environment": {
+      "ASAN_OPTIONS": "detect_leaks=0:halt_on_error=1:abort_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "cwd": "/tmp/wt-i03-t6-005/CTPLoader/run",
+    "exit": 0,
+    "xml": {
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "disabled": "0"
+    }
+  },
+  {
+    "target": "CTPOptLoader",
+    "filter": "CTPOptLoaderCodes.extract_product_name_*",
+    "command": [
+      "/tmp/wt-i03-t6-005/CTPOptLoader/CoverageTests_t_CTPOptLoader",
+      "--gtest_filter=CTPOptLoaderCodes.extract_product_name_*",
+      "--gtest_output=xml:/tmp/wt-i03-t6-005/CTPOptLoader/run/result.xml",
+      "--gtest_color=no"
+    ],
+    "environment": {
+      "ASAN_OPTIONS": "detect_leaks=0:halt_on_error=1:abort_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "cwd": "/tmp/wt-i03-t6-005/CTPOptLoader/run",
+    "exit": 0,
+    "xml": {
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "disabled": "0"
+    }
+  }
+]

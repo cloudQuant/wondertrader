@@ -84,10 +84,11 @@ TEST_F(R160TraderTest, R160InitLoadsTraderModuleAndParsesNodeConfig)
     ASSERT_FALSE(ec);
 
     const std::string libName = DLLHelper::wrap_module("TraderMocker", "lib");
-    std::filesystem::create_symlink(
+    std::filesystem::copy_file(
         std::filesystem::path(binDir) / libName,
-        std::filesystem::path(tradersDir) / libName, ec);
-    ASSERT_FALSE(ec) << "cannot link TraderMocker into the temporary traders dir";
+        std::filesystem::path(tradersDir) / libName,
+        std::filesystem::copy_options::overwrite_existing, ec);
+    ASSERT_FALSE(ec) << "cannot copy TraderMocker into the temporary traders dir: " << ec.message();
 
     const std::string oldInst = WtHelper::getInstDir();
     WtHelper::setInstDir((tmp.path() + "/").c_str());
@@ -127,10 +128,11 @@ TEST_F(R160TraderTest, R160ReleaseAfterInitDetachesAndDeletesMocker)
     ASSERT_FALSE(ec);
 
     const std::string libName = DLLHelper::wrap_module("TraderMocker", "lib");
-    std::filesystem::create_symlink(
+    std::filesystem::copy_file(
         std::filesystem::path(binDir) / libName,
-        std::filesystem::path(tradersDir) / libName, ec);
-    ASSERT_FALSE(ec);
+        std::filesystem::path(tradersDir) / libName,
+        std::filesystem::copy_options::overwrite_existing, ec);
+    ASSERT_FALSE(ec) << "cannot copy TraderMocker into the temporary traders dir: " << ec.message();
 
     const std::string oldInst = WtHelper::getInstDir();
     WtHelper::setInstDir((tmp.path() + "/").c_str());

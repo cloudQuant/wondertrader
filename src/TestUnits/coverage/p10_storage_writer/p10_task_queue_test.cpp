@@ -835,10 +835,12 @@ TEST(P10TaskQueueTest, PreCloseWriteLeaseMayEnqueueAfterReleaseClosesAdmission)
 		FAIL() << "pre-close write was not drained after queue admission closed";
 		return;
 	}
+	// The worker reaching the sink does not imply that the producer has returned
+	// from writeTick() and stored its result. Join while the sink remains blocked.
+	producer.join();
 	EXPECT_TRUE(writeAccepted.load());
 	EXPECT_FALSE(releaseReturned.load());
 	sink.unblock();
-	producer.join();
 	releaser.join();
 	tick->release();
 	EXPECT_TRUE(releaseReturned.load());

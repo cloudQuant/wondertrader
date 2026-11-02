@@ -60,6 +60,24 @@ TEST(l03_commodity, create_fills_identity_fields)
 	c2->release();
 }
 
+TEST(l03_commodity, create_initializes_identity_buffers)
+{
+	WTSCommodityInfo* c = WTSCommodityInfo::create("rb", "name", "SHFE", "S", "T");
+	ASSERT_NE(c, nullptr);
+	const std::array<const char*, 7> fields = {
+		c->getName(), c->getExchg(), c->getProduct(), c->getCurrency(),
+		c->getSession(), c->getTradingTpl(), c->getFullPid()
+	};
+	for (const char* field : fields)
+	{
+		const std::size_t length = std::strlen(field);
+		ASSERT_LT(length, 64u);
+		for (std::size_t i = length; i < 64; ++i)
+			EXPECT_EQ('\0', field[i]);
+	}
+	c->release();
+}
+
 TEST(l03_commodity, identity_field_boundary_length)
 {
 	// wt_strcpy 是无边界检查的 memcpy（见 bugs/l03_includes.md BUG-L03-006），
@@ -76,10 +94,15 @@ TEST(l03_commodity, identity_field_boundary_length)
 	c->release();
 
 	// 空串也要正确终止
-	WTSCommodityInfo* e = WTSCommodityInfo::create("", "", "SHFE", "", "");
+	WTSCommodityInfo* e = WTSCommodityInfo::create("", "", "", "", "", "");
 	ASSERT_NE(e, nullptr);
 	EXPECT_STREQ(e->getProduct(), "");
-	EXPECT_STREQ(e->getFullPid(), "SHFE.");
+	EXPECT_STREQ(e->getName(), "");
+	EXPECT_STREQ(e->getExchg(), "");
+	EXPECT_STREQ(e->getSession(), "");
+	EXPECT_STREQ(e->getTradingTpl(), "");
+	EXPECT_STREQ(e->getCurrency(), "");
+	EXPECT_STREQ(e->getFullPid(), ".");
 	e->release();
 }
 
@@ -101,6 +124,11 @@ TEST(l03_commodity, identity_fields_reject_values_that_do_not_fit)
 			if (delta == 0)
 			{
 				ASSERT_NE(nullptr, info) << "field " << field;
+				const std::array<const char*, 6> actual = {
+					info->getProduct(), info->getName(), info->getExchg(),
+					info->getSession(), info->getTradingTpl(), info->getCurrency()
+				};
+				EXPECT_STREQ(lengths[delta].c_str(), actual[field]) << "field " << field;
 				info->release();
 			}
 			else
@@ -108,6 +136,19 @@ TEST(l03_commodity, identity_fields_reject_values_that_do_not_fit)
 				EXPECT_EQ(nullptr, info) << "field " << field << ", length " << lengths[delta].size();
 			}
 		}
+
+		// Empty strings are accepted independently by direct create, including currency
+		// (which has no commodity-loader configuration field).
+		auto emptyValues = base;
+		emptyValues[field] = "";
+		WTSCommodityInfo* emptyField = create(emptyValues);
+		ASSERT_NE(nullptr, emptyField) << "field " << field;
+		const std::array<const char*, 6> emptyActual = {
+			emptyField->getProduct(), emptyField->getName(), emptyField->getExchg(),
+			emptyField->getSession(), emptyField->getTradingTpl(), emptyField->getCurrency()
+		};
+		EXPECT_STREQ("", emptyActual[field]) << "field " << field;
+		emptyField->release();
 	}
 
 	EXPECT_EQ(nullptr, WTSCommodityInfo::create(nullptr, "name", "SHFE", "S", "T"));

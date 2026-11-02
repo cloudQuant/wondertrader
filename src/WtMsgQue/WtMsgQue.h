@@ -27,7 +27,7 @@ extern "C"
 	 * @details 创建并初始化一个新的消息队列服务端实例
 	 * @param url 服务端绑定的地址，格式如"tcp://0.0.0.0:5555"
 	 * @param confirm 是否需要消息确认
-	 * @return 新创建的服务端ID
+	 * @return 初始化成功时返回非零服务端ID；初始化失败返回 0，且该 ID 未登记
 	 */
 	EXPORT_FLAG WtUInt32	create_server(const char* url, bool confirm);
 	/**
@@ -51,7 +51,7 @@ extern "C"
 	 * @details 创建并初始化一个新的消息队列客户端实例
 	 * @param url 要连接的服务器地址，格式如"tcp://127.0.0.1:5555"
 	 * @param cb 消息接收回调函数，用于处理收到的消息
-	 * @return 新创建的客户端ID
+	 * @return 初始化成功时返回非零客户端ID；初始化失败返回 0，且该 ID 未登记
 	 */
 	EXPORT_FLAG WtUInt32	create_client(const char* url, FuncMQCallback cb);
 

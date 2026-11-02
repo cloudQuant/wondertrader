@@ -1,0 +1,35 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = L02VariantFixture.WtsMapNullAndOwnedValuesAcrossClear
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from L02VariantFixture
+[ RUN      ] L02VariantFixture.WtsMapNullAndOwnedValuesAcrossClear
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==28283==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x0001024aa558 bp 0x00016d98aa90 sp 0x00016d989fc0 T0)
+==28283==The signal is caused by a READ memory access.
+==28283==Hint: address points to the zero page.
+    #0 0x0001024aa558 in wtp::WTSMap<int>::clear() WTSCollection.hpp:551
+    #1 0x0001024aa558 in L02VariantFixture_WtsMapNullAndOwnedValuesAcrossClear_Test::TestBody() l02_variant_collection_test.cpp:561
+    #2 0x0001024ee2d8 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (map-l02-asan-red:arm64+0x10007a2d8)
+    #3 0x0001024ee220 in testing::Test::Run()+0xcc (map-l02-asan-red:arm64+0x10007a220)
+    #4 0x0001024eee00 in testing::TestInfo::Run()+0xd0 (map-l02-asan-red:arm64+0x10007ae00)
+    #5 0x0001024ef884 in testing::TestSuite::Run()+0x1c4 (map-l02-asan-red:arm64+0x10007b884)
+    #6 0x0001024facac in testing::internal::UnitTestImpl::RunAllTests()+0x52c (map-l02-asan-red:arm64+0x100086cac)
+    #7 0x0001024fa658 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (map-l02-asan-red:arm64+0x100086658)
+    #8 0x0001024fa5bc in testing::UnitTest::Run()+0x78 (map-l02-asan-red:arm64+0x1000865bc)
+    #9 0x0001024db738 in main+0x40 (map-l02-asan-red:arm64+0x100067738)
+    #10 0x00018059bdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+==28283==Register values:
+ x[0] = 0x0000000000000000   x[1] = 0x0000604000001710   x[2] = 0x0000000000000000   x[3] = 0x0000604000001720  
+ x[4] = 0x00000000000001ee   x[5] = 0x0000000000000001   x[6] = 0x000000016d190000   x[7] = 0x0000000000000001  
+ x[8] = 0x0000000000000000   x[9] = 0x0000008000020000  x[10] = 0x00000000ffffffff  x[11] = 0x0000000000000003  
+x[12] = 0x0000000000000003  x[13] = 0x0000000000000001  x[14] = 0x00000c08000002dd  x[15] = 0x000010800001ffff  
+x[16] = 0x0000000180963090  x[17] = 0x00000001ee119120  x[18] = 0x0000000000000000  x[19] = 0x000000016d98a9c0  
+x[20] = 0x0000604000001710  x[21] = 0x000000802db513f8  x[22] = 0x0000604000001650  x[23] = 0x0000602000000590  
+x[24] = 0x000000016d98a600  x[25] = 0x0000604000001668  x[26] = 0x000000016d989fc0  x[27] = 0x0000008000020000  
+x[28] = 0x000000016d98a7e0     fp = 0x000000016d98aa90     lr = 0x00000001024aa574     sp = 0x000000016d989fc0  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV WTSCollection.hpp:551 in wtp::WTSMap<int>::clear()
+==28283==ABORTING

@@ -75,6 +75,8 @@ TraderHuaX::TraderHuaX()
 	,_terminal("PC")
 	, _encrypt(false)
 	, _flowdir("HuaXTDFlow")
+	, _hInstHuaX(NULL)
+	, _funcCreator(NULL)
 {
 }
 
@@ -647,7 +649,14 @@ bool TraderHuaX::init(WTSVariant *params)
 	std::string module = params->getString("huaxmodule");
 	if (module.empty())
 		module = "fasttraderapi";
-	std::string dllpath = getBinDir() + DLLHelper::wrap_module(module.c_str(), "lib");
+	const std::string moduleFile = DLLHelper::wrap_module(module.c_str(), "lib");
+	const char* moduleDir = getBinDir();
+	if ((moduleDir == NULL || *moduleDir == '\0') && !fs::path(moduleFile).is_absolute())
+	{
+		write_log(_sink, LL_ERROR, "[TraderHuaX] Cannot locate trader module directory");
+		return false;
+	}
+	std::string dllpath = (moduleDir == NULL ? std::string() : std::string(moduleDir)) + moduleFile;
 
 	_hInstHuaX = DLLHelper::load_library(dllpath.c_str());
 #ifdef _WIN32
@@ -732,6 +741,11 @@ void TraderHuaX::reconnect()
 
 void TraderHuaX::connect()
 {
+	if (_funcCreator == NULL)
+	{
+		write_log(_sink, LL_ERROR, "[TraderHuaX] Cannot connect without a trader API creator");
+		return;
+	}
 	reconnect();
 
 	if (_thrd_worker == NULL)

@@ -353,6 +353,7 @@ void WtStockMinImpactExeUnit::check_unmanager_order()
 
 	// 获取当前未完成数量
 	double undone = _ctx->getUndoneQty(_code.c_str());
+	if (!wtRunIfNoUnverifiedTimeout(_orders_mon, [this, undone]() {
 	// 清空订单监控器
 	_orders_mon.clear_orders();
 
@@ -370,6 +371,8 @@ void WtStockMinImpactExeUnit::check_unmanager_order()
 		for (auto id : ids)
 			_ctx->writeLog(fmt::format("{} mon push unmanager order {} enter time:{}", _code.c_str(), id, _now).c_str());
 	}
+	}))
+		_ctx->writeLog(fmt::format("Unmanaged-order reconciliation for {} suppressed after an unverified timeout", _code.c_str()).c_str());
 }
 
 /**

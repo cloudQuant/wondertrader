@@ -13,7 +13,9 @@
 #include <WtCore/WtHelper.h>
 #include <WTSUtils/WTSCfgLoader.h>
 #include <Includes/ExecuteDefs.h>
+#include <Includes/ILogHandler.h>
 #include <rapidjson/document.h>
+#include <WTSTools/WTSLogger.h>
 
 #include <algorithm>
 #include <atomic>
@@ -407,6 +409,63 @@ std::string uniqueName(const char* suffix)
 #endif
     return std::string("n02_diff_concurrency_") + std::to_string(processId) + "_" + suffix;
 }
+
+bool readSavedPosition(const std::string& path, const char* section,
+    const std::string& code, const char* field, double& value)
+{
+    std::ifstream input(path);
+    if (!input.is_open())
+        return false;
+    const std::string content((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+    rj::Document root;
+    root.Parse(content.c_str());
+    if (root.HasParseError() || !root.IsObject() || !root.HasMember(section) ||
+        !root[section].IsArray())
+        return false;
+    for (const rj::Value& item : root[section].GetArray())
+    {
+        if (!item.IsObject() || !item.HasMember("code") || !item["code"].IsString() ||
+            code != item["code"].GetString() || !item.HasMember(field) || !item[field].IsNumber())
+            continue;
+        value = item[field].GetDouble();
+        return true;
+    }
+    return false;
+}
+
+class DiffErrorLogCapture : public ILogHandler
+{
+public:
+    DiffErrorLogCapture()
+    {
+        static const char* loggerConfig = R"({
+            "root":{"level":"info","async":false,"sinks":[]},
+            "dyn_pattern":{"executer":{"level":"info","async":false,"sinks":[]}}
+        })";
+        WTSLogger::init(loggerConfig, false, NULL);
+        WTSLogger::registerHandler(this);
+    }
+
+    ~DiffErrorLogCapture() { WTSLogger::registerHandler(NULL); }
+
+    void handleLogAppend(WTSLogLevel level, const char* message) override
+    {
+        if (level != LL_ERROR)
+            return;
+        std::lock_guard<std::mutex> lock(_mutex);
+        _messages.emplace_back(message ? message : "");
+    }
+
+    std::vector<std::string> messages() const
+    {
+        std::lock_guard<std::mutex> lock(_mutex);
+        return _messages;
+    }
+
+private:
+    mutable std::mutex _mutex;
+    std::vector<std::string> _messages;
+};
 
 } // namespace
 
@@ -1104,6 +1163,110 @@ TEST(WtDiffExecuterConcurrencyTest, OmittedTargetZeroUsesSignedTargetDelta)
     EXPECT_DOUBLE_EQ(WtDiffExecuterConcurrencyTest::target(executor, "SHFE.ag.2512"), 0.0);
     EXPECT_DOUBLE_EQ(WtDiffExecuterConcurrencyTest::diff(executor, "SHFE.ag.2512"), -4.0);
     EXPECT_EQ(unit->positions(), (std::vector<double>{5.0, 0.0, -5.0, 0.0, 5.0, -4.0}));
+    fs::remove(path, ec);
+}
+
+TEST(WtDiffExecuterConcurrencyTest, OmittedTargetThreeToZeroUsesRawCodeAndExchangeAndPersists)
+{
+    r71::R71BaseDataMgr bd;
+    bd.regisSession("TRADING");
+    WTSSessionInfo* session = bd.session("TRADING");
+    ASSERT_NE(session, nullptr);
+    session->addTradingSection(900, 1500);
+    WTSCommodityInfo* commodity = r71::makeComm("SHFE", "ag", "TRADING", TM_Both);
+    commodity->setSessionInfo(session);
+    WTSContractInfo* contract = r71::makeCt("SHFE", "ag", "ag2512");
+    bd.regis(commodity, contract);
+
+    ASSERT_EQ(bd.getContract("ag2512", "SHFE"), contract);
+    EXPECT_EQ(bd.getContract("SHFE.ag.2512", "SHFE"), nullptr);
+    EXPECT_EQ(bd.getContract("ag2512", ""), nullptr);
+
+    DiffProbeFactory fact;
+    WtExecuterFactory pluginFactory;
+    const std::string name = uniqueName("omitted_three_to_zero_raw_exchange");
+    const std::string path = std::string(WtHelper::getExecDataDir()) + name + ".json";
+    std::error_code ec;
+    fs::remove(path, ec);
+
+    WtDiffExecuter executor(&pluginFactory, name.c_str(), NULL, &bd);
+    WtDiffExecuterConcurrencyTest::configurePool(executor, 2);
+    DiffProbeUnit* unit = WtDiffExecuterConcurrencyTest::registerUnit(executor, fact,
+        "SHFE.ag.2512");
+    wt_hashmap<std::string, double> targets;
+    wt_hashmap<std::string, double> emptyTargets;
+    targets["SHFE.ag.2512"] = 3.0;
+
+    executor.set_position(targets);
+    WtDiffExecuterConcurrencyTest::waitPool(executor);
+    ASSERT_EQ(unit->positions(), (std::vector<double>{3.0}));
+    ASSERT_DOUBLE_EQ(WtDiffExecuterConcurrencyTest::target(executor, "SHFE.ag.2512"), 3.0);
+    ASSERT_DOUBLE_EQ(WtDiffExecuterConcurrencyTest::diff(executor, "SHFE.ag.2512"), 3.0);
+
+    executor.set_position(emptyTargets);
+    WtDiffExecuterConcurrencyTest::waitPool(executor);
+
+    EXPECT_EQ(unit->positions(), (std::vector<double>{3.0, 0.0}));
+    EXPECT_DOUBLE_EQ(WtDiffExecuterConcurrencyTest::target(executor, "SHFE.ag.2512"), 0.0);
+    EXPECT_DOUBLE_EQ(WtDiffExecuterConcurrencyTest::diff(executor, "SHFE.ag.2512"), 0.0);
+    double savedTarget = -1.0;
+    double savedDiff = -1.0;
+    ASSERT_TRUE(readSavedPosition(path, "targets", "SHFE.ag.2512", "target", savedTarget));
+    ASSERT_TRUE(readSavedPosition(path, "diffs", "SHFE.ag.2512", "diff", savedDiff));
+    EXPECT_DOUBLE_EQ(savedTarget, 0.0);
+    EXPECT_DOUBLE_EQ(savedDiff, 0.0);
+    fs::remove(path, ec);
+}
+
+TEST(WtDiffExecuterConcurrencyTest, MissingMatchingExchangeRetainsOmittedTargetAndReportsError)
+{
+    DiffErrorLogCapture logs;
+    r71::R71BaseDataMgr bd;
+    bd.regisSession("TRADING");
+    WTSSessionInfo* session = bd.session("TRADING");
+    ASSERT_NE(session, nullptr);
+    session->addTradingSection(900, 1500);
+    WTSCommodityInfo* otherExchangeCommodity = r71::makeComm("DCE", "ag", "TRADING", TM_Both);
+    otherExchangeCommodity->setSessionInfo(session);
+    WTSContractInfo* otherExchangeContract = r71::makeCt("DCE", "ag", "ag2512");
+    bd.regis(otherExchangeCommodity, otherExchangeContract);
+
+    ASSERT_EQ(bd.getContract("ag2512", "DCE"), otherExchangeContract);
+    EXPECT_EQ(bd.getContract("ag2512", "SHFE"), nullptr);
+    DiffProbeFactory fact;
+    WtExecuterFactory pluginFactory;
+    const std::string name = uniqueName("omitted_target_missing_exchange");
+    const std::string path = std::string(WtHelper::getExecDataDir()) + name + ".json";
+    std::error_code ec;
+    fs::remove(path, ec);
+
+    WtDiffExecuter executor(&pluginFactory, name.c_str(), NULL, &bd);
+    WtDiffExecuterConcurrencyTest::configurePool(executor, 2);
+    DiffProbeUnit* unit = WtDiffExecuterConcurrencyTest::registerUnit(executor, fact,
+        "SHFE.ag.2512");
+    wt_hashmap<std::string, double> targets;
+    wt_hashmap<std::string, double> emptyTargets;
+    targets["SHFE.ag.2512"] = 3.0;
+    executor.set_position(targets);
+    WtDiffExecuterConcurrencyTest::waitPool(executor);
+    ASSERT_EQ(unit->positions(), (std::vector<double>{3.0}));
+
+    executor.set_position(emptyTargets);
+    WtDiffExecuterConcurrencyTest::waitPool(executor);
+
+    EXPECT_EQ(unit->positions(), (std::vector<double>{3.0}));
+    EXPECT_DOUBLE_EQ(WtDiffExecuterConcurrencyTest::target(executor, "SHFE.ag.2512"), 3.0);
+    EXPECT_DOUBLE_EQ(WtDiffExecuterConcurrencyTest::diff(executor, "SHFE.ag.2512"), 3.0);
+    double savedTarget = -1.0;
+    double savedDiff = -1.0;
+    ASSERT_TRUE(readSavedPosition(path, "targets", "SHFE.ag.2512", "target", savedTarget));
+    ASSERT_TRUE(readSavedPosition(path, "diffs", "SHFE.ag.2512", "diff", savedDiff));
+    EXPECT_DOUBLE_EQ(savedTarget, 3.0);
+    EXPECT_DOUBLE_EQ(savedDiff, 3.0);
+    const std::vector<std::string> errors = logs.messages();
+    ASSERT_FALSE(errors.empty());
+    EXPECT_NE(errors.back().find("Omitted target for SHFE.ag.2512 cannot be cleared"), std::string::npos);
+    EXPECT_NE(errors.back().find("existing target and diff are retained"), std::string::npos);
     fs::remove(path, ec);
 }
 

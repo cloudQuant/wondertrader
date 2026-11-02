@@ -193,8 +193,8 @@ TEST_F(R18ShmCasterTest, RingIndexModuloWrapsWithinSmallQueue)
 		// 期望下标由本用例自己喂的 i 直接算出：0,1,2,3,0,1,2,3,0,1
 		static const uint64_t expectIdx[10] = { 0, 1, 2, 3, 0, 1, 2, 3, 0, 1 };
 		ASSERT_EQ(realIdx, expectIdx[i]);
-		if (i > 0)
-			EXPECT_EQ(q._readable, i - 1);
+		// 只有物理槽位 realIdx 回绕；可读游标保存当前单调写入索引。
+		EXPECT_EQ(q._readable, wIdx);
 	}
 	EXPECT_EQ(q._writable, 10u);
 	// 回绕后槽位 0 存的是最后一次写入（i=8），i=0/4 的值被覆盖

@@ -7,7 +7,7 @@
  *   - hft_cancel_all 的非空返回值                        :1868-1887
  *
  * 关键前置：WtBtRunner::config 的 replayer.basefiles 里装载 sessions/commodities/
- * contracts，使 HisDataReplayer 能按 "SHFE.rb2510" 查到 rb 品种；此后
+ * contracts，使 HisDataReplayer 能按标准三段式 "SHFE.rb.2510" 查到 rb 品种；此后
  * init_cta_mocker 的 stra_set_position 会写入信号表，init_hft_mocker 的
  * stra_buy/stra_sell 会返回非空 OrderIDs。
  *
@@ -37,13 +37,18 @@ extern WtBtRunner& getRunner();
 namespace
 {
 	namespace stdfs = std::filesystem;
+	const char* kCode = "SHFE.rb.2510";
 
 	struct ChildReport
 	{
 		int		fails;
 		int		cta_enum_calls;
+		int		cta_enum_entries;
 		int		cta_enum_last;
+		int		cta_enum_code_matches;
+		int		cta_enum_terminal_code_len;
 		double	cta_enum_qty;
+		double	cta_enum_terminal_qty;
 		double	cta_pos;
 		int		buy_len;
 		int		sell_len;
@@ -51,6 +56,7 @@ namespace
 		int		cancel_ok;
 		unsigned long	buy_id;
 		unsigned long	sell_id;
+		char	config_error[256];
 	};
 
 	inline void child_expect(ChildReport& r, bool cond)
@@ -62,9 +68,12 @@ namespace
 	struct EnumRec
 	{
 		int		calls { 0 };
+		int		entries { 0 };
 		bool	last { false };
 		double	qty { 0.0 };
+		double	terminalQty { 0.0 };
 		std::string code;
+		std::string terminalCode;
 	};
 
 	EnumRec g_enum;
@@ -72,9 +81,18 @@ namespace
 	void enum_cb(CtxHandler, const char* code, double qty, bool isLast)
 	{
 		g_enum.calls++;
-		g_enum.last = isLast;
-		g_enum.qty = qty;
-		g_enum.code = code ? code : "";
+		if (isLast)
+		{
+			g_enum.last = true;
+			g_enum.terminalQty = qty;
+			g_enum.terminalCode = code ? code : "";
+		}
+		else
+		{
+			g_enum.entries++;
+			g_enum.qty = qty;
+			g_enum.code = code ? code : "";
+		}
 	}
 
 	void write_text(const std::string& path, const std::string& body)
@@ -114,6 +132,7 @@ namespace
 	std::string replayer_cfg(const stdfs::path& dir)
 	{
 		return "{\"replayer\":{\"mode\":\"none\",\"path\":\"" + dir.string() + "\","
+			"\"stime\":20240102000000,\"etime\":20240103000000,"
 			"\"basefiles\":{"
 			"\"session\":\"" + (dir / "sessions.json").string() + "\","
 			"\"commodity\":\"" + (dir / "commodities.json").string() + "\","
@@ -142,24 +161,36 @@ TEST(R113BtPorterCtaSignal, CtaSetPositionEnumeratesOneSignal)
 		ChildReport rep;
 		memset(&rep, 0, sizeof(rep));
 
-		getRunner().config(cfg.c_str(), false);
+		std::string configError;
+		const bool configured = getRunner().config_v2(cfg.c_str(), false, &configError);
+		child_expect(rep, configured);
+		if (!configured)
+			std::snprintf(rep.config_error, sizeof(rep.config_error), "%s", configError.c_str());
 
 		const CtxHandler cta = init_cta_mocker("r113_cta_wired", 0, false, false, false, false);
 		child_expect(rep, cta > 0U);
 		child_expect(rep, getRunner().cta_mocker() != nullptr);
 
-		cta_set_position(cta, "SHFE.rb2510", 2.0, "r113", 0.0, 0.0);
-		rep.cta_pos = cta_get_position(cta, "SHFE.rb2510", false, "");
+		cta_set_position(cta, kCode, 2.0, "r113", 0.0, 0.0);
+		rep.cta_pos = cta_get_position(cta, kCode, false, "");
 		child_expect(rep, rep.cta_pos == 2.0);
 
 		g_enum = EnumRec();
 		cta_get_all_position(cta, enum_cb);
 		rep.cta_enum_calls = g_enum.calls;
+		rep.cta_enum_entries = g_enum.entries;
 		rep.cta_enum_last = g_enum.last ? 1 : 0;
 		rep.cta_enum_qty = g_enum.qty;
+		rep.cta_enum_terminal_qty = g_enum.terminalQty;
+		rep.cta_enum_code_matches = g_enum.code == kCode ? 1 : 0;
+		rep.cta_enum_terminal_code_len = static_cast<int>(g_enum.terminalCode.size());
 		child_expect(rep, rep.cta_enum_calls == 2);
+		child_expect(rep, rep.cta_enum_entries == 1);
 		child_expect(rep, rep.cta_enum_last == 1);
+		child_expect(rep, rep.cta_enum_code_matches == 1);
 		child_expect(rep, rep.cta_enum_qty == 2.0);
+		child_expect(rep, rep.cta_enum_terminal_code_len == 0);
+		child_expect(rep, rep.cta_enum_terminal_qty == 0.0);
 
 		const ssize_t nw = ::write(fds[1], &rep, sizeof(rep));
 		::close(fds[1]);
@@ -177,11 +208,16 @@ TEST(R113BtPorterCtaSignal, CtaSetPositionEnumeratesOneSignal)
 	ASSERT_EQ(nr, (ssize_t)sizeof(rep)) << "子进程未回传报告";
 	ASSERT_TRUE(WIFEXITED(status));
 	EXPECT_EQ(0, WEXITSTATUS(status));
+	EXPECT_STREQ("", rep.config_error) << "child config_v2 failed";
 	EXPECT_EQ(0, rep.fails);
 	EXPECT_DOUBLE_EQ(2.0, rep.cta_pos);
 	EXPECT_EQ(2, rep.cta_enum_calls);
+	EXPECT_EQ(1, rep.cta_enum_entries);
 	EXPECT_EQ(1, rep.cta_enum_last);
+	EXPECT_EQ(1, rep.cta_enum_code_matches);
 	EXPECT_DOUBLE_EQ(2.0, rep.cta_enum_qty);
+	EXPECT_EQ(0, rep.cta_enum_terminal_code_len);
+	EXPECT_DOUBLE_EQ(0.0, rep.cta_enum_terminal_qty);
 
 	std::error_code ec;
 	stdfs::remove_all(dir, ec);
@@ -208,26 +244,30 @@ TEST(R113BtPorterWiredOrders, HftOrderIdsWithBaseData)
 		ChildReport rep;
 		memset(&rep, 0, sizeof(rep));
 
-		getRunner().config(cfg.c_str(), false);
+		std::string configError;
+		const bool configured = getRunner().config_v2(cfg.c_str(), false, &configError);
+		child_expect(rep, configured);
+		if (!configured)
+			std::snprintf(rep.config_error, sizeof(rep.config_error), "%s", configError.c_str());
 
 		const CtxHandler hft = init_hft_mocker("r113_hft_wired", false);
 		child_expect(rep, hft > 0U);
 		child_expect(rep, getRunner().hft_mocker() != nullptr);
 
-		const char* buy = hft_buy(hft, "SHFE.rb2510", 4500.0, 2.0, "r113", 0);
+		const char* buy = hft_buy(hft, kCode, 4500.0, 2.0, "r113", 0);
 		rep.buy_len = (int)strlen(buy);
 		rep.buy_id = strtoul(buy, NULL, 10);
 		child_expect(rep, rep.buy_len > 0);
 		child_expect(rep, rep.buy_id > 0UL);
 
-		const char* sell = hft_sell(hft, "SHFE.rb2510", 4500.0, 1.0, "r113", 0);
+		const char* sell = hft_sell(hft, kCode, 4500.0, 1.0, "r113", 0);
 		rep.sell_len = (int)strlen(sell);
 		rep.sell_id = strtoul(sell, NULL, 10);
 		child_expect(rep, rep.sell_len > 0);
 		child_expect(rep, rep.sell_id > 0UL);
 		child_expect(rep, rep.sell_id != rep.buy_id);
 
-		const char* canceled = hft_cancel_all(hft, "SHFE.rb2510", true);
+		const char* canceled = hft_cancel_all(hft, kCode, true);
 		rep.cancel_all_len = (int)strlen(canceled);
 		child_expect(rep, rep.cancel_all_len > 0);
 		child_expect(rep, strtoul(canceled, NULL, 10) == rep.buy_id);
@@ -251,6 +291,7 @@ TEST(R113BtPorterWiredOrders, HftOrderIdsWithBaseData)
 	ASSERT_EQ(nr, (ssize_t)sizeof(rep)) << "子进程未回传报告";
 	ASSERT_TRUE(WIFEXITED(status));
 	EXPECT_EQ(0, WEXITSTATUS(status));
+	EXPECT_STREQ("", rep.config_error) << "child config_v2 failed";
 	EXPECT_EQ(0, rep.fails);
 	EXPECT_GT(rep.buy_len, 0);
 	EXPECT_GT(rep.sell_len, 0);

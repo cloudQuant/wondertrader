@@ -163,21 +163,55 @@ TEST_F(Q05ResampleTest, BadSessionTemplateRejected)
 		"d", 1, "{not json", q05Logger), 0u);
 	EXPECT_NE(g_lastLog.find("解析失败"), std::string::npos);
 
-	resetCapture();
-	// 缺 sections（auction 键必须存在，L906 直接 root["auction"] 取值）
-	EXPECT_EQ(resample_bars("whatever", q05Bars, q05Cnt, 20200106, 20200117,
-		"d", 1, R"JSON({"offset": 0, "auction": null})JSON", q05Logger), 0u);
-	EXPECT_NE(g_lastLog.find("格式错误"), std::string::npos);
+	const char* invalidTemplates[] = {
+		"[]", // 根必须为 object
+		R"JSON({"auction": null, "sections": []})JSON", // offset 缺失
+		R"JSON({"offset": "0", "auction": null, "sections": []})JSON", // offset 类型错误
+		R"JSON({"offset": 0, "auction": [], "sections": []})JSON", // auction 类型错误
+		R"JSON({"offset": 0, "auction": {"to": 925}, "sections": []})JSON", // auction.from 缺失
+		R"JSON({"offset": 0, "auction": {"from": "915", "to": 925}, "sections": []})JSON", // auction.from 类型错误
+		R"JSON({"offset": 0, "auction": null})JSON", // sections 缺失
+		R"JSON({"offset": 0, "auction": null, "sections": {}})JSON", // sections 类型错误
+		R"JSON({"offset": 0, "auction": null, "sections": [{}]})JSON", // section.from/to 缺失
+		R"JSON({"offset": 0, "auction": null, "sections": [{"from": 0, "to": "2359"}]})JSON" // section.to 类型错误
+	};
+	for (const char* invalidTemplate : invalidTemplates)
+	{
+		resetCapture();
+		EXPECT_EQ(resample_bars("whatever", q05Bars, q05Cnt, 20200106, 20200117,
+			"d", 1, invalidTemplate, q05Logger), 0u) << invalidTemplate;
+		EXPECT_NE(g_lastLog.find("格式错误"), std::string::npos) << invalidTemplate;
+	}
+
+	// auction 原有语义为可省略或置 null；合法结构应继续进入文件读取路径。
+	const char* optionalAuctionTemplates[] = {
+		R"JSON({"offset": 0, "sections": [{"from": 0, "to": 2359}]})JSON",
+		R"JSON({"offset": 0, "auction": null, "sections": [{"from": 0, "to": 2359}]})JSON"
+	};
+	const fs::path shortFile = _dir / "template-control.dsb";
+	{
+		std::ofstream ofs(shortFile.string(), std::ios::binary | std::ios::trunc);
+		ofs << "tiny";
+	}
+	for (const char* validTemplate : optionalAuctionTemplates)
+	{
+		resetCapture();
+		EXPECT_EQ(resample_bars(shortFile.string().c_str(), q05Bars, q05Cnt,
+			20200106, 20200117, "d", 1, validTemplate, q05Logger), 0u);
+		EXPECT_NE(g_lastLog.find("头部校验失败"), std::string::npos) << validTemplate;
+	}
 }
 
-TEST_F(Q05ResampleTest, MissingOrShortFileFailsHeadCheck)
+TEST_F(Q05ResampleTest, MissingFileReadErrorAndShortFileFailsHeadCheck)
 {
 	resetCapture();
 	const fs::path missing = _dir / "no_such.dsb";
-	// 文件缺失：buffer 为空 -> 小于 HisKlineBlock 头
+	// 文件缺失在 readHelperFile 中返回失败，尚未进入文件头校验分支。
 	EXPECT_EQ(resample_bars(missing.string().c_str(), q05Bars, q05Cnt, 20200106, 20200117,
 		"d", 1, kDaySess, q05Logger), 0u);
-	EXPECT_NE(g_lastLog.find("头部校验失败"), std::string::npos);
+	const std::string readErrorPrefix = std::string("读取数据文件") + missing.string() + "失败:";
+	EXPECT_NE(g_lastLog.find(readErrorPrefix), std::string::npos) << g_lastLog;
+	EXPECT_EQ(g_lastLog.find("头部校验失败"), std::string::npos) << g_lastLog;
 
 	resetCapture();
 	fs::path shortFile = _dir / "short.dsb";
@@ -187,7 +221,8 @@ TEST_F(Q05ResampleTest, MissingOrShortFileFailsHeadCheck)
 	}
 	EXPECT_EQ(resample_bars(shortFile.string().c_str(), q05Bars, q05Cnt, 20200106, 20200117,
 		"d", 1, kDaySess, q05Logger), 0u);
-	EXPECT_NE(g_lastLog.find("头部校验失败"), std::string::npos);
+	EXPECT_NE(g_lastLog.find("头部校验失败"), std::string::npos) << g_lastLog;
+	EXPECT_EQ(g_lastLog.find("读取数据文件"), std::string::npos) << g_lastLog;
 }
 
 TEST_F(Q05ResampleTest, DayResampleOfTenDailyBarsPassesThrough)

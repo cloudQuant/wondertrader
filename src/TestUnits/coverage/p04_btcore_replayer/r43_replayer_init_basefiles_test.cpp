@@ -59,6 +59,18 @@ namespace
 		return cfg;
 	}
 
+	WTSVariant* r43_init_cfg_with_basefiles(const std::filesystem::path& base,
+		const std::filesystem::path& sessionFile, const std::filesystem::path& commodityFile)
+	{
+		WTSVariant* cfg = r43_init_cfg(base);
+		WTSVariant* basefiles = WTSVariant::createObject();
+		basefiles->append("session", sessionFile.string().c_str());
+		basefiles->append("commodity", commodityFile.string().c_str());
+		cfg->append("basefiles", basefiles);
+		basefiles->release();
+		return cfg;
+	}
+
 	bool r43_write_text(const std::filesystem::path& p, const std::string& content)
 	{
 		std::error_code ec;
@@ -71,7 +83,7 @@ namespace
 		return true;
 	}
 
-	bool r43_write_daily_csv(const std::filesystem::path& base)
+	bool r43_write_daily_csv(const std::filesystem::path& base, double closedClose, double currentClose)
 	{
 		std::error_code ec;
 		std::filesystem::create_directories(base / "csv", ec);
@@ -79,8 +91,8 @@ namespace
 		if (!out.is_open())
 			return false;
 		out << "date,time,open,high,low,close,volume,turnover,open_interest,diff_interest,settle\n"
-			<< "20200102,150000,10.0,11.0,9.5,10.5,1000,10000,0,0,0\n"
-			<< "20200103,150000,10.5,12.0,10.4,11.5,1100,11000,0,0,0\n";
+			<< "20200101,150000,10.0,11.0,9.5," << closedClose << ",1000,10000,0,0,0\n"
+			<< "20200102,150000,10.5,12.0,10.4," << currentClose << ",1100,11000,0,0,0\n";
 		out.close();
 		return true;
 	}
@@ -178,9 +190,11 @@ TEST_F(R43ReplayerInitBasefilesTest, optionalBasefilesAllLoaded)
 // store 子节点存在时，数据目录取 store.path 而不是根 path
 TEST_F(R43ReplayerInitBasefilesTest, storePathOverridesRootPath)
 {
-	ASSERT_TRUE(r43_write_daily_csv(_base));
+	const std::filesystem::path rootData = _base / "root_data";
+	ASSERT_TRUE(r43_write_daily_csv(rootData, 99.5, 100.5));
+	ASSERT_TRUE(r43_write_daily_csv(_base, 10.5, 11.5));
 
-	WTSVariant* cfg = r43_init_cfg(_base / "not_a_data_dir");
+	WTSVariant* cfg = r43_init_cfg(rootData);
 	WTSVariant* store = WTSVariant::createObject();
 	store->append("path", _base.string().c_str());
 	cfg->append("store", store);
@@ -205,8 +219,43 @@ TEST_F(R43ReplayerInitBasefilesTest, storePathOverridesRootPath)
 	WTSKlineSlice* slice = replayer.get_kline_slice("SSE.STK.000001", "d", 1, 1, false);
 	ASSERT_NE(nullptr, slice);
 	ASSERT_EQ(1u, slice->size());
+	EXPECT_EQ(20200101u, slice->at(0)->date);
 	EXPECT_DOUBLE_EQ(10.5, slice->at(0)->close);
 	slice->release();
+}
+
+// Required session files must fail init when absent or unparsable.
+TEST_F(R43ReplayerInitBasefilesTest, configuredSessionLoadFailuresFailInit)
+{
+	const std::filesystem::path malformed = _base / "bad_sessions.json";
+	ASSERT_TRUE(r43_write_text(malformed, "{ this is not json"));
+	const std::filesystem::path validCommodity = _root / "dist/common/stk_comms.json";
+	const std::filesystem::path missing = _base / "missing_sessions.json";
+
+	for (const auto& sessionFile : { missing, malformed })
+	{
+		WTSVariant* cfg = r43_init_cfg_with_basefiles(_base, sessionFile, validCommodity);
+		HisDataReplayer replayer;
+		EXPECT_FALSE(replayer.init(cfg)) << sessionFile;
+		cfg->release();
+	}
+}
+
+// Required commodity files must fail init when absent or unparsable.
+TEST_F(R43ReplayerInitBasefilesTest, configuredCommodityLoadFailuresFailInit)
+{
+	const std::filesystem::path malformed = _base / "bad_commodities.json";
+	ASSERT_TRUE(r43_write_text(malformed, "{ this is not json"));
+	const std::filesystem::path validSession = _root / "dist/common/sessions.json";
+	const std::filesystem::path missing = _base / "missing_commodities.json";
+
+	for (const auto& commodityFile : { missing, malformed })
+	{
+		WTSVariant* cfg = r43_init_cfg_with_basefiles(_base, validSession, commodityFile);
+		HisDataReplayer replayer;
+		EXPECT_FALSE(replayer.init(cfg)) << commodityFile;
+		cfg->release();
+	}
 }
 
 // 有效除权因子文件：带 PID 与不带 PID 的 code 都要能解析，且不影响 init 结果

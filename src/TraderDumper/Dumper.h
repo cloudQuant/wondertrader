@@ -2,6 +2,9 @@
 #include "PorterDefs.h"
 #include "../Share/StdUtils.hpp"
 
+#include <condition_variable>
+#include <mutex>
+
 class Dumper
 {
 
@@ -47,6 +50,8 @@ private:
 	FuncOnPosition	_cb_position;
 
 	StdThreadPtr	_worker;
+	std::mutex		_worker_mutex;
+	std::condition_variable _worker_cv;
 
 	uint32_t		_refresh_span;
 	bool			_stopped;

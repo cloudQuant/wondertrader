@@ -7,6 +7,11 @@
 #include <fstream>
 #include <exception>
 #include <filesystem>
+#include <string_view>
+#ifdef WT_T26_LOADJSON_TEST_HOOKS
+#include <algorithm>
+#include <vector>
+#endif
 
 #include "../Share/StrUtil.hpp"
 #include "../Share/fmtlib.h"
@@ -39,6 +44,78 @@ inline const char* encode_text(const char* s)
 }
 
 USING_NS_WTP;
+
+#ifdef WT_T26_LOADJSON_TEST_HOOKS
+namespace t26_test::load_json_test_hook
+{
+	static size_t load_count = 0;
+	static size_t release_count = 0;
+	static std::vector<WTSVariant*> loaded_variants;
+	static std::vector<WTSVariant*> released_variants;
+
+	void reset()
+	{
+		load_count = 0;
+		release_count = 0;
+		loaded_variants.clear();
+		released_variants.clear();
+	}
+
+	void note_load() { ++load_count; }
+	void note_loaded(WTSVariant* value)
+	{
+		if (value != nullptr)
+			loaded_variants.push_back(value);
+	}
+	void note_release(WTSVariant* value)
+	{
+		++release_count;
+		released_variants.push_back(value);
+	}
+	size_t loads() { return load_count; }
+	size_t releases() { return release_count; }
+	bool every_loaded_variant_released_once()
+	{
+		if (loaded_variants.size() != released_variants.size())
+			return false;
+
+		std::vector<WTSVariant*> unmatched = loaded_variants;
+		for (WTSVariant* released : released_variants)
+		{
+			auto it = std::find(unmatched.begin(), unmatched.end(), released);
+			if (it == unmatched.end())
+				return false;
+			unmatched.erase(it);
+		}
+		return unmatched.empty();
+	}
+}
+
+namespace
+{
+	class T26ObservedCfgLoader
+	{
+	public:
+		static WTSVariant* load_from_file(const char* filename)
+		{
+			t26_test::load_json_test_hook::note_load();
+			WTSVariant* value = WTSCfgLoader::load_from_file(filename);
+			t26_test::load_json_test_hook::note_loaded(value);
+			return value;
+		}
+
+		static WTSVariant* load_from_file(const std::string& filename)
+		{
+			t26_test::load_json_test_hook::note_load();
+			WTSVariant* value = WTSCfgLoader::load_from_file(filename);
+			t26_test::load_json_test_hook::note_loaded(value);
+			return value;
+		}
+	};
+}
+
+#define WTSCfgLoader T26ObservedCfgLoader
+#endif
 
 extern std::map<std::string, std::string>	MAP_NAME;
 extern std::map<std::string, std::string>	MAP_SESSION;
@@ -120,13 +197,15 @@ static bool hasTerminator(const char (&value)[N])
 	return std::memchr(value, '\0', N) != NULL;
 }
 
-static bool hasAsciiDigit(const char* value)
+static bool hasAsciiDigit(std::string_view value)
 {
-	if (value == NULL)
+	const size_t terminator = value.find('\0');
+	if (terminator == std::string_view::npos)
 		return false;
-	for (const unsigned char* p = reinterpret_cast<const unsigned char*>(value); *p != '\0'; ++p)
+	value = value.substr(0, terminator);
+	for (unsigned char ch : value)
 	{
-		if (*p >= '0' && *p <= '9')
+		if (ch >= '0' && ch <= '9')
 			return true;
 	}
 	return false;
@@ -386,25 +465,27 @@ inline ContractCategory wrapCategory(TThostFtdcProductClassType cType)
 	}
 }
 
-std::string fillCzceCode(const char* code, uint32_t tdate)
+bool fillCzceCode(std::string_view code, uint32_t tdate, std::string& result)
 {
-	if (code == NULL)
-		return std::string();
-	if (strlen(code) == 0)
-		return code;
+	result.clear();
+	const size_t terminator = code.find('\0');
+	if (terminator == std::string_view::npos)
+		return false;
+	code = code.substr(0, terminator);
+	if (code.empty())
+		return false;
+
 	static uint32_t yearFlag = UINT_MAX;
 	static uint32_t yearPref = UINT_MAX;
 	static uint32_t nextYPref = UINT_MAX;
 
-	std::string ret;
 	uint32_t pid_len = 0;
-	const size_t code_len = strlen(code);
-	while (pid_len < code_len && (code[pid_len] < '0' || code[pid_len] > '9'))
+	while (pid_len < code.size() && (code[pid_len] < '0' || code[pid_len] > '9'))
 	{
 		pid_len++;
 	}
-	if (pid_len == code_len)
-		return std::string();
+	if (pid_len == code.size())
+		return false;
 	if (yearFlag == UINT_MAX)
 	{
 		yearFlag = tdate / 10000 % 10;
@@ -412,21 +493,23 @@ std::string fillCzceCode(const char* code, uint32_t tdate)
 		nextYPref = (yearPref + 1) % 10;
 	}
 
-	uint32_t cYFlag = code[pid_len] - 48;
+	uint32_t cYFlag = static_cast<uint32_t>(code[pid_len] - '0');
+	std::string expanded;
 	if (yearFlag == 0 || (yearPref != 0 && cYFlag >= yearFlag))
 	{
-		ret.append(code, pid_len);
-		ret.append(convert::to_str(yearPref));
-		ret.append(code + pid_len);
+		expanded.append(code.data(), pid_len);
+		expanded.append(convert::to_str(yearPref));
+		expanded.append(code.data() + pid_len, code.size() - pid_len);
 	}
 	else
 	{
-		ret.append(code, pid_len);
-		ret.append(convert::to_str(nextYPref));
-		ret.append(code + pid_len);
+		expanded.append(code.data(), pid_len);
+		expanded.append(convert::to_str(nextYPref));
+		expanded.append(code.data() + pid_len, code.size() - pid_len);
 	}
 
-	return ret;
+	result.swap(expanded);
+	return true;
 }
 
 
@@ -458,6 +541,8 @@ void CTraderSpi::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CTho
 
 			bool bOption = isOption(pInstrument->ProductClass);
 			bool bFuture = isFuture(pInstrument->ProductClass);
+			const std::string_view instrumentCode(pInstrument->InstrumentID, sizeof(pInstrument->InstrumentID));
+			const std::string_view underlyingCode(pInstrument->UnderlyingInstrID, sizeof(pInstrument->UnderlyingInstrID));
 
 			bool isGranted = false;
 			if (bOption && (CLASSMASK & 2) != 0)
@@ -470,8 +555,8 @@ void CTraderSpi::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CTho
 				if (isGranted)
 				{
 					if (strcmp(pInstrument->ExchangeID, "CZCE") == 0 &&
-						(!hasAsciiDigit(pInstrument->InstrumentID) ||
-						(pInstrument->UnderlyingInstrID[0] != '\0' && !hasAsciiDigit(pInstrument->UnderlyingInstrID))))
+						(!hasAsciiDigit(instrumentCode) ||
+						(pInstrument->UnderlyingInstrID[0] != '\0' && !hasAsciiDigit(underlyingCode))))
 					{
 						std::cerr << "--->>> OnRspQryInstrument: invalid CZCE code, skipped" << std::endl;
 						break;
@@ -530,7 +615,11 @@ void CTraderSpi::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CTho
 					Contract contract;
 					if(strcmp(pInstrument->ExchangeID, "CZCE") == 0)
 					{
-						contract.m_strCode = fillCzceCode(pInstrument->InstrumentID, _trading_day);
+						if (!fillCzceCode(instrumentCode, _trading_day, contract.m_strCode))
+						{
+							std::cerr << "--->>> OnRspQryInstrument: invalid CZCE code, skipped" << std::endl;
+							break;
+						}
 						contract.m_strAltCode = pInstrument->InstrumentID;
 					}
 					else
@@ -549,7 +638,14 @@ void CTraderSpi::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CTho
 
 					contract.m_optType = bOption ? (OptionType)pInstrument->OptionsType : OT_None;
 					if (strcmp(pInstrument->ExchangeID, "CZCE") == 0)
-						contract.m_strUnderlying = fillCzceCode(pInstrument->UnderlyingInstrID, _trading_day);
+					{
+						if (pInstrument->UnderlyingInstrID[0] != '\0' &&
+							!fillCzceCode(underlyingCode, _trading_day, contract.m_strUnderlying))
+						{
+							std::cerr << "--->>> OnRspQryInstrument: invalid CZCE underlying code, skipped" << std::endl;
+							break;
+						}
+					}
 					else
 						contract.m_strUnderlying = pInstrument->UnderlyingInstrID;
 					contract.m_strikePrice = pInstrument->StrikePrice;
@@ -742,6 +838,9 @@ void CTraderSpi::LoadFromJson()
 		}
 
 		root->release();
+#ifdef WT_T26_LOADJSON_TEST_HOOKS
+		t26_test::load_json_test_hook::note_release(root);
+#endif
 	}
 
 	path = SAVEPATH;
@@ -749,7 +848,6 @@ void CTraderSpi::LoadFromJson()
 	root = WTSCfgLoader::load_from_file(path);
 	if (root)
 	{
-		WTSVariant* root = WTSCfgLoader::load_from_file(path);
 		for (const auto& exchg_id : root->memberNames())
 		{
 			WTSVariant* jExchg = root->get(exchg_id.c_str());
@@ -796,6 +894,9 @@ void CTraderSpi::LoadFromJson()
 		}
 
 		root->release();
+#ifdef WT_T26_LOADJSON_TEST_HOOKS
+		t26_test::load_json_test_hook::note_release(root);
+#endif
 	}
 	std::cerr << "--->>> " << "LoadFromJson" << std::endl;
 }
@@ -836,7 +937,7 @@ void CTraderSpi::DumpFees()
 	else
 	{
 		path = SAVEPATH;
-		path += "fees.json";
+		path += FEES_FILE;
 	}
 
 	ofs.open(path);

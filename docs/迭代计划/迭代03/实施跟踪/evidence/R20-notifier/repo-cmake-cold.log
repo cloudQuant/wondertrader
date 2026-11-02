@@ -1,0 +1,64 @@
++ set -euo pipefail
++ repo=/Users/yunjinqi/Documents/new_projects/wondertrader
++ out=/tmp/wt-i03-event-notifier/cmake-cold-build
++ /opt/homebrew/bin/cmake -S /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture -B /tmp/wt-i03-event-notifier/cmake-cold-build -G Ninja -DCMAKE_MAKE_PROGRAM=/Users/yunjinqi/opt/anaconda3/bin/ninja -DWT_R20_TOOLS_LIBRARY=/tmp/wt-i03-r58-build/build_x64/Debug/libs/libWTSTools.a -DWT_R20_UTILS_LIBRARY=/tmp/wt-i03-r58-build/build_x64/Debug/libs/libWTSUtils.a '-DWT_R20_EXTRA_INCLUDES=/opt/homebrew/Cellar/boost/1.88.0/include;/opt/homebrew/Cellar/fmt/11.2.0/include;/opt/homebrew/Cellar/spdlog/1.15.3/include;/usr/local/include' '-DWT_R20_EXTRA_LIBRARIES=-lboost_filesystem;-lboost_thread;-liconv' -DCMAKE_CXX_FLAGS=-fprofile-instr-generate '-DCMAKE_EXE_LINKER_FLAGS=-L/opt/homebrew/Cellar/boost/1.88.0/lib -fprofile-instr-generate'
+-- The CXX compiler identification is AppleClang 17.0.0.17000603
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Configuring done (0.6s)
+-- Generating done (0.0s)
+-- Build files have been written to: /tmp/wt-i03-event-notifier/cmake-cold-build
++ /opt/homebrew/bin/cmake --build /tmp/wt-i03-event-notifier/cmake-cold-build --verbose
+Change Dir: '/tmp/wt-i03-event-notifier/cmake-cold-build'
+
+Run Build Command(s): /Users/yunjinqi/opt/anaconda3/bin/ninja -v
+[1/16] /usr/bin/c++ -DOMIT_CREATE -Dfake_missing_create_EXPORTS -I/Users/yunjinqi/Documents/new_projects/wondertrader/src -fprofile-instr-generate -std=gnu++17 -arch arm64 -fPIC -MD -MT CMakeFiles/fake_missing_create.dir/fake_mq.cpp.o -MF CMakeFiles/fake_missing_create.dir/fake_mq.cpp.o.d -o CMakeFiles/fake_missing_create.dir/fake_mq.cpp.o -c /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/fake_mq.cpp
+[2/16] /usr/bin/c++ -DOMIT_PUBLISH -Dfake_missing_publish_EXPORTS -I/Users/yunjinqi/Documents/new_projects/wondertrader/src -fprofile-instr-generate -std=gnu++17 -arch arm64 -fPIC -MD -MT CMakeFiles/fake_missing_publish.dir/fake_mq.cpp.o -MF CMakeFiles/fake_missing_publish.dir/fake_mq.cpp.o.d -o CMakeFiles/fake_missing_publish.dir/fake_mq.cpp.o -c /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/fake_mq.cpp
+[3/16] /usr/bin/c++ -Dfake_full_EXPORTS -I/Users/yunjinqi/Documents/new_projects/wondertrader/src -fprofile-instr-generate -std=gnu++17 -arch arm64 -fPIC -MD -MT CMakeFiles/fake_full.dir/fake_mq.cpp.o -MF CMakeFiles/fake_full.dir/fake_mq.cpp.o.d -o CMakeFiles/fake_full.dir/fake_mq.cpp.o -c /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/fake_mq.cpp
+[4/16] /usr/bin/c++ -DOMIT_DESTROY -Dfake_missing_destroy_EXPORTS -I/Users/yunjinqi/Documents/new_projects/wondertrader/src -fprofile-instr-generate -std=gnu++17 -arch arm64 -fPIC -MD -MT CMakeFiles/fake_missing_destroy.dir/fake_mq.cpp.o -MF CMakeFiles/fake_missing_destroy.dir/fake_mq.cpp.o.d -o CMakeFiles/fake_missing_destroy.dir/fake_mq.cpp.o -c /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/fake_mq.cpp
+[5/16] /usr/bin/c++ -DOMIT_REGISTER -Dfake_missing_register_EXPORTS -I/Users/yunjinqi/Documents/new_projects/wondertrader/src -fprofile-instr-generate -std=gnu++17 -arch arm64 -fPIC -MD -MT CMakeFiles/fake_missing_register.dir/fake_mq.cpp.o -MF CMakeFiles/fake_missing_register.dir/fake_mq.cpp.o.d -o CMakeFiles/fake_missing_register.dir/fake_mq.cpp.o -c /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/fake_mq.cpp
+[6/16] /usr/bin/c++ -DFAIL_CREATE -Dfake_zero_EXPORTS -I/Users/yunjinqi/Documents/new_projects/wondertrader/src -fprofile-instr-generate -std=gnu++17 -arch arm64 -fPIC -MD -MT CMakeFiles/fake_zero.dir/fake_mq.cpp.o -MF CMakeFiles/fake_zero.dir/fake_mq.cpp.o.d -o CMakeFiles/fake_zero.dir/fake_mq.cpp.o -c /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/fake_mq.cpp
+[7/16] : && /usr/bin/c++ -fprofile-instr-generate -arch arm64 -dynamiclib -Wl,-headerpad_max_install_names  -o plugins/missing_publish/libWtMsgQue.dylib -install_name @rpath/libWtMsgQue.dylib CMakeFiles/fake_missing_publish.dir/fake_mq.cpp.o   && :
+[8/16] : && /usr/bin/c++ -fprofile-instr-generate -arch arm64 -dynamiclib -Wl,-headerpad_max_install_names  -o plugins/missing_create/libWtMsgQue.dylib -install_name @rpath/libWtMsgQue.dylib CMakeFiles/fake_missing_create.dir/fake_mq.cpp.o   && :
+[9/16] : && /usr/bin/c++ -fprofile-instr-generate -arch arm64 -dynamiclib -Wl,-headerpad_max_install_names  -o plugins/full/libWtMsgQue.dylib -install_name @rpath/libWtMsgQue.dylib CMakeFiles/fake_full.dir/fake_mq.cpp.o   && :
+[10/16] : && /usr/bin/c++ -fprofile-instr-generate -arch arm64 -dynamiclib -Wl,-headerpad_max_install_names  -o plugins/missing_destroy/libWtMsgQue.dylib -install_name @rpath/libWtMsgQue.dylib CMakeFiles/fake_missing_destroy.dir/fake_mq.cpp.o   && :
+[11/16] : && /usr/bin/c++ -fprofile-instr-generate -arch arm64 -dynamiclib -Wl,-headerpad_max_install_names  -o plugins/missing_register/libWtMsgQue.dylib -install_name @rpath/libWtMsgQue.dylib CMakeFiles/fake_missing_register.dir/fake_mq.cpp.o   && :
+[12/16] : && /usr/bin/c++ -fprofile-instr-generate -arch arm64 -dynamiclib -Wl,-headerpad_max_install_names  -o plugins/zero/libWtMsgQue.dylib -install_name @rpath/libWtMsgQue.dylib CMakeFiles/fake_zero.dir/fake_mq.cpp.o   && :
+[13/16] /usr/bin/c++ -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -I/Users/yunjinqi/Documents/new_projects/wondertrader/src -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include -I/opt/homebrew/Cellar/spdlog/1.15.3/include -fprofile-instr-generate -std=gnu++17 -arch arm64 -include /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h -MD -MT CMakeFiles/notifier_check.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/WtHelper.cpp.o -MF CMakeFiles/notifier_check.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/WtHelper.cpp.o.d -o CMakeFiles/notifier_check.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/WtHelper.cpp.o -c /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/WtHelper.cpp
+[14/16] /usr/bin/c++ -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -I/Users/yunjinqi/Documents/new_projects/wondertrader/src -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include -I/opt/homebrew/Cellar/spdlog/1.15.3/include -fprofile-instr-generate -std=gnu++17 -arch arm64 -include /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h -MD -MT CMakeFiles/notifier_check.dir/notifier_check.cpp.o -MF CMakeFiles/notifier_check.dir/notifier_check.cpp.o.d -o CMakeFiles/notifier_check.dir/notifier_check.cpp.o -c /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/notifier_check.cpp
+[15/16] /usr/bin/c++ -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -I/Users/yunjinqi/Documents/new_projects/wondertrader/src -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include -I/opt/homebrew/Cellar/spdlog/1.15.3/include -fprofile-instr-generate -std=gnu++17 -arch arm64 -include /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h -MD -MT CMakeFiles/notifier_check.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/EventNotifier.cpp.o -MF CMakeFiles/notifier_check.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/EventNotifier.cpp.o.d -o CMakeFiles/notifier_check.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/EventNotifier.cpp.o -c /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/EventNotifier.cpp
+[16/16] : && /usr/bin/c++ -fprofile-instr-generate -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names -L/opt/homebrew/Cellar/boost/1.88.0/lib -fprofile-instr-generate CMakeFiles/notifier_check.dir/notifier_check.cpp.o CMakeFiles/notifier_check.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/EventNotifier.cpp.o CMakeFiles/notifier_check.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/WtHelper.cpp.o -o notifier_check  /tmp/wt-i03-r58-build/build_x64/Debug/libs/libWTSTools.a  /tmp/wt-i03-r58-build/build_x64/Debug/libs/libWTSUtils.a  -lboost_filesystem  -lboost_thread  -liconv && :
+
++ /opt/homebrew/bin/ctest --test-dir /tmp/wt-i03-event-notifier/cmake-cold-build --output-on-failure
+Test project /tmp/wt-i03-event-notifier/cmake-cold-build
+      Start  1: missing_create
+ 1/10 Test  #1: missing_create ...................   Passed    0.68 sec
+      Start  2: missing_destroy
+ 2/10 Test  #2: missing_destroy ..................   Passed    0.31 sec
+      Start  3: missing_register
+ 3/10 Test  #3: missing_register .................   Passed    0.31 sec
+      Start  4: optional_publisher
+ 4/10 Test  #4: optional_publisher ...............   Passed    0.33 sec
+      Start  5: zero_server_id
+ 5/10 Test  #5: zero_server_id ...................   Passed    0.33 sec
+      Start  6: full_plugin
+ 6/10 Test  #6: full_plugin ......................   Passed    0.32 sec
+      Start  7: retry_after_missing_register
+ 7/10 Test  #7: retry_after_missing_register .....   Passed    0.03 sec
+      Start  8: retry_after_zero_id
+ 8/10 Test  #8: retry_after_zero_id ..............   Passed    0.03 sec
+      Start  9: full_plugin_single
+ 9/10 Test  #9: full_plugin_single ...............   Passed    0.02 sec
+      Start 10: optional_publisher_single
+10/10 Test #10: optional_publisher_single ........   Passed    0.02 sec
+
+100% tests passed, 0 tests failed out of 10
+
+Total Test time (real) =   2.39 sec
++ find /tmp/wt-i03-event-notifier/cmake-cold-build -type l -print

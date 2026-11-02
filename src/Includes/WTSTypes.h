@@ -180,7 +180,7 @@ typedef enum tagTimeCondition : uint32_t
 } WTSTimeCondition;
 
 /*
- *	订单标志
+ *	订单标志，不表达生效时限或 GTD 到期日；CTP 的 GTD 回报映射为 WOF_NOR。
  */
 typedef enum tagOrderFlag : uint32_t
 {

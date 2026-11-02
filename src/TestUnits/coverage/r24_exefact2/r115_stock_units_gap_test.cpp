@@ -14,9 +14,8 @@
 //
 // 与 R7/R17/R24 的分工：R7 已覆盖两单元的 init 钳位/通道就绪/主发单链；R24 已覆盖分桶、超时扫描主链、
 // fire_at_once 卖侧与涨跌停组合。本文件只补它们留下的 0 行，并纠正两处 fake 语义：
-//   1) getPosition 按 ExecuteDefs.h 的真实语义 true=可用（昨仓）、false=总仓位。StockMinImpact 的调用
-//      与该语义一致；StockVWap 在 L494/L495 把两个实参写反（变量名与语义相反，BUG-R115-002），
-//      对应用例按产品的变量名喂值，只为触达 L505-508 的“目标上调”计算。
+//   1) fake getPosition 遵循 ExecuteDefs.h 的语义：true=可用仓、false=总仓；StockVWap 的目标调整
+//      用例分别设置总仓与可卖多仓，检查减仓目标上调后卖量不超过可卖仓。
 //   2) 超时回归通过可控 context clock 推进正常 1 秒阈值；只验证 fail-closed 和监控记录保留。
 //
 // 纪律：不启线程、无真实插件；Vwap_*.txt 写在系统临时目录并把 CWD 临时切过去，析构恢复并删除。
@@ -240,18 +239,6 @@ struct Env
 	}
 };
 
-std::string vwapBody(double value, uint32_t rows)
-{
-	std::string body;
-	for (uint32_t i = 0; i < rows; i++)
-	{
-		if (i)
-			body += ",";
-		body += std::to_string((long long)value);
-	}
-	return body;
-}
-
 std::string r115V2VwapBody(double value)
 {
 	std::string body = "{\"version\":2,\"profiles\":[{\"session_id\":\"R115S\",\"offset_minutes\":0,"
@@ -267,12 +254,29 @@ std::string r115V2VwapBody(double value)
 	return body;
 }
 
+std::string r115BucketV2VwapBody()
+{
+	std::string body = "{\"version\":2,\"profiles\":[{\"session_id\":\"R115S\",\"offset_minutes\":0,"
+		"\"sections\":[{\"from\":900,\"to\":1500}],\"bucket_unit\":\"trading_minute\","
+		"\"value_mode\":\"cumulative\",\"close_inclusive\":true,\"values\":[";
+	for (uint32_t i = 0; i <= 360; ++i)
+	{
+		if (i != 0)
+			body += ",";
+		const uint32_t value = i < 60 ? 0 : (i < 180 ? 1000 : (i < 300 ? 2000 : 3000));
+		body += std::to_string(value);
+	}
+	body += "]}]}";
+	return body;
+}
+
 WTSVariant* makeVwapCfg(uint32_t totalTimes, uint32_t priceMode, uint32_t ordSticky,
-	double lots, double minOpenLots, uint32_t offset = 0)
+	double lots, double minOpenLots, uint32_t offset = 0,
+	uint32_t beginTime = 900, uint32_t endTime = 1500)
 {
 	WTSVariant* cfg = WTSVariant::createObject();
-	cfg->append("begin_time", (uint32_t)900);
-	cfg->append("end_time", (uint32_t)1500);
+	cfg->append("begin_time", beginTime);
+	cfg->append("end_time", endTime);
 	cfg->append("ord_sticky", ordSticky);
 	cfg->append("tail_secs", (uint32_t)0);
 	cfg->append("total_times", totalTimes);
@@ -308,7 +312,7 @@ WTSVariant* makeStockMinCfg(uint32_t expire, int32_t priceMode, uint32_t span,
 TEST(r115_exefact, stock_vwap_time_buckets_showhand_and_guards)
 {
 	TempCwd cwd("svwap");
-	cwd.write("Vwap_R115SV.txt", vwapBody(1000, 400));
+	cwd.write("Vwap_R115SV.txt", r115BucketV2VwapBody());
 
 	Env env;
 	env.comm = makeStockComm("STK", "R115SV", "SHSE");
@@ -317,16 +321,18 @@ TEST(r115_exefact, stock_vwap_time_buckets_showhand_and_guards)
 	env.ctx.sess = env.sess;
 	{
 		WtStockVWapExeUnit unit;
-		WTSVariant* cfg = makeVwapCfg(1, 0, 0, 100.0, 100.0);
+		// 10:00-14:00 window with a two-hour fire span keeps all three clock points eligible.
+		WTSVariant* cfg = makeVwapCfg(2, 0, 0, 100.0, 100.0, 0, 1000, 1400);
 		unit.init(&env.ctx, kStockCode, cfg);
 		cfg->release();
+		ASSERT_TRUE(env.ctx.hasLog("初始化完成"));
 
-		// L381-382：空/异码；L395-396：首笔 20:00 不在 09:00-15:00，被过滤且不留缓存
+		// L381-382：空/异码；L395-396：首笔 08:00 盘前行情被过滤，后续 10:00 行情时间递增
 		unit.on_tick(NULL);
 		WTSTickData* foreign = makeStockTick("SHSE.STK.600001", 200000000, 10.0, 9.99, 10.01);
 		unit.on_tick(foreign);
 		foreign->release();
-		WTSTickData* outside = makeStockTick(kStockCode, 200000000, 10.0, 9.99, 10.01);
+		WTSTickData* outside = makeStockTick(kStockCode, 80000000, 10.0, 9.99, 10.01);
 		unit.on_tick(outside);
 		EXPECT_TRUE(env.ctx.buys.empty());
 		outside->release();
@@ -338,28 +344,35 @@ TEST(r115_exefact, stock_vwap_time_buckets_showhand_and_guards)
 		EXPECT_TRUE(env.ctx.buys.empty());
 
 		// L795-797 在同文件另一用例；这里 grabLastTick 返回空，_start_price 仍为 0
-		// L596-598：10:00 -> 上午分桶 30，1000 股按最小 100 股整手
-		unit.set_position(kStockCode, 1000.0);
+		// 10:00 首次执行：1000 股按最小 100 股整手
+		unit.set_position(kStockCode, 3000.0);
 		ASSERT_EQ(env.ctx.buys.size(), 1u);
 		EXPECT_DOUBLE_EQ(env.ctx.buys[0].price, 10.0);
 		EXPECT_DOUBLE_EQ(env.ctx.buys[0].qty, 1000.0);
 
-		// L114-116 + L127-129：12:00 落午休区间再钳到第 120 分钟；total_times=1 -> 第二次即打板
+		// 12:00 是下一笔符合两小时间隔的行情；仍按分布切片价执行。
+		env.ctx.curTime += 7200000;
+		env.ctx.avail_pos = 1000;
+		env.ctx.total_pos = 1000;
+		env.ctx.long_pos = 1000;
 		WTSTickData* t2 = makeStockTick(kStockCode, 120000000, 10.5, 10.49, 10.51);
 		unit.on_tick(t2);
 		ASSERT_EQ(env.ctx.buys.size(), 2u);
-		// L586-589：leftTimes==0 走 max(diff, min_open_lots)；L632-634：打板价加 5 跳
-		EXPECT_NEAR(env.ctx.buys[1].price, 10.55, 1e-9);
+		EXPECT_DOUBLE_EQ(env.ctx.buys[1].price, 10.5);
 		EXPECT_DOUBLE_EQ(env.ctx.buys[1].qty, 1000.0);
 
-		// L118-120：14:00 走下午区间（打板次数已用尽，回到普通分桶价）。
+		// 14:00 再过两小时后进入最后一轮：剩余目标整手加价 5 跳。
 		// 顺带在买单回调里重入 clear_all_position：CalcFlag 占用 -> do_calc 在 L485-487 直接返回，
 		// 不影响外层这笔已算好的单（覆盖重入保护）。
 		env.ctx.onAfterBuy = [&unit]() { unit.clear_all_position(kStockCode); };
+		env.ctx.curTime += 7200000;
+		env.ctx.avail_pos = 2000;
+		env.ctx.total_pos = 2000;
+		env.ctx.long_pos = 2000;
 		WTSTickData* t3 = makeStockTick(kStockCode, 140000000, 10.8, 10.79, 10.81);
 		unit.on_tick(t3);
 		ASSERT_EQ(env.ctx.buys.size(), 3u);
-		EXPECT_DOUBLE_EQ(env.ctx.buys[2].price, 10.8);
+		EXPECT_NEAR(env.ctx.buys[2].price, 10.85, 1e-9);
 
 		t1->release();
 		t2->release();
@@ -374,7 +387,7 @@ TEST(r115_exefact, stock_vwap_time_buckets_showhand_and_guards)
 TEST(r115_exefact, stock_vwap_target_adjust_diff_zero_and_mode2_price)
 {
 	TempCwd cwd("svwap2");
-	cwd.write("Vwap_R115SV2.txt", vwapBody(1000, 400));
+	cwd.write("Vwap_R115SV2.txt", r115V2VwapBody(1000));
 
 	Env env;
 	env.comm = makeStockComm("STK", "R115SV2", "SHSE");
@@ -386,52 +399,62 @@ TEST(r115_exefact, stock_vwap_target_adjust_diff_zero_and_mode2_price)
 		WTSVariant* cfg = makeVwapCfg(10, 2, 0, 100.0, 100.0);
 		unit.init(&env.ctx, kStockCode, cfg);
 		cfg->release();
+		ASSERT_TRUE(env.ctx.hasLog("初始化完成"));
 
 		WTSTickData* t1 = makeStockTick(kStockCode, 100000000, 10.0, 9.99, 10.01);
 		unit.on_tick(t1);
 		unit.on_channel_ready();
 
-		// StockVWap 的 _is_finish 没有在构造函数里初始化（见 bugs/R115.md BUG-R115-004）。
-		// 先用一次公开 set_position 把它置 false（该调用同时产生一笔基准买单），后续分支才可预期。
+		// 先建立基准买单；随后更新目标并送入新行情，验证可卖仓保护和 mode2 卖价路径。
 		unit.set_position(kStockCode, 1000.0);
 		ASSERT_EQ(env.ctx.buys.size(), 1u);
-		EXPECT_DOUBLE_EQ(env.ctx.buys[0].price, 10.0);
+		EXPECT_DOUBLE_EQ(env.ctx.buys[0].price, 10.01); // mode2 买入取卖一价（ask）
 
-		// StockVWap 把 getPosition(code) 当总仓位、getPosition(code,false) 当可用仓位（实参反了）。
-		// 按产品变量名喂 total=1000 / avail=400：目标 0 -> L503 上调到 600（L505-508）；
-		// 同一笔行情时间已在上一轮写进 _last_tick_time，L570-575 会在本轮拦下，不发单。
-		env.ctx.avail_pos = 1000;	// 产品 L494 当作“总仓位”
-		env.ctx.total_pos = 400;	// 产品 L495 当作“可用仓位”
+		// 总仓 1000、可卖多仓 400；目标清到 0 时保护性上调目标到 600，差额 -400。
+		// 同一笔行情时间已被上一轮消费，目标更新不应复用它下单。
+		env.ctx.avail_pos = 400;	// 单边多仓时 flag=3 净可用仓与 flag=1 可卖多仓一致
+		env.ctx.total_pos = 1000;
+		env.ctx.long_pos = 400;
 		unit.set_position(kStockCode, 0.0);
 		EXPECT_EQ(env.ctx.buys.size(), 1u);
 
-		// 换一笔更新的行情：diff=-400，走卖分支
-		WTSTickData* t2 = makeStockTick(kStockCode, 100100000, 10.2, 10.19, 10.21);
+		// 36 分钟 fire_span 到期后，减仓必须卖出且不得超过可卖仓；mode2 卖出取买一价。
+		env.ctx.curTime += 2160000;
+		WTSTickData* t2 = makeStockTick(kStockCode, 103600000, 10.2, 10.19, 10.21);
 		unit.on_tick(t2);
-		// L601-609 的已知缺陷：卖方向 curQty 被 min(可用, 最小开仓) 覆盖成正值，
-		// 于是 L658-661 发成了买单（BUG-R115-002）。这里如实断言方向，不放宽。
-		ASSERT_EQ(env.ctx.buys.size(), 2u);
-		EXPECT_TRUE(env.ctx.sells.empty());
-		// mode2 且 isBuy 在 L617 已被重算为 false -> 取买一价 10.19；方向仍是买（缺陷见上）
-		EXPECT_DOUBLE_EQ(env.ctx.buys[1].price, 10.19);
-		EXPECT_DOUBLE_EQ(env.ctx.buys[1].qty, 100.0);
+		ASSERT_EQ(env.ctx.sells.size(), 1u);
+		EXPECT_EQ(env.ctx.buys.size(), 1u);
+		EXPECT_DOUBLE_EQ(env.ctx.sells[0].price, 10.19);
+		EXPECT_DOUBLE_EQ(env.ctx.sells[0].qty, 100.0);
+		EXPECT_LE(env.ctx.sells[0].qty, env.ctx.long_pos);
+		EXPECT_TRUE(env.ctx.hasLog("target adjust"));
 
-		// 目标=总仓=1000 -> L515-516 早退；set_position 顺带抓 grabLastTick（此处为空）
-		env.ctx.avail_pos = 1000;
+		// 目标与总仓均为 1000；新鲜行情确认 diff==0 早退，不再发单。
+		env.ctx.avail_pos = 400;
 		env.ctx.total_pos = 1000;
 		unit.set_position(kStockCode, 1000.0);
-		EXPECT_EQ(env.ctx.buys.size(), 2u);
+		EXPECT_EQ(env.ctx.buys.size(), 1u);
+		EXPECT_EQ(env.ctx.sells.size(), 1u);
+		env.ctx.curTime += 2160000;
+		WTSTickData* t3 = makeStockTick(kStockCode, 111200000, 10.22, 10.21, 10.23);
+		unit.on_tick(t3);
+		EXPECT_EQ(env.ctx.buys.size(), 1u);
+		EXPECT_EQ(env.ctx.sells.size(), 1u);
+		EXPECT_TRUE(env.ctx.hasLog("reached exactly"));
 
-		// L793-797：grabLastTick 返回最新 tick -> _start_price 被更新；目标未变则不再发单
-		env.ctx._grabTick = makeStockTick(kStockCode, 100100000, 10.25, 10.24, 10.26);
+		// L793-797：grabLastTick 返回最新 tick -> _start_price 被更新；新目标不能复用已消费的行情。
+		env.ctx._grabTick = makeStockTick(kStockCode, 111200000, 10.25, 10.24, 10.26);
 		env.ctx.avail_pos = 0;
 		env.ctx.total_pos = 0;
+		env.ctx.long_pos = 0;
 		unit.set_position(kStockCode, 2000.0);
-		// 同一笔行情时间已被 L570-575 挡住，但 L793-797 已执行（抓 tick 并写 _start_price）
-		EXPECT_EQ(env.ctx.buys.size(), 2u);
+		// 同一笔行情时间已被 do_calc 消费拦下，但 set_position 仍抓 tick 并写 _start_price。
+		EXPECT_EQ(env.ctx.buys.size(), 1u);
+		EXPECT_EQ(env.ctx.sells.size(), 1u);
 
 		t1->release();
 		t2->release();
+		t3->release();
 	}
 }
 
@@ -511,6 +534,7 @@ TEST(r115_exefact, stock_minimpact_expire_enum_error_order_entrust_and_zero_qty)
 		unit.set_position(kStockCode, 200.0);
 		ASSERT_EQ(env.ctx.buys.size(), 1u);
 		env.ctx.undone = env.ctx.buys[0].qty;	// fake 回填活单未完成量
+		const std::string monitoredId = std::to_string(env.ctx.lastId);
 
 		// 第二笔 tick：枚举后报告身份不可验证的超时；不调用 provider cancel。
 		env.ctx.curTime += 1000;
@@ -518,7 +542,7 @@ TEST(r115_exefact, stock_minimpact_expire_enum_error_order_entrust_and_zero_qty)
 		unit.on_tick(t2);
 		EXPECT_TRUE(env.ctx.byidCancels.empty());
 		EXPECT_TRUE(env.ctx.hasLog("Expired order"));
-		EXPECT_TRUE(env.ctx.hasLog("9500 entertime:"));
+		EXPECT_TRUE(env.ctx.hasLog(monitoredId + " entertime:"));
 		EXPECT_EQ(env.ctx.buys.size(), 1u);
 
 		// 第三笔 tick 仍能枚举监控项，不会重复自动撤单或强制删除。
@@ -527,7 +551,7 @@ TEST(r115_exefact, stock_minimpact_expire_enum_error_order_entrust_and_zero_qty)
 		unit.on_tick(t3);
 		EXPECT_TRUE(env.ctx.byidCancels.empty());
 		EXPECT_FALSE(env.ctx.hasLog("erase forcely"));
-		EXPECT_TRUE(env.ctx.hasLog("9500 entertime:"));
+		EXPECT_TRUE(env.ctx.hasLog(monitoredId + " entertime:"));
 		EXPECT_EQ(env.ctx.buys.size(), 1u);
 
 		t1->release();
@@ -631,7 +655,7 @@ TEST(r115_exefact, stock_units_min_order_by_product)
 	// StockVWap 可转债：min_open_lots=min(20,10)=10；分桶值 12 -> 买 10 股
 	{
 		TempCwd cwd("svwapcb");
-		cwd.write("Vwap_R115SVB.txt", vwapBody(12, 400));
+		cwd.write("Vwap_R115SVB.txt", r115V2VwapBody(12));
 		Env env;
 		env.comm = makeStockComm("CBOND", "R115SVB", "SHSE");
 		env.sess = makeSession();
@@ -641,6 +665,7 @@ TEST(r115_exefact, stock_units_min_order_by_product)
 		WTSVariant* cfg = makeVwapCfg(10, 0, 0, 12.0, 20.0);
 		unit.init(&env.ctx, "SHSE.CBOND.113002", cfg);
 		cfg->release();
+		ASSERT_TRUE(env.ctx.hasLog("初始化完成"));
 		WTSTickData* tick = makeStockTick("SHSE.CBOND.113002", 100000000, 100.0, 99.99, 100.01);
 		unit.on_tick(tick);
 		unit.on_channel_ready();
@@ -658,8 +683,8 @@ TEST(r115_exefact, stock_units_min_order_by_product)
 TEST(r115_exefact, stock_vwap_live_order_opposite_and_same_direction_guards)
 {
 	TempCwd cwd("svwap4");
-	cwd.write("Vwap_R115SV4.txt", vwapBody(1000, 400));
-	cwd.write("Vwap_R115SV5.txt", vwapBody(1000, 400));
+	cwd.write("Vwap_R115SV4.txt", r115V2VwapBody(1000));
+	cwd.write("Vwap_R115SV5.txt", r115V2VwapBody(1000));
 
 	// 目标买 1000，未完成 -100（卖单）-> diff*undone<0 -> 按 undone 方向撤卖单（isBuy=false）
 	{
@@ -672,6 +697,7 @@ TEST(r115_exefact, stock_vwap_live_order_opposite_and_same_direction_guards)
 		WTSVariant* cfg = makeVwapCfg(10, 0, 0, 100.0, 100.0);
 		unit.init(&env.ctx, kStockCode, cfg);
 		cfg->release();
+		ASSERT_TRUE(env.ctx.hasLog("初始化完成"));
 
 		WTSTickData* tick = makeStockTick(kStockCode, 100000000, 10.0, 9.99, 10.01);
 		unit.on_tick(tick);
@@ -696,6 +722,7 @@ TEST(r115_exefact, stock_vwap_live_order_opposite_and_same_direction_guards)
 		WTSVariant* cfg = makeVwapCfg(10, 0, 0, 100.0, 100.0);
 		unit.init(&env.ctx, kStockCode, cfg);
 		cfg->release();
+		ASSERT_TRUE(env.ctx.hasLog("初始化完成"));
 
 		WTSTickData* tick = makeStockTick(kStockCode, 100000000, 10.0, 9.99, 10.01);
 		unit.on_tick(tick);

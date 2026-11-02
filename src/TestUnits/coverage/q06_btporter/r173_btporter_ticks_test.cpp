@@ -62,7 +62,8 @@ void clear_ticks()
 	{
 		wt_strcpy(g_ticks[i].code, "rb2510");
 		wt_strcpy(g_ticks[i].exchg, "SHFE");
-		g_ticks[i].action_date = 20240102;
+		/* The second tick is after prepare()'s initial Jan 3 midnight cutoff. */
+		g_ticks[i].action_date = 20240102 + i;
 		g_ticks[i].action_time = 93000000 + i * 1000;
 		g_ticks[i].price = 4501.0 + i;
 	}
@@ -131,23 +132,15 @@ const char* kCommodities =
 const char* kContracts =
 	"{\"SHFE\":{\"rb2510\":{\"name\":\"rb2510\",\"product\":\"rb\",\"exchg\":\"SHFE\"}}}";
 
-std::string make_cfg(const std::string& dir, const char* mode)
+std::string make_cfg(const std::string& dir)
 {
-	std::string section;
-	if (strcmp(mode, "hft") == 0)
-		section = "\"hft\":{\"name\":\"r173_hft_throws\"}";
-	else
-		section = "\"" + std::string(mode) + "\":{\"name\":\"r173_" +
-			std::string(mode) + "_throws\",\"slippage\":0}";
-
 	return "{\"replayer\":{\"mode\":\"none\",\"path\":\"" + dir + "\","
 		"\"stime\":20240103000000,\"etime\":20240104000000,\"tick\":true,"
 		"\"basefiles\":{"
 		"\"session\":\"" + dir + "/sessions.json\","
 		"\"commodity\":\"" + dir + "/commodities.json\","
 		"\"contract\":\"" + dir + "/contracts.json\"}},"
-		"\"env\":{\"mocker\":\"" + std::string(mode) + "\"},"
-		+ section + "}";
+		"\"env\":{\"mocker\":\"none\"}}";
 }
 
 struct TickFixture
@@ -169,7 +162,15 @@ struct TickFixture
 		getRunner().init((dir + "/r173_absent_logcfg.yaml").c_str(), true, dir.c_str());
 
 		register_ext_data_loader(no_bars, NULL, NULL, tick_loader, false);
-		getRunner().config(make_cfg(dir, mode).c_str(), false);
+		getRunner().config(make_cfg(dir).c_str(), false);
+
+		/* The C API tests need an empty mocker, not a loaded strategy plugin. */
+		if (strcmp(mode, "cta") == 0)
+			getRunner().initCtaMocker(tag, 0, false, false, false, false);
+		else if (strcmp(mode, "sel") == 0)
+			getRunner().initSelMocker(tag, 20240103, 93000, "d");
+		else if (strcmp(mode, "hft") == 0)
+			getRunner().initHftMocker(tag, false);
 
 		if (strcmp(mode, "cta") == 0 && getRunner().cta_mocker() == NULL)
 			return false;

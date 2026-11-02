@@ -29,12 +29,41 @@
 #include <cstdio>
 #include <cstdint>
 #include <cstdlib>
+#include <atomic>
+#include <filesystem>
 #include <exception>
 #include <memory>
+#include <mutex>
 #include <string>
+#include <system_error>
+#include <unordered_map>
 #include <vector>
 
+#include "Share/DLLHelper.hpp"
+#include "Includes/ILogHandler.h"
+#include "WtCore/EventNotifier.h"
+#include "WtCore/CtaStrategyMgr.h"
+#include "WtCore/HftStrategyMgr.h"
+#include "WtCore/SelStrategyMgr.h"
+#include "WtCore/WtCtaEngine.h"
+#include "WtCore/WtHftEngine.h"
+#include "WtCore/WtSelEngine.h"
+#include "WtCore/WtExecMgr.h"
+#include "WtCore/WtLocalExecuter.h"
+#include "WtCore/WtDistExecuter.h"
+#include "WtCore/TraderAdapter.h"
+#include "WtCore/ParserAdapter.h"
+#include "WtCore/WtDtMgr.h"
+#include "WtCore/ActionPolicyMgr.h"
+#include "WTSTools/WTSHotMgr.h"
+#include "WTSTools/WTSBaseDataMgr.h"
+#include "WtCore/CtaStraContext.h"
+
+// Preinclude WtRunner.h's dependencies above so this access shim only changes
+// access on WtRunner itself; the macro is removed immediately after the include.
+#define private public
 #include "WtRunner/WtRunner.h"
+#undef private
 #include "WtCore/WtHelper.h"
 #include "Includes/WTSVariant.hpp"
 #include "Share/StdUtils.hpp"
@@ -395,6 +424,145 @@ void prepare_base_fixtures()
 	write_fixture("actpolicy.yaml", kActPolicyDefault);
 }
 
+class CtaFactoryCwdFixture
+{
+public:
+	CtaFactoryCwdFixture() = default;
+	CtaFactoryCwdFixture(const CtaFactoryCwdFixture&) = delete;
+	CtaFactoryCwdFixture& operator=(const CtaFactoryCwdFixture&) = delete;
+
+	~CtaFactoryCwdFixture()
+	{
+		if (_owns_data_storage_module)
+		{
+			std::error_code ec;
+			std::filesystem::remove(_data_storage_module, ec);
+		}
+		if (_owns_directory)
+		{
+			std::error_code ec;
+			std::filesystem::remove_all(_directory, ec);
+		}
+	}
+
+	bool install(std::string& error)
+	{
+		_directory = std::filesystem::path(WtHelper::getCWD()) / "cta";
+		std::error_code ec;
+		if (std::filesystem::exists(_directory, ec))
+		{
+			error = "refusing to replace an existing runner cta/ directory";
+			return false;
+		}
+		if (ec)
+		{
+			error = "could not inspect runner cta/ directory: " + ec.message();
+			return false;
+		}
+		if (!std::filesystem::create_directory(_directory, ec) || ec)
+		{
+			error = "could not create runner cta/ directory";
+			if (ec)
+				error += ": " + ec.message();
+			return false;
+		}
+		_owns_directory = true;
+
+		const std::filesystem::path data_storage_source(WT_R28_DATA_STORAGE_PLUGIN_PATH);
+		const std::filesystem::file_status data_storage_source_status =
+			std::filesystem::symlink_status(data_storage_source, ec);
+		if (ec)
+		{
+			error = "could not inspect real WtDataStorage plugin at " + data_storage_source.string()
+				+ ": " + ec.message();
+			return false;
+		}
+		if (std::filesystem::is_symlink(data_storage_source_status)
+			|| !std::filesystem::is_regular_file(data_storage_source_status))
+		{
+			error = "real WtDataStorage plugin is not an ordinary regular file at "
+				+ data_storage_source.string();
+			return false;
+		}
+
+		const std::filesystem::path cwd(WtHelper::getCWD());
+		const std::string data_storage_name = DLLHelper::wrap_module("WtDataStorage");
+		_data_storage_module = cwd / data_storage_name;
+		const std::filesystem::file_status data_storage_target_status =
+			std::filesystem::symlink_status(_data_storage_module, ec);
+		if (ec == std::errc::no_such_file_or_directory)
+			ec.clear();
+		else if (ec)
+		{
+			error = "could not inspect runner WtDataStorage target " + _data_storage_module.string()
+				+ ": " + ec.message();
+			return false;
+		}
+		if (data_storage_target_status.type() != std::filesystem::file_type::not_found)
+		{
+			error = "refusing to replace an existing runner WtDataStorage target: "
+				+ _data_storage_module.string();
+			return false;
+		}
+		if (!std::filesystem::copy_file(data_storage_source, _data_storage_module,
+			std::filesystem::copy_options::none, ec) || ec)
+		{
+			error = "could not copy WtDataStorage into isolated runner cwd root";
+			if (ec)
+				error += ": " + ec.message();
+			return false;
+		}
+		_owns_data_storage_module = true;
+
+		const std::filesystem::file_status staged_data_storage_status =
+			std::filesystem::symlink_status(_data_storage_module, ec);
+		if (ec)
+		{
+			error = "could not inspect staged WtDataStorage plugin at "
+				+ _data_storage_module.string() + ": " + ec.message();
+			return false;
+		}
+		if (std::filesystem::is_symlink(staged_data_storage_status)
+			|| !std::filesystem::is_regular_file(staged_data_storage_status))
+		{
+			error = "staged WtDataStorage plugin is not an ordinary regular file at "
+				+ _data_storage_module.string();
+			return false;
+		}
+
+		const std::string module = DLLHelper::wrap_module("WtCtaStraFact");
+		const std::filesystem::path source(WT_R28_CTA_FACTORY_PLUGIN_PATH);
+		const std::filesystem::file_status source_status = std::filesystem::symlink_status(source, ec);
+		if (ec)
+		{
+			error = "could not inspect real WtCtaStraFact plugin at " + source.string() + ": " + ec.message();
+			return false;
+		}
+		if (std::filesystem::is_symlink(source_status)
+			|| !std::filesystem::is_regular_file(source_status))
+		{
+			error = "real WtCtaStraFact plugin is not an ordinary regular file at " + source.string();
+			return false;
+		}
+		if (!std::filesystem::copy_file(source, _directory / module, ec) || ec)
+		{
+			error = "could not copy WtCtaStraFact into isolated runner cta/ directory";
+			if (ec)
+				error += ": " + ec.message();
+			return false;
+		}
+		return true;
+	}
+
+	const std::filesystem::path& directory() const { return _directory; }
+
+private:
+	std::filesystem::path _directory;
+	bool _owns_directory = false;
+	std::filesystem::path _data_storage_module;
+	bool _owns_data_storage_module = false;
+};
+
 } // namespace
 
 /* =========================================================================
@@ -557,8 +725,10 @@ TEST(r28_wtrunner_config, unparsable_yaml_returns_false_without_throwing)
 {
 	// WTSCfgLoader.h 承诺文件/内容解析失败返回 NULL；对 WtRunner 来说应转成 false。
 	// 这项回归不把 yaml-cpp 异常向外传播当成预期行为（BUG-R28-003）。
+	prepare_base_fixtures();
 	write_fixture("broken_cfg.yaml", "basefiles: [ this is : not valid\n\t- {{{\n");
 	std::unique_ptr<WtRunner> runner = make_runner();
+	runner->init(fixture_path("logcfg.yaml"));
 	EXPECT_FALSE(runner->config(fixture_path("broken_cfg.yaml")));
 }
 
@@ -569,6 +739,35 @@ TEST(r28_wtrunner_config, unparsable_json_returns_false_without_throwing)
 	write_fixture("broken_cfg.json", "{ \"basefiles\": ][ bad json ");
 	std::unique_ptr<WtRunner> runner = make_runner();
 	EXPECT_FALSE(runner->config(fixture_path("broken_cfg.json")));
+}
+
+TEST(r28_wtrunner_config, valid_json_config_succeeds)
+{
+	prepare_base_fixtures();
+	write_empty_array_sidecar("parsers_empty.yaml", "parsers");
+	write_empty_array_sidecar("traders_empty.yaml", "traders");
+	write_empty_array_sidecar("executers_empty.yaml", "executers");
+	std::unique_ptr<WtRunner> runner = make_runner();
+	runner->init(fixture_path("logcfg.yaml"));
+
+	std::string cfg = std::string("{\n")
+		+ "  \"basefiles\": {"
+		+ "\"session\": \"" + fixture_path("sessions.json") + "\","
+		+ "\"commodity\": \"" + fixture_path("commodities.json") + "\","
+		+ "\"contract\": \"" + fixture_path("contracts.json") + "\","
+		+ "\"holiday\": \"" + fixture_path("holidays.json") + "\","
+		+ "\"hot\": \"" + fixture_path("hots.json") + "\"},\n"
+		+ "  \"env\": {\"name\": \"cta\", \"fees\": \"" + fixture_path("absent_fees.json")
+		+ "\", \"filters\": \"" + fixture_path("absent_filters.yaml") + "\", \"poolsize\": 0},\n"
+		+ "  \"data\": {\"store\": {\"module\": \"WtDataStorage\", \"path\": \""
+		+ fixture_path("data/") + "\"}},\n"
+		+ "  \"bspolicy\": \"" + fixture_path("actpolicy.yaml") + "\",\n"
+		+ "  \"parsers\": \"" + fixture_path("parsers_empty.yaml") + "\",\n"
+		+ "  \"traders\": \"" + fixture_path("traders_empty.yaml") + "\",\n"
+		+ "  \"executers\": \"" + fixture_path("executers_empty.yaml") + "\"\n"
+		+ "}\n";
+	write_fixture("valid_cfg.json", cfg);
+	EXPECT_TRUE(runner->config(fixture_path("valid_cfg.json")));
 }
 
 TEST(r28_wtrunner_config, extensionless_or_unknown_suffix_returns_false)
@@ -672,16 +871,14 @@ TEST(r28_wtrunner_config, unknown_env_name_falls_through_to_hft_else)
 	EXPECT_TRUE(runner->config(fixture_path("badname_cfg.yaml")));
 }
 
-TEST(r28_wtrunner_config, missing_env_and_data_sections_make_config_fail)
+TEST(r28_wtrunner_config, missing_env_section_with_data_present_makes_config_fail)
 {
 	prepare_base_fixtures();
 	std::unique_ptr<WtRunner> runner = make_runner();
 	runner->init(fixture_path("logcfg.yaml"));
 
-	// 缺少 env 时 engine 初始化失败；同时缺 data 可避免把未初始化的 _engine
-	// 传进 initDataMgr。缺少任一必需初始化配置都不应被报告为成功。
-	std::string cfg = basefiles_block()
-		+ "bspolicy: " + fixture_path("actpolicy.yaml") + "\n";
+	// data 与 bspolicy 均存在，只缺必需的 env 对象；配置必须受控失败。
+	std::string cfg = basefiles_block() + tail_block();
 	write_fixture("noenv_cfg.yaml", cfg);
 	EXPECT_FALSE(runner->config(fixture_path("noenv_cfg.yaml")));
 }
@@ -713,6 +910,8 @@ TEST(r28_wtrunner_config, invalid_data_store_module_makes_config_fail)
 		+ "bspolicy: " + fixture_path("actpolicy.yaml") + "\n";
 	write_fixture("invalid_data_store_cfg.yaml", cfg);
 	EXPECT_FALSE(runner->config(fixture_path("invalid_data_store_cfg.yaml")));
+	// initEngine 已运行，但数据管理初始化失败必须清空未就绪 engine；run 只能安全拒绝。
+	EXPECT_NO_THROW(runner->run(false));
 }
 
 TEST(r28_wtrunner_config, missing_bspolicy_makes_config_return_false_early)
@@ -916,20 +1115,20 @@ TEST(r28_wtrunner_config, executers_inline_array_inactive_and_router_absent)
 	// config():228-256 executers 数组 -> initExecuters():466-468 加载 executer/ 工厂目录
 	// -> 唯一条目 active:false -> continue -> :512 "{} executers loaded"
 	// config():259-261 routers 缺失 -> 跳过 loadRouterRules
-	// config():263-266 -> initCtaStrategies():279-283 strategies 缺失 -> false
+	// initCtaStrategies(): strategies 缺失表示没有策略，正常继续配置。
 	std::string cfg = basefiles_block() + env_block("cta") + tail_block()
 		+ "executers:\n-   id: r28e0\n    active: false\n";
 	write_fixture("exec_cfg.yaml", cfg);
 	EXPECT_TRUE(runner->config(fixture_path("exec_cfg.yaml")));
 }
 
-TEST(r28_wtrunner_config, strategies_object_without_cta_array_returns_false_from_engine_side)
+TEST(r28_wtrunner_config, strategies_object_without_cta_array_is_accepted_as_no_strategy)
 {
 	prepare_base_fixtures();
 	std::unique_ptr<WtRunner> runner = make_runner();
 	runner->init(fixture_path("logcfg.yaml"));
 
-	// initCtaStrategies():279 拿到 strategies 对象 -> :284 cfg->get("cta")==NULL -> false
+	// initCtaStrategies() treats an absent optional CTA list as no strategies.
 	std::string cfg = basefiles_block() + env_block("cta") + tail_block()
 		+ "strategies:\n    hft:\n    -   id: r28h0\n        active: false\n";
 	write_fixture("nocta_cfg.yaml", cfg);
@@ -949,6 +1148,110 @@ TEST(r28_wtrunner_config, strategies_cta_inactive_entry_is_skipped)
 		+ "        name: NoSuchFact.Nope\n        slippage: 1\n";
 	write_fixture("ctainactive_cfg.yaml", cfg);
 	EXPECT_TRUE(runner->config(fixture_path("ctainactive_cfg.yaml")));
+}
+
+TEST(r28_wtrunner_strategies, active_strategy_missing_or_unsupported_name_fails_configuration)
+{
+	prepare_base_fixtures();
+	{
+		std::unique_ptr<WtRunner> runner = make_runner();
+		runner->init(fixture_path("logcfg.yaml"));
+		std::string cfg = basefiles_block() + env_block("cta") + tail_block()
+			+ "strategies:\n    cta:\n    -   id: r28_missing_strategy_name\n        active: true\n";
+		write_fixture("cta_missing_strategy_name_cfg.yaml", cfg);
+		EXPECT_FALSE(runner->config(fixture_path("cta_missing_strategy_name_cfg.yaml")));
+	}
+
+	{
+		std::unique_ptr<WtRunner> runner = make_runner();
+		runner->init(fixture_path("logcfg.yaml"));
+		std::string cfg = basefiles_block() + env_block("cta") + tail_block()
+			+ "strategies:\n    cta:\n    -   id: r28_unknown_strategy_factory\n        active: true\n"
+			+ "        name: R28NoSuchFactory.SomeUnit\n";
+		write_fixture("cta_unknown_strategy_factory_cfg.yaml", cfg);
+		EXPECT_FALSE(runner->config(fixture_path("cta_unknown_strategy_factory_cfg.yaml")));
+	}
+
+	{
+		std::unique_ptr<WtRunner> runner = make_runner();
+		runner->init(fixture_path("logcfg.yaml"));
+		std::string cfg = basefiles_block() + env_block("hft") + tail_block()
+			+ "strategies:\n    hft:\n    -   id: r28_missing_hft_strategy_name\n        active: true\n";
+		write_fixture("hft_missing_strategy_name_cfg.yaml", cfg);
+		EXPECT_FALSE(runner->config(fixture_path("hft_missing_strategy_name_cfg.yaml")));
+	}
+
+	{
+		std::unique_ptr<WtRunner> runner = make_runner();
+		runner->init(fixture_path("logcfg.yaml"));
+		std::string cfg = basefiles_block() + env_block("hft") + tail_block()
+			+ "strategies:\n    hft:\n    -   id: r28_unknown_hft_strategy_factory\n        active: true\n"
+			+ "        name: R28NoSuchFactory.SomeUnit\n";
+		write_fixture("hft_unknown_strategy_factory_cfg.yaml", cfg);
+		EXPECT_FALSE(runner->config(fixture_path("hft_unknown_strategy_factory_cfg.yaml")));
+	}
+}
+
+TEST(r28_wtrunner_strategies, real_cta_factory_null_self_is_rejected_and_dual_thrust_configures)
+{
+	prepare_base_fixtures();
+	CtaFactoryCwdFixture factory_fixture;
+	std::string fixture_error;
+	ASSERT_TRUE(factory_fixture.install(fixture_error)) << fixture_error;
+
+	// Verify the real factory contract directly: unsupported units return a
+	// non-null wrapper with a null strategy, while DualThrust is registered.
+	CtaStrategyMgr manager;
+	const std::string factory_dir = factory_fixture.directory().string();
+	ASSERT_TRUE(manager.loadFactories(factory_dir.c_str()));
+	CtaStrategyPtr unsupported = manager.createStrategy(
+		"WtCtaStraFact.DoesNotExist", "r104_unsupported_unit");
+	ASSERT_NE(nullptr, unsupported);
+	EXPECT_EQ(nullptr, unsupported->self());
+
+	CtaStrategyPtr supported = manager.createStrategy(
+		"WtCtaStraFact.DualThrust", "r104_dual_thrust");
+	ASSERT_NE(nullptr, supported);
+	ASSERT_NE(nullptr, supported->self());
+	EXPECT_EQ(supported, manager.getStrategy("r104_dual_thrust"));
+
+	{
+		std::unique_ptr<WtRunner> runner = make_runner();
+		runner->init(fixture_path("logcfg.yaml"));
+		CtaStraContext context_id_probe(nullptr, "r104_null_self_context_probe", 0);
+		const uint32_t rejected_context_id = context_id_probe.id() + 1;
+		const std::string cfg = basefiles_block() + env_block("cta") + tail_block()
+			+ "strategies:\n    cta:\n    -   id: r104_null_self\n        active: true\n"
+			+ "        name: WtCtaStraFact.DoesNotExist\n        params: {}\n";
+		write_fixture("cta_real_factory_null_self_cfg.yaml", cfg);
+		EXPECT_FALSE(runner->config(fixture_path("cta_real_factory_null_self_cfg.yaml")));
+		EXPECT_EQ(nullptr, runner->_cta_engine.getContext(rejected_context_id));
+	}
+
+	{
+		std::unique_ptr<WtRunner> runner = make_runner();
+		runner->init(fixture_path("logcfg.yaml"));
+		CtaStraContext context_id_probe(nullptr, "r104_dual_thrust_context_probe", 0);
+		const uint32_t registered_context_id = context_id_probe.id() + 1;
+		const std::string cfg = basefiles_block() + env_block("cta") + tail_block()
+			+ "strategies:\n    cta:\n    -   id: r104_dual_thrust_runner\n        active: true\n"
+			+ "        name: WtCtaStraFact.DualThrust\n        slippage: 1\n"
+			+ "        params:\n            days: 5\n            k1: 0.5\n            k2: 0.5\n"
+			+ "            period: d1\n            count: 10\n"
+			+ "            code: SSE.r28p2412\n            stock: false\n";
+		write_fixture("cta_real_factory_dual_thrust_cfg.yaml", cfg);
+		EXPECT_TRUE(runner->config(fixture_path("cta_real_factory_dual_thrust_cfg.yaml")));
+		CtaContextPtr context = runner->_cta_engine.getContext(registered_context_id);
+		ASSERT_NE(nullptr, context);
+		CtaStraContext* strategy_context = dynamic_cast<CtaStraContext*>(context.get());
+		ASSERT_NE(nullptr, strategy_context);
+		ASSERT_NE(nullptr, strategy_context->get_stragety());
+		EXPECT_STREQ("WtCtaStraFact", strategy_context->get_stragety()->getFactName());
+		EXPECT_STREQ("DualThrust", strategy_context->get_stragety()->getName());
+		CtaStrategyPtr runner_strategy = runner->_cta_stra_mgr.getStrategy("r104_dual_thrust_runner");
+		ASSERT_NE(nullptr, runner_strategy);
+		EXPECT_EQ(strategy_context->get_stragety(), runner_strategy->self());
+	}
 }
 
 TEST(r28_wtrunner_config, second_config_call_rereads_from_new_path)
@@ -1051,6 +1354,24 @@ TEST(r28_wtrunner_config, executers_side_file_with_inactive_array_loads_zero)
 	EXPECT_TRUE(runner->config(fixture_path("executers_side_cfg.yaml")));
 }
 
+TEST(r28_wtrunner_config, executers_side_file_with_malformed_router_rules_fails)
+{
+	prepare_base_fixtures();
+	std::unique_ptr<WtRunner> runner = make_runner();
+	runner->init(fixture_path("logcfg.yaml"));
+
+	// initExecuters succeeds with the inactive fixture; the following sidecar
+	// router load must propagate WtExecuterMgr's atomic validation failure.
+	write_fixture("executers_router_bad.yaml",
+		"executers:\n-   id: r28e_bad_router\n    active: false\n"
+		"routers:\n-   strategy: r28stra\n");
+	std::string cfg = basefiles_block() + env_block("cta") + tail_block()
+		+ "executers: " + fixture_path("executers_router_bad.yaml") + "\n";
+	write_fixture("executers_router_bad_cfg.yaml", cfg);
+
+	EXPECT_FALSE(runner->config(fixture_path("executers_router_bad_cfg.yaml")));
+}
+
 TEST(r28_wtrunner_config, executers_side_file_unloadable_logs_error)
 {
 	prepare_base_fixtures();
@@ -1115,6 +1436,48 @@ TEST(r28_wtrunner_config, routers_section_reaches_load_router_rules)
 		+ "-   strategy: r28straB\n    executer: r28execB\n";
 	write_fixture("routers_cfg.yaml", cfg);
 	EXPECT_TRUE(runner->config(fixture_path("routers_cfg.yaml")));
+}
+
+TEST(r28_wtrunner_config, router_rule_without_strategy_fails_configuration)
+{
+	prepare_base_fixtures();
+	std::unique_ptr<WtRunner> runner = make_runner();
+	runner->init(fixture_path("logcfg.yaml"));
+
+	std::string cfg = basefiles_block() + env_block("cta") + tail_block()
+		+ "routers:\n-   executer: r28exec\n";
+	write_fixture("routers_missing_strategy_cfg.yaml", cfg);
+	bool configured = true;
+	EXPECT_NO_THROW(configured = runner->config(fixture_path("routers_missing_strategy_cfg.yaml")));
+	EXPECT_FALSE(configured);
+}
+
+TEST(r28_wtrunner_config, router_rule_with_non_string_strategy_json_fails_configuration)
+{
+	prepare_base_fixtures();
+	std::unique_ptr<WtRunner> runner = make_runner();
+	runner->init(fixture_path("logcfg.yaml"));
+
+	// YAML scalars are represented as strings by WTSCfgLoader; use JSON to
+	// preserve the numeric strategy type that the manager must reject.
+	std::string cfg = std::string("{\n")
+		+ "  \"basefiles\": {\n"
+		+ "    \"session\": \"" + fixture_path("sessions.json") + "\",\n"
+		+ "    \"commodity\": \"" + fixture_path("commodities.json") + "\",\n"
+		+ "    \"contract\": \"" + fixture_path("contracts.json") + "\",\n"
+		+ "    \"holiday\": \"" + fixture_path("holidays.json") + "\",\n"
+		+ "    \"hot\": \"" + fixture_path("hots.json") + "\"\n"
+		+ "  },\n"
+		+ "  \"env\": {\"name\": \"cta\", \"fees\": \"" + fixture_path("absent_fees.json")
+		+ "\", \"filters\": \"" + fixture_path("absent_filters.yaml") + "\", \"poolsize\": 0},\n"
+		+ "  \"data\": {\"store\": {\"path\": \"" + fixture_path("data/") + "\"}},\n"
+		+ "  \"bspolicy\": \"" + fixture_path("actpolicy.yaml") + "\",\n"
+		+ "  \"routers\": [{\"strategy\": 7, \"executer\": \"r28exec\"}]\n"
+		+ "}\n";
+	write_fixture("routers_number_strategy_cfg.json", cfg);
+	bool configured = true;
+	EXPECT_NO_THROW(configured = runner->config(fixture_path("routers_number_strategy_cfg.json")));
+	EXPECT_FALSE(configured);
 }
 
 TEST(r28_wtrunner_config, traders_side_file_non_array_reports_loading_traders_failed)
@@ -1232,19 +1595,21 @@ TEST(r28_wtrunner_config, DISABLED_valid_config_without_basefiles_derefs_null_se
 	EXPECT_FALSE(runner->config(fixture_path("empty_obj_cfg.yaml")));
 }
 
-TEST(r28_wtrunner_config, DISABLED_router_rule_without_executer_key_derefs_null)
+TEST(r28_wtrunner_config, router_rule_without_executer_key_fails_configuration)
 {
-	// K5（R28 实测 SIGSEGV(11)）：WtExecMgr.cpp:218-219
-	//   itemExec = item->get("executer"); if(itemExec->isArray())
-	// 「routers 条目漏写 executer 键」直接空指针，而 :217 的 item 本身也没判空。
-	// 见 bugs/R28_runner_mains.md BUG-R28-005。
+	// Initialize a host executor first; invalid top-level routing must propagate
+	// false through failConfig and quiesce the already-registered owner.
 	prepare_base_fixtures();
 	std::unique_ptr<WtRunner> runner = make_runner();
 	runner->init(fixture_path("logcfg.yaml"));
 	std::string cfg = basefiles_block() + env_block("cta") + tail_block()
+		+ "executers:\n-   id: r28e_router_failure\n    active: true\n    name: dist\n"
 		+ "routers:\n-   strategy: r28stra\n    symbol: r28sym\n";
 	write_fixture("badrouter_cfg.yaml", cfg);
-	EXPECT_TRUE(runner->config(fixture_path("badrouter_cfg.yaml")));
+	bool configured = true;
+	EXPECT_NO_THROW(configured = runner->config(fixture_path("badrouter_cfg.yaml")));
+	EXPECT_FALSE(configured);
+	EXPECT_NO_THROW(runner->run(false));
 }
 
 TEST(r28_wtrunner_strategies, DISABLED_active_cta_entry_needs_real_factory_dir)

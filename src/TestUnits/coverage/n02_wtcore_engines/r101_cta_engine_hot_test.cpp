@@ -15,8 +15,12 @@
 
 #include <WTSUtils/WTSCfgLoader.h>
 
+#include <WtCore/TraderAdapter.h>
+#include <WtCore/IExecCommand.h>
+
 #include <filesystem>
 #include <fstream>
+#include <memory>
 #include <string>
 
 using namespace wtp;
@@ -24,6 +28,31 @@ using namespace wtp;
 namespace {
 
 const char* const kHot = "SHFE.ag.HOT";
+const char* const kMonth = "SHFE.ag.2512";
+
+class R101RecordingExecuter final : public IExecCommand
+{
+public:
+    explicit R101RecordingExecuter(const char* name) : IExecCommand(name) {}
+
+    void set_position(const wt_hashmap<std::string, double>& targets) override
+    {
+        last_targets = targets;
+        ++set_calls;
+    }
+
+    wt_hashmap<std::string, double> last_targets;
+    uint32_t set_calls = 0;
+};
+
+void expect_month_mapping(const R101RecordingExecuter& exec, uint32_t expected_calls)
+{
+    ASSERT_EQ(expected_calls, exec.set_calls);
+    const auto month = exec.last_targets.find(kMonth);
+    ASSERT_NE(exec.last_targets.end(), month);
+    EXPECT_DOUBLE_EQ(2.0, month->second);
+    EXPECT_EQ(exec.last_targets.end(), exec.last_targets.find(kHot));
+}
 
 std::string data_file(const char* name)
 {
@@ -62,6 +91,7 @@ protected:
     r73::BaseDataMgr bd;
     r73::HotMgr hot;
     r73::DataMgr dm;
+    TraderAdapterMgr adapter_mgr;
 
     void SetUp() override
     {
@@ -91,20 +121,27 @@ TEST_F(R101CtaEngineHot, OnInitAndScheduleMapHotCode)
     write_text(data_file("r101hot"), hot_position_json());
 
     r73::CtaEngine engine;
+    engine.set_adapter_mgr(&adapter_mgr);
     WTSVariant* cfg = WTSCfgLoader::load_from_content("{\"poolsize\":0,\"filters\":\"\",\"fees\":\"\"}");
     ASSERT_NE(cfg, nullptr);
     engine.init(cfg, &bd, &dm, &hot, NULL);
+    cfg->release();
     engine.attach(&bd, &hot, &dm);
+    std::shared_ptr<R101RecordingExecuter> exec(new R101RecordingExecuter("r101_hot"));
+    engine.addExecuter(ExecCmdPtr(exec));
 
     r73::CtaCtx* raw = new r73::CtaCtx(&engine, "r101hot", 0);
     CtaContextPtr ctx(raw);
     engine.addContext(ctx);
 
     engine.on_init();
+    expect_month_mapping(*exec, 1);
     EXPECT_DOUBLE_EQ(2.0, raw->stra_get_position(kHot));
 
     engine.on_schedule(20250110, 1000);
+    expect_month_mapping(*exec, 2);
     EXPECT_DOUBLE_EQ(2.0, raw->stra_get_position(kHot));
+    engine.release();
 }
 
 //////////////////////////////////////////////////////////////////
@@ -116,18 +153,25 @@ TEST_F(R101CtaEngineHot, PooledScheduleMapsHotCode)
     write_text(data_file("r101hotp"), hot_position_json());
 
     r73::CtaEngine engine;
+    engine.set_adapter_mgr(&adapter_mgr);
     WTSVariant* cfg = WTSCfgLoader::load_from_content("{\"poolsize\":1,\"filters\":\"\",\"fees\":\"\"}");
     ASSERT_NE(cfg, nullptr);
     engine.init(cfg, &bd, &dm, &hot, NULL);
+    cfg->release();
     engine.attach(&bd, &hot, &dm);
+    std::shared_ptr<R101RecordingExecuter> exec(new R101RecordingExecuter("r101_hot"));
+    engine.addExecuter(ExecCmdPtr(exec));
 
     r73::CtaCtx* raw = new r73::CtaCtx(&engine, "r101hotp", 0);
     CtaContextPtr ctx(raw);
     engine.addContext(ctx);
 
     engine.on_init();
+    expect_month_mapping(*exec, 1);
     engine.on_schedule(20250110, 1001);
+    expect_month_mapping(*exec, 2);
     EXPECT_DOUBLE_EQ(2.0, raw->stra_get_position(kHot));
+    engine.release();
 }
 
 }  // namespace

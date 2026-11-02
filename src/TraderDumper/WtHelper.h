@@ -14,6 +14,7 @@
 class WtHelper
 {
 public:
+	// Returns the cached working directory with a trailing slash, or an empty string if unavailable.
 	static const char* get_cwd();
 
 	static const char* get_module_dir(){ return _bin_dir.c_str(); }

@@ -10,6 +10,9 @@
  */
 #pragma once
 #include <memory>
+#include <map>
+#include <mutex>
+#include <unordered_set>
 #include <boost/core/noncopyable.hpp>
 
 #include "../Includes/FasterDefs.h"
@@ -115,6 +118,26 @@ public:
 	HftStrategyPtr getStrategy(const char* id);
 
 private:
+	// Manager-created wrappers share this owner through their shared_ptr
+	// deleter; plugin ABI and HftStraWrapper's public layout stay unchanged.
+	struct FactoryOwner
+	{
+		FactoryOwner(IHftStrategyFact* fact, FuncDeleteHftStraFact remover, DllHandle module)
+			: _fact(fact), _remover(remover), _module_inst(module) {}
+		FactoryOwner(const FactoryOwner&) = delete;
+		FactoryOwner& operator=(const FactoryOwner&) = delete;
+		~FactoryOwner()
+		{
+			if (_active && _fact && _remover)
+				_remover(_fact);
+		}
+
+		IHftStrategyFact* _fact;
+		FuncDeleteHftStraFact _remover;
+		DllHandle _module_inst; // the loader reference remains resident
+		bool _active = false;  // failed/unpublished attempts stay quarantined
+	};
+
 	/**
 	 * @brief 策略工厂信息结构体
 	 * @details 存储策略工厂动态库的路径、句柄和接口指针等信息
@@ -126,11 +149,15 @@ private:
 		IHftStrategyFact*	_fact;		//!< 策略工厂接口
 		FuncCreateHftStraFact	_creator;	//!< 创建工厂函数
 		FuncDeleteHftStraFact	_remover;	//!< 删除工厂函数
+		std::shared_ptr<FactoryOwner> _owner; //!< manager-created wrapper lifetime
 
 		/**
 		 * @brief 构造函数
 		 * @details 初始化成员变量
 		 */
+		_StraFactInfo(const _StraFactInfo&) = delete;
+		_StraFactInfo& operator=(const _StraFactInfo&) = delete;
+
 		_StraFactInfo()
 		{
 			_module_inst = NULL;
@@ -145,7 +172,9 @@ private:
 		 */
 		~_StraFactInfo()
 		{
-			if (_fact)
+			// Legacy in-process registrations may populate only _fact/_remover.
+			// Published modules use _owner and are deleted by its final holder.
+			if (_fact && !_owner)
 			{
 				if (_remover)
 					_remover(_fact);
@@ -157,8 +186,14 @@ private:
 	 * @brief 策略工厂映射表类型
 	 * @details 使用wt_hashmap存储工厂名称与工厂信息的映射关系
 	 */
-	typedef wt_hashmap<std::string, StraFactInfo> StraFactMap;
+	// Node-based storage keeps the owning record stable and avoids copying
+	// its remover-bearing value during hash table growth.
+	typedef std::map<std::string, StraFactInfo> StraFactMap;
 
+	// The synchronization and conflict state must outlive factory destruction,
+	// whose plugin remover is invoked when _factories is destroyed.
+	std::mutex _factories_mutex;
+	std::unordered_set<DllHandle> _conflicting_factory_modules;
 	StraFactMap	_factories;	//!< 存储已加载的策略工厂
 
 	/**

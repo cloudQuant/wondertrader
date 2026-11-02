@@ -78,7 +78,8 @@ public:
 	// A failed parser candidate is quarantined because its API may still call SPI.
 	// The caller must keep this runner and the raw-pointer context it owns alive
 	// until the parser provider confirms that callbacks have stopped.
-	bool	isInitialized() const { return _is_inited; }
+	// This reports successful command submission, not provider readiness.
+	bool	isInitialized() const { return _is_inited && _parser_commands_submitted; }
 	uint32_t	activeParserCount() const { return _parsers.size(); }
 	bool	hasQuarantinedParser() const { return !_quarantined_parsers.empty(); }
 	// Reports adapter ownership only; it does not prove provider callback drain
@@ -262,7 +263,7 @@ private:
 	 * @details 该函数根据配置初始化数据管理器，包括数据存储和数据管理器等组件。
 	 * 通常在initialize函数中调用。
 	 */
-	void	initDataMgr(WTSVariant* config);
+	bool	initDataMgr(WTSVariant* config);
 
 	/**
 	 * @brief 初始化解析器
@@ -325,6 +326,7 @@ private:
 	 * @details 标记数据服务运行器是否已经初始化
 	 */
 	bool			_is_inited;
+	bool			_parser_commands_submitted;
 	bool			_parser_init_failed = false;
 
 	/**

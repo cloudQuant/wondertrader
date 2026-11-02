@@ -14,16 +14,26 @@
 #include "Includes/WTSDataDef.hpp"
 #include "WtDataStorage/DataDefine.h"
 #include "WTSUtils/WTSCmpHelper.hpp"
+#include "Share/BoostFile.hpp"
 
 #include <cstdint>
 #include <cstring>
+#include <fcntl.h>
 #include <filesystem>
 #include <fstream>
+#include <signal.h>
 #include <sstream>
 #include <string>
+#include <sys/resource.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <vector>
 
 USING_NS_WTP;
+
+#ifdef WT_DT_HELPER_CLOSE_TEST_HOOKS
+extern "C" void wt_dt_helper_fail_next_close_for_test();
+#endif
 
 namespace {
 
@@ -134,6 +144,50 @@ namespace {
 		return bar;
 	}
 
+	class ScopedFileSizeLimit
+	{
+	public:
+		ScopedFileSizeLimit()
+		{
+			if (::getrlimit(RLIMIT_FSIZE, &_oldLimit) != 0 ||
+				(_oldLimit.rlim_max != RLIM_INFINITY && _oldLimit.rlim_max < 1))
+				return;
+
+			struct sigaction ignoreAction = {};
+			ignoreAction.sa_handler = SIG_IGN;
+			sigemptyset(&ignoreAction.sa_mask);
+			if (::sigaction(SIGXFSZ, &ignoreAction, &_oldAction) != 0)
+				return;
+			_signalChanged = true;
+
+			struct rlimit limited = _oldLimit;
+			limited.rlim_cur = 1;
+			if (::setrlimit(RLIMIT_FSIZE, &limited) != 0)
+			{
+				::sigaction(SIGXFSZ, &_oldAction, NULL);
+				_signalChanged = false;
+				return;
+			}
+			_active = true;
+		}
+
+		~ScopedFileSizeLimit()
+		{
+			if (_active)
+				::setrlimit(RLIMIT_FSIZE, &_oldLimit);
+			if (_signalChanged)
+				::sigaction(SIGXFSZ, &_oldAction, NULL);
+		}
+
+		bool active() const { return _active; }
+
+	private:
+		struct rlimit _oldLimit = {};
+		struct sigaction _oldAction = {};
+		bool _active = false;
+		bool _signalChanged = false;
+	};
+
 } // namespace
 
 class L05HelperBarTest : public ::testing::Test
@@ -222,9 +276,146 @@ TEST_F(L05HelperBarTest, StoreBarsReportsMissingParentDirectoryFailure)
 	const std::filesystem::path missing_dir = _root / "no_such_dir";
 	ASSERT_FALSE(std::filesystem::exists(missing_dir));
 	const std::filesystem::path output = missing_dir / "x.dsb";
-	EXPECT_FALSE(store_bars(output.string().c_str(), bars.data(), (int)bars.size(), "d", NULL));
+	log_sink().clear();
+	EXPECT_FALSE(store_bars(output.string().c_str(), bars.data(), (int)bars.size(), "d", log_cb));
+	EXPECT_TRUE(any_log_has("创建失败"));
+	EXPECT_TRUE(any_log_has(output.string().c_str()));
+	EXPECT_FALSE(any_log_has("K线数据写入文件成功"));
 	EXPECT_FALSE(std::filesystem::exists(output));
 }
+
+TEST_F(L05HelperBarTest, StoreBarsLongPathCreateFailureKeepsDiagnosticAndReturnsFalse)
+{
+	std::filesystem::path longParent = _root;
+	for (int i = 0; i < 4; ++i)
+	{
+		longParent /= std::string(100, static_cast<char>('a' + i));
+		std::filesystem::create_directories(longParent);
+	}
+	const std::filesystem::path blockerPath = longParent / "not_a_directory";
+	{
+		std::ofstream blocker(blockerPath);
+		ASSERT_TRUE(blocker.is_open());
+		blocker << "blocked";
+	}
+
+	const std::string output = (blockerPath / "output.dsb").string();
+	ASSERT_GT(output.size(), 400U);
+	std::vector<WTSBarStruct> bars{ make_day_bar(20200101, 100) };
+	log_sink().clear();
+	EXPECT_FALSE(store_bars(output.c_str(), bars.data(), (int)bars.size(), "d", log_cb));
+	EXPECT_TRUE(any_log_has("创建失败"));
+	EXPECT_TRUE(any_log_has(output.c_str()));
+	EXPECT_FALSE(any_log_has("K线数据写入文件成功"));
+	EXPECT_FALSE(std::filesystem::exists(output));
+}
+
+TEST_F(L05HelperBarTest, StoreBarsReportsReadOnlyFileFailure)
+{
+	if (::geteuid() == 0)
+		GTEST_SKIP() << "root can bypass file mode write permissions";
+
+	const std::string output = file("read_only.dsb");
+	{
+		std::ofstream seed(output, std::ios::binary | std::ios::trunc);
+		ASSERT_TRUE(seed.is_open());
+		seed << "preserve";
+	}
+	std::error_code ec;
+	std::filesystem::permissions(output, std::filesystem::perms::owner_read,
+		std::filesystem::perm_options::replace, ec);
+	ASSERT_FALSE(ec);
+
+	std::vector<WTSBarStruct> bars{ make_day_bar(20200101, 100) };
+	log_sink().clear();
+	EXPECT_FALSE(store_bars(output.c_str(), bars.data(), (int)bars.size(), "d", log_cb));
+	EXPECT_TRUE(any_log_has("创建失败"));
+	EXPECT_FALSE(any_log_has("K线数据写入文件成功"));
+	std::ifstream input(output, std::ios::binary);
+	std::string saved((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+	EXPECT_EQ(saved, "preserve");
+}
+
+TEST_F(L05HelperBarTest, StoreBarsReportsWriteFailure)
+{
+	std::vector<WTSBarStruct> bars{ make_day_bar(20200101, 100) };
+	ScopedFileSizeLimit fileLimit;
+	ASSERT_TRUE(fileLimit.active());
+	log_sink().clear();
+
+	EXPECT_FALSE(store_bars(file("write_failure.dsb").c_str(), bars.data(),
+		(int)bars.size(), "d", log_cb));
+	EXPECT_TRUE(any_log_has("写入失败"));
+	EXPECT_FALSE(any_log_has("K线数据写入文件成功"));
+}
+
+TEST_F(L05HelperBarTest, CheckedCloseIsIdempotentAfterClosingRealFile)
+{
+	BoostFile fileHandle;
+	EXPECT_TRUE(fileHandle.close_file_checked());
+	ASSERT_TRUE(fileHandle.create_new_file(file("checked_close.bin").c_str()));
+	ASSERT_TRUE(fileHandle.write_file(std::string("abc")));
+	EXPECT_TRUE(fileHandle.close_file_checked());
+	EXPECT_FALSE(fileHandle.valid());
+	EXPECT_TRUE(fileHandle.close_file_checked());
+	std::ifstream input(file("checked_close.bin"), std::ios::binary);
+	EXPECT_EQ(std::string((std::istreambuf_iterator<char>(input)),
+		std::istreambuf_iterator<char>()), "abc");
+}
+
+TEST_F(L05HelperBarTest, CheckedCloseReportsNativeFailureWithoutSecondClose)
+{
+	const std::string path = file("closed_externally.bin");
+	BoostFile fileHandle;
+	ASSERT_TRUE(fileHandle.create_new_file(path.c_str()));
+	struct stat expected = {};
+	ASSERT_EQ(0, ::stat(path.c_str(), &expected));
+	int ownedFd = -1;
+	const int maxFd = ::getdtablesize();
+	for (int fd = 0; fd < maxFd; ++fd)
+	{
+		struct stat actual = {};
+		if (::fstat(fd, &actual) == 0 && actual.st_dev == expected.st_dev &&
+			actual.st_ino == expected.st_ino)
+		{
+			ownedFd = fd;
+			break;
+		}
+	}
+	ASSERT_GE(ownedFd, 0);
+	ASSERT_EQ(0, ::close(ownedFd));
+	// Native close now returns EBADF. The wrapper must report failure and
+	// relinquish ownership so destruction cannot close a reused descriptor.
+	EXPECT_FALSE(fileHandle.close_file_checked());
+	EXPECT_FALSE(fileHandle.valid());
+	const int newFd = ::open(path.c_str(), O_RDONLY);
+	ASSERT_GE(newFd, 0);
+	EXPECT_TRUE(fileHandle.close_file_checked());
+	EXPECT_NE(-1, ::fcntl(newFd, F_GETFD));
+	EXPECT_EQ(0, ::close(newFd));
+}
+
+#ifdef WT_DT_HELPER_CLOSE_TEST_HOOKS
+TEST_F(L05HelperBarTest, StoreBarsReportsInjectedCloseFailureWithoutSuccess)
+{
+	std::vector<WTSBarStruct> bars{ make_day_bar(20200101, 100) };
+	const std::string failed = file("close_failure.dsb");
+	wt_dt_helper_fail_next_close_for_test();
+	EXPECT_FALSE(store_bars(failed.c_str(), bars.data(), (int)bars.size(), "d", log_cb));
+	EXPECT_TRUE(any_log_has("关闭失败"));
+	EXPECT_FALSE(any_log_has("K线数据写入文件成功"));
+	EXPECT_TRUE(std::filesystem::exists(failed));
+
+	// The injected result is one-shot and did not prevent the native close.
+	log_sink().clear();
+	const std::string success = file("close_success.dsb");
+	ASSERT_TRUE(store_bars(success.c_str(), bars.data(), (int)bars.size(), "d", log_cb));
+	EXPECT_TRUE(any_log_has("K线数据写入文件成功"));
+	EXPECT_EQ(read_dsb_bars(success.c_str(), bars_cb, count_cb, log_cb), 1u);
+	ASSERT_EQ(bar_sink().size(), 1u);
+	EXPECT_DOUBLE_EQ(bar_sink().front().close, bars.front().close);
+}
+#endif
 
 TEST_F(L05HelperBarTest, ReadBarsHeaderValidation)
 {
@@ -543,6 +734,8 @@ TEST_F(L05HelperBarTest, DumpBarsWritesCsvAndSkipsOthers)
 		std::ofstream ofs(file("broken.dsb"), std::ios::binary | std::ios::trunc);
 		ofs << "xy";
 		ofs.close();
+		std::ofstream secondBroken(file("second_broken.dsb"), std::ios::binary | std::ios::trunc);
+		secondBroken << "short";
 		std::ofstream ignore(file("ignore.txt"), std::ios::trunc);
 		ignore << "whatever";
 	}
@@ -552,6 +745,12 @@ TEST_F(L05HelperBarTest, DumpBarsWritesCsvAndSkipsOthers)
 	dump_bars(file("").c_str(), csvDir.c_str(), "", log_cb);
 	// srcFolder 用 standardisePath 归一化，直接传根目录
 	dump_bars(_root.string().c_str(), csvDir.c_str(), "", log_cb);
+	const std::string brokenHeader = "文件" + file("broken.dsb") + "头部校验失败";
+	const std::string secondBrokenHeader = "文件" + file("second_broken.dsb") + "头部校验失败";
+	const std::string nonBarType = "文件" + file("tick_like.dsb") + "不是K线数据，跳过转换";
+	EXPECT_TRUE(any_log_has(brokenHeader.c_str())) << brokenHeader;
+	EXPECT_TRUE(any_log_has(secondBrokenHeader.c_str())) << secondBrokenHeader;
+	EXPECT_TRUE(any_log_has(nonBarType.c_str())) << nonBarType;
 
 	const std::string csv = (std::filesystem::path(csvDir) / "SHFE.rb2010.csv").string();
 	ASSERT_TRUE(std::filesystem::exists(csv));
@@ -697,6 +896,73 @@ TEST_F(L05HelperBarTest, TransCsvBarsUnreadableFileIsSkipped)
 	trans_csv_bars(csvDir.c_str(), binDir.c_str(), "d", log_cb);
 	EXPECT_TRUE(log_sink().empty() || any_log_has("失败"));
 	EXPECT_FALSE(std::filesystem::exists(std::filesystem::path(binDir) / "empty.dsb"));
+}
+
+TEST_F(L05HelperBarTest, TransCsvBarsDoesNotReportWriteFailureAsSuccess)
+{
+	const std::string csvDir = file("csv_write_failure");
+	std::filesystem::create_directories(csvDir);
+	{
+		std::ofstream ofs((std::filesystem::path(csvDir) / "one.csv").string());
+		ofs << "date,time,open,high,low,close,settle,volume,turnover,open_interest,diff_interest\n";
+		ofs << "20200116,0,100,101,99,100,100,10,1000,5,0\n";
+	}
+
+	const std::string binDir = file("bin_write_failure");
+	std::filesystem::create_directories(binDir);
+
+	ScopedFileSizeLimit fileLimit;
+	ASSERT_TRUE(fileLimit.active());
+	log_sink().clear();
+	trans_csv_bars(csvDir.c_str(), binDir.c_str(), "d", log_cb);
+	EXPECT_TRUE(any_log_has("写入失败"));
+	EXPECT_TRUE(any_log_has("one.dsb"));
+	EXPECT_FALSE(any_log_has("数据已转储至"));
+}
+
+TEST_F(L05HelperBarTest, TransCsvBarsDoesNotReportCreationFailureAsSuccess)
+{
+	const std::string csvDir = file("csv_create_failure");
+	std::filesystem::create_directories(csvDir);
+	{
+		std::ofstream ofs((std::filesystem::path(csvDir) / "one.csv").string());
+		ofs << "date,time,open,high,low,close,settle,volume,turnover,open_interest,diff_interest\n";
+		ofs << "20200116,0,100,101,99,100,100,10,1000,5,0\n";
+	}
+
+	const std::string blockedPath = file("not_a_directory");
+	{
+		std::ofstream blocker(blockedPath);
+		ASSERT_TRUE(blocker.is_open());
+		blocker << "blocked";
+	}
+
+	log_sink().clear();
+	trans_csv_bars(csvDir.c_str(), blockedPath.c_str(), "d", log_cb);
+	EXPECT_TRUE(any_log_has("创建失败"));
+	EXPECT_TRUE(any_log_has("one.dsb"));
+	EXPECT_FALSE(any_log_has("数据已转储至"));
+
+	std::filesystem::path longParent = _root;
+	for (int i = 0; i < 4; ++i)
+	{
+		longParent /= std::string(100, static_cast<char>('a' + i));
+		std::filesystem::create_directories(longParent);
+	}
+	const std::string longBlockedPath = (longParent / "not_a_directory").string();
+	{
+		std::ofstream blocker(longBlockedPath);
+		ASSERT_TRUE(blocker.is_open());
+		blocker << "blocked";
+	}
+
+	const std::string blockedChild = (std::filesystem::path(longBlockedPath) / "output").string();
+	ASSERT_GT(blockedChild.size(), 400U);
+	log_sink().clear();
+	trans_csv_bars(csvDir.c_str(), blockedChild.c_str(), "d", log_cb);
+	EXPECT_TRUE(any_log_has("创建输出目录"));
+	EXPECT_TRUE(any_log_has(blockedChild.c_str()));
+	EXPECT_FALSE(any_log_has("数据已转储至"));
 }
 
 TEST_F(L05HelperBarTest, ReadDmbBarsValidationPaths)

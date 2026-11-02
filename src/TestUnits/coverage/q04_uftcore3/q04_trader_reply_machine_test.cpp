@@ -14,7 +14,13 @@
  */
 #include "q04_trader_fixture.h"
 
+#include <chrono>
+#include <condition_variable>
+#include <future>
+#include <memory>
+#include <mutex>
 #include <string>
+#include <thread>
 #include <vector>
 
 using namespace wtp;
@@ -59,6 +65,65 @@ struct Env
 	}
 };
 
+class BlockingFakeBaseDataMgr : public q04::FakeBaseDataMgr
+{
+public:
+	void blockNextLookup()
+	{
+		std::lock_guard<std::mutex> lock(_mutex);
+		_blockNext = true;
+		_lookupEntered = false;
+		_lookupReleased = false;
+	}
+
+	bool waitUntilLookupBlocked(std::chrono::milliseconds timeout)
+	{
+		std::unique_lock<std::mutex> lock(_mutex);
+		return _cv.wait_for(lock, timeout, [this]() { return _lookupEntered; });
+	}
+
+	void releaseLookup()
+	{
+		std::lock_guard<std::mutex> lock(_mutex);
+		_lookupReleased = true;
+		_cv.notify_all();
+	}
+
+	WTSContractInfo* getContract(const char* code, const char* exchg = "", uint32_t date = 0) override
+	{
+		{
+			std::unique_lock<std::mutex> lock(_mutex);
+			if (_blockNext)
+			{
+				_lookupEntered = true;
+				_cv.notify_all();
+				_cv.wait(lock, [this]() { return _lookupReleased; });
+				_blockNext = false;
+			}
+		}
+		return q04::FakeBaseDataMgr::getContract(code, exchg, date);
+	}
+
+private:
+	std::mutex _mutex;
+	std::condition_variable _cv;
+	bool _blockNext{false};
+	bool _lookupEntered{false};
+	bool _lookupReleased{false};
+};
+
+class CountingFakeTraderApi : public q04::FakeTraderApi
+{
+public:
+	void release() override
+	{
+		_releaseCalls.fetch_add(1, std::memory_order_relaxed);
+		q04::FakeTraderApi::release();
+	}
+
+	std::atomic<uint32_t> _releaseCalls{0};
+};
+
 }	// namespace
 
 TEST(q04_trader_reply, initext_run_release_wire_the_channel)
@@ -82,9 +147,9 @@ TEST(q04_trader_reply, initext_run_release_wire_the_channel)
 	env._adapter.release();
 	EXPECT_EQ(1u, env._api._releaseCnt);
 	EXPECT_EQ(nullptr, env._api._spi);
-	//重复 release 只是再来一次 registerSpi(NULL) + api->release()
+	//重复 release 在完整清理后是幂等的，不应再次释放 API。
 	env._adapter.release();
-	EXPECT_EQ(2u, env._api._releaseCnt);
+	EXPECT_EQ(1u, env._api._releaseCnt);
 }
 
 TEST(q04_trader_reply, login_result_drives_state_and_position_query)
@@ -250,6 +315,127 @@ TEST(q04_trader_reply, onRspOrders_counts_stats_and_registers_alive_orders)
 	EXPECT_EQ(1u, env._api._qTrdCnt);
 
 	ay->release();
+}
+
+TEST(q04_trader_reply, adapter_destruction_releases_owned_order_map_reference)
+{
+	auto releaseOrder = [](WTSOrderInfo* order) { if (order) order->release(); };
+	auto releaseOrderMap = [](OrderMap* orders) { if (orders) orders->release(); };
+	std::unique_ptr<WTSOrderInfo, decltype(releaseOrder)> order(nullptr, releaseOrder);
+	std::unique_ptr<OrderMap, decltype(releaseOrderMap)> snapshot(nullptr, releaseOrderMap);
+	uint32_t localid = 0;
+
+	{
+		Env env;
+		env.login();
+		WTSArray* emptyPositions = WTSArray::create();
+		env._adapter.onRspPosition(emptyPositions);
+		emptyPositions->release();
+		ASSERT_EQ(TraderAdapter::AS_POSITION_QRYED, env._adapter.state());
+
+		localid = env._adapter.openLong(kStdAg, 5000.0, 1.0, 0);
+		ASSERT_NE(UINT_MAX, localid);
+		ASSERT_EQ(1u, env._api._entrusts.size());
+		order.reset(q04::orderFromSnap(env._api._entrusts.back(), "ORD-LIFETIME"));
+		ASSERT_NE(nullptr, order.get());
+
+		WTSArray* response = Env::makeArray({ order.get() });
+		env._adapter.onRspOrders(response);
+		response->release();
+
+		// Caller + adapter-owned _orders entry.
+		EXPECT_EQ(2u, order->retainCount());
+		snapshot.reset(env._adapter.getOrders(kStdAg));
+		ASSERT_NE(nullptr, snapshot.get());
+		ASSERT_EQ(1u, snapshot->size());
+		EXPECT_EQ(order.get(), snapshot->get(localid));
+		// The returned snapshot independently retains the order.
+		EXPECT_EQ(3u, order->retainCount());
+	}
+
+	// Env destruction drains callbacks and releases the adapter's _orders map.
+	ASSERT_NE(nullptr, snapshot.get());
+	ASSERT_NE(nullptr, order.get());
+	EXPECT_EQ(order.get(), snapshot->get(localid));
+	EXPECT_EQ(2u, order->retainCount());
+	snapshot.reset();
+	EXPECT_EQ(1u, order->retainCount());
+}
+
+TEST(q04_trader_reply, getOrders_snapshot_is_safe_while_release_waits)
+{
+	auto releaseOrder = [](WTSOrderInfo* order) { if (order) order->release(); };
+	auto releaseOrderMap = [](OrderMap* orders) { if (orders) orders->release(); };
+	std::unique_ptr<WTSOrderInfo, decltype(releaseOrder)> order(nullptr, releaseOrder);
+	std::unique_ptr<OrderMap, decltype(releaseOrderMap)> snapshot(nullptr, releaseOrderMap);
+
+	q04::TempRoot temp("reply_order_release_race");
+	CountingFakeTraderApi api;
+	BlockingFakeBaseDataMgr bd;
+	bd.add("SHFE", "ag", "ag2406");
+	ActionPolicyMgr policy;
+	const std::string policyPath = temp.file("policy.json");
+	temp.write(policyPath, q04::policyJsonOpenCloseLimited());
+	ASSERT_TRUE(policy.init(policyPath.c_str()));
+
+	TraderAdapter adapter;
+	ASSERT_TRUE(adapter.initExt("uft-release-race", &api, &bd, &policy));
+	ASSERT_TRUE(adapter.run());
+	adapter.onLoginResult(true, "ok", 20240315);
+	WTSArray* emptyPositions = WTSArray::create();
+	adapter.onRspPosition(emptyPositions);
+	emptyPositions->release();
+	ASSERT_EQ(TraderAdapter::AS_POSITION_QRYED, adapter.state());
+
+	const uint32_t localid = adapter.openLong(kStdAg, 5000.0, 1.0, 0);
+	ASSERT_NE(UINT_MAX, localid);
+	ASSERT_EQ(1u, api._entrusts.size());
+	order.reset(q04::orderFromSnap(api._entrusts.back(), "ORD-RELEASE-RACE"));
+	ASSERT_NE(nullptr, order.get());
+	WTSArray* response = Env::makeArray({ order.get() });
+	adapter.onRspOrders(response);
+	response->release();
+	EXPECT_EQ(2u, order->retainCount()); // caller + adapter map
+
+	bd.blockNextLookup();
+	auto getter = std::async(std::launch::async, [&]() { return adapter.getOrders(kStdAg); });
+	if (!bd.waitUntilLookupBlocked(std::chrono::seconds(2)))
+	{
+		bd.releaseLookup();
+		OrderMap* unexpected = getter.get();
+		if (unexpected)
+			unexpected->release();
+		adapter.release();
+		ADD_FAILURE() << "getOrders did not enter the controlled contract lookup";
+		return;
+	}
+
+	std::promise<void> releaseStarted;
+	std::future<void> releaseStartedFuture = releaseStarted.get_future();
+	auto releaser = std::async(std::launch::async, [&]() {
+		releaseStarted.set_value();
+		adapter.release();
+	});
+	releaseStartedFuture.wait();
+	const auto releaseDeadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
+	while (adapter.state() != TraderAdapter::AS_NOTLOGIN &&
+		std::chrono::steady_clock::now() < releaseDeadline)
+		std::this_thread::yield();
+	EXPECT_EQ(TraderAdapter::AS_NOTLOGIN, adapter.state());
+	EXPECT_EQ(0u, api._releaseCalls.load(std::memory_order_acquire));
+	EXPECT_EQ(std::future_status::timeout, releaser.wait_for(std::chrono::milliseconds(25)));
+
+	bd.releaseLookup();
+	snapshot.reset(getter.get());
+	releaser.get();
+	ASSERT_NE(nullptr, snapshot.get());
+	EXPECT_EQ(1u, snapshot->size());
+	EXPECT_EQ(order.get(), snapshot->get(localid));
+	EXPECT_EQ(1u, api._releaseCalls.load(std::memory_order_acquire));
+	EXPECT_EQ(2u, order->retainCount()); // caller + independent returned snapshot
+	EXPECT_EQ(nullptr, adapter.getOrders(kStdAg)); // closed adapter admits no new query
+	snapshot.reset();
+	EXPECT_EQ(1u, order->retainCount());
 }
 
 TEST(q04_trader_reply, getOrders_supports_raw_and_full_codes_without_cross_contract_matches)

@@ -316,7 +316,8 @@ typedef struct _WTSOrderStruct
 	char			m_strStateMsg[64] = { 0 };
 
 	_WTSOrderStruct()
-		: m_uErrorFlag(WOEF_None)
+		: m_orderFlag(WOF_NOR)
+		, m_uErrorFlag(WOEF_None)
 	, m_uInsertDate(0)
 		, m_uInsertTime(0)
 		, m_dVolTraded(0)

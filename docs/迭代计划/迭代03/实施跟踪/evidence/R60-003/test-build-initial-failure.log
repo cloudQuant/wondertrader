@@ -1,0 +1,13 @@
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp:757:58: error: comparison of integers of different signs: 'uint32_t' (aka 'unsigned int') and 'int' [-Werror,-Wsign-compare]
+  757 |                         ASSERT_TRUE(wait_until([&]() { return sink_.n_event() == previousEvents + 1; }))
+      |                                                               ~~~~~~~~~~~~~~~ ^  ~~~~~~~~~~~~~~~~~~
+/opt/homebrew/include/gtest/gtest.h:1831:50: note: expanded from macro 'ASSERT_TRUE'
+ 1831 | #define ASSERT_TRUE(condition) GTEST_ASSERT_TRUE(condition)
+      |                                                  ^~~~~~~~~
+/opt/homebrew/include/gtest/gtest.h:1814:23: note: expanded from macro 'GTEST_ASSERT_TRUE'
+ 1814 |   GTEST_TEST_BOOLEAN_(condition, #condition, false, true, GTEST_FATAL_FAILURE_)
+      |                       ^~~~~~~~~
+/opt/homebrew/include/gtest/internal/gtest-internal.h:1450:38: note: expanded from macro 'GTEST_TEST_BOOLEAN_'
+ 1450 |           ::testing::AssertionResult(expression))                     \
+      |                                      ^~~~~~~~~~
+1 error generated.

@@ -48,13 +48,12 @@
 #include <WtCore/WtSelEngine.h>
 #include <WtCore/WtSelTicker.h>
 
-// TraderAdapter.h 把 getCommodify/isTradeEnabled 声明成 inline，定义却在 .cpp；
-// 跨 TU 调用会触发 -Wundefined-inline，而本目标带 -Werror。这里只关掉该告警。
-#if defined(__clang__)
-#pragma clang diagnostic ignored "-Wundefined-inline"
-#endif
-
 using namespace wtp;
+
+namespace r202_probe
+{
+bool isTradeEnabled(const TraderAdapter& adapter, const char* stdCode);
+}
 
 namespace {
 
@@ -328,10 +327,7 @@ TEST(R202SelEngine, InlineStubAccessorsAndExecuterRegistration)
  * 4. TraderAdapter 公开查询面：initExt 成功后的初始状态。
  *    state: TraderAdapter.h:198（1 行）
  *
- *    isTradeEnabled 本身无法在本 TU 调用：头文件把它声明成 inline，
- *    定义只在 TraderAdapter.cpp（BUG-R202-003/BUG-R215-003），
- *    目标可执行体内该符号是未定义弱符号，调用即跳空。断言保留下方
- *    的 DISABLED_ 用例，产品修复后去掉前缀即可复核 599-601。
+ *    isTradeEnabled 的跨 TU 查询对照见下方 BUG-R202-003 回归。
  * ------------------------------------------------------------------ */
 TEST(R202TraderAdapter, PublicStateAfterInitExt)
 {
@@ -349,10 +345,9 @@ TEST(R202TraderAdapter, PublicStateAfterInitExt)
     EXPECT_EQ(TraderAdapter::AS_NOTLOGIN, adapter.state());
 }
 
-/* BUG-R215-003（既有 BUG-R202-003）：isTradeEnabled 在头文件标 inline、
- * 定义只在 .cpp，WtCore 静态库不产出外部符号（nm 显示 `U`）。
- * 跨 TU 调用会跳到空地址。断言保持原样，修复定义可见性后再启用。 */
-TEST(R202TraderAdapter, DISABLED_PublicTradeSwitchNeedsExternallyVisibleDefinition)
+/* BUG-R215-003（既有 BUG-R202-003）：公开方法由另一翻译单元调用，
+ * 风控未启用时已知和未知代码都允许交易。 */
+TEST(R202TraderAdapter, PublicTradeSwitchIsExternallyCallable)
 {
     q01sel::Q01TempEnv tmp("r202_trader_switch");
 
@@ -368,8 +363,8 @@ TEST(R202TraderAdapter, DISABLED_PublicTradeSwitchNeedsExternallyVisibleDefiniti
     EXPECT_EQ(TraderAdapter::AS_NOTLOGIN, adapter.state());
 
     // 未启用风控：任何合约都允许交易
-    EXPECT_TRUE(adapter.isTradeEnabled("SHFE.ag.2512"));
-    EXPECT_TRUE(adapter.isTradeEnabled("SHFE.xx.9999"));
+    EXPECT_TRUE(r202_probe::isTradeEnabled(adapter, "SHFE.ag.2512"));
+    EXPECT_TRUE(r202_probe::isTradeEnabled(adapter, "SHFE.xx.9999"));
 }
 
 /* ------------------------------------------------------------------ *

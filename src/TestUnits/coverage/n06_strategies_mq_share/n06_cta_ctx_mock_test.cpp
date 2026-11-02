@@ -12,6 +12,7 @@
 #include <gtest/gtest.h>
 
 #include <cstring>
+#include <limits>
 #include <map>
 #include <string>
 #include <vector>
@@ -216,6 +217,7 @@ TEST(n06_cta_ctx, dualthrust_on_session_begin_switches_main_contract)
 
 	MockCtaCtx ctx;
 	// 第一天：拿到主力 SHFE.au.2005，无旧主力，不清理
+	ctx.set_rawcode("SHFE.au.2005");
 	dt.on_session_begin(&ctx, 20240101);
 	EXPECT_TRUE(ctx.setPositions.empty());
 
@@ -224,8 +226,8 @@ TEST(n06_cta_ctx, dualthrust_on_session_begin_switches_main_contract)
 	ctx.set_rawcode("SHFE.au.2006");
 	dt.on_session_begin(&ctx, 20240102);
 	ASSERT_EQ(2u, ctx.setPositions.size());
-	EXPECT_NE(std::string::npos, ctx.setPositions[0].find("2005:0:switchout"));
-	EXPECT_NE(std::string::npos, ctx.setPositions[1].find("2006:3:switchin"));
+	EXPECT_EQ("SHFE.au.2005:0.000000:switchout", ctx.setPositions[0]);
+	EXPECT_EQ("SHFE.au.2006:3.000000:switchin", ctx.setPositions[1]);
 
 	// 主力不变 → 不重复触发
 	ctx.setPositions.clear();
@@ -245,15 +247,116 @@ TEST(n06_cta_ctx, dualthrust_on_schedule_breaks_upper_enters_long)
 	ASSERT_TRUE(dt.init(cfg.get()));
 
 	MockCtaCtx ctx;
+	// 按正常回调顺序先解析主力合约，再执行调度；突破单应落到该合约上。
+	ctx.set_rawcode("SHFE.au.2005");
+	dt.on_session_begin(&ctx, 20240102);
 	ctx.set_bars(makeKlineSlice({5, 6, 7, 8, 9}, 8.4));
 	ctx.set_position(0.0);
 	dt.on_schedule(&ctx, 20240102, 150000);
 
-	EXPECT_TRUE(hasPrefix(ctx.orders, "enter_long:")) << "金叉应触发 DT_EnterLong";
-	EXPECT_TRUE(hasPrefix(ctx.orders, ":DT_EnterLong"));
+	ASSERT_EQ(1u, ctx.orders.size()) << "上轨突破应触发 DT_EnterLong";
+	EXPECT_EQ("enter_long:SHFE.au.2005:2.000000:DT_EnterLong", ctx.orders[0]);
 	EXPECT_NE(ctx.indexValues.end(), ctx.indexValues.find("upper_bound"));
 	EXPECT_NE(ctx.indexValues.end(), ctx.indexValues.find("lower_bound"));
 	EXPECT_GT(ctx.logs.size(), 0u);
+}
+
+TEST(n06_cta_ctx, dualthrust_insufficient_history_waits_and_releases_slice)
+{
+	WtStraDualThrust dt("s3-short-history");
+	VarHolder cfg(makeDtCfg(2, 0.5, 0.5));
+	ASSERT_TRUE(dt.init(cfg.get()));
+
+	std::vector<WTSBarStruct> bars(1);
+	bars[0].open = 100.0;
+	bars[0].high = 102.0;
+	bars[0].low = 99.0;
+	bars[0].close = 110.0;
+	uint32_t releaseCount = 0;
+	ReleaseCountingKlineSlice* slice = new ReleaseCountingKlineSlice(releaseCount);
+	slice->setCode("SHFE.au.2005");
+	ASSERT_TRUE(slice->appendBlock(bars.data(), static_cast<uint32_t>(bars.size())));
+
+	MockCtaCtx ctx;
+	ctx.set_bars(slice);
+	dt.on_session_begin(&ctx, 20240102);
+	dt.on_schedule(&ctx, 20240102, 150000);
+	EXPECT_TRUE(ctx.orders.empty());
+	EXPECT_TRUE(ctx.indexValues.empty());
+	EXPECT_EQ(1u, releaseCount);
+}
+
+TEST(n06_cta_ctx, dualthrust_invalid_price_data_waits_and_releases_slice)
+{
+	for (int invalidField = 0; invalidField < 4; ++invalidField)
+	{
+		WtStraDualThrust dt("s3-invalid-prices");
+		VarHolder cfg(makeDtCfg(2, 0.5, 0.5));
+		ASSERT_TRUE(dt.init(cfg.get()));
+		std::vector<WTSBarStruct> bars(2);
+		for (auto& bar : bars)
+		{
+			bar.open = 100.0; bar.high = 102.0; bar.low = 99.0; bar.close = 101.0;
+		}
+		if (invalidField == 0) bars[0].high = INVALID_DOUBLE;
+		if (invalidField == 1) bars[0].close = std::numeric_limits<double>::quiet_NaN();
+		if (invalidField == 2) bars[1].open = std::numeric_limits<double>::infinity();
+		if (invalidField == 3) bars[1].close = INVALID_DOUBLE;
+		uint32_t releaseCount = 0;
+		ReleaseCountingKlineSlice* slice = new ReleaseCountingKlineSlice(releaseCount);
+		slice->setCode("SHFE.au.2005");
+		ASSERT_TRUE(slice->appendBlock(bars.data(), static_cast<uint32_t>(bars.size())));
+		MockCtaCtx ctx;
+		ctx.set_bars(slice);
+		dt.on_session_begin(&ctx, 20240102);
+		dt.on_schedule(&ctx, 20240102, 150000);
+		EXPECT_TRUE(ctx.orders.empty()) << invalidField;
+		EXPECT_TRUE(ctx.indexValues.empty()) << invalidField;
+		EXPECT_EQ(1u, releaseCount) << invalidField;
+	}
+}
+
+TEST(n06_cta_ctx, dualthrust_unrepresentable_days_waits_and_releases_slice)
+{
+	WtStraDualThrust dt("s3-unrepresentable-days");
+	VarHolder cfg(makeDtCfg(static_cast<uint32_t>(INT32_MAX) + 1u, 0.5, 0.5));
+	ASSERT_TRUE(dt.init(cfg.get()));
+	std::vector<WTSBarStruct> bars(2);
+	uint32_t releaseCount = 0;
+	ReleaseCountingKlineSlice* slice = new ReleaseCountingKlineSlice(releaseCount);
+	slice->setCode("SHFE.au.2005");
+	ASSERT_TRUE(slice->appendBlock(bars.data(), static_cast<uint32_t>(bars.size())));
+	MockCtaCtx ctx;
+	ctx.set_bars(slice);
+	dt.on_schedule(&ctx, 20240102, 150000);
+	EXPECT_TRUE(ctx.orders.empty());
+	EXPECT_TRUE(ctx.indexValues.empty());
+	EXPECT_EQ(1u, releaseCount);
+}
+
+TEST(n06_cta_ctx, dualthrust_undefined_short_windows_wait_without_signals)
+{
+	// This checks scheduling safety only; it does not define whether days 0/1
+	// should be accepted or how those configurations should eventually behave.
+	for (uint32_t days : {0u, 1u})
+	{
+		WtStraDualThrust dt("s3-short-window");
+		VarHolder cfg(makeDtCfg(days, 0.5, 0.5));
+		ASSERT_TRUE(dt.init(cfg.get()));  // Preserve the current init behavior.
+		std::vector<WTSBarStruct> bars(2);
+		bars[0].open = 100; bars[0].high = 102; bars[0].low = 99; bars[0].close = 101;
+		bars[1].open = 100; bars[1].high = 110; bars[1].low = 99; bars[1].close = 109;
+		uint32_t releaseCount = 0;
+		ReleaseCountingKlineSlice* slice = new ReleaseCountingKlineSlice(releaseCount);
+		slice->setCode("SHFE.au.2005");
+		ASSERT_TRUE(slice->appendBlock(bars.data(), static_cast<uint32_t>(bars.size())));
+		MockCtaCtx ctx;
+		ctx.set_bars(slice);
+		dt.on_schedule(&ctx, 20240102, 150000);
+		EXPECT_TRUE(ctx.orders.empty()) << days;
+		EXPECT_TRUE(ctx.indexValues.empty()) << days;
+		EXPECT_EQ(1u, releaseCount) << days;
+	}
 }
 
 TEST(n06_cta_ctx, dualthrust_on_schedule_long_position_exits_on_lower_break)

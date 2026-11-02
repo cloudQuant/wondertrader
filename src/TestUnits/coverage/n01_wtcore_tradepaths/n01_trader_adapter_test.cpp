@@ -34,6 +34,19 @@
 
 USING_NS_WTP;
 
+namespace wtp {
+
+struct N01TraderAdapterRiskTestAccess
+{
+	static uint32_t orderTotalLimit(TraderAdapter& adapter, const char* stdCode)
+	{
+		const TraderAdapter::RiskParams* riskParams = adapter.getRiskParams(stdCode);
+		return riskParams ? riskParams->_order_total_limits : UINT32_MAX;
+	}
+};
+
+} // namespace wtp
+
 // TraderAdapter.cpp 中的文件级（非 static）自由函数，直接链接可用
 extern uint32_t makeLocalOrderID();
 
@@ -83,15 +96,36 @@ WTSVariant* trader_mocker_params(uint32_t mockerId, bool includeRiskmon, bool ri
 			defaultRule->append("cancel_total_limits", 10u);
 			defaultRule->append("cancel_times_boundary", 10u);
 			defaultRule->append("cancel_stat_timespan", 60u);
-			defaultRule->append("order_total_limits", 10u);
+			defaultRule->append("order_total_limits", 1u);
 			defaultRule->append("order_times_boundary", 10u);
 			defaultRule->append("order_stat_timespan", 60u);
 			policy->append("default", defaultRule, false);
+
+			WTSVariant* agRule = WTSVariant::createObject();
+			agRule->append("order_total_limits", 2u);
+			policy->append("SHFE.ag", agRule, false);
 			riskmon->append("policy", policy, false);
 		}
 		params->append("riskmon", riskmon, false);
 	}
 
+	return params;
+}
+
+WTSVariant* active_riskmon_without_default_params()
+{
+	WTSVariant* params = WTSVariant::createObject();
+	params->append("module", "TraderMocker");
+	params->append("mockerid", 910004u);
+	params->append("span", 50u);
+	WTSVariant* riskmon = WTSVariant::createObject();
+	riskmon->append("active", true);
+	WTSVariant* policy = WTSVariant::createObject();
+	WTSVariant* agRule = WTSVariant::createObject();
+	agRule->append("order_total_limits", 2u);
+	policy->append("SHFE.ag", agRule, false);
+	riskmon->append("policy", policy, false);
+	params->append("riskmon", riskmon, false);
 	return params;
 }
 
@@ -180,10 +214,13 @@ TEST(N01TraderAdapter, init_accepts_no_riskmon_inactive_riskmon_and_complete_act
 	ASSERT_FALSE(ec);
 
 	const std::string moduleName = DLLHelper::wrap_module("TraderMocker", "lib");
-	std::filesystem::create_symlink(
-		std::filesystem::path(moduleDir) / moduleName,
-		std::filesystem::path(tradersDir) / moduleName, ec);
-	ASSERT_FALSE(ec) << "cannot link TraderMocker into the temporary traders dir";
+	const std::filesystem::path moduleSource = std::filesystem::path(moduleDir) / moduleName;
+	ASSERT_TRUE(std::filesystem::is_regular_file(moduleSource)) << moduleSource.string();
+	const std::filesystem::path stagedModule = std::filesystem::path(tradersDir) / moduleName;
+	std::filesystem::copy_file(moduleSource, stagedModule,
+		std::filesystem::copy_options::overwrite_existing, ec);
+	ASSERT_FALSE(ec) << "cannot copy TraderMocker into the temporary traders dir: " << ec.message();
+	ASSERT_TRUE(std::filesystem::is_regular_file(stagedModule)) << stagedModule.string();
 
 	ScopedWtInstDir instDir(tmp.path() + "/");
 	r160::ScopedCwd cwd(tmp.path());
@@ -213,8 +250,48 @@ TEST(N01TraderAdapter, init_accepts_no_riskmon_inactive_riskmon_and_complete_act
 		ASSERT_TRUE(adapter.init("n01_active_riskmon", activePolicyParams, nullptr, nullptr));
 		EXPECT_STREQ(adapter.id(), "n01_active_riskmon");
 		EXPECT_EQ(static_cast<int>(adapter.state()), static_cast<int>(TraderAdapter::AS_NOTLOGIN));
+		// Inspect values returned by the real lookup path after normal config parsing.
+		EXPECT_EQ(2u, wtp::N01TraderAdapterRiskTestAccess::orderTotalLimit(adapter, "SHFE.ag.2512"));
+		EXPECT_EQ(1u, wtp::N01TraderAdapterRiskTestAccess::orderTotalLimit(adapter, "DCE.a.2509"));
 	}
 	activePolicyParams->release();
+}
+
+TEST(N01TraderAdapter, active_riskmon_without_default_rule_is_rejected_before_state_is_committed)
+{
+	const std::string moduleDir = r160::find_module_dir("TraderMocker");
+	if (moduleDir.empty())
+		GTEST_SKIP() << "libTraderMocker not found next to test binary";
+
+	r160::TempDir tmp("n01_trader_missing_default");
+	const std::string tradersDir = tmp.path("traders");
+	std::error_code ec;
+	std::filesystem::create_directories(tradersDir, ec);
+	ASSERT_FALSE(ec);
+
+	const std::string moduleName = DLLHelper::wrap_module("TraderMocker", "lib");
+	const std::filesystem::path moduleSource = std::filesystem::path(moduleDir) / moduleName;
+	ASSERT_TRUE(std::filesystem::is_regular_file(moduleSource)) << moduleSource.string();
+	const std::filesystem::path stagedModule = std::filesystem::path(tradersDir) / moduleName;
+	std::filesystem::copy_file(moduleSource, stagedModule,
+		std::filesystem::copy_options::overwrite_existing, ec);
+	ASSERT_FALSE(ec) << "cannot copy TraderMocker into the temporary traders dir: " << ec.message();
+	ASSERT_TRUE(std::filesystem::is_regular_file(stagedModule)) << stagedModule.string();
+
+	ScopedWtInstDir instDir(tmp.path() + "/");
+	r160::ScopedCwd cwd(tmp.path());
+	ASSERT_TRUE(cwd.ok());
+
+	WTSVariant* params = active_riskmon_without_default_params();
+	TraderAdapter adapter;
+
+	EXPECT_FALSE(adapter.init("n01_missing_default", params, nullptr, nullptr));
+	EXPECT_STREQ(adapter.id(), "");
+	EXPECT_EQ(adapter.getBaseDataMgr(), nullptr);
+	EXPECT_EQ(params->retainCount(), 1u);
+	EXPECT_FALSE(adapter.run());
+
+	params->release();
 }
 
 TEST(N01TraderAdapter, active_riskmon_without_policy_is_rejected_before_state_is_committed)

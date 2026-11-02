@@ -47,7 +47,10 @@ TEST_F(R103Fixture, R103Replayer_DayMultiPeriodCursorAndDump)
 {
 	r103::Loader loader;
 	loader.dayBars[kMain] = {
-		r91::mk_bar(20200102u, 1500u, 10.0, 11.0, 9.0, 10.5, 100.0),
+		// The replay starts before the 20200102 daily bar is complete; provide
+		// a prior close for the initial historical slice.
+		r91::mk_bar(20191231u, 1500u, 9.5, 10.5, 9.0, 10.5, 90.0),
+		r91::mk_bar(20200102u, 1500u, 10.5, 11.0, 10.0, 10.75, 100.0),
 		r91::mk_bar(20200106u, 1500u, 11.0, 12.0, 10.0, 11.5, 110.0)
 	};
 	loader.dayBars[kSubDay] = {
@@ -58,6 +61,7 @@ TEST_F(R103Fixture, R103Replayer_DayMultiPeriodCursorAndDump)
 		r91::mk_bar(20200106u, 1500u, 22.0, 23.0, 21.0, 22.0, 14.0)
 	};
 	loader.m1Bars[kSubMin] = {
+		r91::mk_bar(20200102u, 929u, 29.0, 30.0, 28.0, 29.5, 0.5),
 		r91::mk_bar(20200102u, 931u, 30.0, 31.0, 29.0, 30.5, 1.0),
 		r91::mk_bar(20200102u, 932u, 30.5, 31.5, 29.5, 31.0, 2.0),
 		r91::mk_bar(20200102u, 933u, 31.0, 32.0, 30.0, 31.5, 3.0)
@@ -117,6 +121,7 @@ TEST_F(R103Fixture, R103Replayer_DayMultiPeriodCursorAndDump)
 	ASSERT_NE(nullptr, mainSlice);
 	ASSERT_EQ(1, mainSlice->size());
 	EXPECT_DOUBLE_EQ(10.5, mainSlice->at(0)->close);
+	EXPECT_EQ(20191231u, mainSlice->at(0)->date);
 	mainSlice->release();
 
 	WTSKlineSlice* subDay = replayer.get_kline_slice(kSubDay, "d", 5, 1, false);
@@ -127,6 +132,7 @@ TEST_F(R103Fixture, R103Replayer_DayMultiPeriodCursorAndDump)
 	WTSKlineSlice* subMin = replayer.get_kline_slice(kSubMin, "m", 1, 1, false);
 	ASSERT_NE(nullptr, subMin);
 	EXPECT_EQ(1, subMin->size());
+	EXPECT_EQ(929u, static_cast<uint32_t>(subMin->at(0)->time % 10000u));
 	subMin->release();
 
 	WTSKlineSlice* tail = replayer.get_kline_slice(kTail, "d", 5, 1, false);

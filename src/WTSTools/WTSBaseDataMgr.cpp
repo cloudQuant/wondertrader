@@ -12,6 +12,7 @@
 #include "WTSLogger.h"
 
 #include "../Includes/WTSContractInfo.hpp"
+#include "../Includes/WTSMarcos.h"
 #include "../Includes/WTSSessionInfo.hpp"
 #include "../Includes/WTSVariant.hpp"
 
@@ -61,10 +62,10 @@ WTSBaseDataMgr::~WTSBaseDataMgr()
 		_pid_map = NULL;
 	}
 
-	if(_fullpid_map)
+	if(_fullcode_map)
 	{
-		_fullpid_map->release();
-		_fullpid_map = NULL;
+		_fullcode_map->release();
+		_fullcode_map = NULL;
 	}
 
 	if (_code_list) _code_list->release();
@@ -290,7 +291,10 @@ bool WTSBaseDataMgr::loadSessions(const char* filename)
 
 		WTSVariant* jSecs = jVal->get("sections");
 		if (jSecs == NULL || !jSecs->isArray())
+		{
+			sInfo->release();
 			continue;
+		}
 
 		for (uint32_t i = 0; i < jSecs->size(); i++)
 		{
@@ -298,7 +302,7 @@ bool WTSBaseDataMgr::loadSessions(const char* filename)
 			sInfo->addTradingSection(jSec->getUInt32("from"), jSec->getUInt32("to"));
 		}
 
-		_session_map->add(id.c_str(), sInfo);
+		_session_map->add(id.c_str(), sInfo, false);
 	}
 
 	root->release();
@@ -387,6 +391,7 @@ bool WTSBaseDataMgr::loadCommodities(const char* filename)
 			if(sInfo == NULL)
 			{
 				WTSLogger::error("Session {} of {}.{} not exists", sid, exchg, pid);
+				commInfo->release();
 				continue;
 			}
 			commInfo->setSessionInfo(sInfo);
@@ -397,7 +402,7 @@ bool WTSBaseDataMgr::loadCommodities(const char* filename)
 			if (ayInst == NULL)
 			{
 				ayInst = WTSArray::create();
-				_pid_map->add(pid, ayInst);
+				_pid_map->add(pid, ayInst, false);
 			}
 			ayInst->append(commInfo, true);
 
@@ -438,6 +443,15 @@ bool WTSBaseDataMgr::loadContracts(const char* filename)
 			WTSVariant* jcInfo = jExchg->get(code);
 			const char* contractName = jcInfo->getCString("name");
 			const char* contractExchg = jcInfo->getCString("exchg");
+			// Contract identities also enter AD's fixed-width exchange/code keys.
+			// Reject before creating a rules-derived commodity or registering a contract.
+			if (exchg.size() >= MAX_EXCHANGE_LENGTH || code.size() >= MAX_INSTRUMENT_LENGTH ||
+				contractExchg == nullptr || strlen(contractExchg) >= MAX_EXCHANGE_LENGTH)
+			{
+				WTSLogger::error("Contract identity exceeds storage field capacity: {}.{}", exchg.c_str(), code.c_str());
+				allValid = false;
+				continue;
+			}
 			const bool hasProduct = jcInfo->has("product");
 			const bool hasRules = jcInfo->has("rules");
 			std::string identityPid;
@@ -500,7 +514,7 @@ bool WTSBaseDataMgr::loadContracts(const char* filename)
 				if (ayInst == NULL)
 				{
 					ayInst = WTSArray::create();
-					_pid_map->add(pid, ayInst);
+					_pid_map->add(pid, ayInst, false);
 				}
 				ayInst->append(commInfo, true);
 
@@ -597,7 +611,7 @@ bool WTSBaseDataMgr::loadContracts(const char* filename)
 			if(ayInst == NULL)
 			{
 				ayInst = WTSArray::create();
-				_code_map->add(cInfo->getCode(), ayInst);
+				_code_map->add(cInfo->getCode(), ayInst, false);
 			}
 			ayInst->append(cInfo, true);
 			_fullcode_map->add(cInfo->getFullCode(), cInfo, true);
@@ -608,7 +622,7 @@ bool WTSBaseDataMgr::loadContracts(const char* filename)
 				if (ayInst == NULL)
 				{
 					ayInst = WTSArray::create();
-					_code_map->add(cInfo->getAltCode(), ayInst);
+					_code_map->add(cInfo->getAltCode(), ayInst, false);
 				}
 				ayInst->append(cInfo, true);
 

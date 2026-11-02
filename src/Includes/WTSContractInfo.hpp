@@ -10,11 +10,11 @@
 #pragma once
 #include "WTSObject.hpp"
 #include "WTSTypes.h"
+#include "WTSSessionInfo.hpp"
 #include "FasterDefs.h"
 #include <string>
 
 NS_WTP_BEGIN
-class WTSSessionInfo;
 
 class WTSCommodityInfo: public WTSObject
 {
@@ -96,7 +96,17 @@ public:
 	constexpr inline double	getLotsTick() const noexcept { return m_dLotTick; }
 	constexpr inline double	getMinLots() const  noexcept { return m_dMinLots; }
 
-	constexpr inline void		setSessionInfo(WTSSessionInfo* sInfo) noexcept { m_pSession = sInfo; }
+	inline void setSessionInfo(WTSSessionInfo* sInfo) noexcept
+	{
+		if (m_pSession == sInfo)
+			return;
+		if (sInfo)
+			sInfo->retain();
+		WTSSessionInfo* oldSession = m_pSession;
+		m_pSession = sInfo;
+		if (oldSession)
+			oldSession->release();
+	}
 	constexpr inline WTSSessionInfo* getSessionInfo() const  noexcept { return m_pSession; }
 
 	constexpr inline void		setFeeRates(double open, double close, double closeToday, bool byVolume) noexcept
@@ -149,8 +159,13 @@ public:
 	}
 
 protected:
-	WTSCommodityInfo():m_nFeeAlg(-1){}
-	virtual ~WTSCommodityInfo() {}
+	WTSCommodityInfo(): m_strName{}, m_strExchg{}, m_strProduct{}, m_strCurrency{},
+		m_strSession{}, m_strTrdTpl{}, m_strFullPid{}, m_pSession(nullptr), m_nFeeAlg(-1) {}
+	virtual ~WTSCommodityInfo()
+	{
+		if (m_pSession)
+			m_pSession->release();
+	}
 
 private:
 	static bool fitsField(const char* value, size_t capacity) noexcept

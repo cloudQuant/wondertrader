@@ -8,6 +8,9 @@
  * \author Wesley
  */
 #include <iostream>
+#include <cmath>
+#include <limits>
+#include <memory>
 #include "WtStraDualThrust.h"
 
 #include "../Includes/ICtaStraCtx.h"
@@ -21,6 +24,24 @@ extern const char* FACT_NAME;
 
 //By Wesley @ 2022.01.05
 #include "../Share/fmtlib.h"
+
+namespace
+{
+template <typename T>
+struct WtsRelease
+{
+	void operator()(T* value) const noexcept
+	{
+		if (value != NULL)
+			value->release();
+	}
+};
+
+bool isValidPrice(double value)
+{
+	return value != INVALID_DOUBLE && std::isfinite(value);
+}
+}
 
 /**
  * \brief WtStraDualThrust策略类构造函数
@@ -146,19 +167,35 @@ void WtStraDualThrust::on_schedule(ICtaStraCtx* ctx, uint32_t /*curDate*/, uint3
 	std::string code = _code;
 
 	// 获取K线数据
-	WTSKlineSlice *kline = ctx->stra_get_bars(code.c_str(), _period.c_str(), _count, true);
+	std::unique_ptr<WTSKlineSlice, WtsRelease<WTSKlineSlice>> kline(
+		ctx->stra_get_bars(code.c_str(), _period.c_str(), _count, true));
 	if(kline == NULL)
 	{
 		//这里可以输出一些日志
 		return;
 	}
 
-	// 检查K线数据是否为空
-	if (kline->size() == 0)
-	{
-		kline->release();
+	// The [-days, -2] window needs at least one completed bar plus the
+	// current bar. Keep the initialization contract for days 0/1 unchanged,
+	// but do not produce signals without a representable, complete window.
+	const int32_t count = kline->size();
+	if (count <= 0 || _days < 2 ||
+		_days > static_cast<uint32_t>((std::numeric_limits<int32_t>::max)()) ||
+		_days > static_cast<uint32_t>(count))
 		return;
+
+	const int32_t days = static_cast<int32_t>(_days);
+	for (int32_t i = count - days; i < count - 1; ++i)
+	{
+		const WTSBarStruct* bar = kline->at(i);
+		if (bar == NULL || !isValidPrice(bar->high) || !isValidPrice(bar->low) ||
+			!isValidPrice(bar->close))
+			return;
 	}
+	const WTSBarStruct* currentBar = kline->at(-1);
+	if (currentBar == NULL || !isValidPrice(currentBar->open) ||
+		!isValidPrice(currentBar->close) || !isValidPrice(_k1) || !isValidPrice(_k2))
+		return;
 
 	// 设置交易单位，股票为100股，其他为1手
 	uint32_t trdUnit = 1;
@@ -166,26 +203,34 @@ void WtStraDualThrust::on_schedule(ICtaStraCtx* ctx, uint32_t /*curDate*/, uint3
 		trdUnit = 100;
 
 
-	// 转换回看天数为有符号整数
-	int32_t days = (int32_t)_days;
-
 	// 计算指定天数内的最高价和最低价
 	double hh = kline->maxprice(-days, -2);
 	double ll = kline->minprice(-days, -2);
 
 	// 计算指定天数内的最高收盘价和最低收盘价
-	WTSValueArray* closes = kline->extractData(KFT_CLOSE);
+	std::unique_ptr<WTSValueArray, WtsRelease<WTSValueArray>> closes(kline->extractData(KFT_CLOSE));
+	if (closes == NULL || closes->size() < static_cast<uint32_t>(count))
+		return;
 	double hc = closes->maxvalue(-days, -2);
 	double lc = closes->minvalue(-days, -2);
 	double curPx = closes->at(-1); // 当前收盘价
-	closes->release();///!!!这个释放一定要做
+	closes.reset();
 
 	// 获取当前周期K线的开盘价
-	double openPx = kline->at(-1)->open;
+	double openPx = currentBar->open;
+	if (!isValidPrice(hh) || !isValidPrice(ll) || !isValidPrice(hc) ||
+		!isValidPrice(lc) || !isValidPrice(curPx))
+		return;
+	const double highRange = hh - lc;
+	const double lowRange = hc - ll;
+	if (!isValidPrice(highRange) || !isValidPrice(lowRange))
+		return;
 
 	// 计算上下轨道
-	double upper_bound = openPx + _k1 * (std::max(hh - lc, hc - ll));
-	double lower_bound = openPx - _k2 * std::max(hh - lc, hc - ll);
+	double upper_bound = openPx + _k1 * std::max(highRange, lowRange);
+	double lower_bound = openPx - _k2 * std::max(highRange, lowRange);
+	if (!isValidPrice(upper_bound) || !isValidPrice(lower_bound))
+		return;
 
 	//设置指标值，用于图表显示
 	ctx->set_index_value("DualThrust", "upper_bound", upper_bound);
@@ -250,8 +295,6 @@ void WtStraDualThrust::on_schedule(ICtaStraCtx* ctx, uint32_t /*curDate*/, uint3
 		}
 	}
 
-	//这个释放一定要做
-	kline->release();
 }
 
 /**

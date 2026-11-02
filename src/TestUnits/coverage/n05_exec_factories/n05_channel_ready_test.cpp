@@ -16,6 +16,7 @@
 #include "Includes/WTSContractInfo.hpp"
 #include "Includes/WTSStruct.h"
 #include "Includes/WTSDataDef.hpp"
+#include "Includes/WTSSessionInfo.hpp"
 #include "WtExeFact/WtMinImpactExeUnit.h"
 
 using namespace wtp;
@@ -25,6 +26,18 @@ namespace
 class ReadyCtx : public ExecuteContext
 {
 public:
+	ReadyCtx()
+	{
+		sess = WTSSessionInfo::create("N05_MINIMPACT_READY", "N05 min impact ready test session");
+		sess->addTradingSection(900, 1500);
+	}
+
+	~ReadyCtx() override
+	{
+		if (sess)
+			sess->release();
+	}
+
 	WTSTickSlice* getTicks(const char*, uint32_t, uint64_t) override { return NULL; }
 	WTSTickData* grabLastTick(const char*) override { return NULL; }
 	double getPosition(const char*, bool = true, int32_t = 3) override { return pos; }
@@ -59,7 +72,7 @@ public:
 
 	void writeLog(const char*) override {}
 	WTSCommodityInfo* getCommodityInfo(const char*) override { return comm; }
-	WTSSessionInfo* getSessionInfo(const char*) override { return NULL; }
+	WTSSessionInfo* getSessionInfo(const char*) override { return sess; }
 	uint64_t getCurTime() override { return curTime; }
 
 public:
@@ -69,6 +82,7 @@ public:
 	uint32_t nextId = 8000;
 	uint32_t dirCancelCnt = 1;
 	WTSCommodityInfo* comm = NULL;
+	WTSSessionInfo* sess = NULL;
 	std::vector<std::pair<double, double>> buys;
 	std::vector<std::pair<double, double>> sells;
 	std::vector<bool> dirCancels;

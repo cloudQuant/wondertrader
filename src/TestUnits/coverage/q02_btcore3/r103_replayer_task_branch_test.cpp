@@ -62,8 +62,8 @@ TEST_F(R103Fixture, R103Replayer_TaskCalendarBranches)
 	opts.mode = "csv";
 	opts.tick = false;
 
-	// 月频：20200106 精确命中（_day 口径为 YYMMDD）
-	TaskRun monthly = run_task(_root, _base, opts, 200106u, 931u, "m", "SD0930",
+	// 月频：20200106 精确命中（_day 口径为月内日 1..31）
+	TaskRun monthly = run_task(_root, _base, opts, 6u, 931u, "m", "SD0930",
 		202001020930ull, 202001071500ull);
 	ASSERT_EQ(1u, monthly.dates.size());
 	EXPECT_EQ(20200106u, monthly.dates[0]);
@@ -72,7 +72,7 @@ TEST_F(R103Fixture, R103Replayer_TaskCalendarBranches)
 	// 月频：目标 01/15 落在自定义假日，01/16 同月顺延
 	const std::filesystem::path holi1 = _base / "holidays_midmonth.json";
 	ASSERT_TRUE(r91::write_text(holi1, "{\n  \"CHINA\": [20200115]\n}\n"));
-	TaskRun shifted = run_task(_root, _base, opts, 200115u, 931u, "m", "SD0930",
+	TaskRun shifted = run_task(_root, _base, opts, 15u, 931u, "m", "SD0930",
 		202001140930ull, 202001171500ull, holi1);
 	ASSERT_EQ(1u, shifted.dates.size());
 	EXPECT_EQ(20200116u, shifted.dates[0]);

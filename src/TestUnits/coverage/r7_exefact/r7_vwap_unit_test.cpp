@@ -237,7 +237,8 @@ void sendTick(WtVWapExeUnit& unit, WTSTickData* tick)
 // 见 L110-119 实际读取的键
 WTSVariant* mkCfg(uint32_t totalTimes = 5, uint32_t priceMode = 0, uint32_t priceOffset = 0,
 	double minOpenLots = 1.0, double lots = 10.0, uint32_t ordSticky = 0,
-	uint32_t tailSecs = 0, uint32_t beginTime = 930, uint32_t endTime = 1500)
+	uint32_t tailSecs = 0, uint32_t beginTime = 930, uint32_t endTime = 1500,
+	bool includeMinOpenLots = true)
 {
 	WTSVariant* cfg = WTSVariant::createObject();
 	cfg->append("begin_time", beginTime);
@@ -248,7 +249,8 @@ WTSVariant* mkCfg(uint32_t totalTimes = 5, uint32_t priceMode = 0, uint32_t pric
 	cfg->append("price_mode", priceMode);
 	cfg->append("price_offset", priceOffset);
 	cfg->append("lots", lots);
-	cfg->append("minopenlots", minOpenLots);
+	if (includeMinOpenLots)
+		cfg->append("minopenlots", minOpenLots);
 	return cfg;
 }
 
@@ -301,6 +303,37 @@ TEST(r7_vwap, failed_concurrent_calc_guard_does_not_release_owner)
 		EXPECT_TRUE(unit._in_calc.load(std::memory_order_acquire));
 	}
 	EXPECT_FALSE(unit._in_calc.load(std::memory_order_acquire));
+}
+
+TEST(r7_vwap, startup_cancel_without_explicit_target_does_not_retry_default_zero)
+{
+	VwapFile vf(25.0);
+	FakeCtx ctx;
+	ctx.comm = mkComm();
+	ctx.pos = 100.0;
+	ctx.undone = 5.0;
+	ctx.cancelBydirRetCnt = 1;
+	{
+		WtVWapExeUnit unit;
+		WTSVariant* cfg = mkCfg();
+		unit.init(&ctx, kCode, cfg);
+		cfg->release();
+		ASSERT_TRUE(unit.initializationSucceeded());
+		unit.on_channel_ready();
+		sendTick(unit, mkTick(kCode, 100000000, 10.50, 10.49, 10.51));
+		ASSERT_EQ(ctx.bydirCancels.size(), 1u);
+		ASSERT_EQ(unit._cancel_cnt, 1u);
+		EXPECT_FALSE(unit._target_pos_valid);
+
+		ctx.undone = 0.0;
+		unit.on_order(9000, kCode, false, 5.0, 10.50, true);
+		sendTick(unit, mkTick(kCode, 100100000, 10.50, 10.49, 10.51));
+		EXPECT_EQ(unit._cancel_cnt, 0u);
+		EXPECT_FALSE(unit._target_pos_valid);
+		EXPECT_TRUE(ctx.buys.empty());
+		EXPECT_TRUE(ctx.sells.empty());
+	}
+	ctx.comm->release();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -385,10 +418,45 @@ TEST(r7_vwap, bucket_zero_falls_back_to_min_open_lots)
 	ctx.comm = mkComm();
 	WtVWapExeUnit unit;
 	boot(unit, ctx, 100, mkCfg(5, 0, 0, 7.0));
+	EXPECT_DOUBLE_EQ(unit._min_open_lots, 7.0);
 	sendTick(unit, mkTick(kCode, 100000000, 10.50, 10.49, 10.51));
 	// _Vwap_vol = 0-0 = 0 -> max(0, minopenlots=7) = 7 -> *|100|/100 = 7
 	ASSERT_EQ(ctx.buys.size(), 1u);
 	EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 7.0);
+	ctx.comm->release();
+}
+
+TEST(r7_vwap, minopenlots_absent_defaults_to_zero)
+{
+	VwapFile vf(0.0);
+	FakeCtx ctx;
+	ctx.comm = mkComm();
+	WtVWapExeUnit unit;
+	WTSVariant* cfg = mkCfg(5, 0, 0, 0.0, 10.0, 0, 0, 930, 1500, false);
+	ASSERT_FALSE(cfg->has("minopenlots"));
+	boot(unit, ctx, 100, cfg);
+	ASSERT_TRUE(unit.initializationSucceeded());
+	EXPECT_DOUBLE_EQ(unit._min_open_lots, 0.0);
+	sendTick(unit, mkTick(kCode, 100000000, 10.50, 10.49, 10.51));
+	EXPECT_TRUE(ctx.buys.empty());
+	EXPECT_TRUE(ctx.sells.empty());
+	EXPECT_TRUE(ctx.hasLog("no executable quantity after position availability checks"));
+	ctx.comm->release();
+}
+
+TEST(r7_vwap, explicit_zero_minopenlots_is_accepted_without_floor)
+{
+	VwapFile vf(0.0);
+	FakeCtx ctx;
+	ctx.comm = mkComm();
+	WtVWapExeUnit unit;
+	boot(unit, ctx, 100, mkCfg(5, 0, 0, 0.0));
+	ASSERT_TRUE(unit.initializationSucceeded());
+	EXPECT_DOUBLE_EQ(unit._min_open_lots, 0.0);
+	sendTick(unit, mkTick(kCode, 100000000, 10.50, 10.49, 10.51));
+	EXPECT_TRUE(ctx.buys.empty());
+	EXPECT_TRUE(ctx.sells.empty());
+	EXPECT_TRUE(ctx.hasLog("no executable quantity after position availability checks"));
 	ctx.comm->release();
 }
 
@@ -747,26 +815,69 @@ TEST(r7_vwap, rejection_callback_after_close_does_not_recalculate_from_cached_ti
 }
 
 //////////////////////////////////////////////////////////////////////////
-// fire_at_once 的 price_mode==1 取 ask，与 do_calc 的同一模式取 bid 相反（L401 vs L463）
+// 重发沿用常规下单的价格模式；撤单次数增加一个 tick 的方向性偏移。
 //////////////////////////////////////////////////////////////////////////
-TEST(r7_vwap, fire_at_once_price_mode_1_takes_ask_price)
+TEST(r7_vwap, price_mode_matrix_matches_initial_and_canceled_retry_prices)
 {
 	VwapFile vf(25.0);
-	FakeCtx ctx;
-	ctx.comm = mkComm();
-	WtVWapExeUnit unit;
-	boot(unit, ctx, 100, mkCfg(5, 1));
-	sendTick(unit, mkTick(kCode, 100000000, 10.50, 10.49, 10.51));
-	ASSERT_EQ(ctx.buys.size(), 1u);
-	EXPECT_DOUBLE_EQ(ctx.buys[0].price, 10.49);        // do_calc 模式1买入 -> bid
-	unit.on_order(9000, kCode, true, 5, 10.49, true);  // pending until next tick
-	EXPECT_EQ(ctx.buys.size(), 1u);
-	sendTick(unit, mkTick(kCode, 100100000, 10.60, 10.59, 10.61));
-	ASSERT_EQ(ctx.buys.size(), 2u);
-	// fire_at_once: new askprice(0)=10.61, plus one tick cancel offset.
-	EXPECT_DOUBLE_EQ(ctx.buys[1].price, 10.62);
-	EXPECT_LT(ctx.buys[0].price, ctx.buys[1].price);
-	ctx.comm->release();
+	const double buyInitial[] = { 10.50, 10.49, 10.51 };
+	const double sellInitial[] = { 10.50, 10.51, 10.49 };
+	const double buyRetry[] = { 10.61, 10.60, 10.62 };
+	const double sellRetry[] = { 10.59, 10.60, 10.58 };
+	for (uint32_t mode = 0; mode <= 2; ++mode)
+	{
+		for (int side = 0; side < 2; ++side)
+		{
+			const bool isBuy = side == 0;
+			SCOPED_TRACE(::testing::Message() << "price_mode=" << mode << ", isBuy=" << isBuy);
+			FakeCtx ctx;
+			ctx.comm = mkComm();
+			if (!isBuy)
+				ctx.pos = 100;
+			WtVWapExeUnit unit;
+			boot(unit, ctx, isBuy ? 100 : 0, mkCfg(5, mode));
+			sendTick(unit, mkTick(kCode, 100000000, 10.50, 10.49, 10.51));
+			const auto& initialOrders = isBuy ? ctx.buys : ctx.sells;
+			ASSERT_EQ(initialOrders.size(), 1u);
+			EXPECT_DOUBLE_EQ(initialOrders[0].price, isBuy ? buyInitial[mode] : sellInitial[mode]);
+			unit.on_order(9000, kCode, isBuy, 5, initialOrders[0].price, true);
+			sendTick(unit, mkTick(kCode, 100100000, 10.60, 10.59, 10.61));
+			const auto& retryOrders = isBuy ? ctx.buys : ctx.sells;
+			ASSERT_EQ(retryOrders.size(), 2u);
+			EXPECT_DOUBLE_EQ(retryOrders[1].price, isBuy ? buyRetry[mode] : sellRetry[mode]);
+			EXPECT_TRUE(isBuy ? ctx.sells.empty() : ctx.buys.empty());
+			ctx.comm->release();
+		}
+	}
+}
+
+TEST(r7_vwap, canceled_retry_keeps_upper_and_lower_limit_caps)
+{
+	VwapFile vf(25.0);
+	for (int side = 0; side < 2; ++side)
+	{
+		const bool isBuy = side == 0;
+		SCOPED_TRACE(::testing::Message() << "isBuy=" << isBuy);
+		FakeCtx ctx;
+		ctx.comm = mkComm();
+		if (!isBuy)
+			ctx.pos = 100;
+		WtVWapExeUnit unit;
+		boot(unit, ctx, isBuy ? 100 : 0, mkCfg(5, 2));
+		sendTick(unit, mkTick(kCode, 100000000, 10.50, 10.49, 10.51));
+		const auto& initialOrders = isBuy ? ctx.buys : ctx.sells;
+		ASSERT_EQ(initialOrders.size(), 1u);
+		unit.on_order(9000, kCode, isBuy, 5, initialOrders[0].price, true);
+		if (isBuy)
+			sendTick(unit, mkTick(kCode, 100100000, 10.60, 10.59, 10.60, 10.60, 0));
+		else
+			sendTick(unit, mkTick(kCode, 100100000, 10.20, 10.19, 10.21, 0, 10.20));
+		const auto& retryOrders = isBuy ? ctx.buys : ctx.sells;
+		ASSERT_EQ(retryOrders.size(), 2u);
+		EXPECT_DOUBLE_EQ(retryOrders[1].price, isBuy ? 10.60 : 10.20);
+		EXPECT_TRUE(ctx.hasLog(isBuy ? "modified to upper limit price" : "modified to lower limit price"));
+		ctx.comm->release();
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1251,6 +1362,25 @@ TEST(r7_vwap, init_without_session_fails_closed)
 	EXPECT_TRUE(ctx.buys.empty());
 	EXPECT_TRUE(ctx.sells.empty());
 	ctx.comm->release();
+}
+
+TEST(r7_vwap, init_without_commodity_fails_closed)
+{
+	VwapFile vf(25.0);
+	FakeCtx ctx; // The fixture supplies a valid trading session; only commodity metadata is absent.
+	WtVWapExeUnit unit;
+	WTSVariant* cfg = mkCfg();
+	unit.init(&ctx, kCode, cfg);
+	cfg->release();
+	EXPECT_FALSE(unit.initializationSucceeded());
+	EXPECT_TRUE(ctx.hasLog("commodity or trading session is unavailable"));
+	unit.set_position(kCode, 100);
+	unit.on_channel_ready();
+	sendTick(unit, mkTick(kCode, 100000000, 10.50, 10.49, 10.51));
+	EXPECT_TRUE(ctx.buys.empty());
+	EXPECT_TRUE(ctx.sells.empty());
+	EXPECT_TRUE(ctx.byidCancels.empty());
+	EXPECT_TRUE(ctx.bydirCancels.empty());
 }
 
 TEST(r7_vwap, init_tail_beyond_duration_rejected_and_inert)

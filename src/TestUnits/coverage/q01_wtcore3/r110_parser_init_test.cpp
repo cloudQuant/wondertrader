@@ -9,7 +9,7 @@
  *     145-198, 209-211
  *   - handleQuote 的交易所过滤器早退：:239-245
  *
- * 接缝：把构建产物 libParserUDP.dylib 软链进临时目录的 parsers/ 子目录，并
+ * 接缝：把构建产物 libParserUDP.dylib 复制进临时目录的 parsers/ 子目录，并
  * WtHelper::setInstDir 指向该目录；ParserUDP::init 只解析 host/port 构造 endpoint，
  * 不建 socket、不起线程；本文件只调 init，不调 run()/connect()。
  * 临时目录在用例结束时整棵删除。
@@ -66,7 +66,8 @@ public:
             return;
 
         fs::remove(_root / "parsers" / "libParserUDP.dylib", ec);
-        fs::create_symlink(src, _root / "parsers" / "libParserUDP.dylib", ec);
+        fs::copy_file(src, _root / "parsers" / "libParserUDP.dylib",
+            fs::copy_options::overwrite_existing, ec);
         _ok = !ec;
     }
 

@@ -1,0 +1,86 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R52RdmTest.R52ExrightRealtimeRangeBoundsBeforeHitAndAfterLast
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R52RdmTest
+[ RUN      ] R52RdmTest.R52ExrightRealtimeRangeBoundsBeforeHitAndAfterLast
+=================================================================
+==50380==ERROR: AddressSanitizer: container-overflow on address 0x6080000005a0 at pc 0x00010a3f6fc4 bp 0x00016b154da0 sp 0x00016b154550
+WRITE of size 88 at 0x6080000005a0 thread T0
+    #0 0x00010a3f6fc0 in memcpy+0x510 (libclang_rt.asan_osx_dynamic.dylib:arm64+0x52fc0)
+    #1 0x000104cdcd1c in void std::__1::allocator<wtp::WTSBarStruct>::construct[abi:ne200100]<wtp::WTSBarStruct, wtp::WTSBarStruct const&>(wtp::WTSBarStruct*, wtp::WTSBarStruct const&)+0x24 (CoverageTests_old_first:arm64+0x100034d1c)
+    #2 0x000104cdcc04 in void std::__1::allocator_traits<std::__1::allocator<wtp::WTSBarStruct>>::construct[abi:ne200100]<wtp::WTSBarStruct, wtp::WTSBarStruct const&, 0>(std::__1::allocator<wtp::WTSBarStruct>&, wtp::WTSBarStruct*, wtp::WTSBarStruct const&)+0x24 (CoverageTests_old_first:arm64+0x100034c04)
+    #3 0x000104cdca4c in wtp::WTSBarStruct* std::__1::__uninitialized_allocator_copy_impl[abi:ne200100]<std::__1::allocator<wtp::WTSBarStruct>, wtp::WTSBarStruct const*, wtp::WTSBarStruct const*, wtp::WTSBarStruct*>(std::__1::allocator<wtp::WTSBarStruct>&, wtp::WTSBarStruct const*, wtp::WTSBarStruct const*, wtp::WTSBarStruct*)+0x80 (CoverageTests_old_first:arm64+0x100034a4c)
+    #4 0x000104cdc94c in wtp::WTSBarStruct* std::__1::__uninitialized_allocator_copy[abi:ne200100]<std::__1::allocator<wtp::WTSBarStruct>, wtp::WTSBarStruct const*, wtp::WTSBarStruct const*, wtp::WTSBarStruct*>(std::__1::allocator<wtp::WTSBarStruct>&, wtp::WTSBarStruct const*, wtp::WTSBarStruct const*, wtp::WTSBarStruct*)+0x60 (CoverageTests_old_first:arm64+0x10003494c)
+    #5 0x000104cdc804 in void std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::__construct_at_end<wtp::WTSBarStruct const*, wtp::WTSBarStruct const*>(wtp::WTSBarStruct const*, wtp::WTSBarStruct const*, unsigned long)+0x44 (CoverageTests_old_first:arm64+0x100034804)
+    #6 0x000104e19268 in void std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::__init_with_size[abi:nqe220108]<wtp::WTSBarStruct const*, wtp::WTSBarStruct const*>(wtp::WTSBarStruct const*, wtp::WTSBarStruct const*, unsigned long)+0x204 (CoverageTests_old_first:arm64+0x100171268)
+    #7 0x000104e18fd4 in std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::vector[abi:nqe220108](std::initializer_list<wtp::WTSBarStruct>)+0x234 (CoverageTests_old_first:arm64+0x100170fd4)
+    #8 0x000104df835c in std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::vector[abi:nqe220108](std::initializer_list<wtp::WTSBarStruct>)+0x60 (CoverageTests_old_first:arm64+0x10015035c)
+    #9 0x000104df4a08 in r52::R52RdmTest_R52ExrightRealtimeRangeBoundsBeforeHitAndAfterLast_Test::TestBody()+0x760 (CoverageTests_old_first:arm64+0x10014ca08)
+    #10 0x0001050d29e8 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (CoverageTests_old_first:arm64+0x10042a9e8)
+    #11 0x0001050d2930 in testing::Test::Run()+0xcc (CoverageTests_old_first:arm64+0x10042a930)
+    #12 0x0001050d3510 in testing::TestInfo::Run()+0xd0 (CoverageTests_old_first:arm64+0x10042b510)
+    #13 0x0001050d3f94 in testing::TestSuite::Run()+0x1c4 (CoverageTests_old_first:arm64+0x10042bf94)
+    #14 0x0001050df3bc in testing::internal::UnitTestImpl::RunAllTests()+0x52c (CoverageTests_old_first:arm64+0x1004373bc)
+    #15 0x0001050ded68 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (CoverageTests_old_first:arm64+0x100436d68)
+    #16 0x0001050deccc in testing::UnitTest::Run()+0x78 (CoverageTests_old_first:arm64+0x100436ccc)
+    #17 0x000104fb0434 in main+0x40 (CoverageTests_old_first:arm64+0x100308434)
+    #18 0x00018059bdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+0x6080000005a0 is located 0 bytes inside of 88-byte region [0x6080000005a0,0x6080000005f8)
+allocated by thread T0 here:
+    #0 0x00010a4090e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000104d35608 in wtp::WTSBarStruct* std::__1::__libcpp_allocate[abi:nqe220108]<wtp::WTSBarStruct>(std::__1::__element_count, unsigned long)+0x90 (CoverageTests_old_first:arm64+0x10008d608)
+    #2 0x000104d354ec in std::__1::allocator<wtp::WTSBarStruct>::allocate[abi:nqe220108](unsigned long)+0xa4 (CoverageTests_old_first:arm64+0x10008d4ec)
+    #3 0x000104d34f1c in std::__1::__allocation_result<std::__1::allocator_traits<std::__1::allocator<wtp::WTSBarStruct>>::pointer, std::__1::allocator_traits<std::__1::allocator<wtp::WTSBarStruct>>::size_type> std::__1::__allocate_at_least[abi:nqe220108]<std::__1::allocator<wtp::WTSBarStruct>, std::__1::allocator_traits<std::__1::allocator<wtp::WTSBarStruct>>>(std::__1::allocator<wtp::WTSBarStruct>&, unsigned long)+0x114 (CoverageTests_old_first:arm64+0x10008cf1c)
+    #4 0x000104e198c8 in std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::__vallocate[abi:nqe220108](unsigned long)+0x1c4 (CoverageTests_old_first:arm64+0x1001718c8)
+    #5 0x000104e19250 in void std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::__init_with_size[abi:nqe220108]<wtp::WTSBarStruct const*, wtp::WTSBarStruct const*>(wtp::WTSBarStruct const*, wtp::WTSBarStruct const*, unsigned long)+0x1ec (CoverageTests_old_first:arm64+0x100171250)
+    #6 0x000104e18fd4 in std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::vector[abi:nqe220108](std::initializer_list<wtp::WTSBarStruct>)+0x234 (CoverageTests_old_first:arm64+0x100170fd4)
+    #7 0x000104df835c in std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::vector[abi:nqe220108](std::initializer_list<wtp::WTSBarStruct>)+0x60 (CoverageTests_old_first:arm64+0x10015035c)
+    #8 0x000104df4a08 in r52::R52RdmTest_R52ExrightRealtimeRangeBoundsBeforeHitAndAfterLast_Test::TestBody()+0x760 (CoverageTests_old_first:arm64+0x10014ca08)
+    #9 0x0001050d29e8 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (CoverageTests_old_first:arm64+0x10042a9e8)
+    #10 0x0001050d2930 in testing::Test::Run()+0xcc (CoverageTests_old_first:arm64+0x10042a930)
+    #11 0x0001050d3510 in testing::TestInfo::Run()+0xd0 (CoverageTests_old_first:arm64+0x10042b510)
+    #12 0x0001050d3f94 in testing::TestSuite::Run()+0x1c4 (CoverageTests_old_first:arm64+0x10042bf94)
+    #13 0x0001050df3bc in testing::internal::UnitTestImpl::RunAllTests()+0x52c (CoverageTests_old_first:arm64+0x1004373bc)
+    #14 0x0001050ded68 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (CoverageTests_old_first:arm64+0x100436d68)
+    #15 0x0001050deccc in testing::UnitTest::Run()+0x78 (CoverageTests_old_first:arm64+0x100436ccc)
+    #16 0x000104fb0434 in main+0x40 (CoverageTests_old_first:arm64+0x100308434)
+    #17 0x00018059bdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+HINT: if you don't care about these errors you may set ASAN_OPTIONS=detect_container_overflow=0.
+Or if supported by the container library, pass -D__SANITIZER_DISABLE_CONTAINER_OVERFLOW__ to the compiler to disable  instrumentation.
+If you suspect a false positive see also: https://github.com/google/sanitizers/wiki/AddressSanitizerContainerOverflow.
+SUMMARY: AddressSanitizer: container-overflow (CoverageTests_old_first:arm64+0x100034d1c) in void std::__1::allocator<wtp::WTSBarStruct>::construct[abi:ne200100]<wtp::WTSBarStruct, wtp::WTSBarStruct const&>(wtp::WTSBarStruct*, wtp::WTSBarStruct const&)+0x24
+Shadow bytes around the buggy address:
+  0x608000000300: fa fa fa fa fd fd fd fd fd fd fd fd fd fd fd fd
+  0x608000000380: fa fa fa fa 00 00 00 00 00 00 00 00 00 00 00 00
+  0x608000000400: fa fa fa fa fd fd fd fd fd fd fd fd fd fd fd fd
+  0x608000000480: fa fa fa fa fd fd fd fd fd fd fd fd fd fd fd fd
+  0x608000000500: fa fa fa fa fd fd fd fd fd fd fd fd fd fd fd fa
+=>0x608000000580: fa fa fa fa[fc]fc fc fc fc fc fc fc fc fc fc fa
+  0x608000000600: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x608000000680: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x608000000700: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x608000000780: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x608000000800: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==50380==ABORTING

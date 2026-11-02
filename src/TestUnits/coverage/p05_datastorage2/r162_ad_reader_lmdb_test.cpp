@@ -148,7 +148,7 @@ TEST_F(R162AdReaderTest, R162ReaderADMinuteBarsAppendFromLmdb)
 
 	uint64_t etime = (uint64_t)20240110 * 1000000000ULL + 93100000ULL;
 	std::unique_ptr<WTSKlineSlice, ReleaseSlice<WTSKlineSlice>> first(
-		reader->readKlineSlice("SSE.600000", KP_Minute1, 10, etime));
+		reader->readKlineSlice("SSE.600000", KP_Minute1, 2, etime));
 	ASSERT_TRUE(first != NULL);
 	ASSERT_EQ(bar_count(first.get()), 1u);
 	ASSERT_NE(first->at(0), nullptr);
@@ -160,21 +160,18 @@ TEST_F(R162AdReaderTest, R162ReaderADMinuteBarsAppendFromLmdb)
 	ASSERT_TRUE(put_bar(kline_dir, second_bar));
 
 	std::unique_ptr<WTSKlineSlice, ReleaseSlice<WTSKlineSlice>> second(
-		reader->readKlineSlice("SSE.600000", KP_Minute1, 10,
+		reader->readKlineSlice("SSE.600000", KP_Minute1, 2,
 			(uint64_t)20240110 * 1000000000ULL + 93200000ULL));
 	ASSERT_TRUE(second != NULL);
-	EXPECT_EQ(bar_count(second.get()), 2u);
+	ASSERT_EQ(bar_count(second.get()), 2u);
 	const WTSBarStruct* returned_first = second->at(0);
 	ASSERT_NE(returned_first, nullptr);
 	EXPECT_EQ(returned_first->time, first_bar.time);
 	EXPECT_DOUBLE_EQ(returned_first->close, first_bar.close);
-	if (bar_count(second.get()) >= 2)
-	{
-		const WTSBarStruct* returned_second = second->at(1);
-		ASSERT_NE(returned_second, nullptr);
-		EXPECT_EQ(returned_second->time, second_bar.time);
-		EXPECT_DOUBLE_EQ(returned_second->close, second_bar.close);
-	}
+	const WTSBarStruct* returned_second = second->at(1);
+	ASSERT_NE(returned_second, nullptr);
+	EXPECT_EQ(returned_second->time, second_bar.time);
+	EXPECT_DOUBLE_EQ(returned_second->close, second_bar.close);
 	EXPECT_EQ(_rsink->bars(), 1u);
 
 	// 两次读 tick：第二次命中 get_t_db 的 _tick_dbs 缓存。
@@ -190,6 +187,66 @@ TEST_F(R162AdReaderTest, R162ReaderADMinuteBarsAppendFromLmdb)
 	ASSERT_TRUE(ticks2 != NULL);
 	EXPECT_EQ(tick_count(ticks2.get()), 3u);
 	EXPECT_EQ(_rsink->count_containing("Tick db of SSE.600000 opened"), 1u);
+}
+
+TEST_F(R162AdReaderTest, R162ReaderADCacheLargerThanRequestReturnsLatestWindow)
+{
+	const std::filesystem::path kline_dir = _dir / "min1" / "SSE";
+	const WTSBarStruct first_bar = make_bar(20240110u, 931u, 11.0);
+	const WTSBarStruct second_bar = make_bar(20240110u, 932u, 12.0);
+	const WTSBarStruct third_bar = make_bar(20240110u, 933u, 13.0);
+	ASSERT_TRUE(put_bar(kline_dir, first_bar));
+	ASSERT_TRUE(put_bar(kline_dir, second_bar));
+	ASSERT_TRUE(put_bar(kline_dir, third_bar));
+
+	std::unique_ptr<WtDataReaderAD> reader(make_reader());
+	ASSERT_NE(reader, nullptr);
+	const uint64_t third_bar_time = (uint64_t)20240110 * 1000000000ULL + 93300000ULL;
+	std::unique_ptr<WTSKlineSlice, ReleaseSlice<WTSKlineSlice>> full_window(
+		reader->readKlineSlice("SSE.600000", KP_Minute1, 3, third_bar_time));
+	ASSERT_NE(full_window, nullptr);
+	ASSERT_EQ(bar_count(full_window.get()), 3u);
+
+	std::unique_ptr<WTSKlineSlice, ReleaseSlice<WTSKlineSlice>> latest_two(
+		reader->readKlineSlice("SSE.600000", KP_Minute1, 2, third_bar_time));
+	ASSERT_NE(latest_two, nullptr);
+	ASSERT_EQ(bar_count(latest_two.get()), 2u);
+	ASSERT_NE(latest_two->at(0), nullptr);
+	EXPECT_EQ(latest_two->at(0)->time, second_bar.time);
+	EXPECT_DOUBLE_EQ(latest_two->at(0)->close, second_bar.close);
+	ASSERT_NE(latest_two->at(1), nullptr);
+	EXPECT_EQ(latest_two->at(1)->time, third_bar.time);
+	EXPECT_DOUBLE_EQ(latest_two->at(1)->close, third_bar.close);
+}
+
+TEST_F(R162AdReaderTest, R162ReaderADNoLmdbAppendReturnsExistingBars)
+{
+	const std::filesystem::path kline_dir = _dir / "min1" / "SSE";
+	const WTSBarStruct first_bar = make_bar(20240110u, 931u, 11.0);
+	const WTSBarStruct second_bar = make_bar(20240110u, 932u, 12.0);
+	ASSERT_TRUE(put_bar(kline_dir, first_bar));
+	ASSERT_TRUE(put_bar(kline_dir, second_bar));
+
+	std::unique_ptr<WtDataReaderAD> reader(make_reader());
+	ASSERT_NE(reader, nullptr);
+	std::unique_ptr<WTSKlineSlice, ReleaseSlice<WTSKlineSlice>> initial(
+		reader->readKlineSlice("SSE.600000", KP_Minute1, 2,
+			(uint64_t)20240110 * 1000000000ULL + 93200000ULL));
+	ASSERT_NE(initial, nullptr);
+	ASSERT_EQ(bar_count(initial.get()), 2u);
+
+	// Advance the request time to exercise the LMDB update path without adding rows.
+	std::unique_ptr<WTSKlineSlice, ReleaseSlice<WTSKlineSlice>> unchanged(
+		reader->readKlineSlice("SSE.600000", KP_Minute1, 2,
+			(uint64_t)20240110 * 1000000000ULL + 93300000ULL));
+	ASSERT_NE(unchanged, nullptr);
+	ASSERT_EQ(bar_count(unchanged.get()), 2u);
+	ASSERT_NE(unchanged->at(0), nullptr);
+	EXPECT_EQ(unchanged->at(0)->time, first_bar.time);
+	EXPECT_DOUBLE_EQ(unchanged->at(0)->close, first_bar.close);
+	ASSERT_NE(unchanged->at(1), nullptr);
+	EXPECT_EQ(unchanged->at(1)->time, second_bar.time);
+	EXPECT_DOUBLE_EQ(unchanged->at(1)->close, second_bar.close);
 }
 
 TEST_F(R162AdReaderTest, R162ReaderADTickDbCacheSeparatesContractsWithinExchange)

@@ -1,0 +1,27 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R60MockerTest.released_instance_does_not_deliver_old_queued_query_after_reinit
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R60MockerTest
+[ RUN      ] R60MockerTest.released_instance_does_not_deliver_old_queued_query_after_reinit
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp:571: Failure
+Value of: api_.init(cfg)
+  Actual: false
+Expected: true
+
+[TraderMocker] Cannot connect after release
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp:798: Failure
+Value of: wait_until([this]() { return sink_.n_event() == 2; })
+  Actual: false
+Expected: true
+
+[  FAILED  ] R60MockerTest.released_instance_does_not_deliver_old_queued_query_after_reinit (3008 ms)
+[----------] 1 test from R60MockerTest (3008 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (3008 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R60MockerTest.released_instance_does_not_deliver_old_queued_query_after_reinit
+
+ 1 FAILED TEST

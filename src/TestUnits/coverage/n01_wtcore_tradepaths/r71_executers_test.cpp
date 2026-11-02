@@ -37,6 +37,8 @@
 
 using namespace wtp;
 
+typedef wt_hashmap<std::string, double> R71PositionTargets;
+
 namespace {
 
 class R71RejectingPool
@@ -150,6 +152,16 @@ public:
 		_ready_condition.notify_all();
 	}
 
+	void enableChannelReadyProbe()
+	{
+		_channel_ready_probe.store(true);
+	}
+
+	void disableChannelReadyProbe()
+	{
+		_channel_ready_probe.store(false);
+	}
+
 	double getUndoneQty(const char* code) override
 	{
 		const uint32_t call = ++ready_queries;
@@ -168,7 +180,16 @@ public:
 		}
 		if (should_throw)
 			throw std::runtime_error("R71 injected channel callback failure");
+		if (_channel_ready_probe.load())
+			return 1.0;
 		return BaseExecuter::getUndoneQty(code);
+	}
+
+	OrderIDs cancel(const char* code, bool isBuy, double qty) override
+	{
+		if (_channel_ready_probe.load())
+			channel_ready_cancel_requests.fetch_add(1);
+		return BaseExecuter::cancel(code, isBuy, qty);
 	}
 
 	void writeLog(const char* message) override
@@ -180,14 +201,153 @@ public:
 
 	std::atomic<uint32_t> ready_queries{0};
 	std::atomic<uint32_t> available_updates{0};
+	std::atomic<uint32_t> channel_ready_cancel_requests{0};
 
 private:
+	std::atomic<bool> _channel_ready_probe{false};
 	std::mutex _ready_mutex;
 	std::condition_variable _ready_condition;
 	bool _block_first_ready = false;
 	bool _throw_first_ready = false;
 	bool _ready_entered = false;
 	bool _ready_released = false;
+};
+
+class R71CapturingTraderApi : public r71::R71FakeTraderApi
+{
+public:
+	int orderInsert(WTSEntrust* entrust) override
+	{
+		last_usertag = entrust->getUserTag();
+		const char* localid = std::strrchr(last_usertag.c_str(), '.');
+		last_localid = localid == NULL ? 0 : static_cast<uint32_t>(std::strtoul(localid + 1, NULL, 10));
+		return r71::R71FakeTraderApi::orderInsert(entrust);
+	}
+
+	uint32_t last_localid = 0;
+	std::string last_usertag;
+};
+
+WTSOrderInfo* r71MakeOrderReport(WTSContractInfo* contract, const std::string& usertag,
+	const char* orderId, WTSDirectionType direction, WTSOffsetType offset, double price,
+	double volume, double volumeTraded, double volumeLeft, WTSOrderState state)
+{
+	WTSOrderInfo* order = WTSOrderInfo::create();
+	if (order == NULL)
+		return NULL;
+	order->setContractInfo(contract);
+	order->setDirection(direction);
+	order->setOffsetType(offset);
+	order->setPrice(price);
+	order->setVolume(volume);
+	order->setVolTraded(volumeTraded);
+	order->setVolLeft(volumeLeft);
+	order->setUserTag(usertag.c_str());
+	order->setOrderID(orderId);
+	order->setOrderState(state);
+	return order;
+}
+
+WTSTradeInfo* r71MakeTradeReport(WTSContractInfo* contract, const std::string& usertag,
+	const char* tradeId, const char* orderId, WTSDirectionType direction,
+	WTSOffsetType offset, double price, double volume)
+{
+	if (contract == NULL)
+		return NULL;
+	WTSTradeInfo* trade = WTSTradeInfo::create(contract->getCode(), contract->getExchg());
+	if (trade == NULL)
+		return NULL;
+	trade->setContractInfo(contract);
+	trade->setUserTag(usertag.c_str());
+	trade->setTradeID(tradeId);
+	trade->setRefOrder(orderId);
+	trade->setDirection(direction);
+	trade->setOffsetType(offset);
+	trade->setPrice(price);
+	trade->setVolume(volume);
+	trade->setTradeDate(20250110);
+	trade->setTradeTime(93100000);
+	return trade;
+}
+
+enum class R71PendingCreationBehavior
+{
+	LOCAL_COALESCES_TARGET,
+	ARBI_RETURNS_BEFORE_REGISTRATION,
+	DIFF_WAITS_FOR_CREATOR
+};
+
+struct R71SubmittedOrder
+{
+	uint32_t localid = 0;
+	std::string usertag;
+	WTSDirectionType direction = WDT_LONG;
+	WTSOffsetType offset = WOT_OPEN;
+	double price = 0.0;
+	double volume = 0.0;
+};
+
+class R71LocalExecQuiesceGuard
+{
+public:
+	R71LocalExecQuiesceGuard(WtExecuterMgr& manager, TraderAdapter& trader, ITrdNotifySink* sink)
+		: _manager(manager), _trader(trader), _sink(sink) {}
+
+	~R71LocalExecQuiesceGuard()
+	{
+		WtExecQuiesceCoordinator coordinator({ &_manager });
+		if (!coordinator.quiesce_all() || !coordinator.is_complete())
+		{
+			ADD_FAILURE() << "R71 executor quiesce did not complete";
+			std::abort();
+		}
+		// TraderAdapter does not own sinks. removeSink waits for any callback that
+		// already started, so the manager may safely destroy the executer afterward.
+		if (!_trader.removeSink(_sink))
+		{
+			ADD_FAILURE() << "TraderAdapter still has an active R71 executor callback";
+			std::abort();
+		}
+	}
+
+private:
+	WtExecuterMgr& _manager;
+	TraderAdapter& _trader;
+	ITrdNotifySink* _sink;
+};
+
+class R71ExecGroupQuiesceGuard
+{
+public:
+	template <typename Executer>
+	void add(const std::shared_ptr<Executer>& executer, TraderAdapter& trader,
+		ITrdNotifySink* sink)
+	{
+		_manager.add_executer(executer);
+		_sinks.emplace_back(&trader, sink);
+	}
+
+	~R71ExecGroupQuiesceGuard()
+	{
+		WtExecQuiesceCoordinator coordinator({ &_manager });
+		if (!coordinator.quiesce_all() || !coordinator.is_complete())
+		{
+			ADD_FAILURE() << "R71 executor group quiesce did not complete";
+			std::abort();
+		}
+		for (const auto& registration : _sinks)
+		{
+			if (!registration.first->removeSink(registration.second))
+			{
+				ADD_FAILURE() << "TraderAdapter still has an active R71 executor callback";
+				std::abort();
+			}
+		}
+	}
+
+private:
+	WtExecuterMgr _manager;
+	std::vector<std::pair<TraderAdapter*, ITrdNotifySink*> > _sinks;
 };
 
 class R71ExecTest : public ::testing::Test
@@ -262,6 +422,20 @@ protected:
         ASSERT_TRUE(traderEnv.build(trader, "r71_exec"));
     }
 
+	bool buildCapturingTrader(TraderAdapter& adapter, R71CapturingTraderApi& api,
+		const char* id)
+	{
+		if (!traderEnv.policy_ok() ||
+			!adapter.initExt(id, &api, &traderEnv.bd, traderEnv.policy()) || !adapter.run())
+			return false;
+		adapter.onLoginResult(true, "r71", 20250110);
+		adapter.onRspPosition(static_cast<const WTSArray*>(NULL));
+		adapter.onRspOrders(static_cast<const WTSArray*>(NULL));
+		adapter.onRspTrades(static_cast<const WTSArray*>(NULL));
+		adapter.onRspAccount(static_cast<WTSArray*>(NULL));
+		return adapter.state() == TraderAdapter::AS_ALLREADY;
+	}
+
     WTSVariant* cfg(const char* name, const char* policyUnit, const char* extra)
     {
         std::string json = std::string("{\"scale\":1.0,\"poolsize\":0,")
@@ -281,29 +455,43 @@ protected:
     }
 
 	template <typename Executer>
-	void verifyConcurrentCreation(Executer& executer, R71BlockingExecStub& blockingStub,
-		const char* name, const char* unitName, uint32_t baseInsert)
+	void verifyConcurrentCreation(const std::shared_ptr<Executer>& executer_ptr,
+		R71BlockingExecStub& blockingStub,
+		const char* name, const char* unitName, R71PendingCreationBehavior behavior,
+		uint32_t expectedReadyCallbacks, R71ExecGroupQuiesceGuard& quiesceGuard,
+		TraderAdapter& isolatedTrader, R71CapturingTraderApi& api)
 	{
+		ASSERT_NE(executer_ptr, nullptr);
+		Executer& executer = *executer_ptr;
 		executer.setStub(&blockingStub);
 		WTSVariant* params = cfg(name, unitName, NULL);
 		ASSERT_NE(params, nullptr);
 		ASSERT_TRUE(executer.init(params));
 		params->release();
-		executer.setTrader(&trader);
-		trader.addSink(&executer);
-		executer.on_channel_lost();
+		executer.setTrader(&isolatedTrader);
+		isolatedTrader.addSink(&executer);
+		quiesceGuard.add(executer_ptr, isolatedTrader, &executer);
+		executer.enableChannelReadyProbe();
+
+		// Keep the channel down until the first creation is blocked in its commodity
+		// lookup, then deliver ready/lost/ready before the candidate is registered.
 		blockingStub.blockFirstCommodityLookup();
+		EXPECT_TRUE(isolatedTrader.checkOrderLimits("SHFE.ag.2512"))
+			<< name << " should be eligible to reserve its initial target";
 
 		std::thread creator([&executer]() {
 			executer.on_position_changed("SHFE.ag.2512", 1.0);
 		});
 		const bool initialization_blocked = blockingStub.waitForFirstCommodityLookup(
 			std::chrono::seconds(2));
-		EXPECT_TRUE(initialization_blocked);
 		if (!initialization_blocked)
 		{
 			blockingStub.releaseFirstCommodityLookup();
 			creator.join();
+			const ExecUnitInitStatus status = executer.queryUnitInitStatus("SHFE.ag.2512");
+			ADD_FAILURE() << name << " did not enter its first commodity lookup; calls="
+				<< blockingStub.commodity_queries.load() << ", state="
+				<< static_cast<int>(status.state) << ", error=" << status.error;
 			return;
 		}
 		const ExecUnitInitStatus initializing = executer.queryUnitInitStatus("SHFE.ag.2512");
@@ -315,54 +503,170 @@ protected:
 			ExecUnitInitClearResult::NOT_FAILED);
 
 		std::atomic<bool> second_started(false);
-		std::thread waiter([&executer, &second_started]() {
+		std::atomic<bool> second_finished(false);
+		std::thread concurrentUpdate([&executer, &second_started, &second_finished]() {
 			second_started.store(true);
 			executer.on_position_changed("SHFE.ag.2512", 1.0);
+			second_finished.store(true);
 		});
 		const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
 		while (!second_started.load() && std::chrono::steady_clock::now() < deadline)
 			std::this_thread::yield();
 		EXPECT_TRUE(second_started.load());
 		ExecUnitInitStatus pending = executer.queryUnitInitStatus("SHFE.ag.2512");
-		const auto waiter_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
-		while (pending.waiting_callers < 1 && std::chrono::steady_clock::now() < waiter_deadline)
+		const auto pending_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
+		if (behavior == R71PendingCreationBehavior::DIFF_WAITS_FOR_CREATOR)
 		{
-			std::this_thread::yield();
-			pending = executer.queryUnitInitStatus("SHFE.ag.2512");
+			while (pending.waiting_callers < 1 && std::chrono::steady_clock::now() < pending_deadline)
+			{
+				std::this_thread::yield();
+				pending = executer.queryUnitInitStatus("SHFE.ag.2512");
+			}
+			EXPECT_EQ(pending.waiting_callers, 1u)
+				<< "Diff getUnit contract blocks a same-code caller until its creator completes";
+			EXPECT_FALSE(second_finished.load());
 		}
-		EXPECT_EQ(pending.waiting_callers, 1u);
+		else
+		{
+			while (!second_finished.load() && std::chrono::steady_clock::now() < pending_deadline)
+				std::this_thread::yield();
+			EXPECT_TRUE(second_finished.load());
+			pending = executer.queryUnitInitStatus("SHFE.ag.2512");
+			EXPECT_EQ(pending.waiting_callers, 0u)
+				<< (behavior == R71PendingCreationBehavior::LOCAL_COALESCES_TARGET ?
+					"Local merges the in-flight target without waiting" :
+					"Arbi publishes target first and returns when the unit is not registered yet");
+		}
+		EXPECT_EQ(pending.state, ExecUnitInitState::INITIALIZING);
+		EXPECT_GT(pending.generation, 0u);
 
-		// These transitions occur before the candidate is registered. Only the final
-		// ready state may be delivered when creation completes; stale events must not replay.
+		// Local preserves both ready callbacks in the transition FIFO. Arbi suppresses
+		// the old ready recovery by epoch, while Diff sends the current ready callback
+		// only after registration observes the final channel state.
 		executer.on_channel_ready();
 		executer.on_channel_lost();
 		executer.on_channel_ready();
+
 		blockingStub.releaseFirstCommodityLookup();
 		creator.join();
-		waiter.join();
+		concurrentUpdate.join();
 		const ExecUnitInitStatus ready = executer.queryUnitInitStatus("SHFE.ag.2512");
 		EXPECT_EQ(ready.query_result, ExecUnitInitQueryResult::OK);
 		EXPECT_EQ(ready.state, ExecUnitInitState::READY);
 		EXPECT_EQ(ready.generation, initializing.generation);
 		EXPECT_TRUE(ready.error.empty());
+		EXPECT_EQ(ready.waiting_callers, 0u);
 		EXPECT_EQ(executer.clearFailedUnitInitStatus("SHFE.ag.2512"),
 			ExecUnitInitClearResult::NOT_FAILED);
+		EXPECT_EQ(blockingStub.commodity_queries.load(), 1u)
+			<< "the two same-code target changes must share one creation generation";
+		EXPECT_EQ(executer.channel_ready_cancel_requests.load(), expectedReadyCallbacks)
+			<< "the real plugin's unmanaged-order cancellation proves ready callback delivery";
+		EXPECT_EQ(api.n_action, 0u)
+			<< "the probe presents an unmanaged quantity, but the isolated adapter has no order to cancel";
 
-		EXPECT_EQ(blockingStub.commodity_queries.load(), 1u);
-		EXPECT_EQ(executer.ready_queries.load(), 1u);
-		for (uint32_t i = 0; i < 2; ++i)
-		{
-			WTSTickData* marketTick = tick(93100000 + i * 1000, 3500.0 + i);
+		// A post-registration edge is the independent positive control for the real
+		// plugin callback probe; it must add exactly one ready callback for every style.
+		executer.on_channel_lost();
+		executer.on_channel_ready();
+		EXPECT_EQ(executer.channel_ready_cancel_requests.load(), expectedReadyCallbacks + 1);
+		executer.disableChannelReadyProbe();
+		EXPECT_DOUBLE_EQ(isolatedTrader.getUndoneQty("SHFE.ag.2512"), 0.0);
+
+		const char* const code = "SHFE.ag.2512";
+		WTSContractInfo* contract = traderEnv.bd.getContract("ag2512", "SHFE");
+		ASSERT_NE(contract, nullptr);
+		const auto submitTick = [&](uint32_t time, uint32_t expectedInserts,
+			R71SubmittedOrder* submitted) {
+			WTSTickData* marketTick = tick(time, 3500.0 + static_cast<double>(time - 93100000) / 1000.0);
 			ASSERT_NE(marketTick, nullptr);
-			executer.on_tick("SHFE.ag.2512", marketTick);
+			executer.on_tick(code, marketTick);
 			marketTick->release();
-		}
-		EXPECT_EQ(traderEnv.api.n_insert, baseInsert + 2);
+			EXPECT_EQ(api.n_insert, expectedInserts);
+			if (submitted != NULL && api.n_insert == expectedInserts)
+			{
+				submitted->localid = api.last_localid;
+				submitted->usertag = api.last_usertag;
+				submitted->direction = api.last_dir;
+				submitted->offset = api.last_off;
+				submitted->price = api.last_price;
+				submitted->volume = api.last_vol;
+			}
+		};
+		double filledPosition = 0.0;
+		const auto pushFilledOrder = [&](const R71SubmittedOrder& submitted,
+			const char* orderId, const char* tradeId) {
+			ASSERT_NE(submitted.localid, 0u);
+			ASSERT_FALSE(submitted.usertag.empty());
+			EXPECT_DOUBLE_EQ(submitted.volume, 1.0);
+
+			WTSOrderInfo* pendingOrder = r71MakeOrderReport(contract, submitted.usertag,
+				orderId, submitted.direction, submitted.offset, submitted.price,
+				submitted.volume, 0.0, submitted.volume, WOS_NotTraded_Queuing);
+			ASSERT_NE(pendingOrder, nullptr);
+			isolatedTrader.onPushOrder(pendingOrder);
+			pendingOrder->release();
+			OrderMap* orders = isolatedTrader.getOrders(code);
+			ASSERT_NE(orders, nullptr);
+			ASSERT_EQ(orders->size(), 1u);
+			WTSOrderInfo* tracked = static_cast<WTSOrderInfo*>(orders->get(submitted.localid));
+			ASSERT_NE(tracked, nullptr);
+			EXPECT_STREQ(tracked->getUserTag(), submitted.usertag.c_str());
+			orders->release();
+			EXPECT_DOUBLE_EQ(isolatedTrader.getUndoneQty(code), submitted.volume);
+
+			WTSTradeInfo* trade = r71MakeTradeReport(contract, submitted.usertag,
+				tradeId, orderId, submitted.direction, submitted.offset,
+				submitted.price, submitted.volume);
+			ASSERT_NE(trade, nullptr);
+			isolatedTrader.onPushTrade(trade);
+			trade->release();
+			filledPosition += submitted.volume;
+			EXPECT_DOUBLE_EQ(isolatedTrader.getPosition(code, true), filledPosition);
+			EXPECT_DOUBLE_EQ(isolatedTrader.getUndoneQty(code), 0.0);
+
+			WTSOrderInfo* filledOrder = r71MakeOrderReport(contract, submitted.usertag,
+				orderId, submitted.direction, submitted.offset, submitted.price,
+				submitted.volume, submitted.volume, 0.0, WOS_AllTraded);
+			ASSERT_NE(filledOrder, nullptr);
+			isolatedTrader.onPushOrder(filledOrder);
+			filledOrder->release();
+			orders = isolatedTrader.getOrders(code);
+			ASSERT_NE(orders, nullptr);
+			EXPECT_EQ(orders->size(), 0u);
+			orders->release();
+		};
+
+		const uint32_t baseInsert = api.n_insert;
+		R71SubmittedOrder firstOrder;
+		submitTick(93100000, baseInsert + 1, &firstOrder);
+		ASSERT_NE(firstOrder.localid, 0u);
+		ASSERT_FALSE(firstOrder.usertag.empty());
+		// While the first order is outstanding, another fresh tick must not overlap it.
+		submitTick(93101000, baseInsert + 1, NULL);
+		EXPECT_DOUBLE_EQ(isolatedTrader.getUndoneQty(code), firstOrder.volume);
+		pushFilledOrder(firstOrder, "R71-CONCURRENT-1", "R71-CONCURRENT-T1");
+		EXPECT_DOUBLE_EQ(isolatedTrader.getPosition(code, true), firstOrder.volume);
+
+		R71SubmittedOrder secondOrder;
+		submitTick(93102000, baseInsert + 2, &secondOrder);
+		ASSERT_NE(secondOrder.localid, 0u);
+		ASSERT_NE(secondOrder.localid, firstOrder.localid);
+		ASSERT_NE(secondOrder.usertag, firstOrder.usertag);
+		// The second outstanding order also blocks an overlapping tick.
+		submitTick(93103000, baseInsert + 2, NULL);
+		EXPECT_DOUBLE_EQ(isolatedTrader.getUndoneQty(code), secondOrder.volume);
+		pushFilledOrder(secondOrder, "R71-CONCURRENT-2", "R71-CONCURRENT-T2");
+		EXPECT_EQ(api.n_insert, baseInsert + 2)
+			<< "both concurrent +1 changes must be retained and dispatched one lot at a time";
+		EXPECT_DOUBLE_EQ(isolatedTrader.getPosition(code, true), 2.0);
+		EXPECT_DOUBLE_EQ(isolatedTrader.getUndoneQty(code), 0.0);
 	}
 
 	template <typename Executer>
-	void verifyFailedWaitersDoNotRetry(Executer& executer, R71BlockingExecStub& blockingStub,
-		const char* name, const char* unitName)
+	void verifyFailedInitializationWaiters(Executer& executer,
+		R71BlockingExecStub& blockingStub, const char* name, const char* unitName,
+		R71PendingCreationBehavior behavior, double waiterDelta)
 	{
 		executer.setStub(&blockingStub);
 		WTSVariant* params = cfg(name, unitName, NULL);
@@ -392,13 +696,15 @@ protected:
 		EXPECT_GT(initializing.generation, 0u);
 		const uint32_t waiter_count = 6;
 		std::atomic<uint32_t> started(0);
+		std::atomic<uint32_t> returned(0);
 		std::vector<std::thread> waiters;
 		waiters.reserve(waiter_count);
 		for (uint32_t i = 0; i < waiter_count; ++i)
 		{
-			waiters.emplace_back([&executer, &started]() {
+			waiters.emplace_back([&executer, &started, &returned, waiterDelta]() {
 				started.fetch_add(1);
-				executer.on_position_changed("SHFE.ag.2512", 1.0);
+				executer.on_position_changed("SHFE.ag.2512", waiterDelta);
+				returned.fetch_add(1);
 			});
 		}
 		const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
@@ -406,13 +712,35 @@ protected:
 			std::this_thread::yield();
 		EXPECT_EQ(started.load(), waiter_count);
 		ExecUnitInitStatus pending = initializing;
-		const auto waiter_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
-		while (pending.waiting_callers < waiter_count && std::chrono::steady_clock::now() < waiter_deadline)
+		if (behavior == R71PendingCreationBehavior::DIFF_WAITS_FOR_CREATOR)
 		{
-			std::this_thread::yield();
-			pending = executer.queryUnitInitStatus("SHFE.ag.2512");
+			const auto waiter_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
+			while (pending.waiting_callers < waiter_count &&
+				std::chrono::steady_clock::now() < waiter_deadline)
+			{
+				std::this_thread::yield();
+				pending = executer.queryUnitInitStatus("SHFE.ag.2512");
+			}
+			EXPECT_EQ(pending.waiting_callers, waiter_count)
+				<< "Diff callers wait for the creator and share its failed generation";
+			EXPECT_EQ(returned.load(), 0u)
+				<< "Diff callers must remain blocked until the creator completes";
 		}
-		EXPECT_EQ(pending.waiting_callers, waiter_count);
+		else
+		{
+			const auto return_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
+			while (returned.load() < waiter_count &&
+				std::chrono::steady_clock::now() < return_deadline)
+				std::this_thread::yield();
+			pending = executer.queryUnitInitStatus("SHFE.ag.2512");
+			EXPECT_EQ(returned.load(), waiter_count)
+				<< (behavior == R71PendingCreationBehavior::LOCAL_COALESCES_TARGET ?
+					"Local coalesces in-flight targets without waiting" :
+					"Arbi records the target and returns before registration");
+			EXPECT_EQ(pending.waiting_callers, 0u)
+				<< "Local and Arbi do not expose these callers as blocked waiters";
+		}
+		EXPECT_EQ(pending.generation, initializing.generation);
 
 		blockingStub.releaseFirstCommodityLookup();
 		creator.join();
@@ -423,14 +751,6 @@ protected:
 		const ExecUnitInitStatus failed = executer.queryUnitInitStatus("SHFE.ag.2512");
 		EXPECT_EQ(failed.state, ExecUnitInitState::FAILED);
 		EXPECT_EQ(failed.generation, initializing.generation);
-
-		// Only this new call, made after the failed generation completed, starts
-		// another attempt for the same contract.
-		executer.on_position_changed("SHFE.ag.2512", 1.0);
-		const ExecUnitInitStatus retried = executer.queryUnitInitStatus("SHFE.ag.2512");
-		EXPECT_EQ(retried.state, ExecUnitInitState::FAILED);
-		EXPECT_GT(retried.generation, failed.generation);
-		EXPECT_EQ(blockingStub.commodity_queries.load(), 2u);
 	}
 };
 
@@ -438,62 +758,106 @@ protected:
 // L667-723/737-791/798-857/875-902 单元回调转发
 TEST_F(R71ExecTest, LocalUnitLifecycleAndCallbackDispatch)
 {
-    std::shared_ptr<WtLocalExecuter> local = ownUntilQuiesced(
-		std::shared_ptr<WtLocalExecuter>(new WtLocalExecuter(&factory, "r71_local", &dm)));
+    R71CapturingTraderApi api;
+    TraderAdapter isolatedTrader;
+    ASSERT_TRUE(traderEnv.policy_ok());
+    ASSERT_TRUE(isolatedTrader.initExt("r71_local_case", &api, &traderEnv.bd, traderEnv.policy()));
+    ASSERT_TRUE(isolatedTrader.run());
+    isolatedTrader.onLoginResult(true, "r71", 20250110);
+    isolatedTrader.onRspPosition(static_cast<const WTSArray*>(nullptr));
+    isolatedTrader.onRspOrders(static_cast<const WTSArray*>(nullptr));
+    isolatedTrader.onRspTrades(static_cast<const WTSArray*>(nullptr));
+    isolatedTrader.onRspAccount(static_cast<WTSArray*>(nullptr));
+    ASSERT_EQ(isolatedTrader.state(), TraderAdapter::AS_ALLREADY);
+
+    WtExecuterMgr localManager;
+    std::shared_ptr<WtLocalExecuter> local(new WtLocalExecuter(&factory, "r71_local", &dm));
+    R71LocalExecQuiesceGuard quiesceGuard(localManager, isolatedTrader, local.get());
+    localManager.add_executer(local);
     local->setStub(&stub);
     WTSVariant* c = cfg("r71_local", "WtExeFact.WtMinImpactExeUnit", NULL);
     ASSERT_NE(c, nullptr);
     ASSERT_TRUE(local->init(c));
     c->release();
-    local->setTrader(&trader);
-    trader.addSink(local.get());
+    local->setTrader(&isolatedTrader);
+    isolatedTrader.addSink(local.get());
 
-    const uint32_t base = traderEnv.api.n_insert;
-    // 第一次仓位变化负责自动创建单元，目标 2
-    local->on_position_changed("SHFE.ag.2512", 2.0);
+    const char* const code = "SHFE.ag.2512";
+    WTSContractInfo* agContract = traderEnv.bd.getContract("ag2512", "SHFE");
+    ASSERT_NE(agContract, nullptr);
+    const uint32_t base = api.n_insert;
+	// 第一次仓位变化负责自动创建单元，目标 2
+    local->on_position_changed(code, 2.0);
     WTSTickData* t1 = tick(93100000, 3500.0);
     ASSERT_NE(t1, nullptr);
-    local->on_tick("SHFE.ag.2512", t1);
+    local->on_tick(code, t1);
     t1->release();
-    EXPECT_EQ(traderEnv.api.n_insert, base + 1);
+    ASSERT_EQ(api.n_insert, base + 1);
+    ASSERT_NE(api.last_localid, 0u);
+    const uint32_t firstLocalId = api.last_localid;
+    const std::string firstUsertag = api.last_usertag;
+    const double firstPrice = api.last_price;
+    const double firstVolume = api.last_vol;
+    const WTSDirectionType firstDirection = api.last_dir;
+    const WTSOffsetType firstOffset = api.last_off;
+    EXPECT_DOUBLE_EQ(isolatedTrader.getUndoneQty(code), 1.0);
+    OrderMap* orders = local->getOrders(code);
+    EXPECT_EQ(orders, nullptr); // the API accepted the insert, but no adapter order report arrived
+    if (orders != nullptr)
+        orders->release();
 
-    // 增量目标 -> 单元 set_position；新 tick 触发第二笔
-    local->on_position_changed("SHFE.ag.2512", 1.0);
+	// The next target is retained, while a still-pending first order blocks a duplicate insert.
+    local->on_position_changed(code, 1.0);
     WTSTickData* t2 = tick(93101000, 3501.0);
     ASSERT_NE(t2, nullptr);
-    local->on_tick("SHFE.ag.2512", t2);
+    local->on_tick(code, t2);
     t2->release();
-    EXPECT_EQ(traderEnv.api.n_insert, base + 2);
+    EXPECT_EQ(api.n_insert, base + 1);
+    EXPECT_DOUBLE_EQ(isolatedTrader.getUndoneQty(code), 1.0);
 
-    local->on_order(1, "SHFE.ag.2512", true, 1, 0, 3501.0, false);
-    local->on_trade(1, "SHFE.ag.2512", true, 1, 3501.0);
-    local->on_entrust(1, "SHFE.ag.2512", true, "ok");
+    // Direct executor callbacks reach the unit, but do not update the adapter ledger or order map.
+    local->on_order(firstLocalId, code, true, firstVolume, firstVolume, firstPrice, false);
+    local->on_trade(firstLocalId, code, true, firstVolume, firstPrice);
+    local->on_entrust(firstLocalId, code, true, "ok");
     local->on_account("CNY", 1, 1, 1, 1, 0, 0, 0, 0, 0, 0);
+    EXPECT_DOUBLE_EQ(local->getPosition(code), 0.0);
+    EXPECT_DOUBLE_EQ(local->getUndoneQty(code), 1.0);
+    orders = local->getOrders(code);
+    EXPECT_EQ(orders, nullptr);
+    if (orders != nullptr)
+        orders->release();
 
-    EXPECT_DOUBLE_EQ(local->getPosition("SHFE.ag.2512"), 0.0);
-    EXPECT_DOUBLE_EQ(local->getUndoneQty("SHFE.ag.2512"), 0.0);
-    OrderMap* orders = local->getOrders("SHFE.ag.2512");
+    // A report through TraderAdapter creates the real order snapshot.
+    WTSOrderInfo* pendingOrder = r71MakeOrderReport(agContract, firstUsertag, "R71-LOCAL-1",
+        firstDirection, firstOffset, firstPrice, firstVolume, 0.0, firstVolume, WOS_NotTraded_Queuing);
+    ASSERT_NE(pendingOrder, nullptr);
+    isolatedTrader.onPushOrder(pendingOrder);
+    pendingOrder->release();
+    orders = local->getOrders(code);
     ASSERT_NE(orders, nullptr);
+    ASSERT_EQ(orders->size(), 1u);
     orders->release();
+    EXPECT_DOUBLE_EQ(local->getUndoneQty(code), 1.0);
+    EXPECT_DOUBLE_EQ(local->getPosition(code), 0.0);
 
-    // 单元已存在 -> 通道事件同步转发
+	// 单元已存在 -> 通道事件同步转发
     local->on_channel_lost();
     local->on_channel_ready();
     EXPECT_FALSE(local->cancel(42u));
     local->on_channel_lost();
-    EXPECT_TRUE(local->buy("SHFE.ag.2512", 3500.0, 1.0).empty());
+    EXPECT_TRUE(local->buy(code, 3500.0, 1.0).empty());
     local->on_channel_ready();
-    EXPECT_EQ(local->buy("SHFE.ag.2512", 3500.0, 1.0).size(), 1u);
+    EXPECT_EQ(local->buy(code, 3500.0, 1.0).size(), 1u);
 
-    // on_position 先登记通道持仓；hot 返回空 -> 自动清理链早退
-    local->on_position("SHFE.ag.2512", true, 1, 1, 1, 1, 20250110);
+	// on_position 先登记通道持仓；hot 返回空 -> 自动清理链早退
+    local->on_position(code, true, 1, 1, 1, 1, 20250110);
     EXPECT_EQ(traderEnv.hot.n_prev_, 1u);
 
-    // data_mgr 非空 -> 行情查询转发
-    WTSTickSlice* ticks = local->getTicks("SHFE.ag.2512", 1);
+	// data_mgr 非空 -> 行情查询转发
+    WTSTickSlice* ticks = local->getTicks(code, 1);
     ASSERT_NE(ticks, nullptr);
     ticks->release();
-    WTSTickData* last = local->grabLastTick("SHFE.ag.2512");
+    WTSTickData* last = local->grabLastTick(code);
     ASSERT_NE(last, nullptr);
     last->release();
 }
@@ -535,31 +899,53 @@ TEST_F(R71ExecTest, LocalSetPositionGroupsStaleAndStrictSync)
 // L548-698 行情/回报转发、L707-801 通道/资金转发
 TEST_F(R71ExecTest, ArbiUnitDispatchAndSetPosition)
 {
-    std::shared_ptr<WtArbiExecuter> arbi = ownUntilQuiesced(
-		std::shared_ptr<WtArbiExecuter>(new WtArbiExecuter(&factory, "r71_arbi", &dm)));
+	R71CapturingTraderApi api;
+	TraderAdapter isolatedTrader;
+	ASSERT_TRUE(traderEnv.policy_ok());
+	ASSERT_TRUE(isolatedTrader.initExt("r71_exec_case", &api, &traderEnv.bd, traderEnv.policy()));
+	ASSERT_TRUE(isolatedTrader.run());
+	isolatedTrader.onLoginResult(true, "r71", 20250110);
+	isolatedTrader.onRspPosition(static_cast<const WTSArray*>(nullptr));
+	isolatedTrader.onRspOrders(static_cast<const WTSArray*>(nullptr));
+	isolatedTrader.onRspTrades(static_cast<const WTSArray*>(nullptr));
+	isolatedTrader.onRspAccount(static_cast<WTSArray*>(nullptr));
+	ASSERT_EQ(isolatedTrader.state(), TraderAdapter::AS_ALLREADY);
+
+	WtExecuterMgr localManager;
+	std::shared_ptr<WtArbiExecuter> arbi(
+		new WtArbiExecuter(&factory, "r71_arbi", &dm));
+	R71LocalExecQuiesceGuard quiesceGuard(localManager, isolatedTrader, arbi.get());
+	localManager.add_executer(arbi);
     arbi->setStub(&stub);
     WTSVariant* c = cfg("r71_arbi", "WtExeFact.WtMinImpactExeUnit",
         "\"strict_sync\":true,\"groups\":{\"R71G\":{\"SHFE.rb.2510\":2.0,\"SHFE.au.2212\":2.0}},");
     ASSERT_NE(c, nullptr);
     ASSERT_TRUE(arbi->init(c));
     c->release();
-    arbi->setTrader(&trader);
-    trader.addSink(arbi.get());
+    arbi->setTrader(&isolatedTrader);
+    isolatedTrader.addSink(arbi.get());
 
-    const uint32_t base = traderEnv.api.n_insert;
+    const uint32_t base = api.n_insert;
     arbi->on_position_changed("SHFE.ag.2512", 2.0);
     WTSTickData* t1 = tick(93100000, 3500.0);
     ASSERT_NE(t1, nullptr);
     arbi->on_tick("SHFE.ag.2512", t1);
     t1->release();
-    EXPECT_EQ(traderEnv.api.n_insert, base + 1);
+    ASSERT_EQ(api.n_insert, base + 1);
+    ASSERT_NE(api.last_localid, 0u);
+    EXPECT_DOUBLE_EQ(isolatedTrader.getUndoneQty("SHFE.ag.2512"), 1.0);
+    OrderMap* orders = arbi->getOrders("SHFE.ag.2512");
+    EXPECT_EQ(orders, nullptr); // orderInsert accepted, but no order report arrived yet
+    if (orders != nullptr)
+        orders->release();
 
     arbi->on_position_changed("SHFE.ag.2512", 1.0);
     WTSTickData* t2 = tick(93101000, 3501.0);
     ASSERT_NE(t2, nullptr);
     arbi->on_tick("SHFE.ag.2512", t2);
     t2->release();
-    EXPECT_EQ(traderEnv.api.n_insert, base + 2);
+    EXPECT_EQ(api.n_insert, base + 1); // the first order is still pending
+    EXPECT_DOUBLE_EQ(isolatedTrader.getUndoneQty("SHFE.ag.2512"), 1.0);
 
     // 组合匹配：3 手按 2 手一组可合成 1 组
     wt_hashmap<std::string, double> targets;
@@ -571,18 +957,43 @@ TEST_F(R71ExecTest, ArbiUnitDispatchAndSetPosition)
     wt_hashmap<std::string, double> empty;
     arbi->set_position(empty); // 旧目标清零 + strict_sync 清 cu
 
-    arbi->on_order(1, "SHFE.ag.2512", true, 1, 0, 3501.0, false);
-    arbi->on_trade(1, "SHFE.ag.2512", true, 1, 3501.0);
-    arbi->on_entrust(1, "SHFE.ag.2512", true, "ok");
+    arbi->on_order(api.last_localid, "SHFE.ag.2512", true, 1, api.last_price, false);
+    arbi->on_trade(api.last_localid, "SHFE.ag.2512", true, 1, api.last_price);
+    arbi->on_entrust(api.last_localid, "SHFE.ag.2512", true, "ok");
     arbi->on_account("CNY", 1, 1, 1, 1, 0, 0, 0, 0, 0, 0);
     arbi->on_channel_lost();
     arbi->on_channel_ready();
 
     EXPECT_DOUBLE_EQ(arbi->getPosition("SHFE.ag.2512"), 0.0);
-    EXPECT_DOUBLE_EQ(arbi->getUndoneQty("SHFE.ag.2512"), 0.0);
-    OrderMap* orders = arbi->getOrders("SHFE.ag.2512");
+    EXPECT_DOUBLE_EQ(isolatedTrader.getUndoneQty("SHFE.ag.2512"), 1.0);
+    orders = arbi->getOrders("SHFE.ag.2512");
+    EXPECT_EQ(orders, nullptr); // direct executor callbacks do not mutate TraderAdapter
+    if (orders != nullptr)
+        orders->release();
+
+    // A real adapter order report, unlike the direct executor callbacks above,
+    // creates the local snapshot. Use the local ID emitted in the submitted user tag.
+    WTSContractInfo* agContract = traderEnv.bd.getContract("ag2512", "SHFE");
+    ASSERT_NE(agContract, nullptr);
+    WTSOrderInfo* pendingOrder = WTSOrderInfo::create();
+    ASSERT_NE(pendingOrder, nullptr);
+    pendingOrder->setContractInfo(agContract);
+    pendingOrder->setDirection(api.last_dir);
+    pendingOrder->setOffsetType(api.last_off);
+    pendingOrder->setPrice(api.last_price);
+    pendingOrder->setVolume(api.last_vol);
+    pendingOrder->setVolLeft(api.last_vol);
+    pendingOrder->setUserTag(api.last_usertag.c_str());
+    pendingOrder->setOrderID("R71-ARBI-1");
+    pendingOrder->setOrderState(WOS_NotTraded_Queuing);
+    isolatedTrader.onPushOrder(pendingOrder);
+    pendingOrder->release();
+
+    orders = arbi->getOrders("SHFE.ag.2512");
     ASSERT_NE(orders, nullptr);
+    EXPECT_EQ(orders->size(), 1u);
     orders->release();
+    EXPECT_DOUBLE_EQ(isolatedTrader.getUndoneQty("SHFE.ag.2512"), 1.0);
 
     WTSTickSlice* ticks = arbi->getTicks("SHFE.ag.2512", 1);
     ASSERT_NE(ticks, nullptr);
@@ -592,59 +1003,177 @@ TEST_F(R71ExecTest, ArbiUnitDispatchAndSetPosition)
     last->release();
 }
 
+TEST_F(R71ExecTest, ArbiInitialTargetReplaySubmitsOnFirstTick)
+{
+	std::shared_ptr<WtArbiExecuter> arbi = ownUntilQuiesced(
+		std::shared_ptr<WtArbiExecuter>(new WtArbiExecuter(&factory, "r71_arbi_initial_target", &dm)));
+	arbi->setStub(&stub);
+	WTSVariant* c = cfg("r71_arbi_initial_target", "WtExeFact.WtMinImpactExeUnit", NULL);
+	ASSERT_NE(c, nullptr);
+	ASSERT_TRUE(arbi->init(c));
+	c->release();
+	arbi->setTrader(&trader);
+	trader.addSink(arbi.get());
+	ASSERT_EQ(trader.state(), TraderAdapter::AS_ALLREADY);
+
+	const uint32_t base = traderEnv.api.n_insert;
+	arbi->on_position_changed("SHFE.ag.2512", 2.0);
+	const ExecUnitInitStatus status = arbi->queryUnitInitStatus("SHFE.ag.2512");
+	ASSERT_EQ(status.query_result, ExecUnitInitQueryResult::OK);
+	ASSERT_EQ(status.state, ExecUnitInitState::READY);
+	EXPECT_EQ(traderEnv.api.n_insert, base);
+
+	WTSTickData* marketTick = tick(93100000, 3500.0);
+	ASSERT_NE(marketTick, nullptr);
+	arbi->on_tick("SHFE.ag.2512", marketTick);
+	marketTick->release();
+
+	EXPECT_EQ(traderEnv.api.n_insert, base + 1);
+	EXPECT_DOUBLE_EQ(traderEnv.api.last_vol, 1.0);
+	EXPECT_EQ(traderEnv.api.last_dir, WDT_LONG);
+	EXPECT_EQ(traderEnv.api.last_off, WOT_OPEN);
+}
+
+TEST_F(R71ExecTest, ArbiReadyWithoutActionableTargetDoesNotSubmit)
+{
+	std::shared_ptr<WtArbiExecuter> arbi = ownUntilQuiesced(
+		std::shared_ptr<WtArbiExecuter>(new WtArbiExecuter(&factory, "r71_arbi_no_target", &dm)));
+	arbi->setStub(&stub);
+	WTSVariant* c = cfg("r71_arbi_no_target", "WtExeFact.WtMinImpactExeUnit", NULL);
+	ASSERT_NE(c, nullptr);
+	ASSERT_TRUE(arbi->init(c));
+	c->release();
+	arbi->setTrader(&trader);
+	trader.addSink(arbi.get());
+	ASSERT_EQ(trader.state(), TraderAdapter::AS_ALLREADY);
+
+	const uint32_t base = traderEnv.api.n_insert;
+	WTSTickData* tickBeforeTarget = tick(93100000, 3500.0);
+	ASSERT_NE(tickBeforeTarget, nullptr);
+	arbi->on_tick("SHFE.ag.2512", tickBeforeTarget);
+	tickBeforeTarget->release();
+	EXPECT_EQ(arbi->queryUnitInitStatus("SHFE.ag.2512").state, ExecUnitInitState::UNKNOWN);
+
+	// A zero target creates the unit after the ready event but is not an order target.
+	arbi->on_position_changed("SHFE.ag.2512", 0.0);
+	const ExecUnitInitStatus status = arbi->queryUnitInitStatus("SHFE.ag.2512");
+	ASSERT_EQ(status.query_result, ExecUnitInitQueryResult::OK);
+	ASSERT_EQ(status.state, ExecUnitInitState::READY);
+	WTSTickData* marketTick = tick(93101000, 3501.0);
+	ASSERT_NE(marketTick, nullptr);
+	arbi->on_tick("SHFE.ag.2512", marketTick);
+	marketTick->release();
+
+	EXPECT_EQ(traderEnv.api.n_insert, base);
+}
+
 // 覆盖 WtDiffExecuter.cpp:243-286 getUnit、L304-368 查询、L501-545 on_position_changed、
 // L554-642 set_position、L650-817 行情/差量与通道恢复、L862-884 on_account
 TEST_F(R71ExecTest, DiffUnitDispatchAndChannelRecovery)
 {
-    std::shared_ptr<WtDiffExecuter> diff = ownUntilQuiesced(
-		std::shared_ptr<WtDiffExecuter>(new WtDiffExecuter(&factory, "r71_diff", &dm, &traderEnv.bd)));
+    R71CapturingTraderApi api;
+    TraderAdapter isolatedTrader;
+    ASSERT_TRUE(traderEnv.policy_ok());
+    ASSERT_TRUE(isolatedTrader.initExt("r71_diff_case", &api, &traderEnv.bd, traderEnv.policy()));
+    ASSERT_TRUE(isolatedTrader.run());
+    isolatedTrader.onLoginResult(true, "r71", 20250110);
+    isolatedTrader.onRspPosition(static_cast<const WTSArray*>(nullptr));
+    isolatedTrader.onRspOrders(static_cast<const WTSArray*>(nullptr));
+    isolatedTrader.onRspTrades(static_cast<const WTSArray*>(nullptr));
+    isolatedTrader.onRspAccount(static_cast<WTSArray*>(nullptr));
+    ASSERT_EQ(isolatedTrader.state(), TraderAdapter::AS_ALLREADY);
+
+    WtExecuterMgr localManager;
+    std::shared_ptr<WtDiffExecuter> diff(
+		new WtDiffExecuter(&factory, "r71_diff", &dm, &traderEnv.bd));
+    R71LocalExecQuiesceGuard quiesceGuard(localManager, isolatedTrader, diff.get());
+    localManager.add_executer(diff);
     diff->setStub(&stub);
     WTSVariant* c = cfg("r71_diff", "WtExeFact.WtDiffMinImpactExeUnit",
         NULL);
     ASSERT_NE(c, nullptr);
     ASSERT_TRUE(diff->init(c));
     c->release();
-    diff->setTrader(&trader);
-    trader.addSink(diff.get());
+    diff->setTrader(&isolatedTrader);
+    isolatedTrader.addSink(diff.get());
 
-    const uint32_t base = traderEnv.api.n_insert;
-    diff->on_position_changed("SHFE.ag.2512", 2.0);
+    const char* const code = "SHFE.ag.2512";
+    WTSContractInfo* agContract = traderEnv.bd.getContract("ag2512", "SHFE");
+    ASSERT_NE(agContract, nullptr);
+    const uint32_t base = api.n_insert;
+    diff->on_position_changed(code, 2.0);
     WTSTickData* t1 = tick(93100000, 3500.0);
     ASSERT_NE(t1, nullptr);
-    diff->on_tick("SHFE.ag.2512", t1);
+    diff->on_tick(code, t1);
     t1->release();
-    EXPECT_EQ(traderEnv.api.n_insert, base + 1);
+    ASSERT_EQ(api.n_insert, base + 1);
+    ASSERT_NE(api.last_localid, 0u);
+    const uint32_t localid = api.last_localid;
+    const std::string usertag = api.last_usertag;
+    const double price = api.last_price;
+    const double volume = api.last_vol;
+    const WTSDirectionType direction = api.last_dir;
+    const WTSOffsetType offset = api.last_off;
+    EXPECT_DOUBLE_EQ(diff->getUndoneQty(code), 1.0);
+    OrderMap* orders = diff->getOrders(code);
+    EXPECT_EQ(orders, nullptr); // orderInsert accepted, but no adapter order report arrived
+    if (orders != nullptr)
+        orders->release();
 
-    diff->on_trade(1, "SHFE.ag.2512", true, 1.0, 3500.0);
+    // Direct executor reports use the captured ID but do not mutate TraderAdapter's ledger.
+    diff->on_trade(localid, code, true, volume, price);
+    EXPECT_DOUBLE_EQ(diff->getPosition(code), 0.0);
+    EXPECT_DOUBLE_EQ(diff->getUndoneQty(code), 1.0);
+    orders = diff->getOrders(code);
+    EXPECT_EQ(orders, nullptr);
+    if (orders != nullptr)
+        orders->release();
 
     wt_hashmap<std::string, double> targets;
-    targets["SHFE.ag.2512"] = 3.0;
+    targets[code] = 3.0;
     diff->set_position(targets);
     WTSTickData* t2 = tick(93101000, 3502.0);
     ASSERT_NE(t2, nullptr);
-    diff->on_tick("SHFE.ag.2512", t2);
+    diff->on_tick(code, t2);
     t2->release();
+    EXPECT_EQ(api.n_insert, base + 1); // the first order is still pending
+    EXPECT_DOUBLE_EQ(diff->getUndoneQty(code), 1.0);
 
-    diff->on_order(1, "SHFE.ag.2512", true, 1, 0, 3502.0, false);
-    diff->on_entrust(1, "SHFE.ag.2512", true, "ok");
+    diff->on_order(localid, code, true, volume, volume, price, false);
+    diff->on_entrust(localid, code, true, "ok");
+    diff->on_account("CNY", 1, 1, 1, 1, 0, 0, 0, 0, 0, 0);
+
+    WTSOrderInfo* pendingOrder = r71MakeOrderReport(agContract, usertag, "R71-DIFF-1",
+        direction, offset, price, volume, 0.0, volume, WOS_NotTraded_Queuing);
+    ASSERT_NE(pendingOrder, nullptr);
+    isolatedTrader.onPushOrder(pendingOrder);
+    pendingOrder->release();
+    orders = diff->getOrders(code);
+    ASSERT_NE(orders, nullptr);
+    EXPECT_EQ(orders->size(), 1u);
+    orders->release();
+
     diff->on_channel_lost();
     diff->on_channel_ready(); // 恢复 _diff_pos
-    diff->on_account("CNY", 1, 1, 1, 1, 0, 0, 0, 0, 0, 0);
+    EXPECT_EQ(api.n_insert, base + 1);
+    EXPECT_DOUBLE_EQ(diff->getUndoneQty(code), 1.0);
 
     // 空目标 -> 过期目标清零（_bd_mgr 已登记标准代码别名，能进入 set_position(0) 分支）
     wt_hashmap<std::string, double> empty;
     diff->set_position(empty);
 
-    EXPECT_DOUBLE_EQ(diff->getPosition("SHFE.ag.2512"), 0.0);
-    EXPECT_DOUBLE_EQ(diff->getUndoneQty("SHFE.ag.2512"), 0.0);
-    OrderMap* orders = diff->getOrders("SHFE.ag.2512");
+    EXPECT_EQ(api.n_insert, base + 1);
+    EXPECT_DOUBLE_EQ(diff->getPosition(code), 0.0);
+    EXPECT_DOUBLE_EQ(diff->getUndoneQty(code), 1.0);
+    orders = diff->getOrders(code);
     ASSERT_NE(orders, nullptr);
+    EXPECT_EQ(orders->size(), 1u);
     orders->release();
 
-    WTSTickSlice* ticks = diff->getTicks("SHFE.ag.2512", 1);
+	WTSTickSlice* ticks = diff->getTicks(code, 1);
     ASSERT_NE(ticks, nullptr);
     ticks->release();
-    WTSTickData* last = diff->grabLastTick("SHFE.ag.2512");
+	WTSTickData* last = diff->grabLastTick(code);
     ASSERT_NE(last, nullptr);
     last->release();
 }
@@ -652,136 +1181,183 @@ TEST_F(R71ExecTest, DiffUnitDispatchAndChannelRecovery)
 // Failed V2 initialization must leave no usable unit behind. The first
 // attempt deliberately removes the commodity from the execution context; after
 // restoring it, the same code must be able to create a fresh unit and trade.
-TEST_F(R71ExecTest, FailedUnitInitializationCanBeRetriedAcrossExecuterKinds)
+TEST_F(R71ExecTest, LocalFailedInitializationRetriesAfterV2CleanupWithoutQueuedCallbacks)
 {
 	const std::string oldStyle = GTEST_FLAG_GET(death_test_style);
 	GTEST_FLAG_SET(death_test_style, "threadsafe");
 	EXPECT_EXIT({
 		const uint32_t base = traderEnv.api.n_insert;
 		WtExecuterMgr manager;
+		auto local = std::make_shared<WtLocalExecuter>(&factory, "r71_local_retry", &dm);
+		manager.add_executer(local);
+		local->setStub(&stub);
+		WTSVariant* c = cfg("r71_local_retry", "WtExeFact.WtMinImpactExeUnit", NULL);
+		ASSERT_NE(c, nullptr);
+		ASSERT_TRUE(local->init(c));
+		c->release();
+		local->setTrader(&trader);
+		trader.addSink(local.get());
+		// addSink delivers ready immediately. Keep the failed generation callback-free
+		// so the V2 synchronous cleanup proof can authorize a later retry.
+		local->on_channel_lost();
 
-		{
-			auto local = std::make_shared<WtLocalExecuter>(&factory, "r71_local_retry", &dm);
-			manager.add_executer(local);
-			local->setStub(&stub);
-			WTSVariant* c = cfg("r71_local_retry", "WtExeFact.WtMinImpactExeUnit", NULL);
-			ASSERT_NE(c, nullptr);
-			ASSERT_TRUE(local->init(c));
-			c->release();
-			local->setTrader(&trader);
-			trader.addSink(local.get());
+		stub.comm_ = NULL;
+		local->on_position_changed("SHFE.ag.2512", 1.0);
+		const ExecUnitInitStatus failed_status = local->queryUnitInitStatus("SHFE.ag.2512");
+		ASSERT_EQ(failed_status.query_result, ExecUnitInitQueryResult::OK);
+		ASSERT_EQ(failed_status.state, ExecUnitInitState::FAILED);
+		ASSERT_GT(failed_status.generation, 0u);
+		EXPECT_FALSE(failed_status.error.empty());
 
-			stub.comm_ = NULL;
-			local->on_position_changed("SHFE.ag.2512", 1.0);
-			WTSTickData* failed_tick = tick(93100000, 3500.0);
-			ASSERT_NE(failed_tick, nullptr);
-			local->on_tick("SHFE.ag.2512", failed_tick);
-			failed_tick->release();
-			EXPECT_EQ(traderEnv.api.n_insert, base);
-			const ExecUnitInitStatus failed_status = local->queryUnitInitStatus("SHFE.ag.2512");
-			EXPECT_EQ(failed_status.query_result, ExecUnitInitQueryResult::OK);
-			ASSERT_EQ(failed_status.state, ExecUnitInitState::FAILED);
-			ASSERT_GT(failed_status.generation, 0u);
-			EXPECT_FALSE(failed_status.error.empty());
-
-			stub.comm_ = comm;
-			local->on_position_changed("SHFE.ag.2512", 1.0);
-			WTSTickData* valid_tick = tick(93101000, 3501.0);
-			ASSERT_NE(valid_tick, nullptr);
-			local->on_tick("SHFE.ag.2512", valid_tick);
-			valid_tick->release();
-			EXPECT_EQ(traderEnv.api.n_insert, base + 1);
-			const ExecUnitInitStatus ready_status = local->queryUnitInitStatus("SHFE.ag.2512");
-			EXPECT_EQ(ready_status.query_result, ExecUnitInitQueryResult::OK);
-			EXPECT_EQ(ready_status.state, ExecUnitInitState::READY);
-			EXPECT_GT(ready_status.generation, failed_status.generation);
-		}
-
-		{
-			auto arbi = std::make_shared<WtArbiExecuter>(&factory, "r71_arbi_retry", &dm);
-			manager.add_executer(arbi);
-			arbi->setStub(&stub);
-			WTSVariant* c = cfg("r71_arbi_retry", "WtExeFact.WtMinImpactExeUnit", NULL);
-			ASSERT_NE(c, nullptr);
-			ASSERT_TRUE(arbi->init(c));
-			c->release();
-			arbi->setTrader(&trader);
-			trader.addSink(arbi.get());
-
-			stub.comm_ = NULL;
-			arbi->on_position_changed("SHFE.ag.2512", 1.0);
-			WTSTickData* failed_tick = tick(93102000, 3500.0);
-			ASSERT_NE(failed_tick, nullptr);
-			arbi->on_tick("SHFE.ag.2512", failed_tick);
-			failed_tick->release();
-			EXPECT_EQ(traderEnv.api.n_insert, base + 1);
-			const ExecUnitInitStatus failed_status = arbi->queryUnitInitStatus("SHFE.ag.2512");
-			EXPECT_EQ(failed_status.query_result, ExecUnitInitQueryResult::OK);
-			ASSERT_EQ(failed_status.state, ExecUnitInitState::FAILED);
-			ASSERT_GT(failed_status.generation, 0u);
-			EXPECT_FALSE(failed_status.error.empty());
-
-			stub.comm_ = comm;
-			arbi->on_position_changed("SHFE.ag.2512", 1.0);
-			WTSTickData* valid_tick = tick(93103000, 3501.0);
-			ASSERT_NE(valid_tick, nullptr);
-			arbi->on_tick("SHFE.ag.2512", valid_tick);
-			valid_tick->release();
-			EXPECT_EQ(traderEnv.api.n_insert, base + 2);
-			const ExecUnitInitStatus ready_status = arbi->queryUnitInitStatus("SHFE.ag.2512");
-			EXPECT_EQ(ready_status.query_result, ExecUnitInitQueryResult::OK);
-			EXPECT_EQ(ready_status.state, ExecUnitInitState::READY);
-			EXPECT_GT(ready_status.generation, failed_status.generation);
-		}
-
-		{
-			auto diff = std::make_shared<WtDiffExecuter>(&factory, "r71_diff_retry", &dm,
-				&traderEnv.bd);
-			manager.add_executer(diff);
-			diff->setStub(&stub);
-			WTSVariant* c = cfg("r71_diff_retry", "WtExeFact.WtDiffMinImpactExeUnit", NULL);
-			ASSERT_NE(c, nullptr);
-			ASSERT_TRUE(diff->init(c));
-			c->release();
-			diff->setTrader(&trader);
-			trader.addSink(diff.get());
-
-			stub.comm_ = NULL;
-			diff->on_position_changed("SHFE.ag.2512", 1.0);
-			WTSTickData* failed_tick = tick(93104000, 3500.0);
-			ASSERT_NE(failed_tick, nullptr);
-			diff->on_tick("SHFE.ag.2512", failed_tick);
-			failed_tick->release();
-			EXPECT_EQ(traderEnv.api.n_insert, base + 2);
-			const ExecUnitInitStatus failed_status = diff->queryUnitInitStatus("SHFE.ag.2512");
-			EXPECT_EQ(failed_status.query_result, ExecUnitInitQueryResult::OK);
-			ASSERT_EQ(failed_status.state, ExecUnitInitState::FAILED);
-			ASSERT_GT(failed_status.generation, 0u);
-			EXPECT_FALSE(failed_status.error.empty());
-
-			stub.comm_ = comm;
-			diff->on_position_changed("SHFE.ag.2512", 1.0);
-			WTSTickData* valid_tick = tick(93105000, 3501.0);
-			ASSERT_NE(valid_tick, nullptr);
-			diff->on_tick("SHFE.ag.2512", valid_tick);
-			valid_tick->release();
-			EXPECT_EQ(traderEnv.api.n_insert, base + 3);
-			const ExecUnitInitStatus ready_status = diff->queryUnitInitStatus("SHFE.ag.2512");
-			EXPECT_EQ(ready_status.query_result, ExecUnitInitQueryResult::OK);
-			EXPECT_EQ(ready_status.state, ExecUnitInitState::READY);
-			EXPECT_GT(ready_status.generation, failed_status.generation);
-		}
+		stub.comm_ = comm;
+		// A zero delta triggers creation while preserving the original target for replay.
+		local->on_position_changed("SHFE.ag.2512", 0.0);
+		const ExecUnitInitStatus ready_status = local->queryUnitInitStatus("SHFE.ag.2512");
+		EXPECT_EQ(ready_status.query_result, ExecUnitInitQueryResult::OK);
+		EXPECT_EQ(ready_status.state, ExecUnitInitState::READY);
+		EXPECT_GT(ready_status.generation, failed_status.generation);
+		local->on_channel_ready();
+		WTSTickData* valid_tick = tick(93101000, 3501.0);
+		ASSERT_NE(valid_tick, nullptr);
+		local->on_tick("SHFE.ag.2512", valid_tick);
+		valid_tick->release();
+		EXPECT_EQ(traderEnv.api.n_insert, base + 1);
 
 		stub.comm_ = comm;
 		WtExecQuiesceCoordinator coordinator({ &manager });
 		const bool quiesced = coordinator.quiesce_all();
 		const bool complete = coordinator.is_complete();
-		if (quiesced || complete ||
-			::testing::Test::HasFailure())
+		if (!quiesced || !complete || ::testing::Test::HasFailure())
 			std::exit(92);
-		std::cerr << "r71_expected_incomplete_retry_quiesce coordinator=false complete=false" << std::endl;
+		std::cerr << "r71_local_v2_clean_retry_passed" << std::endl;
 		std::exit(0);
-	}, ::testing::ExitedWithCode(0), "r71_expected_incomplete_retry_quiesce");
+	}, ::testing::ExitedWithCode(0), "r71_local_v2_clean_retry_passed");
+	GTEST_FLAG_SET(death_test_style, oldStyle);
+}
+
+TEST_F(R71ExecTest, ArbiFailedInitializationRetriesAfterV2CleanupAndReplaysOriginalTarget)
+{
+	const std::string oldStyle = GTEST_FLAG_GET(death_test_style);
+	GTEST_FLAG_SET(death_test_style, "threadsafe");
+	EXPECT_EXIT({
+		const uint32_t base = traderEnv.api.n_insert;
+		WtExecuterMgr manager;
+		R71BlockingExecStub blockingStub;
+		blockingStub.comm_ = comm;
+		blockingStub.sess_ = sess;
+		blockingStub.hot_ = &traderEnv.hot;
+		auto arbi = std::make_shared<WtArbiExecuter>(&factory, "r71_arbi_retry", &dm);
+		manager.add_executer(arbi);
+		arbi->setStub(&blockingStub);
+		WTSVariant* c = cfg("r71_arbi_retry", "WtExeFact.WtMinImpactExeUnit", NULL);
+		ASSERT_NE(c, nullptr);
+		ASSERT_TRUE(arbi->init(c));
+		c->release();
+		arbi->setTrader(&trader);
+		trader.addSink(arbi.get());
+
+		blockingStub.comm_ = NULL;
+		arbi->on_position_changed("SHFE.ag.2512", 1.0);
+		const ExecUnitInitStatus failed_status = arbi->queryUnitInitStatus("SHFE.ag.2512");
+		ASSERT_EQ(failed_status.query_result, ExecUnitInitQueryResult::OK);
+		ASSERT_EQ(failed_status.state, ExecUnitInitState::FAILED);
+		ASSERT_GT(failed_status.generation, 0u);
+		EXPECT_FALSE(failed_status.error.empty());
+
+		blockingStub.comm_ = comm;
+		// Arbi does not accept the ready callback until after successful init.
+		// The zero-delta request retries without changing the failed target of one lot.
+		arbi->on_position_changed("SHFE.ag.2512", 0.0);
+		const ExecUnitInitStatus ready_status = arbi->queryUnitInitStatus("SHFE.ag.2512");
+		EXPECT_EQ(ready_status.query_result, ExecUnitInitQueryResult::OK);
+		EXPECT_EQ(ready_status.state, ExecUnitInitState::READY);
+		EXPECT_GT(ready_status.generation, failed_status.generation);
+		EXPECT_EQ(blockingStub.commodity_queries.load(), 2u);
+
+		WTSTickData* valid_tick = tick(93103000, 3501.0);
+		ASSERT_NE(valid_tick, nullptr);
+		arbi->on_tick("SHFE.ag.2512", valid_tick);
+		valid_tick->release();
+		EXPECT_EQ(traderEnv.api.n_insert, base + 1);
+
+		WtExecQuiesceCoordinator coordinator({ &manager });
+		const bool quiesced = coordinator.quiesce_all();
+		const bool complete = coordinator.is_complete();
+		if (!quiesced || !complete || ::testing::Test::HasFailure())
+			std::exit(92);
+		std::cerr << "r71_arbi_v2_clean_retry_replayed_original_target" << std::endl;
+		std::exit(0);
+	}, ::testing::ExitedWithCode(0), "r71_arbi_v2_clean_retry_replayed_original_target");
+	GTEST_FLAG_SET(death_test_style, oldStyle);
+}
+
+TEST_F(R71ExecTest, DiffV2FailedInitializationStillRequiresSafeAutomaticRetry)
+{
+	// This is an explicit Iteration 02 acceptance requirement. Keep the READY/new
+	// generation expectation; the current Diff retry_blocked path is the product gap.
+	const std::string oldStyle = GTEST_FLAG_GET(death_test_style);
+	GTEST_FLAG_SET(death_test_style, "threadsafe");
+	EXPECT_EXIT({
+		const uint32_t base = traderEnv.api.n_insert;
+		WtExecuterMgr manager;
+		R71BlockingExecStub blockingStub;
+		blockingStub.comm_ = comm;
+		blockingStub.sess_ = sess;
+		blockingStub.hot_ = &traderEnv.hot;
+		auto diff = std::make_shared<WtDiffExecuter>(&factory, "r71_diff_v2_retry_requirement", &dm,
+			&traderEnv.bd);
+		manager.add_executer(diff);
+		diff->setStub(&blockingStub);
+		WTSVariant* c = cfg("r71_diff_v2_retry_requirement", "WtExeFact.WtDiffMinImpactExeUnit", NULL);
+		ASSERT_NE(c, nullptr);
+		ASSERT_TRUE(diff->init(c));
+		c->release();
+		diff->setTrader(&trader);
+		trader.addSink(diff.get());
+
+		blockingStub.comm_ = NULL;
+		diff->on_position_changed("SHFE.ag.2512", 1.0);
+		const ExecUnitInitStatus failed_status = diff->queryUnitInitStatus("SHFE.ag.2512");
+		ASSERT_EQ(failed_status.query_result, ExecUnitInitQueryResult::OK);
+		ASSERT_EQ(failed_status.state, ExecUnitInitState::FAILED);
+		ASSERT_GT(failed_status.generation, 0u);
+		EXPECT_FALSE(failed_status.error.empty());
+
+		blockingStub.comm_ = comm;
+		// The failed call has returned and committed target=1 before this absolute
+		// target request. ABI 2.2 cleanup is proven and no callback was accepted in
+		// the failed generation, so this remains an explicit retry acceptance item.
+		R71PositionTargets recoveredTargets;
+		recoveredTargets["SHFE.ag.2512"] = 1.0;
+		diff->set_position(recoveredTargets);
+		const ExecUnitInitStatus ready_status = diff->queryUnitInitStatus("SHFE.ag.2512");
+		if (ready_status.query_result != ExecUnitInitQueryResult::OK ||
+			ready_status.state != ExecUnitInitState::READY ||
+			ready_status.generation <= failed_status.generation ||
+			blockingStub.commodity_queries.load() != 2u)
+		{
+			std::cerr << "R71_DIFF_V2_SAFE_RETRY_CHECK: retry did not start a ready generation; state="
+				<< static_cast<int>(ready_status.state) << " failed_generation="
+				<< failed_status.generation << " observed_generation=" << ready_status.generation
+				<< " commodity_queries=" << blockingStub.commodity_queries.load() << std::endl;
+			std::exit(94);
+		}
+
+		WTSTickData* valid_tick = tick(93105000, 3501.0);
+		ASSERT_NE(valid_tick, nullptr);
+		diff->on_tick("SHFE.ag.2512", valid_tick);
+		valid_tick->release();
+		if (traderEnv.api.n_insert != base + 1)
+		{
+			std::cerr << "R71_DIFF_V2_SAFE_RETRY_CHECK: recovered unit did not dispatch the target"
+				<< std::endl;
+			std::exit(95);
+		}
+		std::cerr << "R71_DIFF_V2_SAFE_RETRY_CHECK: passed" << std::endl;
+		WtExecQuiesceCoordinator coordinator({ &manager });
+		(void)coordinator.quiesce_all();
+		std::exit(0);
+	}, ::testing::ExitedWithCode(0), "R71_DIFF_V2_SAFE_RETRY_CHECK");
 	GTEST_FLAG_SET(death_test_style, oldStyle);
 }
 
@@ -798,6 +1374,10 @@ TEST_F(R71ExecTest, UnitInitializationStatusIsQueryableAndFailedStatusCanBeClear
 		c->release();
 		local->setTrader(&trader);
 		trader.addSink(local.get());
+		// addSink sends channel-ready immediately for this ready adapter. Move the
+		// executor to channel-lost before reserving a unit so no ready callback is
+		// accepted into the generation; this isolates the V2 cleanup-proof retry path.
+		local->on_channel_lost();
 
 		WtExecuterMgr quiesceManager;
 		quiesceManager.add_executer(local);
@@ -831,6 +1411,7 @@ TEST_F(R71ExecTest, UnitInitializationStatusIsQueryableAndFailedStatusCanBeClear
 		ASSERT_EQ(failed.state, ExecUnitInitState::FAILED);
 		ASSERT_GT(failed.generation, 0u);
 		EXPECT_FALSE(failed.error.empty());
+		EXPECT_NE(failed.error.find("execution-unit configuration was rejected"), std::string::npos);
 
 		EXPECT_EQ(manager.clear_failed_exec_unit_init_status("r71_local_status", "SHFE.ag.2512"),
 			ExecUnitInitClearResult::CLEARED);
@@ -856,12 +1437,12 @@ TEST_F(R71ExecTest, UnitInitializationStatusIsQueryableAndFailedStatusCanBeClear
 		WtExecQuiesceCoordinator coordinator({ &quiesceManager });
 		const bool quiesced = coordinator.quiesce_all();
 		const bool complete = coordinator.is_complete();
-		if (quiesced || complete ||
+		if (!quiesced || !complete ||
 			::testing::Test::HasFailure())
 			std::exit(91);
-		std::cerr << "r71_expected_incomplete_status_quiesce coordinator=false complete=false" << std::endl;
+		std::cerr << "r71_expected_complete_status_quiesce coordinator=true complete=true" << std::endl;
 		std::exit(0);
-	}, ::testing::ExitedWithCode(0), "r71_expected_incomplete_status_quiesce");
+	}, ::testing::ExitedWithCode(0), "r71_expected_complete_status_quiesce");
 	GTEST_FLAG_SET(death_test_style, oldStyle);
 }
 
@@ -922,98 +1503,153 @@ TEST_F(R71ExecTest, ExecManagerRegistrySupportsConcurrentAddsAndSnapshots)
 
 TEST_F(R71ExecTest, ConcurrentSameCodeCreationAndPreRegistrationChannelEdges)
 {
-    const uint32_t base = traderEnv.api.n_insert;
+	R71CapturingTraderApi localApi;
+	R71CapturingTraderApi arbiApi;
+	R71CapturingTraderApi diffApi;
+	TraderAdapter localTrader;
+	TraderAdapter arbiTrader;
+	TraderAdapter diffTrader;
+	R71ExecGroupQuiesceGuard quiesceGuard;
 
     {
+		ASSERT_TRUE(buildCapturingTrader(localTrader, localApi, "r71_local_concurrent"));
         std::shared_ptr<R71BlockingExecStub> blockingStub = keepBlockingStub();
         blockingStub->comm_ = comm;
         blockingStub->sess_ = sess;
         blockingStub->hot_ = &traderEnv.hot;
-        auto local = ownUntilQuiesced(std::shared_ptr<R71ObservableExecuter<WtLocalExecuter> >(
-			new R71ObservableExecuter<WtLocalExecuter>(&factory, "r71_local_concurrent", &dm)));
-        verifyConcurrentCreation(*local, *blockingStub, "r71_local_concurrent",
-            "WtExeFact.WtMinImpactExeUnit", base);
+		auto local = std::shared_ptr<R71ObservableExecuter<WtLocalExecuter> >(
+			new R71ObservableExecuter<WtLocalExecuter>(&factory, "r71_local_concurrent", &dm));
+		verifyConcurrentCreation(local, *blockingStub, "r71_local_concurrent",
+			"WtExeFact.WtMinImpactExeUnit", R71PendingCreationBehavior::LOCAL_COALESCES_TARGET,
+			2u, quiesceGuard, localTrader, localApi);
     }
 
     {
+		ASSERT_TRUE(buildCapturingTrader(arbiTrader, arbiApi, "r71_arbi_concurrent"));
         std::shared_ptr<R71BlockingExecStub> blockingStub = keepBlockingStub();
         blockingStub->comm_ = comm;
         blockingStub->sess_ = sess;
         blockingStub->hot_ = &traderEnv.hot;
-        auto arbi = ownUntilQuiesced(std::shared_ptr<R71ObservableExecuter<WtArbiExecuter> >(
-			new R71ObservableExecuter<WtArbiExecuter>(&factory, "r71_arbi_concurrent", &dm)));
-        verifyConcurrentCreation(*arbi, *blockingStub, "r71_arbi_concurrent",
-            "WtExeFact.WtMinImpactExeUnit", base + 2);
+		auto arbi = std::shared_ptr<R71ObservableExecuter<WtArbiExecuter> >(
+			new R71ObservableExecuter<WtArbiExecuter>(&factory, "r71_arbi_concurrent", &dm));
+		verifyConcurrentCreation(arbi, *blockingStub, "r71_arbi_concurrent",
+			"WtExeFact.WtMinImpactExeUnit", R71PendingCreationBehavior::ARBI_RETURNS_BEFORE_REGISTRATION,
+			1u, quiesceGuard, arbiTrader, arbiApi);
     }
 
     {
+		ASSERT_TRUE(buildCapturingTrader(diffTrader, diffApi, "r71_diff_concurrent"));
 		std::shared_ptr<R71BlockingExecStub> blockingStub = keepBlockingStub();
 		blockingStub->comm_ = comm;
 		blockingStub->sess_ = sess;
 		blockingStub->hot_ = &traderEnv.hot;
-		auto diff = ownUntilQuiesced(std::shared_ptr<R71ObservableExecuter<WtDiffExecuter> >(
+		auto diff = std::shared_ptr<R71ObservableExecuter<WtDiffExecuter> >(
 			new R71ObservableExecuter<WtDiffExecuter>(&factory, "r71_diff_concurrent", &dm,
-				&traderEnv.bd)));
-		verifyConcurrentCreation(*diff, *blockingStub, "r71_diff_concurrent",
-			"WtExeFact.WtDiffMinImpactExeUnit", base + 4);
+				&traderEnv.bd));
+		verifyConcurrentCreation(diff, *blockingStub, "r71_diff_concurrent",
+			"WtExeFact.WtDiffMinImpactExeUnit", R71PendingCreationBehavior::DIFF_WAITS_FOR_CREATOR,
+			1u, quiesceGuard, diffTrader, diffApi);
     }
 }
 
-TEST_F(R71ExecTest, FailedInitializationWaitersShareGenerationAndDoNotRetry)
+TEST_F(R71ExecTest, LocalFailedInitializationRequestsCoalesceAndFailClosedAfterReadyCallback)
 {
 	const std::string oldStyle = GTEST_FLAG_GET(death_test_style);
 	GTEST_FLAG_SET(death_test_style, "threadsafe");
 	EXPECT_EXIT({
 		WtExecuterMgr manager;
-		std::vector<std::shared_ptr<R71BlockingExecStub> > blockingStubs;
-		{
-			auto blockingStub = std::make_shared<R71BlockingExecStub>();
-			blockingStub->comm_ = comm;
-			blockingStub->sess_ = sess;
-			blockingStub->hot_ = &traderEnv.hot;
-			blockingStubs.push_back(blockingStub);
-			auto local = std::make_shared<WtLocalExecuter>(
-				&factory, "r71_local_failed_waiters", &dm);
-			manager.add_executer(local);
-			verifyFailedWaitersDoNotRetry(*local, *blockingStub, "r71_local_failed_waiters",
-				"WtExeFact.WtMinImpactExeUnit");
-		}
-
-		{
-			auto blockingStub = std::make_shared<R71BlockingExecStub>();
-			blockingStub->comm_ = comm;
-			blockingStub->sess_ = sess;
-			blockingStub->hot_ = &traderEnv.hot;
-			blockingStubs.push_back(blockingStub);
-			auto arbi = std::make_shared<WtArbiExecuter>(
-				&factory, "r71_arbi_failed_waiters", &dm);
-			manager.add_executer(arbi);
-			verifyFailedWaitersDoNotRetry(*arbi, *blockingStub, "r71_arbi_failed_waiters",
-				"WtExeFact.WtMinImpactExeUnit");
-		}
-
-		{
-			auto blockingStub = std::make_shared<R71BlockingExecStub>();
-			blockingStub->comm_ = comm;
-			blockingStub->sess_ = sess;
-			blockingStub->hot_ = &traderEnv.hot;
-			blockingStubs.push_back(blockingStub);
-			auto diff = std::make_shared<WtDiffExecuter>(
-				&factory, "r71_diff_failed_waiters", &dm, &traderEnv.bd);
-			manager.add_executer(diff);
-			verifyFailedWaitersDoNotRetry(*diff, *blockingStub, "r71_diff_failed_waiters",
-				"WtExeFact.WtDiffMinImpactExeUnit");
-		}
-
+		R71BlockingExecStub blockingStub;
+		blockingStub.comm_ = comm;
+		blockingStub.sess_ = sess;
+		blockingStub.hot_ = &traderEnv.hot;
+		auto local = std::make_shared<WtLocalExecuter>(
+			&factory, "r71_local_failed_waiters", &dm);
+		manager.add_executer(local);
+		const uint32_t base = traderEnv.api.n_insert;
+		verifyFailedInitializationWaiters(*local, blockingStub, "r71_local_failed_waiters",
+			"WtExeFact.WtMinImpactExeUnit", R71PendingCreationBehavior::LOCAL_COALESCES_TARGET, 1.0);
+		const ExecUnitInitStatus failed = local->queryUnitInitStatus("SHFE.ag.2512");
+		ASSERT_EQ(failed.state, ExecUnitInitState::FAILED);
+		local->on_position_changed("SHFE.ag.2512", 0.0);
+		const ExecUnitInitStatus afterRequest = local->queryUnitInitStatus("SHFE.ag.2512");
+		EXPECT_EQ(afterRequest.state, ExecUnitInitState::FAILED);
+		EXPECT_EQ(afterRequest.generation, failed.generation);
+		EXPECT_EQ(blockingStub.commodity_queries.load(), 1u)
+			<< "the queued ready callback makes this generation fail closed";
+		EXPECT_EQ(traderEnv.api.n_insert, base);
 		WtExecQuiesceCoordinator coordinator({ &manager });
 		const bool quiesced = coordinator.quiesce_all();
 		const bool complete = coordinator.is_complete();
-		if (quiesced || complete ||
-			::testing::Test::HasFailure())
+		if (quiesced || complete || ::testing::Test::HasFailure())
 			std::exit(93);
-		std::cerr << "r71_expected_incomplete_waiters_quiesce coordinator=false complete=false" << std::endl;
+		std::cerr << "r71_local_queued_ready_callback_retry_blocked" << std::endl;
 		std::exit(0);
-	}, ::testing::ExitedWithCode(0), "r71_expected_incomplete_waiters_quiesce");
+	}, ::testing::ExitedWithCode(0), "r71_local_queued_ready_callback_retry_blocked");
+	GTEST_FLAG_SET(death_test_style, oldStyle);
+}
+
+
+TEST_F(R71ExecTest, ArbiFailedInitializationRequestsReturnBeforeRegistration)
+{
+	const std::string oldStyle = GTEST_FLAG_GET(death_test_style);
+	GTEST_FLAG_SET(death_test_style, "threadsafe");
+	EXPECT_EXIT({
+		WtExecuterMgr manager;
+		R71BlockingExecStub blockingStub;
+		blockingStub.comm_ = comm;
+		blockingStub.sess_ = sess;
+		blockingStub.hot_ = &traderEnv.hot;
+		auto arbi = std::make_shared<WtArbiExecuter>(
+			&factory, "r71_arbi_failed_waiters", &dm);
+		manager.add_executer(arbi);
+		verifyFailedInitializationWaiters(*arbi, blockingStub, "r71_arbi_failed_waiters",
+			"WtExeFact.WtMinImpactExeUnit", R71PendingCreationBehavior::ARBI_RETURNS_BEFORE_REGISTRATION,
+			1.0);
+		const ExecUnitInitStatus failed = arbi->queryUnitInitStatus("SHFE.ag.2512");
+		ASSERT_EQ(failed.state, ExecUnitInitState::FAILED);
+		ASSERT_GT(failed.generation, 0u);
+		EXPECT_EQ(blockingStub.commodity_queries.load(), 1u)
+			<< "the six pre-registration calls return without starting more attempts";
+		WtExecQuiesceCoordinator coordinator({ &manager });
+		const bool quiesced = coordinator.quiesce_all();
+		const bool complete = coordinator.is_complete();
+		if (!quiesced || !complete || ::testing::Test::HasFailure())
+			std::exit(93);
+		std::cerr << "r71_arbi_pre_registration_callers_returned_without_retry" << std::endl;
+		std::exit(0);
+	}, ::testing::ExitedWithCode(0), "r71_arbi_pre_registration_callers_returned_without_retry");
+	GTEST_FLAG_SET(death_test_style, oldStyle);
+}
+
+
+TEST_F(R71ExecTest, DiffFailedInitializationWaitersShareOneGeneration)
+{
+	const std::string oldStyle = GTEST_FLAG_GET(death_test_style);
+	GTEST_FLAG_SET(death_test_style, "threadsafe");
+	EXPECT_EXIT({
+		WtExecuterMgr manager;
+		R71BlockingExecStub blockingStub;
+		blockingStub.comm_ = comm;
+		blockingStub.sess_ = sess;
+		blockingStub.hot_ = &traderEnv.hot;
+		auto diff = std::make_shared<WtDiffExecuter>(
+			&factory, "r71_diff_failed_waiters", &dm, &traderEnv.bd);
+		manager.add_executer(diff);
+		verifyFailedInitializationWaiters(*diff, blockingStub, "r71_diff_failed_waiters",
+			"WtExeFact.WtDiffMinImpactExeUnit", R71PendingCreationBehavior::DIFF_WAITS_FOR_CREATOR,
+			1.0);
+		const ExecUnitInitStatus failed = diff->queryUnitInitStatus("SHFE.ag.2512");
+		ASSERT_EQ(failed.state, ExecUnitInitState::FAILED);
+		EXPECT_EQ(blockingStub.commodity_queries.load(), 1u)
+			<< "all six callers consumed the failed generation; none is a retry request";
+		WtExecQuiesceCoordinator coordinator({ &manager });
+		const bool quiesced = coordinator.quiesce_all();
+		const bool complete = coordinator.is_complete();
+		if (quiesced || complete || ::testing::Test::HasFailure())
+			std::exit(93);
+		std::cerr << "r71_diff_waiters_shared_failed_generation" << std::endl;
+		std::exit(0);
+	}, ::testing::ExitedWithCode(0), "r71_diff_waiters_shared_failed_generation");
 	GTEST_FLAG_SET(death_test_style, oldStyle);
 }
 
@@ -1053,7 +1689,7 @@ TEST_F(R71ExecTest, SameThreadInitializationReentryFailsWithoutDuplicateUnit)
     EXPECT_EQ(traderEnv.api.n_insert, 1u);
 }
 
-TEST_F(R71ExecTest, ThrowingInitializationChannelCallbackReleasesWaiters)
+TEST_F(R71ExecTest, ThrowingInitializationChannelCallbackDoesNotBlockConcurrentTargetUpdate)
 {
 	const std::string oldStyle = GTEST_FLAG_GET(death_test_style);
 	GTEST_FLAG_SET(death_test_style, "threadsafe");
@@ -1104,14 +1740,14 @@ TEST_F(R71ExecTest, ThrowingInitializationChannelCallbackReleasesWaiters)
 		while (!waiter_started.load() && std::chrono::steady_clock::now() < deadline)
 			std::this_thread::yield();
 		EXPECT_TRUE(waiter_started.load());
-		ExecUnitInitStatus pending = local->queryUnitInitStatus("SHFE.ag.2512");
-		const auto waiter_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
-		while (pending.waiting_callers < 1 && std::chrono::steady_clock::now() < waiter_deadline)
+		const auto target_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
+		while (!waiter_finished.load() && std::chrono::steady_clock::now() < target_deadline)
 		{
 			std::this_thread::yield();
-			pending = local->queryUnitInitStatus("SHFE.ag.2512");
 		}
-		EXPECT_EQ(pending.waiting_callers, 1u);
+		EXPECT_TRUE(waiter_finished.load())
+			<< "Local merges target updates while the registered unit drains callbacks";
+		EXPECT_EQ(local->queryUnitInitStatus("SHFE.ag.2512").waiting_callers, 0u);
 		local->releaseFirstReadyCallback();
 		creator.join();
 		waiter.join();
@@ -1124,18 +1760,23 @@ TEST_F(R71ExecTest, ThrowingInitializationChannelCallbackReleasesWaiters)
 		EXPECT_EQ(failed.state, ExecUnitInitState::FAILED);
 		EXPECT_EQ(failed.generation, initializing.generation);
 
+		// The plugin initialized before the host ready callback threw. Its callback
+		// may have produced an external side effect, so keep this generation blocked
+		// from automatic retry after the concurrent target update has returned.
 		local->on_position_changed("SHFE.ag.2512", 1.0);
-		const ExecUnitInitStatus retried = local->queryUnitInitStatus("SHFE.ag.2512");
-		EXPECT_EQ(retried.state, ExecUnitInitState::READY);
-		EXPECT_GT(retried.generation, failed.generation);
-		EXPECT_EQ(blockingStub.commodity_queries.load(), 2u);
-		EXPECT_EQ(local->ready_queries.load(), 2u);
+		const ExecUnitInitStatus stillFailed = local->queryUnitInitStatus("SHFE.ag.2512");
+		EXPECT_EQ(stillFailed.state, ExecUnitInitState::FAILED);
+		EXPECT_EQ(stillFailed.generation, failed.generation);
+		EXPECT_EQ(local->clearFailedUnitInitStatus("SHFE.ag.2512"),
+			ExecUnitInitClearResult::RETRY_BLOCKED);
+		EXPECT_EQ(blockingStub.commodity_queries.load(), 1u);
+		EXPECT_EQ(local->ready_queries.load(), 1u);
 
 		WTSTickData* marketTick = tick(93100000, 3500.0);
 		ASSERT_NE(marketTick, nullptr);
 		local->on_tick("SHFE.ag.2512", marketTick);
 		marketTick->release();
-		EXPECT_EQ(traderEnv.api.n_insert, 1u);
+		EXPECT_EQ(traderEnv.api.n_insert, 0u);
 
 		WtExecQuiesceCoordinator coordinator({ &manager });
 		const bool quiesced = coordinator.quiesce_all();
@@ -1151,27 +1792,29 @@ TEST_F(R71ExecTest, ThrowingInitializationChannelCallbackReleasesWaiters)
 
 TEST_F(R71ExecTest, AccountFanoutSkipsInitializingUnitUntilReady)
 {
-	const std::string oldStyle = GTEST_FLAG_GET(death_test_style);
-	GTEST_FLAG_SET(death_test_style, "threadsafe");
-	EXPECT_EXIT({
-		WtExecuterMgr manager;
-		R71BlockingExecStub blockingStub;
-		blockingStub.comm_ = comm;
-		blockingStub.sess_ = sess;
-		blockingStub.hot_ = &traderEnv.hot;
-		auto local = std::make_shared<R71ObservableExecuter<WtLocalExecuter>>(
-			&factory, "r71_local_account_fanout", &dm);
-		manager.add_executer(local);
-		local->setStub(&blockingStub);
-		WTSVariant* params = cfg("r71_local_account_fanout", "WtExeFact.WtStockMinImpactExeUnit", NULL);
-		ASSERT_NE(params, nullptr);
-		ASSERT_TRUE(local->init(params));
-		params->release();
-		local->setTrader(&trader);
-		trader.addSink(local.get());
-		local->on_channel_lost();
-		local->on_channel_ready();
-		local->blockFirstReadyCallback(true);
+	WtExecuterMgr manager;
+	R71BlockingExecStub blockingStub;
+	blockingStub.comm_ = comm;
+	blockingStub.sess_ = sess;
+	blockingStub.hot_ = &traderEnv.hot;
+	auto local = std::make_shared<R71ObservableExecuter<WtLocalExecuter>>(
+		&factory, "r71_local_account_fanout", &dm);
+	manager.add_executer(local);
+	local->setStub(&blockingStub);
+	const std::string policyPath = r71::temp_root() + "r71_local_account_fanout.json";
+	const std::string policyConfig =
+		R"json({"scale":1.0,"poolsize":0,"policy":{"default":{"name":"WtExeFact.WtStockMinImpactExeUnit","lots":1,"minopenlots":1,"offset":0,"expire":0,"pricemode":0,"span":0,"byrate":false,"min_order":1.0}}})json";
+	ASSERT_TRUE(r71::write_file(policyPath, policyConfig));
+	WTSVariant* params = WTSCfgLoader::load_from_file(policyPath.c_str());
+	ASSERT_NE(params, nullptr);
+	ASSERT_TRUE(local->init(params));
+	params->release();
+	local->setTrader(&trader);
+	trader.addSink(local.get());
+	R71LocalExecQuiesceGuard quiesceGuard(manager, trader, local.get());
+	local->on_channel_lost();
+	local->on_channel_ready();
+	local->blockFirstReadyCallback(false);
 
 		std::thread creator([local]() {
 			local->on_position_changed("SHFE.ag.2512", 1.0);
@@ -1182,7 +1825,8 @@ TEST_F(R71ExecTest, AccountFanoutSkipsInitializingUnitUntilReady)
 		{
 			local->releaseFirstReadyCallback();
 			creator.join();
-			std::exit(96);
+			FAIL() << "unit initialization did not enter the channel ready callback";
+			return;
 		}
 
 		const ExecUnitInitStatus initializing = local->queryUnitInitStatus("SHFE.ag.2512");
@@ -1192,29 +1836,10 @@ TEST_F(R71ExecTest, AccountFanoutSkipsInitializingUnitUntilReady)
 		local->releaseFirstReadyCallback();
 		creator.join();
 
-		const ExecUnitInitStatus failed = local->queryUnitInitStatus("SHFE.ag.2512");
-		EXPECT_EQ(failed.state, ExecUnitInitState::FAILED);
-		EXPECT_EQ(failed.generation, initializing.generation);
-		EXPECT_EQ(local->available_updates.load(), 0u);
-
-		// A distinct request starts generation 2 and allows the unit to reach READY.
-		local->on_position_changed("SHFE.ag.2512", 1.0);
 		const ExecUnitInitStatus ready = local->queryUnitInitStatus("SHFE.ag.2512");
-		ASSERT_EQ(ready.state, ExecUnitInitState::READY);
-		EXPECT_GT(ready.generation, failed.generation);
-		local->on_account("CNY", 0, 1, 1, 200, 0, 0, 0, 0, 0, 0);
+		EXPECT_EQ(ready.state, ExecUnitInitState::READY);
+		EXPECT_EQ(ready.generation, initializing.generation);
 		EXPECT_EQ(local->available_updates.load(), 1u);
-
-		WtExecQuiesceCoordinator coordinator({ &manager });
-		const bool quiesced = coordinator.quiesce_all();
-		const bool complete = coordinator.is_complete();
-		if (quiesced || complete ||
-			::testing::Test::HasFailure())
-			std::exit(97);
-		std::cerr << "r71_expected_incomplete_account_fanout_quiesce coordinator=false complete=false" << std::endl;
-		std::exit(0);
-	}, ::testing::ExitedWithCode(0), "r71_expected_incomplete_account_fanout_quiesce");
-	GTEST_FLAG_SET(death_test_style, oldStyle);
 }
 
 } // namespace

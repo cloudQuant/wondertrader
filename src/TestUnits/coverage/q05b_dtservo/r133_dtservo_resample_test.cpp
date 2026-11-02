@@ -20,9 +20,11 @@
  */
 #include <gtest/gtest.h>
 
+#include <cstdio>
 #include <cstdint>
 #include <cstring>
 #include <functional>
+#include <set>
 #include <string>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -55,18 +57,92 @@ struct R133DmReport
 
 struct R133CapturedBar
 {
+	std::string code;
 	std::string period;
+	uintptr_t address;
 	WTSBarStruct bar;
 };
 
 std::vector<R133CapturedBar> g_r133CapturedBars;
 
-void r133_capture_bar(const char* /*stdCode*/, const char* period, WTSBarStruct* bar)
+struct R133BarLifetimeEvent
+{
+	uintptr_t address;
+	WtDataManagerBarLifetimeEvent event;
+};
+
+std::vector<R133BarLifetimeEvent> g_r133BarLifetimeEvents;
+
+void r133_capture_bar_lifetime(uintptr_t address, WtDataManagerBarLifetimeEvent event)
+{
+	g_r133BarLifetimeEvents.push_back({ address, event });
+}
+
+bool r133_bar_lifetimes_balanced(std::size_t expectedCount)
+{
+	std::set<uintptr_t> outstanding;
+	std::size_t returned = 0;
+	std::size_t deleted = 0;
+	for (const auto& event : g_r133BarLifetimeEvents)
+	{
+		if (event.event == WT_DM_BAR_FACTORY_RETURNED)
+		{
+			returned++;
+			if (!outstanding.insert(event.address).second)
+				return false;
+		}
+		else if (event.event == WT_DM_BAR_DELETED)
+		{
+			deleted++;
+			if (outstanding.erase(event.address) != 1)
+				return false;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	return returned == expectedCount && deleted == expectedCount && outstanding.empty();
+}
+
+bool r133_callbacks_use_cached_bars()
+{
+	std::set<uintptr_t> detachedAddresses;
+	for (const auto& event : g_r133BarLifetimeEvents)
+	{
+		if (event.event == WT_DM_BAR_FACTORY_RETURNED)
+			detachedAddresses.insert(event.address);
+	}
+	for (const auto& captured : g_r133CapturedBars)
+	{
+		if (detachedAddresses.find(captured.address) != detachedAddresses.end())
+			return false;
+	}
+	return true;
+}
+
+class R133BarLifetimeHookScope
+{
+public:
+	R133BarLifetimeHookScope()
+	{
+		g_r133BarLifetimeEvents.clear();
+		wtp::setWtDataManagerBarLifetimeHook(&r133_capture_bar_lifetime);
+	}
+	~R133BarLifetimeHookScope()
+	{
+		wtp::setWtDataManagerBarLifetimeHook(NULL);
+	}
+};
+
+void r133_capture_bar(const char* stdCode, const char* period, WTSBarStruct* bar)
 {
 	if (bar == NULL)
 		return;
 	R133CapturedBar item;
+	item.code = stdCode == NULL ? "" : stdCode;
 	item.period = period == NULL ? "" : period;
+	item.address = (uintptr_t)bar;
 	item.bar = *bar;
 	g_r133CapturedBars.push_back(item);
 }
@@ -357,6 +433,7 @@ TEST_F(R133WtDataManagerTest, realtime_day_and_second_buckets_are_cached_and_rep
 
 	run_child([this](R133DmReport& rep) {
 		g_r133CapturedBars.clear();
+		R133BarLifetimeHookScope lifetimeHook;
 		WtDtRunner runner;
 		WtDataManager dm;
 		if (!init_dm(runner, dm, r133_capture_bar))
@@ -376,6 +453,9 @@ TEST_F(R133WtDataManagerTest, realtime_day_and_second_buckets_are_cached_and_rep
 
 		auto update = [&](uint32_t actionTime, double price, double volume) {
 			WTSTickStruct ts = r102::make_tick("CFFEX", "IC2204", 20240108, actionTime, price);
+			// WtDtRunner::proc_tick normalizes raw venue codes before update_bars;
+			// this test enters at WtDataManager directly, so match that precondition.
+			snprintf(ts.code, sizeof(ts.code), "%s", "CFFEX.IC.2204");
 			ts.volume = volume;
 			ts.total_volume = volume;
 			ts.turn_over = price * volume;
@@ -390,13 +470,42 @@ TEST_F(R133WtDataManagerTest, realtime_day_and_second_buckets_are_cached_and_rep
 		};
 
 		uint64_t firstSecondBucket = 0;
-		auto checkLatest = [&](std::size_t begin, double close, double volume, bool newSecondBucket) {
+		auto checkLatest = [&](std::size_t begin, double close, double dayVolume,
+			double secVolume, bool newSecondBucket) {
+			auto dumpFailure = [&]() {
+				fprintf(stderr,
+					"[R133 diagnostic] subscriptions=CFFEX.IC.2204:KP_DAY/1,KP_Tick/1 "
+					"begin=%zu expected_callbacks=%zu actual_callbacks=%zu "
+					"expected(date=20240108,close=%.2f,day_vol=%.2f,sec_vol=%.2f,"
+					"new_second=%d,first_second=%llu)\n",
+					begin, begin + 2, g_r133CapturedBars.size(), close, dayVolume, secVolume,
+					newSecondBucket ? 1 : 0,
+					static_cast<unsigned long long>(firstSecondBucket));
+				for (std::size_t i = 0; i < g_r133CapturedBars.size(); ++i)
+				{
+					const R133CapturedBar& item = g_r133CapturedBars[i];
+					fprintf(stderr,
+						"[R133 diagnostic] callback[%zu] code=%s period=%s date=%u time=%llu "
+						"close=%.2f vol=%.2f\n",
+						i, item.code.c_str(), item.period.c_str(), item.bar.date,
+						static_cast<unsigned long long>(item.bar.time), item.bar.close,
+						static_cast<double>(item.bar.vol));
+				}
+			};
 			if (g_r133CapturedBars.size() != begin + 2)
+			{
+				dumpFailure();
 				return false;
+			}
 			const WTSBarStruct* day = NULL;
 			const WTSBarStruct* sec = NULL;
 			for (std::size_t i = begin; i < g_r133CapturedBars.size(); ++i)
 			{
+				if (g_r133CapturedBars[i].code != "CFFEX.IC.2204")
+				{
+					dumpFailure();
+					return false;
+				}
 				const WTSBarStruct& bar = g_r133CapturedBars[i].bar;
 				if (bar.time == 0)
 					day = &bar;
@@ -404,24 +513,43 @@ TEST_F(R133WtDataManagerTest, realtime_day_and_second_buckets_are_cached_and_rep
 					sec = &bar;
 			}
 			if (day == NULL || sec == NULL)
+			{
+				dumpFailure();
 				return false;
-			if (day->date != 20240108 || day->close != close || day->vol != volume)
+			}
+			if (day->date != 20240108 || day->close != close || day->vol != dayVolume)
+			{
+				dumpFailure();
 				return false;
-			if (sec->date != 20240108 || sec->close != close || sec->vol != volume)
+			}
+			if (sec->date != 20240108 || sec->close != close || sec->vol != secVolume)
+			{
+				dumpFailure();
 				return false;
+			}
 			if (begin == 0)
 				firstSecondBucket = sec->time;
 			else if (newSecondBucket == (sec->time == firstSecondBucket))
+			{
+				dumpFailure();
 				return false;
-			return g_r133CapturedBars[begin].period == "d1";
+			}
+			if (g_r133CapturedBars[begin].period != "d1")
+			{
+				dumpFailure();
+				return false;
+			}
+			return true;
 		};
 
 		R133_DM_CHK(rep, update(93001000, 110.0, 1.0));
-		R133_DM_CHK(rep, checkLatest(0, 110.0, 1.0, false));
+		R133_DM_CHK(rep, checkLatest(0, 110.0, 1.0, 1.0, false));
 		R133_DM_CHK(rep, update(93001500, 120.0, 2.0));
-		R133_DM_CHK(rep, checkLatest(2, 120.0, 3.0, false));
+		R133_DM_CHK(rep, checkLatest(2, 120.0, 3.0, 3.0, false));
 		R133_DM_CHK(rep, update(93002000, 130.0, 3.0));
-		R133_DM_CHK(rep, checkLatest(4, 130.0, 6.0, true));
+		R133_DM_CHK(rep, checkLatest(4, 130.0, 6.0, 3.0, true));
+		R133_DM_CHK(rep, r133_bar_lifetimes_balanced(3));
+		R133_DM_CHK(rep, r133_callbacks_use_cached_bars());
 		rep.a = static_cast<int32_t>(g_r133CapturedBars.size());
 		rep.marks = 1;
 	});

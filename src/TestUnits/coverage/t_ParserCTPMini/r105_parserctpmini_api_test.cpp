@@ -467,7 +467,7 @@ TEST_F(R105MiniTest, null_sink_and_no_api_guards)
 	bare.m_sink = NULL;
 	bare.m_pBaseDataMgr = NULL;
 
-	EXPECT_TRUE(bare.connect());
+	EXPECT_FALSE(bare.connect());
 	EXPECT_TRUE(bare.disconnect());
 	bare.release();
 	bare.OnFrontConnected();

@@ -9,6 +9,7 @@
  * @details 本文件定义了HFT(高频交易)延迟测试工具类，用于测量和评估WonderTrader框架中高频交易模块的内部延迟性能
  */
 #pragma once
+#include <atomic>
 #include "../WtCore/WtHftEngine.h"
 #include "../WtCore/HftStrategyMgr.h"
 #include "../WtCore/TraderAdapter.h"
@@ -56,6 +57,7 @@ namespace hft
 		 * @details 绑定CPU核心，运行解析器、交易器和引擎，并实际执行测试
 		 */
 		void run();
+		bool runFailed() const noexcept { return _run_failed.load(std::memory_order_acquire); }
 
 	private:
 		/**
@@ -101,5 +103,6 @@ namespace hft
 		uint32_t			_core;       /**< 测试线程绑定的CPU核心编号 */
 		bool				_init_attempted; /**< init() is a one-shot operation */
 		bool				_shutdown_complete;
+		std::atomic<bool> _run_failed{false};
 	};
 }

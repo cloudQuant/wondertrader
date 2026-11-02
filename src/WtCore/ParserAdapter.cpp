@@ -195,6 +195,17 @@ bool ParserAdapter::initExt(const char* id, IParserApi* api, IParserStub* stub, 
 	try
 	{
 		_id = id == NULL ? "" : id;
+		if (_bd_mgr == NULL)
+		{
+			// Ownership transferred at the initExt call boundary, but without a
+			// base-data manager this adapter cannot safely service provider
+			// callbacks. Keep the candidate quarantined and do not register or
+			// initialize it.
+			_stopped = true;
+			WTSLogger::log_dyn("parser", _id.c_str(), LL_ERROR, "[{}] Parser initialization failed: base-data manager is required", _id.c_str());
+			return false;
+		}
+
 		_parser_api->registerSpi(this);
 		if (!_parser_api->init(NULL))
 		{
@@ -236,7 +247,7 @@ bool ParserAdapter::initExt(const char* id, IParserApi* api, IParserStub* stub, 
 
 bool ParserAdapter::init(const char* id, WTSVariant* cfg, IParserStub* stub, IBaseDataMgr* bgMgr, IHotMgr* hotMgr/* = NULL*/)
 {
-	if (cfg == NULL || hasApi() || _cfg != NULL || _module_handle != NULL)
+	if (cfg == NULL || bgMgr == NULL || hasApi() || _cfg != NULL || _module_handle != NULL)
 		return false;
 
 	_stub = stub;
@@ -492,8 +503,7 @@ bool ParserAdapter::run()
 	if (_parser_api == NULL || !_initialized || _stopped)
 		return false;
 
-	_parser_api->connect();
-	return true;
+	return _parser_api->connect();
 }
 
 //合理毫秒数时间差
@@ -556,6 +566,8 @@ void ParserAdapter::handleQuote(WTSTickData *quote, uint32_t /*procFlag*/)
 	{
 		//如果是分月合约，则进行主力和次主力的判断
 		stdCode = CodeHelper::rawMonthCodeToStdCode(cInfo->getCode(), cInfo->getExchg());
+		if (stdCode.empty())
+			return;
 	}
 	else
 	{

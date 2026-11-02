@@ -110,7 +110,7 @@ inline XTP_POSITION_EFFECT_TYPE wrapOffsetType(WTSOffsetType offType)
 	else if (WOT_CLOSETODAY == offType)
 		return XTP_POSITION_EFFECT_CLOSETODAY;
 	else if (WOT_CLOSEYESTERDAY == offType)
-		return XTP_POSITION_EFFECT_CLOSE;
+		return XTP_POSITION_EFFECT_CLOSEYESTERDAY;
 	else
 		return XTP_POSITION_EFFECT_FORCECLOSE;
 }
@@ -123,7 +123,7 @@ inline WTSOffsetType wrapOffsetType(XTP_SIDE_TYPE /*side*/, XTP_POSITION_EFFECT_
 		return WOT_CLOSE;
 	else if (XTP_POSITION_EFFECT_CLOSETODAY == offType)
 		return WOT_CLOSETODAY;
-	else if (XTP_POSITION_EFFECT_CLOSE == offType)
+	else if (XTP_POSITION_EFFECT_CLOSEYESTERDAY == offType)
 		return WOT_CLOSEYESTERDAY;
 	else
 		return WOT_FORCECLOSE;
@@ -287,6 +287,8 @@ TraderXTP::TraderXTP()
 	, _worker_generation(0)
 	, _reconnect_delay(std::chrono::milliseconds(2000))
 	, _api_stopping(false)
+	, m_hInstXTP(NULL)
+	, m_funcCreator(NULL)
 	{
 }
 
@@ -730,7 +732,14 @@ bool TraderXTP::init(WTSVariant *params)
 
 	std::string module = params->getCString("xtpmodule");
 	if (module.empty()) module = "xtptraderapi";
-	std::string dllpath = getBinDir() + DLLHelper::wrap_module(module.c_str(), "lib");;
+	const std::string wrappedModule = DLLHelper::wrap_module(module.c_str(), "lib");
+	const char* moduleDir = getBinDir();
+	if ((moduleDir == NULL || *moduleDir == '\0') && !fs::path(wrappedModule).is_absolute())
+	{
+		write_log(_sink, LL_ERROR, "[TraderXTP] Cannot locate trader module directory");
+		return false;
+	}
+	std::string dllpath = (moduleDir == NULL ? std::string() : std::string(moduleDir)) + wrappedModule;
 
 	m_hInstXTP = DLLHelper::load_library(dllpath.c_str());
 #ifdef _WIN32
@@ -968,6 +977,11 @@ void TraderXTP::reconnect(bool nonblocking)
 
 void TraderXTP::connect()
 {
+	if (m_funcCreator == NULL)
+	{
+		write_log(_sink, LL_ERROR, "[TraderXTP] Cannot connect without a trader API creator");
+		return;
+	}
 	if (isTraderXTPReentrantRelease(this))
 		return;
 	if (!startWorker() || _worker_stopping.load())
@@ -1281,6 +1295,8 @@ int TraderXTP::logout()
 	uint64_t sessionid;
 	{
 		std::lock_guard<std::mutex> stateLock(_login_state_mutex);
+		if ((_state != TS_LOGINED && _state != TS_ALLREADY) || _sessionid == 0)
+			return -1;
 		sessionid = _sessionid;
 	}
 	_api->Logout(sessionid);

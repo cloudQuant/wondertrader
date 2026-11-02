@@ -30,6 +30,7 @@
 #include <Includes/WTSVariant.hpp>
 #include <WtCore/EventNotifier.h>
 #include <WtCore/HftStraBaseCtx.h>
+#include <WtCore/WtDtMgr.h>
 #include <WtCore/WtHftEngine.h>
 
 using namespace q01sel;
@@ -45,10 +46,11 @@ class R10HftEngine : public WtHftEngine
 {
 public:
     R10HftEngine() {}
-    void attach(IBaseDataMgr* bd, IHotMgr* hot)
+    void attach(IBaseDataMgr* bd, IHotMgr* hot, WtDtMgr* dataMgr)
     {
         _base_data_mgr = bd;
         _hot_mgr = hot;
+        _data_mgr = dataMgr;
         set_date_time(20250110, 931, 45, 931);
         set_trading_date(20250110);
     }
@@ -91,7 +93,7 @@ protected:
         _comm = makeComm("SHFE", "ag", "TRADING", TM_Both, CC_Future);
         _ct = makeCt("SHFE", "ag", "ag2512");
         _bdm.regis(_comm, _ct);
-        _eng.attach(&_bdm, &_hot);
+        _eng.attach(&_bdm, &_hot, &_data_mgr);
     }
 
     void TearDown() override { _env.reset(); }
@@ -114,6 +116,7 @@ protected:
     std::unique_ptr<Q01TempEnv> _env;
     BaseDataMgr _bdm;
     HotMgr _hot;
+    WtDtMgr _data_mgr; // empty manager; declared before engine so it outlives it
     R10HftEngine _eng;
     WTSCommodityInfo* _comm = NULL;
     WTSContractInfo* _ct = NULL;
@@ -181,7 +184,8 @@ TEST_F(R10HftTest, update_dyn_profit_uses_bid_price_and_vol_scale)
     // 未建仓的合约不在 _pos_map 里 => 两个查询都走 find==end 早退
     EXPECT_DOUBLE_EQ(ctx.stra_get_position_avgpx("SSE.600000"), 0.0);
     EXPECT_DOUBLE_EQ(ctx.stra_get_position_profit("SSE.600000"), 0.0);
-    ctx.update_dyn_profit(kAg, NULL);   // 空仓合约：查不到明细直接返回（L908-909）
+    ctx.update_dyn_profit("SSE.600000", NULL); // 未持仓合约：map miss 后直接返回（L908-909）
+    EXPECT_DOUBLE_EQ(ctx.stra_get_position_profit(kAg), -213400.0);
 }
 
 TEST_F(R10HftTest, volume_zero_position_resets_dynprofit)
@@ -295,13 +299,14 @@ TEST_F(R10HftTest, price_query_falls_back_to_engine)
 {
     R10HftCtx ctx(&_eng, "h10_px", false, 0);
     ctx.on_init();
-    // ctx 自己的 _price_map 为空 => 落到 _engine->get_cur_price（引擎也没价 => 0）
+    // ctx 自己的 _price_map 为空；空数据管理器没有 tick，engine fallback 返回 0。
     EXPECT_DOUBLE_EQ(ctx.stra_get_price(kAg), 0.0);
     EXPECT_DOUBLE_EQ(ctx.stra_get_price("SSE.600000"), 0.0);
 
     // stra_get_rawcode/stra_get_comminfo 走引擎，不经 _trader
     EXPECT_EQ(ctx.stra_get_comminfo(kAg), _comm);
-    EXPECT_STREQ(ctx.stra_get_rawcode(kAg).c_str(), "ag2512");
+    // kAg has no hot-code rule in this fixture, so get_rawcode returns an empty string.
+    EXPECT_EQ(ctx.stra_get_rawcode(kAg), std::string(""));
 }
 
 /* ======================= EventNotifier ======================= */

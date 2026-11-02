@@ -229,6 +229,45 @@ TEST(t26_ctploader_dump, czce_contract_is_keyed_by_expanded_code_with_altcode_ke
 /* DumpFees（经费率回报出口；顺带覆盖两个 exit 出口各一侧）                */
 /* ------------------------------------------------------------------ */
 
+TEST(t26_ctploader_dump, default_feesfile_dumps_to_savepath_fees_json)
+{
+	t26::setup_defaults("p_default");
+	QRYFEES = true;							// 保留默认 FEES_FILE=fees.json
+	ASSERT_EQ("fees.json", FEES_FILE);
+
+	_contracts["rb2510"] = make_contract("SHFE", "rb2510", "", "rb");
+	_commodities["SHFE.rb"] = make_commodity("SHFE", "rb");
+	loader::FeeInfo fee;
+	fee._open = 0.0001;
+	fee._close = 0.0002;
+	fee._closet = 0.0003;
+	fee._byvol = false;
+	_fees["rb2510"] = fee;
+
+	CThostFtdcInstrumentMarginRateField mf;
+	std::memset(&mf, 0, sizeof(mf));
+	t26::set_fixed(mf.InstrumentID, sizeof(mf.InstrumentID), "rb2510");
+	mf.LongMarginRatioByMoney = 0.11;
+	mf.ShortMarginRatioByMoney = 0.13;
+
+	CTraderSpi spi;
+	auto ok = t26::ok_rsp();
+	// Exercise the regular margin callback and real file writer with the default name.
+	run_in_child([&spi, &mf, &ok]() { spi.OnRspQryInstrumentMarginRate(&mf, &ok, 76, true); });
+
+	const std::string feesPath = SAVEPATH + "fees.json";
+	ASSERT_TRUE(std::filesystem::exists(feesPath));
+	rj::Document fees;
+	ASSERT_TRUE(parse_dumped(feesPath, fees));
+	const rj::Value* row = jget(fees, "SHFE.rb2510");
+	ASSERT_TRUE(row != NULL);
+	EXPECT_NEAR(0.0001, jget(*row, "open")->GetDouble(), 1e-9);
+	EXPECT_NEAR(0.0002, jget(*row, "close")->GetDouble(), 1e-9);
+	EXPECT_NEAR(0.0003, jget(*row, "closetoday")->GetDouble(), 1e-9);
+	EXPECT_FALSE(jget(*row, "byvolume")->GetBool());
+	EXPECT_NEAR(0.11, jget(*row, "margin")->GetDouble(), 1e-9);
+}
+
 TEST(t26_ctploader_dump, margin_response_dumps_fees_to_configured_relative_name_with_product_fallback)
 {
 	t26::setup_defaults("p3");

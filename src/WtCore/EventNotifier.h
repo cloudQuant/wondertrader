@@ -9,6 +9,10 @@
  */
 #pragma once
 
+#include <atomic>
+#include <memory>
+#include <mutex>
+#include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/io_context.hpp>
 
 #include "../Includes/WTSMarcos.h"
@@ -38,6 +42,9 @@ public:
 private:
 	void	tradeToJson(const char* trader, uint32_t localid, const char* stdCode, WTSTradeInfo* trdInfo, std::string& output);
 	void	orderToJson(const char* trader, uint32_t localid, const char* stdCode, WTSOrderInfo* ordInfo, std::string& output);
+	void	stopAccepting();
+	bool	canAccept(const char* topic) const;
+	template<typename Handler> void postHandler(const char* topic, Handler&& handler);
 
 public:
 	bool	init(WTSVariant* cfg);
@@ -62,8 +69,12 @@ private:
 	FundPublishMessage	_publisher;
 	FuncRegCallbacks	_register;
 
-	bool			_stopped;
+	mutable std::mutex		_state_mutex;
+	bool			_accepting;
+	std::atomic<bool>		_stopped;
 	boost::asio::io_context		_asyncio;
+	using WorkGuard = boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
+	std::unique_ptr<WorkGuard>	_work;
 	StdThreadPtr				_worker;
 };
 

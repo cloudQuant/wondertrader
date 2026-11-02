@@ -20,6 +20,10 @@
 #include <queue>
 #include <map>
 #include <atomic>
+#include <memory>
+#include <mutex>
+#include <utility>
+#include <vector>
 
 /*!
  * \brief Boost内存映射文件智能指针类型
@@ -171,7 +175,7 @@ public:
 	 *          若由本 writer 的操作回调或工作线程重入，只请求停止；外部 owner 必须随后
 	 *          在非工作线程调用 release 或销毁对象，不能在回调中直接 delete writer。
 	 *          销毁对象前，调用方仍须停止发起新的公开操作。
-	 *          定时 checker 与工作线程对既有 block map 的并发访问不由此 admission barrier 修复。
+	 *          实时块 map 与映射由 map mutex、pair lease 和线程 join 顺序保护。
 	 */
 	virtual void release() override;
 
@@ -265,7 +269,7 @@ private:
 		}
 
 	} KBlockPair;
-	typedef wt_hashmap<std::string, KBlockPair*>	KBlockFilesMap;
+	typedef wt_hashmap<std::string, std::shared_ptr<KBlockPair>>	KBlockFilesMap;
 
 	/*!
 	 * \brief Tick数据块对结构
@@ -292,7 +296,7 @@ private:
 			_lasttime = 0;
 		}
 	} TickBlockPair;
-	typedef wt_hashmap<std::string, TickBlockPair*>	TickBlockFilesMap;
+	typedef wt_hashmap<std::string, std::shared_ptr<TickBlockPair>>	TickBlockFilesMap;
 
 	/*!
 	 * \brief 成交数据块对结构
@@ -316,7 +320,7 @@ private:
 			_lasttime = 0;
 		}
 	} TransBlockPair;
-	typedef wt_hashmap<std::string, TransBlockPair*>	TransBlockFilesMap;
+	typedef wt_hashmap<std::string, std::shared_ptr<TransBlockPair>>	TransBlockFilesMap;
 
 	/*!
 	 * \brief 委托明细数据块对结构
@@ -340,7 +344,7 @@ private:
 			_lasttime = 0;
 		}
 	} OrdDtlBlockPair;
-	typedef wt_hashmap<std::string, OrdDtlBlockPair*>	OrdDtlBlockFilesMap;
+	typedef wt_hashmap<std::string, std::shared_ptr<OrdDtlBlockPair>>	OrdDtlBlockFilesMap;
 
 	/*!
 	 * \brief 委托队列数据块对结构
@@ -364,8 +368,87 @@ private:
 			_lasttime = 0;
 		}
 	} OrdQueBlockPair;
-	typedef wt_hashmap<std::string, OrdQueBlockPair*>	OrdQueBlockFilesMap;
+	typedef wt_hashmap<std::string, std::shared_ptr<OrdQueBlockPair>>	OrdQueBlockFilesMap;
 	
+
+	// Keeps a block pair locked from mapping lookup/open through the caller's last
+	// access. Deferred log callbacks are emitted only after the pair lock is dropped.
+	// Existing broadcast/dumper callbacks may still run with a lease held; same-pair
+	// callback reentry remains the separate P10-008 concern.
+	template<typename T>
+	class BlockLease
+	{
+	public:
+		BlockLease() = default;
+		BlockLease(std::shared_ptr<T> pair, IDataWriterSink* sink)
+			: _owner(std::move(pair)), _pair(_owner.get()), _sink(sink)
+		{
+			if (_pair != nullptr)
+				_lock = std::unique_lock<SpinMutex>(_pair->_mutex);
+		}
+		BlockLease(const BlockLease&) = delete;
+		BlockLease& operator=(const BlockLease&) = delete;
+		BlockLease(BlockLease&& rhs) noexcept
+			: _owner(std::move(rhs._owner)), _pair(rhs._pair), _sink(rhs._sink), _lock(std::move(rhs._lock)), _logs(std::move(rhs._logs))
+		{
+			rhs._pair = nullptr;
+			rhs._sink = nullptr;
+		}
+		BlockLease& operator=(BlockLease&&) = delete;
+		~BlockLease() { unlock(); }
+
+		explicit operator bool() const { return _pair != nullptr && _lock.owns_lock(); }
+		T* get() const { return _pair; }
+		T* operator->() const { return _pair; }
+		void deferLog(WTSLogLevel level, const std::string& message)
+		{
+			_logs.emplace_back(level, message);
+		}
+		void unlock() noexcept
+		{
+			if (_lock.owns_lock())
+				_lock.unlock();
+			if (_sink != nullptr)
+			{
+				for (const auto& entry : _logs)
+				{
+					try { _sink->outputLog(entry.first, entry.second.c_str()); }
+					catch (...) {}
+				}
+			}
+			_logs.clear();
+		}
+		void closeBlock()
+		{
+			if (_pair == nullptr || !_lock.owns_lock())
+				return;
+			_pair->_block = nullptr;
+			_pair->_file.reset();
+			_pair->_lasttime = 0;
+		}
+
+	private:
+		std::shared_ptr<T> _owner;
+		T* _pair = nullptr;
+		IDataWriterSink* _sink = nullptr;
+		std::unique_lock<SpinMutex> _lock;
+		std::vector<std::pair<WTSLogLevel, std::string>> _logs;
+	};
+
+	template<typename T>
+	using RtBlockEntryList = std::vector<std::pair<std::string, std::shared_ptr<T>>>;
+	struct RtBlocksSnapshot
+	{
+		RtBlockEntryList<TickBlockPair> ticks;
+		RtBlockEntryList<TransBlockPair> trans;
+		RtBlockEntryList<OrdDtlBlockPair> order_details;
+		RtBlockEntryList<OrdQueBlockPair> order_queues;
+		RtBlockEntryList<KBlockPair> min1;
+		RtBlockEntryList<KBlockPair> min5;
+	};
+
+	RtBlocksSnapshot snapshotRtBlocks();
+	void closeExpiredBlocks(const RtBlocksSnapshot& snapshot, uint64_t now, uint32_t expire_secs);
 
 	/*!
 	 * \brief 1分钟K线数据块映射表
@@ -402,6 +485,10 @@ private:
 	 * \details 以合约标识为键，存储实时委托队列数据
 	 */
 	OrdQueBlockFilesMap _rt_ordque_blocks;
+
+	// Guards every operation on the six block maps; never hold it while acquiring
+	// a pair mutex or invoking an external callback.
+	StdUniqueMutex _rt_blocks_map_mtx;
 
 	/*!
 	 * \brief Tick缓存锁
@@ -724,55 +811,55 @@ private:
 	 * \param ct 合约信息指针
 	 * \param period K线周期
 	 * \param bAutoCreate 如果不存在是否自动创建，默认为true
-	 * \return K线数据块对指针
+	 * \return 持有数据块对锁的 lease
 	 * 
 	 * \details 根据合约信息和K线周期获取对应的K线数据块
 	 */
-	KBlockPair* getKlineBlock(WTSContractInfo* ct, WTSKlinePeriod period, bool bAutoCreate = true);
+	BlockLease<KBlockPair> getKlineBlock(WTSContractInfo* ct, WTSKlinePeriod period, bool bAutoCreate = true);
 
 	/*!
 	 * \brief 获取Tick数据块
 	 * \param ct 合约信息指针
 	 * \param curDate 当前日期
 	 * \param bAutoCreate 如果不存在是否自动创建，默认为true
-	 * \return Tick数据块对指针
+	 * \return 持有数据块对锁的 lease
 	 * 
 	 * \details 根据合约信息和日期获取对应的Tick数据块
 	 */
-	TickBlockPair* getTickBlock(WTSContractInfo* ct, uint32_t curDate, bool bAutoCreate = true);
+	BlockLease<TickBlockPair> getTickBlock(WTSContractInfo* ct, uint32_t curDate, bool bAutoCreate = true);
 
 	/*!
 	 * \brief 获取成交数据块
 	 * \param ct 合约信息指针
 	 * \param curDate 当前日期
 	 * \param bAutoCreate 如果不存在是否自动创建，默认为true
-	 * \return 成交数据块对指针
+	 * \return 持有数据块对锁的 lease
 	 * 
 	 * \details 根据合约信息和日期获取对应的成交数据块
 	 */
-	TransBlockPair* getTransBlock(WTSContractInfo* ct, uint32_t curDate, bool bAutoCreate = true);
+	BlockLease<TransBlockPair> getTransBlock(WTSContractInfo* ct, uint32_t curDate, bool bAutoCreate = true);
 
 	/*!
 	 * \brief 获取委托明细数据块
 	 * \param ct 合约信息指针
 	 * \param curDate 当前日期
 	 * \param bAutoCreate 如果不存在是否自动创建，默认为true
-	 * \return 委托明细数据块对指针
+	 * \return 持有数据块对锁的 lease
 	 * 
 	 * \details 根据合约信息和日期获取对应的委托明细数据块
 	 */
-	OrdDtlBlockPair* getOrdDtlBlock(WTSContractInfo* ct, uint32_t curDate, bool bAutoCreate = true);
+	BlockLease<OrdDtlBlockPair> getOrdDtlBlock(WTSContractInfo* ct, uint32_t curDate, bool bAutoCreate = true);
 
 	/*!
 	 * \brief 获取委托队列数据块
 	 * \param ct 合约信息指针
 	 * \param curDate 当前日期
 	 * \param bAutoCreate 如果不存在是否自动创建，默认为true
-	 * \return 委托队列数据块对指针
+	 * \return 持有数据块对锁的 lease
 	 * 
 	 * \details 根据合约信息和日期获取对应的委托队列数据块
 	 */
-	OrdQueBlockPair* getOrdQueBlock(WTSContractInfo* ct, uint32_t curDate, bool bAutoCreate = true);
+	BlockLease<OrdQueBlockPair> getOrdQueBlock(WTSContractInfo* ct, uint32_t curDate, bool bAutoCreate = true);
 
 	/*!
 	 * \brief 释放数据块资源
@@ -782,7 +869,7 @@ private:
 	 * \details 释放指定类型的数据块资源
 	 */
 	template<typename T>
-	void	releaseBlock(T* block);
+	void	releaseBlock(BlockLease<T>& block);
 
 	/*!
 	 * \brief 将任务添加到任务队列

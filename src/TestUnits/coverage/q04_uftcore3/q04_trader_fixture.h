@@ -251,6 +251,17 @@ public:
 		return it == _contracts.end() ? nullptr : it->second;
 	}
 
+	bool removeContract(const char* exchg, const char* code)
+	{
+		auto it = _contracts.find(std::string(exchg) + "." + code);
+		if (it == _contracts.end())
+			return false;
+
+		it->second->release();
+		_contracts.erase(it);
+		return true;
+	}
+
 	WTSArray* getContracts(const char* /*exchg*/ = "", uint32_t /*uDate*/ = 0) override
 	{
 		WTSArray* ret = WTSArray::create();

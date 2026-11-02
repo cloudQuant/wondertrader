@@ -1,0 +1,113 @@
+--- /tmp/wt-i03-r60-lifecycle/baseline/TraderMocker.cpp	2026-11-01 23:00:34
++++ src/TraderMocker/TraderMocker.cpp	2026-11-01 23:19:15
+@@ -176,6 +176,9 @@
+ 
+ int TraderMocker::orderInsert(WTSEntrust* entrust)
+ {	
++	std::lock_guard<std::mutex> requestLock(_request_mutex);
++	if (_requests_closed)
++		return -1;
+ 	if (entrust == NULL)
+ 	{
+ 		return 0;
+@@ -560,6 +563,11 @@
+ 
+ bool TraderMocker::init(WTSVariant *params)
+ {
++	{
++		std::lock_guard<std::mutex> requestLock(_request_mutex);
++		if (_requests_closed)
++			return false;
++	}
+ 	if (params == NULL)
+ 		return false;
+ 
+@@ -612,6 +620,13 @@
+ 	_pos_file = path;
+ 	_pos_file += "positions.json";
+ 
++	// Release can run while validation or directory creation is in progress.
++	// Never report a successful reinitialization after admission was closed.
++	{
++		std::lock_guard<std::mutex> requestLock(_request_mutex);
++		if (_requests_closed)
++			return false;
++	}
+ 	return true;
+ }
+ 
+@@ -707,6 +722,10 @@
+ 
+ void TraderMocker::release()
+ {
++	{
++		std::lock_guard<std::mutex> requestLock(_request_mutex);
++		_requests_closed = true;
++	}
+ 	_terminated.store(true, std::memory_order_release);
+ 
+ 	if (_thrd_match && _thrd_match->joinable())
+@@ -768,6 +787,13 @@
+ 
+ void TraderMocker::connect()
+ {
++	std::unique_lock<std::mutex> requestLock(_request_mutex);
++	if (_requests_closed)
++	{
++		requestLock.unlock();
++		std::fprintf(stderr, "[TraderMocker] Cannot connect after release\n");
++		return;
++	}
+ 	reconn_udp();
+ 
+ 	_thrd_worker.reset(new StdThread(boost::bind(&boost::asio::io_context::run, &_io_service)));
+@@ -830,6 +856,9 @@
+ 
+ int TraderMocker::orderAction(WTSEntrustAction* action)
+ {
++	std::lock_guard<std::mutex> requestLock(_request_mutex);
++	if (_requests_closed)
++		return -1;
+ 	action->retain();
+ 	
+ 	boost::asio::post(_io_service, [this, action](){
+@@ -912,6 +941,9 @@
+ 
+ int TraderMocker::queryAccount()
+ {
++	std::lock_guard<std::mutex> requestLock(_request_mutex);
++	if (_requests_closed)
++		return -1;
+ 	boost::asio::post(_io_service, [this](){
+ 		WTSArray* ay = WTSArray::create();
+ 		WTSAccountInfo* accountInfo = WTSAccountInfo::create();
+@@ -944,6 +976,9 @@
+ 
+ int TraderMocker::queryPositions()
+ {
++	std::lock_guard<std::mutex> requestLock(_request_mutex);
++	if (_requests_closed)
++		return -1;
+ 	boost::asio::post(_io_service, [this](){
+ 		WTSArray* ayPos = WTSArray::create();
+ 
+@@ -993,6 +1028,9 @@
+ 
+ int TraderMocker::queryOrders()
+ {
++	std::lock_guard<std::mutex> requestLock(_request_mutex);
++	if (_requests_closed)
++		return -1;
+ 	boost::asio::post(_io_service, [this](){
+ 		StdUniqueLock lock(_mutex_api);
+ 
+@@ -1005,6 +1043,9 @@
+ 
+ int TraderMocker::queryTrades()
+ {
++	std::lock_guard<std::mutex> requestLock(_request_mutex);
++	if (_requests_closed)
++		return -1;
+ 	boost::asio::post(_io_service, [this](){
+ 		StdUniqueLock lock(_mutex_api);
+ 

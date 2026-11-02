@@ -66,6 +66,21 @@ void PORTER_FLAG mq_msg_cb(WtUInt32 /*id*/, const char* topic, const char* data,
 	g_mq_got_msg.store(true);
 }
 
+void reset_mq_logs()
+{
+	std::lock_guard<std::mutex> lk(g_log_mtx);
+	g_mq_logs.clear();
+}
+
+bool mq_log_has(const std::string& needle)
+{
+	std::lock_guard<std::mutex> lk(g_log_mtx);
+	for (const std::string& message : g_mq_logs)
+		if (message.find(needle) != std::string::npos)
+			return true;
+	return false;
+}
+
 std::string n06_tmp_dir(const char* tag)
 {
 	auto p = std::filesystem::temp_directory_path() /
@@ -135,10 +150,11 @@ TEST(n06_shareblock, master_roundtrip_and_error_paths)
 	sb.commit_section("n06domain", "sec1");
 	EXPECT_GT(sb.get_section_updatetime("n06domain", "sec1"), 0u);
 
-	// slave 侧：同进程再次 init_slave 命中已有 block；未知文件返回 false
+	// 同进程已经持有 master block；init_slave 命中现有 block，但 master
+	// 不能通过 update_slave 刷新自己。独立 slave 进程的刷新由 R19 覆盖。
 	EXPECT_TRUE(sb.init_slave("n06domain", file.c_str()));
 	EXPECT_FALSE(sb.init_slave("n06_no_file", (dir + "/not_exists.blk").c_str()));
-	EXPECT_TRUE(sb.update_slave("n06domain", true));
+	EXPECT_FALSE(sb.update_slave("n06domain", true));
 
 	// 删除段后读取回落默认值
 	EXPECT_TRUE(sb.delete_section("n06domain", "sec1"));
@@ -194,10 +210,13 @@ TEST(n06_mq_capi, unknown_ids_only_log_and_survive)
 TEST(n06_mq_capi, inproc_pub_sub_roundtrip)
 {
 	regiter_callbacks(mq_log_cb);
+	reset_mq_logs();
 	g_mq_got_msg.store(false);
 
 	const WtUInt32 server = create_server("inproc://n06_ep1", false);
+	ASSERT_NE(0u, server);
 	const WtUInt32 client = create_client("inproc://n06_ep1", mq_msg_cb);
+	ASSERT_NE(0u, client);
 	subscribe_topic(client, "n06_topic");
 	start_client(client);
 
@@ -220,15 +239,44 @@ TEST(n06_mq_capi, inproc_pub_sub_roundtrip)
 	destroy_server(server);
 }
 
-TEST(n06_mq_capi, invalid_url_server_survives_and_cleanup)
+TEST(n06_mq_capi, invalid_url_server_returns_zero_and_is_not_registered)
 {
 	regiter_callbacks(mq_log_cb);
-	// 非法协议：nanomsg nn_bind 失败 → init 返回 false，但 MQManager::create_server
-	// 仍然把 server 塞进 _servers（未判 init 结果，疑似缺陷，见 bugs）
+	reset_mq_logs();
+	// 非法协议：nn_bind 失败，create_server 返回 0 且不登记失败实例。
 	const WtUInt32 bad = create_server("bogus-scheme://x", false);
-	publish_message(bad, "t", "d", 1);       // 必须只走安全路径
+	EXPECT_EQ(0u, bad);
+	EXPECT_TRUE(mq_log_has("binding url bogus-scheme://x failed"));
+
+	reset_mq_logs();
+	publish_message(bad, "t", "d", 1);
 	destroy_server(bad);
-	SUCCEED();
+	EXPECT_TRUE(mq_log_has("MQServer 0 not exists"));
+	EXPECT_FALSE(mq_log_has("has not been initialized yet"));
+}
+
+TEST(n06_mq_capi, invalid_url_client_returns_zero_and_is_not_registered)
+{
+	regiter_callbacks(mq_log_cb);
+	reset_mq_logs();
+
+	const WtUInt32 bad = create_client("bogus-scheme://x", mq_msg_cb);
+	EXPECT_EQ(0u, bad);
+	EXPECT_TRUE(mq_log_has("connecting url bogus-scheme://x failed"));
+
+	reset_mq_logs();
+	subscribe_topic(bad, "t");
+	start_client(bad);
+	destroy_client(bad);
+	EXPECT_EQ(3u, [&]() {
+		std::lock_guard<std::mutex> lk(g_log_mtx);
+		uint32_t count = 0;
+		for (const std::string& message : g_mq_logs)
+			if (message.find("MQClient 0 not exists") != std::string::npos)
+				++count;
+		return count;
+	}());
+	EXPECT_FALSE(mq_log_has("has not been initialized yet"));
 }
 
 // ------------------------------------------------- 崩溃缺陷类（默认禁用）

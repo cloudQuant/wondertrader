@@ -8,6 +8,7 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <set>
 #include <string>
 #include <thread>
 #include <utility>
@@ -105,6 +106,32 @@ struct ParserUDPTestPeer
 	{
 		StdUniqueLock lock(parser._mtx_queue);
 		return parser._send_queue.size();
+	}
+
+	static std::vector<std::string> capture_subscription_packets(ParserUDP& parser, const CodeSet& symbols)
+	{
+		std::lock_guard<std::recursive_mutex> io_lock(parser._mtx_io);
+		parser._set_subs.clear();
+		for (const std::string& symbol : symbols)
+			parser._set_subs.insert(symbol);
+		{
+			StdUniqueLock queue_lock(parser._mtx_queue);
+			std::queue<std::string> empty;
+			parser._send_queue.swap(empty);
+		}
+
+		// With no subscription socket, do_send leaves the serialized packets in
+		// the queue for this test seam to inspect.
+		parser.subscribe();
+
+		std::vector<std::string> packets;
+		StdUniqueLock queue_lock(parser._mtx_queue);
+		while (!parser._send_queue.empty())
+		{
+			packets.push_back(parser._send_queue.front());
+			parser._send_queue.pop();
+		}
+		return packets;
 	}
 
 	static void post(ParserUDP& parser, std::function<void()> task)
@@ -302,6 +329,83 @@ struct ParserUDPTestPeer
 
 namespace
 {
+	#pragma pack(push, 1)
+	struct TestUDPSubscribePacket
+	{
+		uint32_t type;
+		char data[1020];
+	};
+	#pragma pack(pop)
+
+	static_assert(sizeof(TestUDPSubscribePacket) == 1024, "UDP subscribe request packet ABI");
+	constexpr uint32_t kUdpSubscribeMessage = 0x100;
+
+	std::vector<std::string> parse_like_udp_caster(const std::string& packet)
+	{
+		if (packet.size() != sizeof(TestUDPSubscribePacket))
+		{
+			ADD_FAILURE() << "subscription packet has unexpected size " << packet.size();
+			return {};
+		}
+
+		TestUDPSubscribePacket request{};
+		std::memcpy(&request, packet.data(), sizeof(request));
+		EXPECT_EQ(kUdpSubscribeMessage, request.type);
+
+		const char* terminator = static_cast<const char*>(
+			std::memchr(request.data, '\0', sizeof(request.data)));
+		if (terminator == nullptr)
+		{
+			ADD_FAILURE() << "receiver cannot find the required NUL terminator";
+			return {};
+		}
+
+		const std::string payload(request.data, static_cast<std::size_t>(terminator - request.data));
+		std::vector<std::string> codes;
+		std::string exchange;
+		std::string code;
+		std::size_t begin = 0;
+		while (begin <= payload.size())
+		{
+			const std::size_t comma = payload.find(',', begin);
+			const std::string full_code = payload.substr(begin,
+				comma == std::string::npos ? std::string::npos : comma - begin);
+			const std::size_t dot = full_code.find('.');
+			if (dot == std::string::npos)
+				code = full_code;
+			else
+			{
+				code = full_code.substr(dot + 1);
+				exchange = full_code.substr(0, dot);
+			}
+			EXPECT_FALSE(code.empty());
+			// ParserUDP sends instrument suffixes, which UDPCaster resolves by code
+			// through getContract(code, "").
+			EXPECT_TRUE(exchange.empty());
+			codes.push_back(code);
+			if (comma == std::string::npos)
+				break;
+			begin = comma + 1;
+		}
+		return codes;
+	}
+
+	CodeSet make_exact_capacity_symbols(std::set<std::string>& expected_codes)
+	{
+		CodeSet symbols;
+		for (uint32_t index = 0; index < 31; ++index)
+		{
+			const std::string number = index < 10 ? "0" + std::to_string(index) : std::to_string(index);
+			const std::string code = "C" + number + std::string(28, 'x');
+			symbols.insert("SHFE." + code);
+			expected_codes.insert(code);
+		}
+		const std::string short_code = "Z31" + std::string(24, 'y');
+		symbols.insert("DCE." + short_code);
+		expected_codes.insert(short_code);
+		return symbols;
+	}
+
 	WTSVariant* make_udp_config(int sport = 0)
 	{
 		WTSVariant* config = WTSVariant::createObject();
@@ -565,6 +669,74 @@ namespace
 		IParserSpi& _replacement;
 		ParserUDPNestedCallbackState& _state;
 	};
+}
+
+TEST(ParserUDPSubscribeTest, MultiContractPacketIsReadableByUdpCaster)
+{
+	ParserUDP parser;
+	CodeSet symbols;
+	symbols.insert("SHFE.ag2512");
+	symbols.insert("DCE.i2509");
+	symbols.insert("CZCE.MA701");
+
+	const std::vector<std::string> packets = ParserUDPTestPeer::capture_subscription_packets(parser, symbols);
+	ASSERT_EQ(1u, packets.size());
+	const std::vector<std::string> decoded = parse_like_udp_caster(packets.front());
+	const std::set<std::string> actual(decoded.begin(), decoded.end());
+	EXPECT_EQ((std::set<std::string>{ "ag2512", "i2509", "MA701" }), actual);
+}
+
+TEST(ParserUDPSubscribeTest, ExactlyFullReceiverFieldIsNulTerminated)
+{
+	ParserUDP parser;
+	std::set<std::string> expected_codes;
+	const CodeSet symbols = make_exact_capacity_symbols(expected_codes);
+	const std::vector<std::string> packets = ParserUDPTestPeer::capture_subscription_packets(parser, symbols);
+	ASSERT_EQ(1u, packets.size());
+	ASSERT_EQ(sizeof(TestUDPSubscribePacket), packets.front().size());
+
+	TestUDPSubscribePacket request{};
+	std::memcpy(&request, packets.front().data(), sizeof(request));
+	const char* terminator = static_cast<const char*>(
+		std::memchr(request.data, '\0', sizeof(request.data)));
+	ASSERT_NE(nullptr, terminator);
+	EXPECT_EQ(request.data + sizeof(request.data) - 1, terminator);
+	const std::vector<std::string> decoded = parse_like_udp_caster(packets.front());
+	const std::set<std::string> actual(decoded.begin(), decoded.end());
+	EXPECT_EQ(expected_codes, actual);
+}
+
+TEST(ParserUDPSubscribeTest, OverCapacityContractsAreChunkedWithoutLoss)
+{
+	ParserUDP parser;
+	std::set<std::string> expected_codes;
+	CodeSet symbols = make_exact_capacity_symbols(expected_codes);
+	symbols.insert("DCE.EXTRA");
+	expected_codes.insert("EXTRA");
+
+	const std::vector<std::string> packets = ParserUDPTestPeer::capture_subscription_packets(parser, symbols);
+	ASSERT_EQ(2u, packets.size());
+	std::set<std::string> actual;
+	for (const std::string& packet : packets)
+	{
+		const std::vector<std::string> decoded = parse_like_udp_caster(packet);
+		for (const std::string& code : decoded)
+			EXPECT_TRUE(actual.insert(code).second) << "duplicate code across packets: " << code;
+	}
+	EXPECT_EQ(expected_codes, actual);
+}
+
+TEST(ParserUDPSubscribeTest, UnencodableSingleTokenDoesNotCorruptValidSubscriptions)
+{
+	ParserUDP parser;
+	CodeSet symbols;
+	symbols.insert("SHFE.rb");
+	symbols.insert("DCE." + std::string(1020, 'z'));
+
+	const std::vector<std::string> packets = ParserUDPTestPeer::capture_subscription_packets(parser, symbols);
+	ASSERT_EQ(1u, packets.size());
+	const std::vector<std::string> decoded = parse_like_udp_caster(packets.front());
+	EXPECT_EQ((std::set<std::string>{ "rb" }), std::set<std::string>(decoded.begin(), decoded.end()));
 }
 
 TEST(ParserUDPQueueLockTest, SuccessfulWriteReleasesQueueLockBeforeSchedulingNextSend)

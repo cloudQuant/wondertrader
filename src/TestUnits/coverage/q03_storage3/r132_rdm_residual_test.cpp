@@ -121,20 +121,23 @@ TEST_F(R132RdmResidualTest, R132RdmRtHftComparatorsSeeOlderActionDate)
 	vector<WTSOrdQueStruct> que;
 	que.push_back(make_ordque(20240110, 20240109, 140000000, 1));
 	que.push_back(make_ordque(20240110, 20240109, 140100000, 2));
+	que.push_back(make_ordque(20240110, 20240110, 140200000, 3)); // writer-owned final slot
 	ASSERT_TRUE(write_bytes("rt/queue/SSE/600022.dmb",
-		make_rt_block<WTSOrdQueStruct>(BT_RT_OrdQueue, 20240110, 2, 8, que)));
+		make_rt_block<WTSOrdQueStruct>(BT_RT_OrdQueue, 20240110, (uint32_t)que.size(), 8, que)));
 
 	vector<WTSOrdDtlStruct> dtl;
 	dtl.push_back(make_orddtl(20240110, 20240109, 140000000, 11));
 	dtl.push_back(make_orddtl(20240110, 20240109, 140100000, 12));
+	dtl.push_back(make_orddtl(20240110, 20240110, 140200000, 13)); // writer-owned final slot
 	ASSERT_TRUE(write_bytes("rt/orders/SSE/600023.dmb",
-		make_rt_block<WTSOrdDtlStruct>(BT_RT_OrdDetail, 20240110, 2, 8, dtl)));
+		make_rt_block<WTSOrdDtlStruct>(BT_RT_OrdDetail, 20240110, (uint32_t)dtl.size(), 8, dtl)));
 
 	vector<WTSTransStruct> trs;
 	trs.push_back(make_trans(20240110, 20240109, 140000000, 21));
 	trs.push_back(make_trans(20240110, 20240109, 140100000, 22));
+	trs.push_back(make_trans(20240110, 20240110, 140200000, 23)); // writer-owned final slot
 	ASSERT_TRUE(write_bytes("rt/trans/SSE/600024.dmb",
-		make_rt_block<WTSTransStruct>(BT_RT_Trnsctn, 20240110, 2, 8, trs)));
+		make_rt_block<WTSTransStruct>(BT_RT_Trnsctn, 20240110, (uint32_t)trs.size(), 8, trs)));
 
 	WTSOrdQueSlice* sq = _reader.readOrdQueSliceByRange("SSE.STK.600022",
 		20240109210000000ull, 20240110100000000ull);

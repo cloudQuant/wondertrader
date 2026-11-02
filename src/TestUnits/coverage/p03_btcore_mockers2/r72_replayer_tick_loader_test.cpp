@@ -86,6 +86,14 @@ TEST_F(R72ReplayerTickLoader, TickSliceCursorAndEtimeMatrix)
 		rp.register_sink(&sink, "r72_tick_c");
 		ASSERT_TRUE(rp.prepare());
 
+		// cutoff 与末笔时间精确相等时，API 按严格早于 cutoff 取数，故末笔不包含。
+		WTSTickSlice* exact = rp.get_tick_slice(kCode, 2, 202001020932ull);
+		ASSERT_NE(nullptr, exact);
+		ASSERT_EQ(2u, exact->size());
+		EXPECT_DOUBLE_EQ(10.0, exact->at(0)->price);
+		EXPECT_DOUBLE_EQ(10.5, exact->at(1)->price);
+		exact->release();
+
 		// etime 晚于末笔：lower_bound 到尾，按契约应取最后 count 笔（10.5、11）。
 		WTSTickSlice* s = rp.get_tick_slice(kCode, 2, 202001021000ull);
 		ASSERT_NE(nullptr, s);
@@ -140,6 +148,8 @@ TEST_F(R72ReplayerTickLoader, LoaderBarsAndTicksDriveBarReplay)
 {
 	r72::Loader loader;
 	std::vector<WTSBarStruct> bars;
+	// Provide pre-start history so the main daily slice is nonempty at replay start.
+	bars.emplace_back(r72::make_bar(20191231u, 1500u, 10.0));
 	for (uint32_t i = 0; i < 5; i++)
 	{
 		bars.emplace_back(r72::make_bar(kDates[i], 1500u, 10.5 + i));

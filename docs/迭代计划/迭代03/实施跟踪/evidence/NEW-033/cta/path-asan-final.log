@@ -1,0 +1,136 @@
++ CXX=/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++
++ boost=/opt/homebrew/Cellar/boost/1.88.0/include
++ fmt=/opt/homebrew/Cellar/fmt/11.2.0/include
++ spdlog=/opt/homebrew/Cellar/spdlog/1.15.3/include
++ case $(uname -s) in
+++ uname -s
++ ext=dylib
++ shared_flag=-dynamiclib
++ dl_lib=
++ mkdir -p /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/plugins /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/logs
++ deep_rel=deep
++ for part in 01 02 03 04 05
++ deep_rel=deep/01_abcdefghijklmnopqrstuvwxyz0123456789
++ for part in 01 02 03 04 05
++ deep_rel=deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789
++ for part in 01 02 03 04 05
++ deep_rel=deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789
++ for part in 01 02 03 04 05
++ deep_rel=deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789/04_abcdefghijklmnopqrstuvwxyz0123456789
++ for part in 01 02 03 04 05
++ deep_rel=deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789/04_abcdefghijklmnopqrstuvwxyz0123456789/05_abcdefghijklmnopqrstuvwxyz0123456789
++ mkdir -p /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789/04_abcdefghijklmnopqrstuvwxyz0123456789/05_abcdefghijklmnopqrstuvwxyz0123456789
++ shasum -a 256 /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/CtaStrategyMgr.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/CtaStrategyMgr.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/WTSTools/WTSLogger.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmtlib.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/factory.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/check.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/logger_stub.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/run_path_asan.sh /private/tmp/wt-i03-cta-path-before/CtaStrategyMgr.cpp
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ --version
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ -std=c++17 -pthread -fPIC -fsanitize=address -fno-omit-frame-pointer -dynamiclib /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/factory.cpp -o /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/plugins/fixture.dylib
++ cp /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/plugins/fixture.dylib /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789/04_abcdefghijklmnopqrstuvwxyz0123456789/05_abcdefghijklmnopqrstuvwxyz0123456789/fixture.dylib
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ -std=c++17 -g -O1 -pthread -fsanitize=address -fno-omit-frame-pointer -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include -I/opt/homebrew/Cellar/spdlog/1.15.3/include -include stdlib.h -include /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/CtaStrategyMgr.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/logger_stub.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/check.cpp -o /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/current
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ -std=c++17 -g -O1 -pthread -fsanitize=address -fno-omit-frame-pointer -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -I/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include -I/opt/homebrew/Cellar/spdlog/1.15.3/include -include stdlib.h -include /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h /private/tmp/wt-i03-cta-path-before/CtaStrategyMgr.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/logger_stub.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/check.cpp -o /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/previous
++ ulimit -c 0
++ run_case /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/current short-directory current-short
++ binary=/private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/current
++ mode=short-directory
++ label=current-short
++ folder=plugins
++ set +e
++ ASAN_OPTIONS=detect_leaks=0:halt_on_error=1
++ WT_CTA_FACTORY_MODE=short-directory
++ WT_CTA_MARKER=/private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/logs/current-short.marker
++ WT_CTA_LOG_MARKER=/private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/logs/current-short.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/current short-directory /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/plugins /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/plugins/fixture.dylib /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/plugins /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/plugins/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-short 0
+current-short exit=0
++ case "$label:$rc" in
++ run_case /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/current deep-directory current-deep deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789/04_abcdefghijklmnopqrstuvwxyz0123456789/05_abcdefghijklmnopqrstuvwxyz0123456789
++ binary=/private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/current
++ mode=deep-directory
++ label=current-deep
++ folder=deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789/04_abcdefghijklmnopqrstuvwxyz0123456789/05_abcdefghijklmnopqrstuvwxyz0123456789
++ set +e
++ ASAN_OPTIONS=detect_leaks=0:halt_on_error=1
++ WT_CTA_FACTORY_MODE=deep-directory
++ WT_CTA_MARKER=/private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/logs/current-deep.marker
++ WT_CTA_LOG_MARKER=/private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/logs/current-deep.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/current deep-directory /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789/04_abcdefghijklmnopqrstuvwxyz0123456789/05_abcdefghijklmnopqrstuvwxyz0123456789 /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789/04_abcdefghijklmnopqrstuvwxyz0123456789/05_abcdefghijklmnopqrstuvwxyz0123456789/fixture.dylib /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/plugins /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/plugins/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-deep 0
+current-deep exit=0
++ case "$label:$rc" in
++ run_case /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/current long-directory-error current-long-error
++ binary=/private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/current
++ mode=long-directory-error
++ label=current-long-error
++ folder=plugins
++ set +e
++ ASAN_OPTIONS=detect_leaks=0:halt_on_error=1
++ WT_CTA_FACTORY_MODE=long-directory-error
++ WT_CTA_MARKER=/private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/logs/current-long-error.marker
++ WT_CTA_LOG_MARKER=/private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/logs/current-long-error.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/current long-directory-error /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/plugins /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/plugins/fixture.dylib /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/plugins /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/plugins/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-long-error 0
+current-long-error exit=0
++ case "$label:$rc" in
++ run_case /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/previous short-directory previous-short
++ binary=/private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/previous
++ mode=short-directory
++ label=previous-short
++ folder=plugins
++ set +e
++ ASAN_OPTIONS=detect_leaks=0:halt_on_error=1
++ WT_CTA_FACTORY_MODE=short-directory
++ WT_CTA_MARKER=/private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/logs/previous-short.marker
++ WT_CTA_LOG_MARKER=/private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/logs/previous-short.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/previous short-directory /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/plugins /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/plugins/fixture.dylib /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/plugins /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/plugins/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' previous-short 0
+previous-short exit=0
++ case "$label:$rc" in
++ run_case /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/previous deep-directory previous-red-deep deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789/04_abcdefghijklmnopqrstuvwxyz0123456789/05_abcdefghijklmnopqrstuvwxyz0123456789
++ binary=/private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/previous
++ mode=deep-directory
++ label=previous-red-deep
++ folder=deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789/04_abcdefghijklmnopqrstuvwxyz0123456789/05_abcdefghijklmnopqrstuvwxyz0123456789
++ set +e
++ ASAN_OPTIONS=detect_leaks=0:halt_on_error=1
++ WT_CTA_FACTORY_MODE=deep-directory
++ WT_CTA_MARKER=/private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/logs/previous-red-deep.marker
++ WT_CTA_LOG_MARKER=/private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/logs/previous-red-deep.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/previous deep-directory /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789/04_abcdefghijklmnopqrstuvwxyz0123456789/05_abcdefghijklmnopqrstuvwxyz0123456789 /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789/04_abcdefghijklmnopqrstuvwxyz0123456789/05_abcdefghijklmnopqrstuvwxyz0123456789/fixture.dylib /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/plugins /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/plugins/fixture.dylib
++ rc=1
++ set -e
++ printf '%s exit=%s\n' previous-red-deep 1
+previous-red-deep exit=1
++ case "$label:$rc" in
++ run_case /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/previous long-directory-error previous-red-long-error
++ binary=/private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/previous
++ mode=long-directory-error
++ label=previous-red-long-error
++ folder=plugins
++ set +e
++ ASAN_OPTIONS=detect_leaks=0:halt_on_error=1
++ WT_CTA_FACTORY_MODE=long-directory-error
++ WT_CTA_MARKER=/private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/logs/previous-red-long-error.marker
++ WT_CTA_LOG_MARKER=/private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/logs/previous-red-long-error.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/previous long-directory-error /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/plugins /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/plugins/fixture.dylib /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/plugins /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/plugins/fixture.dylib
+src/TestUnits/fixtures/cta_factory_quarantine/run_path_asan.sh: line 36: 19713 Abort trap: 6           ASAN_OPTIONS=detect_leaks=0:halt_on_error=1 WT_CTA_FACTORY_MODE="$mode" WT_CTA_MARKER="$run_dir/logs/$label.marker" WT_CTA_LOG_MARKER="$run_dir/logs/$label.formatted" perl -e 'alarm 20; exec @ARGV' -- "$binary" "$mode" "$run_dir/$folder" "$run_dir/$folder/fixture.$ext" "$run_dir/plugins" "$run_dir/plugins/fixture.$ext" > "$run_dir/logs/$label.log" 2>&1
++ rc=134
++ set -e
++ printf '%s exit=%s\n' previous-red-long-error 134
+previous-red-long-error exit=134
++ case "$label:$rc" in
++ grep -q 'ERROR: AddressSanitizer' /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/logs/previous-red-long-error.log
++ echo previous-long-error-address-sanitizer-report=yes
+previous-long-error-address-sanitizer-report=yes
++ shasum -a 256 /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/CtaStrategyMgr.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/CtaStrategyMgr.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/WTSTools/WTSLogger.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmtlib.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/factory.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/check.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/logger_stub.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/run_path_asan.sh /private/tmp/wt-i03-cta-path-before/CtaStrategyMgr.cpp
++ cmp /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/source-before.sha256 /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/source-after.sha256
++ shasum -a 256 /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/current /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/previous /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/plugins/fixture.dylib
++ find /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E -type l -print
++ test '!' -s /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E/symlinks.txt
++ printf 'evidence=%s\n' /private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E
+evidence=/private/tmp/wt-i03-cta-quarantine/path-asan-final/run.wtBIi56E

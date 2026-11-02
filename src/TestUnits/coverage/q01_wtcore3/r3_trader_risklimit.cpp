@@ -42,10 +42,15 @@
 
 #include "../p11_wtcore_traderadapter/p11_trader_fixture.h"
 
+#include <Share/DLLHelper.hpp>
 #include <Share/ModuleHelper.hpp>
 #include <WtCore/ActionPolicyMgr.h>
 #include <Includes/WTSSessionInfo.hpp>
 #include <rapidjson/document.h>
+
+#ifndef WT_P11_TRADERMOCKER_PATH
+#error "WT_P11_TRADERMOCKER_PATH must point to the built TraderMocker plugin"
+#endif
 
 using namespace p11fix;
 using wtp::TraderAdapter;
@@ -256,29 +261,45 @@ protected:
         dir_ = r3TmpDir("policy");
         oldInstDir_ = WtHelper::getInstDir();
         moduleInstallDir_ = dir_ + "install/";
+        namespace fs = std::filesystem;
         const std::string sourceModule = DLLHelper::wrap_module("TraderMocker");
-        const std::filesystem::path binDir(getBinDir());
-        const std::vector<std::filesystem::path> candidates = {
-            binDir / sourceModule,
-            binDir.parent_path() / sourceModule,
-            std::filesystem::current_path() / "build-cov/build_x64/Debug/bin" / sourceModule
-        };
-        std::filesystem::path sourcePath;
-        for (const auto& candidate : candidates) {
-            if (std::filesystem::exists(candidate)) {
-                sourcePath = candidate;
-                break;
-            }
-        }
+        const fs::path loaderCwd(WtHelper::getCWD());
+        std::error_code cwdEc;
+        const fs::path processCwd = fs::current_path(cwdEc);
+        ASSERT_FALSE(cwdEc) << "cannot inspect process CWD: " << cwdEc.message();
+        const bool sameCwd = fs::equivalent(loaderCwd, processCwd, cwdEc);
+        ASSERT_FALSE(cwdEc) << "cannot compare WtHelper CWD with process CWD: " << cwdEc.message();
+        ASSERT_TRUE(sameCwd) << "WtHelper CWD cache differs from the process CWD";
+        const fs::path cwdModule = loaderCwd / "traders" / sourceModule;
+        const fs::file_status cwdModuleStatus = fs::symlink_status(cwdModule);
+        ASSERT_TRUE(cwdModuleStatus.type() == fs::file_type::not_found)
+            << "CWD already contains a TraderMocker plugin; refusing to load or overwrite it: "
+            << cwdModule.string();
+
+        const fs::path sourcePath(WT_P11_TRADERMOCKER_PATH);
+        ASSERT_TRUE(sourcePath.is_absolute())
+            << "WT_P11_TRADERMOCKER_PATH must be absolute: " << sourcePath.string();
+        std::error_code sourceEc;
+        const fs::file_status sourceStatus = fs::symlink_status(sourcePath, sourceEc);
+        ASSERT_FALSE(sourceEc) << "cannot inspect TraderMocker plugin: " << sourceEc.message();
+        ASSERT_TRUE(fs::is_regular_file(sourceStatus))
+            << "TraderMocker plugin must be a non-symlink regular file: " << sourcePath.string();
+
         const std::filesystem::path moduleDir = std::filesystem::path(moduleInstallDir_) / "traders";
         std::error_code moduleEc;
         std::filesystem::create_directories(moduleDir, moduleEc);
-        ASSERT_FALSE(sourcePath.empty()) << "TraderMocker plugin not found beside test executable";
         ASSERT_FALSE(moduleEc);
-        const bool copied = std::filesystem::copy_file(sourcePath, moduleDir / sourceModule,
+        const fs::path stagedModule = moduleDir / sourceModule;
+        const bool copied = fs::copy_file(sourcePath, stagedModule,
             std::filesystem::copy_options::overwrite_existing, moduleEc);
         ASSERT_TRUE(copied) << moduleEc.message();
         ASSERT_FALSE(moduleEc);
+        std::error_code stagedEc;
+        const fs::file_status stagedStatus = fs::symlink_status(stagedModule, stagedEc);
+        ASSERT_FALSE(stagedEc) << "cannot inspect staged TraderMocker plugin: " << stagedEc.message();
+        ASSERT_TRUE(fs::is_regular_file(stagedStatus))
+            << "staged TraderMocker plugin must be a non-symlink regular file: "
+            << stagedModule.string();
         WtHelper::setInstDir(moduleInstallDir_.c_str());
         sess_ = WTSSessionInfo::create("TRADING", "TRADING", 0);
         sess_->addTradingSection(900, 1130);
@@ -778,21 +799,107 @@ TEST_F(R3TraderTest, cancel_empty_code_cancels_all_buy_orders_without_crashing)
     buildReady(trader);
 
     WTSArray* seededOrders = r3OwnedArray({
-        r3Order(ct_, WDT_LONG, WOT_OPEN, 2, 0, "ORD1", ("otp." + id_ + ".2001").c_str()) });
+        r3Order(ct_, WDT_LONG, WOT_OPEN, 2, 0, "ORD1", ("otp." + id_ + ".2001").c_str()),
+        r3Order(ct2_, WDT_LONG, WOT_OPEN, 2, 0, "ORD2", ("otp." + id_ + ".2002").c_str()) });
     trader.onRspOrders(seededOrders);
     seededOrders->release();
 
-    // TraderAdapter has an explicit empty-code "all orders" path. Keep the
-    // wrapper contract isolated because extractStdCode currently runs first.
+    // extractStdCode safely returns empty CodeInfo for empty input; the wrapper
+    // keeps its explicit all-contract behavior for the requested side.
     EXPECT_EXIT(
         {
             OrderIDs cancelled = trader.cancel("", true);
-            if (cancelled.size() != 1u || api_.n_action_ != 1u)
+            bool foundAg = false;
+            bool foundAu = false;
+            for (uint32_t localid : cancelled)
+            {
+                foundAg = foundAg || localid == 2001u;
+                foundAu = foundAu || localid == 2002u;
+            }
+            if (cancelled.size() != 2u || !foundAg || !foundAu || api_.n_action_ != 2u)
                 std::exit(2);
             std::exit(0);
         },
         ::testing::ExitedWithCode(0), "");
 
+    trader.release();
+}
+
+TEST_F(R3TraderTest, cancel_standard_code_only_cancels_matching_contract)
+{
+    TraderAdapter trader;
+    buildReady(trader);
+
+    WTSArray* seededOrders = r3OwnedArray({
+        r3Order(ct_, WDT_LONG, WOT_OPEN, 2, 0, "ORD1", ("otp." + id_ + ".2001").c_str()),
+        r3Order(ct2_, WDT_LONG, WOT_OPEN, 2, 0, "ORD2", ("otp." + id_ + ".2002").c_str()) });
+    trader.onRspOrders(seededOrders);
+    seededOrders->release();
+
+    OrderIDs cancelled = trader.cancel(kStdCode, true);
+    ASSERT_EQ(1u, cancelled.size());
+    EXPECT_EQ(2001u, cancelled[0]);
+    EXPECT_EQ(1u, api_.n_action_);
+    trader.release();
+}
+
+TEST_F(R3TraderTest, cancel_empty_code_filters_sell_orders_across_contracts)
+{
+    TraderAdapter trader;
+    buildReady(trader);
+
+    WTSArray* seededOrders = r3OwnedArray({
+        r3Order(ct_, WDT_LONG, WOT_OPEN, 2, 0, "ORD1", ("otp." + id_ + ".2001").c_str()),
+        r3Order(ct_, WDT_SHORT, WOT_OPEN, 2, 0, "ORD2", ("otp." + id_ + ".2002").c_str()),
+        r3Order(ct2_, WDT_SHORT, WOT_OPEN, 3, 0, "ORD3", ("otp." + id_ + ".2003").c_str()) });
+    trader.onRspOrders(seededOrders);
+    seededOrders->release();
+
+    OrderIDs cancelled = trader.cancel("", false);
+    bool foundAgSell = false;
+    bool foundAuSell = false;
+    bool foundBuy = false;
+    for (uint32_t localid : cancelled)
+    {
+        foundAgSell = foundAgSell || localid == 2002u;
+        foundAuSell = foundAuSell || localid == 2003u;
+        foundBuy = foundBuy || localid == 2001u;
+    }
+    EXPECT_EQ(2u, cancelled.size());
+    EXPECT_TRUE(foundAgSell);
+    EXPECT_TRUE(foundAuSell);
+    EXPECT_FALSE(foundBuy);
+    EXPECT_EQ(2u, api_.n_action_);
+    trader.release();
+}
+
+TEST_F(R3TraderTest, cancel_empty_code_stops_after_positive_quantity)
+{
+    TraderAdapter trader;
+    buildReady(trader);
+
+    WTSArray* seededOrders = r3OwnedArray({
+        r3Order(ct_, WDT_LONG, WOT_OPEN, 2, 0, "ORD1", ("otp." + id_ + ".2001").c_str()),
+        r3Order(ct2_, WDT_LONG, WOT_OPEN, 2, 0, "ORD2", ("otp." + id_ + ".2002").c_str()),
+        r3Order(ct_, WDT_LONG, WOT_OPEN, 2, 0, "ORD3", ("otp." + id_ + ".2003").c_str()) });
+    trader.onRspOrders(seededOrders);
+    seededOrders->release();
+
+    // Each accepted cancel removes two units. Any two orders meet qty=3,
+    // regardless of map iteration order; the third order must not be submitted.
+    OrderIDs cancelled = trader.cancel("", true, 3.0);
+    double acceptedQty = 0.0;
+    for (uint32_t localid : cancelled)
+    {
+        if (localid == 2001u || localid == 2002u || localid == 2003u)
+            acceptedQty += 2.0;
+        else
+            ADD_FAILURE() << "unexpected local ID " << localid;
+    }
+    EXPECT_EQ(2u, cancelled.size());
+    EXPECT_DOUBLE_EQ(4.0, acceptedQty);
+    EXPECT_GE(acceptedQty, 3.0);
+    EXPECT_EQ(2u, api_.n_action_);
     trader.release();
 }
 

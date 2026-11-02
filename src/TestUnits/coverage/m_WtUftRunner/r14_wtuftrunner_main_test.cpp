@@ -18,6 +18,7 @@
  */
 #include <gtest/gtest.h>
 
+#include <cstdlib>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -27,6 +28,7 @@
 #include "WtUftRunner/WtUftRunner.h"
 /* WtUftRunner.cpp:57 用的是 WtUftCore 这份 WtHelper（与 WtDtCore/WtRunner 侧同名不同实现，见缺陷登记） */
 #include "WtUftCore/WtHelper.h"
+#include "WTSTools/WTSLogger.h"
 
 /* 生产 TU（main.cpp:31）经 -Dmain=... 改名后的入口 */
 int wt_coverage_main_wtuftrunner(int argc, char* argv[]);
@@ -41,8 +43,32 @@ namespace {
 
 const char* kAbsentLogCfg = "./r14_uft_absent_logcfg.yaml";
 const char* kAbsentCfg = "./r14_uft_absent_config.yaml";
+const char* kMissingBasefilesCfg = "./r14_uft_missing_basefiles.yaml";
+const char* kNonObjectBasefilesCfg = "./r14_uft_non_object_basefiles.yaml";
 /* 本用例自己写的配置：只放「能让 config() 逐段早退」的键，不放 env/data/share_domain/parsers/traders */
 const char* kSelfAuthoredCfg = "./r14_uft_min_config.yaml";
+
+class R14LogCapture : public ILogHandler
+{
+public:
+	std::string messages;
+
+	void handleLogAppend(WTSLogLevel, const char* message) override
+	{
+		if (message != nullptr)
+			messages.append(message).push_back('\n');
+	}
+};
+
+class R14ScopedLogHandler
+{
+public:
+	explicit R14ScopedLogHandler(ILogHandler* handler) { WTSLogger::registerHandler(handler); }
+	~R14ScopedLogHandler() { WTSLogger::registerHandler(nullptr); }
+
+	R14ScopedLogHandler(const R14ScopedLogHandler&) = delete;
+	R14ScopedLogHandler& operator=(const R14ScopedLogHandler&) = delete;
+};
 
 int call_entry(std::vector<const char*> words)
 {
@@ -70,6 +96,18 @@ void write_min_config()
 		<< "bspolicy: ./r14_uft_absent_actpolicy.yaml\n";
 	out.flush();
 	out.close();
+}
+
+void write_missing_basefiles_config()
+{
+	std::ofstream out(kMissingBasefilesCfg, std::ios::binary | std::ios::trunc);
+	out << "env: {}\n";
+}
+
+void initialize_error_log_capture(R14LogCapture& capture)
+{
+	WTSLogger::init(R"({"root":{"level":"error","async":false,"sinks":[]}})", false);
+	WTSLogger::registerHandler(&capture);
 }
 
 } // namespace
@@ -171,6 +209,52 @@ TEST(r14_uft_config, authored_config_without_basefiles_children_walks_the_early_
 	EXPECT_FALSE(runner.config(kSelfAuthoredCfg));
 }
 
+TEST(r14_uft_config, missing_basefiles_is_reported_and_rejected_before_run)
+{
+	write_missing_basefiles_config();
+	ASSERT_TRUE(StdFile::exists(kMissingBasefilesCfg));
+
+	R14LogCapture capture;
+	initialize_error_log_capture(capture);
+	R14ScopedLogHandler logHandler(&capture);
+	WtUftRunner runner;
+	EXPECT_FALSE(runner.config(kMissingBasefilesCfg));
+	EXPECT_NO_THROW(runner.run());
+	EXPECT_NE(std::string::npos, capture.messages.find("UFT basefiles configuration is missing"));
+	EXPECT_NE(std::string::npos, capture.messages.find("UFT runner cannot run without a successful"));
+}
+
+TEST(r14_uft_config, non_object_basefiles_is_reported_and_rejected)
+{
+	{
+		std::ofstream out(kNonObjectBasefilesCfg, std::ios::binary | std::ios::trunc);
+		out << "basefiles: invalid\n"
+			<< "env: {}\n";
+	}
+	ASSERT_TRUE(StdFile::exists(kNonObjectBasefilesCfg));
+
+	R14LogCapture capture;
+	initialize_error_log_capture(capture);
+	R14ScopedLogHandler logHandler(&capture);
+	WtUftRunner runner;
+	EXPECT_FALSE(runner.config(kNonObjectBasefilesCfg));
+	EXPECT_NE(std::string::npos, capture.messages.find("UFT basefiles configuration must be an object"));
+}
+
+TEST(r14_uft_config, object_basefiles_passes_validation_and_reaches_env_check)
+{
+	write_min_config();
+	ASSERT_TRUE(StdFile::exists(kSelfAuthoredCfg));
+
+	R14LogCapture capture;
+	initialize_error_log_capture(capture);
+	R14ScopedLogHandler logHandler(&capture);
+	WtUftRunner runner;
+	EXPECT_FALSE(runner.config(kSelfAuthoredCfg));
+	EXPECT_NE(std::string::npos, capture.messages.find("UFT environment configuration is missing"));
+	EXPECT_EQ(std::string::npos, capture.messages.find("UFT basefiles configuration"));
+}
+
 TEST(r14_uft_config, missing_then_authored_configs_use_separate_runner_instances)
 {
 	WtUftRunner missingRunner;
@@ -212,6 +296,14 @@ TEST(r14_uft_entry, config_failure_returns_nonzero_without_running_engine)
 {
 	write_min_config();
 	EXPECT_NE(0, call_entry({"wt_uft_runner", "-c", kSelfAuthoredCfg, "-l", kAbsentLogCfg}));
+}
+
+TEST(r14_uft_entry, missing_basefiles_returns_nonzero_without_running_engine)
+{
+	write_missing_basefiles_config();
+	ASSERT_TRUE(StdFile::exists(kMissingBasefilesCfg));
+	EXPECT_EXIT(std::exit(call_entry({"wt_uft_runner", "-c", kMissingBasefilesCfg, "-l", kAbsentLogCfg})),
+		::testing::ExitedWithCode(1), "");
 }
 
 /* -------------------------------------------------------------------------

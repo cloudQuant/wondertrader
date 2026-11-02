@@ -17,6 +17,7 @@
 // 落盘：std::filesystem/temp_directory_path()/r23_w_<pid>_<seq>，TearDown release()+remove_all。
 // 线程：init 起的 check_loop 不可 join，故 writer 只 release 不 delete（见夹具头注释）。
 #include "r23_writer_fixture.h"
+#include "../p10_storage_writer/p10_writer_test_hooks.h"
 
 namespace r23 {
 
@@ -489,12 +490,18 @@ TEST_F(R23WriterTest, CacheResizeMapFailurePreservesOldCacheAndAllowsRetry)
 	write_tick(w, first, 0);
 
 	const string original_path = cache_file();
-	const string backup_path = original_path + ".before_failed_resize";
-	std::error_code ec;
-	std::filesystem::rename(original_path, backup_path, ec);
-	ASSERT_FALSE(ec) << ec.message();
-	std::filesystem::create_symlink("/dev/null", original_path, ec);
-	ASSERT_FALSE(ec) << ec.message();
+	struct FailureState { bool pending = true; bool retained = false; } failure;
+	p10_writer_test_hooks::Hooks hooks;
+	hooks.context = &failure;
+	hooks.fail_next_tick_cache_resize_map = [](void* context, bool retained) noexcept {
+		auto* state = static_cast<FailureState*>(context);
+		if (!state->pending) return false;
+		state->pending = false;
+		state->retained = retained;
+		return true;
+	};
+	ASSERT_TRUE(p10_writer_test_hooks::install(w, hooks));
+	struct Cleanup { WtDataWriter* writer; ~Cleanup() { p10_writer_test_hooks::uninstall(writer); } } cleanup{w};
 
 	TickSpec second;
 	second.code = "rb2211";
@@ -505,12 +512,15 @@ TEST_F(R23WriterTest, CacheResizeMapFailurePreservesOldCacheAndAllowsRetry)
 
 	EXPECT_EQ(_sink->ticks(), broadcasts_before);
 	EXPECT_FALSE(file_exists(rt_tick_file("rb2211")));
-	EXPECT_TRUE(_sink->has_log("mapping expanded tick cache file", LL_ERROR));
-	const RTBlockHeader preserved = read_block_header<RTBlockHeader>(backup_path);
+	EXPECT_FALSE(failure.pending);
+	EXPECT_TRUE(failure.retained);
+	EXPECT_TRUE(_sink->has_log("Injected mapping failure after extending tick cache file", LL_ERROR));
+	const RTBlockHeader preserved = read_block_header<RTBlockHeader>(original_path);
 	EXPECT_EQ(preserved._capacity, 2u);
 	EXPECT_EQ(preserved._size, 1u);
-	EXPECT_EQ(file_size(backup_path),
-		(uintmax_t)(sizeof(RTTickCache) + 2 * sizeof(TickCacheItem)));
+	// The file grew before the injected failure; its logical header is uncommitted.
+	EXPECT_EQ(file_size(original_path),
+		(uintmax_t)(sizeof(RTTickCache) + 202 * sizeof(TickCacheItem)));
 
 	// 失败后的旧映射仍可读，失败的新代码没有进入索引；两者都证明提交前没有改索引/size。
 	WTSTickData* cached_first = w->getCurTick("rb2210", "SHFE");
@@ -519,11 +529,7 @@ TEST_F(R23WriterTest, CacheResizeMapFailurePreservesOldCacheAndAllowsRetry)
 	cached_first->release();
 	EXPECT_TRUE(w->getCurTick("rb2211", "SHFE") == NULL);
 
-	// 恢复原文件名后重试同一对象，应完成映射、索引和数据提交。
-	ASSERT_TRUE(std::filesystem::remove(original_path, ec));
-	ASSERT_FALSE(ec) << ec.message();
-	std::filesystem::rename(backup_path, original_path, ec);
-	ASSERT_FALSE(ec) << ec.message();
+	// 一次性注入消耗后重试同一对象，应完成映射、索引和数据提交。
 	ASSERT_TRUE(w->writeTick(retryable, 0));
 
 	const RTBlockHeader retried = read_block_header<RTBlockHeader>(original_path);
@@ -632,28 +638,34 @@ TEST_F(R23WriterTest, SessionNotReceivingStopsEverythingBeforeCache)
 
 TEST_F(R23WriterTest, LogGroupSizeControlsReceiptCounterLogging)
 {
-	// groupsize=3 → 只有第 3 笔打日志（:409 cnt % _log_group_size == 0）
+	// Three events test one groupsize=3 interval for the exchange counter.
 	R23Writer* w = make_writer("\"groupsize\":3");
 	ASSERT_TRUE(w != NULL);
 
-	const uint32_t info_before = _sink->count_of(LL_INFO);
+	const char* summary = "ticks received from exchange SHFE";
+	int last_summary = _sink->find_log(summary, LL_INFO);
+	ASSERT_EQ(last_summary, -1);
+	uint32_t summary_boundaries = 0;
 	TickSpec spec;
-	for (uint32_t i = 0; i < 2; i++)
+	for (uint32_t i = 0; i < 3; i++)
 	{
 		spec.total_volume = 1000.0 + i;
 		spec.action_time = 93000000 + i * 100000;
 		write_tick(w, spec, 0);
+		const int current_summary = _sink->find_log(summary, LL_INFO);
+		if (current_summary != last_summary)
+		{
+			++summary_boundaries;
+			last_summary = current_summary;
+		}
+		EXPECT_LE(summary_boundaries, 1u)
+			<< "a three-tick interval must not emit multiple group summaries";
 	}
-	// 前两条会打「建库/首笔」日志，但绝不能打「收到 N 笔」的分组汇总（:409）
-	EXPECT_NE(_sink->count_of(LL_INFO), info_before);
-	EXPECT_FALSE(_sink->has_log("ticks received from exchange", LL_INFO))
-		<< "未满一组（2/3）就打出了分组汇总日志";
-
-	spec.total_volume = 1002.0;
-	spec.action_time = 93200000;
-	write_tick(w, spec, 0);
-	EXPECT_TRUE(_sink->has_log("ticks received from exchange SHFE", LL_INFO));
-	EXPECT_TRUE(_sink->has_log("3 ticks received", LL_INFO));
+	// The receipt counter is static per exchange, so prior fixtures can leave
+	// it at any remainder modulo this writer's groupsize. Three consecutive
+	// ticks must cross a groupsize=3 boundary once regardless of that offset.
+	EXPECT_EQ(_sink->ticks(), 3u);
+	EXPECT_EQ(summary_boundaries, 1u);
 }
 
 } // namespace r23

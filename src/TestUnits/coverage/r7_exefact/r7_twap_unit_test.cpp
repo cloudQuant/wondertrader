@@ -21,6 +21,7 @@
 #include <memory>
 #include <string>
 #include <thread>
+#include <utility>
 #include <vector>
 
 #include "Includes/ExecuteDefs.h"
@@ -160,7 +161,8 @@ void feedTWapTick(WtTWapExeUnit& unit, WTSTickData* tick)
 WTSVariant* mkTCfg(uint32_t totalTimes = 4, uint32_t priceMode = 0, uint32_t priceOffset = 0,
 	double minOpenLots = 1.0, double lots = 10.0, uint32_t ordSticky = 0,
 	uint32_t tailSecs = 19800, uint32_t beginTime = 930, uint32_t endTime = 1500,
-	bool includeTotalTimes = true, bool includeBeginTime = true, bool includeEndTime = true)
+	bool includeTotalTimes = true, bool includeBeginTime = true, bool includeEndTime = true,
+	bool includeMinOpenLots = true)
 {
 	WTSVariant* cfg = WTSVariant::createObject();
 	if (includeBeginTime)
@@ -175,7 +177,8 @@ WTSVariant* mkTCfg(uint32_t totalTimes = 4, uint32_t priceMode = 0, uint32_t pri
 	cfg->append("price_mode", priceMode);
 	cfg->append("price_offset", priceOffset);
 	cfg->append("lots", lots);
-	cfg->append("minopenlots", minOpenLots);
+	if (includeMinOpenLots)
+		cfg->append("minopenlots", minOpenLots);
 	return cfg;
 }
 
@@ -197,6 +200,7 @@ void expectTWapConfigRejected(WTSVariant* cfg, const char* diagnostic)
 		WtTWapExeUnit unit;
 		unit.init(&ctx, kTCode, cfg);
 		cfg->release();
+		EXPECT_FALSE(unit.initializationSucceeded());
 		unit.set_position(kTCode, 100);
 		unit.on_channel_ready();
 		feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
@@ -239,7 +243,19 @@ int run_twap_init_probe(uint32_t totalTimes, int markerFd)
 		if (!r7_test::write_marker(markerFd))
 			exitCode = 4;
 		else
+		{
 			unit.init(&ctx, kTCode, cfg);
+			const bool initialized = unit.initializationSucceeded();
+			const bool rejectedZeroTotalTimes = ctx.hasLog("total_times must be greater than zero");
+			const bool completedInit = ctx.hasLog("初始化完成");
+			if (totalTimes == 0)
+			{
+				if (initialized || !rejectedZeroTotalTimes || completedInit)
+					exitCode = 10;
+			}
+			else if (!initialized || rejectedZeroTotalTimes || !completedInit)
+				exitCode = 11;
+		}
 		cfg->release();
 	}
 	ctx.comm->release();
@@ -310,23 +326,8 @@ TEST(r7_twap, timeout_without_verified_identity_keeps_monitor_and_never_cancels)
 	ctx.comm->release();
 }
 
-TEST(r7_twap, init_rejects_missing_commodity_or_trading_session)
+TEST(r7_twap, init_rejects_missing_trading_session)
 {
-	{
-		TFakeCtx ctx;
-		WtTWapExeUnit unit;
-		WTSVariant* cfg = mkTCfg(4);
-		unit.init(&ctx, kTCode, cfg);
-		cfg->release();
-		EXPECT_FALSE(unit.initializationSucceeded());
-		EXPECT_TRUE(ctx.hasLog("commodity or trading session is unavailable"));
-		unit.set_position(kTCode, 100);
-		unit.on_channel_ready();
-		feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
-		EXPECT_TRUE(ctx.buys.empty());
-		EXPECT_TRUE(ctx.sells.empty());
-	}
-
 	{
 		TFakeCtx ctx;
 		ctx.comm = mkTComm();
@@ -404,6 +405,39 @@ TEST(r7_twap, invalid_schedule_configs_fail_closed_without_orders)
 	expectTWapConfigRejected(
 		mkTCfg(4, 0, 0, 1.0, 10.0, 0, 19800, 2100, 230),
 		"overnight schedules are unsupported pending explicit session semantics");
+}
+
+TEST(r7_twap, total_times_out_of_range_is_rejected_before_unsigned_conversion)
+{
+	for (const char* value : { "-1", "4294967296", "inf", "nan" })
+	{
+		SCOPED_TRACE(value);
+		WTSVariant* cfg = mkTCfg(4, 0, 0, 1.0, 10.0, 0, 18000, 930, 1500, false);
+		cfg->append("total_times", value);
+		expectTWapConfigRejected(cfg, "total_times must be greater than zero");
+	}
+	WTSVariant* negative = mkTCfg(4, 0, 0, 1.0, 10.0, 0, 18000, 930, 1500, false);
+	negative->append("total_times", static_cast<int32_t>(-1));
+	expectTWapConfigRejected(negative, "total_times must be greater than zero");
+}
+
+TEST(r7_twap, positive_total_times_one_and_n_derive_expected_spans)
+{
+	for (const auto& example : { std::pair<uint32_t, uint32_t>{1, 1800}, {10, 180} })
+	{
+		SCOPED_TRACE(example.first);
+		TFakeCtx ctx;
+		ctx.comm = mkTComm();
+		{
+			WtTWapExeUnit unit;
+			WTSVariant* cfg = mkTCfg(example.first, 0, 0, 1.0, 10.0, 0, 18000);
+			unit.init(&ctx, kTCode, cfg);
+			cfg->release();
+			EXPECT_TRUE(unit.initializationSucceeded());
+			EXPECT_EQ(unit._fire_span, example.second);
+		}
+		ctx.comm->release();
+	}
 }
 
 TEST(r7_twap, session_reference_released_after_invalid_config)
@@ -489,10 +523,45 @@ TEST(r7_twap, tiny_diffqty_floors_to_min_open_lots)
 	ctx.comm = mkTComm();
 	WtTWapExeUnit unit;
 	bootT(unit, ctx, 3, mkTCfg(10, 0, 0, 1.0));
+	EXPECT_DOUBLE_EQ(unit._min_open_lots, 1.0);
 	feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
 	// round(3/10)=0 -> max(minopenlots=1, 0) = 1
 	ASSERT_EQ(ctx.buys.size(), 1u);
 	EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 1.0);
+	ctx.comm->release();
+}
+
+TEST(r7_twap, minopenlots_absent_defaults_to_zero)
+{
+	TFakeCtx ctx;
+	ctx.comm = mkTComm();
+	WtTWapExeUnit unit;
+	WTSVariant* cfg = mkTCfg(4, 0, 0, 1.0, 10.0, 0, 19800, 930, 1500,
+		true, true, true, false);
+	ASSERT_FALSE(cfg->has("minopenlots"));
+	bootT(unit, ctx, 10, cfg);
+	ASSERT_TRUE(unit.initializationSucceeded());
+	EXPECT_DOUBLE_EQ(unit._min_open_lots, 0.0);
+	feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	ASSERT_EQ(ctx.buys.size(), 1u);
+	EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 3.0); // round(10/4)=3; default adds no minimum floor
+	EXPECT_TRUE(ctx.sells.empty());
+	ctx.comm->release();
+}
+
+TEST(r7_twap, explicit_zero_minopenlots_is_accepted_and_adds_no_floor)
+{
+	TFakeCtx ctx;
+	ctx.comm = mkTComm();
+	WtTWapExeUnit unit;
+	WTSVariant* cfg = mkTCfg(4, 0, 0, 0.0);
+	bootT(unit, ctx, 10, cfg);
+	ASSERT_TRUE(unit.initializationSucceeded());
+	EXPECT_DOUBLE_EQ(unit._min_open_lots, 0.0);
+	feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+	ASSERT_EQ(ctx.buys.size(), 1u);
+	EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 3.0);
+	EXPECT_TRUE(ctx.sells.empty());
 	ctx.comm->release();
 }
 
@@ -787,11 +856,11 @@ TEST(r7_twap, on_order_drains_cancel_cnt)
 	unit.init(&ctx, kTCode, mkTCfg(4));
 	unit.on_channel_ready();                             // 撤外部单 -> 8001/8002，_cancel_cnt=2
 	unit.on_order(4242, kTCode, true, 0, 10.50, true);   // 未知 id -> L186 return
-	EXPECT_FALSE(ctx.hasLog("updated cancelcnt"));
+	EXPECT_FALSE(ctx.hasLog("Order 4242 updated cancelcnt"));
 	unit.on_order(8001, kTCode, true, 0, 10.50, true);
 	EXPECT_TRUE(ctx.hasLog("Order 8001 updated cancelcnt -> 1"));   // L200
 	unit.on_order(8001, kTCode, true, 0, 10.50, true);              // 已摘除 -> 再次忽略
-	EXPECT_EQ(ctx.countLog("updated cancelcnt"), 1u);
+	EXPECT_EQ(ctx.countLog("Order 8001 updated cancelcnt"), 1u);
 	ctx.comm->release();
 }
 
@@ -945,8 +1014,7 @@ TEST(r7_twap, clear_target_with_flat_position_does_nothing)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// bounded child probe only: no fallback/default is asserted, and a normal ARM64
-// return does not rule out C++ undefined behavior in the division.
+// Bounded child verifies the explicit zero-total-times rejection and a valid positive control.
 //////////////////////////////////////////////////////////////////////////
 TEST(r7_twap, init_zero_total_times_bounded_child_probe)
 {
@@ -954,9 +1022,7 @@ TEST(r7_twap, init_zero_total_times_bounded_child_probe)
 	ASSERT_TRUE(probeDir.ready());
 	const r7_test::ProbeResult result = r7_test::run_bounded_child(probeDir.path(), 0, run_twap_init_probe);
 	ASSERT_TRUE(probeDir.cleanup()) << "failed to remove private init-probe directory";
-	if (!r7_test::expect_normal_return(result))
-		return;
-	GTEST_SKIP() << "The child returned normally on this build; without UBSan or an explicit invalid-config failure contract, this cannot prove safe rejection or absence of undefined behavior.";
+	EXPECT_TRUE(r7_test::expect_normal_return(result));
 }
 
 TEST(r7_twap, init_positive_total_times_control_returns)
@@ -964,24 +1030,30 @@ TEST(r7_twap, init_positive_total_times_control_returns)
 	r7_test::ScopedTempDir probeDir("WT_R7_002_TWAP");
 	ASSERT_TRUE(probeDir.ready());
 	const r7_test::ProbeResult result = r7_test::run_bounded_child(probeDir.path(), 5, run_twap_init_probe);
-	r7_test::expect_normal_return(result);
+	EXPECT_TRUE(r7_test::expect_normal_return(result));
 	EXPECT_TRUE(probeDir.cleanup()) << "failed to remove private init-probe directory";
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 缺陷复现（空指针解引用，不能启用）：ctx 不提供品种信息时 L738 直接踩 NULL
-// init 在 L136-139 允许 _comm_info 为 NULL，do_calc 却无条件 _comm_info->getPriceTick()
+// 缺 commodity 必须在价格偏移读取 price tick 前失败关闭。
 //////////////////////////////////////////////////////////////////////////
-TEST(r7_twap, DISABLED_null_commodity_info_crashes_price_offset_branch)
+TEST(r7_twap, null_commodity_with_price_offset_fails_closed)
 {
 	TFakeCtx ctx;
 	ctx.comm = NULL;
 	WtTWapExeUnit unit;
-	unit.init(&ctx, kTCode, mkTCfg(4, 0, 3));
+	WTSVariant* cfg = mkTCfg(4, 0, 3);
+	unit.init(&ctx, kTCode, cfg);
+	cfg->release();
+	EXPECT_FALSE(unit.initializationSucceeded());
+	EXPECT_TRUE(ctx.hasLog("commodity or trading session is unavailable"));
 	unit.set_position(kTCode, 100);
 	unit.on_channel_ready();
 	feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
-	EXPECT_TRUE(ctx.buys.empty());                       // 期望：崩溃（BUG-R7-006）
+	EXPECT_TRUE(ctx.buys.empty());
+	EXPECT_TRUE(ctx.sells.empty());
+	EXPECT_TRUE(ctx.byidCancels.empty());
+	EXPECT_TRUE(ctx.bydirCancels.empty());
 }
 
 TEST(r7_twap, failed_concurrent_calc_guard_does_not_release_owner)
@@ -1003,4 +1075,31 @@ TEST(r7_twap, failed_concurrent_calc_guard_does_not_release_owner)
 		EXPECT_TRUE(unit._in_calc.load(std::memory_order_acquire));
 	}
 	EXPECT_FALSE(unit._in_calc.load(std::memory_order_acquire));
+}
+
+TEST(r7_twap, startup_cancel_before_first_slice_does_not_retry_default_target)
+{
+	TFakeCtx ctx;
+	ctx.comm = mkTComm();
+	ctx.pos = 20.0;
+	ctx.undone = 5.0;
+	ctx.cancelBydirRetCnt = 1;
+	{
+		WtTWapExeUnit unit;
+		WTSVariant* cfg = mkTCfg(4);
+		unit.init(&ctx, kTCode, cfg);
+		cfg->release();
+		ASSERT_TRUE(unit.initializationSucceeded());
+		unit.on_channel_ready();
+		ASSERT_EQ(ctx.bydirCancels.size(), 1u);
+		ASSERT_EQ(unit._cancel_cnt, 1u);
+		EXPECT_FALSE(unit._this_target_valid);
+
+		unit.on_order(8000, kTCode, true, 5.0, 10.50, true);
+		EXPECT_EQ(unit._cancel_cnt, 0u);
+		EXPECT_FALSE(unit._this_target_valid);
+		EXPECT_TRUE(ctx.buys.empty());
+		EXPECT_TRUE(ctx.sells.empty());
+	}
+	ctx.comm->release();
 }

@@ -113,3 +113,70 @@ TEST_F(R113MockerMatchLong, R113Mocker_LongOpenAndCloseMatchedByUdpTick)
 	ASSERT_TRUE(r113m::wait_until([this, tq]() { return sink_.n_trades_query() >= tq + 1u; }));
 	EXPECT_GT(sink_.queried_trades(), 0u);
 }
+
+TEST_F(R113MockerMatchLong, R113SeedReplaysActualTradeSplitsAcrossInstances)
+{
+	const uint16_t firstPort = r103m::pick_free_udp_port();
+	ASSERT_NE(0, firstPort);
+	set_udp_port(firstPort);
+	WTSVariant* cfg = r103m::make_cfg(9814, firstPort, 10.5, 1.5);
+	cfg->append("rng_seed", uint32_t(601));
+	ASSERT_TRUE(api_.init(cfg));
+	cfg->release();
+	connect_api();
+	login_api();
+	insert_order(200.0, 7000.0, WDT_LONG, WOT_OPEN);
+	send_tick(7000.0, 7000.0, 200.0, 7000.0, 200.0);
+	ASSERT_TRUE(r113m::wait_until([this]() { return sink_.total_trade_volume() >= 200.0; }));
+	const auto firstTrades = sink_.trades();
+	api_.release();
+
+	r113m::Sink secondSink;
+	TraderMocker second;
+	WTSCommodityInfo* comm = WTSCommodityInfo::create("ag", "沪银", "SHFE", "TRADING", "CHINA");
+	comm->setCategory(CC_Future);
+	comm->setCoverMode(CM_OpenCover);
+	comm->setPriceMode(PM_Both);
+	comm->setTradingMode(TM_Both);
+	comm->setPriceTick(1.0);
+	comm->setVolScale(15);
+	WTSContractInfo* contract = WTSContractInfo::create("ag2512", "沪银2512", "SHFE", "ag");
+	contract->setTotalIndex(1);
+	secondSink.bd_.regis(comm, contract);
+	second.registerSpi(&secondSink);
+	const uint16_t secondPort = r103m::pick_free_udp_port();
+	ASSERT_NE(0, secondPort);
+	cfg = r103m::make_cfg(9815, secondPort, 10.5, 1.5);
+	cfg->append("rng_seed", uint32_t(601));
+	ASSERT_TRUE(second.init(cfg));
+	cfg->release();
+	second.connect();
+	ASSERT_TRUE(r113m::wait_until([&secondSink]() { return secondSink.n_event() >= 1u; }));
+	ASSERT_EQ(0, second.login("", "", ""));
+	ASSERT_TRUE(r113m::wait_until([&secondSink]() { return secondSink.n_login() >= 1u; }));
+	WTSEntrust* entrust = r103m::make_entrust("ag2512", "SHFE", contract, 7000.0,
+		200.0, WDT_LONG, WOT_OPEN);
+	ASSERT_EQ(0, second.orderInsert(entrust));
+	entrust->release();
+	ASSERT_TRUE(r113m::wait_until([&secondSink]() { return secondSink.n_push_order() >= 1u; }));
+	const std::string id = secondSink.last_order_id();
+	ASSERT_FALSE(id.empty());
+	bool ready = false;
+	for (int attempt = 0; attempt < 50 && !ready; ++attempt)
+	{
+		const uint32_t before = secondSink.n_orders_query();
+		ASSERT_EQ(0, second.queryOrders());
+		ASSERT_TRUE(r113m::wait_until([&]() { return secondSink.n_orders_query() > before; }));
+		for (const auto& order : secondSink.queried_orders())
+			if (order.id == id) ready = true;
+	}
+	ASSERT_TRUE(ready);
+	set_udp_port(secondPort);
+	send_tick(7000.0, 7000.0, 200.0, 7000.0, 200.0);
+	ASSERT_TRUE(r113m::wait_until([&secondSink]() { return secondSink.total_trade_volume() >= 200.0; }));
+	const auto secondTrades = secondSink.trades();
+	second.release();
+	ASSERT_EQ(firstTrades.size(), secondTrades.size());
+	for (size_t i = 0; i < firstTrades.size(); ++i)
+		EXPECT_DOUBLE_EQ(firstTrades[i].volume, secondTrades[i].volume) << i;
+}

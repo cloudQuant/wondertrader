@@ -12,6 +12,7 @@
 #include <string>
 #include <queue>
 #include <stdint.h>
+#include <atomic>
 
 #include "../Includes/WTSTypes.h"
 #include "../Includes/ITraderApi.h"
@@ -219,6 +220,7 @@ protected:
 
 	typedef WTSHashMap<std::string> PositionMap;
 	PositionMap*				m_mapPosition;
+	bool					m_bPositionQueryIncomplete;
 	WTSArray*					m_ayTrades;
 	WTSArray*					m_ayOrders;
 	WTSArray*					m_ayExecOrds;
@@ -232,7 +234,7 @@ protected:
 	StdUniqueMutex			m_mtxQuery;
 	uint64_t				m_lastQryTime;
 
-	bool					m_bStopped;
+	std::atomic<bool>		m_bStopped;
 	StdThreadPtr			m_thrdWorker;
 
 	std::string		m_strModule;

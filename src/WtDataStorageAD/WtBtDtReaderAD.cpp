@@ -474,7 +474,7 @@ WtBtDtReaderAD::WtLMDBPtr WtBtDtReaderAD::get_k_db(const char* exchg, WTSKlinePe
 
 	if (!dbPtr->open(path.c_str()))
 	{
-		pipe_btreader_log(_sink, LL_ERROR, "Opening {} db if {} failed: {}", subdir, exchg, dbPtr->errmsg());
+		pipe_btreader_log(_sink, LL_ERROR, "Opening {} db of {} failed: {}", subdir, exchg, dbPtr->errmsg());
 		return WtLMDBPtr();
 	}
 	else

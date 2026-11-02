@@ -1081,6 +1081,18 @@ bool WtExecuterMgr::load_router_rules(WTSVariant* config)
 				return false;
 			}
 
+			WTSVariant* itemStrategy = item->get("strategy");
+			if (itemStrategy == NULL)
+			{
+				WTSLogger::error("Router rule {} is invalid: strategy is missing", i);
+				return false;
+			}
+			if (itemStrategy->type() != WTSVariant::VT_String)
+			{
+				WTSLogger::error("Router rule {} is invalid: strategy must be a string", i);
+				return false;
+			}
+
 			WTSVariant* itemExec = item->get("executer");
 			if (itemExec == NULL)
 			{
@@ -1113,7 +1125,7 @@ bool WtExecuterMgr::load_router_rules(WTSVariant* config)
 				return false;
 			}
 
-			parsedRules.emplace_back(item->getCString("strategy"), std::move(executerIds));
+			parsedRules.emplace_back(itemStrategy->asString(), std::move(executerIds));
 		}
 	}
 	catch (...)

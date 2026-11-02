@@ -31,8 +31,12 @@
 
 #include <exception>
 #include <algorithm>
+#include <cstring>
 #include <iterator>
+#include <limits>
+#include <string>
 #include <utility>
+#include <vector>
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 
@@ -41,6 +45,29 @@ using namespace std;
 
 namespace
 {
+// The usertag contents need the "wtp." prefix, adapter id, separator,
+// uint32_t local order id, and a trailing NUL.
+constexpr std::size_t kUserTagBufferBytes = sizeof(((WTSEntrustStruct*)nullptr)->m_strUserTag);
+constexpr std::size_t kOrderTagPrefixBytes = sizeof("wtp.") - 1;
+constexpr std::size_t kMaxLocalOrderIdDigits = std::numeric_limits<uint32_t>::digits10 + 1;
+static_assert(kUserTagBufferBytes > kOrderTagPrefixBytes + 1 + kMaxLocalOrderIdDigits,
+	"WTSEntrust usertag buffer cannot hold the order-tag suffix");
+constexpr std::size_t kMaxAdapterIdBytes = kUserTagBufferBytes - 1 -
+	kOrderTagPrefixBytes - 1 - kMaxLocalOrderIdDigits;
+
+bool isValidOrderTagAdapterId(const char* id) noexcept
+{
+	if (id == nullptr)
+		return false;
+
+	for (std::size_t i = 0; i <= kMaxAdapterIdBytes; ++i)
+	{
+		if (id[i] == '\0')
+			return true;
+	}
+	return false;
+}
+
 thread_local std::vector<const wtp::TraderAdapter*> g_sink_notification_adapters;
 thread_local std::vector<const wtp::TraderAdapter*> g_api_call_adapters;
 thread_local std::vector<const wtp::TraderAdapter*> g_spi_callback_adapters;
@@ -116,6 +143,44 @@ void logAdapterException(const char* id, const char* operation) noexcept
 			"[{}] Trader adapter operation {} threw; lifecycle remains fail-closed", id, operation);
 	}
 	catch (...) {}
+}
+
+bool isValidStandardOrderCode(const char* stdCode) noexcept
+{
+	if (stdCode == nullptr)
+		return false;
+
+	// WTSEntrust stores the incoming full code in a fixed-size instrument field.
+	std::size_t fullCodeLen = 0;
+	while (fullCodeLen < MAX_INSTRUMENT_LENGTH && stdCode[fullCodeLen] != '\0')
+		++fullCodeLen;
+	if (fullCodeLen == MAX_INSTRUMENT_LENGTH)
+		return false;
+
+	std::size_t exchangeLen = 0;
+	std::size_t fieldCount = 1;
+	bool afterSeparator = false;
+	for (std::size_t i = 0; i < fullCodeLen; ++i)
+	{
+		if (stdCode[i] != '.')
+			continue;
+
+		if (i == 0 || stdCode[i - 1] == '.' || i + 1 == fullCodeLen)
+			return false;
+		if (!afterSeparator)
+		{
+			exchangeLen = i;
+			afterSeparator = true;
+		}
+		++fieldCount;
+	}
+
+	// This is a structural and fixed-buffer safety check only. It accepts the
+	// supported two-to-four-field shape but does not validate option semantics.
+	if (!afterSeparator || exchangeLen >= MAX_EXCHANGE_LENGTH || fieldCount > 4)
+		return false;
+
+	return true;
 }
 }
 
@@ -738,7 +803,7 @@ bool TraderAdapter::isReleaseComplete() const
 
 bool TraderAdapter::initExt(const char* id, ITraderApi* api, IBaseDataMgr* bdMgr, ActionPolicyMgr* policyMgr)
 {
-	if (api == NULL || !beginInitialization())
+	if (!isValidOrderTagAdapterId(id) || api == NULL || !beginInitialization())
 		return false;
 	ScopeExit rollback([this]() {
 		rollbackInitialization();
@@ -773,7 +838,7 @@ bool TraderAdapter::initExt(const char* id, ITraderApi* api, IBaseDataMgr* bdMgr
 
 bool TraderAdapter::init(const char* id, WTSVariant* params, IBaseDataMgr* bdMgr, ActionPolicyMgr* policyMgr)
 {
-	if (params == NULL || !beginInitialization())
+	if (!isValidOrderTagAdapterId(id) || params == NULL || !beginInitialization())
 		return false;
 	ScopeExit rollback([this]() {
 		rollbackInitialization();
@@ -962,6 +1027,16 @@ void TraderAdapter::release()
 		_stat_map->release();
 		_stat_map = NULL;
 	}
+	// SPI callbacks have been drained by cleanupApiAndConfig(); the map owns one
+	// reference per stored order, while getOrders() snapshots retain their own.
+	{
+		SpinLock lock(_mtx_orders);
+		if (_orders)
+		{
+			_orders->release();
+			_orders = NULL;
+		}
+	}
 }
 
 double TraderAdapter::enumPosition(const char* stdCode /* = "" */)
@@ -1017,12 +1092,16 @@ double TraderAdapter::getPosition(const char* stdCode, bool bValidOnly, int32_t 
 
 OrderMap* TraderAdapter::getOrders(const char* stdCode)
 {
-	if (_orders == NULL)
+	ApiCallLease apiCall(this);
+	if (!apiCall)
 		return NULL;
 
 	bool isAll = strlen(stdCode) == 0;
 
 	SpinLock lock(_mtx_orders);
+	if (_orders == NULL)
+		return NULL;
+
 	OrderMap* ret = OrderMap::create();
 	for (auto it = _orders->begin(); it != _orders->end(); it++)
 	{
@@ -1066,16 +1145,24 @@ bool TraderAdapter::rollbackUndoneIfNonzero(const char* stdCode, double qty)
 
 uint32_t TraderAdapter::doEntrust(WTSEntrust* entrust)
 {
+	const char* codeInput = entrust == nullptr ? nullptr : entrust->getCode();
+	if (!isValidStandardOrderCode(codeInput))
+		return UINT_MAX;
+
+	const std::string stdCode(codeInput);
+	const std::size_t pos = StrUtil::findFirst(stdCode.c_str(), '.');
+	if (pos == std::string::npos)
+		return UINT_MAX;
+
 	ApiCallLease apiCall(this);
 	if (!apiCall)
 		return UINT_MAX;
 
 	_trader_api->makeEntrustID(entrust->getEntrustID(), 64);
 
-	const char* stdCode = entrust->getCode();
-	std::size_t pos = StrUtil::findFirst(entrust->getCode(), '.');
-	entrust->setExchange(stdCode, pos);
-	entrust->setCode(stdCode + pos + 1);
+	entrust->setExchange(stdCode.c_str(), pos);
+	const std::string code = stdCode.substr(pos + 1);
+	entrust->setCode(code.c_str());
 	//if(entrust->getContractInfo() == NULL)
 	//{
 	//	WTSContractInfo* cInfo = _bd_mgr->getContract(entrust->getCode(), entrust->getExchg());
@@ -1087,6 +1174,12 @@ uint32_t TraderAdapter::doEntrust(WTSEntrust* entrust)
 	wt_strcpy(usertag, _order_pattern.c_str(), _order_pattern.size());
 	usertag[_order_pattern.size()] = '.';
 	fmtutil::format_to(usertag + _order_pattern.size() + 1, "{}", localid);
+
+	if (_risk_mon_enabled && !checkOrderLimits(stdCode.c_str()))
+	{
+		rollbackUndoneIfNonzero(stdCode.c_str(), entrust->getVolume());
+		return UINT_MAX;
+	}
 	
 	int32_t ret = _trader_api->orderInsert(entrust);
 	if(ret < 0)
@@ -1094,11 +1187,12 @@ uint32_t TraderAdapter::doEntrust(WTSEntrust* entrust)
 		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR, "[{}] Order placing failed: {}", _id, ret);
 		return UINT_MAX;
 	}
-	//else if(_risk_mon_enabled)
-	//{
-	//	int64_t now = TimeUtils::getLocalTimeNow();
-	//	_order_time_cache[entrust->getCode()].emplace_back(now);
-	//}
+	if (_risk_mon_enabled)
+	{
+		const RiskParams* riskPara = getRiskParams(stdCode.c_str());
+		if (riskPara != NULL && riskPara->_order_times_boundary != 0)
+			_order_time_cache[stdCode].emplace_back(TimeUtils::getLocalTimeNow());
+	}
 	return localid;
 }
 
@@ -1118,11 +1212,27 @@ bool TraderAdapter::doCancel(WTSOrderInfo* ordInfo)
 
 	WTSContractInfo* cInfo = ordInfo->getContractInfo();
 	if(cInfo == NULL)
+	{
+		if (_bd_mgr == NULL)
+		{
+			WTSLogger::log_dyn("trader", _id.c_str(), LL_WARN,
+				"[{}] Cannot cancel order {}: base data manager is not available",
+				_id.c_str(), ordInfo->getOrderID());
+			return false;
+		}
 		cInfo = _bd_mgr->getContract(ordInfo->getCode(), ordInfo->getExchg());
+		if (cInfo == NULL)
+		{
+			WTSLogger::log_dyn("trader", _id.c_str(), LL_WARN,
+				"[{}] Cannot cancel order {}: contract {}.{} is not present in base data",
+				_id.c_str(), ordInfo->getOrderID(), ordInfo->getExchg(), ordInfo->getCode());
+			return false;
+		}
+	}
+	const std::string stdCode = cInfo->getFullCode();
 
-	//撤单频率检查
-	//if (_risk_mon_enabled && !checkCancelLimits(ordInfo->getCode()))
-	//	return false;
+	if (_risk_mon_enabled && !checkCancelLimits(stdCode.c_str()))
+		return false;
 
 	WTSEntrustAction* action = WTSEntrustAction::create(ordInfo->getCode(), cInfo->getExchg());
 	action->setEntrustID(ordInfo->getEntrustID());
@@ -1136,26 +1246,32 @@ bool TraderAdapter::doCancel(WTSOrderInfo* ordInfo)
 	int ret = _trader_api->orderAction(action);
 	bool isSent = (ret >= 0);
 	action->release();
+	if (isSent && _risk_mon_enabled)
+	{
+		const RiskParams* riskPara = getRiskParams(stdCode.c_str());
+		if (riskPara != NULL && riskPara->_cancel_times_boundary != 0)
+			_cancel_time_cache[stdCode].emplace_back(TimeUtils::getLocalTimeNow());
+	}
 	return isSent;
 }
 
 bool TraderAdapter::cancel(uint32_t localid)
 {
-	if (_orders == NULL || _orders->size() == 0)
+	ApiCallLease apiCall(this);
+	if (!apiCall)
 		return false;
 
 	WTSOrderInfo* ordInfo = NULL;
 	{
 		SpinLock lock(_mtx_orders);
+		if (_orders == NULL || _orders->size() == 0)
+			return false;
 		ordInfo = (WTSOrderInfo*)_orders->grab(localid);
 		if (ordInfo == NULL)
 			return false;
 	}
 	
 	bool bRet = doCancel(ordInfo);
-
-	//if(_risk_mon_enabled)
-	//	_cancel_time_cache[ordInfo->getCode()].emplace_back(TimeUtils::getLocalTimeNow());
 
 	ordInfo->release();
 
@@ -1165,27 +1281,52 @@ bool TraderAdapter::cancel(uint32_t localid)
 OrderIDs TraderAdapter::cancelAll(const char* stdCode)
 {
 	OrderIDs ret;
+	ApiCallLease apiCall(this);
+	if (!apiCall)
+		return ret;
 
 	[[maybe_unused]] double actQty = 0;
 	bool isAll = strlen(stdCode) == 0;
-	if (_orders != NULL && _orders->size() > 0)
+	std::vector<std::pair<uint32_t, WTSOrderInfo*>> aliveOrders;
 	{
-		for (auto it = _orders->begin(); it != _orders->end(); it++)
+		SpinLock lock(_mtx_orders);
+		if (_orders != NULL && _orders->size() > 0)
 		{
-			WTSOrderInfo* orderInfo = (WTSOrderInfo*)it->second;
-			if(!orderInfo->isAlive())
-				continue;
-
-			WTSContractInfo* cInfo = orderInfo->getContractInfo();
-			if (isAll || strcmp(stdCode, cInfo->getFullCode()) == 0)
+			aliveOrders.reserve(_orders->size());
+			for (auto it = _orders->begin(); it != _orders->end(); it++)
 			{
-				if(doCancel(orderInfo))
-				{
-					ret.emplace_back(it->first);
-					//if (_risk_mon_enabled)
-					//	_cancel_time_cache[cInfo->getCode()].emplace_back(TimeUtils::getLocalTimeNow());
-				}
+				WTSOrderInfo* orderInfo = (WTSOrderInfo*)it->second;
+				if (!orderInfo->isAlive())
+					continue;
+				orderInfo->retain();
+				aliveOrders.emplace_back(it->first, orderInfo);
 			}
+		}
+	}
+	ScopeExit releaseOrders([&aliveOrders]() {
+		for (const auto& order : aliveOrders)
+			order.second->release();
+	});
+
+	for (const auto& order : aliveOrders)
+	{
+		WTSOrderInfo* orderInfo = order.second;
+		WTSContractInfo* cInfo = orderInfo->getContractInfo();
+		if (cInfo == NULL && _bd_mgr != NULL)
+			cInfo = _bd_mgr->getContract(orderInfo->getCode(), orderInfo->getExchg());
+
+		if (cInfo == NULL)
+		{
+			WTSLogger::log_dyn("trader", _id.c_str(), LL_WARN,
+				"[{}] Cannot cancel order {}: contract {}.{} is not present in base data",
+				_id.c_str(), orderInfo->getOrderID(), orderInfo->getExchg(), orderInfo->getCode());
+			continue;
+		}
+
+		if (isAll || strcmp(stdCode, cInfo->getFullCode()) == 0)
+		{
+			if (doCancel(orderInfo))
+				ret.emplace_back(order.first);
 		}
 	}
 
@@ -1204,6 +1345,8 @@ uint32_t TraderAdapter::getInfos(const char* stdCode)
 OrderIDs TraderAdapter::buy(const char* stdCode, double price, double qty, int flag, bool bForceClose, WTSContractInfo* cInfo /* = NULL */)
 {
 	OrderIDs ret;
+	if (!isValidStandardOrderCode(stdCode))
+		return ret;
 	if (qty == 0)
 		return ret;
 
@@ -1214,6 +1357,12 @@ OrderIDs TraderAdapter::buy(const char* stdCode, double price, double qty, int f
 	//}
 
 	if (cInfo == NULL) cInfo = getContract(stdCode);
+	if (cInfo == NULL)
+	{
+		WTSLogger::log_dyn("trader", _id.c_str(), LL_WARN,
+			"[{}] Cannot buy {}: contract is not present in base data", _id.c_str(), stdCode);
+		return ret;
+	}
 	WTSCommodityInfo* commInfo = cInfo->getCommInfo();
 
 	WTSLogger::log_dyn("trader", _id.c_str(), LL_DEBUG, "[{}] Buying {} of quantity {}", _id.c_str(), stdCode, qty);
@@ -1484,6 +1633,8 @@ OrderIDs TraderAdapter::buy(const char* stdCode, double price, double qty, int f
 OrderIDs TraderAdapter::sell(const char* stdCode, double price, double qty, int flag, bool bForceClose, WTSContractInfo* cInfo /* = NULL */)
 {
 	OrderIDs ret;
+	if (!isValidStandardOrderCode(stdCode))
+		return ret;
 	if (qty == 0)
 		return ret;
 
@@ -1494,6 +1645,12 @@ OrderIDs TraderAdapter::sell(const char* stdCode, double price, double qty, int 
 	//}
 
 	if (cInfo == NULL) cInfo = getContract(stdCode);
+	if (cInfo == NULL)
+	{
+		WTSLogger::log_dyn("trader", _id.c_str(), LL_WARN,
+			"[{}] Cannot sell {}: contract is not present in base data", _id.c_str(), stdCode);
+		return ret;
+	}
 	WTSCommodityInfo* commInfo = cInfo->getCommInfo();
 
 	const PosItem& pItem = _positions[stdCode];
@@ -1764,6 +1921,8 @@ uint32_t TraderAdapter::openLong(const char* stdCode, double price, double qty, 
 	//	WTSLogger::log_dyn("trader", _id.c_str(), LL_WARN, "{} is forbidden to trade", stdCode);
 	//	return 0;
 	//}
+	if (!isValidStandardOrderCode(stdCode))
+		return UINT_MAX;
 
 	WTSEntrust* entrust = WTSEntrust::create(stdCode, qty, price);
 	if(price == 0.0)
@@ -1793,6 +1952,8 @@ uint32_t TraderAdapter::openShort(const char* stdCode, double price, double qty,
 	//	WTSLogger::log_dyn("trader", _id.c_str(), LL_WARN, "{} is forbidden to trade", stdCode);
 	//	return 0;
 	//}
+	if (!isValidStandardOrderCode(stdCode))
+		return UINT_MAX;
 
 	WTSEntrust* entrust = WTSEntrust::create(stdCode, qty, price);
 	if (price == 0.0)
@@ -1822,6 +1983,8 @@ uint32_t TraderAdapter::closeLong(const char* stdCode, double price, double qty,
 	//	WTSLogger::log_dyn("trader", _id.c_str(), LL_WARN, "{} is forbidden to trade", stdCode);
 	//	return 0;
 	//}
+	if (!isValidStandardOrderCode(stdCode))
+		return UINT_MAX;
 
 	WTSEntrust* entrust = WTSEntrust::create(stdCode, qty, price);
 	if (price == 0.0)
@@ -1851,6 +2014,8 @@ uint32_t TraderAdapter::closeShort(const char* stdCode, double price, double qty
 	//	WTSLogger::log_dyn("trader", _id.c_str(), LL_WARN, "{} is forbidden to trade", stdCode);
 	//	return 0;
 	//}
+	if (!isValidStandardOrderCode(stdCode))
+		return UINT_MAX;
 
 	WTSEntrust* entrust = WTSEntrust::create(stdCode, qty, price);
 	if (price == 0.0)
@@ -2073,8 +2238,11 @@ void TraderAdapter::onRspOrders(const WTSArray* ayOrders)
 
 	if (ayOrders)
 	{
-		if (_orders == NULL)
-			_orders = OrderMap::create();
+		{
+			SpinLock lock(_mtx_orders);
+			if (_orders == NULL)
+				_orders = OrderMap::create();
+		}
 
 		std::lock_guard<std::mutex> undoneLock(_mtx_undone_qty);
 		_undone_qty.clear();
@@ -2175,6 +2343,8 @@ void TraderAdapter::onRspOrders(const WTSArray* ayOrders)
 
 			{
 				SpinLock lock(_mtx_orders);
+				if (_orders == NULL)
+					_orders = OrderMap::create();
 				_orders->add(localid, orderInfo);
 			}
 
@@ -2221,6 +2391,8 @@ void TraderAdapter::onRspTrades(const WTSArray* ayTrades)
 			WTSTradeInfo* tInfo = (WTSTradeInfo*)(*it);
 
 			WTSContractInfo* cInfo = tInfo->getContractInfo();
+			if (cInfo == NULL && _bd_mgr != NULL)
+				cInfo = _bd_mgr->getContract(tInfo->getCode(), tInfo->getExchg());
 			if (cInfo == NULL)
 				continue;
 
@@ -2558,7 +2730,8 @@ void TraderAdapter::onPushTrade(WTSTradeInfo* tradeRecord)
 		return;
 
 	WTSContractInfo* cInfo = tradeRecord->getContractInfo();
-	cInfo = _bd_mgr->getContract(tradeRecord->getCode(), tradeRecord->getExchg());
+	if (cInfo == NULL && _bd_mgr != NULL)
+		cInfo = _bd_mgr->getContract(tradeRecord->getCode(), tradeRecord->getExchg());
 	if (cInfo == NULL)
 		return;
 
@@ -2693,6 +2866,9 @@ void TraderAdapter::handleTraderLog(WTSLogLevel ll, const char* message)
 
 bool TraderAdapter::checkCancelLimits(const char* stdCode)
 {
+	if (!_risk_mon_enabled || stdCode == NULL || stdCode[0] == '\0')
+		return true;
+
 	if (_exclude_codes.find(stdCode) != _exclude_codes.end())
 		return false;
 
@@ -2700,7 +2876,7 @@ bool TraderAdapter::checkCancelLimits(const char* stdCode)
 	if (riskPara == NULL)
 		return true;
 
-	WTSTradeStateInfo* statInfo = (WTSTradeStateInfo*)_stat_map->get(stdCode);
+	WTSTradeStateInfo* statInfo = _stat_map == NULL ? NULL : (WTSTradeStateInfo*)_stat_map->get(stdCode);
 	if (statInfo && riskPara->_cancel_total_limits != 0 && statInfo->total_cancels() >= riskPara->_cancel_total_limits)
 	{
 		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR, "[{}] {} cancel {} times totaly, beyond boundary {} times, adding to excluding list",
@@ -2709,32 +2885,23 @@ bool TraderAdapter::checkCancelLimits(const char* stdCode)
 		return false;
 	}
 
-	//撤单频率检查
-	auto it = _cancel_time_cache.find(stdCode);
-	if (it != _cancel_time_cache.end())
+	if (riskPara->_cancel_times_boundary != 0)
 	{
-		TimeCacheList& cache = (TimeCacheList&)it->second;
-		uint32_t cnt = cache.size();
-		if (cnt >= riskPara->_cancel_times_boundary)
+		auto it = _cancel_time_cache.find(stdCode);
+		if (it != _cancel_time_cache.end())
 		{
-			uint64_t eTime = cache[cnt - 1];
-			uint64_t sTime = eTime - riskPara->_cancel_stat_timespan * 1000;
-			auto tit = std::lower_bound(cache.begin(), cache.end(), sTime);
-			auto sIdx = tit - cache.begin();
-			auto times = cnt - sIdx - 1;
-			if (times > riskPara->_cancel_times_boundary)
+			TimeCacheList& cache = (TimeCacheList&)it->second;
+			const uint64_t now = static_cast<uint64_t>(TimeUtils::getLocalTimeNow());
+			const uint64_t windowMs = static_cast<uint64_t>(riskPara->_cancel_stat_timespan) * 1000U;
+			const uint64_t startTime = now > windowMs ? now - windowMs : 0;
+			auto firstInWindow = std::lower_bound(cache.begin(), cache.end(), startTime);
+			cache.erase(cache.begin(), firstInWindow);
+			if (cache.size() >= riskPara->_cancel_times_boundary)
 			{
 				WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR, "[{}] {} cancel {} times within {} seconds, beyond boundary {} times, adding to excluding list",
-					_id.c_str(), stdCode, times, riskPara->_cancel_stat_timespan, riskPara->_cancel_times_boundary);
+					_id.c_str(), stdCode, cache.size(), riskPara->_cancel_stat_timespan, riskPara->_cancel_times_boundary);
 				_exclude_codes.insert(stdCode);
 				return false;
-			}
-
-			//这里必须要清理一下, 没有特别好的办法
-			//不然随着时间推移, vector长度会越来越长
-			if (tit != cache.begin())
-			{
-				cache.erase(cache.begin(), tit);
 			}
 		}
 	}
@@ -2755,6 +2922,9 @@ bool TraderAdapter::isTradeEnabled(const char* stdCode) const
 
 bool TraderAdapter::checkOrderLimits(const char* stdCode)
 {
+	if (!_risk_mon_enabled || stdCode == NULL || stdCode[0] == '\0')
+		return true;
+
 	if (_exclude_codes.find(stdCode) != _exclude_codes.end())
 		return false;
 
@@ -2762,7 +2932,7 @@ bool TraderAdapter::checkOrderLimits(const char* stdCode)
 	if (riskPara == NULL)
 		return true;
 
-	WTSTradeStateInfo* statInfo = (WTSTradeStateInfo*)_stat_map->get(stdCode);
+	WTSTradeStateInfo* statInfo = _stat_map == NULL ? NULL : (WTSTradeStateInfo*)_stat_map->get(stdCode);
 	if (statInfo && riskPara->_order_total_limits != 0 && statInfo->total_orders() >= riskPara->_order_total_limits)
 	{
 		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR, "[{}] {} entrust {} times totally, beyond boundary {} times, adding to excluding list",
@@ -2771,32 +2941,23 @@ bool TraderAdapter::checkOrderLimits(const char* stdCode)
 		return false;
 	}
 
-	//撤单频率检查
-	auto it = _order_time_cache.find(stdCode);
-	if (it != _order_time_cache.end())
+	if (riskPara->_order_times_boundary != 0)
 	{
-		TimeCacheList& cache = (TimeCacheList&)it->second;
-		uint32_t cnt = cache.size();
-		if (cnt >= riskPara->_order_times_boundary)
+		auto it = _order_time_cache.find(stdCode);
+		if (it != _order_time_cache.end())
 		{
-			uint64_t eTime = cache[cnt - 1];
-			uint64_t sTime = eTime - riskPara->_order_stat_timespan * 1000;
-			auto tit = std::lower_bound(cache.begin(), cache.end(), sTime);
-			auto sIdx = tit - cache.begin();
-			auto times = cnt - sIdx - 1;
-			if (times > riskPara->_order_times_boundary)
+			TimeCacheList& cache = (TimeCacheList&)it->second;
+			const uint64_t now = static_cast<uint64_t>(TimeUtils::getLocalTimeNow());
+			const uint64_t windowMs = static_cast<uint64_t>(riskPara->_order_stat_timespan) * 1000U;
+			const uint64_t startTime = now > windowMs ? now - windowMs : 0;
+			auto firstInWindow = std::lower_bound(cache.begin(), cache.end(), startTime);
+			cache.erase(cache.begin(), firstInWindow);
+			if (cache.size() >= riskPara->_order_times_boundary)
 			{
 				WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR, "[{}] {} entrust {} times within {} seconds, beyond boundary {} times, adding to excluding list",
-					_id.c_str(), stdCode, times, riskPara->_order_stat_timespan, riskPara->_order_times_boundary);
+					_id.c_str(), stdCode, cache.size(), riskPara->_order_stat_timespan, riskPara->_order_times_boundary);
 				_exclude_codes.insert(stdCode);
 				return false;
-			}
-
-			//这里必须要清理一下, 没有特别好的办法
-			//不然随着时间推移, vector长度会越来越长
-			if (tit != cache.begin())
-			{
-				cache.erase(cache.begin(), tit);
 			}
 		}
 	}
@@ -2817,7 +2978,7 @@ const TraderAdapter::RiskParams* TraderAdapter::getRiskParams(const char* stdCod
 		return &it->second;
 
 	it = _risk_params_map.find("default");
-	return &it->second;
+	return it == _risk_params_map.end() ? NULL : &it->second;
 }
 
 #pragma endregion "ITraderSpi接口"

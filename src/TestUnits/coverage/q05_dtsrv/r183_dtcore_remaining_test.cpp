@@ -129,7 +129,8 @@ TEST(R183DtIndexWorkerMgr, MissingFactorySymbolIsSkippedAndAccessorsRoundTrip)
 	ASSERT_TRUE(fs::exists(lib)) << lib;
 
 	std::error_code ec;
-	fs::create_symlink(lib, dir / "libnofactory.dylib", ec);
+	fs::copy_file(lib, dir / "libnofactory.dylib",
+		fs::copy_options::overwrite_existing, ec);
 	ASSERT_FALSE(ec) << ec.message();
 	EXPECT_TRUE(mgr.loadFactories(dir.string().c_str()));
 

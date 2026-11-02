@@ -145,7 +145,7 @@ TEST(R124PorterExecuter, DiffArbiDistWithoutTraderAreAccepted)
 {
 	const std::string dir = prepare_dir("exec");
 	ASSERT_FALSE(dir.empty());
-	write_text(dir + "/actions.json", "{}");
+	write_text(dir + "/actions.json", "{\"default\":{}}");
 
 	WtRtRunner* r = new_runner(dir);
 	ASSERT_NE(r, nullptr);

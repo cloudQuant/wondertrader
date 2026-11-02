@@ -207,13 +207,16 @@ TEST_F(R180LoaderFixture, DISABLED_R180Exec_TwapSecondTickReleasesDanglingLastTi
 
 // 生产: HisDataReplayer.cpp:3710（loader 自动转储 KP_Minute5 的 BlockType）
 //       3634-3666（转储文件命中后直接读取）
-// autoTrans=true 的 loader 首次加载 12 根 m5：写 his/min5/SSE/000001.dsb；
+// autoTrans=true 的 loader 首次加载前一交易日的已完成 bar 和当日 12 根 m5：
+// 写 his/min5/SSE/000001.dsb；
 // 第二次查询同一 key 命中 _bars_cache，不再回调 loader。
 TEST_F(R180LoaderFixture, R180His_LoaderM5AutoTransThenDsbReuse)
 {
 	r72::Loader loader;
 	loader.autoTrans = true;
 	loader.finalBars[kStk1] = r180::make_m5_bars(20200102u, 12, 10.0);
+	loader.finalBars[kStk1].insert(loader.finalBars[kStk1].begin(),
+		r72::make_bar(20200101u, 1455u, 9.9));
 
 	HisDataReplayer rp;
 	WTSVariant* cfg = r72::make_cfg(_root, _base, 202001020930ull, 202001021500ull, true);
@@ -246,6 +249,9 @@ TEST_F(R180LoaderFixture, R180His_CorruptAutoTransDsbRebuiltFromLoader)
 	r72::Loader loader;
 	loader.autoTrans = true;
 	loader.finalBars[kStk1] = r180::make_daily_bars(10.0);
+	// 回放从 2020-01-02 09:30 开始，先提供已完成的前一交易日日线作为查询历史。
+	loader.finalBars[kStk1].insert(loader.finalBars[kStk1].begin(),
+		r72::make_bar(20200101u, 150000u, 9.5));
 
 	const r180::fs::path dsb = _base / "his" / "day" / "SSE" / "000001.dsb";
 	ASSERT_TRUE(r72::write_text(dsb, std::string("bad")));
@@ -269,34 +275,47 @@ TEST_F(R180LoaderFixture, R180His_CorruptAutoTransDsbRebuiltFromLoader)
 
 // 生产: HisDataReplayer.cpp:3651-3652（bSubbed=false 写入 _unbars_cache）
 //       3704-3731（autoTrans 转储 m5）
-// tick=false + 复权代码 isMain 查询把 _main_period 写成 "m#5"、把原始代码放进
-// _unsubbed_in_need；prepare 的 checkUnbars 以 bSubbed=false 调 loader，
-// 加载 12 根 m5 并落盘 his/min5/SSE/000001.dsb。
+// prepare 建立回放游标后，先用另一合约的有效 M5 主序列建立 _main_period="m#5"；
+// 复权代码查询把原始代码放进 _unsubbed_in_need。run_by_bars 的 checkUnbars
+// 再以 bSubbed=false 调 loader，加载原始股票 M5 并落盘 his/min5/SSE/000001.dsb。
 TEST_F(R180LoaderFixture, R180His_CheckUnbarsMinute5UsesUnbarsCache)
 {
 	r72::Loader loader;
 	loader.autoTrans = true;
 	loader.finalBars[kStk1] = r180::make_m5_bars(20200102u, 12, 10.0);
+	loader.finalBars[kStk1].insert(loader.finalBars[kStk1].begin(),
+		r72::make_bar(20200101u, 1455u, 9.9));
+	loader.finalBars[kCu] = r180::make_m5_bars(20200102u, 12, 70000.0);
+	loader.finalBars[kCu].insert(loader.finalBars[kCu].begin(),
+		r72::make_bar(20200101u, 1455u, 69999.0));
 
 	HisDataReplayer rp;
 	WTSVariant* cfg = r72::make_cfg(_root, _base, 202001020930ull, 202001021500ull, false);
 	ASSERT_TRUE(rp.init(cfg, nullptr, &loader));
 	cfg->release();
 
-	r141::NullSink sink;
+	r72::Sink sink;
 	rp.register_sink(&sink, "r180_unbars");
-
-	// 复权代码：loader 没有该 key -> 空切片，但 _main_period / _unsubbed_in_need 已写入
-	EXPECT_EQ(nullptr, rp.get_kline_slice(kStk1Qfq, "m", 2, 5, true));
 	ASSERT_TRUE(rp.prepare());
+
+	WTSKlineSlice* main = rp.get_kline_slice(kCu, "m", 2, 5, true);
+	ASSERT_NE(nullptr, main);
+	EXPECT_EQ(1u, main->size());
+	main->release();
+
+	// 复权代码：loader 没有该 key -> 空切片；原始代码进入 _unsubbed_in_need。
+	EXPECT_EQ(nullptr, rp.get_kline_slice(kStk1Qfq, "m", 2, 5, true));
+	rp.run(false);
 	EXPECT_EQ(1u, sink.initCalls);
-	EXPECT_EQ(2u, loader.finalCalls);
+	EXPECT_GT(sink.barCalls, 0u);
+	EXPECT_EQ(3u, loader.finalCalls);
 	EXPECT_TRUE(r180::fs::exists(_base / "his" / "min5" / "SSE" / "000001.dsb"));
 }
 
 // 生产: HisDataReplayer.cpp:4624-4627（check_cache_days 的 codes 逗号拼接）
 // 主 K 线之外再缓存两只合约，cache_clear_days=2：第二个交易日同时淘汰两者，
-// 第二个 key 进入 codes 非空分支。淘汰后再次查询 A 必须重新走 loader。
+// 第二个 key 进入 codes 非空分支。三个合约均有前一交易日已完成日线以供初始查询；
+// 淘汰后再次查询 A 必须重新走 loader。
 TEST_F(R180LoaderFixture, R180His_CacheClearJoinsMultipleCodes)
 {
 	const char* const kExtraA = "DCE.i.2409";
@@ -307,14 +326,21 @@ TEST_F(R180LoaderFixture, R180His_CacheClearJoinsMultipleCodes)
 	loader.finalBars[kStk1] = r180::make_daily_bars(10.0);
 	loader.finalBars[kExtraA] = r180::make_daily_bars(800.0);
 	loader.finalBars[kExtraB] = r180::make_daily_bars(900.0);
+	loader.finalBars[kStk1].insert(loader.finalBars[kStk1].begin(),
+		r72::make_bar(20200101u, 150000u, 9.5));
+	loader.finalBars[kExtraA].insert(loader.finalBars[kExtraA].begin(),
+		r72::make_bar(20200101u, 150000u, 799.5));
+	loader.finalBars[kExtraB].insert(loader.finalBars[kExtraB].begin(),
+		r72::make_bar(20200101u, 150000u, 899.5));
 
 	HisDataReplayer rp;
 	WTSVariant* cfg = r72::make_cfg(_root, _base, 202001020930ull, 202001081500ull, true);
 	cfg->append("cache_clear_days", static_cast<uint32_t>(2));
+	ASSERT_EQ(2u, cfg->getUInt32("cache_clear_days"));
 	ASSERT_TRUE(rp.init(cfg, nullptr, &loader));
 	cfg->release();
 
-	r141::NullSink sink;
+	r72::Sink sink;
 	rp.register_sink(&sink, "r180_clear");
 	ASSERT_TRUE(rp.prepare());
 
@@ -331,6 +357,9 @@ TEST_F(R180LoaderFixture, R180His_CacheClearJoinsMultipleCodes)
 	EXPECT_EQ(1u, loader.calls[kExtraB]);
 
 	rp.run(false);
+	EXPECT_GT(sink.barCalls, 0u);
+	EXPECT_GE(sink.beginCalls, 2u);
+	EXPECT_EQ(1u, sink.doneCalls);
 
 	// 两只缓存都已在第二个交易日被淘汰；再查询 A 会重新回调 loader。
 	// run 结束后 _cur_tdate 已越过 A 的最后一根日线，切片可能为 NULL，

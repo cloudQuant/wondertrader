@@ -25,6 +25,10 @@
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/writer.h>
+#include <cstdio>
+#include <exception>
+#include <memory>
+#include <utility>
 namespace rj = rapidjson;
 
 USING_NS_WTP;
@@ -40,6 +44,7 @@ EventNotifier::EventNotifier()
 	, _remover(NULL)
 	, _publisher(NULL)
 	, _register(NULL)
+	, _accepting(false)
 	, _stopped(false)
 {
 	
@@ -48,7 +53,7 @@ EventNotifier::EventNotifier()
 
 EventNotifier::~EventNotifier()
 {
-	_stopped = true;
+	stopAccepting();
 	if (_worker)
 		_worker->join();
 
@@ -56,6 +61,48 @@ EventNotifier::~EventNotifier()
 
 	if (_remover && _mq_sid != 0)
 		_remover(_mq_sid);
+}
+
+void EventNotifier::stopAccepting()
+{
+	std::lock_guard<std::mutex> lock(_state_mutex);
+	_accepting = false;
+	_stopped.store(true, std::memory_order_relaxed);
+	if (_work)
+		_work->reset();
+}
+
+// The caller holds _state_mutex until postHandler has returned. This makes an
+// accepted post happen before stopAccepting releases the work guard.
+bool EventNotifier::canAccept(const char* topic) const
+{
+	if (_accepting && _mq_sid != 0)
+		return true;
+	if (_stopped.load(std::memory_order_relaxed))
+		std::fprintf(stderr, "EventNotifier rejected %s: stopping\n", topic);
+	return false;
+}
+
+template<typename Handler>
+void EventNotifier::postHandler(const char* topic, Handler&& handler)
+{
+	try
+	{
+		boost::asio::post(_asyncio, [topic, task = std::forward<Handler>(handler)]() mutable {
+			try { task(); }
+			catch (const std::exception& ex) {
+				std::fprintf(stderr, "EventNotifier %s handler failed: %s\n", topic, ex.what());
+			}
+			catch (...) {
+				std::fprintf(stderr, "EventNotifier %s handler failed: unknown exception\n", topic);
+			}
+		});
+	}
+	catch (...)
+	{
+		std::fprintf(stderr, "EventNotifier failed to queue %s\n", topic);
+		throw;
+	}
 }
 
 bool EventNotifier::init(WTSVariant* cfg)
@@ -111,32 +158,37 @@ bool EventNotifier::init(WTSVariant* cfg)
 	// behavior explicitly so the plugin ABI receives the complete argument list.
 	_mq_sid = _creator(_url.c_str(), false);
 
-	WTSLogger::info("EventNotifier initialized with channel {}", _url.c_str());
-
 	if (_worker == NULL)
 	{
-		auto work = boost::asio::make_work_guard(_asyncio);
-		_worker.reset(new StdThread([this]() {
-			while (!_stopped)
-			{
-				std::this_thread::sleep_for(std::chrono::milliseconds(2));
-				_asyncio.run_one();
-				//m_asyncIO.run();
-			}
-		}));
+		std::lock_guard<std::mutex> lock(_state_mutex);
+		_work.reset(new WorkGuard(_asyncio.get_executor()));
+		try
+		{
+			_worker.reset(new StdThread([this]() {
+				_asyncio.run();
+			}));
+			_accepting = true;
+		}
+		catch (...)
+		{
+			_work.reset();
+			throw;
+		}
 	}
+	WTSLogger::info("EventNotifier initialized with channel {}", _url.c_str());
 
 	return true;
 }
 
 void EventNotifier::notify_log(const char* tag, const char* message)
 {
-	if (_mq_sid == 0)
+	std::lock_guard<std::mutex> lock(_state_mutex);
+	if (!canAccept("LOG"))
 		return;
 
 	std::string strTag = tag;
 	std::string strMsg = message;
-	boost::asio::post(_asyncio, [this, strTag, strMsg]() {
+	postHandler("LOG", [this, strTag, strMsg]() {
 		std::string data;
 		{
 			rj::Document root(rj::kObjectType);
@@ -160,11 +212,12 @@ void EventNotifier::notify_log(const char* tag, const char* message)
 
 void EventNotifier::notify_event(const char* message)
 {
-	if (_mq_sid == 0)
+	std::lock_guard<std::mutex> lock(_state_mutex);
+	if (!canAccept("GRP_EVENT"))
 		return;
 
 	std::string strMsg = message;
-	boost::asio::post(_asyncio, [this, strMsg]() {
+	postHandler("GRP_EVENT", [this, strMsg]() {
 		std::string data;
 		{
 			rj::Document root(rj::kObjectType);
@@ -186,12 +239,13 @@ void EventNotifier::notify_event(const char* message)
 
 void EventNotifier::notify(const char* trader, const char* message)
 {
-	if (_mq_sid == 0)
+	std::lock_guard<std::mutex> lock(_state_mutex);
+	if (!canAccept("TRD_NOTIFY"))
 		return;
 
 	std::string strTrader = trader;
 	std::string strMsg = message;
-	boost::asio::post(_asyncio, [this, strTrader, strMsg]() {
+	postHandler("TRD_NOTIFY", [this, strTrader, strMsg]() {
 		std::string data;
 		{
 			rj::Document root(rj::kObjectType);
@@ -214,33 +268,45 @@ void EventNotifier::notify(const char* trader, const char* message)
 
 void EventNotifier::notify(const char* trader, uint32_t localid, const char* stdCode, WTSTradeInfo* trdInfo)
 {
-	if (trdInfo == NULL || _mq_sid == 0)
+	std::lock_guard<std::mutex> lock(_state_mutex);
+	if (trdInfo == NULL || !canAccept("TRD_TRADE"))
 		return;
 
 	std::string strTrader = trader;
 	std::string strCode = stdCode;
+	// The shared_ptr deleter balances retain even if allocating its control block fails.
 	trdInfo->retain();
-	boost::asio::post(_asyncio, [this, strTrader, strCode, localid, trdInfo]() {
+	std::shared_ptr<WTSTradeInfo> retainedTrade(trdInfo, [](WTSTradeInfo* p) {
+		p->release();
+	});
+	postHandler("TRD_TRADE", [this, strTrader, strCode, localid, retainedTrade]() {
 		std::string data;
-		tradeToJson(strTrader.c_str(), localid, strCode.c_str(), trdInfo, data);
-		if (_publisher)
+		tradeToJson(strTrader.c_str(), localid, strCode.c_str(), retainedTrade.get(), data);
+		if (data.empty())
+			WTSLogger::error("EventNotifier failed to serialize TRD_TRADE JSON");
+		else if (_publisher)
 			_publisher(_mq_sid, "TRD_TRADE", data.c_str(), (WtUInt32)data.size());
-		trdInfo->release();
 	});
 }
 
 void EventNotifier::notify(const char* trader, uint32_t localid, const char* stdCode, WTSOrderInfo* ordInfo)
 {
-	if (ordInfo == NULL || _mq_sid == 0)
+	std::lock_guard<std::mutex> lock(_state_mutex);
+	if (ordInfo == NULL || !canAccept("TRD_ORDER"))
 		return;
 
 	std::string strTrader = trader;
 	std::string strCode = stdCode;
 	ordInfo->retain();
-	boost::asio::post(_asyncio, [this, strTrader, strCode, localid, ordInfo]() {
+	std::shared_ptr<WTSOrderInfo> retainedOrder(ordInfo, [](WTSOrderInfo* p) {
+		p->release();
+	});
+	postHandler("TRD_ORDER", [this, strTrader, strCode, localid, retainedOrder]() {
 		std::string data;
-		orderToJson(strTrader.c_str(), localid, strCode.c_str(), ordInfo, data);
-		if (_publisher)
+		orderToJson(strTrader.c_str(), localid, strCode.c_str(), retainedOrder.get(), data);
+		if (data.empty())
+			WTSLogger::error("EventNotifier failed to serialize TRD_ORDER JSON");
+		else if (_publisher)
 			_publisher(_mq_sid, "TRD_ORDER", data.c_str(), (WtUInt32)data.size());
 	});
 
@@ -249,6 +315,7 @@ void EventNotifier::notify(const char* trader, uint32_t localid, const char* std
 
 void EventNotifier::tradeToJson(const char* trader, uint32_t localid, const char* stdCode, WTSTradeInfo* trdInfo, std::string& output)
 {
+	output.clear();
 	if(trdInfo == NULL)
 	{
 		output = "{}";
@@ -276,14 +343,16 @@ void EventNotifier::tradeToJson(const char* trader, uint32_t localid, const char
 
 		rj::StringBuffer sb;
 		rj::PrettyWriter<rj::StringBuffer> writer(sb);
-		root.Accept(writer);
+		if (!root.Accept(writer) || !writer.IsComplete())
+			return;
 
-		output = sb.GetString();
+		output.assign(sb.GetString(), sb.GetSize());
 	}
 }
 
 void EventNotifier::orderToJson(const char* trader, uint32_t localid, const char* stdCode, WTSOrderInfo* ordInfo, std::string& output)
 {
+	output.clear();
 	if (ordInfo == NULL)
 	{
 		output = "{}";
@@ -316,21 +385,23 @@ void EventNotifier::orderToJson(const char* trader, uint32_t localid, const char
 
 		rj::StringBuffer sb;
 		rj::PrettyWriter<rj::StringBuffer> writer(sb);
-		root.Accept(writer);
+		if (!root.Accept(writer) || !writer.IsComplete())
+			return;
 
-		output = sb.GetString();
+		output.assign(sb.GetString(), sb.GetSize());
 	}
 }
 
 void EventNotifier::notify_chart_index(uint64_t time, const char* straId, const char* idxName, const char* lineName, double val)
 {
-	if (_mq_sid == 0)
+	std::lock_guard<std::mutex> lock(_state_mutex);
+	if (!canAccept("CHART_INDEX"))
 		return;
 
 	std::string sid = straId;
 	std::string iname = idxName;
 	std::string lname = lineName;
-	boost::asio::post(_asyncio, [this, time, sid, iname, lname, val]() {
+	postHandler("CHART_INDEX", [this, time, sid, iname, lname, val]() {
 		std::string data;
 		{
 			rj::Document root(rj::kObjectType);
@@ -355,13 +426,14 @@ void EventNotifier::notify_chart_index(uint64_t time, const char* straId, const 
 
 void EventNotifier::notify_chart_marker(uint64_t time, const char* straId, double price, const char* icon, const char* tag)
 {
-	if (_mq_sid == 0)
+	std::lock_guard<std::mutex> lock(_state_mutex);
+	if (!canAccept("CHART_MARKER"))
 		return;
 
 	std::string sid = straId;
 	std::string sIcon = icon;
 	std::string sTag = tag;
-	boost::asio::post(_asyncio, [this, time, sid, sIcon, sTag, price]() {
+	postHandler("CHART_MARKER", [this, time, sid, sIcon, sTag, price]() {
 		std::string data;
 		{
 			rj::Document root(rj::kObjectType);
@@ -386,13 +458,14 @@ void EventNotifier::notify_chart_marker(uint64_t time, const char* straId, doubl
 
 void EventNotifier::notify_trade(const char* straId, const char* stdCode, bool isLong, bool isOpen, uint64_t curTime, double price, const char* userTag)
 {
-	if (_mq_sid == 0)
+	std::lock_guard<std::mutex> lock(_state_mutex);
+	if (!canAccept("STRA_TRADE"))
 		return;
 
 	std::string sid = straId;
 	std::string code = stdCode;
 	std::string tag = userTag;
-	boost::asio::post(_asyncio, [this, sid, code, tag, isLong, isOpen, curTime, price]() {
+	postHandler("STRA_TRADE", [this, sid, code, tag, isLong, isOpen, curTime, price]() {
 		std::string data;
 		{
 			rj::Document root(rj::kObjectType);

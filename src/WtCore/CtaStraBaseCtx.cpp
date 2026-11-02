@@ -11,6 +11,7 @@
 #include "WtCtaEngine.h"
 #include "WtHelper.h"
 
+#include <algorithm>
 #include <exception>
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
@@ -46,6 +47,180 @@ const char* ACTION_NAMES[] =
 	"CS",
 	"SYN"
 };
+
+namespace
+{
+enum class CtaSnapshotField { Number, Uint, Uint64, Bool, String };
+
+std::string ctaSnapshotCodeForLog(const char* code)
+{
+	constexpr size_t maxDisplayLength = 128;
+	const size_t length = strlen(code);
+	std::string result(code, std::min(length, maxDisplayLength));
+	if (length > maxDisplayLength) result += "...";
+	return result;
+}
+
+// Validate every field the loader will read before it mutates the context or
+// subscribes to market data. Preserve the legacy optional fields that the
+// loader already defaults, rather than inventing a new on-disk version.
+bool validateCtaSnapshot(const rj::Value& root, std::string& invalidPath, size_t detailTagCapacity)
+{
+	auto fail = [&invalidPath](const std::string& path) { invalidPath = path; return false; };
+	auto field = [&fail](const rj::Value& object, const char* name, CtaSnapshotField kind,
+		bool required, const std::string& base) {
+		const std::string path = base + "." + name;
+		if (!object.HasMember(name))
+			return required ? fail(path) : true;
+		const rj::Value& value = object[name];
+		bool valid = false;
+		switch (kind)
+		{
+		case CtaSnapshotField::Number: valid = value.IsNumber(); break;
+		case CtaSnapshotField::Uint: valid = value.IsUint(); break;
+		case CtaSnapshotField::Uint64: valid = value.IsUint64(); break;
+		case CtaSnapshotField::Bool: valid = value.IsBool(); break;
+		case CtaSnapshotField::String:
+			valid = value.IsString() && strlen(value.GetString()) == value.GetStringLength();
+			break;
+		}
+		return valid ? true : fail(path);
+	};
+	auto code = [&fail](const rj::Value& value, const std::string& path, size_t limit) {
+		return value.IsString() && value.GetStringLength() > 0 &&
+			value.GetStringLength() < limit && strlen(value.GetString()) == value.GetStringLength()
+			? true : fail(path);
+	};
+	if (!root.IsObject())
+		return fail("$");
+	if (!root.HasMember("positions") || (!root["positions"].IsArray() && !root["positions"].IsNull()))
+		return fail("$.positions");
+	if (!root.HasMember("conditions") || (!root["conditions"].IsObject() && !root["conditions"].IsNull()))
+		return fail("$.conditions");
+
+	if (root.HasMember("fund") && !root["fund"].IsNull())
+	{
+		const rj::Value& fund = root["fund"];
+		if (!fund.IsObject()) return fail("$.fund");
+		if (!field(fund, "total_profit", CtaSnapshotField::Number, true, "$.fund") ||
+			!field(fund, "total_dynprofit", CtaSnapshotField::Number, true, "$.fund") ||
+			!field(fund, "total_fees", CtaSnapshotField::Number, true, "$.fund") ||
+			!field(fund, "tdate", CtaSnapshotField::Uint, true, "$.fund")) return false;
+	}
+
+	if (root["positions"].IsArray())
+	{
+		const auto positions = root["positions"].GetArray();
+		for (rj::SizeType i = 0; i < positions.Size(); ++i)
+		{
+			const rj::Value& position = positions[i];
+			const std::string path = "$.positions[" + std::to_string(i) + "]";
+			if (!position.IsObject()) return fail(path);
+			if (!field(position, "code", CtaSnapshotField::String, true, path) ||
+				!code(position["code"], path + ".code", static_cast<size_t>(-1)) ||
+				!field(position, "volume", CtaSnapshotField::Number, true, path) ||
+				!field(position, "closeprofit", CtaSnapshotField::Number, true, path) ||
+				!field(position, "dynprofit", CtaSnapshotField::Number, true, path) ||
+				!field(position, "lastentertime", CtaSnapshotField::Uint64, true, path) ||
+				!field(position, "lastexittime", CtaSnapshotField::Uint64, true, path) ||
+				!field(position, "frozen", CtaSnapshotField::Number, false, path) ||
+				!field(position, "frozendate", CtaSnapshotField::Uint, position.HasMember("frozen"), path)) return false;
+			if (!position.HasMember("details") || (!position["details"].IsArray() && !position["details"].IsNull()))
+				return fail(path + ".details");
+			if (position["details"].IsNull()) continue;
+			const auto details = position["details"].GetArray();
+			for (rj::SizeType j = 0; j < details.Size(); ++j)
+			{
+				const rj::Value& detail = details[j];
+				const std::string item = path + ".details[" + std::to_string(j) + "]";
+				if (!detail.IsObject()) return fail(item);
+				if (!field(detail, "volume", CtaSnapshotField::Number, true, item)) return false;
+				// The legacy reader intentionally skips zero-volume details before
+				// accessing the remaining fields. They may be absent there, but
+				// any fields that are present must still have valid types.
+				const bool required = !decimal::eq(detail["volume"].GetDouble(), 0);
+				if (!field(detail, "long", CtaSnapshotField::Bool, required, item) ||
+					!field(detail, "price", CtaSnapshotField::Number, required, item) ||
+					!field(detail, "opentime", CtaSnapshotField::Uint64, required, item) ||
+					!field(detail, "opentdate", CtaSnapshotField::Uint, false, item) ||
+					!field(detail, "maxprice", CtaSnapshotField::Number, false, item) ||
+					!field(detail, "minprice", CtaSnapshotField::Number, false, item) ||
+					!field(detail, "profit", CtaSnapshotField::Number, required, item) ||
+					!field(detail, "maxprofit", CtaSnapshotField::Number, required, item) ||
+					!field(detail, "maxloss", CtaSnapshotField::Number, required, item) ||
+					!field(detail, "opentag", CtaSnapshotField::String, required, item) ||
+					!field(detail, "openbarno", CtaSnapshotField::Uint, false, item)) return false;
+				if (detail.HasMember("opentag") && detail["opentag"].GetStringLength() >= detailTagCapacity)
+					return fail(item + ".opentag");
+			}
+		}
+	}
+
+	if (root["conditions"].IsObject())
+	{
+		const rj::Value& conditions = root["conditions"];
+		if (!field(conditions, "settime", CtaSnapshotField::Uint64, true, "$.conditions")) return false;
+		if (!conditions.HasMember("items") || !conditions["items"].IsObject()) return fail("$.conditions.items");
+		for (const auto& member : conditions["items"].GetObject())
+		{
+			const std::string base = "$.conditions.items";
+			if (!code(member.name, base + ".<code>", sizeof(CondEntrust()._code))) return false;
+			const std::string path = base + "[" + std::string(member.name.GetString(), member.name.GetStringLength()) + "]";
+			if (!member.value.IsArray()) return fail(path);
+			const auto items = member.value.GetArray();
+			for (rj::SizeType i = 0; i < items.Size(); ++i)
+			{
+				const rj::Value& item = items[i];
+				const std::string itemPath = path + ".<code>[" + std::to_string(i) + "]";
+				if (!item.IsObject()) return fail(itemPath);
+				if (!field(item, "usertag", CtaSnapshotField::String, true, itemPath) ||
+					!field(item, "field", CtaSnapshotField::Uint, true, itemPath) ||
+					!field(item, "alg", CtaSnapshotField::Uint, true, itemPath) ||
+					!field(item, "target", CtaSnapshotField::Number, true, itemPath) ||
+					!field(item, "qty", CtaSnapshotField::Number, true, itemPath) ||
+					!field(item, "action", CtaSnapshotField::Uint, true, itemPath)) return false;
+				if (item["usertag"].GetStringLength() >= sizeof(CondEntrust()._usertag)) return fail(itemPath + ".usertag");
+				const uint32_t comparisonField = item["field"].GetUint();
+				if (comparisonField != WCF_NEWPRICE && comparisonField != WCF_BIDPRICE &&
+					comparisonField != WCF_ASKPRICE && comparisonField != WCF_PRICEDIFF && comparisonField != WCF_NONE)
+					return fail(itemPath + ".field");
+				if (item["alg"].GetUint() > WCT_SmallerOrEqual) return fail(itemPath + ".alg");
+				if (item["action"].GetUint() > COND_ACTION_SP) return fail(itemPath + ".action");
+			}
+		}
+	}
+
+	if (root.HasMember("signals") && !root["signals"].IsNull())
+	{
+		const rj::Value& signals = root["signals"];
+		if (!signals.IsObject()) return fail("$.signals");
+		for (const auto& member : signals.GetObject())
+		{
+			if (!code(member.name, "$.signals.<code>", static_cast<size_t>(-1))) return false;
+			// Bound diagnostics independently of untrusted key length: the
+			// logging formatter writes into a fixed-size buffer.
+			std::string shortCode(member.name.GetString(), std::min<size_t>(member.name.GetStringLength(), 64));
+			if (member.name.GetStringLength() > 64) shortCode += "...";
+			const std::string path = "$.signals[" + shortCode + "]";
+			if (!member.value.IsObject()) return fail(path);
+			if (!field(member.value, "usertag", CtaSnapshotField::String, true, path) ||
+				!field(member.value, "volume", CtaSnapshotField::Number, true, path) ||
+				!field(member.value, "sigprice", CtaSnapshotField::Number, true, path) ||
+				!field(member.value, "gentime", CtaSnapshotField::Uint64, true, path)) return false;
+			// A recovered signal's tag is later copied to DetailInfo::_opentag
+			// when the target position is applied.
+			if (member.value["usertag"].GetStringLength() >= detailTagCapacity)
+				return fail(path + ".usertag");
+		}
+	}
+	if (root.HasMember("utils") && !root["utils"].IsNull())
+	{
+		if (!root["utils"].IsObject()) return fail("$.utils");
+		if (!field(root["utils"], "lastbarno", CtaSnapshotField::Uint, true, "$.utils")) return false;
+	}
+	return true;
+}
+}
 
 
 inline uint32_t makeCtaCtxId()
@@ -289,12 +464,38 @@ void CtaStraBaseCtx::load_data(uint32_t /*flag*/ /* = 0xFFFFFFFF */)
 	StdFile::read_file_content(filename.c_str(), content);
 	if (content.empty())
 		return;
+	const std::string diagnosticName = _name.substr(0, 128);
+	if (content.find('\0') != std::string::npos)
+	{
+		log_error("Invalid persisted state for {} at $: raw NUL byte", diagnosticName.c_str());
+		return;
+	}
 
 	rj::Document root;
-	root.Parse(content.c_str());
+	root.Parse(content.data(), content.size());
 
 	if (root.HasParseError())
+	{
+		log_error("Invalid persisted state for {} at $: JSON parse error", diagnosticName.c_str());
 		return;
+	}
+
+	std::string invalidPath;
+	if (!validateCtaSnapshot(root, invalidPath, sizeof(DetailInfo()._opentag)))
+	{
+		log_error("Invalid persisted state for {} at {}", diagnosticName.c_str(), invalidPath.c_str());
+		return;
+	}
+	// Prepare a candidate before publishing any restored state. Existing values
+	// are copied because historical reload semantics update rather than replace
+	// entries absent from the file. Subscriptions are deferred until commit.
+	PositionMap stagedPositions = _pos_map;
+	SignalMap stagedSignals = _sig_map;
+	CondEntrustMap stagedConditions = _condtions;
+	StraFundInfo stagedFund = _fund_info;
+	uint64_t stagedConditionTime = _last_cond_min;
+	uint32_t stagedLastBar = _last_barno;
+	std::vector<std::string> subscriptions;
 
 	if(root.HasMember("fund"))
 	{
@@ -302,10 +503,10 @@ void CtaStraBaseCtx::load_data(uint32_t /*flag*/ /* = 0xFFFFFFFF */)
 		const rj::Value& jFund = root["fund"];
 		if(!jFund.IsNull() && jFund.IsObject())
 		{
-			_fund_info._total_profit = jFund["total_profit"].GetDouble();
-			_fund_info._total_dynprofit = jFund["total_dynprofit"].GetDouble();
+			stagedFund._total_profit = jFund["total_profit"].GetDouble();
+			stagedFund._total_dynprofit = jFund["total_dynprofit"].GetDouble();
 			[[maybe_unused]] uint32_t tdate = jFund["tdate"].GetUint();
-			_fund_info._total_fees = jFund["total_fees"].GetDouble();
+			stagedFund._total_fees = jFund["total_fees"].GetDouble();
 		}
 	}
 
@@ -322,9 +523,9 @@ void CtaStraBaseCtx::load_data(uint32_t /*flag*/ /* = 0xFFFFFFFF */)
 				bool isExpired = (strlen(ruleTag) == 0 && _engine->get_contract_info(stdCode) == NULL);
 
 				if(isExpired)
-					log_info("{} not exists or expired, position ignored", stdCode);
+					log_info("{} not exists or expired, position ignored", ctaSnapshotCodeForLog(stdCode).c_str());
 
-				PosInfo& pInfo = _pos_map[stdCode];
+				PosInfo& pInfo = stagedPositions[stdCode];
 				pInfo._closeprofit = pItem["closeprofit"].GetDouble();
 				pInfo._last_entertime = pItem["lastentertime"].GetUint64();
 				pInfo._last_exittime = pItem["lastexittime"].GetUint64();
@@ -396,58 +597,104 @@ void CtaStraBaseCtx::load_data(uint32_t /*flag*/ /* = 0xFFFFFFFF */)
 
 				if(!isExpired)
 				{
-					log_info("Position confirmed,{} -> {}", stdCode, pInfo._volume);
-					stra_sub_ticks(stdCode);
+					log_info("Position confirmed,{} -> {}", ctaSnapshotCodeForLog(stdCode).c_str(), pInfo._volume);
+					subscriptions.emplace_back(stdCode);
 				}
 			}
 		}
 
-		_fund_info._total_profit = total_profit;
-		_fund_info._total_dynprofit = total_dynprofit;
+		stagedFund._total_profit = total_profit;
+		stagedFund._total_dynprofit = total_dynprofit;
 	}
 
 	{//读取条件单
 		uint32_t count = 0;
 		const rj::Value& jCond = root["conditions"];
-		if (!jCond.IsNull() && jCond.IsObject())
+		if (!jCond.IsNull() && !jCond.IsObject())
 		{
-			_last_cond_min = jCond["settime"].GetUint64();
-			const rj::Value& jItems = jCond["items"];
-			for (auto& m : jItems.GetObject())
+			log_error("Invalid conditions data in {}: expected object", filename.c_str());
+		}
+		else if (jCond.IsObject())
+		{
+			if (!jCond.HasMember("settime") || !jCond["settime"].IsUint64() ||
+				!jCond.HasMember("items") || !jCond["items"].IsObject())
 			{
-				const char* stdCode = m.name.GetString();
-				const char* ruleTag = _engine->get_hot_mgr()->getRuleTag(stdCode);
-				if (strlen(ruleTag) == 0 && _engine->get_contract_info(stdCode) == NULL)
-				{
-					log_info("{} not exists or expired, condition ignored", stdCode);
-					continue;
-				}
-
-				const rj::Value& cListItem = m.value;
-
-				CondList& condList = _condtions[stdCode];
-
-				for(auto& cItem : cListItem.GetArray())
-				{
-					CondEntrust condInfo;
-					strcpy(condInfo._code, stdCode);
-					strcpy(condInfo._usertag, cItem["usertag"].GetString());
-
-					condInfo._field = (WTSCompareField)cItem["field"].GetUint();
-					condInfo._alg = (WTSCompareType)cItem["alg"].GetUint();
-					condInfo._target = cItem["target"].GetDouble();
-					condInfo._qty = cItem["qty"].GetDouble();
-					condInfo._action = (char)cItem["action"].GetUint();
-
-					condList.emplace_back(condInfo);
-
-					log_info("{} condition recovered, {} {}, condition: newprice {} {}",
-						stdCode, ACTION_NAMES[(uint32_t)condInfo._action], condInfo._qty, CMP_ALG_NAMES[(uint32_t)condInfo._alg], condInfo._target);
-					count++;
-				}
+				log_error("Invalid conditions data in {}: expected unsigned settime and object items", filename.c_str());
 			}
+			else
+			{
+				stagedConditionTime = jCond["settime"].GetUint64();
+				const rj::Value& jItems = jCond["items"];
+				for (auto& m : jItems.GetObject())
+				{
+					const char* stdCode = m.name.GetString();
+					if (m.name.GetStringLength() >= MAX_INSTRUMENT_LENGTH ||
+						strlen(stdCode) != m.name.GetStringLength())
+					{
+						log_error("Invalid condition code in {}: code is too long or contains NUL", filename.c_str());
+						continue;
+					}
 
-			log_info("{} conditions recovered, setup time: {}", count, _last_cond_min);
+					const char* ruleTag = _engine->get_hot_mgr()->getRuleTag(stdCode);
+					if (strlen(ruleTag) == 0 && _engine->get_contract_info(stdCode) == NULL)
+					{
+						log_info("{} not exists or expired, condition ignored", stdCode);
+						continue;
+					}
+
+					const rj::Value& cListItem = m.value;
+					if (!cListItem.IsArray())
+					{
+						log_error("Invalid conditions for {}: expected an array", stdCode);
+						continue;
+					}
+
+					for (const rj::Value& cItem : cListItem.GetArray())
+					{
+						if (!cItem.IsObject() ||
+							!cItem.HasMember("usertag") || !cItem["usertag"].IsString() ||
+							cItem["usertag"].GetStringLength() >= sizeof(CondEntrust()._usertag) ||
+							strlen(cItem["usertag"].GetString()) != cItem["usertag"].GetStringLength() ||
+							!cItem.HasMember("field") || !cItem["field"].IsUint() ||
+							!cItem.HasMember("alg") || !cItem["alg"].IsUint() ||
+							cItem["alg"].GetUint() > WCT_SmallerOrEqual ||
+							!cItem.HasMember("target") || !cItem["target"].IsNumber() ||
+							!cItem.HasMember("qty") || !cItem["qty"].IsNumber() ||
+							!cItem.HasMember("action") || !cItem["action"].IsUint() ||
+							cItem["action"].GetUint() > COND_ACTION_SP)
+						{
+							log_error("Invalid condition for {} ignored: missing or invalid field", stdCode);
+							continue;
+						}
+
+						const uint32_t field = cItem["field"].GetUint();
+						if (field != WCF_NEWPRICE && field != WCF_BIDPRICE && field != WCF_ASKPRICE &&
+							field != WCF_PRICEDIFF && field != WCF_NONE)
+						{
+							log_error("Invalid condition for {} ignored: unsupported compare field {}", stdCode, field);
+							continue;
+						}
+
+						CondEntrust condInfo;
+						strcpy(condInfo._code, stdCode);
+						strcpy(condInfo._usertag, cItem["usertag"].GetString());
+
+						condInfo._field = (WTSCompareField)field;
+						condInfo._alg = (WTSCompareType)cItem["alg"].GetUint();
+						condInfo._target = cItem["target"].GetDouble();
+						condInfo._qty = cItem["qty"].GetDouble();
+						condInfo._action = (char)cItem["action"].GetUint();
+
+						stagedConditions[stdCode].emplace_back(condInfo);
+
+						log_info("{} condition recovered, {} {}, condition: newprice {} {}",
+							stdCode, ACTION_NAMES[(uint32_t)condInfo._action], condInfo._qty, CMP_ALG_NAMES[(uint32_t)condInfo._alg], condInfo._target);
+						count++;
+					}
+				}
+
+				log_info("{} conditions recovered, setup time: {}", count, stagedConditionTime);
+			}
 		}
 	}
 
@@ -463,20 +710,20 @@ void CtaStraBaseCtx::load_data(uint32_t /*flag*/ /* = 0xFFFFFFFF */)
 				const char* ruleTag = _engine->get_hot_mgr()->getRuleTag(stdCode);
 				if (strlen(ruleTag) == 0 && _engine->get_contract_info(stdCode) == NULL)
 				{
-					log_info("{} not exists or expired, signal ignored", stdCode);
+					log_info("{} not exists or expired, signal ignored", ctaSnapshotCodeForLog(stdCode).c_str());
 					continue;
 				}
 
 				const rj::Value& jItem = m.value;
 
-				SigInfo& sInfo = _sig_map[stdCode];
+				SigInfo& sInfo = stagedSignals[stdCode];
 				sInfo._usertag = jItem["usertag"].GetString();
 				sInfo._volume = jItem["volume"].GetDouble();
 				sInfo._sigprice = jItem["sigprice"].GetDouble();
 				sInfo._gentime = jItem["gentime"].GetUint64();
 				
-				log_info("{} untouched signal recovered, target pos: {}", stdCode, sInfo._volume);
-				stra_sub_ticks(stdCode);
+				log_info("{} untouched signal recovered, target pos: {}", ctaSnapshotCodeForLog(stdCode).c_str(), sInfo._volume);
+				subscriptions.emplace_back(stdCode);
 			}
 		}
 	}
@@ -487,9 +734,18 @@ void CtaStraBaseCtx::load_data(uint32_t /*flag*/ /* = 0xFFFFFFFF */)
 		const rj::Value& jUtils = root["utils"];
 		if (!jUtils.IsNull() && jUtils.IsObject())
 		{
-			_last_barno = jUtils["lastbarno"].GetUint();
+			stagedLastBar = jUtils["lastbarno"].GetUint();
 		}
 	}
+
+	_pos_map.swap(stagedPositions);
+	_sig_map.swap(stagedSignals);
+	_condtions.swap(stagedConditions);
+	_fund_info = stagedFund;
+	_last_cond_min = stagedConditionTime;
+	_last_barno = stagedLastBar;
+	for (const std::string& code : subscriptions)
+		stra_sub_ticks(code.c_str());
 }
 
 void CtaStraBaseCtx::save_data(uint32_t /*flag*/ /* = 0xFFFFFFFF */)
@@ -801,8 +1057,12 @@ void CtaStraBaseCtx::on_tick(const char* stdCode, WTSTickData* newTick, bool bEm
 		auto it = _sig_map.find(stdCode);
 		if(it != _sig_map.end())
 		{
-			WTSSessionInfo* sInfo = _engine->get_session_info(stdCode, true);
-			if (sInfo->isInTradingTime(_engine->get_raw_time(), true))
+			WTSSessionInfo* sessionInfo = _engine->get_session_info(stdCode, true);
+			if (sessionInfo == NULL)
+			{
+				log_error("Cannot process pending signal of {} without session info; signal retained", stdCode);
+			}
+			else if (sessionInfo->isInTradingTime(_engine->get_raw_time(), true))
 			{
 				const SigInfo sInfo = it->second;
 				//只有当信号类型不为0，即bar内信号或者条件单触发信号时，且信号没有触发过
@@ -1236,6 +1496,12 @@ void CtaStraBaseCtx::stra_exit_long(const char* stdCode, double qty, const char*
 	}
 
 	WTSSessionInfo* sInfo = commInfo->getSessionInfo();
+	if (sInfo == NULL)
+	{
+		log_error("Cannot exit long position of {} without session info", stdCode);
+		return;
+	}
+
 	uint32_t offTime = sInfo->offsetTime(_engine->get_min_time(), true);
 	bool isLastBarOfDay = (offTime == sInfo->getCloseTime(true));
 
@@ -1351,6 +1617,19 @@ double CtaStraBaseCtx::stra_get_day_price(const char* stdCode, int flag /* = 0 *
 
 void CtaStraBaseCtx::stra_set_position(const char* stdCode, double qty, const char* userTag /* = "" */, double limitprice /* = 0.0 */, double stopprice /* = 0.0 */)
 {
+	if (_engine == NULL)
+	{
+		log_error("Cannot set position of {} without CTA engine", stdCode);
+		return;
+	}
+
+	WTSCommodityInfo* commInfo = _engine->get_commodity_info(stdCode);
+	if (commInfo == NULL)
+	{
+		log_error("Cannot find corresponding commodity info of {}", stdCode);
+		return;
+	}
+
 	_engine->sub_tick(id(), stdCode);
 
 	if (decimal::eq(limitprice, 0.0) && decimal::eq(stopprice, 0.0))	//如果不是动态下单模式, 则直接触发
@@ -1669,7 +1948,7 @@ void CtaStraBaseCtx::stra_sub_ticks(const char* code)
 	_tick_subs.insert(code);
 
 	_engine->sub_tick(_context_id, code);
-	log_info("Market data subscribed: {}", code);
+	log_info("Market data subscribed: {}", ctaSnapshotCodeForLog(code).c_str());
 }
 
 void CtaStraBaseCtx::stra_sub_bar_events(const char* stdCode, const char* period)

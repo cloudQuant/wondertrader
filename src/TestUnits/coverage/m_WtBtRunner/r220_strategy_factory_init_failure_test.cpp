@@ -130,8 +130,10 @@ TEST_P(StrategyFactoryInitFailure, ReturnsFailureBeforeSinkRegistrationAndReplay
 		<< R"("replayer":{"mode":"csv","path":".","stime":20200101090000,"etime":20200101150000,"basefiles":{}},)"
 		<< R"("env":{"mocker":")" << mode << R"(","slippage":0},)"
 		<< '"' << config_key << R"(":{"module":")" << missing_module.string()
-		<< R"(","strategy":{"name":"missing_strategy","id":"r220_failure"}})"
-		<< "}";
+		<< R"(","strategy":{"name":"missing_strategy","id":"r220_failure"})";
+	if (mode == "sel")
+		config << R"(,"task":{"date":0,"time":2359,"period":"d"})";
+	config << "}}";
 	write_file(runner_path, config.str());
 
 	const ChildResult result = run_runner_in_child(logger_path, runner_path);

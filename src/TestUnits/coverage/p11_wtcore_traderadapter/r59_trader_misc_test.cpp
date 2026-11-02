@@ -206,13 +206,16 @@ TEST_F(R59Misc, push_trade_without_contract_is_ignored)
     TraderAdapter trader;
     build(trader, &pm);
 
-    // 没有合约信息的成交：在写任何表之前返回
-    WTSTradeInfo* t = WTSTradeInfo::create(kRawCode, kExchg);
+    // 未登记合约的成交：在写任何表之前返回
+    const char* missingCode = "not_registered";
+    ASSERT_EQ(nullptr, bd_.getContract(missingCode, kExchg));
+    WTSTradeInfo* t = WTSTradeInfo::create(missingCode, kExchg);
     t->setDirection(WDT_LONG);
     t->setOffsetType(WOT_OPEN);
     t->setVolume(2);
     t->setPrice(7000.0);
     trader.onPushTrade(t);
+    t->release();
 
     EXPECT_TRUE(sink_.trades_.empty());
     EXPECT_DOUBLE_EQ(0.0, trader.getUndoneQty(kStdCode));

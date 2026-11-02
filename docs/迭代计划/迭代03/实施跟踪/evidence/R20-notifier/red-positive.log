@@ -1,0 +1,18 @@
++ set -e
++ out=/tmp/wt-i03-event-notifier
++ cd /tmp/wt-i03-event-notifier/empty-cwd
++ for mode in full-single no-publish-single
++ :
++ dir=full
++ '[' full-single = no-publish-single ']'
++ WT_R20_MQ_LOG=/tmp/wt-i03-event-notifier/red/full-single.log
++ /tmp/wt-i03-event-notifier/red/notifier_check full-single /tmp/wt-i03-event-notifier/full
+PASS full-single
++ for mode in full-single no-publish-single
++ :
++ dir=full
++ '[' no-publish-single = no-publish-single ']'
++ dir=missing-publish
++ WT_R20_MQ_LOG=/tmp/wt-i03-event-notifier/red/no-publish-single.log
++ /tmp/wt-i03-event-notifier/red/notifier_check no-publish-single /tmp/wt-i03-event-notifier/missing-publish
+PASS no-publish-single

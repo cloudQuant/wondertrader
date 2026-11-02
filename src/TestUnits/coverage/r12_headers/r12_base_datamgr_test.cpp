@@ -112,9 +112,11 @@ TEST_F(R12BaseDataMgr, commodity_lookup_by_stdpid_and_two_args)
 	EXPECT_EQ(_mgr.getCommodity("", ""), nullptr);
 	WTSCommodityInfo* stk = _mgr.getCommodity("SSE.STK");
 	ASSERT_NE(stk, nullptr);
-	// 品种登记的交易模板 id 就是夹具里写的 R12DAY
-	EXPECT_STREQ(stk->getTradingTpl(), "R12DAY");
-	EXPECT_STREQ(byPid->getTradingTpl(), "R12NIGHT");
+	// 品种将交易时段与交易日历模板分别存储。
+	EXPECT_STREQ(stk->getSession(), "R12DAY");
+	EXPECT_STREQ(stk->getTradingTpl(), "CHN");
+	EXPECT_STREQ(byPid->getSession(), "R12NIGHT");
+	EXPECT_STREQ(byPid->getTradingTpl(), "CHN");
 }
 
 TEST_F(R12BaseDataMgr, contract_lookup_and_attributes)
@@ -198,9 +200,7 @@ TEST_F(R12BaseDataMgr, session_lookup_by_id_and_code)
 	CodeSet* pids = _mgr.getSessionComms("R12DAY");
 	ASSERT_NE(pids, nullptr);
 	EXPECT_TRUE(pids->find("SSE.STK") != pids->end());
-	CodeSet* none = _mgr.getSessionComms("NOPE");
-	ASSERT_NE(none, nullptr);
-	EXPECT_EQ(none->size(), (std::size_t)0);
+	EXPECT_EQ(_mgr.getSessionComms("NOPE"), nullptr);
 }
 
 TEST_F(R12BaseDataMgr, holiday_and_trading_date_window)
@@ -259,8 +259,8 @@ TEST_F(R12BaseDataMgr, boundary_time_start_and_end)
 	EXPECT_NE(end, 0u);
 	if (start != 0u && end != 0u)
 	{
-		// 边界时间形如 yyyymmddhhmmss，且 start < end
+		// 边界时间形如 yyyymmddhhmm，且 start < end
 		EXPECT_LT(start, end);
-		EXPECT_EQ(start / 1000000, 20240108u);
+		EXPECT_EQ(start / 10000, 20240108u);
 	}
 }

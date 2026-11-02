@@ -109,14 +109,8 @@ namespace wtp_test
 			if (std::filesystem::is_directory(product_executers, ec))
 			{
 				ec.clear();
-				std::filesystem::create_directory_symlink(product_executers,
-					_fixture_dir / "executer", ec);
-				if (ec)
-				{
-					ec.clear();
-					std::filesystem::copy(product_executers, _fixture_dir / "executer",
-						std::filesystem::copy_options::recursive, ec);
-				}
+				std::filesystem::copy(product_executers, _fixture_dir / "executer",
+					std::filesystem::copy_options::recursive, ec);
 				if (ec)
 				{
 					_error = "could not preserve the product executer lookup directory: " + ec.message();

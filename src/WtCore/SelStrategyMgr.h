@@ -9,6 +9,8 @@
 */
 #pragma once
 #include <memory>
+#include <mutex>
+#include <unordered_set>
 #include <boost/core/noncopyable.hpp>
 
 #include "../Includes/FasterDefs.h"
@@ -62,6 +64,8 @@ private:
 	} StraFactInfo;
 	typedef wt_hashmap<std::string, StraFactInfo> StraFactMap;
 	StraFactMap	_factories;
+	std::mutex _factories_mutex;
+	std::unordered_set<DllHandle> _conflicting_factory_modules;
 
 	typedef wt_hashmap<std::string, SelStrategyPtr> StrategyMap;
 	StrategyMap	_strategies;

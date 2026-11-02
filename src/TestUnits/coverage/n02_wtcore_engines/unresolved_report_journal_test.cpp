@@ -362,6 +362,60 @@ TEST(UnresolvedReportJournal, TruncatedGuardPreservesItsGoodPrefix)
 	EXPECT_LT(inspection.guard_valid_prefix.size(), truncatedSize);
 }
 
+TEST(UnresolvedReportJournal, InterruptedPrimaryAppendAfterProcessExitExportsForensicPrefix)
+{
+	TemporaryJournal file;
+	Journal seed;
+	ASSERT_EQ(Journal::Status::Ok, createJournal(seed, file));
+	uint64_t committedSequence = 0;
+	ASSERT_EQ(Journal::Status::Ok,
+		seed.append("committed-prefix-report", committedSequence));
+	seed.close();
+	const auto readWal = [&file]() {
+		std::ifstream input(file.path(), std::ios::binary);
+		return std::string(std::istreambuf_iterator<char>(input), {});
+	};
+	const std::string validWal = readWal();
+	ASSERT_FALSE(validWal.empty());
+
+	const pid_t child = fork();
+	ASSERT_GE(child, 0);
+	if (child == 0)
+	{
+		Journal writer;
+		if (writer.open(file.string()) != Journal::Status::Ok)
+			_exit(10);
+		wtp::UnresolvedReportJournalTestAccess::failAt(
+			writer, FaultPoint::FailPrimaryPartialWrite, 7);
+		uint64_t sequence = 0;
+		const Journal::Status status = writer.append("report-with-torn-tail", sequence);
+		_exit(status == Journal::Status::StorageFailed && sequence == 0 ? 0 : 1);
+	}
+	int childStatus = 0;
+	ASSERT_EQ(child, waitpid(child, &childStatus, 0));
+	ASSERT_TRUE(WIFEXITED(childStatus));
+	ASSERT_EQ(0, WEXITSTATUS(childStatus));
+	const std::string tornWal = readWal();
+	ASSERT_GT(tornWal.size(), validWal.size());
+	EXPECT_EQ(validWal, tornWal.substr(0, validWal.size()));
+
+	Journal reopened;
+	EXPECT_EQ(Journal::Status::RecoveryRequired, reopened.open(file.string()));
+	const std::string afterOpenWal = readWal();
+	EXPECT_EQ(tornWal, afterOpenWal);
+	Journal::RecoveryInspection inspection;
+	ASSERT_EQ(Journal::Status::RecoveryRequired, reopened.recoveryInspection(inspection));
+	EXPECT_TRUE(inspection.requires_manual_recovery);
+	EXPECT_TRUE(inspection.has_in_flight_marker);
+	EXPECT_EQ(validWal, inspection.primary_valid_prefix);
+	EXPECT_EQ(validWal.size(), inspection.primary_bad_offset);
+	EXPECT_FALSE(inspection.primary_issue.empty());
+	ASSERT_FALSE(inspection.unresolved_prepares.empty());
+	EXPECT_EQ("report-with-torn-tail", inspection.unresolved_prepares.back().raw_payload);
+	std::vector<Journal::Report> pending;
+	EXPECT_EQ(Journal::Status::RecoveryRequired, reopened.pending(pending));
+}
+
 void expectFaultRequiresRecovery(FaultPoint point, const std::string& report,
 	size_t fail_after_bytes = 0)
 {
@@ -525,6 +579,57 @@ TEST(UnresolvedReportJournal, AmbiguousAckCommitRemainsRecoveryRequiredAfterProc
 	EXPECT_FALSE(inspection.in_flight_marker_bytes.empty());
 	std::vector<Journal::Report> pending;
 	EXPECT_EQ(Journal::Status::RecoveryRequired, reopened.pending(pending));
+}
+
+TEST(UnresolvedReportJournal, AmbiguousAckPrimaryFlushRemainsRecoveryRequiredAfterProcessExit)
+{
+	TemporaryJournal file;
+	Journal seed;
+	ASSERT_EQ(Journal::Status::Ok, createJournal(seed, file));
+	uint64_t reportSequence = 0;
+	ASSERT_EQ(Journal::Status::Ok, seed.append("must-remain-unresolved", reportSequence));
+	seed.close();
+
+	const pid_t child = fork();
+	ASSERT_GE(child, 0);
+	if (child == 0)
+	{
+		Journal writer;
+		if (writer.open(file.string()) != Journal::Status::Ok)
+			_exit(10);
+		wtp::UnresolvedReportJournalTestAccess::failAt(
+			writer, FaultPoint::FailPrimaryFlush);
+		const Journal::Status status = writer.acknowledge(reportSequence,
+			"operator-7", "fresh reconciliation ref R-12");
+		_exit(status == Journal::Status::StorageFailed ? 0 : 1);
+	}
+	int childStatus = 0;
+	ASSERT_EQ(child, waitpid(child, &childStatus, 0));
+	ASSERT_TRUE(WIFEXITED(childStatus));
+	ASSERT_EQ(0, WEXITSTATUS(childStatus));
+
+	Journal reopened;
+	EXPECT_EQ(Journal::Status::RecoveryRequired, reopened.open(file.string()));
+	Journal::RecoveryInspection inspection;
+	ASSERT_EQ(Journal::Status::RecoveryRequired, reopened.recoveryInspection(inspection));
+	EXPECT_TRUE(inspection.requires_manual_recovery);
+	EXPECT_TRUE(inspection.has_in_flight_marker);
+	EXPECT_FALSE(inspection.in_flight_marker_bytes.empty());
+	ASSERT_FALSE(inspection.primary_reports.empty());
+	EXPECT_EQ("must-remain-unresolved", inspection.primary_reports.back().raw_payload);
+	EXPECT_FALSE(inspection.primary_reports.back().committed);
+	ASSERT_FALSE(inspection.primary_acknowledgements.empty());
+	const Journal::Acknowledgement& ack = inspection.primary_acknowledgements.back();
+	EXPECT_EQ(reportSequence, ack.acknowledged_high_water);
+	EXPECT_EQ("operator-7", ack.operator_id);
+	EXPECT_FALSE(ack.committed);
+	EXPECT_FALSE(ack.guard_commit_matches_primary);
+	std::vector<Journal::Report> pending;
+	EXPECT_EQ(Journal::Status::RecoveryRequired, reopened.pending(pending));
+	uint64_t safeHighWater = 99;
+	EXPECT_EQ(Journal::Status::RecoveryRequired,
+		reopened.queryPendingHighWater(safeHighWater));
+	EXPECT_EQ(0u, safeHighWater);
 }
 
 TEST(UnresolvedReportJournal, MarkerRemovalDirectoryFlushFailurePersistsCleanupUncertainty)

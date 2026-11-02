@@ -77,6 +77,7 @@ public:
     int init_calls = 0;
     int subscribe_calls = 0;
     int connect_calls = 0;
+    int* ext_connect_calls = NULL;
     int release_calls = 0;
     size_t last_set_size = 0;
     IParserSpi* last_spi = NULL;
@@ -108,7 +109,13 @@ public:
             throw std::runtime_error("controlled parser release failure");
     }
     void prove_callbacks_drained() { _callbacks_drained = true; }
-    bool connect() override { ++connect_calls; return true; }
+    bool connect() override
+    {
+        ++connect_calls;
+        if (ext_connect_calls != NULL)
+            ++(*ext_connect_calls);
+        return true;
+    }
     void subscribe(const CodeSet& setCodes) override
     {
         ++subscribe_calls;
@@ -478,6 +485,58 @@ TEST_F(R42ParserAdapterTest, ParserAdapterMgrRetriesDeferredRemoverWithoutLosing
     EXPECT_EQ(0, unsafe_destroy);
 }
 
+TEST_F(R42ParserAdapterTest, ManagerReleaseStopsRetainedSuccessfulAdapter)
+{
+    int connect_calls = 0;
+    int release_calls = 0;
+    int destroyed = 0;
+    int unsafe_release = 0;
+    int unsafe_destroy = 0;
+    R42ParserApi* api = new R42ParserApi();
+    api->ext_connect_calls = &connect_calls;
+    api->ext_release = &release_calls;
+    api->ext_destroyed = &destroyed;
+    api->ext_unsafe_release = &unsafe_release;
+    api->ext_unsafe_destroy = &unsafe_destroy;
+
+    ParserAdapterMgr mgr;
+    ParserAdapterPtr retained(new ParserAdapter());
+    ASSERT_TRUE(retained->initExt("r42_mgr_retained", api, &stub, &bd, &hot));
+    ASSERT_TRUE(mgr.addAdapter("r42_mgr_retained", retained));
+    std::weak_ptr<ParserAdapter> weak_adapter(retained);
+
+    // This fake connect is synchronous and starts no worker or callback source.
+    mgr.run();
+    EXPECT_EQ(1, connect_calls);
+
+    // The fake provides an explicit callback-drained proof before manager teardown.
+    api->prove_callbacks_drained();
+    mgr.release();
+
+    EXPECT_TRUE(mgr.getAdapter("r42_mgr_retained") == NULL);
+    EXPECT_FALSE(mgr.hasQuarantinedAdapters());
+    EXPECT_EQ(1, release_calls);
+    EXPECT_EQ(1, destroyed);
+    EXPECT_FALSE(retained->hasApi());
+    EXPECT_FALSE(retained->run());
+    EXPECT_EQ(1, connect_calls);
+    EXPECT_EQ(0, unsafe_release);
+    EXPECT_EQ(0, unsafe_destroy);
+
+    // Neither another manager drain nor a retained adapter release may revive
+    // the API or invoke its connect/release/destructor a second time.
+    mgr.release();
+    retained->release();
+    EXPECT_FALSE(retained->run());
+    EXPECT_EQ(1, connect_calls);
+    EXPECT_EQ(1, release_calls);
+    EXPECT_EQ(1, destroyed);
+    EXPECT_FALSE(weak_adapter.expired());
+
+    retained.reset();
+    EXPECT_TRUE(weak_adapter.expired());
+}
+
 // 覆盖 L239-295 handleQuote 的守卫、代码转换与 stub 转发
 TEST_F(R42ParserAdapterTest, HandleQuoteConvertsMonthlyCodeAndFiltersInvalid)
 {
@@ -493,6 +552,19 @@ TEST_F(R42ParserAdapterTest, HandleQuoteConvertsMonthlyCodeAndFiltersInvalid)
     adapter.handleQuote(no_date, 1);
     no_date->release();
     EXPECT_EQ(stub.quotes, 0);
+
+    // Tick 保持月码形态，但合同侧原始码过短，无法转换成标准代码。
+    // 转换失败时不得清空原 tick 代码，也不得转发给 stub。
+    WTSTickData* invalid_month = r42fakes::makeTick("SHFE", "rb2510", 20250110, 20250110, 93100000, 3500.0);
+    WTSContractInfo* short_code = WTSContractInfo::create("rb", "rb", "SHFE", "rb");
+    ASSERT_NE(short_code, nullptr);
+    short_code->setCommInfo(bd.getCommodity("SHFE", "rb"));
+    invalid_month->setContractInfo(short_code);
+    adapter.handleQuote(invalid_month, 1);
+    EXPECT_EQ(stub.quotes, 0);
+    EXPECT_STREQ(invalid_month->code(), "rb2510");
+    invalid_month->release();
+    short_code->release();
 
     // 未注册的合约被丢弃
     WTSTickData* unknown = r42fakes::makeTick("SHFE", "zz9999", 20250110, 20250110, 93100000, 1.0);

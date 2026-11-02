@@ -2,14 +2,12 @@
  * T5 lane — src/TraderYD/TraderYD.cpp 覆盖率用例（收发族）
  *
  * 可测边界（实测源码）：
- *   - m_funcCreator 永远是 NULL（本机没有 libyd.dylib，DLLHelper::load_library 返回 NULL，
- *     get_symbol(NULL,..) 返回 NULL），所以 m_pUserAPI 恒为 NULL；
- *     因此 connect()/doLogin()/notifyLogin(0,..)/orderInsert 的发送分支不能进（必段崩溃），
- *     未登录/未就绪的**拒绝分支**反而可以确定性覆盖。
+ *   - 默认使用不存在的隔离模块验证 init 失败与无 API 时的拒绝路径；独立假模块覆盖
+ *     makeYDApi 动态加载、connect/start、disconnect 与 release 生命周期，不连真实柜台。
  *   - YDListener 的回调（notifyOrder/notifyTrade/notifyFailedOrder/notifyFailedCancelOrder/
  *     notifyReadyForLogin/notifyLogin(错误码)/notifyCaughtUp/notifyAccount）都是 public，
  *     可以手工构造厂商结构体直喂，覆盖「厂商回调结构 → WTS 结构」转换。
- *   - TraderYD 构造函数没有初始化 m_sink / m_lDate / m_orderRef / m_bUpdateCache
+ *   - TraderYD 构造函数没有初始化 m_lDate / m_orderRef / m_bUpdateCache
  *     （见 bugs/T5_yd_xtp_ctp_shm.md），所以每个用例都必须先 init()+registerSpi()
  *     再驱动回调，否则读到不确定值。
  * 不起线程、不 sleep、不连真柜台。
@@ -244,17 +242,33 @@ public:
 	YDFakeBdMgr bd_;
 };
 
-WTSVariant* makeYDCfg(bool with_module, bool update_cache)
+WTSVariant* makeYDCfg(const char* module, bool update_cache)
 {
 	WTSVariant* cfg = WTSVariant::createObject();
 	cfg->append("config", "yd.conf");
 	cfg->append("user", "yduser");
 	cfg->append("pass", "ydpass");
-	if (with_module)
-		cfg->append("ydmodule", "yd");
+	if (module != NULL)
+		cfg->append("ydmodule", module);
 	cfg->append("update_cache", update_cache);
 	return cfg;
 }
+
+class YDInitProbe : public TraderYD
+{
+public:
+	bool hasModule() const { return m_hInstYD != NULL; }
+	bool hasFactory() const { return m_funcCreator != NULL; }
+	bool hasApi() const { return m_pUserAPI != NULL; }
+	bool hasWorker() const { return m_thrdWorker != NULL; }
+	void presetWorker() { m_thrdWorker.reset(new StdThread()); }
+	int fixtureCount(const char* symbol) const
+	{
+		typedef int (*Counter)();
+		Counter counter = reinterpret_cast<Counter>(DLLHelper::get_symbol(m_hInstYD, symbol));
+		return counter == NULL ? -1 : counter();
+	}
+};
 
 class TraderYDTest : public ::testing::Test
 {
@@ -266,8 +280,8 @@ protected:
 
 	void SetUp() override
 	{
-		WTSVariant* cfg = makeYDCfg(false, false);
-		ASSERT_TRUE(api_.init(cfg));
+		WTSVariant* cfg = makeYDCfg("yd_r60_missing_library_fixture", false);
+		ASSERT_FALSE(api_.init(cfg));
 		cfg->release();
 
 		ct_ = WTSContractInfo::create("ag2512", "沪银2512", "SHFE", "ag");
@@ -305,22 +319,68 @@ protected:
 
 /* ---------------------------------------------------------------- 用例 */
 
-/// init 正/负配置：缺 ydmodule 也要回落默认模块名并返回 true；本机无 dylib → creator=NULL
-TEST_F(TraderYDTest, init_accepts_config_and_falls_back_to_default_module)
+/// 缺库是显式初始化失败；之后 connect 必须无副作用地返回。
+TEST_F(TraderYDTest, init_fails_closed_when_library_is_missing)
 {
-	// 缺 ydmodule 的配置已在 SetUp 中通过（返回 true），这里补一条显式给了模块名的
-	WTSVariant* cfg = makeYDCfg(true, true);
-	TraderYD other;
+	WTSVariant* cfg = makeYDCfg("yd_r60_missing_library_fixture", true);
+	YDInitProbe other;
+	YDSink other_sink;
+	other.registerSpi(&other_sink);
+	EXPECT_FALSE(other.init(cfg));
+	cfg->release();
+
+	EXPECT_FALSE(other.hasModule());
+	EXPECT_FALSE(other.hasFactory());
+	EXPECT_FALSE(other.hasApi());
+	EXPECT_NO_THROW(other.connect());
+	EXPECT_FALSE(other.hasWorker());
+	EXPECT_FALSE(other.isConnected());
+	EXPECT_EQ(-1, other.login("u", "p", ""));
+	EXPECT_EQ(-1, other.logout());
+	other.release();
+}
+
+TEST_F(TraderYDTest, init_fails_closed_and_releases_module_without_factory)
+{
+	WTSVariant* cfg = makeYDCfg("yd_r60_missing_symbol_fixture", false);
+	YDInitProbe other;
+	YDSink other_sink;
+	other.registerSpi(&other_sink);
+	EXPECT_FALSE(other.init(cfg));
+	cfg->release();
+
+	EXPECT_FALSE(other.hasModule());
+	EXPECT_FALSE(other.hasFactory());
+	EXPECT_FALSE(other.hasApi());
+	EXPECT_NO_THROW(other.connect());
+	EXPECT_FALSE(other.hasWorker());
+	other.release();
+}
+
+TEST_F(TraderYDTest, init_loads_factory_and_connect_starts_one_api)
+{
+	WTSVariant* cfg = makeYDCfg("yd_r60_factory_fixture", false);
+	YDInitProbe other;
 	YDSink other_sink;
 	other.registerSpi(&other_sink);
 	ASSERT_TRUE(other.init(cfg));
 	cfg->release();
 
-	// creator 一定是 NULL：本机没有 libyd.dylib
-	EXPECT_FALSE(other.isConnected());
-	EXPECT_EQ(-1, other.login("u", "p", ""));
-	EXPECT_EQ(-1, other.logout());
+	ASSERT_TRUE(other.hasModule());
+	ASSERT_TRUE(other.hasFactory());
+	EXPECT_FALSE(other.hasApi());
+	EXPECT_EQ(0, other.fixtureCount("r60_yd_fixture_create_count"));
+	other.presetWorker();
+	other.connect();
+	EXPECT_TRUE(other.hasApi());
+	EXPECT_EQ(1, other.fixtureCount("r60_yd_fixture_create_count"));
+	EXPECT_EQ(1, other.fixtureCount("r60_yd_fixture_start_count"));
+
+	other.disconnect();
+	EXPECT_EQ(1, other.fixtureCount("r60_yd_fixture_disconnect_count"));
 	other.release();
+	EXPECT_FALSE(other.hasApi());
+	EXPECT_EQ(1, other.fixtureCount("r60_yd_fixture_destroy_count"));
 }
 
 /// 未 connected（m_pUserAPI==NULL）时所有业务入口必须拒绝，且返回值可证伪
@@ -361,7 +421,7 @@ TEST_F(TraderYDTest, make_entrust_id_validates_buffer_and_increments_ref)
 	ASSERT_TRUE(api_.makeEntrustID(buf, sizeof(buf)));
 	std::string first(buf);
 	EXPECT_EQ(0u, first.find("yduser#"));
-	ASSERT_EQ(7u, first.find('#'));
+	ASSERT_EQ(6u, first.find('#'));
 	const std::string first_ref = first.substr(7);
 	EXPECT_EQ(10u, first_ref.size());
 	for (auto c : first_ref)
@@ -470,7 +530,7 @@ TEST_F(TraderYDTest, failed_cancel_after_catchup_maps_error_code_to_wts_error)
 	api_.notifyFailedCancelOrder(&real, &exch, &acc);
 	ASSERT_EQ(1u, sink_.n_trader_error_);
 	EXPECT_EQ((int)WEC_ORDERCANCEL, (int)sink_.last_error_.code);
-	EXPECT_EQ("OrderNotFound", sink_.last_error_.msg.substr(0, 12));
+	EXPECT_EQ("OrderNotFound", sink_.last_error_.msg.substr(0, 13));
 	EXPECT_NE(std::string::npos, sink_.last_error_.msg.find("(" + std::to_string(YD_ERROR_OrderNotFound) + ")"));
 }
 

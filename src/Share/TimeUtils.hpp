@@ -400,7 +400,8 @@ namespace TimeUtils
 
 	constexpr static inline uint64_t timeToMinBar(uint32_t uDate, uint32_t uTime) noexcept
 	{
-		return (uint64_t)((uDate-19900000)*10000) + uTime;
+		const uint64_t dateOffset = static_cast<uint64_t>(uDate - 19900000u);
+		return dateOffset * 10000ull + static_cast<uint64_t>(uTime);
 	}
 
 	constexpr static inline uint32_t minBarToDate(uint64_t minTime) noexcept

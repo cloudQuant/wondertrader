@@ -5,9 +5,10 @@
  * 因此可以直接 new 出 TraderFemas 并调用其 protected 成员（用派生探针类暴露，
  * 不使用 #define private public）。
  *
- * 刻意不进入的面（见 docs/迭代计划/迭代01/bugs/T4_femas_ctploader_mini.md）：
- *  - init()：内部 DLLHelper::load_library 会 dlopen 厂商库，路径与产物不稳定 → 不启用；
- *  - connect()/disconnect()：前者创建 Api 实例并起工作线程，后者 post(release)；
+ * 本文件不直接进入的面：
+ *  - init()/connect() 的动态加载失败和成功正控由 r93_traderFemas_api_test.cpp 使用本地 fake 模块覆盖；
+ *    真实厂商 .dylib 与柜台行为不在本地验证范围；
+ *  - disconnect()：调用 post(release)，异步回调关闭合同仍未明确；
  *  - OnRspUserLogin 成功分支：会 m_pUserAPI->GetTradingDay()，无厂商实例必崩；
  *  - login()/logout()/orderInsert() 的「已就绪」正路径：都要 Req* 调用厂商 API。
  */
@@ -1071,10 +1072,11 @@ TEST_F(FemasContractFixture, trade_query_response_reports_appended_records)
 	probe.OnRspQryTrade(&td, &ok, 1, false);
 	EXPECT_TRUE(sink.trades.empty());
 
-	// 错误应答不收集记录，但最后一包仍然要汇报
+	// 错误终帧本身不增加记录；仍汇报此前成功分帧累积的记录。
 	probe.OnRspQryTrade(&td, &bad, 1, true);
 	ASSERT_EQ(sink.trades.size(), 1u);
-	EXPECT_EQ(sink.trades[0].size, 0u);
+	EXPECT_EQ(sink.trades[0].size, 1u);
+	EXPECT_EQ(sink.trades[0].firstCode, "rb2401");
 
 	probe.OnRspQryTrade(&td, &ok, 2, true);
 	ASSERT_EQ(sink.trades.size(), 2u);
@@ -1230,9 +1232,8 @@ TEST_F(TraderFemasTest, make_entrust_id_rejects_insufficient_logical_capacity)
 }
 
 /*
- * init() 走 DLLHelper::load_library（dlopen 厂商库）→ 与「不 dlopen」的约束冲突，
- * 且拿不到符号后 m_funcCreator 仍是未校验状态，connect() 会空指针调用。
- * 本轮只从静态审查记录，不在 CI 里跑。
+ * 真实厂商模块 smoke test 保持禁用；本地 missing/success fake 的加载验收在 R93 测试目标中。
+ * 此用例依赖宿主实际安装 USTPtraderapiAF，不作为本地确定性回归。
  */
 TEST(TraderFemasDisabled, DISABLED_init_dlopens_vendor_module)
 {

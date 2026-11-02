@@ -258,6 +258,38 @@ TEST(r7_stkmin, minimum_order_lookup_keeps_borrowed_commodity_alive)
 	ctx.comm->release();
 }
 
+TEST(r7_stkmin, minimum_order_lookup_keeps_shared_commodity_balanced_across_units)
+{
+	MFakeCtx ctx;
+	ctx.comm = mkMComm("STK");
+	WTSCommodityInfo* comm = ctx.comm;
+	ASSERT_NE(comm, nullptr);
+	for (int i = 0; i < 5; ++i)
+		comm->retain(); // Keep the test safe if a future helper accidentally releases a borrow.
+	const uint32_t fixtureRefs = comm->retainCount();
+	EXPECT_EQ(fixtureRefs, 6u);
+
+	for (int i = 0; i < 2; ++i)
+	{
+		{
+			WtStockMinImpactExeUnit unit;
+			WTSVariant* cfg = mkMCfg(0, 0, 0, false, 500.0, 0.0, 100.0);
+			unit.init(&ctx, kSmStk, cfg);
+			cfg->release();
+			EXPECT_TRUE(unit.initializationSucceeded());
+			EXPECT_EQ(comm->retainCount(), fixtureRefs + 1); // unit owns one retained reference
+			EXPECT_DOUBLE_EQ(unit.get_minOrderQty(kSmStk), 100.0);
+			EXPECT_DOUBLE_EQ(unit.get_minOrderQty(kSmStk), 100.0);
+			EXPECT_EQ(comm->retainCount(), fixtureRefs + 1); // helper only borrows; unit still alive
+		}
+		EXPECT_EQ(comm->retainCount(), fixtureRefs); // unit destruction releases only its own reference
+		EXPECT_STREQ(comm->getProduct(), "STK");
+	}
+
+	ctx.comm = nullptr;
+	releaseAllReferences(comm);
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Commodity lookup failure must fail closed instead of dereferencing null or using
 // the default one-unit order size.

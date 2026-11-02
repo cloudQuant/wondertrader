@@ -14,8 +14,12 @@
 
 #include <fstream>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <vector>
+#include <rapidjson/document.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 namespace {
 
@@ -97,6 +101,38 @@ public:
     // protected 包装
     void set_main_key(const char* key) { _main_key = key; }
     void dump_chart() { dump_chart_info(); }
+    void stra_log_error(const char* message) override
+    {
+        ++errorCount;
+        lastError = message ? message : "";
+    }
+    void stra_log_info(const char* message) override
+    {
+        const std::string text = message ? message : "";
+        if (text.find("position ignored") != std::string::npos) positionIgnored = text;
+        if (text.find("signal ignored") != std::string::npos) signalIgnored = text;
+        if (text.find("Position confirmed,") != std::string::npos) positionConfirmed = text;
+        if (text.find("untouched signal recovered") != std::string::npos) signalRecovered = text;
+        if (text.find("Market data subscribed:") != std::string::npos) subscribed = text;
+    }
+    size_t position_count() const { return _pos_map.size(); }
+    size_t signal_count() const { return _sig_map.size(); }
+    size_t condition_count() const { return _condtions.size(); }
+    double stored_position(const char* code) const
+    {
+        auto it = _pos_map.find(code);
+        return it == _pos_map.end() ? 0.0 : it->second._volume;
+    }
+    double stored_signal(const char* code) const
+    {
+        auto it = _sig_map.find(code);
+        return it == _sig_map.end() ? 0.0 : it->second._volume;
+    }
+    uint64_t condition_time() const { return _last_cond_min; }
+    uint32_t last_bar() const { return _last_barno; }
+    size_t errorCount = 0;
+    std::string lastError;
+    std::string positionIgnored, signalIgnored, positionConfirmed, signalRecovered, subscribed;
 
     uint32_t tick_updates = 0;
     uint32_t bar_closes = 0;
@@ -114,11 +150,26 @@ public:
     bool idx_line_missing_ok = false;
 };
 
+class R42ThrowingBaseDataMgr : public FakeBaseDataMgr
+{
+public:
+    bool throwOnAg = false;
+    bool acceptAnyCode = false;
+    WTSContractInfo* getContract(const char* code, const char* exchg = "", uint32_t date = 0) override
+    {
+        if (acceptAnyCode)
+            return FakeBaseDataMgr::getContract("rb2510", "SHFE", date);
+        if (throwOnAg && std::string(code) == "ag2512")
+            throw std::runtime_error("injected contract lookup failure");
+        return FakeBaseDataMgr::getContract(code, exchg, date);
+    }
+};
+
 class R42CtaPersistTest : public ::testing::Test
 {
 protected:
     P01TempEnv env { "cta_persist" };
-    FakeBaseDataMgr bd;
+    R42ThrowingBaseDataMgr bd;
     FakeHotMgr hot;
     P01CtaEngine engine;
     std::unique_ptr<R42CtaCtx> ctx;
@@ -306,6 +357,310 @@ TEST_F(R42CtaPersistTest, SaveDataRoundTripAcrossContexts)
     // 资金/持仓日志已经落盘
     EXPECT_FALSE(r42_read_file(std::string(WtHelper::getOutputDir()) + "r42_cta_persist/funds.csv").empty());
     EXPECT_FALSE(r42_read_file(std::string(WtHelper::getOutputDir()) + "r42_cta_persist/positions.csv").empty());
+}
+
+TEST_F(R42CtaPersistTest, MalformedSnapshotsDoNotPublishAnyStateOrSubscriptions)
+{
+    const char* baseline = R"json({
+      "fund":{"total_profit":1,"total_dynprofit":2,"total_fees":3,"tdate":20250110},
+      "positions":[{"code":"SHFE.rb.2510","volume":2,"closeprofit":1,"dynprofit":2,
+        "lastentertime":1,"lastexittime":0,"details":[{"long":true,"price":3000,"volume":2,
+        "opentime":1,"profit":2,"maxprofit":3,"maxloss":-1,"opentag":"initial"}]}],
+      "conditions":{"settime":111,"items":{"SHFE.rb.2510":[{"usertag":"initial",
+        "field":0,"alg":0,"target":3500,"qty":2,"action":0}]}},
+      "signals":{"SHFE.rb.2510":{"usertag":"initial","volume":3,"sigprice":3000,"gentime":2}},
+      "utils":{"lastbarno":7}
+    })json";
+    ASSERT_TRUE(r42_write_file(data_file("r42_cta_persist"), baseline));
+    ctx->on_init();
+    ASSERT_EQ(ctx->position_count(), 1u);
+    ASSERT_EQ(ctx->signal_count(), 1u);
+    ASSERT_EQ(ctx->condition_count(), 1u);
+    ASSERT_TRUE(engine.has_tick_subscription(kR42Code));
+    ASSERT_FALSE(engine.has_tick_subscription(kR42T1Code));
+
+    const char* candidate = R"json({
+      "fund":{"total_profit":8,"total_dynprofit":9,"total_fees":10,"tdate":20250111},
+      "positions":[{"code":"SHFE.ag.2512","volume":4,"closeprofit":8,"dynprofit":9,
+        "lastentertime":10,"lastexittime":11,"frozen":1,"frozendate":20250110,
+        "details":[{"long":true,"price":3000,"volume":4,"opentime":10,"profit":9,
+          "maxprofit":10,"maxloss":-1,"opentag":"candidate"}]}],
+      "conditions":{"settime":222,"items":{"SHFE.ag.2512":[{"usertag":"candidate",
+        "field":0,"alg":0,"target":3500,"qty":4,"action":0}]}},
+      "signals":{"SHFE.ag.2512":{"usertag":"candidate","volume":5,"sigprice":3000,"gentime":2}},
+      "utils":{"lastbarno":8}
+    })json";
+    struct InvalidCase
+    {
+        const char* name;
+        const char* path;
+        std::function<void(rapidjson::Document&)> mutate;
+    };
+    const std::vector<InvalidCase> invalid = {
+        {"root_array", "$", [](auto& d) { d.SetArray(); }},
+        {"missing_positions", "$.positions", [](auto& d) { d.RemoveMember("positions"); }},
+        {"bad_positions", "$.positions", [](auto& d) { d["positions"].SetObject(); }},
+        {"missing_conditions", "$.conditions", [](auto& d) { d.RemoveMember("conditions"); }},
+        {"bad_fund", "$.fund", [](auto& d) { d["fund"].SetArray(); }},
+        {"missing_fees", "$.fund.total_fees", [](auto& d) { d["fund"].RemoveMember("total_fees"); }},
+        {"bad_position", "$.positions[0]", [](auto& d) { d["positions"][0].SetBool(true); }},
+        {"empty_code", "$.positions[0].code", [](auto& d) { d["positions"][0]["code"].SetString("", d.GetAllocator()); }},
+        {"nul_code", "$.positions[0].code", [](auto& d) {
+            const char code[] = {'a', '\0', 'b'};
+            d["positions"][0]["code"].SetString(code, 3, d.GetAllocator());
+        }},
+        {"missing_volume", "$.positions[0].volume", [](auto& d) { d["positions"][0].RemoveMember("volume"); }},
+        {"bad_frozen_date", "$.positions[0].frozendate", [](auto& d) { d["positions"][0]["frozendate"].SetString("x", d.GetAllocator()); }},
+        {"bad_details", "$.positions[0].details", [](auto& d) { d["positions"][0]["details"].SetObject(); }},
+        {"bad_detail_price", "$.positions[0].details[0].price", [](auto& d) { d["positions"][0]["details"][0]["price"].SetBool(true); }},
+        {"bad_zero_detail_field", "$.positions[0].details[0].price", [](auto& d) {
+            d["positions"][0]["details"][0]["volume"].SetInt(0);
+            d["positions"][0]["details"][0]["price"].SetBool(true);
+        }},
+        {"long_opentag", "$.positions[0].details[0].opentag", [](auto& d) {
+            const std::string tag(32, 'x');
+            d["positions"][0]["details"][0]["opentag"].SetString(tag.c_str(), tag.size(), d.GetAllocator());
+        }},
+        {"nul_opentag", "$.positions[0].details[0].opentag", [](auto& d) {
+            const char tag[] = {'a', '\0', 'b'};
+            d["positions"][0]["details"][0]["opentag"].SetString(tag, 3, d.GetAllocator());
+        }},
+        {"bad_condition_items", "$.conditions.items", [](auto& d) { d["conditions"]["items"].SetArray(); }},
+        {"condition_code_at_limit", "$.conditions.items[ccccccccccccccccccccccccccccccc].<code>[0].alg", [](auto& d) {
+            const std::string key(31, 'c');
+            auto it = d["conditions"]["items"].MemberBegin();
+            it->name.SetString(key.c_str(), key.size(), d.GetAllocator());
+            it->value[0]["alg"].SetUint(99);
+        }},
+        {"condition_code_over_limit", "$.conditions.items.<code>", [](auto& d) {
+            const std::string key(32, 'c');
+            d["conditions"]["items"].MemberBegin()->name.SetString(key.c_str(), key.size(), d.GetAllocator());
+        }},
+        {"condition_code_very_long", "$.conditions.items.<code>", [](auto& d) {
+            const std::string key(4096, 'c');
+            d["conditions"]["items"].MemberBegin()->name.SetString(key.c_str(), key.size(), d.GetAllocator());
+        }},
+        {"bad_condition_field", ".field", [](auto& d) { d["conditions"]["items"]["SHFE.ag.2512"][0]["field"].SetUint(99); }},
+        {"bad_condition_alg", ".alg", [](auto& d) { d["conditions"]["items"]["SHFE.ag.2512"][0]["alg"].SetUint(99); }},
+        {"bad_condition_action", ".action", [](auto& d) { d["conditions"]["items"]["SHFE.ag.2512"][0]["action"].SetUint(99); }},
+        {"long_condition_tag", ".usertag", [](auto& d) {
+            const std::string tag(32, 'x');
+            d["conditions"]["items"]["SHFE.ag.2512"][0]["usertag"].SetString(tag.c_str(), tag.size(), d.GetAllocator());
+        }},
+        {"bad_signal", "$.signals[SHFE.ag.2512].gentime", [](auto& d) { d["signals"]["SHFE.ag.2512"]["gentime"].SetString("x", d.GetAllocator()); }},
+        {"signal_code_very_long", "$.signals[ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss...].gentime", [](auto& d) {
+            const std::string key(4096, 's');
+            auto it = d["signals"].MemberBegin();
+            it->name.SetString(key.c_str(), key.size(), d.GetAllocator());
+            it->value["gentime"].SetString("x", d.GetAllocator());
+        }},
+        {"long_signal_tag", "$.signals[SHFE.ag.2512].usertag", [](auto& d) {
+            const std::string tag(32, 'x');
+            d["signals"]["SHFE.ag.2512"]["usertag"].SetString(tag.c_str(), tag.size(), d.GetAllocator());
+        }},
+        {"bad_utils", "$.utils.lastbarno", [](auto& d) { d["utils"]["lastbarno"].SetInt(-1); }}
+    };
+    for (const InvalidCase& tc : invalid)
+    {
+        SCOPED_TRACE(tc.name);
+        rapidjson::Document d;
+        d.Parse(candidate);
+        ASSERT_FALSE(d.HasParseError());
+        tc.mutate(d);
+        rapidjson::StringBuffer buffer;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+        ASSERT_TRUE(d.Accept(writer));
+        ASSERT_TRUE(r42_write_file(data_file("r42_cta_persist"), buffer.GetString()));
+        ctx->errorCount = 0;
+        ctx->lastError.clear();
+        ctx->on_init();
+        ASSERT_EQ(ctx->errorCount, 1u);
+        EXPECT_NE(ctx->lastError.find(tc.path), std::string::npos);
+        EXPECT_LT(ctx->lastError.size(), 512u);
+        EXPECT_EQ(ctx->position_count(), 1u);
+        EXPECT_DOUBLE_EQ(ctx->stored_position(kR42Code), 2.0);
+        EXPECT_EQ(ctx->signal_count(), 1u);
+        EXPECT_DOUBLE_EQ(ctx->stored_signal(kR42Code), 3.0);
+        EXPECT_EQ(ctx->condition_count(), 1u);
+        EXPECT_EQ(ctx->condition_time(), 111u);
+        EXPECT_EQ(ctx->last_bar(), 7u);
+        EXPECT_DOUBLE_EQ(ctx->stra_get_fund_data(3), 3.0);
+        EXPECT_FALSE(engine.has_tick_subscription(kR42T1Code));
+    }
+    const std::string malformedText[] = {
+        "{bad JSON", std::string(candidate) + std::string("\0garbage", 8)
+    };
+    for (const std::string& input : malformedText)
+    {
+        ASSERT_TRUE(r42_write_file(data_file("r42_cta_persist"), input));
+        ctx->errorCount = 0;
+        ctx->lastError.clear();
+        ctx->on_init();
+        ASSERT_EQ(ctx->errorCount, 1u);
+        EXPECT_NE(ctx->lastError.find("Invalid persisted state"), std::string::npos);
+        EXPECT_EQ(ctx->position_count(), 1u);
+        EXPECT_DOUBLE_EQ(ctx->stored_position(kR42Code), 2.0);
+        EXPECT_EQ(ctx->signal_count(), 1u);
+        EXPECT_DOUBLE_EQ(ctx->stored_signal(kR42Code), 3.0);
+        EXPECT_EQ(ctx->condition_count(), 1u);
+        EXPECT_EQ(ctx->condition_time(), 111u);
+        EXPECT_EQ(ctx->last_bar(), 7u);
+        EXPECT_DOUBLE_EQ(ctx->stra_get_fund_data(3), 3.0);
+        EXPECT_FALSE(engine.has_tick_subscription(kR42T1Code));
+    }
+}
+
+TEST_F(R42CtaPersistTest, ExpiredPositionCodesHaveBoundedLogDisplay)
+{
+    auto load = [this](const std::string& code) {
+        const std::string json = std::string(R"({"positions":[{"code":")") + code +
+            R"(","volume":1,"closeprofit":0,"dynprofit":0,"lastentertime":0,"lastexittime":0,"details":null}],"conditions":null})";
+        EXPECT_TRUE(r42_write_file(data_file("r42_cta_persist"), json));
+        ctx->on_init();
+    };
+    load("SHFE.xx.9999");
+    EXPECT_EQ(ctx->positionIgnored, "SHFE.xx.9999 not exists or expired, position ignored");
+    const std::string code(4096, 'x');
+    load(code);
+    EXPECT_EQ(ctx->positionIgnored, std::string(128, 'x') + "... not exists or expired, position ignored");
+    EXPECT_DOUBLE_EQ(ctx->stored_position(code.c_str()), 0.0);
+    EXPECT_FALSE(engine.has_tick_subscription(code.c_str()));
+}
+
+TEST_F(R42CtaPersistTest, ExpiredSignalCodesHaveBoundedLogDisplay)
+{
+    auto load = [this](const std::string& code) {
+        const std::string json = std::string(R"({"positions":[],"conditions":null,"signals":{")") + code +
+            R"(":{"usertag":"a","volume":1,"sigprice":1,"gentime":1}}})";
+        EXPECT_TRUE(r42_write_file(data_file("r42_cta_persist"), json));
+        ctx->on_init();
+    };
+    load("SHFE.xx.9999");
+    EXPECT_EQ(ctx->signalIgnored, "SHFE.xx.9999 not exists or expired, signal ignored");
+    const std::string code(4096, 'x');
+    load(code);
+    EXPECT_EQ(ctx->signalIgnored, std::string(128, 'x') + "... not exists or expired, signal ignored");
+    EXPECT_EQ(ctx->signal_count(), 0u);
+    EXPECT_FALSE(engine.has_tick_subscription(code.c_str()));
+}
+
+TEST_F(R42CtaPersistTest, LongRecoveredPositionCodesKeepTheirFullIdentity)
+{
+    bd.acceptAnyCode = true;
+    const std::string first = std::string(4095, 'x') + "a";
+    const std::string second = std::string(4095, 'x') + "b";
+    auto item = [](const std::string& code, int volume) {
+        return std::string(R"({"code":")") + code + R"(","volume":)" + std::to_string(volume) +
+            R"(,"closeprofit":0,"dynprofit":0,"lastentertime":0,"lastexittime":0,"details":[{"long":true,"price":1,"volume":1,"opentime":1,"profit":0,"maxprofit":0,"maxloss":0,"opentag":"a"}]})";
+    };
+    ASSERT_TRUE(r42_write_file(data_file("r42_cta_persist"),
+        std::string(R"({"positions":[)") + item(first, 2) + "," + item(second, 3) + R"(],"conditions":null})"));
+    ctx->on_init();
+    EXPECT_DOUBLE_EQ(ctx->stored_position(first.c_str()), 2.0);
+    EXPECT_DOUBLE_EQ(ctx->stored_position(second.c_str()), 3.0);
+    EXPECT_TRUE(engine.has_tick_subscription(first.c_str()));
+    EXPECT_TRUE(engine.has_tick_subscription(second.c_str()));
+    EXPECT_EQ(ctx->positionConfirmed, "Position confirmed," + std::string(128, 'x') + "... -> 3");
+    EXPECT_EQ(ctx->subscribed, "Market data subscribed: " + std::string(128, 'x') + "...");
+}
+
+TEST_F(R42CtaPersistTest, LongRecoveredSignalCodesKeepTheirFullIdentity)
+{
+    bd.acceptAnyCode = true;
+    const std::string first = std::string(4095, 'x') + "a";
+    const std::string second = std::string(4095, 'x') + "b";
+    auto item = [](const std::string& code, int volume) {
+        return std::string("\"") + code + R"(":{"usertag":"a","volume":)" + std::to_string(volume) +
+            R"(,"sigprice":1,"gentime":1})";
+    };
+    ASSERT_TRUE(r42_write_file(data_file("r42_cta_persist"),
+        std::string(R"({"positions":[],"conditions":null,"signals":{)") + item(first, 2) + "," + item(second, 3) + "}}"));
+    ctx->on_init();
+    EXPECT_DOUBLE_EQ(ctx->stored_signal(first.c_str()), 2.0);
+    EXPECT_DOUBLE_EQ(ctx->stored_signal(second.c_str()), 3.0);
+    EXPECT_TRUE(engine.has_tick_subscription(first.c_str()));
+    EXPECT_TRUE(engine.has_tick_subscription(second.c_str()));
+    EXPECT_EQ(ctx->signalRecovered, std::string(128, 'x') + "... untouched signal recovered, target pos: 3");
+    EXPECT_EQ(ctx->subscribed, "Market data subscribed: " + std::string(128, 'x') + "...");
+}
+
+TEST_F(R42CtaPersistTest, LongDirectTickSubscriptionsKeepTheirFullIdentity)
+{
+    ctx->stra_sub_ticks(kR42Code);
+    EXPECT_EQ(ctx->subscribed, "Market data subscribed: SHFE.rb.2510");
+    const std::string first = std::string(4095, 'x') + "a";
+    const std::string second = std::string(4095, 'x') + "b";
+    ctx->stra_sub_ticks(first.c_str());
+    ctx->stra_sub_ticks(second.c_str());
+    EXPECT_TRUE(engine.has_tick_subscription(first.c_str()));
+    EXPECT_TRUE(engine.has_tick_subscription(second.c_str()));
+    EXPECT_EQ(ctx->subscribed, "Market data subscribed: " + std::string(128, 'x') + "...");
+}
+
+TEST_F(R42CtaPersistTest, MaximumSupportedDetailAndSignalTagsRestoreAndExecute)
+{
+    const std::string tag(31, 't');
+    const std::string json = std::string(R"json({
+      "positions":[{"code":"SHFE.rb.2510","volume":2,"closeprofit":0,"dynprofit":0,
+        "lastentertime":1,"lastexittime":0,"details":[{"long":true,"price":3000,"volume":2,
+        "opentime":1,"profit":0,"maxprofit":0,"maxloss":0,"opentag":")json") + tag + R"json("},{"volume":0}]}],
+      "conditions":{"settime":0,"items":{}},
+      "signals":{"SHFE.rb.2510":{"usertag":")json" + tag + R"json(","volume":3,"sigprice":3000,"gentime":2}}
+    })json";
+    ASSERT_TRUE(r42_write_file(data_file("r42_cta_persist"), json));
+    ctx->on_init();
+    ASSERT_EQ(ctx->errorCount, 0u);
+    EXPECT_DOUBLE_EQ(ctx->stored_position(kR42Code), 2.0);
+    EXPECT_STREQ(ctx->stra_get_last_entertag(kR42Code), tag.c_str());
+    feed(kR42Code, 3500.0);
+    EXPECT_DOUBLE_EQ(ctx->stored_position(kR42Code), 3.0);
+    EXPECT_STREQ(ctx->stra_get_last_entertag(kR42Code), tag.c_str());
+}
+
+TEST_F(R42CtaPersistTest, LookupFailureWhilePreparingSnapshotDoesNotPublishCandidate)
+{
+    const char* baseline = R"json({
+      "fund":{"total_profit":1,"total_dynprofit":2,"total_fees":3,"tdate":20250110},
+      "positions":[{"code":"SHFE.rb.2510","volume":2,"closeprofit":1,"dynprofit":2,
+        "lastentertime":1,"lastexittime":0,"details":[{"long":true,"price":3000,"volume":2,
+        "opentime":1,"profit":2,"maxprofit":3,"maxloss":-1,"opentag":"initial"}]}],
+      "conditions":{"settime":111,"items":{"SHFE.rb.2510":[{"usertag":"initial",
+        "field":0,"alg":0,"target":3500,"qty":2,"action":0}]}},
+      "signals":{"SHFE.rb.2510":{"usertag":"initial","volume":3,"sigprice":3000,"gentime":2}},
+      "utils":{"lastbarno":7}
+    })json";
+    ASSERT_TRUE(r42_write_file(data_file("r42_cta_persist"), baseline));
+    ctx->on_init();
+    ASSERT_EQ(ctx->position_count(), 1u);
+    ASSERT_TRUE(engine.has_tick_subscription(kR42Code));
+    ASSERT_FALSE(engine.has_tick_subscription(kR42T1Code));
+
+    // The first position is applied to the candidate before the second
+    // contract lookup throws. Neither it nor the changed fund may be published.
+    const char* candidate = R"json({
+      "fund":{"total_profit":8,"total_dynprofit":9,"total_fees":10,"tdate":20250111},
+      "positions":[
+        {"code":"SHFE.rb.2510","volume":8,"closeprofit":8,"dynprofit":9,
+         "lastentertime":10,"lastexittime":11,"details":[]},
+        {"code":"SHFE.ag.2512","volume":4,"closeprofit":8,"dynprofit":9,
+         "lastentertime":10,"lastexittime":11,"details":[]}],
+      "conditions":{"settime":222,"items":{}},
+      "signals":{"SHFE.ag.2512":{"usertag":"candidate","volume":5,"sigprice":3000,"gentime":2}},
+      "utils":{"lastbarno":8}
+    })json";
+    ASSERT_TRUE(r42_write_file(data_file("r42_cta_persist"), candidate));
+    bd.throwOnAg = true;
+    EXPECT_THROW(ctx->on_init(), std::runtime_error);
+    bd.throwOnAg = false;
+    EXPECT_EQ(ctx->position_count(), 1u);
+    EXPECT_DOUBLE_EQ(ctx->stored_position(kR42Code), 2.0);
+    EXPECT_EQ(ctx->signal_count(), 1u);
+    EXPECT_DOUBLE_EQ(ctx->stored_signal(kR42Code), 3.0);
+    EXPECT_EQ(ctx->condition_count(), 1u);
+    EXPECT_EQ(ctx->condition_time(), 111u);
+    EXPECT_EQ(ctx->last_bar(), 7u);
+    EXPECT_DOUBLE_EQ(ctx->stra_get_fund_data(3), 3.0);
+    EXPECT_FALSE(engine.has_tick_subscription(kR42T1Code));
 }
 
 // 覆盖 L647-677 on_bar/on_init、L937-1016 on_schedule、L1966-2062 图表接口（成功分支）

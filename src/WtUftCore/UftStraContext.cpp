@@ -28,6 +28,7 @@
 #include "../WTSUtils/WTSCfgLoader.h"
 
 #include <boost/filesystem.hpp>
+#include <memory>
 namespace fs = boost::filesystem;
 
 static const uint32_t DATA_SIZE_STEP = 8000;	//信息量每天最多4000
@@ -1059,8 +1060,13 @@ void UftStraContext::load_local_data()
 
 		WTSLogger::log_dyn("strategy", _name.c_str(), LL_WARN, "{} detected, positions will be overwrited", mannualfile);
 
-		WTSVariant* manual = WTSCfgLoader::load_from_file(mannualfile);
-		if (manual == NULL)
+		auto releaseManual = [](WTSVariant* value) {
+			if (value != NULL)
+				value->release();
+		};
+		std::unique_ptr<WTSVariant, decltype(releaseManual)> manual(
+			WTSCfgLoader::load_from_file(mannualfile), releaseManual);
+		if (!manual)
 		{
 			WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "parsing mannual file {} failed", mannualfile);
 			break;
@@ -1109,7 +1115,9 @@ void UftStraContext::load_local_data()
 					continue;
 				}
 
-				uft::DetailStruct& ds = _pos_blk._block->_details[i];
+				// Unknown contracts do not consume a persisted slot; keep valid
+				// entries contiguous within the published _size.
+				uft::DetailStruct& ds = _pos_blk._block->_details[_pos_blk._block->_size];
 				wt_strcpy(ds._exchg, exchg);
 				wt_strcpy(ds._code, code);
 				ds._direct = objDetail->getUInt32("direct");

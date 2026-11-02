@@ -13,6 +13,7 @@
  */
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <cstdint>
 #include <cstring>
 #include <filesystem>
@@ -195,6 +196,15 @@ namespace
 		return true;
 	}
 
+	bool write_empty_tick_dsb(const std::filesystem::path& base, const char* code, uint32_t uDate)
+	{
+		std::error_code ec;
+		std::filesystem::create_directories(base / "bin" / "ticks", ec);
+		std::ofstream out(base / "bin" / "ticks" / (std::string(code) + "_tick_" + std::to_string(uDate) + ".dsb"),
+			std::ios::binary);
+		return out.is_open();
+	}
+
 	struct DayBar
 	{
 		uint32_t date;
@@ -236,6 +246,7 @@ namespace
 		std::function<void()> onSessionBeginProbe;
 		std::function<void(uint32_t)> onSessionBeginDateProbe;
 		std::function<void()> onTickProbe;
+		std::function<uint64_t()> callbackClock;
 
 		uint32_t initCalls {0};
 		uint32_t beginCalls {0};
@@ -262,9 +273,21 @@ namespace
 		std::vector<double> tickHistoryPrices;
 		std::vector<uint32_t> scheduleDates;
 		std::vector<uint32_t> scheduleTimes;
+		std::vector<uint64_t> callbackNaturalTimes;
+		std::vector<std::string> callbackKinds;
+
+		void record_callback_time(const char* kind)
+		{
+			if (callbackClock)
+			{
+				callbackNaturalTimes.push_back(callbackClock());
+				callbackKinds.emplace_back(kind);
+			}
+		}
 
 		void handle_init() override
 		{
+			record_callback_time("init");
 			initCalls++;
 			if (onInit)
 				onInit();
@@ -272,6 +295,7 @@ namespace
 
 		void handle_tick(const char* stdCode, WTSTickData* curTick, uint32_t pxType) override
 		{
+			record_callback_time("tick");
 			(void)stdCode; (void)pxType;
 			tickCalls++;
 			tickCodes.push_back(stdCode == nullptr ? "" : stdCode);
@@ -288,6 +312,7 @@ namespace
 		void handle_bar_close(const char* stdCode, const char* period,
 			uint32_t times, WTSBarStruct* newBar) override
 		{
+			record_callback_time("bar_close");
 			(void)stdCode; (void)period; (void)times;
 			if (newBar != nullptr)
 			{
@@ -300,11 +325,13 @@ namespace
 
 		void handle_schedule(uint32_t uDate, uint32_t uTime) override
 		{
+			record_callback_time("schedule");
 			scheduleDates.push_back(uDate);
 			scheduleTimes.push_back(uTime);
 		}
 		void handle_session_begin(uint32_t curTDate) override
 		{
+			record_callback_time("session_begin");
 			beginCalls++;
 			beginTDates.push_back(curTDate);
 			if (onSessionBeginProbe)
@@ -312,8 +339,9 @@ namespace
 			if (onSessionBeginDateProbe)
 				onSessionBeginDateProbe(curTDate);
 		}
-		void handle_session_end(uint32_t) override { endCalls++; }
-		void handle_replay_done() override { replayDoneCalls++; }
+		void handle_session_end(uint32_t) override { record_callback_time("session_end"); endCalls++; }
+		void handle_replay_done() override { record_callback_time("replay_done"); replayDoneCalls++; }
+		void handle_section_end(uint32_t, uint32_t) override { record_callback_time("section_end"); }
 	};
 }
 
@@ -761,6 +789,293 @@ TEST_F(R43ReplayerTickCsvTest, mainBarsUseReplayableHftSessionForMixedNaturalDat
 	EXPECT_EQ(1u, sink.replayDoneCalls);
 }
 
+TEST_F(R43ReplayerTickCsvTest, replayableHftEventsKeepLaterSessionBoundary)
+{
+	const char* mainCode = "DCE.m.2005";
+	const char* hftCode = "SHFE.au.2006";
+	std::error_code ec;
+	std::filesystem::create_directories(_base / "csv", ec);
+	std::ofstream bars(_base / "csv" / (std::string(mainCode) + "_m1.csv"));
+	ASSERT_TRUE(bars.is_open());
+	bars << "date,time,open,high,low,close,volume,turnover,open_interest,diff_interest,settle\n"
+		<< "20200103,1500,100,101,99,100.5,1,1,0,0,100.5\n"
+		<< "20200103,2300,100,101,99,100.5,1,1,0,0,100.5\n"
+		<< "20200106,0930,101,102,100,101.5,1,1,0,0,101.5\n";
+	bars.close();
+	const TimedTickRow nextSessionTick{20200103u, 2300u, 1u, 0u, 50.0};
+	ASSERT_TRUE(write_ticks_dsb(_base, hftCode, 20200106u,
+		std::vector<WTSTickStruct>{make_timed_tick("au2006", nextSessionTick, 20200106u, "SHFE")}));
+
+	HisDataReplayer replayer;
+	WTSVariant* cfg = r43_cfg(_root, _base, true, 202001030930ull, 202001060931ull, true);
+	ASSERT_TRUE(replayer.init(cfg));
+	cfg->release();
+	R43Sink sink;
+	replayer.register_sink(&sink, "r43_hft_event_boundary_after_current");
+	sink.callbackClock = [&replayer]() {
+		return static_cast<uint64_t>(replayer.get_date()) * 1000000000ull +
+			static_cast<uint64_t>(replayer.get_min_time()) * 100000ull + replayer.get_secs();
+	};
+	sink.onInit = [&replayer, mainCode]() {
+		WTSKlineSlice* main = replayer.get_kline_slice(mainCode, "m", 1u, 1u, true);
+		if (main != nullptr)
+			main->release();
+	};
+	sink.onSessionBeginProbe = [&replayer, &sink]() {
+		sink.beginClockDates.push_back(replayer.get_date());
+		sink.beginClockTimes.push_back(replayer.get_min_time());
+		sink.beginClockSeconds.push_back(replayer.get_secs());
+	};
+	ASSERT_TRUE(replayer.prepare());
+	replayer.sub_tick(1u, hftCode);
+	replayer.run(false);
+
+	EXPECT_TRUE(std::is_sorted(sink.callbackNaturalTimes.begin(), sink.callbackNaturalTimes.end()))
+		<< "callback kinds: " << ::testing::PrintToString(sink.callbackKinds)
+		<< "; callback natural times: " << ::testing::PrintToString(sink.callbackNaturalTimes);
+	const auto hftBegin = std::find(sink.beginTDates.begin(), sink.beginTDates.end(), 20200106u);
+	ASSERT_NE(sink.beginTDates.end(), hftBegin);
+	const std::size_t beginIndex = static_cast<std::size_t>(hftBegin - sink.beginTDates.begin());
+	ASSERT_LT(beginIndex, sink.beginClockDates.size());
+	EXPECT_EQ(20200103u, sink.beginClockDates[beginIndex]);
+	EXPECT_EQ(2100u, sink.beginClockTimes[beginIndex]);
+	EXPECT_EQ(0u, sink.beginClockSeconds[beginIndex]);
+	const auto replayedTick = std::find(sink.tickNaturalTimes.begin(), sink.tickNaturalTimes.end(),
+		encoded_hft_time(nextSessionTick));
+	ASSERT_NE(sink.tickNaturalTimes.end(), replayedTick);
+	const std::size_t tickIndex = static_cast<std::size_t>(replayedTick - sink.tickNaturalTimes.begin());
+	EXPECT_EQ(hftCode, sink.tickCodes[tickIndex]);
+	EXPECT_DOUBLE_EQ(nextSessionTick.price, sink.tickPrices[tickIndex]);
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+}
+
+TEST_F(R43ReplayerTickCsvTest, missingInRangeHftEventsKeepLaterSessionBoundary)
+{
+	const char* mainCode = "SHFE.au.2006";
+	const TimedTickRow afterRequestedEnd{20200103u, 2330u, 0u, 0u, 50.0};
+	ASSERT_TRUE(write_ticks_dsb(_base, mainCode, 20200106u,
+		std::vector<WTSTickStruct>{make_timed_tick("au2006", afterRequestedEnd, 20200106u, "SHFE")}));
+	std::error_code ec;
+	std::filesystem::create_directories(_base / "csv", ec);
+	std::ofstream bars(_base / "csv" / (std::string(mainCode) + "_m1.csv"));
+	ASSERT_TRUE(bars.is_open());
+	bars << "date,time,open,high,low,close,volume,turnover,open_interest,diff_interest,settle\n"
+		<< "20200102,1500,100,101,99,100.5,1,1,0,0,100.5\n";
+	bars.close();
+
+	HisDataReplayer replayer;
+	WTSVariant* cfg = r43_cfg(_root, _base, true, 202001020930ull, 202001032300ull, true);
+	ASSERT_TRUE(replayer.init(cfg));
+	cfg->release();
+	R43Sink sink;
+	replayer.register_sink(&sink, "r43_no_hft_event_later_boundary");
+	sink.callbackClock = [&replayer]() {
+		return static_cast<uint64_t>(replayer.get_date()) * 1000000000ull +
+			static_cast<uint64_t>(replayer.get_min_time()) * 100000ull + replayer.get_secs();
+	};
+	sink.onInit = [&replayer, mainCode]() {
+		WTSKlineSlice* main = replayer.get_kline_slice(mainCode, "m", 1u, 1u, true);
+		if (main != nullptr)
+			main->release();
+	};
+	sink.onSessionBeginProbe = [&replayer, &sink]() {
+		sink.beginClockDates.push_back(replayer.get_date());
+		sink.beginClockTimes.push_back(replayer.get_min_time());
+		sink.beginClockSeconds.push_back(replayer.get_secs());
+	};
+	ASSERT_TRUE(replayer.prepare());
+	replayer.sub_tick(1u, mainCode);
+	replayer.run(false);
+
+	EXPECT_TRUE(std::is_sorted(sink.callbackNaturalTimes.begin(), sink.callbackNaturalTimes.end()))
+		<< "callback kinds: " << ::testing::PrintToString(sink.callbackKinds)
+		<< "; callback natural times: " << ::testing::PrintToString(sink.callbackNaturalTimes);
+	const auto laterBegin = std::find(sink.beginTDates.begin(), sink.beginTDates.end(), 20200106u);
+	ASSERT_NE(sink.beginTDates.end(), laterBegin);
+	const std::size_t beginIndex = static_cast<std::size_t>(laterBegin - sink.beginTDates.begin());
+	ASSERT_LT(beginIndex, sink.beginClockDates.size());
+	EXPECT_EQ(20200103u, sink.beginClockDates[beginIndex]);
+	EXPECT_EQ(2100u, sink.beginClockTimes[beginIndex]);
+	EXPECT_EQ(0u, sink.beginClockSeconds[beginIndex]);
+	EXPECT_EQ(sink.tickPrices.end(), std::find(sink.tickPrices.begin(), sink.tickPrices.end(), afterRequestedEnd.price));
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+}
+
+TEST_F(R43ReplayerTickCsvTest, mainBarWithoutInRangeHftEventsKeepsLaterSessionBoundary)
+{
+	const char* mainCode = "SHFE.au.2006";
+	const TimedTickRow afterRequestedEnd{20200103u, 2200u, 0u, 0u, 50.0};
+	ASSERT_TRUE(write_ticks_dsb(_base, mainCode, 20200106u,
+		std::vector<WTSTickStruct>{make_timed_tick("au2006", afterRequestedEnd, 20200106u, "SHFE")}));
+	std::error_code ec;
+	std::filesystem::create_directories(_base / "csv", ec);
+	std::ofstream bars(_base / "csv" / (std::string(mainCode) + "_m1.csv"));
+	ASSERT_TRUE(bars.is_open());
+	bars << "date,time,open,high,low,close,volume,turnover,open_interest,diff_interest,settle\n"
+		<< "20200102,1500,100,101,99,100.5,1,1,0,0,100.5\n"
+		<< "20200103,2100,101,102,100,101.5,1,1,0,0,101.5\n";
+	bars.close();
+
+	HisDataReplayer replayer;
+	WTSVariant* cfg = r43_cfg(_root, _base, true, 202001020930ull, 202001032130ull, true);
+	ASSERT_TRUE(replayer.init(cfg));
+	cfg->release();
+	R43Sink sink;
+	replayer.register_sink(&sink, "r43_main_bar_no_hft_event_later_boundary");
+	sink.callbackClock = [&replayer]() {
+		return static_cast<uint64_t>(replayer.get_date()) * 1000000000ull +
+			static_cast<uint64_t>(replayer.get_min_time()) * 100000ull + replayer.get_secs();
+	};
+	sink.onInit = [&replayer, mainCode]() {
+		WTSKlineSlice* main = replayer.get_kline_slice(mainCode, "m", 1u, 1u, true);
+		if (main != nullptr)
+			main->release();
+	};
+	sink.onSessionBeginProbe = [&replayer, &sink]() {
+		sink.beginClockDates.push_back(replayer.get_date());
+		sink.beginClockTimes.push_back(replayer.get_min_time());
+		sink.beginClockSeconds.push_back(replayer.get_secs());
+	};
+	ASSERT_TRUE(replayer.prepare());
+	replayer.sub_tick(1u, mainCode);
+	replayer.run(false);
+
+	EXPECT_TRUE(std::is_sorted(sink.callbackNaturalTimes.begin(), sink.callbackNaturalTimes.end()))
+		<< "callback kinds: " << ::testing::PrintToString(sink.callbackKinds)
+		<< "; callback natural times: " << ::testing::PrintToString(sink.callbackNaturalTimes);
+	const auto laterBegin = std::find(sink.beginTDates.begin(), sink.beginTDates.end(), 20200106u);
+	ASSERT_NE(sink.beginTDates.end(), laterBegin);
+	const std::size_t beginIndex = static_cast<std::size_t>(laterBegin - sink.beginTDates.begin());
+	ASSERT_LT(beginIndex, sink.beginClockDates.size());
+	EXPECT_EQ(20200103u, sink.beginClockDates[beginIndex]);
+	EXPECT_EQ(2100u, sink.beginClockTimes[beginIndex]);
+	EXPECT_EQ(0u, sink.beginClockSeconds[beginIndex]);
+	EXPECT_EQ(sink.tickPrices.end(), std::find(sink.tickPrices.begin(), sink.tickPrices.end(), afterRequestedEnd.price));
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+}
+
+TEST_F(R43ReplayerTickCsvTest, mainBarAndNightSessionBucketsReplayInNaturalTimeOrder)
+{
+	const char* mainCode = "SHFE.au.2006";
+	const char* otherCode = "DCE.m.2005";
+	const TimedTickRow mainBeforeStart{20200102u, 2159u, 58u, 999u, 10.0};
+	const TimedTickRow otherBeforeStart{20200102u, 2159u, 58u, 999u, 1.0};
+	const TimedTickRow startBegin{20200102u, 2159u, 59u, 0u, 2.0};
+	const TimedTickRow startEnd{20200102u, 2159u, 59u, 999u, 3.0};
+	const TimedTickRow nightOpen{20200102u, 2200u, 0u, 0u, 4.0};
+	const TimedTickRow mainAfterOpen{20200102u, 2200u, 0u, 250u, 11.0};
+	const TimedTickRow nightOpenLater{20200102u, 2200u, 0u, 500u, 5.0};
+	const TimedTickRow beforeMainBar{20200102u, 2329u, 59u, 999u, 12.0};
+	const TimedTickRow atMainBar{20200102u, 2330u, 0u, 0u, 13.0};
+	const TimedTickRow afterMainBar{20200102u, 2330u, 0u, 999u, 14.0};
+	const TimedTickRow endBefore{20200103u, 2229u, 59u, 999u, 21.0};
+	const TimedTickRow endAt{20200103u, 2230u, 0u, 0u, 22.0};
+	const TimedTickRow endLastMillisecond{20200103u, 2230u, 0u, 999u, 23.0};
+	const TimedTickRow afterEnd{20200103u, 2230u, 1u, 0u, 24.0};
+	const TimedTickRow otherEndBefore{20200103u, 2229u, 59u, 999u, 31.0};
+	const TimedTickRow otherEndAt{20200103u, 2230u, 0u, 0u, 32.0};
+	const TimedTickRow otherEndLastMillisecond{20200103u, 2230u, 0u, 999u, 33.0};
+	const TimedTickRow otherAfterEnd{20200103u, 2230u, 1u, 0u, 34.0};
+
+	ASSERT_TRUE(write_ticks_dsb(_base, mainCode, 20200103u,
+		std::vector<WTSTickStruct>{
+			make_timed_tick("au2006", mainBeforeStart, 20200103u, "SHFE"),
+			make_timed_tick("au2006", mainAfterOpen, 20200103u, "SHFE"),
+			make_timed_tick("au2006", beforeMainBar, 20200103u, "SHFE"),
+			make_timed_tick("au2006", atMainBar, 20200103u, "SHFE"),
+			make_timed_tick("au2006", afterMainBar, 20200103u, "SHFE")}));
+	ASSERT_TRUE(write_ticks_dsb(_base, otherCode, 20200103u,
+		std::vector<WTSTickStruct>{
+			make_timed_tick("m2005", otherBeforeStart, 20200103u, "DCE"),
+			make_timed_tick("m2005", startBegin, 20200103u, "DCE"),
+			make_timed_tick("m2005", startEnd, 20200103u, "DCE"),
+			make_timed_tick("m2005", nightOpen, 20200103u, "DCE"),
+			make_timed_tick("m2005", nightOpenLater, 20200103u, "DCE")}));
+	ASSERT_TRUE(write_ticks_dsb(_base, mainCode, 20200106u,
+		std::vector<WTSTickStruct>{
+			make_timed_tick("au2006", endBefore, 20200106u, "SHFE"),
+			make_timed_tick("au2006", endAt, 20200106u, "SHFE"),
+			make_timed_tick("au2006", endLastMillisecond, 20200106u, "SHFE"),
+			make_timed_tick("au2006", afterEnd, 20200106u, "SHFE")}));
+	ASSERT_TRUE(write_ticks_dsb(_base, otherCode, 20200106u,
+		std::vector<WTSTickStruct>{
+			make_timed_tick("m2005", otherEndBefore, 20200106u, "DCE"),
+			make_timed_tick("m2005", otherEndAt, 20200106u, "DCE"),
+			make_timed_tick("m2005", otherEndLastMillisecond, 20200106u, "DCE"),
+			make_timed_tick("m2005", otherAfterEnd, 20200106u, "DCE")}));
+
+	std::error_code ec;
+	std::filesystem::create_directories(_base / "csv", ec);
+	std::ofstream bars(_base / "csv" / (std::string(mainCode) + "_m1.csv"));
+	ASSERT_TRUE(bars.is_open());
+	bars << "date,time,open,high,low,close,volume,turnover,open_interest,diff_interest,settle\n"
+		<< "20200102,2330,100,101,99,100.5,1,1,0,0,100.5\n";
+	bars.close();
+
+	HisDataReplayer replayer;
+	WTSVariant* cfg = r43_cfg(_root, _base, true, 20200102215959ull, 20200103223000ull, true);
+	ASSERT_TRUE(replayer.init(cfg));
+	cfg->release();
+	R43Sink sink;
+	replayer.register_sink(&sink, "r43_cross_session_natural_order");
+	sink.callbackClock = [&replayer]() {
+		return static_cast<uint64_t>(replayer.get_date()) * 1000000000ull +
+			static_cast<uint64_t>(replayer.get_min_time()) * 100000ull + replayer.get_secs();
+	};
+	sink.onInit = [&replayer, mainCode]() {
+		WTSKlineSlice* main = replayer.get_kline_slice(mainCode, "m", 1u, 1u, true);
+		if (main != nullptr)
+			main->release();
+	};
+	sink.onSessionBeginProbe = [&replayer, &sink]() {
+		sink.beginClockDates.push_back(replayer.get_date());
+		sink.beginClockTimes.push_back(replayer.get_min_time());
+		sink.beginClockSeconds.push_back(replayer.get_secs());
+	};
+	ASSERT_TRUE(replayer.prepare());
+	replayer.sub_tick(1u, mainCode);
+	replayer.sub_tick(1u, otherCode);
+	replayer.run(false);
+
+	std::vector<uint64_t> replayedHftTimes;
+	std::vector<std::string> replayedHftCodes;
+	for (std::size_t index = 0; index < sink.tickPrices.size(); ++index)
+	{
+		if (sink.tickPrices[index] < 100.0)
+		{
+			replayedHftTimes.push_back(sink.tickNaturalTimes[index]);
+			replayedHftCodes.push_back(sink.tickCodes[index]);
+		}
+	}
+	const std::vector<TimedTickRow> expectedRows = {
+		startBegin, startEnd, nightOpen, mainAfterOpen, nightOpenLater, beforeMainBar,
+		atMainBar, afterMainBar, otherEndBefore, endBefore, otherEndAt, endAt,
+		otherEndLastMillisecond, endLastMillisecond};
+	std::vector<uint64_t> expectedHftTimes;
+	for (const TimedTickRow& row : expectedRows)
+		expectedHftTimes.push_back(encoded_hft_time(row));
+	EXPECT_EQ(expectedHftTimes, replayedHftTimes);
+	EXPECT_EQ(std::vector<std::string>({
+		otherCode, otherCode, otherCode, mainCode, otherCode, mainCode,
+		mainCode, mainCode, otherCode, mainCode, otherCode, mainCode,
+		otherCode, mainCode}), replayedHftCodes);
+	EXPECT_TRUE(std::is_sorted(sink.tickNaturalTimes.begin(), sink.tickNaturalTimes.end()));
+	EXPECT_TRUE(std::is_sorted(sink.callbackNaturalTimes.begin(), sink.callbackNaturalTimes.end()))
+		<< "callback kinds: " << ::testing::PrintToString(sink.callbackKinds)
+		<< "; callback natural times: " << ::testing::PrintToString(sink.callbackNaturalTimes);
+	EXPECT_EQ(std::vector<uint32_t>({20200102u}), sink.closedDates);
+	EXPECT_EQ(std::vector<uint32_t>({20200102u}), sink.scheduleDates);
+	EXPECT_EQ(std::vector<uint32_t>({2330u}), sink.scheduleTimes);
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+	const auto laterSessionBegin = std::find(sink.beginTDates.begin(), sink.beginTDates.end(), 20200106u);
+	ASSERT_NE(sink.beginTDates.end(), laterSessionBegin);
+	const std::size_t beginIndex = static_cast<std::size_t>(laterSessionBegin - sink.beginTDates.begin());
+	ASSERT_LT(beginIndex, sink.beginClockDates.size());
+	EXPECT_EQ(20200103u, sink.beginClockDates[beginIndex]);
+	EXPECT_EQ(2230u, sink.beginClockTimes[beginIndex]);
+	EXPECT_EQ(999u, sink.beginClockSeconds[beginIndex]);
+}
+
 // dsb 文件存在但小于块头 -> 尺寸校验失败，回放无任何 tick
 TEST_F(R43ReplayerTickCsvTest, shortTickDsbRejected)
 {
@@ -774,6 +1089,31 @@ TEST_F(R43ReplayerTickCsvTest, shortTickDsbRejected)
 
 	R43Sink sink;
 	replayer.register_sink(&sink, "r43_shortdsb");
+	ASSERT_TRUE(replayer.prepare());
+	replayer.sub_tick(1, code);
+
+	EXPECT_EQ(nullptr, replayer.get_tick_slice(code, 1));
+	EXPECT_EQ(nullptr, replayer.get_last_tick(code));
+
+	replayer.run(false);
+	EXPECT_EQ(0u, sink.tickCalls);
+	EXPECT_EQ(0u, sink.beginCalls);
+	EXPECT_EQ(1u, sink.replayDoneCalls);
+}
+
+// 空の dsb ファイルもサイズ検査で拒否し、tick キャッシュや回放を開始しない。
+TEST_F(R43ReplayerTickCsvTest, emptyTickDsbRejected)
+{
+	const char* code = "SSE.STK.000001";
+	ASSERT_TRUE(write_empty_tick_dsb(_base, code, 20200102u));
+
+	HisDataReplayer replayer;
+	WTSVariant* cfg = r43_cfg(_root, _base, true);
+	ASSERT_TRUE(replayer.init(cfg));
+	cfg->release();
+
+	R43Sink sink;
+	replayer.register_sink(&sink, "r43_emptydsb");
 	ASSERT_TRUE(replayer.prepare());
 	replayer.sub_tick(1, code);
 

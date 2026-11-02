@@ -15,7 +15,7 @@
  * @brief 测试UFT模块延迟的外部函数声明
  * @details 该函数在UftLatencyTool.cpp中实现，主要用于执行延迟测试流程
  */
-extern void test_uft();
+extern bool test_uft();
 
 /**
  * @brief 程序入口函数
@@ -25,7 +25,11 @@ extern void test_uft();
 int main()
 {
 	// 执行UFT延迟测试
-	test_uft();
+	if (!test_uft())
+	{
+		fprintf(stderr, "UFT latency test failed\r\n");
+		return 1;
+	}
 	// 提示用户按任意键退出
 	printf("press enter key to exit\r\n");
 	getchar();

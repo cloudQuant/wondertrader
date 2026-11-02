@@ -12,7 +12,8 @@
  *  - release 在 _writer==NULL 时的幂等性（L127-134）
  *  - getSessionComms 返回品种 fullPid 集合（L297-300），以及 getTradingDate 委托
  * 禁用占位说明 bdMgr 是必需依赖；全天候装配只允许 StateMonitor 为空。
- * 不加载真实写手插件（所有 module 路径都指向必然 dlopen 失败的临时文件/目录）。
+ * 仅 SessionComms 成功路径装载本地 AD writer；模块副本与 writer cache 均限制在临时目录。
+ * 其余模块失败路径仍只使用必然 dlopen 失败的临时文件/目录。
  */
 #include <gtest/gtest.h>
 
@@ -32,6 +33,8 @@
 #include <Includes/WTSVariant.hpp>
 #include <WTSUtils/WTSCfgLoader.h>
 #include <WTSTools/WTSBaseDataMgr.h>
+
+#include "r102_dtcore_util.h"
 
 namespace fs = std::filesystem;
 
@@ -74,11 +77,38 @@ public:
 	int transCnt { 0 };
 };
 
+class R44ModuleDirGuard
+{
+public:
+	void capture()
+	{
+		if (_captured)
+			return;
+		_previous = WtHelper::get_module_dir();
+		_captured = true;
+	}
+
+	void restore()
+	{
+		if (!_captured)
+			return;
+		WtHelper::set_module_dir(_previous.c_str());
+		_captured = false;
+	}
+
+	~R44ModuleDirGuard() { restore(); }
+
+private:
+	std::string _previous;
+	bool _captured { false };
+};
+
 class R44DataManagerEdgesTest : public ::testing::Test
 {
 protected:
 	void SetUp() override
 	{
+		_moduleDirGuard.capture();
 		_dir = r44_make_tmp_dir("r44_dm");
 		_bin = _dir / "bin";
 		fs::create_directories(_bin);
@@ -107,8 +137,10 @@ protected:
 
 	void TearDown() override
 	{
+		_moduleDirGuard.restore();
 		std::error_code ec;
-		fs::remove_all(_dir, ec);
+		if (!_dir.empty())
+			fs::remove_all(_dir, ec);
 	}
 
 	WTSVariant* loadDmCfg()
@@ -120,6 +152,8 @@ protected:
 	fs::path _bin;
 	WTSBaseDataMgr _bdMgr;
 	StateMonitor _mon;
+	// This fixture changes WtHelper global state; restore it before removing the temp module directory.
+	R44ModuleDirGuard _moduleDirGuard;
 };
 
 // DataManager.cpp:73-104 —— 默认模块名对应的文件存在但不是 Mach-O，dlopen 失败后 return false；
@@ -218,11 +252,33 @@ TEST_F(R44DataManagerEdgesTest, ReleaseWithoutWriterIsIdempotent)
 // getTradingDate 原样委托给 WTSBaseDataMgr
 TEST_F(R44DataManagerEdgesTest, SessionCommsExposeCommodityFullPids)
 {
+	const std::string buildBin = r102dt::bin_dir();
+	const fs::path moduleSrc = fs::path(buildBin) / "libWtDataStorageAD.dylib";
+	std::error_code statusError;
+	const fs::file_status moduleStatus = fs::symlink_status(moduleSrc, statusError);
+	if (statusError || fs::is_symlink(moduleStatus) || !fs::is_regular_file(moduleStatus))
+		GTEST_SKIP() << "本地 libWtDataStorageAD.dylib 缺失或不是非符号链接普通文件";
+	if (!r102dt::ad_writer_ready(buildBin))
+		GTEST_SKIP() << "libWtDataStorageAD.dylib / createWriter 不可用";
+
+	// 用本构建的 AD writer 做有效本地模块；模块副本和 writer cache 都留在 fixture 临时目录。
+	const fs::path moduleCopy = _bin / "libWtDataStorageAD.dylib";
+	std::error_code copyError;
+	fs::copy_file(moduleSrc, moduleCopy, fs::copy_options::overwrite_existing, copyError);
+	ASSERT_FALSE(copyError) << "无法复制本地 AD storage module: " << copyError.message();
+
+	const std::string storePath = (_dir / "writer_store").string() + "/";
+	r44_write_file(_dir / "dm.json",
+		"{\"module\":\"WtDataStorageAD\",\"path\":\"" + storePath +
+		"\",\"groupsize\":10,\"disabletick\":true,"
+		"\"disablemin1\":true,\"disablemin5\":true,"
+		"\"disableday\":true,\"async\":false}");
 	WTSVariant* params = loadDmCfg();
 	ASSERT_NE(params, nullptr);
 	DataManager dm;
-	EXPECT_FALSE(dm.init(params, &_bdMgr, &_mon));
+	const bool initialized = dm.init(params, &_bdMgr, &_mon);
 	params->release();
+	ASSERT_TRUE(initialized) << "AD storage writer must initialize before sink callbacks are queried";
 
 	CodeSet* comms = dm.getSessionComms("DAY0");
 	ASSERT_NE(comms, nullptr);
@@ -231,6 +287,7 @@ TEST_F(R44DataManagerEdgesTest, SessionCommsExposeCommodityFullPids)
 
 	// 只断言委托返回值非零，不锁定具体日期（避免墙钟断言）
 	EXPECT_NE(dm.getTradingDate("SSE.STK"), 0u);
+	dm.release();
 }
 
 /*

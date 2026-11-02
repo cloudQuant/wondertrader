@@ -17,7 +17,7 @@
 #include "../Share/BoostFile.hpp"
 #include "../Share/fmtlib.h"
 
-#include <boost/circular_buffer.hpp>
+#include <map>
 
 #include "ITrdNotifySink.h"
 
@@ -624,16 +624,11 @@ protected:
 	 */
 	inline const char* getOrderTag(uint32_t localid)
 	{
-		thread_local static OrderTag oTag;
-		oTag._localid = localid;
-		auto it = std::lower_bound(_orders.begin(), _orders.end(), oTag, [](const OrderTag& a, const OrderTag& b) {
-			return a._localid < b._localid;
-		});
-
+		auto it = _orders.find(localid);
 		if (it == _orders.end())
 			return "";
 
-		return (*it)._usertag;
+		return it->second.c_str();
 	}
 
 
@@ -645,7 +640,7 @@ protected:
 	 */
 	inline void setUserTag(uint32_t localid, const char* usertag)
 	{
-		_orders.push_back({ localid, usertag });
+		_orders[localid] = usertag ? usertag : "";
 	}
 
 	/**
@@ -655,22 +650,27 @@ protected:
 	 */
 	inline void eraseOrderTag(uint32_t localid)
 	{
-		thread_local static OrderTag oTag;
-		oTag._localid = localid;
-		auto it = std::lower_bound(_orders.begin(), _orders.end(), oTag, [](const OrderTag& a, const OrderTag& b) {
-			return a._localid < b._localid;
-		});
-
-		if (it == _orders.end())
-			return;
-
-		_orders.erase(it);
+		_orders.erase(localid);
 	}
+
+	// Detect synchronous rebinding while a trading action calls into other
+	// components. This does not synchronize concurrent access or own the adapter.
+	bool traderBindingUnchanged(TraderAdapter* expected, uint64_t epoch, const char* action)
+	{
+		if (_trader == expected && _trader_binding_epoch == epoch)
+			return true;
+		log_error("Cannot {}: trader adapter binding changed", action);
+		return false;
+	}
+
+	bool tryGetBoundPosition(const char* stdCode, bool onlyValid, int flag,
+		TraderAdapter* expected, uint64_t epoch, double& position);
 
 protected:
 	uint32_t		_context_id;
 	WtHftEngine*	_engine;
-	TraderAdapter*	_trader;
+	TraderAdapter*	_trader = nullptr;
+	uint64_t		_trader_binding_epoch = 0;
 	int32_t			_slippage;
 
 	wt_hashmap<std::string, std::string> _code_map;
@@ -683,7 +683,7 @@ protected:
 	//用户数据
 	typedef wt_hashmap<std::string, std::string> StringHashMap;
 	StringHashMap	_user_datas;
-	bool			_ud_modified;
+	bool			_ud_modified = false;
 
 	bool			_data_agent;	//数据托管
 
@@ -705,16 +705,15 @@ private:
 		double		_max_profit; ///< 最大盈利
 		double		_max_loss;   ///< 最大亏损
 		double		_profit;     ///< 当前盈亏
-		char		_usertag[32]; ///< 用户自定义标签
+		std::string _usertag; ///< 用户自定义标签
 
 		/**
 		 * @brief 构造函数
 		 * @details 初始化所有成员变量为0
 		 */
 		_DetailInfo()
-		{
-			memset(this, 0, sizeof(_DetailInfo));
-		}
+			: _long(false), _price(0), _volume(0), _opentime(0), _opentdate(0),
+			  _max_profit(0), _max_loss(0), _profit(0) {}
 	} DetailInfo;
 
 	/**
@@ -743,35 +742,9 @@ private:
 	typedef wt_hashmap<std::string, PosInfo> PositionMap;
 	PositionMap		_pos_map;
 
-	/**
-	 * @brief 订单标签结构体
-	 * @details 存储订单的标签信息，包括订单ID和用户自定义标签
-	 */
-	typedef struct _OrderTag
-	{
-		uint32_t	_localid;   ///< 本地订单ID
-		char		_usertag[64] = { 0 }; ///< 用户自定义标签
-
-		/**
-		 * @brief 默认构造函数
-		 */
-		_OrderTag(){}
-
-		/**
-		 * @brief 构造函数
-		 * @param localid 本地订单ID
-		 * @param usertag 用户自定义标签
-		 * @details 初始化订单标签结构体
-		 */
-		_OrderTag(uint32_t localid, const char* usertag)
-		{
-			_localid = localid;
-			wt_strcpy(_usertag, usertag);
-		}
-	} OrderTag;
-	//typedef wt_hashmap<uint32_t, std::string> OrderMap;
-	//OrderMap		_orders;
-	boost::circular_buffer<OrderTag> _orders;
+	// No fixed capacity: registering another order must not silently evict an
+	// existing tag. Callers still need to resolve callback ordering and lifetime.
+	std::map<uint32_t, std::string> _orders;
 
 	/**
 	 * @brief 策略资金信息结构体

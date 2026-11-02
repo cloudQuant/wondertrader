@@ -22,8 +22,11 @@
 #include "q01_sel_env.h"
 
 #include <fstream>
+#include <map>
 #include <sstream>
 #include <string>
+
+#include <rapidjson/document.h>
 
 #include <Includes/IDataManager.h>
 #include <Includes/WTSVariant.hpp>
@@ -41,6 +44,40 @@ USING_NS_WTP;
 static const char* kStdAg = "SHFE.ag.2512";
 static const char* kStdAu = "SHFE.au.2212";
 static const char* kStdStock = "SSE.600000";
+
+using DiffPositionMap = std::map<std::string, double>;
+
+bool parseDiffPositionSection(const rapidjson::Value& section, const char* valueKey,
+    DiffPositionMap& out)
+{
+    if (!section.IsArray())
+        return false;
+
+    for (const rapidjson::Value& item : section.GetArray())
+    {
+        if (!item.IsObject() || !item.HasMember("code") || !item["code"].IsString() ||
+            item["code"].GetStringLength() == 0 || !item.HasMember(valueKey) ||
+            !item[valueKey].IsNumber())
+            return false;
+
+        const std::string code(item["code"].GetString(), item["code"].GetStringLength());
+        if (!out.emplace(code, item[valueKey].GetDouble()).second)
+            return false;
+    }
+    return true;
+}
+
+bool parseDiffSnapshot(const std::string& content, DiffPositionMap& targets, DiffPositionMap& diffs)
+{
+    rapidjson::Document root;
+    root.Parse(content.data(), content.size());
+    if (root.HasParseError() || !root.IsObject() || !root.HasMember("targets") ||
+        !root.HasMember("diffs"))
+        return false;
+
+    return parseDiffPositionSection(root["targets"], "target", targets) &&
+        parseDiffPositionSection(root["diffs"], "diff", diffs);
+}
 
 /** 上一期主力“就是本合约”：只为打通 on_position 的自动清理判定 */
 class PrevHotSelf : public HotMgr
@@ -191,6 +228,16 @@ protected:
         WTSVariant* policy = Cfg::addObject(c.root(), "policy");
         WTSVariant* def = Cfg::addObject(policy, "default");
         def->append("name", unitName);
+        return c.root();
+    }
+
+    WTSVariant* policyCfgWithScale(double scale, const char* unitName = "R10Unit")
+    {
+        Cfg c;
+        WTSVariant* policy = Cfg::addObject(c.root(), "policy");
+        WTSVariant* def = Cfg::addObject(policy, "default");
+        def->append("name", unitName);
+        c.real("scale", scale);
         return c.root();
     }
 
@@ -548,25 +595,36 @@ TEST_F(R10ExecuterTest, diff_load_data_then_set_position_roundtrip)
     EXPECT_EQ(_dm.n_grab, 0u);
 }
 
-TEST_F(R10ExecuterTest, diff_set_position_on_missing_file_creates_empty_json)
+TEST_F(R10ExecuterTest, diff_set_position_on_missing_file_persists_target_without_unit)
 {
     const std::string file = execFile("diff_fresh");
     std::error_code ec;
     std::filesystem::remove(std::filesystem::path(file), ec);
+    ASSERT_FALSE(std::filesystem::exists(std::filesystem::path(file)));
 
     WtDiffExecuter exe(&_factory, "diff_fresh", &_dm, &_bdm);
     exe.setStub(&_stub);
-    ASSERT_TRUE(exe.init(policyCfg()));   // load_data 在 L119-122 因文件缺失早退
+    ASSERT_TRUE(exe.init(policyCfgWithScale(1.0)));   // A missing snapshot is a valid first-run state.
+    ASSERT_EQ(_factory.createDiffExeUnit("R10Unit"), nullptr);
 
     wt_hashmap<std::string, double> targets;
-    targets[kStdAg] = 4;                  // getUnit==NULL => 记账不生效（L560-562）
+    targets[kStdAg] = 4;
     exe.set_position(targets);
 
-    EXPECT_TRUE(std::filesystem::exists(std::filesystem::path(file)));
+    ASSERT_TRUE(std::filesystem::exists(std::filesystem::path(file)));
     const std::string saved = slurp(file);
-    EXPECT_NE(saved.find("\"targets\""), std::string::npos);
-    EXPECT_NE(saved.find("\"diffs\""), std::string::npos);
-    EXPECT_EQ(saved.find(kStdAg), std::string::npos);   // 没有单元 => 目标仓位不会被写入
+    DiffPositionMap savedTargets;
+    DiffPositionMap savedDiffs;
+    ASSERT_TRUE(parseDiffSnapshot(saved, savedTargets, savedDiffs));
+    ASSERT_EQ(savedTargets.size(), 1u);
+    ASSERT_EQ(savedDiffs.size(), 1u);
+    EXPECT_DOUBLE_EQ(savedTargets.at(kStdAg), 4.0);
+    EXPECT_DOUBLE_EQ(savedDiffs.at(kStdAg), 4.0);
+
+    // The snapshot records the requested state even when there is no unit to dispatch it.
+    EXPECT_EQ(exe.getOrders(kStdAg), nullptr);
+    EXPECT_EQ(_dm.n_grab, 0u);
+    EXPECT_EQ(_dm.n_tick_slice, 0u);
 }
 
 TEST_F(R10ExecuterTest, diff_load_data_broken_json_and_empty_file_are_ignored)
@@ -625,7 +683,7 @@ TEST_F(R10ExecuterTest, diff_callbacks_without_unit_early_return)
 {
     WtDiffExecuter exe(&_factory, "diff_cb", &_dm, &_bdm);
     exe.setStub(&_stub);
-    ASSERT_TRUE(exe.init(policyCfg()));
+    ASSERT_TRUE(exe.init(policyCfgWithScale(1.0)));
 
     WTSTickData* tk = makeTick("SHFE", "ag2512", 20250110, 20250110, 93140, 7120.0);
     ASSERT_NE(tk, nullptr);
@@ -636,9 +694,31 @@ TEST_F(R10ExecuterTest, diff_callbacks_without_unit_early_return)
     exe.on_position_changed(kStdAg, 3);
     tk->release();
 
-    // 未创建单元 => _diff_pos 保持空 => 落盘里不该出现该合约
+    // The position callback records target 3 even though the factory supplies no unit.
+    const std::string file = execFile("diff_cb");
+    const std::string before = slurp(file);
+    DiffPositionMap beforeTargets;
+    DiffPositionMap beforeDiffs;
+    ASSERT_TRUE(parseDiffSnapshot(before, beforeTargets, beforeDiffs));
+    ASSERT_EQ(beforeTargets.size(), 1u);
+    ASSERT_EQ(beforeDiffs.size(), 1u);
+    EXPECT_DOUBLE_EQ(beforeTargets.at(kStdAg), 3.0);
+    EXPECT_DOUBLE_EQ(beforeDiffs.at(kStdAg), 3.0);
+
+    // An empty target request clears the persisted target; zero-valued ledger rows remain valid.
     wt_hashmap<std::string, double> empty;
     exe.set_position(empty);
-    EXPECT_EQ(slurp(execFile("diff_cb")).find(kStdAg), std::string::npos);
+    const std::string after = slurp(file);
+    DiffPositionMap afterTargets;
+    DiffPositionMap afterDiffs;
+    ASSERT_TRUE(parseDiffSnapshot(after, afterTargets, afterDiffs));
+    ASSERT_EQ(afterTargets.size(), 1u);
+    ASSERT_EQ(afterDiffs.size(), 1u);
+    EXPECT_DOUBLE_EQ(afterTargets.at(kStdAg), 0.0);
+    EXPECT_DOUBLE_EQ(afterDiffs.at(kStdAg), 0.0);
+    EXPECT_NE(before, after);
     EXPECT_DOUBLE_EQ(exe.getUndoneQty(kStdAg), 0.0);
+    EXPECT_EQ(exe.getOrders(kStdAg), nullptr);
+    EXPECT_EQ(_dm.n_grab, 0u);
+    EXPECT_EQ(_dm.n_tick_slice, 0u);
 }

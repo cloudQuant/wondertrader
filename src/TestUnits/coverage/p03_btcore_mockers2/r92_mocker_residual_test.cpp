@@ -112,6 +112,11 @@ namespace
 	WTSVariant* uft_cfg(const std::string& module, uint32_t errorRate, bool matchThisTick)
 	{
 		WTSVariant* cfg = factory_cfg(module);
+		WTSVariant* strategy = WTSVariant::createObject();
+		strategy->append("name", "R92UftProbe");
+		strategy->append("id", "r92_uft_probe");
+		cfg->append("strategy", strategy);
+		strategy->release();
 		cfg->append("error_rate", errorRate);
 		cfg->append("match_this_tick", matchThisTick);
 		return cfg;
@@ -120,6 +125,11 @@ namespace
 	WTSVariant* hft_cfg(const std::string& module, uint32_t errorRate, bool matchThisTick)
 	{
 		WTSVariant* cfg = factory_cfg(module);
+		WTSVariant* strategy = WTSVariant::createObject();
+		strategy->append("name", "R92HftProbe");
+		strategy->append("id", "r92_hft_probe");
+		cfg->append("strategy", strategy);
+		strategy->release();
 		cfg->append("error_rate", errorRate);
 		cfg->append("match_this_tick", matchThisTick);
 		return cfg;
@@ -144,7 +154,7 @@ TEST_F(R92MockerResidual, FactoriesRejectLibraryWithoutCreator)
 		cfg->release();
 	}
 	{
-		WTSVariant* cfg = factory_cfg(module);
+		WTSVariant* cfg = uft_cfg(module, 0, false);
 		UftMocker mocker(&rp, "r92_fact_uft");
 		EXPECT_FALSE(mocker.init_uft_factory(cfg));
 		cfg->release();
@@ -156,7 +166,7 @@ TEST_F(R92MockerResidual, FactoriesRejectLibraryWithoutCreator)
 		cfg->release();
 	}
 	{
-		WTSVariant* cfg = factory_cfg(module);
+		WTSVariant* cfg = hft_cfg(module, 0, false);
 		HftMocker mocker(&rp, "r92_fact_hft");
 		EXPECT_FALSE(mocker.init_hft_factory(cfg));
 		cfg->release();
@@ -202,9 +212,9 @@ TEST_F(R92MockerResidual, CtaConditionActionsAndSmallerTie)
 	EXPECT_DOUBLE_EQ(-1.0, mocker.stra_get_position(kCu));
 	EXPECT_STREQ("os-cover", mocker.stra_get_last_entertag(kCu));
 
-	// 同算法 SmallerOrEqual：后登记的更高止损价更紧，应替换先登记的宽价
-	mocker.stra_enter_long(kAg, 1, "loose", 0.0, 6000.0);
-	mocker.stra_enter_long(kAg, 1, "tight", 0.0, 6010.0);
+	// 同算法 SmallerOrEqual：后登记的更高下行限价更紧，应替换先登记的宽价
+	mocker.stra_enter_long(kAg, 1, "loose", 6000.0, 0.0);
+	mocker.stra_enter_long(kAg, 1, "tight", 6010.0, 0.0);
 	feed(mocker, kAg, 5999.0);
 	EXPECT_DOUBLE_EQ(1.0, mocker.stra_get_position(kAg));
 	EXPECT_STREQ("tight", mocker.stra_get_last_entertag(kAg));
@@ -644,12 +654,16 @@ TEST_F(R92MockerResidual, UftCoverTodayCancelAndOrderEdges)
 	EXPECT_DOUBLE_EQ(2.0, uft.stra_get_position(kRb, false, 1));
 
 	// askprice=0 -> 不成交
-	ASSERT_NE(0u, uft.stra_enter_long(kAg, 0.0, 1.0));
+	const uint32_t agOrderId = uft.stra_enter_long(kAg, 0.0, 1.0);
+	ASSERT_NE(0u, agOrderId);
 	WTSTickData* ag1 = r72::make_tick(kAg, 20200102u, 93000000u, 6000.0, 5999.0, 0.0);
 	uft.handle_tick(kAg, ag1, 0);
 	ag1->release();
 	EXPECT_DOUBLE_EQ(1.0, uft.stra_get_undone(kAg));
-	EXPECT_TRUE(uft.stra_cancel_all(kAg).empty());
+	const OrderIDs canceledAgOrders = uft.stra_cancel_all(kAg);
+	ASSERT_EQ(1u, canceledAgOrders.size());
+	EXPECT_EQ(agOrderId, canceledAgOrders.front());
+	EXPECT_DOUBLE_EQ(1.0, uft.stra_get_undone(kAg));
 	WTSTickData* ag2 = r72::make_tick(kAg, 20200102u, 93100000u, 6000.0, 5999.0, 0.0);
 	uft.handle_tick(kAg, ag2, 0);
 	ag2->release();
@@ -843,28 +857,34 @@ TEST_F(R92MockerResidual, HftMatchTickErrorsZeroPriceAndT1)
 	EXPECT_DOUBLE_EQ(0.0, err.stra_get_position(kStk));
 	EXPECT_DOUBLE_EQ(0.0, err.stra_get_undone(kStk));
 
-	// askqty=0（kRu）与 askprice=0（kHc）：订单保留
-	ASSERT_EQ(1u, err.stra_buy(kRu, 0.0, 1.0, "noqty").size());
-	WTSTickData* q1 = r72::make_tick(kRu, 20200102u, 93400000u, 10000.0, 9999.0, 10001.0);
-	err.handle_tick(kRu, q1, 0);
-	q1->release();
-	EXPECT_DOUBLE_EQ(1.0, err.stra_get_undone(kRu));
+	// Keep non-fill edge orders separate from the error_rate=10000 mocker above.
+	HftMocker edge(&rp, "r92_hft_edges");
+	WTSVariant* pcfg = hft_cfg("r92_no_such_hft_module", 0, true);
+	EXPECT_FALSE(edge.init_hft_factory(pcfg));
+	pcfg->release();
 
-	ASSERT_EQ(1u, err.stra_buy(kHc, 0.0, 1.0, "nopx").size());
+	// askqty=0（kRu）与 askprice=0（kHc）：订单保留
+	ASSERT_EQ(1u, edge.stra_buy(kRu, 0.0, 1.0, "noqty").size());
+	WTSTickData* q1 = r72::make_tick(kRu, 20200102u, 93400000u, 10000.0, 9999.0, 10001.0);
+	edge.handle_tick(kRu, q1, 0);
+	q1->release();
+	EXPECT_DOUBLE_EQ(1.0, edge.stra_get_undone(kRu));
+
+	ASSERT_EQ(1u, edge.stra_buy(kHc, 0.0, 1.0, "nopx").size());
 	WTSTickData* q2 = r72::make_tick(kHc, 20200102u, 93500000u, 3500.0, 3499.0, 3501.0);
-	err.handle_tick(kHc, q2, 0);
+	edge.handle_tick(kHc, q2, 0);
 	q2->release();
-	EXPECT_DOUBLE_EQ(1.0, err.stra_get_undone(kHc));
-	err.stra_cancel(kRu, true, 0);
-	err.stra_cancel(kHc, true, 0);
+	EXPECT_DOUBLE_EQ(1.0, edge.stra_get_undone(kHc));
+	edge.stra_cancel(kRu, true, 0);
+	edge.stra_cancel(kHc, true, 0);
 
 	// 卖限价高于买一：不成交（用可做空的期货，避免股票可用持仓守卫）
-	ASSERT_EQ(1u, err.stra_sell(kRb, 3900.0, 1.0, "high").size());
+	ASSERT_EQ(1u, edge.stra_sell(kRb, 3900.0, 1.0, "high").size());
 	WTSTickData* q3 = r72::make_tick(kRb, 20200102u, 93600000u, 3800.0, 3799.0, 3801.0);
-	err.handle_tick(kRb, q3, 0);
+	edge.handle_tick(kRb, q3, 0);
 	q3->release();
-	EXPECT_DOUBLE_EQ(-1.0, err.stra_get_undone(kRb));
-	err.stra_cancel(kRb, false, 0);
+	EXPECT_DOUBLE_EQ(-1.0, edge.stra_get_undone(kRb));
+	edge.stra_cancel(kRb, false, 0);
 
 	// T+1 同向加仓：第二次买入进入 open 分支并累计冻结
 	WTSCommodityInfo* stkComm = rp.get_commodity_info(kStk);

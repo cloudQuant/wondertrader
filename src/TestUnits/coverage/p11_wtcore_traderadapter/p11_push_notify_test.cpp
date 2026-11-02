@@ -250,6 +250,12 @@ TEST_F(P11PushNotify, first_local_canceled_push_is_not_returned_as_alive)
     trader.onPushOrder(terminal);
     terminal->release(); // 交回测试创建时持有的引用；订单表若收录会持有自己的引用。
 
+    // 首终态仍照常通知订阅者，只是不进入活单表。
+    ASSERT_EQ(1u, sink_.orders_.size());
+    EXPECT_EQ(1001u, sink_.orders_[0].localid);
+    EXPECT_STREQ(kStdCode, sink_.orders_[0].code.c_str());
+    EXPECT_TRUE(sink_.orders_[0].canceled);
+
     OrderMap* alive = trader.getOrders("");
     if (alive != nullptr)
     {
@@ -288,7 +294,8 @@ TEST_F(P11PushNotify, push_trade_updates_position_and_undone)
 
     // 开空 3
     trader.onPushTrade(makePushTrade(ct_, WDT_SHORT, WOT_OPEN, 3, 7090, "PT4", "O4", kTag1002));
-    EXPECT_DOUBLE_EQ(-3.0, trader.getPosition(kStdCode, false, 2));
+    // 昨空 2 手仍在, 加上今开空 3 手, 总空仓是 5 手。
+    EXPECT_DOUBLE_EQ(-5.0, trader.getPosition(kStdCode, false, 2));
 
     // 平空 5: 昨空 2 先出, 余下 3 出今空
     trader.onPushTrade(makePushTrade(ct_, WDT_SHORT, WOT_CLOSE, 5, 7080, "PT5", "O5", kTag1003));
@@ -300,9 +307,9 @@ TEST_F(P11PushNotify, push_trade_updates_position_and_undone)
     // 外部成交(usertag 为空)不改未完成量, 但仍然分发 (localid=0)
     trader.onPushTrade(makePushTrade(ct_, WDT_LONG, WOT_OPEN, 1, 7000, "PT6", "O6", ""));
     EXPECT_DOUBLE_EQ(-1.0, trader.getUndoneQty(kStdCode));
-    ASSERT_EQ(7u, sink_.trades_.size());
-    EXPECT_EQ(0u, sink_.trades_[6].localid);
-    EXPECT_EQ(2u, api_.n_qaccount_);
+    ASSERT_EQ(6u, sink_.trades_.size());
+    EXPECT_EQ(0u, sink_.trades_[5].localid);
+    EXPECT_EQ(6u, api_.n_qaccount_);
 }
 
 TEST_F(P11PushNotify, push_trade_net_mode)

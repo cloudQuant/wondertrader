@@ -7,6 +7,8 @@
 #include <gtest/gtest.h>
 
 #include <cstring>
+#include <fstream>
+#include <sstream>
 #include <string>
 
 #include <Includes/WTSDataDef.hpp>
@@ -23,6 +25,26 @@ namespace
 	const char* const kStk1 = "SSE.STK.000001";
 	const char* const kFut1 = "DCE.i.2409";
 	const char* const kFut2 = "DCE.j.2409";
+
+	bool prepend_daily_warmup(const std::filesystem::path& base, const char* stdCode,
+		double open, double high, double low, double close)
+	{
+		const std::filesystem::path file = base / "csv" / (std::string(stdCode) + "_d.csv");
+		std::ifstream input(file, std::ios::binary);
+		if (!input.is_open())
+			return false;
+		std::stringstream buffer;
+		buffer << input.rdbuf();
+		std::string content = buffer.str();
+		const std::size_t newline = content.find('\n');
+		if (newline == std::string::npos)
+			return false;
+		std::ostringstream row;
+		row << "20191231,150000," << open << ',' << high << ',' << low << ',' << close
+			<< ",1000," << close * 1000.0 << ",0,0,0\n";
+		content.insert(newline + 1, row.str());
+		return r141::write_text(file, content);
+	}
 }
 
 using R161ReplayFixture = r161::ReplayFixture;
@@ -34,7 +56,7 @@ TEST_F(R161ReplayFixture, R161ReplayEdges_Level2QueriesRejectedInCsvMode)
 	// tick=true 下 rb 有 dsb，正常路径非空
 	WTSTickSlice* ticks = _rp.get_tick_slice(kRb, 10);
 	ASSERT_NE(nullptr, ticks);
-	EXPECT_EQ(1u, ticks->size());
+	EXPECT_EQ(2u, ticks->size());
 	ticks->release();
 
 	// cu 没有 tick dsb，checkTicks 失败后返回空
@@ -50,21 +72,29 @@ TEST_F(R161ReplayFixture, R161ReplayEdges_Level2QueriesRejectedInCsvMode)
 // 生产: HisDataReplayer.cpp:64-72（压缩块长度与块头 _size 不一致时拒绝）
 TEST_F(R161ReplayFixture, R161ReplayEdges_MalformedTickBlockSizeMismatch)
 {
-	// 长度恰好是 1 个 WTSTickStruct，避免失败路径之后的 memcpy 越过 vector 尾
-	std::string content(sizeof(WTSTickStruct), '\0');
+	// 保留两条 tick 的整数倍长度；第二条是有效 tick，可区分“拒绝块”与
+	// 忽略解码失败后把文件头和原始 payload 当作 tick 缓存。
+	std::string content(sizeof(WTSTickStruct) * 2, '\0');
 	BlockHeaderV2* hdr = (BlockHeaderV2*)&content[0];
 	memset(hdr, 0, sizeof(*hdr));
 	memcpy(hdr->_blk_flag, BLK_FLAG, sizeof(hdr->_blk_flag));
 	hdr->_type = BT_HIS_Ticks;
 	hdr->_version = BLOCK_VERSION_CMP_V2;
 	hdr->_size = 1;	// 与 content.size()-sizeof(BlockHeaderV2) 不符
+	WTSTickStruct validTick;
+	memset(&validTick, 0, sizeof(validTick));
+	strcpy(validTick.code, "SHFE.cu.2406");
+	validTick.action_date = 20200102u;
+	validTick.action_time = 93100000u;
+	validTick.price = 42.0;
+	memcpy(content.data() + sizeof(WTSTickStruct), &validTick, sizeof(validTick));
 
 	ASSERT_TRUE(r141::write_text(
 		_base / "bin" / "ticks" / (std::string(kCu) + "_tick_20200102.dsb"),
 		content));
 
-	// proc_block_data 报长度校验失败；缓存里只有一条零值 tick，游标定位后返回空
-	EXPECT_EQ(nullptr, _rp.get_tick_slice(kCu, 10));
+	// CMP_V2 长度校验失败必须阻止缓存原始文件内容；否则查询会命中第二条伪造 tick。
+	EXPECT_EQ(nullptr, _rp.get_tick_slice(kCu, 1, 202001021500ull));
 }
 
 // 生产: HisDataReplayer.cpp:64-72（bar 分支 isBar=true）
@@ -91,12 +121,34 @@ TEST_F(R161ReplayFixture, R161ReplayEdges_MalformedBarBlockSizeMismatch)
 //       UftMocker.cpp:770-772（非平今模式下平空时释放今仓可用）
 TEST_F(R161ReplayFixture, R161UftCover_PartialExitReleasesNewAvail)
 {
+	// UftMocker 的订单处理会查询 replay cursor 可见的 last tick；默认块第二笔是09:31:30，早于09:32。
+	std::string fut1Ticks = r141::make_old_tick_block(3, 800.0);
+	std::string fut2Ticks = r141::make_old_tick_block(3, 900.0);
+	WTSTickStructOld* fut1Records = (WTSTickStructOld*)(fut1Ticks.data() + sizeof(BlockHeader));
+	WTSTickStructOld* fut2Records = (WTSTickStructOld*)(fut2Ticks.data() + sizeof(BlockHeader));
+	fut1Records[2].action_time = 93200000u;
+	fut2Records[2].action_time = 93200000u;
+	ASSERT_TRUE(r141::write_text(
+		_base / "bin" / "ticks" / (std::string(kFut1) + "_tick_20200102.dsb"),
+		fut1Ticks));
+	ASSERT_TRUE(r141::write_text(
+		_base / "bin" / "ticks" / (std::string(kFut2) + "_tick_20200102.dsb"),
+		fut2Ticks));
+	WTSTickData* available = _rp.get_last_tick(kFut1);
+	ASSERT_NE(nullptr, available);
+	EXPECT_EQ(93200000u, available->actiontime());
+	available->release();
+	available = _rp.get_last_tick(kFut2);
+	ASSERT_NE(nullptr, available);
+	EXPECT_EQ(93200000u, available->actiontime());
+	available->release();
+
 	UftMocker mocker(&_rp, "r161_uft");
 
 	// 大商所期货 covermode=CM_OpenCover 且非 T+1：当日开多后 newavail=10
 	OrderIDs buys = mocker.stra_buy(kFut1, 0.0, 10);
 	ASSERT_EQ(1u, buys.size());
-	WTSTickData* t1 = r141::make_tick(kFut1, 20200102u, 93130000u, 801.0, 800.0, 802.0, 50, 50);
+	WTSTickData* t1 = r141::make_tick(kFut1, 20200102u, 93200000u, 801.0, 800.0, 802.0, 50, 50);
 	mocker.handle_tick(kFut1, t1, 0);
 	t1->release();
 	ASSERT_DOUBLE_EQ(10.0, mocker.stra_get_position(kFut1));
@@ -104,7 +156,7 @@ TEST_F(R161ReplayFixture, R161UftCover_PartialExitReleasesNewAvail)
 	// 平 4 手：preavail=0，走 newavail -= qty 分支
 	OrderIDs sells = mocker.stra_sell(kFut1, 0.0, 4);
 	ASSERT_EQ(1u, sells.size());
-	WTSTickData* t2 = r141::make_tick(kFut1, 20200102u, 93130000u, 801.0, 800.0, 802.0, 50, 50);
+	WTSTickData* t2 = r141::make_tick(kFut1, 20200102u, 93200000u, 801.0, 800.0, 802.0, 50, 50);
 	mocker.handle_tick(kFut1, t2, 0);
 	t2->release();
 	EXPECT_DOUBLE_EQ(6.0, mocker.stra_get_position(kFut1));
@@ -112,14 +164,14 @@ TEST_F(R161ReplayFixture, R161UftCover_PartialExitReleasesNewAvail)
 	// 另一只期货做空后再平空，覆盖 stra_exit_short 的同一分支
 	OrderIDs shorts = mocker.stra_sell(kFut2, 0.0, 10);
 	ASSERT_EQ(1u, shorts.size());
-	WTSTickData* t3 = r141::make_tick(kFut2, 20200102u, 93130000u, 901.0, 900.0, 902.0, 50, 50);
+	WTSTickData* t3 = r141::make_tick(kFut2, 20200102u, 93200000u, 901.0, 900.0, 902.0, 50, 50);
 	mocker.handle_tick(kFut2, t3, 0);
 	t3->release();
 	ASSERT_DOUBLE_EQ(-10.0, mocker.stra_get_position(kFut2));
 
 	OrderIDs covers = mocker.stra_buy(kFut2, 0.0, 4);
 	ASSERT_EQ(1u, covers.size());
-	WTSTickData* t4 = r141::make_tick(kFut2, 20200102u, 93130000u, 901.0, 900.0, 902.0, 50, 50);
+	WTSTickData* t4 = r141::make_tick(kFut2, 20200102u, 93200000u, 901.0, 900.0, 902.0, 50, 50);
 	mocker.handle_tick(kFut2, t4, 0);
 	t4->release();
 	EXPECT_DOUBLE_EQ(-6.0, mocker.stra_get_position(kFut2));
@@ -209,6 +261,7 @@ namespace
 //       CtaMocker.cpp:2208-2227（set_index_value 的成功/未知 index/未知 line）
 TEST_F(R161ReplayFixture, R161CtaChart_MarkAndIndexInsideSchedule)
 {
+	ASSERT_TRUE(prepend_daily_warmup(_base, kRb, 3799.8, 3800.4, 3799.5, 3800.0));
 	ChartCta cta(&_rp, "r161_chart", 0, true, NULL, false);
 
 	// 先建立主 K 线 tag，并把 tag 标记为已收盘，on_schedule 才会触发 on_calculate
@@ -238,24 +291,39 @@ TEST_F(R161ReplayFixture, R161CtaChart_MarkAndIndexInsideSchedule)
 // 生产: CtaMocker.cpp:1813-1816（复权代码取 K 线后剥掉后缀再订阅 tick）
 TEST_F(R161ReplayFixture, R161CtaExright_StripsSuffixAfterBarsLoaded)
 {
-	// 复权代码在 csv 模式下走 <exchg>.<code><suffix>.dsb 文件名
+	// 复权代码在 csv 模式下走 <exchg>.<code><suffix>.dsb 文件名。
+	// 加入已完成的历史根及当前日期根，保证查询窗口可定位并把目标前复权线作为历史返回。
+	std::vector<WTSBarStruct> bars = {
+		r141::make_bar(20191231u, 150000u, 9.75),
+		r141::make_bar(20200101u, 150000u, 10.25),
+		r141::make_bar(20200102u, 150000u, 11.25)
+	};
+	const std::string compressed = WTSCmpHelper::compress_data(
+		bars.data(), bars.size() * sizeof(WTSBarStruct));
+	std::string block(sizeof(BlockHeaderV2), '\0');
+	BlockHeaderV2* header = (BlockHeaderV2*)block.data();
+	memset(header, 0, sizeof(*header));
+	memcpy(header->_blk_flag, BLK_FLAG, sizeof(header->_blk_flag));
+	header->_type = BT_HIS_Day;
+	header->_version = BLOCK_VERSION_CMP_V2;
+	header->_size = (uint32_t)compressed.size();
+	block.append(compressed);
 	ASSERT_TRUE(r141::write_text(
 		_base / "his" / "day" / "SSE" / "SSE.000001+.dsb",
-		r141::make_cmp_bar_block(5, 10.0)));
+		block));
 
 	CtaMocker cta(&_rp, "r161_exright", 0, false, NULL, false);
 	WTSKlineSlice* kline = cta.stra_get_bars("SSE.STK.000001+", "d", 10, true);
 	ASSERT_NE(nullptr, kline);
-	EXPECT_EQ(1, kline->size());
-	EXPECT_DOUBLE_EQ(10.25, kline->at(0)->close);
+	ASSERT_EQ(2, kline->size());
+	EXPECT_DOUBLE_EQ(9.75, kline->at(0)->close);
+	EXPECT_DOUBLE_EQ(10.25, kline->at(1)->close);
 	kline->release();
 }
 
-// BUG-R161-001（待审核）：cacheRawTicksFromCSV 忽略 proc_block_data 的 false 返回值，
-// 随后按 content.size()/sizeof(WTSTickStruct) 扩容、再按 content.size() memcpy
-// （HisDataReplayer.cpp:3495-3499）。content 长度不是结构体整数倍时会越界写。
-// 触发即 heap corruption，故禁用；保留为缺陷复现占位，不放宽断言。
-TEST_F(R161ReplayFixture, DISABLED_MalformedTickBlockTailBeyondLastItem)
+// BUG-R161-001：失败的块解码不能继续分配 tick 并复制文件字节；若后续移除
+// 截断检查，非整条记录的长度会使 memcpy 越过 tick vector 的末尾。
+TEST_F(R161ReplayFixture, MalformedTickBlockTailBeyondLastItem)
 {
 	std::string content(sizeof(WTSTickStruct) + 3, '\0');
 	BlockHeaderV2* hdr = (BlockHeaderV2*)&content[0];

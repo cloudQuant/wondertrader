@@ -19,6 +19,7 @@
 #include "../Share/Converter.hpp"
 
 #include <filesystem>
+#include <vector>
 namespace fs = std::filesystem;
 
  //By Wesley @ 2022.01.05
@@ -82,17 +83,28 @@ ParserXTP::ParserXTP()
 	:m_uTradingDate(0)
 ,m_pUserAPI(NULL)
 	,m_iRequestID(0)
+	,m_sink(NULL)
+	,m_pBaseDataMgr(NULL)
+	,m_hInst(NULL)
+	,m_funcCreator(NULL)
+	,_worker_stopping(false)
 	{
 }
 
 
 ParserXTP::~ParserXTP()
 {
-	m_pUserAPI = NULL;
+	release();
 }
 
 bool ParserXTP::init(WTSVariant* config)
 {
+	if (m_hInst != NULL || m_pUserAPI != NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[ParserXTP] Init rejected while an XTP quote API is already loaded");
+		return false;
+	}
+
 	m_strHost	= config->getCString("host");
 	m_iPort		= config->getInt32("port");
 	m_strUser = config->getCString("user");
@@ -113,11 +125,26 @@ bool ParserXTP::init(WTSVariant* config)
 	if (module.empty())
 		module = "xtpquoteapi";
 
+	const std::string moduleFile = DLLHelper::wrap_module(module.c_str(), "lib");
+	const char* moduleDir = getBinDir();
+	if ((moduleDir == nullptr || moduleDir[0] == '\0') && !fs::path(moduleFile).is_absolute())
+	{
+		write_log(m_sink, LL_ERROR, "[ParserXTP] Cannot locate the parser module directory");
+		return false;
+	}
+
 	std::string path = fmtutil::format("{}/{}/", m_strFlowDir.c_str(), m_strUser.c_str());
 	fs::create_directories(path.c_str());
 
-	std::string dllpath = getBinDir() + DLLHelper::wrap_module(module.c_str(), "lib");;
+	std::string dllpath = (moduleDir ? std::string(moduleDir) : std::string()) + moduleFile;
 	m_hInst = DLLHelper::load_library(dllpath.c_str());
+	if (m_hInst == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[ParserXTP] Failed to load XTP quote API module: {}", dllpath.c_str());
+		m_funcCreator = NULL;
+		m_pUserAPI = NULL;
+		return false;
+	}
 #ifdef _WIN32
 #	ifdef _WIN64
 	const char* creatorName = "?CreateQuoteApi@QuoteApi@API@XTP@@SAPEAV123@EPEBDW4XTP_LOG_LEVEL@@@Z";
@@ -128,7 +155,25 @@ bool ParserXTP::init(WTSVariant* config)
 	const char* creatorName = "_ZN3XTP3API8QuoteApi14CreateQuoteApiEhPKc13XTP_LOG_LEVEL";
 #endif
 	m_funcCreator = (XTPCreater)DLLHelper::get_symbol(m_hInst, creatorName);
+	if (m_funcCreator == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[ParserXTP] XTP quote API creator symbol was not found: {}", creatorName);
+		DLLHelper::free_library(m_hInst);
+		m_hInst = NULL;
+		m_pUserAPI = NULL;
+		return false;
+	}
+
 	m_pUserAPI = m_funcCreator(m_uClientID, path.c_str(), XTP_LOG_LEVEL_DEBUG);
+	if (m_pUserAPI == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[ParserXTP] XTP quote API creator returned null: {}", module.c_str());
+		m_funcCreator = NULL;
+		DLLHelper::free_library(m_hInst);
+		m_hInst = NULL;
+		return false;
+	}
+
 	m_pUserAPI->RegisterSpi(this);
 
 	return true;
@@ -141,18 +186,27 @@ void ParserXTP::release()
 
 bool ParserXTP::connect()
 {
+	if (m_pUserAPI == NULL)
+	{
+		write_log(m_sink, LL_ERROR, "[ParserXTP] Connect rejected because the XTP quote API is not initialized");
+		return false;
+	}
+
+	if (_worker_stopping.load())
+	{
+		write_log(m_sink, LL_ERROR, "[ParserXTP] Connect rejected after worker shutdown");
+		return false;
+	}
+
 	DoLogin();
 
 	if (_thrd_worker == NULL)
 	{
-		//boost::asio::io_context::work work(_asyncio);
 		_worker.reset(new boost::asio::executor_work_guard<boost::asio::io_context::executor_type>(boost::asio::make_work_guard(_asyncio)));
 		_thrd_worker.reset(new StdThread([this]() {
-			while (true)
+			while (!_worker_stopping.load())
 			{
-				std::this_thread::sleep_for(std::chrono::milliseconds(2));
 				_asyncio.run_one();
-				//m_asyncIO.run();
 			}
 		}));
 	}
@@ -162,11 +216,37 @@ bool ParserXTP::connect()
 
 bool ParserXTP::disconnect()
 {
+	if (!stopWorker())
+		return false;
+
 	if(m_pUserAPI)
 	{
 		m_pUserAPI->RegisterSpi(NULL);
 		m_pUserAPI->Release();
 		m_pUserAPI = NULL;
+	}
+
+	return true;
+}
+
+bool ParserXTP::stopWorker()
+{
+	_worker_stopping.store(true);
+	_worker.reset();
+	_asyncio.stop();
+
+	if (_thrd_worker != NULL)
+	{
+		if (_thrd_worker->joinable())
+		{
+			if (_thrd_worker->get_id() == std::this_thread::get_id())
+			{
+				write_log(m_sink, LL_ERROR, "[ParserXTP] Cannot join the parser worker from itself; shutdown must be completed by its owner thread");
+				return false;
+			}
+			_thrd_worker->join();
+		}
+		_thrd_worker.reset();
 	}
 
 	return true;
@@ -803,8 +883,58 @@ void ParserXTP::subscribe(const CodeSet &vecSymbols)
 	}
 }
 
-void ParserXTP::unsubscribe(const CodeSet &/*vecSymbols*/)
+void ParserXTP::unsubscribe(const CodeSet &vecSymbols)
 {
+	CodeSet setSH, setSZ;
+	for (const auto& code : vecSymbols)
+	{
+		if (strncmp(code.c_str(), "SSE.", 4) == 0)
+		{
+			const std::string ticker = code.c_str() + 4;
+			if (m_fitSHSubs.find(ticker) != m_fitSHSubs.end())
+				setSH.insert(ticker);
+		}
+		else if (strncmp(code.c_str(), "SZSE.", 5) == 0)
+		{
+			const std::string ticker = code.c_str() + 5;
+			if (m_fitSZSubs.find(ticker) != m_fitSZSubs.end())
+				setSZ.insert(ticker);
+		}
+	}
+
+	auto unsubscribeExchange = [this](const CodeSet& tickers, CodeSet& subscriptions,
+		XTP_EXCHANGE_TYPE exchange, const char* exchangeName)
+	{
+		if (tickers.empty())	return;
+
+		if (m_uTradingDate == 0 || m_pUserAPI == NULL)
+		{
+			for (const auto& ticker : tickers)
+				subscriptions.erase(ticker);
+			return;
+		}
+
+		std::vector<char*> symbols;
+		symbols.reserve(tickers.size());
+		for (const auto& ticker : tickers)
+			symbols.push_back(const_cast<char*>(ticker.c_str()));
+
+		const int mdResult = m_pUserAPI->UnSubscribeMarketData(symbols.data(), static_cast<int>(symbols.size()), exchange);
+		const int tbtResult = m_pUserAPI->UnSubscribeTickByTick(symbols.data(), static_cast<int>(symbols.size()), exchange);
+		if (mdResult != 0)
+			write_log(m_sink, LL_ERROR, "[ParserXTP] Sending md unsubscribe request of {} failed: {}", exchangeName, mdResult);
+		if (tbtResult != 0)
+			write_log(m_sink, LL_ERROR, "[ParserXTP] Sending tick_by_tick unsubscribe request of {} failed: {}", exchangeName, tbtResult);
+
+		if (mdResult == 0 && tbtResult == 0)
+		{
+			for (const auto& ticker : tickers)
+				subscriptions.erase(ticker);
+		}
+	};
+
+	unsubscribeExchange(setSH, m_fitSHSubs, XTP_EXCHANGE_SH, "SSE");
+	unsubscribeExchange(setSZ, m_fitSZSubs, XTP_EXCHANGE_SZ, "SZSE");
 }
 
 bool ParserXTP::isConnected()

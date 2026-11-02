@@ -4,6 +4,9 @@
 #include <cctype>
 #include <cstring>
 #include <fstream>
+#if defined(WT_T4_CTP_OPT_MISSING_SYMBOL_FIXTURE)
+#include <atomic>
+#endif
 
 #include "../Share/StrUtil.hpp"
 #include "../Share/charconv.hpp"
@@ -20,6 +23,82 @@
 namespace rj = rapidjson;
 
 #include "TraderSpi.h"
+
+#if defined(WT_T4_CTP_OPT_MISSING_SYMBOL_FIXTURE)
+namespace t4_016_cfg_loader_probe
+{
+namespace
+{
+std::atomic<size_t> loadCalls{0};
+std::vector<WTSVariant*> loadedRoots;
+}
+
+void releaseCapturedRoots()
+{
+	for (WTSVariant* root : loadedRoots)
+	{
+		const uint32_t refs = root->retainCount();
+		for (uint32_t i = 0; i < refs; ++i)
+			root->release();
+	}
+	loadedRoots.clear();
+}
+
+void reset()
+{
+	releaseCapturedRoots();
+	loadCalls.store(0, std::memory_order_relaxed);
+}
+
+size_t count()
+{
+	return loadCalls.load(std::memory_order_relaxed);
+}
+
+void noteLoadCall()
+{
+	loadCalls.fetch_add(1, std::memory_order_relaxed);
+}
+
+void captureRoot(WTSVariant* root)
+{
+	if (root)
+	{
+		root->retain();
+		root->retain();
+		loadedRoots.push_back(root);
+	}
+}
+
+std::vector<uint32_t> capturedRetainCounts()
+{
+	std::vector<uint32_t> counts;
+	counts.reserve(loadedRoots.size());
+	for (WTSVariant* root : loadedRoots)
+		counts.push_back(root->retainCount());
+	return counts;
+}
+}
+
+class T4_016CfgLoaderProxy
+{
+public:
+	static WTSVariant* load_from_file(const std::string& filename)
+	{
+		return load_from_file(filename.c_str());
+	}
+
+	static WTSVariant* load_from_file(const char* filename)
+	{
+		t4_016_cfg_loader_probe::noteLoadCall();
+		WTSVariant* root = WTSCfgLoader::load_from_file(filename);
+		t4_016_cfg_loader_probe::captureRoot(root);
+		return root;
+	}
+};
+
+#define WTSCfgLoader T4_016CfgLoaderProxy
+#endif
 
 inline const char* encode_text(const char* s)
 {
@@ -469,7 +548,6 @@ void CTraderSpi::LoadFromJson()
 	root = WTSCfgLoader::load_from_file(path);
 	if (root)
 	{
-		WTSVariant* root = WTSCfgLoader::load_from_file(path);
 		for (const auto& exchg_id : root->memberNames())
 		{
 			WTSVariant* jExchg = root->get(exchg_id.c_str());
@@ -520,6 +598,10 @@ void CTraderSpi::LoadFromJson()
 	}
 	std::cerr << "--->>> " << "LoadFromJson" << std::endl;
 }
+
+#if defined(WT_T4_CTP_OPT_MISSING_SYMBOL_FIXTURE)
+#undef WTSCfgLoader
+#endif
 
 
 void CTraderSpi::DumpToJson()

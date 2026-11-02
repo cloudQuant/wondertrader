@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <cstdint>
 #include <condition_variable>
 #include <cstring>
 #include <filesystem>
@@ -70,6 +71,53 @@ std::atomic<bool>* g_ext_parser_reentry_called = nullptr;
 std::atomic<bool>* g_ext_parser_duplicate_create_succeeded = nullptr;
 WtRtRunner* g_ext_parser_release_runner = nullptr;
 std::atomic<bool>* g_ext_parser_release_called = nullptr;
+
+std::filesystem::path make_unique_r220_temp_dir(const char* label)
+{
+	static std::atomic<uint64_t> sequence{ 0 };
+	std::error_code ec;
+	const std::filesystem::path tempRoot = std::filesystem::temp_directory_path(ec);
+	if (ec)
+		return std::filesystem::path();
+
+	for (uint32_t attempt = 0; attempt < 100; ++attempt)
+	{
+		const auto now = std::chrono::steady_clock::now().time_since_epoch();
+		const auto stamp = std::chrono::duration_cast<std::chrono::nanoseconds>(now).count();
+		const uint64_t serial = sequence.fetch_add(1, std::memory_order_relaxed);
+		const std::filesystem::path candidate = tempRoot /
+			(std::string("wt_r220_") + label + "_" + std::to_string(stamp) + "_" +
+				std::to_string(serial));
+		ec.clear();
+		if (std::filesystem::create_directory(candidate, ec))
+			return candidate;
+		if (ec)
+			return std::filesystem::path();
+	}
+	return std::filesystem::path();
+}
+
+class ScopedR220TempDir
+{
+public:
+	explicit ScopedR220TempDir(const char* label)
+		: _path(make_unique_r220_temp_dir(label))
+	{}
+
+	~ScopedR220TempDir()
+	{
+		if (!_path.empty())
+		{
+			std::error_code ec;
+			std::filesystem::remove_all(_path, ec);
+		}
+	}
+
+	const std::filesystem::path& path() const { return _path; }
+
+private:
+	std::filesystem::path _path;
+};
 
 void reenter_quote_from_ext_parser_init(uint32_t event, const char* id)
 {
@@ -725,14 +773,42 @@ TEST(r220_wtrt_runner_sink_shutdown, external_parser_requires_configured_engine)
 
 TEST(r220_wtrt_runner_sink_shutdown, ext_parser_init_callback_can_reenter_quote_registry)
 {
+	ScopedR220TempDir tempDir("ext_parser_reentry_quote");
+	ASSERT_FALSE(tempDir.path().empty());
+	const std::filesystem::path directory = tempDir.path();
+	const std::filesystem::path sessionPath = directory / "sessions.yaml";
+	const std::filesystem::path actionPath = directory / "actions.json";
+	{
+		std::ofstream sessions(sessionPath, std::ios::binary | std::ios::trunc);
+		sessions << "ALLDAY:\n"
+			"    name: AllDay\n"
+			"    offset: 0\n"
+			"    sections:\n"
+			"        - from: 0\n"
+			"          to: 2400\n";
+		ASSERT_TRUE(sessions.good());
+		std::ofstream actions(actionPath, std::ios::binary | std::ios::trunc);
+		actions << "{\"default\":{}}";
+		ASSERT_TRUE(actions.good());
+	}
+
+	WtRtRunner runner;
+	const std::string noLogConfig = (directory / "no_log_config.yaml").string();
+	ASSERT_TRUE(runner.init(noLogConfig.c_str(), true, directory.string().c_str()));
+	const std::string config = std::string("{\"basefiles\":{\"session\":\"") +
+		sessionPath.generic_string() + "\"},\"env\":{\"name\":\"cta\",\"product\":{\"session\":\"ALLDAY\"}}," +
+		"\"data\":{},\"bspolicy\":\"" + actionPath.generic_string() +
+		"\",\"parsers\":[],\"traders\":[],\"executers\":[]}";
+	ASSERT_TRUE(runner.config(config.c_str(), false));
+	ASSERT_EQ(WtRtRunner::LifecycleState::CONFIGURED,
+		WtRtRunnerSinkShutdownTestAccess::state(runner));
+	ASSERT_NE(nullptr, runner._engine);
+	ASSERT_NE(nullptr, runner._engine->get_basedata_mgr());
+
 	WtRtRunner& callbackRunner = getRunner();
 	const FuncParserEvtCallback previousEventCallback = callbackRunner._cb_parser_evt;
 	const FuncParserSubCallback previousSubCallback = callbackRunner._cb_parser_sub;
 	callbackRunner.registerParserPorter(&reenter_quote_from_ext_parser_init, nullptr);
-
-	WtRtRunner runner;
-	runner._engine = &runner._cta_engine;
-	runner._lifecycle_state = WtRtRunner::LifecycleState::CONFIGURED;
 	std::atomic<bool> callbackCalled{ false };
 	std::atomic<bool> duplicateCreateSucceeded{ false };
 	g_ext_parser_reentry_runner = &runner;
@@ -754,14 +830,42 @@ TEST(r220_wtrt_runner_sink_shutdown, ext_parser_init_callback_can_reenter_quote_
 
 TEST(r220_wtrt_runner_sink_shutdown, ext_parser_init_racing_release_is_quarantined_not_published)
 {
+	ScopedR220TempDir tempDir("ext_parser_release_race");
+	ASSERT_FALSE(tempDir.path().empty());
+	const std::filesystem::path directory = tempDir.path();
+	const std::filesystem::path sessionPath = directory / "sessions.yaml";
+	const std::filesystem::path actionPath = directory / "actions.json";
+	{
+		std::ofstream sessions(sessionPath, std::ios::binary | std::ios::trunc);
+		sessions << "ALLDAY:\n"
+			"    name: AllDay\n"
+			"    offset: 0\n"
+			"    sections:\n"
+			"        - from: 0\n"
+			"          to: 2400\n";
+		ASSERT_TRUE(sessions.good());
+		std::ofstream actions(actionPath, std::ios::binary | std::ios::trunc);
+		actions << "{\"default\":{}}";
+		ASSERT_TRUE(actions.good());
+	}
+
+	WtRtRunner runner;
+	const std::string noLogConfig = (directory / "no_log_config.yaml").string();
+	ASSERT_TRUE(runner.init(noLogConfig.c_str(), true, directory.string().c_str()));
+	const std::string config = std::string("{\"basefiles\":{\"session\":\"") +
+		sessionPath.generic_string() + "\"},\"env\":{\"name\":\"cta\",\"product\":{\"session\":\"ALLDAY\"}}," +
+		"\"data\":{},\"bspolicy\":\"" + actionPath.generic_string() +
+		"\",\"parsers\":[],\"traders\":[],\"executers\":[]}";
+	ASSERT_TRUE(runner.config(config.c_str(), false));
+	ASSERT_EQ(WtRtRunner::LifecycleState::CONFIGURED,
+		WtRtRunnerSinkShutdownTestAccess::state(runner));
+	ASSERT_NE(nullptr, runner._engine);
+	ASSERT_NE(nullptr, runner._engine->get_basedata_mgr());
+
 	WtRtRunner& callbackRunner = getRunner();
 	const FuncParserEvtCallback previousEventCallback = callbackRunner._cb_parser_evt;
 	const FuncParserSubCallback previousSubCallback = callbackRunner._cb_parser_sub;
 	callbackRunner.registerParserPorter(&release_runner_from_ext_parser_init, nullptr);
-
-	WtRtRunner runner;
-	runner._engine = &runner._cta_engine;
-	runner._lifecycle_state = WtRtRunner::LifecycleState::CONFIGURED;
 	std::atomic<bool> callbackCalled{ false };
 	g_ext_parser_release_runner = &runner;
 	g_ext_parser_release_called = &callbackCalled;

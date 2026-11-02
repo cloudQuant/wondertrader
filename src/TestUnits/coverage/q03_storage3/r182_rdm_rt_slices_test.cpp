@@ -60,7 +60,7 @@ TEST_F(R182RdmRtSlicesTest, R182Min1RangeStartsInsideRtBlock)
 	ASSERT_EQ(slice->size(), 2u);
 	EXPECT_EQ(slice->at(0)->time, r52::min_bar_time(kDate, 931));
 	EXPECT_EQ(slice->at(1)->time, r52::min_bar_time(kDate, 932));
-	EXPECT_DOUBLE_EQ(slice->at(0)->open, 11.0);	// make_bar(seq=2) -> 10.0+2
+	EXPECT_DOUBLE_EQ(slice->at(0)->open, 12.0);	// make_bar(seq=2) -> 10.0+2
 	slice->release();
 }
 

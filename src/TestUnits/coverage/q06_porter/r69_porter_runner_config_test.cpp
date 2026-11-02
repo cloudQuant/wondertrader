@@ -9,7 +9,7 @@
  *     外部文件缺 "parsers" 键或 JSON 损坏均失败（L1190-1227）
  *   - traders 外部文件数组合法项（L630-647、L1071-1087）
  *   - executers 外部文件 + routers 两处入口（L668-685、L702-704）、文件缺失（L691-694）
- *   - initDataMgr() 空 data/no-store 配置（L884-896，config 不检查返回值）
+ *   - initDataMgr() 的空 data/no-store 配置与 reader-null 查询守卫
  *   - initEngine() 空 name -> CTA（L846-850）与未知 name -> HFT（L855-865）
  *   - initEvtNotifier() 对象段（L1054-1063）
  *
@@ -23,6 +23,8 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <cstring>
+#include <dlfcn.h>
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -31,11 +33,14 @@
 #include <unistd.h>
 
 #include "WtCore/WtHelper.h"
+#include "WtCore/ExecUnitInitStatus.h"
 #include "WtPorter/PorterDefs.h"
 #include "WtPorter/WtPorter.h"
 #include "WtPorter/WtRtRunner.h"
 
 #include "Includes/WTSVariant.hpp"
+#include "Includes/WTSDataDef.hpp"
+#include "Includes/WTSStruct.h"
 #include "WTSTools/WTSHotMgr.h"
 
 USING_NS_WTP;
@@ -99,6 +104,46 @@ namespace {
 		"\"oldclose\":100.0,\"newclose\":100.0}]}}";
 
 	const char* kActions = "{\"default\":{}}";
+
+	WtRtRunner* g_data_store_loader_runner = nullptr;
+	uint32_t g_data_store_loader_calls = 0;
+	WTSBarStruct g_data_store_bars[2];
+
+	bool data_store_loader(const char* /*stdCode*/, const char* /*period*/)
+	{
+		if (g_data_store_loader_runner == nullptr)
+			return false;
+
+		++g_data_store_loader_calls;
+		g_data_store_loader_runner->feedRawBars(g_data_store_bars, 2);
+		return true;
+	}
+
+	void write_query_basefiles(const std::string& dir)
+	{
+		write_text(dir + "/sessions.json", kSessions);
+		write_text(dir + "/commodity.json", kCommodityOne);
+		write_text(dir + "/contract.json", kContractOne);
+	}
+
+	std::string query_basefiles(const std::string& dir)
+	{
+		return "\"basefiles\":{\"session\":\"" + dir + "/sessions.json\","
+			"\"commodity\":\"" + dir + "/commodity.json\","
+			"\"contract\":\"" + dir + "/contract.json\"}";
+	}
+
+	std::string bin_dir()
+	{
+		Dl_info info;
+		if (dladdr(reinterpret_cast<void*>(&bin_dir), &info) == 0 || info.dli_fname == nullptr)
+			return std::string();
+		std::filesystem::path p = std::filesystem::path(info.dli_fname).parent_path().parent_path();
+		std::string ret = p.string();
+		if (!ret.empty() && ret.back() != '/')
+			ret.push_back('/');
+		return ret;
+	}
 
 	/* config 的公共尾巴：env/data/bspolicy。envName 为空串时命中 CTA 默认支。 */
 	std::string tail(const std::string& dir, const std::string& envName)
@@ -278,9 +323,10 @@ TEST(R69PorterRunnerConfig, TraderInitFailureInExternalFileFailsConfig)
 	clean_dir(dir);
 }
 
-/* WtRtRunner.cpp:691-694 + :884-896 + :1054-1063：executers 指向不存在的文件只告警；
- * tail() 固定附加 data:{}，此用例覆盖空 data/no-store 配置；不会声称覆盖缺失 data 键。
- * initDataMgr() 的返回值不被 config() 检查，config() 继续走；
+/* WtRtRunner.cpp:691-694 + initDataMgr()：executers 指向不存在的文件只告警；
+ * tail() 固定附加 data:{}，此用例覆盖空 data/no-store 可选模式；不会声称覆盖缺失 data 键。
+ * data.store 不存在时，WtDtMgr::init 的 false 保持可选 reader 行为，
+ * Engine 公共 K 线查询最终由 WtDtMgr 的空 reader 守卫安全返回 NULL；
  * notifier 是对象（active=false，EventNotifier::init 内部返回 false，不加载 MQ 模块），
  * initEvtNotifier() 仍返回 true。 */
 TEST(R69PorterRunnerConfig, MissingExecuterFileAndEmptyDataStillReturnTrue)
@@ -288,19 +334,105 @@ TEST(R69PorterRunnerConfig, MissingExecuterFileAndEmptyDataStillReturnTrue)
 	const std::string dir = prepare_dir();
 	ASSERT_FALSE(dir.empty());
 
+	write_query_basefiles(dir);
 	write_text(dir + "/actions.json", kActions);
 
 	WtRtRunner* r = new_runner(dir);
 	ASSERT_NE(r, nullptr);
 
 	const std::string cfg =
-		"{\"basefiles\":{},"
+		"{" + query_basefiles(dir) + ","
 		"\"executers\":\"" + dir + "/r69_absent_executers.json\","
 		"\"notifier\":{\"active\":false},"
 		+ tail(dir, "cta") + "}";
 
 	ASSERT_TRUE(r->config(cfg.c_str(), false));
 	ASSERT_NE(r->getEngine(), nullptr);
+	ASSERT_NE(nullptr, r->getEngine()->get_commodity_info("SHFE.au.2406"));
+	EXPECT_EQ(nullptr, r->getEngine()->get_kline_slice(0, "SHFE.au.2406", "d", 1));
+
+	clean_dir(dir);
+}
+
+TEST(R69PorterRunnerConfig, ExplicitMissingDataStoreModuleFailsConfigAndLeavesRunnerNotReady)
+{
+	const std::string dir = prepare_dir();
+	ASSERT_FALSE(dir.empty());
+	write_query_basefiles(dir);
+	write_text(dir + "/actions.json", kActions);
+
+	WtRtRunner* r = new_runner(dir);
+	ASSERT_NE(r, nullptr);
+	const std::string cfg =
+		"{" + query_basefiles(dir) + ","
+		"\"env\":{\"name\":\"cta\"},"
+		"\"data\":{\"store\":{\"module\":\"r69_no_such_data_storage\"}},"
+		"\"bspolicy\":\"" + dir + "/actions.json\"}";
+
+	EXPECT_FALSE(r->config(cfg.c_str(), false));
+	ASSERT_NE(r->getEngine(), nullptr);
+	ASSERT_NE(nullptr, r->getEngine()->get_commodity_info("SHFE.au.2406"));
+	EXPECT_EQ(nullptr, r->getEngine()->get_kline_slice(0, "SHFE.au.2406", "d", 1));
+
+	ExecUnitInitStatus status;
+	EXPECT_EQ(EXEC_UNIT_STATUS_API_NOT_READY,
+		r->queryExecUnitInitStatus(ET_CTA, "r69_missing_exec", "SHFE.rb.2510", status));
+
+	clean_dir(dir);
+}
+
+TEST(R69PorterRunnerConfig, ValidDataStoreModuleLoadsAndServesKlineQuery)
+{
+	const std::string bin = bin_dir();
+	ASSERT_FALSE(bin.empty());
+	ASSERT_TRUE(std::filesystem::exists(bin + "libWtDataStorage.dylib"))
+		<< "CoverageTests_porter must be paired with its built WtDataStorage module";
+
+	const std::string dir = prepare_dir();
+	ASSERT_FALSE(dir.empty());
+	write_query_basefiles(dir);
+	write_text(dir + "/actions.json", kActions);
+
+	WtRtRunner* r = new_runner(dir);
+	ASSERT_NE(r, nullptr);
+	const std::string oldInstDir = WtHelper::getInstDir();
+	WtHelper::setInstDir(bin.c_str());
+	memset(g_data_store_bars, 0, sizeof(g_data_store_bars));
+	for (uint32_t i = 0; i < 2; ++i)
+	{
+		g_data_store_bars[i].date = 20240102 + i;
+		g_data_store_bars[i].time = 1500;
+		g_data_store_bars[i].open = 4500.0;
+		g_data_store_bars[i].high = 4510.0;
+		g_data_store_bars[i].low = 4490.0;
+		g_data_store_bars[i].close = 4505.0 + i * 15.0;
+		g_data_store_bars[i].vol = 10;
+	}
+	g_data_store_loader_runner = r;
+	g_data_store_loader_calls = 0;
+	r->registerExtDataLoader(&data_store_loader, &data_store_loader, nullptr, nullptr);
+
+	const std::string cfg =
+		"{" + query_basefiles(dir) + ","
+		"\"env\":{\"name\":\"cta\"},"
+		"\"data\":{\"store\":{\"module\":\"WtDataStorage\",\"path\":\"" + dir + "\"}},"
+		"\"bspolicy\":\"" + dir + "/actions.json\"}";
+	const bool configured = r->config(cfg.c_str(), false);
+	WtHelper::setInstDir(oldInstDir.c_str());
+	if (!configured)
+		g_data_store_loader_runner = nullptr;
+	ASSERT_TRUE(configured);
+	ASSERT_NE(r->getEngine(), nullptr);
+	ASSERT_NE(nullptr, r->getEngine()->get_commodity_info("SHFE.au.2406"));
+
+	WTSKlineSlice* bars = r->getEngine()->get_kline_slice(0, "SHFE.au.2406", "d", 2);
+	g_data_store_loader_runner = nullptr;
+	ASSERT_NE(nullptr, bars) << "the real WtDataStorage reader should return the fed history bars";
+	EXPECT_EQ(2, bars->size());
+	ASSERT_NE(nullptr, bars->at(1));
+	EXPECT_DOUBLE_EQ(4520.0, bars->at(1)->close);
+	bars->release();
+	EXPECT_EQ(1u, g_data_store_loader_calls);
 
 	clean_dir(dir);
 }

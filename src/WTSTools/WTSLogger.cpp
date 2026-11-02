@@ -25,6 +25,7 @@
 #include "../Share/TimeUtils.hpp"
 
 #include <filesystem>
+#include <memory>
 namespace fs = std::filesystem;
 
 #include <spdlog/sinks/daily_file_sink.h>
@@ -212,6 +213,10 @@ void WTSLogger::init(const char* propFile /* = "logcfg.json" */, bool isFile /* 
 	WTSVariant* cfg = isFile ? WTSCfgLoader::load_from_file(propFile) : WTSCfgLoader::load_from_content(propFile, false);
 	if (cfg == NULL)
 		return;
+	std::unique_ptr<WTSVariant, void (*)(WTSVariant*)> cfgOwner(cfg, [](WTSVariant* value) {
+		if (value != NULL)
+			value->release();
+	});
 
 	auto keys = cfg->memberNames();
 	for (std::string& key : keys)

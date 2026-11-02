@@ -21,11 +21,17 @@
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
+#include <chrono>
 #include <filesystem>
+#include <functional>
 #include <map>
 #include <set>
+#include <signal.h>
 #include <string>
+#include <thread>
 #include <tuple>
+#include <sys/wait.h>
+#include <unistd.h>
 #include <vector>
 
 #include "r61_ctpopt_api_stub.h"
@@ -38,6 +44,10 @@
 #include <WTSContractInfo.hpp>
 #include <IBaseDataMgr.h>
 #include <TimeUtils.hpp>
+
+#ifndef WT_T1_CTPOPT_MISSING_SYMBOL_MODULE
+#define WT_T1_CTPOPT_MISSING_SYMBOL_MODULE "wt_t1_ctpopt_missing_symbol"
+#endif
 
 USING_NS_WTP;
 
@@ -86,6 +96,7 @@ namespace
 			m_sessionID = 0;
 			m_orderRef = 0;
 			m_lDate = 0;
+			m_bPositionQueryIncomplete = false;
 			m_pUserAPI = NULL;
 			m_bdMgr = NULL;
 			m_bscSink = NULL;
@@ -127,10 +138,15 @@ namespace
 		void setCreator(CTPCreator creator) { m_funcCreator = creator; }
 		void setDummyWorker() { m_thrdWorker.reset(new StdThread([]() {})); }
 		bool workerNull() const { return m_thrdWorker == NULL; }
+		bool moduleNull() const { return m_hInstCTP == NULL; }
+		bool creatorNull() const { return m_funcCreator == NULL; }
 		void loadIni(const char* path) { m_iniHelper.load(path); }
 		std::string iniString(const char* sec, const char* key) { return m_iniHelper.readString(sec, key); }
 
 		WTSArray* ayExecOrds() const { return m_ayExecOrds; }
+		bool positionQueryIncomplete() const { return m_bPositionQueryIncomplete; }
+		bool positionMapNull() const { return m_mapPosition == nullptr; }
+		size_t positionMapSize() const { return m_mapPosition == nullptr ? 0 : m_mapPosition->size(); }
 		size_t queueSize() const { return m_queQuery.size(); }
 		void drainQueue()
 		{
@@ -201,6 +217,7 @@ namespace
 		int pushOrderState = -1;
 		std::string pushTradeUserTag, pushTradeID;
 		std::vector<std::string> rspEntrustTags;
+		std::function<void()> traderErrorHook;
 
 		IBaseDataMgr* getBaseDataMgr() override { return mgr; }
 		IOptTraderSpi* getOptSpi() override { return opt; }
@@ -217,6 +234,11 @@ namespace
 		{
 			if (err != nullptr)
 				traderErrors.emplace_back(err->getErrorCode(), err->getMessage());
+			if (traderErrorHook)
+			{
+				auto hook = std::move(traderErrorHook);
+				hook();
+			}
 		}
 		void onRspEntrust(WTSEntrust* entrust, WTSError*) override
 		{
@@ -378,6 +400,8 @@ namespace
 	{
 	public:
 		uint32_t release_calls = 0, init_calls = 0, spi_regs = 0, front_regs = 0;
+		bool sync_order_action_error_once = false;
+		CThostFtdcTraderSpi* spi = nullptr;
 		THOST_TE_RESUME_TYPE pub_topic = THOST_TERT_RESTART, priv_topic = THOST_TERT_RESTART;
 
 		uint32_t auth_calls = 0, login_calls = 0, logout_calls = 0;
@@ -402,7 +426,7 @@ namespace
 
 		void Release() override { ++n_calls_; ++release_calls; }
 		void Init() override { ++n_calls_; ++init_calls; }
-		void RegisterSpi(CThostFtdcTraderSpi*) override { ++n_calls_; ++spi_regs; }
+		void RegisterSpi(CThostFtdcTraderSpi* value) override { ++n_calls_; ++spi_regs; spi = value; }
 		void RegisterFront(char*) override { ++n_calls_; ++front_regs; }
 		void SubscribePublicTopic(THOST_TE_RESUME_TYPE t) override { ++n_calls_; pub_topic = t; }
 		void SubscribePrivateTopic(THOST_TE_RESUME_TYPE t) override { ++n_calls_; priv_topic = t; }
@@ -433,7 +457,18 @@ namespace
 		}
 		int ReqOrderAction(CThostFtdcInputOrderActionField* p, int) override
 		{
-			++n_calls_; ++action_calls; action = *p; return stub_ret_;
+			++n_calls_; ++action_calls; action = *p;
+			if (sync_order_action_error_once)
+			{
+				sync_order_action_error_once = false;
+				CThostFtdcRspInfoField rsp;
+				std::memset(&rsp, 0, sizeof(rsp));
+				rsp.ErrorID = 1;
+				std::snprintf(rsp.ErrorMsg, sizeof(rsp.ErrorMsg), "%s", "synchronous fake error");
+				if (spi != nullptr)
+					spi->OnRspOrderAction(p, &rsp, 1, true);
+			}
+			return stub_ret_;
 		}
 		int ReqExecOrderInsert(CThostFtdcInputExecOrderField* p, int) override
 		{
@@ -481,6 +516,11 @@ namespace
 	CThostFtdcTraderApi* r61_opt_creator(const char*)
 	{
 		return g_created_opt_api;
+	}
+
+	CThostFtdcTraderApi* r61_opt_null_creator(const char*)
+	{
+		return nullptr;
 	}
 
 	CThostFtdcRspInfoField r61_opt_ok()
@@ -536,7 +576,6 @@ TEST(R61_TraderCTPOpt, connect_subscribes_topics_and_disconnect_releases_api)
 	R61OptApi api;
 	g_created_opt_api = &api;
 	probe.setCreator(&r61_opt_creator);
-	probe.setDummyWorker();		/* 阻止 connect 拉起常驻查询线程 */
 
 	probe.connect();
 	EXPECT_EQ(&api, probe.api());
@@ -547,26 +586,79 @@ TEST(R61_TraderCTPOpt, connect_subscribes_topics_and_disconnect_releases_api)
 	EXPECT_EQ((int)THOST_TERT_RESUME, (int)api.priv_topic);
 	EXPECT_TRUE(fs::exists(tmp.path + "/flows/9999/tester"));
 
-	/* disconnect 先入队 release，再 join 线程；本用例的线程是空的 */
+	/* 用真实 worker 验证 stop 信号可达，join 有界且 API 只 release 一次。 */
+	auto stopStart = std::chrono::steady_clock::now();
 	probe.disconnect();
+	EXPECT_LT(std::chrono::steady_clock::now() - stopStart, std::chrono::seconds(2));
 	EXPECT_TRUE(probe.workerNull());
-	ASSERT_EQ(1u, probe.queueSize());
-	probe.drainQueue();
+	EXPECT_EQ(0u, probe.queueSize());
 	EXPECT_EQ(nullptr, probe.api());
+	EXPECT_EQ(1u, api.release_calls);
+	probe.disconnect();
 	EXPECT_EQ(1u, api.release_calls);
 
 	/* quick 分支：订阅 QUICK 主题 */
 	R61OptApi api2;
 	g_created_opt_api = &api2;
 	probe.setQuick(true);
-	probe.setDummyWorker();
 	probe.connect();
 	EXPECT_EQ((int)THOST_TERT_QUICK, (int)api2.pub_topic);
 	EXPECT_EQ((int)THOST_TERT_QUICK, (int)api2.priv_topic);
 	probe.disconnect();
-	probe.drainQueue();
 	EXPECT_EQ(1u, api2.release_calls);
 	g_created_opt_api = nullptr;
+}
+
+TEST(R61_TraderCTPOpt, init_rejects_missing_library_and_creator_symbol)
+{
+	R61OptProbe missingLibrary;
+	missingLibrary.harden();
+	WTSVariant* missingLibraryParams = WTSVariant::createObject();
+	ASSERT_NE(nullptr, missingLibraryParams);
+	missingLibraryParams->append("ctpmodule", "wt_t1_ctpopt_module_that_does_not_exist_20261031");
+	EXPECT_FALSE(missingLibrary.init(missingLibraryParams));
+	EXPECT_TRUE(missingLibrary.moduleNull());
+	EXPECT_TRUE(missingLibrary.creatorNull());
+	missingLibraryParams->release();
+	R61OptProbe missingCreatorSymbol;
+	missingCreatorSymbol.harden();
+	WTSVariant* missingCreatorParams = WTSVariant::createObject();
+	ASSERT_NE(nullptr, missingCreatorParams);
+	missingCreatorParams->append("ctpmodule", WT_T1_CTPOPT_MISSING_SYMBOL_MODULE);
+	EXPECT_FALSE(missingCreatorSymbol.init(missingCreatorParams));
+	EXPECT_TRUE(missingCreatorSymbol.moduleNull());
+	EXPECT_TRUE(missingCreatorSymbol.creatorNull());
+	missingCreatorParams->release();
+}
+
+TEST(R61_TraderCTPOpt, connect_rejects_missing_or_null_creator)
+{
+	R61TempDir tmp;
+	ASSERT_FALSE(tmp.path.empty());
+	R61OptSink sink;
+
+	R61OptProbe missingCreator;
+	missingCreator.harden();
+	missingCreator.registerSpi(&sink);
+	missingCreator.setFlowDir(tmp.path + "/missing/");
+	missingCreator.connect();
+	EXPECT_TRUE(missingCreator.workerNull());
+	EXPECT_EQ(nullptr, missingCreator.api());
+	ASSERT_EQ(1u, sink.events.size());
+	EXPECT_EQ(WTE_Connect, sink.events.back().first);
+	EXPECT_EQ(-1, sink.events.back().second);
+
+	R61OptProbe nullApi;
+	nullApi.harden();
+	nullApi.registerSpi(&sink);
+	nullApi.setFlowDir(tmp.path + "/null/");
+	nullApi.setCreator(&r61_opt_null_creator);
+	nullApi.connect();
+	EXPECT_TRUE(nullApi.workerNull());
+	EXPECT_EQ(nullptr, nullApi.api());
+	ASSERT_EQ(2u, sink.events.size());
+	EXPECT_EQ(WTE_Connect, sink.events.back().first);
+	EXPECT_EQ(-1, sink.events.back().second);
 }
 
 /* TraderCTPOpt.cpp:413-428 login；447-465 logout；430-445 doLogin；
@@ -827,6 +919,98 @@ TEST(R61_TraderCTPOpt, order_insert_and_cancel_fill_ctp_requests)
 
 	ent->release();
 	act->release();
+}
+
+TEST(R61_TraderCTPOpt, order_actions_reject_missing_api)
+{
+	WTSEntrustAction* ordinary = WTSEntrustAction::create("rb2610", "CFFEX");
+	WTSEntrustAction* option = WTSEntrustAction::create("rb2610", "CFFEX", BT_EXECUTE);
+	ASSERT_NE(nullptr, ordinary);
+	ASSERT_NE(nullptr, option);
+	ordinary->setEntrustID("000005#0000000006#000042");
+	option->setEntrustID("000005#0000000006#000042");
+
+	R61OptProbe noApi;
+	noApi.harden();
+	noApi.setState(TraderCTPOpt::WS_ALLREADY);
+	EXPECT_EQ(-1, noApi.orderAction(ordinary));
+	EXPECT_EQ(-1, noApi.orderActionOpt(option));
+
+	R61OptApi api;
+	R61OptProbe stopping;
+	stopping.harden();
+	stopping.setApi(&api);
+	stopping.setState(TraderCTPOpt::WS_ALLREADY);
+	stopping.release();
+	EXPECT_EQ(1u, api.release_calls);
+	EXPECT_EQ(-1, stopping.orderAction(ordinary));
+	EXPECT_EQ(-1, stopping.orderActionOpt(option));
+	EXPECT_EQ(0u, api.action_calls);
+	EXPECT_EQ(0u, api.exec_action_calls);
+
+	ordinary->release();
+	option->release();
+}
+
+TEST(R61_TraderCTPOpt, synchronous_cancel_callback_reentry_finishes_within_timeout)
+{
+	const pid_t child = fork();
+	ASSERT_GE(child, 0);
+	if (child == 0)
+	{
+		R61OptApi api;
+		api.sync_order_action_error_once = true;
+		R61OptSink sink;
+		R61OptProbe probe;
+		probe.harden();
+		probe.setApi(&api);
+		probe.setState(TraderCTPOpt::WS_ALLREADY);
+		probe.registerSpi(&sink);
+		api.RegisterSpi(&probe);
+
+		WTSEntrustAction* action = WTSEntrustAction::create("rb2610", "CFFEX");
+		if (action == nullptr)
+			_exit(2);
+		action->setEntrustID("000005#0000000006#000042");
+		action->setActionFlag(WAF_CANCEL);
+		action->setOrderID("SYS42");
+		bool reentered = false;
+		sink.traderErrorHook = [&]() {
+			reentered = true;
+			if (probe.orderAction(action) != 0)
+				_exit(3);
+		};
+		const int result = probe.orderAction(action);
+		_exit(result == 0 && reentered ? 0 : 4);
+	}
+
+	int status = 0;
+	bool exited = false;
+	const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(500);
+	while (std::chrono::steady_clock::now() < deadline)
+	{
+		const pid_t waited = waitpid(child, &status, WNOHANG);
+		if (waited == child)
+		{
+			exited = true;
+			break;
+		}
+		if (waited < 0)
+			break;
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	}
+	if (!exited)
+	{
+		kill(child, SIGKILL);
+		waitpid(child, &status, 0);
+	}
+
+	EXPECT_TRUE(exited) << "synchronous SDK callback reentry did not finish within the timeout";
+	if (exited)
+	{
+		ASSERT_TRUE(WIFEXITED(status));
+		EXPECT_EQ(0, WEXITSTATUS(status));
+	}
 }
 
 /* TraderCTPOpt.cpp:467-529 orderInsertOpt；531-574 orderActionOpt */
@@ -1155,9 +1339,7 @@ TEST(R61_TraderCTPOpt, position_query_covers_open_cover_combo_and_negative)
 	R61OptContract fx("rb", "rb2610", "SHFE", CM_OpenCover, CC_Future, 10);
 	R61OptContract fxCombo("sp", "sp2610", "SHFE", CM_CoverToday, CC_Combination, 1);
 	R61OptContract fxNeg("neg", "neg2610", "SHFE", CM_OpenCover, CC_Future, 1);
-	// 收尾行必须落在已登记合约上：OnRspQryInvestorPosition 在 contract==NULL 时
-	// 会提前 return，连 bIsLast 的聚合/回调都跳过（BUG-R65-002，历史引用 BUG-R57-003）。这里用一条
-	// 全零的已登记合约触发收尾，isLast+未知合约的原始场景留在 DISABLED_ 用例。
+	// 成功批次以已登记的全零合约收尾；未知合约导致不完整批次的路径由 BUG-R65-002 专项测试覆盖。
 	R61OptContract fxZero("zero", "zero2610", "SHFE", CM_OpenCover, CC_Future, 1);
 
 	R61OptSink sink;
@@ -1209,10 +1391,6 @@ TEST(R61_TraderCTPOpt, position_query_covers_open_cover_combo_and_negative)
 	p.PositionCost = 0.0;
 	probe.OnRspQryInvestorPosition(&p, nullptr, 3, false);
 
-	/* 未知合约：只建了 map，不得崩溃也不得入表 */
-	std::snprintf(p.InstrumentID, sizeof(p.InstrumentID), "%s", "ghost");
-	probe.OnRspQryInvestorPosition(&p, nullptr, 4, false);
-
 	/* 末笔：用一条全零的已登记合约触发收尾（避免同一 key 二次累计），
 	 * 先返回聚合持仓再释放 map */
 	std::memset(&p, 0, sizeof(p));
@@ -1252,10 +1430,8 @@ TEST(R61_TraderCTPOpt, position_query_covers_open_cover_combo_and_negative)
 	probe.OnRspQryInvestorPosition(&p, &err, 6, false);
 }
 
-/* BUG-R65-002：未知合约末帧提前返回，可能留下上一批聚合状态。
- * 不把未知合约前的部分持仓当作成功快照；先记录首批回调数量，再发起不同请求 ID
- * 的新批次，确认新结果不混入首批持仓。 */
-TEST(R61_TraderCTPOpt, position_query_unknown_last_row_does_not_pollute_next_batch)
+/* BUG-R65-002：未知合约或响应错误使本批不完整，不能回调部分快照；末帧必须清理聚合状态。 */
+TEST(R61_TraderCTPOpt, position_query_unknown_rows_mark_batch_incomplete_and_next_batch_is_clean)
 {
 	R61OptContract fx("rb", "rb2610", "SHFE", CM_OpenCover, CC_Future, 10);
 	R61OptContract next("ag", "ag2610", "SHFE", CM_OpenCover, CC_Future, 10);
@@ -1278,24 +1454,47 @@ TEST(R61_TraderCTPOpt, position_query_unknown_last_row_does_not_pollute_next_bat
 	p.TodayPosition = 4;
 	p.PosiDirection = THOST_FTDC_PD_Long;
 	probe.OnRspQryInvestorPosition(&p, nullptr, 1, false);
-
-	std::memset(&p, 0, sizeof(p));
 	std::snprintf(p.InstrumentID, sizeof(p.InstrumentID), "%s", "ghost");
-	std::snprintf(p.ExchangeID, sizeof(p.ExchangeID), "%s", "SHFE");
-	p.PosiDirection = THOST_FTDC_PD_Long;
-	probe.OnRspQryInvestorPosition(&p, nullptr, 1, true);
+	probe.OnRspQryInvestorPosition(&p, nullptr, 1, false);
+	EXPECT_TRUE(probe.positionQueryIncomplete());
+	EXPECT_EQ(0u, sink.positionCalls);
+	EXPECT_TRUE(sink.hasLog("Unknown contract in position query"));
 
-	RecordProperty("first_batch_position_callback_count", (int)sink.positionCalls);
-	sink.positionCalls = 0;
-	sink.positions.clear();
-
+	/* A valid last row cannot turn an earlier unknown row into a complete snapshot. */
 	std::memset(&p, 0, sizeof(p));
 	std::snprintf(p.InstrumentID, sizeof(p.InstrumentID), "%s", "ag2610");
 	std::snprintf(p.ExchangeID, sizeof(p.ExchangeID), "%s", "SHFE");
 	p.PositionDate = THOST_FTDC_PSD_History;
 	p.Position = 2;
 	p.PosiDirection = THOST_FTDC_PD_Short;
+	probe.OnRspQryInvestorPosition(&p, nullptr, 1, true);
+	EXPECT_EQ(0u, sink.positionCalls);
+	EXPECT_TRUE(sink.positions.empty());
+	EXPECT_TRUE(probe.positionMapNull());
+	EXPECT_FALSE(probe.positionQueryIncomplete());
+
+	/* Unknown last row also clears a partially accumulated batch without emitting it. */
+	std::memset(&p, 0, sizeof(p));
+	std::snprintf(p.InstrumentID, sizeof(p.InstrumentID), "%s", "rb2610");
+	std::snprintf(p.ExchangeID, sizeof(p.ExchangeID), "%s", "SHFE");
+	p.PositionDate = THOST_FTDC_PSD_History;
+	p.Position = 10;
+	p.PosiDirection = THOST_FTDC_PD_Long;
+	probe.OnRspQryInvestorPosition(&p, nullptr, 2, false);
+	std::snprintf(p.InstrumentID, sizeof(p.InstrumentID), "%s", "ghost");
 	probe.OnRspQryInvestorPosition(&p, nullptr, 2, true);
+	EXPECT_EQ(0u, sink.positionCalls);
+	EXPECT_TRUE(probe.positionMapNull());
+	EXPECT_FALSE(probe.positionQueryIncomplete());
+
+	/* A later successful query contains only its own data. */
+	std::memset(&p, 0, sizeof(p));
+	std::snprintf(p.InstrumentID, sizeof(p.InstrumentID), "%s", "ag2610");
+	std::snprintf(p.ExchangeID, sizeof(p.ExchangeID), "%s", "SHFE");
+	p.PositionDate = THOST_FTDC_PSD_History;
+	p.Position = 2;
+	p.PosiDirection = THOST_FTDC_PD_Short;
+	probe.OnRspQryInvestorPosition(&p, nullptr, 3, true);
 
 	ASSERT_EQ(1u, sink.positionCalls);
 	std::set<std::string> actualCodes;
@@ -1306,4 +1505,44 @@ TEST(R61_TraderCTPOpt, position_query_unknown_last_row_does_not_pollute_next_bat
 	const R61OptSink::PosCap* ag = findPos(sink.positions, "ag2610");
 	ASSERT_NE(nullptr, ag);
 	EXPECT_DOUBLE_EQ(2.0, ag->total);
+}
+
+TEST(R61_TraderCTPOpt, position_query_error_response_discards_partial_batch_and_release_resets_incomplete)
+{
+	R61OptContract fx("rb", "rb2610", "SHFE", CM_OpenCover, CC_Future, 10);
+	R61OptDataMgr mgr;
+	mgr.add(fx.ct);
+	R61OptSink sink;
+	sink.mgr = &mgr;
+
+	R61OptProbe probe;
+	probe.harden();
+	probe.registerSpi(&sink);
+
+	CThostFtdcInvestorPositionField p;
+	std::memset(&p, 0, sizeof(p));
+	std::snprintf(p.InstrumentID, sizeof(p.InstrumentID), "%s", "rb2610");
+	std::snprintf(p.ExchangeID, sizeof(p.ExchangeID), "%s", "SHFE");
+	p.PositionDate = THOST_FTDC_PSD_History;
+	p.Position = 10;
+	p.PosiDirection = THOST_FTDC_PD_Long;
+	probe.OnRspQryInvestorPosition(&p, nullptr, 1, false);
+
+	CThostFtdcRspInfoField queryErr = r61_opt_error(23, "position query failed");
+	probe.OnRspQryInvestorPosition(nullptr, &queryErr, 1, true);
+	EXPECT_EQ(0u, sink.positionCalls);
+	EXPECT_TRUE(sink.hasLog("Position query response failed: 23 : position query failed"));
+	EXPECT_TRUE(probe.positionMapNull());
+	EXPECT_FALSE(probe.positionQueryIncomplete());
+
+	probe.OnRspQryInvestorPosition(&p, nullptr, 2, false);
+	p.Position = 11;
+	std::snprintf(p.InstrumentID, sizeof(p.InstrumentID), "%s", "ghost");
+	probe.OnRspQryInvestorPosition(&p, nullptr, 2, false);
+	ASSERT_TRUE(probe.positionQueryIncomplete());
+	ASSERT_EQ(1u, probe.positionMapSize());
+
+	probe.release();
+	EXPECT_FALSE(probe.positionQueryIncomplete());
+	EXPECT_EQ(0u, probe.positionMapSize());
 }

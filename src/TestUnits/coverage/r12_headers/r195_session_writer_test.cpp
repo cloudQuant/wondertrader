@@ -86,7 +86,7 @@ TEST_F(R195WriterSessionEdgeTest, night_session_cross_day_offset_and_close_time)
 	spec.turn_over = 27010.0;
 	spec.action_date = 20240108;
 	spec.trading_date = 20240109;
-	spec.action_time = 23000000;	// 23:00:00.000
+	spec.action_time = 230000000;	// 23:00:00.000
 	write_tick(w, spec);
 
 	WTSTickData* cached = w->getCurTick("fn2201", "SHFE");
@@ -102,7 +102,7 @@ TEST_F(R195WriterSessionEdgeTest, night_session_cross_day_offset_and_close_time)
 	same.turn_over = 27020.0;
 	same.action_date = 20240108;
 	same.trading_date = 20240109;
-	same.action_time = 23000000;
+	same.action_time = 230000000;
 	write_tick(w, same);
 
 	WTSTickData* cached2 = w->getCurTick("fn2201", "SHFE");

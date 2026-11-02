@@ -28,6 +28,7 @@ TEST_F(R103Fixture, R103Replayer_MinuteSliceCursorAndDayPrice)
 {
 	r103::Loader loader;
 	loader.m1Bars[kMain] = {
+		r91::mk_bar(20200102u, 929u, 8.5, 9.8, 8.2, 9.5, 80.0),
 		r91::mk_bar(20200102u, 931u, 9.0, 10.0, 8.0, 9.5, 100.0),
 		r91::mk_bar(20200102u, 932u, 10.0, 12.0, 9.0, 11.0, 200.0),
 		r91::mk_bar(20200102u, 935u, 11.0, 13.0, 10.0, 12.0, 300.0)
@@ -69,33 +70,36 @@ TEST_F(R103Fixture, R103Replayer_MinuteSliceCursorAndDayPrice)
 	ASSERT_NE(nullptr, mainSlice);
 	ASSERT_EQ(1, mainSlice->size());
 	EXPECT_DOUBLE_EQ(9.5, mainSlice->at(0)->close);
+	EXPECT_EQ(929u, static_cast<uint32_t>(mainSlice->at(0)->time % 10000u));
 	mainSlice->release();
 
 	replayer.sub_tick(3u, kUnsub);
 
 	replayer.run(false);
 
-	// 09:31 被初始游标当历史，只回放 09:32；随后第二次切片又推进到 09:35 之前
-	ASSERT_EQ(1u, sink.bars.size());
-	EXPECT_EQ(932u, sink.bars[0].time);
-	EXPECT_DOUBLE_EQ(11.0, sink.bars[0].close);
+	// 09:29 is complete history; all later bars remain replayable after the initial query.
+	ASSERT_EQ(3u, sink.bars.size());
+	EXPECT_EQ(931u, sink.bars[0].time);
+	EXPECT_EQ(932u, sink.bars[1].time);
+	EXPECT_EQ(935u, sink.bars[2].time);
+	EXPECT_DOUBLE_EQ(11.0, sink.bars[1].close);
 
-	// 未订阅合约在 09:32 跳过 09:25/09:31 两段游标后模拟 tick
+	// The unsubscribed series skips 09:25 and emits OHLC ticks for 09:31 and 09:32.
 	uint32_t unsubTicks = 0;
 	for (const r91::TickRec& rec : sink.ticks)
 	{
 		if (rec.code == kUnsub)
 			unsubTicks++;
 	}
-	ASSERT_EQ(4u, unsubTicks);
+	ASSERT_EQ(8u, unsubTicks);
 
 	// 09:32 收盘 tick 时 _day_cache 已是该分钟的 OHLC
 	auto it = sink.dayPrices.find(932u);
 	ASSERT_NE(sink.dayPrices.end(), it);
 	ASSERT_EQ(5u, it->second.size());
-	EXPECT_DOUBLE_EQ(10.0, it->second[0]);
+	EXPECT_DOUBLE_EQ(9.0, it->second[0]);
 	EXPECT_DOUBLE_EQ(12.0, it->second[1]);
-	EXPECT_DOUBLE_EQ(9.0, it->second[2]);
+	EXPECT_DOUBLE_EQ(8.0, it->second[2]);
 	EXPECT_DOUBLE_EQ(11.0, it->second[3]);
 	EXPECT_DOUBLE_EQ(0.0, it->second[4]);
 }

@@ -21,13 +21,13 @@
  * @param 是否为服务器模式
  * @return 服务器ID
  */
-typedef unsigned long(*FuncCreateMQServer)(const char*, bool);
+typedef WtUInt32(PORTER_FLAG *FuncCreateMQServer)(const char*, bool);
 
 /**
  * @brief 销毁消息队列服务器的函数类型
  * @param 服务器ID
  */
-typedef void(*FuncDestroyMQServer)(unsigned long);
+typedef void(PORTER_FLAG *FuncDestroyMQServer)(WtUInt32);
 
 /**
  * @brief 发布消息的函数类型
@@ -36,7 +36,7 @@ typedef void(*FuncDestroyMQServer)(unsigned long);
  * @param 消息内容
  * @param 消息长度
  */
-typedef void(*FundPublishMessage)(unsigned long, const char*, const char*, unsigned long);
+typedef void(PORTER_FLAG *FundPublishMessage)(WtUInt32, const char*, const char*, WtUInt32);
 
 /**
  * @brief 日志回调函数类型
@@ -44,13 +44,13 @@ typedef void(*FundPublishMessage)(unsigned long, const char*, const char*, unsig
  * @param 日志消息
  * @param 是否为服务器
  */
-typedef void(*FuncLogCallback)(unsigned long, const char*, bool);
+typedef void(PORTER_FLAG *FuncLogCallback)(WtUInt32, const char*, bool);
 
 /**
  * @brief 注册回调函数的函数类型
  * @param 日志回调函数
  */
-typedef void(*FuncRegCallbacks)(FuncLogCallback);
+typedef void(PORTER_FLAG *FuncRegCallbacks)(FuncLogCallback);
 
 
 NS_WTP_BEGIN

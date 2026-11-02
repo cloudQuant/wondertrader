@@ -12,12 +12,14 @@
  * 是WonderTrader中数据访问的核心组件
  */
 #pragma once
-#include <vector>
+#include <list>
+#include <mutex>
 #include "../Includes/IDataReader.h"
 #include "../Includes/IDataManager.h"
 
 #include "../Includes/FasterDefs.h"
 #include "../Includes/WTSCollection.hpp"
+#include "../Includes/WTSStruct.h"
 
 NS_WTP_BEGIN
 class WTSVariant;
@@ -58,6 +60,7 @@ private:
 	 * @details 根据配置初始化数据存储模块，设置数据缓存策略
 	 */
 	bool	initStore(WTSVariant* cfg);
+	void	enqueue_bar_notify(const char* code, char period, uint32_t times, WTSBarStruct* newBar);
 
 public:
 	/**
@@ -325,24 +328,32 @@ private:
 		uint32_t	_times;
 
 		/**
-		 * @brief 新K线数据指针
-		 * @details 指向新生成的K线数据
+		 * @brief 新K线数据快照
+		 * @details 按值保存，避免通知延迟期间源 bar 被覆盖或失效
 		 */
-		WTSBarStruct* _newBar;
+		WTSBarStruct _newBar;
+
+		/**
+		 * @brief 原通知是否携带有效 K 线
+		 * @details 保留原有 NULL 通知行为
+		 */
+		bool _has_bar;
 
 		/**
 		 * @brief 构造函数
 		 * @param code 合约代码
 		 * @param period K线周期
 		 * @param times 周期倍数
-		 * @param newBar 新K线数据指针
+		 * @param newBar 新K线数据指针，构造时复制其值
 		 * @details 初始化通知项结构
 		 */
 		_NotifyItem(const char* code, char period, uint32_t times, WTSBarStruct* newBar)
-			: _times(times), _newBar(newBar)
+			: _times(times), _newBar(), _has_bar(newBar != NULL)
 		{
 			wt_strcpy(_code, code);
 			_period[0] = period;
+			if (_has_bar)
+				_newBar = *newBar;
 		}
 	} NotifyItem;
 
@@ -350,7 +361,10 @@ private:
 	 * @brief K线数据通知项列表
 	 * @details 存储待处理的K线数据更新通知
 	 */
-	std::vector<NotifyItem> _bar_notifies;
+	std::list<NotifyItem> _bar_notifies;
+	std::mutex _bar_notifies_mtx;
+	bool _bar_notifies_draining = false;
+	bool _bar_redrain_requested = false;
 };
 
 NS_WTP_END

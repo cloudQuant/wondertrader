@@ -64,6 +64,7 @@ WtExecRunner::WtExecRunner()
 	, _factory_operation_active(false)
 	, _active_runtime_calls(0)
 	, _active_context_calls(0)
+	, _config(NULL)
 	, _quiesce_coordinator(std::vector<WtExecuterMgr*>{ &_exe_mgr })
 {
 }
@@ -300,7 +301,10 @@ bool WtExecRunner::config(const char* cfgFile, bool isFile /* = true */)
 
 				WTSVariant* cfgBF = _config->get("basefiles");
 				if (cfgBF == NULL)
+				{
+					WTSLogger::error("Required configuration field '{}' is missing", "basefiles");
 					return false;
+				}
 				if (cfgBF->get("session"))
 				{
 					_bd_mgr.loadSessions(cfgBF->getCString("session"));

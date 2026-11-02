@@ -61,7 +61,8 @@ void initialize(WtString cfgFile, WtString logCfg, bool bCfgFile, bool bLogCfgFi
 
 void start(bool bAsync/* = false*/)
 {
-	getRunner().start(bAsync);
+	WtDtRunner& runner = getRunner();
+	runner.start(bAsync, runner.isAlldayMode());
 }
 
 const char* get_version()

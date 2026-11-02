@@ -260,7 +260,7 @@ public:
 	bool	cancel(uint32_t localid);
 	OrderIDs cancelAll(const char* stdCode);
 
-	inline bool	isTradeEnabled(const char* stdCode) const;
+	bool	isTradeEnabled(const char* stdCode) const;
 
 	bool	checkCancelLimits(const char* stdCode);
 	bool	checkOrderLimits(const char* stdCode);

@@ -1,0 +1,23 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R42CtaPersistTest.ProbeLongExpiredSignalCode
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R42CtaPersistTest
+[ RUN      ] R42CtaPersistTest.ProbeLongExpiredSignalCode
+0   probe-asan                          0x00000001053f3778 _ZN12_GLOBAL__N_114probeTerminateEv + 320
+1   libc++abi.dylib                     0x000000018090d75c _ZSt11__terminatePFvvE + 16
+2   libc++abi.dylib                     0x000000018090d710 _ZSt9terminatev + 108
+3   probe-asan                          0x0000000105729208 _ZNK3fmt3v1116format_to_resultcvPcEv + 0
+4   probe-asan                          0x00000001056cc3b8 _ZN3wtp14CtaStraBaseCtx8log_infoIJPKcEEEvS3_DpRKT_ + 76
+5   probe-asan                          0x00000001056c6d18 _ZN3wtp14CtaStraBaseCtx9load_dataEj + 13968
+6   probe-asan                          0x00000001056d31a0 _ZN3wtp14CtaStraBaseCtx7on_initEv + 56
+7   probe-asan                          0x00000001053f40d8 _ZN12_GLOBAL__N_149R42CtaPersistTest_ProbeLongExpiredSignalCode_Test8TestBodyEv + 1744
+8   probe-asan                          0x0000000105a4cc24 _ZN7testing8internal35HandleExceptionsInMethodIfSupportedINS_4TestEvEET0_PT_MS4_FS3_vEPKc + 104
+9   probe-asan                          0x0000000105a4cb6c _ZN7testing4Test3RunEv + 208
+10  probe-asan                          0x0000000105a4d74c _ZN7testing8TestInfo3RunEv + 212
+11  probe-asan                          0x0000000105a4e1d0 _ZN7testing9TestSuite3RunEv + 456
+12  probe-asan                          0x0000000105a595f8 _ZN7testing8internal12UnitTestImpl11RunAllTestsEv + 1328
+13  probe-asan                          0x0000000105a58fa4 _ZN7testing8internal35HandleExceptionsInMethodIfSupportedINS0_12UnitTestImplEbEET0_PT_MS4_FS3_vEPKc + 104
+14  probe-asan                          0x0000000105a58f08 _ZN7testing8UnitTest3RunEv + 124
+15  probe-asan                          0x000000010598ca04 main + 68
+16  dyld                                0x000000018059be00 start + 6992

@@ -484,10 +484,12 @@ TEST(t26_ctploader_instrument, czce_code_without_numeric_suffix_is_skipped)
 	auto f = t26::make_instrument("CZCE", "SRCS", "SR", THOST_FTDC_PC_Futures);
 	auto ok = t26::ok_rsp();
 	CTraderSpi spi;
+	t26::CoutCapture output;
 	spi.OnRspQryInstrument(&f, &ok, 8, false);
 
 	EXPECT_TRUE(_contracts.empty());
 	EXPECT_TRUE(_commodities.empty());
+	EXPECT_NE(std::string::npos, output.text().find("invalid CZCE code, skipped")) << output.text();
 }
 
 TEST(t26_ctploader_instrument, unterminated_fixed_instrument_id_is_skipped)
@@ -498,10 +500,12 @@ TEST(t26_ctploader_instrument, unterminated_fixed_instrument_id_is_skipped)
 	std::memset(f.InstrumentID, 'X', sizeof(f.InstrumentID));
 	auto ok = t26::ok_rsp();
 	CTraderSpi spi;
+	t26::CoutCapture output;
 	spi.OnRspQryInstrument(&f, &ok, 9, false);
 
 	EXPECT_TRUE(_contracts.empty());
 	EXPECT_TRUE(_commodities.empty());
+	EXPECT_NE(std::string::npos, output.text().find("unterminated instrument field, skipped")) << output.text();
 }
 
 /* ------------------------------------------------------------------ */
@@ -511,20 +515,30 @@ TEST(t26_ctploader_instrument, unterminated_fixed_instrument_id_is_skipped)
 TEST(t26_ctploader_names, fill_czce_latches_decade_on_first_call_2025)
 {
 	t26::setup_defaults("i15");
-	// 空码提前返回、**不消耗锁存**（L305-306 在 static 判定之前）
-	EXPECT_EQ("", fillCzceCode("", 20251027));
+	std::string expanded;
+	// 空码和未终止字段都在消耗 decade 锁存前明确拒绝。
+	EXPECT_FALSE(fillCzceCode(std::string_view("", 1), 20251027, expanded));
 	// CZCE 品种代码无月份数字时安全拒绝，不扫描越过字符串末尾。
-	EXPECT_EQ("", fillCzceCode("SRCS", 19990101));
+	EXPECT_FALSE(fillCzceCode(std::string_view("SRCS", sizeof("SRCS")), 19990101, expanded));
+	const char unterminated[] = { 'S', 'R', '5' };
+	EXPECT_FALSE(fillCzceCode(std::string_view(unterminated, sizeof(unterminated)), 19990101, expanded));
+	EXPECT_TRUE(expanded.empty());
 	// 首调用 tdate=20251027 → yearFlag=5/yearPref=2/nextY=3，此后所有调用共用该锁存
-	EXPECT_EQ("SR2510", fillCzceCode("SR510", 20251027));
-	EXPECT_EQ("MA3412", fillCzceCode("MA412", 19990101));	// 4<5 → 借下个十年位 3；第二个参数被锁存忽略
-	EXPECT_EQ("CF2901", fillCzceCode("CF901", 20251027));	// 9>=5 → 十年位 2
+	ASSERT_TRUE(fillCzceCode(std::string_view("SR510", sizeof("SR510")), 20251027, expanded));
+	EXPECT_EQ("SR2510", expanded);
+	ASSERT_TRUE(fillCzceCode(std::string_view("MA412", sizeof("MA412")), 19990101, expanded));
+	EXPECT_EQ("MA3412", expanded);	// 4<5 → 借下个十年位 3；第二个参数被锁存忽略
+	ASSERT_TRUE(fillCzceCode(std::string_view("CF901", sizeof("CF901")), 20251027, expanded));
+	EXPECT_EQ("CF2901", expanded);	// 9>=5 → 十年位 2
 }
 
 TEST(t26_ctploader_names, fill_czce_decade_zero_prefers_current_decade_digit)
 {
 	t26::setup_defaults("i16");
+	std::string expanded;
 	// 首调用 tdate=20200106 → yearFlag=0 → 恒走 yearPref=2 分支（L326 的 yearFlag==0 一侧）
-	EXPECT_EQ("CF2012", fillCzceCode("CF012", 20200106));
-	EXPECT_EQ("SR2510", fillCzceCode("SR510", 20200106));	// cYFlag=5 也走同一条（yearFlag==0 短路）
+	ASSERT_TRUE(fillCzceCode(std::string_view("CF012", sizeof("CF012")), 20200106, expanded));
+	EXPECT_EQ("CF2012", expanded);
+	ASSERT_TRUE(fillCzceCode(std::string_view("SR510", sizeof("SR510")), 20200106, expanded));
+	EXPECT_EQ("SR2510", expanded);	// cYFlag=5 也走同一条（yearFlag==0 短路）
 }

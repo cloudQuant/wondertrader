@@ -191,10 +191,11 @@ TEST(R54StraMgr, loads_plugin_and_creates_strategy)
 		GTEST_SKIP() << "libWtUftStraFact.dylib not found in this build";
 
 	q04::TempRoot tmp("r54mgr");
-	const std::string link = tmp.file("libWtUftStraFact.dylib");
+	const std::string stagedPlugin = tmp.file("libWtUftStraFact.dylib");
 	std::error_code ec;
-	std::filesystem::create_symlink(plugin, link, ec);
-	ASSERT_FALSE(ec) << "create_symlink failed: " << ec.message();
+	std::filesystem::copy_file(plugin, stagedPlugin,
+		std::filesystem::copy_options::overwrite_existing, ec);
+	ASSERT_FALSE(ec) << "copy_file failed: " << ec.message();
 
 	UftStrategyMgr mgr;
 	EXPECT_TRUE(mgr.loadFactories(tmp.dir().string().c_str()));
@@ -222,10 +223,11 @@ TEST(R54StraMgr, managerDestructorReleasesFactoryWithPublishedAbi)
 		GTEST_SKIP() << "libWtUftStraFact.dylib not found in this build";
 
 	q04::TempRoot tmp("r54mgrdtor");
-	const std::string link = tmp.file("libWtUftStraFact.dylib");
+	const std::string stagedPlugin = tmp.file("libWtUftStraFact.dylib");
 	std::error_code ec;
-	std::filesystem::create_symlink(plugin, link, ec);
-	ASSERT_FALSE(ec) << "create_symlink failed: " << ec.message();
+	std::filesystem::copy_file(plugin, stagedPlugin,
+		std::filesystem::copy_options::overwrite_existing, ec);
+	ASSERT_FALSE(ec) << "copy_file failed: " << ec.message();
 
 	{
 		UftStrategyMgr mgr;
@@ -242,10 +244,11 @@ TEST(R54StraMgr, skips_module_without_entry_symbol)
 		GTEST_SKIP() << "no candidate dylib without createStrategyFact";
 
 	q04::TempRoot tmp("r54mgrbad");
-	const std::string link = tmp.file("libNoEntry.dylib");
+	const std::string stagedPlugin = tmp.file("libNoEntry.dylib");
 	std::error_code ec;
-	std::filesystem::create_symlink(dylib, link, ec);
-	ASSERT_FALSE(ec) << "create_symlink failed: " << ec.message();
+	std::filesystem::copy_file(dylib, stagedPlugin,
+		std::filesystem::copy_options::overwrite_existing, ec);
+	ASSERT_FALSE(ec) << "copy_file failed: " << ec.message();
 
 	UftStrategyMgr mgr;
 	EXPECT_TRUE(mgr.loadFactories(tmp.dir().string().c_str()));

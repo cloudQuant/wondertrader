@@ -23,6 +23,8 @@
 
 #include "t27_seam.hpp"
 
+#include <future>
+
 using namespace t27;
 
 namespace
@@ -88,7 +90,7 @@ TEST_F(XtpSeamF, mirror_tail_slots_are_the_objects_the_parser_uses)
 	EXPECT_STREQ("0.0.0.0", m->m_strLocalIP.c_str());
 	EXPECT_EQ(XTP_PROTOCOL_UDP, m->m_iProtocol);
 	EXPECT_EQ(&api, m->m_pUserAPI);
-	/* 占位 worker 必须已经非空，否则 connect() 会去拉起不可回收线程（T1-XTP-02） */
+	/* 占位 worker 让本夹具通过 poll() 手动泵送，而不在后台异步消费 */
 	EXPECT_EQ(workerPlaceholder.get(), m->_thrd_worker.get());
 	EXPECT_EQ(nullptr, m->_worker);
 	/* 镜像里的 _asyncio 就是真对象那一个：此时队列全空 */
@@ -96,17 +98,20 @@ TEST_F(XtpSeamF, mirror_tail_slots_are_the_objects_the_parser_uses)
 }
 /* ==================== DoLogin：判空 / 两条失败支路 ==================== */
 
-TEST_F(XtpLoginF, login_touches_nothing_when_api_pointer_is_null)
+TEST_F(XtpLoginF, connect_fails_closed_without_api_and_does_not_start_worker)
 {
 	m->m_pUserAPI = nullptr;
+	m->_thrd_worker.reset();
 	api.loginRet = 0;
 
-	EXPECT_TRUE(parser.connect());
+	EXPECT_FALSE(parser.connect());
 	EXPECT_FALSE(parser.isConnected());
+	EXPECT_EQ(nullptr, m->_thrd_worker);
+	EXPECT_EQ(nullptr, m->_worker);
 	EXPECT_EQ(0, api.loginCalls);
 	EXPECT_EQ(int64_t{-1}, api.lastHbInterval);
 	EXPECT_EQ(uint64_t{0}, api.lastUdpBuffer);
-	EXPECT_TRUE(sink.logs.empty());
+	EXPECT_TRUE(sink.hasLog("Connect rejected because the XTP quote API is not initialized"));
 	EXPECT_TRUE(sink.events.empty());
 	EXPECT_EQ(std::size_t{0}, pump());
 	EXPECT_EQ(0u, m->m_uTradingDate);
@@ -236,7 +241,7 @@ TEST_F(XtpLoginF, login_success_sets_trading_date_and_starts_subscription_before
 	EXPECT_EQ("[ParserXTP] Tick_by_tick data of 1 instruments of SZSE subscribed", sink.logs[4].second);
 }
 
-TEST_F(XtpLoginF, login_success_accepts_eight_digit_trading_day)
+TEST_F(XtpLoginF, connect_succeeds_with_initialized_api_and_eight_digit_trading_day)
 {
 	api.loginRet = 0;
 	std::snprintf(api.tradingDay, sizeof(api.tradingDay), "%s", "20260105");
@@ -562,6 +567,70 @@ TEST_F(XtpOnlineF, post_login_subscribe_without_api_buffers_only)
 	EXPECT_TRUE(sink.logs.empty());
 }
 
+/* ==================== unsubscribe ==================== */
+
+TEST_F(XtpOnlineF, unsubscribe_sends_tracked_codes_by_exchange_for_both_streams)
+{
+	CodeSet codes;
+	codes.insert("SSE.600519");
+	codes.insert("SZSE.000001");
+	codes.insert("SSE.999999");
+	codes.insert("HK.00700");
+	codes.insert("malformed");
+	parser.unsubscribe(codes);
+
+	ASSERT_EQ(2u, api.unsubMdCalls.size());
+	ASSERT_EQ(2u, api.unsubTbtCalls.size());
+	EXPECT_EQ(XTP_EXCHANGE_SH, api.unsubMdCalls[0].exchg);
+	EXPECT_EQ((std::vector<std::string>{"600519"}), api.unsubMdCalls[0].codes);
+	EXPECT_EQ(XTP_EXCHANGE_SZ, api.unsubMdCalls[1].exchg);
+	EXPECT_EQ((std::vector<std::string>{"000001"}), api.unsubMdCalls[1].codes);
+	EXPECT_EQ(api.unsubMdCalls[0].codes, api.unsubTbtCalls[0].codes);
+	EXPECT_EQ(api.unsubMdCalls[1].codes, api.unsubTbtCalls[1].codes);
+	EXPECT_TRUE(m->m_fitSHSubs.empty());
+	EXPECT_TRUE(m->m_fitSZSubs.empty());
+
+	parser.unsubscribe(codes);
+	EXPECT_EQ(2u, api.unsubMdCalls.size());
+	EXPECT_EQ(2u, api.unsubTbtCalls.size());
+}
+
+TEST_F(XtpLoginF, unsubscribe_before_login_only_removes_the_local_cache)
+{
+	CodeSet codes;
+	codes.insert("SSE.600519");
+	codes.insert("SZSE.000001");
+	codes.insert("SSE.999999");
+	parser.unsubscribe(codes);
+
+	EXPECT_TRUE(m->m_fitSHSubs.empty());
+	EXPECT_TRUE(m->m_fitSZSubs.empty());
+	EXPECT_TRUE(api.unsubMdCalls.empty());
+	EXPECT_TRUE(api.unsubTbtCalls.empty());
+}
+
+TEST_F(XtpOnlineF, unsubscribe_retains_cache_until_both_sync_requests_succeed)
+{
+	CodeSet codes;
+	codes.insert("SSE.600519");
+	api.unsubMdRet = 7;
+	parser.unsubscribe(codes);
+	EXPECT_EQ(1u, m->m_fitSHSubs.count("600519"));
+	EXPECT_TRUE(sink.hasLog("md unsubscribe request of SSE failed"));
+
+	api.unsubMdRet = 0;
+	api.unsubTbtRet = 9;
+	parser.unsubscribe(codes);
+	EXPECT_EQ(1u, m->m_fitSHSubs.count("600519"));
+	EXPECT_TRUE(sink.hasLog("tick_by_tick unsubscribe request of SSE failed"));
+
+	api.unsubTbtRet = 0;
+	parser.unsubscribe(codes);
+	EXPECT_EQ(0u, m->m_fitSHSubs.count("600519"));
+	EXPECT_EQ(3u, api.unsubMdCalls.size());
+	EXPECT_EQ(3u, api.unsubTbtCalls.size());
+}
+
 /* ==================== disconnect / release / isConnected ==================== */
 
 TEST_F(XtpOnlineF, disconnect_unregisters_spi_releases_once_and_nulls_the_pointer)
@@ -611,6 +680,47 @@ TEST_F(XtpSeamF, is_connected_and_disconnect_pair_without_an_api_pointer)
 	EXPECT_TRUE(api.spiRegs.empty());
 }
 
+TEST_F(XtpSeamF, connect_disconnect_joins_the_worker_and_release_is_idempotent)
+{
+	m->_thrd_worker.reset();
+	m->_worker.reset();
+	ASSERT_TRUE(parser.connect());
+	ASSERT_NE(nullptr, m->_thrd_worker);
+	ASSERT_TRUE(m->_thrd_worker->joinable());
+
+	EXPECT_TRUE(parser.disconnect());
+	EXPECT_EQ(nullptr, m->_thrd_worker);
+	EXPECT_EQ(nullptr, m->_worker);
+	EXPECT_TRUE(m->_worker_stopping.load());
+	EXPECT_EQ(1, api.releaseCalls);
+
+	parser.release();
+	EXPECT_EQ(1, api.releaseCalls);
+	EXPECT_FALSE(parser.connect());
+}
+
+TEST_F(XtpSeamF, worker_thread_shutdown_fails_closed_until_owner_joins)
+{
+	m->_thrd_worker.reset();
+	m->_worker.reset();
+	ASSERT_TRUE(parser.connect());
+
+	std::promise<bool> workerDisconnect;
+	auto result = workerDisconnect.get_future();
+	boost::asio::post(m->_asyncio, [&parser = parser, &workerDisconnect]() {
+		workerDisconnect.set_value(parser.disconnect());
+	});
+
+	ASSERT_EQ(std::future_status::ready, result.wait_for(std::chrono::seconds(2)));
+	EXPECT_FALSE(result.get());
+	EXPECT_EQ(&api, m->m_pUserAPI);
+	EXPECT_EQ(0, api.releaseCalls);
+
+	EXPECT_TRUE(parser.disconnect());
+	EXPECT_EQ(nullptr, m->_thrd_worker);
+	EXPECT_EQ(1, api.releaseCalls);
+}
+
 /* ==================== 崩溃/挂死输入：只登记，不启用 ==================== */
 
 /*
@@ -651,17 +761,4 @@ TEST_F(XtpLoginF, DISABLED_posted_login_handlers_deref_sink_nulled_after_post)
 	pump();	// 跑 lambda：m_sink 已经是 NULL
 }
 
-/*
- * connect() 在 `_thrd_worker == NULL` 时拉起 `while(true){sleep(2ms); _asyncio.run_one();}`
- * 且 release/disconnect 都不回收它（L150-157、L137-140），parser 析构后 io_context 变成
- * 悬垂对象 → 挂死或退出期崩。同 T1-XTP-02。
- */
-TEST_F(XtpSeamF, DISABLED_connect_without_pre_seeded_worker_starts_unstoppable_thread)
-{
-	m->_thrd_worker = nullptr;
-	api.loginRet = -1;
-	api.setErrMsg("tcp refused");
-	EXPECT_TRUE(parser.connect());
-	EXPECT_NE(nullptr, m->_thrd_worker.get());
-	EXPECT_NE(nullptr, m->_worker.get());
-}
+/* T1-XTP-02 worker shutdown is exercised by the enabled local fake tests above. */

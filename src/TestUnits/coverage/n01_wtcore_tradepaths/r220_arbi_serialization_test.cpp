@@ -1,4 +1,5 @@
 #include <WtCore/WtArbiExecuter.h>
+#include <WtCore/WtExecMgr.h>
 #include <WtCore/WtExecuterFactory.h>
 #include <WTSUtils/WTSCfgLoader.h>
 
@@ -627,6 +628,146 @@ TEST(WtArbiExecuterSerialization, OlderPositionBatchCannotClearNewerTargetSnapsh
 	EXPECT_DOUBLE_EQ(positions[1], 5.0);
 }
 
+TEST(WtArbiExecuterSerialization, PublicSetPositionAppliesGroupTargetsAndClearsOnEmptyInput)
+{
+	ArbiProbeFact fact;
+	auto groupProbe = std::make_shared<ArbiProbe>();
+	auto rbProbe = std::make_shared<ArbiProbe>();
+	auto auProbe = std::make_shared<ArbiProbe>();
+	WtArbiExecuter executer(NULL, "arbi_group_targets", NULL);
+	std::shared_ptr<WTSVariant> config(WTSCfgLoader::load_from_content(
+		R"json({"scale":1.0,"poolsize":0,"strict_sync":false,
+		"groups":{"SHFE.ags":{"SHFE.rb.2510":2.0,"SHFE.au.2212":2.0}},
+		"policy":{"default":{"name":"WtExeFact.WtMinImpactExeUnit"}}})json"),
+		[](WTSVariant* value) { if (value) value->release(); });
+	ASSERT_NE(config.get(), nullptr);
+	ASSERT_TRUE(executer.init(config.get()));
+
+	const std::string groupCode = "SHFE.ags";
+	const std::string rbCode = "SHFE.rb.2510";
+	const std::string auCode = "SHFE.au.2212";
+	wtp::WtArbiExecuterTestAccess::registerUnit(executer, groupCode, groupProbe, &fact, false);
+	wtp::WtArbiExecuterTestAccess::registerUnit(executer, rbCode, rbProbe, &fact, false);
+	wtp::WtArbiExecuterTestAccess::registerUnit(executer, auCode, auProbe, &fact, false);
+
+	auto expectLastTarget = [](const std::shared_ptr<ArbiProbe>& probe,
+		double expected, size_t expectedCount) {
+		const std::vector<double> positions = probe->positionSnapshot();
+		ASSERT_EQ(positions.size(), expectedCount);
+		EXPECT_DOUBLE_EQ(positions.back(), expected);
+	};
+
+	wt_hashmap<std::string, double> negativeTargets;
+	negativeTargets[rbCode] = -6.0;
+	negativeTargets[auCode] = -8.0;
+	executer.set_position(negativeTargets);
+	EXPECT_TRUE(groupProbe->positionSnapshot().empty());
+	expectLastTarget(rbProbe, -6.0, 1);
+	expectLastTarget(auProbe, -8.0, 1);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, rbCode), -6.0);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, auCode), -8.0);
+
+	// Fractional member targets stay on the original path; the existing Arbi
+	// dispatch rounds unit callbacks while the target ledger retains precision.
+	wt_hashmap<std::string, double> fractionalGroupTargets;
+	fractionalGroupTargets[rbCode] = 7.5;
+	fractionalGroupTargets[auCode] = 8.0;
+	executer.set_position(fractionalGroupTargets);
+	EXPECT_TRUE(groupProbe->positionSnapshot().empty());
+	expectLastTarget(rbProbe, 8.0, 2);
+	expectLastTarget(auProbe, 8.0, 2);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, rbCode), 7.5);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, auCode), 8.0);
+
+	// Integer member targets may also imply a fractional group count.
+	wt_hashmap<std::string, double> fractionalCountTargets;
+	fractionalCountTargets[rbCode] = 7.0;
+	fractionalCountTargets[auCode] = 8.0;
+	executer.set_position(fractionalCountTargets);
+	EXPECT_TRUE(groupProbe->positionSnapshot().empty());
+	expectLastTarget(rbProbe, 7.0, 3);
+	expectLastTarget(auProbe, 8.0, 3);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, rbCode), 7.0);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, auCode), 8.0);
+
+	wt_hashmap<std::string, double> targets;
+	targets[rbCode] = 6.0;
+	targets[auCode] = 8.0;
+	executer.set_position(targets);
+
+	expectLastTarget(groupProbe, 3.0, 1);
+	expectLastTarget(rbProbe, 0.0, 4);
+	expectLastTarget(auProbe, 2.0, 4);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, groupCode), 3.0);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, rbCode), 0.0);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, auCode), 2.0);
+
+	executer.set_position(targets);
+	expectLastTarget(groupProbe, 3.0, 2);
+	expectLastTarget(rbProbe, 0.0, 5);
+	expectLastTarget(auProbe, 2.0, 5);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, groupCode), 3.0);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, rbCode), 0.0);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, auCode), 2.0);
+
+	wt_hashmap<std::string, double> empty;
+	executer.set_position(empty);
+	expectLastTarget(groupProbe, 0.0, 3);
+	expectLastTarget(rbProbe, 0.0, 6);
+	expectLastTarget(auProbe, 0.0, 6);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, groupCode), 0.0);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, rbCode), 0.0);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, auCode), 0.0);
+}
+
+TEST(WtArbiExecuterSerialization, OverlappingGroupsPreserveOriginalTargets)
+{
+	ArbiProbeFact fact;
+	auto firstGroupProbe = std::make_shared<ArbiProbe>();
+	auto secondGroupProbe = std::make_shared<ArbiProbe>();
+	auto rbProbe = std::make_shared<ArbiProbe>();
+	auto auProbe = std::make_shared<ArbiProbe>();
+	auto cuProbe = std::make_shared<ArbiProbe>();
+	WtArbiExecuter executer(NULL, "arbi_overlapping_group_targets", NULL);
+	std::shared_ptr<WTSVariant> config(WTSCfgLoader::load_from_content(
+		R"json({"scale":1.0,"poolsize":0,"strict_sync":false,
+		"groups":{"SHFE.ags":{"SHFE.rb.2510":2.0,"SHFE.au.2212":2.0},
+		"SHFE.agc":{"SHFE.rb.2510":1.0,"SHFE.cu.2212":1.0}},
+		"policy":{"default":{"name":"WtExeFact.WtMinImpactExeUnit"}}})json"),
+		[](WTSVariant* value) { if (value) value->release(); });
+	ASSERT_NE(config.get(), nullptr);
+	ASSERT_TRUE(executer.init(config.get()));
+
+	const std::string firstGroupCode = "SHFE.ags";
+	const std::string secondGroupCode = "SHFE.agc";
+	const std::string rbCode = "SHFE.rb.2510";
+	const std::string auCode = "SHFE.au.2212";
+	const std::string cuCode = "SHFE.cu.2212";
+	wtp::WtArbiExecuterTestAccess::registerUnit(executer, firstGroupCode, firstGroupProbe, &fact, false);
+	wtp::WtArbiExecuterTestAccess::registerUnit(executer, secondGroupCode, secondGroupProbe, &fact, false);
+	wtp::WtArbiExecuterTestAccess::registerUnit(executer, rbCode, rbProbe, &fact, false);
+	wtp::WtArbiExecuterTestAccess::registerUnit(executer, auCode, auProbe, &fact, false);
+	wtp::WtArbiExecuterTestAccess::registerUnit(executer, cuCode, cuProbe, &fact, false);
+
+	wt_hashmap<std::string, double> targets;
+	targets[rbCode] = 6.0;
+	targets[auCode] = 8.0;
+	targets[cuCode] = 5.0;
+	executer.set_position(targets);
+
+	EXPECT_TRUE(firstGroupProbe->positionSnapshot().empty());
+	EXPECT_TRUE(secondGroupProbe->positionSnapshot().empty());
+	ASSERT_EQ(rbProbe->positionSnapshot().size(), 1u);
+	ASSERT_EQ(auProbe->positionSnapshot().size(), 1u);
+	ASSERT_EQ(cuProbe->positionSnapshot().size(), 1u);
+	EXPECT_DOUBLE_EQ(rbProbe->positionSnapshot().back(), 6.0);
+	EXPECT_DOUBLE_EQ(auProbe->positionSnapshot().back(), 8.0);
+	EXPECT_DOUBLE_EQ(cuProbe->positionSnapshot().back(), 5.0);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, rbCode), 6.0);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, auCode), 8.0);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, cuCode), 5.0);
+}
+
 TEST(WtArbiExecuterSerialization, OlderTargetBatchCannotWriteAfterNewerBatchStarts)
 {
 	ArbiProbeFact fact;
@@ -1185,7 +1326,7 @@ TEST(WtArbiExecuterSerialization, StartupCallbackFailureDiscardsRetainedTickAndS
 	}
 }
 
-TEST(WtArbiExecuterSerialization, PluginInitializationFailureBlocksRetryAfterEnvironmentRecovers)
+TEST(WtArbiExecuterSerialization, PluginInitializationFailureCanRetryAfterEnvironmentRecovers)
 {
 	r71::R71PluginDir pluginDir;
 	ASSERT_TRUE(pluginDir.ok());
@@ -1211,21 +1352,29 @@ TEST(WtArbiExecuterSerialization, PluginInitializationFailureBlocksRetryAfterEnv
 		[](WTSVariant* value) { if (value) value->release(); });
 	ASSERT_NE(config.get(), nullptr);
 
-	R220ThrowingArbi executer(&factory, "arbi_plugin_init_fail", NULL);
-	executer.throw_on_first_callback = false;
-	executer.setStub(&stub);
-	ASSERT_TRUE(executer.init(config.get()));
-	executer.on_position_changed("SHFE.rb.2510", 1.0);
-	const ExecUnitInitStatus failed = executer.queryUnitInitStatus("SHFE.rb.2510");
+	auto executer = std::make_shared<R220ThrowingArbi>(&factory, "arbi_plugin_init_fail", nullptr);
+	executer->throw_on_first_callback = false;
+	executer->setStub(&stub);
+	ASSERT_TRUE(executer->init(config.get()));
+	WtExecuterMgr manager;
+	manager.add_executer(executer);
+	executer->on_position_changed("SHFE.rb.2510", 1.0);
+	const ExecUnitInitStatus failed = executer->queryUnitInitStatus("SHFE.rb.2510");
 	ASSERT_EQ(failed.state, ExecUnitInitState::FAILED);
-	EXPECT_NE(failed.error.find("automatic retry is disabled"), std::string::npos);
 
 	stub.comm_ = commodity.get();
-	EXPECT_EQ(executer.clearFailedUnitInitStatus("SHFE.rb.2510"), ExecUnitInitClearResult::RETRY_BLOCKED);
-	executer.on_position_changed("SHFE.rb.2510", 1.0);
-	const ExecUnitInitStatus stillFailed = executer.queryUnitInitStatus("SHFE.rb.2510");
-	EXPECT_EQ(stillFailed.state, ExecUnitInitState::FAILED);
-	EXPECT_EQ(stillFailed.generation, failed.generation);
+	EXPECT_EQ(executer->clearFailedUnitInitStatus("SHFE.rb.2510"), ExecUnitInitClearResult::CLEARED);
+
+	// ABI 2.2 proves the failed initializer synchronously destroyed its unit.
+	// A zero-delta trigger retries without changing the original target of +1.
+	executer->on_position_changed("SHFE.rb.2510", 0.0);
+	const ExecUnitInitStatus recovered = executer->queryUnitInitStatus("SHFE.rb.2510");
+	EXPECT_EQ(recovered.state, ExecUnitInitState::READY);
+	EXPECT_GT(recovered.generation, failed.generation);
+
+	WtExecQuiesceCoordinator coordinator(std::vector<WtExecuterMgr*>{ &manager });
+	ASSERT_TRUE(coordinator.quiesce_all());
+	EXPECT_TRUE(coordinator.is_complete());
 }
 
 TEST(WtArbiExecuterSerialization, InitializedV21PluginOwnerIsRetainedUntilItsHooksQuiesce)

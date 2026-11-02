@@ -136,7 +136,7 @@ public:
 		_connectCnt++;
 		if (_stats != nullptr)
 			_stats->connectCnt++;
-		return true;
+		return _connectRet;
 	}
 
 	virtual bool disconnect() override { _disconnectCnt++; return true; }
@@ -183,6 +183,7 @@ public:
 	bool		_releaseThrows { false };
 	FakeParserApiStats* _stats { nullptr };
 	bool		_connected { false };
+	bool		_connectRet { true };
 	int			_initCnt { 0 };
 	int			_spiRegCnt { 0 };
 	int			_releaseCnt { 0 };
@@ -538,6 +539,22 @@ TEST_F(R18ParserAdapterTest, InitExtSubscribesEveryContractFullCode)
 	pa.release();
 	EXPECT_EQ(stats.releaseCnt, 1);
 	EXPECT_TRUE(stats.destroyed);
+}
+
+TEST_F(R18ParserAdapterTest, RunReportsConnectionCommandSubmission)
+{
+	ParserAdapter pa(&_bdMgr, &_dm, nullptr);
+	EXPECT_FALSE(pa.run());
+	auto* api = new FakeParserApi();
+	ASSERT_TRUE(pa.initExt("r18_run_status", api));
+	api->_connectRet = false;
+	EXPECT_FALSE(pa.run());
+	EXPECT_EQ(api->_connectCnt, 1);
+	api->_connectRet = true;
+	EXPECT_TRUE(pa.run());
+	EXPECT_EQ(api->_connectCnt, 2);
+	pa.release();
+	EXPECT_FALSE(pa.run());
 }
 
 TEST_F(R18ParserAdapterTest, InitReleasesRetainedConfigWhenNoApiWasCreated)

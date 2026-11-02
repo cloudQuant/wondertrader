@@ -375,6 +375,9 @@ WtRtRunner::WtRtRunner()
 	, _ext_fnl_bar_loader(NULL)
 	, _ext_raw_bar_loader(NULL)
 	, _ext_adj_fct_loader(NULL)
+	, _feed_obj(NULL)
+	, _feeder_bars(NULL)
+	, _feeder_fcts(NULL)
 {
 	_exec_quiesce_coordinator.reset(new WtExecQuiesceCoordinator({
 		&_cta_engine.getExecuterMgr(),
@@ -575,9 +578,14 @@ void WtRtRunner::feedAdjFactors(const char* stdCode, uint32_t* dates, double* fa
 
 void WtRtRunner::feedRawBars(WTSBarStruct* bars, uint32_t count)
 {
-	if (_ext_fnl_bar_loader == NULL)
+	if (_ext_fnl_bar_loader == NULL && _ext_raw_bar_loader == NULL)
 	{
-		WTSLogger::error("Cannot feed bars because of no extented bar loader registered.");
+		WTSLogger::error("Cannot feed bars because no extended bar loader is registered.");
+		return;
+	}
+	if (_feeder_bars == NULL)
+	{
+		WTSLogger::error("Cannot feed bars because no bar feeder is loaded.");
 		return;
 	}
 
@@ -1082,6 +1090,13 @@ bool WtRtRunner::config(const char* cfgFile, bool isFile /* = true */)
 
 	//基础数据文件
 	WTSVariant* cfgBF = _config->get("basefiles");
+	if (cfgBF == NULL || cfgBF->type() != WTSVariant::VT_Object)
+	{
+		WTSLogger::error("Runner config requires basefiles to be an object");
+		_config->release();
+		_config = NULL;
+		return false;
+	}
 	if (cfgBF->get("session"))
 	{
 		_bd_mgr.loadSessions(cfgBF->getCString("session"));
@@ -1178,7 +1193,11 @@ bool WtRtRunner::config(const char* cfgFile, bool isFile /* = true */)
 	}
 
 	//初始化数据管理
-	initDataMgr();
+	if (!initDataMgr())
+	{
+		WTSLogger::error("Initializing configured data store failed");
+		return false;
+	}
 
 	//初始化开平策略
 	if (!initActionPolicy())
@@ -1328,10 +1347,19 @@ bool WtRtRunner::config(const char* cfgFile, bool isFile /* = true */)
 		
 	}
 
-	if (!_is_hft)
-		initCtaStrategies();
-	else
-		initHftStrategies();
+	if (_is_hft)
+	{
+		if (!initHftStrategies())
+		{
+			WTSLogger::error("Initializing configured HFT strategies failed");
+			return false;
+		}
+	}
+	else if (!initCtaStrategies())
+	{
+		WTSLogger::error("Initializing configured CTA strategies failed");
+		return false;
+	}
 	
 	bool releaseRequestedDuringConfig = false;
 	{
@@ -1504,26 +1532,77 @@ ExecUnitStatusApiResult WtRtRunner::clearFailedExecUnitInitStatus(uint32_t engin
 bool WtRtRunner::initCtaStrategies()
 {
 	WTSVariant* cfg = _config->get("strategies");
-	if (cfg == NULL || cfg->type() != WTSVariant::VT_Object)
+	if (cfg == NULL)
+		return true;
+	if (cfg->type() != WTSVariant::VT_Object)
 		return false;
 
 	cfg = cfg->get("cta");
-	if (cfg == NULL || cfg->type() != WTSVariant::VT_Array)
+	if (cfg == NULL)
+		return true;
+	if (cfg->type() != WTSVariant::VT_Array)
 		return false;
 
+	struct PendingCtaStrategy
+	{
+		WTSVariant* config;
+		const char* id;
+		const char* name;
+		int32_t slippage;
+		CtaStrategyPtr strategy;
+	};
+	std::vector<PendingCtaStrategy> pending;
+	pending.reserve(cfg->size());
+
+	// Resolve every active entry before init or context publication. Otherwise a
+	// valid earlier strategy can leave a live context when a later factory/unit
+	// is invalid and config() returns false.
 	for (uint32_t idx = 0; idx < cfg->size(); idx++)
 	{
 		WTSVariant* cfgItem = cfg->get(idx);
+		if (cfgItem == NULL || cfgItem->type() != WTSVariant::VT_Object)
+		{
+			WTSLogger::error("Invalid CTA strategy configuration at index {}", idx);
+			return false;
+		}
 		if (!cfgItem->getBoolean("active"))
 			continue;
 
 		const char* id = cfgItem->getCString("id");
 		const char* name = cfgItem->getCString("name");
 		int32_t slippage = cfgItem->getInt32("slippage");
-		CtaStrategyPtr stra = _cta_mgr.createStrategy(name, id);
-		stra->self()->init(cfgItem->get("params"));
-		CtaStraContext* ctx = new CtaStraContext(&_cta_engine, id, slippage);
-		ctx->set_strategy(stra->self());
+		if (id == NULL || id[0] == '\0' || name == NULL || name[0] == '\0')
+		{
+			WTSLogger::error("Creating CTA strategy failed: strategy id and name are required");
+			return false;
+		}
+
+		CtaStrategyPtr stra;
+		try
+		{
+			stra = _cta_mgr.createStrategy(name, id);
+		}
+		catch (...)
+		{
+			WTSLogger::error("Creating CTA strategy {} ({}) threw an exception", name, id);
+			return false;
+		}
+		CtaStrategy* strategy = stra == NULL ? NULL : stra->self();
+		if (strategy == NULL)
+		{
+			WTSLogger::error("Creating CTA strategy {} ({}) failed", name, id);
+			return false;
+		}
+		pending.push_back({ cfgItem, id, name, slippage, stra });
+	}
+
+	// Keep init/context publication in the original per-strategy order. The
+	// preflight above only moves factory resolution before context installation.
+	for (const PendingCtaStrategy& item : pending)
+	{
+		item.strategy->self()->init(item.config->get("params"));
+		CtaStraContext* ctx = new CtaStraContext(&_cta_engine, item.id, item.slippage);
+		ctx->set_strategy(item.strategy->self());
 		_cta_engine.addContext(CtaContextPtr(ctx));
 	}
 
@@ -1533,11 +1612,15 @@ bool WtRtRunner::initCtaStrategies()
 bool WtRtRunner::initSelStrategies()
 {
 	WTSVariant* cfg = _config->get("strategies");
-	if (cfg == NULL || cfg->type() != WTSVariant::VT_Object)
+	if (cfg == NULL)
+		return true;
+	if (cfg->type() != WTSVariant::VT_Object)
 		return false;
 
 	cfg = cfg->get("cta");
-	if (cfg == NULL || cfg->type() != WTSVariant::VT_Array)
+	if (cfg == NULL)
+		return true;
+	if (cfg->type() != WTSVariant::VT_Array)
 		return false;
 
 	for (uint32_t idx = 0; idx < cfg->size(); idx++)
@@ -1553,6 +1636,11 @@ bool WtRtRunner::initSelStrategies()
 		uint32_t date = cfgItem->getUInt32("date");
 		uint32_t time = cfgItem->getUInt32("time");
 		const char* period = cfgItem->getCString("period");
+		if (name == NULL || name[0] == '\0')
+		{
+			WTSLogger::error("Creating SEL strategy {} failed: strategy name is required", id);
+			return false;
+		}
 
 		TaskPeriodType ptype;
 		if (wt_stricmp(period, "d") == 0)
@@ -1567,9 +1655,15 @@ bool WtRtRunner::initSelStrategies()
 			ptype = TPT_None;
 
 		SelStrategyPtr stra = _sel_mgr.createStrategy(name, id);
-		stra->self()->init(cfgItem->get("params"));
+		SelStrategy* strategy = stra == NULL ? NULL : stra->self();
+		if (strategy == NULL)
+		{
+			WTSLogger::error("Creating SEL strategy {} ({}) failed", name, id);
+			return false;
+		}
+		strategy->init(cfgItem->get("params"));
 		SelStraContext* ctx = new SelStraContext(&_sel_engine, id, slippage);
-		ctx->set_strategy(stra->self());
+		ctx->set_strategy(strategy);
 		_sel_engine.addContext(SelContextPtr(ctx), date, time, ptype);
 	}
 
@@ -1579,16 +1673,39 @@ bool WtRtRunner::initSelStrategies()
 bool WtRtRunner::initHftStrategies()
 {
 	WTSVariant* cfg = _config->get("strategies");
-	if (cfg == NULL || cfg->type() != WTSVariant::VT_Object)
+	if (cfg == NULL)
+		return true;
+	if (cfg->type() != WTSVariant::VT_Object)
 		return false;
 
 	cfg = cfg->get("hft");
-	if (cfg == NULL || cfg->type() != WTSVariant::VT_Array)
+	if (cfg == NULL)
+		return true;
+	if (cfg->type() != WTSVariant::VT_Array)
 		return false;
 
+	struct PendingHftStrategy
+	{
+		WTSVariant* config;
+		const char* id;
+		const char* name;
+		bool agent;
+		int32_t slippage;
+		HftStrategyPtr strategy;
+	};
+	std::vector<PendingHftStrategy> pending;
+	pending.reserve(cfg->size());
+
+	// Resolve all active factories before any HFT context or trader sink is
+	// installed, so a later invalid unit cannot leave earlier registrations.
 	for (uint32_t idx = 0; idx < cfg->size(); idx++)
 	{
 		WTSVariant* cfgItem = cfg->get(idx);
+		if (cfgItem == NULL || cfgItem->type() != WTSVariant::VT_Object)
+		{
+			WTSLogger::error("Invalid HFT strategy configuration at index {}", idx);
+			return false;
+		}
 		if (!cfgItem->getBoolean("active"))
 			continue;
 
@@ -1596,19 +1713,42 @@ bool WtRtRunner::initHftStrategies()
 		const char* name = cfgItem->getCString("name");
 		bool bAgent = cfgItem->getBoolean("agent");
 		int32_t slippage = cfgItem->getInt32("slippage");
+		if (id == NULL || id[0] == '\0' || name == NULL || name[0] == '\0')
+		{
+			WTSLogger::error("Creating HFT strategy failed: strategy id and name are required");
+			return false;
+		}
 
-		HftStrategyPtr stra = _hft_mgr.createStrategy(name, id);
-		if (stra == NULL)
-			continue;
+		HftStrategyPtr stra;
+		try
+		{
+			stra = _hft_mgr.createStrategy(name, id);
+		}
+		catch (...)
+		{
+			WTSLogger::error("Creating HFT strategy {} ({}) threw an exception", name, id);
+			return false;
+		}
+		HftStrategy* strategy = stra == NULL ? NULL : stra->self();
+		if (strategy == NULL)
+		{
+			WTSLogger::error("Creating HFT strategy {} ({}) failed", name, id);
+			return false;
+		}
 
-		stra->self()->init(cfgItem->get("params"));
-		HftStraContext* ctx = new HftStraContext(&_hft_engine, id, bAgent, slippage);
-		ctx->set_strategy(stra->self());
+		pending.push_back({ cfgItem, id, name, bAgent, slippage, stra });
+	}
+
+	for (const PendingHftStrategy& item : pending)
+	{
+		item.strategy->self()->init(item.config->get("params"));
+		HftStraContext* ctx = new HftStraContext(&_hft_engine, item.id, item.agent, item.slippage);
+		ctx->set_strategy(item.strategy->self());
 		// Publish the context before addSink: addSink may synchronously deliver
 		// the initial READY event when the adapter is already connected.
 		_hft_engine.addContext(HftContextPtr(ctx));
 
-		const char* traderid = cfgItem->getCString("trader");
+		const char* traderid = item.config->getCString("trader");
 		TraderAdapterPtr trader = _traders.getAdapter(traderid);
 		if (trader)
 		{
@@ -1664,6 +1804,12 @@ bool WtRtRunner::initEngine()
 		_cta_engine.init(cfg, &_bd_mgr, &_data_mgr, &_hot_mgr, &_notifier);
 		_engine = &_cta_engine;
 	}
+	if (!_engine->fee_config_valid())
+	{
+		WTSLogger::error("Runner initialization rejected: fee template configuration is invalid");
+		_engine = NULL;
+		return false;
+	}
 
 	_engine->set_adapter_mgr(&_traders);
 	
@@ -1674,11 +1820,13 @@ bool WtRtRunner::initDataMgr()
 {
 	WTSVariant* cfg = _config->get("data");
 	if (cfg == NULL)
-		return false;
+		return true;
 
 	_data_mgr.regsiter_loader(this);
 
-	_data_mgr.init(cfg, _engine, true);
+	const bool initialized = _data_mgr.init(cfg, _engine, true);
+	if (!initialized && cfg->get("store") != NULL)
+		return false;
 
 	WTSLogger::log_raw(LL_INFO, "Data manager initialized");
 	return true;
@@ -2607,8 +2755,16 @@ void WtRtRunner::parser_unsubscribe(const char* id, const char* code)
 
 void WtRtRunner::on_ext_parser_quote(const char* id, WTSTickStruct* curTick, uint32_t uProcFlag)
 {
-	if (id == NULL || id[0] == '\0' || curTick == NULL)
+	if (id == NULL || id[0] == '\0')
+	{
+		WTSLogger::warn("External parser quote ignored: parser id is null or empty");
 		return;
+	}
+	if (curTick == NULL)
+	{
+		WTSLogger::warn("External parser quote for {} ignored: tick is null", id);
+		return;
+	}
 
 	{
 		std::lock_guard<std::mutex> configLock(_status_config_mutex);

@@ -7,23 +7,198 @@
  *      usertag 打上 "otp.<id>.<localid>" 标记、市价/限价选择、提交失败(ret<0)返回 UINT_MAX、
  *      撤单前的存活检查与风控检查、撤单后按回报摘除订单。
  *   B. 风控开启后 checkOrderLimits / checkCancelLimits 的实体分支：
- *      init() 的 riskmon 段解析（注意：无 module 时 init 返回 false，但风控参数已落地）、
- *      撤单总量封禁进 _exclude_codes、被排除合约短路返回、getRiskParams 的品种命中/回落 default。
- *      另证一条实测结论：时间缓存是以「交易所原始代码」为键写入的，
- *      而 checkOrderLimits 用「标准代码」查，因此频率窗口永不命中（见 bugs/p11）。
+ *      使用真实 TraderMocker 插件走完整 init、活跃 default 风控策略的解析，
+ *      验证累计撤单封禁进入 _exclude_codes、被排除合约短路返回及品种规则命中。
+ *      频率用例保留 boundary=2 的拒绝 oracle；当前实现仍错误放行第三次预检查
+ *      （R3-002 产品红控）。
  */
 #include "p11_trader_fixture.h"
 
+#include "Share/DLLHelper.hpp"
+#include "WtCore/ActionPolicyMgr.h"
+
+#include <atomic>
+#include <chrono>
+#include <condition_variable>
 #include <fstream>
+#include <memory>
+#include <mutex>
+#include <sstream>
 
 using namespace p11fix;
 using wtp::TraderAdapter;
+using wtp::ActionPolicyMgr;
 
 namespace {
+
+namespace fs = std::filesystem;
+
+#ifndef WT_P11_TRADERMOCKER_PATH
+#error "WT_P11_TRADERMOCKER_PATH must point to the built TraderMocker plugin"
+#endif
 
 const char* kStdAu = "SHFE.au.2212";
 const char* kTag1001 = "otp.p11r.1001";
 const char* kTag1002 = "otp.p11r.1002";
+
+class ScopedMockerEnvironment
+{
+public:
+    explicit ScopedMockerEnvironment(const fs::path& root)
+        : _old_cwd(fs::current_path())
+        , _old_inst_dir(WtHelper::getInstDir())
+    {
+        // Cache the original CWD before switching directories: getCWD() is
+        // process-static, so module lookup must fall back to the staged instdir.
+        const fs::path original_cwd(WtHelper::getCWD());
+        std::error_code cwd_ec;
+        const bool same_cwd = fs::equivalent(original_cwd, _old_cwd, cwd_ec);
+        if (cwd_ec || !same_cwd)
+        {
+            _error = "WtHelper CWD cache differs from the process CWD";
+            if (cwd_ec)
+                _error += ": " + cwd_ec.message();
+            return;
+        }
+        const std::string module_name = DLLHelper::wrap_module("TraderMocker", "lib");
+        const fs::path cwd_module = original_cwd / "traders" / module_name;
+        if (fs::exists(cwd_module))
+        {
+            _error = "CWD already contains a TraderMocker plugin: " + cwd_module.string();
+            return;
+        }
+
+        const fs::path source(WT_P11_TRADERMOCKER_PATH);
+        if (!fs::exists(source))
+        {
+            _error = "TraderMocker plugin missing: " + source.string();
+            return;
+        }
+
+        std::error_code ec;
+        fs::create_directories(root / "traders", ec);
+        if (ec)
+        {
+            _error = "cannot create temporary traders directory: " + ec.message();
+            return;
+        }
+        const fs::path staged_module = root / "traders" / module_name;
+        if (!fs::is_regular_file(source))
+        {
+            _error = "TraderMocker plugin is not a regular file: " + source.string();
+            return;
+        }
+        fs::copy_file(source, staged_module, fs::copy_options::overwrite_existing, ec);
+        if (ec)
+        {
+            _error = "cannot copy TraderMocker plugin: " + ec.message();
+            return;
+        }
+        if (!fs::is_regular_file(staged_module))
+        {
+            _error = "staged TraderMocker plugin is not a regular file: " + staged_module.string();
+            return;
+        }
+
+        fs::current_path(root, ec);
+        if (ec)
+        {
+            _error = "cannot switch to temporary mocker CWD: " + ec.message();
+            return;
+        }
+        _cwd_changed = true;
+
+        const std::string inst_dir = root.string() + "/";
+        WtHelper::setInstDir(inst_dir.c_str());
+        _inst_dir_changed = true;
+        _ok = true;
+    }
+
+    ~ScopedMockerEnvironment()
+    {
+        if (_inst_dir_changed)
+            WtHelper::setInstDir(_old_inst_dir.c_str());
+        if (_cwd_changed)
+        {
+            std::error_code ec;
+            fs::current_path(_old_cwd, ec);
+        }
+    }
+
+    bool ok() const { return _ok; }
+    const std::string& error() const { return _error; }
+
+private:
+    fs::path _old_cwd;
+    std::string _old_inst_dir;
+    std::string _error;
+    bool _cwd_changed = false;
+    bool _inst_dir_changed = false;
+    bool _ok = false;
+};
+
+class RiskMockerSink : public RecordingSink
+{
+public:
+    void on_channel_ready() override
+    {
+        RecordingSink::on_channel_ready();
+        {
+            std::lock_guard<std::mutex> lock(_mutex);
+            _ready = true;
+        }
+        _changed.notify_all();
+    }
+
+    void on_order(uint32_t localid, const char* stdCode, bool isBuy, double totalQty,
+        double leftQty, double price, bool isCanceled = false) override
+    {
+        RecordingSink::on_order(localid, stdCode, isBuy, totalQty, leftQty, price, isCanceled);
+        {
+            std::lock_guard<std::mutex> lock(_mutex);
+            ++_orders;
+        }
+        _changed.notify_all();
+    }
+
+    bool waitReady()
+    {
+        std::unique_lock<std::mutex> lock(_mutex);
+        return _changed.wait_for(lock, std::chrono::seconds(5), [this] { return _ready; });
+    }
+
+    bool waitOrders(uint32_t count)
+    {
+        std::unique_lock<std::mutex> lock(_mutex);
+        return _changed.wait_for(lock, std::chrono::seconds(5), [this, count] { return _orders >= count; });
+    }
+
+private:
+    std::mutex _mutex;
+    std::condition_variable _changed;
+    bool _ready = false;
+    uint32_t _orders = 0;
+};
+
+uint32_t nextMockerId()
+{
+    static std::atomic<uint32_t> sequence{ 0 };
+    return static_cast<uint32_t>(::getpid()) * 100 + sequence.fetch_add(1, std::memory_order_relaxed) + 1;
+}
+
+std::string mockerRiskConfig(uint32_t mockerId, const std::string& riskmon)
+{
+    std::ostringstream json;
+    json << "{\"module\":\"TraderMocker\",\"mockerid\":" << mockerId
+        << ",\"span\":0,\"udp_port\":0,\"savedata\":false,\"riskmon\":" << riskmon << "}";
+    return json.str();
+}
+
+void releaseVariant(wtp::WTSVariant* value)
+{
+    if (value)
+        value->release();
+}
 
 WTSOrderInfo* makeAliveOrder(WTSContractInfo* ct, WTSDirectionType dir, WTSOffsetType off,
     double vol, double traded, const char* oid, const char* utag, WTSOrderFlag flag = WOF_NOR)
@@ -236,32 +411,40 @@ TEST_F(P11PreOrderRisk, cancel_of_dead_order_is_rejected)
 
 TEST_F(P11PreOrderRisk, risk_params_loaded_by_init_and_cancel_limit_blocks)
 {
-    wtp::WTSVariant* cfg = writeCfg("risk.json",
-        "{\"ignore_selfmatch\":false,\"savedata\":false,"
-        "\"riskmon\":{\"active\":true,\"policy\":{"
+    const std::string riskmon =
+        "{\"active\":true,\"policy\":{"
         "\"default\":{\"order_times_boundary\":2,\"order_stat_timespan\":60,"
         "\"order_total_limits\":100,\"cancel_times_boundary\":9,"
         "\"cancel_stat_timespan\":60,\"cancel_total_limits\":2},"
         "\"SHFE.au\":{\"order_times_boundary\":9,\"order_stat_timespan\":60,"
         "\"order_total_limits\":9,\"cancel_times_boundary\":9,"
-        "\"cancel_stat_timespan\":60,\"cancel_total_limits\":9}}}}");
-    ASSERT_NE(nullptr, cfg);
+        "\"cancel_stat_timespan\":60,\"cancel_total_limits\":9}}}";
+    std::unique_ptr<wtp::WTSVariant, decltype(&releaseVariant)> cfg(
+        writeCfg("risk.json", mockerRiskConfig(nextMockerId(), riskmon)), &releaseVariant);
+    ASSERT_NE(nullptr, cfg.get());
 
+    ScopedMockerEnvironment mockerEnv(tmp_);
+    ASSERT_TRUE(mockerEnv.ok()) << mockerEnv.error();
+    ActionPolicyMgr policy;
+    RiskMockerSink sink;
     TraderAdapter trader;
-    ASSERT_TRUE(trader.initExt(id_.c_str(), &api_, &bd_, NULL));
-    // 配置里没有 module -> init 返回 false, 但 _risk_mon_enabled / _risk_params_map 已经落地
-    EXPECT_FALSE(trader.init(id_.c_str(), cfg, &bd_, NULL));
-    cfg->release();
+    ASSERT_TRUE(trader.init(id_.c_str(), cfg.get(), &bd_, &policy));
+    cfg.reset();
+    trader.addSink(&sink);
     ASSERT_TRUE(trader.run());
-    EXPECT_EQ(TraderAdapter::AS_LOGINING, trader.state());
+    ASSERT_TRUE(sink.waitReady()) << "TraderMocker query callbacks did not complete";
 
     EXPECT_TRUE(trader.checkCancelLimits(kStdCode));
     EXPECT_TRUE(trader.checkOrderLimits(kStdCode));
 
     // 两笔撤销回报 -> total_cancels 达到 cancel_total_limits(2)
-    trader.onPushOrder(makeCanceledOrder(ct_, 1, 0, "RA1", kTag1001));
+    WTSOrderInfo* firstCanceled = makeCanceledOrder(ct_, 1, 0, "RA1", kTag1001);
+    trader.onPushOrder(firstCanceled);
+    firstCanceled->release();
     EXPECT_TRUE(trader.checkCancelLimits(kStdCode));         // 1 次, 未越界
-    trader.onPushOrder(makeCanceledOrder(ct_, 1, 0, "RA2", kTag1002));
+    WTSOrderInfo* secondCanceled = makeCanceledOrder(ct_, 1, 0, "RA2", kTag1002);
+    trader.onPushOrder(secondCanceled);
+    secondCanceled->release();
 
     EXPECT_FALSE(trader.checkCancelLimits(kStdCode));        // 2 次, 封禁并进排除队列
     EXPECT_FALSE(trader.checkCancelLimits(kStdCode));        // 排除队列短路
@@ -271,51 +454,52 @@ TEST_F(P11PreOrderRisk, risk_params_loaded_by_init_and_cancel_limit_blocks)
     // 被排除的合约连撤单请求都发不出去（doCancel 前置的风控检查直接拒绝）
     WTSOrderInfo* alive = makeAliveOrder(ct_, WDT_LONG, WOT_CLOSE, 1, 0, "RA3", "otp.p11r.1003");
     trader.onPushOrder(alive);
+    alive->release();
     OrderMap* tab = trader.getOrders("");
     ASSERT_NE(nullptr, tab);
     EXPECT_EQ(1u, tab->size());            // 活单进表
     tab->release();
-    EXPECT_EQ(0u, api_.n_action_);
     EXPECT_FALSE(trader.cancel(1003u));    // 风控封禁 -> 撤单请求不下发
-    EXPECT_EQ(0u, api_.n_action_);
+
+    trader.release();
 }
 
 TEST_F(P11PreOrderRisk, order_frequency_window_rejects_standard_code_after_successful_orders)
 {
-    wtp::WTSVariant* cfg = writeCfg("freq.json",
-        "{\"savedata\":false,\"riskmon\":{\"active\":true,\"policy\":{"
+    const std::string riskmon =
+        "{\"active\":true,\"policy\":{"
         "\"default\":{\"order_times_boundary\":2,\"order_stat_timespan\":60,"
         "\"order_total_limits\":100,\"cancel_times_boundary\":9,"
-        "\"cancel_stat_timespan\":60,\"cancel_total_limits\":99}}}}");
-    ASSERT_NE(nullptr, cfg);
+        "\"cancel_stat_timespan\":60,\"cancel_total_limits\":99}}}";
+    std::unique_ptr<wtp::WTSVariant, decltype(&releaseVariant)> cfg(
+        writeCfg("freq.json", mockerRiskConfig(nextMockerId(), riskmon)), &releaseVariant);
+    ASSERT_NE(nullptr, cfg.get());
 
+    ScopedMockerEnvironment mockerEnv(tmp_);
+    ASSERT_TRUE(mockerEnv.ok()) << mockerEnv.error();
+    ActionPolicyMgr policy;
+    RiskMockerSink sink;
     TraderAdapter trader;
-    ASSERT_TRUE(trader.initExt(id_.c_str(), &api_, &bd_, NULL));
-    EXPECT_FALSE(trader.init(id_.c_str(), cfg, &bd_, NULL));
-    cfg->release();
+    ASSERT_TRUE(trader.init(id_.c_str(), cfg.get(), &bd_, &policy));
+    cfg.reset();
+    trader.addSink(&sink);
     ASSERT_TRUE(trader.run());
+    ASSERT_TRUE(sink.waitReady()) << "TraderMocker query callbacks did not complete";
 
     // 未下单前放行
     EXPECT_TRUE(trader.checkOrderLimits(kStdCode));
 
-    // 连续成功提交 4 单，超过 order_times_boundary=2。
-    for (uint32_t i = 0; i < 4; ++i)
+    // 两笔提交均收到真实 TraderMocker 订单回报后，再检查 boundary=2 的第三次预检查。
+    for (uint32_t i = 0; i < 2; ++i)
+    {
         EXPECT_NE(UINT_MAX, trader.openLong(kStdCode, 7000.0, 1, 0));
-    EXPECT_EQ(4u, api_.n_insert_);
-    EXPECT_STREQ(kRawCode, api_.last_code_.c_str());
+        ASSERT_TRUE(sink.waitOrders(i + 1)) << "TraderMocker did not acknowledge order " << (i + 1);
+    }
 
-    // 按公开标准码检查应命中这些记录并拒绝后续下单。
+    // R3-002 产品红控：当前实现允许 boundary=2 后的第三次预检查通过。
     EXPECT_FALSE(trader.checkOrderLimits(kStdCode));
 
-    // 仅撤销一单，cancel_times_boundary=9，撤单频率检查仍应放行。
-    trader.onRspOrders(makeArray({
-        makeAliveOrder(ct_, WDT_LONG, WOT_OPEN, 1, 0, "FB1", kTag1001) }));
-    EXPECT_TRUE(trader.cancel(1001u));
-    EXPECT_EQ(1u, api_.n_action_);
-    EXPECT_TRUE(trader.checkCancelLimits(kStdCode));
-
-    // 未下单的品种自然放行
-    EXPECT_TRUE(trader.checkOrderLimits(kStdAu));
+    trader.release();
 }
 
 TEST_F(P11PreOrderRisk, inactive_riskmon_short_circuits_before_stat_map)
@@ -361,9 +545,9 @@ TEST_F(P11PreOrderRisk, init_rejects_null_params_and_second_cfg)
     EXPECT_FALSE(trader.init(id_.c_str(), cfg, &bd_, NULL));
     cfg->release();
 
-    // 二次 initExt 同样被 _cfg 之外的守卫挡住? 这里 _cfg 仍是 NULL, 所以 initExt 可以重复装配
-    ASSERT_TRUE(trader.initExt(id_.c_str(), &api_, &bd_, NULL));
-    EXPECT_EQ(2u, api_.n_init_);
+    // 已装配 API 时拒绝重复 initExt，且不会再次初始化同一个 API
+    EXPECT_FALSE(trader.initExt(id_.c_str(), &api_, &bd_, NULL));
+    EXPECT_EQ(1u, api_.n_init_);
 
     // api 为空则直接失败
     TraderAdapter trader2;

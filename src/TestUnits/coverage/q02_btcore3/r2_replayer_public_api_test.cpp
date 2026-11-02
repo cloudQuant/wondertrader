@@ -36,7 +36,7 @@ namespace
 	std::filesystem::path lane_root()
 	{
 		return std::filesystem::path(__FILE__).parent_path()
-			.parent_path().parent_path().parent_path();
+			.parent_path().parent_path().parent_path().parent_path();
 	}
 
 	std::filesystem::path make_temp_dir(const char* tag)
@@ -50,11 +50,12 @@ namespace
 	}
 
 	const char* const kStk = "SSE.STK.000001";
-	const char* const kFut = "DCE.a2105";
+	const char* const kFut = "DCE.a.2105";
 	const uint32_t kBarCnt = 5;
 	const uint32_t kDates[kBarCnt] = { 20200102u, 20200103u, 20200106u, 20200107u, 20200108u };
 
-	bool write_daily_csv(const std::filesystem::path& base, const char* stdCode)
+	bool write_daily_csv(const std::filesystem::path& base, const char* stdCode,
+		bool includeWarmup = false, bool includeCurrentDay = false)
 	{
 		std::error_code ec;
 		std::filesystem::create_directories(base / "csv", ec);
@@ -62,6 +63,8 @@ namespace
 		if (!out.is_open())
 			return false;
 		out << "date,time,open,high,low,close,volume,turnover,open_interest,diff_interest,settle\n";
+		if (includeWarmup)
+			out << "20191231,150000,9.0,10.0,8.5,9.5,900,9000,0,0,0\n";
 		for (uint32_t i = 0; i < kBarCnt; i++)
 		{
 			out << kDates[i] << ",150000,"
@@ -69,18 +72,21 @@ namespace
 				<< (9.5 + i) << "," << (10.5 + i) << ","
 				<< (1000 + i) << "," << (1000 + i) * 10.0 << ",0,0,0\n";
 		}
+		if (includeCurrentDay)
+			out << "20200109,150000,15.0,16.0,14.5,15.5,1005,15050,0,0,0\n";
 		out.close();
 		return true;
 	}
 
 	WTSVariant* pub_cfg(const std::filesystem::path& root,
-		const std::filesystem::path& base, const char* fees)
+		const std::filesystem::path& base, const char* fees,
+		uint64_t stime = 202001020930, uint64_t etime = 202001081500)
 	{
 		WTSVariant* cfg = WTSVariant::createObject();
 		cfg->append("mode", "csv");
 		cfg->append("path", base.string().c_str());
-		cfg->append("stime", static_cast<uint64_t>(202001020930));
-		cfg->append("etime", static_cast<uint64_t>(202001081500));
+		cfg->append("stime", stime);
+		cfg->append("etime", etime);
 		cfg->append("tick", false);
 		cfg->append("adjust_flag", static_cast<uint32_t>(0));
 		cfg->append("align_by_section", false);
@@ -164,15 +170,44 @@ protected:
 	std::filesystem::path _base;
 	std::filesystem::path _out;
 
-	void setup(HisDataReplayer& replayer, CountSink& sink, const char* fees)
+	void setup(HisDataReplayer& replayer, CountSink& sink, const char* fees,
+		uint64_t stime = 202001020930, uint64_t etime = 202001081500)
 	{
-		WTSVariant* cfg = pub_cfg(_root, _base, fees);
+		WTSVariant* cfg = pub_cfg(_root, _base, fees, stime, etime);
 		ASSERT_TRUE(replayer.init(cfg, NULL, NULL));
 		cfg->release();
 		replayer.register_sink(&sink, "r2_pub");
 		ASSERT_TRUE(replayer.prepare());
 	}
 };
+
+// A sink is required for the initialize callback. A missing sink must fail
+// before publishing a running replay or changing its observable replay time,
+// and registering a sink afterwards must permit a normal prepare.
+TEST_F(R2PublicTest, PrepareWithoutSinkFailsBeforeStateChangesAndAllowsRetry)
+{
+	HisDataReplayer replayer;
+	WTSVariant* cfg = pub_cfg(_root, _base, "");
+	ASSERT_TRUE(replayer.init(cfg, NULL, NULL));
+	cfg->release();
+	const uint32_t initialDate = replayer.get_date();
+	const uint32_t initialTime = replayer.get_min_time();
+	const uint32_t initialTradingDate = replayer.get_trading_date();
+	EXPECT_FALSE(replayer.prepare());
+	EXPECT_FALSE(replayer.prepare());
+	EXPECT_EQ(initialDate, replayer.get_date());
+	EXPECT_EQ(initialTime, replayer.get_min_time());
+	EXPECT_EQ(initialTradingDate, replayer.get_trading_date());
+
+	CountSink sink;
+	replayer.register_sink(&sink, "r2_prepare_retry");
+	ASSERT_TRUE(replayer.prepare());
+	EXPECT_EQ(1u, sink._initCnt);
+	EXPECT_EQ(20200102u, replayer.get_date());
+	EXPECT_EQ(930u, replayer.get_min_time());
+	replayer.stop();
+	replayer.run(false);
+}
 
 /*
  * loadFees 的三条早退/正常分支 + calc_fee 的全部费率算法：
@@ -280,6 +315,7 @@ TEST_F(R2PublicTest, stopBeforeRunQuitsReplayEarly)
 {
 	HisDataReplayer replayer;
 	CountSink sink;
+	ASSERT_TRUE(write_daily_csv(_base, kStk, true));
 	setup(replayer, sink, "");
 
 	// prepare 之后 _running 为 true
@@ -306,9 +342,10 @@ TEST_F(R2PublicTest, clearCacheForcesReloadOnNextPrepare)
 {
 	HisDataReplayer replayer;
 	CountSink sink;
-	setup(replayer, sink, "");
+	ASSERT_TRUE(write_daily_csv(_base, kStk, false, true));
+	setup(replayer, sink, "", 202001090930, 202001091500);
 
-	WTSKlineSlice* first = replayer.get_kline_slice(kStk, "d1", kBarCnt, 1, true);
+	WTSKlineSlice* first = replayer.get_kline_slice(kStk, "d1", kBarCnt, 1, false);
 	ASSERT_NE(nullptr, first);
 	EXPECT_EQ(kBarCnt, (uint32_t)first->size());
 	first->release();
@@ -318,7 +355,7 @@ TEST_F(R2PublicTest, clearCacheForcesReloadOnNextPrepare)
 	replayer.update_price(kStk, 88.0);
 	EXPECT_DOUBLE_EQ(88.0, replayer.get_cur_price(kStk));
 	replayer.clear_cache();
-	EXPECT_EQ(20200102u, replayer.get_date());
+	EXPECT_EQ(20200109u, replayer.get_date());
 	EXPECT_DOUBLE_EQ(0.0, replayer.get_cur_price(kStk));
 
 	replayer.run();
@@ -326,12 +363,15 @@ TEST_F(R2PublicTest, clearCacheForcesReloadOnNextPrepare)
 
 	// 二次 prepare：reset() 把游标还原，重新装载仍能拿到 5 根
 	ASSERT_TRUE(replayer.prepare());
+	EXPECT_EQ(20200109u, replayer.get_date());
 	WTSKlineSlice* second = replayer.get_kline_slice(kStk, "d1", kBarCnt, 1, false);
 	ASSERT_NE(nullptr, second);
 	EXPECT_EQ(kBarCnt, (uint32_t)second->size());
-	uint32_t firstDate = second->at(0)->date;
+	const uint32_t firstDate = second->at(0)->date;
+	const uint32_t lastDate = second->at(second->size() - 1)->date;
 	second->release();
-	EXPECT_TRUE(firstDate >= 20200102u && firstDate <= 20200108u);
+	EXPECT_EQ(20200102u, firstDate);
+	EXPECT_EQ(20200108u, lastDate);
 }
 
 /*
@@ -345,21 +385,20 @@ TEST_F(R2PublicTest, registeredTaskSwitchesToTaskReplayAndSchedules)
 	CountSink sink;
 	setup(replayer, sink, "");
 
-	replayer.register_task(1, 0, 935, "d1");
-	WTSKlineSlice* bars = replayer.get_kline_slice(kStk, "d1", kBarCnt, 1, true);
-	ASSERT_NE(nullptr, bars);
-	bars->release();
+	replayer.register_task(1, 0, 935, "d");
 
 	replayer.run();
-	EXPECT_GE(sink._schedCnt, 1u);
+	EXPECT_EQ(5u, sink._schedCnt);
 	EXPECT_EQ(1u, sink._doneCnt);
-	EXPECT_EQ(20200108u, sink._lastBarDate);
-	EXPECT_LE(sink._lastSchedTime, 100000u);
+	EXPECT_EQ(0u, sink._barClose);
+	EXPECT_EQ(20200108u, sink._lastSchedDate);
+	EXPECT_EQ(934u, sink._lastSchedTime);
 
 	// 非法周期 / 非法模板不应崩
 	replayer.register_task(2, 0, 935, "x1");
 	replayer.register_task(3, 0, 99999, "d1");
-	EXPECT_EQ(20200108u, replayer.get_date());
+	const std::string invalidTemplate(16, 'X');
+	replayer.register_task(4, 0, 935, "d", invalidTemplate.c_str());
 }
 
 /*

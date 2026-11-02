@@ -31,6 +31,44 @@ namespace
 	namespace fs = std::filesystem;
 
 	using R190Fixture = r72::Fixture;
+
+	class EmptyIcLoader : public r72::Loader
+	{
+	public:
+		bool loadRawHisTicks(void* obj, const char* stdCode, uint32_t uDate, FuncReadTicks cb) override
+		{
+			if (stdCode != nullptr && std::string(stdCode) == kIc)
+			{
+				cb(obj, nullptr, 0u);
+				return true;
+			}
+			return r72::Loader::loadRawHisTicks(obj, stdCode, uDate, cb);
+		}
+	};
+
+	struct ObservedTick
+	{
+		std::string code;
+		uint32_t actionDate;
+		uint32_t actionTime;
+		double price;
+	};
+
+	class RecordingSink : public r72::Sink
+	{
+	public:
+		std::vector<ObservedTick> ticks;
+
+		void handle_tick(const char* stdCode, WTSTickData* curTick, uint32_t pxType) override
+		{
+			if (stdCode != nullptr && curTick != nullptr)
+			{
+				const WTSTickStruct tick = curTick->getTickStruct();
+				ticks.push_back({ stdCode, tick.action_date, tick.action_time, tick.price });
+			}
+			r72::Sink::handle_tick(stdCode, curTick, pxType);
+		}
+	};
 }
 
 // 生产: HisDataReplayer.cpp:1633（getNextTransTime 在 csv 模式 check 失败时 continue）
@@ -41,7 +79,7 @@ namespace
 // 至少有一轮有效迭代，使空列表分支实际执行。
 TEST_F(R190Fixture, R190His_TickReplayEmptyHftListsContinue)
 {
-	r72::Loader loader;
+	EmptyIcLoader loader;
 	loader.ticks[std::string(kCu) + "#20200102"] = {
 		r72::make_tick_struct(kCu, 20200102u, 93100000u, 70000.0, 69990.0, 70010.0),
 		r72::make_tick_struct(kCu, 20200102u, 93200000u, 70001.0, 70000.0, 70002.0)
@@ -105,6 +143,7 @@ TEST_F(R190Fixture, R190His_DailyCursorCatchesUpAfterTickRun)
 {
 	r72::Loader loader;
 	loader.finalBars[kCu] = {
+		r190::make_daily(20191231u, 69990.0),	// 回放起点前的已完成日线，供首个历史切片定位
 		r190::make_daily(20200102u, 70000.0),
 		r190::make_daily(20200103u, 70010.0),
 		r190::make_daily(20200106u, 70020.0),
@@ -142,6 +181,7 @@ TEST_F(R190Fixture, R190His_UnbarsDailySkipStaleBars)
 {
 	r72::Loader loader;
 	loader.finalBars[kCu] = {
+		r190::make_daily(20191231u, 69990.0),	// 回放起点前的已完成日线
 		r190::make_daily(20200102u, 70000.0),
 		r190::make_daily(20200106u, 70050.0),
 	};
@@ -157,7 +197,7 @@ TEST_F(R190Fixture, R190His_UnbarsDailySkipStaleBars)
 	ASSERT_TRUE(rp.init(cfg, nullptr, &loader));
 	cfg->release();
 
-	r72::Sink sink;
+	RecordingSink sink;
 	rp.register_sink(&sink, "r190_unbars_skip");
 	ASSERT_TRUE(rp.prepare());
 
@@ -171,8 +211,19 @@ TEST_F(R190Fixture, R190His_UnbarsDailySkipStaleBars)
 	rp.run(false);
 
 	EXPECT_GT(sink.tickCalls, 0u);
-	EXPECT_EQ(1u, sink.barCalls);
+	EXPECT_EQ(2u, sink.barCalls);	// 02 与 06 两根主日线都在回放范围内闭合
 	EXPECT_EQ(1u, sink.doneCalls);
+	std::vector<ObservedTick> stockTicks;
+	for (const ObservedTick& tick : sink.ticks)
+		if (tick.code == kStk)
+			stockTicks.push_back(tick);
+	ASSERT_EQ(4u, stockTicks.size());	// 03/04/05 过期，06 日线是可模拟的正控
+	const double expectedStockPrices[] = { 10.2, 10.5, 10.1, 10.3 };
+	for (std::size_t i = 0; i < stockTicks.size(); ++i)
+	{
+		EXPECT_EQ(20200106u, stockTicks[i].actionDate);
+		EXPECT_DOUBLE_EQ(expectedStockPrices[i], stockTicks[i].price);
+	}
 }
 
 // 生产: HisDataReplayer.cpp:3651-3652（cacheFinalBarsFromLoader 命中 dsb 时
@@ -184,6 +235,7 @@ TEST_F(R190Fixture, R190His_UnbarsDsbDirectReadReusesCache)
 {
 	const fs::path dsb = _base / "his" / "day" / "SSE" / "000001.dsb";
 	std::vector<WTSBarStruct> stkBars = {
+		r190::make_daily(20191231u, 9.9),		// 同步提供暖场原始日线
 		r190::make_daily(20200102u, 10.0),
 		r190::make_daily(20200103u, 10.1),
 		r190::make_daily(20200106u, 10.2),
@@ -191,6 +243,7 @@ TEST_F(R190Fixture, R190His_UnbarsDsbDirectReadReusesCache)
 		r190::make_daily(20200108u, 10.4),
 	};
 	std::vector<WTSBarStruct> cuBars = {
+		r190::make_daily(20191231u, 69990.0),	// 回放起点前的已完成日线
 		r190::make_daily(20200102u, 70000.0),
 		r190::make_daily(20200103u, 70010.0),
 		r190::make_daily(20200106u, 70020.0),
@@ -272,6 +325,7 @@ TEST_F(R190Fixture, R190His_UnbarsCsvDsbDirectRead)
 	r72::Loader loader;
 	loader.autoTrans = false;
 	loader.finalBars[kCu] = {
+		r190::make_daily(20191231u, 69990.0),	// 回放起点前的已完成日线
 		r190::make_daily(20200102u, 70000.0),
 		r190::make_daily(20200103u, 70010.0),
 		r190::make_daily(20200106u, 70020.0),
@@ -342,13 +396,16 @@ TEST_F(R190Fixture, R190His_MinuteSimTicksSkipsStaleBars)
 {
 	r72::Loader loader;
 	loader.finalBars[kCu] = {
+		r190::make_minute(20200102u, 930u, 69990.0),	// 回放起点前的完整 5 分钟 bar
 		r190::make_minute(20200102u, 935u, 70000.0),
 		r190::make_minute(20200102u, 1305u, 70100.0),
 	};
 	loader.finalBars[kStk] = {
+		r190::make_minute(20200102u, 930u, 9.9),		// 回放起点前的完整 5 分钟 bar
 		r190::make_minute(20200102u, 936u, 10.0),
 		r190::make_minute(20200102u, 937u, 10.1),
 		r190::make_minute(20200102u, 938u, 10.2),
+		r190::make_minute(20200102u, 1305u, 10.3),	// 同一时刻的有效 bar，作为正控
 	};
 
 	HisDataReplayer rp;
@@ -356,7 +413,7 @@ TEST_F(R190Fixture, R190His_MinuteSimTicksSkipsStaleBars)
 	ASSERT_TRUE(rp.init(cfg, nullptr, &loader));
 	cfg->release();
 
-	r72::Sink sink;
+	RecordingSink sink;
 	rp.register_sink(&sink, "r190_min_skip");
 	ASSERT_TRUE(rp.prepare());
 
@@ -371,6 +428,18 @@ TEST_F(R190Fixture, R190His_MinuteSimTicksSkipsStaleBars)
 	rp.run(false);
 
 	EXPECT_GT(sink.tickCalls, 0u);
-	EXPECT_EQ(1u, sink.barCalls);
+	EXPECT_EQ(6u, sink.barCalls);	// 主线 2 根 + 股票 m5 4 根，均落在回放时间窗内
 	EXPECT_EQ(1u, sink.doneCalls);
+	std::vector<ObservedTick> stockTicks;
+	for (const ObservedTick& tick : sink.ticks)
+		if (tick.code == kStk)
+			stockTicks.push_back(tick);
+	ASSERT_EQ(4u, stockTicks.size());	// 9:36-9:38 过期，13:05 有效 bar 产生 OHLC 正控
+	const double expectedStockPrices[] = { 10.2, 10.5, 10.1, 10.3 };
+	for (std::size_t i = 0; i < stockTicks.size(); ++i)
+	{
+		EXPECT_EQ(20200102u, stockTicks[i].actionDate);
+		EXPECT_EQ(130500000u, stockTicks[i].actionTime);
+		EXPECT_DOUBLE_EQ(expectedStockPrices[i], stockTicks[i].price);
+	}
 }

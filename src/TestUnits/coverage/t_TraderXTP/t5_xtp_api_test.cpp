@@ -324,6 +324,8 @@ protected:
 	WTSContractInfo* stk_ct_ = NULL;
 	WTSCommodityInfo* fut_comm_ = NULL;
 	WTSContractInfo* fut_ct_ = NULL;
+	WTSCommodityInfo* opt_comm_ = NULL;
+	WTSContractInfo* opt_ct_ = NULL;
 
 	void SetUp() override
 	{
@@ -345,6 +347,12 @@ protected:
 		fut_comm_->setVolScale(3);
 		sink_.bd_.regis(fut_comm_, fut_ct_);
 
+		opt_ct_ = WTSContractInfo::create("OPT2601C3000", "测试 ETF 期权", "SSE", "ETFOPT");
+		opt_comm_ = WTSCommodityInfo::create("ETFOPT", "测试 ETF 期权", "SSE", "TRADE", "CHINA");
+		opt_comm_->setCategory(CC_ETFOption);
+		opt_comm_->setVolScale(1);
+		sink_.bd_.regis(opt_comm_, opt_ct_);
+
 		api_.registerSpi(&sink_);
 	}
 
@@ -355,6 +363,8 @@ protected:
 		if (stk_comm_) stk_comm_->release();
 		if (fut_ct_) fut_ct_->release();
 		if (fut_comm_) fut_comm_->release();
+		if (opt_ct_) opt_ct_->release();
+		if (opt_comm_) opt_comm_->release();
 	}
 };
 
@@ -522,6 +532,7 @@ TEST_F(TraderXTPTest, order_event_szse_unregistered_and_rejected_mapping)
 	snprintf(ord.ticker, sizeof(ord.ticker), "%s", "600000");
 	ord.quantity = 100;
 	ord.side = XTP_SIDE_SELL;
+	ord.position_effect = XTP_POSITION_EFFECT_INIT;    // 股票按 SDK 合同使用 INIT
 	ord.order_status = XTP_ORDER_STATUS_CANCELED;
 
 	api_.OnOrderEvent(&ord, NULL, 1);
@@ -579,6 +590,7 @@ TEST_F(TraderXTPTest, trade_event_converts_report_into_trade_info)
 	trd.order_xtp_id = 8123456;
 	trd.trade_time = 20250102143000500ULL;
 	trd.side = XTP_SIDE_SELL;
+	trd.position_effect = XTP_POSITION_EFFECT_INIT;    // 股票按 SDK 合同使用 INIT
 
 	api_.OnTradeEvent(&trd, 1);
 	ASSERT_EQ(1u, sink_.n_push_trade_);
@@ -594,6 +606,47 @@ TEST_F(TraderXTPTest, trade_event_converts_report_into_trade_info)
 	EXPECT_EQ((int)WOT_CLOSE, (int)t.offset);          // SELL → 平
 	EXPECT_EQ((int)WTT_Common, (int)t.trade_type);
 	EXPECT_EQ(20250102u, t.trade_date);
+}
+
+/// 期权回报保留平昨；普通股票用 INIT 并仍按 side 映射平仓。
+TEST_F(TraderXTPTest, option_close_yesterday_order_and_trade_callbacks_preserve_offset)
+{
+	ASSERT_TRUE(opt_comm_->isOption());
+
+	XTPOrderInfo order;
+	memset(&order, 0, sizeof(order));
+	order.market = XTP_MKT_SH_A;
+	snprintf(order.ticker, sizeof(order.ticker), "%s", "OPT2601C3000");
+	order.price = 0.123;
+	order.quantity = 2;
+	order.price_type = XTP_PRICE_LIMIT;
+	order.side = XTP_SIDE_BUY;
+	order.position_effect = XTP_POSITION_EFFECT_CLOSEYESTERDAY;
+	order.business_type = XTP_BUSINESS_TYPE_OPTION;
+	order.order_client_id = 7001;
+	order.order_xtp_id = 9001;
+	order.order_status = XTP_ORDER_STATUS_NOTRADEQUEUEING;
+
+	api_.OnOrderEvent(&order, NULL, 1);
+	ASSERT_EQ(1u, sink_.n_push_order_);
+	EXPECT_EQ((int)WOT_CLOSEYESTERDAY, (int)sink_.last_order_.offset);
+
+	XTPTradeReport trade;
+	memset(&trade, 0, sizeof(trade));
+	trade.market = XTP_MKT_SH_A;
+	snprintf(trade.ticker, sizeof(trade.ticker), "%s", "OPT2601C3000");
+	trade.price = 0.124;
+	trade.quantity = 1;
+	snprintf(trade.exec_id, sizeof(trade.exec_id), "%s", "OPT-CY-1");
+	trade.order_xtp_id = 9001;
+	trade.trade_time = 20250102143000500ULL;
+	trade.side = XTP_SIDE_BUY;
+	trade.position_effect = XTP_POSITION_EFFECT_CLOSEYESTERDAY;
+	trade.business_type = XTP_BUSINESS_TYPE_OPTION;
+
+	api_.OnTradeEvent(&trade, 1);
+	ASSERT_EQ(1u, sink_.n_push_trade_);
+	EXPECT_EQ((int)WOT_CLOSEYESTERDAY, (int)sink_.last_trade_.offset);
 }
 
 /// 未知合约的成交回报 → makeTradeInfo NULL → 不外发也不崩

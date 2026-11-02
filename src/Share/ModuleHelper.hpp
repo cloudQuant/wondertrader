@@ -10,35 +10,28 @@
 #include "../Share/StrUtil.hpp"
 
 #ifdef _MSC_VER
-#include <wtypes.h>
-/**
- * @brief Windows平台下DLL模块句柄
- * @details 在Windows平台下存储当前已加载的DLL模块句柄
- */
-static HMODULE	g_dllModule = NULL;
+#ifndef NOMINMAX
+#define NOMINMAX
+#define WT_MODULE_HELPER_UNDEFINE_NOMINMAX
+#endif
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#define WT_MODULE_HELPER_UNDEFINE_WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#ifdef WT_MODULE_HELPER_UNDEFINE_WIN32_LEAN_AND_MEAN
+#undef WT_MODULE_HELPER_UNDEFINE_WIN32_LEAN_AND_MEAN
+#undef WIN32_LEAN_AND_MEAN
+#endif
+#ifdef WT_MODULE_HELPER_UNDEFINE_NOMINMAX
+#undef WT_MODULE_HELPER_UNDEFINE_NOMINMAX
+#undef NOMINMAX
+#endif
 
-/**
- * @brief Windows平台下DLL入口点函数
- * @param hModule 模块句柄
- * @param ul_reason_for_call 调用原因
- * @param lpReserved 保留参数
- * @return BOOL 返回TRUE表示成功
- * @details 当DLL被加载到进程空间时，保存模块句柄以便后续使用
- */
-BOOL APIENTRY DllMain(
-	HANDLE hModule,
-	DWORD  ul_reason_for_call,
-	LPVOID lpReserved
-)
-{
-	switch (ul_reason_for_call)
-	{
-	case DLL_PROCESS_ATTACH:
-		g_dllModule = (HMODULE)hModule;
-		break;
-	}
-	return TRUE;
-}
+// Writable TU-local storage cannot be folded with another module's anchor.
+// Looking up this address identifies the DLL (or executable) containing the TU
+// without defining a DllMain in a public header.
+static char wt_module_helper_path_anchor;
 #else
 #include <dlfcn.h>
 /**
@@ -55,13 +48,14 @@ static void wt_module_helper_path_anchor() {}
  */
 static const std::string& getInstPath()
 {
-	static std::string moduleName;
-	if (moduleName.empty())
-	{
-		Dl_info dl_info;
-		dladdr((void *)wt_module_helper_path_anchor, &dl_info);
-		moduleName = dl_info.dli_fname;
-	}
+	// Cache failures as well as successes and let C++ initialize the result
+	// once, so concurrent first callers never write the same string.
+	static const std::string moduleName = []() -> std::string {
+		Dl_info dl_info{};
+		if (dladdr((void *)wt_module_helper_path_anchor, &dl_info) == 0 || dl_info.dli_fname == nullptr)
+			return {};
+		return dl_info.dli_fname;
+	}();
 
 	return moduleName;
 }
@@ -78,21 +72,45 @@ static const std::string& getInstPath()
  */
 [[maybe_unused]] static const char* getBinDir()
 {
-	static std::string g_bin_dir;
-
-	if (g_bin_dir.empty())
-	{
 #ifdef _MSC_VER
-		char strPath[MAX_PATH];
-		GetModuleFileName(g_dllModule, strPath, MAX_PATH);
+	// Initialize once, including on failure, so concurrent callers do not race
+	// over a mutable path.  An empty string reports lookup/truncation failure;
+	// never pass a null module handle to GetModuleFileNameA (which means the exe).
+	static const std::string g_bin_dir = []() -> std::string {
+		HMODULE module = NULL;
+		if (!GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+			GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+			reinterpret_cast<LPCSTR>(&wt_module_helper_path_anchor), &module) || module == NULL)
+			return {};
 
-		g_bin_dir = StrUtil::standardisePath(strPath, false);
+		std::vector<char> path(MAX_PATH);
+		// Accommodate long Windows paths and multibyte ANSI encodings, while
+		// refusing to turn a persistently truncated result into a directory.
+		constexpr std::size_t maxPathBytes = 131072;
+		for (;;)
+		{
+			DWORD length = GetModuleFileNameA(module, path.data(), static_cast<DWORD>(path.size()));
+			if (length == 0)
+				return {};
+			if (length < path.size())
+			{
+				std::string modulePath = StrUtil::standardisePath(std::string(path.data(), length), false);
+				const std::size_t pos = modulePath.find_last_of('/');
+				return pos == std::string::npos ? std::string() : modulePath.substr(0, pos + 1);
+			}
+			if (path.size() >= maxPathBytes)
+				return {};
+			path.resize(path.size() > maxPathBytes / 2 ? maxPathBytes : path.size() * 2);
+		}
+	}();
+	return g_bin_dir.c_str();
 #else
-		g_bin_dir = getInstPath();
-#endif
-		std::size_t nPos = g_bin_dir.find_last_of('/');
-		g_bin_dir = g_bin_dir.substr(0, nPos + 1);
-	}
+	static const std::string g_bin_dir = []() -> std::string {
+		const std::string& path = getInstPath();
+		const std::size_t pos = path.find_last_of('/');
+		return pos == std::string::npos ? std::string() : path.substr(0, pos + 1);
+	}();
 
 	return g_bin_dir.c_str();
+#endif
 }

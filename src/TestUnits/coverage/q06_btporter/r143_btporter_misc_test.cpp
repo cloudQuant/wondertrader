@@ -31,6 +31,9 @@
 #include "WtBtPorter/PorterDefs.h"
 #include "WtBtPorter/WtBtPorter.h"
 #include "WtBtPorter/WtBtRunner.h"
+#include "WtBtCore/CtaMocker.h"
+#include "WtBtCore/HftMocker.h"
+#include "WtBtCore/SelMocker.h"
 
 #include "Includes/WTSStruct.h"
 
@@ -116,6 +119,11 @@ void ticks_cb(CtxHandler, const char* /*code*/, WTSTickStruct* tick, WtUInt32 co
 void reset_singleton()
 {
 	WtBtRunner& r = getRunner();
+	r.stop();
+	r.replayer().register_sink(nullptr, "");
+	delete r.cta_mocker();
+	delete r.sel_mocker();
+	delete r.hft_mocker();
 	r.~WtBtRunner();
 	new (&r) WtBtRunner();
 }
@@ -147,23 +155,15 @@ const char* kCommodities =
 const char* kContracts =
 	"{\"SHFE\":{\"rb2510\":{\"name\":\"rb2510\",\"product\":\"rb\",\"exchg\":\"SHFE\"}}}";
 
-std::string make_cfg(const std::string& dir, const char* mode)
+std::string make_cfg(const std::string& dir)
 {
-	std::string section;
-	if (strcmp(mode, "hft") == 0)
-		section = "\"hft\":{\"name\":\"r143_hft_ticks\"}";
-	else
-		section = "\"" + std::string(mode) + "\":{\"name\":\"r143_" +
-			std::string(mode) + "_ticks\",\"slippage\":0}";
-
 	return "{\"replayer\":{\"mode\":\"none\",\"path\":\"" + dir + "\","
 		"\"stime\":20240103000000,\"etime\":20240104000000,\"tick\":true,"
 		"\"basefiles\":{"
 		"\"session\":\"" + dir + "/sessions.json\","
 		"\"commodity\":\"" + dir + "/commodities.json\","
 		"\"contract\":\"" + dir + "/contracts.json\"}},"
-		"\"env\":{\"mocker\":\"" + std::string(mode) + "\"},"
-		+ section + "}";
+		"\"env\":{\"mocker\":\"none\"}}";
 }
 
 struct TickFixture
@@ -185,7 +185,15 @@ struct TickFixture
 		getRunner().init((dir + "/r143_absent_logcfg.yaml").c_str(), true, dir.c_str());
 
 		register_ext_data_loader(no_bars, nullptr, nullptr, tick_loader, false);
-		getRunner().config(make_cfg(dir, mode).c_str(), false);
+		getRunner().config(make_cfg(dir).c_str(), false);
+
+		// The public init methods create empty Exp mockers without loading strategy factories.
+		if (strcmp(mode, "cta") == 0)
+			getRunner().initCtaMocker(tag, 0, false, false, false, false);
+		else if (strcmp(mode, "sel") == 0)
+			getRunner().initSelMocker(tag, 20240103, 93000, "d");
+		else if (strcmp(mode, "hft") == 0)
+			getRunner().initHftMocker(tag, false);
 
 		if (strcmp(mode, "cta") == 0 && getRunner().cta_mocker() == nullptr)
 			return false;
@@ -258,8 +266,7 @@ TEST(R143BtRunnerInline, event_callbacks_and_accessors_are_wired)
 TEST(R143BtPorterTicksEmpty, sel_zero_count_takes_null_callback)
 {
 	TickFixture fx;
-	if (!fx.setup("sel_ticks", "sel"))
-		GTEST_SKIP() << "sel mocker/replayer not available";
+	ASSERT_TRUE(fx.setup("sel_ticks", "sel")) << "SEL mocker/replayer setup failed";
 
 	const WtUInt32 cnt = sel_get_ticks(1, kCode, 0, ticks_cb);
 	EXPECT_EQ(0U, cnt);
@@ -273,8 +280,7 @@ TEST(R143BtPorterTicksEmpty, sel_zero_count_takes_null_callback)
 TEST(R143BtPorterTicksEmpty, cta_zero_count_takes_null_callback)
 {
 	TickFixture fx;
-	if (!fx.setup("cta_ticks", "cta"))
-		GTEST_SKIP() << "cta mocker/replayer not available";
+	ASSERT_TRUE(fx.setup("cta_ticks", "cta")) << "CTA mocker/replayer setup failed";
 
 	const WtUInt32 cnt = cta_get_ticks(1, kCode, 0, ticks_cb);
 	EXPECT_EQ(0U, cnt);
@@ -288,8 +294,7 @@ TEST(R143BtPorterTicksEmpty, cta_zero_count_takes_null_callback)
 TEST(R143BtPorterTicksEmpty, hft_zero_count_takes_null_callback)
 {
 	TickFixture fx;
-	if (!fx.setup("hft_ticks", "hft"))
-		GTEST_SKIP() << "hft mocker/replayer not available";
+	ASSERT_TRUE(fx.setup("hft_ticks", "hft")) << "HFT mocker/replayer setup failed";
 
 	const WtUInt32 cnt = hft_get_ticks(1, kCode, 0, ticks_cb);
 	EXPECT_EQ(0U, cnt);

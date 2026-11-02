@@ -120,9 +120,18 @@ TEST(R5UDPCaster, AddBRecverAcceptsValidIPv4IntoTypeBucket)
 	EXPECT_TRUE(caster.addBRecver("127.0.0.1", 9999, 1));
 	// type==2 -> m_listRawRecver（L232-233）
 	EXPECT_TRUE(caster.addBRecver("10.0.0.1", 65535, 2));
-	// 未知 type：三个 if 都不命中，仍然返回 true（静默丢弃，见 BUG 记录）
-	EXPECT_TRUE(caster.addBRecver("172.16.0.1", 7000, 3));
-	EXPECT_TRUE(caster.addBRecver("172.16.0.1", 7000, 99));
+}
+
+TEST(R5UDPCaster, AddBRecverRejectsUnknownTypes)
+{
+	UDPCaster caster;
+	EXPECT_FALSE(caster.addBRecver("172.16.0.1", 7000, 3));
+	EXPECT_FALSE(caster.addBRecver("172.16.0.1", 7000, 99));
+
+	// 拒绝未知值后仍可将合法类型登记到各自 bucket。
+	EXPECT_TRUE(caster.addBRecver("172.16.0.1", 7001, 0));
+	EXPECT_TRUE(caster.addBRecver("172.16.0.1", 7002, 1));
+	EXPECT_TRUE(caster.addBRecver("172.16.0.1", 7003, 2));
 }
 
 TEST(R5UDPCaster, AddBRecverRejectsUnparsableAddressViaCatch)
@@ -143,10 +152,11 @@ TEST(R5UDPCaster, AddBRecverRejectsUnparsableAddressViaCatch)
 TEST(R5UDPCaster, AddBRecverAcceptsPortBoundariesAndDuplicates)
 {
 	UDPCaster caster;
-	// port 是 int，直接进 boost::asio endpoint 的 uint16 端口位；不校验范围也不该抛
+	// 0 和 65535 是 UDP 端口类型可表示的边界，均可登记。
 	EXPECT_TRUE(caster.addBRecver("239.255.1.1", 0));
 	EXPECT_TRUE(caster.addBRecver("239.255.1.2", 65535, 1));
-	EXPECT_TRUE(caster.addBRecver("239.255.1.3", -1, 2));
+	EXPECT_FALSE(caster.addBRecver("239.255.1.3", -1, 2));
+	EXPECT_FALSE(caster.addBRecver("239.255.1.4", 65536, 2));
 	// 同一 host:port 重复登记：实现里没有任何去重，两次都返回 true（列表增长）
 	EXPECT_TRUE(caster.addBRecver("239.255.1.1", 0));
 	EXPECT_TRUE(caster.addBRecver("239.255.1.1", 0, 0));

@@ -20,6 +20,8 @@
 #include <WtDtServo/WtDataManager.h>
 #include <WtDtServo/WtDtRunner.h>
 #include <WtDtServo/WtHelper.h>
+#include <WtDtServo/ParserAdapter.h>
+#include <Includes/WTSVariant.hpp>
 
 #include <dlfcn.h>
 #include <unistd.h>
@@ -162,6 +164,63 @@ protected:
 
 }	// namespace
 
+TEST(R85ModulePath, EmptyAndTrailingSeparatorsKeepRelativePaths)
+{
+	WtHelper::set_module_dir("");
+	EXPECT_EQ(WtHelper::get_module_path("libReader.dylib"), "libReader.dylib");
+	EXPECT_EQ(WtHelper::get_module_path("parsers/libParser.dylib"), "parsers/libParser.dylib");
+	WtHelper::set_module_dir("module_root");
+	EXPECT_EQ(WtHelper::get_module_path("libReader.dylib"), "module_root/libReader.dylib");
+	WtHelper::set_module_dir("module_root/");
+	EXPECT_EQ(WtHelper::get_module_path("parsers/libParser.dylib"), "module_root/parsers/libParser.dylib");
+	WtHelper::set_module_dir("");
+}
+
+TEST_F(RunnerFixture, StoreLoadsWithAndWithoutModuleDirectorySeparator)
+{
+	const fs::path moduleRoot = _dir / "module_root";
+	fs::create_directories(moduleRoot);
+	fs::copy_file(fs::path(_bin) / "libWtDataStorageAD.dylib",
+		moduleRoot / "libWtDataStorageAD.dylib", fs::copy_options::overwrite_existing);
+	const std::string cfgFile = writeConfig("wtdt_store_paths.json", true, "");
+	for (const std::string& suffix : { std::string(), std::string("/") })
+	{
+		WtDtRunner runner;
+		const std::string moduleDir = moduleRoot.string() + suffix;
+		runner.initialize(cfgFile.c_str(), true, moduleDir.c_str(), _logCfg.c_str(), nullptr, nullptr);
+		EXPECT_TRUE(runner.isInitialized()) << moduleDir;
+		EXPECT_NE(nullptr, runner.getBaseDataMgr().getSession("SD0930")) << moduleDir;
+	}
+}
+
+TEST_F(RunnerFixture, ParserLoadsWithAndWithoutModuleDirectorySeparator)
+{
+	const fs::path moduleRoot = _dir / "module_root";
+	fs::create_directories(moduleRoot / "parsers");
+	fs::copy_file(fs::path(_bin) / "libWtDataStorageAD.dylib",
+		moduleRoot / "libWtDataStorageAD.dylib", fs::copy_options::overwrite_existing);
+	fs::copy_file(fs::path(_bin) / "libParserUDP.dylib",
+		moduleRoot / "parsers/libParserUDP.dylib", fs::copy_options::overwrite_existing);
+	const std::string cfgFile = writeConfig("wtdt_parser_paths.json", true, "");
+	WtDtRunner runner;
+	runner.initialize(cfgFile.c_str(), true, moduleRoot.string().c_str(), _logCfg.c_str(), nullptr, nullptr);
+	ASSERT_TRUE(runner.isInitialized());
+
+	WTSVariant* cfg = WTSVariant::createObject();
+	cfg->append("module", "ParserUDP");
+	cfg->append("host", "127.0.0.1");
+	for (const std::string& suffix : { std::string(), std::string("/") })
+	{
+		const std::string moduleDir = moduleRoot.string() + suffix;
+		WtHelper::set_module_dir(moduleDir.c_str());
+		ParserAdapter parser(&runner.getBaseDataMgr(), &runner);
+		EXPECT_TRUE(parser.init("r85_parser_path", cfg)) << moduleDir;
+		// init does not start ParserUDP's worker; release is safe before connect.
+		parser.release();
+	}
+	cfg->release();
+}
+
 // WtDtRunner.cpp:152-175
 TEST_F(RunnerFixture, parser_sidecar_errors_reject_initialization)
 {
@@ -275,20 +334,23 @@ TEST_F(RunnerFixture, FailedParserInitializationDoesNotRegisterOrStartRunner)
 
 	// Keep the runner and quarantined parser graph alive for the test process:
 	// the provider has no verified callback-drain contract for destruction.
-	WtDtRunner* runner = new WtDtRunner();
-	runner->initialize(cfgFile.c_str(), true, moduleRoot.string().c_str(),
-		_logCfg.c_str(), nullptr, nullptr);
+	for (const std::string& suffix : { std::string(), std::string("/") })
+	{
+		WtDtRunner* runner = new WtDtRunner();
+		const std::string moduleDir = moduleRoot.string() + suffix;
+		runner->initialize(cfgFile.c_str(), true, moduleDir.c_str(),
+			_logCfg.c_str(), nullptr, nullptr);
 
-	// ParserUDP rejects the host during init before connect()/worker startup.
-	// The failed candidate is kept in quarantine and never enters ParserAdapterMgr.
-	EXPECT_FALSE(runner->isInitialized());
-	EXPECT_EQ(runner->activeParserCount(), 0u);
-	EXPECT_TRUE(runner->hasQuarantinedParser());
-	EXPECT_TRUE(runner->hasRetainedParserAdapters());
-	runner->start();
-	EXPECT_FALSE(runner->isInitialized());
-	EXPECT_EQ(runner->activeParserCount(), 0u);
-	retainedRunnerGraphs().push_back(runner);
+		// A failed parser candidate is kept in quarantine and never registered.
+		EXPECT_FALSE(runner->isInitialized()) << moduleDir;
+		EXPECT_EQ(runner->activeParserCount(), 0u) << moduleDir;
+		EXPECT_TRUE(runner->hasQuarantinedParser()) << moduleDir;
+		EXPECT_TRUE(runner->hasRetainedParserAdapters()) << moduleDir;
+		runner->start();
+		EXPECT_FALSE(runner->isInitialized()) << moduleDir;
+		EXPECT_EQ(runner->activeParserCount(), 0u) << moduleDir;
+		retainedRunnerGraphs().push_back(runner);
+	}
 }
 
 // WtDtRunner.cpp:218-239

@@ -1,0 +1,17 @@
+--- /tmp/ctpm-i03-connect/baseline/connect-baseline.cpp	2026-11-01 22:51:49
++++ src/ParserCTPMini/ParserCTPMini.cpp	2026-11-01 22:52:25
+@@ -197,11 +197,9 @@
+ 
+ bool ParserCTPMini::connect()
+ {
+-	if(m_pUserAPI)
+-	{
+-		m_pUserAPI->Init();
+-	}
+-
++	if (m_pUserAPI == NULL)
++		return false;
++	m_pUserAPI->Init();
+ 	return true;
+ }
+ 

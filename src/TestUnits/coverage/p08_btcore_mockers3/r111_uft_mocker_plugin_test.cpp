@@ -84,7 +84,7 @@ namespace
 	}
 
 	WTSVariant* make_factory_cfg(const std::string& module, const char* code,
-		const char* strategyName = "SimpleUft")
+		const char* strategyName = "SimpleUft", bool withParams = true)
 	{
 		WTSVariant* cfg = WTSVariant::createObject();
 		cfg->append("module", module.c_str());
@@ -94,14 +94,17 @@ namespace
 			stra->append("name", strategyName);
 		stra->append("id", "r111_uft_plug");
 
-		WTSVariant* params = WTSVariant::createObject();
-		params->append("code", code);
-		params->append("second", static_cast<uint32_t>(10));
-		params->append("freq", static_cast<uint32_t>(0));
-		params->append("offset", static_cast<uint32_t>(0));
-		params->append("lots", 1.0);
-		stra->append("params", params);
-		params->release();
+		if (withParams)
+		{
+			WTSVariant* params = WTSVariant::createObject();
+			params->append("code", code);
+			params->append("second", static_cast<uint32_t>(10));
+			params->append("freq", static_cast<uint32_t>(0));
+			params->append("offset", static_cast<uint32_t>(0));
+			params->append("lots", 1.0);
+			stra->append("params", params);
+			params->release();
+		}
 
 		cfg->append("strategy", stra);
 		stra->release();
@@ -241,6 +244,20 @@ TEST_F(R111UftMocker, FactoryRejectsUnknownStrategyAndCleansPlugin)
 
 	UftMocker mocker(&_rp, "r111_uft_unknown_strategy");
 	WTSVariant* cfg = make_factory_cfg(plugin, kRb, "NoSuchStrategy");
+	EXPECT_FALSE(mocker.init_uft_factory(cfg));
+	EXPECT_FALSE(UftMockerTestAccess::hasModule(mocker));
+	EXPECT_FALSE(UftMockerTestAccess::hasFactory(mocker));
+	EXPECT_FALSE(UftMockerTestAccess::hasStrategy(mocker));
+	cfg->release();
+}
+
+TEST_F(R111UftMocker, RealSimpleUftRejectsMissingParamsWithoutCrash)
+{
+	const std::string plugin = module();
+	ASSERT_TRUE(std::filesystem::exists(plugin)) << plugin;
+
+	UftMocker mocker(&_rp, "r111_uft_missing_simple_params");
+	WTSVariant* cfg = make_factory_cfg(plugin, kRb, "SimpleUft", false);
 	EXPECT_FALSE(mocker.init_uft_factory(cfg));
 	EXPECT_FALSE(UftMockerTestAccess::hasModule(mocker));
 	EXPECT_FALSE(UftMockerTestAccess::hasFactory(mocker));

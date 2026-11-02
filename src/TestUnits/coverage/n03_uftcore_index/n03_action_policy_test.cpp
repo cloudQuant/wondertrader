@@ -212,7 +212,11 @@ TEST(n03_action_policy, init_twice_is_additive)
 	EXPECT_EQ(2u, def[1]._limit);
 	EXPECT_EQ(3u, def[2]._limit);
 	// 第二份配置的 filters 也生效
-	EXPECT_EQ(2u, mgr.getActionRules("DCE.m").size());
+	const ActionRuleGroup& dce = mgr.getActionRules("DCE.m");
+	ASSERT_EQ(3u, dce.size());
+	EXPECT_EQ(1u, dce[0]._limit);
+	EXPECT_EQ(2u, dce[1]._limit);
+	EXPECT_EQ(3u, dce[2]._limit);
 }
 
 TEST(n03_action_policy, unrecognized_action_types_are_skipped)

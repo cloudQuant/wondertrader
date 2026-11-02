@@ -1,0 +1,21 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R15CtxTest.registered_order_tag_reaches_callbacks_and_remains_after_terminal_order
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R15CtxTest
+[ RUN      ] R15CtxTest.registered_order_tag_reaches_callbacks_and_remains_after_terminal_order
+src/WtCore/HftStraBaseCtx.cpp:557:6: runtime error: load of value 24, which is not a valid value for type 'bool'
+    #0 0x00010420414c in wtp::HftStraBaseCtx::on_order(unsigned int, char const*, bool, double, double, double, bool) HftStraBaseCtx.cpp:557
+    #1 0x000104308ed0 in HftStraContext::on_order(unsigned int, char const*, bool, double, double, double, bool) HftStraContext.cpp:215
+    #2 0x00010414d674 in R15CtxTest_registered_order_tag_reaches_callbacks_and_remains_after_terminal_order_Test::TestBody() r15_hft_stra_context.cpp:567
+    #3 0x0001043d1070 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (asan-tests:arm64+0x1002a1070)
+    #4 0x0001043d0fb8 in testing::Test::Run()+0xcc (asan-tests:arm64+0x1002a0fb8)
+    #5 0x0001043d1b98 in testing::TestInfo::Run()+0xd0 (asan-tests:arm64+0x1002a1b98)
+    #6 0x0001043d261c in testing::TestSuite::Run()+0x1c4 (asan-tests:arm64+0x1002a261c)
+    #7 0x0001043dda44 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (asan-tests:arm64+0x1002ada44)
+    #8 0x0001043dd3f0 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (asan-tests:arm64+0x1002ad3f0)
+    #9 0x0001043dd354 in testing::UnitTest::Run()+0x78 (asan-tests:arm64+0x1002ad354)
+    #10 0x0001043be6cc in main+0x40 (asan-tests:arm64+0x10028e6cc)
+    #11 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior src/WtCore/HftStraBaseCtx.cpp:557:6 

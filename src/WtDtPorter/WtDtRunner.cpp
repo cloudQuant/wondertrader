@@ -104,16 +104,114 @@ bool insert_parser_adapter_locked(ParserAdapterMgr& parsers, const std::string& 
 		return false;
 	return parsers._adapters.emplace(id, adapter).second;
 }
+
+std::string validate_runner_config(WTSVariant* config, WTSVariant*& parserFileConfig)
+{
+	WTSVariant* basefiles = config == NULL ? NULL : config->get("basefiles");
+	if (basefiles == NULL || basefiles->type() != WTSVariant::VT_Object)
+		return "basefiles";
+
+	auto requireString = [](WTSVariant* value, const std::string& path) -> std::string {
+		return value == NULL || value->type() != WTSVariant::VT_String ? path : std::string();
+	};
+	auto requireStringOrStringArray = [](WTSVariant* value, const std::string& path) -> std::string {
+		if (value == NULL)
+			return std::string();
+		if (value->type() == WTSVariant::VT_String)
+			return std::string();
+		if (value->type() != WTSVariant::VT_Array)
+			return path;
+		for (uint32_t idx = 0; idx < value->size(); ++idx)
+		{
+			WTSVariant* item = value->get(idx);
+			if (item == NULL || item->type() != WTSVariant::VT_String)
+				return path + "[" + std::to_string(idx) + "]";
+		}
+		return std::string();
+	};
+
+	for (const char* key : { "session", "holiday", "hot", "second" })
+	{
+		if (!basefiles->has(key))
+			continue;
+		std::string invalid = requireString(basefiles->get(key), std::string("basefiles.") + key);
+		if (!invalid.empty())
+			return invalid;
+	}
+	for (const char* key : { "commodity", "contract" })
+	{
+		if (!basefiles->has(key))
+			continue;
+		std::string invalid = requireStringOrStringArray(basefiles->get(key), std::string("basefiles.") + key);
+		if (!invalid.empty())
+			return invalid;
+	}
+	WTSVariant* rules = basefiles->get("rules");
+	if (rules != NULL)
+	{
+		if (rules->type() != WTSVariant::VT_Object)
+			return "basefiles.rules";
+		for (const std::string& tag : rules->memberNames())
+		{
+			std::string invalid = requireString(rules->get(tag), std::string("basefiles.rules.") + tag);
+			if (!invalid.empty())
+				return invalid;
+		}
+	}
+
+	WTSVariant* writer = config->get("writer");
+	if (writer == NULL || writer->type() != WTSVariant::VT_Object)
+		return "writer";
+	if (writer->has("module"))
+	{
+		std::string invalid = requireString(writer->get("module"), "writer.module");
+		if (!invalid.empty())
+			return invalid;
+	}
+
+	WTSVariant* parsers = config->get("parsers");
+	if (parsers == NULL)
+		return std::string(); // The top-level parser section is optional.
+
+	auto validateParserArray = [](WTSVariant* array, const std::string& path) -> std::string {
+		if (array == NULL || array->type() != WTSVariant::VT_Array)
+			return path;
+		for (uint32_t idx = 0; idx < array->size(); ++idx)
+		{
+			WTSVariant* item = array->get(idx);
+			if (item == NULL || item->type() != WTSVariant::VT_Object)
+				return path + "[" + std::to_string(idx) + "]";
+		}
+		return std::string();
+	};
+
+	if (parsers->type() == WTSVariant::VT_Array)
+		return validateParserArray(parsers, "parsers");
+	if (parsers->type() != WTSVariant::VT_String)
+		return "parsers";
+
+	const char* filename = parsers->asCString();
+	if (filename == NULL || !StdFile::exists(filename))
+		return std::string(); // A missing optional parser file has historically been skipped.
+
+	parserFileConfig = WTSCfgLoader::load_from_file(filename);
+	if (parserFileConfig == NULL || parserFileConfig->type() != WTSVariant::VT_Object)
+		return "parsers.file";
+	return validateParserArray(parserFileConfig->get("parsers"), "parsers.file.parsers");
+}
 }
 
 
 WtDtRunner::WtDtRunner()
-	: _dumper_for_bars(NULL)
+	: _cb_parser_evt(NULL)
+	, _cb_parser_sub(NULL)
+	, _dumper_for_bars(NULL)
 	, _dumper_for_ticks(NULL)
 	, _dumper_for_ordque(NULL)
 	, _dumper_for_orddtl(NULL)
 	, _dumper_for_trans(NULL)
 	, _to_exit(false)
+	, _allday_mode(false)
 	, _startup_blocked(false)
 	, _parser_registry_started(false)
 	, _parser_registry_stopped(false)
@@ -240,6 +338,21 @@ void WtDtRunner::initialize(const char* cfgFile, const char* logCfg, const char*
 		return;
 	}
 
+	WTSVariant* parserFileConfig = NULL;
+	const std::string invalidField = validate_runner_config(config, parserFileConfig);
+	if (!invalidField.empty())
+	{
+		{
+			std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
+			_startup_blocked = true;
+		}
+		WTSLogger::error("Invalid data runner configuration at {}; startup is blocked", invalidField);
+		if (parserFileConfig != NULL)
+			parserFileConfig->release();
+		config->release();
+		return;
+	}
+
 	//基础数据文件
 	WTSVariant* cfgBF = config->get("basefiles");
 	if (cfgBF->get("session"))
@@ -327,6 +440,8 @@ void WtDtRunner::initialize(const char* cfgFile, const char* logCfg, const char*
 				_startup_blocked = true;
 			}
 			WTSLogger::error("Active shared-memory caster initialization failed; runner startup is blocked");
+			if (parserFileConfig != NULL)
+				parserFileConfig->release();
 			config->release();
 			return;
 		}
@@ -340,8 +455,8 @@ void WtDtRunner::initialize(const char* cfgFile, const char* logCfg, const char*
 
 	//By Wesley @ 2021.12.27
 	//全天候模式，不需要再使用状态机
-	bool bAlldayMode = config->getBoolean("allday");
-	if (!bAlldayMode)
+	_allday_mode = config->getBoolean("allday");
+	if (!_allday_mode)
 	{
 		_state_mon.initialize(config->getCString("statemonitor"), &_bd_mgr, &_data_mgr);
 	}
@@ -350,7 +465,7 @@ void WtDtRunner::initialize(const char* cfgFile, const char* logCfg, const char*
 		WTSLogger::info("datakit will run in allday mode");
 	}
 
-	initDataMgr(config->get("writer"), bAlldayMode);
+	initDataMgr(config->get("writer"), _allday_mode);
 
 	if (config->has("index"))
 	{
@@ -378,19 +493,10 @@ void WtDtRunner::initialize(const char* cfgFile, const char* logCfg, const char*
 		if (cfgParser->type() == WTSVariant::VT_String)
 		{
 			const char* filename = cfgParser->asCString();
-			if (StdFile::exists(filename))
+			if (parserFileConfig != NULL)
 			{
 				WTSLogger::info("Reading parser config from {}...", filename);
-				WTSVariant* var = WTSCfgLoader::load_from_file(filename);
-				if (var)
-				{
-					initParsers(var->get("parsers"));
-					var->release();
-				}
-				else
-				{
-					WTSLogger::error("Loading parser config {} failed", filename);
-				}
+				initParsers(parserFileConfig->get("parsers"));
 			}
 			else
 			{
@@ -405,6 +511,8 @@ void WtDtRunner::initialize(const char* cfgFile, const char* logCfg, const char*
 	else
 		WTSLogger::log_raw(LL_WARN, "No parsers config, skipped loading parsers");
 
+	if (parserFileConfig != NULL)
+		parserFileConfig->release();
 	config->release();
 }
 

@@ -25,8 +25,10 @@
 #include <fstream>
 #include <atomic>
 #include <chrono>
+#include <cmath>
 #include <condition_variable>
 #include <mutex>
+#include <sstream>
 #include <string>
 #include <system_error>
 #include <thread>
@@ -47,13 +49,38 @@
 #undef private
 
 /* 生产 TU UftLatencyTool.cpp:28 的自由函数（main.cpp:19 也是这样声明的） */
-void test_uft();
-namespace uft { class TestParser; }
+bool test_uft();
+int wt_coverage_main_wtlatencyuft();
+namespace uft {
+class TestParser;
+void setTestRunFailureForTesting(int stage, bool unknown);
+void setTestTickCreateFailureForTesting(bool fail);
+void clearTestOrderInsertForTesting();
+void getTestOrderInsertForTesting(std::string& exchange, std::string& code);
+}
 
 namespace {
 
 namespace stdfs = std::filesystem;
 using namespace wtp;
+
+constexpr int kRunFailureParser = 1;
+constexpr int kRunFailureTrader = 2;
+constexpr int kRunFailureEngine = 3;
+
+class ScopedRunFailure
+{
+public:
+	ScopedRunFailure(int stage, bool unknown) { uft::setTestRunFailureForTesting(stage, unknown); }
+	~ScopedRunFailure() { uft::setTestRunFailureForTesting(0, false); }
+};
+
+class ScopedTickCreateFailure
+{
+public:
+	ScopedTickCreateFailure() { uft::setTestTickCreateFailureForTesting(true); }
+	~ScopedTickCreateFailure() { uft::setTestTickCreateFailureForTesting(false); }
+};
 
 class UftLatencyShutdownContext : public UftStraContext
 {
@@ -338,6 +365,15 @@ const char* kConfigRunZero =
 	"times: 0\n"
 	"core: 0\n";
 
+/* run() 用：省略 times，验证 WTSVariant::getUInt32 的缺省 0 */
+const char* kConfigRunDefaultTimes =
+	"basefiles:\n"
+	"    session: sessions.yaml\n"
+	"env:\n"
+	"    product:\n"
+	"        session: ALLDAY\n"
+	"core: 0\n";
+
 /* run() 用：只加载 session，times=1 且无合约 */
 const char* kConfigRunOneWithoutContract =
 	"basefiles:\n"
@@ -426,6 +462,7 @@ TEST(r95_ufttool_run, zero_ticks_after_successful_init_exercises_engine_and_pars
 	bool init_ok = false;
 	bool repeated_init_ok = false;
 	bool run_threw = false;
+	bool run_failed = true;
 	{
 		ScopedWarningCapture capture;
 		{
@@ -437,6 +474,7 @@ TEST(r95_ufttool_run, zero_ticks_after_successful_init_exercises_engine_and_pars
 				{
 					repeated_init_ok = tool.init();
 					tool.run();
+					run_failed = tool.runFailed();
 				}
 			}
 			catch (...)
@@ -448,10 +486,58 @@ TEST(r95_ufttool_run, zero_ticks_after_successful_init_exercises_engine_and_pars
 	EXPECT_TRUE(init_ok);
 	EXPECT_FALSE(repeated_init_ok) << "init() is a one-shot operation";
 	EXPECT_FALSE(run_threw);
+	EXPECT_FALSE(run_failed);
 	bool saw_no_samples = false;
 	for (const std::string& warning : g_warning_log_handler.messages())
 		saw_no_samples = saw_no_samples || warning.find("average latency unavailable (no samples)") != std::string::npos;
 	EXPECT_TRUE(saw_no_samples);
+}
+
+TEST(r95_ufttool_run, omitted_times_defaults_to_zero_without_average_latency)
+{
+	ScopedTempCwd guard("run_default_times");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(write_text("sessions.yaml", kSessionsYaml));
+	ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
+	ASSERT_TRUE(write_text("config.yaml", kConfigRunDefaultTimes));
+	ASSERT_EQ(std::string::npos, std::string(kConfigRunDefaultTimes).find("times:"));
+
+	WTSLogger::init("logcfg.yaml");
+	g_warning_log_handler.clear();
+	bool init_ok = false;
+	bool run_threw = false;
+	bool run_failed = true;
+	{
+		ScopedWarningCapture capture;
+		{
+			uft::UftLatencyTool tool;
+			try
+			{
+				init_ok = tool.init();
+				if (init_ok)
+				{
+					tool.run();
+					run_failed = tool.runFailed();
+				}
+			}
+			catch (...)
+			{
+				run_threw = true;
+			}
+		}
+	}
+	EXPECT_TRUE(init_ok);
+	EXPECT_FALSE(run_threw);
+	EXPECT_FALSE(run_failed);
+	bool saw_no_samples = false;
+	bool saw_average_latency = false;
+	for (const std::string& warning : g_warning_log_handler.messages())
+	{
+		saw_no_samples = saw_no_samples || warning.find("average latency unavailable (no samples)") != std::string::npos;
+		saw_average_latency = saw_average_latency || warning.find("UftEngine Innner Latency:") != std::string::npos;
+	}
+	EXPECT_TRUE(saw_no_samples);
+	EXPECT_FALSE(saw_average_latency);
 }
 
 TEST(r95_ufttool_run, run_after_failed_init_does_not_use_parser)
@@ -622,6 +708,7 @@ TEST(r95_ufttool_run, one_tick_without_contract_reports_and_returns)
 	g_warning_log_handler.clear();
 	bool init_ok = false;
 	bool run_threw = false;
+	bool run_failed = true;
 	{
 		ScopedWarningCapture capture;
 		{
@@ -632,6 +719,7 @@ TEST(r95_ufttool_run, one_tick_without_contract_reports_and_returns)
 				try
 				{
 					tool.run();
+					run_failed = tool.runFailed();
 				}
 				catch (...)
 				{
@@ -642,6 +730,7 @@ TEST(r95_ufttool_run, one_tick_without_contract_reports_and_returns)
 	}
 	EXPECT_TRUE(init_ok);
 	EXPECT_FALSE(run_threw);
+	EXPECT_FALSE(run_failed);
 	bool saw_missing_contract = false;
 	for (const std::string& warning : g_warning_log_handler.messages())
 		saw_missing_contract = saw_missing_contract || warning.find("contract SHFE.rb2205 not found") != std::string::npos;
@@ -657,9 +746,11 @@ TEST(r95_ufttool_run, one_tick_with_contract_and_commodity_runs)
 	ASSERT_TRUE(write_text("config.yaml", kConfigRunOneWithValidContract));
 	WTSLogger::init("logcfg.yaml");
 
+	uft::clearTestOrderInsertForTesting();
 	g_warning_log_handler.clear();
 	bool init_ok = false;
 	bool run_threw = false;
+	bool run_failed = true;
 	{
 		ScopedWarningCapture capture;
 		{
@@ -670,6 +761,7 @@ TEST(r95_ufttool_run, one_tick_with_contract_and_commodity_runs)
 				try
 				{
 					tool.run();
+					run_failed = tool.runFailed();
 				}
 				catch (...)
 				{
@@ -680,10 +772,116 @@ TEST(r95_ufttool_run, one_tick_with_contract_and_commodity_runs)
 	}
 	EXPECT_TRUE(init_ok);
 	EXPECT_FALSE(run_threw);
+	EXPECT_FALSE(run_failed);
+	std::string submitted_exchange;
+	std::string submitted_code;
+	uft::getTestOrderInsertForTesting(submitted_exchange, submitted_code);
+	EXPECT_EQ("SHFE", submitted_exchange);
+	EXPECT_EQ("rb2205", submitted_code);
 	bool saw_completed_tick = false;
+	bool parsed_finite_average = false;
+	const std::string latency_label = "UftEngine Innner Latency: ";
 	for (const std::string& warning : g_warning_log_handler.messages())
-		saw_completed_tick = saw_completed_tick || warning.find("1 ticks simulated in") != std::string::npos;
+	{
+		const size_t summary = warning.find("1 ticks simulated in ");
+		if (summary == std::string::npos)
+			continue;
+		saw_completed_tick = true;
+
+		const size_t value_start = warning.find(latency_label, summary);
+		ASSERT_NE(std::string::npos, value_start) << "missing latency field in summary: " << warning;
+		const size_t value_begin = value_start + latency_label.size();
+		const size_t value_end = warning.find(" ns", value_begin);
+		ASSERT_NE(std::string::npos, value_end) << "missing latency unit in summary: " << warning;
+
+		std::istringstream value_stream(warning.substr(value_begin, value_end - value_begin));
+		double average_latency = 0.0;
+		value_stream >> average_latency;
+		const bool finite_value = !value_stream.fail() && std::isfinite(average_latency);
+		value_stream >> std::ws;
+		const bool consumed_value = value_stream.eof();
+		EXPECT_TRUE(finite_value && consumed_value)
+			<< "latency summary must contain a finite numeric mean: " << warning;
+		parsed_finite_average = parsed_finite_average || (finite_value && consumed_value);
+	}
 	EXPECT_TRUE(saw_completed_tick);
+	EXPECT_TRUE(parsed_finite_average) << "the positive-tick summary did not produce a finite latency mean";
+}
+
+TEST(r95_ufttool_run, tick_creation_failure_is_reported_and_fails_run)
+{
+	ScopedTempCwd guard("run_tick_create_failure");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(prepare_base());
+	ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
+	ASSERT_TRUE(write_text("config.yaml", kConfigRunOneWithValidContract));
+	WTSLogger::init("logcfg.yaml");
+
+	g_warning_log_handler.clear();
+	bool init_ok = false;
+	bool run_threw = false;
+	bool run_failed = false;
+	{
+		ScopedWarningCapture capture;
+		{
+			uft::UftLatencyTool tool;
+			init_ok = tool.init();
+			if (init_ok)
+			{
+				ScopedTickCreateFailure injected;
+				try
+				{
+					tool.run();
+					run_failed = tool.runFailed();
+				}
+				catch (...)
+				{
+					run_threw = true;
+				}
+			}
+		}
+	}
+	EXPECT_TRUE(init_ok);
+	EXPECT_FALSE(run_threw);
+	EXPECT_TRUE(run_failed);
+	bool saw_tick_create_failure = false;
+	for (const std::string& message : g_warning_log_handler.messages())
+		saw_tick_create_failure = saw_tick_create_failure ||
+			message.find("UFT latency test failed to create tick SHFE.rb2205") != std::string::npos;
+	EXPECT_TRUE(saw_tick_create_failure);
+}
+
+TEST(r95_ufttool_run, reports_parser_trader_and_engine_exceptions)
+{
+	ScopedTempCwd guard("run_exceptions");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(prepare_base());
+	ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
+	ASSERT_TRUE(write_text("config.yaml", kConfigRunZero));
+	WTSLogger::init("logcfg.yaml");
+
+	struct FailureCase { int stage; bool unknown; const char* diagnostic; };
+	const FailureCase cases[] = {
+		{ kRunFailureParser, false, "injected parser exception" },
+		{ kRunFailureTrader, false, "injected trader exception" },
+		{ kRunFailureEngine, true, "unknown exception" },
+	};
+	ScopedWarningCapture capture;
+	for (const FailureCase& failure : cases)
+	{
+		g_warning_log_handler.clear();
+		{
+			ScopedRunFailure injected(failure.stage, failure.unknown);
+			uft::UftLatencyTool tool;
+			ASSERT_TRUE(tool.init());
+			EXPECT_NO_THROW(tool.run());
+			EXPECT_TRUE(tool.runFailed());
+		}
+		bool saw_diagnostic = false;
+		for (const std::string& message : g_warning_log_handler.messages())
+			saw_diagnostic = saw_diagnostic || message.find(failure.diagnostic) != std::string::npos;
+		EXPECT_TRUE(saw_diagnostic) << "missing diagnostic: " << failure.diagnostic;
+	}
 }
 
 /* -------------------------------------------------------------------------
@@ -698,5 +896,18 @@ TEST(r95_ufttool_entry, free_function_runs_init_and_run_with_valid_config)
 
 	// :30 栈上构造 UftLatencyTool；:31 init()（配置有效 -> true）；
 	// :33 run()（times=0，引擎/解析器/交易器同上）；出作用域走工具析构，ticker stop/join。
-	EXPECT_NO_THROW(test_uft());
+	EXPECT_TRUE(test_uft());
+}
+
+TEST(r95_ufttool_entry, injected_run_failure_reaches_executable_status)
+{
+	ScopedTempCwd guard("entry_run_failure");
+	ASSERT_TRUE(guard.ok());
+	ASSERT_TRUE(write_text("sessions.yaml", kSessionsYaml));
+	ASSERT_TRUE(write_text("logcfg.yaml", kLogConfig));
+	ASSERT_TRUE(write_text("config.yaml", kConfigRunZero));
+	WTSLogger::init("logcfg.yaml");
+
+	ScopedRunFailure injected(kRunFailureParser, false);
+	EXPECT_EQ(1, wt_coverage_main_wtlatencyuft());
 }

@@ -179,10 +179,9 @@ void WtDiffMinImpactExeUnit::on_order(uint32_t localid, const char* stdCode, boo
 
 		if (isCanceled || leftover == 0)
 		{	
-			//By Wesley @ 2022.05.24
-			//这句要注释掉，因为需要早on_trade里处理一些数据
-			//这里如果从OMS中删除了订单号，ontrade就会判断失败
-			//_orders_mon.erase_order(localid);
+			// Keep the local-id association for a possibly late trade report, but
+			// remove this terminal order from future expiry scans.
+			_orders_mon.mark_order_terminal(localid);
 			if (_cancel_cnt > 0)
 			{
 				_cancel_cnt--;
@@ -220,6 +219,7 @@ void WtDiffMinImpactExeUnit::on_channel_ready()
 
 	if(!decimal::eq(undone, 0) && !_orders_mon.has_order())
 	{
+		if (!wtRunIfNoUnverifiedTimeout(_orders_mon, [this, undone]() {
 		/*
 		 *	如果未完成单不为0，而OMS没有订单
 		 *	这说明有未完成单不在监控之中,全部撤销掉
@@ -234,6 +234,8 @@ void WtDiffMinImpactExeUnit::on_channel_ready()
 		_cancel_cnt += ids.size();
 
 		_ctx->writeLog(fmtutil::format("[{}@{}]cancelcnt -> {}", __FILE__, __LINE__, _cancel_cnt));
+		}))
+			_ctx->writeLog(fmtutil::format("Unmanaged-order cancellation for {} suppressed after an unverified timeout", _code.c_str()));
 	}
 	else if (decimal::eq(undone, 0) && _orders_mon.has_order())
 	{

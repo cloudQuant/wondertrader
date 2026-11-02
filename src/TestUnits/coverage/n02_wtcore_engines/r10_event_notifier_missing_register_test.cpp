@@ -226,3 +226,75 @@ TEST(R10EventNotifier, MissingRegisterExportUnloadsCandidateAndPreservesActiveNo
 	EXPECT_EQ(1u, destroyCount());
 	EXPECT_EQ(expectedId, destroyedId());
 }
+
+TEST(R10EventNotifier, MissingCreateServerExportUnloadsWithoutStartingWorker)
+{
+	const std::string goodDir = WT_R160_FAKE_MQ_DIR;
+	const std::string badDir = WT_R10_MISSING_CREATE_MQ_DIR;
+	const std::string module = DLLHelper::wrap_module("WtMsgQue", "lib");
+	if (fs::exists(fs::path(WtHelper::getCWD()) / module))
+		GTEST_SKIP() << "cwd contains WtMsgQue; cannot select controlled fixture deterministically";
+	ASSERT_TRUE(fs::exists(fs::path(goodDir) / module));
+	ASSERT_TRUE(fs::exists(fs::path(badDir) / module));
+
+	ScopedInstDir instDir;
+	TempDir temp;
+	const std::string loadedMarker = temp.file("missing_create_loaded");
+	const std::string unloadedMarker = temp.file("missing_create_unloaded");
+	const std::string callbackMarker = temp.file("missing_create_callback");
+	const std::string destroyMarker = temp.file("missing_create_destroy");
+	const std::string publishMarker = temp.file("missing_create_publish");
+	ScopedEnvironment loadEnv("WT_R10_CREATE_MQ_LOAD_MARKER", loadedMarker);
+	ScopedEnvironment unloadEnv("WT_R10_CREATE_MQ_UNLOAD_MARKER", unloadedMarker);
+	ScopedEnvironment callbackEnv("WT_R10_CREATE_MQ_CALLBACK_MARKER", callbackMarker);
+	ScopedEnvironment destroyEnv("WT_R10_CREATE_MQ_DESTROY_MARKER", destroyMarker);
+	ScopedEnvironment publishEnv("WT_R10_CREATE_MQ_PUBLISH_MARKER", publishMarker);
+
+	instDir.set(badDir + "/");
+	VariantPtr badCfg = active_config("fake://missing_create_server");
+	ASSERT_NE(nullptr, badCfg.get());
+	{
+		EventNotifier notifier;
+		EXPECT_FALSE(notifier.init(badCfg.get()));
+		EXPECT_EQ(0u, notifier._mq_sid);
+		EXPECT_EQ(nullptr, notifier._creator);
+		EXPECT_EQ(nullptr, notifier._register);
+		EXPECT_EQ(nullptr, notifier._worker.get()) << "missing required export must not start a worker";
+		EXPECT_TRUE(fs::exists(loadedMarker)) << "the controlled module must have loaded before rejection";
+		EXPECT_TRUE(fs::exists(unloadedMarker)) << "the rejected candidate module must be released";
+		EXPECT_FALSE(fs::exists(callbackMarker)) << "no plugin function may run before ABI validation";
+		EXPECT_FALSE(fs::exists(destroyMarker));
+		EXPECT_FALSE(fs::exists(publishMarker));
+	}
+
+	// Positive control: the same EventNotifier path accepts the normal fake MQ
+	// module, invokes its required exports, and creates the worker.
+	instDir.set(goodDir + "/");
+	ScopedDll inspector(DLLHelper::load_library((goodDir + "/" + module).c_str()));
+	ASSERT_NE(nullptr, inspector.handle);
+	using Reset = void(*)();
+	using Count = uint32_t(*)();
+	using Id = WtUInt32(*)();
+	const auto reset = reinterpret_cast<Reset>(DLLHelper::get_symbol(inspector.handle, "r160_fake_reset"));
+	const auto createCount = reinterpret_cast<Count>(DLLHelper::get_symbol(inspector.handle, "r160_fake_create_count"));
+	const auto registerCount = reinterpret_cast<Count>(DLLHelper::get_symbol(inspector.handle, "r160_fake_register_count"));
+	const auto serverId = reinterpret_cast<Id>(DLLHelper::get_symbol(inspector.handle, "r160_fake_server_id"));
+	ASSERT_NE(nullptr, reset);
+	ASSERT_NE(nullptr, createCount);
+	ASSERT_NE(nullptr, registerCount);
+	ASSERT_NE(nullptr, serverId);
+	reset();
+
+	constexpr WtUInt32 expectedId = 0xF1234567u;
+	VariantPtr goodCfg = active_config("fake://valid_create_server");
+	ASSERT_NE(nullptr, goodCfg.get());
+	{
+		EventNotifier notifier;
+		ASSERT_TRUE(notifier.init(goodCfg.get()));
+		EXPECT_EQ(expectedId, notifier._mq_sid);
+		ASSERT_NE(nullptr, notifier._worker.get());
+		EXPECT_EQ(1u, createCount());
+		EXPECT_EQ(1u, registerCount());
+		EXPECT_EQ(expectedId, serverId());
+	}
+}

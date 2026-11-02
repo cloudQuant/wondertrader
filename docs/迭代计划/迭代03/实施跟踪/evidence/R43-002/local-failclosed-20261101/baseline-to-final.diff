@@ -1,0 +1,329 @@
+--- baseline/MatchEngine.cpp
++++ final/MatchEngine.cpp
+@@ -338,6 +338,11 @@
+ 	WTSTickData* lastTick = grab_last_tick(stdCode);
+ 	if (lastTick == NULL)
+ 		return OrderIDs();
++	if (lastTick->bidprice(0) == 0.0 && lastTick->askprice(0) == 0.0)
++	{
++		lastTick->release();
++		return OrderIDs();
++	}
+ 
+ 	const uint64_t creationSequence = next_order_sequence();
+ 	uint32_t localid = makeLocalOrderID();
+@@ -385,6 +390,11 @@
+ 	WTSTickData* lastTick = grab_last_tick(stdCode);
+ 	if (lastTick == NULL)
+ 		return OrderIDs();
++	if (lastTick->bidprice(0) == 0.0 && lastTick->askprice(0) == 0.0)
++	{
++		lastTick->release();
++		return OrderIDs();
++	}
+ 
+ 	const uint64_t creationSequence = next_order_sequence();
+ 	uint32_t localid = makeLocalOrderID();
+--- baseline/WtStockVWapExeUnit.cpp
++++ final/WtStockVWapExeUnit.cpp
+@@ -446,6 +446,11 @@
+ 		return;
+ 	// 标记交易通道为就绪状态
+ 	_channel_ready = true;
++	if (hasUnverifiedSubmission())
++	{
++		_ctx->writeLog(fmt::format("{} submission outcome unverified; channel reconciliation and automatic actions held", _code).c_str());
++		return;
++	}
+ 	
+ 	// 获取未完成的订单数量
+ 	double undone = _ctx->getUndoneQty(_code.c_str());
+@@ -466,6 +471,8 @@
+ 		bool isBuy = (undone > 0);
+ 		
+ 		// 撤销对应方向的所有未完成订单
++		if (hasUnverifiedSubmission())
++			return;
+ 		OrderIDs ids = _ctx->cancel(_code.c_str(), isBuy);
+ 		
+ 		// 将撤销的订单添加到监控器中进行跟踪
+@@ -557,6 +564,8 @@
+ 	// 检查行情数据是否有效且属于当前合约
+ 	if (newTick == NULL || _code.compare(newTick->code()) != 0)
+ 		return;
++	if (hasUnverifiedSubmission())
++		return;
+ 	if (!_config_valid)
+ 		return;
+ 	if (_unsupported_date_contract)
+@@ -822,7 +831,7 @@
+  */
+ void WtStockVWapExeUnit::do_calc()
+ {
+-	if (_orders_mon.has_unverified_timeout())
++	if (hasUnverifiedSubmission() || _orders_mon.has_unverified_timeout())
+ 		return;
+ 	if (!_config_valid || !_target_pos_valid || _ctx == nullptr || _last_tick == nullptr)
+ 		return;
+@@ -960,6 +969,8 @@
+ 		decimal::gt(abs(undone), abs(requestedRemainder));
+ 	if (oppositeLiveOrder || oversizedSameDirectionOrder)
+ 	{
++		if (hasUnverifiedSubmission())
++			return;
+ 		OrderIDs ids = _ctx->cancel(code, undoneIsBuy);
+ 		if (!ids.empty())
+ 		{
+@@ -1116,7 +1127,7 @@
+ 		isCanCancel = false;	//如果价格被修正为涨跌停价，订单不可撤销
+ 	}
+ 	OrderIDs ids;
+-	if (_orders_mon.has_unverified_timeout())
++	if (hasUnverifiedSubmission() || _orders_mon.has_unverified_timeout())
+ 		return;
+ 	if (curQty > 0)
+ 	{
+@@ -1125,6 +1136,14 @@
+ 	else {
+ 		ids = _ctx->sell(code, targetPx, abs(curQty));
+ 	}
++	if (ids.empty())
++	{
++		_unverified_submission.store(true);
++		_pending_action = PendingAction::none;
++		_retry_not_before = 0;
++		_ctx->writeLog(fmt::format("{} order returned no IDs; submission outcome unverified, automatic actions held", _code).c_str());
++		return;
++	}
+ 	_orders_mon.push_order(ids.data(), ids.size(), now, isCanCancel);
+ 	for (uint32_t localid : ids)
+ 		_order_target_generations[localid] = { _target_generation, true };
+@@ -1174,7 +1193,7 @@
+  */
+ void WtStockVWapExeUnit::fire_at_once(double qty)
+ {
+-	if (_orders_mon.has_unverified_timeout())
++	if (hasUnverifiedSubmission() || _orders_mon.has_unverified_timeout())
+ 		return;
+ 	// 如果数量为0，直接返回
+ 	if (decimal::eq(qty, 0) || !_config_valid || _last_tick == nullptr || _comm_info == nullptr)
+@@ -1268,7 +1287,7 @@
+ 	OrderIDs ids;
+ 	
+ 	// 根据数量正负发送买入或卖出订单
+-	if (_orders_mon.has_unverified_timeout())
++	if (hasUnverifiedSubmission() || _orders_mon.has_unverified_timeout())
+ 	{
+ 		curTick->release();
+ 		return;
+@@ -1281,22 +1300,12 @@
+ 		ids = _ctx->sell(code, targetPx, abs(qty));
+ 	if (ids.empty())
+ 	{
+-		_pending_action = PendingAction::retry;
++		_unverified_submission.store(true);
++		_pending_action = PendingAction::none;
+ 		_last_tick_time = curTickTime;
+-		// Throttle only failed ID returns. _fire_span is seconds; compare against
+-		// the fresh tick's calendar timestamp so midnight rollover is explicit.
+-		// A zero span is otherwise valid (tail_secs may equal the duration), so
+-		// use a documented 1-second fail-safe only for this failed-send path.
+-		const uint32_t retry_interval_secs = _fire_span == 0 ? 1 : _fire_span;
+-		const int64_t retry_tick_epoch = TimeUtils::makeTime(curTick->actiondate(), curTick->actiontime());
+-		_retry_not_before = retry_tick_epoch + static_cast<int64_t>(retry_interval_secs) * 1000;
+-		if (_fire_span == 0)
+-			_ctx->writeLog(fmt::format("{} retry order returned no order ids; configured fire_span is zero (including tail_secs==duration), using a 1-second fail-safe retry interval",
+-				_code).c_str());
+-		else
+-			_ctx->writeLog(fmt::format("{} retry order returned no order ids; waiting at least {} seconds per configured fire_span",
+-				_code, retry_interval_secs).c_str());
++		_retry_not_before = 0;
+ 		curTick->release();
++		_ctx->writeLog(fmt::format("{} retry order returned no IDs; submission outcome unverified, automatic actions held", _code).c_str());
+ 		return;
+ 	}
+ 
+--- baseline/WtStockVWapExeUnit.h
++++ final/WtStockVWapExeUnit.h
+@@ -83,6 +83,9 @@
+ 	 */
+ 	WtStockVWapExeUnit();
+ 
++	// An empty provider response does not establish whether the order was accepted.
++	bool hasUnverifiedSubmission() const { return _unverified_submission.load(); }
++
+ 	/**
+ 	 * @brief 析构函数
+ 	 * @details 清理所有分配的资源，包括行情数据和商品信息
+@@ -368,6 +371,8 @@
+ 	
+ 	/// @brief 原子变量，标记是否在计算过程中，用于防止多线程竞争
+ 	std::atomic<bool> _in_calc;
++	// Process-local quarantine: no automatic recovery without trusted reconciliation.
++	std::atomic<bool> _unverified_submission{ false };
+ 
+ 	/**
+ 	 * @brief 计算标记结构体
+--- baseline/r43_match_engine_flow_test.cpp
++++ final/r43_match_engine_flow_test.cpp
+@@ -110,6 +110,7 @@
+ class MatchEngineTestAccess
+ {
+ public:
++	static uint64_t sequence(const MatchEngine& engine) { return engine._next_order_sequence; }
+ 	static const std::map<uint32_t, double>* book_items(
+ 		const MatchEngine& engine, const char* code)
+ 	{
+@@ -147,6 +148,28 @@
+ 	R43MatchSink sink;
+ };
+ 
++TEST_F(R43MatchEngineFlowTest, emptyBookRejectsWithoutSideEffectsAndLaterQuoteAllowsOrders)
++{
++	const char* code = "SSE.STK.610000";
++	feed(code, r43_tick(code, 10.0, 1000, 0, 0, 0, 0));
++	const auto sequence = MatchEngineTestAccess::sequence(engine);
++	EXPECT_TRUE(engine.buy(code, 10.0, 100, 1).empty());
++	EXPECT_TRUE(engine.sell(code, 10.0, 100, 1).empty());
++	EXPECT_TRUE(engine.buy(code, 11.0, 100, 1).empty());
++	EXPECT_TRUE(engine.sell(code, 9.0, 100, 1).empty());
++	EXPECT_EQ(sequence, MatchEngineTestAccess::sequence(engine));
++	EXPECT_TRUE(engine.get_order_snapshots(code).empty());
++	EXPECT_TRUE(sink.orders.empty());
++	EXPECT_TRUE(sink.trades.empty());
++	EXPECT_EQ(0u, sink.entrusts);
++	feed(code, r43_tick(code, 10.0, 1000, 9.9, 500, 10.1, 600));
++	EXPECT_EQ(1u, engine.buy(code, 10.0, 100, 2).size());
++	EXPECT_EQ(1u, engine.sell(code, 10.0, 100, 2).size());
++	EXPECT_EQ(sequence + 2, MatchEngineTestAccess::sequence(engine));
++	EXPECT_EQ(2u, engine.get_order_snapshots(code).size());
++	EXPECT_TRUE(sink.trades.empty());
++}
++
+ // 被动买价严格低于限价（且不等于最新价）：按委托剩余量成交，不受盘口量限制
+ TEST_F(R43MatchEngineFlowTest, passiveBuyBelowLimitFillsRemainingQty)
+ {
+--- baseline/r7_stock_vwap_unit_test.cpp
++++ final/r7_stock_vwap_unit_test.cpp
+@@ -1622,61 +1622,87 @@
+ 	ctx.comm->release();
+ }
+ 
+-TEST(r7_stkvw, empty_retry_order_ids_obey_configured_fire_span)
++TEST(r7_stkvw, empty_retry_ids_quarantine_across_ticks_and_reconnect)
+ {
+ 	SVwapFile vf(25.0);
+ 	SFakeCtx ctx;
+ 	ctx.comm = mkSComm("STK");
+ 	ctx.pos = ctx.avail = 1000;
+ 	WtStockVWapExeUnit unit;
+-	WTSVariant* cfg = mkSCfg(3, 0, 0, 100.0, 1000.0, 0, 0, true, 1000, 1100);
+-	bootS(unit, ctx, kStk, 100, cfg);
++	bootS(unit, ctx, kStk, 100, mkSCfg(3, 0, 0, 100.0, 1000.0, 0, 0, true, 1000, 1100));
+ 	ASSERT_EQ(ctx.sells.size(), 1u);
++	const auto fired = unit._fired_times;
++	const auto lastFire = unit._last_fire_time;
+ 	unit.on_order(7000, kStk, false, 50, 10.50, true);
+-
+ 	ctx.returnEmptyOrderIds = true;
+ 	unit.on_tick(mkSTick(kStk, 100100000, 10.50, 10.49, 10.51));
+-	EXPECT_EQ(ctx.sells.size(), 1u);
+-	EXPECT_EQ(ctx.emptyOrderIdAttempts, 1u);
+-	EXPECT_TRUE(ctx.hasLog("at least 1200 seconds per configured fire_span"));
+-	unit.on_tick(mkSTick(kStk, 100200000, 10.50, 10.49, 10.51));
+-	EXPECT_EQ(ctx.emptyOrderIdAttempts, 1u); // every new quote does not cause another retry
+-	unit.on_tick(mkSTick(kStk, 102059000, 10.50, 10.49, 10.51));
+-	EXPECT_EQ(ctx.emptyOrderIdAttempts, 1u); // one second short of fire_span
+-	unit.on_tick(mkSTick(kStk, 102100000, 10.50, 10.49, 10.51)); // interval elapsed: second empty response
+-	EXPECT_EQ(ctx.emptyOrderIdAttempts, 2u);
+-	unit.on_tick(mkSTick(kStk, 102200000, 10.50, 10.49, 10.51));
+-	EXPECT_EQ(ctx.emptyOrderIdAttempts, 2u); // second empty response also starts a new interval
+-
++	ASSERT_EQ(ctx.emptyOrderIdAttempts, 1u);
++	EXPECT_TRUE(unit.hasUnverifiedSubmission());
++	EXPECT_EQ(unit._fired_times, fired);
++	EXPECT_EQ(unit._last_fire_time, lastFire);
++	const uint32_t expiredId = 8888;
++	unit._orders_mon.push_order(&expiredId, 1, ctx.curTime);
++	unit._orders_mon.check_orders_with_generation(1, ctx.curTime + 1000,
++		[&](uint32_t id, uint64_t generation) {
++			EXPECT_TRUE(unit._orders_mon.mark_unverified_timeout(id, generation, 1, ctx.curTime + 1000));
++		});
++	EXPECT_TRUE(unit._orders_mon.has_unverified_timeout());
+ 	ctx.returnEmptyOrderIds = false;
+-	unit.on_tick(mkSTick(kStk, 104100000, 10.50, 10.49, 10.51)); // second interval elapsed: normal retry control
+-	ASSERT_EQ(ctx.sells.size(), 2u);
+-	EXPECT_GT(ctx.sells[1].qty, 0.0);
+-	EXPECT_LE(ctx.sells[1].qty, 100.0);
++	unit.on_tick(mkSTick(kStk, 104100000, 10.50, 10.49, 10.51));
++	unit.on_tick(mkSTick(kStk, 100100000, 10.50, 10.49, 10.51, 0, 0, 20240104, 20240104));
++	ctx.undone = 100;
++	unit.on_channel_lost();
++	unit.on_channel_ready();
++	unit.set_position(kStk, 500);
++	unit.clear_all_position(kStk);
++	unit.fire_at_once(100);
++	EXPECT_EQ(ctx.emptyOrderIdAttempts, 1u);
++	EXPECT_EQ(ctx.sells.size(), 1u);
++	EXPECT_TRUE(ctx.buys.empty());
++	EXPECT_TRUE(ctx.bydirCancels.empty());
++	EXPECT_TRUE(ctx.byidCancels.empty());
++	EXPECT_TRUE(unit.hasUnverifiedSubmission());
++	EXPECT_TRUE(unit._orders_mon.has_unverified_timeout());
++	EXPECT_EQ(unit._fired_times, 0u); // explicit target updates reset the normal execution counter
++	EXPECT_TRUE(ctx.hasLog("submission outcome unverified"));
+ 	ctx.comm->release();
+ }
+ 
+-TEST(r7_stkvw, zero_fire_span_empty_retry_uses_one_second_failsafe_only_for_retry)
++TEST(r7_stkvw, empty_initial_ids_quarantine_without_counting_or_auto_cancellation)
+ {
+ 	SVwapFile vf(25.0);
+ 	SFakeCtx ctx;
+ 	ctx.comm = mkSComm("STK");
+-	ctx.pos = ctx.avail = 1000;
+-	WtStockVWapExeUnit unit;
+-	WTSVariant* cfg = mkSCfg(1, 0, 0, 100.0, 1000.0, 0, 3600, true, 1000, 1100);
+-	bootS(unit, ctx, kStk, 100, cfg); // tail_secs == duration is valid and yields fire_span == 0
+-	ASSERT_EQ(ctx.sells.size(), 1u);
+-	unit.on_order(7000, kStk, false, 50, 10.50, true);
+ 	ctx.returnEmptyOrderIds = true;
+-	unit.on_tick(mkSTick(kStk, 100010000, 10.50, 10.49, 10.51)); // 10:00:10
++	WtStockVWapExeUnit unit;
++	bootS(unit, ctx, kStk, 1000, mkSCfg(1, 0, 0, 100.0, 1000.0, 0, 3600, true, 1000, 1100));
+ 	ASSERT_EQ(ctx.emptyOrderIdAttempts, 1u);
+-	EXPECT_TRUE(ctx.hasLog("using a 1-second fail-safe retry interval"));
+-	unit.on_tick(mkSTick(kStk, 100010500, 10.50, 10.49, 10.51)); // 500 ms later
+-	EXPECT_EQ(ctx.emptyOrderIdAttempts, 1u);
++	EXPECT_TRUE(unit.hasUnverifiedSubmission());
++	EXPECT_EQ(unit._fired_times, 0u);
++	EXPECT_EQ(unit._last_fire_time, 0u);
+ 	ctx.returnEmptyOrderIds = false;
+-	unit.on_tick(mkSTick(kStk, 100011000, 10.50, 10.49, 10.51)); // one second elapsed
+-	ASSERT_EQ(ctx.sells.size(), 2u);
+-	EXPECT_LE(ctx.sells[1].qty, 100.0);
++	ctx.undone = 100;
++	unit.on_channel_lost();
++	unit.on_channel_ready();
++	unit.on_tick(mkSTick(kStk, 100010000, 10.50, 10.49, 10.51));
++	unit.do_calc();
++	unit.fire_at_once(100);
++	EXPECT_EQ(ctx.emptyOrderIdAttempts, 1u);
++	EXPECT_TRUE(ctx.buys.empty());
++	EXPECT_TRUE(ctx.sells.empty());
++	EXPECT_TRUE(ctx.bydirCancels.empty());
++	EXPECT_TRUE(ctx.byidCancels.empty());
++	EXPECT_EQ(unit._fired_times, 0u);
++	EXPECT_TRUE(ctx.hasLog("submission outcome unverified"));
++	WTSVariant* cfg = mkSCfg();
++	unit.init(&ctx, kStk, cfg);
++	cfg->release();
++	unit.set_position(kStk, 1000);
++	unit.on_channel_ready();
++	unit.on_tick(mkSTick(kStk, 100100000, 10.50, 10.49, 10.51));
++	EXPECT_TRUE(unit.hasUnverifiedSubmission());
++	EXPECT_TRUE(ctx.buys.empty());
++	EXPECT_TRUE(ctx.bydirCancels.empty());
+ 	ctx.comm->release();
+ }
+ 

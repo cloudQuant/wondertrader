@@ -171,11 +171,29 @@ class R59Stub : public wtp::IExecuterStub
 public:
     wtp::IHotMgr* hot_ = nullptr;
 
+    // Borrowed fixture objects; R59TraderTest owns them through executor quiesce.
+    void bindCommodityInfo(const char* stdCode, WTSCommodityInfo* comm)
+    {
+        if (stdCode != nullptr && stdCode[0] != '\0' && comm != nullptr)
+            comm_infos_[stdCode] = comm;
+    }
+
     virtual uint64_t get_real_time() override { return 20240510100000000ULL; }
-    virtual WTSCommodityInfo* get_comm_info(const char*) override { return nullptr; }
-    virtual WTSSessionInfo* get_sess_info(const char*) override { return nullptr; }
+    virtual WTSCommodityInfo* get_comm_info(const char* stdCode) override
+    {
+        auto it = comm_infos_.find(stdCode == nullptr ? "" : stdCode);
+        return it == comm_infos_.end() ? nullptr : it->second;
+    }
+    virtual WTSSessionInfo* get_sess_info(const char* stdCode) override
+    {
+        WTSCommodityInfo* comm = get_comm_info(stdCode);
+        return comm == nullptr ? nullptr : comm->getSessionInfo();
+    }
     virtual wtp::IHotMgr* get_hot_mon() override { return hot_; }
     virtual uint32_t get_trading_day() override { return 20240510; }
+
+private:
+    std::map<std::string, WTSCommodityInfo*> comm_infos_;
 };
 
 /// load_data 与 set_position 都能查到的合约表：标准码/原始码都映射到同一张合约
@@ -248,6 +266,12 @@ protected:
     std::string execFile(const char* name)
     {
         return std::string(WtHelper::getExecDataDir()) + name + ".json";
+    }
+
+    void bindFixtureMetadataForRealPlugin()
+    {
+        stub_.bindCommodityInfo(kStdCode, comm_);
+        stub_.bindCommodityInfo(kStdAu, comm2_);
     }
 
     void TearDown() override
@@ -459,9 +483,25 @@ TEST_F(R59Exec, diff_loads_valid_targets_and_recovers_on_channel_ready)
 
     std::ifstream in(file);
     std::string saved((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
-    EXPECT_NE(std::string::npos, saved.find("\"targets\""));
-    EXPECT_NE(std::string::npos, saved.find("\"diffs\""));
-    EXPECT_NE(std::string::npos, saved.find("10"));
+    rapidjson::Document savedDoc;
+    savedDoc.Parse(saved.c_str());
+    ASSERT_FALSE(savedDoc.HasParseError()) << saved;
+    ASSERT_TRUE(savedDoc.IsObject());
+    ASSERT_TRUE(savedDoc.HasMember("targets") && savedDoc["targets"].IsArray());
+    ASSERT_EQ(1u, savedDoc["targets"].Size());
+    const rapidjson::Value& savedTarget = savedDoc["targets"][0];
+    ASSERT_TRUE(savedTarget.IsObject() && savedTarget.HasMember("code") && savedTarget["code"].IsString() &&
+        savedTarget.HasMember("target") && savedTarget["target"].IsNumber());
+    EXPECT_STREQ("SHFE.ag.2512", savedTarget["code"].GetString());
+    EXPECT_DOUBLE_EQ(0.0, savedTarget["target"].GetDouble());
+
+    ASSERT_TRUE(savedDoc.HasMember("diffs") && savedDoc["diffs"].IsArray());
+    ASSERT_EQ(1u, savedDoc["diffs"].Size());
+    const rapidjson::Value& savedDiff = savedDoc["diffs"][0];
+    ASSERT_TRUE(savedDiff.IsObject() && savedDiff.HasMember("code") && savedDiff["code"].IsString() &&
+        savedDiff.HasMember("diff") && savedDiff["diff"].IsNumber());
+    EXPECT_STREQ("SHFE.ag.2512", savedDiff["code"].GetString());
+    EXPECT_DOUBLE_EQ(-7.0, savedDiff["diff"].GetDouble());
     EXPECT_EQ(0u, reader_.slices_); // 没有调用行情接口
 }
 
@@ -539,6 +579,7 @@ TEST_F(R59Exec, diff_stale_target_uses_raw_code_lookup_and_clears_with_real_unit
         fs::copy_options::overwrite_existing, ec);
     ASSERT_FALSE(ec) << ec.message();
     ASSERT_TRUE(factory_.loadFactories(stagedPlugins.string().c_str()));
+    bindFixtureMetadataForRealPlugin();
 
     auto unitProbe = factory_.createDiffExeUnit("WtExeFact", "WtDiffMinImpactExeUnit");
     ASSERT_NE(nullptr, unitProbe.get());
@@ -570,6 +611,10 @@ TEST_F(R59Exec, diff_stale_target_uses_raw_code_lookup_and_clears_with_real_unit
     wt_hashmap<std::string, double> empty;
     ex->set_position(empty);
 
+    const ExecUnitInitStatus agStatus = ex->queryUnitInitStatus(kStdCode);
+    EXPECT_EQ(agStatus.query_result, ExecUnitInitQueryResult::OK);
+    EXPECT_EQ(agStatus.state, ExecUnitInitState::READY);
+
     ASSERT_EQ(2u, bd.lookups_.size());
     EXPECT_EQ("ag2512|SHFE", bd.lookups_[0]); // load_data 的原始码查询
     EXPECT_EQ("ag2512|SHFE", bd.lookups_[1]); // 过期清理应遵循相同查询契约
@@ -595,6 +640,7 @@ TEST_F(R59Exec, diff_stale_target_clears_with_raw_code_only_contract_lookup)
         fs::copy_options::overwrite_existing, ec);
     ASSERT_FALSE(ec) << ec.message();
     ASSERT_TRUE(factory_.loadFactories(stagedPlugins.string().c_str()));
+    bindFixtureMetadataForRealPlugin();
 
     auto unitProbe = factory_.createDiffExeUnit("WtExeFact", "WtDiffMinImpactExeUnit");
     ASSERT_NE(nullptr, unitProbe.get());
@@ -626,6 +672,13 @@ TEST_F(R59Exec, diff_stale_target_clears_with_raw_code_only_contract_lookup)
     wt_hashmap<std::string, double> targets;
     targets["SHFE.au.2212"] = 5.0;
     ex->set_position(targets);
+
+    const ExecUnitInitStatus agStatus = ex->queryUnitInitStatus(kStdCode);
+    const ExecUnitInitStatus auStatus = ex->queryUnitInitStatus(kStdAu);
+    EXPECT_EQ(agStatus.query_result, ExecUnitInitQueryResult::OK);
+    EXPECT_EQ(agStatus.state, ExecUnitInitState::READY);
+    EXPECT_EQ(auStatus.query_result, ExecUnitInitQueryResult::OK);
+    EXPECT_EQ(auStatus.state, ExecUnitInitState::READY);
 
     ASSERT_EQ(3u, bd.lookups_.size());
     EXPECT_EQ("ag2512|SHFE", bd.lookups_[0]); // load_data 以原始码和交易所装载目标

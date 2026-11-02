@@ -41,10 +41,12 @@ public:
     void set_position(const wt_hashmap<std::string, double>& targets) override
     {
         last = targets;
+        calls.push_back(targets);
         ++sets;
     }
 
     wt_hashmap<std::string, double> last;
+    std::vector<wt_hashmap<std::string, double>> calls;
     uint32_t sets = 0;
 };
 
@@ -211,6 +213,14 @@ TEST(R110CtaRule, RunExportsListsAndPoolForwardsQfqTick)
 
     engine.run();
 
+    // run() synchronously reaches ticker on_init before starting its thread.
+    ASSERT_EQ(1u, exec->sets);
+    ASSERT_EQ(1u, exec->calls.size());
+    ASSERT_EQ(1u, exec->calls.front().size());
+    const auto initTarget = exec->calls.front().find(kCode);
+    ASSERT_NE(exec->calls.front().end(), initTarget);
+    EXPECT_DOUBLE_EQ(2.0, initTarget->second);
+
     const std::string marker = std::string(WtHelper::getBaseDir()) + "marker.json";
     EXPECT_TRUE(std::filesystem::exists(marker));
 
@@ -225,7 +235,15 @@ TEST(R110CtaRule, RunExportsListsAndPoolForwardsQfqTick)
     EXPECT_EQ(1u, static_cast<R110Ctx*>(ctx.get())->scheds);
     EXPECT_EQ(1u, static_cast<R110Ctx*>(ctx.get())->ticks);
     EXPECT_EQ("SHFE.ag.2512-", static_cast<R110Ctx*>(ctx.get())->last_tick);
-    EXPECT_EQ(1u, exec->sets);
+    EXPECT_EQ(2u, exec->sets);
+    ASSERT_EQ(2u, exec->calls.size());
+    for (const auto& targets : exec->calls)
+    {
+        ASSERT_EQ(1u, targets.size());
+        const auto target = targets.find(kCode);
+        ASSERT_NE(targets.end(), target);
+        EXPECT_DOUBLE_EQ(2.0, target->second);
+    }
 
     engine.release();
 }

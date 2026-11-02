@@ -64,6 +64,7 @@ namespace
 WtDtRunner::WtDtRunner()
 	: _data_store(NULL)
 	, _is_inited(false)
+	, _parser_commands_submitted(false)
 {
 }
 
@@ -290,7 +291,11 @@ void WtDtRunner::initialize(const char* cfgFile, bool isFile /* = true */, const
 	}
 	ayContracts->release();
 
-	initDataMgr(config->get("data"));
+	if (!initDataMgr(config->get("data")))
+	{
+		releaseConfig();
+		return;
+	}
 
 	if (cfgParser != NULL)
 	{
@@ -316,14 +321,20 @@ void WtDtRunner::initialize(const char* cfgFile, bool isFile /* = true */, const
 	start();
 }
 
-void WtDtRunner::initDataMgr(WTSVariant* config)
+bool WtDtRunner::initDataMgr(WTSVariant* config)
 {
 	if (config == NULL)
-		return;
+		return true;
 
-	_data_mgr.init(config, this);
+	const bool storeConfigured = config->has("store");
+	if (!_data_mgr.init(config, this) && storeConfigured)
+	{
+		WTSLogger::error("Configured data store failed to initialize; WtDtServo startup stopped");
+		return false;
+	}
 
 	WTSLogger::info("Data manager initialized");
+	return true;
 }
 
 WTSKlineSlice* WtDtRunner::get_bars_by_range(const char* stdCode, const char* period, uint64_t beginTime, uint64_t endTime /* = 0 */)
@@ -564,7 +575,11 @@ void WtDtRunner::start()
 		return;
 	}
 
-	_parsers.run();
+	// Some providers may already have accepted a command when another fails.
+	// Keep all owners alive; callback-drain behavior is not established here.
+	_parser_commands_submitted = _parsers.runWithResult();
+	if (!_parser_commands_submitted)
+		WTSLogger::error("WtDtServo parser connect commands were not all submitted; partial startup may have occurred");
 }
 
 void WtDtRunner::proc_tick(WTSTickData* curTick)
@@ -754,6 +769,16 @@ void WtDtRunner::trigger_tick(const char* stdCode, WTSTickData* curTick)
 
 void WtDtRunner::sub_tick(const char* codes, bool bReplace, bool bInner /* = false */)
 {
+	if (codes == NULL || codes[0] == '\0')
+		return;
+
+	const auto isSuffixOnly = [](const std::string& code) {
+		return code.size() == 1
+			&& (code[0] == SUFFIX_QFQ || code[0] == SUFFIX_HFQ);
+	};
+	if (bInner && isSuffixOnly(codes))
+		return;
+
 	if(bInner)
 	{
 		StdUniqueLock lock(_mtx_innersubs);
@@ -776,13 +801,28 @@ void WtDtRunner::sub_tick(const char* codes, bool bReplace, bool bInner /* = fal
 	}
 	else
 	{
+		StringVector ayCodes = StrUtil::split(codes, ",");
+		bool hasValidCode = false;
+		for (const std::string& code : ayCodes)
+		{
+			if (!code.empty() && !isSuffixOnly(code))
+			{
+				hasValidCode = true;
+				break;
+			}
+		}
+		if (!hasValidCode)
+			return;
+
 		StdUniqueLock lock(_mtx_subs);
 		if (bReplace)
 			_tick_sub_map.clear();
 
-		StringVector ayCodes = StrUtil::split(codes, ",");
 		for (const std::string& code : ayCodes)
 		{
+			if (code.empty() || isSuffixOnly(code))
+				continue;
+
 			//如果是主力合约代码, 如SHFE.ag.HOT, 那么要转换成原合约代码, SHFE.ag.1912
 			//因为执行器只识别原合约代码
 			const char* stdCode = code.c_str();
@@ -804,6 +844,9 @@ void WtDtRunner::sub_tick(const char* codes, bool bReplace, bool bInner /* = fal
 
 void WtDtRunner::sub_bar(const char* stdCode, const char* period)
 {
+	if (stdCode == NULL || stdCode[0] == '\0' || period == NULL || period[0] == '\0')
+		return;
+
 	thread_local static char basePeriod[2] = { 0 };
 	basePeriod[0] = period[0];
 	uint32_t times = 1;

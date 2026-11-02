@@ -38,7 +38,7 @@ namespace
 	std::filesystem::path lane_root()
 	{
 		return std::filesystem::path(__FILE__).parent_path()
-			.parent_path().parent_path().parent_path();
+			.parent_path().parent_path().parent_path().parent_path();
 	}
 
 	std::filesystem::path make_temp_dir(const char* tag)
@@ -187,10 +187,10 @@ protected:
 		WTSVariant* cfg = replay_cfg(_root, _base);
 		ASSERT_TRUE(_replayer.init(cfg));
 		cfg->release();
-		ASSERT_TRUE(_replayer.prepare());
-
 		_mocker = new CtaMocker(&_replayer, "q02_pm");
 		_replayer.register_sink(_mocker, "q02_pm");
+		ASSERT_TRUE(_replayer.prepare());
+
 		_mocker->load_incremental_data("q02_state");
 	}
 
@@ -244,7 +244,7 @@ TEST_F(Q02CtaPosMatrixTest, detailTimeAndCostPairUp)
 
 	// 首次/末次开仓时间：details[0] 与 _last_entertime 两个来源
 	EXPECT_EQ(20200102093100000ull, _mocker->stra_get_first_entertime(kCode));
-	EXPECT_EQ(20200106093100000ull, _mocker->stra_get_first_entertime(kCode2));
+	EXPECT_EQ(20200102093100000ull, _mocker->stra_get_first_entertime(kCode2));
 	EXPECT_EQ(20200103145500000ull, _mocker->stra_get_last_entertime(kCode));
 	EXPECT_EQ(20200106093100000ull, _mocker->stra_get_last_exittime(kCode));
 	EXPECT_EQ(0ull, _mocker->stra_get_last_exittime(kCode2));

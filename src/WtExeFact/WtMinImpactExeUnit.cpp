@@ -255,6 +255,7 @@ void WtMinImpactExeUnit::on_channel_ready()
 
 	if(!decimal::eq(undone, 0) && !_orders_mon.has_order())
 	{
+		if (!wtRunIfNoUnverifiedTimeout(_orders_mon, [this, undone]() {
 		/*
 		 *	如果未完成单不为0，而OMS没有订单
 		 *	这说明有未完成单不在监控之中,全部撤销掉
@@ -269,6 +270,8 @@ void WtMinImpactExeUnit::on_channel_ready()
 		_cancel_cnt += ids.size();
 
 		_ctx->writeLog(fmtutil::format("[{}@{}]cancelcnt -> {}", __FILE__, __LINE__, _cancel_cnt));
+		}))
+			_ctx->writeLog(fmtutil::format("Unmanaged-order cancellation for {} suppressed after an unverified timeout", _code.c_str()));
 	}
 	else if (decimal::eq(undone, 0) && _orders_mon.has_order())
 	{

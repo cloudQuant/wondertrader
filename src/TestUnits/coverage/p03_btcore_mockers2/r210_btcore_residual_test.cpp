@@ -102,6 +102,7 @@ TEST_F(R210Fixture, R210His_BarReplaySkipsEmptyL2Lists)
 {
 	r72::Loader loader;
 	loader.finalBars[kCu] = {
+		r72::make_bar(20200101u, 150000u, 69990.0),
 		r72::make_bar(20200102u, 150000u, 70000.0),
 		r72::make_bar(20200103u, 150000u, 70010.0)
 	};
@@ -134,6 +135,7 @@ TEST_F(R210Fixture, R210His_BarReplaySkipsEmptyL2Lists)
 
 	rp.run(false);
 
+	EXPECT_GT(sink.barCalls, 0u);
 	EXPECT_GT(sink.tickCalls, 0u);
 	EXPECT_EQ(1u, sink.doneCalls);
 }
@@ -164,6 +166,8 @@ TEST_F(R210Fixture, R210His_CorruptCompressedBarBlockIsCaught)
 TEST_F(R210Fixture, R210His_UncompressedV2BarBlockHeaderStripped)
 {
 	std::vector<WTSBarStruct> bars = {
+		r72::make_bar(20191230u, 150000u, 69980.0),
+		r72::make_bar(20191231u, 150000u, 69990.0),
 		r72::make_bar(20200102u, 150000u, 70000.0),
 		r72::make_bar(20200103u, 150000u, 70010.0)
 	};

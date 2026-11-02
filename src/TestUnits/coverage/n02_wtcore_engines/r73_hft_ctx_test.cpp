@@ -121,7 +121,7 @@ TEST_F(R73HftCtxTest, DynProfitUsesBidAskAndWritesFunds)
     // 反手到 -2：多头平仓后开空，空头估值用 ask
     ctx->do_set_position(kCode, -2.0, 100.0, "S");
     feed(*ctx, 105.0, 90.0, 110.0, 93101000);
-    EXPECT_DOUBLE_EQ(200.0, ctx->stra_get_position_profit(kCode));
+    EXPECT_DOUBLE_EQ(-200.0, ctx->stra_get_position_profit(kCode));
 
     // 清零后 dynprofit 归零
     ctx->do_set_position(kCode, 0.0, 100.0, "F");

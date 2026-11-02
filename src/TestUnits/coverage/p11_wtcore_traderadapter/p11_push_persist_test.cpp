@@ -244,7 +244,10 @@ TEST_F(P11PushPersist, reopened_csv_keeps_header_and_appends)
     }
     std::string afterSecond = readAll(tradesCsv);
     EXPECT_EQ(3u, std::count(afterSecond.begin(), afterSecond.end(), '\n'));
-    EXPECT_EQ(1u, std::count(afterSecond.begin(), afterSecond.end(), 'l'));   // "localid" 只出现一次
+    const std::string header = "localid,date,time,code,action,volume,price,tradeid,orderid\n";
+    const auto headerPos = afterSecond.find(header);
+    ASSERT_NE(std::string::npos, headerPos);
+    EXPECT_EQ(std::string::npos, afterSecond.find(header, headerPos + header.size()));
     EXPECT_NE(std::string::npos,
         afterSecond.find("2002,20240510,93210,SHFE.ag.2512,OS,2,7000,TR2,OR2"));
 }

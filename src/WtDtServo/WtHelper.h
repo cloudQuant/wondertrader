@@ -46,6 +46,19 @@ public:
 	 */
 	static const char* get_module_dir(){ return _bin_dir.c_str(); }
 
+	// Join a relative module path without requiring callers to include a trailing separator.
+	static std::string get_module_path(const std::string& relative)
+	{
+		std::string path = _bin_dir;
+		if (!path.empty() && path.back() != '/'
+#ifdef _WIN32
+			&& path.back() != '\\'
+#endif
+		)
+			path += '/';
+		return path + relative;
+	}
+
 	/**
 	 * @brief 设置模块目录
 	 * 

@@ -9,6 +9,7 @@
 
 #include <cstdint>
 #include <filesystem>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -163,6 +164,29 @@ TEST_F(R56Logger, InitSuccessWritesAllLevelsAndCategories)
 	EXPECT_EQ(nullptr, spdlog::get("r56dyn").get());
 	WTSLogger::stop();
 	EXPECT_EQ(nullptr, spdlog::get("root").get());
+}
+
+// init releases the parsed root on both exception and success paths while the
+// separately retained dyn_pattern remains usable after the root is gone.
+TEST_F(R56Logger, InitReleasesConfigAndKeepsRetainedPatternAfterMissingRoot)
+{
+	const std::string dynLog = root_file("retry-dyn.log");
+	const std::string missingRoot =
+		"{\"dyn_pattern\":{\"r56retry\":{\"level\":\"debug\",\"async\":false,\"sinks\":[" +
+		r56_basic_sink(dynLog) + "]}}}";
+
+	EXPECT_THROW(WTSLogger::init(missingRoot.c_str(), false, NULL), std::runtime_error);
+
+	const std::string rootConfig = r56_cfg_root("debug", "");
+	ASSERT_NO_THROW(WTSLogger::init(rootConfig.c_str(), false, NULL));
+	WTSLogger::log_dyn("r56retry", "r56retrylogger", LL_INFO, "retained-pattern-alive");
+	SpdLoggerPtr dynamicLogger = spdlog::get("r56retrylogger");
+	ASSERT_NE(nullptr, dynamicLogger.get());
+	dynamicLogger->flush();
+	EXPECT_NE(std::string::npos, r56tmp::read_file(dynLog).find("retained-pattern-alive"));
+
+	WTSLogger::freeAllDynLoggers();
+	WTSLogger::stop();
 }
 
 // WTSLogger.cpp:204-248（二次 init 早退）

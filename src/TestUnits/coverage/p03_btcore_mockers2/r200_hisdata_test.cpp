@@ -12,6 +12,7 @@
 #include <gtest/gtest.h>
 
 #include <cstdint>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -29,6 +30,25 @@ namespace
 	const char* const kStkHfq = "SSE.STK.000001+";
 
 	namespace fs = std::filesystem;
+
+	class R200Loader : public r72::Loader
+	{
+	public:
+		std::set<std::string> successfulEmptyTickBuckets;
+
+		bool loadRawHisTicks(void* obj, const char* stdCode, uint32_t uDate, FuncReadTicks cb) override
+		{
+			if (stdCode != nullptr && successfulEmptyTickBuckets.find(
+				std::string(stdCode) + "#" + std::to_string(uDate)) != successfulEmptyTickBuckets.end())
+			{
+				++tickCalls;
+				cb(obj, nullptr, 0u);
+				return true;
+			}
+			return r72::Loader::loadRawHisTicks(obj, stdCode, uDate, cb);
+		}
+	};
+
 	using R200Fixture = r72::Fixture;
 }
 
@@ -38,7 +58,8 @@ namespace
 // 2 笔 tick 保证首笔不会被 getNextTickTime 的 cursor>=count 提前跳过。
 TEST_F(R200Fixture, R200His_TickReplayEmptyHftListsContinue)
 {
-	r72::Loader loader;
+	R200Loader loader;
+	loader.successfulEmptyTickBuckets.insert(std::string(kJ) + "#20200102");
 	loader.ticks[std::string(kCu) + "#20200102"] = {
 		r72::make_tick_struct(kCu, 20200102u, 93100000u, 70000.0, 69990.0, 70010.0),
 		r72::make_tick_struct(kCu, 20200102u, 93200000u, 70010.0, 70000.0, 70020.0)
@@ -61,7 +82,7 @@ TEST_F(R200Fixture, R200His_TickReplayEmptyHftListsContinue)
 
 	rp.run(false);
 
-	EXPECT_EQ(1u, sink.tickCalls);
+	EXPECT_EQ(2u, sink.tickCalls);
 	EXPECT_EQ(1u, sink.beginCalls);
 	EXPECT_EQ(1u, sink.endCalls);
 	EXPECT_EQ(1u, sink.doneCalls);
@@ -73,8 +94,14 @@ TEST_F(R200Fixture, R200His_TickReplayEmptyHftListsContinue)
 // 交易日提供 2 笔，j 始终无 tick。
 TEST_F(R200Fixture, R200His_BarReplaySkipsEmptyTickList)
 {
-	r72::Loader loader;
+	R200Loader loader;
+	loader.successfulEmptyTickBuckets = {
+		std::string(kCu) + "#20200102",
+		std::string(kJ) + "#20200102",
+		std::string(kJ) + "#20200103"
+	};
 	loader.finalBars[kCu] = {
+		r200::make_daily(20191231u, 69990.0),	// 回测开始前已完成的暖场日线
 		r200::make_daily(20200102u, 70000.0),
 		r200::make_daily(20200103u, 70010.0)
 	};
@@ -226,6 +253,7 @@ TEST_F(R200Fixture, R200His_DailyCursorCatchesUpAfterMinuteRun)
 {
 	r72::Loader loader;
 	loader.finalBars[kCu] = {
+		r200::make_minute(20200102u, 940u, 69990.0),	// 回放起点前的完整 5 分钟 bar
 		r200::make_minute(20200102u, 945u, 70000.0),
 		r200::make_minute(20200103u, 945u, 70010.0),
 		r200::make_minute(20200106u, 945u, 70020.0),
@@ -233,6 +261,7 @@ TEST_F(R200Fixture, R200His_DailyCursorCatchesUpAfterMinuteRun)
 		r200::make_minute(20200108u, 945u, 70040.0)
 	};
 	loader.finalBars[kIc] = {
+		r200::make_daily(20191231u, 3990.0),		// 回放起点前的已完成日线
 		r200::make_daily(20200102u, 4000.0),
 		r200::make_daily(20200103u, 4010.0),
 		r200::make_daily(20200106u, 4020.0),
@@ -262,7 +291,12 @@ TEST_F(R200Fixture, R200His_DailyCursorCatchesUpAfterMinuteRun)
 
 	WTSKlineSlice* catchup = rp.get_kline_slice(kIc, "d", 5, 1, false);
 	ASSERT_NE(nullptr, catchup);
-	EXPECT_EQ(4u, catchup->size());
+	ASSERT_EQ(5u, catchup->size());	// 一根暖场日线 + 回放范围内追平到 07 的四根日线
+	EXPECT_EQ(20191231u, catchup->at(0)->date);
+	EXPECT_EQ(20200102u, catchup->at(1)->date);
+	EXPECT_EQ(20200103u, catchup->at(2)->date);
+	EXPECT_EQ(20200106u, catchup->at(3)->date);
+	EXPECT_EQ(20200107u, catchup->at(4)->date);
 	catchup->release();
 }
 
@@ -294,12 +328,19 @@ TEST_F(R200Fixture, R200His_CacheClearJoinsMultipleCodes)
 {
 	r72::Loader loader;
 	loader.finalBars[kCu] = {
+		r200::make_daily(20191231u, 69990.0),	// 回放起点前的已完成主日线
 		r200::make_daily(20200102u, 70000.0),
 		r200::make_daily(20200103u, 70010.0),
 		r200::make_daily(20200106u, 70020.0)
 	};
-	loader.finalBars[kIc] = { r200::make_daily(20200102u, 4000.0) };
-	loader.finalBars[kJ] = { r200::make_daily(20200102u, 1000.0) };
+	loader.finalBars[kIc] = {
+		r200::make_daily(20191231u, 3990.0),	// 回放起点前的已完成日线
+		r200::make_daily(20200102u, 4000.0)
+	};
+	loader.finalBars[kJ] = {
+		r200::make_daily(20191231u, 990.0),		// 回放起点前的已完成日线
+		r200::make_daily(20200102u, 1000.0)
+	};
 
 	HisDataReplayer rp;
 	WTSVariant* cfg = r200::make_csv_cfg(_root, _base,

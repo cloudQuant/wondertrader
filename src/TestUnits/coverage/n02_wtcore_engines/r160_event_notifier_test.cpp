@@ -20,10 +20,15 @@
 
 #include <atomic>
 #include <chrono>
+#include <condition_variable>
 #include <cstdint>
+#include <memory>
+#include <mutex>
+#include <stdexcept>
 #include <string>
 #include <thread>
 #include <type_traits>
+#include <vector>
 
 #include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/io_context.hpp>
@@ -53,6 +58,8 @@ static_assert(std::is_same<FundPublishMessage,
 static_assert(std::is_same<FuncLogCallback,
     void(PORTER_FLAG *)(WtUInt32, const char*, bool)>::value,
     "MQ log callback must match WtMsgQue ABI");
+static_assert(std::is_same<decltype(EventNotifier::_stopped), std::atomic<bool>>::value,
+    "the worker stop flag must be atomic");
 
 std::atomic<int> g_log{ 0 };
 std::atomic<int> g_event{ 0 };
@@ -62,6 +69,91 @@ std::atomic<int> g_order{ 0 };
 std::atomic<int> g_index{ 0 };
 std::atomic<int> g_marker{ 0 };
 std::atomic<int> g_stra{ 0 };
+std::atomic<int> g_order_probe_destructions{ 0 };
+std::atomic<int> g_trade_probe_destructions{ 0 };
+std::atomic<int> g_throwing_publisher_calls{ 0 };
+std::atomic<int> g_blocked_publisher_calls{ 0 };
+std::mutex g_blocked_publisher_mutex;
+std::condition_variable g_blocked_publisher_cv;
+bool g_blocked_publisher_entered = false;
+bool g_blocked_publisher_released = false;
+std::mutex g_sequence_mutex;
+std::condition_variable g_sequence_cv;
+std::vector<std::string> g_sequence;
+bool g_sequence_entered = false;
+bool g_sequence_released = false;
+std::atomic<int> g_exception_calls{0};
+std::atomic<int> g_exception_successes{0};
+
+void ordered_publisher(WtUInt32, const char*, const char* data, WtUInt32 len)
+{
+	std::unique_lock<std::mutex> lock(g_sequence_mutex);
+	g_sequence.emplace_back(data, len);
+	if (g_sequence.size() == 1) {
+		g_sequence_entered = true;
+		g_sequence_cv.notify_all();
+		g_sequence_cv.wait(lock, [] { return g_sequence_released; });
+	}
+	g_sequence_cv.notify_all();
+}
+
+void throw_then_publish(WtUInt32, const char*, const char*, WtUInt32)
+{
+	if (g_exception_calls.fetch_add(1) == 0)
+		throw std::runtime_error("injected publisher failure");
+	++g_exception_successes;
+}
+
+class OrderInfoDestructionProbe final : public WTSOrderInfo
+{
+public:
+	~OrderInfoDestructionProbe() noexcept override
+	{
+		++g_order_probe_destructions;
+	}
+
+	void release() override
+	{
+		// This probe is allocated with new, not WTSOrderInfo::create(). Route the
+		// final reference through WTSObject::release() so delete invokes the
+		// virtual probe destructor instead of the production object-pool release.
+		WTSObject::release();
+	}
+};
+
+class TradeInfoDestructionProbe final : public WTSTradeInfo
+{
+public:
+	~TradeInfoDestructionProbe() noexcept override
+	{
+		++g_trade_probe_destructions;
+	}
+
+	void release() override
+	{
+		// This probe is allocated with new, not WTSTradeInfo::create(). Route the
+		// final reference through WTSObject::release() so delete invokes the
+		// virtual probe destructor instead of the production object-pool release.
+		WTSObject::release();
+	}
+};
+
+void throwing_trade_publisher(WtUInt32 /*id*/, const char* /*topic*/,
+	const char* /*data*/, WtUInt32 /*dataLen*/)
+{
+	++g_throwing_publisher_calls;
+	throw std::runtime_error("R160 trade publisher failure");
+}
+
+void blocked_order_publisher(WtUInt32 /*id*/, const char* /*topic*/,
+	const char* /*data*/, WtUInt32 /*dataLen*/)
+{
+	std::unique_lock<std::mutex> lock(g_blocked_publisher_mutex);
+	g_blocked_publisher_entered = true;
+	g_blocked_publisher_cv.notify_all();
+	g_blocked_publisher_cv.wait(lock, [] { return g_blocked_publisher_released; });
+	++g_blocked_publisher_calls;
+}
 
 void PORTER_FLAG on_mq_message(uint32_t /*id*/, const char* topic, const char* /*data*/, uint32_t /*len*/)
 {
@@ -209,6 +301,8 @@ TEST(R160EventNotifier, WorkGuardKeepsWorkerAliveForEveryPublishLambda)
     ord->setVolLeft(2);
     ord->setPrice(3510.0);
     ord->setStateMsg("canceled");
+    const uint32_t tradeRefBefore = trd->retainCount();
+    const uint32_t orderRefBefore = ord->retainCount();
 
     // 用显式路径加载与 EventNotifier 同一份 WtMsgQue，避免测试二进制里另有一份
     // 静态副本时客户端/服务端落在两个 MQManager 上。
@@ -265,7 +359,9 @@ TEST(R160EventNotifier, WorkGuardKeepsWorkerAliveForEveryPublishLambda)
                 && g_trade.load() >= 1 && g_order.load() >= 1 && g_index.load() >= 1
                 && g_marker.load() >= 1 && g_stra.load() >= 1;
         };
-        for (int i = 0; i < 500 && !all_delivered(); ++i)
+        for (int i = 0; i < 500 && (!all_delivered()
+            || trd->retainCount() != tradeRefBefore
+            || ord->retainCount() != orderRefBefore); ++i)
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
         // 9 个入口必须各自真正发布（而非仅仅 post）
@@ -277,6 +373,10 @@ TEST(R160EventNotifier, WorkGuardKeepsWorkerAliveForEveryPublishLambda)
         EXPECT_GE(g_index.load(), 1) << "CHART_INDEX 主题未收到消息";
         EXPECT_GE(g_marker.load(), 1) << "CHART_MARKER 主题未收到消息";
         EXPECT_GE(g_stra.load(), 1) << "STRA_TRADE 主题未收到消息";
+        EXPECT_EQ(tradeRefBefore, trd->retainCount())
+            << "成交通知 handler 完成后必须释放其 retain 引用";
+        EXPECT_EQ(orderRefBefore, ord->retainCount())
+            << "订单通知 handler 完成后必须释放其 retain 引用";
 
         guard.reset();
     }
@@ -288,4 +388,374 @@ TEST(R160EventNotifier, WorkGuardKeepsWorkerAliveForEveryPublishLambda)
     ord->release();
     DLLHelper::free_library(mqHandle);
     WtHelper::setInstDir(oldInst.c_str());
+}
+
+TEST(R160EventNotifier, DiscardedOrderHandlerReleasesRetainedReference)
+{
+    WTSOrderInfo* ord = WTSOrderInfo::create();
+    ASSERT_NE(nullptr, ord);
+    const uint32_t orderRefBefore = ord->retainCount();
+
+    {
+        EventNotifier notifier;
+        // Set only the guard needed to enqueue the order. No worker runs this
+        // context, so destruction discards the queued handler deterministically.
+        notifier._mq_sid = 1;
+        notifier._accepting = true;
+        notifier.notify("R160_TRADER", 12u, "SHFE.ag.2512", ord);
+        EXPECT_EQ(orderRefBefore + 1, ord->retainCount());
+        notifier._asyncio.stop();
+    }
+
+    EXPECT_EQ(orderRefBefore, ord->retainCount())
+        << "被销毁的队列 handler 也必须释放订单通知引用";
+    ord->release();
+}
+
+TEST(R160EventNotifier, AsyncOrderHandlerDestroysObjectOnceAfterPublisherReturns)
+{
+	g_order_probe_destructions = 0;
+	g_blocked_publisher_calls = 0;
+	{
+		std::lock_guard<std::mutex> lock(g_blocked_publisher_mutex);
+		g_blocked_publisher_entered = false;
+		g_blocked_publisher_released = false;
+	}
+
+	EventNotifier notifier;
+	notifier._mq_sid = 1;
+	notifier._accepting = true;
+	notifier._publisher = blocked_order_publisher;
+
+	WTSOrderInfo* order = new OrderInfoDestructionProbe();
+	ASSERT_NE(nullptr, order);
+	order->setCode("ag2512");
+	order->setExchange("SHFE");
+	order->setDirection(WDT_SHORT);
+	order->setOffsetType(WOT_OPEN);
+	order->setOrderState(WOS_Canceled);
+	order->setVolume(3);
+	order->setVolTraded(1);
+	order->setVolLeft(2);
+	order->setPrice(3510.0);
+	order->setStateMsg("canceled");
+
+	notifier.notify("R160_TRADER", 12u, "SHFE.ag.2512", order);
+	EXPECT_EQ(2u, order->retainCount());
+	order->release(); // Drop the caller's reference; the queued handler owns the last one.
+
+	std::thread handlerThread([&notifier] { notifier._asyncio.run_one(); });
+	bool publisherEntered = false;
+	{
+		std::unique_lock<std::mutex> lock(g_blocked_publisher_mutex);
+		publisherEntered = g_blocked_publisher_cv.wait_for(lock, std::chrono::seconds(2), [] {
+			return g_blocked_publisher_entered;
+		});
+	}
+	EXPECT_TRUE(publisherEntered) << "the queued order handler must reach the publisher";
+	if (publisherEntered)
+		EXPECT_EQ(0, g_order_probe_destructions.load())
+			<< "the order remains alive until the asynchronous publisher returns";
+
+	{
+		std::lock_guard<std::mutex> lock(g_blocked_publisher_mutex);
+		g_blocked_publisher_released = true;
+	}
+	g_blocked_publisher_cv.notify_all();
+	handlerThread.join();
+
+	EXPECT_EQ(1, g_blocked_publisher_calls.load());
+	EXPECT_EQ(1, g_order_probe_destructions.load())
+		<< "completion of the async handler must destroy its final order reference exactly once";
+}
+
+TEST(R160EventNotifier, DiscardedOrderHandlerDestroysLastReferenceOnce)
+{
+	g_order_probe_destructions = 0;
+	{
+		EventNotifier notifier;
+		notifier._mq_sid = 1;
+		notifier._accepting = true;
+		auto* order = new OrderInfoDestructionProbe();
+		notifier.notify("R160_TRADER", 12u, "SHFE.ag.2512", order);
+		order->release();
+		EXPECT_EQ(0, g_order_probe_destructions.load());
+		notifier._asyncio.stop();
+	}
+	EXPECT_EQ(1, g_order_probe_destructions.load());
+}
+
+TEST(R160EventNotifier, ThrowingOrderPublisherDestroysLastReferenceOnce)
+{
+	g_order_probe_destructions = 0;
+	g_throwing_publisher_calls = 0;
+	EventNotifier notifier;
+	notifier._mq_sid = 1;
+	notifier._accepting = true;
+	notifier._publisher = throwing_trade_publisher;
+	auto* order = new OrderInfoDestructionProbe();
+	notifier.notify("R160_TRADER", 12u, "SHFE.ag.2512", order);
+	order->release();
+	EXPECT_NO_THROW(notifier._asyncio.run_one());
+	EXPECT_EQ(1, g_throwing_publisher_calls.load());
+	EXPECT_EQ(1, g_order_probe_destructions.load());
+}
+
+TEST(R160EventNotifier, WorkerFinishesPendingOrderBeforeDestructorReturns)
+{
+	const std::string oldInst = WtHelper::getInstDir();
+	struct RestoreInstDir {
+		std::string value;
+		~RestoreInstDir() { WtHelper::setInstDir(value.c_str()); }
+	} restore{oldInst};
+	WtHelper::setInstDir((std::string(WT_R160_FAKE_MQ_DIR) + "/").c_str());
+	const std::string fakePath = std::string(WT_R160_FAKE_MQ_DIR) + "/" + DLLHelper::wrap_module("WtMsgQue", "lib");
+	DllHandle inspector = DLLHelper::load_library(fakePath.c_str());
+	ASSERT_NE(nullptr, inspector);
+	using FakeReset = void(*)();
+	using FakeCount = uint32_t(*)();
+	const auto reset = (FakeReset)DLLHelper::get_symbol(inspector, "r160_fake_reset");
+	const auto destroyCount = (FakeCount)DLLHelper::get_symbol(inspector, "r160_fake_destroy_count");
+	ASSERT_NE(nullptr, reset);
+	ASSERT_NE(nullptr, destroyCount);
+	reset();
+	WTSVariant* cfg = WTSCfgLoader::load_from_content("{\"active\":true,\"url\":\"fake://r41_stop\"}");
+	ASSERT_NE(nullptr, cfg);
+
+	g_order_probe_destructions = 0;
+	g_blocked_publisher_calls = 0;
+	{
+		std::lock_guard<std::mutex> lock(g_blocked_publisher_mutex);
+		g_blocked_publisher_entered = false;
+		g_blocked_publisher_released = false;
+	}
+	std::unique_ptr<EventNotifier> notifier(new EventNotifier());
+	auto guard = boost::asio::make_work_guard(notifier->_asyncio);
+	if (!notifier->init(cfg)) {
+		guard.reset();
+		cfg->release();
+		FAIL() << "fake MQ initialization failed";
+		return;
+	}
+	notifier->_publisher = blocked_order_publisher;
+	auto* order = new OrderInfoDestructionProbe();
+	notifier->notify("R160_TRADER", 12u, "SHFE.ag.2512", order);
+	order->release();
+	bool entered = false;
+	{
+		std::unique_lock<std::mutex> lock(g_blocked_publisher_mutex);
+		entered = g_blocked_publisher_cv.wait_for(lock, std::chrono::seconds(2), [] {
+			return g_blocked_publisher_entered;
+		});
+	}
+	EXPECT_TRUE(entered);
+	guard.reset();
+	std::atomic<bool> destructorStarted{false}, destructorFinished{false};
+	std::thread destroyer([&] {
+		destructorStarted.store(true);
+		notifier.reset();
+		destructorFinished.store(true);
+	});
+	while (!destructorStarted.load()) std::this_thread::yield();
+	if (entered) {
+		EXPECT_FALSE(destructorFinished.load());
+		EXPECT_EQ(0, g_order_probe_destructions.load());
+		EXPECT_EQ(0u, destroyCount());
+	}
+	{
+		std::lock_guard<std::mutex> lock(g_blocked_publisher_mutex);
+		g_blocked_publisher_released = true;
+	}
+	g_blocked_publisher_cv.notify_all();
+	destroyer.join();
+	EXPECT_TRUE(destructorFinished.load());
+	EXPECT_EQ(entered ? 1 : 0, g_blocked_publisher_calls.load());
+	EXPECT_EQ(1, g_order_probe_destructions.load());
+	EXPECT_EQ(1u, destroyCount());
+	cfg->release();
+	DLLHelper::free_library(inspector);
+}
+
+TEST(R160EventNotifier, DiscardedTradeHandlerReleasesRetainedReference)
+{
+	g_trade_probe_destructions = 0;
+	auto* trade = new TradeInfoDestructionProbe();
+	trade->setCode("ag2512");
+	trade->setDirection(WDT_LONG);
+	trade->setOffsetType(WOT_CLOSETODAY);
+	trade->setVolume(2);
+	trade->setPrice(3500.0);
+
+	{
+		EventNotifier notifier;
+		notifier._mq_sid = 1;
+		notifier._accepting = true;
+		notifier.notify("R160_TRADER", 11u, "SHFE.ag.2512", trade);
+		EXPECT_EQ(2u, trade->retainCount());
+		notifier._asyncio.stop();
+	}
+
+	const uint32_t refsAfterDiscard = trade->retainCount();
+	EXPECT_EQ(1u, refsAfterDiscard)
+		<< "discarding the queued trade handler must release its retained reference";
+	// Clean up the old implementation's leaked test reference after recording
+	// the failure, while keeping the test process free of an intentional leak.
+	if (refsAfterDiscard > 1)
+		trade->release();
+	trade->release();
+	EXPECT_EQ(1, g_trade_probe_destructions.load());
+}
+
+TEST(R160EventNotifier, ThrowingTradePublisherReleasesRetainedReference)
+{
+	g_trade_probe_destructions = 0;
+	g_throwing_publisher_calls = 0;
+	auto* trade = new TradeInfoDestructionProbe();
+	trade->setCode("ag2512");
+	trade->setDirection(WDT_LONG);
+	trade->setOffsetType(WOT_CLOSETODAY);
+	trade->setVolume(2);
+	trade->setPrice(3500.0);
+
+	EventNotifier notifier;
+	notifier._mq_sid = 1;
+	notifier._accepting = true;
+	notifier._publisher = throwing_trade_publisher;
+	notifier.notify("R160_TRADER", 11u, "SHFE.ag.2512", trade);
+	EXPECT_EQ(2u, trade->retainCount());
+
+	bool publisherThrew = false;
+	try
+	{
+		notifier._asyncio.run_one();
+	}
+	catch (const std::runtime_error&)
+	{
+		publisherThrew = true;
+	}
+	EXPECT_FALSE(publisherThrew) << "the notifier must isolate publisher exceptions";
+	EXPECT_EQ(1, g_throwing_publisher_calls.load());
+
+	const uint32_t refsAfterHandler = trade->retainCount();
+	EXPECT_EQ(1u, refsAfterHandler)
+		<< "handler unwinding after a publisher exception must release the trade reference";
+	if (refsAfterHandler > 1)
+		trade->release();
+	trade->release();
+	EXPECT_EQ(1, g_trade_probe_destructions.load());
+}
+
+TEST(R160EventNotifier, DeliversAfterIdleWithoutExternalWorkGuard)
+{
+	const std::string oldInst = WtHelper::getInstDir();
+	struct Restore { std::string dir; ~Restore() { WtHelper::setInstDir(dir.c_str()); } } restore{oldInst};
+	WtHelper::setInstDir((std::string(WT_R160_FAKE_MQ_DIR) + "/").c_str());
+	WTSVariant* cfg = WTSCfgLoader::load_from_content("{\"active\":true,\"url\":\"fake://r41_idle\"}");
+	ASSERT_NE(nullptr, cfg);
+	{
+		std::lock_guard<std::mutex> lock(g_sequence_mutex);
+		g_sequence.clear(); g_sequence_entered = false; g_sequence_released = true;
+	}
+	{
+		EventNotifier notifier;
+		ASSERT_TRUE(notifier.init(cfg));
+		notifier._publisher = ordered_publisher;
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		EXPECT_FALSE(notifier._asyncio.stopped());
+		notifier.notify_event("after idle");
+		std::unique_lock<std::mutex> lock(g_sequence_mutex);
+		const bool delivered = g_sequence_cv.wait_for(lock, std::chrono::seconds(2), [] {
+			return !g_sequence.empty();
+		});
+		EXPECT_TRUE(delivered);
+		if (delivered) EXPECT_NE(std::string::npos, g_sequence.front().find("after idle"));
+	}
+	cfg->release();
+}
+
+TEST(R160EventNotifier, ThrowingPublisherIsReportedAndLaterItemRuns)
+{
+	const std::string oldInst = WtHelper::getInstDir();
+	struct Restore { std::string dir; ~Restore() { WtHelper::setInstDir(dir.c_str()); } } restore{oldInst};
+	WtHelper::setInstDir((std::string(WT_R160_FAKE_MQ_DIR) + "/").c_str());
+	WTSVariant* cfg = WTSCfgLoader::load_from_content("{\"active\":true,\"url\":\"fake://r41_throw\"}");
+	ASSERT_NE(nullptr, cfg);
+	g_exception_calls = 0; g_exception_successes = 0;
+	std::unique_ptr<EventNotifier> notifier(new EventNotifier());
+	ASSERT_TRUE(notifier->init(cfg));
+	notifier->_publisher = throw_then_publish;
+	testing::internal::CaptureStderr();
+	notifier->notify_event("throws");
+	notifier->notify_event("after failure");
+	notifier.reset(); // Drain both accepted items before the fake server is destroyed.
+	const std::string diagnostic = testing::internal::GetCapturedStderr();
+	EXPECT_EQ(2, g_exception_calls.load());
+	EXPECT_EQ(1, g_exception_successes.load());
+	EXPECT_NE(std::string::npos, diagnostic.find("GRP_EVENT handler failed: injected publisher failure"));
+	cfg->release();
+}
+
+TEST(R160EventNotifier, ConcurrentStopDrainsAcceptedItemsAndRejectsLaterItems)
+{
+	const std::string oldInst = WtHelper::getInstDir();
+	struct Restore { std::string dir; ~Restore() { WtHelper::setInstDir(dir.c_str()); } } restore{oldInst};
+	WtHelper::setInstDir((std::string(WT_R160_FAKE_MQ_DIR) + "/").c_str());
+	WTSVariant* cfg = WTSCfgLoader::load_from_content("{\"active\":true,\"url\":\"fake://r41_drain\"}");
+	ASSERT_NE(nullptr, cfg);
+	{
+		std::lock_guard<std::mutex> lock(g_sequence_mutex);
+		g_sequence.clear(); g_sequence_entered = false; g_sequence_released = false;
+	}
+	std::unique_ptr<EventNotifier> notifier(new EventNotifier());
+	ASSERT_TRUE(notifier->init(cfg));
+	notifier->_publisher = ordered_publisher;
+	notifier->notify_event("hold");
+	bool entered;
+	{
+		std::unique_lock<std::mutex> lock(g_sequence_mutex);
+		entered = g_sequence_cv.wait_for(lock, std::chrono::seconds(2), [] { return g_sequence_entered; });
+	}
+	if (!entered) {
+		{ std::lock_guard<std::mutex> lock(g_sequence_mutex); g_sequence_released = true; }
+		g_sequence_cv.notify_all(); notifier.reset(); cfg->release();
+		FAIL() << "first handler did not reach the fake publisher";
+		return;
+	}
+	constexpr int count = 200;
+	std::atomic<bool> ready{false}, go{false};
+	testing::internal::CaptureStderr();
+	std::thread producer([&] {
+		for (int i = 0; i < count; ++i) {
+			if (i == 10) { ready.store(true); while (!go.load()) std::this_thread::yield(); }
+			notifier->notify_event((std::string("seq-") + std::to_string(i)).c_str());
+		}
+	});
+	while (!ready.load()) std::this_thread::yield();
+	std::thread stopper([&] { while (!go.load()) std::this_thread::yield(); notifier->stopAccepting(); });
+	go.store(true);
+	producer.join(); stopper.join();
+	notifier->notify_event("late"); // Explicit post-stop rejection.
+	{
+		std::lock_guard<std::mutex> lock(g_sequence_mutex);
+		g_sequence_released = true;
+	}
+	g_sequence_cv.notify_all();
+	notifier.reset();
+	const std::string diagnostic = testing::internal::GetCapturedStderr();
+	const std::string rejectedText = "EventNotifier rejected GRP_EVENT: stopping";
+	std::size_t rejected = 0, pos = 0;
+	while ((pos = diagnostic.find(rejectedText, pos)) != std::string::npos) { ++rejected; pos += rejectedText.size(); }
+	std::lock_guard<std::mutex> lock(g_sequence_mutex);
+	ASSERT_FALSE(g_sequence.empty());
+	EXPECT_NE(std::string::npos, g_sequence.front().find("hold"));
+	const std::size_t accepted = g_sequence.size() - 1;
+	EXPECT_GE(accepted, 10u);
+	EXPECT_GE(rejected, 1u);
+	EXPECT_EQ(static_cast<std::size_t>(count + 1), accepted + rejected);
+	for (std::size_t i = 0; i < accepted; ++i) {
+		const std::size_t marker = g_sequence[i + 1].find("seq-");
+		ASSERT_NE(std::string::npos, marker);
+		EXPECT_EQ(static_cast<int>(i), std::stoi(g_sequence[i + 1].substr(marker + 4)));
+	}
+	cfg->release();
 }

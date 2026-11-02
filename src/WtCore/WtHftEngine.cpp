@@ -66,6 +66,12 @@ void WtHftEngine::init(WTSVariant* cfg, IBaseDataMgr* bdMgr, WtDtMgr* dataMgr, I
 
 void WtHftEngine::run()
 {
+	if (!fee_config_valid())
+	{
+		WTSLogger::error("HFT engine start rejected: fee template configuration is invalid");
+		return;
+	}
+
 	for (auto it = _ctx_map.begin(); it != _ctx_map.end(); it++)
 	{
 		HftContextPtr& ctx = (HftContextPtr&)it->second;

@@ -5,7 +5,7 @@
  *   R71TempRoot     系统临时目录下 r71_wtcore_<pid>/，进程退出时整棵删除
  *   R71GenEnv       把 WtHelper 生成目录钉到上述临时目录
  *   R71BinDir       从测试可执行文件位置推出 build_x64/Debug/bin
- *   R71PluginDir    只含一个 libWtExeFact.dylib 符号链接的临时目录
+ *   R71PluginDir    只含一个复制的插件文件的临时目录
  *                    （WtExecuterFactory::loadFactories 会 dlopen 目录里每个 dylib）
  *   R71BaseDataMgr  IBaseDataMgr 替身（时段/品种/合约/主力）
  *   R71HotMgr       IHotMgr 替身，只为 HOT 后缀返回自定义规则 tag
@@ -132,7 +132,7 @@ inline std::string bin_dir()
     return dir.string();
 }
 
-/// 目录里只放一个插件链接，避免 loadFactories 顺带 dlopen 其它插件
+/// 目录里只复制一个插件文件，避免 loadFactories 顺带 dlopen 其它插件
 class R71PluginDir
 {
 public:
@@ -146,8 +146,18 @@ public:
 
         fs::path src = fs::path(bin_dir()) / wrapped;
         fs::path dst = _dir / wrapped;
-        fs::create_symlink(src, dst, ec);
-        _ok = !ec && fs::exists(dst);
+        const fs::file_status srcStatus = fs::symlink_status(src, ec);
+        if (!ec && fs::is_regular_file(srcStatus))
+        {
+            ec.clear();
+            fs::copy_file(src, dst, fs::copy_options::overwrite_existing, ec);
+        }
+
+        if (!ec)
+        {
+            const fs::file_status dstStatus = fs::symlink_status(dst, ec);
+            _ok = !ec && fs::is_regular_file(dstStatus);
+        }
     }
 
     ~R71PluginDir()

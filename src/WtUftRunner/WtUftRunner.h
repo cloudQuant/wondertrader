@@ -78,7 +78,8 @@ public:
 	/**
 	 * @brief 启动并运行引擎
 	 * @param bAsync 是否以异步模式运行，默认为同步模式
-	 * @details 运行策略引擎、行情和交易适配器，并根据需要等待退出信号
+	 * @details 两种模式都会在当前线程启动引擎、行情和交易适配器。异步模式在启动完成后返回；
+	 *          调用方必须保持 runner 存活，并在控制线程调用 shutdown()。同步模式等待退出信号并自行调用 shutdown()。
 	 */
 	void run(bool bAsync = false);
 

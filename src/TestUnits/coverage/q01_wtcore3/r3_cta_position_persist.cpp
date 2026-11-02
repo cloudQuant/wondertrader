@@ -20,6 +20,8 @@
  */
 #include "../p01_wtcore_stractx/p01_cta_env.h"
 
+#include <rapidjson/document.h>
+
 #include <cctype>
 #include <fstream>
 #include <functional>
@@ -29,6 +31,8 @@
 #include <vector>
 
 namespace {
+
+namespace rj = rapidjson;
 
 /** 能窥视 protected 簿记的 CTA 上下文（只读访问，不改语义） */
 class R3CtaCtx : public P01CtaCtx
@@ -131,18 +135,25 @@ protected:
     }
 
     // 喂一条 tick（bEmitStrategy 固定 false，避免策略回调干扰）
-    void feed(const char* code, double price, const char* rawcode = "rb2510")
+    void feed(R3CtaCtx& targetCtx, const char* code, double price, const char* rawcode = "rb2510")
     {
         WTSTickData* tick = p01MakeTick("SHFE", rawcode, 20250110, 20250110, 93100000, price);
         ASSERT_NE(tick, nullptr);
-        ctx->on_tick(code, tick, false);
+        engine.prime_price(code, price);
+        targetCtx.on_tick(code, tick, false);
         tick->release();
+    }
+
+    void feed(const char* code, double price, const char* rawcode = "rb2510")
+    {
+        feed(*ctx, code, price, rawcode);
     }
 
     void feedAt(const char* code, const char* exchg, const char* rawcode, double price)
     {
         WTSTickData* tick = p01MakeTick(exchg, rawcode, 20250110, 20250110, 93100000, price);
         ASSERT_NE(tick, nullptr);
+        engine.prime_price(code, price);
         ctx->on_tick(code, tick, false);
         tick->release();
     }
@@ -161,8 +172,8 @@ protected:
     }
 };
 
-const char* R3CtaTest::kCode = "SHFE.rb2510";
-const char* R3CtaTest::kT1Code = "SZSE.of159915";
+const char* R3CtaTest::kCode = "SHFE.rb.2510";
+const char* R3CtaTest::kT1Code = "SZSE.of.of159915";
 
 //////////////////////////////////////////////////////////////////////////
 // init_outputs
@@ -200,6 +211,7 @@ TEST_F(R3CtaTest, init_outputs_writes_seven_headers_then_appends_on_reopen)
 TEST_F(R3CtaTest, flat_signal_on_tick_opens_detail_and_pushes_portfolio_delta)
 {
     ctx->on_init();
+    feed(kCode, 3500.0); // Establish the reference price before the signal is created.
     ctx->stra_enter_long(kCode, 3, "open_a");
     ASSERT_EQ(ctx->sigmap().size(), 1u);
     EXPECT_EQ(ctx->sigmap()[kCode]._volume, 3.0);
@@ -221,10 +233,10 @@ TEST_F(R3CtaTest, flat_signal_on_tick_opens_detail_and_pushes_portfolio_delta)
     EXPECT_DOUBLE_EQ(engine.port_pos(kCode), 3.0);
 
     std::string trades = readAll(ctxFile("trades.csv"));
-    EXPECT_NE(trades.find("SHFE.rb2510,202501100931,LONG,OPEN,"), std::string::npos) << trades;
+    EXPECT_NE(trades.find("SHFE.rb.2510,202501100931,LONG,OPEN,"), std::string::npos) << trades;
     EXPECT_NE(trades.find(",open_a,"), std::string::npos) << trades;
     std::string sigs = readAll(ctxFile("signals.csv"));
-    EXPECT_NE(sigs.find("SHFE.rb2510,3,3500,"), std::string::npos) << sigs;
+    EXPECT_NE(sigs.find("SHFE.rb.2510,3,3500,"), std::string::npos) << sigs;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -273,7 +285,7 @@ TEST_F(R3CtaTest, partial_close_splits_detail_and_books_closeprofit)
     EXPECT_DOUBLE_EQ(engine.port_pos(kCode), 1.0);
 
     std::string closes = readAll(ctxFile("closes.csv"));
-    EXPECT_NE(closes.find("SHFE.rb2510,LONG,202501100931,3500,202501100931,3600,2,2000.00,2000.00,open_a,close_a"),
+    EXPECT_NE(closes.find("SHFE.rb.2510,LONG,202501100931,3500,202501100931,3600,2,2000.00,2000.00,open_a,close_a"),
               std::string::npos) << closes;
 }
 
@@ -416,7 +428,7 @@ TEST_F(R3CtaTest, condition_os_cs_and_sp_fire_on_matching_tick)
     EXPECT_DOUBLE_EQ(ctx->stra_get_position(kCode), -1.0);
 
     // COND_ACTION_SP + isBuy=false（目标 -4 < 当前 -1）=> 限价单用 LargerOrEqual
-    ctx->stra_set_position(kCode, -4, "sp_tag", 0.0, 3100.0);
+    ctx->stra_set_position(kCode, -4, "sp_tag", 3100.0, 0.0);
     EXPECT_EQ(ctx->conds()[kCode][0]._action, (char)COND_ACTION_SP);
     EXPECT_EQ(ctx->conds()[kCode][0]._alg, WCT_LargerOrEqual);
     feed(kCode, 3110.0);
@@ -438,14 +450,14 @@ TEST_F(R3CtaTest, on_schedule_after_main_bar_close_clears_conditions_and_stamps_
     bar.date = 20250110;
     bar.close = 3500.0;
     ctx->on_bar(kCode, "m", 1, &bar);
-    ctx->mainkey() = "SHFE.rb2510#m1";
+    ctx->mainkey() = "SHFE.rb.2510#m1";
 
     // 调度前登记一条条件单，on_calculate 里再登记一条
     ctx->stra_enter_long(kCode, 9, "stale", 3000.0);
     ASSERT_EQ(ctx->conds()[kCode].size(), 1u);
     bool entered = false;
     ctx->calc_hook = [&entered](R3CtaCtx& c) {
-        c.stra_enter_long("SHFE.rb2601", 2, "fresh", 0.0, 4000.0);
+        c.stra_enter_long("SHFE.rb.2601", 2, "fresh", 0.0, 4000.0);
         c.add_chart_mark(3500.0, "buy1", "mark_tag");
         entered = true;
     };
@@ -458,7 +470,7 @@ TEST_F(R3CtaTest, on_schedule_after_main_bar_close_clears_conditions_and_stamps_
     EXPECT_EQ(ctx->barno(), 1u);                          // L1014
     // 旧条件单被清空，on_calculate 里的新条件单被保留并写了 settime
     EXPECT_EQ(ctx->conds().count(kCode), 0u);
-    ASSERT_EQ(ctx->conds().count("SHFE.rb2601"), 1u);
+    ASSERT_EQ(ctx->conds().count("SHFE.rb.2601"), 1u);
     EXPECT_EQ(ctx->condmin(), 202501100931ULL);
     EXPECT_FALSE(ctx->in_schedule());
 
@@ -466,8 +478,22 @@ TEST_F(R3CtaTest, on_schedule_after_main_bar_close_clears_conditions_and_stamps_
     EXPECT_NE(marks.find("202501100931,3500,buy1,mark_tag"), std::string::npos) << marks;
 
     std::string datas = readAll(std::string(WtHelper::getStraDataDir()) + name_ + ".json");
-    EXPECT_NE(datas.find("\"settime\" : 202501100931"), std::string::npos) << datas;
-    EXPECT_NE(datas.find("fresh"), std::string::npos) << datas;
+    rj::Document saved;
+    saved.Parse(datas.c_str());
+    ASSERT_FALSE(saved.HasParseError()) << datas;
+    ASSERT_TRUE(saved.IsObject());
+    ASSERT_TRUE(saved.HasMember("conditions") && saved["conditions"].IsObject());
+    const rj::Value& savedConditions = saved["conditions"];
+    ASSERT_TRUE(savedConditions.HasMember("settime") && savedConditions["settime"].IsUint64());
+    EXPECT_EQ(202501100931ULL, savedConditions["settime"].GetUint64());
+    ASSERT_TRUE(savedConditions.HasMember("items") && savedConditions["items"].IsObject());
+    const rj::Value& savedConditionItems = savedConditions["items"];
+    ASSERT_TRUE(savedConditionItems.HasMember("SHFE.rb.2601") &&
+        savedConditionItems["SHFE.rb.2601"].IsArray() && savedConditionItems["SHFE.rb.2601"].Size() == 1);
+    const rj::Value& savedFreshCondition = savedConditionItems["SHFE.rb.2601"][0];
+    ASSERT_TRUE(savedFreshCondition.IsObject() && savedFreshCondition.HasMember("usertag") &&
+        savedFreshCondition["usertag"].IsString());
+    EXPECT_STREQ("fresh", savedFreshCondition["usertag"].GetString());
 
     // 非交易时段（收盘之后）不再触发计算
     engine.set_date_time(20250110, 1500, 0);
@@ -487,16 +513,43 @@ TEST_F(R3CtaTest, save_then_load_roundtrip_restores_positions_signals_conditions
     EXPECT_DOUBLE_EQ(ctx->stra_get_position(kCode), 3.0);
 
     ctx->stra_enter_short(kCode, 2, "pend");              // 保留一条未触发的信号
-    ctx->stra_set_position("SHFE.rb2601", 5, "cond_sp", 3800.0);
+    ctx->stra_set_position("SHFE.rb.2601", 5, "cond_sp", 3800.0);
     ctx->stra_save_user_data("rk1", "rv1");
     ctx->barno() = 7;
     ctx->condmin() = 202501100931ULL;
     ctx->on_session_end(20250110);
 
     std::string datas = readAll(std::string(WtHelper::getStraDataDir()) + name_ + ".json");
-    EXPECT_NE(datas.find("\"volume\" : 3"), std::string::npos) << datas;
-    EXPECT_NE(datas.find("\"lastbarno\" : 7"), std::string::npos) << datas;
-    EXPECT_NE(datas.find("open_a"), std::string::npos) << datas;
+    rj::Document saved;
+    saved.Parse(datas.c_str());
+    ASSERT_FALSE(saved.HasParseError()) << datas;
+    ASSERT_TRUE(saved.IsObject());
+    ASSERT_TRUE(saved.HasMember("positions") && saved["positions"].IsArray());
+    const rj::Value* savedPosition = nullptr;
+    for (const rj::Value& position : saved["positions"].GetArray())
+    {
+        if (position.IsObject() && position.HasMember("code") && position["code"].IsString() &&
+            std::string(position["code"].GetString()) == kCode)
+        {
+            savedPosition = &position;
+            break;
+        }
+    }
+    ASSERT_NE(nullptr, savedPosition) << datas;
+    ASSERT_TRUE(savedPosition->HasMember("volume") && (*savedPosition)["volume"].IsNumber() &&
+        savedPosition->HasMember("details") && (*savedPosition)["details"].IsArray() &&
+        savedPosition->HasMember("code") && (*savedPosition)["code"].IsString());
+    EXPECT_STREQ(kCode, (*savedPosition)["code"].GetString());
+    EXPECT_DOUBLE_EQ(3.0, (*savedPosition)["volume"].GetDouble());
+    ASSERT_TRUE((*savedPosition)["details"].IsArray());
+    ASSERT_EQ(1u, (*savedPosition)["details"].Size());
+    ASSERT_TRUE((*savedPosition)["details"][0].IsObject() &&
+        (*savedPosition)["details"][0].HasMember("opentag") &&
+        (*savedPosition)["details"][0]["opentag"].IsString());
+    EXPECT_STREQ("open_a", (*savedPosition)["details"][0]["opentag"].GetString());
+    ASSERT_TRUE(saved.HasMember("utils") && saved["utils"].IsObject());
+    ASSERT_TRUE(saved["utils"].HasMember("lastbarno") && saved["utils"]["lastbarno"].IsUint());
+    EXPECT_EQ(7u, saved["utils"]["lastbarno"].GetUint());
 
     R3CtaCtx rd(&engine, name_.c_str(), 0);
     rd.on_init();
@@ -509,18 +562,18 @@ TEST_F(R3CtaTest, save_then_load_roundtrip_restores_positions_signals_conditions
     ASSERT_EQ(rd.sigmap().count(kCode), 1u);
     EXPECT_DOUBLE_EQ(rd.sigmap()[kCode]._volume, -2.0);
     EXPECT_EQ(rd.sigmap()[kCode]._usertag, "pend");
-    ASSERT_EQ(rd.conds().count("SHFE.rb2601"), 1u);
-    EXPECT_EQ(rd.conds()["SHFE.rb2601"][0]._action, (char)COND_ACTION_SP);
-    EXPECT_DOUBLE_EQ(rd.conds()["SHFE.rb2601"][0]._target, 3800.0);
+    ASSERT_EQ(rd.conds().count("SHFE.rb.2601"), 1u);
+    EXPECT_EQ(rd.conds()["SHFE.rb.2601"][0]._action, (char)COND_ACTION_SP);
+    EXPECT_DOUBLE_EQ(rd.conds()["SHFE.rb.2601"][0]._target, 3800.0);
     EXPECT_EQ(rd.barno(), 7u);
     EXPECT_EQ(rd.condmin(), 202501100931ULL);
     EXPECT_EQ(rd.ud()["rk1"], "rv1");
-    EXPECT_EQ(rd.stra_load_user_data("rk1", "def"), "rv1");
+    EXPECT_STREQ("rv1", rd.stra_load_user_data("rk1", "def"));
     EXPECT_EQ(rd.stra_load_user_data("nope", "def"), "def");
 
     // on_session_end 的两条 csv
     std::string poss = readAll(ctxFile("positions.csv"));
-    EXPECT_NE(poss.find("20250110,SHFE.rb2510,3,0.00,0.00"), std::string::npos) << poss;
+    EXPECT_NE(poss.find("20250110,SHFE.rb.2510,3,0.00,0.00"), std::string::npos) << poss;
     std::string funds = readAll(ctxFile("funds.csv"));
     EXPECT_NE(funds.find("20250110,"), std::string::npos) << funds;
 }
@@ -608,11 +661,30 @@ TEST_F(R3CtaTest, chart_apis_reject_outside_schedule_and_dump_chart_info_writes_
 
     ctx->dumpChart();
     std::string chart = readAll(ctxFile("rtchart.json"));
-    EXPECT_NE(chart.find("\"kline\""), std::string::npos) << chart;
-    EXPECT_NE(chart.find("SHFE.rb2510"), std::string::npos) << chart;
-    EXPECT_NE(chart.find("\"macd\""), std::string::npos) << chart;
-    EXPECT_NE(chart.find("\"dif\" : \"dif\""), std::string::npos) << chart;
-    EXPECT_NE(chart.find("\"baselines\""), std::string::npos) << chart;
+    rj::Document chartDoc;
+    chartDoc.Parse(chart.c_str());
+    ASSERT_FALSE(chartDoc.HasParseError()) << chart;
+    ASSERT_TRUE(chartDoc.IsObject());
+    ASSERT_TRUE(chartDoc.HasMember("kline") && chartDoc["kline"].IsObject());
+    ASSERT_TRUE(chartDoc["kline"].HasMember("code") && chartDoc["kline"]["code"].IsString());
+    ASSERT_TRUE(chartDoc["kline"].HasMember("period") && chartDoc["kline"]["period"].IsString());
+    EXPECT_STREQ(kCode, chartDoc["kline"]["code"].GetString());
+    EXPECT_STREQ("m1", chartDoc["kline"]["period"].GetString());
+    ASSERT_TRUE(chartDoc.HasMember("index") && chartDoc["index"].IsArray());
+    ASSERT_EQ(1u, chartDoc["index"].Size());
+    const rj::Value& chartIndex = chartDoc["index"][0];
+    ASSERT_TRUE(chartIndex.IsObject() && chartIndex.HasMember("name") && chartIndex["name"].IsString());
+    EXPECT_STREQ("macd", chartIndex["name"].GetString());
+    ASSERT_TRUE(chartIndex.HasMember("lines") && chartIndex["lines"].IsArray());
+    ASSERT_EQ(1u, chartIndex["lines"].Size());
+    const rj::Value& chartLine = chartIndex["lines"][0];
+    ASSERT_TRUE(chartLine.IsObject() && chartLine.HasMember("name") && chartLine["name"].IsString());
+    EXPECT_STREQ("dif", chartLine["name"].GetString());
+    ASSERT_TRUE(chartLine.HasMember("line_type") && chartLine["line_type"].IsUint());
+    EXPECT_EQ(2u, chartLine["line_type"].GetUint());
+    ASSERT_TRUE(chartIndex.HasMember("baselines") && chartIndex["baselines"].IsObject());
+    ASSERT_TRUE(chartIndex["baselines"].HasMember("zero"));
+    EXPECT_DOUBLE_EQ(0.0, chartIndex["baselines"]["zero"].GetDouble());
 
     std::string idx = readAll(ctxFile("indice.csv"));
     EXPECT_NE(idx.find("macd,dif,3.5"), std::string::npos) << idx;
@@ -632,15 +704,27 @@ TEST_F(R3CtaTest, modified_userdata_is_flushed_on_tick_and_session_begin)
 
     feed(kCode, 3500.0);                       // on_tick 末尾 flush
     ASSERT_TRUE(std::filesystem::exists(usrpath));
-    EXPECT_NE(readAll(usrpath).find("\"cnt\" : \"17\""), std::string::npos) << readAll(usrpath);
+    std::string firstUserData = readAll(usrpath);
+    rj::Document firstUserDataDoc;
+    firstUserDataDoc.Parse(firstUserData.c_str());
+    ASSERT_FALSE(firstUserDataDoc.HasParseError()) << firstUserData;
+    ASSERT_TRUE(firstUserDataDoc.IsObject() && firstUserDataDoc.HasMember("cnt") &&
+        firstUserDataDoc["cnt"].IsString());
+    EXPECT_STREQ("17", firstUserDataDoc["cnt"].GetString());
 
     ctx->stra_save_user_data("cnt", "18");
     ctx->on_session_begin(20250111);           // 第二条 flush 路径
-    EXPECT_NE(readAll(usrpath).find("\"cnt\" : \"18\""), std::string::npos);
+    std::string secondUserData = readAll(usrpath);
+    rj::Document secondUserDataDoc;
+    secondUserDataDoc.Parse(secondUserData.c_str());
+    ASSERT_FALSE(secondUserDataDoc.HasParseError()) << secondUserData;
+    ASSERT_TRUE(secondUserDataDoc.IsObject() && secondUserDataDoc.HasMember("cnt") &&
+        secondUserDataDoc["cnt"].IsString());
+    EXPECT_STREQ("18", secondUserDataDoc["cnt"].GetString());
 
     R3CtaCtx rd(&engine, name_.c_str(), 0);
     rd.on_init();
-    EXPECT_EQ(rd.stra_load_user_data("cnt", "0"), "18");
+    EXPECT_STREQ("18", rd.stra_load_user_data("cnt", "0"));
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -657,7 +741,7 @@ TEST_F(R3CtaTest, on_bar_marks_tag_closed_and_only_notifies_subscribed_keys)
     // 未订阅 => 只打标记，不回调策略
     ctx->on_bar(kCode, "m", 1, &bar);
     EXPECT_EQ(ctx->bar_closes, 0u);
-    const std::string kkey = "SHFE.rb2510#m1";
+    const std::string kkey = "SHFE.rb.2510#m1";
     ASSERT_EQ(ctx->klines().count(kkey), 1u);
     EXPECT_TRUE(ctx->klines()[kkey]._closed);
 
@@ -709,13 +793,13 @@ TEST_F(R3CtaTest, slippage_shifts_entry_up_and_exit_down)
     std::filesystem::create_directories(d, ec);
     slip.on_init();
     slip.stra_enter_long(kCode, 1, "s");
-    feed(kCode, 3500.0);
+    feed(slip, kCode, 3500.0);
     // 引擎价格 3500 + 2*priceTick(1.0) = 3502
     EXPECT_DOUBLE_EQ(slip.stra_get_position(kCode), 1.0);
     EXPECT_DOUBLE_EQ(slip.stra_get_detail_cost(kCode, "s"), 3502.0);
     // 市价单成交价由 on_tick 写入的 _price_map 决定，这里再喂一条 3500 后平掉
     slip.stra_exit_long(kCode, 1, "x");
-    feed(kCode, 3500.0);
+    feed(slip, kCode, 3500.0);
     // 平仓：3500 - 2 = 3498，亏 4*1*10 = -40
     EXPECT_DOUBLE_EQ(slip.stra_get_position(kCode), 0.0);
     EXPECT_DOUBLE_EQ(slip.fund()._total_profit, -40.0);

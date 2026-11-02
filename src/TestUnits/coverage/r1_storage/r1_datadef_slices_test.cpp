@@ -76,7 +76,7 @@ public:
 		vector<WTSBarStruct> bars;
 		bars.push_back(make(20240108, 0, 0.0));		// close 10.5
 		bars.push_back(make(20240108, 1, 5.0));		// close 15.5
-		bars.push_back(make(20240109, 2, -3.0));	// close 7.5
+		bars.push_back(make(20240109, 2, -3.0));	// close 9.5
 		return bars;
 	}
 };
@@ -129,14 +129,14 @@ TEST_F(R1DataDefTest, kline_slice_extract_data_all_field_types)
 	vector<WTSBarStruct> bars = KlineSliceProbe::three_day_bars();
 	bars[0].vol = 100;	// 阳线 close>open → +100
 	bars[1].vol = 200;	// 阳线 → +200
-	bars[2].vol = 300;	// close 7.5 < open 12 → 阴线 → -300
+	bars[2].vol = 300;	// close 9.5 < open 12 → 阴线 → -300
 	WTSKlineSlice* slice = WTSKlineSlice::create("SHFE.rb2401", KP_DAY, 1, bars.data(), (int32_t)bars.size());
 
 	WTSValueArray* closes = slice->extractData(KFT_CLOSE);
 	ASSERT_TRUE(closes != NULL);
 	ASSERT_EQ(closes->size(), 3u);
 	EXPECT_DOUBLE_EQ(closes->at(0), 10.5);
-	EXPECT_DOUBLE_EQ(closes->at(2), 7.5);
+	EXPECT_DOUBLE_EQ(closes->at(2), 9.5);
 	closes->release();
 
 	WTSValueArray* svol = slice->extractData(KFT_SVOLUME);
@@ -192,6 +192,8 @@ TEST_F(R1DataDefTest, kline_data_flags_period_and_range_bounds)
 	kd->at(0)->high = 12.0;
 	kd->at(1)->high = 18.0;
 	kd->at(2)->high = 14.0;
+	kd->at(0)->low = 10.0;
+	kd->at(1)->low = 9.0;
 	kd->at(2)->low = 8.0;
 	EXPECT_DOUBLE_EQ(kd->maxprice(0, 2), 18.0);
 	EXPECT_DOUBLE_EQ(kd->minprice(0, 2), 8.0);

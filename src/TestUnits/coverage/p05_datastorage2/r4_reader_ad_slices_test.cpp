@@ -14,8 +14,94 @@
 #include "r4_ad_fixture.h"
 #include "Includes/IDataReader.h"
 #include "WtDataStorageAD/WtDataReaderAD.h"
+#include "WTSTools/WTSHotMgr.h"
+
+#include <fstream>
+
+namespace wtp {
+
+struct WtLMDBCheckedLowersTestAccess
+{
+	static void set_cursor_get_override(WtLMDBQuery& query, LMDBRangeCursorGetOverride callback, void* context)
+	{
+		query._range_cursor_get_override = callback;
+		query._range_cursor_get_context = context;
+	}
+
+	static void abort_transaction(WtLMDBQuery& query)
+	{
+		if (query._txn != NULL)
+		{
+			mdb_txn_abort(query._txn);
+			query._txn = NULL;
+		}
+		query._db.update_errno(MDB_BAD_TXN);
+	}
+};
+
+struct WtDataReaderADTestAccess
+{
+	static void set_cursor_get_override(LMDBRangeCursorGetOverride callback, void* context)
+	{
+		WtDataReaderAD::set_test_cursor_get_override(callback, context);
+	}
+	// P05-009 is an intentionally isolated test of an otherwise unused private
+	// helper; other reader tests in this file exercise their public interfaces.
+	static bool read_bars_to_buffer(WtDataReaderAD& reader, const char* exchg,
+		const char* code, WTSKlinePeriod period, std::string& output)
+	{
+		return reader.read_bars_to_buffer(exchg, code, period, output);
+	}
+	static std::string read_bars_legacy(WtDataReaderAD& reader, const char* exchg,
+		const char* code, WTSKlinePeriod period)
+	{
+		return reader.read_bars_to_buffer(exchg, code, period);
+	}
+};
+
+} // namespace wtp
 
 namespace {
+
+struct R4CursorFailureState
+{
+	int calls = 0;
+	int fail_on_call = 3;
+};
+
+struct R4CursorCallCounter
+{
+	int calls = 0;
+};
+
+int count_cursor_get_calls(void* context, MDB_cursor* cursor, MDB_val* key, MDB_val* value, MDB_cursor_op op)
+{
+	R4CursorCallCounter* counter = static_cast<R4CursorCallCounter*>(context);
+	++counter->calls;
+	return mdb_cursor_get(cursor, key, value, op);
+}
+
+int fail_on_selected_cursor_call(void* context, MDB_cursor* cursor, MDB_val* key, MDB_val* value, MDB_cursor_op op)
+{
+	R4CursorFailureState* state = static_cast<R4CursorFailureState*>(context);
+	if (++state->calls == state->fail_on_call)
+		return MDB_CORRUPTED;
+	return mdb_cursor_get(cursor, key, value, op);
+}
+
+class ScopedR4CursorOverride
+{
+public:
+	explicit ScopedR4CursorOverride(R4CursorFailureState* state)
+	{
+		WtDataReaderADTestAccess::set_cursor_get_override(&fail_on_selected_cursor_call, state);
+	}
+
+	~ScopedR4CursorOverride()
+	{
+		WtDataReaderADTestAccess::set_cursor_get_override(NULL, NULL);
+	}
+};
 
 //////////////////////////////////////////////////////////////////////////
 // IDataReaderSink 替身
@@ -34,6 +120,7 @@ public:
 			_last_bar = *newBar;
 			_last_code = stdCode == NULL ? "" : stdCode;
 			_last_period = period;
+			_bar_events.push_back({ _last_code, period, newBar->date, newBar->time, newBar->open });
 		}
 	}
 
@@ -68,6 +155,15 @@ public:
 	const WTSBarStruct& last_bar() const { return _last_bar; }
 	const std::string& last_bar_code() const { return _last_code; }
 	WTSKlinePeriod last_period() const { return _last_period; }
+	struct BarEvent
+	{
+		std::string code;
+		WTSKlinePeriod period;
+		uint32_t date;
+		uint64_t time;
+		double open;
+	};
+	const std::vector<BarEvent>& bar_events() const { return _bar_events; }
 	uint32_t log_count(WTSLogLevel ll) const
 	{
 		auto it = _logs.find(ll);
@@ -104,9 +200,20 @@ private:
 	std::string		_last_code;
 	WTSKlinePeriod	_last_period = KP_DAY;
 	uint32_t		_total = 0;
+	std::vector<BarEvent> _bar_events;
 	std::vector<std::string> _all;
 	wt_hashmap<WTSLogLevel, uint32_t> _logs;
 	wt_hashmap<WTSLogLevel, std::string> _last;
+};
+
+class R4ReaderHotSink : public R4ReaderSink
+{
+public:
+	R4ReaderHotSink(IBaseDataMgr* bd, IHotMgr* hot) : R4ReaderSink(bd), _hot(hot) {}
+	IHotMgr* get_hot_mgr() override { return _hot; }
+
+private:
+	IHotMgr* _hot;
 };
 
 static const uint32_t R4_RD1 = 20230103;
@@ -162,6 +269,10 @@ protected:
 	{
 		_reader.reset();
 		delete _sink;
+		_sink = NULL;
+		if (_owned_hot_mgr != NULL)
+			_owned_hot_mgr->release();
+		_owned_hot_mgr.reset();
 		delete _bd;
 		std::error_code ec;
 		std::filesystem::remove_all(_root, ec);
@@ -282,6 +393,19 @@ protected:
 	R4BaseDataMgr*			_bd = NULL;
 	R4ReaderSink*			_sink = NULL;
 	std::unique_ptr<WtDataReaderAD> _reader;
+	std::unique_ptr<WTSHotMgr> _owned_hot_mgr;
+};
+
+class R4NightSessionBaseDataMgr : public R4BaseDataMgr
+{
+public:
+	R4NightSessionBaseDataMgr() : R4BaseDataMgr("R4_NIGHT", 2100, 2359, 300) {}
+
+	uint32_t calcTradingDate(const char*, uint32_t date, uint32_t time, bool) override
+	{
+		// A futures night session on Jan 3 belongs to the Jan 4 trading date.
+		return date == 20230103 && time >= 2100 ? 20230104 : date;
+	}
 };
 
 class R4ReaderADRawKeyTest : public R4ReaderADTest,
@@ -311,11 +435,9 @@ TEST_F(R4ReaderADTest, InitLogsRootOnlyWhenCfgProvided)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 2. tick 首次读取走增量分支（reload_flag 被 L132-137 覆盖回 1）
-//    全量 get_lowers 的 count 限制因此失效：区间内所有 tick 都被读进循环缓冲区，
-//    最终只保留最后 count 条。见 R4-BUG-06。
+// 2. 首读使用 count 限量回源，而不是扫描完整历史区间后再裁剪。
 //////////////////////////////////////////////////////////////////////////
-TEST_F(R4ReaderADTest, FirstTickReadTakesIncrementalRangeAndKeepsLastCount)
+TEST_F(R4ReaderADTest, FirstTickReadUsesCountLimitedReload)
 {
 	add_stock("EXR1", "rb2301");
 	seed_ticks("EXR1", "rb2301", {
@@ -325,32 +447,216 @@ TEST_F(R4ReaderADTest, FirstTickReadTakesIncrementalRangeAndKeepsLastCount)
 		});
 	init_reader();
 
-	// etime = 20230103 10:00:00.000
-	// 区间 [date0/time1, 20230103/100000000] 命中全部 3 笔 → 缓冲区容量 2 → 保留后 2 笔，
-	// 并且因为回绕，切片要拆成两个连续块
+	// etime = 20230103 10:00:00.000；历史 3 笔，只应限量读取最近 2 笔。
 	WTSTickSlice* slice = _reader->readTickSlice("EXR1.rb2301", 2, 20230103100000000ull);
 	ASSERT_TRUE(slice != NULL);
-	EXPECT_EQ(slice->get_block_counts(), (std::size_t)2);
-	ASSERT_EQ(slice->get_block_size(0), 1u);
+	ASSERT_EQ(slice->get_block_counts(), (std::size_t)1);
+	ASSERT_EQ(slice->get_block_size(0), 2u);
 	EXPECT_DOUBLE_EQ(slice->get_block_addr(0)[0].price, 3910.0);
 	EXPECT_EQ(slice->get_block_addr(0)[0].action_time, 93100000u);
-	ASSERT_EQ(slice->get_block_size(1), 1u);
-	EXPECT_DOUBLE_EQ(slice->get_block_addr(1)[0].price, 3920.0);
+	EXPECT_DOUBLE_EQ(slice->get_block_addr(0)[1].price, 3920.0);
+	EXPECT_EQ(slice->get_block_addr(0)[1].action_time, 93200000u);
 	slice->release();
 
-	// tick 库缓存键写成了 exchg（L617），查的是 exchg.code（L599）→ 每次都重开环境。
-	// 断言面（R32 修正）：本次读取的 DEBUG 有两条 —— 先"Tick db ... opened"（L614），
-	// 后"3 ticks after ... append to cache"（L163，reload_flag 被 :135 覆盖成 1 的
-	// R4-BUG-06 增量分支）；last_log 只剩后一条，所以逐条数走 count_containing。
-	EXPECT_EQ(_sink->count_containing("Tick db of EXR1.rb2301 opened"), 1u);
-	// 首次读取没有走 get_lowers 全量分支（L181 的 "loaded to cache for the first
-	// time" 一条都没出现），而是走了增量分支 —— R4-BUG-06 的直接现象
-	EXPECT_EQ(_sink->count_containing("append to cache"), 1u);
-	EXPECT_EQ(_sink->count_containing("loaded to cache for the first time"), 0u);
+	EXPECT_EQ(_sink->count_containing("2 ticks of EXR1.rb2301 loaded to cache for the first time"), 1u);
+	EXPECT_EQ(_sink->count_containing("append to cache"), 0u);
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 3. 同一 etime 复读和时间推进均返回预期 tick 窗口
+// 3. checked lower query 区分完整空结果与游标失败，不向失败回调部分记录。
+//////////////////////////////////////////////////////////////////////////
+TEST_F(R4ReaderADTest, CheckedLowerQuerySeparatesEmptyAndCursorFailure)
+{
+	const std::filesystem::path dir = _root / "checked_lowers";
+	std::filesystem::create_directories(dir);
+	{
+		WtLMDB writer_db(false);
+		ASSERT_TRUE(writer_db.open(dir.string().c_str(), 8 * 1024 * 1024));
+		WtLMDBQuery writer(writer_db);
+		ASSERT_TRUE(writer.put("a", "first"));
+		ASSERT_TRUE(writer.put("b", "second"));
+		ASSERT_TRUE(writer.put("c", "third"));
+		writer.commit();
+	}
+	WtLMDB db(true);
+	ASSERT_TRUE(db.open(dir.string().c_str(), 8 * 1024 * 1024));
+
+	WtLMDBQuery query(db);
+	int callback_calls = 0;
+	EXPECT_EQ(0, query.get_lowers_checked("z", "z", 5,
+		[&callback_calls](const ValueArray& keys, const ValueArray& values) {
+			++callback_calls;
+			EXPECT_TRUE(keys.empty());
+			EXPECT_TRUE(values.empty());
+		}));
+	EXPECT_EQ(1, callback_calls);
+	EXPECT_FALSE(db.has_error());
+
+	R4CursorFailureState failure;
+	WtLMDBCheckedLowersTestAccess::set_cursor_get_override(query, &fail_on_selected_cursor_call, &failure);
+	EXPECT_EQ(-1, query.get_lowers_checked("a", "z", 5,
+		[&callback_calls](const ValueArray&, const ValueArray&) { ++callback_calls; }));
+	EXPECT_EQ(3, failure.calls);
+	EXPECT_EQ(1, callback_calls);
+	EXPECT_TRUE(db.has_error());
+	EXPECT_STREQ(mdb_strerror(MDB_CORRUPTED), db.errmsg());
+
+	// 清除注入后，相同边界重试可完整返回；此前失败没有发布部分结果。
+	WtLMDBCheckedLowersTestAccess::set_cursor_get_override(query, NULL, NULL);
+	ValueArray keys;
+	ValueArray values;
+	EXPECT_EQ(3, query.get_lowers_checked("a", "z", 5,
+		[&callback_calls, &keys, &values](const ValueArray& found_keys, const ValueArray& found_values) {
+			++callback_calls;
+			keys = found_keys;
+			values = found_values;
+		}));
+	EXPECT_EQ(2, callback_calls);
+	EXPECT_FALSE(db.has_error());
+	ASSERT_EQ(3u, keys.size());
+	ASSERT_EQ(3u, values.size());
+	EXPECT_EQ("a", keys[0]);
+	EXPECT_EQ("c", keys[2]);
+
+	R4CursorCallCounter counter;
+	WtLMDBCheckedLowersTestAccess::set_cursor_get_override(query, &count_cursor_get_calls, &counter);
+	keys.clear();
+	values.clear();
+	EXPECT_EQ(2, query.get_lowers_checked("a", "z", 2,
+		[&keys, &values](const ValueArray& found_keys, const ValueArray& found_values) {
+			keys = found_keys;
+			values = found_values;
+		}));
+	EXPECT_EQ(3, counter.calls);
+	ASSERT_EQ(2u, keys.size());
+	EXPECT_EQ("b", keys[0]);
+	EXPECT_EQ("c", keys[1]);
+	WtLMDBCheckedLowersTestAccess::set_cursor_get_override(query, NULL, NULL);
+
+	WtLMDBQuery invalid_query(db);
+	WtLMDBCheckedLowersTestAccess::abort_transaction(invalid_query);
+	EXPECT_EQ(-1, invalid_query.get_lowers_checked("a", "z", 5,
+		[&callback_calls](const ValueArray&, const ValueArray&) { ++callback_calls; }));
+	EXPECT_EQ(2, callback_calls);
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 4. 首读打开数据库失败后不提交缓存/cursor；修复库文件后同 etime 重试成功。
+//////////////////////////////////////////////////////////////////////////
+TEST_F(R4ReaderADTest, FailedInitialTickDbOpenCanRetrySameEtime)
+{
+	add_stock("EXR_FAIL", "rb2301");
+	seed_ticks("EXR_FAIL", "rb2301", {
+		{R4_RD1, tick_at("EXR_FAIL", "rb2301", 93000000, 3900.0)},
+		{R4_RD1, tick_at("EXR_FAIL", "rb2301", 93100000, 3910.0)},
+		{R4_RD1, tick_at("EXR_FAIL", "rb2301", 93200000, 3920.0)}
+		});
+	init_reader();
+
+	const std::filesystem::path db_path = std::filesystem::path(tick_dir("EXR_FAIL", "rb2301")) / "data.mdb";
+	const std::filesystem::path backup_path = _root / "valid_ticks.mdb";
+	ASSERT_TRUE(std::filesystem::exists(db_path));
+	std::filesystem::copy_file(db_path, backup_path);
+	{
+		std::ofstream corrupt(db_path.string().c_str(), std::ios::binary | std::ios::trunc);
+		ASSERT_TRUE(corrupt.good());
+		corrupt << "not an LMDB data file";
+	}
+	const uint64_t etime = 20230103100000000ull;
+	EXPECT_EQ(NULL, _reader->readTickSlice("EXR_FAIL.rb2301", 2, etime));
+	EXPECT_EQ(1u, _sink->log_count(LL_ERROR));
+	EXPECT_EQ(0u, _sink->count_containing("loaded to cache for the first time"));
+
+	std::filesystem::copy_file(backup_path, db_path, std::filesystem::copy_options::overwrite_existing);
+	WTSTickSlice* retry = _reader->readTickSlice("EXR_FAIL.rb2301", 2, etime);
+	ASSERT_TRUE(retry != NULL);
+	ASSERT_EQ(retry->get_block_counts(), (std::size_t)1);
+	ASSERT_EQ(retry->get_block_size(0), 2u);
+	EXPECT_DOUBLE_EQ(retry->get_block_addr(0)[0].price, 3910.0);
+	EXPECT_DOUBLE_EQ(retry->get_block_addr(0)[1].price, 3920.0);
+	retry->release();
+	EXPECT_EQ(1u, _sink->count_containing("2 ticks of EXR_FAIL.rb2301 loaded to cache for the first time"));
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 首次 get_lowers checked 扫描中途失败时不发布部分 cache，并可用同 etime 重试。
+//////////////////////////////////////////////////////////////////////////
+TEST_F(R4ReaderADTest, FailedInitialTickLowerQueryCanRetrySameEtime)
+{
+	add_stock("EXR_LOWER_FAIL", "rb2301");
+	seed_ticks("EXR_LOWER_FAIL", "rb2301", {
+		{R4_RD1, tick_at("EXR_LOWER_FAIL", "rb2301", 93000000, 3900.0)},
+		{R4_RD1, tick_at("EXR_LOWER_FAIL", "rb2301", 93100000, 3910.0)},
+		{R4_RD1, tick_at("EXR_LOWER_FAIL", "rb2301", 93200000, 3920.0)}
+		});
+	init_reader();
+
+	R4CursorFailureState failure;
+	failure.fail_on_call = 3; // SET_RANGE miss, LAST finds one row, PREV then fails
+	const uint64_t etime = 20230103100000000ull;
+	{
+		ScopedR4CursorOverride injected(&failure);
+		EXPECT_EQ(NULL, _reader->readTickSlice("EXR_LOWER_FAIL.rb2301", 2, etime));
+	}
+	EXPECT_EQ(3, failure.calls);
+	EXPECT_EQ(1u, _sink->log_count(LL_ERROR));
+	EXPECT_EQ(0u, _sink->count_containing("loaded to cache for the first time"));
+
+	WTSTickSlice* retry = _reader->readTickSlice("EXR_LOWER_FAIL.rb2301", 2, etime);
+	ASSERT_TRUE(retry != NULL);
+	ASSERT_EQ(retry->get_block_counts(), (std::size_t)1);
+	ASSERT_EQ(retry->get_block_size(0), 2u);
+	EXPECT_DOUBLE_EQ(retry->get_block_addr(0)[0].price, 3910.0);
+	EXPECT_DOUBLE_EQ(retry->get_block_addr(0)[1].price, 3920.0);
+	retry->release();
+	EXPECT_EQ(1u, _sink->count_containing("2 ticks of EXR_LOWER_FAIL.rb2301 loaded to cache for the first time"));
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 增量 get_range checked 扫描中途失败时 cursor/cache 不推进，同 etime 重试补入新 tick。
+//////////////////////////////////////////////////////////////////////////
+TEST_F(R4ReaderADTest, FailedIncrementalTickRangeQueryCanRetrySameEtime)
+{
+	add_stock("EXR_RANGE_FAIL", "rb2301");
+	seed_ticks("EXR_RANGE_FAIL", "rb2301", {
+		{R4_RD1, tick_at("EXR_RANGE_FAIL", "rb2301", 93000000, 3900.0)},
+		{R4_RD1, tick_at("EXR_RANGE_FAIL", "rb2301", 93100000, 3910.0)},
+		{R4_RD1, tick_at("EXR_RANGE_FAIL", "rb2301", 93200000, 3920.0)}
+		});
+	init_reader();
+
+	const uint64_t initial_etime = 20230103093130000ull;
+	WTSTickSlice* initial = _reader->readTickSlice("EXR_RANGE_FAIL.rb2301", 2, initial_etime);
+	ASSERT_TRUE(initial != NULL);
+	ASSERT_EQ(initial->get_block_size(0), 2u);
+	EXPECT_DOUBLE_EQ(initial->get_block_addr(0)[0].price, 3900.0);
+	EXPECT_DOUBLE_EQ(initial->get_block_addr(0)[1].price, 3910.0);
+	initial->release();
+
+	R4CursorFailureState failure;
+	failure.fail_on_call = 2; // SET_RANGE finds the new row, NEXT fails after collecting it
+	const uint64_t next_etime = 20230103093230000ull;
+	{
+		ScopedR4CursorOverride injected(&failure);
+		EXPECT_EQ(NULL, _reader->readTickSlice("EXR_RANGE_FAIL.rb2301", 2, next_etime));
+	}
+	EXPECT_EQ(2, failure.calls);
+	EXPECT_EQ(1u, _sink->log_count(LL_ERROR));
+	EXPECT_EQ(0u, _sink->count_containing("ticks after 20230103093130001"));
+
+	WTSTickSlice* retry = _reader->readTickSlice("EXR_RANGE_FAIL.rb2301", 2, next_etime);
+	ASSERT_TRUE(retry != NULL);
+	ASSERT_EQ(retry->get_block_counts(), (std::size_t)2);
+	ASSERT_EQ(retry->get_block_size(0), 1u);
+	ASSERT_EQ(retry->get_block_size(1), 1u);
+	EXPECT_DOUBLE_EQ(retry->get_block_addr(0)[0].price, 3910.0);
+	EXPECT_DOUBLE_EQ(retry->get_block_addr(1)[0].price, 3920.0);
+	retry->release();
+	EXPECT_EQ(1u, _sink->count_containing("1 ticks after 20230103093130001 of EXR_RANGE_FAIL.rb2301 append to cache"));
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 7. 同一 etime 复读和时间推进均返回预期 tick 窗口
 //////////////////////////////////////////////////////////////////////////
 TEST_F(R4ReaderADTest, RepeatTickReadPreservesDataAndAdvancesWindow)
 {
@@ -396,7 +702,7 @@ TEST_F(R4ReaderADTest, RepeatTickReadPreservesDataAndAdvancesWindow)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 4. 空库读取：0 命中，切片区容量为 count 且块大小为 0
+// 8. 空库读取：0 命中，切片区容量为 count 且块大小为 0
 //////////////////////////////////////////////////////////////////////////
 TEST_F(R4ReaderADTest, TickReadAgainstEmptyDbYieldsEmptySlice)
 {
@@ -629,47 +935,58 @@ TEST_P(R4ReaderADRawKeyTest, IncrementalUpdateRejectsMalformedRawKeyWithoutPollu
 	const R4RawBarKeyLength keyLength = GetParam();
 	const char* exchg = keyLength == R4RawBarKeyLength::Short ? "EXKSU" : "EXKLU";
 	const std::string stdCode = std::string(exchg) + ".rb2301";
-	const uint32_t badKeyTime = R4_M1_932 + 256u;
-	const uint32_t laterKey1 = badKeyTime + 256u;
-	const uint32_t laterKey2 = laterKey1 + 1u;
+	const uint32_t initialTime1 = 3301030859u;
+	const uint32_t initialTime2 = 3301030900u;
+	const uint32_t badKeyTime = initialTime2 + 256u; // 11:56: bytewise after 09:00 and before 12:00.
+	const uint32_t laterTime = 3301031157u;
+	const uint32_t cutoffTime = 3301031200u;
 	add_stock(exchg, "rb2301");
-	WTSBarStruct pending = bar_at("rb2301", R4_M1_933, 3920.0);
 	WTSBarStruct badKeyValue = bar_at("rb2301", badKeyTime, 3930.0);
-	WTSBarStruct cached1 = bar_at("rb2301", R4_M1_931, 3900.0);
-	WTSBarStruct cached2 = bar_at("rb2301", R4_M1_932, 3910.0);
-	// 反转端序后的时间键是字节序有序的：badKeyTime 的高 3 字节比游标
-	// R4_M1_932 大，因此即使短 key 少了末字节，MDB_SET_RANGE 仍会返回它；
-	// 后两根 key 更大，使首读只装载它们，随后增量查询确实经过坏 key。
+	WTSBarStruct cached1 = bar_at("rb2301", initialTime1, 3900.0);
+	WTSBarStruct cached2 = bar_at("rb2301", initialTime2, 3910.0);
+	WTSBarStruct later1 = bar_at("rb2301", laterTime, 3940.0);
+	WTSBarStruct later2 = bar_at("rb2301", cutoffTime, 3950.0);
+	// 先在 09:00 截止时缓存 08:59/09:00；11:56 的 malformed key 位于本次
+	// 增量查询范围内，但不应影响更早的首读。它后面还有合法记录，验证整批校验。
 	seed_raw_bar_values("min1", exchg, {
-		{bar_key_str(exchg, "rb2301", R4_M1_932), std::string((const char*)&pending, sizeof(pending))},
+		{bar_key_str(exchg, "rb2301", initialTime1), std::string((const char*)&cached1, sizeof(cached1))},
+		{bar_key_str(exchg, "rb2301", initialTime2), std::string((const char*)&cached2, sizeof(cached2))},
 		{raw_bar_key_str(exchg, "rb2301", badKeyTime, keyLength),
 			std::string((const char*)&badKeyValue, sizeof(badKeyValue))},
-		{bar_key_str(exchg, "rb2301", laterKey1), std::string((const char*)&cached1, sizeof(cached1))},
-		{bar_key_str(exchg, "rb2301", laterKey2), std::string((const char*)&cached2, sizeof(cached2))}
+		{bar_key_str(exchg, "rb2301", laterTime), std::string((const char*)&later1, sizeof(later1))},
+		{bar_key_str(exchg, "rb2301", cutoffTime), std::string((const char*)&later2, sizeof(later2))}
 		});
 	init_reader();
 
+	WTSKlineSlice* first = _reader->readKlineSlice(stdCode.c_str(), KP_Minute1, 2,
+		20230103090000000ull);
+	ASSERT_NE(first, nullptr);
+	ASSERT_EQ(first->size(), 2);
+	EXPECT_EQ(first->at(0)->time, (uint64_t)initialTime1);
+	EXPECT_EQ(first->at(1)->time, (uint64_t)initialTime2);
+	first->release();
+
 	EXPECT_EQ(_reader->readKlineSlice(stdCode.c_str(), KP_Minute1, 2,
-		20230103100000000ull), nullptr);
+		20230103120000000ull), nullptr);
 	EXPECT_NE(_sink->last_log(LL_ERROR).find("Malformed bar key/value in LMDB while updating"), std::string::npos);
 	EXPECT_EQ(_sink->bar_calls(), 0u);
 
 	// 以末 bar 时间为截止值重读，公开切片仍只能看到最初装入的两根缓存数据。
 	WTSKlineSlice* cached = _reader->readKlineSlice(stdCode.c_str(), KP_Minute1, 2,
-		20230103093200000ull);
+		20230103090000000ull);
 	ASSERT_NE(cached, nullptr);
 	ASSERT_EQ(cached->get_block_size(0), 2u);
 	const WTSBarStruct* cached_bars = cached->get_block_addr(0);
-	EXPECT_EQ(cached_bars[0].time, (uint64_t)R4_M1_931);
+	EXPECT_EQ(cached_bars[0].time, (uint64_t)initialTime1);
 	EXPECT_DOUBLE_EQ(cached_bars[0].open, 3900.0);
-	EXPECT_EQ(cached_bars[1].time, (uint64_t)R4_M1_932);
+	EXPECT_EQ(cached_bars[1].time, (uint64_t)initialTime2);
 	EXPECT_DOUBLE_EQ(cached_bars[1].open, 3910.0);
 	cached->release();
 	EXPECT_EQ(_sink->bar_calls(), 0u);
 
 	// 再次请求同一窗口可从未污染缓存返回；更新错误依旧被隔离。
 	WTSKlineSlice* retry = _reader->readKlineSlice(stdCode.c_str(), KP_Minute1, 1,
-		20230103093200000ull);
+		20230103090000000ull);
 	ASSERT_NE(retry, nullptr);
 	EXPECT_DOUBLE_EQ(retry->get_block_addr(0)[0].open, 3910.0);
 	retry->release();
@@ -681,18 +998,18 @@ TEST_P(R4ReaderADRawKeyTest, IncrementalUpdateRejectsMalformedRawKeyWithoutPollu
 	std::error_code ec;
 	std::filesystem::remove_all(_root / "min1" / exchg, ec);
 	seed_bars("min1", exchg, "rb2301", {
-		{R4_M1_931, bar_at("rb2301", R4_M1_931, 3900.0)},
-		{R4_M1_932, bar_at("rb2301", R4_M1_932, 3910.0)},
-		{R4_M1_933, bar_at("rb2301", R4_M1_933, 3920.0)},
-		{R4_M1_940, bar_at("rb2301", R4_M1_940, 3930.0)}
+		{initialTime1, bar_at("rb2301", initialTime1, 3900.0)},
+		{initialTime2, bar_at("rb2301", initialTime2, 3910.0)},
+		{badKeyTime, bar_at("rb2301", badKeyTime, 3920.0)},
+		{cutoffTime, bar_at("rb2301", cutoffTime, 3930.0)}
 		});
 	init_reader();
 	WTSKlineSlice* repaired = _reader->readKlineSlice(stdCode.c_str(), KP_Minute1, 4,
-		20230103100000000ull);
+		20230103120000000ull);
 	ASSERT_NE(repaired, nullptr);
 	ASSERT_EQ(repaired->get_block_size(0), 4u);
-	EXPECT_EQ(repaired->get_block_addr(0)[0].time, (uint64_t)R4_M1_931);
-	EXPECT_EQ(repaired->get_block_addr(0)[3].time, (uint64_t)R4_M1_940);
+	EXPECT_EQ(repaired->get_block_addr(0)[0].time, (uint64_t)initialTime1);
+	EXPECT_EQ(repaired->get_block_addr(0)[3].time, (uint64_t)cutoffTime);
 	repaired->release();
 }
 
@@ -834,16 +1151,575 @@ TEST_F(R4ReaderADTest, DayKlineUsesDateKeyAndDaySubdir)
 		});
 	init_reader();
 
-	// 日线的 etime 只用自然日：20230103
+	// 自然日与交易日相同的股票在 20230103 cutoff 下不包含 20230104 日线。
 	WTSKlineSlice* slice = _reader->readKlineSlice("EXD9.rb2301", KP_DAY, 2, 20230103100000000ull);
 	ASSERT_TRUE(slice != NULL);
-	ASSERT_EQ(slice->get_block_size(0), 2u);
+	ASSERT_EQ(slice->get_block_size(0), 1u);
 	const WTSBarStruct* b = slice->get_block_addr(0);
 	EXPECT_EQ(b[0].date, R4_RD1);
 	EXPECT_DOUBLE_EQ(b[0].open, 3900.0);
-	EXPECT_EQ(b[1].date, 20230104u);
 	slice->release();
 	EXPECT_TRUE(std::filesystem::exists(_root / "day" / "EXD9" / "data.mdb"));
+}
+
+//////////////////////////////////////////////////////////////////////////
+// R122：AD K 线 cutoff 使用 17 位时间；首次读取仅返回 cutoff 及之前的 bars。
+//////////////////////////////////////////////////////////////////////////
+TEST_F(R4ReaderADTest, KlineFirstReadHonorsInclusiveCutoffForMin1AndMin5)
+{
+	add_stock("EXCUT", "rb2301");
+	const uint32_t m5_930 = 3301030930u;
+	const uint32_t m5_935 = 3301030935u;
+	const uint32_t m5_940 = 3301030940u;
+	const uint32_t m5_945 = 3301030945u;
+	seed_bars("min1", "EXCUT", "rb2301", {
+		{R4_M1_931, bar_at("rb2301", R4_M1_931, 3900.0)},
+		{R4_M1_932, bar_at("rb2301", R4_M1_932, 3910.0)},
+		{R4_M1_933, bar_at("rb2301", R4_M1_933, 3920.0)},
+		{R4_M1_940, bar_at("rb2301", R4_M1_940, 3930.0)}
+		});
+	seed_bars("min5", "EXCUT", "rb2301", {
+		{m5_930, bar_at("rb2301", m5_930, 4000.0)},
+		{m5_935, bar_at("rb2301", m5_935, 4010.0)},
+		{m5_940, bar_at("rb2301", m5_940, 4020.0)},
+		{m5_945, bar_at("rb2301", m5_945, 4030.0)}
+		});
+	init_reader();
+
+	WTSKlineSlice* m1 = _reader->readKlineSlice("EXCUT.rb2301", KP_Minute1, 3,
+		20230103093300000ull);
+	ASSERT_NE(m1, nullptr);
+	ASSERT_EQ(m1->get_block_size(0), 3u);
+	const WTSBarStruct* m1_bars = m1->get_block_addr(0);
+	EXPECT_EQ(m1_bars[0].time, (uint64_t)R4_M1_931);
+	EXPECT_EQ(m1_bars[1].time, (uint64_t)R4_M1_932);
+	EXPECT_EQ(m1_bars[2].time, (uint64_t)R4_M1_933);
+	m1->release();
+
+	// IDataReader's 12-digit minute format is also supported by this AD reader.
+	WTSKlineSlice* m1_12_digit = _reader->readKlineSlice("EXCUT.rb2301", KP_Minute1, 3,
+		202301030933ull);
+	ASSERT_NE(m1_12_digit, nullptr);
+	ASSERT_EQ(m1_12_digit->get_block_size(0), 3u);
+	EXPECT_EQ(m1_12_digit->get_block_addr(0)[0].time, (uint64_t)R4_M1_931);
+	EXPECT_EQ(m1_12_digit->get_block_addr(0)[2].time, (uint64_t)R4_M1_933);
+	m1_12_digit->release();
+
+	WTSKlineSlice* m5 = _reader->readKlineSlice("EXCUT.rb2301", KP_Minute5, 2,
+		20230103094000000ull);
+	ASSERT_NE(m5, nullptr);
+	ASSERT_EQ(m5->get_block_size(0), 2u);
+	const WTSBarStruct* m5_bars = m5->get_block_addr(0);
+	EXPECT_EQ(m5_bars[0].time, (uint64_t)m5_935);
+	EXPECT_EQ(m5_bars[1].time, (uint64_t)m5_940);
+	m5->release();
+}
+
+TEST_F(R4ReaderADTest, KlineSameReaderEarlierCutoffReloadsHistoricalBars)
+{
+	add_stock("EXBACK", "rb2301");
+	seed_bars("min1", "EXBACK", "rb2301", {
+		{R4_M1_931, bar_at("rb2301", R4_M1_931, 3900.0)},
+		{R4_M1_932, bar_at("rb2301", R4_M1_932, 3910.0)},
+		{R4_M1_933, bar_at("rb2301", R4_M1_933, 3920.0)},
+		{R4_M1_940, bar_at("rb2301", R4_M1_940, 3930.0)},
+		{3301030941u, bar_at("rb2301", 3301030941u, 3940.0)},
+		{3301030942u, bar_at("rb2301", 3301030942u, 3950.0)}
+		});
+	init_reader();
+
+	WTSKlineSlice* late = _reader->readKlineSlice("EXBACK.rb2301", KP_Minute1, 3,
+		20230103094200000ull);
+	ASSERT_NE(late, nullptr);
+	ASSERT_EQ(late->get_block_size(0), 3u);
+	EXPECT_EQ(late->get_block_addr(0)[0].time, (uint64_t)R4_M1_940);
+	EXPECT_EQ(late->get_block_addr(0)[2].time, 3301030942u);
+	late->release();
+
+	// 同一个 reader 回退到更早 cutoff，必须从足量 LMDB 历史中取早期窗口。
+	WTSKlineSlice* early = _reader->readKlineSlice("EXBACK.rb2301", KP_Minute1, 3,
+		20230103093300000ull);
+	ASSERT_NE(early, nullptr);
+	ASSERT_EQ(early->get_block_size(0), 3u);
+	const WTSBarStruct* early_bars = early->get_block_addr(0);
+	EXPECT_EQ(early_bars[0].time, (uint64_t)R4_M1_931);
+	EXPECT_EQ(early_bars[1].time, (uint64_t)R4_M1_932);
+	EXPECT_EQ(early_bars[2].time, (uint64_t)R4_M1_933);
+	early->release();
+}
+
+TEST_F(R4ReaderADTest, KlineForwardIncrementIsBoundedByCutoff)
+{
+	add_stock("EXFWD", "rb2301");
+	seed_bars("min1", "EXFWD", "rb2301", {
+		{R4_M1_931, bar_at("rb2301", R4_M1_931, 3900.0)},
+		{R4_M1_932, bar_at("rb2301", R4_M1_932, 3910.0)},
+		{R4_M1_933, bar_at("rb2301", R4_M1_933, 3920.0)},
+		{R4_M1_940, bar_at("rb2301", R4_M1_940, 3930.0)},
+		{3301030945u, bar_at("rb2301", 3301030945u, 3940.0)}
+		});
+	init_reader();
+
+	WTSKlineSlice* first = _reader->readKlineSlice("EXFWD.rb2301", KP_Minute1, 3,
+		20230103093200000ull);
+	ASSERT_NE(first, nullptr);
+	ASSERT_EQ(first->get_block_size(0), 2u);
+	first->release();
+
+	// Existing capacity is sufficient, so this exercises the forward LMDB update path.
+	WTSKlineSlice* forward = _reader->readKlineSlice("EXFWD.rb2301", KP_Minute1, 3,
+		20230103094000000ull);
+	ASSERT_NE(forward, nullptr);
+	ASSERT_EQ(forward->size(), 3);
+	EXPECT_EQ(forward->at(0)->time, (uint64_t)R4_M1_932);
+	EXPECT_EQ(forward->at(1)->time, (uint64_t)R4_M1_933);
+	EXPECT_EQ(forward->at(2)->time, (uint64_t)R4_M1_940);
+	forward->release();
+}
+
+TEST_F(R4ReaderADTest, KlineCountGrowthReloadsTheRequestedCutoffWindow)
+{
+	add_stock("EXGROW", "rb2301");
+	seed_bars("min1", "EXGROW", "rb2301", {
+		{R4_M1_931, bar_at("rb2301", R4_M1_931, 3900.0)},
+		{R4_M1_932, bar_at("rb2301", R4_M1_932, 3910.0)},
+		{R4_M1_933, bar_at("rb2301", R4_M1_933, 3920.0)},
+		{R4_M1_940, bar_at("rb2301", R4_M1_940, 3930.0)}
+		});
+	init_reader();
+
+	WTSKlineSlice* small = _reader->readKlineSlice("EXGROW.rb2301", KP_Minute1, 1,
+		20230103094000000ull);
+	ASSERT_NE(small, nullptr);
+	ASSERT_EQ(small->get_block_size(0), 1u);
+	EXPECT_EQ(small->get_block_addr(0)[0].time, (uint64_t)R4_M1_940);
+	small->release();
+
+	WTSKlineSlice* larger = _reader->readKlineSlice("EXGROW.rb2301", KP_Minute1, 3,
+		20230103094000000ull);
+	ASSERT_NE(larger, nullptr);
+	ASSERT_EQ(larger->size(), 3);
+	EXPECT_EQ(larger->at(0)->time, (uint64_t)R4_M1_932);
+	EXPECT_EQ(larger->at(1)->time, (uint64_t)R4_M1_933);
+	EXPECT_EQ(larger->at(2)->time, (uint64_t)R4_M1_940);
+	larger->release();
+}
+
+TEST_F(R4ReaderADTest, KlineZeroCountWithoutInitializedCacheReturnsNull)
+{
+	add_stock("EXZERO_EMPTY", "rb2301");
+	init_reader();
+	EXPECT_EQ(nullptr, _reader->readKlineSlice("EXZERO_EMPTY.rb2301", KP_Minute1, 0,
+		20230103093300000ull));
+}
+
+TEST_F(R4ReaderADTest, KlineRealtimeBarCanFillAnEmptyLmDbCacheWithoutLeakingFuture)
+{
+	add_stock("EXRT_ONLY", "rb2301");
+	seed_bars("min1", "EXRT_ONLY", "rb2301", {});
+	std::vector<BarCacheItem> items{
+		make_bar_item("EXRT_ONLY", "rb2301", R4_RD1, R4_M1_940, 3940.0)};
+	write_block_file((_root / "cache_m1.dmb").string(), BLK_FLAG, BT_RT_Cache, 1, 1, 1,
+		bar_payload(items));
+	init_reader();
+
+	// The RT bar must stay hidden before its inclusive cutoff, even when history is empty.
+	EXPECT_EQ(nullptr, _reader->readKlineSlice("EXRT_ONLY.rb2301", KP_Minute1, 3,
+		20230103093300000ull));
+
+	WTSKlineSlice* exact = _reader->readKlineSlice("EXRT_ONLY.rb2301", KP_Minute1, 3,
+		20230103094000000ull);
+	ASSERT_NE(exact, nullptr);
+	ASSERT_EQ(exact->size(), 1);
+	EXPECT_EQ(exact->at(0)->time, (uint64_t)R4_M1_940);
+	EXPECT_DOUBLE_EQ(exact->at(0)->open, 3940.0);
+	exact->release();
+}
+
+TEST_F(R4ReaderADTest, KlineRealtimeBarCanAppearOnARepeatedSameCutoffRead)
+{
+	add_stock("EXRT_LATE", "rb2301");
+	seed_bars("min1", "EXRT_LATE", "rb2301", {
+		{R4_M1_931, bar_at("rb2301", R4_M1_931, 3900.0)},
+		{R4_M1_932, bar_at("rb2301", R4_M1_932, 3910.0)}
+		});
+	init_reader();
+
+	const uint64_t cutoff = 20230103094000000ull;
+	WTSKlineSlice* before = _reader->readKlineSlice("EXRT_LATE.rb2301", KP_Minute1, 3, cutoff);
+	ASSERT_NE(before, nullptr);
+	ASSERT_EQ(before->size(), 2);
+	EXPECT_EQ(before->at(1)->time, (uint64_t)R4_M1_932);
+	before->release();
+
+	// Simulate the writer publishing the still-open bar after the first read.
+	std::vector<BarCacheItem> items{
+		make_bar_item("EXRT_LATE", "rb2301", R4_RD1, R4_M1_940, 3940.0)};
+	write_block_file((_root / "cache_m1.dmb").string(), BLK_FLAG, BT_RT_Cache, 1, 1, 1,
+		bar_payload(items));
+
+	WTSKlineSlice* after = _reader->readKlineSlice("EXRT_LATE.rb2301", KP_Minute1, 3, cutoff);
+	ASSERT_NE(after, nullptr);
+	ASSERT_EQ(after->size(), 3);
+	EXPECT_EQ(after->at(0)->time, (uint64_t)R4_M1_931);
+	EXPECT_EQ(after->at(1)->time, (uint64_t)R4_M1_932);
+	EXPECT_EQ(after->at(2)->time, (uint64_t)R4_M1_940);
+	EXPECT_DOUBLE_EQ(after->at(2)->open, 3940.0);
+	after->release();
+}
+
+TEST_F(R4ReaderADTest, KlineForwardIncrementDoesNotStopAt9999Rows)
+{
+	add_stock("EXPAGE", "rb2301");
+
+	auto next_date = [](uint32_t date) {
+		uint32_t year = date / 10000;
+		uint32_t month = (date / 100) % 100;
+		uint32_t day = date % 100;
+		static const uint32_t days_per_month[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+		uint32_t days = days_per_month[month - 1];
+		if (month == 2 && (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)))
+			days++;
+		if (++day > days)
+		{
+			day = 1;
+			if (++month > 12)
+			{
+				month = 1;
+				++year;
+			}
+		}
+		return year * 10000 + month * 100 + day;
+	};
+	auto make_row = [](uint32_t date, uint32_t minute_index, double px) {
+		const uint32_t hhmm = (9 + minute_index / 60) * 100 + minute_index % 60;
+		const uint32_t key_time = (date - 19900000u) * 10000u + hhmm;
+		WTSBarStruct bar = bar_at("rb2301", key_time, px);
+		bar.date = date;
+		return std::make_pair(key_time, bar);
+	};
+	const uint32_t rows_count = 10003;
+	std::vector<std::pair<uint32_t, WTSBarStruct>> rows;
+	rows.reserve(rows_count);
+	uint32_t date = R4_RD1;
+	for (uint32_t i = 0; i < rows_count; i++)
+	{
+		if (i > 0 && i % 360 == 0)
+			date = next_date(date);
+		rows.push_back(make_row(date, i % 360, 3900.0 + i));
+	}
+	seed_bars("min1", "EXPAGE", "rb2301", rows);
+	init_reader();
+
+	auto etime_for = [&next_date](uint32_t row_index) {
+		uint32_t date = R4_RD1;
+		for (uint32_t d = 0; d < row_index / 360; d++)
+			date = next_date(date);
+		const uint32_t hhmm = (9 + (row_index % 360) / 60) * 100 + row_index % 60;
+		return static_cast<uint64_t>(date) * 1000000000ull + static_cast<uint64_t>(hhmm) * 100000ull;
+	};
+
+	WTSKlineSlice* first = _reader->readKlineSlice("EXPAGE.rb2301", KP_Minute1, 3, etime_for(2));
+	ASSERT_NE(first, nullptr);
+	ASSERT_EQ(first->size(), 3);
+	EXPECT_EQ(first->at(0)->time, rows[0].second.time);
+	EXPECT_EQ(first->at(2)->time, rows[2].second.time);
+	first->release();
+
+	WTSKlineSlice* final = _reader->readKlineSlice("EXPAGE.rb2301", KP_Minute1, 3, etime_for(rows_count - 1));
+	ASSERT_NE(final, nullptr);
+	ASSERT_EQ(final->size(), 3);
+	for (uint32_t i = 0; i < 3; i++)
+	{
+		EXPECT_EQ(final->at(i)->time, rows[rows_count - 3 + i].second.time);
+		EXPECT_DOUBLE_EQ(final->at(i)->open, rows[rows_count - 3 + i].second.open);
+	}
+	final->release();
+	// The inclusive lower row is already cached and must not trigger a duplicate callback.
+	EXPECT_EQ(_sink->bar_calls(), rows_count - 3);
+}
+
+TEST_F(R4ReaderADTest, KlineDoesNotAppendRealtimeBarAfterCutoff)
+{
+	add_stock("EXRT_AFTER", "rb2301");
+	seed_bars("min1", "EXRT_AFTER", "rb2301", {
+		{R4_M1_931, bar_at("rb2301", R4_M1_931, 3900.0)},
+		{R4_M1_932, bar_at("rb2301", R4_M1_932, 3910.0)}
+		});
+	std::vector<BarCacheItem> items{
+		make_bar_item("EXRT_AFTER", "rb2301", R4_RD1, R4_M1_940, 3940.0)};
+	write_block_file((_root / "cache_m1.dmb").string(), BLK_FLAG, BT_RT_Cache, 1, 1, 1,
+		bar_payload(items));
+	init_reader();
+
+	WTSKlineSlice* slice = _reader->readKlineSlice("EXRT_AFTER.rb2301", KP_Minute1, 3,
+		20230103093300000ull);
+	ASSERT_NE(slice, nullptr);
+	ASSERT_EQ(slice->get_block_size(0), 2u);
+	EXPECT_EQ(slice->get_block_addr(0)[0].time, (uint64_t)R4_M1_931);
+	EXPECT_EQ(slice->get_block_addr(0)[1].time, (uint64_t)R4_M1_932);
+	slice->release();
+}
+
+TEST_F(R4ReaderADTest, KlineAppendsRealtimeBarAtInclusiveCutoff)
+{
+	add_stock("EXRT_EXACT", "rb2301");
+	seed_bars("min1", "EXRT_EXACT", "rb2301", {
+		{R4_M1_931, bar_at("rb2301", R4_M1_931, 3900.0)},
+		{R4_M1_932, bar_at("rb2301", R4_M1_932, 3910.0)}
+		});
+	std::vector<BarCacheItem> items{
+		make_bar_item("EXRT_EXACT", "rb2301", R4_RD1, R4_M1_940, 3940.0)};
+	write_block_file((_root / "cache_m1.dmb").string(), BLK_FLAG, BT_RT_Cache, 1, 1, 1,
+		bar_payload(items));
+	init_reader();
+
+	WTSKlineSlice* slice = _reader->readKlineSlice("EXRT_EXACT.rb2301", KP_Minute1, 3,
+		20230103094000000ull);
+	ASSERT_NE(slice, nullptr);
+	ASSERT_EQ(slice->get_block_size(0), 3u);
+	EXPECT_EQ(slice->get_block_addr(0)[0].time, (uint64_t)R4_M1_931);
+	EXPECT_EQ(slice->get_block_addr(0)[1].time, (uint64_t)R4_M1_932);
+	EXPECT_EQ(slice->get_block_addr(0)[2].time, (uint64_t)R4_M1_940);
+	slice->release();
+}
+
+TEST_F(R4ReaderADTest, KlineDoesNotDuplicateRealtimeBarAlreadyInLMDB)
+{
+	add_stock("EXRT_DUP", "rb2301");
+	seed_bars("min1", "EXRT_DUP", "rb2301", {
+		{R4_M1_931, bar_at("rb2301", R4_M1_931, 3900.0)},
+		{R4_M1_932, bar_at("rb2301", R4_M1_932, 3910.0)},
+		{R4_M1_940, bar_at("rb2301", R4_M1_940, 3930.0)}
+		});
+	std::vector<BarCacheItem> items{
+		make_bar_item("EXRT_DUP", "rb2301", R4_RD1, R4_M1_940, 3940.0)};
+	write_block_file((_root / "cache_m1.dmb").string(), BLK_FLAG, BT_RT_Cache, 1, 1, 1,
+		bar_payload(items));
+	init_reader();
+
+	WTSKlineSlice* slice = _reader->readKlineSlice("EXRT_DUP.rb2301", KP_Minute1, 3,
+		20230103100000000ull);
+	ASSERT_NE(slice, nullptr);
+	ASSERT_EQ(slice->get_block_size(0), 3u);
+	const WTSBarStruct* bars = slice->get_block_addr(0);
+	EXPECT_EQ(bars[0].time, (uint64_t)R4_M1_931);
+	EXPECT_EQ(bars[1].time, (uint64_t)R4_M1_932);
+	EXPECT_EQ(bars[2].time, (uint64_t)R4_M1_940);
+	slice->release();
+}
+
+TEST_F(R4ReaderADTest, KlineDatabaseDirectoryCreationFailureReturnsNullEvenWithRealtimeBar)
+{
+	add_stock("EXKDIR", "rb2301");
+	{
+		std::ofstream blocker(_root / "min1", std::ios::binary | std::ios::trunc);
+		ASSERT_TRUE(blocker.good());
+		blocker << "min1 is a file, not a directory";
+	}
+	std::vector<BarCacheItem> items{
+		make_bar_item("EXKDIR", "rb2301", R4_RD1, R4_M1_940, 3940.0)};
+	write_block_file((_root / "cache_m1.dmb").string(), BLK_FLAG, BT_RT_Cache, 1, 1, 1,
+		bar_payload(items));
+	init_reader();
+
+	WTSKlineSlice* slice = nullptr;
+	EXPECT_NO_THROW(slice = _reader->readKlineSlice("EXKDIR.rb2301", KP_Minute1, 1,
+		20230103094000000ull));
+	EXPECT_EQ(slice, nullptr);
+	if (slice != nullptr)
+		slice->release();
+	ASSERT_GT(_sink->log_count(LL_ERROR), 0u);
+	EXPECT_NE(_sink->last_log(LL_ERROR).find("EXKDIR"), std::string::npos);
+	EXPECT_NE(_sink->last_log(LL_ERROR).find("min1"), std::string::npos);
+}
+
+TEST_F(R4ReaderADTest, TickDatabaseDirectoryCreationFailureReturnsNullWithoutThrow)
+{
+	add_stock("EXTICKDIR", "rb2301");
+	{
+		std::ofstream blocker(_root / "ticks", std::ios::binary | std::ios::trunc);
+		ASSERT_TRUE(blocker.good());
+		blocker << "ticks is a file, not a directory";
+	}
+	init_reader();
+
+	WTSTickSlice* slice = nullptr;
+	EXPECT_NO_THROW(slice = _reader->readTickSlice("EXTICKDIR.rb2301", 1,
+		20230103094000000ull));
+	EXPECT_EQ(slice, nullptr);
+	if (slice != nullptr)
+		slice->release();
+	ASSERT_GT(_sink->log_count(LL_ERROR), 0u);
+	EXPECT_NE(_sink->last_log(LL_ERROR).find("EXTICKDIR"), std::string::npos);
+	EXPECT_NE(_sink->last_log(LL_ERROR).find("tick"), std::string::npos);
+}
+
+TEST_F(R4ReaderADTest, KlineCreatesMissingDirectoryAndUsesRealtimeBar)
+{
+	add_stock("EXKDIR_RT", "rb2301");
+	ASSERT_FALSE(std::filesystem::exists(_root / "min1"));
+	std::vector<BarCacheItem> items{
+		make_bar_item("EXKDIR_RT", "rb2301", R4_RD1, R4_M1_940, 3940.0)};
+	write_block_file((_root / "cache_m1.dmb").string(), BLK_FLAG, BT_RT_Cache, 1, 1, 1,
+		bar_payload(items));
+	init_reader();
+
+	WTSKlineSlice* slice = _reader->readKlineSlice("EXKDIR_RT.rb2301", KP_Minute1, 1,
+		20230103094000000ull);
+	ASSERT_NE(slice, nullptr);
+	ASSERT_EQ(slice->size(), 1);
+	EXPECT_EQ(slice->at(0)->time, (uint64_t)R4_M1_940);
+	EXPECT_DOUBLE_EQ(slice->at(0)->open, 3940.0);
+	slice->release();
+	EXPECT_TRUE(std::filesystem::is_directory(_root / "min1" / "EXKDIR_RT"));
+}
+
+TEST_F(R4ReaderADTest, HotWithoutProductHistoryFailsClosedWithoutRawReplay)
+{
+	WTSCommodityInfo* hotComm = _bd->add_commodity("EXHOT", "rb", ContractCategory::CC_Future);
+	ASSERT_NE(hotComm, nullptr);
+	ASSERT_NE(_bd->add_contract("EXHOT", "rb2401", hotComm), nullptr);
+
+	const std::filesystem::path rulesPath = _root / "hot_rules.json";
+	{
+		std::ofstream rules(rulesPath);
+		ASSERT_TRUE(rules.good());
+		rules << R"({"EXHOT":{"rb":[
+			{"date":20230102,"from":"","to":"rb2401","oldclose":0.0,"newclose":0.0},
+			{"date":20230104,"from":"rb2401","to":"rb2405","oldclose":0.0,"newclose":0.0}
+		]}})";
+	}
+	_owned_hot_mgr.reset(new WTSHotMgr());
+	ASSERT_TRUE(_owned_hot_mgr->loadCustomRules("HOT", rulesPath.string().c_str()));
+	ASSERT_STREQ(_owned_hot_mgr->getCustomRawCode("HOT", "EXHOT.rb", R4_RD1), "rb2401");
+	ASSERT_STREQ(_owned_hot_mgr->getRuleTag("EXHOT.rb.HOT"), "HOT");
+
+	delete _sink;
+	_sink = new R4ReaderHotSink(_bd, _owned_hot_mgr.get());
+
+	// AD writer keys physical futures contracts. A physical row alone does not
+	// prove whether this HOT reader should use raw contracts or legacy premerged
+	// product history, so the AD reader must fail closed rather than infer a source.
+	seed_bars("min1", "EXHOT", "rb2401", {
+		{R4_M1_931, bar_at("rb2401", R4_M1_931, 3900.0)},
+		{R4_M1_932, bar_at("rb2401", R4_M1_932, 3910.0)},
+		{R4_M1_933, bar_at("rb2401", R4_M1_933, 3920.0)},
+		{R4_M1_940, bar_at("rb2401", R4_M1_940, 3930.0)}
+		});
+	init_reader();
+
+	WTSKlineSlice* hot = _reader->readKlineSlice("EXHOT.rb.HOT", KP_Minute1, 1,
+		20230103094000000ull);
+	EXPECT_EQ(hot, nullptr);
+	if (hot != nullptr)
+		hot->release();
+	EXPECT_TRUE(_sink->bar_events().empty())
+		<< "an ambiguous HOT source must not replay physical-contract history";
+}
+
+TEST_F(R4ReaderADTest, HotBackwardCutoffWithEmptyProductHistoryFailsClosed)
+{
+	WTSCommodityInfo* hotComm = _bd->add_commodity("EXHOT_BACK", "rb", ContractCategory::CC_Future);
+	ASSERT_NE(hotComm, nullptr);
+	ASSERT_NE(_bd->add_contract("EXHOT_BACK", "rb2401", hotComm), nullptr);
+
+	const std::filesystem::path rulesPath = _root / "hot_rules_backward.json";
+	{
+		std::ofstream rules(rulesPath);
+		ASSERT_TRUE(rules.good());
+		rules << R"({"EXHOT_BACK":{"rb":[
+			{"date":20230102,"from":"","to":"rb2401","oldclose":0.0,"newclose":0.0},
+			{"date":20230104,"from":"rb2401","to":"rb2405","oldclose":0.0,"newclose":0.0}
+		]}})";
+	}
+	_owned_hot_mgr.reset(new WTSHotMgr());
+	ASSERT_TRUE(_owned_hot_mgr->loadCustomRules("HOT", rulesPath.string().c_str()));
+	ASSERT_STREQ(_owned_hot_mgr->getCustomRawCode("HOT", "EXHOT_BACK.rb", R4_RD1), "rb2401");
+	ASSERT_STREQ(_owned_hot_mgr->getRuleTag("EXHOT_BACK.rb.HOT"), "HOT");
+	delete _sink;
+	_sink = new R4ReaderHotSink(_bd, _owned_hot_mgr.get());
+
+	// The first cutoff is served by legacy product history. At the earlier
+	// cutoff, only physical-contract history exists; the source must not switch.
+	seed_bars("min1", "EXHOT_BACK", "rb", {
+		{R4_M1_940, bar_at("rb", R4_M1_940, 4930.0)}
+		});
+	seed_bars("min1", "EXHOT_BACK", "rb2401", {
+		{R4_M1_931, bar_at("rb2401", R4_M1_931, 3900.0)},
+		{R4_M1_932, bar_at("rb2401", R4_M1_932, 3910.0)},
+		{R4_M1_933, bar_at("rb2401", R4_M1_933, 3920.0)},
+		{R4_M1_940, bar_at("rb2401", R4_M1_940, 3940.0)}
+		});
+	init_reader();
+
+	WTSKlineSlice* late = _reader->readKlineSlice("EXHOT_BACK.rb.HOT", KP_Minute1, 1,
+		20230103094000000ull);
+	ASSERT_NE(late, nullptr);
+	ASSERT_EQ(late->size(), 1);
+	EXPECT_EQ(late->at(0)->time, (uint64_t)R4_M1_940);
+	EXPECT_DOUBLE_EQ(late->at(0)->open, 4930.0);
+	late->release();
+	ASSERT_TRUE(_sink->bar_events().empty());
+
+	WTSKlineSlice* early = _reader->readKlineSlice("EXHOT_BACK.rb.HOT", KP_Minute1, 1,
+		20230103093300000ull);
+	EXPECT_EQ(early, nullptr);
+	if (early != nullptr)
+		early->release();
+	EXPECT_TRUE(_sink->bar_events().empty())
+		<< "backward cutoff must not switch from product to raw history and replay it";
+}
+
+TEST_F(R4ReaderADTest, ZeroKlineEtimeUsesSinkClockAsInclusiveCutoff)
+{
+	add_stock("EXZERO_K", "rb2301");
+	seed_bars("min1", "EXZERO_K", "rb2301", {
+		{R4_M1_931, bar_at("rb2301", R4_M1_931, 3900.0)},
+		{R4_M1_932, bar_at("rb2301", R4_M1_932, 3910.0)},
+		{R4_M1_933, bar_at("rb2301", R4_M1_933, 3920.0)}
+		});
+	_sink->set_clock(R4_RD1, 932, 0);
+	init_reader();
+
+	WTSKlineSlice* slice = _reader->readKlineSlice("EXZERO_K.rb2301", KP_Minute1, 3, 0);
+	ASSERT_NE(slice, nullptr);
+	ASSERT_EQ(slice->get_block_size(0), 2u);
+	EXPECT_EQ(slice->get_block_addr(0)[0].time, (uint64_t)R4_M1_931);
+	EXPECT_EQ(slice->get_block_addr(0)[1].time, (uint64_t)R4_M1_932);
+	slice->release();
+}
+
+TEST_F(R4ReaderADTest, DayKlineNightSessionCutoffUsesTradingDate)
+{
+	// 让 AD reader 经实际接口询问 night-session 时间对应的交易日。
+	delete _sink;
+	_sink = NULL;
+	delete _bd;
+	_bd = new R4NightSessionBaseDataMgr();
+	_sink = new R4ReaderSink(_bd);
+	WTSCommodityInfo* comm = _bd->add_commodity("EXNIGHT", "rb2301", ContractCategory::CC_Future);
+	_bd->add_contract("EXNIGHT", "rb2301", comm);
+
+	WTSBarStruct jan4 = bar_at("rb2301", 0, 4010.0);
+	jan4.date = 20230104;
+	WTSBarStruct jan5 = bar_at("rb2301", 0, 4020.0);
+	jan5.date = 20230105;
+	seed_bars("day", "EXNIGHT", "rb2301", {
+		{20230103u, bar_at("rb2301", 0, 4000.0)},
+		{20230104u, jan4},
+		{20230105u, jan5}
+		});
+	init_reader();
+
+	// Jan 3 23:00 belongs to Jan 4's trading date: include that daily bar, exclude Jan 5.
+	WTSKlineSlice* slice = _reader->readKlineSlice("EXNIGHT.rb2301", KP_DAY, 3,
+		20230103230000000ull);
+	ASSERT_NE(slice, nullptr);
+	ASSERT_EQ(slice->get_block_size(0), 2u);
+	EXPECT_EQ(slice->get_block_addr(0)[0].date, 20230103u);
+	EXPECT_EQ(slice->get_block_addr(0)[1].date, 20230104u);
+	slice->release();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -876,10 +1752,11 @@ TEST_F(R4ReaderADTest, ZeroEtimeFallsBackToSinkClock)
 	EXPECT_DOUBLE_EQ(s2->get_block_addr(0)[0].price, 3915.0);
 	EXPECT_EQ(s2->get_block_addr(0)[0].action_time, 101530000u);
 	s2->release();
-	// 0 命中不产生 append 日志，最后一条 DEBUG 只会是"重开环境"
+	// 0 命中不产生 append 日志；DB 打开日志可能被首次 full-reload 日志覆盖，
+	// 因此只确认该日志曾产生，不绑定 last_log 的最终内容。
 	EXPECT_EQ(_sink->last_log(LL_DEBUG).find("append to cache"), std::string::npos)
 		<< _sink->last_log(LL_DEBUG);
-	EXPECT_NE(_sink->last_log(LL_DEBUG).find("Tick db of EXC0.rb2301 opened"), std::string::npos);
+	EXPECT_EQ(_sink->count_containing("Tick db of EXC0.rb2301 opened"), 1u);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1034,6 +1911,82 @@ TEST_F(R4ReaderADTest, OnMinuteEndEmitsDailyRtCacheBarOnce)
 	EXPECT_EQ(_sink->last_bar_code(), "EXX6.rb2301");
 	EXPECT_EQ(_sink->last_period(), KP_DAY);
 	EXPECT_EQ(_sink->all_updated(), 1u);
+}
+
+TEST_F(R4ReaderADTest, P05ReadBarsBufferHandlesEmptySingleAndClosedRange)
+{
+	const WTSBarStruct first = bar_at("rb2301", 0, 100.0);
+	const WTSBarStruct middle = bar_at("rb2301", 123, 200.0);
+	const WTSBarStruct last = bar_at("rb2301", UINT32_MAX, 300.0);
+	const WTSBarStruct other = bar_at("rb2302", 42, 400.0);
+	seed_bars("min1", "EXX", "rb2301", {{0, first}, {123, middle}, {UINT32_MAX, last}});
+	seed_bars("min1", "EXX", "rb2302", {{42, other}});
+	init_reader();
+
+	std::string output = "old value";
+	ASSERT_TRUE(WtDataReaderADTestAccess::read_bars_to_buffer(*_reader, "EXX", "missing", KP_Minute1, output));
+	EXPECT_TRUE(output.empty());
+	ASSERT_TRUE(WtDataReaderADTestAccess::read_bars_to_buffer(*_reader, "EXX", "rb2302", KP_Minute1, output));
+	EXPECT_EQ(output, std::string((const char*)&other, sizeof(other)));
+	ASSERT_TRUE(WtDataReaderADTestAccess::read_bars_to_buffer(*_reader, "EXX", "rb2301", KP_Minute1, output));
+	std::string expected;
+	expected.append((const char*)&first, sizeof(first));
+	expected.append((const char*)&middle, sizeof(middle));
+	expected.append((const char*)&last, sizeof(last));
+	EXPECT_EQ(output.size(), 3 * sizeof(WTSBarStruct));
+	EXPECT_EQ(output, expected);
+	EXPECT_EQ(WtDataReaderADTestAccess::read_bars_legacy(*_reader, "EXX", "rb2301", KP_Minute1), expected);
+}
+
+TEST_F(R4ReaderADTest, P05ReadBarsBufferRejectsMalformedValuesWithoutPublishingPartial)
+{
+	const WTSBarStruct bar = bar_at("rb2301", 1, 123.0);
+	const std::string valid((const char*)&bar, sizeof(bar));
+	seed_bar_values("min1", "SHRT", "rb2301", {{1, valid}, {2, valid.substr(0, valid.size() - 1)}});
+	seed_bar_values("min1", "LONG", "rb2301", {{1, valid}, {2, valid + "x"}});
+	seed_raw_bar_values("min1", "KEYX", {{bar_key_str("KEYX", "rb2301", 1), valid},
+		{bar_key_str("KEYX", "rb2301", 2) + "x", valid}});
+	init_reader();
+	for (const char* exchg : {"SHRT", "LONG", "KEYX"})
+	{
+		std::string output = "unchanged";
+		EXPECT_FALSE(WtDataReaderADTestAccess::read_bars_to_buffer(*_reader, exchg, "rb2301", KP_Minute1, output));
+		EXPECT_EQ(output, "unchanged");
+	}
+}
+
+TEST_F(R4ReaderADTest, P05ReadBarsBufferRejectsQueryErrorsWithoutPublishingPartial)
+{
+	const WTSBarStruct first = bar_at("rb2301", 1, 123.0);
+	const WTSBarStruct second = bar_at("rb2301", 2, 124.0);
+	seed_bars("min1", "EXX", "rb2301", {{1, first}, {2, second}});
+	init_reader();
+	std::string output = "unchanged";
+	R4CursorFailureState failure;
+	failure.fail_on_call = 2;  // First item is read; the following cursor operation fails.
+	{
+		ScopedR4CursorOverride scoped(&failure);
+		EXPECT_FALSE(WtDataReaderADTestAccess::read_bars_to_buffer(*_reader, "EXX", "rb2301", KP_Minute1, output));
+	}
+	EXPECT_EQ(failure.calls, 2);
+	EXPECT_EQ(output, "unchanged");
+	ASSERT_TRUE(WtDataReaderADTestAccess::read_bars_to_buffer(*_reader, "EXX", "rb2301", KP_Minute1, output));
+	EXPECT_EQ(output, std::string((const char*)&first, sizeof(first)) +
+		std::string((const char*)&second, sizeof(second)));
+}
+
+TEST_F(R4ReaderADTest, P05ReadBarsBufferRejectsInvalidIdentityAndPeriod)
+{
+	init_reader();
+	std::string output = "unchanged";
+	const std::string longExchg(MAX_EXCHANGE_LENGTH, 'E');
+	const std::string longCode(MAX_INSTRUMENT_LENGTH, 'C');
+	EXPECT_FALSE(WtDataReaderADTestAccess::read_bars_to_buffer(*_reader, nullptr, "rb2301", KP_Minute1, output));
+	EXPECT_FALSE(WtDataReaderADTestAccess::read_bars_to_buffer(*_reader, "EXX", nullptr, KP_Minute1, output));
+	EXPECT_FALSE(WtDataReaderADTestAccess::read_bars_to_buffer(*_reader, longExchg.c_str(), "rb2301", KP_Minute1, output));
+	EXPECT_FALSE(WtDataReaderADTestAccess::read_bars_to_buffer(*_reader, "EXX", longCode.c_str(), KP_Minute1, output));
+	EXPECT_FALSE(WtDataReaderADTestAccess::read_bars_to_buffer(*_reader, "EXX", "rb2301", static_cast<WTSKlinePeriod>(99), output));
+	EXPECT_EQ(output, "unchanged");
 }
 
 }  // namespace

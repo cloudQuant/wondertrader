@@ -270,7 +270,9 @@ void EventNotifier::notify(const char* trader, uint32_t localid, const char* std
 	boost::asio::post(_asyncio, [this, strTrader, strCode, localid, retained]() {
 		std::string data;
 		tradeToJson(strTrader.c_str(), localid, strCode.c_str(), retained.get(), data);
-		if (_publisher)
+		if (data.empty())
+			WTSLogger::error("UFT EventNotifier failed to serialize TRD_TRADE JSON");
+		else if (_publisher)
 			_publisher(_mq_sid, "TRD_TRADE", data.c_str(), (WtUInt32)data.size());
 	});
 }
@@ -286,13 +288,16 @@ void EventNotifier::notify(const char* trader, uint32_t localid, const char* std
 	boost::asio::post(_asyncio, [this, strTrader, strCode, localid, retained]() {
 		std::string data;
 		orderToJson(strTrader.c_str(), localid, strCode.c_str(), retained.get(), data);
-		if (_publisher)
+		if (data.empty())
+			WTSLogger::error("UFT EventNotifier failed to serialize TRD_ORDER JSON");
+		else if (_publisher)
 			_publisher(_mq_sid, "TRD_ORDER", data.c_str(), (WtUInt32)data.size());
 	});
 }
 
 void EventNotifier::tradeToJson(const char* trader, uint32_t localid, const char* stdCode, WTSTradeInfo* trdInfo, std::string& output)
 {
+	output.clear();
 	if(trdInfo == NULL)
 	{
 		output = "{}";
@@ -320,14 +325,16 @@ void EventNotifier::tradeToJson(const char* trader, uint32_t localid, const char
 
 		rj::StringBuffer sb;
 		rj::PrettyWriter<rj::StringBuffer> writer(sb);
-		root.Accept(writer);
+		if (!root.Accept(writer) || !writer.IsComplete())
+			return;
 
-		output = sb.GetString();
+		output.assign(sb.GetString(), sb.GetSize());
 	}
 }
 
 void EventNotifier::orderToJson(const char* trader, uint32_t localid, const char* stdCode, WTSOrderInfo* ordInfo, std::string& output)
 {
+	output.clear();
 	if (ordInfo == NULL)
 	{
 		output = "{}";
@@ -360,8 +367,9 @@ void EventNotifier::orderToJson(const char* trader, uint32_t localid, const char
 
 		rj::StringBuffer sb;
 		rj::PrettyWriter<rj::StringBuffer> writer(sb);
-		root.Accept(writer);
+		if (!root.Accept(writer) || !writer.IsComplete())
+			return;
 
-		output = sb.GetString();
+		output.assign(sb.GetString(), sb.GetSize());
 	}
 }

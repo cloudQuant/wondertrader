@@ -11,6 +11,8 @@
  */
 #pragma once
 #include <memory>
+#include <mutex>
+#include <unordered_set>
 #include <boost/core/noncopyable.hpp>
 
 #include "../Includes/FasterDefs.h"
@@ -132,6 +134,8 @@ private:
 	typedef wt_hashmap<std::string, StraFactInfo> StraFactMap;
 
 	StraFactMap	_factories;		//!< 已加载的策略工厂映射表
+	std::mutex		_factories_mutex; //!< 保护工厂表；调用插件时不持有
+	std::unordered_set<DllHandle> _conflicting_factory_modules; //!< 本管理器中名称冲突的模块
 
 	/**
 	 * @brief 策略映射表类型

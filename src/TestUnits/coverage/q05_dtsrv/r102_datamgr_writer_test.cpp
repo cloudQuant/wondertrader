@@ -118,20 +118,15 @@ TEST_F(R102DataManagerWriterTest, DefaultModuleNameUsesAliasedAdWriter)
 	if (!r102dt::ad_writer_ready(_bin))
 		GTEST_SKIP() << "libWtDataStorageAD.dylib / createWriter 不可用";
 
-	// 默认模块名是 "WtDataStorage"；在临时模块目录里放同名软链指向 AD writer，
+	// 默认模块名是 "WtDataStorage"；在临时模块目录里复制 AD writer 并使用默认名，
 	// 驱动 DataManager.cpp:72-76 的 module.empty() 分支，同时不碰真实文件写手线程。
 	const fs::path mods = _dir / "mods";
 	fs::create_directories(mods);
 	const fs::path alias = mods / "libWtDataStorage.dylib";
 	std::error_code ec;
-	fs::create_symlink(fs::path(_bin) / "libWtDataStorageAD.dylib", alias, ec);
-	if (ec)
-	{
-		ec.clear();
-		fs::copy_file(fs::path(_bin) / "libWtDataStorageAD.dylib", alias,
-			fs::copy_options::overwrite_existing, ec);
-	}
-	ASSERT_FALSE(ec) << "无法建立默认模块名软链";
+	fs::copy_file(fs::path(_bin) / "libWtDataStorageAD.dylib", alias,
+		fs::copy_options::overwrite_existing, ec);
+	ASSERT_FALSE(ec) << "无法复制默认模块名";
 
 	WtHelper::set_module_dir(r102dt::with_slash(mods).c_str());
 

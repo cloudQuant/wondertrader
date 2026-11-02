@@ -942,7 +942,7 @@ bool ShareBlocks::update_slave_locked(const char* name, ShmPair& shm, bool bForc
 		return false;
 
 	const uint64_t publishedVersion = shm._block->_updatetime;
-	if (shm._blocktime == publishedVersion && !bForce)
+	if (!bForce && shm._blocktime == publishedVersion)
 		return false;
 
 	ShmPair::SectionMap stagedSections;
@@ -1844,17 +1844,34 @@ bool ShareBlocks::init_cmder(const char* name, bool isCmder /* = false */, const
 	std::string filename = path;
 	if (filename.empty())
 		filename = ".cmd";
+	filename = canonical_file_path(filename.c_str());
+	if (filename.empty())
+		return false;
+
+	// Serialize first creation and cold initialization across processes. Only
+	// initializers that honor this sidecar lock cooperate; it does not make
+	// rolling upgrades with legacy initializers safe. This protects initialization
+	// only, not concurrent command writers. Active attachments must not rewrite
+	// the shared monotonic command cursors.
+	const std::string initLockPath = filename + ".wtshareblocks.init.lock";
+	SharedFileLock initGuard(initLockPath.c_str());
+	if (!initGuard.locked())
+		return false;
 
 	if (!StdFile::exists(filename.c_str()))
 	{
 		BoostFile bf;
-		bf.create_new_file(filename.c_str());
-		bf.truncate_file(sizeof(CmdBlock));
+		if (!bf.create_new_file(filename.c_str()) || !bf.truncate_file(sizeof(CmdBlock)))
+			return false;
 		bf.close_file();
 	}
 
 	cmdPair._domain.reset(new BoostMappingFile);
-	cmdPair._domain->map(filename.c_str());
+	if (!cmdPair._domain->map(filename.c_str()) || cmdPair._domain->size() < sizeof(CmdBlock))
+	{
+		cmdPair._domain.reset();
+		return false;
+	}
 	cmdPair._cmder = isCmder;
 	cmdPair._block = (CmdBlock*)cmdPair._domain->addr();
 	if(cmdPair._block->_capacity == 0)
@@ -1866,22 +1883,24 @@ bool ShareBlocks::init_cmder(const char* name, bool isCmder /* = false */, const
 #else
 		cmdPair._block->_cmdpid = getpid();
 #endif
-  
-	
-	//启动的时候都做一下偏移
-	cmdPair._block->_writable %= cmdPair._block->_capacity;
-	if(cmdPair._block->_readable != UINT32_MAX)
-	{
-		cmdPair._block->_readable %= cmdPair._block->_capacity;
-		if (cmdPair._block->_readable > cmdPair._block->_writable)
-			cmdPair._block->_writable += cmdPair._block->_capacity;
-	}
-
 	return true;
 }
 
 bool ShareBlocks::add_cmd(const char* name, const char* cmd)
 {
+	if (name == nullptr || cmd == nullptr)
+		return false;
+
+	// _command includes its terminating NUL, so at most MAX_CMD_SIZE - 1
+	// payload bytes can be published. Validate before touching the shared cursor
+	// or the target slot.
+	constexpr std::size_t cmdCapacity = static_cast<std::size_t>(MAX_CMD_SIZE);
+	std::size_t cmdSize = 0;
+	while (cmdSize < cmdCapacity && cmd[cmdSize] != '\0')
+		++cmdSize;
+	if (cmdSize == cmdCapacity)
+		return false;
+
 	ShareBlocksLockGuard localGuard;
 	auto it = _cmd_blocks.find(name);
 	if (it == _cmd_blocks.end())

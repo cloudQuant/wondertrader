@@ -124,8 +124,10 @@ TEST_F(P01CtaQueryTest, on_tick_fills_price_map_and_respects_emit_flag)
     EXPECT_EQ(ctx->tick_updates, 1u);
     EXPECT_EQ(ctx->_last_upd_code, "SHFE.rb.2510");
 
-    // 没有任何 tick 到达过的合约：ctx 本地表没有，回落去问引擎
-    EXPECT_DOUBLE_EQ(ctx->stra_get_price("DCE.i2509"), 0.0);
+    // 没有任何 tick 到达过的合约：ctx 本地表没有，回落去问引擎价格缓存。
+    // 该夹具没有初始化 _data_mgr，因此为引擎缓存一个确定值，避免触发历史行情查询。
+    engine.prime_price("DCE.i2509", 123.25);
+    EXPECT_DOUBLE_EQ(ctx->stra_get_price("DCE.i2509"), 123.25);
 
     t1->release();
     t2->release();
@@ -139,27 +141,27 @@ TEST_F(P01CtaQueryTest, on_bar_notifies_only_after_subscribing_bar_events)
     bar.close = 3500.0;
 
     // 未订阅 -> 只登记 tag._closed，不回调策略
-    ctx->on_bar("SHFE.rb.2510", "m1", 1, &bar);
+    ctx->on_bar("SHFE.rb.2510", "m", 1, &bar);
     EXPECT_EQ(ctx->bar_closes, 0u);
 
     ctx->stra_sub_bar_events("SHFE.rb.2510", "m1");
-    ctx->on_bar("SHFE.rb.2510", "m1", 1, &bar);
+    ctx->on_bar("SHFE.rb.2510", "m", 1, &bar);
     EXPECT_EQ(ctx->bar_closes, 1u);
     EXPECT_EQ(ctx->_last_close_code, "SHFE.rb.2510");
-    EXPECT_EQ(ctx->_last_close_period, "m11");
+    EXPECT_EQ(ctx->_last_close_period, "m1");
     EXPECT_EQ(ctx->_last_close_bar, &bar);
 
     // 重复订阅不会让通知变成两次以上的一一对应关系（每次 close 只回调一次）
     ctx->stra_sub_bar_events("SHFE.rb.2510", "m1");
-    ctx->on_bar("SHFE.rb.2510", "m1", 1, &bar);
+    ctx->on_bar("SHFE.rb.2510", "m", 1, &bar);
     EXPECT_EQ(ctx->bar_closes, 2u);
 
     // 其它周期没有订阅
-    ctx->on_bar("SHFE.rb.2510", "m5", 1, &bar);
+    ctx->on_bar("SHFE.rb.2510", "m", 5, &bar);
     EXPECT_EQ(ctx->bar_closes, 2u);
 
     // newBar == NULL 早退
-    ctx->on_bar("SHFE.rb.2510", "m1", 1, NULL);
+    ctx->on_bar("SHFE.rb.2510", "m", 1, NULL);
     EXPECT_EQ(ctx->bar_closes, 2u);
 }
 

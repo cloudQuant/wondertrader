@@ -182,9 +182,9 @@ TEST_F(P11SyncReport, login_result_drives_query_chain)
     trader.handleEvent(WTE_Close, -1);
     EXPECT_EQ(1u, sink_.n_lost_);
 
-    // 已就绪后重复的资金回报仍分发，但不再重复广播通道就绪
+    // 断连后的资金回报仍分发，但不会恢复就绪状态或重复广播通道就绪
     trader.onRspAccount(makeArray({ acct }));
-    EXPECT_EQ(TraderAdapter::AS_ALLREADY, trader.state());
+    EXPECT_EQ(TraderAdapter::AS_NOTLOGIN, trader.state());
     EXPECT_EQ(1u, sink_.n_ready_);
     EXPECT_EQ(2u, sink_.accts_.size());
 
@@ -339,6 +339,13 @@ TEST_F(P11SyncReport, trade_report_stats_and_self_match_guard)
     TraderAdapter trader;
     buildReady(trader);
     trader.onLoginResult(true, "ok", 20240510);
+
+    // Drive the query state machine through positions and orders before trades.
+    trader.onRspPosition(nullptr);
+    EXPECT_EQ(TraderAdapter::AS_POSITION_QRYED, trader.state());
+    trader.onRspOrders(nullptr);
+    EXPECT_EQ(TraderAdapter::AS_ORDERS_QRYED, trader.state());
+    EXPECT_EQ(1u, api_.n_qtrades_);
 
     uint32_t actsBefore = api_.n_action_;
     trader.onRspTrades(makeArray({

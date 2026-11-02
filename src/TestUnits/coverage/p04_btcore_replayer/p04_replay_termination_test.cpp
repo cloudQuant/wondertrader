@@ -186,14 +186,14 @@ TEST_F(P04ReplayTermTest, tickModeWithoutTickDataStillTerminates)
 	EXPECT_TRUE(replayer.is_tick_simulated());
 }
 
-// 结束时间早于第一根K线收盘时刻：第一轮就 break（L807），只补一次收尾 session_end
-TEST_F(P04ReplayTermTest, invertedTimeRangeStopsBeforeFirstBar)
+// 显式起止倒挂违反回放区间合同，prepare 应拒绝且不能启动任何回调。
+TEST_F(P04ReplayTermTest, invertedTimeRangeIsRejectedBeforePrepare)
 {
 	HisDataReplayer replayer;
 	WTSVariant* cfg = term_cfg(_root, _base, 202001020930, 202001081500, false);
 	ASSERT_TRUE(replayer.init(cfg));
 	cfg->release();
-	// 起止倒挂：end 落在 begin 之前
+	// 显式起止倒挂：end 落在 begin 之前，应在 prepare 阶段拒绝。
 	replayer.set_time_range(202001020930, 202001010930);
 
 	CountingSink sink;
@@ -201,18 +201,13 @@ TEST_F(P04ReplayTermTest, invertedTimeRangeStopsBeforeFirstBar)
 	sink.onInit = [&replayer]() {
 		replayer.get_kline_slice("SSE.STK.000001", "d", 1, 1, true);
 	};
-	ASSERT_TRUE(replayer.prepare());
-	replayer.run(false);
-
+	EXPECT_FALSE(replayer.prepare());
+	EXPECT_EQ(0u, sink.initCalls);
 	EXPECT_EQ(0u, sink.closeCalls);
 	EXPECT_EQ(0u, sink.beginCalls);
 	EXPECT_EQ(0u, sink.scheduleCalls);
-	// L926：_closed_tdate(0) != _cur_tdate(20200102) -> 收尾时补发一次 session_end
-	EXPECT_EQ(1u, sink.endCalls);
-	EXPECT_EQ(1u, sink.replayDoneCalls);
-	// 时间游标没有被推进
-	EXPECT_EQ(20200102u, replayer.get_date());
-	EXPECT_EQ(930u, replayer.get_raw_time());
+	EXPECT_EQ(0u, sink.endCalls);
+	EXPECT_EQ(0u, sink.replayDoneCalls);
 }
 
 // 有序回放区间完全早于首根日线：upper-bound 定位不得在 begin() 上自减，也不得回放伪 bar。

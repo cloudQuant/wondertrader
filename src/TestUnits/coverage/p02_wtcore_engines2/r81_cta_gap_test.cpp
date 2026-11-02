@@ -17,6 +17,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 
 using namespace wtp;
 
@@ -66,10 +67,25 @@ public:
         last_cond_target = target;
     }
 
+    void stra_log_error(const char* message) override
+    {
+        logged_errors.emplace_back(message != nullptr ? message : "");
+    }
+
     // protected 包装（测试内子类，仅驱动被测基类实现）
     void set_main_key(const char* key) { _main_key = key; }
+    size_t condition_count(const char* stdCode)
+    {
+        auto it = _condtions.find(stdCode);
+        return it == _condtions.end() ? 0u : it->second.size();
+    }
+    const CondEntrust* first_condition(const char* stdCode)
+    {
+        auto it = _condtions.find(stdCode);
+        return it == _condtions.end() || it->second.empty() ? nullptr : &it->second.front();
+    }
     // 注入一条非法比较算法的条件单，用于覆盖 switch 的 default 分支。
-    // 正常 load_data 会对 alg 做 CMP_ALG_NAMES 下标访问，非法值属越界，故只从测试侧注入。
+    // load_data 恢复路径会拒绝非法枚举；此注入只测试运行期 switch 的 default 分支。
     void inject_condition(const char* stdCode, WTSCompareType alg, char action,
         double target, double qty, const char* tag)
     {
@@ -97,6 +113,7 @@ public:
     uint32_t last_calc_time = 0;
     bool emit_condition = false;
     std::string cond_code;
+    std::vector<std::string> logged_errors;
 };
 
 class R81CtaTest : public ::testing::Test
@@ -263,6 +280,68 @@ TEST_F(R81CtaTest, ConditionAlgorithmsActionsAndNoMatchCode)
     EXPECT_DOUBLE_EQ(targets["SHFE.sn.2510"], 0.0);
 }
 
+TEST_F(R81CtaTest, ConditionRecoveryRejectsWholeMalformedSnapshotAndRestoresValidSnapshot)
+{
+    auto ctx = makeCtx("r81_cta_invalid_condition_enum");
+    const char* json = R"json({
+  "positions": [],
+  "conditions": {"settime": 123, "items": {
+    "SHFE.rb.2510": [{"usertag":"bad_alg","field":0,"alg":99,"target":3500.0,"qty":2.0,"action":0}],
+    "SHFE.ag.2512": [{"usertag":"bad_action","field":0,"alg":0,"target":3500.0,"qty":2.0,"action":99}],
+    "SHFE.au.2212": [{"usertag":"bad_field","field":99,"alg":0,"target":3500.0,"qty":2.0,"action":0}],
+    "SHFE.cu.2510": [{"usertag":"valid","field":0,"alg":0,"target":3500.0,"qty":2.0,"action":0}]
+  }}
+})json";
+    ASSERT_TRUE(r81::write_file(r81::stra_data_file("r81_cta_invalid_condition_enum"), json));
+
+    ctx->on_init();
+
+    EXPECT_EQ(ctx->condition_count("SHFE.rb.2510"), 0u);
+    EXPECT_EQ(ctx->condition_count("SHFE.ag.2512"), 0u);
+    EXPECT_EQ(ctx->condition_count("SHFE.au.2212"), 0u);
+	// Snapshot recovery is atomic for invalid schema: a valid sibling in the
+	// same malformed file must not be published either.
+	EXPECT_EQ(ctx->condition_count("SHFE.cu.2510"), 0u);
+	ASSERT_EQ(ctx->logged_errors.size(), 1u);
+	EXPECT_NE(ctx->logged_errors[0].find("Invalid persisted state"), std::string::npos);
+	EXPECT_NE(ctx->logged_errors[0].find(".alg"), std::string::npos);
+
+    // Malformed records are absent from the table and cannot create signals.
+    feed(*ctx, "SHFE.rb.2510", 3500.0);
+    feed(*ctx, "SHFE.ag.2512", 3500.0);
+    feed(*ctx, "SHFE.au.2212", 3500.0);
+	feed(*ctx, "SHFE.cu.2510", 3500.0);
+    EXPECT_DOUBLE_EQ(ctx->stra_get_position("SHFE.rb.2510"), 0.0);
+    EXPECT_DOUBLE_EQ(ctx->stra_get_position("SHFE.ag.2512"), 0.0);
+    EXPECT_DOUBLE_EQ(ctx->stra_get_position("SHFE.au.2212"), 0.0);
+	EXPECT_DOUBLE_EQ(ctx->stra_get_position("SHFE.cu.2510"), 0.0);
+    EXPECT_EQ(ctx->cond_fires, 0u);
+
+	// A separate valid snapshot must still restore every field and execute.
+	auto validCtx = makeCtx("r81_cta_valid_condition");
+	const char* validJson = R"json({"positions":[],"conditions":{"settime":123,"items":{
+		"SHFE.cu.2510":[{"usertag":"valid","field":0,"alg":0,"target":3500.0,"qty":2.0,"action":0}]
+	}}})json";
+	ASSERT_TRUE(r81::write_file(r81::stra_data_file("r81_cta_valid_condition"), validJson));
+	validCtx->on_init();
+	ASSERT_EQ(validCtx->condition_count("SHFE.cu.2510"), 1u);
+	const CondEntrust* recovered = validCtx->first_condition("SHFE.cu.2510");
+	ASSERT_NE(recovered, nullptr);
+	EXPECT_STREQ(recovered->_code, "SHFE.cu.2510");
+	EXPECT_STREQ(recovered->_usertag, "valid");
+	EXPECT_EQ(recovered->_field, WCF_NEWPRICE);
+	EXPECT_EQ(recovered->_alg, WCT_Equal);
+	EXPECT_DOUBLE_EQ(recovered->_target, 3500.0);
+	EXPECT_DOUBLE_EQ(recovered->_qty, 2.0);
+	EXPECT_EQ(recovered->_action, COND_ACTION_OL);
+	feed(*validCtx, "SHFE.cu.2510", 3500.0);
+	EXPECT_DOUBLE_EQ(validCtx->stra_get_position("SHFE.cu.2510"), 2.0);
+	feed(*validCtx, "SHFE.cu.2510", 3500.0);
+	EXPECT_DOUBLE_EQ(validCtx->stra_get_position("SHFE.cu.2510"), 2.0);
+	EXPECT_EQ(validCtx->cond_fires, 1u);
+	EXPECT_EQ(validCtx->last_cond_code, "SHFE.cu.2510");
+}
+
 // 覆盖 CtaStraBaseCtx.cpp:937-1016 on_schedule（第 20 次统计、脏用户数据落盘、条件单落盘）
 TEST_F(R81CtaTest, ScheduleTwentiethEmitPersistsUserDataAndConditions)
 {
@@ -378,7 +457,8 @@ TEST_F(R81CtaTest, ExitConditionsAndPositionAccountingBranches)
     feed(*ctx, "SHFE.ag.2512", 3600.0);
     EXPECT_DOUBLE_EQ(ctx->stra_get_position("SHFE.ag.2512"), 0.0);
     EXPECT_DOUBLE_EQ(ctx->stra_get_position_profit("SHFE.ag.2512"), 0.0);
-    EXPECT_DOUBLE_EQ(ctx->stra_get_fund_data(1), 3740.0);
+    // fund_data(1) is cumulative realized PnL across rb/cu/au and ag, not ag alone.
+    EXPECT_DOUBLE_EQ(ctx->stra_get_fund_data(1), 13620.0);
 
     // 多头平仓后反手开空（覆盖剩余手数反向建仓）
     ctx->stra_set_position("SHFE.rb.2510", -1.0, "REV");

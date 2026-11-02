@@ -234,6 +234,25 @@ protected:
 		return s;
 	}
 
+	void expectBlockedStart(const std::string& cfg, const std::string& id)
+	{
+		WtDtRunner runner;
+		register_parser_callbacks(rec_evt, rec_sub);
+		evt_hits().clear();
+		sub_hits().clear();
+		ASSERT_TRUE(runner.createExtParser(id.c_str()));
+		ASSERT_EQ(1U, evt_hits().size());
+		ASSERT_EQ(EVENT_PARSER_INIT, evt_hits()[0]._evt);
+
+		runner.initialize(cfg.c_str(), _logCfg.c_str(), _dir.string().c_str(), false, false);
+		const std::string afterId = id + "_after_init";
+		EXPECT_FALSE(runner.createExtParser(afterId.c_str()));
+		runner.start(true, true);
+		ASSERT_EQ(1U, evt_hits().size());
+		EXPECT_EQ(EVENT_PARSER_INIT, evt_hits()[0]._evt);
+		register_parser_callbacks(NULL, NULL);
+	}
+
 	fs::path			_dir;
 	std::string			_logCfg;
 	std::string			_absentMod;
@@ -352,10 +371,9 @@ TEST_F(R22RunnerInitTest, ActiveShmCasterFailureBlocksInitializationAndStart)
 	ASSERT_EQ(1U, evt_hits().size());
 	EXPECT_EQ(EVENT_PARSER_INIT, evt_hits()[0]._evt);
 
-	// No writer section is intentional: a failed required caster must return
-	// before DataManager::init (which dereferences that section) or parser startup.
+	// Keep writer structurally valid so this reaches the failed-caster branch.
 	std::string cfg = "{\"basefiles\":{},\"allday\":true,\"shmcaster\":{\"active\":true,\"path\":\"";
-	cfg += shmDir.string() + "\"}}";
+	cfg += shmDir.string() + "\"},\"writer\":{\"module\":\"" + _absentMod + "\"}}";
 	runner.initialize(cfg.c_str(), _logCfg.c_str(), _dir.string().c_str(), false, false);
 	EXPECT_FALSE(runner.createExtParser("r22_shm_fail_after_init"));
 	runner.start(true, true);
@@ -415,7 +433,7 @@ TEST_F(R22RunnerInitTest, IndexSectionWithAbsentFileIsReportedAndDoesNotBreakBas
 	EXPECT_EQ(refCodes({"comm_a.json"}, {"ct_a.json"}), got);
 }
 
-TEST_F(R22RunnerInitTest, ParsersAsInlineArrayRegistersActiveEntriesOnly)
+TEST_F(R22RunnerInitTest, ActiveParserModuleFailureBlocksStartup)
 {
 	WtDtRunner runner;
 	std::string cfg = cfgHead(true);
@@ -426,16 +444,14 @@ TEST_F(R22RunnerInitTest, ParsersAsInlineArrayRegistersActiveEntriesOnly)
 	cfg += "]}";
 	runner.initialize(cfg.c_str(), _logCfg.c_str(), _dir.string().c_str(), false, false);
 
-	// initParsers 即使在缺失模块时初始化失败，仍会把活跃条目的 ID 加入 registry。
-	// 未配置的 ID 首次创建成功，同一 ID 再创建必须因重复而失败。
-	ASSERT_TRUE(runner.createExtParser("r22_never_used"));
+	// 任一 active parser 初始化失败即按现有合同阻塞 runner；失败候选不登记，
+	// 也不会继续创建后续配置项或接受运行时 parser。
 	EXPECT_FALSE(runner.createExtParser("r22_never_used"));
-	// 配置中已登记的显式 ID 和自动 ID 也必须拒绝重复创建。
 	EXPECT_FALSE(runner.createExtParser("r22_p2"));
 	EXPECT_FALSE(runner.createExtParser("auto_parser_1000"));
 }
 
-TEST_F(R22RunnerInitTest, ParsersAsStringPathToExistingFileIsExpanded)
+TEST_F(R22RunnerInitTest, ExistingParserFileActiveModuleFailureBlocksStartup)
 {
 	const char* body = R"({"parsers":[
 		{"active":true,"id":"r22_from_file","module":"r22_absent_writer"}
@@ -447,10 +463,8 @@ TEST_F(R22RunnerInitTest, ParsersAsStringPathToExistingFileIsExpanded)
 	cfg += ",\"parsers\":\"" + pathOf("parsers.json") + "\"}";
 	runner.initialize(cfg.c_str(), _logCfg.c_str(), _dir.string().c_str(), false, false);
 
-	// 唯一且未配置的 ID 首次创建成功，第二次创建必须失败。
-	ASSERT_TRUE(runner.createExtParser("r22_file_control"));
+	// 已存在的 parser 文件被读取；其 active 模块初始化失败后 runner fail closed。
 	EXPECT_FALSE(runner.createExtParser("r22_file_control"));
-	// 文件存在，且 initParsers 即使无法加载模块也会登记活跃条目的 ID。
 	EXPECT_FALSE(runner.createExtParser("r22_from_file"));
 }
 
@@ -475,43 +489,53 @@ TEST_F(R22RunnerInitTest, ParsersAsStringPathToMissingFileIsSkipped)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 崩溃路径：整条 DISABLED_，触发条件写在这里，缺陷登记见 bugs/R22_dtporter.md
-TEST_F(R22RunnerInitTest, DISABLED_basefiles_section_missing_derefs_null_section)
+// Invalid config must fail closed before operational initialization side effects.
+TEST_F(R22RunnerInitTest, MissingOrWrongRequiredConfigurationBlocksStart)
 {
-	// 触发条件：合法 json，但完全没有 basefiles 段 ->
-	//   WtDtRunner.cpp:106 config->get("basefiles") 返回 NULL，
-	//   :107 cfgBF->get("session") 直接对 NULL 取成员 -> SIGSEGV。
-	WtDtRunner runner;
-	const char* cfg = "{\"allday\":true,\"writer\":{\"module\":\"r22_absent_writer\"}}";
-	runner.initialize(cfg, _logCfg.c_str(), _dir.string().c_str(), false, false);
-	FAIL() << "unreachable: 上一行已经段错误";
-}
+	std::vector<std::string> invalidConfigs;
+	invalidConfigs.emplace_back("{\"allday\":true,\"writer\":{\"module\":\"" + _absentMod + "\"}}");
+	invalidConfigs.emplace_back("{\"basefiles\":[],\"allday\":true,\"writer\":{}}");
+	invalidConfigs.emplace_back("{\"basefiles\":{\"session\":7},\"allday\":true,\"writer\":{}}");
+	invalidConfigs.emplace_back("{\"basefiles\":{},\"allday\":true}");
+	invalidConfigs.emplace_back("{\"basefiles\":{},\"allday\":true,\"writer\":[]}");
+	invalidConfigs.emplace_back("{\"basefiles\":{},\"allday\":true,\"writer\":{\"module\":7}}");
+	invalidConfigs.emplace_back("{\"basefiles\":{},\"allday\":true,\"writer\":{},\"parsers\":false}");
 
-TEST_F(R22RunnerInitTest, DISABLED_writer_section_missing_derefs_null_params)
-{
-	// 触发条件：basefiles 齐全、allday 任意，但没有 writer 段 ->
-	//   WtDtRunner.cpp:199 config->get("writer") 返回 NULL，
-	//   WtDtCore/DataManager.cpp::init 第一句 params->getCString("module") 解引用 NULL。
-	WtDtRunner runner;
-	std::string cfg = "{";
-	cfg += "\"basefiles\":{\"session\":\"" + pathOf("sessions.json") + "\",";
-	cfg += "\"contract\":\"" + pathOf("ct_a.json") + "\"";
-	cfg += "},\"allday\":true}";
-	runner.initialize(cfg.c_str(), _dir.string().c_str(), _dir.string().c_str(), false, false);
-	FAIL() << "unreachable: 上一行已经段错误";
-}
-
-TEST_F(R22RunnerInitTest, DISABLED_parsers_file_without_parsers_key_derefs_null)
-{
-	// 触发条件：parsers 指向一个「存在、能解析、但不含 parsers 键」的 json 文件 ->
-	//   WtDtRunner.cpp:233 initParsers(var->get("parsers")) 传入 NULL，
-	//   :264 cfg->size() 解引用 NULL。
 	write_text(_dir / "parsers_naked.json", R"({"somethingelse":1})");
+	std::string missingParserArray = "{\"basefiles\":{},\"allday\":true,\"writer\":{},\"parsers\":\"";
+	missingParserArray += pathOf("parsers_naked.json") + "\"}";
+	invalidConfigs.emplace_back(missingParserArray);
+
+	write_text(_dir / "parsers_wrong_type.json", R"({"parsers":{}})");
+	std::string wrongParserArray = "{\"basefiles\":{},\"allday\":true,\"writer\":{},\"parsers\":\"";
+	wrongParserArray += pathOf("parsers_wrong_type.json") + "\"}";
+	invalidConfigs.emplace_back(wrongParserArray);
+
+	invalidConfigs.emplace_back("{\"basefiles\":{},\"allday\":true,\"writer\":{},\"parsers\":[1]}");
+
+	for (size_t idx = 0; idx < invalidConfigs.size(); ++idx)
+	{
+		SCOPED_TRACE("invalid config index " + std::to_string(idx));
+		expectBlockedStart(invalidConfigs[idx], "r22_invalid_" + std::to_string(idx));
+	}
+}
+
+TEST_F(R22RunnerInitTest, StructurallyValidConfigWithUnavailableWriterStillAllowsParserStart)
+{
 	WtDtRunner runner;
-	std::string cfg = cfgHead(true);
-	cfg += ",\"parsers\":\"" + pathOf("parsers_naked.json") + "\"}";
+	register_parser_callbacks(rec_evt, rec_sub);
+	evt_hits().clear();
+	ASSERT_TRUE(runner.createExtParser("r22_valid_start"));
+	ASSERT_EQ(1U, evt_hits().size());
+	EXPECT_EQ(EVENT_PARSER_INIT, evt_hits()[0]._evt);
+
+	std::string cfg = cfgHead(true) + ",\"parsers\":[]}";
 	runner.initialize(cfg.c_str(), _logCfg.c_str(), _dir.string().c_str(), false, false);
-	FAIL() << "unreachable: 上一行已经段错误";
+	runner.start(true, true);
+
+	ASSERT_EQ(2U, evt_hits().size());
+	EXPECT_EQ(EVENT_PARSER_CONNECT, evt_hits()[1]._evt);
+	EXPECT_EQ("r22_valid_start", evt_hits()[1]._id);
 }
 
 TEST_F(R22RunnerInitTest, DISABLED_start_sync_branch_never_returns)

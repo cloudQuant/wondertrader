@@ -183,8 +183,8 @@ TEST(ParserCTPMiniFactory, lifecycle_calls_without_api_are_safe)
 	ParserCTPMini parser;
 	parser.registerSpi(nullptr);
 
-	// m_pUserAPI 由构造函数初始化为 NULL，connect/disconnect 都只在非空时才解引用
-	EXPECT_TRUE(parser.connect());
+	// 没有 API 时不会发出连接命令，返回值必须报告未发送。
+	EXPECT_FALSE(parser.connect());
 	EXPECT_TRUE(parser.disconnect());
 	EXPECT_NO_THROW(parser.release());
 	EXPECT_FALSE(parser.isConnected());
@@ -253,6 +253,7 @@ TEST_F(ParserCTPMiniTest, invalid_prices_become_zero)
 	d.OpenPrice = FLT_MAX;
 	d.HighestPrice = DBL_MAX;
 	d.LowestPrice = FLT_MAX;
+	d.AskPrice1 = DBL_MAX;
 
 	parser.OnRtnDepthMarketData(&d);
 

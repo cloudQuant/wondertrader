@@ -65,11 +65,13 @@ TEST_F(R74WriterResidualTest, R74WriterMinPriceModeUpdatesMergedBars)
 	EXPECT_DOUBLE_EQ(min5.close, 3620.0);
 }
 
-// ------------------------------------------------------------------ NULL dumper 三循环
+// ------------------------------------------------------------------ NULL dumper 三个 bar 循环
 // WtDataWriter.cpp: dump_bars_via_dumper :1729-1734 / :1755-1760 / :1789-1794
 TEST_F(R74WriterResidualTest, R74WriterNullDumperIsSkippedInAllBarLoops)
 {
-	R23Writer* w = make_writer();
+	// 此用例只验证 d1/m1/m5 bar 回调。tick dumper 的 null 处理属于另一条路径，
+	// disabletick 让收盘任务跳过 tick dumper 分发，同时仍执行 bar dumper 三循环。
+	R23Writer* w = make_writer("\"disabletick\":true");
 	ASSERT_TRUE(w != NULL);
 
 	FakeDumper good;
@@ -88,7 +90,7 @@ TEST_F(R74WriterResidualTest, R74WriterNullDumperIsSkippedInAllBarLoops)
 	EXPECT_EQ(good.bar_count_of("d1"), 1u);
 	EXPECT_EQ(good.bar_count_of("m1"), 1u);
 	EXPECT_EQ(good.bar_count_of("m5"), 1u);
-	EXPECT_EQ(good.tick_calls(), 1u);
+	EXPECT_EQ(good.tick_calls(), 0u);
 }
 
 // ------------------------------------------------------------------ 无 tick 的收盘作业

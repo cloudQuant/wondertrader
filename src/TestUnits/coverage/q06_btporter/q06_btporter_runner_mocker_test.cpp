@@ -220,6 +220,9 @@ namespace {
 	uint32_t g_load_date = 0;
 	uint32_t g_fnl = 0, g_raw = 0, g_fct = 0, g_tick = 0;
 	uint32_t g_feeder_bars = 0, g_feeder_fcts = 0, g_feeder_ticks = 0;
+	void* g_feeder_bars_obj = NULL;
+	WTSBarStruct* g_feeder_bars_ptr = NULL;
+	WTSBarStruct g_loader_bar = {};
 	bool g_ret = true;
 
 	bool fnl_loader(const char* stdCode, const char* period)
@@ -242,8 +245,25 @@ namespace {
 		g_tick++; g_load_code = stdCode; g_load_date = uDate;
 		return g_ret;
 	}
+	bool fnl_loader_feeds_bars(const char* stdCode, const char* period)
+	{
+		g_fnl++; g_load_code = stdCode; g_load_period = period;
+		getRunner().feedRawBars(&g_loader_bar, 1);
+		return g_ret;
+	}
+	bool raw_loader_feeds_bars(const char* stdCode, const char* period)
+	{
+		g_raw++; g_load_code = stdCode; g_load_period = period;
+		getRunner().feedRawBars(&g_loader_bar, 1);
+		return g_ret;
+	}
 
-	void bars_feeder(void* /*obj*/, WTSBarStruct* /*bars*/, uint32_t count) { g_feeder_bars = count; }
+	void bars_feeder(void* obj, WTSBarStruct* bars, uint32_t count)
+	{
+		g_feeder_bars = count;
+		g_feeder_bars_obj = obj;
+		g_feeder_bars_ptr = bars;
+	}
 	void fct_feeder(void* /*obj*/, const char* /*code*/, uint32_t* /*d*/, double* /*f*/, uint32_t count) { g_feeder_fcts = count; }
 	void tick_feeder(void* /*obj*/, WTSTickStruct* /*t*/, uint32_t count) { g_feeder_ticks = count; }
 
@@ -255,6 +275,9 @@ namespace {
 			g.clear();
 			g_fnl = g_raw = g_fct = g_tick = 0;
 			g_feeder_bars = g_feeder_fcts = g_feeder_ticks = 0;
+			g_feeder_bars_obj = NULL;
+			g_feeder_bars_ptr = NULL;
+			memset(&g_loader_bar, 0, sizeof(g_loader_bar));
 			g_load_code.clear();
 			g_load_period.clear();
 			g_ret = true;
@@ -498,6 +521,52 @@ TEST_F(Q06BtRunner, FeedHelpersUseCachedFeeders)
 	EXPECT_EQ(g_feeder_fcts, 2U);
 }
 
+TEST_F(Q06BtRunner, FeedRawBarsWorksWithRawOnlyAndRawPlusFinalLoaders)
+{
+	WtBtRunner& r = getRunner();
+	int obj = 17;
+	g_loader_bar.close = 123.45;
+
+	r.registerExtDataLoader(NULL, raw_loader_feeds_bars, NULL, NULL, false);
+	ASSERT_TRUE(r.loadRawHisBars(&obj, "SSE.600000", KP_DAY, bars_feeder));
+	EXPECT_EQ(g_raw, 1U);
+	EXPECT_EQ(g_fnl, 0U);
+	EXPECT_EQ(g_feeder_bars, 1U);
+	EXPECT_EQ(g_feeder_bars_obj, &obj);
+	ASSERT_EQ(g_feeder_bars_ptr, &g_loader_bar);
+	EXPECT_DOUBLE_EQ(g_feeder_bars_ptr->close, 123.45);
+
+	r.registerExtDataLoader(fnl_loader_feeds_bars, raw_loader_feeds_bars, NULL, NULL, false);
+	ASSERT_TRUE(r.loadRawHisBars(&obj, "SSE.600000", KP_DAY, bars_feeder));
+	EXPECT_EQ(g_raw, 2U);
+	EXPECT_EQ(g_fnl, 0U);
+	EXPECT_EQ(g_feeder_bars, 1U);
+	ASSERT_TRUE(r.loadFinalHisBars(&obj, "SSE.600000", KP_DAY, bars_feeder));
+	EXPECT_EQ(g_raw, 2U);
+	EXPECT_EQ(g_fnl, 1U);
+	EXPECT_EQ(g_feeder_bars, 1U);
+	EXPECT_EQ(g_feeder_bars_obj, &obj);
+	EXPECT_EQ(g_feeder_bars_ptr, &g_loader_bar);
+}
+
+TEST_F(Q06BtRunner, FeedRawBarsWithNullFeederAndWithoutLoaderReturnsSafely)
+{
+	WtBtRunner& r = getRunner();
+	int obj = 23;
+	r.registerExtDataLoader(NULL, raw_loader_feeds_bars, NULL, NULL, false);
+
+	ASSERT_TRUE(r.loadRawHisBars(&obj, "SSE.600000", KP_DAY, NULL));
+	EXPECT_EQ(g_raw, 1U);
+	EXPECT_EQ(g_fnl, 0U);
+	EXPECT_EQ(g_feeder_bars, 0U);
+
+	r.registerExtDataLoader(NULL, NULL, NULL, NULL, false);
+	WTSBarStruct bar;
+	memset(&bar, 0, sizeof(bar));
+	r.feedRawBars(&bar, 1);
+	EXPECT_EQ(g_feeder_bars, 0U);
+}
+
 TEST(Q06BtRunnerNoLoader, AllLoadAndFeedPathsRefuse)
 {
 	WtBtRunner& r = getRunner();
@@ -527,6 +596,16 @@ TEST(Q06BtRunnerNoLoader, AllLoadAndFeedPathsRefuse)
 	r.on_schedule_event(20240601, 93000);
 	r.on_backtest_end();
 	SUCCEED();
+}
+
+TEST(Q06BtRunnerNoLoader, FeedRawBarsWithoutLoadedFeederReturnsSafely)
+{
+	WtBtRunner runner;
+	runner.registerExtDataLoader(NULL, raw_loader, NULL, NULL, false);
+
+	WTSBarStruct bar;
+	memset(&bar, 0, sizeof(bar));
+	runner.feedRawBars(&bar, 1);
 }
 
 /*

@@ -17,16 +17,19 @@
  * initCtaMocker/initSelMocker 首次创建、stop 早退；R9 覆盖 mocker 接线与
  * run/stop 线程面。本文件只取上述未覆盖支，不重复这些行段。
  *
- * 堆上 new、永不 delete（BUG-R46-001：_hft_mocker/_exec_mocker/_worker/_cfg 未初始化），
- * 因此不调用 release()/run()/isAutoTrans()/hft_mocker() 之外的未初始化槽位。
- * 临时目录按 pid 隔离，用例末尾 remove_all。
+ * 多数用例沿用堆上 new 而不 delete；exec 正例在 config_v2 成功后显式 release 清理插件，
+ * 只断言配置合同，不覆盖其它生命周期行为。临时目录按 pid 隔离，用例末尾 remove_all。
  */
 #include <gtest/gtest.h>
 
 #include <cstring>
 #include <filesystem>
 #include <string>
+#include <vector>
 
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#endif
 #include <unistd.h>
 
 #include "WtBtCore/WtHelper.h"
@@ -67,7 +70,49 @@ namespace {
 
 	std::string replayer_cfg(const std::string& dir)
 	{
-		return "\"replayer\":{\"mode\":\"none\",\"basefiles\":{},\"path\":\"" + dir + "\"}";
+		return "\"replayer\":{\"mode\":\"none\",\"basefiles\":{},\"path\":\"" + dir +
+			"\",\"stime\":20240102000000,\"etime\":20240103000000}";
+	}
+
+	std::filesystem::path executable_dir()
+	{
+#ifdef __APPLE__
+		uint32_t size = 0;
+		_NSGetExecutablePath(nullptr, &size);
+		std::vector<char> path(size + 1, 0);
+		if (_NSGetExecutablePath(path.data(), &size) != 0)
+			return std::filesystem::current_path();
+		return std::filesystem::path(path.data()).parent_path();
+#else
+		char path[4096] = { 0 };
+		const ssize_t size = ::readlink("/proc/self/exe", path, sizeof(path) - 1);
+		return size <= 0 ? std::filesystem::current_path()
+			: std::filesystem::path(std::string(path, static_cast<size_t>(size))).parent_path();
+#endif
+	}
+
+	std::string exec_valid_plugin_path()
+	{
+#ifdef __APPLE__
+		const char* suffix = ".dylib";
+#else
+		const char* suffix = ".so";
+#endif
+		std::filesystem::path dir = executable_dir();
+		for (int depth = 0; depth != 8 && !dir.empty(); ++depth)
+		{
+			const std::filesystem::path candidates[] = {
+				dir / "exec_v2_plugins" / (std::string("valid") + suffix),
+				dir / "coverage" / "exec_v2_plugins" / (std::string("valid") + suffix),
+				dir / "TestUnits" / "coverage" / "exec_v2_plugins" / (std::string("valid") + suffix),
+				dir / "src" / "TestUnits" / "coverage" / "exec_v2_plugins" / (std::string("valid") + suffix)
+			};
+			for (const std::filesystem::path& candidate : candidates)
+				if (std::filesystem::exists(candidate))
+					return candidate.string();
+			dir = dir.parent_path();
+		}
+		return std::string();
 	}
 
 	/* ---- IHisDataLoader 替身 ---- */
@@ -111,10 +156,9 @@ namespace {
 
 } // namespace
 
-/* WtBtRunner.cpp:480-486 + :465 + :467：env.mocker="hft" 时按 hft 段建 ExpHftMocker
- * 并注册 sink；module 为空时 init_hft_factory 在 DLLHelper 处返回 false，但槽位
- * 已建立。notifier 段给 active=false，只走 EventNotifier::init 的早退。 */
-TEST(R69BtRunnerConfig, HftModeCreatesHftMockerSlot)
+/* WtBtRunner.cpp:480-486：有效回放范围使配置进入 HFT factory；缺少 module
+ * 时 factory 失败且 fail-closed，不应留下半初始化 mocker。 */
+TEST(R69BtRunnerConfig, HftModeFactoryFailureLeavesMockerEmpty)
 {
 	const std::string dir = prepare_dir();
 	ASSERT_FALSE(dir.empty());
@@ -128,9 +172,11 @@ TEST(R69BtRunnerConfig, HftModeCreatesHftMockerSlot)
 		"\"notifier\":{\"active\":false},"
 		"\"hft\":{\"name\":\"r69_bt_hft\",\"module\":\"\"}}";
 
-	r->config(cfg.c_str(), false);
+	std::string error;
+	EXPECT_FALSE(r->config_v2(cfg.c_str(), false, &error));
+	EXPECT_NE(error.find("strategy factory failed"), std::string::npos) << error;
 
-	EXPECT_NE(r->hft_mocker(), nullptr);
+	EXPECT_EQ(r->hft_mocker(), nullptr);
 	EXPECT_EQ(r->cta_mocker(), nullptr);
 	EXPECT_EQ(r->sel_mocker(), nullptr);
 	EXPECT_FALSE(r->isAsync());
@@ -138,9 +184,9 @@ TEST(R69BtRunnerConfig, HftModeCreatesHftMockerSlot)
 	clean_dir(dir);
 }
 
-/* WtBtRunner.cpp:488-499：env.mocker="sel" + task 子段；register_task 用 "d" 周期
- * 与 CHINA/TRADING 模板（与 R46 的 initSelMocker 同口径，但这里走 config 的 task 支）。 */
-TEST(R69BtRunnerConfig, SelModeWithTaskRegistersSchedule)
+/* WtBtRunner.cpp:488-499：有效回放范围使配置经过 SEL task 参数校验；缺少 module
+ * 时 factory 失败且 fail-closed，不应留下 mocker 或注册 task。 */
+TEST(R69BtRunnerConfig, SelModeWithTaskFactoryFailureLeavesMockerEmpty)
 {
 	const std::string dir = prepare_dir();
 	ASSERT_FALSE(dir.empty());
@@ -155,19 +201,47 @@ TEST(R69BtRunnerConfig, SelModeWithTaskRegistersSchedule)
 		"\"task\":{\"date\":20240102,\"time\":93000,\"period\":\"d\","
 		"\"trdtpl\":\"CHINA\",\"session\":\"TRADING\"}}}";
 
-	r->config(cfg.c_str(), false);
+	std::string error;
+	EXPECT_FALSE(r->config_v2(cfg.c_str(), false, &error));
+	EXPECT_NE(error.find("strategy factory failed"), std::string::npos) << error;
 
-	EXPECT_NE(r->sel_mocker(), nullptr);
+	EXPECT_EQ(r->sel_mocker(), nullptr);
 	EXPECT_EQ(r->cta_mocker(), nullptr);
 	EXPECT_FALSE(r->isAsync());
 
 	clean_dir(dir);
 }
 
-/* WtBtRunner.cpp:500-506：env.mocker="exec" 时建 ExecMocker；matcher 段缺省时
- * MatchEngine::init(NULL) 直接返回，module 为空时 DLLHelper 返回 NULL，均不抛。 */
-TEST(R69BtRunnerConfig, ExecModeCreatesExecMockerSlot)
+TEST(R69BtRunnerConfig, SelModeRejectsOversizedTaskBeforeCreatingMocker)
 {
+	const std::string dir = prepare_dir();
+	ASSERT_FALSE(dir.empty());
+
+	WtBtRunner* r = new_runner(dir);
+	ASSERT_NE(r, nullptr);
+	const std::string oversizedTemplate(16, 'T');
+	const std::string cfg =
+		"{\"replayer\":{\"mode\":\"none\",\"basefiles\":{},\"path\":\"" + dir + "\","
+		"\"stime\":\"202401020930\",\"etime\":\"202401021000\"},"
+		"\"env\":{\"mocker\":\"sel\"},"
+		"\"sel\":{\"name\":\"r69_bad_sel_task\",\"module\":\"\","
+		"\"task\":{\"date\":20240102,\"time\":93000,\"period\":\"d\","
+		"\"trdtpl\":\"" + oversizedTemplate + "\",\"session\":\"TRADING\"}}}";
+	std::string error;
+	EXPECT_FALSE(r->config_v2(cfg.c_str(), false, &error));
+	EXPECT_NE(error.find("invalid SEL task parameters"), std::string::npos) << error;
+	EXPECT_EQ(r->sel_mocker(), nullptr);
+
+	clean_dir(dir);
+}
+
+/* 有效的执行插件应使 exec 配置通过公开 config_v2 契约；这里验证初始化成功，
+ * 不通过测试专用 accessor 检查 ExecMocker 内部槽位。 */
+TEST(R69BtRunnerConfig, ExecModeValidPluginConfigurationSucceeds)
+{
+	const std::string module = exec_valid_plugin_path();
+	ASSERT_FALSE(module.empty()) << "missing coverage execution-plugin fixture valid";
+
 	const std::string dir = prepare_dir();
 	ASSERT_FALSE(dir.empty());
 
@@ -177,13 +251,16 @@ TEST(R69BtRunnerConfig, ExecModeCreatesExecMockerSlot)
 	const std::string cfg =
 		"{" + replayer_cfg(dir) + ","
 		"\"env\":{\"mocker\":\"exec\"},"
-		"\"exec\":{\"name\":\"r69_bt_exec\",\"module\":\"\"}}";
+		"\"exec\":{\"name\":\"r69_bt_exec\",\"module\":\"" + module +
+		"\",\"code\":\"SHFE.rb2510\",\"period\":\"m1\",\"volunit\":0,\"volmode\":0,"
+		"\"executer\":{\"name\":\"R69Unit\",\"id\":\"r69_exec\",\"params\":{}},"
+		"\"matcher\":{\"cancelrate\":0}}}";
 
-	r->config(cfg.c_str(), false);
+	std::string error;
+	EXPECT_TRUE(r->config_v2(cfg.c_str(), false, &error)) << error;
 
-	EXPECT_EQ(r->cta_mocker(), nullptr);
-	EXPECT_EQ(r->sel_mocker(), nullptr);
-	EXPECT_FALSE(r->isAsync());
+	// Explicitly close the plugin after the public configuration assertion.
+	r->release();
 
 	clean_dir(dir);
 }
@@ -248,6 +325,11 @@ TEST(R69BtRunnerConfig, IncrementalCtaAndReplacedSelMocker)
 	const uint32_t selId1 = r->initSelMocker("r69_bt_sel_rep", 20240102, 93000, "d");
 	EXPECT_NE(selId1, 0u);
 	ASSERT_NE(r->sel_mocker(), nullptr);
+	auto* originalSelMocker = r->sel_mocker();
+	const std::string oversizedTemplate(16, 'T');
+	EXPECT_EQ(0u, r->initSelMocker("r69_bt_sel_rep", 20240104, 93000, "d", oversizedTemplate.c_str()));
+	EXPECT_EQ(0u, r->initSelMocker("r69_bt_sel_rep", 20240104, 93000, nullptr));
+	EXPECT_EQ(originalSelMocker, r->sel_mocker()) << "invalid replacement must keep the previous owner";
 
 	const uint32_t selId2 = r->initSelMocker("r69_bt_sel_rep", 20240103, 93000, "d");
 	EXPECT_NE(selId2, 0u);

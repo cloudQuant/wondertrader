@@ -196,22 +196,25 @@ TEST_F(R20ExecMocker, DISABLED_SellDecrementsUndone)
 	m.handle_session_end(20240103);
 }
 
-// 暂停：未成功 init 的 fixture 无法安全进入 tick/撤单路径，SIGSEGV 发生在 matcher 调用处。
-// 保留期望与首撤对照；需换成成功初始化的 executer fixture 后再启用验证。
-TEST_F(R20ExecMocker, DISABLED_CancelByIdDoesNotRestoreUndoneTwice)
+// A single tick primes MatchEngine's cache. The order is then cancelled without
+// feeding another tick, so no pending-order callback reaches the unregistered sink.
+TEST_F(R20ExecMocker, CancelByIdDoesNotRestoreUndoneTwice)
 {
 	ExecMocker m(&_rp);
 	WTSTickData* t1 = make_exec_tick(kCode, 3800.0, 3799.0, 3801.0, 5, 7, 20240103, 142500000);
+	ASSERT_NE(nullptr, t1);
 	m.handle_tick(kCode, t1, 0);
+	t1->release();
 	OrderIDs rb = m.buy(kCode, 3801.0, 3);
 	ASSERT_EQ(1u, rb.size());
 	EXPECT_DOUBLE_EQ(3.0, m.getUndoneQty(kCode));
 
-	EXPECT_TRUE(m.cancel(rb[0]));			// change=+3 → undone 0（L259-264）
+	EXPECT_TRUE(m.cancel(rb[0]));			// change=+3 → undone 0
 	EXPECT_DOUBLE_EQ(0.0, m.getUndoneQty(kCode));
 
-	// 重复撤单的 bool 返回语义尚未明确；这里只检查撤单账本没有重复归还。
-	m.cancel(rb[0]);
+	// The first cancellation moves the order to its terminal state. A second
+	// request must report no change, so it cannot update undone or cancel totals.
+	EXPECT_FALSE(m.cancel(rb[0]));
 	EXPECT_DOUBLE_EQ(0.0, m.getUndoneQty(kCode));
 
 	m.handle_session_end(20240103);			// 清 _orders，之后撤单查无

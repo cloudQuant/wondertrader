@@ -142,7 +142,7 @@ TEST_F(R100WriterADTest, R100WriterADProcFlag2ZeroFillAndDayDumper)
 	write_or_fail(t3, 2);
 
 	BarCacheItem item;
-	ASSERT_TRUE(read_bar_item(path_of("cache_d1.dmb"), "EXC2", "rb02", item));
+	ASSERT_TRUE(read_bar_item(base + "/cache_d1.dmb", "EXC2", "rb02", item));
 	EXPECT_EQ(item._bar.date, 20230105u);
 	EXPECT_DOUBLE_EQ(item._bar.close, 3920.0);
 	EXPECT_DOUBLE_EQ(item._bar.open, 3920.0);

@@ -63,7 +63,7 @@ class R151ReplayerPaths : public r151::ReplayFixture
 TEST_F(R151ReplayerPaths, AutoMainKeyFromNonMainSlice)
 {
 	ASSERT_TRUE(r151::write_bars_csv(_base, std::string(kRb) + "_d", five_days(10.0), false));
-	ASSERT_TRUE(r151::init_replay(_rp, _root, _base, 202001020930ull, 202001081500ull, false));
+	ASSERT_TRUE(r151::init_replay(_rp, _root, _base, 202001030930ull, 202001081500ull, false));
 
 	r151::Sink sink;
 	_rp.register_sink(&sink, "r151_auto_main");
@@ -74,19 +74,22 @@ TEST_F(R151ReplayerPaths, AutoMainKeyFromNonMainSlice)
 	WTSKlineSlice* slice = _rp.get_kline_slice(kRb, "d", 10);
 	ASSERT_NE(nullptr, slice);
 	EXPECT_GT(slice->size(), 0u);
+	EXPECT_EQ(20200102u, slice->at(-1)->date);
 	slice->release();
 
 	_rp.run();
 
 	EXPECT_EQ(1u, sink.done_calls);
 	EXPECT_GE(sink.bar_calls, 1u);
+	ASSERT_FALSE(sink.bar_dates.empty());
+	EXPECT_EQ(20200103u, sink.bar_dates.front());
 }
 
 // 日线 + tick=true（无真实 tick 文件）：simTicks 按开高低收模拟 4 笔 tick
 TEST_F(R151ReplayerPaths, DailyBarsSimulateOhlcTicks)
 {
 	ASSERT_TRUE(r151::write_bars_csv(_base, std::string(kRb) + "_d", five_days(20.0), false));
-	ASSERT_TRUE(r151::init_replay(_rp, _root, _base, 202001020930ull, 202001081500ull, true));
+	ASSERT_TRUE(r151::init_replay(_rp, _root, _base, 202001030930ull, 202001081500ull, true));
 
 	r151::Sink sink;
 	_rp.register_sink(&sink, "r151_daily_sim");
@@ -94,6 +97,7 @@ TEST_F(R151ReplayerPaths, DailyBarsSimulateOhlcTicks)
 	ASSERT_TRUE(_rp.prepare());
 	WTSKlineSlice* slice = _rp.get_kline_slice(kRb, "d", 10, 1, true);
 	ASSERT_NE(nullptr, slice);
+	EXPECT_EQ(20200102u, slice->at(-1)->date);
 	slice->release();
 
 	_rp.run();
@@ -101,12 +105,14 @@ TEST_F(R151ReplayerPaths, DailyBarsSimulateOhlcTicks)
 	// 至少 4 个交易日各 4 笔（首根可能作为历史）
 	EXPECT_GE(sink.tick_codes.size(), 16u);
 	EXPECT_GE(sink.bar_calls, 4u);
+	ASSERT_FALSE(sink.bar_dates.empty());
+	EXPECT_EQ(20200103u, sink.bar_dates.front());
 	ASSERT_FALSE(sink.tick_px_types.empty());
 	for (uint32_t px : sink.tick_px_types)
 		EXPECT_LT(px, 4u);
 }
 
-// 主K线 0102 仅作历史定位bar，实际回放首日 0106 晚于次K线起始 20191231：
+// 主K线 0102 在起点 0103 前已完成，实际回放首日 0106 晚于次K线起始 20191231：
 // simTicks 先把次K线游标从 0103 推进到 0106（L1373-1378）
 TEST_F(R151ReplayerPaths, DailySecondaryBarsCursorCatchesUp)
 {
@@ -116,7 +122,7 @@ TEST_F(R151ReplayerPaths, DailySecondaryBarsCursorCatchesUp)
 		day_bars(mainDates, 4, 30.0), false));
 	ASSERT_TRUE(r151::write_bars_csv(_base, std::string(kCu) + "_d",
 		day_bars(subDates, 6, 60.0), false));
-	ASSERT_TRUE(r151::init_replay(_rp, _root, _base, 202001020930ull, 202001081500ull, true));
+	ASSERT_TRUE(r151::init_replay(_rp, _root, _base, 202001030930ull, 202001081500ull, true));
 
 	r151::Sink sink;
 	_rp.register_sink(&sink, "r151_daily_gap");
@@ -124,11 +130,13 @@ TEST_F(R151ReplayerPaths, DailySecondaryBarsCursorCatchesUp)
 	ASSERT_TRUE(_rp.prepare());
 	WTSKlineSlice* mainSlice = _rp.get_kline_slice(kRb, "d", 10, 1, true);
 	ASSERT_NE(nullptr, mainSlice);
+	EXPECT_EQ(20200102u, mainSlice->at(-1)->date);
 	mainSlice->release();
 
 	// 非主K线：仅缓存，供 simTicks 遍历时补齐游标
 	WTSKlineSlice* subSlice = _rp.get_kline_slice(kCu, "d", 10);
 	ASSERT_NE(nullptr, subSlice);
+	EXPECT_EQ(20200102u, subSlice->at(-1)->date);
 	subSlice->release();
 
 	_rp.run();
@@ -136,6 +144,8 @@ TEST_F(R151ReplayerPaths, DailySecondaryBarsCursorCatchesUp)
 	EXPECT_GE(sink.count_code(kRb), 8u);
 	EXPECT_GE(sink.count_code(kCu), 8u);
 	EXPECT_EQ(1u, sink.done_calls);
+	ASSERT_FALSE(sink.bar_dates.empty());
+	EXPECT_EQ(20200106u, sink.bar_dates.front());
 }
 
 // 分钟主K线 + notifier：BT_STATE 的 KP_Minute1 分支；m5 次K线游标回退

@@ -61,6 +61,15 @@ bool hasString(const std::vector<std::string>& values, const std::string& needle
 
 } // namespace
 
+TEST(R125HftDemo, RejectsNullConfigAndAcceptsValidConfig)
+{
+	WtHftStraDemo demo("r125_hft_null_init_probe");
+	EXPECT_FALSE(demo.init(NULL));
+
+	VarHolder cfg(makeHftCfg(false, 0.0));
+	EXPECT_TRUE(demo.init(cfg.get()));
+}
+
 TEST(R125HftDemo, InitCalcEntryAndOrderExpiry)
 {
 	// L111-123 on_init；L131-211 do_calc 频率控制/微价多空；L221-235 on_tick；

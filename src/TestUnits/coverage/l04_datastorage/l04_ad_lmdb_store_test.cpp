@@ -158,6 +158,8 @@ TEST(L04ADLayout, FlexibleArrayOffsets)
 	RTBarCache* bars = (RTBarCache*)bbuf.data();
 	EXPECT_EQ((const char*)&bars->_items[0] - bbuf.data(), (std::ptrdiff_t)sizeof(RTBlockHeader));
 	EXPECT_EQ((const char*)&bars->_items[1]._bar.open - (const char*)&bars->_items[1]._bar,
+		(std::ptrdiff_t)offsetof(WTSBarStruct, open));
+	EXPECT_EQ((const char*)&bars->_items[1]._bar - (const char*)&bars->_items[1],
 		(std::ptrdiff_t)(16 + 32));
 }
 

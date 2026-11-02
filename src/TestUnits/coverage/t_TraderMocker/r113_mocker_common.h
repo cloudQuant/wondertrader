@@ -11,6 +11,7 @@
 #pragma once
 
 #include <cstdint>
+#include <condition_variable>
 #include <cstring>
 #include <mutex>
 #include <string>
@@ -146,6 +147,17 @@ namespace r113m
 
 		void onRspOrders(const WTSArray* ay) override
 		{
+			{
+				std::unique_lock<std::mutex> lk(_orders_query_gate_mtx);
+				if (_block_next_orders_query)
+				{
+					_block_next_orders_query = false;
+					_orders_query_blocked = true;
+					_orders_query_gate_cv.notify_all();
+					_orders_query_gate_cv.wait(lk, [this]() { return _release_orders_query; });
+				}
+			}
+
 			std::vector<OrderSnap> recs;
 			if (ay != NULL)
 			{
@@ -197,6 +209,28 @@ namespace r113m
 		uint32_t n_orders_query() const { return _orders_query.load(); }
 		uint32_t n_trades_query() const { return _trades_query.load(); }
 		uint32_t n_error() const { return _error.load(); }
+		void block_next_orders_query()
+		{
+			std::lock_guard<std::mutex> lk(_orders_query_gate_mtx);
+			_block_next_orders_query = true;
+			_orders_query_blocked = false;
+			_release_orders_query = false;
+		}
+
+		bool wait_orders_query_blocked(int timeout_ms = 3000)
+		{
+			std::unique_lock<std::mutex> lk(_orders_query_gate_mtx);
+			return _orders_query_gate_cv.wait_for(lk, std::chrono::milliseconds(timeout_ms), [this]() {
+				return _orders_query_blocked;
+			});
+		}
+
+		void unblock_orders_query()
+		{
+			std::lock_guard<std::mutex> lk(_orders_query_gate_mtx);
+			_release_orders_query = true;
+			_orders_query_gate_cv.notify_all();
+		}
 		uint32_t queried_trades() const
 		{
 			std::lock_guard<std::mutex> lk(_mtx);
@@ -296,6 +330,11 @@ namespace r113m
 
 	private:
 		mutable std::mutex _mtx;
+		std::mutex _orders_query_gate_mtx;
+		std::condition_variable _orders_query_gate_cv;
+		bool _block_next_orders_query { false };
+		bool _orders_query_blocked { false };
+		bool _release_orders_query { false };
 		std::atomic<uint32_t> _events{ 0 };
 		std::atomic<uint32_t> _login{ 0 };
 		std::atomic<uint32_t> _entrusts{ 0 };

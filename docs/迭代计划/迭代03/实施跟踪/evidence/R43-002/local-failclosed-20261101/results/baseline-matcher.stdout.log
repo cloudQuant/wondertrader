@@ -1,0 +1,60 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R43MatchEngineFlowTest.emptyBookRejectsWithoutSideEffectsAndLaterQuoteAllowsOrders
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R43MatchEngineFlowTest
+[ RUN      ] R43MatchEngineFlowTest.emptyBookRejectsWithoutSideEffectsAndLaterQuoteAllowsOrders
+src/TestUnits/coverage/n04_btcore_mockers/r43_match_engine_flow_test.cpp:156: Failure
+Value of: engine.buy(code, 10.0, 100, 1).empty()
+  Actual: false
+Expected: true
+
+src/TestUnits/coverage/n04_btcore_mockers/r43_match_engine_flow_test.cpp:157: Failure
+Value of: engine.sell(code, 10.0, 100, 1).empty()
+  Actual: false
+Expected: true
+
+src/TestUnits/coverage/n04_btcore_mockers/r43_match_engine_flow_test.cpp:158: Failure
+Value of: engine.buy(code, 11.0, 100, 1).empty()
+  Actual: false
+Expected: true
+
+src/TestUnits/coverage/n04_btcore_mockers/r43_match_engine_flow_test.cpp:159: Failure
+Value of: engine.sell(code, 9.0, 100, 1).empty()
+  Actual: false
+Expected: true
+
+src/TestUnits/coverage/n04_btcore_mockers/r43_match_engine_flow_test.cpp:160: Failure
+Expected equality of these values:
+  sequence
+    Which is: 0
+  MatchEngineTestAccess::sequence(engine)
+    Which is: 4
+
+src/TestUnits/coverage/n04_btcore_mockers/r43_match_engine_flow_test.cpp:161: Failure
+Value of: engine.get_order_snapshots(code).empty()
+  Actual: false
+Expected: true
+
+src/TestUnits/coverage/n04_btcore_mockers/r43_match_engine_flow_test.cpp:168: Failure
+Expected equality of these values:
+  sequence + 2
+    Which is: 2
+  MatchEngineTestAccess::sequence(engine)
+    Which is: 6
+
+src/TestUnits/coverage/n04_btcore_mockers/r43_match_engine_flow_test.cpp:170: Failure
+Value of: sink.trades.empty()
+  Actual: false
+Expected: true
+
+[  FAILED  ] R43MatchEngineFlowTest.emptyBookRejectsWithoutSideEffectsAndLaterQuoteAllowsOrders (0 ms)
+[----------] 1 test from R43MatchEngineFlowTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R43MatchEngineFlowTest.emptyBookRejectsWithoutSideEffectsAndLaterQuoteAllowsOrders
+
+ 1 FAILED TEST

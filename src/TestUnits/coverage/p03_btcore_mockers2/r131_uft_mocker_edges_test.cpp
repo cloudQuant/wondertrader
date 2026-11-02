@@ -45,7 +45,7 @@ protected:
 		WtHelper::setOutputDir(_out.string().c_str());
 
 		// askqty=1：委托 2 手时单次 tick 只能成交 1 手
-		_loader.add(kRb, 20200102u, 93100000u, 3800.0, 3799.0, 3801.0, 100, 1);
+		_loader.add(kRb, 20200102u, 93200000u, 3800.0, 3799.0, 3801.0, 100, 1);
 
 		WTSVariant* cfg = r111::make_tick_cfg(_root, _base, 202001020932ull, 202001021500ull);
 		ASSERT_TRUE(_rp.init(cfg, nullptr, &_loader));
@@ -67,6 +67,10 @@ protected:
 TEST_F(R131UftOrder, PartialFillKeepsOrderUntilNextTick)
 {
 	UftMocker m(&_rp, "r131_uft_partial");
+	WTSTickData* available = _rp.get_last_tick(kRb);
+	ASSERT_NE(nullptr, available);
+	EXPECT_EQ(93200000u, available->actiontime());
+	available->release();
 
 	OrderIDs ids = m.stra_buy(kRb, 0.0, 2.0, 0);
 	ASSERT_EQ(1u, ids.size());

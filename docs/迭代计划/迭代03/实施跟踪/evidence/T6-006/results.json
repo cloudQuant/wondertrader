@@ -1,0 +1,35 @@
+[
+  {
+    "case": "t6_parserudp_packets.short_and_unknown_frames_are_ignored",
+    "exit": 0,
+    "command": [
+      "/tmp/wt-i03-udp/build/udp_focused",
+      "--gtest_filter=t6_parserudp_packets.short_and_unknown_frames_are_ignored",
+      "--gtest_output=xml:/tmp/wt-i03-udp/short/result.xml"
+    ],
+    "log": "/tmp/wt-i03-udp/short/output.log",
+    "xml": "/tmp/wt-i03-udp/short/result.xml"
+  },
+  {
+    "case": "t6_parserudp_packets.complete_packets_dispatch_aligned_payload_fields",
+    "exit": 0,
+    "command": [
+      "/tmp/wt-i03-udp/build/udp_focused",
+      "--gtest_filter=t6_parserudp_packets.complete_packets_dispatch_aligned_payload_fields",
+      "--gtest_output=xml:/tmp/wt-i03-udp/complete/result.xml"
+    ],
+    "log": "/tmp/wt-i03-udp/complete/output.log",
+    "xml": "/tmp/wt-i03-udp/complete/result.xml"
+  },
+  {
+    "case": "ParserUDPReceiveTest.EmptyBroadcastDatagramRearmsBeforeTheNextValidTick",
+    "exit": 0,
+    "command": [
+      "/tmp/wt-i03-udp/build/udp_focused",
+      "--gtest_filter=ParserUDPReceiveTest.EmptyBroadcastDatagramRearmsBeforeTheNextValidTick",
+      "--gtest_output=xml:/tmp/wt-i03-udp/loopback/result.xml"
+    ],
+    "log": "/tmp/wt-i03-udp/loopback/output.log",
+    "xml": "/tmp/wt-i03-udp/loopback/result.xml"
+  }
+]
