@@ -18340,7 +18340,7 @@
   "id": "T3-015",
   "kind": "items",
   "review_class": "E_NEEDS_USER_DECISION",
-  "post_class": "E",
+  "post_class": "B",
   "current_status": "待验证",
   "tests": {
    "CoverageTests_t_TraderCTPMini::I03S5TraderCTPMini.ValidTradingDayLoginAndNightDatesStayCorrect": {
@@ -18357,6 +18357,11 @@
     "run": "pass",
     "asan": "pass",
     "tsan": "pass"
+   },
+   "CoverageTests_t_TraderCTPMini::I03S5TraderCTPMini.K49InvalidTradingDayRecoversOnNextValidLogin": {
+    "run": "pass",
+    "asan": "pass",
+    "tsan": "pass"
    }
   },
   "fixture": {},
@@ -18364,9 +18369,10 @@
   "external_pending": [
    "CTPMini SDK GetTradingDay 空/无效值与真实登录合同（X，供应商文件或实测）"
   ],
-  "note": "GetTradingDay 失效登录后恢复策略待用户裁定（建议 A=现实现）；真实 CTPMini SDK 合同外部",
-  "matched_tests": 3,
-  "final_status": "阻塞"
+  "note": "K49=A 用户裁定（2026-11-05），补 K49 恢复用例并有变异红控；真实 CTPMini SDK 合同外部",
+  "matched_tests": 4,
+  "final_status": "本地验证通过",
+  "decision": "K49=A（2026-11-05）"
  },
  {
   "id": "BUG-T26-002",

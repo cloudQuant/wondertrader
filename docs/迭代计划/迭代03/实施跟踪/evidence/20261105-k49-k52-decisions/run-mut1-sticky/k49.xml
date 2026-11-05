@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="4" failures="1" disabled="0" errors="0" time="0.006" timestamp="2026-11-05T23:43:43.106" name="AllTests">
+  <testsuite name="I03S5TraderCTPMini" tests="4" failures="1" disabled="0" skipped="0" errors="0" time="0.006" timestamp="2026-11-05T23:43:43.106">
+    <testcase name="ValidTradingDayLoginAndNightDatesStayCorrect" file="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp" line="389" status="run" result="completed" time="0.002" timestamp="2026-11-05T23:43:43.106" classname="I03S5TraderCTPMini" />
+    <testcase name="InvalidTradingDayFailsClosed" file="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp" line="409" status="run" result="completed" time="0.001" timestamp="2026-11-05T23:43:43.109" classname="I03S5TraderCTPMini" />
+    <testcase name="InvalidTradingDayMatrixIsRejected" file="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp" line="425" status="run" result="completed" time="0.001" timestamp="2026-11-05T23:43:43.110" classname="I03S5TraderCTPMini" />
+    <testcase name="K49InvalidTradingDayRecoversOnNextValidLogin" file="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp" line="489" status="run" result="completed" time="0." timestamp="2026-11-05T23:43:43.112" classname="I03S5TraderCTPMini">
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:505&#x0A;Expected equality of these values:&#x0A;  TraderCTPMini::WS_ALLREADY&#x0A;    Which is: 6&#x0A;  trader_.state()&#x0A;    Which is: 3&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:505
+Expected equality of these values:
+  TraderCTPMini::WS_ALLREADY
+    Which is: 6
+  trader_.state()
+    Which is: 3
+]]></failure>
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:506&#x0A;Value of: trader_.isConnected()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:506
+Value of: trader_.isConnected()
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:507&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  sink_.login_ok.load()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:507
+Expected equality of these values:
+  1
+  sink_.login_ok.load()
+    Which is: 0
+]]></failure>
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:508&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  sink_.login_fail.load()&#x0A;    Which is: 2&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:508
+Expected equality of these values:
+  1
+  sink_.login_fail.load()
+    Which is: 2
+]]></failure>
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:509&#x0A;Expected equality of these values:&#x0A;  20260106u&#x0A;    Which is: 20260106&#x0A;  sink_.login_date.load()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:509
+Expected equality of these values:
+  20260106u
+    Which is: 20260106
+  sink_.login_date.load()
+    Which is: 0
+]]></failure>
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:510&#x0A;Expected equality of these values:&#x0A;  20260106u&#x0A;    Which is: 20260106&#x0A;  trader_.tradingDate()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:510
+Expected equality of these values:
+  20260106u
+    Which is: 20260106
+  trader_.tradingDate()
+    Which is: 0
+]]></failure>
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:511&#x0A;Expected equality of these values:&#x0A;  &quot;&quot;&#x0A;  trader_.rawDay()&#x0A;    Which is: &quot;20260106&quot;&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:511
+Expected equality of these values:
+  ""
+  trader_.rawDay()
+    Which is: "20260106"
+]]></failure>
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:514&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  sink_.pushed_orders.load()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:514
+Expected equality of these values:
+  1
+  sink_.pushed_orders.load()
+    Which is: 0
+]]></failure>
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:515&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  sink_.pushed_trades.load()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:515
+Expected equality of these values:
+  1
+  sink_.pushed_trades.load()
+    Which is: 0
+]]></failure>
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:516&#x0A;Expected equality of these values:&#x0A;  20260106u&#x0A;    Which is: 20260106&#x0A;  sink_.last_order_date.load()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:516
+Expected equality of these values:
+  20260106u
+    Which is: 20260106
+  sink_.last_order_date.load()
+    Which is: 0
+]]></failure>
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:517&#x0A;Expected equality of these values:&#x0A;  20260106u&#x0A;    Which is: 20260106&#x0A;  sink_.last_trade_date.load()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:517
+Expected equality of these values:
+  20260106u
+    Which is: 20260106
+  sink_.last_trade_date.load()
+    Which is: 0
+]]></failure>
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:519&#x0A;Expected equality of these values:&#x0A;  20260105u&#x0A;    Which is: 20260105&#x0A;  sink_.last_order_date.load()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:519
+Expected equality of these values:
+  20260105u
+    Which is: 20260105
+  sink_.last_order_date.load()
+    Which is: 0
+]]></failure>
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:520&#x0A;Expected equality of these values:&#x0A;  20260105u&#x0A;    Which is: 20260105&#x0A;  sink_.last_trade_date.load()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:520
+Expected equality of these values:
+  20260105u
+    Which is: 20260105
+  sink_.last_trade_date.load()
+    Which is: 0
+]]></failure>
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:521&#x0A;Expected equality of these values:&#x0A;  0&#x0A;  trader_.queryAccount()&#x0A;    Which is: -1&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:521
+Expected equality of these values:
+  0
+  trader_.queryAccount()
+    Which is: -1
+]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

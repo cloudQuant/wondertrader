@@ -482,6 +482,45 @@ TEST_F(I03S5TraderCTPMini, InvalidTradingDayMatrixIsRejected)
     }
 }
 
+// K49=A（T3-015 恢复策略，2026-11-05 用户裁定）：GetTradingDay 失效导致登录 fail-closed 后，
+// 同一实例在下一次合法登录时自动就绪，不需要人工确认。宿主在 WTE_Connect 时重新 login
+// （TraderAdapter::handleEvent），这里按“断开 → 重连 → login”驱动插件。
+// 失效期间不推送回报、不允许查询；恢复后交易日、诊断串、回报日期与查询都按新的合法交易日。
+TEST_F(I03S5TraderCTPMini, K49InvalidTradingDayRecoversOnNextValidLogin)
+{
+    loginWithTradingDay("2026013X");
+    ASSERT_EQ(TraderCTPMini::WS_LOGINFAILED, trader_.state());
+    ASSERT_EQ(1, sink_.login_fail.load());
+    ASSERT_EQ(0, sink_.login_ok.load());
+    ASSERT_EQ("2026013X", trader_.rawDay());
+    pushOrderAndTrade("10:00:00");
+    EXPECT_EQ(0, sink_.pushed_orders.load());
+    EXPECT_EQ(0, sink_.pushed_trades.load());
+    EXPECT_EQ(-1, trader_.queryAccount());
+
+    trader_.OnFrontDisconnected(0x1001);
+    EXPECT_EQ(TraderCTPMini::WS_NOTLOGIN, trader_.state());
+    trader_.OnFrontConnected();
+    loginWithTradingDay("20260106");   // Tuesday
+    EXPECT_EQ(TraderCTPMini::WS_ALLREADY, trader_.state());
+    EXPECT_TRUE(trader_.isConnected());
+    EXPECT_EQ(1, sink_.login_ok.load());
+    EXPECT_EQ(1, sink_.login_fail.load());
+    EXPECT_EQ(20260106u, sink_.login_date.load());
+    EXPECT_EQ(20260106u, trader_.tradingDate());
+    EXPECT_EQ("", trader_.rawDay());
+
+    pushOrderAndTrade("10:00:00");
+    EXPECT_EQ(1, sink_.pushed_orders.load());
+    EXPECT_EQ(1, sink_.pushed_trades.load());
+    EXPECT_EQ(20260106u, sink_.last_order_date.load());
+    EXPECT_EQ(20260106u, sink_.last_trade_date.load());
+    pushOrderAndTrade("21:05:00");     // 周二夜盘回推前一自然日
+    EXPECT_EQ(20260105u, sink_.last_order_date.load());
+    EXPECT_EQ(20260105u, sink_.last_trade_date.load());
+    EXPECT_EQ(0, trader_.queryAccount());
+}
+
 // T3-006：void connect 的各类失败以 WTE_Connect 非零事件可观察，不创建 worker。
 TEST_F(I03S5TraderCTPMini, ConnectFailuresAreObservableEvents)
 {

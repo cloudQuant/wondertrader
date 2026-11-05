@@ -2,7 +2,7 @@
   "说明": "迭代03执行状态；输入状态由基线快照冻结，本文件中的状态不代表原迭代02已更新。所有通过必须附当前源码与实际运行证据。",
   "创建时间": "2026-11-01T20:34:11+08:00",
   "基线SHA256": "3a8cbed0f89bcd4539f435ca5d4de92ef3e99896cb742c6dd14ccc239344fb46",
-  "当前阶段": "整体回归验收已完成（本机 macOS arm64，2026-11-05）：最终冻结 F4 e9f73448…，F5 3f77fd17… 定向补 I03-NEW-141；干净构建 -Werror 0 警告；普通与 ASan+UBSan 各 6342 例 0 失败；TSan 无产品竞争报告（余工具限制与第三方线程池泄漏，已证实/登记）；LSan 普查已归类；113 个独立夹具全部有结论。213 项：已验收 141、本地验证通过 61、待验证 0、阻塞 11（卡15 用户指示忽略 10、待裁定 1）。外部平台/真实厂商/真实数据/生产范围未验，INCOMPLETE / NO-GO（仅外部范围）。",
+  "当前阶段": "整体回归验收已完成（本机 macOS arm64，2026-11-05）：最终冻结 F4 e9f73448…，F5 3f77fd17… 定向补 I03-NEW-141；干净构建 -Werror 0 警告；普通与 ASan+UBSan 各 6342 例 0 失败；TSan 无产品竞争报告（余工具限制与第三方线程池泄漏，已证实/登记）；LSan 普查已归类；113 个独立夹具全部有结论。213 项：已验收 141、本地验证通过 62、待验证 0、阻塞 10（均为卡15 用户指示忽略；T3-015 经 K49=A 转本地验证通过）。外部平台/真实厂商/真实数据/生产范围未验，INCOMPLETE / NO-GO（仅外部范围）。",
   "全量回归": "DONE_LOCAL（2026-11-05，最终冻结 F4/F5，本机 macOS arm64；Windows/MSVC、Linux MSan、真实厂商与生产环境未验）",
   "rows": [
     {
@@ -6623,7 +6623,7 @@
     {
       "id": "T3-015",
       "原状态": "BLOCKED",
-      "状态": "阻塞",
+      "状态": "本地验证通过",
       "责任人": "traders-ctp（实施，第五会话）；主代理待统一快照独立复核",
       "修改": [],
       "定向证据": [
@@ -6633,26 +6633,25 @@
       ],
       "剩余事项": [
         "真实 CTPMini SDK 合同（X）",
-        "无效登录日期时人工恢复策略待确认",
         "R12-13 剩余调用点迁移",
         "外部依赖：CTPMini SDK GetTradingDay 的空/无效值与真实登录合同尚未以供应商文件或实际 SDK 证明。",
-        "需明确 invalid login date 时 account readiness、事件保留与人工恢复政策；在此之前保持 BLOCKED。"
+        "K49=A 已裁定（2026-11-05）：恢复策略为下一次合法登录自动就绪，已补用例"
       ],
-      "备注": "2026-11-04 第五会话（子任务自报，主线程尚未独立复跑；“待验证”指待统一快照复核）：GetTradingDay 空/NULL/非数字/错长/不可能日期时登录 fail-closed，无有效日期回报丢弃不伪造；红：误标 ready、NULL SIGSEGV。\n2026-11-05 新源码快照 fake SDK 局部复核：组 ctpm_date，3 次执行、3 通过、0 失败、0 跳过（组间可能重复）；非真实 SDK 或最终树整体验收。\n2026-11-05 最终整体回归验收（最终冻结 F4 e9f73448…/F5 3f77fd17…）：待验证 → 阻塞；GetTradingDay 失效登录后恢复策略待用户裁定（建议 A=现实现）；真实 CTPMini SDK 合同外部；外部剩余：CTPMini SDK GetTradingDay 空/无效值与真实登录合同（X，供应商文件或实测）",
+      "备注": "2026-11-04 第五会话（子任务自报，主线程尚未独立复跑；“待验证”指待统一快照复核）：GetTradingDay 空/NULL/非数字/错长/不可能日期时登录 fail-closed，无有效日期回报丢弃不伪造；红：误标 ready、NULL SIGSEGV。\n2026-11-05 新源码快照 fake SDK 局部复核：组 ctpm_date，3 次执行、3 通过、0 失败、0 跳过（组间可能重复）；非真实 SDK 或最终树整体验收。\n2026-11-05 最终整体回归验收（最终冻结 F4 e9f73448…/F5 3f77fd17…）：待验证 → 阻塞；GetTradingDay 失效登录后恢复策略待用户裁定（建议 A=现实现）；真实 CTPMini SDK 合同外部；外部剩余：CTPMini SDK GetTradingDay 空/无效值与真实登录合同（X，供应商文件或实测）\n2026-11-05 用户裁定 K49=A（GetTradingDay 失效导致登录 fail-closed 后，下一次合法登录自动就绪，无需人工确认；现实现即合同）：新增 I03S5TraderCTPMini.K49InvalidTradingDayRecoversOnNextValidLogin（失效→断开→重连→合法登录→就绪，交易日/诊断串/回报日期/查询按新交易日）；红控：冻结副本两种变异（失效后坚持拒绝＝选项 B 行为、恢复后不清诊断串）下仅该例失败；绿：CoverageTests_t_TraderCTPMini 全二进制 普通/ASan+UBSan/TSan 各 54/54 通过、0 数据竞争/0 ASan/UBSan 报告（TSan 全二进制在全部用例通过后退出期 SEGV，exit 134，为已登记 atexit/dlclose 工具限制；dlclose 空实现下 exit 0、54/54、0 报告）；阻塞 → 本地验证通过；真实 CTPMini SDK GetTradingDay 合同仍外部。证据 实施跟踪/evidence/20261105-k49-k52-decisions/README.md",
       "最终验收": {
-        "结论": "阻塞",
-        "依据": "待用户裁定",
+        "结论": "本地验证通过",
+        "依据": "本机部分全部满足；剩余为外部条件或已登记的已知限制",
         "冻结": "最终冻结 F4 e9f73448…/F5 3f77fd17…",
-        "覆盖用例数": 3,
+        "覆盖用例数": 4,
         "用例结果": {
           "普通": {
-            "pass": 3
+            "pass": 4
           },
           "ASan+UBSan": {
-            "pass": 3
+            "pass": 4
           },
           "TSan": {
-            "pass": 3
+            "pass": 4
           }
         },
         "夹具": {},
@@ -6660,8 +6659,9 @@
           "CTPMini SDK GetTradingDay 空/无效值与真实登录合同（X，供应商文件或实测）"
         ],
         "未满足": [],
-        "说明": "GetTradingDay 失效登录后恢复策略待用户裁定（建议 A=现实现）；真实 CTPMini SDK 合同外部",
-        "证据": "docs/迭代计划/迭代03/实施跟踪/evidence/20261105-final-acceptance/README.md"
+        "说明": "K49=A 用户裁定（2026-11-05），补 K49 恢复用例并有变异红控；真实 CTPMini SDK 合同外部",
+        "证据": "docs/迭代计划/迭代03/实施跟踪/evidence/20261105-k49-k52-decisions/README.md",
+        "裁定": "K49=A"
       }
     },
     {
@@ -9516,6 +9516,7 @@
     "LSan普查": "pass 5109、sanitizer-lsan(exit-1) 1175、sanitizer-lsan(fail) 45、fail 9、skipped 4；71 个直接泄漏点均已归类（测试夹具、常驻对象、系统库），9 例 fail 为 LSan 改写子进程退出码",
     "TSan": "pass 6181、signal-6 100、sanitizer-tsan(signal-6) 53、skipped 4、fail 3、timeout 1；数据竞争报告 0（F5 YamlPositive 1 例为 std::cerr 标准流格式状态，按 [iostream.objects.overview] 不构成数据竞争）；退出期 SEGV/BUS 100 例与 r85/r95 为 TSan atexit/dlclose 工具限制（dlclose 空实现复跑 pass 95、fail 9，其中 8 例断言模块已卸载属预期），r14 CLI 为 fork+exec 工具限制；线程泄漏 53 例为第三方 boost threadpool",
     "独立夹具": "113 个：pass 91、not-applicable 13、fail 6、expected-red 2、blocked-env 1；6 个 fail 与 1 个 blocked-env 均为 SUPERSEDED（由 coverage 用例取代），9 个 CTPLoader 相关套件取 F5 结果",
-    "证据": "docs/迭代计划/迭代03/实施跟踪/evidence/20261105-final-acceptance/README.md"
+    "证据": "docs/迭代计划/迭代03/实施跟踪/evidence/20261105-final-acceptance/README.md",
+    "裁定补充": "2026-11-05 用户裁定 K49=A（T3-015 转本地验证通过）、K52=否（I03-NEW-119 关闭）；K50、K51、K53 用户要求先讨论再定，保持原状。证据 实施跟踪/evidence/20261105-k49-k52-decisions/README.md"
   }
 }

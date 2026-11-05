@@ -1,0 +1,112 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03S5TraderCTPMini.K49*:I03S5TraderCTPMini.*TradingDay*
+[==========] Running 4 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 4 tests from I03S5TraderCTPMini
+[ RUN      ] I03S5TraderCTPMini.ValidTradingDayLoginAndNightDatesStayCorrect
+[       OK ] I03S5TraderCTPMini.ValidTradingDayLoginAndNightDatesStayCorrect (2 ms)
+[ RUN      ] I03S5TraderCTPMini.InvalidTradingDayFailsClosed
+[       OK ] I03S5TraderCTPMini.InvalidTradingDayFailsClosed (1 ms)
+[ RUN      ] I03S5TraderCTPMini.InvalidTradingDayMatrixIsRejected
+[       OK ] I03S5TraderCTPMini.InvalidTradingDayMatrixIsRejected (1 ms)
+[ RUN      ] I03S5TraderCTPMini.K49InvalidTradingDayRecoversOnNextValidLogin
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:505: Failure
+Expected equality of these values:
+  TraderCTPMini::WS_ALLREADY
+    Which is: 6
+  trader_.state()
+    Which is: 3
+
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:506: Failure
+Value of: trader_.isConnected()
+  Actual: false
+Expected: true
+
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:507: Failure
+Expected equality of these values:
+  1
+  sink_.login_ok.load()
+    Which is: 0
+
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:508: Failure
+Expected equality of these values:
+  1
+  sink_.login_fail.load()
+    Which is: 2
+
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:509: Failure
+Expected equality of these values:
+  20260106u
+    Which is: 20260106
+  sink_.login_date.load()
+    Which is: 0
+
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:510: Failure
+Expected equality of these values:
+  20260106u
+    Which is: 20260106
+  trader_.tradingDate()
+    Which is: 0
+
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:511: Failure
+Expected equality of these values:
+  ""
+  trader_.rawDay()
+    Which is: "20260106"
+
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:514: Failure
+Expected equality of these values:
+  1
+  sink_.pushed_orders.load()
+    Which is: 0
+
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:515: Failure
+Expected equality of these values:
+  1
+  sink_.pushed_trades.load()
+    Which is: 0
+
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:516: Failure
+Expected equality of these values:
+  20260106u
+    Which is: 20260106
+  sink_.last_order_date.load()
+    Which is: 0
+
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:517: Failure
+Expected equality of these values:
+  20260106u
+    Which is: 20260106
+  sink_.last_trade_date.load()
+    Which is: 0
+
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:519: Failure
+Expected equality of these values:
+  20260105u
+    Which is: 20260105
+  sink_.last_order_date.load()
+    Which is: 0
+
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:520: Failure
+Expected equality of these values:
+  20260105u
+    Which is: 20260105
+  sink_.last_trade_date.load()
+    Which is: 0
+
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k49/tree/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:521: Failure
+Expected equality of these values:
+  0
+  trader_.queryAccount()
+    Which is: -1
+
+[  FAILED  ] I03S5TraderCTPMini.K49InvalidTradingDayRecoversOnNextValidLogin (0 ms)
+[----------] 4 tests from I03S5TraderCTPMini (6 ms total)
+
+[----------] Global test environment tear-down
+[==========] 4 tests from 1 test suite ran. (6 ms total)
+[  PASSED  ] 3 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] I03S5TraderCTPMini.K49InvalidTradingDayRecoversOnNextValidLogin
+
+ 1 FAILED TEST
